@@ -121,63 +121,41 @@ test("⚠️ the 4px status edge is the ladder's own tint, and the frame is comp
   expect(rungs.length, `every card wears one rung: ${JSON.stringify(rungs)}`).toBeGreaterThan(1);
 });
 
-test("⚠️ hovering a compact bar peeks the COMFORTABLE card over it, and leave or scroll clears it", async ({ page }) => {
+test("⚠️ the peek is RETIRED (v65 §B) — compact hovers like comfortable, and the CLICK card replaced it", async ({ page }) => {
+  /* ⚠️ RETARGETED BY v65 §B/§C, as an inverse with its successor named. v64 gave compact a hover
+     peek — a page-layer clone of the comfortable card — because the compact bar states less. v65
+     rules that hover is lift-and-reveal in BOTH densities and the reveal is the CLICK card, which
+     carries strictly more than the peek did (a gauge, three counters, the note). So the peek is
+     asserted GONE and the card asserted PRESENT: "the peek is gone" alone would pass on a board
+     where the click had stopped working too. */
   await openRoute(page, CAL, { width: 1440, height: 900 });
   await toCompact(page);
-  /* a real pointer with real intent — the 60ms timer is the mechanism under test */
-  const bar = page.locator(".tl-cal .tl-p").first();
-  const barBox = (await bar.boundingBox())!;
-  await page.mouse.move(barBox.x + Math.min(80, barBox.width / 2), barBox.y + barBox.height / 2);
-  await page.waitForTimeout(300);
-  const r = await page.evaluate(() => {
-    const peek = document.querySelector<HTMLElement>("body > .tl-peek");
-    if (!peek) return null;
-    const pb = peek.getBoundingClientRect();
-    const inner = peek.querySelector<HTMLElement>(".tl-p, .tl-jc");
-    const band = peek.querySelector<HTMLElement>(".tl-sband");
-    const fact = peek.querySelector<HTMLElement>(".tl-ffx");
+  const bar = page.locator(".tl-cal .tl-p[data-seg]").first();
+  const box = (await bar.boundingBox())!;
+  await page.mouse.move(box.x + Math.min(80, box.width / 2), box.y + box.height / 2);
+  await page.waitForTimeout(320);
+  const hov = await page.evaluate(() => ({
+    peek: document.querySelectorAll(".tl-peek").length,
+    card: document.querySelectorAll(".tl-cc").length,
+    on: document.querySelectorAll(".tl-act.on").length,
+  }));
+  expect(hov.peek, "the peek came back").toBe(0);
+  expect(hov.card, "hover opened the card — the card is the CLICK's").toBe(0);
+  /* the successor: a click opens it, in compact, over the same bar */
+  await bar.evaluate((e) => (e as HTMLElement).click());
+  await page.waitForTimeout(250);
+  const cc = await page.evaluate(() => {
+    const c2 = document.querySelector<HTMLElement>("body > .tl-cc");
+    if (!c2) return null;
     return {
-      top: +pb.top.toFixed(1), left: +pb.left.toFixed(1), h: +pb.height.toFixed(1), w: +pb.width.toFixed(1),
-      z: getComputedStyle(peek).zIndex,
-      hasCard: !!inner,
-      bandH: band ? +band.getBoundingClientRect().height.toFixed(1) : null,
-      bandPaints: band ? getComputedStyle(band).backgroundColor !== "rgba(0, 0, 0, 0)" : null,
-      factShown: !!fact && getComputedStyle(fact).display !== "none"
-        && fact.getBoundingClientRect().height > 1,
-      shadow: getComputedStyle(peek).boxShadow !== "none",
-      compactInside: peek.matches('[data-dens="compact"]') || !!peek.closest('[data-dens="compact"]'),
+      w: +c2.getBoundingClientRect().width.toFixed(0),
+      gauge: !!c2.querySelector(".tl-ccgauge"),
+      counters: c2.querySelectorAll(".tl-ccmeta div").length,
     };
   });
-  expect(r, "no peek appeared after 300ms of hover").not.toBeNull();
-  expect(r!.hasCard, "the peek holds no card clone").toBe(true);
-  expect(r!.h, `the peek is ${r!.h}px tall`).toBe(86);
-  expect(r!.w, `the peek is ${r!.w}px wide`).toBeGreaterThanOrEqual(260);
-  /* exactly over the bar: top-aligned (or bottom-aligned when it opened upward) */
-  const overTop = Math.abs(r!.top - barBox.y) <= 1.5;
-  const overBottom = Math.abs((r!.top + r!.h) - (barBox.y + barBox.height)) <= 1.5;
-  expect(overTop || overBottom, `peek top ${r!.top} vs bar top ${barBox.y}`).toBe(true);
-  /* the clone renders COMFORTABLE: the tinted 26px band is back and the fact is visible */
-  expect(r!.compactInside, "the peek inherited compact — the clone is not the comfortable card").toBe(false);
-  expect(r!.bandH, `the peek's band is ${r!.bandH}px`).toBe(26);
-  expect(r!.bandPaints, "the peek's band does not paint its tint").toBe(true);
-  expect(r!.factShown, "the peek hides the fact — the reveal is its whole job").toBe(true);
-  expect(r!.shadow, "no soft shadow on the peek").toBe(true);
-  /* leave clears it */
-  await page.mouse.move(10, 10);
-  await page.waitForTimeout(120);
-  expect(await page.evaluate(() => !!document.querySelector("body > .tl-peek")), "the peek survived leave").toBe(false);
-  /* hover again, then scroll — scroll clears it */
-  await page.mouse.move(barBox.x + Math.min(80, barBox.width / 2), barBox.y + barBox.height / 2);
-  await page.waitForTimeout(200);
-  const again = await page.evaluate(() => !!document.querySelector("body > .tl-peek"));
-  if (again) {
-    await page.evaluate(() => {
-      const g = [...document.querySelectorAll<HTMLElement>(".tl-cal")].find((e) => e.getBoundingClientRect().height > 0)!;
-      g.querySelector(".tl-rows")!.dispatchEvent(new Event("scroll", { bubbles: false }));
-    });
-    await page.waitForTimeout(80);
-    expect(await page.evaluate(() => !!document.querySelector("body > .tl-peek")), "the peek survived a scroll").toBe(false);
-  }
+  expect(cc, "compact lost its reveal entirely — the peek went and nothing replaced it").not.toBeNull();
+  expect(cc!.gauge, "the card has no gauge").toBe(true);
+  expect(cc!.counters, "the card has no counters").toBe(3);
 });
 
 test("⚠️ a card at the window's edge is whole — hairline, corners, and 6px short of the lane", async ({ page }) => {

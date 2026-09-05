@@ -171,6 +171,41 @@ test.describe("v63 · B — the sidebar pane", () => {
     expect(flt!.value, `Filter reads "${flt!.value}" with nothing hidden`).toBe("All");
     expect(grp!.value, "Group's resting value is not Attention").toBe("Attention");
     expect(srt!.value, "Sort's resting value is not Urgency").toBe("Urgency");
+
+    /* ⚠️ v65 §F — THE CARDS FORMAT (the ref's `data-sbf="cards"`). Each control is its own white
+       card on the page cream and its options unfold INSIDE it: the open row squares its foot and
+       the options carry the matching squared head, so the two read as ONE object rather than a
+       row with a tray beneath. The panel's facet model is unchanged. */
+    const cards = await page.evaluate(() => {
+      const np = document.querySelector<HTMLElement>(".tl-axis .tl-np")!;
+      return [...np.querySelectorAll<HTMLElement>(".tl-pr")].map((r) => {
+        const s = getComputedStyle(r);
+        const nx = r.nextElementSibling;
+        const px = nx?.classList.contains("tl-px") ? getComputedStyle(nx as HTMLElement) : null;
+        return {
+          open: r.classList.contains("open"),
+          bg: s.backgroundColor, bw: s.borderTopWidth, rad: s.borderTopLeftRadius,
+          foot: s.borderBottomLeftRadius,
+          pxBg: px?.backgroundColor ?? null, pxHead: px?.borderTopLeftRadius ?? null,
+          pxTopBorder: px?.borderTopWidth ?? null,
+        };
+      });
+    });
+    expect(cards.length, "the panel lost its rows").toBe(3);
+    for (const k of cards) {
+      expect(k.bg, "a control is not a white card").toBe("rgb(255, 255, 255)");
+      expect(k.bw, "a control card has no hairline").toBe("1px");
+      expect(k.rad, "a control card is not 10px").toBe("10px");
+      if (k.open) {
+        /* one object: the row's foot is square and the options continue it with no top border */
+        expect(k.foot, "an open card kept a rounded foot").toBe("0px");
+        expect(k.pxBg, "an open card's options are not on the card").toBe("rgb(255, 255, 255)");
+        expect(k.pxHead, "the options rounded their own head — two objects").toBe("0px");
+        expect(k.pxTopBorder, "the options drew a border between themselves and their row").toBe("0px");
+      } else {
+        expect(k.foot, "a closed card is not fully rounded").toBe("10px");
+      }
+    }
   });
 });
 

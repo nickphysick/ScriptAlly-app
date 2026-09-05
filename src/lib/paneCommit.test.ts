@@ -288,10 +288,23 @@ describe("⚠️ the primary commits, and mounts nothing", () => {
  * path was built around, left with no caller when `PaneJourney.tsx` was deleted.
  */
 describe("⚠️ the takeover survives; the pane's orphans do not", () => {
+  /**
+   * ⚠️ RETARGETED BY CALENDAR v65 §A, AND THE CLAIM IS UNCHANGED: FocusFlow must keep a live
+   * caller so a reachability sweep cannot take it. What changed is WHICH — the Calendar retired
+   * its mount when the legacy task pane went (v65 §A: a click there opens the read card, and the
+   * writes go to the Action sheet), so the To-do page is the caller now, through its own dock.
+   *
+   * ⚠️ THE CALENDAR'S ABSENCE IS ASSERTED TOO, not merely tolerated. A lock that only says
+   * "somebody mounts it" would go quietly green the day the To-do page dropped it as well and
+   * some third page picked it up by accident; naming both sides states what the app actually is.
+   */
   it("FocusFlow keeps a caller that is not the pane, and is named here so no sweep takes it", () => {
+    const todo = read("../components/todo/ToDoPage.tsx");
+    expect(todo, "the To-do page stopped mounting FocusFlow — it may now look dead").toContain("<FocusFlow");
+    expect(todo).toContain('from "./FocusFlow"');
     const cal = read("../components/todo/TodoCalendarPage.tsx");
-    expect(cal, "the Calendar stopped mounting FocusFlow — it may now look dead").toContain("<FocusFlow");
-    expect(cal).toContain('from "./FocusFlow"');
+    expect(cal, "the Calendar mounts FocusFlow again — v65 §A retired that surface")
+      .not.toContain("<FocusFlow");
   });
 
   /**

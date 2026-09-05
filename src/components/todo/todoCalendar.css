@@ -138,19 +138,25 @@
    surfaces at all in v64 (§A took even its pane), and a card here would be the one box on an
    unboxed column. Row = quiet 400 ink-brown; the VALUE is the bold ink — the ref's emphasis, and
    the reverse of the first build's. */
+/* ⚠️ THE CARDS FORMAT (v65 §F — the ref's `data-sbf="cards"`, superseding v64's bare rows). Each
+   control is its own white card on the page cream; its options unfold INSIDE the card, which is
+   what the negative margin and the squared top corners are for — an open row and its options are
+   one object, not a row with a tray under it. The panel keeps its facet model unchanged. */
 .tl-np {
-  display: flex; flex-direction: column; align-items: stretch; gap: 8px;
+  display: flex; flex-direction: column; align-items: stretch; gap: 10px;
   background: transparent; border: 0; border-radius: 0;
   padding: 10px 4px; border-bottom: 1px solid var(--tl-ch-line);
 }
 .tl-pr {
   display: flex; align-items: center; gap: 8px;
-  padding: 8px 6px; border: 0; border-radius: 8px; cursor: pointer;
-  background: transparent; text-align: left;
+  padding: 10px 12px; cursor: pointer; text-align: left;
+  background: #fff; border: 1px solid #e3d9ca; border-radius: 10px;
   /* 15px — a 31px row like the ref's; a button's UA line box ran it to 34.8 */
   font-size: 12.5px; font-weight: 400; color: #4a3d33; line-height: 15px;
 }
-.tl-pr:hover { background: rgba(255, 255, 255, .7); }
+/* an OPEN card squares its foot so the options below are the same object */
+.tl-pr.open { border-radius: 10px 10px 0 0; border-bottom-color: transparent; }
+.tl-pr:hover { border-color: #cdbfa8; }
 .tl-pr:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
 .tl-prchev { color: #a89880; font-size: 12px; transition: transform .12s; }
 .tl-pr.open .tl-prchev { transform: rotate(90deg); }
@@ -163,7 +169,11 @@
   cursor: pointer;
 }
 /* the expansion — options indented under their row, the ref's 22px hang */
-.tl-px { display: flex; flex-direction: column; gap: 1px; padding: 2px 0 8px 22px; }
+.tl-px {
+  display: flex; flex-direction: column; gap: 1px;
+  background: #fff; border: 1px solid #e3d9ca; border-top: none;
+  border-radius: 0 0 10px 10px; margin-top: -1px; padding: 8px 10px 10px 14px;
+}
 .tl-px > button {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 8px; border: 0; border-radius: 7px; cursor: pointer;
