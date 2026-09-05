@@ -1,0 +1,66 @@
+{
+  "block-queried": {
+    "band": "rgb(230, 234, 227)",
+    "head": "rgb(230, 234, 227)",
+    "ms": "rgb(230, 234, 227)",
+    "cardBand": "rgb(230, 234, 227)",
+    "bar": "rgb(253, 250, 245)",
+    "tabs": "rgb(255, 255, 255)",
+    "body": "rgb(255, 255, 255)",
+    "avatar": "rgb(255, 255, 255)",
+    "parchmentBetween": [],
+    "illo": true
+  },
+  "block-partialreq": {
+    "band": "rgb(248, 233, 226)",
+    "head": "rgb(248, 233, 226)",
+    "ms": "rgb(248, 233, 226)",
+    "cardBand": "rgb(248, 233, 226)",
+    "bar": "rgb(253, 250, 245)",
+    "tabs": "rgb(255, 255, 255)",
+    "body": "rgb(255, 255, 255)",
+    "avatar": "rgb(255, 255, 255)",
+    "parchmentBetween": [],
+    "illo": true
+  },
+  "block-rejected": {
+    "band": "rgb(228, 225, 219)",
+    "head": "rgb(228, 225, 219)",
+    "ms": "rgb(228, 225, 219)",
+    "cardBand": "rgb(228, 225, 219)",
+    "bar": "rgb(253, 250, 245)",
+    "tabs": "rgb(255, 255, 255)",
+    "body": "rgb(255, 255, 255)",
+    "avatar": "rgb(255, 255, 255)",
+    "parchmentBetween": [],
+    "illo": true
+  },
+  "bounds-1440": {
+    "cardTop": 122,
+    "cardBottom": 427.0625,
+    "cardH": 305.0625,
+    "winTop": 110,
+    "winBottom": 880,
+    "winH": 770,
+    "chain": [
+      "qcd qcc--s-out-1"
+    ],
+    "cardOverflow": "visible",
+    "scrollerOverflow": "auto",
+    "notch": "on"
+  },
+  "bounds-2560": {
+    "cardTop": 122,
+    "cardBottom": 427.0625,
+    "cardH": 305.0625,
+    "winTop": 110,
+    "winBottom": 880,
+    "winH": 770,
+    "chain": [
+      "qcd qcc--s-out-1"
+    ],
+    "cardOverflow": "visible",
+    "scrollerOverflow": "auto",
+    "notch": "on"
+  }
+}
