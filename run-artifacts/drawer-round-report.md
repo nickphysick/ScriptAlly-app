@@ -6,7 +6,7 @@
 `check-design-refs.mjs`'s watchlist** (20 → 22 guarded), so a later edit to either fails the build
 rather than silently changing what this round's assertions cite.
 
-**Where I stopped:** end of Phase 4. Recon is `run-artifacts/drawer-recon.md`.
+**Where I stopped:** end of Phase 5. Recon is `run-artifacts/drawer-recon.md`.
 
 ---
 
@@ -518,6 +518,103 @@ wrapping, the Next pill on the row.
 
 ---
 
+## Phase 5 — `todo: completion leaves the list` · `2f4cae90`
+
+A successful completion holds everything for the undo toast's own window (`WITH_UNDO_MS`, exported
+— **one clock**, so "undo within the window" and "the row holds for the window" cannot drift): the
+row stays in the list, still counted, still selected; the sheet stays on the task with
+**Recorded ✓** in its foot instead of the primary; ‹ › already skip it, because it left the walk
+queue at the write. When the window lapses the row fades (300ms), the footer count drops from the
+one array, and the sheet opens the next open task — or closes the drawer when none remain.
+**12/12 measured, run twice for stability.**
+
+### Red first, in the brief's order
+
+4 red on HEAD, and the named one was the sharpest: **the crossover's selection landed on
+`seed-pkgq-4` while the originating row was `cor-move-a`** — the sheet and the row disagreeing
+about which task just finished, on the deployed behaviour, exactly as the brief predicted.
+
+### ⚠️ The race is at BOTH ends
+
+Firestore's latency compensation re-derives the board **before** the awaited write resolves, so the
+key-vanished effect moved `dockKey` while `completed()` was still waiting on the ack — the sheet
+advanced during the window. The stand-down (`leavingRef`) is therefore armed **before** the write,
+synchronously, in the commit wrapper. And the undo end mirrors it: clearing the hold on undo left a
+beat where the key was in neither the derived board nor the hold, and the effect stomped in the
+gap — so an undone hold stays armed, marked `undone`, until the board actually has the card back.
+
+### ⚠️ The placement map remembers — geometry-not-presence, met one phase after it was written down
+
+The map of row placements was rebuilt from the current board each render; the guaranteed post-write
+render forgot the card, the lookup missed, and **the held row re-entered under the "yours"
+fallback, three groups from home — with every assertion green**, because they asked whether the row
+existed and held. *Where* it held did not exist as a claim until the screenshot forced it; P5.7 now
+reads the group head above the held row. The map updates entries and never forgets one. The
+restore-the-rebuild mutation is **timing-dependent end-to-end** (the ack sometimes beats the echo —
+exactly why a suite alone missed it), so its deterministic red lives in the source lock.
+
+### ⚠️ My `doneToast` wrapper had silently never landed — the phase's meta-lesson
+
+The edit script asserted halfway and aborted **before writing**; I repaired the failed half
+believing the first had applied. **Two green runs followed, green for the wrong reason** (`dockKey`
+happened not to have moved), and undo left the 8s timer alive — a ghost-fade on the restored row
+and a sheet-jump, eight seconds after the writer thought the matter closed. A multi-replace script
+that dies on assert N leaves replacements 1…N−1 unapplied too; the repair must re-apply the whole
+script, not the assert that failed. Both undo arms (the toast's button and the session's remembered
+redo) now route through one wrapped closure.
+
+### Also
+
+- **The done group leaves the list.** A ticked note used to re-file under a rendered "done" group —
+  the row left and arrived in one gesture, and the footer could never drop. The cleared log is
+  untouched (`deskState` reads `boardCols.done` directly).
+- **Undo brings the task back on screen even if the writer walked away mid-window** — without it
+  the same undo sometimes restored the sheet and sometimes left a neighbour: the suite caught it as
+  a flake, a writer would have met it as inconsistency.
+- **The expiry advances only if the writer is still standing on the completed task** — stomping a
+  selection made mid-window would be the auto-dock's fault reborn.
+- **A failed write leaves everything as it was, with the failure stated in the foot** — and only
+  the branch that knows nothing was *declined* sets it, because "couldn't record" over a choice the
+  writer just made would be the app contradicting them.
+- **The last task closing the drawer is locked at source** (the expiry's `?? null` IS `closeDock`'s
+  state; Phase 2's measured close takes it to full width). The end-to-end walk needs the fixture's
+  sparse shape — the same second-account gap as Phase 1's manuscript column. Stated, not skipped.
+
+### The fixture is the restore
+
+The expiry case spends the toast, so the toast cannot be the restore: the spec creates its own task
+through the same Firebase SDK the board-shapes fixture uses, and the teardown deletes it whatever
+happened in between — asserted in-run, loud on failure. The crossover case commits a real close and
+presses Undo inside the window with no navigation between, per the standing rule.
+
+### Mutations
+
+| mutation | red |
+|---|---|
+| the hold completes the WRONG row (the named one) | 4 |
+| the stand-down guard removed (the race returns) | 4 |
+| the expiry never removes the row | 2 |
+| `committed` stuck false | 3 |
+| the done group renders again | 3 |
+| the undo never tells the page | 1 |
+| source locks (map mirrors · guard gone · last-task opens instead of closing · stand-down after the write · done group back) | 1 each |
+
+### Gates
+
+Build clean. tsc and vitest carry **only other streams' in-flight reds** — verified by file: 0 tsc
+errors and 0 FAIL files in this change set; my 108 suite cases pass. The calendar stream's
+`gpill`/`--tl-flag-lift` cases and the query-drawer restructure's suites are red against their own
+uncommitted WIP in the shared tree.
+
+### Screenshots
+
+`run-artifacts/p5-crossover-hold-1440.png` · `p5-crossover-hold-1920.png` — the originating send
+row held in **Needs you now**, selected, with the crossed close sheet reading "CROSSED FROM send",
+"THIS RECORDS Closed as withdrawn, today", the foot's Recorded ✓ and the toast's Undo.
+`p5-undone-1440.png` — after Undo.
+
+---
+
 ## What worked — and the one finding the round is really about
 
 ### The resting state had never existed, and nothing had ever asked for it
@@ -572,8 +669,7 @@ changing.
 
 ## Next
 
-**Phase 5 — completion leaves the list.** The receipt window, the row fading out, the footer count
-dropping from the one array, the sheet opening the next open task (or closing the drawer), the
-crossover completing the originating row, Undo restoring both. Then Phase 6 (group & order, filter —
-the `listView` extension), Phase 7 (the re-prove sweep over ~8 suites, `qcPanel` to be confirmed as
-a false positive first).
+**Phase 6 — group & order, and filter.** The `todoListView` extension, both panels through
+`AnchoredPanel` with fixed max-height and stable option rows, chips, the footer's two forms,
+persistence through `todoPrefs`. Then Phase 7 (the re-prove sweep over ~8 suites, `qcPanel` to be
+confirmed as a false positive first).

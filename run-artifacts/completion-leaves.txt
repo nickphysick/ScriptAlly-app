@@ -1,0 +1,24 @@
+green  · P5.0 · the fixture task is on the board
+           rows = 31 · footer "31 tasks · 18 need you now"
+green  · P5.1 · the primary was pressed (undo pass)
+           
+green  · P5.2 · during the window the row HOLDS — present, still counted, still selected
+           rows 31 → 31 · footer 31 → 31 · row present = true · sel = true
+green  · P5.3 · the sheet holds too, with the receipt in the foot and Undo in the toast
+           deed "P5 fixture — completion leaves" · foot recorded = true · toast = true · undo = true
+green  · P5.4 · ‹ › walk PAST the completed task — it is out of the queue while it holds
+           › → "Reply to the offer" · ‹ → "Reply to the offer"
+green  · P5.5 · Undo keeps the row and the count, and the sheet is back on the task — nothing ever left
+           rows 31 · footer 31 · row opacity 1 · deed "P5 fixture — completion leaves the list" · foot recorded = false
+green  · P5.6 · a partial Send opens for the crossover
+           key = "task-partial-cor-move-a"
+green  · P5.7 · the crossover completes the ORIGINATING row — the send row holds, marked, selected
+           primary pressed · held row "task-partial-cor-move-a" vs send row "task-partial-cor-move-a" · recorded = true
+green  · P5.8 · the crossover's Undo restores the send row
+           row back = true
+green  · P5.9 · after the window the row is GONE and the footer dropped from the one array
+           row present = false · rows 31 → 30 · footer 31 → 30
+green  · P5.10 · …and the sheet has moved to the next open task
+           drawer open = true · deed "Chase the Blaine partial"
+green  · teardown · the fixture is deleted — the account's delta is zero
+           was present at teardown = true
