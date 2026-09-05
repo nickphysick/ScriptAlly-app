@@ -1,0 +1,99 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>ScriptAlly — bar hover states</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1c130f;--page:#f5f1eb;--lane:#faf7f2;--parch:#fdf9f5;--line:#e3d9cb;--rose:#c98e8a;--blush:#eed6cc;--sage:#d3dccd;--cream:#f1e9df;--note:#f5e9bf;--mute:#a89880}
+*{box-sizing:border-box}body{margin:0;background:var(--page);font-family:Inter,sans-serif;color:var(--ink)}
+h1{font-family:'Playfair Display',serif;font-weight:500;font-size:30px;margin:28px 40px 6px}
+.sub{margin:0 40px 22px;color:#6f6055;font-size:13.5px;max-width:900px;line-height:1.5}
+.grid{display:grid;grid-template-columns:150px repeat(4,1fr);gap:14px 18px;margin:0 40px;align-items:start}
+.hd{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);padding-bottom:6px;border-bottom:1px solid var(--line)}
+.rl{font-size:12.5px;font-weight:600;padding-top:14px}
+.rl small{display:block;font-weight:400;color:#8a7a6c;font-size:11px;margin-top:2px}
+.cell{background:var(--lane);border:1px solid #ece4d6;border-radius:12px;padding:16px 14px 18px;min-height:120px;position:relative;overflow:visible}
+.cell .cap{position:absolute;left:12px;bottom:6px;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;text-transform:uppercase;color:#b3a48f}
+/* bars */
+.bar{position:relative;background:#fff;border:1px solid var(--line);border-radius:9px;width:100%;transition:transform .16s}
+.bar.cf{height:86px}
+.bar.cp{height:40px}
+.bar .band{height:26px;display:flex;align-items:center;gap:8px;padding:0 12px 0 10px;border-radius:9px 9px 0 0;border-bottom:1px solid rgba(58,28,20,.06);font-family:'Playfair Display',serif;font-size:12.5px}
+.bar .band .sh{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:#7d6c5c}
+.bar .band .swi{font-style:italic;font-size:12px;color:#8a7a6c;margin-left:4px}
+.dot{width:14px;height:14px;border-radius:99px;border:1.5px solid #8c4f4a;display:inline-block;flex:0 0 auto}
+.dot.sg{border-color:#55684b}.dot.nt{border-color:#8a7a3a;border-radius:4px}
+.bar .body{padding:9px 14px 0}
+.bar .l1{display:flex;align-items:baseline;gap:8px;white-space:nowrap}
+.nm{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:500}
+.ag{font-family:'Playfair Display',serif;font-style:italic;font-size:12px;color:#8a7a6c}
+.bar .l2{display:flex;align-items:baseline;gap:9px;margin-top:7px;font-size:12px;white-space:nowrap}
+.feb{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.bang{display:inline-flex;width:13px;height:13px;border-radius:99px;border:1.3px solid #8c4f4a;color:#8c4f4a;font-size:9px;font-weight:700;align-items:center;justify-content:center;font-family:'Playfair Display',serif}
+.bar.cp .l1{position:absolute;left:34px;top:50%;transform:translateY(-50%)}
+.bar.cp .nm{font-size:13.5px}
+.bar.cp .dot{position:absolute;left:10px;top:50%;transform:translateY(-50%)}
+.bar.cp .sh{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.16em;text-transform:uppercase;color:#7d6c5c}
+.bar.cp.edge{background-image:linear-gradient(90deg,var(--st),var(--st));background-size:100% 4px;background-repeat:no-repeat}
+.bar.lift{transform:translate(2px,-2px)}
+.bar.ghost{opacity:.32}
+.bar.ghost.on{opacity:1}
+/* peek */
+.peek{position:absolute;left:14px;right:14px;top:16px;height:86px;background:#fff;border:1px solid var(--line);border-radius:9px;box-shadow:0 10px 28px rgba(58,28,20,.16),0 2px 6px rgba(58,28,20,.08);z-index:5}
+.peek .band{height:26px;display:flex;align-items:center;gap:8px;padding:0 12px 0 10px;border-radius:9px 9px 0 0;border-bottom:1px solid rgba(58,28,20,.06);font-family:'Playfair Display',serif;font-size:12.5px}
+.peek .band .sh{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:#7d6c5c}
+.peek .body{padding:9px 14px 0}
+.peek .l1{display:flex;align-items:baseline;gap:8px}.peek .l2{display:flex;align-items:baseline;gap:9px;margin-top:7px;font-size:12px}
+.cell.tall{min-height:150px}
+/* actions */
+.act{position:absolute;right:-6px;top:50%;transform:translate(100%,-50%);display:flex;align-items:center;gap:8px;white-space:nowrap}
+.act .cv{font-family:Caveat,cursive;font-size:16px;color:#6f6055}
+.act.od .cv{color:#8c4f4a}
+.act .btn{padding:5px 11px;border-radius:9px;border:1.5px solid #2a1f17;background:#fff;font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.sym{position:absolute;right:-6px;top:50%;transform:translate(100%,-50%);width:22px;height:22px;border-radius:99px;border:1px solid #d3c8b6;color:#b3a48f;display:flex;align-items:center;justify-content:center;font-size:11px}
+.sym.wake{border-color:#2a1f17;color:var(--ink);background:#fff}
+.sym.wake+.act{right:-36px}
+.pulse{position:absolute;right:-5px;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:99px;background:#2a1f17;border:2px solid #fff;box-shadow:0 0 0 6px rgba(42,31,23,.12)}
+.bar.open{border-right:none;border-top-right-radius:0;border-bottom-right-radius:0}
+.rules{margin:26px 40px 50px;max-width:980px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px}
+.rules h3{font-family:'Playfair Display',serif;font-weight:500;font-size:18px;margin:0 0 10px}
+.rules li{font-size:13px;line-height:1.55;margin:6px 0}
+.cursor{position:absolute;right:38%;top:46%;width:14px;height:20px;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 20'><path d='M1 1l12 9-5 1 3 6-2 1-3-6-4 4z' fill='white' stroke='black' stroke-width='1.2'/></svg>") no-repeat;z-index:9}
+</style></head><body>
+<h1>Bar hover states</h1>
+<p class="sub">What a bar does under the cursor, by bar type and density. Hover is always the <b>bar</b>, never the row. Three responses exist and no others: the <b>lift</b>, the <b>action reveal</b>, and (compact only) the <b>peek</b>. No tips, no summary pills, no legacy panes.</p>
+<div class="grid">
+ <div class="hd"></div><div class="hd">Comfortable · rest</div><div class="hd">Comfortable · hover</div><div class="hd">Compact · rest</div><div class="hd">Compact · hover</div>
+
+ <div class="rl">Query, waiting<small>With the agent</small></div>
+ <div class="cell"><div class="bar cf"><div class="band" style="background:var(--cream)"><span class="dot"></span>Queried<span class="sh">With the agent</span></div><div class="body"><div class="l1"><span class="nm">Harriet Vane-Coe</span><span class="ag">Stillwater Reps</span></div><div class="l2">Reply expected 23 Sept<span class="feb">18 days waiting</span></div></div><span class="sym">⌛</span></div><span class="cap">symbol quiet</span></div>
+ <div class="cell"><div class="bar cf lift"><div class="band" style="background:var(--cream)"><span class="dot"></span>Queried<span class="sh">With the agent</span></div><div class="body"><div class="l1"><span class="nm">Harriet Vane-Coe</span><span class="ag">Stillwater Reps</span></div><div class="l2">Reply expected 23 Sept<span class="feb">18 days waiting</span></div></div><span class="sym wake">⌛</span><span class="act"><span class="cv">in 18 days</span><span class="btn">Nudge ›</span></span></div><span class="cursor"></span><span class="cap">lift + symbol wakes + action slides out</span></div>
+ <div class="cell"><div class="bar cp edge" style="--st:var(--cream)"><span class="dot"></span><div class="l1"><span class="nm">Harriet Vane-Coe</span><span class="ag">Stillwater Reps</span></div><span class="sh">With the agent</span><span class="sym">⌛</span></div><span class="cap">one row · top edge tint</span></div>
+ <div class="cell tall"><div class="bar cp edge" style="--st:var(--cream);opacity:.4"><span class="dot"></span><div class="l1"><span class="nm">Harriet Vane-Coe</span></div></div><div class="peek"><div class="band" style="background:var(--cream)"><span class="dot"></span>Queried<span class="sh">With the agent</span></div><div class="body"><div class="l1"><span class="nm">Harriet Vane-Coe</span><span class="ag">Stillwater Reps</span></div><div class="l2">Reply expected 23 Sept<span class="feb">18 days waiting</span></div></div><span class="sym wake">⌛</span><span class="act"><span class="cv">in 18 days</span><span class="btn">Nudge ›</span></span></div><span class="cursor"></span><span class="cap">peek over the bar, page layer + action</span></div>
+
+ <div class="rl">Query, urgent<small>needs you now</small></div>
+ <div class="cell"><div class="bar cf open"><div class="band" style="background:var(--blush)"><span class="dot"></span>Partial requested<span class="sh">With you</span></div><div class="body"><div class="l1"><span class="nm">Greg Panetta</span><span class="ag">Panetta Literary</span></div><div class="l2"><span class="bang">!</span>No date promised<span class="feb">9 weeks overdue</span></div></div><span class="pulse"></span></div><span class="cap">open end on today · pulse only</span></div>
+ <div class="cell"><div class="bar cf open lift"><div class="band" style="background:var(--blush)"><span class="dot"></span>Partial requested<span class="sh">With you</span></div><div class="body"><div class="l1"><span class="nm">Greg Panetta</span><span class="ag">Panetta Literary</span></div><div class="l2"><span class="bang">!</span>No date promised<span class="feb">9 weeks overdue</span></div></div><span class="pulse"></span><span class="act od" style="right:-18px"><span class="cv">9 weeks overdue</span><span class="btn">Send partial ›</span></span></div><span class="cursor"></span><span class="cap">lift + action (rose label)</span></div>
+ <div class="cell"><div class="bar cp edge open" style="--st:var(--blush)"><span class="dot"></span><div class="l1"><span class="nm">Greg Panetta</span><span class="ag">Panetta Literary</span></div><span class="sh">With you</span><span class="pulse"></span></div><span class="cap">pulse only</span></div>
+ <div class="cell tall"><div class="bar cp edge open" style="--st:var(--blush);opacity:.4"><span class="dot"></span><div class="l1"><span class="nm">Greg Panetta</span></div></div><div class="peek" style="border-right:none;border-top-right-radius:0;border-bottom-right-radius:0"><div class="band" style="background:var(--blush)"><span class="dot"></span>Partial requested<span class="sh">With you</span></div><div class="body"><div class="l1"><span class="nm">Greg Panetta</span><span class="ag">Panetta Literary</span></div><div class="l2"><span class="bang">!</span>No date promised<span class="feb">9 weeks overdue</span></div></div><span class="pulse"></span><span class="act od" style="right:-18px"><span class="cv">9 weeks overdue</span><span class="btn">Send partial ›</span></span></div><span class="cursor"></span><span class="cap">peek + action</span></div>
+
+ <div class="rl">Past stage<small>ghost</small></div>
+ <div class="cell"><div class="bar cf ghost"><div class="band" style="background:var(--cream)"><span class="dot"></span>Queried</div><div class="body"><div class="l1"><span class="nm" style="font-family:Inter;font-size:12.5px;font-weight:500">Agent requested the full</span></div><div class="l2"><span class="feb">12 Jul – 3 Aug · 3 weeks and 1 day</span></div></div></div><span class="cap">32% opacity</span></div>
+ <div class="cell"><div class="bar cf ghost on"><div class="band" style="background:var(--cream)"><span class="dot"></span>Queried</div><div class="body"><div class="l1"><span class="nm" style="font-family:Inter;font-size:12.5px;font-weight:500">Agent requested the full</span></div><div class="l2"><span class="feb">12 Jul – 3 Aug · 3 weeks and 1 day</span></div></div></div><span class="cursor"></span><span class="cap">100% · no lift, no action</span></div>
+ <div class="cell"><div class="bar cp ghost edge" style="--st:var(--cream)"><span class="dot"></span><div class="l1"><span class="nm" style="font-family:Inter;font-size:12px;font-weight:500">Agent requested the full</span></div></div><span class="cap">one-liner ghost</span></div>
+ <div class="cell tall"><div class="bar cp ghost edge" style="--st:var(--cream);opacity:.2"><span class="dot"></span><div class="l1"><span class="nm" style="font-family:Inter;font-size:12px">Agent requested the full</span></div></div><div class="peek"><div class="band" style="background:var(--cream)"><span class="dot"></span>Queried</div><div class="body"><div class="l1"><span class="nm" style="font-family:Inter;font-size:12.5px;font-weight:500">Agent requested the full</span></div><div class="l2"><span class="feb">12 Jul – 3 Aug · 3 weeks and 1 day</span></div></div></div><span class="cursor"></span><span class="cap">peek at full opacity</span></div>
+
+ <div class="rl">Task<small>your own</small></div>
+ <div class="cell"><div class="bar cf"><div class="band" style="background:var(--note)"><span class="dot nt"></span>Task<span class="sh">With you</span></div><div class="body"><div class="l1"><span class="nm">Polish the synopsis</span></div><div class="l2">Due 9 Sept<span class="feb">in 4 days</span></div></div><span class="sym">⚑</span></div><span class="cap">flag symbol quiet</span></div>
+ <div class="cell"><div class="bar cf lift"><div class="band" style="background:var(--note)"><span class="dot nt"></span>Task<span class="sh">With you</span></div><div class="body"><div class="l1"><span class="nm">Polish the synopsis</span></div><div class="l2">Due 9 Sept<span class="feb">in 4 days</span></div></div><span class="sym wake">⚑</span><span class="act"><span class="cv">in 4 days</span><span class="btn">Mark done ›</span></span></div><span class="cursor"></span><span class="cap">lift + Mark done</span></div>
+ <div class="cell"><div class="bar cp edge" style="--st:var(--note)"><span class="dot nt"></span><div class="l1"><span class="nm">Polish the synopsis</span></div><span class="sh">With you</span><span class="sym">⚑</span></div><span class="cap"></span></div>
+ <div class="cell tall"><div class="bar cp edge" style="--st:var(--note);opacity:.4"><span class="dot nt"></span><div class="l1"><span class="nm">Polish the synopsis</span></div></div><div class="peek"><div class="band" style="background:var(--note)"><span class="dot nt"></span>Task<span class="sh">With you</span></div><div class="body"><div class="l1"><span class="nm">Polish the synopsis</span></div><div class="l2">Due 9 Sept<span class="feb">in 4 days</span></div></div><span class="sym wake">⚑</span><span class="act"><span class="cv">in 4 days</span><span class="btn">Mark done ›</span></span></div><span class="cursor"></span><span class="cap">peek + Mark done</span></div>
+</div>
+
+<div class="rules"><h3>The hover contract</h3><ol>
+<li><b>Target is the bar.</b> Entering the bar's box (or its peek) starts the state; leaving both ends it. The row, the lane and the gap between bars do nothing.</li>
+<li><b>Comfortable: lift + reveal.</b> The bar translates 2px up-right; the row's action (Caveat label + outlined button) fades in at the bar's end and the event symbol wakes to ink. Ghost stages go to full opacity and nothing else. No tooltip, no summary pill.</li>
+<li><b>Compact: peek.</b> After 60ms of intent, the Comfortable card renders over the bar as a page-layer overlay (shadow, never clipped, flips upward when out of room) with the same action reveal; the bar beneath dims to 40%. Ghosts peek at full opacity. Clears on leave, on scroll, or when the pointer enters another bar.</li>
+<li><b>Urgent bars never hide their pulse.</b> The dot on the today line is always visible; the action is hover-only.</li>
+<li><b>One state at a time.</b> Only one bar can be lifted or peeked; opening the drawer (click) clears any hover state.</li>
+<li><b>Hover never navigates or writes.</b> Nothing happens to data on hover; the action button is a real button and needs a click (which opens the Action sheet).</li>
+<li><b>Touch has no hover.</b> On touch, a tap on a bar opens the drawer directly; the action button sits in the drawer.</li>
+</ol></div>
+</body></html>

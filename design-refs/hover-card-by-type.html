@@ -1,0 +1,93 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>ScriptAlly — hover card C by bar type</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1c130f;--page:#f5f1eb;--line:#e3d9cb;--rose:#c98e8a;--cream:#f1e9df;--mute:#a89880;--sage:#d3dccd;--blush:#eed6cc;--slate:#d3dae2;--sand:#ece5d8;--grey:#e9e5dd;--note:#f5e9bf}
+*{box-sizing:border-box}body{margin:0;background:var(--page);font-family:Inter,sans-serif;color:var(--ink)}
+h1{font-family:'Playfair Display',serif;font-weight:500;font-size:30px;margin:28px 40px 6px}
+.sub{margin:0 40px 22px;color:#6f6055;font-size:13.5px;max-width:960px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:0 40px 40px}
+.opt h4{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin:0 0 8px}
+.opt p{font-size:11.5px;color:#6f6055;line-height:1.45;margin:8px 0 0}
+.card{background:#fff;border:1px solid var(--line);border-radius:9px;box-shadow:0 10px 28px rgba(58,28,20,.14);overflow:hidden}
+.card.ghost .band,.card.ghost .body{opacity:1}
+.band{height:26px;display:flex;align-items:center;gap:8px;padding:0 12px 0 10px;border-bottom:1px solid rgba(58,28,20,.06);font-family:'Playfair Display',serif;font-size:12.5px}
+.band .swi{font-style:italic;font-size:12px;color:#8a7a6c}
+.band .sh{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:#7d6c5c}
+.dot{width:14px;height:14px;border-radius:99px;border:1.5px solid #8c4f4a;display:inline-block;flex:0 0 auto}
+.dot.sg{border-color:#55684b}.dot.sl{border-color:#40586e}.dot.nt{border-color:#8a7a3a;border-radius:4px}.dot.gy{border-color:#8a8177}
+.body{padding:10px 12px 12px}
+.l1{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.nm{font-family:'Playfair Display',serif;font-size:15px;font-weight:500}.ag{font-family:'Playfair Display',serif;font-style:italic;font-size:12px;color:#8a7a6c}
+.l2{display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:12px;flex-wrap:wrap}.feb{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.bang{display:inline-flex;width:13px;height:13px;border-radius:99px;border:1.3px solid #8c4f4a;color:#8c4f4a;font-size:9px;font-weight:700;align-items:center;justify-content:center;font-family:'Playfair Display',serif}
+.gauge{margin-top:14px;height:6px;border-radius:3px;background:#f1e9de;position:relative}
+.gauge i{position:absolute;left:0;top:0;bottom:0;border-radius:3px}
+.gauge i.over{background:var(--rose)}
+.gauge b{position:absolute;top:-4px;width:14px;height:14px;border-radius:99px;background:#2a1f17;border:2px solid #fff;transform:translateX(-50%)}
+.gauge .lab{position:absolute;top:10px;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
+.gauge .lab.r{right:0}
+.gauge .lab.ov{color:#8c4f4a}
+.meta{margin-top:28px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.meta div{border:1px solid #f1e9de;border-radius:8px;padding:7px 8px}
+.meta b{display:block;font-family:'Playfair Display',serif;font-size:16px;font-weight:500}
+.meta b.r{color:#8c4f4a}
+.meta small{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.note{margin-top:10px;font-size:11.5px;color:#8a7a6c;border-top:1px solid #f1e9de;padding-top:8px;font-style:italic}
+.actl{margin-top:10px;display:flex;justify-content:flex-end;gap:8px;align-items:center}
+.cv{font-family:Caveat,cursive;font-size:15px;color:#6f6055}.cv.od{color:#8c4f4a}
+.btn{padding:5px 10px;border-radius:9px;border:1.5px solid #2a1f17;background:#fff;font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.rules{margin:0 40px 50px;max-width:980px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px}
+.rules h3{font-family:'Playfair Display',serif;font-weight:500;font-size:18px;margin:0 0 10px}
+.rules li{font-size:13px;line-height:1.55;margin:6px 0}
+</style></head><body>
+<h1>Hover card C, by bar type</h1>
+<p class="sub">The same card everywhere — band, name, fact, a gauge, three counters, the last note, the action — with the <b>gauge's two ends</b> and the <b>three counters</b> chosen per bar type. Nothing is invented: every number is one the pages already show.</p>
+<div class="grid">
+ <div class="opt"><h4>Query · waiting on the agent</h4><div class="card"><div class="band" style="background:var(--cream)"><span class="dot"></span>Queried<span class="sh">With the agent</span></div><div class="body"><div class="l1"><span class="nm">Harriet Vane-Coe</span><span class="ag">Stillwater Reps</span></div><div class="l2">Reply expected 23 Sept<span class="feb">18 days waiting</span></div>
+  <div class="gauge"><i style="width:62%;background:var(--sage)"></i><b style="left:62%"></b><span class="lab">sent 26 Aug</span><span class="lab r">expected 23 Sept</span></div>
+  <div class="meta"><div><b>18</b><small>days waiting</small></div><div><b>1</b><small>nudge</small></div><div><b>61</b><small>days total</small></div></div>
+  <div class="note">Prefers email; replies slowly in August.</div><div class="actl"><span class="cv">in 18 days</span><span class="btn">Nudge ›</span></div></div></div><p>Gauge: sent → their expected date. Counters: waiting · nudges · total since first query.</p></div>
+
+ <div class="opt"><h4>Query · agent's date passed</h4><div class="card"><div class="band" style="background:var(--sage)"><span class="dot sg"></span>Partial sent<span class="sh">With the agent</span></div><div class="body"><div class="l1"><span class="nm">Priya Raman</span><span class="ag">Raman &amp; Hale</span></div><div class="l2"><span class="bang">!</span>Expected 28 Aug<span class="feb">5 days overdue</span></div>
+  <div class="gauge"><i style="width:100%;background:var(--sage)"></i><i class="over" style="left:100%;width:8%"></i><b style="left:108%"></b><span class="lab">sent 16 Jul</span><span class="lab r ov">expected 28 Aug · 5 over</span></div>
+  <div class="meta"><div><b class="r">5</b><small>days overdue</small></div><div><b>0</b><small>nudges</small></div><div><b>49</b><small>days total</small></div></div>
+  <div class="note">—</div><div class="actl"><span class="cv od">5 days overdue</span><span class="btn">Nudge ›</span></div></div></div><p>The gauge fills and runs past its end in rose; today sits beyond. Counter one turns to overdue.</p></div>
+
+ <div class="opt"><h4>Query · your move, dated</h4><div class="card"><div class="band" style="background:var(--blush)"><span class="dot"></span>Full requested<span class="sh">With you</span></div><div class="body"><div class="l1"><span class="nm">R. Whitmore</span><span class="ag">Whitmore &amp; Bond</span></div><div class="l2"><span class="bang">!</span>Due 27 Aug<span class="feb">6 days overdue</span></div>
+  <div class="gauge"><i style="width:100%;background:var(--blush)"></i><i class="over" style="left:100%;width:10%"></i><b style="left:110%"></b><span class="lab">requested 6 Aug</span><span class="lab r ov">due 27 Aug · 6 over</span></div>
+  <div class="meta"><div><b class="r">6</b><small>days overdue</small></div><div><b>21</b><small>days you had</small></div><div><b>34</b><small>days total</small></div></div>
+  <div class="note">Asked for the full after the partial — wants it by end of month.</div><div class="actl"><span class="cv od">6 days overdue</span><span class="btn">Send full ›</span></div></div></div><p>Gauge: their request → your promised date. Counters: overdue · the window you were given · total.</p></div>
+
+ <div class="opt"><h4>Query · your move, no date</h4><div class="card"><div class="band" style="background:var(--blush)"><span class="dot"></span>Partial requested<span class="sh">With you</span></div><div class="body"><div class="l1"><span class="nm">Greg Panetta</span><span class="ag">Panetta Literary</span></div><div class="l2"><span class="bang">!</span>No date promised<span class="feb">9 weeks overdue</span></div>
+  <div class="gauge"><i style="width:100%;background:var(--blush)"></i><b style="left:100%"></b><span class="lab">requested 1 Jul</span><span class="lab r ov">no date · 9 weeks</span></div>
+  <div class="meta"><div><b class="r">63</b><small>days since request</small></div><div><b>—</b><small>date promised</small></div><div><b>63</b><small>days total</small></div></div>
+  <div class="note">—</div><div class="actl"><span class="cv od">9 weeks overdue</span><span class="btn">Send partial ›</span></div></div></div><p>No end date: the gauge is simply the elapsed time, today at its end. Counter two is an honest dash.</p></div>
+
+ <div class="opt"><h4>Offer on the table</h4><div class="card"><div class="band" style="background:var(--slate)"><span class="dot sl"></span>Offer<span class="sh">Offer</span></div><div class="body"><div class="l1"><span class="nm">Tom Ellery</span><span class="ag">Curtis Vane</span></div><div class="l2">Decide by 19 Sept<span class="feb">in 14 days</span></div>
+  <div class="gauge"><i style="width:0%;background:var(--slate)"></i><b style="left:2%"></b><span class="lab">offered 5 Sept</span><span class="lab r">decide by 19 Sept</span></div>
+  <div class="meta"><div><b>14</b><small>days to decide</small></div><div><b>3</b><small>others to nudge</small></div><div><b>112</b><small>days total</small></div></div>
+  <div class="note">Offer of representation; two-book interest.</div><div class="actl"><span class="cv">in 14 days</span><span class="btn">Answer ›</span></div></div></div><p>Gauge: offer → your decision date. Counter two is the offer-nudge count for the other open queries.</p></div>
+
+ <div class="opt"><h4>Gone quiet</h4><div class="card"><div class="band" style="background:var(--sand)"><span class="dot gy"></span>No response<span class="sh">No response</span></div><div class="body"><div class="l1"><span class="nm">Penhallow Literary</span><span class="ag">Agent not specified</span></div><div class="l2">Expected 25 Apr 2024<span class="feb">quiet 28 months</span></div>
+  <div class="gauge"><i style="width:22%;background:var(--sand)"></i><i class="over" style="left:22%;width:78%;background:#e0d4bb"></i><b style="left:100%"></b><span class="lab">sent 1 Mar 2024</span><span class="lab r">expected 25 Apr 2024 · long passed</span></div>
+  <div class="meta"><div><b>860</b><small>days quiet</small></div><div><b>2</b><small>nudges</small></div><div><b>0</b><small>replies</small></div></div>
+  <div class="note">—</div><div class="actl"><span class="cv">no reply in 28 months</span><span class="btn">Close query ›</span></div></div></div><p>Gauge: the short expected window, then a long sand overrun. Counters: quiet · nudges · replies (zero, plainly).</p></div>
+
+ <div class="opt"><h4>Past stage (ghost)</h4><div class="card"><div class="band" style="background:var(--cream)"><span class="dot"></span>Queried</div><div class="body"><div class="l1"><span class="nm" style="font-family:Inter;font-size:12.5px;font-weight:500">Agent requested the full</span></div><div class="l2"><span class="feb">12 Jul – 3 Aug · 3 weeks and 1 day</span></div>
+  <div class="gauge"><i style="width:100%;background:var(--cream)"></i><span class="lab">12 Jul</span><span class="lab r">3 Aug · requested</span></div>
+  <div class="meta"><div><b>22</b><small>days in stage</small></div><div><b>0</b><small>nudges</small></div><div><b>1</b><small>of 3 stages</small></div></div>
+  <div class="note">—</div></div></div><p>A finished stage: the gauge is full with no today marker; counters describe the stage; no action.</p></div>
+
+ <div class="opt"><h4>Task</h4><div class="card"><div class="band" style="background:var(--note)"><span class="dot nt"></span>Task<span class="sh">With you</span></div><div class="body"><div class="l1"><span class="nm">Polish the synopsis</span></div><div class="l2">Due 9 Sept<span class="feb">in 4 days</span></div>
+  <div class="gauge"><i style="width:70%;background:var(--note)"></i><b style="left:70%"></b><span class="lab">created 22 Aug</span><span class="lab r">due 9 Sept</span></div>
+  <div class="meta"><div><b>4</b><small>days left</small></div><div><b>1</b><small>rolled</small></div><div><b>18</b><small>days open</small></div></div>
+  <div class="note">Rolled from 28 Aug.</div><div class="actl"><span class="cv">in 4 days</span><span class="btn">Mark done ›</span></div></div></div><p>Gauge: created → due. Counters: days left (or overdue) · times rolled · days open. Nudges don't apply and aren't shown.</p></div>
+</div>
+<div class="rules"><h3>Does it hold?</h3><ol>
+<li><b>Yes for every type</b>, with one card shape and two decisions made per type: which two dates bound the gauge, and which three numbers are honest.</li>
+<li><b>The gauge always reads sent/requested/created → expected/due/decide.</b> When today is past the end it overruns in rose (sand for silences); when there is no end date the bar is the elapsed time; when the stage is finished there is no today marker.</li>
+<li><b>Counter one is always the headline number</b> the eyebrow already shows (waiting, overdue, days to decide, days quiet, days left). Counters two and three change by type and may be a dash — never a guess.</li>
+<li><b>The note is the last note on the relationship</b> (or a dash); tasks show their roll history there.</li>
+<li><b>Closed rows</b> (rejected, withdrawn) use the ghost form: full gauge, no today, counters = total days · nudges · outcome; no action.</li>
+<li>It is <b>compact-only</b>. At Comfortable, the card is already on screen; the hover there stays lift + action.</li>
+</ol></div>
+</body></html>

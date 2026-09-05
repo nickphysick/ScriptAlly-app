@@ -1,0 +1,205 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>ScriptAlly — the action journey</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1c130f;--page:#f5f1eb;--parch:#fdf9f5;--line:#e3d9ca;--rose:#c98e8a;--blush:#f8ece6;--sage:#d3dccd;--note:#f5e9bf;--mute:#a89880}
+*{box-sizing:border-box}body{margin:0;background:var(--page);font-family:Inter,sans-serif;color:var(--ink)}
+h1{font-family:'Playfair Display',serif;font-weight:500;font-size:30px;margin:28px 40px 6px}
+.sub{margin:0 40px 22px;color:#6f6055;font-size:13.5px;max-width:900px;line-height:1.5}
+.tabs{display:flex;gap:6px;margin:0 40px 22px}
+.tabs span{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:600;cursor:pointer;color:#4a3d33}
+.tabs span.on{background:#2a1f17;color:var(--parch);border-color:#2a1f17}
+.flow{display:none;padding:0 40px 40px}
+.flow.on{display:block}
+.rule{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin:0 0 10px}
+.steps{display:flex;gap:18px;align-items:flex-start;overflow-x:auto;padding-bottom:12px}
+.step{flex:0 0 auto;width:330px}
+.step .lbl{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.step .lbl b{width:22px;height:22px;border-radius:99px;background:#2a1f17;color:var(--parch);font-size:11px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace}
+.step .lbl span{font-size:12.5px;font-weight:600}
+.step .lbl small{color:var(--mute);font-size:11px;margin-left:auto}
+.arrow{flex:0 0 auto;align-self:center;color:#cdbfa8;font-size:22px;margin-top:20px}
+/* entry points */
+.entry{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:0 1px 2px rgba(58,28,20,.04)}
+.entry .where{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
+.entry .qcc{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.entry .qcc .h{background:var(--blush);padding:7px 10px;font-family:'Playfair Display',serif;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.entry .qcc .h i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.14em;color:#8c4f4a}
+.entry .qcc .b{padding:10px}
+.entry .nm{font-family:'Playfair Display',serif;font-size:15px}
+.entry .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:11.5px;color:#8a7a6c}
+.entry .row2{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:9px;border:1.5px solid #2a1f17;background:#fff;font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
+.btn.pri{background:#2a1f17;color:var(--parch)}
+.btn.ghost{border-color:var(--line);color:#6f6055;font-weight:500}
+.entry .task{display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px solid #f1e9de}
+.entry .task .bx{width:16px;height:16px;border-radius:5px;border:1.5px solid #8a7a6c}
+.entry .task .bx.on{background:#2a1f17;border-color:#2a1f17}
+.entry .task .t{font-size:12.5px;font-weight:600}
+.entry .task .m{font-size:11px;color:var(--mute)}
+.entry .cal{border:1px solid var(--line);border-radius:9px;overflow:hidden;position:relative}
+.entry .cal .band{height:22px;background:var(--sage);display:flex;align-items:center;padding:0 10px;font-family:'Playfair Display',serif;font-size:12px}
+.entry .cal .bd{padding:8px 10px}
+.entry .cal .act{position:absolute;right:8px;bottom:8px;display:flex;align-items:center;gap:8px}
+.entry .cal .act .cv{font-family:Caveat,cursive;font-size:14px;color:#8c4f4a}
+/* the sheet */
+.sheet{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 50px rgba(58,28,20,.16);overflow:hidden}
+.sheet .sh{padding:12px 16px;border-bottom:1px solid #f1e9de;display:flex;align-items:center;gap:10px}
+.sheet .sh .t{font-family:'Playfair Display',serif;font-size:16px}
+.sheet .sh .who{margin-left:auto;font-size:11.5px;color:#6f6055}
+.sheet .sh .x{width:22px;height:22px;border-radius:6px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:#6f6055;margin-left:8px}
+.sheet .sb{padding:14px 16px}
+.sheet .q{font-size:12.5px;font-weight:600;margin-bottom:8px}
+.sheet .opts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.sheet .opt{padding:7px 11px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:#3a1c14;display:inline-flex;align-items:center;gap:7px}
+.sheet .opt .ck{width:13px;height:13px;border-radius:99px;border:1.3px solid #cdbfa8;display:inline-block}
+.sheet .opt.on{border-color:var(--rose)}
+.sheet .opt.on .ck{background:var(--rose);border-color:var(--rose)}
+.sheet .fld{border:1px solid var(--line);border-radius:9px;padding:8px 11px;font-size:12.5px;color:#3a1c14;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.sheet .fld small{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.sheet .fld.txt{color:var(--mute);min-height:56px;align-items:flex-start}
+.sheet .seg{display:flex;background:#f3ede4;border-radius:999px;padding:3px;gap:2px;margin-bottom:12px}
+.sheet .seg span{flex:1;text-align:center;padding:6px;border-radius:999px;font-size:11.5px;color:#6f6055}
+.sheet .seg span.on{background:#fff;font-weight:600;color:var(--ink);box-shadow:0 1px 3px rgba(58,28,20,.08)}
+.sheet .will{background:var(--parch);border:1px solid #efe6da;border-radius:10px;padding:10px 12px;font-size:12px;color:#3a1c14;line-height:1.55}
+.sheet .will .h{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin-bottom:4px}
+.sheet .will .d{display:flex;gap:8px;align-items:baseline}
+.sheet .will .d i{font-style:normal;color:var(--rose)}
+.sheet .sf{padding:12px 16px;border-top:1px solid #f1e9de;display:flex;justify-content:space-between;align-items:center}
+.sheet .sf a{font-size:12px;color:#6f6055;text-decoration:underline;text-underline-offset:3px}
+/* outcome */
+.after{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
+.toast{display:inline-flex;align-items:center;gap:10px;background:#2a1f17;color:var(--parch);border-radius:10px;padding:10px 14px;font-size:12.5px;margin-bottom:12px}
+.toast a{color:#c9bca4;text-decoration:underline;text-underline-offset:3px}
+.after .cal .band.pink{background:var(--blush)}
+.after .cal .band.note{background:var(--note)}
+.after .list{font-size:12px;color:#3a1c14;line-height:1.6;margin-top:10px}
+.after .list b{font-weight:600}
+.rules{margin:26px 40px 50px;max-width:980px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px}
+.rules h3{font-family:'Playfair Display',serif;font-weight:500;font-size:18px;margin:0 0 10px}
+.rules li{font-size:13px;line-height:1.55;color:#3a1c14;margin:6px 0}
+.rules li b{font-weight:600}
+
+/* layout repairs: steps are equal columns; sheets and outcomes have room */
+.steps{display:grid;grid-template-columns:330px 24px 380px 24px 380px;align-items:start;gap:0 12px;overflow:visible}
+.step{width:auto;min-width:0}
+.arrow{margin-top:120px;text-align:center}
+.sheet .sb{padding:16px 18px}
+.sheet .q{margin:10px 0 8px}
+.sheet .q:first-child{margin-top:0}
+.sheet .opts{margin-bottom:6px}
+.sheet .seg{margin:0 0 6px}
+.sheet .fld{margin:8px 0}
+.sheet .fld.txt{display:block}
+.sheet .will{margin-top:14px}
+.sheet .will .d{display:grid;grid-template-columns:12px 1fr;gap:6px;align-items:start;margin:3px 0}
+.sheet .will .d i{line-height:1.6}
+.sheet .sh .who{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
+.after{padding:14px}
+.after .toast{display:flex;justify-content:space-between;width:100%}
+.after .cal{margin:4px 0 10px}
+.after .list{display:grid;grid-template-columns:auto;gap:6px;margin-top:8px;line-height:1.5}
+.after .list b{display:inline-block;min-width:96px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:600;margin-right:6px}
+.entry .cal .act{position:static;justify-content:flex-end;padding:0 10px 10px}
+.entry .cal .band em{font-style:italic;font-family:'Playfair Display',serif}
+.after .cal .band em{font-style:italic;font-family:'Playfair Display',serif}
+</style></head><body>
+<h1>The action journey</h1>
+<p class="sub">One component — the <b>Action sheet</b> — opened from any page: a Query Centre card, a To-do row, a Calendar bar or its drawer. The same three or four screens, the same words, the same outcome, wherever you start. Four journeys below; every step is the real sheet.</p>
+<div class="tabs"><span class="on" data-f="nudge">Log a nudge</span><span data-f="sent">Log sent materials</span><span data-f="resp">Record a response</span><span data-f="task">Complete a task</span></div>
+
+<div class="flow on" id="f-nudge">
+<div class="rule">Entry points — the same sheet from all three</div>
+<div class="steps">
+ <div class="step"><div class="lbl"><b>0</b><span>Entry</span><small>any page</small></div>
+  <div class="entry"><div class="where">Query Centre card</div><div class="qcc"><div class="h">Queried <i>WITH THE AGENT</i></div><div class="b"><div class="nm">Harriet Vane-Coe</div><div class="ag">Stillwater Reps</div><div class="row2"><span>Reply expected 23 Sept</span><span class="btn">Nudge ›</span></div></div></div>
+  <div class="where" style="margin-top:12px">To-do row</div><div class="task"><span class="bx"></span><span><div class="t">Nudge Harriet Vane-Coe</div><div class="m">from 4 Sept · Stillwater Reps</div></span></div>
+  <div class="where" style="margin-top:12px">Calendar bar · hover action</div><div class="cal"><div class="band">Queried</div><div class="bd"><div class="nm">Harriet Vane-Coe</div><div class="ag">Stillwater Reps</div></div><div class="act"><span class="cv">in 2 days</span><span class="btn">Nudge ›</span></div></div></div></div>
+ <div class="arrow">→</div>
+ <div class="step"><div class="lbl"><b>1</b><span>Action sheet</span><small>what happened</small></div>
+  <div class="sheet"><div class="sh"><span class="t">Log a nudge</span><span class="who">Harriet Vane-Coe · Stillwater Reps</span><span class="x">✕</span></div>
+   <div class="sb"><div class="q">When did you nudge?</div><div class="seg"><span class="on">Today</span><span>Yesterday</span><span>Pick a date</span></div>
+   <div class="q">How?</div><div class="opts"><span class="opt on"><span class="ck"></span>Email</span><span class="opt"><span class="ck"></span>QueryTracker</span><span class="opt"><span class="ck"></span>Other</span></div>
+   <div class="fld txt">Add a note (optional)</div>
+   <div class="will"><div class="h">What this does</div><div class="d"><i>●</i>Status stays <b>Queried</b>, annotated <i>Nudged once</i></div><div class="d"><i>●</i>A <b>Nudge again</b> reminder is set for <b>18 Sept</b> (14 days)</div><div class="d"><i>●</i>The Calendar bar shows a nudge event on today</div></div></div>
+   <div class="sf"><a>Cancel</a><span class="btn pri">Log nudge</span></div></div></div>
+ <div class="arrow">→</div>
+ <div class="step"><div class="lbl"><b>2</b><span>Outcome</span><small>everywhere at once</small></div>
+  <div class="after"><div class="toast">Nudge logged · reminder 18 Sept <a>Undo</a></div>
+   <div class="cal"><div class="band">Queried &nbsp;<em style="font-size:11px;color:#8a7a6c">Nudged once</em></div><div class="bd"><div class="nm">Harriet Vane-Coe</div><div class="ag">Stillwater Reps</div></div></div>
+   <div class="list"><div><b>Query Centre</b>card reads Queried · nudged once · 0 days waiting</div><div><b>To-do</b>"Nudge Harriet" ticked off; "Nudge again · 18 Sept" appears under Coming up</div><div><b>Calendar</b>nudge event on 5 Sept; a new bar begins; bell symbol at 18 Sept</div><div><b>Activity</b>"You nudged — 5 Sept" added to the journey</div></div></div></div>
+</div></div>
+
+<div class="flow" id="f-sent">
+<div class="rule">Entry — from the deed on any page</div>
+<div class="steps">
+ <div class="step"><div class="lbl"><b>0</b><span>Entry</span></div>
+  <div class="entry"><div class="where">Calendar drawer · primary action</div><div class="cal"><div class="band" style="background:var(--blush)">Partial requested</div><div class="bd"><div class="nm">Greg Panetta</div><div class="ag">Panetta Literary</div></div><div class="act"><span class="cv">9 weeks overdue</span><span class="btn">Send partial ›</span></div></div>
+  <div class="where" style="margin-top:12px">To-do row</div><div class="task"><span class="bx"></span><span><div class="t">Send your partial</div><div class="m">Greg Panetta · no date on record</div></span></div></div></div>
+ <div class="arrow">→</div>
+ <div class="step"><div class="lbl"><b>1</b><span>Action sheet</span><small>what you sent</small></div>
+  <div class="sheet"><div class="sh"><span class="t">Log sent materials</span><span class="who">Greg Panetta</span><span class="x">✕</span></div>
+   <div class="sb"><div class="q">What did you send?</div><div class="opts"><span class="opt on"><span class="ck"></span>Partial</span><span class="opt"><span class="ck"></span>Full</span><span class="opt"><span class="ck"></span>Synopsis</span><span class="opt"><span class="ck"></span>Revision</span></div>
+   <div class="q">When?</div><div class="seg"><span class="on">Today</span><span>Yesterday</span><span>Pick a date</span></div>
+   <div class="q">When do they say they'll reply?</div><div class="fld"><span>They gave a date</span><small>set ›</small></div><div class="fld"><span>No date given — use the usual <b>8 weeks</b></span><small>edit</small></div>
+   <div class="will"><div class="h">What this does</div><div class="d"><i>●</i>Status becomes <b>Partial sent</b> · with the agent</div><div class="d"><i>●</i>Reply expected <b>31 Oct</b>; a nudge is offered from then</div><div class="d"><i>●</i>The "Send your partial" task is completed</div></div></div>
+   <div class="sf"><a>Cancel</a><span class="btn pri">Log sent</span></div></div></div>
+ <div class="arrow">→</div>
+ <div class="step"><div class="lbl"><b>2</b><span>Outcome</span></div>
+  <div class="after"><div class="toast">Partial logged as sent · reply expected 31 Oct <a>Undo</a></div>
+   <div class="cal"><div class="band">Partial sent</div><div class="bd"><div class="nm">Greg Panetta</div><div class="ag">Panetta Literary</div></div></div>
+   <div class="list"><div><b>Query Centre</b>header Partial Sent · WITH THE AGENT · "Reply expected by 31 Oct"</div><div><b>To-do</b>task ticked; nothing new until 31 Oct, then "Nudge Greg"</div><div><b>Calendar</b>the urgent bar closes at today; a sage bar runs 5 Sept → 31 Oct with an hourglass; the row leaves Urgent for With agents</div><div><b>Activity</b>"You sent the partial — 5 Sept"</div></div></div></div>
+</div></div>
+
+<div class="flow" id="f-resp">
+<div class="rule">Entry — a reply came in</div>
+<div class="steps">
+ <div class="step"><div class="lbl"><b>0</b><span>Entry</span></div>
+  <div class="entry"><div class="where">Query Centre card · "Record a response"</div><div class="qcc"><div class="h" style="background:var(--sage)">Full Sent <i style="color:#55684b">WITH THE AGENT</i></div><div class="b"><div class="nm">Sophie Dunn</div><div class="ag">Curtis Vane</div><div class="row2"><span>Reply expected 3 Sept</span><span class="btn">Record response ›</span></div></div></div>
+  <div class="where" style="margin-top:12px">Calendar drawer</div><div class="cal"><div class="band">Full sent</div><div class="bd"><div class="nm">Sophie Dunn</div><div class="ag">Curtis Vane</div></div><div class="act"><span class="cv">2 days overdue</span><span class="btn">Nudge ›</span></div></div></div></div>
+ <div class="arrow">→</div>
+ <div class="step"><div class="lbl"><b>1</b><span>Action sheet</span><small>what they said</small></div>
+  <div class="sheet"><div class="sh"><span class="t">Record a response</span><span class="who">Sophie Dunn · Curtis Vane</span><span class="x">✕</span></div>
+   <div class="sb"><div class="q">What did they say?</div><div class="opts"><span class="opt"><span class="ck"></span>Requested the full</span><span class="opt on"><span class="ck"></span>Offer</span><span class="opt"><span class="ck"></span>Revise &amp; resubmit</span><span class="opt"><span class="ck"></span>Rejection</span><span class="opt"><span class="ck"></span>Something else</span></div>
+   <div class="q">When?</div><div class="seg"><span class="on">Today</span><span>Yesterday</span><span>Pick a date</span></div>
+   <div class="q">Do you owe them a reply by a date?</div><div class="fld"><span>Decision by</span><small>19 Sept ›</small></div>
+   <div class="fld txt">Paste the key line of their email (optional)</div>
+   <div class="will"><div class="h">What this does</div><div class="d"><i>●</i>Status becomes <b>Offer</b> · with you</div><div class="d"><i>●</i>A task <b>Answer Curtis Vane</b> is due 19 Sept</div><div class="d"><i>●</i>Other open queries get an <b>offer-nudge</b> suggestion</div></div></div>
+   <div class="sf"><a>Cancel</a><span class="btn pri">Record</span></div></div></div>
+ <div class="arrow">→</div>
+ <div class="step"><div class="lbl"><b>2</b><span>Outcome</span></div>
+  <div class="after"><div class="toast">Offer recorded — congratulations · answer by 19 Sept <a>Undo</a></div>
+   <div class="cal"><div class="band" style="background:#d3dae2">Offer</div><div class="bd"><div class="nm">Sophie Dunn</div><div class="ag">Curtis Vane</div></div></div>
+   <div class="list"><div><b>Query Centre</b>Offer · WITH YOU · "Awaiting your decision · 0 days since offer"</div><div><b>To-do</b>"Answer Curtis Vane · 19 Sept" under Needs you</div><div><b>Calendar</b>slate bar from today to 19 Sept with a flag at its end; the row moves to Upcoming</div><div><b>Activity</b>"Agent made an offer — 5 Sept"</div></div></div></div>
+</div></div>
+
+<div class="flow" id="f-task">
+<div class="rule">Entry — ticking a task, wherever the task is shown</div>
+<div class="steps">
+ <div class="step"><div class="lbl"><b>0</b><span>Entry</span></div>
+  <div class="entry"><div class="where">To-do row</div><div class="task"><span class="bx on"></span><span><div class="t">Polish the synopsis</div><div class="m">your task · due 9 Sept</div></span></div>
+  <div class="where" style="margin-top:12px">Calendar task bar · hover action</div><div class="cal"><div class="band" style="background:var(--note)">Task</div><div class="bd"><div class="nm">Polish the synopsis</div></div><div class="act"><span class="cv">in 4 days</span><span class="btn">Mark done ›</span></div></div>
+  <div class="where" style="margin-top:12px">Calendar drawer</div><div class="task"><span class="bx"></span><span><div class="t">Mark done</div><div class="m">primary action in the drawer</div></span></div></div></div>
+ <div class="arrow">→</div>
+ <div class="step"><div class="lbl"><b>1</b><span>No sheet</span><small>a tick is a tick</small></div>
+  <div class="after"><div class="toast">Task done · "Polish the synopsis" <a>Undo</a></div>
+   <div class="list" style="display:block;line-height:1.6">Completing a plain task never opens a sheet — the tick <b>is</b> the action, and Undo lives in the toast for 8 seconds.<br><br>When the task is <b>linked to a relationship</b> ("Send your partial", "Nudge Harriet", "Answer Curtis Vane"), the tick opens the matching sheet instead, pre-filled, so the record is kept: sent materials, a nudge, a decision. Ticking without recording would leave the query's story incomplete.</div></div></div>
+ <div class="arrow">→</div>
+ <div class="step"><div class="lbl"><b>2</b><span>Outcome</span></div>
+  <div class="after"><div class="cal"><div class="band" style="background:var(--note)">Task &nbsp;<em style="font-size:11px;color:#8a7a3a">Done 5 Sept</em></div><div class="bd"><div class="nm" style="color:#a89880;text-decoration:line-through">Polish the synopsis</div></div></div>
+   <div class="list"><div><b>To-do</b>moves to Done (collapsed by default)</div><div><b>Calendar</b>the bar ghosts at 32% and ends at today with a tick; hidden by the default filter after a week</div><div><b>Dashboard</b>tasks count −1</div></div></div></div>
+</div></div>
+
+<div class="rules"><h3>The rules that make it one journey</h3><ol>
+<li><b>One component.</b> The Action sheet is a single modal, owned by one module, opened by every entry point with the same call: <code>openAction(kind, relationshipOrTask, prefill)</code>. No page has its own version.</li>
+<li><b>Four kinds, one shape.</b> Nudge · Sent materials · Response · (Task tick, sheetless unless linked). Each sheet is: what happened → when → the one fact the app needs next (a date, a reply window) → an optional note → <b>"What this does"</b> → one primary button.</li>
+<li><b>"What this does" is always shown</b> before committing: the status change, the task it completes, the reminder it sets, the bar it creates. Written in the same words the pages will show afterwards.</li>
+<li><b>Same vocabulary everywhere.</b> Statuses are QC's nine; holders are With you / With the agent / Offer; lateness is one form. The sheet, the toast, the card header and the calendar band all say the same thing.</li>
+<li><b>One outcome, all surfaces.</b> A single write to the relationship's activity produces the QC card, the To-do row, the Calendar bar and the At-a-glance counts. Nothing is written per page.</li>
+<li><b>Undo, not confirm.</b> No "are you sure?"; every commit shows an 8-second toast with Undo, and Undo reverts the whole write (status, task, reminder).</li>
+<li><b>Dates default to today</b>, with Yesterday and a picker one tap away; agency reply windows default to the usual (editable) so no one is forced to invent a date.</li>
+<li><b>Linked tasks record; plain tasks tick.</b> A tick on a relationship task opens its sheet pre-filled; a plain task just completes.</li>
+<li><b>Entry never changes the journey.</b> Whether you began on a card button, a row tick, a bar's hover action or the drawer's primary action, step 1 is the same sheet with the same prefill.</li>
+</ol></div>
+<script>
+document.querySelectorAll('.tabs span').forEach(function(t){t.addEventListener('click',function(){document.querySelectorAll('.tabs span').forEach(function(x){x.classList.remove('on')});t.classList.add('on');document.querySelectorAll('.flow').forEach(function(f){f.classList.toggle('on',f.id==='f-'+t.dataset.f)});});});
+</script></body></html>
