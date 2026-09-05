@@ -37,6 +37,21 @@ const rawSplitCss = readFileSync(join(here, "todoSplit.css"), "utf8");
 const decomment = (src: string): string =>
   src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const splitCss = decomment(rawSplitCss);
+/* ⚠️ THE LIST CARD'S OWN SHEET, READ HERE BECAUSE THE FRAME MOVED INTO IT (drawer round, Phase 1).
+   Three cases below assert that exactly one thing draws the list's edge; each names BOTH sides —
+   the track does not and the card does — because an absence asserted alone passes just as well on
+   a page with no card at all. Decommented for the same reason `todoSplit.css` is. */
+const listCardCss = decomment(readFileSync(join(here, "taskList.css"), "utf8"));
+
+/**
+ * ⚠️ A `border` CHECK MUST BE A DECLARATION CHECK — `box-sizing: border-box` contains the word.
+ * The first form of the three cases below read `not.toContain("border")` and went red on a rule
+ * whose only "border" was the box model, which is this repo's most-repeated lock fault wearing a
+ * property name instead of a class name. `drawsAnEdge` matches only a `border…:` at the start of
+ * a declaration, and `box-sizing` cannot satisfy it because the property is `box-sizing`.
+ */
+const drawsAnEdge = (ruleText: string): string[] =>
+  (ruleText.match(/(?:^|[;{])\s*(border[a-z-]*)\s*:/g) ?? []).map((m) => m.replace(/[^a-z-]/g, ""));
 const layout = readFileSync(join(here, "TasksPageLayout.tsx"), "utf8");
 const board = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const cal = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
@@ -859,10 +874,27 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
        `minmax(260px, 340px)` starved it because 260 is a floor the grid honours before
        `minmax(0, 1fr)` gets anything; `min(340px, 34%)` has no floor, so the pane always keeps two
        thirds of the measure. Which is why the range is asserted as a proportion below. */
-    /* ⚠️ 392, NOT 340 — the list contract's own card width, and the list is what this track holds.
-       The row grammar is measured at 392: a 56px pill column, a middle that must not wrap, and a
-       78px right column. At 340 the middle was 52px short, which is where the meta lines wrapped. */
-    expect(split).toContain("grid-template-columns: min(392px, 36%) minmax(0, 1fr)");
+    /* ⚠️ RE-POINTED, AND THE SPLIT HAS TWO SHAPES NOW (drawer round, Phase 1). The 392px rail went
+       with the always-two-columns layout: at REST the list is the page (one track) and only
+       `.open` states the pair. The claim this case makes is unchanged and is about neither number
+       — a track may not be sized by its content — so it is asserted over BOTH shapes rather than
+       pinned to whichever width the design currently wants.
+
+       ⚠️ AND BOTH HALVES ARE ASSERTED, because either alone passes on a page with one state
+       missing: a rest declaration with no `.open` rule is a page that never opens, and an `.open`
+       rule with no base is a page with no resting shape. */
+    expect(split, "the resting split is not one full-width track").toContain("grid-template-columns: minmax(0, 1fr)");
+    const openRule = rule(splitCss, ".tdw-split.open {");
+    expect(openRule, "the open split does not state a two-track shape").toContain("grid-template-columns: 520px minmax(0, 1fr)");
+    /* ⚠️ CONTENT SIZING IS FORBIDDEN BY NAME IN BOTH, which is the case's actual title. `auto`,
+       `min-content`, `max-content` and `fit-content` are the four ways a track asks its contents
+       how wide to be; a bare `1fr` (without `minmax(0, …)`) is the fifth, because `1fr` carries a
+       `min-content` floor. Naming them beats pinning a value: a legitimate re-width passes and a
+       track that starts listening to its contents does not. */
+    for (const shape of [split, openRule]) {
+      const cols = /grid-template-columns:([^;]*)/.exec(shape)?.[1] ?? "";
+      expect(cols, "a column track is sized by its content").not.toMatch(/\b(auto|min-content|max-content|fit-content)\b/);
+    }
     expect(split, "the wrapping row is back — the panes will be sized by their content").not.toContain("flex-wrap");
     /* ⚠️ THE VERTICAL CLAIM SURVIVES THE MECHANISM CHANGE. `grid-template-rows: minmax(0, 1fr)` was
        how a GRID refused to be sized by its content; a flex column refuses with `min-height: 0`,
@@ -960,13 +992,23 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     /* One overflow primitive on this page family — the fault `.tpl-zone` was extracted to fix.
        The rail declares no overflow of its own; it is a flex column and the zone inside it
        scrolls, exactly as `.tpl-body` did before the split. */
-    /* ⚠️ THE CARD ITSELF CLIPS, AND THAT IS ITS EDGE RATHER THAN A SCROLL DECISION — a 14px
-       radius with square content spilling past it is not a card. What must not clip is anything
-       BETWEEN the card and the scroller, and there is nothing: `.tpl-zone` is the rail's direct
-       scrolling child. The distinction is the whole of this case, so it is asserted rather than
-       relaxed away. */
-    expect(rule(splitCss, ".tdw-rail {")).toContain("overflow: hidden");
-    expect(rule(splitCss, ".tdw-rail {")).toContain("border-radius: 14px");
+    /* ⚠️ RE-POINTED — THE RAIL IS NOT A CARD ANY MORE, AND IT WAS ONE TOO MANY (drawer round,
+       Phase 1). It carried the border, the 14px radius and the clip from when it WAS the bare
+       column; the ported `.tlc` then brought its own 1px, 12px and shadow, so the page drew two
+       hairlines a pixel apart and clipped the inner card's lift away. Measured at 1440: rail left
+       282 · card left 283 · rail right 1382 · card right 1381.
+
+       ⚠️ THE CASE'S OWN CLAIM IS UNCHANGED AND IS NOW STATED WITHOUT AN EXCEPTION. It is about
+       there being ONE overflow primitive on this page family: the rail declares no overflow of
+       its own and the zone inside it scrolls. That used to need a carve-out for the card's edge;
+       with the frame on `.tlc`, where it belongs, the rule holds flat. */
+    expect(rule(splitCss, ".tdw-rail {"), "the rail is clipping again")
+      .not.toContain("overflow");
+    expect(drawsAnEdge(rule(splitCss, ".tdw-rail {")), "the rail grew a frame again").toEqual([]);
+    /* ⚠️ AND THE CARD STILL HAS ONE — the frame MOVED, it was not deleted. Asserting only the
+       absence would pass on a page with no card at all, which is the vacuous half of every
+       retirement lock. */
+    expect(listCardCss, "the list card lost the frame the rail gave up").toContain("border-radius:12px");
     expect(splitCss).not.toContain(".tpl-zone");   // the primitive is not re-declared here
     /* the rail gained its own tools block above the scroller (Phase 4); the ZONE is still the
        one relocated scroller, which is what this case is about */
@@ -1014,10 +1056,16 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
    * is still the one recording surface — nothing in the rail records anything.
    */
   it("the dock mounts INSIDE the workspace pane, and the list keeps the rail", () => {
-    for (const anchor of ['className="tdw-split"', 'className="tdw-rail"', 'className="tdw-work"', "<TaskPane"]) {
+    /* ⚠️ THE SPLIT'S CLASS IS A TEMPLATE NOW (drawer round, Phase 1) — `tdw-split` plus `open`
+       when a task is docked — so its literal stopped matching an element that had not moved. The
+       claim is the ORDER of three mounts, which is a fact about the tree and not about how a
+       class string is assembled; the other two are still literals because they still are. */
+    const splitAt = board.search(/className=\{?[`"]tdw-split/);
+    expect(splitAt, "the split's opening element").toBeGreaterThan(-1);
+    for (const anchor of ['className="tdw-rail"', 'className="tdw-work"', "<TaskPane"]) {
       expect(board, anchor).toContain(anchor);
     }
-    expect(board.indexOf('className="tdw-split"')).toBeLessThan(board.indexOf('className="tdw-rail"'));
+    expect(splitAt).toBeLessThan(board.indexOf('className="tdw-rail"'));
     expect(board.indexOf('className="tdw-rail"')).toBeLessThan(board.indexOf('className="tdw-work"'));
     expect(board.indexOf('className="tdw-work"')).toBeLessThan(board.indexOf("<TaskPane"));
     /* still exactly one dock mount and one entrance function */
@@ -1058,7 +1106,20 @@ describe("⚠️ A NARROWING IS A RAIL FACT — it must never empty the workspac
    * correct pair, and clearing the search brings the rail back around it.
    */
   it("the pane reads a HELD card, so a rail with nothing in it cannot blank it", () => {
-    expect(board).toContain("const paneCard = docked.card ?? (allDockable.length > 0 ? heldCard.current : null);");
+    /* ⚠️ THE HOLD GAINED A SECOND GUARD AND THE LAW IS UNCHANGED (drawer round, Phase 1). It read
+       `allDockable.length > 0` alone, which is true of the ordinary resting page — so the held
+       card survived `closeDock` and **Close did not close**. `dockKey` is what separates the two:
+       a narrowing leaves it set (the writer has not closed anything, so the card is held), and
+       closing clears it.
+
+       ⚠️ BOTH HALVES ARE ASSERTED, because each alone permits the other's bug. Without
+       `allDockable` a finished board would keep a card on screen; without `dockKey` a close is not
+       a close. Asserted as the two operands rather than as the line, so a reordering or a
+       reformatting is not a red. */
+    const hold = /const paneCard = docked\.card \?\? \(([^)]*)\?/.exec(board)?.[1] ?? "";
+    expect(hold, "the pane's fallback is gone").not.toBe("");
+    expect(hold, "the hold survives a finished board").toContain("allDockable.length > 0");
+    expect(hold, "a close is not a close — the held card outlives it").toContain("dockKey");
     expect(board).toContain("{paneCard ? (");
   });
 
@@ -1167,11 +1228,12 @@ describe("⚠️ EACH PANE SCROLLS, AND NEITHER CLIPS — the distinction a page
     ] as const) {
       expect(rule(sheet, sel), sel).not.toContain("overflow");
     }
-    /* ⚠️ `.tdw-rail` IS THE EXCEPTION AND IT IS NAMED. It clips because it is a rounded CARD, and
-       its clip is its own edge; the scroller is its direct child, so nothing is swallowed on the
-       way down. Exempting it silently would leave the next reader unable to tell this from the
-       fault the case exists for. */
-    expect(rule(splitCss, ".tdw-rail {")).toContain("overflow: hidden");
+    /* ⚠️ THE EXCEPTION IS GONE WITH THE FRAME THAT NEEDED IT (drawer round, Phase 1). `.tdw-rail`
+       used to be exempted here because it clipped as a rounded CARD; it is a track now, the card
+       is `.tlc`, and `.tdw-rail` joins the flat rule with the others. A named carve-out that has
+       stopped applying quietly shrinks the population a case covers — so it is removed rather
+       than left to pass on a rule nobody re-measures. */
+    expect(rule(splitCss, ".tdw-rail {"), ".tdw-rail {").not.toContain("overflow");
     /* `.tdb-wrap` is the ONE deliberate clip — it is the frame, and the frame is a window. Its
        `overflow: hidden` is what makes the panes scroll instead of the page, and it is asserted
        positively above rather than exempted quietly here. */
@@ -1223,16 +1285,28 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
        NO horizontal component, because the scroll row's 35px gutter is the inset and a second one
        put this page's cards 23px further in than the Query Centre's. */
     expect(split).toContain("padding: 20px 0 32px");
-    /* and the border is still there to do the delineating alone */
-    expect(rule(splitCss, ".tdw-rail {")).toContain("border: 1px solid var(--tdw-hair)");
+    /* ⚠️ THE DELINEATING HAIRLINE MOVED TO THE CARD (drawer round, Phase 1) — it was on BOTH, a
+       pixel apart. The claim is that exactly one thing draws the list's edge, so both halves are
+       asserted: the track does not, and the card does. */
+    expect(drawsAnEdge(rule(splitCss, ".tdw-rail {")), "the rail is drawing an edge again").toEqual([]);
+    expect(listCardCss, "nothing draws the list's edge").toContain("border:1px solid var(--edge)");
   });
 
-  it("the rail is a CARD — hairline and radius, and the divider went with the sheet", () => {
+  /**
+   * ⚠️ RENAMED WITH THE THING IT DESCRIBES (drawer round, Phase 1). It read "the rail is a CARD",
+   * and the rail WAS a card — a second one, a pixel outside the list card's own, 14px radius
+   * around 12px, with `overflow: hidden` eating the inner card's lift. Two frames for one object.
+   * The claim worth keeping is that there is exactly ONE, and that the divider stayed retired.
+   */
+  it("the LIST CARD is the card — one frame, and the divider is still gone", () => {
     const rail = rule(splitCss, ".tdw-rail {");
-    expect(rail).toContain("border: 1px solid var(--tdw-hair)");
-    expect(rail).toContain("border-radius: 14px");
-    /* the border-RIGHT that split one sheet in two is gone; the ground separates them now */
-    expect(rail).not.toContain("border-right");
+    expect(drawsAnEdge(rail), "the rail grew a frame or a radius again").toEqual([]);
+    /* ⚠️ BOTH HALVES. Absence alone passes on a page with no card; the card's own frame is what
+       makes this "the frame moved" rather than "the frame went". */
+    expect(listCardCss).toContain("border:1px solid var(--edge)");
+    expect(listCardCss).toContain("border-radius:12px");
+    /* the border-RIGHT that split one sheet in two is gone; the ground separates them now — and
+       it is covered by the sweep above, which forbids every `border…:` on this rule */
   });
 
   it("⚠️ THE WORKSPACE PANE PAINTS NOTHING — the card floats on the ground directly", () => {

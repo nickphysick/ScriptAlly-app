@@ -59,7 +59,59 @@
 .tlc .grp.yours .g-dot { background:#c2a869; }
 .tlc .grp .g-lbl { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink2);font-weight:500;white-space:nowrap; }
 .tlc .grp .g-n { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;color:#c0b0a0; }
-.tlc .row { display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:11px;align-items:center; padding:11px 16px 11px 13px;cursor:pointer;border-left:3px solid transparent;transition:background .13s;position:relative; }
+/* ⚠️ ONE BASE RULE FOR `.tlc .row`, AND THE COLUMNS ARE THE ONLY THING THE TWO WIDTHS ARGUE
+   ABOUT. The wide grid is the drawer contract's own track list (`todo-fullscreen-final.html`);
+   the folded one is its `.stage.open .row`. Everything else — the padding, the selection
+   border, the hover — is shared, so a change to the row's feel cannot land in one width and
+   not the other. Restating the whole rule under `.folded` is what produced two rows that
+   drifted; the modifier below states ONLY the columns. */
+.tlc .row { display:grid;grid-template-columns:var(--row-cols);gap:14px;align-items:center; padding:11px 16px 11px 13px;cursor:pointer;border-left:3px solid transparent;transition:background .13s;position:relative; }
+
+/* ⚠️ THE TRACK LIST IS A TOKEN ON THE CARD, NOT A DECLARATION ON THE ROW — three widths, one
+   property, and the row never learns which of them it is in. The manuscript track is dropped
+   rather than zeroed: a `0px` track still takes the row's `gap` on both sides, so a hidden
+   column would leave 28px of hole that nothing accounts for. */
+.tlc            { --row-cols: 64px minmax(180px,1.4fr) minmax(130px,1fr) minmax(130px,1fr) 0px 118px 96px; }
+.tlc.hasms      { --row-cols: 64px minmax(180px,1.4fr) minmax(130px,1fr) minmax(130px,1fr) minmax(120px,.9fr) 118px 96px; }
+.tlc.folded     { --row-cols: 64px minmax(0,1fr) 118px; }
+.tlc.folded.hasms { --row-cols: 64px minmax(0,1fr) 118px; }
+
+/* ⚠️ THE MANUSCRIPT CELL IS EMPTIED, NOT UNMOUNTED (see the component's note). `display:none` on
+   a grid child removes it from placement, which would shift every cell after it into the wrong
+   track — so it keeps its (zero-width) track and hides its ink. */
+.tlc:not(.hasms) .r-ms { visibility:hidden; }
+
+/* ── the wide row's three cells ─────────────────────────────────────────────────────────── */
+.tlc .cell { font-size:12px;color:var(--ink2);font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0; }
+.tlc .r-ag { display:flex;align-items:center;gap:8px; }
+.tlc .r-ag .r-agname { white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0; }
+/* the contract's `.av.s` — a person-shaped disc, blush with a hairline burgundy edge */
+.tlc .av { display:inline-flex;align-items:center;justify-content:center;border-radius:50%; background:#efe4dc;color:var(--burg);font-family:'JetBrains Mono',monospace;font-weight:500; letter-spacing:0.02em;flex-shrink:0;border:1px solid rgba(124,58,42,0.18);overflow:hidden; }
+.tlc .av.s { width:22px;height:22px;font-size:8px; }
+
+/* ⚠️ QUIET AT REST, PINK ON THE ROW'S HOVER — and the hover is the ROW's, not the control's, so
+   the whole row lights one affordance rather than the pointer having to find it. Transparent is
+   stated rather than omitted: an unstated background is `rgba(0,0,0,0)` too, but a measurement
+   asking what this control looks like at rest deserves a declaration to read. */
+.tlc .actb { justify-self:end;height:28px;padding:0 12px;border-radius:999px; border:1px solid transparent;background:transparent;font-size:11px;font-weight:500;color:#c0b0a0; display:inline-flex;align-items:center;transition:background .12s,border-color .12s,color .12s; }
+/* ⚠️ THE COMPUTED VALUE OF THE SHOWN STATE IS `block`, NOT `inline`, AND NOTHING IS WRONG. `.actb`
+   is an inline-flex container, so a direct child is BLOCKIFIED — the browser rewrites `inline` to
+   `block` before anything can read it. The declaration is the contract's word and the layout is
+   identical either way; a measurement asking whether the word shows must therefore ask "not
+   none", never "inline". Recorded here because the first reading of it looked like a lost rule. */
+.tlc .actb .w { display:none; }
+.tlc .row:hover .actb { border-color:var(--pink-b);background:var(--pink);color:var(--burg); }
+.tlc .row:hover .actb .w { display:inline; }
+
+/* ── folded: the drawer is open and the card is 520px ───────────────────────────────────── */
+/* ⚠️ THE META LINE AND THE COLUMNS ARE THE SAME FACTS, SO EXACTLY ONE OF THEM SHOWS. Wide, the
+   agent, agency and manuscript have columns and the meta sentence is redundant; folded, the
+   columns are gone and the sentence is the only place those facts survive. Showing both was the
+   rail's state and it printed the agent twice. */
+.tlc.folded .cell:not(.keep) { display:none; }
+.tlc.folded .actb { display:none; }
+.tlc.folded .r-deed { white-space:normal; }
+.tlc.folded .keep { text-align:right; }
 .tlc .row:hover { background:#fbf7f2; }
 .tlc .row.sel { background:#f6efe7;border-left-color:var(--burg); }
 .tlc .row+.row::before { content:'';position:absolute;top:0;left:16px;right:16px;height:1px;background:#f3ece3; }
@@ -71,11 +123,12 @@
 .tlc .pill.close { background:#eef1ec;border:0.5px solid #dfe5dc;color:#5a6e58; }
 .tlc .pill.fix { background:#eceef2;border:0.5px solid #dde1e8;color:#5c6a80; }
 .tlc .pill.note { background:#faf4e8;border:0.5px solid #efe4cc;color:#a08a58; }
-.tlc .r-deed { font-size:13px;font-weight:600;color:var(--ink);line-height:1.3;letter-spacing:0.001em; }
-.tlc .r-meta { font-size:11px;color:var(--muted2);font-weight:300;margin-top:2.5px; white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.tlc .r-deed { font-size:13px;font-weight:600;color:var(--ink);line-height:1.3;letter-spacing:0.001em; white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.tlc .r-meta { display:none;font-size:11px;color:var(--muted2);font-weight:300;margin-top:2.5px; white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.tlc.folded .r-meta { display:block; }
 .tlc .r-meta .dot { color:#d8ccbe;padding:0 1px; }
 .tlc .r-note { font-family:'Caveat',cursive;font-size:17.5px;color:#6a5a48;font-weight:500;line-height:1.1; }
-.tlc .r-fig { text-align:right;min-width:78px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.07em;line-height:1.55;color:var(--muted2);text-transform:uppercase; }
+.tlc .r-fig { text-align:right;min-width:0;white-space:normal;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.07em;line-height:1.55;color:var(--muted2);text-transform:uppercase; }
 .tlc .r-fig b { font-family:'Playfair Display',serif;font-size:15px;letter-spacing:0;text-transform:none;font-weight:500;color:var(--ink2);padding-right:1px;font-variant-numeric:lining-nums; }
 .tlc .r-fig.hot b { color:var(--burg); }
 .tlc .r-fig.absent { color:#c0b0a0;font-size:8.5px;letter-spacing:0.09em; }

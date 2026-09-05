@@ -236,3 +236,53 @@ export const PANE_COPY: Record<Bucket, PaneCopy> = {
 };
 
 export const paneCopy = (c: BoardCard): PaneCopy => PANE_COPY[cardBucket(c)];
+
+/* ── the wide row's own cells (drawer round, Phase 1) ─────────────────────────────────────── */
+
+/**
+ * ⚠️ THE WIDE ROW'S CELLS ARE THE META LINE'S FACTS, SPLIT INTO COLUMNS — never re-derived.
+ * `listMeta` composes agent, agency and the ask into one sentence for the 392px rail; at full
+ * width the same facts get columns of their own. Both read the SAME two accessors (`agentOf`,
+ * `agencyOf`), so a row cannot say "no agency" in one form and print an agency in the other.
+ *
+ * ⚠️ AND ABSENCE STAYS PLAIN. The columns keep the contract's words for a record that does not
+ * hold the fact rather than falling back to an em dash, because "no agency" is a statement about
+ * the record and "—" is a statement about nothing.
+ */
+export const listAgent = (i: RowInputs): string => agentOf(i.card);
+export const listAgency = (i: RowInputs): string => agencyOf(i);
+
+/**
+ * The manuscript this row's work belongs to. Absent on a user task, which is not about a book.
+ * `null` means "print nothing", NOT "print a placeholder" — an empty cell in a column that is
+ * only rendered when there is more than one manuscript reads correctly; a dash does not.
+ */
+export const listManuscript = (i: RowInputs): string | null =>
+  (i.card.msTitle || "").trim() || null;
+
+/**
+ * ⚠️ THE MANUSCRIPT COLUMN IS A PROPERTY OF THE ACCOUNT, NOT OF A ROW. With one manuscript every
+ * cell in the column holds the same word, so the column is a repeated constant taking width from
+ * the deed — it is HIDDEN, not greyed, because a greyed column still costs the space that made it
+ * worth removing.
+ *
+ * ⚠️ ONE is the boundary, and ZERO must fall on the hidden side with it. An account with no
+ * manuscripts has nothing to distinguish either, and `> 1` states the rule the way it is meant —
+ * "more than one book to tell apart" — rather than `!== 1`, which would show an empty column to
+ * somebody who has not added a book yet.
+ */
+export const showsManuscriptColumn = (manuscriptCount: number): boolean => manuscriptCount > 1;
+
+/**
+ * ⚠️ THE AVATAR IS AN AGENT'S, SO A ROW WITHOUT AN AGENT HAS NONE. A user task's `initials` is a
+ * GLYPH (`✎` / `✓`) and an agentless query card's is `•`; both are meaningful in the board's own
+ * chip and neither is a person's initials. Rendering them in a person-shaped disc would claim the
+ * row is about somebody it is not.
+ *
+ * ⚠️ `Agent.image` EXISTS AND IS DELIBERATELY NOT READ HERE. Its own docstring says
+ * "absent === the initials avatar", but the field is NOT in `firestore.rules`' agent-update
+ * allowlist and no agent on any account has one — so a photo branch would be a permanently dead
+ * path pretending to be a fallback. When upload lands, this is the one place that changes.
+ */
+export const listAvatarInitials = (c: BoardCard): string | null =>
+  c.userTaskId || !(c.who || "").trim() ? null : (c.initials || "").trim() || null;

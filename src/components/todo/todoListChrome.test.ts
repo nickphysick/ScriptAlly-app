@@ -41,8 +41,14 @@ const code = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/
  *  put the list inside a pane so `") : renderList()}"` stopped existing. The slice ends at the
  *  body's opening element, whatever the body currently is — that is the whole point of anchoring
  *  on it rather than on a view. */
+/* ⚠️ AND A FOURTH TIME, AS A PATTERN RATHER THAN A LITERAL (drawer round, Phase 1). The split's
+   class became a TEMPLATE — `tdw-split` plus `open` when a task is docked — so
+   `'<div className="tdw-split">'` stopped matching an element that had not moved. That is the
+   spelling-versus-claim fault: the anchor's claim is "the page's body opens here", and how its
+   class is assembled is no part of it. The pattern accepts a literal or a template and is what
+   this anchor should have been the first time it moved. */
 const chrome = (() => {
-  const i = page.indexOf('<div className="tdw-split">');
+  const i = page.search(/<div className=\{?[`"]tdw-split/);
   expect(i, "the split — the page's body — must exist for this slice to mean anything").toBeGreaterThan(-1);
   return page.slice(0, i);
 })();

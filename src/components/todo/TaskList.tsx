@@ -22,7 +22,10 @@ import React from "react";
 import { BoardCard } from "../../lib/todoBoard";
 import { TaskGroup } from "../../lib/todoGroups";
 import { BUCKET_LABEL, cardBucket } from "../../lib/todoBuckets";
-import { listDeed, listFragment, listMeta, RowInputs } from "../../lib/taskListRow";
+import {
+  listAgency, listAgent, listAvatarInitials, listDeed, listFragment, listManuscript,
+  listMeta, RowInputs,
+} from "../../lib/taskListRow";
 import "./taskList.css";
 
 export interface TaskListProps {
@@ -49,6 +52,19 @@ export interface TaskListProps {
   asideCount?: number;
   onAside: (anchor: HTMLElement) => void;
   asideMenu?: React.ReactNode;
+  /**
+   * ⚠️ THE MANUSCRIPT COLUMN IS THE ACCOUNT'S DECISION, PASSED IN — the rule lives in
+   * `showsManuscriptColumn` and the page reads the manuscripts. The list is handed the answer
+   * rather than the collection, so it has no second way to reach a different one.
+   */
+  showManuscript?: boolean;
+  /**
+   * ⚠️ FOLDED IS THE DRAWER'S STATE, NOT THE LIST'S. When a task is open the card is 520px and
+   * the row drops to three columns; the flag comes from the page because the page owns whether
+   * anything is open. The row's MARKUP is identical either way — every cell is always rendered
+   * and CSS decides what shows — so folding cannot change what a row says, only what fits.
+   */
+  folded?: boolean;
 }
 
 /** the contract's three group tints, keyed by its own group ids */
@@ -92,7 +108,7 @@ const PlusIcon = () => (
 export const TaskList: React.FC<TaskListProps> = ({
   groups, selectedKey, onOpen, rowInputs, search, onSearch, onAdd, onExport,
   filterActive, onFilter, filterMenu, sortActive, onSort, sortMenu,
-  asideActive, asideCount, onAside, asideMenu,
+  asideActive, asideCount, onAside, asideMenu, showManuscript, folded,
 }) => {
   /**
    * ⚠️ ONE ARRAY, COUNTED ONCE. The rows map over `g.cards`; the head prints `g.cards.length`; the
@@ -107,7 +123,7 @@ export const TaskList: React.FC<TaskListProps> = ({
        own name for this element. The pane port kept the mockup's class names verbatim and put the
        scope on the RULE; the same principle applies here, and the card is the one element where
        the two coincide — so it carries both rather than losing the contract's word. */
-    <div className="tlc listcard">
+    <div className={`tlc listcard${folded ? " folded" : ""}${showManuscript ? " hasms" : ""}`}>
       <div className="l-bar">
         <label className="l-search">
           <SearchIcon />
@@ -166,6 +182,7 @@ export const TaskList: React.FC<TaskListProps> = ({
               const bucket = cardBucket(c);
               const frag = listFragment(inputs);
               const meta = listMeta(inputs);
+              const avatarInitials = listAvatarInitials(c);
               return (
                 /* ⚠️ THE ROW IS THE CONTROL. A div with an onClick and a keyboard equivalent —
                    there is nothing interactive inside it, at rest or on hover. */
@@ -178,7 +195,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                   onClick={() => onOpen(c)}
                 >
                   <span className={`pill ${bucket}`}>{BUCKET_LABEL[bucket]}</span>
-                  <div>
+                  <div className="r-said">
                     {bucket === "note"
                       ? <div className="r-note">{c.title}</div>
                       : <>
@@ -195,11 +212,31 @@ export const TaskList: React.FC<TaskListProps> = ({
                           )}
                         </>}
                   </div>
-                  <div className={`r-fig${frag.hot ? " hot" : ""}${frag.absent ? " absent" : ""}`}>
+                  {/* ⚠️ THE THREE WIDE CELLS RENDER ALWAYS AND HIDE IN CSS — never conditionally
+                      mounted on `folded`. Unmounting them would make folding a DOM change, so
+                      every open and close would rebuild a third of the list; and a measurement
+                      could not then tell "the drawer is open" from "this row has no agency". */}
+                  <div className="cell r-ag">
+                    {avatarInitials && (
+                      <span className="av s" aria-hidden="true">{avatarInitials}</span>
+                    )}
+                    <span className="r-agname">{listAgent(inputs)}</span>
+                  </div>
+                  <div className="cell r-agc">{listAgency(inputs)}</div>
+                  <div className="cell r-ms">{listManuscript(inputs) ?? ""}</div>
+                  <div className={`cell keep r-fig${frag.hot ? " hot" : ""}${frag.absent ? " absent" : ""}`}>
                     {frag.absent
                       ? frag.lead
                       : <>{frag.lead}{frag.lead && <br />}<b>{frag.figure}</b> {frag.tail}</>}
                   </div>
+                  {/* ⚠️ A SPAN, NOT THE CONTRACT'S `<button>` — and this is the one place the port
+                      diverges from the markup on purpose. The ROW is `role="button"`, and the
+                      mockup's `.actb` carries no handler of its own: its click works because the
+                      row's does. A real button inside a button is invalid, unreachable to a
+                      screen reader as anything separate, and would put a second tab stop on
+                      every row for a control that does exactly what the row already does. The
+                      treatment is the contract's to the pixel; only the element is honest. */}
+                  <span className="actb" aria-hidden="true"><span className="w">Action </span>›</span>
                 </div>
               );
             })}

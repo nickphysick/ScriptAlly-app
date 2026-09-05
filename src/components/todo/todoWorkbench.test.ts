@@ -849,7 +849,13 @@ describe("P4 — search + filters (source locks; the matrix lives in todoFilters
     expect(page).toContain("const railEmpty = railGroups().length === 0;");
     /* the desk states still replace the whole body — a first run has no list to put in a rail */
     expect(page).toContain('desk === "new-desk" ? renderNewDesk()');
-    expect(page.indexOf('desk === "new-desk"')).toBeLessThan(page.indexOf('className="tdw-split"'));
+    /* ⚠️ A PATTERN, NOT THE LITERAL (drawer round, Phase 1). The split's class became a template
+       — `tdw-split` plus `open` — so this read `indexOf(...) === -1` and asserted "before −1",
+       which no index can satisfy. The claim is that the desk states sit ABOVE the body; the shape
+       of the body's class attribute is no part of it. */
+    const splitAt = page.search(/className=\{?[`"]tdw-split/);
+    expect(splitAt, "the split's opening element").toBeGreaterThan(-1);
+    expect(page.indexOf('desk === "new-desk"')).toBeLessThan(splitAt);
   });
   it("search state: ⌘K focuses (visibility-guarded, P1); the input re-lands in the deck (P2)", () => {
     expect(page).toContain("matchesSearch(c, search, sctx)"); // the filter plumbing survives the move

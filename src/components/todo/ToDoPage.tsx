@@ -85,7 +85,7 @@ import {
 } from "../../lib/todoListView";
 import { useNavigate } from "react-router-dom";
 import { groupColumn, TaskGroup } from "../../lib/todoGroups";
-import { paneCopy } from "../../lib/taskListRow";
+import { paneCopy, showsManuscriptColumn } from "../../lib/taskListRow";
 import { daysBetween, elapsedParts } from "../../lib/elapsed";
 import { materialRows, materialName, anchorNoun, bandForward, holderRows } from "../../lib/todoHandoff";
 import { notifyGroups, reminderFields } from "../../lib/offerNotify";
@@ -129,7 +129,14 @@ import {
 /* THE CONSOLIDATED PAGE'S OWN DERIVATIONS — groups, stat chips and the eyebrow, all pure and
    locked away from this component (tasks-consolidation P2). */
 import { taskGroups, railChips, chipGroups, chipMatchesCard, RailChipId } from "../../lib/todoGroups";
-import { paneRestLine, showingLine, tasksCsv } from "../../lib/todoHandoff";
+/* ⚠️ `paneRestLine` IS NO LONGER IMPORTED (drawer round, Phase 1). Its one mount was the work
+   column's "Nothing needs you." pane, which the resting layout removes: at rest there is no
+   work column, so there is nowhere for it to be. It was ALSO the page's THIRD empty statement —
+   `renderNewDesk` (not yet) and `renderDeskCleared` (well done) are both better scoped, and this
+   one rendered whenever nothing happened to be docked, i.e. beside a full list. The function and
+   its nine unit cases are left whole and unmounted, per the house rule on orphans; sweeping them
+   is a commit of its own. */
+import { showingLine, tasksCsv } from "../../lib/todoHandoff";
 import { rowFigure, daysSince, waitAnchorMs, RowFigure, cardBucket, BUCKET_LABEL, taskDeed } from "../../lib/todoBuckets";
 /* ⚠️ THE THREE LIFTED DERIVATIONS (tasks-workflow, Pack A). Aliased on import so the page's own
    wrappers keep the names every call site already uses — the lift changes where the code lives,
@@ -142,7 +149,6 @@ import {
 } from "../../lib/taskCardFacts";
 import { rowPrimaryLabel } from "../../lib/taskRow";
 import { SnoozeDial } from "./SnoozeDial";
-import { isTerminalStatus } from "../../lib/agentList";
 import { longDate } from "../../lib/dashboardStats";
 import {
   TODO_GROUPS, HOUSEKEEPING_FOLD, foldRows, snoozedCount, isSnoozed,
@@ -793,7 +799,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * one distinction that matters: an empty rail because you filtered is a view, an empty rail
    * because you finished is a fact, and the two must not look the same.
    */
-  const paneCard = docked.card ?? (allDockable.length > 0 ? heldCard.current : null);
+  /**
+   * ⚠️ THE HOLD IS CONDITIONAL ON A KEY BEING NAMED — `dockKey`, not merely on work existing
+   * (drawer round, Phase 1). It read `allDockable.length > 0`, which is true of the ordinary
+   * resting page, so `heldCard` kept the last card on screen after `closeDock` set the key to
+   * null: **Close did not close.** Nobody had noticed because the auto-dock meant the pane was
+   * always open anyway, so "it stayed open" was indistinguishable from "it opened again".
+   *
+   * ⚠️ THE NARROWED-TO-NOTHING HOLD IS UNCHANGED AND IS THE WHOLE POINT OF THE FALLBACK. A search
+   * that empties the rail leaves `dockKey` set — the writer has not closed anything — so the card
+   * is still held, and clearing the search brings the rail back around it. Closing clears the key;
+   * narrowing does not. That one difference is what separates the two cases, and reading the
+   * queue's length could never see it.
+   */
+  const paneCard = docked.card ?? (dockKey && allDockable.length > 0 ? heldCard.current : null);
 
   /**
    * ⚠️ THE PANE'S SESSION, AND THE SEVEN THINGS THE PAGE STILL OWNS. Everything the form holds —
@@ -886,15 +905,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * "there is work", not on every render with a null key — otherwise closing the pane deliberately
    * would re-open it on the next frame, which is a control that refuses to be used.
    */
-  const restedOnce = useRef(false);
-  useEffect(() => {
-    if (dockKey || dockable.length === 0) return;
-    if (restedOnce.current) return;
-    restedOnce.current = true;
-    dockPos.current = 0;
-    setDockKey(dockable[0].key);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dockable.length, dockKey]);
+  /**
+   * ⚠️ THE AUTO-DOCK IS RETIRED (drawer round, Phase 1) — the page opens AT REST, with the list at
+   * full width and nothing selected, which is the state the contract draws as the arrival state.
+   *
+   * ⚠️ IT WAS NOT A PREFERENCE, IT MADE THE REST STATE UNREACHABLE. While it fired, `/todo` had no
+   * "no task open" at all with work on the board: the effect ran on the first render that had a
+   * dockable card and opened it, so the full-width list existed only in the frames before the data
+   * arrived. Everything Phase 1 asserts about the resting list would have been asserting about a
+   * state a reader never sees.
+   *
+   * ⚠️ AND ITS OWN GUARD SAID SO. `restedOnce` existed because "closing the pane deliberately
+   * would re-open it on the next frame" — i.e. the effect was already known to fight the writer,
+   * and the ref was a way to let it win exactly once. With the drawer, opening a task is the
+   * gesture; there is nothing left for it to be the shortcut for.
+   */
 
   const dockSig = dockable.map((c) => c.key).join("|");
   const narrowSig = `${chip}|${search.trim().toLowerCase()}|${tagSel ?? ""}`;
@@ -1569,7 +1594,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               onDismiss={() => { dismissCard(docked.card!); setDismissOpen(false); }}
             />
           )}
-          <div className="tdw-split">
+          {/* ⚠️ THE SPLIT HAS TWO SHAPES AND THE CLASS IS THE ONLY THING THAT SAYS WHICH — the
+              contract's `.stage` / `.stage.open`. At rest there is ONE track and the list has the
+              whole width; open, the list folds to 520 and the work column takes the rest. The flag
+              is `!!paneCard`, the same expression the work column's own contents read, so the
+              layout and what is in it cannot come to disagree about whether anything is open. */}
+          <div className={`tdw-split${paneCard ? " open" : ""}`}>
             {/* the frame contract's command bar, above the split */}
             <div className="tdw-rail">
               {/* ⚠️ A NARROWED-TO-NOTHING RAIL IS A RAIL FACT, AND IT STAYS IN THE RAIL (Phase 4).
@@ -1624,24 +1654,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                     onNext: () => { const i = dockable.findIndex((c) => c.key === paneCard.key); if (i < dockable.length - 1) setDockKey(dockable[i + 1].key); },
                   }}
                 />
-              ) : (
-                /**
-                 * ⚠️ THE EMPTY PANE REPORTS, IT DOES NOT CONGRATULATE (Phase 5). "Nothing needs
-                 * you." is the whole verdict; beneath it are two facts and no adjectives — how
-                 * many queries are out, and when the next reply window falls. No exclamation, no
-                 * "great work", no tally of what you cleared: the app states what is true and
-                 * leaves the feeling to the writer.
-                 *
-                 * ⚠️ AND THE SECOND LINE OMITS WHAT IT CANNOT ANSWER. No live queries → no clause
-                 * about them; no window derivable → no date invented. A sentence assembled from
-                 * whichever facts exist beats one padded with zeroes.
-                 */
-                <div className="tdw-none">
-                  <ArtSlot name="desk-clear" className="tdw-noneart" />
-                  <h3>Nothing needs you.</h3>
-                  <p>{paneRestLine(queries.filter((q) => !isTerminalStatus(q.status)), new Date(now))}</p>
-                </div>
-              )}
+              ) : null}
             </div>
           </div>
           </>
@@ -2698,6 +2711,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         onOpen={(c) => openDock(c.key)}
         selectedKey={docked.card?.key}
         rowInputs={listRowInputs}
+        /* ⚠️ THE ACCOUNT DECIDES THE COLUMN, THROUGH THE ONE PREDICATE. `showsManuscriptColumn`
+           holds the rule (more than one book to tell apart); the page holds the manuscripts. The
+           list is handed the answer so it has no second route to a different one. */
+        showManuscript={showsManuscriptColumn(manuscripts.length)}
+        /* ⚠️ THE SAME EXPRESSION THE SPLIT'S OWN CLASS READS — `!!paneCard`. Two derivations of
+           "is a task open" is how a folded row ends up in a full-width card. */
+        folded={!!paneCard}
         search={search}
         onSearch={setSearch}
         onAdd={() => openComposer("task")}
