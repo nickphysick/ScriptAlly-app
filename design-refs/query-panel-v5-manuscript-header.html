@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Tabbed slide-over + correction pop-out</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#1c130f;--heading-ink:#2e3a2c;--body-ink:#3a1c14;--muted:#8a7a6c;--label:#9c8878;
+    --burgundy:#7c3a2a;--sage-a:#dce0d9;--sage-b:#d0d6cc;--sage-accent:#8a9e88;--sage-text:#5a6e58;
+    --pink:#f5e2da;--pink-border:#e8c8bc;--field-border:#e0d5c8;--hairline:#ece0d2;
+    --stage-in-1:#f8e9e2;--stage-in-1-deep:#e8c9bb;--stage-accent:var(--stage-in-1-deep);--pkg-fill:#e6edf4;--pkg-edge:#c3d5e4;--pkg-ink:#41627f}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--ground);font-family:'Inter',sans-serif;color:var(--body-ink);font-size:13px;overflow:hidden}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+  .bar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:12px;padding:10px 20px;background:rgba(242,237,231,.94);border-bottom:.5px solid #d8ccbc}
+  .bar h1{font-family:'Playfair Display',serif;font-weight:500;font-size:16px;color:var(--ink);margin-right:8px}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--field-border);border-radius:9px;padding:2px}
+  .seg button{border:none;background:transparent;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#6a5a50;padding:6px 11px;border-radius:7px}
+  .seg button.on{background:var(--pink);color:var(--body-ink)}
+  .bar .note{margin-left:auto;font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:#6a5a50}
+
+  /* the page behind */
+  .page{position:absolute;inset:0;padding:70px 40px 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-content:start;opacity:.55;filter:saturate(.7)}
+  .gcard{background:#fff;border-radius:14px;height:230px;box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 22px rgba(58,28,20,.09);overflow:hidden}
+  .gcard .b{height:48px;background:#e6eae3}
+  .gcard .b.p{background:#f8e9e2}.gcard .b.s{background:#d7ddd3}.gcard .b.g{background:#e4e1db}
+  .scrim{position:absolute;inset:64px 0 0 0;background:rgba(58,28,20,.10)}
+
+  /* drawer */
+  .drawer{position:absolute;top:64px;right:0;bottom:0;width:580px;background:var(--parchment);box-shadow:-6px 0 30px rgba(58,28,20,.14);display:flex;flex-direction:column;z-index:10}
+  .pbar{display:flex;align-items:center;gap:6px;padding:14px 16px;border-bottom:.5px solid var(--hairline)}
+  .icb{width:32px;height:32px;border-radius:8px;border:1px solid var(--field-border);background:#fff;display:inline-flex;align-items:center;justify-content:center;color:#a08a78}
+  .pbar .pos{color:var(--label);margin-left:4px}.pbar .sp{flex:1}
+  .act{background:#fff;border:1px solid var(--field-border);border-radius:8px;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:#6a5a50}
+  .act.pink{background:var(--pink);border-color:var(--pink-border);color:var(--body-ink)}
+  .pband{display:flex;align-items:center;gap:10px;padding:14px 26px;background:var(--stage-in-1);border-bottom:.5px solid rgba(0,0,0,.06)}
+  .pband .word{font-family:'Playfair Display',serif;font-size:20px;color:var(--ink)}
+  .pband .r{margin-left:auto;color:#6a5a50}
+  .phead{padding:20px 26px 0;display:flex;align-items:center;gap:16px}
+  .avatar{width:58px;height:58px;border-radius:50%;background:var(--parchment);box-shadow:0 1px 2px rgba(58,28,20,.08),0 3px 8px rgba(58,28,20,.10);border:.5px solid #e6dccf;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;flex:none}
+  .phead .nm{font-family:'Playfair Display',serif;font-weight:500;font-size:27px;color:var(--ink);line-height:1.1}
+  .phead .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#6a5a50;margin-top:5px}
+  .phead .snt{margin-left:auto;text-align:right;color:var(--label);line-height:1.6}
+  .pms{display:flex;align-items:center;gap:9px;padding:12px 26px 4px;font-family:'Playfair Display',serif;font-size:14.5px;color:var(--ink)}
+  .pms .m{color:var(--label);margin-left:2px}
+  .pms .v{margin-left:auto;color:var(--label)}
+  /* tab rail */
+  .tabs{display:flex;gap:2px;padding:14px 26px 0;border-bottom:.5px solid var(--hairline);position:sticky;top:0;background:var(--parchment);z-index:3}
+  .tab{padding:10px 14px 12px;font-family:'Playfair Display',serif;font-size:15px;color:#8a7a6c;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-.5px;display:flex;align-items:center;gap:7px}
+  .tab .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--label);background:#fff;border:.5px solid var(--field-border);border-radius:99px;padding:1px 7px}
+  .tab.on{color:var(--ink);border-bottom-color:var(--stage-accent)}
+  .body{overflow-y:auto;flex:1;padding:18px 26px 40px}
+  .stats{display:flex;gap:12px}
+  .stat{flex:1;display:flex;align-items:center;gap:11px;background:#fff;border:.5px solid var(--hairline);border-radius:10px;padding:12px 14px}
+  .stat .big{font-family:'Playfair Display',serif;font-size:24px;color:var(--ink);line-height:1}
+  .stat .big span{font-size:13px;font-style:italic;margin-left:3px}
+  .stat .cap{color:var(--label);margin-top:5px}
+  .msline{display:flex;align-items:center;gap:8px;margin:16px 2px 0;font-family:'Playfair Display',serif;font-size:14.5px;color:var(--ink)}
+
+  /* timeline */
+  .rail{margin-top:18px;position:relative;padding-left:36px}
+  .rail::before{content:'';position:absolute;left:14px;top:14px;bottom:14px;width:1.5px;background:#e8dcd0}
+  .rung{position:relative;margin-bottom:18px;border-radius:10px;padding:4px 6px;margin-left:-6px}
+  .rung.target{background:#fff;box-shadow:0 0 0 1.5px var(--stage-accent)}
+  .rung .node{position:absolute;left:-30px;top:8px;width:28px;height:28px;border-radius:50%;background:var(--parchment);display:flex;align-items:center;justify-content:center;border:1.6px solid var(--burgundy)}
+  .rung .node.in{border-color:var(--sage-accent)}
+  .rung .node.wait{border:1.5px dashed #c8bcae;color:#b0a090}
+  .rline{display:flex;align-items:baseline;gap:9px;position:relative;padding-right:28px}
+  .rline .ev{font-family:'Playfair Display',serif;font-size:19px;color:var(--ink)}
+  .rline .ev.it{font-style:italic}
+  .rline .via{font-size:13px;color:var(--muted);border-bottom:1px dashed #cdbfae}
+  .rline .sub{font-size:13px;color:#6a5a50}
+  .rline .when{margin-left:auto;color:var(--label);white-space:nowrap}
+  .rline .dots{position:absolute;right:0;top:-2px;width:24px;height:24px;border-radius:6px;border:none;background:transparent;color:#c0b0a0;cursor:pointer;font-size:16px;opacity:0;transition:opacity .15s}
+  .rung:hover .dots,.rung.target .dots{opacity:1}
+  .rung.target .dots{background:#fff;color:var(--ink)}
+  .rbody{font-size:13px;color:#6a5a50;margin-top:4px}
+  .rbody .chap{font-family:'Playfair Display',serif;font-style:italic;color:var(--body-ink)}
+  .strip{margin-top:10px;display:flex;align-items:center;gap:10px;background:var(--pkg-fill);border:1px solid var(--pkg-edge);border-radius:10px;padding:8px 10px}
+  .strip .slot{width:38px;height:38px;border:1.5px dashed var(--pkg-edge);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--pkg-ink);flex:none}
+  .strip .seal .k{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--pkg-ink)}
+  .strip .seal .n{font-family:'Playfair Display',serif;font-size:14px;color:var(--ink);line-height:1.1;margin-top:2px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+  .chip{background:#fff;border:.5px solid var(--pkg-edge);border-radius:99px;padding:4px 9px;font-size:11.5px;color:var(--body-ink);display:inline-flex;align-items:center;gap:5px}
+  .loose{margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .loose .slot{width:38px;height:38px;border:1.5px dashed #d8ccbc;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#a08a78;flex:none}
+  .loose .chip{border-color:var(--field-border)}
+  .loose .save{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:#a08a78;border-bottom:.5px solid #cdbfae}
+  .prog{margin-top:10px}
+  .prog .bar2{height:7px;border-radius:99px;background:#efe5d8;overflow:hidden}
+  .prog .bar2 i{display:block;height:100%;border-radius:99px;background:repeating-linear-gradient(90deg,var(--stage-accent) 0 6px,transparent 6px 9px)}
+  .prog .lbl{display:flex;justify-content:space-between;margin-top:6px;color:var(--label)}
+  .prog .lbl .ed{border-bottom:1px dashed #cdbfae}
+
+  /* agent tab */
+  .glance{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .g{background:#fff;border:.5px solid var(--hairline);border-radius:10px;padding:12px 14px}
+  .g .v{font-family:'Playfair Display',serif;font-size:18px;color:var(--ink)}
+  .g .k{color:var(--label);margin-top:4px}
+  .asks{margin-top:14px;background:#fff;border:.5px solid var(--hairline);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.5}
+  .asks .k{color:var(--label);margin-bottom:5px}
+  .hist{margin-top:14px}
+  .hist .k{color:var(--label);margin-bottom:8px}
+  .hrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:.5px solid var(--hairline);font-size:13px}
+  .hrow .w{font-family:'Playfair Display',serif;color:var(--ink)}
+  .hrow .d{margin-left:auto;color:var(--label)}
+  .hrow .sw{width:10px;height:10px;border-radius:50%;border:.5px solid rgba(0,0,0,.08)}
+  .lnk{display:inline-block;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#6a5a50;border-bottom:.5px solid #cdbfae}
+  .prof{background:#fff;border:.5px solid var(--hairline);border-radius:10px;padding:4px 14px}
+  .prow{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:9px 0;border-bottom:.5px solid var(--hairline);align-items:baseline}
+  .prow:last-child{border-bottom:none}
+  .prow .k{color:var(--label)}
+  .prow .v{font-size:13px;color:var(--ink)}
+  .prow .v .sub{color:var(--label)}
+  .prow .v a{color:var(--body-ink);border-bottom:.5px solid #cdbfae;cursor:pointer}
+  .plinks{display:flex;gap:18px}
+  .ahero{display:flex;align-items:center;gap:18px}
+  .aav{width:76px;height:76px;border-radius:50%;background:var(--parchment);box-shadow:0 1px 2px rgba(58,28,20,.08),0 4px 12px rgba(58,28,20,.12);border:.5px solid #e6dccf;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:18px;flex:none}
+  .anm{font-family:'Playfair Display',serif;font-weight:500;font-size:28px;color:var(--ink);line-height:1.05}
+  .aag{font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:#6a5a50;margin-top:5px}
+  .aloc{color:var(--label);margin-top:7px;display:flex;gap:10px}
+  .aopen{margin-left:auto;align-self:flex-start;border:1px solid rgba(58,28,20,.35);border-radius:99px;padding:4px 11px}
+  .aacts{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+  .actb{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--field-border);border-radius:99px;padding:8px 14px;font-size:12.5px;color:var(--body-ink);cursor:pointer}
+  .actb:hover{border-color:#cdbfae}
+  .atiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}
+  .tile{background:#fff;border:.5px solid var(--hairline);border-radius:10px;padding:12px 12px 10px;text-align:center}
+  .tile .v{font-family:'Playfair Display',serif;font-size:20px;color:var(--ink);line-height:1}
+  .tile .v span{font-size:12px;font-style:italic;margin-left:2px}
+  .tile .k{color:var(--label);margin-top:6px;font-size:8px}
+  .aquote{margin-top:22px;padding:4px 0 4px 22px;border-left:2px solid var(--stage-accent);font-family:'Playfair Display',serif;font-style:italic;font-size:16.5px;line-height:1.5;color:var(--ink);position:relative}
+  .aquote::before{content:'“';position:absolute;left:-2px;top:-18px;font-size:48px;color:var(--stage-accent);font-style:normal}
+  .aquote .k{display:block;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);font-style:normal;margin-top:8px}
+  .aasks{margin-top:18px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .aasks .k{width:100%;color:var(--label);margin-bottom:2px}
+  .achip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:.5px solid var(--field-border);border-radius:99px;padding:5px 11px;font-size:12px}
+  .achip.no{color:#a09080}
+  .hist{margin-top:20px}
+  /* notes tab */
+  .note{background:var(--pink);border:1px solid #f0d9cd;border-radius:10px;padding:12px 14px;margin-bottom:10px}
+  .note .nt{font-family:'Caveat',cursive;font-size:19px;color:var(--body-ink);line-height:1.25}
+  .note .nw{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;color:#b09484;margin-top:5px}
+  .nrow{display:flex;gap:9px;margin-top:12px}
+  .nrow textarea{flex:1;resize:none;border:1px solid var(--field-border);border-radius:9px;background:#fff;font:inherit;font-size:13px;padding:10px 13px;height:44px}
+  .nrow button{align-self:flex-end;background:var(--pink);border:1px solid var(--pink-border);border-radius:9px;padding:10px 18px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase}
+  .hint{text-align:center;margin-top:24px;color:#c0b0a0}
+
+  /* pop-out desk, to the left of the drawer */
+  .desk{position:absolute;right:592px;top:64px;bottom:0;width:440px;z-index:9;display:flex;flex-direction:column;justify-content:flex-start;padding-top:92px;pointer-events:none}
+  .desk .card{pointer-events:auto;background:var(--parchment);border-top:5px solid var(--stage-accent);border-radius:14px;box-shadow:0 2px 6px rgba(58,28,20,.08),0 18px 44px rgba(58,28,20,.18);padding:18px 20px 16px;position:relative;animation:slide .26s cubic-bezier(.2,.7,.2,1)}
+  @keyframes slide{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+  .desk .card::after{content:'';position:absolute;right:-9px;top:var(--arrow,34px);width:16px;height:16px;background:var(--parchment);transform:rotate(45deg);box-shadow:3px -3px 6px rgba(58,28,20,.06)}
+  .desk h3{font-family:'Playfair Display',serif;font-weight:500;font-size:20px;color:var(--ink);line-height:1.2}
+  .desk .subj{color:var(--label);margin:7px 0 14px}
+  .desk .step{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:#fff;border:.5px solid var(--hairline);margin-bottom:8px;font-size:12.5px;color:#6a5a50}
+  .desk .step b{font-family:'Playfair Display',serif;font-weight:500;color:var(--ink)}
+  .desk .step .chg{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#a08a78;border-bottom:.5px solid #cdbfae}
+  .pi{display:flex;gap:11px;padding:10px 10px;border-radius:9px;cursor:pointer;border:.5px solid transparent}
+  .pi:hover{background:#fff;border-color:var(--hairline)}
+  .pi .gl{width:28px;height:28px;border-radius:7px;background:#fff;border:.5px solid var(--field-border);display:flex;align-items:center;justify-content:center;flex:none;font-size:13px}
+  .pi u{text-decoration:none;font-family:'Playfair Display',serif;font-size:16px;color:var(--ink);display:block}
+  .pi s{text-decoration:none;display:block;font-size:12.5px;color:#6a5a50;line-height:1.45;margin-top:3px}
+  .desk label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--label);display:block;margin-bottom:5px}
+  .desk .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  .fld{width:100%;background:#fff;border:.5px solid var(--field-border);border-radius:9px;padding:9px 12px;font:inherit;font-size:13px;display:flex;align-items:center;gap:8px}
+  .fld .chev{margin-left:auto;color:var(--burgundy)}
+  .desk textarea{width:100%;resize:none;height:56px;border:.5px solid var(--field-border);border-radius:9px;background:#fff;font-family:'Caveat',cursive;font-size:18px;padding:8px 12px;color:var(--body-ink)}
+  .desk .err{font-size:12px;color:#6a5a50;margin-top:8px;line-height:1.45}
+  .desk .err b{color:var(--body-ink);font-weight:500}
+  .prev{background:#fff;border:.5px solid var(--hairline);border-radius:10px;padding:12px 12px 8px;margin-top:4px}
+  .prev .rail{margin-top:0;padding-left:30px}
+  .prev .rail::before{left:11px;background:repeating-linear-gradient(180deg,#e8dcd0 0 4px,transparent 4px 8px)}
+  .prev .rung{margin-bottom:10px;padding:0;margin-left:0}
+  .prev .rung .node{left:-30px;width:24px;height:24px;top:2px}
+  .prev .rline .ev{font-size:15px}
+  .prev .rung.struck .rline .ev,.prev .rung.struck .rline .when,.prev .rung.struck .rbody{text-decoration:line-through;color:#b0a090}
+  .prev .rung.struck .node{border-style:dashed;opacity:.45}
+  .prev .rbody.sg{color:var(--sage-text)}
+  .prev .rbody.bg{color:var(--burgundy)}
+  .desk .sum{font-size:12.5px;color:#6a5a50;margin:12px 2px 0;line-height:1.5}
+  .desk .sum b{font-weight:500;color:var(--body-ink)}
+  .acts{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+  .cact{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border-radius:10px;border:1px solid var(--field-border);background:#fff;cursor:pointer;text-align:left}
+  .cact.p{background:var(--stage-in-1);border-color:var(--stage-accent)}
+  .cact .t{font-size:13px;font-weight:500;color:var(--body-ink)}
+  .cact .cost{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--label);text-align:right;white-space:nowrap}
+  .desk .cancel{display:block;margin:14px auto 0;background:none;border:none;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#a08a78;cursor:pointer}
+  .btns{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+  .btns .b{border-radius:9px;padding:8px 14px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase}
+  .btns .b.c{background:#fff;border:1px solid var(--field-border);color:#6a5a50}
+  .btns .b.s{background:var(--pink);border:1px solid var(--pink-border);color:var(--body-ink)}
+  .toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;background:var(--ink);color:#fdfaf5;border-radius:10px;padding:11px 14px 11px 16px;display:flex;align-items:center;gap:14px;font-size:13px;box-shadow:0 10px 30px rgba(58,28,20,.25);white-space:nowrap}
+  .toast b{font-family:'Playfair Display',serif;font-weight:500;font-size:14px}
+  .toast button{background:transparent;border:1px solid rgba(253,250,245,.35);color:#fdfaf5;border-radius:7px;padding:5px 10px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="bar"><h1>Tabbed drawer · correction desk to the left</h1>
+  <div class="seg" id="seg">
+    <button class="on" data-s="tracking">Tracking</button>
+    <button data-s="agent">Agent tab</button>
+    <button data-s="notes">Notes tab</button>
+    <button data-s="fork">⋯ → desk: the fork</button>
+    <button data-s="edit">desk: edit</button>
+    <button data-s="sheet">desk: consequences</button>
+    <button data-s="del">desk: delete guard</button>
+    <button data-s="undo">saved + undo</button>
+  </div>
+  <span class="note">The drawer never leaves; the desk does the work beside it.</span>
+</div>
+
+<div class="page" id="page"></div>
+<div class="scrim"></div>
+<div class="desk" id="desk"></div>
+<div class="drawer" id="drawer"></div>
+<div id="toastHost"></div>
+
+<script>
+const dotOut=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
+const dotIn=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4c6249" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>`;
+const hour=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 3h12M6 21h12M8 3v4l4 5-4 5v4M16 3v4l-4 5 4 5v4"/></svg>`;
+const parcel=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 8l9-5 9 5v9l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v9M7.5 5.5l9 5"/></svg>`;
+const sheets=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M7 4h9l4 4v12H7z"/><path d="M16 4v4h4M4 8v13h11"/></svg>`;
+const I={letter:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>`,syn:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 10h16M4 14h10M4 18h7"/></svg>`,pages:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>`};
+
+document.getElementById("page").innerHTML=Array.from({length:9},(_,i)=>`<div class="gcard"><div class="b ${['','p','s','','','g','','p',''][i]}"></div></div>`).join("");
+
+function drawer(tab,body,targetRung){
+  return `
+  <div class="pbar"><span class="icb">‹</span><span class="icb">›</span><span class="pos mono">3 OF 26</span><span class="sp"></span><span class="act pink">Mark sent</span><span class="act">Nudge</span><span class="act">Mark closed</span><span class="icb">✕</span></div>
+  <div class="pband">${dotIn}<span class="word">Partial Requested</span><span class="r mono">With you</span></div>
+  <div class="phead"><div class="avatar">PR</div><div><div class="nm">Priya Raman</div><div class="ag">Raman Literary</div></div><div class="snt mono">Sent 3 Apr 2026<br>via Email</div></div>
+  <div class="pms"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="1.8"><path d="M4 19V5a2 2 0 012-2h13v18H6a2 2 0 01-2-2zm0 0a2 2 0 012-2h13"/></svg><span class="t">Murphy's Day Out</span><span class="m mono">Thriller · 50,000 words</span><span class="v mono">Version 2 · Mar 2026</span></div>
+  <div class="tabs">
+    <div class="tab ${tab==='tracking'?'on':''}">Tracking</div>
+    <div class="tab ${tab==='agent'?'on':''}">Agent</div>
+    <div class="tab ${tab==='notes'?'on':''}">Notes <span class="n">1</span></div>
+  </div>
+  <div class="body">${body}</div>`;
+}
+const rung=(cls,node,html)=>`<div class="rung ${cls}"><span class="node ${node}">${node==='wait'?hour:node==='in'?dotIn:dotOut}</span>${html}</div>`;
+function tracking(target=""){
+  return `
+  <div class="stats">
+    <div class="stat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8a9e88" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><div><div class="big">13<span>days</span></div><div class="cap mono">since request</div></div></div>
+    <div class="stat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c98f78" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg><div><div class="big">12 Sept</div><div class="cap mono">your send-by estimate</div></div></div>
+  </div>
+  <div class="rail">
+    ${rung("","",`<div class="rline"><span class="ev">Query sent</span><span class="via">· Email</span><span class="when mono">3 Apr</span><button class="dots">⋯</button></div>
+      <div class="strip"><span class="slot">${parcel}</span><span class="seal"><div class="k">Package</div><div class="n">Standard UK package</div></span><span class="chips"><span class="chip">${I.letter}Letter</span><span class="chip">${I.syn}Synopsis</span><span class="chip">${I.pages}First 3 chapters</span></span></div>`)}
+    ${rung(target==='req1'?'target':'',"in",`<div class="rline"><span class="ev">Partial requested</span><span class="when mono">1 May</span><button class="dots">⋯</button></div><div class="rbody">Raman asked for <span class="chap">the first partial</span> — 50 pages</div>`)}
+    ${rung("","",`<div class="rline"><span class="ev">Partial sent</span><span class="via">· Email</span><span class="when mono">4 May</span><button class="dots">⋯</button></div>
+      <div class="loose"><span class="slot">${sheets}</span><span class="chip">${I.pages}First 50 pages</span><span class="save">Save as package ›</span></div>`)}
+    ${rung(target==='req2'?'target':'',"in",`<div class="rline"><span class="ev">Partial requested</span><span class="when mono">22 Aug</span><button class="dots">⋯</button></div><div class="rbody">Raman asked for <span class="chap">the second partial</span> — chapters 4–9</div>`)}
+    ${rung("","wait",`<div class="rline"><span class="ev it">Waiting to send</span><span class="sub">— nothing owed by Raman until it goes</span><span class="when mono">13 days</span></div>
+      <div class="prog"><div class="bar2"><i style="width:30%"></i></div><div class="lbl mono"><span>Requested 22 Aug</span><span class="ed">Your estimate · send by 12 Sept</span></div></div>`)}
+  </div>
+  <div class="hint mono">← → move between queries · esc closes</div>`;
+}
+const agentTab=`
+  <div class="ahero"><div class="aav">PR</div><div><div class="anm">Priya Raman</div><div class="aag">Raman Literary · Senior agent, fiction</div><div class="aloc mono"><span>🇬🇧 London</span><span>·</span><span>est. 2011</span></div></div><span class="aopen mono">Open to submissions</span></div>
+  <div class="aacts"><span class="actb">✉ priya@ramanliterary.co.uk</span><span class="actb">⌂ ramanliterary.co.uk</span><span class="actb">@priyareads</span></div>
+  <div class="atiles">
+    <div class="tile"><div class="v">6<span>wks</span></div><div class="k mono">window</div></div>
+    <div class="tile"><div class="v">Email</div><div class="k mono">method</div></div>
+    <div class="tile"><div class="v">Means no</div><div class="k mono">silence</div></div>
+    <div class="tile"><div class="v">2</div><div class="k mono">your queries</div></div>
+  </div>
+  <div class="aquote">Literary and upmarket fiction with a strong sense of place; rural crime; anything about siblings.<span class="k">Manuscript wishlist</span></div>
+  <div class="aasks"><span class="k mono">Raman asks for</span><span class="achip">✉ Query letter</span><span class="achip">≡ Synopsis · 1 page</span><span class="achip">▤ First 3 chapters</span><span class="achip no">High fantasy</span><span class="achip no">YA</span></div>
+  <div class="hist"><div class="k mono">Your history with Raman</div>
+    <div class="hrow"><span class="sw" style="background:#f8e9e2"></span><span class="w">Murphy's Day Out</span><span>Partial requested</span><span class="d mono">this query</span></div>
+    <div class="hrow"><span class="sw" style="background:#e4e1db"></span><span class="w">The Quiet House</span><span>Closed · pass on query</span><span class="d mono">Nov 2024</span></div></div>
+  <div class="plinks"><a class="lnk">Open in Contact list ›</a><a class="lnk">Edit agent ›</a></div>`;
+const notesTab=`
+  <div class="note"><div class="nt">Met her at the York festival — mention the panel on rural crime.</div><div class="nw">3 APR · 21:11</div></div>
+  <div class="nrow"><textarea placeholder="Write a note…"></textarea><button>Save</button></div>`;
+
+const deskFork=`<div class="card">
+  <h3>Partial requested · 22 Aug</h3><div class="subj mono">Priya Raman · Murphy's Day Out</div>
+  <div class="pi"><span class="gl">✏</span><span><u>I'm correcting a mistake</u><s>The record is wrong — wrong query, wrong date, misread email. This changes history, because it never happened that way.</s></span></div>
+  <div class="pi"><span class="gl">↩</span><span><u>Something changed since</u><s>The agent reached out, reversed a decision, asked for something else. The record stays; what happened next goes on top.</s></span></div>
+  <button class="cancel">Close</button></div>`;
+const deskEdit=`<div class="card">
+  <h3>Correcting a mistake</h3><div class="subj mono">Partial requested · 22 Aug · Priya Raman</div>
+  <div class="step"><b>What's wrong?</b> The record is false<span class="chg">change</span></div>
+  <div class="row"><div><label>Date</label><div class="fld"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>28 Apr 2026<span class="chev">▾</span></div></div>
+    <div><label>What happened</label><div class="fld">Partial requested<span class="chev">▾</span></div></div></div>
+  <label>Note</label><textarea>chapters 4–9</textarea>
+  <div class="err">28 Apr is earlier than <b>Partial sent · 4 May</b>, which answered a request. Save shows you the reorder before anything changes.</div>
+  <div class="btns"><button class="b c">Remove this event instead</button><button class="b s">Save</button></div>
+  <button class="cancel">Cancel</button></div>`;
+const prevRe=`<div class="prev"><div class="rail">
+  <div class="rung"><span class="node">${dotOut}</span><div class="rline"><span class="ev">Query sent</span><span class="when mono">3 Apr</span></div></div>
+  <div class="rung"><span class="node in">${dotIn}</span><div class="rline"><span class="ev">Partial requested</span><span class="when mono">28 Apr</span></div><div class="rbody sg">↑ moves up · becomes the first partial</div></div>
+  <div class="rung"><span class="node in">${dotIn}</span><div class="rline"><span class="ev">Partial requested</span><span class="when mono">1 May</span></div><div class="rbody sg">becomes the second partial</div></div>
+  <div class="rung"><span class="node">${dotOut}</span><div class="rline"><span class="ev">Partial sent</span><span class="when mono">4 May</span></div><div class="rbody sg">now answers the 1 May request</div></div>
+</div></div>`;
+const deskSheet=`<div class="card">
+  <h3>Moving this request to 28 April puts it ahead of the one on 1 May — it becomes the first partial.</h3>
+  <div class="subj mono">Partial requested · 22 Aug → 28 Apr · Priya Raman</div>
+  ${prevRe}
+  <div class="sum">Status stays <b>Partial Requested</b>. The chapter labels swap. The 4 May send is re-attributed. Nothing is deleted.</div>
+  <div class="acts"><button class="cact p"><span class="t">Save the new date</span><span class="cost">Labels swap · 1 edit</span></button>
+    <button class="cact"><span class="t">Also re-date the 4 May send to answer this one</span><span class="cost">2 edits · both previewed</span></button></div>
+  <button class="cancel">Cancel — keep 22 Aug</button></div>`;
+const deskDel=`<div class="card">
+  <h3>The partial you sent on 4 May answered this request. Remove one, or both?</h3>
+  <div class="subj mono">Partial requested · 1 May · Priya Raman</div>
+  <div class="prev"><div class="rail">
+    <div class="rung"><span class="node">${dotOut}</span><div class="rline"><span class="ev">Query sent</span><span class="when mono">3 Apr</span></div></div>
+    <div class="rung struck"><span class="node in">${dotIn}</span><div class="rline"><span class="ev">Partial requested</span><span class="when mono">1 May</span></div><div class="rbody">the first partial</div></div>
+    <div class="rung"><span class="node">${dotOut}</span><div class="rline"><span class="ev">Partial sent</span><span class="when mono">4 May</span></div><div class="rbody bg">would answer nothing</div></div>
+    <div class="rung"><span class="node in">${dotIn}</span><div class="rline"><span class="ev">Partial requested</span><span class="when mono">22 Aug</span></div><div class="rbody sg">becomes the first partial</div></div>
+  </div></div>
+  <div class="sum">Removing only the request leaves a send with nothing behind it. Status stays <b>Partial Requested</b>.</div>
+  <div class="acts"><button class="cact"><span class="t">Remove both</span><span class="cost">2 removed · Queried until 22 Aug</span></button>
+    <button class="cact p"><span class="t">Edit the request instead</span><span class="cost">Nothing removed</span></button></div>
+  <button class="cancel">Cancel — keep it</button></div>`;
+const toast=`<div class="toast"><span>Date corrected — <b>Partial requested</b> on Priya Raman now 28 Apr</span><button>Undo</button></div>`;
+
+const S={
+ tracking:["tracking",()=>tracking(),""],
+ agent:["agent",()=>agentTab,""],
+ notes:["notes",()=>notesTab,""],
+ fork:["tracking",()=>tracking("req2"),deskFork],
+ edit:["tracking",()=>tracking("req2"),deskEdit],
+ sheet:["tracking",()=>tracking("req2"),deskSheet],
+ del:["tracking",()=>tracking("req1"),deskDel],
+ undo:["tracking",()=>tracking().replace('22 Aug</span><button class="dots">⋯</button></div><div class="rbody">Raman asked for <span class="chap">the second partial</span>','28 Apr</span><button class="dots">⋯</button></div><div class="rbody">Raman asked for <span class="chap">the first partial</span>'),""],
+};
+function render(k){
+  const [tab,body,desk]=S[k];
+  document.getElementById("drawer").innerHTML=drawer(tab,body());
+  document.getElementById("desk").innerHTML=desk;
+  document.getElementById("toastHost").innerHTML=k==="undo"?toast:"";
+  const deskEl=document.getElementById("desk"), t=document.querySelector(".rung.target");
+  if(t&&desk){ const r=t.getBoundingClientRect(), d=deskEl.getBoundingClientRect(); const card=deskEl.querySelector(".card");
+    let top=r.top-d.top+r.height/2-42; const maxTop=Math.max(12,d.height-card.offsetHeight-12); top=Math.max(12,Math.min(top,maxTop));
+    deskEl.style.paddingTop=top+"px"; card.style.setProperty("--arrow",(r.top-d.top+r.height/2-top-8)+"px"); }
+}
+document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#seg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");render(b.dataset.s);});
+render("tracking");
+</script>
+</body>
+</html>
