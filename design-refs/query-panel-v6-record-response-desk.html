@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Record response + Nudge in the desk</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#1c130f;--heading-ink:#2e3a2c;--body-ink:#3a1c14;--muted:#8a7a6c;--label:#9c8878;
+    --burgundy:#7c3a2a;--sage-accent:#8a9e88;--sage-text:#5a6e58;--pink:#f5e2da;--pink-border:#e8c8bc;--field-border:#e0d5c8;--hairline:#ece0d2;
+    --stage-out-1:#e6eae3;--stage-out-3:#c7d0c2;--stage-in-1:#f8e9e2;--stage-in-3:#e8c9bb;--stage-accent:var(--stage-out-3);--pkg-fill:#e6edf4;--pkg-edge:#c3d5e4;--pkg-ink:#41627f}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--ground);font-family:'Inter',sans-serif;color:var(--body-ink);font-size:13px;overflow:hidden}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+  .bar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:12px;padding:10px 20px;background:rgba(242,237,231,.94);border-bottom:.5px solid #d8ccbc}
+  .bar h1{font-family:'Playfair Display',serif;font-weight:500;font-size:16px;color:var(--ink);margin-right:8px}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--field-border);border-radius:9px;padding:2px}
+  .seg button{border:none;background:transparent;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#6a5a50;padding:6px 11px;border-radius:7px}
+  .seg button.on{background:var(--pink);color:var(--body-ink)}
+  .bar .note{margin-left:auto;font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:#6a5a50}
+  .page{position:absolute;inset:0;padding:70px 40px 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-content:start;opacity:.55;filter:saturate(.7)}
+  .gcard{background:#fff;border-radius:14px;height:230px;box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 22px rgba(58,28,20,.09);overflow:hidden}
+  .gcard .b{height:48px;background:#e6eae3}.gcard .b.p{background:#f8e9e2}.gcard .b.s{background:#d7ddd3}.gcard .b.g{background:#e4e1db}
+  .scrim{position:absolute;inset:64px 0 0 0;background:rgba(58,28,20,.10)}
+
+  .drawer{position:absolute;top:64px;right:0;bottom:0;width:580px;background:var(--parchment);box-shadow:-6px 0 30px rgba(58,28,20,.14);display:flex;flex-direction:column;z-index:10}
+  .pbar{display:flex;align-items:center;gap:6px;padding:14px 16px;border-bottom:.5px solid var(--hairline)}
+  .icb{width:32px;height:32px;border-radius:8px;border:1px solid var(--field-border);background:#fff;display:inline-flex;align-items:center;justify-content:center;color:#a08a78}
+  .pbar .pos{color:var(--label);margin-left:4px}.pbar .sp{flex:1}
+  .act{background:#fff;border:1px solid var(--field-border);border-radius:8px;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:#6a5a50;cursor:pointer}
+  .act.pink{background:var(--pink);border-color:var(--pink-border);color:var(--body-ink)}
+  .act.live{box-shadow:0 0 0 1.5px var(--stage-accent)}
+  .pband{display:flex;align-items:center;gap:10px;padding:14px 26px;background:var(--stage-out-1);border-bottom:.5px solid rgba(0,0,0,.06)}
+  .pband .word{font-family:'Playfair Display',serif;font-size:20px;color:var(--ink)}
+  .pband .r{margin-left:auto;color:#6a5a50}
+  .phead{padding:20px 26px 0;display:flex;align-items:center;gap:16px}
+  .avatar{width:58px;height:58px;border-radius:50%;background:var(--parchment);box-shadow:0 1px 2px rgba(58,28,20,.08),0 3px 8px rgba(58,28,20,.10);border:.5px solid #e6dccf;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;flex:none}
+  .phead .nm{font-family:'Playfair Display',serif;font-weight:500;font-size:27px;color:var(--ink);line-height:1.1}
+  .phead .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#6a5a50;margin-top:5px}
+  .phead .snt{margin-left:auto;text-align:right;color:var(--label);line-height:1.6}
+  .pms{display:flex;align-items:center;gap:9px;padding:12px 26px 4px;font-family:'Playfair Display',serif;font-size:14.5px;color:var(--ink)}
+  .pms .m{color:var(--label);margin-left:2px}.pms .v{margin-left:auto;color:var(--label)}
+  .tabs{display:flex;gap:2px;padding:12px 26px 0;border-bottom:.5px solid var(--hairline)}
+  .tab{padding:10px 14px 12px;font-family:'Playfair Display',serif;font-size:15px;color:#8a7a6c;border-bottom:2px solid transparent;margin-bottom:-.5px}
+  .tab.on{color:var(--ink);border-bottom-color:var(--stage-accent)}
+  .body{overflow-y:auto;flex:1;padding:18px 26px 40px}
+  .stats{display:flex;gap:12px}
+  .stat{flex:1;display:flex;align-items:center;gap:11px;background:#fff;border:.5px solid var(--hairline);border-radius:10px;padding:12px 14px}
+  .stat .big{font-family:'Playfair Display',serif;font-size:24px;color:var(--ink);line-height:1}
+  .stat .big span{font-size:13px;font-style:italic;margin-left:3px}
+  .stat .cap{color:var(--label);margin-top:5px}
+  .rail{margin-top:18px;position:relative;padding-left:36px}
+  .rail::before{content:'';position:absolute;left:14px;top:14px;bottom:14px;width:1.5px;background:#e8dcd0}
+  .rung{position:relative;margin-bottom:18px;padding:4px 6px;margin-left:-6px;border-radius:10px}
+  .rung .node{position:absolute;left:-30px;top:8px;width:28px;height:28px;border-radius:50%;background:var(--parchment);display:flex;align-items:center;justify-content:center;border:1.6px solid var(--burgundy)}
+  .rung .node.in{border-color:var(--sage-accent)}
+  .rung .node.wait{border:1.5px dashed #c8bcae;color:#b0a090}
+  .rung.ghost{border:1.5px dashed #d2c4b4;background:transparent}
+  .rung.ghost .node{border-style:dashed;opacity:.7}
+  .rung.ghost .rline .ev{color:#8a7a6c}
+  .rung.ghost .rbody{color:#a09080}
+  .rline{display:flex;align-items:baseline;gap:9px}
+  .rline .ev{font-family:'Playfair Display',serif;font-size:19px;color:var(--ink)}
+  .rline .ev.it{font-style:italic}
+  .rline .via{font-size:13px;color:var(--muted);border-bottom:1px dashed #cdbfae}
+  .rline .sub{font-size:13px;color:#6a5a50}
+  .rline .when{margin-left:auto;color:var(--label);white-space:nowrap}
+  .rbody{font-size:13px;color:#6a5a50;margin-top:4px}
+  .rbody .chap{font-family:'Playfair Display',serif;font-style:italic;color:var(--body-ink)}
+  .strip{margin-top:10px;display:flex;align-items:center;gap:10px;background:var(--pkg-fill);border:1px solid var(--pkg-edge);border-radius:10px;padding:8px 10px}
+  .strip .slot{width:38px;height:38px;border:1.5px dashed var(--pkg-edge);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--pkg-ink);flex:none}
+  .strip .seal .k{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--pkg-ink)}
+  .strip .seal .n{font-family:'Playfair Display',serif;font-size:14px;color:var(--ink);line-height:1.1;margin-top:2px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+  .chip{background:#fff;border:.5px solid var(--pkg-edge);border-radius:99px;padding:4px 9px;font-size:11.5px;color:var(--body-ink);display:inline-flex;align-items:center;gap:5px}
+  .prog{margin-top:10px}
+  .prog .bar2{height:7px;border-radius:99px;background:#efe5d8;overflow:hidden}
+  .prog .bar2 i{display:block;height:100%;border-radius:99px;background:var(--stage-accent)}
+  .prog .bar2 i.past{background:#e6bfb1}
+  .prog .lbl{display:flex;justify-content:space-between;margin-top:6px;color:var(--label)}
+  .nudgeline{margin-top:6px;font-size:12px;color:#6a5a50;display:flex;gap:6px;align-items:center}
+  .nudgeline .k{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--label)}
+
+  /* desk */
+  .desk{position:absolute;right:592px;top:64px;bottom:0;width:460px;z-index:9;display:flex;flex-direction:column;pointer-events:none}
+  .desk .card{pointer-events:auto;background:var(--parchment);border-top:5px solid var(--stage-accent);border-radius:14px;box-shadow:0 2px 6px rgba(58,28,20,.08),0 18px 44px rgba(58,28,20,.18);padding:18px 20px 16px;position:relative;animation:slide .26s cubic-bezier(.2,.7,.2,1);max-height:calc(100% - 24px);overflow:auto}
+  @keyframes slide{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+  .desk .card::after{content:'';position:absolute;right:-9px;top:var(--arrow,34px);width:16px;height:16px;background:var(--parchment);transform:rotate(45deg);box-shadow:3px -3px 6px rgba(58,28,20,.06)}
+  .desk h3{font-family:'Playfair Display',serif;font-weight:500;font-size:20px;color:var(--ink);line-height:1.2}
+  .desk .subj{color:var(--label);margin:7px 0 14px}
+  .kinds{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .kind{display:flex;gap:10px;align-items:flex-start;padding:10px 11px;border-radius:10px;background:#fff;border:.5px solid var(--hairline);cursor:pointer}
+  .kind:hover{border-color:#cdbfae}
+  .kind.on{box-shadow:0 0 0 1.5px var(--stage-accent);background:#fff}
+  .kind .n{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--sage-accent);display:flex;align-items:center;justify-content:center;flex:none;background:var(--parchment)}
+  .kind .n.b{border-color:var(--burgundy)}
+  .kind .n.g{border-color:#b8aa9a}
+  .kind u{text-decoration:none;font-family:'Playfair Display',serif;font-size:14.5px;color:var(--ink);display:block}
+  .kind s{text-decoration:none;display:block;font-size:11.5px;color:#8a7a6c;margin-top:2px;line-height:1.35}
+  .kind.wide{grid-column:1/-1}
+  .step{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:#fff;border:.5px solid var(--hairline);margin-bottom:10px;font-size:12.5px;color:#6a5a50}
+  .step b{font-family:'Playfair Display',serif;font-weight:500;color:var(--ink)}
+  .step .chg{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#a08a78;border-bottom:.5px solid #cdbfae}
+  .desk label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--label);display:block;margin-bottom:5px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  .fld{width:100%;background:#fff;border:.5px solid var(--field-border);border-radius:9px;padding:9px 12px;font:inherit;font-size:13px;display:flex;align-items:center;gap:8px}
+  .fld .chev{margin-left:auto;color:var(--burgundy)}
+  .fld .sub{margin-left:auto;color:var(--label);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+  .qc{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .stepc{display:inline-flex;align-items:stretch;border:.5px solid var(--field-border);border-radius:9px;overflow:hidden;background:#fff}
+  .stepc button{border:none;background:transparent;width:32px;cursor:pointer;color:var(--burgundy);font-size:15px}
+  .stepc input{width:66px;border:none;border-left:.5px solid var(--field-border);border-right:.5px solid var(--field-border);text-align:center;font:inherit;font-size:13px;font-weight:500;color:var(--ink);padding:7px 0}
+  .useg{display:inline-flex;background:#fff;border:.5px solid var(--field-border);border-radius:9px;padding:2px}
+  .useg button{border:none;background:transparent;border-radius:7px;padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#6a5a50}
+  .useg button.on{box-shadow:inset 0 0 0 1.2px var(--ink);color:var(--ink)}
+  .desk textarea{width:100%;resize:none;height:54px;border:.5px solid var(--field-border);border-radius:9px;background:#fff;font-family:'Caveat',cursive;font-size:18px;padding:8px 12px;color:var(--body-ink);margin-bottom:6px}
+  .derived{font-size:12.5px;color:#6a5a50;line-height:1.5;margin-top:6px}
+  .derived b{color:var(--body-ink);font-weight:500}
+  .chipsn{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+  .chipsn button{border:1px solid var(--field-border);background:#fff;border-radius:99px;padding:7px 13px;cursor:pointer;font:inherit;font-size:12.5px;color:#6a5a50}
+  .chipsn button.on{background:var(--pink);border-color:var(--pink-border);color:var(--body-ink)}
+  .chipsn button.win{border-color:var(--sage-accent);background:#eef1ec;color:var(--heading-ink)}
+  .chipsn button.win.on{background:var(--pink);border-color:var(--pink-border);color:var(--body-ink)}
+  .btns{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+  .btns .b{border-radius:9px;padding:9px 16px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase}
+  .btns .b.c{background:#fff;border:1px solid var(--field-border);color:#6a5a50}
+  .btns .b.s{background:var(--pink);border:1px solid var(--pink-border);color:var(--body-ink)}
+  .btns .b.s:disabled{opacity:.4}
+  .desk .cancel{display:block;margin:12px auto 0;background:none;border:none;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#a08a78;cursor:pointer}
+  .toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;background:var(--ink);color:#fdfaf5;border-radius:10px;padding:11px 14px 11px 16px;display:flex;align-items:center;gap:14px;font-size:13px;box-shadow:0 10px 30px rgba(58,28,20,.25);white-space:nowrap}
+  .toast b{font-family:'Playfair Display',serif;font-weight:500;font-size:14px}
+  .toast button{background:transparent;border:1px solid rgba(253,250,245,.35);color:#fdfaf5;border-radius:7px;padding:5px 10px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+  .mail{background:#fff;border:.5px solid var(--hairline);border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.55;color:var(--body-ink)}
+  .mail .h{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--label);margin-bottom:6px}
+  .mail .h b{color:var(--body-ink);font-weight:500;letter-spacing:0;font-family:'Inter',sans-serif;font-size:12px;text-transform:none}
+</style>
+</head>
+<body>
+<div class="bar"><h1>Record response · Nudge — in the desk</h1>
+  <div class="seg" id="seg">
+    <button class="on" data-s="rest">At rest</button>
+    <button data-s="kind">Record response · what happened?</button>
+    <button data-s="detail">· details + ghost rung</button>
+    <button data-s="saved">· saved</button>
+    <button data-s="nudge">Nudge</button>
+    <button data-s="nudged">· nudged</button>
+    <button data-s="withyou">With-you query · Mark sent</button>
+  </div>
+  <span class="note">Same host as corrections. The timeline stays visible; the new rung appears on it as you type.</span>
+</div>
+<div class="page" id="page"></div>
+<div class="scrim"></div>
+<div class="desk" id="desk"></div>
+<div class="drawer" id="drawer"></div>
+<div id="toastHost"></div>
+
+<script>
+const dotOut=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
+const dotIn=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4c6249" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>`;
+const bell=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 004 0"/></svg>`;
+const hour=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 3h12M6 21h12M8 3v4l4 5-4 5v4M16 3v4l-4 5 4 5v4"/></svg>`;
+const parcel=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 8l9-5 9 5v9l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v9M7.5 5.5l9 5"/></svg>`;
+document.getElementById("page").innerHTML=Array.from({length:9},(_,i)=>`<div class="gcard"><div class="b ${['','p','s','','','g','','p',''][i]}"></div></div>`).join("");
+
+function drawer(opts){
+  const {band="Queried",tint="var(--stage-out-1)",turn="With the agent",primary="Record response",nudge=true,live="",rail=""}=opts;
+  return `
+  <div class="pbar"><span class="icb">‹</span><span class="icb">›</span><span class="pos mono">1 OF 26</span><span class="sp"></span>
+    <span class="act pink ${live==='primary'?'live':''}">${primary}</span>${nudge?`<span class="act ${live==='nudge'?'live':''}">Nudge</span>`:""}<span class="act">Mark closed</span><span class="icb">✕</span></div>
+  <div class="pband" style="background:${tint}">${dotOut}<span class="word">${band}</span><span class="r mono">${turn}</span></div>
+  <div class="phead"><div class="avatar">HV</div><div><div class="nm">Harriet Vane-Coe</div><div class="ag">Stillwater Reps</div></div><div class="snt mono">Sent 12 Aug 2026<br>via Email</div></div>
+  <div class="pms"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="1.8"><path d="M4 19V5a2 2 0 012-2h13v18H6a2 2 0 01-2-2zm0 0a2 2 0 012-2h13"/></svg><span>Murphy's Day Out</span><span class="m mono">Thriller · 50,000 words</span><span class="v mono">Version 2 · Mar 2026</span></div>
+  <div class="tabs"><span class="tab on">Tracking</span><span class="tab">Agent</span><span class="tab">Notes</span></div>
+  <div class="body">${rail}</div>`;
+}
+const rungSent=`<div class="rung"><span class="node">${dotOut}</span>
+  <div class="rline"><span class="ev">Query sent</span><span class="via">· Email</span><span class="when mono">12 Aug</span></div>
+  <div class="strip"><span class="slot">${parcel}</span><span class="seal"><div class="k">Package</div><div class="n">Standard UK package</div></span><span class="chips"><span class="chip">Letter</span><span class="chip">Synopsis</span><span class="chip">First 3 chapters</span></span></div></div>`;
+const rungWait=(past)=>`<div class="rung"><span class="node wait">${hour}</span>
+  <div class="rline"><span class="ev it">Waiting to hear back</span><span class="sub">— Stillwater Reps advise 6 weeks</span><span class="when mono">${past?'4 weeks':'3 weeks'}</span></div>
+  <div class="prog"><div class="bar2"><i style="width:${past?'62%':'52%'}"></i></div><div class="lbl mono"><span>Sent 12 Aug</span><span>Expected by 23 Sept</span></div></div></div>`;
+const rungNudge=`<div class="rung"><span class="node" style="border-color:#7c3a2a">${bell}</span>
+  <div class="rline"><span class="ev">Nudged</span><span class="via">· Email</span><span class="when mono">5 Sep</span></div>
+  <div class="rbody">Follow-up sent after 24 days · next nudge <b>3 Oct</b></div></div>`;
+const rungGhost=(qty)=>`<div class="rung ghost"><span class="node in">${dotIn}</span>
+  <div class="rline"><span class="ev">Partial requested</span><span class="when mono">5 Sep</span></div>
+  <div class="rbody">Vane-Coe asked for <span class="chap">the first partial</span> — ${qty}</div></div>`;
+const rungReal=`<div class="rung"><span class="node in">${dotIn}</span>
+  <div class="rline"><span class="ev">Partial requested</span><span class="via">· Email</span><span class="when mono">5 Sep</span></div>
+  <div class="rbody">Vane-Coe asked for <span class="chap">the first partial</span> — first 50 pages</div></div>`;
+const rungWaitSend=`<div class="rung"><span class="node wait">${hour}</span>
+  <div class="rline"><span class="ev it">Waiting to send</span><span class="sub">— nothing owed by Vane-Coe until it goes</span><span class="when mono">today</span></div></div>`;
+const stats=(a,b,ak,bk)=>`<div class="stats"><div class="stat"><div><div class="big">${a}</div><div class="cap mono">${ak}</div></div></div><div class="stat"><div><div class="big">${b}</div><div class="cap mono">${bk}</div></div></div></div>`;
+
+const deskKind=`<div class="card">
+  <h3>What happened?</h3><div class="subj mono">Harriet Vane-Coe · Stillwater Reps · Murphy's Day Out</div>
+  <div class="kinds">
+    <div class="kind"><span class="n">${dotIn}</span><span><u>Asked for a partial</u><s>Pages or chapters — you'll say how many</s></span></div>
+    <div class="kind"><span class="n">${dotIn}</span><span><u>Asked for the full</u><s>The whole manuscript</s></span></div>
+    <div class="kind"><span class="n">${dotIn}</span><span><u>Asked for revisions</u><s>Revise and resubmit</s></span></div>
+    <div class="kind"><span class="n b">✓</span><span><u>Offered representation</u><s>The call</s></span></div>
+    <div class="kind"><span class="n g">×</span><span><u>Passed</u><s>A no, with or without a reason</s></span></div>
+    <div class="kind"><span class="n g">···</span><span><u>Closed it yourself</u><s>Withdrawn, or gone quiet for good</s></span></div>
+  </div>
+  <button class="cancel">Cancel</button></div>`;
+const deskDetail=`<div class="card">
+  <h3>Asked for a partial</h3><div class="subj mono">Harriet Vane-Coe · Stillwater Reps</div>
+  <div class="step"><b>What happened</b> Asked for a partial<span class="chg">change</span></div>
+  <div class="row"><div><label>When</label><div class="fld"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>5 Sep 2026<span class="sub">today</span></div></div>
+    <div><label>How</label><div class="fld">Email<span class="chev">▾</span></div></div></div>
+  <label>How much did they ask for</label>
+  <div class="qc"><div class="stepc"><button>−</button><input value="50"><button>+</button></div><div class="useg"><button>Chapters</button><button class="on">Pages</button><button>Words</button></div></div>
+  <label>Note <span style="color:#c8b8a8">— optional</span></label>
+  <textarea placeholder="Anything they said worth keeping…">"Loved the voice. Send the first 50."</textarea>
+  <div class="derived">Status becomes <b>Partial Requested</b> — with you. The waiting bar stops here; nothing is owed by Vane-Coe until you send. The nudge for 3 Oct is retired.</div>
+  <div class="btns"><button class="b c">Cancel</button><button class="b s">Record it</button></div></div>`;
+const deskNudge=`<div class="card">
+  <h3>Nudge Stillwater Reps</h3><div class="subj mono">Query sent 12 Aug · 24 days ago · window 6 weeks</div>
+  <div class="mail"><div class="h">To <b>harriet@stillwaterreps.co.uk</b> · from your own mail client</div>
+    Dear Ms Vane-Coe,<br><br>I wrote to you on 12 August with a query for MURPHY'S DAY OUT, a 50,000-word thriller. I'd be grateful to know whether it reached you and whether you'd like to see more.<br><br>With thanks,<br>Bethany Carter</div>
+  <div class="row" style="margin-top:12px"><div><label>Nudge date</label><div class="fld"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>5 Sep 2026<span class="sub">today</span></div></div>
+    <div><label>How</label><div class="fld">Email<span class="chev">▾</span></div></div></div>
+  <label>Nudge me again after</label>
+  <div class="chipsn"><button class="win on">4 wks <span class="mono" style="font-size:8px">· 3 Oct</span></button><button>6 wks</button><button>8 wks</button><button>Pick a date</button><button>No more nudges</button></div>
+  <div class="derived">Records a <b>Nudged</b> rung on the timeline. Status stays <b>Queried</b>. The draft is copied for your mail client — ScriptAlly never sends.</div>
+  <div class="btns"><button class="b c">Cancel</button><button class="b s">Copy draft & record nudge</button></div></div>`;
+const deskMarkSent=`<div class="card">
+  <h3>Mark the partial sent</h3><div class="subj mono">Harriet Vane-Coe asked for the first partial · 5 Sep</div>
+  <div class="row"><div><label>Sent on</label><div class="fld">5 Sep 2026<span class="sub">today</span></div></div><div><label>How</label><div class="fld">Email<span class="chev">▾</span></div></div></div>
+  <label>What went</label>
+  <div class="qc"><div class="stepc"><button>−</button><input value="50"><button>+</button></div><div class="useg"><button>Chapters</button><button class="on">Pages</button><button>Words</button></div><span class="mono" style="color:#9c8878">as asked</span></div>
+  <label>Nudge me after</label>
+  <div class="chipsn"><button class="win on">6 wks <span class="mono" style="font-size:8px">· their window</span></button><button>8 wks</button><button>12 wks</button><button>Pick a date</button><button>No nudge</button></div>
+  <div class="derived">Status becomes <b>Partial Sent</b> — with the agent. Reply expected by <b>17 Oct</b>.</div>
+  <div class="btns"><button class="b c">Cancel</button><button class="b s">Mark sent</button></div></div>`;
+
+const S={
+ rest:()=>[drawer({rail:stats("3<span>weeks</span>","23 Sept","waiting so far","reply expected by")+`<div class="rail">${rungSent}${rungWait()}</div>`}),""],
+ kind:()=>[drawer({live:"primary",rail:stats("3<span>weeks</span>","23 Sept","waiting so far","reply expected by")+`<div class="rail">${rungSent}${rungWait()}</div>`}),deskKind],
+ detail:()=>[drawer({live:"primary",rail:stats("3<span>weeks</span>","23 Sept","waiting so far","reply expected by")+`<div class="rail">${rungSent}${rungGhost("first 50 pages")}</div>`}),deskDetail],
+ saved:()=>[drawer({band:"Partial Requested",tint:"var(--stage-in-1)",turn:"With you",primary:"Mark sent",nudge:false,rail:stats("0<span>days</span>","—","since request","reply expected by")+`<div class="rail">${rungSent}${rungReal}${rungWaitSend}</div>`}),"",`<div class="toast"><span>Recorded — <b>Partial requested</b> from Harriet Vane-Coe</span><button>Undo</button></div>`],
+ nudge:()=>[drawer({live:"nudge",rail:stats("3<span>weeks</span>","23 Sept","waiting so far","reply expected by")+`<div class="rail">${rungSent}${rungWait()}</div>`}),deskNudge],
+ nudged:()=>[drawer({rail:stats("3<span>weeks</span>","23 Sept","waiting so far","reply expected by")+`<div class="rail">${rungSent}${rungNudge}${rungWait(true)}</div>`}),"",`<div class="toast"><span>Nudged <b>Stillwater Reps</b> — draft copied · next nudge 3 Oct</span><button>Undo</button></div>`],
+ withyou:()=>[drawer({band:"Partial Requested",tint:"var(--stage-in-1)",turn:"With you",primary:"Mark sent",nudge:false,live:"primary",rail:stats("0<span>days</span>","—","since request","reply expected by")+`<div class="rail">${rungSent}${rungReal}${rungWaitSend}</div>`}),deskMarkSent],
+};
+function render(k){
+  const [d,desk,toast]=S[k]();
+  document.getElementById("drawer").innerHTML=d;
+  document.getElementById("desk").innerHTML=desk; document.getElementById("toastHost").innerHTML=toast||"";
+  const deskEl=document.getElementById("desk"); const card=deskEl.querySelector(".card");
+  if(card){ const btn=document.querySelector(".pbar .act.live"); const r=btn?btn.getBoundingClientRect():null, dr=deskEl.getBoundingClientRect();
+    const top=12; deskEl.style.paddingTop=top+"px"; card.style.setProperty("--arrow",(r?(r.top-dr.top+r.height/2-top-8):20)+"px"); }
+  const accent=k==="saved"||k==="withyou"?"var(--stage-in-3)":"var(--stage-out-3)";
+  document.documentElement.style.setProperty("--stage-accent",accent);
+}
+document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#seg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");render(b.dataset.s);});
+render("rest");
+</script>
+</body>
+</html>
