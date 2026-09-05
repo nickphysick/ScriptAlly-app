@@ -77,6 +77,7 @@ test.describe("v63 · C — the toolbar", () => {
         inPane: pane.contains(v),
         aboveRail: v.getBoundingClientRect().bottom <= rail.getBoundingClientRect().top + 1,
         pad: cs.padding,
+        h: v.getBoundingClientRect().height,
         bg: cs.backgroundColor,
         chromeBg: getComputedStyle(document.querySelector(".tl-axis")!).backgroundColor,
         borderB: cs.borderBottomWidth,
@@ -89,7 +90,12 @@ test.describe("v63 · C — the toolbar", () => {
     /* it is the board pane's chrome, not the page's, and it sits above the date bar */
     expect(bar!.inPane, "the toolbar is not inside the board pane").toBe(true);
     expect(bar!.aboveRail, "the toolbar is not above the date bar").toBe(true);
-    expect(bar!.pad, "the ref's 8/14 padding").toBe("8px 14px");
+    /* ⚠️ THE CLAIM IS THE INSET AND THE HEIGHT, NOT THE SPELLING. The row was `padding: 8px 14px`
+       and is now `height: 44px; padding: 0 14px` — the fidelity pass made the height explicit so
+       the date bar could sit on the toolbar's bottom edge. Same 14px inset, same 44px of chrome,
+       and a lock that pinned the old spelling failed over an edit that made its own claim truer. */
+    expect(bar!.pad, `the toolbar's horizontal inset is ${bar!.pad}`).toMatch(/\b14px\b/);
+    expect(bar!.h, `the toolbar is ${bar!.h}px of chrome`).toBeCloseTo(45, 0);
     expect(bar!.borderB, "no hairline under the toolbar").toBe("1px");
     /* ⚠️ THE IDENTITY, NOT THE VALUE — the toolbar wears the same chrome as the sidebar pane, which
        survives a retone; pinning `#faf9f7` would go red on a legitimate one. */
