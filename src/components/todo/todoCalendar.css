@@ -63,96 +63,149 @@
  * survives too — eight rules outside this block still read it.
  */
 
-/* ══ THE BOARD TOOLBAR (v63, section C) ══════════════════════════════════════════════════════
+/* ══ THE WINBAR — THE BOARD'S TOP BAR (v64 §B) ═══════════════════════════════════════════════
  *
- * A row of controls between the two panes' chrome and the rail, on the chrome ground with a
- * hairline under it. Every value here is the ref's; the colours come through the chrome tokens
- * rather than as literals, so the row moves with the scheme like the rest of the board.
+ * White, a hairline beneath, inside the board: ‹ range headline › · Today link (only once the
+ * window has moved) · the search · the density toggle. The v63 toolbar row is DELETED — its
+ * Group/Sort/Status controls live in the sidebar now — and the window controls that lived in the
+ * sidebar live here. One home each, swapped rather than duplicated.
+ *
+ * ⚠️ 58px INCLUDING ITS HAIRLINE, measured off the rendered ref (y 163.4 → rail at 221.4). The
+ * menu chassis below (`.tl-tb`, `.tl-dd`, …) SURVIVES the toolbar's deletion — the sidebar's
+ * controls are built from it.
  */
-/* ⚠️ THE TOOLBAR AND THE DATE BAR ARE ONE CHROME BLOCK ON THE CONTAINER'S TOP EDGE (fidelity 1).
-   44px, a hairline, then the date bar — no gap between them and none above the toolbar, so the
-   container's top, the toolbar's top and the sidebar pane's top are one line. */
-.tl-vtool {
-  display: flex; align-items: center; gap: 8px;
-  /* ⚠️ 44px OF CONTENT PLUS ITS HAIRLINE — a 45px box, which is what puts the date bar at 46. With
-     `box-sizing: border-box` the border ate into the 44 and the whole block below sat a pixel high. */
-  height: 44px; box-sizing: content-box;
-  padding: 0 14px;
-  border-bottom: 1px solid var(--tl-ch-line);
-  background: var(--tl-ch-bg);
+.tl-winbar {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 16px;
+  height: 58px; box-sizing: border-box; padding: 10px 20px;
+  background: #fff; border-bottom: 1px solid #eee6da;
+  flex: 0 0 auto;
 }
-/* ⚠️ THE TRIGGER'S WRAPPER IS THE POSITIONING CONTEXT, NOT THE BUTTON. The panel is `absolute` to
-   it, so the button can be re-styled — padding, a badge, an icon — without the panel moving. */
-.tl-tb { position: relative; display: inline-flex; flex: none; }
-.tl-tbtrig {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 6px 10px; border-radius: 8px; cursor: pointer;
-  border: 1px solid var(--tl-ch-ctlbd); background: var(--tl-ch-ctl);
-  font-size: 11.5px; color: var(--tl-ch-tx); white-space: nowrap;
+.tl-wleft { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
+/* the range as a headline — the ref's Playfair 24/500, flanked by the chevrons */
+.tl-rng {
+  font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 500;
+  color: var(--tl-nearblack); white-space: nowrap; line-height: 1.3;
 }
-.tl-tbtrig:hover { border-color: #d3c4b3; }
-/* the open trigger reads as pressed — off `aria-expanded`, which is already on the element */
-.tl-tbtrig[aria-expanded="true"] { border-color: #d3c4b3; color: var(--tl-nearblack); }
-.tl-tbtrig:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
-/* the control's NAME, quieter than the value it holds — "Group" beside "Urgency" */
-.tl-tbk { color: #8a7a6c; }
-.tl-tbchev { color: #a89880; font-size: 10px; }
-.tl-tbtrig svg { width: 12px; height: 12px; color: #7d6c5c; flex: none; }
-/* ⚠️ THE BADGE COUNTS WHAT IS TICKED AND IS ABSENT AT ZERO — a roundel reading `0` states that
-   nothing is filtered in the vocabulary of something being filtered. */
-.tl-tbbadge {
-  min-width: 15px; height: 15px; padding: 0 4px; border-radius: 99px;
+.tl-wchv {
+  width: 30px; height: 30px; flex: 0 0 auto; cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
-  background: #c98e8a; color: #fff;
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px;
+  background: transparent; border: 0; border-radius: 99px;
+  font-size: 15px; color: #7d6c5c;
 }
-.tl-dd {
-  position: absolute; left: 0; top: calc(100% + 6px); z-index: 80;
-  min-width: 200px; padding: 6px;
-  background: #fff; border: 1px solid #ddd0bd; border-radius: 12px;
-  box-shadow: 0 10px 26px rgba(58, 28, 20, 0.14);
+.tl-wchv:hover { background: #f6f1ea; color: var(--tl-nearblack); }
+.tl-wchv:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+/* ⚠️ PRESENT ONLY ONCE THE WINDOW HAS MOVED, and gone again on return — a Today link beside a
+   board already showing today is a control that does nothing. The same rule the sidebar's
+   `Back to today` followed; this is that control, moved and renamed. */
+.tl-todaylink {
+  margin-left: 10px; padding: 0; cursor: pointer; background: transparent; border: 0;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 12px; font-weight: 600;
+  color: var(--tl-nearblack); text-decoration: underline; text-underline-offset: 3px;
 }
-.tl-ddopt {
-  display: flex; align-items: center; gap: 9px; width: 100%;
-  padding: 7px 10px; border-radius: 8px; cursor: pointer;
-  border: 0; background: none; text-align: left;
-  font-size: 12px; color: #3a1c14;
+/* the search, right of centre — the sidebar's field, moved; same construction, new width */
+.tl-winbar .tl-search { justify-self: end; width: 260px; flex: none; }
+/* the density toggle, at the right end — the ref's `.wdens`: a putty pill, the active half white */
+.tl-dseg {
+  display: inline-flex; align-items: center; gap: 2px;
+  background: #f3ede4; border-radius: 999px; padding: 3px;
 }
-.tl-ddopt:hover { background: #f8f4ec; }
-.tl-ddopt:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
-/* ⚠️ THE TICK IS ALWAYS LAID OUT AND ONLY ITS OPACITY MOVES. Rendering it conditionally would
-   shift every label sideways as the selection moved — the ref hides it with `opacity`, and that
-   is the reason rather than a preference. */
-.tl-ddname { min-width: 0; }
-.tl-ddck { margin-left: auto; opacity: 0; }
-.tl-ddopt[data-on] .tl-ddck { opacity: 1; }
-.tl-ddbox {
-  width: 13px; height: 13px; flex: none;
-  border-radius: 4px; border: 1.3px solid #b8a889;
+.tl-dseg button {
+  padding: 5px 14px; border: 0; border-radius: 999px; cursor: pointer;
+  background: transparent; font-size: 11.5px; color: #6a5a50;
 }
-.tl-ddopt[data-on] .tl-ddbox { background: var(--tl-nearblack); border-color: var(--tl-nearblack); }
-/* a rule between the options and whatever acts on them */
-.tl-ddfoot { border-top: 1px solid #efe6da; margin-top: 4px; padding-top: 6px; }
-.tl-ddfoot + .tl-ddfoot { border-top: 0; margin-top: 0; padding-top: 0; }
-.tl-ddlink {
-  padding: 3px 10px; cursor: pointer; border: 0; background: none;
-  font-size: 11.5px; color: #6f6055;
-  text-decoration: underline; text-underline-offset: 3px;
+.tl-dseg button[data-on="true"] { background: #fff; color: var(--tl-nearblack); box-shadow: 0 1px 2px rgba(58, 28, 20, .08); }
+.tl-dseg button:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+
+/* ⚠️ THE VIEWS PILLS AND THE AT-A-GLANCE TILES ARE DELETED WITH THEIR RENDERERS (v64 §E) — every
+   `.gpill`, `.sbx`, `.sbh`, `.slbl` and `.st` rule. Both directions checked: nothing renders the
+   classes, and nothing styles them. */
+/* the interim `.tl-sbctl` block is gone with §E — the Notion panel below is the sidebar */
+
+/* ══ THE NOTION PANEL (v64 §E) ════════════════════════════════════════════════════════════════
+ *
+ * Three rows on a white card — label, value right-aligned, › that expands the section INLINE.
+ * Selection is a WHITE box with a rose tick (radios a rose dot); no filled boxes, per the ref's
+ * `data-orl="essentials"`. Counts ride each option in mono, zero-padded like every count here.
+ */
+.tl-np {
+  display: flex; flex-direction: column; align-items: stretch; gap: 0;
+  background: #fff; border: 1px solid #e7e0d4; border-radius: 12px;
+  padding: 4px; overflow: hidden;
 }
-.tl-ddlink:hover { color: var(--tl-nearblack); }
-.tl-tbclear {
-  margin-left: 2px; cursor: pointer; border: 0; background: none; padding: 0;
-  font-size: 11.5px; color: var(--tl-ch-tx);
-  text-decoration: underline; text-underline-offset: 3px;
+.tl-pr {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 10px; border: 0; border-radius: 8px; cursor: pointer;
+  background: transparent; text-align: left;
+  font-size: 12.5px; font-weight: 600; color: var(--tl-nearblack);
 }
+.tl-pr:hover { background: #faf6ef; }
+.tl-pr:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
+.tl-prchev { color: #a89880; font-size: 12px; transition: transform .12s; }
+.tl-pr.open .tl-prchev { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .tl-prchev { transition: none; } }
+.tl-prv { margin-left: auto; font-weight: 400; font-size: 12px; color: #8a7a6c; }
+/* the Filter row's live figure — rose only while something is hidden */
+.tl-prv.act { color: #8c4f4a; font-weight: 600; }
+.tl-prclr {
+  font-size: 11px; color: #6f6055; text-decoration: underline; text-underline-offset: 2px;
+  cursor: pointer;
+}
+/* the expansion — options as full-width rows, hanging from their header row */
+.tl-px { display: flex; flex-direction: column; gap: 1px; padding: 2px 0 8px 6px; }
+.tl-px > button {
+  display: flex; align-items: center; gap: 9px;
+  padding: 6px 10px; border: 0; border-radius: 8px; cursor: pointer;
+  background: transparent; text-align: left;
+  font-size: 12px; color: #3a2c22;
+}
+.tl-px > button:hover { background: #faf6ef; }
+.tl-px > button:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
+.tl-px > button b {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .1em;
+  color: #a89880; font-weight: 500;
+}
+/* ⚠️ SELECTED IS A WHITE BOX WITH A ROSE TICK — never a filled box. A wall of solid boxes reads as
+   pressed buttons; the tick is the statement and the box is just its seat. */
+.tl-bx {
+  width: 14px; height: 14px; flex: 0 0 auto;
+  border-radius: 4px; border: 1.5px solid #cdbfa8; background: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.tl-px > button[data-on] .tl-bx::after {
+  content: ""; width: 8px; height: 5px;
+  border-left: 2px solid #8c4f4a; border-bottom: 2px solid #8c4f4a;
+  transform: rotate(-45deg) translate(0.5px, -1px);
+}
+/* radios — a rose dot in a round seat */
+.tl-rad {
+  width: 14px; height: 14px; flex: 0 0 auto;
+  border-radius: 99px; border: 1.5px solid #cdbfa8; background: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.tl-px > button[data-on] .tl-rad::after {
+  content: ""; width: 7px; height: 7px; border-radius: 99px; background: #8c4f4a;
+}
+/* a facet section's header — its name, then All · None as quiet links */
+.tl-fh2 {
+  display: flex; align-items: baseline; gap: 8px;
+  margin: 8px 4px 3px; padding-top: 8px; border-top: 1px solid #f0e9df;
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: #a89880;
+}
+.tl-fh2:first-child { border-top: 0; margin-top: 2px; padding-top: 2px; }
+.tl-fh2 a {
+  cursor: pointer; color: #6f6055; text-decoration: underline; text-underline-offset: 2px;
+  text-transform: none; letter-spacing: 0; font-family: Inter, ui-sans-serif, sans-serif; font-size: 10px;
+}
+.tl-fh2 a:first-of-type { margin-left: auto; }
+
+/* ⚠️ THE DROPDOWN CHASSIS IS DELETED (v64 §E) — `.tl-tb`, `.tl-dd`, the boxes and ticks. Its two
+   consumers (the v63 toolbar, the §B interim sidebar block) are gone; the Notion panel draws its
+   own rows. A chassis with no consumer is the fourth dead dropdown this board would have carried. */
 /* ⚠️ THE COUNT IS HOW MANY ROWS ARE DRAWN, and it is a different number from the sidebar's census
    on purpose — which is why it names its unit. Two unlabelled numerals answering two questions is
    how a board comes to state a figure nobody can reconcile. */
-.tl-tbcnt {
-  margin-left: auto; flex: none; white-space: nowrap;
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px;
-  letter-spacing: 0.14em; text-transform: uppercase; color: #a89880;
-}
 
 .tl-search {
   flex: 0 1 190px; min-width: 90px; height: 26px; padding: 0 10px; font-size: 11.5px;
@@ -393,7 +446,10 @@
   /* ⚠️ THE ONE COLOUR ON THE RAIL, and it is the app's own requested-state rose —
      `STATUS_DOT_MAP[PARTIAL_REQUESTED].base`. Today is the only thing the rail is allowed to
      colour, so it borrows a hue the reader already knows rather than inventing one. */
-  --tl-cs-today: #c98e8a;
+  /* ⚠️ INK, NOT ROSE (v64 lock i). The today circle, the today line and the pulse dot are one
+     statement in one colour; rose belonged to the urgency vocabulary and put a lateness tone on a
+     mark that only says "now". The rendered ref draws the circle in ink with a parchment numeral. */
+  --tl-cs-today: #2a1f17;
   --tl-field: #f5f1eb;
   /* ⚠️ THE SECTION SURFACE IS THE APP'S OWN PANEL, BY NAME. The ref's `.grp` is `var(--panel)`,
      its content surface; `.t-f12` — which this page's root carries — declares `--panel: #fffdfb`.
@@ -656,18 +712,18 @@
 /* ⚠️ `.tl-cal` AND `.tl-board` ARE ONE ELEMENT, and this rule is declared AFTER `.tl-board`'s so
    its white ground wins over the board's `transparent`. Same specificity, one element, so order is
    the rule — stated here rather than left to be discovered. */
+/* ⚠️ TWO THINGS ON THE PAGE, NOT ONE CONTAINER (v64 §A). The split frame is LAYOUT ONLY — no
+   fill, no border, no radius, no clip: the sidebar sits directly on the page cream and the BOARD
+   is its own rounded container one level down. v63 drew one box around both, which made the
+   sidebar a pane; v64's sidebar is a column of controls on the page. */
 .tl-cal {
-  flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: var(--tl-cs-ground); border: 1px solid #e7e0d4; border-radius: 16px;
+  flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: transparent; border: 0; border-radius: 0;
   /* ⚠️ IT CLIPS, AND THE BADGE SURVIVES BECAUSE IT IS INSIDE THE CARD NOW. v60's medallion burst
      past the card's left edge and every ancestor had to stay `overflow: visible` for it; at 40px
      and inset there is nothing to escape, so the container can round its own corner. */
-  overflow: hidden; box-shadow: 0 1px 3px rgba(58, 28, 20, .04);
-  border-color: var(--tl-cs-frame);
+  overflow: visible; box-shadow: none;
 }
-.tl-side .slbl {
-  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .16em;
-  text-transform: uppercase; color: #a89880; padding: 0 2px; margin-bottom: 2px;
-}
+
 .tl-side .sblk { display: flex; flex-direction: column; gap: 6px; }
 .tl-side .navrow { display: flex; gap: 6px; }
 /* ⚠️ THE CONTROLS WERE BUILT FOR A ROW AND ARE NOW IN A COLUMN. `.tl-search` had `flex: 1` and no
@@ -684,33 +740,22 @@
 .tl-todaychip { display: none; }
 .tl-side .navrow .tl-btn { flex: 1; text-align: center; }
 /* the group list — these ARE the filters, and the tab strip is retired */
-.gpill {
-  display: flex; align-items: center; gap: 9px; padding: 8px 11px; border-radius: 10px;
-  border: 1px solid transparent; background: none;
-  font-family: inherit; font-size: 12.5px; font-weight: 600; color: #4a3d33;
-  cursor: pointer; text-align: left; width: 100%;
-}
-.gpill svg { width: 15px; height: 15px; flex: 0 0 auto; }
-.gpill span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+
+
 /* ⚠️ THE COUNT IS PUSHED RIGHT BY `margin-left: auto` ON THE NUMBER, not by a spacer element —
    one fewer node, and the number stays attached to the row it counts. */
-.gpill b {
-  margin-left: auto; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px;
-  letter-spacing: .1em; color: #a89880; font-weight: 500;
-}
-.gpill:hover { background: #faf6ee; }
-.gpill.on {
-  background: #fff; border-color: #e7dccb; color: var(--tl-nearblack);
-  box-shadow: 0 1px 3px rgba(58, 28, 20, .05);
-}
-.gpill:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
+
+
+
+
 /* each pill takes its own group's ink for its mark, so the list and the dividers agree */
-.gpill[data-sec="over"] svg  { color: var(--tl-g-over-ico); }
-.gpill[data-sec="with"] svg  { color: var(--tl-g-with-ico); }
-.gpill[data-sec="need"] svg  { color: var(--tl-g-need-ico); }
-.gpill[data-sec="quiet"] svg { color: var(--tl-g-quiet-ico); }
-.gpill[data-sec="task"] svg  { color: var(--tl-g-task-ico); }
-.gpill[data-sec="shut"] svg  { color: var(--tl-g-shut-ico); }
+
+
+
+
+
+
 
 /* ══ A GROUP IS A DIVIDER NOW, NOT A CONTAINER (v61) ══════════════════════════════════════════
  *
@@ -1557,33 +1602,25 @@ button.tl-tchip { cursor: pointer; }
    declarations of one selector: the cascade takes the last and a reader takes the first, and the
    viewport lock read the wrong block and reported that the rows had stopped scrolling. The padding
    is folded in here instead. */
-.tl-rows { position: relative; flex: 1; min-height: 0; overflow-y: auto; padding: 0 0 24px;
+/* ⚠️ THE LANE IS INSET 20px LEFT AND RIGHT (v64 §A3) — content never meets the container's edge.
+   The rendered ref: rows at x 566/w 830, every group bar and row at x 586/w 790. No top padding:
+   the first thing in the rows is a group bar, and the bar carries the group's 12px top spacing
+   INSIDE itself (§D's seal) — padding here would be a strip a stuck bar could never cover. */
+.tl-rows { position: relative; flex: 1; min-height: 0; overflow-y: auto; padding: 0 20px 24px;
   background: var(--tl-cs-ground);
 }
-/* ⚠️ TODAY IS A DRAWN RULE AGAIN (v54, Phase 2), AND THE SHADOW THAT REPLACED IT IS GONE.
-   v37 made it a leftward shadow to avoid "a thing on the page competing with every other line on
-   it" — sound while the past was also washed, because the two said one thing between them. With
-   the wash deleted a shadow is the only remaining claim about the past, and a soft one: the board
-   now needs to say WHERE today is, not what is behind it.
-   ⚠️ THE BOX KEEPS ITS ZERO WIDTH AND THE INK IS A BORDER. Five locks read this element's painted
-   x — including the two that caught the 346px displacement and the fill edge — and the comment
-   they were written under says what is asserted is the box, never the border. A 1.5px width would
-   move every one of those readings by 0.75px; a border paints from the box's left edge, which IS
-   today's x.
-   ⚠️ AND `z-index: 60` IS IN FRONT OF EVERY CARD, not merely in front of most. Cards sit at 2,
-   an owed card at 4 and a hovered one at 6 — the line was 6 too, so it beat a hovered card only
-   on DOM order. A tie decided by source position is not a rule. */
+/* ⚠️ THE TODAY LINE IS A 1.5px DASHED INK LINE IN THE ROWS ONLY (v64 §C, `data-tl="dash"`). It
+   is a child of `.tl-rowsin`, so its `top: 0 / bottom: 0` ARE the first row's top and the content's
+   bottom — the lock's claim, satisfied structurally rather than by arithmetic. No cap, no chip, and
+   it never crosses the date row or the winbar because it cannot reach them.
+   ⚠️ `width: 0` WITH A BORDER, per the ref — a 1.5px BACKGROUND rounds to 1 or 2 at whole-pixel
+   positions; a border keeps its sub-pixel width. `translateX(-1px)` centres it on the date. */
+.tl-rowsin { position: relative; }
 .tl-todayline {
-  /* ⚠️ IT STARTS AT THE RAIL'S TOP, NOT AT THE WRAP'S BORDER EDGE. `top: 0` on an absolutely
-     positioned child resolves against the containing block's PADDING box, and `.tl-wrap` carries
-     `padding-top: var(--tl-flag-lift)` to give the flags room to fly — so the line began 18px
-     above the rail, in the gap under the controls, pointing at nothing. Measured: line top 331
-     against rail top 349. The offset is the same token that opened the gap, so the two cannot
-     drift apart. */
-  position: absolute; top: var(--tl-flag-lift, 0px); bottom: 0; width: 0;
-  border-left: 1.5px solid #e6c3b4;
-  z-index: 60; pointer-events: none;
-  border-left-color: var(--tl-cs-today);
+  position: absolute; top: 0; bottom: 0; width: 0;
+  border-left: 1.5px dashed var(--tl-nearblack);
+  transform: translateX(-1px);
+  z-index: 3; pointer-events: none;
 }
 /* ⚠️ THE FLAG SITS ABOVE THE BOARD, CLEAR OF THE FIRST GROUP TITLE. It was 2px above it —
    not overlapping, and not clear either, which on a 19px Playfair title reads as a collision. It
@@ -1592,12 +1629,8 @@ button.tl-tchip { cursor: pointer; }
 /* ⚠️ THE TODAY CAP IS HIDDEN WHILE THE TODAY TILE EXISTS (v61's `data-rail="inline"`). The tile
    already names today, in pink, on the rail; a cap floating above it is the same date twice, three
    pixels apart, and the cap was the one drawn over the tile. */
-.tl-todayflag { display: none; }
-.tl-todayflag-unused {
-  position: absolute; transform: translateX(-50%); font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 8px; letter-spacing: .12em; color: var(--tl-ink); pointer-events: none; z-index: 5;
-  top: calc(-1 * var(--tl-flag-lift));
-}
+/* ⚠️ THE FLAG IS DELETED, RULES AND ALL (v64 §C). It had been `display: none` with an `-unused`
+   twin for two packs — furniture whose obituary outlived it twice over. */
 /* ⚠️ THE 18px LIFT IS DELETED — IT WAS ROOM RESERVED FOR A RETIRED ELEMENT (fidelity 1). It made
    space above the rail for `.tl-todayflag`, which is `display: none` and has been for two packs; the
    gap outlived it, and it was the ground-coloured band standing between the toolbar and the date
@@ -1989,34 +2022,16 @@ button.tl-tchip { cursor: pointer; }
 /* the left cut, stated the same way — it had only ever been implied by the overlay */
 .tl-p.fadeL .tl-frame { border-left: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; }
 
-/* ══ THE THREE DENSITIES (v63, §D) ══════════════════════════════════════════════════════════
+/* ══ TWO DENSITIES (v64 §F) ═════════════════════════════════════════════════════════════════
  *
- * ⚠️ `regular` IS THE DESIGN AND IS DECLARED ON `.tl-board` ITSELF, not repeated here. These two
- * blocks are its named neighbours; a third block restating the default would be a second copy of
- * the values every other rule reads, and the first thing to drift.
+ * ⚠️ COMFORTABLE IS THE BASE — the dev card exactly as it stands, 106/86, renamed. It has NO
+ * override block: a block restating the base values would be a second copy of every number the
+ * board reads, and the first thing to drift. "Regular" is retired as a word, and the old 124/104
+ * step is deleted with it — three steps were two extra answers to a question with one good one.
  *
- * ⚠️ AND EACH ONE MOVES THE BODY'S CEILING WITH THE BAR'S HEIGHT. `--bar-h` alone would leave the
- * words centred on a `top` and a `max-height` written for a different card — which is how the
- * eyebrow came to be clipped in this section's first build. The pair travels together.
+ * Compact is re-cut by §F: one 52px row, a 40px bar, no band, a status-tinted top edge, and a
+ * hover peek instead of a taller row.
  */
-/* ⚠️ 120/100, NOT THE REF'S 116/96 — AND THE FOUR PIXELS ARE THE DESCENDER FLOOR AGAIN. Comfortable
-   STACKS the name over the agency, so its body holds four typographic lines; at `line-height: 1.3`
-   its stack measures ~73.7px against the 70 that a 96px bar leaves once the 26px band is
-   taken. The ref fits because it sets 1.15 on its own name, which this repo forbids on mixed-case
-   Playfair inside a clipping box. Eight pixels of bar is the cheapest honest way to keep both. */
-.tl-board[data-dens="comfortable"] {
-  --row-h: 124px; --bar-h: 104px;
-}
-/* the name and the agency stack rather than sitting on one line — the room is there for it */
-.tl-board[data-dens="comfortable"] .tl-trow { flex-direction: column; align-items: flex-start; gap: 2px; }
-.tl-board[data-dens="comfortable"] .tl-fag { margin-left: 0; }
-/* ⚠️ 62px, NOT THE REF'S 56 — and the reason is the descender floor, not taste. Comfortable STACKS
-   the name over the agency, so the body holds three lines of Playfair and Inter at `line-height:
-   1.3`; the ref sets 1.15 on its own name, which this repo forbids on mixed-case Playfair inside a
-   clipping box. Measured at 1.3 the stack is ~60.4px and 56 clipped it. The top comes in to 32 —
-   6px clear of the 26px band rather than 10 — so 32 + 62 still lands inside the 96px bar. */
-.tl-board[data-dens="comfortable"] .tl-cardbody { top: 27px; max-height: 75px; }
-
 .tl-board[data-dens="compact"] {
   --row-h: 76px; --bar-h: 58px;
 }
@@ -2056,13 +2071,14 @@ button.tl-tchip { cursor: pointer; }
      by a value that happens to look right. */
   position: absolute; right: -5px; top: 50%; transform: translateY(-50%);
   width: 10px; height: 10px; border-radius: 99px;
-  background: #c98e8a; border: 2px solid #fff; z-index: 6; pointer-events: none;
+  /* ink, with an ink ripple at low alpha — one colour for "now" (v64 lock i) */
+  background: var(--tl-nearblack); border: 2px solid #fff; z-index: 6; pointer-events: none;
   animation: tlRipple 2.2s ease-out infinite;
 }
 @keyframes tlRipple {
-  0%   { box-shadow: 0 0 0 0 rgba(201, 142, 138, .55); }
-  70%  { box-shadow: 0 0 0 12px rgba(201, 142, 138, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(201, 142, 138, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(28, 19, 15, .30); }
+  70%  { box-shadow: 0 0 0 12px rgba(28, 19, 15, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(28, 19, 15, 0); }
 }
 /* ⚠️ THE OVERRIDE COMES AFTER THE RULE IT OVERRIDES. A media query confers NO specificity, so a
    `prefers-reduced-motion` block placed above `.tl-pulsedot` would lose to it at equal weight and
@@ -2569,8 +2585,8 @@ button.tl-tchip { cursor: pointer; }
    scroll inside a container taller than the viewport, so the bottom border was never painted and
    the board read as a surface with no end rather than as an object on the page. */
 .tl-cal {
-  /* the container is a ROW now: the axis is its left pane, the board its right */
-  flex-direction: row;
+  /* the container is a ROW: the sidebar on the page, then 18px, then the board */
+  flex-direction: row; gap: 18px;
   border-color: var(--tl-ch-frame);
   background: var(--tl-ch-ground);
 }
@@ -2581,9 +2597,12 @@ button.tl-tchip { cursor: pointer; }
      caught by four times: a selector declared twice, and a reader takes the first. */
   flex: 0 0 var(--tl-axis-w);
   display: flex; flex-direction: column; gap: 0;
-  padding: 14px 12px 12px; min-width: 0;
-  background: var(--tl-ch-bg);
-  border-right: 1px solid var(--tl-ch-line);
+  /* ⚠️ NO PANE (v64 §A). The sidebar sits on the page cream — no fill, no border, no clip. Its
+     blocks are white controls and hairline-separated groups; the COLUMN itself is nothing. The
+     rendered ref: `.axis` background transparent, border 0, on body cream #f2ede7. */
+  padding: 0 2px 12px; min-width: 0;
+  background: transparent;
+  border-right: 0;
   /* ⚠️ AND IT SCROLLS ON ITS OWN — WHICH THE REF DOES NOT DO EITHER. `.axis` carries no `overflow`
      anywhere in the ref, so its own fourth glance tile is unreachable at a short viewport; the
      board's rows region scrolls and the pane beside it simply runs off the bottom. Two panes that
@@ -2592,7 +2611,16 @@ button.tl-tchip { cursor: pointer; }
      its content without it, and an `overflow` on a box that never shrinks does nothing. */
   min-height: 0; overflow-y: auto;
 }
-.tl-boardpane { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+/* ⚠️ THE BOARD IS THE CONTAINER (v64 §A). Rounded 16, hairline, faint lift, and the pale-cream
+   ground the date row and lane share — the rendered ref's `.board`: #faf7f2 on 1px #e3d9ca with a
+   two-layer 4%/6% lift. It clips, which is what bounds the rows' scroll to it. */
+.tl-boardpane {
+  flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column;
+  background: var(--tl-lane);
+  border: 1px solid #e3d9ca; border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, .04), 0 6px 18px rgba(58, 28, 20, .05);
+  overflow: hidden;
+}
 /* ⚠️ THE NUMBERS GUTTER IS GONE. It ran 01…nn down the side of a board whose rows are named by the
    cards on them; the axis is the vertical index now, and a second one down the lanes was a census
    nobody was reading. */
@@ -2601,19 +2629,26 @@ button.tl-tchip { cursor: pointer; }
 
 /* the date bar and the group bars wear the chrome, and the ground below is one surface */
 .tl-rail { background: var(--tl-ch-bg); border-bottom-color: var(--tl-ch-line); }
-.tl-rows { background: var(--tl-ch-ground); }
+.tl-rows { background: var(--tl-lane); }
 .tl-glanes { background: transparent; }
 
 /* ══ GROUP BARS — full width, in the chrome tone ══════════════════════════════════════════════
    ⚠️ A BAR, NOT A LABEL ON A RULE. v62's divider was a name standing on a hairline, which reads as
    a break between two runs of rows; a 40px bar in the chrome's own tone reads as a HEADING for what
    follows, and it is what makes sticking it under the date bar meaningful. */
+/* ⚠️ THE GROUP BAR — DOUBLE RULE, SEALED (v64 §D). Bar-toned ground, a 2px ink rule beneath
+   (rose beneath Urgent, and no tinted wash — v63's `#f1d5cc` band is superseded), Playfair 17
+   title, the purpose eyebrow in ink at the right.
+
+   ⚠️ THE SEAL IS PADDING INSIDE THE BAR. The group's 12px top spacing is carried INSIDE the bar
+   (52px box, 12px padding-top), so when the bar sticks there is no strip above it for a card to
+   show through — the rendered ref's `data-lay2="split"` mechanism, and lock (e)'s subject. */
 .tl-gdiv {
-  height: 40px; margin: 0; position: relative;
-  background: var(--tl-ch-bg);
-  border-top: 1px solid var(--tl-ch-line);
-  border-bottom: 1px solid var(--tl-ch-line);
-  display: flex; align-items: center; gap: 12px; padding: 0 16px;
+  height: 52px; box-sizing: border-box; padding: 12px 16px 0;
+  margin: 0; position: relative;
+  background: var(--tl-gbar, #faf9f7);
+  border-bottom: 2px solid var(--tl-nearblack);
+  display: flex; align-items: center; gap: 12px;
 }
 /* ══ BEHAVIOURS (v63, §G) ═══════════════════════════════════════════════════════════════════
  *
@@ -2622,7 +2657,10 @@ button.tl-tchip { cursor: pointer; }
  * above it to clear — and a sticky on a page that cannot scroll CLAMPS rather than idling, which is
  * why the offset is zero rather than a guessed clearance for chrome that is not there.
  */
-.tl-gdiv { position: sticky; top: 0; z-index: 8; cursor: pointer; }
+/* ⚠️ z 25 — ABOVE THE CARDS AND THE TODAY LINE (v64 §D). The bar is opaque and sealed, so a
+   stuck bar covers everything scrolling beneath it; z 8 let a card's own stacking rise past it.
+   The rendered ref: `.gdiv` sticky top 0, z 25, on the split layout. */
+.tl-gdiv { position: sticky; top: 0; z-index: 25; cursor: pointer; }
 .tl-gdiv:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
 /* the chevron states which way the group is — it is the only thing that changes when it collapses */
 .tl-gchev {
@@ -2652,7 +2690,8 @@ button.tl-tchip { cursor: pointer; }
 .tl-gdiv .gp {
   position: static; transform: none; background: transparent; padding: 0;
   display: inline-flex; align-items: center; gap: 8px;
-  font-family: 'Playfair Display', Georgia, serif; font-size: 15px; font-weight: 500;
+  /* 17px — the ref's `data-gh="rule"` title size */
+  font-family: 'Playfair Display', Georgia, serif; font-size: 17px; font-weight: 500;
   color: var(--tl-ch-tx); line-height: 1.3; white-space: nowrap;
 }
 .tl-gdiv .gp .gico { width: 16px; height: 16px; color: var(--tl-ch-tx); }
@@ -2663,27 +2702,21 @@ button.tl-tchip { cursor: pointer; }
 /* ⚠️ THE EYEBROW SAYS WHAT THE GROUP IS FOR, at the bar's right end. A group NAME is a label a
    reader has to decode — "Gone quiet" against "No reply for a long while" — and the bar is wide
    enough to carry the sentence beside it. */
+/* the purpose eyebrow, IN INK at the bar's right end — the ref's `data-gh="rule"` .geb (8px, ink) */
 .tl-gdiv .geb {
   margin-left: auto;
-  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--tl-ch-mute); white-space: nowrap;
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--tl-nearblack); white-space: nowrap;
 }
 /* the one exception: Urgent is blush, and its count and eyebrow take the rose */
-/* ⚠️ ONLY URGENT IS TINTED, AND THE REF'S CASCADE IS WHY. `.gdiv` is chrome-bg with a `--ch-line`
-   edge for every group; `.grp.g-over .gdiv` alone overrides it to `#f1d5cc` on `#e3bcb0`. Tinting
-   every section by its own token — which is what a first pass at this did — makes six coloured
-   bands down the board and the one that matters stops standing out. The exception IS the emphasis.
-
-   ⚠️ AND THE EDGE IS A LIGHTER DERIVATIVE OF THE FILL, NOT THE SECTION'S STUB COLOUR. `--gtone`
-   is the accent the section's rule-stub wears; used here it drew a `#c98e8a` edge — louder than
-   the fill it borders, so the bar read as outlined rather than as a band. */
-.tl-grp[data-sec="over"] .tl-gdiv {
-  background: var(--tl-ch-urgent);
-  border-top-color: var(--tl-ch-urgent-edge);
-  border-bottom-color: var(--tl-ch-urgent-edge);
-}
+/* ⚠️ URGENT'S RULE IS ROSE — AND ONLY THE RULE (v64 §D). v63's tinted wash (`#f1d5cc` on
+   `#e3bcb0`) is SUPERSEDED: the v64 ref draws every bar on the same bar tone with a 2px ink rule,
+   and Urgent's one distinction is the rose rule beneath it. A wash and a rule were two statements;
+   the rule is the design's one. */
+.tl-grp[data-sec="over"] .tl-gdiv { border-bottom-color: #8c4f4a; }
 .tl-grp[data-sec="over"] .tl-gdiv .gp b,
-.tl-grp[data-sec="over"] .tl-gdiv .geb { color: var(--tl-ch-urgent-tx); }
+/* Urgent's eyebrow keeps the rose voice — the one place the section's colour speaks on the bar */
+.tl-grp[data-sec="over"] .tl-gdiv .geb { color: #8c4f4a; }
 
 
 /* ══ v63 · THE SIDEBAR PANE'S BLOCKS ══════════════════════════════════════════════════════════
@@ -2694,10 +2727,7 @@ button.tl-tchip { cursor: pointer; }
 }
 .tl-axis .abl.grow { flex: 0 0 auto; padding-top: 8px; }
 .tl-axis .abl:last-of-type { border-bottom: none; }
-.tl-axis .slbl {
-  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--tl-ch-mute); margin: 4px 2px 6px;
-}
+
 /* ⚠️ `flex: 0 0 auto` OR IT FILLS THE COLUMN. `.tl-search` carries `flex: 1` for the row it was
    built in; in a column that makes it take every pixel the axis has spare, as one enormous empty
    box. v61 fixed this once for the old sidebar and the rule did not follow the pane inside the
@@ -2732,38 +2762,21 @@ button.tl-tchip { cursor: pointer; }
 }
 .tl-axis .backtoday:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
 /* At a glance — four tiles, two by two */
-.tl-axis .sbx {
-  display: flex; flex-direction: column; gap: 8px;
-  padding: 12px 4px 10px; border-bottom: 1px solid var(--tl-ch-line);
-}
-.tl-axis .sbx:last-of-type { border-bottom: none; }
-.tl-axis .sbh .t {
-  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--tl-ch-mute);
-}
-.tl-axis .st { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.tl-axis .st > div {
-  background: var(--tl-ch-ctl); border: 1px solid var(--tl-ch-ctlbd); border-radius: 10px;
-  padding: 9px 10px;
-}
-.tl-axis .st b {
-  display: block; font-family: 'Playfair Display', Georgia, serif; font-size: 20px;
-  font-weight: 500; color: var(--tl-ch-tx); line-height: 1.3;
-}
-.tl-axis .st small {
-  display: block; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 6.5px;
-  letter-spacing: .14em; text-transform: uppercase; color: var(--tl-ch-mute); margin-top: 4px;
-}
+
+
+
+
+
+
+
 /* the one figure that is asking for something takes the rose */
-.tl-axis .st .r b { color: var(--tl-ch-urgent-tx); }
+
 /* the views list inherits the chrome's selection treatment */
-.tl-axis .gpill { color: var(--tl-ch-tx); }
-.tl-axis .gpill b { color: var(--tl-ch-mute); }
-.tl-axis .gpill:hover { background: var(--tl-ch-hov); }
-.tl-axis .gpill.on {
-  background: var(--tl-ch-sel); border-color: var(--tl-ch-selbd); color: var(--tl-ch-tx);
-}
+
+
+
+
 /* ⚠️ ONE COUNT IN ROSE, AND ONLY ONE. "Needs me" is the single view that is asking for something;
    every other number on this pane is a tally. A second rose figure would make the colour mean
    "a number" rather than "a number that wants you". */
-.tl-axis .gpill[data-sec="over"] b { color: var(--tl-ch-urgent-tx); }
+

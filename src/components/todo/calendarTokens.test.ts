@@ -237,12 +237,14 @@ describe("⚠️ the today line is a drawn rule, and its width is a source claim
     return hits[0][1];
   };
 
-  it("1.5px, in the pinned tone, and above every card", () => {
+  it("1.5px, dashed, in ink, in the rows only (v64 §C)", () => {
+    /* ⚠️ RETARGETED BY v64: the line is `data-tl="dash"` — 1.5px DASHED INK, a child of
+       `.tl-rowsin` so it cannot reach the date row or the winbar, and BELOW the sealed group bars
+       (z 3 against their 25) rather than above everything. The v54 values (solid rose #e6c3b4,
+       z 60) described a line that crossed the whole board; that line is retired. */
     const r = ruleFor(".tl-todayline");
-    expect(r).toMatch(/border-left\s*:\s*1\.5px solid #e6c3b4/i);
-    /* cards sit at 2, an owed card at 4, a hovered one at 6 — a tie decided by DOM order is not a
-       rule, which is what `z-index: 6` on this element was */
-    expect(r).toMatch(/z-index\s*:\s*60/);
+    expect(r).toMatch(/border-left\s*:\s*1\.5px dashed var\(--tl-nearblack\)/i);
+    expect(r).toMatch(/z-index\s*:\s*3\b/);
   });
 
   it("⚠️ AND THE PAST WASH IS GONE FROM THE SHEET, not merely unset by the page", () => {
@@ -393,7 +395,10 @@ describe("the scrawl is gone from the calendar", () => {
     const setters = [...css.matchAll(/(?:^|\})\s*([^{}]+?)\s*\{([^}]*Caveat[^}]*)\}/g)]
       .map((m) => m[1].trim().replace(/\s+/g, " "));
     expect(setters, `the calendar sheet sets Caveat on: ${setters.join(" | ")}`)
-      .toEqual([".tl-cap .w"]);
+      /* ⚠️ RETARGETED TWICE, AND THE LAW HELD BOTH TIMES: Caveat is the ACTION's hand and nothing
+         else's. v60's flag (`.tl-cap .w`) carried it; §E's action label (`.tl-actlab`) inherits the
+         role with the element. One selector, the action's, and the app's own hand untouched. */
+      .toEqual([".tl-actlab"]);
     /* the page and the copy module may not set it at all — a flag's deed is styled, never inlined */
     for (const f of ["src/components/todo/TodoCalendarPage.tsx", "src/lib/timelineCopy.ts"]) {
       const src = stripAll(readFileSync(join(process.cwd(), f), "utf8"));

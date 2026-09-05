@@ -38,12 +38,14 @@ import { pillText } from "../../lib/calendarPill";
 import { stageSentence, type StageEnd } from "../../lib/stageSentence";
 import { QueryStatus } from "../../types";
 import {
-  calSectionOf, CAL_SECTION_DRAW, CAL_SECTION_LABEL, CAL_SECTION_PURPOSE, CAL_SECTION_VIEW,
+  calSectionOf, CAL_SECTION_DRAW, CAL_SECTION_LABEL, CAL_SECTION_PURPOSE,
 } from "../../lib/calendarSections";
+/* ⚠️ THE TOOLBAR LIB'S SURVIVORS (v64 §E). The v63 toolbar is deleted and the sidebar reads the
+   FACET model for filtering and the move grouping — so `matchesStatus`, `anythingApplied` and the
+   whole ACTION grouping lose their last reader here. The sort keys and the status ladder survive:
+   the sort is the same four keys in a new home. */
 import {
-  GROUP_BY_ORDER, GROUP_BY_LABEL, ACTION_ORDER, ACTION_LABEL, actionBucketOf,
-  SORT_BY_ORDER, SORT_BY_LABEL, STATUS_LADDER, statusRank, matchesStatus, anythingApplied,
-  type GroupBy, type SortBy, type ActionBucket,
+  SORT_BY_ORDER, SORT_BY_LABEL, STATUS_LADDER, statusRank, type SortBy,
 } from "../../lib/calendarToolbar";
 import type { CalSection, CalSectionFacts } from "../../lib/calendarSections";
 /* ⚠️ THE QUERY CENTRE'S OWN TWO DERIVATIONS, IMPORTED RATHER THAN RESTATED (v63, section D).
@@ -54,6 +56,11 @@ import { stageFor, turnWordFor } from "../../lib/queryCardFacts";
 import { fadesFor, cardBounds } from "../../lib/calendarFade";
 import type { CapKind } from "../../lib/calendarPill";
 import { taskBar, taskHolder, taskTail } from "../../lib/taskBars";
+import {
+  rowFacets, rowPasses, rowCarries, emptyOff, hiddenCount, FACET_SECTIONS,
+  moveGroupOf, MOVE_GROUP_ORDER, MOVE_GROUP_LABEL,
+  type RowFacets, type FacetOff, type FacetSection,
+} from "../../lib/calendarFacets";
 import { overdueSpan } from "../../lib/journeyBars";
 import {
   TAB_ORDER, TAB_LABEL, rowInTab, tabOf, type TimelineTab,
@@ -110,10 +117,11 @@ import "./todoCalendar.css";
 /** ⚠️ THE BAND'S DOT — the pack's 20px, NOT the ref's 14px `.sseg svg`. The ref sizes a flat glyph
     of its own making; this app's `StatusDot` carries direction and stage in its SHAPE, and 14px
     loses it. A glyph's legible size is part of the glyph, which is the app's half of the split. */
-/** ⚠️ THE REF'S OWN THREE WORDS. `Regular` is the default the design was drawn at; the other two
-    are its named neighbours, not invented steps. */
-const DENSITY_LABEL: Record<"comfortable" | "regular" | "compact", string> = {
-  comfortable: "Comfortable", regular: "Regular", compact: "Compact",
+/** ⚠️ TWO DENSITIES (v64 §F). `Comfortable` IS the dev card as it stands — the 106/86 base,
+    renamed — and `Regular` is retired everywhere as a word. The old 124/104 "comfortable" is
+    deleted with it: three steps were two more answers to a question with one good one. */
+const DENSITY_LABEL: Record<"comfortable" | "compact", string> = {
+  comfortable: "Comfortable", compact: "Compact",
 };
 
 /** ⚠️ 14px — THE REF'S `.sseg svg`, AND IT SUPERSEDES §D's 20. That pass argued a glyph's legible
@@ -866,88 +874,10 @@ function ActionMark({ urgent, kind, label, deed, style, onPress }: {
   );
 }
 
-/**
- * ══ ONE TOOLBAR CONTROL (v63, section C) ═══════════════════════════════════════════════════
- *
- * A trigger that names its own value, and a panel beneath it. The three controls differ only in
- * what goes IN the panel — a radio list, a radio list with a checkbox and a reset, a checkbox
- * list with a clear — so the shell is one component and the body is `children`. Configuring one
- * generic list component to express all three would need three flags and a slot, which is a
- * config soup that reads worse than the three bodies it replaces.
- *
- * ⚠️ IT REPLACES `Menu`, `Popover` AND `PopRow`, WHICH ARE DELETED IN THE SAME EDIT. All three
- * had ZERO render sites — a dropdown cluster left standing after the controls that used it were
- * retired. A replacement that is ADDED leaves the original reachable, and this repo has paid for
- * that three times in one build; shipping a fourth dropdown beside three dead ones is the same
- * fault with a bigger denominator.
- *
- * ⚠️ THE DISMISSAL IDIOM IS THE HOUSE ONE, and Escape is consumed on the CAPTURE phase with
- * `stopImmediatePropagation`: this panel sits inside a page that owns its own Escape, so a press
- * that dismissed the panel AND reached past it would close the board behind the thing the reader
- * was actually dismissing.
- */
-function TbMenu({ open, onOpen, trigger, label, children }: {
-  open: boolean;
-  /** `true` to open this one, `false` to close it — the page holds which, so only one is ever open */
-  onOpen: (v: boolean) => void;
-  trigger: React.ReactNode;
-  label: string;
-  children: React.ReactNode;
-}) {
-  const wrap = React.useRef<HTMLSpanElement>(null);
-  React.useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.stopImmediatePropagation();
-      onOpen(false);
-    };
-    /* ⚠️ THE TRIGGER COUNTS AS INSIDE. Without it the pointerdown closes the panel and the click
-       that follows reopens it, so the control reads as inert on every second press. */
-    const onDown = (e: PointerEvent) => {
-      if (!wrap.current?.contains(e.target as Node)) onOpen(false);
-    };
-    document.addEventListener("keydown", onKey, true);
-    document.addEventListener("pointerdown", onDown);
-    return () => {
-      document.removeEventListener("keydown", onKey, true);
-      document.removeEventListener("pointerdown", onDown);
-    };
-  }, [open, onOpen]);
-  return (
-    /* ⚠️ NO `--open` MODIFIER. The panel is rendered conditionally rather than shown by a class, and
-       the trigger's own open treatment hangs off `aria-expanded`, which is on the element anyway
-       and cannot fall out of step with the state the way a second class can. A modifier emitted
-       with no rule behind it is invisible chrome the stylesheet does not know exists — the reach
-       sweep is what caught it, which is the whole reason that sweep runs. */
-    <span className="tl-tb" ref={wrap}>
-      <button type="button" className="tl-tbtrig" aria-expanded={open} aria-label={label}
-        onClick={() => onOpen(!open)}>
-        {trigger}
-        <span className="tl-tbchev" aria-hidden>▾</span>
-      </button>
-      {open && <div className="tl-dd" role="group" aria-label={label}>{children}</div>}
-    </span>
-  );
-}
-
-/** one option in a toolbar panel — a name, and a tick or a box that says whether it is on */
-function TbOpt({ on, mark, onClick, children }: {
-  on: boolean; mark: "tick" | "box"; onClick: () => void; children: React.ReactNode;
-}) {
-  return (
-    <button type="button" className="tl-ddopt" data-on={on || undefined}
-      role={mark === "box" ? "checkbox" : "radio"} aria-checked={on} onClick={onClick}>
-      {mark === "box" && <span className="tl-ddbox" aria-hidden />}
-      {/* ⚠️ THE LABEL IS ITS OWN NAMED SPAN. The tick is always laid out (only its opacity moves,
-          so labels do not shift as the selection does), which means the button's `textContent`
-          reads `Urgency✓` — a probe taking the button's text is reading the mark as part of the
-          name. Naming the span is what lets a lock assert the option list exactly. */}
-      <span className="tl-ddname">{children}</span>
-      {mark === "tick" && <span className="tl-ddck" aria-hidden>✓</span>}
-    </button>
-  );
-}
+/* ⚠️ `TbMenu` AND `TbOpt` ARE DELETED WITH THE TOOLBAR ERA (v64 §E). The winbar's controls are a
+   segmented pair and plain buttons; the sidebar's are the Notion panel's own rows. A dropdown
+   chassis with zero render sites is exactly what §C deleted three of — leaving a fourth would be
+   the same fault with a shorter memory. */
 
 export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, onNavigatePath = () => {} }) => {
   const {
@@ -1612,12 +1542,17 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      dead knob, `groupMode`, still has readers inside the board builder and is flagged at its
      declaration for the sweep — stated plainly, because a comment claiming a retirement that did
      not happen is worse than no comment. */
-  const [groupBy, setGroupBy] = useState<GroupBy>("urgency");
+  /* ⚠️ v64's GROUPINGS: Attention (the six sections) · Whose move · Status · None. `action` is
+     RETIRED — "whose move" answers the question it approximated, from the facet the rows carry. */
+  const [groupBy, setGroupBy] = useState<"urgency" | "move" | "status" | "none">("urgency");
   const [sortBy, setSortBy] = useState<SortBy>("urgency");
   const [sortRev, setSortRev] = useState(false);
-  const [statusPick, setStatusPick] = useState<QueryStatus[]>([]);
-  /* which toolbar menu is open — one at a time, and `null` is closed */
-  const [tbOpen, setTbOpen] = useState<null | "group" | "sort" | "status">(null);
+  /* ⚠️ THE FILTER IS THE FACET MODEL (v64 §E): which options are OFF, per section — everything
+     ticked at rest. `statusPick` is retired into it: status is one facet section of six now. */
+  const [facetOff, setFacetOff] = useState<FacetOff>(emptyOff);
+  /* which sidebar panel rows are expanded — Group and Sort open at rest, the ref's `data-side` */
+  const [prOpen, setPrOpen] = useState<{ g: boolean; f: boolean; s: boolean }>(
+    { g: true, f: false, s: true });
   /* ══ BEHAVIOURS (v63, §G) ═══════════════════════════════════════════════════════════════
      ⚠️ COLLAPSING IS SESSION-ONLY, LIKE EVERY OTHER VIEW STATE ON THIS PAGE. No route, no
      persistence: a board that remembered a collapsed group would hide work from a writer who has
@@ -1685,8 +1620,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      and the split is the same one the two surfaces already keep: the toolbar asks how the rows are
      ARRANGED, the sidebar carries what you are looking at and how much of it fits. Session-only,
      like every other view state on this page: no route, no persistence, no second copy. */
-  const [density, setDensity] = useState<"comfortable" | "regular" | "compact">("regular");
-  const [densOpen, setDensOpen] = useState(false);
+  const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
 
   const cutByAvailable = boardManuscripts.length > 1;
   const [cutBy, setCutBy] = useState<"needs" | "ms">("needs");
@@ -1736,7 +1670,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * changed as you clicked them could not be added up — which is precisely the fault the retired tab
    * strip had, where every tab but the current one reported its own view's total.
    */
-  const [secFilter, setSecFilter] = useState<CalSection | null>(null);
+  /* ⚠️ `secFilter` IS RETIRED WITH THE VIEWS LIST (v64 §E) — a filter nothing can reach is how a
+     retired control comes back as a bug. The facet filter is the one narrowing mechanism. */
 
   /**
    * The crosshair — pure geometry, and it reads the DAY rather than remembering one.
@@ -1959,83 +1894,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * The wrap is the only ancestor that spans every row and clips nothing, so the line must live
    * there; a percentage of the wrap is therefore meaningless and the position has to be measured.
    */
-  const [todayX, setTodayX] = useState<number | null>(null);
-  /**
-   * ⚠️ THE ACTION CAP CLAMPS INSIDE ITS LANE — the ref's `placeText`, and it must run after layout.
-   *
-   * A cap is centred on its own date, so one near either edge of the window hangs half its width
-   * outside the lane and paints over the row's furniture — measured before this ran, at the Month
-   * range where the window is tightest. Clamping is the ref's answer rather than hiding it: the
-   * date is still in view, so the deed should still be named; what moves is the pill, by the
-   * minimum needed to keep it whole.
-   *
-   * ⚠️ IT READS `offsetLeft`, NOT `getBoundingClientRect`. The cap carries `translateX(-50%)`, and
-   * a rect is the TRANSFORMED box — so measuring that and then writing `left` applies the shift
-   * twice. `offsetLeft` is the layout position the transform is applied to.
-   */
-  /**
-   * ⚠️ CLIPPED TEXT GLIDES ON HOVER — A TRANSITION ON THE INNER GLIDER, AND NOTHING ELSE MOVES.
-   *
-   * The ref arms this per card: on enter, if the words overflow their clip, translate the wrapper
-   * by exactly the overflow with a duration scaled to the distance; on leave, back to zero. It is
-   * a TRANSITION rather than a keyframe because a keyframe would run whether or not there is
-   * anything to reveal, and because the distance is different on every card.
-   *
-   * The frame and the clip never move: the card must stay on its own dates while its words travel.
-   */
-  React.useEffect(() => {
-    const root = pageRef.current;
-    if (!root) return;
-    const offs: (() => void)[] = [];
-    for (const card of Array.from(root.querySelectorAll<HTMLElement>(".tl-p"))) {
-      const clip = card.querySelector<HTMLElement>(".tl-cardbody");
-      const glider = card.querySelector<HTMLElement>(".tl-bwrap");
-      if (!clip || !glider) continue;
-      const enter = () => {
-        const d = glider.scrollWidth - clip.clientWidth;
-        if (d > 6) {
-          glider.style.transition = `transform ${(0.5 + d / 80).toFixed(2)}s ease`;
-          glider.style.transform = `translateX(-${d}px)`;
-        }
-      };
-      const leave = () => { glider.style.transform = "translateX(0)"; };
-      card.addEventListener("mouseenter", enter);
-      card.addEventListener("mouseleave", leave);
-      offs.push(() => {
-        card.removeEventListener("mouseenter", enter);
-        card.removeEventListener("mouseleave", leave);
-      });
-    }
-    return () => { for (const off of offs) off(); };
-  });
-
-  /* ⚠️ THE FLAG-CLAMPING EFFECT IS DELETED (v63, §E). It measured each flag against its lane and
-     folded one near the edge inward — DOM-MEASURED PLACEMENT, which this pack's laws forbid, and
-     which put an action on a day it does not belong to. An action stands on its own date now and
-     is clipped by the board like everything else, so there is nothing to measure and nothing to
-     fold. The whole effect goes rather than being left with no subject. */
-
-  React.useLayoutEffect(() => {
-    const place = () => {
-      const root = pageRef.current;
-      if (!root || todayAt == null) { setTodayX(null); return; }
-      const wrap = wrapRef.current;
-      const lane = Array.from(root.querySelectorAll<HTMLElement>(".tl-rrow .tl-c-tl"))
-        .find((e) => e.getBoundingClientRect().width > 0);
-      if (!wrap || !lane) { setTodayX(null); return; }
-      const wr = wrap.getBoundingClientRect();
-      const lr = lane.getBoundingClientRect();
-      setTodayX((lr.left - wr.left) + lr.width * (todayAt / range.days));
-    };
-    place();
-    /* ⚠️ AND IT IS RE-PLACED ON RESIZE, because the lane's width is what it is measured from. A
-       value taken once is correct until the first time anything moves. */
-    const ro = new ResizeObserver(place);
-    const board = pageRef.current?.querySelector(".tl-board");
-    if (board) ro.observe(board);
-    return () => ro.disconnect();
-  });
-  const todayLeft = todayX == null ? undefined : `${todayX}px`;
+  /* ⚠️ THE TODAY LINE'S MEASURING EFFECT IS DELETED (v64 §C) — `todayX`, its `place()` walk and
+     its ResizeObserver. The line is a percentage of the lane now, the same fraction the bars use,
+     so there is nothing to measure and nothing to re-place on resize. This was the page's last
+     DOM-measured placement; the law finally holds everywhere. */
 
   /**
    * ⚠️ `RIGHT NOW` IS A FILTER OF THE ONE DERIVATION, NEVER A SECOND ONE. It shows every row that
@@ -2273,7 +2135,14 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
         /* the writer's own passed date, OR an agency estimate that passed on a running wait */
         isUrgent: segs.some((sg) => sg.owed) || segs.some((sg) => sg.state === "quiet"),
         writerHolds: segs.some((sg) => sideOf(sg.status) === "yours"),
-        nextDatedIn: r.pressingAt ?? null,
+        /* ⚠️ DAYS, NOT MILLISECONDS — AND THIS GATE HAD BEEN DEAD SINCE IT WAS WRITTEN. The
+           contract documents days; the page passed `pressingAt`, which is epoch-ms (with an
+           8.64e15 PRESSING_BASE offset on undated rows), so `>= 0 && <= 14` was never true and
+           every "Upcoming" row was arriving via `writerHolds` alone. Found while wiring the facet
+           model's `Due within 14 days`, which would have inherited the same dead comparison. */
+        nextDatedIn: r.pressingAt == null || r.pressingAt >= 8.64e15
+          ? null
+          : Math.floor((r.pressingAt - now) / 86400000),
       };
     };
     const bySec = new Map<CalSection, TimelineRow[]>();
@@ -2289,22 +2158,44 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       .filter((g) => g.rows.length > 0);
   }, [oneList, barsByRow]);
 
-  /* ⚠️ WHICH SECTION EACH ROW FELL IN, DERIVED FROM `sectioned` RATHER THAN RE-CASCADED. The
-     action grouping needs a row's urgency class, and asking `calSectionOf` a second time would be
-     a second opinion about it — the exact shape that let the board once call a row urgent in one
-     place and file it under "with agents" in another. One partition, read two ways. */
-  const secOfRow = React.useMemo(() => {
-    const m = new Map<string, CalSection>();
-    for (const g of sectioned) for (const r of g.rows) m.set(r.key, g.sec);
+  /**
+   * ══ EVERY ROW'S FACETS (v64 §E) ══════════════════════════════════════════════════════════
+   * ⚠️ FROM THE SAME FLAGS THE SECTIONS READ, plus the builder's own dates — one derivation, so
+   * the filter can never hide a row the board's partition calls something else. `wasNudged` reads
+   * the segment's `nudgedOn` (the stored date) and `hasReminder` its `nudged` state; both are the
+   * bar pass's, never recomputed here.
+   */
+  const facetsByRow = React.useMemo(() => {
+    const m = new Map<string, RowFacets>();
+    for (const r of oneList) {
+      const segs = barsByRow.get(r.key)?.segs ?? [];
+      m.set(r.key, rowFacets({
+        isTask: r.group === null,
+        isClosed: r.group === "closed",
+        status: r.status,
+        isUrgent: segs.some((sg) => sg.owed) || segs.some((sg) => sg.state === "quiet"),
+        isQuiet: segs.some((sg) => sg.state === "ghost"),
+        hasReminder: segs.some((sg) => sg.state === "nudged"),
+        wasNudged: segs.some((sg) => sg.nudgedOn != null),
+        writerHolds: segs.some((sg) => sideOf(sg.status) === "yours"),
+        nextDatedIn: r.pressingAt == null || r.pressingAt >= 8.64e15
+          ? null : Math.floor((r.pressingAt - now) / 86400000),
+        daysSinceActive: Number.isFinite(r.lastActiveAt)
+          ? Math.floor((now - r.lastActiveAt) / 86400000) : null,
+      }));
+    }
     return m;
-  }, [sectioned]);
+  }, [oneList, barsByRow, now]);
+
+  /* ⚠️ `secOfRow` IS DELETED — its two readers (the action grouping, the views filter) are both
+     retired by v64. */
 
   /* ⚠️ THE FILTER IS APPLIED TO THE DRAWN GROUPS AND NOWHERE ELSE. `sectioned` stays the whole
      board, so the sidebar's counts are a census however many groups are on screen — a tally that
      changed as you filtered it could not be added up. */
   const shownSections = React.useMemo(
-    () => (secFilter === null ? sectioned : sectioned.filter((g) => g.sec === secFilter)),
-    [sectioned, secFilter],
+    () => sectioned,
+    [sectioned],
   );
 
   /**
@@ -2327,7 +2218,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     /* ⚠️ THE STATUS FILTER NARROWS WHAT IS DRAWN AND NOT WHAT IS COUNTED. `sectioned` stays the
        whole board, so the sidebar's census still adds up; the toolbar states its own row count for
        exactly this reason — two numbers answering two questions, with the second one named. */
-    const keep = (r: TimelineRow) => matchesStatus(statusPick, r.status);
+    /* ⚠️ THE FILTER IS THE FACET MODEL. A row is hidden if ANY facet it carries is unticked —
+       `rowPasses`, the same function the census reads, so the two cannot disagree. */
+    const keep = (r: TimelineRow) => {
+      const fx = facetsByRow.get(r.key);
+      return fx ? rowPasses(fx, facetOff) : true;
+    };
 
     if (groupBy === "urgency") {
       return shownSections
@@ -2352,8 +2248,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      * flattened — and the composition was wrong, which is why no unit lock could see it. Reading
      * `oneList` and filtering by the row's own section preserves the sort exactly.
      */
-    const flat = oneList.filter((r) => (secFilter === null || secOfRow.get(r.key) === secFilter))
-      .filter(keep);
+    const flat = oneList.filter(keep);
 
     if (groupBy === "none") {
       /* ⚠️ ONE GROUP, NOT ZERO. The rows still need the container that carries the number column
@@ -2385,34 +2280,27 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       return out;
     }
 
-    const byAct = new Map<ActionBucket, TimelineRow[]>();
+    /* ⚠️ WHOSE MOVE (v64) — four buckets from the row's own move facet. `action` is retired: it
+       approximated this question from the urgency partition; the facet answers it directly. */
+    const byMove = new Map<string, TimelineRow[]>();
     for (const r of flat) {
-      const b = actionBucketOf(secOfRow.get(r.key) ?? "with");
-      const l = byAct.get(b); if (l) l.push(r); else byAct.set(b, [r]);
+      const fx = facetsByRow.get(r.key);
+      const b = fx ? moveGroupOf(fx) : "them";
+      const l = byMove.get(b); if (l) l.push(r); else byMove.set(b, [r]);
     }
-    /* one bucket to one section's tone, so the tint keeps meaning what it means elsewhere */
-    const ACT_TONE: Record<ActionBucket, CalSection> = {
-      required: "over", upcoming: "need", nothing: "with", closed: "shut",
-    };
-    const ACT_PURPOSE: Record<ActionBucket, string> = {
-      required: "waiting on you",
-      upcoming: "coming up",
-      nothing: "nothing to do yet",
-      closed: "no longer running",
-    };
-    return ACTION_ORDER
-      .filter((b) => byAct.has(b))
+    /* the tint keeps meaning what it means elsewhere: your move wears the urgent family's tone,
+       the agency's the waiting tone, an offer the offer's, closed the closed's */
+    const MOVE_TONE: Record<string, CalSection> = { you: "over", them: "with", offer: "need", shut: "shut" };
+    return MOVE_GROUP_ORDER
+      .filter((b) => byMove.has(b))
       .map((b) => ({
-        key: `ac:${b}`, tone: ACT_TONE[b], label: ACTION_LABEL[b], purpose: ACT_PURPOSE[b],
-        rows: byAct.get(b) ?? [],
+        key: `mv:${b}`, tone: MOVE_TONE[b] ?? null, label: MOVE_GROUP_LABEL[b], purpose: null,
+        rows: byMove.get(b) ?? [],
       }));
-  }, [shownSections, oneList, secFilter, groupBy, statusPick, secOfRow]);
+  }, [shownSections, oneList, groupBy, facetOff, facetsByRow]);
 
-  /** how many rows are actually on the board — the toolbar's own count, and the ref's `N rows` */
-  const drawnCount = React.useMemo(
-    () => drawnGroups.reduce((n, g) => n + g.rows.length, 0),
-    [drawnGroups],
-  );
+  /* ⚠️ `drawnCount` IS DELETED WITH THE COUNT LINE (v64 §E: "no count line"). The filter row's
+     `N hidden` is the sidebar's one live figure. */
 
   /**
    * ⚠️ THE ROW NUMBERS RUN CONTINUOUSLY ACROSS SECTIONS, so the column is a census of the board
@@ -2477,7 +2365,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     /* ⚠️ IT NAMES THE TOOLBAR'S SETTINGS, NOT THE TWO DEAD KNOBS IT USED TO. `groupMode` and
        `view.sort` were both stuck at their defaults with no control on the page, so two of the
        four clauses could never fire — a summary of settings nobody could change. */
-    groupBy === "urgency" ? "" : GROUP_BY_LABEL[groupBy],
+    groupBy === "urgency" ? ""
+      : groupBy === "move" ? "Whose move" : groupBy === "status" ? "Status" : "No grouping",
     sortBy === "urgency" ? "" : SORT_BY_LABEL[sortBy],
     sortRev ? "Reversed" : "",
     cutNow === "ms" ? "By book" : "",
@@ -2512,116 +2401,142 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * start to a remembered value: the centre is what "today's window" MEANS, and a start-based
    * check would call a window that had moved and come back a different one.
    */
+  /* ⚠️ THE HEADLINE SAYS THE MONTHS IN FULL AND THE YEAR ONCE — "19 July – 17 October 2026", the
+     ref's own text. `shortCalDate` abbreviates for cells; a 24px Playfair headline has the room,
+     and the year belongs at the end unless the window spans two, when each end carries its own. */
   const windowRangeLabel = React.useMemo(() => {
     const a = visible[0], b = visible[visible.length - 1];
-    return a && b ? `${shortCalDate(a)} – ${shortCalDate(b)}` : "";
+    if (!a || !b) return "";
+    const d = (ymd: string) => {
+      const [y, m, dd] = ymd.split("-").map(Number);
+      return { y, txt: `${dd} ${new Date(y, m - 1, dd).toLocaleString("en-GB", { month: "long" })}` };
+    };
+    const A = d(a), B = d(b);
+    return A.y === B.y ? `${A.txt} – ${B.txt} ${B.y}` : `${A.txt} ${A.y} – ${B.txt} ${B.y}`;
   }, [visible]);
   const movedOffToday = todayAt == null
     || Math.abs(todayAt - (range.days - 1) / 2) > 0.51;
 
-  /**
-   * ⚠️ THE FOUR FIGURES COME FROM THE SECTIONS, NOT FROM A SECOND PASS OVER THE DATA. The views
-   * list above states the same counts; deriving these separately is how a sidebar comes to hold two
-   * descriptions of one board — the fault this file has already recorded against tabs and dividers.
-   */
-  const glance = React.useMemo(() => {
-    const n = (sec: CalSection) => sectioned.find((g) => g.sec === sec)?.rows.length ?? 0;
-    return {
-      open: n("over") + n("need") + n("with") + n("quiet"),
-      urgent: n("over"),
-      withAgents: n("with"),
-      tasks: n("task"),
-    };
-  }, [sectioned]);
+  /* ⚠️ `glance` IS DELETED WITH ITS TILES (v64 §E) — a derivation kept alive for a surface that no
+     longer renders is what a later reader resurrects by accident. */
 
   const sidebar = (
     <>
-      {/* ══ 1 · SEARCH ══════════════════════════════════════════════════════════════════════ */}
-      <div className="abl">
-        <input className="tl-search" type="search" value={view.search}
-          aria-label="Search agents or agencies"
-          placeholder="Search agents or agencies"
-          onChange={(e) => setView1("search", e.target.value)} />
-      </div>
-
-      {/* ══ 2 · WINDOW ══════════════════════════════════════════════════════════════════════
-          ⚠️ THE PILL'S CENTRE IS THE LIVE RANGE, NOT THE WORD "WINDOW". Three buttons labelled
-          ‹ TODAY › say what they do and never say where you are; the dates say both — and once
-          they stop reading as today's window, the way back has to be offered rather than
-          remembered, which is what the link below is for.
-          ⚠️ AND IT APPEARS ONLY WHEN IT HAS SOMETHING TO UNDO. A permanent "Back to today" on a
-          board already showing today is a control that does nothing, which teaches a reader to
-          ignore it for the one moment it matters. */}
-      <div className="abl">
-        <div className="railnav">
-          <button type="button" className="tl-btn" aria-label="Previous window"
-            onClick={() => setWinStart((w) => shiftWindow(w, WEEK_STEP, -1))}>‹</button>
-          <span className="wl">{windowRangeLabel}</span>
-          <button type="button" className="tl-btn" aria-label="Next window"
-            onClick={() => setWinStart((w) => shiftWindow(w, WEEK_STEP, 1))}>›</button>
-        </div>
-        {movedOffToday && (
-          <button type="button" className="backtoday" onClick={() => setWinStart(today)}>
-            Back to today
-          </button>
+      {/* ⚠️ SEARCH AND THE WINDOW LIVE IN THE WINBAR NOW (v64 §B) — one home each. The sidebar is
+          Group · Filter · Sort and nothing else; §E rebuilds it as the Notion panel. */}
+      {/* ⚠️ THE VIEWS LIST IS RETIRED (v64 §E) — the sidebar is Group · Filter · Sort and nothing
+          else. What the views did survives twice over: the ATTENTION grouping is the same six-way
+          partition as headings, and the filter's facets narrow to any one class and to
+          intersections the views never could. `secFilter` is retired with its only control. */}
+      {/* ══ THE NOTION PANEL (v64 §E) ═══════════════════════════════════════════════════════
+          ⚠️ THREE ROWS — Group · Filter · Sort — each a label with its value at the right and a
+          chevron that expands it INLINE. Group and Sort are open at rest (`data-side="open"`);
+          Filter is closed, and its row carries the one live figure: `N hidden` in rose, with a
+          Clear link, whenever anything is off. The interim TbMenus this replaces were the v63
+          toolbar's, parked here by §B so no control was homeless between commits. */}
+      <div className="abl tl-np" role="group" aria-label="Board controls">
+        {/* ── Group ── */}
+        <button type="button" className={`tl-pr${prOpen.g ? " open" : ""}`}
+          aria-expanded={prOpen.g}
+          onClick={() => setPrOpen((c) => ({ ...c, g: !c.g }))}>
+          <span className="tl-prchev" aria-hidden>›</span>Group
+          <span className="tl-prv">{
+            groupBy === "urgency" ? "Attention" : groupBy === "move" ? "Whose move"
+              : groupBy === "status" ? "Status" : "None"}</span>
+        </button>
+        {prOpen.g && (
+          <div className="tl-px" role="radiogroup" aria-label="Group rows by">
+            {([["urgency", "Attention"], ["move", "Whose move"], ["status", "Status"],
+               ["none", "None"]] as const).map(([k, lab]) => (
+              <button key={k} type="button" role="radio" aria-checked={groupBy === k}
+                data-on={groupBy === k || undefined}
+                onClick={() => setGroupBy(k)}>
+                <span className="tl-rad" aria-hidden />{lab}
+              </button>
+            ))}
+          </div>
+        )}
+        {/* ── Filter ── */}
+        <button type="button" className={`tl-pr${prOpen.f ? " open" : ""}`}
+          aria-expanded={prOpen.f}
+          onClick={() => setPrOpen((c) => ({ ...c, f: !c.f }))}>
+          <span className="tl-prchev" aria-hidden>›</span>Filter
+          <span className={`tl-prv${hiddenCount(facetOff) ? " act" : ""}`}>
+            {hiddenCount(facetOff) ? `${hiddenCount(facetOff)} hidden` : "All"}
+          </span>
+          {hiddenCount(facetOff) > 0 && (
+            <span className="tl-prclr" role="button" tabIndex={0}
+              onClick={(e) => { e.stopPropagation(); setFacetOff(emptyOff()); }}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault(); e.stopPropagation(); setFacetOff(emptyOff()); } }}>
+              Clear
+            </span>
+          )}
+        </button>
+        {prOpen.f && (
+          <div className="tl-px">
+            {FACET_SECTIONS.map((sec) => (
+              <React.Fragment key={sec.key}>
+                <div className="tl-fh2">
+                  {sec.label}
+                  <a role="button" tabIndex={0}
+                    onClick={() => setFacetOff((c) => ({ ...c, [sec.key]: new Set() }))}>All</a>
+                  <a role="button" tabIndex={0}
+                    onClick={() => setFacetOff((c) => ({ ...c,
+                      [sec.key]: new Set(sec.options.map((o) => o.key)) }))}>None</a>
+                </div>
+                {sec.options.map((o) => {
+                  const off = facetOff[sec.key].has(o.key);
+                  /* ⚠️ THE COUNT IS A CENSUS OF THE WHOLE BOARD — how many rows CARRY the option,
+                     from the same `rowCarries` the hide rule reads, unmoved by what is ticked. */
+                  const n = oneList.filter((r) => {
+                    const fx = facetsByRow.get(r.key);
+                    return fx ? rowCarries(fx, sec.key, o.key) : false;
+                  }).length;
+                  return (
+                    <button key={o.key} type="button" role="checkbox" aria-checked={!off}
+                      data-on={!off || undefined}
+                      onClick={() => setFacetOff((c) => {
+                        const next = new Set(c[sec.key]);
+                        if (next.has(o.key)) next.delete(o.key); else next.add(o.key);
+                        return { ...c, [sec.key]: next };
+                      })}>
+                      <span className="tl-bx" aria-hidden />{o.label}
+                      <b>{String(n).padStart(2, "0")}</b>
+                    </button>
+                  );
+                })}
+              </React.Fragment>
+            ))}
+          </div>
+        )}
+        {/* ── Sort ── */}
+        <button type="button" className={`tl-pr${prOpen.s ? " open" : ""}`}
+          aria-expanded={prOpen.s}
+          onClick={() => setPrOpen((c) => ({ ...c, s: !c.s }))}>
+          <span className="tl-prchev" aria-hidden>›</span>Sort
+          <span className="tl-prv">{SORT_BY_LABEL[sortBy]}</span>
+        </button>
+        {prOpen.s && (
+          <div className="tl-px" role="radiogroup" aria-label="Sort rows by">
+            {SORT_BY_ORDER.map((k) => (
+              <button key={k} type="button" role="radio" aria-checked={sortBy === k}
+                data-on={sortBy === k || undefined}
+                onClick={() => setSortBy(k)}>
+                <span className="tl-rad" aria-hidden />{SORT_BY_LABEL[k]}
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
-      {/* ══ 3 · VIEWS ═══════════════════════════════════════════════════════════════════════
-          ⚠️ ONE LIST, SINGLE-SELECT, AND ITS COUNTS ARE A CENSUS. Every row states how many rows
-          that class holds over the WHOLE board, so the numbers can be added up — a tally that
-          changed as you clicked it is the fault the retired tab strip had. */}
-      <div className="abl grow">
-        <span className="slbl">Views</span>
-        <button type="button" className={`gpill${secFilter === null ? " on" : ""}`}
-          aria-pressed={secFilter === null} onClick={() => setSecFilter(null)}>
-          <span>All</span>
-          <b>{String(sectioned.reduce((n, g) => n + g.rows.length, 0)).padStart(2, "0")}</b>
-        </button>
-        {CAL_SECTION_DRAW.map((sec) => {
-          const g = sectioned.find((x) => x.sec === sec);
-          if (!g) return null;
-          return (
-            <button key={sec} type="button" className={`gpill${secFilter === sec ? " on" : ""}`}
-              data-sec={sec} aria-pressed={secFilter === sec}
-              onClick={() => setSecFilter((c) => (c === sec ? null : sec))}>
-              <SectionIcon sec={sec} />
-              {/* the VIEW's name — see `CAL_SECTION_VIEW`; the group bar uses `CAL_SECTION_LABEL` */}
-              <span>{CAL_SECTION_VIEW[sec]}</span>
-              <b>{String(g.rows.length).padStart(2, "0")}</b>
-            </button>
-          );
-        })}
-      </div>
+      {/* ⚠️ THE DISPLAY MENU IS GONE FROM THE SIDEBAR (v64 §B) — density is the winbar's segmented
+          toggle now. The rule that put it here (a knob ships with a control) is satisfied by the
+          new home, not repealed. */}
 
-      {/* ══ 4 · AT A GLANCE ═════════════════════════════════════════════════════════════════
-          ⚠️ FOUR FIGURES, AND ONE OF THEM IS ROSE. They are derived from the same row set the
-          views count, so the sidebar cannot state two different boards; "need you now" takes the
-          rose because it is the only one of the four that is asking for something. */}
-      {/* ══ DISPLAY — three densities (v63, §D) ═══════════════════════════════════════════
-          ⚠️ IT SHIPS WITH A CONTROL OR IT DOES NOT SHIP. Three `--row-h`/`--bar-h` pairs behind no
-          control is a knob nothing can turn, which is the exact fault this session has retired
-          twice already (`groupMode`, `view.sort`). The attribute goes on `.tl-board`, which is
-          where every other token on this page is declared. */}
-      <div className="abl">
-        <TbMenu label="Display density" open={densOpen} onOpen={setDensOpen}
-          trigger={<><span className="tl-tbk">Display</span>{DENSITY_LABEL[density]}</>}>
-          {(["comfortable", "regular", "compact"] as const).map((d) => (
-            <TbOpt key={d} mark="tick" on={d === density}
-              onClick={() => { setDensity(d); setDensOpen(false); }}>{DENSITY_LABEL[d]}</TbOpt>
-          ))}
-        </TbMenu>
-      </div>
-
-      <div className="sbx stats">
-        <div className="sbh"><span className="t">At a glance</span></div>
-        <div className="st">
-          <div><b>{glance.open}</b><small>Open queries</small></div>
-          <div className="r"><b>{glance.urgent}</b><small>Need you now</small></div>
-          <div><b>{glance.withAgents}</b><small>With agents</small></div>
-          <div><b>{glance.tasks}</b><small>Tasks</small></div>
-        </div>
-      </div>
+      {/* ⚠️ AT A GLANCE IS RETIRED FROM THE SIDEBAR (v64 §E). Its four figures were a census the
+          filter's own counts now state per option, from the same facets — two tallies of one board
+          is the fault the views and the dividers already retired once. */}
     </>
   );
 
@@ -3199,13 +3114,27 @@ data-rowkey={r.key}
           title="Calendar"
           mark="calendar"
           tools={
-            /* ⚠️ EMPTY (v61). Every control that lived here — the tabs, the pager, Display,
-               search, the count and Add — is in the sidebar now. A tools row above a board that
-               needs all its width was five controls competing with the thing they control, and
-               the page read as a strip of chrome over a stack of panels. `TplTools` still
-               renders the row's structure; what it holds is nothing, deliberately, rather than
-               the prop being dropped and the page's header losing its slot. */
-            <></>
+            /* ⚠️ THE PAGE'S ACTION STRIP (v64 §A1) — three actions, in the masthead's own slot,
+               which the header session owns; this page only fills it. v61 emptied this row because
+               it held five VIEW controls competing with the board; these three are DOORS, not view
+               state, which is why the row comes back for them and for nothing else.
+
+               ⚠️ ALL THREE NAVIGATE. The task and note composers are page-local state on /todo and
+               the Noteboard — no route opens them, and those files are another session's to change.
+               So "Add a task" lands on the To-do list (its composer is the first control on it) and
+               "Add a note" on the Noteboard's. A deep-open is a one-line follow-up WHEN a route
+               exists; inventing one here would be a second entry to another page's state. */
+            <>
+              <button type="button" className="tl-btn" onClick={() => onNavigatePath("/todo")}>
+                ＋ Add a task
+              </button>
+              <button type="button" className="tl-btn" onClick={() => onNavigatePath("/todo/noteboard")}>
+                ＋ Add a note
+              </button>
+              <button type="button" className="tl-btn" onClick={() => onNavigatePath("/todo")}>
+                Go to to-do list ›
+              </button>
+            </>
           }
         >
           {/* ⚠️ ONE STATE OR THE OTHER, NEVER BOTH ON SCREEN. Acting collapses the board to a day's
@@ -3247,88 +3176,42 @@ data-rowkey={r.key}
           <div className="tl-cal tl-board" data-dens={density}>
             <aside className="tl-axis" aria-label="Calendar controls">{sidebar}</aside>
             <div className="tl-boardpane">
-            {/* ══ THE BOARD TOOLBAR (v63, section C) ═══════════════════════════════════════════
-                ⚠️ IT ASKS A DIFFERENT QUESTION FROM THE SIDEBAR AND SITS IN A DIFFERENT PANE.
-                The sidebar's views choose WHICH rows; this chooses how the survivors are grouped,
-                ordered and narrowed. Both can be set at once without either being a second copy of
-                the other — which is why this row states its OWN count: the sidebar's numbers are a
-                census of the whole board and this one is how many are actually drawn. Two numbers,
-                two questions, and the second one is named so they cannot be confused. */}
+            {/* ══ THE WINBAR (v64 §B) ═══════════════════════════════════════════════════════════
+                ⚠️ THE ONE HOME FOR THE WINDOW, THE SEARCH AND THE DENSITY — and the v63 toolbar is
+                DELETED, its Group/Sort/Status menus moved to the sidebar. The range is a headline
+                because it is the page's one orienting fact; the chevrons flank it so the control
+                and the thing it changes are one object.
+
+                ⚠️ STEPPING IS INSTANT (`data-anim="none"`). A window step is a change of subject,
+                not a movement of the camera — `shiftWindow` swaps the day list and everything
+                re-derives; nothing here animates, and lock (c) measures that nothing does. */}
             {board.length > 0 && (
-              <div className="tl-vtool">
-                <TbMenu label="Group rows by" open={tbOpen === "group"}
-                  onOpen={(v) => setTbOpen(v ? "group" : null)}
-                  trigger={<><span className="tl-tbk">Group</span>{GROUP_BY_LABEL[groupBy]}</>}>
-                  {GROUP_BY_ORDER.map((g) => (
-                    <TbOpt key={g} mark="tick" on={g === groupBy}
-                      onClick={() => { setGroupBy(g); setTbOpen(null); }}>{GROUP_BY_LABEL[g]}</TbOpt>
-                  ))}
-                </TbMenu>
-
-                <TbMenu label="Sort rows by" open={tbOpen === "sort"}
-                  onOpen={(v) => setTbOpen(v ? "sort" : null)}
-                  trigger={<><span className="tl-tbk">Sort</span>{SORT_BY_LABEL[sortBy]}</>}>
-                  {SORT_BY_ORDER.map((k) => (
-                    <TbOpt key={k} mark="tick" on={k === sortBy}
-                      onClick={() => { setSortBy(k); setTbOpen(null); }}>{SORT_BY_LABEL[k]}</TbOpt>
-                  ))}
-                  {/* ⚠️ THE DIRECTION IS A CHECKBOX BESIDE THE KEYS, NOT A FIFTH KEY. It applies to
-                      whichever key is on, so listing it as an option would make it exclusive with
-                      the thing it modifies. */}
-                  <div className="tl-ddfoot">
-                    <TbOpt mark="box" on={sortRev} onClick={() => setSortRev((v) => !v)}>
-                      Reverse order
-                    </TbOpt>
-                  </div>
-                  <div className="tl-ddfoot">
-                    <button type="button" className="tl-ddlink"
-                      onClick={() => { setSortBy("urgency"); setSortRev(false); setTbOpen(null); }}>
-                      Reset sort
+              <div className="tl-winbar">
+                <div className="tl-wleft">
+                  <button type="button" className="tl-wchv" aria-label="Back one week"
+                    onClick={() => setWinStart((w) => shiftWindow(w, WEEK_STEP, -1))}>‹</button>
+                  <span className="tl-rng">{windowRangeLabel}</span>
+                  <button type="button" className="tl-wchv" aria-label="Forward one week"
+                    onClick={() => setWinStart((w) => shiftWindow(w, WEEK_STEP, 1))}>›</button>
+                  {/* ⚠️ ONLY ONCE THE WINDOW HAS MOVED — a Today link beside a board already
+                      showing today is a control that does nothing. */}
+                  {movedOffToday && (
+                    <button type="button" className="tl-todaylink" onClick={() => setWinStart(today)}>
+                      Today
                     </button>
-                  </div>
-                </TbMenu>
-
-                <TbMenu label="Filter by status" open={tbOpen === "status"}
-                  onOpen={(v) => setTbOpen(v ? "status" : null)}
-                  trigger={<>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
-                      strokeLinecap="round" aria-hidden><path d="M4 6h16M7 12h10M10 18h4" /></svg>
-                    Status
-                    {/* the badge counts what is TICKED, and is absent at zero rather than reading 0 */}
-                    {statusPick.length > 0 && <span className="tl-tbbadge">{statusPick.length}</span>}
-                  </>}>
-                  {/* ⚠️ TEN OPTIONS, IN THE APP'S OWN NAMES — a deviation from the ref, recorded.
-                      The ref lists nine: it abbreviates `Revise & Resubmit` to `R&R` and folds
-                      `Rejected` and `Withdrawn` into one `Closed`. Both are a mockup's convenience.
-                      Folding two statuses into one option makes them unfilterable apart, and this
-                      app's own law is that a `QueryStatus` is written and read as its exact enum
-                      string — a filter naming `R&R` names a status the data does not contain. */}
-                  {STATUS_LADDER.map((st) => (
-                    <TbOpt key={st} mark="box" on={statusPick.includes(st)}
-                      onClick={() => setStatusPick((cur) =>
-                        cur.includes(st) ? cur.filter((x) => x !== st) : [...cur, st])}>
-                      {st}
-                    </TbOpt>
-                  ))}
-                  {statusPick.length > 0 && (
-                    <div className="tl-ddfoot">
-                      <button type="button" className="tl-ddlink" onClick={() => setStatusPick([])}>
-                        Clear all
-                      </button>
-                    </div>
                   )}
-                </TbMenu>
-
-                {/* ⚠️ `Clear all` IS PRESENT ONLY WHEN IT HAS SOMETHING TO CLEAR — the same rule
-                    `Back to today` follows. A control that is always there and usually does nothing
-                    teaches a reader to ignore it for the one moment it matters. */}
-                {anythingApplied({ view: secFilter, statuses: statusPick }) && (
-                  <button type="button" className="tl-tbclear"
-                    onClick={() => { setSecFilter(null); setStatusPick([]); }}>
-                    Clear all
-                  </button>
-                )}
-                <span className="tl-tbcnt">{drawnCount} {drawnCount === 1 ? "row" : "rows"}</span>
+                </div>
+                <input className="tl-search" type="search" value={view.search}
+                  aria-label="Search agents or agencies"
+                  placeholder="Search agents or agencies"
+                  onChange={(e) => setView1("search", e.target.value)} />
+                <div className="tl-dseg" role="group" aria-label="Density">
+                  {(["comfortable", "compact"] as const).map((d) => (
+                    <button key={d} type="button" data-on={d === density}
+                      aria-pressed={d === density}
+                      onClick={() => setDensity(d)}>{DENSITY_LABEL[d]}</button>
+                  ))}
+                </div>
               </div>
             )}
             <TplZone className="tl-zone" hem={false} label={range.label}>
@@ -3417,6 +3300,16 @@ data-rowkey={r.key}
                     left, and anything that changed the rail's height moved the rows under it. Here
                     the rail is outside the scrolling box and cannot be reached by it at all. */}
                 <div className="tl-rows">
+                {/* ⚠️ `.tl-rowsin` EXISTS FOR THE TODAY LINE (v64 §C). In a scroller, an absolutely
+                    positioned child's `bottom: 0` resolves against the SCROLLPORT, not the content
+                    — so a line meant to run the content height needs an inner wrapper that IS the
+                    content height. The line is its child at a percentage left: the same fraction
+                    the bars use, no measurement, and it scrolls with the rows by construction. */}
+                <div className="tl-rowsin">
+                {todayAt != null && (
+                  <div className="tl-todayline" aria-hidden
+                    style={{ left: `${((todayAt / range.days) * 100).toFixed(4)}%` }} />
+                )}
                 {board.length === 0 ? sparse : (
                   /* ══ SIX SECTIONS, EACH A CONTAINER (v60) ═══════════════════════════════════
                      ⚠️ THE SECTION REPLACES BOTH EARLIER SHAPES — v58's single bare list and the
@@ -3484,21 +3377,17 @@ data-rowkey={r.key}
                   ))
                 )}
                 </div>
+                </div>
                 {/* ⚠️ THE OLD GROUPED BLOCK AND THE BARE ONE LIST ARE BOTH DELETED, NOT LEFT
                     BEHIND A FALSE GUARD. v60's sections replace them; a replacement that is
                     ADDED leaves the original reachable, and this repo has paid for that three
                     times in one build. `board` still feeds the tab counts and the manuscript
                     cut, which is why the derivation survives and only its render is gone. */}
-                {/* ⚠️ TODAY, THE CROSSHAIR AND THE ONE TOOLTIP ARE ALL CHILDREN OF THE WRAP, never
-                    of a lane — a lane clips, and a clipping ancestor beats any z-index. */}
-                {todayAt != null && (
-                  <>
-                    <div className="tl-todayline" style={{ left: todayLeft }} aria-hidden />
-                    <div className="tl-todayflag" style={{ left: todayLeft }} aria-hidden>
-                      {shortCalDate(today)}
-                    </div>
-                  </>
-                )}
+                {/* ⚠️ THE TODAY LINE LIVES IN THE ROWS NOW (v64 §C) — rendered inside
+                    `.tl-rowsin`, so it begins at the first row, runs the content height, and never
+                    crosses the date row or the winbar. The flag went with it: `display: none`
+                    furniture whose render outlived its rule. The crosshair stays a wrap child —
+                    it must span the rail and rows, which is its job. */}
                 {/* the action's receipt — what was pressed, never a claim the work is done */}
                 {actToast && <div className="tl-acttoast" role="status">{actToast}</div>}
                 {cross && (
