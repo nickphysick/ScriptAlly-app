@@ -1112,14 +1112,7 @@
   text-transform: uppercase; color: var(--tl-label); margin-top: 2px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-/* ⚠️ THE SAME BOX AS THE `StatusDot` BESIDE IT (`ROW_DOT`, 18px). The pinned row holds no query,
-   so it keeps a square rather than a dot invented for it — but a smaller box would start its name
-   at a different x and the head would read as two columns. */
-.tl-sd { width: 18px; height: 18px; border-radius: 50%; flex: 0 0 auto; border: 1.5px solid var(--tl-nearblack); }
-.tl-sd[data-dot="you"] { background: var(--tl-nearblack); }
-.tl-sd[data-dot="them"] { background: #f8e2d9; }
-.tl-sd[data-dot="quiet"] { background: transparent; border-color: #d3c4b3; }
-.tl-sd[data-dot="self"] { border-radius: 3px; background: transparent; }
+
 .tl-rrow.closed .tl-c-nm { opacity: .62; }
 
 /* ⚠️ THE ROW'S NAME IS A BUTTON, AND IT MUST NOT LOOK LIKE ONE. It opens the relationship's
@@ -1131,9 +1124,6 @@
 }
 .tl-nmbtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
 
-/* the collapsed day column's own name and agency — a different surface, and it keeps its own
-   treatment because it is a list of everyone rather than a row of the board */
-.tl-nmtxt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .tl-ag {
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px; letter-spacing: 0.13em;
   text-transform: uppercase; color: var(--tl-label, #9c8878); margin-top: 2px;
@@ -1230,14 +1220,10 @@
    date is the one thing the card's position states. `--hx` is its resting `--l` except where
    opening rightwards would run past the lane, in which case the fit pass slides it left by the
    minimum needed and the card's RIGHT edge lands inside the lane instead. */
-/* ⚠️ `.tl-force-open` IS THE MEASUREMENT'S HOOK AND CARRIES NO STYLE OF ITS OWN. Playwright's
-   `hover` moves a real pointer, which a neighbouring card's own hover then steals; the class puts
-   the card in the SAME state the hover rule produces without a pointer being anywhere. */
-.tl-p[data-tight]:hover,
-.tl-p[data-tight]:focus-visible,
-.tl-p[data-tight].tl-force-open {
-  width: var(--exp, var(--w)); left: var(--hx, var(--l)); z-index: 20;
-}
+/* ⚠️ THE HOVER-WIDEN IS RETIRED (v65 §A/§B, with the inline expand). Hover changes NOTHING but
+   the bar's transform, the action and the symbol; a bar too tight for its words says what fits
+   and the CLICK card says the rest. `--exp`/`--hx`, `data-tight` and `.tl-force-open` go with
+   it. */
 /* ⚠️ THE SOFT EDGE IS ON THE TEXT'S OWN WRAPPER AND ONLY WHILE IT IS CLIPPED. It is a different
    mask from the frame's: the frame's says the CARD is cut by the window, this says the WORDS run
    past the card. An opened card is not clipped, so it carries neither. */
@@ -1245,7 +1231,6 @@
    for it to open to. The headline and the pill never drop: whose move it is and what this is are
    the two things a card exists to say, and v40's ladder removed both on sixteen of twenty-three
    cards at six months. */
-.tl-p[data-nodetail] .tl-cdt, .tl-p[data-nodetail] .tl-csep { display: none; }
 /* ⚠️ THE SOFT EDGE ON THE WORDS IS GONE (v60, Law 2 — "a mask must never sit on a text-bearing
    element"). v55 read that law as being about the CARD and moved the mask down to the text
    container, which satisfied the letter and not the point: `.tl-content` holds the headline and the
@@ -1253,7 +1238,6 @@
    the clip is a hard cut — `overflow: hidden` on the container, with the overflow revealed by the
    hover glide. Law 10 says the same thing from the other side: show what fits, CUT OFF, never blank
    a card and never hide a fragment. */
-.tl-p[data-tight] .tl-content { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .tl-p { transition: none; }
 }
@@ -1296,18 +1280,7 @@
 }
 /* ⚠️ A COLUMN, SO THE PILL AND THE HEADLINE SHARE ONE LEFT EDGE. `align-self: flex-start` keeps
    the pill its own width without stretching it across the card. */
-/* ⚠️ `tl-cbody`, NOT `tl-body` — THE NAME WAS ALREADY TAKEN, AND THIS IS THE THIRD TIME.
-   ⚠️ AND THIS COMMENT DID NOT STOP IT HAPPENING AGAIN, SEVEN HUNDRED LINES BELOW ITSELF. v58 named
-   the card's body `.tl-body` — the exact name forbidden here, in this file, by this paragraph — and
-   `calendarTokens.test.ts`'s class-ownership sweep went red and was left red. That is this repo's
-   own law twice over: a comment is not a guard, and a red lock is worth nothing while it is being
-   stepped over. The body is `.tl-cardbody` now; the LOCK is what keeps it that way.
-   `f12.css` declares `.tl-cardbody` for the Query Centre's timeline, with `margin-top: 7px` and
-   `> * + * { margin-top: 9px }`. Both sheets ship in one bundle, so the calendar's new column
-   inherited 16px of vertical space it never asked for and every card's headline fell out of its
-   bottom edge. v54 hit the identical trap with `.tl-dt` and `.tl-sep` and adopted the `tl-c…`
-   prefix for it; this is that convention being used rather than rediscovered. */
-.tl-cbody { display: flex; flex-direction: column; gap: 5px; white-space: nowrap; min-width: 0; }
+
 .tl-pill { align-self: flex-start; }
 
 /* ⚠️ THE CONTENT'S INSET IS A PER-CARD VALUE NOW, because a card has to clear its own marks. It
@@ -1672,13 +1645,7 @@ button.tl-tchip { cursor: pointer; }
   font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .1em;
   padding: 2px 8px; border-radius: 999px; z-index: 52; pointer-events: none; white-space: nowrap;
 }
-.tl-tipp {
-  position: absolute; background: #fff; border: 1px solid var(--tl-hair);
-  box-shadow: 0 4px 14px rgba(58, 28, 20, .14); border-radius: 8px; padding: 6px 10px;
-  font-size: 10.5px; color: var(--tl-ink); white-space: nowrap; z-index: 20; pointer-events: none;
-  opacity: 0; transition: opacity .09s;
-}
-.tl-tipp.on { opacity: 1; }
+/* the hover tip (`.tl-tipp`) is retired (v65 §A) — hover mounts nothing */
 
 /* ══ THE EMPTY BOARD ═══════════════════════════════════════════════════════════════════════
  * ⚠️ NOT A FAILURE STATE. No apology and no prompt to do more — a writer with a quiet window is
@@ -1691,37 +1658,9 @@ button.tl-tchip { cursor: pointer; }
 .tl-sparse p { font-size: 12.5px; color: var(--tl-muted); max-width: 420px; margin: 0 auto; line-height: 1.55; }
 
 @media (prefers-reduced-motion: reduce) {
-  /* ⚠️ NOTHING ANIMATES ON THIS BOARD ANY MORE — the pulse retired when the fill arrived, because
-     position states what motion was straining to. This block keeps only the row's hover fade,
-     which is a state change rather than an attractor. */
-  .tl-rrow, .tl-tipp { transition: none; }
+  .tl-rrow { transition: none; }
 }
-
-/* ══ THE ACTION OVERLAY (finishing pack, Phase 6; ref calendar-month-focus-v5.html) ════════════
- *
- * ⚠️ ONLY THE WIDTH IS SCOPED, because everything else the pack asks for was already true.
- * `FocusFlow` is `role="dialog" aria-modal="true"` over a fixed scrim, centred by `.tdb-ffstage`,
- * scrolling in `.tdb-ffbody`, and closing on Escape and scrim-click. Rebuilding any of that here
- * would be a second implementation of a working one. The sheet is `min(860px, 92vw)` for the
- * To-do page's full-width takeover; from the calendar it should read as a WINDOW over the month.
- *
- * ⚠️ 430px IS A LIVE HOUSE WIDTH, not a number invented for this — `.tdb-sssum` in `todo.css` is
- * the same, and it is comfortably under the journey's own 640px container query, so the two-column
- * journey folds to one column here on its own. That fold is a CONTAINER query, so it answers to
- * this width rather than to the viewport, which is exactly why it works at any screen size.
- *
- * ⚠️ 0-3-0, DELIBERATELY. `.tdb-ffwrap .tdb-ffsheet` in `todo.css` is 0-2-0, so a `.cal-flow
- * .tdb-ffsheet` rule would TIE with it and be decided by which stylesheet the bundler happened to
- * put last — the page-versus-component cascade trap this repo already records. Three classes wins
- * outright and needs no `!important`.
- */
-.cal-flow .tdb-ffstage .tdb-ffwrap { width: min(430px, 92vw); }
-.cal-flow .tdb-ffstage .tdb-ffsheet { width: min(430px, 92vw); }
-/* ⚠️ THE BODY KEEPS ITS OWN SCROLL REGION; only the padding tightens for the narrower card. It
-   carries three classes for the same reason the two above do, even though its only competitor is
-   0-1-0 and two would win TODAY: a uniform rule is one someone can extend without re-deriving the
-   specificity argument, and this file's lock asserts the whole family rather than case by case. */
-.cal-flow .tdb-ffstage .tdb-ffbody { padding: 24px 22px 20px; }
+/* the FocusFlow window (`.cal-flow` width scoping) went with the flow itself (v65 §A) */
 
 /* ⚠️ THE PANE'S FLOATING WINDOW IS RETIRED (timeline pack, Phase 4) — `.cal-panescrim`,
    `.cal-panewin`, `.cal-panex` and `.cal-panescroll`. The pane is a COLUMN of the workspace now,
@@ -1730,7 +1669,7 @@ button.tl-tchip { cursor: pointer; }
    ⚠️ THE RULING THE SCRIM CARRIED IS NOT LOST, IT IS VACUOUS: "clicking the scrim never closes,
    because the pane holds answers the writer has typed". There is no scrim to click. Escape still
    leaves — which it always did — and it now returns to the week rather than closing a dialogue.
-   `.cal-flow` below is untouched: `FocusFlow` is still a modal and keeps its own behaviour. */
+   `.cal-flow` itself went with FocusFlow in v65 §A. */
 
 
 /* ══ WHAT SITS BELOW THE BOARD (timeline pack, Phase 4; ref timeline-week-ref.html, scheme C) ══
@@ -1784,129 +1723,12 @@ button.tl-tchip { cursor: pointer; }
 .tl-btn.primary { background: #f5e2da; border-color: #e8c8bc; color: #1c130f; }
 .tl-btn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
 
-/* ══ THE WORKSPACE ═════════════════════════════════════════════════════════════════════════ */
-
-.tl-split { display: grid; grid-template-columns: 352px minmax(0, 1fr); gap: 14px; flex: 1; min-height: 0; }
-.tl-col {
-  background: #fdfaf5; border: 1px solid #ece0d2; border-radius: 14px; overflow: hidden;
-  display: flex; flex-direction: column; min-height: 0;
-}
-.tl-colhd {
-  background: linear-gradient(135deg, #d7ddd5, #d5dbd3); border-bottom: 1px solid #ece0d2;
-  padding: 9px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px;
-  flex: none;
-}
-.tl-coldt {
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10px; font-weight: 500;
-  color: #3f4d3d; letter-spacing: 0.1em;
-}
-.tl-colbd { overflow-y: auto; min-height: 0; }
-.tl-crow {
-  display: flex; align-items: flex-start; gap: 10px; width: 100%; text-align: left;
-  padding: 10px 13px; border: 0; border-bottom: 1px solid #f0e9dd;
-  background: none; cursor: pointer;
-}
-.tl-crow:hover { background: #faf5ee; }
-/* ⚠️ EVERY AGENT STAYS LISTED AND THE REST DIM — the collapsed column is still the week's cast,
-   so the reader keeps the context they were working in. Dimming is opacity on the ROW, never a
-   filter that removes it: a row that vanished would say the relationship had. */
-.tl-crow.off { opacity: 0.3; }
-.tl-crow.on { background: #faf5f0; box-shadow: inset 2px 0 0 #1c130f; }
-.tl-cwho { flex: 1; min-width: 0; }
-.tl-cn {
-  font-family: "Playfair Display", Georgia, serif; font-size: 13.5px; font-weight: 500;
-  line-height: 1.3; display: flex; align-items: center; gap: 7px; min-width: 0; color: #2e2118;
-}
-.tl-cits { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 5px; }
-/* the mini chips are the board's grammar at rest — same kinds, same tones, no absolute position */
-.tl-mini {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 3px 8px; border-radius: 999px; font-size: 9.5px; font-weight: 600;
-  border: 1px solid transparent; max-width: 100%;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.tl-mini[data-kind="turn"] { background: #f8e2d9; border-color: #eecfc2; color: #7a3a28; }
-.tl-mini[data-kind="rec"] { background: #fff; border-color: #ece0d2; color: #6b5a4d; font-weight: 500; }
-.tl-mini[data-kind="task"] { background: #fff; border-color: #d9d0c4; color: #3f5a3d; }
-.tl-mini[data-kind="ghost"] { background: transparent; border: 1px dashed #d3c4b3; color: #a08f80; font-weight: 500; }
-.tl-mini[data-kind="wait"] { background: #e9ede6; border-color: #c9d6c5; color: #3f5a3d; font-weight: 500; }
-.tl-cempty {
-  margin-top: 6px;
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px;
-  letter-spacing: 0.12em; text-transform: uppercase; color: #c3b6a6;
-}
-
-.tl-ws {
-  background: #fff; border: 1px solid #ece0d2; border-top: 4px solid #8a9e88; border-radius: 4px;
-  display: flex; flex-direction: column; min-height: 0;
-}
-.tl-wshd {
-  padding: 13px 18px 11px; border-bottom: 1px solid #ece0d2; flex: none;
-  display: flex; justify-content: space-between; align-items: center; gap: 12px;
-}
-.tl-wsbd { overflow-y: auto; min-height: 0; padding: 16px 20px 20px; }
-/* ⚠️ WIDTH IS SPENT ON THE CONVERSATION — it is the only column that benefits from it. The pane
-   has a measure of its own (430 is a live house width, and the journey's container query folds
-   below 640 on its own), and the facts are short lines that do not read better wider. */
-.tl-two {
-  display: grid; grid-template-columns: 430px minmax(320px, 1fr) 300px;
-  gap: 26px; align-items: start;
-}
-.tl-do { min-width: 0; border: 1px solid #ece0d2; border-radius: 10px; overflow: hidden; background: #fff; }
-/**
- * ⚠️ THE PANE'S OWN TWO-COLUMN SPLIT IS FOLDED HERE, AND THE FAULT IT FIXES IS OLDER THAN THIS
- * PACK. `.tpn .ws` is `minmax(0, 1fr) 288px` unconditionally — no container query, no media query
- * — so in any mount narrower than about 600px the steps column is whatever is left. At the 440px
- * modal window the month grid used, that was ~140px: the fork's answers rendered one word per
- * line. It shipped that way and no assertion could see it, because every property was correct and
- * the fault was in the arrangement.
- *
- * ⚠️ IT WAS FOUND BY LOOKING, NOT BY MEASURING. The acceptance passed at all four widths — the
- * pane was 430 wide, exactly as specified — and the screenshot showed an unreadable column. That
- * is the standing reason a phase renders an image.
- *
- * ⚠️ 0-3-0, DELIBERATELY, and it is `.cal-flow`'s precedent applied to the same component. A
- * `.tl-do .ws` rule would be 0-2-0 and TIE with the component's own, leaving the winner to
- * whichever stylesheet the bundler happened to put last. Three classes wins outright and needs no
- * `!important`. The record card goes BELOW the steps, which is the choice the journey sheet's own
- * 640px fold already makes for the same reason: reference belongs under the thing it references.
- */
-.tl-do .tpn .ws { grid-template-columns: minmax(0, 1fr); }
-.tl-read { min-width: 0; border: 1px solid #ece0d2; border-radius: 11px; background: #fdfaf5; overflow: hidden; }
-.tl-readhd {
-  padding: 11px 14px; border-bottom: 1px solid #ece0d2;
-  display: flex; justify-content: space-between; align-items: center; gap: 10px;
-}
-/* ⚠️ THE MEASURE AND THE TYPE IT MEASURES ARE ON THE SAME ELEMENT, in the same units. `ch` is the
-   width of a `0` in the ELEMENT'S OWN font — on a container that inherits 16px while its children
-   paint at 12.5 it applies at a size nobody chose. This rule sets both, so they cannot diverge. */
-.tl-readbd { padding: 12px 14px 14px; font-size: 12.5px; max-width: 60ch; }
-.tl-know { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
-.tl-box { border: 1px solid #ece0d2; border-radius: 10px; padding: 12px 13px; background: #fdfaf5; }
-.tl-box .k {
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8px;
-  letter-spacing: 0.13em; text-transform: uppercase; color: #a2937f; margin-bottom: 5px;
-}
-.tl-box .v { font-size: 12.5px; line-height: 1.45; color: #3a2c22; }
-
-/* ⚠️ NARROW LAST. Equal specificity is decided by order, so a wider query below a narrower one
-   silently overrides it — which is exactly the fault the REF ships: its blocks run 1500 → 1080 →
-   1240, so at 1080 and below the 1240 rule wins and the workspace collapses to one 430px column
-   instead of stacking. The ref draws one width; this has to survive four. */
-@media (max-width: 1500px) {
-  .tl-two { grid-template-columns: 430px minmax(320px, 1fr); }
-  /* Know drops beneath as a four-across strip — the facts are short, so four fit and none wraps */
-  .tl-know { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-}
-@media (max-width: 1240px) {
-  .tl-split { grid-template-columns: 288px minmax(0, 1fr); }
-}
-@media (max-width: 1080px) {
-  .tl-split { grid-template-columns: minmax(0, 1fr); }
-  .tl-two { grid-template-columns: minmax(0, 1fr); }
-  .tl-know { grid-template-columns: repeat(2, 1fr); }
-}
-
+/* ⚠️ THE WORKSPACE'S WHOLE CSS FAMILY IS DELETED (v65 §A) — `.tl-split`, the collapsed day
+   column (`.tl-col*`, `.tl-crow`, `.tl-mini`, `.tl-cempty`), the work column (`.tl-ws*`,
+   `.tl-two`, `.tl-do`, `.tl-read*`, `.tl-know`, `.tl-box`) and their three media steps. The
+   split render is gone from the page, so every one of these selected nothing; a rule with no
+   subject is how the next reader is misled. The focus band (`.tl-below`, `.tl-fx*`) SURVIVES —
+   the v65 ref keeps `data-focus="on"`. */
 /* the row head's third line: the books this relationship spans, where it spans more than one */
 .tl-ms {
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7px;
@@ -2105,10 +1927,7 @@ button.tl-tchip { cursor: pointer; }
 /* a cut compact card starts its text at 34px like every other — the base already says 34; the
    fadeL override that put comfortable text at 14px must not drag compact's down with it */
 .tl-board[data-dens="compact"] .tl-p.fadeL .tl-cardbody { left: 34px; max-width: calc(100% - 120px); }
-/* the widen is comfortable's; compact reveals through the peek */
-.tl-board[data-dens="compact"] .tl-p[data-tight]:hover { width: var(--w); left: var(--l); }
-.tl-board[data-dens="compact"] .tl-p.fadeL[data-tight]:hover { left: 6px; width: calc(var(--l) + var(--w) - 6px); }
-.tl-board[data-dens="compact"] .tl-p.cutR[data-tight]:hover { width: calc(100cqw - var(--l) - 6px); }
+/* the compact widen-neutralisers went with the widen itself (v65 §A) */
 
 /* ══ THE HOVER PEEK (v64 §F — the ref's `data-grow="place"`) ═════════════════════════════════
  *

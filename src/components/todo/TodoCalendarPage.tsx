@@ -25,10 +25,6 @@ import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { useTodoToast } from "./useTodoToast";
-import { FocusFlow } from "./FocusFlow";
-import { TaskPane } from "./TaskPane";
-import { useTaskPaneSession, type TaskPaneHost } from "./useTaskPaneSession";
-import { useTaskCommit } from "./useTaskCommit";
 import { TIMELINE_RANGES, DEFAULT_RANGE_INDEX, pastDaysOf } from "../../lib/timelineRanges";
 import {
   GROUP_ORDER, GROUP_LABEL, COLLAPSED_BY_DEFAULT, groupSentence, TASKS_HEADING, TASKS_SENTENCE,
@@ -69,7 +65,6 @@ import {
 } from "../../lib/timelineViews";
 import { useConfirmAsk } from "./ConfirmAsk";
 /** this mount's pane section-id prefix — every workspace page stays mounted, so ids must not collide */
-const CAL_PANE_PREFIX = "cal-";
 import { useScriptAllyDb } from "../../lib/db";
 import { localYMD } from "../../lib/shellSidebar";
 import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
@@ -92,11 +87,9 @@ import {
   type Segment, type BarNode,
 } from "../../lib/journeyBars";
 import { classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
-import { useDockActivity } from "./useDockActivity";
 /* ⚠️ THE QUERY CENTRE'S OWN ROWS, NOT A SECOND READING PANE. `FocusFlow` already mounts these two
    from the To-do world (`FocusFlow.tsx:33`), so the precedent and the shape are both established;
    building a calendar-local conversation would be the second implementation this repo forbids. */
-import { TimelineRows, buildTimelineRows } from "../reading-pane/QueryTimeline";
 import { StatusDot } from "../StatusDot";
 import { formatQueryMaterial } from "../../lib/materials";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -457,7 +450,6 @@ const Piece: React.FC<{
       data-trueto={bounds.end.toFixed(3)}
       data-days={String(days)}
       data-live={sg.live ? "1" : undefined}
-      data-tip={sg.tip || undefined}
       onClick={onPick}
       role="button"
       tabIndex={0}
@@ -777,7 +769,6 @@ const Marker: React.FC<{ n: BarNode; selected: boolean; onPick: () => void }> = 
     type="button"
     className={`tl-at2 tl-mk2 ${n.mark}${selected ? " sel" : ""}`}
     style={{ left: pct(n.at), ...laneVar(n.lane) }}
-    data-tip={n.caption}
     aria-label={n.caption}
     onClick={onPick}
   >
@@ -901,16 +892,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   /* ⚠️ SELECTING IS FREE — nothing is written, nothing opens. It rings the chip and fills the band
      below, and that is the whole of it. */
   const [sel, setSel] = useState<string | null>(null);
-  /**
-   * ⚠️ ACTING IS A DIFFERENT GESTURE FROM SELECTING, and the workspace is a STATE OF THE PAGE
-   * rather than a thing that floats over it. The board collapses to one day's column, every agent
-   * still listed and every row but this one dimmed, and the rest of the page becomes the work.
-   *
-   * ⚠️ THE DAY FOLLOWS THE ITEM RATHER THAN PINNING TO TODAY (one of Nick's open questions;
-   * `follows` is the stated default). Opening a Friday task and being shown Wednesday would be the
-   * page answering a question the writer did not ask.
-   */
-  const [work, setWork] = useState<{ rowKey: string; ymd: string; itemKey: string | null } | null>(null);
+  
   const pageRef = React.useRef<HTMLDivElement>(null);
 
 
@@ -983,164 +965,30 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       .map((r) => r.left);
   };
 
+  /**
+   * ⚠️ THE FIT PASS IS REDUCED TO THE SLIVER HIDE (v65 §A). Its other outputs — `--exp`/`--hx`,
+   * `data-tight`, `data-nodetail`, `data-tier` — served the v54 hover-widen and the v40 content
+   * ladder, both retired with the inline expand: v65's hover changes NOTHING but the bar's
+   * transform, the action and the symbol, and the reveal is the CLICK card. What survives is
+   * geometry hygiene: a piece whose span resolves to no room paints a 2px border-box sliver over
+   * its own marker unless it is not drawn at all.
+   */
   useLayoutEffect(() => {
     const fit = () => {
       const root = pageRef.current;
       if (!root) return;
       for (const seg of Array.from(root.querySelectorAll<HTMLElement>(".tl-p"))) {
-        /**
-         * ⚠️ A PIECE WITH NO ROOM TO DRAW IS NOT DRAWN, and `border-box` is why this is needed.
-         *
-         * A bar stands 12px off each marker it abuts. Where the stretch between two markers is
-         * only a day or so, those two standoffs consume the whole span — and a width calc that
-         * resolves NEGATIVE is not clamped to nothing: with `box-sizing: border-box` the used
-         * width is clamped UP to the borders, so the piece paints a 2px sliver. Measured
-         * box-to-box, that sliver overlapped its own marker by exactly 2px on four rows, which is
-         * the whole of the residual clearance fault after the drawn markers became breaks.
-         *
-         * A sliver says nothing that its run's neighbouring pieces do not, and it cannot be drawn
-         * without overlapping the marker it abuts — so it is hidden rather than shrunk. The same
-         * judgement as a label going bare: where there is no room, the honest thing is absence.
-         */
         /* ⚠️ RESET BEFORE MEASURING, or the hide LATCHES: a `display: none` element reports
-           `clientWidth` 0 for ever, so a piece hidden once at six months would stay hidden when
-           the reader came back to one month. The same shape as the label's own reset above.
-           ⚠️ AND IT IS `display`, NOT `visibility` — a hidden element still HAS a box, so the
-           sliver would go on overlapping its marker where it counts, in the geometry. */
+           `clientWidth` 0 for ever. And it is `display`, not `visibility` — a hidden element
+           still HAS a box, so the sliver would go on overlapping its marker in the geometry. */
         seg.style.display = "";
-        if (seg.clientWidth <= 0) { seg.style.display = "none"; continue; }
-        const line = seg.querySelector<HTMLElement>(".tl-line");
-        const track = seg.querySelector<HTMLElement>(".tl-track");
-        const pillEl = seg.querySelector<HTMLElement>(".tl-pill");
-
-        /**
-         * ⚠️ THE LADDER IS MEASURED AGAINST THE ROOM AFTER THE MARKS, NOT AGAINST THE CARD.
-         *
-         * v40's cards are wide — a relationship spans months, not the stretch between two status
-         * changes — so card width stopped predicting whether the words fit. What decides it is the
-         * room LEFT: a 400px card whose last mark sits at 380 has twenty pixels for its sentence.
-         * Measured on the first one-card render, before this existed: one card drew nothing at all
-         * and its neighbour's text ran off its own right edge, both of them comfortably over 300px
-         * wide. Reading `clientWidth` would have called both of them roomy.
-         *
-         * Four rungs, and each is the previous one less the part that can be spared: full (pill ·
-         * headline · detail) → headline (the detail goes) → pill (the words go, and whose move it
-         * is survives, because that is the one thing a card is for) → stub.
-         */
-        /**
-         * ⚠️ RESET EVERY OUTPUT OF THIS PASS BEFORE READING ANYTHING — the tier included.
-         *
-         * `data-tier` selects which rule places the content, so measuring with last pass's tier
-         * still on asks the browser where the pill sits under a decision that has not been made
-         * yet. Measured on the six-month board before this: pills clipped at the card's right
-         * edge, because the tier was chosen against the after-marks offset and the pill was then
-         * placed at the pinned one — two offsets, one comparison, and the comparison used the
-         * wrong one. Cleared, the card is in its `full` layout, which is the state every rung is
-         * a reduction OF.
-         */
-        /**
-         * ⚠️ CLIP AND OPEN, NOT DROP (v54, Phase 4) — and this replaces the four-rung ladder.
-         *
-         * v40 answered "the words do not fit" by removing some: the detail went, then the words,
-         * then the card became a disc. That is a decision made FOR the reader, and it is made on
-         * every card whose dates happen to be close together — on the six-month board sixteen of
-         * twenty-three cards had lost their sentence. v54 keeps the words and clips them with a
-         * soft edge; the card opens on hover to exactly what they need.
-         *
-         * The detail drops in ONE case only: where even the opened card would be wider than the
-         * lane, so there is nowhere for it to open TO. The headline and the pill never drop —
-         * whose move it is and what this is are the two things a card exists to say.
-         */
-        seg.style.removeProperty("--exp");
-        seg.style.removeProperty("--hx");
-        seg.removeAttribute("data-tight");
-        seg.removeAttribute("data-nodetail");
-        delete seg.dataset.tier;
-        if (!line || !track || !pillEl) continue;
-
-        const lane = seg.parentElement?.getBoundingClientRect();
-        const cb = seg.getBoundingClientRect();
-        const inset = parseFloat(getComputedStyle(seg).getPropertyValue(
-          seg.classList.contains("fadeL") ? "--card-fade-inset" : "--tl-text-inset")) || 0;
-        const detail = track.querySelector<HTMLElement>(".tl-cdt");
-
-        /* what the content needs: the inset, the WIDER of the pill and the track, and the air the
-           content pays on its right — plus the fade's own width where the card's right edge is
-           dissolving, or the last word opens straight into the dissolve */
-        /* ⚠️ THE WIDER OF THE TWO, NEVER THEIR SUM — the pill sits ABOVE the headline now, so they
-           do not share a line and their widths do not add. The sum is what v54 needed when the two
-           sat side by side, and carrying it into a column layout overstated every card by roughly
-           a pill: measured, a tight card opened 142px past its own words, and cards whose words
-           fitted were being clipped and having their detail dropped to make room for space nothing
-           occupies. The ref computes exactly this — `Math.max(pill.scrollWidth, line.scrollWidth)`.
-           If the pill and the headline are ever put back on one line, this goes back to a sum. */
-        const fadePad = seg.classList.contains("fadeR")
-          ? parseFloat(getComputedStyle(seg).getPropertyValue("--card-fade")) || 0 : 0;
-        const needed = () => inset
-          + Math.max(pillEl.getBoundingClientRect().width, track.scrollWidth)
-          + CONTENT_MARGIN_R + fadePad;
-
-        const laneW = lane ? lane.width : Infinity;
-        let want = needed();
-
-        /* ⚠️ THE DETAIL DROPS ONLY WHERE THERE IS NOWHERE TO OPEN TO. Measured against the LANE,
-           not against the card: a narrow card with a wide lane beside it can open. */
-        /* ⚠️ THE PRE-DROP NEED IS PUBLISHED TOO, because that is the number the decision was
-           made on. After the detail goes the track is narrower, so a lock reading only the final
-           `data-need` sees a card that "needed 271 in a 434px lane" and reports a justified drop
-           as unjustified — 27 of them. The justification is the width WITH the detail. */
-        seg.dataset.needfull = String(Math.ceil(want));
-        if (want > laneW && detail) {
-          seg.setAttribute("data-nodetail", "1");
-          want = needed();
-        }
-
-        /* ⚠️ THE PASS PUBLISHES ITS OWN NUMBERS, so a lock reads what the decision was made from
-           rather than recomputing it. A probe that re-derives `needed` is a second implementation
-           of this arithmetic, and the two disagreeing is indistinguishable from the feature being
-           broken — which cost a round here: the probe said a card needed 398px in a 250px lane
-           while the pass had decided otherwise, and only publishing both settled which was wrong. */
-        seg.dataset.need = String(Math.ceil(want));
-        seg.dataset.lane = String(Math.round(laneW));
-        seg.dataset.hasdetail = detail ? "1" : "0";
-
-        if (want <= cb.width + 1) continue;   /* it fits — no clip, no open, no mask */
-
-        seg.setAttribute("data-tight", "1");
-        seg.style.setProperty("--exp", `${Math.ceil(want)}px`);
-        /* ⚠️ RIGHTWARDS FROM ITS START, and left only by the minimum needed. The start date is what
-           the card's position states, so it moves last and least. */
-        const restLeft = cb.left - (lane ? lane.left : 0);
-        const over = restLeft + want - laneW;
-        seg.style.setProperty("--hx", over > 0 ? `${Math.max(0, restLeft - over)}px` : `${restLeft}px`);
-
-        /* ⚠️ THE OVERFLOW BOOKKEEPING WENT WITH THE MARQUEE. `fits` and `data-over` existed to
-           tell the hover animation how far to slide; the ladder never leaves a line overflowing,
-           so both were describing a state the board can no longer be in. */
+        if (seg.clientWidth <= 0) seg.style.display = "none";
       }
     };
     fit();
-
-    /**
-     * ⚠️ THE MARQUEE IS RETIRED, AND THE LADDER IS WHAT RETIRED IT (v40, Phase 4/6).
-     *
-     * It existed to answer "what happens when the words do not fit" with `Measured, then marked —
-     * the words are never removed`: the line was masked and the track slid on hover. The content
-     * ladder answers the SAME question by dropping the detail, and two answers to one question is
-     * how they come to disagree. The brief asked for the marquee to be narrowed to the `full`
-     * rung; measured, that narrowing RETIRES it, because `full` is chosen precisely when the
-     * content fits — pill, gap, track and the right margin against the room after the marks — so
-     * `scrollWidth - clientWidth` cannot exceed zero there. Unreachable by construction, not by
-     * fixture, which is why it goes rather than staying as a mechanism nothing can enter.
-     *
-     * `cycleFor` and `src/lib/calendarMarquee.ts` go with it. FLAGGED FOR NICK in the run report:
-     * the brief said narrow, and narrowing turned out to mean retire.
-     */
     const board = pageRef.current?.querySelector(".tl-board");
     const ro = new ResizeObserver(fit);
     if (board) ro.observe(board);
-    /* ⚠️ THE HOVER LISTENERS WENT WITH THE MARQUEE; the observer is what is left, and it is
-       conditional, so the teardown must run whether or not a board was found. */
     return () => { ro.disconnect(); };
   });
 
@@ -1337,122 +1185,16 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     if (sel && !selItem && !selSeg) setSel(null);
   }, [sel, selItem, selSeg]);
 
-  const workRow = work ? rows.find((r) => r.key === work.rowKey) ?? null : null;
-  /* the workspace lost its row — a filter, a page, or the card completing and evaporating */
-  React.useEffect(() => {
-    if (work && !workRow) { setWork(null); setPaneCard(null); }
-  }, [work, workRow]);
 
-  /**
-   * ⚠️ THE QUERY THE WORKSPACE IS ABOUT — the worked item's, falling back to whatever else in the
-   * row names one. A row is a RELATIONSHIP and can hold several queries; the item decides, and the
-   * fallback is only for a row head opened with nothing selected.
-   */
-  const workQueryId = useMemo(() => {
-    if (!workRow) return undefined;
-    const picked = work?.itemKey ? workRow.items.find((i) => i.key === work.itemKey) : undefined;
-    return picked?.queryId
-      ?? barsByRow.get(workRow.key)?.segs[0]?.queryId
-      ?? workRow.items.find((i) => i.queryId)?.queryId;
-  }, [workRow, work, barsByRow]);
-  const workQuery = workQueryId ? queries.find((q) => q.id === workQueryId) ?? null : null;
-  const workAgent = workRow?.agentId ? agents.find((a) => a.id === workRow.agentId) ?? null : null;
-  const workSeg = workRow ? (barsByRow.get(workRow.key)?.segs ?? []).find((sg) => sg.side === "theirs") ?? null : null;
 
-  /**
-   * ⚠️ THE AUTHORITATIVE ROWS, from the query's own subcollection — the store the Query Centre
-   * reads. The global `activities` feed this page holds is a best-effort projection twin, and
-   * reading the conversation out of it is how the dock came to say "Nothing logged yet." about a
-   * query with history.
-   *
-   * ⚠️ AND IT IS A SECOND LISTENER ON THE SAME SUBCOLLECTION while a card is docked, because
-   * `useTaskPaneSession` opens its own and exposes only `{ journey, onPrimary }`. Wasteful, not
-   * wrong — one query, one document each — and the fix is to surface `dockRows` from the session,
-   * which is a file this session does not own. Flagged in the report.
-   */
-  const convo = useDockActivity(currentUser?.id, workQueryId);
-  const convoRows = useMemo(
-    () => (workQuery ? buildTimelineRows(convo, workQuery, workAgent) : []),
-    [convo, workQuery, workAgent],
-  );
+  
+
+  
 
   /* ══ THE TASK PANE, OVER THE TIMELINE ═══════════════════════════════════════════════════ */
-  /* `offer` and `fix` still reach `FocusFlow` — but the way `/todo` reaches it, through the pane's
-     own primary, past `paneCommits`. It is never a second entrance. */
-  const [flowCard, setFlowCard] = useState<BoardCard | null>(null);
-  const [paneCard, setPaneCard] = useState<BoardCard | null>(null);
-  const { commit, quickDone } = useTaskCommit({
-    flash, rememberUndo: remember, confirmAsk,
-    openFlow: (c) => setFlowCard(c),
-  });
-  const paneRef = React.useRef<HTMLDivElement | null>(null);
-  const paneHost: TaskPaneHost = {
-    /**
-     * ⚠️ SCOPED TO THIS MOUNT'S OWN PANE, which is why Pack B built `idPrefix`. Every workspace
-     * page stays MOUNTED, so `/todo`'s pane is in the document too — a bare `document.querySelector`
-     * would find ITS section and scroll a page the reader cannot see.
-     */
-    /* ⚠️ FOCUS, NOT SCROLL — the same change `/todo` made in the workspace round, for the same
-       reason: the session has already opened the row, and focusing brings it into its scrollport
-       without a second mechanism deciding where to put it. Scoped to `paneRef` because every
-       workspace page stays mounted and `/todo`'s pane is in the document too. */
-    jumpToSection: (id) => {
-      const root = paneRef.current;
-      const sect = root?.querySelector<HTMLElement>(`#${CAL_PANE_PREFIX}${id}`);
-      if (!sect) return;
-      (sect.querySelector<HTMLElement>("button, input, textarea, [tabindex]") ?? sect).focus?.();
-    },
-    /* the `offer`/`fix` hand-off — parity with `/todo`, which is why the sheet stays mounted */
-    openFlow: (c) => { setPaneCard(null); setFlowCard(c); },
-    commit,
-    /* ⚠️ NO DOCK CURSOR HERE. `/todo` advances to the next card in its dock; a week is not a queue,
-       so a completed card leaves the board and the workspace closes with it — which is the
-       catalogue's "settle" step: the card evaporates from every surface at once, because the
-       condition that derived it stopped holding. */
-    advance: () => { setPaneCard(null); setWork(null); },
-    openQuery: (c) => { if (c.relatedRecordId) onNavigate("queries", c.relatedRecordId); },
-    /* ⚠️ THE CALENDAR SUPPLIES NEITHER `snooze` NOR `mute`, AND ABSENCE IS NOT DISABLED. Its snooze
-       is DRAG — on the surface where days are the subject — and it shows no dismissed cards at all,
-       which is the same reason it passes no `onSnooze` and no `onDismiss`. A delay intent there
-       therefore writes nothing rather than writing through a surface that has no place for it; the
-       fork's delay options are the journey's, and whether this host can honour them is the host's
-       business. Flagged in the run report as the one journey the calendar cannot complete. */
-    /* the deed's two links — the same one-shot reveal keys `/todo` and the ⋯ menu use */
-    openAgent: (agentId) => {
-      try { sessionStorage.setItem("sa.agentReveal", agentId); } catch { /* private mode */ }
-      onNavigate("agents");
-    },
-    openManuscript: (manuscriptId) => {
-      try { sessionStorage.setItem("sa.manuscriptReveal", manuscriptId); } catch { /* private mode */ }
-      onNavigate("manuscripts");
-    },
-    /* onSnooze / onDismiss are deliberately ABSENT — see `TaskPaneHost`. The calendar's snooze is
-       drag, and it shows no dismissed cards at all. */
-  };
-  const paneSession = useTaskPaneSession(paneCard, paneHost, CAL_PANE_PREFIX);
+  
 
-  /**
-   * ⚠️ ESCAPE RETURNS TO THE WEEK, and only while the workspace is open. It is captured so it does
-   * not also reach the page beneath — a menu and the workspace would otherwise close on one press.
-   * `FocusFlow` keeps its own handler; the two are mutually exclusive, since the pane closes itself
-   * before handing a card over.
-   *
-   * ⚠️ IT ALWAYS DID CLOSE THE PANE, so nothing about typed answers changed here. What the retired
-   * scrim carried — "a stray click on the ground is not a decision to discard them" — is vacuous
-   * now rather than lost: there is no ground to click.
-   */
-  React.useEffect(() => {
-    if (!work) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.preventDefault();
-      e.stopPropagation();
-      setWork(null);
-      setPaneCard(null);
-    };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, [work]);
+  
 
 
   /* ══ DRAG A TASK TO A NEW DAY ════════════════════════════════════════════════════════════
@@ -1474,31 +1216,15 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     endDrag();
   };
 
-  /**
-   * ⚠️ TWO GESTURES, TWO OUTCOMES. A chip that carries a CARD is work, so it opens the workspace;
-   * anything else — a record entry, a ghost, a band — is a fact, so it selects and fills the band
-   * below. The brief names a your-turn chip; a writer's own task carries a card too, and refusing
-   * it would be a regression against the month, where every carded pip opened the pane.
-   */
-  const openWork = (rowKey: string, ymd: string, itemKey: string | null, card?: BoardCard) => {
-    setSel(itemKey);
-    setWork({ rowKey, ymd, itemKey });
-    setPaneCard(card ?? null);
-  };
-  /**
-   * ⚠️ A YOUR-MOVE STRETCH IS WORK, SO IT OPENS THE WORKSPACE — the same gesture a your-turn chip
-   * had before the chip became part of the bar. The card is found by the query the stretch belongs
-   * to, which is the join the page already makes for everything else.
-   */
-  const cardForQuery = (queryId: string): BoardCard | undefined =>
-    visible.flatMap((ymd) => itemsFor(ymd)).find((it) => it.card?.relatedRecordId === queryId)?.card;
-  const pickSeg = (rowKey: string, sg: Segment) => {
-    const card = sg.side === "yours" ? cardForQuery(sg.queryId) : undefined;
-    if (card) { openWork(rowKey, visible[Math.floor(sg.from)] ?? today, sg.key, card); return; }
+  
+  
+  /* ⚠️ THE CLICK'S WORK-FLOW BRANCH IS RETIRED (v65 §A) — a click is a READ gesture now, and §C
+     gives it the card. Until the card lands, a click selects; the branch that opened the legacy
+     task pane is gone rather than dormant. */
+  const pickSeg = (_rowKey: string, sg: Segment) => {
     setSel((c) => (c === sg.key ? null : sg.key));
   };
-  const pick = (rowKey: string, it: TimelineItem) => {
-    if (it.card) { openWork(rowKey, it.ymd, it.key, it.card); return; }
+  const pick = (_rowKey: string, it: TimelineItem) => {
     setSel((c) => (c === it.key ? null : it.key));
   };
 
@@ -1628,9 +1354,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      ARRANGED, the sidebar carries what you are looking at and how much of it fits. Session-only,
      like every other view state on this page: no route, no persistence, no second copy. */
   const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
-  /* the tip effect binds once; its peek gate needs the LIVE density, not the mount's */
-  const densityRef = useRef<"comfortable" | "compact">("comfortable");
-  densityRef.current = density;
 
   /* ══ THE HOVER PEEK (v64 §F — the ref's `data-grow="place"`) ══════════════════════════════════
    *
@@ -1752,7 +1475,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    */
 
   const wrapRef = React.useRef<HTMLDivElement | null>(null);
-  const tipRef = React.useRef<HTMLDivElement | null>(null);
   const [cross, setCross] = useState<{ x: number; label: string } | null>(null);
   /**
    * Which group the sidebar is showing, or `null` for all.
@@ -1787,54 +1509,9 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   };
   const clearCross = () => setCross(null);
 
-  /**
-   * ONE tooltip, portalled to the board wrap.
-   *
-   * ⚠️ `.tl-c-tl` CLIPS (`overflow: hidden`), SO NO DESCENDANT TOOLTIP CAN ESCAPE IT — a clipping
-   * ancestor beats any `z-index` a child can declare. That is why this is a single element at
-   * board level rather than one per bar, and why it is positioned against the wrap and clamped
-   * inside it: a tip on the last row or at the right-hand edge would otherwise be cut in half by
-   * the very box it belongs to.
-   *
-   * ⚠️ AND IT NEVER INTERCEPTS CLICKS. `pointer-events: none` in the sheet, so a marker under it
-   * stays clickable — a tooltip that swallowed the click on the thing it describes would be a
-   * control that looks live and is not.
-   */
-  React.useEffect(() => {
-    const wrap = wrapRef.current;
-    const tip = tipRef.current;
-    if (!wrap || !tip) return;
-    const show = (ev: MouseEvent) => {
-      const t = (ev.target as HTMLElement | null)?.closest?.("[data-tip]") as HTMLElement | null;
-      if (!t) { tip.classList.remove("on"); return; }
-      /* ⚠️ IN COMPACT A BAR'S REVEAL IS THE PEEK — the tip repeating the same sentence above the
-         peeked card was the fact narrated twice (v64 §F). Rail and marker tips are untouched. */
-      if (densityRef.current === "compact" && t.closest(".tl-p, .tl-jc")) {
-        tip.classList.remove("on"); return;
-      }
-      const text = t.getAttribute("data-tip") ?? "";
-      if (!text) { tip.classList.remove("on"); return; }
-      tip.textContent = text;
-      tip.classList.add("on");
-      const wr = wrap.getBoundingClientRect();
-      const tr = t.getBoundingClientRect();
-      tip.style.top = `${(tr.top - wr.top) - tip.offsetHeight - 7}px`;
-      const half = tip.offsetWidth / 2;
-      const want = (tr.left - wr.left) + Math.min(tr.width / 2, 90);
-      const x = Math.max(half + 2, Math.min(wr.width - half - 2, want));
-      tip.style.left = `${x - half}px`;
-    };
-    const hide = (ev: MouseEvent) => {
-      const to = ev.relatedTarget as HTMLElement | null;
-      if (!to || !to.closest?.("[data-tip]")) tip.classList.remove("on");
-    };
-    wrap.addEventListener("mouseover", show);
-    wrap.addEventListener("mouseout", hide);
-    return () => {
-      wrap.removeEventListener("mouseover", show);
-      wrap.removeEventListener("mouseout", hide);
-    };
-  }, []);
+  /* ⚠️ THE HOVER TIP IS RETIRED (v65 §A). Hover reveals the action, wakes the symbol and lifts
+     the bar — nothing else mounts; the record's reveal is the CLICK card. The `data-tip`
+     attributes went with the machinery, so nothing advertises a tooltip that no longer exists. */
 
   /* ⚠️ THESE TWO ARE DECLARED ABOVE THE BOARD DERIVATION, AND THE ORDER IS LOAD-BEARING.
      `board` is a `useMemo` that RUNS DURING RENDER and called `asksOfYou` → `actionFor`; a `const`
@@ -2956,7 +2633,6 @@ data-rowkey={r.key}
                  Porcelain rebuild dropped the treatment without replacing it. */
               className={`tl-at2 tl-tchip${it.kind === "ghost" ? " ghost" : ""}${it.struck ? " struck" : ""}${it.draggable && it.card?.userTaskId ? " grab" : ""}${sel === it.key ? " sel" : ""}`}
               style={{ left: `calc(${pct(it.idx)} + var(--tl-gap))`, ...laneVar(it.lane) }}
-              data-tip={it.label}
               draggable={!!(it.draggable && it.card?.userTaskId)}
               onDragStart={it.draggable && it.card?.userTaskId ? (e) => {
                 /* the payload rides the event for protocol correctness — the STATE is what the
@@ -3052,10 +2728,8 @@ data-rowkey={r.key}
     facts.push({ k: "Kind", v: FILTER_LABEL[it.kind] });
     acts = (
       <>
-        {it.card && (
-          <button type="button" className="tl-btn primary"
-            onClick={() => openWork(row.key, it.ymd, it.key, it.card)}>Open the task</button>
-        )}
+        {/* "Open the task" opened the legacy pane — retired (v65 §A); the card (§C) and the
+            sheet (§E) are the read and write surfaces now */}
         {it.kind === "ghost" && (
           <button type="button" className="tl-btn" onClick={() => setSel(null)}>Go to the task</button>
         )}
@@ -3087,111 +2761,6 @@ data-rowkey={r.key}
     </div>
   );
 
-  /* ── the collapsed day column: the week's whole cast, all but one dimmed ─────────────────── */
-  const collapsed = work && (
-    <div className="tl-col">
-      <div className="tl-colhd">
-        <span className="tl-lbl2">Everyone</span>
-        <span className="tl-coldt">
-          {DOW[new Date(`${work.ymd}T12:00:00`).getDay()]} {Number(work.ymd.slice(8))}
-        </span>
-      </div>
-      <div className="tl-colbd">
-        {rows.map((r) => {
-          const its = r.items.filter((i) => i.ymd === work.ymd);
-          const i = visible.indexOf(work.ymd);
-          const bs = (barsByRow.get(r.key)?.segs ?? []).filter((sg) => i + 0.5 >= sg.from && i + 0.5 <= sg.to);
-          const on = r.key === work.rowKey;
-          return (
-            <button key={r.key} type="button" className={`tl-crow${on ? " on" : " off"}`}
-              aria-current={on || undefined}
-              onClick={() => openWork(r.key, work.ymd, null)}>
-              <span className="tl-cwho">
-                <span className="tl-cn">
-                  <i className="tl-sd" data-dot={r.dot} aria-hidden />
-                  <span className="tl-nmtxt">{r.name}</span>
-                </span>
-                {r.agency && <span className="tl-ag">{r.agency}</span>}
-                {its.length + bs.length === 0 ? (
-                  <span className="tl-cempty">nothing today</span>
-                ) : (
-                  <span className="tl-cits">
-                    {bs.map((sg) => <span key={sg.key} className="tl-mini" data-kind={sg.side === "yours" ? "turn" : "wait"}>{sg.label || sg.count}</span>)}
-                    {its.map((i) => <span key={i.key} className="tl-mini" data-kind={i.kind}>{i.label}</span>)}
-                  </span>
-                )}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-
-  /* ── the workspace: do, read, know ───────────────────────────────────────────────────────── */
-  const know: { k: string; v: string }[] = [];
-  if (workQuery) {
-    know.push({ k: "Status", v: workQuery.status });
-    /* ⚠️ "Reply window" WAS THE KEY HERE and it is the code's phrase, not a writer's. The bar's
-       own words are what this row shows, so it names them rather than a derivation. */
-    know.push({
-      k: "Waiting until",
-      v: workSeg ? workSeg.label || "No date resolvable" : "No date resolvable",
-    });
-    const mats = (workQuery.materialsWanted ?? []).map(formatQueryMaterial).filter(Boolean);
-    if (mats.length) know.push({ k: "Materials", v: mats.join(", ") });
-    if (workQuery.personalisationNotes) know.push({ k: "Your note", v: workQuery.personalisationNotes });
-  }
-  if (workAgent) know.push({ k: "Agency", v: agentSecondary(workAgent) || agentPrimary(workAgent) });
-
-  const workspace = work && workRow && (
-    <div className="tl-ws">
-      <div className="tl-wshd">
-        <span className="tl-lbl2">
-          {workQuery ? `${getPrimaryAction(workQuery.status).ballHolder === "writer" ? "With you" : "Waiting to hear"} · ` : ""}
-          {workRow.name}
-        </span>
-        <button type="button" className="tl-btn" onClick={() => { setWork(null); setPaneCard(null); }}>
-          Esc · back to the week
-        </button>
-      </div>
-      <div className="tl-wsbd">
-        <div className="tl-two">
-          {/* DO — the same pane `/todo` draws, driven by the same session hook and writing through
-              the same committer. It is the point of the whole stream: one task workflow, wherever
-              you meet a task. */}
-          <div className="tl-do" ref={paneRef}>
-            {paneSession.journey
-              ? <TaskPane journey={paneSession.journey} onPrimary={paneSession.onPrimary} />
-              : <div className="tl-readbd">Nothing to do on this relationship just now.</div>}
-          </div>
-          {/* READ — the Query Centre's OWN rows, off the authoritative subcollection */}
-          <div className="tl-read">
-            <div className="tl-readhd">
-              <span className="tl-lbl2">The whole conversation</span>
-              {workQueryId && (
-                <button type="button" className="tl-btn"
-                  onClick={() => onNavigatePath(`/queries?q=${encodeURIComponent(workQueryId)}`)}>
-                  Open in Query Centre →
-                </button>
-              )}
-            </div>
-            <div className="tl-readbd">
-              {convoRows.length > 0
-                ? <TimelineRows rows={convoRows} />
-                : <span className="tl-cempty">Nothing logged yet</span>}
-            </div>
-          </div>
-          {/* KNOW — facts, each omitting itself when there is nothing to state */}
-          <div className="tl-know">
-            {know.map((b) => (
-              <div key={b.k} className="tl-box"><div className="k">{b.k}</div><div className="v">{b.v}</div></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="t-f12 spine-root cal-timeline" ref={pageRef}>
@@ -3215,15 +2784,10 @@ data-rowkey={r.key}
             onNavigatePath("/todo");
           } }}
         >
-          {/* ⚠️ ONE STATE OR THE OTHER, NEVER BOTH ON SCREEN. Acting collapses the board to a day's
-              column and gives the rest of the page to the work; the full board and its focus band
-              are what the week looks like when nothing is being worked. */}
-          {work ? (
-            <div className="tl-split">
-              {collapsed}
-              {workspace}
-            </div>
-          ) : (
+          {/* ⚠️ THE WORK SPLIT IS RETIRED (v65 §A). Acting used to collapse the board to a day's
+              column and mount the legacy task pane beside it; v65's gestures are read-first — a
+              click opens card C, the card opens the drawer, and every WRITE goes through the one
+              Action sheet. The board is always the whole page. */}
           <>
           {/* ══ ONE CALENDAR (v61) ═══════════════════════════════════════════════════════════
               ⚠️ THE CONTROLS SIT BESIDE THE BOARD, NOT ABOVE IT. v60's tools row put the tabs, the
@@ -3484,7 +3048,6 @@ data-rowkey={r.key}
                     <div className="tl-xhlab" style={{ left: `${cross.x}px` }} aria-hidden>{cross.label}</div>
                   </>
                 )}
-                <div ref={tipRef} className="tl-tipp" role="tooltip" aria-hidden />
               </div>
             </TplZone>
             </div>
@@ -3492,7 +3055,6 @@ data-rowkey={r.key}
           </div>
           {focusBand}
           </>
-          )}
         </TasksPageLayout>
       </div>
 
@@ -3509,19 +3071,8 @@ data-rowkey={r.key}
 
       {confirmAskNode}
 
-      {flowCard && (
-        <div className="cal-flow">
-        <FocusFlow
-          items={[{ kind: "card", card: flowCard }]}
-          onClose={() => setFlowCard(null)}
-          /* the receipts and their Undo are whatever the shared hook already produces, which is the
-             only way this page and `/todo` can be relied on to say the same thing */
-          onNavigate={onNavigate}
-          onToast={flash}
-          quickDone={quickDone}
-        />
-        </div>
-      )}
+      {/* ⚠️ FocusFlow LEFT WITH THE PANE (v65 §A) — the Action sheet (§E) is the one write
+          surface this page mounts. */}
     </div>
   );
 };
