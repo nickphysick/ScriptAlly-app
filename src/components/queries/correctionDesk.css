@@ -31,6 +31,25 @@
    accent border sit on the card's box, and an overflowing card would clip its own notch. */
 .qcd-scroll { overflow-y: auto; min-height: 0; display: flex; flex-direction: column; }
 
+/**
+ * ⚠️ THE CARD'S PADDING IS GEOMETRY 1'S (`18px 20px 16px`) AND THE DESK NEVER HAD IT (drawer-3
+ * correction): measured, every verb's h3 sat at cardTop + 5 — hard against the accent strip, with
+ * zero clearance. `.qrd` has no base rule and `.qcd-verb` had none either.
+ *
+ * ⚠️ AND IT SITS ON THE SCROLLER, NOT ON `.qcd-verb` — which the first fix tried and which passed
+ * for Record response while Nudge stayed flush, because only TWO of the four verb mounts carry
+ * that wrapper (Mark closed and Nudge arrived in later runs without it). A padding that depends on
+ * which mount someone remembered to wrap is not a padding. `.qcd-scroll` wraps EVERY guest by
+ * construction, so the claim holds for the two verbs that have no wrapper and for the next one.
+ *
+ * The guests that brought their own inset have it neutralised here — the same "the host restyles
+ * its guest's chassis" arrangement `.qcd .cor-sheet` already states, so the desk states the inset
+ * exactly once whichever guest is in it.
+ */
+.qcd-scroll { padding: 18px 20px 16px; }
+.qcd .cor-body { padding: 0; }
+.qcd .qcd-step { margin-left: 0; margin-right: 0; }
+
 /* §3 — the verb/correct spot slot, top-right of the card; the content clears it */
 .qcd-spot { position: absolute; right: 16px; top: 14px; z-index: 1; }
 .qcd-scroll[data-spot="on"] .qrd > h3,

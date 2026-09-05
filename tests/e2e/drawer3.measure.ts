@@ -65,41 +65,77 @@ test("§1 · one tint across the block, equal to the card's band, three stages �
   }
 });
 
+/**
+ * ⚠️ A RECT LOCK CANNOT SEE A CLIPPED DESK — this replaces one (drawer-3 correction). The bounds
+ * check was green on a build whose strip painted dead and whose title sat hard against it, because
+ * `getBoundingClientRect` describes a BOX and says nothing about what is painted in it. These ask
+ * the browser what is actually at the pixel.
+ */
+async function paintProbe(page: import("@playwright/test").Page) {
+  return page.evaluate(() => {
+    const card = document.querySelector<HTMLElement>(".qcd-card")!;
+    const c = card.getBoundingClientRect();
+    const cs = getComputedStyle(card);
+    const strip = parseFloat(cs.borderTopWidth);
+    const h3 = card.querySelector<HTMLElement>("h3")!;
+    const spot = card.querySelector<HTMLElement>(".qcd-spot");
+    const hit = document.elementFromPoint(c.left + c.width / 2, c.top + strip / 2);
+    const sr = spot?.getBoundingClientRect();
+    return {
+      stripPx: strip,
+      stripColour: cs.borderTopColor,
+      /* the pixel at the strip's midpoint belongs to the card (its border area) or to a descendant */
+      stripHitInCard: !!hit && (hit === card || card.contains(hit)),
+      stripHit: hit ? `${hit.tagName.toLowerCase()}.${(hit.className || "").toString().split(/\s+/)[0]}` : "NONE",
+      stripBottom: c.top + strip,
+      h3Top: h3.getBoundingClientRect().top,
+      spotInsideCard: sr ? (sr.top >= c.top && sr.bottom <= c.bottom && sr.left >= c.left && sr.right <= c.right) : null,
+      spotRect: sr ? { top: +sr.top.toFixed(1), bottom: +sr.bottom.toFixed(1) } : null,
+      cardTop: c.top, cardBottom: c.bottom, cardH: c.height,
+      chain: (() => { const out: string[] = []; let el = card.parentElement;
+        while (el && el !== document.body) { out.push(el.className.toString().slice(0, 24) || el.tagName); el = el.parentElement; } return out; })(),
+      scrollerOverflow: getComputedStyle(card.querySelector<HTMLElement>(".qcd-scroll")!).overflowY,
+      cardOverflow: cs.overflowY,
+    };
+  });
+}
+
 for (const width of [1440, 2560] as const) {
-  test(`§2 · the desk's bounds contract, button-anchored, at ${width}`, async ({ page }) => {
+  test(`§2 · the desk PAINTS its top, all three verbs, at ${width}`, async ({ page }) => {
     mkdirSync(SHOTS, { recursive: true });
     await openDrawerOn(page, "cor-move-b", width);
-    await page.locator(".qpn-act", { hasText: "Record response" }).first().click();
-    await expect(page.locator(".qcd-card .qrd")).toBeVisible();
-    const r = await page.evaluate(() => {
-      const card = document.querySelector<HTMLElement>(".qcd-card")!;
-      const win = document.querySelector<HTMLElement>(".ws-window")!.getBoundingClientRect();
-      const c = card.getBoundingClientRect();
-      /* the ancestor chain, card → body: anything that could clip or contain */
-      const chain: string[] = [];
-      let el: HTMLElement | null = card.parentElement;
-      while (el && el !== document.body) { chain.push(el.className.toString().slice(0, 24) || el.tagName); el = el.parentElement; }
-      const scroller = card.querySelector<HTMLElement>(".qcd-scroll")!;
-      return {
-        cardTop: c.top, cardBottom: c.bottom, cardH: c.height,
-        winTop: win.top, winBottom: win.bottom, winH: win.height,
-        chain, cardOverflow: getComputedStyle(card).overflowY,
-        scrollerOverflow: getComputedStyle(scroller).overflowY,
-        notch: card.getAttribute("data-notch"),
-      };
-    });
-    out[`bounds-${width}`] = r;
-    expect(r.cardTop, "top bound").toBeGreaterThanOrEqual(r.winTop + 12);
-    expect(r.cardBottom, "bottom bound").toBeLessThanOrEqual(r.winBottom - 12 + 1);
-    expect(r.cardH, "height bound").toBeLessThanOrEqual(r.winH - 24 + 1);
-    /* the only element between the card and the body is the desk's OWN portal root — a
-       pointer-events:none fixed wrapper with no overflow; any page ancestor here is the fault */
-    expect(r.chain.length, `ancestors: ${r.chain.join(" → ")}`).toBe(1);
-    expect(r.chain[0], "the card's parent is not the desk's own root").toMatch(/^qcd /);
-    expect(r.scrollerOverflow, "no internal scroller").toBe("auto");
-    expect(r.cardOverflow, "the card scrolls its own box — the notch clips").toBe("visible");
-    expect(r.notch).toBe("on");
-    await page.keyboard.press("Escape");
+    const verbs: [string, string, string][] = [
+      ["Record response", ".qcd-card .qrd-kinds", "respond"],
+      ["Nudge", ".qcd-card .qrd-mail", "nudge"],
+      ["Mark closed", ".qcd-card .qrd-kinds--closed", "closed"],
+    ];
+    for (const [verb, ready, key] of verbs) {
+      await page.locator(".qpn-act", { hasText: verb }).first().click();
+      await expect(page.locator(ready)).toBeVisible();
+      /* the frame AFTER open — place() runs in a layout effect against .ws-window */
+      await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+      const r = await paintProbe(page);
+      out[`paint-${key}-${width}`] = r;
+
+      /* the three paint claims */
+      expect(r.stripHitInCard, `${key}: the strip's midpoint paints ${r.stripHit}, not the card`).toBe(true);
+      expect(r.h3Top, `${key}: the title is flush to the strip`).toBeGreaterThanOrEqual(r.stripBottom + 12);
+      expect(r.spotInsideCard, `${key}: the spot slot is not wholly inside the card`).toBe(true);
+      /* and the strip is the STAGE's colour, not the neutral fallback the portal used to leave it */
+      expect(r.stripPx).toBe(5);
+      expect(r.stripColour, `${key}: the strip paints the #e0d5c8 fallback — the palette did not reach the portal`)
+        .not.toBe("rgb(224, 213, 200)");
+
+      /* the bounds contract still holds, as a floor rather than the whole claim */
+      expect(r.cardTop).toBeGreaterThanOrEqual(122 - 0.5);
+      expect(r.cardBottom).toBeLessThanOrEqual(880 - 12 + 1);
+      expect(r.cardH).toBeLessThanOrEqual(770 - 24 + 1);
+      expect(r.chain.length, `ancestors: ${r.chain.join(" → ")}`).toBe(1);
+      expect(r.chain[0]).toMatch(/qcd/);
+      expect(r.scrollerOverflow).toBe("auto");
+      expect(r.cardOverflow, "the card scrolls its own box — the notch clips").toBe("visible");
+      await page.keyboard.press("Escape");
+    }
   });
 
   test(`§4 · the three verbs open, at ${width}`, async ({ page }) => {

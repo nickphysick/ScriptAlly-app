@@ -107,7 +107,20 @@ export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ stage, anchor, r
    * `--stage-accent` still resolves.
    */
   return createPortal(
-    <div className={`qcd qcc--s-${stage}`} role="presentation">
+    /**
+     * ⚠️ THE SCOPE CLASSES RIDE THE PORTAL ROOT, AND WITHOUT THEM THE STRIP PAINTS DEAD (drawer-3
+     * correction). `--stage-out-3` and its family are declared on **`.t-f12`** — the Query Centre
+     * page's own root, not `:root` — so moving the desk to `document.body` left the palette
+     * behind: `--stage-accent: var(--stage-out-3)` became invalid at computed-value time and
+     * `var(--stage-accent, #e0d5c8)` painted its neutral fallback, a 5px parchment strip on a
+     * parchment card. Measured: `--stage-accent` was `#c7d0c2` inside the drawer and EMPTY on the
+     * desk. The house idiom for a body portal is to restate the scope — the three verb desks'
+     * own popovers already do it (`t-f12 qc-neutral qrd-pop`); this is that, one level up.
+     *
+     * ⚠️ NOT "is it a token" but WHERE IS IT EVALUATED — the law this file's siblings already
+     * state, met from the other side: here the SUBJECT moved out from under the defining scope.
+     */
+    <div className={`t-f12 qc-neutral qcd qcc--s-${stage}`} role="presentation">
       <div
         ref={cardRef}
         className="qcd-card"
