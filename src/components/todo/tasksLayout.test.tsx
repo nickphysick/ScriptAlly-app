@@ -243,7 +243,12 @@ describe("⚠️ every control sits above the surface it acts on, and nothing fl
       expect(bare, `${cls} is still on the page`).not.toContain(cls);
     }
     const card = readFileSync(join(here, "TaskList.tsx"), "utf8");
-    for (const cls of ["l-search", "l-icon", "l-add"]) {
+    /* ⚠️ RETARGETED (tightened round, Phase 1): `l-add` retired — the Add is the card's own
+       TOOLBAR row now (the `{toolbar}` slot the card renders first; the row's class lives in
+       TodoToolbar). The claim is unchanged: the list's instruments live in the card, and the
+       page keeps none. */
+    expect(card, "the toolbar slot left the card").toContain("{toolbar}");
+    for (const cls of ["l-search", "l-icon"]) {
       expect(card, `${cls} is missing from the card's toolbar`).toContain(cls);
     }
   });

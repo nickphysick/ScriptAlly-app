@@ -356,11 +356,13 @@ describe("⚠️ ＋ Add task or note reaches a MOUNTED composer (P3)", () => {
   it("the control bar's Add opens task mode; the session launcher is gone", () => {
     /* ⚠️ THE ADD MOVED TO THE CONTROL BAR (corrections, Phase 4) — the tool row is retired, and
        the bar is the one place a list-level action lives now. */
-    /* ⚠️ THE ADD MOVED INTO THE CARD (list port) and calls the SAME opener — one composer, one
-       entrance. Read from the card, where the button now is. */
-    expect(readFileSync(join(here, "TaskList.tsx"), "utf8")).toContain("onClick={onAdd}");
-    expect(page).toContain('onAdd={() => openComposer("task")}');
-    expect(page).toContain("Add task or note");
+    /* ⚠️ RETARGETED (tightened round, Phase 1): the Add is the card TOOLBAR's now — TaskList
+       renders the slot, the toolbar's button carries the handler, and the page still wires it to
+       the SAME opener in task mode. One composer, one entrance, read at each link. */
+    expect(readFileSync(join(here, "TaskList.tsx"), "utf8")).toContain("{toolbar}");
+    expect(readFileSync(join(here, "TodoToolbar.tsx"), "utf8")).toContain("onClick={onAddTask}");
+    expect(page).toContain('onAddTask={() => openComposer("task")}');
+    expect(page).toContain('onAddNote={() => openComposer("note")}');
     expect(page).not.toContain("tdb-ghb");
   });
 

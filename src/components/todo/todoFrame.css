@@ -27,24 +27,11 @@
   --c-now-ink:#7c3a2a; --c-house-ink:#4c5f4a; --c-yours-ink:#8a7440;
 }
 
-.tdf .cmdbar { flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 2px 14px; }
-.tdf .cmd-l, .tdf .cmd-r { display:flex;align-items:center;gap:8px; }
-.tdf .cb { cursor:pointer;height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border-radius:999px;font-size:12px;font-weight:500;transition:all .16s;white-space:nowrap;font-family:'Inter',sans-serif; }
-.tdf .cb svg { flex-shrink:0; }
-.tdf .cb.fill { background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-weight:600; }
-.tdf .cb.fill:hover { background:#efd5ca;border-color:#d8a89a; }
-.tdf .cb.line { background:var(--white);border:1px solid var(--edge);color:#57534e; }
-.tdf .cb.line:hover { background:#f5f2ee; }
-.tdf .cb.line:disabled { opacity:0.45;cursor:default; }
-.tdf .cb.icon-only { width:34px;padding:0;justify-content:center; }
-.tdf .cmd-rule { flex:0 0 auto;height:1px;background:var(--edge);margin:0 2px 16px; }
-.tdf .meter { display:flex;flex-direction:column;gap:6px;min-width:300px;max-width:380px;flex:1;cursor:default; }
-.tdf .meter .track { display:flex;height:7px;border-radius:4px;overflow:hidden;gap:2px; }
-.tdf .meter .track span { border-radius:3px;transition:filter .15s;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(58,28,20,0.10); }
-.tdf .meter .track span:hover { filter:brightness(0.95); }
-.tdf .meter .legend { display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.11em;text-transform:uppercase;color:var(--muted); }
-.tdf .meter .legend b { color:var(--ink2);font-weight:500;font-size:9px; }
-.tdf .cmd-mid { flex:1;display:flex;justify-content:center;min-width:0; }
+/* ⚠️ THE COMMAND BAR'S RULES ARE DELETED WITH ITS RENDERER (tightened round, Phase 1) — `.cmdbar`,
+   `.cmd-l`/`.cmd-r`/`.cmd-mid`, `.cmd-rule`, the `.tdf .cb` cluster and the `.tdf .meter` cluster.
+   The meter and the actions live in the list card's toolbar now (`.tlc .l-toolbar`, taskList.css),
+   restyled to the contract's 150px track and 32px controls. A styled class with no renderer is one
+   a future element wears by accident — the unexploded-selector rule. */
 .tdf .frame { flex:1 1 auto;min-height:0;display:grid;grid-template-columns:min(392px,36%) minmax(0,1fr);gap:18px;align-items:stretch; }
 .tdf .panel { position:fixed;z-index:70;background:var(--white);border:1px solid var(--edge);border-radius:12px; box-shadow:0 4px 8px rgba(58,28,20,0.06),0 16px 44px rgba(58,28,20,0.15);width:288px;padding:16px;display:none; }
 .tdf .panel.open { display:block; }

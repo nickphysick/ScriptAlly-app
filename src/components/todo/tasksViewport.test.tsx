@@ -955,13 +955,15 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
   it("⚠️ ADD ACTS ON THE LIST, SO IT LIVES ON THE LIST — and it is pink, not ink", () => {
     const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
     /* same handler as the bar's copy — a rehoming, not a new entrance */
-    /* ⚠️ THE ADD IS THE CARD'S NOW, and it is the contract's only filled control. Its title is the
-       contract's word too — "Add a task". */
-    expect(readFileSync(join(here, "TaskList.tsx"), "utf8")).toContain('title="Add a task"');
-    /* ⚠️ THE ADD MOVED INTO THE CARD (list port) and calls the SAME opener — one composer, one
-       entrance. Read from the card, where the button now is. */
-    expect(readFileSync(join(here, "TaskList.tsx"), "utf8")).toContain("onClick={onAdd}");
-    expect(page).toContain('onAdd={() => openComposer("task")}');
+    /* ⚠️ RETARGETED (tightened round, Phase 1): the Add is the card TOOLBAR's filled control —
+       the contract's `.cb.fill`, pink by the stylesheet, labelled with the contract's words. Same
+       opener, task mode, read at each link of the new chain. */
+    const toolbar = readFileSync(join(here, "TodoToolbar.tsx"), "utf8");
+    expect(toolbar).toMatch(/className="cb fill"[\s\S]{0,80}onClick={onAddTask}/);
+    expect(toolbar).toContain("Add a task");
+    const css = readFileSync(join(here, "taskList.css"), "utf8");
+    expect(css).toMatch(/\.tlc \.cb\.fill \{[^}]*var\(--pink\)/);
+    expect(page).toContain('onAddTask={() => openComposer("task")}');
     /* ⚠️ BLACK IS RESERVED FOR "THIS ADVANCES". Adding opens a composer — the start of something,
        not the end of it — so it wears the page's other colour. */
     const add = rule(splitCss, ".tdw-add {");

@@ -43,7 +43,7 @@ const groups = (c: BoardCard): TaskGroup[] => [
 const render = (c: BoardCard, showManuscript: boolean) => renderToStaticMarkup(
   <TaskList
     groups={groups(c)} onOpen={() => {}} rowInputs={() => ({ agency: "The Marsh Agency" })}
-    search="" onSearch={() => {}} onAdd={() => {}} onExport={() => {}}
+    search="" onSearch={() => {}} onExport={() => {}}
     onFilter={() => {}} onSort={() => {}} onAside={() => {}}
     showManuscript={showManuscript}
   />,

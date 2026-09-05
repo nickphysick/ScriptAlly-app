@@ -73,7 +73,7 @@ import {
    on orphans: flag, then sweep in a commit of its own). */
 import { TaskList } from "./TaskList";
 import { TODO_ROUTES } from "../../lib/todoRoutes";
-import { TodoCommandBar } from "./TodoCommandBar";
+import { TodoToolbar } from "./TodoToolbar";
 import { AnchoredPanel } from "./AnchoredPanel";
 import { FilterMenu, SortMenu, SnoozePanel } from "./TodoFrameMenus";
 import { SetAsidePanel } from "./SetAsidePanel";
@@ -1752,28 +1752,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               onClose={(rf) => { if (rf) cbSnooze.current?.focus(); setCbDial(false); }}
             />
           )}
-          {/* ⚠️ THE COMMAND BAR SITS ABOVE THE SPLIT, and the split still fills what is left — the
-              frame's height chain is `.wpg--fill`'s, unchanged, with one more `flex: 0 0 auto` row on
-              top of it. Adding a bar must not cost the panes their alignment; the frame assertions
-              measure both card bottoms and were green before this and stay green after. */}
-          <TodoCommandBar
-            groups={railGroups()}
-            onAddTask={() => openComposer("task")}
-            onAddNote={() => openComposer("note")}
-            /* ⚠️ THE ROUTER DIRECTLY (the house rule for new code) — `/todo/calendar` is a real
-               route (todoRoutes.ts:41, mounted in App.tsx), which recon confirmed before this
-               button was drawn. A calendar link with no calendar is the dead link the brief forbids.
-
-               ⚠️ AND THIS COMMENT IS BARE, NOT BRACED. Inside a JSX OPENING TAG the braced form is
-               a syntax error; in CHILDREN it is required; at EXPRESSION position it parses as a
-               block. Three positions, three rules, same two characters — all three have cost time
-               in this session. */
-            onCalendar={() => navigate(TODO_ROUTES.find((p) => p.id === "calendar")!.path)}
-            onJumpTo={(g) => {
-              const el = document.querySelector(`.tlc .grp.${{ urgent: "now", housekeeping: "house", yours: "yours" }[g]}`);
-              el?.scrollIntoView({ behavior: "smooth", block: "start" });
-            }}
-          />
+          {/* ⚠️ THE COMMAND BAR ROW ABOVE THE SPLIT IS RETIRED (tightened round, Phase 1) — its
+              contents are the list card's own toolbar now, mounted through `renderList`'s slot.
+              The split therefore starts one row higher; the frame's height chain is unchanged.
+              The bar's jump-to segments retired with it (the meter is the contract's,
+              non-interactive; the group heads are sticky and one flick away). */}
           {/* ⚠️ THE THIRD DOOR, RESTORED. The list round removed the row's hover clock and left snoozing
               to the `s` key and the pane; this panel puts it back on a surface that says what it will do
               before it does it — the deed named, the return date stated, and the note that nothing is
@@ -3003,7 +2986,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           .filter((g) => g.id !== "done"))}
         search={search}
         onSearch={setSearch}
-        onAdd={() => openComposer("task")}
+        /* ⚠️ THE TOOLBAR READS THE SAME `railGroups()` THE ROWS RENDER FROM — the meter states the
+           groups' own lengths, so it and the group heads cannot disagree (the counting law).
+           Calendar goes through the router directly (the house rule; `/todo/calendar` is a real
+           route, recon-confirmed before the button was first drawn). */
+        toolbar={<TodoToolbar
+          groups={railGroups()}
+          onAddTask={() => openComposer("task")}
+          onAddNote={() => openComposer("note")}
+          onCalendar={() => navigate(TODO_ROUTES.find((p) => p.id === "calendar")!.path)}
+        />}
         onExport={exportRail}
         /* ⚠️ THE FUNNEL LIGHTS FROM THE VIEW, NOT FROM A FLAG. `isFiltered` compares to the default,
          so toggling something back off turns the light off too — a tracked "touched" boolean would

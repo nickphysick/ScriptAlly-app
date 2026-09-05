@@ -46,8 +46,25 @@
 .tlc .l-search input::placeholder { color:#c8b8a8; }
 .tlc .l-icon { cursor:pointer;width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--white);border:0.5px solid var(--hair2);border-radius:9px;color:var(--muted2);transition:all .16s; }
 .tlc .l-icon:hover { border-color:#c9a89e;color:var(--burg); }
-.tlc .l-add { cursor:pointer;width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--pink);border:0.5px solid var(--pink-b);border-radius:9px;color:var(--burg);transition:all .16s; }
-.tlc .l-add:hover { background:#efd5ca; }
+/* ── the toolbar — ONE 32px row, the card's first child (tightened round, Phase 1; contract
+   `.toolbar`/`.meterMini`/`.cb`). The meter's track is the contract's 150px with the one-line
+   legend beside it; the three actions close the row. `.l-add` retired with the command bar —
+   the toolbar's Add-a-task is the card's one filled control now. No hairline of its own: the
+   `.l-bar` beneath already draws the card's first rule, and two rules one row apart would read
+   as a header that failed to merge. ── */
+.tlc .l-toolbar { display:flex;align-items:center;gap:10px;padding:12px 14px 2px;flex:0 0 auto; }
+.tlc .l-tbsp { margin-left:auto; }
+.tlc .meterMini { display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);min-width:0; }
+.tlc .meterMini .track { display:flex;width:150px;height:6px;border-radius:3px;overflow:hidden;gap:2px;flex-shrink:0; }
+.tlc .meterMini .track span { border-radius:2px;box-shadow:inset 0 0 0 1px rgba(58,28,20,0.10); }
+.tlc .meterMini .legend { white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.tlc .meterMini b { color:var(--ink2);font-weight:500; }
+.tlc .cb { cursor:pointer;height:32px;padding:0 13px;border-radius:999px;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:all .16s;font-family:'Inter',sans-serif;flex-shrink:0; }
+.tlc .cb svg { flex-shrink:0; }
+.tlc .cb.fill { background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-weight:600; }
+.tlc .cb.fill:hover { background:#efd5ca;border-color:#d8a89a; }
+.tlc .cb.line { background:var(--white);border:1px solid var(--edge);color:#57534e; }
+.tlc .cb.line:hover { background:#f5f2ee; }
 .tlc .l-body { overflow-y:auto;flex:1 1 auto;min-height:0;padding-bottom:4px; }
 .tlc .l-body::-webkit-scrollbar { width:9px; }
 .tlc .l-body::-webkit-scrollbar-thumb { background:#e2d6c8;border-radius:5px;border:2px solid var(--white); }

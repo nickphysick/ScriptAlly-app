@@ -36,7 +36,11 @@ export interface TaskListProps {
   rowInputs: (card: BoardCard) => Omit<RowInputs, "card">;
   search: string;
   onSearch: (v: string) => void;
-  onAdd: () => void;
+  /** ⚠️ THE CARD'S OWN TOP CHROME (tightened round, Phase 1) — the one 32px toolbar row: the
+   *  workload meter and the three actions. A slot rather than a mount because the actions need
+   *  the page's handlers; the card owns only where it sits. Replaces the retired `onAdd` — the
+   *  toolbar's Add-a-task is the card's one filled control now. */
+  toolbar?: React.ReactNode;
   onExport: () => void;
   /** the filter and sort triggers keep their menus; only their clothing is the contract's */
   filterActive?: boolean;
@@ -127,14 +131,8 @@ const SortIcon = () => (
       transform="scale(0.9) translate(1,1)" />
   </svg>
 );
-const PlusIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
-    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-  </svg>
-);
-
 export const TaskList: React.FC<TaskListProps> = ({
-  groups, selectedKey, onOpen, rowInputs, search, onSearch, onAdd, onExport,
+  groups, selectedKey, onOpen, rowInputs, search, onSearch, toolbar, onExport,
   filterActive, onFilter, filterMenu, sortActive, onSort, sortMenu,
   asideActive, asideCount, onAside, asideMenu, showManuscript, folded, leaving,
   chips, onClearFilters, filterCount, sortLabel, totalUnfiltered,
@@ -223,6 +221,10 @@ export const TaskList: React.FC<TaskListProps> = ({
        scope on the RULE; the same principle applies here, and the card is the one element where
        the two coincide — so it carries both rather than losing the contract's word. */
     <div className={`tlc listcard${folded ? " folded" : ""}${showManuscript ? " hasms" : ""}`}>
+      {/* ⚠️ THE TOOLBAR IS THE CARD'S FIRST CHILD (tightened round, Phase 1) — the meter and the
+          three actions on one 32px row, ABOVE the search row. It is a slot: the page supplies the
+          handlers, and the masthead keeps the page's one title element (the header stream's). */}
+      {toolbar}
       <div className="l-bar">
         <label className="l-search">
           <SearchIcon />
@@ -262,10 +264,6 @@ export const TaskList: React.FC<TaskListProps> = ({
           </button>
           {asideMenu}
         </span>
-        {/* ⚠️ THE ONLY FILLED CONTROL IN THE LIST — the command-bar rule: one primary per surface */}
-        <button type="button" className="l-add" title="Add a task" aria-label="Add a task" onClick={onAdd}>
-          <PlusIcon />
-        </button>
       </div>
 
       {chips && chips.length > 0 && (
