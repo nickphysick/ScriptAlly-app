@@ -974,7 +974,12 @@ export const Queries: React.FC<{
     /* §3 — the detail the drawer crossfades to opens on TRACKING, whatever tab the session last
        used: the writer has just logged a send, and the timeline is where it landed. */
     try { sessionStorage.setItem("sa.qpnTab", "tracking"); } catch { /* fine */ }
+    /* ⚠️ THE URL TOO, NOT ONLY STATE — the ONE-SOURCE law: `?q=` present-and-resolvable selects,
+       absent CLEARS, so a selection set without navigating is cleared by the sync effect in the
+       same tick and the drawer never opens. `pickRow`'s own comment states this; the save's
+       landing goes through the same door. Measured: state-only left `qpn: []` on every tick. */
     setSelectedQueryId(pendingSave.id);
+    onOpenQuery?.(pendingSave.id);
     // Would the current filters hide it? Ask THE predicate, never a copy of it.
     if (!matchesFilters(saved)) setGraceRow({ id: pendingSave.id, leaving: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps

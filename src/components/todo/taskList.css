@@ -103,6 +103,23 @@
 .tlc .row:hover .actb { border-color:var(--pink-b);background:var(--pink);color:var(--burg); }
 .tlc .row:hover .actb .w { display:inline; }
 
+/* ── the view's chrome — the badge, the label, the chips (drawer round, Phase 6) ────────── */
+/* every name minted here was grepped first (the `.unitrow` lesson): l-fbadge, l-slbl, l-wide,
+   l-chips, fchip, l-clear — all clean across the todo and materials sheets */
+.tlc .l-fbadge { position:absolute;top:-5px;right:-5px;min-width:15px;height:15px;padding:0 4px;border-radius:999px; background:var(--burg);color:#fff;font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:500; display:inline-flex;align-items:center;justify-content:center;border:1.5px solid var(--white); }
+/* the badge SUPERSEDES the bare active dot — two markers on one button would say one thing twice */
+.tlc .l-icon.active .l-fbadge ~ .l-icondot, .tlc .l-icon .l-fbadge ~ .l-icondot { display:none; }
+.tlc .l-icon.l-wide { width:auto;padding:0 11px;gap:7px; }
+.tlc .l-slbl { font-size:11px;font-weight:500;white-space:nowrap; }
+
+.tlc .l-chips { display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--hair);flex-wrap:wrap;align-items:center;flex:0 0 auto; }
+.tlc .fchip { display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:999px; background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-size:11px;font-weight:500; }
+/* the facet name in mono — the contract's rule, so an agent's name cannot read as a search term */
+.tlc .fchip .k { font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#a3785f; }
+.tlc .fchip .x { cursor:pointer;font-size:12px;line-height:1;opacity:.7;background:none;border:0;color:inherit;padding:0; }
+.tlc .fchip .x:hover { opacity:1; }
+.tlc .l-clear { margin-left:auto;font-size:10.5px;color:var(--muted2);cursor:pointer;background:none;border:0;padding:0; border-bottom:1px dashed rgba(124,58,42,0.3); }
+
 /* ── the receipt window's row (drawer round, Phase 5) ───────────────────────────────────── */
 /* ⚠️ `held` GIVES THE TRANSITION A FROM-VALUE; `leaving` IS THE FADE. `max-height` cannot animate
    from `auto`, so the held row states a ceiling comfortably above any row (the tallest folded row

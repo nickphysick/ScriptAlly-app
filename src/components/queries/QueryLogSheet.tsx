@@ -20,6 +20,7 @@
  * brief's own phrase, and a portal is the only honest answer inside a scrolling column.
  */
 import React, { useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import "./queryLogSheet.css";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { MaterialsFields } from "./CorrectionDesk";
@@ -63,6 +64,23 @@ export interface QueryLogSheetProps {
    */
   onGhostHint?: (h: { name: string; agency: string } | null) => void;
 }
+
+/**
+ * ⚠️ EVERY POPOVER PORTALS TO document.body — the drawer (`.qpn`) carries a transform, and a
+ * transformed ancestor is the containing block for `position: fixed`: measured, the typeahead's
+ * "fixed" coordinates resolved against the drawer's box and `.qls-sec`'s overflow CLIPPED it —
+ * the exact fault the brief's "must not be clipped by any ancestor" names. The portal wrapper
+ * carries `.t-f12 qc-neutral` because it escapes the page root (QueryJourneySheet's precedent,
+ * for the same reason).
+ */
+const SheetPop: React.FC<{ style: React.CSSProperties; className?: string; label: string; role?: string;
+  panelRef: React.RefObject<HTMLElement>; children: React.ReactNode }> =
+  ({ style, className = "", label, role = "dialog", panelRef, children }) =>
+    createPortal(
+      <div className={`t-f12 qc-neutral ${className}`.trim()} ref={panelRef as React.RefObject<HTMLDivElement>}
+        style={style} role={role} aria-label={label}>{children}</div>,
+      document.body,
+    );
 
 const fmt1 = (iso: string) => {
   const d = new Date(`${iso.slice(0, 10)}T12:00:00`);
@@ -214,7 +232,7 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
                 />
               </div>
               {listOpen && (
-                <div className="qls-list" ref={listPanelRef as React.RefObject<HTMLDivElement>} style={listStyle} role="listbox" aria-label="Agents">
+                <SheetPop className="qls-list" panelRef={listPanelRef} style={listStyle} role="listbox" label="Agents">
                   {hits.map((a, i) => (
                     <button type="button" key={a.id} role="option" aria-selected={i === hi}
                       className={`qls-it${i === hi ? " qls-it--hi" : ""}`}
@@ -238,7 +256,7 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
                       <span className="qls-ita">name and agency now, the rest later</span>
                     </span>
                   </button>
-                </div>
+                </SheetPop>
               )}
               {!newAgent && (
                 <div className="qls-notl">Not listed?{" "}
@@ -328,7 +346,7 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
                   {draft.dateSent === todayInputDate() && <span className="qls-sub">today</span>}
                 </button>
                 {dateOpen && (
-                  <div className="qls-pop" ref={datePanelRef as React.RefObject<HTMLDivElement>} style={dateStyle} role="dialog" aria-label="Date sent">
+                  <SheetPop className="qls-pop" panelRef={datePanelRef} style={dateStyle} label="Date sent">
                     {/* the timeline records what happened — a send cannot be tomorrow */}
                     <BrandDatePicker value={draft.dateSent} max={todayInputDate()}
                       onChange={(iso) => {
@@ -345,7 +363,7 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
                         });
                         setDateOpen(false);
                       }} />
-                  </div>
+                  </SheetPop>
                 )}
               </div>
               <div>
@@ -377,14 +395,14 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
                 {draft.reminder.kind === "custom" ? fmt1(draft.reminder.date) : "Pick a date"}
               </button>
               {nudgePickOpen && (
-                <div className="qls-pop" ref={nudgePanelRef as React.RefObject<HTMLDivElement>} style={nudgeStyle} role="dialog" aria-label="Nudge date">
+                <SheetPop className="qls-pop" panelRef={nudgePanelRef} style={nudgeStyle} label="Nudge date">
                   {/* ⚠️ THE HUB'S OWN LAW, PORTED WITH THE JOURNEY (datePickerHub): the nudge
                       refuses the sending day itself and everything before it — a chase for a
                       parcel that has not gone is not a reminder. Floor = sent + 1. */}
                   <BrandDatePicker value={draft.reminder.kind === "custom" ? draft.reminder.date : ""}
                     min={(() => { const d = new Date(`${draft.dateSent}T12:00:00`); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); })()}
                     onChange={(iso) => { onDraft({ ...draft, reminder: { kind: "custom", date: iso } }); setNudgePickOpen(false); }} />
-                </div>
+                </SheetPop>
               )}
               <button type="button" className={`qls-chipb${draft.reminder.kind === "none" ? " on" : ""}`}
                 onClick={() => onDraft({ ...draft, reminder: { kind: "none" } })}>No nudge</button>
@@ -417,7 +435,7 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
               {ms && <span className="qls-sub">{[ms.genre, ms.wordCount ? `${ms.wordCount.toLocaleString("en-GB")} words` : null].filter(Boolean).join(" · ")}</span>}
             </button>
             {msOpen && (
-              <div className="qls-pop qls-menupop" ref={msPanelRef as React.RefObject<HTMLDivElement>} style={msStyle} role="listbox" aria-label="Manuscript">
+              <SheetPop className="qls-pop qls-menupop" panelRef={msPanelRef} style={msStyle} role="listbox" label="Manuscript">
                 {manuscripts.map((m) => (
                   <button key={m.id} type="button" role="option" aria-selected={m.id === draft.manuscriptId}
                     className={`qls-it${m.id === draft.manuscriptId ? " qls-it--hi" : ""}`}
@@ -426,7 +444,7 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
                       <span className="qls-ita">{[m.genre, m.wordCount ? `${m.wordCount.toLocaleString("en-GB")} words` : null].filter(Boolean).join(" · ")}</span></span>
                   </button>
                 ))}
-              </div>
+              </SheetPop>
             )}
             <MaterialsFields rows={draft.materials}
               statedSample={(() => {
@@ -449,13 +467,13 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
               <div className="qls-pkg">
                 <button type="button" ref={pkgRef as React.RefObject<HTMLButtonElement>} onClick={() => setPkgOpen((o) => !o)}>Attach a package ›</button>
                 {pkgOpen && (
-                  <div className="qls-pop qls-menupop" ref={pkgPanelRef as React.RefObject<HTMLDivElement>} style={pkgStyle} role="listbox" aria-label="Packages">
+                  <SheetPop className="qls-pop qls-menupop" panelRef={pkgPanelRef} style={pkgStyle} role="listbox" label="Packages">
                     {attachable.map((p) => (
                       <button key={p.id} type="button" role="option" className="qls-it" onClick={() => attachPackage(p)}>
                         <span className="qls-ittx"><span className="qls-itn">{p.packageName}</span></span>
                       </button>
                     ))}
-                  </div>
+                  </SheetPop>
                 )}
               </div>
             )}

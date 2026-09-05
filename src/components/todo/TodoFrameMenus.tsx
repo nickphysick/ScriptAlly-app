@@ -8,8 +8,8 @@
 import React from "react";
 import { Bucket } from "../../lib/todoBuckets";
 import {
-  GROUP_IDS, GroupId, GROUPING_LABEL, GroupingId, ListView, SORT_LABEL, SortId,
-  TYPE_LABEL, TYPE_ORDER, VIEW_DEFAULT,
+  GROUP_IDS, GroupId, GROUPING_DESC, GROUPING_LABEL, GroupingId, ListView, SORT_DESC, SORT_LABEL,
+  SortId, TYPE_LABEL, TYPE_ORDER, VIEW_DEFAULT,
 } from "../../lib/todoListView";
 import { snoozeParts } from "../../lib/elapsed";
 
@@ -36,69 +36,146 @@ const Item: React.FC<{
 
 export interface FilterMenuProps {
   view: ListView;
-  groupCounts: Record<GroupId, number>;
+  /**
+   * ⚠️ CONDITIONAL COUNTS — "what this choice would leave, given the others", the contract's own
+   * foot-note. The page derives both from `viewLeaving` (the view re-run with the option's own
+   * facet lifted), so the numbers genuinely answer the question the panel is asking; a count over
+   * the raw board would promise rows the other filters have already hidden.
+   */
   typeCounts: Record<Bucket, number>;
+  /** every agent who has a live card, id → name+count — the ticks' population AND their labels */
+  agentRows: { id: string; name: string; count: number }[];
   snoozedCount: number;
   dismissedCount: number;
-  shown: number;
   onChange: (v: ListView) => void;
 }
 
 export const FilterMenu: React.FC<FilterMenuProps> = ({
-  view, groupCounts, typeCounts, snoozedCount, dismissedCount, shown, onChange,
+  view, typeCounts, agentRows, snoozedCount, dismissedCount, onChange,
 }) => {
-  /* ⚠️ A MULTI-SELECT NEVER EMPTIES ITSELF. Turning the last one off would show nothing and read as
-     a broken page; the toggle simply refuses, which is what "these are alternatives" means. */
-  const toggle = <T,>(list: T[], v: T): T[] =>
-    list.includes(v) ? (list.length > 1 ? list.filter((x) => x !== v) : list) : [...list, v];
-
+  /* the find box narrows the TICK LIST, never the tasks — a panel-local convenience */
+  const [find, setFind] = React.useState("");
+  const toggleType = (t: Bucket): Bucket[] =>
+    view.types.includes(t)
+      ? (view.types.length > 1 ? view.types.filter((x) => x !== t) : view.types)
+      : [...view.types, t];
+  const toggleAgent = (id: string): string[] =>
+    view.agents.includes(id) ? view.agents.filter((x) => x !== id) : [...view.agents, id];
+  const shownAgents = agentRows.filter((a) => a.name.toLowerCase().includes(find.trim().toLowerCase()));
   return (
-    <>
-      <div className="m-h">Show tasks</div>
-      {GROUP_IDS.map((g) => (
-        <Item key={g} on={view.groups.includes(g)} swatch={GROUP_SWATCH[g]} count={groupCounts[g]}
-          onPick={() => onChange({ ...view, groups: toggle(view.groups, g) })}>{GROUP_LABEL[g]}</Item>
-      ))}
-      <div className="m-rule" />
-      <div className="m-h">By type</div>
-      {TYPE_ORDER.map((t) => (
-        <Item key={t} on={view.types.includes(t)} swatch={TYPE_SWATCH[t]} count={typeCounts[t]}
-          onPick={() => onChange({ ...view, types: toggle(view.types, t) })}>{TYPE_LABEL[t]}</Item>
-      ))}
-      <div className="m-rule" />
-      <Item on={view.includeSnoozed} count={snoozedCount}
-        onPick={() => onChange({ ...view, includeSnoozed: !view.includeSnoozed })}>Include snoozed</Item>
-      {/* ⚠️ BESIDE IT, NOT INSTEAD OF IT (pane round, Phase 7). Two states, two entries, both off by
-          default — the list shows what is live, and either can be admitted without the other. */}
-      <Item on={view.includeDismissed} count={dismissedCount}
-        onPick={() => onChange({ ...view, includeDismissed: !view.includeDismissed })}>Include dismissed</Item>
-      <div className="m-foot">
-        <a role="button" tabIndex={0} onClick={() => onChange({ ...VIEW_DEFAULT })}>Show everything</a>
-        <span className="n">{shown} shown</span>
+    <div className="tdvp" role="none">
+      <div className="v-ph"><span className="t">Filter</span>
+        <button type="button" className="a"
+          onClick={() => onChange({ ...view, types: [...TYPE_ORDER], agents: [], includeSnoozed: false, includeDismissed: false })}>
+          Clear all
+        </button>
       </div>
-    </>
+      <div className="v-sec">Task type</div>
+      {TYPE_ORDER.map((t) => (
+        <button key={t} type="button" role="menuitemcheckbox" aria-checked={view.types.includes(t)}
+          className={view.types.includes(t) ? "v-opt on" : "v-opt"}
+          onClick={() => onChange({ ...view, types: toggleType(t) })}>
+          <span className="v-tick" aria-hidden>✓</span>
+          <span className="v-body">{TYPE_LABEL[t]}</span>
+          <span className="v-c">{typeCounts[t]}</span>
+        </button>
+      ))}
+      <div className="v-sec">Agent</div>
+      <div className="v-find">
+        <input value={find} onChange={(e) => setFind(e.target.value)}
+          placeholder="Find an agent…" aria-label="Find an agent" />
+      </div>
+      {/* ⚠️ THE TICK LIST SCROLLS INSIDE THE PANEL — the AnchoredPanel re-placement rule from the
+          recon, built in from the start: the panel's own height never changes as counts change or
+          the find box narrows, so the placement is measured once and holds. */}
+      <div className="v-agents">
+        {shownAgents.map((a) => (
+          <button key={a.id} type="button" role="menuitemcheckbox" aria-checked={view.agents.includes(a.id)}
+            className={view.agents.includes(a.id) ? "v-opt on" : "v-opt"}
+            onClick={() => onChange({ ...view, agents: toggleAgent(a.id) })}>
+            <span className="v-tick" aria-hidden>✓</span>
+            <span className="v-av" aria-hidden>{a.name.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase()}</span>
+            <span className="v-body">{a.name}</span>
+            <span className="v-c">{a.count}</span>
+          </button>
+        ))}
+        {shownAgents.length === 0 && <div className="v-none">No agent matches that.</div>}
+      </div>
+      <div className="v-sec">Also show</div>
+      {/* ⚠️ THE ONLY TOGGLES THAT WIDEN — everything above narrows, and the + on the count says so */}
+      <button type="button" role="menuitemcheckbox" aria-checked={view.includeSnoozed}
+        className={view.includeSnoozed ? "v-opt on" : "v-opt"}
+        onClick={() => onChange({ ...view, includeSnoozed: !view.includeSnoozed })}>
+        <span className="v-tick" aria-hidden>✓</span>
+        <span className="v-body">Snoozed tasks</span>
+        <span className="v-c">+{snoozedCount}</span>
+      </button>
+      <button type="button" role="menuitemcheckbox" aria-checked={view.includeDismissed}
+        className={view.includeDismissed ? "v-opt on" : "v-opt"}
+        onClick={() => onChange({ ...view, includeDismissed: !view.includeDismissed })}>
+        <span className="v-tick" aria-hidden>✓</span>
+        <span className="v-body">Dismissed tasks</span>
+        <span className="v-c">+{dismissedCount}</span>
+      </button>
+      <div className="v-pf">Counts show how many tasks each choice would leave, given your other filters.</div>
+    </div>
   );
 };
 
-export const SortMenu: React.FC<{ view: ListView; onChange: (v: ListView) => void }> = ({ view, onChange }) => (
-  <>
-    <div className="m-h">Order by</div>
-    {(Object.keys(SORT_LABEL) as SortId[]).map((s) => (
-      <button key={s} type="button" role="menuitemradio" aria-checked={view.sort === s}
-        className={view.sort === s ? "m-i on" : "m-i"} onClick={() => onChange({ ...view, sort: s })}>
-        {SORT_LABEL[s]}<span className="mark">✓</span>
+/**
+ * ⚠️ GROUP FIRST, ORDER SECOND, DIRECTION BENEATH — the contract's own sequence, because it is the
+ * order the list is actually built in: grouping decides the big shape, ordering runs inside each
+ * group. The panel reading top-down as the pipeline runs is what stops "sort by agent" quietly
+ * destroying the urgency groups — the contract's own note, kept in its foot.
+ *
+ * ⚠️ EVERYTHING IS SCOPED `.tdvp` — a fresh namespace, grepped clean before minting, because the
+ * `.unitrow` orphan fired one phase ago and `tick`/`chip`/`panel` all exist elsewhere in this app.
+ */
+export const SortMenu: React.FC<{
+  view: ListView; onChange: (v: ListView) => void;
+  /** the manuscript grouping is offered only on a multi-book account — hidden, not greyed */
+  showManuscript?: boolean;
+}> = ({ view, onChange, showManuscript }) => {
+  const groupings = (Object.keys(GROUPING_LABEL) as GroupingId[])
+    .filter((g) => g !== "manuscript" || showManuscript);
+  return (
+  <div className="tdvp" role="none">
+    <div className="v-ph"><span className="t">Group &amp; order</span>
+      <button type="button" className="a"
+        onClick={() => onChange({ ...view, sort: VIEW_DEFAULT.sort, grouping: VIEW_DEFAULT.grouping, direction: VIEW_DEFAULT.direction })}>
+        Reset
       </button>
-    ))}
-    <div className="m-rule" />
-    <div className="m-h">Grouping</div>
-    {(Object.keys(GROUPING_LABEL) as GroupingId[]).map((g) => (
+    </div>
+    <div className="v-sec">Group by</div>
+    {groupings.map((g) => (
       <button key={g} type="button" role="menuitemradio" aria-checked={view.grouping === g}
-        className={view.grouping === g ? "m-i on" : "m-i"} onClick={() => onChange({ ...view, grouping: g })}>
-        {GROUPING_LABEL[g]}<span className="mark">✓</span>
+        className={view.grouping === g ? "v-opt on" : "v-opt"} onClick={() => onChange({ ...view, grouping: g })}>
+        <span className="v-radio" aria-hidden />
+        <span className="v-body">{GROUPING_LABEL[g]}
+          {GROUPING_DESC[g] && <span className="v-desc">{GROUPING_DESC[g]}</span>}
+        </span>
       </button>
     ))}
-  </>
-);
+    <div className="v-sec">Then order each group by</div>
+    {(Object.keys(SORT_LABEL) as SortId[]).map((sId) => (
+      <button key={sId} type="button" role="menuitemradio" aria-checked={view.sort === sId}
+        className={view.sort === sId ? "v-opt on" : "v-opt"} onClick={() => onChange({ ...view, sort: sId })}>
+        <span className="v-radio" aria-hidden />
+        <span className="v-body">{SORT_LABEL[sId]}
+          {SORT_DESC[sId] && <span className="v-desc">{SORT_DESC[sId]}</span>}
+        </span>
+      </button>
+    ))}
+    <div className="v-sw" role="group" aria-label="Direction">
+      <button type="button" className={view.direction === "asc" ? "on" : ""} aria-pressed={view.direction === "asc"}
+        onClick={() => onChange({ ...view, direction: "asc" })}>First → last</button>
+      <button type="button" className={view.direction === "desc" ? "on" : ""} aria-pressed={view.direction === "desc"}
+        onClick={() => onChange({ ...view, direction: "desc" })}>Last → first</button>
+    </div>
+    <div className="v-pf">Grouping decides the big shape; ordering runs inside each group. Group by “None” gives one flat list.</div>
+  </div>
+  );
+};
 
 /* ── the snooze panel ─────────────────────────────────────────────────────────────────────── */
 

@@ -82,6 +82,7 @@ import { TaskDismissDialog } from "./TaskDismissDialog";
 import {
   applyView, groupCounts as viewGroupCounts, GroupId, isFiltered, isSorted, ListView, parseView,
   typeCounts as viewTypeCounts, viewTotal, VIEW_DEFAULT,
+  viewLeaving, viewButtonLabel, filterBadge, TYPE_ORDER, TYPE_LABEL, GROUP_IDS,
 } from "../../lib/todoListView";
 import { useNavigate } from "react-router-dom";
 import { groupColumn, TaskGroup } from "../../lib/todoGroups";
@@ -137,7 +138,7 @@ import { taskGroups, railChips, chipGroups, chipMatchesCard, RailChipId } from "
    its nine unit cases are left whole and unmounted, per the house rule on orphans; sweeping them
    is a commit of its own. */
 import { showingLine, tasksCsv } from "../../lib/todoHandoff";
-import { rowFigure, daysSince, waitAnchorMs, RowFigure, cardBucket, BUCKET_LABEL, taskDeed } from "../../lib/todoBuckets";
+import { rowFigure, daysSince, waitAnchorMs, RowFigure, cardBucket, BUCKET_LABEL, taskDeed, Bucket } from "../../lib/todoBuckets";
 /* ⚠️ THE THREE LIFTED DERIVATIONS (tasks-workflow, Pack A). Aliased on import so the page's own
    wrappers keep the names every call site already uses — the lift changes where the code lives,
    never what this file calls it. */
@@ -802,6 +803,36 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      derivation — it read `board` where the rail reads `boardCols`, and produced a different total,
      which is why the pane said "of 14" beside a list of 11. The queue is now the cards the list is
      showing, in the order it shows them, so "TASK n OF m" cannot describe a set you cannot see. */
+  /* ⚠️ DECLARED ABOVE `allDockable`, WHICH IS THE POINT (Phase 6 — caught by the render smoke,
+     not by tsc). `railGroups()` is a hoisted function that now passes `viewFacts` to `applyView`,
+     and its first render-time CALLER is the line below — so with these two declared at their old
+     home, four hundred lines down, the page threw `Cannot access 'viewFacts' before
+     initialization` on every render. The exact hoisted-helper TDZ the repo's rules document: tsc
+     cannot see through the function boundary, and the OLD inline closure only survived in the same
+     position because the default sort never invoked it — a latent crash for every non-default
+     sort, shipped green. The rule applied is the ORDER rule: anything a render-time expression
+     reads is declared above it. */
+  /* ⚠️ LIFTED TO `lib/taskCardFacts.ts` (Pack A) — a WRAPPER over the moved body, and the
+     `useCallback` with its EXACT original dependency list is kept deliberately: this function is
+     handed to `TaskList` as `rowInputs` and drives the view's sort key, so its identity stability
+     is load-bearing. Changing the memoisation would change when the list re-renders, which is a
+     behaviour change, and this pack forbids one. */
+  const listRowInputs = React.useCallback(
+    (c: BoardCard) => libListRowInputs(c, taskData),
+    [taskData],
+  );
+
+  /* ⚠️ THE SORT'S FACTS ARE THE ROWS' FACTS — the accessors `applyView` orders by are the same
+     `listRowInputs` the cells render from, so "Agency A–Z" cannot disagree with the agency column
+     it is ostensibly ordering. Declared BELOW its dependency: the dep array evaluates at the
+     declaration, and above it this was a same-scope TDZ tsc rightly refused (TS2448 — and per the
+     house rule, the refusal triggered an audit of the memo's other render-time reads: there are
+     none). */
+  const viewFacts = React.useMemo(() => ({
+    days: (c: BoardCard) => listRowInputs(c).days ?? null,
+    agency: (c: BoardCard) => (listRowInputs(c).agency ?? "").trim(),
+  }), [listRowInputs]);
+
   const allDockable = dockQueue(railGroups().flatMap((g) => g.cards));
   /* the chip narrows the SAME list the rail draws, so the pane walks exactly what you can see */
   const dockable = allDockable.filter((c) => chipMatchesCard(chip, c));
@@ -1098,15 +1129,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
 
 
-  /* ⚠️ LIFTED TO `lib/taskCardFacts.ts` (Pack A) — a WRAPPER over the moved body, and the
-     `useCallback` with its EXACT original dependency list is kept deliberately: this function is
-     handed to `TaskList` as `rowInputs` and drives the view's sort key, so its identity stability
-     is load-bearing. Changing the memoisation would change when the list re-renders, which is a
-     behaviour change, and this pack forbids one. */
-  const listRowInputs = React.useCallback(
-    (c: BoardCard) => libListRowInputs(c, taskData),
-    [taskData],
-  );
+  /* (`listRowInputs` and `viewFacts` moved ABOVE the board derivations — see there) */
 
 
 
@@ -2826,10 +2849,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        the one array. A "done" group re-admitting the card three groups down would mean the row
        LEAVES and ARRIVES in one gesture, and the footer would never drop at all. The cleared log
        is untouched — `deskState` and the desk-cleared band read `boardCols.done` directly. */
-    return applyView(generatedGroups(chipGroups(taskGroups(narrowed), chip)), view, (c) => {
-      const f = listRowInputs(c);
-      return f.days;
-    }).filter((g) => g.id !== "done");
+    return applyView(generatedGroups(chipGroups(taskGroups(narrowed), chip)), view, viewFacts)
+      .filter((g) => g.id !== "done");
   }
 
   /**
@@ -2919,6 +2940,43 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         /* ⚠️ THE SAME EXPRESSION THE SPLIT'S OWN CLASS READS — `!!paneCard`. Two derivations of
            "is a task open" is how a folded row ends up in a full-width card. */
         folded={!!paneCard}
+        /* ⚠️ THE CHIPS ARE DERIVED FROM THE SAME VIEW THE PANEL EDITS — remove one and you have
+           edited the view, exactly as unticking it in the panel would. Facet names in mono per the
+           contract; group heads use the family's own labels. */
+        chips={[
+          ...GROUP_IDS.filter((g) => !view.groups.includes(g)).map((g) => ({
+            facet: "hiding", label: ({ urgent: "Needs you now", housekeeping: "Housekeeping", yours: "Your tasks" })[g],
+            onRemove: () => setView({ ...view, groups: [...view.groups, g] }),
+          })),
+          ...(view.types.length !== TYPE_ORDER.length
+            ? view.types.map((t) => ({
+                facet: "type", label: TYPE_LABEL[t],
+                onRemove: () => setView({
+                  ...view,
+                  types: view.types.length > 1 ? view.types.filter((x) => x !== t) : [...TYPE_ORDER],
+                }),
+              }))
+            : []),
+          ...view.agents.map((id) => ({
+            facet: "agent",
+            label: (() => { const a = agents.find((x) => x.id === id); return a ? agentPrimary(a) : "(agent)"; })(),
+            onRemove: () => setView({ ...view, agents: view.agents.filter((x) => x !== id) }),
+          })),
+          ...(view.includeSnoozed ? [{ facet: "also", label: "Snoozed",
+            onRemove: () => setView({ ...view, includeSnoozed: false }) }] : []),
+          ...(view.includeDismissed ? [{ facet: "also", label: "Dismissed",
+            onRemove: () => setView({ ...view, includeDismissed: false }) }] : []),
+        ]}
+        onClearFilters={() => setView({ ...view, groups: [...GROUP_IDS], types: [...TYPE_ORDER], agents: [], includeSnoozed: false, includeDismissed: false })}
+        filterCount={filterBadge(view)}
+        sortLabel={viewButtonLabel(view)}
+        /* ⚠️ N IS "WHAT WOULD SHOW WITH NOTHING NARROWING" — the same pipeline with the narrowing
+           facets lifted, NOT a raw store count. Search and the chip narrow upstream of the view,
+           so they participate in n and in N alike; the footer's two-number form appears exactly
+           when the view itself is hiding rows, which is the claim the contract makes. */
+        totalUnfiltered={viewTotal(applyView(railGroupsAll(),
+          { ...view, groups: [...GROUP_IDS], types: [...TYPE_ORDER], agents: [] }, viewFacts)
+          .filter((g) => g.id !== "done"))}
         search={search}
         onSearch={setSearch}
         onAdd={() => openComposer("task")}
@@ -2933,11 +2991,45 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           onClose={(back) => { setFilterOpen(false); if (back) filterAnchor.current?.focus(); }}>
           <FilterMenu
             view={view}
-            groupCounts={viewGroupCounts(railGroupsAll())}
-            typeCounts={viewTypeCounts(railGroupsAll())}
+            /* ⚠️ CONDITIONAL COUNTS (Phase 6) — each facet's numbers come from the view re-run
+               with that facet's OWN choices lifted, so the panel answers "what would this leave,
+               given the others". `viewLeaving` is the one derivation; counting the raw board here
+               would promise rows the other filters have already hidden. */
+            typeCounts={(() => {
+              const left = viewLeaving(generatedGroups(chipGroups(taskGroups({
+                todo: narrowCards(boardCols.todo), today: narrowCards(boardCols.today),
+                snoozed: narrowCards(boardCols.snoozed), dismissed: narrowCards(boardCols.dismissed),
+                done: narrowCards(boardCols.done),
+              }), chip)), view, viewFacts, "types");
+              const out = Object.fromEntries(TYPE_ORDER.map((t) => [t, 0])) as Record<Bucket, number>;
+              for (const c of left) out[cardBucket(c)] += 1;
+              return out;
+            })()}
+            agentRows={(() => {
+              const left = viewLeaving(generatedGroups(chipGroups(taskGroups({
+                todo: narrowCards(boardCols.todo), today: narrowCards(boardCols.today),
+                snoozed: narrowCards(boardCols.snoozed), dismissed: narrowCards(boardCols.dismissed),
+                done: narrowCards(boardCols.done),
+              }), chip)), view, viewFacts, "agents");
+              const rows = new Map<string, { id: string; name: string; count: number }>();
+              for (const c of left) {
+                if (!c.agentId || !(c.who || "").trim()) continue;
+                const r = rows.get(c.agentId) ?? { id: c.agentId, name: (c.who || "").trim(), count: 0 };
+                r.count += 1; rows.set(c.agentId, r);
+              }
+              /* ⚠️ A TICKED AGENT NEVER VANISHES FROM THE PANEL — an active filter must stay
+                 removable where it was set, even when the other filters have taken its count to
+                 zero. Absent rows for ticked ids are re-added at 0. */
+              for (const id of view.agents) {
+                if (!rows.has(id)) {
+                  const name = agents.find((a) => a.id === id);
+                  rows.set(id, { id, name: name ? agentPrimary(name) : "(agent)", count: 0 });
+                }
+              }
+              return [...rows.values()].sort((a, b) => a.name.localeCompare(b.name));
+            })()}
             snoozedCount={narrowCards(boardCols.snoozed).length}
             dismissedCount={narrowCards(boardCols.dismissed).length}
-            shown={viewTotal(railGroups())}
             onChange={setView}
           />
         </AnchoredPanel>
@@ -2947,7 +3039,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       sortMenu={sortOpen && sortAnchor.current ? (
         <AnchoredPanel anchor={sortAnchor.current} ariaLabel="Sort tasks"
           onClose={(back) => { setSortOpen(false); if (back) sortAnchor.current?.focus(); }}>
-          <SortMenu view={view} onChange={setView} />
+          <SortMenu view={view} onChange={setView} showManuscript={showsManuscriptColumn(manuscripts.length)} />
         </AnchoredPanel>
       ) : null}
       /* ⚠️ THE COUNT IS DERIVED FROM THE SAME `hiddenItems` THE PANEL RENDERS — never a second

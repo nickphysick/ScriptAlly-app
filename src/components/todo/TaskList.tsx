@@ -73,6 +73,26 @@ export interface TaskListProps {
    * `.tdb-ffsheet.leaving`, which cannot reach a `.tlc .row`.
    */
   leaving?: { key: string; fading: boolean };
+  /**
+   * ⚠️ THE CHIPS ARE THE ACTIVE FILTER SET, HANDED DOWN AS DATA (Phase 6). The page derives them
+   * from the SAME view the panel edits, so a chip and a tick cannot disagree about what is
+   * filtering the list. Each carries the facet name in mono — the contract's rule, so "Jonathan
+   * Marsh" cannot be mistaken for a search term — and its own ×; the row renders only when
+   * something is active.
+   */
+  chips?: { facet: string; label: string; onRemove: () => void }[];
+  onClearFilters?: () => void;
+  /** the filter button's badge — the count of active choices, 0 hides it */
+  filterCount?: number;
+  /** the Group & order trigger's label — the contract's "By agent · Longest waiting" */
+  sortLabel?: string;
+  /**
+   * ⚠️ THE FOOTER'S SECOND FORM (Phase 6). When anything is hiding rows it reads
+   * "Showing n of N" — n is the ONE array's total as ever; N arrives from the page as what would
+   * show with nothing narrowing. The two-number form appears EXACTLY when they differ, which is
+   * computed here from the numbers rather than from a flag that could go stale.
+   */
+  totalUnfiltered?: number;
 }
 
 /** the contract's three group tints, keyed by its own group ids */
@@ -117,6 +137,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   groups, selectedKey, onOpen, rowInputs, search, onSearch, onAdd, onExport,
   filterActive, onFilter, filterMenu, sortActive, onSort, sortMenu,
   asideActive, asideCount, onAside, asideMenu, showManuscript, folded, leaving,
+  chips, onClearFilters, filterCount, sortLabel, totalUnfiltered,
 }) => {
   /**
    * ⚠️ ONE ARRAY, COUNTED ONCE. The rows map over `g.cards`; the head prints `g.cards.length`; the
@@ -214,15 +235,20 @@ export const TaskList: React.FC<TaskListProps> = ({
             className={filterActive ? "l-icon active" : "l-icon"}
             onClick={(e) => onFilter(e.currentTarget)}>
             <FilterIcon />
+            {/* ⚠️ A COUNT, NOT A DOT — the contract's badge says HOW MANY choices are active,
+                which is what makes "why is my list short" answerable from the toolbar */}
+            {!!filterCount && <span className="l-fbadge">{filterCount}</span>}
           </button>
           {filterMenu}
         </span>
         <span className="l-menuwrap" onPointerDown={(e) => e.stopPropagation()}>
-          <button type="button" title="Sort" aria-label="Sort"
+          <button type="button" title="Group and order" aria-label="Group and order"
             aria-haspopup="menu" aria-expanded={!!sortActive}
-            className={sortActive ? "l-icon active" : "l-icon"}
+            className={(sortActive ? "l-icon active" : "l-icon") + (sortLabel ? " l-wide" : "")}
             onClick={(e) => onSort(e.currentTarget)}>
             <SortIcon />
+            {/* the trigger reads its own state — "By agent · Longest waiting" — the contract's label */}
+            {sortLabel && <span className="l-slbl">{sortLabel}</span>}
           </button>
           {sortMenu}
         </span>
@@ -242,6 +268,20 @@ export const TaskList: React.FC<TaskListProps> = ({
         </button>
       </div>
 
+      {chips && chips.length > 0 && (
+        <div className="l-chips">
+          {chips.map((c, i) => (
+            <span className="fchip" key={`${c.facet}-${c.label}-${i}`}>
+              <span className="k">{c.facet}</span>{c.label}
+              <button type="button" className="x" aria-label={`Remove the ${c.facet} filter ${c.label}`}
+                onClick={c.onRemove}>×</button>
+            </span>
+          ))}
+          {onClearFilters && (
+            <button type="button" className="l-clear" onClick={onClearFilters}>Clear all</button>
+          )}
+        </div>
+      )}
       <div className="l-body" ref={bodyRef} onScroll={readAnchor}>
         {groups.map((g) => (
           <React.Fragment key={g.id}>
@@ -330,7 +370,9 @@ export const TaskList: React.FC<TaskListProps> = ({
       <div className="l-foot">
         {/* ⚠️ ONE COUNT, FROM THE ARRAY THE ROWS RENDER FROM. No "showing X of Y" — there is no
             second number, so the two cannot disagree. */}
-        <span className="c"><b>{total}</b> tasks · {needsYouNow} need you now</span>
+        {typeof totalUnfiltered === "number" && totalUnfiltered !== total
+          ? <span className="c">Showing <b>{total}</b> of {totalUnfiltered}</span>
+          : <span className="c"><b>{total}</b> tasks · {needsYouNow} need you now</span>}
         <a href="#" onClick={(e) => { e.preventDefault(); onExport(); }}>Export CSV</a>
       </div>
     </div>

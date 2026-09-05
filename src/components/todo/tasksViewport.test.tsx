@@ -1511,14 +1511,19 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
   it("the filter menu reads `railChips`, the same derivation the bands read", () => {
     const at = board.indexOf("function renderList");
     expect(at, "the rail tools are gone — this slice would read nothing").toBeGreaterThan(-1);
-    const fn = board.slice(at, at + 3200);
-    /* ⚠️ RE-POINTED (frame round). The contract's filter counts by GROUP and by TYPE, and both
-       come from `railGroupsAll()` — the same array the section bands and the command bar's meter
-       read. The claim is the one this case has always made: the menu's figures and the bands'
-       figures are one derivation, so they cannot disagree. The chips' own map is retired with them. */
-    expect(fn).toContain("groupCounts={viewGroupCounts(railGroupsAll())}");
-    expect(fn).toContain("typeCounts={viewTypeCounts(railGroupsAll())}");
-    expect(fn).toContain("shown={viewTotal(railGroups())}");
+    /* bounded by the next function, not by a guessed length — the 3200-char window silently
+       stopped short of the FilterMenu block the moment the chips grew above it */
+    const end = board.indexOf("function openSundayReview", at);
+    expect(end, "the slice's closing anchor is gone").toBeGreaterThan(at);
+    const fn = board.slice(at, end);
+    /* ⚠️ RE-POINTED AGAIN (drawer round, Phase 6), AND THE CLAIM SHARPENED WITH IT. The sort-filter
+       contract's counts are CONDITIONAL — "what this choice would leave, given the others" — so
+       the one derivation both readers share is now `viewLeaving`: the view re-run with the
+       option's own facet lifted. A raw-board count here would promise rows the other filters have
+       already hidden, which is the disagreement this case exists to forbid, wearing a new face. */
+    expect(fn, "the type counts stopped being conditional").toContain('viewFacts, "types")');
+    expect(fn, "the agent counts stopped being conditional").toContain('viewFacts, "agents")');
+    expect(fn, "a raw-board count crept back in").not.toContain("viewTypeCounts(railGroupsAll())");
   });
 
   /**
