@@ -95,14 +95,16 @@
  * `background-color`. A real gradient across a 20px band reads as a lighting effect and makes two
  * adjacent rungs indistinguishable where they meet.
  */
-.qcc--s-out-1 { --band-a: var(--stage-out-1); --band-b: var(--stage-out-1); }
-.qcc--s-out-2 { --band-a: var(--stage-out-2); --band-b: var(--stage-out-2); }
-.qcc--s-out-3 { --band-a: var(--stage-out-3); --band-b: var(--stage-out-3); }
-.qcc--s-in-1 { --band-a: var(--stage-in-1); --band-b: var(--stage-in-1); }
-.qcc--s-in-2 { --band-a: var(--stage-in-2); --band-b: var(--stage-in-2); }
-.qcc--s-in-3 { --band-a: var(--stage-in-3); --band-b: var(--stage-in-3); }
-.qcc--s-offer { --band-a: var(--stage-offer); --band-b: var(--stage-offer); }
-.qcc--s-closed { --band-a: var(--stage-closed); --band-b: var(--stage-closed); }
+.qcc--s-out-1 { --band-a: var(--stage-out-1); --band-b: var(--stage-out-1); --stage-accent: var(--stage-out-3); }
+.qcc--s-out-2 { --band-a: var(--stage-out-2); --band-b: var(--stage-out-2); --stage-accent: var(--stage-out-3); }
+.qcc--s-out-3 { --band-a: var(--stage-out-3); --band-b: var(--stage-out-3); --stage-accent: var(--stage-out-3); }
+.qcc--s-in-1 { --band-a: var(--stage-in-1); --band-b: var(--stage-in-1); --stage-accent: var(--stage-in-3); }
+.qcc--s-in-2 { --band-a: var(--stage-in-2); --band-b: var(--stage-in-2); --stage-accent: var(--stage-in-3); }
+.qcc--s-in-3 { --band-a: var(--stage-in-3); --band-b: var(--stage-in-3); --stage-accent: var(--stage-in-3); }
+.qcc--s-offer { --band-a: var(--stage-offer); --band-b: var(--stage-offer); --stage-accent: var(--stage-offer); }
+.qcc--s-closed { --band-a: var(--stage-closed); --band-b: var(--stage-closed); --stage-accent: var(--stage-closed); }
+
+
 
 /* ── the band ───────────────────────────────────────────────────────────────────────────────── */
 .qcc-band {

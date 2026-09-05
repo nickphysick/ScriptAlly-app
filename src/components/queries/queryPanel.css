@@ -39,15 +39,12 @@
  */
 .qpn-body { overflow-y: auto; flex: 1; min-height: 0; padding: 18px 26px 40px; }
 
-/* ── the stage accent — decision 3 ──────────────────────────────────────────────────────────────
-   The DEEPEST step of the query's own hue, derived from the same stage class the band reads.
-   Not a new token: out-* resolves to out-3, in-* to in-3; offer and closed are their own single
-   steps. Every accent surface in the drawer (tab underline, desk strip, rung ring) reads
-   `--stage-accent` and nothing else, so a retuned ladder moves all of them together. */
-.qpn.qcc--s-out-1, .qpn.qcc--s-out-2, .qpn.qcc--s-out-3 { --stage-accent: var(--stage-out-3); }
-.qpn.qcc--s-in-1, .qpn.qcc--s-in-2, .qpn.qcc--s-in-3 { --stage-accent: var(--stage-in-3); }
-.qpn.qcc--s-offer { --stage-accent: var(--stage-offer); }
-.qpn.qcc--s-closed { --stage-accent: var(--stage-closed); }
+/* the stage accent map lives in queryCard.css, on the bare stage classes — the drawer AND the
+   correction desk both carry `qcc--s-{stage}` and read the one map. See decision 3 there. */
+
+/* §3 — the rung the desk is open on takes a ring in the accent. Scoped to the drawer: the class
+   arrives through TimelineRows' additive highlight and only this surface passes it. */
+.qpn .tl-ev--target { background: #fff; box-shadow: 0 0 0 1.5px var(--stage-accent, #e0d5c8); border-radius: 10px; }
 
 /* ── the header's manuscript line ─────────────────────────────────────────────────────────────── */
 .qpn-ms {
@@ -326,3 +323,87 @@
   background: #fdfaf5; border: 1px solid #e0d5c8; border-radius: 12px; padding: 10px;
   box-shadow: 0 4px 10px rgba(58, 28, 20, 0.07), 0 14px 34px rgba(58, 28, 20, 0.12);
 }
+
+/* ══ §4 · THE AGENT TAB — layout A ═══════════════════════════════════════════════════════════════
+   A view of the agent document; the two links at the foot are the only route to change anything. */
+.qat-hero { display: flex; align-items: center; gap: 18px; }
+.qat-av {
+  width: 76px; height: 76px; border-radius: 50%; background: #fdfaf5; flex: none;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.08), 0 4px 12px rgba(58, 28, 20, 0.12);
+  border: 0.5px solid #e6dccf; display: flex; align-items: center; justify-content: center;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 18px; color: #3a1c14;
+}
+.qat-nm { font-family: var(--font-serif); font-weight: 500; font-size: 28px; color: #1c130f; line-height: 1.05; }
+.qat-ag { font-family: var(--font-serif); font-style: italic; font-size: 15px; color: #6a5a50; margin-top: 5px; }
+.qat-loc {
+  margin-top: 7px; display: flex; align-items: center; gap: 8px;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: #9c8878;
+}
+.qat-loc .fi { border-radius: 1.5px; overflow: hidden; }
+.qat-open {
+  margin-left: auto; align-self: flex-start; border: 1px solid rgba(58, 28, 20, 0.35);
+  border-radius: 99px; padding: 4px 11px;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: #3a1c14; white-space: nowrap;
+}
+.qat-acts { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+.qat-actb {
+  display: inline-flex; align-items: center; gap: 7px; background: #fff;
+  border: 1px solid #e0d5c8; border-radius: 99px; padding: 8px 14px;
+  font-size: 12.5px; color: #3a1c14; text-decoration: none; cursor: pointer;
+}
+.qat-actb:hover { border-color: #cdbfae; }
+.qat-actb--plain { cursor: default; }
+.qat-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+.qat-tile { background: #fff; border: 0.5px solid #ece0d2; border-radius: 10px; padding: 12px 12px 10px; text-align: center; }
+.qat-tv { font-family: var(--font-serif); font-size: 20px; color: #1c130f; line-height: 1; }
+.qat-tv span { font-size: 12px; font-style: italic; margin-left: 2px; }
+.qat-tk {
+  margin-top: 6px; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8px;
+  letter-spacing: 0.13em; text-transform: uppercase; color: #9c8878;
+}
+.qat-quote {
+  margin: 22px 0 0; padding: 4px 0 4px 22px; border-left: 2px solid var(--stage-accent, #e0d5c8);
+  font-family: var(--font-serif); font-style: italic; font-size: 16.5px; line-height: 1.5;
+  color: #1c130f; position: relative;
+}
+.qat-quote::before {
+  content: "\201C"; position: absolute; left: -2px; top: -18px; font-size: 48px;
+  color: var(--stage-accent, #e0d5c8); font-style: normal;
+}
+.qat-qk {
+  display: block; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8.5px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: #9c8878; font-style: normal; margin-top: 8px;
+}
+.qat-asks { margin-top: 18px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.qat-ak {
+  width: 100%; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px;
+  letter-spacing: 0.13em; text-transform: uppercase; color: #9c8878; margin-bottom: 2px;
+}
+.qat-achip {
+  display: inline-flex; align-items: center; gap: 6px; background: #fff;
+  border: 0.5px solid #e0d5c8; border-radius: 99px; padding: 5px 11px; font-size: 12px; color: #3a1c14;
+}
+/* reporting, not appraising: grey ink, NO strike-through. Ships unworn — no anti-wishlist field
+   exists in the model; the grammar waits for the day one does. */
+.qat-achip--no { color: #a09080; }
+.qat-hist { margin-top: 20px; }
+.qat-hk {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: #9c8878; margin-bottom: 8px;
+}
+.qat-hrow { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 0.5px solid #ece0d2; font-size: 13px; color: #6a5a50; }
+.qat-sw { width: 10px; height: 10px; border-radius: 50%; border: 0.5px solid rgba(0, 0, 0, 0.08); background: var(--band-a, #e4e1db); flex: none; }
+.qat-hw { font-family: var(--font-serif); color: #1c130f; }
+.qat-hd {
+  margin-left: auto; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px;
+  letter-spacing: 0.13em; text-transform: uppercase; color: #9c8878;
+}
+.qat-links { display: flex; gap: 18px; margin-top: 14px; }
+.qat-lnk {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: #6a5a50; border-bottom: 0.5px solid #cdbfae;
+}
+.qat-lnk:hover { color: #1c130f; }

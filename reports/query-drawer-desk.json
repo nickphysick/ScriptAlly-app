@@ -1,0 +1,15 @@
+{
+  "rungsWithMenu": 3,
+  "accent": {
+    "accent": "rgb(199, 208, 194)",
+    "strip": "rgb(199, 208, 194)"
+  },
+  "notch": {
+    "rungCentre": 537.421875,
+    "cardTop": 495.421875,
+    "arrow": 34,
+    "notchCentre": 537.421875,
+    "clamped": false
+  },
+  "reorderPreview": "Save this correction?\nFULL SENT · 8 AUG 2026\nTHE TIMELINE, AFTER\nQuery sent\nFull sent\nPartial sent\nstatus Full Sent → Partial Sent · waiting your send on 8 Aug 2026 → your send on 5 Jul 2026 · window the agency's window · 3 Oct 2026 → the agency's window · 30 Aug 2026\nSave the correction\none undo restores it\nEdit instead\nkeep it, fix the details\nCancel"
+}

@@ -59,9 +59,13 @@ describe("⚠️ the panel's chrome is not tinted, and the ladder starts below i
     expect(bar, "the top bar reads the ladder token").not.toContain("--band-a");
   });
 
-  it("the band is the only thing that paints the ladder", () => {
+  it("the ladder paints only SEMANTIC state surfaces — the band, and the Agent tab's swatch", () => {
+    /* §4 widened this from [.qpn-band]: the history row's swatch IS the query's band tint by
+       design (the brief's "state swatch"), so it is a second legitimate reader. The law is
+       unchanged — no CHROME (bar, tabs, buttons) reads a ladder token; the readers are named
+       exactly so a third one fails here and states its case. */
     const readers = [...css.matchAll(/^\s*(\.[a-zA-Z0-9_.\s-]+?)\s*\{[^}]*var\(--band-a/gm)].map((m) => m[1].trim());
-    expect(readers, `--band-a is read by ${readers.join(", ")}`).toEqual([".qpn-band"]);
+    expect(readers, `--band-a is read by ${readers.join(", ")}`).toEqual([".qpn-band", ".qat-sw"]);
   });
 
   it("⚠️ the progress track has its own name, and it is not the bar's", () => {
@@ -116,8 +120,9 @@ describe("⚠️ the legacy edit sheet is unreachable from the live page", () =>
       return liveBranch.slice(at, end);
     })();
     expect(mount).toContain("<QueryTimeline");
-    expect(mount, "the ⋯ is off — corrections unreachable from the drawer").toContain("onEditEntry={onEditEntry}");
-    expect(mount).toContain("onDeleteEntry={onDeleteEntry}");
+    /* §3 — the ⋯ opens the desk at the fork directly; onEntryFork is what makes it render at all */
+    expect(mount, "the ⋯ is off — corrections unreachable from the drawer").toContain("onEntryFork={(entry, trigger)");
+    expect(mount, "the desk's ring is unwired").toContain("highlightId={correcting?.entry.activityId");
   });
 
   it("⚠️ and the only surviving caller is inside the branch Phase 6 deletes", () => {
@@ -213,9 +218,15 @@ describe("§1 · the tabbed body", () => {
    */
   it("the active tab underline reads --stage-accent, mapped to the deepest step per family", () => {
     expect(decls).toMatch(/\.qpn-tab--on[^{]*\{[^}]*border-bottom-color:\s*var\(--stage-accent/);
-    expect(decls).toMatch(/\.qpn\.qcc--s-out-1[^{]*\{\s*--stage-accent:\s*var\(--stage-out-3\)/);
-    expect(decls).toMatch(/\.qpn\.qcc--s-in-1[^{]*\{\s*--stage-accent:\s*var\(--stage-in-3\)/);
-    expect(decls).toMatch(/\.qpn\.qcc--s-closed\s*\{\s*--stage-accent:\s*var\(--stage-closed\)/);
+    /* §3 moved the map to queryCard.css, folded into each stage class's ONE rule — the card, the
+       drawer and the correction desk all wear `qcc--s-*`, so the map has one home and the house
+       one-rule-per-selector invariant holds. Same law: accent = the family's deepest step. */
+    const cardCss = readFileSync(join(process.cwd(), "src/components/queries/queryCard.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const [stage, deep] of [["out-1", "out-3"], ["out-2", "out-3"], ["in-1", "in-3"], ["in-2", "in-3"], ["offer", "offer"], ["closed", "closed"]] as const) {
+      expect(cardCss, `qcc--s-${stage} does not derive its accent from ${deep}`)
+        .toMatch(new RegExp(`\\.qcc--s-${stage}[^{]*\\{[^}]*--stage-accent:\\s*var\\(--stage-${deep}\\)`));
+    }
     for (const stage of ["out-1", "in-2", "closed"]) {
       const html = draw(stage === "out-1" ? QueryStatus.QUERIED : stage === "in-2" ? QueryStatus.FULL_REQUESTED : QueryStatus.REJECTED);
       expect(html, `the root does not carry qcc--s-${stage}`).toContain(`qcc--s-${stage}`);

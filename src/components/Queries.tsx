@@ -67,6 +67,10 @@ import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteH
 import { QueryCentreGrid, type GridCard } from "./queries/QueryCentreGrid";
 import { QueryPanel, type PanelRung } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
+import { CorrectionDesk } from "./queries/CorrectionDesk";
+import { QueryAgentTab, type AgentHistoryRow } from "./queries/QueryAgentTab";
+import { queriesForAgent } from "../lib/agentList";
+import { useOpenEditAgent } from "./EditAgentHost";
 import { PortalMenu } from "./todo/PortalMenu";
 import { BrandDatePicker } from "./forms/BrandDatePicker";
 import { rungFacts, waitProgress } from "../lib/queryPanelRungs";
@@ -393,6 +397,7 @@ export const Queries: React.FC<{
   const { showConfirm, showToast } = useToast();
   // Query editing is the app-level Edit Query drawer (the inline isEditMode editor is retired).
   const openEditQuery = useOpenEditQuery();
+  const openEditAgent = useOpenEditAgent();
   /**
    * ⚠️ THE APP'S ONE BLOCKING-CHOICE PRIMITIVE, REUSED RATHER THAN A SECOND DIALOG BUILT (D10).
    * `useConfirmAsk` already owns Escape, the scrim, one-at-a-time and the promise — the parts worth
@@ -1131,6 +1136,9 @@ export const Queries: React.FC<{
       }
     | null
   >(null);
+  /* §3 — the ⋯ (or dotted field) that opened the desk: the notch's anchor and the focus home.
+     A ref, not state — it must survive every step transition without re-rendering anything. */
+  const correctingTriggerRef = useRef<HTMLElement | null>(null);
 
   /** The log as raw docs, the shape the engine reads. */
   const asRawDocs = (evts: any[]) => evts.map((e) => ({ id: e.id, data: e as Record<string, unknown> }));
@@ -4912,8 +4920,22 @@ export const Queries: React.FC<{
           * them on the page.
           */}
         {correcting && activeQuery && (
-          <div className="cor-scrim" role="presentation" onClick={() => setCorrecting(null)}>
-            <div onClick={(e) => e.stopPropagation()}>
+          /**
+           * ══ §3 · THE DESK — the correction flow beside the drawer, not over the page ═════════
+           *
+           * The 440px card to the drawer's left hosts the EXISTING components in sequence —
+           * fork → edit → consequence — anchored to the ⋯'d rung (which takes the accent ring
+           * through the timeline's additive highlight), notched at its centre, Escape captured so
+           * the drawer behind stays open, focus returned to the ⋯ on close. The `.cor-scrim`
+           * centred host this replaces is gone from the live page.
+           */
+          <CorrectionDesk
+            stage={panelRow?.facts.stage ?? "closed"}
+            anchor={correctingTriggerRef.current?.closest?.(".tl-ev") as HTMLElement | null}
+            returnTo={correctingTriggerRef.current}
+            onClose={() => setCorrecting(null)}
+          >
+            <>
               {correcting.step === "fork" && (
                 <CorrectionFork
                   subject={`${correcting.entry.label} · ${fmtShortISO(correcting.entry.dateISO)}`}
@@ -4921,20 +4943,11 @@ export const Queries: React.FC<{
                   /* ⚠️ BRANCH TWO ROUTES — the record is true, so the answer is to append, and the
                      flow that appends already exists. No third way to record a response. */
                   onAppend={() => { setCorrecting(null); setIsRecordResponseFocusFormOpen(true); }}
-                  /* ⚠️ MOVE SITS ON THE CORRECTION BRANCH, not beside it. Filing an event under the
-                     wrong agent IS the record being wrong, so it belongs with "I'm correcting a
-                     mistake"; offering it as a third peer would suggest a move is a different KIND
-                     of act from an edit, which is the distinction the fork exists to draw. */
-                  onMove={moveTargetsFor().length ? () => {
-                    const evts = guardEvents();
-                    const me = evts.find((e) => e.activityId === correcting.entry.activityId);
-                    const guard = me ? moveGuard(me, evts) : { kind: "allow" as const };
-                    if (guard.kind === "route") {
-                      showConfirm({ title: "This entry cannot move", body: <p style={{ margin: 0 }}>{guard.message}</p>, confirmLabel: "Close", onConfirm: async () => {} });
-                      return;
-                    }
-                    setCorrecting({ step: "pick", entry: correcting.entry });
-                  } : undefined}
+                  /* ⚠️ TWO BRANCHES, VERBATIM (decision 5). Move is BUILT — MovePicker, MoveSheet
+                     and correctionMove all stand, tested — and the desk deliberately does not
+                     offer it: no onMove means the fork renders correct/append only. Reinstating it
+                     is one prop; an open question in the run report records that this run made a
+                     live flow unreachable by instruction. */
                   onCancel={() => setCorrecting(null)}
                 />
               )}
@@ -4945,6 +4958,13 @@ export const Queries: React.FC<{
                 /* the root may be edited and never removed — removal routes to deleting the query */
                 const root = me ? rootGuard(me, evts) : { kind: "allow" as const };
                 return (
+                  <>
+                  {/* the fork, collapsed to one line — "change" reopens it */}
+                  <div className="qcd-step">
+                    <b>What&rsquo;s wrong?</b> The record is false
+                    <button type="button" className="qcd-chg"
+                      onClick={() => setCorrecting({ step: "fork", entry: correcting.entry })}>change</button>
+                  </div>
                   <CorrectionEdit
                     subject={`${correcting.entry.label} · ${fmtShortISO(correcting.entry.dateISO)}`}
                     initial={{ dateISO: correcting.entry.dateISO, note: correcting.entry.note }}
@@ -4995,6 +5015,7 @@ export const Queries: React.FC<{
                       setCorrecting({ step: "sheet", entry: correcting.entry, question: "Save this correction?", diff, commit, partners: [] });
                     }}
                   />
+                  </>
                 );
               })()}
 
@@ -5061,8 +5082,8 @@ export const Queries: React.FC<{
                   onCancel={() => setCorrecting(null)}
                 />
               )}
-            </div>
-          </div>
+            </>
+          </CorrectionDesk>
         )}
 
         {isCloseMenuOpen && activeQuery && (
@@ -5859,19 +5880,56 @@ export const Queries: React.FC<{
                     agent={activeAgent}
                     events={trackingEvents}
                     primaryAction={{ ballHolder: ta.ballHolder, markKind: ta.kind === "mark-sent" ? ta.markKind : undefined }}
-                    onEditEntry={onEditEntry}
-                    onDeleteEntry={onDeleteEntry}
+                    /* §3 — the ⋯ opens the DESK at the fork, directly: the fork subsumes the old
+                       Edit/Delete menu (append is its second branch, remove lives on the edit
+                       form), so the two-item hop is gone. The trigger rides a ref for the notch
+                       and the focus return. */
+                    onEntryFork={(entry, trigger) => {
+                      correctingTriggerRef.current = trigger;
+                      setCorrecting({ step: "fork", entry });
+                    }}
+                    highlightId={correcting?.entry.activityId ?? null}
                     onNudge={() => setIsNudgeOpen(true)}
                     onSetExpectedDate={(iso) => commitExpectedDate(iso)}
                     onMarkClosed={() => setIsCloseMenuOpen(true)}
-                    onEditSendMethod={sentActivity ? () => {
+                    onEditSendMethod={sentActivity ? (anchor) => {
                       const entry = rungEntry(sentActivity.id);
-                      if (entry) setCorrecting({ step: "fork", entry });
+                      if (entry) { correctingTriggerRef.current = anchor; setCorrecting({ step: "fork", entry }); }
                     } : undefined}
                     sentExtra={sentExtra}
                   />
                 );
               })()}
+              /**
+               * §4 — THE AGENT TAB, a view of the agent document (decision 4). History rows are
+               * derived HERE because they need queries+manuscripts: every query with this agent,
+               * newest activity first, the open one marked `this query`. `queriesForAgent` is the
+               * same reader the Contact list counts with — one derivation, two surfaces.
+               */
+              agentTab={activeAgent ? (
+                <QueryAgentTab
+                  agent={activeAgent}
+                  history={queriesForAgent(activeAgent.id, queries).map((q): AgentHistoryRow => {
+                    const ms = manuscripts.find((m) => m.id === q.manuscriptId);
+                    const when = (() => {
+                      if (q.id === activeQuery.id) return "this query";
+                      const iso = q.lastStatusChange || q.dateSent;
+                      if (!iso) return "";
+                      return new Date(iso).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+                    })();
+                    return {
+                      queryId: q.id,
+                      manuscriptTitle: ms?.title ?? "—",
+                      statusLine: q.status,
+                      when,
+                      isThisQuery: q.id === activeQuery.id,
+                      status: q.status,
+                    };
+                  })}
+                  onOpenContactList={() => onNavigate?.("agents")}
+                  onEditAgent={() => openEditAgent?.(activeAgent.id)}
+                />
+              ) : undefined}
               /**
                * §1 — THE NOTES TAB IS THE EXISTING THREAD, UNBOXED. `NotesThread` owns ordering,
                * pinning, the composer and the settle; the tab is just where it lives now.
