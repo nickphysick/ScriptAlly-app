@@ -53,14 +53,28 @@ test("the Query Centre's panel — computed ground and bottom gap", async ({ pag
       const low = cards.reduce((a, b) => (b.getBoundingClientRect().bottom > a.getBoundingClientRect().bottom ? b : a));
       return Math.round(sheet.getBoundingClientRect().bottom - low.getBoundingClientRect().bottom);
     }); })();
+  /* ⚠️ RE-ANCHORED AND DE-VACUATED (drawer round, Phase 7). This case had been passing as
+     `null === null`: `.tdk-w` was retired from /todo rounds ago and `.f12-card` from /queries by
+     the log-sheet stream's rebuild, so BOTH halves returned null and the equality held over
+     nothing — the exact silent-green the presumed-vacuous rule exists for, found by probing the
+     populations. The recon's `.ws` suspicion was confirmed too (no such match), but the vacuity
+     was the real finding. The To-do half now reads `.tlc`, the live list card. */
   const todo = await (async () => { await openRoute(page, "/todo", { width: 1920, height: 1000 }); await page.waitForTimeout(800);
     return page.evaluate(() => {
       const vis = (e: Element) => e.getBoundingClientRect().height > 0;
-      const card = [...document.querySelectorAll(".tdk-w")].find(vis) as HTMLElement | undefined;
+      const card = [...document.querySelectorAll(".tlc")].find(vis) as HTMLElement | undefined;
       const sheet = [...document.querySelectorAll(".wpg-scroll")].find(vis) as HTMLElement | undefined;
       if (!card || !sheet) return null;
       return Math.round(sheet.getBoundingClientRect().bottom - card.getBoundingClientRect().bottom);
     }); })();
   console.log(`BOTTOM GAP — Query Centre ${qc}px · To-do ${todo}px`);
+  /* ⚠️ THE POPULATIONS ARE ASSERTED, SO ABSENCE IS LOUD. The To-do reading must exist. The Query
+     Centre's card class is MID-REBUILD by the log-sheet stream — until their round names it, this
+     case is RED BY DESIGN with this message rather than green over nothing: a parity claim with
+     one leg is not a claim, and the silent form of that is what this repair replaces. Re-anchor
+     the `.f12-card` selector to their new card when their round lands; the law (the two pages'
+     bottom rhythm agrees) is unchanged. */
+  expect(todo, "the To-do half is unmeasurable — .tlc or .wpg-scroll missing").not.toBeNull();
+  expect(qc, "the Query Centre half is unmeasurable — its card class is mid-rebuild (log-sheet stream); re-anchor .f12-card to the new card when their round lands").not.toBeNull();
   expect(todo, `the two pages' bottom gaps differ (QC ${qc}, To-do ${todo})`).toBe(qc);
 });

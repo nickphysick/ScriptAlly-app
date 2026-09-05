@@ -118,8 +118,8 @@ test("finishing round", async ({ page }) => {
       const rims = all(".tpn .rim");
       const band = all(".tpn .band")[0];
       const mid = all(".tpn .workscroll")[0];
-      const form = all(".tpn .fc.work")[0];
-      const story = all(".tpn .fc.rec")[0];
+      const form = all(".tpn .sheet")[0];
+      const story = all(".tpn .qr")[0];
       const bar = all(".tpn .actbar")[0];
 
       /* ⚠️ THE TINT IS SAMPLED AT THE BAND'S FOUR CORNERS, INSET, AND THE RECT IS PROVED ON SCREEN
@@ -152,6 +152,7 @@ test("finishing round", async ({ page }) => {
         corners,
         minH,
         formH: form ? Math.round(form.getBoundingClientRect().height) : 0,
+        formBottom: form ? Math.round(form.getBoundingClientRect().bottom) : 0,
         midH: mid ? Math.round(mid.getBoundingClientRect().height) : 0,
         barBottom: bar ? Math.round(bar.getBoundingClientRect().bottom) : 0,
         paneBottom: Math.round(pane.getBoundingClientRect().bottom),
@@ -193,13 +194,19 @@ test("finishing round", async ({ page }) => {
   /* ⚠️ THE NOTE IS REPORTED AS ABSENT, NOT ASSERTED AROUND (repair, 26 Aug). The account holds no
      user Note card, so `note` is null and every combined claim in this file would go red for a
      reason that has nothing to do with the pane. Each names which journeys it actually reached. */
-  add("P1.1 · a query journey draws three rim cards; bulk draws two",
-      !!send && send.rims === 3 && !!close && close.rims === 3
-        && (!bulk || bulk.rims === 2) && (note ? note.rims === 2 : true),
+  /* ⚠️ RE-POINTED FOR THE SHEET (drawer round, Phase 7): three cards became ONE — `.sheet > .rim`
+     holding band, work and foot, with the record promoted to the slip (`.qr > .rrim`, a different
+     class for a different object). So every journey draws exactly ONE `.rim` now, query or note or
+     bulk alike; the slip's presence is the record's own question and taskPanePort/sheetSlip carry
+     it. The old counts (3 / 2) were the three-card chassis's, retired with it. */
+  add("P1.1 · every journey draws ONE rim — the sheet is one framed object",
+      !!send && send.rims === 1 && !!close && close.rims === 1
+        && (!bulk || bulk.rims === 1) && (note ? note.rims === 1 : true),
       `send=${send?.rims} close=${close?.rims}` + (bulk ? ` bulk=${bulk.rims}` : ` · ${NOT_RUN_BULK}`)
         + (note ? ` note=${note.rims}` : ` · ${NOT_RUN_NOTE}`));
-  add("P1.2 · the pane column is transparent on the ground, gap 12",
-      !!send && /rgba\(0, 0, 0, 0\)|transparent/.test(send.paneBg) && send.paneGap === "12px",
+  /* the pane became a ROW (sheet beside slip) and its gap is the drawer contract's 14 */
+  add("P1.2 · the pane is transparent on the ground, gap 14",
+      !!send && /rgba\(0, 0, 0, 0\)|transparent/.test(send.paneBg) && send.paneGap === "14px",
       send ? `bg=${send.paneBg} gap=${send.paneGap}` : "-");
   add("P1.3 · the band tint reaches all four corners inside the rim, which clips",
       !!send && !!send.corners && send.corners.onScreen
@@ -237,12 +244,13 @@ test("finishing round", async ({ page }) => {
      its column deliberately and the scroller absorbs whatever the content does. The part of the
      law that survives is that nothing is padded to a height — which P2.2 asserts directly — so
      this asserts the structure that replaced it rather than a value it no longer has. */
-  add("P2.1 · the scroller sits inside the worksheet card and absorbs the content",
+  add("P2.1 · the scroller sits inside the SHEET and absorbs the content",
       !!send && send.midH > 0 && send.formH > send.midH,
-      send ? `card ${send.formH} holding a ${send.midH} scroller (align-items=${send.midAlign} — a block, not a flex column)` : "-");
+      send ? `sheet ${send.formH} holding a ${send.midH} scroller` : "-");
   /* ⚠️ THE CARDS MUST EXIST BEFORE THEIR HEIGHTS MEAN ANYTHING. This read `minH.every(...)` over an
      array that is EMPTY until Phase 1 builds the cards, and `[].every()` is true — so it went green
      before a single card existed. The documented liar, caught in its own baseline. */
+  /* the population is the sheet + the slip where a journey has one — a note has no slip */
   add("P2.2 · no card in the pane declares a minimum height",
       !!send && send.minH.length === 2
         && [...send.minH, ...(note?.minH ?? [])].every((v: string) => v === "0px" || v === "auto"),
@@ -253,16 +261,21 @@ test("finishing round", async ({ page }) => {
      now, deliberately, so "content-driven and shorter than a send" describes the pre-rebuild pane.
      What survives is that neither card is padded to a height, which P2.2 asserts directly; this
      asserts the structure that replaced it — the scroller sits inside the card and absorbs. */
-  add("P2.3 · a note's card holds its scroller, like every other journey's",
-      note ? (!!send && note.midH > 0 && note.formH > note.midH) : true,
-      note && send ? `note ${note.formH}/${note.midH} = ${(note.formH / note.midH).toFixed(2)} · send ${send.formH}` : NOT_RUN_NOTE);
-  /* ⚠️ THE SHORTEST JOURNEY WAS THE NOTE, AND THE NOTE IS ABSENT — so this measures the shortest
-     one that IS on the board rather than reporting nothing at all. A close asks one question; the
-     claim is unchanged, that the bar sits at the pane's foot however little the form holds. */
-  add("P2.4 · the action bar stays at the pane's foot on the shortest journey present",
-      (() => { const j = note ?? close; return !!j && Math.abs(j.barBottom - j.paneBottom) <= 2; })(),
+  add("P2.3 · a note's sheet holds its scroller, like every other journey's",
+      note ? (note.midH > 0 && note.formH > note.midH) : true,
+      note ? `note ${note.formH}/${note.midH}` : NOT_RUN_NOTE);
+  /* ⚠️ INVERTED BY DESIGN (drawer round, Phase 7): the foot RIDES THE CONTENT NOW. Phase 3's
+     height rule — the brief's own words — is that the sheet is its content's height, capped at the
+     drawer's, and "the foot moves with the content (the earlier fixed-foot rule was for a
+     scrolling page; the drawer doesn't scroll)". So on the SHORTEST journey the foot must sit
+     WELL ABOVE the pane's bottom, with desk beneath — the exact reading (bar 604 in an 847 pane)
+     this case used to fail on. What holds in both eras is that the foot is INSIDE the sheet's rim,
+     which sheetSlip P3.3 measures on the longest journey; here the short journey proves the hug. */
+  add("P2.4 · the foot rides the content — a short journey leaves desk beneath the sheet",
+      (() => { const j = note ?? close; return !!j && j.paneBottom - j.barBottom > 40
+        && Math.abs(j.barBottom - j.formBottom) <= 8; })(),
       (() => { const j = note ?? close; return j
-        ? `${note ? "note" : "close (the note is absent)"}: bar=${j.barBottom} pane=${j.paneBottom}` : "-"; })());
+        ? `${note ? "note" : "close (the note is absent)"}: bar=${j.barBottom} sheet=${j.formBottom} pane=${j.paneBottom}` : "-"; })());
 
   /* ══ PHASE 3 · choices are made, not inherited ═══════════════════════════════════════════ */
   add("P3.1 · no option is pre-selected on first render, on any journey reached",

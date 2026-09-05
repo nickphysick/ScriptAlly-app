@@ -116,6 +116,13 @@ test("steer round", async ({ page }) => {
        showing a decision, and reports the ledger as missing rather than as unasked. */
     await page.evaluate(ANSWER_FORK);
     await page.waitForTimeout(1000);
+  /* ⚠️ RE-ANCHORED (drawer round, Phase 7): ".fc.work" was the three-card pane's form card,
+     retired by the sheet — the coverage scan was sweeping zero elements and its own population
+     floor (P4.1) is what said so, exactly as designed. The form's home is the sheet's ".work".
+     ⚠️ AND THIS NOTE SITS OUTSIDE THE TEMPLATE: its first draft, written INTO the evaluate with
+     backticks around the class names, was the round's FIFTH backtick casualty — one hour after
+     the fourth was written up. The lesson is apparently not learnable by prose alone, which is
+     why the sweep runs before every commit. */
     return await page.evaluate(`(() => {
       const vis = ${VIS};
       const all = (s) => [...document.querySelectorAll(s)].filter(vis);
@@ -143,7 +150,7 @@ test("steer round", async ({ page }) => {
          sections, and it is a solid burgundy 6x6 MARK rather than a surface. The law is about
          PAPER — what is tinted is what is touchable — so a mark is excluded by SIZE here and the
          size is reported, which means a burgundy SURFACE can never hide behind the exception. */
-      const formCard = all(".tpn .fc.work")[0];
+      const formCard = all(".tpn .work")[0];
       const marks = [];
       const bgs = formCard
         ? [...formCard.querySelectorAll("*")].filter(vis)
@@ -372,11 +379,19 @@ test("steer round", async ({ page }) => {
    * reads the row's recorded answer rather than the input's live value: it survives the re-render
    * into the thing that gets written, which is what anybody cared about.
    */
-  add("P3.3 · a typed value survives a re-render — into the answer the row records",
-      !!typed && typed.fired && !!survived && survived.done && /77/.test(survived.answer),
+  /* ⚠️ RE-POINTED A SECOND TIME, AND THE WHEEL HAS COME FULL CIRCLE (drawer round, Phase 7). The
+     note above records why the caret half was once retired: an amount COMPLETED the parcel, so the
+     next render closed the row and unmounted the input — the value could only be chased into the
+     recorded answer. Phase 4 reversed that flow ON PURPOSE (commit and advance are two gestures;
+     the row stays open until Enter or Next), so the ORIGINAL, STRONGER claim is assertable again:
+     after an unrelated re-render the INPUT IS STILL THERE, still holding the typed 77, with the
+     row still open. The law never moved — the typed value survives into what gets recorded — and
+     each retarget has followed the flow that carries it. */
+  add("P3.3 · a typed value survives a re-render — alive in the still-open row's input",
+      !!typed && typed.fired && !!survived && survived.liveInput === "77"
+        && survived.openIds.some((id: string) => id.indexOf("s-unit") >= 0),
       survived
-        ? `answer="${survived.answer}" done=${survived.done} · open moved to ${JSON.stringify(survived.openIds)}`
-          + ` · live input=${JSON.stringify(survived.liveInput)} (unmounted by design — see the note)`
+        ? `live input=${JSON.stringify(survived.liveInput)} · open rows ${JSON.stringify(survived.openIds)}`
         : "-");
 
   /* steppers honour the unit's own increment, and never change which unit is chosen.
