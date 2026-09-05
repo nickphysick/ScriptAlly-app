@@ -25,6 +25,7 @@ import { join } from "node:path";
 import React from "react";
 import { QueryStatus } from "../../types";
 import { TaskPane, TaskPaneJourney } from "./TaskPane";
+import { JOURNEYS } from "../../lib/journeys";
 import { StatusDot } from "../StatusDot";
 import { TaskPaneBody } from "./TaskPaneBody";
 import { requirementsFor } from "../../lib/paneGate";
@@ -46,6 +47,15 @@ const REF_MATERIALS = readFileSync(join(process.cwd(), "design-refs/todo-materia
    own words; adding the FILE keeps the law intact — every class the pane renders comes from a
    contract — where a hand-written exemption list would have quietly suspended it. */
 const REF_PRIMARY = readFileSync(join(process.cwd(), "design-refs/todo-filling-primary.html"), "utf8");
+/**
+ * ⚠️ THE PANE'S CHASSIS COMES FROM A SIXTH CONTRACT NOW (drawer round, Phase 3). The three floating
+ * cards became one sheet beside a quick-reference slip, and that shape is drawn in
+ * `todo-fullscreen-final.html` — so `wcol`, `sheet`, `foot`, `qrwrap`, `qr`, `rrim`, `qrtab` and
+ * the slip's `x` are contract words, not invented ones. The journey INTERNALS are still the pane
+ * contract's; this file is a composition of two refs and says so rather than pretending one
+ * covers both. Both are on `check-design-refs.mjs`'s watchlist, so neither can drift under it.
+ */
+const REF_DRAWER = readFileSync(join(process.cwd(), "design-refs/todo-fullscreen-final.html"), "utf8");
 const PANE_CSS = readFileSync(join(process.cwd(), "src/components/todo/taskPane.css"), "utf8");
 const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
@@ -111,7 +121,7 @@ describe("1 · the pane's class names are the mockup's", () => {
    */
   const cssOf = (src: string) => strip(src.slice(src.indexOf("<style>"), src.indexOf("</style>")));
   const mockClasses = new Set(
-    [REF, REF_FINAL, REF_PANE, REF_MATERIALS, REF_PRIMARY].flatMap((r) =>
+    [REF, REF_FINAL, REF_PANE, REF_MATERIALS, REF_PRIMARY, REF_DRAWER].flatMap((r) =>
       [...cssOf(r).matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1])),
   );
 
@@ -140,44 +150,49 @@ describe("1 · the pane's class names are the mockup's", () => {
   });
 
   it("the structural names are present, and nested as the mockup nests them", () => {
-    /* ⚠️ RETARGETED, AND THE LAW IT ASSERTS IS UNCHANGED: the pane's structure is the contract's,
-       named in the contract's words, in the contract's order. What moved is WHICH contract — the
-       corrected action-bar file replaces `.mid`/`.formcol`/`.storycol` (one scroller holding a form
-       card beside a story card) with `.ws` → `.paneCol` beside `.rec`. A suite that kept asserting
-       the retired names would be asserting a page the app no longer serves. */
-    for (const c of ["pane", "ws", "paneCol", "band", "deed", "b-sub", "work", "actbar", "willrec"]) {
+    /* ⚠️ RETARGETED AGAIN, AND THE LAW IT ASSERTS IS UNCHANGED (drawer round, Phase 3): the pane's
+       structure is the contract's, named in the contract's words, in the contract's order. What
+       moved is WHICH contract. `.ws` → `.paneCol` beside `.rec` was the two-track grid of the
+       three-card pane; the drawer contract draws ONE sheet — `.wcol` → `.sheet` → `.rim` holding
+       band, work and foot — beside a `.qrwrap` slip. A suite that kept asserting the retired names
+       would be asserting a page the app no longer serves, which is the whole test of whether a
+       retarget is honest: the names changed because the page did, and every one of the new ones is
+       a word from the ref that changed it. */
+    for (const c of ["pane", "wcol", "sheet", "rim", "band", "deed", "b-sub", "work", "foot", "actbar", "willrec"]) {
       expect(rendered.has(c), `${c} is missing from the rendered pane`).toBe(true);
     }
-    /* ⚠️ THREE ZONES IN ORDER, AND NOW THREE CARDS — REVERSED DELIBERATELY (finishing round,
-       Phase 1). This forbade `.fc`, on the previous round's reading that the pane contract had
-       retired the Form 11 card-in-card. The UPDATED contract (md5 52473130) draws the opposite: a
-       transparent pane column holding `.fc > .rim` cards for the header, the form and the story.
-       So the prohibition is deleted rather than argued with, and what it was protecting — the zone
-       ORDER — is asserted as it always was, alongside the card count it now expects. */
-    /* ⚠️ THE BAR IS THE COLUMN'S LAST CHILD AND THE RECORD IS THE COLUMN'S SIBLING — the two facts
-       the corrected contract exists to state. Read as source order, which is the only half of it a
-       string can carry; that the bar is not a LID is a rendered-page claim and lives in
-       `tests/e2e/workspaceRound.measure.ts`. */
-    const hdr = HTML.indexOf('class="fc hdr"');
-    const ws = HTML.indexOf('class="ws');
+    /* ⚠️ ONE CARD, NOT THREE — REVERSED AGAIN, AND FOR THE OPPOSITE REASON (drawer round, Phase 3).
+       The previous round asserted THREE `.fc > .rim` cards, from a contract that drew a
+       transparent column holding a header card, a form card and a story card. The drawer contract
+       draws ONE framed object: `.sheet > .rim` holding the band, the work and the foot, with the
+       record promoted to a slip beside it. Three frames for one task made the deed read as a
+       caption above the form rather than as the form's own top edge.
+
+       ⚠️ WHAT THE CASE ASSERTS IS UNCHANGED AND IS WHY IT SURVIVES BOTH REVERSALS: the zone ORDER.
+       Band, then work, then foot, then the slip — in source order, which is the only half a string
+       can carry. That the foot is not a LID over the work is a rendered-page claim and lives in
+       `tests/e2e/sheetSlip.measure.ts`. */
+    const sheet = HTML.indexOf('class="sheet"');
     const band = HTML.indexOf('class="band"');
-    const work = HTML.indexOf('class="fc work"');
-    const bar = HTML.indexOf('class="actbar"');
-    const rec = HTML.indexOf('class="fc rec"');
+    const work = HTML.indexOf('class="work"');
+    const bar = HTML.indexOf('class="foot actbar"');
+    const rec = HTML.indexOf('class="qrwrap"');
     expect(band).toBeGreaterThan(-1);
-    /* ⚠️ THE HEADER IS OUTSIDE THE SPLIT AND ABOVE IT (owner's call, mid-round). The deed is the
-       TASK's statement and both columns answer it, so it spans both rather than sitting in the
-       worksheet column at 390px with a hard edge between it and the record. Asserted as source
-       order — header before the row that holds the two columns. */
-    expect(hdr, "the header card is missing").toBeGreaterThan(-1);
-    expect(ws, "the split row is missing").toBeGreaterThan(hdr);
-    expect(work).toBeGreaterThan(ws);
+    expect(sheet, "the sheet is missing").toBeGreaterThan(-1);
+    expect(band, "the band is not the sheet's top edge").toBeGreaterThan(sheet);
+    expect(work).toBeGreaterThan(band);
     expect(bar).toBeGreaterThan(work);
-    expect(rec, "the record card is not after the pane column — it is inside it").toBeGreaterThan(bar);
-    /* a query journey: header + worksheet + record. The rim is what clips the band's tint, so its
-       presence is the structural half of the claim the measurement makes about the corners. */
-    expect((HTML.match(/class="rim"/g) || []).length, "a query journey draws three rim cards").toBe(3);
-    expect(HTML, "the header card lost its fixed-zone class").toContain('class="fc hdr"');
+    expect(rec, "the slip is not after the sheet — it is inside it").toBeGreaterThan(bar);
+    /* ⚠️ EXACTLY TWO RIMS ON A QUERY JOURNEY, AND THEY ARE DIFFERENT OBJECTS: the sheet's, which
+       clips the band's tint and the work's overflow, and the slip's own `.rrim`. Asserting the
+       count is what stops a fourth card growing back one round at a time. */
+    expect((HTML.match(/class="rim"/g) || []).length, "the sheet is not one rim").toBe(1);
+    expect((HTML.match(/class="rrim"/g) || []).length, "the slip is not one rim").toBe(1);
+    /* ⚠️ AND THE THREE CARD CLASSES ARE GONE, ASSERTED BY NAME. A retirement stated only as "the
+       new names are present" passes on a page carrying both. */
+    for (const dead of ["fc hdr", "fc work", "fc rec"]) {
+      expect(HTML, `${dead} is still rendered`).not.toContain(`class="${dead}"`);
+    }
     /* ⚠️ THE TILES ARE IN THE RECORD, AND NOWHERE ELSE. They were three cells in the header band —
        facts about the record, drawn on the task — and the whole point of the split is that the
        record owns them. Asserted as absence AND presence, because either alone is satisfiable by a
@@ -239,13 +254,21 @@ describe("2 · every element of the mockup's Send journey exists in the rendered
      retired with the band's tile row and `mid`/`formcol`/`storycol` with the single scroller; the
      record card's own parts take their place. The CLAIM is unchanged: the pane is a port of its
      contract, and the contract is the input rather than a fixture. */
-  const PANE_PARTS = ["pane", "ws", "paneCol", "band", "deed", "b-nav",
-    "work", "workscroll", "form", "actbar", "wr", "ab",
-    "rec", "rhead", "rtiles", "rtile", "rtl", "rfoot"];
+  /* ⚠️ THE CHASSIS WORDS ARE THE DRAWER CONTRACT'S NOW (Phase 3) — `wcol`/`sheet`/`foot`/`qrwrap`
+     replace `ws`/`paneCol`/`rec`. The JOURNEY internals are unchanged and still the pane
+     contract's, which is the honest shape of a pane assembled from two refs. */
+  const PANE_PARTS = ["pane", "wcol", "sheet", "band", "deed", "b-nav",
+    "work", "workscroll", "form", "foot", "actbar", "wr", "ab",
+    "qrwrap", "qr", "rrim", "rhead", "rtiles", "rtile", "rtl", "rfoot"];
 
   it("the mockup emits every part this checks", () => {
     /* the guard on the guard: a part that stopped being in the ref would silently drop out */
-    const gone = PANE_PARTS.filter((p) => !emitted.has(p) && !REF.includes(`class="${p}`) && !REF.includes(`class='${p}`));
+    /* ⚠️ THE GUARD ON THE GUARD READS BOTH REFS, because the parts now come from both. Left
+       reading `REF` alone it would report every drawer word as "not in the mockup" — a guard going
+       red about a page that is exactly right. */
+    const inRef = (p: string) => [REF, REF_DRAWER].some((r) =>
+      r.includes(`class="${p}`) || r.includes(`class='${p}`) || r.includes(`.${p}{`) || r.includes(`.${p} `));
+    const gone = PANE_PARTS.filter((p) => !emitted.has(p) && !inRef(p));
     expect(gone, `not found in the ref — the checklist is stale: ${gone.join(" ")}`).toHaveLength(0);
   });
 
@@ -273,9 +296,17 @@ describe("2 · every element of the mockup's Send journey exists in the rendered
        cohort concerns many queries and a note concerns none; both take the full width. */
     const noTl = renderToStaticMarkup(
       <TaskPane journey={{ ...SEND, tiles: null, tl: null }} onPrimary={() => {}} />);
-    expect(noTl, "the record card survived a journey with no record").not.toContain('class="fc rec"');
+    /* ⚠️ NO RECORD, NO SLIP AND NO SLOT — the 264px column is reserved only when there is something
+       to put in it. That is a different claim from the wrap law, which is about the slot NOT
+       collapsing when the writer dismisses a slip that exists; a journey with no record never had
+       one, so holding its width would be reserving space for nothing. A cohort concerns many
+       queries and a note concerns none: both take the sheet's full width. */
+    expect(noTl, "the slip survived a journey with no record").not.toMatch(/["\s`]qr["\s`]/);
     expect(noTl, "an empty tile row rendered").not.toMatch(/["\s`]rtiles["\s`]/);
-    expect(noTl, "the grid kept a record track with no record in it").toContain('class="ws solo"');
+    expect(noTl, "the slip's slot is held open with nothing in it").not.toMatch(/["\s`]qrwrap["\s`]/);
+    /* ⚠️ AND THE TAB GOES WITH IT. A bookmark for a reference that does not exist is a control
+       that cannot do anything — the dead-control fault, arriving through an absent branch. */
+    expect(noTl, "the bookmark tab survived a journey with no record").not.toMatch(/["\s`]qrtab["\s`]/);
   });
 
   /**
@@ -346,13 +377,17 @@ describe("3 · no class from the retired pane survives", () => {
  * every claim here is about what the writer is shown and offered.
  */
 describe("the fork — the pane opens on the decision, not the paperwork", () => {
+  /* ⚠️ THE FIXTURE IS DERIVED FROM THE DECLARATION, NOT RETYPED (drawer round, Phase 3). It held a
+     hand-written copy of the send journey's three intents, which is the "an input the system can
+     actually produce" fault waiting to happen: it went stale the moment `JourneyIntent` gained its
+     glyph, and it would have gone stale silently had the new field been optional. Reading
+     `JOURNEYS.send.fork` means the fixture cannot describe a fork the app does not offer. */
   const FORK = {
-    label: "Where are you with it?",
-    options: [
-      { id: "sent", title: "I’ve sent it", subtitle: "Note what went, and set the clock" },
-      { id: "later", title: "Not yet — hold me to it", subtitle: "Pick a day and it lands back on your list" },
-      { id: "wont", title: "I’m not going to send it", subtitle: "Record that, and close the query honestly", crossesTo: "close" },
-    ],
+    label: JOURNEYS.send.fork.label,
+    options: JOURNEYS.send.fork.options.map((o) => ({
+      id: o.id, title: o.title, subtitle: o.subtitle, glyph: o.glyph,
+      ...(o.id === "wont" ? { crossesTo: "close" } : {}),
+    })),
     onChoose: () => {},
   };
   const forked = (over: Partial<TaskPaneJourney> = {}) =>
@@ -582,9 +617,14 @@ describe("the app frame — four named adaptations, and only four", () => {
        ⚠️ THE SCROLLERS THEMSELVES ARE PHASE 2's and are asserted there — this case asserts that the
        chain still reaches them, which is the half a retirement can break silently. */
     expect(decls, "the single-scrollport middle is back").not.toMatch(/\.tpn \.mid[ .{:,]/);
+    /* ⚠️ THE CHAIN ENDS IN THE SHEET NOW (Phase 3). It ran pane → `.ws` → `.paneCol` → the card;
+       the sheet is one object, so it is pane → `.wcol` → `.sheet` → `.rim` → the scroller. Same
+       law, one fewer link, and every link still declares `min-height: 0` or a `flex: 1 1 0%`
+       chain silently computes to zero — which this repo has measured twice. */
     expect(rule(".tpn > .pane")).toContain("min-height: 0");
-    expect(rule(".tpn .ws")).toContain("min-height:0");
-    expect(rule(".tpn .paneCol")).toContain("min-height:0");
+    expect(rule(".tpn .wcol")).toContain("min-height:0");
+    expect(rule(".tpn .sheet")).toContain("min-height: 0");
+    expect(rule(".tpn .sheet > .rim")).toContain("min-height:0");
   });
 
   it("3 · fluid columns — no breakpoint decides anything", () => {
@@ -597,9 +637,18 @@ describe("the app frame — four named adaptations, and only four", () => {
        content — without it the worksheet refuses to shrink and pushes the record off its measure. */
     expect(decls, "the retired workrow is back").not.toContain(".tpn .workrow");
     expect(decls, "the wrapping middle's columns are back").not.toMatch(/\.tpn \.(formcol|storycol)[ .{:,]/);
-    const ws = rule(".tpn .ws").replace(/\s*:\s*/g, ":");
-    expect(ws).toContain("grid-template-columns:minmax(0,1fr) 288px");
-    expect(ws, "a wrap decides the split instead of the grid").not.toContain("flex-wrap");
+    /* ⚠️ THE SPLIT IS A FLEX ROW NOW, NOT A GRID (Phase 3) — the sheet grows, the slip's slot is a
+       fixed 264, and there is still no threshold deciding anything. `flex: 1 1 auto` with
+       `min-width: 0` is the flex spelling of `minmax(0, 1fr)`: without the min-width the sheet
+       refuses to shrink below its content and pushes the slip off its measure, which is exactly
+       what the grid's `minmax(0, …)` was there to prevent. */
+    const pane = rule(".tpn .pane").replace(/\s*:\s*/g, ":");
+    const wcol = rule(".tpn .wcol").replace(/\s*:\s*/g, ":");
+    const slot = rule(".tpn .qrwrap").replace(/\s*:\s*/g, ":");
+    expect(pane, "a wrap decides the split instead of the row").not.toContain("flex-wrap");
+    expect(wcol).toContain("flex:1 1 auto");
+    expect(wcol, "the sheet refuses to shrink and pushes the slip off its measure").toContain("min-width:0");
+    expect(slot, "the slip's slot is not a fixed 264").toContain("flex:0 0 264px");
     /* the tiles stack in the record column now — there is no column count left to auto-fit */
     expect(decls, "the retired tile row's auto-fit is back").not.toContain("repeat(auto-fit, minmax(150px, 1fr))");
   });

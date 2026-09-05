@@ -222,7 +222,23 @@ function rung(e: TaskPaneEvent): React.ReactNode {
   }
 }
 
+/**
+ * ⚠️ THE SLIP'S DISMISSAL IS THE SESSION'S, AND IT LIVES AT MODULE SCOPE FOR THE SAME REASON
+ * `foundingStore` does — a context has to be provided by every host that mounts this pane, and
+ * forgetting it is a silent regression to per-instance state, which is the exact fault the scope
+ * exists to prevent. Nothing to wire means nothing to forget.
+ *
+ * ⚠️ IT IS NOT PERSISTED, DELIBERATELY. "Not now" is a statement about this sitting, not a
+ * preference about the app; a writer who closes the tab and comes back tomorrow is starting again,
+ * and should find their reference where the design puts it. The brief says "for the session" and
+ * that is exactly the scope of a module variable.
+ */
+let slipAwayThisSession = false;
+
 export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }) => {
+  const [recAway, setRecAwayState] = React.useState(slipAwayThisSession);
+  /* written through on every change, so a close-and-reopen of the pane finds the same answer */
+  const setRecAway = React.useCallback((v: boolean) => { slipAwayThisSession = v; setRecAwayState(v); }, []);
   /**
    * ⚠️ THE RECORD CARD RENDERS WHERE THERE IS A RECORD, AND ITS ABSENCE IS THE SPLIT'S OWN ANSWER
    * (workspace round, Phase 1). `panePresence` already decides this once, per card — tiles and a
@@ -290,7 +306,20 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
             would have to share the grid's height model with the two columns beneath, and the whole
             of Phase 2 rests on `.ws` being a stretch row whose height IS the pane's remaining
             space. Header fixed, row fills — the same two-part chain, one level up. */}
-        <div className="fc hdr"><div className="rim">
+        {/* ⚠️ ONE FRAMED OBJECT (drawer round, Phase 3). The band, the work and the foot were
+            THREE floating cards — `.fc.hdr`, `.fc.work` and `.actbar` — each with its own border,
+            radius and lift, stacked with a 12px gap. Three frames for one task: the deed read as a
+            caption ABOVE the form rather than as its top edge, and the bar read as a separate
+            surface the form happened to sit above. They are one rim now, and the rim's edge is the
+            object's edge.
+
+            ⚠️ THE SHEET'S HEIGHT IS ITS CONTENT'S, CAPPED AT THE DRAWER'S — `align-self: start`
+            plus `max-height: 100%`, never `stretch`. A short journey hugs and leaves desk beneath
+            it; a long one stops at the cap and the WORK scrolls inside the rim while the foot
+            stays put. Stretching to fill was what put a 340px hole between a two-question form and
+            its own bar. */}
+        <div className="wcol">
+        <div className="sheet"><div className="rim">
           <div className="band">
             <div style={{ minWidth: 0 }}>
               <div className={d.hand ? "deed hand" : "deed"}>{d.deed}</div>
@@ -315,17 +344,11 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
               </div>
             )}
           </div>
-        </div></div>
-
-        <div className={hasRecord ? "ws" : "ws solo"}>
-          {/* ⚠️ THE PANE COLUMN'S TWO PARTS, IN ORDER — worksheet, then bar. The bar is the LAST
-              CHILD of the column rather than anything's footer, which is what puts its bottom edge
-              on the record's. */}
-          <div className="paneCol">
-            {/* ⚠️ THE WORK SCROLLS INSIDE THE CARD'S RIM, NEVER BEHIND THE BAR (Phase 2). `.rim`
-                carries `overflow: hidden`, so work leaves at the card's edge and there is nothing
-                underneath it to reappear in. The bar below is a SIBLING, not a lid. */}
-            <div className="fc work"><div className="rim">
+            {/* ⚠️ THE WORK SCROLLS INSIDE THE RIM AND THE FOOT STAYS PUT — the rim carries
+                `overflow: hidden`, so work leaves at the object's own edge and there is nothing
+                underneath it to reappear in. The foot is a SIBLING of the scroller inside the same
+                rim, not a lid over it and no longer a card of its own. */}
+            <div className="work">
               {/* ⚠️ NO FORM HEADING AND NO SUB-LINE (workspace round, Phase 4). "Sent it? Note it
                   here" sat under a deed reading "Send your full manuscript for Murphy's Day Out to
                   Jonathan Marsh" — the same instruction, in weaker words, three centimetres below
@@ -352,6 +375,12 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
                         {d.fork.options.map((o) => (
                           <button type="button" className="fk" key={o.id}
                             onClick={() => d.fork!.onChoose(o.id)}>
+                            {/* ⚠️ THE MARK IS THE INTENT'S OWN, DECLARED (drawer round, Phase 3) —
+                                see `IntentGlyph`. It is `aria-hidden` because the title already
+                                says what the option is: a screen reader announcing "tick, I've
+                                sent it" reads the decoration twice, and the four marks distinguish
+                                nothing a sighted reader has not already got from the sentence. */}
+                            <span className="g" aria-hidden="true">{o.glyph}</span>
                             <span className="t">{o.title}</span>
                             <span className="s">{o.subtitle}</span>
                             {/* ⚠️ A CROSSOVER SAYS SO BEFORE IT IS PRESSED. Swapping the whole
@@ -396,13 +425,17 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
                   {d.body}
                 </div>
               </div>
-            </div></div>
+            </div>
 
-            {/* ⚠️ THE ACTION BAR IS THE COLUMN'S LAST CHILD, and it is where Snooze and Dismiss
-                live — they act on the OPEN TASK, and this is where the open task is. The
-                will-record strip states the actual values the primary will write, so the button is
-                never the only description of what pressing it does. */}
-            <div className="actbar">
+            {/* ⚠️ THE FOOT IS THE SHEET'S BOTTOM EDGE, NOT A BAR BESIDE IT — and it is where Snooze
+                and Dismiss live, because they act on the OPEN TASK and this is where the open task
+                is. The will-record strip states the actual values the primary will write, so the
+                button is never the only description of what pressing it does.
+                ⚠️ IT KEEPS ITS `actbar` CLASS ALONGSIDE `foot`. Every rule in this sheet's
+                stylesheet and four measurements address it by that name; renaming it would be a
+                change of spelling with no claim behind it, which is what this repo's locks exist
+                to refuse. `foot` is what the contract calls the position. */}
+            <div className="foot actbar">
               {/* ⚠️ THE STRIP YIELDS TO THE MISSING LINE, IT DOES NOT COMPETE WITH IT. Both in the
                   bar at once is two sentences fighting for one row, and the will-record is restated
                   in the form — so when the writer has just been told what is still owed, that is
@@ -485,12 +518,41 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
                 );
               })()}
             </div>
-          </div>
+        </div></div>
+        {/* ⚠️ THE BOOKMARK TAB LIVES ON THE SHEET'S RIGHT EDGE AND ONLY WHEN THE SLIP IS AWAY.
+            It is a sibling of the sheet inside `.wcol`, positioned over the sheet's edge — the
+            sheet's own rim clips, so a child could not hang off it. Vertical mono, sage, 26px:
+            it says WHAT is behind it rather than offering an anonymous chevron.
+            ⚠️ AND IT IS ABSENT, NOT HIDDEN, WHEN THE SLIP IS SHOWING — a tab pointing at
+            something already on screen is a control with nothing to do. */}
+        {hasRecord && recAway && (
+          <button type="button" className="qrtab" title="Show the quick reference"
+            onClick={() => setRecAway(false)}>
+            <span>Quick reference</span>
+          </button>
+        )}
+        </div>
 
-          {/* ⚠️ THE RECORD — one card, its own column, and it does not scroll with the work.
-              Header and the query link are fixed; only the middle moves (Phase 2). */}
-          {hasRecord && (
-            <div className="fc rec"><div className="rim">
+        {/* ⚠️ THE SLIP'S 264px SLOT IS ALWAYS THERE; ONLY THE SLIP COMES AND GOES — and that is
+            THE WRAP LAW, made structural rather than remembered. The ref this is built from
+            collapses the slot (`.stage.noRec .qrwrap { flex-basis: 0; width: 0 }`) with
+            `.wcol { flex: 1 1 auto }` above it, so dismissing GROWS the sheet by 264px and the
+            deed re-wraps — a real bug in the mockup, and the brief corrects it. Nothing about the
+            slip's state may reach the band.
+
+            ⚠️ THE COST IS 264px OF EMPTY DESK WHEN IT IS AWAY, AND IT IS THE RIGHT TRADE. A writer
+            who puts the reference aside to concentrate on the form does not want the form to
+            reflow underneath them; the tab marks where it went, and one click brings it back to
+            exactly the width it left. Reclaiming the space would mean re-laying-out the sentence
+            they are reading, every time.
+
+            ⚠️ AND THE DISMISSAL IS THE SESSION'S, NOT THE TASK'S. Per-task memory would make the
+            slip flicker in and out as ‹ › walk the list — the writer said "not now", about the
+            slip, not about this one card. */}
+        {hasRecord && (
+          <div className="qrwrap">
+          {!recAway && (
+            <div className="qr"><div className="rrim">
               {/* ⚠️ THE HEAD SPEAKS THE QUERY CENTRE'S VOICE (deed round, Phase 3): the sage band
                   the Tracking panel wears, with the query's own STATUS on the right in Playfair. It
                   was an entry COUNT — "3 entries" — which is a fact about the list rather than about
@@ -499,8 +561,15 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
                   status-word function, so this card and the Centre's pill cannot come to call one
                   status two things. */}
               <div className="rhead">
-                <span className="t">The record</span>
+                <span className="t">Quick reference</span>
                 {d.statusWord && <span className="stat">{d.statusWord}</span>}
+                {/* ⚠️ THE ONLY CONTROL IN THE SLIP BESIDES THE QUERY LINK, AND THAT IS ASSERTED
+                    RATHER THAN INTENDED (`sheetSlip.measure.ts` P3.9 sweeps every descendant, not
+                    the first level). A reference you can change is not a reference: everything in
+                    here is a fact about the query, and the two things a reader may do with it are
+                    put it away and go to the record it summarises. */}
+                <button type="button" className="x" title="Put the quick reference away"
+                  aria-label="Put the quick reference away" onClick={() => setRecAway(true)}>×</button>
               </div>
               <div className="recscroll">
                 {/* ⚠️ THE TILES ARE STACKED, NOT A ROW. A 288px column cannot carry three cells
@@ -533,7 +602,8 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
               )}
             </div></div>
           )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

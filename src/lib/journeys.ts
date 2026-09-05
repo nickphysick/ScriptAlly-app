@@ -65,11 +65,28 @@ export type IntentTarget =
   | { kind: "flow"; flow: string }
   | { kind: "journey"; journey: JourneyId };
 
+/**
+ * ⚠️ THE FOUR GLYPHS ARE A CLOSED SET, AND AN INTENT DECLARES ITS OWN (drawer round, Phase 3).
+ * The contract draws a mark in the fork panel's first column; deriving it from the id or the
+ * target would mean a DEFAULT for anything the table did not know, and a default here invents a
+ * meaning — the one shape this file's own `FlowWrite` note already refuses. Four marks, one per
+ * kind of answer a fork can offer:
+ *
+ *   ✓  I have done it            — the thing happened; record it
+ *   ⏱  not yet, ask me later     — the clock moves, nothing else does
+ *   ×  I am not going to         — record that honestly, and close
+ *   ↻  do it again / something else — the journey swaps for another
+ */
+export type IntentGlyph = "✓" | "⏱" | "×" | "↻";
+
 export interface JourneyIntent {
   /** stable, and it becomes part of a DOM id — see `idPrefix` in `TaskPaneBody` */
   id: string;
   title: string;
   subtitle: string;
+  /** REQUIRED — the compiler is what makes the next intent state its own mark rather than inherit
+   *  somebody else's by falling through a table. */
+  glyph: IntentGlyph;
   target: IntentTarget;
 }
 
@@ -192,14 +209,14 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
     fork: {
       label: "Where are you with it?",
       options: [
-        { id: "sent", title: "I’ve sent it", subtitle: "Note what went, and set the clock",
+        { id: "sent", title: "I’ve sent it", subtitle: "Note what went, and set the clock", glyph: "✓",
           target: { kind: "flow", flow: "sent" } },
-        { id: "later", title: "Not yet — hold me to it", subtitle: "Pick a day and it lands back on your list",
+        { id: "later", title: "Not yet — hold me to it", subtitle: "Pick a day and it lands back on your list", glyph: "⏱",
           target: { kind: "flow", flow: "later" } },
         /* ⚠️ A CROSSOVER, NOT A THIRD FLOW. Deciding not to send is a CLOSE, and it is a close with
            its own reason — withdrawn. Modelling it here would give the app two ways to close a
            query, which is how the two would come to write different things. */
-        { id: "wont", title: "I’m not going to send it", subtitle: "Record that, and close the query honestly",
+        { id: "wont", title: "I’m not going to send it", subtitle: "Record that, and close the query honestly", glyph: "×",
           target: { kind: "journey", journey: "close" } },
       ],
     },
@@ -225,11 +242,11 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
     fork: {
       label: "Where are you with it?",
       options: [
-        { id: "nudged", title: "I’ve nudged them", subtitle: "Record it, and reset the clock",
+        { id: "nudged", title: "I’ve nudged them", subtitle: "Record it, and reset the clock", glyph: "✓",
           target: { kind: "flow", flow: "nudged" } },
-        { id: "wait", title: "I’ll give it a little longer", subtitle: "Choose when this should come back",
+        { id: "wait", title: "I’ll give it a little longer", subtitle: "Choose when this should come back", glyph: "⏱",
           target: { kind: "flow", flow: "wait" } },
-        { id: "toclose", title: "Actually — time to close", subtitle: "Enough waiting; record it honestly",
+        { id: "toclose", title: "Actually — time to close", subtitle: "Enough waiting; record it honestly", glyph: "×",
           target: { kind: "journey", journey: "close" } },
       ],
     },
@@ -266,11 +283,11 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
     fork: {
       label: "What would you like to do?",
       options: [
-        { id: "closenow", title: "Close it now", subtitle: "Records no response — not a rejection. It reopens if a reply ever comes",
+        { id: "closenow", title: "Close it now", subtitle: "Records no response — not a rejection. It reopens if a reply ever comes", glyph: "×",
           target: { kind: "flow", flow: "closenow" } },
-        { id: "nudgefirst", title: "Nudge them once more first", subtitle: "One more try before the ledger closes",
+        { id: "nudgefirst", title: "Nudge them once more first", subtitle: "One more try before the ledger closes", glyph: "↻",
           target: { kind: "journey", journey: "nudge" } },
-        { id: "leave", title: "Leave it open for now", subtitle: "Choose when you’d like to be asked again — or not at all",
+        { id: "leave", title: "Leave it open for now", subtitle: "Choose when you’d like to be asked again — or not at all", glyph: "⏱",
           target: { kind: "flow", flow: "leave" } },
       ],
     },
@@ -304,9 +321,9 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
     fork: {
       label: "This query came in by import — what went with it?",
       options: [
-        { id: "fill", title: "I can fill it in", subtitle: "Tick what went; set the sample if there was one",
+        { id: "fill", title: "I can fill it in", subtitle: "Tick what went; set the sample if there was one", glyph: "✓",
           target: { kind: "flow", flow: "fill" } },
-        { id: "forget", title: "I can’t remember", subtitle: "Fair enough — stop asking, record nothing",
+        { id: "forget", title: "I can’t remember", subtitle: "Fair enough — stop asking, record nothing", glyph: "×",
           target: { kind: "flow", flow: "forget" } },
       ],
     },
@@ -334,9 +351,9 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
     fork: {
       label: "Your note — what now?",
       options: [
-        { id: "tick", title: "Tick it off", subtitle: "Done is done — the tick is dated today",
+        { id: "tick", title: "Tick it off", subtitle: "Done is done — the tick is dated today", glyph: "✓",
           target: { kind: "flow", flow: "tick" } },
-        { id: "date", title: "Give it a date", subtitle: "Turn it into a reminder that comes back",
+        { id: "date", title: "Give it a date", subtitle: "Turn it into a reminder that comes back", glyph: "⏱",
           target: { kind: "flow", flow: "date" } },
       ],
     },
@@ -367,7 +384,7 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
     fork: {
       label: "An offer needs its own answer",
       options: [
-        { id: "open", title: "Answer the offer", subtitle: "Accept, decline, or ask for time — on its own screen",
+        { id: "open", title: "Answer the offer", subtitle: "Accept, decline, or ask for time — on its own screen", glyph: "↻",
           target: { kind: "flow", flow: "open" } },
       ],
     },
@@ -384,7 +401,7 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
     fork: {
       label: "This agent’s record has gaps",
       options: [
-        { id: "open", title: "Fill in the agent’s record", subtitle: "Their window, what they ask for, their wish list",
+        { id: "open", title: "Fill in the agent’s record", subtitle: "Their window, what they ask for, their wish list", glyph: "↻",
           target: { kind: "flow", flow: "open" } },
       ],
     },
@@ -401,7 +418,7 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
     fork: {
       label: "These queries came in by import",
       options: [
-        { id: "fill", title: "Fill in what you sent", subtitle: "One row per query; copy the first row down if they match",
+        { id: "fill", title: "Fill in what you sent", subtitle: "One row per query; copy the first row down if they match", glyph: "✓",
           target: { kind: "flow", flow: "fill" } },
       ],
     },

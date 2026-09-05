@@ -1171,7 +1171,7 @@ export function useTaskPaneSession(
                         ? { fork: {
                             label: JOURNEYS[activeId].fork.label,
                             options: JOURNEYS[activeId].fork.options.map((o) => ({
-                              id: o.id, title: o.title, subtitle: o.subtitle,
+                              id: o.id, title: o.title, subtitle: o.subtitle, glyph: o.glyph,
                               crossesTo: crossoverOf(activeId, o.id) ?? undefined,
                             })),
                             onChoose: chooseIntent,

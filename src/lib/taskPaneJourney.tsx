@@ -172,6 +172,11 @@ export interface TaskPaneForkOption {
   id: string;
   title: string;
   subtitle: string;
+  /** ⚠️ THE INTENT'S OWN MARK, CARRIED THROUGH — `IntentGlyph`, not re-derived here. The view type
+   *  restates the four values rather than importing the union so this module keeps its one-way
+   *  dependency on `journeys`; `journeyRegister.test.ts` reconciles the two, so they cannot drift
+   *  into meaning different sets. */
+  glyph: "✓" | "⏱" | "×" | "↻";
   /** the journey this intent crosses to, where it does — the contract's "crosses to closing →" */
   crossesTo?: string;
 }

@@ -307,7 +307,35 @@
    left no room for the rims. */
 /* ⚠️ THE PANE IS A TWO-PART COLUMN AGAIN — the full-width header, then the split row that fills
    what is left. The gap is back because `.ws` is no longer the only child. */
-.tpn .pane { display:flex;flex-direction:column;min-width:0;gap:12px; }
+/* ⚠️ THE PANE IS A ROW NOW — the sheet's column, then the slip (drawer round, Phase 3). It was a
+   COLUMN of a header card over a two-track grid, which is what made the band a caption above the
+   work rather than the work's own top edge. `align-items: stretch` gives `.wcol` the pane's full
+   height, which is the cap the sheet measures itself against. */
+.tpn .pane { display:flex;min-width:0;gap:14px;align-items:stretch;min-height:0; }
+/* the sheet's column: full height, so `max-height: 100%` on the sheet means "the drawer's" */
+.tpn .wcol { flex:1 1 auto;min-width:0;min-height:0;position:relative;display:flex;flex-direction:column; }
+
+/* ⚠️ THE HEIGHT RULE IS `flex`, AND `align-self` HAS NOTHING TO DO WITH IT — corrected by trying
+   to break it. The first form of this note said `align-self: flex-start` was what stopped the
+   sheet stretching; mutating it to `stretch` changed NOTHING, because `.wcol` is a flex COLUMN and
+   `align-self` there governs the CROSS axis, which is horizontal. What actually decides the height
+   is the two flex numbers:
+     `flex-grow: 0`   → a short journey hugs its content instead of filling the drawer
+     `flex-shrink: 1` → a long one is pulled back to the column's height rather than overflowing it
+   `max-height: 100%` is belt and braces on the second: it says the same thing declaratively, and
+   it is what would hold the cap if the shrink were ever removed. Stated as three facts rather than
+   two because a note that names the wrong mechanism is worse than no note — the next person breaks
+   the real one while carefully preserving the decoration.
+   ⚠️ `align-self: flex-start` STAYS, and it is doing a different job: `width: 100%` beside it is
+   what keeps the sheet the column's full width, and `stretch` would fight it. */
+.tpn .sheet {
+  align-self: flex-start; flex: 0 1 auto; min-height: 0; max-height: 100%; width: 100%;
+  display: flex; position: relative;
+  background:var(--white);border:1px solid var(--edge);border-radius:12px;padding:6px;
+  box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);
+}
+/* the rim is the object's edge: it clips, so the work leaves at the frame and the foot sits on it */
+.tpn .sheet > .rim { display:flex;flex-direction:column;min-height:0;width:100%;max-height:100%; }
 .tpn .band { flex:0 0 auto;padding:13px 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative; }
 .tpn .band::after { content:'';position:absolute;bottom:0;left:0;right:0;height:1px; }
 .tpn .pane.u-now .band { background:linear-gradient(135deg,var(--u-now-1),var(--u-now-2)); }
@@ -364,7 +392,6 @@
 /* ⚠️ THE FORM 11 CARD, and the pane holds three of them. `.fc` is the white card with the app's
    edge; `.rim` is the burgundy hairline inside it, and its `overflow:hidden` is what CLIPS the
    band's tint to the 9px radius rather than letting a square fill run under a rounded border. */
-.tpn .fc { background:var(--white);border:1px solid var(--edge);border-radius:12px;padding:6px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07); }
 .tpn .rim { border:1px solid rgba(124,58,42,0.28);border-radius:9px;overflow:hidden; }
 .tpn .hdr { flex:0 0 auto; }
 /* ⚠️ THE WORKSHEET'S PADDING IS `.form`'s, WHICH IS THE CONTRACT'S OWN ELEMENT — it replaces the
@@ -401,8 +428,10 @@
 /* ⚠️ `min-height: 0` IS NOT OPTIONAL ANYWHERE ON THE CHAIN. A flex item's automatic minimum is its
    content, so without it the worksheet grows past the frame and the PAGE scrolls — the fault this
    whole block exists to prevent, and it fails silently. */
-.tpn .work { flex:1 1 auto;min-height:0;display:flex; }
-.tpn .work > .rim { display:flex;flex-direction:column;min-height:0;width:100%; }
+/* ⚠️ THE WORK IS A SCROLLER INSIDE THE RIM, NOT A CARD ANY MORE. `flex: 0 1 auto` rather than
+   `1 1 auto` is the whole of the hug: with `1` it would GROW to fill the rim whenever the rim was
+   taller than the content, which is the stretch this phase removes one level down as well as up. */
+.tpn .work { flex:0 1 auto;min-height:0;display:flex;min-width:0; }
 .tpn .workscroll { flex:1 1 auto;min-height:0;overflow-y:auto; }
 .tpn .workscroll::-webkit-scrollbar { width:9px; }
 .tpn .workscroll::-webkit-scrollbar-thumb { background:#e2d6c8;border-radius:5px;border:2px solid var(--white); }
@@ -410,8 +439,6 @@
 /* ⚠️ THE RECORD SCROLLS ITS OWN MIDDLE THE SAME WAY, and for the same reason: a long history would
    otherwise push the query link off the bottom of a card that cannot grow. Head and foot are
    fixed; only the tiles and the story move between them. */
-.tpn .rec { align-self:stretch;display:flex;min-height:0; }
-.tpn .rec > .rim { display:flex;flex-direction:column;min-height:0;width:100%; }
 .tpn .recscroll { flex:1 1 auto;min-height:0;overflow-y:auto; }
 .tpn .recscroll::-webkit-scrollbar { width:9px; }
 .tpn .recscroll::-webkit-scrollbar-thumb { background:#e2d6c8;border-radius:5px;border:2px solid var(--white); }
@@ -465,7 +492,13 @@
    container query rather than a media query because the number that matters is THIS BAR's width —
    it is 390 at 1440 inside the split and wider outside it, and the viewport cannot tell you which.
    The house idiom, from the journeys pack. */
-.tpn .actbar { flex:0 0 auto;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:10px;padding:12px 16px;background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,0.05);container-type:inline-size; }
+/* ⚠️ THE FOOT LOST ITS FRAME BECAUSE IT IS NO LONGER A CARD — border, radius and lift all go, and
+   a single hairline TOP is what separates it from the work above. Keeping any of them would have
+   drawn a card inside a card, which is exactly the fault the sheet exists to end (and which the
+   rail was quietly committing one level out until Phase 1).
+   ⚠️ `min-height: 54px` IS THE CONTRACT'S, and it is a floor rather than a height: the foot holds
+   a receipt on some journeys and a bare primary on others, and a fixed height would crop one. */
+.tpn .actbar { flex:0 0 auto;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:10px;padding:10px 16px;min-height:54px;background:var(--white);border-top:1px solid var(--hair);container-type:inline-size; }
 /* ⚠️ PROSE, NOT A FIELD STRING (deed round, Phase 2). It was uppercase mono with `·` separators and
    `text-overflow: ellipsis` — a database row read aloud, and clipped. It is a sentence now: Inter,
    sentence case, wrapping, capped at a readable measure. The mono survives on the LEAD-IN alone,
@@ -597,19 +630,36 @@
   animation:tpn-sqPulse 1.6s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) { .tpn .forklbl .sqm { animation: none; } }
-.tpn .fork { display:flex;flex-direction:column;gap:8px; }
+/* ⚠️ THE FORK IS ROOMY (drawer round, Phase 3) — the contract's 80px panel, laid out as a GRID
+   rather than a stack: a glyph column, the title with its subtitle beneath, and the crossover tag
+   held to the right. It was a block with everything flowing down the left, which is legible and
+   reads as a list of paragraphs; the panels are the FIRST decision of every journey and they now
+   look like a choice being offered rather than options being listed.
+   ⚠️ `min-height`, NEVER `height`. A two-line subtitle at 1440 is normal and a fixed 80 would crop
+   it — the panel grows and the grid keeps the columns. */
+.tpn .fork { display:flex;flex-direction:column;gap:9px; }
 .tpn .fk {
-  cursor:pointer;text-align:left;display:block;width:100%;
-  background:var(--field);border:0.5px solid var(--hair2);border-radius:10px;padding:11px 14px;
+  cursor:pointer;text-align:left;width:100%;
+  background:var(--field);border:0.5px solid var(--hair2);border-radius:10px;padding:14px 16px;
   transition:all .15s;
+  display:grid;grid-template-columns:30px 1fr auto;grid-template-rows:auto auto;
+  column-gap:12px;row-gap:2px;align-items:center;min-height:80px;
 }
 .tpn .fk:hover { border-color:#c9a89e;background:var(--white); }
 .tpn .fk:focus-visible { outline:2px solid var(--burg);outline-offset:2px; }
-.tpn .fk .t { display:block;font-size:13px;font-weight:500;color:var(--ink2); }
-.tpn .fk .s { display:block;font-size:11.5px;font-weight:300;color:var(--muted2);margin-top:2px;line-height:1.45; }
+/* the glyph sits in its own column across both rows — a mark beside the pair, not above them */
+.tpn .fk .g {
+  grid-column:1;grid-row:1/3;width:30px;height:30px;border-radius:7px;
+  background:var(--white);border:0.5px solid var(--hair2);
+  display:inline-flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted2);
+  flex-shrink:0;transition:border-color .15s,color .15s;
+}
+.tpn .fk:hover .g { border-color:var(--pink-b);color:var(--burg); }
+.tpn .fk .t { grid-column:2;grid-row:1;display:block;font-size:14.5px;font-weight:500;color:var(--ink2);line-height:1.35; }
+.tpn .fk .s { grid-column:2;grid-row:2;display:block;font-size:11.5px;font-weight:300;color:var(--muted2);line-height:1.45; }
 /* ⚠️ A CROSSOVER SAYS SO BEFORE IT IS PRESSED — swapping the whole journey unannounced would read
    as the pane losing its place. */
-.tpn .fk .x { display:block;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);margin-top:6px; }
+.tpn .fk .x { grid-column:3;grid-row:1/3;display:block;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);white-space:nowrap;margin:0; }
 
 /* the collapsed fork — one line, and the way back */
 .tpn .receipt { display:flex;align-items:center;gap:8px;padding:9px 0 3px;flex-wrap:wrap; }
@@ -629,7 +679,9 @@
    element — and only a rendered measurement can see it. `:has` selects the last `.q` whatever
    follows it. */
 .tpn .q:not(:has(~ .q)) { border-bottom:0; }
-.tpn .q .head { display:flex;align-items:center;gap:9px;min-height:40px;padding:5px 0; }
+/* the contract's 44px ledger row — the fork grew, and a 40px row beneath an 80px panel read as
+   a different density rather than the same page */
+.tpn .q .head { display:flex;align-items:center;gap:9px;min-height:44px;padding:5px 0; }
 /* every closed row opens on a click — see `TaskPaneBody` for why that is one target and not two */
 .tpn .q .head[role="button"] { cursor:pointer; }
 .tpn .q .head[role="button"]:focus-visible { outline:2px solid var(--burg);outline-offset:2px;border-radius:6px; }
@@ -695,19 +747,15 @@
  * ROW rather than of either column: it is what makes the pane column fill the row's height, which
  * is what puts the action bar's bottom edge on the record card's bottom edge by construction.
  * ═════════════════════════════════════════════════════════════════════════════════════════════ */
-.tpn .ws { display:grid;grid-template-columns:minmax(0,1fr) 288px;gap:12px;align-items:stretch;flex:1 1 auto;min-height:0; }
 /* ⚠️ ONE COLUMN WHERE THERE IS NO RECORD, and the modifier says which case that is rather than the
    grid guessing from a child count. A cohort concerns many queries and a note concerns none; both
    take the full width, and `.ws` without `.rec` beside it would otherwise hold a 288px empty
    track. */
-.tpn .ws.solo { grid-template-columns:minmax(0,1fr); }
-.tpn .paneCol { display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0; }
 
 /* ── the record card ───────────────────────────────────────────────────────────────────────────
    ⚠️ THE SAGE HEAD IS THE TRACKING PANEL'S, ported by VALUE rather than by importing its rule —
    the two surfaces are in different stylesheets and a shared selector between them would couple a
    task pane to a query page. Same gradient, same rule colour, stated here. */
-.tpn .rec { min-width:0; }
 .tpn .rhead { flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 15px;background:linear-gradient(135deg,#d7ddd5,#d5dbd3);border-bottom:1px solid rgba(90,110,88,0.20); }
 .tpn .rhead .t { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#3c4a3a;font-weight:500; }
 /* the status word — Playfair, and the only thing on this row that is not a label */
@@ -793,3 +841,42 @@
   .tpn .ab.go.prime .fill { transition: none; }
   .tpn .ab.go.prime.nudge { animation: none; }
 }
+
+/* ⚠️ `.fc`, `.ws`, `.ws.solo`, `.paneCol` AND `.rec` ARE RETIRED WITH THE THREE-CARD PANE (drawer
+   round, Phase 3), and the rules are DELETED rather than left inert — a selector nothing renders is
+   the rule-with-no-subject fault this repo has already paid for twice, silent in both directions.
+   Where each went: `.fc` was the card treatment the band, the work and the bar each wore, and there
+   is one card now (`.sheet`); `.ws` was the two-track grid and `.paneCol` its left column, both
+   superseded by the pane being a flex row; `.rec` was the 288px record column and is the slip.
+   ⚠️ `.rec` WAS DECLARED TWICE, two hundred lines apart — the shape this file's own locks watch
+   for, found while removing it. */
+
+/* ── the quick reference slip ────────────────────────────────────────────────────────────── */
+/* ⚠️ THE SLOT IS ALWAYS 264px; ONLY THE SLIP INSIDE IT COMES AND GOES. That is the wrap law made
+   structural: `.wcol` is `flex: 1 1 auto` beside a slot that never changes size, so the sheet's
+   width — and therefore the deed's wrapping — cannot depend on whether the reference is showing.
+   The ref collapses this slot and grows the sheet; the brief forbids it, and the reason is a real
+   wrap bug in the mockup. */
+.tpn .qrwrap { flex:0 0 264px;width:264px;min-width:264px;align-self:flex-start;margin-top:14px; }
+.tpn .qr { background:var(--white);border:1px solid var(--edge);border-radius:12px;padding:6px;box-shadow:0 2px 4px rgba(58,28,20,0.06),0 14px 34px rgba(58,28,20,0.12);width:264px; }
+/* ⚠️ SAGE-EDGED, WHERE THE SHEET'S RIM IS BURGUNDY — the two objects are different KINDS, and the
+   edge is what says so: one is where you work, the other is what you consult. Sage is the Query
+   Centre's own reference voice, which this card already spoke in its head band. */
+.tpn .qr > .rrim { border:1px solid rgba(90,110,88,0.28);border-radius:9px;overflow:hidden;background:var(--white);display:flex;flex-direction:column;min-height:0; }
+
+/* ⚠️ THE TAB IS ON THE SHEET'S EDGE AND POINTS INTO THE EMPTY SLOT. `right: -1px` sits it over the
+   sheet's own border so it reads as attached to the object rather than floating beside it; the
+   sheet's rim clips, which is why this is a SIBLING of the sheet rather than a child of it. */
+.tpn .qrtab {
+  position:absolute;right:-1px;top:76px;width:26px;padding:12px 0;cursor:pointer;
+  border:1px solid rgba(90,110,88,0.28);border-right:0;border-radius:8px 0 0 8px;
+  background:linear-gradient(180deg,var(--u-house-1),var(--u-house-2));
+  box-shadow:-2px 2px 6px rgba(58,28,20,0.06);
+  display:flex;align-items:center;justify-content:center;
+}
+.tpn .qrtab span { writing-mode:vertical-rl;transform:rotate(180deg);font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.14em;text-transform:uppercase;color:#3c4a3a;font-weight:500; }
+.tpn .qrtab:hover { background:linear-gradient(180deg,#d0d8ce,#cbd4c9); }
+
+/* the slip's own dismiss — the contract's `.rhead .x` */
+.tpn .rhead .x { cursor:pointer;width:20px;height:20px;border-radius:6px;border:0.5px solid rgba(58,28,20,0.13);background:rgba(255,253,250,0.8);font-size:11px;display:flex;align-items:center;justify-content:center;color:#3c4a3a;margin-left:6px;flex-shrink:0;padding:0; }
+.tpn .rhead .x:hover { border-color:rgba(90,110,88,0.5); }
