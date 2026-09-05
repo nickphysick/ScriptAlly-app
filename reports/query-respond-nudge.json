@@ -7,15 +7,23 @@
   },
   "notch-1440": {
     "missing": false,
-    "notchCentre": 29.99219,
+    "notchCentre": 140,
     "btnCentre": 29.9921875,
     "notchShown": true
+  },
+  "clamp-1440": {
+    "drawerTop": 0,
+    "cardTop": 122,
+    "winTop": 110,
+    "cardBottom": 423.921875,
+    "vh": 900
   },
   "ghost-1440": {
     "ghosts": 1,
     "ghostText": "Partial requested5 SEPTPriya asked for a partial",
     "derived": "Status becomes Partial Requested — with you. The waiting bar stops here; nothing is owed by Nair until you send. "
   },
+  "quickTop-1440": 167,
   "nudge-1440": {
     "chips": [
       "4 wks · 3 Oct",
@@ -41,15 +49,23 @@
   },
   "notch-1920": {
     "missing": false,
-    "notchCentre": 29.99219,
+    "notchCentre": 140,
     "btnCentre": 29.9921875,
     "notchShown": true
+  },
+  "clamp-1920": {
+    "drawerTop": 0,
+    "cardTop": 122,
+    "winTop": 110,
+    "cardBottom": 423.921875,
+    "vh": 900
   },
   "ghost-1920": {
     "ghosts": 1,
     "ghostText": "Partial requested5 SEPTPriya asked for a partial",
     "derived": "Status becomes Partial Requested — with you. The waiting bar stops here; nothing is owed by Nair until you send. "
   },
+  "quickTop-1920": 167,
   "nudge-1920": {
     "chips": [
       "4 wks · 3 Oct",

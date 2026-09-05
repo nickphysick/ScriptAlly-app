@@ -78,8 +78,25 @@ for (const width of [1440, 1920] as const) {
     if (!n1.missing) {
       out[`notch-${width}`] = n1;
       expect(n1.notchShown, "the notch is hidden on a bar anchor").toBe(true);
-      expect(Math.abs(n1.notchCentre - n1.btnCentre), "notch vs button centre").toBeLessThanOrEqual(2);
+      /* pass 3 §1: a bar anchor sits ABOVE the card's reachable top now (the desk clears the app
+         masthead), so the notch clamps to the nearest point on the card's edge — the button-centre
+         equality holds only for anchors the card can reach (the rung case below). */
     }
+
+    /* pass 3 §1 — the desk clears the app masthead. The brief's literal bound (drawer.top + 12)
+       is a FALSE PREMISE: .qpn is a full-height takeover, its top is 0 (asserted here so the
+       premise stays measured). The intent binds to the content window. */
+    const clamp = await page.evaluate(() => {
+      const qpn = [...document.querySelectorAll<HTMLElement>(".qpn")].find((e) => e.getBoundingClientRect().height > 0)!;
+      const card = document.querySelector(".qcd-card")!.getBoundingClientRect();
+      const win = document.querySelector<HTMLElement>(".ws-window")!.getBoundingClientRect();
+      return { drawerTop: qpn.getBoundingClientRect().top, cardTop: card.top, winTop: win.top, cardBottom: card.bottom, vh: window.innerHeight };
+    });
+    out[`clamp-${width}`] = clamp;
+    expect(clamp.drawerTop, "the drawer stopped being a full-height takeover — re-derive the bound").toBe(0);
+    expect(clamp.cardTop, "the desk sits over the app masthead").toBeGreaterThanOrEqual(clamp.winTop + 12);
+    expect(clamp.cardTop, "and trivially clears the drawer's own top").toBeGreaterThanOrEqual(clamp.drawerTop + 12);
+    expect(clamp.cardBottom, "the desk runs past the drawer's foot").toBeLessThanOrEqual(clamp.vh - 12 + 1);
 
     /* choose Partial requested → details + the ghost rung through the ONE builder */
     await page.locator(".qrd-kind", { hasText: "Asked for a partial" }).click();
@@ -100,6 +117,20 @@ for (const width of [1440, 1920] as const) {
     expect(scene2.ghostText.toLowerCase()).toContain("partial");
     expect(scene2.derived).toContain("Partial Requested");
     await page.screenshot({ path: `${SHOTS}/respond-details-ghost-${width}.png` });
+
+    /* pass 3 §2 — nothing wedges in above the quick filters while a query is open. The old close
+       menu rendered IN FLOW there (its trigger retired with the browsing chrome, so its menuStyle
+       was empty) and pushed the grid down. The composed claim: the quick row sits where it sits
+       on a fresh page, and the desktop page body carries no "Close this query as…" block at all
+       (the string survives only in the unmounted mobile sheet). */
+    const openTop = await page.evaluate(() =>
+      Math.round(document.querySelector(".qcc-quick")?.getBoundingClientRect().top ?? -1));
+    const closeText = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>("div,section")].some((e) =>
+        e.getBoundingClientRect().height > 0 && (e.textContent ?? "").trim().startsWith("Close this query as")));
+    expect(closeText, "an in-flow close block is on the page").toBe(false);
+    out[`quickTop-${width}`] = openTop;
+    expect(openTop, "the quick row is missing").toBeGreaterThan(0);
   });
 
   test(`nudge: the desk with the draft, at ${width}`, async ({ page }) => {
@@ -149,11 +180,10 @@ for (const width of [1440, 1920] as const) {
 }
 
 /**
- * ⚠️ THE SAVE RECORDS AN R&R, NOT A PARTIAL — a finding, not a preference. The deployed nested
- * allowlist (26 Aug) has no materialsType/materialsQuantity/fullVersionSent/feedbackType, so
- * recordQueryResponse's partial/full/rejected rungs are DENIED on dev (probed field-by-field;
- * pre-existing on main — the record journey is equally affected). R&R carries none of the denied
- * keys, so it proves the desk's save/pulse/undo composition while the rules gap is reported.
+ * The save records a PARTIAL — the outcome that was blocked until correction pass 3's rules fix
+ * (the nested allowlist gained materialsType/materialsQuantity/fullVersionSent/feedbackType,
+ * deployed to dev and probed red→green field-by-field). It exercises the qty overlay end-to-end;
+ * the run that found the gap substituted an R&R here, and this is the substitution repaid.
  */
 test("post-save: one rung lands with the pulse, the toast's Undo takes it back — 1440", async ({ page }) => {
   mkdirSync(SHOTS, { recursive: true });
@@ -166,7 +196,7 @@ test("post-save: one rung lands with the pulse, the toast's Undo takes it back �
   const before = await reals();
 
   await page.locator(".qpn-act", { hasText: "Record response" }).first().click();
-  await page.locator(".qrd-kind", { hasText: "Asked for revisions" }).click();
+  await page.locator(".qrd-kind", { hasText: "Asked for a partial" }).click();
   await page.locator(".qrd-b--s", { hasText: "Record it" }).click();
 
   /* the receipt IS the undo — capture, press IMMEDIATELY, and only then assert. An assertion
@@ -178,11 +208,57 @@ test("post-save: one rung lands with the pulse, the toast's Undo takes it back �
   await page.screenshot({ path: `${SHOTS}/respond-post-save-1440.png` });
   await undo.click();
 
+  /* ⚠️ POLL THE STATUS, NOT ONLY THE RUNG COUNT — the undo is delete + status revert + recompute,
+     and the rung's disappearance is only its FIRST write landing. Ending the test there killed the
+     revert in flight once: nested store clean, the query stuck at the saved status, and a feed
+     orphan the reseed's same-id sweep could never find (cleaned by hand, 5 Sep). The card's
+     accessible name carries the status, so "back to Queried" is the whole undo, observed. */
   await expect
     .poll(async () => reals(), { timeout: 15_000 })
     .toBe(before);
+  await expect
+    .poll(async () => (await page.locator('[data-qcc-id="cor-move-b"]').getAttribute("aria-label")) ?? "", { timeout: 15_000 })
+    .toContain("Queried");
   out.postSave = { before, fresh, after };
   expect(after, "exactly one rung landed").toBe(before + 1);
   expect(fresh, "the fresh pulse resolved onto the new rung").toBe(1);
   writeFileSync("reports/query-respond-nudge.json", JSON.stringify(out, null, 2));
+});
+
+test("pass 3: Mark closed in the desk, and the Agent tab states the name once — 1440", async ({ page }) => {
+  mkdirSync(SHOTS, { recursive: true });
+  await openDrawerOn(page, "cor-move-b", 1440);
+
+  /* §4 — the drawer states the agent's full name exactly once while the Agent tab is active */
+  await page.locator(".qpn-tab", { hasText: "Agent" }).click();
+  const nameCount = await page.evaluate(() => {
+    const qpn = [...document.querySelectorAll<HTMLElement>(".qpn")].find((e) => e.getBoundingClientRect().height > 0)!;
+    return (qpn.textContent ?? "").split("Priya Nair").length - 1;
+  });
+  out.agentTabNameCount = nameCount;
+  expect(nameCount, "the tab repeats the identity row").toBe(1);
+  await page.screenshot({ path: `${SHOTS}/agent-tab-1440.png` });
+
+  /* §2 — the closed desk: reason cards, derived line, ghost; Cancel — nothing is written */
+  await page.locator(".qpn-tab", { hasText: "Tracking" }).click();
+  await page.locator(".qpn-act", { hasText: "Mark closed" }).first().click();
+  await expect(page.locator(".qcd-card .qrd-kinds--closed")).toBeVisible();
+  const closed = await page.evaluate(() => ({
+    reasons: [...document.querySelectorAll(".qrd-kinds--closed .qrd-kind u")].map((b) => b.textContent),
+    derived: (document.querySelector(".qrd-derived") as HTMLElement | null)?.textContent ?? "",
+    ghosts: document.querySelectorAll(".tl-ev--ghost").length,
+  }));
+  expect(closed.reasons).toEqual(["Rejected", "Withdrawn", "No Response"]);
+  expect(closed.ghosts, "no ghost before a reason is chosen").toBe(0);
+  await page.locator(".qrd-kinds--closed .qrd-kind", { hasText: "Withdrawn" }).click();
+  const after = await page.evaluate(() => ({
+    ghosts: document.querySelectorAll(".tl-ev--ghost").length,
+    derived: (document.querySelector(".qrd-derived") as HTMLElement | null)?.textContent ?? "",
+  }));
+  out.closedDesk = after;
+  expect(after.ghosts, "the closed proposal reaches the one ghost channel").toBe(1);
+  expect(after.derived).toContain("Status becomes Closed — Withdrawn.");
+  await page.screenshot({ path: `${SHOTS}/markclosed-desk-1440.png` });
+  await page.keyboard.press("Escape");
+  writeFileSync("reports/query-corrections-3.json", JSON.stringify(out, null, 2));
 });

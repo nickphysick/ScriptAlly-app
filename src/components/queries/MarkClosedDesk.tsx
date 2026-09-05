@@ -65,7 +65,7 @@ export const MarkClosedDesk: React.FC<MarkClosedDeskProps> = ({
             className={`qrd-kind${draft.reason === r.key ? " qrd-kind--on" : ""}`}
             onClick={() => onDraft({ ...draft, reason: r.key })}>
             <span className="qrd-kn" aria-hidden="true"><StatusDot status={r.key} overrideSize={18} decorative /></span>
-            <span className="qrd-ktx"><b>{r.key}</b><i>{r.sub}</i></span>
+            <span className="qrd-ktx"><u>{r.key}</u><s>{r.sub}</s></span>
           </button>
         ))}
       </div>
