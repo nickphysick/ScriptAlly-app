@@ -1,0 +1,42 @@
+green  · P3.0 @1440 · rows on the board, so there is a task to open
+           rows = 30
+green  · P3.1 @1440 · the sheet is ONE rim holding the band, the work and the foot
+           sheets 1 · rims inside 1 · band true · work true · foot true · loose .fc cards 0
+green  · P3.2 @1440 · the sheet is min(its content, the drawer) — first journey
+           sheet 209 vs min(content 209, drawer 537) — out by 0 · HUGGING
+green  · P3.3 @1440 · the sheet is min(its content, the drawer) — longest journey
+           sheet 537 vs min(content 955, drawer 537) — out by 0 · CAPPED, work overflows by 418 · the foot is inside the rim = true
+green  · P3.4 @1440 · the slip has a dismiss of its own
+           the slip's × was found and pressed
+green  · P3.5 @1440 · THE WRAP LAW — the band's width is identical with the slip gone
+           band 268 → 268 · the deed sets 27 → 27 lines
+green  · P3.6 @1440 · the bookmark tab appears once the slip is put away
+           the tab is shown
+green  · P3.7 @1440 · the dismissal survives walking to the next task
+           the slip is unmounted · it had been dismissed = true
+green  · P3.8 @1440 · the tab brings it back, and then the tab goes
+           slip 264px · the tab is absent
+green  · P3.9 @1440 · the slip holds no control but its × and the query link
+           2 focusable: head:button, foot:a
+green  · P3.0 @1920 · rows on the board, so there is a task to open
+           rows = 30
+green  · P3.1 @1920 · the sheet is ONE rim holding the band, the work and the foot
+           sheets 1 · rims inside 1 · band true · work true · foot true · loose .fc cards 0
+green  · P3.2 @1920 · the sheet is min(its content, the drawer) — first journey
+           sheet 142 vs min(content 142, drawer 537) — out by 0 · HUGGING
+green  · P3.3 @1920 · the sheet is min(its content, the drawer) — longest journey
+           sheet 454 vs min(content 453, drawer 537) — out by 0.3 · HUGGING · the foot is inside the rim = true
+green  · P3.4 @1920 · the slip has a dismiss of its own
+           the slip's × was found and pressed
+green  · P3.5 @1920 · THE WRAP LAW — the band's width is identical with the slip gone
+           band 748 → 748 · the deed sets 10 → 10 lines
+green  · P3.6 @1920 · the bookmark tab appears once the slip is put away
+           the tab is shown
+green  · P3.7 @1920 · the dismissal survives walking to the next task
+           the slip is unmounted · it had been dismissed = true
+green  · P3.8 @1920 · the tab brings it back, and then the tab goes
+           slip 264px · the tab is absent
+green  · P3.9 @1920 · the slip holds no control but its × and the query link
+           2 focusable: head:button, foot:a
+green  · P3.10 · both branches of the height rule were exercised in this run
+           branches seen: capped, hugging

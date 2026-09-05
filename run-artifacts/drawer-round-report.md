@@ -6,7 +6,7 @@
 `check-design-refs.mjs`'s watchlist** (20 → 22 guarded), so a later edit to either fails the build
 rather than silently changing what this round's assertions cite.
 
-**Where I stopped:** end of Phase 2. Recon is `run-artifacts/drawer-recon.md`.
+**Where I stopped:** end of Phase 3. Recon is `run-artifacts/drawer-recon.md`.
 
 ---
 
@@ -335,6 +335,98 @@ them this commit's.
 
 ---
 
+## Phase 3 — `todo: the sheet and the Quick reference slip` · `1cb76f10`
+
+The three floating cards — header, work, action bar — become **one framed object** (`.sheet > .rim`
+holding band, work and foot), and the record is promoted to a 264px sage-edged slip beside it, with
+a bookmark tab on the sheet's edge when the slip is put away. **21/21 at 1440 and 1920.**
+
+### The two laws, proved red first — as asked
+
+Both were written and run against the three-card build before a line of it changed: **16 of 20
+assertions red** on the old pane. The red pass earned its keep immediately — **P3.7 was green
+against a page with no slip at all**, because "absent" satisfied "still away". It requires
+`dismissed` first now.
+
+**The wrap law is structural, not remembered.** The slip's 264px slot is *always* there; only the
+slip inside it comes and goes, so nothing about its state can reach the band. The ref does not obey
+its own law — its `.wcol` is `flex: 1 1 auto` over a collapsing slot, so dismissing grows the sheet
+by 264px and the deed re-wraps. Restoring the ref's own behaviour as a mutation reddens 2. The cost
+is 264px of empty desk when the slip is away, and it is the right trade.
+
+**The height rule is `flex`, and `align-self` has nothing to do with it** — corrected by trying to
+break it. The first note credited `align-self: flex-start` with the hug; mutating it to `stretch`
+changed *nothing*, because `.wcol` is a flex **column** and `align-self` there governs the
+horizontal axis. `flex-grow: 0` is the hug; `flex-shrink: 1` plus `max-height: 100%` is the cap.
+The note now names the real mechanism — a note naming the wrong one is worse than none, because the
+next person breaks the real lever while carefully preserving the decoration.
+
+### ⚠️ The height assertion was circular in its first form
+
+It computed the content's height as `sheet.height + scroller.overflow`. A sheet stretched to fill
+has no overflow, so "wants" came back **equal to the cap** and `h === min(wants, cap)` was satisfied
+by the very fault it exists to catch — **`flex-grow: 1` reddened nothing.** Only mutation shows
+this; reading the assertion does not. The content's height is now summed from its parts (band +
+foot + `scrollHeight` + padding + the rim's own borders), which does not know how tall the sheet
+turned out. Two more corrections fell out of the same repair:
+
+- **Round once.** Three separate roundings made a 0.6px layout read as a 1px disagreement at 1920.
+  The claim is a full-precision `delta`; the printed figures stay rounded for the reader.
+- **"Long" is width-dependent.** The same journey overflows by 418px at 1440 and fits at 1920, so
+  "a long journey caps" as a fixture-shaped case was the short case twice at one width. The claim is
+  now the rule — `min(content, drawer)` — with a run-level tally (P3.10) asserting **both branches
+  were actually exercised**, so a fixture drifting shorter fails loudly.
+
+### ⚠️ The fourth backtick of the round faked three clean mutation results
+
+A comment containing backticks was moved *into* a `page.evaluate` template. The file failed to
+collect, "No tests found" grepped as **zero reds**, and three mutations in a row reported clean
+about runs that never happened. The mutation runner now refuses any run that produced fewer than 15
+assertions, and the file was swept before anything after it was believed. That is the "No tests
+found" trap escalated: it does not just hide a stale report, it **counterfeits a clean mutation
+pass**.
+
+### Also in this phase
+
+- **`JourneyIntent` gains a required `glyph`** (✓ ⏱ × ↻) — the contract's fork mark, declared per
+  intent rather than derived, because a derivation needs a default and a default here invents a
+  meaning. All 16 intents state theirs; the compiler makes the next one do the same. The fork is
+  the contract's roomy 80px grid; ledger rows 40 → 44.
+- The foot keeps `actbar` beside `foot` — every rule and four measurements address it by that name.
+- The slip's dismissal is the **session's**, at module scope (the `foundingStore` argument), and
+  deliberately not persisted.
+- `taskPanePort`'s fork fixture now derives from `JOURNEYS.send.fork` rather than a hand-typed
+  copy — it went stale the moment the glyph landed, the an-input-the-system-can-produce fault
+  caught in the act.
+- `.fc`, `.ws`, `.ws.solo`, `.paneCol`, `.rec` deleted, not left inert. `.rec` was declared twice,
+  two hundred lines apart — found by removing it.
+- A journey with no record renders **no slip, no slot and no tab** — the slot is reserved only when
+  there is something to put in it, a different claim from the wrap law and asserted separately.
+
+### Mutations — all reddening
+
+| mutation | red |
+|---|---|
+| the ref's own collapse restored (wrap law) | 2 |
+| the sheet grows to fill (`flex-grow: 1`) | 3 |
+| the cap and the shrink both go | 2 |
+| the tab never appears | 2 |
+| the tab stays while the slip is back | 2 |
+| the tab rendered while the slip shows | 2 |
+| a control appears in the slip's body | 2 |
+| per-task dismissal memory | 4 |
+| a second rim inside the sheet | 6 |
+
+### Gates
+
+tsc clean · build clean · **7,553 pass** · the same four baseline reds. `paneMounts` **14/14**.
+
+### Screenshots
+
+`run-artifacts/p3-sheet-1440.png` · `p3-sheet-1920.png` · `p3-dismissed-1440.png`
+
+---
+
 ## What worked — and the one finding the round is really about
 
 ### The resting state had never existed, and nothing had ever asked for it
@@ -389,7 +481,8 @@ changing.
 
 ## Next
 
-**Phase 3 — the sheet and the Quick reference slip.** The three floating cards visible in
-`p2-open-1440.png` become one framed object plus a 264px sage-edged slip, with the bookmark tab
-when the slip is dismissed. Phase 2's Close chip lives in the band that Phase 3 rebuilds into the
-sheet's rim — behaviour Phase 3 re-homes, not re-decides.
+**Phase 4 — the unit row's Next.** The commit-gesture rule for a question that can be *edited*
+rather than merely picked: Enter and a `Next ↵` pill commit, the steppers never advance, the count
+updates live. Then Phase 5 (completion leaves the list), Phase 6 (group & order, filter — the
+`listView` extension), Phase 7 (the re-prove sweep over ~8 suites, `qcPanel` to be confirmed as a
+false positive first).
