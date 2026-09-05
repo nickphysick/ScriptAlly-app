@@ -1,0 +1,161 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE LOG SHEET — the four steps inside the drawer's form mode (log-sheet run §2).
+ * Geometry and tones from query-centre-v5-sticky-hero-cta.html's `.sec`/`.srow`/`.agcard`.
+ */
+
+.qls { display: flex; flex-direction: column; gap: 14px; }
+
+/* ── the open section ─────────────────────────────────────────────────────────────────────────── */
+.qls-sec {
+  background: #fdfaf5; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 6px 18px rgba(58, 28, 20, 0.08);
+}
+.qls-sh {
+  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  background: linear-gradient(135deg, #dce0d9, #d0d6cc); border-bottom: 0.5px solid #c4ccc0;
+}
+.qls-sh h4 { font-family: var(--font-serif); font-weight: 500; font-size: 16px; color: #2e3a2c; margin: 0; }
+.qls-num {
+  width: 22px; height: 22px; border-radius: 50%; border: 1.2px solid #2e3a2c; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 10px; color: #2e3a2c;
+}
+.qls-hint { margin-left: auto; font-size: 12px; color: #5a6e58; font-style: italic; font-family: var(--font-serif); }
+.qls-sb { padding: 16px; }
+.qls-l {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9.5px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: #9c8878; display: block; margin-bottom: 6px;
+}
+.qls-fld {
+  width: 100%; background: #fff; border: 0.5px solid #e0d5c8; border-radius: 9px; padding: 10px 13px;
+  font: inherit; font-size: 13px; color: #3a1c14; outline: none; text-align: left; cursor: pointer;
+  display: flex; align-items: center; gap: 8px; box-shadow: inset 0 1px 2px rgba(58, 28, 20, 0.03);
+}
+.qls-fld:focus-within, .qls-fld:focus { border-color: #8a9e88; box-shadow: 0 0 0 3px rgba(138, 158, 136, 0.12); }
+.qls-fld--search { padding: 0 0 0 12px; }
+.qls-fld--search input { flex: 1; border: none; outline: none; background: transparent; font: inherit; font-size: 13px; color: #3a1c14; padding: 10px 8px; }
+.qls-sub { margin-left: auto; color: #9c8878; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; }
+.qls-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.qls-seg { display: flex; background: #fff; border: 0.5px solid #e0d5c8; border-radius: 9px; padding: 3px; }
+.qls-seg button { flex: 1; border: none; background: transparent; border-radius: 7px; padding: 8px 4px; cursor: pointer; font: inherit; font-size: 12.5px; color: #6a5a50; }
+.qls-seg button.on { background: #f5e2da; color: #3a1c14; }
+
+/* ── the typeahead ────────────────────────────────────────────────────────────────────────────── */
+.qls-ta { position: relative; }
+.qls-list {
+  position: fixed; z-index: 80; background: #fdfaf5; border: 1px solid #e0d5c8; border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(58, 28, 20, 0.07), 0 14px 34px rgba(58, 28, 20, 0.12);
+  padding: 6px; max-height: 260px; overflow: auto; min-width: 320px;
+}
+.qls-it {
+  display: flex; align-items: center; gap: 10px; padding: 8px 9px; border-radius: 7px; cursor: pointer;
+  border: none; background: transparent; width: 100%; text-align: left; font: inherit;
+}
+.qls-it:hover, .qls-it--hi { background: #fff; }
+.qls-chip {
+  width: 30px; height: 30px; border-radius: 50%; background: #fdfaf5; border: 0.5px solid #ece2d6;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.08); display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 10px; color: #3a1c14; flex: none;
+}
+.qls-chip--new { border-style: dashed; background: transparent; box-shadow: none; }
+.qls-chip--big { width: 48px; height: 48px; font-size: 13px; }
+.qls-ittx { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.qls-itn { font-size: 13px; color: #1c130f; }
+.qls-ita { font-family: var(--font-serif); font-style: italic; font-size: 12px; color: #6a5a50; }
+.qls-itr {
+  margin-left: auto; text-align: right; color: #9c8878; flex: none;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.5;
+}
+.qls-it--new { border-top: 0.5px solid #ece0d2; margin-top: 4px; border-radius: 0 0 7px 7px; }
+.qls-notl { display: flex; justify-content: flex-end; font-size: 12px; color: #6a5a50; margin-top: 8px; gap: 5px; }
+.qls-notl button { border: none; background: none; padding: 0; color: #7c3a2a; text-decoration: underline; cursor: pointer; font: inherit; font-size: 12px; }
+
+/* ── the new-agent sub-card ───────────────────────────────────────────────────────────────────── */
+.qls-naf { margin-top: 12px; background: #fff; border: 0.5px solid #e0d5c8; border-radius: 12px; padding: 14px 16px; }
+.qls-naf h5 { font-family: var(--font-serif); font-weight: 500; font-size: 15px; color: #1c130f; margin: 0 0 10px; }
+.qls-in {
+  width: 100%; background: #fbf6ef; border: 0.5px solid #e0d5c8; border-radius: 9px; padding: 10px 13px;
+  font: inherit; font-size: 13px; color: #3a1c14; outline: none; margin-bottom: 10px;
+}
+.qls-in:focus { border-color: #8a9e88; box-shadow: 0 0 0 3px rgba(138, 158, 136, 0.12); }
+.qls-r2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.qls-r2 .qls-in { margin-bottom: 0; }
+.qls-nafb { display: flex; justify-content: space-between; margin-top: 12px; }
+
+/* ── the agent reference card ─────────────────────────────────────────────────────────────────── */
+.qls-agcard {
+  background: #fff; border-radius: 14px; padding: 16px 18px;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 8px 22px rgba(58, 28, 20, 0.09);
+}
+.qls-agtop { display: flex; align-items: center; gap: 13px; }
+.qls-agtx { flex: 1; min-width: 0; }
+.qls-agnm { font-family: var(--font-serif); font-weight: 500; font-size: 18px; color: #1c130f; }
+.qls-agag { font-family: var(--font-serif); font-style: italic; font-size: 13px; color: #6a5a50; margin-top: 2px; }
+.qls-agopen { font-size: 12px; color: #6a5a50; margin-top: 3px; }
+.qls-agopen button { border: none; background: none; padding: 0; margin-left: 5px; color: #7c3a2a; text-decoration: underline; cursor: pointer; font: inherit; font-size: 12px; }
+.qls-chg {
+  background: #fff; border: 1px solid #e0d5c8; border-radius: 9px; padding: 8px 12px; cursor: pointer;
+  font: inherit; font-size: 12px; color: #3a1c14; display: inline-flex; align-items: center; gap: 6px; flex: none;
+}
+.qls-glance { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 0.5px solid #ece0d2; }
+.qls-gv { font-size: 13px; color: #1c130f; }
+.qls-gv b { font-family: var(--font-serif); font-weight: 500; font-size: 16px; }
+.qls-gk { margin-top: 2px; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: #9c8878; }
+.qls-agfoot { display: flex; margin-top: 10px; }
+.qls-pill {
+  border: 1px solid rgba(58, 28, 20, 0.35); border-radius: 99px; padding: 3px 9px; color: #3a1c14;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
+}
+
+/* ── chips, task line, popovers ───────────────────────────────────────────────────────────────── */
+.qls-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.qls-chipb {
+  border: 1px solid #e0d5c8; background: #fff; border-radius: 99px; padding: 8px 14px; cursor: pointer;
+  font: inherit; font-size: 12.5px; color: #6a5a50; display: inline-flex; align-items: center; gap: 6px;
+}
+.qls-chipb.on { background: #f5e2da; border-color: #e8c8bc; color: #3a1c14; }
+/* ⚠️ THE WINDOW PILL IS SAGE-BORDERED AT REST — the agency's own figure leads the row — and takes
+   the ordinary pink when chosen: selection is one grammar, provenance another. */
+.qls-chipb--win { border-color: #8a9e88; background: #eef1ec; color: #2e3a2c; }
+.qls-chipb--win.on { background: #f5e2da; border-color: #e8c8bc; color: #3a1c14; }
+.qls-mono { font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8px; opacity: 0.7; letter-spacing: 0.08em; text-transform: uppercase; }
+.qls-task { font-size: 12.5px; color: #6a5a50; margin-top: 10px; }
+.qls-task b { font-weight: 500; color: #3a1c14; }
+.qls-pop { position: fixed; z-index: 80; }
+.qls-menupop {
+  background: #fdfaf5; border: 1px solid #e0d5c8; border-radius: 10px; padding: 6px; min-width: 280px;
+  box-shadow: 0 4px 10px rgba(58, 28, 20, 0.07), 0 14px 34px rgba(58, 28, 20, 0.12); max-height: 260px; overflow: auto;
+}
+.qls-msfld { margin-bottom: 14px; }
+.qls-qerr { font-size: 11.5px; color: #7c3a2a; margin-top: 6px; padding-left: 2px; }
+.qls-pkg { display: flex; justify-content: flex-end; margin-top: 10px; position: relative; }
+.qls-pkg > button {
+  border: none; background: none; cursor: pointer; padding: 0;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #6a5a50; border-bottom: 0.5px solid #cdbfae;
+}
+.qls-note {
+  width: 100%; resize: none; height: 70px; border: 0.5px solid #e0d5c8; border-radius: 9px; background: #fff;
+  font-family: "Caveat", cursive; font-size: 18px; line-height: 1.25; padding: 8px 12px; color: #3a1c14; outline: none;
+}
+
+/* ── the pinned rows ──────────────────────────────────────────────────────────────────────────── */
+.qls-row {
+  display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 16px;
+  background: #fdfaf5; border: none; border-radius: 12px; cursor: pointer; width: 100%; text-align: left;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 4px 12px rgba(58, 28, 20, 0.06);
+  font: inherit; color: #a09080;
+}
+.qls-row h5 { font-family: var(--font-serif); font-weight: 500; font-size: 14px; color: #1c130f; margin: 0; flex: none; }
+.qls-row .qls-num { border-color: #cdbfae; color: #a09080; }
+.qls-row--done .qls-num { background: #1c130f; border-color: #1c130f; color: #fdfaf5; }
+.qls-sum { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.qls-nav { display: flex; justify-content: space-between; margin-top: 14px; }
+.qls-nav .qls-fb--go:only-child { margin-left: auto; }
+.qls-fb { border-radius: 9px; padding: 9px 14px; cursor: pointer; font: inherit; font-size: 13px; }
+.qls-fb--ghost { background: #fff; border: 1px solid #e0d5c8; color: #3a1c14; }
+.qls-fb--go { background: #f5e2da; border: 1px solid #e8c8bc; color: #3a1c14; font-weight: 500; }
+.qls-fb:disabled { opacity: 0.45; cursor: not-allowed; }

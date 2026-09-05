@@ -75,6 +75,11 @@ export function initialReminder(agent: Agent | null | undefined): ReminderChoice
 }
 
 export interface QueryDraft {
+  /**
+   * §2 (log-sheet) — the attached Submission Package, when "Attach a package" filled the rows.
+   * Additive and optional: every existing producer omits it and the payload writes "" as before.
+   */
+  packageId?: string;
   agentId: string | null;
   manuscriptId: string;
   /** yyyy-mm-dd (the date input's native format). */
@@ -264,7 +269,7 @@ export function draftToPayload(d: QueryDraft, agent: Agent | null | undefined) {
   return {
     manuscriptId: d.manuscriptId,
     agentId: d.agentId as string,
-    packageId: "",
+    packageId: d.packageId ?? "",
     materialsWanted: draftMaterialsToQuery(d.materials),
     personalisationNotes: "",
     sendMethod: d.sendMethod,
@@ -303,4 +308,27 @@ export function queryMaterialsToRows(stored: readonly (string | QueryMaterial)[]
        silently drop a recorded material on the next unrelated save */
     { key: "other", kind: "text", name: MATERIAL_ROW_NAMES.other, on: otherAt >= 0, text: otherText },
   ];
+}
+
+/**
+ * §2/§3 (log-sheet run) — THE EXPECTED-REPLY OVERRIDE THE DRAFT IMPLIES, as an ISO instant, or
+ * null where nothing should be written.
+ *
+ * ⚠️ THE AGENT'S WINDOW IS THE DEFAULT, NOT AN OVERRIDE. Keeping the pre-selected their-window
+ * pill states nothing the agent record does not already state — writing it would freeze a derived
+ * fact, the exact fault addQuery's own §1 note records removing. An override exists only where
+ * the writer CHOSE something else: another preset, a picked date, or any preset at all when the
+ * agent states no window (the house assumption would otherwise disagree with the chosen nudge).
+ * `none` writes nothing. One derivation, two readers — the ghost tile and the save — so the
+ * preview and the record cannot disagree about what the choice means.
+ */
+export function draftExpectedOverrideIso(d: QueryDraft, agent: Agent | null | undefined): string | null {
+  const r = d.reminder;
+  if (r.kind === "none") return null;
+  if (r.kind === "custom") return new Date(`${r.date}T12:00:00`).toISOString();
+  const win = agent?.responseTimeWeeks;
+  if (typeof win === "number" && win > 0 && r.weeks === win) return null;
+  const dt = new Date(`${d.dateSent}T12:00:00`);
+  dt.setDate(dt.getDate() + r.weeks * 7);
+  return dt.toISOString();
 }

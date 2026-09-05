@@ -26,7 +26,9 @@ describe("CREATE_QTY is forked, and MAT_QTY is untouched", () => {
   });
 
   it("and the create bounds are the narrower, likelier range", () => {
-    expect(CREATE_QTY.Pages).toEqual({ step: 5, min: 5, max: 400 });
+    /* Pages' floor is 1 since the log-sheet run (brief + ref agree): "first page" is a real
+       sample, and a floor of one whole step made the smallest honest answer illegal. */
+    expect(CREATE_QTY.Pages).toEqual({ step: 5, min: 1, max: 400 });
     expect(CREATE_QTY.Words).toEqual({ step: 500, min: 500, max: 120_000 });
     expect(CREATE_QTY.Chapters).toEqual({ step: 1, min: 1, max: 40 });
   });
@@ -88,14 +90,18 @@ describe("the ladder is the ladder, wherever you join it", () => {
      harder. `canStep` disables the button; the clamp is the backstop behind it. */
   it("and it refuses at the bounds rather than pretending", () => {
     expect(canStep("400", "Pages", 1)).toBe(false);
-    expect(canStep("400", "Pages", 1, 500), "her figure re-opens the ceiling").toBe(true);
-    expect(canStep("5", "Pages", -1)).toBe(false);
+    expect(canStep("400", "Pages", 1, 500), "their figure re-opens the ceiling").toBe(true);
+    /* floor 1 now — 5 steps down to the floor; only the floor itself refuses */
+    expect(canStep("5", "Pages", -1)).toBe(true);
+    expect(stepQty("5", "Pages", -1)).toBe(1);
+    expect(canStep("1", "Pages", -1)).toBe(false);
     expect(canStep("5", "Pages", 1)).toBe(true);
     expect(stepQty("400", "Pages", 1)).toBe(400);
   });
 
   it("an empty field steps from the minimum, not from zero", () => {
-    expect(stepQty("", "Pages", 1)).toBe(10);
+    /* from empty, one press lands on the first clean multiple above the floor */
+    expect(stepQty("", "Pages", 1)).toBe(5);
     expect(stepQty("", "Words", 1)).toBe(1000);
   });
 });

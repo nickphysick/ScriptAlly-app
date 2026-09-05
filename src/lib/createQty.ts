@@ -21,7 +21,9 @@
 import type { SampleUnit } from "./agentMaterials";
 
 export const CREATE_QTY: Record<SampleUnit, { step: number; min: number; max: number }> = {
-  Pages: { step: 5, min: 5, max: 400 },
+  /* min 1, not 5 (log-sheet §2, brief + ref agree): "first page" is a real sample — picture
+     books, prologue-only asks — and a floor of one step made the smallest honest answer illegal. */
+  Pages: { step: 5, min: 1, max: 400 },
   Words: { step: 500, min: 500, max: 120_000 },
   Chapters: { step: 1, min: 1, max: 40 },
 };
@@ -41,6 +43,14 @@ export function effectiveMax(unit: SampleUnit, stated?: number | null): number {
 }
 
 /** Digits only — the field is formatted with separators while it is not being typed into. */
+/**
+ * The floor's own words — `At least 500 words` (log-sheet §2). Beside the numbers it speaks for,
+ * so a retuned floor cannot leave the copy stating the old one.
+ */
+export function floorCopy(unit: SampleUnit): string {
+  return `At least ${CREATE_QTY[unit].min.toLocaleString("en-GB")} ${unit.toLowerCase()}`;
+}
+
 export function parseQty(raw: string): number {
   const n = parseInt(String(raw).replace(/[^0-9]/g, ""), 10);
   return Number.isNaN(n) ? 0 : n;

@@ -69,10 +69,11 @@ import { QueryPanel } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
 import { CorrectionDesk, MaterialsFields } from "./queries/CorrectionDesk";
 import { QueryAgentTab, type AgentHistoryRow } from "./queries/QueryAgentTab";
+import { QueryLogSheet } from "./queries/QueryLogSheet";
 import { queriesForAgent } from "../lib/agentList";
 import { useOpenEditAgent } from "./EditAgentHost";
 import { rungFacts } from "../lib/queryPanelRungs";
-import { queryMaterialsToRows, draftMaterialsToQuery } from "../lib/queryDraft";
+import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { cardFacts, cardMaterials, turnFor, MATERIAL_SLOTS, type Turn } from "../lib/queryCardFacts";
 import { MATERIAL_ROW_NAMES, type MaterialRow } from "../lib/agentMaterials";
 import {
@@ -451,6 +452,8 @@ export const Queries: React.FC<{
   /* §1 (log-sheet) — which section is open. Component state would die with the sheet's node on
      every drawer re-render branch; the page owns it like it owns the draft. */
   const [createStep, setCreateStep] = useState<1 | 2 | 3 | 4>(1);
+  /* the sample floor's complaint — page-held so canSave reads the same flag the sheet shows */
+  const [createQtyError, setCreateQtyError] = useState<string | null>(null);
 
   /* ── CHOREOGRAPHY STATE ────────────────────────────────────────────────────────────────────
      `stashedSelection` is whatever was open when create mode started: entry clears the selected
@@ -2817,10 +2820,16 @@ export const Queries: React.FC<{
   const ghostRow: GridCard | null = (() => {
     if (!creating || !createDraft) return null;
     const agent = agents.find((a2) => a2.id === createDraft.agentId);
+    /* §2 (log-sheet) — THE EXPECTED SEAM. The draft's nudge choice reaches the ghost as the
+       writer-expected override, through the SAME `draftExpectedOverrideIso` the save writes and
+       the same `resolveExpectedDate` preference every card reads — so the tile's expected line
+       moves the moment a chip is pressed, and cannot disagree with what Save will record. */
+    const overrideIso = draftExpectedOverrideIso(createDraft, agent ?? null);
     const stub = {
       id: "__ghost", userId: "", manuscriptId: createDraft.manuscriptId, agentId: createDraft.agentId ?? "",
       status: QueryStatus.QUERIED,
       dateSent: createDraft.dateSent ? new Date(createDraft.dateSent).toISOString() : new Date().toISOString(),
+      ...(overrideIso ? { writerExpectedDate: overrideIso } : {}),
     } as unknown as Query;
     const facts = cardFacts(stub, new Date(), { agencyWeeks: agent?.responseTimeWeeks });
     return {
@@ -5739,12 +5748,49 @@ export const Queries: React.FC<{
                   materials: createStep > 3 && createDraft.materials.some((r) => r.on),
                 },
                 sentence: formSentence,
-                canSave: !!createDraft.agentId && !createSaving,
+                canSave: !!createDraft.agentId && !createSaving && !createQtyError,
                 saving: createSaving,
                 onCancel: () => closeCreate(),
                 onSave: () => void saveCreate(false),
                 onSaveAnother: () => void saveCreate(true),
-                body: null /* §2 — the four steps land here */,
+                body: (
+                  <QueryLogSheet
+                    draft={createDraft}
+                    onDraft={(d) => setCreateDraft(d)}
+                    step={createStep}
+                    onStep={setCreateStep}
+                    agents={agents}
+                    queries={queries}
+                    manuscripts={pickableManuscripts(manuscripts)}
+                    packages={packages}
+                    onAddAgent={async (a) => {
+                      /* §2 — createAgent's minimal write, through the ONE addAgent path. Four
+                         facts from the sub-card; everything else is the agent record's defaults,
+                         fillable later on the Contact list. */
+                      const res = await addAgent({
+                        name: a.name.trim(),
+                        agency: a.agency.trim(),
+                        email: a.email.trim(),
+                        website: "",
+                        genres: [],
+                        mswlNotes: "",
+                        submissionStatus: SubmissionStatus.OPEN,
+                        ...(a.responseTimeWeeks != null ? { responseTimeWeeks: a.responseTimeWeeks } : {}),
+                        submissionMethod: a.submissionMethod as never,
+                        materialsWanted: [],
+                        notes: "",
+                      } as never);
+                      if (!res.success || !res.id) return null;
+                      showToast({ message: `Added ${a.name.trim()} to your contact list` });
+                      return { id: res.id, name: a.name.trim(), agency: a.agency.trim(),
+                        submissionMethod: a.submissionMethod, responseTimeWeeks: a.responseTimeWeeks ?? undefined,
+                        submissionStatus: SubmissionStatus.OPEN } as never;
+                    }}
+                    onOpenQuery={(id) => closeCreate(() => { setSelectedQueryId(id); onOpenQuery?.(id); })}
+                    qtyError={createQtyError}
+                    onQtyError={setCreateQtyError}
+                  />
+                ),
               }}
               facts={ghostRow.facts}
               status={QueryStatus.QUERIED}
