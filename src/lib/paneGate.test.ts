@@ -54,7 +54,7 @@ const renderForm = (kind: JourneyKind): string | null =>
   kind === "bulk" ? null :
   renderToStaticMarkup(React.createElement(TaskPaneBody, {
     value: { rows: [], alongside: "", when: null, expect: null, remind: null, also: "",
-             hold: null, checkin: null, again: null, unitCommitted: false },
+             hold: null, checkin: null, again: null },
     onChange: () => {},
     questions: requirementsFor(kind).map((r) => ({
       id: r.id, field: r.field, label: r.label, answered: false,
@@ -127,23 +127,33 @@ describe("⚠️ the parcel's amount must be committed, not merely seeded", () =
   const seeded = { unit: false, when: false, expect: false, remind: false, rows: false,
                    holdday: false, checkin: false, again: false };
 
-  it("the gate refuses a unit whose amount has only been seeded", () => {
-    /* the shape the session builds: a unit chosen, an amount present, no commit */
+  /* ⚠️ RETARGETED, AND THE LAW CHANGED WITH THE OWNER'S SIGNATURE (drawer round, Phase 4 — the
+     brief says "the question counts as answered from the moment a unit is chosen" in as many
+     words). The old law required a COMMIT because a local draft meant the field could show 7
+     while the record kept 3 — the flag tracked the divergence. The picker writes through on
+     every keystroke now, so there is no divergence to track: `picked` (a unit on, a non-empty
+     amount) IS the record's live state, and the flag is retired with the fault. The gate's job
+     narrows to what only it can see — an EMPTY amount is not a parcel. */
+  it("the gate refuses a unit whose amount has been emptied", () => {
     expect(gateOpen("fix", { ...seeded, unit: false, when: true }),
-      "a seeded amount satisfied the gate").toBe(false);
+      "an empty amount satisfied the gate").toBe(false);
   });
 
-  it("and accepts it once the writer has committed the value", () => {
+  it("and accepts a chosen unit with an amount in the field — no commit gesture required", () => {
     expect(gateOpen("fix", { ...seeded, unit: true, when: true })).toBe(true);
   });
 
-  /* ⚠️ THE PREDICATE ITSELF IS ASSERTED AT THE SESSION, because that is where the two facts meet —
-     `picked` and `unitCommitted`. A gate test can only say the gate honours its input. */
-  it("the session requires BOTH the pick and the commit", async () => {
+  /* ⚠️ THE PREDICATE ITSELF IS ASSERTED AT THE SESSION, because that is where it lives. A gate
+     test can only say the gate honours its input; this says the input is derived the way the law
+     states — answered on the pick, with no commit flag anywhere in the expression. */
+  it("the session derives answered-ness from the pick alone", async () => {
     const fs = await import("node:fs");
     const hook = fs.readFileSync(new URL("../components/todo/useTaskPaneSession.tsx", import.meta.url), "utf8");
-    expect(hook, "the gate stopped requiring the commit")
-      .toContain("unit: wholeThing || (picked && paneBody.unitCommitted)");
+    expect(hook, "the pick stopped being the answer").toContain("unit: wholeThing || picked");
+    /* the flag is GONE from the predicate, not merely joined by an || that lets either satisfy —
+       comments stripped first, because the note explaining the retirement names it */
+    const bare = hook.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(bare, "unitCommitted is still read somewhere").not.toContain("unitCommitted");
     /* and a whole manuscript still needs neither — it has no unit to pick */
     expect(hook).toContain("wholeThing");
   });

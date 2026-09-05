@@ -70,6 +70,13 @@ export interface SampleSpecPickerProps {
    * OPTIONAL so `mode="wanted"` and every other caller are byte-identical.
    */
   onCommit?: (rows: MaterialRow[]) => void;
+  /**
+   * ⚠️ THE FLOW GESTURE, SEPARATED FROM THE VALUE GESTURE (drawer round, Phase 4). `onCommit` says
+   * "this is the amount"; `onAdvance` says "and I am done with this question" — and only Enter
+   * fires it. They used to be one callback, which is how a stepper press came to close the row
+   * under the writer: nudging − + is committing a value, not finishing a question.
+   */
+  onAdvance?: () => void;
   /** Distinguishes this instance's inputs when several sit on one page (the bulk table). */
   idPrefix?: string;
   /** The bulk table renders many of these — it states its own summary instead. */
@@ -83,7 +90,7 @@ export function selectedUnits(rows: readonly MaterialRow[]): SampleUnit[] {
 }
 
 export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
-  rows, onChange, join, mode = "wanted", idPrefix = "ssp", hideSummary, disabled, onCommit,
+  rows, onChange, join, mode = "wanted", idPrefix = "ssp", hideSummary, disabled, onCommit, onAdvance,
 }) => {
   const chosen = selectedUnits(rows);
   const qtyRows = rows.filter(isQty).filter((r) => r.on);
@@ -203,18 +210,38 @@ export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
                 onClick={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
               >
+                {/* ⚠️ A STEPPER CLEARS THE DRAFT BEFORE IT COMMITS — a latent bug the old
+                    advance-on-commit was MASKING, surfaced the moment the row stayed open. The
+                    arrow keys always did `setDraft(null)`; the buttons never did, so a press after
+                    typing wrote the stepped value to the record while the input went on showing
+                    the stale draft. Unobservable while every commit closed the row and unmounted
+                    the input; visible the first time it did not. */}
                 <button type="button" aria-label={`Fewer ${u.toLowerCase()}`} disabled={disabled}
-                  onClick={() => onCommit?.(patch(row, stepAmount(row.amount, u, -1)))}>−</button>
+                  onClick={() => { setDraft(null); onCommit?.(patch(row, stepAmount(row.amount, u, -1))); }}>−</button>
                 <input
                   id={`${idPrefix}-${u.toLowerCase()}`}
                   type="text" inputMode="numeric"
                   aria-label={`Amount in ${u.toLowerCase()}`}
                   disabled={disabled}
                   value={draft ?? row.amount}
-                  onChange={(e) => setDraft(e.target.value.replace(/[^0-9]/g, ""))}
+                  /* ⚠️ EVERY KEYSTROKE WRITES THROUGH (drawer round, Phase 4). The draft used to be
+                     local until a commit, which is what made "typed 7, kept 3" possible at all —
+                     two copies of one number, disagreeing until a gesture reconciled them. With
+                     the value following the keys there is nothing to reconcile: the record, the
+                     count and the fill read what is in the field, live, and the commit gesture's
+                     only remaining jobs are the CLAMP and the FLOW. An empty field writes an empty
+                     amount, which the answered-predicate reads as unanswered — that dip and return
+                     of the count while typing over the seed IS the live update, on the page. */
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^0-9]/g, "");
+                    setDraft(raw);
+                    onChange(patch(row, raw));
+                  }}
                   onBlur={(e) => commit(row, e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") { commit(row, (e.target as HTMLInputElement).value); return; }
+                    /* ⚠️ ENTER IS THE ONLY KEY THAT ADVANCES — commit first, so the clamped value
+                       is what the next question opens over. */
+                    if (e.key === "Enter") { commit(row, (e.target as HTMLInputElement).value); onAdvance?.(); return; }
                     if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
                     e.preventDefault();
                     setDraft(null);
@@ -223,7 +250,7 @@ export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
                 />
                 <span className="u">{u.toLowerCase()}</span>
                 <button type="button" aria-label={`More ${u.toLowerCase()}`} disabled={disabled}
-                  onClick={() => onCommit?.(patch(row, stepAmount(row.amount, u, 1)))}>+</button>
+                  onClick={() => { setDraft(null); onCommit?.(patch(row, stepAmount(row.amount, u, 1))); }}>+</button>
               </span>
             )}
           </button>

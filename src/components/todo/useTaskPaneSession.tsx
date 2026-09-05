@@ -280,7 +280,7 @@ export function useTaskPaneSession(
      number is not a decision — but nothing here is an answer until the writer gives one. */
   const BLANK: Omit<SendBodyValues, "rows"> =
     { alongside: "", when: null, expect: null, remind: null, also: "",
-      hold: null, checkin: null, again: null, unitCommitted: false };
+      hold: null, checkin: null, again: null };
   const [paneBody, setPaneBody] = React.useState<SendBodyValues>(
     { rows: seedRows(null), ...BLANK });
   /* the answers reset with the card — a half-filled form carried onto another task is answers
@@ -781,12 +781,14 @@ export function useTaskPaneSession(
     const wholeThing = spec?.material === "full";
     const picked = paneBody.rows.some((r) => r.kind === "qty" && r.on && String(r.amount).trim() !== "");
     return {
-      /* ⚠️ A SEEDED NUMBER IS NOT AN ANSWER (journey round, Phase 4). Choosing a unit fills the
-         amount with the app's default so the picker opens on something; `picked` was true the
-         instant that happened, so pressing "Chapters" silently accepted 3 and the primary went
-         live. The writer has to COMMIT the value — blur, Enter, a stepper, an arrow — and a whole
-         manuscript still needs neither, because it has no unit to pick. */
-      unit: wholeThing || (picked && paneBody.unitCommitted),
+      /* ⚠️ ANSWERED FROM THE MOMENT A UNIT IS CHOSEN (drawer round, Phase 4 — the owner's
+         amendment to the journey round's commit gate, stated in the brief in as many words). The
+         gate used to also require `unitCommitted`, because a local draft meant the record could
+         hold a number the field was not showing; the picker writes through on every keystroke now,
+         so `picked` — a unit on, a non-empty amount — IS the record's state, live. Emptying the
+         field un-answers this predicate in the same keystroke, which is what makes the count
+         honest while typing. A whole manuscript still needs neither: it has no unit to pick. */
+      unit: wholeThing || picked,
       when: !!paneBody.when && (paneBody.when.kind !== "date" || !!paneBody.when.ymd),
       expect: !!paneBody.expect && (paneBody.expect.kind !== "date" || !!paneBody.expect.ymd),
       /* ⚠️ A REVEALED-BUT-EMPTY DATE IS NOT AN ANSWER (deed round, Phase 4). The predicate read the

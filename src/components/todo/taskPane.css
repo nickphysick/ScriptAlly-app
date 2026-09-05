@@ -109,16 +109,14 @@
 .tpn .cbx.on { background:var(--burg);border-color:var(--burg); }
 .tpn .cbx.on svg { opacity:1; }
 .tpn .smpcell { display:flex;align-items:center;gap:8px;justify-content:center; }
-.tpn .smplink { display:none;cursor:pointer;background:none;border:0;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.06em;color:var(--burg);border-bottom:1px solid rgba(124,58,42,0.3);padding:0 0 1px;white-space:nowrap; }
-.tpn .smpcell.on .smplink { display:inline; }
-.tpn .unsure { margin-top:14px;padding-top:13px;border-top:1px dashed #efe6da;font-size:11.5px;color:var(--muted2);font-weight:300; }
-.tpn .unsure a { color:var(--burg);text-decoration:none;border-bottom:1px solid rgba(124,58,42,0.3); }
-.tpn .smpbox { display:none;padding:11px 13px 12px 40px;margin-top:-4px; }
-.tpn .mat.on+.smpbox { display:block; }
-.tpn .unitrow { display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px; }
-.tpn .unitpill { cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.07em;background:var(--white);border:0.5px solid var(--hair2);border-radius:20px;padding:6px 13px;color:#a99a8a;transition:all .15s; }
-.tpn .unitpill:hover { border-color:#c9a89e; }
-.tpn .unitpill.on { background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500; }
+/* ⚠️ THE OLD SAMPLE-SPEC CELL'S RULES ARE DELETED — `smplink`, `smpcell`, `unsure`, `smpbox`,
+   `mat`, `unitrow`, `unitpill` render NOWHERE (swept 5 Sep; the `"unsure"` hits in TaskPaneBody
+   are a DelayChoice kind, not a class). They were the rule-with-no-subject fault waiting in its
+   SECOND direction, and it fired: Phase 4 gave the pane a new element that happened to be called
+   `unitrow`, the dead rule's `flex-wrap: wrap` reached it, and the Next pill wrapped off its row
+   onto a line of its own — a fault whose cause was seven hundred lines from its symptom, in a rule
+   nobody had rendered for rounds. An orphaned rule is not merely clutter; it is a claim lying in
+   wait for the next element to wander under its selector. */
 .tpn .cnts { display:flex;flex-direction:column;gap:7px; }
 .tpn .cnt { display:flex;align-items:center;gap:9px; }
 .tpn .cnt .ck { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);width:64px; }
@@ -349,7 +347,15 @@
    structural rather than a value someone has to remember not to change.
    ⚠️ AND `line-height` GOES 1.12 → 1.3, which the standing Playfair rule already required: 1.12 on
    mixed-case Playfair crops descenders, and the deed now renders whole sentences full of them. */
-.tpn .deed { font-family:'Playfair Display',serif;font-size:19px;font-weight:400;color:var(--ink2);line-height:1.3;max-width:72ch; }
+/* ⚠️ 16.5px IS THE DRAWER CONTRACT'S OWN `.dd`, ADOPTED WITH THE CHASSIS (Phase 4, found by
+   screenshot rather than by measurement — 16/16 assertions were green over it). The 19px was the
+   wide pane's size, and beside the slip the sheet is ~280px at 1440: a full send deed set at 19
+   wrapped to EIGHT lines, a ~250px band, and the work area scrolling at 122px inside a sheet that
+   was nowhere near its cap. Every number in that state was correct and the page was wrong — the
+   per-element checks could not see it because the fault was in what the band's height did to the
+   room downstream, which is the composed-result family again. line-height 1.34 is the contract's
+   too, and it clears the Playfair descender floor. */
+.tpn .deed { font-family:'Playfair Display',serif;font-size:16.5px;font-weight:400;color:var(--ink2);line-height:1.34;max-width:72ch; }
 /* ⚠️ VARIABLES IN 600, FRAME WORDS AT 400 — treatment C, and `.deed i` is retired with the italic
    it drew (workspace round, Phase 5). The deed is a sentence of variables; italicising three of its
    five spans reads as prose with something wrong with it rather than as a filled-in form. Manuscript
@@ -679,6 +685,23 @@
    element — and only a rendered measurement can see it. `:has` selects the last `.q` whatever
    follows it. */
 .tpn .q:not(:has(~ .q)) { border-bottom:0; }
+/* ── the unit row's Next (drawer round, Phase 4; the contract's `.unitrow` + `.nextb`) ──── */
+/* ⚠️ THE PILL IS PINNED RIGHT OF THE ROW, NOT APPENDED AFTER THE PILLS — a flex row where the
+   picker takes what the pill does not. Wrapping would drop it under the units at narrow widths,
+   where it reads as a fourth unit. */
+.tpn .unitrow { display:flex;align-items:center;gap:10px; }
+.tpn .unitrow .ssp { flex:1 1 auto;min-width:0; }
+.tpn .nextb {
+  margin-left:auto;height:32px;padding:0 12px 0 14px;border-radius:999px;
+  background:var(--white);border:1px solid var(--edge);color:#57534e;
+  font-size:11.5px;font-weight:500;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;align-self:flex-start;
+}
+.tpn .nextb:hover { border-color:var(--pink-b);background:var(--pink);color:var(--burg); }
+/* the key cap inside the pill — the pill and the key are one gesture with two spellings */
+.tpn .nextb kbd { font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1;background:var(--field);border:1px solid var(--hair2);border-radius:5px;padding:2px 5px;color:#a89684; }
+.tpn .nextb:hover kbd { border-color:var(--pink-b);color:var(--burg);background:rgba(255,253,250,0.8); }
+
 /* the contract's 44px ledger row — the fork grew, and a 40px row beneath an 80px panel read as
    a different density rather than the same page */
 .tpn .q .head { display:flex;align-items:center;gap:9px;min-height:44px;padding:5px 0; }

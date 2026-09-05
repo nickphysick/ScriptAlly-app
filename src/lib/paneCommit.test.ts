@@ -52,7 +52,7 @@ function slice(name: string): string {
 const NOW = new Date("2026-08-21T09:00:00");
 const body = (over: Partial<SendBodyValues> = {}): SendBodyValues => ({
   rows: materialRowsFromAgent([]), alongside: "", when: null, expect: null, remind: null, also: "",
-  hold: null, checkin: null, again: null, unitCommitted: true, ...over,
+  hold: null, checkin: null, again: null, ...over,
 });
 
 /* every member of the union, listed once — the compiler checks this list is complete */

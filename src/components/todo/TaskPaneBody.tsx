@@ -117,17 +117,12 @@ export interface SendBodyValues {
   remind: RemindChoice | null;
   /** the free text under "Anything else?" */
   also: string;
-  /**
-   * ⚠️ THE WRITER HAS COMMITTED THE PARCEL'S AMOUNT, and the seed alone does not (journey round,
-   * Phase 4). Choosing a unit SEEDS a default so the picker opens on something; that seed is the
-   * app's guess. `unit` was answered the moment a unit was pressed, so clicking "Chapters" silently
-   * accepted 3 and the primary went live on a number nobody had chosen — a fabricated answer
-   * rendered with the same confidence as a real one, which is the fault this pane exists to remove.
-   *
-   * Set by `SampleSpecPicker`'s `onCommit` — blur, Enter, a stepper, an arrow key — and cleared
-   * whenever the unit changes, because a new unit is a new question.
-   */
-  unitCommitted: boolean;
+  /* ⚠️ `unitCommitted` IS RETIRED (drawer round, Phase 4 — it was the journey round's guard
+     against the seed satisfying the gate). What made the seed dangerous was DIVERGENCE: a local
+     draft meant the field could show 7 while the record kept 3, so a flag had to say whether the
+     number had ever been the writer's. The picker writes through on every keystroke now — there is
+     no second copy to diverge — and the flow moves only on Enter or Next, so the flag's two jobs
+     both ceased to exist. Deleted rather than left as dead state, per the house rule. */
   /* ── the fork's three, `null` until the writer says (journey round, Phase 1) ─────────────── */
   /** the delay intents' day — Send's *hold me to it*, Nudge's *give it longer*, Note's *give it a date* */
   hold: DelayChoice | null;
@@ -428,29 +423,61 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
   /** the control a row opens onto — chosen by the declaration's field, never by row position */
   const control = (q: PaneQuestion): React.ReactNode => {
     const field = q.field;
+    /* ⚠️ THE CONTRACT'S RULE, WRITTEN WHERE THE BRIEF SAYS TO WRITE IT (drawer round, Phase 4):
+       A QUESTION THAT CAN BE *EDITED* RATHER THAN MERELY *PICKED* NEEDS ITS OWN COMMIT GESTURE,
+       AND MUST NEVER SILENTLY ACCEPT AN UNCONFIRMED VALUE. The unit row is this pane's one
+       editable — everything else is a pill, one click, one act. Here the two halves land as:
+         · the VALUE follows the keys live (write-through in `SampleSpecPicker`), so the record can
+           never hold a number the field is not showing — the "typed 7, kept 3" divergence is
+           structurally gone, not guarded against;
+         · the FLOW moves only on Enter or the Next pill. A stepper press, an arrow, a blur all
+           commit the amount and leave the question open, because a writer nudging − + is still
+           deciding. The same rule reaches the two optional free-text fields below: their value is
+           their keystrokes (nothing to confirm), so blur commits and Enter advances.
+       ⚠️ AND THE QUESTION COUNTS AS ANSWERED FROM THE MOMENT A UNIT IS CHOSEN — the Phase 4
+       amendment, owner's call, superseding the journey round's `unitCommitted` gate. What made the
+       seed dangerous was never its presence but its divergence: the field could show one number
+       while the record kept another. Write-through removes the divergence, the choice leaves the
+       seed focused and selected under the writer's eyes, and emptying the field un-answers the
+       question live. `unitCommitted` is retired with the divergence it tracked. */
     if (field === "unit") return (
       <>
-        <SampleSpecPicker
-          rows={value.rows}
-          /* ⚠️ A UNIT CHANGE CLEARS THE COMMIT. `mode="sent"` REPLACES the sample row rather than
-             joining, so a different unit is a different parcel and its seeded amount is the app's
-             guess again — carrying the flag across would let one committed answer vouch for a
-             number the writer never saw. */
-          onChange={(rows) => {
-            const was = value.rows.find((r) => r.kind === "qty" && r.on);
-            const now = rows.find((r) => r.kind === "qty" && r.on);
-            const unitChanged = (was?.kind === "qty" ? was.unit : null) !== (now?.kind === "qty" ? now.unit : null);
-            onChange({ ...value, rows, ...(unitChanged ? { unitCommitted: false } : {}) });
-          }}
-          /* ⚠️ ONE WRITE CARRYING BOTH FACTS. The rows arrive from the picker rather than being
-             read back off this render's `value`, which still holds the PRE-commit amount — two
-             writes in one batch and the second wins, so the writer's number reverted to the seed. */
-          onCommit={(rows) => { onChange({ ...value, rows, unitCommitted: true }); onAnswered?.(); }}
-          /* ⚠️ "and", NOT "or". A requirement offers a choice; a record describes one parcel. */
-          join="and"
-          mode="sent"
-          idPrefix="tpn-sent"
-        />
+        <div className="unitrow">
+          <SampleSpecPicker
+            rows={value.rows}
+            /* ⚠️ CHOOSING A UNIT PINS THE ROW OPEN — the mechanism behind "no other question opens
+               until Enter or Next", found by watching the first build advance anyway. The open row
+               is `openId ?? firstUnanswered`, and answered-on-pick removes this question from the
+               unanswered set in the same click — so the FALLBACK moved on the moment a unit was
+               chosen, with no advance gesture anywhere. The pin (`onOpen(q.id)`) says the writer
+               is IN this question; Enter and Next release it (`onAnswered` clears the pin), and
+               the fallback then points at the next unanswered, which is exactly the flow the rule
+               describes. Pinned on the unit CHANGE only, never per keystroke. */
+            onChange={(rows) => {
+              const was = value.rows.find((r) => r.kind === "qty" && r.on);
+              const now = rows.find((r) => r.kind === "qty" && r.on);
+              onChange({ ...value, rows });
+              if ((was?.kind === "qty" ? was.unit : null) !== (now?.kind === "qty" ? now.unit : null)) {
+                onOpen?.(q.id);
+              }
+            }}
+            /* the commit's remaining job is the CLAMP — the value itself already arrived live */
+            onCommit={(rows) => onChange({ ...value, rows })}
+            /* ⚠️ ENTER, AND ONLY ENTER, MOVES THE FLOW FROM THE KEYBOARD */
+            onAdvance={() => onAnswered?.()}
+            /* ⚠️ "and", NOT "or". A requirement offers a choice; a record describes one parcel. */
+            join="and"
+            mode="sent"
+            idPrefix="tpn-sent"
+          />
+          {/* ⚠️ THE PILL AND THE KEY ARE ONE GESTURE WITH TWO SPELLINGS — the key cap in the pill
+              says so on the surface. It does not commit anything itself: the value is already
+              live, and pressing it blurs the input first (focus moves), which is where the clamp
+              runs. Pinned right of the row, quiet — the contract's own `.nextb`. */}
+          <button type="button" className="nextb" onClick={() => onAnswered?.()}>
+            Next <kbd>↵</kbd>
+          </button>
+        </div>
         <div className="hint">Pick the unit you actually sent in — one only.</div>
       </>
     );
@@ -635,6 +662,11 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
           autoFocus
           value={value.alongside}
           onChange={(e) => onChange({ ...value, alongside: e.target.value })}
+          /* ⚠️ THE EDITABLE-QUESTION RULE'S OPTIONAL-FIELD HALF (see the unit control): the value
+             is the keystrokes, so blur commits by construction and Enter says "done here" — it
+             releases the field rather than opening anything, because the optionals sit below the
+             questions and have no next. */
+          onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
         />
       </div>
     )}
@@ -644,7 +676,12 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
         <label className="f-lbl" htmlFor={domId("s-also")}>A note for your file <span className="opttag">OPTIONAL</span></label>
         <textarea id={domId("s-also")} className="note-in" autoFocus
           placeholder="Add any further details you want to keep on file"
-          value={value.also} onChange={(e) => onChange({ ...value, also: e.target.value })} />
+          value={value.also} onChange={(e) => onChange({ ...value, also: e.target.value })}
+          /* ⚠️ SHIFT+ENTER KEEPS THE NEWLINE — this is a NOTE, and a note has paragraphs. A bare
+             Enter advancing would apply the rule at the cost of the field's whole point, so the
+             plain key advances and the modifier writes; the convention every chat field has
+             taught. */
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); e.currentTarget.blur(); } }} />
       </div>
     )}
 

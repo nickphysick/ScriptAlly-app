@@ -109,9 +109,14 @@ test("deed round", async ({ page }) => {
       !!send && /^Send your (full|partial) manuscript for .+/.test(send.deedText)
         && send.deedEms > 0 && send.deedOldEms === 0,
       send ? `"${send.deedText}" i=${send.deedEms} em=${send.deedOldEms}` : "-");
-  add("P1.4 · it is Playfair 19/400 at 1.3, not the old 21/500 at 1.12",
-      !!send && send.deedSize === "19px" && send.deedWeight === "400"
-        && Math.abs(parseFloat(send.deedLh) - 19 * 1.3) < 1.5,
+  /* ⚠️ RETARGETED WITH THE VALUE IT PINS (drawer round, Phase 4). 19px was the WIDE pane's size;
+     beside the Quick reference slip the sheet is ~280px at 1440, and a full send deed at 19
+     wrapped to EIGHT lines and starved the work area. 16.5/1.34 is the drawer contract's own
+     `.dd`, adopted with the chassis. The LAW this case carries is unchanged — the deed is Playfair
+     at 400, on a leading that clears the descender floor, and never the old 21/500 at 1.12. */
+  add("P1.4 · it is the drawer contract's Playfair 16.5/400 at 1.34, not the old 21/500 at 1.12",
+      !!send && send.deedSize === "16.5px" && send.deedWeight === "400"
+        && Math.abs(parseFloat(send.deedLh) - 16.5 * 1.34) < 1.5,
       send ? `${send.deedSize}/${send.deedWeight} lh=${send.deedLh}` : "-");
   add("P1.5 · no placeholder text ever appears inside a deed",
       [send, note, bulk, close].filter(Boolean)

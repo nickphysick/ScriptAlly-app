@@ -16,7 +16,12 @@
 .ssp { display: flex; flex-direction: column; gap: 8px; }
 
 /* ── the three units ─────────────────────────────────────────────────────────────────────── */
-.ssp-units { display: inline-flex; gap: 4px; }
+/* ⚠️ THE UNITS WRAP (drawer round, Phase 4 — the contract's own `.units{flex-wrap:wrap}`). The
+   sheet beside the slip is ~280px at 1440, and an expanded pill plus its two collapsed neighbours
+   do not fit one line there; without the wrap the row CLIPPED at the rim's edge — pills half
+   painted, the Next pill pushed clean out of the sheet, silently, because `overflow: hidden` on
+   the rim is doing exactly its job. Wrapping is what the mockup draws at the same width. */
+.ssp-units { display: inline-flex; flex-wrap: wrap; gap: 4px; }
 
 .ssp-units button {
   box-sizing: border-box;

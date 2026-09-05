@@ -86,7 +86,7 @@ const SEND: TaskPaneJourney = {
         /* ⚠️ THE FIXTURE OPENS UNCHOSEN, like the real form. A fixture with answers in it would
            render every pill lit and quietly assert the opposite of Phase 3's rule. */
         alongside: "", when: null, expect: null, remind: null, also: "",
-        hold: null, checkin: null, again: null, unitCommitted: true,
+        hold: null, checkin: null, again: null,
       }}
       onChange={() => {}}
       upsell={<><span className="tag">Pro</span><span>Records which draft went to each agent.</span></>}
@@ -481,7 +481,7 @@ describe("the chrome diet — what the form no longer says", () => {
         }))}
         openId={requirementsFor(kind)[0]?.id ?? null}
         value={{ rows: [], alongside: "", when: null, expect: null, remind: null, also: "",
-                 hold: null, checkin: null, again: null, unitCommitted: false }}
+                 hold: null, checkin: null, again: null }}
         onChange={() => {}}
         {...(kind === "note" ? { note: { text: "Chase the agency", added: "18 Aug" } } : {})}
         {...over}
@@ -502,7 +502,7 @@ describe("the chrome diet — what the form no longer says", () => {
     const html = renderToStaticMarkup(
       <TaskPaneBody questions={[]} openId={null} offers={[]}
         value={{ rows: [], alongside: "", when: null, expect: null, remind: null, also: "",
-                 hold: null, checkin: null, again: null, unitCommitted: false }}
+                 hold: null, checkin: null, again: null }}
         onChange={() => {}} />);
     expect(html, "an optional field was offered before the intent was chosen").not.toContain("addlink");
     expect(html).not.toContain("<textarea");
@@ -515,7 +515,7 @@ describe("the chrome diet — what the form no longer says", () => {
           id: r.id, field: r.field, label: r.label, answered: false }))}
         openId="s-when" offers={["also"]}
         value={{ rows: [], alongside: "", when: null, expect: null, remind: null, also: "",
-                 hold: null, checkin: null, again: null, unitCommitted: false }}
+                 hold: null, checkin: null, again: null }}
         onChange={() => {}} />);
     expect(html).toContain("+ Add a note for your file");
     expect(html, "a field this flow does not offer was offered anyway")
