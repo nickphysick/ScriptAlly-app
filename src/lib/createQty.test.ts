@@ -11,7 +11,9 @@ import { MAT_QTY, snapToUnit } from "./agentMaterials";
 import { materialRowsForDraft } from "./queryDraft";
 import { readFileSync } from "fs";
 
-const pane = readFileSync(new URL("../components/queries/QueryCreatePane.tsx", import.meta.url), "utf8");
+/* RETARGETED (§4): the ladder's consumer is the drawer's sheet + the shared MaterialsFields. */
+const pane = readFileSync(new URL("../components/queries/CorrectionDesk.tsx", import.meta.url), "utf8")
+  + readFileSync(new URL("../components/queries/QueryLogSheet.tsx", import.meta.url), "utf8");
 
 /* ══════════════════════════════════════════════════════════════════════════════════════════
    ⚠️ THE FORK IS THE POINT. `MAT_QTY` is storage-level validation shared with the agent editor:
@@ -59,12 +61,13 @@ describe("the bound yields to the agent's own figure", () => {
 
   it("stepping up towards a stated 500 pages is not clamped at 400", () => {
     expect(stepQty("495", "Pages", 1, 500)).toBe(500);
-    expect(stepQty("495", "Pages", 1), "and without her figure, 400 holds").toBe(400);
+    expect(stepQty("495", "Pages", 1), "and without their figure, 400 holds").toBe(400);
   });
 
-  it("the pane passes her figure to the stepper rather than the bare bound", () => {
+  it("the control passes their figure to the stepper rather than the bare bound", () => {
     expect(pane).toContain("stepQty(sample.amount, sample.unit, 1, statedSample)");
-    expect(pane).toContain("canStep(sample.amount, sample.unit, -1, statedSample)");
+    expect(pane, "the sheet does not derive the agent's stated figure")
+      .toContain('statedSample={(() => {');
   });
 });
 
@@ -140,10 +143,10 @@ describe("the row reports the requirement and passes no comment on it", () => {
      MANUSCRIPT" said the same thing a fifth time on the manuscript row — five tags restating one
      fact about the agent, in a step that was 800px tall partly to hold them. */
   it("the requirement is stated once, in the head, and nowhere else", () => {
-    expect(pane).toContain('<span className="qc-asks">{asksLine}</span>');
-    expect(pane, "the per-row sub-label came back").not.toContain('className="qc-matsub"');
-    expect(pane, "the per-row tag came back").not.toContain('"Requested" : "Not requested"');
-    expect(pane, "and the manuscript row's tag went with them").not.toContain("Only manuscript");
+    /* RETARGETED (§4): the sheet's section head carries the asks sentence; no per-row sub-label
+       or Requested tag restates it. Same law, the drawer's spelling. */
+    expect(pane).toContain("asksSentence(agentPrimary(agent)");
+    expect(pane, "a per-row requirement tag came back").not.toContain('"Requested" : "Not requested"');
   });
 
   it("the sentence is right for one, two, three and no requirements", () => {
@@ -170,7 +173,8 @@ describe("the row reports the requirement and passes no comment on it", () => {
   /* Asking the agent again here would give two answers to one question the moment either changed;
      `materialRowsForDraft` already turned their record into rows. */
   it("read from the seeded rows, never a second parse of the agent record", () => {
-    expect(pane).toContain("const asked = useMemo(() => materialRowsForDraft(agent), [agent]);");
+    /* the sheet reads the ONE stored-materials reader inline — same source, new spelling */
+    expect(pane).toContain("materialRowsFromAgent(agent.materialsWanted)");
   });
 
   it("and it never appraises what the writer actually sent", () => {
@@ -218,12 +222,15 @@ describe("the stepper survived the move into the chip", () => {
   /* ⚠️ THE CHIP IS A BUTTON AND THE STEPPER IS INSIDE IT. Without stopPropagation, ticking Sample
      and then pressing an arrow toggles the chip back off — the control the writer aimed at is
      nested inside the control they did not. */
-  it("controls inside an expanded chip do not toggle the chip", () => {
-    const body = sliceBetween(pane, 'className="qc-chipbody"', "{isOther && on");
-    expect(body).toContain("onClick={(e) => e.stopPropagation()}");
-    expect(body, "the arrows must not bubble").toContain("e.stopPropagation(); setRow(\"sample\"");
-    expect(body, "nor the unit menu").toContain("e.stopPropagation(); setUnitMenuOpen");
-    expect(body, "nor ↑/↓ in the field").toMatch(/e\.preventDefault\(\); e\.stopPropagation\(\);[\s\S]{0,80}ArrowUp/);
+  it("the row's toggle is ONLY its checkbox — inner controls cannot flip it", () => {
+    /* RETARGETED (§4): the old chip expanded on row click, so every inner control had to stop
+       propagation. The doc row's toggle is a dedicated checkbox button now — the stepper, the
+       unit segment and the free-text input are SIBLINGS, and the law holds structurally: no
+       row-level onClick exists for them to bubble into. */
+    const mf = pane.slice(pane.indexOf("export const MaterialsFields"));
+    expect(mf).toContain('className="qcd-cb"');
+    expect(mf, "a row-level toggle came back — inner clicks would flip the row")
+      .not.toMatch(/className={`qcd-doc[^`]*`}\s+onClick/);
   });
 
   /* Pre-ticking from the agent's own requirements, including the case with exactly one. */
@@ -243,14 +250,11 @@ describe("the stepper survived the move into the chip", () => {
   /* ⚠️ ENTER COMMITS TO A REMOVABLE CHIP — it used to blur, which left the writer unsure whether
      anything had been recorded. The chips are pane-local and mirrored into `other.text`, so the
      SAVED value is unchanged and `materialsPhrase` needs no knowledge of them. */
-  it("Other commits on Enter to a removable chip, and the draft keeps one field", () => {
-    expect(pane).toContain("commitOther([...otherChips, v]);");
-    expect(pane).toContain("commitOther(otherChips.filter((_, j) => j !== i))");
-    expect(pane, "the chips must mirror into the draft's single text field")
-      .toContain('setRow("other", { text: chips.join(", ") })');
-    const rows = materialRowsForDraft(null);
-    expect(Object.keys(rows.find((r) => r.key === "other")!).sort(),
-      "the shared MaterialRow must not have grown a committed[]")
-      .toEqual(["key", "kind", "name", "on", "text"]);
+  it("Other keeps ONE field on the draft — the writer's words, verbatim", () => {
+    /* RETARGETED (§4): the chip-per-entry Other editor retired with the takeover; the row is a
+       single free-text input bound to the one draft field, which is what the storage law
+       (the array is the delimiter; prose travels verbatim) always required. */
+    const mf = pane.slice(pane.indexOf("export const MaterialsFields"));
+    expect(mf).toContain('setRow("other", { text: e.target.value })');
   });
 });

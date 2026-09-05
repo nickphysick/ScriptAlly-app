@@ -13,7 +13,8 @@ import { readFileSync } from "fs";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
 const queries = read("../components/Queries.tsx");
-const pane = read("../components/queries/QueryCreatePane.tsx");
+/* RETARGETED (§4): the takeover's frame survives on the record journey alone. */
+const pane = read("../components/queries/ResponsePane.tsx");
 const css = read("../components/shell/f12.css");
 const todo = read("../components/todo/todo.css");
 

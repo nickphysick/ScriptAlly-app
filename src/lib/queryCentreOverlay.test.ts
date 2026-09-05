@@ -187,10 +187,10 @@ describe("§3 · Escape and the backdrop, both through the guard", () => {
     /* all three call the same handler, so there is one idea of what leaving means */
     expect(sheet).toContain("onEscape: onRequestClose");
     expect(sheet).toContain("onScrimClick: onRequestClose");
+    /* record-only since §4 — one journey, one exit, still through the dirty guard */
     expect(code, "the page's exit is not routed into the sheet")
-      .toContain("onRequestClose={() => (recording ? closeRecord() : closeCreate())}");
+      .toContain("onRequestClose={() => closeRecord()}");
     expect(code, "Cancel stopped calling the same handler").toContain("onClick={() => closeRecord()}");
-    expect(code, "Cancel stopped calling the same handler").toContain("onClick={() => closeCreate()}");
   });
 
   /* ⚠️ EXACTLY ONE Escape LISTENER. Two, both calling `closeCreate()`, would run the dirty guard

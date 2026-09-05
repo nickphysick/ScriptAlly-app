@@ -28,7 +28,8 @@ const panel = read("../components/queries/AgentContextPanel.tsx");
    pulse — was extracted to `StepStack` so the response takeover wears the same rhythm rather than a
    copy of it. Create mode is now TWO files, and "the pane's source" honestly means both: every
    assertion below is unchanged and still fails if its subject disappears from wherever it lives. */
-const pane = read("../components/queries/QueryCreatePane.tsx") + read("../components/queries/StepStack.tsx");
+/* RETARGETED (§4): the panel's live host is the record journey (ResponsePane). */
+const pane = read("../components/queries/ResponsePane.tsx") + read("../components/queries/StepStack.tsx");
 
 const bare = (over: Partial<Agent> = {}): Agent => ({
   id: "a1", userId: "u", name: "William Tan", agency: "Foxglove Literary", email: "", website: "",

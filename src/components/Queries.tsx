@@ -27,12 +27,10 @@ import { TypeGlyph } from "./packages/TypeGlyph";
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
 import { PillTrig, F12Popover, F12Menu, F12Panel, PopSection, PRow, Chip } from "./shell/F12Shell";
-import { QueryJourneySheet } from "./queries/QueryJourneySheet";
 import { PaneCard } from "./queries/PaneCard";
-import { QueryCreatePane } from "./queries/QueryCreatePane";
 import { emptyDraft, draftDirty, draftReady, draftToPayload, materialRowsForDraft, todayInputDate, type QueryDraft, type ReminderChoice } from "../lib/queryDraft";
-import { requirements } from "../lib/createSteps";
 import { prefersReducedMotion } from "../lib/reducedMotion";
+import { QueryJourneySheet } from "./queries/QueryJourneySheet";
 import { ResponsePane, type RespStepId } from "./queries/ResponsePane";
 import {
   emptyResponseDraft, responseReady, responseChips, responseDraftToPayload, OUTCOME_LABEL,
@@ -445,7 +443,6 @@ export const Queries: React.FC<{
   const [createDraft, setCreateDraft] = useState<QueryDraft | null>(null);
   const [createBase, setCreateBase] = useState<QueryDraft | null>(null);
   /* Which create-mode steps have been opened — reported up by the pane, which owns the stack. */
-  const [createOpened, setCreateOpened] = useState({ when: false, what: false });
   const [createSaving, setCreateSaving] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const creating = createDraft !== null;
@@ -478,7 +475,6 @@ export const Queries: React.FC<{
      a row that then vanishes, so nothing animates until `addQuery` resolves: the button holds its
      pressed state and the takeover stays put while the write is in flight. A spinner in place is
      honest; an optimistic exit is a claim the app cannot yet make. */
-  const [createExiting, setCreateExiting] = useState(false);
   /* The row that has just landed — carries the sage ring for one beat. */
   const [landedId, setLandedId] = useState<string | null>(null);
   /* ⚠️ THE ENTRANCE IS SCOPED TO ONE OPENING, which is the whole job of this flag. The stagger is
@@ -486,7 +482,6 @@ export const Queries: React.FC<{
      mode does, they would replay whenever their elements remounted — and picking an agent remounts
      stage 1's question and picker into stage 2's hero and stack, so choosing someone would cost
      another 410ms before the first field felt live. Cleared when the last child lands. */
-  const [createEntering, setCreateEntering] = useState(false);
   /* ── RECORDING A RESPONSE (§1) ────────────────────────────────────────────────────────────
      The same takeover as create, and deliberately the same STATE SHAPE: a draft that is local
      until Save, a baseline for the dirty check, and the three motion flags. Two journeys, one
@@ -523,17 +518,13 @@ export const Queries: React.FC<{
      a different animation rather than a shared "exiting". Save says "the form became that row";
      cancel says "nothing happened", and is deliberately the faster of the two: undoing an opening
      should not feel like an event. */
-  const [createCancelling, setCreateCancelling] = useState(false);
   /* The caller's continuation, held across the 150ms — `closeCreate(() => pickRow(id))` must still
      select that row, and the teardown that runs it now happens at the end of the motion. */
-  const cancelThenRef = useRef<(() => void) | undefined>(undefined);
   /* ⚠️ "SAVE & LOG ANOTHER" IS NOT AN EXIT — it is the one path where the takeover does not leave,
      and pretending otherwise would be a lie: you never went anywhere. The body wipes and reseats in
      place while the header stays put. */
-  const [createReseating, setCreateReseating] = useState(false);
   /* How many have been logged in THIS sitting. Session-only and deliberately not stored: it counts
      a stretch of work, not a fact about the account. */
-  const [sessionLogged, setSessionLogged] = useState(0);
   /* ⚠️ READ FRESH AT UNDO TIME, NOT CAPTURED AT SAVE TIME. The receipt's closure is built during the
      write, when the journal entry it needs to remove has not yet come back from the listener — a
      captured array would be empty exactly when it mattered, and the entry would survive its
@@ -577,16 +568,13 @@ export const Queries: React.FC<{
     setCreateDraft(base);
     setCreateError(null);
     setCreateSaving(false);
-    setCreateOpened({ when: false, what: false });
     /* ⚠️ NOT ARMED UNDER REDUCED MOTION. The scope class would resolve to `animation: none` on
        every child, so `qc-in-last` would never fire and the class would sit on the pane for the
        rest of the session (see lib/reducedMotion.ts). Focus is unaffected either way: the field
        autofocuses on mount, and the entrance's completion only GUARANTEES that ending place. */
-    setCreateEntering(!prefersReducedMotion());
     /* A fresh sitting starts at nothing. The tally counts this opening, so it must not carry over
        from the last one — a takeover that opened stating "3 logged" would be counting a session the
        writer has already finished. */
-    setSessionLogged(0);
     /* §3 — the ghost lands at index 0; scroll the page's own scroller to its top so the tile is
        on screen when it appears (the controls sit sticky above; scrolling to 0 rests the masthead
        and puts the grid's first row directly beneath them). */
@@ -594,7 +582,6 @@ export const Queries: React.FC<{
       const sc = document.querySelector<HTMLElement>(".wpg-scroll");
       sc?.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
     });
-    setCreateReseating(false);
     setSeal(null);
   };
 
@@ -776,11 +763,6 @@ export const Queries: React.FC<{
     setCreateDraft(null);
     setCreateBase(null);
     setCreateError(null);
-    /* Cleared on the way out, or a takeover discarded mid-entrance would leave the scope class
-       set and the NEXT opening would render its children already at rest — the stagger silently
-       playing only for writers who did not change their mind. */
-    setCreateEntering(false);
-    setCreateCancelling(false);
     /* ⚠️ AND THE SEAL, for the same reason the entrance scope is cleared here: under reduced motion
        it is armed with no `animationend` to retire it, so a stale receipt would greet the next
        sitting. */
@@ -793,32 +775,13 @@ export const Queries: React.FC<{
     then?.();
   };
 
-  /** The cancel exit's completion, at the end of its one gesture. */
-  const finishCancelExit = () => {
-    const then = cancelThenRef.current;
-    cancelThenRef.current = undefined;
-    shutCreate(then);
-    /* ⚠️ FOCUS RETURNS TO THE CONTROL THAT OPENED IT. Leaving it on a node that has just been
-       unmounted drops the writer at the top of the document. */
-    logTriggerRef.current?.focus();
-  };
 
   /** Leave create mode. Untouched → silent; dirty → confirm. `then` runs once it's actually shut
    *  (so clicking another row selects it only after the draft is resolved). */
   const closeCreate = (then?: () => void) => {
-    /* Already leaving. Without this, a second Esc during the 150ms would re-arm the animation from
-       its first frame — the takeover flashing back to full opacity on its way out. */
-    if (createCancelling) return;
-    const leave = () => {
-      /* ⚠️ ONE GESTURE, AND NEVER A REVERSED STAGGER. The entrance's scope class goes first, so any
-         children still arriving settle at once and the frame leaves as a single object. A staggered
-         exit makes leaving feel like work, and the writer who opened this by accident has to sit
-         through it. */
-      setCreateEntering(false);
-      if (prefersReducedMotion()) { shutCreate(then); logTriggerRef.current?.focus(); return; }
-      cancelThenRef.current = then;
-      setCreateCancelling(true);
-    };
+    /* §4 — the takeover's exit choreography left with it: the DRAWER carries the leaving motion
+       (its own slide), so closing is just shutting. The dirty guard is unchanged. */
+    const leave = () => { shutCreate(then); logTriggerRef.current?.focus(); };
     if (createDraft && createBase && draftDirty(createDraft, createBase)) {
       showConfirm({
         title: "Discard this query?",
@@ -869,13 +832,6 @@ export const Queries: React.FC<{
 
      The draft nulls here as well because the effect waits on the listener: if the row never
      arrives, this is what stops the takeover sitting open over a query that was written. */
-  const finishSaveExit = () => {
-    setCreateExiting(false);
-    setCreateEntering(false);
-    setCreateDraft(null);
-    setCreateBase(null);
-    logTriggerRef.current?.focus();
-  };
 
   /**
    * Undo a create — the receipt's own action (fix pack 5 §3).
@@ -905,33 +861,10 @@ export const Queries: React.FC<{
     setLandedId((cur) => (cur === id ? null : cur));
     setGraceRow((cur) => (cur?.id === id ? null : cur));
     await deleteQuery(id);
-    /* The tally counted it; undoing it must uncount it, or the sitting reports work that is no
-       longer there. `max(0, …)` because the floor is a real one — never a negative count. */
-    if (wasBatch) setSessionLogged((n) => Math.max(0, n - 1));
+    /* the session tally left with the takeover it counted for (§4) */
   };
 
-  /** The reseat's completion. The takeover never left, so there is nothing to tear down — this only
-   *  ends the motion and makes sure focus is back where the next query begins. */
-  const finishReseat = (pane: HTMLElement) => {
-    setCreateReseating(false);
-    /* The picker remounts with the agent cleared and autofocuses itself, so this is the GUARANTEE
-       rather than the mechanism — and, as with the entrance, it must not take focus off a writer
-       who has already started typing into it. */
-    if (pane.contains(document.activeElement)) return;
-    pane.querySelector<HTMLElement>(".qc-pickfield")?.focus();
-  };
 
-  /** The entrance's completion — bound to the LAST child's own animation NAME (see f12.css), which
-   *  is the only deterministic way to ask `animationend` "was that the last one?". */
-  const finishEntrance = (pane: HTMLElement) => {
-    setCreateEntering(false);
-    /* ⚠️ FOCUS ENDS IN THE FIELD; IT IS NOT GRABBED AGAIN. The field autofocuses on mount so
-       typing works from the first frame — this only guarantees where focus ENDS UP. A writer who
-       clicked or tabbed somewhere inside the takeover while it was arriving keeps where they went;
-       stealing them back at 650ms is the behaviour that would actually eat a keystroke. */
-    if (pane.contains(document.activeElement)) return;
-    pane.querySelector<HTMLElement>(".qc-pickfield")?.focus();
-  };
 
   /* `logAnother` keeps create mode open after the write instead of handing over to the saved
      record — the batch case (a morning's worth of queries in one sitting). */
@@ -957,16 +890,10 @@ export const Queries: React.FC<{
          `animationend` (see lib/reducedMotion.ts), so arming it there would leave the pane wearing
          a rule that is `opacity: 0` with no event left to clear it — every save blanking the
          reading pane for the rest of the session. The completion runs directly instead. */
-      /* ⚠️ CREATE ALWAYS SEALS BURGUNDY (§5). There is one thing that can have happened here — a
-         query went out — so there is nothing for the colour to vary with, and varying it would
-         invent a distinction. `Save & log another` seals too and does NOT exit: the seal marks the
-         save, not the leaving, and the sheet stays for the next one. */
-      if (prefersReducedMotion()) {
-        setSeal({ kind: "burgundy", thenExit: false });
-        if (!logAnother) finishSaveExit();
-      } else {
-        setSeal({ kind: "burgundy", thenExit: !logAnother });
-      }
+      /* §4 — THE SEAL LEFT WITH THE TAKEOVER. The drawer's landing is the pendingSave effect:
+         it waits for the saved query to ARRIVE, then clears the draft and selects it — clearing
+         early here would kill the ghost before the real card exists and leave a one-frame hole.
+         `landedId` drives the card's one pulse. */
       setLandedId(newId);
       /* THE RECEIPT IS THE APP'S EXISTING TOAST, not a second primitive. `showToast` already owns
          one-at-a-time replacement and the undo affordance elsewhere in this app; a receipt built
@@ -1038,11 +965,6 @@ export const Queries: React.FC<{
          new query — leaving them ticked would state that the writer had confirmed a date and a
          manuscript for a record they have not looked at yet. The values carry over; the claim that
          they were checked does not. */
-      setCreateOpened({ when: false, what: false });
-      setSessionLogged((n) => n + 1);
-      /* The body wipes and reseats in place. Not armed under reduced motion, where it would resolve
-         to `animation: none` and leave no `animationend` to complete on. */
-      if (!prefersReducedMotion()) setCreateReseating(true);
       setPendingSave(null);
       return;
     }
@@ -4868,6 +4790,200 @@ export const Queries: React.FC<{
 
 
 
+          {/**
+            * ══ THE RECORD JOURNEY'S CHASSIS ══════════════════════════════════════════════════
+            *
+            * ⚠️ RECORD-ONLY SINCE §4 (log-sheet run). This mount used to carry BOTH journeys
+            * (`open={creating || recording}`) — the create half moved into the drawer's form mode,
+            * and §4's first cut deleted the whole mount before noticing the record journey lived
+            * in it too: Record response is on the do-not-touch list, and it came back in the same
+            * commit. The sheet, the lamp, the dock and the exit motion are byte-what they were;
+            * only the create branches are gone.
+            */}
+          <QueryJourneySheet
+            open={recording}
+            register="record"
+            ariaLabel="Recording a response"
+            onRequestClose={() => closeRecord()}
+            lamp={respDraft?.outcome === "offer" ? "offer" : "record"}
+            act="Record a response"
+            stateClass={`${respEntering ? " qc-entering" : ""}${respCancelling ? " qc-exit-cancel" : ""}${respExiting ? " qc-exit-save" : ""}`.trim()}
+            onAnimationEnd={(e) => {
+              if (seal && e.animationName === "qc-seal") {
+                const leaving = seal.thenExit;
+                setSeal(null);
+                if (leaving) setRespExiting(true);
+                return;
+              }
+              if (respCancelling && e.animationName === "qc-exit-cancel") {
+                shutRecord(); recordTriggerRef.current?.focus(); return;
+              }
+              if (respExiting && e.animationName === "qc-exit-save") {
+                shutRecord(); recordTriggerRef.current?.focus(); return;
+              }
+              if (respEntering && e.animationName === "qc-in-last") { setRespEntering(false); return; }
+            }}
+                dock={!isMobile ? (
+                  /* ⚠️ THE DOCK IS INSIDE THE SHEET NOW, not row 4 of WorkspacePageGrid. It states
+                     what committing THIS composition will do, so it belongs to the composition rather
+                     than to the page the composition is lying on.
+
+                     ⚠️ AND THE RHYTHM PACK'S WARNING RETIRES WITH THE MOVE: "a dock's height comes out
+                     of the scrollport" was true while the dock was a grid row. It is not a grid row.
+                     Nothing about `--wpg-reclaim-pad` is affected by it any more — do not reinstate
+                     that coupling on this page.
+
+                     ⚠️ DESKTOP ONLY, BECAUSE THE MOBILE DOCK ALREADY EXISTS. `.qh-mcmd` is Query
+                     Centre's own floating command bar below md — the same idea at the other
+                     breakpoint, and it carries the Mark-sent anchor. Rendering both would stack two
+                     bottom bars over a tab bar.
+
+                     ⚠️ AND THE TOAST HOST FLOATS OVER IT, WHICH IS CORRECT. `.sa-toasts` is z:300
+                     against the sheet's 201, so a receipt sits ABOVE the dock rather than pushing it
+                     — a confirmation should never move the control you just used. */
+                  <div className={`qc-dock${respEntering ? " qc-dock-in" : ""}${respCancelling ? " qc-dock-out" : ""}${seal ? " qc-dock-sealed" : ""}`}>
+                    <span className="qc-dock-say">
+                      {/* ⚠️ `OUTCOME_STATUS`, NOT A CAST. `respDraft.outcome` is an outcome KEY ("rr",
+                          "noreply", "rejected") and casting it to `QueryStatus` typechecks while
+                          producing a value the enum never contains — measured, the dock read "Saves as
+                          rejected" in lowercase and `getPrimaryAction` fell through to its default, so
+                          the line promised "closed — the row will offer Record response", which
+                          contradicts itself. `responseDraft.ts` owns this map: "This module maps
+                          outcomes to statuses; it never sets one." */}
+                      {respDraft
+                        ? consequenceLine(respDraft.outcome ? OUTCOME_STATUS[respDraft.outcome] : null)
+                        : null}
+                    </span>
+                    <span className="qc-dock-acts">
+                      {/* ⚠️ THE SEAL SITS BESIDE THE PRIMARY, and it is `aria-hidden` because the
+                          toast already announces the save in words. Two announcements of one event
+                          talk over each other, and a wax seal is not information a screen reader
+                          needs — it is the felt half of a confirmation whose spoken half exists. */}
+                      {seal && (
+                        <span className={`qc-seal qc-seal--${seal.kind}`} aria-hidden="true">
+                          <svg viewBox="0 0 24 24"><path d="m5 13 4 4L19 7" /></svg>
+                        </span>
+                      )}
+                      <span className="qch-esc" aria-hidden="true">Esc</span>
+                      {respDraft && (
+                        <>
+                          <button type="button" className="f12-btn-sec" onClick={() => closeRecord()} disabled={respSaving}>Cancel</button>
+                          {/* ⚠️ NO "SAVE AND RECORD ANOTHER" — a response belongs to one query, so there
+                              is no next one to move on to and offering it would invent a batch. */}
+                          <button type="button" className="f12-btn-pri" onClick={() => void saveResponse()}
+                            disabled={!respDraft || !responseReady(respDraft) || respSaving}>
+                            {respSaving ? "Saving…" : "Save response"}
+                          </button>
+                        </>
+                      )}
+                    </span>
+                  </div>
+                ) : undefined}
+          >
+            {respDraft && respQueryId ? (
+              /* ── RECORDING A RESPONSE (§1, ref 83-record-response.html) ── */
+              <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, padding: "16px 20px 20px" }}>
+                <div className="qch qch-resp">
+                  {/* ⚠️ THE BEAT NEEDS A WRAPPER (§5). The ring is a `::after`, and an `<img>` is a
+                      replaced element that cannot carry one — hung off the image directly the rule
+                      would parse, pass every lock, and draw nothing at all. */}
+                  <span className="qc-motif">
+                    <img className="qch-ill" src="/Log_Query_Icon.png" alt="" width={64} height={64} />
+                  </span>
+                  <div className="qch-txt">
+                    <h2 className="qch-title">Recording a response</h2>
+                    {/* ⚠️ THE LEDE IS GONE (§4); THE ERROR IS NOT. This one element did two jobs —
+                        a standing line, and the save failure announced in burgundy — so deleting
+                        the copy meant keeping the announcer. It renders only when there IS a
+                        failure now, which is also the honest shape: a live region that is populated
+                        at rest has nothing to announce when it changes.
+
+                        The header is two lines: what this is, and where it sits. The lede said
+                        neither — "the rest follows from that" describes the form's own behaviour,
+                        which the chips and the enabled-on-a-pair Save already state by BEING it. */}
+                    {respError && (
+                      <p className="qch-sub qch-err" aria-live="assertive" aria-atomic="true">{respError}</p>
+                    )}
+                    {/* ⚠️ THE PLACE LINE (§2b) — where this act sits in the campaign, as FACT. No
+                        adjective, no encouragement, no streak: "your 17th query for X" is a
+                        position, "your 17th — keep going" is a coach. Rendered only when it has
+                        something to say; a clause whose figure is missing omits itself rather than
+                        printing a zero. It is NOT a live region — the lede above already is one,
+                        and two announcers on one block talk over each other. */}
+                    {respPlace && <p className="qch-place">{respPlace}</p>}
+                    {/* ⚠️ TWO CHIPS ONLY, because Save waits for exactly two facts. The three-state
+                        marks are create's: empty until answered, a DASH for what we pre-filled, a
+                        tick only once the writer has opened the step carrying it. */}
+                    <div className="qch-reqs">
+                      {/* ⚠️ ONLY THE EARNED ONES (§4) — see create's note. `done`, never `prefilled`:
+                          the arrival date is seeded to today, and a tick against a date nobody has
+                          looked at claims a confirmation that did not happen. */}
+                      {responseChips(respDraft, respOpened)
+                        .filter((r) => r.state === "done")
+                        .map((r) => (
+                        <span key={r.key} className="qch-rq qch-answered">
+                          <span className="qch-c" aria-hidden="true">✓</span>
+                          {r.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  {/* ⚠️ THE ACTIONS MOVED TO THE DOCK (§3). The journey header keeps IDENTITY AND
+                      PROGRESS only — motif, title, lede, place line, chips. Two jobs, two places:
+                      what this is and how far along it is here, what happens when you commit it at
+                      the foot, next to the button that commits it. */}
+                </div>
+                <ResponsePane
+                  draft={respDraft}
+                  onChange={setRespDraft}
+                  query={queries.find((q) => q.id === respQueryId)!}
+                  agent={agents.find((a) => a.id === queries.find((q) => q.id === respQueryId)?.agentId) ?? null}
+                  manuscripts={manuscripts}
+                  active={respStep.active}
+                  reached={respStep.reached}
+                  /* The order is the DRAFT's, not a constant — the stack changes with the outcome,
+                     so the two movers have to ask the same question the renderer does. */
+                  /* ⚠️ PAST THE STEP, NOT ON IT (§4). This armed on `reached === "when" || active
+                     === "when"`, so the Date chip ticked the moment the writer LANDED on the When
+                     step rather than when they finished with it — the same unearned mark create's
+                     header carried, one step later. `pastWhen` is the shared predicate. */
+                  onJump={(id) => {
+                    const n = jumpIn(stepsFor(respDraft.outcome), id, respStep.reached);
+                    setRespStep(n);
+                    if (pastWhen(respDraft.outcome, n.reached)) setRespOpened({ when: true });
+                  }}
+                  onAdvance={() => {
+                    const n = advanceIn(stepsFor(respDraft.outcome), respStep.active, respStep.reached);
+                    setRespStep(n);
+                    if (pastWhen(respDraft.outcome, n.reached)) setRespOpened({ when: true });
+                  }}
+                  dropped={respDropped}
+                  /* ⚠️ THE POSITION IS RESEATED WITH THE FIELDS. `reached` can point at a step the
+                     new journey does not have, and a stack whose shape has just changed is one the
+                     writer has to look at again — so it is clamped into the new order rather than
+                     left dangling. */
+                  onOutcomeChange={(next, lost) => {
+                    setRespDraft(next);
+                    setRespDropped(lost);
+                    const order = stepsFor(next.outcome);
+                    setRespStep((cur) => {
+                      const n = reseatInto(order, order, cur.active, cur.reached);
+                      return { active: n.active, reached: n.reached };
+                    });
+                  }}
+                  onSave={() => void saveResponse()}
+                  canSave={responseReady(respDraft)}
+                  saving={respSaving}
+                  sentISO={(queries.find((q) => q.id === respQueryId) as { dateSent?: string } | undefined)?.dateSent}
+                  /* ⚠️ THE HISTORY ROW HAD NO DATA TO WORK WITH. `responseRefRows` was called with a
+                     literal `[]`, so `historyRow` returned null on every reply ever recorded and the
+                     row silently never appeared. */
+                  queries={queries}
+                />
+              </div>
+            ) : null}
+          </QueryJourneySheet>
+
         {/* MarkSentPopover — anchored via useFixedMenu to the actions-toolbar CTA */}
         <AnimatePresence>
           {isMarkSentOpen && activeQuery && activeAgent && (() => {
@@ -5352,402 +5468,6 @@ export const Queries: React.FC<{
             </div>
           </div>
 
-          {/**
-            * ⚠️ THE PANEL IS A SIBLING OF THE COLUMN, NOT A CHILD OF THE GRID. It is `position:
-            * fixed` and must not inherit the 1360 cap or sit inside anything that clips.
-            *
-            * ⚠️ AND IT RENDERS ONLY WITH A ROW TO SHOW. `panelRow` comes from `gridRows`, so a
-            * query filtered out of the current view has no panel — which is the same rule the
-            * position counter follows, and stops `N of M` counting something you cannot step to.
-            */}
-          {/**
-            * ⚠️ THE LOG-A-QUERY JOURNEY LIVES HERE NOW, AND IT WAS UNREACHABLE UNTIL IT DID.
-            *
-            * Phase 4 made the grid the page always, and this block was inside the record branch —
-            * so `Log new query` set `creating` and rendered NOTHING. Measured before the move:
-            * clicking the hero CTA left the page byte-identical (body text 7391 → 7391, no create
-            * pane, no step stack). Nothing asserted it, which is why it survived a commit.
-            *
-            * ⚠️ MOVED, NOT REBUILT. `QueryJourneySheet` is the app's journey chassis — its own
-            * scrim, its own Escape, the dirty guard that diffs the draft against the baseline
-            * captured at open, the seal, the motion. Re-hosting a 41KB form inside a different
-            * shell would have put a second journey chassis on the one page that already has one.
-            */}
-            {/**
-              * ⚠️ THE JOURNEYS ARE AN OVERLAY, NOT A BRANCH OF THIS PANE (§2). They sit lexically
-              * inside it and render nowhere near it: `QueryJourneySheet` portals to document.body,
-              * so the sheet lands above the whole desk while the JSX stays where the state it reads
-              * already is. Moving 180 lines to move a box was the alternative, and it would have
-              * bought nothing but a diff.
-              *
-              * ⚠️ WHICH MEANS THE PANE KEEPS READING UNDERNEATH. The hero, the columns and the
-              * kebab are all still mounted and still correct while a journey is open — dimmed by
-              * the scrim, not replaced. That is the whole of §2: a sheet laid on the desk rather
-              * than a page that swapped itself out.
-              *
-              * ⚠️ THE LIFECYCLE HANDLER MOVED HERE WITH THE FRAME, AND MUST BE IN EXACTLY ONE
-              * PLACE. React events bubble through the REACT tree, not the DOM one, so an
-              * `animationend` inside the portal still reaches this pane — leaving a copy on the
-              * pane as well would run every teardown twice.
-              */}
-            {/**
-              * ⚠️ §1 (log-sheet run) — THE JOURNEY SHEET NO LONGER OPENS. Form mode in the drawer is
-              * the create surface now; this mount is gated dead so nothing on #/queries reaches the
-              * old takeover, and §4 deletes the component, this block, and the locks that read them
-              * TOGETHER — a dead-but-locked transition held for exactly this run, stated rather than
-              * discovered (the overnight §6 lesson).
-              */}
-            {false && (<>
-            <QueryJourneySheet
-              open={creating || recording}
-              register={recording ? "record" : "create"}
-              ariaLabel={recording ? "Recording a response" : "Logging a new query"}
-              /* ⚠️ ONE EXIT, THREE ROUTES (§3). Escape, a backdrop click and the dock's Cancel all
-                 call this — which is the SAME handler Cancel already called, so the dirty guard is
-                 inherited rather than rebuilt. `closeCreate` / `closeRecord` diff the draft against
-                 the baseline captured at open and confirm only when it is dirty; an untouched sheet
-                 closes silently, and every seeded default (today's date, the house nudge, a
-                 pre-selected manuscript) is part of that baseline and therefore already clean. */
-              onRequestClose={() => (recording ? closeRecord() : closeCreate())}
-              /* ⚠️ OFFER IS THE ONLY OUTCOME THAT MOVES THE LIGHT (§5). Record already sits a step
-                 deeper than create — a reply is something that happened TO you — and an offer
-                 deepens one further because it is the moment the whole campaign is for. Nothing
-                 else changes it: a pass is not darker, just quieter, and a room that dimmed for a
-                 rejection would be reacting to bad news on the writer's behalf. */
-              lamp={recording ? (respDraft?.outcome === "offer" ? "offer" : "record") : "create"}
-              act={recording ? "Record a response" : "Log a query"}
-              /* ⚠️ THE SAME THREE CLASSES, ON THE NEW FRAME. They were a template literal on the
-                 pane and stay one here — the classes did not change, only what wears them, and
-                 keeping the expression shape means the locks that guard them still read as prose
-                 about the thing they guard. Both journeys arm the same three; only the state
-                 driving them differs. */
-              stateClass={`${createEntering || respEntering ? " qc-entering" : ""}${createCancelling || respCancelling ? " qc-exit-cancel" : ""}${createExiting || respExiting ? " qc-exit-save" : ""}`.trim()}
-              /* ⚠️ THE JOURNEY GOES WHEN THE ANIMATION ENDS, not after a hardcoded delay that would
-                 drift the moment the timing changed.
-
-                 ⚠️ THE OLD COMMENT HERE CLAIMED `animation: none` "still fires animationend". IT
-                 DOES NOT — verified in-browser — which is why the reduced-motion path is a branch at
-                 the arming site (saveCreate) rather than a second listener. Under reduced motion
-                 this handler is never reached, because the class is never applied.
-
-                 ⚠️ AND IT NOW ALSO RECEIVES THE SHEET'S OWN `qc-sheet-lay`. Unnamed animations fall
-                 through every branch below and do nothing, which is the correct outcome — but it is
-                 why each branch tests the NAME rather than assuming what fired. */
-              onAnimationEnd={(e) => {
-                /* ⚠️ THE SEAL ARMS THE EXIT, AND IT IS CHECKED FIRST. It is the beat between the
-                   write landing and the sheet leaving, so nothing below should run while it plays.
-                   `thenExit` is false for "Save & log another", where the seal marks a save that
-                   is not a departure. */
-                if (seal && e.animationName === "qc-seal") {
-                  const leaving = seal.thenExit;
-                  setSeal(null);
-                  if (leaving) { if (recording) setRespExiting(true); else setCreateExiting(true); }
-                  return;
-                }
-                if (respCancelling && e.animationName === "qc-exit-cancel") {
-                  shutRecord(); recordTriggerRef.current?.focus(); return;
-                }
-                if (respExiting && e.animationName === "qc-exit-save") {
-                  shutRecord(); recordTriggerRef.current?.focus(); return;
-                }
-                if (respEntering && e.animationName === "qc-in-last") { setRespEntering(false); return; }
-                if (createCancelling && e.animationName === "qc-exit-cancel") { finishCancelExit(); return; }
-                if (createExiting && e.animationName === "qc-exit-save") { finishSaveExit(); return; }
-                if (createReseating && e.animationName === "qc-reseat") { finishReseat(e.currentTarget); return; }
-                /* ⚠️ NOT WHILE LEAVING. A `qc-in-last` still in flight when Cancel is pressed would
-                   otherwise put focus back into a journey that is on its way out. */
-                if (!createCancelling && e.animationName === "qc-in-last") finishEntrance(e.currentTarget);
-              }}
-              dock={!isMobile ? (
-                /* ⚠️ THE DOCK IS INSIDE THE SHEET NOW, not row 4 of WorkspacePageGrid. It states
-                   what committing THIS composition will do, so it belongs to the composition rather
-                   than to the page the composition is lying on.
-
-                   ⚠️ AND THE RHYTHM PACK'S WARNING RETIRES WITH THE MOVE: "a dock's height comes out
-                   of the scrollport" was true while the dock was a grid row. It is not a grid row.
-                   Nothing about `--wpg-reclaim-pad` is affected by it any more — do not reinstate
-                   that coupling on this page.
-
-                   ⚠️ DESKTOP ONLY, BECAUSE THE MOBILE DOCK ALREADY EXISTS. `.qh-mcmd` is Query
-                   Centre's own floating command bar below md — the same idea at the other
-                   breakpoint, and it carries the Mark-sent anchor. Rendering both would stack two
-                   bottom bars over a tab bar.
-
-                   ⚠️ AND THE TOAST HOST FLOATS OVER IT, WHICH IS CORRECT. `.sa-toasts` is z:300
-                   against the sheet's 201, so a receipt sits ABOVE the dock rather than pushing it
-                   — a confirmation should never move the control you just used. */
-                <div className={`qc-dock${createEntering || respEntering ? " qc-dock-in" : ""}${createCancelling || respCancelling ? " qc-dock-out" : ""}${seal ? " qc-dock-sealed" : ""}`}>
-                  <span className="qc-dock-say">
-                    {/* ⚠️ `OUTCOME_STATUS`, NOT A CAST. `respDraft.outcome` is an outcome KEY ("rr",
-                        "noreply", "rejected") and casting it to `QueryStatus` typechecks while
-                        producing a value the enum never contains — measured, the dock read "Saves as
-                        rejected" in lowercase and `getPrimaryAction` fell through to its default, so
-                        the line promised "closed — the row will offer Record response", which
-                        contradicts itself. `responseDraft.ts` owns this map: "This module maps
-                        outcomes to statuses; it never sets one." */}
-                    {recording && respDraft
-                      ? consequenceLine(respDraft.outcome ? OUTCOME_STATUS[respDraft.outcome] : null)
-                      : consequenceLine(createReady ? QueryStatus.QUERIED : null)}
-                  </span>
-                  <span className="qc-dock-acts">
-                    {/* ⚠️ THE SEAL SITS BESIDE THE PRIMARY, and it is `aria-hidden` because the
-                        toast already announces the save in words. Two announcements of one event
-                        talk over each other, and a wax seal is not information a screen reader
-                        needs — it is the felt half of a confirmation whose spoken half exists. */}
-                    {seal && (
-                      <span className={`qc-seal qc-seal--${seal.kind}`} aria-hidden="true">
-                        <svg viewBox="0 0 24 24"><path d="m5 13 4 4L19 7" /></svg>
-                      </span>
-                    )}
-                    <span className="qch-esc" aria-hidden="true">Esc</span>
-                    {recording ? (
-                      <>
-                        <button type="button" className="f12-btn-sec" onClick={() => closeRecord()} disabled={respSaving}>Cancel</button>
-                        {/* ⚠️ NO "SAVE AND RECORD ANOTHER" — a response belongs to one query, so there
-                            is no next one to move on to and offering it would invent a batch. */}
-                        <button type="button" className="f12-btn-pri" onClick={() => void saveResponse()}
-                          disabled={!responseReady(respDraft!) || respSaving}>
-                          {respSaving ? "Saving…" : "Save response"}
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button type="button" className="f12-btn-sec" onClick={() => closeCreate()} disabled={createSaving}>Cancel</button>
-                        <button type="button" className="qch-tert" onClick={() => saveCreate(true)} disabled={!createReady || createSaving}>Save &amp; log another</button>
-                        <button type="button" className="f12-btn-pri" onClick={() => saveCreate()} disabled={!createReady || createSaving}>
-                          {createSaving ? "Saving…" : "Save query"}
-                        </button>
-                      </>
-                    )}
-                  </span>
-                </div>
-              ) : undefined}
-            >
-            {respDraft && respQueryId ? (
-              /* ── RECORDING A RESPONSE (§1, ref 83-record-response.html) ── */
-              <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, padding: "16px 20px 20px" }}>
-                <div className="qch qch-resp">
-                  {/* ⚠️ THE BEAT NEEDS A WRAPPER (§5). The ring is a `::after`, and an `<img>` is a
-                      replaced element that cannot carry one — hung off the image directly the rule
-                      would parse, pass every lock, and draw nothing at all. */}
-                  <span className="qc-motif">
-                    <img className="qch-ill" src="/Log_Query_Icon.png" alt="" width={64} height={64} />
-                  </span>
-                  <div className="qch-txt">
-                    <h2 className="qch-title">Recording a response</h2>
-                    {/* ⚠️ THE LEDE IS GONE (§4); THE ERROR IS NOT. This one element did two jobs —
-                        a standing line, and the save failure announced in burgundy — so deleting
-                        the copy meant keeping the announcer. It renders only when there IS a
-                        failure now, which is also the honest shape: a live region that is populated
-                        at rest has nothing to announce when it changes.
-
-                        The header is two lines: what this is, and where it sits. The lede said
-                        neither — "the rest follows from that" describes the form's own behaviour,
-                        which the chips and the enabled-on-a-pair Save already state by BEING it. */}
-                    {respError && (
-                      <p className="qch-sub qch-err" aria-live="assertive" aria-atomic="true">{respError}</p>
-                    )}
-                    {/* ⚠️ THE PLACE LINE (§2b) — where this act sits in the campaign, as FACT. No
-                        adjective, no encouragement, no streak: "your 17th query for X" is a
-                        position, "your 17th — keep going" is a coach. Rendered only when it has
-                        something to say; a clause whose figure is missing omits itself rather than
-                        printing a zero. It is NOT a live region — the lede above already is one,
-                        and two announcers on one block talk over each other. */}
-                    {respPlace && <p className="qch-place">{respPlace}</p>}
-                    {/* ⚠️ TWO CHIPS ONLY, because Save waits for exactly two facts. The three-state
-                        marks are create's: empty until answered, a DASH for what we pre-filled, a
-                        tick only once the writer has opened the step carrying it. */}
-                    <div className="qch-reqs">
-                      {/* ⚠️ ONLY THE EARNED ONES (§4) — see create's note. `done`, never `prefilled`:
-                          the arrival date is seeded to today, and a tick against a date nobody has
-                          looked at claims a confirmation that did not happen. */}
-                      {responseChips(respDraft, respOpened)
-                        .filter((r) => r.state === "done")
-                        .map((r) => (
-                        <span key={r.key} className="qch-rq qch-answered">
-                          <span className="qch-c" aria-hidden="true">✓</span>
-                          {r.label}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  {/* ⚠️ THE ACTIONS MOVED TO THE DOCK (§3). The journey header keeps IDENTITY AND
-                      PROGRESS only — motif, title, lede, place line, chips. Two jobs, two places:
-                      what this is and how far along it is here, what happens when you commit it at
-                      the foot, next to the button that commits it. */}
-                </div>
-                <ResponsePane
-                  draft={respDraft}
-                  onChange={setRespDraft}
-                  query={queries.find((q) => q.id === respQueryId)!}
-                  agent={agents.find((a) => a.id === queries.find((q) => q.id === respQueryId)?.agentId) ?? null}
-                  manuscripts={manuscripts}
-                  active={respStep.active}
-                  reached={respStep.reached}
-                  /* The order is the DRAFT's, not a constant — the stack changes with the outcome,
-                     so the two movers have to ask the same question the renderer does. */
-                  /* ⚠️ PAST THE STEP, NOT ON IT (§4). This armed on `reached === "when" || active
-                     === "when"`, so the Date chip ticked the moment the writer LANDED on the When
-                     step rather than when they finished with it — the same unearned mark create's
-                     header carried, one step later. `pastWhen` is the shared predicate. */
-                  onJump={(id) => {
-                    const n = jumpIn(stepsFor(respDraft.outcome), id, respStep.reached);
-                    setRespStep(n);
-                    if (pastWhen(respDraft.outcome, n.reached)) setRespOpened({ when: true });
-                  }}
-                  onAdvance={() => {
-                    const n = advanceIn(stepsFor(respDraft.outcome), respStep.active, respStep.reached);
-                    setRespStep(n);
-                    if (pastWhen(respDraft.outcome, n.reached)) setRespOpened({ when: true });
-                  }}
-                  dropped={respDropped}
-                  /* ⚠️ THE POSITION IS RESEATED WITH THE FIELDS. `reached` can point at a step the
-                     new journey does not have, and a stack whose shape has just changed is one the
-                     writer has to look at again — so it is clamped into the new order rather than
-                     left dangling. */
-                  onOutcomeChange={(next, lost) => {
-                    setRespDraft(next);
-                    setRespDropped(lost);
-                    const order = stepsFor(next.outcome);
-                    setRespStep((cur) => {
-                      const n = reseatInto(order, order, cur.active, cur.reached);
-                      return { active: n.active, reached: n.reached };
-                    });
-                  }}
-                  onSave={() => void saveResponse()}
-                  canSave={responseReady(respDraft)}
-                  saving={respSaving}
-                  sentISO={(queries.find((q) => q.id === respQueryId) as { dateSent?: string } | undefined)?.dateSent}
-                  /* ⚠️ THE HISTORY ROW HAD NO DATA TO WORK WITH. `responseRefRows` was called with a
-                     literal `[]`, so `historyRow` returned null on every reply ever recorded and the
-                     row silently never appeared. */
-                  queries={queries}
-                />
-              </div>
-            ) : createDraft ? (
-              /* v4 P2 — CREATE MODE owns the pane while a draft is open (ref create-mode-ref.html). */
-              <div
-                className={createReseating ? "qc-reseat" : undefined}
-                style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, padding: "16px 20px 20px" }}>
-                {/* ── THE ILLUSTRATED HEADER (ref qc-create-v2.html) — replaces the retired
-                    command bar. It says what you are doing, what it needs, and offers the three
-                    ways out, in one band at the top of the work. ── */}
-                <div className="qch">
-                  {/* ⚠️ THE BEAT NEEDS A WRAPPER — see the record journey's note: a `::after` on a
-                      replaced element draws nothing, silently. */}
-                  <span className="qc-motif">
-                    <img className="qch-ill" src="/Log_Query_Icon.png" alt="" width={64} height={64} />
-                  </span>
-                  <div className="qch-txt">
-                    <h2 className="qch-title">Logging new query</h2>
-                    {/* ⚠️ ONE LINE, TWO JOBS: the requirement by default, the save error in
-                        burgundy when there is one. A failure belongs beside the button that
-                        failed, not in a toast that can be missed.
-                        The live region is PERMANENT rather than a role toggled on when the error
-                        arrives. A live region announces CHANGES after first render, so the static
-                        subtitle is not read on mount but the swap to an error is — whereas adding
-                        role="alert" to an element already in the tree is unreliably announced
-                        across screen readers. aria-atomic because the line replaces its text
-                        rather than appending to it. */}
-                    {/* ⚠️ THE LEDE IS GONE (§4); THE ERROR IS NOT. This element did two jobs — a
-                        standing requirement line, and the save failure in burgundy — so deleting the
-                        copy meant keeping the announcer, which now renders only when there IS a
-                        failure. That is also the honest shape for a live region: one populated at
-                        rest has nothing to announce when it changes.
-
-                        "Needs an agent, a manuscript and a date — everything else can wait" promised
-                        a queue that does not exist. The chips state the same requirement, and the
-                        Save that enables on the trio states it as BEHAVIOUR rather than as a claim.
-                        The header is two lines now: what this is, and where it sits. */}
-                    {createError && (
-                      <p className="qch-sub qch-err" aria-live="assertive" aria-atomic="true">{createError}</p>
-                    )}
-                    {/* ⚠️ THE PLACE LINE — where this act sits in the campaign, as FACT. No
-                        adjective, no encouragement, no streak: "your 17th query for X" is a
-                        position, "your 17th — keep going" is a coach. Rendered only when it has
-                        something to say; a line whose figure is missing omits itself rather than
-                        printing a zero. It is NOT a live region — the error above is one when it
-                        appears, and two announcers on one block talk over each other. */}
-                    {createPlace && <p className="qch-place">{createPlace}</p>}
-                    {/* ⚠️ THE PIPS READ THE DRAFT, NEVER THE STEPS — required ≠ sequential. Two
-                        are green on arrival because openCreate seeds the manuscript and today's
-                        date; only the agent is genuinely open. They are deliberately NOT a live
-                        region: the subtitle above already is one, and two announcers on one line
-                        of chrome would talk over each other on every keystroke. */}
-                    {/* ⚠️ THE CHECKLIST STATES VALUES, AND ITS TICKS ARE NOT ALL THE SAME TICK.
-                        A bare green tick beside Manuscript and Date claimed the writer had
-                        completed them when openCreate had merely pre-filled them — so the one
-                        item that genuinely needs them read as one open thing among three
-                        settled ones. Outlined = answered for you; solid = answered by you.
-                        `createBase` is the baseline that tells them apart (see requirements). */}
-                    {/* ⚠️ LABELS AND A MARK — NO VALUES. The chips used to preview "Manuscript
-                        Murphy's Day Out" and "Date today", which restated what the sidebar and the
-                        When step already say and read as confirmations of things the writer had not
-                        seen. The values live in the collapsed step rows.
-                        ⚠️ AND A TICK MEANS CONFIRMED. Pre-filled takes a DASH — the conventional
-                        partial mark, and one that cannot be misread as completion — because an
-                        outlined tick still reads as done, which is the claim this exists to stop
-                        making. The tick arrives only once that step has been opened. */}
-                    <div className="qch-reqs">
-                      {/* ⚠️ ONLY THE EARNED ONES (§4). Every chip used to render from the first
-                          frame, so the header opened with a row of empty rings exactly where the eye
-                          should be going to the question. A chip appears when its phase is COMPLETE
-                          — answered by the writer, not merely pre-filled for them — and it appears
-                          already ticked, because there is no other state it can be in.
-                          ⚠️ `answered`, NOT `answered || prefilled`. `prefilled` is the app's own
-                          seeding: today's date and a manuscript the writer has not looked at. A chip
-                          for that is a tick against work nobody did. */}
-                      {requirements(createDraft, createBase, createOpened)
-                        .filter((r) => r.state === "answered")
-                        .map((r) => (
-                        <span key={r.key} className="qch-rq qch-answered">
-                          <span className="qch-c" aria-hidden="true">✓</span>
-                          {r.label}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  {/* ⚠️ THE ACTIONS MOVED TO THE DOCK (§3). The journey header keeps IDENTITY AND
-                      PROGRESS only — motif, title, lede, place line, chips. Two jobs, two places:
-                      what this is and how far along it is here, what happens when you commit it at
-                      the foot, next to the button that commits it. */}
-                    {/* ⚠️ THE TALLY STAYS IN THE HEADER, and it nearly went to the dock with the
-                        buttons it was sitting beside. It is PROGRESS — how far this sitting has
-                        got — which is the header's half of the split, not the dock's. The dock
-                        states what the NEXT save will do; this states what the previous ones did.
-                        Absent at zero: "0 logged" is a statement about nothing. */}
-                    {sessionLogged > 0 && (
-                      <span className="qch-tally" aria-live="polite">
-                        {sessionLogged} logged
-                      </span>
-                    )}
-                </div>
-                <QueryCreatePane
-                  draft={createDraft}
-                  onChange={setCreateDraft}
-                  agents={agents}
-                  manuscripts={pickableManuscripts(manuscripts)}
-                  onCreateAgent={handleCreateAgentInline}
-                  queries={queries}
-                  /* The duplicate link discards the draft through the normal door — closeCreate
-                     owns the dirty-confirm, so "go and look at that one" can never lose typing
-                     silently. */
-                  onOpenQuery={(id) => closeCreate(() => setSelectedQueryId(id))}
-                  /* ⚠️ ROUTES OUT OF CREATE MODE DISCARD THROUGH closeCreate, which owns the
-                     dirty-confirm — leaving the pane by any other door could lose typing in
-                     silence. Both are omitted when the page has no navigation bridge, because a
-                     route card that goes nowhere teaches the wrong shape of the app. */
-                  onStepsOpened={setCreateOpened}
-                  onSave={() => void saveCreate()}
-                  canSave={createReady}
-                  saving={createSaving}
-                  onSeeAllAgents={onNavigate ? () => closeCreate(() => onNavigate("agents")) : undefined}
-                  onDiscover={onNavigate ? () => closeCreate(() => onNavigate("agents", "Discover")) : undefined}
-                />
-              </div>
-            ) : null}
-            </QueryJourneySheet>
-            </>)}
 
 
 

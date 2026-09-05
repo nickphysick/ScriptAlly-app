@@ -112,8 +112,17 @@ import { snapToUnit, SAMPLE_UNITS, type MaterialRow, type SampleUnit } from "../
 export const MaterialsFields: React.FC<{
   rows: MaterialRow[];
   onChange: (rows: MaterialRow[]) => void;
-}> = ({ rows, onChange }) => {
-  const set = (key: MaterialRow["key"], patch: Partial<MaterialRow>) =>
+  /**
+   * The agent's own stated sample figure, when they ask for more than the create ceiling —
+   * their figure re-opens the stepper's bound (createQty's law). The desk passes none: a
+   * correction is about what WENT, not what the agency asks for.
+   */
+  statedSample?: number | null;
+}> = ({ rows, onChange, statedSample = null }) => {
+  /* raw while focused, formatted otherwise — a separator reapplied under the hands rewrites the
+     figure being typed (createQty's own law, ported with the control) */
+  const [qtyFocused, setQtyFocused] = useState(false);
+  const setRow = (key: MaterialRow["key"], patch: Partial<MaterialRow>) =>
     onChange(rows.map((r) => (r.key === key ? ({ ...r, ...patch } as MaterialRow) : r)));
   const sample = rows.find((r) => r.key === "sample");
   const other = rows.find((r) => r.key === "other");
@@ -128,33 +137,42 @@ export const MaterialsFields: React.FC<{
             role="checkbox"
             aria-checked={r.on}
             aria-label={r.name}
-            onClick={() => set(r.key, { on: !r.on, ...(r.key === "sample" && !r.on && !(r as { amount?: string }).amount ? { amount: snapToUnit((r as { unit: SampleUnit }).unit) } : {}) })}
+            onClick={() => setRow(r.key, { on: !r.on, ...(r.key === "sample" && !r.on && !(r as { amount?: string }).amount ? { amount: snapToUnit((r as { unit: SampleUnit }).unit) } : {}) })}
           >
             {r.on && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fdfaf5" strokeWidth="3.4" aria-hidden="true"><path d="M4 12l5 5L20 7" /></svg>}
           </button>
           <span className="qcd-docnm">{r.name}</span>
           {r.key === "sample" && r.on && sample && "unit" in sample && (
             <span className="qcd-qty">
-              <button type="button" aria-label="Less" onClick={() => set("sample", { amount: String(stepQty(sample.amount, sample.unit, -1)) })}>−</button>
+              <button type="button" aria-label="Less" onClick={() => setRow("sample", { amount: String(stepQty(sample.amount, sample.unit, -1, statedSample)) })}>−</button>
               <input
-                value={formatQty(sample.amount)}
+                value={qtyFocused ? sample.amount : formatQty(sample.amount)}
                 inputMode="numeric"
                 aria-label={`Amount in ${sample.unit.toLowerCase()}`}
-                onChange={(e) => set("sample", { amount: String(parseQty(e.target.value)) })}
+                onFocus={() => setQtyFocused(true)}
+                onBlur={() => setQtyFocused(false)}
+                onChange={(e) => setRow("sample", { amount: String(parseQty(e.target.value)) })}
+                onKeyDown={(e) => {
+                  /* the keyboard is not a second-class way to use this control */
+                  if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+                  const dir = e.key === "ArrowUp" ? 1 : -1;
+                  e.preventDefault();
+                  setRow("sample", { amount: String(stepQty(sample.amount, sample.unit, dir, statedSample)) });
+                }}
               />
-              <button type="button" aria-label="More" onClick={() => set("sample", { amount: String(stepQty(sample.amount, sample.unit, 1)) })}>+</button>
+              <button type="button" aria-label="More" onClick={() => setRow("sample", { amount: String(stepQty(sample.amount, sample.unit, 1, statedSample)) })}>+</button>
               <span className="qcd-pm">{stepLabel(sample.unit)}</span>
               <span className="qcd-useg">
                 {SAMPLE_UNITS.map((u) => (
                   <button key={u} type="button" className={sample.unit === u ? "on" : undefined}
-                    onClick={() => set("sample", { unit: u, amount: snapToUnit(u) })}>{u}</button>
+                    onClick={() => setRow("sample", { unit: u, amount: snapToUnit(u) })}>{u}</button>
                 ))}
               </span>
             </span>
           )}
           {r.key === "other" && r.on && other && "text" in other && (
             <input className="qcd-free" placeholder="e.g. author bio, portal upload" value={other.text}
-              onChange={(e) => set("other", { text: e.target.value })} aria-label="Other material" />
+              onChange={(e) => setRow("other", { text: e.target.value })} aria-label="Other material" />
           )}
           {!r.on && <span className="qcd-notsent">NOT SENT</span>}
         </div>

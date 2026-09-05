@@ -137,7 +137,7 @@ describe("§5 · 1 · the lamplight dim", () => {
 
     /* at source, `offer` is the ONLY outcome consulted */
     expect(code, "the lamp depth stopped being driven by the outcome")
-      .toContain('lamp={recording ? (respDraft?.outcome === "offer" ? "offer" : "record") : "create"}');
+      .toContain('lamp={respDraft?.outcome === "offer" ? "offer" : "record"}');
     for (const o of ["rejected", "noreply", "partial", "full", "rr"]) {
       expect(code, `${o} started changing the light`).not.toContain(`outcome === "${o}" ? "`);
     }
@@ -177,8 +177,9 @@ describe("§5 · 2 · the arrival beat", () => {
    * draws absolutely nothing. Both journeys wrap their motif.
    */
   it("the motif is wrapped, because a replaced element cannot carry a pseudo-element", () => {
+    /* one journey wears the sheet now (§4) — create's motif went with its takeover */
     expect((code.match(/className="qc-motif"/g) ?? []).length,
-      "both journeys must wrap their motif — one unwrapped draws no beat at all").toBe(2);
+      "the record journey must wrap its motif — unwrapped draws no beat at all").toBe(1);
     expect(code, "the ring was hung off the image itself").not.toMatch(/qch-ill[^>]*::after/);
   });
 
@@ -217,7 +218,7 @@ describe("§5 · 3 · the seal", () => {
     /* every outcome has one, so no save can stamp an unstyled seal */
     for (const o of OUTCOME_ORDER) expect(OUTCOME_SEAL[o], `${o} has no seal`).toBeTruthy();
     /* create is always burgundy — one thing can have happened, so nothing varies */
-    expect(code, "create's seal started varying").toContain('setSeal({ kind: "burgundy"');
+    /* create seals nothing since §4 — its save lands in the drawer with a card pulse instead */
   });
 
   /* ⚠️ WARM GREY, NEVER RED, AND THE WAX READS TOKENS. A pass is the commonest thing that happens
@@ -244,7 +245,7 @@ describe("§5 · 3 · the seal", () => {
     const at = code.indexOf('if (seal && e.animationName === "qc-seal")');
     const handoff = code.slice(at, code.indexOf("return;", at));
     expect(handoff, "the handoff does not arm either exit").toContain("setRespExiting(true)");
-    expect(handoff).toContain("setCreateExiting(true)");
+    /* the create exit left with the takeover — the record's is the only one to arm */
     expect(handoff, "a timer stood in for the animation").not.toContain("setTimeout");
     /* `Save & log another` seals without leaving — the seal marks the save, not the departure */
     expect(handoff, "every seal now exits, including the batch save").toContain("if (leaving)");
@@ -331,7 +332,7 @@ describe("§5 · reduced motion cuts to the final frame", () => {
      strand the sheet open forever. Both paths branch at the arming site. */
   it("the save paths branch rather than waiting for an event that never arrives", () => {
     expect(code).toContain('if (prefersReducedMotion()) { setSeal({ kind, thenExit: false }); shutRecord();');
-    expect(code).toContain('setSeal({ kind: "burgundy", thenExit: false });');
+    /* create's reduced-motion seal went with §4; the record path above is the surviving branch */
     expect(code, "reduced motion armed a handoff it will never receive")
       .not.toMatch(/prefersReducedMotion\(\)\s*\)\s*\{[^}]*thenExit:\s*true/);
   });

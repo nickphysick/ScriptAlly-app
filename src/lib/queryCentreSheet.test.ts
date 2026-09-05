@@ -104,12 +104,16 @@ describe("§2 · the sheet is paper, not another card", () => {
 });
 
 describe("§2 · one surface, two registers", () => {
-  it("both journeys render through the SAME component — there is only one of it", () => {
+it("the record journey renders through the chassis — create moved into the drawer (§4, log-sheet run)", () => {
+    /* RETARGETED: the law was "one component, two registers". The create journey lives in the
+       drawer's form mode now, so the chassis has ONE register and one mount — asserting the old
+       pair would demand the resurrection of the surface §4 deleted. What survives: the sheet is
+       still the record journey's one home, and nothing mounts a second copy. */
+    const code = read("../components/Queries.tsx");
     expect(code, "the sheet is not mounted").toContain("<QueryJourneySheet");
-    expect((code.match(/<QueryJourneySheet/g) ?? []).length,
-      "a second sheet appeared — the two journeys would drift into two objects").toBe(1);
-    /* one mount, both states: the register is a prop, not a fork */
-    expect(code, "the register stopped being a prop").toContain('register={recording ? "record" : "create"}');
+    expect((code.match(/<QueryJourneySheet/g) ?? []).length, "a second mount grew").toBe(1);
+    expect(code).toContain('register="record"');
+    expect(code).toContain("open={recording}");
   });
 
   /* ⚠️ THE REGISTER CHOOSES COLOUR AND NOTHING STRUCTURAL. A writer who has logged a query already

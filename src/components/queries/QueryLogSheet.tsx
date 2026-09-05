@@ -329,7 +329,22 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
                 </button>
                 {dateOpen && (
                   <div className="qls-pop" ref={datePanelRef as React.RefObject<HTMLDivElement>} style={dateStyle} role="dialog" aria-label="Date sent">
-                    <BrandDatePicker value={draft.dateSent} onChange={(iso) => { onDraft({ ...draft, dateSent: iso }); setDateOpen(false); }} />
+                    {/* the timeline records what happened — a send cannot be tomorrow */}
+                    <BrandDatePicker value={draft.dateSent} max={todayInputDate()}
+                      onChange={(iso) => {
+                        /* ⚠️ MOVING THE SEND CAN STRAND A CHOSEN NUDGE (datePickerHub's law,
+                           ported with the journey). Keeping a custom date at or before the new
+                           send schedules a chase for a parcel that had not gone; silently moving
+                           it would edit a day the writer picked on purpose. It falls back to the
+                           default — the agent's window when stated, else the house weeks. */
+                        const stranded = draft.reminder.kind === "custom" && draft.reminder.date <= iso;
+                        onDraft({
+                          ...draft,
+                          dateSent: iso,
+                          ...(stranded ? { reminder: win != null ? { kind: "preset" as const, weeks: win } : { kind: "preset" as const, weeks: 6 } } : {}),
+                        });
+                        setDateOpen(false);
+                      }} />
                   </div>
                 )}
               </div>
@@ -363,7 +378,11 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
               </button>
               {nudgePickOpen && (
                 <div className="qls-pop" ref={nudgePanelRef as React.RefObject<HTMLDivElement>} style={nudgeStyle} role="dialog" aria-label="Nudge date">
+                  {/* ⚠️ THE HUB'S OWN LAW, PORTED WITH THE JOURNEY (datePickerHub): the nudge
+                      refuses the sending day itself and everything before it — a chase for a
+                      parcel that has not gone is not a reminder. Floor = sent + 1. */}
                   <BrandDatePicker value={draft.reminder.kind === "custom" ? draft.reminder.date : ""}
+                    min={(() => { const d = new Date(`${draft.dateSent}T12:00:00`); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); })()}
                     onChange={(iso) => { onDraft({ ...draft, reminder: { kind: "custom", date: iso } }); setNudgePickOpen(false); }} />
                 </div>
               )}
@@ -409,7 +428,13 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
                 ))}
               </div>
             )}
-            <MaterialsFields rows={draft.materials} onChange={(rows) => {
+            <MaterialsFields rows={draft.materials}
+              statedSample={(() => {
+                const r = materialRowsFromAgent(agent.materialsWanted).find((x) => x.key === "sample" && x.on);
+                const n = r && "amount" in r ? parseInt(r.amount, 10) : NaN;
+                return Number.isFinite(n) && n > 0 ? n : null;
+              })()}
+              onChange={(rows) => {
               onDraft({ ...draft, materials: rows });
               /* the floor speaks HERE, in its own words, and Save reads the same flag — a typed
                  200 words stays visible under its complaint rather than being silently corrected */

@@ -241,8 +241,9 @@ describe("the redundant raises are gone", () => {
   it("no z-raise survives anywhere — the scrim it existed for is gone", () => {
     /* Both buttons moved to the illustrated header (P3) and the primary's handler is wrapped
        now — onClick={saveCreate} would hand the click event in as the batch flag. */
-    expect(code).toContain('className="f12-btn-sec" onClick={() => closeCreate()}');
-    expect(code).toContain("onClick={() => saveCreate()}");
+    expect(code).toContain('className="f12-btn-sec" onClick={() => closeRecord()}');
+    /* the create dock left with the takeover (§4); the record dock's primary is the anchor now */
+    expect(code).toContain("onClick={() => void saveResponse()}");
     expect(code, "a raise outlived the scrim").not.toContain("qh-lit");
     expect(code, "the scrim element outlived its system").not.toContain("qh-scrim");
     expect(code, "the focus class outlived its system").not.toContain("qh-focus");
@@ -326,7 +327,9 @@ describe("the journey's strip offers no exit of its own", () => {
     }
     /* and no INLINE style in the journey's own components reaches for the viewport either —
        that is where `.qc-take-body` and the takeover column get their boxes */
-    for (const rel of ["../components/Queries.tsx", "../components/queries/QueryCreatePane.tsx",
+    /* QueryCreatePane left the census with the takeover (§4, log-sheet run); the sheet that
+       replaced it joins instead — same law over the surviving population. */
+    for (const rel of ["../components/Queries.tsx", "../components/queries/QueryLogSheet.tsx",
                        "../components/queries/ResponsePane.tsx", "../components/queries/StepStack.tsx"]) {
       const src = read(rel).replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
       expect(src, `${rel} sizes something to the viewport inline`).not.toMatch(/\b\d+(\.\d+)?(vh|dvh|svh|lvh)\b/);

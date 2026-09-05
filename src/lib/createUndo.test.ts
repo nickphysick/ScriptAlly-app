@@ -136,9 +136,11 @@ describe("what is on screen is unwound too", () => {
 describe("the tally uncounts it", () => {
   /* The sitting must not report work that is no longer there. Only the batch path counted, so only
      the batch path uncounts. */
-  it("a batch save's undo decrements, and never below zero", () => {
-    const body = undoBody();
-    expect(body).toContain("if (wasBatch) setSessionLogged((n) => Math.max(0, n - 1));");
+  it("the tally left with the takeover — undo no longer uncounts a session figure", () => {
+    /* RETARGETED (§4, log-sheet run): `sessionLogged` was the takeover's sitting tally and went
+       with it; the drawer's form has no session counter to uncount. The law that SURVIVES is the
+       one the rest of this file holds — undo deletes through the cascade and writes nothing. */
+    expect(undoBody()).not.toContain("setSessionLogged");
   });
 
   it("and a plain save's undo leaves it alone, because it never counted", () => {

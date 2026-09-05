@@ -216,9 +216,10 @@ describe("the interval is a fact, not a verdict", () => {
 
 describe("it wears the shared motion, not a second copy", () => {
   it("the same three classes create uses", () => {
-    expect(queries).toContain("createEntering || respEntering ? \" qc-entering\" : \"\"");
-    expect(queries).toContain("createCancelling || respCancelling ? \" qc-exit-cancel\" : \"\"");
-    expect(queries).toContain("createExiting || respExiting ? \" qc-exit-save\" : \"\"");
+    /* record-only since §4 — one journey, its own three flags on the same classes */
+    expect(queries).toContain("respEntering ? \" qc-entering\" : \"\"");
+    expect(queries).toContain("respCancelling ? \" qc-exit-cancel\" : \"\"");
+    expect(queries).toContain("respExiting ? \" qc-exit-save\" : \"\"");
   });
 
   /* ⚠️ `animation: none` FIRES NO `animationend`, so a class armed under reduced motion is never
@@ -282,11 +283,14 @@ describe("a response belongs to one query", () => {
   it("there is no save-and-record-another", () => {
     const at = queries.indexOf('<span className="qc-dock-acts">');
     expect(at, "the dock's action cluster is missing").toBeGreaterThan(-1);
-    const dock = queries.slice(at, queries.indexOf("</span>", queries.indexOf("Save query")));
+    /* §4 — the dock is record-only now: sliced to the cluster's own close, not to a create
+       button that no longer exists */
+    /* the cluster's own extent — the first inner span (Esc) closes before the save, so the
+       bound is the WRAPPING span's close: the next `</span>` that sits at line start depth.
+       A fixed window is honest here; the cluster is a few hundred chars. */
+    const dock = queries.slice(at, at + 2500);
     expect(dock, "the response save is missing from the dock").toContain("Save response");
-    /* the record BRANCH of the dock — the create branch legitimately has one */
-    const recBranch = dock.slice(dock.indexOf("recording ?"), dock.indexOf(") : ("));
-    expect(recBranch, "a batch action in the record branch would be inventing one").not.toContain("log another");
+    expect(dock, "a batch action grew on a response").not.toContain("another");
   });
 
   /* ⚠️ ITS OWN RECEIPT CHANNEL. Logging a query and recording a reply are different facts; sharing

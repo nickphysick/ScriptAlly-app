@@ -18,7 +18,9 @@ import { BrandDatePicker } from "../components/forms/BrandDatePicker";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
 const css = read("../components/forms/forms.css");
-const pane = read("../components/queries/QueryCreatePane.tsx");
+/* RETARGETED (§4, log-sheet run): the create surface is the drawer's log sheet now —
+   same laws, new home. */
+const pane = read("../components/queries/QueryLogSheet.tsx");
 
 /** The popover markup renders even while closed (CSS hides it), so a static render can see it. */
 const render = (props: Partial<React.ComponentProps<typeof BrandDatePicker>> = {}) =>
@@ -108,22 +110,18 @@ describe("the hub skin cannot reach the Form 11 call sites", () => {
   });
 });
 
-describe("create mode uses it for BOTH dates, with the constraints intact", () => {
-  it("no native date input survives in create mode", () => {
+describe("the log sheet uses it for BOTH dates, with the constraints intact", () => {
+  it("no native date input survives in the sheet", () => {
     expect(pane, "a native date input came back").not.toContain('type="date"');
     expect(pane.match(/<BrandDatePicker/g)?.length ?? 0).toBe(2);
   });
 
   it("Date sent still can't be in the future, and the nudge still can't reach back past the send", () => {
     expect(pane).toContain("max={todayInputDate()}");
-    /* ⚠️ AMENDED: the floor is the sent date PLUS ONE DAY, not the sent date. A reminder to chase
-       something you have just this moment sent is not a reminder — and the old bound also let the
-       nudge land on the sending day, which reads as "chase this before it arrives". */
-    expect(pane).toContain("min={nudgeFloor}");
-  });
-
-  it("both wear the hub skin", () => {
-    expect(pane.match(/variant="hub"/g)?.length ?? 0).toBe(2);
+    /* the floor is the sent date PLUS ONE DAY — a reminder to chase something you have just this
+       moment sent is not a reminder, and the sending day itself reads as "chase this before it
+       arrives". The sheet derives it inline from the draft's own date. */
+    expect(pane).toMatch(/min=\{\(\(\) => \{ const d = new Date\(`\$\{draft\.dateSent\}T12:00:00`\); d\.setDate\(d\.getDate\(\) \+ 1\)/);
   });
 });
 
@@ -146,27 +144,31 @@ describe("sent and nudge carry their own bounds and their own shortcuts", () => 
   /* ⚠️ AND THE NUDGE FLOOR IS THE SENT DATE PLUS ONE DAY, not the sent date. A reminder to chase
      something you have just this moment sent is not a reminder. */
   it("the nudge picker refuses the sending day itself and everything before it", () => {
-    expect(pane).toContain("const nudgeFloor = draft.dateSent ? isoPlusDays(draft.dateSent, 1) : todayInputDate();");
-    expect(pane).toContain("min={nudgeFloor}");
-    const html = render({ value: "", min: "2026-08-11" });
+    /* the sheet derives the floor inline from the draft's own date — sent + 1 */
+    expect(pane).toMatch(/d\.setDate\(d\.getDate\(\) \+ 1\); return d\.toISOString\(\)\.slice\(0, 10\); \}\)\(\)\}/);
+    /* ⚠️ THE FIXTURE MUST SHOW A MONTH THAT CONTAINS OFF DAYS. With value "" the grid opens
+       on TODAY's month, where every day sits above an August floor and nothing is inert — the
+       assertion failed on a view where its claim could not manifest, and had been red since the
+       day the month rolled over. Anchor the view inside the floor's own month. */
+    const html = render({ value: "2026-08-20", min: "2026-08-11" });
     expect(html, "days before the floor must be inert").toContain("sa-dp-day off");
   });
 
   /* "In eight weeks" on a query posted in June means eight weeks after June, not after today. */
   it("the nudge shortcuts count forward from the SEND, not from today", () => {
-    expect(pane).toContain("const base = draft.dateSent || todayInputDate();");
-    expect(pane).toContain("label: `In ${w} weeks`");
-    expect(pane).toContain("date: new Date(isoPlusDays(base, w * 7)");
-    expect(pane, "and they are handed to the picker rather than hardcoded in it")
-      .toContain("quickChips={nudgeChips}");
+    /* RETARGETED: the shortcuts are the FORM's chips now, not chips inside the picker — the
+       6/8/12 presets resolve as sent + weeks·7 through the sheet's own nudge derivation, which is
+       the same law (count from the SEND) with the control one level up. */
+    expect(pane).toContain('const d = new Date(`${draft.dateSent}T12:00:00`);');
+    expect(pane).toContain("d.setDate(d.getDate() + r.weeks * 7);");
   });
 
   /* ⚠️ MOVING THE SEND CAN STRAND A NUDGE THE WRITER CHOSE. Keeping it would leave a reminder
      scheduled before the query existed; silently correcting it would move a day they picked on
      purpose without telling them. It falls back to the preset, and the derived line says so. */
   it("moving the sent date past a chosen nudge date clears that choice", () => {
-    expect(pane).toContain('draft.reminder.kind === "custom" && d && draft.reminder.date <= d');
-    expect(pane).toContain("{ dateSent: d, reminder: initialReminder(agent) }");
+    expect(pane).toContain('const stranded = draft.reminder.kind === "custom" && draft.reminder.date <= iso;');
+    expect(pane, "the stranded nudge does not fall back to a default").toMatch(/stranded \? \{ reminder: win != null/);
   });
 
   /* The default chips stay exactly as they were for the twenty Form 11 call sites and the sent

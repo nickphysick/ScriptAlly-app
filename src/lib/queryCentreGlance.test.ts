@@ -23,7 +23,8 @@ const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8"
 const css = read("../components/shell/f12.css");
 const panel = read("../components/queries/AgentContextPanel.tsx");
 const respPane = read("../components/queries/ResponsePane.tsx");
-const createPane = read("../components/queries/QueryCreatePane.tsx");
+/* RETARGETED (§4): the glance's one host is the record journey now. */
+const createPane = read("../components/queries/ResponsePane.tsx");
 /** Comment-stripped: both files DISCUSS the deleted chassis where it used to be. */
 const strip = (t: string) => t.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "").replace(/^\s*\/\/.*$/gm, "");
 const cssCode = css.replace(/\/\*[\s\S]*?\*\//g, "");

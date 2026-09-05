@@ -318,10 +318,15 @@ describe("§1 (log sheet) · the routes open the right step", () => {
     expect(page).toContain("setCreateStep(seedAgent ? 2 : 1)");
   });
 
-  it("nothing opens the old journey sheet — the mount is gated dead until §4 deletes it", () => {
+  it("the journey sheet is the RECORD journey's alone — create never reaches it (§4)", () => {
+    /* the transition gate ({false &&) resolved: the create takeover is DELETED and the chassis
+       survives as the record journey's one home. The claim that holds: one mount, record register,
+       opened by `recording` and nothing else. */
     const at = page.indexOf("<QueryJourneySheet");
-    expect(at).toBeGreaterThan(-1);
-    const before = page.slice(Math.max(0, at - 400), at);
-    expect(before, "the journey mount is reachable again").toContain("{false && (");
+    expect(at, "the record journey lost its chassis").toBeGreaterThan(-1);
+    const mount = page.slice(at, page.indexOf(">", at));
+    expect(mount).toContain('register="record"');
+    expect(mount).toContain("open={recording}");
+    expect(mount, "create reaches the sheet again").not.toContain("creating");
   });
 });
