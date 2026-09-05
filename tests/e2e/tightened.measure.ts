@@ -375,3 +375,198 @@ test("Phase 2 — the dense list: 44 both states, the strip, the keys", async ({
   expect(out.length, "assertion floor").toBeGreaterThanOrEqual(14);
   expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
 });
+
+test("Phase 3 — the sheet is a document: the header, the title, the measures, the hug", async ({ page }) => {
+  const out: R[] = [];
+  const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
+  const OUT3 = process.env.SA_TI_OUT3 ?? "run-artifacts/tightened-p3.txt";
+  rmSync(OUT3, { force: true });
+  const branches: string[] = [];
+
+  await ensureSignedIn(page);
+
+  /* ⚠️ TWO WIDTHS, AND THEY MEASURE DIFFERENT HALVES OF ONE LAW. The document column is what the
+     split leaves after the reference column: 268 at 1440, 748 at 1920. So the 620 measure is
+     SLACK at 1440 and BINDS at 1920 — asserting it at one width only would be a pass about
+     nothing at the narrow end (the precondition rule). The height law splits the same way: the
+     sheet is at its CAP at 1440 and HUGS at 1920. Both are asserted, and the branches are
+     tallied at the foot, so a run where one never happened cannot report itself as covering it. */
+  for (const w of [1440, 1920]) {
+    await page.setViewportSize({ width: w, height: 900 });
+    await page.goto("/todo");
+    await page.waitForFunction(
+      "document.querySelectorAll('.tlc .row').length > 0", null, { timeout: 45_000 }).catch(() => {});
+    await liftMotionSuppression(page);
+
+    /* ⚠️ SEEK A ROW WITH A FORK rather than assuming one — the first row's journey is "Reply to
+       the offer", which has neither fork nor ledger, so a probe that took row 1 measured an
+       empty form and reported [] for both. The index it lands on is REPORTED, so a fixture that
+       drifts is visible rather than silently changing what was measured. */
+    const forkRow = await page.evaluate(`(async () => {
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+      const rows = [...document.querySelectorAll(".tlc .row")];
+      for (let i = 0; i < Math.min(rows.length, 8); i++) {
+        rows[i].click(); await sleep(140);
+        const f = document.querySelector(".tlc .row.focus"); if (f) f.click();
+        await sleep(750);
+        if (document.querySelectorAll(".tpn .fk").length > 0) return i;
+      }
+      return -1;
+    })()`) as number;
+    add("P3.0 @" + w + " · a journey with a fork was found to measure",
+        forkRow >= 0, "row index " + forkRow);
+    if (forkRow < 0) continue;
+
+    const h = await page.evaluate(`(() => {
+      const head = document.querySelector(".tpn .dhead");
+      const fam = document.querySelector(".tpn .dhead .fam");
+      const title = document.querySelector(".tpn .title");
+      const form = document.querySelector(".tpn .form");
+      const sheet = document.querySelector(".tpn .sheet");
+      const wcol = document.querySelector(".tpn .wcol");
+      const scroller = document.querySelector(".tpn .workscroll");
+      /* ⚠️ TINTED MEANS "A FILL THAT IS NOT THE HEADER'S OWN" — comparing against transparency
+         alone counted the three white controls, which sit on white and tint nothing. Asked of
+         the browser, not by class name, so a new element cannot slip past the census. */
+      const hb = head ? getComputedStyle(head).backgroundColor : "";
+      const tinted = [];
+      if (head) for (const el of head.querySelectorAll("*")) {
+        const cs = getComputedStyle(el);
+        const bg = cs.backgroundColor;
+        const opaque = bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent" && bg !== hb;
+        if (opaque || cs.backgroundImage !== "none") tinted.push(String(el.className) || el.tagName);
+      }
+      const kids = title ? [title, ...title.querySelectorAll("*")] : [];
+      const cs = title ? getComputedStyle(title) : null;
+      const R = (e) => e ? e.getBoundingClientRect() : null;
+      return {
+        band: !!document.querySelector(".tpn .band"),
+        hasHead: !!head, fam: fam ? (fam.textContent || "").trim() : null,
+        pos: ((document.querySelector(".tpn .pos") || {}).textContent || "").trim(),
+        tinted: tinted,
+        ctrls: head ? [...head.querySelectorAll(".dnav button")].map((b) => Math.round(b.getBoundingClientRect().height)) : [],
+        headRule: head ? getComputedStyle(head).borderBottomWidth : "",
+        titleFont: cs ? cs.fontFamily.split(",")[0].replace(/"/g, "") : "",
+        titleSize: cs ? cs.fontSize : "", titleWeight: cs ? cs.fontWeight : "",
+        inks: [...new Set(kids.map((el) => getComputedStyle(el).color))],
+        titleW: title ? Math.round(R(title).width) : -1,
+        titleH: title ? Math.round(R(title).height) : -1,
+        docW: form ? Math.round(R(form).width) : -1,
+        forks: [...document.querySelectorAll(".tpn .fk")].map((f) => Math.round(R(f).height * 10) / 10),
+        sheetH: sheet ? Math.round(R(sheet).height * 10) / 10 : -1,
+        capH: wcol ? Math.round(R(wcol).height * 10) / 10 : -1,
+        scrollerH: scroller ? Math.round(R(scroller).height) : -1,
+      };
+    })()`) as any;
+
+    if (w === 1440) {
+      add("P3.1 · no .band renders", !h.band, "");
+      add("P3.2 · the header carries the family pill and the position",
+          h.hasHead && !!h.fam && /^Task \d+ of \d+$/.test(h.pos),
+          "pill " + JSON.stringify(h.fam) + " · " + JSON.stringify(h.pos));
+      add("P3.3 · exactly ONE tinted element in the header — the pill",
+          h.tinted.length === 1 && String(h.tinted[0]).includes("fam"),
+          "tinted: " + JSON.stringify(h.tinted));
+      add("P3.4 · the header's controls are 26px, on one row with a hairline beneath",
+          h.ctrls.length >= 2 && h.ctrls.every((x: number) => x === 26) && h.headRule === "1px",
+          "controls " + JSON.stringify(h.ctrls) + " · rule " + h.headRule);
+      add("P3.5 · the title is Playfair 21/400",
+          h.titleFont === "Playfair Display" && h.titleSize === "21px" && h.titleWeight === "400",
+          h.titleFont + " " + h.titleSize + "/" + h.titleWeight);
+      /* ⚠️ ONE INK, over EVERY descendant rather than the first level — nobody puts the offending
+         span at the top, which is how the deed's burgundy `em` survived three rounds. */
+      add("P3.6 · the title and every descendant render ONE ink",
+          h.inks.length === 1, "inks " + JSON.stringify(h.inks));
+      /* ⚠️ 56 IS A MINIMUM, AND AT THE NARROW COLUMN IT IS THE FLOOR RATHER THAN THE HEIGHT —
+         the contract draws these rows in a 620px column where every subtitle is one line. At
+         268 they wrap and the option GROWS, which is the right behaviour (`min-height`, never
+         `height`: a fixed row would crop the subtitle). What is asserted here is the floor and
+         that nothing runs away: the crossover tag drops below the pair under 420 of container,
+         after it left ~120px for the text and grew one option to 265px. */
+      add("P3.7a · at 1440 no fork row is under 56, and none runs away",
+          h.forks.length > 0 && h.forks.every((x: number) => x >= 55.5)
+            && Math.max(...(h.forks as number[])) <= 120,
+          JSON.stringify(h.forks));
+      /* ⚠️ THE NARROW END'S REAL RISK, MEASURED RATHER THAN ASSUMED. The drawer round cut this
+         sentence from 19px to 16.5 because at ~280px it wrapped to eight lines and starved the
+         work to 122px. At 21px in the 268px column it takes four lines and 109px, and the work
+         still gets ~468 — so the contract's size survives the narrow column. This assertion is
+         what stops the next size change re-creating that fault silently. */
+      add("P3.8a · at 1440 the title leaves the work the greater share",
+          h.titleH > 0 && h.scrollerH > h.titleH * 2,
+          "title " + h.titleH + " · scroller " + h.scrollerH + " · doc column " + h.docW);
+      branches.push("1440");
+    }
+
+    if (w === 1920) {
+      /* the 620 measure, at the width where it BINDS: the column is wider and the text stops */
+      add("P3.8b · at 1920 the 620px measure binds — the column is wider and the title stops at 620",
+          h.docW > 700 && h.titleW === 620,
+          "doc column " + h.docW + " · title " + h.titleW);
+      /* where the contract's own measure holds, its row height holds with it */
+      /* ⚠️ THIS MEASURES THE CONTENT, NOT THE FLOOR, AND THE DIFFERENCE WAS FOUND BY MUTATION.
+         Dropping `min-height` 56 → 20 in the served CSS reddened NOTHING: at the contract's own
+         type (13/10.5, padding 11) the option's content is 57.8, so the minimum never binds and
+         this assertion is about the row the type produces. The floor still guards the case the
+         fixture has not got — an option with NO subtitle, which would be ~40 — so it stays, and
+         the report says it is unexercised rather than pretending otherwise. What this forbids is
+         the state that started this: 67.2, where the number was in the stylesheet and the type
+         above it made the row half again as tall. */
+      add("P3.7b · at 1920 the fork row is the contract's height — 56, within 2px",
+          h.forks.length > 0 && h.forks.every((x: number) => x >= 55.5 && x <= 58),
+          JSON.stringify(h.forks));
+      branches.push("1920");
+    }
+
+    /* ── the height law, both halves ── */
+    const forkH = h.sheetH;
+    const forkN = h.forks.length;
+    await page.evaluate(`(() => { const b = document.querySelector(".tpn .fk"); if (b) b.click(); })()`);
+    await page.waitForTimeout(800);
+    const led = await page.evaluate(`(() => {
+      const s = document.querySelector(".tpn .sheet");
+      const wcol = document.querySelector(".tpn .wcol");
+      return {
+        h: s ? Math.round(s.getBoundingClientRect().height * 10) / 10 : -1,
+        cap: wcol ? Math.round(wcol.getBoundingClientRect().height * 10) / 10 : -1,
+        heads: [...document.querySelectorAll(".tpn .q .head")].map((f) => Math.round(f.getBoundingClientRect().height * 10) / 10),
+      };
+    })()`) as { h: number; cap: number; heads: number[] };
+
+    if (w === 1440) {
+      /* same law as the fork's: 42 is the floor, and a label that wraps grows its row rather
+         than cropping. One row measured 45.5 at this column — a wrap, not a drift. */
+      add("P3.9a · at 1440 no ledger row is under the contract's 42px floor",
+          led.heads.length >= 3 && led.heads.every((x) => x >= 41.5) && Math.max(...led.heads) <= 60,
+          JSON.stringify(led.heads));
+      /* CAPPED: at this width the content exceeds the drawer, so the sheet sits ON the cap */
+      add("P3.10a · at 1440 the content exceeds the drawer, and the sheet stops AT the cap",
+          Math.abs(led.h - led.cap) <= 1, "sheet " + led.h + " · cap " + led.cap);
+    }
+    if (w === 1920) {
+      add("P3.9b · at 1920 the ledger's rows ARE the contract's 42px",
+          led.heads.length >= 3 && led.heads.every((x) => x >= 41.5 && x <= 43.5),
+          JSON.stringify(led.heads));
+      /* HUGGING: the fork and a four-question ledger hold different amounts, so a hugging sheet
+         is two different heights — a stretched one is a single height whatever it holds. */
+      add("P3.10b · at 1920 the sheet HUGS — the fork and the ledger are different heights, both under the cap",
+          forkH > 0 && led.h > 0 && Math.abs(forkH - led.h) > 2 && led.h < led.cap - 1 && forkH < led.cap - 1,
+          "fork (" + forkN + " options) " + forkH + " · ledger (" + led.heads.length + " rows) " + led.h
+            + " · cap " + led.cap);
+    }
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(300);
+  }
+
+  /* ⚠️ THE BRANCH TALLY — a run that measured one width would otherwise report itself as having
+     covered a law whose two halves live at two widths. */
+  add("P3.11 · both widths were measured", branches.length === 2, "branches " + JSON.stringify(branches));
+
+  const lines = out.map((x) => (x.ok ? "green  " : "RED    ") + "· " + x.id + (x.note ? "\n         " + x.note : ""));
+  const red = out.filter((x) => !x.ok);
+  writeFileSync(OUT3, "── tightened · Phase 3 · " + out.length + " assertions · " + red.length
+    + " RED · " + (out.length - red.length) + " green\n" + lines.join("\n") + "\n");
+  console.log(lines.join("\n"));
+  expect(out.length, "assertion floor").toBeGreaterThanOrEqual(14);
+  expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
+});

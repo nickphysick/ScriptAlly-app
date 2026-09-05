@@ -248,6 +248,11 @@ function rung(e: TaskPaneEvent): React.ReactNode {
  */
 let slipAwayThisSession = false;
 
+/** the three families, in the words the list's own group heads use — one vocabulary */
+const FAM_LABEL: Record<"u-now" | "u-house" | "u-yours", string> = {
+  "u-now": "Needs you now", "u-house": "Housekeeping", "u-yours": "Your tasks",
+};
+
 export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, committed }) => {
   const [recAway, setRecAwayState] = React.useState(slipAwayThisSession);
   /* written through on every change, so a close-and-reopen of the pane finds the same answer */
@@ -356,26 +361,24 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, 
             its own bar. */}
         <div className="wcol">
         <div className="sheet"><div className="rim">
-          <div className="band">
-            <div style={{ minWidth: 0 }}>
-              <div className={d.hand ? "deed hand" : "deed"}>{d.deed}</div>
-              {/* absent, not empty — a rendered `.b-sub` holding nothing is a blank line under
-                  the deed, and blank space under a heading reads as something that failed to
-                  load */}
-              {d.sub ? <div className="b-sub">{d.sub}</div> : null}
-            </div>
-            {/* ⚠️ THE ARROWS LIVE HERE, not in a counter row above the card — Phase 1's
-                retirement. */}
+          {/* ⚠️ THE TINTED BAND IS RETIRED (tightened round, Phase 3) — the sheet is a DOCUMENT,
+              and a document's first line is its title, not a coloured strip carrying one. What
+              is left is a chrome row: the family pill, the position, and the three controls that
+              move you between tasks or out. THE PILL IS THE ONLY TINT IN THE HEADER, which is
+              what makes it read as a label rather than as a surface; the deed moves INTO the
+              document, below, as its title. */}
+          <div className="dhead">
+            <span className={`fam ${d.cls}`}>{FAM_LABEL[d.cls]}</span>
+            {nav && <span className="pos">Task {nav.index + 1} of {nav.total}</span>}
             {nav && (
-              <div className="b-nav">
+              <div className="dnav">
                 <button type="button" onClick={nav.onPrev} aria-label="Previous task">‹</button>
                 <button type="button" onClick={nav.onNext} aria-label="Next task">›</button>
-                {/* ⚠️ THE CONTRACT'S OWN CHIP, BESIDE THE ARROWS — the two verbs that move you
-                    between tasks and the one that leaves. It reads the word rather than an ✕
-                    because this is not a dialogue being dismissed: the list is still there and
-                    still live, and "Close" says which of the two things on screen is going. */}
+                {/* ⚠️ THE WORD, NOT AN ✕ — this is not a dialogue being dismissed: the list is
+                    still there and still live, and the contract prints the KEY, which is the one
+                    that closes it. */}
                 {nav.onClose && (
-                  <button type="button" className="b-close" onClick={nav.onClose}>Close</button>
+                  <button type="button" className="k b-close" onClick={nav.onClose}>Esc</button>
                 )}
               </div>
             )}
@@ -393,6 +396,17 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, 
                   the `When` row's hint, which is where it is read. */}
               <div className="workscroll">
                 <div className="form">
+                  {/* ⚠️ THE DEED SENTENCE IS THE DOCUMENT'S TITLE (tightened round, Phase 3) —
+                      Playfair 21/400 in ink on white, carrying NO colour of its own. Treatment C:
+                      the variables are 600, and the manuscript and the agent wear a dotted
+                      underline because they are the two things in the sentence you can go and
+                      look at. It came out of the band, where it was a caption on a coloured
+                      strip; a document's title is the first line of the document. */}
+                  <div className={d.hand ? "title hand" : "title"}>{d.deed}</div>
+                  {/* absent, not empty — a rendered `.b-sub` holding nothing is a blank line
+                      under the title, and blank space under a heading reads as something that
+                      failed to load */}
+                  {d.sub ? <div className="b-sub">{d.sub}</div> : null}
                   {/* ⚠️ THE FORK IS THE FIRST QUESTION (journey round, Phase 2; ref
                       `design-refs/todo-journey-logic.html`). A journey starts with the DECISION, not
                       the paperwork: the pane asks what the writer wants to do, and each intent gets

@@ -40,9 +40,12 @@
      app's palette through the mockup's own declarations, unedited. The ref's values, for the
      record: --sage #5a6e58, --pink #f5e2da, --pink-b #e8c8bc, --pink-h #efd5ca. */
   --rim:rgba(124,58,42,0.28); --rimline:rgba(124,58,42,0.13);
-  --u-now-1:#f3e0d6; --u-now-2:#eed7ca; --u-now-ink:#7c3a2a; --u-now-rule:rgba(124,58,42,0.16);
-  --u-house-1:#d7ddd5; --u-house-2:#d5dbd3; --u-house-ink:#4c5f4a; --u-house-rule:rgba(90,110,88,0.20);
-  --u-yours-1:#f7f0e2; --u-yours-2:#f2e9d6; --u-yours-ink:#8a7440; --u-yours-rule:rgba(138,116,64,0.16);
+  /* (the three `--u-*-rule` stops are DELETED — they were the band's ::after hairline and
+     nothing reads them since the band went; a declared token nobody reads is a knob with
+     nothing behind it, which is the orphan half of the shell's own token lock.) */
+  --u-now-1:#f3e0d6; --u-now-2:#eed7ca; --u-now-ink:#7c3a2a;
+  --u-house-1:#d7ddd5; --u-house-2:#d5dbd3; --u-house-ink:#4c5f4a;
+  --u-yours-1:#f7f0e2; --u-yours-2:#f2e9d6; --u-yours-ink:#8a7440;
   /* ⚠️ `--dash` IS A DEFECT IN THE MOCKUP, FOUND BY PORTING IT. `.upsell` reads
      `border-top: 1px dashed var(--dash)` and the ref defines `--dash` NOWHERE — so in the mockup
      itself that declaration is invalid and dropped, and the Pro upsell has no rule above it. The
@@ -53,14 +56,11 @@
 }
 
 
-.tpn .u-now .band { background:linear-gradient(135deg,var(--u-now-1) 0%,var(--u-now-2) 100%); }
-.tpn .u-now .band::after { background:var(--u-now-rule); }
-.tpn .u-house .band { background:linear-gradient(135deg,var(--u-house-1) 0%,var(--u-house-2) 100%); }
-.tpn .u-house .band::after { background:var(--u-house-rule); }
-.tpn .u-yours .band { background:linear-gradient(135deg,var(--u-yours-1) 0%,var(--u-yours-2) 100%); }
-.tpn .u-yours .band::after { background:var(--u-yours-rule); }
-.tpn .u-house .deed { color:#2e3a2c; }
-/* (`.u-house .deed em` is retired — the deed has never rendered an `<em>` since the emphasis became
+/* (the six `.u-* .band` rules are DELETED with the band — tightened round, Phase 3. The three
+   papers survive on `.fam`, the header's pill, at label size; the `--u-*-rule` stops go with the
+   `::after` hairline they drew, since the header's rule is the document's own hairline now.) */
+
+/* (`.u-house .title em` is retired — the deed has never rendered an `<em>` since the emphasis became
    typographic, and it drew a COLOUR, which is the one thing a deed's emphasis may not carry. A rule
    reaching no element, and a rule that would have broken the law if it ever had.) */
 .tpn .u-now .b-sub { color:#8a6558; }
@@ -196,7 +196,9 @@
    ⚠️ ITS TWO `.tiles` RULES WENT WITH THE TILE ROW (workspace round, Phase 1) — the tiles are
    stacked inside the record card now and there is no four-across row left to step down. */
 @media (max-width: 1160px) {
-  .tpn .band { flex-direction:column; }
+  /* (the band's narrow step went with the band — the header row is a pill, a mono position and
+     three 26px controls, which fit at any width this app supports.) */
+  .tpn .dhead { gap:8px;padding-left:12px; }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════════════════════
@@ -254,9 +256,9 @@
    deliberate: the port stays readable as a port, and every substitution is visible as a line that
    replaces a named one rather than as an edit to the ported block. */
 .tpn {
-  --u-now-1: var(--pink); --u-now-2: var(--pink-h); --u-now-rule: var(--pink-b);
-  --u-house-1: var(--sage-band); --u-house-2: var(--sage-band-2); --u-house-rule: var(--sage-edge);
-  --u-yours-1: var(--gold-t); --u-yours-2: var(--gold-b); --u-yours-rule: var(--gold-b);
+  --u-now-1: var(--pink); --u-now-2: var(--pink-h);
+  --u-house-1: var(--sage-band); --u-house-2: var(--sage-band-2);
+  --u-yours-1: var(--gold-t); --u-yours-2: var(--gold-b);
 }
 
 /* ── the one control the mockup has no markup for ──────────────────────────────────────────────
@@ -334,12 +336,25 @@
 }
 /* the rim is the object's edge: it clips, so the work leaves at the frame and the foot sits on it */
 .tpn .sheet > .rim { display:flex;flex-direction:column;min-height:0;width:100%;max-height:100%; }
-.tpn .band { flex:0 0 auto;padding:13px 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative; }
-.tpn .band::after { content:'';position:absolute;bottom:0;left:0;right:0;height:1px; }
-.tpn .pane.u-now .band { background:linear-gradient(135deg,var(--u-now-1),var(--u-now-2)); }
-.tpn .pane.u-now .band::after { background:var(--u-now-rule); }
-.tpn .pane.u-house .band { background:linear-gradient(135deg,var(--u-house-1),var(--u-house-2)); }
-.tpn .pane.u-house .band::after { background:var(--u-house-rule); }
+/* ── the document's chrome row (tightened round, Phase 3; contract `.dhead`) ─────────────────
+   ⚠️ THE TINTED BAND IS RETIRED, AND ITS TINT IS NOW A PILL. The sheet is a document: the strip
+   of colour under its own title made the title read as a caption on a coloured surface. What is
+   left is white, with a hairline, holding the family pill · the position · the three controls.
+   ⚠️ THE PILL IS THE HEADER'S ONLY TINT, which is what makes it a LABEL rather than a surface —
+   two tinted things in one row and neither means anything. Its three papers are the same
+   `--u-*` tokens the band wore, so the family reads the same colour it always did, at label
+   size. The `.band` rules and the `.u-* .band` pair are DELETED rather than left: a rule for an
+   element nothing renders is the trap this file has a standing note about. ── */
+.tpn .dhead { flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:10px 12px 10px 18px; border-bottom:1px solid var(--hair);background:var(--white); }
+.tpn .fam { height:22px;padding:0 9px;border-radius:999px;font-family:'JetBrains Mono',monospace; font-size:8px;letter-spacing:0.12em;text-transform:uppercase;display:inline-flex;align-items:center; font-weight:500;flex-shrink:0; }
+.tpn .fam.u-now { background:linear-gradient(135deg,var(--u-now-1),var(--u-now-2));color:var(--burg); }
+.tpn .fam.u-house { background:linear-gradient(135deg,var(--u-house-1),var(--u-house-2));color:#2e3a2c; }
+.tpn .fam.u-yours { background:linear-gradient(135deg,var(--u-yours-1),var(--u-yours-2));color:#8a7440; }
+.tpn .pos { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em; color:#b3a494;text-transform:uppercase;white-space:nowrap; }
+.tpn .dnav { margin-left:auto;display:flex;gap:4px;flex-shrink:0; }
+.tpn .dnav button { cursor:pointer;width:26px;height:26px;border-radius:7px;background:var(--white); border:1px solid var(--edge);color:var(--ink2);display:inline-flex;align-items:center;justify-content:center; font-size:11px; }
+.tpn .dnav button:hover { border-color:#c9a89e; }
+.tpn .dnav button.k { width:auto;padding:0 8px;font-family:'JetBrains Mono',monospace;font-size:8px; letter-spacing:0.1em;text-transform:uppercase; }
 /* ⚠️ A HEADING MAY NOT CARRY COLOUR-SHIFTED EMPHASIS (deed round, Phase 1 — repo law, also in
    CLAUDE.md). `.deed em` was burgundy for three rounds: a heading that changes colour mid-sentence
    reads as two things, and the reader has to work out which half is the point. Emphasis is
@@ -355,7 +370,12 @@
    per-element checks could not see it because the fault was in what the band's height did to the
    room downstream, which is the composed-result family again. line-height 1.34 is the contract's
    too, and it clears the Playfair descender floor. */
-.tpn .deed { font-family:'Playfair Display',serif;font-size:16.5px;font-weight:400;color:var(--ink2);line-height:1.34;max-width:72ch; }
+/* ⚠️ 21px IS THE CONTRACT'S TITLE (tightened round, Phase 3), UP FROM THE BAND'S 16.5. The
+   16.5 was right for a deed inside a ~280px band beside the floating slip; the slip is a COLUMN
+   of the sheet now (Phase 4), the document column is capped at 620, and 21/1.3 is what the
+   contract sets for a title on that measure. line-height 1.3 is the Playfair descender floor —
+   the title is whole sentences of names and titles, which are full of them. */
+.tpn .title { font-family:'Playfair Display',serif;font-size:21px;font-weight:400;color:var(--ink2);line-height:1.3;margin-bottom:16px; }
 /* ⚠️ VARIABLES IN 600, FRAME WORDS AT 400 — treatment C, and `.deed i` is retired with the italic
    it drew (workspace round, Phase 5). The deed is a sentence of variables; italicising three of its
    five spans reads as prose with something wrong with it rather than as a filled-in form. Manuscript
@@ -364,29 +384,22 @@
    ⚠️ `color: inherit` IS THE STRUCTURAL HALF OF THE REPO'S OWN LAW: a heading may not carry
    colour-shifted emphasis. It is declared rather than left to inheritance so a retone cannot drift
    it, and so a burgundy revival has to edit a line that says why it must not. */
-.tpn .deed b { font-weight:600;color:inherit; }
+.tpn .title b { font-weight:600;color:inherit; }
 /* ⚠️ A LINKABLE VARIABLE IS A DOTTED UNDERLINE AND NOTHING ELSE AT REST — the manuscript and the
    agent, both records this app holds. The AGENCY has no page and therefore no underline: a rule
    that underlines a word going nowhere teaches the reader that underlines here mean nothing.
    Burgundy arrives on HOVER, which is a pointer state rather than resting emphasis. */
-.tpn .deed a.dl {
+.tpn .title a.dl {
   font-weight:600;color:inherit;text-decoration:none;cursor:pointer;
   border-bottom:1px dotted rgba(58,28,20,0.42);
 }
-.tpn .deed a.dl:hover { border-bottom-style:solid;border-bottom-color:var(--burg);color:var(--burg); }
-.tpn .deed a.dl:focus-visible { outline:2px solid var(--sage);outline-offset:2px;border-radius:3px; }
+.tpn .title a.dl:hover { border-bottom-style:solid;border-bottom-color:var(--burg);color:var(--burg); }
+.tpn .title a.dl:focus-visible { outline:2px solid var(--sage);outline-offset:2px;border-radius:3px; }
 .tpn .b-sub { font-size:11px;font-weight:300;margin-top:3px; }
-.tpn .b-nav { display:flex;gap:6px;flex-shrink:0; }
-.tpn .b-nav button { cursor:pointer;width:28px;height:28px;border-radius:8px;background:rgba(255,253,250,0.8);border:0.5px solid rgba(58,28,20,0.13);color:var(--ink2);display:flex;align-items:center;justify-content:center; }
-.tpn .b-nav button:hover { background:#fffdfa; }
-/* ⚠️ THE CONTRACT'S `.bnav .chip` — a WORD, so it needs a width the two arrows do not. It shares
-   their fill and hairline deliberately: Close is the same kind of thing as ‹ and › (a way of
-   moving out of this task), not a primary and not a dismissal, so it must not out-weigh them. */
-.tpn .b-nav .b-close {
-  width: auto; padding: 0 10px;
-  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.1em;
-  text-transform: uppercase; margin-left: 4px;
-}
+/* (`.b-nav` and its `.b-close` sizing are DELETED with the band — the three controls are
+   `.dnav`'s above, at the contract's 26px. `.b-close` survives as a CLASS on the Esc button so
+   nothing that reaches for the close control by name loses it, but it carries no rules of its
+   own any more.) */
 /* (`.tiles`/`.tile` are retired with the band's tile row — workspace round, Phase 1. The facts are
    `.rtiles`/`.rtile` inside the record card now, stacked rather than in a row of thirds, and their
    rules are in the record-card block at the foot of this file. A rule for an element nothing
@@ -403,7 +416,13 @@
 /* ⚠️ THE WORKSHEET'S PADDING IS `.form`'s, WHICH IS THE CONTRACT'S OWN ELEMENT — it replaces the
    retired `.formpad`. The card, its rim and its scroller carry none, so the scroller's edge is the
    card's edge and work disappears at the rim rather than inside an inset. */
-.tpn .form { padding:4px 20px 14px; }
+/* ⚠️ THE DOCUMENT'S MEASURE IS 620px (tightened round, Phase 3; contract `.doc > *`). It sits on
+   the CHILDREN, not on the column: the column still fills the sheet, so the scroller, the
+   hairlines between ledger rows and the header's rule all run the full width, while the text and
+   the controls stop at a readable line. A cap on the column would pull the rules in with it and
+   the document would read as a narrow card floating in a wide one. */
+.tpn .form { padding:18px 26px 18px 22px;container-type:inline-size; }
+.tpn .form > * { max-width:620px; }
 
 /* ══════════════════════════════════════════════════════════════════════════════════════════════
  * THE FIXED-ZONE PANE (workspace round, Phase 2) — `design-refs/todo-actionbar-corrected.html`.
@@ -610,7 +629,7 @@
 /* ══════════════════════════════════════════════════════════════════════════════════════════════
  * THE LEDGER (workspace round, Phase 3) — `design-refs/todo-workspace-final.html`.
  *
- * ⚠️ ONE 40px ROW PER QUESTION, WHETHER OPEN, UNANSWERED OR ANSWERED. `min-height` on `.head`, not
+ * ⚠️ ONE 42px ROW PER QUESTION, WHETHER OPEN, UNANSWERED OR ANSWERED. `min-height` on `.head`, not
  * a fixed height: the row must not CROP if a label ever wraps, and the claim is that answering a
  * question does not change its row's height — which a minimum satisfies and a maximum would break
  * in the one direction that matters. The form's height changes only by the open question's body.
@@ -641,31 +660,58 @@
    held to the right. It was a block with everything flowing down the left, which is legible and
    reads as a list of paragraphs; the panels are the FIRST decision of every journey and they now
    look like a choice being offered rather than options being listed.
-   ⚠️ `min-height`, NEVER `height`. A two-line subtitle at 1440 is normal and a fixed 80 would crop
-   it — the panel grows and the grid keeps the columns. */
+   ⚠️ `min-height`, NEVER `height`. A two-line subtitle at 1440 is normal and a fixed height would
+   crop it — the panel grows and the grid keeps the columns.
+   ⚠️ 56px IS THE CONTRACT'S (tightened round, Phase 3), down from 80. The 80 was drawn for a fork
+   in a ~280px column beside the floating slip, where every subtitle wrapped; the document column
+   is 620 now and the subtitles fit on one line, so the extra 24px was air the tightening is for.
+   It is still a MINIMUM: a fork option whose subtitle does wrap grows, and nothing crops. */
 .tpn .fork { display:flex;flex-direction:column;gap:9px; }
 .tpn .fk {
   cursor:pointer;text-align:left;width:100%;
-  background:var(--field);border:0.5px solid var(--hair2);border-radius:10px;padding:14px 16px;
+  background:var(--field);border:0.5px solid var(--hair2);border-radius:10px;padding:11px 13px;
   transition:all .15s;
-  display:grid;grid-template-columns:30px 1fr auto;grid-template-rows:auto auto;
-  column-gap:12px;row-gap:2px;align-items:center;min-height:80px;
+  display:grid;grid-template-columns:26px 1fr auto;grid-template-rows:auto auto;
+  column-gap:11px;row-gap:1px;align-items:center;min-height:56px;
 }
 .tpn .fk:hover { border-color:#c9a89e;background:var(--white); }
 .tpn .fk:focus-visible { outline:2px solid var(--burg);outline-offset:2px; }
 /* the glyph sits in its own column across both rows — a mark beside the pair, not above them */
 .tpn .fk .g {
-  grid-column:1;grid-row:1/3;width:30px;height:30px;border-radius:7px;
+  grid-column:1;grid-row:1/3;width:26px;height:26px;border-radius:7px;
   background:var(--white);border:0.5px solid var(--hair2);
   display:inline-flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted2);
   flex-shrink:0;transition:border-color .15s,color .15s;
 }
 .tpn .fk:hover .g { border-color:var(--pink-b);color:var(--burg); }
-.tpn .fk .t { grid-column:2;grid-row:1;display:block;font-size:14.5px;font-weight:500;color:var(--ink2);line-height:1.35; }
-.tpn .fk .s { grid-column:2;grid-row:2;display:block;font-size:11.5px;font-weight:300;color:var(--muted2);line-height:1.45; }
+/* ⚠️ 13 AND 10.5 ARE THE CONTRACT'S, AND THEY ARE WHAT MAKES 56 REACHABLE (tightened round,
+   Phase 3). At 14.5/11.5 with 14px padding the option's own content is ~67px, so the 56px
+   minimum could never be the height — the number was in the stylesheet and nothing obeyed it.
+   Measured before and after rather than reasoned: 67.2 → the contract's row. */
+.tpn .fk .t { grid-column:2;grid-row:1;display:block;font-size:13px;font-weight:500;color:var(--ink2);line-height:1.35; }
+.tpn .fk .s { grid-column:2;grid-row:2;display:block;font-size:10.5px;font-weight:300;color:var(--muted2);line-height:1.45; }
 /* ⚠️ A CROSSOVER SAYS SO BEFORE IT IS PRESSED — swapping the whole journey unannounced would read
    as the pane losing its place. */
 .tpn .fk .x { grid-column:3;grid-row:1/3;display:block;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);white-space:nowrap;margin:0; }
+
+/* ⚠️ THE CROSSOVER TAG TAKES A COLUMN THE NARROW SHEET HAS NOT GOT — a CONTAINER query, not a
+   viewport one (tightened round, Phase 3; measured, not guessed). "crosses to close →" is
+   `nowrap` in the grid's third track, so at the 268px document column it left ~120px for the
+   title and the subtitle and the option grew to 265px against its 56px sibling — the contract's
+   own row, drawn at 620, arriving at a fifth of the width. Below 420 of the FORM's inline size
+   the tag drops onto its own row under the pair, where it reads as a note about the option
+   rather than as a label squeezed beside it. The viewport is the wrong question here: this
+   column's width comes from the split and the reference column, not from the window.
+   ⚠️ AND IT SITS IMMEDIATELY AFTER THE RULE IT OVERRIDES, WHICH IS THE WHOLE POINT. A container
+   query confers NO SPECIFICITY, exactly as a media query does not: written 270 lines earlier —
+   which is where it first went — `.tpn .fk .x` at equal specificity simply won, the build
+   contained the block, and nothing moved. The repo already records this for
+   `prefers-reduced-motion`; it is the same law. */
+@container (max-width: 420px) {
+  .tpn .fk { grid-template-rows:auto auto auto; }
+  .tpn .fk .x { grid-column:2;grid-row:3;margin-top:3px;white-space:normal; }
+}
+
 
 /* ── the foot's receipt and failure lines (drawer round, Phase 5) ───────────────────────── */
 /* the receipt replaces the primary for the window — sage, quiet, a statement not a control */
@@ -711,7 +757,8 @@
 
 /* the contract's 44px ledger row — the fork grew, and a 40px row beneath an 80px panel read as
    a different density rather than the same page */
-.tpn .q .head { display:flex;align-items:center;gap:9px;min-height:44px;padding:5px 0; }
+/* 42px per ledger row — the contract's, and still a MINIMUM for the same reason the fork's is */
+.tpn .q .head { display:flex;align-items:center;gap:9px;min-height:42px;padding:4px 0; }
 /* every closed row opens on a click — see `TaskPaneBody` for why that is one target and not two */
 .tpn .q .head[role="button"] { cursor:pointer; }
 .tpn .q .head[role="button"]:focus-visible { outline:2px solid var(--burg);outline-offset:2px;border-radius:6px; }

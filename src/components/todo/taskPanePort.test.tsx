@@ -47,6 +47,13 @@ const REF_MATERIALS = readFileSync(join(process.cwd(), "design-refs/todo-materia
    own words; adding the FILE keeps the law intact — every class the pane renders comes from a
    contract — where a hand-written exemption list would have quietly suspended it. */
 const REF_PRIMARY = readFileSync(join(process.cwd(), "design-refs/todo-filling-primary.html"), "utf8");
+/* ⚠️ AND THE TIGHTENED PAGE'S CONTRACT JOINS THEM (tightened round, Phase 3), for the same reason
+   each of the others did: it is now the authority for what it draws. `todo-belongs` owns the
+   sheet's HEADER — `.dhead`, `.fam`, `.pos`, `.dnav` — and the deed-as-`.title`, and supersedes
+   the chassis contract there, exactly as the chassis superseded the pane contract before it. The
+   law is unchanged in kind: every class the pane renders comes from ONE OF THE FIVE, so a name
+   invented while porting still has nowhere to hide. */
+const REF_BELONGS = readFileSync(join(process.cwd(), "design-refs/todo-belongs.html"), "utf8");
 /**
  * ⚠️ THE PANE'S CHASSIS COMES FROM A SIXTH CONTRACT NOW (drawer round, Phase 3). The three floating
  * cards became one sheet beside a quick-reference slip, and that shape is drawn in
@@ -121,7 +128,7 @@ describe("1 · the pane's class names are the mockup's", () => {
    */
   const cssOf = (src: string) => strip(src.slice(src.indexOf("<style>"), src.indexOf("</style>")));
   const mockClasses = new Set(
-    [REF, REF_FINAL, REF_PANE, REF_MATERIALS, REF_PRIMARY, REF_DRAWER].flatMap((r) =>
+    [REF, REF_FINAL, REF_PANE, REF_MATERIALS, REF_PRIMARY, REF_DRAWER, REF_BELONGS].flatMap((r) =>
       [...cssOf(r).matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1])),
   );
 
@@ -158,7 +165,14 @@ describe("1 · the pane's class names are the mockup's", () => {
        would be asserting a page the app no longer serves, which is the whole test of whether a
        retarget is honest: the names changed because the page did, and every one of the new ones is
        a word from the ref that changed it. */
-    for (const c of ["pane", "wcol", "sheet", "rim", "band", "deed", "b-sub", "work", "foot", "actbar", "willrec"]) {
+    /* ⚠️ RETARGETED ONCE MORE, SAME LAW (tightened round, Phase 3). The band is RETIRED: the sheet
+       is a document, so its first line is its title and the coloured strip that carried the deed
+       is gone. `.band` → `.dhead` (white, hairline, the family pill · the position · the three
+       controls) and `.deed` → `.title` (Playfair 21 on white, no colour of its own). Both new
+       names are `todo-belongs`'s own words. A suite still requiring `.band` would be requiring the
+       page this round deleted — and it went red on exactly that, which is the retarget being
+       honest rather than convenient. */
+    for (const c of ["pane", "wcol", "sheet", "rim", "dhead", "fam", "pos", "dnav", "title", "b-sub", "work", "foot", "actbar", "willrec"]) {
       expect(rendered.has(c), `${c} is missing from the rendered pane`).toBe(true);
     }
     /* ⚠️ ONE CARD, NOT THREE — REVERSED AGAIN, AND FOR THE OPPOSITE REASON (drawer round, Phase 3).
@@ -173,15 +187,23 @@ describe("1 · the pane's class names are the mockup's", () => {
        can carry. That the foot is not a LID over the work is a rendered-page claim and lives in
        `tests/e2e/sheetSlip.measure.ts`. */
     const sheet = HTML.indexOf('class="sheet"');
-    const band = HTML.indexOf('class="band"');
+    const head = HTML.indexOf('class="dhead"');
     const work = HTML.indexOf('class="work"');
+    const title = HTML.indexOf('class="title"');
     const bar = HTML.indexOf('class="foot actbar"');
     const rec = HTML.indexOf('class="qrwrap"');
-    expect(band).toBeGreaterThan(-1);
+    expect(head, "the header row is missing").toBeGreaterThan(-1);
     expect(sheet, "the sheet is missing").toBeGreaterThan(-1);
-    expect(band, "the band is not the sheet's top edge").toBeGreaterThan(sheet);
-    expect(work).toBeGreaterThan(band);
-    expect(bar).toBeGreaterThan(work);
+    expect(head, "the header is not the sheet's top edge").toBeGreaterThan(sheet);
+    expect(work).toBeGreaterThan(head);
+    /* ⚠️ AND THE TITLE IS INSIDE THE WORK, NOT IN THE HEADER — the half of the retarget that
+       carries the round's actual change. The deed used to be the band's first child; a document's
+       title is the first line of the DOCUMENT, so it sits in the scrolling work area, below the
+       chrome row. Asserting only that both exist would have passed with the title still in the
+       header, which is the arrangement this phase retired. */
+    expect(title, "the title is missing").toBeGreaterThan(-1);
+    expect(title, "the title is in the header rather than in the document").toBeGreaterThan(work);
+    expect(bar).toBeGreaterThan(title);
     expect(rec, "the slip is not after the sheet — it is inside it").toBeGreaterThan(bar);
     /* ⚠️ EXACTLY TWO RIMS ON A QUERY JOURNEY, AND THEY ARE DIFFERENT OBJECTS: the sheet's, which
        clips the band's tint and the work's overflow, and the slip's own `.rrim`. Asserting the
@@ -257,7 +279,10 @@ describe("2 · every element of the mockup's Send journey exists in the rendered
   /* ⚠️ THE CHASSIS WORDS ARE THE DRAWER CONTRACT'S NOW (Phase 3) — `wcol`/`sheet`/`foot`/`qrwrap`
      replace `ws`/`paneCol`/`rec`. The JOURNEY internals are unchanged and still the pane
      contract's, which is the honest shape of a pane assembled from two refs. */
-  const PANE_PARTS = ["pane", "wcol", "sheet", "band", "deed", "b-nav",
+  /* ⚠️ THE HEADER WORDS ARE `todo-belongs`'s NOW (tightened round, Phase 3) — `dhead`/`fam`/
+     `pos`/`dnav`/`title` replace `band`/`deed`/`b-nav`. The journey internals are unchanged and
+     still the pane contract's, which is the honest shape of a pane assembled from several refs. */
+  const PANE_PARTS = ["pane", "wcol", "sheet", "dhead", "fam", "pos", "dnav", "title",
     "work", "workscroll", "form", "foot", "actbar", "wr", "ab",
     "qrwrap", "qr", "rrim", "rhead", "rtiles", "rtile", "rtl", "rfoot"];
 
@@ -266,7 +291,7 @@ describe("2 · every element of the mockup's Send journey exists in the rendered
     /* ⚠️ THE GUARD ON THE GUARD READS BOTH REFS, because the parts now come from both. Left
        reading `REF` alone it would report every drawer word as "not in the mockup" — a guard going
        red about a page that is exactly right. */
-    const inRef = (p: string) => [REF, REF_DRAWER].some((r) =>
+    const inRef = (p: string) => [REF, REF_DRAWER, REF_BELONGS].some((r) =>
       r.includes(`class="${p}`) || r.includes(`class='${p}`) || r.includes(`.${p}{`) || r.includes(`.${p} `));
     const gone = PANE_PARTS.filter((p) => !emitted.has(p) && !inRef(p));
     expect(gone, `not found in the ref — the checklist is stale: ${gone.join(" ")}`).toHaveLength(0);
