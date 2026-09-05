@@ -25,6 +25,10 @@
     "design-refs/todo-sort-filter.html": "b8f70e1077442b79d9642fe6b1599318987ea64cfb82d73b80a3edc263c397d5",
     "design-refs/query-panel-v5-manuscript-header.html": "c0092129eb4e0902ffeafe93aba365a36617b850015e0ef9c6aa4f5fa9f7ab18",
     "design-refs/timeline-v64.html": "f5f032f22177831306f6d0e8f1f3501349d76ca3b73d361a2f34417e44450eb0",
-    "design-refs/query-panel-v7-agent-tab-dedup.html": "be01f5a975b37a13a8caae66cfe0417c60e5f74a3287e73a90688e9dac4c08de"
+    "design-refs/query-panel-v7-agent-tab-dedup.html": "be01f5a975b37a13a8caae66cfe0417c60e5f74a3287e73a90688e9dac4c08de",
+    "design-refs/timeline-v65.html": "981b360d6b76d474e9d4091ce547908afd5a17d6a61d6967bf42d8b2137dcfe7",
+    "design-refs/action-journey.html": "b363147c683b1a7bcd66b9a7d15bb8d4c21aa56cd4bdafc75a0cd450c81ea2f5",
+    "design-refs/bar-hover-states.html": "212c494a27915e2152f58122bc3301a90324ebbddba8f2c32e9e5a35fb49f1d8",
+    "design-refs/hover-card-by-type.html": "f0ffe9a727a34714bcca9d3a3095327e2f976c6817360473386292b7703a41e0"
   }
 }
