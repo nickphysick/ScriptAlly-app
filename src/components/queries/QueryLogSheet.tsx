@@ -57,6 +57,11 @@ export interface QueryLogSheetProps {
   /** the sample floor's complaint, when the writer types below it — page-held so Save can read it */
   qtyError: string | null;
   onQtyError: (e: string | null) => void;
+  /**
+   * §3 — the new-agent sub-card's name/agency AS TYPED, for the ghost tile. The draft cannot carry
+   * them (no agent exists yet), so the hint is the seam; null the moment the sub-card closes.
+   */
+  onGhostHint?: (h: { name: string; agency: string } | null) => void;
 }
 
 const fmt1 = (iso: string) => {
@@ -67,6 +72,7 @@ const fmt1 = (iso: string) => {
 export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
   draft, onDraft, step, onStep, agents, queries, manuscripts, packages,
   onAddAgent, onOpenQuery, qtyError, onQtyError,
+  onGhostHint,
 }) => {
   const agent = agents.find((a) => a.id === draft.agentId) ?? null;
   const ms = manuscripts.find((m) => m.id === draft.manuscriptId) ?? null;
@@ -90,7 +96,7 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
   const openCount = (a: Agent) => queries.filter((x) => x.agentId === a.id && !isTerminalStatus(x.status)).length;
 
   const pick = (a: Agent) => {
-    setListOpen(false); setQ(""); setNewAgent(null);
+    setListOpen(false); setQ(""); setNewAgent(null); onGhostHint?.(null);
     onDraft({
       ...draft,
       agentId: a.id,
@@ -245,9 +251,9 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
               <div className="qls-naf">
                 <h5>Add a new agent</h5>
                 <input className="qls-in" placeholder="Agent name" value={newAgent.name} aria-label="Agent name"
-                  onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })} />
+                  onChange={(e) => { const v = e.target.value; setNewAgent({ ...newAgent, name: v }); onGhostHint?.({ name: v, agency: newAgent.agency }); }} />
                 <input className="qls-in" placeholder="Agency" value={newAgent.agency} aria-label="Agency"
-                  onChange={(e) => setNewAgent({ ...newAgent, agency: e.target.value })} />
+                  onChange={(e) => { const v = e.target.value; setNewAgent({ ...newAgent, agency: v }); onGhostHint?.({ name: newAgent.name, agency: v }); }} />
                 <input className="qls-in" placeholder="Email (optional)" value={newAgent.email} aria-label="Email"
                   onChange={(e) => setNewAgent({ ...newAgent, email: e.target.value })} />
                 <div className="qls-r2">
@@ -262,7 +268,7 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
                   </div>
                 </div>
                 <div className="qls-nafb">
-                  <button type="button" className="qls-fb qls-fb--ghost" onClick={() => { setNewAgent(null); setListOpen(true); }}>Cancel</button>
+                  <button type="button" className="qls-fb qls-fb--ghost" onClick={() => { setNewAgent(null); onGhostHint?.(null); setListOpen(true); }}>Cancel</button>
                   <button type="button" className="qls-fb qls-fb--go" disabled={!newAgent.name.trim() || adding} onClick={() => void addAndSelect()}>Add and select</button>
                 </div>
               </div>

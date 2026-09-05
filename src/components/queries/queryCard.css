@@ -314,3 +314,12 @@
   .qcc--enter { animation: none; }
   .qcc, .qcc-tip { transition: none; }
 }
+
+/* §3 (log-sheet) — the saved card's one pulse as it takes the ghost's place (ref `fresh`). */
+.qcc--fresh { animation: qccFresh 1.6s ease-out 1; }
+@keyframes qccFresh {
+  0% { box-shadow: 0 0 0 0 rgba(232, 200, 188, 0), 0 8px 22px rgba(58, 28, 20, 0.09); }
+  25% { box-shadow: 0 0 0 6px rgba(232, 200, 188, 0.55), 0 8px 22px rgba(58, 28, 20, 0.09); }
+  100% { box-shadow: 0 0 0 0 rgba(232, 200, 188, 0), 0 8px 22px rgba(58, 28, 20, 0.09); }
+}
+@media (prefers-reduced-motion: reduce) { .qcc--fresh { animation: none; } }

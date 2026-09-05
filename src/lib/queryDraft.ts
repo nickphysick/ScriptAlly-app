@@ -275,6 +275,14 @@ export function draftToPayload(d: QueryDraft, agent: Agent | null | undefined) {
     sendMethod: d.sendMethod,
     dateSent: new Date(d.dateSent).toISOString(),
     ...(reminder ? { nudgeDate: new Date(reminder).toISOString() } : {}),
+    /* §3 (log-sheet) — the writer-expected override rides the CREATE, one write: the same
+       `draftExpectedOverrideIso` the ghost renders, so the saved card's expected line equals the
+       tile's to the day. Nothing is written when the agent's window was kept — the derivation
+       answers that case, and freezing it would be the removed create-time seed back again. */
+    ...((): Record<string, string> => {
+      const o = draftExpectedOverrideIso(d, agent);
+      return o ? { writerExpectedDate: o, writerExpectedSetAt: new Date().toISOString() } : {};
+    })(),
   };
 }
 

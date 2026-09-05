@@ -454,6 +454,9 @@ export const Queries: React.FC<{
   const [createStep, setCreateStep] = useState<1 | 2 | 3 | 4>(1);
   /* the sample floor's complaint — page-held so canSave reads the same flag the sheet shows */
   const [createQtyError, setCreateQtyError] = useState<string | null>(null);
+  /* §3 — the new-agent sub-card's name/agency as typed, rendered by the ghost until a real agent
+     exists. Cleared on pick, cancel, and close. */
+  const [createHint, setCreateHint] = useState<{ name: string; agency: string } | null>(null);
 
   /* ── CHOREOGRAPHY STATE ────────────────────────────────────────────────────────────────────
      `stashedSelection` is whatever was open when create mode started: entry clears the selected
@@ -568,6 +571,8 @@ export const Queries: React.FC<{
     /* seeded entry (#/queries/new?agent=…, the Contact list's Log query) lands at step 2 with the
        agent already pinned; a bare open starts at Who. */
     setCreateStep(seedAgent ? 2 : 1);
+    setCreateHint(null);
+    setCreateQtyError(null);
     setCreateBase(base);
     setCreateDraft(base);
     setCreateError(null);
@@ -582,6 +587,13 @@ export const Queries: React.FC<{
        from the last one — a takeover that opened stating "3 logged" would be counting a session the
        writer has already finished. */
     setSessionLogged(0);
+    /* §3 — the ghost lands at index 0; scroll the page's own scroller to its top so the tile is
+       on screen when it appears (the controls sit sticky above; scrolling to 0 rests the masthead
+       and puts the grid's first row directly beneath them). */
+    requestAnimationFrame(() => {
+      const sc = document.querySelector<HTMLElement>(".wpg-scroll");
+      sc?.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    });
     setCreateReseating(false);
     setSeal(null);
   };
@@ -1018,6 +1030,9 @@ export const Queries: React.FC<{
         reminder: pendingSave.again.reminder,
       };
       setCreateDraft(next);
+      setCreateStep(1);
+      setCreateHint(null);
+      setCreateQtyError(null);
       setCreateBase(next);
       /* ⚠️ THE CHIPS RESET WITH THE DRAFT. They report which steps have been OPENED, and this is a
          new query — leaving them ticked would state that the writer had confirmed a date and a
@@ -1034,6 +1049,9 @@ export const Queries: React.FC<{
     setCreateDraft(null);
     setCreateBase(null);
     setStashedSelection(null);
+    /* §3 — the detail the drawer crossfades to opens on TRACKING, whatever tab the session last
+       used: the writer has just logged a send, and the timeline is where it landed. */
+    try { sessionStorage.setItem("sa.qpnTab", "tracking"); } catch { /* fine */ }
     setSelectedQueryId(pendingSave.id);
     // Would the current filters hide it? Ask THE predicate, never a copy of it.
     if (!matchesFilters(saved)) setGraceRow({ id: pendingSave.id, leaving: true });
@@ -2836,8 +2854,8 @@ export const Queries: React.FC<{
       id: "__ghost",
       status: QueryStatus.QUERIED,
       turn: facts.turn,
-      name: agent ? agentPrimary(agent) : "New query",
-      agency: agent ? agentAgencyLine(agent) : "choose an agent",
+      name: agent ? agentPrimary(agent) : (createHint?.name.trim() || "New query"),
+      agency: agent ? agentAgencyLine(agent) : (createHint?.agency.trim() || "choose an agent"),
       initials: agent ? agentInitials(agent) : "",
       lastMs: null, sentMs: null, expectedMs: facts.expectedReply?.getTime() ?? null,
       facts,
@@ -5311,6 +5329,7 @@ export const Queries: React.FC<{
             ) : (
               <QueryCentreGrid
                 ghost={ghostRow}
+                freshId={landedId}
                 rows={gridRows}
                 group={gridGroup}
                 onOpen={(id) => onOpenQuery?.(id)}
@@ -5789,6 +5808,7 @@ export const Queries: React.FC<{
                     onOpenQuery={(id) => closeCreate(() => { setSelectedQueryId(id); onOpenQuery?.(id); })}
                     qtyError={createQtyError}
                     onQtyError={setCreateQtyError}
+                    onGhostHint={setCreateHint}
                   />
                 ),
               }}

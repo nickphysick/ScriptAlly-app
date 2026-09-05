@@ -68,7 +68,12 @@
 .qpn-fb--text:hover:not(:disabled) { text-decoration: underline; }
 .qpn-fb--go { background: #f5e2da; border: 1px solid #e8c8bc; color: #3a1c14; font-weight: 500; }
 .qpn-fb:disabled { opacity: 0.45; cursor: not-allowed; }
-.qpn-inner { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.qpn-inner { flex: 1; min-height: 0; display: flex; flex-direction: column; animation: qpnSwap 0.28s ease; }
+/* §3 — the crossfade between form and detail: the two branches render different inners, so the
+   branch switch remounts and this one-shot runs. It also runs on first open, under the slide,
+   where it is invisible — cheaper than a mode-change detector for the same picture. */
+@keyframes qpnSwap { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .qpn-inner { animation: none; } }
 
 /**
  * ⚠️ THE SCROLLER IS THE TAB BODY, NOT THE DRAWER. Band, identity row, manuscript line and the

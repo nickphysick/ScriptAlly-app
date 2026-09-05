@@ -122,3 +122,60 @@ describe("§2 · pinned rows derive their summaries at render", () => {
     expect(without, "a window pill rendered for an agent with no window").not.toContain("their window");
   });
 });
+
+/* ══ §3 — ghost and save ══════════════════════════════════════════════════════════════════════ */
+describe("§3 · one activity per save, the override on the payload, the ghost never counted", () => {
+  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+
+  it("saveCreate writes through the ONE primitive, exactly once", () => {
+    const at = page.indexOf("const saveCreate = async");
+    expect(at).toBeGreaterThan(-1);
+    const body = page.slice(at, page.indexOf("const undoCreate", at));
+    expect((body.match(/await addQuery\(/g) ?? []).length, "a second write path grew beside addQuery").toBe(1);
+    expect(body).toContain("undo: () => undoCreate(newId, logAnother)");
+  });
+
+  it("the payload carries the writer-expected override from the one derivation", () => {
+    const draft = readFileSync(join(process.cwd(), "src/lib/queryDraft.ts"), "utf8");
+    expect(draft).toMatch(/const o = draftExpectedOverrideIso\(d, agent\);[\s\S]{0,120}writerExpectedDate: o/);
+  });
+
+  it("the saved card's expected date equals the chosen nudge date — both cases", () => {
+    /* chosen ≠ window: the override carries it */
+    const chosen = draftAt({ reminder: { kind: "custom", date: "2026-11-02" } });
+    const iso = draftExpectedOverrideIso(chosen, agent)!;
+    const factsChosen = cardFacts(
+      { id: "s", status: QueryStatus.QUERIED, dateSent: "2026-09-04T12:00:00.000Z", writerExpectedDate: iso } as never,
+      new Date("2026-09-06"), { agencyWeeks: 6 },
+    );
+    expect(factsChosen.expectedReply?.toISOString().slice(0, 10)).toBe("2026-11-02");
+    /* window kept: NO override — the derived window lands on the same day the nudge does */
+    const kept = draftAt({ reminder: { kind: "preset", weeks: 6 } });
+    expect(draftExpectedOverrideIso(kept, agent)).toBeNull();
+    const factsKept = cardFacts(
+      { id: "s2", status: QueryStatus.QUERIED, dateSent: "2026-09-04T12:00:00.000Z" } as never,
+      new Date("2026-09-06"), { agencyWeeks: 6 },
+    );
+    expect(factsKept.expectedReply?.toISOString().slice(0, 10)).toBe("2026-10-16");
+  });
+
+  it("the ghost hint renders the sub-card's typing, and a real agent silences it", () => {
+    expect(page).toContain('name: agent ? agentPrimary(agent) : (createHint?.name.trim() || "New query")');
+    expect(page).toContain("onGhostHint={setCreateHint}");
+  });
+
+  it("save lands on Tracking; save-and-log-another resets to a fresh step 1", () => {
+    expect(page).toContain('sessionStorage.setItem("sa.qpnTab", "tracking")');
+    const again = page.slice(page.indexOf("if (pendingSave.again)"), page.indexOf("setCreateDraft(null)", page.indexOf("if (pendingSave.again)")));
+    expect(again).toContain("setCreateStep(1)");
+    expect(again).toContain("setCreateHint(null)");
+  });
+
+  it("the saved card pulses once and the pulse honours reduced motion", () => {
+    expect(page).toContain("freshId={landedId}");
+    const css = readFileSync(join(process.cwd(), "src/components/queries/queryCard.css"), "utf8");
+    expect(css).toMatch(/\.qcc--fresh \{ animation: qccFresh/);
+    expect(css).toMatch(/prefers-reduced-motion[\s\S]{0,80}\.qcc--fresh \{ animation: none/);
+  });
+});

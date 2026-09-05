@@ -74,6 +74,8 @@ export interface QueryCardProps {
    * announcing it would read out a half-finished record as though it existed.
    */
   ghost?: boolean;
+  /** §3 (log-sheet) — one pulse as the saved card takes the ghost's place. Presentation only. */
+  fresh?: boolean;
 }
 
 export const QueryCard: React.FC<QueryCardProps> = ({
@@ -86,7 +88,7 @@ export const QueryCard: React.FC<QueryCardProps> = ({
   selected = false,
   entering = false,
   onOpen,
-  ghost = false,
+  ghost = false, fresh = false,
 }) => {
   const cls = [
     "qcc",
@@ -96,6 +98,7 @@ export const QueryCard: React.FC<QueryCardProps> = ({
     selected ? "qcc--sel" : "",
     entering ? "qcc--enter" : "",
     ghost ? "qcc--ghost" : "",
+    fresh ? "qcc--fresh" : "",
   ]
     .filter(Boolean)
     .join(" ");

@@ -44,10 +44,12 @@ export const QueryCentreGrid: React.FC<{
   rows: readonly GridCard[];
   /** The live preview of a query being written — index 0, inert, never in `rows`. */
   ghost?: GridCard | null;
+  /** §3 (log-sheet) — the just-saved card wears one pulse as it takes the ghost's place. */
+  freshId?: string | null;
   group: GroupKey;
   selectedId?: string | null;
   onOpen?: (id: string) => void;
-}> = ({ rows, ghost, group, selectedId, onOpen }) => {
+}> = ({ rows, ghost, freshId = null, group, selectedId, onOpen }) => {
   const stageRef = useRef<HTMLDivElement>(null);
   /**
    * ⚠️ RECTS ARE CAPTURED AFTER EACH COMMIT, NEVER DURING RENDER. `measureFlip` writes to the DOM
@@ -102,6 +104,7 @@ export const QueryCentreGrid: React.FC<{
       agency={r.agency}
       initials={r.initials}
       facts={r.facts}
+      fresh={freshId === r.id}
       selected={selectedId === r.id}
       onOpen={onOpen}
     />
