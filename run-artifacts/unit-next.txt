@@ -1,0 +1,32 @@
+green  · P4.0 · a PARTIAL Send is on the board and opens — the journey that has a unit
+           clicked a partial Send row = true
+green  · P4.1 · the fork offers the sent intent and it opens the ledger
+           chose the intent = true
+green  · P4.2 · the unit row is the first open question
+           open row = "What you sent" · count = "4 still to answer"
+green  · P4.3 · choosing a unit opens the picker focused and text-selected
+           amount "3" · focused input with all text selected
+green  · P4.4 · after choosing, no other question opens until Enter or Next
+           open row "What you sent" → "What you sent"
+green  · P4.5 · the count ticks the moment the unit is chosen — no commit needed
+           count "4 still to answer" → "3 still to answer"
+green  · P4.6 · the Next pill sits on the unit row
+           the pill is shown
+green  · P4.7 · the count follows the keys live — empty un-answers, typing re-answers, no commit
+           count "3 still to answer" → emptied "4 still to answer" → typed "3 still to answer" · amount "12"
+green  · P4.8 · …and the flow still has not moved
+           open row = "What you sent"
+green  · P4.9 · a stepper press adjusts the amount (12 → 13)
+           amount = "13"
+green  · P4.10 · a stepper press leaves the unit row open — nudging − + is still deciding
+           open row "What you sent" → "What you sent"
+green  · P4.11 · a blur commits the value and stays on the row
+           open row = "What you sent" · amount = "13"
+green  · P4.12 · Enter with 5 typed records 5, not the seed
+           the closed row says: "5 chapters✓Edit"
+green  · P4.13 · …and Enter is what opens the next unanswered question
+           open row "What you sent" → "When"
+green  · P4.14a · the reopened row took the typed 8
+           amount before Next = "8" · open row = "What you sent"
+green  · P4.14 · the Next pill commits the typed 8 and moves on, exactly as Enter does
+           the closed row says: "8 chapters✓Edit" · open row = "When"

@@ -6,7 +6,7 @@
 `check-design-refs.mjs`'s watchlist** (20 → 22 guarded), so a later edit to either fails the build
 rather than silently changing what this round's assertions cite.
 
-**Where I stopped:** end of Phase 3. Recon is `run-artifacts/drawer-recon.md`.
+**Where I stopped:** end of Phase 4. Recon is `run-artifacts/drawer-recon.md`.
 
 ---
 
@@ -427,6 +427,97 @@ tsc clean · build clean · **7,553 pass** · the same four baseline reds. `pane
 
 ---
 
+## Phase 4 — `todo: the unit row's Next` · `20ddc464`
+
+The unit question is the pane's one *editable*, and the rule is written into the contract comment
+as the brief instructs: **a question that can be edited rather than merely picked needs its own
+commit gesture, and must never silently accept an unconfirmed value.** 16/16 measured.
+
+### Red first, as asked — and the named one reddened hardest
+
+Run against HEAD before a line changed: **8 red**, and the sharpest was the phase's whole case —
+**a stepper press advanced the flow** ("What you sent" → "When" on a − + nudge), because commit and
+advance were one callback. The assertion you named — *choose a unit, press nothing, prove the next
+question does not open* — is green on HEAD too (choosing never advanced), so its red came from
+mutation: wiring the pill's click to advance reddens **9 of 16**, the largest of the set.
+
+### The three changes
+
+- **The value follows the keys live.** The picker's draft was local until a commit — two copies of
+  one number, which is what made "typed 7, kept 3" possible at all. Write-through removes the
+  divergence structurally; emptying the field un-answers the question in the same keystroke, which
+  is what makes the count honest while typing (P4.7 watches it dip and return).
+- **The flow moves only on Enter or Next** — the contract's `.nextb`, pinned right of the row, the
+  return glyph in a key cap. Steppers, arrows and blur commit and stay: nudging − + is still
+  deciding. The optional free-text fields get the same split; Shift+Enter keeps the newline in the
+  note, because a note has paragraphs and the rule is not worth the field's point.
+- **Answered from the moment a unit is chosen** — the owner's amendment, superseding the journey
+  round's `unitCommitted` gate. What made the seed dangerous was never its presence but its
+  divergence; with write-through there is none, and the flag is retired with the fault it tracked.
+  The `paneGate` lock is retargeted with that law stated, and asserts the flag is gone from the
+  predicate entirely (comments stripped first).
+
+### ⚠️ Answered-on-pick made the fallback advance by itself
+
+The mechanism find of the phase. The open row is `openId ?? firstUnanswered` — so removing the
+question from the unanswered set *in the same click* moved the fallback on with no gesture
+anywhere. The first build of the phase failed its own P4.4 this way. Choosing a unit now **pins**
+the row open (`onOpen(q.id)`); Enter and Next release the pin, and the fallback then points where
+the flow should go. Pinned on the unit *change* only, never per keystroke.
+
+### ⚠️ An orphaned rule fired in its second direction
+
+`taskPane.css` carried `.tpn .unitrow { flex-wrap: wrap }` from a retired sample-spec cell —
+`smplink`, `smpcell`, `smpbox`, `unitpill` and all, **zero renderers** — and the moment Phase 4
+named a new element `unitrow`, the dead rule's wrap reached it and the Next pill dropped onto a
+line of its own, seven hundred lines from the cause. **16/16 was green over it**: P4.6 asked
+"shown", and a wrapped element still has a box. Caught by screenshot; the orphan cluster is
+deleted; P4.6 asserts **geometry** now (on the row's first line, inside the rim), and restoring the
+orphan's wrap as a mutation reddens it. A rule with no subject is not clutter — it is a claim lying
+in wait for the next element to wander under its selector.
+
+### Two latent faults the old advance-on-commit was masking
+
+- **The stepper buttons never cleared the typing draft** (the arrow keys did), so a press after
+  typing wrote the stepped value while the input went on showing the stale one — unobservable while
+  every commit closed the row and unmounted the input; visible the first time it did not.
+- **The deed was the wide pane's 19px.** Beside the slip the sheet is ~280px at 1440, and a full
+  send deed wrapped to **eight lines**, starving the work area to a 122px scroller with the sheet
+  nowhere near its cap. It is the drawer contract's own 16.5/1.34 now; `deedRound`'s P1.4 is
+  retargeted with the law stated. Found by screenshot with every assertion green — the composed
+  result again: every number correct, the page wrong.
+
+### Mutations — all reddening
+
+| mutation | red |
+|---|---|
+| choosing a unit advances the flow (the named one) | **9** |
+| the gate wants the commit back | 5 |
+| a stepper advances again (the old wiring) | 4 |
+| the write-through is removed | 4 |
+| Enter stops advancing | 2 |
+| the Next pill is unmounted | 2 |
+| the orphan's `flex-wrap` returns | 1 |
+
+### Fixture repairs, each a lesson kept
+
+The first Send row is a **full manuscript** (`wholeThing` — no unit to pick), so the probe picks
+the row whose deed says *partial*; the reopen-finder hunted labels the page never had; and the
+recorded value is read off the **closed row's own answer**, because advancing unmounts the input —
+`input.value` after Enter measures an element that is not there.
+
+### Gates
+
+tsc clean · build clean · **7,581 pass** · the same four baseline reds. `paneMounts` 14/14 and
+`sheetSlip` 21/21 on this build.
+
+### Screenshot
+
+`run-artifacts/p4-unitrow-1440.png` — the chosen unit expanded with its seed selected, the units
+wrapping, the Next pill on the row.
+
+---
+
 ## What worked — and the one finding the round is really about
 
 ### The resting state had never existed, and nothing had ever asked for it
@@ -481,8 +572,8 @@ changing.
 
 ## Next
 
-**Phase 4 — the unit row's Next.** The commit-gesture rule for a question that can be *edited*
-rather than merely picked: Enter and a `Next ↵` pill commit, the steppers never advance, the count
-updates live. Then Phase 5 (completion leaves the list), Phase 6 (group & order, filter — the
-`listView` extension), Phase 7 (the re-prove sweep over ~8 suites, `qcPanel` to be confirmed as a
-false positive first).
+**Phase 5 — completion leaves the list.** The receipt window, the row fading out, the footer count
+dropping from the one array, the sheet opening the next open task (or closing the drawer), the
+crossover completing the originating row, Undo restoring both. Then Phase 6 (group & order, filter —
+the `listView` extension), Phase 7 (the re-prove sweep over ~8 suites, `qcPanel` to be confirmed as
+a false positive first).
