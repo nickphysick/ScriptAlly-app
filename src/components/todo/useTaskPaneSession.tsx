@@ -137,6 +137,14 @@ export interface TaskPaneHost {
   onDismiss?: () => void;
   openQuery: (card: BoardCard) => void;
   /**
+   * ⚠️ A COMPLETION IS REPORTED, NOT ACTED ON (drawer round, Phase 5). The page owns what follows
+   * a successful commit — the held row, the receipt window, the delayed advance, the undo's
+   * cancellation — so the session HANDS OVER rather than advancing. Optional: a host without it
+   * gets the old immediate `advance`, which is also what the snooze and mute paths still do,
+   * because moving a card is not completing one and has no receipt window.
+   */
+  completed?: (card: BoardCard) => void;
+  /**
    * ⚠️ THE DEED'S TWO LINKS, AND THEY ARE THE HOST'S BECAUSE THEY ARE NAVIGATION (workspace round,
    * Phase 5). This hook's own head note already says it: a hook must not own navigation. Optional
    * for the same reason `onSnooze` is — a host with no route to a manuscript passes nothing and the
@@ -246,6 +254,13 @@ export function useTaskPaneSession(
    */
   const [intentId, setIntentId] = React.useState<string | null>(null);
   const [crossed, setCrossed] = React.useState<{ from: JourneyId; fromIntent: string; to: JourneyId } | null>(null);
+  /* ⚠️ THE LAST PRESS FAILED — shown in the foot until the next press or the next card. Only a
+     REFUSED WRITE sets it; a declined confirm returns false too, but the committers toast their
+     own words for that and a "couldn't record" over a choice the writer just made would be the
+     app contradicting them. The distinction lives where the knowledge does: `commitFromPane`'s
+     false is both, so this is set from the one branch that knows nothing changed AND nothing was
+     declined — see `dockPrimary`. */
+  const [commitFailed, setCommitFailed] = React.useState(false);
   /* ⚠️ SET ONLY WHEN ANSWERS WERE ACTUALLY DISCARDED. A line saying "your answers were cleared" on a
      fork nobody had answered is the app narrating an event that did not happen. */
   const [clearedNote, setClearedNote] = React.useState(false);
@@ -972,12 +987,16 @@ export function useTaskPaneSession(
         ...(q?.sendMethod ? { queryMethod: q.sendMethod } : {}),
         now: new Date(),
       }), bulkRows);
-      /* ⚠️ NOTHING WRITTEN, NOTHING ADVANCED. A failed or empty commit leaves the writer where they
-         are, beside the toast that says so — moving on would report success by moving. */
-      if (!wrote) return;
-      /* the card is gone from the derived board; the pane follows to the next, or to the empty
-         state when there is none, which is what `card` resolving to nothing already draws */
-      host.advance(card);
+      /* ⚠️ NOTHING WRITTEN, NOTHING ADVANCED — and now the foot says so too (drawer round,
+         Phase 5): the row, the receipt and the sheet stay exactly as they were, with the failure
+         stated where the writer is looking. Pressing again is the retry. */
+      if (!wrote) { setCommitFailed(true); return; }
+      setCommitFailed(false);
+      /* ⚠️ THE PAGE TAKES OVER FROM HERE (Phase 5). `completed` starts the receipt window — the
+         held row, the delayed advance, the undo's cancellation — where `advance` moved the sheet
+         the instant the write landed, which is what let a crossover's selection land on a row
+         that was not the task just finished. */
+      (host.completed ?? host.advance)(card);
     })();
   }
 
@@ -987,6 +1006,13 @@ export function useTaskPaneSession(
    * different branch of the same one. Doing it here rather than at the button means the pane cannot
    * end up half-crossed.
    */
+  /* the failure line clears when the subject changes — a new card's foot owes nothing about the
+     last card's weather */
+  const failedKeyRef = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    if (card?.key !== failedKeyRef.current) { setCommitFailed(false); failedKeyRef.current = card?.key ?? null; }
+  }, [card?.key]);
+
   function chooseIntent(id: string) {
     if (!activeId) return;
     const to = crossoverOf(activeId, id);
@@ -1194,6 +1220,7 @@ export function useTaskPaneSession(
                                        journey: crossed.from, onBack: goBack } }
                         : {}),
                       ...(clearedNote ? { clearedNote: true } : {}),
+                      ...(commitFailed ? { failed: true } : {}),
                       ...(activeFlow?.info ? { flowInfo: activeFlow.info } : {}),
                     } : {}),
                     onOpenQuery: () => paneVerbs.openQuery.onPress(),

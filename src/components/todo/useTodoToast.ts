@@ -63,7 +63,10 @@ export interface TodoToastApi {
    ref's, and hover still pauses it, so a toast you are reaching for cannot expire under the
    cursor. A plain notice with nothing to undo keeps its shorter life: there is nothing to reach
    for, and holding it for eight seconds would be the page talking over you. */
-const WITH_UNDO_MS = 8000;
+/* ⚠️ EXPORTED because the receipt window and the undo toast are ONE CLOCK (drawer round,
+   Phase 5): the list's held row fades when the toast dies, so "Undo within the window" and "the
+   row holds for the window" cannot drift apart — there is one number. */
+export const WITH_UNDO_MS = 8000;
 const PLAIN_MS = 2600;
 
 export function useTodoToast(): TodoToastApi {

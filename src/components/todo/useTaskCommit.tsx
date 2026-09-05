@@ -49,6 +49,8 @@ export interface TaskCommitHost {
   confirmAsk: (msg: string, opts?: { confirmLabel?: string; cancelLabel?: string }) => Promise<boolean>;
   /** the `offer`/`fix` hand-off, and the takeover a receipt's `edit` re-opens */
   openFlow: (card: BoardCard) => void;
+  /** the receipt window's cancellation — fired after any committer's undo has finished reversing */
+  onUndone?: (c: BoardCard) => void;
 }
 
 export interface TaskCommit {
@@ -73,8 +75,17 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
   const { flash, rememberUndo, confirmAsk } = host;
 
   function doneToast(c: BoardCard, fn: () => Promise<void>) {
-    rememberUndo(c.key, fn);
-    flash(`Done — “${c.title}”`, { label: "Undo", fn });
+    /* ⚠️ THE UNDO TELLS THE HOST (drawer round, Phase 5). Every committer's undo funnels through
+       here, so one wrapper is what lets the page cancel its receipt window — the held row, the
+       8-second timer, the pending advance — for all of them at once. Without it the timer OUTLIVES
+       the undo: the restored row grows the fade classes eight seconds later and the sheet jumps to
+       the next task, long after the writer thought the matter closed. After the write is reversed,
+       not before: the page's restore reasons about a board the undo has already put back.
+       ⚠️ BOTH ARMS ARE WRAPPED — the toast's button and the session's remembered redo take the
+       same route, or an undo recalled through the session would leave the window running. */
+    const undoAndTell = async () => { await fn(); host.onUndone?.(c); };
+    rememberUndo(c.key, undoAndTell);
+    flash(`Done — “${c.title}”`, { label: "Undo", fn: undoAndTell });
   }
   /**
    * ⚠️ IT REPORTS WHETHER IT WROTE (completion-paths Phase 2), and the reason is a bug that would

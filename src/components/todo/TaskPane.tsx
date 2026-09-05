@@ -95,6 +95,12 @@ export interface TaskPaneTile {
 export interface TaskPaneJourney {
   /** `u-now` · `u-house` · `u-yours` — the band's paper, set on `.v` exactly as the mockup does */
   cls: "u-now" | "u-house" | "u-yours";
+  /**
+   * ⚠️ THE LAST PRESS FAILED AND NOTHING CHANGED (drawer round, Phase 5). The foot states it in
+   * place — the brief's words — beside the primary, which stays live because pressing again IS the
+   * retry. Distinct from `missing`: that is the writer's to answer, this is the app's to admit.
+   */
+  failed?: boolean;
   /** `.deed` — may carry an `<em>`, which the mockup renders burgundy italic */
   deed: React.ReactNode;
   /** `.deed.hand` — the Caveat variant a note's own words are written in */
@@ -173,6 +179,13 @@ export interface TaskPaneProps {
    * rule on dead controls.
    */
   nav?: { index: number; total: number; label: string; onPrev: () => void; onNext: () => void; onClose?: () => void };
+  /**
+   * ⚠️ THE COMMIT LANDED AND THE WINDOW IS OPEN (drawer round, Phase 5) — the PAGE's fact, passed
+   * down, because the page owns the hold's whole lifecycle (the row, the timer, the undo). While
+   * it is true the foot shows the receipt line INSTEAD of the primary: the one thing that must be
+   * impossible during the window is a second press writing a second record.
+   */
+  committed?: boolean;
 }
 
 /* (`entryCount` is deleted with the count it fed — workspace round, Phase 1. The story header
@@ -235,7 +248,7 @@ function rung(e: TaskPaneEvent): React.ReactNode {
  */
 let slipAwayThisSession = false;
 
-export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }) => {
+export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, committed }) => {
   const [recAway, setRecAwayState] = React.useState(slipAwayThisSession);
   /* written through on every change, so a close-and-reopen of the pane finds the same answer */
   const setRecAway = React.useCallback((v: boolean) => { slipAwayThisSession = v; setRecAwayState(v); }, []);
@@ -485,7 +498,21 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
                   button that guessed would be the pane assuming the answer to its own first
                   question. Snooze and Dismiss above stay, because both are honest answers to
                   "not now". */}
-              {d.prim !== null && (() => {
+              {/* ⚠️ THE RECEIPT REPLACES THE PRIMARY FOR THE WINDOW — a live primary beside a
+                  "recorded" line is a double-write waiting for a second press. Undo lives in the
+                  toast, where it was built; this line says where to look. */}
+              {committed && (
+                <span className="recorded" role="status">
+                  Recorded <span className="tick" aria-hidden>✓</span> — Undo is in the toast.
+                </span>
+              )}
+              {d.failed && !committed && (
+                /* the brief's words: the failure stated in the foot. Nothing moved, nothing left. */
+                <span className="cfail" role="alert">
+                  Couldn’t record that — nothing has changed. The button is the retry.
+                </span>
+              )}
+              {!committed && d.prim !== null && (() => {
                 const f = d.fill ?? { pct: 1, count: null, ready: true };
                 return (
                   <>

@@ -153,7 +153,7 @@ import { longDate } from "../../lib/dashboardStats";
 import {
   TODO_GROUPS, HOUSEKEEPING_FOLD, foldRows, snoozedCount, isSnoozed,
 } from "../../lib/todoListPage";
-import { ToastAction, useTodoToast } from "./useTodoToast";
+import { ToastAction, useTodoToast, WITH_UNDO_MS } from "./useTodoToast";
 import "./todo.css";
 import "./todoGroups.css";
 import "./todoSplit.css";
@@ -523,6 +523,30 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     rememberUndo,
     confirmAsk,
     openFlow: (c) => openFlowCards([c]),
+    /* ⚠️ UNDO ENDS THE RECEIPT WINDOW (Phase 5). The write is already reversed when this fires, so
+       the real row is back in the derived board and clearing the hold cannot double it — the
+       injection only ever adds a card the groups do not already hold. `dockKey` never moved, so
+       the sheet is still on the task: "restores the sheet's state" is the hold never having let
+       it go. */
+    /* ⚠️ THE UNDO END HAS THE SAME RACE THE COMMIT END HAD, MIRRORED — and clearing the hold here
+       is how it was lost. The un-tick is written but its echo has not re-derived the board, so for
+       a beat the key is in NEITHER the derived groups NOR the hold; the key-vanished effect fires
+       in that gap and moves the sheet to a neighbour. So the hold is not cleared — it is marked
+       UNDONE and stays armed (the row keeps rendering from the injection, the stand-down keeps the
+       effect off the key) until the board actually holds the card again, which the effect below
+       watches for. Symmetry with the commit end: armed before the write there, held past the
+       reversal here. */
+    onUndone: (c) => {
+      if (leaveTimer.current) { clearTimeout(leaveTimer.current); leaveTimer.current = null; }
+      setLeaving((l) => (l && l.card.key === c.key ? { ...l, undone: true } : l));
+      setLeavingFading(false);
+      /* ⚠️ UNDO BRINGS THE TASK BACK ON SCREEN, EVEN IF THE WRITER WALKED AWAY MID-WINDOW.
+         "Restores the sheet's state" is literal: the undo is a gesture about THAT task, and its
+         receipt is seeing the task back in front of you, un-done. Without this the outcome
+         depended on where ‹ › happened to have wandered — the same undo sometimes restored the
+         sheet and sometimes left you looking at a neighbour. */
+      setDockKey(c.key);
+    },
   });
   // Fresh activities for late undo closures (the created nudge row lands AFTER the click's snapshot).
   const activitiesRef = useRef(activities);
@@ -785,7 +809,40 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      a pure function of this render's own inputs, so a repeated render writes the same number. */
   /* ⚠️ THE UNNARROWED SET GOES IN — see `resolveDocked`. Without it a search narrowing and a
      snooze are indistinguishable here, and the pane advances off a card you are still working on. */
-  const docked = resolveDocked(dockable, dockKey, dockPos.current, allDockable);
+  /**
+   * ⚠️ THE RECEIPT WINDOW'S HOLD (drawer round, Phase 5). A successful completion does not move
+   * anything for the length of the undo toast: the row stays in the list, still counted, still
+   * selected; the sheet stays on the task with the receipt in its foot; ‹ › already skip it,
+   * because it left `dockable` the moment the write landed. When the window lapses the row fades
+   * (300ms), the count drops from the one array, and the sheet opens the next open task — or
+   * closes the drawer when none remain. Undo cancels all of it: the write is reversed, the real
+   * row is back in the derived board, and the hold simply ends.
+   *
+   * ⚠️ THE PLACEMENT IS CAPTURED FROM THE LAST RENDER, NOT LOOKED UP AT COMPLETION. Firestore's
+   * latency compensation re-derives the board almost synchronously with the write, so by the time
+   * `completed(card)` runs the card may already be gone from `railGroups()` — the lookup would
+   * miss and the row would vanish instantly, which is the exact behaviour this replaces. The ref
+   * holds the placements of the render the primary was pressed in.
+   */
+  /**
+   * ⚠️ ARMED BEFORE THE WRITE, NOT AT COMPLETION — the race this ref exists for. Firestore's
+   * latency compensation re-derives the board BEFORE the awaited write resolves, so the
+   * key-vanished effect below saw the card go and moved `dockKey` to its neighbour while
+   * `completed()` was still waiting on the ack — the sheet advanced during the window, the held
+   * row lost its selection, and the crossover's selection landed on the wrong task (measured:
+   * held row `seed-pkgq-4` against originating `cor-move-a`). A ref because it must take effect
+   * SYNCHRONOUSLY, in the same tick as the commit call, before any snapshot can render.
+   */
+  const leavingRef = useRef<string | null>(null);
+  const [leaving, setLeaving] = useState<{ card: BoardCard; groupId: string; label: string; index: number; undone?: boolean } | null>(null);
+  const [leavingFading, setLeavingFading] = useState(false);
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rowPlaceRef = useRef<Map<string, { groupId: string; label: string; index: number }>>(new Map());
+
+  const docked = resolveDocked(dockable, dockKey, dockPos.current,
+    /* the held card must stay RESOLVABLE while the window is open, or the pane would swap to
+       whatever now sits at its old position — the fault the hold exists to remove */
+    leaving ? [...allDockable, leaving.card] : allDockable);
   if (docked.card) { dockPos.current = docked.pos; heldCard.current = docked.card; }
 
   /**
@@ -840,7 +897,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const paneHost: TaskPaneHost = {
     jumpToSection,
     openFlow: (c) => openFlowCards([c]),
-    commit: (c, v, rows) => commitFromPane(c, v, rows),
+    commit: async (c, v, rows) => {
+      /* the stand-down is armed BEFORE the write — see `leavingRef`'s own comment */
+      leavingRef.current = c.key;
+      const wrote = await commitFromPane(c, v, rows);
+      if (!wrote) leavingRef.current = null;
+      return wrote;
+    },
     /* ⚠️ THE CURSOR IS RESOLVED AGAINST THE BOARD AS IT WAS, AND THAT IS CLOSURE CAPTURE RATHER
        THAN STATEMENT ORDER — which is the one thing about this that is easy to get wrong later.
        The board is derived, so the instant a commit succeeds the card being stood on leaves
@@ -853,6 +916,30 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       const at = dockable.findIndex((x) => x.key === c.key);
       const nextKey = at >= 0 ? (dockable[at + 1]?.key ?? dockable[at - 1]?.key) : undefined;
       if (nextKey) setDockKey(nextKey);
+    },
+    /* ⚠️ THE RECEIPT WINDOW STARTS HERE (Phase 5) — see the hold's own comment at its state. The
+       placement comes from the ref (last render, pre-write board); the timer is the undo toast's
+       own window, so "Undo within the window" and "the row holds for the window" are one clock. */
+    completed: (c) => {
+      const place = rowPlaceRef.current.get(c.key);
+      if (leaveTimer.current) clearTimeout(leaveTimer.current);
+      setLeavingFading(false);
+      setLeaving({ card: c, groupId: place?.groupId ?? "yours", label: place?.label ?? "", index: place?.index ?? 0 });
+      const heldPos = dockPos.current;
+      leaveTimer.current = setTimeout(() => {
+        setLeavingFading(true);
+        leaveTimer.current = setTimeout(() => {
+          leavingRef.current = null;
+          setLeaving(null); setLeavingFading(false);
+          /* ⚠️ ONLY ADVANCE IF THE WRITER IS STILL STANDING ON THE COMPLETED TASK. ‹ ›, ↑/↓ and
+             row clicks all stay live through the window; stomping a selection the writer made
+             during it would be the auto-dock's fault reborn at the other end of the task. */
+          if (dockKeyRef.current !== c.key) return;
+          const list = dockableRef.current;
+          const next = list[Math.min(heldPos, list.length - 1)]?.key ?? null;
+          setDockKey(next);
+        }, 320);
+      }, WITH_UNDO_MS);
     },
     onSnooze: (el) => setSnoozeAnchor(el),
     onDismiss: () => setDismissOpen(true),
@@ -944,9 +1031,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     if (allDockable.length === 0) { setDockKey(null); return; }  // nothing left anywhere — close
     if (dockable.length === 0) return;                           // narrowed to nothing — HOLD
     if (dockable.some((c) => c.key === dockKey)) return;         // still on screen
+    /* ⚠️ A HELD COMPLETION IS NOT A VANISHED CARD (Phase 5). The receipt window owns what happens
+       to this key — the delayed advance, or the undo putting the card back — and this effect
+       moving first is exactly the race the hold lost before the ref existed. */
+    if (leavingRef.current === dockKey) return;
     setDockKey(narrowed ? dockable[0].key : (docked.card?.key ?? dockable[0].key));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dockSig, dockKey, narrowSig, allDockable.length]);
+
+  /* ⚠️ THE UNDONE HOLD RELEASES ONLY WHEN THE BOARD HAS THE CARD BACK — the undo-end race's other
+     half. Watching `dockSig` because that is exactly the signal "the derived board changed". */
+  useEffect(() => {
+    if (!leaving?.undone) return;
+    if (allDockable.some((c) => c.key === leaving.card.key)) {
+      leavingRef.current = null;
+      setLeaving(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dockSig, leaving]);
 
   /**
    * ⚠️ BOTH MENUS CLOSE ON OUTSIDE PRESS AND ON ESCAPE, AND NEITHER TRAPS FOCUS (Phase 5). They
@@ -1703,6 +1805,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                 <TaskPane
                   journey={session.journey!}
                   onPrimary={session.onPrimary}
+                  /* the receipt window's flag — while the held task is the open one, the foot
+                     shows the receipt instead of the primary (Phase 5) */
+                  committed={!!leaving && !leaving.undone && leaving.card.key === paneCard.key}
                   nav={{
                     index: dockable.findIndex((c) => c.key === paneCard.key) + 1,
                     total: dockable.length,
@@ -2716,10 +2821,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        all read the SAME post-filter array. Applying it in the component would give the meter a
        different array from the rows, which is the disagreement this page has already been caught
        by twice. */
+    /* ⚠️ THE DONE GROUP DOES NOT RENDER IN THE LIST (drawer round, Phase 5). Completion leaves
+       the list — the row holds for the receipt window and then fades, and the footer drops from
+       the one array. A "done" group re-admitting the card three groups down would mean the row
+       LEAVES and ARRIVES in one gesture, and the footer would never drop at all. The cleared log
+       is untouched — `deskState` and the desk-cleared band read `boardCols.done` directly. */
     return applyView(generatedGroups(chipGroups(taskGroups(narrowed), chip)), view, (c) => {
       const f = listRowInputs(c);
       return f.days;
-    });
+    }).filter((g) => g.id !== "done");
   }
 
   /**
@@ -2759,13 +2869,46 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * with it: two surfaces stating one scope is exactly the "showing 13 of 12" fault, and the fix
    * is that there is only one place a count can be written.
    */
+  /**
+   * ⚠️ THE HELD ROW IS INJECTED INTO THE ONE ARRAY THE LIST RENDERS AND THE FOOTER COUNTS — never
+   * overlaid. "The footer count drops from the one array" is only true if the held card is IN that
+   * array until the fade ends; an overlay would keep the row on screen while the count fell eight
+   * seconds early. Injected at its remembered place, and ONLY if the derived board does not still
+   * hold it (an undo puts the real card back before the hold clears — a blind splice would double
+   * the key for a frame).
+   *
+   * ⚠️ AND `dockable` STAYS UN-INJECTED, which is what makes ‹ › skip the completed row without a
+   * skip rule: the walk queue never re-admits it.
+   */
+  function groupsForList(): TaskGroup[] {
+    const gs = railGroups();
+    /* ⚠️ THE PLACEMENT MAP REMEMBERS — entries are UPDATED for cards on the board and KEPT for
+       cards that have left it, never rebuilt from scratch. The first form replaced the whole map
+       each render, and latency compensation guarantees a post-write render BEFORE `completed()`
+       reads it — so the lookup missed and the held row re-entered under the "yours" fallback,
+       three groups from home. Found by screenshot: every assertion was green, because they check
+       the row EXISTS and holds, and a row holding in the wrong group satisfies both. Geometry,
+       not presence — met again, one phase after it was written down. */
+    gs.forEach((g) => g.cards.forEach((c, i) => rowPlaceRef.current.set(c.key, { groupId: g.id, label: g.label, index: i })));
+    if (!leaving) return gs;
+    if (gs.some((g) => g.cards.some((c) => c.key === leaving.card.key))) return gs;
+    const at = gs.findIndex((g) => g.id === leaving.groupId);
+    if (at === -1) {
+      return [...gs, { id: leaving.groupId as TaskGroup["id"], label: leaving.label, description: "", cards: [leaving.card] }];
+    }
+    return gs.map((g, i) => i !== at ? g : {
+      ...g, cards: [...g.cards.slice(0, leaving.index), leaving.card, ...g.cards.slice(leaving.index)],
+    });
+  }
+
   function renderList() {
     /* ⚠️ `railChips` IS NO LONGER THE FILTER'S SOURCE (frame round). The contract's menu counts by
        GROUP and by TYPE, both from `railGroupsAll()` — the same array the bands and the meter read,
        so the one-derivation claim the chips carried is unchanged and the artefact moved. */
     return (
       <TaskList
-        groups={railGroups()}
+        groups={groupsForList()}
+        leaving={leaving ? { key: leaving.card.key, fading: leavingFading } : undefined}
         onOpen={(c) => openDock(c.key)}
         selectedKey={docked.card?.key}
         rowInputs={listRowInputs}

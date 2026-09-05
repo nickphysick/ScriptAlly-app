@@ -222,10 +222,18 @@ describe("⚠️ the primary commits, and mounts nothing", () => {
        therefore found the DELAY's advance, hundreds of characters before the commit's, and reported
        a law broken that is intact. The law is unchanged: the advance that follows a COMMIT is gated
        on that commit having written. */
-    const wrote = body.indexOf("if (!wrote) return;");
+    /* ⚠️ RETARGETED (drawer round, Phase 5), LAW UNCHANGED AND STRONGER: nothing moves unless the
+       write landed. The failure branch now also STATES the failure (`setCommitFailed(true)`), and
+       the success path hands over to `host.completed` — the page's receipt window — with
+       `host.advance` as the fallback for hosts without one. The gate is still what separates them,
+       and it is still consulted before anything downstream of a commit moves. */
+    const wrote = body.indexOf("if (!wrote) { setCommitFailed(true); return; }");
     expect(wrote, "the commit's answer is not consulted before advancing").toBeGreaterThan(-1);
-    const advances = [...body.matchAll(/host\.advance\(/g)].map((m) => m.index ?? -1);
+    const advances = [...body.matchAll(/host\.(?:advance|completed)/g)].map((m) => m.index ?? -1);
     expect(advances.some((i) => i > wrote), "the commit advances without consulting the write").toBe(true);
+    /* ⚠️ AND THE HAND-OVER FALLS BACK, so a host without the receipt window still advances — a
+       completion that goes nowhere on an older host would be a write with no visible consequence */
+    expect(body.slice(wrote)).toContain("(host.completed ?? host.advance)(card);");
     /* and every advance BEFORE the gate belongs to a write that cannot fail silently — the delay
        and the mute, whose writers toast their own outcome */
     const beforeGate = body.slice(0, wrote);

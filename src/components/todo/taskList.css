@@ -103,6 +103,16 @@
 .tlc .row:hover .actb { border-color:var(--pink-b);background:var(--pink);color:var(--burg); }
 .tlc .row:hover .actb .w { display:inline; }
 
+/* ── the receipt window's row (drawer round, Phase 5) ───────────────────────────────────── */
+/* ⚠️ `held` GIVES THE TRANSITION A FROM-VALUE; `leaving` IS THE FADE. `max-height` cannot animate
+   from `auto`, so the held row states a ceiling comfortably above any row (the tallest folded row
+   measures ~58px) and the fade takes it to zero with the paddings and the border — collapse and
+   opacity in one 300ms move, which is what stops the list snapping shut under the reader. Applied
+   only to the ONE held row, never to rows at large: a standing max-height on every row is a crop
+   waiting for a taller row. */
+.tlc .row.held { max-height:120px;transition:opacity .3s ease,max-height .3s ease,padding .3s ease,border-width .3s ease; }
+.tlc .row.held.leaving { opacity:0;max-height:0;padding-top:0;padding-bottom:0;border-width:0;overflow:hidden;pointer-events:none; }
+
 /* ── folded: the drawer is open and the card is 520px ───────────────────────────────────── */
 /* ⚠️ THE META LINE AND THE COLUMNS ARE THE SAME FACTS, SO EXACTLY ONE OF THEM SHOWS. Wide, the
    agent, agency and manuscript have columns and the meta sentence is redundant; folded, the

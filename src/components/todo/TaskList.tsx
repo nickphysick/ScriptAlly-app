@@ -65,6 +65,14 @@ export interface TaskListProps {
    * and CSS decides what shows — so folding cannot change what a row says, only what fits.
    */
   folded?: boolean;
+  /**
+   * ⚠️ THE RECEIPT WINDOW'S ROW (drawer round, Phase 5) — held in the list while the undo toast
+   * lives, fading out when it lapses. The page injects the card into `groups` and names it here;
+   * this component only DRESSES it (`held`, then `leaving` for the 300ms fade). Grepped before
+   * naming, per the `.unitrow` lesson: `.leaving` exists only as the compound
+   * `.tdb-ffsheet.leaving`, which cannot reach a `.tlc .row`.
+   */
+  leaving?: { key: string; fading: boolean };
 }
 
 /** the contract's three group tints, keyed by its own group ids */
@@ -108,7 +116,7 @@ const PlusIcon = () => (
 export const TaskList: React.FC<TaskListProps> = ({
   groups, selectedKey, onOpen, rowInputs, search, onSearch, onAdd, onExport,
   filterActive, onFilter, filterMenu, sortActive, onSort, sortMenu,
-  asideActive, asideCount, onAside, asideMenu, showManuscript, folded,
+  asideActive, asideCount, onAside, asideMenu, showManuscript, folded, leaving,
 }) => {
   /**
    * ⚠️ ONE ARRAY, COUNTED ONCE. The rows map over `g.cards`; the head prints `g.cards.length`; the
@@ -263,7 +271,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                      DOM, and matching on text would break on the one thing that differs between
                      the two widths — the meta line the fold reveals. */
                   data-rowkey={c.key}
-                  className={`row${c.key === selectedKey ? " sel" : ""}`}
+                  className={`row${c.key === selectedKey ? " sel" : ""}${leaving?.key === c.key ? (leaving.fading ? " held leaving" : " held") : ""}`}
                   role="button"
                   tabIndex={-1}
                   aria-current={c.key === selectedKey}
