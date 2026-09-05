@@ -621,8 +621,12 @@ const Piece: React.FC<{
               {/* the ringed `!` — QC's own urgent mark, on the fact rather than beside the name */}
               {(sg.owed || sg.state === "quiet") && <span className="tl-bang" aria-hidden>!</span>}
               {sg.fact}
+              {/* ⚠️ INSIDE THE FACT, NOT BESIDE IT — which is where the ref puts it, and the only
+                  place `display: inline` survives. As a SIBLING inside the flex column `.tl-gstack`
+                  it was a flex item, and a flex item is BLOCKIFIED: `display: inline` computed to
+                  `block` and the eyebrow stayed on a third line while the rule read correctly. */}
+              <span className="tl-feb">{sg.tail}</span>
             </span>
-            <span className="tl-feb">{sg.tail}</span>
             {/* ⚠️ NO MONO EYEBROW, AND TWO SEPARATE REASONS — both recorded because each alone
                 would look like an omission.
 

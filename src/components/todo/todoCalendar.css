@@ -69,9 +69,15 @@
  * hairline under it. Every value here is the ref's; the colours come through the chrome tokens
  * rather than as literals, so the row moves with the scheme like the rest of the board.
  */
+/* ⚠️ THE TOOLBAR AND THE DATE BAR ARE ONE CHROME BLOCK ON THE CONTAINER'S TOP EDGE (fidelity 1).
+   44px, a hairline, then the date bar — no gap between them and none above the toolbar, so the
+   container's top, the toolbar's top and the sidebar pane's top are one line. */
 .tl-vtool {
   display: flex; align-items: center; gap: 8px;
-  padding: 8px 14px;
+  /* ⚠️ 44px OF CONTENT PLUS ITS HAIRLINE — a 45px box, which is what puts the date bar at 46. With
+     `box-sizing: border-box` the border ate into the 44 and the whole block below sat a pixel high. */
+  height: 44px; box-sizing: content-box;
+  padding: 0 14px;
   border-bottom: 1px solid var(--tl-ch-line);
   background: var(--tl-ch-bg);
 }
@@ -201,7 +207,37 @@
 .tpl-zone.tl-zone { overflow: hidden; display: flex; flex-direction: column; }
 .tl-zone { overflow-x: hidden; }
 
+/* ⚠️ THE APP SETS `font-family` ON `p, span, div, button, input, select, textarea, label` — an
+   ELEMENT rule, so INHERITANCE NEVER REACHES ANY OF THEM and giving the board its own face changed
+   nothing below its own box. That blanket rule is why the app is "mostly Source Sans Pro" while its
+   stated stack says Inter; it is app-wide and not this pass's to move.
+
+   ⚠️ `:where()` CONTRIBUTES NO SPECIFICITY, WHICH IS THE WHOLE REASON IT IS HERE. The selector
+   weighs 0-1-0 — enough to beat the global element rule, and NOT enough to beat any single-class
+   rule that names its own face. Written with a descendant combinator instead it would weigh 0-1-1
+   and would have overridden `.tl-sw`'s Playfair and `.tl-feb`'s mono, which is the "raise the
+   specificity until it wins" fault this repo already records. Declared EARLY so that a tie with a
+   single-class rule is resolved in that rule's favour by order. */
+.tl-board :where(p, span, div, button, input, select, textarea, label) { font-family: inherit; }
+
 .tl-board {
+  /* ⚠️ THE BOARD'S INHERITED FACE IS INTER, WHICH IS THE REF'S — AND THIS IS SCOPED TO THE
+     CALENDAR, NOT AN APP-WIDE CHANGE.
+
+     Measured: 63 text leaves on this board render in the INHERITED family — the sidebar's view
+     names, the toolbar's labels, the counts — and the ref draws every one of them in Inter. The
+     app's `--font-sans` is Source Sans Pro, so they were coming out in a different face from the
+     drawing they were signed off against. It is one declaration on the board's own root and
+     touches no other page.
+
+     ⚠️ AND IT SITS AGAINST A STANDING QUESTION THIS REPO ALREADY RECORDS: the app's STATED stack
+     is Playfair · Inter · JetBrains Mono · Caveat, while `--font-sans` is Source Sans Pro and Inter
+     is named by one selector. Whether the app corrects the drift or updates the stated stack is
+     Nick's call, not a change to make in passing — so this is deliberately the calendar's own line
+     and is reversible by deleting it. If the app-wide answer turns out to be Source Sans Pro, this
+     is the one place to remove. */
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+
   /* ══ THE TINT LADDER — A DOCUMENTED COPY, NEVER A `var()` REFERENCE (v63, section D) ═══════
      ⚠️ THE LADDER IS SCOPED TO `.t-f12` AND THE CALENDAR IS NOT UNDER IT. `f12.css` declares
      `--stage-out-1`…`--stage-closed` on the Query Centre's own theme class, and its own comment
@@ -325,9 +361,16 @@
   --tl-ch-today: #2a1f17;
   --tl-ch-todaytx: #fdf9f5;
   /* the one bar that is not the chrome's tone — Urgent, in the app's blush, with rose numerals */
-  --tl-ch-urgent: #f8ece6;
+  /* ⚠️ #f1d5cc — THE REF'S OWN URGENT FILL. Ours had drifted to a much paler #f8ece6, so the one
+     band the design puts weight on read as barely tinted. Measured against the rendered ref. */
+  --tl-ch-urgent: #f1d5cc;
+  /* its edge, a shade deeper than the fill and no more — the ref's `#e3bcb0` */
+  --tl-ch-urgent-edge: #e3bcb0;
   --tl-ch-urgent-tx: #8c4f4a;
-  --tl-axis-w: 240px;
+  /* ⚠️ 232px, AND THE REF DECLARES `.axis` FOUR TIMES — 232, 240, 264, 232. Run 2 read the first
+     two and took 240 as "the later one wins"; run 3 read all four and the LAST is 232. The rendered
+     ref is the authority and always was: one measurement settles what four readings could not. */
+  --tl-axis-w: 232px;
   --tl-cs-ground: #f2f1ee;
   --tl-cs-rail: #faf9f7;
   --tl-cs-frame: #e0ddd6;
@@ -335,7 +378,8 @@
   --tl-cs-monthline: #e6e3dd;
   --tl-cs-card: #ffffff;
   --tl-cs-cardbd: #e2dfd8;
-  --tl-cs-cardshut: #f3f2ef;
+  /* #f1eee8 — the ref's own closed-card fill (`body[data-fill] .card.shut .frame`) */
+  --tl-cs-cardshut: #f1eee8;
   --tl-cs-shadow: 0 1px 2px rgba(40, 36, 30, .07), 0 4px 12px rgba(40, 36, 30, .08);
   --tl-cs-shadowhover: 0 2px 4px rgba(40, 36, 30, .09), 0 12px 26px rgba(40, 36, 30, .15);
   --tl-cs-num: #807a72;
@@ -384,7 +428,10 @@
   /* Closed — warm grey, the quietest thing on the board */
   --tl-g-shut-tone: #cfc6b8;  --tl-g-shut-tint: #efece6;  --tl-g-shut-ico: #8a8177;
   /* the ref's one card border, its owed variant, and the silence's faint fill */
-  --tl-frame-bd: #e2d4be;
+  /* ⚠️ #e3d9cb — the ref's own card hairline (`body[data-bar="qc"] .card .frame`). The board had
+     drifted to a warmer #e2d4be, and per-state overrides pushed a live card to #e6c3b4, so no two
+     cards on the board carried the same edge. One token, one edge. */
+  --tl-frame-bd: #e3d9cb;
   /* ⚠️ TWO LAYERS, FROM THE REF — a tight contact shadow and a wide lift. Ours was ONE faint layer
      (`0 1px 3px` at .06), which is a card printed on the field rather than resting on it: measured
      against the ref's `0 1px 2px/.08` plus `0 5px 14px/.09`. The second layer is what makes a card
@@ -393,7 +440,12 @@
      brown, correct on a cream board and reading as dirt on a cool greige one, which is the same
      law this repo records for the sage desk. Pointing the token at the scheme rather than adding
      a second rule keeps one owner for the frame's shadow, which v61 fought to establish. */
-  --tl-frame-sh: var(--tl-cs-shadow);
+  /* ⚠️ NO RESTING SHADOW ON ANY CARD — the ref's `body[data-bar="qc"] .card .frame { box-shadow:
+     none !important }`. §D deleted the separate `.tl-shd` ELEMENT and stopped there, so uncut cards
+     went on carrying the frame's own two-layer lift while cut ones did not: two card treatments on
+     one board, and the element difference list could not see it because the card it samples is cut.
+     The HOVER lift survives — it is the card's whole hover response — and it is set on hover. */
+  --tl-frame-sh: none;
   /* ⚠️ THE REF'S FOCUS SHADOW, WHICH IS DEEPER THAN ITS BASE HOVER. `.card:hover .frame` is
      `.09/.16` and `data-focus="on"` deepens it to `.10/.18`; focus is on, so this is the one that
      paints and the base hover value has no reader. One token, one value, one home. */
@@ -550,7 +602,19 @@
    *
    * The padding and the spacer are one token now, so they cannot be given different values.
    */
-  --tl-lane-inset: calc(var(--tl-gnum-w) + 8px);
+  /* ⚠️ ZERO SINCE §A HID THE NUMBERS GUTTER, AND IT WAS 66px FOR THREE SECTIONS AFTER IT (fidelity 3).
+     This reserves, ahead of the RAIL's lane, exactly the width the ROWS give their number column —
+     so a tick at `pct(d)` lands on the same pixel as a bar at `pct(d)`. §A set
+     `.tl-gnums { display: none }` and the rows' gutter went to 0; the rail went on reserving
+     `58 + 8`, so every date on the date bar stood 66px to the RIGHT of the column its bars sit in.
+     Measured: rail lane at 581, rows' lane at 515.
+
+     ⚠️ IT WENT UNSEEN BECAUSE THE ONE LOCK THAT WATCHES THIS SEAM NEVER RAN. `calProbe60` asserts
+     "the rail's lane and every row's lane are THE SAME BOX" — the seam v60d spent a phase fixing —
+     and the pre-v63 sweep hung before reaching it. A lock nobody runs is a lock nobody has.
+
+     Derived from the gutter rather than typed, so the two move together if the column returns. */
+  --tl-lane-inset: 0px;
   /* ⚠️ 16px SINCE v54: a mark is a LEAD-IN now, drawn before the card rather than riding on it.
      At 22 it was sized to be read against a card it sat on; on a dotted run it is a waypoint. */
   --mk: 16px;
@@ -661,7 +725,10 @@
  */
 .tl-grp {
   background: transparent; border: none; border-radius: 0; box-shadow: none;
-  margin: 0; overflow: visible; padding-top: 6px;
+  /* ⚠️ NO PADDING ABOVE THE GROUP (fidelity 1). Six pixels stood between the date bar and the first
+     group bar, so the chrome block ended in a strip of ground rather than in the bar it introduces.
+     The ref puts the bar directly under the hairline. */
+  margin: 0; overflow: visible; padding-top: 0;
 }
 /* the v60 header is gone — the divider replaces it */
 .tl-gt { display: none; }
@@ -769,7 +836,11 @@
    drawn from the top of the board would paint across the date ruler it is measured against. */
 .tl-rail {
   /* the ref's `.rail` — it caps the board, so only its top corners round */
-  border-radius: 14px 14px 0 0;
+  /* ⚠️ NO RADIUS (fidelity 1). It rounded its own top corners because it USED to be the board's
+     top edge; the toolbar is above it now, so a rounded bar in the middle of a chrome block reads
+     as two objects where the ref draws one. The container keeps the radius, which is where it
+     belongs. */
+  border-radius: 0;
   /* ⚠️ THE RAIL IS OPAQUE, AND THAT IS WHAT MAKES IT OUTRANK THE ROWS. Measured transparent: a
      z-index and an isolation both correct, and row text reading straight through the header on
      scroll. Stacking decides what is DRAWN ON TOP; it says nothing about what can be seen through.
@@ -1116,7 +1187,8 @@
   position: absolute; inset: 0; pointer-events: none;
   background: var(--card-bg, #ffffff);
   border: 1px solid var(--tl-frame-bd);
-  border-radius: 10px;
+  /* 9px — the ref's, and the band's own top corners share it so the two read as one object */
+  border-radius: 9px;
   /* ⚠️ ONE DECLARATION, AND EVERY STATE SETS THE TOKEN RATHER THAN THE PROPERTY. Four rules used
      to write `box-shadow` on this element — resting, hover (TWICE, see below), closed and owed —
      all at 0-2-0 or 0-3-0, so which one a card actually wore was decided by source order. The fade
@@ -1526,7 +1598,11 @@ button.tl-tchip { cursor: pointer; }
   font-size: 8px; letter-spacing: .12em; color: var(--tl-ink); pointer-events: none; z-index: 5;
   top: calc(-1 * var(--tl-flag-lift));
 }
-.tl-wrap { --tl-flag-lift: 18px; padding-top: var(--tl-flag-lift); }
+/* ⚠️ THE 18px LIFT IS DELETED — IT WAS ROOM RESERVED FOR A RETIRED ELEMENT (fidelity 1). It made
+   space above the rail for `.tl-todayflag`, which is `display: none` and has been for two packs; the
+   gap outlived it, and it was the ground-coloured band standing between the toolbar and the date
+   bar. `.tl-wrap`'s second declaration goes with it — this file states one rule per selector as its
+   own invariant, and this was the second. */
 /* ══ THE PROBE (v60, the ref's `.probe` / `.probecap`) ═══════════════════════════════════════
  *
  * ⚠️ THE LINE PASSES UNDER THE RAIL AND THE CAP SITS ON IT, which is two z-indexes either side of
@@ -1962,7 +2038,8 @@ button.tl-tchip { cursor: pointer; }
    takes a click meant for the card underneath it. */
 .tl-evn {
   position: absolute; top: 50%; transform: translate(-50%, -50%);
-  width: 22px; height: 22px; border-radius: 99px;
+  /* 24px — the ref's `.evn`; 22 was the action ring's size borrowed for a different object */
+  width: 24px; height: 24px; border-radius: 99px;
   background: #fff; border: 1.2px solid #cdbfa8; color: #7d6c5c;
   display: flex; align-items: center; justify-content: center;
   z-index: 5; pointer-events: none;
@@ -1973,7 +2050,11 @@ button.tl-tchip { cursor: pointer; }
    that is BOTH still running and already late, which is the one combination the card's own shape
    cannot state: an open end says "no end named" and says nothing about whether that is a problem. */
 .tl-pulsedot {
-  position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+  /* ⚠️ CENTRED ON THE CARD'S END EDGE, WHICH IS THE TODAY LINE. `right: -6px` on a 10px dot puts
+     its centre one pixel PAST the edge — measured 1.8px off the line, which is visible against a
+     1px rule. `-5px` is half the dot, so the centre lands on the edge by construction rather than
+     by a value that happens to look right. */
+  position: absolute; right: -5px; top: 50%; transform: translateY(-50%);
   width: 10px; height: 10px; border-radius: 99px;
   background: #c98e8a; border: 2px solid #fff; z-index: 6; pointer-events: none;
   animation: tlRipple 2.2s ease-out infinite;
@@ -2023,12 +2104,22 @@ button.tl-tchip { cursor: pointer; }
  * plus the medallion — so consecutive stages never run one's badge into the next one's words. It
  * is a `calc()` over `--badge`, not a literal, so retuning the badge moves the gap with it.
  */
+/* ⚠️ A PAST STAGE IS A CARD, NOT A DOTTED OUTLINE (fidelity, ghost stage). The ref's
+   `body[data-past="ghost"] .jc` is `height: var(--bar-h); background: #fff; border: 1px solid
+   #e3d9cb; border-radius: 9px` — the SAME object as a live card, at 32% until you look at it. Ours
+   was a 44px transparent box with a 1.5px dotted edge: a different shape, a different size and a
+   different grammar for the same thing, which is why history read as a diagram rather than as
+   cards behind cards. */
 .tl-jc {
   --tl-jc-gap: calc(var(--badge) * 0.79 + 12px);
   position: absolute; top: 50%; transform: translateY(-50%);
-  height: var(--tl-jc-h); z-index: 1; overflow: hidden; background: var(--tl-cs-past); border: 1.5px dotted var(--tl-ghost-bd); border-radius: 10px;
+  height: var(--bar-h); z-index: 1; overflow: hidden;
+  background: #fff; border: 1px solid var(--tl-frame-bd); border-radius: 9px;
   box-shadow: none;
-  border-color: var(--tl-cs-pastbd);
+  /* ⚠️ THE CARD'S OWN HAIRLINE, NOT A SEPARATE PAST-BORDER TOKEN. `--tl-cs-pastbd` was a second
+     edge colour for the same object — a past stage IS a card, drawn at 32% — and it restated the
+     border two declarations after the shorthand set it, which is how the ghost ended up with an
+     edge no live card has. The 32% opacity is what says "past"; the edge is not a second signal. */
 }
 /* ⚠️ A NARROW STAGE DROPS ITS BADGE AND STARTS ITS TEXT AT THE CARD'S OWN INSET — the ref's
    `.jc.narrow`. Below the second gate there is not room for a disc AND a sentence, and the sentence
@@ -2093,6 +2184,8 @@ button.tl-tchip { cursor: pointer; }
    an instruction; definite the moment the row is the one you are looking at. */
 .tl-actsym {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  /* the ref's own weight on the symbol's glyph — 400 read a shade thinner than the ring around it */
+  font-weight: 500;
   width: 22px; height: 22px; border-radius: 99px;
   border: 1px solid #d3c8b6; color: #b3a48f; background: transparent;
   transition: border-color .16s, color .16s, background .16s;
@@ -2211,7 +2304,10 @@ button.tl-tchip { cursor: pointer; }
 .tl-st-closed { background: var(--tl-stage-closed); }
 /* ⚠️ A CARD WHOSE RIGHT EDGE DISSOLVES SQUARES THE BAND'S CORNER AND STOPS SHORT OF THE NOTCH, so
    the band does not run out through the chevron the frame opens. */
-.tl-p.fadeR .tl-sband { right: 16px; border-top-right-radius: 0; }
+/* ⚠️ THE BAND SPANS THE WHOLE CARD, CUT OR NOT (fidelity 4). It stopped 16px short to clear the
+   chevron notch — and the chevron was deleted in §D, so the band was being shortened for a shape
+   that no longer exists. Measured: a 430.8px card carrying a 414.7px band. */
+.tl-p.fadeR .tl-sband { border-top-right-radius: 0; }
 .tl-p.fadeL .tl-sband { border-top-left-radius: 0; }
 /* ⚠️ EXPLICIT WIDTH AND HEIGHT ON THE SVG — `top`/`bottom` do not size one, and a transform is
    ignored on an SVG element by some engines. The dot is drawn at the size it is asked for. */
@@ -2266,15 +2362,21 @@ button.tl-tchip { cursor: pointer; }
    clears the 26px band and 28 + 57 lands inside the 86px bar. Measured twice: 36/44 clipped, and so
    did 30/54, by 0.07px. Arithmetic on paper missed it both times. */
 .tl-cardbody {
-  position: absolute; top: 28px; transform: none;
+  /* ⚠️ 36px — THE REF'S, RESTORED NOW THE EYEBROW IS INLINE. It came down to 28 to fit a body
+     three lines deep; with line two carrying its own tail there are two, and 36 is where the ref
+     puts them. Measured: every text element on the card sat 4–5px high against the ref until this. */
+  position: absolute; top: 36px; transform: none;
   display: flex; align-items: center; gap: 9px;
   white-space: nowrap; z-index: 3;
-  left: 12px; max-width: calc(100% - 24px);
-  max-height: 57px; overflow: hidden;
+  left: 14px; max-width: calc(100% - 28px);
+  /* two lines now that the eyebrow is inline — the ceiling comes down with it */
+  max-height: 44px; overflow: hidden;
 }
 /* ⚠️ THE SAME INSET ON A LEFT-DISSOLVING CARD. v60 pushed the words further in because the badge
    moved; the badge no longer moves, so neither do they. */
-.tl-p.fadeL .tl-cardbody { left: 36px; max-width: calc(100% - 48px); }
+/* ⚠️ THE SAME 14px INSET ON A CUT CARD (fidelity 4). It was 36 to clear the left dissolve; the
+   dissolve is deleted, so the words were being pushed in to make room for nothing. */
+.tl-p.fadeL .tl-cardbody { left: 14px; max-width: calc(100% - 28px); }
 /* an ongoing card keeps its words clear of the chevron notch */
 .tl-p.fadeR .tl-cardbody { max-width: calc(100% - 24px - 20px); }
 /* ⚠️ LINE ONE IS THE NAME AND ITS CHIP ON ONE ROW — the ref's `.trow`. The chip was a third
@@ -2351,8 +2453,12 @@ button.tl-tchip { cursor: pointer; }
    register a span belongs in, under the fact rather than inline with it. §D shipped line two as one
    Inter sentence because `latenessLine` emitted one string; `barFactLine` returns the two parts
    from the dates themselves now, so there is nothing to split and nothing to go wrong. */
+/* ⚠️ INLINE ON LINE TWO, NOT A THIRD LINE (fidelity 4). The ref's own card builder puts `.feb`
+   INSIDE `.ffx` and `body[data-seg="band"]` makes it `display: inline; margin: 0` — a mono tail on
+   the fact's own line. Rendered as a block it made the body three lines deep, which is why the body
+   kept needing a taller ceiling on every density. Two lines in the body, never three. */
 .tl-feb {
-  display: block; margin-top: 3px;
+  display: inline; margin: 0 0 0 9px;
   /* ⚠️ 8px, NOT 7.5 — THE DIFFERENCE LIST SETTLED IT. The formatting pass asked for 7.5 and the ref
      renders 8 (`body[data-body="airy"] .feb`); 7.5 is inside the stated half-pixel tolerance, so
      both readings were satisfiable, and only 8 makes the two screens the same. Where a spec and the
@@ -2417,8 +2523,14 @@ button.tl-tchip { cursor: pointer; }
      · closed — dashed, and dashed is the closed state's alone
    Saying the same fact in the chip AND the outline is how a board comes to have two vocabularies
    for one thing, and the outline is the one nobody can read. */
-.tl-p.owed .tl-frame   { border-color: var(--tl-frame-owed-bd); }
-.tl-p.owed:not(.fadeL):not(.fadeR) { --frame-sh: var(--tl-frame-owed-sh); }
+/* ⚠️ AN OWED CARD KEEPS THE SAME EDGE AS EVERY OTHER (fidelity 4). It carried a warmer border, so
+   the board had two card edges and the difference read as a treatment rather than as a state — and
+   lateness is already said three times on that card (the rose holder, the ringed `!`, the pulse on
+   its open end). One hairline, one token: the ref draws one. */
+/* ⚠️ AN OWED CARD TAKES NO LIFT OF ITS OWN. It carried a deeper two-layer shadow so lateness read
+   as elevation — a fourth statement of a fact the rose holder, the ringed `!` and the pulse on its
+   open end already make three times. It also meant late cards sat on a different plane from calm
+   ones, which is two card treatments on one board. The hover lift is every card's, equally. */
 /* ⚠️ THESE THREE SET THE TOKEN TOO, and consistency is the point rather than tidiness: they were
    `box-shadow: none` at 0-3-0 on the frame, which happens to beat the token and happens to want
    the same answer. Leaving them is how the next person reintroduces the conflict the token was
@@ -2432,7 +2544,10 @@ button.tl-tchip { cursor: pointer; }
    read from the scheme, each stated once, in the rule that already owns the element */
 .tl-dt.now { background: var(--tl-cs-today); color: #fff; font-weight: 600; }
 .tl-glanes, .tl-gwrap, .tl-grp, .tl-gnums { background: transparent; }
-.tl-p .tl-frame { background: var(--tl-cs-card); border-color: var(--tl-cs-cardbd); }
+/* ⚠️ THE SCHEME PAINTS THE CARD'S FACE, NOT ITS EDGE. `--tl-cs-cardbd` was a second edge colour
+   living beside `--tl-frame-bd`, and being declared later it won — so the token the card's own rule
+   names had no effect and no card on the board wore it. One hairline token, one edge. */
+.tl-p .tl-frame { background: var(--tl-cs-card); }
 .tl-p.shut .tl-frame, .tl-p.closedp .tl-frame,
 .tl-p.quiet .tl-frame, .tl-p.ghost .tl-frame { background: var(--tl-cs-cardshut); }
 .tl-tail path { fill: var(--tl-cs-card); stroke: var(--tl-cs-cardbd); }
@@ -2448,6 +2563,11 @@ button.tl-tchip { cursor: pointer; }
  * it, and it is why the identity lock can say "sidebar = date bar = group bar" at all.
  */
 .tl-board[data-v63] { --x: 0; }
+/* ⚠️ THE CONTAINER IS A PAGE CARD, BOUNDED TO THE PAGE (fidelity 2). It ends a page-padding above
+   the viewport's foot with its hairline and radius visible on all four sides, and its ROWS region
+   scrolls inside it. Before this it ran off the bottom of the screen: the rows had nowhere to
+   scroll inside a container taller than the viewport, so the bottom border was never painted and
+   the board read as a surface with no end rather than as an object on the page. */
 .tl-cal {
   /* the container is a ROW now: the axis is its left pane, the board its right */
   flex-direction: row;
@@ -2525,7 +2645,9 @@ button.tl-tchip { cursor: pointer; }
   box-shadow: 0 8px 22px rgba(58, 28, 20, .18);
 }
 
-.tl-grp:first-child .tl-gdiv { border-top: none; }
+/* ⚠️ THE FIRST GROUP BAR KEEPS ITS TOP EDGE. It lost it when the bar sat directly under the date
+   bar and two hairlines met; the toolbar and the date bar are one chrome block now and the first
+   bar is a separate object below them, so the edge is the thing that says so. The ref draws it. */
 .tl-gdiv::before { display: none; }
 .tl-gdiv .gp {
   position: static; transform: none; background: transparent; padding: 0;
@@ -2547,7 +2669,19 @@ button.tl-tchip { cursor: pointer; }
   text-transform: uppercase; color: var(--tl-ch-mute); white-space: nowrap;
 }
 /* the one exception: Urgent is blush, and its count and eyebrow take the rose */
-.tl-grp[data-sec="over"] .tl-gdiv { background: var(--tl-ch-urgent); }
+/* ⚠️ ONLY URGENT IS TINTED, AND THE REF'S CASCADE IS WHY. `.gdiv` is chrome-bg with a `--ch-line`
+   edge for every group; `.grp.g-over .gdiv` alone overrides it to `#f1d5cc` on `#e3bcb0`. Tinting
+   every section by its own token — which is what a first pass at this did — makes six coloured
+   bands down the board and the one that matters stops standing out. The exception IS the emphasis.
+
+   ⚠️ AND THE EDGE IS A LIGHTER DERIVATIVE OF THE FILL, NOT THE SECTION'S STUB COLOUR. `--gtone`
+   is the accent the section's rule-stub wears; used here it drew a `#c98e8a` edge — louder than
+   the fill it borders, so the bar read as outlined rather than as a band. */
+.tl-grp[data-sec="over"] .tl-gdiv {
+  background: var(--tl-ch-urgent);
+  border-top-color: var(--tl-ch-urgent-edge);
+  border-bottom-color: var(--tl-ch-urgent-edge);
+}
 .tl-grp[data-sec="over"] .tl-gdiv .gp b,
 .tl-grp[data-sec="over"] .tl-gdiv .geb { color: var(--tl-ch-urgent-tx); }
 
