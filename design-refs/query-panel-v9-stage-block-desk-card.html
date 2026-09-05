@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Drawer v9: stage block + desk card (locked)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#1c130f;--heading-ink:#2e3a2c;--body-ink:#3a1c14;--muted:#8a7a6c;--label:#9c8878;
+    --burgundy:#7c3a2a;--frame:rgba(124,58,42,.28);--sage-a:#dce0d9;--sage-b:#d0d6cc;--sage-accent:#8a9e88;--sage-text:#5a6e58;
+    --pink:#f5e2da;--pink-border:#e8c8bc;--field-border:#e0d5c8;--hairline:#ece0d2;
+    --stage:#f8e9e2;--stage-accent:#e8c9bb;--pkg-fill:#e6edf4;--pkg-edge:#c3d5e4;--pkg-ink:#41627f}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--ground);font-family:'Inter',sans-serif;color:var(--body-ink);font-size:13px;overflow:hidden}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+  .bar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:14px;padding:10px 20px;background:rgba(242,237,231,.96);border-bottom:.5px solid #d8ccbc}
+  .bar h1{font-family:'Playfair Display',serif;font-weight:500;font-size:15px;color:var(--ink)}
+  .bar .grp{display:flex;align-items:center;gap:6px}
+  .bar .grp .k{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--label)}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--field-border);border-radius:9px;padding:2px}
+  .seg button{border:none;background:transparent;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#6a5a50;padding:6px 10px;border-radius:7px}
+  .seg button.on{background:var(--pink);color:var(--body-ink)}
+  /* app frame */
+  .mast{position:absolute;top:56px;left:0;right:0;height:64px;background:var(--ground);border-bottom:.5px solid #d8ccbc;display:flex;align-items:center;padding:0 40px;gap:14px;font-family:'Playfair Display',serif;font-size:18px;color:#6a5a50;z-index:5}
+  .mast b{color:var(--ink);font-weight:500}
+  .win{position:absolute;top:120px;left:0;right:0;bottom:0}
+  .page{position:absolute;inset:0;padding:24px 40px 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-content:start;opacity:.5;filter:saturate(.7)}
+  .gcard{background:#fff;border-radius:14px;height:230px;box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 22px rgba(58,28,20,.09);overflow:hidden}
+  .gcard .b{height:48px;background:#e6eae3}.gcard .b.p{background:#f8e9e2}.gcard .b.s{background:#d7ddd3}.gcard .b.g{background:#e4e1db}
+  .scrim{position:absolute;inset:0;background:rgba(58,28,20,.10)}
+
+  /* ---------- drawer base ---------- */
+  .drawer{position:absolute;top:0;right:0;bottom:0;width:580px;background:var(--parchment);box-shadow:-6px 0 30px rgba(58,28,20,.14);display:flex;flex-direction:column;z-index:10}
+  .pbar{display:flex;align-items:center;gap:6px;padding:14px 16px;border-bottom:.5px solid var(--hairline)}
+  .icb{width:32px;height:32px;border-radius:8px;border:1px solid var(--field-border);background:#fff;display:inline-flex;align-items:center;justify-content:center;color:#a08a78}
+  .pbar .pos{color:var(--label);margin-left:4px}.pbar .sp{flex:1}
+  .act{background:#fff;border:1px solid var(--field-border);border-radius:8px;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:#6a5a50}
+  .act.pink{background:var(--pink);border-color:var(--pink-border);color:var(--body-ink)}
+  .act.live{box-shadow:0 0 0 1.5px var(--stage-accent)}
+  .pband{display:flex;align-items:center;gap:10px;padding:14px 26px;background:var(--stage);border-bottom:.5px solid rgba(0,0,0,.06)}
+  .pband .word{font-family:'Playfair Display',serif;font-size:20px;color:var(--ink)}
+  .pband .r{margin-left:auto;color:#6a5a50}
+  .phead{padding:20px 26px 0;display:flex;align-items:center;gap:16px}
+  .avatar{width:58px;height:58px;border-radius:50%;background:var(--parchment);box-shadow:0 1px 2px rgba(58,28,20,.08),0 3px 8px rgba(58,28,20,.10);border:.5px solid #e6dccf;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;flex:none}
+  .phead .nm{font-family:'Playfair Display',serif;font-weight:500;font-size:27px;color:var(--ink);line-height:1.1}
+  .phead .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#6a5a50;margin-top:5px}
+  .phead .snt{margin-left:auto;text-align:right;color:var(--label);line-height:1.6}
+  .pms{display:flex;align-items:center;gap:9px;padding:12px 26px 4px;font-family:'Playfair Display',serif;font-size:14.5px;color:var(--ink)}
+  .pms .m{color:var(--label);margin-left:2px}.pms .v{margin-left:auto;color:var(--label)}
+  .tabs{display:flex;gap:2px;padding:12px 26px 0;border-bottom:.5px solid var(--hairline)}
+  .tab{padding:10px 14px 12px;font-family:'Playfair Display',serif;font-size:15px;color:#8a7a6c;border-bottom:2px solid transparent;margin-bottom:-.5px}
+  .tab.on{color:var(--ink);border-bottom-color:var(--stage-accent)}
+  .body{overflow-y:auto;flex:1;padding:18px 26px 40px;position:relative}
+  .stats{display:flex;gap:12px}
+  .stat{flex:1;display:flex;align-items:center;gap:11px;background:#fff;border:.5px solid var(--hairline);border-radius:10px;padding:12px 14px}
+  .stat .big{font-family:'Playfair Display',serif;font-size:24px;color:var(--ink);line-height:1}
+  .stat .big span{font-size:13px;font-style:italic;margin-left:3px}
+  .stat .cap{color:var(--label);margin-top:5px}
+  .rail{margin-top:18px;position:relative;padding-left:36px}
+  .rail::before{content:'';position:absolute;left:14px;top:14px;bottom:14px;width:1.5px;background:#e8dcd0}
+  .rung{position:relative;margin-bottom:18px;padding:4px 6px;margin-left:-6px;border-radius:10px}
+  .rung .node{position:absolute;left:-30px;top:8px;width:28px;height:28px;border-radius:50%;background:var(--parchment);display:flex;align-items:center;justify-content:center;border:1.6px solid var(--burgundy)}
+  .rung .node.in{border-color:var(--sage-accent)}
+  .rung .node.wait{border:1.5px dashed #c8bcae;color:#b0a090}
+  .rung.ghost{border:1.5px dashed #d2c4b4}
+  .rung.ghost .node{border-style:dashed;opacity:.7}
+  .rline{display:flex;align-items:baseline;gap:9px}
+  .rline .ev{font-family:'Playfair Display',serif;font-size:19px;color:var(--ink)}
+  .rline .ev.it{font-style:italic}
+  .rline .via{font-size:13px;color:var(--muted);border-bottom:1px dashed #cdbfae}
+  .rline .sub{font-size:13px;color:#6a5a50}
+  .rline .when{margin-left:auto;color:var(--label);white-space:nowrap}
+  .rbody{font-size:13px;color:#6a5a50;margin-top:4px}
+  .rbody .chap{font-family:'Playfair Display',serif;font-style:italic;color:var(--body-ink)}
+  .strip{margin-top:10px;display:flex;align-items:center;gap:10px;background:var(--pkg-fill);border:1px solid var(--pkg-edge);border-radius:10px;padding:8px 10px}
+  .strip .slot{width:38px;height:38px;border:1.5px dashed var(--pkg-edge);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--pkg-ink);flex:none}
+  .strip .seal .k{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--pkg-ink)}
+  .strip .seal .n{font-family:'Playfair Display',serif;font-size:14px;color:var(--ink);line-height:1.1;margin-top:2px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+  .chip{background:#fff;border:.5px solid var(--pkg-edge);border-radius:99px;padding:4px 9px;font-size:11.5px;color:var(--body-ink)}
+
+  /* ---------- chrome variants ---------- */
+  /* A · ink masthead */
+  .cA .pbar{background:var(--ink);border-bottom:none}
+  .cA .icb{background:rgba(253,250,245,.08);border-color:rgba(253,250,245,.22);color:#e8dcd0}
+  .cA .pbar .pos{color:#b0a090}
+  .cA .act{background:rgba(253,250,245,.08);border-color:rgba(253,250,245,.22);color:#f0e6da}
+  .cA .act.pink{background:var(--pink);border-color:var(--pink);color:var(--body-ink)}
+  .cA .pband{background:var(--ink);border-bottom:none;padding-top:4px}
+  .cA .pband .word{color:#fdfaf5}.cA .pband .r{color:#b0a090}
+  .cA .phead{background:var(--ink);padding-bottom:18px}
+  .cA .phead .nm{color:#fdfaf5}.cA .phead .ag{color:#c8b8a8}.cA .phead .snt{color:#8a7a6c}
+  .cA .avatar{background:#fdfaf5;border-color:transparent}
+  .cA .pms{background:var(--stage);padding:12px 26px;color:var(--ink);border-bottom:.5px solid rgba(0,0,0,.06)}
+  .cA .pms .m,.cA .pms .v{color:#6a5a50}
+  .cA .tabs{background:#fff}
+  .cA .body{background:#fff}
+  .cA .rung .node{background:#fff}
+  /* B · white body, parchment chrome */
+  .cB .body{background:#fff}
+  .cB .tabs{background:#fff;padding-top:10px}
+  .cB .tab.on{border-bottom-color:var(--ink)}
+  .cB .rung .node{background:#fff}
+  .cB .stat{background:var(--parchment)}
+  .cB .pbar{background:var(--parchment)}
+  .cB .phead,.cB .pms{background:var(--parchment)}
+  .cB .pms{padding-bottom:12px;border-bottom:.5px solid var(--hairline)}
+  /* C · framed (MountCard chassis) */
+  .cC .drawer{padding:8px 8px 8px 0;background:var(--parchment)}
+  .cC .frame{border:1px solid var(--frame);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;flex:1;background:#fff}
+  .cC .pbar{background:var(--parchment)}
+  .cC .pband{background:linear-gradient(135deg,var(--sage-a),var(--sage-b));border-bottom:.5px solid #c4ccc0}
+  .cC .pband .word{color:var(--heading-ink)}
+  .cC .pband .stg{margin-left:10px;background:var(--stage);border:.5px solid var(--stage-accent);border-radius:99px;padding:3px 10px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--body-ink)}
+  .cC .body{background:#fff}
+  .cC .rung .node{background:#fff}
+  .cC .stat{background:var(--parchment)}
+  /* D · stage block header */
+  .cD .pband,.cD .phead,.cD .pms{background:var(--stage)}
+  .cD .phead{padding-bottom:6px}
+  .cD .pms{padding-bottom:16px;border-bottom:.5px solid rgba(0,0,0,.06)}
+  .cD .pband{border-bottom:none;padding-bottom:8px}
+  .cD .avatar{background:#fff}
+  .cD .tabs{background:#fff}
+  .cD .body{background:#fff}
+  .cD .rung .node{background:#fff}
+  .cD .tab.on{border-bottom-color:var(--ink)}
+
+  /* illustration placeholders */
+  .illo{background:repeating-linear-gradient(135deg,rgba(58,28,20,.05) 0 6px,transparent 6px 12px);border:1px dashed rgba(58,28,20,.22);border-radius:10px;display:flex;align-items:center;justify-content:center;text-align:center;color:#8a7a6c;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;line-height:1.5;flex:none}
+  .cD .phead{position:relative;padding-right:170px}
+  .cD .phead .snt{position:absolute;right:26px;bottom:8px;text-align:right}
+  .cD .illo.hdr{position:absolute;right:26px;top:-34px;width:130px;height:78px;background-color:rgba(255,255,255,.35)}
+  .g1 .card{position:relative}
+  .g1 .illo.desk{position:absolute;right:16px;top:14px;width:56px;height:56px;border-radius:50%}
+  .g1 .card h3{padding-right:70px}
+  .illo.tabempty{width:100%;height:120px;margin:14px 0 8px}
+  /* ---------- pop-out geometries ---------- */
+  .pop{position:absolute;z-index:9}
+  /* 1 · desk card (fixed to the window, never taller than it) */
+  .g1 .pop{right:592px;top:12px;bottom:12px;width:460px;display:flex;flex-direction:column;justify-content:flex-start;pointer-events:none}
+  .g1 .card{pointer-events:auto;background:var(--parchment);border-top:5px solid var(--stage-accent);border-radius:14px;box-shadow:0 2px 6px rgba(58,28,20,.08),0 18px 44px rgba(58,28,20,.18);padding:18px 20px 16px;position:relative;max-height:100%;overflow:auto}
+  .g1 .card::after{content:'';position:absolute;right:-9px;top:22px;width:16px;height:16px;background:var(--parchment);transform:rotate(45deg)}
+  /* 2 · second column, full height, own header */
+  .g2 .pop{right:580px;top:0;bottom:0;width:440px;background:var(--parchment);box-shadow:-6px 0 24px rgba(58,28,20,.10);border-right:.5px solid var(--hairline);display:flex;flex-direction:column}
+  .g2 .col-h{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:.5px solid var(--hairline);background:var(--parchment)}
+  .g2 .col-h .strip{margin:0;padding:0;background:none;border:none;width:5px;height:22px;border-radius:3px;display:block}
+  .g2 .col-h .strip{background:var(--stage-accent)}
+  .g2 .col-h b{font-family:'Playfair Display',serif;font-weight:500;font-size:15px;color:var(--ink)}
+  .g2 .col-h .x{margin-left:auto}
+  .g2 .card{padding:18px 20px 16px;overflow:auto;flex:1}
+  .g2 .card::after{display:none}
+  /* 3 · sheet inside the drawer body, timeline stays above */
+  .g3 .pop{display:none}
+  .g3 .sheet{position:absolute;left:0;right:0;bottom:0;z-index:20;background:var(--parchment);border-top:5px solid var(--stage-accent);box-shadow:0 -10px 30px rgba(58,28,20,.16);padding:18px 26px 16px;max-height:62%;overflow:auto;animation:up .26s cubic-bezier(.2,.7,.2,1)}
+  @keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+
+  /* shared pop content */
+  .pop h3,.sheet h3{font-family:'Playfair Display',serif;font-weight:500;font-size:20px;color:var(--ink);line-height:1.2}
+  .subj{color:var(--label);margin:7px 0 14px}
+  .kinds{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .kind{display:flex;gap:10px;align-items:flex-start;padding:10px 11px;border-radius:10px;background:#fff;border:.5px solid var(--hairline)}
+  .kind .n{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--sage-accent);display:flex;align-items:center;justify-content:center;flex:none;background:var(--parchment);font-size:11px}
+  .kind .n.b{border-color:var(--burgundy)}.kind .n.g{border-color:#b8aa9a}
+  .kind u{text-decoration:none;font-family:'Playfair Display',serif;font-size:14.5px;color:var(--ink);display:block}
+  .kind s{text-decoration:none;display:block;font-size:11.5px;color:#8a7a6c;margin-top:2px;line-height:1.35}
+  .cancel{display:block;margin:12px auto 0;background:none;border:none;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#a08a78}
+  .notes{position:absolute;left:40px;bottom:24px;width:520px;background:rgba(253,250,245,.92);border:.5px solid var(--hairline);border-radius:12px;padding:14px 16px;font-size:12.5px;line-height:1.55;color:#4a3a30;z-index:30;backdrop-filter:blur(6px)}
+  .notes b{font-weight:500;color:var(--body-ink)}
+</style>
+</head>
+<body>
+<div class="bar"><h1>Drawer v9 · locked: D stage block + 1 desk card · toggles kept for comparison</h1>
+  <div class="grp"><span class="k">Chrome</span><div class="seg" id="cseg"><button data-c="cA">A · Ink masthead</button><button data-c="cB">B · White body</button><button data-c="cC">C · Framed</button><button class="on" data-c="cD">D · Stage block</button></div></div>
+  <div class="grp"><span class="k">Pop-out</span><div class="seg" id="gseg"><button class="on" data-g="g1">1 · Desk card</button><button data-g="g2">2 · Second column</button><button data-g="g3">3 · In-drawer sheet</button></div></div>
+</div>
+<div class="mast">ScriptAlly / Queries / <b>Jonathan Marsh</b></div>
+<div class="win cD g1" id="win">
+  <div class="page" id="page"></div>
+  <div class="scrim"></div>
+  <div class="pop" id="pop"></div>
+  <div class="drawer" id="drawer"></div>
+</div>
+<div class="notes" id="notes"></div>
+
+<script>
+const dotOut=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
+const dotIn=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4c6249" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>`;
+const hour=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 3h12M6 21h12M8 3v4l4 5-4 5v4M16 3v4l-4 5 4 5v4"/></svg>`;
+const parcel=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 8l9-5 9 5v9l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v9M7.5 5.5l9 5"/></svg>`;
+document.getElementById("page").innerHTML=Array.from({length:9},(_,i)=>`<div class="gcard"><div class="b ${['','p','s','','','g','','p',''][i]}"></div></div>`).join("");
+
+const kinds=`<h3>What happened?</h3><div class="subj mono">Jonathan Marsh · The Marsh Agency · Murphy's Day Out</div>
+  <div class="kinds">
+    <div class="kind"><span class="n">${dotIn}</span><span><u>Asked for a partial</u><s>Pages or chapters — you'll say how many</s></span></div>
+    <div class="kind"><span class="n">${dotIn}</span><span><u>Asked for the full</u><s>The whole manuscript</s></span></div>
+    <div class="kind"><span class="n">${dotIn}</span><span><u>Asked for revisions</u><s>Revise and resubmit</s></span></div>
+    <div class="kind"><span class="n b">✓</span><span><u>Offered representation</u><s>The call</s></span></div>
+    <div class="kind"><span class="n g">×</span><span><u>Passed</u><s>A no, with or without a reason</s></span></div>
+    <div class="kind"><span class="n g">···</span><span><u>Closed it yourself</u><s>Withdrawn, or gone quiet for good</s></span></div>
+  </div><button class="cancel">Cancel</button>`;
+
+function drawerHTML(c,g){
+  const framed=c==="cC";
+  const band = framed
+    ? `<div class="pband">${dotIn}<span class="word">Tracking</span><span class="stg">Partial Requested · with you</span><span class="r mono">2 of 26</span></div>`
+    : `<div class="pband">${dotIn}<span class="word">Partial Requested</span><span class="r mono">With you</span></div>`;
+  const inner=`
+  <div class="pbar"><span class="icb">‹</span><span class="icb">›</span>${framed?"":'<span class="pos mono">2 OF 26</span>'}<span class="sp"></span><span class="act pink live">Mark sent</span><span class="act">Mark closed</span><span class="icb">✕</span></div>
+  ${band}
+  <div class="phead"><div class="avatar">JM</div><div><div class="nm">Jonathan Marsh</div><div class="ag">The Marsh Agency</div></div>${c==="cD"?'<div class="illo hdr">illustration<br>stage-specific<br>130×78</div>':''}<div class="snt mono">Sent 22 Aug 2026<br>via Post</div></div>
+  <div class="pms"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5a2 2 0 012-2h13v18H6a2 2 0 01-2-2zm0 0a2 2 0 012-2h13"/></svg><span>Murphy's Day Out</span><span class="m mono">Thriller · 50,000 words</span><span class="v mono">Version 2 · Mar 2026</span></div>
+  <div class="tabs"><span class="tab on">Tracking</span><span class="tab">Agent</span><span class="tab">Notes</span></div>
+  <div class="body">
+    <div class="stats"><div class="stat"><div><div class="big">14<span>days</span></div><div class="cap mono">since request</div></div></div><div class="stat"><div><div class="big">—</div><div class="cap mono">reply expected by</div></div></div></div>
+    <div class="rail">
+      <div class="rung"><span class="node">${dotOut}</span><div class="rline"><span class="ev">Query sent</span><span class="via">· Post</span><span class="when mono">22 Aug</span></div>
+        <div class="strip"><span class="slot">${parcel}</span><span class="seal"><div class="k">Package</div><div class="n">Standard UK package</div></span><span class="chips"><span class="chip">Letter</span><span class="chip">Synopsis</span><span class="chip">First 3 chapters</span></span></div></div>
+      <div class="rung"><span class="node in">${dotIn}</span><div class="rline"><span class="ev">Partial requested</span><span class="when mono">22 Aug</span></div><div class="rbody">Marsh asked for <span class="chap">the first partial</span> — 50 pages</div></div>
+      <div class="rung"><span class="node wait">${hour}</span><div class="rline"><span class="ev it">Waiting to send</span><span class="sub">— nothing owed by Marsh until it goes</span><span class="when mono">14 days</span></div></div>
+    </div>
+    ${g==="g3"?`<div class="sheet">${kinds}</div>`:""}
+  </div>`;
+  return framed?`<div class="frame">${inner}</div>`:inner;
+}
+function popHTML(g){
+  if(g==="g1") return `<div class="card"><div class="illo desk">spot<br>56</div>${kinds}</div>`;
+  if(g==="g2") return `<div class="col-h"><span class="strip"></span><b>Record response</b><span class="mono" style="color:var(--label)">Jonathan Marsh</span><span class="icb x">✕</span></div><div class="card">${kinds}</div>`;
+  return "";
+}
+const NOTES={
+ cA:`<b>A · Ink masthead.</b> Top bar, band and identity sit on near-black ink with parchment type; the manuscript line takes the stage tint beneath; tabs and body are white. Most contrast, most "record". Risk: heavy against a parchment page, and the band's stage colour is demoted to one strip.`,
+ cB:`<b>B · White body.</b> Chrome stays parchment (bar, band, identity, manuscript), the tab rail and body go white with an ink underline on the active tab. The rungs and strips sit on white like the cards do. Cheapest change; the split alone reads as structure.`,
+ cC:`<b>C · Framed.</b> The drawer becomes a MountCard — parchment rim, inset burgundy hairline frame, sage band header like every other panel in the app, with the stage as a pill in the band, white body. Most consistent with the rest of the product; the stage tint gets smaller.`,
+ cD:`<b>D · Stage block (locked).</b> Illustration slot top-right of the header block, 130×78, a stage-specific spot (paper plane for out, opened envelope for in, etc.).  Band, identity and manuscript become one header block on the stage tint — the whole top of the drawer is pink or sage — with a white body beneath. Loudest use of the ladder; the query's state is the drawer's colour.`,
+ g1:`<b>1 · Desk card (locked)</b> — bounds: top = content-window top + 12, bottom = window bottom − 12, never taller, internal scroll; 56px round spot-illustration slot top-right of the card.  a card beside the drawer, top-anchored inside the content window with a 12px inset, never taller than the window, internal scroll if it must. Notch to the button. Keeps the timeline visible. Still a second geometry to get right.`,
+ g2:`<b>2 · Second column.</b> The pop-out is a full-height column the same height as the drawer, with its own small header (accent strip, verb, agent, ✕). No notch, no clamping, nothing can clip — it's just another drawer. The timeline stays visible beside it and the ghost rung still appears.`,
+ g3:`<b>3 · In-drawer sheet.</b> The pop-out rises inside the drawer's body, below the header and tabs, over the lower part of the timeline. One geometry, no second column; the header/identity stay in view; the top of the timeline stays visible. Ghost rung must be scrolled to.`,
+};
+let C="cD",G="g1";
+function render(){
+  const w=document.getElementById("win"); w.className="win "+C+" "+G;
+  document.getElementById("drawer").innerHTML=drawerHTML(C,G);
+  document.getElementById("pop").innerHTML=popHTML(G);
+  document.getElementById("notes").innerHTML=NOTES[C]+"<br><br>"+NOTES[G];
+}
+document.querySelectorAll("#cseg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#cseg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");C=b.dataset.c;render();});
+document.querySelectorAll("#gseg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#gseg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");G=b.dataset.g;render();});
+render();
+</script>
+</body>
+</html>

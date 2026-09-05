@@ -30,6 +30,7 @@
     "design-refs/timeline-v65.html": "981b360d6b76d474e9d4091ce547908afd5a17d6a61d6967bf42d8b2137dcfe7",
     "design-refs/todo-fullscreen-final.html": "76db9d9d4d65d06580846d7255c147b7a71e525e2aa4b3d81b41f6ab3cfe7cb0",
     "design-refs/todo-sort-filter.html": "b8f70e1077442b79d9642fe6b1599318987ea64cfb82d73b80a3edc263c397d5",
-    "design-refs/todo-belongs.html": "fe42cd9a5806eee3f44e4526c2e29af49762d4eef0f780c6294f8fabaf719b15"
+    "design-refs/todo-belongs.html": "fe42cd9a5806eee3f44e4526c2e29af49762d4eef0f780c6294f8fabaf719b15",
+    "design-refs/query-panel-v9-stage-block-desk-card.html": "e93c658c823e1bba538dd3ba4ca928d24c253f6567f9a20b841f2591aaf85c1d"
   }
 }
