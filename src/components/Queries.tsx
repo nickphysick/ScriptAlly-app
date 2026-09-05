@@ -66,6 +66,7 @@ import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
 import { QueryCentreGrid, type GridCard } from "./queries/QueryCentreGrid";
 import { QueryPanel, type PanelRung } from "./queries/QueryPanel";
+import { SentMaterials } from "./queries/SentMaterials";
 import { PortalMenu } from "./todo/PortalMenu";
 import { BrandDatePicker } from "./forms/BrandDatePicker";
 import { rungFacts, waitProgress } from "../lib/queryPanelRungs";
@@ -5820,7 +5821,39 @@ export const Queries: React.FC<{
                */
               tracking={(() => {
                 const ta = getPrimaryAction(activeQuery.status as QueryStatus);
+                /**
+                 * §2 — THE SEND'S MATERIALS, READ-ONLY UNDER THE SEND RUNG. The same three states
+                 * the retired record view drew, from the same derivations: a PACKAGED send is the
+                 * blue `PackageGroup` strip (parcel slot · PACKAGE seal · chips), a LOOSE send is
+                 * the floating `LooseMaterials` chips, and a send with NOTHING recorded is the
+                 * dashed prompt. Editing is NOT here — decision 2 moves it into the ⋯'s mistake
+                 * branch, so the pills carry no popovers, no ×, and no ＋ Attach.
+                 *
+                 * ⚠️ THE AGENT'S EXPECTED SET IS SUPPRESSED BESIDE ANY ATTACHMENT (D6/D7) and
+                 * beside a DANGLING packageId (F-AD): what the agency usually asks for is not
+                 * evidence of what went. The fallback survives only where the query carries
+                 * nothing at all — where it answers "what does this agency ask for".
+                 */
+                const sentExtra = (
+                  <SentMaterials
+                    query={activeQuery}
+                    base={activeQuery.packageId ? ((activeQuery.materialsWanted ?? []) as (string | QueryMaterial)[]) : baseMaterialsFor(activeQuery, activeAgent)}
+                    packages={packages}
+                    portion={queryPortion(activeQuery, activeAgent)}
+                    onViewPackages={() => onNavigate?.("manuscripts", "Submission packages")}
+                  />
+                );
+                /**
+                 * ⚠️ THE DOTTED METHOD OPENS THE FORK, NEVER A DIRECT WRITE (decision 1). The
+                 * affordance survives; the shortcut is withdrawn. It is passed ONLY when the send
+                 * rung is a real activity — a synthesised root (dateSent with no Queried doc) has
+                 * no record to correct, and TimelineRows' own convention renders plain text when
+                 * the handler is absent rather than a dead control.
+                 */
+                const sentActivity = trackingEvents.find((e: any) => (e.type as QueryStatus) === QueryStatus.QUERIED);
                 return (
+                  /* the drawer's own rhythm for the shared renderer — the ref's 19px titles; a
+                     token override at the use site, never an edit to TimelineRows */
                   <QueryTimeline
                     query={activeQuery}
                     agent={activeAgent}
@@ -5831,6 +5864,11 @@ export const Queries: React.FC<{
                     onNudge={() => setIsNudgeOpen(true)}
                     onSetExpectedDate={(iso) => commitExpectedDate(iso)}
                     onMarkClosed={() => setIsCloseMenuOpen(true)}
+                    onEditSendMethod={sentActivity ? () => {
+                      const entry = rungEntry(sentActivity.id);
+                      if (entry) setCorrecting({ step: "fork", entry });
+                    } : undefined}
+                    sentExtra={sentExtra}
                   />
                 );
               })()}

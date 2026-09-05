@@ -35,16 +35,24 @@ describe("the query reading pane keeps the four material rows", () => {
 });
 
 describe("⚠️ the editor is NOT gated on status — that is what makes the exclusion safe", () => {
-  it("no terminal-status guard stands between the pane and its materials editor", () => {
-    /* the materials block is `sentExtra`; a status gate anywhere inside it would strand exactly the
-       queries Phase B stopped raising tasks for. */
-    const i = code.indexOf("sentExtra={");
-    expect(i, "sentExtra not found — the anchor moved").toBeGreaterThan(-1);
-    const block = code.slice(i, i + 9000);
-    expect(block).not.toContain("isTerminalStatus");
-    expect(block).not.toContain("QueryStatus.REJECTED");
-    expect(block).not.toContain("QueryStatus.WITHDRAWN");
-    expect(block).not.toContain("QueryStatus.NO_RESPONSE");
+  it("no terminal-status guard stands between the pane and its materials surface", () => {
+    /**
+     * RETARGETED (drawer cut 2, §2) — same law, right artefact. The materials surface is
+     * `SentMaterials` now (the drawer's read-only strip/loose/prompt; editing moves into the ⋯
+     * fork, which is not status-gated either). The old form sliced 9000 chars forward from
+     * `sentExtra={` in Queries.tsx — a window that, after the drawer rebuild, swept whatever JSX
+     * happened to follow the mount and failed on a close-reasons menu it was never about.
+     * A status gate that would strand closed queries can live in exactly two places: inside the
+     * renderer, or as a conditional on the mount. Both are asserted.
+     */
+    const mat = readFileSync(join(process.cwd(), "src/components/queries/SentMaterials.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    expect(mat).not.toContain("isTerminalStatus");
+    expect(mat).not.toContain("QueryStatus.REJECTED");
+    expect(mat).not.toContain("QueryStatus.WITHDRAWN");
+    expect(mat).not.toContain("QueryStatus.NO_RESPONSE");
+    /* the mount: `sentExtra` is assigned unconditionally — no turn/status test guards it */
+    expect(code).toMatch(/const sentExtra = \(\n\s+<SentMaterials/);
   });
 
   it("⚠️ the two halves reconcile: what the task list drops, the pane still reaches", () => {

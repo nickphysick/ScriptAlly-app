@@ -82,7 +82,12 @@
   background: #fff; border: 0.5px solid #e0d5c8; border-radius: 99px; padding: 1px 7px;
 }
 
-.qpn-track { margin-top: 18px; }
+.qpn-track { margin-top: 18px; --tl-title: 19px; }
+/* ⚠️ THE 19px IS THE DRAWER'S RHYTHM FOR THE SHARED RENDERER — the ref draws event titles at 19
+   where the retired record view set the :root 16. A token override at the use site: TimelineRows
+   is untouched, FocusFlow's condensed copy keeps the :root value, and retuning the drawer is one
+   line here rather than an edit to a renderer three surfaces share. */
+.qpn-chip { cursor: default; }
 .qpn-hint {
   text-align: center; margin-top: 24px; color: #c0b0a0;
   font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px;
