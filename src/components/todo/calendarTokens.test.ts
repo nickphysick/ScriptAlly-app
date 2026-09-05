@@ -380,7 +380,7 @@ describe("the scrawl is gone from the calendar", () => {
    * cannot come back wearing a new class. The `tl-scr` clause above is untouched and still forbids
    * the original by name.
    */
-  it("Caveat sets exactly TWO things — the flag's deed and the card's lateness — both the action's hand", () => {
+  it("Caveat sets exactly THREE things — the bar's deed, the card's lateness, the drawer's primary — all the action's hand", () => {
     const css = stripAll(readFileSync(join(process.cwd(), "src/components/todo/todoCalendar.css"), "utf8"));
     /* every rule in the calendar sheet that names the face, with its selector */
     const setters = [...css.matchAll(/(?:^|\})\s*([^{}]+?)\s*\{([^}]*Caveat[^}]*)\}/g)]
@@ -389,7 +389,10 @@ describe("the scrawl is gone from the calendar", () => {
       /* ⚠️ RETARGETED TWICE, AND THE LAW HELD BOTH TIMES: Caveat is the ACTION's hand and nothing
          else's. v60's flag (`.tl-cap .w`) carried it; §E's action label (`.tl-actlab`) inherits the
          role with the element. One selector, the action's, and the app's own hand untouched. */
-      .toEqual([".tl-cccv", ".tl-actlab"].sort());
+            /* ⚠️ THREE SITES, ONE ROLE (v65). The bar's action label, the card's action lateness and
+         the DRAWER's primary-deed lateness — all three are the ACTION's hand, which is the law
+         this census has held through four retargets. The app's own hand is still untouched. */
+      .toEqual([".tl-actlab", ".tl-cccv", ".tl-dwar .cv"].sort());
     /* the page and the copy module may not set it at all — a flag's deed is styled, never inlined */
     for (const f of ["src/components/todo/TodoCalendarPage.tsx", "src/lib/timelineCopy.ts"]) {
       const src = stripAll(readFileSync(join(process.cwd(), f), "utf8"));
