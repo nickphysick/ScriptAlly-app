@@ -100,9 +100,24 @@ describe("⚠️ the legacy edit sheet is unreachable from the live page", () =>
     expect(liveBranch, "the live page still opens the legacy edit sheet").not.toContain("openEditQuery");
   });
 
-  it("the panel's materials Edit toggles in place instead", () => {
-    expect(liveBranch).toContain("setPanelMatsEdit");
-    expect(liveBranch).toContain("onToggleMaterial");
+  /**
+   * RETARGETED (drawer cut 2, §1) — the law this held was "the panel does not hand the reader to
+   * the legacy sheet". The in-place materials toggle it pointed at is withdrawn by decision 1
+   * (every timeline edit goes through the fork); the surviving claim is that the drawer's
+   * Tracking tab mounts the SHARED timeline with the ⋯ on — the same TimelineRows FocusFlow
+   * renders bare (todoSheet.test.ts holds that half).
+   */
+  it("the drawer's tracking tab is the shared timeline, ⋯ on", () => {
+    const mount = (() => {
+      const at = liveBranch.indexOf("tracking={(() => {");
+      expect(at, "the drawer's tracking mount is missing").toBeGreaterThan(-1);
+      const end = liveBranch.indexOf("notesTab=", at);
+      expect(end, "the notes tab no longer bounds the tracking slice").toBeGreaterThan(at);
+      return liveBranch.slice(at, end);
+    })();
+    expect(mount).toContain("<QueryTimeline");
+    expect(mount, "the ⋯ is off — corrections unreachable from the drawer").toContain("onEditEntry={onEditEntry}");
+    expect(mount).toContain("onDeleteEntry={onDeleteEntry}");
   });
 
   it("⚠️ and the only surviving caller is inside the branch Phase 6 deletes", () => {
@@ -130,5 +145,85 @@ describe("⚠️ the legacy edit sheet is unreachable from the live page", () =>
     expect(src).toMatch(/rung-correct[\s\S]{0,120}onEditEntry/);
     expect(src).toMatch(/rung-changed[\s\S]{0,120}openRecord/);
     expect(src).toMatch(/rung-delete[\s\S]{0,120}onDeleteEntry/);
+  });
+});
+
+/* ══ drawer cut 2 · §1 — the tabbed body ═══════════════════════════════════════════════════════ */
+import { renderToStaticMarkup } from "react-dom/server";
+import React from "react";
+import { QueryPanel } from "./QueryPanel";
+import { cardFacts } from "../../lib/queryCardFacts";
+import { QueryStatus } from "../../types";
+
+const draw = (status: QueryStatus, extra: Partial<React.ComponentProps<typeof QueryPanel>> = {}) =>
+  renderToStaticMarkup(
+    React.createElement(QueryPanel, {
+      open: true,
+      facts: cardFacts({ id: "q1", status, dateSent: "2026-04-03" } as never, new Date("2026-09-01")),
+      status,
+      name: "Priya Raman", agency: "Raman Literary", initials: "PR",
+      sentLabel: "3 Apr 2026", viaLabel: "Email",
+      manuscriptTitle: "Murphy's Day Out",
+      manuscriptMeta: "Thriller · 50,000 words",
+      versionLabel: "Version 2 · Mar 2026",
+      position: { index: 2, total: 26 },
+      primaryLabel: "Record response",
+      onClose: () => {}, onStep: () => {},
+      elapsed: { value: "13", unit: "days", caption: "waiting so far" },
+      expectedLabel: "12 Sept",
+      tracking: React.createElement("div", { className: "fixture-track" }, "the timeline"),
+      noteCount: 1,
+      ...extra,
+    }),
+  );
+
+describe("§1 · the tabbed body", () => {
+  const css = readFileSync(join(process.cwd(), "src/components/queries/queryPanel.css"), "utf8");
+  const decls = css.replace(/\/\*[\s\S]*?\*\//g, "");
+
+  it("the manuscript title appears exactly once in the drawer — in the header", () => {
+    const html = draw(QueryStatus.PARTIAL_REQUESTED);
+    const hits = html.split("Murphy&#x27;s Day Out").length - 1;
+    expect(hits, `the title renders ${hits} times`).toBe(1);
+    /* and it is the header's line, above the tab rail — not a body row */
+    expect(html).toMatch(/qpn-ms[\s\S]*?qpn-tabs/);
+  });
+
+  it("no MountPanel and no framed section inside the drawer body", () => {
+    const src = readFileSync(join(process.cwd(), "src/components/queries/QueryPanel.tsx"), "utf8");
+    expect(src).not.toContain("MountPanel");
+    const html = draw(QueryStatus.QUERIED);
+    for (const cls of ["qpn-frame", "qpn-sband", "qpn-sect"]) {
+      expect(html, `${cls} survives in the rendered drawer`).not.toMatch(new RegExp(`["\\s]${cls}["\\s]`));
+    }
+  });
+
+  it("the timeline renders straight on parchment — the tracking node, unframed", () => {
+    const html = draw(QueryStatus.QUERIED);
+    expect(html).toContain("fixture-track");
+    expect(html).toMatch(/qpn-track/);
+  });
+
+  /**
+   * ⚠️ THE UNDERLINE AND THE ACCENT ARE ONE VARIABLE, asserted at the stylesheet where the
+   * binding lives: `.qpn-tab--on` reads `--stage-accent` and nothing else, and the accent map
+   * derives each family's accent from the DEEPEST step of its own hue (decision 3 — out-3, in-3,
+   * offer, closed; never a new token). Three stages then agree by construction: the rendered root
+   * carries the stage class, the class sets the var, the underline reads the var.
+   */
+  it("the active tab underline reads --stage-accent, mapped to the deepest step per family", () => {
+    expect(decls).toMatch(/\.qpn-tab--on[^{]*\{[^}]*border-bottom-color:\s*var\(--stage-accent/);
+    expect(decls).toMatch(/\.qpn\.qcc--s-out-1[^{]*\{\s*--stage-accent:\s*var\(--stage-out-3\)/);
+    expect(decls).toMatch(/\.qpn\.qcc--s-in-1[^{]*\{\s*--stage-accent:\s*var\(--stage-in-3\)/);
+    expect(decls).toMatch(/\.qpn\.qcc--s-closed\s*\{\s*--stage-accent:\s*var\(--stage-closed\)/);
+    for (const stage of ["out-1", "in-2", "closed"]) {
+      const html = draw(stage === "out-1" ? QueryStatus.QUERIED : stage === "in-2" ? QueryStatus.FULL_REQUESTED : QueryStatus.REJECTED);
+      expect(html, `the root does not carry qcc--s-${stage}`).toContain(`qcc--s-${stage}`);
+    }
+  });
+
+  it("the notes count pill omits itself at zero", () => {
+    expect(draw(QueryStatus.QUERIED, { noteCount: 0 })).not.toMatch(/qpn-tabn/);
+    expect(draw(QueryStatus.QUERIED, { noteCount: 3 })).toContain(">3</span>");
   });
 });

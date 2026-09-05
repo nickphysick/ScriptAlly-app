@@ -29,7 +29,65 @@
 .qpn[data-on="true"] { transform: translateX(0); }
 /* the log sheet's width — Phase 5 */
 .qpn--wide { width: 660px; }
-.qpn-inner { overflow-y: auto; flex: 1; padding-bottom: 30px; }
+.qpn-inner { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+/**
+ * ⚠️ THE SCROLLER IS THE TAB BODY, NOT THE DRAWER. Band, identity row, manuscript line and the
+ * tab rail are chrome — the ref never scrolls them away, and "sticky under the identity row"
+ * is satisfied structurally: a rail outside the scroller cannot leave. `position: sticky` on the
+ * rail would be a dead claim on a box that cannot move, which this repo has an audit about.
+ */
+.qpn-body { overflow-y: auto; flex: 1; min-height: 0; padding: 18px 26px 40px; }
+
+/* ── the stage accent — decision 3 ──────────────────────────────────────────────────────────────
+   The DEEPEST step of the query's own hue, derived from the same stage class the band reads.
+   Not a new token: out-* resolves to out-3, in-* to in-3; offer and closed are their own single
+   steps. Every accent surface in the drawer (tab underline, desk strip, rung ring) reads
+   `--stage-accent` and nothing else, so a retuned ladder moves all of them together. */
+.qpn.qcc--s-out-1, .qpn.qcc--s-out-2, .qpn.qcc--s-out-3 { --stage-accent: var(--stage-out-3); }
+.qpn.qcc--s-in-1, .qpn.qcc--s-in-2, .qpn.qcc--s-in-3 { --stage-accent: var(--stage-in-3); }
+.qpn.qcc--s-offer { --stage-accent: var(--stage-offer); }
+.qpn.qcc--s-closed { --stage-accent: var(--stage-closed); }
+
+/* ── the header's manuscript line ─────────────────────────────────────────────────────────────── */
+.qpn-ms {
+  display: flex; align-items: center; gap: 9px; padding: 12px 26px 4px;
+  font-family: var(--font-serif); font-size: 14.5px; color: #1c130f;
+}
+.qpn-ms svg { flex: none; }
+.qpn-mst { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qpn-msm {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: #9c8878; margin-left: 2px; flex: none;
+}
+.qpn-msv {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: #9c8878; margin-left: auto; flex: none;
+}
+
+/* ── the tab rail ─────────────────────────────────────────────────────────────────────────────── */
+.qpn-tabs {
+  display: flex; gap: 2px; padding: 14px 26px 0; border-bottom: 0.5px solid #ece0d2;
+  background: #fdfaf5; flex: none;
+}
+.qpn-tab {
+  padding: 10px 14px 12px; font-family: var(--font-serif); font-size: 15px; color: #8a7a6c;
+  cursor: pointer; border: none; background: none;
+  border-bottom: 2px solid transparent; margin-bottom: -0.5px;
+  display: flex; align-items: center; gap: 7px;
+}
+.qpn-tab--on { color: #1c130f; border-bottom-color: var(--stage-accent, #e0d5c8); }
+.qpn-tabn {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; color: #9c8878;
+  background: #fff; border: 0.5px solid #e0d5c8; border-radius: 99px; padding: 1px 7px;
+}
+
+.qpn-track { margin-top: 18px; }
+.qpn-hint {
+  text-align: center; margin-top: 24px; color: #c0b0a0;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px;
+  letter-spacing: 0.13em; text-transform: uppercase;
+}
 
 /* ── top bar ────────────────────────────────────────────────────────────────────────────────── */
 .qpn-bar {

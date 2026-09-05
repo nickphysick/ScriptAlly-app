@@ -16,13 +16,27 @@
  * Mark closed, the correction fork — all of them are surfaces that already exist. This file knows
  * which one to ask for and nothing about what any of them does.
  */
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./queryCard.css";
 import "./queryPanel.css";
 import { StatusDot } from "../StatusDot";
-import { MATERIAL_ROW_NAMES, type MaterialKind } from "../../lib/agentMaterials";
-import { MATERIAL_SLOTS, type CardFacts } from "../../lib/queryCardFacts";
+import type { CardFacts } from "../../lib/queryCardFacts";
 import type { QueryStatus } from "../../types";
+
+/**
+ * ⚠️ THE TAB PERSISTS PER SESSION, NOT PER QUERY AND NOT PER ACCOUNT. A reader stepping ←/→
+ * through queries on the Agent tab is comparing agents; snapping each new query back to Tracking
+ * would undo the comparison on every step. sessionStorage, not localStorage — "last used" is a
+ * fact about this sitting, and next week's visit starts at Tracking like the brief says.
+ */
+export type PanelTab = "tracking" | "agent" | "notes";
+const TAB_KEY = "sa.qpnTab";
+const readTab = (): PanelTab => {
+  try {
+    const v = sessionStorage.getItem(TAB_KEY);
+    return v === "agent" || v === "notes" ? v : "tracking";
+  } catch { return "tracking"; }
+};
 
 export interface PanelRung {
   /** Stable id — the activity's, where there is one. `null` for the derived waiting rung. */
@@ -53,6 +67,14 @@ export interface QueryPanelProps {
   sentLabel: string;
   viaLabel: string;
   manuscriptTitle?: string | null;
+  /** Mono `{genre} · {words} words`, beside the title on the header's manuscript line. */
+  manuscriptMeta?: string | null;
+  /**
+   * `Version 2 · Mar 2026`, right-aligned on the manuscript line — ONLY when the query records a
+   * sent version (manuscriptHeld, falling back to the package's opening read). Absent = omitted:
+   * a version label on a query that never named one would state a fact nobody recorded.
+   */
+  versionLabel?: string | null;
   /** `3 OF 44` — position in the CURRENT filtered/sorted order. */
   position: { index: number; total: number } | null;
   primaryLabel: string;
@@ -61,19 +83,18 @@ export interface QueryPanelProps {
   onMarkClosed?: () => void;
   onClose: () => void;
   onStep: (delta: 1 | -1) => void;
-  rungs: PanelRung[];
   /** The two trays: elapsed, and the expected reply. */
   elapsed: { value: string; unit: string; caption: string };
   expectedLabel: string;
-  /** `null` where nothing has been recorded — the dashed prompt shows instead. */
-  materialsRecorded: boolean;
-  onListMaterials?: () => void;
-  onAttachPackage?: () => void;
-  onEditMaterials?: () => void;
-  /** The section's Edit toggle, swapping the read rows for the four toggle rows. */
-  matsEditing?: boolean;
-  onToggleMaterial?: (kind: MaterialKind) => void;
-  notes?: React.ReactNode;
+  /**
+   * ⚠️ THE TABS' BODIES ARRIVE AS NODES, BUILT BY THE PAGE. The Tracking tab is the shared
+   * QueryTimeline with the page's own correction/nudge/record wiring; building it in here would
+   * mean threading fifteen handlers through this component to a renderer that already exists.
+   * The drawer owns WHICH tab shows and nothing about what any tab does.
+   */
+  tracking: React.ReactNode;
+  agentTab?: React.ReactNode;
+  notesTab?: React.ReactNode;
   noteCount: number;
 }
 
@@ -85,13 +106,17 @@ const Icon: React.FC<{ d: string; size?: number; stroke?: string; width?: number
 );
 
 export const QueryPanel: React.FC<QueryPanelProps> = ({
-  open, facts, status, name, agency, initials, sentLabel, viaLabel, manuscriptTitle,
-  position, primaryLabel, onPrimary, onNudge, onMarkClosed, onClose, onStep, rungs,
-  elapsed, expectedLabel, materialsRecorded, onListMaterials, onAttachPackage, onEditMaterials,
-  matsEditing = false, onToggleMaterial,
-  notes, noteCount,
+  open, facts, status, name, agency, initials, sentLabel, viaLabel,
+  manuscriptTitle, manuscriptMeta, versionLabel,
+  position, primaryLabel, onPrimary, onNudge, onMarkClosed, onClose, onStep,
+  elapsed, expectedLabel, tracking, agentTab, notesTab, noteCount,
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
+  const [tab, setTab] = useState<PanelTab>(readTab);
+  const pickTab = (t: PanelTab) => {
+    setTab(t);
+    try { sessionStorage.setItem(TAB_KEY, t); } catch { /* private windows: the default is fine */ }
+  };
 
   /**
    * ⚠️ ESCAPE AND THE ARROWS ARE BOUND WHILE OPEN AND ONLY WHILE OPEN, and both skip an editable.
@@ -169,15 +194,41 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
             <div className="qpn-snt">Sent {sentLabel}<br />via {viaLabel}</div>
           </div>
 
-          {/* ══ Tracking ══ */}
-          <section className="qpn-sect">
-            <div className="qpn-frame">
-              <div className="qpn-sband">
-                <Icon d="M2 12h4l3-8 4 16 3-8h6" stroke="#5a6e58" />
-                <span className="qpn-ttl">Tracking</span>
-                <span className="qpn-tag">{status}</span>
-              </div>
-              <div className="qpn-sbody">
+          {/**
+            * ⚠️ THE MANUSCRIPT LINE LIVES IN THE HEADER, ONCE. It used to sit inside the Tracking
+            * section, which made it a fact about the timeline rather than about the query — and it
+            * vanished with the tab. Here it is true on every tab, and the assertion that the title
+            * appears EXACTLY once in the drawer is what keeps a second copy from creeping back.
+            */}
+          {manuscriptTitle && (
+            <div className="qpn-ms">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" strokeWidth="1.8" aria-hidden="true"><path d="M4 19V5a2 2 0 012-2h13v18H6a2 2 0 01-2-2zm0 0a2 2 0 012-2h13" /></svg>
+              <span className="qpn-mst">{manuscriptTitle}</span>
+              {manuscriptMeta && <span className="qpn-msm">{manuscriptMeta}</span>}
+              {versionLabel && <span className="qpn-msv">{versionLabel}</span>}
+            </div>
+          )}
+
+          <div className="qpn-tabs" role="tablist" aria-label="Query detail">
+            {(["tracking", "agent", "notes"] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                role="tab"
+                aria-selected={tab === t}
+                className={`qpn-tab${tab === t ? " qpn-tab--on" : ""}`}
+                onClick={() => pickTab(t)}
+              >
+                {t === "tracking" ? "Tracking" : t === "agent" ? "Agent" : "Notes"}
+                {/* the count pill omits itself at zero — "0 notes" is a sentence about nothing */}
+                {t === "notes" && noteCount > 0 && <span className="qpn-tabn">{noteCount}</span>}
+              </button>
+            ))}
+          </div>
+
+          <div className="qpn-body">
+            {tab === "tracking" && (
+              <>
                 <div className="qpn-stats">
                   <div className="qpn-stat">
                     <Icon d="M12 7v5l3 2" stroke="#8a9e88" width={1.8} size={15} />
@@ -194,130 +245,14 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
                     </div>
                   </div>
                 </div>
-
-                {manuscriptTitle && (
-                  <div className="qpn-msline">
-                    <Icon d="M4 19V5a2 2 0 012-2h13v18H6a2 2 0 01-2-2zm0 0a2 2 0 012-2h13" stroke="#7c3a2a" width={1.8} />
-                    {manuscriptTitle}
-                  </div>
-                )}
-
-                <div className="qpn-rail">
-                  {rungs.map((r, i) => (
-                    <div className="qpn-rung" key={r.id ?? `derived-${i}`}>
-                      <span className="qpn-node"><StatusDot status={r.status} overrideSize={20} /></span>
-                      <div className={`qpn-rcard${r.pending ? " qpn-rcard--pend" : ""}`}>
-                        <div className="qpn-rline">
-                          <span className="qpn-ev" style={r.pending ? { fontStyle: "italic" } : undefined}>{r.event}</span>
-                          {r.detail && (r.onEditDetail
-                            ? <button type="button" className="qpn-via qpn-ed" onClick={r.onEditDetail} title="Change how it was sent">{r.detail}</button>
-                            : <span className="qpn-via">{r.detail}</span>)}
-                          {r.onEditDate
-                            ? <button type="button" className="qpn-when qpn-ed" onClick={r.onEditDate} title="Change the date">{r.dateLabel}</button>
-                            : <span className="qpn-when">{r.dateLabel}</span>}
-                        </div>
-
-                        {/* the dashed prompt, on the send rung, when nothing is recorded */}
-                        {i === 0 && !materialsRecorded && (
-                          <div className="qpn-whatwent">
-                            What went with this query?
-                            {onAttachPackage && <button type="button" className="qpn-b qpn-b--slate" onClick={onAttachPackage}>Attach a package</button>}
-                            {onListMaterials && <button type="button" className="qpn-b" onClick={onListMaterials}>List materials</button>}
-                          </div>
-                        )}
-
-                        {r.progress && (
-                          <div className="qpn-prog">
-                            <div className="qpn-progbar">
-                              <i className={r.progress.past ? "qpn-past" : undefined} style={{ width: `${r.progress.pct}%` }} />
-                            </div>
-                            <div className="qpn-lbl">
-                              <span>{r.progress.sentLabel}</span>
-                              {r.progress.onEditExpected
-                                ? <button type="button" className="qpn-ed" title="Change the expected date"
-                                    onClick={(e) => r.progress!.onEditExpected!(e.currentTarget)}>{r.progress.expectedLabel}</button>
-                                : <span>{r.progress.expectedLabel}</span>}
-                            </div>
-                          </div>
-                        )}
-
-                        {r.onMenu && (
-                          <button type="button" className="qpn-more" title="Correct or delete"
-                            aria-label={`Correct or delete: ${r.event}`}
-                            onClick={(e) => r.onMenu!(e.currentTarget)}>⋯</button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* ══ What went with this query ══ */}
-          <section className="qpn-sect">
-            <div className="qpn-frame">
-              <div className="qpn-sband">
-                <Icon d="M21 12l-8.5 8.5a5 5 0 01-7-7L14 5a3.3 3.3 0 014.7 4.7L10.5 18a1.7 1.7 0 01-2.4-2.4L15 8.5" stroke="#5a6e58" />
-                <span className="qpn-ttl">What went with this query</span>
-                {onEditMaterials && (
-                  <button type="button" className="qpn-edit" onClick={onEditMaterials}>
-                    {matsEditing ? "Done" : "Edit"}
-                  </button>
-                )}
-                <span className="qpn-tag">
-                  {MATERIAL_SLOTS.filter((k) => facts.materials[k]).length} of {MATERIAL_SLOTS.length}
-                </span>
-              </div>
-              <div className="qpn-sbody">
-                {/**
-                  * ⚠️ THE SAME FOUR ROWS IN BOTH STATES, one tick apart. The read view and the edit
-                  * view are the same list — a separate editor would be a second place the four
-                  * slots are named, and this repo has an audit about exactly that.
-                  */}
-                {MATERIAL_SLOTS.map((k) => {
-                  const on = !!facts.materials[k];
-                  if (!matsEditing) {
-                    return (
-                      <div key={k} className={`qpn-row${on ? "" : " qpn-row--no"}`}>
-                        <span>{MATERIAL_ROW_NAMES[k]}</span>
-                        <span className="qpn-v">{facts.materials[k] ?? "—"}</span>
-                      </div>
-                    );
-                  }
-                  return (
-                    <button
-                      key={k}
-                      type="button"
-                      className={`qpn-doc${on ? " qpn-doc--on" : ""}`}
-                      aria-pressed={on}
-                      onClick={() => onToggleMaterial?.(k)}
-                    >
-                      <span className="qpn-cb" aria-hidden="true">
-                        {on && <Icon d="M4 12l5 5L20 7" size={10} stroke="#fdfaf5" width={3.4} />}
-                      </span>
-                      <span className="qpn-docnm">{MATERIAL_ROW_NAMES[k]}</span>
-                      <span className="qpn-v">{facts.materials[k] ?? "Not sent"}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
-
-          {/* ══ Notes ══ */}
-          <section className="qpn-sect">
-            <div className="qpn-frame">
-              <div className="qpn-sband">
-                <Icon d="M8 8h8M8 12h8M8 16h5" stroke="#5a6e58" />
-                <span className="qpn-ttl">Notes</span>
-                <span className="qpn-tag">{noteCount === 1 ? "1 note" : `${noteCount} notes`}</span>
-              </div>
-              <div className="qpn-sbody">
-                {notes ?? <div className="qpn-nempty">Nothing noted yet for this query.</div>}
-              </div>
-            </div>
-          </section>
+                {/* ⚠️ STRAIGHT ON PARCHMENT — no frame, no band. The timeline is the tab. */}
+                <div className="qpn-track">{tracking}</div>
+                <div className="qpn-hint">← → move between queries · esc closes</div>
+              </>
+            )}
+            {tab === "agent" && <div className="qpn-agent">{agentTab}</div>}
+            {tab === "notes" && <div className="qpn-notes">{notesTab}</div>}
+          </div>
         </div>
       </aside>
     </>

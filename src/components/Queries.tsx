@@ -138,7 +138,7 @@ import { queryPortion } from "../lib/queryPortion";
 import { PackageGroup, LooseMaterials } from "./reading-pane/PackageGroup";
 import { VersionLines } from "./reading-pane/VersionLines";
 import { bookVersionsOf } from "../lib/bookVersions";
-import { openingRead, versionsActive, listVersion, UNRECORDED_VERSION } from "../lib/queryVersions";
+import { openingRead, manuscriptHeld, versionsActive, listVersion, UNRECORDED_VERSION } from "../lib/queryVersions";
 import { isPackageLocked, materialsLinkWrites } from "../lib/packageMetrics";
 import { useConfirmAsk } from "./todo/ConfirmAsk";
 import { useOpenEditQuery } from "./EditQueryHost";
@@ -5756,7 +5756,23 @@ export const Queries: React.FC<{
               initials={panelRow.initials}
               sentLabel={activeQuery.dateSent ? fmtShortISO(activeQuery.dateSent) : "—"}
               viaLabel={sendMethodLabel(activeQuery.sendMethod)}
-              manuscriptTitle={manuscripts.find((m) => m.id === activeQuery.manuscriptId)?.title ?? null}
+              manuscriptTitle={activeMs?.title ?? null}
+              /**
+               * The header's manuscript line — mono meta beside the title, and the sent version
+               * right-aligned WHEN THE QUERY RECORDS ONE. `manuscriptHeld` is the same "what do
+               * they hold" derivation the version surfaces read (latest partial/full send), and
+               * `openingRead` the same package-sample fallback — composed, never re-derived, so
+               * this line and the Versions pane cannot disagree about which draft went.
+               */
+              manuscriptMeta={activeMs ? [activeMs.genre, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString("en-GB")} words` : null].filter(Boolean).join(" · ") || null : null}
+              versionLabel={(() => {
+                const v = manuscriptHeld(activeQuery.id, activities as never, activeBookVersions)?.version
+                  ?? openingRead(activeQuery, packages, versions, activeBookVersions);
+                if (!v) return null;
+                const m = /^(\d{4})-(\d{2})/.exec(v.createdDate);
+                const when = m ? new Date(Number(m[1]), Number(m[2]) - 1, 1).toLocaleDateString("en-GB", { month: "short", year: "numeric" }) : null;
+                return when ? `${v.name} · ${when}` : v.name;
+              })()}
               position={{ index: panelIndex, total: gridRows.length }}
               /* the CTA engine's own answer — never a second table of verbs */
               primaryLabel={
@@ -5786,7 +5802,6 @@ export const Queries: React.FC<{
                     ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
                 });
               }}
-              rungs={panelRungs}
               elapsed={(() => {
                 const [n, u] = (panelRow.facts.caption.match(/^(\d+)\s+(\w+)/) ?? [null, "—", ""]).slice(1) as [string, string];
                 return {
@@ -5797,17 +5812,51 @@ export const Queries: React.FC<{
                 };
               })()}
               expectedLabel={panelRow.expectedMs ? fmtShortISO(new Date(panelRow.expectedMs).toISOString()) : "—"}
-              materialsRecorded={panelRow.facts.materialsRecorded}
               /**
-               * ⚠️ IN PLACE, NOT THE LEGACY SHEET. Both of these opened `EditQueryDrawer` — the
-               * hole-punched `EDITING QUERY` surface Phase 4 was meant to replace — so the panel
-               * quietly handed the reader back to the thing it exists instead of. Phase 6 deletes
-               * that component; nothing on this page may reach it before then.
+               * ⚠️ THE TRACKING TAB IS THE SHARED TIMELINE — the same `QueryTimeline` the record
+               * view rendered and FocusFlow condenses, never a drawer-local imitation. The ⋯ is ON
+               * here (onEditEntry/onDeleteEntry) and off in FocusFlow, which renders the bare rows.
+               * §2 wires the send-rung extras; this mount is the chassis.
                */
-              matsEditing={panelMatsEdit}
-              onListMaterials={() => setPanelMatsEdit(true)}
-              onEditMaterials={() => setPanelMatsEdit((v) => !v)}
-              onToggleMaterial={(kind) => toggleQueryMaterial(kind)}
+              tracking={(() => {
+                const ta = getPrimaryAction(activeQuery.status as QueryStatus);
+                return (
+                  <QueryTimeline
+                    query={activeQuery}
+                    agent={activeAgent}
+                    events={trackingEvents}
+                    primaryAction={{ ballHolder: ta.ballHolder, markKind: ta.kind === "mark-sent" ? ta.markKind : undefined }}
+                    onEditEntry={onEditEntry}
+                    onDeleteEntry={onDeleteEntry}
+                    onNudge={() => setIsNudgeOpen(true)}
+                    onSetExpectedDate={(iso) => commitExpectedDate(iso)}
+                    onMarkClosed={() => setIsCloseMenuOpen(true)}
+                  />
+                );
+              })()}
+              /**
+               * §1 — THE NOTES TAB IS THE EXISTING THREAD, UNBOXED. `NotesThread` owns ordering,
+               * pinning, the composer and the settle; the tab is just where it lives now.
+               */
+              notesTab={(
+                <NotesThread
+                  resetKey={activeQuery.id}
+                  notes={journalEntries
+                    .filter((entry) => entry.queryId === activeQuery.id)
+                    .map((e) => ({ id: e.id, entryText: e.entryText, createdAt: e.createdAt, pinned: (e as { pinned?: boolean }).pinned === true }))}
+                  onAdd={(text) => addJournalEntry(activeQuery.id, text)}
+                  onEdit={(id, text) => updateJournalEntry(id, text)}
+                  onPin={(id, pinned) => pinJournalEntry(id, pinned)}
+                  onDelete={(n) => showConfirm({
+                    title: "Delete this note?",
+                    danger: true,
+                    confirmLabel: "Delete",
+                    cancelLabel: "Keep it",
+                    body: <p style={{ margin: 0 }}>This note will be removed from the query&rsquo;s record.</p>,
+                    onConfirm: () => deleteJournalEntry(n.id),
+                  })}
+                />
+              )}
               noteCount={journalEntries.filter((j) => j.queryId === activeQuery.id).length}
             />
           )}
