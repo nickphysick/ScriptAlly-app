@@ -153,3 +153,12 @@
 }
 .qcc-none-btn:hover { border-color: #cdbfae; color: var(--ink, #1c130f); }
 
+
+/* ── the board's horizontal scroll, and the calendar's placeholder (colours v2, Phases 4–5) ──
+   The board is seven 240px columns and scrolls sideways; it is the one view on this page that
+   does, which is why the wrapper is the board's and not the page's. */
+.qcc-boardwrap { overflow-x: auto; overflow-y: visible; margin: 0 -2px; padding: 0 2px 4px; }
+.qcc-calph {
+  font-family: var(--font-serif); font-style: italic; font-size: 15px; color: #8a7a6c;
+  background: #fdfaf5; border-radius: 14px; padding: 48px 24px; text-align: center; margin: 0;
+}

@@ -465,3 +465,74 @@ describe("Phase 2 · the tiles state the whole set, and the switch changes only 
     expect(sw, "the switch grew state of its own").not.toMatch(/useState|useEffect/);
   });
 });
+
+/* ══ colours v2 · Phases 3–5 — List, Board, and the Calendar placeholder ══════════════════════ */
+describe("Phase 3–5 · three renderers over one set of rows", () => {
+  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const list = readFileSync(join(process.cwd(), "src/components/queries/QueryListView.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const board = readFileSync(join(process.cwd(), "src/components/queries/QueryBoardView.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  it("all three views take the SAME rows, already narrowed and ordered — no view re-derives", () => {
+    for (const mount of ["<QueryListView", "<QueryBoardView", "<QueryCentreGrid"])
+      expect(page, `${mount} is not fed gridRows`).toMatch(new RegExp(`${mount}[\\s\\S]{0,400}rows=\\{gridRows\\}`));
+    for (const [what, src] of [["list", list], ["board", board]] as const) {
+      expect(src, `the ${what} sorts its own copy`).not.toMatch(/\.sort\(/);
+      expect(src, `the ${what} filters on something other than its column`).not.toMatch(/matchesFilters|inQuick|quickCounts/);
+    }
+  });
+
+  it("all three open the SAME drawer", () => {
+    expect((page.match(/onOpen=\{\(id\) => onOpenQuery\?\.\(id\)\}/g) ?? []).length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("the list's headers speak the PAGE's sort vocabulary, and direction is one flag", () => {
+    /* a header handing back GRID_SORTS' keys would be a second sort model over one list */
+    for (const k of ["journey_depth", "agent_az", "date_newest", "due_soonest"])
+      expect(list, `the list does not offer ${k}`).toContain(`"${k}"`);
+    expect(page).toContain("onSort={(k) => { if (k === sortKey) setSortDesc((d) => !d); else { setSortKey(k); setSortDesc(false); } }}");
+    expect(page).toContain("const compareQueries = (a: Query, b: Query): number => sortDesc ? -compareQueriesAsc(a, b) : compareQueriesAsc(a, b);");
+  });
+
+  it("⚠️ the board has NO drag — status is derived, and the board is a read", () => {
+    for (const h of ["onDrop", "onDragStart", "onDragOver", "onDragEnd", "draggable"])
+      expect(board, `the board grew a ${h} handler`).not.toContain(h);
+  });
+
+  it("seven columns in the enum's own order, every status reaching exactly one", async () => {
+    const { BOARD_COLUMNS, boardColumnsCover, boardColumnFor } = await import("../../lib/queryCentreGrid");
+    expect(BOARD_COLUMNS).toHaveLength(7);
+    expect(BOARD_COLUMNS.map((c) => c.key)).toEqual(["queried", "preq", "psent", "freq", "fsent", "offer", "closed"]);
+    expect(boardColumnsCover(), "a status reaches no column, or two").toBe(true);
+    /* the two collectors the ref names, stated rather than implied */
+    expect(boardColumnFor(QueryStatus.REVISE_RESUBMIT)).toBe("freq");
+    expect(boardColumnFor(QueryStatus.NO_RESPONSE)).toBe("closed");
+  });
+
+  it("the band survives ONLY where the card's status is not its column's own", () => {
+    expect(board).toContain("const alt = r.status !== col.statuses[0];");
+    expect(board).toContain("{alt && (");
+    /* and the strip is always there — the column made the band redundant, not the colour */
+    expect(board).toContain('<span className="qbv-strip" aria-hidden="true" />');
+  });
+
+  it("the shingle overlaps by the fact line, and the last card keeps its fact", () => {
+    const css = readFileSync(join(process.cwd(), "src/components/queries/queryBoardView.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).toMatch(/\.qbv-card \{[^}]*margin-bottom: -36px/);
+    expect(css).toMatch(/\.qbv-card:last-child \{ margin-bottom: 0; \}/);
+    expect(css).toMatch(/\.qbv-card:hover[^{]*\{[^}]*transform: translateY\(-6px\)/);
+    expect(css, "the hovered card does not rise above its neighbours").toMatch(/\.qbv-card:hover[^{]*\{[^}]*z-index: 5/);
+    /* the header's rule is the state's deep step, and the header takes no fill */
+    expect(css).toMatch(/\.qbv-h \{[^}]*border-bottom: 1\.5px solid var\(--state-accent/);
+    expect(css.match(/\.qbv-h \{[^}]*\}/)?.[0] ?? "", "the column header grew a filled bar").not.toMatch(/background/);
+  });
+
+  it("the Calendar renders a placeholder and nothing else (Phase 5)", () => {
+    expect(page).toContain('<p className="qcc-calph">Calendar — coming with the timeline board</p>');
+    /* it must not have grown a second timeline board here — the fork the ref cautions against */
+    expect(page).not.toMatch(/TodoCalendarPage|timeline-v57|<TimelineBoard/);
+  });
+});

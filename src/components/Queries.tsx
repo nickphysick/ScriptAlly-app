@@ -64,6 +64,8 @@ import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
 import { QueryCentreGrid, type GridCard } from "./queries/QueryCentreGrid";
 import { QueryStatTiles } from "./queries/QueryStatTiles";
+import { QueryListView } from "./queries/QueryListView";
+import { QueryBoardView } from "./queries/QueryBoardView";
 import { QueryViewSwitch, type QueryView } from "./queries/QueryViewSwitch";
 import { QueryPanel } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
@@ -2095,6 +2097,14 @@ export const Queries: React.FC<{
   const [sampleQty, setSampleQty] = useState("");
   /* F12 sort — grouped Activity / Dates / Pipeline (ref sort popover). Default: last activity. */
   const [sortKey, setSortKey] = useState<string>("last_activity");
+  /* ⚠️ DIRECTION IS A FLAG OVER THE PAGE'S OWN KEYS, not a second sort (colours v2, Phase 3). The
+     list's headers need a reversible order and the page's vocabulary already bakes direction into
+     some keys (`date_newest` / `date_oldest`); a header that toggled between paired keys would
+     work for one column and silently do nothing on the others. Reversing the SORTED array is
+     well-defined for every key, so one flag covers all of them — and the Sort popover keeps
+     writing the key alone, which is why choosing a key there resets the flag rather than
+     inheriting a reversal nobody asked for. */
+  const [sortDesc, setSortDesc] = useState(false);
   /* Legacy shim — the hidden (display:none) mobile filter region still references this;
      nothing in the F12 chrome drives it. Cleanup candidate. */
   const [sortOption, setSortOption] = useState<string>("Newest first");
@@ -3082,7 +3092,8 @@ export const Queries: React.FC<{
   /* v5 P2 — THE sort comparator, extracted for the same reason as the predicate: the create
      flow's FLIP travel asks it where the saved row belongs, and it must be the comparator the
      list itself is ordered by, or the row animates to the wrong slot. */
-  const compareQueries = (a: Query, b: Query): number => {
+  const compareQueries = (a: Query, b: Query): number => sortDesc ? -compareQueriesAsc(a, b) : compareQueriesAsc(a, b);
+  const compareQueriesAsc = (a: Query, b: Query): number => {
     const agA = agents.find(ag => ag.id === a.agentId)?.name || "";
     const agB = agents.find(ag => ag.id === b.agentId)?.name || "";
     switch (sortKey) {
@@ -3507,7 +3518,7 @@ export const Queries: React.FC<{
       {F12_SORT_GROUPS.map(g => (
         <PopSection key={g.group} label={g.group}>
           {g.items.map(i => (
-            <PRow key={i.key} kind="rad" on={sortKey === i.key} label={i.label} sub={i.sub} onClick={() => setSortKey(i.key)} />
+            <PRow key={i.key} kind="rad" on={sortKey === i.key} label={i.label} sub={i.sub} onClick={() => { setSortKey(i.key); setSortDesc(false); }} />
           ))}
         </PopSection>
       ))}
@@ -5872,6 +5883,31 @@ export const Queries: React.FC<{
                   Clear filters
                 </button>
               </p>
+            ) : gridView === "list" ? (
+              /* ⚠️ THE SAME ROWS, ALREADY NARROWED AND ORDERED. The list re-derives nothing — it
+                 hands a header's sort key back to the page and the page does the ordering, so the
+                 two views cannot disagree about what order things are in. */
+              <QueryListView
+                rows={gridRows}
+                sortKey={sortKey}
+                sortDesc={sortDesc}
+                selectedId={selectedQueryId}
+                onSort={(k) => { if (k === sortKey) setSortDesc((d) => !d); else { setSortKey(k); setSortDesc(false); } }}
+                onOpen={(id) => onOpenQuery?.(id)}
+                onMore={(id, anchor) => { setSelectedQueryId(id); onOpenQuery?.(id); void anchor; }}
+              />
+            ) : gridView === "board" ? (
+              <div className="qcc-boardwrap">
+                <QueryBoardView rows={gridRows} selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} />
+              </div>
+            ) : gridView === "calendar" ? (
+              /* ⚠️ A PLACEHOLDER, AND IT SAYS SO IN THE ONE SENTENCE IT HAS (Phase 5). The calendar
+                 is the Tasks page's timeline board re-hosted with queries as rows; that board is
+                 not extractable today (it is built inside TodoCalendarPage, from To-do data), and
+                 a second implementation here would be the fork the ref's own caution warns
+                 against. The recon, the adapter sketch and the moment to run it are in
+                 reports/query-views.md. */
+              <p className="qcc-calph">Calendar — coming with the timeline board</p>
             ) : (
               <QueryCentreGrid
                 ghost={ghostRow}

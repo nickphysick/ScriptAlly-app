@@ -42,7 +42,9 @@ const MARK: Record<MaterialKind, React.ReactNode> = {
   other: <path d="M21 12l-8.5 8.5a5 5 0 01-7-7L14 5a3.3 3.3 0 014.7 4.7L10.5 18a1.7 1.7 0 01-2.4-2.4L15 8.5" />,
 };
 
-const Mark: React.FC<{ kind: MaterialKind }> = ({ kind }) => (
+/** ⚠️ EXPORTED FOR THE LIST (colours v2, Phase 3), not copied into it. The four slot glyphs are
+ *  the same four facts in both views; a second set of paths is a second thing to keep in step. */
+export const Mark: React.FC<{ kind: MaterialKind }> = ({ kind }) => (
   <svg
     width="13"
     height="13"

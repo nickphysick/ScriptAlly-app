@@ -81,6 +81,42 @@ export function quickCounts(turns: readonly Turn[]): Record<QuickKey, number> {
   return out;
 }
 
+/* ── the board's columns ─────────────────────────────────────────────────────────────────────── */
+
+/**
+ * SEVEN COLUMNS IN LADDER ORDER (v10). The order is the ENUM's own — `QueryStatus` already runs
+ * Queried · Partial Requested · Partial Sent · Full Requested · Full Sent · R&R · Offer · the
+ * closed three — so the board reads the pipeline rather than a hand-written list that would go
+ * stale the day a status is added, and go stale silently.
+ *
+ * ⚠️ TWO COLUMNS COLLECT MORE THAN ONE STATUS, and both are the ref's call: R&R sits in Full
+ * Requested (it is the same ask in longer form) and the three closed statuses sit in Closed. A
+ * card in a column whose status is not the column's OWN keeps its band, so the board never states
+ * something the record does not — the column says where it sits, the band says what it is.
+ */
+export const BOARD_COLUMNS: readonly { key: string; label: string; statuses: readonly QueryStatus[] }[] = [
+  { key: "queried", label: QueryStatus.QUERIED, statuses: [QueryStatus.QUERIED] },
+  { key: "preq", label: QueryStatus.PARTIAL_REQUESTED, statuses: [QueryStatus.PARTIAL_REQUESTED] },
+  { key: "psent", label: QueryStatus.PARTIAL_SENT, statuses: [QueryStatus.PARTIAL_SENT] },
+  { key: "freq", label: QueryStatus.FULL_REQUESTED, statuses: [QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT] },
+  { key: "fsent", label: QueryStatus.FULL_SENT, statuses: [QueryStatus.FULL_SENT] },
+  { key: "offer", label: QueryStatus.OFFER, statuses: [QueryStatus.OFFER] },
+  { key: "closed", label: "Closed", statuses: [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE] },
+];
+
+/** Which column a status belongs to. Unrecognised sinks to Closed — the same fall-through
+ *  `stateFor` uses, so a new status is filed rather than dropped off the board. */
+export function boardColumnFor(status: QueryStatus): string {
+  return BOARD_COLUMNS.find((c) => c.statuses.includes(status))?.key ?? "closed";
+}
+
+/** ⚠️ EVERY STATUS REACHES EXACTLY ONE COLUMN — asserted over the enum, never over a fixture. */
+export function boardColumnsCover(): boolean {
+  return (Object.values(QueryStatus) as QueryStatus[]).every(
+    (s) => BOARD_COLUMNS.filter((c) => c.statuses.includes(s)).length === 1,
+  );
+}
+
 /* ── grouping ───────────────────────────────────────────────────────────────────────────────── */
 
 export type GroupKey = "none" | "turn" | "status" | "agency" | "month";

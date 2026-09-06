@@ -1,0 +1,94 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The board — v10, density B (shingled), Headline headers.
+ *
+ * ⚠️ THE OVERLAP IS THE FACT LINE'S HEIGHT, and that is the whole idea: each card covers exactly
+ * the line the card above it does not need to show at rest, so tint strip, monogram, name, agency
+ * and leaf stay readable on every card while a column of eight takes the height a grid gives
+ * three. The last card in a column keeps its fact — nothing is below it to cover it.
+ */
+.qbv {
+  display: grid; grid-template-columns: repeat(7, 240px); gap: 14px; align-items: start;
+  min-width: max-content; padding-bottom: 8px;
+}
+.qbv-col { background: rgba(253, 250, 245, 0.6); border-radius: 14px; padding: 8px; min-height: 420px; }
+
+/* the header's rule is the column's own deep step — never a filled bar */
+.qbv-h { padding: 4px 4px 10px; margin-bottom: 10px; border-bottom: 1.5px solid var(--state-accent, #e0d5c8); }
+.qbv-htop { display: flex; align-items: center; gap: 8px; }
+.qbv-hw {
+  font-family: var(--font-serif); font-size: 17px; color: var(--ink, #1c130f);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.qbv-hn {
+  margin-left: auto; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9.5px;
+  color: #6a5a50; background: #fff; border: 0.5px solid #e0d5c8; border-radius: 99px; padding: 2px 8px;
+}
+.qbv-hcap {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: #9c8878; margin-top: 4px; padding-left: 26px;
+}
+
+.qbv-cards { display: flex; flex-direction: column; }
+.qbv-card {
+  position: relative; background: #fff; border-radius: 11px; overflow: hidden; cursor: pointer;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 6px 16px rgba(58, 28, 20, 0.08);
+  margin-bottom: -36px; transition: transform 0.16s, box-shadow 0.16s;
+}
+.qbv-card:last-child { margin-bottom: 0; }
+.qbv-card:hover, .qbv-card:focus-visible {
+  transform: translateY(-6px); z-index: 5;
+  box-shadow: 0 2px 4px rgba(58, 28, 20, 0.06), 0 14px 30px rgba(58, 28, 20, 0.16);
+}
+.qbv-card--on { box-shadow: 0 0 0 1.5px #e8c8bc, 0 6px 16px rgba(58, 28, 20, 0.08); z-index: 4; }
+@media (prefers-reduced-motion: reduce) { .qbv-card { transition: none; } }
+
+/* the 5px state strip stands in for the band the column made redundant */
+.qbv-strip { display: block; height: 5px; background: var(--band-a, var(--state-closed)); }
+/* …and the band comes back where the card's status is not the column's own */
+.qbv-band {
+  display: flex; align-items: center; gap: 8px; padding: 6px 12px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.06); background: var(--band-a, var(--state-closed));
+  font-family: var(--font-serif); font-size: 12.5px; color: var(--ink, #1c130f);
+}
+
+.qbv-body { padding: 11px 12px 10px; }
+.qbv-who { display: flex; align-items: center; gap: 10px; }
+.qbv-chip {
+  width: 32px; height: 32px; border-radius: 50%; background: #fdfaf5; flex: none;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.08), 0 2px 6px rgba(58, 28, 20, 0.1);
+  border: 0.5px solid #e6dccf; display: flex; align-items: center; justify-content: center;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9.5px; color: #3a1c14;
+}
+.qbv-whotx { min-width: 0; }
+.qbv-nm { display: block; font-family: var(--font-serif); font-weight: 500; font-size: 14.5px; color: var(--ink, #1c130f); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qbv-ag { display: block; font-family: var(--font-serif); font-style: italic; font-size: 11px; color: #6a5a50; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qbv-leaf {
+  margin-left: auto; width: 34px; border-radius: 6px; background: #fff; border: 0.5px solid #dccfc0;
+  text-align: center; flex: none; overflow: hidden; box-shadow: 0 1px 2px rgba(58, 28, 20, 0.06);
+}
+.qbv-mo {
+  display: block; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 6px;
+  letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 0 1px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08); background: var(--band-a, var(--state-closed));
+}
+.qbv-dy { display: block; font-family: var(--font-serif); font-size: 14px; color: var(--ink, #1c130f); line-height: 1; padding: 4px 0 3px; }
+
+/* ⚠️ THE FACT LINE IS THE OVERLAP'S MEASURE — 36px at these sizes, and the harness measures BOTH
+   rather than trusting the pair to stay in step. */
+.qbv-fact {
+  margin-top: 9px; padding-top: 8px; border-top: 0.5px solid #ece0d2; font-size: 11px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #3a1c14;
+}
+.qbv-fs b { font-weight: 600; }
+.qbv-m { display: block; color: #9c8878; margin-top: 3px; font-size: 8px; font-family: var(--f12-mono, "JetBrains Mono", monospace); letter-spacing: 0.1em; text-transform: uppercase; }
+.qbv-mk {
+  width: 13px; height: 13px; border-radius: 50%; border: 1.2px solid var(--ink, #1c130f);
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center; margin-right: 5px;
+  vertical-align: -2px; color: var(--ink, #1c130f);
+}
+.qbv-col[data-qbv-col="closed"] .qbv-card { opacity: 0.85; }
+.qbv-empty { font-family: var(--font-serif); font-style: italic; font-size: 12.5px; color: #b9a893; padding: 6px 4px; margin: 0; }

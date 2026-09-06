@@ -1,0 +1,83 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The list — v9's geometry. One card-white surface, hairline rows, and the columns' widths taken
+ * from the ref: 200px status · 1.4fr agent · 110px sent · 130px what went · 1.4fr where it stands
+ * · 120px court · 44px ⋯.
+ *
+ * ⚠️ THE ROW HEIGHT IS THE BRIEF'S ONE MEASUREMENT — twelve rows per 1000px, which with the head
+ * leaves ~78px per row. Padding and type are set to reach it rather than tuned by eye, and the
+ * harness measures the count rather than the padding, because the count is the claim.
+ */
+.qlv {
+  background: #fff; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 8px 22px rgba(58, 28, 20, 0.09);
+}
+.qlv-head, .qlv-row {
+  display: grid; grid-template-columns: 200px 1.4fr 110px 130px 1.4fr 120px 44px; gap: 14px;
+  align-items: center; border-bottom: 0.5px solid #ece0d2;
+}
+.qlv-head { padding: 12px 18px; }
+.qlv-row { padding: 13px 18px; cursor: pointer; text-align: left; }
+.qlv-row:last-child { border-bottom: none; }
+.qlv-row:hover { background: #fffdf9; }
+/* selection is a ring, never a fill — the palette's own rule */
+.qlv-row--on { box-shadow: inset 0 0 0 1.5px #e8c8bc; }
+
+.qlv-h {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: #9c8878;
+}
+.qlv-h--btn { background: none; border: none; padding: 0; cursor: pointer; text-align: left; display: inline-flex; align-items: center; gap: 5px; }
+.qlv-h--btn:hover { color: #3a1c14; }
+.qlv-h--on { color: var(--ink, #1c130f); }
+.qlv-caret { font-size: 8px; }
+
+/* the status pill takes the row's own state fill — the one place colour appears in a list row */
+.qlv-st {
+  display: inline-flex; align-items: center; gap: 8px; border-radius: 99px; padding: 5px 11px 5px 6px;
+  font-family: var(--font-serif); font-size: 13px; color: var(--ink, #1c130f); width: max-content;
+  background: var(--band-a, var(--state-closed));
+}
+.qlv-who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.qlv-chip {
+  width: 34px; height: 34px; border-radius: 50%; flex: none; background: #fdfaf5;
+  border: 0.5px solid #e6dccf; display: flex; align-items: center; justify-content: center;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 10px; color: #3a1c14;
+}
+.qlv-whotx { min-width: 0; }
+.qlv-nm { display: block; font-family: var(--font-serif); font-size: 15px; color: var(--ink, #1c130f); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qlv-ag { display: block; font-family: var(--font-serif); font-style: italic; font-size: 12px; color: #6a5a50; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.qlv-d { font-family: var(--font-serif); font-size: 15px; color: var(--ink, #1c130f); }
+.qlv-d small, .qlv-fs small {
+  display: block; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8.5px;
+  letter-spacing: 0.1em; text-transform: uppercase; color: #9c8878; margin-top: 3px;
+}
+.qlv-mats { display: flex; gap: 6px; align-items: center; }
+.qlv-ic { width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #7c3a2a; }
+.qlv-ic--off { opacity: 0.22; }
+.qlv-none { font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #c0b0a0; }
+
+.qlv-fs { font-size: 13px; color: #3a1c14; min-width: 0; }
+.qlv-fs b { font-weight: 600; }
+.qlv-mk {
+  width: 15px; height: 15px; border-radius: 50%; border: 1.3px solid var(--ink, #1c130f);
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center; margin-right: 6px;
+  vertical-align: -2px; color: var(--ink, #1c130f);
+}
+.qlv-turn {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: #6a5a50;
+}
+.qlv-more button {
+  background: none; border: none; cursor: pointer; font-size: 15px; color: #a08a78; padding: 4px 8px;
+  border-radius: 7px;
+}
+.qlv-more button:hover { background: #f6efe6; color: #3a1c14; }
+
+@media (max-width: 1280px) {
+  .qlv-head, .qlv-row { grid-template-columns: 170px 1.3fr 96px 110px 1.4fr 100px 40px; gap: 10px; padding-inline: 14px; }
+}

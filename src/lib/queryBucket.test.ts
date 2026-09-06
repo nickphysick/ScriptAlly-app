@@ -83,7 +83,12 @@ describe("Queries filter bar — artefacts", () => {
 
   it("the SORT popover drives setSortKey (the actual sort driver), defaulting to last activity", () => {
     expect(src).toContain("renderSortPopover");
-    expect(src).toContain("onClick={() => setSortKey(i.key)}");
+    /* ⚠️ RETARGETED (colours v2, Phase 3): the popover still writes the key and is still the sort
+       driver — what it also does now is CLEAR the list's direction flag, because a key chosen here
+       must not inherit a reversal the reader set on a list header and has since left behind. Both
+       halves are asserted, so a popover that stopped writing either one fails. */
+    expect(src).toContain("onClick={() => { setSortKey(i.key); setSortDesc(false); }}");
     expect(src).toContain('useState<string>("last_activity")');
+    expect(src).toContain("const [sortDesc, setSortDesc] = useState(false);");
   });
 });
