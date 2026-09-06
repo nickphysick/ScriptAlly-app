@@ -5376,7 +5376,7 @@ export const Queries: React.FC<{
           */}
         {deskVerb && activeQuery && activeAgent && panelRow && (
           <CorrectionDesk
-            stage={panelRow.facts.stage}
+            state={panelRow.facts.state}
             anchor={correctingTriggerRef.current}
             returnTo={correctingTriggerRef.current}
             spot={deskVerb === "closed" ? "close" : deskVerb}
@@ -5467,7 +5467,7 @@ export const Queries: React.FC<{
            * centred host this replaces is gone from the live page.
            */
           <CorrectionDesk
-            stage={panelRow?.facts.stage ?? "closed"}
+            state={panelRow?.facts.state ?? "closed"}
             anchor={correctingTriggerRef.current?.closest?.(".tl-ev") as HTMLElement | null}
             returnTo={correctingTriggerRef.current}
             spot="correct"

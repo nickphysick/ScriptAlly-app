@@ -61,7 +61,45 @@ Declared in `:root` (`src/index.css`) and consumed by every theme. Type families
 **StatusDot:** never restyled by theme CSS — its palette is a component token (`--sd-hue` / `--sd-centre`, listed per theme below). Direction/stage is carried by shape, not colour. Pro pills always stay slate regardless of theme.
 
 
-### Query Centre stage ladder (`--stage-*`) — theme-independent, `.t-f12`
+### Query Centre state colours (`--state-*`) — theme-independent, `.t-f12`
+
+**Five FLAT fills, locked 6 Sep 2026** (`design-refs/query-state-colours-v2.md`). Colour says whose
+court it is and whether the journey has started; **depth is `StatusDot`'s alone.**
+
+| Token | Value | Statuses | Turn |
+|---|---|---|---|
+| `--state-queried` | `#f7efe3` sand | Queried | With the agent |
+| `--state-agent` | `#e0e5dd` sage | Partial Sent · Full Sent | With the agent |
+| `--state-you` | `#f5e6df` pink | Partial/Full Requested · R&R · requested-but-unsent | With you |
+| `--state-offer` | `#d7e0e8` slate | Offer, undecided | Offer |
+| `--state-closed` | `#e4e1db` grey | Rejected · Withdrawn · No Response · decided Offer | Closed |
+
+Each carries a deeper step of the SAME family — `--state-{name}-deep` (`#e7d9bd` · `#c7d0c2` ·
+`#e8c9bb` · `#c9d6e1` · `#cfc9c1`) — exposed as `--state-accent` by the `qcc--st-*` class that sets
+the fill. It is the desk's strip, the target rung's ring and the board header's rule; never a fill,
+and never a sixth colour.
+
+⚠️ **One mapping, exported once**: `stateFor(status)` and `STATE_TOKEN` in
+`src/lib/queryCardFacts.ts`. Nothing stores a colour.
+
+⚠️ **Sand must never read as closed grey** — locked by ΔE > 5 in `queryStateColours.test.ts`, not
+by eye.
+
+⚠️ **Bold Pastille and Editorial: `TODO`.** Both read the values above today — deliberately and
+visibly, rather than reading nothing, since a `var()` whose defining scope is not an ancestor
+paints nothing at all. Override site: `.t-bold .t-f12` / `.t-edn .t-f12`.
+
+---
+
+### ⚠️ SUPERSEDED — the stage ladder (`--stage-*`), and why it is still declared
+
+**Retired from the Query Centre by the five states above.** The eight tokens remain declared on
+`.t-f12` because they are NOT the Query Centre's alone: `TodoCalendarPage` reads `stageFor` at
+three sites, `TaskPane` paints `var(--stage-{stage})` inline, and `calendarStageTints.test.ts`
+locks the calendar's own `--tl-stage-*` mirror against this file. Deleting them would blank another
+stream's live surfaces silently. **Their removal belongs to the To-do stream**, and
+`queryStateColours.test.ts` names the surviving consumers so the leftovers read as load-bearing
+rather than missed.
 
 How far a query has travelled, and in which direction. Eight FLAT tokens declared once on `.t-f12`
 (`src/components/shell/f12.css`). **Supersedes the four `--turn-*` pairs and the sand trio, which

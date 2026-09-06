@@ -94,7 +94,7 @@ export const QueryCard: React.FC<QueryCardProps> = ({
     "qcc",
     /* ⚠️ THE STAGE, NOT THE TURN. The band is the tint ladder's rung — eight of them — while the
        turn is the five-court split the filters use. They are different questions about one status. */
-    `qcc--s-${facts.stage}`,
+    `qcc--st-${facts.state}`,
     selected ? "qcc--sel" : "",
     entering ? "qcc--enter" : "",
     ghost ? "qcc--ghost" : "",

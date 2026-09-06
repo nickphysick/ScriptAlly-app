@@ -89,8 +89,8 @@ describe("§4 · the four tiles state — when absent, and the count is derived"
 describe("§4 · history rows across manuscripts", () => {
   it("the state swatch is the query's own band class, and `this query` is marked", () => {
     const html = draw();
-    expect(html).toMatch(/qat-sw qcc--s-in-1/);      /* Partial Requested */
-    expect(html).toMatch(/qat-sw qcc--s-closed/);    /* Rejected */
+    expect(html).toMatch(/qat-sw qcc--st-you/);      /* Partial Requested */
+    expect(html).toMatch(/qat-sw qcc--st-closed/);    /* Rejected */
     expect(html).toContain("this query");
     expect(html).toContain("Nov 2024");
   });

@@ -85,10 +85,10 @@ describe("§3 · the desk's chassis", () => {
   const desk = read("src/components/queries/CorrectionDesk.tsx");
 
   it("the top strip is the drawer's own accent — one variable, not a second colour", () => {
-    expect(css).toMatch(/\.qcd-card[^{]*\{[^}]*border-top:\s*5px solid var\(--stage-accent/);
+    expect(css).toMatch(/\.qcd-card[^{]*\{[^}]*border-top:\s*5px solid var\(--state-accent/);
     /* and the desk root carries the stage class so the accent RESOLVES outside the drawer —
        the drawer's transform makes it a containing block the desk cannot live inside */
-    expect(desk).toContain("qcc--s-${stage}");
+    expect(desk).toContain("qcc--st-${state}");
   });
 
   it("the sheet chassis is neutralised INSIDE the desk — markup untouched, chrome un-doubled", () => {

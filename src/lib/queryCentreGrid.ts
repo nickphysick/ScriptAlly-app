@@ -15,7 +15,7 @@
  * anywhere on this page is how two counts of the same thing come to disagree.
  */
 import { QueryStatus } from "../types";
-import { turnFor, turnWordFor, type Turn, type Stage } from "./queryCardFacts";
+import { turnFor, turnWordFor, type Turn, type Stage, type State } from "./queryCardFacts";
 
 /* ── quick filters ──────────────────────────────────────────────────────────────────────────── */
 
@@ -33,10 +33,17 @@ export type QuickKey = "all" | "you" | "agent" | "offer" | "closed";
  * for With you, `out-2` for With the agent. Taking rung 1 would make both pills nearly white and
  * indistinguishable from each other; taking rung 3 would advertise the deepest case as the norm.
  */
-export const QUICK_FILTERS: readonly { key: QuickKey; label: string; swatch: Stage | null }[] = [
+/**
+ * ⚠️ THE SWATCH IS A `State` NOW (colours v2), AND `Closed` HAS BECOME `Past expected`. The five
+ * tiles the v9 ref draws are All · With you · With the agent · Offers · Past expected: closed
+ * queries are what Filter is for, and the tile row's job is what is LIVE. Past expected is not a
+ * turn at all — it is the overdue predicate the old `!` chip carried beside the row, promoted into
+ * the row it always belonged in, which is why its swatch is null and its ring is drawn instead.
+ */
+export const QUICK_FILTERS: readonly { key: QuickKey; label: string; swatch: State | null }[] = [
   { key: "all", label: "All", swatch: null },
-  { key: "you", label: "With you", swatch: "in-2" },
-  { key: "agent", label: "With the agent", swatch: "out-2" },
+  { key: "you", label: "With you", swatch: "you" },
+  { key: "agent", label: "With the agent", swatch: "agent" },
   { key: "offer", label: "Offers", swatch: "offer" },
   { key: "closed", label: "Closed", swatch: "closed" },
 ];
@@ -227,4 +234,4 @@ export function matchesGridFilters(
 }
 
 export { turnFor, turnWordFor };
-export type { Turn, Stage };
+export type { Turn, Stage, State };

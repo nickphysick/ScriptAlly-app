@@ -229,24 +229,24 @@ describe("§1 · the tabbed body", () => {
    * offer, closed; never a new token). Three stages then agree by construction: the rendered root
    * carries the stage class, the class sets the var, the underline reads the var.
    */
-  it("the active tab underline is INK; the accent map still holds, deepest step per family", () => {
-    /* ⚠️ RETARGETED for v9 chrome D (drawer-3 §1): the underline leaves the accent — the tab rail
-       reads as chrome against the white body, and the accent's remaining readers are the desk's
-       strip, the target rung's ring and the live verb button. The MAP below is unchanged law. */
+  it("the active tab underline is INK; the STATE accent map still holds, one deeper step per family", () => {
+    /* ⚠️ RETARGETED (colours v2). The underline law is unchanged (ink, not the accent). The map
+       below is the retarget: five flat states, each deriving `--state-accent` from its OWN deeper
+       step — never a rung of a ladder, and never a sixth token. */
     expect(decls).toMatch(/\.qpn-tab--on[^{]*\{[^}]*border-bottom-color:\s*var\(--ink/);
-    expect(decls).not.toMatch(/\.qpn-tab--on[^{]*\{[^}]*--stage-accent/);
-    /* §3 moved the map to queryCard.css, folded into each stage class's ONE rule — the card, the
-       drawer and the correction desk all wear `qcc--s-*`, so the map has one home and the house
-       one-rule-per-selector invariant holds. Same law: accent = the family's deepest step. */
+    expect(decls).not.toMatch(/\.qpn-tab--on[^{]*\{[^}]*--state-accent/);
     const cardCss = readFileSync(join(process.cwd(), "src/components/queries/queryCard.css"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "");
-    for (const [stage, deep] of [["out-1", "out-3"], ["out-2", "out-3"], ["in-1", "in-3"], ["in-2", "in-3"], ["offer", "offer"], ["closed", "closed"]] as const) {
-      expect(cardCss, `qcc--s-${stage} does not derive its accent from ${deep}`)
-        .toMatch(new RegExp(`\\.qcc--s-${stage}[^{]*\\{[^}]*--stage-accent:\\s*var\\(--stage-${deep}\\)`));
+    for (const state of ["queried", "agent", "you", "offer", "closed"] as const) {
+      expect(cardCss, `qcc--st-${state} does not derive its accent from its own deep step`)
+        .toMatch(new RegExp(`\\.qcc--st-${state}[^{]*\\{[^}]*--state-accent:\\s*var\\(--state-${state}-deep\\)`));
+      expect(cardCss, `qcc--st-${state} does not set the fill from its own token`)
+        .toMatch(new RegExp(`\\.qcc--st-${state}[^{]*\\{[^}]*--band-a:\\s*var\\(--state-${state}\\)`));
     }
-    for (const stage of ["out-1", "in-2", "closed"]) {
-      const html = draw(stage === "out-1" ? QueryStatus.QUERIED : stage === "in-2" ? QueryStatus.FULL_REQUESTED : QueryStatus.REJECTED);
-      expect(html, `the root does not carry qcc--s-${stage}`).toContain(`qcc--s-${stage}`);
+    expect(cardCss, "a retired ladder class survives").not.toMatch(/\.qcc--s-(out|in)-/);
+    for (const state of ["queried", "you", "closed"]) {
+      const html = draw(state === "queried" ? QueryStatus.QUERIED : state === "you" ? QueryStatus.FULL_REQUESTED : QueryStatus.REJECTED);
+      expect(html, `the root does not carry qcc--st-${state}`).toContain(`qcc--st-${state}`);
     }
   });
 

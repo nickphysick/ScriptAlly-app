@@ -26,8 +26,8 @@ import { IlloSlot } from "./IlloSlot";
 import "./correctionDesk.css";
 
 export interface CorrectionDeskProps {
-  /** The drawer's stage — `qcc--s-{stage}` goes on the desk root so the accent resolves here. */
-  stage: string;
+  /** The drawer's STATE — `qcc--st-{state}` goes on the desk root so the accent resolves here. */
+  state: string;
   /** The rung row (`.tl-ev`) the notch points at. Null = no anchor; the card sits at its default. */
   anchor: HTMLElement | null;
   /** The ⋯ (or dotted field) that opened the desk — focus returns here on close. */
@@ -43,7 +43,7 @@ export interface CorrectionDeskProps {
  *  drops its placeholder chrome by itself. */
 const SPOT_ART: Partial<Record<string, React.ReactNode>> = {};
 
-export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ stage, anchor, returnTo, onClose, children, spot }) => {
+export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ state, anchor, returnTo, onClose, children, spot }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; maxH: number | null; arrow: number | null }>({ top: 92, maxH: null, arrow: null });
 
@@ -120,7 +120,7 @@ export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ stage, anchor, r
      * ⚠️ NOT "is it a token" but WHERE IS IT EVALUATED — the law this file's siblings already
      * state, met from the other side: here the SUBJECT moved out from under the defining scope.
      */
-    <div className={`t-f12 qc-neutral qcd qcc--s-${stage}`} role="presentation">
+    <div className={`t-f12 qc-neutral qcd qcc--st-${state}`} role="presentation">
       <div
         ref={cardRef}
         className="qcd-card"

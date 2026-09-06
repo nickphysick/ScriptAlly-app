@@ -155,21 +155,29 @@ describe("the band, the leaf and the marker say what the facts say", () => {
    * and Full Sent shared a colour under the courts and the ladder exists to separate them.
    * Both halves are asserted, since `turn` still drives the filters and the grouping.
    */
-  it("the band class is the derived STAGE — not re-derived here", () => {
-    for (const [over, stage, turn] of [
-      [{}, "out-1", "sand"],
-      [{ status: QueryStatus.PARTIAL_SENT, partialSentDate: ago(9), lastStatusChange: ago(9) }, "out-2", "agent"],
-      [{ status: QueryStatus.FULL_SENT, fullSentDate: ago(10), lastStatusChange: ago(10) }, "out-3", "agent"],
-      [{ status: QueryStatus.PARTIAL_REQUESTED, lastStatusChange: ago(3) }, "in-1", "you"],
-      [{ status: QueryStatus.FULL_REQUESTED, lastStatusChange: ago(3) }, "in-2", "you"],
-      [{ status: QueryStatus.REVISE_RESUBMIT, lastStatusChange: ago(3) }, "in-3", "you"],
-      [{ status: QueryStatus.OFFER, lastStatusChange: ago(1) }, "offer", "offer"],
-      [{ status: QueryStatus.REJECTED, lastStatusChange: ago(1) }, "closed", "closed"],
+  it("the band class is the derived STATE — five values, not re-derived here", () => {
+    /* ⚠️ RETARGETED (colours v2): the eight-rung ladder is retired from this page and the card
+       wears `qcc--st-{state}`. The claim is unchanged in kind — the class is the DERIVATION's, not
+       a second mapping in the component — and the table below is what changed: the two sends fold
+       into sage, the three asks (R&R included) into pink, and depth leaves colour for StatusDot.
+       `stage` is still asserted because the To-do stream reads it; the two keys are checked
+       TOGETHER so a future edit cannot quietly change one and leave the other. */
+    for (const [over, stage, state, turn] of [
+      [{}, "out-1", "queried", "sand"],
+      [{ status: QueryStatus.PARTIAL_SENT, partialSentDate: ago(9), lastStatusChange: ago(9) }, "out-2", "agent", "agent"],
+      [{ status: QueryStatus.FULL_SENT, fullSentDate: ago(10), lastStatusChange: ago(10) }, "out-3", "agent", "agent"],
+      [{ status: QueryStatus.PARTIAL_REQUESTED, lastStatusChange: ago(3) }, "in-1", "you", "you"],
+      [{ status: QueryStatus.FULL_REQUESTED, lastStatusChange: ago(3) }, "in-2", "you", "you"],
+      [{ status: QueryStatus.REVISE_RESUBMIT, lastStatusChange: ago(3) }, "in-3", "you", "you"],
+      [{ status: QueryStatus.OFFER, lastStatusChange: ago(1) }, "offer", "offer", "offer"],
+      [{ status: QueryStatus.REJECTED, lastStatusChange: ago(1) }, "closed", "closed", "closed"],
     ] as const) {
       const { html, facts } = render(over as Partial<Query>);
       expect(facts.stage, `stage for ${JSON.stringify(over)}`).toBe(stage);
+      expect(facts.state, `state for ${JSON.stringify(over)}`).toBe(state);
       expect(facts.turn).toBe(turn);
-      expect(html, `${stage} card lost its band class`).toContain(`qcc--s-${stage}`);
+      expect(html, `${state} card lost its band class`).toContain(`qcc--st-${state}`);
+      expect(html, "the retired ladder class is still emitted").not.toContain(`qcc--s-${stage}`);
       expect(html).toContain(`data-qcc-turn="${turn}"`);
     }
   });
@@ -236,11 +244,16 @@ describe("⚠️ the stylesheet's own traps", () => {
     for (const f of frames) expect(f, "a keyframe block reads a token").not.toContain("var(");
   });
 
-  it("every stage token the sheet reads is one the page declares", () => {
+  it("every STATE token the sheet reads is one the page declares — and no ladder token survives here", () => {
+    /* ⚠️ RETARGETED (colours v2). The law is the same one — a `var()` on an undeclared property
+       paints nothing, silently — pointed at the five that replaced the eight. And the inverse is
+       asserted too: this sheet may no longer read a `--stage-*` at all, which is the grep the
+       palette run promised, expressed where it cannot rot. */
     const f12 = readFileSync(join(process.cwd(), "src/components/shell/f12.css"), "utf8");
-    const read = new Set((decls(css).match(/var\((--stage-[a-z0-9-]+)/g) ?? []).map((m) => m.slice(4)));
-    expect(read.size, "the sheet reads no stage token at all").toBeGreaterThan(6);
+    const read = new Set((decls(css).match(/var\((--state-[a-z0-9-]+)/g) ?? []).map((m) => m.slice(4)));
+    expect(read.size, "the sheet reads no state token at all").toBeGreaterThan(4);
     for (const t of read) expect(f12, `${t} is read but never declared`).toContain(`${t}:`);
+    expect(decls(css), "the retired ladder is still read here").not.toMatch(/var\(--stage-/);
   });
 
   it("⚠️ the retired turn tints are GONE, not left inert", () => {

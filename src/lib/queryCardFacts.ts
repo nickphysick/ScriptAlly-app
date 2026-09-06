@@ -50,6 +50,20 @@ export type Turn = "sand" | "you" | "agent" | "offer" | "closed";
  */
 export type Stage = "out-1" | "out-2" | "out-3" | "in-1" | "in-2" | "in-3" | "offer" | "closed";
 
+/**
+ * THE STATE — five values, colours v2 (design-refs/query-state-colours-v2.md). Colour says whose
+ * court it is and whether the journey has started; DEPTH is `StatusDot`'s alone.
+ *
+ * ⚠️ IT DOES NOT REPLACE `Stage`, AND THAT IS A DELIBERATE OVERLAP RATHER THAN A LEFTOVER. The
+ * eight-rung ladder is retired from the Query Centre, but `stageFor` is a SHARED export: the
+ * To-do stream reads it in `TodoCalendarPage` (three sites, `tl-st-{stage}` band classes) and in
+ * `TaskPane` (an inline `var(--stage-{stage})`), and `calendarStageTints.test.ts` locks the
+ * calendar's own mirror against `.t-f12`'s copy. Deleting it here would blank another stream's
+ * live surfaces silently and redden their lock, mid-flight. Retiring `Stage` is that stream's to
+ * schedule; this file states which values belong to which surface so neither drifts.
+ */
+export type State = "queried" | "agent" | "you" | "offer" | "closed";
+
 /** One run of the fact sentence. Rendered as nodes — never as `innerHTML`. */
 export interface Run {
   text: string;
@@ -77,8 +91,10 @@ export type CardMaterials = Record<MaterialKind, string | null>;
 
 export interface CardFacts {
   turn: Turn;
-  /** The tint ladder's rung — the token key, and the card's `qcc--s-{stage}` class. */
+  /** ⚠️ RETIRED FROM THE QUERY CENTRE, LIVE FOR THE TO-DO STREAM — see `State` above. */
   stage: Stage;
+  /** The state colour's key — the token, and the card's `qcc--st-{state}` class (colours v2). */
+  state: State;
   turnWord: string;
   leaf: CardLeaf | null;
   sentence: Run[];
@@ -179,6 +195,47 @@ const STAGE_OF: Partial<Record<QueryStatus, Stage>> = {
 export function stageFor(status: QueryStatus): Stage {
   return STAGE_OF[status] ?? "closed";
 }
+
+/**
+ * ⚠️ THE PINK FAMILY IS "SOMETHING IS ASKED OF YOU", WHICH IS WHY R&R SITS IN IT. Partial and Full
+ * Requested are the agent asking; a revise-and-resubmit is the same sentence in longer form. All
+ * three are with you until you send.
+ */
+const STATE_OF: Partial<Record<QueryStatus, State>> = {
+  [QueryStatus.QUERIED]: "queried",
+  [QueryStatus.PARTIAL_SENT]: "agent",
+  [QueryStatus.FULL_SENT]: "agent",
+  [QueryStatus.PARTIAL_REQUESTED]: "you",
+  [QueryStatus.FULL_REQUESTED]: "you",
+  [QueryStatus.REVISE_RESUBMIT]: "you",
+  [QueryStatus.OFFER]: "offer",
+};
+
+export function stateFor(status: QueryStatus): State {
+  return STATE_OF[status] ?? "closed";
+}
+
+/**
+ * THE ONE `{state} → token` MAPPING, exported once (the rulesheet's own words). Every surface that
+ * needs the colour in JS rather than through a class reads THIS — the stat tiles' icon discs, the
+ * board's header rule, the list's status pill. Nothing stores a colour.
+ */
+export const STATE_TOKEN: Record<State, string> = {
+  queried: "var(--state-queried)",
+  agent: "var(--state-agent)",
+  you: "var(--state-you)",
+  offer: "var(--state-offer)",
+  closed: "var(--state-closed)",
+};
+
+/** …and its deeper step, for rules and rings. Same key, so the two cannot fall out of step. */
+export const STATE_ACCENT_TOKEN: Record<State, string> = {
+  queried: "var(--state-queried-deep)",
+  agent: "var(--state-agent-deep)",
+  you: "var(--state-you-deep)",
+  offer: "var(--state-offer-deep)",
+  closed: "var(--state-closed-deep)",
+};
 
 export function turnWordFor(status: QueryStatus): string {
   const turn = turnFor(status);
@@ -419,6 +476,9 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
   return {
     turn,
     stage: decided ? "closed" : stageFor(status),
+    /* a DECIDED offer is closed in both keys — the decision is what ended it, and the status
+       string still says Offer, which is why neither key can read the status alone */
+    state: decided ? "closed" : stateFor(status),
     turnWord: decided ? "Closed" : turnWordFor(status),
     leaf,
     sentence,

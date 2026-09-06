@@ -41,8 +41,8 @@
   /* ⚠️ A DEFAULT PAIR SO EVERY CARD RESOLVES IT — a `var()` on an undefined custom property drops
      the whole declaration in silence, and a card whose stage class failed to land would otherwise
      have a transparent band rather than a visibly wrong one. */
-  --band-a: var(--stage-closed);
-  --band-b: var(--stage-closed);
+  --band-a: var(--state-closed);
+  --band-b: var(--state-closed);
 
   /**
    * ⚠️ A COLUMN FLEX, NOT A BLOCK — AND THE REASON IS THAT THIS CARD IS A `<button>`.
@@ -95,14 +95,21 @@
  * `background-color`. A real gradient across a 20px band reads as a lighting effect and makes two
  * adjacent rungs indistinguishable where they meet.
  */
-.qcc--s-out-1 { --band-a: var(--stage-out-1); --band-b: var(--stage-out-1); --stage-accent: var(--stage-out-3); }
-.qcc--s-out-2 { --band-a: var(--stage-out-2); --band-b: var(--stage-out-2); --stage-accent: var(--stage-out-3); }
-.qcc--s-out-3 { --band-a: var(--stage-out-3); --band-b: var(--stage-out-3); --stage-accent: var(--stage-out-3); }
-.qcc--s-in-1 { --band-a: var(--stage-in-1); --band-b: var(--stage-in-1); --stage-accent: var(--stage-in-3); }
-.qcc--s-in-2 { --band-a: var(--stage-in-2); --band-b: var(--stage-in-2); --stage-accent: var(--stage-in-3); }
-.qcc--s-in-3 { --band-a: var(--stage-in-3); --band-b: var(--stage-in-3); --stage-accent: var(--stage-in-3); }
-.qcc--s-offer { --band-a: var(--stage-offer); --band-b: var(--stage-offer); --stage-accent: var(--stage-offer); }
-.qcc--s-closed { --band-a: var(--stage-closed); --band-b: var(--stage-closed); --stage-accent: var(--stage-closed); }
+/**
+ * ⚠️ FIVE CLASSES, ONE PER STATE (colours v2). The eight-rung `.qcc--s-*` ladder is retired: it
+ * spelled depth in tint while `StatusDot` spelled it in shape, and where the two disagreed the
+ * tint won by area. `--band-a`/`--band-b` keep their pair — nothing paints a gradient, and a flat
+ * band is what stops two adjacent rows reading as one lit surface.
+ *
+ * ⚠️ `--state-accent` IS DERIVED HERE, from the same class that sets the fill — never passed in,
+ * never stored. One deeper step of the family, and its only jobs are the desk's strip, the active
+ * tab, the target rung's ring and the board header's rule.
+ */
+.qcc--st-queried { --band-a: var(--state-queried); --band-b: var(--state-queried); --state-accent: var(--state-queried-deep); }
+.qcc--st-agent   { --band-a: var(--state-agent);   --band-b: var(--state-agent);   --state-accent: var(--state-agent-deep); }
+.qcc--st-you     { --band-a: var(--state-you);     --band-b: var(--state-you);     --state-accent: var(--state-you-deep); }
+.qcc--st-offer   { --band-a: var(--state-offer);   --band-b: var(--state-offer);   --state-accent: var(--state-offer-deep); }
+.qcc--st-closed  { --band-a: var(--state-closed);  --band-b: var(--state-closed);  --state-accent: var(--state-closed-deep); }
 
 
 

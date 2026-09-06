@@ -93,13 +93,13 @@
 
 /* §3 — the rung the desk is open on takes a ring in the accent. Scoped to the drawer: the class
    arrives through TimelineRows' additive highlight and only this surface passes it. */
-.qpn .tl-ev--target { background: #fff; box-shadow: 0 0 0 1.5px var(--stage-accent, #e0d5c8); border-radius: 10px; }
+.qpn .tl-ev--target { background: #fff; box-shadow: 0 0 0 1.5px var(--state-accent, #e0d5c8); border-radius: 10px; }
 
 /* ── the header's manuscript line ─────────────────────────────────────────────────────────────── */
 .qpn-ms {
   display: flex; align-items: center; gap: 9px; padding: 12px 26px 16px;
   font-family: var(--font-serif); font-size: 14.5px; color: #1c130f;
-  background-color: var(--band-a, var(--stage-closed));
+  background-color: var(--band-a, var(--state-closed));
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
 }
 .qpn-ms svg { flex: none; }
@@ -201,7 +201,7 @@
    * contest at all — it applies only when nothing declared the token anywhere, which is exactly
    * what "the stage class failed to land" means.
    */
-  background-color: var(--band-a, var(--stage-closed));
+  background-color: var(--band-a, var(--state-closed));
 }
 .qpn-word { font-family: var(--font-serif); font-size: 20px; line-height: 1.35; color: var(--ink, #1c130f); }
 .qpn-turn {
@@ -211,7 +211,7 @@
 .qpn-head {
   padding: 16px 170px 6px 26px; display: flex; align-items: center; gap: 16px;
   position: relative;
-  background-color: var(--band-a, var(--stage-closed));
+  background-color: var(--band-a, var(--state-closed));
 }
 /* the stage-family slot floats in the reserved column, rising into the band — one tint, one block */
 .qpn-illo { position: absolute; right: 26px; top: -34px; background-color: rgba(255, 255, 255, 0.35); }
@@ -323,13 +323,13 @@
   letter-spacing: 0.13em; text-transform: uppercase; color: #9c8878;
 }
 .qat-quote {
-  margin: 22px 0 0; padding: 4px 0 4px 22px; border-left: 2px solid var(--stage-accent, #e0d5c8);
+  margin: 22px 0 0; padding: 4px 0 4px 22px; border-left: 2px solid var(--state-accent, #e0d5c8);
   font-family: var(--font-serif); font-style: italic; font-size: 16.5px; line-height: 1.5;
   color: #1c130f; position: relative;
 }
 .qat-quote::before {
   content: "\201C"; position: absolute; left: -2px; top: -18px; font-size: 48px;
-  color: var(--stage-accent, #e0d5c8); font-style: normal;
+  color: var(--state-accent, #e0d5c8); font-style: normal;
 }
 .qat-qk {
   display: block; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8.5px;
@@ -368,4 +368,4 @@
 .qat-lnk:hover { color: #1c130f; }
 
 /* §1 (respond-nudge) — the top-bar button the desk is open on wears the accent ring */
-.qpn-act--live { box-shadow: 0 0 0 1.5px var(--stage-accent, #c7d0c2); }
+.qpn-act--live { box-shadow: 0 0 0 1.5px var(--state-accent, #c7d0c2); }

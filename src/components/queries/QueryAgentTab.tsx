@@ -26,7 +26,7 @@ import { StatusDot } from "../StatusDot";
 import { materialRowsFromAgent } from "../../lib/agentMaterials";
 import { flagFor, countryName } from "../../lib/territory";
 import type { Agent, Query } from "../../types";
-import { stageFor } from "../../lib/queryCardFacts";
+import { stateFor } from "../../lib/queryCardFacts";
 
 export interface AgentHistoryRow {
   queryId: string;
@@ -140,7 +140,7 @@ export const QueryAgentTab: React.FC<QueryAgentTabProps> = ({ agent, history, on
           {history.map((h) => (
             <div key={h.queryId} className="qat-hrow">
               {/* the swatch is the query's own band tint — the stage class resolves it */}
-              <span className={`qat-sw qcc--s-${stageFor(h.status)}`} aria-hidden="true" />
+              <span className={`qat-sw qcc--st-${stateFor(h.status)}`} aria-hidden="true" />
               <span className="qat-hw">{h.manuscriptTitle}</span>
               <span className="qat-hs">{h.statusLine}</span>
               <span className="qat-hd">{h.when}</span>

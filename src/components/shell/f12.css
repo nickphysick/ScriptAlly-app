@@ -4615,5 +4615,28 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
 
   --stage-offer: #d7e0e8;   /* an offer, while it is open */
   --stage-closed: #e4e1db;  /* closed, rejected, withdrawn, no response */
+
+  /**
+   * ══ THE STATE PALETTE (colours v2, design-refs/query-state-colours-v2.md) ══════════════════
+   *
+   * FIVE FLAT FILLS, AND DEPTH IS `StatusDot`'S ALONE. Colour says whose court it is and whether
+   * the journey has started; the ladder above said how FAR along it was, which is the same thing
+   * `StatusDot` already draws — so two devices were spelling one fact and the tints did it worse.
+   * Sand is the start and has no hue of its own; sage and pink arrive with the agent's first
+   * reply. Sand must never read as closed grey (locked by ΔE, not by eye).
+   */
+  --state-queried: #f7efe3;   /* sand  · Queried                                   · with the agent */
+  --state-agent:   #e0e5dd;   /* sage  · Partial Sent, Full Sent                   · with the agent */
+  --state-you:     #f5e6df;   /* pink  · Partial/Full Requested, R&R, unsent ask    · with you      */
+  --state-offer:   #d7e0e8;   /* slate · an offer, undecided                       · offer         */
+  --state-closed:  #e4e1db;   /* grey  · closed, rejected, withdrawn, no response   · closed        */
+
+  /* one deeper step of the SAME family — desk strip, active tab, target-rung ring, estimate bars.
+     Not a sixth colour: derived from the same `state`, and never used as a fill. */
+  --state-queried-deep: #e7d9bd;
+  --state-agent-deep:   #c7d0c2;
+  --state-you-deep:     #e8c9bb;
+  --state-offer-deep:   #c9d6e1;
+  --state-closed-deep:  #cfc9c1;
 }
 

@@ -360,11 +360,14 @@ describe("§3 (drawer-3) · two slots, placeholder until art exists, one-line sw
     expect(html, "the label survives beside finished art").not.toContain("spot · nudge");
   });
 
-  it("the header slot is keyed by stage FAMILY off the same stage the band wears; the desk's by verb", () => {
+  it("the header slot is keyed by the STATE the band wears; the desk's by verb", () => {
+    /* ⚠️ RETARGETED (colours v2): five flat states ARE the illustration families, so the fold from
+       eight rungs to four is gone rather than rewritten — one fewer mapping between status and
+       picture, and the slot's key is now the same word the band's class carries. */
     const panel = readFileSync(join(process.cwd(), "src/components/queries/QueryPanel.tsx"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(panel).toContain("stage-specific · ${stageFamily(facts.stage)}");
-    expect(panel).toContain("art={STAGE_ART[stageFamily(facts.stage)]}");
+    expect(panel).toContain("state-specific · ${facts.state}");
+    expect(panel).toContain("art={STATE_ART[facts.state]}");
     const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8");
     expect(page).toContain('spot={deskVerb === "closed" ? "close" : deskVerb}');
     expect(page).toContain('spot="correct"');
@@ -375,7 +378,7 @@ describe("§3 (drawer-3) · two slots, placeholder until art exists, one-line sw
   it("both ART tables are EMPTY today — the slots render placeholders, and an entry is the whole swap", () => {
     const panel = readFileSync(join(process.cwd(), "src/components/queries/QueryPanel.tsx"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    expect(panel).toMatch(/const STAGE_ART[^=]*= \{\};/);
+    expect(panel).toMatch(/const STATE_ART[^=]*= \{\};/);
     const desk = readFileSync(join(process.cwd(), "src/components/queries/CorrectionDesk.tsx"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
     expect(desk).toMatch(/const SPOT_ART[^=]*= \{\};/);
