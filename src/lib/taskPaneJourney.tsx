@@ -52,6 +52,12 @@ export interface JourneyInputs {
   partial?: boolean;
   /** the query's status word, through `getStatusLabel` — never mapped again here */
   statusWord?: string;
+  /* the Quick Look column's derived header and its agent row (tightened round, Phase 4) — all
+     computed in the session from the query's own dates and status; nothing stored */
+  stage?: string;
+  status?: QueryStatus;
+  since?: string;
+  agent?: { name: string; agency?: string; initials: string; onOpen?: () => void };
   /** a note's own added date, for the form's meta line — "18 Aug" */
   noteAddedDate?: string;
   /** what is still unanswered — the ONE list the chip, the line and the square all read */
@@ -314,6 +320,10 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
        meant. A button reading "Log 0 queries" says what it would do; a disabled button with a
        generic label would say only that something is wrong. */
     statusWord: input.statusWord,
+    stage: input.stage,
+    status: input.status,
+    since: input.since,
+    agent: input.agent,
     bulk: input.bulk,
     missing: input.missing,
     showMissing: input.showMissing,

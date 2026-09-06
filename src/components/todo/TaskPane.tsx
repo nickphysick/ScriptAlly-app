@@ -137,6 +137,19 @@ export interface TaskPaneJourney {
    * A second map here is how the pane and the Query Centre come to call one status two things.
    */
   statusWord?: string;
+  /**
+   * ⚠️ THE QUICK LOOK COLUMN'S THREE NEW FACTS (tightened round, Phase 4), ALL DERIVED UPSTREAM
+   * AND NONE STORED. `stage` is `stageFor(status)` — the Query Centre's own ladder key, so the
+   * header's tint is the colour that page paints and not a second opinion; `status` is the enum
+   * the real `StatusDot` draws from (the app's one drawing of a query status); `since` is the
+   * elapsed line, absent rather than guessed when the query has no date to count from.
+   * `statusWord` above is already `getStatusLabel`'s, which is why the word is not recomputed.
+   */
+  stage?: string;
+  status?: QueryStatus;
+  since?: string;
+  /** the agent behind the query — the column's one row about a person, and its one outward link */
+  agent?: { name: string; agency?: string; initials: string; onOpen?: () => void };
   /** a cohort's numbers — present only on the bulk journey; see `taskPaneJourney` */
   bulk?: { count: number; touched: number };
   /**
@@ -360,7 +373,7 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, 
             stays put. Stretching to fill was what put a 340px hole between a two-question form and
             its own bar. */}
         <div className="wcol">
-        <div className="sheet"><div className="rim">
+        <div className={`sheet${hasRecord && recAway ? " railClosed" : ""}`}><div className="rim">
           {/* ⚠️ THE TINTED BAND IS RETIRED (tightened round, Phase 3) — the sheet is a DOCUMENT,
               and a document's first line is its title, not a coloured strip carrying one. What
               is left is a chrome row: the family pill, the position, and the three controls that
@@ -485,6 +498,112 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, 
                 stylesheet and four measurements address it by that name; renaming it would be a
                 change of spelling with no claim behind it, which is what this repo's locks exist
                 to refuse. `foot` is what the contract calls the position. */}
+            {/* ⚠️ THE REFERENCE IS A COLUMN OF THE SHEET NOW (tightened round, Phase 4) — one
+                vertical hairline, no rim, no radius, no field tint. It was a floating SLIP: its own
+                card, its own inset rim, its own sage head, beside the sheet rather than part of it.
+                A reference that belongs to the document it summarises should be a column of that
+                document; two framed objects side by side made the sheet read as two things.
+
+                ⚠️ THE HEADER IS THE COLUMN'S ONLY TINT, AND ITS COLOUR IS DERIVED — the Query
+                Centre's own stage ladder (`stageFor(status)` → `var(--stage-*)`), never a value
+                stored on the card. So this column and the Centre's card cannot paint one query two
+                colours, and a status the ladder has not placed falls to its safe grey.
+
+                ⚠️ AND THE DOCUMENT KEEPS ITS WIDTH WHEN THE COLUMN COLLAPSES — the wrap law from the
+                drawer round, restated inside the sheet. The ref gives the freed space back to the
+                document (`.sheet.railClosed { grid-template-columns: minmax(0,1fr) 30px }`), which
+                re-wraps the sentence the writer is reading, every time they put the reference aside.
+                Here the SHEET narrows by exactly what the column gave up, so the document does not
+                move and the desk shows to its right. */}
+            {hasRecord && (
+              <aside className="rail" aria-label="Quick reference">
+                {/* ⚠️ THE CONTRACT'S OWN WORDS — `.rail`, its `.in` scroller, `.rh` for the collapsed
+                spine and `.sheet.railClosed` for the state. They were `ref`/`refscroll`/
+                `refspine`/`refOpen`, which the port census correctly reported as INVENTED: the
+                mockup has this column and names it, so a new name for it is a name nobody can
+                check the page against. And there is no `railOpen`: the open width comes from
+                `:has()` on the column's own presence, so the three states (absent · open ·
+                collapsed) need no class that the contract does not have. */}
+            {/* the collapsed spine: the label vertical, and the chevron back */}
+                {recAway ? (
+                  <button type="button" className="rh" title="Show the quick reference"
+                    aria-expanded="false" onClick={() => setRecAway(false)}>
+                    <span className="cv" aria-hidden="true">‹</span>
+                    <span className="t">Quick reference</span>
+                  </button>
+                ) : (
+                  <>
+                    <div className="qhead" style={d.stage ? { background: `var(--stage-${d.stage})` } : undefined}>
+                      <div className="lbl">
+                        <span>Quick reference</span>
+                        {/* ⚠️ ONE OF THE COLUMN'S TWO CONTROLS, AND THAT IS ASSERTED RATHER THAN
+                            INTENDED — the measurement sweeps every descendant for an input or a
+                            button. A reference you can change is not a reference: everything here is
+                            a fact about the query, and the two things a reader may do with it are put
+                            it away and go to the record it summarises. */}
+                        <button type="button" className="cl" title="Put the quick reference away"
+                          aria-expanded="true"
+                          aria-label="Put the quick reference away" onClick={() => setRecAway(true)}>›</button>
+                      </div>
+                      {d.statusWord && (
+                        <div className="st">
+                          {/* the app's ONE drawing of a query status — never a lookalike */}
+                          {d.status && <StatusDot status={d.status} overrideSize={13} />}
+                          {d.statusWord}
+                        </div>
+                      )}
+                      {/* ⚠️ HOW LONG, NOT JUST WHERE. A status without its age is the one thing a
+                          writer glancing at a record cannot supply themselves. Derived upstream from
+                          the query's own dates; absent rather than guessed when there is no date. */}
+                      {d.since && <div className="since">{d.since}</div>}
+                    </div>
+
+                    <div className="in">
+                      {d.agent && (
+                        <div className="who">
+                          <span className="av" aria-hidden="true">{d.agent.initials}</span>
+                          <div style={{ minWidth: 0 }}>
+                            <div className="n">{d.agent.name}</div>
+                            <div className="a">{d.agent.agency || "No agency"}</div>
+                          </div>
+                          {d.agent.onOpen && (
+                            <a href="#" className="lk" aria-label={`Open ${d.agent.name}`}
+                              onClick={(ev) => { ev.preventDefault(); d.agent?.onOpen?.(); }}>→</a>
+                          )}
+                        </div>
+                      )}
+                      {/* the facts, as a definition list: a 78px mono label column and the value
+                          beside it, with the secondary line beneath where there is one */}
+                      {d.tiles && d.tiles.length > 0 && (
+                        <div className="facts">
+                          {d.tiles.map((t, i) => (
+                            <div className="fact" key={`${t.k}-${i}`}>
+                              <span className="k">{t.k}</span>
+                              {t.absent
+                                ? <span className="v absent">{t.val}</span>
+                                : <span className="v">{t.val}{t.small && <small>{t.small}</small>}</span>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {d.tl && d.tl.length > 0 && (
+                        <>
+                          <div className="sub">The story so far</div>
+                          <div className="rtl"><div className="tl">{d.tl.map(rung)}</div></div>
+                        </>
+                      )}
+                      {/* a dotted-underline LINK, not a button — going to the record is not an act
+                          on it, and the column offers no acts */}
+                      {d.onOpenQuery && (
+                        <a href="#" className="qbtn" onClick={(ev) => { ev.preventDefault(); d.onOpenQuery?.(); }}>
+                          Open the full query →
+                        </a>
+                      )}
+                    </div>
+                  </>
+                )}
+              </aside>
+            )}
             <div className="foot actbar">
               {/* ⚠️ THE STRIP YIELDS TO THE MISSING LINE, IT DOES NOT COMPETE WITH IT. Both in the
                   bar at once is two sentences fighting for one row, and the will-record is restated
@@ -583,91 +702,11 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, 
               })()}
             </div>
         </div></div>
-        {/* ⚠️ THE BOOKMARK TAB LIVES ON THE SHEET'S RIGHT EDGE AND ONLY WHEN THE SLIP IS AWAY.
-            It is a sibling of the sheet inside `.wcol`, positioned over the sheet's edge — the
-            sheet's own rim clips, so a child could not hang off it. Vertical mono, sage, 26px:
-            it says WHAT is behind it rather than offering an anonymous chevron.
-            ⚠️ AND IT IS ABSENT, NOT HIDDEN, WHEN THE SLIP IS SHOWING — a tab pointing at
-            something already on screen is a control with nothing to do. */}
-        {hasRecord && recAway && (
-          <button type="button" className="qrtab" title="Show the quick reference"
-            onClick={() => setRecAway(false)}>
-            <span>Quick reference</span>
-          </button>
-        )}
+        {/* (the bookmark TAB is retired with the floating slip — the reference is a column of
+            the sheet now, and its collapsed state is a spine INSIDE that column rather than a
+            tab hung on the sheet's outer edge. One place the reference can be, open or shut.) */}
         </div>
 
-        {/* ⚠️ THE SLIP'S 264px SLOT IS ALWAYS THERE; ONLY THE SLIP COMES AND GOES — and that is
-            THE WRAP LAW, made structural rather than remembered. The ref this is built from
-            collapses the slot (`.stage.noRec .qrwrap { flex-basis: 0; width: 0 }`) with
-            `.wcol { flex: 1 1 auto }` above it, so dismissing GROWS the sheet by 264px and the
-            deed re-wraps — a real bug in the mockup, and the brief corrects it. Nothing about the
-            slip's state may reach the band.
-
-            ⚠️ THE COST IS 264px OF EMPTY DESK WHEN IT IS AWAY, AND IT IS THE RIGHT TRADE. A writer
-            who puts the reference aside to concentrate on the form does not want the form to
-            reflow underneath them; the tab marks where it went, and one click brings it back to
-            exactly the width it left. Reclaiming the space would mean re-laying-out the sentence
-            they are reading, every time.
-
-            ⚠️ AND THE DISMISSAL IS THE SESSION'S, NOT THE TASK'S. Per-task memory would make the
-            slip flicker in and out as ‹ › walk the list — the writer said "not now", about the
-            slip, not about this one card. */}
-        {hasRecord && (
-          <div className="qrwrap">
-          {!recAway && (
-            <div className="qr"><div className="rrim">
-              {/* ⚠️ THE HEAD SPEAKS THE QUERY CENTRE'S VOICE (deed round, Phase 3): the sage band
-                  the Tracking panel wears, with the query's own STATUS on the right in Playfair. It
-                  was an entry COUNT — "3 entries" — which is a fact about the list rather than about
-                  the query, and the one thing a writer glancing at a record wants is where the
-                  query stands. `statusWord` arrives already through `getStatusLabel`, the app's ONE
-                  status-word function, so this card and the Centre's pill cannot come to call one
-                  status two things. */}
-              <div className="rhead">
-                <span className="t">Quick reference</span>
-                {d.statusWord && <span className="stat">{d.statusWord}</span>}
-                {/* ⚠️ THE ONLY CONTROL IN THE SLIP BESIDES THE QUERY LINK, AND THAT IS ASSERTED
-                    RATHER THAN INTENDED (`sheetSlip.measure.ts` P3.9 sweeps every descendant, not
-                    the first level). A reference you can change is not a reference: everything in
-                    here is a fact about the query, and the two things a reader may do with it are
-                    put it away and go to the record it summarises. */}
-                <button type="button" className="x" title="Put the quick reference away"
-                  aria-label="Put the quick reference away" onClick={() => setRecAway(true)}>×</button>
-              </div>
-              <div className="recscroll">
-                {/* ⚠️ THE TILES ARE STACKED, NOT A ROW. A 288px column cannot carry three cells
-                    side by side, and the facts read better one to a line with a hairline between
-                    them than squeezed into thirds. */}
-                {d.tiles && d.tiles.length > 0 && (
-                  <div className="rtiles">
-                    {d.tiles.map((t, i) => (
-                      <div className="rtile" key={`${t.k}-${i}`}>
-                        <div className="k">{t.k}</div>
-                        {t.absent
-                          ? <div className="v absent">{t.val}</div>
-                          : <div className="v">{t.val}{t.small && <small>{t.small}</small>}</div>}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {d.tl && d.tl.length > 0 && (
-                  <div className="rtl">
-                    <div className="tl">{d.tl.map(rung)}</div>
-                  </div>
-                )}
-              </div>
-              {d.onOpenQuery && (
-                <div className="rfoot">
-                  <a href="#" onClick={(ev) => { ev.preventDefault(); d.onOpenQuery?.(); }}>
-                    Open the full query →
-                  </a>
-                </div>
-              )}
-            </div></div>
-          )}
-          </div>
-        )}
       </div>
     </div>
   );

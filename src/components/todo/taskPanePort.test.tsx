@@ -186,12 +186,15 @@ describe("1 · the pane's class names are the mockup's", () => {
        Band, then work, then foot, then the slip — in source order, which is the only half a string
        can carry. That the foot is not a LID over the work is a rendered-page claim and lives in
        `tests/e2e/sheetSlip.measure.ts`. */
-    const sheet = HTML.indexOf('class="sheet"');
+    const sheet = HTML.indexOf('class="sheet');
     const head = HTML.indexOf('class="dhead"');
     const work = HTML.indexOf('class="work"');
     const title = HTML.indexOf('class="title"');
     const bar = HTML.indexOf('class="foot actbar"');
-    const rec = HTML.indexOf('class="qrwrap"');
+    /* ⚠️ `class="sheet` WITHOUT ITS CLOSING QUOTE — the sheet carries a state modifier now
+       (`railClosed`), so an exact-attribute match finds nothing. The token is still bounded on
+       its left by the quote, which is what the class-name rule asks for. */
+    const rec = HTML.indexOf('class="rail"');
     expect(head, "the header row is missing").toBeGreaterThan(-1);
     expect(sheet, "the sheet is missing").toBeGreaterThan(-1);
     expect(head, "the header is not the sheet's top edge").toBeGreaterThan(sheet);
@@ -204,12 +207,20 @@ describe("1 · the pane's class names are the mockup's", () => {
     expect(title, "the title is missing").toBeGreaterThan(-1);
     expect(title, "the title is in the header rather than in the document").toBeGreaterThan(work);
     expect(bar).toBeGreaterThan(title);
-    expect(rec, "the slip is not after the sheet — it is inside it").toBeGreaterThan(bar);
+    /* ⚠️ AND THE REFERENCE IS NOW A COLUMN INSIDE THE SHEET, BEFORE THE FOOT — the reversal of
+       what this line used to assert. The slip was a sibling AFTER the whole sheet; the rail is a
+       grid cell between the work and the foot, which is what "a column of the sheet" means in
+       source order. */
+    expect(rec, "the reference is not inside the sheet").toBeGreaterThan(sheet);
+    expect(rec, "the reference is not a column beside the work").toBeGreaterThan(work);
+    expect(bar, "the foot is not below both columns").toBeGreaterThan(rec);
     /* ⚠️ EXACTLY TWO RIMS ON A QUERY JOURNEY, AND THEY ARE DIFFERENT OBJECTS: the sheet's, which
        clips the band's tint and the work's overflow, and the slip's own `.rrim`. Asserting the
        count is what stops a fourth card growing back one round at a time. */
     expect((HTML.match(/class="rim"/g) || []).length, "the sheet is not one rim").toBe(1);
-    expect((HTML.match(/class="rrim"/g) || []).length, "the slip is not one rim").toBe(1);
+    /* the slip's sage rim went with the slip — the reference is a column of the sheet's own
+       frame now, so the pane draws exactly ONE rim */
+    expect((HTML.match(/class="rrim"/g) || []).length, "a second rim came back").toBe(0);
     /* ⚠️ AND THE THREE CARD CLASSES ARE GONE, ASSERTED BY NAME. A retirement stated only as "the
        new names are present" passes on a page carrying both. */
     for (const dead of ["fc hdr", "fc work", "fc rec"]) {
@@ -220,7 +231,10 @@ describe("1 · the pane's class names are the mockup's", () => {
        record owns them. Asserted as absence AND presence, because either alone is satisfiable by a
        pane that renders no tiles at all. */
     expect(HTML, "a tile row is back in the band").not.toMatch(/["\s`]tiles["\s`]/);
-    expect(HTML.indexOf('class="rtiles"'), "the tiles are not inside the record card")
+    /* ⚠️ THE FACTS ARE IN THE REFERENCE AND NOWHERE ELSE — the same claim, in the column's own
+       word (`facts`, from `todo-belongs`) rather than the slip's `rtiles`. Asserted as absence
+       AND presence, because either alone is satisfiable by a pane that renders no facts at all. */
+    expect(HTML.indexOf('class="facts"'), "the facts are not inside the reference column")
       .toBeGreaterThan(rec);
   });
 
@@ -282,9 +296,18 @@ describe("2 · every element of the mockup's Send journey exists in the rendered
   /* ⚠️ THE HEADER WORDS ARE `todo-belongs`'s NOW (tightened round, Phase 3) — `dhead`/`fam`/
      `pos`/`dnav`/`title` replace `band`/`deed`/`b-nav`. The journey internals are unchanged and
      still the pane contract's, which is the honest shape of a pane assembled from several refs. */
+  /* ⚠️ THE REFERENCE'S WORDS ARE `todo-belongs`'s NOW (tightened round, Phase 4) — `rail`, its
+     `qhead`, `who`, `facts`/`fact`, `sub` and `qbtn` replace the slip's `qrwrap`/`qr`/`rrim`/
+     `rhead`/`rtiles`/`rtile`/`rfoot`. The column IS the contract's; using its words is what lets
+     this census mean anything. */
   const PANE_PARTS = ["pane", "wcol", "sheet", "dhead", "fam", "pos", "dnav", "title",
     "work", "workscroll", "form", "foot", "actbar", "wr", "ab",
-    "qrwrap", "qr", "rrim", "rhead", "rtiles", "rtile", "rtl", "rfoot"];
+    "rail", "qhead", "facts", "fact", "sub", "rtl", "qbtn"];
+  /* ⚠️ `who` IS NOT IN THAT LIST, AND THE ABSENCE IS THE HONEST ONE: this fixture's journey
+     carries no `agent`, so the row legitimately does not render. Requiring it here would mean
+     adding an agent to the fixture to satisfy a checklist rather than because the journey has
+     one — and the row IS measured, on the real page, over seven cards
+     (`tests/e2e/tightened.measure.ts` P4.7). */
 
   it("the mockup emits every part this checks", () => {
     /* the guard on the guard: a part that stopped being in the ref would silently drop out */
@@ -662,18 +685,21 @@ describe("the app frame — four named adaptations, and only four", () => {
        content — without it the worksheet refuses to shrink and pushes the record off its measure. */
     expect(decls, "the retired workrow is back").not.toContain(".tpn .workrow");
     expect(decls, "the wrapping middle's columns are back").not.toMatch(/\.tpn \.(formcol|storycol)[ .{:,]/);
-    /* ⚠️ THE SPLIT IS A FLEX ROW NOW, NOT A GRID (Phase 3) — the sheet grows, the slip's slot is a
-       fixed 264, and there is still no threshold deciding anything. `flex: 1 1 auto` with
-       `min-width: 0` is the flex spelling of `minmax(0, 1fr)`: without the min-width the sheet
-       refuses to shrink below its content and pushes the slip off its measure, which is exactly
-       what the grid's `minmax(0, …)` was there to prevent. */
+    /* ⚠️ THE REFERENCE IS A COLUMN OF THE SHEET NOW (tightened round, Phase 4), so the split it
+       used to make with `.wcol` is INSIDE the sheet's own grid — `minmax(0, 1fr)` beside a track
+       whose width is a token. Still no threshold deciding anything: the document's track has no
+       fixed width at any viewport, and the reference's three states are a token value rather
+       than a breakpoint. The `minmax(0, …)` matters for the same reason `min-width: 0` did —
+       without it the document refuses to shrink below its content and pushes the reference off
+       its measure. */
     const pane = rule(".tpn .pane").replace(/\s*:\s*/g, ":");
     const wcol = rule(".tpn .wcol").replace(/\s*:\s*/g, ":");
-    const slot = rule(".tpn .qrwrap").replace(/\s*:\s*/g, ":");
+    const rim = rule(".tpn .sheet > .rim").replace(/\s*:\s*/g, ":");
     expect(pane, "a wrap decides the split instead of the row").not.toContain("flex-wrap");
     expect(wcol).toContain("flex:1 1 auto");
-    expect(wcol, "the sheet refuses to shrink and pushes the slip off its measure").toContain("min-width:0");
-    expect(slot, "the slip's slot is not a fixed 264").toContain("flex:0 0 264px");
+    expect(wcol, "the sheet refuses to shrink and pushes the reference off its measure").toContain("min-width:0");
+    expect(rim, "the document's track can be pushed past its measure").toContain("grid-template-columns:minmax(0,1fr)");
+    expect(rim, "the reference's width is a literal rather than a token").toContain("var(--ref-w)");
     /* the tiles stack in the record column now — there is no column count left to auto-fit */
     expect(decls, "the retired tile row's auto-fit is back").not.toContain("repeat(auto-fit, minmax(150px, 1fr))");
   });

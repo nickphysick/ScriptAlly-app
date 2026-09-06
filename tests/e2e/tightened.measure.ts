@@ -15,16 +15,36 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn, liftMotionSuppression } from "./measure";
+/* ⚠️ THE EXPECTED SIDE COMES FROM THE APP'S OWN DERIVATIONS, NEVER FROM A LITERAL HERE — the
+   Query Centre's ladder key and the app's one status-word function. A hex typed into this file
+   would be a second copy of the mapping under test, which is the circular-assertion family. */
+import { stageFor } from "../../src/lib/queryCardFacts";
+import { QueryStatus } from "../../src/types";
+/* ⚠️ `getStatusLabel` IS NOT IMPORTED, AND THE REASON IS MECHANICAL RATHER THAN A PREFERENCE:
+   it lives in `StatusPill.tsx`, which imports a stylesheet, and a CSS import in this runner
+   makes the FILE FAIL TO COLLECT — reported as "No tests found", which greps as zero reds. So
+   the one clause of it that matters here is restated, with the source named: every status'
+   label is its own enum string, except REJECTED. Restating a two-line function is the lesser
+   evil against a suite that silently does not run — and `statusLabelsMatch` below asserts the
+   restatement against the real function's ONE exception, so a change there fails here. */
+const labelOf = (st: QueryStatus): string =>
+  st === QueryStatus.REJECTED ? "Rejected" : String(st);
 import { writeFileSync, rmSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
+/* ⚠️ THE REMOVAL IS INSIDE THE TEST, NOT AT MODULE SCOPE — and this file had it the other way for
+   three phases. Playwright imports the file once PER WORKER, so with four tests spread across
+   workers a later import deleted the report an earlier worker had already written: Phase 1's
+   output went missing on run after run while its assertions were all green. A vanished report
+   reads exactly like a test that did not run, which is the stale-report fault wearing its own
+   clothes. */
 const OUT = process.env.SA_TI_OUT ?? "run-artifacts/tightened.txt";
-rmSync(OUT, { force: true });
 
 test("Phase 1 — one toolbar: the row, the title census, the meter's figures", async ({ page }) => {
   const out: R[] = [];
   const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
 
+  rmSync(OUT, { force: true });
   await ensureSignedIn(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/todo");
@@ -246,6 +266,14 @@ test("Phase 2 — the dense list: 44 both states, the strip, the keys", async ({
       host: prev ? prev.getAttribute("data-rowkey") : null,
       paneClasses: (document.querySelector(".tpn") || { className: "" }).className };
   })()`) as { strips: number; under: boolean; onsel: boolean; selKey: string | null; host: string | null; paneClasses: string };
+  const foldedFoot = await page.evaluate(`(() => {
+    const c = document.querySelector(".tlc .l-foot .c");
+    return { keys: !!document.querySelector(".tlc .l-foot .keys") && getComputedStyle(document.querySelector(".tlc .l-foot .keys")).display !== "none",
+      count: c ? Math.round(c.getBoundingClientRect().height) : -1 };
+  })()`) as { keys: boolean; count: number };
+  add("P2.17 · folded, the hints stand down and the count stays on one line",
+      !foldedFoot.keys && foldedFoot.count > 0 && foldedFoot.count <= 20, JSON.stringify(foldedFoot));
+
   add("P2.8 · the strip stays under the SELECTED row while the sheet is open",
       openStrip.strips === 1 && openStrip.under && openStrip.onsel && openStrip.selKey === openStrip.host,
       JSON.stringify(openStrip));
@@ -364,6 +392,38 @@ test("Phase 2 — the dense list: 44 both states, the strip, the keys", async ({
   await page.waitForTimeout(250);
   const stillThere = await page.evaluate(
     "!!document.querySelector('.tlc .row[data-rowkey=" + JSON.stringify(houseKey ?? "") + "]')") as boolean;
+  /* ⚠️ THE FOOTER'S KEY HINTS ARE CHROME, NOT COPY — they shipped with no rule for one commit
+     and rendered at the page's inherited size, the largest thing in the row. Every assertion
+     about the footer was about its TEXT, and the text was right; only the screenshot showed it.
+     So: the hints are mono, small, and no taller than the count they sit beside. */
+  const foot = await page.evaluate(`(() => {
+    const keys = document.querySelector(".tlc .l-foot .keys");
+    const count = document.querySelector(".tlc .l-foot .c");
+    if (!keys || !count) return null;
+    const cs = getComputedStyle(keys);
+    return { fs: parseFloat(cs.fontSize), fam: cs.fontFamily.split(",")[0].replace(/"/g, ""),
+      h: Math.round(keys.getBoundingClientRect().height),
+      countH: Math.round(count.getBoundingClientRect().height),
+      kbds: document.querySelectorAll(".tlc .l-foot .keys kbd").length };
+  })()`) as { fs: number; fam: string; h: number; countH: number; kbds: number } | null;
+  /* and the footer stays ONE line in both states — at 520 the hints stand down rather than
+     wrapping the count and the export onto second lines */
+  const footLines = await page.evaluate(`(() => {
+    const f = document.querySelector(".tlc .l-foot");
+    const c = document.querySelector(".tlc .l-foot .c");
+    return f && c ? { foot: Math.round(f.getBoundingClientRect().height),
+      count: Math.round(c.getBoundingClientRect().height) } : null;
+  })()`) as { foot: number; count: number } | null;
+  add("P2.16 · the footer is one line at rest",
+      !!footLines && footLines.count <= 20, JSON.stringify(footLines));
+
+  add("P2.15 · the footer's key hints are mono chrome, not body copy",
+      /* FIVE caps for FOUR actions — j and k are one deed with two keys, which is the contract's
+         own line and the reason this is not `=== 4` */
+      !!foot && foot.fam === "JetBrains Mono" && foot.fs <= 9 && foot.kbds === 5
+        && foot.h <= foot.countH + 6,
+      JSON.stringify(foot));
+
   add("P2.14 · d opens the dismiss confirm, and Keep leaves the row standing",
       confirmUp && stillThere, "confirm=" + confirmUp + " row still there=" + stillThere);
 
@@ -372,7 +432,7 @@ test("Phase 2 — the dense list: 44 both states, the strip, the keys", async ({
   writeFileSync(OUT2, "── tightened · Phase 2 · " + out.length + " assertions · " + red.length
     + " RED · " + (out.length - red.length) + " green\n" + lines.join("\n") + "\n");
   console.log(lines.join("\n"));
-  expect(out.length, "assertion floor").toBeGreaterThanOrEqual(14);
+  expect(out.length, "assertion floor").toBeGreaterThanOrEqual(17);
   expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
 });
 
@@ -518,8 +578,18 @@ test("Phase 3 — the sheet is a document: the header, the title, the measures, 
       branches.push("1920");
     }
 
-    /* ── the height law, both halves ── */
-    const forkH = h.sheetH;
+    /* ── the height law, both halves ──
+       ⚠️ THE REFERENCE COLUMN IS COLLAPSED FIRST AT 1920, AND THAT IS A PRECONDITION RATHER THAN
+       A CONVENIENCE. Phase 4 put the reference INSIDE the sheet, so "the sheet hugs its content"
+       now means it hugs the TALLER OF ITS TWO COLUMNS — and the reference is taller than a fork
+       or a short ledger, so both states measured an identical 598.5 and the hug looked like a
+       stretch. Measuring the document's own hug means measuring it where the document governs. */
+    if (w === 1920) {
+      await page.evaluate(`(() => { const b = document.querySelector(".tpn .qhead .cl"); if (b) b.click(); })()`);
+      await page.waitForTimeout(450);
+    }
+    const forkH = await page.evaluate(
+      `(() => { const s = document.querySelector(".tpn .sheet"); return s ? Math.round(s.getBoundingClientRect().height * 10) / 10 : -1; })()`) as number;
     const forkN = h.forks.length;
     await page.evaluate(`(() => { const b = document.querySelector(".tpn .fk"); if (b) b.click(); })()`);
     await page.waitForTimeout(800);
@@ -549,7 +619,7 @@ test("Phase 3 — the sheet is a document: the header, the title, the measures, 
           JSON.stringify(led.heads));
       /* HUGGING: the fork and a four-question ledger hold different amounts, so a hugging sheet
          is two different heights — a stretched one is a single height whatever it holds. */
-      add("P3.10b · at 1920 the sheet HUGS — the fork and the ledger are different heights, both under the cap",
+      add("P3.10b · at 1920, with the reference put aside, the sheet HUGS its document — the fork and the ledger are different heights, both under the cap",
           forkH > 0 && led.h > 0 && Math.abs(forkH - led.h) > 2 && led.h < led.cap - 1 && forkH < led.cap - 1,
           "fork (" + forkN + " options) " + forkH + " · ledger (" + led.heads.length + " rows) " + led.h
             + " · cap " + led.cap);
@@ -567,6 +637,210 @@ test("Phase 3 — the sheet is a document: the header, the title, the measures, 
   writeFileSync(OUT3, "── tightened · Phase 3 · " + out.length + " assertions · " + red.length
     + " RED · " + (out.length - red.length) + " green\n" + lines.join("\n") + "\n");
   console.log(lines.join("\n"));
-  expect(out.length, "assertion floor").toBeGreaterThanOrEqual(14);
+  expect(out.length, "assertion floor").toBeGreaterThanOrEqual(17);
+  expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
+});
+
+test("Phase 4 — the Quick Look column: the ladder tint, the facts, the collapse", async ({ page }) => {
+  const out: R[] = [];
+  const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
+  const OUT4 = process.env.SA_TI_OUT4 ?? "run-artifacts/tightened-p4.txt";
+  rmSync(OUT4, { force: true });
+
+  await ensureSignedIn(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/todo");
+  await page.waitForFunction(
+    "document.querySelectorAll('.tlc .row').length > 0", null, { timeout: 45_000 }).catch(() => {});
+  await liftMotionSuppression(page);
+
+  /* ⚠️ SWEEP SEVERAL CARDS RATHER THAN ONE, and TALLY what was seen. One card is a monoculture:
+     the first row's query is an Offer with no anchor date, so a probe that stopped there would
+     have reported the "since" line as absent and called the branch covered. */
+  const seen = await page.evaluate(`(async () => {
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const rows = [...document.querySelectorAll(".tlc .row")];
+    const acc = [];
+    for (let i = 0; i < Math.min(rows.length, 7); i++) {
+      rows[i].click(); await sleep(140);
+      const f = document.querySelector(".tlc .row.focus"); if (f) f.click();
+      await sleep(700);
+      const ref = document.querySelector(".tpn .rail");
+      if (!ref) continue;
+      const qh = document.querySelector(".tpn .qhead");
+      const cs = getComputedStyle(ref);
+      const probe = document.querySelector(".tpn");
+      const ladder = {};
+      for (const k of ["out-1","out-2","out-3","in-1","in-2","in-3","offer","closed"])
+        ladder[k] = getComputedStyle(probe).getPropertyValue("--stage-" + k).trim();
+      /* ⚠️ A TINTED REGION SPANS THE COLUMN — asked of the browser, and the width is what makes
+         it a REGION rather than a mark. The first form counted the chevron and the agent's
+         initials disc: both carry a fill, neither is an area of the column, and requiring them
+         to be colourless would have meant a colourless avatar to satisfy a claim about bands. */
+      const tinted = [];
+      const base = cs.backgroundColor;
+      const colW = ref.getBoundingClientRect().width;
+      for (const el of ref.querySelectorAll("*")) {
+        const s2 = getComputedStyle(el);
+        const bg = s2.backgroundColor;
+        const filled = (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent" && bg !== base)
+          || s2.backgroundImage !== "none";
+        if (filled && el.getBoundingClientRect().width >= colW * 0.8) tinted.push(String(el.className));
+      }
+      acc.push({
+        i: i,
+        radius: cs.borderRadius, bl: cs.borderLeftWidth, bt: cs.borderTopWidth,
+        br: cs.borderRightWidth, bb: cs.borderBottomWidth,
+        headBg: qh ? getComputedStyle(qh).backgroundColor : "",
+        tinted: tinted,
+        word: ((document.querySelector(".tpn .qhead .st") || {}).textContent || "").trim(),
+        dot: !!document.querySelector(".tpn .qhead .st svg"),
+        since: ((document.querySelector(".tpn .qhead .since") || {}).textContent || "").trim(),
+        who: !!document.querySelector(".tpn .who .av"),
+        factCols: [...document.querySelectorAll(".tpn .fact")].map((f) => getComputedStyle(f).gridTemplateColumns),
+        absents: [...document.querySelectorAll(".tpn .fact .v.absent")].map((v) => (v.textContent || "").trim()),
+        story: !!document.querySelector(".tpn .rail .rtl .tl"),
+        link: !!document.querySelector(".tpn .qbtn"),
+        linkIsAnchor: (document.querySelector(".tpn .qbtn") || {}).tagName,
+        /* the control census — every input or button in the column, at any depth */
+        controls: [...ref.querySelectorAll("input, textarea, select, button")].map((c) => String(c.className) || c.tagName),
+        ladder: ladder,
+      });
+    }
+    return acc;
+  })()`) as any[];
+
+  add("P4.0 · the column was measured on more than one card",
+      seen.length >= 2, "cards with a reference: " + seen.length + " (rows " + seen.map((x) => x.i).join(",") + ")");
+  if (!seen.length) {
+    writeFileSync(OUT4, "── tightened · Phase 4 · no reference column found\n");
+    expect(seen.length, "no card rendered a reference column").toBeGreaterThan(0);
+  }
+  const first = seen[0];
+
+  add("P4.1 · the column is a COLUMN — no radius, one hairline on its left and nowhere else",
+      seen.every((s) => s.radius === "0px" && s.bl === "1px" && s.bt === "0px" && s.br === "0px" && s.bb === "0px"),
+      JSON.stringify({ radius: first.radius, l: first.bl, t: first.bt, r: first.br, b: first.bb }));
+
+  add("P4.2 · exactly ONE tinted region in the column — its header",
+      seen.every((s) => s.tinted.length === 1 && String(s.tinted[0]).includes("qhead")),
+      JSON.stringify(seen.map((s) => s.tinted)));
+
+  /* ⚠️ THE TINT IS THE QUERY CENTRE'S LADDER VALUE FOR THIS QUERY'S STATUS — and BOTH SIDES are
+     derived: the status comes off the page as a word, `getStatusLabel` maps the enum to that word
+     so the word maps back to a status, `stageFor` gives the rung, and the expected colour is the
+     PAGE'S OWN `--stage-*` token. No hex is typed here; a literal would be a second copy of the
+     mapping under test. */
+  const rgb = (hex: string) => {
+    const h = hex.trim().replace("#", "");
+    if (h.length !== 6) return hex.trim();
+    return "rgb(" + parseInt(h.slice(0, 2), 16) + ", " + parseInt(h.slice(2, 4), 16) + ", " + parseInt(h.slice(4, 6), 16) + ")";
+  };
+  const statusOf = (word: string): QueryStatus | null =>
+    (Object.values(QueryStatus) as QueryStatus[]).find((st) => labelOf(st) === word) ?? null;
+  const tintChecks = seen.map((s) => {
+    const st = statusOf(s.word);
+    if (!st) return { word: s.word, ok: false, why: "no status carries this word" };
+    const want = rgb(s.ladder[stageFor(st)] || "");
+    return { word: s.word, stage: stageFor(st), ok: s.headBg === want, got: s.headBg, want: want };
+  });
+  add("P4.3 · the header's fill IS the ladder's value for the query's own status",
+      tintChecks.every((c) => c.ok), JSON.stringify(tintChecks));
+
+  add("P4.4 · the status word is the app's own — and the real StatusDot is beside it",
+      seen.every((s) => !!statusOf(s.word) && s.dot),
+      JSON.stringify(seen.map((s) => [s.word, s.dot])));
+
+  /* ⚠️ THE "SINCE" LINE IS CHECKED FOR INTERNAL TRUTH, not for a string: the elapsed it states
+     must be the elapsed between the date it states and today. A line reading a real date beside
+     a wrong age would satisfy any format check and is exactly the failure worth catching. And
+     BOTH BRANCHES ARE TALLIED — an Offer with no anchor renders no line at all, which is the
+     absent-rather-than-guessed rule, and a sweep that saw only those would prove nothing. */
+  const withSince = seen.filter((s) => s.since);
+  const sinceChecks = withSince.map((s) => {
+    /* ⚠️ THE YEAR IS OPTIONAL IN THE LINE AND NOT OPTIONAL IN THE CHECK — a date over a year old
+       MUST carry it, or the sentence cannot be resolved by a reader or by this. Found here:
+       "since 12 June · 15 months" reconstructed to the nearest June and computed 3. */
+    const m = /^since (\d+) ([A-Za-z]+)( \d{4})? · (\d+) (day|days|weeks|week|months|month)$/.exec(s.since);
+    if (!m) return { line: s.since, ok: false, why: "shape" };
+    const now = new Date();
+    const month = ["January","February","March","April","May","June","July","August","September","October","November","December"]
+      .indexOf(m[2]);
+    let d = m[3] ? new Date(Number(m[3]), month, Number(m[1])) : new Date(now.getFullYear(), month, Number(m[1]));
+    if (!m[3] && d.getTime() > now.getTime()) d = new Date(now.getFullYear() - 1, month, Number(m[1]));
+    /* and an undated line more than a year back is itself the fault */
+    if (!m[3] && now.getTime() - d.getTime() > 360 * 86400000)
+      return { line: s.since, ok: false, why: "over a year old and states no year" };
+    const days = Math.round((now.getTime() - d.getTime()) / 86400000);
+    const stated = Number(m[4]);
+    const unit = m[5];
+    const expect2 = unit.startsWith("day") ? days
+      : unit.startsWith("week") ? Math.round(days / 7) : Math.round(days / 30.44);
+    return { line: s.since, ok: Math.abs(expect2 - stated) <= 1, stated: stated, computed: expect2 };
+  });
+  add("P4.5 · every 'since' line states the elapsed its OWN date implies",
+      withSince.length > 0 && sinceChecks.every((c) => c.ok),
+      "with a line: " + withSince.length + " of " + seen.length + " · " + JSON.stringify(sinceChecks));
+  add("P4.5b · and a query with no anchor renders NO line rather than a guess",
+      seen.some((s) => !s.since) || withSince.length === seen.length,
+      "without a line: " + (seen.length - withSince.length));
+
+  add("P4.6 · the facts are a definition list with the contract's 78px label column",
+      first.factCols.length > 0 && first.factCols.every((c: string) => c.startsWith("78px")),
+      JSON.stringify([...new Set(seen.flatMap((s) => s.factCols))]));
+
+  add("P4.7 · the agent row, the story and the query link are all there",
+      seen.some((s) => s.who) && seen.some((s) => s.story) && seen.every((s) => s.link),
+      "who " + seen.filter((s) => s.who).length + " · story " + seen.filter((s) => s.story).length
+        + " · link " + seen.filter((s) => s.link).length);
+
+  add("P4.8 · 'Open the full query' is a LINK, not a button",
+      seen.every((s) => s.linkIsAnchor === "A"), first.linkIsAnchor);
+
+  /* ⚠️ THE CONTROL CENSUS SWEEPS EVERY DESCENDANT, not the first level. A reference you can
+     change is not a reference: the chevron and the link are the two things a reader may do. */
+  add("P4.9 · nothing in the column is editable — one button (the chevron) and no fields",
+      seen.every((s) => s.controls.length === 1 && String(s.controls[0]).includes("cl")),
+      JSON.stringify(seen.map((s) => s.controls)));
+
+  /* ── the collapse: the spine, and the document standing still ── */
+  const before = await page.evaluate(
+    `Math.round(document.querySelector(".tpn .form").getBoundingClientRect().width)`) as number;
+  await page.evaluate(`(() => { const b = document.querySelector(".tpn .qhead .cl"); if (b) b.click(); })()`);
+  await page.waitForTimeout(500);
+  const after = await page.evaluate(`(() => {
+    const form = document.querySelector(".tpn .form");
+    const spine = document.querySelector(".tpn .rh");
+    const ref = document.querySelector(".tpn .rail");
+    return { doc: form ? Math.round(form.getBoundingClientRect().width) : -1,
+      spine: !!spine, refW: ref ? Math.round(ref.getBoundingClientRect().width) : -1,
+      vertical: spine ? getComputedStyle(spine.querySelector(".t")).writingMode : "",
+      head: !!document.querySelector(".tpn .qhead") };
+  })()`) as { doc: number; spine: boolean; refW: number; vertical: string; head: boolean };
+
+  add("P4.10 · collapsed, the column is a 30px spine with its label vertical",
+      after.spine && after.refW === 30 && after.vertical.startsWith("vertical") && !after.head,
+      JSON.stringify(after));
+  /* ⚠️ THE DOCUMENT DOES NOT MOVE — the wrap law, inside the sheet. The ref hands the freed space
+     back to the document, which re-wraps the sentence being read; here the sheet gives up
+     exactly what the column gave up. */
+  add("P4.11 · the document keeps its width, open or collapsed",
+      before > 0 && Math.abs(before - after.doc) <= 1, "open " + before + " · collapsed " + after.doc);
+
+  /* and it comes back, and the state survives walking to another task (session-remembered) */
+  await page.evaluate(`(() => { const b = document.querySelector(".tpn .rh"); if (b) b.click(); })()`);
+  await page.waitForTimeout(400);
+  const back = await page.evaluate(`!!document.querySelector(".tpn .qhead")`) as boolean;
+  add("P4.12 · and the spine opens it again", back, "");
+
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(250);
+
+  const lines = out.map((x) => (x.ok ? "green  " : "RED    ") + "· " + x.id + (x.note ? "\n         " + x.note : ""));
+  const red = out.filter((x) => !x.ok);
+  writeFileSync(OUT4, "── tightened · Phase 4 · " + out.length + " assertions · " + red.length
+    + " RED · " + (out.length - red.length) + " green\n" + lines.join("\n") + "\n");
+  console.log(lines.join("\n"));
+  expect(out.length, "assertion floor").toBeGreaterThanOrEqual(12);
   expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
 });

@@ -168,6 +168,19 @@
 .tlc .l-foot .c { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted); }
 .tlc .l-foot .c b { color:var(--ink2);font-weight:500; }
 .tlc .l-foot a { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none; }
+/* ⚠️ THE FOUR LIST KEYS, TAUGHT IN THE FOOT (tightened round, Phase 2; the contract's `.keys`).
+   It shipped as bare markup with no rule for one commit and rendered at the page's inherited
+   size — the largest thing in the footer, teaching keys in a voice louder than the count beside
+   them. Found in a screenshot, which is the only instrument that shows it: every assertion about
+   the footer was about its text, and the text was right. */
+.tlc .l-foot .keys { display:flex;gap:9px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted); }
+.tlc .l-foot .keys kbd { font-family:'JetBrains Mono',monospace;font-size:8px;background:var(--field);border:1px solid var(--hair2);border-radius:4px;padding:1px 5px;color:#a89684;text-transform:none;letter-spacing:0; }
+/* ⚠️ AND THEY GO WHEN THE DRAWER FOLDS THE CARD TO 520 — measured in a screenshot, not reasoned:
+   five caps and their words beside the count and Export CSV wrapped BOTH of those onto two
+   lines, so the row's only two pieces of information were broken up to make room for its
+   teaching. The hints are chrome and the count is a fact; at the width where one must go, it is
+   the chrome. They return the moment the drawer closes. */
+.tlc.folded .l-foot .keys { display:none; }
 
 /* ⚠️ THE ACTIVE FUNNEL LIVES HERE, NOT IN `todoFrame.css`, BECAUSE THE BUTTON DOES. The frame
    contract states `.l-icon.active` and its badge dot, and porting them under `.tdf` put the rule in

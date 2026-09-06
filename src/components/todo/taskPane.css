@@ -329,13 +329,46 @@
    ⚠️ `align-self: flex-start` STAYS, and it is doing a different job: `width: 100%` beside it is
    what keeps the sheet the column's full width, and `stretch` would fight it. */
 .tpn .sheet {
-  align-self: flex-start; flex: 0 1 auto; min-height: 0; max-height: 100%; width: 100%;
+  /* ⚠️ `width: auto` WITH A STRETCHED CROSS-AXIS, NOT `width: 100%` (tightened round, Phase 4).
+     They look identical until the collapsed reference asks the sheet to narrow: a 100%-wide box
+     with a right margin OVERFLOWS its parent instead of shrinking, so the freed space went to
+     the document's track and the sentence re-wrapped — the exact fault the wrap law exists to
+     prevent, arriving through the margin meant to prevent it. Measured: the document went 306 →
+     516 on collapse. */
+  align-self: stretch; flex: 0 1 auto; min-height: 0; max-height: 100%; width: auto;
   display: flex; position: relative;
   background:var(--white);border:1px solid var(--edge);border-radius:12px;padding:6px;
   box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);
 }
-/* the rim is the object's edge: it clips, so the work leaves at the frame and the foot sits on it */
-.tpn .sheet > .rim { display:flex;flex-direction:column;min-height:0;width:100%;max-height:100%; }
+/* ── the rim is the object's edge: it clips, so the work leaves at the frame and the foot sits
+   on it. ⚠️ IT IS A GRID NOW (tightened round, Phase 4), because the reference became a COLUMN
+   of the sheet: the header row and the foot span both tracks, and between them the document and
+   the reference stand side by side, parted by the reference's own single hairline. As a flex
+   column it could only have stacked them. ── */
+.tpn .sheet > .rim { display:grid;grid-template-columns:minmax(0,1fr) var(--ref-w);grid-template-rows:auto minmax(0,1fr) auto;min-height:0;width:100%;max-height:100%; }
+/* ⚠️ THREE STATES, TWO CLASSES AND NO INVENTED ONE. The column can be ABSENT (a note or a
+   cohort has no query behind it), OPEN or COLLAPSED. `:has()` answers the first from the
+   column's own presence — the contract has no "open" modifier because its pane always has a
+   rail — so the only class is the contract's own `railClosed`. */
+.tpn .sheet { --ref-w:0px; --ref-open:240px; --ref-spine:30px; }
+/* ⚠️ `:has()` TAKES ITS ARGUMENT'S SPECIFICITY, so the collapsed rule must carry the same test
+   rather than relying on its class. `.tpn .sheet:has(> .rim > .rail)` is 0-4-0 — the two classes
+   of the selector plus the two INSIDE the `:has()` — while `.tpn .sheet.railClosed` is only
+   0-3-0, so the open width won and the column stayed 240 while its spine rendered inside it.
+   Measured: the sheet's margin moved (a rule with no competitor) and the track did not, which is
+   the signature of a specificity loss rather than a missing class. The third time this repo has
+   recorded a query-or-condition that confers no priority of its own; the first through `:has()`. */
+.tpn .sheet:has(> .rim > .rail) { --ref-w:var(--ref-open); }
+.tpn .sheet.railClosed:has(> .rim > .rail) { --ref-w:var(--ref-spine); }
+/* ⚠️ THE DOCUMENT KEEPS ITS WIDTH WHEN THE COLUMN COLLAPSES — the drawer round's wrap law, moved
+   inside the sheet. The ref hands the freed 210px back to the document, which re-wraps the
+   sentence the writer is reading every time they put the reference aside; here the SHEET gives
+   up exactly what the column gave up, so the document does not move and the desk shows to its
+   right. One expression, so the two can never disagree about the amount. */
+.tpn .sheet.railClosed { margin-right:calc(var(--ref-open) - var(--ref-spine)); }
+.tpn .sheet > .rim > .dhead, .tpn .sheet > .rim > .foot { grid-column:1/3; }
+.tpn .sheet > .rim > .work { grid-column:1;grid-row:2;min-width:0; }
+.tpn .sheet > .rim > .rail { grid-column:2;grid-row:2; }
 /* ── the document's chrome row (tightened round, Phase 3; contract `.dhead`) ─────────────────
    ⚠️ THE TINTED BAND IS RETIRED, AND ITS TINT IS NOW A PILL. The sheet is a document: the strip
    of colour under its own title made the title read as a caption on a coloured surface. What is
@@ -829,30 +862,56 @@
    take the full width, and `.ws` without `.rec` beside it would otherwise hold a 288px empty
    track. */
 
-/* ── the record card ───────────────────────────────────────────────────────────────────────────
-   ⚠️ THE SAGE HEAD IS THE TRACKING PANEL'S, ported by VALUE rather than by importing its rule —
-   the two surfaces are in different stylesheets and a shared selector between them would couple a
-   task pane to a query page. Same gradient, same rule colour, stated here. */
-.tpn .rhead { flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 15px;background:linear-gradient(135deg,#d7ddd5,#d5dbd3);border-bottom:1px solid rgba(90,110,88,0.20); }
-.tpn .rhead .t { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#3c4a3a;font-weight:500; }
-/* the status word — Playfair, and the only thing on this row that is not a label */
-.tpn .rhead .stat { font-family:'Playfair Display',serif;font-size:12px;color:#2e3a2c;font-weight:500;white-space:nowrap; }
+/* ── the Quick Look column (tightened round, Phase 4; contract `todo-belongs.html`) ───────────
+   ⚠️ IT IS A COLUMN OF THE SHEET, NOT A CARD BESIDE IT. One vertical hairline separates it from
+   the document; no radius, no inner border, no field tint — plain paper, except its header. The
+   floating slip it replaces had its own card, its own sage-edged rim and its own sage head:
+   three frames' worth of chrome around a summary of the document standing next to it.
 
-/* ⚠️ STACKED, ONE FACT TO A LINE, SEPARATED BY A HAIRLINE. The band drew three cells side by side
-   because it had the whole pane's width; a 288px column has room for one, and a fact per line with
-   a rule between reads better than three squeezed into thirds. */
-.tpn .rtiles { padding:4px 15px; }
-.tpn .rtile { padding:9px 0;border-bottom:1px solid #f0e9df; }
-.tpn .rtile:last-child { border-bottom:0; }
-.tpn .rtile .k { font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);font-weight:500; }
-.tpn .rtile .v { font-family:'Playfair Display',serif;font-size:14.5px;font-weight:500;color:var(--ink2);margin-top:2px;line-height:1.3; }
-.tpn .rtile .v small { font-family:'Inter',sans-serif;font-size:10px;color:var(--muted2);font-weight:300;display:block; }
-.tpn .rtile .v.absent { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0; }
+   ⚠️ THE HEADER IS THE COLUMN'S ONLY TINTED REGION, and its colour is the QUERY CENTRE'S OWN
+   LADDER — `var(--stage-*)`, keyed by `stageFor(status)` upstream. It is set inline because the
+   value is DERIVED PER QUERY; the stylesheet cannot know which rung this card is on, and a class
+   per rung would be a second copy of a mapping that already exists in one place. */
+.tpn .rail { border-left:1px solid var(--hair);background:var(--white);display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden; }
+.tpn .qhead { flex:0 0 auto;padding:12px 16px;border-bottom:1px solid rgba(58,28,20,0.10); }
+.tpn .qhead .lbl { display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(58,28,20,0.55); }
+.tpn .qhead .cl { cursor:pointer;width:18px;height:18px;border-radius:5px;border:0.5px solid rgba(58,28,20,0.13);background:rgba(255,253,250,0.6);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink2);padding:0;flex-shrink:0; }
+.tpn .qhead .cl:hover { background:rgba(255,255,255,0.9); }
+.tpn .qhead .st { display:flex;align-items:center;gap:8px;margin-top:8px;font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink2);line-height:1.3; }
+.tpn .qhead .since { font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(58,28,20,0.55);margin-top:3px; }
+.tpn .rail .in { flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column; }
+.tpn .rail .in::-webkit-scrollbar { width:9px; }
+.tpn .rail .in::-webkit-scrollbar-thumb { background:#e2d6c8;border-radius:5px;border:2px solid var(--white); }
 
-.tpn .rtl { padding:11px 15px 12px;border-top:1px solid var(--hair);background:var(--white); }
-.tpn .rfoot { flex:0 0 auto;padding:10px 15px;border-top:1px solid var(--hair); }
-.tpn .rfoot a { font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none; }
-.tpn .rfoot a:hover { text-decoration:underline; }
+/* the agent row — the column's one row about a person, and its one outward link */
+.tpn .who { display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--hair);flex:0 0 auto; }
+.tpn .who .av { width:30px;height:30px;border-radius:50%;background:#efe4dc;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(124,58,42,0.18);flex-shrink:0; }
+.tpn .who .n { font-size:12.5px;font-weight:500;color:var(--ink);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.tpn .who .a { font-size:10.5px;color:var(--muted2);font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.tpn .who .lk { margin-left:auto;font-size:10.5px;color:#b3a494;white-space:nowrap;text-decoration:none;flex-shrink:0; }
+.tpn .who:hover .lk, .tpn .who .lk:hover { color:var(--burg); }
+
+/* ⚠️ THE FACTS ARE A DEFINITION LIST, NOT STACKED PAIRS — a 78px mono label column with the value
+   beside it, so the eye runs down one edge for the labels and another for the answers. The slip
+   stacked label over value, which at three facts read as six lines of unequal weight. */
+.tpn .facts { padding:8px 16px 6px;flex:0 0 auto; }
+.tpn .fact { display:grid;grid-template-columns:78px 1fr;gap:10px;align-items:baseline;padding:7px 0; }
+.tpn .fact .k { font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted); }
+.tpn .fact .v { font-size:12.5px;color:var(--ink);font-weight:500;min-width:0; }
+.tpn .fact .v small { display:block;font-size:10px;color:var(--muted2);font-weight:300;margin-top:1px; }
+/* absence in the mono absent voice — "None sent", never a dash and never an invented value */
+.tpn .fact .v.absent { font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;font-weight:400; }
+
+.tpn .rail .sub { font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#b3a494;padding:12px 16px 8px;border-top:1px solid var(--hair);margin-top:6px;flex:0 0 auto; }
+/* ⚠️ A LINK, NOT A BUTTON — going to the record is not an act ON it, and this column offers no
+   acts. The dotted underline is the same affordance the title's variables wear. */
+.tpn .qbtn { margin:10px 16px 14px;font-size:11px;color:var(--burg);cursor:pointer;text-decoration:none;border-bottom:1px dotted rgba(124,58,42,0.4);align-self:flex-start;padding-bottom:1px;flex:0 0 auto; }
+.tpn .qbtn:hover { border-bottom-style:solid; }
+
+/* the collapsed spine — the label vertical, and the way back */
+.tpn .rh { cursor:pointer;width:100%;height:100%;border:0;background:var(--field);display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0;color:var(--muted2); }
+.tpn .rh .t { writing-mode:vertical-rl;transform:rotate(180deg);font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.14em;text-transform:uppercase; }
+.tpn .rh:hover { background:#f6f1ea;color:var(--burg); }
 
 /* ══════════════════════════════════════════════════════════════════════════════════════════════
  * ⚠️ THE BAR'S WRAP OVERRIDE, AND IT LIVES HERE BECAUSE A CONTAINER QUERY CONFERS NO SPECIFICITY.
@@ -928,32 +987,8 @@
    ⚠️ `.rec` WAS DECLARED TWICE, two hundred lines apart — the shape this file's own locks watch
    for, found while removing it. */
 
-/* ── the quick reference slip ────────────────────────────────────────────────────────────── */
-/* ⚠️ THE SLOT IS ALWAYS 264px; ONLY THE SLIP INSIDE IT COMES AND GOES. That is the wrap law made
-   structural: `.wcol` is `flex: 1 1 auto` beside a slot that never changes size, so the sheet's
-   width — and therefore the deed's wrapping — cannot depend on whether the reference is showing.
-   The ref collapses this slot and grows the sheet; the brief forbids it, and the reason is a real
-   wrap bug in the mockup. */
-.tpn .qrwrap { flex:0 0 264px;width:264px;min-width:264px;align-self:flex-start;margin-top:14px; }
-.tpn .qr { background:var(--white);border:1px solid var(--edge);border-radius:12px;padding:6px;box-shadow:0 2px 4px rgba(58,28,20,0.06),0 14px 34px rgba(58,28,20,0.12);width:264px; }
-/* ⚠️ SAGE-EDGED, WHERE THE SHEET'S RIM IS BURGUNDY — the two objects are different KINDS, and the
-   edge is what says so: one is where you work, the other is what you consult. Sage is the Query
-   Centre's own reference voice, which this card already spoke in its head band. */
-.tpn .qr > .rrim { border:1px solid rgba(90,110,88,0.28);border-radius:9px;overflow:hidden;background:var(--white);display:flex;flex-direction:column;min-height:0; }
-
-/* ⚠️ THE TAB IS ON THE SHEET'S EDGE AND POINTS INTO THE EMPTY SLOT. `right: -1px` sits it over the
-   sheet's own border so it reads as attached to the object rather than floating beside it; the
-   sheet's rim clips, which is why this is a SIBLING of the sheet rather than a child of it. */
-.tpn .qrtab {
-  position:absolute;right:-1px;top:76px;width:26px;padding:12px 0;cursor:pointer;
-  border:1px solid rgba(90,110,88,0.28);border-right:0;border-radius:8px 0 0 8px;
-  background:linear-gradient(180deg,var(--u-house-1),var(--u-house-2));
-  box-shadow:-2px 2px 6px rgba(58,28,20,0.06);
-  display:flex;align-items:center;justify-content:center;
-}
-.tpn .qrtab span { writing-mode:vertical-rl;transform:rotate(180deg);font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.14em;text-transform:uppercase;color:#3c4a3a;font-weight:500; }
-.tpn .qrtab:hover { background:linear-gradient(180deg,#d0d8ce,#cbd4c9); }
-
-/* the slip's own dismiss — the contract's `.rhead .x` */
-.tpn .rhead .x { cursor:pointer;width:20px;height:20px;border-radius:6px;border:0.5px solid rgba(58,28,20,0.13);background:rgba(255,253,250,0.8);font-size:11px;display:flex;align-items:center;justify-content:center;color:#3c4a3a;margin-left:6px;flex-shrink:0;padding:0; }
-.tpn .rhead .x:hover { border-color:rgba(90,110,88,0.5); }
+/* (⚠️ THE SLIP'S WHOLE BLOCK IS DELETED — tightened round, Phase 4: `.qrwrap` (the 264px slot),
+   `.qr` (the card), `.rrim` (its sage rim), `.qrtab` (the bookmark tab) and `.rhead`/`.rhead .x`
+   (the sage head and its dismiss). The reference is a COLUMN of the sheet now, blocked above.
+   The wrap law they carried is not lost — it moved INSIDE the sheet: see `.sheet.railClosed`,
+   where the sheet narrows by exactly what the column gives up so the document does not move.) */

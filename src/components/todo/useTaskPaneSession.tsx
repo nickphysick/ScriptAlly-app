@@ -60,6 +60,10 @@ import {
 import { paneCommits, paneCommitValues } from "../../lib/paneCommit";
 import { sendSpecFor, collapseTimelineDuplicates } from "../../lib/todoDock";
 import { cardBucket, waitAnchorMs } from "../../lib/todoBuckets";
+/* the Quick Look column's derivations (tightened round, Phase 4) — the Query Centre's own ladder
+   and span, and the app's one agent-display helper; none of them re-implemented here */
+import { stageFor, span } from "../../lib/queryCardFacts";
+import { agentPrimary, agentSecondary, agentInitials } from "../../lib/agentDisplay";
 import { anchorNoun, bandForward, materialRows, materialName } from "../../lib/todoHandoff";
 import { groupColumn } from "../../lib/todoGroups";
 import { cardMenu } from "../../lib/todoMenu";
@@ -357,6 +361,57 @@ export function useTaskPaneSession(
     if (fwd) out.push({ k: fwd.k, v: fwd.v });
     return out;
   }, [card, queries, agents, userTasks]);
+
+  /**
+   * ⚠️ THE QUICK LOOK COLUMN'S HEADER (tightened round, Phase 4) — three facts, ALL DERIVED HERE
+   * and none stored on the card.
+   *
+   * `stage` is `stageFor(status)`, the Query Centre's OWN ladder key, so the column's tint is the
+   * colour that page paints for this query rather than a second table that could drift from it —
+   * and an unrecognised status falls to the ladder's safe grey rather than to a rung it has not
+   * been placed on. `status` travels as the enum because the real `StatusDot` draws from it.
+   *
+   * `since` is the same wait anchor the facts above count from, so the header's age and the
+   * facts' dates cannot disagree; ABSENT rather than guessed when the query has no date, because
+   * "since —" is a statement about nothing and a fabricated date is worse.
+   */
+  const paneRef = React.useMemo(() => {
+    if (!card?.relatedRecordId) return null;
+    const q = queries.find((x) => x.id === card.relatedRecordId);
+    if (!q?.status) return null;
+    const ag = card.agentId ? agents.find((a) => a.id === card.agentId) : undefined;
+    /* ⚠️ EVERY DATE THROUGH `isoOf` — the store hands some of these back as Timestamps, and
+       `waitAnchorMs` parses strings, so a raw field yields NaN and the header silently loses its
+       age. `paneFacts` above normalises only the two it was bitten by; this normalises all. */
+    const anchorMs = waitAnchorMs(cardBucket(card), card.taskType, {
+      dateSent: isoOf(q.dateSent), partialRequestedDate: isoOf(q.partialRequestedDate),
+      fullRequestedDate: isoOf(q.fullRequestedDate), partialSentDate: isoOf(q.partialSentDate),
+      fullSentDate: isoOf(q.fullSentDate), lastNudgeSentDate: isoOf(q.lastNudgeSentDate),
+      lastReplyAt: isoOf(q.responseReceivedAt), statusMovedAt: isoOf(q.lastStatusChange),
+    });
+    let since: string | undefined;
+    if (Number.isFinite(anchorMs)) {
+      const days = Math.max(0, Math.round((Date.now() - anchorMs) / 86400000));
+      const [n, unit] = span(days);
+      /* ⚠️ THE YEAR APPEARS WHEN THE DATE IS NOT IN THIS ONE, and it was found by measurement:
+         "since 12 June · 15 months" is a line a reader cannot resolve — the June it means is
+         fifteen months back, and the sentence offers no way to know that. The same rule the
+         list's queried date already follows ("30 Jun 2024" once the year turns). Within the
+         year the year is noise, so it stays off. */
+      const when = new Date(anchorMs);
+      since = `since ${when.toLocaleDateString("en-GB", when.getFullYear() === new Date().getFullYear()
+        ? { day: "numeric", month: "long" }
+        : { day: "numeric", month: "long", year: "numeric" })} · ${n} ${unit}`;
+    }
+    return {
+      stage: stageFor(q.status), status: q.status, since,
+      agent: ag ? {
+        name: agentPrimary(ag), agency: agentSecondary(ag) || undefined,
+        initials: agentInitials(ag),
+        ...(host.openAgent ? { onOpen: () => host.openAgent!(ag.id) } : {}),
+      } : undefined,
+    };
+  }, [card, queries, agents, host]);
 
   /**
    * ⚠️ THE FORK'S DERIVATIONS SIT ABOVE `paneWill`, AND THAT IS LOAD-BEARING (journey round, found
@@ -1094,6 +1149,9 @@ export function useTaskPaneSession(
                       const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
                       return q?.status ? { statusWord: getStatusLabel(q.status) } : {};
                     })(),
+                    /* the Quick Look column's derived header — one memo, spread whole, so the
+                       tint, the dot and the age cannot come from three different reads */
+                    ...(paneRef ?? {}),
                     /* ⚠️ THE PRIMARY IS THE FLOW'S — `null` while the fork is showing, which is
                        what removes the button rather than disabling it. */
                     /* ⚠️ THE CROSSOVER'S VERB WHERE IT HAS ONE. Arriving at a close TASK you are
