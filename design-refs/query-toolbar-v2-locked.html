@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Toolbar popovers, Group, list headers</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#1c130f;--body-ink:#3a1c14;--label:#9c8878;--burgundy:#7c3a2a;--sage-accent:#8a9e88;--hairline:#ece0d2;--field-border:#e0d5c8;--pink:#f5e2da;--pink-border:#e8c8bc;
+    --sand:#f7efe3;--sage:#e0e5dd;--pinkS:#f5e6df;--offer:#d7e0e8;--closed:#e4e1db;--sand-d:#e7d9bd;--sage-d:#c7d0c2;--pink-d:#e8c9bb;--closed-d:#cfc9c1}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ground);font-family:'Inter',sans-serif;color:var(--body-ink);font-size:13px;padding:28px 36px 90px}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+  h1{font-family:'Playfair Display',serif;font-weight:500;font-size:26px;color:var(--ink)}
+  h2{font-family:'Playfair Display',serif;font-weight:500;font-size:16px;color:#2e3a2c;margin:30px 0 8px}
+  .lede{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#6a5a50;margin:6px 0 10px;max-width:840px;line-height:1.5}
+  .note{font-size:12.5px;color:#6a5a50;max-width:840px;line-height:1.55;margin-bottom:14px}
+  .note b{font-weight:500;color:var(--body-ink)} .note code{font-family:'JetBrains Mono',monospace;font-size:11px}
+  .tbtn{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--field-border);border-radius:9px;padding:9px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:#6a5a50}
+  .tbtn b{color:var(--ink);font-weight:500}
+  .tbtn.open{border-color:#cdbfae;background:var(--parchment)}
+  .stage{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap}
+
+  /* ---- on-brand popover ---- */
+  .pop{width:260px;background:var(--parchment);border-radius:14px;padding:6px;box-shadow:0 2px 6px rgba(58,28,20,.07),0 16px 40px rgba(58,28,20,.16);position:relative}
+  .pop .frame{border:1px solid rgba(124,58,42,.28);border-radius:10px;overflow:hidden;background:var(--parchment)}
+  .pop .ph{background:linear-gradient(135deg,#dce0d9,#d0d6cc);border-bottom:.5px solid #c4ccc0;padding:10px 14px;display:flex;align-items:center;gap:8px}
+  .pop .ph .t{font-family:'Playfair Display',serif;font-weight:500;font-size:14px;color:#2e3a2c}
+  .pop .ph .clr{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#5a6e58;border-bottom:.5px solid #a8b5a5;cursor:pointer}
+  .pop .pb{padding:8px}
+  .grp{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--label);padding:8px 8px 5px}
+  .opt{display:flex;align-items:center;gap:10px;padding:8px 9px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--body-ink)}
+  .opt:hover{background:#fff}
+  .opt.on{background:var(--pink)}
+  .opt .box{width:15px;height:15px;border-radius:5px;border:1px solid var(--field-border);background:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none;font-size:9px;color:var(--burgundy)}
+  .opt.on .box{border-color:var(--pink-border)}
+  .opt .sw{width:12px;height:12px;border-radius:4px;border:.5px solid rgba(0,0,0,.08);flex:none}
+  .opt .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--label)}
+  .opt .tick{margin-left:auto;color:var(--burgundy);font-size:11px;opacity:0}
+  .opt.on .tick{opacity:1}
+  .pop .foot{border-top:.5px solid var(--hairline);margin:6px 4px 0;padding:8px 5px 4px;display:flex;justify-content:space-between;align-items:center}
+  .pop .foot .mono{color:var(--label)}
+  .dirseg{display:inline-flex;background:#fff;border:.5px solid var(--field-border);border-radius:8px;padding:2px}
+  .dirseg span{padding:5px 9px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#6a5a50}
+  .dirseg span.on{background:var(--pink);color:var(--body-ink)}
+
+  /* ---- list header options ---- */
+  .list{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 22px rgba(58,28,20,.09);overflow:hidden;width:100%;max-width:1180px}
+  .lh,.lr{display:grid;grid-template-columns:170px 1.2fr 76px 100px 160px 1.4fr 250px;gap:14px;align-items:center;padding:12px 18px 12px 22px}
+  .lr{border-top:.5px solid var(--hairline);position:relative}
+  .lr::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:4px;border-radius:0 3px 3px 0;background:var(--bar)}
+  .hA .lh{color:var(--label);background:#fff;border-bottom:.5px solid var(--hairline)}
+  .hB .lh{background:var(--parchment);border-bottom:1px solid #ddd2c4;color:#6a5a50;padding-top:14px;padding-bottom:12px}
+  .hB .lh span{font-family:'Playfair Display',serif;font-size:14px;letter-spacing:0;text-transform:none;color:#6a5a50;display:flex;align-items:center;gap:6px;cursor:pointer}
+  .hB .lh span:hover{color:var(--ink)}
+  .hB .lh span.sorted{color:var(--ink)}
+  .hB .lh span .ar{font-size:9px;color:var(--burgundy)}
+  .hB .lh span:last-child{justify-content:flex-end;cursor:default}
+  .hC .lh{background:#fff;border-bottom:.5px solid #d8ccbc;padding-top:16px;padding-bottom:10px}
+  .hC .lh span{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:#a08a78;display:flex;align-items:center;gap:6px}
+  .hC .lh span.sorted{color:var(--ink)}
+  .hC .lh span .ar{font-size:9px;color:var(--burgundy)}
+  .hD .lh{background:linear-gradient(135deg,#dce0d9,#d0d6cc);border-bottom:.5px solid #c4ccc0}
+  .hD .lh span{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:#2e3a2c}
+  .st{display:inline-flex;align-items:center;gap:8px;font-family:'Playfair Display',serif;font-size:13.5px;color:var(--ink)}
+  .dot{width:20px;height:20px;border-radius:50%;border:1.4px solid var(--burgundy);background:#f5e2da;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:var(--burgundy);flex:none}
+  .dot.in{border-color:var(--sage-accent);background:#e2e7e0;color:#4c6249}
+  .chip{width:34px;height:34px;border-radius:50%;background:var(--parchment);box-shadow:0 1px 2px rgba(58,28,20,.08),0 2px 6px rgba(58,28,20,.10);border:.5px solid #e6dccf;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;flex:none}
+  .nm{font-family:'Playfair Display',serif;font-weight:500;font-size:15px;color:var(--ink)}
+  .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:12px;color:#6a5a50;margin-top:2px}
+  .who{display:flex;align-items:center;gap:10px}
+  .leaf{width:40px;border-radius:7px;background:#fff;border:.5px solid #dccfc0;text-align:center;overflow:hidden}
+  .leaf .mo{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;text-transform:uppercase;padding:3px 0 2px;border-bottom:.5px solid rgba(0,0,0,.08);background:var(--sand)}
+  .leaf .dy{font-family:'Playfair Display',serif;font-size:16px;color:var(--ink);line-height:1;padding:4px 0 3px}
+  .leaf .cap{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);padding-bottom:3px}
+  .mats{display:inline-flex;gap:4px}.mats i{width:18px;height:18px;border-radius:5px;border:.5px solid #e6dccf;background:var(--parchment);display:inline-block}.mats i.off{opacity:.28}
+  .ev{width:22px;height:22px;border-radius:50%;background:#fff;border:1.3px solid #cdbfae;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#6a5a50}
+  .stand{display:flex;align-items:center;gap:12px}
+  .stand .illo{width:44px;height:44px;border-radius:50%;background:repeating-linear-gradient(135deg,rgba(58,28,20,.05) 0 6px,transparent 6px 12px);border:1px dashed rgba(58,28,20,.22);flex:none}
+  .stand .s{font-size:12.5px}.stand .m{color:var(--label);margin-top:3px}
+  .acts{display:grid;grid-template-columns:132px 30px 30px 30px;gap:6px;justify-content:end;align-items:center}
+  .act{border-radius:8px;padding:7px 0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;background:var(--pink);border:1px solid var(--pink-border);color:var(--body-ink)}
+  .icb{width:30px;height:30px;border-radius:8px;border:1px solid var(--field-border);background:#fff;display:inline-flex;align-items:center;justify-content:center;color:#a08a78}
+  /* group section head */
+  .ghead{display:flex;align-items:baseline;gap:10px;padding:14px 22px 8px;background:#fff}
+  .ghead h3{font-family:'Playfair Display',serif;font-weight:500;font-size:17px;color:var(--ink)}
+  .ghead .n{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#6a5a50;background:var(--parchment);border:.5px solid var(--field-border);border-radius:99px;padding:2px 8px}
+  .ghead .line{flex:1;height:1.5px;background:var(--bar);align-self:center;margin-left:4px}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--field-border);border-radius:10px;padding:3px;margin:0 0 12px}
+  .seg button{border:none;background:transparent;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#6a5a50;padding:8px 14px;border-radius:7px}
+  .seg button.on{background:var(--pink);color:var(--body-ink)}
+</style>
+</head>
+<body>
+<h1>Toolbar popovers · Group · list headers</h1>
+<div class="lede">Three fixes: the dropdowns get the app's own chassis and a much shorter menu; Group is specified so it visibly does something; and four options for the list header.</div>
+
+<h2>1 · Popovers — MountCard chassis, short menus</h2>
+<div class="note">Same three-layer chassis as every panel in the app: parchment rim, inset burgundy hairline frame, sage band header. Options are 13px Inter with a rounded hover, pink when active, counts in mono on the right. <b>Filter keeps two facets only</b> — Status and Sent via — with an "Included" facet dropped (it was a fifth way to ask a question nobody asks in a list). <b>Sort keeps five</b>, with direction as a segmented control in the footer rather than five more rows.</div>
+<div class="stage">
+  <div><div class="tbtn open">Filter <b>2</b></div>
+    <div class="pop" style="margin-top:8px"><div class="frame">
+      <div class="ph"><span class="t">Filter</span><span class="clr">Clear</span></div>
+      <div class="pb">
+        <div class="grp">Status</div>
+        <div class="opt on"><span class="box">✓</span><span class="sw" style="background:var(--sand)"></span>Queried<span class="n">12</span></div>
+        <div class="opt"><span class="box"></span><span class="sw" style="background:var(--pinkS)"></span>Partial Requested<span class="n">3</span></div>
+        <div class="opt"><span class="box"></span><span class="sw" style="background:var(--sage)"></span>Partial Sent<span class="n">2</span></div>
+        <div class="opt"><span class="box"></span><span class="sw" style="background:var(--pinkS)"></span>Full Requested<span class="n">1</span></div>
+        <div class="opt on"><span class="box">✓</span><span class="sw" style="background:var(--sage)"></span>Full Sent<span class="n">3</span></div>
+        <div class="opt"><span class="box"></span><span class="sw" style="background:var(--offer)"></span>Offer<span class="n">1</span></div>
+        <div class="opt"><span class="box"></span><span class="sw" style="background:var(--closed)"></span>Closed<span class="n">4</span></div>
+        <div class="grp">Sent via</div>
+        <div class="opt"><span class="box"></span>Email<span class="n">21</span></div>
+        <div class="opt"><span class="box"></span>Form<span class="n">4</span></div>
+        <div class="opt"><span class="box"></span>Post<span class="n">1</span></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div><div class="tbtn open">Sort <b>Last activity</b></div>
+    <div class="pop" style="margin-top:8px;width:240px"><div class="frame">
+      <div class="ph"><span class="t">Sort by</span></div>
+      <div class="pb">
+        <div class="opt on">Last activity<span class="tick">✓</span></div>
+        <div class="opt">Date sent<span class="tick">✓</span></div>
+        <div class="opt">Reply expected<span class="tick">✓</span></div>
+        <div class="opt">Agent name<span class="tick">✓</span></div>
+        <div class="opt">Agency<span class="tick">✓</span></div>
+        <div class="foot"><span class="mono">Order</span><span class="dirseg"><span class="on">Newest</span><span>Oldest</span></span></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div><div class="tbtn open">Group <b>Status</b></div>
+    <div class="pop" style="margin-top:8px;width:240px"><div class="frame">
+      <div class="ph"><span class="t">Group by</span></div>
+      <div class="pb">
+        <div class="opt">None<span class="tick">✓</span></div>
+        <div class="opt on">Status<span class="tick">✓</span></div>
+        <div class="opt">Whose court<span class="tick">✓</span></div>
+        <div class="opt">Agency<span class="tick">✓</span></div>
+        <div class="opt">Month sent<span class="tick">✓</span></div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<h2>2 · What Group must actually do</h2>
+<div class="note">Group is currently inert. It should partition <b>whichever view is showing</b>, keeping Filter and Sort applied within each group:<br>
+<b>Grid</b> — a Playfair 17px section heading with a count pill and a rule in the group's accent colour, then that group's cards; groups in ladder order for Status and Whose court, newest-first for Month, A–Z for Agency.<br>
+<b>List</b> — the same heading as a full-width row between the rows of each group (shown below).<br>
+<b>Board</b> — Group is <b>disabled</b> with the button reading `Group Status` and a tooltip "The board is already grouped by status"; choosing another value switches the board's columns (Whose court → four columns; Agency → a column per agency; Month → a column per month).<br>
+<b>Calendar</b> — groups become lane sections.<br>
+Empty groups are omitted. The heading row is not sticky.</div>
+<div class="list hB">
+  <div class="lh"><span>Status</span><span>Agent</span><span>Sent</span><span>What went</span><span>Since then</span><span>Where it stands</span><span style="text-align:right">Actions</span></div>
+  <div class="ghead" style="--bar:var(--sand-d)"><h3>Queried</h3><span class="n">12</span><span class="line"></span></div>
+  <div class="lr" style="--bar:var(--sand-d)"><span class="st"><span class="dot">→</span>Queried</span><span class="who"><span class="chip">HV</span><span><div class="nm">Harriet Vane-Coe</div><div class="ag">Stillwater Reps</div></span></span><span class="leaf"><div class="mo">Aug</div><div class="dy">12</div><div class="cap">sent</div></span><span class="mats"><i></i><i></i><i></i><i class="off"></i></span><span class="mono" style="color:#c0b0a0">nothing yet</span><span class="stand"><span class="illo"></span><span><div class="s">Reply expected by <b>23 Sep</b></div><div class="m mono">3 weeks away <span style="color:#d8ccbc;margin:0 5px">|</span> Nudge in 4 weeks</div></span></span><span class="acts"><span class="act">Record response</span><span class="icb">🔔</span><span class="icb">×</span><span class="icb">⋯</span></span></div>
+  <div class="ghead" style="--bar:var(--pink-d)"><h3>Partial Requested</h3><span class="n">3</span><span class="line"></span></div>
+  <div class="lr" style="--bar:var(--pink-d)"><span class="st"><span class="dot in">←</span>Partial Requested</span><span class="who"><span class="chip">JM</span><span><div class="nm">Jonathan Marsh</div><div class="ag">The Marsh Agency</div></span></span><span class="leaf"><div class="mo">Aug</div><div class="dy">1</div><div class="cap">sent</div></span><span class="mats"><i></i><i class="off"></i><i></i><i class="off"></i></span><span><span class="ev">←</span></span><span class="stand"><span class="illo"></span><span><div class="s">Partial — <b>not yet sent</b></div><div class="m mono">15 days since request</div></span></span><span class="acts"><span class="act">Mark sent</span><span></span><span class="icb">×</span><span class="icb">⋯</span></span></div>
+</div>
+
+<h2>3 · List header — four treatments</h2>
+<div class="seg" id="seg"><button data-h="hA">A · Current</button><button class="on" data-h="hB">B · Playfair (locked)</button><button data-h="hC">C · Letterspaced rule</button><button data-h="hD">D · Sage band</button></div>
+<div class="note" id="hdesc"></div>
+<div class="list hB" id="demo">
+  <div class="lh"><span class="sorted">Status</span><span>Agent</span><span class="sorted">Sent <span class="ar">▾</span></span><span>What went</span><span>Since then</span><span>Where it stands</span><span style="text-align:right">Actions</span></div>
+  <div class="lr" style="--bar:var(--sand-d)"><span class="st"><span class="dot">→</span>Queried</span><span class="who"><span class="chip">HV</span><span><div class="nm">Harriet Vane-Coe</div><div class="ag">Stillwater Reps</div></span></span><span class="leaf"><div class="mo">Aug</div><div class="dy">12</div><div class="cap">sent</div></span><span class="mats"><i></i><i></i><i></i><i class="off"></i></span><span class="mono" style="color:#c0b0a0">nothing yet</span><span class="stand"><span class="illo"></span><span><div class="s">Reply expected by <b>23 Sep</b></div><div class="m mono">3 weeks away <span style="color:#d8ccbc;margin:0 5px">|</span> Nudge in 4 weeks</div></span></span><span class="acts"><span class="act">Record response</span><span class="icb">🔔</span><span class="icb">×</span><span class="icb">⋯</span></span></div>
+  <div class="lr" style="--bar:var(--sage-d)"><span class="st"><span class="dot">→</span>Full Sent</span><span class="who"><span class="chip">DO</span><span><div class="nm">Daniel O'Rourke</div><div class="ag">Inkwell &amp; Stone</div></span></span><span class="leaf"><div class="mo">Aug</div><div class="dy">14</div><div class="cap">sent</div></span><span class="mats"><i></i><i></i><i></i><i class="off"></i></span><span><span class="ev">←</span> <span class="ev">→</span></span><span class="stand"><span class="illo"></span><span><div class="s">Reply expected by <b>9 Oct</b></div><div class="m mono">5 weeks away <span style="color:#d8ccbc;margin:0 5px">|</span> Nudge in 2 weeks</div></span></span><span class="acts"><span class="act">Record response</span><span class="icb">🔔</span><span class="icb">×</span><span class="icb">⋯</span></span></div>
+</div>
+
+<script>
+const D={hA:`<b>A · Current.</b> Mono 9px, uppercase, label grey, hairline beneath. What's there now.`,
+ hB:`<b>B · Playfair (locked).</b> Column names in Playfair 14px on parchment with a 1px rule; muted by default, ink with a burgundy caret on the sorted column, ink on hover. The headers read as writing rather than as a schema.`,
+ hC:`<b>C · Letterspaced rule.</b> Mono 8.5px at .18em on white with a deeper 1px rule and more room above; the sorted column's name turns ink with a burgundy caret. Quiet, and the sort state is visible without a control.`,
+ hD:`<b>D · Sage band.</b> The header takes the app's sage panel band, like every MountPanel header. Most consistent with the rest of the product; heaviest at the top of a long list.`};
+document.getElementById("hdesc").innerHTML=D.hB;
+document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#seg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");document.getElementById("demo").className="list "+b.dataset.h;document.getElementById("hdesc").innerHTML=D[b.dataset.h];});
+</script>
+</body>
+</html>
