@@ -410,3 +410,58 @@ describe("§2 (drawer-3) · the desk mounts on the BODY; the card scrolls inside
     expect(desk).toMatch(/setPos\(\{ top, maxH, arrow: Math\.max\(10, Math\.min\(centre - top - 8, h - 26\)\) \}\)/);
   });
 });
+
+/* ══ colours v2 · Phase 2 — the stat tiles and the view switch ════════════════════════════════ */
+describe("Phase 2 · the tiles state the whole set, and the switch changes only the renderer", () => {
+  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const tiles = readFileSync(join(process.cwd(), "src/components/queries/QueryStatTiles.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  it("the tile counts are the DERIVED ones — quickCounts over the scoped set, and THE overdue predicate", () => {
+    expect(page).toContain("counts={quickTally}");
+    expect(page).toContain("overdueCount={overdueTally}");
+    /* the overdue figure calls the same predicate the filter does — never a second rule */
+    expect(page).toContain("const overdueTally = mastheadScopedQueries.filter((q) => isOverdueForReply(q)).length;");
+    expect(page).toContain("if (needsOverdue && !isOverdueForReply(q)) return false;");
+  });
+
+  it("⚠️ Past expected is a SECOND AXIS, not a fifth court — it combines with whichever court is on", () => {
+    /* the chips' semantics exactly: one court + a flag. A tile row of five exclusive buttons would
+       have made "with you AND past expected" unaskable, which is the commonest question here. */
+    expect(tiles).toContain("const isPast = t.key === \"past\";");
+    expect(tiles).toContain("const on = isPast ? overdue : quickKey === t.key;");
+    expect(tiles).toContain("isPast ? onOverdue(!overdue) : onQuick(t.key as QuickKey)");
+  });
+
+  it("active is an ink border, never a fill — colour on this page states the court", () => {
+    const css = readFileSync(join(process.cwd(), "src/components/queries/queryStatTiles.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).toMatch(/\.qct-tile--on \{[^}]*border-color: var\(--ink/);
+    expect(css, "the active tile takes a fill").not.toMatch(/\.qct-tile--on \{[^}]*background/);
+  });
+
+  it("the retired chip row is gone — markup AND rules, together", () => {
+    expect(page).not.toContain("qcc-quick");
+    expect(page).not.toContain("QUICK_FILTERS.map");
+    const grid = readFileSync(join(process.cwd(), "src/components/queries/queryCentreGrid.css"), "utf8");
+    for (const c of [".qcc-qf ", ".qcc-qf{", ".qcc-quick", ".qcc-qf-sw", ".qcc-qf-mk"])
+      expect(grid, `${c} outlived its markup`).not.toContain(c);
+  });
+
+  it("the view is session state with a URL reflection — one writer on the URL, not two", () => {
+    /* ⚠️ `?q=` is App.tsx's and a selection NAVIGATES; a second owned param would put two writers
+       on one URL. replaceState cannot navigate, so it cannot fight the router — and the effect
+       re-asserts the param when a `?q=` navigation drops it. */
+    expect(page).toContain('sessionStorage.setItem("sa.qcView", gridView)');
+    expect(page).toContain("window.history.replaceState(window.history.state,");
+    expect(page).toContain("}, [gridView, selectedQueryId]);");
+    expect(page, "the view took the router's own writer").not.toMatch(/navigate\([^)]*view=/);
+  });
+
+  it("the switch is beside Sort and owns nothing else", () => {
+    expect(page).toContain("<QueryViewSwitch view={gridView} onView={setGridView} />");
+    const sw = readFileSync(join(process.cwd(), "src/components/queries/QueryViewSwitch.tsx"), "utf8");
+    expect(sw, "the switch grew state of its own").not.toMatch(/useState|useEffect/);
+  });
+});

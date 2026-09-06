@@ -63,6 +63,8 @@ import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitl
 import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
 import { QueryCentreGrid, type GridCard } from "./queries/QueryCentreGrid";
+import { QueryStatTiles } from "./queries/QueryStatTiles";
+import { QueryViewSwitch, type QueryView } from "./queries/QueryViewSwitch";
 import { QueryPanel } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
 import { CorrectionDesk, MaterialsFields } from "./queries/CorrectionDesk";
@@ -1905,6 +1907,35 @@ export const Queries: React.FC<{
   const [selectedManuscriptFilter, setSelectedManuscriptFilter] = useState<string>("All");
   const [needsOverdue, setNeedsOverdue] = useState(false);
 
+  /**
+   * ⚠️ THE VIEW IS A RENDERER, NOT A ROUTE — and that is why it is session state with a URL
+   * REFLECTION rather than a router param (colours v2, Phase 2). `?q=` is owned by App.tsx and a
+   * selection navigates; making the view a second owned param would put two writers on one URL.
+   * So: session storage is the source, `?view=` is written back with `replaceState` (which does
+   * not navigate, so it cannot fight the router), and the effect re-asserts it whenever a `?q=`
+   * navigation drops it. Read once on mount, defaulting to Grid.
+   */
+  const [gridView, setGridView] = useState<QueryView>(() => {
+    try {
+      const fromUrl = new URLSearchParams(window.location.search).get("view");
+      if (fromUrl === "list" || fromUrl === "board" || fromUrl === "calendar" || fromUrl === "grid") return fromUrl;
+      const saved = sessionStorage.getItem("sa.qcView");
+      if (saved === "list" || saved === "board" || saved === "calendar") return saved;
+    } catch { /* a private window has no storage — Grid is the honest default */ }
+    return "grid";
+  });
+  useEffect(() => {
+    try { sessionStorage.setItem("sa.qcView", gridView); } catch { /* fine */ }
+    try {
+      const url = new URL(window.location.href);
+      const want = gridView === "grid" ? null : gridView;
+      if ((url.searchParams.get("view") ?? null) !== want) {
+        if (want) url.searchParams.set("view", want); else url.searchParams.delete("view");
+        window.history.replaceState(window.history.state, "", url.toString());
+      }
+    } catch { /* fine */ }
+  }, [gridView, selectedQueryId]);
+
   /* ── THE ?status= FILTER (shell-rebuild pack, Phase 3) ──
      The shell's four Queries children are this same hub under different filters. The param is
      APPLIED to the filter state the hub ALREADY models — it never becomes a fifth filter with
@@ -3265,6 +3296,9 @@ export const Queries: React.FC<{
   const quickTally = quickCounts(
     mastheadScopedQueries.map((q) => turnFor(q.status as QueryStatus)),
   );
+  /* the fifth tile's figure, from the same scoped set and THE predicate the filter itself calls —
+     a second overdue rule here is how a tile comes to state a number the list cannot produce */
+  const overdueTally = mastheadScopedQueries.filter((q) => isOverdueForReply(q)).length;
 
   /** Quick filters and the popover's "Whose turn" are ONE state — see `turnFilter`. */
   const quickKey: QuickKey =
@@ -5714,39 +5748,23 @@ export const Queries: React.FC<{
               * from the control that set it.
               */}
             <div className="qcc-controls">
-            <div className="qcc-quick" role="group" aria-label="Quick filters">
-              {QUICK_FILTERS.map((f) => (
-                <button
-                  key={f.key}
-                  type="button"
-                  className="qcc-qf"
-                  aria-pressed={quickKey === f.key}
-                  onClick={() => setQuickKey(f.key)}
-                >
-                  {f.swatch && (
-                    <span
-                      className="qcc-qf-sw"
-                      aria-hidden="true"
-                      style={{ background: `var(--stage-${f.swatch})` }}
-                    />
-                  )}
-                  {f.label}
-                  <span className="qcc-qf-n">{quickTally[f.key]}</span>
-                </button>
-              ))}
-              <span className="qcc-qf-sep" aria-hidden="true" />
-              {/* The same ink ring the card uses, so the toggle and the marker read as one idea. */}
-              <button
-                type="button"
-                className="qcc-qf"
-                aria-pressed={needsOverdue}
-                onClick={() => setNeedsOverdue((v) => !v)}
-              >
-                <span className="qcc-qf-mk" aria-hidden="true">!</span>
-                Past expected
-              </button>
-
-            </div>
+            {/**
+              * ⚠️ THE STAT TILES REPLACE THE QUICK CHIPS (colours v2, Phase 2). Same two axes —
+              * one court, plus the overdue flag as an independent second — and the same
+              * derivations: `quickCounts` over the manuscript-scoped set, and THE overdue
+              * predicate the filter itself calls. What changed is that the row now states the
+              * figures rather than hiding them behind a pill, and that `Closed` leaves it: the
+              * row's job is what is LIVE, and closed stays reachable through Filter's Status and
+              * Whose-turn facets (checked, not assumed).
+              */}
+            <QueryStatTiles
+              counts={quickTally}
+              overdueCount={overdueTally}
+              quickKey={quickKey}
+              overdue={needsOverdue}
+              onQuick={(k) => setQuickKey(k)}
+              onOverdue={(next) => setNeedsOverdue(next)}
+            />
 
             {/**
               * ⚠️ THE REF'S TOOLBAR — LABELLED, WITH THE CURRENT VALUE ON THE BUTTON'S FACE. It
@@ -5816,6 +5834,11 @@ export const Queries: React.FC<{
                 </button>
                 {sortPopOpen && renderSortPopover()}
               </div>
+
+              {/* ⚠️ RIGHT OF SORT, AND IT CHANGES ONLY THE RENDERER. The tiles, Filter, Group,
+                  Sort, the search and the drawer are all shared — a view that owned any of them
+                  would be a second page wearing a segment's clothes. */}
+              <QueryViewSwitch view={gridView} onView={setGridView} />
 
               {/**
                 * ⚠️ NO PRIMARY IN THIS ROW — `Log new query` lives in the HERO and nowhere else.

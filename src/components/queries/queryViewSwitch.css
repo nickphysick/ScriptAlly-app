@@ -1,0 +1,19 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The view switch — v9's segmented control. The active segment takes the soft pink, which is this
+ * page's one selection fill; the states' own colours are never borrowed for chrome.
+ */
+.qvs {
+  display: inline-flex; background: #fff; border: 1px solid #e0d5c8; border-radius: 9px; padding: 3px;
+  flex: none;
+}
+.qvs button {
+  border: none; background: transparent; cursor: pointer; display: inline-flex; align-items: center;
+  gap: 7px; padding: 7px 13px; border-radius: 7px; font-family: var(--font-serif); font-size: 14px;
+  color: #8a7a6c;
+}
+.qvs button:hover { color: #3a1c14; }
+.qvs .qvs-on { background: #f5e2da; color: var(--ink, #1c130f); }
+@media (max-width: 1180px) { .qvs button span, .qvs button { gap: 0; } .qvs button { padding: 7px 10px; } }

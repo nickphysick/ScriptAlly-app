@@ -48,6 +48,26 @@ export const QUICK_FILTERS: readonly { key: QuickKey; label: string; swatch: Sta
   { key: "closed", label: "Closed", swatch: "closed" },
 ];
 
+/**
+ * THE STAT TILES (v9). Four courts plus `past` — and `past` is not a court at all: it is the
+ * overdue predicate that used to hang beside the row as a lone `!` chip, promoted into the row it
+ * always belonged in. `Closed` leaves the tile row because the row's job is what is LIVE; it stays
+ * reachable through Filter's Status and Whose-turn facets, which is checked rather than assumed.
+ *
+ * ⚠️ `past` COMBINES rather than replaces: it is a second axis over whichever court is active, so
+ * the tiles keep the chips' semantics exactly (one court + the overdue flag), not five exclusive
+ * buttons. The renderer must therefore mark it active independently.
+ */
+export type TileKey = QuickKey | "past";
+
+export const STAT_TILES: readonly { key: TileKey; label: string; swatch: State | null; mark?: "!" }[] = [
+  { key: "all", label: "All queries", swatch: null },
+  { key: "you", label: "With you", swatch: "you" },
+  { key: "agent", label: "With the agent", swatch: "agent" },
+  { key: "offer", label: "Offers", swatch: "offer" },
+  { key: "past", label: "Past expected", swatch: null, mark: "!" },
+];
+
 export function inQuick(turn: Turn, key: QuickKey): boolean {
   if (key === "all") return true;
   if (key === "agent") return turn === "sand" || turn === "agent";
