@@ -1,18 +1,26 @@
 # To-do on the Query Centre's chassis — night one
 
-**Where I stopped:** at the **Phase 1 boundary**. Recon (Phase 0) and Phase 1 are written and
-committed; Phases 2–7 are night two. Full recon in `run-artifacts/qc-chassis-recon.md`.
+**Where I stopped:** at the **Phase 1 boundary**, with Phase 1 now MEASURED and deployed. Phases
+2–7 are night two. Full recon in `run-artifacts/qc-chassis-recon.md`.
 
-⚠️ **Phase 1's MEASUREMENT did not complete, and that is stated first because it is the thing a
-reader most needs to know.** The unit gates are green (tsc, the full 7,418-case suite, the
-production build), but `tests/e2e/qcChassis.measure.ts` has not yet produced a trustworthy run —
-see "The measurement's state" below. Nothing in this report claims a measured layout.
+✅ **Phase 1 is measured: 15 of 15 green against the deployed dev bundle** (`run-artifacts/qc-chassis-p1.txt`).
+The earlier version of this report led with a warning that it was not; that warning was right, and
+running the measurement is what found the two faults below.
+
+⚠️ **AND THE MEASUREMENT FOUND A PAGE THAT CRASHED ON EVERY TILE CLICK.** Phase 1 shipped to dev
+with `tsc`, 7,443 unit tests and a clean production build all green, and the To-do page fell into
+its error boundary the moment a reader touched a tile. That is the whole argument for the rule this
+round added to `CLAUDE.md`: *a phase whose measurement has not run is not landed, whatever the gates
+say.*
 
 | phase | SHA | what landed |
 |---|---|---|
 | contracts | `af98bb58` | the three refs, enrolled (38 guarded) |
 | 0 · recon | — | `run-artifacts/qc-chassis-recon.md`, no commit |
-| 1 · header, tiles, toolbar | `<this>` | the page moves onto the Query Centre's own parts |
+| 1 · header, tiles, toolbar | `e7acb30e` | the page moves onto the Query Centre's own parts |
+| 1 · measured | `48e429ec` | the TDZ crash, the two totals, `visiblePage()`, two `CLAUDE.md` rules |
+| 1 · reconciled | `c595a02e` | the nine reds Phase 1 left in `tightened.measure.ts` |
+| 1 · reported | `<this>` | the rail badge is a third number; screenshots from dev |
 
 ---
 
@@ -99,20 +107,83 @@ now finds the visible `.tdb-wrap` by measuring it, tags it, and reads inside the
 
 ---
 
-## The measurement's state — read this before trusting anything visual
+## What the measurement found — the two faults, and why no gate could see either
 
-`tests/e2e/qcChassis.measure.ts` exists, is scoped to the visible page, and asserts twelve claims
-including the partition law and that both pages import the one shared module. **It has not
-produced a clean run.** The one run that completed was the unscoped version (5 red, all of them
-artefacts of reading the Query Centre); every run since has died in `auth.setup` under contention.
+### 1 · A temporal dead zone that took the whole page down
 
-⚠️ **And I read a STALE REPORT once while establishing that** — the file on disk was the previous
-run's, because the test deletes it at its own start and the run never reached that line. Identical
-numbers read as "the change did nothing" rather than "the change never ran". The same fault I
-recorded in the last round, in the same session.
+`railGroups()` is a hoisted function whose first render-time caller sits at line 924. Phase 1 made
+it reach `tileNarrow`, which reads `nudgedBefore` — declared eight hundred lines further down. Every
+tile click threw `Cannot access 'oc' before initialization` and dropped the page into its error
+boundary.
 
-**Night two starts by running it on a quiet machine**, red-proving each assertion, and only then
-treating Phase 1's layout as measured.
+**Three things made it invisible.** `tsc` cannot see through a function boundary, so the read
+typechecked. `tileNarrow` returns early while the selected tile is `all` — the initial state — so
+the page LOADED perfectly and only died on the first click. And a warning comment describing this
+exact fault, from the last time this file had it, sat **four lines above the offending call site**.
+
+Comments are not guards. `todoTileTdz.test.ts` asserts the ORDER now, both halves — that the chain
+still reads each dependency, and that each is declared above the first caller — and was proved red
+by putting the bug back and watching both fire.
+
+### 2 · The page stated two different totals
+
+The tiles counted `railGroupsAll()` raw while the list renders `railGroups()`, so the page showed
+**29 in a tile beside "27 tasks" in the card's own footer**, three inches apart, and a Housekeeping
+tile reading 3 that narrowed to two rows. Both numbers were right about their own set; nothing said
+which one the word "tasks" meant.
+
+The difference was two snoozed-or-dismissed cards, which `applyView` drops under a law it states
+outright: *what is not shown is not counted, anywhere.* Both surfaces now read one `tileScope()`,
+so they agree structurally rather than by two derivations happening to match. The footer's own
+`totalUnfiltered` had already filtered them for that reason — the page knew the right population
+and the tiles were the one surface that missed it.
+
+⚠️ **A THIRD SURFACE STILL DISAGREES, AND IS REPORTED RATHER THAN FIXED.** The rail rib reads
+`To-do list29` against the page's 27, because it counts `boardFigures(cols).cards`. That predates
+this round — the page moved to the view-excluded total in the drawer round and the badge never
+followed — and it contradicts `ShellSidebar`'s own comment promising the badge "cannot drift from
+the page counts". **What the badge should MEAN is a product call**, and it is shell chrome besides,
+so P1.2c prints both figures every run instead of patching it here.
+
+---
+
+## The nine reds Phase 1 left behind, reconciled
+
+Retiring the list card's toolbar broke nine assertions in `tightened.measure.ts`. **Provenance was
+established before anything was touched**: the same file was run against the deployed dev bundle and
+produced the identical nine, so none came from the fixes above.
+
+- **`TodoToolbar.tsx` was deleted**, with `.l-toolbar`, `.l-tbsp`, `.meterMini`, the `.cb` cluster
+  and `.l-search`. It had zero importers and zero tests naming it — a replacement that was ADDED
+  rather than swapped, the third recorded instance of that shape in this repo.
+- **The dead-class sweep ran against the RENDERED page, not the source**, and it mattered: a source
+  scan reported `grp` and `l-icon` as dead too, and both are live behind interpolated class names.
+  Four more (`l-fbadge`, `l-slbl`, `l-wide`, `fchip`) were deliberately left — drawer-round filter
+  chrome that may be conditional on filters the probe did not set.
+- **Every retired assertion names where its claim went**, and a new `P1.0b` asserts the retirement
+  itself, so a supersession cannot be mistaken for a regression. `P1.1` and `P1.9` followed the row
+  to `.tdb-qtool`; `P2.6` was retargeted and re-measured green.
+
+⚠️ **AND `P3.10b` IS A FINDING, NOT A RETUNE.** Phase 1's two rows of chrome lowered the task
+drawer's cap. Measured: the sheet's content wants **461px**, the cap is **404 at a 900px viewport**
+and clear of 461 from **1050** up. So the hug branch became unreachable at the harness's default
+height and the sheet was capped at both widths — a branch tally passing over one state twice. The
+1920 case runs at 1050 now so the law is still tested. **It must not be read as "the hug is fine":
+on a 1440×900 laptop the drawer scrolls internally where it used to hug.** Nick's to rule on.
+
+---
+
+## `visiblePage()`, and why it is a function rather than a tag
+
+Every `/todo` probe now scopes through `visiblePage(page)` (`tests/e2e/measure.ts`), a rule this
+round added to `CLAUDE.md`. It installs `window.__saVisRoot()`, which finds the one visible root by
+MEASURING it and throws on none or two.
+
+**The tag version was written first and broke within the hour.** Setting `data-sa-vis` on the
+element works until the first interaction: React re-created the root on a tile click, took the
+attribute with it, and the next probe crashed on `null.querySelectorAll` — a crashing probe, which
+tells you nothing and hides every assertion below it. Re-measuring on every call cannot go stale,
+because it never remembers anything.
 
 ---
 
