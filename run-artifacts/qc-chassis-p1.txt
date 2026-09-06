@@ -1,0 +1,28 @@
+── qc chassis · Phase 1 · 14 assertions · 0 RED · 14 green
+green  · P1.-1 · the visible To-do page was found, so the readings below are about it
+         scoped via visiblePage('.tdb-wrap')
+green  · P1.0 · the tiles rendered, and so did the list
+         tiles 7 · rows 27
+green  · P1.1 · seven tiles, in the contract's order
+         ["All tasks","Urgent","Agent requests","Nudges","Gone quiet","Housekeeping","Your tasks"]
+green  · P1.2 · the five categories partition All — their sum IS the All count
+         five sum 27 · All 27 · {"All tasks":27,"Urgent":6,"Agent requests":9,"Nudges":9,"Gone quiet":5,"Housekeeping":2,"Your tasks":2}
+green  · P1.2b · the tile's total and the card footer's total are the SAME number
+         tile 27 · footer "27 tasks · 18 need you now" -> 27 · rail badge ""
+green  · P1.3 · Urgent is a LENS, not a sixth part — it is not in that sum
+         urgent 6 · agent requests 9
+green  · P1.4 · the header carries the title, the subtitle and one primary
+         title "To-do list" · sub "Everything that's yours to do, and everything worth a look." · cta "Add a task"
+green  · P1.5 · and the illustration slot
+green  · P1.6 · one search box on the page, and it is the toolbar's
+         toolbar 1 · page 1 · card 0
+green  · P1.7 · three toolbar controls, in the contract's order
+         ["Filter","GroupUrgency","SortPriority"]
+green  · P1.8 · the view switch offers Grid and Board, and nothing else
+         ["Grid","Board"]
+green  · P1.9 · the tiles and the toolbar are SHARED — both pages import the one module
+         QueryStatTiles→StatTiles · ToDoPage→StatTiles · Queries→ToolbarButton · ToDoPage→ToolbarButton
+green  · P1.10 · selecting a tile rings it, and only it
+         ["Housekeeping"]
+green  · P1.11 · and the list narrows to exactly the number the tile stated
+         tile said 2 · rows 27 -> 2

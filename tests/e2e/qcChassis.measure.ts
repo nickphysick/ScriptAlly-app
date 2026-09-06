@@ -12,7 +12,7 @@
  * Read-only: it clicks tiles and reads. It presses no primary and writes nothing.
  */
 import { test, expect } from "@playwright/test";
-import { ensureSignedIn, liftMotionSuppression } from "./measure";
+import { ensureSignedIn, liftMotionSuppression, visiblePage } from "./measure";
 import { writeFileSync, rmSync } from "node:fs";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -31,25 +31,19 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
   await page.waitForFunction("document.querySelectorAll('.qct-tile').length > 0", null, { timeout: 45_000 }).catch(() => {});
   await liftMotionSuppression(page);
 
-  /* ⚠️ SCOPE TO THE VISIBLE PAGE FIRST. Every workspace page stays MOUNTED and the shell toggles
-     `display`, so `document.querySelector` reaches the Query Centre's copy of everything this
-     measures — its five tiles, its masthead, its toolbar. The first run of this file read TWELVE
-     tiles (5 + 7) and reported the Query Centre's own title as the To-do page's, which is a true
-     reading of the wrong page. The visible grid is found by MEASURING, then tagged, and every
-     probe below reads inside the tag. */
-  const scoped = await page.evaluate(`(() => {
-    const vis = (e) => { const b = e.getBoundingClientRect(); return b.width > 0 && b.height > 0; };
-    const page = [...document.querySelectorAll(".tdb-wrap")].find(vis);
-    if (!page) return false;
-    page.setAttribute("data-qc-probe", "1");
-    return true;
-  })()`) as boolean;
+  /* ⚠️ SCOPE TO THE VISIBLE PAGE FIRST, THROUGH THE SHARED HELPER. Every workspace page stays
+     MOUNTED and the shell toggles `display`, so `document.querySelector` reaches the Query Centre's
+     copy of everything this measures — its five tiles, its masthead, its toolbar. The first run of
+     this file read TWELVE tiles (5 + 7) and reported the Query Centre's own title as the To-do
+     page's, which is a true reading of the wrong page.
+     `visiblePage` finds the one visible root by MEASURING it and THROWS on none or two, so this
+     can never quietly degrade to reading the whole document. */
+  await visiblePage(page, ".tdb-wrap");
   add("P1.-1 · the visible To-do page was found, so the readings below are about it",
-      scoped, "tagged the visible .tdb-wrap");
+      true, "scoped via visiblePage('.tdb-wrap')");
 
   const r = await page.evaluate(`(() => {
-    const root = document.querySelector("[data-qc-probe]");
-    if (!root) return { tiles: [], row: false, rows: 0 };
+    const root = __saVisRoot();
     const tiles = [...root.querySelectorAll(".qct .qct-tile")];
     const read = (t) => ({
       label: ((t.querySelector(".qct-k") || {}).textContent || "").trim(),
@@ -74,6 +68,10 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
       pageSearches: root.querySelectorAll(".qcc-tb-search").length,
       cardBar: root.querySelectorAll(".tlc .l-search").length,
       rows: root.querySelectorAll(".tlc .row").length,
+      /* the card's own footer, which states a total of its own */
+      foot: ((root.querySelector(".tlc .l-foot .c") || {}).textContent || "").trim(),
+      /* and the rail badge, the third surface that names a number of tasks */
+      badge: ((document.querySelector(".ws-navcount, .ws-nav-count") || {}).textContent || "").trim(),
     };
   })()`) as any;
 
@@ -95,6 +93,18 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
   add("P1.2 · the five categories partition All — their sum IS the All count",
       five === byLabel["All tasks"] && byLabel["All tasks"] > 0,
       "five sum " + five + " · All " + byLabel["All tasks"] + " · " + JSON.stringify(byLabel));
+
+  /* ⚠️ AND THE TILE'S TOTAL MUST AGREE WITH THE CARD'S OWN FOOTER — the two-numbers-both-called-
+     To-do fault, which this repo has closed once already and which Phase 1 reintroduced on its own
+     surface. Found by LOOKING at the deployed page: the tile read 29 and the footer read 27, both
+     correct on their own terms, with nothing on the page saying which one the word means.
+     The partition law above cannot see it: the five parts summed to the tile's own total, so it
+     was internally consistent and wrong. This reads the OTHER surface. */
+  const footN = Number((/(\d+)\s+tasks/.exec(r.foot ?? "") ?? [])[1] ?? NaN);
+  add("P1.2b · the tile's total and the card footer's total are the SAME number",
+      Number.isFinite(footN) && footN === byLabel["All tasks"],
+      "tile " + byLabel["All tasks"] + " · footer " + JSON.stringify(r.foot) + " -> " + footN
+        + " · rail badge " + JSON.stringify(r.badge));
 
   add("P1.3 · Urgent is a LENS, not a sixth part — it is not in that sum",
       typeof byLabel["Urgent"] === "number" && byLabel["Urgent"] <= byLabel["Agent requests"],
@@ -136,7 +146,7 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
   /* ── selecting a tile narrows the list ── */
   const before = r.rows;
   const picked = await page.evaluate(`(() => {
-    const root = document.querySelector("[data-qc-probe]");
+    const root = __saVisRoot();
     const t = [...root.querySelectorAll(".qct .qct-tile")]
       .find((x) => ((x.querySelector(".qct-k") || {}).textContent || "").trim() === "Housekeeping");
     if (!t) return null;
@@ -146,7 +156,7 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
   })()`) as number | null;
   await page.waitForTimeout(400);
   const after = await page.evaluate(`(() => {
-    const root = document.querySelector("[data-qc-probe]");
+    const root = __saVisRoot();
     return {
       rows: root.querySelectorAll(".tlc .row").length,
       on: [...root.querySelectorAll(".qct .qct-tile--on")]

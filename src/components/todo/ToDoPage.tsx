@@ -898,6 +898,29 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     agency: (c: BoardCard) => (listRowInputs(c).agency ?? "").trim(),
   }), [listRowInputs]);
 
+  /* ⚠️ GONE QUIET'S DISCRIMINATOR, READ FROM THE QUERY (see `taskCategory`): a `nudge_overdue`
+     whose query has been nudged already is a SILENCE the app has chased once, not a fresh nudge.
+     `lastNudgeSentDate` is what `logNudge` always writes; `nudgeDate` is absent where the writer
+     declined a check-in, so it cannot serve. The card does not carry either, which is why this
+     reads the store here rather than the derivation reading a field that is not on a card.
+
+     ⚠️ AND IT IS DECLARED HERE, ABOVE `allDockable`, FOR THE REASON THE COMMENT BLOCK ABOVE GIVES
+     — the SECOND time this file has had that fault and the first time it reached dev. `railGroups()`
+     now calls `tileNarrow`, which reads this; its first render-time caller is the line below. At
+     its old home four hundred lines down, picking any tile threw `Cannot access 'nudgedBefore'
+     before initialization` and dropped the whole page into its error boundary.
+
+     ⚠️ IT LOADED PERFECTLY, WHICH IS WHY EVERY GATE PASSED. `tileNarrow` returns early while the
+     tile is `all` — the initial state — so this is never read until the first click. tsc, 7,443
+     unit tests and a clean production build were all green over a page that died the moment a
+     reader touched it, and it took the rendered measurement to find. The warning four lines above
+     describes this precise fault and did not stop it: comments are not guards, which is why
+     `todoTileTdz.test.ts` now asserts the ORDER. */
+  const nudgedBefore = React.useCallback((c: BoardCard) => {
+    if (!c.relatedRecordId) return false;
+    return !!queries.find((q) => q.id === c.relatedRecordId)?.lastNudgeSentDate;
+  }, [queries]);
+
   const allDockable = dockQueue(railGroups().flatMap((g) => g.cards));
   /* the chip narrows the SAME list the rail draws, so the pane walks exactly what you can see */
   const dockable = allDockable.filter((c) => chipMatchesCard(chip, c));
@@ -1730,17 +1753,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    *
    * ⚠️ ASSIGNED HERE, after everything `railGroupsAll` transitively reads — the hoisted-helper
    * TDZ rule, which this page has been bitten by once already.
+   *
+   * ⚠️ AND THE CLEARED GROUP IS DROPPED, BECAUSE THE LIST DROPS IT. `railGroupsAll()` keeps `done`
+   * and `railGroups()` filters it out, so counting the raw array made the tiles state a population
+   * the list can never show: **29 in the tile beside "27 tasks" in the card's own footer**, and a
+   * Housekeeping tile reading 3 that narrowed to two rows. Both numbers were right about their own
+   * set, which is precisely the two-numbers-both-called-To-do fault this page has closed once
+   * before. The footer's own `totalUnfiltered` already filtered `done` for exactly this reason —
+   * the page knew the right population and the tiles were the one surface that missed it.
+   *
+   * ⚠️ IT IS NOT THE SAME EXCLUSION AS THE VIEW'S. The tiles must still count the WHOLE board
+   * before the tile, the chip's view filters and the sort — that is the paragraph above. Dropping
+   * `done` is a statement about what counts as a task at all, not about what is currently selected,
+   * which is why it belongs here and the view's filters do not.
    */
-  /* ⚠️ GONE QUIET'S DISCRIMINATOR, READ FROM THE QUERY (see `taskCategory`): a `nudge_overdue`
-     whose query has been nudged already is a SILENCE the app has chased once, not a fresh nudge.
-     `lastNudgeSentDate` is what `logNudge` always writes; `nudgeDate` is absent where the writer
-     declined a check-in, so it cannot serve. The card does not carry either, which is why this
-     reads the store here rather than the derivation reading a field that is not on a card. */
-  const nudgedBefore = React.useCallback((c: BoardCard) => {
-    if (!c.relatedRecordId) return false;
-    return !!queries.find((q) => q.id === c.relatedRecordId)?.lastNudgeSentDate;
-  }, [queries]);
-  const tileCards = railGroupsAll().flatMap((g) => g.cards);
+  const tileCards = tileScope().flatMap((g) => g.cards);
   const tileCounts = React.useMemo(() => {
     const out: Record<string, number> = { all: tileCards.length, urgent: 0 };
     for (const c of CATEGORIES) out[c] = 0;
@@ -3224,6 +3251,35 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   /* the UNFILTERED groups — what the menu's live counts are of, so a zero is information rather
      than a consequence of the filter that is hiding it */
+  /**
+   * ⚠️ THE POPULATION BOTH THE TILES AND THE FOOTER'S "N" COUNT — ONE EXPRESSION, SO THEY CANNOT
+   * DISAGREE (QC-chassis round, Phase 1, after they did).
+   *
+   * It is `railGroupsAll()` with the view's NARROWING facets lifted — every group, every type,
+   * every agent — and the cleared group dropped. What it deliberately does NOT lift is
+   * `includeSnoozed` / `includeDismissed`, because those decide what is a live task at all rather
+   * than which live tasks are on screen, and `applyView` states the law directly: *what is not
+   * shown is not counted, anywhere.*
+   *
+   * ⚠️ THE TILES USED TO READ `railGroupsAll()` RAW, AND THE TWO SURFACES SAID DIFFERENT NUMBERS —
+   * **29 in the tile beside "27 tasks" in the footer three inches below it**, with a Housekeeping
+   * tile reading 3 that narrowed to two rows. Both were right about their own set; nothing on the
+   * page said which one the word "tasks" meant. The two snoozed-or-dismissed cards were the
+   * difference. The fix is not a matching literal but a shared derivation: the footer's `N` and
+   * every tile now come from this one call, so agreement is structural.
+   *
+   * ⚠️ AND IT IS STILL NOT `railGroups()`. The tile's OWN selection and the sort must not narrow
+   * it, or every category you are not currently in would read 0 — the one number nobody needs.
+   * Lifting the narrowing facets is what keeps those two things separate.
+   */
+  function tileScope() {
+    return applyView(
+      railGroupsAll(),
+      { ...view, groups: [...GROUP_IDS], types: [...TYPE_ORDER], agents: [] },
+      viewFacts,
+    ).filter((g) => g.id !== "done");
+  }
+
   function railGroupsAll() {
     const narrowed = {
       todo: narrowCards(boardCols.todo),
@@ -3330,9 +3386,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
            facets lifted, NOT a raw store count. Search and the chip narrow upstream of the view,
            so they participate in n and in N alike; the footer's two-number form appears exactly
            when the view itself is hiding rows, which is the claim the contract makes. */
-        totalUnfiltered={viewTotal(applyView(railGroupsAll(),
-          { ...view, groups: [...GROUP_IDS], types: [...TYPE_ORDER], agents: [] }, viewFacts)
-          .filter((g) => g.id !== "done"))}
+        totalUnfiltered={viewTotal(tileScope())}
         /* ⚠️ THE CARD'S OWN TOOLBAR IS RETIRED (QC-chassis round, Phase 1) — `TodoToolbar`'s meter
            and its three actions. The meter counted the three FAMILIES; the page's seven tiles
            count the five CATEGORIES and are the same fact told better, so keeping both would be

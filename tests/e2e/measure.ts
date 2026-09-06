@@ -165,6 +165,75 @@ export async function openRoute(page: Page, route: string, viewport?: { width: n
 }
 
 /**
+ * ⚠️ THE VISIBLE PAGE, TAGGED — BECAUSE `document` REACHES EVERY OTHER PAGE TOO.
+ *
+ * Every workspace page stays MOUNTED under the display-toggling shell, so `document.querySelector`
+ * answers about whichever copy comes first in the DOM, which is routinely a page the reader cannot
+ * see. It is the single most expensive hazard in this harness and it has three distinct faces:
+ *
+ *   - **A wrong reading that looks right.** The QC-chassis measurement's first completed run
+ *     reported TWELVE stat tiles — the Query Centre's five plus To-do's seven — and named the
+ *     Query Centre's title as the To-do page's. Five reds, every one an artefact.
+ *   - **A hang, not a failure.** A locator resolving to a hidden page's zero-sized copy waits for
+ *     it to become "stable" until the test timeout, reporting *"element is not visible"* about a
+ *     page that is perfectly visible. One such wait cost 900 seconds.
+ *   - **A duplicate id.** Two mounts of a component with a hard-coded `id` put two of it in the
+ *     document; `getElementById` takes the first.
+ *
+ * This installs `window.__saVisRoot()` in the page — a function that finds the visible root by
+ * MEASURING it (visibility here is `display`, not a class) and returns the element. Call this once
+ * after each `openRoute`, then start every probe with the global:
+ *
+ *   await visiblePage(page, ".tdb-wrap");
+ *   const n = await page.evaluate(`__saVisRoot().querySelectorAll(".qct-tile").length`);
+ *
+ * ⚠️ IT IS A FUNCTION RATHER THAN A TAG, AND THAT IS THE WHOLE DESIGN — learned by writing the tag
+ * version first and watching it break within the hour. Setting `data-sa-vis` on the element works
+ * until the first interaction: React re-created the root on a tile click, took the imperative
+ * attribute with it, and the next probe crashed on `null.querySelectorAll` — a CRASHING probe,
+ * which tells you nothing and hides every assertion below it. Re-measuring on every call cannot go
+ * stale, because it never remembers anything. It also re-applies the attribute, so a locator-based
+ * caller can still use the returned prefix — but only until the next re-render, and the function is
+ * the form to reach for.
+ *
+ * ⚠️ AND IT THROWS ON NONE OR TWO, DELIBERATELY — in the page as well as here. Falling back to
+ * `document` would put the hazard back exactly where a tired reader stops looking, and an empty
+ * scope makes every count-of-zero and every `not.toContain` pass vacuously: the failure this repo
+ * already records as a probe satisfied by having measured nothing.
+ */
+export async function visiblePage(page: Page, root = ".wpg"): Promise<string> {
+  const n = await page.evaluate((root) => {
+    const w = window as unknown as { __saVisRoot?: () => Element };
+    w.__saVisRoot = () => {
+      const hits = [...document.querySelectorAll(root)].filter((e) => {
+        const b = e.getBoundingClientRect();
+        return b.width > 0 && b.height > 0;
+      });
+      if (hits.length !== 1) {
+        throw new Error(`__saVisRoot: expected one visible "${root}", found ${hits.length}`);
+      }
+      document.querySelectorAll("[data-sa-vis]").forEach((e) => e.removeAttribute("data-sa-vis"));
+      hits[0].setAttribute("data-sa-vis", "1");
+      return hits[0];
+    };
+    try { w.__saVisRoot(); return 1; } catch { /* fall through to the count */ }
+    return [...document.querySelectorAll(root)].filter((e) => {
+      const b = e.getBoundingClientRect();
+      return b.width > 0 && b.height > 0;
+    }).length;
+  }, root);
+  if (n !== 1) {
+    throw new Error(
+      `visiblePage: expected exactly one VISIBLE "${root}", found ${n}. ` +
+      (n === 0
+        ? "The page has not rendered, or its root is named something else — check before scoping."
+        : "Two visible roots means the shell is showing two pages at once; scoping to either would " +
+          "be a guess. Narrow the root argument to this page's own class."));
+  }
+  return `[data-sa-vis="1"] `;
+}
+
+/**
  * ⚠️ CONFIRM THE SCROLLBAR MODE RATHER THAN TRUSTING THE FLAG. Overlay scrollbars take no layout
  * width, which is how a 15px content loss survived a session — every measurement on that machine
  * agreed. This asks a scrolling element how much width its bar actually took.
