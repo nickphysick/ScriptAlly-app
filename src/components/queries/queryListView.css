@@ -14,12 +14,16 @@
   background: #fff; border-radius: 14px; overflow: hidden;
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 8px 22px rgba(58, 28, 20, 0.09);
 }
+/* v14 §2: Status · Agent · Sent · What went · Since then · Where it stands · Actions.
+   Court is retired — the Status column's dot and word already said it, and the standing sentence
+   says it again in prose. The Actions track is FIXED so the four slots align down the page. */
 .qlv-head, .qlv-row {
-  display: grid; grid-template-columns: 200px 1.4fr 110px 130px 1.4fr 120px 44px; gap: 14px;
+  display: grid;
+  grid-template-columns: 170px 1.25fr 74px 108px 132px 1.5fr 240px; gap: 14px;
   align-items: center; border-bottom: 0.5px solid #ece0d2;
 }
 .qlv-head { padding: 12px 18px; }
-.qlv-row { padding: 13px 18px; cursor: pointer; text-align: left; }
+.qlv-row { padding: 13px 18px 13px 26px; cursor: pointer; text-align: left; position: relative; }
 .qlv-row:last-child { border-bottom: none; }
 .qlv-row:hover { background: #fffdf9; }
 /* selection is a ring, never a fill — the palette's own rule */
@@ -35,10 +39,16 @@
 .qlv-caret { font-size: 8px; }
 
 /* the status pill takes the row's own state fill — the one place colour appears in a list row */
+/* ⚠️ THE ROW'S COLOUR IS THE BAR, NOT A PILL (v14 §2). One device per fact: the bar states the
+   state, the dot states the step, the word names it. A tinted pill beside the bar is the same
+   sentence at twice the volume. */
+.qlv-bar {
+  position: absolute; left: 10px; top: 8px; bottom: 8px; width: 4px;
+  background: var(--state-accent, #e0d5c8); border-radius: 0 3px 3px 0;
+}
 .qlv-st {
-  display: inline-flex; align-items: center; gap: 8px; border-radius: 99px; padding: 5px 11px 5px 6px;
-  font-family: var(--font-serif); font-size: 13px; color: var(--ink, #1c130f); width: max-content;
-  background: var(--band-a, var(--state-closed));
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-serif); font-size: 13.5px; color: var(--ink, #1c130f);
 }
 .qlv-who { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .qlv-chip {
@@ -50,7 +60,45 @@
 .qlv-nm { display: block; font-family: var(--font-serif); font-size: 15px; color: var(--ink, #1c130f); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qlv-ag { display: block; font-family: var(--font-serif); font-style: italic; font-size: 12px; color: #6a5a50; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.qlv-d { font-family: var(--font-serif); font-size: 15px; color: var(--ink, #1c130f); }
+/* the Sent leaf — always the ORIGINAL send, always in the Queried sand (it marks the start) */
+.qlv-leaf {
+  display: block; width: 40px; border-radius: 6px; background: #fff; border: 0.5px solid #dccfc0;
+  text-align: center; overflow: hidden; box-shadow: 0 1px 2px rgba(58, 28, 20, 0.06);
+}
+.qlv-mo {
+  display: block; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 6.5px;
+  letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 0 1px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08); background: var(--band-a, var(--state-queried));
+}
+.qlv-dy { display: block; font-family: var(--font-serif); font-size: 16px; color: var(--ink, #1c130f); line-height: 1; padding: 4px 0 2px; }
+.qlv-cap {
+  display: block; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 6px;
+  letter-spacing: 0.1em; text-transform: uppercase; color: #9c8878; padding-bottom: 3px;
+}
+
+/* Since then — one 22px mark per recorded activity after the send, in date order */
+.qlv-since { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.qlv-ev {
+  position: relative; width: 22px; height: 22px; border-radius: 50%; display: inline-flex;
+  align-items: center; justify-content: center; font-size: 11px; cursor: default;
+  border: 0.5px solid rgba(0, 0, 0, 0.08); background: #fff;
+}
+.qlv-ev--requested { color: #4c6249; background: #e8ede6; }
+.qlv-ev--sent { color: #7c3a2a; background: #f7ece7; }
+.qlv-ev--nudged { color: #1c130f; background: #f2ece3; }
+.qlv-ev--response { color: #3a1c14; background: #f3ece2; }
+.qlv-ev--closed { color: #8a7a6c; background: #eceae5; }
+.qlv-tip {
+  position: absolute; bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%);
+  background: #fdfaf5; border: 0.5px solid #e0d5c8; border-radius: 8px; padding: 6px 9px;
+  font-family: var(--font-serif); font-size: 11.5px; color: #1c130f; white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(58, 28, 20, 0.14); opacity: 0; pointer-events: none;
+  transition: opacity 0.12s; z-index: 6;
+}
+.qlv-tip i { display: block; font-style: normal; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: #9c8878; margin-top: 2px; }
+.qlv-ev:hover .qlv-tip, .qlv-ev:focus-visible .qlv-tip { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .qlv-tip { transition: none; } }
+
 .qlv-d small, .qlv-fs small {
   display: block; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8.5px;
   letter-spacing: 0.1em; text-transform: uppercase; color: #9c8878; margin-top: 3px;
@@ -60,7 +108,19 @@
 .qlv-ic--off { opacity: 0.22; }
 .qlv-none { font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #c0b0a0; }
 
-.qlv-fs { font-size: 13px; color: #3a1c14; min-width: 0; }
+/* Where it stands — the spot slot, then the sentence and its clauses */
+.qlv-fs { font-size: 13px; color: #3a1c14; min-width: 0; display: flex; align-items: center; gap: 11px; }
+.qlv-spot { flex: none; }
+.qlv-fstx { min-width: 0; }
+.qlv-sent { display: block; }
+.qlv-cappar {
+  display: flex; align-items: center; gap: 8px; margin-top: 3px;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8.5px;
+  letter-spacing: 0.1em; text-transform: uppercase; color: #9c8878;
+}
+/* ⚠️ THE DIVIDER IS A RULE, NOT A CHARACTER (v14). A middot is punctuation inside a sentence; the
+   two clauses are separate facts, and a hairline says so without being read aloud. */
+.qlv-pipe { width: 1px; height: 10px; background: #d8ccbc; flex: none; }
 .qlv-fs b { font-weight: 600; }
 .qlv-mk {
   width: 15px; height: 15px; border-radius: 50%; border: 1.3px solid var(--ink, #1c130f);
@@ -68,16 +128,25 @@
   display: inline-flex; align-items: center; justify-content: center; margin-right: 6px;
   vertical-align: -2px; color: var(--ink, #1c130f);
 }
-.qlv-turn {
-  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: #6a5a50;
+/* ⚠️ A FIXED FOUR-SLOT TRACK — 132px primary then three 30px icons — so the ⋯ shares one
+   x-coordinate down the page and every primary shares one width. An absent verb is HIDDEN in its
+   slot, never removed: removal would shuffle the others left and the column would stop being one. */
+.qlv-acts { display: grid; grid-template-columns: 132px 30px 30px 30px; gap: 6px; justify-content: end; align-items: center; }
+.qlv-pri {
+  height: 30px; border-radius: 8px; border: 1px solid #e8c8bc; background: #f5e2da; cursor: pointer;
+  font: inherit; font-size: 12px; color: #3a1c14; text-align: center; padding: 0 6px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.qlv-more button {
-  background: none; border: none; cursor: pointer; font-size: 15px; color: #a08a78; padding: 4px 8px;
-  border-radius: 7px;
+.qlv-pri:hover { background: #f8e9e2; }
+.qlv-pri--off { background: #f1ece4; border-color: #e0d5c8; color: #b0a293; cursor: default; }
+.qlv-ib {
+  width: 30px; height: 30px; border-radius: 8px; border: 1px solid #e0d5c8; background: #fff;
+  cursor: pointer; font: inherit; font-size: 13px; color: #6a5a50; display: inline-flex;
+  align-items: center; justify-content: center;
 }
-.qlv-more button:hover { background: #f6efe6; color: #3a1c14; }
+.qlv-ib:hover { background: #f6efe6; color: #3a1c14; }
 
-@media (max-width: 1280px) {
-  .qlv-head, .qlv-row { grid-template-columns: 170px 1.3fr 96px 110px 1.4fr 100px 40px; gap: 10px; padding-inline: 14px; }
+@media (max-width: 1380px) {
+  .qlv-head, .qlv-row { grid-template-columns: 150px 1.1fr 62px 96px 108px 1.3fr 240px; gap: 10px; }
+  .qlv-row { padding-left: 22px; }
 }

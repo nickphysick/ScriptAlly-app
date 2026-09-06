@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useLayoutEffect, useState, useEffect, useRef } from "react";
+import React, { useLayoutEffect, useState, useEffect, useRef, useMemo } from "react";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
@@ -82,7 +82,8 @@ import { useOpenEditAgent } from "./EditAgentHost";
 import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
-import { cardFacts, cardMaterials, turnFor, MATERIAL_SLOTS, type Turn } from "../lib/queryCardFacts";
+import { cardFacts, cardMaterials, turnFor, MATERIAL_SLOTS, MON as MONTHS_SHORT, type Turn, type CardLeaf } from "../lib/queryCardFacts";
+import { sinceThen, type SinceEvent } from "../lib/queryRowFacts";
 import { MATERIAL_ROW_NAMES, type MaterialRow } from "../lib/agentMaterials";
 import {
   QUICK_FILTERS, quickCounts, GRID_GROUPS, GRID_SORTS,
@@ -3146,6 +3147,39 @@ export const Queries: React.FC<{
     return () => window.removeEventListener("keydown", onKey);
   }, [routeActive, activeQuery]);
 
+  /**
+   * §2 (v14) — THE LIST'S TWO EXTRA DERIVATIONS, both from sources that already exist.
+   *
+   * `listSince` reads the SAME global feed the drawer's timeline renders, so the row's marks are a
+   * summary of that timeline rather than a second history of the query. `listSentLeaf` is the
+   * card's own leaf recomputed from `dateSent` alone — the Sent column marks where the journey
+   * STARTED, so it must not drift to the last thing that happened as the card's leaf legitimately
+   * does.
+   */
+  const listSince = useMemo(() => {
+    const out: Record<string, SinceEvent[]> = {};
+    if (gridView !== "list") return out;
+    for (const q of sortedList) {
+      const sent = q.dateSent ? new Date(q.dateSent).getTime() : null;
+      out[q.id] = sinceThen(activities as never, q.id, Number.isNaN(sent as number) ? null : sent);
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gridView, sortedList, activities]);
+
+  const listSentLeaf = useMemo(() => {
+    const out: Record<string, CardLeaf | null> = {};
+    if (gridView !== "list") return out;
+    for (const q of sortedList) {
+      const ms = q.dateSent ? new Date(q.dateSent).getTime() : NaN;
+      if (Number.isNaN(ms)) { out[q.id] = null; continue; }
+      const d = new Date(ms);
+      out[q.id] = { month: MONTHS_SHORT[d.getMonth()].toUpperCase(), day: d.getDate(), caption: "sent" };
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gridView, sortedList]);
+
   const gridRows: GridCard[] = sortedList.map((q) => {
     const agent = agents.find((a) => a.id === q.agentId);
     const facts = cardFacts(q as Query, new Date(), { agencyWeeks: agent?.responseTimeWeeks });
@@ -5889,6 +5923,23 @@ export const Queries: React.FC<{
                  two views cannot disagree about what order things are in. */
               <QueryListView
                 rows={gridRows}
+                since={listSince}
+                sentLeaf={listSentLeaf}
+                onVerb={(id, verb, anchor) => {
+                  /**
+                   * ⚠️ THE DESK NEEDS ITS HOST, AND THE GHOST RUNG NEEDS A RAIL (v14 §2). A row
+                   * action therefore opens the DRAWER on that row first and the desk second — the
+                   * desk is anchored beside the drawer and its proposed rung is drawn on the
+                   * drawer's timeline, so firing the verb without the drawer would put a card
+                   * beside nothing and a preview nowhere.
+                   */
+                  setSelectedQueryId(id);
+                  onOpenQuery?.(id);
+                  const q = queries.find((x) => x.id === id);
+                  const t = q ? turnFor(q.status as QueryStatus) : "sand";
+                  if (verb === "primary" && t === "offer") { if (q) openRecord(q as Query); return; }
+                  openDeskVerb(verb === "primary" ? (t === "you" ? "marksent" : "respond") : verb === "nudge" ? "nudge" : "closed", anchor);
+                }}
                 sortKey={sortKey}
                 sortDesc={sortDesc}
                 selectedId={selectedQueryId}
@@ -6073,10 +6124,14 @@ export const Queries: React.FC<{
                 });
               }}
               elapsed={(() => {
-                const [n, u] = (panelRow.facts.caption.match(/^(\d+)\s+(\w+)/) ?? [null, "—", ""]).slice(1) as [string, string];
+                /* ⚠️ THE FIGURE, NOT THE PROSE (v14). This regexed `caption` for its leading
+                   number — and v14's caption opens with days-to-EXPECTED, so the tray would have
+                   gone on labelling it "waiting so far" while showing something else entirely.
+                   `facts.elapsed` is the number the tray actually means; the copy above is now
+                   free to change without moving it. */
                 return {
-                  value: n ?? "—",
-                  unit: u ?? "",
+                  value: String(panelRow.facts.elapsed.value),
+                  unit: panelRow.facts.elapsed.unit,
                   caption: panelRow.facts.turn === "you" ? "since request"
                     : panelRow.facts.turn === "closed" ? "since close" : "waiting so far",
                 };

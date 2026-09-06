@@ -203,7 +203,16 @@ describe("§4 · the draft is the ONE template, and the nudge is one activity wi
   it("Nudge stays absent for with-you and closed — the panel's turn gate is untouched", () => {
     const panel = readFileSync(join(process.cwd(), "src/components/queries/QueryPanel.tsx"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(panel).toContain('onNudge && (facts.turn === "sand" || facts.turn === "agent")');
+    /* ⚠️ RETARGETED (v14 §3): the gate moved into `queryVerbs`, which the panel AND the list's
+       action grid now import — the law is stronger for it, because one predicate cannot let two
+       surfaces disagree about what a with-you row offers. Both halves asserted: the panel reads
+       the predicate, and the predicate is the agent-side rule. */
+    expect(panel).toContain("onNudge && verbs.nudge");
+    expect(panel).toContain("const verbs = queryVerbs(facts.turn);");
+    const verbsSrc = readFileSync(join(process.cwd(), "src/lib/queryRowFacts.ts"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(verbsSrc).toContain('nudge: turn === "sand" || turn === "agent"');
+    expect(verbsSrc, "a closed row offers a nudge").toMatch(/turn === "closed"[\s\S]{0,220}nudge: false/);
   });
 
   it("the derived line states record + unchanged status + never-sends, in the ref's words", () => {
@@ -518,16 +527,21 @@ describe("Phase 3–5 · three renderers over one set of rows", () => {
     expect(board).toContain('<span className="qbv-strip" aria-hidden="true" />');
   });
 
-  it("the shingle overlaps by the fact line, and the last card keeps its fact", () => {
+  it("⚠️ v14 §1 — the card is identity only, and the shingle went with the line it hid", () => {
+    /* RETARGETED. The overlap's whole justification was covering the fact line at rest; with no
+       line to cover it would have eaten the leaf instead. An 8px stack of short cards is also
+       shorter than tall cards overlapped — the density is bought again, more plainly. */
     const css = readFileSync(join(process.cwd(), "src/components/queries/queryBoardView.css"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "");
-    /* ⚠️ ONE TOKEN, read by both — the ref's literal -36px described a fact line it did not own,
-       and the two drifted the moment the type did (measured 39.5 against 36). */
-    expect(css).toMatch(/\.qbv-card \{[^}]*margin-bottom: calc\(-1 \* var\(--qbv-fact-h\)\)/);
-    expect(css).toMatch(/\.qbv-fact \{[^}]*height: var\(--qbv-fact-h\)/);
-    expect(css).toMatch(/\.qbv-card:last-child \{ margin-bottom: 0; \}/);
-    expect(css).toMatch(/\.qbv-card:hover[^{]*\{[^}]*transform: translateY\(-6px\)/);
-    expect(css, "the hovered card does not rise above its neighbours").toMatch(/\.qbv-card:hover[^{]*\{[^}]*z-index: 5/);
+    expect(css).toMatch(/\.qbv-card \{[^}]*margin-bottom: 8px/);
+    expect(css, "the shingle survives").not.toMatch(/margin-bottom: calc\(-1/);
+    expect(css, "the hover lift survives — there is nothing underneath to lift clear of").not.toMatch(/\.qbv-card:hover[^{]*\{[^}]*translateY/);
+    expect(css, "the hover shadow went too — a clickable card should say so").toMatch(/\.qbv-card:hover[^{]*\{[^}]*box-shadow/);
+    /* the fact line's rules went WITH its markup */
+    for (const c of [".qbv-fact", ".qbv-fs", ".qbv-m ", ".qbv-mk"])
+      expect(css, `${c} outlived its markup`).not.toContain(c);
+    expect(board, "the board still renders a fact line").not.toContain("qbv-fact");
+    expect(board, "the board still renders materials").not.toMatch(/MATERIAL_SLOTS|qbv-mats/);
     /* the header's rule is the state's deep step, and the header takes no fill */
     expect(css).toMatch(/\.qbv-h \{[^}]*border-bottom: 1\.5px solid var\(--state-accent/);
     expect(css.match(/\.qbv-h \{[^}]*\}/)?.[0] ?? "", "the column header grew a filled bar").not.toMatch(/background/);
@@ -537,5 +551,101 @@ describe("Phase 3–5 · three renderers over one set of rows", () => {
     expect(page).toContain('<p className="qcc-calph">Calendar — coming with the timeline board</p>');
     /* it must not have grown a second timeline board here — the fork the ref cautions against */
     expect(page).not.toMatch(/TodoCalendarPage|timeline-v57|<TimelineBoard/);
+  });
+});
+
+/* ══ views pass 4 (v14) — the row, the verbs, the scrim and the motion ════════════════════════ */
+describe("v14 §2–§4 · one predicate, one history, one ground", () => {
+  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const list = readFileSync(join(process.cwd(), "src/components/queries/QueryListView.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const panel = readFileSync(join(process.cwd(), "src/components/queries/QueryPanel.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const pcss = readFileSync(join(process.cwd(), "src/components/queries/queryPanel.css"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
+  const lcss = readFileSync(join(process.cwd(), "src/components/queries/queryListView.css"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
+
+  it("§2 · the list's verbs ARE the drawer's — one predicate, imported by both", () => {
+    expect(list).toContain('import { queryVerbs, type SinceEvent } from "../../lib/queryRowFacts";');
+    expect(panel).toContain("const verbs = queryVerbs(facts.turn);");
+    expect(list).toContain("const v = queryVerbs(f.turn);");
+    /* neither surface restates a gate of its own */
+    for (const [what, src] of [["list", list], ["panel", panel]] as const)
+      expect(src, `${what} restates the agent-side gate`).not.toMatch(/turn === "sand" \|\| .*turn === "agent"/);
+  });
+
+  it("§2 · Court is retired, and the status is plain text with its dot", () => {
+    expect(list).not.toContain("qlv-turn");
+    expect(list).not.toContain("Court");
+    expect(lcss, "the status pill kept a fill").not.toMatch(/\.qlv-st \{[^}]*background/);
+    /* the row's colour is the bar, in the deep tone */
+    expect(lcss).toMatch(/\.qlv-bar \{[^}]*background: var\(--state-accent/);
+    expect(lcss).toMatch(/\.qlv-bar \{[^}]*width: 4px/);
+  });
+
+  it("§2 · the Sent leaf is the original send, in sand, whatever the row's state", () => {
+    /* built from `dateSent` alone — the card's leaf legitimately drifts to the last event, and the
+       Sent column must not, because it marks where the journey started */
+    expect(page).toContain("const ms = q.dateSent ? new Date(q.dateSent).getTime() : NaN;");
+    expect(page).toContain('out[q.id] = { month: MONTHS_SHORT[d.getMonth()].toUpperCase(), day: d.getDate(), caption: "sent" };');
+    /* …and it wears the Queried class, so its month strip is sand on every row */
+    expect(list).toContain('className="qlv-leaf qcc--st-queried"');
+    /* one month table, shared with the card's own leaf */
+    expect(page).toContain("MON as MONTHS_SHORT");
+  });
+
+  it("§2 · Since then reads the timeline's own rows, and says so when there are none", () => {
+    expect(page).toContain("out[q.id] = sinceThen(activities as never, q.id,");
+    expect(list).toContain("nothing yet");
+    const facts = readFileSync(join(process.cwd(), "src/lib/queryRowFacts.ts"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    /* the send is the leaf's, so it is excluded — what is left is precisely "since then" */
+    expect(facts).toContain("if (a.activityType === ActivityType.QUERY_SENT) continue;");
+    expect(facts).toContain("out.sort((x, y) => x.atMs - y.atMs)");
+  });
+
+  it("§2 · the action grid is fixed, and an absent verb is hidden rather than removed", () => {
+    expect(lcss).toMatch(/\.qlv-acts \{[^}]*grid-template-columns: 132px 30px 30px 30px/);
+    expect(list).toContain('style={v.nudge ? undefined : { visibility: "hidden" }}');
+    expect(list).toContain('style={v.markClosed ? undefined : { visibility: "hidden" }}');
+    /* a row action opens the DRAWER first — the desk needs its host and the ghost needs a rail */
+    expect(page).toContain("setSelectedQueryId(id);\n                  onOpenQuery?.(id);");
+  });
+
+  it("⚠️ §3 · the top bar carries NO verbs — navigation only", () => {
+    /* ⚠️ THE FAR ANCHOR IS SEARCHED FROM THE NEAR ONE. There are two `qpn-inner` in this file (the
+       form mode's comes FIRST), so a bare indexOf gave a negative slice and an empty string — the
+       first-match trap, caught by asserting the slice found something before reading it. */
+    const barAt = panel.indexOf('<div className="qpn-bar">');
+    expect(barAt, "the top bar has moved").toBeGreaterThan(-1);
+    const bar = panel.slice(barAt, panel.indexOf('<div className="qpn-inner">', barAt));
+    expect(bar.length, "the top bar's slice found nothing").toBeGreaterThan(100);
+    expect(bar, "a verb survives in the top bar").not.toContain("qpn-act");
+    expect(bar).toContain("Previous query");
+    /* and the verb row exists, on the stage block's own ground */
+    expect(panel).toContain('<div className="qpn-verbs">');
+    expect(pcss).toMatch(/\.qpn-verbs \{[^}]*background-color: var\(--band-a/);
+  });
+
+  it("§4 · the scrim portals to the body and covers everything", () => {
+    expect(panel).toContain("createPortal(");
+    expect(panel).toContain("document.body,");
+    expect(pcss).toMatch(/\.qpn-scrim \{[^}]*position: fixed; inset: 0/);
+    expect(pcss).toMatch(/\.qpn-scrim \{[^}]*background: rgba\(58, 28, 20, 0\.14\)/);
+    expect(pcss).toMatch(/\.qpn-scrim \{[^}]*transition: opacity 240ms/);
+  });
+
+  it("§4 · 360 opening, 220 closing, and reduced motion keeps the scrim's fade", () => {
+    /* the timing lives on the state being transitioned TO, so no JS has to know the direction */
+    expect(pcss).toMatch(/\.qpn \{[^}]*transition: transform 220ms cubic-bezier\(0\.4, 0, 1, 1\)/);
+    expect(pcss).toMatch(/\.qpn\[data-on="true"\] \{[^}]*transition: transform 360ms cubic-bezier\(0\.2, 0\.8, 0\.2, 1\)/);
+    expect(pcss).toMatch(/\.qpn \{ transition-duration: 0s; \}/);
+    expect(pcss).toMatch(/\.qpn-scrim \{ transition-duration: 120ms; \}/);
+    /* ⚠️ NO `var()` INSIDE THE FRAMES — it fails silently in this setup */
+    const frames = pcss.match(/@keyframes qpnRise \{[^}]*\}[^}]*\}/)?.[0] ?? "";
+    expect(frames, "the rise keyframes are missing").toContain("translateY(8px)");
+    expect(frames, "a var() reached the keyframes").not.toContain("var(");
   });
 });

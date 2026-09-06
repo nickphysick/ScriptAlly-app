@@ -66,7 +66,9 @@ describe("⚠️ the panel's chrome is not tinted, and the ladder starts below i
        chrome (bar, tabs, buttons, body) reads a ladder token, and a fifth reader fails here and
        states its case. Source order in the sheet: ms, band, head. */
     const readers = [...css.matchAll(/^\s*(\.[a-zA-Z0-9_.\s-]+?)\s*\{[^}]*var\(--band-a/gm)].map((m) => m[1].trim());
-    expect(readers, `--band-a is read by ${readers.join(", ")}`).toEqual([".qpn-ms", ".qpn-band", ".qpn-head", ".qat-sw"]);
+    /* v14 §3 widens the block once more: the VERB ROW closes it and therefore wears its ground.
+       The enumeration stays exact — a sixth reader fails here and states its case. */
+    expect(readers, `--band-a is read by ${readers.join(", ")}`).toEqual([".qpn-ms", ".qpn-band", ".qpn-head", ".qpn-verbs", ".qat-sw"]);
   });
 
   it("⚠️ the progress track has its own name, and it is not the bar's", () => {

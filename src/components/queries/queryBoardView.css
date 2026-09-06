@@ -32,23 +32,23 @@
 }
 
 .qbv-cards { display: flex; flex-direction: column; }
+/**
+ * ⚠️ NO SHINGLE (v14, §1), AND THE OVERLAP WENT WITH THE THING IT COVERED. The shingle existed to
+ * hide each card's fact line at rest; with the card stripped to identity there is no line to hide,
+ * and an overlap would have started eating the leaf instead. An 8px stack of 60px cards is also
+ * SHORTER than a stack of 100px cards overlapped by 40 — the density the shingle bought is bought
+ * again, more plainly, by the card being smaller.
+ *
+ * The hover LIFT went with it (nothing is underneath to lift clear of); the hover SHADOW stays,
+ * because a card you can click should say so.
+ */
 .qbv-card {
-  /**
-   * ⚠️ ONE NUMBER, NOT TWO THAT AGREE. The ref draws `margin-bottom: -36px` beside a fact line
-   * that happens to be 36px AT THE REF'S TYPE — measured here it renders 39.5, and the two drifted
-   * apart the moment the sizes did. The overlap and the fact line's height are the SAME token now,
-   * so "each card overlaps the one above by the height of its fact line" is true by construction
-   * rather than by two values being kept in step by hand. The harness still measures BOTH, because
-   * a construction is a claim about the page and this repo checks those on the page.
-   */
-  --qbv-fact-h: 40px;
   position: relative; background: #fff; border-radius: 11px; overflow: hidden; cursor: pointer;
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 6px 16px rgba(58, 28, 20, 0.08);
-  margin-bottom: calc(-1 * var(--qbv-fact-h)); transition: transform 0.16s, box-shadow 0.16s;
+  margin-bottom: 8px; transition: box-shadow 0.16s;
 }
 .qbv-card:last-child { margin-bottom: 0; }
 .qbv-card:hover, .qbv-card:focus-visible {
-  transform: translateY(-6px); z-index: 5;
   box-shadow: 0 2px 4px rgba(58, 28, 20, 0.06), 0 14px 30px rgba(58, 28, 20, 0.16);
 }
 .qbv-card--on { box-shadow: 0 0 0 1.5px #e8c8bc, 0 6px 16px rgba(58, 28, 20, 0.08); z-index: 4; }
@@ -63,7 +63,7 @@
   font-family: var(--font-serif); font-size: 12.5px; color: var(--ink, #1c130f);
 }
 
-.qbv-body { padding: 11px 12px 0; }
+.qbv-body { padding: 11px 12px 11px; }
 .qbv-who { display: flex; align-items: center; gap: 10px; }
 .qbv-chip {
   width: 32px; height: 32px; border-radius: 50%; background: #fdfaf5; flex: none;
@@ -85,20 +85,7 @@
 }
 .qbv-dy { display: block; font-family: var(--font-serif); font-size: 14px; color: var(--ink, #1c130f); line-height: 1; padding: 4px 0 3px; }
 
-/* ⚠️ THE FACT LINE IS THE OVERLAP'S MEASURE — 36px at these sizes, and the harness measures BOTH
-   rather than trusting the pair to stay in step. */
-.qbv-fact {
-  height: var(--qbv-fact-h); box-sizing: border-box;
-  margin-top: 9px; padding: 7px 0 0; border-top: 0.5px solid #ece0d2; font-size: 11px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #3a1c14;
-}
-.qbv-fs b { font-weight: 600; }
-.qbv-m { display: block; color: #9c8878; margin-top: 3px; font-size: 8px; font-family: var(--f12-mono, "JetBrains Mono", monospace); letter-spacing: 0.1em; text-transform: uppercase; }
-.qbv-mk {
-  width: 13px; height: 13px; border-radius: 50%; border: 1.2px solid var(--ink, #1c130f);
-  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8px; font-weight: 700;
-  display: inline-flex; align-items: center; justify-content: center; margin-right: 5px;
-  vertical-align: -2px; color: var(--ink, #1c130f);
-}
+/* the fact line, its hairline, its caption and its `!` marker went WITH the markup (v14 §1) —
+   rules with no subject are silent in both directions, and this page has paid for one already */
 .qbv-col[data-qbv-col="closed"] .qbv-card { opacity: 0.85; }
 .qbv-empty { font-family: var(--font-serif); font-style: italic; font-size: 12.5px; color: #b9a893; padding: 6px 4px; margin: 0; }

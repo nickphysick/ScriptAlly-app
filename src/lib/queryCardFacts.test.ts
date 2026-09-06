@@ -80,12 +80,29 @@ describe("turn — five courts, and the counts must partition", () => {
 });
 
 describe("the six sentence shapes", () => {
-  it("agent-side, inside the window", () => {
+  it("agent-side, inside the window — v14's standing copy: what is coming, and when you would chase", () => {
+    /* ⚠️ RETARGETED (v14). The caption stated how long it had been WAITING — a fact about the past
+       the leaf already shows. It now states the two things the reader can act on: how far off the
+       reply is, and when the next nudge falls. The sentence is unchanged. */
     const f = cardFacts(q({ dateSent: ago(14) }), TODAY, { agencyWeeks: 8 });
     expect(sentenceText(f.sentence)).toBe("Reply expected by 16 Oct");
-    expect(f.caption).toBe("14 days waiting");
+    expect(f.caption).toBe("6 weeks away · no nudge set");
+    expect(f.captionParts).toEqual(["6 weeks away", "no nudge set"]);
     expect(f.attention).toBe(false);
     expect(f.leaf?.caption).toBe("sent");
+    /* ⚠️ AND THE ELAPSED FIGURE SURVIVES AS A NUMBER — the drawer's tray reads it rather than
+       regexing the prose, which is what let the copy move at all. */
+    expect(f.elapsed).toEqual({ value: 14, unit: "days" });
+  });
+
+  it("⚠️ the second clause counts to the reminder `reconcileNudge` stored — one derivation", () => {
+    /* the seam: `nudgeDate` on the query IS reconcileNudge's output (logNudge writes it,
+       deleteActivity re-derives it), so the card counts to it rather than owning a second rule */
+    const f = cardFacts(q({ dateSent: ago(14), nudgeDate: new Date(TODAY.getTime() + 5 * 864e5).toISOString() }), TODAY, { agencyWeeks: 8 });
+    expect(f.captionParts[1]).toBe("Nudge agent in 5 days");
+    /* a reminder already past is not one to count to — it has come round */
+    const g = cardFacts(q({ dateSent: ago(14), nudgeDate: new Date(TODAY.getTime() - 2 * 864e5).toISOString() }), TODAY, { agencyWeeks: 8 });
+    expect(g.captionParts[1]).toBe("no nudge set");
   });
 
   it("agent-side, past the window — the marker and the nudge", () => {

@@ -26,7 +26,9 @@ import { classifyQueryMaterial, type MaterialKind } from "./agentMaterials";
 import { formatQueryMaterial } from "./materials";
 
 const DAY = 86_400_000;
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+/** ⚠️ EXPORTED (v14 §2) so the list's Sent leaf builds its month strip from the SAME table the
+ *  card's leaf does — a second array of month names is a second thing to keep in step. */
+export const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
 
 /**
  * ⚠️ HOW LONG A REQUEST MAY SIT BEFORE THE CARD MARKS IT — Nick's call, and a NAMED constant so it
@@ -99,6 +101,20 @@ export interface CardFacts {
   leaf: CardLeaf | null;
   sentence: Run[];
   caption: string;
+  /**
+   * The caption's clauses, unjoined (v14). `caption` stays the joined string every existing reader
+   * takes; a renderer that wants the ref's HAIRLINE PIPE between clauses draws it from these,
+   * because a divider that is a rule cannot be a character inside a string.
+   */
+  captionParts: string[];
+  /**
+   * ⚠️ HOW LONG THIS HAS BEEN WAITING, AS A NUMBER — because the drawer's stat tray was REGEXING
+   * the caption for it (`/^(\d+)\s+(\w+)/`) and v14's new caption opens with a different figure
+   * entirely. The tray would have gone on labelling it "waiting so far" while showing days-to-
+   * expected: a true number under a false label, which is the worst shape a figure can take. The
+   * tray reads this now, and the prose is free to change without moving a number underneath it.
+   */
+  elapsed: { value: number; unit: string };
   /** The ink `!` ring. Never a colour, never a fifth band tint. */
   attention: boolean;
   expectedReply: Date | null;
@@ -400,6 +416,8 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
 
   let sentence: Run[];
   let caption: string;
+  /* set only where a caption has more than one clause; otherwise derived from `caption` below */
+  let captionParts: string[] | null = null;
   let attention = false;
 
   if (expectedApplies) {
@@ -413,8 +431,26 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
         ];
         caption = `${spanWords(sinceSend)} waiting · nudge available`;
       } else {
+        /**
+         * ⚠️ v14'S STANDING COPY: what is coming, and when you would chase it — never how long it
+         * has been. "3 weeks waiting" is a fact about the past that the reader can already see in
+         * the leaf; "12 days away · Nudge agent in 5 days" is the two things they can act on.
+         *
+         * ⚠️ THE SECOND FIGURE IS `reconcileNudge`'S OUTPUT, READ WHERE IT IS STORED. `nudgeDate`
+         * on the query IS what that function derives — `logNudge` writes it and `deleteActivity`
+         * re-derives it through `reconcileNudge` — so counting to it here is one derivation with
+         * two readers rather than a second reminder rule living on a card.
+         */
         sentence = [{ text: "Reply expected by " }, { text: shortDate(expectedReply), strong: true }];
-        caption = `${spanWords(sinceSend)} waiting`;
+        const away = Math.max(0, daysBetween(nowMs, expectedReply.getTime()));
+        const nudgeMs = query.nudgeDate ? new Date(query.nudgeDate).getTime() : NaN;
+        const nudgeIn = Number.isNaN(nudgeMs) ? null : daysBetween(nowMs, nudgeMs);
+        /* a reminder in the past is not a reminder to count to — it has already come round */
+        captionParts = [
+          `${spanWords(away)} away`,
+          nudgeIn != null && nudgeIn > 0 ? `Nudge agent in ${spanWords(nudgeIn)}` : "no nudge set",
+        ];
+        caption = captionParts.join(" · ");
       }
     } else {
       /**
@@ -483,6 +519,8 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
     leaf,
     sentence,
     caption,
+    captionParts: captionParts ?? (caption ? caption.split(" · ") : []),
+    elapsed: (() => { const [v, u] = span(sinceSend); return { value: v, unit: u }; })(),
     attention,
     expectedReply,
     expectedSource: expectedApplies ? resolved.source : null,

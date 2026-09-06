@@ -20,8 +20,10 @@ import "./queryListView.css";
 import { StatusDot } from "../StatusDot";
 import { Mark } from "./QueryCard";
 import type { GridCard } from "./QueryCentreGrid";
-import { MATERIAL_SLOTS } from "../../lib/queryCardFacts";
+import { MATERIAL_SLOTS, type CardLeaf } from "../../lib/queryCardFacts";
 import { MATERIAL_ROW_NAMES } from "../../lib/agentMaterials";
+import { IlloSlot } from "./IlloSlot";
+import { queryVerbs, type SinceEvent } from "../../lib/queryRowFacts";
 /**
  * ⚠️ THE KEYS ARE THE PAGE'S OWN, NOT `GRID_SORTS`'. The Query Centre sorts on a richer set
  * (`last_activity`, `date_newest`, `waiting_longest`, `due_soonest`, `journey_depth`, `agent_az`)
@@ -32,18 +34,33 @@ import { MATERIAL_ROW_NAMES } from "../../lib/agentMaterials";
 type SortKey = string;
 
 /** Which sort each header hands back. `null` = the column states no order of its own. */
+/**
+ * ⚠️ COURT IS RETIRED (v14 §2). It restated in a column what the Status column's own dot and word
+ * already say — and what the standing sentence says again in prose. Three tellings of one fact.
+ */
 export const LIST_COLUMNS: readonly { label: string; sort: SortKey | null }[] = [
   { label: "Status", sort: "journey_depth" },
   { label: "Agent", sort: "agent_az" },
   { label: "Sent", sort: "date_newest" },
   { label: "What went", sort: null },
+  { label: "Since then", sort: null },
   { label: "Where it stands", sort: "due_soonest" },
-  { label: "Court", sort: null },
-  { label: "", sort: null },
+  { label: "Actions", sort: null },
 ];
+
+/** The five marks a Since-then row can draw. Direction, not decoration — in, out, and the rest. */
+const SINCE_GLYPH: Record<SinceEvent["kind"], string> = {
+  requested: "←", sent: "→", nudged: "◔", response: "✳", closed: "×",
+};
+const shortWhen = (ms: number) =>
+  new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
 export const QueryListView: React.FC<{
   rows: readonly GridCard[];
+  /** the Since-then marks per query id — derived by the page from the SAME feed the timeline reads */
+  since: Record<string, SinceEvent[]>;
+  /** the original send, per query id — the leaf here is `dateSent`, never last activity */
+  sentLeaf: Record<string, CardLeaf | null>;
   sortKey: SortKey;
   /** true = the page is showing this sort reversed; the header draws the caret from it */
   sortDesc: boolean;
@@ -51,7 +68,9 @@ export const QueryListView: React.FC<{
   onSort: (key: SortKey) => void;
   onOpen?: (id: string) => void;
   onMore?: (id: string, anchor: HTMLElement) => void;
-}> = ({ rows, sortKey, sortDesc, selectedId, onSort, onOpen, onMore }) => (
+  /** every action opens the desk AND the drawer behind it — see the page's handler */
+  onVerb?: (id: string, verb: "primary" | "nudge" | "closed", anchor: HTMLElement) => void;
+}> = ({ rows, since, sentLeaf, sortKey, sortDesc, selectedId, onSort, onOpen, onMore, onVerb }) => (
   <div className="qlv">
     <div className="qlv-head" role="row">
       {LIST_COLUMNS.map((c, i) =>
@@ -74,6 +93,12 @@ export const QueryListView: React.FC<{
 
     {rows.map((r) => {
       const f = r.facts;
+      const v = queryVerbs(f.turn);
+      const ev = since[r.id] ?? [];
+      /* ⚠️ THE SEND, NOT THE LAST THING THAT HAPPENED. The Sent column marks where the journey
+         STARTED, so it reads `dateSent` however far the query has travelled — and it stays in the
+         Queried sand for the same reason: the start is the start whatever the row is now. */
+      const leaf = sentLeaf[r.id] ?? null;
       return (
         <div
           key={r.id}
@@ -84,6 +109,11 @@ export const QueryListView: React.FC<{
           onClick={() => onOpen?.(r.id)}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen?.(r.id); } }}
         >
+          {/* the row's own state, as a 4px bar in the deep tone — inset, rounded on the inner edge */}
+          <span className="qlv-bar" aria-hidden="true" />
+
+          {/* ⚠️ PLAIN TEXT AND ITS DOT — no pill, no fill (v14 §2). The accent bar already carries
+              the row's colour; a tinted pill beside it says the same thing twice, louder. */}
           <span className="qlv-st">
             <StatusDot status={r.status} overrideSize={16} decorative />
             {r.status}
@@ -97,8 +127,14 @@ export const QueryListView: React.FC<{
             </span>
           </span>
 
-          <span className="qlv-d">
-            {f.leaf ? (<>{f.leaf.day} {f.leaf.month}<small>{f.leaf.caption}</small></>) : <span className="qlv-none">—</span>}
+          <span className="qlv-leafwrap">
+            {leaf ? (
+              <span className="qlv-leaf qcc--st-queried" aria-hidden="true">
+                <span className="qlv-mo">{leaf.month}</span>
+                <span className="qlv-dy">{leaf.day}</span>
+                <span className="qlv-cap">sent</span>
+              </span>
+            ) : <span className="qlv-none">—</span>}
           </span>
 
           <span className="qlv-mats">
@@ -111,20 +147,65 @@ export const QueryListView: React.FC<{
               : <span className="qlv-none">Not recorded</span>}
           </span>
 
-          <span className="qlv-fs">
-            <span className="qlv-fstx">
-              {f.attention && <span className="qlv-mk" aria-hidden="true">!</span>}
-              {f.sentence.map((run, i) => (run.strong ? <b key={i}>{run.text}</b> : <React.Fragment key={i}>{run.text}</React.Fragment>))}
-            </span>
-            {f.caption && <small>{f.caption}</small>}
+          {/* ⚠️ EVERY RECORDED ACTIVITY AFTER THE SEND, from the same rows the drawer's timeline
+              renders. A row with nothing after the send says so rather than drawing an empty box. */}
+          <span className="qlv-since">
+            {ev.length === 0
+              ? <span className="qlv-none">nothing yet</span>
+              : ev.map((e) => (
+                  <span key={e.id} className={`qlv-ev qlv-ev--${e.kind}`} tabIndex={0}>
+                    <span aria-hidden="true">{SINCE_GLYPH[e.kind]}</span>
+                    <span className="qlv-tip" role="note">{e.label}<i>{shortWhen(e.atMs)}</i></span>
+                  </span>
+                ))}
           </span>
 
-          <span className="qlv-turn">{f.turnWord}</span>
+          <span className="qlv-fs">
+            {/* the same family the drawer's header slot uses — omitted, never blank, when absent */}
+            <IlloSlot className="qlv-spot" name={`spot · ${f.state}`} width={44} height={44} round />
+            <span className="qlv-fstx">
+              <span className="qlv-sent">
+                {f.attention && <span className="qlv-mk" aria-hidden="true">!</span>}
+                {f.sentence.map((run, i) => (run.strong ? <b key={i}>{run.text}</b> : <React.Fragment key={i}>{run.text}</React.Fragment>))}
+              </span>
+              {f.captionParts.length > 0 && (
+                <span className="qlv-cappar">
+                  {f.captionParts.map((part, i) => (
+                    <React.Fragment key={i}>
+                      {i > 0 && <i className="qlv-pipe" aria-hidden="true" />}
+                      <span>{part}</span>
+                    </React.Fragment>
+                  ))}
+                </span>
+              )}
+            </span>
+          </span>
 
-          <span className="qlv-more">
+          {/* ⚠️ A FIXED FOUR-SLOT GRID, and an absent verb leaves its slot EMPTY rather than
+              collapsing it — every row's ⋯ shares one x, every primary one width, so the column
+              reads as a column. `visibility: hidden`, not removal. */}
+          <span className="qlv-acts" onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
-              aria-label={`More actions for ${r.name}`}
+              className={`qlv-pri${v.primary.enabled ? "" : " qlv-pri--off"}`}
+              disabled={!v.primary.enabled}
+              title={v.primary.enabled ? undefined : "Reopening a closed query is not built yet"}
+              onClick={(e) => { e.stopPropagation(); onVerb?.(r.id, "primary", e.currentTarget); }}
+            >{v.primary.label}</button>
+            <button
+              type="button" className="qlv-ib" aria-label="Nudge"
+              style={v.nudge ? undefined : { visibility: "hidden" }}
+              tabIndex={v.nudge ? 0 : -1}
+              onClick={(e) => { e.stopPropagation(); onVerb?.(r.id, "nudge", e.currentTarget); }}
+            >◔</button>
+            <button
+              type="button" className="qlv-ib" aria-label="Mark closed"
+              style={v.markClosed ? undefined : { visibility: "hidden" }}
+              tabIndex={v.markClosed ? 0 : -1}
+              onClick={(e) => { e.stopPropagation(); onVerb?.(r.id, "closed", e.currentTarget); }}
+            >×</button>
+            <button
+              type="button" className="qlv-ib" aria-label={`More actions for ${r.name}`}
               onClick={(e) => { e.stopPropagation(); onMore?.(r.id, e.currentTarget); }}
             >⋯</button>
           </span>

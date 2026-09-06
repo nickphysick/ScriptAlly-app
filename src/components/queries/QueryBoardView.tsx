@@ -11,6 +11,12 @@
  * status, which is the one thing this app never does directly. The board is a read — every change
  * of column comes from recording what happened. No handler here accepts a drop.
  *
+ * ⚠️ THE CARD IS IDENTITY ONLY (v14, §1). The fact line, its hairline and the materials are gone,
+ * and so is the shingle that existed to hide them: the overlap's whole justification was that the
+ * card below covered a line the card above did not need at rest, and with no line to cover the
+ * overlap was hiding the leaf instead. Cards sit in an 8px stack now — shorter than the shingled
+ * pair was, because a 64px card beats a 100px card overlapped by 40.
+ *
  * ⚠️ THE COLUMN SAYS WHERE IT SITS; THE BAND SAYS WHAT IT IS. Cards drop their band because the
  * column already names the status — except a card whose status is not the column's own (an R&R in
  * Full Requested, a No response in Closed), which keeps its band so the board never states
@@ -82,13 +88,6 @@ export const QueryBoardView: React.FC<{
                           <span className="qbv-dy">{f.leaf.day}</span>
                         </span>
                       )}
-                    </div>
-                    <div className="qbv-fact">
-                      <span className="qbv-fs">
-                        {f.attention && <span className="qbv-mk" aria-hidden="true">!</span>}
-                        {f.sentence.map((run, i) => (run.strong ? <b key={i}>{run.text}</b> : <React.Fragment key={i}>{run.text}</React.Fragment>))}
-                      </span>
-                      {f.caption && <span className="qbv-m">{f.caption}</span>}
                     </div>
                   </div>
                 </article>

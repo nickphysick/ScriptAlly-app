@@ -21,6 +21,8 @@ import "./queryCard.css";
 import "./queryPanel.css";
 import { StatusDot } from "../StatusDot";
 import { IlloSlot } from "./IlloSlot";
+import { queryVerbs } from "../../lib/queryRowFacts";
+import { createPortal } from "react-dom";
 import type { CardFacts } from "../../lib/queryCardFacts";
 import type { QueryStatus } from "../../types";
 
@@ -164,7 +166,7 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
       if (e.key === "ArrowLeft") { e.preventDefault(); onStep(-1); }
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+  return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose, onStep]);
 
   const stepper = (delta: 1 | -1, d: string, label: string) => (
@@ -174,10 +176,27 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
     </button>
   );
 
+  /* ⚠️ ONE PREDICATE (v14 §3). The label lived in the page and the two gates lived here — two
+     files deciding what a row offers. `queryVerbs` is that decision, and the list imports it. */
+  const verbs = queryVerbs(facts.turn);
+
   return (
     <>
-      {/* the scrim is a button so a pointer AND a keyboard can dismiss it */}
-      <button type="button" className="qpn-scrim" data-on={open} aria-label="Close query" tabIndex={-1} onClick={onClose} />
+      {/**
+        * ⚠️ THE SCRIM PORTALS TO THE BODY (v14 §4), for the reason the desk already learned: a
+        * `position: fixed` element inside a transformed ancestor is CONTAINED by it, and this page
+        * has transforms above the drawer (the stage's enter animation among them). Inside the
+        * tree it covered the content and left the rail and the masthead lit — which reads as the
+        * drawer belonging to the page rather than sitting over the whole app.
+        *
+        * It stays a button so a pointer AND a keyboard can dismiss it.
+        */}
+      {typeof document !== "undefined"
+        ? createPortal(
+            <button type="button" className="qpn-scrim" data-on={open} aria-label="Close query" tabIndex={-1} onClick={onClose} />,
+            document.body,
+          )
+        : null}
       <aside
         ref={panelRef}
         /* ⚠️ THE LADDER CLASS IS THE CARD'S — same class, same `--band-a`, so the two cannot
@@ -232,19 +251,9 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
           {stepper(1, "M9 6l6 6-6 6", "Next query")}
           {position && <span className="qpn-pos">{position.index + 1} of {position.total}</span>}
           <span className="qpn-spacer" />
-          {onPrimary && (
-            <button type="button" className={`qpn-act qpn-act--pink${liveAction === "primary" ? " qpn-act--live" : ""}`}
-              onClick={(e) => onPrimary(e.currentTarget)}>{primaryLabel}</button>
-          )}
-          {/* ⚠️ NUDGE IS AGENT-SIDE ONLY. There is nobody to chase about a parcel you have not sent. */}
-          {onNudge && (facts.turn === "sand" || facts.turn === "agent") && (
-            <button type="button" className={`qpn-act${liveAction === "nudge" ? " qpn-act--live" : ""}`}
-              onClick={(e) => onNudge(e.currentTarget)}>Nudge</button>
-          )}
-          {onMarkClosed && facts.turn !== "closed" && (
-            <button type="button" className={`qpn-act${liveAction === "closed" ? " qpn-act--live" : ""}`}
-              onClick={(e) => onMarkClosed(e.currentTarget)}>Mark closed</button>
-          )}
+          {/* ⚠️ NAVIGATION ONLY (v14 §3). The verbs moved to the foot of the stage block, beneath
+              the manuscript line — where they sit on the query's own colour, beside the sentence
+              that says what it needs, rather than in a bar that is about moving between records. */}
           <button type="button" className="qpn-icb" aria-label="Close" onClick={onClose}>
             <Icon d="M18 6L6 18M6 6l12 12" size={14} width={2.2} />
           </button>
@@ -269,7 +278,6 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
                 The Sent/via caption sits beneath it, absolute in the same reserved column. */}
             <IlloSlot className="qpn-illo" name={`state-specific · ${facts.state}`}
               width={130} height={78} art={STATE_ART[facts.state]} />
-            <div className="qpn-snt">Sent {sentLabel}<br />via {viaLabel}</div>
           </div>
 
           {/**
@@ -284,6 +292,36 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
               <span className="qpn-mst">{manuscriptTitle}</span>
               {manuscriptMeta && <span className="qpn-msm">{manuscriptMeta}</span>}
               {versionLabel && <span className="qpn-msv">{versionLabel}</span>}
+            </div>
+          )}
+
+          {/**
+            * ⚠️ THE VERB ROW, ON THE STAGE BLOCK'S OWN GROUND (v14 §3). It closes the block rather
+            * than sitting in the navigation bar: the verbs are about THIS query, and the bar is
+            * about which query you are looking at. The `Sent / via` caption comes with them,
+            * right-aligned on the same line, because it is the one fact that belongs to the act
+            * rather than to the identity.
+            *
+            * ⚠️ THE VERBS ARE `queryVerbs`', NOT THIS COMPONENT'S. The primary's label, the
+            * agent-side Nudge gate and the open-row Mark-closed gate lived here while the label
+            * itself lived in the page — two files deciding one thing. One predicate now, and the
+            * list's action grid imports the same one.
+            */}
+          {(onPrimary || onNudge || onMarkClosed) && (
+            <div className="qpn-verbs">
+              {onPrimary && verbs.primary.enabled && (
+                <button type="button" className={`qpn-act qpn-act--pink${liveAction === "primary" ? " qpn-act--live" : ""}`}
+                  onClick={(e) => onPrimary(e.currentTarget)}>{primaryLabel || verbs.primary.label}</button>
+              )}
+              {onNudge && verbs.nudge && (
+                <button type="button" className={`qpn-act${liveAction === "nudge" ? " qpn-act--live" : ""}`}
+                  onClick={(e) => onNudge(e.currentTarget)}>Nudge</button>
+              )}
+              {onMarkClosed && verbs.markClosed && (
+                <button type="button" className={`qpn-act${liveAction === "closed" ? " qpn-act--live" : ""}`}
+                  onClick={(e) => onMarkClosed(e.currentTarget)}>Mark closed</button>
+              )}
+              <div className="qpn-snt">Sent {sentLabel}<br />via {viaLabel}</div>
             </div>
           )}
 
