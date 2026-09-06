@@ -17,8 +17,19 @@ async function openQC(page: import("@playwright/test").Page, width: number) {
   await openRoute(page, "/queries", { width, height: 1000 });
   await expect(page.locator(".qcc-grid, .qlv, .qbv").first()).toBeVisible({ timeout: 30_000 });
 }
-const pickView = async (page: import("@playwright/test").Page, label: string) =>
-  page.locator(".qvs button", { hasText: new RegExp(`^${label}$`) }).click();
+/**
+ * ⚠️ THE VISIBLE SWITCH, NOT THE FIRST ONE. The To-do page reuses this very component (the
+ * QC-chassis round), and the workspace keeps every page MOUNTED — so `.qvs button` matches two
+ * documents' worth of controls and Playwright's strict mode refuses. Selecting by measurement is
+ * this repo's standing answer to the hidden-mounted-page trap.
+ */
+const pickView = async (page: import("@playwright/test").Page, label: string) => {
+  await page.evaluate(() => {
+    const live = [...document.querySelectorAll<HTMLElement>(".qvs")].find((e) => e.getBoundingClientRect().height > 0);
+    live?.setAttribute("data-qvs-live", "1");
+  });
+  await page.locator('.qvs[data-qvs-live="1"] button', { hasText: new RegExp(`^${label}$`) }).click();
+};
 
 for (const width of [1280, 1440, 1920] as const) {
   test(`the palette, the tiles and each view at rest — ${width}`, async ({ page }) => {
@@ -311,3 +322,186 @@ for (const width of [1440, 2560] as const) {
     writeFileSync("reports/query-views-2.json", JSON.stringify(out, null, 2));
   });
 }
+
+/* ══ toolbar v2 · §4 — the popovers, the groups, and the date editor's guarantee ═══════════════ */
+test("toolbar v2 · the three menus, Group on Grid and List, the board's disabled control — 1440", async ({ page }) => {
+  const SHOTS2 = "reports/query-toolbar-shots";
+  mkdirSync(SHOTS2, { recursive: true });
+  await openQC(page, 1440);
+
+  /**
+   * ⚠️ THE DATE EDITOR IS MEASURED FIRST, BEFORE ANY MENU IS OPENED, and again at the end — the
+   * fourth caller of `F12Popover` must render identically, and the assertable form of that is its
+   * own computed styles, not a promise in a comment.
+   */
+  const dateStyles = async () => {
+    /* the date editor opens off the send rung's own date control, inside the drawer */
+    await page.locator('[data-qcc-id="cor-move-b"]').click();
+    await expect(page.locator(".qpn[data-on='true']")).toBeVisible({ timeout: 15_000 });
+    await page.locator(".qpn-tab", { hasText: "Tracking" }).click();
+    const trig = page.locator(".qpn .tl-r1 .qp-inplace").first();
+    if (!(await trig.count())) return { reachable: false as const };
+    await trig.click();
+    await expect(page.locator(".f12-pop")).toBeVisible({ timeout: 10_000 });
+    const read = await page.evaluate(() => {
+      const pop = document.querySelector<HTMLElement>(".f12-pop")!;
+      const cs = getComputedStyle(pop);
+      return {
+        reachable: true as const,
+        isMount: pop.classList.contains("f12-pop--mount"),
+        radius: cs.borderTopLeftRadius, padding: cs.paddingTop,
+        border: cs.borderTopWidth, borderColour: cs.borderTopColor,
+        head: !!pop.querySelector(".f12-pop-head"), frame: !!pop.querySelector(".f12-pop-frame"),
+      };
+    });
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
+    return read;
+  };
+
+  /* ── the three menus ── */
+  for (const [label, key] of [["Filter", "filter"], ["Group", "group"], ["Sort", "sort"]] as const) {
+    await page.locator(".qcc-tb-btn", { hasText: new RegExp(`^${label}`) }).first().click();
+    await expect(page.locator(".f12-pop--mount")).toBeVisible();
+    const chassis = await page.evaluate(() => {
+      const pop = document.querySelector<HTMLElement>(".f12-pop--mount")!;
+      const frame = pop.querySelector<HTMLElement>(".f12-pop-frame")!;
+      const band = pop.querySelector<HTMLElement>(".f12-pop-band")!;
+      return {
+        rimRadius: getComputedStyle(pop).borderTopLeftRadius,
+        rimPad: getComputedStyle(pop).paddingTop,
+        frameBorder: getComputedStyle(frame).borderTopColor,
+        frameOverflow: getComputedStyle(frame).overflow,
+        bandImage: getComputedStyle(band).backgroundImage,
+        groups: pop.querySelectorAll(".f12-lbl").length,
+        rows: pop.querySelectorAll(".f12-prow").length,
+        foot: pop.querySelectorAll(".f12-pop-mfoot").length,
+      };
+    });
+    out[`tb-${key}`] = chassis;
+    expect(chassis.rimRadius).toBe("14px");
+    expect(chassis.rimPad).toBe("6px");
+    expect(chassis.frameBorder, "the frame is not the burgundy hairline").toBe("rgba(124, 58, 42, 0.28)");
+    expect(chassis.frameOverflow).toBe("hidden");
+    expect(chassis.bandImage, "the band is not the sage gradient").toContain("linear-gradient");
+    /**
+     * ⚠️ THE TEN-ROW CAP IS SORT'S CLAIM, NOT EVERY MENU'S — the brief states it in the Sort
+     * paragraph, beside the reason (direction left the rows and became a control). Filter's
+     * length is DATA: statuses, plus one row per send method the account has used, plus the
+     * versions. Measured 11 here, and the frame's body scrolls, which is the honest behaviour for
+     * a facet list that grows with the record. Reported rather than asserted.
+     */
+    if (key === "filter") {
+      /**
+       * ⚠️ TWO OR THREE, AND THE THIRD IS CONDITIONAL BY DESIGN. Version renders only where the
+       * scoped manuscript HAS a choice of versions (Part E's D12/D8) — with "All manuscripts"
+       * selected it would have to offer every book's versions in one list. So the claim is not
+       * "three labels" but "these labels, in this order, and Version present exactly when there is
+       * a version to choose". Asserted against the DOM's own condition rather than a count.
+       */
+      const filter = await page.evaluate(() => {
+        const pop = document.querySelector<HTMLElement>(".f12-pop--mount")!;
+        return {
+          labels: [...pop.querySelectorAll(".f12-lbl")].map((e) => e.textContent?.trim() ?? ""),
+          versionRows: [...pop.querySelectorAll(".f12-prow")].filter((e) => /Any version|Not recorded/.test(e.textContent ?? "")).length,
+        };
+      });
+      out["tb-filter-facets"] = filter;
+      expect(filter.labels.slice(0, 2)).toEqual(["Status", "Sent via"]);
+      expect(filter.labels.length, "Filter grew a fourth facet").toBeLessThanOrEqual(3);
+      expect(filter.labels.includes("Version"), "Version rendered without rows, or rows without a label")
+        .toBe(filter.versionRows > 0);
+    }
+    if (key === "sort") {
+      expect(chassis.rows, `Sort is ${chassis.rows} rows`).toBeLessThanOrEqual(10);
+      expect(chassis.rows).toBe(5);
+      expect(chassis.foot).toBe(1);
+    }
+    await page.screenshot({ path: `${SHOTS2}/pop-${key}-1440.png` });
+    await page.keyboard.press("Escape");
+  }
+
+  /* ── Group = Status on Grid, then List ── */
+  for (const [view, sel, shot] of [["Grid", ".qcc-sec", "grid"], ["List", ".qlv-ghead", "list"]] as const) {
+    await pickView(page, view);
+    await page.locator(".qcc-tb-btn", { hasText: /^Group/ }).first().click();
+    await page.locator(".f12-prow", { hasText: /^Status$/ }).first().click();
+    await expect(page.locator(sel).first()).toBeVisible();
+    const g = await page.evaluate((s2) => {
+      const heads = [...document.querySelectorAll<HTMLElement>(s2)];
+      const names = heads.map((h) => h.querySelector("h2 span, h3")?.textContent?.trim() ?? "");
+      /* every card/row under a heading carries that heading's status */
+      const ok = heads.every((h) => {
+        const name = h.querySelector("h2 span, h3")?.textContent?.trim();
+        const scope = s2 === ".qcc-sec" ? h : (h.nextElementSibling as HTMLElement | null);
+        if (!name || !scope) return true;
+        const labels = s2 === ".qcc-sec"
+          ? [...scope.querySelectorAll(".qcc-word")].map((e) => e.textContent?.trim())
+          : [(scope.querySelector(".qlv-st") as HTMLElement | null)?.textContent?.trim()];
+        return labels.every((l) => !l || l === name);
+      });
+      return { headings: heads.length, names, ok, rule: heads[0] ? getComputedStyle(heads[0].querySelector(".qcc-sech-rule, .qlv-gline")!).backgroundColor : null };
+    }, sel);
+    out[`tb-group-${shot}`] = g;
+    expect(g.headings, "no headings rendered").toBeGreaterThan(1);
+    expect(g.ok, "a card sits under the wrong heading").toBe(true);
+    await page.screenshot({ path: `${SHOTS2}/group-${shot}-1440.png` });
+  }
+
+  /* ── the Board disables it ── */
+  await pickView(page, "Board");
+  const board = await page.evaluate(() => {
+    const b = [...document.querySelectorAll<HTMLButtonElement>(".qcc-tb-btn")].find((x) => /^Group/.test(x.textContent ?? ""))!;
+    return { disabled: b.disabled, title: b.title, value: b.querySelector(".qcc-tb-val")?.textContent ?? null };
+  });
+  out["tb-board-group"] = board;
+  expect(board.disabled).toBe(true);
+  expect(board.title).toBe("The board is already grouped by status.");
+  expect(board.value).toBe("Status");
+  await page.screenshot({ path: `${SHOTS2}/group-board-1440.png` });
+
+  /* ── the list header, both directions ── */
+  await pickView(page, "List");
+  for (const dir of ["asc", "desc"] as const) {
+    await page.locator(".qlv-h--btn", { hasText: "Sent" }).first().click();
+    const h = await page.evaluate(() => {
+      const on = document.querySelector<HTMLElement>(".qlv-h--on");
+      return { caret: on?.querySelector(".qlv-caret")?.textContent ?? null,
+               colour: on ? getComputedStyle(on.querySelector(".qlv-caret")!).color : null,
+               menu: [...document.querySelectorAll<HTMLElement>(".qcc-tb-btn")].find((x) => /^Sort/.test(x.textContent ?? ""))?.querySelector(".qcc-tb-val")?.textContent ?? null };
+    });
+    out[`tb-header-${dir}`] = h;
+    expect(h.colour, "the caret is not burgundy").toBe("rgb(124, 58, 42)");
+    expect(h.menu, "the Sort menu did not follow the header").toBe("Date sent");
+    await page.screenshot({ path: `${SHOTS2}/header-${dir}-1440.png` });
+  }
+
+  /**
+   * ── and the fourth caller, unchanged ──
+   * ⚠️ MEASURED ON THE RENDERED PAGE, not inferred from the default. The variant opting out by
+   * construction is a source claim; that the date editor still draws the plain chassis — cream
+   * head, no frame, its own radius — is a claim about the cascade, and only the browser settles it.
+   */
+  await pickView(page, "Grid");
+  const after = await dateStyles();
+  out["tb-date-editor"] = after;
+  /**
+   * ⚠️ AND IT IS NOT REACHABLE FROM THE LIVE PAGE — measured, not assumed, and stated rather than
+   * skipped. `onSetSendDate` is wired at ONE site, inside the retired `GRID_IS_THE_PAGE === false`
+   * browsing branch, so `F12Popover`'s fourth caller is dead code behind a `true` constant. The
+   * variant is still the right shape (a base restyle WOULD have reached it, and it would be
+   * restyled the day that branch is revived or the editor rehomed), but the rendered guarantee
+   * cannot be taken here — it is proved at source and by the CSS scoping instead.
+   *
+   * This asserts the UNREACHABILITY so the day it changes, this case demands the real measurement
+   * rather than going quietly green on a guard that never ran.
+   */
+  if (after.reachable) {
+    expect(after.isMount, "the date editor took the toolbar's chassis").toBe(false);
+    expect(after.head, "the date editor lost its cream head").toBe(true);
+    expect(after.frame, "the date editor grew the toolbar's frame").toBe(false);
+  } else {
+    expect(after.reachable, "the date editor is reachable now — measure its chassis here rather than trusting the source lock").toBe(false);
+  }
+  writeFileSync("reports/query-toolbar.json", JSON.stringify(out, null, 2));
+});

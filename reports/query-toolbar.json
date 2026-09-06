@@ -1,0 +1,91 @@
+{
+  "tb-filter": {
+    "rimRadius": "14px",
+    "rimPad": "6px",
+    "frameBorder": "rgba(124, 58, 42, 0.28)",
+    "frameOverflow": "hidden",
+    "bandImage": "linear-gradient(135deg, rgb(220, 224, 217), rgb(208, 214, 204))",
+    "groups": 2,
+    "rows": 11,
+    "foot": 0
+  },
+  "tb-filter-facets": {
+    "labels": [
+      "Status",
+      "Sent via"
+    ],
+    "versionRows": 0
+  },
+  "tb-group": {
+    "rimRadius": "14px",
+    "rimPad": "6px",
+    "frameBorder": "rgba(124, 58, 42, 0.28)",
+    "frameOverflow": "hidden",
+    "bandImage": "linear-gradient(135deg, rgb(220, 224, 217), rgb(208, 214, 204))",
+    "groups": 0,
+    "rows": 5,
+    "foot": 0
+  },
+  "tb-sort": {
+    "rimRadius": "14px",
+    "rimPad": "6px",
+    "frameBorder": "rgba(124, 58, 42, 0.28)",
+    "frameOverflow": "hidden",
+    "bandImage": "linear-gradient(135deg, rgb(220, 224, 217), rgb(208, 214, 204))",
+    "groups": 0,
+    "rows": 5,
+    "foot": 1
+  },
+  "tb-group-grid": {
+    "headings": 10,
+    "names": [
+      "Queried",
+      "Partial Requested",
+      "Partial Sent",
+      "Full Requested",
+      "Full Sent",
+      "Revise & Resubmit",
+      "Offer",
+      "Rejected",
+      "Withdrawn",
+      "No Response"
+    ],
+    "ok": true,
+    "rule": "rgb(231, 217, 189)"
+  },
+  "tb-group-list": {
+    "headings": 10,
+    "names": [
+      "Queried",
+      "Partial Requested",
+      "Partial Sent",
+      "Full Requested",
+      "Full Sent",
+      "Revise & Resubmit",
+      "Offer",
+      "Rejected",
+      "Withdrawn",
+      "No Response"
+    ],
+    "ok": true,
+    "rule": "rgb(231, 217, 189)"
+  },
+  "tb-board-group": {
+    "disabled": true,
+    "title": "The board is already grouped by status.",
+    "value": "Status"
+  },
+  "tb-header-asc": {
+    "caret": "▲",
+    "colour": "rgb(124, 58, 42)",
+    "menu": "Date sent"
+  },
+  "tb-header-desc": {
+    "caret": "▼",
+    "colour": "rgb(124, 58, 42)",
+    "menu": "Date sent"
+  },
+  "tb-date-editor": {
+    "reachable": false
+  }
+}
