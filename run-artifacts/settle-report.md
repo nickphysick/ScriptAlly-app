@@ -136,6 +136,24 @@ running the same chassis with the other stream's toolbar v2 on it.
 
 ---
 
+### What dev serves, and why it is not main's tip
+
+Dev serves **`74919916`**. `main` has since moved to `40b59e21` — the other session landed
+`toolbar v2 §3` and `§4` while I was verifying, plus my own artefacts commit, which contains
+nothing but markdown, screenshots and a text log.
+
+**I did not chase it, deliberately.** Redeploying would have broken the evidence chain — the four
+screenshots and the console readings in this report describe the bundle that is on dev — and their
+round is visibly still running, so the tip would have moved again before the walk finished.
+Nothing in those two commits touches `/todo` or the task pane; they are entirely the Query Centre's
+toolbar.
+
+**The suite is green at both ends, so neither is a risk:** 445 files, **7,443 passed, 3 skipped,
+0 failed** at `74919916` (what is deployed) and again at `40b59e21` (main's tip, including their §4
+and my artefacts commit).
+
+---
+
 ## Two things the walk turned up, for Job 2
 
 **1 · ⚠️ `/todo` states two different totals.** The stat tile reads **ALL TASKS 29** and the rail
