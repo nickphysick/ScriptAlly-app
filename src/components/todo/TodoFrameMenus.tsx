@@ -131,23 +131,32 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
  * ⚠️ EVERYTHING IS SCOPED `.tdvp` — a fresh namespace, grepped clean before minting, because the
  * `.unitrow` orphan fired one phase ago and `tick`/`chip`/`panel` all exist elsewhere in this app.
  */
+/**
+ * ⚠️ THE PANEL SPLITS IN TWO WITHOUT BECOMING TWO PANELS (QC-chassis round, Phase 1). The chassis
+ * contract draws separate GROUP and SORT buttons where this page has one combined panel — the
+ * drawer round put grouping and ordering together deliberately, in that order, because grouping
+ * decides the big shape and ordering runs inside it. `section` renders one half; absent renders
+ * both, so anything still mounting it whole is unchanged and the drawer round's own assertions
+ * about the combined order still hold.
+ */
 export const SortMenu: React.FC<{
   view: ListView; onChange: (v: ListView) => void;
   /** the manuscript grouping is offered only on a multi-book account — hidden, not greyed */
   showManuscript?: boolean;
-}> = ({ view, onChange, showManuscript }) => {
+  section?: "group" | "order";
+}> = ({ view, onChange, showManuscript, section }) => {
   const groupings = (Object.keys(GROUPING_LABEL) as GroupingId[])
     .filter((g) => g !== "manuscript" || showManuscript);
   return (
   <div className="tdvp" role="none">
-    <div className="v-ph"><span className="t">Group &amp; order</span>
+    <div className="v-ph"><span className="t">{section === "group" ? "Group" : section === "order" ? "Order" : "Group & order"}</span>
       <button type="button" className="a"
         onClick={() => onChange({ ...view, sort: VIEW_DEFAULT.sort, grouping: VIEW_DEFAULT.grouping, direction: VIEW_DEFAULT.direction })}>
         Reset
       </button>
     </div>
-    <div className="v-sec">Group by</div>
-    {groupings.map((g) => (
+    {section !== "order" && <div className="v-sec">Group by</div>}
+    {section !== "order" && groupings.map((g) => (
       <button key={g} type="button" role="menuitemradio" aria-checked={view.grouping === g}
         className={view.grouping === g ? "v-opt on" : "v-opt"} onClick={() => onChange({ ...view, grouping: g })}>
         <span className="v-radio" aria-hidden />
@@ -156,8 +165,8 @@ export const SortMenu: React.FC<{
         </span>
       </button>
     ))}
-    <div className="v-sec">Then order each group by</div>
-    {(Object.keys(SORT_LABEL) as SortId[]).map((sId) => (
+    {section !== "group" && <div className="v-sec">{section === "order" ? "Order by" : "Then order each group by"}</div>}
+    {section !== "group" && (Object.keys(SORT_LABEL) as SortId[]).map((sId) => (
       <button key={sId} type="button" role="menuitemradio" aria-checked={view.sort === sId}
         className={view.sort === sId ? "v-opt on" : "v-opt"} onClick={() => onChange({ ...view, sort: sId })}>
         <span className="v-radio" aria-hidden />
@@ -166,12 +175,12 @@ export const SortMenu: React.FC<{
         </span>
       </button>
     ))}
-    <div className="v-sw" role="group" aria-label="Direction">
+    {section !== "group" && <div className="v-sw" role="group" aria-label="Direction">
       <button type="button" className={view.direction === "asc" ? "on" : ""} aria-pressed={view.direction === "asc"}
         onClick={() => onChange({ ...view, direction: "asc" })}>First → last</button>
       <button type="button" className={view.direction === "desc" ? "on" : ""} aria-pressed={view.direction === "desc"}
         onClick={() => onChange({ ...view, direction: "desc" })}>Last → first</button>
-    </div>
+    </div>}
     <div className="v-pf">Grouping decides the big shape; ordering runs inside each group. Group by “None” gives one flat list.</div>
   </div>
   );

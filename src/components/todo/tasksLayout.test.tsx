@@ -232,25 +232,34 @@ describe("⚠️ every control sits above the surface it acts on, and nothing fl
     expect(listPage).not.toContain('className="tdw-cbar"');
   });
 
-  it("the rail's instruments moved INTO the card, and the page keeps none", () => {
-    /* ⚠️ RE-POINTED (list port). `renderRailTools` is deleted: the contract draws search, filter,
-       sort and add inside the list card, so the four instruments live in `TaskList` and the page
-       holds none of them. The claim — one home for the list's controls — is unchanged; the home
-       moved. Comments stripped first, because the note explaining the deletion names it. */
+  it("the list's instruments have ONE home, and it is the page's toolbar row", () => {
+    /* ⚠️ RE-POINTED AGAIN, AND THE CLAIM HAS NEVER CHANGED: the list's controls have ONE home.
+       It was the page's rail (`renderRailTools`), then the card's own bar (the list port), and it
+       is the page's toolbar row now — the Query Centre's, mounted through `shared/ToolbarButton`
+       (QC-chassis round, Phase 1). What must never be true is TWO homes, which is what this case
+       has always been for. The card keeps exactly one control, the set-aside door, because it is
+       the only route to the ledger and to tags and has no other home yet.
+       Comments stripped first, because the notes explaining each move name what they retired. */
     const bare = listPage.replace(/\/\*[\s\S]*?\*\//g, "");
     expect(bare, "the rail grew a toolbar again").not.toContain("renderRailTools");
     for (const cls of ["tdw-search", "tdw-menuwrap", "tdw-cbic"]) {
       expect(bare, `${cls} is still on the page`).not.toContain(cls);
     }
     const card = readFileSync(join(here, "TaskList.tsx"), "utf8");
-    /* ⚠️ RETARGETED (tightened round, Phase 1): `l-add` retired — the Add is the card's own
-       TOOLBAR row now (the `{toolbar}` slot the card renders first; the row's class lives in
-       TodoToolbar). The claim is unchanged: the list's instruments live in the card, and the
-       page keeps none. */
-    expect(card, "the toolbar slot left the card").toContain("{toolbar}");
-    for (const cls of ["l-search", "l-icon"]) {
-      expect(card, `${cls} is missing from the card's toolbar`).toContain(cls);
+    /* the page holds the instruments — one search box, one Filter, one Group, one Sort */
+    expect(bare, "the page lost its toolbar row").toContain("tdb-qtool");
+    for (const [what, once] of [["ToolbarSearch", 1], ["ToolbarButton", 3]] as const) {
+      expect((bare.match(new RegExp("<" + what, "g")) ?? []).length,
+        `the page draws ${what} ${once} time(s)`).toBe(once);
     }
+    /* and the card holds NO second copy of any of them */
+    for (const cls of ["l-search", "qcc-tb-btn", "ToolbarSearch"]) {
+      expect(card, `${cls} is a second copy in the card`).not.toContain(cls);
+    }
+    /* ⚠️ EXCEPT THE ONE DOOR WITH NOWHERE ELSE TO GO — asserted PRESENT, so unmounting it needs a
+       decision rather than a deletion. This page has taken the ledger and tag management offline
+       once already by unmounting the sheet that held them. */
+    expect(card, "the set-aside door left the card with no home to go to").toContain("l-icon");
   });
 
   it("⚠️ NEITHER BLOCK SCROLLS WITH WHAT IT NARROWS", () => {

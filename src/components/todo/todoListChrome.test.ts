@@ -105,12 +105,10 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
   it("⚠️ THE ADD IS THE CONTROL BAR'S NOW, and still the only creation action", () => {
     /* ⚠️ THE TOOL ROW IS RETIRED (corrections, Phase 4). The Add moved into the control bar as the
        one list-level action there; the session launcher stays extinct. */
-    /* ⚠️ RETARGETED (tightened round, Phase 1): the Add is the card TOOLBAR's — the slot is
-       rendered by the card, the button lives in TodoToolbar, and the page wires it to the SAME
-       opener in task mode. The law survives the move; only the spelling moved. */
-    expect(readFileSync(join(here, "TaskList.tsx"), "utf8")).toContain("{toolbar}");
-    expect(readFileSync(join(here, "TodoToolbar.tsx"), "utf8")).toContain("onClick={onAddTask}");
-    expect(page).toContain('onAddTask={() => openComposer("task")}');
+    /* ⚠️ RETARGETED AGAIN (QC-chassis round, Phase 1): the Add is the PAGE HEADER's one primary
+       now — the Query Centre's arrangement, where a page states its creative verb once in the
+       masthead. Same opener, same task mode; the law survives every move. */
+    expect(page).toContain('primary={{ label: "Add a task", onClick: () => openComposer("task") }}');
     expect(page).not.toContain("tdb-ghb");
     expect(page).not.toContain("function renderTools");
   });

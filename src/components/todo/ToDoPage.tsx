@@ -73,7 +73,14 @@ import {
    on orphans: flag, then sweep in a commit of its own). */
 import { TaskList } from "./TaskList";
 import { TODO_ROUTES } from "../../lib/todoRoutes";
-import { TodoToolbar } from "./TodoToolbar";
+import { StatTiles, type StatTile } from "../shared/StatTiles";
+import { ToolbarButton, ToolbarIcon, ToolbarSearch } from "../shared/ToolbarButton";
+import { QueryViewSwitch, type QueryView } from "../queries/QueryViewSwitch";
+import { IlloSlot } from "../queries/IlloSlot";
+import {
+  CATEGORIES, CATEGORY_LABEL, CATEGORY_FAMILY, taskCategory, isUrgentCard,
+  type Category, type Family,
+} from "../../lib/todoCategory";
 import { AnchoredPanel } from "./AnchoredPanel";
 import { FilterMenu, SortMenu, SnoozePanel } from "./TodoFrameMenus";
 import { SetAsidePanel } from "./SetAsidePanel";
@@ -83,6 +90,7 @@ import {
   applyView, groupCounts as viewGroupCounts, GroupId, isFiltered, isSorted, ListView, parseView,
   typeCounts as viewTypeCounts, viewTotal, VIEW_DEFAULT,
   viewLeaving, viewButtonLabel, filterBadge, TYPE_ORDER, TYPE_LABEL, GROUP_IDS,
+  SORT_LABEL, GROUPING_LABEL,
 } from "../../lib/todoListView";
 import { useNavigate, useLocation } from "react-router-dom";
 import { groupColumn, TaskGroup } from "../../lib/todoGroups";
@@ -301,6 +309,26 @@ export interface ToDoPageProps {
  * workspace page stays mounted.
  */
 export const PANE_ID_PREFIX = "";
+
+/** ⚠️ TWO SEGMENTS, NAMED HERE RATHER THAN INLINE, so the switch's list and anything measuring it
+ *  read one array. The Query Centre's own four are its default; this page has a Grid and a Board
+ *  and no List or Calendar, and a segment for a view that does not exist would be a dead control. */
+/** ⚠️ THE TILE DISCS WEAR THE CATEGORY'S FAMILY PAPER — the same three the pane's hero and the
+ *  card tags use, so a category is one colour wherever it appears. Read from the family map
+ *  rather than restated per tile: a fourth paper would have to be declared once. */
+const FAMILY_PAPER: Record<Family, string> = {
+  now: "#f6e3da", house: "#dde4db", yours: "#f7efe0",
+};
+const TILE_SWATCH: Record<Category, string> = {
+  req: FAMILY_PAPER[CATEGORY_FAMILY.req], nudge: FAMILY_PAPER[CATEGORY_FAMILY.nudge],
+  quiet: FAMILY_PAPER[CATEGORY_FAMILY.quiet], house: FAMILY_PAPER[CATEGORY_FAMILY.house],
+  yours: FAMILY_PAPER[CATEGORY_FAMILY.yours],
+};
+
+const TODO_VIEWS: readonly { key: QueryView; label: string }[] = [
+  { key: "grid", label: "Grid" },
+  { key: "board", label: "Board" },
+];
 
 export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const navigate = useNavigate();
@@ -813,6 +841,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [filterOpen, setFilterOpen] = useState(false);
   /* the board's third door — "Set aside & tags" (see SetAsidePanel for why it is one door) */
   const [asideOpen, setAsideOpen] = useState(false);
+  /* ⚠️ THE PAGE'S CHROME (QC-chassis round, Phase 1) — the selected tile, the view, and the three
+     toolbar triggers the popovers anchor to. Session-local, all of it: which tile is ringed and
+     which view is showing are ways of READING the list, not facts about it, and a stored one
+     would greet the writer in a state they last left rather than in the page's own. */
+  const [tile, setTile] = useState<string>("all");
+  const [todoView, setTodoView] = useState<QueryView>("grid");
+  const [groupOpen, setGroupOpen] = useState(false);
+  const filterTrigRef = React.useRef<HTMLButtonElement>(null);
+  const groupTrigRef = React.useRef<HTMLButtonElement>(null);
+  const sortTrigRef = React.useRef<HTMLButtonElement>(null);
   const boardScroll = useRef(0);
 
   /**
@@ -1678,6 +1716,52 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // styles live on in the trimmed todoShell.css.
   /* ⚠️ NARROWED TO NOTHING — a RAIL fact, and the rail alone says it (Phase 4). Read from the
      groups the rail actually draws, so the message and the list cannot disagree. */
+  /**
+   * ⚠️ THE SEVEN TILES, COUNTED FROM THE ONE ARRAY THE VIEWS RENDER FROM (QC-chassis round,
+   * Phase 1). `railGroupsAll()` is that array — the board after narrowing, before the view's own
+   * filters — so the five categories PARTITION it and their sum is All structurally rather than
+   * by two derivations agreeing. A tile counting what it would show after clicking would read 0
+   * for every category you are not in, which is the one number nobody needs: the same law the
+   * Query Centre's own tiles have carried since they replaced its chips.
+   *
+   * ⚠️ URGENT IS A LENS AND IS NOT IN THE SUM. It counts sends whose clock is running, which are
+   * already counted under Agent requests; adding it would make the row's figures stop adding up
+   * and make a task change category as time passed.
+   *
+   * ⚠️ ASSIGNED HERE, after everything `railGroupsAll` transitively reads — the hoisted-helper
+   * TDZ rule, which this page has been bitten by once already.
+   */
+  /* ⚠️ GONE QUIET'S DISCRIMINATOR, READ FROM THE QUERY (see `taskCategory`): a `nudge_overdue`
+     whose query has been nudged already is a SILENCE the app has chased once, not a fresh nudge.
+     `lastNudgeSentDate` is what `logNudge` always writes; `nudgeDate` is absent where the writer
+     declined a check-in, so it cannot serve. The card does not carry either, which is why this
+     reads the store here rather than the derivation reading a field that is not on a card. */
+  const nudgedBefore = React.useCallback((c: BoardCard) => {
+    if (!c.relatedRecordId) return false;
+    return !!queries.find((q) => q.id === c.relatedRecordId)?.lastNudgeSentDate;
+  }, [queries]);
+  const tileCards = railGroupsAll().flatMap((g) => g.cards);
+  const tileCounts = React.useMemo(() => {
+    const out: Record<string, number> = { all: tileCards.length, urgent: 0 };
+    for (const c of CATEGORIES) out[c] = 0;
+    for (const card of tileCards) {
+      out[taskCategory(card, { nudgedBefore: nudgedBefore(card) })] += 1;
+      if (isUrgentCard(card, listRowInputs(card).days)) out.urgent += 1;
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tileCards, listRowInputs]);
+  const tileRow: StatTile[] = [
+    { key: "all", label: "All tasks", count: tileCounts.all, glyph: "✎" },
+    { key: "urgent", label: "Urgent", count: tileCounts.urgent, mark: "!" },
+    ...CATEGORIES.map((c) => ({
+      key: c as string,
+      label: CATEGORY_LABEL[c],
+      count: tileCounts[c] ?? 0,
+      swatch: TILE_SWATCH[c],
+    })),
+  ];
+
   const railEmpty = railGroups().length === 0;
 
   /* ⚠️ ASSIGNED HERE, LAST — after every declaration `groupsForList` transitively reads (the
@@ -1709,11 +1793,150 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             ⚠️ THE SIDEBAR IS GONE FROM THIS PAGE, so no Tasks page carries one. Task settings is
             still reachable (the Settings page's second door, tasks-viewport P5) and so is the
             Noteboard (its own nav row) — the sidebar's other two jobs. */}
+        {/* ⚠️ THE PAGE'S HEADER IS THE QUERY CENTRE'S (QC-chassis round, Phase 1) — the same
+            `PageHeader variant="workspace"` both pages already mounted, now carrying the same
+            THREE things: a subtitle, one primary and the illustration slot. `mark` goes with the
+            picture arriving, for the reason the Query Centre records at its own header: a glyph
+            beside a commissioned illustration is a second picture competing with the first. */}
         <TasksPageLayout
           title="To-do list"
-          mark="todo"
+          subtitle="Everything that's yours to do, and everything worth a look."
+          primary={{ label: "Add a task", onClick: () => openComposer("task") }}
+          illo={<IlloSlot className="tdb-illo" name="page · to-do" width={132} height={72} />}
         >
           <div className="tdb-centre">
+          {/* ⚠️ SEVEN TILES AND ONE TOOLBAR, BOTH THE QUERY CENTRE'S (QC-chassis round, Phase 1).
+              The tiles are `shared/StatTiles` — the markup extracted from `QueryStatTiles`, which
+              now mounts it too, so this is a shared component rather than a copy wearing its
+              classes. The toolbar's search and its three controls are `shared/ToolbarButton`,
+              extracted from the Query Centre's own inline markup for the same reason.
+
+              ⚠️ THE COUNTS COME FROM THE ONE ARRAY THE VIEWS RENDER FROM, and the five categories
+              partition it — so their sum IS All, structurally, rather than by two derivations
+              happening to agree. Urgent is a LENS over the same array and is deliberately not in
+              that sum: a send whose clock is running is still an Agent request. */}
+          {desk !== "new-desk" && desk !== "desk-cleared" && (
+            <>
+              <StatTiles
+                label="Task totals"
+                columns={7}
+                tiles={tileRow}
+                selected={tile}
+                onPick={(k) => setTile(k === tile && k !== "all" ? "all" : k)}
+              />
+              <div className="tdb-qtool">
+                <ToolbarSearch
+                  value={search} onChange={setSearch} ref={searchRef}
+                  placeholder="Search tasks, agents or agencies"
+                  ariaLabel="Search tasks, agents or agencies"
+                />
+                <span className="tdb-popwrap">
+                  <ToolbarButton
+                    ref={filterTrigRef} label="Filter" icon={ToolbarIcon.filter}
+                    count={filterBadge(view)} open={filterOpen}
+                    onClick={() => { setSortOpen(false); setAsideOpen(false); setFilterOpen((o) => !o); }}
+                  />
+                </span>
+                <span className="tdb-popwrap">
+                  <ToolbarButton
+                    ref={groupTrigRef} label="Group" icon={ToolbarIcon.group}
+                    value={GROUPING_LABEL[view.grouping]} open={groupOpen}
+                    onClick={() => { setFilterOpen(false); setSortOpen(false); setAsideOpen(false); setGroupOpen((o) => !o); }}
+                  />
+                </span>
+                <span className="tdb-popwrap">
+                  <ToolbarButton
+                    ref={sortTrigRef} label="Sort" icon={ToolbarIcon.sort}
+                    value={SORT_LABEL[view.sort]} open={sortOpen}
+                    onClick={() => { setFilterOpen(false); setGroupOpen(false); setAsideOpen(false); setSortOpen((o) => !o); }}
+                  />
+                </span>
+                {/* ⚠️ TWO SEGMENTS, THROUGH THE QUERY CENTRE'S OWN SWITCH — its `views` list is
+                    additive and defaults to that page's four, so this is the same component
+                    rather than a second one drawing two of the same buttons. */}
+                <span className="tdb-views">
+                  <QueryViewSwitch
+                    view={todoView} onView={(v) => setTodoView(v)}
+                    views={TODO_VIEWS}
+                  />
+                </span>
+              </div>
+              {/* ⚠️ THE TWO PANELS HANG OFF THE PAGE'S OWN TRIGGERS NOW (QC-chassis round, Phase 1)
+                  — they were passed INTO the list card as `filterMenu`/`sortMenu` because its bar
+                  held the buttons. The card no longer has them, so a panel routed through it would
+                  be a popover travelling through a component that has nothing to do with it. Same
+                  panels, same `AnchoredPanel`, same conditional counts. */}
+              {filterOpen && filterTrigRef.current ? (
+
+        /* ⚠️ RE-HOSTED, NOT REBUILT (QC-chassis round, Phase 1). The panel is the drawer round's
+           own `FilterMenu` with its conditional counts intact; what changed is the TRIGGER it
+           hangs off — the page's toolbar button rather than the list card's icon. Anchoring stays
+           `AnchoredPanel`'s, which is this page's one popover mechanism. */
+        <AnchoredPanel anchor={filterTrigRef.current} ariaLabel="Filter tasks"
+          onClose={(back) => { setFilterOpen(false); if (back) filterTrigRef.current?.focus(); }}>
+          <FilterMenu
+            view={view}
+            /* ⚠️ CONDITIONAL COUNTS (Phase 6) — each facet's numbers come from the view re-run
+               with that facet's OWN choices lifted, so the panel answers "what would this leave,
+               given the others". `viewLeaving` is the one derivation; counting the raw board here
+               would promise rows the other filters have already hidden. */
+            typeCounts={(() => {
+              const left = viewLeaving(generatedGroups(chipGroups(taskGroups({
+                todo: narrowCards(boardCols.todo), today: narrowCards(boardCols.today),
+                snoozed: narrowCards(boardCols.snoozed), dismissed: narrowCards(boardCols.dismissed),
+                done: narrowCards(boardCols.done),
+              }), chip)), view, viewFacts, "types");
+              const out = Object.fromEntries(TYPE_ORDER.map((t) => [t, 0])) as Record<Bucket, number>;
+              for (const c of left) out[cardBucket(c)] += 1;
+              return out;
+            })()}
+            agentRows={(() => {
+              const left = viewLeaving(generatedGroups(chipGroups(taskGroups({
+                todo: narrowCards(boardCols.todo), today: narrowCards(boardCols.today),
+                snoozed: narrowCards(boardCols.snoozed), dismissed: narrowCards(boardCols.dismissed),
+                done: narrowCards(boardCols.done),
+              }), chip)), view, viewFacts, "agents");
+              const rows = new Map<string, { id: string; name: string; count: number }>();
+              for (const c of left) {
+                if (!c.agentId || !(c.who || "").trim()) continue;
+                const r = rows.get(c.agentId) ?? { id: c.agentId, name: (c.who || "").trim(), count: 0 };
+                r.count += 1; rows.set(c.agentId, r);
+              }
+              /* ⚠️ A TICKED AGENT NEVER VANISHES FROM THE PANEL — an active filter must stay
+                 removable where it was set, even when the other filters have taken its count to
+                 zero. Absent rows for ticked ids are re-added at 0. */
+              for (const id of view.agents) {
+                if (!rows.has(id)) {
+                  const name = agents.find((a) => a.id === id);
+                  rows.set(id, { id, name: name ? agentPrimary(name) : "(agent)", count: 0 });
+                }
+              }
+              return [...rows.values()].sort((a, b) => a.name.localeCompare(b.name));
+            })()}
+            snoozedCount={narrowCards(boardCols.snoozed).length}
+            dismissedCount={narrowCards(boardCols.dismissed).length}
+            onChange={setView}
+          />
+        </AnchoredPanel>
+              ) : null}
+              {groupOpen && groupTrigRef.current ? (
+                /* the same panel, its GROUP half — see SortMenu's own note on why one component
+                   serves two buttons rather than two components serving one law */
+                <AnchoredPanel anchor={groupTrigRef.current} ariaLabel="Group tasks"
+                  onClose={(back) => { setGroupOpen(false); if (back) groupTrigRef.current?.focus(); }}>
+                  <SortMenu view={view} onChange={setView} section="group"
+                    showManuscript={showsManuscriptColumn(manuscripts.length)} />
+                </AnchoredPanel>
+              ) : null}
+              {sortOpen && sortTrigRef.current ? (
+
+        <AnchoredPanel anchor={sortTrigRef.current} ariaLabel="Sort tasks"
+          onClose={(back) => { setSortOpen(false); if (back) sortTrigRef.current?.focus(); }}>
+          <SortMenu view={view} onChange={setView} section="order" />
+        </AnchoredPanel>
+              ) : null}
+            </>
+          )}
           {/* THE BRIEFING SLOT (briefing-slot pack — ref design-refs/briefing-slot.html option 1;
               SUPERSEDES the todo-rebuild featured card). ONE region between the hero rule and the
               filter row, rendering the review briefing and nothing else.
@@ -2962,8 +3185,23 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        the one array. A "done" group re-admitting the card three groups down would mean the row
        LEAVES and ARRIVES in one gesture, and the footer would never drop at all. The cleared log
        is untouched — `deskState` and the desk-cleared band read `boardCols.done` directly. */
-    return applyView(generatedGroups(chipGroups(taskGroups(narrowed), chip)), view, viewFacts)
+    /* ⚠️ THE TILE NARROWS AFTER THE VIEW AND BEFORE THE RENDER (QC-chassis round, Phase 1) — so
+       one selection reaches the Grid, the Board, the pane's queue and the footer at once, which is
+       the same reason the view itself is applied here rather than in a component. It is NOT applied
+       to `railGroupsAll`, which is what the tiles count: a tile that counted its own selection
+       would read 0 for every category you are not in. */
+    return tileNarrow(applyView(generatedGroups(chipGroups(taskGroups(narrowed), chip)), view, viewFacts))
       .filter((g) => g.id !== "done");
+  }
+
+  /** the selected tile's narrowing — `all` passes everything, `urgent` is the lens, the rest are
+   *  the one category each, read through the same derivation the tiles counted with */
+  function tileNarrow(gs: TaskGroup[]): TaskGroup[] {
+    if (tile === "all") return gs;
+    const keep = (c: BoardCard) => (tile === "urgent"
+      ? isUrgentCard(c, listRowInputs(c).days)
+      : taskCategory(c, { nudgedBefore: nudgedBefore(c) }) === tile);
+    return gs.map((g) => ({ ...g, cards: g.cards.filter(keep) })).filter((g) => g.cards.length > 0);
   }
 
   /**
@@ -3088,8 +3326,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             onRemove: () => setView({ ...view, includeDismissed: false }) }] : []),
         ]}
         onClearFilters={() => setView({ ...view, groups: [...GROUP_IDS], types: [...TYPE_ORDER], agents: [], includeSnoozed: false, includeDismissed: false })}
-        filterCount={filterBadge(view)}
-        sortLabel={viewButtonLabel(view)}
         /* ⚠️ N IS "WHAT WOULD SHOW WITH NOTHING NARROWING" — the same pipeline with the narrowing
            facets lifted, NOT a raw store count. Search and the chip narrow upstream of the view,
            so they participate in n and in N alike; the footer's two-number form appears exactly
@@ -3097,80 +3333,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         totalUnfiltered={viewTotal(applyView(railGroupsAll(),
           { ...view, groups: [...GROUP_IDS], types: [...TYPE_ORDER], agents: [] }, viewFacts)
           .filter((g) => g.id !== "done"))}
-        search={search}
-        onSearch={setSearch}
-        /* ⚠️ THE TOOLBAR READS THE SAME `railGroups()` THE ROWS RENDER FROM — the meter states the
-           groups' own lengths, so it and the group heads cannot disagree (the counting law).
-           Calendar goes through the router directly (the house rule; `/todo/calendar` is a real
-           route, recon-confirmed before the button was first drawn). */
-        toolbar={<TodoToolbar
-          groups={railGroups()}
-          onAddTask={() => openComposer("task")}
-          onAddNote={() => openComposer("note")}
-          onCalendar={() => navigate(TODO_ROUTES.find((p) => p.id === "calendar")!.path)}
-        />}
+        /* ⚠️ THE CARD'S OWN TOOLBAR IS RETIRED (QC-chassis round, Phase 1) — `TodoToolbar`'s meter
+           and its three actions. The meter counted the three FAMILIES; the page's seven tiles
+           count the five CATEGORIES and are the same fact told better, so keeping both would be
+           two statements of one derivation three inches apart. `+ Add a task` is the header's one
+           primary now, `+ Add a note` is the composer's other mode reached from it, and Calendar
+           is a nav row in the sidebar. The component is unmounted, not deleted. */
         onExport={exportRail}
         /* ⚠️ THE FUNNEL LIGHTS FROM THE VIEW, NOT FROM A FLAG. `isFiltered` compares to the default,
          so toggling something back off turns the light off too — a tracked "touched" boolean would
          leave a full list wearing the filtered marker. */
-      filterActive={isFiltered(view)}
-      onFilter={(el) => { filterAnchor.current = el; setSortOpen(false); setFilterOpen((v) => !v); }}
-      filterMenu={filterOpen && filterAnchor.current ? (
-        <AnchoredPanel anchor={filterAnchor.current} ariaLabel="Filter tasks"
-          onClose={(back) => { setFilterOpen(false); if (back) filterAnchor.current?.focus(); }}>
-          <FilterMenu
-            view={view}
-            /* ⚠️ CONDITIONAL COUNTS (Phase 6) — each facet's numbers come from the view re-run
-               with that facet's OWN choices lifted, so the panel answers "what would this leave,
-               given the others". `viewLeaving` is the one derivation; counting the raw board here
-               would promise rows the other filters have already hidden. */
-            typeCounts={(() => {
-              const left = viewLeaving(generatedGroups(chipGroups(taskGroups({
-                todo: narrowCards(boardCols.todo), today: narrowCards(boardCols.today),
-                snoozed: narrowCards(boardCols.snoozed), dismissed: narrowCards(boardCols.dismissed),
-                done: narrowCards(boardCols.done),
-              }), chip)), view, viewFacts, "types");
-              const out = Object.fromEntries(TYPE_ORDER.map((t) => [t, 0])) as Record<Bucket, number>;
-              for (const c of left) out[cardBucket(c)] += 1;
-              return out;
-            })()}
-            agentRows={(() => {
-              const left = viewLeaving(generatedGroups(chipGroups(taskGroups({
-                todo: narrowCards(boardCols.todo), today: narrowCards(boardCols.today),
-                snoozed: narrowCards(boardCols.snoozed), dismissed: narrowCards(boardCols.dismissed),
-                done: narrowCards(boardCols.done),
-              }), chip)), view, viewFacts, "agents");
-              const rows = new Map<string, { id: string; name: string; count: number }>();
-              for (const c of left) {
-                if (!c.agentId || !(c.who || "").trim()) continue;
-                const r = rows.get(c.agentId) ?? { id: c.agentId, name: (c.who || "").trim(), count: 0 };
-                r.count += 1; rows.set(c.agentId, r);
-              }
-              /* ⚠️ A TICKED AGENT NEVER VANISHES FROM THE PANEL — an active filter must stay
-                 removable where it was set, even when the other filters have taken its count to
-                 zero. Absent rows for ticked ids are re-added at 0. */
-              for (const id of view.agents) {
-                if (!rows.has(id)) {
-                  const name = agents.find((a) => a.id === id);
-                  rows.set(id, { id, name: name ? agentPrimary(name) : "(agent)", count: 0 });
-                }
-              }
-              return [...rows.values()].sort((a, b) => a.name.localeCompare(b.name));
-            })()}
-            snoozedCount={narrowCards(boardCols.snoozed).length}
-            dismissedCount={narrowCards(boardCols.dismissed).length}
-            onChange={setView}
-          />
-        </AnchoredPanel>
-      ) : null}
-      sortActive={isSorted(view)}
-      onSort={(el) => { sortAnchor.current = el; setFilterOpen(false); setSortOpen((v) => !v); }}
-      sortMenu={sortOpen && sortAnchor.current ? (
-        <AnchoredPanel anchor={sortAnchor.current} ariaLabel="Sort tasks"
-          onClose={(back) => { setSortOpen(false); if (back) sortAnchor.current?.focus(); }}>
-          <SortMenu view={view} onChange={setView} showManuscript={showsManuscriptColumn(manuscripts.length)} />
-        </AnchoredPanel>
-      ) : null}
       /* ⚠️ THE COUNT IS DERIVED FROM THE SAME `hiddenItems` THE PANEL RENDERS — never a second
          tally. A door that states a figure the surface behind it disagrees with is worse than a
          door that states none. */

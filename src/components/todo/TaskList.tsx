@@ -34,8 +34,10 @@ export interface TaskListProps {
   onOpen: (card: BoardCard) => void;
   /** everything a row needs beyond the card — supplied by the page, never re-derived here */
   rowInputs: (card: BoardCard) => Omit<RowInputs, "card">;
-  search: string;
-  onSearch: (v: string) => void;
+  /* ⚠️ `search`/`onSearch`/`filterActive`/`onFilter`/`filterMenu`/`sortActive`/`onSort`/
+     `sortMenu`/`filterCount`/`sortLabel` are RETIRED with the card's own bar (QC-chassis round,
+     Phase 1) — the page's toolbar owns all of them. A prop with no render site is a slot a future
+     page fills without anyone deciding it should exist, which is why they go rather than linger. */
   /** ⚠️ THE CARD'S OWN TOP CHROME (tightened round, Phase 1) — the one 32px toolbar row: the
    *  workload meter and the three actions. A slot rather than a mount because the actions need
    *  the page's handlers; the card owns only where it sits. Replaces the retired `onAdd` — the
@@ -43,12 +45,6 @@ export interface TaskListProps {
   toolbar?: React.ReactNode;
   onExport: () => void;
   /** the filter and sort triggers keep their menus; only their clothing is the contract's */
-  filterActive?: boolean;
-  onFilter: (anchor: HTMLElement) => void;
-  filterMenu?: React.ReactNode;
-  sortActive?: boolean;
-  onSort: (anchor: HTMLElement) => void;
-  sortMenu?: React.ReactNode;
   /** ⚠️ THE THIRD DOOR — "Set aside & tags". Same shape as filter and sort, because it is the same
    *  kind of thing: a control on the tool row that opens an anchored panel. Its count is the
    *  ledger's, so the row can say there is something waiting without being opened. */
@@ -112,9 +108,7 @@ export interface TaskListProps {
   chips?: { facet: string; label: string; onRemove: () => void }[];
   onClearFilters?: () => void;
   /** the filter button's badge — the count of active choices, 0 hides it */
-  filterCount?: number;
   /** the Group & order trigger's label — the contract's "By agent · Longest waiting" */
-  sortLabel?: string;
   /**
    * ⚠️ THE FOOTER'S SECOND FORM (Phase 6). When anything is hiding rows it reads
    * "Showing n of N" — n is the ONE array's total as ever; N arrives from the page as what would
@@ -131,16 +125,6 @@ const GRP_LABEL: Record<string, string> = {
   urgent: "Needs you now", housekeeping: "Housekeeping", yours: "Your tasks",
 };
 
-const SearchIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-    <circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.5" y2="16.5" />
-  </svg>
-);
-const FilterIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-    <polygon points="22 3 2 3 10 12.5 10 19 14 21 14 12.5 22 3" />
-  </svg>
-);
 /** An archive tray — what is put aside, not thrown away. */
 const AsideIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
@@ -150,19 +134,12 @@ const AsideIcon = () => (
     <path d="M10 12h4" />
   </svg>
 );
-const SortIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-    <path d="M11 5h10M11 9h7M11 13h4M3 17V3M3 3L1 5.5M3 3l2 2.5M7 7v14M7 21l-2-2.5M7 21l2-2.5"
-      transform="scale(0.9) translate(1,1)" />
-  </svg>
-);
 export const TaskList: React.FC<TaskListProps> = ({
-  groups, selectedKey, onOpen, rowInputs, search, onSearch, toolbar, onExport,
-  filterActive, onFilter, filterMenu, sortActive, onSort, sortMenu,
+  groups, selectedKey, onOpen, rowInputs, toolbar, onExport,
   asideActive, asideCount, onAside, asideMenu, folded, leaving,
   focusedKey, onFocusRow, onStripSnooze, onStripDismiss, stripMeta,
   collapsedGroups, onToggleGroup,
-  chips, onClearFilters, filterCount, sortLabel, totalUnfiltered,
+  chips, onClearFilters, totalUnfiltered,
 }) => {
   /**
    * ⚠️ ONE ARRAY, COUNTED ONCE. The rows map over `g.cards`; the head prints `g.cards.length`; the
@@ -252,35 +229,14 @@ export const TaskList: React.FC<TaskListProps> = ({
           three actions on one 32px row, ABOVE the search row. It is a slot: the page supplies the
           handlers, and the masthead keeps the page's one title element (the header stream's). */}
       {toolbar}
-      <div className="l-bar">
-        <label className="l-search">
-          <SearchIcon />
-          <input value={search} onChange={(e) => onSearch(e.target.value)}
-            placeholder="Search your tasks…" aria-label="Search your tasks" />
-        </label>
-        <span className="l-menuwrap" onPointerDown={(e) => e.stopPropagation()}>
-          <button type="button" title="Filter" aria-label="Filter"
-            aria-haspopup="menu" aria-expanded={!!filterActive}
-            className={filterActive ? "l-icon active" : "l-icon"}
-            onClick={(e) => onFilter(e.currentTarget)}>
-            <FilterIcon />
-            {/* ⚠️ A COUNT, NOT A DOT — the contract's badge says HOW MANY choices are active,
-                which is what makes "why is my list short" answerable from the toolbar */}
-            {!!filterCount && <span className="l-fbadge">{filterCount}</span>}
-          </button>
-          {filterMenu}
-        </span>
-        <span className="l-menuwrap" onPointerDown={(e) => e.stopPropagation()}>
-          <button type="button" title="Group and order" aria-label="Group and order"
-            aria-haspopup="menu" aria-expanded={!!sortActive}
-            className={(sortActive ? "l-icon active" : "l-icon") + (sortLabel ? " l-wide" : "")}
-            onClick={(e) => onSort(e.currentTarget)}>
-            <SortIcon />
-            {/* the trigger reads its own state — "By agent · Longest waiting" — the contract's label */}
-            {sortLabel && <span className="l-slbl">{sortLabel}</span>}
-          </button>
-          {sortMenu}
-        </span>
+      {/* ⚠️ THE CARD'S SEARCH, FILTER AND SORT ARE RETIRED (QC-chassis round, Phase 1) — the page
+          owns them now, in the Query Centre's own toolbar row above the tiles, so there is one
+          search box and one Filter button on the page rather than two of each.
+          ⚠️ THE SET-ASIDE DOOR STAYS, AND DELIBERATELY. It is the only route to the ledger and to
+          tag management, and this page has already taken both offline once by unmounting the sheet
+          that held them. It is not in the contract's toolbar, so it keeps the card's bar until
+          Phase 3 rehomes it with the rest of the list — recorded rather than quietly dropped. */}
+      <div className="l-bar l-bar--aside">
         <span className="l-menuwrap" onPointerDown={(e) => e.stopPropagation()}>
           <button type="button" title="Set aside & tags" aria-label="Set aside and tags"
             aria-haspopup="dialog" aria-expanded={!!asideActive}

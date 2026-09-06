@@ -45,10 +45,15 @@ import "./tasksLayout.css";
 
 export interface TasksPageLayoutProps {
   title: string;
-  /** ⚠️ THE PLATE'S MARK, declared per page as on every other band-tier page. Required rather than
+  /** ⚠️ THE PLATE'S MARK, declared per page as on every other band-tier page. Declared rather than
    *  derived: this component cannot see the route, and one shared default would give three pages
-   *  the same glyph. */
-  mark: MarkName;
+   *  the same glyph.
+   *  ⚠️ AND IT IS OPTIONAL SINCE THE ILLUSTRATION SLOT ARRIVED (QC-chassis round, Phase 1). A page
+   *  carrying a commissioned picture in its header does not also carry a 20px glyph — the Query
+   *  Centre records the same decision at its own masthead, in the same words: "a glyph beside a
+   *  47px title in front of it is a second picture competing with the first". `mastheadMatrix`
+   *  counts the markless pages, so a page cannot drop its mark unnoticed. */
+  mark?: MarkName;
   /** The one-line description. Optional — a page with nothing to say says nothing. It is the
    *  PLATE's description now, so it fades when the plate condenses. */
   subtitle?: string;
@@ -69,6 +74,9 @@ export interface TasksPageLayoutProps {
    *  `PageHeader primary` — Query Centre's `Log new query` is the reference). Optional and
    *  additive: the To-do list and the Noteboard pass nothing and render byte-identically. */
   primary?: { label: string; onClick: () => void; disabled?: boolean };
+  /** ⚠️ THE PAGE'S PICTURE, forwarded to the masthead's own additive slot (QC-chassis round,
+   *  Phase 1). Optional and additive: the three pages that pass nothing render byte-identically. */
+  illo?: React.ReactNode;
   /** The shared side container. Absent = the body takes the full width (the Noteboard). */
   sidebar?: React.ReactNode;
   children: React.ReactNode;
@@ -112,7 +120,7 @@ export const TplZone: React.FC<TplZoneProps> = ({ children, hem = true, classNam
 );
 
 export const TasksPageLayout: React.FC<TasksPageLayoutProps> = ({
-  title, mark, subtitle, eyebrow, tools, primary, sidebar, children,
+  title, mark, subtitle, eyebrow, tools, primary, illo, sidebar, children,
 }) => (
   /* `.tdb-col` is the SINGLE geometry owner (max-width, gutters, and the top token) — the layout
      wears it rather than restating its numbers. `.tpl` adds only what the contract needs. */
@@ -156,7 +164,7 @@ export const TasksPageLayout: React.FC<TasksPageLayoutProps> = ({
        */
       scroller=".tpl-zone, .l-body, .cal-fpbody"
       scrollLabel={title}
-      masthead={<PageHeader variant="workspace" mark={mark} title={title} description={subtitle} primary={primary} />}
+      masthead={<PageHeader variant="workspace" mark={mark} title={title} description={subtitle} primary={primary} illo={illo} />}
       /* ⚠️ THE EYEBROW RIDES THE TOOL ROW. Mono context — a date, a week count — and the rule is
          that the plate carries identity while the tool row carries tallies and context. Absent
          both, the grid renders no row and no hairline rather than a bare rule. */

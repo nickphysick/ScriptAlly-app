@@ -48,6 +48,7 @@ const RESPONSE_RECEIPT_CHANNEL = "query-response";
 import { pickableManuscripts } from "../lib/lifecycle";
 import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
+import { ToolbarButton, ToolbarIcon } from "./shared/ToolbarButton";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, createPlaceLine, recordPlaceLine, agentRepliesForManuscript, consequenceLine, trackingStatCells, DAY } from "../lib/queryAmbient";
@@ -5840,43 +5841,38 @@ export const Queries: React.FC<{
                 <span className="qcc-tb-kbd" aria-hidden="true">/</span>
               </div>
 
+              {/* ⚠️ THESE THREE WERE INLINE MARKUP AND ARE NOW `shared/ToolbarButton` MOUNTS
+                  (QC-chassis round, Phase 1). The To-do page needs the same three controls, and
+                  the only way to have them without a component was to type the markup again —
+                  which is a fork that looks identical until one of them is restyled. The classes,
+                  the icons, the chevron and the anchoring refs are unchanged; what moved is the
+                  40 lines each of them used to spell out. */}
               <div className="f12-popwrap">
-                <button
-                  type="button" className="qcc-tb-btn" ref={filterTrigRef}
-                  aria-expanded={filterPopOpen} aria-haspopup="dialog"
+                <ToolbarButton
+                  ref={filterTrigRef} label="Filter" icon={ToolbarIcon.filter}
+                  count={activeFilterCount} open={filterPopOpen}
                   onClick={() => { setSortPopOpen(false); setGroupPopOpen(false); setFilterPopOpen((o) => !o); }}
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4" /></svg>
-                  Filter
-                  {activeFilterCount > 0 && <span className="qcc-tb-cnt">{activeFilterCount}</span>}
-                  <svg className="qcc-tb-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" strokeWidth="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-                </button>
+                />
                 {filterPopOpen && renderFilterPopover()}
               </div>
 
               <div className="f12-popwrap">
-                <button
-                  type="button" className="qcc-tb-btn" ref={groupTrigRef}
-                  aria-expanded={groupPopOpen} aria-haspopup="dialog"
+                <ToolbarButton
+                  ref={groupTrigRef} label="Group" icon={ToolbarIcon.group}
+                  value={GRID_GROUPS.find((g) => g.key === gridGroup)?.label ?? "None"}
+                  open={groupPopOpen}
                   onClick={() => { setFilterPopOpen(false); setSortPopOpen(false); setGroupPopOpen((o) => !o); }}
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="1.5" /><rect x="3" y="14" width="18" height="6" rx="1.5" /></svg>
-                  Group <span className="qcc-tb-val">{GRID_GROUPS.find((g) => g.key === gridGroup)?.label ?? "None"}</span>
-                  <svg className="qcc-tb-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" strokeWidth="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-                </button>
+                />
                 {groupPopOpen && renderGroupPopover()}
               </div>
 
               <div className="f12-popwrap">
-                <button
-                  type="button" className="qcc-tb-btn" ref={sortTrigRef}
-                  aria-expanded={sortPopOpen} aria-haspopup="dialog"
+                <ToolbarButton
+                  ref={sortTrigRef} label="Sort" icon={ToolbarIcon.sort}
+                  value={F12_SORT_GROUPS.flatMap((g) => g.items).find((i) => i.key === sortKey)?.label ?? "Last activity"}
+                  open={sortPopOpen}
                   onClick={() => { setFilterPopOpen(false); setGroupPopOpen(false); setSortPopOpen((o) => !o); }}
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M7 4v13M7 17l-3-3M7 17l3-3M17 20V7M17 7l-3 3M17 7l3 3" /></svg>
-                  Sort <span className="qcc-tb-val">{F12_SORT_GROUPS.flatMap((g) => g.items).find((i) => i.key === sortKey)?.label ?? "Last activity"}</span>
-                  <svg className="qcc-tb-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" strokeWidth="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-                </button>
+                />
                 {sortPopOpen && renderSortPopover()}
               </div>
 

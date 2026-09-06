@@ -356,13 +356,11 @@ describe("⚠️ ＋ Add task or note reaches a MOUNTED composer (P3)", () => {
   it("the control bar's Add opens task mode; the session launcher is gone", () => {
     /* ⚠️ THE ADD MOVED TO THE CONTROL BAR (corrections, Phase 4) — the tool row is retired, and
        the bar is the one place a list-level action lives now. */
-    /* ⚠️ RETARGETED (tightened round, Phase 1): the Add is the card TOOLBAR's now — TaskList
-       renders the slot, the toolbar's button carries the handler, and the page still wires it to
-       the SAME opener in task mode. One composer, one entrance, read at each link. */
-    expect(readFileSync(join(here, "TaskList.tsx"), "utf8")).toContain("{toolbar}");
-    expect(readFileSync(join(here, "TodoToolbar.tsx"), "utf8")).toContain("onClick={onAddTask}");
-    expect(page).toContain('onAddTask={() => openComposer("task")}');
-    expect(page).toContain('onAddNote={() => openComposer("note")}');
+    /* ⚠️ RETARGETED AGAIN (QC-chassis round, Phase 1): the Add is the PAGE HEADER's one primary,
+       reaching the SAME opener in task mode. The card's toolbar is unmounted with its meter. The
+       law is unchanged at every retarget — one composer, one entrance — and it is now stated
+       where the app-wide masthead puts a page's creative verb. */
+    expect(page).toContain('primary={{ label: "Add a task", onClick: () => openComposer("task") }}');
     expect(page).not.toContain("tdb-ghb");
   });
 

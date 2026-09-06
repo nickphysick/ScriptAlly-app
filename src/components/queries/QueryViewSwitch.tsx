@@ -28,9 +28,19 @@ const Icon: React.FC<{ view: QueryView }> = ({ view }) => (
   </svg>
 );
 
-export const QueryViewSwitch: React.FC<{ view: QueryView; onView: (v: QueryView) => void }> = ({ view, onView }) => (
+/**
+ * ⚠️ THE LIST IS ADDITIVE AND DEFAULTS TO THE QUERY CENTRE'S FOUR (QC-chassis round, Phase 1).
+ * The To-do page has a Grid and a Board and no List or Calendar; a second switch component for
+ * two of the same segments would be a fork, and a `views` prop with a default is one line. The
+ * Query Centre's own call site passes nothing and renders byte-identically.
+ */
+export const QueryViewSwitch: React.FC<{
+  view: QueryView;
+  onView: (v: QueryView) => void;
+  views?: readonly { key: QueryView; label: string }[];
+}> = ({ view, onView, views = QUERY_VIEWS }) => (
   <div className="qvs" role="group" aria-label="View">
-    {QUERY_VIEWS.map((v) => (
+    {views.map((v) => (
       <button
         key={v.key}
         type="button"

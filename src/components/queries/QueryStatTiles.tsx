@@ -9,9 +9,22 @@
  * ⚠️ THE COUNTS ARE THE WHOLE SET'S, never the filtered view's. A tile that counted what it would
  * show after clicking would read 0 for every court you are not in, which is the one number nobody
  * needs. Same rule the chips stated; the derivation is `quickCounts`, unchanged.
+ *
+ * ⚠️ THE MARKUP MOVED TO `shared/StatTiles` AND THIS COMPONENT DID NOT CHANGE (QC-chassis round,
+ * Phase 1). The To-do page needs the same tiles over its own five categories; a copy carrying the
+ * same class names would be a fork that looks identical until one of them is restyled. So the
+ * rendering is shared and the Query Centre's SEMANTICS stay here: the two axes, which one is
+ * pressed, and the fact that `past` toggles rather than selects. Same props, same element
+ * structure, same stylesheet — the call site in `Queries.tsx` is untouched.
+ *
+ * ⚠️ AND THE TWO AXES ARE WHY THIS WRAPPER EXISTS AT ALL. This page has a court AND an independent
+ * overdue flag; the wrapper decides which keys are ringed and interprets the pick, and `StatTiles`
+ * takes a SET so it can ring both. The first version of that prop was a single key, which
+ * silently collapsed the two axes into one — caught by this page's own lock, which had pinned the
+ * three lines that implemented it. The lock was pinning a spelling and it was RIGHT.
  */
 import React from "react";
-import "./queryStatTiles.css";
+import { StatTiles } from "../shared/StatTiles";
 import { STAT_TILES, type TileKey, type QuickKey } from "../../lib/queryCentreGrid";
 import { STATE_TOKEN } from "../../lib/queryCardFacts";
 
@@ -26,32 +39,20 @@ export const QueryStatTiles: React.FC<{
   onQuick: (k: QuickKey) => void;
   onOverdue: (next: boolean) => void;
 }> = ({ counts, overdueCount, quickKey, overdue, onQuick, onOverdue }) => (
-  <div className="qct" role="group" aria-label="Query totals">
-    {STAT_TILES.map((t) => {
-      const isPast = t.key === "past";
-      const on = isPast ? overdue : quickKey === t.key;
-      const n = isPast ? overdueCount : counts[t.key as QuickKey];
-      return (
-        <button
-          key={t.key}
-          type="button"
-          className={`qct-tile${on ? " qct-tile--on" : ""}`}
-          aria-pressed={on}
-          onClick={() => (isPast ? onOverdue(!overdue) : onQuick(t.key as QuickKey))}
-        >
-          <span
-            className={`qct-ic${t.swatch ? "" : " qct-ic--plain"}`}
-            aria-hidden="true"
-            style={t.swatch ? { background: STATE_TOKEN[t.swatch] } : undefined}
-          >
-            {t.mark ? <span className="qct-mk">{t.mark}</span> : GLYPH[t.key]}
-          </span>
-          <span className="qct-tx">
-            <span className="qct-k">{t.label}</span>
-            <span className="qct-n">{n}</span>
-          </span>
-        </button>
-      );
-    })}
-  </div>
+  <StatTiles
+    label="Query totals"
+    /* ⚠️ TWO AXES, SO TWO KEYS CAN BE RINGED AT ONCE — one active court PLUS the independent
+       overdue flag. "With you and past expected" is the commonest question on this page and a row
+       of five exclusive buttons would make it unaskable. */
+    selected={overdue ? [quickKey, "past"] : [quickKey]}
+    onPick={(k) => (k === "past" ? onOverdue(!overdue) : onQuick(k as QuickKey))}
+    tiles={STAT_TILES.map((t) => ({
+      key: t.key,
+      label: t.label,
+      count: t.key === "past" ? overdueCount : counts[t.key as QuickKey],
+      swatch: t.swatch ? STATE_TOKEN[t.swatch] : undefined,
+      glyph: GLYPH[t.key],
+      mark: t.mark,
+    }))}
+  />
 );

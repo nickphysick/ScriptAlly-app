@@ -1598,3 +1598,15 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-jnrow.on .tdb-jnbx { background: var(--sage); border-color: var(--sage); color: #fff; }
 .tdb-jnbx svg { width: 10px; height: 10px; }
 .tdb-jnsub { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* ══ THE PAGE'S TOOLBAR ROW (QC-chassis round, Phase 1; ref todo-qc-style.html `.qtool`) ════════
+   ⚠️ THE CONTROLS THEMSELVES ARE THE QUERY CENTRE'S and carry its classes — `.qcc-tb-search`,
+   `.qcc-tb-btn` and the rest, from `queryCentreGrid.css`. What this block owns is the ROW: how
+   the controls sit together and where the view switch goes. Restyling a control here would be a
+   second opinion about a shared object; there is exactly one, in the Query Centre's sheet. */
+.tdb-qtool { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; flex-wrap: wrap; }
+.tdb-popwrap { position: relative; display: flex; align-items: center; }
+/* the switch closes the row on the right, as the contract draws it */
+.tdb-views { margin-left: auto; display: flex; align-items: center; }
+/* the header's picture — sized by the slot, spaced by the header's own row */
+.tdb-illo { flex: none; margin-left: 18px; }

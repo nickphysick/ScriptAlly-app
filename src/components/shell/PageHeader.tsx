@@ -141,6 +141,9 @@ export interface PageHeaderProps {
   /** Rendered inline immediately right of the title text, baseline-aligned (Discover's Pro pill).
    *  Additive and optional — every existing call site is unchanged. */
   titleAdornment?: React.ReactNode;
+  /** ⚠️ THE PAGE'S PICTURE, right of the text and left of the primary — `workspace` only, and
+   *  absent on every page that does not pass one. See the note at its render site. */
+  illo?: React.ReactNode;
   /** A custom control occupying the same slot as `actions` — for pages whose right-hand control
    *  isn't a button (Discover's "Finding for" manuscript selector). Ignored when `actions` is set. */
   actionsSlot?: React.ReactNode;
@@ -166,6 +169,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   actions,
   toolbar,
   titleAdornment,
+  illo,
   actionsSlot,
   overflow,
 }) => {
@@ -331,6 +335,14 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
                 height to keep, so a title-only page is simply shorter. */}
             {description && <p className="wsh-sub">{description}</p>}
           </div>
+          {/* ⚠️ THE ILLUSTRATION SLOT IS ADDITIVE AND NINE PAGES PASS NOTHING (QC-chassis round,
+              Phase 1). It sits between the text and the primary, so the sentence still bounds
+              itself against what the button leaves; a page that passes no `illo` renders no node
+              and reserves no width, exactly as an absent description renders nothing. It is a
+              SLOT rather than a mark because the mark registry draws 20px monoline glyphs and
+              this is a commissioned picture — the two are different objects, which is why this
+              page carries no mark. */}
+          {illo}
           {/**
             * ⚠️ ONE BUTTON, AND IT IS THE PAGE'S — the same handler the toolbar used to call, moved
             * rather than copied. The slim bar renders the same `primary` at its own size, so a page
