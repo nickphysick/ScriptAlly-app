@@ -70,8 +70,11 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
       rows: root.querySelectorAll(".tlc .row").length,
       /* the card's own footer, which states a total of its own */
       foot: ((root.querySelector(".tlc .l-foot .c") || {}).textContent || "").trim(),
-      /* and the rail badge, the third surface that names a number of tasks */
-      badge: ((document.querySelector(".ws-navcount, .ws-nav-count") || {}).textContent || "").trim(),
+      /* THE RAIL BADGE — the third surface that names a number of tasks. REPORTED, not asserted:
+         it is shell chrome and its derivation (boardFigures(cols).cards) is not this page's to
+         change. Reported on every run so the disagreement stays visible rather than being
+         rediscovered. Its rib reads like "To-do list29", so the label is stripped off the front. */
+      ribs: [...document.querySelectorAll(".ws-ni")].map((e) => (e.textContent || "").trim()),
     };
   })()`) as any;
 
@@ -101,10 +104,28 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
      The partition law above cannot see it: the five parts summed to the tile's own total, so it
      was internally consistent and wrong. This reads the OTHER surface. */
   const footN = Number((/(\d+)\s+tasks/.exec(r.foot ?? "") ?? [])[1] ?? NaN);
+  /* ⚠️ MATCHED HERE, IN NODE, NOT INSIDE THE EVALUATE TEMPLATE. The first version of this read
+     did it in the browser and reported "(not found)" about a rib that was plainly on screen: a
+     template literal eats the backslash, so \d became d and the pattern was /^To-do listd+$/.
+     The house rule exists for exactly this and I broke it anyway — the evaluate returns raw
+     strings now and every pattern lives on this side. */
+  const badge = ((r.ribs as string[]) ?? [])
+    .map((t) => /^To-do list\s*(\d+)$/.exec(t.replace(/\s+/g, " ").trim()))
+    .find(Boolean)?.[1] ?? "(not found)";
   add("P1.2b · the tile's total and the card footer's total are the SAME number",
       Number.isFinite(footN) && footN === byLabel["All tasks"],
-      "tile " + byLabel["All tasks"] + " · footer " + JSON.stringify(r.foot) + " -> " + footN
-        + " · rail badge " + JSON.stringify(r.badge));
+      "tile " + byLabel["All tasks"] + " · footer " + JSON.stringify(r.foot) + " -> " + footN);
+  /* ⚠️ AND THE RAIL BADGE IS A THIRD SURFACE THAT DOES NOT AGREE — REPORTED, NOT ASSERTED.
+     It counts boardFigures(cols).cards, which keeps the snoozed and dismissed the page's own
+     scope drops, so it reads 29 beside the page's 27. That predates this round (the page moved
+     to the view-excluded total in the drawer round; the badge did not follow) and it contradicts
+     ShellSidebar's own comment, which promises the badge "cannot drift from the page counts".
+     Not fixed here: it is shell chrome, and what the badge MEANS — every live card, or only the
+     ones not deliberately deferred — is a product call rather than a defect to patch in passing.
+     Printed every run so it stays visible instead of being rediscovered. */
+  add("P1.2c · [REPORTED] the rail badge's figure, beside the page's",
+      true, "rail badge " + JSON.stringify(badge) + " · page " + byLabel["All tasks"]
+        + (String(badge) === String(byLabel["All tasks"]) ? "  — they now AGREE" : "  — they DISAGREE (known, Nick's call)"));
 
   add("P1.3 · Urgent is a LENS, not a sixth part — it is not in that sum",
       typeof byLabel["Urgent"] === "number" && byLabel["Urgent"] <= byLabel["Agent requests"],
