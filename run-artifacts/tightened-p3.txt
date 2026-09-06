@@ -1,0 +1,34 @@
+── tightened · Phase 3 · 17 assertions · 0 RED · 17 green
+green  · P3.0 @1440 · a journey with a fork was found to measure
+         row index 1
+green  · P3.1 · no .band renders
+green  · P3.2 · the header carries the family pill and the position
+         pill "Needs you now" · "Task 3 of 27"
+green  · P3.3 · exactly ONE tinted element in the header — the pill
+         tinted: ["fam u-now"]
+green  · P3.4 · the header's controls are 26px, on one row with a hairline beneath
+         controls [26,26,26] · rule 1px
+green  · P3.5 · the title is Playfair 21/400
+         Playfair Display 21px/400
+green  · P3.6 · the title and every descendant render ONE ink
+         inks ["rgb(58, 28, 20)"]
+green  · P3.7a · at 1440 no fork row is under 56, and none runs away
+         [58.8,58.8,73.8]
+green  · P3.8a · at 1440 the title leaves the work the greater share
+         title 109 · scroller 286 · doc column 306
+green  · P3.9a · at 1440 no ledger row is under the contract's 42px floor
+         [42,42,42,42]
+green  · P3.10a · at 1440 the content exceeds the drawer, and the sheet stops AT the cap
+         sheet 404 · cap 404
+green  · P3.0 @1920 · a journey with a fork was found to measure
+         row index 1
+green  · P3.8b · at 1920 the 620px measure binds — the column is wider and the title stops at 620
+         doc column 786 · title 620
+green  · P3.7b · at 1920 the fork row is the contract's height — 56, within 2px
+         [57.8,57.8,57.8]
+green  · P3.9b · at 1920 the ledger's rows ARE the contract's 42px
+         [42,42,42,42]
+green  · P3.10b · at 1920, with the reference put aside, the sheet HUGS its document — the fork and the ledger are different heights, both under the cap
+         fork (3 options) 448.1 · ledger (4 rows) 505.8 · cap 554
+green  · P3.11 · both widths were measured
+         branches ["1440","1920"]

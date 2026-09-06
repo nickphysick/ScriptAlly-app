@@ -1,0 +1,28 @@
+── tightened · Phase 4 · 14 assertions · 0 RED · 14 green
+green  · P4.0 · the column was measured on more than one card
+         cards with a reference: 7 (rows 0,1,2,3,4,5,6)
+green  · P4.1 · the column is a COLUMN — no radius, one hairline on its left and nowhere else
+         {"radius":"0px","l":"1px","t":"0px","r":"0px","b":"0px"}
+green  · P4.2 · exactly ONE tinted region in the column — its header
+         [["qhead"],["qhead"],["qhead"],["qhead"],["qhead"],["qhead"],["qhead"]]
+green  · P4.3 · the header's fill IS the ladder's value for the query's own status
+         [{"word":"Offer","stage":"offer","ok":true,"got":"rgb(215, 224, 232)","want":"rgb(215, 224, 232)"},{"word":"Full Requested","stage":"in-2","ok":true,"got":"rgb(241, 219, 208)","want":"rgb(241, 219, 208)"},{"word":"Full Requested","stage":"in-2","ok":true,"got":"rgb(241, 219, 208)","want":"rgb(241, 219, 208)"},{"word":"Full Requested","stage":"in-2","ok":true,"got":"rgb(241, 219, 208)","want":"rgb(241, 219, 208)"},{"word":"Partial Requested","stage":"in-1","ok":true,"got":"rgb(248, 233, 226)","want":"rgb(248, 233, 226)"},{"word":"Partial Requested","stage":"in-1","ok":true,"got":"rgb(248, 233, 226)","want":"rgb(248, 233, 226)"},{"word":"Partial Requested","stage":"in-1","ok":true,"got":"rgb(248, 233, 226)","want":"rgb(248, 233, 226)"}]
+green  · P4.4 · the status word is the app's own — and the real StatusDot is beside it
+         [["Offer",true],["Full Requested",true],["Full Requested",true],["Full Requested",true],["Partial Requested",true],["Partial Requested",true],["Partial Requested",true]]
+green  · P4.5 · every 'since' line states the elapsed its OWN date implies
+         with a line: 5 of 7 · [{"line":"since 12 June 2025 · 15 months","ok":true,"stated":15,"computed":15},{"line":"since 31 July · 5 weeks","ok":true,"stated":5,"computed":5},{"line":"since 29 July · 6 weeks","ok":true,"stated":6,"computed":6},{"line":"since 3 August · 5 weeks","ok":true,"stated":5,"computed":5},{"line":"since 20 August · 17 days","ok":true,"stated":17,"computed":18}]
+green  · P4.5b · and a query with no anchor renders NO line rather than a guess
+         without a line: 2
+green  · P4.6 · the facts are a definition list with the contract's 78px label column
+         ["78px 119px"]
+green  · P4.7 · the agent row, the story and the query link are all there
+         who 7 · story 7 · link 7
+green  · P4.8 · 'Open the full query' is a LINK, not a button
+         A
+green  · P4.9 · nothing in the column is editable — one button (the chevron) and no fields
+         [["cl"],["cl"],["cl"],["cl"],["cl"],["cl"],["cl"]]
+green  · P4.10 · collapsed, the column is a 30px spine with its label vertical
+         {"doc":306,"spine":true,"refW":30,"vertical":"vertical-rl","head":false}
+green  · P4.11 · the document keeps its width, open or collapsed
+         open 306 · collapsed 306
+green  · P4.12 · and the spine opens it again

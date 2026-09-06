@@ -39,32 +39,20 @@
    and the card fills it. */
 .tlc { height:100%; min-height:0; width:100%; }
 .tlc .l-bar { display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--hair);flex:0 0 auto; }
-.tlc .l-search { flex:1;display:flex;align-items:center;gap:8px;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:8px 12px;transition:border-color .15s; }
-.tlc .l-search:focus-within { border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.12); }
-.tlc .l-search svg { color:var(--muted);flex-shrink:0; }
-.tlc .l-search input { border:0;outline:0;font-size:12.5px;color:var(--ink);width:100%;background:transparent;font-family:'Inter',sans-serif; }
-.tlc .l-search input::placeholder { color:#c8b8a8; }
 .tlc .l-icon { cursor:pointer;width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--white);border:0.5px solid var(--hair2);border-radius:9px;color:var(--muted2);transition:all .16s; }
 .tlc .l-icon:hover { border-color:#c9a89e;color:var(--burg); }
-/* ── the toolbar — ONE 32px row, the card's first child (tightened round, Phase 1; contract
-   `.toolbar`/`.meterMini`/`.cb`). The meter's track is the contract's 150px with the one-line
-   legend beside it; the three actions close the row. `.l-add` retired with the command bar —
-   the toolbar's Add-a-task is the card's one filled control now. No hairline of its own: the
-   `.l-bar` beneath already draws the card's first rule, and two rules one row apart would read
-   as a header that failed to merge. ── */
-.tlc .l-toolbar { display:flex;align-items:center;gap:10px;padding:12px 14px 2px;flex:0 0 auto; }
-.tlc .l-tbsp { margin-left:auto; }
-.tlc .meterMini { display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);min-width:0; }
-.tlc .meterMini .track { display:flex;width:150px;height:6px;border-radius:3px;overflow:hidden;gap:2px;flex-shrink:0; }
-.tlc .meterMini .track span { border-radius:2px;box-shadow:inset 0 0 0 1px rgba(58,28,20,0.10); }
-.tlc .meterMini .legend { white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-.tlc .meterMini b { color:var(--ink2);font-weight:500; }
-.tlc .cb { cursor:pointer;height:32px;padding:0 13px;border-radius:999px;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:all .16s;font-family:'Inter',sans-serif;flex-shrink:0; }
-.tlc .cb svg { flex-shrink:0; }
-.tlc .cb.fill { background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-weight:600; }
-.tlc .cb.fill:hover { background:#efd5ca;border-color:#d8a89a; }
-.tlc .cb.line { background:var(--white);border:1px solid var(--edge);color:#57534e; }
-.tlc .cb.line:hover { background:#f5f2ee; }
+/* ── THE CARD'S OWN TOOLBAR IS GONE, AND SO ARE ITS RULES (QC-chassis round, Phase 1) ──────────
+   `.l-toolbar`, `.l-tbsp`, `.meterMini` (track/legend/b) and the `.cb` cluster went with
+   `TodoToolbar.tsx`; `.l-search` went with the card's search box. The page owns all of it now: the
+   meter's three families became the header's seven tiles, the three actions became the header's
+   one primary plus the rail, and the search moved to the page toolbar so there is one of it.
+
+   Deleted rather than left inert, because a styled class with no renderer is one a future element
+   wears by accident — and because a replacement that is ADDED leaves the original reachable, which
+   this repo has three recorded instances of. Verified against the RENDERED page, not the source:
+   a source scan reported `grp` and `l-icon` as dead too, and both are live behind interpolated
+   class names. `l-fbadge`, `l-slbl`, `l-wide` and `fchip` were left alone deliberately — they are
+   the drawer round's filter chrome and may be conditional on filters this probe did not set. ── */
 .tlc .l-body { overflow-y:auto;flex:1 1 auto;min-height:0;padding-bottom:4px; }
 .tlc .l-body::-webkit-scrollbar { width:9px; }
 .tlc .l-body::-webkit-scrollbar-thumb { background:#e2d6c8;border-radius:5px;border:2px solid var(--white); }

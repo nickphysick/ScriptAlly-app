@@ -1,0 +1,34 @@
+── tightened · Phase 2 · 18 assertions · 0 RED · 18 green
+green  · P2.1a · every resting row is 44px
+         27 rows · distinct [44]
+green  · P2.2 · one click focuses — the sheet does NOT open
+green  · P2.3 · exactly one strip exists
+         strips=1
+green  · P2.4 · the strip renders BELOW the row and covers no row's content
+         strip top 585 · row bottom 585 · rows intersected 0
+green  · P2.5 · the deed names the agent inline (r-who)
+green  · P2.6 · a j typed into the search is a letter — no action fired, and focus survives the query
+         query "j" open=false door=false · focus after clear task-offer-seed-query-12 was task-offer-seed-query-12
+green  · P2.7 · j moves focus without opening
+         focus task-offer-seed-query-12 -> task-full-seed-cal-passed865-q open=false
+green  · P2.1b · every row is 44px with the drawer open
+         27 rows · distinct [44]
+green  · P2.17 · folded, the hints stand down and the count stays on one line
+         {"keys":false,"count":14}
+green  · P2.8 · the strip stays under the SELECTED row while the sheet is open
+         {"strips":1,"under":true,"onsel":true,"selKey":"task-full-seed-cal-passed865-q","host":"task-full-seed-cal-passed865-q","paneClasses":"tpn"}
+green  · P2.9 · a digit picks the fork option — the fork collapses to its chosen line
+         options 3 -> 0 chosen=true
+green  · P2.10 · a collapsed section renders no rows and keeps its count
+         27 -> 9 rows · count "18" expanded=false
+green  · P2.11 · j lands only on rendered rows while a section is closed
+green  · P2.12 · s opens the snooze panel for the focused row
+         row task-no-res-close-seed-query-ms2-a
+green  · P2.13 · s snoozes through the snooze writer — the row left, and Undo brought it back
+         left=true undo=true back=true
+green  · P2.16 · the footer is one line at rest
+         {"foot":37,"count":14}
+green  · P2.15 · the footer's key hints are mono chrome, not body copy
+         {"fs":8,"fam":"JetBrains Mono","h":0,"countH":14,"kbds":5}
+green  · P2.14 · d opens the dismiss confirm, and Keep leaves the row standing
+         confirm=true row still there=true

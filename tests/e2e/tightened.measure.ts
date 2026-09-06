@@ -55,7 +55,13 @@ test("Phase 1 — one toolbar: the row, the title census, the meter's figures", 
   const r = await page.evaluate(`(() => {
     const vis = (el) => { const b = el.getBoundingClientRect(); return b.width > 0 && b.height > 0; };
     const card = document.querySelector(".tlc");
-    const tb = document.querySelector(".tlc .l-toolbar");
+    /* THE TOOLBAR MOVED OUT OF THE CARD AND ONTO THE PAGE (QC-chassis round, Phase 1).
+       .tlc .l-toolbar was this round's own row; the page's .tdb-qtool replaced it, and
+       TodoToolbar.tsx was deleted rather than left unmounted. The geometry claims below follow
+       the row to its new home; the ones about the meter and the three actions are RETIRED, each
+       naming where its claim now lives. (No backticks in here — see the file header.) */
+    const tb = document.querySelector(".tdb-qtool");
+    const deadToolbar = document.querySelectorAll(".tlc .l-toolbar, .tlc .meterMini, .tlc .cb, .tlc .l-search").length;
     const bar = document.querySelector(".tlc .l-bar");
     /* the title census: HEADING elements whose text is exactly the page title. The shell's rail
        label and the breadcrumb also carry the page's NAME — that is wayfinding, not a title, and
@@ -67,40 +73,33 @@ test("Phase 1 — one toolbar: the row, the title census, the meter's figures", 
       if ((el.textContent || "").trim() === "To-do list")
         holders.push(el.tagName + "." + String(el.className).split(" ")[0]);
     }
-    /* the meter against the heads — figures read off the RENDERED page on both sides */
-    const legend = tb ? (tb.querySelector(".meterMini .legend") || {}).textContent || "" : "";
-    const legendNums = (legend.match(/\\d+/g) || []).map(Number);
-    const headNums = [...document.querySelectorAll(".tlc .grp .g-n")].map((el) => Number(el.textContent));
-    const track = tb ? tb.querySelector(".meterMini .track") : null;
-    const cbs = tb ? [...tb.querySelectorAll(".cb")] : [];
-    const cbTexts = cbs.map((b) => (b.textContent || "").trim());
-    const fills = tb ? tb.querySelectorAll(".cb.fill").length : 0;
-    const cardFills = document.querySelectorAll(".tlc .cb.fill, .tlc .l-add").length;
     return {
-      hasCard: !!card, hasToolbar: !!tb,
+      hasCard: !!card, hasToolbar: !!tb, deadToolbar: deadToolbar,
       cmdbar: !!document.querySelector(".cmdbar"), ladd: !!document.querySelector(".l-add"),
       cardTop: card ? card.getBoundingClientRect().top : -1,
       tbBottom: tb ? tb.getBoundingClientRect().bottom : -1,
       tbTop: tb ? tb.getBoundingClientRect().top : -1,
-      cbHeights: cbs.map((b) => Math.round(b.getBoundingClientRect().height * 10) / 10),
-      cbTexts: cbTexts, fills: fills, cardFills: cardFills,
-      trackW: track ? Math.round(track.getBoundingClientRect().width) : -1,
-      legend: legend.trim(), legendNums: legendNums, headNums: headNums,
       holders: holders,
       barTop: bar ? bar.getBoundingClientRect().top : -1,
     };
   })()`) as {
-    hasCard: boolean; hasToolbar: boolean; cmdbar: boolean; ladd: boolean;
-    cardTop: number; tbBottom: number; tbTop: number; cbHeights: number[]; cbTexts: string[];
-    fills: number; cardFills: number; trackW: number; legend: string;
-    legendNums: number[]; headNums: number[]; holders: string[]; barTop: number;
+    hasCard: boolean; hasToolbar: boolean; deadToolbar: number; cmdbar: boolean; ladd: boolean;
+    cardTop: number; tbBottom: number; tbTop: number; holders: string[]; barTop: number;
   };
 
-  add("P1.0 · the card and its toolbar rendered", r.hasCard && r.hasToolbar, "");
+  add("P1.0 · the card and the page's toolbar rendered", r.hasCard && r.hasToolbar, "");
 
-  /* the brief's own geometry: the card's top edge within 60px of the toolbar's bottom — i.e. no
-     pile of chrome between the two, whichever side of the card edge the toolbar sits. */
-  add("P1.1 · the list card's top edge is within 60px of the toolbar's bottom (1440)",
+  /* ⚠️ AND THE CARD'S OWN TOOLBAR IS GONE — the claim that replaces P1.4-P1.8 below. A round that
+     retires a surface owns saying so in the lock that measured it, or the next reader cannot tell
+     a supersession from a regression. `TodoToolbar.tsx` and its rules were DELETED, not unmounted:
+     a replacement that is added leaves the original reachable. */
+  add("P1.0b · the card's own toolbar, meter, actions and search are retired, not merely hidden",
+      r.deadToolbar === 0, "surviving .l-toolbar/.meterMini/.cb/.l-search in the card: " + r.deadToolbar);
+
+  /* the brief's own geometry, FOLLOWED TO THE NEW ROW: the card's top edge within 60px of the
+     toolbar's bottom — i.e. no pile of chrome between the two. The claim is unchanged and still
+     worth making; only which element is "the toolbar" moved. */
+  add("P1.1 · the list card's top edge is within 60px of the page toolbar's bottom (1440)",
       r.hasToolbar && Math.abs(r.tbBottom - r.cardTop) <= 60,
       "card top " + r.cardTop + " · toolbar bottom " + r.tbBottom);
 
@@ -110,35 +109,23 @@ test("Phase 1 — one toolbar: the row, the title census, the meter's figures", 
   add("P1.3 · the separate command bar row is gone, and so is the old add button",
       !r.cmdbar && !r.ladd, "cmdbar=" + r.cmdbar + " l-add=" + r.ladd);
 
-  add("P1.4 · one 32px row — every action control measures 32",
-      r.cbHeights.length === 3 && r.cbHeights.every((h) => Math.abs(h - 32) <= 0.5),
-      JSON.stringify(r.cbHeights));
+  /* ⚠️ P1.4-P1.8 ARE RETIRED, and each names where its claim went (QC-chassis round, Phase 1).
+     They measured `TodoToolbar` — a component this round deleted — so retargeting them would be
+     asserting the new surface twice while pretending to be about the old one.
+       P1.4 (32px action controls) and P1.5 (three actions in order) → the page's three toolbar
+         controls, `qcChassis.measure.ts` P1.7, plus the header's one primary at P1.4.
+       P1.6 (one filled control) → the header's single primary, qcChassis P1.4.
+       P1.7 (the 150px meter track) → the meter is GONE. The seven tiles are the same fact told
+         better, and their geometry is the contract's, not this one's.
+       P1.8 (the legend's figures ARE the group heads') → the counting law moved to a STRONGER
+         pair: qcChassis P1.2 (the five categories partition All) and P1.2b (the tile total IS the
+         card footer's total) — the second of which caught the page stating 29 beside 27.
+     P1.0b above asserts the retirement itself, so this is not a silent shrinking of coverage. */
 
-  add("P1.5 · the three actions, in the contract's order",
-      r.cbTexts.length === 3 && r.cbTexts[0] === "Add a task" && r.cbTexts[1] === "Add a note"
-        && r.cbTexts[2] === "Calendar",
-      JSON.stringify(r.cbTexts));
-
-  add("P1.6 · one filled control in the card — the toolbar's Add a task",
-      r.fills === 1 && r.cardFills === 1, "toolbar fills=" + r.fills + " card fills=" + r.cardFills);
-
-  add("P1.7 · the meter's track is the contract's 150px",
-      r.trackW === 150, "track " + r.trackW + "px");
-
-  /* ⚠️ THE COUNTING LAW, AT THE COMPOSED SURFACE: the legend's figures and the group heads'
-     figures are the same numbers in the same order — both read off the rendered page, neither
-     from the store. A page with a collapsed or empty group would legitimately show fewer heads,
-     so the claim is set-shaped: every head figure appears in the legend, and the legend's three
-     figures sum to the rows the heads sum to. */
-  const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
-  add("P1.8 · the legend's figures ARE the group heads' figures",
-      r.legendNums.length === 3 && sum(r.legendNums) === sum(r.headNums)
-        && r.headNums.every((n) => r.legendNums.includes(n)),
-      "legend " + JSON.stringify(r.legendNums) + " heads " + JSON.stringify(r.headNums)
-        + " · " + r.legend);
-
-  /* one line: the toolbar row is a single line of controls, not a stack */
-  add("P1.9 · the toolbar is one row — meter and actions share a line",
+  /* one line: the toolbar is a single row of controls, not a stack. The claim survived the move —
+     what changed is that the row now holds the search, Filter, Group, Sort and the view switch
+     rather than the meter and three actions. A stacked toolbar is the fault either way. */
+  add("P1.9 · the toolbar is one row — its controls share a line",
       r.tbBottom - r.tbTop <= 48, "row height " + (r.tbBottom - r.tbTop));
 
   const lines = out.map((x) => (x.ok ? "green  " : "RED    ") + "· " + x.id + (x.note ? "\n         " + x.note : ""));
@@ -146,7 +133,7 @@ test("Phase 1 — one toolbar: the row, the title census, the meter's figures", 
   writeFileSync(OUT, "── tightened · Phase 1 · " + out.length + " assertions · " + red.length
     + " RED · " + (out.length - red.length) + " green\n" + lines.join("\n") + "\n");
   console.log(lines.join("\n"));
-  expect(out.length, "assertion floor").toBeGreaterThanOrEqual(9);
+  expect(out.length, "assertion floor").toBeGreaterThanOrEqual(6);
   expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
 });
 
@@ -210,7 +197,7 @@ test("Phase 2 — the dense list: 44 both states, the strip, the keys", async ({
   add("P2.5 · the deed names the agent inline (r-who)", afterClick.who, "");
 
   /* ── typing guard: a j typed into search moves nothing ── */
-  await page.evaluate(`(() => { const i = document.querySelector(".tlc .l-search input"); if (i) { i.focus(); } })()`);
+  await page.evaluate(`(() => { const i = document.querySelector(".tdb-qtool .qcc-tb-search input"); if (i) { i.focus(); } })()`);
   await page.keyboard.type("j");
   await page.waitForTimeout(200);
   /* ⚠️ the typed j NARROWS THE LIST — it is a search letter, so the focused row may legitimately
@@ -219,16 +206,20 @@ test("Phase 2 — the dense list: 44 both states, the strip, the keys", async ({
      it again. Asserting the row visible mid-query was the first form, and it was wrong about
      what typing does. */
   const whileTyped = await page.evaluate(`(() => ({
-    q: (document.querySelector(".tlc .l-search input") || {}).value || "",
+    q: (document.querySelector(".tdb-qtool .qcc-tb-search input") || {}).value || "",
     open: !!(document.querySelector(".tdw-split") || { classList: { contains: () => false } }).classList.contains("open"),
     door: !!document.querySelector(".tdf .panel"),
   }))()`) as { q: string; open: boolean; door: boolean };
-  await page.evaluate(`(() => { const i = document.querySelector(".tlc .l-search input");
+  await page.evaluate(`(() => { const i = document.querySelector(".tdb-qtool .qcc-tb-search input");
     if (i) { const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
       set.call(i, ""); i.dispatchEvent(new Event("input", { bubbles: true })); i.blur(); } })()`);
   await page.waitForTimeout(250);
   const afterCleared = await page.evaluate(`(() =>
     (document.querySelector(".tlc .row.focus") || { getAttribute: () => null }).getAttribute("data-rowkey"))()`) as string | null;
+  /* ⚠️ RETARGETED, NOT RETIRED — the SEARCH moved to the page toolbar (QC-chassis Phase 1) and the
+     claim did not. "A letter typed into a search box is a letter, not a shortcut" is the whole
+     reason the list's single-key grammar is safe to have, and it is MORE at risk now that the box
+     lives outside the card the keys act on: the handler and the field no longer share a parent. */
   add("P2.6 · a j typed into the search is a letter — no action fired, and focus survives the query",
       whileTyped.q.includes("j") && !whileTyped.open && !whileTyped.door && afterCleared === k1,
       "query " + JSON.stringify(whileTyped.q) + " open=" + whileTyped.open + " door=" + whileTyped.door
@@ -451,8 +442,19 @@ test("Phase 3 — the sheet is a document: the header, the title, the measures, 
      nothing at the narrow end (the precondition rule). The height law splits the same way: the
      sheet is at its CAP at 1440 and HUGS at 1920. Both are asserted, and the branches are
      tallied at the foot, so a run where one never happened cannot report itself as covering it. */
-  for (const w of [1440, 1920]) {
-    await page.setViewportSize({ width: w, height: 900 });
+  /* ⚠️ THE 1920 BRANCH RUNS AT 1050 TALL, AND THE REASON IS A FINDING RATHER THAN A CONVENIENCE
+     (QC-chassis round, Phase 1). That round added two rows of page chrome above the drawer — the
+     seven stat tiles and the toolbar — which lowered the sheet's cap by roughly the same amount.
+     Measured on the same build: the sheet's content wants 461px, and the cap is 404 at a 900px
+     viewport and comfortably above 461 from 1050 up. So at 1920x900 the sheet is CAPPED, exactly
+     as it is at 1440, and the hug branch became unreachable at the harness's default height.
+
+     Raising the height keeps the LAW under test rather than deleting it, and the branch tally at
+     the foot still proves both states ran. What it must not be read as is "the hug is fine": on a
+     1440x900 laptop the task drawer now scrolls internally where it used to hug, and that is a
+     design consequence for Nick to rule on, recorded in the round report. */
+  for (const [w, vh] of [[1440, 900], [1920, 1050]] as const) {
+    await page.setViewportSize({ width: w, height: vh });
     await page.goto("/todo");
     await page.waitForFunction(
       "document.querySelectorAll('.tlc .row').length > 0", null, { timeout: 45_000 }).catch(() => {});
