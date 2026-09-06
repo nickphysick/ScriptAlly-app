@@ -1,0 +1,30 @@
+── pane mounts · 14 assertions · 0 RED · 14 green
+
+  green  P0 · the board rendered, so there is something to click
+           rows on screen = 27
+  green  P0b · at least two journey types were on the board to cover
+           kinds = ["Decide","Send","Chase","Close","Fix","Note"]
+  green  · Decide — clicking it mounts the pane
+           clicked=task-offer-seed-query-12 pane=true workspace chars=255
+  green  · Decide — and the console says nothing
+           no console errors, no page errors
+  green  · Send — clicking it mounts the pane
+           clicked=task-full-seed-cal-passed865-q pane=true workspace chars=575
+  green  · Send — and the console says nothing
+           no console errors, no page errors
+  green  · Chase — clicking it mounts the pane
+           clicked=task-nudge-cor-undo pane=true workspace chars=513
+  green  · Chase — and the console says nothing
+           no console errors, no page errors
+  green  · Close — clicking it mounts the pane
+           clicked=task-no-res-close-seed-query-ms2-a pane=true workspace chars=608
+  green  · Close — and the console says nothing
+           no console errors, no page errors
+  green  · Fix — clicking it mounts the pane
+           clicked=sweep-dq_mswl pane=true workspace chars=209
+  green  · Fix — and the console says nothing
+           no console errors, no page errors
+  green  · Note — clicking it mounts the pane
+           clicked=seed-cal-carried pane=true workspace chars=328
+  green  · Note — and the console says nothing
+           no console errors, no page errors
