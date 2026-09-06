@@ -33,9 +33,18 @@
 
 .qbv-cards { display: flex; flex-direction: column; }
 .qbv-card {
+  /**
+   * ⚠️ ONE NUMBER, NOT TWO THAT AGREE. The ref draws `margin-bottom: -36px` beside a fact line
+   * that happens to be 36px AT THE REF'S TYPE — measured here it renders 39.5, and the two drifted
+   * apart the moment the sizes did. The overlap and the fact line's height are the SAME token now,
+   * so "each card overlaps the one above by the height of its fact line" is true by construction
+   * rather than by two values being kept in step by hand. The harness still measures BOTH, because
+   * a construction is a claim about the page and this repo checks those on the page.
+   */
+  --qbv-fact-h: 40px;
   position: relative; background: #fff; border-radius: 11px; overflow: hidden; cursor: pointer;
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 6px 16px rgba(58, 28, 20, 0.08);
-  margin-bottom: -36px; transition: transform 0.16s, box-shadow 0.16s;
+  margin-bottom: calc(-1 * var(--qbv-fact-h)); transition: transform 0.16s, box-shadow 0.16s;
 }
 .qbv-card:last-child { margin-bottom: 0; }
 .qbv-card:hover, .qbv-card:focus-visible {
@@ -54,7 +63,7 @@
   font-family: var(--font-serif); font-size: 12.5px; color: var(--ink, #1c130f);
 }
 
-.qbv-body { padding: 11px 12px 10px; }
+.qbv-body { padding: 11px 12px 0; }
 .qbv-who { display: flex; align-items: center; gap: 10px; }
 .qbv-chip {
   width: 32px; height: 32px; border-radius: 50%; background: #fdfaf5; flex: none;
@@ -79,7 +88,8 @@
 /* ⚠️ THE FACT LINE IS THE OVERLAP'S MEASURE — 36px at these sizes, and the harness measures BOTH
    rather than trusting the pair to stay in step. */
 .qbv-fact {
-  margin-top: 9px; padding-top: 8px; border-top: 0.5px solid #ece0d2; font-size: 11px;
+  height: var(--qbv-fact-h); box-sizing: border-box;
+  margin-top: 9px; padding: 7px 0 0; border-top: 0.5px solid #ece0d2; font-size: 11px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #3a1c14;
 }
 .qbv-fs b { font-weight: 600; }

@@ -521,7 +521,10 @@ describe("Phase 3–5 · three renderers over one set of rows", () => {
   it("the shingle overlaps by the fact line, and the last card keeps its fact", () => {
     const css = readFileSync(join(process.cwd(), "src/components/queries/queryBoardView.css"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(css).toMatch(/\.qbv-card \{[^}]*margin-bottom: -36px/);
+    /* ⚠️ ONE TOKEN, read by both — the ref's literal -36px described a fact line it did not own,
+       and the two drifted the moment the type did (measured 39.5 against 36). */
+    expect(css).toMatch(/\.qbv-card \{[^}]*margin-bottom: calc\(-1 \* var\(--qbv-fact-h\)\)/);
+    expect(css).toMatch(/\.qbv-fact \{[^}]*height: var\(--qbv-fact-h\)/);
     expect(css).toMatch(/\.qbv-card:last-child \{ margin-bottom: 0; \}/);
     expect(css).toMatch(/\.qbv-card:hover[^{]*\{[^}]*transform: translateY\(-6px\)/);
     expect(css, "the hovered card does not rise above its neighbours").toMatch(/\.qbv-card:hover[^{]*\{[^}]*z-index: 5/);

@@ -1,0 +1,284 @@
+{
+  "palette-1280": {
+    "bands": {
+      "queried": "rgb(247, 239, 227)",
+      "closed": "rgb(228, 225, 219)",
+      "you": "rgb(245, 230, 223)",
+      "agent": "rgb(224, 229, 221)",
+      "offer": "rgb(215, 224, 232)"
+    },
+    "ladderStillDeclared": "#e6eae3"
+  },
+  "tiles-1280": {
+    "n": 5,
+    "labels": [
+      "All queries",
+      "With you",
+      "With the agent",
+      "Offers",
+      "Past expected"
+    ],
+    "counts": [
+      54,
+      8,
+      30,
+      1,
+      0
+    ],
+    "activeFill": "rgb(255, 255, 255)",
+    "activeBorder": "rgb(20, 20, 18)"
+  },
+  "list-1280": {
+    "rows": 54,
+    "rowH": 68.1,
+    "headTop": 450.546875,
+    "fitIn1000": 7,
+    "pillTinted": "rgb(247, 239, 227)"
+  },
+  "board-1280": {
+    "cols": 7,
+    "order": [
+      "queried",
+      "preq",
+      "psent",
+      "freq",
+      "fsent",
+      "offer",
+      "closed"
+    ],
+    "heads": [
+      {
+        "rule": "rgb(231, 217, 189)",
+        "accent": "#e7d9bd",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(232, 201, 187)",
+        "accent": "#e8c9bb",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(199, 208, 194)",
+        "accent": "#c7d0c2",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(232, 201, 187)",
+        "accent": "#e8c9bb",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(199, 208, 194)",
+        "accent": "#c7d0c2",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(201, 214, 225)",
+        "accent": "#c9d6e1",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(207, 201, 193)",
+        "accent": "#cfc9c1",
+        "fill": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "factH": 40,
+    "overlapGap": -40,
+    "bandedCards": 6,
+    "lastShowsFact": "0px"
+  },
+  "palette-1440": {
+    "bands": {
+      "queried": "rgb(247, 239, 227)",
+      "closed": "rgb(228, 225, 219)",
+      "you": "rgb(245, 230, 223)",
+      "agent": "rgb(224, 229, 221)",
+      "offer": "rgb(215, 224, 232)"
+    },
+    "ladderStillDeclared": "#e6eae3"
+  },
+  "tiles-1440": {
+    "n": 5,
+    "labels": [
+      "All queries",
+      "With you",
+      "With the agent",
+      "Offers",
+      "Past expected"
+    ],
+    "counts": [
+      54,
+      8,
+      30,
+      1,
+      0
+    ],
+    "activeFill": "rgb(255, 255, 255)",
+    "activeBorder": "rgb(20, 20, 18)"
+  },
+  "list-1440": {
+    "rows": 54,
+    "rowH": 68.1,
+    "headTop": 401.703125,
+    "fitIn1000": 8,
+    "pillTinted": "rgb(247, 239, 227)"
+  },
+  "board-1440": {
+    "cols": 7,
+    "order": [
+      "queried",
+      "preq",
+      "psent",
+      "freq",
+      "fsent",
+      "offer",
+      "closed"
+    ],
+    "heads": [
+      {
+        "rule": "rgb(231, 217, 189)",
+        "accent": "#e7d9bd",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(232, 201, 187)",
+        "accent": "#e8c9bb",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(199, 208, 194)",
+        "accent": "#c7d0c2",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(232, 201, 187)",
+        "accent": "#e8c9bb",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(199, 208, 194)",
+        "accent": "#c7d0c2",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(201, 214, 225)",
+        "accent": "#c9d6e1",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(207, 201, 193)",
+        "accent": "#cfc9c1",
+        "fill": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "factH": 40,
+    "overlapGap": -40,
+    "bandedCards": 6,
+    "lastShowsFact": "0px"
+  },
+  "palette-1920": {
+    "bands": {
+      "queried": "rgb(247, 239, 227)",
+      "closed": "rgb(228, 225, 219)",
+      "you": "rgb(245, 230, 223)",
+      "agent": "rgb(224, 229, 221)",
+      "offer": "rgb(215, 224, 232)"
+    },
+    "ladderStillDeclared": "#e6eae3"
+  },
+  "tiles-1920": {
+    "n": 5,
+    "labels": [
+      "All queries",
+      "With you",
+      "With the agent",
+      "Offers",
+      "Past expected"
+    ],
+    "counts": [
+      54,
+      8,
+      30,
+      1,
+      0
+    ],
+    "activeFill": "rgb(255, 255, 255)",
+    "activeBorder": "rgb(20, 20, 18)"
+  },
+  "list-1920": {
+    "rows": 54,
+    "rowH": 68.1,
+    "headTop": 401.703125,
+    "fitIn1000": 8,
+    "pillTinted": "rgb(247, 239, 227)"
+  },
+  "board-1920": {
+    "cols": 7,
+    "order": [
+      "queried",
+      "preq",
+      "psent",
+      "freq",
+      "fsent",
+      "offer",
+      "closed"
+    ],
+    "heads": [
+      {
+        "rule": "rgb(231, 217, 189)",
+        "accent": "#e7d9bd",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(232, 201, 187)",
+        "accent": "#e8c9bb",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(199, 208, 194)",
+        "accent": "#c7d0c2",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(232, 201, 187)",
+        "accent": "#e8c9bb",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(199, 208, 194)",
+        "accent": "#c7d0c2",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(201, 214, 225)",
+        "accent": "#c9d6e1",
+        "fill": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "rule": "rgb(207, 201, 193)",
+        "accent": "#cfc9c1",
+        "fill": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "factH": 40,
+    "overlapGap": -40,
+    "bandedCards": 6,
+    "lastShowsFact": "0px"
+  },
+  "drawer-Grid": {
+    "tile": "With the agent",
+    "view": "Grid",
+    "url": null
+  },
+  "drawer-List": {
+    "tile": "With the agent",
+    "view": "List",
+    "url": "list"
+  },
+  "drawer-Board": {
+    "tile": "With the agent",
+    "view": "Board",
+    "url": "board"
+  }
+}
