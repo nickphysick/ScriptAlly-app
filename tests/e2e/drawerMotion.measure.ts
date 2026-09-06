@@ -77,7 +77,16 @@ test("the drawer pushes, moves as one, and can be left", async ({ page }) => {
                   Math.round(split.getBoundingClientRect().width * 100) / 100]);
         if (++n < 40) requestAnimationFrame(tick); else done(seq);
       };
-      requestAnimationFrame(() => { row.click(); requestAnimationFrame(tick); });
+      /* ⚠️ THE OPEN IS THE SECOND CLICK (tightened round, Phase 2) — the first FOCUSES the row and
+         drops its action strip. The frames captured here must start at the OPEN, so the focus
+         click happens first and outside the capture; a capture that started at the focus click
+         would record the strip's 160ms drop-in as the drawer's motion. */
+      row.click();
+      requestAnimationFrame(() => {
+        const f = document.querySelector(".tlc .row.focus") || row;
+        f.click();
+        requestAnimationFrame(tick);
+      });
     }))()`) as [number, number, number, number][];
 
     const firstMove = (i: number) => frames.findIndex((f) => Math.abs(f[i] - frames[0][i]) > 0.5);
@@ -156,7 +165,7 @@ test("the drawer pushes, moves as one, and can be left", async ({ page }) => {
       `(() => { const r = document.querySelector(".tlc .row.sel"); return r ? r.textContent.trim().slice(0, 40) : null; })()`) as Promise<string | null>;
     const first = await keyOf();
 
-    await page.locator('.tpn .b-nav button[aria-label="Next task"]').click();
+    await page.locator('.tpn .dnav button[aria-label="Next task"]').click();
     await page.waitForTimeout(260);
     const afterNext = await keyOf();
     const openAfterNext = await page.evaluate(`document.querySelector(".tdw-split").classList.contains("open")`) as boolean;
@@ -195,7 +204,7 @@ test("the drawer pushes, moves as one, and can be left", async ({ page }) => {
     })()`) as { scroll: number; row: string | null; rowH: number };
     const scrolled = before.scroll;
 
-    await page.locator(".tpn .b-nav .b-close").click();
+    await page.locator(".tpn .dnav .b-close").click();
     await page.waitForFunction(SETTLED, null, { timeout: 5_000 }).catch(() => {});
     const closedByChip = await page.evaluate(`(() => ({
       open: document.querySelector(".tdw-split").classList.contains("open"),
@@ -220,7 +229,10 @@ test("the drawer pushes, moves as one, and can be left", async ({ page }) => {
         + " · scrollTop " + scrolled + " → " + closedByChip.scroll
         + " (anchoring, against a row height of " + before.rowH + ")");
 
+    /* two clicks a render apart — the contract's click grammar (focus, then open) */
     await page.locator(".tlc .row").first().click();
+    await page.waitForFunction("!!document.querySelector('.tlc .actrow.show')", null, { timeout: 5_000 }).catch(() => {});
+    await page.locator(".tlc .row.focus").first().click();
     await page.waitForFunction(SETTLED, null, { timeout: 5_000 }).catch(() => {});
     await page.evaluate(`document.activeElement && document.activeElement.blur()`);
     await page.keyboard.press("Escape");
@@ -246,7 +258,10 @@ test("the drawer pushes, moves as one, and can be left", async ({ page }) => {
        that matched an element with no box. The floor below is what makes it a measurement. */
     const sideBefore = await page.evaluate(
       `(() => { const a = document.querySelector(".ws-panel"); return a ? Math.round(a.getBoundingClientRect().width) : -1; })()`) as number;
+    /* two clicks a render apart — the contract's click grammar (focus, then open) */
     await page.locator(".tlc .row").first().click();
+    await page.waitForFunction("!!document.querySelector('.tlc .actrow.show')", null, { timeout: 5_000 }).catch(() => {});
+    await page.locator(".tlc .row.focus").first().click();
     await page.waitForFunction(SETTLED, null, { timeout: 5_000 }).catch(() => {});
     const sideAfter = await page.evaluate(
       `(() => { const a = document.querySelector(".ws-panel"); return a ? Math.round(a.getBoundingClientRect().width) : -1; })()`) as number;

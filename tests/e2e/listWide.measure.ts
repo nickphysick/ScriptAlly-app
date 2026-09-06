@@ -92,7 +92,7 @@ test("the list at full width, the columns, and the action control", async ({ pag
         !!fill && restTracks.length === 2 && parseFloat(restTracks[1]) === 0 && parseFloat(fill.gap) === 0,
         fill ? "grid-template-columns = " + fill.tracks + " · gap " + fill.gap : "not found");
 
-    /* ── the row's seven columns ─────────────────────────────────────────────────────────── */
+    /* ── the row's four columns (tightened round, Phase 2: pill · deed · agent · wait) ──── */
     const row = await page.evaluate(`(() => {
       const r = document.querySelector(".tlc .row");
       const card = document.querySelector(".tlc");
@@ -101,88 +101,43 @@ test("the list at full width, the columns, and the action control", async ({ pag
       const cellW = (sel) => { const e = r.querySelector(sel); if (!e) return null;
         const b = e.getBoundingClientRect(); return Math.round(b.width * 10) / 10; };
       const vis = (sel) => { const e = r.querySelector(sel); return e ? getComputedStyle(e).visibility : "absent"; };
-      const meta = r.querySelector(".r-meta");
       return {
-        hasms: card.classList.contains("hasms"),
-        tracks, ms: cellW(".r-ms"), msVis: vis(".r-ms"),
-        ag: cellW(".r-ag"), agc: cellW(".r-agc"), fig: cellW(".r-fig"),
-        msText: ((r.querySelector(".r-ms") || {}).textContent || "").trim(),
+        tracks, ag: cellW(".r-ag"), fig: cellW(".r-fig"),
+        who: !!r.querySelector(".r-deed .r-who"),
         avatar: (() => { const a = r.querySelector(".av.s"); if (!a) return null;
           const b = a.getBoundingClientRect(); const s = getComputedStyle(a);
           return { w: Math.round(b.width), h: Math.round(b.height), bg: s.backgroundColor, bd: s.borderTopColor,
                    bw: s.borderTopWidth, txt: (a.textContent || "").trim() }; })(),
-        metaShown: meta ? getComputedStyle(meta).display : "absent",
       };
     })()`) as any;
 
-    add("P1.4 @" + w + " · the wide row is a SEVEN-track grid",
-        !!row && row.tracks.length === 7, row ? "tracks = [" + row.tracks.join(", ") + "]" : "no row");
+    add("P1.4 @" + w + " · the wide row is a FOUR-track grid",
+        !!row && row.tracks.length === 4, row ? "tracks = [" + row.tracks.join(", ") + "]" : "no row");
     /* the harness account holds four manuscripts, so this is the PRESENT half of the brief's pair */
-    add("P1.5 @" + w + " · the manuscript column is present and carries ink (4 manuscripts)",
-        !!row && row.hasms && (row.ms ?? 0) > 0 && row.msVis === "visible",
-        row ? "hasms=" + row.hasms + " width=" + row.ms + " visibility=" + row.msVis + " text=" + JSON.stringify(row.msText) : "no row");
+    /* (P1.5 is DELETED — the manuscript COLUMN is retired with the 44px row; the name rides the action strip's meta, measured in tightened.measure.ts P2.3) */
 
-    /* ⚠️ THE ABSENT HALF, MEASURED BY THE CLASS RATHER THAN BY A SECOND ACCOUNT. The harness
-       account has four manuscripts and a one-manuscript fixture would mean deleting three, which
-       cascades their queries. The RULE (showsManuscriptColumn) and the WIRING (the flag reaching
-       this class) are locked in the unit spec; what only a browser can answer is what the class
-       does to the track, and that is what this measures. Stated as the split it is. */
-    const off = await page.evaluate(`(() => {
-      const card = document.querySelector(".tlc");
-      if (!card) return null;
-      card.classList.remove("hasms");
-      const r = card.querySelector(".row");
-      const tracks = getComputedStyle(r).gridTemplateColumns.trim().split(/[ ]+/).map(Number);
-      const ms = r.querySelector(".r-ms");
-      const res = { tracks, w: Math.round(ms.getBoundingClientRect().width * 10) / 10,
-                    vis: getComputedStyle(ms).visibility,
-                    deed: Math.round(r.querySelector(".r-said").getBoundingClientRect().width * 10) / 10 };
-      card.classList.add("hasms");
-      return res;
-    })()`) as any;
+    /* (the `hasms` probe went with P1.5 and P1.6 — there is no manuscript track to switch, and
+       `showsManuscriptColumn` governs the SORT MENU's grouping option now rather than a column.) */
+    /* (P1.6 is DELETED — same retirement — there is no manuscript track to be zero) */
 
-    add("P1.6 @" + w + " · without the class the manuscript track is ZERO and its ink is hidden",
-        !!off && off.w === 0 && off.vis === "hidden",
-        off ? "track = " + off.tracks[4] + " · cell width " + off.w + " · visibility " + off.vis : "not found");
-
-    /* ── the action control ──────────────────────────────────────────────────────────────── */
-    const act = await page.evaluate(`(() => {
+    /* (the `.actb` probes and the row hover went with P1.7 and P1.8 — the action strip is a
+       SIBLING beneath the row, so there is no control inside the row to measure at rest or under
+       the pointer. What replaced them is measured in `tightened.measure.ts` P2.2–P2.4, which
+       checks the strip's POSITION rather than a chip's fill: below the row, covering nothing. */
+    /* ⚠️ THE LAW SURVIVES ITS OLD SUBJECT (tightened round, Phase 5). It used to be stated about
+       `.actb` — "the action chip is a span, not a second tab stop" — and the chip is gone. The
+       claim underneath it is about the ROW: the row IS the control, and a focusable child would
+       put a second tab stop on every row for something the row already does. The strip is a
+       SIBLING, so it is legitimately focusable and legitimately not inside the row. */
+    const focusable = await page.evaluate(`(() => {
       const r = document.querySelector(".tlc .row");
-      const a = r && r.querySelector(".actb");
-      if (!a) return null;
-      const s = getComputedStyle(a);
-      const word = a.querySelector(".w");
-      return { tag: a.tagName, bg: s.backgroundColor, bd: s.borderTopColor, colour: s.color,
-               wordShown: word ? getComputedStyle(word).display : "absent",
-               tabbable: !!r.querySelector("button, a[href], input, [tabindex]:not([tabindex='-1'])") };
-    })()`) as any;
-
-    await page.locator(".tlc .row").first().hover();
-    await page.waitForTimeout(220);
-
-    const actHover = await page.evaluate(`(() => {
-      const a = document.querySelector(".tlc .row .actb");
-      if (!a) return null;
-      const s = getComputedStyle(a);
-      const word = a.querySelector(".w");
-      return { bg: s.backgroundColor, bd: s.borderTopColor, colour: s.color,
-               wordShown: word ? getComputedStyle(word).display : "absent" };
-    })()`) as any;
-
-    /* --pink is #f5e2da = rgb(245, 226, 218); at rest the fill must be fully transparent */
-    add("P1.7 @" + w + " · the action control is transparent at rest",
-        !!act && act.bg === "rgba(0, 0, 0, 0)" && act.bd === "rgba(0, 0, 0, 0)" && act.wordShown === "none",
-        act ? "background " + act.bg + " · border " + act.bd + " · the word is " + act.wordShown : "not found");
-    /* ⚠️ THE WORD'S COMPUTED DISPLAY IS `block`, NOT THE `inline` THE RULE STATES — `.actb` is an
-       inline-flex container and a direct child is blockified before anything can read it. So the
-       claim is "shown", not a spelling; asserting `inline` failed on a perfectly working control. */
-    add("P1.8 @" + w + " · under the row's hover it is --pink and says the word",
-        !!actHover && actHover.bg === "rgb(245, 226, 218)" && actHover.wordShown !== "none",
-        actHover ? "background " + actHover.bg + " · border " + actHover.bd + " · colour " + actHover.colour + " · the word is " + actHover.wordShown : "not found");
-    /* ⚠️ THE ROW IS THE ONLY CONTROL IN THE ROW — no second tab stop per row */
-    add("P1.9 @" + w + " · the row holds no focusable child",
-        !!act && act.tag === "SPAN" && act.tabbable === false,
-        act ? "the control is a <" + act.tag.toLowerCase() + "> · focusable children = " + act.tabbable : "not found");
+      if (!r) return null;
+      return { role: r.getAttribute("role"),
+        kids: r.querySelectorAll("button, a[href], input, [tabindex]:not([tabindex='-1'])").length };
+    })()`) as { role: string; kids: number } | null;
+    add("P1.9 @" + w + " · the row IS the control, and holds no focusable child",
+        !!focusable && focusable.role === "button" && focusable.kids === 0,
+        focusable ? "role=" + focusable.role + " · focusable children = " + focusable.kids : "no row");
 
     /* ── the avatar ──────────────────────────────────────────────────────────────────────── */
     add("P1.10 @" + w + " · the agent's disc is 22px, blush, with a burgundy hairline",
@@ -193,13 +148,13 @@ test("the list at full width, the columns, and the action control", async ({ pag
           ? row.avatar.w + "x" + row.avatar.h + " · " + row.avatar.bg + " · " + row.avatar.bw + " " + row.avatar.bd + " · " + JSON.stringify(row.avatar.txt)
           : "no avatar on the first row");
 
-    /* ⚠️ THE META LINE AND THE COLUMNS ARE THE SAME FACTS, so exactly one of them shows. Wide, the
-       sentence is redundant and hidden; folded (below) it is the only place those facts survive. */
-    add("P1.11 @" + w + " · the meta sentence is hidden while the columns carry its facts",
-        !!row && row.metaShown === "none", row ? "display = " + row.metaShown : "no row");
+    /* (P1.11 is DELETED — the two-line meta is retired with the 44px row; the agent rides the deed inline, asserted in taskListWide.test.tsx and tightened P2.5) */
 
     /* ── the folded geometry, which Phase 2 will animate ─────────────────────────────────── */
+    /* two clicks a render apart — the contract's click grammar (focus, then open) */
     await page.locator(".tlc .row").first().click();
+    await page.waitForFunction("!!document.querySelector('.tlc .actrow.show')", null, { timeout: 5_000 }).catch(() => {});
+    await page.locator(".tlc .row.focus").first().click();
     /* ⚠️ WAIT FOR THE MOTION, NEVER FOR A NUMBER OF MILLISECONDS. A fixed 320ms against a 380ms
        transition read the card at 523px and 525px — a true measurement of a box still moving,
        reported as a 3px design error. `getAnimations()` includes CSS transitions, so an empty list
@@ -212,22 +167,24 @@ test("the list at full width, the columns, and the action control", async ({ pag
       const split = document.querySelector(".tdw-split");
       const r = card && card.querySelector(".row");
       if (!card || !split || !r) return null;
-      const meta = r.querySelector(".r-meta");
       return {
         open: split.classList.contains("open"), folded: card.classList.contains("folded"),
         cardW: Math.round(card.getBoundingClientRect().width),
         tracks: getComputedStyle(r).gridTemplateColumns.trim().split(/[ ]+/).length,
-        metaShown: meta ? getComputedStyle(meta).display : "absent",
-        actShown: getComputedStyle(r.querySelector(".actb")).display,
+        h: Math.round(r.getBoundingClientRect().height),
+        agShown: getComputedStyle(r.querySelector(".r-ag")).display,
       };
     })()`) as any;
 
     add("P1.12 @" + w + " · opening a task folds the card to 520 and the row to three tracks",
         !!folded && folded.open && folded.folded && folded.cardW === 520 && folded.tracks === 3,
         folded ? "open=" + folded.open + " folded=" + folded.folded + " card=" + folded.cardW + "px tracks=" + folded.tracks : "not found");
-    add("P1.13 @" + w + " · folded, the meta sentence comes back and the action control goes",
-        !!folded && folded.metaShown === "block" && folded.actShown === "none",
-        folded ? "meta " + folded.metaShown + " · action " + folded.actShown : "not found");
+    /* ⚠️ AND THE ROW IS STILL 44 — the fold drops the agent CELL and changes nothing else, which
+       is the density claim's other half: before this round the folded row wrapped to ~58px, so
+       every scroll position in the list moved when the drawer opened. */
+    add("P1.13 @" + w + " · folded, the agent cell goes and the row is still 44px",
+        !!folded && folded.agShown === "none" && Math.abs(folded.h - 44) <= 0.5,
+        folded ? "agent cell " + folded.agShown + " · row " + folded.h + "px" : "not found");
 
     /* ⚠️ THE CLOSE IS PHASE 2's, AND PHASE 1 FOUND THE CAUSE RATHER THAN BUILDING IT. There is no
        way to close the pane today by ANY route: `closeDock` has no caller (defined in

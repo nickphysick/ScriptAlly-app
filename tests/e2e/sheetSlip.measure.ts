@@ -1,5 +1,12 @@
 /**
- * ⚠️ THE SHEET AND THE QUICK REFERENCE SLIP — drawer round, Phase 3.
+ * ⚠️ THE SHEET AND THE QUICK REFERENCE — drawer round Phase 3, RETARGETED by the tightened
+ * round's Phase 4 (5 Sep). The reference was a floating SLIP beside the sheet; it is a COLUMN OF
+ * THE SHEET now, so every claim below that was about the slip's own card — its rim, its bookmark
+ * tab, its 264px slot — is either restated about the column or DELETED with its object. What
+ * survives unchanged is the pair of laws this file exists for, and they matter more, not less:
+ * the WRAP LAW (now: the DOCUMENT's width cannot change when the reference is put aside) and the
+ * HEIGHT RULE, whose from-parts derivation and branch tally are still the strongest statement of
+ * it anywhere in the suite.
  *
  * The three floating cards become ONE framed object and one slip beside it. Two of the claims
  * below were written and PROVED RED against the three-card build before a line of it was changed,
@@ -50,7 +57,14 @@ test("the sheet is one object, the slip is beside it, and the band never hears a
     const rows = await page.evaluate(`document.querySelectorAll(".tlc .row").length`) as number;
     add("P3.0 @" + w + " · rows on the board, so there is a task to open", rows > 1, "rows = " + rows);
 
+    /* ⚠️ TWO CLICKS, A RENDER APART (tightened round, Phase 2's grammar) — the first FOCUSES the
+       row and drops its action strip, the second opens. With one click the pane never mounted, so
+       every probe below read null and the `› Next task` locator waited out the whole test for an
+       element that could not appear: a HANG rather than a red, which reports as a timeout and
+       says nothing about the page. */
     await page.locator(".tlc .row").first().click();
+    await page.waitForFunction("!!document.querySelector('.tlc .actrow.show')", null, { timeout: 5_000 }).catch(() => {});
+    await page.locator(".tlc .row.focus").first().click();
     await page.waitForFunction(SETTLED, null, { timeout: 5_000 }).catch(() => {});
 
     /* ── one framed object ──────────────────────────────────────────────────────────────── */
@@ -66,7 +80,7 @@ test("the sheet is one object, the slip is beside it, and the band never hears a
         cards: work.querySelectorAll(".fc").length,
         sheets: work.querySelectorAll(".sheet").length,
         rimsInSheet: sheet ? sheet.querySelectorAll(".rim").length : -1,
-        bandInSheet: !!(sheet && sheet.querySelector(".band")),
+        bandInSheet: !!(sheet && sheet.querySelector(".dhead")),
         workInSheet: !!(sheet && sheet.querySelector(".work, .workscroll")),
         footInSheet: !!(sheet && sheet.querySelector(".foot")),
       };
@@ -75,7 +89,7 @@ test("the sheet is one object, the slip is beside it, and the band never hears a
         !!shape && shape.sheets === 1 && shape.rimsInSheet === 1
           && shape.bandInSheet && shape.workInSheet && shape.footInSheet,
         shape ? "sheets " + shape.sheets + " · rims inside " + shape.rimsInSheet
-          + " · band " + shape.bandInSheet + " · work " + shape.workInSheet + " · foot " + shape.footInSheet
+          + " · header " + shape.bandInSheet + " · work " + shape.workInSheet + " · foot " + shape.footInSheet
           + " · loose .fc cards " + shape.cards : "no drawer");
 
     /* ── ⚠️ THE HEIGHT RULE, STATED AS A RULE RATHER THAN AS TWO SAMPLES ────────────────── */
@@ -106,7 +120,7 @@ test("the sheet is one object, the slip is beside it, and the band never hears a
       const rim = sheet.querySelector(".rim");
       const scroller = sheet.querySelector(".workscroll");
       const foot = sheet.querySelector(".foot");
-      const band = sheet.querySelector(".band");
+      const band = sheet.querySelector(".dhead");
       const pad = sheet.getBoundingClientRect().height - rim.getBoundingClientRect().height;
       const over = scroller ? scroller.scrollHeight - scroller.clientHeight : 0;
       /* the rim's own top and bottom borders are between the sheet's padding and its contents, and
@@ -136,21 +150,40 @@ test("the sheet is one object, the slip is beside it, and the band never hears a
           + " · " + (short.over > 0 ? "CAPPED, work overflows by " + short.over : "HUGGING") : "no sheet");
     if (short) seen.add(short.over > 0 ? "capped" : "hugging");
 
-    /* ⚠️ THE SECOND SAMPLE IS THE LONGEST JOURNEY ON THE BOARD, chosen by measuring rather than by
-       naming a card — a fixture that drifts would otherwise make this the first case twice, which
-       is the monoculture fault this repo already records. */
-    const longest = await page.evaluate(`(() => {
+    /* ⚠️ THE SECOND SAMPLE IS THE TALLEST SHEET ON THE BOARD, FOUND BY OPENING ROWS AND
+       MEASURING — not by scoring their pills. The pill heuristic ("Close beats Send beats the
+       rest") is a PROXY for length, and it picked a housekeeping close whose sheet came to 575
+       against a 614 cap: hugging, so the run's tally reported the capping branch as never
+       exercised, which it was. The proxy was reasonable and wrong, and only the tally said so.
+       Each candidate is opened, its fork answered if it has one, and its sheet measured; the
+       tallest wins. That is slower and it is the only version that means what it says. */
+    const longest = await page.evaluate(`(async () => {
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       const rows = [...document.querySelectorAll(".tlc .row")];
-      let best = 0, bestN = -1;
-      for (let i = 0; i < rows.length; i++) {
-        const pill = ((rows[i].querySelector(".pill") || {}).textContent || "").trim();
-        const score = pill === "Close" ? 3 : pill === "Send" ? 2 : 1;
-        if (score > best) { best = score; bestN = i; }
+      let best = -1, bestN = -1;
+      for (let i = 0; i < Math.min(rows.length, 6); i++) {
+        const list = [...document.querySelectorAll(".tlc .row")];
+        if (!list[i]) continue;
+        list[i].click(); await sleep(140);
+        const f = document.querySelector(".tlc .row.focus"); if (f) f.click();
+        await sleep(650);
+        const fk = document.querySelector(".tpn .fk"); if (fk) { fk.click(); await sleep(550); }
+        const sh = document.querySelector(".tpn .sheet");
+        const h = sh ? sh.getBoundingClientRect().height : -1;
+        if (h > best) { best = h; bestN = i; }
       }
       return bestN;
     })()`) as number;
     if (longest > -1) {
       await page.locator(".tlc .row").nth(longest).click();
+      await page.waitForFunction("!!document.querySelector('.tlc .actrow.show')", null, { timeout: 5_000 }).catch(() => {});
+      await page.locator(".tlc .row.focus").first().click();
+      /* ⚠️ AND ITS LEDGER, NOT ITS FORK — the fork is three options and the ledger is four
+         questions plus what they open, so a "longest journey" that stopped at the fork measured
+         the SHORT state under a long name. It is what took the capping branch out of this run's
+         tally (P3.10 saw only "hugging"), which is the tally doing exactly its job. */
+      await page.waitForTimeout(400);
+      await page.evaluate(`(() => { const b = document.querySelector(".tpn .fk"); if (b) b.click(); })()`);
       await page.waitForTimeout(300);
     }
     const tall = await measureSheet();
@@ -162,14 +195,22 @@ test("the sheet is one object, the slip is beside it, and the band never hears a
     if (tall) seen.add(tall.over > 0 ? "capped" : "hugging");
 
     /* ── ⚠️ THE WRAP LAW ────────────────────────────────────────────────────────────────── */
-    /* The band's width, with the slip shown and with it dismissed. The ref grows the sheet when
-       the slip goes (`.wcol { flex: 1 1 auto }`), which re-wraps the deed — the brief forbids it
-       and this is where that correction lives. */
+    /* ⚠️ THE SUBJECT MOVED WITH THE REFERENCE AND THE LAW DID NOT (tightened round, Phase 4).
+       It was the BAND's width with the slip shown and dismissed; the band is retired and the
+       reference is a column of the sheet, so what must not move is the DOCUMENT — measured here
+       as the header row's width, which is the document's own track, plus the TITLE's line count,
+       which is what a reader actually notices when a measure changes under them. The ref still
+       gives the freed space back (`.sheet.railClosed { grid-template-columns: minmax(0,1fr) 30px }`);
+       the correction is now the sheet's own margin, and this is where it is held. */
+    /* ⚠️ THE DOCUMENT'S OWN TRACK, NOT THE HEADER — and the difference is the whole restructure.
+       The header row SPANS BOTH COLUMNS now, so it narrows with the sheet when the reference
+       collapses (546 → 336, measured) and is no longer a proxy for the document's width. What
+       must not move is the column the writer is reading. */
     const bandW = () => page.evaluate(
-      `(() => { const b = document.querySelector(".tdw-work .band");
+      `(() => { const b = document.querySelector(".tdw-work .form");
                 return b ? Math.round(b.getBoundingClientRect().width * 100) / 100 : -1; })()`) as Promise<number>;
     const deedLines = () => page.evaluate(
-      `(() => { const d = document.querySelector(".tdw-work .deed");
+      `(() => { const d = document.querySelector(".tdw-work .title");
                 if (!d) return -1;
                 const r = document.createRange(); r.selectNodeContents(d);
                 return r.getClientRects().length; })()`) as Promise<number>;
@@ -178,7 +219,7 @@ test("the sheet is one object, the slip is beside it, and the band never hears a
     const linesBefore = await deedLines();
 
     const dismissed = await page.evaluate(`(() => {
-      const x = document.querySelector(".tdw-work .qr .x, .tdw-work .rhead .x");
+      const x = document.querySelector(".tdw-work .rail .qhead .cl");
       if (!x) return false;
       x.click();
       return true;
@@ -187,62 +228,66 @@ test("the sheet is one object, the slip is beside it, and the band never hears a
     const bandAfter = await bandW();
     const linesAfter = await deedLines();
 
-    add("P3.4 @" + w + " · the slip has a dismiss of its own",
-        dismissed, dismissed ? "the slip's × was found and pressed" : "no × inside the slip");
-    add("P3.5 @" + w + " · THE WRAP LAW — the band's width is identical with the slip gone",
+    add("P3.4 @" + w + " · the reference column has a collapse of its own",
+        dismissed, dismissed ? "the column's chevron was found and pressed" : "no chevron in the column");
+    add("P3.5 @" + w + " · THE WRAP LAW — the document's width and the title's line count are identical with the reference put aside",
         dismissed && bandBefore > 0 && Math.abs(bandAfter - bandBefore) < 0.5 && linesAfter === linesBefore,
-        "band " + bandBefore + " → " + bandAfter + " · the deed sets " + linesBefore + " → " + linesAfter + " lines");
+        "document " + bandBefore + " → " + bandAfter + " · the title sets " + linesBefore + " → " + linesAfter + " lines");
 
-    /* the tab exists only when the slip is dismissed */
+    /* the spine IS the collapsed column — it exists only once the reference is put aside */
     const tabWhenGone = await page.evaluate(`(() => {
-      const t = document.querySelector(".tdw-work .qrtab");
+      const t = document.querySelector(".tdw-work .rail .rh");
       if (!t) return "absent";
       const r = t.getBoundingClientRect();
       return r.width > 0 && r.height > 0 ? "shown" : "hidden";
     })()`) as string;
-    add("P3.6 @" + w + " · the bookmark tab appears once the slip is put away",
-        tabWhenGone === "shown", "the tab is " + tabWhenGone);
+    add("P3.6 @" + w + " · the spine appears once the reference is put away",
+        tabWhenGone === "shown", "the spine is " + tabWhenGone);
 
     /* ⚠️ DISMISSAL IS REMEMBERED FOR THE SESSION, NOT PER TASK — so walking with › must not bring
-       it back. A per-task memory would make the slip flicker in and out as you walk the list. */
-    await page.locator('.tdw-work .b-nav button[aria-label="Next task"]').click().catch(() => {});
+       it back. A per-task memory would make the reference flicker in and out as you walk the list. */
+    await page.locator('.tdw-work .dnav button[aria-label="Next task"]').click().catch(() => {});
     await page.waitForTimeout(320);
     const stillGone = await page.evaluate(`(() => {
-      const qr = document.querySelector(".tdw-work .qr");
+      const qr = document.querySelector(".tdw-work .rail");
       if (!qr) return "unmounted";
-      return qr.getBoundingClientRect().width > 0 ? "back" : "collapsed";
+      return qr.getBoundingClientRect().width > 40 ? "back" : "collapsed";
     })()`) as string;
     /* ⚠️ UNMOUNTED AND ZERO-WIDTH ARE BOTH "AWAY", and the precondition is what makes that safe
        to fold. A dismissed slip is not rendered at all, so `unmounted` is the honest reading of a
        working page; before the build it was ALSO the reading of a page with no slip — which is why
        the case requires `dismissed` first, and why it went green against the three-card pane until
        that guard was added in the red-before pass. */
+    /* ⚠️ "BACK" IS NOW A WIDTH, NOT A PRESENCE. The slip was UNMOUNTED when dismissed; the
+       column is always mounted and collapses to its 30px spine, so the reading that means "it
+       came back" is the OPEN width. A check still asking whether the element exists would pass
+       on a column that had reopened itself. */
     add("P3.7 @" + w + " · the dismissal survives walking to the next task",
-        dismissed && stillGone !== "back", "the slip is " + stillGone
+        dismissed && stillGone !== "back", "the reference is " + stillGone
         + " · it had been dismissed = " + dismissed);
 
-    /* restore it through the tab */
+    /* restore it through the spine */
     const restored = await page.evaluate(`(() => {
-      const t = document.querySelector(".tdw-work .qrtab");
+      const t = document.querySelector(".tdw-work .rail .rh");
       if (!t) return false;
       t.click();
       return true;
     })()`) as boolean;
     await page.waitForTimeout(360);
     const backShape = await page.evaluate(`(() => {
-      const qr = document.querySelector(".tdw-work .qr");
-      const t = document.querySelector(".tdw-work .qrtab");
+      const qr = document.querySelector(".tdw-work .rail");
+      const t = document.querySelector(".tdw-work .rail .rh");
       const tb = t ? t.getBoundingClientRect() : null;
       return { qr: qr ? Math.round(qr.getBoundingClientRect().width) : -1,
                tab: tb ? (tb.width > 0 && tb.height > 0 ? "shown" : "hidden") : "absent" };
     })()`) as { qr: number; tab: string };
-    add("P3.8 @" + w + " · the tab brings it back, and then the tab goes",
-        restored && backShape.qr === 264 && backShape.tab !== "shown",
-        "slip " + backShape.qr + "px · the tab is " + backShape.tab);
+    add("P3.8 @" + w + " · the spine brings it back at its full width, and the spine goes",
+        restored && backShape.qr === 240 && backShape.tab !== "shown",
+        "reference " + backShape.qr + "px · the spine is " + backShape.tab);
 
-    /* ── ⚠️ NOTHING IN THE SLIP IS EDITABLE — a COVERAGE sweep, not a first-level one ────── */
+    /* ── ⚠️ NOTHING IN THE REFERENCE IS EDITABLE — a COVERAGE sweep, not a first-level one ────── */
     const slipControls = await page.evaluate(`(() => {
-      const qr = document.querySelector(".tdw-work .qr");
+      const qr = document.querySelector(".tdw-work .rail");
       if (!qr) return null;
       const found = [];
       for (const el of qr.querySelectorAll("*")) {
@@ -252,19 +297,21 @@ test("the sheet is one object, the slip is beside it, and the band never hears a
           || (tag === "a" && el.getAttribute("href"))
           || (el.getAttribute("tabindex") && el.getAttribute("tabindex") !== "-1");
         if (!editable) continue;
-        const where = el.closest(".rhead") ? "head" : el.closest(".rfoot") ? "foot" : "body";
+        const where = el.closest(".qhead") ? "head" : el.closest(".qbtn") ? "foot" : "body";
         found.push(where + ":" + tag);
       }
       return found;
     })()`) as string[] | null;
-    /* ⚠️ EXACTLY TWO SURVIVE, AND THEY ARE IDENTIFIED BY WHERE THEY ARE, NOT BY A CLASS. The
-       query link carries no class of its own — a first form matched on one and reported the link
-       itself as a stray, which is a check going red about a page that is correct. The dismiss is
-       the button in the head; the link is the anchor in the foot; anything else is a stray. */
-    const strays = (slipControls ?? []).filter((c) => c !== "head:button" && c !== "foot:a");
-    add("P3.9 @" + w + " · the slip holds no control but its × and the query link",
-        !!slipControls && slipControls.length === 2 && strays.length === 0,
-        slipControls ? slipControls.length + " focusable: " + slipControls.join(", ") : "no slip");
+    /* ⚠️ EXACTLY THREE SURVIVE NOW, AND EVERY ONE IS NAMED BY THE CONTRACT — the chevron in the
+       head, the agent's → in the body, and the query link in the foot. It was two: the column
+       gained the agent row in the tightened round's Phase 4, and its arrow is a LINK to a record
+       rather than an act on this one, which is the distinction this case is actually about. They
+       are identified by WHERE they are rather than by a class, because the two links carry
+       different ones and a class-matched form once reported the query link itself as a stray. */
+    const strays = (slipControls ?? []).filter((c) => c !== "head:button" && c !== "foot:a" && c !== "body:a");
+    add("P3.9 @" + w + " · the reference holds no control but its chevron and its two links",
+        !!slipControls && slipControls.length <= 3 && strays.length === 0,
+        slipControls ? slipControls.length + " focusable: " + slipControls.join(", ") : "no reference");
   }
 
   /* ⚠️ BOTH BRANCHES, OR THE RULE IS HALF-PROVED. `min(a, b)` is satisfied trivially whenever the
