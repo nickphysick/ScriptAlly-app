@@ -35,6 +35,9 @@
     "design-refs/query-state-colours-v2.md": "afb95652695748b92fa24dc218a4f9ba0fa0f882a5cef72d61d00e75fc8f57c3",
     "design-refs/query-centre-v9-views-locked.html": "a6457fae24734048923b8a3573a0d3649aacc0a2d78663a2a1dd1c1a864f7e64",
     "design-refs/query-centre-v10-board-headline-locked.html": "8a193a9ea8b82ad36054904202cfca5f2bfb9d5894e95e62417788213c6c5f59",
-    "design-refs/query-centre-v14-list-standing-copy.html": "fe0bc2de3d3a8db7f514b3c6400b32c62d222bad0ad3252046996c1cc4242b7d"
+    "design-refs/query-centre-v14-list-standing-copy.html": "fe0bc2de3d3a8db7f514b3c6400b32c62d222bad0ad3252046996c1cc4242b7d",
+    "design-refs/todo-qc-style.html": "7675f3651966d5aedb024f243ddc7052268c76d6575eb51ffe21f74185121c35",
+    "design-refs/todo-card-options.html": "a84775109b5b4cd052234a1a60a2481e9d06038946a085d6f55c97dd6789caf0",
+    "design-refs/todo-reference-card.html": "a93d4a078af74d98ede267d02395f47dd1e21f5cd7774ae9dc96ee5f141358b9"
   }
 }
