@@ -1,0 +1,4 @@
+todo      /todo                  heading="To-do list" grid=768 ink=3220 boundary=false consoleErrors=0
+queries   /queries               heading="Query Centre" grid=768 ink=7472 boundary=false consoleErrors=0
+packages  /manuscripts/packages  heading="Submission packages" grid=752 ink=1196 boundary=false consoleErrors=0
+calendar  /todo/calendar         heading="Calendar" grid=768 ink=3608 boundary=false consoleErrors=0
