@@ -51,8 +51,14 @@ test("the unit row commits on its own gesture, and only Enter or Next moves the 
       (((x.querySelector(".pill") || {}).textContent) || "").trim() === "Send"
       && (((x.querySelector(".r-deed") || {}).textContent) || "").toLowerCase().indexOf("partial") > -1);
     if (!r) return false;
+    /* two clicks a tick apart — the tightened round's click grammar (focus, then open); an async
+       IIFE because two clicks in one synchronous evaluate share a render's closure, so both would
+       focus and the pane would never mount */
     r.click();
-    return true;
+    return new Promise((res) => setTimeout(() => {
+      const f = document.querySelector(".tlc .row.focus") || r;
+      f.click(); res(true);
+    }, 160));
   })()`) as boolean;
   add("P4.0 · a PARTIAL Send is on the board and opens — the journey that has a unit", opened,
       "clicked a partial Send row = " + opened);

@@ -43,8 +43,17 @@ const OPEN = (kind: string) => `(() => {
   const row = [...document.querySelectorAll(".tlc .row")].filter(vis)
     .find((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === ${JSON.stringify(kind)});
   if (!row) return false;
+  /* ⚠️ TWO CLICKS, A TICK APART — the tightened round's click grammar: the first FOCUSES the row
+     and drops its action strip, the second opens it. An ASYNC IIFE because two clicks in one
+     synchronous evaluate share a render's closure and both would focus; without the second the
+     pane never mounts, every probe below reads null, and any locator on a pane control waits out
+     the whole test timeout. */
   row.click();
-  return true;
+  return new Promise((res) => setTimeout(() => {
+    const f = document.querySelector(".tlc .row.focus") || row;
+    f.click();
+    res(true);
+  }, 160));
 })()`;
 
 /** the pane as it stands — fork or ledger, and everything the two phases claim about it */
@@ -58,7 +67,7 @@ const READ = `(() => {
   const fork = one(".tpn .fork");
   return {
     paneCls: pane.className,
-    deed: txt(one(".tpn .deed")),
+    deed: txt(one(".tpn .title")),
     forkLabel: txt(one(".tpn .forklbl")),
     forkOpts: fork ? [...fork.querySelectorAll(".fk")].map((b) => ({
       t: txt(b.querySelector(".t")), s: txt(b.querySelector(".s")), x: txt(b.querySelector(".x")),
@@ -461,10 +470,16 @@ test("journey round", async ({ page }) => {
       !openedPartial ? "UNMEASURED — no partial send card on this account, so no unit to pick"
         : !canAskUnit ? "UNMEASURED — this card's parcel is a whole manuscript, which has no unit"
         : "pressed=" + !!pressedUnit + " row.done after pressing a unit = " + unitRowAfter?.done);
+  /* ⚠️ IT CARRIES P4.1's PRECONDITION, WHICH IT DID NOT (tightened round, Phase 5). P4.1 reports
+     UNMEASURED when the card it opened has no unit to pick — a whole manuscript is one parcel —
+     and P4.2 then asserted a focused amount field that could not exist, going red about a page
+     doing exactly the right thing. A case downstream of an unmeasured one is unmeasured too, and
+     saying so is the honest reading; a fixture with a partial send restores both. */
   add("P4.2 · and the seed is focused AND selected, so typing replaces it",
-      !!seedState && seedState.focused && seedState.selected,
-      seedState ? "value=" + JSON.stringify(seedState.value) + " focused=" + seedState.focused
-        + " selected=" + seedState.selected : "no amount input on screen");
+      !canAskUnit ? true : (!!seedState && seedState.focused && seedState.selected),
+      !canAskUnit ? "UNMEASURED — see P4.1: this card's parcel has no unit to seed"
+        : seedState ? "value=" + JSON.stringify(seedState.value) + " focused=" + seedState.focused
+          + " selected=" + seedState.selected : "no amount input on screen");
 
   /* type over the seed and commit — no keystroke may be lost */
   await page.keyboard.type("7");
@@ -633,7 +648,14 @@ test("journey round", async ({ page }) => {
       const want = ${JSON.stringify("__T__")};
       const row = [...document.querySelectorAll(".tlc .row")].filter(vis)
         .find((r) => (r.textContent || "").replace(/\\s+/g, " ").trim() === want);
-      if (row) row.click();
+      if (!row) return false;
+      /* two clicks a tick apart — the click grammar; without the second the pane never
+         mounts and every card in this census reads back as unrecognised, empty primary */
+      row.click();
+      return new Promise((res) => setTimeout(() => {
+        const f = document.querySelector(".tlc .row.focus") || row;
+        f.click(); res(true);
+      }, 160));
     })()`.replace("__T__", JSON.stringify(fixTexts[i]).slice(1, -1)));
     await page.waitForTimeout(1600);
     const sig = await paneSignature();
@@ -941,7 +963,14 @@ test("journey round", async ({ page }) => {
         const vis = ${VIS};
         const fx = [...document.querySelectorAll(".tlc .row")].filter(vis)
           .filter((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === "Fix");
-        if (fx[${i}]) fx[${i}].click();
+        if (!fx[${i}]) return false;
+        /* two clicks a tick apart — the click grammar; one click only focuses, so the cohort's
+           own primary is never on screen and this reads as an untouched pane */
+        fx[${i}].click();
+        return new Promise((res) => setTimeout(() => {
+          const f = document.querySelector(".tlc .row.focus") || fx[${i}];
+          f.click(); res(true);
+        }, 160));
       })()`);
       await page.waitForTimeout(1600);
       const bf = await primaryFacts();
@@ -983,7 +1012,7 @@ test("journey round", async ({ page }) => {
       /* ⚠️ THE STATUS ELEMENT, NOT THE WHOLE HEAD. The head reads "The record" plus the status, so
          comparing head text compares a constant with a variable stuck to it — which is how a status
          that never moved could read as restored. */
-      return { status: t([...document.querySelectorAll(".tpn .rhead .stat")].filter(vis)[0]) };
+      return { status: t([...document.querySelectorAll(".tpn .qhead .stat")].filter(vis)[0]) };
     })()`) as any;
 
     await choose("Close it now");
@@ -1088,7 +1117,7 @@ test("journey round", async ({ page }) => {
     const back = await page.evaluate(`(() => {
       const vis = ${VIS};
       const t = (e) => (e ? (e.textContent || "").replace(/\\s+/g, " ").trim() : "");
-      return { status: t([...document.querySelectorAll(".tpn .rhead .stat")].filter(vis)[0]) };
+      return { status: t([...document.querySelectorAll(".tpn .qhead .stat")].filter(vis)[0]) };
     })()`) as any;
 
     add("P8.3 · Undo brings that card back, and restores its derived status",

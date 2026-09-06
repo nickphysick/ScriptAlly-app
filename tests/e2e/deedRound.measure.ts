@@ -22,13 +22,46 @@ const OPEN = (kind: string) => `(() => {
   const vis = ${VIS};
   const row = [...document.querySelectorAll(".tlc .row")].filter(vis)
     .find((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === ${JSON.stringify(kind)});
-  if (!row) return false; row.click(); return true;
+  if (!row) return false;
+  /* two clicks a tick apart — the tightened round's click grammar (focus, then open); an async
+     IIFE because two clicks in one synchronous evaluate share a render's closure */
+  row.click();
+  return new Promise((res) => setTimeout(() => {
+    const f = document.querySelector(".tlc .row.focus") || row;
+    f.click(); res(true);
+  }, 160));
 })()`;
+/**
+ * ⚠️ THE FORK IS THE FIRST QUESTION, AND THIS SUITE PREDATES IT — grafted here for the same
+ * reason it was grafted into workspaceRound, where its absence produced SEVENTEEN reds from one
+ * missing step. A journey opens on the DECISION now; until an intent is chosen there is no
+ * ledger, no rows and no strip, so every case downstream reads the fork's empty state and reports
+ * "This records—" as though the page were broken.
+ */
+const ANSWER_FORK = `(() => {
+  const vis = ${VIS};
+  const fk = [...document.querySelectorAll(".tpn .fk")].filter(vis)[0];
+  if (!fk) return false;
+  fk.click();
+  return true;
+})()`;
+
 const OPEN_BULK = `(() => {
   const vis = ${VIS};
   const row = [...document.querySelectorAll(".tlc .row")].filter(vis)
-    .find((r) => /imported queries are missing their materials/.test((r.querySelector(".r-meta") || {}).textContent || ""));
-  if (!row) return false; row.click(); return true;
+    /* the r-meta cell is RETIRED with the 44px row (no backticks in here: this comment lives
+       inside a template literal, and one would terminate the string — which it did, and the file
+       stopped compiling). The bulk row's sentence is in its deed now, so the search reads the
+       row's own text rather than a cell that no longer exists. */
+    .find((r) => /imported queries are missing their materials/.test(r.textContent || ""));
+  if (!row) return false;
+  /* two clicks a tick apart — the tightened round's click grammar (focus, then open); an async
+     IIFE because two clicks in one synchronous evaluate share a render's closure */
+  row.click();
+  return new Promise((res) => setTimeout(() => {
+    const f = document.querySelector(".tlc .row.focus") || row;
+    f.click(); res(true);
+  }, 160));
 })()`;
 
 test("deed round", async ({ page }) => {
@@ -43,18 +76,22 @@ test("deed round", async ({ page }) => {
     const opened = await page.evaluate(kind === "__bulk" ? OPEN_BULK : OPEN(kind));
     if (!opened) return null;
     await page.waitForTimeout(1300);
+    /* answer the fork — see ANSWER_FORK: without it every shape below is the fork's, not the
+       journey's, and the cases downstream read an empty ledger as a broken page */
+    await page.evaluate(ANSWER_FORK);
+    await page.waitForTimeout(900);
     return await page.evaluate(`(() => {
       const vis = ${VIS};
       const all = (s) => [...document.querySelectorAll(s)].filter(vis);
       const pane = all(".tpn .pane")[0];
       if (!pane) return null;
       const cs = (e) => getComputedStyle(e);
-      const deed = all(".tpn .deed")[0];
+      const deed = all(".tpn .title")[0];
 
       /* ⚠️ EVERY HEADING-ROLE ELEMENT, AND EVERY DESCENDANT OF EACH — the coverage assertion.
          Checking the deed's own children only would miss an emphasis nested two deep, which is
          exactly how a rule like this survives: nobody puts the offending span at the top level. */
-      const HEAD_SEL = ".tpn .deed, .tpn .f-h, .tpn .story-h .t, .tpn .story-h .stat, .tpn .notebody";
+      const HEAD_SEL = ".tpn .title, .tpn .f-h, .tpn .story-h .t, .tpn .story-h .stat, .tpn .notebody";
       const heads = all(HEAD_SEL);
       const shifted = [];
       for (const h of heads) {
@@ -69,6 +106,8 @@ test("deed round", async ({ page }) => {
         deedText: deed ? (deed.textContent || "").replace(/[ ]+/g, " ").trim() : "",
         deedEms: deed ? deed.querySelectorAll("i").length : 0,
         deedOldEms: deed ? deed.querySelectorAll("em").length : 0,
+        deedBolds: deed ? deed.querySelectorAll("b").length : 0,
+        deedLinks: deed ? deed.querySelectorAll("a.dl").length : 0,
         deedSize: deed ? cs(deed).fontSize : "",
         deedWeight: deed ? cs(deed).fontWeight : "",
         deedLh: deed ? cs(deed).lineHeight : "",
@@ -79,9 +118,20 @@ test("deed round", async ({ page }) => {
         will: (all(".tpn .willrec")[0] || {}).textContent || "",
         willLead: (all(".tpn .willrec .lead")[0] || {}).textContent || "",
         willTransform: all(".tpn .willrec")[0] ? cs(all(".tpn .willrec")[0]).textTransform : "",
-        storyHeadBg: all(".tpn .story-h")[0] ? cs(all(".tpn .story-h")[0]).backgroundImage : "",
-        storyStat: (all(".tpn .story-h .stat")[0] || {}).textContent || "",
-        storyCount: all(".tpn .story-h .c").length,
+        /* the story-h class has not existed for two rounds — it became the slip's rhead and is
+           the reference column's qhead now, so these three read nothing and P3.1/P3.2 have been
+           red on a page that was correct. (No backticks in here: this comment is inside a
+           template literal and one terminates the string.) The CLAIM changes with the object:
+           the header's fill is the Query Centre's LADDER value for this query's status, a flat
+           colour, where the slip wore one sage gradient whatever the query was doing. */
+        storyHeadBg: all(".tpn .qhead")[0] ? cs(all(".tpn .qhead")[0]).backgroundColor : "",
+        storyStat: (all(".tpn .qhead .st")[0] || {}).textContent || "",
+        storyCount: all(".tpn .qhead .c").length,
+        ladder: (() => { const probe = document.querySelector(".tpn");
+          if (!probe) return [];
+          return ["out-1","out-2","out-3","in-1","in-2","in-3","offer","closed"]
+            .map((k) => getComputedStyle(probe).getPropertyValue("--stage-" + k).trim())
+            .filter(Boolean); })(),
       };
     })()`) as any;
   };
@@ -99,24 +149,34 @@ test("deed round", async ({ page }) => {
   const close = await shapeOf("Close");
 
   /* ══ PHASE 1 · the deed is a sentence ════════════════════════════════════════════════════ */
-  add("P1.1 · the coverage scan reached every heading and their descendants",
-      !!send && send.headCount >= 2 && send.kidCount >= 2,
+  /* ⚠️ ONE HEADING, NOT TWO (tightened round, Phase 3) — the band's deed and its sub-line were
+     two; the sheet is a document with ONE title. The floor that matters is the DESCENDANTS: this
+     case exists so the colour scan below cannot pass by having reached nothing. */
+  add("P1.1 · the coverage scan reached the heading and its descendants",
+      !!send && send.headCount >= 1 && send.kidCount >= 2,
       send ? `headings=${send.headCount} descendants=${send.kidCount}` : "-");
   add("P1.2 · no element inside a heading shifts colour",
       [send, note, bulk, close].filter(Boolean).every((j: any) => j.shifted.length === 0),
       JSON.stringify([send, note, bulk, close].filter(Boolean).flatMap((j: any) => j.shifted).slice(0, 3)));
-  add("P1.3 · the send deed is the contract's sentence, italic and uncoloured",
+  /* ⚠️ THE ITALIC WAS RETIRED BY THE WORKSPACE ROUND AND THIS CASE WENT ON REQUIRING IT — the
+     stylesheet says so in as many words ("`.deed i` is retired with the italic it drew"), and the
+     reason is that italicising three of five spans reads as prose with something wrong with it
+     rather than as a filled-in form. Treatment C is what the sentence wears: variables at 600,
+     and a DOTTED UNDERLINE on the two that are records you can go and look at. */
+  add("P1.3 · the send deed is the contract's sentence — treatment C, and no italic",
       !!send && /^Send your (full|partial) manuscript for .+/.test(send.deedText)
-        && send.deedEms > 0 && send.deedOldEms === 0,
-      send ? `"${send.deedText}" i=${send.deedEms} em=${send.deedOldEms}` : "-");
-  /* ⚠️ RETARGETED WITH THE VALUE IT PINS (drawer round, Phase 4). 19px was the WIDE pane's size;
-     beside the Quick reference slip the sheet is ~280px at 1440, and a full send deed at 19
-     wrapped to EIGHT lines and starved the work area. 16.5/1.34 is the drawer contract's own
-     `.dd`, adopted with the chassis. The LAW this case carries is unchanged — the deed is Playfair
-     at 400, on a leading that clears the descender floor, and never the old 21/500 at 1.12. */
-  add("P1.4 · it is the drawer contract's Playfair 16.5/400 at 1.34, not the old 21/500 at 1.12",
-      !!send && send.deedSize === "16.5px" && send.deedWeight === "400"
-        && Math.abs(parseFloat(send.deedLh) - 16.5 * 1.34) < 1.5,
+        && send.deedEms === 0 && send.deedOldEms === 0 && send.deedBolds > 0 && send.deedLinks > 0,
+      send ? `"${send.deedText}" i=${send.deedEms} b=${send.deedBolds} links=${send.deedLinks}` : "-");
+  /* ⚠️ RETARGETED AGAIN, AND THE VALUE WENT BACK UP (tightened round, Phase 3). The drawer round
+     cut this to 16.5 because at ~280px a 19px deed wrapped to eight lines and starved the work
+     area to 122px; the sheet is a DOCUMENT now and this sentence is its TITLE, at the tightened
+     contract's 21/400. That is not a return to the old 21/500 at 1.12 — the weight and the
+     leading are the halves that mattered, and 1.3 is the Playfair descender floor. The narrow
+     column's risk was re-measured rather than assumed: 21px costs the title 109px of a 614px
+     sheet at 1440 and leaves the work 468 (`tightened.measure.ts` P3.8a). */
+  add("P1.4 · it is the tightened contract's Playfair 21/400 at 1.3 — never 500, never below the descender floor",
+      !!send && send.deedSize === "21px" && send.deedWeight === "400"
+        && Math.abs(parseFloat(send.deedLh) - 21 * 1.3) < 1.5,
       send ? `${send.deedSize}/${send.deedWeight} lh=${send.deedLh}` : "-");
   add("P1.5 · no placeholder text ever appears inside a deed",
       [send, note, bulk, close].filter(Boolean)
@@ -143,10 +203,20 @@ test("deed round", async ({ page }) => {
       () => /nothing yet/i.test(bulk.will) && !/·/.test(bulk.will), () => `"${bulk.will}"`);
 
   /* ══ PHASE 3 · the story panel speaks the Query Centre's voice ════════════════════════════ */
-  add("P3.1 · the story header carries the sage gradient",
-      !!send && /linear-gradient/.test(send.storyHeadBg)
-        && /215, 221, 213/.test(send.storyHeadBg) && /213, 219, 211/.test(send.storyHeadBg),
-      send ? send.storyHeadBg.slice(0, 80) : "-");
+  /* ⚠️ THE HEADER IS THE LADDER'S, NOT SAGE (tightened round, Phase 4). The claim underneath is
+     unchanged and stronger: the reference speaks the Query Centre's own voice. It did that with
+     one sage gradient for every query; it does it with THAT QUERY'S OWN RUNG now, so the colour
+     is a fact about the record rather than a house style. Asserted against the page's own
+     `--stage-*` values rather than a hex typed here — a literal would be a second copy of the
+     mapping under test. */
+  const rgbOf = (hex: string) => {
+    const h = hex.trim().replace("#", "");
+    if (h.length !== 6) return hex.trim();
+    return "rgb(" + parseInt(h.slice(0, 2), 16) + ", " + parseInt(h.slice(2, 4), 16) + ", " + parseInt(h.slice(4, 6), 16) + ")";
+  };
+  add("P3.1 · the reference's header carries one of the ladder's own stage tints",
+      !!send && (send.ladder || []).map(rgbOf).includes(send.storyHeadBg),
+      send ? send.storyHeadBg + " · ladder " + JSON.stringify((send.ladder || []).map(rgbOf)) : "-");
   add("P3.2 · the right-hand side is the query's status word, not an entry count",
       !!send && send.storyStat.trim().length > 0 && send.storyCount === 0,
       send ? `stat="${send.storyStat}" counts=${send.storyCount}` : "-");
@@ -156,6 +226,8 @@ test("deed round", async ({ page }) => {
     await page.goto("/todo"); await page.waitForTimeout(6000);
     if (!(await page.evaluate(OPEN("Send")))) return null;
     await page.waitForTimeout(1300);
+    await page.evaluate(ANSWER_FORK);
+    await page.waitForTimeout(900);
     /* answer everything, choosing the named reminder — the strip only states what is chosen */
     for (let i = 0; i < 5; i++) {
       await page.evaluate(`(() => {
@@ -173,7 +245,7 @@ test("deed round", async ({ page }) => {
        reads whatever pane happens to be open reports a true sentence about the wrong journey. */
     return await page.evaluate(`(() => {
       const vis = ${VIS};
-      const deed = [...document.querySelectorAll(".tpn .deed")].filter(vis)[0];
+      const deed = [...document.querySelectorAll(".tpn .title")].filter(vis)[0];
       if (!deed || !/^Send your /.test((deed.textContent || "").trim())) return "";
       const w = [...document.querySelectorAll(".tpn .willrec")].filter(vis)[0];
       return w ? (w.textContent || "").replace(/[ ]+/g, " ") : "";
@@ -200,10 +272,12 @@ test("deed round", async ({ page }) => {
   /* ══ PHASE 4 · custom date opens the calendar ═════════════════════════════════════════════ */
   await page.evaluate(OPEN("Send"));
   await page.waitForTimeout(1300);
+  await page.evaluate(ANSWER_FORK);
+  await page.waitForTimeout(900);
   const reveals: Record<string, unknown> = {};
   /* which journey the pane is actually showing when P4 runs — the diagnostic that was missing */
   reveals["deed"] = await page.evaluate(`(() => {
-    const d = document.querySelector(".tpn .deed");
+    const d = document.querySelector(".tpn .title");
     return d ? (d.textContent || "").slice(0, 34) : "(no pane)";
   })()`);
   for (const [row, label] of [["s-when", "Another date…"], ["s-expect", "Another date…"], ["s-remind", "A custom date…"]] as const) {
@@ -256,13 +330,14 @@ test("deed round", async ({ page }) => {
       const vis = ${VIS};
       const all = (s) => [...document.querySelectorAll(s)].filter(vis);
       const cs = (e) => getComputedStyle(e);
-      const deed = all(".tpn .deed")[0];
+      const deed = all(".tpn .title")[0];
       const go = all(".tpn .actbar .ab.go")[0];
       return {
         deed: deed ? (deed.textContent || "").replace(/[ ]+/g, " ").trim() : "",
-        tiles: all(".tpn .tile .k").map((e) => (e.textContent || "").trim()),
-        storyBg: all(".tpn .story-h")[0] ? cs(all(".tpn .story-h")[0]).backgroundImage : "",
-        storyStat: (all(".tpn .story-h .stat")[0] || {}).textContent || "",
+        /* the tiles are the reference column's FACTS now — a definition list, not a tile row */
+        tiles: all(".tpn .fact .k").map((e) => (e.textContent || "").trim()),
+        storyBg: all(".tpn .qhead")[0] ? cs(all(".tpn .qhead")[0]).backgroundColor : "",
+        storyStat: (all(".tpn .qhead .st")[0] || {}).textContent || "",
         heading: (all(".tpn .formcol .f-h")[0] || {}).textContent || "",
         rate: (all(".tpn .formcol")[0] || {}).textContent || "",
         prim: go ? (go.textContent || "") : "",
@@ -280,10 +355,11 @@ test("deed round", async ({ page }) => {
         && /waited/i.test(closeShape.tiles[0]) && /most recent interaction/i.test(closeShape.tiles[1])
         && /sent previously/i.test(closeShape.tiles[2]),
       closeShape ? JSON.stringify(closeShape.tiles) : "-");
-  add("P6.3 · the story panel wears the sage header and the query's status word",
-      !!closeShape && /linear-gradient/.test(closeShape.storyBg)
-        && /215, 221, 213/.test(closeShape.storyBg) && closeShape.storyStat.trim().length > 0,
-      closeShape ? `stat="${closeShape.storyStat}"` : "-");
+  /* the sage header is retired with the slip — the reference's header is the ladder's tint for
+     this query's own rung (tightened round, Phase 4), and the status word is what it carries */
+  add("P6.3 · the reference wears a ladder tint and the query's status word",
+      !!closeShape && /^rgb\(/.test(closeShape.storyBg) && closeShape.storyStat.trim().length > 0,
+      closeShape ? `bg=${closeShape.storyBg} stat="${closeShape.storyStat}"` : "-");
   add("P6.4 · it gates on When alone, and the response-rate line is verbatim",
       !!closeShape && closeShape.nextId === "s-when" && closeShape.chip === "1 to answer"
         && /response rate stays honest/.test(closeShape.rate)

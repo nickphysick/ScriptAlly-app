@@ -75,12 +75,17 @@ test("completion holds through the window, then the row leaves and the sheet mov
       "[...document.querySelectorAll('.tlc .row')].some((r) => (r.textContent || '').indexOf('P5 fixture') > -1)",
       null, { timeout: 20_000 }).catch(() => {});
 
-    /* the footer opens with its bold total ("30 tasks · …"), so parseInt on the text is the number */
+    /* ⚠️ THE FOOTER HAS TWO FORMS AND `parseInt` ONLY READS ONE. It opens with its bold total
+       ("30 tasks · …") but reads "Showing 28 of 30" whenever the view is hiding rows — and
+       `parseInt("Showing…")` is NaN, so the count came back as NaN and the hold looked broken on
+       a page that was holding correctly. The first NUMBER in the line is the total in both
+       forms, which is what the footer actually promises. */
     const counts = () => page.evaluate(`(() => {
       const foot = document.querySelector(".tlc .l-foot .c");
       const rows = document.querySelectorAll(".tlc .row").length;
-      return { rows, foot: foot ? foot.textContent.trim() : null,
-               footN: foot ? parseInt(foot.textContent, 10) : -1 };
+      const txt = foot ? foot.textContent.trim() : null;
+      const m = txt ? txt.match(/[0-9]+/) : null;
+      return { rows, foot: txt, footN: m ? parseInt(m[0], 10) : -1 };
     })()`) as Promise<any>;
     const fixtureRow = () => page.evaluate(`(() => {
       const r = [...document.querySelectorAll(".tlc .row")]
@@ -100,7 +105,15 @@ test("completion holds through the window, then the row leaves and the sheet mov
     await page.evaluate(`(() => {
       const r = [...document.querySelectorAll(".tlc .row")]
         .find((x) => (x.textContent || "").indexOf("P5 fixture") > -1);
-      if (r) r.click();
+      if (!r) return false;
+      /* two clicks a tick apart — the tightened round's click grammar (focus, then open); an
+         async IIFE because two clicks in one synchronous evaluate share a render's closure, so
+         both would focus and the pane would never mount */
+      r.click();
+      return new Promise((res) => setTimeout(() => {
+        const f = document.querySelector(".tlc .row.focus") || r;
+        f.click(); res(true);
+      }, 160));
     })()`);
     await page.waitForFunction(SETTLED, null, { timeout: 5_000 }).catch(() => {});
     await page.evaluate(`(() => {
@@ -123,7 +136,7 @@ test("completion holds through the window, then the row leaves and the sheet mov
     const during = await counts();
     const dRow = await fixtureRow();
     const sheetDuring = await page.evaluate(`(() => {
-      const deed = document.querySelector(".tpn .deed");
+      const deed = document.querySelector(".tpn .title");
       const rec = document.querySelector(".tpn .foot .recorded");
       const toast = document.querySelector(".tdb-toast");
       const undoBtn = toast && [...toast.querySelectorAll("button")]
@@ -141,14 +154,14 @@ test("completion holds through the window, then the row leaves and the sheet mov
         + " · toast = " + sheetDuring.toast + " · undo = " + sheetDuring.undo);
 
     /* ‹ › skip the completed row: › then ‹ must not land back on the fixture */
-    await page.locator('.tpn .b-nav button[aria-label="Next task"]').click();
+    await page.locator('.tpn .dnav button[aria-label="Next task"]').click();
     await page.waitForTimeout(250);
     const afterNext = await page.evaluate(
-      `(() => { const d = document.querySelector(".tpn .deed"); return d ? d.textContent.trim().slice(0, 40) : null; })()`) as string | null;
-    await page.locator('.tpn .b-nav button[aria-label="Previous task"]').click();
+      `(() => { const d = document.querySelector(".tpn .title"); return d ? d.textContent.trim().slice(0, 40) : null; })()`) as string | null;
+    await page.locator('.tpn .dnav button[aria-label="Previous task"]').click();
     await page.waitForTimeout(250);
     const afterBack = await page.evaluate(
-      `(() => { const d = document.querySelector(".tpn .deed"); return d ? d.textContent.trim().slice(0, 40) : null; })()`) as string | null;
+      `(() => { const d = document.querySelector(".tpn .title"); return d ? d.textContent.trim().slice(0, 40) : null; })()`) as string | null;
     add("P5.4 · ‹ › walk PAST the completed task — it is out of the queue while it holds",
         !!afterNext && !!afterBack && (afterBack || "").indexOf("P5 fixture") === -1,
         "› → " + JSON.stringify(afterNext) + " · ‹ → " + JSON.stringify(afterBack));
@@ -167,7 +180,7 @@ test("completion holds through the window, then the row leaves and the sheet mov
     const afterUndo = await counts();
     const uRow = await fixtureRow();
     const sheetUndo = await page.evaluate(`(() => {
-      const d = document.querySelector(".tpn .deed");
+      const d = document.querySelector(".tpn .title");
       const rec = document.querySelector(".tpn .foot .recorded");
       return { deed: d ? d.textContent.trim().slice(0, 40) : null, recorded: !!rec };
     })()`) as any;
@@ -271,7 +284,15 @@ test("completion holds through the window, then the row leaves and the sheet mov
     await page.evaluate(`(() => {
       const r = [...document.querySelectorAll(".tlc .row")]
         .find((x) => (x.textContent || "").indexOf("P5 fixture") > -1);
-      if (r) r.click();
+      if (!r) return false;
+      /* two clicks a tick apart — the tightened round's click grammar (focus, then open); an
+         async IIFE because two clicks in one synchronous evaluate share a render's closure, so
+         both would focus and the pane would never mount */
+      r.click();
+      return new Promise((res) => setTimeout(() => {
+        const f = document.querySelector(".tlc .row.focus") || r;
+        f.click(); res(true);
+      }, 160));
     })()`);
     await page.waitForTimeout(400);
     await page.evaluate(`(() => {
@@ -287,7 +308,7 @@ test("completion holds through the window, then the row leaves and the sheet mov
     const gone = await fixtureRow();
     const afterExpiry = await counts();
     const sheetAfter = await page.evaluate(`(() => {
-      const d = document.querySelector(".tpn .deed");
+      const d = document.querySelector(".tpn .title");
       const open = document.querySelector(".tdw-split").classList.contains("open");
       return { deed: d ? d.textContent.trim().slice(0, 40) : null, open };
     })()`) as any;

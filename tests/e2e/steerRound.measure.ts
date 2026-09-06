@@ -46,8 +46,17 @@ const OPEN = (kind: string) => `(() => {
   const row = [...document.querySelectorAll(".tlc .row")].filter(vis)
     .find((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === ${JSON.stringify(kind)});
   if (!row) return false;
+  /* ⚠️ TWO CLICKS, A TICK APART — the tightened round's click grammar: the first FOCUSES the row
+     and drops its action strip, the second opens it. An ASYNC IIFE because two clicks in one
+     synchronous evaluate share a render's closure and both would focus; without the second the
+     pane never mounts, every probe below reads null, and any locator on a pane control waits out
+     the whole test timeout. */
   row.click();
-  return true;
+  return new Promise((res) => setTimeout(() => {
+    const f = document.querySelector(".tlc .row.focus") || row;
+    f.click();
+    res(true);
+  }, 160));
 })()`;
 
 /** both Fix rows wear the same pill; the cohort is known by its own sub-line */

@@ -45,8 +45,17 @@ const OPEN = (kind: string) => `(() => {
   const row = [...document.querySelectorAll(".tlc .row")].filter(vis)
     .find((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === ${JSON.stringify(kind)});
   if (!row) return false;
+  /* ⚠️ TWO CLICKS, A TICK APART — the tightened round's click grammar: the first FOCUSES the row
+     and drops its action strip, the second opens it. An ASYNC IIFE because two clicks in one
+     synchronous evaluate share a render's closure and both would focus; without the second the
+     pane never mounts, every probe below reads null, and any locator on a pane control waits out
+     the whole test timeout. */
   row.click();
-  return true;
+  return new Promise((res) => setTimeout(() => {
+    const f = document.querySelector(".tlc .row.focus") || row;
+    f.click();
+    res(true);
+  }, 160));
 })()`;
 
 /**
@@ -116,7 +125,7 @@ test("finishing round", async ({ page }) => {
       }).map((e) => e.className.toString().split(" ")[0]);
 
       const rims = all(".tpn .rim");
-      const band = all(".tpn .band")[0];
+      const band = all(".tpn .dhead")[0];
       const mid = all(".tpn .workscroll")[0];
       const form = all(".tpn .sheet")[0];
       const story = all(".tpn .qr")[0];
@@ -164,7 +173,7 @@ test("finishing round", async ({ page }) => {
         optTags: all(".tpn .opttag").length,
         /* the optional fields a flow OFFERS — collapsed to a link until the writer opens one */
         addlinks: all(".tpn .addrow .addlink").length,
-        deed: ((all(".tpn .deed")[0] || {}).textContent || "").trim(),
+        deed: ((all(".tpn .title")[0] || {}).textContent || "").trim(),
         stars: ((all(".tpn .form")[0] || {}).textContent || "").indexOf("*"),
         whenSeg: all(".tpn .form .seg").length,
         text: ((all(".tpn .form")[0] || {}).textContent || "").replace(/[ ]+/g, " "),
@@ -225,9 +234,15 @@ test("finishing round", async ({ page }) => {
      scroller") was RED for a page behaving correctly. What the law protects is that the record
      never travels with the form; that is violated by a SECOND scroller, not by a quiet first one.
      The count is reported either way, so a pane that stopped scrolling entirely is visible. */
-  add("P1.4 · nothing in the pane scrolls except the worksheet",
-      !!send && send.scrollers.every((c: string) => c === "workscroll"),
-      send ? `${JSON.stringify(send.scrollers)} (none is expected while the ledger fits)` : "-");
+  /* ⚠️ TWO SCROLLERS NOW, AND THAT IS THE LAW RATHER THAN A BREACH OF IT (tightened round,
+     Phase 4). The claim was always "the record must not travel with the form" — one scrollport
+     holding both columns is what made a long journey scroll the thing being consulted off the
+     screen. The reference is a COLUMN OF THE SHEET now, and it owns its own overflow (its `.in`),
+     which is that law being kept rather than broken. What is still forbidden is a scroller that
+     is NEITHER: a third box, or the sheet itself. */
+  add("P1.4 · the only scrollers in the pane are the worksheet's and the reference's",
+      !!send && send.scrollers.every((c: string) => c === "workscroll" || c === "in"),
+      send ? `${JSON.stringify(send.scrollers)} (either may be quiet while its content fits)` : "-");
 
   /* ══ PHASE 2 · cards hug their content ═══════════════════════════════════════════════════ */
   /* ⚠️ THE MECHANISM CHANGED AND THE LAW DID NOT. `.mid` was a flex column and hugged its cards by
@@ -252,7 +267,10 @@ test("finishing round", async ({ page }) => {
      before a single card existed. The documented liar, caught in its own baseline. */
   /* the population is the sheet + the slip where a journey has one — a note has no slip */
   add("P2.2 · no card in the pane declares a minimum height",
-      !!send && send.minH.length === 2
+      /* ⚠️ THE POPULATION IS ONE NOW, NOT TWO. It was the sheet PLUS the slip's card; the slip is
+         a column of the sheet, so there is one framed card in the pane and one minimum to check.
+         The floor stays — an empty array is the documented liar this case was written against. */
+      !!send && send.minH.length >= 1
         && [...send.minH, ...(note?.minH ?? [])].every((v: string) => v === "0px" || v === "auto"),
       `send=${JSON.stringify(send?.minH)}`
         + (note ? ` note=${JSON.stringify(note.minH)}` : ` · ${NOT_RUN_NOTE}`));
@@ -574,7 +592,7 @@ test("finishing round", async ({ page }) => {
         fills: all(".tpn .fillrow .fb").map((b) => (b.textContent || "").trim()),
         caveat: (all(".tpn .form")[0] || {}).textContent || "",
         bandSub: ((all(".tpn .b-sub")[0] || {}).textContent || "").trim(),
-        deed: ((all(".tpn .deed")[0] || {}).textContent || "").trim(),
+        deed: ((all(".tpn .title")[0] || {}).textContent || "").trim(),
         dismissAll: all(".tpn .actbar button").map((b) => (b.textContent || "").trim()),
       };
     })()`) as any;

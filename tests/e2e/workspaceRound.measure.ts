@@ -30,8 +30,17 @@ const OPEN = (kind: string) => `(() => {
   const row = [...document.querySelectorAll(".tlc .row")].filter(vis)
     .find((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === ${JSON.stringify(kind)});
   if (!row) return false;
+  /* ⚠️ TWO CLICKS, A TICK APART — the tightened round's click grammar: the first FOCUSES the row
+     and drops its action strip, the second opens it. An ASYNC IIFE because two clicks in one
+     synchronous evaluate share a render's closure and both would focus; without the second the
+     pane never mounts, every probe below reads null, and any locator on a pane control waits out
+     the whole test timeout. */
   row.click();
-  return true;
+  return new Promise((res) => setTimeout(() => {
+    const f = document.querySelector(".tlc .row.focus") || row;
+    f.click();
+    res(true);
+  }, 160));
 })()`;
 
 /** both Fix rows wear the same pill; the cohort is known by its own sub-line */
@@ -112,10 +121,10 @@ test("workspace round", async ({ page }) => {
           .filter((e) => getComputedStyle(e).position === "sticky")
           .map((e) => (e.className || "").toString().split(" ")[0]),
         /* the tiles live in the record and nowhere else */
-        tilesInBand: all(".tpn .band .rtile").length + all(".tpn .band .tile").length,
+        tilesInBand: all(".tpn .dhead .rtile").length + all(".tpn .dhead .tile").length,
         tilesInRecord: all(".tpn .rec .rtile").length,
-        statusWord: one(".tpn .rhead .stat") ? one(".tpn .rhead .stat").textContent.trim() : "",
-        recHead: one(".tpn .rhead .t") ? one(".tpn .rhead .t").textContent.trim() : "",
+        statusWord: one(".tpn .qhead .stat") ? one(".tpn .qhead .stat").textContent.trim() : "",
+        recHead: one(".tpn .qhead .t") ? one(".tpn .qhead .t").textContent.trim() : "",
         page: { scrollH: doc.scrollHeight, clientH: doc.clientHeight },
       };
     })()`) as any;
@@ -236,10 +245,14 @@ test("workspace round", async ({ page }) => {
      height IS the contract's 44) are different claims; only together do they say what the case
      says. This is the circular-assertion family again — the expected value must not be derived
      from the thing under test. */
-  add("P3.6 · closed heads share the contract's 44, except where a wrapped answer honestly grows one",
-      closed.length > 1 && Math.abs(baseH - 44) <= 0.5
+  /* ⚠️ 42, NOT 44 (tightened round, Phase 3) — the ledger row is the tightened contract's now.
+     The anchor is the point of this assertion: its relational half alone could not tell a
+     uniform shrink from a design, which is what its own mutation proved. So the number moves
+     when the contract does, and it moves HERE, once. */
+  add("P3.6 · closed heads share the contract's 42, except where a wrapped answer honestly grows one",
+      closed.length > 1 && Math.abs(baseH - 42) <= 0.5
         && closed.every((x: any) => Math.abs(x.headH - baseH) <= 0.5 || x.ansH > 24),
-      "base " + baseH + " (contract 44) · heads " + JSON.stringify(closed.map((x: any) => [x.headH, x.ansH])));
+      "base " + baseH + " (contract 42) · heads " + JSON.stringify(closed.map((x: any) => [x.headH, x.ansH])));
 
   /* Edit reopens the row it belongs to, and no other */
   const editTarget = L1.rows.find((x: any) => x.edit)?.id;
@@ -404,7 +417,7 @@ test("workspace round", async ({ page }) => {
   const deed = await page.evaluate(`(() => {
     const vis = ${VIS};
     const all = (s) => [...document.querySelectorAll(s)].filter(vis);
-    const d = all(".tpn .deed")[0];
+    const d = all(".tpn .title")[0];
     if (!d) return null;
     const base = getComputedStyle(d);
     const leaves = [...d.querySelectorAll("*")];
@@ -462,7 +475,7 @@ test("workspace round", async ({ page }) => {
      The reveal key is read once on arrival, so it is checked BEFORE the page consumes it. */
   const navCheck = await page.evaluate(`(() => {
     const vis = ${VIS};
-    const d = [...document.querySelectorAll(".tpn .deed")].filter(vis)[0];
+    const d = [...document.querySelectorAll(".tpn .title")].filter(vis)[0];
     const links = d ? [...d.querySelectorAll("a")] : [];
     if (!links.length) return null;
     sessionStorage.removeItem("sa.manuscriptReveal");
@@ -505,7 +518,7 @@ test("workspace round", async ({ page }) => {
   await page.waitForTimeout(900);
   const agentClick = await page.evaluate(`(() => {
     const vis = ${VIS};
-    const d = [...document.querySelectorAll(".tpn .deed")].filter(vis)[0];
+    const d = [...document.querySelectorAll(".tpn .title")].filter(vis)[0];
     const links = d ? [...d.querySelectorAll("a")] : [];
     if (links.length < 2) return null;
     sessionStorage.removeItem("sa.agentReveal");

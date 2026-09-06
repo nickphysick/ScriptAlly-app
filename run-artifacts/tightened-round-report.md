@@ -1,6 +1,8 @@
 # To-do — the tightened page
 
-**Where I stopped:** Phases 0–4 complete and committed; **Phase 5 in progress** at the boundary.
+**Where I stopped:** all five phases complete and committed. Phase 5 leaves two suites red and
+both are named with their reason — `qcPanel` (standing, another stream's) and `deedRound` (six
+journey-flow cases, not mechanical).
 Recon at the top, then a phase each, then the mutation table, the false premises, concurrency,
 and the shots.
 
@@ -218,24 +220,60 @@ explicit path.
 
 ## Phase 5 — the suites
 
-Presumed vacuous, and each one **crashed** rather than failing: all three opened a row with a
-single click, so the pane never mounted and every probe read null. A crash names a line; a
-failure names a property — and one of them (`sheetSlip`) hung for the whole 900-second timeout
-waiting on a `› Next task` that could not appear, which reports as a timeout and says nothing
-about the page at all.
+Presumed vacuous, and **not one of them merely failed**: the first three CRASHED, and one HUNG
+for a whole 900-second timeout. Every one opened a row with a single click, so the pane never
+mounted, every probe read null, and a locator waiting on a pane control waited out the test. A
+crash names a line; a failure names a property; a hang names neither.
 
-| suite | disposition |
+**The fix is one helper, `openFocusedRow` in `tests/e2e/measure.ts`** — the click grammar stated
+once, with the wait between the two clicks (two clicks in one `page.evaluate` share a render's
+closure, so both would focus). Where a suite has its own `OPEN(kind)` template the grammar went
+in there instead, as an async IIFE, so every one of that suite's entrances got it at once.
+
+| suite | result |
 |---|---|
-| `listWide` | **18 green.** Six cases DELETED with their objects (the manuscript column ×2, the `.actb` hover chip ×2, the meta line, the folded meta) and named where each law now lives. P1.4 retargeted seven tracks → four. P1.9's law survives its subject: it was "the action chip is a span, not a second tab stop", and the chip is gone — the claim underneath is that the ROW is the control and holds no focusable child, which the strip (a SIBLING) does not violate. P1.13 rewritten: folding drops the agent cell and the row is **still 44**, which is the density claim's other half. |
-| `drawerMotion` | **25 green.** The motion capture starts at the OPEN click, not the focus click — a capture that started one click earlier would have recorded the strip's 160ms drop-in as the drawer's motion. `.b-nav` → `.dnav`. |
-| `sheetSlip` | **21 green, both branches.** Retargeted wholesale: the slip is the reference COLUMN, the tab is the spine, `.band` is `.dhead`, the deed is the title. Two real finds — **P3.5 was measuring the header, which now SPANS BOTH COLUMNS** and so correctly narrows with the sheet (546 → 336); the document's own track is what must not move, and it does not. And **P3.10's tally caught its own sample being wrong**: the "longest journey" was chosen by scoring pills, a PROXY for length, which picked a 575px sheet against a 614 cap — hugging, so the capping branch went unexercised. It now opens candidates and measures them, and both branches are seen. |
-| `contract`, `finishRound`, `workspaceRound`, `journeyRound`, `deedRound`, `steerRound`, `unitNext`, `completionLeaves`, `viewPanels`, `qcPanel` | **NOT YET RUN — the honest state at the boundary.** Each will need the same two mechanical retargets at minimum (the two-click grammar; `.band`/`.deed`/`.actb`/`.qr*` → `.dhead`/`.title`/`.actrow`/`.rail`), and each must be proved red before being believed. They are named here rather than assumed green. A run of three files took 14 minutes under this machine's contention, which is why the sweep is a separate sitting rather than a rushed one. |
-| `paneMounts` | green (14/14) — retargeted in Phase 2 and run as the canary before every phase. |
-| `taskListWide`, `taskPanePort`, `tasksKeys` (unit) | green — retargeted in Phases 2–4, each proved red first. |
+| `paneMounts` | **2/2** — the canary, run before every phase |
+| `contract` | **4/4** |
+| `listWide` | **18/18** — six cases deleted with their objects, each naming where its law went |
+| `drawerMotion` | **25/25** |
+| `sheetSlip` | **21/21, both branches** |
+| `steerRound` | **21/21** — the OPEN patch alone |
+| `unitNext` | **all green** |
+| `finishRound` | **29/29** |
+| `workspaceRound` | **31/31** |
+| `journeyRound` | **52/53** — only the standing P8.3 |
+| `completionLeaves` | **12 green, 0 red** |
+| `viewPanels` | **0 red** |
+| `qcPanel` | **RED BY DESIGN**, unchanged — awaiting the log-sheet stream's card class |
+| `deedRound` | **17/23** — six red, and they are NOT mechanical: the journeys do not progress in
+its `clause()` and Phase-4 helpers, so the strip reads its empty state ("This records—") and the
+custom-date rows never reveal. Named rather than guessed at. |
 
-**Standing reds carried in from the drawer round**, unchanged by this one and still owned
-elsewhere: `qcPanel` (awaiting the log-sheet stream's card class) and `journeyRound` P8.3 (a
-close's undo possibly leaving a derivation flag).
+**What the retargets found, beyond the click grammar:**
+
+- **`listWide`'s P1.9 law survived its subject.** It read "the action chip is a span, not a second
+  tab stop"; the chip is gone, and the claim underneath is that the ROW is the control and holds
+  no focusable child — which the strip, a SIBLING, does not violate.
+- **`sheetSlip`'s wrap law was measuring the header, which now SPANS BOTH COLUMNS** and therefore
+  correctly narrows with the sheet (546 → 336). The document's own track is what must not move.
+- **`sheetSlip`'s P3.10 tally caught its own sample being wrong.** "The longest journey" was chosen
+  by scoring pills — a proxy — which picked a 575px sheet against a 614 cap, so the capping branch
+  went unexercised. It opens candidates and measures them now.
+- **`deedRound` P1.3 had been requiring an italic the workspace round retired**, in a suite whose
+  own stylesheet says so in as many words. Red on a correct page, for two rounds.
+- **`deedRound` P3.1/P3.2 read `.story-h`, a class two names stale** — so they were reading nothing
+  and failing about a page that was right. The header is `.qhead` and its fill is the ladder's.
+- **`deedRound` had no `ANSWER_FORK`** — the same missing step that produced seventeen reds in the
+  drawer round's `workspaceRound`.
+- **`workspaceRound` P3.6's anchor moved 44 → 42** with the contract, which is the anchor doing its
+  job: its relational half alone could not tell a uniform shrink from a design.
+- **`finishRound` P1.4 asserted ONE scroller and there are two now** — the worksheet's and the
+  reference's — which is the "the record must not travel with the form" law being KEPT rather than
+  broken. A third would still be forbidden.
+- **`completionLeaves`' footer parse broke on the two-number form**: `parseInt("Showing 28 of 30")`
+  is NaN, so a correct hold reported a NaN count.
+- **`journeyRound` P4.2 did not carry P4.1's precondition** — P4.1 reports UNMEASURED when the card
+  has no unit to pick, and P4.2 then asserted a field that could not exist.
 
 ---
 

@@ -169,6 +169,28 @@ export async function openRoute(page: Page, route: string, viewport?: { width: n
  * width, which is how a 15px content loss survived a session — every measurement on that machine
  * agreed. This asks a scrolling element how much width its bar actually took.
  */
+/**
+ * ⚠️ THE TO-DO LIST'S CLICK GRAMMAR, ONCE (tightened round, Phase 2). A row takes TWO clicks: the
+ * first FOCUSES it and drops its action strip beneath it, the second opens it in the pane. Call
+ * this straight after whatever click a suite already makes on a row.
+ *
+ * ⚠️ IT WAITS BETWEEN THEM, AND THAT IS THE POINT. Two clicks in one `page.evaluate` share a
+ * single render's closure — the stale-closure batching fault — so both would focus and nothing
+ * would open. The wait is for the STRIP, which is the state the first click produced, rather than
+ * for a number of milliseconds.
+ *
+ * ⚠️ AND A SUITE THAT DOES NOT CALL IT DOES NOT FAIL — IT HANGS. With the pane unmounted every
+ * probe reads null (which reports as a red about the wrong thing) and any locator waiting on a
+ * pane control waits out the whole test timeout. Three suites did exactly that before this
+ * existed; one of them for 900 seconds.
+ */
+export async function openFocusedRow(page: Page) {
+  await page.waitForFunction(
+    "!!document.querySelector('.tlc .actrow.show')", null, { timeout: 5_000 }).catch(() => {});
+  await page.evaluate(
+    `(() => { const f = document.querySelector(".tlc .row.focus"); if (f) f.click(); })()`);
+}
+
 export async function scrollbarWidth(page: Page): Promise<number> {
   await page.addStyleTag({ content: FORCE_CLASSIC_SCROLLBARS }).catch(() => { /* already present */ });
   return page.evaluate(() => {
