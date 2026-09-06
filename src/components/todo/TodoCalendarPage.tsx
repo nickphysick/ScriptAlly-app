@@ -33,6 +33,7 @@ import {
 } from "../../lib/timelineGroups";
 import { pillText } from "../../lib/calendarPill";
 import { cardCFor, CardCFacts, CardKind } from "../../lib/cardC";
+import { actionKindFor, type ActionKind, type ActionSubject, type ActionPrefill } from "../../lib/actionKind";
 import { stageSentence, type StageEnd } from "../../lib/stageSentence";
 import { QueryStatus, ActivityType } from "../../types";
 import {
@@ -852,9 +853,9 @@ function ActionSym({ kind }: { kind: ActionGlyph }) {
 function ActionMark({ urgent, kind, label, deed, style, onPress, on, forSeg }: {
   urgent?: boolean; kind: ActionGlyph; label: string; deed: string;
   lane: number; style: React.CSSProperties;
-  /* ⚠️ THE PRESS IS REPORTED, NOT PERFORMED HERE. What the deed DOES belongs to the flow it opens;
-     this hands the word back so the board can say what was pressed. */
-  onPress?: (deed: string) => void;
+  /* ⚠️ THE PRESS GOES THROUGH THE PAGE'S ONE DOOR (v65 §E ruling). What the deed DOES belongs to
+     the desk it opens; this component decides nothing about it and performs no write. */
+  onPress?: () => void;
   /** v65 §B — the reveal follows the BAR's hover, not the row's: the page pairs bar and action by
    *  segment key and hands the pairing down, because CSS cannot match one sibling's attribute to
    *  another's. `forSeg` is published for the locks, which assert the pairing from outside. */
@@ -870,7 +871,7 @@ function ActionMark({ urgent, kind, label, deed, style, onPress, on, forSeg }: {
       {/* ⚠️ A BUTTON, NOT A TILE. It is the one thing on this row you can press, so it is an element
           the keyboard can reach and assistive tech can announce. */}
       <button type="button" className="tl-actbtn"
-        onClick={(e) => { e.stopPropagation(); onPress?.(deed); }}>
+        onClick={(e) => { e.stopPropagation(); onPress?.(); }}>
         {deed}<span aria-hidden>&nbsp;›</span>
       </button>
     </div>
@@ -1247,12 +1248,37 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     if (from && from !== to) setHoverSeg(to);
   };
 
+  /* ══ THE ONE DOOR (v65 §E ruling) ═══════════════════════════════════════════════════════════
+   *
+   * ⚠️ THE DESKS ARE THE IMPLEMENTATION, AND THIS PAGE DOES NOT OWN THEM. The ruling settles §E:
+   * `NudgeDesk`, `MarkSentDesk`, `RespondDesk` and `MarkClosedDesk` are the app's four writes and
+   * stay the only implementation; there is no Action sheet. `requestAction` is the single door
+   * every entry point on this page goes through — the bar's action button, the card's action and
+   * every drawer row — so that when the QC session lands the modal chassis, ONE function changes
+   * and all three surfaces follow.
+   *
+   * ⚠️ AND UNTIL THEN IT IS HONESTLY EMPTY. It reports the press and WRITES NOTHING: a toast that
+   * said "Nudged" over a journey the writer has not completed is the fabricated-confirmation
+   * fault, and a second implementation built here to fill the gap is the exact duplication the
+   * ruling exists to prevent. The receipt names the deed; the record is unchanged.
+   */
+  const requestAction = (kind: ActionKind, subject: ActionSubject, prefill?: ActionPrefill) => {
+    /* the QC chassis's call site, when it lands:
+         openDesk(kind, subject, prefill)   — mounts DESK_FOR_KIND[kind] in CorrectionDesk's chassis */
+    /* ⚠️ THE RECEIPT NEVER SHOWS A KIND NAME. `?? kind` would put "marksent" or "respond" — a
+       derivation's own word — in front of a reader, which is the fault `timelineCopy`'s "no
+       derivation name reaches a sentence" lock exists for. Every door passes a deed today; the
+       fallback is a sentence rather than a symbol so that stays true if one ever stops. */
+    setActToast(prefill?.deed ?? "Recording this");
+    return { kind, subject, prefill };
+  };
+
   /* ══ THE CLICK CARD (v65 §C; ref hover-card-by-type.html) ═══════════════════════════════════
      The payload is ASSEMBLED AT CLICK TIME from the same derivations the bar was painted from —
      seg day-floats, `pillText`, `turnWordFor`, the ladder's own band class — and the arithmetic
      goes through `cardCFor`, which is unit-locked against the ref's eight worked examples. */
   type CardPayload = {
-    key: string; isTask: boolean;
+    key: string; rowKey: string; isTask: boolean;
     bandClass: string; bandStatus: string; holder: string; dotStatus: QueryStatus | null;
     name: string; agency?: string;
     fact: string; tail: string; bang: boolean;
@@ -1326,7 +1352,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       : sg.capWord ?? null;
     const agent = agents.find((a) => a.id === rows.find((r) => r.key === sg.rowKey)?.agentId);
     return {
-      key: sg.key, isTask: !!sg.isTask,
+      key: sg.key, rowKey: sg.rowKey, isTask: !!sg.isTask,
       bandClass: sg.isTask ? "tl-sband--task" : `tl-st-${stageFor(sg.status)}`,
       bandStatus: sg.isTask ? "Task" : String(sg.status),
       holder: sg.isTask ? taskHolder(!!sg.owed) : turnWordFor(sg.status),
@@ -1362,10 +1388,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const [drawer, setDrawer] = useState<DrawerData | null>(null);
   const [drawerTab, setDrawerTab] = useState<"view" | "actions">("view");
   const closeDrawer = () => setDrawer(null);
-  const requestAction = (kind: string, d: DrawerData) => {
-    /* §E replaces this body with openAction(kind, subject, prefill) — the seam is the point */
-    setActToast(`${kind} — ${d.name}`);
-  };
+  /* the drawer's rows name their kind directly — a row labelled "Log a nudge" IS the nudge kind,
+     so no resolver is consulted for the ones the reader picked by name */
+  const drawerSubject = (d: DrawerData): ActionSubject => ({
+    rowKey: d.rowKey, queryId: d.queryId, taskId: d.taskId,
+    name: d.name, agency: d.agency, status: d.dotStatus ?? undefined, isTask: d.isTask,
+  });
   const openDrawerFor = (rowKey: string) => {
     const row = rows.find((r) => r.key === rowKey);
     const bar = barsByRow.get(rowKey);
@@ -2585,7 +2613,10 @@ data-rowkey={r.key}
               deadline; giving tasks a fifth symbol would say they are a different kind of thing
               from a deadline you set yourself, which is exactly what they are not. */}
           {bar.segs.filter((sg) => sg.isTask).map((sg) => (
-            <ActionMark onPress={setActToast} key={`tact-${sg.key}`} kind="sendBy"
+            <ActionMark key={`tact-${sg.key}`} kind="sendBy"
+              onPress={() => requestAction("task",
+                { rowKey: r.key, taskId: sg.taskId, name: r.name, isTask: true },
+                { deed: "Mark done" })}
               on={hoverSeg === sg.key} forSeg={sg.key}
               label={sg.tail} deed="Mark done" lane={sg.lane}
               style={{ ...laneVar(sg.lane),
@@ -2594,7 +2625,13 @@ data-rowkey={r.key}
                 left: "calc(var(--l) + var(--w) + 14px)" }} />
           ))}
           {bar.segs.filter((sg) => sg.capWord && !rowUrgent && !sg.isTask).map((sg) => (
-            <ActionMark onPress={setActToast} key={`act-${sg.key}`} kind={sg.capSource ?? "window"}
+            <ActionMark key={`act-${sg.key}`} kind={sg.capSource ?? "window"}
+              onPress={() => requestAction(
+                actionKindFor({ isTask: false, status: sg.status, capSource: sg.capSource ?? null,
+                  deed: sg.capWord ?? null }),
+                { rowKey: r.key, queryId: sg.queryId, name: r.name, agency: r.agency,
+                  status: sg.status, isTask: false },
+                { deed: sg.capWord ?? null })}
               on={hoverSeg === sg.key} forSeg={sg.key}
               label={sg.capOn ?? ""} deed={sg.capWord ?? ""} lane={sg.lane}
               style={{ ...laneVar(sg.lane),
@@ -2632,7 +2669,13 @@ data-rowkey={r.key}
             /* the tail already says how late, in the one lateness vocabulary — never recomputed */
             if (!late.tail) return null;
             return (
-              <ActionMark onPress={setActToast} key={`od-${late.key}`} urgent kind={late.capSource ?? "sendBy"}
+              <ActionMark key={`od-${late.key}`} urgent kind={late.capSource ?? "sendBy"}
+                onPress={() => requestAction(
+                  actionKindFor({ isTask: false, status: late.status,
+                    capSource: late.capSource ?? null, deed: p.text }),
+                  { rowKey: r.key, queryId: late.queryId, name: r.name, agency: r.agency,
+                    status: late.status, isTask: false },
+                  { deed: p.text })}
                 on={hoverSeg === late.key} forSeg={late.key}
                 label={late.tail} deed={p.text} lane={late.lane}
                 style={{ ...laneVar(late.lane),
@@ -2755,7 +2798,7 @@ data-rowkey={r.key}
                             const rowName = rows.find((r2) => r2.key === a.rowKey)?.name ?? "";
                             const stageDays = Math.round(to - from);
                             openCardOver({
-                              key: `js-${a.key}`, isTask: false,
+                              key: `js-${a.key}`, rowKey: a.rowKey, isTask: false,
                               bandClass: `tl-st-${stageFor(a.status ?? QueryStatus.QUERIED)}`,
                               bandStatus: stage, holder: "", dotStatus: a.status ?? QueryStatus.QUERIED,
                               name: stageSentence({ stage, end, next: b?.status ? String(b.status) : undefined,
@@ -3307,7 +3350,13 @@ data-rowkey={r.key}
               <div className="tl-ccact">
                 <span className={`tl-cccv${cardPayload.action.urgent ? " od" : ""}`}>{cardPayload.action.cv}</span>
                 <button type="button" className="tl-ccbtn"
-                  onClick={() => setActToast(cardPayload.action!.deed)}>{cardPayload.action.deed} ›</button>
+                  onClick={() => requestAction(
+                    actionKindFor({ isTask: cardPayload.isTask, status: cardPayload.dotStatus ?? undefined,
+                      deed: cardPayload.action!.deed }),
+                    { rowKey: cardPayload.rowKey, queryId: cardPayload.queryId, name: cardPayload.name,
+                      agency: cardPayload.agency, status: cardPayload.dotStatus ?? undefined,
+                      isTask: cardPayload.isTask },
+                    { deed: cardPayload.action!.deed })}>{cardPayload.action.deed} ›</button>
               </div>
             )}
           </div>
@@ -3357,7 +3406,11 @@ data-rowkey={r.key}
             ) : (
               <>
                 {drawer.primaryDeed && (
-                  <button type="button" className="tl-dwar pri" onClick={() => requestAction(drawer.primaryDeed!, drawer)}>
+                  <button type="button" className="tl-dwar pri"
+                    onClick={() => requestAction(
+                      actionKindFor({ isTask: drawer.isTask, status: drawer.dotStatus ?? undefined,
+                        deed: drawer.primaryDeed }),
+                      drawerSubject(drawer), { deed: drawer.primaryDeed })}>
                     <span className="ai" aria-hidden>›</span>
                     <span><span className="at">{drawer.primaryDeed}</span>
                       <span className="ad">The one thing this row asks next</span></span>
@@ -3365,16 +3418,19 @@ data-rowkey={r.key}
                   </button>
                 )}
                 {(drawer.isTask
-                  ? [["Mark done", "Complete this task"], ["Change date", "Move its due date"], ["Add note", "A note on your file"]]
-                  : [["Log a nudge", "You chased; the record should say so"],
-                     ["Record a response", "They replied — what did they say?"],
-                     ["Log sent materials", "You sent something they asked for"],
-                     ["Change date", "Correct a date on the record"],
-                     ["Add note", "A note on this relationship"],
-                     ["Close query", "No response · rejected · withdrawn"]])
+                  ? ([["Mark done", "Complete this task", "task"],
+                      ["Change date", "Move its due date", "task"],
+                      ["Add note", "A note on your file", "task"]] as const)
+                  : ([["Log a nudge", "You chased; the record should say so", "nudge"],
+                      ["Record a response", "They replied — what did they say?", "respond"],
+                      ["Log sent materials", "You sent something they asked for", "marksent"],
+                      ["Change date", "Correct a date on the record", "respond"],
+                      ["Add note", "A note on this relationship", "respond"],
+                      ["Close query", "No response · rejected · withdrawn", "closed"]] as const))
                   .filter(([t2]) => t2 !== drawer.primaryDeed)
-                  .map(([t2, d2]) => (
-                    <button key={t2} type="button" className="tl-dwar" onClick={() => requestAction(t2, drawer)}>
+                  .map(([t2, d2, k2]) => (
+                    <button key={t2} type="button" className="tl-dwar"
+                      onClick={() => requestAction(k2 as ActionKind, drawerSubject(drawer), { deed: t2 })}>
                       <span className="ai" aria-hidden>·</span>
                       <span><span className="at">{t2}</span><span className="ad">{d2}</span></span>
                     </button>

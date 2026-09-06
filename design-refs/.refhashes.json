@@ -1,7 +1,7 @@
 {
   "_note": "Hashes of the design refs that are ACTIVE design authorities — a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act — `--update design-refs/<file>.html` — because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
   "refs": {
-    "design-refs/action-journey.html": "b363147c683b1a7bcd66b9a7d15bb8d4c21aa56cd4bdafc75a0cd450c81ea2f5",
+    "design-refs/action-journey.html": "129247fc29907b723cb4a9d58d5cab25d439220ba34eb2bb248f4eb0ba56c89d",
     "design-refs/bar-hover-states.html": "212c494a27915e2152f58122bc3301a90324ebbddba8f2c32e9e5a35fb49f1d8",
     "design-refs/collapse-transition.html": "867d3df78d8697f144b157be71248a542df7a8c3b60fd73d6bfe83861eec1b18",
     "design-refs/compact-headers.html": "b9552e2b4b54fa7a812aaa3cd1022b511f2464b85ea988b3bb13d6e5ce35a529",

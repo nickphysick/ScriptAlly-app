@@ -199,6 +199,28 @@ h1{font-family:'Playfair Display',serif;font-weight:500;font-size:30px;margin:28
 <li><b>Dates default to today</b>, with Yesterday and a picker one tap away; agency reply windows default to the usual (editable) so no one is forced to invent a date.</li>
 <li><b>Linked tasks record; plain tasks tick.</b> A tick on a relationship task opens its sheet pre-filled; a plain task just completes.</li>
 <li><b>Entry never changes the journey.</b> Whether you began on a card button, a row tick, a bar's hover action or the drawer's primary action, step 1 is the same sheet with the same prefill.</li>
+</ol>
+<h3 style="margin-top:22px">Debt — superseded by the v65 §E ruling (6 Sep 2026)</h3>
+<ol>
+<li><b>There is no Action sheet, and rule 1 above is superseded.</b> The ruling names the four
+<b>desks</b> — <code>NudgeDesk</code> · <code>MarkSentDesk</code> · <code>RespondDesk</code> ·
+<code>MarkClosedDesk</code> — as the app's four writes and the only implementation. This document
+is read as <b>the specification those desks conform to</b>, not as a fifth component to build.
+The single call survives as <code>requestAction(kind, subject, prefill)</code>, which mounts the
+matching desk in the chassis; rules 2–9 stand and are what the desks are held to.</li>
+<li><b>The four-chip materials picker in the "Log sent materials" journey is superseded.</b> Its
+chips (Partial · Full · Synopsis · Revision) and the bracketed eight-item list that accompanied
+this ref in the v65 pack are both withdrawn. The picker is the app's own, by identity:
+<code>PACKAGE_MATERIALS</code> as it stands — <b>the two</b> — with the standing exclusions kept
+(no Full manuscript, no Author bio, no "First 50 pages"; the opening sample is named
+"Opening sample" because the record cannot state its unit). What the ruling adds is only the
+<b>default</b>: rows pre-ticked to what the agent's request named, each tagged "asked for", with
+the line that says so — and where the request record cannot name it, nothing is pre-ticked and
+the line is omitted.</li>
+<li><b>The 8-second toast is a decision, not yet a fact.</b> The app's shared
+<code>ToastProvider</code> defaults to 6000ms. Either the desks pass <code>duration: 8000</code>
+or the ruling accepts the house six seconds; flagged rather than changed, because the provider is
+shared with the whole app.</li>
 </ol></div>
 <script>
 document.querySelectorAll('.tabs span').forEach(function(t){t.addEventListener('click',function(){document.querySelectorAll('.tabs span').forEach(function(x){x.classList.remove('on')});t.classList.add('on');document.querySelectorAll('.flow').forEach(function(f){f.classList.toggle('on',f.id==='f-'+t.dataset.f)});});});
