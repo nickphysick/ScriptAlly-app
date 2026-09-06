@@ -15,7 +15,7 @@
  * anywhere on this page is how two counts of the same thing come to disagree.
  */
 import { QueryStatus } from "../types";
-import { turnFor, turnWordFor, type Turn, type Stage, type State } from "./queryCardFacts";
+import { turnFor, turnWordFor, stateFor, type Turn, type Stage, type State } from "./queryCardFacts";
 
 /* ── quick filters ──────────────────────────────────────────────────────────────────────────── */
 
@@ -192,6 +192,30 @@ export function compareGroupLabels(a: string, b: string, key: GroupKey): number 
   return a.localeCompare(b);
 }
 
+/**
+ * The heading's own colour class, where the group names a state (toolbar v2, §2).
+ *
+ * ⚠️ IT RETURNS "" FOR THE GROUPS THAT NAME NO STATE. Agency and Month sent are not points on the
+ * ladder; giving their headings a state's accent would be borrowing a colour to mean nothing,
+ * which is the one thing this palette's rulesheet forbids outright. The caller's CSS keeps its
+ * neutral rule for those.
+ */
+export function groupAccentClass(label: string, key: GroupKey): string {
+  if (key === "status") {
+    const st = (Object.values(QueryStatus) as string[]).includes(label) ? (label as QueryStatus) : null;
+    return st ? `qcc--st-${stateFor(st)}` : "";
+  }
+  if (key === "turn") {
+    const byWord: Record<string, string> = {
+      "With you": "you", "Offer": "offer", "With the agent": "agent",
+      "No response": "closed", "Closed": "closed",
+    };
+    const state = byWord[label];
+    return state ? `qcc--st-${state}` : "";
+  }
+  return "";
+}
+
 /* ── sort ───────────────────────────────────────────────────────────────────────────────────── */
 
 export type SortKey = "activity" | "sent" | "expect" | "name" | "agency";
@@ -257,7 +281,6 @@ export interface GridFilters {
   agency: ReadonlySet<string>;
   via: ReadonlySet<string>;
   /** Material slots that must ALL be present — `queryLetter`, `synopsis`, `sample`, `other`. */
-  included: ReadonlySet<string>;
 }
 
 /**
@@ -269,11 +292,10 @@ export const emptyGridFilters = (): GridFilters => ({
   status: new Set(),
   agency: new Set(),
   via: new Set(),
-  included: new Set(),
 });
 
 export const gridFilterCount = (f: GridFilters): number =>
-  f.status.size + f.agency.size + f.via.size + f.included.size;
+  f.status.size + f.agency.size + f.via.size;
 
 export const gridFiltersAreEmpty = (f: GridFilters): boolean => gridFilterCount(f) === 0;
 
@@ -285,7 +307,6 @@ export function matchesGridFilters(
   if (f.status.size && !f.status.has(row.status)) return false;
   if (f.agency.size && !f.agency.has(row.agency)) return false;
   if (f.via.size && !f.via.has(row.via)) return false;
-  for (const k of f.included) if (!row.slots.has(k)) return false;
   return true;
 }
 

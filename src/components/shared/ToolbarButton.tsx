@@ -40,10 +40,23 @@ export const ToolbarButton = React.forwardRef<HTMLButtonElement, {
   icon: React.ReactNode;
   open: boolean;
   onClick: () => void;
-}>(({ label, value, count, icon, open, onClick }, ref) => (
+  /**
+   * ⚠️ ADDITIVE (toolbar v2, §2), and the Query Centre's board is why: grouping is unavailable
+   * there because the board IS grouped by status, and a control that silently did nothing would
+   * be worse than one that says why. Optional, so the To-do page's three mounts and the Query
+   * Centre's other two are byte-identical without it.
+   *
+   * A disabled control still states its VALUE — `Group Status` — because the reason it is
+   * disabled is that the value is already true.
+   */
+  disabled?: boolean;
+  /** the native tooltip a disabled control needs to explain itself */
+  title?: string;
+}>(({ label, value, count, icon, open, onClick, disabled = false, title }, ref) => (
   <button
-    type="button" className="qcc-tb-btn" ref={ref}
+    type="button" className={disabled ? "qcc-tb-btn qcc-tb-btn--off" : "qcc-tb-btn"} ref={ref}
     aria-expanded={open} aria-haspopup="dialog"
+    disabled={disabled} title={title}
     onClick={onClick}
   >
     {icon}

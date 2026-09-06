@@ -1508,6 +1508,84 @@
 /* ── popovers — shared anatomy: paper Playfair head · sectioned body · paper foot ── */
 .f12-popwrap { position: relative; display: flex; align-items: center; }
 .f12-pop { position: absolute; top: calc(100% + 7px); left: 0; z-index: 30; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--sh-3); overflow: hidden; }
+/**
+ * ══ THE MOUNT CHASSIS (toolbar v2, §1) — the three toolbar menus only ═══════════════════════════
+ *
+ * ⚠️ A VARIANT, AND THE MODIFIER IS WHY. `F12Popover` has a fourth caller — the date editor — and
+ * these rules must not reach it, so every one of them is scoped to `.f12-pop--mount`. The base
+ * rules below are untouched, which is what makes "the date editor renders identically" a fact
+ * about the cascade rather than a promise.
+ *
+ * The app's three layers, as every panel here draws them: a parchment RIM (the popover itself,
+ * 6px of padding), an inset burgundy hairline FRAME that clips, and a sage BAND inside it.
+ */
+.f12-pop--mount {
+  background: var(--parchment, #fdfaf5); border: none; border-radius: 14px; padding: 6px;
+  box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07), 0 16px 40px rgba(58, 28, 20, 0.16);
+  overflow: visible;
+}
+.f12-pop-frame {
+  border: 1px solid rgba(124, 58, 42, 0.28); border-radius: 10px; overflow: hidden;
+  background: var(--parchment, #fdfaf5); display: flex; flex-direction: column; min-height: 0;
+}
+.f12-pop-band {
+  background: linear-gradient(135deg, #dce0d9, #d0d6cc); border-bottom: 0.5px solid #c4ccc0;
+  padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex: none;
+}
+.f12-pop-bt { font-family: var(--f12-serif); font-weight: 500; font-size: 14px; color: #2e3a2c; }
+/* `Clear` — Filter's only header action; the band's own ink, never the page's burgundy */
+.f12-pop-band .f12-reset {
+  margin-left: auto; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8.5px;
+  letter-spacing: 0.1em; text-transform: uppercase; color: #5a6e58;
+  border: none; border-bottom: 0.5px solid #a8b5a5; background: none; padding: 0; cursor: pointer;
+}
+.f12-pop-mbody { padding: 8px; overflow-y: auto; min-height: 0; }
+
+/**
+ * The menus' own furniture, inside the frame.
+ *
+ * ⚠️ SCOPED TO THE EXISTING MARKUP, NOT TO NEW CLASSES. `PopSection` and `PRow` already emit
+ * `.f12-sect-h`/`.f12-lbl` and `.f12-prow`/`.f12-on`; naming a parallel `.f12-opt` set would have
+ * meant a second row component to render them, which is the fork this section exists to avoid. The
+ * variant restyles the rows the shell already draws.
+ */
+.f12-pop--mount .f12-sect { padding: 0; }
+.f12-pop--mount .f12-sect-h { padding: 8px 8px 5px; }
+.f12-pop--mount .f12-sect-h .f12-rule { display: none; }
+.f12-pop--mount .f12-lbl {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8.5px; letter-spacing: 0.15em;
+  text-transform: uppercase; color: #9c8878;
+}
+.f12-pop--mount .f12-prow {
+  display: flex; align-items: center; gap: 10px; padding: 8px 9px; border-radius: 8px;
+  cursor: pointer; font-size: 13px; color: #3a1c14; background: none; border: none;
+  width: 100%; text-align: left; font-family: inherit;
+}
+.f12-pop--mount .f12-prow:hover { background: #fff; }
+/* ⚠️ `--state` IS THE ACTIVE FILL, and it falls back to the page's pink rather than to nothing —
+   the token is set by the row's own state class where one applies, and most rows have none. */
+.f12-pop--mount .f12-prow.f12-on { background: var(--state, #f5e2da); }
+/* the 12px state swatch the Status options carry */
+.f12-pop--mount .f12-sw { width: 12px; height: 12px; border-radius: 4px; border: 0.5px solid rgba(0, 0, 0, 0.08); flex: none; }
+.f12-pop--mount .f12-cnt { margin-left: auto; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; color: #9c8878; }
+
+/* the foot — Sort's direction segment; a control, not a confirm */
+.f12-pop-mfoot {
+  border-top: 0.5px solid #ece0d2; margin: 6px 4px 0; padding: 8px 5px 4px;
+  display: flex; justify-content: space-between; align-items: center; flex: none;
+}
+.f12-pop-mfoot .f12-dirlab {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #9c8878;
+}
+.f12-dirseg { display: inline-flex; background: #fff; border: 0.5px solid #e0d5c8; border-radius: 8px; padding: 2px; }
+.f12-dirseg button {
+  padding: 5px 9px; border-radius: 6px; border: none; background: none; cursor: pointer;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #6a5a50;
+}
+.f12-dirseg button.is-on { background: #f5e2da; color: #3a1c14; }
+
 .f12-pop-head { display: flex; align-items: center; gap: 9px; padding: 13px 15px; background: var(--paper); border-bottom: 1px solid var(--line); }
 .f12-pop-head .f12-pt { font-family: var(--f12-serif); font-size: 15.5px; font-weight: 600; }
 .f12-pop-head .f12-reset { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; color: var(--muted); padding: 4px 8px; border-radius: 99px; transition: background 0.12s, color 0.12s; }

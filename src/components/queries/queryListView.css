@@ -155,3 +155,18 @@
   .qlv-head, .qlv-row { grid-template-columns: 150px 1.1fr 62px 96px 108px 1.3fr 240px; gap: 10px; }
   .qlv-row { padding-left: 22px; }
 }
+
+/* ── group headings (toolbar v2, §2) ──────────────────────────────────────────────────────────
+   The grid's heading laid flat: Playfair name, count pill, then the group's own deep step filling
+   the row. Not sticky — a heading that follows you down states the group you are in twice, once
+   in the rows you can see and once in a bar you cannot dismiss. */
+.qlv-ghead {
+  display: flex; align-items: baseline; gap: 10px; padding: 16px 18px 8px 26px;
+  background: #fff; border-bottom: 0.5px solid #ece0d2;
+}
+.qlv-ghead h3 { font-family: var(--font-serif); font-weight: 500; font-size: 17px; color: var(--ink, #1c130f); margin: 0; }
+.qlv-gn {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9.5px; color: #6a5a50;
+  background: var(--parchment, #fdfaf5); border: 0.5px solid #e0d5c8; border-radius: 99px; padding: 2px 8px;
+}
+.qlv-gline { flex: 1; height: 1.5px; background: var(--state-accent, #e4d9cb); align-self: center; margin-left: 4px; }

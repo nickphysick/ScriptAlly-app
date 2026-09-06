@@ -499,7 +499,12 @@ describe("Phase 3–5 · three renderers over one set of rows", () => {
     for (const mount of ["<QueryListView", "<QueryBoardView", "<QueryCentreGrid"])
       expect(page, `${mount} is not fed gridRows`).toMatch(new RegExp(`${mount}[\\s\\S]{0,400}rows=\\{gridRows\\}`));
     for (const [what, src] of [["list", list], ["board", board]] as const) {
-      expect(src, `the ${what} sorts its own copy`).not.toMatch(/\.sort\(/);
+      /* ⚠️ NARROWED (toolbar v2, §2): this forbade ANY `.sort(`, which was the right claim about
+         ROWS and the wrong one about headings — the list orders its group headings through the
+         shared `compareGroupLabels`, which is the opposite of a second ordering. What must never
+         happen is a view re-ordering the rows it was handed, so that is what is asserted. */
+      expect(src, `the ${what} sorts the rows it was handed`).not.toMatch(/rows[\s\S]{0,12}\.sort\(/);
+      expect(src, `the ${what} sorts a copy of the rows`).not.toMatch(/\[\.\.\.rows\]/);
       expect(src, `the ${what} filters on something other than its column`).not.toMatch(/matchesFilters|inQuick|quickCounts/);
     }
   });
@@ -707,7 +712,141 @@ describe("§3 (toolbar v2) · the header is writing, and it drives THE sort", ()
        header click. ⚠️ ASSERTED AS THE DERIVATION, NOT THE MARKUP: the trigger's spelling is the
        To-do stream's to change (it is becoming a shared ToolbarButton as this runs), and a lock
        pinned to their markup would go red on an edit that leaves this claim entirely true. */
-    const sortFace = /F12_SORT_GROUPS\.flatMap\(\(g\) => g\.items\)\.find\(\(i\) => i\.key === sortKey\)\?\.label/;
-    expect(page, "the Sort control's face stopped being read from sortKey").toMatch(sortFace);
+    expect(page, "the Sort control's face stopped being read from sortKey")
+      .toContain("value={SORT_LABELS[sortKey] ?? \"Last activity\"}");
+    /* ⚠️ AND THE TABLE COVERS THE KEYS THE MENU DOES NOT OFFER. The Status header sorts by
+       `journey_depth`, which the five-row menu deliberately omits; a trigger reading the menu's
+       own list would name "Last activity" while the list was ordered by something else. */
+    expect(page).toMatch(/const SORT_LABELS[^=]*=[\s\S]{0,260}journey_depth:/);
+  });
+});
+
+/* ══ toolbar v2 · §1 — the popovers' chassis ══════════════════════════════════════════════════ */
+describe("§1 (toolbar v2) · an OPT-IN chassis, and a fourth caller that must not feel it", () => {
+  const shell = readFileSync(join(process.cwd(), "src/components/shell/F12Shell.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const css = readFileSync(join(process.cwd(), "src/components/shell/f12.css"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
+  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  it("⚠️ THE DATE EDITOR IS THE FOURTH CALLER AND OPTS OUT — by default, not by care", () => {
+    /* the variant defaults to `plain`, so a caller that says nothing renders exactly what it
+       always did; the date editor says nothing, and that is asserted rather than assumed */
+    expect(shell).toContain('chassis = "plain"');
+    const dateAt = page.indexOf('title={dateEdit === "sent" ? "Date sent" : "Reply expected by"}');
+    expect(dateAt, "the date editor has moved").toBeGreaterThan(-1);
+    const mount = page.slice(page.lastIndexOf("<F12Popover", dateAt), dateAt + 400);
+    expect(mount, "the date editor took the toolbar's chassis").not.toContain("chassis=");
+    /* and every mount rule is scoped to the modifier, so the cascade cannot reach it */
+    for (const rule of css.split("}").filter((r) => r.includes("f12-pop-frame") || r.includes("f12-pop-band") || r.includes("f12-pop-mbody")))
+      expect(rule, `an unscoped mount rule: ${rule.slice(0, 60)}`).not.toMatch(/^\s*\.f12-pop\s*\{/);
+  });
+
+  it("the three toolbar menus opt IN, and nothing else does", () => {
+    expect((page.match(/chassis="mount"/g) ?? []).length, "the mount chassis has spread").toBe(3);
+    for (const title of ['title="Filter"', 'title="Group"', 'title="Sort"'])
+      expect(page).toContain(title);
+  });
+
+  it("the chassis is the app's three layers — rim, frame, sage band", () => {
+    expect(css).toMatch(/\.f12-pop--mount \{[^}]*border-radius: 14px/);
+    expect(css).toMatch(/\.f12-pop--mount \{[^}]*padding: 6px/);
+    expect(css).toMatch(/\.f12-pop-frame \{[^}]*border: 1px solid rgba\(124, 58, 42, 0\.28\)/);
+    expect(css).toMatch(/\.f12-pop-frame \{[^}]*overflow: hidden/);
+    expect(css).toMatch(/\.f12-pop-band \{[^}]*linear-gradient\(135deg, #dce0d9, #d0d6cc\)/);
+    expect(css).toMatch(/\.f12-pop-bt \{[^}]*font-size: 14px/);
+  });
+
+  it("⚠️ the variant restyles the shell's OWN rows — it does not fork PRow", () => {
+    /* naming a parallel `.f12-opt` set would have meant a second row component to render it */
+    expect(css).toMatch(/\.f12-pop--mount \.f12-prow \{/);
+    expect(css).toMatch(/\.f12-pop--mount \.f12-prow\.f12-on \{[^}]*background: var\(--state/);
+    expect(css, "a parallel option class was introduced").not.toMatch(/\.f12-opt \{/);
+  });
+
+  it("Filter is THREE facets — Status, Sent via, Version — and Included is gone, not deprecated", () => {
+    const at = page.indexOf("const renderFilterPopover");
+    const body = page.slice(at, page.indexOf("const renderGroupPopover", at));
+    const labels = [...body.matchAll(/<PopSection label="([^"]+)"/g)].map((m) => m[1]);
+    expect(labels).toEqual(["Status", "Sent via", "Version"]);
+    /* ⚠️ Version stays because this popover is its ONLY control — the ref's "exactly two" would
+       have retired Part E's filter by accident. */
+    expect(body).toContain("setVersionFilter");
+    /* Included had no other reader, so the field went with the facet rather than being deprecated */
+    const grid = readFileSync(join(process.cwd(), "src/lib/queryCentreGrid.ts"), "utf8");
+    expect(grid, "the retired facet's field survives").not.toContain("included");
+    expect(page).not.toContain("needsTasks");
+  });
+
+  it("Sort is five keys plus ONE footer control, and the labels flip for the name keys", () => {
+    const at = page.indexOf("const SORT_KEYS");
+    const keys = [...page.slice(at, page.indexOf("SORT_IS_NAME", at)).matchAll(/key: "([^"]+)"/g)].map((m) => m[1]);
+    expect(keys).toEqual(["last_activity", "date_newest", "due_soonest", "agent_az", "agency_az"]);
+    expect(page).toContain('SORT_IS_NAME(sortKey) ? "A–Z" : "Newest"');
+    expect(page).toContain('SORT_IS_NAME(sortKey) ? "Z–A" : "Oldest"');
+    /* ⚠️ A KEY THE MENU OFFERS IS A KEY THE SORT CAN DO — `agency_az` came with its own case, or
+       it would have fallen through and ordered by something else under an honest-looking label. */
+    expect(page).toMatch(/case "agency_az": \{/);
+  });
+});
+
+/* ══ toolbar v2 · §2 — Group actually groups ══════════════════════════════════════════════════ */
+describe("§2 (toolbar v2) · one partition, three views, and a board that says why not", () => {
+  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const list = readFileSync(join(process.cwd(), "src/components/queries/QueryListView.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const grid = readFileSync(join(process.cwd(), "src/components/queries/QueryCentreGrid.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  it("⚠️ the List partitions with the GRID'S OWN functions — never a second grouping", () => {
+    for (const src of [grid, list]) {
+      expect(src).toContain("groupLabelFor(r, group)");
+      expect(src).toContain("compareGroupLabels(a, b, group)");
+    }
+    expect(page).toContain("group={gridGroup}");
+    /* both views are handed the same state, so they cannot partition differently */
+    expect((page.match(/group=\{gridGroup\}/g) ?? []).length).toBe(2);
+  });
+
+  it("an empty group is omitted — the buckets ARE the headings", () => {
+    /* headings come from the bucket keys, so a group with nothing in it cannot have a heading */
+    for (const src of [grid, list])
+      expect(src).toContain("[...buckets.keys()].sort((a, b) => compareGroupLabels(a, b, group))");
+    expect(list).toContain('group === "none"');
+  });
+
+  it("the heading's rule is the group's own deep step, and blank where the group names no state", () => {
+    const gridLib = readFileSync(join(process.cwd(), "src/lib/queryCentreGrid.ts"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(gridLib).toContain("export function groupAccentClass");
+    /* ⚠️ agency and month name no state, so they get "" and the CSS falls back to neutral —
+       borrowing a state's colour for a group that is not a state would mean nothing */
+    expect(gridLib).toMatch(/if \(key === "status"\)[\s\S]{0,400}return "";\n\}/);
+    const gcss = readFileSync(join(process.cwd(), "src/components/queries/queryCentreGrid.css"), "utf8");
+    expect(gcss).toMatch(/\.qcc-sech-rule \{[^}]*background: var\(--state-accent, #e4d9cb\)/);
+    const lcss = readFileSync(join(process.cwd(), "src/components/queries/queryListView.css"), "utf8");
+    expect(lcss).toMatch(/\.qlv-gline \{[^}]*background: var\(--state-accent, #e4d9cb\)/);
+  });
+
+  it("⚠️ the Board disables Group and says why — it is already grouped by status", () => {
+    expect(page).toContain('disabled={gridView === "board"}');
+    expect(page).toContain('title={gridView === "board" ? "The board is already grouped by status." : undefined}');
+    /* and it keeps stating its value, because the reason it is disabled is that the value is true */
+    expect(page).toContain('value={gridView === "board" ? "Status" : (GRID_GROUPS.find((g) => g.key === gridGroup)?.label ?? "None")}');
+    const tb = readFileSync(join(process.cwd(), "src/components/shared/ToolbarButton.tsx"), "utf8");
+    /* the shared control gained the state ADDITIVELY — the To-do page's mounts pass nothing */
+    expect(tb).toContain("disabled = false");
+    expect(tb).toContain('className={disabled ? "qcc-tb-btn qcc-tb-btn--off" : "qcc-tb-btn"}');
+  });
+
+  it("the headings are not sticky", () => {
+    const lcss = readFileSync(join(process.cwd(), "src/components/queries/queryListView.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(lcss.match(/\.qlv-ghead \{[^}]*\}/)?.[0] ?? "", "the list's heading sticks").not.toContain("sticky");
+    const gcss = readFileSync(join(process.cwd(), "src/components/queries/queryCentreGrid.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(gcss.match(/\.qcc-sech \{[^}]*\}/)?.[0] ?? "", "the grid's heading sticks").not.toContain("sticky");
   });
 });

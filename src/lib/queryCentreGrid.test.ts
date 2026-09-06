@@ -151,11 +151,6 @@ describe("the narrowing filters", () => {
     expect(matchesGridFilters(r, { ...emptyGridFilters(), status: new Set([QueryStatus.QUERIED]), via: new Set(["Post"]) })).toBe(false);
   });
 
-  it("⚠️ 'Included' means ALL of them — it is a description of the parcel, not a shortlist", () => {
-    expect(matchesGridFilters(r, { ...emptyGridFilters(), included: new Set(["queryLetter", "synopsis"]) })).toBe(true);
-    expect(matchesGridFilters(r, { ...emptyGridFilters(), included: new Set(["queryLetter", "sample"]) })).toBe(false);
-  });
-
   it("an empty set matches everything", () => {
     expect(matchesGridFilters(r, emptyGridFilters())).toBe(true);
     expect(gridFiltersAreEmpty(emptyGridFilters())).toBe(true);
@@ -165,7 +160,12 @@ describe("the narrowing filters", () => {
   it("⚠️ Clear all is BUILT, so a facet added later cannot escape it", () => {
     const empty = emptyGridFilters() as unknown as Record<string, Set<string>>;
     const keys = Object.keys(empty);
-    expect(keys.length).toBeGreaterThan(3);
+    /* ⚠️ THE FLOOR FOLLOWED A RETIREMENT (toolbar v2, §1): `included` was deleted with the facet
+       that set it — nothing else read it — taking the set from four to three. The floor exists to
+       stop an EMPTY object satisfying the loop below, not to pin a count, so it moves with the
+       facets rather than the facets being kept alive to satisfy it. */
+    expect(keys.length, "the facet set has emptied — the loop below would assert nothing").toBeGreaterThanOrEqual(3);
+    expect(keys.sort()).toEqual(["agency", "status", "via"]);
     /* Every facet is a real, empty Set — a hand-written literal that missed one would fail here. */
     for (const k of keys) {
       expect(empty[k], `${k} is not a Set`).toBeInstanceOf(Set);

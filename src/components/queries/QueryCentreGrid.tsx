@@ -19,7 +19,7 @@ import "./queryCard.css";
 import "./queryCentreGrid.css";
 import { QueryCard } from "./QueryCard";
 import { measureFlip, playFlip, clearFlip, type FlipRects } from "../../lib/flip";
-import { compareGroupLabels, groupLabelFor, type GroupKey, type GridRow } from "../../lib/queryCentreGrid";
+import { compareGroupLabels, groupLabelFor, groupAccentClass, type GroupKey, type GridRow } from "../../lib/queryCentreGrid";
 import type { CardFacts } from "../../lib/queryCardFacts";
 import type { QueryStatus } from "../../types";
 
@@ -143,7 +143,11 @@ export const QueryCentreGrid: React.FC<{
     <div className="qcc-stage" ref={stageRef}>
       {ghostCard && <div className="qcc-grid">{ghostCard}</div>}
       {headings.map((h) => (
-        <section className="qcc-sec" key={h}>
+        <section className={`qcc-sec ${groupAccentClass(h, group)}`} key={h}>
+          {/* ⚠️ THE RULE TAKES THE GROUP'S OWN DEEP STEP where the group HAS one — grouping by
+              status or by court names a state, so the heading can wear it; grouping by agency or
+              month does not, and the rule stays neutral rather than borrowing a colour that would
+              mean nothing. `groupAccentClass` returns "" in that case, and the CSS falls back. */}
           <h2 className="qcc-sech">
             <span className="qcc-sech-tx">{h}</span>
             <span className="qcc-sech-n">{buckets.get(h)!.length}</span>

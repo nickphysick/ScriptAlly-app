@@ -83,7 +83,7 @@ import { useOpenEditAgent } from "./EditAgentHost";
 import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
-import { cardFacts, cardMaterials, turnFor, MATERIAL_SLOTS, MON as MONTHS_SHORT, type Turn, type CardLeaf } from "../lib/queryCardFacts";
+import { cardFacts, cardMaterials, turnFor, stateFor, MATERIAL_SLOTS, MON as MONTHS_SHORT, type Turn, type CardLeaf } from "../lib/queryCardFacts";
 import { sinceThen, type SinceEvent } from "../lib/queryRowFacts";
 import { MATERIAL_ROW_NAMES, type MaterialRow } from "../lib/agentMaterials";
 import {
@@ -1853,7 +1853,7 @@ export const Queries: React.FC<{
      turn — WHOSE TURN radio, derived from the CTA engine's queryBucket (the ONE source of
      truth): "move" = writer's turn, "wait" = agent's court; never a second derivation.
      statusSel — exact QueryStatus enum strings, multi-select (empty OR full set = no filter).
-     needsOverdue / needsTasks — the NEEDS ATTENTION checkboxes, both derived (reply overdue
+     needsOverdue — the overdue flag, derived (reply overdue
      from responseDeadline while waiting; open tasks from the derived tasks array). */
   /**
    * ⚠️ FIVE VALUES NOW, AND THE FIRST THREE ARE UNTOUCHED. The browsing grid's quick filters and
@@ -1961,7 +1961,6 @@ export const Queries: React.FC<{
     setStatusSel(next.statusSel);
     setNeedsOverdue(next.needsOverdue);
   }, [statusFilter]);
-  const [needsTasks, setNeedsTasks] = useState(false);
   const [filterPopOpen, setFilterPopOpen] = useState(false);
   const [sortPopOpen, setSortPopOpen] = useState(false);
 
@@ -3011,7 +3010,6 @@ export const Queries: React.FC<{
       else if (v?.id !== versionFilter) return false;
     }
     if (needsOverdue && !isOverdueForReply(q)) return false;
-    if (needsTasks && queryTaskBadge(tasks, q.id).count === 0) return false;
 
     // Search bar filters
     const term = (listSearch || searchQuery).toLowerCase();
@@ -3100,6 +3098,14 @@ export const Queries: React.FC<{
     const agB = agents.find(ag => ag.id === b.agentId)?.name || "";
     switch (sortKey) {
       case "agent_az": return agA.localeCompare(agB);
+      /* ⚠️ ADDED WITH THE MENU ROW THAT OFFERS IT (toolbar v2). A key in the menu with no case
+         here falls through to the default and sorts by something else while the trigger names
+         `Agency` — a control that lies rather than one that is missing. */
+      case "agency_az": {
+        const cyA = agents.find(ag => ag.id === a.agentId)?.agency || "";
+        const cyB = agents.find(ag => ag.id === b.agentId)?.agency || "";
+        return cyA.localeCompare(cyB) || agA.localeCompare(agB);
+      }
       case "date_newest": return toMs(b.dateSent) - toMs(a.dateSent);
       case "date_oldest": return (toMs(a.dateSent) || MAXT) - (toMs(b.dateSent) || MAXT);
       case "waiting_longest": {
@@ -3361,25 +3367,22 @@ export const Queries: React.FC<{
     /* ⚠️ BUILT, NEVER TYPED OUT — a hand-written literal here is how a facet added later silently
        stops being cleared, which has happened on the agent list to the door facet. */
     setGridFilters(emptyGridFilters());
-    setNeedsOverdue(false); setNeedsTasks(false);
+    setNeedsOverdue(false);
   };
   const activeFilterChips: { key: string; label: string; remove: () => void }[] = [
     ...(turnFilter !== "all" ? [{ key: "turn", label: TURN_CHIP_LABEL[turnFilter], remove: () => setTurnFilter("all") }] : []),
     /* Every tick is its own removable chip — one that cleared a whole facet would take away
        choices the writer did not make. */
-    ...(["via", "included"] as const).flatMap((facet) =>
+    ...(["via"] as const).flatMap((facet) =>
       [...gridFilters[facet]].map((v) => ({
         key: `${facet}:${v}`,
-        label: (facet === "included"
-          ? `WITH ${MATERIAL_ROW_NAMES[v as keyof typeof MATERIAL_ROW_NAMES] ?? v}`
-          : v).toUpperCase(),
+        label: v.toUpperCase(),
         remove: () => toggleFacet(facet, v),
       })),
     ),
     ...(selectedManuscriptFilter !== "All" ? [{ key: "ms", label: (manuscriptsWithQueries.find(m => m.id === selectedManuscriptFilter)?.title || "MANUSCRIPT").toUpperCase(), remove: () => setSelectedManuscriptFilter("All") }] : []),
     ...(statusFilterActive ? statusSel.map(s => ({ key: `st:${s}`, label: (s === QueryStatus.REVISE_RESUBMIT ? "R&R" : s).toUpperCase(), remove: () => setStatusSel(prev => prev.filter(x => x !== s)) })) : []),
     ...(needsOverdue ? [{ key: "overdue", label: "OVERDUE FOR A REPLY", remove: () => setNeedsOverdue(false) }] : []),
-    ...(needsTasks ? [{ key: "tasks", label: "HAS OPEN TASKS", remove: () => setNeedsTasks(false) }] : []),
   ];
   const activeFilterCount = activeFilterChips.length;
   /* Is the list narrowed? Both doors count — the filter popovers AND either search (the list's
@@ -3403,49 +3406,46 @@ export const Queries: React.FC<{
   /* The mockup labels Revise & Resubmit "R&R" — the FILTER VALUE stays the exact enum string. */
   const statusDisplay = (s: QueryStatus) => (s === QueryStatus.REVISE_RESUBMIT ? "R&R" : s);
 
+  /**
+   * FILTER — THREE FACETS (toolbar v2, §1 + Nick's correction). Status · Sent via · Version.
+   *
+   * ⚠️ THE REF SAYS TWO, AND IT IS WRONG ON THAT POINT — recorded rather than obeyed. `Version` is
+   * Part E's filter and this popover is its ONLY control (`setVersionFilter` is called nowhere
+   * else), so "exactly two" would have retired a feature by accident. The ref is superseded here
+   * and nowhere else.
+   *
+   * What did go, and why each is safe or reported:
+   *   · `Whose turn` — the stat tiles own it (`quickKey` ↔ `turnFilter` are locked as ONE state).
+   *   · `Manuscript` — set from three other live controls, so the rows were a fourth door.
+   *   · `Included`  — DELETED outright: nothing read it but this facet and its own predicate.
+   *   · `Needs attention` — `Overdue for a reply` is the Past expected tile. ⚠️ `Has open tasks`
+   *     was NOT: `setNeedsTasks` was called only here, so it goes with this section. That is the
+   *     same fault as Version, one layer down; it is in the report rather than buried, and one row
+   *     restores it.
+   */
   const renderFilterPopover = () => (
     <F12Popover
-      width={288}
+      width={272}
+      chassis="mount"
       title="Filter"
       style={filterMenuStyle}
       panelRef={filterPopRef}
       onClose={() => setFilterPopOpen(false)}
-      headAction={<button type="button" className="f12-reset" onClick={resetAllFilters}>RESET ALL</button>}
-      footText={<><b>{filteredList.length}</b>&nbsp;OF {queries.length} QUERIES</>}
+      headAction={<button type="button" className="f12-reset" onClick={resetAllFilters}>Clear</button>}
     >
-      <PopSection label="Whose turn">
-        <PRow kind="rad" on={turnFilter === "all"} label="All queries" sub="Everything, open and closed" onClick={() => setTurnFilter("all")} />
-        <PRow kind="rad" on={turnFilter === "move"} label="Your move" sub="The agent has replied — your turn" onClick={() => setTurnFilter("move")} />
-        <PRow kind="rad" on={turnFilter === "wait"} label="Waiting" sub="Ball is in the agent's court" onClick={() => setTurnFilter("wait")} />
+      <PopSection label="Status">
+        {STATUS_SORT_ORDER.map(s => (
+          <PRow
+            key={s}
+            kind="box"
+            on={statusSel.includes(s)}
+            label={statusDisplay(s)}
+            lead={<span className={`f12-sw qcc--st-${stateFor(s)}`} style={{ background: "var(--band-a)" }} aria-hidden="true" />}
+            onClick={() => setStatusSel(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
+          />
+        ))}
       </PopSection>
-      {/**
-        * Part E, D11 — filter by version, alongside the existing filters.
-        *
-        * ⚠️ THE SECTION RENDERS ONLY WHEN THE FILTERED MANUSCRIPT HAS TWO OR MORE (D12/D8). With
-        * "All manuscripts" selected it would have to offer every book's versions in one list, where
-        * two manuscripts could each have an opening called "Draft two" and the writer could not
-        * tell which they were choosing. A filter that cannot name what it filters is worse than no
-        * filter.
-        *
-        * ⚠️ AND "NOT RECORDED" IS ITS OWN OPTION, not the resting state. `versionFilter === null`
-        * means not filtering; a writer asking which queries have no version recorded is asking a
-        * real question — the ordinary one, in fact, since no send predating this feature has one.
-        */}
-      {versionFilterOptions.length >= 2 && (
-        <PopSection label="Version">
-          <PRow kind="rad" on={versionFilter === null} label="Any version" onClick={() => setVersionFilter(null)} />
-          {versionFilterOptions.map((v) => (
-            <PRow key={v.id} kind="rad" on={versionFilter === v.id} label={v.name}
-                  onClick={() => setVersionFilter(v.id)} />
-          ))}
-          <PRow kind="rad" on={versionFilter === UNRECORDED_VERSION} label="Not recorded"
-                sub="Sent before you named your versions" onClick={() => setVersionFilter(UNRECORDED_VERSION)} />
-        </PopSection>
-      )}
-      {/* ⚠️ AGENCY IS NOT A FILTER FACET — decision 2, and the ref removed it in `1ce96f02`. It was
-          here for one pass, added when `GridFilters` was wired. Agency remains reachable under Sort
-          and Group, which is the better home for it: a facet lists every agency a writer has ever
-          queried and grows without bound, where a sort orders the same set in one row. */}
+
       <PopSection label="Sent via">
         {[...new Set(mastheadScopedQueries.map((q) => sendMethodLabel(q.sendMethod)))]
           .filter(Boolean).sort().map((v) => (
@@ -3454,49 +3454,19 @@ export const Queries: React.FC<{
           ))}
       </PopSection>
 
-      {/* ⚠️ "INCLUDED" MEANS ALL OF THEM — it describes the parcel, not a shortlist. Locked. */}
-      <PopSection label="Included">
-        {MATERIAL_SLOTS.map((k) => (
-          <PRow key={k} kind="box" on={gridFilters.included.has(k)} label={MATERIAL_ROW_NAMES[k]}
-            onClick={() => toggleFacet("included", k)} />
-        ))}
-      </PopSection>
-
-      <PopSection label="Manuscript">
-        <PRow kind="rad" on={selectedManuscriptFilter === "All"} label="All manuscripts" onClick={() => setSelectedManuscriptFilter("All")} />
-        {manuscriptsWithQueries.map(m => (
-          <PRow key={m.id} kind="rad" on={selectedManuscriptFilter === m.id} label={m.title} onClick={() => setSelectedManuscriptFilter(m.id)} />
-        ))}
-        {/* ⚠️ OFFERED ONLY WHEN THERE IS SOMETHING IN IT (derived, never stored). An always-present
-            "Unassigned" would teach that the state is normal; an absent one on an account that has
-            some would hide them. The count is derived like every other figure on this page. */}
-        {unassignedCount > 0 && (
-          <PRow kind="rad" on={selectedManuscriptFilter === UNASSIGNED_MS}
-                label={`${UNASSIGNED_LABEL} · ${unassignedCount}`}
-                onClick={() => setSelectedManuscriptFilter(UNASSIGNED_MS)} />
-        )}
-      </PopSection>
-      <PopSection label="Status">
-        <div className="f12-quick">
-          <button type="button" onClick={() => setStatusSel([...OPEN_STATUSES_F12])}>OPEN ONLY</button>
-          <button type="button" onClick={() => setStatusSel([...CLOSED_STATUSES_F12])}>CLOSED ONLY</button>
-          <button type="button" onClick={() => setStatusSel([])}>CLEAR</button>
-        </div>
-        {STATUS_SORT_ORDER.map(s => (
-          <PRow
-            key={s}
-            kind="box"
-            on={statusSel.includes(s)}
-            label={statusDisplay(s)}
-            lead={<StatusDot status={s} overrideSize={15} decorative />}
-            onClick={() => setStatusSel(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
-          />
-        ))}
-      </PopSection>
-      <PopSection label="Needs attention">
-        <PRow kind="box" on={needsOverdue} label="Overdue for a reply" onClick={() => setNeedsOverdue(v => !v)} />
-        <PRow kind="box" on={needsTasks} label="Has open tasks" onClick={() => setNeedsTasks(v => !v)} />
-      </PopSection>
+      {/* ⚠️ THE SECTION RENDERS ONLY WHERE THERE IS A CHOICE (Part E, D12/D8) — with "All
+          manuscripts" selected it would have to offer every book's versions in one list. */}
+      {versionFilterOptions.length > 1 && (
+        <PopSection label="Version">
+          <PRow kind="rad" on={versionFilter === null} label="Any version" onClick={() => setVersionFilter(null)} />
+          {versionFilterOptions.map((v) => (
+            <PRow key={v.id} kind="rad" on={versionFilter === v.id} label={v.name}
+              onClick={() => setVersionFilter(v.id)} />
+          ))}
+          <PRow kind="rad" on={versionFilter === UNRECORDED_VERSION} label="Not recorded"
+            sub="Sent before you named your versions" onClick={() => setVersionFilter(UNRECORDED_VERSION)} />
+        </PopSection>
+      )}
     </F12Popover>
   );
 
@@ -3523,11 +3493,11 @@ export const Queries: React.FC<{
   const renderGroupPopover = () => (
     <F12Popover
       width={252}
+      chassis="mount"
       title="Group"
       style={groupMenuStyle}
       panelRef={groupPopRef}
       onClose={() => setGroupPopOpen(false)}
-      footText={(GRID_GROUPS.find((g) => g.key === gridGroup)?.label || "None").toUpperCase()}
     >
       {GRID_GROUPS.map((g) => (
         <PRow
@@ -3541,21 +3511,61 @@ export const Queries: React.FC<{
     </F12Popover>
   );
 
+  /**
+   * SORT — FIVE KEYS AND A DIRECTION (toolbar v2, §1).
+   *
+   * ⚠️ DIRECTION LEFT THE ROWS AND BECAME A CONTROL. The page's vocabulary spelled it into the
+   * keys — `Date sent · newest` and `Date sent · oldest` were two rows for one question — so a
+   * menu that offered every combination grew a row per direction per key. Five keys plus one
+   * segment says the same thing in half the height, and the menu can no longer exceed ten rows.
+   *
+   * ⚠️ AND THE LABELS FLIP FOR THE TWO NAME KEYS. `Newest / Oldest` is nonsense over a surname;
+   * the segment reads `A–Z / Z–A` there. Same state, honest words.
+   */
+  const SORT_KEYS: { key: string; label: string; sub?: string }[] = [
+    { key: "last_activity", label: "Last activity", sub: "Most recently moved first" },
+    { key: "date_newest", label: "Date sent", sub: "When it went out" },
+    { key: "due_soonest", label: "Reply expected", sub: "Soonest first" },
+    { key: "agent_az", label: "Agent name" },
+    { key: "agency_az", label: "Agency" },
+  ];
+  const SORT_IS_NAME = (k: string) => k === "agent_az" || k === "agency_az";
+  /**
+   * ⚠️ EVERY KEY THE APP CAN SET, NOT ONLY THE FIVE THE MENU OFFERS. The list's Status header sorts
+   * by `journey_depth`, which the menu deliberately does not list — so a trigger that read the
+   * menu's own five would find nothing and fall back to naming "Last activity" while the list was
+   * ordered by something else. One table, and it is the trigger's source.
+   */
+  const SORT_LABELS: Record<string, string> = {
+    ...Object.fromEntries(SORT_KEYS.map((k) => [k.key, k.label])),
+    journey_depth: "Journey depth",
+    date_oldest: "Date sent",
+    waiting_longest: "Waiting longest",
+  };
+
   const renderSortPopover = () => (
     <F12Popover
       width={276}
+      chassis="mount"
       title="Sort"
       style={sortMenuStyle}
       panelRef={sortPopRef}
       onClose={() => setSortPopOpen(false)}
-      footText={(F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || "Last activity").toUpperCase()}
+      foot={
+        <div className="f12-pop-mfoot">
+          <span className="f12-dirlab">Order</span>
+          <span className="f12-dirseg" role="group" aria-label="Sort direction">
+            <button type="button" className={sortDesc ? "" : "is-on"} aria-pressed={!sortDesc}
+              onClick={() => setSortDesc(false)}>{SORT_IS_NAME(sortKey) ? "A–Z" : "Newest"}</button>
+            <button type="button" className={sortDesc ? "is-on" : ""} aria-pressed={sortDesc}
+              onClick={() => setSortDesc(true)}>{SORT_IS_NAME(sortKey) ? "Z–A" : "Oldest"}</button>
+          </span>
+        </div>
+      }
     >
-      {F12_SORT_GROUPS.map(g => (
-        <PopSection key={g.group} label={g.group}>
-          {g.items.map(i => (
-            <PRow key={i.key} kind="rad" on={sortKey === i.key} label={i.label} sub={i.sub} onClick={() => { setSortKey(i.key); setSortDesc(false); }} />
-          ))}
-        </PopSection>
+      {SORT_KEYS.map((i) => (
+        <PRow key={i.key} kind="rad" on={sortKey === i.key} label={i.label} sub={i.sub}
+          onClick={() => { setSortKey(i.key); setSortDesc(false); }} />
       ))}
     </F12Popover>
   );
@@ -3568,7 +3578,7 @@ export const Queries: React.FC<{
    * the two things auto-selecting the first row on load. Its stated job is to keep the pane from
    * reading a row that has gone; with nothing selected there is nothing to keep.
    */
-  const statusFiltersKey = `${turnFilter}|${statusSel.join(",")}|${needsOverdue}|${needsTasks}`;
+  const statusFiltersKey = `${turnFilter}|${statusSel.join(",")}|${needsOverdue}`;
   useEffect(() => {
     if (sortedList.length > 0) {
       if (selectedQueryId && !sortedList.some(q => q.id === selectedQueryId)) {
@@ -5858,9 +5868,15 @@ export const Queries: React.FC<{
 
               <div className="f12-popwrap">
                 <ToolbarButton
-                  ref={groupTrigRef} label="Group" icon={ToolbarIcon.group}
-                  value={GRID_GROUPS.find((g) => g.key === gridGroup)?.label ?? "None"}
+                  ref={groupTrigRef} label="Group"
+                  icon={ToolbarIcon.group}
+                  value={gridView === "board" ? "Status" : (GRID_GROUPS.find((g) => g.key === gridGroup)?.label ?? "None")}
                   open={groupPopOpen}
+                  /* ⚠️ THE BOARD IS ALREADY GROUPED BY STATUS — its seven columns ARE the grouping.
+                     Offering a second key would ask the board to reshape its columns, which is out
+                     of this run's scope; a control that opened and did nothing would be worse. */
+                  disabled={gridView === "board"}
+                  title={gridView === "board" ? "The board is already grouped by status." : undefined}
                   onClick={() => { setFilterPopOpen(false); setSortPopOpen(false); setGroupPopOpen((o) => !o); }}
                 />
                 {groupPopOpen && renderGroupPopover()}
@@ -5869,7 +5885,7 @@ export const Queries: React.FC<{
               <div className="f12-popwrap">
                 <ToolbarButton
                   ref={sortTrigRef} label="Sort" icon={ToolbarIcon.sort}
-                  value={F12_SORT_GROUPS.flatMap((g) => g.items).find((i) => i.key === sortKey)?.label ?? "Last activity"}
+                  value={SORT_LABELS[sortKey] ?? "Last activity"}
                   open={sortPopOpen}
                   onClick={() => { setFilterPopOpen(false); setGroupPopOpen(false); setSortPopOpen((o) => !o); }}
                 />
@@ -5919,6 +5935,7 @@ export const Queries: React.FC<{
                  two views cannot disagree about what order things are in. */
               <QueryListView
                 rows={gridRows}
+                group={gridGroup}
                 since={listSince}
                 sentLeaf={listSentLeaf}
                 onVerb={(id, verb, anchor) => {

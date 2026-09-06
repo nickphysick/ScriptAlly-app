@@ -127,8 +127,19 @@ export const F12Popover: React.FC<{
    * panel's foot below the fold.
    */
   panelRef?: React.RefObject<HTMLElement | null>;
+  /**
+   * ⚠️ AN OPT-IN CHASSIS, NOT A RESTYLE (toolbar v2, §1). The app's MountCard three-layer shape —
+   * parchment rim, inset burgundy hairline frame, sage band header — for the three TOOLBAR menus
+   * only. It is a variant rather than a new look for `F12Popover` because this component has a
+   * FOURTH caller: the date editor (`Date sent` / `Reply expected by`), which is out of that
+   * section's scope and must render byte-identically. Default is the cream head this has always
+   * drawn, so the date editor's path is untouched by construction rather than by care.
+   */
+  chassis?: "plain" | "mount";
+  /** Footer content for the `mount` chassis — the direction segment on Sort. Ignored on `plain`. */
+  foot?: React.ReactNode;
   children: React.ReactNode;
-}> = ({ width, title, onClose, style, headAction, footText, panelRef, children }) => {
+}> = ({ width, title, onClose, style, headAction, footText, panelRef, chassis = "plain", foot, children }) => {
   const ref = useRef<HTMLDivElement>(null);
   /* one element, two holders: the outside-click handler's and the caller's placement measurement */
   useEffect(() => { if (panelRef) (panelRef as React.MutableRefObject<HTMLElement | null>).current = ref.current; });
@@ -159,22 +170,37 @@ export const F12Popover: React.FC<{
     <div className="t-f12 qc-neutral">
       <div
         ref={ref}
-        className="f12-pop"
+        className={chassis === "mount" ? "f12-pop f12-pop--mount" : "f12-pop"}
         /* ⚠️ A FLEX COLUMN (§8), so a `max-height` from the caller squeezes the BODY and leaves the
            head and foot pinned. As a block it scrolled as a whole and took the foot with it. */
         style={{ width, display: "flex", flexDirection: "column", minHeight: 0, zIndex: 60, ...style }}
         role="dialog"
         aria-label={title}
       >
-        <div className="f12-pop-head">
-          <span className="f12-pt">{title}</span>
-          {headAction}
-        </div>
-        <div className="f12-pop-body">{children}</div>
-        <div className="f12-pop-foot">
-          <span>{footText}</span>
-          <button type="button" className="f12-done" onClick={onClose}>DONE</button>
-        </div>
+        {chassis === "mount" ? (
+          /* the rim is the element above; the FRAME is this child, and it clips so the sage band
+             meets the frame's own corners rather than overhanging them */
+          <div className="f12-pop-frame">
+            <div className="f12-pop-band">
+              <span className="f12-pop-bt">{title}</span>
+              {headAction}
+            </div>
+            <div className="f12-pop-mbody">{children}</div>
+            {foot}
+          </div>
+        ) : (
+          <>
+            <div className="f12-pop-head">
+              <span className="f12-pt">{title}</span>
+              {headAction}
+            </div>
+            <div className="f12-pop-body">{children}</div>
+            <div className="f12-pop-foot">
+              <span>{footText}</span>
+              <button type="button" className="f12-done" onClick={onClose}>DONE</button>
+            </div>
+          </>
+        )}
       </div>
     </div>,
     document.body

@@ -20,6 +20,7 @@ import "./queryListView.css";
 import { StatusDot } from "../StatusDot";
 import { Mark } from "./QueryCard";
 import type { GridCard } from "./QueryCentreGrid";
+import { compareGroupLabels, groupLabelFor, groupAccentClass, type GroupKey } from "../../lib/queryCentreGrid";
 import { MATERIAL_SLOTS, type CardLeaf } from "../../lib/queryCardFacts";
 import { MATERIAL_ROW_NAMES } from "../../lib/agentMaterials";
 import { IlloSlot } from "./IlloSlot";
@@ -62,6 +63,8 @@ export const QueryListView: React.FC<{
   /** the original send, per query id — the leaf here is `dateSent`, never last activity */
   sentLeaf: Record<string, CardLeaf | null>;
   sortKey: SortKey;
+  /** the page's grouping — the list partitions the SAME rows the grid would (toolbar v2, §2) */
+  group?: GroupKey;
   /** true = the page is showing this sort reversed; the header draws the caret from it */
   sortDesc: boolean;
   selectedId?: string | null;
@@ -70,7 +73,145 @@ export const QueryListView: React.FC<{
   onMore?: (id: string, anchor: HTMLElement) => void;
   /** every action opens the desk AND the drawer behind it — see the page's handler */
   onVerb?: (id: string, verb: "primary" | "nudge" | "closed", anchor: HTMLElement) => void;
-}> = ({ rows, since, sentLeaf, sortKey, sortDesc, selectedId, onSort, onOpen, onMore, onVerb }) => (
+}> = ({ rows, since, sentLeaf, sortKey, group = "none", sortDesc, selectedId, onSort, onOpen, onMore, onVerb }) => {
+  /**
+   * ⚠️ THE SAME PARTITION THE GRID MAKES, from the same two pure functions — never a second
+   * grouping. Rows arrive already narrowed and ordered; this only decides where a heading goes,
+   * and an empty group is omitted because it is not a fact about anything.
+   */
+  const buckets = new Map<string, GridCard[]>();
+  if (group !== "none") {
+    for (const r of rows) {
+      const label = groupLabelFor(r, group);
+      const list = buckets.get(label);
+      if (list) list.push(r); else buckets.set(label, [r]);
+    }
+  }
+  const headings = [...buckets.keys()].sort((a, b) => compareGroupLabels(a, b, group));
+
+  const row = (r: GridCard) => {
+      const f = r.facts;
+    const v = queryVerbs(f.turn);
+    const ev = since[r.id] ?? [];
+    /* ⚠️ THE SEND, NOT THE LAST THING THAT HAPPENED. The Sent column marks where the journey
+       STARTED, so it reads `dateSent` however far the query has travelled — and it stays in the
+       Queried sand for the same reason: the start is the start whatever the row is now. */
+    const leaf = sentLeaf[r.id] ?? null;
+    return (
+      <div
+        key={r.id}
+        className={`qlv-row qcc--st-${f.state}${selectedId === r.id ? " qlv-row--on" : ""}`}
+        data-qlv-id={r.id}
+        role="button"
+        tabIndex={0}
+        onClick={() => onOpen?.(r.id)}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen?.(r.id); } }}
+      >
+        {/* the row's own state, as a 4px bar in the deep tone — inset, rounded on the inner edge */}
+        <span className="qlv-bar" aria-hidden="true" />
+
+        {/* ⚠️ PLAIN TEXT AND ITS DOT — no pill, no fill (v14 §2). The accent bar already carries
+            the row's colour; a tinted pill beside it says the same thing twice, louder. */}
+        <span className="qlv-st">
+          <StatusDot status={r.status} overrideSize={16} decorative />
+          {r.status}
+        </span>
+
+        <span className="qlv-who">
+          <span className="qlv-chip" aria-hidden="true">{r.initials}</span>
+          <span className="qlv-whotx">
+            <span className="qlv-nm">{r.name}</span>
+            <span className="qlv-ag">{r.agency}</span>
+          </span>
+        </span>
+
+        <span className="qlv-leafwrap">
+          {leaf ? (
+            <span className="qlv-leaf qcc--st-queried" aria-hidden="true">
+              <span className="qlv-mo">{leaf.month}</span>
+              <span className="qlv-dy">{leaf.day}</span>
+              <span className="qlv-cap">sent</span>
+            </span>
+          ) : <span className="qlv-none">—</span>}
+        </span>
+
+        <span className="qlv-mats">
+          {f.materialsRecorded
+            ? MATERIAL_SLOTS.map((k) => (
+                <span key={k} className={`qlv-ic${f.materials[k] ? "" : " qlv-ic--off"}`} title={MATERIAL_ROW_NAMES[k]}>
+                  <Mark kind={k} />
+                </span>
+              ))
+            : <span className="qlv-none">Not recorded</span>}
+        </span>
+
+        {/* ⚠️ EVERY RECORDED ACTIVITY AFTER THE SEND, from the same rows the drawer's timeline
+            renders. A row with nothing after the send says so rather than drawing an empty box. */}
+        <span className="qlv-since">
+          {ev.length === 0
+            ? <span className="qlv-none">nothing yet</span>
+            : ev.map((e) => (
+                <span key={e.id} className={`qlv-ev qlv-ev--${e.kind}`} tabIndex={0}>
+                  <span aria-hidden="true">{SINCE_GLYPH[e.kind]}</span>
+                  <span className="qlv-tip" role="note">{e.label}<i>{shortWhen(e.atMs)}</i></span>
+                </span>
+              ))}
+        </span>
+
+        <span className="qlv-fs">
+          {/* the same family the drawer's header slot uses — omitted, never blank, when absent */}
+          <IlloSlot className="qlv-spot" name={`spot · ${f.state}`} width={44} height={44} round />
+          <span className="qlv-fstx">
+            <span className="qlv-sent">
+              {f.attention && <span className="qlv-mk" aria-hidden="true">!</span>}
+              {f.sentence.map((run, i) => (run.strong ? <b key={i}>{run.text}</b> : <React.Fragment key={i}>{run.text}</React.Fragment>))}
+            </span>
+            {f.captionParts.length > 0 && (
+              <span className="qlv-cappar">
+                {f.captionParts.map((part, i) => (
+                  <React.Fragment key={i}>
+                    {i > 0 && <i className="qlv-pipe" aria-hidden="true" />}
+                    <span>{part}</span>
+                  </React.Fragment>
+                ))}
+              </span>
+            )}
+          </span>
+        </span>
+
+        {/* ⚠️ A FIXED FOUR-SLOT GRID, and an absent verb leaves its slot EMPTY rather than
+            collapsing it — every row's ⋯ shares one x, every primary one width, so the column
+            reads as a column. `visibility: hidden`, not removal. */}
+        <span className="qlv-acts" onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            className={`qlv-pri${v.primary.enabled ? "" : " qlv-pri--off"}`}
+            disabled={!v.primary.enabled}
+            title={v.primary.enabled ? undefined : "Reopening a closed query is not built yet"}
+            onClick={(e) => { e.stopPropagation(); onVerb?.(r.id, "primary", e.currentTarget); }}
+          >{v.primary.label}</button>
+          <button
+            type="button" className="qlv-ib" aria-label="Nudge"
+            style={v.nudge ? undefined : { visibility: "hidden" }}
+            tabIndex={v.nudge ? 0 : -1}
+            onClick={(e) => { e.stopPropagation(); onVerb?.(r.id, "nudge", e.currentTarget); }}
+          >◔</button>
+          <button
+            type="button" className="qlv-ib" aria-label="Mark closed"
+            style={v.markClosed ? undefined : { visibility: "hidden" }}
+            tabIndex={v.markClosed ? 0 : -1}
+            onClick={(e) => { e.stopPropagation(); onVerb?.(r.id, "closed", e.currentTarget); }}
+          >×</button>
+          <button
+            type="button" className="qlv-ib" aria-label={`More actions for ${r.name}`}
+            onClick={(e) => { e.stopPropagation(); onMore?.(r.id, e.currentTarget); }}
+          >⋯</button>
+        </span>
+      </div>
+    );
+  };
+
+  return (
   <div className="qlv">
     {/**
       * ⚠️ THE HEADER READS AS WRITING, NOT AS A SCHEMA (v2 toolbar, §3) — Playfair 14px, muted
@@ -100,126 +241,19 @@ export const QueryListView: React.FC<{
       )}
     </div>
 
-    {rows.map((r) => {
-      const f = r.facts;
-      const v = queryVerbs(f.turn);
-      const ev = since[r.id] ?? [];
-      /* ⚠️ THE SEND, NOT THE LAST THING THAT HAPPENED. The Sent column marks where the journey
-         STARTED, so it reads `dateSent` however far the query has travelled — and it stays in the
-         Queried sand for the same reason: the start is the start whatever the row is now. */
-      const leaf = sentLeaf[r.id] ?? null;
-      return (
-        <div
-          key={r.id}
-          className={`qlv-row qcc--st-${f.state}${selectedId === r.id ? " qlv-row--on" : ""}`}
-          data-qlv-id={r.id}
-          role="button"
-          tabIndex={0}
-          onClick={() => onOpen?.(r.id)}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen?.(r.id); } }}
-        >
-          {/* the row's own state, as a 4px bar in the deep tone — inset, rounded on the inner edge */}
-          <span className="qlv-bar" aria-hidden="true" />
-
-          {/* ⚠️ PLAIN TEXT AND ITS DOT — no pill, no fill (v14 §2). The accent bar already carries
-              the row's colour; a tinted pill beside it says the same thing twice, louder. */}
-          <span className="qlv-st">
-            <StatusDot status={r.status} overrideSize={16} decorative />
-            {r.status}
-          </span>
-
-          <span className="qlv-who">
-            <span className="qlv-chip" aria-hidden="true">{r.initials}</span>
-            <span className="qlv-whotx">
-              <span className="qlv-nm">{r.name}</span>
-              <span className="qlv-ag">{r.agency}</span>
-            </span>
-          </span>
-
-          <span className="qlv-leafwrap">
-            {leaf ? (
-              <span className="qlv-leaf qcc--st-queried" aria-hidden="true">
-                <span className="qlv-mo">{leaf.month}</span>
-                <span className="qlv-dy">{leaf.day}</span>
-                <span className="qlv-cap">sent</span>
-              </span>
-            ) : <span className="qlv-none">—</span>}
-          </span>
-
-          <span className="qlv-mats">
-            {f.materialsRecorded
-              ? MATERIAL_SLOTS.map((k) => (
-                  <span key={k} className={`qlv-ic${f.materials[k] ? "" : " qlv-ic--off"}`} title={MATERIAL_ROW_NAMES[k]}>
-                    <Mark kind={k} />
-                  </span>
-                ))
-              : <span className="qlv-none">Not recorded</span>}
-          </span>
-
-          {/* ⚠️ EVERY RECORDED ACTIVITY AFTER THE SEND, from the same rows the drawer's timeline
-              renders. A row with nothing after the send says so rather than drawing an empty box. */}
-          <span className="qlv-since">
-            {ev.length === 0
-              ? <span className="qlv-none">nothing yet</span>
-              : ev.map((e) => (
-                  <span key={e.id} className={`qlv-ev qlv-ev--${e.kind}`} tabIndex={0}>
-                    <span aria-hidden="true">{SINCE_GLYPH[e.kind]}</span>
-                    <span className="qlv-tip" role="note">{e.label}<i>{shortWhen(e.atMs)}</i></span>
-                  </span>
-                ))}
-          </span>
-
-          <span className="qlv-fs">
-            {/* the same family the drawer's header slot uses — omitted, never blank, when absent */}
-            <IlloSlot className="qlv-spot" name={`spot · ${f.state}`} width={44} height={44} round />
-            <span className="qlv-fstx">
-              <span className="qlv-sent">
-                {f.attention && <span className="qlv-mk" aria-hidden="true">!</span>}
-                {f.sentence.map((run, i) => (run.strong ? <b key={i}>{run.text}</b> : <React.Fragment key={i}>{run.text}</React.Fragment>))}
-              </span>
-              {f.captionParts.length > 0 && (
-                <span className="qlv-cappar">
-                  {f.captionParts.map((part, i) => (
-                    <React.Fragment key={i}>
-                      {i > 0 && <i className="qlv-pipe" aria-hidden="true" />}
-                      <span>{part}</span>
-                    </React.Fragment>
-                  ))}
-                </span>
-              )}
-            </span>
-          </span>
-
-          {/* ⚠️ A FIXED FOUR-SLOT GRID, and an absent verb leaves its slot EMPTY rather than
-              collapsing it — every row's ⋯ shares one x, every primary one width, so the column
-              reads as a column. `visibility: hidden`, not removal. */}
-          <span className="qlv-acts" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className={`qlv-pri${v.primary.enabled ? "" : " qlv-pri--off"}`}
-              disabled={!v.primary.enabled}
-              title={v.primary.enabled ? undefined : "Reopening a closed query is not built yet"}
-              onClick={(e) => { e.stopPropagation(); onVerb?.(r.id, "primary", e.currentTarget); }}
-            >{v.primary.label}</button>
-            <button
-              type="button" className="qlv-ib" aria-label="Nudge"
-              style={v.nudge ? undefined : { visibility: "hidden" }}
-              tabIndex={v.nudge ? 0 : -1}
-              onClick={(e) => { e.stopPropagation(); onVerb?.(r.id, "nudge", e.currentTarget); }}
-            >◔</button>
-            <button
-              type="button" className="qlv-ib" aria-label="Mark closed"
-              style={v.markClosed ? undefined : { visibility: "hidden" }}
-              tabIndex={v.markClosed ? 0 : -1}
-              onClick={(e) => { e.stopPropagation(); onVerb?.(r.id, "closed", e.currentTarget); }}
-            >×</button>
-            <button
-              type="button" className="qlv-ib" aria-label={`More actions for ${r.name}`}
-              onClick={(e) => { e.stopPropagation(); onMore?.(r.id, e.currentTarget); }}
-            >⋯</button>
-          </span>
-        </div>
-      );
-    })}
+    {group === "none"
+      ? rows.map(row)
+      : headings.map((h) => (
+          <React.Fragment key={h}>
+            {/* the heading is a full-width row between groups — the grid's own anatomy, laid flat */}
+            <div className={`qlv-ghead ${groupAccentClass(h, group)}`} role="row">
+              <h3>{h}</h3>
+              <span className="qlv-gn">{buckets.get(h)!.length}</span>
+              <span className="qlv-gline" aria-hidden="true" />
+            </div>
+            {buckets.get(h)!.map(row)}
+          </React.Fragment>
+        ))}
   </div>
-);
+  );
+};
