@@ -72,6 +72,12 @@ export const QueryListView: React.FC<{
   onVerb?: (id: string, verb: "primary" | "nudge" | "closed", anchor: HTMLElement) => void;
 }> = ({ rows, since, sentLeaf, sortKey, sortDesc, selectedId, onSort, onOpen, onMore, onVerb }) => (
   <div className="qlv">
+    {/**
+      * ⚠️ THE HEADER READS AS WRITING, NOT AS A SCHEMA (v2 toolbar, §3) — Playfair 14px, muted
+      * until you touch it. And it drives THE sort state, not a copy: a header hands `onSort` the
+      * page's own key, so the Sort menu's label changes when you click a column and the two
+      * controls can never disagree about what order the list is in.
+      */}
     <div className="qlv-head" role="row">
       {LIST_COLUMNS.map((c, i) =>
         c.sort ? (
@@ -83,10 +89,13 @@ export const QueryListView: React.FC<{
             onClick={() => onSort(c.sort!)}
           >
             {c.label}
-            <span className="qlv-caret" aria-hidden="true">{sortKey === c.sort ? (sortDesc ? "▾" : "▴") : ""}</span>
+            {sortKey === c.sort && (
+              <span className="qlv-caret" aria-hidden="true">{sortDesc ? "▼" : "▲"}</span>
+            )}
           </button>
         ) : (
-          <span key={i} className="qlv-h">{c.label}</span>
+          /* Actions states no order of its own, so it is not a control — right-aligned, inert */
+          <span key={i} className={`qlv-h${c.label === "Actions" ? " qlv-h--end" : ""}`}>{c.label}</span>
         ),
       )}
     </div>

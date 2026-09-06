@@ -437,10 +437,21 @@ describe("Phase 2 · the tiles state the whole set, and the switch changes only 
 
   it("⚠️ Past expected is a SECOND AXIS, not a fifth court — it combines with whichever court is on", () => {
     /* the chips' semantics exactly: one court + a flag. A tile row of five exclusive buttons would
-       have made "with you AND past expected" unaskable, which is the commonest question here. */
-    expect(tiles).toContain("const isPast = t.key === \"past\";");
-    expect(tiles).toContain("const on = isPast ? overdue : quickKey === t.key;");
-    expect(tiles).toContain("isPast ? onOverdue(!overdue) : onQuick(t.key as QuickKey)");
+       have made "with you AND past expected" unaskable, which is the commonest question here.
+       ⚠️ RETARGETED FROM THREE SPELLINGS TO THE CLAIM (QC-chassis round, Phase 1), AND ONLY AFTER
+       THOSE SPELLINGS CAUGHT A REAL REGRESSION. The tile MARKUP moved to `shared/StatTiles` so the
+       To-do page could mount the same component; the first version of that component took ONE
+       selected key and silently collapsed these two axes into one. This lock went red, correctly,
+       on a page that then pressed a single tile where it had pressed two. So the claim is asserted
+       where it now lives — the wrapper rings a SET, and the pick still branches on `past` — and
+       the component is asserted to honour a set at all, which is the half that broke. */
+    expect(tiles, "the overdue flag stopped combining with the court")
+      .toContain("selected={overdue ? [quickKey, \"past\"] : [quickKey]}");
+    expect(tiles, "past stopped toggling its own axis")
+      .toContain("k === \"past\" ? onOverdue(!overdue) : onQuick(k as QuickKey)");
+    const shared = readFileSync(join(process.cwd(), "src/components/shared/StatTiles.tsx"), "utf8");
+    expect(shared, "the shared row cannot ring two tiles, so the two axes cannot both show")
+      .toContain("Array.isArray(selected) ? selected.includes(k) : selected === k");
   });
 
   it("active is an ink border, never a fill — colour on this page states the court", () => {
@@ -647,5 +658,56 @@ describe("v14 §2–§4 · one predicate, one history, one ground", () => {
     const frames = pcss.match(/@keyframes qpnRise \{[^}]*\}[^}]*\}/)?.[0] ?? "";
     expect(frames, "the rise keyframes are missing").toContain("translateY(8px)");
     expect(frames, "a var() reached the keyframes").not.toContain("var(");
+  });
+});
+
+/* ══ toolbar v2 · §3 — the list header ════════════════════════════════════════════════════════ */
+describe("§3 (toolbar v2) · the header is writing, and it drives THE sort", () => {
+  const list = readFileSync(join(process.cwd(), "src/components/queries/QueryListView.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const css = readFileSync(join(process.cwd(), "src/components/queries/queryListView.css"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
+  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  it("Playfair on parchment with its own rule — not mono capitals", () => {
+    expect(css).toMatch(/\.qlv-h \{[^}]*font-family: var\(--font-serif\)/);
+    expect(css).toMatch(/\.qlv-h \{[^}]*font-size: 14px/);
+    expect(css).toMatch(/\.qlv-h \{[^}]*color: #6a5a50/);
+    expect(css, "the header kept its mono capitals").not.toMatch(/\.qlv-h \{[^}]*text-transform: uppercase/);
+    expect(css).toMatch(/\.qlv-head \{[^}]*border-bottom: 1px solid #ddd2c4/);
+    expect(css).toMatch(/\.qlv-head \{[^}]*background: var\(--parchment/);
+  });
+
+  it("the caret is burgundy, on the sorted column only, and follows the direction", () => {
+    expect(css).toMatch(/\.qlv-caret \{[^}]*color: #7c3a2a/);
+    /* rendered only for the sorted column — an empty caret on every other one is a mark that
+       means nothing, and this header has exactly one mark that means something */
+    expect(list).toContain("{sortKey === c.sort && (");
+    expect(list).toContain('{sortDesc ? "▼" : "▲"}');
+  });
+
+  it("Actions names no order, so it is inert and right-aligned — not a control that does nothing", () => {
+    expect(list).toContain('c.label === "Actions" ? " qlv-h--end" : ""');
+    expect(css).toMatch(/\.qlv-h--end \{[^}]*cursor: default/);
+    expect(css).toMatch(/\.qlv-h--end \{[^}]*justify-content: flex-end/);
+  });
+
+  it("⚠️ ONE SORT STATE — a header writes the page's own key, so the Sort menu's label follows", () => {
+    /* the header hands back the PAGE's vocabulary… */
+    for (const k of ["journey_depth", "agent_az", "date_newest", "due_soonest"])
+      expect(list, `the header does not offer ${k}`).toContain(`"${k}"`);
+    /* ⚠️ …AND THE HEADER ACTUALLY CALLS IT. The first draft of this case asserted the keys and the
+       page's routing and never the click, so a header whose onClick was emptied passed it — the
+       parts were each correct and the composition was dead. Proved by that mutation. */
+    expect(list, "a header no longer drives the sort").toContain("onClick={() => onSort(c.sort!)}");
+    /* …the page routes it into the one sortKey, toggling direction on a repeat… */
+    expect(page).toContain("onSort={(k) => { if (k === sortKey) setSortDesc((d) => !d); else { setSortKey(k); setSortDesc(false); } }}");
+    /* …and the Sort MENU's face is DERIVED FROM THAT SAME KEY, which is what makes it follow a
+       header click. ⚠️ ASSERTED AS THE DERIVATION, NOT THE MARKUP: the trigger's spelling is the
+       To-do stream's to change (it is becoming a shared ToolbarButton as this runs), and a lock
+       pinned to their markup would go red on an edit that leaves this claim entirely true. */
+    const sortFace = /F12_SORT_GROUPS\.flatMap\(\(g\) => g\.items\)\.find\(\(i\) => i\.key === sortKey\)\?\.label/;
+    expect(page, "the Sort control's face stopped being read from sortKey").toMatch(sortFace);
   });
 });

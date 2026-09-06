@@ -22,7 +22,9 @@
   grid-template-columns: 170px 1.25fr 74px 108px 132px 1.5fr 240px; gap: 14px;
   align-items: center; border-bottom: 0.5px solid #ece0d2;
 }
-.qlv-head { padding: 12px 18px; }
+/* §3 (v2 toolbar) — the header is PLAYFAIR on parchment, with its own rule beneath. It used to be
+   mono capitals, which reads as a database's column names; these read as the page's own words. */
+.qlv-head { padding: 14px 18px 12px 26px; background: var(--parchment, #fdfaf5); border-bottom: 1px solid #ddd2c4; }
 .qlv-row { padding: 13px 18px 13px 26px; cursor: pointer; text-align: left; position: relative; }
 .qlv-row:last-child { border-bottom: none; }
 .qlv-row:hover { background: #fffdf9; }
@@ -30,13 +32,16 @@
 .qlv-row--on { box-shadow: inset 0 0 0 1.5px #e8c8bc; }
 
 .qlv-h {
-  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.13em;
-  text-transform: uppercase; color: #9c8878;
+  font-family: var(--font-serif); font-size: 14px; letter-spacing: 0; text-transform: none;
+  color: #6a5a50; display: flex; align-items: center; gap: 6px;
 }
-.qlv-h--btn { background: none; border: none; padding: 0; cursor: pointer; text-align: left; display: inline-flex; align-items: center; gap: 5px; }
-.qlv-h--btn:hover { color: #3a1c14; }
+.qlv-h--btn { background: none; border: none; padding: 0; cursor: pointer; text-align: left; font: inherit; color: inherit; }
+.qlv-h--btn:hover { color: var(--ink, #1c130f); }
 .qlv-h--on { color: var(--ink, #1c130f); }
-.qlv-caret { font-size: 8px; }
+/* the caret is the ONE burgundy mark in the header — it says which column is sorted, and which way */
+.qlv-caret { font-size: 9px; color: #7c3a2a; }
+/* Actions names no order, so it is right-aligned and inert rather than a control that does nothing */
+.qlv-h--end { justify-content: flex-end; cursor: default; }
 
 /* the status pill takes the row's own state fill — the one place colour appears in a list row */
 /* ⚠️ THE ROW'S COLOUR IS THE BAR, NOT A PILL (v14 §2). One device per fact: the bar states the
