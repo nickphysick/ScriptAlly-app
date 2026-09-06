@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Query Centre: Grid · List · Calendar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#1c130f;--body-ink:#3a1c14;--muted:#8a7a6c;--label:#9c8878;--burgundy:#7c3a2a;
+    --sage-accent:#8a9e88;--pink:#f5e2da;--pink-border:#e8c8bc;--field-border:#e0d5c8;--hairline:#ece0d2;
+    --out1:#f7efe3;--out2:#e0e5dd;--out3:#e0e5dd;--in1:#f5e6df;--in2:#f5e6df;--in3:#f5e6df;--offer:#d7e0e8;--closed:#e4e1db}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ground);font-family:'Inter',sans-serif;color:var(--body-ink);font-size:13px}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+  .page{max-width:1400px;margin:0 auto;padding:28px 36px 80px}
+  .hero{background:var(--parchment);border-radius:16px;padding:26px 32px;display:flex;align-items:center;gap:30px;box-shadow:0 1px 2px rgba(58,28,20,.04),0 8px 22px rgba(58,28,20,.07);margin-bottom:18px;position:relative}
+  .hero h1{font-family:'Playfair Display',serif;font-weight:500;font-size:38px;color:var(--ink);line-height:1}
+  .hero .strap{font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:#6a5a50;margin-top:10px}
+  .hero .art{margin-left:auto;width:360px;height:110px;border-radius:12px;background:repeating-linear-gradient(135deg,#f7f1e9 0 8px,#f2ebe1 8px 16px);display:flex;align-items:center;justify-content:center;color:#c0b0a0}
+  .hero .cta{position:absolute;right:32px;bottom:22px;background:var(--ink);color:#fdfaf5;border-radius:99px;padding:11px 20px;font-size:13.5px;font-weight:500}
+
+  /* stat tiles = quick filters */
+  .tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:16px}
+  .tile{background:#fff;border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 1px 2px rgba(58,28,20,.04),0 6px 16px rgba(58,28,20,.06);border:1.5px solid transparent}
+  .tile:hover{box-shadow:0 2px 4px rgba(58,28,20,.05),0 10px 24px rgba(58,28,20,.10)}
+  .tile.on{border-color:var(--ink)}
+  .tile .ic{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
+  .tile .k{color:var(--label)}
+  .tile .n{font-family:'Playfair Display',serif;font-size:26px;color:var(--ink);line-height:1;margin-top:4px}
+  .tile .mk{width:16px;height:16px;border-radius:50%;border:1.4px solid var(--ink);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+
+  /* toolbar */
+  .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+  .search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--field-border);border-radius:9px;padding:9px 13px;width:260px}
+  .search span{color:#c8b8a8}
+  .tbtn{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--field-border);border-radius:9px;padding:9px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:#6a5a50}
+  .tbtn b{color:var(--ink);font-weight:500}
+  .sp{flex:1}
+  .views{display:inline-flex;background:#fff;border:1px solid var(--field-border);border-radius:9px;padding:3px}
+  .views button{border:none;background:transparent;cursor:pointer;display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:7px;font-family:'Playfair Display',serif;font-size:14px;color:#8a7a6c}
+  .views button.on{background:var(--pink);color:var(--ink)}
+  .views svg{width:14px;height:14px}
+
+  /* grid cards (compact) */
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+  .card{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 22px rgba(58,28,20,.09);overflow:hidden}
+  .band{display:flex;align-items:center;gap:9px;padding:11px 18px;border-bottom:.5px solid rgba(0,0,0,.06)}
+  .band .w{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink)}
+  .band .r{margin-left:auto;color:#6a5a50}
+  .cbody{padding:16px 18px 14px}
+  .who{display:flex;align-items:center;gap:13px}
+  .chip{width:42px;height:42px;border-radius:50%;background:var(--parchment);box-shadow:0 1px 2px rgba(58,28,20,.08),0 3px 8px rgba(58,28,20,.10);border:.5px solid #e6dccf;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;flex:none}
+  .nm{font-family:'Playfair Display',serif;font-weight:500;font-size:18px;color:var(--ink);line-height:1.15}
+  .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:#6a5a50;margin-top:3px}
+  .leaf{margin-left:auto;width:42px;border-radius:7px;background:#fff;border:.5px solid #dccfc0;box-shadow:0 1px 2px rgba(58,28,20,.06),0 3px 8px rgba(58,28,20,.08);text-align:center;flex:none;overflow:hidden}
+  .leaf .mo{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.14em;text-transform:uppercase;padding:3px 0 2px;border-bottom:.5px solid rgba(0,0,0,.08)}
+  .leaf .dy{font-family:'Playfair Display',serif;font-size:17px;color:var(--ink);line-height:1;padding:5px 0 4px}
+  .leaf .cap{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);padding-bottom:4px}
+  .fact{margin-top:14px;padding-top:12px;border-top:.5px solid var(--hairline);display:flex;align-items:flex-end;gap:12px}
+  .fact .s{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fact .m{color:var(--label);margin-top:5px}
+  .fact .txt{flex:1;min-width:0}
+  .mats{display:inline-flex;gap:4px}
+  .mats i{width:20px;height:20px;border-radius:5px;border:.5px solid #e6dccf;background:var(--parchment);display:inline-block}
+  .mats i.off{opacity:.28}
+  .dot{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--burgundy);background:#f5e2da;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:var(--burgundy);flex:none}
+  .dot.in{border-color:var(--sage-accent);background:#e2e7e0;color:#4c6249}
+  .dot.g{border-color:#b8aa9a;background:transparent;color:#b8aa9a}
+  .dot.o{border-color:var(--burgundy);background:var(--burgundy);color:#fdfaf5}
+
+  /* list */
+  .list{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 22px rgba(58,28,20,.09);overflow:hidden}
+  .lh{display:grid;grid-template-columns:200px 1.4fr 110px 130px 1.4fr 120px 44px;gap:14px;padding:12px 18px;border-bottom:.5px solid var(--hairline);color:var(--label)}
+  .lr{display:grid;grid-template-columns:200px 1.4fr 110px 130px 1.4fr 120px 44px;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--hairline);align-items:center;cursor:pointer}
+  .lr:hover{background:#fffdf9}
+  .lr .st{display:inline-flex;align-items:center;gap:8px;border-radius:99px;padding:5px 11px 5px 6px;font-family:'Playfair Display',serif;font-size:13px;color:var(--ink);width:max-content}
+  .lr .who .chip{width:34px;height:34px;font-size:10px}
+  .lr .nm{font-size:15px}.lr .ag{font-size:12px;margin-top:2px}
+  .lr .d{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink)}
+  .lr .d small{display:block;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--label);margin-top:3px}
+  .lr .fs{font-size:12.5px}.lr .fs small{display:block;color:var(--label);font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
+  .lr .turn{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:#6a5a50}
+  .lr .more{width:28px;height:28px;border-radius:7px;border:1px solid var(--field-border);background:#fff;display:inline-flex;align-items:center;justify-content:center;color:#a08a78;justify-self:end}
+  .lr .mk{width:15px;height:15px;border-radius:50%;border:1.3px solid var(--ink);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-right:6px;vertical-align:-2px}
+
+  /* calendar / timeline board */
+  .cal{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 22px rgba(58,28,20,.09);overflow:hidden}
+  .calbar{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:.5px solid var(--hairline)}
+  .calbar h3{font-family:'Playfair Display',serif;font-weight:500;font-size:17px;color:var(--ink)}
+  .calbar .nav{display:inline-flex;gap:4px;margin-left:8px}
+  .calbar .nav span{width:26px;height:26px;border-radius:7px;border:1px solid var(--field-border);display:inline-flex;align-items:center;justify-content:center;color:#a08a78;font-size:12px}
+  .calbar .leg{margin-left:auto;display:flex;gap:14px;color:var(--label)}
+  .calbar .leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .board{display:grid;grid-template-columns:230px 1fr}
+  .rows{border-right:.5px solid var(--hairline)}
+  .rowh{height:44px;display:flex;align-items:center;padding:0 16px;border-bottom:.5px solid var(--hairline);color:var(--label)}
+  .row{height:58px;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:.5px solid var(--hairline)}
+  .row .chip{width:30px;height:30px;font-size:9px}
+  .row .nm{font-size:14px}.row .ag{font-size:11.5px;margin-top:1px}
+  .lanes{position:relative;overflow:hidden}
+  .weeks{height:44px;display:grid;grid-template-columns:repeat(8,1fr);border-bottom:.5px solid var(--hairline)}
+  .weeks span{padding:0 10px;display:flex;flex-direction:column;justify-content:center;border-left:.5px solid var(--hairline);font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--label)}
+  .weeks span b{font-family:'Playfair Display',serif;font-weight:500;font-size:14px;color:var(--ink);letter-spacing:0;text-transform:none}
+  .lane{height:58px;position:relative;border-bottom:.5px solid var(--hairline);background:repeating-linear-gradient(90deg,transparent 0 calc(12.5% - .5px),#ece0d2 calc(12.5% - .5px) 12.5%)}
+  .today{position:absolute;top:0;bottom:0;width:1.5px;background:var(--burgundy);opacity:.6;z-index:2}
+  .today::before{content:'today';position:absolute;top:6px;left:6px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--burgundy)}
+  .barx{position:absolute;top:17px;height:24px;border-radius:99px;display:flex;align-items:center;padding:0 10px;font-size:11.5px;color:var(--ink);white-space:nowrap}
+  .barx.est{background:repeating-linear-gradient(90deg,#e6eae3 0 8px,transparent 8px 12px);border:1px dashed #c7d0c2}
+  .barx .pin{position:absolute;right:-6px;top:50%;transform:translateY(-50%);width:12px;height:12px;border-radius:50%;background:#fff;border:1.5px solid var(--burgundy)}
+  .ev{position:absolute;top:19px;width:20px;height:20px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;z-index:3}
+  .ev.sent{border:1.5px solid var(--burgundy);color:var(--burgundy)}
+  .ev.req{border:1.5px solid var(--sage-accent);color:#4c6249}
+  .ev.nudge{border:1.5px solid var(--ink);color:var(--ink)}
+  .ev.exp{border:1.5px dashed #c8bcae;color:#b0a090}
+  .rec{margin-top:26px;max-width:800px;line-height:1.6;color:#4a3a30}
+  .rec b{font-weight:500;color:var(--body-ink)}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hero"><div><h1>Query Centre</h1><div class="strap">Every query, every response — track every step of your journey so far</div></div><div class="art mono">illustration</div><span class="cta">+ Log new query</span></div>
+
+  <div class="tiles" id="tiles">
+    <div class="tile on" data-f="all"><div class="ic" style="background:var(--parchment);border:.5px solid #e6dccf">✎</div><div><div class="k mono">All queries</div><div class="n">26</div></div></div>
+    <div class="tile" data-f="you"><div class="ic" style="background:var(--in2)">←</div><div><div class="k mono">With you</div><div class="n">4</div></div></div>
+    <div class="tile" data-f="agent"><div class="ic" style="background:var(--out2)">→</div><div><div class="k mono">With the agent</div><div class="n">17</div></div></div>
+    <div class="tile" data-f="offer"><div class="ic" style="background:var(--offer)">✓</div><div><div class="k mono">Offers</div><div class="n">1</div></div></div>
+    <div class="tile" data-f="past"><div class="ic" style="background:#fff;border:.5px solid var(--field-border)"><span class="mk">!</span></div><div><div class="k mono">Past expected</div><div class="n">5</div></div></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search"><span>⌕</span><span>Search agents or agencies</span></div>
+    <span class="tbtn">Filter</span><span class="tbtn">Group <b>None</b></span><span class="tbtn">Sort <b>Last activity</b></span>
+    <span class="sp"></span>
+    <div class="views" id="views">
+      <button class="on" data-v="grid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Grid</button>
+      <button data-v="list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>List</button>
+      <button data-v="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="10" rx="1.5"/><rect x="17" y="4" width="4" height="13" rx="1.5"/></svg>Board</button>
+      <button data-v="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar</button>
+    </div>
+    <span class="tbtn">Export CSV</span>
+  </div>
+
+  <div id="grid" class="grid"></div>
+  <div id="list" class="list" hidden></div>
+  <div id="board" hidden style="padding:40px;text-align:center;font-family:'Playfair Display',serif;font-style:italic;color:#8a7a6c">Board — see query-centre-v8-board-shingled-locked.html</div>
+  <div id="cal" class="cal" hidden></div>
+
+  <div class="rec">
+    <p><b>Where I land.</b> Yes to all three, as a view switch in the toolbar — not nav items, not a title page. They're three lenses on one set: the grid for scanning, the list for triage (sort by any column, dense, twelve to a screen), the calendar for time. All three open the same drawer, all three obey the same tiles and filters, and the view persists per session. The stat tiles are the quick filters grown up — the counts were always the point; now they earn their space and the swatch becomes an icon disc in the ladder colour.</p>
+    <p style="margin-top:8px"><b>Two cautions.</b> The calendar is the Tasks page's timeline board (`timeline-v57`) re-hosted with queries as rows rather than agent relationships — bars from sent to expected, solid when the agency stated the window, dashed when it's your estimate, pins for sent / requested / nudged, a burgundy today line. It should be the same component, not a cousin; if it can't be re-hosted cleanly, defer it rather than fork it. And the grid's tweak here is a compact card (smaller chip, 18px name, 42px leaf) — roughly 40px shorter — so three-up shows four rows where it showed three. If you'd rather keep the cards as they are, the switch works just as well.</p>
+  </div>
+</div>
+
+<script>
+const Q=[
+ ["Harriet Vane-Coe","Stillwater Reps","Queried","out1","→","With the agent","Aug","12","sent","Reply expected by 23 Sept","3 weeks waiting",[1,1,1,0],0],
+ ["Jonathan Marsh","The Marsh Agency","Partial Requested","in1","←","With you","Aug","22","requested","Partial — not yet sent","14 days since request",[1,0,1,0],0],
+ ["Daniel O'Rourke","Inkwell & Stone","Full Sent","out3","→","With the agent","Aug","14","sent","Reply expected by 9 Oct","3 weeks waiting",[1,1,1,0],0],
+ ["William Tan","Foxglove Literary","Queried","out1","→","With the agent","Jul","29","sent","Reply was expected by 9 Sept — 12 days past","8 weeks waiting · nudge available",[1,1,1,1],1],
+ ["Tom Ellery","Curtis Vane","Offer","offer","✓","Offer","Aug","29","received","Awaiting your decision","8 days since offer",[1,1,1,0],0],
+ ["Marcus Reed","Hartley & Co","Closed","closed","×","Closed","Apr","20","closed","Pass after full","replied after 11 weeks",[1,0,1,0],0],
+ ["Aisha Kapoor","The Lantern Agency","R&R","in3","✎","With you","Aug","26","requested","Revisions — not yet sent","11 days since request",[1,1,1,0],0],
+ ["Eleanor Whitfield","Greenfield Literary","Queried","out1","→","With the agent","Aug","13","sent","Reply expected by 24 Sept","3 weeks waiting",[1,1,1,0],0],
+ ["Iris Moreau","Greenfield Literary","Partial Sent","out2","→","With the agent","Aug","25","sent","Reply expected by 6 Oct","12 days waiting",[1,1,1,0],0],
+];
+const ini=n=>n.split(/[\s-]+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+const tint=k=>`var(--${k})`;
+const dotc=(k,g)=>`<span class="dot ${k.startsWith('in')?'in':k==='closed'?'g':k==='offer'?'o':''}">${g}</span>`;
+document.getElementById("grid").innerHTML=Q.map(([n,a,s,k,g,t,mo,dy,cap,f,m,mats,od])=>`
+  <div class="card"><div class="band" style="background:${tint(k)}">${dotc(k,g)}<span class="w">${s}</span><span class="r mono">${t}</span></div>
+  <div class="cbody"><div class="who"><div class="chip">${ini(n)}</div><div style="min-width:0"><div class="nm">${n}</div><div class="ag">${a}</div></div><div class="leaf"><div class="mo" style="background:${tint(k)}">${mo}</div><div class="dy">${dy}</div><div class="cap">${cap}</div></div></div>
+  <div class="fact"><div class="txt"><div class="s">${od?'<span class="mk" style="width:15px;height:15px;border-radius:50%;border:1.3px solid var(--ink);font-family:JetBrains Mono;font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-right:6px;vertical-align:-2px">!</span>':''}${f}</div><div class="m mono">${m}</div></div><span class="mats">${mats.map(x=>`<i class="${x?'':'off'}"></i>`).join("")}</span></div></div></div>`).join("");
+
+document.getElementById("list").innerHTML=`<div class="lh mono"><span>Status</span><span>Agent</span><span>Sent</span><span>What went</span><span>Where it stands</span><span>Court</span><span></span></div>`+
+ Q.map(([n,a,s,k,g,t,mo,dy,cap,f,m,mats,od])=>`<div class="lr">
+   <span class="st" style="background:${tint(k)}">${dotc(k,g)}${s}</span>
+   <span class="who"><div class="chip">${ini(n)}</div><div style="min-width:0"><div class="nm">${n}</div><div class="ag">${a}</div></div></span>
+   <span class="d">${dy} ${mo}<small>${cap}</small></span>
+   <span class="mats">${mats.map(x=>`<i class="${x?'':'off'}"></i>`).join("")}</span>
+   <span class="fs">${od?'<span class="mk">!</span>':''}${f}<small>${m}</small></span>
+   <span class="turn">${t}</span>
+   <span class="more">⋯</span></div>`).join("");
+
+const weeks=["17 Aug","24 Aug","31 Aug","7 Sep","14 Sep","21 Sep","28 Sep","5 Oct"];
+const lanes=[
+ [0,`<span class="ev sent" style="left:-3%">→</span><div class="barx" style="left:0%;width:74%;background:var(--out1)">Query · Stillwater Reps advise 6 weeks<span class="pin"></span></div>`],
+ [1,`<span class="ev req" style="left:9%">←</span><div class="barx est" style="left:10%;width:38%">Partial · your send-by estimate 12 Sept</div>`],
+ [2,`<span class="ev sent" style="left:-3%">→</span><div class="barx" style="left:0%;width:100%;background:var(--out3)">Full · Inkwell & Stone advise 8 weeks</div>`],
+ [3,`<div class="barx" style="left:-30%;width:58%;background:var(--out1)">Query · window ended 9 Sept</div><span class="ev exp" style="left:28%">⌛</span><span class="ev nudge" style="left:33%">🔔</span>`],
+ [4,`<span class="ev req" style="left:21%">✓</span><div class="barx" style="left:22%;width:30%;background:var(--offer)">Offer — awaiting your decision</div>`],
+ [6,`<span class="ev req" style="left:16%">✎</span><div class="barx est" style="left:17%;width:36%">R&R · your estimate</div>`],
+ [7,`<span class="ev sent" style="left:-1%">→</span><div class="barx" style="left:0%;width:76%;background:var(--out1)">Query · advise 6 weeks<span class="pin"></span></div>`],
+ [8,`<span class="ev sent" style="left:13%">→</span><div class="barx" style="left:14%;width:86%;background:var(--out2)">Partial · advise 6 weeks</div>`],
+];
+document.getElementById("cal").innerHTML=`<div class="calbar"><h3>Aug – Oct 2026</h3><span class="nav"><span>‹</span><span>›</span></span><span class="tbtn" style="padding:6px 10px">Today</span>
+  <span class="leg mono"><span><i style="background:var(--out2)"></i>agency window</span><span><i style="background:repeating-linear-gradient(90deg,#e6eae3 0 3px,transparent 3px 5px);border:1px dashed #c7d0c2"></i>your estimate</span><span><i style="background:#fff;border:1.5px solid var(--burgundy)"></i>sent</span><span><i style="background:#fff;border:1.5px solid var(--sage-accent)"></i>requested</span><span><i style="background:#fff;border:1.5px solid var(--ink)"></i>nudged</span></span></div>
+  <div class="board"><div class="rows"><div class="rowh mono">Query</div>${lanes.map(([i])=>`<div class="row"><div class="chip">${ini(Q[i][0])}</div><div><div class="nm">${Q[i][0]}</div><div class="ag">${Q[i][1]}</div></div></div>`).join("")}</div>
+  <div class="lanes"><div class="weeks">${weeks.map(w=>`<span><b>${w.split(" ")[0]}</b>${w.split(" ")[1]}</span>`).join("")}</div><div class="today" style="left:36%"></div>${lanes.map(([,h])=>`<div class="lane">${h}</div>`).join("")}</div></div>`;
+
+document.querySelectorAll("#views button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#views button").forEach(x=>x.classList.remove("on"));b.classList.add("on");["grid","list","board","cal"].forEach(v=>document.getElementById(v).hidden=v!==b.dataset.v);});
+document.querySelectorAll("#tiles .tile").forEach(t=>t.onclick=()=>{document.querySelectorAll("#tiles .tile").forEach(x=>x.classList.remove("on"));t.classList.add("on");});
+</script>
+</body>
+</html>

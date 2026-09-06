@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Board view: kanban by stage</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#1c130f;--body-ink:#3a1c14;--muted:#8a7a6c;--label:#9c8878;--burgundy:#7c3a2a;
+    --sage-accent:#8a9e88;--pink:#f5e2da;--pink-border:#e8c8bc;--field-border:#e0d5c8;--hairline:#ece0d2;
+    --out1:#f7efe3;--out2:#e0e5dd;--out3:#e0e5dd;--in1:#f5e6df;--in2:#f5e6df;--in3:#f5e6df;--offer:#d7e0e8;--closed:#e4e1db;--out1-d:#e7d9bd;--out2-d:#c7d0c2;--out3-d:#c7d0c2;--in1-d:#e8c9bb;--in2-d:#e8c9bb;--in3-d:#e8c9bb;--offer-d:#c9d6e1;--closed-d:#cfc9c1}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ground);font-family:'Inter',sans-serif;color:var(--body-ink);font-size:13px;padding:28px 36px 80px}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+  h1{font-family:'Playfair Display',serif;font-weight:500;font-size:26px;color:var(--ink)}
+  .lede{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#6a5a50;margin:6px 0 16px;max-width:820px;line-height:1.5}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--field-border);border-radius:10px;padding:3px;margin-bottom:12px}
+  .seg button{border:none;background:transparent;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#6a5a50;padding:8px 14px;border-radius:7px}
+  .seg button.on{background:var(--pink);color:var(--body-ink)}
+  .desc{color:#6a5a50;max-width:820px;line-height:1.55;margin-bottom:18px;min-height:40px}
+  .desc b{font-weight:500;color:var(--body-ink)}
+  .views{display:inline-flex;background:#fff;border:1px solid var(--field-border);border-radius:9px;padding:3px;margin-bottom:16px}
+  .views span{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:7px;font-family:'Playfair Display',serif;font-size:14px;color:#8a7a6c}
+  .views span.on{background:var(--pink);color:var(--ink)}
+
+  .boardwrap{overflow-x:auto;padding-bottom:12px}
+  .board{display:grid;grid-template-columns:repeat(7,240px);gap:14px;align-items:start;min-width:max-content}
+  .col{background:rgba(253,250,245,.6);border-radius:14px;padding:8px;min-height:420px}
+  .colh{padding:4px 4px 10px;margin-bottom:10px;border-bottom:1.5px solid var(--c)}
+  .colh .top{display:flex;align-items:center;gap:8px}
+  .colh .cap{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);margin-top:4px;padding-left:26px}
+  .colh .w{font-family:'Playfair Display',serif;font-size:17px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .colh .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#6a5a50;background:#fff;border:.5px solid var(--field-border);border-radius:99px;padding:2px 8px}
+  .stack{display:flex;flex-direction:column}
+  .card{background:#fff;border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,.05),0 6px 16px rgba(58,28,20,.10);overflow:hidden;position:relative;transition:transform .18s,box-shadow .18s,z-index 0s;cursor:pointer}
+  .band{height:5px}
+  .band .w,.band .dot,.band .r{display:none}
+  .card.alt .band{height:auto;display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:.5px solid rgba(0,0,0,.06)}
+  .card.alt .band .w,.card.alt .band .dot{display:inline-flex}
+  .band .w{font-family:'Playfair Display',serif;font-size:12.5px;color:var(--ink)}
+  .band .r{margin-left:auto;color:#6a5a50;font-size:8px}
+  .dot{width:18px;height:18px;border-radius:50%;border:1.4px solid var(--burgundy);background:#f5e2da;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:var(--burgundy);flex:none}
+  .dot.in{border-color:var(--sage-accent);background:#e2e7e0;color:#4c6249}
+  .dot.g{border-color:#b8aa9a;background:transparent;color:#b8aa9a}
+  .dot.o{border-color:var(--burgundy);background:var(--burgundy);color:#fdfaf5}
+  .cbody{padding:11px 12px 10px}
+  .who{display:flex;align-items:center;gap:10px}
+  .chip{width:32px;height:32px;border-radius:50%;background:var(--parchment);box-shadow:0 1px 2px rgba(58,28,20,.08),0 2px 6px rgba(58,28,20,.10);border:.5px solid #e6dccf;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;flex:none}
+  .nm{font-family:'Playfair Display',serif;font-weight:500;font-size:14.5px;color:var(--ink);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:#6a5a50;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .leaf{margin-left:auto;width:34px;border-radius:6px;background:#fff;border:.5px solid #dccfc0;text-align:center;flex:none;overflow:hidden;box-shadow:0 1px 2px rgba(58,28,20,.06)}
+  .leaf .mo{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.12em;text-transform:uppercase;padding:2px 0 1px;border-bottom:.5px solid rgba(0,0,0,.08)}
+  .leaf .dy{font-family:'Playfair Display',serif;font-size:14px;color:var(--ink);line-height:1;padding:4px 0 3px}
+  .fact{margin-top:9px;padding-top:8px;border-top:.5px solid var(--hairline);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fact .m{color:var(--label);margin-top:3px;font-size:8px}
+  .mk{width:13px;height:13px;border-radius:50%;border:1.2px solid var(--ink);font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-right:5px;vertical-align:-2px}
+  .closedcol .card{opacity:.85}
+
+  /* A · clipped: band + identity, fact hidden until hover */
+  .dA .card{margin-bottom:8px}
+  .dA .fact{display:none}
+  .dA .card:hover .fact{display:block}
+  /* B · shingled: cards overlap 18px; hover lifts and reveals */
+  .dB .card{margin-bottom:-36px}
+  .dB .card:last-child{margin-bottom:0}
+  .dB .card:hover{transform:translateY(-6px);z-index:5;box-shadow:0 2px 4px rgba(58,28,20,.06),0 14px 30px rgba(58,28,20,.16)}
+  /* C · deck: only the band + name row shows (52px), heavy overlap; hover fans open */
+  .dC .card{margin-bottom:-52px}
+  .dC .card:last-child{margin-bottom:0}
+  .dC .cbody{padding:9px 12px 12px}
+  .dC .chip{width:26px;height:26px;font-size:8.5px}
+  .dC .ag,.dC .fact,.dC .leaf{display:none}
+  .dC .card:hover{transform:translateY(-6px);z-index:5;box-shadow:0 2px 4px rgba(58,28,20,.06),0 14px 30px rgba(58,28,20,.16)}
+  .dC .card:hover .ag,.dC .card:hover .fact,.dC .card:hover .leaf{display:block}
+  .dC .card:hover .leaf{display:block}
+  .dC .stack:hover .card{margin-bottom:-30px}
+  .rec{margin-top:26px;max-width:820px;line-height:1.6;color:#4a3a30}
+  .rec b{font-weight:500;color:var(--body-ink)}
+</style>
+</head>
+<body>
+<h1>Board — kanban by stage</h1>
+<div class="lede">Seven columns in ladder order; headers are the Headline treatment — Playfair status, court caption, a 1.5px rule in the state's deep tone, count as a parchment pill. Cards drop their band — the column is the status — and keep a 5px tint strip, monogram, name, agency, leaf. A card whose status differs from its column (R&R in Full Requested) keeps a band. Three densities.</div>
+<div class="views"><span>Grid</span><span>List</span><span class="on">Board</span><span>Calendar</span></div><br>
+<div class="seg" id="seg"><button data-d="dA">A · Clipped</button><button class="on" data-d="dB">B · Shingled (locked)</button><button data-d="dC">C · Deck</button></div>
+<div class="desc" id="desc"></div>
+<div class="boardwrap"><div class="board dB" id="board"></div></div>
+<div class="rec">
+  <p><b>Where I land: B, shingled.</b> Each card overlaps the one above by 18px, so the band and identity of every card stay readable while a column of eight takes the height a grid gives three. Hover lifts a card clear and shows its fact line; click opens the drawer. It's the "fanned hand" idea without losing the name on any card.</p>
+  <p style="margin-top:8px">A is the safe version — clipped to identity, no overlap, roughly twice the density of the grid. C goes furthest — 52px per card, heavy overlap, the column fans open on hover — and reads as a deck of tickets; wonderful at 30 queries, but the leaf and agency vanish at rest and the fan-open motion is a lot for a scanning view. Columns: Queried · Partial Requested · Partial Sent · Full Requested · Full Sent · Offer, with Closed as a narrow grey column at the end so it's present but not competing. R&R sits in Full Requested's column as its own band (it's step 3 of the same hue); No response sits in Closed.</p>
+  <p style="margin-top:8px"><b>No drag between columns.</b> Moving a card would be a status write, and status is derived. The board is a read; the verbs stay in the drawer.</p>
+</div>
+
+<script>
+const COLS=[["Queried","out1","→","With the agent"],["Partial Requested","in1","←","With you"],["Partial Sent","out2","→","With the agent"],["Full Requested","in2","←","With you"],["Full Sent","out3","→","With the agent"],["Offer","offer","✓","Offer"],["Closed","closed","×","Closed"]];
+const Q=[
+ ["Harriet Vane-Coe","Stillwater Reps",0,"Aug","12","Reply expected by 23 Sept","3 weeks",0],["Eleanor Whitfield","Greenfield Literary",0,"Aug","13","Reply expected by 24 Sept","3 weeks",0],
+ ["William Tan","Foxglove Literary",0,"Jul","29","Expected 9 Sept — 12 days past","8 weeks",1],["Rupert Halloway","Penhallow Literary",0,"Aug","30","Reply expected by 11 Oct","1 week",0],
+ ["Lena Brandt","Brandt Literary",0,"Aug","20","Reply expected by 1 Oct","2 weeks",0],["Owen Lisle","Foxglove Literary",0,"Jul","15","Expected 26 Aug — 9 days past","7 weeks",1],
+ ["Marcus Reed","Bloomsbury Quill",0,"Jun","11","Expected 20 Aug — 15 days past","3 months",1],["Daniel O'Rourke","Inkwell & Stone",0,"Aug","9","Reply expected by 20 Sept","4 weeks",0],
+ ["Jonathan Marsh","The Marsh Agency",1,"Aug","22","Partial — not yet sent","14 days",0],["Nadia Cole","Cole & Wren",1,"Sep","1","Partial — not yet sent","5 days",0],
+ ["Iris Moreau","Greenfield Literary",2,"Aug","25","Reply expected by 6 Oct","12 days",0],["Priya Raman","No agency",2,"Aug","2","Expected 27 Aug — 10 days past","5 weeks",1],
+ ["Greg Panetta","No agency",3,"Aug","18","Full — not yet sent","18 days",1],["Aisha Kapoor","The Lantern Agency",3,"Aug","26","Revisions — not yet sent","11 days",0],
+ ["Daniel O'Rourke","Inkwell & Stone",4,"Aug","14","Reply expected by 9 Oct","3 weeks",0],["Sophie Dunn","Curtis Vane",4,"Jan","15","Expected 3 Sept — 3 days past","7 months",1],
+ ["Tom Ellery","Curtis Vane",5,"Aug","29","Awaiting your decision","8 days",0],
+ ["Marcus Reed","Hartley & Co",6,"Apr","20","Pass after full","",0],["Fenella Str","Brightwater Books",6,"Mar","14","No reply — window 12 weeks","",0],["Callum Reyes","The Marsh Agency",6,"May","5","Withdrawn by you","",0],["Hannah Firth","Firth & Field",6,"Mar","30","Pass after partial","",0],
+];
+const ini=n=>n.split(/[\s-]+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+const dotc=(k,g)=>`<span class="dot ${k.startsWith('in')?'in':k==='closed'?'g':k==='offer'?'o':''}">${g}</span>`;
+function render(){
+  document.getElementById("board").innerHTML=COLS.map(([s,k,g,court],ci)=>{
+    const items=Q.filter(q=>q[2]===ci);
+    return `<div class="col ${ci===6?'closedcol':''}"><div class="colh" style="--c:var(--${k}-d)"><div class="top">${dotc(k,g)}<span class="w">${s}</span><span class="n">${items.length}</span></div><div class="cap">${court}</div></div>
+      <div class="stack">${items.map(([n,a,,mo,dy,f,m,od])=>{
+        const st=(n==="Aisha Kapoor")?["R&R","in3","✎"]:[s,k,g];
+        return `<div class="card ${st[0]!==s?"alt":""}"><div class="band" style="background:var(--${st[1]})">${dotc(st[1],st[2])}<span class="w">${st[0]}</span></div>
+          <div class="cbody"><div class="who"><div class="chip">${ini(n)}</div><div style="min-width:0"><div class="nm">${n}</div><div class="ag">${a}</div></div><div class="leaf"><div class="mo" style="background:var(--${st[1]})">${mo}</div><div class="dy">${dy}</div></div></div>
+          <div class="fact">${od?'<span class="mk">!</span>':''}${f}<div class="m mono">${m}</div></div></div></div>`;}).join("")}</div></div>`;
+  }).join("");
+}
+const DESC={dA:`<b>A · Clipped.</b> Each card is cut to band + identity — no fact line, no materials — and stacks with an 8px gap. Hover reveals the fact line. About twice the grid's density, nothing hidden that names the query.`,
+ dB:`<b>B · Shingled.</b> Each card keeps its fact line, and the next card overlaps exactly that line — like roof tiles — so at rest you read tint strip, monogram, name, agency and leaf on every card. Hover lifts a card clear to show its fact. A column of eight takes the height of four grid cards.`,
+ dC:`<b>C · Deck.</b> Only band + name at rest, 52px a card, overlapping heavily; hover fans the whole column open and lifts the card with its agency, leaf and fact line. Densest by far — thirty queries in a screen — at the cost of the leaf and agency hiding at rest.`};
+document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#seg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");document.getElementById("board").className="board "+b.dataset.d;document.getElementById("desc").innerHTML=DESC[b.dataset.d];});
+document.getElementById("desc").innerHTML=DESC.dB; render();
+</script>
+</body>
+</html>

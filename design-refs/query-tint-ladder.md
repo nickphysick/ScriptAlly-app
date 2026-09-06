@@ -1,3 +1,5 @@
+> ⚠️ **SUPERSEDED by `query-state-colours-v2.md` (colours-v2 run).** Five FLAT state colours replace this ladder's depth steps; depth is `StatusDot`'s alone and the `--stage-*` tokens are removed. Kept for the reasoning behind the families, not for its values.
+
 # Query state tints — the tint ladder (rulesheet)
 
 **Status:** locked, 4 Sep 2026. Supersedes the sand/sage/pink scheme in `query-state-colours.html` and the band values in `query-centre.html`; where they disagree, this sheet wins. Canonical tokens go in `design-refs/themes.md` (Cappuccino); Bold Pastille and Editorial rows are `TODO`.
