@@ -1,0 +1,110 @@
+{
+  "v14-card-1440": {
+    "n": 54,
+    "maxPlainH": 62.7,
+    "maxAltH": 93.8,
+    "facts": 0,
+    "gap": 8
+  },
+  "v14-row-1440": {
+    "rows": 12,
+    "moreXs": [
+      1369
+    ],
+    "priWidths": [
+      132
+    ],
+    "monthFills": [
+      "rgb(247, 239, 227)"
+    ],
+    "barsMatch": true,
+    "sinceCounts": [
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      11,
+      0,
+      0,
+      0
+    ],
+    "pillFill": "rgba(0, 0, 0, 0)"
+  },
+  "v14-scrim-1440": {
+    "atRail": "button.qpn-scrim",
+    "isScrim": true,
+    "parentIsBody": true,
+    "bg": "rgba(58, 28, 20, 0.14)",
+    "scrimMs": "0.24s",
+    "openMs": "0.36s"
+  },
+  "v14-close-1440": "0.22s",
+  "v14-bar-1440": {
+    "actsInBar": 0,
+    "actsInVerbRow": 3,
+    "verbRowBg": "rgb(247, 239, 227)",
+    "blockBg": "rgb(247, 239, 227)"
+  },
+  "v14-rowdesk-1440": {
+    "drawerOpen": true,
+    "deskOnBody": true
+  },
+  "v14-card-2560": {
+    "n": 54,
+    "maxPlainH": 62.7,
+    "maxAltH": 93.8,
+    "facts": 0,
+    "gap": 8
+  },
+  "v14-row-2560": {
+    "rows": 12,
+    "moreXs": [
+      2024
+    ],
+    "priWidths": [
+      132
+    ],
+    "monthFills": [
+      "rgb(247, 239, 227)"
+    ],
+    "barsMatch": true,
+    "sinceCounts": [
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      11,
+      0,
+      0,
+      0
+    ],
+    "pillFill": "rgba(0, 0, 0, 0)"
+  },
+  "v14-scrim-2560": {
+    "atRail": "button.qpn-scrim",
+    "isScrim": true,
+    "parentIsBody": true,
+    "bg": "rgba(58, 28, 20, 0.14)",
+    "scrimMs": "0.24s",
+    "openMs": "0.36s"
+  },
+  "v14-close-2560": "0.22s",
+  "v14-bar-2560": {
+    "actsInBar": 0,
+    "actsInVerbRow": 3,
+    "verbRowBg": "rgb(247, 239, 227)",
+    "blockBg": "rgb(247, 239, 227)"
+  },
+  "v14-rowdesk-2560": {
+    "drawerOpen": true,
+    "deskOnBody": true
+  }
+}
