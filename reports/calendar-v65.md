@@ -1,4 +1,9 @@
-# Calendar v65 — run report (§A · §B · §C · §D · §F built; **§E stopped, and why**)
+# Calendar v65 — run report (all six sections; §E built to the ruling)
+
+> **§E RULING APPLIED (6 Sep).** The section below headed "§E is not built" is the report as it
+> stood when the collision was found; the ruling that answered it — *the desks are the shared
+> component* — is implemented and recorded in **§E, as ruled** at the foot of this file. Both are
+> kept: the finding is why the ruling exists, and deleting it would leave the ruling unexplained.
 
 Refs (Phase 0, all four verified before anything was read):
 
@@ -183,3 +188,81 @@ reading rather than by moving.
 - **A To-do row tick and a QC card button are unwired** — both wait on the §E ruling.
 - The focus band below the board survives (the v65 ref keeps `data-focus="on"`), but its "Open the
   task" button went with the pane; the band is now read-only until §E lands.
+
+
+---
+
+# §E, as ruled (6 Sep) — the one door, and the pack filed with the desks
+
+The ruling: **the desks are the shared component.** `NudgeDesk`, `MarkSentDesk`, `RespondDesk` and
+`MarkClosedDesk` are the app's four writes and stay the only implementation; there is no Action
+sheet; `action-journey.html` is the specification they conform to. The desks belong to the Query
+Centre session, so this session **filed a pack and touched nothing** in `src/components/queries/`.
+
+## What the Calendar built (`078fca09`, deployed, `index-CSZPrP96.js`)
+
+**`requestAction(kind, subject, prefill)` is the single door.** Every action entry point on the
+page goes through it — the bar's action button in all three forms (calm, urgent, task), the click
+card's action, and all six drawer rows. `setActToast` now has **exactly one caller: the door
+itself**. It reports the press and **writes nothing**, with the chassis's future call site written
+above it as the line to fill.
+
+**`src/lib/actionKind.ts`** is the shared vocabulary: the kinds, `DESK_FOR_KIND` (the one desk
+that owns each, **by name**), and a resolver that reads **`getPrimaryAction(status).kind`** rather
+than a second status table — asserted over the whole `QueryStatus` enum, so a status added later
+cannot quietly resolve to the wrong desk. 11 unit cases, two proved red by mutation: **exactly one
+component per kind anywhere in `src/`**, and **no `ActionSheet` exists**.
+
+**`calSeam65.measure.ts`** asserts both halves together — every door answers, **and** the record is
+untouched — because "every door answers" alone passes on a page that has quietly started writing,
+and "nothing was written" alone passes on a page whose buttons are dead. 4/4.
+
+**A latent copy fault, found and fixed:** the receipt's fallback was `?? kind`, which would have put
+*"marksent"* in front of a reader. Unreachable today (every door passes a deed); prose now, so it
+stays unreachable if one ever stops. Exactly what `timelineCopy`'s "no derivation name reaches a
+sentence" lock exists for.
+
+## The audit the ruling asked for — which desks already meet the shape
+
+Taken **by reading**, 6 Sep. Full detail and the asks in `reports/pack-desk-chassis.md`.
+
+| | when segment | one fact next | note | "What this does" | one primary | Undo |
+|---|---|---|---|---|---|---|
+| `NudgeDesk` | ✗ *(date, defaults today)* | ✓ | ✗ | ~ sentence | ✓ | ✓ whole-write |
+| `MarkSentDesk` | ✗ | ✓ | ✓ | ~ sentence | ✓ | ✓ whole-write |
+| `RespondDesk` | ✗ | ✓ | ✓ | ~ sentence | ✓ | ✓ whole-write |
+| `MarkClosedDesk` | ✗ | ✓ | ✓ | ~ sentence | ✓ | ✓ whole-write |
+
+**The gaps are narrow and specific**, which is the audit's real finding: the `Today · Yesterday ·
+Pick a date` segment on all four (each has a date field defaulting to today, which is close but is
+not the ref's control); a note on `NudgeDesk`; and "What this does" as a **block** rather than the
+one good sentence each already renders. Everything else is already there — including an Undo that
+reverts the **whole** write (`saveDeskNudge` deletes the activity *and* restores the prior
+`nudgeDate`/`lastNudgeSentDate`).
+
+**Two decisions flagged rather than taken**, because both reach past this session:
+
+1. **The toast is 6 seconds, not 8.** `ToastProvider`'s default is `6000`; the ruling says eight.
+   Either the desks pass `duration: 8000` or the ruling accepts the house six — the provider is
+   shared with the whole app, so it is not a number to change in passing.
+2. **The chassis needs a mounting mode with no QC anchor.** `CorrectionDesk` is already *"one
+   scrim, one chassis"* and already takes a desk as content; what it cannot do is mount away from
+   the trigger ref Query Centre hands it.
+
+## Materials (ruling §2) — the app's law stands, and the ref says so now
+
+The bracketed eight-item list is **withdrawn**. `PACKAGE_MATERIALS` stays as it is — the two — with
+the exclusions kept. The one addition is the **default**: pre-ticked to what the request named, each
+tagged "asked for", with the line that says so; and where the request record cannot name it,
+**nothing is pre-ticked and the line is omitted**.
+
+`action-journey.html` gained a **Debt section in place** (the house treatment for a partially-current
+artefact — annotated, never re-cut) recording all three supersessions, and was re-enrolled on the
+watchlist as the deliberate act that is. Its own four-chip picker is superseded by the same ruling.
+
+## Still open
+
+- The To-do row tick and Query Centre's own buttons route through `requestAction` **when the
+  chassis lands** — both are in the pack, neither is this session's to wire.
+- A linked task's tick resolving to its relationship's kind (ruling §3) belongs with whoever owns
+  the tick.
