@@ -1,0 +1,56 @@
+[
+  {
+    "column": "Covering letters",
+    "entry": "add",
+    "open": true,
+    "title": "Add a material",
+    "onTypeStep": false,
+    "nameValue": "Voice-led",
+    "text": "Add a material×‹ Change typeName this covering letterA short handle you'll recognise in a list — not the document's title.ContentPASTE TEXTATTACH FILESOONNAME O"
+  },
+  {
+    "column": "Covering letters",
+    "entry": "ghost",
+    "open": true,
+    "title": "Add a material",
+    "onTypeStep": false,
+    "nameValue": "Voice-led",
+    "text": "Add a material×‹ Change typeName this covering letterA short handle you'll recognise in a list — not the document's title.ContentPASTE TEXTATTACH FILESOONNAME O"
+  },
+  {
+    "column": "Synopses",
+    "entry": "add",
+    "open": true,
+    "title": "Add a material",
+    "onTypeStep": false,
+    "nameValue": "Two-page",
+    "text": "Add a material×‹ Change typeName this synopsisA short handle you'll recognise in a list — not the document's title.ContentPASTE TEXTATTACH FILESOONNAME ONLYThe "
+  },
+  {
+    "column": "Synopses",
+    "entry": "ghost",
+    "open": true,
+    "title": "Add a material",
+    "onTypeStep": false,
+    "nameValue": "Two-page",
+    "text": "Add a material×‹ Change typeName this synopsisA short handle you'll recognise in a list — not the document's title.ContentPASTE TEXTATTACH FILESOONNAME ONLYThe "
+  },
+  {
+    "column": "Sample pages",
+    "entry": "add",
+    "open": true,
+    "title": "Add a material",
+    "onTypeStep": false,
+    "nameValue": "Chapters 1–3",
+    "text": "Add a material×‹ Change typeName this sample pagesA short handle you'll recognise in a list — not the document's title.ContentPASTE TEXTATTACH FILESOONNAME ONLY"
+  },
+  {
+    "column": "Sample pages",
+    "entry": "ghost",
+    "open": true,
+    "title": "Add a material",
+    "onTypeStep": false,
+    "nameValue": "Chapters 1–3",
+    "text": "Add a material×‹ Change typeName this sample pagesA short handle you'll recognise in a list — not the document's title.ContentPASTE TEXTATTACH FILESOONNAME ONLY"
+  }
+]

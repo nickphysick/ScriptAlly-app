@@ -1,0 +1,202 @@
+{
+  "colCount": 3,
+  "columns": [
+    {
+      "heading": "Covering letters",
+      "held": "2 held",
+      "box": {
+        "x": 342,
+        "y": 653,
+        "w": 312,
+        "h": 351,
+        "top": 653,
+        "bottom": 1003
+      },
+      "head": {
+        "x": 342,
+        "y": 653,
+        "w": 312,
+        "h": 88,
+        "top": 653,
+        "bottom": 741
+      },
+      "ghost": {
+        "x": 342,
+        "y": 949,
+        "w": 312,
+        "h": 54,
+        "top": 949,
+        "bottom": 1003
+      },
+      "disc": {
+        "x": 342,
+        "y": 653,
+        "w": 76,
+        "h": 76,
+        "top": 653,
+        "bottom": 729
+      },
+      "emptyHold": null,
+      "sheets": [
+        {
+          "name": "Hook-first",
+          "metaText": "TextIn 1 package",
+          "metaKidMids": [
+            820,
+            820,
+            820
+          ],
+          "metaGap": 21,
+          "metaDot": 3,
+          "binCentred": 0.5,
+          "box": {
+            "x": 342,
+            "y": 753,
+            "w": 312,
+            "h": 87,
+            "top": 753,
+            "bottom": 840
+          }
+        },
+        {
+          "name": "Comps-forward",
+          "metaText": "TextIn 1 package",
+          "metaKidMids": [
+            917,
+            917,
+            917
+          ],
+          "metaGap": 21,
+          "metaDot": 3,
+          "binCentred": 0.5,
+          "box": {
+            "x": 342,
+            "y": 850,
+            "w": 312,
+            "h": 87,
+            "top": 850,
+            "bottom": 937
+          }
+        }
+      ]
+    },
+    {
+      "heading": "Synopses",
+      "held": "1 held",
+      "box": {
+        "x": 676,
+        "y": 653,
+        "w": 312,
+        "h": 351,
+        "top": 653,
+        "bottom": 1003
+      },
+      "head": {
+        "x": 676,
+        "y": 653,
+        "w": 312,
+        "h": 88,
+        "top": 653,
+        "bottom": 741
+      },
+      "ghost": {
+        "x": 676,
+        "y": 949,
+        "w": 312,
+        "h": 54,
+        "top": 949,
+        "bottom": 1003
+      },
+      "disc": {
+        "x": 676,
+        "y": 653,
+        "w": 76,
+        "h": 76,
+        "top": 653,
+        "bottom": 729
+      },
+      "emptyHold": null,
+      "sheets": [
+        {
+          "name": "One-page",
+          "metaText": "TextIn 2 packages",
+          "metaKidMids": [
+            820,
+            820,
+            820
+          ],
+          "metaGap": 21,
+          "metaDot": 3,
+          "binCentred": 0.5,
+          "box": {
+            "x": 676,
+            "y": 753,
+            "w": 312,
+            "h": 87,
+            "top": 753,
+            "bottom": 840
+          }
+        }
+      ]
+    },
+    {
+      "heading": "Sample pages",
+      "held": "1 held",
+      "box": {
+        "x": 1010,
+        "y": 653,
+        "w": 312,
+        "h": 351,
+        "top": 653,
+        "bottom": 1003
+      },
+      "head": {
+        "x": 1010,
+        "y": 653,
+        "w": 312,
+        "h": 88,
+        "top": 653,
+        "bottom": 741
+      },
+      "ghost": {
+        "x": 1010,
+        "y": 949,
+        "w": 312,
+        "h": 54,
+        "top": 949,
+        "bottom": 1003
+      },
+      "disc": {
+        "x": 1010,
+        "y": 653,
+        "w": 76,
+        "h": 76,
+        "top": 653,
+        "bottom": 729
+      },
+      "emptyHold": null,
+      "sheets": [
+        {
+          "name": "Chapters 1-3",
+          "metaText": "Text · 520 wordsIn 2 packages",
+          "metaKidMids": [
+            820,
+            820,
+            820
+          ],
+          "metaGap": 21,
+          "metaDot": 3,
+          "binCentred": 0.5,
+          "box": {
+            "x": 1010,
+            "y": 753,
+            "w": 312,
+            "h": 87,
+            "top": 753,
+            "bottom": 840
+          }
+        }
+      ]
+    }
+  ]
+}

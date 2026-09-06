@@ -1,0 +1,35 @@
+{
+  "filled": [
+    {
+      "label": "＋ New package",
+      "bg": "rgb(245, 226, 218)",
+      "dist": 37
+    }
+  ],
+  "overflowPx": 0,
+  "bands": [
+    1460,
+    1460,
+    1460,
+    1460
+  ],
+  "trackGhosts": [
+    {
+      "title": "Replies by package",
+      "slot": "ghost-replies",
+      "icon": "chart",
+      "px": 52,
+      "plate": 86
+    },
+    {
+      "title": "Requests by material",
+      "slot": "ghost-requests",
+      "icon": "tally",
+      "px": 52,
+      "plate": 86
+    }
+  ],
+  "nudge": "Attach Standard UK when you log your next query — replies land back he",
+  "statCards": 0,
+  "pkgCards": 1
+}

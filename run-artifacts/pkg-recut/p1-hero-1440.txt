@@ -1,0 +1,213 @@
+{
+  "hero": {
+    "x": 342,
+    "y": 231,
+    "w": 980,
+    "h": 306
+  },
+  "cols": "542px 330px",
+  "bg": "rgb(255, 255, 255)",
+  "topBorder": "4px",
+  "radius": "16px",
+  "align": "center",
+  "left": {
+    "box": {
+      "x": 377,
+      "y": 265,
+      "w": 542,
+      "h": 241
+    },
+    "natural": 241
+  },
+  "plate": {
+    "box": {
+      "x": 957,
+      "y": 301,
+      "w": 330,
+      "h": 168
+    },
+    "natural": 168,
+    "bg": "rgb(243, 224, 214)"
+  },
+  "headline": "Fed up of guessing which materials are landing with agents?",
+  "rule": true,
+  "statline": "4 materials · 2 packages · 8 sent",
+  "h1s": [
+    "Submission packages"
+  ],
+  "titleInBand": false,
+  "proMarkers": 0,
+  "proText": 0,
+  "slots": [
+    {
+      "id": "hero",
+      "icon": "desk",
+      "px": 92,
+      "paths": 6,
+      "plate": {
+        "x": 957,
+        "y": 301,
+        "w": 330,
+        "h": 168
+      },
+      "dashed": "dashed"
+    },
+    {
+      "id": "mat-Query Letter",
+      "icon": "envelope",
+      "px": 40,
+      "paths": 3,
+      "plate": {
+        "x": 342,
+        "y": 653,
+        "w": 76,
+        "h": 76
+      },
+      "dashed": "dashed"
+    },
+    {
+      "id": "mat-Synopsis",
+      "icon": "scroll",
+      "px": 40,
+      "paths": 3,
+      "plate": {
+        "x": 676,
+        "y": 653,
+        "w": 76,
+        "h": 76
+      },
+      "dashed": "dashed"
+    },
+    {
+      "id": "mat-Sample Pages",
+      "icon": "pages",
+      "px": 40,
+      "paths": 4,
+      "plate": {
+        "x": 1010,
+        "y": 653,
+        "w": 76,
+        "h": 76
+      },
+      "dashed": "dashed"
+    },
+    {
+      "id": "stamp-seed-pkg-1",
+      "icon": "typewriter",
+      "px": 36,
+      "paths": 4,
+      "plate": {
+        "x": 744,
+        "y": 1130,
+        "w": 62,
+        "h": 72
+      },
+      "dashed": "dashed"
+    },
+    {
+      "id": "stamp-seed-pkg-2",
+      "icon": "inkwell",
+      "px": 36,
+      "paths": 3,
+      "plate": {
+        "x": 1243,
+        "y": 1130,
+        "w": 62,
+        "h": 72
+      },
+      "dashed": "dashed"
+    },
+    {
+      "id": "pkg-ghost",
+      "icon": "parcelOpen",
+      "px": 54,
+      "paths": 3,
+      "plate": {
+        "x": 539,
+        "y": 1347,
+        "w": 88,
+        "h": 88
+      },
+      "dashed": "dashed"
+    },
+    {
+      "id": "stat-sent",
+      "icon": "outgoing",
+      "px": 40,
+      "paths": 2,
+      "plate": {
+        "x": 585,
+        "y": 1633,
+        "w": 70,
+        "h": 70
+      },
+      "dashed": "dashed"
+    },
+    {
+      "id": "stat-replies",
+      "icon": "opened",
+      "px": 40,
+      "paths": 3,
+      "plate": {
+        "x": 917,
+        "y": 1633,
+        "w": 70,
+        "h": 70
+      },
+      "dashed": "dashed"
+    },
+    {
+      "id": "stat-requests",
+      "icon": "bookmark",
+      "px": 40,
+      "paths": 4,
+      "plate": {
+        "x": 1249,
+        "y": 1633,
+        "w": 70,
+        "h": 70
+      },
+      "dashed": "dashed"
+    },
+    {
+      "id": "hn-sent",
+      "icon": "postbox",
+      "px": 34,
+      "paths": 4,
+      "plate": {
+        "x": 367,
+        "y": 2354,
+        "w": 64,
+        "h": 64
+      },
+      "dashed": "dashed"
+    },
+    {
+      "id": "hn-replies",
+      "icon": "doormat",
+      "px": 34,
+      "paths": 4,
+      "plate": {
+        "x": 693,
+        "y": 2354,
+        "w": 64,
+        "h": 64
+      },
+      "dashed": "dashed"
+    },
+    {
+      "id": "hn-requests",
+      "icon": "magnifier",
+      "px": 34,
+      "paths": 6,
+      "plate": {
+        "x": 1019,
+        "y": 2354,
+        "w": 64,
+        "h": 64
+      },
+      "dashed": "dashed"
+    }
+  ],
+  "briefText": 0
+}

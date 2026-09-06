@@ -1,0 +1,59 @@
+{
+  "sheets": [
+    {
+      "id": "ver-nfrpvoz23",
+      "name": "Broadsheet free letter 1787335859630",
+      "use": "Not in a package"
+    },
+    {
+      "id": "seed-mat-ql1",
+      "name": "Hook-first",
+      "use": "In 1 package"
+    },
+    {
+      "id": "seed-mat-ql2",
+      "name": "Comps-forward",
+      "use": "In 1 package"
+    },
+    {
+      "id": "seed-mat-syn",
+      "name": "One-page",
+      "use": "In 2 packages"
+    },
+    {
+      "id": "seed-mat-pag",
+      "name": "Chapters 1-3",
+      "use": "In 2 packages"
+    }
+  ],
+  "heldPop": {
+    "open": true,
+    "heading": "Archive Hook-first?",
+    "body": "It leaves your materials list and stays in Standard UK. Nothing you have already sent changes.",
+    "actions": [
+      "Cancel",
+      "Archive"
+    ],
+    "onScreen": true,
+    "rect": {
+      "x": 364,
+      "y": 684,
+      "w": 280
+    }
+  },
+  "freePop": {
+    "open": true,
+    "heading": "Delete Broadsheet free letter 1787335859630?",
+    "body": "No package holds this covering letter, so it can go for good. This can’t be undone.",
+    "actions": [
+      "Cancel",
+      "Delete"
+    ],
+    "onScreen": true,
+    "rect": {
+      "x": 364,
+      "y": 479,
+      "w": 280
+    }
+  }
+}

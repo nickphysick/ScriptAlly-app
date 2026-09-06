@@ -1,0 +1,12 @@
+{
+  "clicked": {
+    "name": "Hook-first",
+    "id": "seed-mat-ql1"
+  },
+  "state": {
+    "open": true,
+    "onTypeStep": false,
+    "nameValue": "Hook-first",
+    "text": "Edit material×Name this covering letterA short handle you'll recognise in a list — not the document's title.ContentPASTE TEXTATTACH FILESOON"
+  }
+}

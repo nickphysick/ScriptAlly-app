@@ -1,0 +1,41 @@
+{
+  "target": {
+    "id": "seed-mat-ql1",
+    "name": "Hook-first"
+  },
+  "before": {
+    "sheets": [
+      "Broadsheet free letter 1787335859630",
+      "Hook-first",
+      "Comps-forward",
+      "One-page",
+      "Chapters 1-3"
+    ],
+    "counts": [
+      "3 held",
+      "1 held",
+      "1 held"
+    ],
+    "packageRows": [
+      "Covering letterHook-firstSynopsisOne-pageSample pagesChapters 1-3",
+      "Covering letterComps-forwardSynopsisOne-pageSample pagesChapters 1-3"
+    ]
+  },
+  "after": {
+    "sheets": [
+      "Broadsheet free letter 1787335859630",
+      "Comps-forward",
+      "One-page",
+      "Chapters 1-3"
+    ],
+    "counts": [
+      "2 held",
+      "1 held",
+      "1 held"
+    ],
+    "packageRows": [
+      "Covering letterHook-firstSynopsisOne-pageSample pagesChapters 1-3",
+      "Covering letterComps-forwardSynopsisOne-pageSample pagesChapters 1-3"
+    ]
+  }
+}

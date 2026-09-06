@@ -1,0 +1,55 @@
+{
+  "ledger": [
+    {
+      "date": "01 AUG",
+      "dir": "→",
+      "what": "Query sent to Rachel Lin",
+      "pkg": "Comps-led variant"
+    },
+    {
+      "date": "24 JUL",
+      "dir": "→",
+      "what": "Query sent to Tom Ellery",
+      "pkg": "Standard UK"
+    },
+    {
+      "date": "22 JUL",
+      "dir": "→",
+      "what": "Query sent to Elinor Hale",
+      "pkg": "Standard UK"
+    },
+    {
+      "date": "21 JUL",
+      "dir": "←",
+      "what": "Rejected from David Marsh",
+      "pkg": "Comps-led variant"
+    },
+    {
+      "date": "11 JUL",
+      "dir": "←",
+      "what": "Partial requested from Priya Nair",
+      "pkg": "Standard UK"
+    }
+  ],
+  "cards": [
+    "Standard UK",
+    "Comps-led variant"
+  ],
+  "stats": [
+    {
+      "n": "8",
+      "label": "→Queries sent with a package",
+      "slot": "stat-sent"
+    },
+    {
+      "n": "2",
+      "label": "←Replies received",
+      "slot": "stat-replies"
+    },
+    {
+      "n": "2",
+      "label": "←Requests for more",
+      "slot": "stat-requests"
+    }
+  ]
+}

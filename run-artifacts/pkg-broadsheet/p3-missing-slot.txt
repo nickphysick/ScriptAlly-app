@@ -1,0 +1,62 @@
+{
+  "before": {
+    "tiles": [
+      {
+        "name": "Standard UK",
+        "rows": [
+          "Covering letterHook-first",
+          "SynopsisOne-page",
+          "Sample pagesChapters 1-3"
+        ]
+      },
+      {
+        "name": "Comps-led variant",
+        "rows": [
+          "Covering letterComps-forward",
+          "SynopsisOne-page",
+          "Sample pagesChapters 1-3"
+        ]
+      }
+    ]
+  },
+  "after": {
+    "tiles": [
+      {
+        "name": "Standard UK",
+        "rows": [
+          "Covering letterHook-first",
+          "SynopsisNo longer available",
+          "Sample pagesChapters 1-3"
+        ]
+      },
+      {
+        "name": "Comps-led variant",
+        "rows": [
+          "Covering letterComps-forward",
+          "SynopsisOne-page",
+          "Sample pagesChapters 1-3"
+        ]
+      }
+    ]
+  },
+  "restored": {
+    "tiles": [
+      {
+        "name": "Standard UK",
+        "rows": [
+          "Covering letterHook-first",
+          "SynopsisOne-page",
+          "Sample pagesChapters 1-3"
+        ]
+      },
+      {
+        "name": "Comps-led variant",
+        "rows": [
+          "Covering letterComps-forward",
+          "SynopsisOne-page",
+          "Sample pagesChapters 1-3"
+        ]
+      }
+    ]
+  }
+}

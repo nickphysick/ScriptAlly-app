@@ -1,0 +1,16 @@
+{
+  "made": {
+    "id": "ver-dh80lm4pz",
+    "use": "Not in a package"
+  },
+  "pop": {
+    "open": true,
+    "heading": "Delete Broadsheet free letter 1787336126439?",
+    "body": "No package holds this covering letter, so it can go for good. This can’t be undone.",
+    "actions": [
+      "Cancel",
+      "Delete"
+    ]
+  },
+  "remaining": 0
+}

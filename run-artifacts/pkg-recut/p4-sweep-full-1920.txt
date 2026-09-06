@@ -1,0 +1,20 @@
+{
+  "filled": [
+    {
+      "label": "＋ New package",
+      "bg": "rgb(245, 226, 218)",
+      "dist": 37
+    }
+  ],
+  "overflowPx": 0,
+  "bands": [
+    1460,
+    1460,
+    1460,
+    1460
+  ],
+  "trackGhosts": [],
+  "nudge": null,
+  "statCards": 3,
+  "pkgCards": 2
+}

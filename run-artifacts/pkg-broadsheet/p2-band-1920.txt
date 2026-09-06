@@ -1,0 +1,130 @@
+{
+  "bandHead": "Your materials",
+  "bandTag": "4 held",
+  "bandBox": {
+    "x": 342,
+    "w": 1460,
+    "h": 380
+  },
+  "gridTemplate": "473.328px 473.328px 473.344px",
+  "railPanels": [
+    "Packages"
+  ],
+  "colCount": 3,
+  "columns": [
+    {
+      "heading": "Covering letters",
+      "held": "2 held",
+      "slot": "mat-Query Letter",
+      "slotBox": {
+        "x": 342,
+        "w": 44,
+        "h": 44
+      },
+      "addLabel": "+ ADD",
+      "ghost": "Add a letter",
+      "box": {
+        "x": 342,
+        "w": 473,
+        "h": 322
+      },
+      "sheets": [
+        {
+          "type": "Covering letter",
+          "name": "Hook-first",
+          "src": "Text",
+          "use": "In 1 package",
+          "box": {
+            "x": 342,
+            "w": 473,
+            "h": 96
+          },
+          "dogEar": "linear-gradient(225deg, rgb(242, 237, 23",
+          "overflowPx": 0
+        },
+        {
+          "type": "Covering letter",
+          "name": "Comps-forward",
+          "src": "Text",
+          "use": "In 1 package",
+          "box": {
+            "x": 342,
+            "w": 473,
+            "h": 96
+          },
+          "dogEar": "linear-gradient(225deg, rgb(242, 237, 23",
+          "overflowPx": 0
+        }
+      ]
+    },
+    {
+      "heading": "Synopses",
+      "held": "1 held",
+      "slot": "mat-Synopsis",
+      "slotBox": {
+        "x": 835,
+        "w": 44,
+        "h": 44
+      },
+      "addLabel": "+ ADD",
+      "ghost": "Add a synopsis",
+      "box": {
+        "x": 835,
+        "w": 473,
+        "h": 216
+      },
+      "sheets": [
+        {
+          "type": "Synopsis",
+          "name": "One-page",
+          "src": "Text",
+          "use": "In 2 packages",
+          "box": {
+            "x": 835,
+            "w": 473,
+            "h": 96
+          },
+          "dogEar": "linear-gradient(225deg, rgb(242, 237, 23",
+          "overflowPx": 0
+        }
+      ]
+    },
+    {
+      "heading": "Sample pages",
+      "held": "1 held",
+      "slot": "mat-Sample Pages",
+      "slotBox": {
+        "x": 1329,
+        "w": 44,
+        "h": 44
+      },
+      "addLabel": "+ ADD",
+      "ghost": "Add sample pages",
+      "box": {
+        "x": 1329,
+        "w": 473,
+        "h": 216
+      },
+      "sheets": [
+        {
+          "type": "Sample pages",
+          "name": "Chapters 1-3",
+          "src": "Text · 520 words",
+          "use": "In 2 packages",
+          "box": {
+            "x": 1329,
+            "w": 473,
+            "h": 96
+          },
+          "dogEar": "linear-gradient(225deg, rgb(242, 237, 23",
+          "overflowPx": 0
+        }
+      ]
+    }
+  ],
+  "sheetCount": 4,
+  "openControls": 4,
+  "binControls": 4,
+  "nestedButtons": 0,
+  "gridOverflowPx": 0
+}
