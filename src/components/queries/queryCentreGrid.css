@@ -82,7 +82,23 @@
  */
 .qcc-controls {
   position: sticky;
-  top: 0;
+  /**
+   * ⚠️ THE OFFSET IS THE PINNED CHROME'S OWN HEIGHT, PUBLISHED BY THE GRID — not `0`, not a
+   * literal, and not `calc(100vh - …)`. `top: 0` clamps this block to the same line the collapsed
+   * bar occupies, so the bar disappears behind it and the first row of cards is clipped under both.
+   *
+   * The masthead pack states the mechanism and this reuses it rather than inventing a second one.
+   * `WorkspacePageGrid.tsx`: "`--wpg-stuck-h` IS THE BAR'S HEIGHT — how far down the scrollport the
+   * first unobstructed pixel is… WRITTEN ONLY WHILE THE BAR IS SHOWN, because that is the only
+   * state in which anything is pinned above a sticky child." `buildPanel.css` is the precedent
+   * consumer, for the same fault: "a panel at `top: 0` clamps to the same line and slides under it…
+   * a literal here would be a second element encoding a height it does not own."
+   *
+   * ⚠️ NO GAP TERM. The builder's panel adds `--wpg-chrome-gap` because it is an object floating in
+   * the scrollport; this block is the page's own chrome and meets the bar's bottom edge exactly,
+   * which is what the assertion measures.
+   */
+  top: var(--wpg-stuck-h, 0px);
   z-index: 30;
   /**
    * ⚠️ `--ws-window`, NOT `--desk`. Measured before this: the band painted `rgb(232, 221, 208)` —

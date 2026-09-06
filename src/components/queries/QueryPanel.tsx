@@ -20,7 +20,7 @@ import React, { useEffect, useRef } from "react";
 import "./queryCard.css";
 import "./queryPanel.css";
 import { StatusDot } from "../StatusDot";
-import { MATERIAL_ROW_NAMES } from "../../lib/agentMaterials";
+import { MATERIAL_ROW_NAMES, type MaterialKind } from "../../lib/agentMaterials";
 import { MATERIAL_SLOTS, type CardFacts } from "../../lib/queryCardFacts";
 import type { QueryStatus } from "../../types";
 
@@ -40,7 +40,7 @@ export interface PanelRung {
   onMenu?: (anchor: HTMLElement) => void;
   /** The waiting rung's dashed treatment and its bar. */
   pending?: boolean;
-  progress?: { pct: number; past: boolean; sentLabel: string; expectedLabel: string; onEditExpected?: () => void };
+  progress?: { pct: number; past: boolean; sentLabel: string; expectedLabel: string; onEditExpected?: (anchor: HTMLElement) => void };
 }
 
 export interface QueryPanelProps {
@@ -70,6 +70,9 @@ export interface QueryPanelProps {
   onListMaterials?: () => void;
   onAttachPackage?: () => void;
   onEditMaterials?: () => void;
+  /** The section's Edit toggle, swapping the read rows for the four toggle rows. */
+  matsEditing?: boolean;
+  onToggleMaterial?: (kind: MaterialKind) => void;
   notes?: React.ReactNode;
   noteCount: number;
 }
@@ -85,6 +88,7 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
   open, facts, status, name, agency, initials, sentLabel, viaLabel, manuscriptTitle,
   position, primaryLabel, onPrimary, onNudge, onMarkClosed, onClose, onStep, rungs,
   elapsed, expectedLabel, materialsRecorded, onListMaterials, onAttachPackage, onEditMaterials,
+  matsEditing = false, onToggleMaterial,
   notes, noteCount,
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -230,7 +234,8 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
                             <div className="qpn-lbl">
                               <span>{r.progress.sentLabel}</span>
                               {r.progress.onEditExpected
-                                ? <button type="button" className="qpn-ed" onClick={r.progress.onEditExpected} title="Change the expected date">{r.progress.expectedLabel}</button>
+                                ? <button type="button" className="qpn-ed" title="Change the expected date"
+                                    onClick={(e) => r.progress!.onEditExpected!(e.currentTarget)}>{r.progress.expectedLabel}</button>
                                 : <span>{r.progress.expectedLabel}</span>}
                             </div>
                           </div>
@@ -255,18 +260,47 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
               <div className="qpn-sband">
                 <Icon d="M21 12l-8.5 8.5a5 5 0 01-7-7L14 5a3.3 3.3 0 014.7 4.7L10.5 18a1.7 1.7 0 01-2.4-2.4L15 8.5" stroke="#5a6e58" />
                 <span className="qpn-ttl">What went with this query</span>
-                {onEditMaterials && <button type="button" className="qpn-edit" onClick={onEditMaterials}>Edit</button>}
+                {onEditMaterials && (
+                  <button type="button" className="qpn-edit" onClick={onEditMaterials}>
+                    {matsEditing ? "Done" : "Edit"}
+                  </button>
+                )}
                 <span className="qpn-tag">
                   {MATERIAL_SLOTS.filter((k) => facts.materials[k]).length} of {MATERIAL_SLOTS.length}
                 </span>
               </div>
               <div className="qpn-sbody">
-                {MATERIAL_SLOTS.map((k) => (
-                  <div key={k} className={`qpn-row${facts.materials[k] ? "" : " qpn-row--no"}`}>
-                    <span>{MATERIAL_ROW_NAMES[k]}</span>
-                    <span className="qpn-v">{facts.materials[k] ?? "—"}</span>
-                  </div>
-                ))}
+                {/**
+                  * ⚠️ THE SAME FOUR ROWS IN BOTH STATES, one tick apart. The read view and the edit
+                  * view are the same list — a separate editor would be a second place the four
+                  * slots are named, and this repo has an audit about exactly that.
+                  */}
+                {MATERIAL_SLOTS.map((k) => {
+                  const on = !!facts.materials[k];
+                  if (!matsEditing) {
+                    return (
+                      <div key={k} className={`qpn-row${on ? "" : " qpn-row--no"}`}>
+                        <span>{MATERIAL_ROW_NAMES[k]}</span>
+                        <span className="qpn-v">{facts.materials[k] ?? "—"}</span>
+                      </div>
+                    );
+                  }
+                  return (
+                    <button
+                      key={k}
+                      type="button"
+                      className={`qpn-doc${on ? " qpn-doc--on" : ""}`}
+                      aria-pressed={on}
+                      onClick={() => onToggleMaterial?.(k)}
+                    >
+                      <span className="qpn-cb" aria-hidden="true">
+                        {on && <Icon d="M4 12l5 5L20 7" size={10} stroke="#fdfaf5" width={3.4} />}
+                      </span>
+                      <span className="qpn-docnm">{MATERIAL_ROW_NAMES[k]}</span>
+                      <span className="qpn-v">{facts.materials[k] ?? "Not sent"}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </section>

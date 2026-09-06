@@ -235,3 +235,31 @@
 @media (prefers-reduced-motion: reduce) {
   .qpn, .qpn-scrim, .qpn-more { transition: none; }
 }
+
+/* ── the materials editor's four toggle rows ────────────────────────────────────────────────── */
+/* ⚠️ THE SAME FOUR ROWS AS THE READ VIEW, one tick apart — not a second list. */
+.qpn-doc {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 0;
+  border: 0; border-bottom: 0.5px solid #ece0d2; background: none; cursor: pointer;
+  font: inherit; font-size: 12.5px; color: #3a1c14; text-align: left;
+}
+.qpn-doc:last-child { border-bottom: none; }
+.qpn-cb {
+  width: 18px; height: 18px; border-radius: 5px; flex: none;
+  border: 1px solid #e0d5c8; background: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.qpn-doc--on .qpn-cb { background: var(--ink, #1c130f); border-color: var(--ink, #1c130f); }
+.qpn-docnm { flex: 1; min-width: 0; }
+.qpn-doc:not(.qpn-doc--on) { color: #c0b0a0; }
+.qpn-doc:not(.qpn-doc--on) .qpn-v { color: #d0c4b6; }
+
+/* ── the expected-date picker, anchored to its dotted field ─────────────────────────────────── */
+/* ⚠️ ABOVE THE PANEL (z 70) BUT BELOW NOTHING ELSE — it is opened from inside the panel and must
+   not be clipped by it, which is why it is fixed rather than a child of the scrolling inner. */
+.qpn-pickscrim { position: fixed; inset: 0; z-index: 80; background: transparent; border: 0; padding: 0; cursor: default; }
+.qpn-pick {
+  position: fixed; z-index: 81; width: 300px;
+  background: #fdfaf5; border: 1px solid #e0d5c8; border-radius: 12px; padding: 10px;
+  box-shadow: 0 4px 10px rgba(58, 28, 20, 0.07), 0 14px 34px rgba(58, 28, 20, 0.12);
+}

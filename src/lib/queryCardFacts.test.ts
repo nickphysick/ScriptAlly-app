@@ -213,10 +213,12 @@ describe("materials — four slots, and unrecorded is not empty", () => {
   it("routes every item through formatQueryMaterial into its slot", () => {
     const f = cardFacts(q({ materialsWanted: ["Query letter", "Synopsis", "First 3 chapters"] }), TODAY);
     expect(f.materialsRecorded).toBe(true);
-    /* ⚠️ THE APP'S OWN LABEL, NOT THE INPUT STRING — `formatQueryMaterial` normalises
-       "Query letter" to "Covering letter", which is what every other surface prints. */
-    expect(f.materials.queryLetter).toBe("Covering letter");
-    expect(f.materials.synopsis).toBe("Synopsis");
+    /* ⚠️ THE VALUE IS `Sent` WHERE THERE IS NO QUANTITY — it is the value COLUMN, and a column
+       that repeats its own row label ("Synopsis · Synopsis") states nothing. Supersedes an earlier
+       assertion here that pinned the formatted label. */
+    expect(f.materials.queryLetter).toBe("Sent");
+    expect(f.materials.synopsis).toBe("Sent");
+    /* a quantity IS the value — that is the one thing worth showing */
     expect(f.materials.sample).toBe("First 3 chapters");
     expect(f.materials.other).toBeNull();
   });
@@ -485,7 +487,59 @@ describe("⚠️ a closed card does not invent how long the reply took", () => {
     ]) {
       const f = cardFacts(q(over), TODAY);
       expect(f.leaf, "a closed card rendered no leaf").not.toBeNull();
-      expect(f.leaf!.caption).toBe("closed");
+      /* ⚠️ THE CAPTION FOLLOWS THE DATE THE LEAF IS ACTUALLY SHOWING. With no `lastStatusChange`
+         the leaf falls back to the SEND, so it says `sent` — the send date under the word `closed`
+         would be a true date beneath a false label. */
+      expect(f.leaf!.caption).toBe(over.lastStatusChange ? "closed" : "sent");
     }
+  });
+});
+
+
+describe("⚠️ the value column never repeats its own label", () => {
+  it("no slot's value equals the row name it sits beside", () => {
+    const f = cardFacts(q({ materialsWanted: ["Query letter", "Synopsis", "First 3 chapters", "Marketing plan"] }), TODAY);
+    const names: Record<string, string> = {
+      queryLetter: "Query letter", synopsis: "Synopsis", sample: "Opening sample", other: "Other",
+    };
+    for (const [k, v] of Object.entries(f.materials)) {
+      if (!v) continue;
+      expect(v.toLowerCase(), `${k} repeats its label`).not.toBe(names[k].toLowerCase());
+    }
+  });
+
+  it("`other` keeps its free text, digit or no digit", () => {
+    /* ⚠️ THE TEXT MUST CARRY NO MATERIAL KEYWORD. "A one-page pitch" classifies as `sample` —
+       `classifyQueryMaterial` matches on "page" — so it was testing the wrong slot. That is the
+       parser's documented substring behaviour, not a fault here, but it is a trap for a fixture. */
+    const f = cardFacts(q({ materialsWanted: ["Marketing plan"] }), TODAY);
+    expect(f.materials.other).toBe("Marketing plan");
+  });
+
+  it("⚠️ a quantity survives; a bare material becomes `Sent`", () => {
+    const withQty = cardFacts(q({ materialsWanted: ["First 50 pages"] }), TODAY);
+    expect(withQty.materials.sample).toBe("First 50 pages");
+    const bare = cardFacts(q({ materialsWanted: ["Synopsis"] }), TODAY);
+    expect(bare.materials.synopsis).toBe("Sent");
+  });
+});
+
+describe("⚠️ an unknown defining date shows the send, and says nothing about elapsed time", () => {
+  it("a closed query with no last activity: leaf = sent date, caption silent", () => {
+    const f = cardFacts(q({ status: QueryStatus.REJECTED, dateSent: ago(40) }), TODAY);
+    expect(f.leaf!.caption).toBe("sent");
+    expect(f.caption, "it reported an interval it does not know").toBe("");
+  });
+
+  it("with a real last activity it says both", () => {
+    const f = cardFacts(q({ status: QueryStatus.REJECTED, dateSent: ago(40), lastStatusChange: ago(5) }), TODAY);
+    expect(f.leaf!.caption).toBe("closed");
+    expect(f.caption).toBe("replied after 5 weeks");
+  });
+
+  it("⚠️ and the same for a request that has no dated activity", () => {
+    /* `requested` over the SEND date would date the agent's request to the day you wrote to them. */
+    const f = cardFacts(q({ status: QueryStatus.FULL_REQUESTED, dateSent: ago(40) }), TODAY);
+    expect(f.leaf!.caption).toBe("sent");
   });
 });
