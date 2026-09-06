@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — the task card, five ways</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f4efe7;--white:#fff;--paper:#fdfaf5;--ink:#241209;--ink2:#3a1c14;--muted:#9c8878;--muted2:#8a7a6c;--hair:#e7ddd2;--hair2:#e0d5c8;--edge:#e8e0d8;--burg:#7c3a2a;--sage:#5a6e58;--pink:#f5e2da;--pink-b:#e8c8bc;
+--now1:#f6e3da;--now2:#f0d6ca;--house1:#dde4db;--house2:#d3dcd1;--yours1:#f7efe0;}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);padding:30px 28px 90px;}
+.wrap{max-width:1180px;margin:0 auto;}
+h1{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;color:var(--ink2);}
+.lede{font-size:12.5px;color:#6a584a;font-weight:300;line-height:1.65;max-width:900px;margin:5px 0 24px;}
+.lede b{font-weight:500;color:var(--ink2);}
+.opt{margin-bottom:34px;}
+.opt h2{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink2);margin-bottom:4px;}
+.opt p{font-size:12px;color:#6a584a;font-weight:300;line-height:1.6;max-width:880px;margin-bottom:14px;}
+.opt p b{font-weight:500;color:var(--ink2);}
+.row{display:grid;grid-template-columns:repeat(3,300px);gap:18px;}
+.av{width:26px;height:26px;border-radius:50%;background:#efe4dc;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(124,58,42,0.18);flex-shrink:0;}
+.qs{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);font-weight:500;white-space:nowrap;}
+.qs svg{width:13px;height:13px;}
+.msc{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.08em;text-transform:uppercase;color:#c3b6a7;white-space:nowrap;}
+.msc svg{width:11px;height:11px;}
+.mono{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);}
+.tag{height:22px;padding:0 9px;border-radius:999px;font-size:10.5px;font-weight:500;display:inline-flex;align-items:center;}
+.tag.now{background:var(--now1);color:var(--burg);}
+.tag.house{background:var(--house1);color:#3c4a3a;}
+
+/* ═══ A · Editorial ═══ */
+.A{background:var(--white);border:1px solid var(--edge);border-radius:14px;padding:20px 22px 16px;box-shadow:0 1px 2px rgba(58,28,20,0.04),0 6px 20px rgba(58,28,20,0.05);display:flex;flex-direction:column;gap:12px;}
+.A .top{display:flex;justify-content:space-between;align-items:center;}
+.A .kicker{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--burg);font-weight:500;display:inline-flex;align-items:center;gap:6px;}
+.A .kicker.h{color:#4c5f4a;}
+.A .kicker::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
+.A .ttl{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;color:var(--ink2);line-height:1.25;}
+.A .stand{font-size:12.5px;color:#6a584a;font-weight:300;line-height:1.5;}
+.A .stand b{font-weight:500;color:var(--ink2);}
+.A .rule{height:1px;background:var(--hair);}
+.A .by{display:flex;align-items:center;gap:9px;}
+.A .by .n{font-size:12px;font-weight:500;}
+.A .by .a{font-size:10.5px;color:var(--muted2);font-weight:300;}
+.A .by .qs{margin-left:auto;}
+.A .num{font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--ink2);}
+.A .num.late{color:var(--burg);}
+
+/* ═══ B · Ticket ═══ */
+.B{background:var(--white);border:1px solid var(--edge);border-radius:12px;overflow:hidden;display:grid;grid-template-columns:6px 1fr;box-shadow:0 1px 2px rgba(58,28,20,0.04);}
+.B .edge{background:var(--now2);}
+.B.h .edge{background:var(--house2);}
+.B .in{padding:14px 16px 12px;display:flex;flex-direction:column;gap:9px;}
+.B .top{display:flex;justify-content:space-between;align-items:center;}
+.B .ttl{font-size:14.5px;font-weight:600;color:var(--ink2);line-height:1.3;}
+.B .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;padding:9px 0 0;border-top:1px dashed var(--hair2);}
+.B .cell .k{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);}
+.B .cell .v{font-size:12px;font-weight:500;color:var(--ink2);margin-top:2px;}
+.B .cell .v.late{color:var(--burg);}
+.B .foot{display:flex;align-items:center;gap:8px;padding-top:9px;border-top:1px dashed var(--hair2);}
+.B .foot .n{font-size:11.5px;font-weight:500;}
+.B .foot .qs{margin-left:auto;font-size:11px;}
+
+/* ═══ C · Allout, in the brand ═══ */
+.C{background:var(--white);border:1px solid var(--edge);border-radius:16px;box-shadow:0 1px 2px rgba(58,28,20,0.04),0 8px 24px rgba(58,28,20,0.06);overflow:hidden;}
+.C .body{padding:20px 22px 16px;display:flex;flex-direction:column;gap:12px;}
+.C .top{display:flex;justify-content:space-between;align-items:center;}
+.C .ttl{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:var(--ink2);line-height:1.28;}
+.C .desc{font-size:12.5px;color:#6a584a;font-weight:300;line-height:1.55;}
+.C .desc b{font-weight:500;color:var(--ink2);}
+.C .agent{display:flex;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--hair);border-radius:11px;padding:9px 11px;}
+.C .agent .av{width:30px;height:30px;font-size:9.5px;}
+.C .agent .n{font-size:12.5px;font-weight:500;line-height:1.2;}
+.C .agent .a{font-size:10.5px;color:var(--muted2);font-weight:300;}
+.C .agent .qs{margin-left:auto;font-size:11px;}
+.C .foot{display:flex;align-items:center;justify-content:space-between;padding:11px 22px;border-top:1px solid #f1eae1;background:#fcfaf6;}
+.C .foot .when{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted2);}
+.C .foot .when b{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink2);font-weight:500;}
+.C .foot .when b.late{color:var(--burg);}
+.C .foot .when svg{width:13px;height:13px;}
+
+/* ═══ D · Stat-led ═══ */
+.D{background:var(--white);border:1px solid var(--edge);border-radius:14px;padding:18px 20px 14px;box-shadow:0 1px 2px rgba(58,28,20,0.04),0 6px 20px rgba(58,28,20,0.05);display:grid;grid-template-columns:auto 1fr;column-gap:16px;row-gap:10px;align-items:start;}
+.D .stat{text-align:center;padding:6px 10px 8px;border-radius:12px;background:var(--paper);border:1px solid var(--hair);min-width:64px;}
+.D .stat b{font-family:'Playfair Display',serif;font-size:26px;color:var(--ink2);font-weight:500;line-height:1;display:block;}
+.D .stat b.late{color:var(--burg);}
+.D .stat span{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-top:4px;}
+.D .main{min-width:0;}
+.D .main .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.D .ttl{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink2);line-height:1.25;}
+.D .sub{font-size:11.5px;color:var(--muted2);font-weight:300;margin-top:4px;}
+.D .foot{grid-column:1/3;display:flex;align-items:center;gap:9px;padding-top:11px;border-top:1px solid #f1eae1;}
+.D .foot .n{font-size:12px;font-weight:500;}
+.D .foot .a{font-size:10.5px;color:var(--muted2);font-weight:300;}
+.D .foot .qs{margin-left:auto;}
+
+/* ═══ E · Two-tone ═══ */
+.E{background:var(--white);border:1px solid var(--edge);border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(58,28,20,0.04),0 6px 20px rgba(58,28,20,0.05);}
+.E .band{padding:12px 18px;display:flex;justify-content:space-between;align-items:center;}
+.E .band.now{background:linear-gradient(135deg,var(--now1),var(--now2));}
+.E .band.house{background:linear-gradient(135deg,var(--house1),var(--house2));}
+.E .band .k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(58,28,20,0.7);font-weight:500;}
+.E .band .n{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink2);font-weight:500;}
+.E .band .n small{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(58,28,20,0.6);margin-left:5px;font-weight:400;}
+.E .body{padding:16px 18px 14px;display:flex;flex-direction:column;gap:10px;}
+.E .ttl{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:var(--ink2);line-height:1.25;}
+.E .sub{font-size:12px;color:#6a584a;font-weight:300;line-height:1.5;}
+.E .sub b{font-weight:500;color:var(--ink2);}
+.E .foot{display:flex;align-items:center;gap:9px;padding-top:10px;border-top:1px solid #f1eae1;}
+.E .foot .n{font-size:12px;font-weight:500;}
+.E .foot .a{font-size:10.5px;color:var(--muted2);font-weight:300;}
+.E .foot .qs{margin-left:auto;}
+.E .msc{position:absolute;}
+.rec{margin-top:26px;background:var(--white);border:1px solid var(--edge);border-radius:12px;padding:16px 18px;font-size:12px;color:#6a584a;font-weight:300;line-height:1.66;max-width:900px;}
+.rec b{font-weight:500;color:var(--ink2);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>The task card, five ways</h1>
+<div class="lede">Same three tasks in each — a send, a nudge, a close. Every option keeps the rules you set: <b>fill means task family, glyph means query state</b>; the manuscript sits in a corner; the numeral goes burgundy only where the writer owes the date.</div>
+
+<!-- A -->
+<div class="opt"><h2>A · Editorial</h2><p>A magazine grammar: kicker, headline, standfirst, byline. The task type is a coloured word with a dot rather than a pill; the wait is an italic numeral in the standfirst; the agent is the byline with the status beside them. Quietest and most "written".</p>
+<div class="row">
+  <div class="A"><div class="top"><span class="kicker">Send</span><span class="msc">📖 Murphy's Day Out</span></div><div class="ttl">Send your full manuscript</div><div class="stand">Jonathan Marsh asked on 2 April — <span class="num late">7 weeks</span> waiting.</div><div class="rule"></div><div class="by"><span class="av">JM</span><div><div class="n">Jonathan Marsh</div><div class="a">The Marsh Agency</div></div><span class="qs"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#5a6e58" stroke-width="1.5" fill="#8a9e88"/><path d="M9.5 7H4.8M6.6 5.2L4.8 7l1.8 1.8" stroke="#fdfaf5" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Full requested</span></div></div>
+  <div class="A"><div class="top"><span class="kicker">Nudge</span><span class="msc">📖 Murphy's Day Out</span></div><div class="ttl">Worth a nudge</div><div class="stand">Their window closed 26 August — <span class="num">1 week</span> past it, quiet since July.</div><div class="rule"></div><div class="by"><span class="av">AK</span><div><div class="n">Aisha Kapoor</div><div class="a">The Lantern Agency</div></div><span class="qs"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#7c3d3d" stroke-width="1.5" fill="#f5e2da"/><path d="M4.5 7h4.7M7.4 5.2L9.2 7l-1.8 1.8" stroke="#7c3d3d" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Queried</span></div></div>
+  <div class="A"><div class="top"><span class="kicker h">Close</span><span class="msc">📖 Murphy's Day Out</span></div><div class="ttl">Consider closing</div><div class="stand">Quiet since 14 March 2024 — <span class="num">2½ years</span> without a reply.</div><div class="rule"></div><div class="by"><span class="av">MR</span><div><div class="n">Marcus Reed</div><div class="a">Bloomsbury Quill</div></div><span class="qs"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#7c3d3d" stroke-width="1.5" fill="#f5e2da"/><path d="M4.5 7h4.7M7.4 5.2L9.2 7l-1.8 1.8" stroke="#7c3d3d" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Queried</span></div></div>
+</div></div>
+
+<!-- B -->
+<div class="opt"><h2>B · Ticket</h2><p>A coloured edge carries the family; inside, a two-by-two of labelled facts on a dashed rule, like a stub. Densest — the most tasks per screen — and the most legible at a glance because every fact has a label.</p>
+<div class="row">
+  <div class="B"><div class="edge"></div><div class="in"><div class="top"><span class="tag now">Send</span><span class="msc">📖 Murphy's Day Out</span></div><div class="ttl">Send your full manuscript</div><div class="grid"><div class="cell"><div class="k">Asked on</div><div class="v">2 April</div></div><div class="cell"><div class="k">Waiting</div><div class="v late">7 weeks</div></div></div><div class="foot"><span class="av">JM</span><span class="n">Jonathan Marsh</span><span class="qs"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#5a6e58" stroke-width="1.5" fill="#8a9e88"/><path d="M9.5 7H4.8M6.6 5.2L4.8 7l1.8 1.8" stroke="#fdfaf5" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Full requested</span></div></div></div>
+  <div class="B"><div class="edge"></div><div class="in"><div class="top"><span class="tag now">Nudge</span><span class="msc">📖 Murphy's Day Out</span></div><div class="ttl">Worth a nudge</div><div class="grid"><div class="cell"><div class="k">Window closed</div><div class="v">26 August</div></div><div class="cell"><div class="k">Past it</div><div class="v">1 week</div></div></div><div class="foot"><span class="av">AK</span><span class="n">Aisha Kapoor</span><span class="qs"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#7c3d3d" stroke-width="1.5" fill="#f5e2da"/><path d="M4.5 7h4.7M7.4 5.2L9.2 7l-1.8 1.8" stroke="#7c3d3d" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Queried</span></div></div></div>
+  <div class="B h"><div class="edge"></div><div class="in"><div class="top"><span class="tag house">Close</span><span class="msc">📖 Murphy's Day Out</span></div><div class="ttl">Consider closing</div><div class="grid"><div class="cell"><div class="k">Quiet since</div><div class="v">14 Mar 2024</div></div><div class="cell"><div class="k">That's</div><div class="v">2½ years</div></div></div><div class="foot"><span class="av">MR</span><span class="n">Marcus Reed</span><span class="qs"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#7c3d3d" stroke-width="1.5" fill="#f5e2da"/><path d="M4.5 7h4.7M7.4 5.2L9.2 7l-1.8 1.8" stroke="#7c3d3d" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Queried</span></div></div></div>
+</div></div>
+
+<!-- C -->
+<div class="opt"><h2>C · Allout, in the brand</h2><p>Your first reference's card, translated faithfully: tag, title, one sentence, then the agent as the "attachment" block (the thing that made those cards feel anchored), and a footer on warmer ground with the wait. The most conventional, and the most reassuring.</p>
+<div class="row">
+  <div class="C"><div class="body"><div class="top"><span class="tag now">Send</span><span class="msc">📖 Murphy's Day Out</span></div><div class="ttl">Send your full manuscript</div><div class="desc"><b>Jonathan Marsh</b> asked for the full on 2 April.</div><div class="agent"><span class="av">JM</span><div><div class="n">Jonathan Marsh</div><div class="a">The Marsh Agency</div></div><span class="qs"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#5a6e58" stroke-width="1.5" fill="#8a9e88"/><path d="M9.5 7H4.8M6.6 5.2L4.8 7l1.8 1.8" stroke="#fdfaf5" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Full requested</span></div></div><div class="foot"><span class="mono">Asked 2 April</span><span class="when"><svg viewBox="0 0 24 24" fill="none" stroke="#8a7a6c" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><b class="late">7</b>weeks waiting</span></div></div>
+  <div class="C"><div class="body"><div class="top"><span class="tag now">Nudge</span><span class="msc">📖 Murphy's Day Out</span></div><div class="ttl">Worth a nudge</div><div class="desc">Quiet for 5 weeks — a week past <b>The Lantern Agency</b>'s window.</div><div class="agent"><span class="av">AK</span><div><div class="n">Aisha Kapoor</div><div class="a">The Lantern Agency</div></div><span class="qs"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#7c3d3d" stroke-width="1.5" fill="#f5e2da"/><path d="M4.5 7h4.7M7.4 5.2L9.2 7l-1.8 1.8" stroke="#7c3d3d" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Queried</span></div></div><div class="foot"><span class="mono">Window closed 26 Aug</span><span class="when"><svg viewBox="0 0 24 24" fill="none" stroke="#8a7a6c" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><b>1</b>week past</span></div></div>
+  <div class="C"><div class="body"><div class="top"><span class="tag house">Close</span><span class="msc">📖 Murphy's Day Out</span></div><div class="ttl">Consider closing</div><div class="desc">No reply since your query in March 2024.</div><div class="agent"><span class="av">MR</span><div><div class="n">Marcus Reed</div><div class="a">Bloomsbury Quill</div></div><span class="qs"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#7c3d3d" stroke-width="1.5" fill="#f5e2da"/><path d="M4.5 7h4.7M7.4 5.2L9.2 7l-1.8 1.8" stroke="#7c3d3d" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Queried</span></div></div><div class="foot"><span class="mono">Quiet since 14 Mar 2024</span><span class="when"><svg viewBox="0 0 24 24" fill="none" stroke="#8a7a6c" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><b>2½</b>years</span></div></div>
+</div></div>
+
+<!-- D -->
+<div class="opt"><h2>D · Stat-led</h2><p>The wait is the first thing on the card — a numeral in a paper well on the left — because on a to-do list "how long" is what decides what to open first. Title and date beside it, agent and status beneath. The most triage-friendly.</p>
+<div class="row">
+  <div class="D"><div class="stat"><b class="late">7</b><span>wks waiting</span></div><div class="main"><div class="top"><span class="tag now">Send</span><span class="msc">📖 Murphy's</span></div><div class="ttl">Send your full manuscript</div><div class="sub">Asked on 2 April</div></div><div class="foot"><span class="av">JM</span><div><div class="n">Jonathan Marsh</div><div class="a">The Marsh Agency</div></div><span class="qs"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#5a6e58" stroke-width="1.5" fill="#8a9e88"/><path d="M9.5 7H4.8M6.6 5.2L4.8 7l1.8 1.8" stroke="#fdfaf5" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Full requested</span></div></div>
+  <div class="D"><div class="stat"><b>1</b><span>wk past</span></div><div class="main"><div class="top"><span class="tag now">Nudge</span><span class="msc">📖 Murphy's</span></div><div class="ttl">Worth a nudge</div><div class="sub">Window closed 26 August</div></div><div class="foot"><span class="av">AK</span><div><div class="n">Aisha Kapoor</div><div class="a">The Lantern Agency</div></div><span class="qs"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#7c3d3d" stroke-width="1.5" fill="#f5e2da"/><path d="M4.5 7h4.7M7.4 5.2L9.2 7l-1.8 1.8" stroke="#7c3d3d" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Queried</span></div></div>
+  <div class="D"><div class="stat"><b>2½</b><span>yrs quiet</span></div><div class="main"><div class="top"><span class="tag house">Close</span><span class="msc">📖 Murphy's</span></div><div class="ttl">Consider closing</div><div class="sub">Quiet since 14 March 2024</div></div><div class="foot"><span class="av">MR</span><div><div class="n">Marcus Reed</div><div class="a">Bloomsbury Quill</div></div><span class="qs"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#7c3d3d" stroke-width="1.5" fill="#f5e2da"/><path d="M4.5 7h4.7M7.4 5.2L9.2 7l-1.8 1.8" stroke="#7c3d3d" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Queried</span></div></div>
+</div></div>
+
+<!-- E -->
+<div class="opt"><h2>E · Two-tone</h2><p>The family tint becomes a header band — task type left, wait right — the same device as the drawer's hero block, so card and drawer are visibly one family. White body: title, a line, agent and status. The most "branded".</p>
+<div class="row">
+  <div class="E"><div class="band now"><span class="k">Send</span><span class="n" style="color:var(--burg)">7 weeks<small>waiting</small></span></div><div class="body"><div class="ttl">Send your full manuscript</div><div class="sub"><b>Jonathan Marsh</b> asked for the full on 2 April.</div><div class="foot"><span class="av">JM</span><div><div class="n">Jonathan Marsh</div><div class="a">The Marsh Agency</div></div><span class="qs"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#5a6e58" stroke-width="1.5" fill="#8a9e88"/><path d="M9.5 7H4.8M6.6 5.2L4.8 7l1.8 1.8" stroke="#fdfaf5" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Full requested</span></div><div style="text-align:right"><span class="msc">📖 Murphy's Day Out</span></div></div></div>
+  <div class="E"><div class="band now"><span class="k">Nudge</span><span class="n">1 week<small>past window</small></span></div><div class="body"><div class="ttl">Worth a nudge</div><div class="sub">Their window closed 26 August; quiet since July.</div><div class="foot"><span class="av">AK</span><div><div class="n">Aisha Kapoor</div><div class="a">The Lantern Agency</div></div><span class="qs"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#7c3d3d" stroke-width="1.5" fill="#f5e2da"/><path d="M4.5 7h4.7M7.4 5.2L9.2 7l-1.8 1.8" stroke="#7c3d3d" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Queried</span></div><div style="text-align:right"><span class="msc">📖 Murphy's Day Out</span></div></div></div>
+  <div class="E"><div class="band house"><span class="k">Close</span><span class="n">2½ years<small>quiet</small></span></div><div class="body"><div class="ttl">Consider closing</div><div class="sub">No reply since your query in March 2024.</div><div class="foot"><span class="av">MR</span><div><div class="n">Marcus Reed</div><div class="a">Bloomsbury Quill</div></div><span class="qs"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#7c3d3d" stroke-width="1.5" fill="#f5e2da"/><path d="M4.5 7h4.7M7.4 5.2L9.2 7l-1.8 1.8" stroke="#7c3d3d" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Queried</span></div><div style="text-align:right"><span class="msc">📖 Murphy's Day Out</span></div></div></div>
+</div></div>
+
+<div class="rec"><b>My order: C, then E.</b> C is the one your reference proved works — the agent block gives the card a centre of gravity, the footer gives the wait a home, and nothing is fighting for the eye. E is the more distinctive and ties card to drawer, but a tinted band on every card is a lot of colour on a page of twenty. A is the most beautiful at three cards and the least scannable at twenty. B wins on density and loses on charm. D is the right answer if you decide "how long" should always come first — which for a to-do list it might.</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — the reference card, reconstructed</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f7f4ee;--white:#fff;--field:#fdfbf7;--ink:#241209;--ink2:#3a1c14;--muted:#9c8878;--muted2:#8a7a6c;--hair:#e7ddd2;--hair2:#e0d5c8;--edge:#e8e0d8;--burg:#7c3a2a;--sage:#5a6e58;--pink:#f5e2da;--pink-b:#e8c8bc;
+/* the ladder */--in1:#f8e9e2;--in2:#f1dbd0;--in3:#e8c9bb;--out1:#e6eae3;--out2:#d7ddd3;--out3:#c7d0c2;--offer:#d7e0e8;--closed:#e4e1db;}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);padding:28px 26px 90px;}
+.wrap{max-width:1120px;margin:0 auto;}
+h1{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;color:var(--ink2);}
+.lede{font-size:12.5px;color:#6a584a;font-weight:300;line-height:1.65;max-width:900px;margin:5px 0 18px;}
+.lede b{font-weight:500;color:var(--ink2);}
+.research{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:26px;}
+.rs{background:var(--white);border:1px solid var(--edge);border-radius:10px;padding:11px 13px;font-size:11px;color:#6a584a;font-weight:300;line-height:1.5;}
+.rs b{display:block;font-weight:500;color:var(--ink2);font-size:11.5px;margin-bottom:3px;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.13em;text-transform:uppercase;color:#b3a494;margin:0 0 8px;}
+.desc{font-size:11.5px;color:#6a584a;font-weight:300;line-height:1.6;margin-top:10px;}
+.desc b{font-weight:500;color:var(--ink2);}
+/* card chassis — the app's own */
+.fc{background:var(--white);border:1px solid var(--edge);border-radius:12px;padding:6px;box-shadow:0 2px 4px rgba(58,28,20,0.05),0 14px 34px rgba(58,28,20,0.12);width:268px;}
+.rim{border:1px solid rgba(124,58,42,0.22);border-radius:9px;overflow:hidden;background:var(--white);}
+.av{width:30px;height:30px;border-radius:50%;background:#efe4dc;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(124,58,42,0.18);flex-shrink:0;}
+.mono{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.dot{width:13px;height:13px;flex-shrink:0;}
+.tl{position:relative;padding-left:20px;}
+.tl::before{content:'';position:absolute;left:5px;top:9px;bottom:9px;width:1.5px;background:#e1d7d0;}
+.te{position:relative;padding:4px 0;font-size:11px;font-weight:500;color:var(--ink);}
+.te .dot{position:absolute;left:-20px;top:6px;width:11px;height:11px;}
+.te.now{color:var(--burg);}
+.te .d{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;display:block;font-weight:400;margin-top:1px;}
+.gapl{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:0.09em;text-transform:uppercase;color:#c8b8a6;padding:2px 0;}
+.link{font-size:11px;color:var(--burg);border-bottom:1px dotted rgba(124,58,42,0.4);display:inline-block;cursor:pointer;}
+
+/* ═══ A · Quick Look — tinted header carries the state ═══ */
+.A .head{padding:12px 14px 11px;background:var(--in2);border-bottom:1px solid rgba(124,58,42,0.14);}
+.A .head .lbl{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8a6558;display:flex;justify-content:space-between;align-items:center;}
+.A .head .lbl i{font-style:normal;width:18px;height:18px;border-radius:5px;border:0.5px solid rgba(58,28,20,0.13);background:rgba(255,253,250,0.6);display:flex;align-items:center;justify-content:center;font-size:10px;color:#3a1c14;cursor:pointer;}
+.A .head .st{display:flex;align-items:center;gap:8px;margin-top:8px;font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink2);}
+.A .head .since{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a6558;margin-top:3px;}
+.A .who{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--hair);}
+.A .who .n{font-size:12.5px;font-weight:500;}
+.A .who .a{font-size:10.5px;color:var(--muted2);font-weight:300;}
+.A .who .go{margin-left:auto;color:#b3a494;}
+.A .dl{padding:8px 14px 6px;}
+.A .dl .r{display:grid;grid-template-columns:76px 1fr;gap:8px;padding:6px 0;align-items:baseline;}
+.A .dl .v{font-size:12.5px;font-weight:500;color:var(--ink);}
+.A .dl .v small{display:block;font-size:10px;color:var(--muted2);font-weight:300;}
+.A .dl .v.abs{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;font-weight:400;}
+.A .sec{padding:12px 14px 4px;border-top:1px solid var(--hair);}
+.A .foot{padding:10px 14px 12px;}
+
+/* ═══ B · Ledger — a coloured edge, the rest is paper ═══ */
+.B .rim{border-left:4px solid var(--in3);}
+.B .top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;}
+.B .chip{display:inline-flex;align-items:center;gap:7px;height:26px;padding:0 10px 0 7px;border-radius:999px;background:var(--in2);font-size:12px;font-weight:500;color:var(--ink2);}
+.B .who{display:flex;align-items:center;gap:10px;padding:8px 14px 12px;border-bottom:1px solid var(--hair);}
+.B .who .n{font-size:12.5px;font-weight:500;}
+.B .who .a{font-size:10.5px;color:var(--muted2);font-weight:300;}
+.B .sec{padding:12px 14px 4px;}
+.B .sec+.sec{border-top:1px solid var(--hair);}
+.B .r{display:grid;grid-template-columns:76px 1fr;gap:8px;padding:6px 0;align-items:baseline;}
+.B .v{font-size:12.5px;font-weight:500;color:var(--ink);}
+.B .v small{display:block;font-size:10px;color:var(--muted2);font-weight:300;}
+.B .v.abs{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;font-weight:400;}
+.B .foot{padding:8px 14px 12px;}
+
+/* ═══ C · Profile — the person on the tint, the state beneath ═══ */
+.C .hero{padding:16px 14px 14px;background:var(--in2);border-bottom:1px solid rgba(124,58,42,0.14);display:flex;align-items:center;gap:12px;}
+.C .hero .av{width:44px;height:44px;font-size:13px;background:#fff;border-color:rgba(124,58,42,0.22);}
+.C .hero .n{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:500;color:var(--ink2);}
+.C .hero .a{font-size:11px;color:#8a6558;font-weight:300;margin-top:1px;}
+.C .strip{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--hair);font-size:12.5px;font-weight:500;color:var(--ink2);}
+.C .strip .mono{margin-left:auto;font-weight:400;}
+.C .sec{padding:10px 14px 4px;}
+.C .sec+.sec{border-top:1px solid var(--hair);}
+.C .r{display:grid;grid-template-columns:76px 1fr;gap:8px;padding:6px 0;align-items:baseline;}
+.C .v{font-size:12.5px;font-weight:500;color:var(--ink);}
+.C .v small{display:block;font-size:10px;color:var(--muted2);font-weight:300;}
+.C .v.abs{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;font-weight:400;}
+.C .foot{padding:8px 14px 12px;}
+.swatches{display:flex;gap:6px;margin-top:22px;align-items:center;flex-wrap:wrap;}
+.sw{width:88px;height:44px;border-radius:8px;border:1px solid rgba(58,28,20,0.08);display:flex;align-items:flex-end;padding:5px 7px;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.08em;text-transform:uppercase;color:#5a4a3a;}
+.notes{margin-top:22px;}
+.notes p{font-size:12px;line-height:1.66;color:#6a584a;font-weight:300;margin-bottom:9px;max-width:900px;}
+.notes b{font-weight:500;color:var(--ink2);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>The reference card, reconstructed</h1>
+<div class="lede">What at-a-glance cards that people trust have in common, then three rebuilds of Quick reference using the app's <b>own card chassis</b> and its <b>own status tint</b> — so the card's colour is the record's state, not decoration.</div>
+
+<div class="research">
+  <div class="rs"><b>GitHub hover card · Slack profile</b>Identity first: avatar, name, one line of context. The card answers "who" before "what".</div>
+  <div class="rs"><b>Stripe side panel · Linear peek</b>Facts as a definition list — label left in a fixed column, value right, one per row, no borders. Sections separated by a hairline and a small-caps heading.</div>
+  <div class="rs"><b>macOS Quick Look · Notion preview</b>One tinted band at the top carries the object's kind or state; everything below is plain paper. Colour once, then restraint.</div>
+  <div class="rs"><b>Linear activity · Stripe events</b>History as a compact vertical feed with a thin rail, newest or current state emphasised. One link out at the bottom, never a row of buttons.</div>
+</div>
+
+<div class="grid">
+
+  <div>
+    <div class="lab">A · Quick Look — the header is the state</div>
+    <div class="A fc"><div class="rim">
+      <div class="head">
+        <div class="lbl"><span>Quick reference</span><i>›</i></div>
+        <div class="st"><svg class="dot" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#5a6e58" stroke-width="1.5" fill="#8a9e88"/><path d="M9.5 7H4.8M6.6 5.2L4.8 7l1.8 1.8" stroke="#fdfaf5" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Full requested</div>
+        <div class="since">Since 2 April · 22 weeks</div>
+      </div>
+      <div class="who"><span class="av">JM</span><div><div class="n">Jonathan Marsh</div><div class="a">The Marsh Agency</div></div><span class="go">→</span></div>
+      <div class="dl">
+        <div class="r"><span class="mono">Window</span><span class="v">6 weeks</span></div>
+        <div class="r"><span class="mono">Waiting</span><span class="v">7 weeks<small>past their window by 1</small></span></div>
+        <div class="r"><span class="mono">Sent before</span><span class="v abs">None sent</span></div>
+      </div>
+      <div class="sec"><div class="mono" style="margin-bottom:8px;">The story so far</div>
+        <div class="tl">
+          <div class="te"><svg class="dot" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#7c3d3d" stroke-width="1.5"/></svg>Query sent<span class="d">2 Apr · via email</span></div>
+          <div class="gapl">same day</div>
+          <div class="te"><svg class="dot" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#8a9e88" stroke-width="1.5"/><path d="M6 1 A5 5 0 0 1 9.76 3.5 L6 6 Z" fill="#8a9e88"/></svg>Full requested<span class="d">2 Apr · via email</span></div>
+          <div class="gapl">22 weeks quiet</div>
+          <div class="te now"><svg class="dot" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="#7c3d3d"/></svg>Your turn<span class="d">Today</span></div>
+        </div></div>
+      <div class="foot"><span class="link">Open the full query →</span></div>
+    </div></div>
+    <div class="desc"><b>The stage tint is the header</b> (Full requested → <code>#f1dbd0</code>), carrying the StatusDot, the status word in Playfair, and how long it's been so. Everything beneath is paper. Change the status and only the header changes colour — Queried goes sage, Closed goes grey — the same way the Query Centre's cards do.</div>
+  </div>
+
+  <div>
+    <div class="lab">B · Ledger — a coloured edge, the rest is paper</div>
+    <div class="B fc"><div class="rim">
+      <div class="top"><span class="mono" style="font-size:8px;">Quick reference</span><span class="chip"><svg class="dot" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#5a6e58" stroke-width="1.5" fill="#8a9e88"/><path d="M9.5 7H4.8M6.6 5.2L4.8 7l1.8 1.8" stroke="#fdfaf5" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Full requested</span></div>
+      <div class="who"><span class="av">JM</span><div><div class="n">Jonathan Marsh</div><div class="a">The Marsh Agency</div></div></div>
+      <div class="sec"><div class="mono" style="margin-bottom:4px;">Details</div>
+        <div class="r"><span class="mono">Since</span><span class="v">2 April<small>22 weeks ago</small></span></div>
+        <div class="r"><span class="mono">Window</span><span class="v">6 weeks</span></div>
+        <div class="r"><span class="mono">Waiting</span><span class="v">7 weeks</span></div>
+        <div class="r"><span class="mono">Sent before</span><span class="v abs">None sent</span></div>
+      </div>
+      <div class="sec"><div class="mono" style="margin-bottom:8px;">Activity</div>
+        <div class="tl">
+          <div class="te"><svg class="dot" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#7c3d3d" stroke-width="1.5"/></svg>Query sent<span class="d">2 Apr</span></div>
+          <div class="te"><svg class="dot" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#8a9e88" stroke-width="1.5"/><path d="M6 1 A5 5 0 0 1 9.76 3.5 L6 6 Z" fill="#8a9e88"/></svg>Full requested<span class="d">2 Apr</span></div>
+          <div class="te now"><svg class="dot" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="#7c3d3d"/></svg>Your turn<span class="d">Today</span></div>
+        </div></div>
+      <div class="foot"><span class="link">Open the full query →</span></div>
+    </div></div>
+    <div class="desc"><b>Stripe's grammar.</b> A 4px left edge in the stage's deeper step (<code>#e8c9bb</code>), a status chip top-right, then "Details" and "Activity" as sections. The most information-dense; the colour is a margin note rather than a band.</div>
+  </div>
+
+  <div>
+    <div class="lab">C · Profile — the person on the tint</div>
+    <div class="C fc"><div class="rim">
+      <div class="hero"><span class="av">JM</span><div><div class="n">Jonathan Marsh</div><div class="a">The Marsh Agency · responds in ~6 weeks</div></div></div>
+      <div class="strip"><svg class="dot" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#5a6e58" stroke-width="1.5" fill="#8a9e88"/><path d="M9.5 7H4.8M6.6 5.2L4.8 7l1.8 1.8" stroke="#fdfaf5" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Full requested<span class="mono">2 Apr</span></div>
+      <div class="sec">
+        <div class="r"><span class="mono">Waiting</span><span class="v">7 weeks<small>past their window by 1</small></span></div>
+        <div class="r"><span class="mono">Sent before</span><span class="v abs">None sent</span></div>
+      </div>
+      <div class="sec"><div class="mono" style="margin-bottom:8px;">The story so far</div>
+        <div class="tl">
+          <div class="te"><svg class="dot" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#7c3d3d" stroke-width="1.5"/></svg>Query sent<span class="d">2 Apr</span></div>
+          <div class="gapl">same day</div>
+          <div class="te"><svg class="dot" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#8a9e88" stroke-width="1.5"/><path d="M6 1 A5 5 0 0 1 9.76 3.5 L6 6 Z" fill="#8a9e88"/></svg>Full requested<span class="d">2 Apr</span></div>
+          <div class="gapl">22 weeks quiet</div>
+          <div class="te now"><svg class="dot" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="#7c3d3d"/></svg>Your turn<span class="d">Today</span></div>
+        </div></div>
+      <div class="foot"><span class="link">Open the full query →</span></div>
+    </div></div>
+    <div class="desc"><b>Slack/GitHub's grammar.</b> The agent is the hero on the tint — because a query's story is a relationship with a person — and the state sits beneath as a strip. Warmest of the three; slightly less about the record, more about the agent.</div>
+  </div>
+
+</div>
+
+<div class="swatches">
+  <span class="mono" style="margin-right:6px;">The header follows the ladder →</span>
+  <div class="sw" style="background:var(--out1);">Queried</div><div class="sw" style="background:var(--out2);">Partial sent</div><div class="sw" style="background:var(--out3);">Full sent</div>
+  <div class="sw" style="background:var(--in1);">Partial req.</div><div class="sw" style="background:var(--in2);">Full req.</div><div class="sw" style="background:var(--in3);">R&amp;R</div>
+  <div class="sw" style="background:var(--offer);">Offer</div><div class="sw" style="background:var(--closed);">Closed</div>
+</div>
+
+<div class="notes">
+  <p><b>Recommendation: A.</b> It's the pattern the best glance cards share — colour once at the top to say what kind of thing this is, then plain paper — and here the colour is already meaningful, because it's the Query Centre's ladder. A writer who has learned that pink means "the ball came to you" reads this card's header the same way without being told. It uses the app's own card chassis (edge, rim, shadow), so it looks like a Query Centre card that has been picked up and set beside the sheet — which is exactly what it is.</p>
+  <p><b>B if you'd rather the card stayed quieter</b> — the edge is the smallest honest use of the tint. <b>C if you want the agent to feel like the subject</b>; I'd resist it here because the reference is about the query, and the agent is one fact of it.</p>
+  <p><b>Two rules that come with A:</b> the header is the only tinted region on the card, and its colour is derived from status through the same function the Query Centre uses — nothing stores a colour. And the header's second line always says <i>how long</i> ("since 2 April · 22 weeks"), because that is the single fact a writer opening a task most wants without asking.</p>
+</div>
+
+</div>
+</body>
+</html>
