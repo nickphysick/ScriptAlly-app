@@ -32,7 +32,7 @@
  * context and mirrors the back face.
  */
 import React from "react";
-import { Pencil, Send } from "lucide-react";
+import { Contact, Pencil, Send } from "lucide-react";
 import { Agent, Query } from "../../types";
 import { agentInitials, agentPrimary, agentSecondary } from "../../lib/agentDisplay";
 import { flagFor } from "../../lib/territory";
@@ -67,18 +67,22 @@ const Stars: React.FC<{ rating?: number; size?: number }> = ({ rating, size = 11
 
 interface AgentCardProps {
   agent: Agent;
-  /** True while this card is the one flipped open (one at a time — the parent enforces it). */
-  flipped?: boolean;
-  /** The back face, mounted only for the flipped card. */
-  editor?: React.ReactNode;
+  /** True while this card's back face is showing (one at a time — the parent enforces it). */
+  peeked?: boolean;
+  /** The back face's contents — the contact peek, mounted only while peeked. */
+  back?: React.ReactNode;
   queries: Query[];
   /**
    * The genre to tint, already normalised by `matchGenre` — null when there is no manuscript in
    * scope or it records no genre. A null means "no claim", and every chip renders plain.
    */
   matchGenre: string | null;
-  /** Opens the editor for this agent. */
+  /** Opens the drawer on this agent, in READ mode — the card body's own click. */
+  onOpen: (agentId: string) => void;
+  /** Opens the drawer on Contact in EDIT mode — the pencil. */
   onEdit: (agentId: string) => void;
+  /** Turns the card over to the contact peek (or back). */
+  onPeek: (agentId: string) => void;
   /** Log a query against this agent — preselects them in the focus form. */
   onLogQuery: (agent: Agent) => void;
   /** Load-stagger delay, set by the grid (the row depends on the live column count). */
@@ -127,7 +131,7 @@ const Wishlist: React.FC<{ text: string; hostRef: React.RefObject<HTMLDivElement
 };
 
 export const AgentCard: React.FC<AgentCardProps> = ({
-  agent, queries, matchGenre, onEdit, onLogQuery, flipped = false, editor, style, motionClass,
+  agent, queries, matchGenre, onOpen, onEdit, onPeek, onLogQuery, peeked = false, back, style, motionClass,
 }) => {
   const open = isDoorOpen(agent);
   /* THE DIM — closed door AND nothing of yours live. See the header: the ref draws neither half
@@ -143,7 +147,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({
 
   return (
     <div className={`agl-scene ${cardClasses}${motionClass ? ` ${motionClass}` : ""}`} style={style} data-agent-card={agent.id}>
-      <div className={`agl-rotor${flipped ? " flipped" : ""}`} ref={hostRef}>
+      <div className={`agl-rotor${peeked ? " flipped" : ""}`} ref={hostRef}>
         <div className="agl-facef">
           <div className="agl-acard">
             {/* THEIR DOOR — the fill and the pill say the same thing, in colour and in words. */}
@@ -151,10 +155,22 @@ export const AgentCard: React.FC<AgentCardProps> = ({
               <span className="agl-doorpill">{open ? "Open to queries" : "Closed to queries"}</span>
               <span className="agl-sp" />
               <Stars rating={agent.starRating} />
+              {/* THE CORNER — contact first, then the pencil. The contact button turns the card
+                  over; the pencil goes straight to the drawer's Contact tab in edit. */}
+              <button
+                type="button"
+                className={`agl-cbtn${peeked ? " on" : ""}`}
+                onClick={(e) => { e.stopPropagation(); onPeek(agent.id); }}
+                title={`Contact details for ${name}`}
+                aria-label={`Contact details for ${name}`}
+                aria-pressed={peeked}
+              >
+                <Contact width={13} height={13} aria-hidden="true" />
+              </button>
               <button
                 type="button"
                 className="agl-cbtn"
-                onClick={() => onEdit(agent.id)}
+                onClick={(e) => { e.stopPropagation(); onEdit(agent.id); }}
                 title={`Edit ${name}`}
                 aria-label={`Edit ${name}`}
               >
@@ -162,7 +178,8 @@ export const AgentCard: React.FC<AgentCardProps> = ({
               </button>
             </div>
 
-            <div className="agl-body">
+            <div className="agl-body" onClick={() => onOpen(agent.id)} role="button" tabIndex={0}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(agent.id); } }}>
               <div className="agl-who">
                 <div className="agl-av">
                   {agent.image ? <img src={agent.image} alt="" /> : <div className="ini">{agentInitials(agent)}</div>}
@@ -229,8 +246,11 @@ export const AgentCard: React.FC<AgentCardProps> = ({
             </div>
           </div>
         </div>
-        {/* Back face — pre-rotated 180° in CSS; mounted only while flipped. */}
-        <div className="agl-faceb" aria-hidden={!flipped}>{flipped ? editor : null}</div>
+        {/* ⚠️ BACK FACE — THE CONTACT PEEK, AND NEVER AGAIN AN EDITOR. It is read-only by
+            construction: `contactPeek.test.tsx` asserts the rendered back face contains no input,
+            textarea, select or form control at all. An editor here was a form you could only
+            reach by turning a card over, on a face that cannot be scrolled to. */}
+        <div className="agl-faceb" aria-hidden={!peeked}>{peeked ? back : null}</div>
       </div>
     </div>
   );

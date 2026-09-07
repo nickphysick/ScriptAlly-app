@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ScriptAlly — Contact list v5</title>
+<!-- ⚠️ AMENDED IN PLACE, 7 Sep: every "Query letter" here now reads "Covering letter".
+     The app maps that stored token to "Covering letter" in lib/materials — one display map, so
+     that no screen disagrees with another about what a material is called — and the ref was
+     carrying a value the code overrules. A ref that states an overruled value is worse than no
+     ref: it is read as authority. The STORED token is untouched and stays "Query letter": it is
+     ComponentType.QUERY_LETTER and a literal inside thousands of documents. -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -268,24 +274,24 @@ const A=[
  {n:"Penhallow Literary",ag:"",note:"Agent not specified",open:true,stars:3,wks:6,method:"Email",nrn:false,
   email:"submissions@penhallow.co.uk",site:"penhallowliterary.co.uk",city:"London",country:"United Kingdom",
   genres:["Crime","Thriller","Book club fiction"],mswl:"",
-  mat:{letter:"Query letter",syn:"Synopsis",sample:"First 3 chapters",other:""},
+  mat:{letter:"Covering letter",syn:"Synopsis",sample:"First 3 chapters",other:""},
   socials:[{t:"x",h:"@penhallowlit"}],status:"Queried",added:"2026-07"},
  {n:"Aisha Kapoor",ag:"The Lantern Agency",open:true,stars:3,wks:6,method:"Email",nrn:true,
   email:"aisha@lanternagency.co.uk",site:"lanternagency.co.uk/submissions",city:"Bristol",country:"United Kingdom",
   genres:["Literary fiction","Historical fiction"],
   mswl:"Voice-led novels with an unreliable narrator, and anything set in a place I've never been. I'd love a family saga that isn't sentimental, and I'm always looking for a comic novel that earns its ending. Not for me: high fantasy, thrillers with a serial killer at the centre, or anything that opens with a dream.",
-  mat:{letter:"Query letter",syn:"Synopsis (1 page)",sample:"First 50 pages",other:"Comparable titles"},
+  mat:{letter:"Covering letter",syn:"Synopsis (1 page)",sample:"First 50 pages",other:"Comparable titles"},
   socials:[{t:"x",h:"@aishareads"},{t:"bs",h:"@aishakapoor.bsky.social"}],status:"Queried",added:"2026-08"},
  {n:"Daniel O'Rourke",ag:"Inkwell & Stone",open:true,stars:3,wks:6,method:"Email",nrn:false,
   email:"",site:"inkwellandstone.com",city:"Dublin",country:"Ireland",
   genres:["Thriller","Crime","Horror"],
   mswl:"Propulsive crime with a strong sense of place — small towns, closed communities, secrets that curdle. I'd read a hundred more Irish noirs and still want another.",
-  mat:{letter:"Query letter",syn:"",sample:"First 3 chapters",other:""},
+  mat:{letter:"Covering letter",syn:"",sample:"First 3 chapters",other:""},
   socials:[{t:"ig",h:"@danreadslate"}],status:"Full sent",added:"2026-06"},
  {n:"Eleanor Whitfield",ag:"Greenfield Literary",open:true,stars:3,wks:4,method:"Email",nrn:false,
   email:"queries@greenfieldliterary.co.uk",site:"greenfieldliterary.co.uk",city:"Edinburgh",country:"United Kingdom",
   genres:["Thriller","Speculative fiction"],mswl:"",
-  mat:{letter:"Query letter",syn:"Synopsis",sample:"First 10 pages",other:""},
+  mat:{letter:"Covering letter",syn:"Synopsis",sample:"First 10 pages",other:""},
   socials:[],status:"Queried",added:"2026-08"},
  {n:"Fenella Str",ag:"Brightwater Books",open:false,stars:3,wks:6,method:"Email",nrn:false,
   email:"fenella@brightwaterbooks.com",site:"",city:"London",country:"United Kingdom",
@@ -296,39 +302,39 @@ const A=[
  {n:"Greg Panetta",ag:"",note:"Agent not specified",open:true,stars:3,wks:6,method:"Email",nrn:true,
   email:"greg@panetta.agency",site:"panetta.agency",city:"Manchester",country:"United Kingdom",
   genres:["Commercial fiction","Thriller"],mswl:"",
-  mat:{letter:"Query letter",syn:"Synopsis",sample:"",other:""},socials:[],status:"Partial requested",added:"2026-09"},
+  mat:{letter:"Covering letter",syn:"Synopsis",sample:"",other:""},socials:[],status:"Partial requested",added:"2026-09"},
  {n:"Harriet Vane-Coe",ag:"Stillwater Reps",open:true,stars:4,wks:8,method:"Form",nrn:false,
   email:"",site:"stillwaterreps.com/submit",city:"Leeds",country:"United Kingdom",
   genres:["Crime","Thriller"],
   mswl:"Classic detective fiction, updated. Give me a series character I can live with for ten books, a puzzle that plays fair, and a setting that does more than sit there. I'm not the right home for cosy crime, and I'd rather not see another domestic noir with a wine glass on the cover.",
-  mat:{letter:"Query letter",syn:"Synopsis",sample:"First 3 chapters",other:""},
+  mat:{letter:"Covering letter",syn:"Synopsis",sample:"First 3 chapters",other:""},
   socials:[{t:"bs",h:"@hvc.bsky.social"}],status:"Queried",added:"2026-08"},
  {n:"Jonathan Marsh",ag:"The Marsh Agency",open:true,stars:5,wks:10,method:"Email",nrn:false,
   email:"jm@marshagency.co.uk",site:"marshagency.co.uk",city:"London",country:"United Kingdom",
   genres:["Literary fiction","Thriller"],
   mswl:"Literary suspense. Books that would sit happily beside Tana French and Sarah Waters.",
-  mat:{letter:"Query letter",syn:"Synopsis",sample:"First 3 chapters",other:"Author bio"},
+  mat:{letter:"Covering letter",syn:"Synopsis",sample:"First 3 chapters",other:"Author bio"},
   socials:[{t:"x",h:"@marshagency"}],status:"Partial requested",added:"2026-08"},
  {n:"Sophie Dunn",ag:"Curtis Vane",open:true,stars:4,wks:12,method:"Post",nrn:false,
   email:"sdunn@curtisvane.com",site:"curtisvane.com",city:"New York",country:"United States",
   genres:["Thriller","Commercial fiction"],
   mswl:"High-concept suspense with a hook I can say in one sentence.",
-  mat:{letter:"Query letter",syn:"",sample:"First chapter",other:""},socials:[],status:"Full sent",added:"2026-05"},
+  mat:{letter:"Covering letter",syn:"",sample:"First chapter",other:""},socials:[],status:"Full sent",added:"2026-05"},
  {n:"William Tan",ag:"Foxglove Literary",open:true,stars:5,wks:6,method:"Email",nrn:false,
   email:"will@foxgloveliterary.co.uk",site:"foxgloveliterary.co.uk",city:"London",country:"United Kingdom",
   genres:["Thriller","Crime"],
   mswl:"Anything that keeps me up past midnight. Strong on plot, stronger on character.",
-  mat:{letter:"Query letter",syn:"Synopsis",sample:"First 3 chapters",other:""},
+  mat:{letter:"Covering letter",syn:"Synopsis",sample:"First 3 chapters",other:""},
   socials:[{t:"bs",h:"@wtan.bsky.social"}],status:"Offer",added:"2026-05"},
  {n:"Marcus Ilve",ag:"Rookery & Vale",open:false,stars:2,wks:6,method:"Email",nrn:false,
   email:"",site:"rookeryvale.co.uk",city:"Cardiff",country:"United Kingdom",
   genres:["Speculative fiction","Sci-fi"],mswl:"",
-  mat:{letter:"Query letter",syn:"",sample:"",other:""},socials:[],status:"",added:"2026-09"},
+  mat:{letter:"Covering letter",syn:"",sample:"",other:""},socials:[],status:"",added:"2026-09"},
  {n:"Priya Raman",ag:"Halcyon Literary",open:true,stars:4,wks:12,method:"Form",nrn:true,
   email:"hello@halcyonliterary.com",site:"halcyonliterary.com",city:"London",country:"United Kingdom",
   genres:["Book club fiction","Saga","Historical fiction"],
   mswl:"Multi-generational stories about migration, food, and inheritance in every sense. I'm particularly hungry for novels set outside London, and for anything that treats work as seriously as it treats love. Please don't send me anything where the grandmother exists only to die in chapter one.",
-  mat:{letter:"Query letter",syn:"Synopsis",sample:"First chapter",other:""},
+  mat:{letter:"Covering letter",syn:"Synopsis",sample:"First chapter",other:""},
   socials:[{t:"ig",h:"@halcyonlit"}],status:"",added:"2026-09"}
 ];
 A.forEach((a,i)=>a.i=i);
@@ -446,7 +452,7 @@ const MICON={
  sample:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.5 5 8 4.5 4 4.8v13c4-.3 6.5.2 8 1.7 1.5-1.5 4-2 8-1.7v-13c-4-.3-6.5.2-8 1.7z"/><path d="M12 6.5v13"/></svg>`,
  other:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5 12.4 19a4.2 4.2 0 0 1-6-6l7.6-7.5a2.8 2.8 0 0 1 4 4l-7.5 7.5a1.4 1.4 0 0 1-2-2l7-7"/></svg>`
 };
-const MNAME={letter:"Query letter",syn:"Synopsis",sample:"Opening sample",other:"Also asked for"};
+const MNAME={letter:"Covering letter",syn:"Synopsis",sample:"Opening sample",other:"Also asked for"};
 function matSlots(a){
   const keys=["letter","syn","sample"].concat(a.mat.other?["other"]:[]);
   return `<div class="mslots">${keys.map(k=>{
@@ -599,7 +605,7 @@ function drawDrawer(){
         ${a.mswl?`<p style="font-family:'Playfair Display',serif;font-style:italic;font-size:16px;line-height:1.6;margin:6px 0 0">${a.mswl}</p>`:'<p class="empty">Nothing recorded — check their site.</p>'}</div>`;
   } else if(drawerTab==="materials"){
     body=`<p class="mono" style="margin-bottom:12px">What they ask for with a query</p>`+
-      [["letter","Query letter"],["syn","Synopsis"],["sample","Opening sample"],["other","Other"]].map(([k,lab])=>
+      [["letter","Covering letter"],["syn","Synopsis"],["sample","Opening sample"],["other","Other"]].map(([k,lab])=>
         `<div class="field"><label>${lab}</label><div class="val">${a.mat[k]?a.mat[k]:'<span class="empty">Not asked for</span>'}</div></div>`).join("");
   } else {
     body=`<div style="background:#f7f2ea;border:1px solid var(--hair);border-radius:10px;padding:12px 14px;margin-bottom:8px;font-size:13.5px">Met at the Bath Novel Award drinks — mentioned she's building a crime list.</div><div class="mono">14 Aug 2026</div>`;

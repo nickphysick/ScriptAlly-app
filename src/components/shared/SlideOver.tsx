@@ -44,11 +44,20 @@ export interface SlideOverProps {
   label: string;
   /** how wide, in px; the CSS caps it at 94vw so a narrow window is never overrun */
   width?: number;
+  /**
+   * ⚠️ ADDITIVE (Contact list, Phase 4), and the existing mount passes nothing. Below `md` a
+   * drawer at 94vw leaves a sliver of scrim no thumb can use and no eye reads as a control; the
+   * Contact list's drawer REPLACES a full-screen editor push on mobile, so it has to take the
+   * whole width or that page loses room it used to have. Opt-in rather than a change to the base
+   * rule, because the To-do pane's drawer sits beside its own mobile chassis and must stay
+   * byte-identical — which is the test that this was additive at all.
+   */
+  fullBleedBelowMd?: boolean;
   children: React.ReactNode;
 }
 
 export const SlideOver: React.FC<SlideOverProps> = ({
-  open, onClose, label, width = 580, children,
+  open, onClose, label, width = 580, fullBleedBelowMd = false, children,
 }) => {
   React.useEffect(() => {
     if (!open) return undefined;
@@ -73,7 +82,7 @@ export const SlideOver: React.FC<SlideOverProps> = ({
           across the browsers this app supports, and a closed drawer that keeps its tab stops is a
           reader tabbing into something they cannot see. */}
       <aside
-        className="slo"
+        className={fullBleedBelowMd ? "slo slo--bleed" : "slo"}
         data-on={open ? "true" : "false"}
         aria-hidden={!open}
         aria-label={label}

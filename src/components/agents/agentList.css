@@ -638,7 +638,11 @@
    and the back is pre-rotated 180°. The rotor must NEVER gain an `overflow`
    property — any value flattens the 3D context and mirrors the back face.
    ══════════════════════════════════════════════════════════════════════════ */
-.aglist .agl-rotor.flipped { transform: rotateY(180deg); height: 580px; }
+/* ⚠️ THE FLIPPED HEIGHT IS GONE (Phase 4). The back face was an EDITOR and needed 580px to hold
+   one; it is the contact peek now — five rows and a button — which sits inside the front's own
+   400. A rotor that grew on flip made the grid's row jump under the reader's pointer, and the
+   number was a second place to keep in step with whatever the editor happened to contain. */
+.aglist .agl-rotor.flipped { transform: rotateY(180deg); }
 .aglist .agl-faceb {
   backface-visibility: hidden; -webkit-backface-visibility: hidden;
   position: absolute; inset: 0;
@@ -1004,28 +1008,19 @@
 
 /* ══════════════════════════════════════════════════════════════════════════
    MOBILE (Mobile Pass 1, <md; ref design-refs/mobile-concept-v1.html frame 05)
-   The flip stands down below md (baked decision 6): opening a card renders the
-   SAME editor element as a full-screen in-flow view that replaces the list —
-   .aglist stays the scroll container, the shell bar carries Done/Cancel, the
-   tab bar stands down. The rotor is untouched (its no-overflow law included).
+
+   ⚠️ THE IN-FLOW EDITOR PUSH IS RETIRED (Phase 4) AND ITS RULES ARE DELETED RATHER
+   THAN LEFT INERT. Below md the flip still stands down — baked decision 6, and that
+   part is unchanged — but what opens is the DRAWER at full bleed, through
+   SlideOver's own opt-in. A replacement that is ADDED leaves the original alive;
+   only one that is SWAPPED retires it, and a stylesheet still carrying `.agl-mpush`
+   would keep a dead layout available to whoever found the class next.
+   The rotor is untouched (its no-overflow law included).
    ══════════════════════════════════════════════════════════════════════════ */
-.aglist .agl-mpush { display: none; }
 /* the sheet-hosted popover panels: the .aglist wrapper carries the tokens/scoping but must not
    bring the page root's own scroll geometry with it */
 .aglist.agl-inpop { height: auto; overflow: visible; }
 @media (max-width: 767.98px) {
-  /* the pushed editor replaces the list (scroll saved/restored around it in AgentList) */
-  .aglist .agl-mpushed { display: none; }
-  .aglist .agl-mpush {
-    display: block;
-    padding: 14px 14px calc(30px + env(safe-area-inset-bottom));
-    animation: aglMPushIn 0.22s ease-out;
-  }
-  /* the editor card sizes to its content in flow; give short tabs a workable minimum */
-  .aglist .agl-mpush .agl-acard { min-height: 60vh; min-height: 60dvh; }
-  /* the notes pane keeps its own column geometry inside the push */
-  .aglist .agl-mpush .agl-pane.chat { height: auto; min-height: 50vh; min-height: 50dvh; }
-
   /* the toolbar wraps: search full-width above the three controls + count */
   .aglist .agl-toolbar { flex-wrap: wrap; }
 
@@ -1033,14 +1028,6 @@
      change-photo veil is the one control on this surface revealed only by :hover */
   .aglist .agl-ehead .agl-av .cam { opacity: 1; background: rgba(43, 32, 23, 0.28); }
 }
-@keyframes aglMPushIn {
-  from { opacity: 0; transform: translateX(24px); }
-  to { opacity: 1; transform: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .aglist .agl-mpush { animation: none; }
-}
-
 /* ── the material slot's tooltip ─────────────────────────────────────────────
    ⚠️ NOT SCOPED UNDER `.aglist`, AND THAT IS NOT AN OVERSIGHT. It is portalled to
    `document.body` so the List view's horizontal scroller cannot clip it, which puts
@@ -1053,3 +1040,100 @@
   font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .04em;
   max-width: 260px; box-shadow: 0 6px 18px -8px rgba(44, 28, 20, .55);
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE CONTACT PEEK — one component, three containers (Phase 4)
+   The ROWS are identical everywhere; only the frame differs, which is why
+   `variant` changes padding and nothing else. If a row ever needs different
+   chrome in one container that is a prop on the peek, never a second copy.
+   ══════════════════════════════════════════════════════════════════════════ */
+.aglist .agl-peek, .agl-peek {
+  display: flex; flex-direction: column; min-height: 0; flex: 1;
+  padding: 14px 18px;
+}
+.agl-peek--drawer { padding: 4px 0 0; flex: none; }
+.agl-prow {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 9px 0; border-bottom: 1px solid var(--agl-hair);
+}
+.agl-prow .agl-pk {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--agl-ink-label); width: 108px; flex: none;
+}
+.agl-prow .agl-pv { font-size: 13.5px; flex: 1; word-break: break-word; display: flex; align-items: center; gap: 7px; }
+.agl-pnone { font-family: 'Playfair Display', serif; font-style: italic; color: var(--agl-ink-muted); }
+.agl-pemail { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.agl-plink { color: #2f4a5e; text-decoration: underline; text-underline-offset: 2px; text-decoration-color: rgba(47, 74, 94, .3); }
+.agl-copy {
+  border: 1px solid var(--agl-hair2); background: var(--agl-paper); border-radius: 5px;
+  padding: 3px 8px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--agl-ink-muted);
+  cursor: pointer; flex: none;
+}
+.agl-copy:hover { color: var(--agl-ink-head); border-color: var(--agl-ink-body); }
+.agl-psoc { display: flex; flex-wrap: wrap; gap: 7px; padding: 12px 0 0; }
+.agl-psocial {
+  display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--agl-ink-body);
+  border: 1px solid var(--agl-hair2); background: #fbf7f1; border-radius: 999px; padding: 6px 12px;
+}
+.agl-pfoot { margin-top: auto; padding-top: 14px; }
+/* the card's back face wears the same frame as the front, so turning it over is one object
+   rotating rather than two cards swapping places */
+.aglist .agl-backcard .agl-band .agl-doorpill { background: rgba(255, 255, 255, .62); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE DRAWER (Phase 4) — the head, the tabs and the read views. The scrim, the
+   two durations, the Escape listener and the reduced-motion block belong to the
+   shared `SlideOver` and are not restated here.
+   ══════════════════════════════════════════════════════════════════════════ */
+.agl-dhead { padding: 16px 20px 14px; border-bottom: 1px solid var(--agl-hair2); flex: none; }
+.agl-dhead.s-open { background: var(--agl-sage-band); }
+.agl-dhead.s-shut { background: var(--agl-grey-band); }
+.agl-dtop { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.agl-dwho { display: flex; gap: 13px; align-items: center; }
+.agl-av-lg { width: 52px; height: 52px; }
+.agl-av-lg .ini { font-size: 15px; }
+.agl-dname {
+  font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600;
+  color: var(--agl-ink-head); line-height: 1.3;
+}
+.agl-dstars { margin-top: 6px; }
+.agl-dtabs {
+  display: flex; gap: 22px; padding: 0 20px; flex: none;
+  border-bottom: 1px solid var(--agl-hair2); background: #f9f4ed;
+}
+.agl-dtab {
+  border: 0; background: transparent; padding: 13px 0 11px; font-size: 13px; font-family: inherit;
+  color: var(--agl-ink-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer;
+}
+.agl-dtab.on { color: var(--agl-ink-head); border-bottom-color: var(--agl-ink); font-weight: 500; }
+.agl-dbody { padding: 18px 20px 26px; overflow: auto; flex: 1; min-height: 0; }
+.agl-dsect { display: flex; flex-direction: column; }
+.agl-slab-gap { margin-top: 20px; }
+.agl-dmswl {
+  font-family: 'Playfair Display', serif; font-style: italic; font-size: 16px;
+  line-height: 1.6; color: var(--agl-ink-body); margin: 6px 0 0;
+}
+.agl-dhint {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--agl-ink-label); margin: 14px 0 0; line-height: 1.7;
+}
+.agl-dfoot {
+  padding: 14px 20px; border-top: 1px solid var(--agl-hair2); background: #f9f4ed;
+  display: flex; gap: 9px; align-items: center; flex: none;
+}
+.agl-dpos {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--agl-ink-muted);
+}
+/* ⚠️ THE FORM FILLS THE DRAWER WHILE EDITING, and it brings its own head, tabs and footer — so
+   this is a flex column with no chrome of its own to add. The editor card must not keep the
+   card-face frame here: inside a drawer it IS the surface, not an object resting on one. */
+.agl-dedit { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.agl-dedit .agl-acard { border: 0; border-radius: 0; box-shadow: none; height: 100%; }
+/* the notes pane keeps its own column geometry inside the drawer's read body */
+.agl-dnotes { flex: 1; min-height: 0; }
+.agl-dnotes .agl-acard { border: 0; border-radius: 0; box-shadow: none; }
+
+/* the drawer's controls reuse the card's, so a chevron and a corner button are one object */
+.agl-dhead .agl-cbtn[disabled] { opacity: .38; cursor: not-allowed; }

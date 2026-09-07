@@ -35,7 +35,9 @@ const draw = (id: string, tint: string | null = matchGenre(FIXTURE_GENRE)) =>
       agent={byId(id)}
       queries={CONTACT_FIXTURE_QUERIES}
       matchGenre={tint}
+      onOpen={() => {}}
       onEdit={() => {}}
+      onPeek={() => {}}
       onLogQuery={() => {}}
     />,
   );

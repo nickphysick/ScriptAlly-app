@@ -91,3 +91,16 @@
 @media (prefers-reduced-motion: reduce) {
   .slo .rail { transform: rotate(-1.2deg); }
 }
+
+/* ── the opt-in full-bleed, below md (Contact list, Phase 4) ──────────────────────────────────
+   ⚠️ OPT-IN, SO THE EXISTING MOUNT IS UNTOUCHED. `.slo`'s own `max-width: 94vw` is right for a
+   drawer that sits beside a page; it is wrong for one that REPLACES a full-screen editor push,
+   where the leftover 6% is a sliver of scrim no thumb can use. Only a caller that says so gets
+   this, which is what makes the To-do pane's drawer byte-identical — the test of an additive
+   change is that the thing you did not touch did not move.
+
+   ⚠️ AND IT OVERRIDES `max-width`, NOT `width`. The width is an inline style from the caller and
+   inline beats a stylesheet; the cap is what actually binds here, so the cap is what moves. */
+@media (max-width: 767.98px) {
+  .slo--bleed { max-width: 100vw; width: 100vw !important; }
+}

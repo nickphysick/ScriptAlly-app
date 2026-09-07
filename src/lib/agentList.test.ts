@@ -191,9 +191,11 @@ describe("agentList · the door (UNKNOWN is retired — reads OPEN)", () => {
       const card = stripComments(readFileSync(join(__dirname, "..", "components", "agents", "AgentCard.tsx"), "utf8"));
       const css = stripComments(readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8"));
       expect(card, "the body went back behind a condition — a closed agency's genres and wishlist are the reason you opened this page").not.toMatch(/\{\s*!?\w+\s*&&\s*<div className="agl-body"/);
-      expect(card).toContain('<div className="agl-body">');
+      /* the OPENING TAG, not the whole element: the body gained a click target in Phase 4 and the
+         claim was never about what else is on the tag */
+      expect(card).toContain('<div className="agl-body"');
       // both sections are inside it, unconditionally
-      const body = sliceBetween(card, '<div className="agl-body">', 'className="agl-foot"');
+      const body = sliceBetween(card, '<div className="agl-body"', 'className="agl-foot"');
       for (const kept of ["Genres sought", "Manuscript wishlist"]) expect(body).toContain(kept);
       // and the hush's floor is gone with it
       expect(css, "the hush min-height survived the hush").not.toContain("s-hush");

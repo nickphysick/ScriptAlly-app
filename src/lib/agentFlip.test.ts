@@ -60,18 +60,24 @@ describe("agent list · 3D flip structural rules", () => {
     ).toContain("transform: rotateY(180deg)");
   });
 
-  it("fixed heights are CSS-driven: 400 resting, 580 flipped", () => {
-    expect(
-      block(".aglist .agl-rotor"),
-      "the resting height left the stylesheet — absolutely-positioned faces have no height of their own, so the rotor collapses and the grid row closes over the card",
-    ).toContain("height: 400px");
-    expect(
-      css,
-      "the flipped height left the stylesheet — the editor's four tabs and pinned composer are then clipped by a 400px rotor",
-    ).toContain(".aglist .agl-rotor.flipped { transform: rotateY(180deg); height: 580px; }");
+  /* ⚠️ RETARGETED (Phase 4), AND THE PAIR IS DELIBERATELY HALF ITS FORMER SIZE. The rotor grew to
+     580px on flip because the back face held an EDITOR; it holds the contact peek now — five rows
+     and a button — which fits inside the front's own 400. What is asserted is the law that made
+     the pair worth locking in the first place: the rotor has ONE height, so turning a card over
+     cannot change the grid row's height under the reader's pointer. */
+  it("the rotor has ONE height — turning a card over never resizes its row", () => {
+    const rest = /\.aglist \.agl-rotor \{([^}]*)\}/.exec(css)?.[1] ?? "";
+    expect(rest, "the rotor's own rule is gone").not.toBe("");
+    expect(rest).toContain("height: 400px");
+    const flipped = /\.aglist \.agl-rotor\.flipped \{([^}]*)\}/.exec(css)?.[1] ?? "";
+    expect(flipped, "the flipped rule is gone").not.toBe("");
+    expect(flipped, "the flipped rotor took a height again — the row will jump as the card turns").not.toContain("height");
+    expect(flipped).toContain("rotateY(180deg)");
   });
 
-  it("the editor face never fades, even on a closed (grey) agent", () => {
+  /* the face was the editor's; it is the peek's now, and the law is unchanged — a dimmed card
+     must not hand you a half-faded set of contact details to read */
+  it("the BACK face never fades, even on a dimmed card", () => {
     expect(
       css,
       "the closed-agent fade reached the editor face — editing a closed agent would happen at 62% opacity, reading as a disabled form the writer can nonetheless type into",

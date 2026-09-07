@@ -49,6 +49,7 @@ import {
   STANDING_LABEL,
   TURN_LABEL,
   agentAxisCounts,
+  isDoorOpen,
   contactListState,
   emptyFilterSet,
   groupAgents,
@@ -72,6 +73,9 @@ import { saveNotice, saveOutcome, sectionFor } from "../../lib/agentSaveOutcome"
 import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
 import { AgentToolbar, AppliedTag, AgentAppliedTags } from "./AgentToolbar";
 import { ContactListEmptyState } from "./ContactListEmptyState";
+import { ContactPeek } from "./ContactPeek";
+import { AgentDrawer } from "./AgentDrawer";
+import { RotateCcw } from "lucide-react";
 import { RAIL_GROUPS } from "../shell/railNav";
 import { countryName } from "../../lib/territory";
 import { matchGenre } from "../../lib/genreMatch";
@@ -289,7 +293,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   // ONE card is open at a time. Opening clones the agent into `draft`; every editor interaction
   // mutates the draft only; Done validates, diffs and commits a SINGLE updateAgent call; Escape
   // (or opening another card) discards it. Nothing here writes per keystroke.
-  const [flippedId, setFlippedId] = useState<string | null>(null);
+  /* ⚠️ `openId` IS THE DRAWER'S AGENT, and it used to be `flippedId` — the card whose editor face
+     was showing. The rename is the point rather than tidiness: the editor left the card in Phase
+     4, so a name meaning "the flipped card" would have described a mechanism that no longer
+     exists while driving one that does. The card's own flip is `peekId` now, and what it shows is
+     the read-only contact peek. */
+  const [openId, setOpenId] = useState<string | null>(null);
+  /** The card whose back face is showing the contact peek (Grid only). One at a time. */
+  const [peekId, setPeekId] = useState<string | null>(null);
   const [draft, setDraft] = useState<AgentDraft | null>(null);
   const [tab, setTab] = useState<AgentEditorTab>("contact");
   const [error, setError] = useState<DraftError | null>(null);
@@ -300,7 +311,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /** Clear the editor state. Separated from the exit MOTION below so a save (which has its own
    *  three-beat choreography) and a discard (which reverses) can share the teardown. */
   const clearEditor = useCallback(() => {
-    setFlippedId(null);
+    setOpenId(null);
     setDraft(null);
     setError(null);
     setStoredNotes([]);
@@ -317,7 +328,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    * An existing card just flips back; nothing leaves, so there is nothing to animate.
    */
   const discard = useCallback(() => {
-    const departing = newAgent?.id && flippedId === newAgent.id ? newAgent.id : null;
+    const departing = newAgent?.id && openId === newAgent.id ? newAgent.id : null;
     clearEditor();
     if (!departing) return setNewAgent(null);
 
@@ -332,7 +343,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       setLeavingId(null);
       setNewAgent(null);
     }, EXIT_MS);
-  }, [clearEditor, newAgent, flippedId]);
+  }, [clearEditor, newAgent, openId]);
 
   /**
    * SAVE — three beats (Baked 4). Never one motion: a card flung across the grid the instant you
@@ -436,8 +447,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   useEffect(() => {
     setStoredNotes([]);
     setNotesLoaded(false);
-    if (!flippedId || !currentUser) return;
-    const ref = collection(db, "users", currentUser.id, "agents", flippedId, "notes");
+    if (!openId || !currentUser) return;
+    const ref = collection(db, "users", currentUser.id, "agents", openId, "notes");
     const unsub = onSnapshot(
       ref,
       (snap) => {
@@ -456,55 +467,78 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         setStoredNotes(list);
         setNotesLoaded(true);
       },
-      (e) => handleFirestoreError(e, OperationType.LIST, `users/${currentUser.id}/agents/${flippedId}/notes`),
+      (e) => handleFirestoreError(e, OperationType.LIST, `users/${currentUser.id}/agents/${openId}/notes`),
     );
     return () => unsub();
-  }, [flippedId, currentUser?.id]);
+  }, [openId, currentUser?.id]);
 
+  /**
+   * OPEN the drawer on this agent, READ by default. The tab is reset to Contact because opening a
+   * different agent on whichever tab you last used states a fact about them you did not ask for.
+   */
+  const onOpen = useCallback((agentId: string, at: AgentEditorTab = "contact") => {
+    if (!agents.some((a) => a.id === agentId)) return;
+    setPeekId(null);
+    setOpenId(agentId);
+    setTab(at);
+    setDraft(null);
+    setError(null);
+  }, [agents]);
+
+  /**
+   * ENTER EDIT — the draft is created here and nowhere else, so `draft !== null` IS the edit
+   * session and the two can never disagree about which mode the drawer is in.
+   */
   const onEdit = useCallback(
-    (agentId: string) => {
+    (agentId: string, at: AgentEditorTab = "contact") => {
       const agent = agents.find((a) => a.id === agentId);
       if (!agent) return;
-      setFlippedId(agentId);
+      setPeekId(null);
+      setOpenId(agentId);
       setDraft(draftFromAgent(agent));
-      setTab("contact");
+      setTab(at);
       setError(null);
     },
     [agents],
   );
 
+  /** Leave edit and return to READ — the drawer stays open on the same agent. */
+  const cancelEdit = useCallback(() => { setDraft(null); setError(null); }, []);
+
+  /**
+   * ⚠️ LEAVING EDIT MEANS TWO DIFFERENT THINGS, AND THE DIFFERENCE IS WHETHER THERE IS ANYTHING
+   * TO GO BACK TO. Discarding an edit to an EXISTING agent returns to the read view — the record
+   * is still there and you were only changing it. Discarding an UNSAVED NEW agent has no read
+   * state to return to: nothing has been written, so the honest outcome is that the drawer closes
+   * and the draft card leaves with its own exit motion.
+   *
+   * Both are wired to ONE expression so the Escape key and the form's own Discard cannot disagree
+   * about which of the two just happened.
+   */
+  const leaveEdit = useCallback(() => {
+    if (newAgent && openId === newAgent.id) { discard(); return; }
+    cancelEdit();
+  }, [newAgent, openId, discard, cancelEdit]);
+
   // What the Notes pane shows: stored minus buffered deletions, plus buffered additions, with the
   // legacy flat note as the oldest bubble until it migrates.
-  const openAgent = flippedId ? agents.find((a) => a.id === flippedId) ?? null : null;
+  const openAgent = openId ? agents.find((a) => a.id === openId) ?? null : null;
   const visibleNotes = draft
     ? effectiveNotes(storedNotes, draft.notes, { flatNote: openAgent?.notes, dateAdded: openAgent?.dateAdded })
     : [];
 
-  // ── Mobile editor push (Mobile Pass 1, baked decision 6) ──────────────────
-  // Below md the 3D flip stands down: opening a card renders the SAME editor element (same
-  // draft buffer, same handlers, one updateAgent on Done) as a full-screen in-flow view that
-  // REPLACES the list — the .aglist root stays the scroll container, the shell bar above
-  // carries Done/Cancel via the MobileDetailSpec seam, and the tab bar stands down with it.
+  /* ⚠️ THE MOBILE PUSH IS RETIRED (Phase 4). Below md the card still does not rotate — that is
+     unchanged and is baked decision 6 — but what opens is the DRAWER at full bleed, not a
+     full-screen editor in flow that replaced the list. One editor host at every width.
+
+     The scroll-restore machinery went with it and did not need replacing: the push HID `.aglist`,
+     which clamped its scrollTop to 0, so the position had to be saved and put back by hand. A
+     drawer overlays the list instead, so the scroller is never hidden and never clamped, and the
+     reader's place is kept by the browser rather than by us. Removing a mechanism beats keeping
+     one correct. */
   const isMobile = useIsMobile();
   const { setMobileDetail } = useMobileChrome();
   const rootRef = useRef<HTMLDivElement>(null);
-  const pushAgent = openAgent ?? (newAgent && flippedId === newAgent.id ? newAgent : null);
-  const mobilePushOpen = isMobile && !!draft && !!flippedId && !!pushAgent;
-  // The list's scroll survives the push: .aglist is the scroller, and hiding the list clamps
-  // its scrollTop — saved on push, restored on return (back-preserves-scroll).
-  const listScrollMemo = useRef(0);
-  const prevPush = useRef(false);
-  useLayoutEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-    if (mobilePushOpen && !prevPush.current) {
-      listScrollMemo.current = el.scrollTop;
-      el.scrollTop = 0;
-    } else if (!mobilePushOpen && prevPush.current) {
-      el.scrollTop = listScrollMemo.current;
-    }
-    prevPush.current = mobilePushOpen;
-  }, [mobilePushOpen]);
 
   const onDone = useCallback(async () => {
     if (!draft) return;
@@ -675,10 +709,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   //    CAPTURE phase and calls stopImmediatePropagation, so this bubble-phase handler never runs
   //    for that key. Dismissing a dropdown must never discard the draft.
   // 2. Focus in a field → blur it, draft untouched.
-  // 3. Nothing focused → discard the draft and flip back. No confirmation: silent discard matches
-  //    switching cards, and a modal here would be heavier than the risk.
+  // 3. Nothing focused → leave EDIT and return to READ. It does not close the drawer: SlideOver
+  //    has its own Escape and does not capture, so one press steps out of the form and a second
+  //    closes the record. Stepping straight from a half-typed form to a closed drawer is two
+  //    dismissals for one key.
   useEffect(() => {
-    if (!flippedId) return;
+    if (!draft) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       const el = document.activeElement as HTMLElement | null;
@@ -691,36 +727,29 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         return;
       }
       e.preventDefault();
-      discard();
+      leaveEdit();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [flippedId, discard]);
+  }, [draft, leaveEdit]);
 
   // A card that scrolls out of the filtered set takes its draft with it. Checked against `shown`,
   // not `visible` — the unsaved new agent rides only in `shown`, and checking `visible` would
   // discard a brand-new card the instant it opened.
   useEffect(() => {
-    if (flippedId && !shown.some((a) => a.id === flippedId)) discard();
-  }, [shown, flippedId, discard]);
+    if (openId && !shown.some((a) => a.id === openId)) discard();
+  }, [shown, openId, discard]);
 
-  // The shell's Done/Cancel (baked decision 5): the pushed editor registers itself so the top
-  // bar swaps to Cancel · title · Done and the tab bar stands down. Done is the editor's own
-  // commit; Cancel is the silent discard — the page's Escape grammar (the editor's in-card ✕
-  // keeps the ask-if-dirty path for careful discards).
-  useEffect(() => {
-    if (!mobilePushOpen) {
-      setMobileDetail("agents", null);
-      return;
-    }
-    setMobileDetail("agents", {
-      kind: "editor",
-      title: newAgent && flippedId === newAgent.id ? "New agent" : "Edit agent",
-      onCancel: discard,
-      onDone: () => void onDone(),
-    });
-    return () => setMobileDetail("agents", null);
-  }, [mobilePushOpen, flippedId, newAgent, discard, onDone, setMobileDetail]);
+  /* ⚠️ THE MOBILE EDITOR PUSH IS RETIRED (Phase 4), AND ITS SHELL REGISTRATION WITH IT. Below md
+     the card used to render the SAME editor element full-screen in flow, replacing the list, with
+     Done/Cancel borrowed from the shell bar through `MobileDetailSpec`. The drawer does that job
+     now — `SlideOver` goes full-bleed below md through its own opt-in prop — so there is ONE
+     editor host on every width instead of two that had to be kept in step. The spec seam itself
+     is untouched and still serves the query detail; only this page's editor registration is gone.
+
+     The list's scroll no longer needs saving: the drawer overlays the list rather than replacing
+     it, so `.aglist` is never hidden and its scrollTop is never clamped. */
+  useEffect(() => () => setMobileDetail("agents", null), [setMobileDetail]);
 
   /**
    * Add a new agent (decision 16, as amended): a DRAFT-ONLY record — nothing is persisted until
@@ -754,24 +783,63 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     // be displaced can be sent back to their old places and released into the bump.
     flipBefore.current = measureFlip(gridRef.current);
     setNewAgent(stub);
-    setFlippedId(id);
+    setOpenId(id);
     setDraft(blankDraft(id));
     setTab("contact");
     setError(null);
   };
   const onLogQuery = (agent: { id: string }) => onNavigate?.("queries", "Log a query", { agentId: agent.id });
 
+  /* ⚠️ THE DRAWER'S SUBJECT INCLUDES AN UNSAVED NEW AGENT, which is not in `agents` yet — a
+     draft-only record lives in `newAgent` until Done validates it, and looking it up in the store
+     would open the drawer on nothing. */
+  const drawerAgent = openAgent ?? (newAgent && openId === newAgent.id ? newAgent : null);
+  /* ⚠️ THE STEP ORDER IS `shown` — the list's OWN order, filtered, sorted and grouped as the
+     reader sees it. Stepping through the underlying store instead would walk agents that are not
+     on screen, which is a different list wearing the same chevrons. -1 when the drawer's agent is
+     not in it (an unsaved new record), and both chevrons are then disabled by construction. */
+  const drawerIndex = openId ? shown.findIndex((a) => a.id === openId) : -1;
+
+  /**
+   * THE CARD'S BACK FACE — the same `ContactPeek` the drawer and the List/Board popover render,
+   * with the container's own footer. Nothing about the five rows is decided here.
+   */
+  const peekFace = (agent: Agent) => (
+    <div className="agl-acard agl-backcard">
+      <div className={`agl-band ${isDoorOpen(agent) ? "s-open" : "s-shut"}`}>
+        <span className="agl-doorpill">Contact details</span>
+        <span className="agl-sp" />
+        <button type="button" className="agl-cbtn on" onClick={() => setPeekId(null)} aria-label="Turn the card back">
+          <RotateCcw width={13} height={13} aria-hidden="true" />
+        </button>
+      </div>
+      <ContactPeek
+        agent={agent}
+        variant="face"
+        footer={
+          <button
+            type="button"
+            className="agl-btn agl-btn-ghost"
+            onClick={() => { setPeekId(null); onEdit(agent.id, "contact"); }}
+          >
+            Edit contact details
+          </button>
+        }
+      />
+    </div>
+  );
+
   /** ONE editor element builder, shared by the card back face (desktop flip) and the mobile
    *  push host — a second copy would drift the moment the editor gains a prop. */
   const editorFor = (agent: Agent) =>
-    draft && flippedId === agent.id ? (
+    draft && openId === agent.id ? (
                     <AgentEditor
                       draft={draft}
                       onChange={(patch) => setDraft((d) => (d ? { ...d, ...patch } : d))}
                       tab={tab}
                       onTab={setTab}
                       onDone={() => void onDone()}
-                      onDiscard={discard}
+                      onDiscard={leaveEdit}
                       dirty={draftDirty(draft)}
                       error={error}
                       onImageError={(msg) => setError({ tab: "contact", msg })}
@@ -838,22 +906,21 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
                 agent={agent}
                 queries={queries}
                 matchGenre={tintGenre}
+                onOpen={onOpen}
                 onEdit={onEdit}
+                onPeek={(id) => setPeekId((p) => (p === id ? null : id))}
                 onLogQuery={onLogQuery}
-                flipped={!isMobile && flippedId === agent.id && saveState?.id !== agent.id}
-                editor={!isMobile ? editorFor(agent) : null}
+                /* ⚠️ THE FLIP IS THE PEEK NOW, AND IT IS DESKTOP-ONLY AS IT ALWAYS WAS. Below md
+                   the card does not rotate; the contact button opens the drawer's Contact tab
+                   instead, which is the same rows in the third container. */
+                peeked={!isMobile && peekId === agent.id}
+                back={!isMobile && peekId === agent.id ? peekFace(agent) : null}
               />
   );
 
   return (
     <div className={`aglist${loadAnim ? " agl-anim" : ""}`} ref={rootRef}>
-      {/* THE MOBILE EDITOR PUSH (baked decisions 5 + 6) — in flow, replacing the list; the
-          .aglist root keeps scrolling, the shell bar carries Done/Cancel, the tab bar stands
-          down. The SAME editor element the card back would host — one draft, one commit. */}
-      {mobilePushOpen && pushAgent && (
-        <div className="agl-mpush">{editorFor(pushAgent)}</div>
-      )}
-      <div className={`agl-page${mobilePushOpen ? " agl-mpushed" : ""}`}>
+      <div className="agl-page">
        {/* The content column: padding rides the page, the CAP rides here, so a wide monitor
            pools its surplus as symmetric margin rather than stretching the grid. */}
        {/* ⚠️ THE CHROME IS OUT OF THE SCROLLER (amendment 9). The plate and the toolbar are ROWS 1
@@ -1008,6 +1075,32 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
        </div>
        </WorkspacePageGrid>
       </div>
+
+      {/* ⚠️ ONE DRAWER, OUTSIDE THE GRID, and it is the shared `SlideOver` rather than a fourth
+          private one. It hosts the editor so the DRAFT OUTLIVES A TAB SWITCH — the tabs are a view
+          onto one buffer, not four forms, and a draft owned by the drawer would be created fresh
+          each time the tab changed. */}
+      <AgentDrawer
+        agent={drawerAgent}
+        open={!!drawerAgent}
+        tab={tab}
+        onTab={setTab}
+        editing={!!draft}
+        onEdit={() => { if (drawerAgent) onEdit(drawerAgent.id, tab); }}
+        onClose={discard}
+        onStep={(d) => {
+          const i = drawerIndex;
+          if (i < 0) return;
+          const next = shown[i + d];
+          if (next) onOpen(next.id, tab);
+        }}
+        canStepBack={drawerIndex > 0}
+        canStepOn={drawerIndex >= 0 && drawerIndex < shown.length - 1}
+        position={drawerIndex >= 0 ? { index: drawerIndex, total: shown.length } : null}
+        matchGenre={tintGenre}
+        editor={drawerAgent ? editorFor(drawerAgent) : null}
+        onLogQuery={onLogQuery}
+      />
     </div>
   );
 };

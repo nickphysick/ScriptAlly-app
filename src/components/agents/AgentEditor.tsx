@@ -235,7 +235,7 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
           {tab === "contact" && (
             <>
               {/* the door — mockup fills the active segment INK (the band drives the switch below) */}
-              <div className="agl-door" role="group" aria-label="Submission status">
+              <div className="agl-door" role="group" aria-label="Submission status" data-field="submissionStatus">
                 <button type="button" className={draft.open ? "on" : ""} aria-pressed={draft.open} onClick={() => onChange({ open: true })}>
                   Open to queries
                 </button>
@@ -247,35 +247,40 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
               <div className="agl-row2">
                 <div className="agl-field">
                   <label className="agl-label" htmlFor="agl-name">Agent name</label>
-                  <input id="agl-name" ref={nameRef} type="text" className="agl-in" value={draft.name} onChange={(e) => onChange({ name: e.target.value })} />
+                  <input id="agl-name" data-field="name" ref={nameRef} type="text" className="agl-in" value={draft.name} onChange={(e) => onChange({ name: e.target.value })} />
                 </div>
                 <div className="agl-field">
                   <label className="agl-label" htmlFor="agl-agency">Agency</label>
-                  <input id="agl-agency" type="text" className="agl-in" value={draft.agency} onChange={(e) => onChange({ agency: e.target.value })} />
+                  <input id="agl-agency" data-field="agency" type="text" className="agl-in" value={draft.agency} onChange={(e) => onChange({ agency: e.target.value })} />
                 </div>
               </div>
 
               <div className="agl-field">
                 <label className="agl-label" htmlFor="agl-email">Email</label>
-                <input id="agl-email" type="text" className="agl-in" value={draft.email} placeholder="name@agency.co.uk" onChange={(e) => onChange({ email: e.target.value })} />
+                <input id="agl-email" data-field="email" type="text" className="agl-in" value={draft.email} placeholder="name@agency.co.uk" onChange={(e) => onChange({ email: e.target.value })} />
               </div>
 
               {/* Location — a real, rules-validated field. Country goes through the constrained
                   ISO picker (free text would produce writes isKnownCountry rejects); city is plain. */}
               <div className="agl-row2">
-                <div className="agl-field">
+                {/* ⚠️ THE TAG IS ON THE WRAPPER, NOT THE PICKER. `AgentCountryPicker` destructures
+                    its three props and forwards nothing, so a `data-field` handed to it is dropped
+                    on the floor — tsc says nothing and the attribute simply never reaches the DOM,
+                    which would have read to the field-set lock as a country field that does not
+                    exist. A prop a component does not forward is a silent no-op. */}
+                <div className="agl-field" data-field="country">
                   <label className="agl-label" htmlFor="agl-country">Country</label>
                   <AgentCountryPicker id="agl-country" value={draft.country} onChange={(next) => onChange({ country: next })} />
                 </div>
                 <div className="agl-field">
                   <label className="agl-label" htmlFor="agl-city">City</label>
-                  <input id="agl-city" type="text" className="agl-in" value={draft.city} placeholder="London" onChange={(e) => onChange({ city: e.target.value })} />
+                  <input id="agl-city" data-field="city" type="text" className="agl-in" value={draft.city} placeholder="London" onChange={(e) => onChange({ city: e.target.value })} />
                 </div>
               </div>
 
               <div className="agl-field">
                 <label className="agl-label" htmlFor="agl-site">Submissions page</label>
-                <input id="agl-site" type="text" className="agl-in" value={draft.website} placeholder="https://…" onChange={(e) => onChange({ website: e.target.value })} />
+                <input id="agl-site" data-field="website" type="text" className="agl-in" value={draft.website} placeholder="https://…" onChange={(e) => onChange({ website: e.target.value })} />
               </div>
 
               {/* (agent-list-fixes P4) Each its OWN full-width row — side by side these squashed
@@ -284,6 +289,7 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
                   <label className="agl-label" htmlFor="agl-weeks">Typical response (weeks)</label>
                   <input
                     id="agl-weeks"
+                    data-field="responseTimeWeeks"
                     type="text"
                     className="agl-in"
                     inputMode="numeric"
@@ -308,7 +314,7 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
                     control that drew both the same, and the segment states all three outright. */}
                 <div className={`agl-field agl-nrn ${nrnState(draft.noResponseMeansNo)}`}>
                   <label className="agl-label">If they don&rsquo;t reply</label>
-                  <span className="agl-useg agl-nrnseg" role="radiogroup" aria-label="If they don't reply">
+                  <span className="agl-useg agl-nrnseg" role="radiogroup" aria-label="If they don't reply" data-field="noResponseMeansNo">
                     <button
                       type="button" role="radio"
                       aria-checked={draft.noResponseMeansNo === true}
@@ -338,6 +344,7 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
                 <label className="agl-label" htmlFor="agl-method">Submission method</label>
                 <select
                   id="agl-method"
+                  data-field="submissionMethod"
                   className="agl-in"
                   value={draft.submissionMethod}
                   onChange={(e) => onChange({ submissionMethod: e.target.value as SubmissionMethod | "Other" })}
@@ -359,7 +366,7 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
                 )}
               </div>
 
-              <label className="agl-label">Social media</label>
+              <label className="agl-label" data-field="socials">Social media</label>
               <div className="agl-soc-list">
                 {draft.socials.length ? (
                   draft.socials.map((sc, i) => (

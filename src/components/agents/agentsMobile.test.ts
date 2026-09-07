@@ -9,6 +9,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { stripComments } from "../../lib/styleWiring";
 
 const css = readFileSync(resolve(__dirname, "./agentList.css"), "utf8");
 const list = readFileSync(resolve(__dirname, "./AgentList.tsx"), "utf8");
@@ -24,36 +25,57 @@ describe("breakpoint law — md is the one mobile/desktop divider", () => {
   });
 });
 
-describe("the editor push (baked decision 6) — no 3D flip below md", () => {
-  it("the card never flips on mobile and carries no editor face there", () => {
-    expect(list).toContain("flipped={!isMobile && flippedId === agent.id && saveState?.id !== agent.id}");
-    expect(list).toContain("editor={!isMobile ? editorFor(agent) : null}");
+/**
+ * ⚠️ REWRITTEN, AND THE MECHANISM THESE GUARDED IS GONE (Phase 4). Below md the card used to
+ * render the SAME editor element full-screen IN FLOW, replacing the list, with Done and Cancel
+ * borrowed from the shell bar through `MobileDetailSpec` and the list's scrollTop saved and put
+ * back by hand because hiding a scroller clamps it. All four of those are retired: the drawer is
+ * the one editor host at every width, and it goes full-bleed below md through `SlideOver`'s own
+ * opt-in prop.
+ *
+ * The LAW that survives is baked decision 6 itself — no 3D flip below md — and it is asserted
+ * below over the peek, which is what the card's back face shows now. The rest is asserted as
+ * ABSENCE, because a retired mechanism that is still reachable is the fault this repo records
+ * most often: a replacement that is ADDED leaves the original alive, and only one that is SWAPPED
+ * retires it.
+ */
+describe("baked decision 6 — no 3D flip below md, and now no second editor host either", () => {
+  it("the card does not turn over on mobile, and mounts no back face there", () => {
+    expect(list).toContain("peeked={!isMobile && peekId === agent.id}");
+    expect(list).toContain("back={!isMobile && peekId === agent.id ? peekFace(agent) : null}");
   });
 
-  it("the push renders the SAME editor element in flow, replacing the list", () => {
-    expect(list).toContain('<div className="agl-mpush">{editorFor(pushAgent)}</div>');
-    expect(list).toContain("agl-page${mobilePushOpen ? \" agl-mpushed\" : \"\"}");
-    const mobileBlock = css.split("@media (max-width: 767.98px)")[2] ?? ""; // grid → page-pad → push
-    expect(css.split("@media (max-width: 767.98px)").length, "three <md blocks").toBeGreaterThan(3);
-    expect(css).toContain(".aglist .agl-mpushed { display: none; }");
-    expect(css).toContain(".aglist .agl-mpush { display: none; }"); // md+ never sees it
+  /* ⚠️ ASSERTED AS ABSENCE IN BOTH ARTEFACTS. The component's mount going is not the same as the
+     mechanism going: a stylesheet still carrying `.agl-mpush` would keep a dead layout alive for
+     the next person who found the class and wondered what rendered it. */
+  it("the in-flow push is GONE — no host, no class, no stylesheet rule", () => {
+    const decl = stripComments(list);
+    for (const dead of ["agl-mpush", "mobilePushOpen", "listScrollMemo", "pushAgent"]) {
+      expect(decl, `${dead} survived the push's retirement`).not.toContain(dead);
+    }
+    expect(stripComments(css), "the push's stylesheet rules outlived the push").not.toContain("agl-mpush");
   });
 
-  it("back preserves scroll: the list's scrollTop is saved on push and restored on return", () => {
-    expect(list).toContain("listScrollMemo.current = el.scrollTop");
-    expect(list).toContain("el.scrollTop = listScrollMemo.current");
+  /* the seam itself is untouched — it still serves the query detail; only THIS page's editor
+     registration is gone, and the page still clears its own slot on unmount */
+  it("the shell's editor registration is withdrawn, and the seam survives for its other callers", () => {
+    const decl = stripComments(list);
+    expect(decl, "this page still registers an editor with the shell bar").not.toContain('kind: "editor"');
+    expect(decl, "the page stopped clearing its shell slot, so a stale bar can outlive the page").toContain('setMobileDetail("agents", null)');
   });
 
-  it("Done/Cancel live in the shell bar via the MobileDetailSpec seam", () => {
-    expect(list).toContain('setMobileDetail("agents", {');
-    expect(list).toContain('kind: "editor"');
-    expect(list).toContain("onCancel: discard");
-    expect(list).toContain("onDone: () => void onDone()");
-    expect(list).toContain('setMobileDetail("agents", null)');
+  it("the drawer is the one editor host, and it takes the full width below md", () => {
+    expect(list, "the drawer is not mounted").toContain("<AgentDrawer");
+    const drawer = readFileSync(new URL("./AgentDrawer.tsx", import.meta.url), "utf8");
+    expect(drawer, "the drawer stopped asking for full bleed, so mobile keeps a 6% sliver of scrim").toContain("fullBleedBelowMd");
+    const slo = readFileSync(new URL("../shared/slideOver.css", import.meta.url), "utf8");
+    expect(slo, "the full-bleed rule is gone from the shared drawer").toMatch(/\.slo--bleed \{[^}]*100vw/);
   });
 
   it("the rotor keeps its locked flip physics — untouched by the pass", () => {
-    expect(css).toContain(".aglist .agl-rotor.flipped { transform: rotateY(180deg); height: 580px; }");
+    /* the flipped HEIGHT went with the editor (Phase 4) — the rotor has one height now; the
+       physics being asserted is the rotation and the mobile block leaving the rotor alone */
+    expect(css).toContain(".aglist .agl-rotor.flipped { transform: rotateY(180deg); }");
     // and the mobile block never styles the rotor (any overflow would flatten the 3D context)
     const push = css.match(/MOBILE \(Mobile Pass 1[\s\S]*$/)?.[0] ?? "";
     expect(push, "the mobile block must exist").not.toBe("");
