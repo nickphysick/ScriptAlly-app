@@ -1,0 +1,15 @@
+── qc chassis · Phase 5 · 7 assertions · 0 RED · 7 green
+green  · P5.0 · in Grid the drawer exists and is closed — off screen, hidden, untabbable
+         data-on false · aria-hidden true · onScreen false · left 1455 · scrim tabindex -1
+green  · P5.1 · clicking a ticket slides the drawer ON, with the pane inside it
+         data-on true · onScreen true · left 680 · panes inside 1 · scrim true
+green  · P5.2 · the drawer is named for the task it holds
+         label "Noah Bright has made an offer" · ticket "Noah Bright has made an offer"
+green  · P5.3 · exactly one pane is mounted — the drawer's, not the split's as well
+         in the drawer 1 · in the split 0
+green  · P5.4 · Escape closes the drawer
+         data-on false · onScreen false · left 1455
+green  · P5.5 · in List the pane docks in the split, and no drawer is mounted at all
+         drawers 0 · panes in the split 1 · split open 1
+green  · P5.6 · SlideOver names the three drawers that have not adopted it
+         named: QueryPanel · QueryLogSheet · packages Broadsheet

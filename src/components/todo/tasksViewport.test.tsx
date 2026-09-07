@@ -1150,7 +1150,19 @@ describe("⚠️ A NARROWING IS A RAIL FACT — it must never empty the workspac
     expect(hold, "the pane's fallback is gone").not.toBe("");
     expect(hold, "the hold survives a finished board").toContain("allDockable.length > 0");
     expect(hold, "a close is not a close — the held card outlives it").toContain("dockKey");
-    expect(board).toContain("{paneCard ? (");
+    /* ⚠️ RETARGETED FROM THE SPELLING TO THE CLAIM (QC-chassis round, Phase 5). This pinned the
+       literal `{paneCard ? (`, which stopped existing the moment the pane gained a SECOND host: the
+       split renders it in List view (`todoView === "list" && paneCard`) and a `SlideOver` renders it
+       over the grid and the board (`open={!!paneCard}`). Neither is a regression — both read the
+       HELD card, which is the whole claim — but the spelling could not say so.
+       Asserted as: every host gates on `paneCard`, and NONE of them gates on `docked.card`, which
+       is the fault the case exists for (a narrowing would blank the workspace). */
+    expect(board, "the split's host no longer gates on the held card")
+      .toContain("todoView === \"list\" && paneCard ? (");
+    expect(board, "the drawer's host no longer gates on the held card")
+      .toContain("open={!!paneCard}");
+    expect(board, "a host gates on docked.card, so a narrowing would blank the workspace")
+      .not.toContain("{docked.card ? (");
   });
 
   /**

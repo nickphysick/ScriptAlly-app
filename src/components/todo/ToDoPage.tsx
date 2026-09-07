@@ -74,6 +74,7 @@ import {
 import { TaskList } from "./TaskList";
 import { TaskTicket } from "./TaskTicket";
 import { TaskBoard } from "./TaskBoard";
+import { SlideOver } from "../shared/SlideOver";
 import { ticketFacts } from "../../lib/ticketFacts";
 import { STATE_TOKEN, stateFor } from "../../lib/queryCardFacts";
 import { TODO_ROUTES } from "../../lib/todoRoutes";
@@ -2151,7 +2152,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               whole width; open, the list folds to 520 and the work column takes the rest. The flag
               is `!!paneCard`, the same expression the work column's own contents read, so the
               layout and what is in it cannot come to disagree about whether anything is open. */}
-          <div className={`tdw-split${paneCard ? " open" : ""}`}>
+          {/* ⚠️ THE SPLIT FOLDS ONLY WHERE IT ACTUALLY SPLITS (QC-chassis round, Phase 5). `open`
+              narrows the list to 520px to make room for the docked pane — but in Grid and Board the
+              pane is a DRAWER that floats over the content, so there is nothing to make room for.
+              Gated on `paneCard` alone, opening a ticket squeezed the grid to a single column behind
+              a drawer that had not taken any of its width. Measured, not reasoned: the screenshot is
+              what showed it. */}
+          <div className={`tdw-split${todoView === "list" && paneCard ? " open" : ""}`}>
             {/* the frame contract's command bar, above the split */}
             <div className="tdw-rail">
               {/* ⚠️ A NARROWED-TO-NOTHING RAIL IS A RAIL FACT, AND IT STAYS IN THE RAIL (Phase 4).
@@ -2185,8 +2192,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   sits. (And the braced form cannot be quoted inside a comment either — its closing
                   sequence ends the comment early, which is how the second attempt at this failed.) */}
             </div>
+            {/* ⚠️ THE SPLIT HOSTS THE PANE ONLY IN LIST VIEW (QC-chassis round, Phase 5). The grid
+                and the board fill the width, so there is no second track to dock into — the
+                contract opens the task as a DRAWER over them, which is what `SlideOver` below is.
+                One `renderPane()`, two hosts: a second copy of that JSX is how the docked pane and
+                the drawer would come to offer different verbs for one card. */}
             <div className="tdw-work">
-              {paneCard ? (
+              {todoView === "list" && paneCard ? (
                 /* ⚠️ THE PORTED PANE (`TaskPane`), which replaced `TodoDock` wholesale. The old pane's
                     markup and stylesheet are deleted in the same commit — leaving both would have given the
                     page two panes to drift apart, and the class names overlap enough that a stray rule from
@@ -2195,21 +2207,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                     ⚠️ WHAT CROSSED OVER IS BEHAVIOUR: the completion path (`dockPrimary`), snooze, dismiss,
                     open query and task navigation. The verbs are the SAME `cardMenu` derivation the ⋯ menu
                     reads, so the pane and the menu cannot disagree about what applies to a card. */
-                <TaskPane
-                  journey={session.journey!}
-                  onPrimary={session.onPrimary}
-                  /* the receipt window's flag — while the held task is the open one, the foot
-                     shows the receipt instead of the primary (Phase 5) */
-                  committed={!!leaving && !leaving.undone && leaving.card.key === paneCard.key}
-                  nav={{
-                    index: dockable.findIndex((c) => c.key === paneCard.key) + 1,
-                    total: dockable.length,
-                    label: liveFamily(paneCard) === "urgent" ? "Urgent" : liveFamily(paneCard) === "housekeeping" ? "Housekeeping" : "Your tasks",
-                    onPrev: () => { const i = dockable.findIndex((c) => c.key === paneCard.key); if (i > 0) setDockKey(dockable[i - 1].key); },
-                    onNext: () => { const i = dockable.findIndex((c) => c.key === paneCard.key); if (i < dockable.length - 1) setDockKey(dockable[i + 1].key); },
-                    onClose: closeDock,
-                  }}
-                />
+                renderPane()
               ) : null}
             </div>
           </div>
@@ -2230,6 +2228,30 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               a units change to a Pro surface is neither of them. */}
           </div>{/* .tdb-centre */}
         </TasksPageLayout>
+        {/* ⚠️ THE DRAWER IS THE GRID'S AND THE BOARD'S PANE (QC-chassis round, Phase 5), and it is
+            the first adopter of `SlideOver` — the app's three other right-hand drawers each own a
+            private fixed element, and a primitive nobody mounts is a fourth one wearing a shared
+            name. Those three are named in `SlideOver.tsx` and deliberately not migrated: each sits
+            in a file another stream is mid-round in.
+
+            ⚠️ IT IS MOUNTED ONLY WHERE THERE IS NO SPLIT. List view docks the pane beside the rows;
+            the grid and the board fill the width, so the contract slides the task over them.
+            Rendering both at once would put two panes on screen for one card. */}
+        {todoView !== "list" && (
+          <SlideOver
+            open={!!paneCard}
+            onClose={closeDock}
+            label={paneCard ? paneCard.title : "Task"}
+            /* ⚠️ WIDER THAN THE PRIMITIVE'S DEFAULT, because the pane is a TWO-COLUMN document: the
+               deed and its ledger on the left, the Quick Reference rail on the right. At the 580 the
+               Query Centre's panel uses, the rail took nearly half and left the document a strip —
+               measured from the first screenshot of this drawer, not reasoned. The primitive's
+               `max-width: 94vw` still caps it, so a narrow window loses nothing. */
+            width={760}
+          >
+            {renderPane()}
+          </SlideOver>
+        )}
         {/* THE WORKSPACE SHELL (todo-fix48) — Today, back in its corner: a floating card
             bottom-right of the workspace, minimising to a pill; absent when the list is empty. */}
         {/* ⚠️ THE CORNER POP-UP IS RETIRED (workspace P3), AND SO IS THE PAGE THAT REPLACED IT
@@ -3411,6 +3433,34 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         }}
         urgentOf={(c) => isUrgentCard(c, listRowInputs(c).days)}
         onOpen={(c) => openDock(c.key)}
+      />
+    );
+  }
+
+  /**
+   * ⚠️ ONE PANE, TWO HOSTS (QC-chassis round, Phase 5). In List view it sits in the split's work
+   * column; in Grid and Board — which fill the width and have no second track — it rides a
+   * `SlideOver`, which is what the contract draws. Rendering the JSX twice would be two panes free
+   * to offer different verbs for one card, which is the fault this page closed when `TodoDock` and
+   * `TaskPane` briefly coexisted.
+   */
+  function renderPane() {
+    if (!paneCard) return null;
+    return (
+                <TaskPane
+        journey={session.journey!}
+        onPrimary={session.onPrimary}
+        /* the receipt window's flag — while the held task is the open one, the foot
+           shows the receipt instead of the primary (Phase 5) */
+        committed={!!leaving && !leaving.undone && leaving.card.key === paneCard.key}
+        nav={{
+          index: dockable.findIndex((c) => c.key === paneCard.key) + 1,
+          total: dockable.length,
+          label: liveFamily(paneCard) === "urgent" ? "Urgent" : liveFamily(paneCard) === "housekeeping" ? "Housekeeping" : "Your tasks",
+          onPrev: () => { const i = dockable.findIndex((c) => c.key === paneCard.key); if (i > 0) setDockKey(dockable[i - 1].key); },
+          onNext: () => { const i = dockable.findIndex((c) => c.key === paneCard.key); if (i < dockable.length - 1) setDockKey(dockable[i + 1].key); },
+          onClose: closeDock,
+        }}
       />
     );
   }

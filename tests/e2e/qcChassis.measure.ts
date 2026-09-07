@@ -12,7 +12,7 @@
  * Read-only: it clicks tiles and reads. It presses no primary and writes nothing.
  */
 import { test, expect } from "@playwright/test";
-import { ensureSignedIn, liftMotionSuppression, visiblePage } from "./measure";
+import { ensureSignedIn, liftMotionSuppression, visiblePage, openFocusedRow } from "./measure";
 import { writeFileSync, rmSync } from "node:fs";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -692,5 +692,131 @@ test("Phase 4 — the board's five columns", async ({ page }) => {
     + " RED · " + (out.length - red.length) + " green\n" + lines.join("\n") + "\n");
   console.log(lines.join("\n"));
   expect(out.length, "assertion floor").toBeGreaterThanOrEqual(9);
+  expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
+});
+
+/**
+ * Phase 5 — the drawer.
+ *
+ * ⚠️ NO BACKTICKS AND NO REGEX INSIDE ANY page.evaluate TEMPLATE. Patterns are matched in Node.
+ *
+ * ⚠️ AND MOTION IS LIFTED BEFORE ANYTHING IS DRIVEN. The drawer's whole behaviour is a transform
+ * transition, and a suppressed transition reports where it STARTED — so a measurement taken with
+ * motion off would read a closed drawer as closed no matter what the click did.
+ */
+test("Phase 5 — the drawer over the grid, and the split in List", async ({ page }) => {
+  const out: R[] = [];
+  const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
+  const OUT = process.env.SA_QC_OUT5 ?? "run-artifacts/qc-chassis-p5.txt";
+  rmSync(OUT, { force: true });
+
+  await ensureSignedIn(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/todo");
+  await page.waitForFunction("document.querySelectorAll('.qct-tile').length > 0", null, { timeout: 45_000 }).catch(() => {});
+  await liftMotionSuppression(page);
+  await visiblePage(page, ".tdb-wrap");
+  await page.waitForTimeout(700);
+
+  const drawerState = () => page.evaluate(`(() => {
+    const d = document.querySelector(".slo");
+    const sc = document.querySelector(".slo-scrim");
+    if (!d) return { present: false };
+    const r = d.getBoundingClientRect();
+    return {
+      present: true,
+      on: d.getAttribute("data-on"),
+      hidden: d.getAttribute("aria-hidden"),
+      /* ⚠️ THE RECT, NOT THE ATTRIBUTE — a data-on that says open over a drawer still translated
+         off screen is exactly the fault a computed-style read cannot see. */
+      onScreen: r.right > 0 && r.left < window.innerWidth && r.width > 0,
+      left: Math.round(r.left),
+      label: d.getAttribute("aria-label") || "",
+      pane: d.querySelectorAll(".tpn").length,
+      scrimOn: sc ? sc.getAttribute("data-on") : null,
+      scrimTab: sc ? sc.getAttribute("tabindex") : null,
+      /* the split's own pane must NOT also be mounted */
+      splitPane: [...document.querySelectorAll(".tdw-work .tpn")].length,
+    };
+  })()`) as Promise<any>;
+
+  const rest = await drawerState();
+  add("P5.0 · in Grid the drawer exists and is closed — off screen, hidden, untabbable",
+      rest.present && rest.on === "false" && rest.hidden === "true"
+        && !rest.onScreen && rest.scrimTab === "-1",
+      "data-on " + rest.on + " · aria-hidden " + rest.hidden + " · onScreen " + rest.onScreen
+        + " · left " + rest.left + " · scrim tabindex " + rest.scrimTab);
+
+  /* open a ticket */
+  const opened = await page.evaluate(`(() => {
+    const t = __saVisRoot().querySelector(".tkt");
+    if (!t) return null;
+    const title = ((t.querySelector(".ttl") || {}).textContent || "").trim();
+    t.click();
+    return title;
+  })()`) as string | null;
+  await page.waitForTimeout(1200);
+  const open = await drawerState();
+
+  add("P5.1 · clicking a ticket slides the drawer ON, with the pane inside it",
+      open.on === "true" && open.hidden === "false" && open.onScreen
+        && open.pane === 1 && open.scrimOn === "true",
+      "data-on " + open.on + " · onScreen " + open.onScreen + " · left " + open.left
+        + " · panes inside " + open.pane + " · scrim " + open.scrimOn);
+
+  add("P5.2 · the drawer is named for the task it holds",
+      !!opened && open.label === opened, "label " + JSON.stringify(open.label)
+        + " · ticket " + JSON.stringify(opened));
+
+  /* ⚠️ ONE PANE ON SCREEN, NOT TWO. The split hosts the pane in List view and the drawer hosts it
+     everywhere else; rendering both would put two panes on screen for one card, each with its own
+     verbs. Asserted where it can actually be seen. */
+  add("P5.3 · exactly one pane is mounted — the drawer's, not the split's as well",
+      open.pane === 1 && open.splitPane === 0,
+      "in the drawer " + open.pane + " · in the split " + open.splitPane);
+
+  /* Escape closes it — and the drawer listens WITHOUT capturing, so the page keeps its own chain */
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(900);
+  const closed = await drawerState();
+  add("P5.4 · Escape closes the drawer",
+      closed.on === "false" && !closed.onScreen,
+      "data-on " + closed.on + " · onScreen " + closed.onScreen + " · left " + closed.left);
+
+  /* ── and in List view the pane docks in the split instead, with no drawer ── */
+  await page.evaluate(`(() => {
+    const b = [...__saVisRoot().querySelectorAll(".qvs button")].find((x) => (x.textContent || "").trim() === "List");
+    if (b) b.click();
+  })()`);
+  await page.waitForTimeout(800);
+  await page.evaluate(`(() => {
+    const r = __saVisRoot().querySelector(".tlc .row");
+    if (r) r.click();
+  })()`);
+  await openFocusedRow(page);
+  await page.waitForTimeout(1100);
+  const list = await page.evaluate(`(() => ({
+    drawer: document.querySelectorAll(".slo").length,
+    splitPane: document.querySelectorAll(".tdw-work .tpn").length,
+    splitOpen: document.querySelectorAll(".tdw-split.open").length,
+  }))()`) as any;
+  add("P5.5 · in List the pane docks in the split, and no drawer is mounted at all",
+      list.drawer === 0 && list.splitPane === 1 && list.splitOpen === 1,
+      "drawers " + list.drawer + " · panes in the split " + list.splitPane
+        + " · split open " + list.splitOpen);
+
+  /* ⚠️ THE PRIMITIVE HAS AN ADOPTER, AND THREE NAMED NON-ADOPTERS — the source half, because a
+     rendered page cannot show that three other drawers still own private fixed elements. */
+  const so = readFileSync(join(process.cwd(), "src/components/shared/SlideOver.tsx"), "utf8");
+  add("P5.6 · SlideOver names the three drawers that have not adopted it",
+      so.includes("QueryPanel.tsx") && so.includes("QueryLogSheet.tsx") && so.includes("Broadsheet"),
+      "named: QueryPanel · QueryLogSheet · packages Broadsheet");
+
+  const lines = out.map((x) => (x.ok ? "green  " : "RED    ") + "· " + x.id + (x.note ? "\n         " + x.note : ""));
+  const red = out.filter((x) => !x.ok);
+  writeFileSync(OUT, "── qc chassis · Phase 5 · " + out.length + " assertions · " + red.length
+    + " RED · " + (out.length - red.length) + " green\n" + lines.join("\n") + "\n");
+  console.log(lines.join("\n"));
+  expect(out.length, "assertion floor").toBeGreaterThanOrEqual(6);
   expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
 });

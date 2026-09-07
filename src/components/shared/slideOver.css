@@ -1,0 +1,38 @@
+/* ── SlideOver — the shared right-hand drawer (QC-chassis round, Phase 5) ─────────────────────────
+   ⚠️ `.slo` was grepped before it was minted (the `.unitrow` lesson): nothing in the app declares
+   it, and it cannot be reached as a prefix of a live class. The three existing drawers keep their
+   own names until they adopt this — see SlideOver.tsx, which lists them. ── */
+
+.slo-scrim {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(58, 28, 20, 0.14);
+  border: 0; padding: 0; cursor: default;
+  opacity: 0; pointer-events: none;
+  transition: opacity 240ms;
+}
+.slo-scrim[data-on="true"] { opacity: 1; pointer-events: auto; }
+
+.slo {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 70;
+  max-width: 94vw;
+  display: flex; flex-direction: column;
+  background: #fdfaf5;
+  box-shadow: -6px 0 30px rgba(58, 28, 20, 0.14);
+  /* ⚠️ TWO DURATIONS, ONE PROPERTY, NO JS. A transition reads its timing from the state being
+     transitioned TO — so the CLOSING timing lives here and the OPENING timing on the `data-on`
+     rule, and the drawer opens in 360ms and closes in 220 without anything knowing its direction. */
+  transform: translateX(102%);
+  transition: transform 220ms cubic-bezier(0.4, 0, 1, 1);
+}
+.slo[data-on="true"] {
+  transform: translateX(0);
+  transition: transform 360ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ⚠️ THE OVERRIDE FOLLOWS ITS TARGET. A media query confers no specificity, so a reduced-motion
+   block written above these rules would lose to them — the fault this repo recorded against the
+   founding panel's progress bar, measured at 0.5s under `reduce`. Both directions matter: no
+   transition under reduce, the real timings without it. */
+@media (prefers-reduced-motion: reduce) {
+  .slo, .slo[data-on="true"], .slo-scrim { transition: none; }
+}
