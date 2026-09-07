@@ -1,7 +1,7 @@
 ── pane mounts · 14 assertions · 0 RED · 14 green
 
   green  P0 · the board rendered, so there is something to click
-           rows on screen = 27
+           rows on screen = 28
   green  P0b · at least two journey types were on the board to cover
            kinds = ["Decide","Send","Chase","Close","Fix","Note"]
   green  · Decide — clicking it mounts the pane

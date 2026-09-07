@@ -51,6 +51,20 @@ test("every journey type mounts its pane with a clean console", async ({ page })
   /** the board's own rows, waited for rather than slept on — a fixed wait is a guess about a machine */
   const boardReady = async (): Promise<number> => {
     await page.goto("/todo");
+    /* ⚠️ THE LIST IS SELECTED FIRST (QC-chassis round, Phase 7). This canary clicks ROWS, and the
+       page gained a view switch whose default is now the ticket GRID — so both its assertions went
+       red reporting "the board did not render" about a page full of work. The wait below is for
+       the rows, so without this it also burned its full 45s timeout first. A probe that names a
+       body must put that body on screen. */
+    await page.waitForFunction(
+      "document.querySelectorAll('.qvs button').length > 0", null, { timeout: 45_000 }).catch(() => {});
+    await page.evaluate(`(() => {
+      const vis = (e) => e.getBoundingClientRect().height > 0;
+      const w = [...document.querySelectorAll(".tdb-wrap")].find(vis);
+      if (!w) return;
+      const b = [...w.querySelectorAll(".qvs button")].find((x) => (x.textContent || "").trim() === "List");
+      if (b) b.click();
+    })()`);
     await page.waitForFunction(
       "document.querySelectorAll('.tlc .row').length > 0", null, { timeout: 45_000 }).catch(() => {});
     await liftMotionSuppression(page);

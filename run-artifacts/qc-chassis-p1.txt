@@ -20,8 +20,8 @@ green  · P1.6 · one search box on the page, and it is the toolbar's
          toolbar 1 · page 1 · card 0
 green  · P1.7 · three toolbar controls, in the contract's order
          ["Filter","GroupUrgency","SortPriority"]
-green  · P1.8 · the view switch offers Grid and Board, and nothing else
-         ["Grid","Board"]
+green  · P1.8 · the view switch offers Grid, List and Board, and nothing else
+         ["Grid","List","Board"]
 green  · P1.9 · the tiles and the toolbar are SHARED — both pages import the one module
          QueryStatTiles→StatTiles · ToDoPage→StatTiles · Queries→ToolbarButton · ToDoPage→ToolbarButton
 green  · P1.10 · selecting a tile rings it, and only it

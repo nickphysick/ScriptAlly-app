@@ -3,7 +3,7 @@ green  · P3.0 @1440 · a journey with a fork was found to measure
          row index 1
 green  · P3.1 · no .band renders
 green  · P3.2 · the header carries the family pill and the position
-         pill "Needs you now" · "Task 3 of 27"
+         pill "Needs you now" · "Task 3 of 28"
 green  · P3.3 · exactly ONE tinted element in the header — the pill
          tinted: ["fam u-now"]
 green  · P3.4 · the header's controls are 26px, on one row with a hairline beneath

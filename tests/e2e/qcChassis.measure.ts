@@ -240,6 +240,21 @@ test("Phase 2 — category as a grouping, and Gone quiet's two feeders", async (
   await liftMotionSuppression(page);
   await visiblePage(page, ".tdb-wrap");
 
+  /* ⚠️ THIS PHASE MEASURES THE LIST, SO IT SELECTS THE LIST (added in Phase 7). Grouping draws
+     HEADS, and heads are a list concept — the grid has none and the board's columns are the
+     categories themselves. Phase 3 made Grid the DEFAULT view, and this probe, written when the
+     list was the only body, quietly began reading `.tlc .grp` on a page showing tickets: four of
+     its six assertions went red and stayed red across two commits with nothing saying so.
+
+     That is the presumed-vacuous rule from the other end — the phase was green when it landed and
+     a LATER phase invalidated it. It is why Phase 7 re-runs every phase rather than trusting the
+     report each one wrote about itself. */
+  await page.evaluate(`(() => {
+    const b = [...__saVisRoot().querySelectorAll(".qvs button")].find((x) => (x.textContent || "").trim() === "List");
+    if (b) b.click();
+  })()`);
+  await page.waitForTimeout(800);
+
   /* the tiles' figures first — the other surface every claim below is measured against */
   const tiles = await page.evaluate(`(() => {
     const root = __saVisRoot();

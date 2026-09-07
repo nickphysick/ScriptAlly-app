@@ -149,6 +149,19 @@ test("Phase 2 — the dense list: 44 both states, the strip, the keys", async ({
   await page.waitForFunction(
     "document.querySelectorAll('.tlc .row').length > 0", null, { timeout: 45_000 }).catch(() => {});
   await liftMotionSuppression(page);
+  /* ⚠️ THIS PHASE MEASURES THE LIST, SO IT SELECTS THE LIST (QC-chassis round, Phase 7). The
+     To-do page gained a view switch and GRID is now the default, so every probe here — which
+     reads `.tlc .row`, its 44px height, its action strip and its keys — was measuring a page
+     showing tickets. Twelve assertions went red at once, none of them because anything about the
+     list had changed. A phase that names a body must put that body on screen. */
+  await page.evaluate(`(() => {
+    const vis = (e) => e.getBoundingClientRect().height > 0;
+    const w = [...document.querySelectorAll(".tdb-wrap")].find(vis);
+    if (!w) return;
+    const b = [...w.querySelectorAll(".qvs button")].find((x) => (x.textContent || "").trim() === "List");
+    if (b) b.click();
+  })()`);
+  await page.waitForTimeout(800);
 
   const heights = () => page.evaluate(`[...document.querySelectorAll(".tlc .row")]
     .filter((r) => r.getBoundingClientRect().width > 0)
@@ -459,6 +472,19 @@ test("Phase 3 — the sheet is a document: the header, the title, the measures, 
     await page.waitForFunction(
       "document.querySelectorAll('.tlc .row').length > 0", null, { timeout: 45_000 }).catch(() => {});
     await liftMotionSuppression(page);
+  /* ⚠️ THIS PHASE MEASURES THE LIST, SO IT SELECTS THE LIST (QC-chassis round, Phase 7). The
+     To-do page gained a view switch and GRID is now the default, so every probe here — which
+     reads `.tlc .row`, its 44px height, its action strip and its keys — was measuring a page
+     showing tickets. Twelve assertions went red at once, none of them because anything about the
+     list had changed. A phase that names a body must put that body on screen. */
+  await page.evaluate(`(() => {
+    const vis = (e) => e.getBoundingClientRect().height > 0;
+    const w = [...document.querySelectorAll(".tdb-wrap")].find(vis);
+    if (!w) return;
+    const b = [...w.querySelectorAll(".qvs button")].find((x) => (x.textContent || "").trim() === "List");
+    if (b) b.click();
+  })()`);
+  await page.waitForTimeout(800);
 
     /* ⚠️ SEEK A ROW WITH A FORK rather than assuming one — the first row's journey is "Reply to
        the offer", which has neither fork nor ledger, so a probe that took row 1 measured an
@@ -655,6 +681,19 @@ test("Phase 4 — the Quick Look column: the ladder tint, the facts, the collaps
   await page.waitForFunction(
     "document.querySelectorAll('.tlc .row').length > 0", null, { timeout: 45_000 }).catch(() => {});
   await liftMotionSuppression(page);
+  /* ⚠️ THIS PHASE MEASURES THE LIST, SO IT SELECTS THE LIST (QC-chassis round, Phase 7). The
+     To-do page gained a view switch and GRID is now the default, so every probe here — which
+     reads `.tlc .row`, its 44px height, its action strip and its keys — was measuring a page
+     showing tickets. Twelve assertions went red at once, none of them because anything about the
+     list had changed. A phase that names a body must put that body on screen. */
+  await page.evaluate(`(() => {
+    const vis = (e) => e.getBoundingClientRect().height > 0;
+    const w = [...document.querySelectorAll(".tdb-wrap")].find(vis);
+    if (!w) return;
+    const b = [...w.querySelectorAll(".qvs button")].find((x) => (x.textContent || "").trim() === "List");
+    if (b) b.click();
+  })()`);
+  await page.waitForTimeout(800);
 
   /* ⚠️ SWEEP SEVERAL CARDS RATHER THAN ONE, and TALLY what was seen. One card is a monoculture:
      the first row's query is an Offer with no anchor date, so a probe that stopped there would

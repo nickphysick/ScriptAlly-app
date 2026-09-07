@@ -10,7 +10,7 @@ green  · P4.3 · the header's fill IS the ladder's value for the query's own st
 green  · P4.4 · the status word is the app's own — and the real StatusDot is beside it
          [["Offer",true],["Full Requested",true],["Full Requested",true],["Full Requested",true],["Partial Requested",true],["Partial Requested",true],["Partial Requested",true]]
 green  · P4.5 · every 'since' line states the elapsed its OWN date implies
-         with a line: 5 of 7 · [{"line":"since 12 June 2025 · 15 months","ok":true,"stated":15,"computed":15},{"line":"since 31 July · 5 weeks","ok":true,"stated":5,"computed":5},{"line":"since 29 July · 6 weeks","ok":true,"stated":6,"computed":6},{"line":"since 3 August · 5 weeks","ok":true,"stated":5,"computed":5},{"line":"since 20 August · 17 days","ok":true,"stated":17,"computed":18}]
+         with a line: 5 of 7 · [{"line":"since 12 June 2025 · 15 months","ok":true,"stated":15,"computed":15},{"line":"since 31 July · 5 weeks","ok":true,"stated":5,"computed":5},{"line":"since 29 July · 6 weeks","ok":true,"stated":6,"computed":6},{"line":"since 3 August · 5 weeks","ok":true,"stated":5,"computed":5},{"line":"since 20 August · 18 days","ok":true,"stated":18,"computed":18}]
 green  · P4.5b · and a query with no anchor renders NO line rather than a guess
          without a line: 2
 green  · P4.6 · the facts are a definition list with the contract's 78px label column

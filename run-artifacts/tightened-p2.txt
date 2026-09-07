@@ -1,6 +1,6 @@
 ── tightened · Phase 2 · 18 assertions · 0 RED · 18 green
 green  · P2.1a · every resting row is 44px
-         27 rows · distinct [44]
+         28 rows · distinct [44]
 green  · P2.2 · one click focuses — the sheet does NOT open
 green  · P2.3 · exactly one strip exists
          strips=1
@@ -12,7 +12,7 @@ green  · P2.6 · a j typed into the search is a letter — no action fired, and
 green  · P2.7 · j moves focus without opening
          focus task-offer-seed-query-12 -> task-full-seed-cal-passed865-q open=false
 green  · P2.1b · every row is 44px with the drawer open
-         27 rows · distinct [44]
+         28 rows · distinct [44]
 green  · P2.17 · folded, the hints stand down and the count stays on one line
          {"keys":false,"count":14}
 green  · P2.8 · the strip stays under the SELECTED row while the sheet is open
@@ -20,7 +20,7 @@ green  · P2.8 · the strip stays under the SELECTED row while the sheet is open
 green  · P2.9 · a digit picks the fork option — the fork collapses to its chosen line
          options 3 -> 0 chosen=true
 green  · P2.10 · a collapsed section renders no rows and keeps its count
-         27 -> 9 rows · count "18" expanded=false
+         28 -> 9 rows · count "19" expanded=false
 green  · P2.11 · j lands only on rendered rows while a section is closed
 green  · P2.12 · s opens the snooze panel for the focused row
          row task-no-res-close-seed-query-ms2-a
