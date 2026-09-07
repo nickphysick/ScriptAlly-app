@@ -213,3 +213,23 @@
   background: rgba(124, 58, 42, 0.06);
   color: #8a7d6c;
 }
+
+/* ── "Add a password" — the form that opens inside a row's control column ────
+   ⚠️ IT IS A `full` ROW'S CHILD, NOT A 280px CONTROL. Two labelled fields and two buttons do not
+   fit a control column, and squeezing them there would give a security form the narrowest box on
+   the page. The row goes full-width the moment the form opens — see the render. */
+.ap-form { display: flex; flex-direction: column; gap: 6px; max-width: 360px; }
+.ap-lbl {
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #6a5a50;
+}
+.ap-lbl + input { margin-bottom: 4px; }
+.ap-hint {
+  margin: 0;
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 12.5px;
+  color: #8a7d6c;
+}
+.ap-acts { display: flex; gap: 8px; margin-top: 6px; }

@@ -139,3 +139,35 @@ export const SECURITY_AFTER_LAUNCH =
  */
 export const PASSWORD_ABSENT_NOTE =
   "Not set. Adding one means you can still sign in if you lose access to your other sign-in method.";
+
+/**
+ * What the page says for each outcome of adding a password.
+ *
+ * ⚠️ FIVE OUTCOMES, FIVE SENTENCES, AND THE SPLIT IS THE POINT. Collapsing them into "something
+ * went wrong" is what makes a security page useless at the moment it matters — `recent-login` is
+ * fixed by signing in again, which is a thing the reader can DO, and it is the one a real writer is
+ * most likely to hit, because Firebase requires a fresh session before it will change credentials
+ * and most people reach settings long after signing in.
+ *
+ * ⚠️ NONE OF THEM BLAMES THE READER, and `already-set` in particular does not read as an error: it
+ * means the page offered a control it should not have, which is this app's fault and not theirs.
+ *
+ * ⚠️ IT IS A MAP KEYED BY THE RESULT UNION, so a new outcome fails to compile until it has words.
+ * The alternative is a `switch` with a default, and a default branch here would answer an
+ * unrecognised failure with a sentence written for a different one.
+ */
+export const ADD_PASSWORD_MESSAGE: Record<
+  "recent-login" | "already-set" | "weak" | "no-user" | "failed",
+  string
+> = {
+  "recent-login":
+    "For this change you'll need to sign in again first — it's a security step, and nothing has changed on your account.",
+  "already-set": "This account already has a password. Use Change password instead.",
+  weak: "That password was refused. Try a longer one.",
+  "no-user": "You're not signed in any more. Sign in and try again.",
+  failed: "That didn't work. Please try again.",
+};
+
+/** What the page says when it worked. */
+export const ADD_PASSWORD_DONE =
+  "Password added. You can now sign in with your email address as well.";

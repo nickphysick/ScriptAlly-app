@@ -52,6 +52,7 @@ import { useToast } from "./toast/ToastProvider";
 import { validateDisplayName } from "../lib/accountValidation";
 import { MountPanel } from "./MountPanel";
 import { SECTION_BANDS } from "./settings/sectionBands";
+import { AddPassword } from "./settings/AddPassword";
 import {
   SettingsTitle, SettingsCard, SettingsRow, SettingsNote, IdentityRow,
 } from "./settings/SettingsCards";
@@ -522,8 +523,15 @@ export const AccountSettings: React.FC<{
   const [verifyMsg, setVerifyMsg] = useState<string | null>(null);
   /* ⚠️ READ ONCE PER MOUNT, NOT SUBSCRIBED. `auth.currentUser` is not reactive and `emailVerified`
      in particular only moves on a reload — so a snapshot at mount is exactly as fresh as anything
-     a subscription could offer, and it does not pretend otherwise. */
-  const authFacts = useMemo(() => readAuthFacts(), []);
+     a subscription could offer, and it does not pretend otherwise.
+     ⚠️ AND IT IS RE-READABLE ON DEMAND, WHICH IS A NARROWER CLAIM THAN "REACTIVE". Adding a password
+     changes `providerData` on the SAME user object, synchronously, in this tab — so there is one
+     moment when a fresh read is both possible and necessary, and `refreshAuthFacts` is it. It is
+     not a subscription and must not become one: `emailVerified` still only moves on a reload, and a
+     poll would spin waiting for something that cannot change without one. */
+  const [authKey, setAuthKey] = useState(0);
+  const authFacts = useMemo(() => readAuthFacts(), [authKey]);
+  const refreshAuthFacts = useCallback(() => setAuthKey((n) => n + 1), []);
   const [exportMsg, setExportMsg] = useState<string | null>(null);
   const [showDelete, setShowDelete] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
@@ -916,11 +924,19 @@ export const AccountSettings: React.FC<{
         ))}
 
         {pwMode === "federated-only" ? (
-          <SettingsRow
-            label="Password"
-            description={PASSWORD_ABSENT_NOTE}
-            control={<span className="acct-chip acct-chip--muted">Not set</span>}
-          />
+          /* ⚠️ THIS ROW USED TO BE A DEAD END, AND THAT WAS THE WHOLE DEFECT. It read "there's no
+              ScriptAlly password on this account, so there's nothing here to change" — true, and an
+              account whose only sign-in route is one provider is one lost Google account away from
+              losing every manuscript in it, with no way back the app could offer.
+              ⚠️ THE ROW GOES FULL-WIDTH: two labelled fields and two buttons do not belong in a
+              280px control column, and a security form should not be the narrowest box on the page.
+              The `key` forces a remount when the linking succeeds, so the row re-derives from the
+              new provider list rather than holding the form's own "done" state for ever. */
+          <SettingsRow key={`pw-${authKey}`} label="Password" description={PASSWORD_ABSENT_NOTE} full>
+            <div style={{ marginTop: 10 }}>
+              <AddPassword buttonStyle={ghostBtn} onAdded={refreshAuthFacts} />
+            </div>
+          </SettingsRow>
         ) : (
           /* ⚠️ NO "LAST CHANGED {date}" LINE. Firebase exposes creationTime and lastSignInTime and
              nothing else; printing either under that label is a real date wearing the wrong name.
