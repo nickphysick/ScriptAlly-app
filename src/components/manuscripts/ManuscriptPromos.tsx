@@ -79,25 +79,18 @@ export const ManuscriptPromos: React.FC<ManuscriptPromosProps> = ({
     /* The grid fills whatever is on it — see the note at `.mpr`. */
     <div className="mpr" style={{ "--mpr-count": tiles.length } as React.CSSProperties}>
       {tiles.includes("versions") && (
-        <article className="mpr-tile">
-          <div className="mpr-info" aria-hidden="true">
-            {/* Two spines, arrowed to a requests box — the shape of what versions are for. */}
-            <span className="mpr-spine" /><span className="mpr-spine mpr-spine--b" />
-            <span className="mpr-arrow">→</span>
-            <span className="mpr-box">Requests</span>
-          </div>
-          <div className="mpr-copy">
-            <h3 className="mpr-name">Versions <span className="mpr-pro">Pro</span></h3>
-            <p className="mpr-body">Keep more than one cut of the book, and see which one each agent is holding.</p>
-            <button type="button" className="mpr-link" onClick={onVersions}>How versions work ›</button>
-          </div>
+        <article className="mpr-card">
+          <h3 className="mpr-name">Versions <span className="mpr-pro">Pro</span></h3>
+          <p className="mpr-body">Keep more than one cut of the book, and see which one each agent is holding.</p>
+          <button type="button" className="mpr-link" onClick={onVersions}>How versions work ›</button>
         </article>
       )}
 
       {tiles.includes("wordcount") && (
-        <article className="mpr-tile">
+        <article className="mpr-card">
           {dismiss("wordcount")}
-          <div className="mpr-info">
+          <h3 className="mpr-name">Word count, by genre</h3>
+          <div className="mpr-chart">
             <div className="wcb">
               {rows.map(({ band, yours }) => (
                 <div className={`wcb-row${yours ? " wcb-row--yours" : ""}`} key={band.label + String(yours)}>
@@ -134,31 +127,27 @@ export const ManuscriptPromos: React.FC<ManuscriptPromosProps> = ({
               </div>
             </div>
           </div>
-          <div className="mpr-copy">
-            <h3 className="mpr-name">Word count</h3>
-            <p className="mpr-body">Where your book sits against the usual ranges — shown, not scored.</p>
-            <p className="mpr-foot">Reference only: ranges vary by imprint and by list fit.</p>
-          </div>
+          <p className="mpr-foot">Reference only: ranges vary by imprint and by list fit. Shown, not scored.</p>
         </article>
       )}
 
       {tiles.includes("packages") && (
-        <article className="mpr-tile">
+        <article className="mpr-card">
           {dismiss("packages")}
-          <div className="mpr-info" aria-hidden="true">
-            <span className="mpr-brace">
-              <span className="mpr-doc">Letter</span>
-              <span className="mpr-doc">Synopsis</span>
-              <span className="mpr-doc">Chapters</span>
-            </span>
+          <h3 className="mpr-name">Submission packages</h3>
+          {/* ⚠️ ONE LINE, NOT A FIELD. The diagram was a third of the card in a tinted box; it says
+              the same thing in a row of chips and leaves the card the size of its content. */}
+          <div className="mpr-diagram" aria-hidden="true">
+            <span className="mpr-doc">Letter</span>
+            <span className="mpr-doc">Synopsis</span>
+            <span className="mpr-doc">Ch 1–3</span>
+            <span className="mpr-arrow">→</span>
+            <span className="mpr-doc">Package</span>
             <span className="mpr-arrow">→</span>
             <span className="mpr-avs"><i /><i /><i /></span>
           </div>
-          <div className="mpr-copy">
-            <h3 className="mpr-name">Submission packages</h3>
-            <p className="mpr-body">Group a letter, a synopsis and sample chapters, and send the same set to several agents.</p>
-            <button type="button" className="mpr-link" onClick={onPackages}>Open packages ›</button>
-          </div>
+          <p className="mpr-body">Send the same set to several agents, and track what each one has.</p>
+          <button type="button" className="mpr-link" onClick={onPackages}>Open packages ›</button>
         </article>
       )}
     </div>

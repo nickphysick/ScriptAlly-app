@@ -133,3 +133,64 @@ describe("the promo row sizes to its tiles", () => {
     expect(tsx).toContain("if (!tiles.length) return null;");
   });
 });
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   THE HERO'S ID IS THE ARGUMENT — the Versions fix, stated as the three counts that matter.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+describe("the Versions card, keyed on the hero", () => {
+  const shelf = [{ id: "hero" }, { id: "other" }];
+  const at = (n: number) => Array.from({ length: n }, () => v("hero"));
+  const tiles = (n: number) =>
+    visibleTiles({ user: u(), manuscripts: shelf, versions: at(n), manuscriptId: "hero" });
+
+  /**
+   * ⚠️ THE THRESHOLD WAS NEVER THE FAULT. It shows at nought and one and hides at two — which is
+   * what "hide only when a second version exists" means, and what it has always said. What was
+   * wrong was the ARGUMENT: with no focal book the page passed `ordered[0]`, so one book's nine
+   * versions hid the pitch for three books with none. The page has a hero now.
+   */
+  it("renders at zero versions", () => { expect(tiles(0)).toContain("versions"); });
+  it("renders at one version", () => { expect(tiles(1)).toContain("versions"); });
+  it("hides at two", () => { expect(tiles(2)).not.toContain("versions"); });
+  it("stays hidden at nine", () => { expect(tiles(9)).not.toContain("versions"); });
+
+  /** ⚠️ ANOTHER BOOK'S VERSIONS CANNOT HIDE THE HERO'S CARD — the fault, stated directly. */
+  it("ignores versions belonging to another book", () => {
+    const others = Array.from({ length: 9 }, () => v("other"));
+    expect(visibleTiles({ user: u(), manuscripts: shelf, versions: others, manuscriptId: "hero" }),
+      "another book's versions hid the hero's card").toContain("versions");
+  });
+
+  /**
+   * ⚠️ AND THE GRID SIZES TO THE COUNT. Three cards when Versions renders, two when it does not —
+   * a fixed column count leaves a hole, and for a Pro user using versions that hole is permanent.
+   */
+  it("gives three cards at zero versions and two at two", () => {
+    expect(tiles(0)).toHaveLength(3);
+    expect(tiles(2)).toHaveLength(2);
+  });
+});
+
+describe("and the component passes the hero's id", () => {
+  const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const tsx = strip(readFileSync(join(__dirname, "../components/manuscripts/ManuscriptPromos.tsx"), "utf8"));
+  const page = strip(readFileSync(join(__dirname, "../components/AllManuscripts.tsx"), "utf8"));
+
+  /**
+   * ⚠️ THE PURE CASES ABOVE CANNOT SEE THIS. Drop `manuscriptId` at the call site and every one of
+   * them still passes, because they pass it themselves — the component would silently fall back to
+   * the shelf-wide rule and the card would go missing again, exactly as it did on dev. The
+   * composition is the half a pure test cannot make.
+   */
+  it("keys the tiles on the hero, not the shelf", () => {
+    expect(tsx, "the component stopped passing the hero's id")
+      .toContain("visibleTiles({ user, manuscripts, versions, manuscriptId: heroId })");
+  });
+
+  /** ⚠️ AND THE PAGE HANDS IT THE HERO — never `ordered[0]`, which is the argument that caused it. */
+  it("the page passes the derived hero", () => {
+    expect(page).toContain("heroId={hero?.id ?? null}");
+    expect(page, "the page went back to the first book on the shelf")
+      .not.toMatch(/heroId=\{ordered\[0\]/);
+  });
+});
