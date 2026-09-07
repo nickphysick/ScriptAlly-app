@@ -4,6 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ScriptAlly — quick add</title>
+<!-- ⚠️ AMENDED IN PLACE: the material slot and the dashed add slot both read 28px, not 26.
+     They were drawn at 26 here and the BUILD ships 28 — the mockup had drifted from the code, and
+     the standing rule is that the code is authoritative for a design value. A ref that states a
+     value the build overrules is worse than no ref, because it is read as authority: this one had
+     already produced one commit taking the build's material slots down to 26 to match it.
+
+     ⚠️ AND THE `.escal` RULES ARE REMOVED. They styled an escalation panel this ref's own script
+     never renders, and the build has no such panel either: the wishlist and materials slots open
+     the DRAWER at the relevant tab, permanently, because a paragraph and four structured rows are
+     the drawer's work. A styled body for a panel that does not exist is a design nobody built. -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--ground:#f2ede7;--paper:#fdfaf5;--ink:#1c130f;--ink-2:#4a3c34;--muted:#8b7b70;--faint:#a89a8f;
@@ -29,10 +39,10 @@ h2{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin:28
 .chip{font-size:11.5px;background:#f6f1ea;border:1px solid var(--hair);border-radius:999px;padding:4px 10px;color:var(--ink-2)}
 .mono-c{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
 .mslots{display:flex;gap:5px}
-.mslot{width:26px;height:26px;border-radius:6px;display:grid;place-items:center;border:1px solid var(--hair);background:#fbf7f1;color:#4a3c34}
+.mslot{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;border:1px solid var(--hair);background:#fbf7f1;color:#4a3c34}
 .mslot.off{background:transparent;border-color:#ece5db;color:#cfc4b8}
 
-.gap{width:26px;height:26px;padding:0;border:1px dashed #ded2c6;border-radius:6px;background:transparent;color:#d0c4b7;display:grid;place-items:center;cursor:pointer;transition:border-color .14s,color .14s,background .14s}
+.gap{width:28px;height:28px;padding:0;border:1px dashed #ded2c6;border-radius:6px;background:transparent;color:#d0c4b7;display:grid;place-items:center;cursor:pointer;transition:border-color .14s,color .14s,background .14s}
 .gap svg{display:block}
 .lrow:hover .gap{border-color:#cabbac;color:#a89a8c}
 .gap:hover{border-style:solid;border-color:#241813;background:#fff;color:var(--ink)}
@@ -62,8 +72,6 @@ h2{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin:28
 .kbd{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
 .bsave{background:#241813;color:#f6f0e8;border:0;border-radius:999px;padding:7px 14px;font-size:12.5px;cursor:pointer}
 .bghost{background:transparent;border:1px solid var(--hair-2);border-radius:999px;padding:7px 12px;font-size:12.5px;color:var(--ink-2);cursor:pointer}
-.escal{padding:13px 14px;font-size:13px;color:var(--ink-2);line-height:1.5}
-.escal button{margin-top:10px}
 
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;max-width:1200px}
 .card{background:var(--paper);border:1px solid var(--hair-2);border-radius:10px;box-shadow:var(--shadow);overflow:hidden}

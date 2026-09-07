@@ -62,7 +62,11 @@ test.describe("the slot", () => {
     expect(r.slot!.w, "the slot's width differs from the material slot's").toBe(r.mslot!.w);
     expect(r.slot!.h, "the slot's height differs from the material slot's").toBe(r.mslot!.h);
     expect(r.slot!.r, "the slot's radius differs from the material slot's").toBe(r.mslot!.r);
-    expect(r.slot!.w, "the ref draws both at 26").toBe(26);
+    /* ⚠️ THE PAIR'S SIZE IS THE BUILD'S, NOT THE MOCKUP'S. It went to 26 for one commit because
+       the quick-add ref drew it there; the ref had drifted from the code, and the code is
+       authoritative for a design value. The comparison above is the real claim — this only pins
+       which of the two they agree ON, so a silent drift in BOTH would still be caught. */
+    expect(r.slot!.w, "the pair moved off the build's 28").toBe(28);
     expect(r.slot!.style, "the slot is not dashed — a solid rim reads as a thing they asked for").toBe("dashed");
 
     /* the italic sentences are gone from the table */

@@ -540,12 +540,12 @@
    width shifting from card to card. */
 .aglist .agl-mslots { display: flex; gap: 5px; flex: none; }
 .aglist .agl-mslotwrap { display: inline-flex; }
-/* ⚠️ 26px, DOWN FROM 28, SO THE TWO IDIOMS ARE ONE SHAPE. The quick-add ref draws the material
-   slot and the dashed add slot together at 26 apiece, and the pack asks for a 26px slot that is
-   "identical in shape and radius to the ghosted material slots already in the row" — which cannot
-   both be true while these are 28. The newer ref shows the pair, so the pair moves. */
+/* ⚠️ 28px, AND THE ADD SLOT FOLLOWS IT RATHER THAN THE OTHER WAY ROUND. These briefly went to 26
+   because the quick-add mockup drew them there; the mockup had drifted from the build, and the
+   standing rule is that the CODE is authoritative for a design value. The pair is one shape, and
+   the shape is the one that shipped. */
 .aglist .agl-mslot {
-  width: 26px; height: 26px; border-radius: 6px; display: grid; place-items: center;
+  width: 28px; height: 28px; border-radius: 6px; display: grid; place-items: center;
   border: 1px solid var(--agl-hair); background: #fbf7f1; color: var(--agl-ink-body);
   cursor: default;
 }
@@ -1058,17 +1058,22 @@
 /* ══════════════════════════════════════════════════════════════════════════
    THE DASHED ADD SLOT (quick add, Phase 3; ref contact-list-quick-add-v1.html)
 
-   ⚠️ THE SAME 26px SQUARE AND 6px RADIUS AS THE MATERIAL SLOT, and that is the
-   whole idea: a hairline square is a thing they ask for, a ghosted one is a
-   thing they do not, and a DASHED one is a thing that could be here. Three
-   degrees of presence in one row, in one shape.
+   ⚠️ THE SAME BOX AND RADIUS AS THE MATERIAL SLOT, and that is the whole idea:
+   a hairline square is a thing they ask for, a ghosted one is a thing they do
+   not, and a DASHED one is a thing that could be here. Three degrees of
+   presence in one row, in one shape.
+
+   ⚠️ THE SHAPE IS THE MATERIAL SLOT'S, NOT A NUMBER OF ITS OWN. It follows that
+   rule rather than restating it, and the lock compares the two RULES rather
+   than asserting a literal on both sides — which is why taking the pair from 26
+   back to 28 moved one declaration and nothing else.
 
    Four states, off the ref: resting is barely there; the ROW's hover lifts every
    slot in it a step, so passing over a row shows what is missing without having
    to hunt; the slot's OWN hover goes solid and white; open is filled ink.
    ══════════════════════════════════════════════════════════════════════════ */
 .aglist .agl-gap {
-  width: 26px; height: 26px; padding: 0; border-radius: 6px;
+  width: 28px; height: 28px; padding: 0; border-radius: 6px;
   border: 1px dashed #ded2c6; background: transparent; color: #d0c4b7;
   display: grid; place-items: center; cursor: pointer;
   transition: border-color .14s, color .14s, background .14s;
