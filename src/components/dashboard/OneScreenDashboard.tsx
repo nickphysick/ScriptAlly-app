@@ -103,6 +103,12 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
 
   const firstName = (currentUser?.name ?? "").trim().split(/\s+/)[0] || "there";
 
+  /* ⚠️ THE FEED'S ACTION AND THE PANEL'S DRAWER, JOINED HERE BECAUSE THEY ARE IN DIFFERENT COLUMNS
+     (Phase 6). The rail's "Mark sent" hands up a query id; the to-do panel resolves it against the
+     live board and opens its own drawer on the card. One drawer on the page, one session, one write
+     path — a second one in the rail would be a second answer to what finishing a send involves. */
+  const [feedOpenQueryId, setFeedOpenQueryId] = useState<string | null>(null);
+
   /* ── §12 · the tour ── */
   const [touring, setTouring] = useState(false);
   /* the rail's expanded state is lifted here so the tour can collapse it before starting */
@@ -314,6 +320,8 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
             onAddAgent={() => onNavigate("agents", "Add an agent")}
             onNavigate={onNavigate}
+            openForQueryId={feedOpenQueryId}
+            onOpenHandled={() => setFeedOpenQueryId(null)}
           />
         </div>
 
@@ -331,6 +339,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           activeManuscript={activeManuscript}
           onNavigate={onNavigate}
           updateUserProfile={updateUserProfile}
+          onOpenTask={(queryId) => setFeedOpenQueryId(queryId)}
           now={now}
         />
       </div>

@@ -732,6 +732,74 @@
 .os-ahead .os-ctrls { margin-left: auto; }
 /* §10: the headline counts up once — tabular numerals so the width never jitters */
 
+/* ══ §6 · THE ACTIVITY FEED, AS A CONVERSATION (dashboard redesign, Phase 6) ═════════════════
+ *
+ * ⚠️ THE TIMELINE MARKUP IS RETIRED, RULE AND ELEMENT TOGETHER — `.os-tlev` and its thread, dot,
+ * connector and cardlet, plus `.os-r1`/`.os-st`/`.os-who`/`.os-cap`/`.os-tm`. Twelve classes, swept
+ * for renderers with comments stripped before any of them went; all twelve had none.
+ */
+
+/* ⚠️ TABS ON A HAIRLINE, NOT PILLS — a view selector, not a row of equal-weight buttons. The
+   active one underlines in BURGUNDY, which is one of the four places this repo permits it. */
+.os-ftabs { display: flex; gap: 14px; padding: 0 16px; border-bottom: 1px solid #f0e7db; flex: none; }
+.os-ftab {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 0; background: none; padding: 7px 0 6px; margin-bottom: -1px; cursor: pointer;
+  font: inherit; font-size: 12px; color: #8a7a6c; white-space: nowrap;
+  border-bottom: 2px solid transparent;
+}
+.os-ftab.on { color: #241811; border-bottom-color: #7c3a2a; }
+.os-ftab i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex: none; }
+.os-ftabn { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: #bfb2a3; }
+.os-ftab.on .os-ftabn { color: #8a7a6c; }
+
+/* ⚠️ THE DAY CAPTION IS CENTRED AND STICKY — it is the one thing in the column that is not a
+   message, so it sits on the axis nothing else does. */
+.os-aday {
+  position: sticky; top: 0; z-index: 2;
+  text-align: center; padding: 7px 0 5px;
+  font-family: "JetBrains Mono", monospace; font-size: 8.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: #bfb2a3; background: #fffdf9;
+}
+
+/* ⚠️ ALIGNMENT CARRIES DIRECTION, AND THERE IS NO LEGEND FOR IT. `in` is the agent's and hugs the
+   left; `out` is the writer's and hugs the right. A legend for a thing the layout already says is
+   the page explaining its own picture. */
+.os-bub { display: flex; align-items: flex-start; gap: 7px; padding: 0 16px; margin-bottom: 7px; }
+.os-bub.out { flex-direction: row-reverse; }
+/* a tight run: same side, same day — the furniture goes, the spacing closes up */
+.os-bub.run { margin-top: -4px; }
+.os-knot { flex: none; margin-top: 7px; }
+.os-bubin {
+  min-width: 0; max-width: 84%;
+  border-radius: 12px; padding: 7px 10px 8px;
+  /* the DEFAULT is the housekeeping / neutral treatment: white, a neutral hairline, no state */
+  background: #ffffff; border: 1px solid #e4dcd0;
+}
+.os-bub.in .os-bubin { border-top-left-radius: 4px; }
+.os-bub.out .os-bubin { border-top-right-radius: 4px; }
+.os-bublab {
+  display: flex; align-items: center; gap: 6px;
+  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: #8a7a6c; margin-bottom: 3px;
+}
+.os-bubsay { font-size: 12.5px; color: #241811; line-height: 1.35; }
+.os-bubmeta {
+  display: flex; align-items: baseline; gap: 8px;
+  font-size: 10.5px; color: #9b8c7c; margin-top: 3px;
+}
+.os-bubt { margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 9px; color: #bfb2a3; }
+/* ⚠️ ON HOVER, AND ON FOCUS-WITHIN — a control that only appears under a pointer is unreachable
+   from a keyboard, which is the fault the tasks card's own end-cell already records. */
+.os-bubact {
+  display: block; margin-top: 6px; opacity: 0;
+  border: 1px solid #d8cdbd; border-radius: 99px; background: #fffdf9;
+  padding: 3px 10px; font: inherit; font-size: 11px; color: #4a3a2e; cursor: pointer;
+  transition: opacity 0.14s ease;
+}
+.os-bub:hover .os-bubact, .os-bub:focus-within .os-bubact { opacity: 1; }
+@media (hover: none) { .os-bubact { opacity: 1; } }
+
 /* ══ §5 · THE TO-DO PANEL (dashboard redesign, Phase 5) ══════════════════════════════════════
  *
  * ⚠️ THE ROW MARKUP IS RETIRED, RULE AND ELEMENT TOGETHER — `.os-trow` and its twelve companions
@@ -1196,11 +1264,11 @@
 .os-abody { padding: 0 14px calc(var(--os-afoot-h) + 10px); }
 .os-aempty { min-height: 120px; display: grid; place-items: center; padding: 16px; position: relative; }
 .os-aempty span { font-family: var(--font-serif); font-style: italic; font-size: 13px; color: #b3a596; text-align: center; }
-.os-tlday { margin: 8px 0 6px; }
+
 /* ⚠️ THE CASCADE IS CAPPED AT THE FIRST EIGHT — beyond that a stagger is a queue you wait
    through, and the feed scrolls. Later cardlets simply appear. Scoped to `.enter`, which the page
    removes once, so no fill-mode survives the entrance. */
-.os-tlev { display: flex; gap: 9px; }
+
 .os-actv.enter .os-tlev { animation: os-rise 0.34s cubic-bezier(0.22, 0.68, 0.36, 1) backwards; }
 .os-actv.enter .os-tlev:nth-child(1) { animation-delay: 0.20s; }
 .os-actv.enter .os-tlev:nth-child(2) { animation-delay: 0.25s; }
@@ -1211,39 +1279,23 @@
 .os-actv.enter .os-tlev:nth-child(7) { animation-delay: 0.50s; }
 .os-actv.enter .os-tlev:nth-child(8) { animation-delay: 0.55s; }
 .os-actv.enter .os-tlev:nth-child(n+9) { animation: none; }
-.os-tlthread { width: 14px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.os-tlthread .os-tlln { width: 1.5px; flex: 1; background: #e8dcd0; }
-.os-tldot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid #cfc6bb; background: #efeae2; flex: none; }
-.os-cardlet {
-  flex: 1; background: #fffdf9; border: 1px solid #ece0d2; border-radius: 9px;
-  padding: 8px 10px; margin-bottom: 7px; min-width: 0;
-  transition: border-color 0.16s ease, background 0.16s ease;
-}
-.os-cardlet:hover { border-color: #ddd0c0; background: #fffdf9; }
-.os-cardlet .os-r1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px; }
-.os-st {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 6.5px; letter-spacing: 0.11em; text-transform: uppercase;
-  background: #f3e0d6; color: #7c3a2a; border-radius: 99px; padding: 2.5px 7px; white-space: nowrap;
-}
+
+
+
+
+
+
+
 .os-st.sg { background: #e9ede6; color: #5a6e58; }
 /* the pill and its run count travel together — see the two-children note in OneScreenRail */
-.os-r1l { display: flex; align-items: center; gap: 5px; min-width: 0; }
+
 /* ⚠️ QUIETER THAN THE PILL. The count is a footnote ON the event, not a second label competing
    with it — a filled chip here would read as a status of its own. */
 .os-runx { font-family: "JetBrains Mono", monospace; font-size: 6.5px; letter-spacing: 0.06em; color: #a89a8a; white-space: nowrap; }
-.os-tm { font-family: "JetBrains Mono", monospace; font-size: 7.5px; color: #b3a596; }
-.os-who {
-  font-family: var(--font-serif); font-size: 14px; color: #2c1a12;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  transition: color 0.14s ease;
-}
-.os-cardlet:hover .os-who { color: #6b3023; }
-.os-cap {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 6.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #9c8878; margin-top: 2px;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
+
+
+
+
 /* the foot caption is CENTRED on the card's own edge — it names the window, it is not a label */
 .os-afoot { flex: none; border-top: 1px solid #ece0d2; padding: 7px 16px; display: flex; align-items: center; justify-content: center; }
 .os-afoot .os-ac {
@@ -1395,10 +1447,10 @@
 .os-card.os-lift { transition: box-shadow 0.16s ease; }
 
 /* activity — the cardlet steps aside, its dot swells on a slight overshoot */
-.os-tlev .os-cardlet { transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1); }
-.os-tlev:hover .os-cardlet { transform: translateX(2px); }
-.os-tlthread > * { transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1); }
-.os-tlev:hover .os-tlthread > * { transform: scale(1.15); }
+
+
+
+
 
 /* author tile — the plate lifts and tips off-square as the whole card is hovered */
 .os-msicon { transition: transform 0.18s cubic-bezier(0.22, 0.68, 0.36, 1); }

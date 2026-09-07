@@ -12,10 +12,10 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ActivityType, QueryStatus, UserPlan } from "../../types";
-import { feedLabel, feedRows, OneScreenRail } from "./OneScreenRail";
+import { FEED_TABS, feedLabel, feedRows, feedTabOf, OneScreenRail } from "./OneScreenRail";
 import { deriveGoalProgress } from "../../lib/queryingGoals";
 import type { QueryingGoalEntry } from "../../types";
-import { cssRule } from "../../test/cssRule";
+import { cssRule, cssRuleCount } from "../../test/cssRule";
 
 const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
 const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
@@ -194,22 +194,124 @@ describe("the sage band and the timeline (app-shell-v2)", () => {
     expect(cssRule(cssRules, ".os-ahead h2", "oneScreen.css")).toContain("color: #2b3a29");
   });
 
-  /* ⚠️ THE DOTS ARE THE LOCKED COMPONENT. The mockup draws simplified circles; those are a
-     stand-in, and a local circle would lose the direction colouring the real dot carries.
-     Asserted on the COMPONENT, never on a colour. */
-  it("⚠️ the feed's dots are StatusDot instances at 9px, never local circles", () => {
+  /* ⚠️ RETARGETED (dashboard redesign, Phase 6). The dot is now the bubble's KNOT, hung off the
+     outer edge, at 13px rather than 9 — but the law it guards is unchanged and is the one worth
+     keeping: it is the locked COMPONENT, never a local circle, because a circle drawn here would
+     lose the direction colouring the real dot carries.
+
+     ⚠️ AND IT TAKES THE NORMALISED STATUS. `StatusDot`'s prop is `QueryStatus | string`, so the raw
+     `resultingStatus` would go straight through it and draw whatever the fallback happens to be —
+     a mark for a status the query does not have. `bubbleShape` returns an exact enum member or
+     `null`, and `null` draws no knot at all. */
+  it("⚠️ the feed's knot is a StatusDot instance, never a local circle, and never a raw string", () => {
     const src = readFileSync(resolve(__dirname, "./OneScreenRail.tsx"), "utf8");
-    expect(src).toContain("<StatusDot status={r.dotStatus} overrideSize={9} decorative />");
+    expect(src).toContain("<StatusDot status={r.status}");
     expect(src).toContain('import { StatusDot }');
+    /* the raw field must not reach the component */
+    expect(src).not.toContain("status={a.resultingStatus}");
+    expect(src).not.toContain("status={r.dotStatus}");
   });
 
-  it("the cardlet is parchment with a hairline and a 9px radius; the foot caption centres", () => {
-    const c = cssRules.slice(cssRules.indexOf(".os-cardlet {"));
-    const block = c.slice(0, c.indexOf("}"));
-    expect(block).toContain("background: #fffdf9");
-    expect(block).toContain("border-radius: 9px");
+  /* ⚠️ RETARGETED: the parchment CARDLET is retired with the timeline. The bubble's DEFAULT is the
+     housekeeping treatment — white, a neutral hairline, no state — and a query bubble overrides it
+     with a v2 fill inline. So the sheet asserts the neutral default and the absence of the twelve
+     retired timeline classes; the fill is asserted where it comes from, in `feedConversation`. */
+  it("the bubble's default is the housekeeping treatment: white, hairline, no state", () => {
+    const block = cssRule(cssRules, ".os-bubin", "oneScreen.css");
+    expect(block).toContain("background: #ffffff");
+    expect(block).toContain("border: 1px solid");
+    for (const dead of ["os-cardlet", "os-tlev", "os-tlthread", "os-tldot", "os-r1", "os-st",
+      "os-who", "os-cap", "os-tm", "os-tlday", "os-tlln", "os-r1l"]) {
+      expect(cssRuleCount(cssRules, `.${dead}`), `.${dead} survived the timeline`).toBe(0);
+    }
     const f = cssRules.slice(cssRules.indexOf(".os-afoot {"));
     expect(f.slice(0, f.indexOf("}"))).toContain("justify-content: center");
+  });
+});
+
+/* ══ §6 · THE FEED AS A CONVERSATION (dashboard redesign, Phase 6) ═══════════════════════════ */
+
+describe("the feed is a conversation", () => {
+  const railSrc = readFileSync(resolve(__dirname, "./OneScreenRail.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+
+  /* ⚠️ THE CLASSIFICATION IS `lib/feedConversation`'s, IMPORTED — not a second branch here. The
+     rail resolves the SUBJECT (which lookup names who an event is about); what a bubble IS comes
+     from one place, because `queryId` deciding it is the whole point. */
+  it("⚠️ the shape comes from feedConversation, and the rail derives none of its own", () => {
+    expect(railSrc).toContain('from "../../lib/feedConversation"');
+    expect(railSrc).toContain("bubbleShape(a)");
+    expect(railSrc).toContain("markSentOffered(a, queries)");
+    expect(railSrc).toContain("tightRunHeads(");
+  });
+
+  /* ⚠️ NO HOUSEKEEPING BUBBLE CONTAINS A StatusDot — it has no query state to draw, which is a
+     fact about the record rather than a style choice. Asserted at the guard that enforces it. */
+  it("⚠️ the knot is drawn only for a query bubble with a real status", () => {
+    expect(railSrc).toContain('r.kind === "query" && r.status && (');
+    /* and every fill comes from the v2 table, never a local hex */
+    expect(railSrc).toContain("STATE_TOKEN[r.state]");
+    for (const hex of ["#f7efe3", "#e0e5dd", "#f5e6df", "#d7e0e8"]) {
+      expect(railSrc, `${hex} is restated in the rail`).not.toContain(hex);
+    }
+  });
+
+  /* ⚠️ ALIGNMENT CARRIES DIRECTION — so the legends that used to name it are forbidden, not merely
+     absent. A legend for a thing the layout already says is the page explaining its own picture. */
+  it("⚠️ there is no From-agents / From-you legend", () => {
+    for (const gone of ["From agents", "From you", "From the agent"]) {
+      expect(railSrc, `${gone} is back`).not.toContain(gone);
+    }
+    expect(cssRules).toContain(".os-bub.out { flex-direction: row-reverse; }");
+  });
+
+  /* ⚠️ THE FOUR TABS SUM TO `all` BY CONSTRUCTION — `feedTabOf` gives each row exactly one tab and
+     `all` is the length rather than a fourth sum. A tab counted separately is how a summary comes
+     to disagree with the list beneath it. */
+  it("⚠️ every row lands in exactly one tab, and the three sum to All", () => {
+    expect(FEED_TABS.map((t) => t.key)).toEqual(["all", "in", "out", "desk"]);
+    const rows = [
+      { kind: "query" as const, side: "in" as const },
+      { kind: "query" as const, side: "out" as const },
+      { kind: "query" as const, side: "out" as const },
+      { kind: "housekeeping" as const, side: "out" as const },
+    ];
+    const tabs = rows.map(feedTabOf);
+    expect(tabs).toEqual(["in", "out", "out", "desk"]);
+    const counts = { in: 0, out: 0, desk: 0 } as Record<string, number>;
+    for (const t of tabs) counts[t]++;
+    expect(counts.in + counts.out + counts.desk).toBe(rows.length);
+    /* ⚠️ AND A HOUSEKEEPING ROW GOES TO Desk WHATEVER SIDE IT SITS ON — the tab follows `kind`
+       first, or a desk event aligned right would be counted as the writer's query traffic. */
+    expect(feedTabOf({ kind: "housekeeping", side: "out" })).toBe("desk");
+  });
+
+  /* ⚠️ FOUR THINGS WERE DESIGNED AND SET ASIDE, AND ARE ASSERTED ABSENT — thread highlighting, the
+     chart link, the month rail and the since-last-visit rule. A designed-and-parked feature is one
+     hover handler from arriving by accident. */
+  it("⚠️ the four parked features are not built", () => {
+    for (const parked of ["os-thread", "threadHighlight", "os-mrail", "monthRail", "sinceLastVisit", "os-since"]) {
+      expect(railSrc, `${parked} was built`).not.toContain(parked);
+      expect(cssRules, `${parked} has a rule`).not.toContain(parked);
+    }
+  });
+
+  it("the day caption is centred and sticky; a tight run drops its furniture", () => {
+    const day = cssRule(cssRules, ".os-aday", "oneScreen.css");
+    expect(day).toContain("position: sticky");
+    expect(day).toContain("text-align: center");
+    expect(railSrc).toContain("const head = runHeads[i];");
+    expect(railSrc).toContain("{head && (");
+  });
+
+  /* ⚠️ THE QUICK ACTION OPENS THE PANEL'S DRAWER, NOT ONE OF ITS OWN. A second pane in the rail
+     would be a second answer to what finishing a send involves, three inches from the first. */
+  it("⚠️ Mark sent hands a query id up rather than mounting a pane", () => {
+    expect(railSrc).toContain("onOpenTask?.(r.queryId)");
+    expect(railSrc, "the rail must not mount a pane of its own").not.toContain("<TaskPane");
+    expect(railSrc).not.toContain("SlideOver");
+    /* it is reachable from a keyboard, not only under a pointer */
+    expect(cssRules).toContain(".os-bub:hover .os-bubact, .os-bub:focus-within .os-bubact");
   });
 });
 

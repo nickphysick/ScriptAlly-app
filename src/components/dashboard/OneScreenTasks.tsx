@@ -84,11 +84,20 @@ export interface OneScreenTasksProps {
   onAddManuscript?: () => void;
   onAddAgent?: () => void;
   onNavigate: (tab: string, sub?: string) => void;
+  /**
+   * ⚠️ THE FEED'S "Mark sent" OPENS THIS DRAWER, NOT ONE OF ITS OWN. The activity feed is a sibling
+   * in another column, so the request arrives as a QUERY id and is resolved here against the live
+   * board — which is the only place that knows which card a query is currently raising. A second
+   * drawer over there would be a second answer to what finishing a send involves.
+   */
+  openForQueryId?: string | null;
+  onOpenHandled?: () => void;
 }
 
 export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
   loading, tasks, queries, agents, manuscripts, userTasks, activities, taskFlags, currentUser,
   now, dayOne = false, onSeeAll, onAddManuscript, onAddAgent, onNavigate,
+  openForQueryId, onOpenHandled,
 }) => {
   const [filter, setFilter] = useState<Category | null>(null);
   const [legendOpen, setLegendOpen] = useState(false);
@@ -119,7 +128,14 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
 
   /* ⚠️ THE OPEN CARD IS RESOLVED AGAINST THE LIVE BOARD, so a card that leaves the board while its
      drawer is open closes it rather than stranding a pane over a task that no longer exists. */
-  const openCard = useMemo(() => live.find((c) => c.key === openKey) ?? null, [live, openKey]);
+  /* ⚠️ TWO SELECTORS, ONE CARD. `openKey` is a ticket the writer clicked; `openForQueryId` is the
+     feed asking for whichever card a query is currently raising. Resolving both here — rather than
+     syncing one into the other in an effect — means there is no moment where they disagree. */
+  const openCard = useMemo(
+    () => live.find((c) => c.key === openKey)
+      ?? (openForQueryId ? live.find((c) => c.relatedRecordId === openForQueryId) ?? null : null),
+    [live, openKey, openForQueryId]);
+  const closeDrawer = () => { setOpenKey(null); onOpenHandled?.(); };
 
 
   /* ── the rule ─────────────────────────────────────────────────────────────────────────────── */
@@ -232,7 +248,7 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
         <Suspense fallback={null}>
           <DashTaskDrawer
             card={openCard}
-            onClose={() => setOpenKey(null)}
+            onClose={closeDrawer}
             onSeeAll={onSeeAll}
             onNavigate={onNavigate}
           />

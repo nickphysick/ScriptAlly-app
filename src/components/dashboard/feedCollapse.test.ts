@@ -24,6 +24,15 @@ const row = (over: Partial<FeedRow> & Pick<FeedRow, "id">): FeedRow => ({
   subjects: 1,
   subjectNames: [over.who ?? "Updated Sophie Dunn at Curtis Vane"],
   fromTime: "",
+  /* the conversation shape (Phase 6) — this fixture's rows are housekeeping, which is what a
+     row with no `queryId` is, so the defaults say exactly that */
+  kind: "housekeeping",
+  side: "out",
+  state: null,
+  status: null,
+  neutral: false,
+  markSent: false,
+  queryId: "",
   ...over,
 });
 

@@ -28,8 +28,38 @@ import { OneScreenPanel } from "./OneScreenPanel";
 import { OneScreenMark } from "./OneScreenMark";
 import targetMark from "../../assets/shell/query-target-icon.png";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
+import { bubbleShape, markSentOffered, tightRunHeads, type Side } from "../../lib/feedConversation";
+import { STATE_TOKEN, type State } from "../../lib/queryCardFacts";
 
 /* ── the 30-day feed, pure (exported for tests) ── */
+
+/**
+ * ⚠️ FOUR TABS, AND THEIR DOTS ARE DIRECTION MARKS RATHER THAN STATES. All · Agents · You · Desk —
+ * the same three groups the bubbles are aligned into, plus everything. The dot is a small direction
+ * cue beside the word, deliberately NOT one of the v2 state fills: a tab is not a status, and
+ * borrowing a state colour for it would put the chart's vocabulary on a view selector.
+ */
+export const FEED_TABS = [
+  { key: "all" as const, label: "All", dot: "" },
+  { key: "in" as const, label: "Agents", dot: "#9db497" },
+  { key: "out" as const, label: "You", dot: "#d8a894" },
+  { key: "desk" as const, label: "Desk", dot: "#cdc3b7" },
+];
+export type FeedTab = (typeof FEED_TABS)[number]["key"];
+
+/** Which tab a row belongs to — one row, one tab, so the counts sum to All by construction. */
+export const feedTabOf = (r: Pick<FeedRow, "kind" | "side">): Exclude<FeedTab, "all"> =>
+  r.kind === "housekeeping" ? "desk" : r.side;
+
+/** ⚠️ THE DEEPER STEP OF THE SAME FAMILY, for the bubble's own edge — same key as `STATE_TOKEN`,
+ *  so the fill and the border cannot fall out of step. */
+const STATE_ACCENT: Record<State, string> = {
+  queried: "var(--state-queried-deep)",
+  agent: "var(--state-agent-deep)",
+  you: "var(--state-you-deep)",
+  offer: "var(--state-offer-deep)",
+  closed: "var(--state-closed-deep)",
+};
 
 export interface FeedRow {
   id: string;
@@ -53,6 +83,23 @@ export interface FeedRow {
   subjectNames: string[];
   /** The EARLIEST time in a folded run, so a run reads as a span rather than one instant. */
   fromTime: string;
+
+  /* ── the conversation (dashboard redesign, Phase 6) ─────────────────────────────────────────
+     ⚠️ THE SHAPE IS `lib/feedConversation`'s, IMPORTED. `kind` is decided by the presence of a
+     `queryId` and by nothing else — keying it off `resultingStatus` would draw every pre-migration
+     query send as a white desk bubble, silently. `scope` above is a different question and stays:
+     it chooses which lookup resolves the SUBJECT, not what the bubble is. */
+  kind: "query" | "housekeeping";
+  side: Side;
+  /** the v2 state whose fill the bubble takes — `null` on housekeeping and on a neutral query */
+  state: State | null;
+  /** the exact status for `StatusDot`. Never a string that is not an enum member. */
+  status: QueryStatus | null;
+  /** a query event the record cannot place: no fill, no state label, and no guess */
+  neutral: boolean;
+  /** offered only while the query still sits at the request this bubble recorded */
+  markSent: boolean;
+  queryId: string;
 }
 
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -159,8 +206,13 @@ export const feedRows = (
     .map((x) => ({ a: x, t: new Date(x.date).getTime() }))
     .filter((x) => Number.isFinite(x.t) && x.t >= from && x.t <= now.getTime())
     .sort((x, y) => y.t - x.t)) {
+    const shape = bubbleShape(a);
     const pill = feedLabel(a);
-    if (!pill) continue; // an unmapped type is a bug — never a generic row
+    /* ⚠️ AN UNMAPPED HOUSEKEEPING TYPE IS STILL A BUG AND STILL DROPS — that law is unchanged. A
+       QUERY event with no label does NOT drop: it becomes a neutral bubble, because "this happened
+       on this query and the record does not say what it did" is true, and dropping it would hide
+       an event that occurred. */
+    if (!pill && shape.kind === "housekeeping") continue;
 
     let who = "";
     let caption = "";
@@ -227,6 +279,13 @@ export const feedRows = (
       subjects: 1,
       subjectNames: [who],
       fromTime: "",
+      kind: shape.kind,
+      side: shape.side,
+      state: shape.state,
+      status: shape.status,
+      neutral: shape.kind === "query" && shape.status === null,
+      markSent: markSentOffered(a, queries),
+      queryId: a.queryId ?? "",
     });
   }
   return collapseFeedRuns(rows);
@@ -341,11 +400,18 @@ export interface OneScreenRailProps {
    * bug — a count that drops when you switch books — is one nobody would think to check for.
    */
   goal: GoalProgress;
+  /**
+   * ⚠️ THE FEED'S ONE ACTION, AND IT OPENS THE PANEL'S DRAWER RATHER THAN A SECOND ONE. A
+   * "Mark sent" here that mounted its own pane would be a second answer to what finishing a send
+   * involves, three inches from the first. The rail hands up a query id; the dashboard resolves it
+   * to a card and the to-do panel opens on it — one drawer, one session, one write path.
+   */
+  onOpenTask?: (queryId: string) => void;
   now: Date;
 }
 
 export const OneScreenRail: React.FC<OneScreenRailProps> = ({
-  expanded, setExpanded, loading, queries, agents, manuscripts, activities, currentUser,
+  expanded, setExpanded, loading, queries, agents, manuscripts, activities, currentUser, onOpenTask,
   activeManuscript, onNavigate, updateUserProfile, goal, now,
 }) => {
   /* ⚠️ TWO PIECES OF STATE, AND NEITHER IS A DRAFT. The old inline editor kept a `goalDraft` in
@@ -359,6 +425,17 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
 
   const ms = activeManuscript ?? manuscripts[0] ?? null;
   const rows = useMemo(() => feedRows(activities, queries, agents, manuscripts, now), [activities, queries, agents, manuscripts, now]);
+  const [tab, setTab] = useState<FeedTab>("all");
+  /* ⚠️ THE COUNTS SUM TO `all` BY CONSTRUCTION, because `feedTabOf` gives each row exactly one tab
+     and `all` is the length rather than a fourth sum. A tab whose count is derived separately is
+     how a summary comes to disagree with the list beneath it. */
+  const tabCounts = useMemo(() => {
+    const c: Record<FeedTab, number> = { all: rows.length, in: 0, out: 0, desk: 0 };
+    for (const r of rows) c[feedTabOf(r)]++;
+    return c;
+  }, [rows]);
+  const shownRows = useMemo(() => (tab === "all" ? rows : rows.filter((r) => feedTabOf(r) === tab)), [rows, tab]);
+  const runHeads = useMemo(() => tightRunHeads(shownRows), [shownRows]);
 
   const setExp = useCallback((on: boolean) => {
     setExpanded(on);
@@ -553,46 +630,93 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
               : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>}
           </button>
         </div>
+        {/* ⚠️ TABS ON A HAIRLINE, NOT PILLS. A pill row reads as a set of buttons of equal weight;
+            these are a view selector, and the underline says which view you are in — the same
+            grammar the app's other tab rows use. The active one underlines in burgundy, which is one
+            of the four places this repo permits that colour. */}
+        {rows.length > 0 && (
+          <div className="os-ftabs" role="group" aria-label="Filter the feed">
+            {FEED_TABS.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                className={`os-ftab${tab === t.key ? " on" : ""}`}
+                aria-pressed={tab === t.key}
+                onClick={() => setTab(t.key)}
+              >
+                {t.key !== "all" && <i style={{ background: t.dot }} aria-hidden="true" />}
+                {t.label}
+                <span className="os-ftabn">{tabCounts[t.key]}</span>
+              </button>
+            ))}
+          </div>
+        )}
         {/* ⚠️ THE SHARED FADE (polish P2) — conditional by construction, so a short feed shows
             none and the end of a long one is honestly the end. See the tasks card for the rule. */}
         <EdgeFadeScroll fade="#fffdf9" outerClassName="os-abodywrap" scrollClassName="os-abody" scrollId="os-actv-body">
-          {rows.length === 0 ? (
+          {shownRows.length === 0 ? (
             <div className="os-aempty">
               <span className="os-aempty-thread" aria-hidden="true" />
-              <span>The story starts with your first query.</span>
+              <span>{tab === "all" ? "The story starts with your first query." : "Nothing here yet."}</span>
             </div>
           ) : (
-            rows.map((r, i) => (
-              <React.Fragment key={r.id}>
-                {(i === 0 || r.dayLabel !== rows[i - 1].dayLabel) && <div className="os-tlday os-lbl">{r.dayLabel}</div>}
-                <div className="os-tlev">
-                  <div className="os-tlthread">
-                    {r.dotStatus
-                      ? <StatusDot status={r.dotStatus} overrideSize={9} decorative />
-                      : <span className="os-tldot" aria-hidden="true" />}
-                    <span className="os-tlln" aria-hidden="true" />
-                  </div>
-                  <div className="os-cardlet">
-                    {/* ⚠️ TWO CHILDREN, ALWAYS. `.os-r1` is space-between, so a bare third child
-                        would be pushed to the middle of the row rather than sitting with the pill. */}
-                    <div className="os-r1">
-                      <span className="os-r1l">
-                        <span className={`os-st${r.sage ? " sg" : ""}`}>{runPill(r)}</span>
-                        {/* ⚠️ A FOLDED RUN STATES ITS SIZE AND ITS SPAN — without the count, the
-                            fold is indistinguishable from events having gone missing. */}
-                        {r.count > 1 && <span className="os-runx">×{r.count}</span>}
+            shownRows.map((r, i) => {
+              /* ⚠️ A TIGHT RUN DROPS THE FURNITURE, NEVER THE BUBBLE — the first of a same-side run
+                 keeps its state label and its meta line so the burst can still be dated and
+                 attributed; the rest read as one burst. */
+              const head = runHeads[i];
+              const newDay = i === 0 || r.dayLabel !== shownRows[i - 1].dayLabel;
+              return (
+                <React.Fragment key={r.id}>
+                  {newDay && <div className="os-aday">{r.dayLabel}</div>}
+                  {/* ⚠️ ALIGNMENT CARRIES DIRECTION, so there is no "From agents / From you" legend
+                      — a legend for a thing the layout already says is the page explaining its own
+                      picture. */}
+                  <div className={`os-bub ${r.side}${r.kind === "housekeeping" ? " desk" : ""}${head ? "" : " run"}`}>
+                    {/* ⚠️ THE KNOT IS THE REAL `StatusDot`, HUNG OFF THE OUTER EDGE — and a
+                        HOUSEKEEPING bubble has none, because it has no query state to draw. That is
+                        not a style choice: the dot is the app's one drawing of a query status, and
+                        an event not tied to a query has no status to show. */}
+                    {r.kind === "query" && r.status && (
+                      <span className="os-knot" aria-hidden="true">
+                        <StatusDot status={r.status} overrideSize={13} decorative />
                       </span>
-                      <span className="os-tm">{r.count > 1 && r.fromTime ? `${r.fromTime}–${r.time}` : r.time}</span>
-                    </div>
-                    {/* ⚠️ SUBJECT ON THE LINE, CONTEXT BENEATH — never a sentence spanning both. */}
-                    <div className="os-who">{runLines(r)?.line ?? r.who}</div>
-                    {(runLines(r)?.caption || r.caption) && (
-                      <div className="os-cap">{runLines(r)?.caption || r.caption}</div>
                     )}
+                    <div
+                      className="os-bubin"
+                      /* ⚠️ THE FILL IS THE v2 STATE, THROUGH `STATE_TOKEN` — never a local table.
+                         A neutral query bubble and a housekeeping bubble both take none, and the
+                         stylesheet's default carries them. */
+                      style={r.state ? { background: STATE_TOKEN[r.state], borderColor: STATE_ACCENT[r.state] } : undefined}
+                    >
+                      {head && (
+                        <div className="os-bublab">
+                          {r.kind === "housekeeping" ? "Housekeeping" : (r.pill || "On this query")}
+                          {r.count > 1 && <span className="os-runx">×{r.count}</span>}
+                        </div>
+                      )}
+                      <div className="os-bubsay">{runLines(r)?.line ?? r.who}</div>
+                      {head && (
+                        <div className="os-bubmeta">
+                          {r.kind === "housekeeping"
+                            ? "Not tied to a query"
+                            : (runLines(r)?.caption || r.caption || "")}
+                          <span className="os-bubt">{r.count > 1 && r.fromTime ? `${r.fromTime}–${r.time}` : r.time}</span>
+                        </div>
+                      )}
+                      {/* ⚠️ OFFERED ONLY WHILE THE REQUEST IS STILL OPEN — read from the QUERY's
+                          current status, never stored on the event, so it disappears the moment
+                          the materials go out. */}
+                      {r.markSent && (
+                        <button type="button" className="os-bubact" onClick={() => onOpenTask?.(r.queryId)}>
+                          Mark sent
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </React.Fragment>
-            ))
+                </React.Fragment>
+              );
+            })
           )}
         </EdgeFadeScroll>
         <div className="os-esc">Click the arrows, press Escape, or click away to close</div>
