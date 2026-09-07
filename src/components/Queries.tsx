@@ -6263,6 +6263,10 @@ export const Queries: React.FC<{
                  popover simply anchors to its own button. Sending these through `openDeskVerb`
                  would put a composing surface over a one-answer question. */
               onSnooze={(anchor) => { if (activeQuery) openQuick("snooze", activeQuery.id, anchor); }}
+              /* the row's OWN reminder clause, not a second spelling of it — see the prop's note */
+              reminderLabel={panelRow && panelRow.facts.nudgePartIndex != null
+                ? panelRow.facts.captionParts[panelRow.facts.nudgePartIndex] ?? null
+                : null}
               onMarkClosed={(anchor) => { if (activeQuery) openQuick("close", activeQuery.id, anchor); }}
               onClose={() => onSelectView?.("cards")}
               onStep={(delta) => {

@@ -973,6 +973,40 @@ describe("§4 (quick actions) · no drawer, no desk, no selection — and one co
   });
 
   /**
+   * ⚠️ THE THIRD ANCHOR, AND IT IS DRIVEN BY THE FACTS RATHER THAN BY THE PROSE. Which caption
+   * clause is the reminder comes from `nudgePartIndex`; a view testing `part.startsWith("Nudge
+   * agent in")` would stop being a control the day the wording changed, silently. This file
+   * already records the same lesson from the other direction — the drawer's tray used to REGEX
+   * the caption for a figure and went on labelling a true number with a false label.
+   */
+  it("the reminder clause is a control in BOTH places, and neither matches on the wording", () => {
+    const facts = readFileSync(join(process.cwd(), "src/lib/queryCardFacts.ts"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(facts, "the facts stopped publishing which clause is the reminder").toContain("nudgePartIndex");
+    /* the list's clause */
+    expect(list).toContain("i === f.nudgePartIndex && v.nudge");
+    expect(list).toContain('onVerb?.(r.id, "snooze", e.currentTarget)');
+    /* the drawer's clause — the SAME string, passed in rather than rebuilt */
+    expect(panel).toContain("reminderLabel && onSnooze && verbs.nudge");
+    expect(page).toContain("panelRow.facts.captionParts[panelRow.facts.nudgePartIndex]");
+    /* neither surface may recognise the clause by reading it */
+    for (const view of [list, panel]) {
+      expect(view, "a view matched the reminder clause on its wording")
+        .not.toMatch(/Nudge agent in|no nudge set/);
+    }
+  });
+
+  /* ⚠️ THE DASHED UNDERLINE IS THE PANE'S "edit in place", NOT THE TIMELINE'S "provisional".
+     Two grammars live three inches apart on this page and the repo already paid for diluting
+     one; both anchors wear the same one, and it is asserted so a restyle cannot split them. */
+  it("both reminder clauses wear one dashed treatment", () => {
+    const lcss = readFileSync(join(process.cwd(), "src/components/queries/queryListView.css"), "utf8");
+    const pcss = readFileSync(join(process.cwd(), "src/components/queries/queryPanel.css"), "utf8");
+    expect(lcss).toMatch(/\.qlv-snz \{[^}]*border-bottom: 1px dashed #cdbfae/);
+    expect(pcss).toMatch(/\.qpn-snz \{[^}]*border-bottom: 1px dashed #cdbfae/);
+  });
+
+  /**
    * ⚠️ SNOOZE WRITES NO ACTIVITY — the claim its own sub-line makes to the reader. Asserted over
    * the write's body, and it names the activity primitives rather than counting calls, because
    * "one call fewer" is not the claim: the claim is that NONE of them is reachable from here.

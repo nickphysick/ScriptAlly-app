@@ -108,6 +108,16 @@ export interface CardFacts {
    */
   captionParts: string[];
   /**
+   * ⚠️ WHICH CLAUSE IS THE REMINDER, AS AN INDEX — because the quick-action anchor needs to make
+   * exactly that clause a control (§4.2), and the alternative is a renderer matching the prose it
+   * was handed. This file already records why that is wrong: the drawer's tray used to REGEX the
+   * caption for a figure, and the day the caption changed it went on labelling a true number with
+   * a false label. A view that tests `part.startsWith("Nudge agent in")` is the same mistake with
+   * a shorter regex — the wording is this module's to change, and it would silently stop being a
+   * control the moment it did. `null` where the caption carries no reminder clause at all.
+   */
+  nudgePartIndex: number | null;
+  /**
    * ⚠️ HOW LONG THIS HAS BEEN WAITING, AS A NUMBER — because the drawer's stat tray was REGEXING
    * the caption for it (`/^(\d+)\s+(\w+)/`) and v14's new caption opens with a different figure
    * entirely. The tray would have gone on labelling it "waiting so far" while showing days-to-
@@ -418,6 +428,7 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
   let caption: string;
   /* set only where a caption has more than one clause; otherwise derived from `caption` below */
   let captionParts: string[] | null = null;
+  let nudgePartIndex: number | null = null;
   let attention = false;
 
   if (expectedApplies) {
@@ -450,6 +461,10 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
           `${spanWords(away)} away`,
           nudgeIn != null && nudgeIn > 0 ? `Nudge agent in ${spanWords(nudgeIn)}` : "no nudge set",
         ];
+        /* ⚠️ BOTH WORDINGS ARE THE REMINDER CLAUSE — "no nudge set" is as much a reminder control
+           as a date is, because pressing it is how you set one. Marking only the dated form would
+           make the affordance appear and disappear with the data. */
+        nudgePartIndex = 1;
         caption = captionParts.join(" · ");
       }
     } else {
@@ -520,6 +535,7 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
     sentence,
     caption,
     captionParts: captionParts ?? (caption ? caption.split(" · ") : []),
+    nudgePartIndex,
     elapsed: (() => { const [v, u] = span(sinceSend); return { value: v, unit: u }; })(),
     attention,
     expectedReply,

@@ -123,6 +123,13 @@ export interface QueryPanelProps {
   elapsed: { value: string; unit: string; caption: string };
   expectedLabel: string;
   /**
+   * ⚠️ THE REMINDER CLAUSE, WORD FOR WORD FROM THE ROW'S OWN CAPTION (§4.2) — passed in rather
+   * than rebuilt, because this is the same sentence the list states and two spellings of one
+   * fact is how the drawer and the list come to disagree about when you asked to be reminded.
+   * Absent where the query carries no reminder clause; a control only where Snooze is offered.
+   */
+  reminderLabel?: string | null;
+  /**
    * ⚠️ THE TABS' BODIES ARRIVE AS NODES, BUILT BY THE PAGE. The Tracking tab is the shared
    * QueryTimeline with the page's own correction/nudge/record wiring; building it in here would
    * mean threading fifteen handlers through this component to a renderer that already exists.
@@ -146,7 +153,7 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
   facts, status, name, agency, initials, sentLabel, viaLabel,
   manuscriptTitle, manuscriptMeta, versionLabel,
   position, primaryLabel, onPrimary, onNudge, liveAction = null, onMarkClosed, onSnooze, onClose, onStep,
-  elapsed, expectedLabel, tracking, agentTab, notesTab, noteCount,
+  elapsed, expectedLabel, reminderLabel, tracking, agentTab, notesTab, noteCount,
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const [tab, setTab] = useState<PanelTab>(readTab);
@@ -373,6 +380,14 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
                     <div>
                       <div className="qpn-big">{expectedLabel}</div>
                       <div className="qpn-cap">reply expected by</div>
+                      {/* the third anchor's second half — the same popover the verb row's Snooze
+                          opens, reached by pressing the phrase that states the date */}
+                      {reminderLabel && onSnooze && verbs.nudge && (
+                        <button
+                          type="button" className="qpn-snz"
+                          onClick={(e) => onSnooze(e.currentTarget)}
+                        >{reminderLabel}</button>
+                      )}
                     </div>
                   </div>
                 </div>

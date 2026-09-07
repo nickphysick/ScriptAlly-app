@@ -177,7 +177,19 @@ export const QueryListView: React.FC<{
                 {f.captionParts.map((part, i) => (
                   <React.Fragment key={i}>
                     {i > 0 && <i className="qlv-pipe" aria-hidden="true" />}
-                    <span>{part}</span>
+                    {/* ⚠️ THE REMINDER CLAUSE IS THE THIRD ANCHOR (§4.2) — the same popover the
+                        row's bell and the drawer's verb open, reached by pressing the phrase that
+                        states the date. Which clause that is comes from the facts, never from
+                        matching the prose: the wording belongs to `queryCardFacts`, and a view
+                        testing for it would stop being a control the day it was reworded. */}
+                    {i === f.nudgePartIndex && v.nudge ? (
+                      <button
+                        type="button" className="qlv-snz"
+                        onClick={(e) => { e.stopPropagation(); onVerb?.(r.id, "snooze", e.currentTarget); }}
+                      >{part}</button>
+                    ) : (
+                      <span>{part}</span>
+                    )}
                   </React.Fragment>
                 ))}
               </span>
