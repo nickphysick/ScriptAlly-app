@@ -38,14 +38,6 @@
      the same token. Measured: foot 25.5px rendered, last row 36px clear of it. */
   --os-afoot-h: 26px;
   /**
-   * ⚠️ THE PASTILLE, AS TOKENS (fixes-2 A5) — the same treatment is wanted on other pages' header
-   * pills, and four loose hexes repeated per surface is how three pages end up nearly matching.
-   */
-  --os-pastille-bg: #f4f7fa;
-  --os-pastille-line: #dde6ee;
-  --os-pastille-ink: #4a5a6b;
-  --os-pastille-fig: #2c3f52;
-  /**
    * ⚠️ THE PAGE SKELETON'S MEASURED HEIGHTS, AND ITS PAPER (P1) — declared in THIS rule for the
    * reason stated above: a second `.os-root` block is invisible to the smoke test's slice.
    *
@@ -321,22 +313,17 @@
   border: 1px solid #e3d9cc; border-radius: 10px; padding: 7px 12px; white-space: nowrap;
 }
 .os-datechip svg { width: 13px; height: 13px; stroke: #7c3a2a; fill: none; stroke-width: 1.7; flex: none; }
-.os-pills { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 14px; padding-bottom: 6px; }
-/* ⚠️ THESE ARE THE HEADER PILLS THE PASTILLE WAS FOR (fixes-2 A5), and the previous pass put it
-   on `.os-p` — the TASKS TRIO — instead. Two different pills, similar names, and the colour landed
-   on the wrong one while the copy change landed on the right one. */
-.os-pill {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--os-pastille-bg); border: 1px solid var(--os-pastille-line); border-radius: 99px;
-  padding: 5px 12px; font-size: 11.5px; color: var(--os-pastille-ink); white-space: nowrap;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-.os-pill:hover { border-color: #c9d6e2; }
-.os-pill b { font-family: var(--font-serif); font-size: 13px; color: var(--os-pastille-fig); font-weight: 500; }
-.os-pill.sg { background: #e9ede6; border-color: #d6ddd2; color: #5a6e58; }
-.os-pill.sg b { color: #3f5a3c; }
-.os-pill.pk { background: #f8ece4; border-color: #e8c8bc; color: #6b3023; }
-.os-pill.pk b { color: #6b3023; }
+/* ⚠️ `.os-pills` AND `.os-pill` ARE RETIRED WITH THE ROW THEY DRESSED (dashboard redesign, Phase 3).
+   The greeting's tenure and achievement pills are gone; nothing in `src/` renders either class, and
+   a rule the stylesheet selects on that no component emits is a rule with no subject — this repo has
+   shipped a whole entrance animation into that state once already.
+
+   ⚠️ AND THE `--os-pastille-*` TOKENS GO WITH THEM — CHECKED, NOT ASSUMED. The first draft of this
+   note said `.os-p` (the tasks trio) reads them and they must stay. It does not: `.os-p` is WHITE and
+   its own lock says so in as many words — "the trio is white, so it must NOT read the pastille". The
+   pills were the only consumer, so removing them left four tokens declared and read by nothing, which
+   is the orphan the inverse sweep exists to catch. A grep for `var(--os-pastille` is what settled it;
+   the claim in the comment was worth exactly what it was checked against. */
 
 /* ══ §8 · SKELETONS ══
    Overlay per card; content goes opacity:0 so the layout cannot shift when data lands.
@@ -454,15 +441,12 @@
 @media (max-width: 1360px) {
   .os-content { grid-template-columns: 276px minmax(0, 1fr) 262px; column-gap: 14px; padding: 16px 22px 22px; }
   .os-greet h1 { font-size: 40px; }
-  .os-pills { gap: 6px; }
 }
 @media (max-width: 1240px) {
   .os-greet h1 { font-size: 34px; }
 }
 @media (max-width: 1200px) {
   .os-content { grid-template-columns: 256px minmax(0, 1fr) 240px; }
-  /* the achievement slot is the softest fact — it gives ground first (§11) */
-  .os-pills .os-pill:nth-child(2) { display: none; }
 }
 /* ⚠️ THE LOCK RELEASES (§11) — one column, the page scrolls. `!important` is retained: the base
    rule is only `height:100%` now, but the release must also beat any future inline or shell-side
@@ -483,7 +467,6 @@
   .os-colM .os-tasks { flex: none; max-height: none; }
   .os-colL .os-aut, .os-colL .os-comm, .os-colL .os-probanner { flex: none; }
   .os-colR .os-actv { flex: none; }
-  .os-pills .os-pill:nth-child(2) { display: inline-flex; }
 }
 /* short desktop viewports: the promise cannot be kept, so stop pretending (§11) */
 @media (max-height: 680px) and (min-width: 1025px) {
@@ -506,13 +489,25 @@
 
 /* ══ THE HEADER COUNTERS ══ */
 /* takes ALL the remaining width; min-width:0 so a long greeting cannot push it out of the row */
+/* ⚠️ THE CONTAINER IS GONE (dashboard redesign, Phase 3) — the three stats sit directly on the
+   page ground beside the greeting. What went is the CARD: `.os-card`'s paper, its radius, its
+   shadow and its `::after` rim, none of which this element carries any more.
+
+   ⚠️ AND THEY ARE CENTRED IN THE REMAINING WIDTH, NOT PUSHED RIGHT. The greeting is `flex: 0 0 auto`
+   and sizes to its widest child; the stats take everything after the gap and `justify-content:
+   center` centres them INSIDE that. Pushing right (`margin-left: auto` on a shrink-wrapped row)
+   would tie their position to the greeting's length, so the row would shift every time the writer's
+   name or the date changed underneath it. */
 .os-counters {
   flex: 1; min-width: 0;
-  display: flex; align-items: stretch;
-  padding: 16px 10px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0;
 }
-/* ⚠️ READOUTS, NOT CONTROLS — no lift, ever. Stated even though the card carries no `os-lift`,
-   so adding the class later cannot quietly re-arm a hover that promises a click. */
+/* ⚠️ READOUTS, NOT CONTROLS — no lift, ever. Kept after the card came off (Phase 3): the element
+   no longer carries `.os-card`, so these two rules select nothing TODAY, and they are the guard
+   against someone putting it back. A rule with no subject is normally the fault this repo records;
+   here the absence of the subject IS the state being guarded, which is the one case where keeping
+   it is right rather than sentimental. */
 .os-card.os-counters:hover, .os-card.os-counters.os-lift:hover {
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06);
   transform: none;
@@ -526,10 +521,14 @@
 /* equal thirds, each CENTRED within its own third — not spread to the edges.
    ⚠️ NOT `.os-ct`: that name belonged to the retired book-spine title, and a class that has meant
    two different things is a class nobody can grep. */
+/* ⚠️ `flex: 0 1 auto`, NOT `flex: 1` (Phase 3). Inside the card each stat took an equal third of
+   a fixed box and the row filled it exactly, so `justify-content` had nothing to do. On the open
+   ground the three shrink-wrap and the GROUP is what centres — which is what makes "centred in
+   the remaining width" a statement rather than a no-op. Padding widens to carry the space the
+   card's own used to. */
 .os-counter {
   display: flex; align-items: center; justify-content: center; gap: 12px;
-  flex: 1; min-width: 0; padding: 2px 14px;
-  border-left: 1px solid #f0e7db;
+  flex: 0 1 auto; min-width: 0; padding: 2px 26px; border-left: 1px solid #f0e7db;
 }
 .os-counter:first-child { border-left: none; }
 /**
@@ -557,6 +556,25 @@
   mix-blend-mode: multiply;
   transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1);
 }
+/**
+ * ⚠️ 44px, AND THE CEILING IS THE ARTWORK'S — MEASURED, NOT CHOSEN (dashboard redesign, Phase 3).
+ *
+ * The pack asked for 96px, "up from 74". Neither figure was the page's: they were 44 (54 for the
+ * plane) and had been. More usefully, these are RASTERS, so the honest ceiling is the source's own
+ * resolution at the device pixel ratio the app targets — and the app ships one resolution with no
+ * `srcset` and no DPR handling anywhere, so at DPR 2 the ceiling is half the intrinsic size:
+ *
+ *     agents-on-file-icon.png    100 × 100  →  50px
+ *     response-rate-icon.png     100 × 100  →  50px
+ *     active-query-image.png     800 × 800  → 400px   (the plane; huge headroom, and unused)
+ *
+ * Two of the three bind at 50px, which is below the ~64px the brief set as the floor worth moving
+ * for. So they stay at 44 and the plane stays at its own 54 — every mark is inside its ceiling
+ * today, and growing them would be upsampling a 100px PNG to fill a box it cannot fill.
+ *
+ * ⚠️ THE FIX IS BIGGER SOURCE ARTWORK, NEVER A BIGGER BOX. If the marks are wanted larger, the two
+ * 100px files are re-exported at 2× the intended display size and this number moves with them.
+ */
 .os-cic {
   width: 44px; height: 44px;
   /* the overhang is absorbed, so the counter's text sets the row height */
@@ -632,7 +650,6 @@
    lands on 1240 exactly as the pack asks, because the page already breaks there. One rhythm. */
 @media (max-width: 1360px) {
   .os-greet { gap: 24px; }
-  .os-counters { padding: 14px 6px; }
   .os-counter { padding: 2px 10px; gap: 10px; }
   .os-cn { font-size: 21px; }
 }
@@ -640,13 +657,13 @@
   .os-greet { gap: 18px; }
   /* the round marks are the only thing here that can go without losing information */
   .os-cic { display: none; }
-  .os-counters { padding: 12px 4px; }
   .os-counter { padding: 2px 8px; }
 }
 @media (max-width: 1024px) {
   /* the header stacks: greeting first, the card full width beneath it */
   .os-greet { flex-direction: column; align-items: flex-start; padding-bottom: 0; }
-  .os-counters { width: 100%; margin-top: 4px; }
+  /* stacked, the stats have no leftover width to centre in — they start where the greeting does */
+  .os-counters { width: 100%; margin-top: 4px; justify-content: flex-start; }
 }
 
 /* ══ §3 · THE CHART CARD ══ */

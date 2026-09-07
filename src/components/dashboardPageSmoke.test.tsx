@@ -26,10 +26,14 @@ describe("/dashboard renders", () => {
      by §9's DAY ONE — Getting started kicker, the chart as an invitation, the ghost CTAs. */
   it("…and produces the day-one chrome, so it is not an empty shell that merely did not crash", () => {
     const html = renderPage(page());
-    /* ⚠️ RETARGETED (v16 §1): the kicker line is RETIRED — a muted date line sits above the
-       greeting instead, and day one now announces itself with its pill and the chart's
-       invitation rather than a "Getting started" kicker. */
-    expect(html).toContain(">Day one<");
+    /* ⚠️ RETARGETED TWICE. First (v16 §1) off the "Getting started" kicker onto the Day-one PILL;
+       now (dashboard redesign, Phase 3) off the pill, because the greeting's pill row is retired
+       with the tenure and achievement pills it sat beside. Day one announces itself in the chart's
+       invitation and the tasks card's own empty state, both of which are asserted below and both of
+       which are the page's actual first-run content rather than a badge over it.
+
+       ⚠️ AND A SMOKE PINS THE MINIMUM, NOT THE APPEARANCE — this repo's own rule for page smokes,
+       and this line is the third time that has had to be re-learned on one page. */
     expect(html).toContain("Every query you send and every reply that comes back will be charted here.");
     expect(html).toContain("Send your first query");
   });
@@ -46,8 +50,12 @@ describe("/dashboard renders", () => {
   it("…and that render is the real dashboard — the chart card, not the day-one panel", () => {
     const html = renderPageSeeded(page());
     expect(html).toContain("Active queries");   // the chart card, the page's spine
-    expect(html).toContain("Querying since");   // the tenure pill
+    expect(html).toContain("Agents on file");   // the stats, on the ground since Phase 3
     expect(html).toContain("Querying goals");   // the rail
-    expect(html).not.toContain(">Day one<"); // day one has stood down
+    /* ⚠️ DAY ONE HAS STOOD DOWN, asserted on the CHART's own invitation. The first try used the
+       rail's "The story starts with your first query." — which is the empty ACTIVITY FEED's line and
+       shows on the seeded fixture too, so it discriminated nothing. A day-one check has to name copy
+       that only day one produces. */
+    expect(html).not.toContain("Every query you send and every reply that comes back will be charted here.");
   });
 });

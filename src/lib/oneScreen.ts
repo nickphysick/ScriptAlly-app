@@ -237,13 +237,29 @@ export const headerCounters = (queries: Query[], agents: Agent[], now: Date): He
   }, 0);
 
   const responses = responsesReceivedCount(queries);
-  /* the rate is omitted outright when there is nothing to divide or nothing to report */
-  const rate = sent > 0 && responses > 0 ? Math.round((responses / sent) * 100) : null;
+  /**
+   * ⚠️ THE CHIP STATES THE DENOMINATOR, NOT A PERCENTAGE (dashboard redesign, Phase 3).
+   * "12 · of 21" rather than "12 · 57%". A rate is a figure the reader has to unpack against a
+   * total they cannot see; the total IS the interesting half, and stating it makes the numeral
+   * beside it mean something without arithmetic.
+   *
+   * ⚠️ AND IT QUIETLY SETTLES A DISAGREEMENT THIS FILE RECORDED. `dashboardStats.responseRatePercent`
+   * divides by EVERY query while this divided by queries SENT, so two things called "response rate"
+   * gave different answers — noted here as a bug in the shared selector and a tracked follow-up.
+   * This surface no longer states a rate at all, so it can no longer disagree with one. The selector
+   * is still understated wherever else it is used; that is unchanged and still owed.
+   *
+   * ⚠️ THE OMISSION CONDITION IS UNTOUCHED, DELIBERATELY. It is arguably now too strict — "0 · of 21"
+   * is a true and useful thing to say, where "0%" read as a measurement of nothing — but loosening
+   * when a chip appears is a product decision rather than a copy change, and it is flagged in the
+   * run report rather than taken here.
+   */
+  const denominator = sent > 0 && responses > 0 ? sent : null;
 
   return [
     { key: "sent", label: "Queries sent", n: sent, ...(sentRecently > 0 ? { chip: `↑ ${sentRecently}` } : {}) },
     { key: "agents", label: "Agents on file", n: agents.length, ...(addedRecently > 0 ? { chip: `↑ ${addedRecently}` } : {}) },
-    { key: "responses", label: "Responses", n: responses, ...(rate !== null ? { chip: `${rate}%` } : {}) },
+    { key: "responses", label: "Responses", n: responses, ...(denominator !== null ? { chip: `of ${denominator}` } : {}) },
   ];
 };
 

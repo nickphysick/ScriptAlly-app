@@ -270,26 +270,24 @@ describe("§2 · the greeting", () => {
     expect(r).toContain("margin-top: 6px");
   });
 
-  /* ⚠️ TWO PILLS NOW. The agents count moved to the counters card — one number, one home; two
-     homes is how they come to disagree. */
-  it("the pills are tenure then achievement, and the agents pill is GONE", () => {
+  /* ⚠️ RETARGETED (dashboard redesign, Phase 3) — THE PILLS ARE RETIRED, and this asserts that
+     they went rather than what they said. "Querying since {month}" and the achievement pill were
+     both true and neither was work: one states how long you have been at it, the other congratulates
+     you, on a page whose job is to show what needs doing.
+
+     ⚠️ THE COPY LITERALS ARE KEPT IN THE NEGATIVE, DELIBERATELY. This case previously carried a note
+     recording that retargeting it off the copy once PINNED A REGRESSION — the source had reverted to
+     older wording and the test was changed to match it. Asserting the sentences are ABSENT keeps the
+     same anchor pointing the other way, so a pill reinstated with either wording fails here. */
+  it("the greeting's two pills are RETIRED — no tenure, no achievement, no row", () => {
     const html = render();
-    const pills = html.indexOf("os-pills");
-    expect(pills).toBeGreaterThan(-1);
-    const tenure = html.indexOf("Querying since", pills);
-    /* ⚠️ THE LITERAL IS BACK, AND MY REMOVING IT WAS THE MISTAKE. I retargeted this onto the
-       `os-pill ach` class on the reasoning that the copy was fixture-dependent. It was not: the
-       pill genuinely reads "out with agents", and the reason the source said "awaiting a reply"
-       was that `a7b5d54` had reverted `oneScreen.ts` to the older wording. So the assertion was
-       right, the source was wrong, and retargeting the test PINNED THE REGRESSION — the same
-       fault as the census. Anchored on the copy again, because the copy is the decision:
-       "the writer is the subject of it. The queries are somewhere, doing something." */
-    const ach = html.indexOf("out with agents", pills);
-    expect(tenure).toBeGreaterThan(-1);
-    expect(ach).toBeGreaterThan(tenure);
-    // the phrase survives ONLY as the counter's label, never as a pill
-    const pillRow = html.slice(pills, html.indexOf("os-counters"));
-    expect(pillRow).not.toContain("agents on file");
+    expect(html).not.toContain("os-pills");
+    expect(html).not.toContain("os-pill");
+    expect(html).not.toContain("Querying since");
+    expect(html).not.toContain("out with agents");
+    /* the greeting keeps its name and its question — the row went, the address did not */
+    expect(html).toContain("Hello, ");
+    expect(html).toContain("on your desk today?");
   });
 
   it('the counter says "Agents on file" — "on file", never "met"', () => {
@@ -297,8 +295,17 @@ describe("§2 · the greeting", () => {
     expect(render()).not.toContain("agents met");
   });
 
-  it("the ≤1200px rule drops the SECOND pill — the achievement slot", () => {
-    expect(cssRules).toContain(".os-pills .os-pill:nth-child(2) { display: none; }");
+  /* ⚠️ RETARGETED: the ≤1200 rule dropped the achievement pill because the header was crowded.
+     With no pills there is nothing to drop, and the rule must not survive them — a `:nth-child`
+     rule aimed at a retired row is the "class with no subject" fault wearing a media query. */
+  it("the ≤1200px pill rule went with the pills", () => {
+    expect(cssRules).not.toContain(".os-pills");
+    expect(cssRuleCount(cssRules, ".os-pill")).toBe(0);
+    /* ⚠️ AND THE PASTILLE TOKENS GO WITH THE PILL — CHECKED, NOT ASSUMED. The first draft of this
+       assertion said the tokens must SURVIVE because `.os-p` (the tasks trio) reads them. It does
+       not: the trio is white and its own lock says so in as many words. The pill was the only
+       consumer, so retiring it left four tokens declared and read by nothing. */
+    expect(cssRules).not.toContain("--os-pastille");
   });
 });
 
@@ -338,35 +345,36 @@ describe("the sparse chart state and the tasks empty state (shells)", () => {
 });
 
 describe("§9 · first-run states", () => {
-  it("day one: the single Day one pill, the invitation chart, the two ghost CTAs", () => {
+  /* ⚠️ RETARGETED (Phase 3). These three cases read the GREETING's pills, which are gone. The
+     first-run states themselves are untouched and still worth locking — they just live in the chart
+     and the tasks card now, which is where `scopedStage` was always the input. The ACCOUNT-wide
+     `stage` that drove the pills is deleted with them; the SCOPED one is not, and that split was
+     already the file's own documented decision (B3). */
+  it("day one: the invitation chart and the two ghost CTAs", () => {
     const html = render({ queries: [], manuscripts: [], agents: [], activeManuscript: null });
-    expect(html).toContain(">Day one<");
-    // the pill row holds ONLY Day one — no tenure, no achievement
-    expect(sliceBetween(html, "os-pills", "os-counters")).not.toContain("Querying since");
     expect(html).toContain("Every query you send and every reply that comes back will be charted here.");
     expect(html).toContain("Send your first query");
-    /* ⚠️ the header's day-one line folded into the shared empty state (v16 §4) — the "yet" it
-       carried is said properly by the BODY copy below it, so nothing was lost but a duplicate */
     expect(html).toContain("Nothing needs you");
     expect(html).toContain("Tasks appear here as your queries progress.");
     expect(html).toContain("Add your manuscript");
     expect(html).toContain("Add an agent");
     expect(html).toContain("The story starts with your first query.");
+    /* the retired pill row must not come back on the one state that had a pill of its own */
+    expect(html).not.toContain(">Day one<");
   });
 
-  /* ⚠️ EARLY DAYS SUPPRESSES THE ACHIEVEMENT PILL even though §7's fallback is always true — §9
-     is explicit, and a day-three account told "2 queries awaiting a reply" as an ACHIEVEMENT is
-     the padding the facts-only rule exists to stop. The chart's chip carries that fact instead. */
-  it("early days: the tenure pill only; the chart chip is the awaiting count", () => {
+  /* ⚠️ EARLY DAYS IS STILL A DISTINCT STATE — the chart's chip carries the awaiting count, which is
+     the fact the achievement pill was suppressed here to avoid dressing up as a triumph. */
+  it("early days: the chart chip is the awaiting count, and nothing congratulates", () => {
     const html = render({ queries: [q({ dateSent: daysAgo(3) }), q({ dateSent: daysAgo(9) })] });
-    expect(html).toContain("Querying since");
-    expect(html).not.toContain("os-pill ach");
     expect(html).toContain("awaiting a reply");
+    expect(html).not.toContain("os-pill");
   });
 
-  it("settled: both pills, achievement second", () => {
+  it("settled: the page states no achievement anywhere", () => {
     const html = render(); // base fixture: first send 30 days ago
-    expect(html).toContain("os-pill ach");
+    expect(html).not.toContain("os-pill ach");
+    expect(html).not.toContain("Best month");
   });
 });
 

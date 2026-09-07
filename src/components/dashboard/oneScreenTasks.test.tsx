@@ -8,7 +8,7 @@ import { describe, it, expect } from "vitest";
 import { sliceBetween } from "../../test/sliceBetween";
 import React from "react";
 import { readFileSync } from "node:fs";
-import { cssRule } from "../../test/cssRule";
+import { cssRule, cssRuleCount } from "../../test/cssRule";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueryStatus } from "../../types";
@@ -219,33 +219,39 @@ describe("§5 · the stylesheet", () => {
  * half of one instruction went to each. This pins the pastille to BOTH by token, so the next
  * change to it cannot reach one and miss the other.
  */
-describe("the pastille is tokenised and reaches the header pills", () => {
+describe("the pastille is retired with the pill it dressed", () => {
   const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
   const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
-  const blk = (sel: string) => {
-    const i = bare.indexOf(`${sel} {`);
-    expect(i, `${sel} must exist`).toBeGreaterThan(-1);
-    return bare.slice(i, bare.indexOf("}", i));
-  };
+  /* the shared ANCHORED reader — `blk` was `indexOf(sel + " {")`, which matches inside any
+     descendant selector ending in the same name. See src/test/cssRule.ts. */
+  const blk = (sel: string) => cssRule(bare, sel, "oneScreen.css");
 
   it("the four values are declared once, as tokens", () => {
-    for (const t of ["--os-pastille-bg: #f4f7fa", "--os-pastille-line: #dde6ee",
-      "--os-pastille-ink: #4a5a6b", "--os-pastille-fig: #2c3f52"]) {
-      expect(bare).toContain(t);
+    /* ⚠️ THE CENSUS INVERTS (dashboard redesign, Phase 3). It listed the four tokens and required
+       them PRESENT, so a retune could not reach one surface and miss the other. The header pill was
+       the only surface, and it is retired — which left four tokens declared and read by nothing. A
+       `var()` with no definition is invisible; a DEFINITION with no reader is the orphan half of the
+       same sweep, and it is what makes the next person think there is a pastille treatment here to
+       match. */
+    for (const t of ["--os-pastille-bg", "--os-pastille-line", "--os-pastille-ink", "--os-pastille-fig"]) {
+      expect(bare, `${t} is declared and read by nothing`).not.toContain(t);
     }
   });
 
-  it("⚠️ the HEADER pill wears it — the pill the instruction was actually about", () => {
-    const p = blk(".os-pill");
-    expect(p).toContain("var(--os-pastille-bg)");
-    expect(p).toContain("var(--os-pastille-line)");
-    expect(p).toContain("var(--os-pastille-ink)");
-    expect(blk(".os-pill b")).toContain("var(--os-pastille-fig)");
+  /* ⚠️ RETARGETED (dashboard redesign, Phase 3). The greeting's pills are gone with the row that
+     held them, so the rule this pinned has no subject. What replaces it is the retirement itself:
+     nothing may declare or read the pastille, because there is no longer a pill to wear it. */
+  it("⚠️ the header pill is RETIRED — no rule, and no token behind it", () => {
+    expect(cssRuleCount(bare, ".os-pill")).toBe(0);
+    expect(cssRuleCount(bare, ".os-pills")).toBe(0);
+    expect(bare).not.toContain("var(--os-pastille");
   });
 
-  it("neither pill restates a raw hex — a literal here is the drift starting again", () => {
-    /* ⚠️ ONLY THE HEADER PILL NOW — the trio is white, so it must NOT read the pastille. */
-    expect(blk(".os-pill"), ".os-pill must read the token").not.toMatch(/#f4f7fa|#dde6ee|#4a5a6b/);
+  /* ⚠️ THE TRIO'S HALF OF THE LAW IS THE HALF THAT SURVIVES, and it is the one worth keeping: the
+     trio is WHITE and must not go tinted. It never read the pastille — its own case said so — and
+     there is now none to read, so the claim is stated against the literals as well as the token. */
+  it("the trio stays white — it never wore the pastille and there is none to wear", () => {
     expect(blk(".os-p"), ".os-p is white and must not wear the pastille").not.toMatch(/pastille/);
+    expect(blk(".os-p")).not.toMatch(/#f4f7fa|#dde6ee|#4a5a6b/);
   });
 });

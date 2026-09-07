@@ -24,7 +24,7 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import { Activity, Agent, Manuscript, Query, Task, User, UserTask } from "../../types";
-import { achievementPill, Achievement, runStage, tenureLine, tourAutoRuns, tourChipShows } from "../../lib/oneScreen";
+import { runStage, tourAutoRuns, tourChipShows } from "../../lib/oneScreen";
 import { OneScreenTour, TOUR_BREAKPOINT } from "./OneScreenTour";
 import { OneScreenAuthor } from "./OneScreenAuthor";
 import { OneScreenChart } from "./OneScreenChart";
@@ -57,11 +57,6 @@ export interface OneScreenDashboardProps {
   /** Injectable for tests; defaults to the real clock. */
   now?: Date;
 }
-
-/** The achievement pill's tone follows the mockup's map: sage for the wins, plain for the rest. */
-const ACH_TONE: Record<Achievement["key"], string> = {
-  record: "sg", streak: "sg", fastest: "sg", milestone: "", awaiting: "",
-};
 
 /** §8: the per-card shimmer, shaped roughly like the card it stands in for. */
 export const Skel: React.FC<{ bars: ("h" | "grow" | "")[] }> = ({ bars }) => (
@@ -192,17 +187,12 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
     return () => window.clearTimeout(id);
   }, [loading]);
 
-  /* ⚠️ TENURE IS ACCOUNT-SCOPED — "querying since" is when YOU started, not when this book did. */
-  const tenure = tenureLine(queries);
-  /**
-   * ⚠️ THE ACHIEVEMENT PILL STAYS ACCOUNT-SCOPED, beside the tenure pill it partners. "Your best
-   * month" and "a new fastest reply" are facts about your querying, and narrowing them to one book
-   * turns a real record into a weaker claim about a subset — while the pill sits next to a tenure
-   * line that is explicitly account-wide. Two neighbouring pills answering at different scopes is
-   * the two-numbers-one-name fault in a new place.
-   */
-  const ach = achievementPill(queries, now);
-  const stage = runStage(queries, manuscripts, now);
+  /* ⚠️ THE ACCOUNT-WIDE `stage` IS GONE WITH THE PILLS (Phase 3). It had exactly two readers —
+     `stage === "day-one"` for the single Day-one pill and `stage === "settled"` for the
+     achievement — and `tsc` does not flag an assigned-but-unread `const`, so it would have
+     sat here computing a value nobody looks at. The SCOPED stage below is untouched: it is a
+     different question (this book's state, not the account's) and the chart and tasks both
+     still ask it. */
   /**
    * ⚠️ TWO STAGES, BECAUSE THE PAGE AND THE BOOK ARE AT DIFFERENT POINTS (B3).
    *
@@ -253,25 +243,18 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
               )}
             </div>
             <div className="os-sub2">What&rsquo;s on your desk today?</div>
-            <div className="os-pills">
-              {/* §2: tenure · achievement. ⚠️ THE AGENTS PILL IS GONE — the counters card states
-                  that figure now, and two homes for one number is how they come to disagree.
-                  §9: day one is a single pill; early days drops the achievement slot — a day-three
-                  account told "2 awaiting a reply" as an ACHIEVEMENT is the padding the facts-only
-                  rule exists to stop. */}
-              {stage === "day-one" ? (
-                <span className="os-pill">Day one</span>
-              ) : (
-                <>
-                  {tenure && <span className="os-pill">{tenure.replace(/ ([^ ]+ \d{4})$/, "")} <b>{tenure.match(/([^ ]+ \d{4})$/)?.[1]}</b></span>}
-                  {stage === "settled" && (
-                    <span className={`os-pill ach ${ACH_TONE[ach.key]}`.trim()}>
-                      {ach.pre}<b>{ach.strong}</b>{ach.post}
-                    </span>
-                  )}
-                </>
-              )}
-            </div>
+            {/* ⚠️ THE TWO PILLS ARE RETIRED (dashboard redesign, Phase 3). "Querying since {month}"
+                and the achievement — "Best month yet", "a new fastest reply" — are gone with the
+                row that held them. Both were true and neither was work: a tenure line states how
+                long you have been at it and an achievement congratulates you, on a page whose job
+                is to show what needs doing. `.os-pills` goes with them, element and rule together.
+
+                ⚠️ `tenureLine` AND `achievementPill` SURVIVE IN `lib/oneScreen`, UNREFERENCED, with
+                their tests — and that is a decision rather than an oversight. Deleting a tested pure
+                derivation is a separate act from removing a row that rendered it, and this file has
+                the precedent at hand: `dashboard/focusSlot.ts` has sat in exactly that state since
+                the settled-desk pass. Both are named in the run report so the sweep is a decision
+                somebody takes, not one that happens by omission. */}
           </div>
           {/* ⚠️ queries SCOPED, agents NOT — "agents on file" is a person-count, not a per-book fact. */}
           <OneScreenCounters loading={loading} queries={scopedQueries} agents={agents} now={now} />

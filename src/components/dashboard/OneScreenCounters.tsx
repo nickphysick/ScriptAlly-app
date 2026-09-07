@@ -4,9 +4,10 @@
  *
  * OneScreenCounters — the header counters card (ref design-refs/dashboard-v16.html, `.counters`).
  *
- * ⚠️ THESE ARE READOUTS, NOT CONTROLS. The card deliberately does NOT take the generic card lift:
- * a hover lift promises a click that does not happen. It carries no `os-lift`, and the stylesheet
- * also overrides the lift explicitly so adding the class later cannot quietly re-arm it.
+ * ⚠️ THESE ARE READOUTS, NOT CONTROLS, and since Phase 3 they are not a card either — they sit on
+ * the page ground beside the greeting. The no-lift rules in the stylesheet are KEPT even though
+ * `.os-card` is gone from this element: they are what stops the class coming back with a hover that
+ * promises a click.
  *
  * ⚠️ EVERY FIGURE IS DERIVED AT READ TIME (`headerCounters`) — there are no stored counters, and
  * there must never be one: a stored total is a number that can be wrong.
@@ -54,7 +55,10 @@ export const OneScreenCounters: React.FC<{
   agents: Agent[];
   now: Date;
 }> = ({ loading, queries, agents, now }) => (
-  <div className={`os-card os-counters${loading ? " isload" : ""}`}>
+  /* ⚠️ NO `os-card` (dashboard redesign, Phase 3) — the stats sit on the page ground. The class
+     carried the paper, the radius, the shadow and the `::after` rim; all four go together, because
+     a readout on the ground with a rim left on it is a card that forgot its fill. */
+  <div className={`os-counters${loading ? " isload" : ""}`}>
     {loading && <Skel bars={["h", ""]} />}
     {headerCounters(queries, agents, now).map((c) => (
       <div className="os-counter" key={c.key}>

@@ -71,13 +71,18 @@ describe("the three figures", () => {
     expect(ags.chip).toBe("↑ 2");   // 5 and 1 days ago
   });
 
-  /* ⚠️ THE RATE DIVIDES BY QUERIES SENT, not by every query on file. With 2 responses to 4 sends
-     it is 50% — dividing by all 5 would report 40% and quietly punish the writer for a draft. */
-  it("⚠️ the response rate is out of SENT, so a draft cannot drag it down", () => {
+  /* ⚠️ RETARGETED (dashboard redesign, Phase 3) — THE CHIP STATES THE DENOMINATOR, NOT A RATE.
+     "12 · of 21" rather than "12 · 57%". The law underneath is unchanged and is the reason this
+     case exists: the denominator is queries SENT, never every query on file, so a draft sitting in
+     the system cannot quietly make the writer's record look worse. With the figure stated outright
+     the claim is now directly readable rather than inferred from a percentage — 2 of 4, not 50%. */
+  it("⚠️ the denominator is queries SENT, so a draft cannot drag it down", () => {
     const [, , res] = headerCounters(queries, agents, NOW);
-    expect(res.chip).toBe("50%");
+    expect(res.chip).toBe("of 4");
     const noDraft = headerCounters(queries.filter((x) => x.dateSent), agents, NOW);
-    expect(noDraft[2].chip).toBe("50%"); // adding a draft changes nothing
+    expect(noDraft[2].chip).toBe("of 4"); // adding a draft changes nothing
+    /* and it must not silently become a rate again */
+    expect(res.chip).not.toMatch(/%/);
   });
 });
 
@@ -109,12 +114,26 @@ describe("empty and early states — a chip that reports nothing is omitted", ()
 });
 
 describe("the card's CSS", () => {
-  it("takes the remaining width; three centred equal columns with hairline dividers", () => {
+  /* ⚠️ RETARGETED (dashboard redesign, Phase 3) — THE CARD CAME OFF and the three stats sit on the
+     page ground. The block still takes the remaining width; what changed is that the stats inside
+     it shrink-wrap (`flex: 0 1 auto`) and the GROUP centres. Inside the card each took an equal
+     third of a fixed box and filled it exactly, so `justify-content` had nothing to do — which is
+     why "centred in the remaining width" needed the flex change to become a statement at all. */
+  it("takes the remaining width; the three stats shrink-wrap and the group centres", () => {
     const c = rule(".os-counters");
     expect(c).toContain("flex: 1");
     expect(c).toContain("min-width: 0");
+    expect(c).toContain("justify-content: center");
+    /* the card is gone: no paper, no radius, no shadow, no padding of its own */
+    expect(c).toContain("padding: 0");
+    /* ⚠️ COMMENTS STRIPPED FIRST — house rule, and it caught this on its first run. The file's own
+       note explains that `os-card` came OFF, so a raw-text sweep finds the token in the prose that
+       records its removal and reports the removal as not having happened. */
+    const src = readFileSync(resolve(__dirname, "./OneScreenCounters.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(src, "the stats must not carry the card class").not.toMatch(/["\s`]os-card["\s`]/);
     const col = rule(".os-counter");
-    expect(col).toContain("flex: 1");
+    expect(col).toContain("flex: 0 1 auto");
     expect(col).toContain("justify-content: center");
     expect(col).toContain("border-left: 1px solid");
     expect(cssRules).toContain(".os-counter:first-child { border-left: none; }");
@@ -150,10 +169,10 @@ describe("the card's CSS", () => {
   it("responsive: figures shrink, icons go, the header stacks — and the steps can WIN", () => {
     expect(cssRules).toContain(".os-cn { font-size: 21px; }");
     expect(cssRules).toContain(".os-cic { display: none; }");
-    expect(cssRules).toContain(".os-counters { width: 100%; margin-top: 4px; }");
+    expect(cssRules).toContain(".os-counters { width: 100%; margin-top: 4px; justify-content: flex-start; }");
     const base = cssRules.indexOf(".os-cic {");
     expect(base).toBeGreaterThan(-1);
-    for (const step of [".os-cn { font-size: 21px; }", ".os-cic { display: none; }", ".os-counters { width: 100%; margin-top: 4px; }"]) {
+    for (const step of [".os-cn { font-size: 21px; }", ".os-cic { display: none; }", ".os-counters { width: 100%; margin-top: 4px; justify-content: flex-start; }"]) {
       expect(cssRules.indexOf(step), step).toBeGreaterThan(base);
     }
   });
