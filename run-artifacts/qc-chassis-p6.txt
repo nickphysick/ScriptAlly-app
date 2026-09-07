@@ -1,15 +1,15 @@
 ── qc chassis · Phase 6 · 7 assertions · 0 RED · 7 green
 green  · P6.0 · there are urgent cards AND calm ones, so both branches are measurable
          tickets 28 · urgent 6 · calm 22
-green  · P6.1 · every urgent ticket runs the nudge AND the glow, on one 4.5s cycle
-         {"name":"saUrgentWiggle, saUrgentGlow","dur":"4.5s, 4.5s","delay":"0.9s","origin":"178.336px 101.006px","border":"rgb(227, 196, 184)"}
+green  · P6.1 · every urgent ticket runs the glow, on a 4.5s cycle, and does NOT rotate
+         {"name":"saUrgentGlow","dur":"4.5s","delay":"0.9s","origin":"178.664px 82.1719px","border":"rgb(227, 196, 184)"}
 green  · P6.2 · no calm ticket animates — the motion IS the lens
          calm animation-names ["none","none","none"]
 green  · P6.3 · the urgent cards are staggered — they do not all move together
-         distinct delays across 6 urgent tickets: ["0.9s","1.8s","0s, 0s"]
+         distinct delays across 6 urgent tickets: ["0.9s","1.8s","0s"]
 green  · P6.4 · under `reduce` the motion stops — and it comes back without it
-         under reduce ["none","none","none","none","none","none"] · restored ["saUrgentWiggle, saUrgentGlow"]
+         under reduce ["none","none","none","none","none","none"] · restored ["saUrgentGlow"]
 green  · P6.5 · the urgent border remains under `reduce` — the mark is not the motion
          border under reduce ["rgb(227, 196, 184)"] · normally ["rgb(227, 196, 184)"]
 green  · P6.6 · the reduced-motion block comes AFTER the rules it overrides
-         override at 862 · last animated rule at 749 (comments stripped)
+         override at 541 · last animated rule at 428 (comments stripped)

@@ -13,15 +13,16 @@
    reader who has asked for no animation still needs to see which cards are urgent. Motion is the
    emphasis; the border is the fact. */
 
-/* the nudge: still for three-quarters of the cycle, then a small shake and back */
-@keyframes saUrgentWiggle {
-  0%, 74%, 100% { transform: rotate(0); }
-  78% { transform: rotate(-1deg); }
-  82% { transform: rotate(1deg); }
-  86% { transform: rotate(-0.7deg); }
-  90% { transform: rotate(0.7deg); }
-  94% { transform: rotate(0); }
-}
+/* ⚠️ THE NUDGE IS RETIRED — THE GLOW CARRIES IT ALONE (Nick's ruling, corrections). The contract
+   draws both, and both were built and measured. Seen on a real page, six cards rotating every 4.5
+   seconds is more movement than a work surface wants: the wiggle is what makes the page feel
+   restless, and the glow is what makes an urgent card findable. Dropping the rotation loses nothing
+   the mark was for.
+
+   ⚠️ AND THE KEYFRAME GOES WITH IT rather than being left unreferenced. A keyframe nothing animates
+   is exactly the "styled class with no renderer" this repo sweeps for — the next reader restores it
+   because it looks like a feature someone forgot to wire. It is recoverable from this commit's
+   parent if the judgement is ever revisited. */
 
 /* the glow, timed to land with the nudge so they read as one gesture rather than two */
 @keyframes saUrgentGlow {
@@ -31,12 +32,12 @@
 
 .tkt.urgent,
 .brd-card.urgent {
-  animation: saUrgentWiggle 4.5s ease-in-out infinite, saUrgentGlow 4.5s ease-in-out infinite;
-  transform-origin: 50% 60%;
+  animation: saUrgentGlow 4.5s ease-in-out infinite;
 }
 
-/* ⚠️ THE STAGGER IS NOT DECORATION — six cards nudging in unison reads as the PAGE twitching, which
-   is alarming rather than informative. Three phases, so no two neighbours ever move together. */
+/* ⚠️ THE STAGGER SURVIVES THE WIGGLE'S RETIREMENT, and matters MORE without it. Six cards glowing
+   in unison reads as the page pulsing; staggered, each one asks for attention on its own. Three
+   phases, so no two neighbours ever brighten together. */
 .tkt.urgent:nth-child(2n),
 .brd-card.urgent:nth-child(2n) { animation-delay: .9s; }
 .tkt.urgent:nth-child(3n),

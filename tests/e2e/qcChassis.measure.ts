@@ -908,9 +908,15 @@ test("Phase 6 — the urgent motion, and reduced motion in both directions", asy
       m.urgent > 0 && m.calm > 0,
       "tickets " + m.total + " · urgent " + m.urgent + " · calm " + m.calm);
 
-  add("P6.1 · every urgent ticket runs the nudge AND the glow, on one 4.5s cycle",
+  /* ⚠️ THE GLOW ALONE (Nick's ruling, corrections). The contract draws a nudge as well and both
+     were built and measured; on a real page six cards rotating every 4.5s is more movement than a
+     work surface wants. The glow is what makes an urgent card findable; the rotation was what made
+     the page feel restless. Asserted in BOTH directions — the glow present AND no rotation — so
+     re-adding the wiggle is a decision rather than a drift. */
+  add("P6.1 · every urgent ticket runs the glow, on a 4.5s cycle, and does NOT rotate",
       m.u.length > 0 && m.u.every((a: any) =>
-        a.name.indexOf("saUrgentWiggle") > -1 && a.name.indexOf("saUrgentGlow") > -1
+        a.name.indexOf("saUrgentGlow") > -1
+        && a.name.indexOf("Wiggle") === -1
         && a.dur.indexOf("4.5s") === 0),
       JSON.stringify(m.u[0]));
 
@@ -938,7 +944,7 @@ test("Phase 6 — the urgent motion, and reduced motion in both directions", asy
 
   add("P6.4 · under `reduce` the motion stops — and it comes back without it",
       reduced.u.every((a: any) => a.name === "none")
-        && restored.u.every((a: any) => a.name.indexOf("saUrgentWiggle") > -1),
+        && restored.u.every((a: any) => a.name.indexOf("saUrgentGlow") > -1),
       "under reduce " + JSON.stringify(reduced.u.map((a: any) => a.name))
         + " · restored " + JSON.stringify(restored.u.slice(0, 1).map((a: any) => a.name)));
 
