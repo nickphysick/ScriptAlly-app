@@ -22,6 +22,8 @@ import { createPortal } from "react-dom";
 import { Agent, Query, QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
 import { activeStageBreakdown } from "../../lib/dashboardStats";
+import { bandSeries, BAND_KEYS, BAND_LABEL, type BandKey, type BandPoint } from "../../lib/chartBands";
+import { STATE_TOKEN } from "../../lib/queryCardFacts";
 import { placeTooltip, Rect } from "../../lib/deskTooltip";
 import {
   aggregateLedger, awaitingChip, bindEvents, chartEvents, ChartEvent, dailyLedger, DEFAULT_RANGE_DAYS,
@@ -134,6 +136,12 @@ export const OneScreenChart: React.FC<{
   const view = useMemo(() => rangeWindow(ledger, rangeDays), [ledger, rangeDays]);
   const active = daily.length ? daily[daily.length - 1].active : 0;
   const shownActive = useCountUp(active);
+  /**
+   * ⚠️ THE BANDS ARE READ AT THE SAME INSTANTS THE LINE IS (Phase 4) — `bandSeries` takes the view
+   * and samples each period's close, so `bands[i]` and `view[i]` are the same moment by construction
+   * rather than by two date calculations that happen to agree.
+   */
+  const bands = useMemo(() => bandSeries(view, queries, now), [view, queries, now]);
   const stages = useMemo(() => activeStageBreakdown(queries), [queries]);
   const activeTotal = stages.reduce((a, r) => a + r.count, 0);
 
@@ -169,6 +177,53 @@ export const OneScreenChart: React.FC<{
     [view, W, H, lo, hi, sparse],
   );
   const path = useMemo(() => monotonePath(pts), [pts]);
+  /* ⚠️ THE BRUSH'S THUMBNAIL IS THE WHOLE LEDGER IN A 100×22 BOX, drawn with its own scale so a
+     short record still fills the strip. `preserveAspectRatio="none"` lets it stretch to whatever
+     width the control gets — a thumbnail is a shape, not a measurement. */
+  const brushPath = useMemo(() => {
+    if (ledger.length < 2) return "";
+    const top = Math.max(1, ...ledger.map((p) => p.active));
+    const pt = ledger.map((p, i) => [
+      (i * 100) / (ledger.length - 1),
+      22 - (p.active / top) * 20,
+    ] as [number, number]);
+    const line = monotonePath(pt);
+    return line ? `${line} L 100 22 L 0 22 Z` : "";
+  }, [ledger]);
+  /**
+   * ⚠️ THE BANDS ARE PAINTED AS CUMULATIVE AREAS, BACK TO FRONT — never as three polygons with
+   * shared edges. A stacked polygon needs its lower boundary to be the previous band's upper one
+   * REVERSED, and reversing a monotone cubic is fiddly enough that the two edges drift apart at
+   * every curve; the seam then shows as a hairline of card paper between two bands. Painting
+   * `queried+agent+you` in the top band's colour, then `queried+agent` over it, then `queried` over
+   * that, tiles exactly by construction: every visible band is the difference between two areas
+   * that share the identical curve.
+   *
+   * ⚠️ AND THE FILLS ARE `STATE_TOKEN`, VIA `stateFor` — the locked v2 state colours the Query
+   * Centre's cards and the To-do ticket's edge already read. A fourth copy of four hexes is how a
+   * page comes to be nearly the right colour.
+   */
+  const bandAreas = useMemo(() => {
+    if (sparse || !W || !H) return [] as { key: BandKey; d: string }[];
+    const cum = (upTo: number) => view.map((_, i) => {
+      const bp = bands[i];
+      let n = 0;
+      for (let k = 0; k <= upTo; k++) n += bp ? bp[BAND_KEYS[k]] : 0;
+      return n;
+    });
+    const out: { key: BandKey; d: string }[] = [];
+    /* back to front: the widest stack first, so each later fill covers the one beneath it */
+    for (let k = BAND_KEYS.length - 1; k >= 0; k--) {
+      const ys2 = cum(k).map((v, i) => [chartX(i, W, view.length), chartY(v, H, lo, hi)] as [number, number]);
+      const top = monotonePath(ys2);
+      if (!top) continue;
+      out.push({
+        key: BAND_KEYS[k],
+        d: `${top} L ${chartX(view.length - 1, W, view.length).toFixed(1)} ${H} L ${chartX(0, W, view.length).toFixed(1)} ${H} Z`,
+      });
+    }
+    return out;
+  }, [bands, view, W, H, lo, hi, sparse]);
   const ys = useMemo(() => pts.map((p) => p[1]), [pts]);
 
   /* ⚠️ THE DRAW-IN RUNS ONCE, EVER (§3) — never on resize, never on range change, never under
@@ -240,6 +295,7 @@ export const OneScreenChart: React.FC<{
   const every = xLabelEvery(view.length, effFreq);
   const lastIdx = view.length - 1;
   const focusedWeek: LedgerPoint | null = focusIdx >= 0 ? view[focusIdx] : null;
+  const focusBand: BandPoint | null = focusIdx >= 0 ? bands[focusIdx] ?? null : null;
   const pinEvent = pinIdx !== null ? events.get(pinIdx) ?? null : null;
 
   return (
@@ -259,16 +315,24 @@ export const OneScreenChart: React.FC<{
         */}
       <div className="os-ahead">
         <OneScreenMark name="active-queries" />
-        <h2>Active queries</h2>
-        {/* ⚠️ THE FIGURE LIVES IN THE BAND (option A). Nothing floats loose beneath the header any
-            more: the headline number and its chip are part of the label, so the body below is the
-            chart and only the chart. */}
-        <span className="os-n">{shownActive}</span>
-        {/* §9: in the first fortnight the chip states what is out, not a movement — a two-point
-            range delta is noise dressed as trend */}
-        {earlyDays
-          ? <span className="os-chip">{awaitingChip(queries)}</span>
-          : view.length >= 2 && <span className="os-chip">{rangeChip(view)}</span>}
+        {/* ⚠️ THE STAT BLOCK (dashboard redesign, Phase 4; ref `hdr:b`) — the FIGURE leads at
+            Playfair 38, with the title and the delta caption stacked beside it. Before, the figure
+            was one item in a flat row of five, reading as one more control; leading with it is what
+            makes the header a readout with a name rather than a name with a number after it.
+
+            ⚠️ THE CAPTION IS THE SAME DERIVATION AS THE OLD CHIP, RE-LAID-OUT, NOT A NEW FIGURE.
+            `rangeChip` and `awaitingChip` are unchanged and the §9 split is unchanged with them: in
+            the first fortnight it states what is out, because a two-point range delta is noise
+            dressed as a trend. */}
+        <span className="os-stat">
+          <span className="os-n">{shownActive}</span>
+          <span className="os-statxt">
+            <h2>Active queries</h2>
+            {earlyDays
+              ? <span className="os-delta">{awaitingChip(queries)}</span>
+              : view.length >= 2 && <span className="os-delta">{rangeChip(view)}</span>}
+          </span>
+        </span>
         {/* ⚠️ ONE CLUSTER (audit P5) — the label must travel WITH the slider it reports. */}
         <div className="os-ctrls">
         <div className="os-freqsel">
@@ -283,28 +347,28 @@ export const OneScreenChart: React.FC<{
           </select>
           <span className="os-cv" aria-hidden="true">▾</span>
         </div>
-        {/* ⚠️ CONTINUOUS BUT SNAPPING: the thumb can only rest on a landmark, so every position
-            it can hold names a real span. The label is the control's value in words. */}
-        {/* ⚠️ THE SLIDER AND ITS LABEL SHARE ONE CAPSULE (P3). The control was invisible because
-            it sat directly ON the sage band; the fix is to stop putting it there. The capsule is a
-            parchment surface the slider can be read against, and the label rides inside it because
-            the label IS the slider's value — separating them put a readout on the band and its
-            control on parchment. */}
-        <div className="os-rangecap">
-        <div className="os-rangeslider">
+        {/* ⚠️ THE BRUSH (dashboard redesign, Phase 4; ref `rc:brush`) REPLACES THE SLIDER. A slider
+            is an abstract scale with a word beside it; a brush is a thumbnail of the writer's own
+            record with the excluded span shaded, so the control shows what it is excluding. Same
+            landmark stops, same `nearestStop` snapping, same `rangeDays` — this is the slider's
+            value expressed against the data rather than against a track.
+
+            ⚠️ IT DRAWS THE FULL LEDGER, NOT THE VIEW. The view is what the brush SELECTS; drawing
+            the selection inside the selector would make the thumbnail redraw itself every time the
+            handle moved, and the excluded span would have nothing to be excluded from. */}
+        <div className="os-brush">
+          <svg viewBox="0 0 100 22" preserveAspectRatio="none" aria-hidden="true">
+            {brushPath && <path d={brushPath} fill="#dfe4dc" />}
+            <rect className="os-brushmask" x={0} y={0} width={100 - stop.p} height={22} />
+          </svg>
           <input
             type="range" min={0} max={100} step={1} value={stop.p}
             aria-label="Chart range"
             aria-valuetext={stop.label}
-            /* ⚠️ `--fill` IS WHAT MAKES THE TRACK LEGIBLE. A bare track with a dot on it was the
-               version that failed; the travelled portion filled in burgundy is what says where you
-               are. Set inline because it is a per-render value, and read by the track gradient. */
-            style={{ ["--fill" as string]: `${stop.p}%` }}
             onChange={(e) => { setRangeDays(nearestStop(Number(e.target.value)).days); resetRead(); }}
           />
         </div>
         <span className="os-rangelbl">{stop.label}</span>
-        </div>
         </div>
       </div>
       {/* ⚠️ THE PADDING IS THE BODY'S, NOT THE CARD'S — the band must run edge to edge, so the
@@ -357,6 +421,14 @@ export const OneScreenChart: React.FC<{
                 {/* the only scale furniture: axis lo and hi, faint mono, left edge (§3) */}
                 <text className="os-ylab" x={3} y={chartY(hi, H, lo, hi) + 3}>{hi}</text>
                 <text className="os-ylab" x={3} y={chartY(lo, H, lo, hi) + 3}>{lo}</text>
+                {/* ⚠️ THE BANDS SIT BENEATH THE LINE, AND THE GAP BETWEEN THEM IS A FACT.
+                    `active` counts every query on the board; the bands count the ones the record can
+                    place. Where a Revise & Resubmit's flip crossed a band with no date on it, the
+                    stack falls short of the line by exactly that many — visible, rather than folded
+                    into whichever band happened to be nearest. */}
+                {bandAreas.map((a) => (
+                  <path key={a.key} className="os-band" d={a.d} fill={STATE_TOKEN[a.key]} />
+                ))}
                 <path ref={areaRef} d={`${path} L ${chartX(lastIdx, W, view.length).toFixed(1)} ${H} L ${chartX(0, W, view.length).toFixed(1)} ${H} Z`} fill="url(#os-aqg)" />
                 <path ref={lineRef} d={path} fill="none" stroke="#8a9e88" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
                 {/* event pins — 20px above the line, priority over the crosshair (§3) */}
@@ -422,6 +494,18 @@ export const OneScreenChart: React.FC<{
       <div className="os-sr" aria-live="polite">{liveText}</div>
 
       {/* ── the Form 11 popup: a week, or a pin ── */}
+      {/* ⚠️ THREE SWATCHES, NOT FOUR — the legend names what is drawn. A slate entry here would be
+          the first half of drawing a band whose members this chart's own `TERMINAL` set excludes. */}
+      {!dayOne && !sparse && (
+        <div className="os-bandkey">
+          {BAND_KEYS.map((k) => (
+            <span className="os-bk" key={k}>
+              <i style={{ background: STATE_TOKEN[k] }} aria-hidden="true" />
+              {BAND_LABEL[k]}
+            </span>
+          ))}
+        </div>
+      )}
       <ChartTip anchor={tipAnchor}>
         {pinEvent ? (
           <div className="frame pinframe">
@@ -446,17 +530,54 @@ export const OneScreenChart: React.FC<{
                 })()}
               </div>
               <div className="fsep" />
-              {/* stage is only known AS-OF-NOW — the caption is what stops the card implying
-                  historical stage data it does not have (§4) */}
-              <div className="fcap">{focusIdx === lastIdx ? "Where they stand" : "Where they stand today"}</div>
-              {stages.map((s) => (
-                <div key={s.status} className={`srow${s.count === 0 ? " dim" : ""}`}>
-                  <StatusDot status={s.status} overrideSize={12} ghost={s.count === 0} decorative />
-                  <span className="nm">{STAGE_SHORT[s.status] ?? s.label}</span>
-                  <span className="ct">{s.count}</span>
-                </div>
-              ))}
-              {activeTotal === 0 && <div className="fl" style={{ marginTop: 4 }}>Nothing in flight</div>}
+              {/**
+                * ⚠️ TWO DIFFERENT BLOCKS, AND WHICH ONE YOU GET IS A STATEMENT ABOUT WHAT IS KNOWN.
+                *
+                * On any PAST point the panel states the three bands — whose turn it was — because
+                * that is what the dated rungs can answer about a past instant. On the FINAL point it
+                * states the full per-status standing instead, because "now" is the one moment at
+                * which a query's exact status is known rather than reconstructed.
+                *
+                * The old panel showed the per-status list at every point under the caption "Where
+                * they stand today", which was honest and answered a question nobody asked while
+                * hovering a week in March. The bands answer the question the hover is actually
+                * making.
+                */}
+              {focusIdx === lastIdx ? (
+                <>
+                  <div className="fcap">Where they stand today</div>
+                  {stages.map((s) => (
+                    <div key={s.status} className={`srow${s.count === 0 ? " dim" : ""}`}>
+                      <StatusDot status={s.status} overrideSize={12} ghost={s.count === 0} decorative />
+                      <span className="nm">{STAGE_SHORT[s.status] ?? s.label}</span>
+                      <span className="ct">{s.count}</span>
+                    </div>
+                  ))}
+                  {activeTotal === 0 && <div className="fl" style={{ marginTop: 4 }}>Nothing in flight</div>}
+                </>
+              ) : (
+                <>
+                  <div className="fcap">By whose turn</div>
+                  {BAND_KEYS.map((k) => {
+                    const n = focusBand ? focusBand[k] : 0;
+                    return (
+                      <div key={k} className={`srow${n === 0 ? " dim" : ""}`}>
+                        <i className="bsw" style={{ background: STATE_TOKEN[k] }} aria-hidden="true" />
+                        <span className="nm">{BAND_LABEL[k]}</span>
+                        <span className="ct">{n}</span>
+                      </div>
+                    );
+                  })}
+                  {/* ⚠️ THE SHORTFALL IS NAMED, NEVER ABSORBED. The three bands can be fewer than the
+                      headline when a revision's flip crossed a band with no date on it; saying so is
+                      the difference between a chart that reports and one that quietly rounds. */}
+                  {focusBand && focusBand.undated > 0 && (
+                    <div className="fl" style={{ marginTop: 5 }}>
+                      {focusBand.undated} not placed — no date on record for the change
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         ) : null}

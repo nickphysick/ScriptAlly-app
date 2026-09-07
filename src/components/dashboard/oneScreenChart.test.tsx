@@ -78,7 +78,7 @@ describe("the chart card's structure", () => {
 
   /* ⚠️ THE THREE-PILL RANGE GROUP IS RETIRED (v16 §3) — it spent a pill per range and left no
      room to say anything about GRAIN. Two controls now: a select for grain, a slider for span. */
-  it("frequency is a select of three; range is a snapping slider that states its value", () => {
+  it("frequency is a select of three; range is a snapping BRUSH that states its value", () => {
     const html = render(twoWeeks);
     expect(html).toContain('aria-label="Chart frequency"');
     for (const f of ["Daily", "Weekly", "Monthly"]) expect(html).toContain(`>${f}</option>`);
@@ -89,9 +89,13 @@ describe("the chart card's structure", () => {
     /* ⚠️ the numbers toggle's `aria-pressed` assertion lived here and the control is retired.
        The cover did NOT go with it — the two surviving controls carry the labels asserted above,
        so this component keeps its accessibility check. */
-    /* ⚠️ anchor the class, not the stem — "os-rangeslider" contains "os-ranges" and a bare
-       substring check passes for the wrong reason (it did, on the first run of this very case) */
-    expect(html).not.toContain('class="os-ranges"');
+    /* ⚠️ RETARGETED (Phase 4): the slider is a BRUSH — a thumbnail of the record with the excluded
+       span shaded — and the real `input[type=range]` is laid over it, which is why every assertion
+       above survives untouched. The control's keyboard, its snapping and its spoken value are the
+       same control; only the picture behind it changed. */
+    expect(html).toContain('class="os-brush"');
+    expect(html).not.toContain('class="os-rangeslider"');
+    expect(html).not.toContain('class="os-rangecap"');
   });
 
   /* the grain the chart OPENS on was asserted through the ledger's first column; the ledger is
@@ -120,6 +124,71 @@ describe("the chart card's structure", () => {
 });
 
 /* ── the CSS side of §3–§4 ── */
+
+/* ══ §4 · THE THREE BANDS (dashboard redesign, Phase 4) ══════════════════════════════════════ */
+
+describe("the bands are drawn from the shared state colours, and there are three", () => {
+  /* ⚠️ ITS OWN FIXTURE. `twoWeeks` is scoped to another describe, and reaching for a name that
+     happens to be in the file is how a case comes to measure a set nobody chose for it. */
+  const spread = [
+    q({ dateSent: daysAgo(40) }),
+    q({ status: QueryStatus.PARTIAL_REQUESTED, dateSent: daysAgo(35), partialRequestedDate: daysAgo(9) }),
+    q({ status: QueryStatus.FULL_SENT, dateSent: daysAgo(30), fullRequestedDate: daysAgo(18), fullSentDate: daysAgo(6) }),
+  ];
+  const chart = readFileSync(resolve(__dirname, "./OneScreenChart.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  /* ⚠️ THE FILLS COME FROM `STATE_TOKEN`, NEVER A LOCAL TABLE. These are the locked v2 state
+     colours the Query Centre's cards and the To-do ticket's edge already read; a fourth copy of
+     four hexes is how a page comes to be nearly the right colour. */
+  it("⚠️ every band fill is STATE_TOKEN — no hex is restated in the component", () => {
+    expect(chart).toContain('from "../../lib/queryCardFacts"');
+    expect(chart).toContain("STATE_TOKEN[a.key]");
+    for (const hex of ["#f7efe3", "#e0e5dd", "#f5e6df", "#d7e0e8"]) {
+      expect(chart, `${hex} is restated in the component`).not.toContain(hex);
+    }
+  });
+
+  /* ⚠️ THREE, AND THE SLATE ONE IS NOT DRAWN CONDITIONALLY — it is not drawn. An open offer is
+     TERMINAL to this chart's own ledger, so the band would have had no members to show. */
+  it("⚠️ the slate offer band is absent outright, not gated on there being offers", () => {
+    const html = render(spread);
+    expect(html).not.toContain("--state-offer");
+    expect(html).not.toContain("#d7e0e8");
+    expect(chart).not.toContain('"offer"');
+  });
+
+  it("the legend names the three bands it draws, and no fourth", () => {
+    const html = render(spread);
+    for (const label of ["Awaiting first response", "Material with the agent", "your move"]) {
+      expect(html).toContain(label);
+    }
+    expect(html).not.toContain("Offer open");
+    expect((html.match(/class="os-bk"/g) ?? []).length).toBe(3);
+  });
+
+  /* ⚠️ THE PANEL'S STATUS ROWS RENDER THE COMPONENT, never a local circle. `StatusDot` is the app's
+     one drawing of a query status and this pack's global rule forbids a second. */
+  it("⚠️ the hover panel's status rows are StatusDot, by import", () => {
+    expect(chart).toContain('import { StatusDot }');
+    expect(chart).toContain("<StatusDot status={s.status}");
+    /* the band rows are a SWATCH and deliberately not a dot — a band is not a status */
+    expect(chart).toContain('className="bsw"');
+  });
+
+  /* ⚠️ TWO BLOCKS, AND WHICH ONE APPEARS IS A STATEMENT ABOUT WHAT IS KNOWN — the per-status list
+     only on the final point, where a status is known rather than reconstructed. */
+  it("⚠️ the panel says 'By whose turn' on a past point and 'Where they stand today' on the last", () => {
+    /* ⚠️ THE CAPTIONS ARE JSX TEXT NODES, NOT QUOTED STRINGS — asserted as they are written. The
+       first draft of this case looked for `"Where they stand today"` with its quotes and failed
+       against a component that says exactly that, which is the wrong-artefact fault in miniature. */
+    expect(chart).toContain(">Where they stand today<");
+    expect(chart).toContain(">By whose turn<");
+    expect(chart).toContain("focusIdx === lastIdx ?");
+    /* the old caption pair is gone — "Where they stand" and "…today" said one thing twice */
+    expect(chart).not.toContain(">Where they stand<");
+  });
+});
 
 describe("the chart's stylesheet", () => {
   it("cursor flips across the reading boundary: default at rest, crosshair in the zone", () => {

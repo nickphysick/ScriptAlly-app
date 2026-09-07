@@ -688,7 +688,6 @@
    natural minimum, so it is the one that gives; without this the cluster pushes the title into an
    ellipsis at 1024 while the slider keeps its full 150px. */
 .os-ahead .os-ctrls { min-width: 0; }
-.os-ahead .os-rangeslider { width: clamp(72px, 14vw, 150px); }
 /* ⚠️ TWO CONTROLS, TWO SHAPES — a select for the grain (a small closed set you pick from) and a
    slider for the span (an ordered scale you move along). The retired three-pill group could say
    neither: it had to spend a pill on each range and had no room to say anything about grain. */
@@ -704,27 +703,6 @@
 .os-freqsel select:hover { border-color: #cdbfae; background: #fffdf9; }
 .os-freqsel select:focus-visible { outline: 2px solid #b98a76; outline-offset: 1px; }
 .os-freqsel .os-cv { position: absolute; right: 10px; font-size: 9px; color: #c0b2a2; pointer-events: none; }
-.os-rangeslider { width: 150px; padding-top: 2px; flex: none; }
-.os-rangeslider input[type="range"] {
-  -webkit-appearance: none; appearance: none; width: 100%; height: 16px;
-  background: transparent; cursor: pointer; display: block; margin: 0;
-}
-.os-rangeslider input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: 99px; background: #e9dfd1; }
-.os-rangeslider input[type="range"]::-moz-range-track { height: 4px; border-radius: 99px; background: #e9dfd1; }
-.os-rangeslider input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none;
-  width: 13px; height: 13px; border-radius: 50%;
-  background: #fdfaf5; border: 2px solid #7c3a2a;
-  margin-top: -4.5px; box-shadow: 0 1px 3px rgba(58, 28, 20, 0.2);
-  transition: transform 0.14s ease;
-}
-.os-rangeslider input[type="range"]::-moz-range-thumb {
-  width: 13px; height: 13px; border-radius: 50%; border: 2px solid #7c3a2a;
-  background: #fdfaf5; box-shadow: 0 1px 3px rgba(58, 28, 20, 0.2);
-}
-.os-rangeslider input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.15); }
-.os-rangeslider input[type="range"]:focus-visible { outline: none; }
-.os-rangeslider input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(185, 138, 118, 0.4); }
 /**
  * The slider has no scale marks, so the label IS its value — never decoration.
  *
@@ -743,14 +721,73 @@
 /* ⚠️ `.os-fig` IS RETIRED — the figure sits IN the band now (option A), so a wrapper whose only
    job was to hold it beneath the header has nothing left to do. */
 /* the headline, in the band: smaller than the old 28px body figure, and the chip rides beside it */
+/* ⚠️ 38px AND WEIGHT 600 — the stat block's figure (Phase 4), up from 21 in the flat row. Tabular
+   numerals stay: a counting figure whose glyph widths change re-lays-out the row on every frame. */
 .os-ahead .os-n {
-  font-family: var(--font-serif); font-weight: 500; font-size: 21px; color: #241811;
-  line-height: 1; font-variant-numeric: tabular-nums; flex: none; margin-left: 2px;
+  font-family: var(--font-serif); font-weight: 600; font-size: 38px; color: #241811;
+  line-height: 1; font-variant-numeric: tabular-nums; flex: none;
 }
 .os-ahead .os-chip { flex: none; }
 /* the cluster takes the slack, and gives it back first */
 .os-ahead .os-ctrls { margin-left: auto; }
 /* §10: the headline counts up once — tabular numerals so the width never jitters */
+
+/* ══ §4 · THE BANDS, THE STAT BLOCK AND THE BRUSH (dashboard redesign, Phase 4) ══════════════ */
+
+/* ⚠️ NO STROKE, NO OPACITY. The bands are painted as cumulative areas back to front, so each one is
+   the DIFFERENCE between two fills that share an identical curve; an alpha would let the fill
+   beneath show through and turn two flat colours into three. */
+.os-band { stroke: none; }
+
+/* ⚠️ THE LEGEND NAMES WHAT IS DRAWN — three, never four. */
+.os-bandkey {
+  display: flex; flex-wrap: wrap; gap: 4px 16px;
+  padding: 6px 18px 2px; flex: none;
+}
+.os-bk { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; color: #6b5c50; white-space: nowrap; }
+.os-bk i { width: 11px; height: 11px; border-radius: 3px; flex: none; box-shadow: inset 0 0 0 1px rgba(58, 28, 20, 0.08); }
+
+/* ⚠️ THE STAT BLOCK: the figure leads, the name and the delta stack beside it. `align-items:
+   baseline` is deliberately NOT used — the figure is 38px and the title 15px, so a shared baseline
+   drops the two-line stack below the numeral's foot. The stack centres against the figure instead. */
+.os-stat { display: flex; align-items: center; gap: 11px; min-width: 0; flex: none; }
+.os-statxt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.os-statxt h2 { margin: 0; }
+/* ⚠️ THE DELTA IS A CAPTION, NOT A CHIP. It sat in a bordered pastille beside the title, which gave
+   a derived aside the same weight as the name of the card. `.os-chip` survives untouched for the
+   surfaces that still want a pill. */
+.os-delta {
+  font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #8a7a6c; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ⚠️ THE BRUSH — a thumbnail of the whole record with the excluded span shaded, and the real
+   `input[type=range]` laid transparently over it so the control keeps its keyboard, its
+   `aria-valuetext` and its snapping. The picture is decoration; the input is the control. */
+.os-brush { position: relative; width: 132px; height: 22px; flex: none; }
+.os-brush svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; border-radius: 5px; overflow: hidden; }
+/* the excluded span, from the left edge to the handle — shaded, never hidden */
+.os-brushmask { fill: #fdfaf5; opacity: 0.72; }
+.os-brush input[type="range"] {
+  position: absolute; inset: 0; width: 100%; height: 100%; margin: 0;
+  appearance: none; -webkit-appearance: none; background: transparent; cursor: ew-resize;
+}
+.os-brush input[type="range"]::-webkit-slider-runnable-track { height: 22px; background: transparent; }
+.os-brush input[type="range"]::-moz-range-track { height: 22px; background: transparent; }
+/* ⚠️ THE HANDLE IS THE LEFT EDGE OF THE SELECTION, so it is a RULE rather than a knob: a round
+   thumb on a thumbnail reads as a point on a line, which is the one thing it is not. */
+.os-brush input[type="range"]::-webkit-slider-thumb {
+  appearance: none; -webkit-appearance: none;
+  width: 3px; height: 22px; border-radius: 2px; background: #7c3a2a; border: 0;
+}
+.os-brush input[type="range"]::-moz-range-thumb {
+  width: 3px; height: 22px; border-radius: 2px; background: #7c3a2a; border: 0;
+}
+.os-brush input[type="range"]:focus-visible { outline: 2px solid #b98a76; outline-offset: 2px; border-radius: 6px; }
+
+/* the tip's band swatch — the same square the legend uses, at the row's size */
+.os-tip .bsw { width: 11px; height: 11px; border-radius: 3px; flex: none; box-shadow: inset 0 0 0 1px rgba(58, 28, 20, 0.08); }
 
 .os-chip { font-size: 10px; border-radius: 99px; padding: 2.5px 9px; background: #e9ede6; border: 1px solid #d6ddd2; color: #3f5a3c; }
 /* the band runs edge to edge, so the padding belongs to the body */
@@ -1411,44 +1448,7 @@
 .os-ahead .os-freqsel select:hover { border-color: #a8b5a5; }
 .os-ahead .os-cv { color: #6f8069; }
 
-/**
- * ⚠️ THE CAPSULE (P3) — the slider is not ON the sage, it is on parchment laid over it.
- *
- * A bare track with a dot was the version that failed. The capsule gives the control a surface,
- * and the LABEL rides inside it because the label IS the slider's value — separating them put the
- * readout on the band and its control on parchment.
- */
-.os-rangecap {
-  display: flex; align-items: center; gap: 9px; flex: none;
-  background: #fffdf9;
-  border: 1px solid #bcc7b9;
-  border-radius: 99px;
-  padding: 5px 13px 5px 11px;
-}
-.os-rangecap .os-rangeslider { width: clamp(72px, 12vw, 132px); padding-top: 0; }
-.os-rangecap .os-rangelbl { color: #4a5a45; min-width: 0; }
 
-/* ⚠️ THE TRAVELLED PORTION IS FILLED — that is what says where you are. `--fill` is set inline per
-   render and read here; without the gradient this is a bare rail again. */
-.os-rangecap input[type="range"]::-webkit-slider-runnable-track {
-  height: 5px; border-radius: 99px;
-  background: linear-gradient(to right, #7c3a2a 0 var(--fill, 0%), #e6ddd0 var(--fill, 0%) 100%);
-}
-.os-rangecap input[type="range"]::-webkit-slider-thumb {
-  width: 13px; height: 13px; border-radius: 50%;
-  background: #fffdf9; border: 2.5px solid #7c3a2a;
-  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.24);
-  margin-top: -4px;
-}
-/* ⚠️ FIREFOX IGNORES THE -webkit- PSEUDO-ELEMENTS ENTIRELY and would render the browser default —
-   a blue OS slider sitting on a parchment capsule. These are not a nicety. */
-.os-rangecap input[type="range"]::-moz-range-track { height: 5px; border-radius: 99px; background: #e6ddd0; }
-.os-rangecap input[type="range"]::-moz-range-progress { height: 5px; border-radius: 99px; background: #7c3a2a; }
-.os-rangecap input[type="range"]::-moz-range-thumb {
-  width: 13px; height: 13px; border-radius: 50%;
-  background: #fffdf9; border: 2.5px solid #7c3a2a;
-  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.24);
-}
 
 /* ══ COMMUNITY TILE (community-tile pack, P1) ═══════════════════════════════════════════════════
    Sage-band card at the author tile's width. Phase 1 renders the empty state and nothing else —

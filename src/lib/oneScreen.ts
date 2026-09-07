@@ -31,7 +31,10 @@ const TERMINAL: ReadonlySet<QueryStatus> = new Set([
 
 /** When a terminal query stopped being active — derived-field precedence, matching
  *  `activeWeeklySeries`' closedAtOf so the two lines can never disagree. */
-const closedAt = (q: Query): number | null => {
+/** ⚠️ EXPORTED (dashboard redesign, Phase 4) so `chartBands` asks the SAME question this ledger
+ *  asks about whether a query is still on the board. A second reading of "closed" is how the bands
+ *  and the total line come to disagree about which queries are in flight. */
+export const closedAt = (q: Query): number | null => {
   if (!TERMINAL.has(q.status)) return null;
   return parseWhen(q.lastStatusChange) ?? parseWhen(q.responseReceivedAt) ?? parseWhen(q.dateSent);
 };

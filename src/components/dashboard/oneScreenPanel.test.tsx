@@ -16,6 +16,7 @@ import React from "react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { OneScreenPanel } from "./OneScreenPanel";
+import { cssRule, cssRuleCount } from "../../test/cssRule";
 
 const html = (el: React.ReactElement) => renderToStaticMarkup(el);
 
@@ -164,10 +165,21 @@ describe("the bands are one geometry, coloured by purpose", () => {
     expect(bare).not.toMatch(/\.os-ll\s*\{/);
   });
 
-  it("⚠️ the SLIDER gives before the title does at a narrow width", () => {
-    // without this the control cluster keeps its full width and ellipses the title at 1024
-    expect(bare).toMatch(/\.os-ahead \.os-rangeslider\s*\{[^}]*clamp\(/);
+  /* ⚠️ RETARGETED (dashboard redesign, Phase 4). The SLIDER is replaced by the BRUSH, so the
+     `clamp()` that let it give ground before the title did has no subject. The law it stood for is
+     unchanged and still worth holding — the control cluster must yield before the card's name is
+     ellipsed — so it is asserted where it now lives: the brush is a fixed, deliberately modest
+     width and the cluster still carries `min-width: 0` so it, rather than the title, is what
+     shrinks. */
+  it("⚠️ the CONTROLS give before the title does at a narrow width", () => {
     expect(bare).toMatch(/\.os-ahead \.os-ctrls\s*\{[^}]*min-width:\s*0/);
+    /* the brush states a width rather than growing with the band */
+    expect(cssRule(bare, ".os-brush")).toMatch(/width:\s*\d+px/);
+    expect(cssRule(bare, ".os-brush")).toContain("flex: none");
+    /* and the retired slider must not survive its replacement — an added control leaves the
+       original reachable; a swapped one does not */
+    expect(cssRuleCount(bare, ".os-rangeslider")).toBe(0);
+    expect(cssRuleCount(bare, ".os-rangecap")).toBe(0);
   });
 
   it("the controls are IN the band — no separate control row was introduced", () => {
@@ -254,22 +266,29 @@ describe("one band geometry, declared", () => {
     expect(bare.slice(i, bare.indexOf("}", i))).not.toMatch(/padding:/);
   });
 
-  it("⚠️ the controls read AGAINST sage — parchment fill and a green edge, as a pair", () => {
+  /* ⚠️ RETARGETED TWICE. First (P3) the slider gained a parchment CAPSULE so it could be read
+     against the sage band. The band is gone (Phase 2) and the slider with it (Phase 4), so neither
+     the capsule nor the "against sage" reasoning has a subject. The frequency select keeps its own
+     pair, because it is still a control on a card and still needs an edge.
+
+     ⚠️ AND THE BRUSH IS LEGIBLE BY BEING A PICTURE, which is the point of replacing the slider: the
+     track's travelled fill existed to say where you were on an abstract scale, and a thumbnail of
+     your own record with the excluded span shaded says it without a scale at all. */
+  it("⚠️ the controls carry their own edge, and the brush carries a picture", () => {
     expect(bare).toMatch(/\.os-ahead \.os-freqsel select\s*\{[^}]*#fffdf9/);
     expect(bare).toMatch(/\.os-ahead \.os-freqsel select\s*\{[^}]*#bcc7b9/);
-    /* ⚠️ RETARGETED (P3 capsule): the slider no longer sits ON the sage, so the green edge moved
-       from the TRACK to the CAPSULE around it, and the track now carries the travelled fill —
-       which is the part that makes the control legible. A bare track was the version that failed. */
-    expect(bare).toMatch(/\.os-rangecap\s*\{[^}]*#fffdf9/);
-    expect(bare).toMatch(/\.os-rangecap\s*\{[^}]*#bcc7b9/);
-    expect(bare).toMatch(/slider-runnable-track[\s\S]{0,220}var\(--fill/);
-    expect(bare).toMatch(/slider-thumb[\s\S]{0,160}#7c3a2a/); // burgundy edge…
-    expect(bare).toMatch(/slider-thumb[\s\S]{0,160}#fffdf9/); // …on a parchment thumb
+    /* the excluded span is SHADED, never hidden — the reader can see what they are leaving out */
+    expect(cssRule(bare, ".os-brushmask")).toMatch(/opacity:\s*0?\.\d+/);
+    /* the handle is a RULE, not a knob: it marks an edge of a selection, not a point on a line */
+    expect(bare).toMatch(/slider-thumb[\s\S]{0,200}#7c3a2a/);
+    expect(bare).toMatch(/slider-thumb[\s\S]{0,200}width:\s*3px/);
 
     /* ⚠️ FIREFOX IGNORES -webkit- PSEUDO-ELEMENTS ENTIRELY — without these it renders the browser
-       default, a blue OS slider on a parchment capsule. */
+       default, a blue OS slider laid over the thumbnail. The law is unchanged; the LIST is one
+       shorter, because `::-moz-range-progress` styled the TRAVELLED FILL and the brush has no
+       track fill to travel — the shaded span is drawn in the SVG beneath, where a picture belongs.
+       Asserting it here would demand a rule for a part this control does not have. */
     expect(bare).toContain("::-moz-range-track");
-    expect(bare).toContain("::-moz-range-progress");
     expect(bare).toContain("::-moz-range-thumb");
   });
 });
