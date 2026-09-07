@@ -116,3 +116,26 @@ export async function signOutOtherSessions(): Promise<SessionRevokeResult> {
  */
 export const SESSION_REVOKE_UNAVAILABLE =
   "Signing out other sessions isn't available yet — it needs a server action this app doesn't have.";
+
+/**
+ * The foot note on "Ways to sign in".
+ *
+ * ⚠️ IT NAMES WHAT IS COMING WITHOUT RENDERING A CONTROL FOR IT. A disabled "Set up two-step
+ * verification" row would be the Pen name field wearing a security label — a control that spends
+ * its whole life saying no. A sentence says the same thing and cannot be clicked.
+ *
+ * ⚠️ AND IT SAYS "after launch", NOT A DATE. A date in settings copy is a commitment made by
+ * whoever typed it, checkable by the reader, and wrong the moment a plan moves.
+ */
+export const SECURITY_AFTER_LAUNCH =
+  "Passkeys and two-step verification are coming after launch.";
+
+/**
+ * What a federated-only account reads where the password row would be.
+ *
+ * ⚠️ IT STATES THE CONSEQUENCE, NOT THE ABSENCE. "There's no password on this account" is true and
+ * tells a reader nothing they can act on; the reason to add one is that Google is currently the
+ * single point of failure for getting back in, and that is what the sentence has to carry.
+ */
+export const PASSWORD_ABSENT_NOTE =
+  "Not set. Adding one means you can still sign in if you lose access to your other sign-in method.";

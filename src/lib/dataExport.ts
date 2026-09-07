@@ -40,6 +40,45 @@ export const EXPORT_COLLECTIONS: (keyof ExportSources)[] = [
   "user", "manuscripts", "versions", "packages", "agents", "queries", "activities", "notes", "userTasks",
 ];
 
+/**
+ * What each collection is called on the page — and the sentence settings prints from them.
+ *
+ * ⚠️ THE WORDS ARE DERIVED FROM `EXPORT_COLLECTIONS`, NEVER TYPED BESIDE IT. A hand-written list on
+ * the settings page is a CLAIM ABOUT COVERAGE, and it goes stale the first time a collection is
+ * added to the bundle — the failure being a page that tells a reader their notes are in a file that
+ * does not contain them. The map is keyed by the union, so a new member fails to compile until it
+ * has a name.
+ *
+ * ⚠️ `user` IS DELIBERATELY ABSENT FROM THE SENTENCE. It is the account record itself, not a
+ * collection of the writer's work, and "your account" in a list of things you made reads as one
+ * more of them. It is still IN the bundle — the omission is from the prose, not the export, which
+ * is why the sentence is built by filtering rather than by a second list.
+ */
+export const EXPORT_LABELS: Record<keyof ExportSources, string | null> = {
+  user: null,
+  manuscripts: "manuscripts",
+  versions: "versions",
+  packages: "packages",
+  agents: "agents",
+  queries: "queries",
+  activities: "recorded activity",
+  notes: "notes",
+  userTasks: "to-dos",
+};
+
+/**
+ * "Your agents, queries, recorded activity, manuscripts, versions, packages, notes and to-dos."
+ *
+ * ⚠️ IT IS A SENTENCE, SO IT TAKES AN OXFORD-LESS "and" BEFORE THE LAST ITEM rather than printing a
+ * comma-separated dump. The page is telling a writer what they are about to download, in the same
+ * register as everything else on it.
+ */
+export function exportCoverageLine(): string {
+  const names = EXPORT_COLLECTIONS.map((k) => EXPORT_LABELS[k]).filter((n): n is string => !!n);
+  const last = names[names.length - 1];
+  return `Your ${names.slice(0, -1).join(", ")} and ${last}.`;
+}
+
 export interface ExportBundle {
   /** Bumped when the shape changes, so an old file can still be read. */
   format: 1;

@@ -20,6 +20,7 @@ import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { stripComments } from "../../test/pageSmoke";
+import { sliceBetween } from "../../test/sliceBetween";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (rel: string) => stripComments(readFileSync(resolve(here, rel), "utf8"));
@@ -158,10 +159,19 @@ describe("⚠️ one implementation — logout() itself", () => {
 describe("the second door — Account & settings", () => {
   const SETTINGS = read("../AccountSettings.tsx");
 
+  /* ⚠️ ANCHORED ON THE HEADING ids, NOT ON A PROP'S SPELLING (settings-mode pack, Phase 2). These
+     three cases read `title="Signing out"` and `title="Danger zone"` — props of `SubCard`, which the
+     stacked-cards chassis retired; the cards are `heading=` on `SettingsCard` now and the copy of
+     one of them changed. Not one of the CLAIMS moved: there is still a sign-out card, it still sits
+     above the deletion card, and it still touches nothing on the deletion path. A lock that goes red
+     on a refactor which changed nothing it asserts cannot tell a refactor from a regression, which
+     is the only thing a lock is for.
+     `acct-h-signout` and `acct-h-danger` are the two headings' ids. They are what the page's own
+     `aria-labelledby` and its smoke test already address, so they are load-bearing rather than
+     incidental — a spelling that cannot drift without something else failing first. */
   it("offers a sign-out row", () => {
-    expect(SETTINGS).toContain('title="Signing out"');
-    expect(SETTINGS).toContain("Sign out");
     expect(SETTINGS).toContain("acct-h-signout");
+    expect(SETTINGS).toContain("Sign out");
   });
 
   /**
@@ -170,10 +180,10 @@ describe("the second door — Account & settings", () => {
    * have to scroll past a delete button to find it. Two exits; the reversible one comes first.
    */
   it("sits above the closing-your-account block", () => {
-    const signOut = SETTINGS.indexOf('title="Signing out"');
-    const danger = SETTINGS.indexOf('title="Danger zone"');
-    expect(signOut).toBeGreaterThan(-1);
-    expect(danger).toBeGreaterThan(-1);
+    const signOut = SETTINGS.indexOf("acct-h-signout");
+    const danger = SETTINGS.indexOf("acct-h-danger");
+    expect(signOut, "the sign-out card's heading id").toBeGreaterThan(-1);
+    expect(danger, "the deletion card's heading id").toBeGreaterThan(-1);
     expect(signOut).toBeLessThan(danger);
   });
 
@@ -189,8 +199,7 @@ describe("the second door — Account & settings", () => {
    * exactly why the boundary is worth asserting: sign-out must never reach the flag or the confirm.
    */
   it("is independent of the deletion path", () => {
-    const at = SETTINGS.indexOf('title="Signing out"');
-    const card = SETTINGS.slice(at, SETTINGS.indexOf('title="Danger zone"'));
+    const card = sliceBetween(SETTINGS, "acct-h-signout", "acct-h-danger", "the sign-out card");
     expect(card).not.toContain("ACCOUNT_DELETION_ENABLED");
     expect(card).not.toContain("setShowDelete");
     expect(card).not.toContain("deletionConfirmed");

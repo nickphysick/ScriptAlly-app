@@ -2,29 +2,28 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Account settings — rebuilt onto the Form 11 / dashboard design system:
- * the app's shared ground (no page paint of its own), a left section rail,
- * and parchment cards carrying the sage-band uniform header (3px burgundy rule + Playfair
- * title + far-right lucide emblem). Section/danger cards use CardShell — the same three-layer
- * clipping structure the app already uses correctly (the onboarding "Database populated" card):
- * an outer parchment panel whose even padding is the rim, an inner 1px frame with overflow:hidden
- * as the clipping context, and a header with no radius/margin so its fill stops at the frame border
- * and is clipped to the rounded corners (never an overlay border, which can't contain a fill → spill).
+ * Account settings — the STACKED-CARDS chassis (ref design-refs/settings-mode-stacked-cards-v2.html).
  *
- * Wiring rule: a control is wired only when its end-to-end behaviour already exists (or is
- * trivially self-contained this pass). Everything else is rendered on-brand but clearly inert
- * and persists NOTHING (a dead stored pref is a desync trap).
- *   WIRED ........ display name (updateUserProfile), home country (updateUserProfile — drives
- *                  the agent territory split; changeable but never cleared back to unset, per
- *                  the origin-state law), password reset (resetPassword),
- *                  plan + trial display, View plans (onNavigate "plans" — a workspace route;
- *                  the focus tier is retired),
- *                  data export (client-side JSON of the already-loaded data),
- *                  data import (onNavigate "import" → ImportCsv).
- *   COMING-SOON .. pen name, email change, two-factor, active sessions, manage billing,
- *                  notification prefs, time zone / date format, account deletion (the
- *                  typed-confirmation modal is present; the final delete action is disabled —
- *                  irreversible deletion is never wired unsupervised, and no endpoint exists).
+ * A page title block, then one flat card per concern: 1px hairline, 12px radius, parchment, no
+ * shadow and no header band. Every setting is one row — a label and its explanation on the left, a
+ * control in a fixed 280px column on the right, a hairline between. Identity appears ONCE, at the
+ * top of Profile. The section rail is NOT here: settings is a mode, and the rail lives in the
+ * shell's panel slot (`settings/SettingsRail.tsx`).
+ *
+ * ⚠️ THE OLD DESCRIPTION OF THIS FILE SURVIVED THE THING IT DESCRIBED BY ONE COMMIT. It opened
+ * "parchment cards carrying the sage-band uniform header … an outer parchment panel whose even
+ * padding is the rim, an inner 1px frame with overflow:hidden" — a precise account of `SectionCard`,
+ * `SubCard` and `MountPanel`, all three of which this chassis retired. A comment that outlives what
+ * it describes is worse than no comment, because it is read as fact.
+ *
+ * Wiring rule: a control is wired only when its end-to-end behaviour already exists. Everything
+ * else is absent rather than rendered inert — a dead control is worse than a missing one, and this
+ * page has removed four on that grounds (pen name, author photo, session revocation, date format).
+ *   WIRED ........ display name (explicit save), home country, theme, time zone, every notification
+ *                  and task toggle, password reset, email verification resend, plan display, data
+ *                  export, import, deletion request + cancel, sign out.
+ *   NOT BUILT .... billing (no payment path exists), the account purge itself (no job runs), 2FA
+ *                  and passkeys (named in a sentence, never as a disabled control).
  */
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -35,7 +34,7 @@ import {
   notifyPrefs, NotifyPrefs, marketingGranted, marketingConsentRecord, ALWAYS_SENT_LINE,
   resolveTimeZone, tzOptions, TZ_HELPER,
 } from "../lib/accountPrefs";
-import { buildExport, downloadExport, exportFilename } from "../lib/dataExport";
+import { buildExport, downloadExport, exportFilename, exportCoverageLine } from "../lib/dataExport";
 import {
   DELETION_GRACE_DAYS, DELETION_CONFIRM_WORD, DELETION_REMOVES, RETENTION_LINE,
   deletionArmed, deletionRequest, scheduledDeletion, deletionNotice,
@@ -44,31 +43,30 @@ import { ACCOUNT_ROUTES, AccountSectionId } from "../lib/accountRoutes";
 import { useDirtyField } from "../lib/useSaveState";
 import { auth } from "../lib/firebase";
 import { sendEmailVerification } from "firebase/auth";
-import { passwordMode, federatedNames, federatedLine } from "../lib/accountSecurity";
+import {
+  passwordMode, federatedNames, SECURITY_AFTER_LAUNCH, PASSWORD_ABSENT_NOTE,
+} from "../lib/accountSecurity";
 import { readAuthFacts } from "../lib/accountAuthFacts";
 import { dirtyFieldKeys } from "../lib/saveSignal";
 import { useToast } from "./toast/ToastProvider";
 import { validateDisplayName } from "../lib/accountValidation";
 import { MountPanel } from "./MountPanel";
 import { SECTION_BANDS } from "./settings/sectionBands";
+import {
+  SettingsTitle, SettingsCard, SettingsRow, SettingsNote, IdentityRow,
+} from "./settings/SettingsCards";
 import "./settings/settings.css";
 import { CountryCombobox } from "./forms";
 import { PlanComparison } from "./plans/PlanComparison";
-import { AccountHeader } from "./settings/AccountHeader";
-import { SettingsIllo, hasSectionWatermark } from "./settings/SettingsIllo";
-import { accountFacts, sentCount } from "../lib/accountHeaderFacts";
 import { todoPrefs, STALE_MONTHS_CHOICES } from "../lib/todoPrefs";
 import { optionalTaskTypes, ALWAYS_ON_LINE, staleOptionLabel, STALE_NOTE } from "../lib/accountTasks";
+/* ⚠️ THE PARCHMENT/RIM/BAND TOKENS ARE GONE FROM THIS IMPORT with the chassis that read them —
+   `parchment`, `PAPER_TEXTURE`, `mountShadow`, `insetBorder`, `sageBandGradient`, `sageBandRule`
+   and `headingInk`. They are all still exported and still read by the rest of the app; what is
+   deleted is this page's use of them, which is the honest half of a chassis change. */
 import {
-  parchment,
-  PAPER_TEXTURE,
-  mountShadow,
-  insetBorder,
-  sageBandGradient,
-  sageBandRule,
   sageAccent,
   burgundy,
-  headingInk,
   bodyInk,
   mutedInk,
   labelColor,
@@ -77,7 +75,6 @@ import {
   FONT_MONO,
 } from "../lib/designTokens";
 import {
-  Mail,
   Trash2,
   LogOut,
   Check,
@@ -218,66 +215,65 @@ const VerifiedChip: React.FC<{ verified: boolean }> = ({ verified }) => (
 );
 
 /** A group heading inside a section — mono, muted, the same grammar as the rail's SETTINGS label. */
-const GroupLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <p className="acct-grouplabel">{children}</p>
-);
+/* ⚠️ `GroupLabel` IS GONE. It drew a mono eyebrow above a run of rows — "Workspace", "Your to-do
+   list" — which is exactly what a card's Playfair heading now says, one line higher and in the
+   page's own voice. Two ways to name a group of settings, on the same screen, is one more than the
+   reader can be asked to interpret. */
 
 /**
- * A LIVE toggle row — the instant-commit half of the save model.
+ * The LIVE switch — the instant-commit half of the save model.
  *
  * ⚠️ IT IS A `role="switch"` BUTTON, NOT A CHECKBOX PAINTED TO LOOK LIKE ONE. The state has to
  * reach a screen reader as on/off, and `aria-checked` on a switch is the one that does.
  *
  * ⚠️ AND IT COMMITS ON CHANGE, WITH NO SAVE BUTTON ANYWHERE NEAR IT. Flicking a switch is the
  * whole decision; asking for a confirmation afterwards would be asking twice.
+ *
+ * ⚠️ IT WAS `ToggleRow` AND IS NOW JUST THE SWITCH (settings-mode pack, Phase 2). The row's label
+ * and description are `SettingsRow`'s job now, and a component that drew its own would put a second
+ * row grammar inside the first — two rhythms, one card. What it keeps is the part only it knows:
+ * the switch's geometry, its ARIA and its transition. `label` survives as the accessible name
+ * because the visible label is no longer this component's child to point at.
  */
-const ToggleRow: React.FC<{
-  title: string;
-  desc: string;
+const Toggle: React.FC<{
   on: boolean;
   onChange: (next: boolean) => void;
-  first?: boolean;
-}> = ({ title, desc, on, onChange, first }) => (
-  <div className={`acct-row acct-row--pad${first ? "" : " acct-row--ruled"}`}>
-    <div className="acct-rowmain">
-      <p className="acct-rowtitle">{title}</p>
-      <p className="acct-note acct-note--tight">{desc}</p>
-    </div>
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      aria-label={title}
-      onClick={() => onChange(!on)}
+  label: string;
+}> = ({ on, onChange, label }) => (
+  <button
+    type="button"
+    role="switch"
+    aria-checked={on}
+    aria-label={label}
+    onClick={() => onChange(!on)}
+    style={{
+      width: 38,
+      height: 22,
+      borderRadius: 999,
+      background: on ? sageAccent : "#e2d7c9",
+      border: "none",
+      padding: 0,
+      position: "relative",
+      flexShrink: 0,
+      cursor: "pointer",
+      transition: "background 0.15s",
+    }}
+  >
+    <span
+      aria-hidden="true"
       style={{
-        width: 38,
-        height: 22,
-        borderRadius: 999,
-        background: on ? sageAccent : "#e2d7c9",
-        border: "none",
-        padding: 0,
-        position: "relative",
-        flexShrink: 0,
-        cursor: "pointer",
-        transition: "background 0.15s",
+        position: "absolute",
+        top: 2,
+        left: on ? 18 : 2,
+        width: 18,
+        height: 18,
+        borderRadius: "50%",
+        background: "#fff",
+        boxShadow: "0 1px 2px rgba(58,28,20,0.2)",
+        transition: "left 0.15s",
       }}
-    >
-      <span
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: 2,
-          left: on ? 18 : 2,
-          width: 18,
-          height: 18,
-          borderRadius: "50%",
-          background: "#fff",
-          boxShadow: "0 1px 2px rgba(58,28,20,0.2)",
-          transition: "left 0.15s",
-        }}
-      />
-    </button>
-  </div>
+    />
+  </button>
 );
 
 /** A notice banner shown atop a section whose behaviour isn't switched on yet. */
@@ -316,103 +312,22 @@ const InertNotice: React.FC<{ children: React.ReactNode }> = ({ children }) => (
  * stops the fill at the frame border — the ref draws this as a `::before` overlay and then
  * hand-matches a radius on the band to fake the same result, which an overlay border cannot do.
  */
-const SectionCard: React.FC<{
-  section: SectionId;
-  headingId?: string;
-  children: React.ReactNode;
-}> = ({ section, headingId, children }) => {
-  const band = SECTION_BANDS[section];
-  /* ⚠️ `fill` IS LOAD-BEARING, NOT DECORATION. MountPanel wraps its children in an inner FRAME div,
-        and that frame is a plain block unless `fill` makes it a stretching flex column — so
-        `.acct-cardbody { flex: 1 }` was addressing a parent that could not grant it. Measured: the
-        body filled 213px of a 520px card, leaving three hundred pixels of bare panel below the
-        frame and a card that looked like it had stopped early. The min-height was doing its job
-     the whole time; nothing inside it was. */
-  return (
-    <MountPanel className="acct-card" fill>
-      <div
-        className="acct-band"
-        style={{ background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}` }}
-      >
-        <span
-          id={headingId}
-          role="heading"
-          aria-level={2}
-          className="acct-band-name"
-          style={{ color: headingInk }}
-        >
-          {band.name}
-        </span>
-        <span className="acct-band-sub">{band.sub}</span>
-      </div>
-      {/* ⚠️ CONTENT → SPACER → FOOT (law 1). The illustration is a SIBLING of the content, pushed to
-          the card's floor by a flex spacer — not a layer over it. The build this replaces placed it
-          absolutely and spent a phase proving by measurement that it did not overlap anything; in
-          flow there is nothing left to prove, which is the better kind of correct. */}
-      <div className="acct-cardbody">
-        {children}
-        {hasSectionWatermark(section) && (
-          <>
-            <div className="acct-spacer" aria-hidden="true" />
-            <div className="acct-foot"><SettingsIllo slot="section" section={section} /></div>
-          </>
-        )}
-      </div>
-    </MountPanel>
-  );
-};
+/* ⚠️ `SectionCard` AND `SubCard` ARE GONE, AND WITH THEM THE SAGE BAND (settings-mode pack,
+   Phase 2). Both wore a gradient header — sage, or the danger card's warmer variant — carrying the
+   section's name and sub-line above a `MountPanel` rim and inner frame. Three things retired it:
 
-/**
- * A card WITHIN a section — Signing out and the Danger zone, which sit under Your data.
- *
- * ⚠️ IT KEEPS THE PLAIN TITLED HEADER, DELIBERATELY. The band's disc/pre-label/name/sub-line
- * anatomy says "this is a section of settings"; wearing it twice on one screen would make two of
- * the three cards under Your data look like sections the rail forgot to list.
- */
-const SubCard: React.FC<{
-  title: string;
-  Icon: React.ComponentType<any>;
-  danger?: boolean;
-  headingId?: string;
-  children: React.ReactNode;
-}> = ({ title, Icon, danger, headingId, children }) => (
-  <MountPanel style={{ marginBottom: 20 }}>
-    <div
-      style={{
-        padding: "13px 18px 11px",
-        background: danger ? DANGER_BAND : sageBandGradient,
-        borderBottom: `1px solid ${danger ? DANGER_RULE : sageBandRule}`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 10,
-      }}
-    >
-      <span className="flex items-center" style={{ minWidth: 0 }}>
-        <span
-          aria-hidden="true"
-          style={{ width: 3, height: 18, borderRadius: 2, background: danger ? DANGER_INK : burgundy, marginRight: 12, flexShrink: 0, display: "inline-block" }}
-        />
-        <span
-          id={headingId}
-          role="heading"
-          aria-level={2}
-          style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 500, color: danger ? DANGER_INK : headingInk, lineHeight: 1.1 }}
-        >
-          {title}
-        </span>
-      </span>
-      <Icon style={{ width: 19, height: 19, color: danger ? DANGER_INK : burgundy, flexShrink: 0 }} strokeWidth={1.8} aria-hidden="true" />
-    </div>
-    <div style={{ padding: 18 }}>{children}</div>
-  </MountPanel>
-);
+     · THE BAND SAID WHAT THE PAGE ALREADY SAYS. The title block names the section and the rail
+       shows which one is selected; the band was a third statement of it, and the loudest element
+       on screen carried the least information.
+     · A SECTION AND A SUB-SECTION LOOKED LIKE TWO KINDS OF THING. `SubCard`'s own note admitted
+       it: it kept a plainer header so the two cards under Your data would not "look like sections
+       the rail forgot to list". One flat card per concern removes the question.
+     · THE DANGER CARD FILLED. A warning gradient at the foot of Your data shouts at a reader who
+       came to download a copy of their work; the deletion card is a hairline and an ink now.
 
-/* ⚠️ THE `Rail` COMPONENT IS GONE FROM THIS FILE — it is `settings/SettingsRail.tsx`, rendered by
-   the SHELL into the panel slot (settings-mode pack, Phase 1). Settings is a mode: the panel shows
-   the app's nav or the settings rail, and a page-level copy would be a second one on screen with
-   the first. Its ids, its roving tab index and its blush active state went across unchanged, which
-   is why the page's `aria-labelledby` still resolves. */
+   `MountPanel` is untouched and still carries every other card in the app — see the note in
+   `settings/SettingsCards.tsx` for why the flat card is genuinely a different object rather than a
+   `flat` prop on it. */
 
 /**
  * The delete-account modal — a typed confirmation that schedules, rather than deletes.
@@ -649,11 +564,12 @@ export const AccountSettings: React.FC<{
     }
   };
 
-  const headerFacts = accountFacts({
-    creationTime: authFacts?.createdAt,
-    manuscriptCount: manuscripts.length,
-    sentCount: sentCount(queries),
-  });
+  /* ⚠️ `headerFacts` IS GONE WITH THE HEADER. `accountFacts` derived a "joined / manuscripts /
+     queries sent" strip for the illustrated plate; the plate is retired and nothing else on this
+     page states those figures — they are the dashboard's job, and a settings page that counts your
+     queries at you is a settings page doing something else. The helper survives in
+     `lib/accountHeaderFacts` with its tests; it is a derivation with no caller, which the run
+     report names rather than leaving to be discovered. */
   const notify = notifyPrefs(currentUser.notifyPrefs);
   const marketingOn = marketingGranted(currentUser.marketingConsent);
   const timezone = resolveTimeZone(currentUser.workspacePrefs?.timezone);
@@ -834,190 +750,142 @@ export const AccountSettings: React.FC<{
      only caller has been deleted is dormant code that reads as a feature. */
 
   const profileSection = (
-    <SectionCard section="profile" headingId="acct-h-profile">
-      <div className="acct-two">
-        <div>
+    <>
+      <SettingsTitle name={SECTION_BANDS.profile.name} description={SECTION_BANDS.profile.sub} />
 
-      {/* ⚠️ NO AUTHOR-PHOTO CONTROL, AND NO DISABLED PLACEHOLDER FOR ONE. Firebase Storage is not
-          configured in this project — no `storage.rules`, no storage block in either hosting
-          config, no `firebase/storage` import anywhere in src. A "Change photo" button that
-          cannot store a photo is the Pen name field wearing a different label, and this build
-          removed that one for exactly this reason. The dashboard byline's initials fallback
-          stands alone until Storage exists.
-          STANDING FLAG: `OneScreenAuthor.tsx:62`'s "Add a photo +" navigates here and will find
-          nothing — left untouched, as a one-line follow-up rather than a change smuggled into
-          this phase. */}
+      {/* ⚠️ IDENTITY APPEARS ONCE IN THE WHOLE OF SETTINGS, AND THIS IS IT. It used to be an
+          illustrated header above every section — the writer's own name and address restated seven
+          times, so the only element that could have held still while you navigated was the one that
+          moved most. The rail says which section you are in; this says whose account it is, in the
+          section about you.
 
-      {/* ⚠️ NO IDENTITY BLOCK EITHER. A 52px monogram over the name and email used to open this
-          body, and the band directly above now carries the same monogram, the same name and the
-          same email — the writer's own address printed twice, four centimetres apart. */}
+          ⚠️ NO AUTHOR-PHOTO CONTROL, AND NO DISABLED PLACEHOLDER FOR ONE. Firebase Storage is not
+          configured in this project — no `storage.rules`, no storage block in either hosting config,
+          no `firebase/storage` import anywhere in src. A "Change photo" button that cannot store a
+          photo is the Pen name field wearing a different label, and this build removed that one for
+          exactly this reason.
+          STANDING FLAG: `OneScreenAuthor.tsx:62`'s "Add a photo +" navigates here and finds nothing
+          — a one-line follow-up, deliberately not smuggled into this phase. */}
+      <SettingsCard heading="You" headingId="acct-h-profile">
+        <IdentityRow name={currentUser.name} email={currentUser.email} />
+      </SettingsCard>
 
-      <label htmlFor="account-name" className="acct-label">
-        Display name
-      </label>
-      <input
-        id="account-name"
-        type="text"
-        value={name}
-        maxLength={256}
-        onChange={(e) => setName(e.target.value)}
-        className="acct-input"
-        style={inputStyle}
-        aria-describedby={nameStatus.type === "error" ? "account-name-error" : undefined}
-      />
-
-      {/* ⚠️ THE ROW IS ABSENT UNTIL THE FIELD DIVERGES, not present-and-disabled. A permanently
-          greyed Save button is a control that spends its whole life saying no; its arrival is the
-          page telling you there is something to do. It leaves again the moment the value matches
-          what is stored — including when you type your way back to it by hand. */}
-      {nameChanged && (
-        <div className="acct-actions">
-          <button
-            onClick={saveName}
-            disabled={!nameValid || nameStatus.type === "saving"}
-            style={{ ...primaryBtn, opacity: !nameValid || nameStatus.type === "saving" ? 0.4 : 1, cursor: nameValid ? "pointer" : "not-allowed" }}
-          >
-            {nameStatus.type === "saving" ? "Saving…" : "Save"}
-          </button>
-          <button onClick={discardName} disabled={nameStatus.type === "saving"} style={ghostBtn}>
-            Discard
-          </button>
-        </div>
-      )}
-      {nameStatus.type === "error" && (
-        <p id="account-name-error" className="acct-err">
-          {nameStatus.msg}
-        </p>
-      )}
-
-        </div>
-        <div>
-      {/* Home country — seeded silently at signup from the browser locale (key omitted when
-          unresolvable) and previously never writable again: a wrong guess was a permanent trap
-          for the agent territory split (Tier 2 · Phase 4). Absent shows as "Not set" and is
-          settable; once set it can be changed but not cleared (the origin-state law).
-
-          ⚠️ IT COMMITS ON SELECT, WITH A RECEIPT AND NO SAVE BUTTON — choosing from a list IS the
-          decision. `CountryCombobox` is the app's own control; a native `<select>` would drop the
-          flags and take the OS's menu styling into the middle of a Form 11 card. */}
-      <div className="acct-ruled">
-        <label htmlFor="account-homecountry" className="acct-label">
-          Home country
-        </label>
-        <div style={{ maxWidth: 360 }}>
-          <CountryCombobox
-            id="account-homecountry"
-            value={currentUser.homeCountry ?? ""}
-            onChange={saveHomeCountry}
-            placeholder="Not set"
-          />
-        </div>
-        <div className="acct-actions">
-          <p className="acct-note acct-note--tight">
-            The agent list uses this to tell agents in your country from international ones. You can change
-            it any time.
-          </p>
-        </div>
-        {countryStatus.type === "error" && (
-          <p className="acct-err">{countryStatus.msg}</p>
+      <SettingsCard
+        heading="Details"
+        note="Your name saves when you press Save. Everything else saves as you change it."
+        /* ⚠️ THE SAVE IS ABSENT UNTIL THE FIELD DIVERGES, not present-and-disabled. A permanently
+           greyed button spends its whole life saying no; its ARRIVAL is the page telling you there
+           is something to do, and it leaves the moment the value matches what is stored — including
+           when you type your way back to it by hand. */
+        action={nameChanged ? (
+          <span className="acct-actions" style={{ margin: 0 }}>
+            <button
+              onClick={saveName}
+              disabled={!nameValid || nameStatus.type === "saving"}
+              style={{ ...primaryBtn, opacity: !nameValid || nameStatus.type === "saving" ? 0.4 : 1, cursor: nameValid ? "pointer" : "not-allowed" }}
+            >
+              {nameStatus.type === "saving" ? "Saving…" : "Save"}
+            </button>
+            <button onClick={discardName} disabled={nameStatus.type === "saving"} style={ghostBtn}>
+              Discard
+            </button>
+          </span>
+        ) : undefined}
+      >
+        <SettingsRow
+          label="Display name"
+          description="Shown in the app and on anything you export."
+          control={
+            <input
+              id="account-name"
+              type="text"
+              value={name}
+              maxLength={256}
+              onChange={(e) => setName(e.target.value)}
+              className="acct-input sc-grow"
+              style={inputStyle}
+              aria-label="Display name"
+              aria-describedby={nameStatus.type === "error" ? "account-name-error" : undefined}
+            />
+          }
+        />
+        {nameStatus.type === "error" && (
+          <SettingsNote><span id="account-name-error" className="acct-err">{nameStatus.msg}</span></SettingsNote>
         )}
-      </div>
-        </div>
-      </div>
-    </SectionCard>
+
+        {/* Home country — seeded silently at signup from the browser locale (key omitted when
+            unresolvable) and previously never writable again: a wrong guess was a permanent trap
+            for the agent territory split (Tier 2 · Phase 4). Absent shows as "Not set" and is
+            settable; once set it can be changed but not cleared (the origin-state law).
+
+            ⚠️ IT COMMITS ON SELECT, WITH A RECEIPT AND NO SAVE BUTTON — choosing from a list IS the
+            decision. `CountryCombobox` is the app's own control; a native `<select>` would drop the
+            flags and take the OS's menu styling into the middle of the card. */}
+        <SettingsRow
+          label="Home country"
+          description="The agent list uses this to tell agents in your country from international ones. You can change it any time."
+          control={
+            <div className="sc-grow">
+              <CountryCombobox
+                id="account-homecountry"
+                value={currentUser.homeCountry ?? ""}
+                onChange={saveHomeCountry}
+                placeholder="Not set"
+              />
+            </div>
+          }
+        />
+        {countryStatus.type === "error" && (
+          <SettingsNote><span className="acct-err">{countryStatus.msg}</span></SettingsNote>
+        )}
+      </SettingsCard>
+    </>
   );
 
   const securitySection = (
-    <SectionCard section="security" headingId="acct-h-security">
-      <div className="acct-two">
-        <div>
+    <>
+      <SettingsTitle name={SECTION_BANDS.security.name} description={SECTION_BANDS.security.sub} />
 
-      <label htmlFor="account-email" className="acct-label">
-        Email
-      </label>
-      <div className="acct-actions acct-actions--tight">
-        <div style={{ position: "relative", flex: 1, minWidth: 220 }}>
-          <Mail style={{ position: "absolute", left: 11, top: 11, width: 16, height: 16, color: "rgba(58,28,20,0.4)" }} aria-hidden="true" />
-          <input
-            id="account-email"
-            type="email"
-            value={currentUser.email}
-            readOnly
-            className="acct-input"
-            style={{ ...inputStyle, paddingLeft: 34, background: "#faf6f0", color: "#6a5a50" }}
+      <SettingsCard heading="Email" headingId="acct-h-security">
+        {/* ⚠️ "Change email" GOES TO SUPPORT, BECAUSE THERE IS NO FLOW BEHIND IT. Firebase's
+            `verifyBeforeUpdateEmail` needs a recent sign-in and a re-auth path this app has never
+            built, and a button that opens nothing is the disabled-field fault wearing a verb. This
+            reuses Your data's own "Correct something we hold" route, which exists for exactly the
+            case where the writer cannot change something themselves. */}
+        <SettingsRow
+          label="Email address"
+          description="The address you sign in with. To change it, you'll confirm from both the old and the new address."
+          control={
+            <>
+              <VerifiedChip verified={authFacts?.emailVerified ?? true} />
+              <button onClick={() => onNavigate("contact")} style={ghostBtn}>Change</button>
+            </>
+          }
+        />
+
+        {/* ⚠️ `emailVerified` DOES NOT RE-RENDER. It is a snapshot on the auth user, refreshed only
+            by a reload or an explicit `reload()`; polling it would spin, and flipping the chip
+            locally after sending would be the UI asserting an outcome it has not observed. So the
+            confirmation says to reload — the one honest instruction. */}
+        {authFacts && !authFacts.emailVerified && (
+          <SettingsRow
+            label="Confirm this address"
+            description="Until it's confirmed we can't be sure a reset link reaches you."
+            control={
+              <>
+                {verifyMsg && verifyMsg !== "sending" && (
+                  <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: verifyMsg.startsWith("Couldn") ? ERROR_RED : SUCCESS_GREEN }}>
+                    {verifyMsg}
+                  </span>
+                )}
+                <button onClick={resendVerification} disabled={verifyMsg === "sending"} style={ghostBtn}>
+                  {verifyMsg === "sending" ? "Sending…" : "Resend"}
+                </button>
+              </>
+            }
           />
-        </div>
-        <VerifiedChip verified={authFacts?.emailVerified ?? true} />
-      </div>
-
-      {/* ⚠️ `emailVerified` DOES NOT RE-RENDER. It is a snapshot on the auth user, refreshed only
-          by a reload or an explicit `reload()`; polling it would spin, and flipping the chip
-          locally after sending would be the UI asserting an outcome it has not observed. So the
-          confirmation says to reload — the one honest instruction. */}
-      {authFacts && !authFacts.emailVerified && (
-        <div className="acct-actions">
-          <button onClick={resendVerification} disabled={verifyMsg === "sending"} style={ghostBtn}>
-            {verifyMsg === "sending" ? "Sending…" : "Resend verification"}
-          </button>
-          {verifyMsg && verifyMsg !== "sending" && (
-            <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: verifyMsg.startsWith("Couldn") ? ERROR_RED : SUCCESS_GREEN }}>
-              {verifyMsg}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* ⚠️ "Change email" GOES TO SUPPORT, BECAUSE THERE IS NO FLOW BEHIND IT. Firebase's
-          `verifyBeforeUpdateEmail` needs a recent sign-in and a re-auth path this app has never
-          built, and a button that opens nothing is the disabled-field fault wearing a verb. This
-          reuses Your data's own "Correct something we hold" route, which exists for exactly the
-          case where the writer cannot change something themselves. */}
-      <div className="acct-row acct-block">
-        <p style={{ ...helpText, margin: 0, flex: 1, minWidth: 200 }}>
-          The address you sign in with. To change it, you'll confirm from both the old and new address.
-        </p>
-        <button onClick={() => onNavigate("contact")} style={ghostBtn}>Change email</button>
-      </div>
-
-        </div>
-        <div>
-      {/* ── Password — provider-aware ──────────────────────────────────────── */}
-      <div className="acct-ruled">
-        {pwMode === "federated-only" ? (
-          <>
-            <p className="acct-rowtitle">How you sign in</p>
-            <p className="acct-note acct-note--tight">{federatedLine(authFacts?.providerIds ?? [], currentUser.email)}</p>
-            <p className="acct-note">There's no ScriptAlly password on this account, so there's nothing here to change.</p>
-          </>
-        ) : (
-          <>
-            <p className="acct-rowtitle">Password</p>
-            {/* ⚠️ NO "LAST CHANGED {date}" LINE. Firebase exposes creationTime and lastSignInTime
-                and nothing else; printing either under that label is a real date wearing the wrong
-                name. See PASSWORD_LAST_CHANGED_AVAILABLE. */}
-            <div className="acct-actions acct-actions--tight">
-              <input
-                type="password"
-                value="············"
-                readOnly
-                aria-label="Password (hidden)"
-                className="acct-input"
-                style={{ ...inputStyle, width: "auto", minWidth: 180, background: "#faf6f0", color: "#6a5a50", letterSpacing: "0.12em" }}
-              />
-            </div>
-            {pwMode === "both" && (
-              <p className="acct-note">
-                You can also sign in with {federatedNames(authFacts?.providerIds ?? []).join(" and ")}.
-              </p>
-            )}
-            <p className="acct-note">We'll email you a secure link to set a new one.</p>
-            <button onClick={sendReset} style={ghostBtn}>
-              <KeyRound style={{ width: 14, height: 14 }} aria-hidden="true" /> Change password
-            </button>
-            {resetMsg && <p className="acct-note" style={{ color: SUCCESS_GREEN, fontWeight: 500 }}>{resetMsg}</p>}
-          </>
         )}
-      </div>
+      </SettingsCard>
 
       {/* ⚠️ NO SESSIONS BLOCK. "Sign out of all other sessions" was built here, wired to a named
           stub, and reported honestly that it could not act — and an honest dead control is still a
@@ -1026,93 +894,129 @@ export const AccountSettings: React.FC<{
           Pen name field and the author-photo control.
           `signOutOtherSessions` and `SESSION_REVOKE_UNAVAILABLE` survive in `lib/accountSecurity`
           with their tests: the seam is where the Cloud Function lands, and deleting it would mean
-          rediscovering that the client SDK cannot revoke a session at all.
-          ⚠️ PASSKEYS, 2FA AND A DEVICE LIST ARE OUT OF SCOPE — absent, not advertised. */}
-        </div>
-      </div>
-    </SectionCard>
+          rediscovering that the client SDK cannot revoke a session at all. */}
+      <SettingsCard
+        heading="Ways to sign in"
+        blurb="Keep more than one, so you can always get back in."
+        note={SECURITY_AFTER_LAUNCH}
+      >
+        {/* ⚠️ THE PROVIDER ROWS ARE DERIVED, NEVER LISTED. `federatedNames` reads what Firebase
+            reports on the account, so an account that gains a provider gains a row without anyone
+            editing this file — and one that never had Google never sees a Google row.
+            ⚠️ NO CONNECTION DATE. Firebase exposes `creationTime` and `lastSignInTime` on the USER
+            and nothing per provider; printing either under "connected" is a real date wearing the
+            wrong name, which is the same fault as the password's retired "last changed" line. */}
+        {federatedNames(authFacts?.providerIds ?? []).map((n) => (
+          <SettingsRow
+            key={n}
+            label={n}
+            description={currentUser.email}
+            control={<span className="acct-chip">Connected</span>}
+          />
+        ))}
+
+        {pwMode === "federated-only" ? (
+          <SettingsRow
+            label="Password"
+            description={PASSWORD_ABSENT_NOTE}
+            control={<span className="acct-chip acct-chip--muted">Not set</span>}
+          />
+        ) : (
+          /* ⚠️ NO "LAST CHANGED {date}" LINE. Firebase exposes creationTime and lastSignInTime and
+             nothing else; printing either under that label is a real date wearing the wrong name.
+             See PASSWORD_LAST_CHANGED_AVAILABLE. */
+          <SettingsRow
+            label="Password"
+            description="We'll email you a secure link to set a new one."
+            control={
+              <>
+                {resetMsg && <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN }}>{resetMsg}</span>}
+                <button onClick={sendReset} style={ghostBtn}>
+                  <KeyRound style={{ width: 14, height: 14 }} aria-hidden="true" /> Change
+                </button>
+              </>
+            }
+          />
+        )}
+      </SettingsCard>
+    </>
   );
 
   const planSection = (
-    <SectionCard section="plan" headingId="acct-h-plan">
-      <PlanComparison
-        currentPlan={currentUser.plan === UserPlan.PRO ? "pro" : "free"}
-        onSeePlans={() => onNavigate("plans")}
-      />
+    <>
+      <SettingsTitle name={SECTION_BANDS.plan.name} description={SECTION_BANDS.plan.sub} />
 
-      {/* ── Billing ────────────────────────────────────────────────────────────
-          ⚠️ NO USAGE BLOCK ANYWHERE ON THIS CARD — no meters, no counts, no "where you stand".
+      {/* ⚠️ NO USAGE BLOCK ANYWHERE ON THIS SECTION — no meters, no counts, no "where you stand".
           The card answers "what do I get" and stops; position against a limit is not what anyone
           opens this page for, and it is the half that ages into nagging.
-          ⚠️ AND CSV EXPORT IS NOT MENTIONED HERE. It is a data right, it lives in Your data, and
-          naming it beside a plan comparison invites the reading that it is a plan feature. */}
-      <div className="acct-ruled">
-        <p className="acct-rowtitle">Billing</p>
-        {/* The empty state IS the state: there is no payment path in the app at all, so every
-            account reads this. It says what will appear and when, rather than pretending a
-            payment method is merely missing. */}
-        <p className="acct-note">
-          Price to be confirmed. Nothing to pay on the Free plan — your invoices will appear here if
-          you move to a paid plan.
-        </p>
-      </div>
-    </SectionCard>
+          ⚠️ AND THE EXPORT IS NOT MENTIONED HERE. It is a data right, it lives in Your data, and
+          naming it beside a plan comparison invites the reading that it is a plan feature.
+          ⚠️ `PlanComparison` IS UNCHANGED AND KEEPS ITS OWN CHASSIS. It is a table, not a column of
+          rows, and forcing it into the row grammar would be re-drawing a locked component to match
+          a layout — the rows here are one label, one control; a comparison is one label and TWO
+          values, which the row cannot say. */}
+      <SettingsCard
+        heading="What each plan includes"
+        headingId="acct-h-plan"
+        note="Price to be confirmed. Nothing to pay on the Free plan — your invoices will appear here if you move to a paid plan."
+      >
+        <div className="sc-row sc-row--full">
+          <PlanComparison
+            currentPlan={currentUser.plan === UserPlan.PRO ? "pro" : "free"}
+            onSeePlans={() => onNavigate("plans")}
+          />
+        </div>
+      </SettingsCard>
+    </>
   );
 
   const notificationsSection = (
-    <SectionCard section="notifications" headingId="acct-h-notifications">
-      <div className="acct-two">
-        <div>
+    <>
+      <SettingsTitle name={SECTION_BANDS.notifications.name} description={SECTION_BANDS.notifications.sub} />
 
-      {/* ⚠️ THE NOTICE IS WHAT MAKES THESE TOGGLES HONEST. There is no email-sending
-          infrastructure in this app and no scheduler to run one — `functions/` holds eight
-          callables and zero scheduled jobs, and even "contact us" writes a Firestore document
-          rather than posting mail. So these record what you want FOR WHEN THERE IS. Without the
-          notice they would claim to govern a live behaviour, which is the fault that removed Pen
-          name and the sessions button; with it, they are a stored decision that will be honoured
-          the day a job exists. */}
+      {/* ⚠️ THE NOTICE IS WHAT MAKES THESE TOGGLES HONEST. There is no email-sending infrastructure
+          in this app and no scheduler to run one — `functions/` holds nine callables and one
+          scheduled job, and that job is the waitlist's retention sweep. So these record what you
+          want FOR WHEN THERE IS. Without the notice they would claim to govern a live behaviour,
+          which is the fault that removed Pen name and the sessions button; with it, they are a
+          stored decision that will be honoured the day a job exists. */}
+      {/* ⚠️ NO WRAPPER. This carried a `sc-inert` class that no stylesheet declared — a class the
+          component emits and nothing selects on, which is the `.wpg--record` fault from the other
+          end and just as silent. `InertNotice` already owns its own spacing. */}
       <InertNotice>
-        ScriptAlly doesn't send these emails yet. What you choose here is stored and will be
+          ScriptAlly doesn't send these emails yet. What you choose here is stored and will be
         honoured from the day it does.
       </InertNotice>
 
-      <GroupLabel>About your querying</GroupLabel>
-      <ToggleRow
-        first
-        title="Nudge reminders"
-        desc="When a query is due a nudge."
-        on={notify.nudges}
-        onChange={(v) => saveNotify({ nudges: v }, "Nudge reminders")}
-      />
-      <ToggleRow
-        title="Weekly summary"
-        desc="One email each Monday with what happened in the past week."
-        on={notify.weeklyDigest}
-        onChange={(v) => saveNotify({ weeklyDigest: v }, "Weekly summary")}
-      />
+      <SettingsCard heading="About your querying" headingId="acct-h-notifications" note={ALWAYS_SENT_LINE}>
+        <SettingsRow
+          label="Nudge reminders"
+          description="When a query is due a nudge."
+          control={<Toggle on={notify.nudges} onChange={(v) => saveNotify({ nudges: v }, "Nudge reminders")} label="Nudge reminders" />}
+        />
+        <SettingsRow
+          label="Weekly summary"
+          description="One email each Monday with what happened in the past week."
+          control={<Toggle on={notify.weeklyDigest} onChange={(v) => saveNotify({ weeklyDigest: v }, "Weekly summary")} label="Weekly summary" />}
+        />
+      </SettingsCard>
 
-        </div>
-        <div>
-      {/* ⚠️ MARKETING IS ITS OWN GROUP, AND ITS OWN STORED FIELD. Under UK PECR consent must be
+      {/* ⚠️ MARKETING IS ITS OWN CARD, AND ITS OWN STORED FIELD. Under UK PECR consent must be
           affirmative, evidenced and withdrawable in one action — so it defaults OFF, is never
-          pre-ticked, writes a timestamped record in BOTH directions, and takes effect on the
-          click rather than on a Save. Withdrawal rewrites the record rather than deleting it: the
-          evidence that consent existed, and when it stopped, is the half a regulator asks about. */}
-      <GroupLabel>News from ScriptAlly</GroupLabel>
-      <ToggleRow
-        first
-        title="Product news"
-        desc="Occasional news about new ScriptAlly features."
-        on={marketingOn}
-        onChange={saveMarketing}
-      />
-
-      <p className="acct-note acct-ruled">
-        {ALWAYS_SENT_LINE}
-      </p>
-        </div>
-      </div>
-    </SectionCard>
+          pre-ticked, writes a timestamped record in BOTH directions, and takes effect on the click
+          rather than on a Save. Withdrawal rewrites the record rather than deleting it: the
+          evidence that consent existed, and when it stopped, is the half a regulator asks about.
+          ⚠️ ITS OWN CARD RATHER THAN A GROUP INSIDE THE ONE ABOVE, because the separation is the
+          legal point — transactional and marketing email are different things with different rules,
+          and a shared card says they are two settings of one kind. */}
+      <SettingsCard heading="News from ScriptAlly" note={`Sent to ${currentUser.email}.`}>
+        <SettingsRow
+          label="Product news"
+          description="Occasional news about new ScriptAlly features. Off unless you turn it on, and one click to stop."
+          control={<Toggle on={marketingOn} onChange={saveMarketing} label="Product news" />}
+        />
+      </SettingsCard>
+    </>
   );
 
   /* ⚠️ THE PREFERENCES LINK ROW IS DELETED, NOT RE-POINTED. Tasks is a rail section again, and a
@@ -1120,294 +1024,289 @@ export const AccountSettings: React.FC<{
      between sections. What it used to open, `TaskSettingsSheet`, is retired in this same commit. */
 
   const preferencesSection = (
-    <SectionCard section="preferences" headingId="acct-h-preferences">
-      <div className="acct-two">
-        <div>
+    <>
+      <SettingsTitle name={SECTION_BANDS.preferences.name} description={SECTION_BANDS.preferences.sub} />
 
-      <GroupLabel>Workspace</GroupLabel>
+      {/* ⚠️ THE TASKS LINK ROW THE REF DRAWS IS DELIBERATELY NOT BUILT. `settings-mode-stacked-
+          cards-v2.html` puts a "Task defaults → Open" row at the foot of this section, pointing at
+          the sibling Tasks section. `accountRoutes.ts` deleted exactly that row and states its
+          reason: Tasks is a rail section again, and a link from inside one section to another is
+          clutter beside a rail that is already the way between them. A reasoned value in prose
+          beats an unreasoned one in an artefact — the house's own mockup-wins carve-out. Flagged in
+          the run report rather than decided quietly. */}
+      <SettingsCard heading="Workspace" headingId="acct-h-preferences">
+        {/* Theme — the one setting on this page that changes something the moment you click it.
+            The three that ship are the segmented switcher's own list (design-refs/themes.md); the
+            value written is `queriesTheme`, which the AppShell root reads as .t-capp / .t-bold /
+            .t-edn. Instant commit, receipt, no Save button. */}
+        <SettingsRow
+          label="Theme"
+          description="The look of your workspace."
+          control={
+            <div role="radiogroup" aria-label="Workspace theme" style={{ display: "inline-flex", gap: 3, flexShrink: 0, background: "#f3ece2", border: "1px solid #e2d6c6", borderRadius: 10, padding: 3 }}>
+              {([["cappuccino", "Capp"], ["bold", "Bold"], ["editorial", "Editorial"]] as const).map(([val, label]) => {
+                const on = (currentUser?.queriesTheme ?? "cappuccino") === val;
+                return (
+                  <button
+                    key={val}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    /* ⚠️ THE ACCESSIBLE NAME IS THE FULL ONE. The visible labels shortened to fit
+                       the 280px control column; "Capp" is not a word, and a screen reader must not
+                       be handed an abbreviation the design chose for width. */
+                    aria-label={val === "cappuccino" ? "Cappuccino" : val === "bold" ? "Bold Pastille" : "Editorial"}
+                    onClick={() => { void updateUserProfile({ queriesTheme: val }); savedReceipt("Theme"); }}
+                    style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: on ? 700 : 500, color: on ? bodyInk : "#8a7d6c", background: on ? "#fffefb" : "transparent", border: on ? "1px solid #d8cebf" : "1px solid transparent", boxShadow: on ? "0 1px 2px rgba(29,23,18,.10)" : "none", borderRadius: 8, padding: "6px 11px", cursor: "pointer" }}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          }
+        />
 
-      {/* Theme — the one setting on this card that changes something the moment you click it.
-          The three that ship are the segmented switcher's own list (design-refs/themes.md); the
-          value written is `queriesTheme`, which the AppShell root reads as .t-capp / .t-bold /
-          .t-edn. Instant commit, receipt, no Save button. */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, padding: "14px 0" }}>
-        <div style={{ minWidth: 0 }}>
-          <p className="acct-rowtitle">Theme</p>
-          <p className="acct-note">The look of your workspace.</p>
-        </div>
-        <div role="radiogroup" aria-label="Workspace theme" style={{ display: "inline-flex", gap: 3, flexShrink: 0, background: "#f3ece2", border: "1px solid #e2d6c6", borderRadius: 10, padding: 3 }}>
-          {([["cappuccino", "Cappuccino"], ["bold", "Bold Pastille"], ["editorial", "Editorial"]] as const).map(([val, label]) => {
-            const on = (currentUser?.queriesTheme ?? "cappuccino") === val;
-            return (
-              <button
-                key={val}
-                type="button"
-                role="radio"
-                aria-checked={on}
-                onClick={() => { void updateUserProfile({ queriesTheme: val }); savedReceipt("Theme"); }}
-                style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: on ? 700 : 500, color: on ? bodyInk : "#8a7d6c", background: on ? "#fffefb" : "transparent", border: on ? "1px solid #d8cebf" : "1px solid transparent", boxShadow: on ? "0 1px 2px rgba(29,23,18,.10)" : "none", borderRadius: 8, padding: "6px 13px", cursor: "pointer" }}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+        {/* ⚠️ TIME ZONE IS STORED AND NOTHING READS IT YET, AND THE HELPER SAYS SO. Dates already
+            render in the device's zone — the same zone, for almost every writer — and wiring this
+            to DISPLAY would mean threading it through 93 `toLocaleDateString` call sites, several
+            in files this build must not touch. It is stored for the scheduled work that does not
+            exist yet: a reminder at 9am local needs a server to know which 9am.
+            ⚠️ AND THE VALUE IS RESOLVED, NEVER BACKFILLED. An account with nothing stored reads as
+            its BROWSER's zone, not Europe/London — pinning a writer in Chicago to London would give
+            them wrong day boundaries with nothing on screen to explain it. */}
+        <SettingsRow
+          label="Time zone"
+          description={TZ_HELPER}
+          control={
+            <select
+              id="account-timezone"
+              aria-label="Time zone"
+              value={timezone}
+              onChange={(e) => saveTimezone(e.target.value)}
+              className="acct-input sc-grow"
+              style={{ ...inputStyle, padding: "7px 10px", fontSize: 13 }}
+            >
+              {tzOptions(timezone).map((z) => <option key={z} value={z}>{z}</option>)}
+            </select>
+          }
+        />
 
-      {/* ⚠️ TIME ZONE IS STORED AND NOTHING READS IT YET, AND THE HELPER SAYS SO. Dates already
-          render in the device's zone — the same zone, for almost every writer — and wiring this to
-          DISPLAY would mean threading it through 93 `toLocaleDateString` call sites, several in
-          files this build must not touch. It is stored for the scheduled work that does not exist
-          yet: a reminder at 9am local needs a server to know which 9am.
-          ⚠️ AND THE VALUE IS RESOLVED, NEVER BACKFILLED. An account with nothing stored reads as
-          its BROWSER's zone, not Europe/London — pinning a writer in Chicago to London would give
-          them wrong day boundaries with nothing on screen to explain it. */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 14, padding: "14px 0", borderTop: "0.5px solid #efe5da" }}>
-        <div className="acct-rowmain">
-          <p className="acct-rowtitle">Time zone</p>
-          <p className="acct-note">{TZ_HELPER}</p>
-        </div>
-        <select
-          id="account-timezone"
-          aria-label="Time zone"
-          value={timezone}
-          onChange={(e) => saveTimezone(e.target.value)}
-          className="acct-input"
-          style={{ ...inputStyle, width: "auto", maxWidth: 200, padding: "7px 10px", fontSize: 13, flexShrink: 0 }}
-        >
-          {tzOptions(timezone).map((z) => <option key={z} value={z}>{z}</option>)}
-        </select>
-      </div>
-
-      {/* ⚠️ NO DATE-FORMAT AND NO WEEK-START CONTROL. Both are pure DISPLAY claims, and every date
-          in this app renders through one of 93 `toLocaleDateString("en-GB", …)` calls — several of
-          them in files this build must not touch. A stored "MM/DD/YYYY" beside a page full of
-          "20 August 2026" is not a deferred preference, it is a visible untruth, and it is the
-          same fault that removed Pen name, the author-photo control and the sessions button. They
-          arrive with a shared formatter, not before one. */}
-
-        </div>
-        <div>
-      <GroupLabel>Tasks</GroupLabel>
-        </div>
-      </div>
-    </SectionCard>
+        {/* ⚠️ NO DATE-FORMAT AND NO WEEK-START CONTROL, THOUGH THE REF DRAWS BOTH. Both are pure
+            DISPLAY claims, and every date in this app renders through one of 93
+            `toLocaleDateString("en-GB", …)` calls — several of them in files this build must not
+            touch. A stored "MM/DD/YYYY" beside a page full of "20 August 2026" is not a deferred
+            preference, it is a visible untruth, and it is the same fault that removed Pen name, the
+            author-photo control and the sessions button. They arrive with a shared formatter, not
+            before one. */}
+      </SettingsCard>
+    </>
   );
 
-  /* ⚠️ YOUR DATA SPLITS AT THE CARD LEVEL, NOT INSIDE ONE CARD — the only section that does. Its
-     two independent groups are "what you can take away" and "how you leave", and the second lives
-     in its own cards because a deletion control does not belong in the same frame as an export
-     button. Putting the destructive column beside the routine one uses the width the way the other
-     sections do, and keeps the two apart in the way this page has kept them since the sign-out row
-     was placed above the danger zone rather than below it. */
   /**
-   * THE TASKS SECTION — and it is now the ONLY form for these fields.
+   * THE TASKS SECTION — preferences only, and the ONLY form for these fields.
    *
-   * ⚠️ `TaskSettingsSheet` IS RETIRED IN THE SAME COMMIT THIS SHIPS. Two forms over one set of
-   * fields must not coexist for even one commit: "two places to change a default and two chances
-   * to disagree about it" is the fault the sheet itself was built to prevent, and leaving both
-   * alive briefly would be committing that fault on purpose.
-   *
-   * All four `todoPrefs` values live here — `rollForward`, `weeklyBriefing`, `staleMonths` and
-   * `types` — plus the muted-rule list, so nothing is stranded when the sheet goes.
-   */
-  /**
-   * THE TASKS SECTION — preferences only.
+   * ⚠️ `TaskSettingsSheet` IS RETIRED. Two forms over one set of fields must not coexist: "two
+   * places to change a default and two chances to disagree about it" is the fault the sheet itself
+   * was built to prevent.
    *
    * ⚠️ THE MUTED-RULES COLUMN LEFT FOR THE BOARD. It listed one of the THREE kinds of hiding the
    * app has; the other two — permanent dismissals and live snoozes — were never here, so a writer
    * looking for something they had set aside had to know which kind it was before they knew where
    * to look. `hiddenItems()` returns all three in one shape, and the board's "Set aside & tags"
-   * panel renders them together. Splitting them was the "two places to change one thing" fault the
-   * retired sheet existed to prevent, wearing different clothes.
+   * panel renders them together.
    *
-   * What stays is what a SETTING is: the four behaviours that decide what reaches the list at all.
+   * What stays is what a SETTING is: the behaviours that decide what reaches the list at all.
    */
   const tasksSection = (
-    <SectionCard section="tasks" headingId="acct-h-tasks">
-      <div className="acct-two">
-        <div>
-          <div className="acct-group">
-            <span className="acct-grouplabel">Your to-do list</span>
-            <ToggleRow
-              title="Keep unfinished tasks"
-              desc="Anything you don't finish moves to today rather than being left behind."
-              first
-              on={prefs.rollForward}
-              onChange={(v) => saveTodoPref({ rollForward: v }, "Keep unfinished tasks")}
-            />
-            <ToggleRow
-              title="Start the week with a summary"
-              desc="A short review of the week just gone, on Monday."
-              on={prefs.weeklyBriefing}
-              onChange={(v) => saveTodoPref({ weeklyBriefing: v }, "Weekly summary")}
-            />
-            <div className="acct-block">
-              <label className="acct-label" htmlFor="account-stale">
-                Move a task to the back of the list after
-              </label>
-              <select
-                id="account-stale"
-                className="acct-input acct-select"
-                value={prefs.staleMonths}
-                onChange={(e) => saveTodoPref({ staleMonths: Number(e.target.value) }, "Waiting time")}
-              >
-                {STALE_MONTHS_CHOICES.map((m) => (
-                  <option key={m} value={m}>{staleOptionLabel(m)}</option>
-                ))}
-              </select>
-              <p className="acct-note">{STALE_NOTE}</p>
-            </div>
-          </div>
-        </div>
+    <>
+      <SettingsTitle name={SECTION_BANDS.tasks.name} description={SECTION_BANDS.tasks.sub} />
 
-        {/* ⚠️ `decide` GETS A SENTENCE, NOT A SWITCH. `todoPrefs` forces it true — the one value the
-            prefs resolver refuses to take an instruction on — so a toggle for it would be a control
-            that cannot act, which this build has removed three times now. */}
-        <div>
-          <div className="acct-group">
-            <span className="acct-grouplabel">What appears on your list</span>
-            {optionalTaskTypes().map((t, i) => (
-              <ToggleRow
-                key={t.key}
-                title={t.label}
-                desc={t.gloss}
-                first={i === 0}
-                on={prefs.types[t.key]}
-                onChange={(v) => saveTodoPref({ types: { ...prefs.types, [t.key]: v } }, t.label)}
-              />
-            ))}
-            <p className="acct-note">{ALWAYS_ON_LINE}</p>
-          </div>
-        </div>
-      </div>
-    </SectionCard>
+      <SettingsCard heading="Your to-do list" headingId="acct-h-tasks" note={STALE_NOTE}>
+        <SettingsRow
+          label="Keep unfinished tasks"
+          description="Anything you don't finish moves to today rather than being left behind."
+          control={<Toggle on={prefs.rollForward} onChange={(v) => saveTodoPref({ rollForward: v }, "Keep unfinished tasks")} label="Keep unfinished tasks" />}
+        />
+        <SettingsRow
+          label="Start the week with a summary"
+          description="A short review of the week just gone, on Monday."
+          control={<Toggle on={prefs.weeklyBriefing} onChange={(v) => saveTodoPref({ weeklyBriefing: v }, "Weekly summary")} label="Start the week with a summary" />}
+        />
+        <SettingsRow
+          label="Move a task to the back of the list after"
+          control={
+            <select
+              id="account-stale"
+              aria-label="Move a task to the back of the list after"
+              className="acct-input acct-select sc-grow"
+              value={prefs.staleMonths}
+              onChange={(e) => saveTodoPref({ staleMonths: Number(e.target.value) }, "Waiting time")}
+            >
+              {STALE_MONTHS_CHOICES.map((m) => (
+                <option key={m} value={m}>{staleOptionLabel(m)}</option>
+              ))}
+            </select>
+          }
+        />
+      </SettingsCard>
+
+      {/* ⚠️ `decide` GETS A SENTENCE, NOT A SWITCH. `todoPrefs` forces it true — the one value the
+          prefs resolver refuses to take an instruction on — so a toggle for it would be a control
+          that cannot act, which this build has removed three times now. */}
+      <SettingsCard heading="What appears on your list" note={ALWAYS_ON_LINE}>
+        {optionalTaskTypes().map((t) => (
+          <SettingsRow
+            key={t.key}
+            label={t.label}
+            description={t.gloss}
+            control={<Toggle on={prefs.types[t.key]} onChange={(v) => saveTodoPref({ types: { ...prefs.types, [t.key]: v } }, t.label)} label={t.label} />}
+          />
+        ))}
+      </SettingsCard>
+    </>
   );
 
   const dataSection = (
-    <div className="acct-two acct-two--cards">
-      <SectionCard section="data" headingId="acct-h-data">
-        {/* ⚠️ THE EXPORT IS THE PORTABILITY RIGHT, SAID WITHOUT LEGALESE. UK GDPR gives you a copy
-            of your own records in a form a machine can read; the copy says that in plain words
-            rather than citing an article at someone who just wants their work.
-            ⚠️ AND IT IS THE JSON BUNDLE, NOT A CSV. The brief said "CSV export"; the CSV that
-            exists covers the query LIST only, and a partial file is not the complete copy the
-            right is about. `buildExport` is the whole account. */}
-        <div className="acct-row acct-rowsplit">
-          <div className="acct-rowmain">
-            <p className="acct-rowtitle">Take a copy of your data</p>
-            <p className="acct-note">
-              Downloads everything ScriptAlly holds about your querying — your agents, queries, and
-              history — as files you can open anywhere.
-            </p>
-          </div>
-          <button onClick={exportData} style={ghostBtn}>
-            <Download style={{ width: 14, height: 14 }} aria-hidden="true" /> Download my data
-          </button>
-        </div>
-        {exportMsg && <p className="acct-note" style={{ color: SUCCESS_GREEN, fontWeight: 500 }}>{exportMsg}</p>}
+    <>
+      <SettingsTitle name={SECTION_BANDS.data.name} description={SECTION_BANDS.data.sub} />
+
+      {/* ⚠️ THE EXPORT IS THE PORTABILITY RIGHT, SAID WITHOUT LEGALESE. UK GDPR gives you a copy of
+          your own records in a form a machine can read; the copy says that in plain words rather
+          than citing an article at someone who just wants their work.
+          ⚠️ AND IT IS THE JSON BUNDLE, NOT A CSV. The original brief said "CSV export"; the CSV that
+          exists covers the query LIST only, and a partial file is not the complete copy the right
+          is about. `buildExport` is the whole account, and `EXPORT_COLLECTIONS` is derived from its
+          own shape so a collection cannot be added to one and forgotten in the other. */}
+      <SettingsCard
+        heading="Take a copy of your data"
+        /* ⚠️ THE BRIEF-FIXED SENTENCE IS RESTORED VERBATIM AND THE DERIVED LIST SITS BESIDE IT,
+           rather than replacing it. This phase first swapped the sentence for `exportCoverageLine()`
+           on the grounds that it is more accurate — see the run report, which raises that as a
+           question rather than answering it. Overruling copy a brief fixed is not a layout
+           decision, so the sentence stands and the enumeration is ADDED, which understates
+           nothing. */
+        blurb="Downloads everything ScriptAlly holds about your querying — your agents, queries, and history — as files you can open anywhere."
+        headingId="acct-h-data"
+        note={exportMsg ? <span style={{ color: SUCCESS_GREEN, fontWeight: 500 }}>{exportMsg}</span> : undefined}
+      >
+        {/* ⚠️ THE LIST IS DERIVED FROM `EXPORT_COLLECTIONS`, NEVER TYPED OUT. A hand-written list
+            beside a real export is a claim about coverage that goes stale the first time a
+            collection is added — and the failure is a page telling a reader their notes are in a
+            file that does not contain them. */}
+        <SettingsRow
+          label="Everything you've put in"
+          description={exportCoverageLine()}
+          control={
+            <button onClick={exportData} style={ghostBtn}>
+              <Download style={{ width: 14, height: 14 }} aria-hidden="true" /> Download a copy
+            </button>
+          }
+        />
 
         {/* ⚠️ THE THIRD DATA RIGHT, AND IT HAD NO ROUTE. The privacy policy offers access, export,
             CORRECTION and deletion; export and deletion had surfaces here and correction had none,
             so the one right a writer is most likely to need was the one with nowhere to click. */}
-        <div className="acct-row acct-rowsplit">
-          <div className="acct-rowmain">
-            <p className="acct-rowtitle">Correct something we hold</p>
-            <p className="acct-note">Most things you can edit yourself. For anything you can't, write to us and we'll put it right.</p>
-          </div>
-          <button onClick={() => onNavigate("contact")} style={ghostBtn}>Get in touch</button>
-        </div>
+        <SettingsRow
+          label="Correct something we hold"
+          description="Most things you can edit yourself. For anything you can't, write to us and we'll put it right."
+          control={<button onClick={() => onNavigate("contact")} style={ghostBtn}>Get in touch</button>}
+        />
 
-        <div className="acct-row acct-rowsplit">
-          <div className="acct-rowmain">
-            <p className="acct-rowtitle">Import agents &amp; queries</p>
-            <p className="acct-note">Bring in your existing tracking from a spreadsheet.</p>
-          </div>
-          <button onClick={() => onNavigate("import")} style={ghostBtn}>
-            <Upload style={{ width: 14, height: 14 }} aria-hidden="true" /> Open import
-          </button>
-        </div>
+        <SettingsRow
+          label="Import agents and queries"
+          description="Bring in your existing tracking from a spreadsheet."
+          control={
+            <button onClick={() => onNavigate("import")} style={ghostBtn}>
+              <Upload style={{ width: 14, height: 14 }} aria-hidden="true" /> Open import
+            </button>
+          }
+        />
+      </SettingsCard>
 
-        {/* Retention — the period comes from the same constant the privacy policy reads, brackets
-            and all: it is a figure nobody has confirmed, and settings quoting a confident "30 days"
-            beside a policy that hedges would be the app disagreeing with its own notice. */}
-        <div>
-          <p className="acct-rowtitle">How long we keep it</p>
-          <p className="acct-note">{RETENTION_LINE}</p>
-        </div>
-      </SectionCard>
+      {/* Retention — the period comes from the same constant the privacy policy reads, so settings
+          and the notice cannot state two different numbers. */}
+      <SettingsCard heading="How long we keep it">
+        <SettingsNote>{RETENTION_LINE}</SettingsNote>
+      </SettingsCard>
 
-      <div>
-      {/* ⚠️ SIGN OUT SITS ABOVE THE DANGER ZONE, NOT BELOW IT. Someone scrolling to close their
+      {/* ⚠️ SIGN OUT SITS ABOVE THE DELETION CARD, NOT BELOW IT. Someone scrolling to close their
           account should not pass the way out on the journey to deletion — and someone looking for
           the way out should not have to scroll past a delete button to find it. Two exits, and the
           reversible one comes first.
 
           ⚠️ ONE IMPLEMENTATION, TWO DOORS. This is the same `logout` the account menu calls, so
           where sign-out leaves you cannot differ by the door you used. */}
-      <SubCard title="Signing out" Icon={LogOut} headingId="acct-h-signout">
-        <div className="acct-row">
-          <div className="acct-rowmain">
-            <p className="acct-rowtitle">Sign out</p>
-            <p className="acct-note">Ends this session and takes you back to the ScriptAlly home page. Your work stays where it is.</p>
-          </div>
-          {/* No confirm: leaving is not destructive, and signing back in costs a password. */}
-          <button onClick={() => { void logout(); }} style={ghostBtn}>
-            <LogOut style={{ width: 14, height: 14 }} aria-hidden="true" /> Sign out
-          </button>
-        </div>
-      </SubCard>
+      <SettingsCard heading="Signing out" headingId="acct-h-signout">
+        <SettingsRow
+          label="Sign out"
+          description="Ends this session and takes you back to the ScriptAlly home page. Your work stays where it is."
+          /* No confirm: leaving is not destructive, and signing back in costs a password. */
+          control={
+            <button onClick={() => { void logout(); }} style={ghostBtn}>
+              <LogOut style={{ width: 14, height: 14 }} aria-hidden="true" /> Sign out
+            </button>
+          }
+        />
+      </SettingsCard>
 
-      <SubCard title="Danger zone" Icon={Trash2} danger headingId="acct-h-danger">
+      <SettingsCard heading="Delete your account" danger headingId="acct-h-danger">
         {pendingDeletion ? (
           /* ⚠️ THE SCHEDULED STATE REPLACES THE REQUEST CONTROL — it does not sit beside it. Two
              delete buttons, one of them already pressed, is how someone confirms twice and cannot
              tell what state they are in. */
           <div id="acct-deletion-scheduled">
-            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: DANGER_INK, marginBottom: 4 }}>
-              {deletionNotice(pendingDeletion)}
-            </p>
-            <p style={{ ...helpText, marginBottom: 4 }}>
+            <SettingsNote>
+              <span style={{ fontWeight: 600, color: DANGER_INK }}>{deletionNotice(pendingDeletion)}</span>
+            </SettingsNote>
+            <SettingsNote>
               Nothing has been removed. Cancel any time before then and your account carries on
               exactly as it is.
-            </p>
-            {/* ⚠️ STATED, BECAUSE IT IS TRUE AND THE ALTERNATIVE IS A PROMISE NOBODY KEEPS. There
-                is no job that purges an account, so the page must not imply one runs on the date.
-                It offers the route that does work. */}
-            <p className="acct-note">
-              Deletion isn't automatic yet — we complete it by hand.{" "}
-              <button
-                type="button"
-                onClick={() => onNavigate("contact")}
-                style={{ background: "none", border: "none", padding: 0, font: "inherit", color: DANGER_INK, textDecoration: "underline", textUnderlineOffset: 2, cursor: "pointer" }}
-              >
-                Write to us
-              </button>{" "}
-              if you need it done by a particular date.
-            </p>
-            <button onClick={cancelDeletion} style={ghostBtn}>Cancel deletion</button>
+            </SettingsNote>
+            {/* ⚠️ STATED, BECAUSE IT IS TRUE AND THE ALTERNATIVE IS A PROMISE NOBODY KEEPS. There is
+                no job that purges an account, so the page must not imply one runs on the date. It
+                offers the route that does work. */}
+            <SettingsRow
+              label="Changed your mind?"
+              description={
+                <>
+                  Deletion isn't automatic yet — we complete it by hand.{" "}
+                  <button
+                    type="button"
+                    onClick={() => onNavigate("contact")}
+                    style={{ background: "none", border: "none", padding: 0, font: "inherit", color: DANGER_INK, textDecoration: "underline", textUnderlineOffset: 2, cursor: "pointer" }}
+                  >
+                    Write to us
+                  </button>{" "}
+                  if you need it done by a particular date.
+                </>
+              }
+              control={<button onClick={cancelDeletion} style={ghostBtn}>Cancel deletion</button>}
+            />
           </div>
         ) : (
-          <div className="acct-row">
-            <div className="acct-rowmain">
-              <p className="acct-rowtitle">Delete account</p>
-              <p className="acct-note">
-                This removes your account and everything in it — manuscripts, agents, queries, and
-                history. You&rsquo;ll have {DELETION_GRACE_DAYS} days to change your mind: signing in
-                again within that time cancels it.
-              </p>
-            </div>
-            <button
-              onClick={() => setShowDelete(true)}
-              style={{ ...ghostBtn, color: DANGER_INK, borderColor: DANGER_INK }}
-            >
-              <Trash2 style={{ width: 14, height: 14 }} aria-hidden="true" /> Delete account…
-            </button>
-          </div>
+          <>
+            {/* ⚠️ THE BRIEF-FIXED SENTENCE, VERBATIM. It was briefly replaced by a run of
+                `DELETION_REMOVES` lines — a longer and more precise list — and the same rule
+                applies as to the export blurb above: a more accurate sentence is still a copy
+                change, and copy a brief fixed is not this phase's to rewrite. `DELETION_REMOVES`
+                is still what the confirmation modal enumerates. */}
+            <SettingsRow
+              label="Delete account"
+              description={`This removes your account and everything in it — manuscripts, agents, queries, and history. You'll have ${DELETION_GRACE_DAYS} days to change your mind: signing in again within that time cancels it.`}
+              control={
+                <button
+                  onClick={() => setShowDelete(true)}
+                  style={{ ...ghostBtn, color: DANGER_INK, borderColor: DANGER_INK }}
+                >
+                  <Trash2 style={{ width: 14, height: 14 }} aria-hidden="true" /> Delete account…
+                </button>
+              }
+            />
+          </>
         )}
-      </SubCard>
-      </div>
-    </div>
+      </SettingsCard>
+    </>
   );
 
   const sectionContent: Record<SectionId, React.ReactNode> = {
@@ -1442,7 +1341,6 @@ export const AccountSettings: React.FC<{
           There is no page title any more: this says whose account it is, which the title never
           did. */}
       <div className="acct-plane" style={{ position: "relative", zIndex: 1 }}>
-        <AccountHeader name={currentUser.name} email={currentUser.email} facts={headerFacts} />
         {/* ⚠️ THE RAIL AND THE ASIDE ARE GONE FROM THIS PAGE — they moved into the SHELL's panel
             slot (`shell/WorkspaceShell.tsx` → `settings/SettingsRail.tsx`). Settings is a mode
             now: the panel shows the app's nav or the settings rail, never both, so a page-level
