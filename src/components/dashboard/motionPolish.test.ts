@@ -141,3 +141,37 @@ describe("search — focus must not resize the field", () => {
     expect(decls).not.toMatch(/(^|[\s;{])width:/);
   });
 });
+
+/**
+ * ⚠️ THE LAZY DRAWER, GUARDED FROM A FILE THAT IMPORTS NOTHING (dashboard redesign, Phase 5).
+ *
+ * `OneScreenTasks` loads `DashTaskDrawer` through `React.lazy`, because the drawer reaches
+ * `useTaskCommit` → `lib/db` → `lib/firebase`, which initialises the Firebase SDK at MODULE LOAD.
+ * A static import puts `auth/invalid-api-key` into the graph of every suite that renders the
+ * dashboard, and those suites then fail to COLLECT.
+ *
+ * ⚠️ WHICH IS EXACTLY WHY THE GUARD CANNOT LIVE IN ONE OF THEM. `oneScreenTasks.test.tsx` carries
+ * the same assertion and it is unreachable in the failing case: the file it would run in does not
+ * load, and vitest reports that as `Tests no tests` — which greps as zero reds. This file reads
+ * source with `readFileSync` and imports no component at all, so it still runs, and still fails,
+ * on the day somebody flattens the import back.
+ */
+describe("the dashboard's to-do drawer stays out of the load path", () => {
+  const panel = readFileSync(join(__dirname, "OneScreenTasks.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  it("⚠️ DashTaskDrawer is React.lazy, never a static import", () => {
+    expect(panel).toContain("React.lazy(");
+    expect(panel).toContain('import("./DashTaskDrawer")');
+    expect(panel, "a static import drags the Firebase SDK into every dashboard suite")
+      .not.toMatch(/^import[^\n]*DashTaskDrawer/m);
+  });
+
+  /* ⚠️ AND THE PANEL ITSELF MUST NOT REACH THE WRITE LAYER BY ANOTHER DOOR — the point is the
+     GRAPH, not the one import everybody remembers. */
+  it("⚠️ and the panel imports no part of the write layer directly", () => {
+    for (const f of ["../../lib/db", "useTaskCommit", "../../lib/firebase"]) {
+      expect(panel, `the panel imports ${f}`).not.toContain(f);
+    }
+  });
+});

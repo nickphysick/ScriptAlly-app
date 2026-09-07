@@ -30,6 +30,23 @@ import type { TicketFacts } from "../../lib/ticketFacts";
 /* ⚠️ THE SHAPE IS `lib/ticketFacts`'s, IMPORTED — not restated here. Two declarations of one
    record is how a field comes to mean different things at the two ends of it; the derivation owns
    the type, and this file renders whatever it produces. */
+/**
+ * ⚠️ `snipped` IS A VARIANT, NOT A SECOND TICKET (dashboard redesign, Phase 5). The dashboard's
+ * panel is a WINDOW onto the To-do page, so it renders this component with three of its four rows
+ * dropped — tag and headline only — rather than a look-alike that would drift from it on the first
+ * restyle. Both tinted regions are unchanged and still come from different functions: the edge from
+ * `stateFor`, the tag from `CATEGORY_FAMILY`.
+ *
+ * ⚠️ AND `facts` STAYS REQUIRED. A snipped ticket does not render them, so making the prop optional
+ * would let a caller mount one with no facts at all and then discover, on the day the panel wants a
+ * date, that its cards were built without one. The derivation is cheap and the shape is the point.
+ *
+ * ⚠️ THE HEADLINE IS THE CARD'S OWN TITLE IN BOTH VARIANTS — deliberately NOT `deedSentence`. The
+ * pack's global rule said deeds are full sentences; `taskDeed`'s own docstring says the LIST keeps
+ * the short deed because a column of forty sentences is unreadable, and a grid of tickets is that
+ * column. The addendum settled it the same way: short deed on the ticket, full sentence in the
+ * drawer's header.
+ */
 export const TaskTicket: React.FC<{
   card: BoardCard;
   facts: TicketFacts;
@@ -38,10 +55,12 @@ export const TaskTicket: React.FC<{
   urgent?: boolean;
   /** the status tint painted down the card's leading edge */
   edge: string;
+  /** the dashboard's cut: the tag and the headline, and nothing else */
+  snipped?: boolean;
   onOpen: () => void;
-}> = ({ card, facts, manuscript, selected, urgent, edge, onOpen }) => {
+}> = ({ card, facts, manuscript, selected, urgent, edge, snipped, onOpen }) => {
   const cat = taskCategory(card);
-  const cls = ["tkt", selected ? "sel" : "", urgent ? "urgent" : ""].filter(Boolean).join(" ");
+  const cls = ["tkt", snipped ? "snip" : "", selected ? "sel" : "", urgent ? "urgent" : ""].filter(Boolean).join(" ");
   return (
     <button type="button" className={cls} onClick={onOpen} aria-pressed={!!selected}>
       {/* the edge is a child rather than a border, so the tint can be a flat fill the card's
@@ -50,10 +69,10 @@ export const TaskTicket: React.FC<{
       <span className="in">
         <span className="top">
           <span className={"tag " + CATEGORY_FAMILY[cat]}>{CATEGORY_TAG[cat]}</span>
-          {manuscript && <span className="msc">{manuscript}</span>}
+          {!snipped && manuscript && <span className="msc">{manuscript}</span>}
         </span>
         <span className="ttl">{card.title}</span>
-        <span className="facts">
+        {!snipped && <span className="facts">
           <span className="cell">
             <span className="k">{facts.dateKey}</span>
             <span className="v">{facts.dateValue}</span>
@@ -62,8 +81,8 @@ export const TaskTicket: React.FC<{
             <span className="k">{facts.spanKey}</span>
             <span className={facts.late ? "v late" : "v"}>{facts.spanValue}</span>
           </span>
-        </span>
-        <span className="tfoot">
+        </span>}
+        {!snipped && <span className="tfoot">
           {card.who ? (
             <>
               <span className="av" aria-hidden>{card.initials}</span>
@@ -78,7 +97,7 @@ export const TaskTicket: React.FC<{
             /* ⚠️ WORDS, NOT AN EMPTY DISC — see the header. */
             <span className="n own">Your own note</span>
           )}
-        </span>
+        </span>}
       </span>
     </button>
   );

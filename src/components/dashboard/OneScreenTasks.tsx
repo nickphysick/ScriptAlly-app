@@ -2,112 +2,192 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * OneScreenTasks — the tasks card (spec §5; ref dashboard-one-screen.html).
+ * OneScreenTasks — the dashboard's window onto the To-do page (dashboard redesign, Phase 5).
  *
- * ⚠️ THE END CELL IS ONE CELL, TWO OCCUPANTS: the status pill and the action button are BOTH
- * absolutely positioned in the same 104px cell, crossfading on hover/focus-within — so revealing
- * the action can never reflow the row. On touch (`hover:none`) the action is simply always on.
+ * ⚠️ THIS IS A MIGRATION, NOT A RESTYLE, AND THE OLD CARD WAS COUNTING A DIFFERENT THING.
+ * It built its own three-way split — `buildOverToYouRows` + `buildHousekeepingRows` +
+ * `yourTasksToday` — on the MEMBER unit, while the rail badge beside it had already moved to
+ * `boardFigures(assembleBoardColumns(...).cols).cards`, the CARD unit. Two numbers, one word, and
+ * nothing on either surface saying which one "To-do" meant: the exact fault the counting-law
+ * migration closed everywhere else in the app and left standing here. Every figure on this panel
+ * now comes from `assembleBoardColumns` and every category from `lib/todoCategory`.
  *
- * ⚠️ ROWS COME FROM THE LIVE CTA BUILDERS — buildOverToYouRows and buildHousekeepingRows, the
- * same derivations the To-do board runs. This card lists and links; it never re-decides what a
- * task's action is.
+ * ⚠️ THE PANEL DERIVES NO CATEGORY OF ITS OWN. `taskCategory` is exhaustive over `TaskType` and
+ * closes with the house `never` idiom, so a thirteenth task type fails to compile until it says
+ * where it belongs. A local branch here would be a second opinion that cannot fail that way.
+ *
+ * ⚠️ URGENT IS A LENS, NOT A BAND. `isUrgentCard` is deliberately absent from the five: a task
+ * whose clock starts would otherwise change category as time passed, and the rule would redraw
+ * itself overnight.
  */
-import React from "react";
-import { Agent, Query, Task, UserTask } from "../../types";
-import { taskSurfaced } from "../../lib/todoBoard";
-import { buildHousekeepingRows, buildOverToYouRows } from "./OverToYou";
+import React, { Suspense, useMemo, useState } from "react";
+
+/**
+ * ⚠️ LAZY, AND IT IS NOT AN OPTIMISATION. The drawer reaches `useTaskCommit` → `lib/db` →
+ * `lib/firebase`, which initialises the Firebase SDK AT MODULE LOAD; this repo's test environment is
+ * `node` with no emulator, so a static import here put `auth/invalid-api-key` into the import graph
+ * of ELEVEN dashboard suites and they stopped COLLECTING — the failure that reads as "no tests
+ * found" rather than as a red. `OneScreenDashboard` already dodges the same trap by importing
+ * `lib/firebase` dynamically inside an effect; this is that shape applied to a subtree.
+ *
+ * It is also a real saving: the dashboard does not pay for the To-do page's whole write layer
+ * until somebody opens a ticket.
+ */
+const DashTaskDrawer = React.lazy(() =>
+  import("./DashTaskDrawer").then((m) => ({ default: m.DashTaskDrawer })));
+import { Activity, Agent, Manuscript, Query, Task, TaskFlag, User, UserTask } from "../../types";
 import { OneScreenPanel } from "./OneScreenPanel";
 import { OneScreenMark } from "./OneScreenMark";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
-
-/** "Due today" / "Due Friday" / "Overdue" — the row's second line when it has no detail of its own. */
-const dueWord = (dueYmd: string, now: Date): string => {
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  if (dueYmd < today) return "Overdue";
-  if (dueYmd === today) return "Due today";
-  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dueYmd);
-  if (!m) return "Due";
-  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0, 0);
-  return `Due ${d.toLocaleDateString("en-GB", { weekday: "long" })}`;
-};
+import { TaskTicket } from "../todo/TaskTicket";
+import { assembleBoardColumns } from "../../lib/todoColumns";
+import { BoardCard } from "../../lib/todoBoard";
+import { CATEGORIES, CATEGORY_FAMILY, CATEGORY_LABEL, isUrgentCard, taskCategory, type Category } from "../../lib/todoCategory";
+import { listRowInputs } from "../../lib/taskCardFacts";
+import { ticketFacts } from "../../lib/ticketFacts";
+import { elapsedPhrase } from "../../lib/elapsed";
+import { stateFor, STATE_TOKEN } from "../../lib/queryCardFacts";
+import { localYMD } from "../../lib/shellSidebar";
 
 /**
- * ⚠️ THE HEADER SENTENCE IS RETIRED (v16 §4) — the title now states the job and the COUNT PILLS
- * state the split. The sentence had to pick one number to lead on and say nothing about the rest.
+ * ⚠️ THE RULE'S ORDER IS NOT THE DECLARATION'S ORDER, AND THAT IS THE WHOLE OF PHASE 5's COLOUR
+ * ANSWER. There are FIVE categories and THREE family papers — `req`+`nudge` share "now",
+ * `quiet`+`house` share "house" — so five bands painted by family gives two pairs of identical
+ * colours side by side. The ref's answer was five per-category tints, which are the chart's four
+ * state fills plus the closed grey: the same colours would then mean STATE in the chart and
+ * CATEGORY in the rule, on one page, which breaks the vocabulary rather than bending it.
  *
- * ⚠️ THE PILLS COUNT EXACTLY THE ROWS BENEATH THEM. A pill for a kind this card does not render
- * would send you to "See all" to find out what it meant, and the visible list would never add up
- * to the summary above it — which is the whole fault a summary exists to avoid.
+ * So: three papers, and the categories sharing one sit ADJACENT, separated by a card-coloured
+ * hairline. The paper says which family, the separator says there are two of them in it, and the
+ * legend names which is which. `CATEGORY_FAMILY` stays the only source of the fill.
  */
-export interface TaskTrio { key: "urgent" | "house" | "mine"; label: string; n: number }
-export const taskTrio = (urgent: number, housekeeping: number, yours: number): TaskTrio[] =>
-  ([
-    { key: "urgent", label: "urgent", n: urgent },
-    { key: "house", label: "housekeeping", n: housekeeping },
-    { key: "mine", label: "yours", n: yours },
-  ] as TaskTrio[]).filter((p) => p.n > 0); // a kind with nothing in it simply drops out
+const RULE_ORDER: readonly Category[] = ["req", "nudge", "quiet", "house", "yours"];
 
-/**
- * ⚠️ "YOURS" REUSES THE ONE SURFACING LAW (`taskSurfaced`), never a second rule written here: a
- * user card with a due date is a TASK, and it joins today's list once its surfacing window opens.
- * Dateless cards are NOTES and never surface — so they are not counted, and not shown.
- */
-export const yourTasksToday = (userTasks: UserTask[], now: Date): UserTask[] => {
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  return userTasks.filter((t) => !t.done && !!t.dueDate && taskSurfaced(t.dueDate, t.surfaceOffset, today));
+/** the three family papers, as the tokens the pane and the ticket tag already read */
+const FAMILY_FILL: Record<string, string> = {
+  now: "var(--u-now-1)", house: "var(--u-house-1)", yours: "var(--u-yours-1)",
 };
 
-/** The kind pill's word (§5): Pages / Offer / Tidy — a scan column, not a sentence. */
-export const kindWord = (urgentType: string | null): { word: string; sage: boolean } => {
-  if (urgentType === null) return { word: "Tidy", sage: true };
-  if (urgentType === "offer_received") return { word: "Offer", sage: true };
-  return { word: "Pages", sage: false };
-};
-
-export const OneScreenTasks: React.FC<{
+export interface OneScreenTasksProps {
   loading: boolean;
   tasks: Task[];
   queries: Query[];
   agents: Agent[];
+  manuscripts: Manuscript[];
   userTasks: UserTask[];
+  activities: Activity[];
+  taskFlags: TaskFlag[];
+  currentUser: User | null;
   now: Date;
   dayOne?: boolean;
-  onAction: (task: Task) => void;
   onSeeAll: () => void;
   onAddManuscript?: () => void;
   onAddAgent?: () => void;
-}> = ({ loading, tasks, queries, agents, userTasks, now, dayOne = false, onAction, onSeeAll, onAddManuscript, onAddAgent }) => {
-  const urgent = buildOverToYouRows(tasks, queries, agents);
-  const house = buildHousekeepingRows(tasks, queries, agents);
-  const mine = yourTasksToday(userTasks, now);
-  const trio = taskTrio(urgent.length, house.length, mine.length);
-  const empty = trio.length === 0;
+  onNavigate: (tab: string, sub?: string) => void;
+}
+
+export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
+  loading, tasks, queries, agents, manuscripts, userTasks, activities, taskFlags, currentUser,
+  now, dayOne = false, onSeeAll, onAddManuscript, onAddAgent, onNavigate,
+}) => {
+  const [filter, setFilter] = useState<Category | null>(null);
+  const [legendOpen, setLegendOpen] = useState(false);
+  const [openKey, setOpenKey] = useState<string | null>(null);
+
+  /* ⚠️ THE SAME CALL THE RAIL BADGE AND EVERY TASKS PAGE MAKE, on the dashboard's SCOPED arrays —
+     so switching the manuscript chip moves this panel and nothing else about the derivation. */
+  const cols = useMemo(() => assembleBoardColumns({
+    tasks, userTasks, queries, agents, manuscripts, taskFlags, activities,
+    now: now.getTime(), today: localYMD(now.getTime()), mutedTaskRules: currentUser?.mutedTaskRules,
+  }).cols, [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, now, currentUser?.mutedTaskRules]);
+
+  /* ⚠️ THE BADGE COUNTS WHAT THE PANEL SHOWS, AND SNOOZED IS NOT SHOWN — the same two columns
+     `boardFigures` reads, for the same reason its own note gives: a badge counting a set the page
+     does not draw is the two-numbers fault arriving one surface along. */
+  const live = useMemo<BoardCard[]>(() => [...cols.todo, ...cols.today], [cols]);
+
+  const counts = useMemo(() => {
+    const m = Object.fromEntries(CATEGORIES.map((c) => [c, 0])) as Record<Category, number>;
+    for (const c of live) m[taskCategory(c)]++;
+    return m;
+  }, [live]);
+  const total = live.length;
+
+  const shown = useMemo(() => (filter ? live.filter((c) => taskCategory(c) === filter) : live), [live, filter]);
+  const taskData = useMemo(() => ({ queries, agents, manuscripts, userTasks, activities }),
+    [queries, agents, manuscripts, userTasks, activities]);
+
+  /* ⚠️ THE OPEN CARD IS RESOLVED AGAINST THE LIVE BOARD, so a card that leaves the board while its
+     drawer is open closes it rather than stranding a pane over a task that no longer exists. */
+  const openCard = useMemo(() => live.find((c) => c.key === openKey) ?? null, [live, openKey]);
+
+
+  /* ── the rule ─────────────────────────────────────────────────────────────────────────────── */
+  const bands = RULE_ORDER.map((c) => ({ c, n: counts[c], pct: total > 0 ? (counts[c] / total) * 100 : 0 }));
+
+  const badge = filter
+    ? { n: counts[filter], label: CATEGORY_LABEL[filter], fam: CATEGORY_FAMILY[filter] }
+    : { n: total, label: "open", fam: null as string | null };
 
   return (
     <OneScreenPanel variant="os-tasks" loading={loading} skel={["h", "", "", ""]}>
       <div className="os-th2">
         <OneScreenMark name="tasks" />
-        <h2>Tasks requiring your attention</h2>
-        {/* ⚠️ ONE TYPEFACE THROUGHOUT THE PILL. Playfair digits beside Inter labels sit below the
-            baseline — the numerals are the thing being read, so they set the face. */}
-        <span className="os-trio">
-          {dayOne || empty
-            ? <span className="os-none">Nothing needs you</span>
-            : trio.map((p) => (
-              <span key={p.key} className={`os-p ${p.key === "urgent" ? "u" : p.key === "house" ? "h" : "m"}`}>
-                <span className="os-pdot" aria-hidden="true" /><b>{p.n}</b> {p.label}
-              </span>
-            ))}
+        <h2>To-do list</h2>
+        {/* ⚠️ ONE BADGE, TWO READINGS. At rest it is the open total; under a filter it is that
+            category's count and name, in that category's own paper — so the badge always states
+            what the tickets beneath it are, rather than a total the visible set contradicts. */}
+        <span
+          className="os-tbadge"
+          style={badge.fam ? { background: FAMILY_FILL[badge.fam] } : undefined}
+        >
+          <b>{badge.n}</b> {badge.label}
         </span>
         <button type="button" className="os-see" onClick={onSeeAll}>See all <span className="os-arr">→</span></button>
       </div>
-      {/* ⚠️ THE SHARED FADE, NEVER A SECOND ONE (polish P2). EdgeFadeScroll already computes
-          "is there more above / below" with a ResizeObserver and shows each edge only when it is
-          true — a permanent fade is a lie at the end of a list. `fade` takes the CARD's own
-          background so the mist matches the surface rather than being a generic grey. */}
+
+      {!dayOne && total > 0 && (
+        /* ⚠️ THE LEGEND IS AN OVERLAY, AND THAT IS THE REQUIREMENT RATHER THAN A STYLE. Revealing it
+           must not move a single ticket — a legend that reflows the grid makes the thing you were
+           about to click jump out from under the pointer. It is absolutely positioned over the
+           tickets, so the grid's boxes are identical open or closed. */
+        <div
+          className={`os-rulezone${legendOpen ? " on" : ""}`}
+          onMouseEnter={() => setLegendOpen(true)}
+          onMouseLeave={() => setLegendOpen(false)}
+        >
+          <div className="os-rule" role="group" aria-label="Filter by category">
+            {bands.map(({ c, n, pct }) => (
+              <button
+                key={c}
+                type="button"
+                className={`os-rb${filter === c ? " on" : ""}`}
+                style={{ width: `${pct}%`, background: FAMILY_FILL[CATEGORY_FAMILY[c]] }}
+                aria-pressed={filter === c}
+                aria-label={`${CATEGORY_LABEL[c]}, ${n}`}
+                onClick={() => setFilter((f) => (f === c ? null : c))}
+              />
+            ))}
+          </div>
+          <div className="os-legend" hidden={!legendOpen}>
+            {RULE_ORDER.map((c) => (
+              <button
+                key={c}
+                type="button"
+                className={`os-lg${filter === c ? " on" : ""}`}
+                aria-pressed={filter === c}
+                onClick={() => setFilter((f) => (f === c ? null : c))}
+              >
+                <i style={{ background: FAMILY_FILL[CATEGORY_FAMILY[c]] }} aria-hidden="true" />
+                <b>{counts[c]}</b> {CATEGORY_LABEL[c]}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <EdgeFadeScroll fade="#fffdf9" outerClassName="os-tbodywrap" scrollClassName="os-tbody">
         {dayOne ? (
-          /* §9: day one explains where tasks come from and offers the two first moves */
           <div className="os-tempty os-dayone-tasks">
             <span>Tasks appear here as your queries progress.</span>
             <div className="os-dayone-ctas">
@@ -115,64 +195,49 @@ export const OneScreenTasks: React.FC<{
               <button type="button" className="os-btn-mini ghost" onClick={onAddAgent}>Add an agent</button>
             </div>
           </div>
-        ) : empty && <div className="os-tempty"><span>Nothing needs you today.</span></div>}
-
-        {/* urgent first, housekeeping beneath — one list, deadline order preserved per tier */}
-        {urgent.map((r) => {
-          const k = kindWord(r.type);
-          return (
-            <div className="os-trow" tabIndex={0} key={r.task.id}>
-              <span className={`os-knd${k.sage ? " sg" : ""}`}>{k.word}</span>
-              <span className="os-tt">
-                <span className="os-tn">{r.description}</span>
-                <span className="os-tm2">{r.agentName}</span>
-              </span>
-              <span className="os-endcell">
-                <span className="os-stp u">Urgent</span>
-                <span className="os-act">
-                  <button type="button" className="os-btn-mini" onClick={() => onAction(r.task)}>{r.actionLabel}</button>
-                </span>
-              </span>
-              {/* the ⋯ opens the board, where a task's full menu lives — never a dead control */}
-              <button type="button" className="os-dots" title="Open on the To-do board" aria-label="Open on the To-do board" onClick={onSeeAll}>⋯</button>
-            </div>
-          );
-        })}
-
-        {mine.map((t) => (
-          <div className="os-trow" tabIndex={0} key={t.id}>
-            <span className="os-knd sg">{t.detail ? "Note" : "Task"}</span>
-            <span className="os-tt">
-              <span className="os-tn">{t.text}</span>
-              <span className="os-tm2">{t.detail || dueWord(t.dueDate!, now)}</span>
-            </span>
-            <span className="os-endcell">
-              <span className="os-stp t">Yours</span>
-              <span className="os-act">
-                <button type="button" className="os-btn-mini ghost" onClick={onSeeAll}>Open</button>
-              </span>
-            </span>
-            <button type="button" className="os-dots" title="Open on the To-do board" aria-label="Open on the To-do board" onClick={onSeeAll}>⋯</button>
+        ) : shown.length === 0 ? (
+          <div className="os-tempty">
+            <span>{filter ? `Nothing in ${CATEGORY_LABEL[filter].toLowerCase()}.` : "Nothing needs you today."}</span>
           </div>
-        ))}
-
-        {house.map((r) => (
-          <div className="os-trow" tabIndex={0} key={r.task.id}>
-            <span className="os-knd sg">Tidy</span>
-            <span className="os-tt">
-              <span className="os-tn">{r.description}</span>
-              <span className="os-tm2">{r.subject}</span>
-            </span>
-            <span className="os-endcell">
-              <span className="os-stp t">Housekeeping</span>
-              <span className="os-act">
-                <button type="button" className="os-btn-mini ghost" onClick={() => onAction(r.task)}>{r.actionLabel}</button>
-              </span>
-            </span>
-            <button type="button" className="os-dots" title="Open on the To-do board" aria-label="Open on the To-do board" onClick={onSeeAll}>⋯</button>
+        ) : (
+          <div className="os-tkgrid">
+            {shown.map((c) => {
+              const inp = listRowInputs(c, taskData);
+              return (
+                <TaskTicket
+                  key={c.key}
+                  card={c}
+                  snipped
+                  /* the two tinted regions, from two different derivations: the edge is the QUERY's
+                     state, the tag is the CARD's family. They never swap. */
+                  edge={c.status ? STATE_TOKEN[stateFor(c.status)] : STATE_TOKEN.closed}
+                  urgent={isUrgentCard(c, inp.days)}
+                  selected={openKey === c.key}
+                  facts={ticketFacts(c, {
+                    days: inp.days,
+                    dateLabel: inp.anchorDate,
+                    elapsed: typeof inp.days === "number" ? elapsedPhrase(inp.days) : null,
+                  })}
+                  onOpen={() => setOpenKey(c.key)}
+                />
+              );
+            })}
           </div>
-        ))}
+        )}
       </EdgeFadeScroll>
+
+      {/* ⚠️ MOUNTED ONLY ONCE A TICKET IS OPEN — with no fallback, deliberately. The drawer's own
+          entrance is what announces it; a spinner in the sheet's place would be a second arrival. */}
+      {openCard && (
+        <Suspense fallback={null}>
+          <DashTaskDrawer
+            card={openCard}
+            onClose={() => setOpenKey(null)}
+            onSeeAll={onSeeAll}
+            onNavigate={onNavigate}
+          />
+        </Suspense>
+      )}
     </OneScreenPanel>
   );
 };

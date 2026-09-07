@@ -732,6 +732,77 @@
 .os-ahead .os-ctrls { margin-left: auto; }
 /* §10: the headline counts up once — tabular numerals so the width never jitters */
 
+/* ══ §5 · THE TO-DO PANEL (dashboard redesign, Phase 5) ══════════════════════════════════════
+ *
+ * ⚠️ THE ROW MARKUP IS RETIRED, RULE AND ELEMENT TOGETHER — `.os-trow` and its twelve companions
+ * (`.os-knd`, `.os-tt`, `.os-tn`, `.os-tm2`, `.os-endcell`, `.os-stp`, `.os-act`, `.os-dots`,
+ * `.os-trio`, `.os-p`, `.os-pdot`, `.os-none`). The panel renders `TaskTicket` now, so every one of
+ * them selected nothing; a sweep with comments stripped found no renderer for any of the thirteen
+ * before they went. A retired rule left in a sheet is how a deleted layout comes back.
+ */
+
+/* the badge: the count and what it is counting, in the filtered category's own paper */
+.os-tbadge {
+  display: inline-flex; align-items: baseline; gap: 5px; flex: none;
+  border-radius: 99px; padding: 3px 10px;
+  font-size: 11px; color: #5c5148; white-space: nowrap;
+  background: #f4efe8;
+  transition: background 0.16s ease;
+}
+.os-tbadge b { font-weight: 600; font-size: 12.5px; color: #241811; font-variant-numeric: tabular-nums; }
+
+/* ⚠️ THE ZONE IS TALLER THAN THE RULE, DELIBERATELY. The rule is 9px; the zone reserves the hover
+   target and the 18px of air between it and the first ticket, so thickening on hover happens
+   INSIDE space that is already there and no ticket moves. */
+.os-rulezone { position: relative; padding: 2px 18px 18px; flex: none; }
+.os-rule { display: flex; height: 9px; border-radius: 5px; overflow: hidden; gap: 2px; }
+/* ⚠️ THE THICKEN IS INSTANT, AND THAT IS THE HOUSE MOTION LAW RATHER THAN A COMPROMISE. The first
+   draft carried `transition: height 0.14s` and `motionPolish.test.ts` caught it on its first run:
+   motion on this sheet is transform and opacity only, because animating a layout property makes
+   every frame a reflow. A 9→12px thicken has nowhere useful to spend 140ms anyway. */
+.os-rulezone.on .os-rule { height: 12px; }
+/* ⚠️ THE SEPARATOR IS THE GAP, IN THE CARD'S OWN PAPER — `gap: 2px` on a container the card shows
+   through. Two categories sharing a family paper sit adjacent and are told apart by this and by the
+   legend; a third tint to separate them would be a fourth vocabulary on one page. */
+.os-rb { border: 0; padding: 0; min-width: 3px; cursor: pointer; transition: filter 0.14s ease; }
+.os-rb:hover { filter: brightness(0.96); }
+.os-rb.on { box-shadow: inset 0 0 0 1.5px #7c3a2a; }
+.os-rb:focus-visible { outline: 2px solid #b98a76; outline-offset: 1px; }
+
+/* ⚠️ AN OVERLAY, NOT A ROW. Revealing the legend must not move a single ticket — a legend that
+   reflows the grid makes the thing you were about to click jump out from under the pointer. */
+.os-legend {
+  position: absolute; left: 18px; right: 18px; top: 100%; z-index: 4;
+  display: flex; flex-wrap: wrap; gap: 3px 14px;
+  padding: 9px 12px; margin-top: -12px;
+  background: #fffdf9; border-radius: 11px;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 8px 22px rgba(58, 28, 20, 0.1);
+}
+.os-lg {
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 0; background: none; padding: 2px 3px; cursor: pointer;
+  font: inherit; font-size: 11.5px; color: #5c5148; white-space: nowrap;
+}
+.os-lg b { font-weight: 600; color: #241811; font-variant-numeric: tabular-nums; }
+.os-lg i { width: 10px; height: 10px; border-radius: 3px; flex: none; box-shadow: inset 0 0 0 1px rgba(58, 28, 20, 0.08); }
+.os-lg.on { color: #241811; text-decoration: underline; text-underline-offset: 3px; }
+.os-lg:focus-visible { outline: 2px solid #b98a76; outline-offset: 2px; border-radius: 6px; }
+
+/* ⚠️ THREE ACROSS, TOP-ALIGNED. `align-content: start` is what stops three tickets in a tall card
+   spreading down it — the grid would otherwise distribute its rows into the height the card gives.
+   `minmax(0, 1fr)` because a ticket's headline is a sentence and `1fr` alone would let the longest
+   one set every column's width. */
+.os-tkgrid {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px; align-content: start; padding: 0 18px 14px;
+}
+@media (max-width: 1360px) { .os-tkgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 1024px) { .os-tkgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 720px) { .os-tkgrid { grid-template-columns: minmax(0, 1fr); } }
+
+/* the drawer's pane takes the whole sheet — `SlideOver` supplies the chrome around it */
+.dash-tpn { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+
 /* ══ §4 · THE BANDS, THE STAT BLOCK AND THE BRUSH (dashboard redesign, Phase 4) ══════════════ */
 
 /* ⚠️ NO STROKE, NO OPACITY. The bands are painted as cumulative areas back to front, so each one is
@@ -890,16 +961,12 @@
   font-family: var(--font-serif); font-size: 15.5px; font-weight: 600; color: #3a241a;
   margin: 0; white-space: nowrap;
 }
-.os-trio { display: flex; gap: 6px; align-items: center; margin-left: 4px; }
+
 /* ⚠️ ONE TYPEFACE THROUGHOUT THE PILL (inherited Inter, never the serif). Playfair digits beside
    Inter labels drop below the baseline — and the numeral is the thing being read. */
-.os-p {
-  display: inline-flex; align-items: center; gap: 6px;
-  border-radius: 99px; padding: 4px 11px;
-  font-size: 11px; line-height: 1; white-space: nowrap;
-}
-.os-p b { font-weight: 600; font-size: 12px; line-height: 1; font-variant-numeric: tabular-nums; }
-.os-pdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+
+
 /* ⚠️ FAINT PASTILLE BLUE (polish P7) — ONE fill for all three pills, with the DOT carrying the
    kind.
 
@@ -909,12 +976,12 @@
    chip with a hairline. That also frees the tint for surfaces where nothing else is doing the
    sorting.
    ⚠️ THE FIGURE IS DARKER THAN THE LABEL. It is the thing being read. */
-.os-p { background: #ffffff; border: 1px solid rgba(58, 28, 20, 0.08); color: #5c5148; }
-.os-p b { color: #2e2118; }
+
+
 .os-p.u .os-pdot { background: #7c3a2a; }
 .os-p.h .os-pdot { background: #8a9e88; }
 .os-p.m .os-pdot { background: #b9a893; }
-.os-none { font-size: 12px; color: #8a7a6c; }
+
 .os-see {
   margin-left: auto; font-size: 11.5px; color: #7c3a2a; font-weight: 500;
   background: none; border: none; padding: 0; cursor: pointer;
@@ -933,57 +1000,23 @@
 
 /* ⚠️ THE FIXED GRID (§5): 56px | text | 104px | 18px — every pill lines up, and the end cell's
    two occupants are ABSOLUTE in the same cell so hover can never reflow the row. */
-.os-trow {
-  display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) 104px 18px;
-  align-items: center;
-  column-gap: 11px;
-  padding: 9px 8px;
-  border-bottom: 1px solid #ece0d2;
-  border-radius: 9px;
-  position: relative;
-  cursor: pointer;
-  transition: background 0.14s ease;
-}
-.os-trow:last-child { border-bottom: none; }
-.os-trow:hover { background: #faf6ef; }
-.os-knd {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 7px; letter-spacing: 0.11em; text-transform: uppercase;
-  border-radius: 99px; background: #f8ece4; border: 1px solid #f0dccd; color: #7c3a2a;
-  display: flex; align-items: center; justify-content: center;
-  height: 20px; padding: 0 6px; box-sizing: border-box;
-  transition: background 0.14s ease, border-color 0.14s ease;
-}
+
+
+
+
 .os-knd.sg { background: #e9ede6; border-color: #d6ddd2; color: #5a6e58; }
-.os-trow:hover .os-knd { background: #ffffff; border-color: #d9c9bb; }
-.os-tt { min-width: 0; }
-.os-tn {
-  display: block; font-size: 12.5px; font-weight: 600; color: #241811;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  transition: color 0.14s ease;
-}
-.os-trow:hover .os-tn { color: #6b3023; }
-.os-tm2 {
-  display: block; font-size: 10.5px; color: #8a7a6c; margin-top: 2px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.os-endcell { position: relative; height: 24px; display: flex; align-items: center; justify-content: flex-end; }
-.os-stp {
-  position: absolute; right: 0; top: 50%; transform: translateY(-50%);
-  display: flex; align-items: center; height: 20px; padding: 0 10px;
-  font-size: 10px; border-radius: 99px; white-space: nowrap;
-  opacity: 1; transition: opacity 0.14s ease;
-}
+
+
+
+
+
+
+
 .os-stp.u { background: #f3e0d6; color: #6b3023; }
 .os-stp.t { background: #e9ede6; color: #5a6e58; }
-.os-act {
-  position: absolute; right: 0; top: 50%; transform: translateY(-50%) translateX(4px);
-  display: flex; align-items: center; opacity: 0;
-  transition: opacity 0.16s ease, transform 0.16s ease;
-}
-.os-trow:hover .os-stp, .os-trow:focus-within .os-stp { opacity: 0; }
-.os-trow:hover .os-act, .os-trow:focus-within .os-act { opacity: 1; transform: translateY(-50%) translateX(0); }
+
+
+
 .os-btn-mini {
   font-size: 10.5px; font-weight: 500; border-radius: 99px; padding: 0 12px; height: 24px;
   display: flex; align-items: center; white-space: nowrap; cursor: pointer;
@@ -992,33 +1025,29 @@
 .os-btn-mini:hover { background: #3a2d22; }
 .os-btn-mini.ghost { background: #ffffff; border-color: #d5c8b8; color: #5c4d42; }
 .os-btn-mini.ghost:hover { border-color: #b9a893; color: #3a1c14; }
-.os-dots {
-  background: none; border: none; padding: 0;
-  color: #b9a893; letter-spacing: 2px; cursor: pointer;
-  opacity: 0; text-align: center; line-height: 1; transition: opacity 0.16s ease;
-}
-.os-trow:hover .os-dots, .os-trow:focus-within .os-dots { opacity: 1; }
+
+
 
 /* touch: no hover, so the action shows outright (§5) */
 @media (hover: none) {
-  .os-trow .os-stp { opacity: 0; }
-  .os-trow .os-act { opacity: 1; transform: translateY(-50%); }
-  .os-trow .os-dots { opacity: 1; }
+
+
+
   .os-chartwrap svg { cursor: default; }
 }
 
 /* §11: the task grid tightens, then stacks */
 @media (max-width: 1200px) {
-  .os-trow { grid-template-columns: 52px minmax(0, 1fr) 96px 16px; column-gap: 9px; }
+
 }
 @media (max-width: 640px) {
-  .os-trow { grid-template-columns: 1fr; row-gap: 6px; padding: 11px 8px; }
-  .os-trow .os-knd { justify-self: start; }
-  .os-trow .os-endcell { justify-content: flex-start; height: auto; }
-  .os-trow .os-stp { position: static; transform: none; }
-  .os-trow .os-act { position: static; transform: none; opacity: 1; }
-  .os-trow:hover .os-stp { opacity: 1; }
-  .os-trow .os-dots { display: none; }
+
+
+
+
+
+
+
 }
 
 /* §10: slim warm scrollbars, appearing on container hover */
@@ -1382,8 +1411,8 @@
 /* ⚠️ THE HOVER MOVED TO THE IMG (trap 2) — a transform on this wrapper isolates the blend. */
 
 /* header pills — a 1px lift and a warmer edge */
-.os-p { transition: transform 0.14s ease, border-color 0.14s ease; }
-.os-p:hover { transform: translateY(-1px); }
+
+
 
 /* buttons — ⚠️ THE PRESSED STATE IS THE ONE USUALLY MISSED, and it is the only feedback a click
    gives before its effect arrives. */

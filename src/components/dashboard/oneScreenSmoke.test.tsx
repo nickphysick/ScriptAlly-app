@@ -31,7 +31,7 @@ const base = {
   queries: [q({ dateSent: daysAgo(30) }), q({ dateSent: daysAgo(2) })],
   agents: [{ id: "a1", name: "Sophie Dunn", agency: "Curtis Vane" }] as any[],
   manuscripts: [{ id: "m1", title: "Murphy's Day Out", genre: "Thriller", wordCount: 82400 }] as any[],
-  tasks: [], userTasks: [], activities: [],
+  tasks: [], userTasks: [], activities: [], taskFlags: [],
   currentUser: { id: "u", name: "Nick Physick", plan: UserPlan.FREE } as any,
   activeManuscript: { id: "m1", title: "Murphy's Day Out" } as any,
   onNavigate: () => {}, onTaskAction: () => {},
@@ -354,7 +354,8 @@ describe("§9 · first-run states", () => {
     const html = render({ queries: [], manuscripts: [], agents: [], activeManuscript: null });
     expect(html).toContain("Every query you send and every reply that comes back will be charted here.");
     expect(html).toContain("Send your first query");
-    expect(html).toContain("Nothing needs you");
+    /* ⚠️ RETARGETED (Phase 5): the header's "Nothing needs you" was the retired count trio's empty
+       slot. Day one states its case in the BODY, which is where the two first moves are. */
     expect(html).toContain("Tasks appear here as your queries progress.");
     expect(html).toContain("Add your manuscript");
     expect(html).toContain("Add an agent");

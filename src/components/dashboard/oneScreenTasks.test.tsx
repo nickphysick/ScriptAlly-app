@@ -2,7 +2,14 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Locks for the tasks card (spec §5; P4).
+ * Locks for the to-do panel (dashboard redesign, Phase 5).
+ *
+ * ⚠️ THE THREE-WAY DERIVATION THIS FILE USED TO TEST IS DELETED, NOT ORPHANED. `taskTrio`,
+ * `kindWord`, `yourTasksToday` and `dueWord` were the panel's own split — `buildOverToYouRows` +
+ * `buildHousekeepingRows` + a dated-user-task filter, on the MEMBER unit, while the rail badge
+ * beside it counted CARDS. A sweep with comments stripped found zero references to all four
+ * outside this file before they went; `buildOverToYouRows`/`buildHousekeepingRows` themselves are
+ * still live (the attention chip, `DeskTodoCard`) and are untouched.
  */
 import { describe, it, expect } from "vitest";
 import { sliceBetween } from "../../test/sliceBetween";
@@ -12,125 +19,192 @@ import { cssRule, cssRuleCount } from "../../test/cssRule";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueryStatus } from "../../types";
-import { kindWord, OneScreenTasks, taskTrio, yourTasksToday } from "./OneScreenTasks";
+import { OneScreenTasks } from "./OneScreenTasks";
+import { CATEGORIES, CATEGORY_FAMILY, CATEGORY_LABEL, taskCategory } from "../../lib/todoCategory";
+import { TASK_TYPES } from "../../lib/todoActions";
 
 const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
 const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
-/* ⚠️ ALL blocks for a selector, joined — a selector is legitimately declared more than once in
-   this sheet, and taking the first match tests half the rule. */
 /* the shared ANCHORED reader — see src/test/cssRule.ts for the substring fault it closes */
 const rule = (sel: string) => cssRule(cssRules, sel, "oneScreen.css");
 
-/* ⚠️ THE HEADER SENTENCE IS RETIRED (v16 §4) — the title states the job, the pills state the
-   split. The sentence had to lead on one number and said nothing about the rest. */
-describe("§4 · the count trio", () => {
-  it("three pills, in order, each naming its own kind", () => {
-    expect(taskTrio(3, 2, 2)).toEqual([
-      { key: "urgent", label: "urgent", n: 3 },
-      { key: "house", label: "housekeeping", n: 2 },
-      { key: "mine", label: "yours", n: 2 },
-    ]);
+const panel = readFileSync(resolve(__dirname, "./OneScreenTasks.tsx"), "utf8")
+  .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+/* ══ THE MIGRATION ═══════════════════════════════════════════════════════════════════════════ */
+
+describe("the panel reads the To-do page's categories and derives none of its own", () => {
+  /**
+   * ⚠️ A TABLE OVER THE WHOLE UNION, NOT A SAMPLE. `taskCategory` closes with the house `never`
+   * idiom, so a thirteenth task type cannot compile until it says where it belongs — this asserts
+   * the same property from the outside, over every declared type, so a `default` branch quietly
+   * replacing the guard would be caught even though it would still compile.
+   */
+  it("⚠️ every declared task type maps to exactly one of the five categories", () => {
+    expect(TASK_TYPES.length).toBeGreaterThan(8);
+    for (const t of TASK_TYPES) {
+      const c = taskCategory({ key: `k-${t}`, title: "x", taskType: t } as any);
+      expect(CATEGORIES, `${t} landed outside the five`).toContain(c);
+    }
+    /* and the five are exhaustively named and papered — a category with no label or no family
+       would render an empty band nobody could identify */
+    for (const c of CATEGORIES) {
+      expect(CATEGORY_LABEL[c], `${c} has no label`).toBeTruthy();
+      expect(CATEGORY_FAMILY[c], `${c} has no family paper`).toBeTruthy();
+    }
   });
 
-  it("⚠️ a kind with nothing in it DROPS OUT — never a pill reading zero", () => {
-    expect(taskTrio(3, 0, 0).map((p) => p.key)).toEqual(["urgent"]);
-    expect(taskTrio(0, 4, 0).map((p) => p.key)).toEqual(["house"]);
-    expect(taskTrio(0, 0, 1).map((p) => p.key)).toEqual(["mine"]);
-    expect(taskTrio(0, 0, 0)).toEqual([]);
+  /* ⚠️ NO SECOND OPINION IN THE PANEL. A local branch on `taskType` here would be a derivation that
+     cannot fail the way `taskCategory`'s `never` guard does. */
+  it("⚠️ the panel contains no category derivation of its own", () => {
+    expect(panel).toContain('from "../../lib/todoCategory"');
+    expect(panel).toContain("taskCategory(");
+    for (const forbidden of ["buildOverToYouRows", "buildHousekeepingRows", "yourTasksToday", "taskTrio", "kindWord"]) {
+      expect(panel, `${forbidden} is back in the panel`).not.toContain(forbidden);
+    }
+    /* the counting law: the same call every Tasks page and the rail badge make */
+    expect(panel).toContain("assembleBoardColumns");
+  });
+
+  /* ⚠️ URGENT IS A LENS, NOT A BAND — a task whose clock starts would otherwise change category as
+     time passed, and the rule would redraw itself overnight. */
+  it("urgent is applied to a ticket and is never one of the bands", () => {
+    expect(panel).toContain("isUrgentCard(");
+    expect(panel).toContain("RULE_ORDER");
+    const order = /const RULE_ORDER[^=]*=\s*\[([^\]]*)\]/.exec(panel)?.[1] ?? "";
+    expect(order, "the rule order must be declared").not.toBe("");
+    expect(order).not.toContain("urgent");
+    for (const c of CATEGORIES) expect(order, `${c} is missing from the rule`).toContain(`"${c}"`);
+  });
+
+  /**
+   * ⚠️ THE ORDER IS NOT THE DECLARATION'S ORDER, AND THAT IS PHASE 5's WHOLE COLOUR ANSWER. Five
+   * categories, three family papers: `req`+`nudge` share "now" and `quiet`+`house` share "house",
+   * so the two pairs must sit ADJACENT or the rule shows two identical colours with a stranger
+   * between them.
+   */
+  it("⚠️ categories sharing a family paper are adjacent in the rule", () => {
+    const order = (/const RULE_ORDER[^=]*=\s*\[([^\]]*)\]/.exec(panel)?.[1] ?? "")
+      .split(",").map((x) => x.trim().replace(/"/g, "")).filter(Boolean);
+    expect(order.length).toBe(CATEGORIES.length);
+    const fams = order.map((c) => CATEGORY_FAMILY[c as never]);
+    /* every family occupies ONE contiguous run — the property, not a pinned sequence, so a
+       legitimate re-ordering within a family passes and a split does not */
+    for (const f of new Set(fams)) {
+      const first = fams.indexOf(f), last = fams.lastIndexOf(f);
+      expect(fams.slice(first, last + 1).every((x) => x === f), `${f} is split across the rule`).toBe(true);
+    }
   });
 });
 
-describe("§4 · what counts as YOURS", () => {
-  const NOW = new Date(2026, 7, 7, 10, 0, 0); // Fri 7 Aug 2026
-  const ut = (o: Record<string, unknown>) => ({ id: String(Math.random()), userId: "u", text: "x", done: false, createdAt: "", updatedAt: "", ...o }) as any;
+describe("the rendered panel", () => {
+  const base = {
+    loading: false,
+    tasks: [] as any[], queries: [] as any[], agents: [] as any[], manuscripts: [] as any[],
+    userTasks: [] as any[], activities: [] as any[], taskFlags: [] as any[],
+    currentUser: { id: "u", name: "N" } as any,
+    now: new Date(2026, 7, 6, 15, 0, 0),
+    onSeeAll: () => {}, onNavigate: () => {},
+  };
+  const html = (over: Record<string, unknown> = {}) =>
+    renderToStaticMarkup(<OneScreenTasks {...base} {...over} />);
 
-  /* ⚠️ it reuses the ONE surfacing law (taskSurfaced), never a second rule written on the
-     dashboard — otherwise the card and the board could disagree about the same task. */
-  it("dated, open and surfaced — overdue and due-today both count", () => {
-    const rows = yourTasksToday([
-      ut({ id: "od", dueDate: "2026-08-01" }),
-      ut({ id: "today", dueDate: "2026-08-07" }),
-      ut({ id: "soon", dueDate: "2026-08-08", surfaceOffset: "day-before" }),
-    ], NOW);
-    expect(rows.map((r) => r.id).sort()).toEqual(["od", "soon", "today"]);
+  it("states its name, a badge and one route to the page", () => {
+    const h = html();
+    expect(h).toContain("To-do list");
+    expect(h).toContain("os-tbadge");
+    expect(h).toContain("See all");
   });
 
-  it("a task not yet in its window is NOT counted — the pill matches the list", () => {
-    expect(yourTasksToday([ut({ dueDate: "2026-09-20" })], NOW)).toEqual([]);
+  /* ⚠️ THE BADGE AND THE TICKETS ARE ONE SET. At rest the badge is the open total; the fault it
+     forecloses is a badge stating a number the visible tickets contradict. */
+  it("an empty board states nothing needs you, and the badge agrees", () => {
+    const h = html();
+    expect(h).toContain("Nothing needs you today.");
+    expect(h).toContain("<b>0</b> open");
   });
 
-  it("done tasks and DATELESS notes never surface here", () => {
-    expect(yourTasksToday([
-      ut({ dueDate: "2026-08-01", done: true }),
-      ut({ text: "a plain note" }),           // no dueDate → a note, not a task
-    ], NOW)).toEqual([]);
+  it("day one explains where tasks come from and offers the two first moves", () => {
+    const h = html({ dayOne: true });
+    expect(h).toContain("Tasks appear here as your queries progress.");
+    expect(h).toContain("Add your manuscript");
+    expect(h).toContain("Add an agent");
+    /* ⚠️ AND THE RULE IS ABSENT ON DAY ONE — five bands of nothing is a shape promising data that
+       does not exist, which is the fault the community tile's own header already records. */
+    expect(h).not.toContain("os-rule");
+  });
+
+  /* ⚠️ THE DRAWER IS THE To-do PAGE'S PANE, BY IMPORT — not a reduced form of it. */
+  /* ⚠️ THE DRAWER IS ITS OWN MODULE AND THE PANEL LOADS IT LAZILY, WHICH IS NOT AN OPTIMISATION.
+     `useTaskCommit` reaches `lib/db` → `lib/firebase`, which initialises the SDK at module load;
+     a static import from the panel put `auth/invalid-api-key` into ELEVEN dashboard suites and they
+     stopped COLLECTING — a failure that reads as "no tests found" rather than as a red. Asserted so
+     nobody flattens it back to a static import and rediscovers that the hard way. */
+  it("⚠️ the drawer mounts TaskPane and its session, by import — and is loaded lazily", () => {
+    expect(panel).toContain("React.lazy(");
+    expect(panel).toContain('import("./DashTaskDrawer")');
+    expect(panel, "a static import would drag Firebase into every dashboard suite")
+      .not.toMatch(/^import .*DashTaskDrawer/m);
+    const drawer = readFileSync(resolve(__dirname, "./DashTaskDrawer.tsx"), "utf8");
+    expect(drawer).toContain('from "../todo/TaskPane"');
+    expect(drawer).toContain('from "../todo/useTaskPaneSession"');
+    expect(drawer).toContain('from "../shared/SlideOver"');
+    expect(drawer).toContain("useTaskPaneSession(");
+    expect(drawer).toContain("<TaskPane");
+    expect(drawer).toMatch(/width=\{580\}/);
+  });
+
+  /* ⚠️ THE TICKET IS THE SHARED COMPONENT, SNIPPED — never a look-alike. */
+  it("⚠️ the tickets are TaskTicket, snipped, with two tints from two derivations", () => {
+    expect(panel).toContain('from "../todo/TaskTicket"');
+    expect(panel).toContain("snipped");
+    /* the EDGE is the query's state; the TAG is the card's family. They come from different
+       functions and must never swap — the ticket's own head note states the same law. */
+    expect(panel).toContain("STATE_TOKEN[stateFor(c.status)]");
+    const ticket = readFileSync(resolve(__dirname, "../todo/TaskTicket.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(ticket).toContain("CATEGORY_FAMILY[cat]");
+    expect(ticket).not.toContain("CATEGORY_FAMILY[stateFor");
   });
 });
 
-describe("§5 · the kind pill", () => {
-  it("Offer is sage; other urgent kinds are Pages; housekeeping is Tidy", () => {
-    expect(kindWord("offer_received")).toEqual({ word: "Offer", sage: true });
-    expect(kindWord("full_requested")).toEqual({ word: "Pages", sage: false });
-    expect(kindWord("partial_requested")).toEqual({ word: "Pages", sage: false });
-    expect(kindWord(null)).toEqual({ word: "Tidy", sage: true });
-  });
-});
-
-describe("the rendered rows", () => {
-  const NOW_TASKS: any[] = [
-    { id: "t1", taskType: "full_requested", relatedRecordId: "q1", manuscriptTitle: "Murphy's Day Out" },
-    { id: "t2", taskType: "offer_received", relatedRecordId: "q2" },
-  ];
-  const queries: any[] = [
-    { id: "q1", agentId: "a1", status: QueryStatus.FULL_REQUESTED },
-    { id: "q2", agentId: "a2", status: QueryStatus.OFFER },
-  ];
-  const agents: any[] = [
-    { id: "a1", name: "Jonathan Marsh", agency: "The Marsh Agency" },
-    { id: "a2", name: "Tom Ellery", agency: "Curtis Vane" },
-  ];
-
-  const html = renderToStaticMarkup(
-    <OneScreenTasks loading={false} tasks={NOW_TASKS} queries={queries} agents={agents}
-      userTasks={[{ id: "u1", userId: "u", text: "Redraft the opening paragraph", done: false,
-        createdAt: "", updatedAt: "", dueDate: "2026-08-07" } as any]}
-      now={new Date(2026, 7, 7, 10, 0, 0)}
-      onAction={() => {}} onSeeAll={() => {}} />,
-  );
-
-  it("rows come from the LIVE builders, with their action labels", () => {
-    expect(html).toContain("Jonathan Marsh");
-    expect(html).toContain("Tom Ellery");
-    expect(html).toContain("full manuscript"); // the builder's own description
+describe("the panel's stylesheet", () => {
+  /* ⚠️ THE LEGEND IS AN OVERLAY — asserted here as `position: absolute`, and measured on a rendered
+     page as "the tickets' boxes do not move". The declaration is what makes it possible; only the
+     measurement proves it happened. */
+  it("⚠️ the legend is positioned OVER the tickets, never in the flow", () => {
+    const lg = rule(".os-legend");
+    expect(lg).toContain("position: absolute");
+    expect(lg).toContain("z-index");
+    expect(rule(".os-rulezone")).toContain("position: relative");
   });
 
-  it("both endcell occupants render — the pill AND the action, same cell", () => {
-    expect(html).toContain("os-stp u");
-    expect(html).toContain("os-act");
-    expect(html).toContain("os-btn-mini");
+  it("the rule is 9px, thickens on hover, and separates with the card's own paper", () => {
+    expect(rule(".os-rule")).toContain("height: 9px");
+    expect(cssRules).toContain(".os-rulezone.on .os-rule { height: 12px; }");
+    /* the separator is the GAP — a third tint between two same-family bands would be a fourth
+       colour vocabulary on one page */
+    expect(rule(".os-rule")).toContain("gap: 2px");
   });
 
-  it("rows are keyboard targets and the ⋯ has an accessible name and a real destination", () => {
-    expect(html).toContain('tabindex="0"');
-    expect(html).toContain('aria-label="Open on the To-do board"');
+  it("three tickets across, top-aligned, and the grid scrolls inside the card", () => {
+    const g = rule(".os-tkgrid");
+    expect(g).toContain("repeat(3, minmax(0, 1fr))");
+    expect(g).toContain("align-content: start");
+    /* ⚠️ THE SCROLL IS `EdgeFadeScroll`'s, SET INLINE — the shared fade computes "is there more
+       above / below" itself and owns the overflow, so a `.os-tbody { overflow }` rule here would be
+       a second mechanism. Asserted at the mount instead of in the sheet. */
+    expect(panel).toContain("<EdgeFadeScroll");
+    expect(panel).toContain('scrollClassName="os-tbody"');
   });
 
-  it("the title states the job and the pills state the split", () => {
-    expect(html).toContain("Tasks requiring your attention");
-    expect(html).toContain("os-p u");
-    expect(html).toContain("os-p m");
-    expect(html).not.toContain("things require your attention");
-  });
-
-  /* ⚠️ THE PILLS COUNT EXACTLY THE ROWS BENEATH THEM — a pill for a kind this card does not
-     render would never add up to the visible list. */
-  it("⚠️ every counted kind is also a rendered row", () => {
-    expect(html).toContain("Redraft the opening paragraph"); // the "yours" row itself
-    expect(html).toContain("os-stp t");
-    const pills = (html.match(/class="os-p /g) ?? []).length;
-    expect(pills).toBe(2);                                    // urgent + yours; no housekeeping
-    const rows = (html.match(/class="os-trow"/g) ?? []).length;
-    expect(rows).toBe(3);                                     // 2 urgent + 1 yours
+  /* ⚠️ THE ROW MARKUP IS RETIRED, RULE AND ELEMENT TOGETHER — thirteen classes, swept for
+     renderers with comments stripped before any of them went. */
+  it("⚠️ no rule survives for the retired row markup", () => {
+    for (const dead of ["os-trow", "os-knd", "os-tt", "os-tn", "os-tm2", "os-endcell",
+      "os-stp", "os-act", "os-dots", "os-trio", "os-p", "os-pdot", "os-none"]) {
+      expect(cssRuleCount(cssRules, `.${dead}`), `.${dead} still has a rule`).toBe(0);
+    }
   });
 });
 
@@ -159,66 +233,40 @@ describe("the pink band (app-shell-v2)", () => {
      trio read as three separate objects, told apart only by their text colour. They now share one
      faint pastille-blue fill and the DOT carries the kind, which is the job it always had. The
      dots' own hues are unchanged, and that half of the lock stands. */
-  it("the trio's pills share ONE pastille fill, and the dots still carry the kind", () => {
-    /* ⚠️ TOKENS NOW (fixes-2 A5) — the same pastille is wanted on other pages' header pills, and
-       four loose hexes repeated per surface is how three pages end up NEARLY matching. */
-    /* ⚠️ RETARGETED (P5): the trio went WHITE. The tint was doing the dot's job — two devices for
-       one distinction — so colour lives in the dot and the pill is a white chip. The pastille
-       tokens survive for the HEADER pills, where nothing else carries the sorting. */
-    expect(rule(".os-p")).toContain("background: #ffffff");
-    expect(rule(".os-p")).toContain("border: 1px solid rgba(58, 28, 20, 0.08)");
-    /* ⚠️ THE PER-KIND FILL RULES ARE GONE ENTIRELY — asserted as ABSENT, not asserted through a
-       helper that requires them to exist. One fill, declared once; a `.os-p.u { background }`
-       reappearing is the trio splintering back into three objects. */
-    for (const k of [".os-p.u {", ".os-p.h {", ".os-p.m {"]) {
-      expect(cssRules, `${k} must not re-declare a fill`).not.toContain(k);
-    }
-    expect(rule(".os-p.u .os-pdot")).toContain("background: #7c3a2a");
-    expect(rule(".os-p.h .os-pdot")).toContain("background: #8a9e88");
-  });
-});
-
-describe("§5 · the stylesheet", () => {
-  it("the fixed grid: 56px | text | 104px | 18px, tightening at 1200", () => {
-    expect(cssRules).toContain("grid-template-columns: 56px minmax(0, 1fr) 104px 18px");
-    expect(cssRules).toContain("grid-template-columns: 52px minmax(0, 1fr) 96px 16px");
-  });
-
-  it("⚠️ the crossfade is ABSOLUTE-in-one-cell — no reflow on hover", () => {
-    const stp = sliceBetween(cssRules, ".os-stp {", ".os-stp.u");
-    expect(stp).toContain("position: absolute");
-    const act = sliceBetween(cssRules, ".os-act {", ".os-trow:hover .os-stp");
-    expect(act).toContain("position: absolute");
-    expect(cssRules).toContain(".os-trow:hover .os-stp, .os-trow:focus-within .os-stp { opacity: 0; }");
-  });
-
-  it("kind pills are a fixed 20px with centred text", () => {
-    const knd = sliceBetween(cssRules, ".os-knd {", ".os-knd.sg");
-    expect(knd).toContain("height: 20px");
-    expect(knd).toContain("justify-content: center");
-  });
-
-  it("touch shows the action outright — no hover to find it with", () => {
-    const touch = cssRules.slice(cssRules.indexOf("@media (hover: none)"));
-    expect(touch).toContain(".os-trow .os-act { opacity: 1;");
-    expect(touch).toContain(".os-trow .os-dots { opacity: 1; }");
-  });
-
-  it("≤640px stacks to one column with the ⋯ hidden", () => {
-    const m = cssRules.slice(cssRules.lastIndexOf("@media (max-width: 640px)"));
-    expect(m).toContain("grid-template-columns: 1fr");
-    expect(m).toContain(".os-trow .os-dots { display: none; }");
+  /* ⚠️ THE TRIO IS RETIRED (Phase 5) — the three count pills were the panel's own three-way split
+     rendered as chips, and the split is gone. The badge states one figure and the rule states the
+     five categories beneath it, which is the same information without a second vocabulary for it. */
+  it("the count trio is retired — one badge states the figure now", () => {
+    expect(cssRuleCount(cssRules, ".os-p")).toBe(0);
+    expect(cssRuleCount(cssRules, ".os-trio")).toBe(0);
+    expect(cssRuleCount(cssRules, ".os-tbadge")).toBe(1);
   });
 });
 
 /**
- * ⚠️ THE PASTILLE BELONGS TO THE HEADER PILLS, AND IT WAS PUT ON THE WRONG ONES (fixes-2 A5).
- *
- * `.os-p` is the tasks TRIO; `.os-pill` is the greeting's header pill. Similar names, different
- * objects — the previous pass coloured the trio while the copy change landed on the header, so
- * half of one instruction went to each. This pins the pastille to BOTH by token, so the next
- * change to it cannot reach one and miss the other.
+ * ⚠️ THE ROW STYLESHEET IS RETIRED WITH THE ROW (dashboard redesign, Phase 5). This describe held
+ * five cases about `.os-trow`'s fixed grid, its absolute-in-one-cell crossfade, its 20px kind pill,
+ * its touch behaviour and its ≤640 stack. All five were true and none has a subject: the panel
+ * renders `TaskTicket` now. They are replaced by the ONE claim that outlives them — that the rules
+ * went with the markup, because a retired rule left in a sheet is how a deleted layout comes back.
  */
+describe("§5 · the row stylesheet is retired with the row", () => {
+  it("⚠️ no rule survives for any of the thirteen retired row classes", () => {
+    for (const dead of ["os-trow", "os-knd", "os-tt", "os-tn", "os-tm2", "os-endcell",
+      "os-stp", "os-act", "os-dots", "os-trio", "os-p", "os-pdot", "os-none"]) {
+      expect(cssRuleCount(cssRules, `.${dead}`), `.${dead} still has a rule`).toBe(0);
+    }
+  });
+
+  /* ⚠️ AND NOTHING RENDERS THEM EITHER — the other half of the sweep, because a rule and its
+     element are retired together or one of them comes back looking for the other. */
+  it("⚠️ and no component emits them", () => {
+    for (const dead of ["os-trow", "os-knd", "os-endcell", "os-stp", "os-dots", "os-trio", "os-pdot"]) {
+      expect(panel, `the panel still renders .${dead}`).not.toMatch(new RegExp(`["\`\\s]${dead}["\`\\s]`));
+    }
+  });
+});
+
 describe("the pastille is retired with the pill it dressed", () => {
   const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
   const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
@@ -250,8 +298,15 @@ describe("the pastille is retired with the pill it dressed", () => {
   /* ⚠️ THE TRIO'S HALF OF THE LAW IS THE HALF THAT SURVIVES, and it is the one worth keeping: the
      trio is WHITE and must not go tinted. It never read the pastille — its own case said so — and
      there is now none to read, so the claim is stated against the literals as well as the token. */
-  it("the trio stays white — it never wore the pastille and there is none to wear", () => {
-    expect(blk(".os-p"), ".os-p is white and must not wear the pastille").not.toMatch(/pastille/);
-    expect(blk(".os-p")).not.toMatch(/#f4f7fa|#dde6ee|#4a5a6b/);
+  /* ⚠️ RETARGETED AGAIN, ONE PHASE LATER, AND THE SECOND MOVE MAKES THE FIRST ONE MOOT. Phase 3
+     retired the header PILL and kept this as "the trio is white"; Phase 5 retired the TRIO itself
+     with the panel's three-way split. Neither element exists, so the surviving claim is about the
+     PAGE: no pastille anywhere, in any form. */
+  it("the pastille is gone from the sheet entirely — no token, no literal, no reader", () => {
+    expect(bare).not.toContain("--os-pastille");
+    expect(bare).not.toContain("var(--os-pastille");
+    for (const hex of ["#f4f7fa", "#dde6ee", "#4a5a6b", "#2c3f52"]) {
+      expect(bare, `${hex} survived the pastille's retirement as a literal`).not.toContain(hex);
+    }
   });
 });

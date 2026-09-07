@@ -1450,7 +1450,17 @@ export const Dashboard: React.FC<{
   // Route visibility: the dashboard StagePage stays mounted; AppContent re-renders on every
   // navigation, so reading location directly stays fresh without a hook-ordering hazard.
   const isDashRoute = typeof window !== "undefined" && window.location.pathname === "/dashboard";
-  // The chip and the To-do card must agree — both read buildOverToYouRows.
+  /* ⚠️ THE COMMENT HERE SAID "the chip and the To-do card must agree — both read
+     buildOverToYouRows", AND IT STOPPED BEING TRUE IN PHASE 5. The to-do panel was migrated onto
+     `assembleBoardColumns`, so it no longer reads this at all. Corrected rather than left, because
+     a comment that outlives what it described is read as fact.
+
+     ⚠️ AND THEY DO NOT NOW STATE ONE NUMBER TWICE — CHECKED. This is the ATTENTION CHIP's figure:
+     urgent rows, member unit, collapsed by `agentCardKey`, worded "{n} things need your attention".
+     The panel's badge is live board CARDS, worded "{n} open". Two different questions with two
+     different words, which is the one shape the two-numbers law permits; the fault it forbids is
+     two surfaces giving one word two answers. `OverToYou` and `DeskTodoCard` are still real
+     consumers of this derivation, so it stays. */
   const urgentRowCount = buildOverToYouRows(tasks, queries, agents).length;
   // Mobile Pass 1 (<md only — the surfaces are CSS-gated): the desk line + To-do doorway read
   // the To-do BOARD's tallies via the sidebar recipe, so they agree with /todo, their target.
@@ -1507,6 +1517,7 @@ export const Dashboard: React.FC<{
         tasks={tasks}
         userTasks={userTasks}
         activities={mergedActivities}
+        taskFlags={taskFlags}
         currentUser={currentUser}
         activeManuscript={activeManuscriptForKicker}
         onNavigate={onNavigate}

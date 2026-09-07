@@ -23,7 +23,7 @@
  * scrollbar. Locked in the smoke test against the stylesheet.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { Activity, Agent, Manuscript, Query, Task, User, UserTask } from "../../types";
+import { Activity, Agent, Manuscript, Query, Task, TaskFlag, User, UserTask } from "../../types";
 import { runStage, tourAutoRuns, tourChipShows } from "../../lib/oneScreen";
 import { OneScreenTour, TOUR_BREAKPOINT } from "./OneScreenTour";
 import { OneScreenAuthor } from "./OneScreenAuthor";
@@ -48,6 +48,10 @@ export interface OneScreenDashboardProps {
   tasks: Task[];
   userTasks: UserTask[];
   activities: Activity[];
+  /* ⚠️ THE BOARD'S STANCES (Phase 5) — the to-do panel calls `assembleBoardColumns`, which reads
+     them. A stance is the writer's decision about a task (snoozed, muted), never a per-book fact,
+     so it is handed down unscoped like `agents`. */
+  taskFlags: TaskFlag[];
   currentUser: User | null;
   /** The manuscript the shell scope names — the kicker repeats it (§2). */
   activeManuscript: Manuscript | null;
@@ -66,7 +70,7 @@ export const Skel: React.FC<{ bars: ("h" | "grow" | "")[] }> = ({ bars }) => (
 );
 
 export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
-  loading, queries, agents, manuscripts, tasks, userTasks, activities, currentUser,
+  loading, queries, agents, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
   activeManuscript, onNavigate, onTaskAction, updateUserProfile, now = new Date(),
 }) => {
   /**
@@ -289,18 +293,27 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             dayOne={scopedStage === "day-one"} earlyDays={scopedStage === "early-days"}
             onSendFirst={() => onNavigate("queries", "Send a query")}
           />
+          {/* ⚠️ SCOPED WHERE SCOPE MEANS SOMETHING, RAW WHERE IT DOES NOT (Phase 5). Tasks and
+              activities are the manuscript's; queries, agents and manuscripts are the LOOKUP sets
+              the board resolves cards against, and scoping those would hide the agent a scoped
+              task is about. `taskFlags` is a stance the writer took on a task, not a per-book fact.
+              This is the same split `assembleBoardColumns` is given everywhere else it is called. */}
           <OneScreenTasks
             loading={loading}
             tasks={scopedTasks}
             queries={queries}
             agents={agents}
+            manuscripts={manuscripts}
             userTasks={userTasks}
+            activities={scopedActivities}
+            taskFlags={taskFlags}
+            currentUser={currentUser}
             now={now}
             dayOne={scopedStage === "day-one"}
-            onAction={onTaskAction}
             onSeeAll={() => onNavigate("todo")}
             onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
             onAddAgent={() => onNavigate("agents", "Add an agent")}
+            onNavigate={onNavigate}
           />
         </div>
 
