@@ -10,6 +10,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { surnameKey } from "../../lib/queryCentreGrid";
 import { TimelineRows, buildTimelineRows } from "../reading-pane/QueryTimeline";
 import { deriveQueryFields } from "../../lib/queryDerivation";
 import { OUTCOME_STATUS } from "../../lib/responseDraft";
@@ -667,7 +668,7 @@ describe("v14 §2–§4 · one predicate, one history, one ground", () => {
 });
 
 /* ══ toolbar v2 · §3 — the list header ════════════════════════════════════════════════════════ */
-describe("§3 (toolbar v2) · the header is writing, and it drives THE sort", () => {
+describe("§3 (mono, superseding v2's Playfair) · the header is a column name, and it drives THE sort", () => {
   const list = readFileSync(join(process.cwd(), "src/components/queries/QueryListView.tsx"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
   const css = readFileSync(join(process.cwd(), "src/components/queries/queryListView.css"), "utf8")
@@ -675,27 +676,90 @@ describe("§3 (toolbar v2) · the header is writing, and it drives THE sort", ()
   const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
-  it("Playfair on parchment with its own rule — not mono capitals", () => {
-    expect(css).toMatch(/\.qlv-h \{[^}]*font-family: var\(--font-serif\)/);
-    expect(css).toMatch(/\.qlv-h \{[^}]*font-size: 14px/);
-    expect(css).toMatch(/\.qlv-h \{[^}]*color: #6a5a50/);
-    expect(css, "the header kept its mono capitals").not.toMatch(/\.qlv-h \{[^}]*text-transform: uppercase/);
+  /* ⚠️ REWRITTEN, NOT RETARGETED. The previous four assertions asserted PLAYFAIR — the choice
+     this section withdraws — so they described a retired decision and are deleted rather than
+     inverted. What survives is the LAW they were standing for: the header must not be set in the
+     face the agent names beneath it use, whatever that face is. */
+  it("mono capitals on white — and NOT the serif the agent names use", () => {
+    expect(css).toMatch(/\.qlv-h \{[^}]*font-family: var\(--font-mono\)/);
+    expect(css).toMatch(/\.qlv-h \{[^}]*font-size: 9px/);
+    expect(css).toMatch(/\.qlv-h \{[^}]*letter-spacing: 0\.16em/);
+    expect(css).toMatch(/\.qlv-h \{[^}]*text-transform: uppercase/);
+    expect(css).toMatch(/\.qlv-h \{[^}]*color: #a08a78/);
+    /* the law, stated so it survives the next restyle: the header and the names below it are
+       never the same family. `.qlv-nm` is the agent name. */
+    expect(css, "the header took the agent names' serif again")
+      .not.toMatch(/\.qlv-h \{[^}]*font-family: var\(--font-serif\)/);
     expect(css).toMatch(/\.qlv-head \{[^}]*border-bottom: 1px solid #ddd2c4/);
-    expect(css).toMatch(/\.qlv-head \{[^}]*background: var\(--parchment/);
+    expect(css).toMatch(/\.qlv-head \{[^}]*background: #fff/);
+    expect(css).toMatch(/\.qlv-head \{[^}]*padding-top: 14px/);
+    expect(css).toMatch(/\.qlv-head \{[^}]*padding-bottom: 12px/);
   });
 
-  it("the caret is burgundy, on the sorted column only, and follows the direction", () => {
+  /* ⚠️ THE ALIGNMENT LAW, AS SOURCE — the rendered proof is in the measurement, which is where a
+     geometric claim belongs. What a source lock CAN say is that there is only one template and
+     one horizontal padding to disagree about, which is the structural guarantee behind it. */
+  it("one grid template and one horizontal padding, shared by the header and the rows", () => {
+    const shared = css.match(/\.qlv-head, \.qlv-row \{[^}]*\}/g) ?? [];
+    expect(shared.length, "the shared rule was split or renamed").toBeGreaterThanOrEqual(1);
+    expect(shared[0]).toMatch(/grid-template-columns:/);
+    expect(shared[0]).toMatch(/padding-left: 26px/);
+    expect(shared[0]).toMatch(/padding-right: 18px/);
+    /* neither may state a horizontal padding of its own — that is exactly how they drifted */
+    const headOnly = (css.match(/(?:^|\n)\.qlv-head \{[^}]*\}/) ?? [""])[0];
+    const rowOnly = (css.match(/(?:^|\n)\.qlv-row \{[^}]*\}/) ?? [""])[0];
+    for (const [name, block] of [["head", headOnly], ["row", rowOnly]] as const) {
+      expect(block, `${name} restated a horizontal padding`).not.toMatch(/padding-left|padding-right/);
+      expect(block, `${name} used the padding shorthand, which sets all four`).not.toMatch(/padding:/);
+    }
+    /* ⚠️ AND THE MEDIA QUERY IS WHERE IT ACTUALLY BROKE: it narrowed the ROW's left padding and
+       not the header's, so the two were 4px apart at 1280 and identical at 1440. */
+    const mq = (css.match(/@media \(max-width: 1380px\) \{[\s\S]*?\n\}/) ?? [""])[0];
+    /* ⚠️ ANCHORED. A bare `\.qlv-row \{` also matches the TAIL of `.qlv-head, .qlv-row {`, so the
+       first form of this assertion went red on the shared rule that fixes the bug — the exact
+       first-match trap this repo records against class-name locks, wearing a grouped selector. */
+    expect(mq, "the narrow regime moved one of them without the other")
+      .not.toMatch(/(?:^|\n)\s*\.qlv-row \{[^}]*padding-left/);
+  });
+
+  /* ⚠️ THE CONDITIONAL-MOUNT ASSERTION IS DELETED, NOT INVERTED. It required the caret to exist
+     only on the sorted column, which is precisely what §3 changes: a caret that is mounted on
+     hover grows an element under the pointer and reflows the label. Three opacities, one
+     element, nothing moving. */
+  it("the caret is always mounted and opacity-stepped — 0, .4 on hover, 1 when sorted", () => {
     expect(css).toMatch(/\.qlv-caret \{[^}]*color: #7c3a2a/);
-    /* rendered only for the sorted column — an empty caret on every other one is a mark that
-       means nothing, and this header has exactly one mark that means something */
-    expect(list).toContain("{sortKey === c.sort && (");
-    expect(list).toContain('{sortDesc ? "▼" : "▲"}');
+    expect(css).toMatch(/\.qlv-caret \{[^}]*opacity: 0/);
+    expect(css).toMatch(/\.qlv-h--btn:hover \.qlv-caret \{[^}]*opacity: 0\.4/);
+    expect(css).toMatch(/\.qlv-h--on \.qlv-caret \{[^}]*opacity: 1/);
+    expect(list, "the caret went back to being conditionally mounted").not.toContain("{sortKey === c.sort && (");
+    expect(css).toMatch(/\.qlv-h--btn:hover \{[^}]*color: #3a1c14/);
   });
 
-  it("Actions names no order, so it is inert and right-aligned — not a control that does nothing", () => {
-    expect(list).toContain('c.label === "Actions" ? " qlv-h--end" : ""');
-    expect(css).toMatch(/\.qlv-h--end \{[^}]*cursor: default/);
-    expect(css).toMatch(/\.qlv-h--end \{[^}]*justify-content: flex-end/);
+  /* ⚠️ RIGHT-ALIGNMENT IS RETIRED BY §4.1, so that half is deleted rather than kept. The law that
+     survives is that the three orderless columns are not controls: muted, default cursor, and
+     rendered as spans so they are out of the tab order entirely. */
+  it("What went, Since then and Actions name no order — inert, muted, unfocusable", () => {
+    expect(list).toContain('<span key={i} className="qlv-h qlv-h--dead">{c.label}</span>');
+    expect(css).toMatch(/\.qlv-h--dead \{[^}]*cursor: default/);
+    expect(css).toMatch(/\.qlv-h--dead \{[^}]*color: #c8b8a8/);
+    /* §4.1 — the Actions column joins the other six rather than hanging off the right edge */
+    expect(css).toMatch(/\.qlv-acts \{[^}]*justify-content: start/);
+    expect(css, "Actions is right-aligned again").not.toMatch(/\.qlv-acts \{[^}]*justify-content: end/);
+  });
+
+  /* ⚠️ THE AGENT COLUMN SORTS BY SURNAME, which it claimed and did not do. Asserted through the
+     PURE function rather than the comparator's spelling, so a refactor of the switch cannot
+     redden it and a change of meaning must. */
+  it("Agent sorts by surname, not by the whole name", () => {
+    expect(surnameKey("Hester Blaine")).toBe("blaine");
+    expect(surnameKey("Ottoline de Vere")).toBe("vere");
+    expect(surnameKey("Madonna")).toBe("madonna");          // a mononym sorts under itself
+    expect(surnameKey("  Iris  Kwan  ")).toBe("kwan");      // a trailing space is not a surname
+    expect(surnameKey("Ana Ruiz-Marsh")).toBe("ruiz-marsh"); // a hyphenated surname is one token
+    expect(surnameKey("")).toBe("");
+    expect(surnameKey(null)).toBe("");
+    /* and the comparator reaches it, with the full name as the tiebreak */
+    expect(page).toMatch(/case "agent_az": return surnameKey\(agA\)[\s\S]{0,80}agA\.localeCompare\(agB\)/);
   });
 
   it("⚠️ ONE SORT STATE — a header writes the page's own key, so the Sort menu's label follows", () => {

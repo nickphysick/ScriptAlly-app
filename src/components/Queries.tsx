@@ -89,6 +89,7 @@ import { MATERIAL_ROW_NAMES, type MaterialRow } from "../lib/agentMaterials";
 import {
   QUICK_FILTERS, quickCounts, GRID_GROUPS, GRID_SORTS,
   emptyGridFilters, gridFiltersAreEmpty, gridFilterCount, matchesGridFilters, type GridFilters,
+  surnameKey,
   type QuickKey, type GroupKey,
 } from "../lib/queryCentreGrid";
 import { measureFlip, playFlip, clearFlip, type FlipRects } from "../lib/flip";
@@ -3097,7 +3098,10 @@ export const Queries: React.FC<{
     const agA = agents.find(ag => ag.id === a.agentId)?.name || "";
     const agB = agents.find(ag => ag.id === b.agentId)?.name || "";
     switch (sortKey) {
-      case "agent_az": return agA.localeCompare(agB);
+      /* ⚠️ SURNAME, not the whole name (toolbar v2 §3). `localeCompare` on `agA` filed
+         "Hester Blaine" under H, in a column headed `Agent` that a reader scans for Blaine. The
+         full name is still the tiebreak, so two Blaines keep a stable order. */
+      case "agent_az": return surnameKey(agA).localeCompare(surnameKey(agB)) || agA.localeCompare(agB);
       /* ⚠️ ADDED WITH THE MENU ROW THAT OFFERS IT (toolbar v2). A key in the menu with no case
          here falls through to the default and sorts by something else while the trigger names
          `Agency` — a control that lies rather than one that is missing. */

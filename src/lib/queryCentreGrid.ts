@@ -312,3 +312,23 @@ export function matchesGridFilters(
 
 export { turnFor, turnWordFor };
 export type { Turn, Stage, State };
+
+/**
+ * The Agent column's sort key — SURNAME, then the whole name to break ties (toolbar v2 §3).
+ *
+ * ⚠️ IT SORTED ON THE FULL NAME UNTIL NOW, so "Hester Blaine" filed under H. The header calls the
+ * column `Agent` and a reader scanning it for Blaine looked in the wrong place; the brief's
+ * "surname A–Z" is what the column always claimed and never did.
+ *
+ * ⚠️ AND THE EDGE CASES ARE THE POINT, because a naive `split(" ")[1]` gets every one of them
+ * wrong: a mononym has no surname and must sort under itself rather than under the empty string;
+ * a hyphenated or particled surname is the LAST run of characters, so taking the last token is
+ * right where taking the second is not; and a trailing space produces an empty final token that
+ * would sort every such agent to the top. `displayName.ts` records the same three traps against
+ * its own splitter — this is that lesson applied to ordering rather than to truncation.
+ */
+export function surnameKey(name: string | null | undefined): string {
+  const parts = String(name ?? "").trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "";
+  return parts[parts.length - 1].toLocaleLowerCase();
+}

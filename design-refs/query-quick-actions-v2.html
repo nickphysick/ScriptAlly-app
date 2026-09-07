@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Snooze &amp; dismiss as quick actions</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#1c130f;--body-ink:#3a1c14;--label:#9c8878;--burgundy:#7c3a2a;--sage-accent:#8a9e88;--hairline:#ece0d2;--field-border:#e0d5c8;--pink:#f5e2da;--pink-border:#e8c8bc;
+    --sand:#f7efe3;--sage:#e0e5dd;--pinkS:#f5e6df;--closed:#e4e1db;--sand-d:#e7d9bd;--sage-d:#c7d0c2;--pink-d:#e8c9bb;--closed-d:#cfc9c1}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ground);font-family:'Inter',sans-serif;color:var(--body-ink);font-size:13px;padding:26px 32px 90px}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+  h1{font-family:'Playfair Display',serif;font-weight:500;font-size:25px;color:var(--ink)}
+  h2{font-family:'Playfair Display',serif;font-weight:500;font-size:16px;color:#2e3a2c;margin:30px 0 8px}
+  .lede{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#6a5a50;margin:6px 0 12px;max-width:860px;line-height:1.5}
+  .note{font-size:12.5px;color:#6a5a50;max-width:860px;line-height:1.6;margin-bottom:14px}
+  .note b{font-weight:500;color:var(--body-ink)} .note code{font-family:'JetBrains Mono',monospace;font-size:11px}
+
+  /* list */
+  .list{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 22px rgba(58,28,20,.09);overflow:visible;position:relative}
+  .lh,.lr{display:grid;grid-template-columns:170px 1.15fr 76px 104px 118px 1.3fr 236px;gap:14px;align-items:center;padding:12px 18px 12px 22px}
+  .lh{border-bottom:1px solid #ddd2c4}
+  .lh span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#a08a78;display:flex;align-items:center;gap:6px}
+  .lh span.sorted{color:var(--ink)} .lh .ar{font-size:9px;color:var(--burgundy)}
+  .lh span.nosort{color:#c8b8a8}
+  .lr{border-top:.5px solid var(--hairline);position:relative}
+  .lr::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:4px;border-radius:0 3px 3px 0;background:var(--bar)}
+  .st{display:inline-flex;align-items:center;gap:8px;font-family:'Playfair Display',serif;font-size:13.5px;color:var(--ink)}
+  .dot{width:20px;height:20px;border-radius:50%;border:1.4px solid var(--burgundy);background:#f5e2da;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:var(--burgundy);flex:none}
+  .dot.in{border-color:var(--sage-accent);background:#e2e7e0;color:#4c6249}
+  .chip{width:34px;height:34px;border-radius:50%;background:var(--parchment);box-shadow:0 1px 2px rgba(58,28,20,.08),0 2px 6px rgba(58,28,20,.10);border:.5px solid #e6dccf;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;flex:none}
+  .who{display:flex;align-items:center;gap:10px;min-width:0}
+  .nm{font-family:'Playfair Display',serif;font-weight:500;font-size:15px;color:var(--ink)}
+  .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:12px;color:#6a5a50;margin-top:2px}
+  .leaf{width:40px;border-radius:7px;background:#fff;border:.5px solid #dccfc0;text-align:center;overflow:hidden}
+  .leaf .mo{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;text-transform:uppercase;padding:3px 0 2px;border-bottom:.5px solid rgba(0,0,0,.08);background:var(--sand)}
+  .leaf .dy{font-family:'Playfair Display',serif;font-size:16px;color:var(--ink);line-height:1;padding:4px 0 3px}
+  .leaf .cap{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);padding-bottom:3px}
+  .mats{display:inline-flex;gap:4px}.mats i{width:18px;height:18px;border-radius:5px;border:.5px solid #e6dccf;background:var(--parchment);display:inline-block}.mats i.off{opacity:.28}
+  .none{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#c8b8a8}
+  .ev{width:22px;height:22px;border-radius:50%;background:#fff;border:1.3px solid #cdbfae;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#6a5a50}
+  .stand{display:flex;align-items:center;gap:11px}
+  .stand .illo{width:42px;height:42px;border-radius:50%;background:repeating-linear-gradient(135deg,rgba(58,28,20,.05) 0 6px,transparent 6px 12px);border:1px dashed rgba(58,28,20,.22);flex:none}
+  .stand .s{font-size:12.5px}.stand .m{color:var(--label);margin-top:3px}
+  .stand .snz{border-bottom:1px dashed #cdbfae;cursor:pointer}
+  .acts{display:grid;grid-template-columns:126px 28px 28px 28px;gap:6px;justify-content:start;align-items:center;position:relative}
+  .qp{--x:0}
+  .act{border-radius:8px;padding:7px 0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;background:var(--pink);border:1px solid var(--pink-border);color:var(--body-ink);cursor:pointer}
+  .icb{width:28px;height:28px;border-radius:8px;border:1px solid var(--field-border);background:#fff;display:inline-flex;align-items:center;justify-content:center;color:#a08a78;font-size:11px;cursor:pointer}
+  .icb.on{border-color:var(--ink);color:var(--ink);background:var(--parchment)}
+
+  /* quick popover */
+  .qp{position:absolute;z-index:40;width:236px;background:var(--parchment);border-radius:12px;padding:5px;box-shadow:0 2px 6px rgba(58,28,20,.07),0 16px 40px rgba(58,28,20,.16)}
+  .qp .frame{border:1px solid rgba(124,58,42,.28);border-radius:9px;overflow:hidden;background:var(--parchment)}
+  .qp .ph{background:linear-gradient(135deg,#dce0d9,#d0d6cc);border-bottom:.5px solid #c4ccc0;padding:8px 12px;display:flex;align-items:center;gap:7px}
+  .qp .ph .t{font-family:'Playfair Display',serif;font-weight:500;font-size:13.5px;color:#2e3a2c}
+  .qp .pb{padding:6px}
+  .qp .sub{font-size:11.5px;color:#6a5a50;padding:6px 8px 2px;line-height:1.45}
+  .qp .opt{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:8px;cursor:pointer;font-size:13px}
+  .qp .opt:hover{background:#fff}
+  .qp .opt .d{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--label)}
+  .qp .opt.on{background:var(--pink)}
+  .qp .sep{height:.5px;background:var(--hairline);margin:5px 8px}
+  .qp .foot{padding:6px 9px 8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--label)}
+  .qp .foot a{color:#6a5a50;border-bottom:.5px solid #cdbfae;cursor:pointer}
+  .qp .dot{width:16px;height:16px;font-size:8px}
+
+  /* drawer */
+  .drawer{width:580px;background:var(--parchment);border-radius:14px;overflow:visible;box-shadow:0 2px 6px rgba(58,28,20,.06),0 14px 40px rgba(58,28,20,.14);position:relative}
+  .pbar{display:flex;align-items:center;gap:6px;padding:12px 16px;border-bottom:.5px solid var(--hairline)}
+  .pbar .sp{flex:1}
+  .blk{background:var(--sand)}
+  .band{display:flex;align-items:center;gap:10px;padding:14px 26px 6px}
+  .band .w{font-family:'Playfair Display',serif;font-size:20px;color:var(--ink)}
+  .band .r{margin-left:auto;color:#6a5a50}
+  .idn{display:flex;align-items:center;gap:16px;padding:8px 26px 0}
+  .idn .chip{width:56px;height:56px;font-size:13px;background:#fff}
+  .idn .nm{font-size:26px}.idn .ag{font-size:14px;margin-top:4px}
+  .pms{display:flex;align-items:center;gap:9px;padding:12px 26px 0;font-family:'Playfair Display',serif;font-size:14.5px;color:var(--ink)}
+  .pms .m{color:var(--label);margin-left:2px}
+  .verbs{display:flex;align-items:center;gap:8px;padding:14px 26px 16px;position:relative}
+  .verbs .b{border-radius:9px;padding:10px 15px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+  .verbs .b.p{background:var(--pink);border:1px solid var(--pink-border);color:var(--body-ink)}
+  .verbs .b.g{background:#fff;border:1px solid var(--field-border);color:#6a5a50}
+  .verbs .b.g.on{border-color:var(--ink);color:var(--ink)}
+  .verbs .snt{margin-left:auto;color:#6a5a50;text-align:right;line-height:1.6}
+  .tabs{display:flex;gap:2px;padding:12px 26px 0;border-bottom:.5px solid var(--hairline);background:#fff}
+  .tab{padding:10px 14px 12px;font-family:'Playfair Display',serif;font-size:15px;color:#8a7a6c;border-bottom:2px solid transparent;margin-bottom:-.5px}
+  .tab.on{color:var(--ink);border-bottom-color:var(--ink)}
+  .dbody{background:#fff;padding:16px 26px 22px}
+  .trays{display:flex;gap:12px}
+  .tray{flex:1;background:var(--parchment);border:.5px solid var(--hairline);border-radius:10px;padding:12px 14px}
+  .tray .big{font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);line-height:1}
+  .tray .cap{color:var(--label);margin-top:5px}
+  .tray .snz{margin-top:6px;font-size:11.5px;color:#6a5a50}
+  .tray .snz b{border-bottom:1px dashed #cdbfae;cursor:pointer;font-weight:400}
+  .row2{display:flex;gap:30px;align-items:flex-start;flex-wrap:wrap}
+  .toast{margin-top:14px;display:inline-flex;align-items:center;gap:14px;background:var(--ink);color:#fdfaf5;border-radius:10px;padding:10px 14px 10px 16px;font-size:13px}
+  .toast b{font-family:'Playfair Display',serif;font-weight:500;font-size:14px}
+  .toast button{background:transparent;border:1px solid rgba(253,250,245,.35);color:#fdfaf5;border-radius:7px;padding:5px 10px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<h1>Snooze &amp; dismiss — quick actions</h1>
+<div class="lede">Two small popovers, one component, anchored to whichever control was pressed. No drawer, no desk, no page change.</div>
+
+<div class="note"><b>The bug is mine.</b> I specified that every list action "opens the same desk the drawer uses, and opens the drawer behind it" so the desk would have a host and the ghost rung a rail. That's right for <i>Record response</i> and <i>Mark sent</i>, which compose a record and want the timeline visible — and wrong for snooze and dismiss, which are one decision each. Those two become quick popovers everywhere they appear.</div>
+
+<h2>1 · On the list — actions left-aligned, popover anchored to the button</h2>
+<div class="list">
+  <div class="lh"><span>Status</span><span>Agent</span><span class="sorted">Sent <span class="ar">▾</span></span><span class="nosort">What went</span><span class="nosort">Since then</span><span>Where it stands</span><span class="nosort">Actions</span></div>
+  <div class="lr" style="--bar:var(--sand-d)">
+    <span class="st"><span class="dot">→</span>Queried</span>
+    <span class="who"><span class="chip">HV</span><span style="min-width:0"><div class="nm">Harriet Vane-Coe</div><div class="ag">Stillwater Reps</div></span></span>
+    <span class="leaf"><div class="mo">Aug</div><div class="dy">12</div><div class="cap">sent</div></span>
+    <span class="none">not recorded</span><span class="none">nothing yet</span>
+    <span class="stand"><span class="illo"></span><span><div class="s">Reply expected by <b>23 Sep</b></div><div class="m mono">15 days away <span style="color:#d8ccbc;margin:0 5px">|</span> <span class="snz">Nudge in 4 weeks</span></div></span></span>
+    <span class="acts"><span class="act">Record response</span><span class="icb on" title="Snooze">🔔</span><span class="icb" title="Dismiss">×</span><span class="icb">⋯</span>
+      <div class="qp" style="right:0;top:38px"><div class="frame">
+        <div class="ph"><span class="dot" style="border-color:var(--ink);background:#fff;color:var(--ink)">🔔</span><span class="t">Snooze the nudge</span></div>
+        <div class="pb">
+          <div class="sub">Currently due <b>3 Oct</b>. Pushing it back changes only the reminder — nothing is recorded on the query.</div>
+          <div class="opt">In 1 week<span class="d">10 Oct</span></div>
+          <div class="opt on">In 2 weeks<span class="d">17 Oct</span></div>
+          <div class="opt">In 4 weeks<span class="d">31 Oct</span></div>
+          <div class="sep"></div>
+          <div class="opt">Pick a date…</div>
+          <div class="opt">Stop nudging me</div>
+        </div>
+      </div></div>
+    </span>
+  </div>
+  <div class="lr" style="--bar:var(--pink-d)">
+    <span class="st"><span class="dot in">←</span>Partial Requested</span>
+    <span class="who"><span class="chip">JM</span><span style="min-width:0"><div class="nm">Jonathan Marsh</div><div class="ag">The Marsh Agency</div></span></span>
+    <span class="leaf"><div class="mo">Aug</div><div class="dy">1</div><div class="cap">sent</div></span>
+    <span class="mats"><i></i><i class="off"></i><i></i><i class="off"></i></span>
+    <span><span class="ev">←</span></span>
+    <span class="stand"><span class="illo"></span><span><div class="s">Partial — <b>not yet sent</b></div><div class="m mono">15 days since request</div></span></span>
+    <span class="acts"><span class="act">Mark sent</span><span></span><span class="icb on" title="Dismiss">×</span><span class="icb">⋯</span>
+      <div class="qp" style="right:0;top:38px;width:250px"><div class="frame">
+        <div class="ph"><span class="dot" style="border-color:#b8aa9a;background:transparent;color:#b8aa9a">×</span><span class="t">Close this query</span></div>
+        <div class="pb">
+          <div class="sub">Records one activity dated today. The query moves to Closed and any nudge is retired.</div>
+          <div class="opt"><span class="dot" style="border-color:#b8aa9a;background:transparent;color:#b8aa9a">×</span>They passed</div>
+          <div class="opt"><span class="dot" style="border-color:#b8aa9a;background:transparent;color:#b8aa9a">−</span>I withdrew it</div>
+          <div class="opt"><span class="dot" style="border-color:#b8aa9a;background:transparent;color:#b8aa9a">···</span>No reply — gone quiet</div>
+          <div class="sep"></div>
+          <div class="foot">Need a date or a note? <a>Open the query</a></div>
+        </div>
+      </div></div>
+    </span>
+  </div>
+</div>
+<div class="toast">Nudge for <b>Harriet Vane-Coe</b> moved to 17 Oct<button>Undo</button></div>
+
+<h2>2 · In the drawer — the same two popovers, same copy</h2>
+<div class="note">The verb row becomes four: <b>Record response</b> (pink, opens the desk) · <b>Nudge</b> (ghost, opens the desk — draft, record, reschedule) · <b>Snooze</b> (ghost, quick popover) · <b>Close</b> (ghost, quick popover). Nudge and Snooze are different verbs and the row says so: nudging <i>writes a Nudged rung and sends you to your mail client</i>; snoozing <i>only moves the reminder</i>. The reminder fact in the tray is also a shortcut — the dotted <i>Nudge in 4 weeks</i> opens the same snooze popover, as it does in the list's "where it stands" caption. One popover component, three anchors.</div>
+<div class="row2">
+  <div class="drawer">
+    <div class="pbar"><span class="icb">‹</span><span class="icb">›</span><span class="mono" style="color:var(--label);margin-left:4px">1 OF 26</span><span class="sp"></span><span class="icb">✕</span></div>
+    <div class="blk">
+      <div class="band"><span class="dot">→</span><span class="w">Queried</span><span class="r mono">With the agent</span></div>
+      <div class="idn"><span class="chip">HV</span><span><div class="nm">Harriet Vane-Coe</div><div class="ag">Stillwater Reps</div></span></div>
+      <div class="pms">📖 Murphy's Day Out <span class="m mono">Thriller · 50,000 words</span></div>
+      <div class="verbs"><span class="b p">Record response</span><span class="b g">Nudge</span><span class="b g on">Snooze</span><span class="b g">Close</span><span class="snt mono">Sent 12 Aug<br>via Email</span>
+        <div class="qp" style="left:196px;top:52px"><div class="frame">
+          <div class="ph"><span class="dot" style="border-color:var(--ink);background:#fff;color:var(--ink)">🔔</span><span class="t">Snooze the nudge</span></div>
+          <div class="pb"><div class="sub">Currently due <b>3 Oct</b>. Pushing it back changes only the reminder — nothing is recorded on the query.</div>
+            <div class="opt">In 1 week<span class="d">10 Oct</span></div><div class="opt on">In 2 weeks<span class="d">17 Oct</span></div><div class="opt">In 4 weeks<span class="d">31 Oct</span></div>
+            <div class="sep"></div><div class="opt">Pick a date…</div><div class="opt">Stop nudging me</div></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="tabs"><span class="tab on">Tracking</span><span class="tab">Agent</span><span class="tab">Notes</span></div>
+    <div class="dbody"><div class="trays">
+      <div class="tray"><div class="big">15 <span style="font-size:12px;font-style:italic">days</span></div><div class="cap mono">until reply expected</div></div>
+      <div class="tray"><div class="big">23 Sept</div><div class="cap mono">reply expected by</div><div class="snz">Nudge in 4 weeks · <b>snooze</b></div></div>
+    </div></div>
+  </div>
+</div>
+
+<h2>3 · The rules</h2>
+<div class="note">
+<b>Snooze writes no activity.</b> It moves the reminder date only — `reconcileNudge` and nothing else. The timeline is unchanged, the status is unchanged, "Since then" gains no icon. Receipt toast with Undo restores the previous date.<br>
+<b>Nudge writes an activity.</b> Draft, copy, Nudged rung, reminder rescheduled. Stays in the desk because it composes something.<br>
+<b>Close writes one activity</b> with the chosen reason, dated today, and retires the nudge. If the writer needs a different date or a note, the popover's footer sends them to the query — the quick path stays quick and the full path stays available.<br>
+<b>Availability.</b> Snooze appears only where a reminder exists or could (agent-side, open); Close on any open query; both absent on closed. Same predicate as everywhere else — one `queryVerbs`.<br>
+<b>Anchoring.</b> The popover opens against the control pressed and closes on Esc, outside click, or choosing; focus returns to the control. It never opens the drawer, never moves the page, and on the list it does not change the row's selection.
+</div>
+</body>
+</html>

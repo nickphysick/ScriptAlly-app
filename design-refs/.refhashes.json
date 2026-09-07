@@ -1,5 +1,5 @@
 {
-  "_note": "Hashes of the design refs that are ACTIVE design authorities \u2014 a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act \u2014 `--update design-refs/<file>.html` \u2014 because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
+  "_note": "Hashes of the design refs that are ACTIVE design authorities — a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act — `--update design-refs/<file>.html` — because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
   "refs": {
     "design-refs/action-journey.html": "129247fc29907b723cb4a9d58d5cab25d439220ba34eb2bb248f4eb0ba56c89d",
     "design-refs/bar-hover-states.html": "212c494a27915e2152f58122bc3301a90324ebbddba8f2c32e9e5a35fb49f1d8",
@@ -40,6 +40,8 @@
     "design-refs/todo-reference-card.html": "a93d4a078af74d98ede267d02395f47dd1e21f5cd7774ae9dc96ee5f141358b9",
     "design-refs/query-toolbar-v2-locked.html": "294f36bbfceac24f2e7db5739ebd3810e0b92aa513173ade50697ba874ac9a40",
     "design-refs/contact-list-v5.html": "31d19010275cf77033957fd376a980bc10947a2bc0887741ac0dc3606d5542f1",
-    "design-refs/manuscripts-hero-landing.html": "1053f4dc10e8e3f76512e925481347b73f3b26ccecc4ced7e5f8d8a2006691c3"
+    "design-refs/manuscripts-hero-landing.html": "1053f4dc10e8e3f76512e925481347b73f3b26ccecc4ced7e5f8d8a2006691c3",
+    "design-refs/query-list-headers-v2-mono-locked.html": "e1ac7bd00a855ff05af15c507cb4b40733364d47b0e9a899009feec99d64b077",
+    "design-refs/query-quick-actions-v2.html": "8179ba84837d218c18bb303055844c9b5792c7692c6f5795148555c8840762f8"
   }
 }

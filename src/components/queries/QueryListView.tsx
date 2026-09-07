@@ -214,10 +214,12 @@ export const QueryListView: React.FC<{
   return (
   <div className="qlv">
     {/**
-      * ⚠️ THE HEADER READS AS WRITING, NOT AS A SCHEMA (v2 toolbar, §3) — Playfair 14px, muted
-      * until you touch it. And it drives THE sort state, not a copy: a header hands `onSort` the
-      * page's own key, so the Sort menu's label changes when you click a column and the two
-      * controls can never disagree about what order the list is in.
+      * ⚠️ MONO CAPITALS, NOT PLAYFAIR (§3, superseding v2's own choice). Set in the page's serif
+      * the header competed with the Playfair agent NAMES an inch beneath it — two lines of the
+      * same face where one is a label and the other is data. Mono at 9px cannot be misread as a
+      * row. And it drives THE sort state, not a copy: a header hands `onSort` the page's own key,
+      * so the Sort menu's label changes when you click a column and the two controls can never
+      * disagree about what order the list is in.
       */}
     <div className="qlv-head" role="row">
       {LIST_COLUMNS.map((c, i) =>
@@ -230,13 +232,16 @@ export const QueryListView: React.FC<{
             onClick={() => onSort(c.sort!)}
           >
             {c.label}
-            {sortKey === c.sort && (
-              <span className="qlv-caret" aria-hidden="true">{sortDesc ? "▼" : "▲"}</span>
-            )}
+            {/* always mounted, opacity-stepped in CSS — see the note at `.qlv-caret`. The arrow
+                still states the CURRENT direction, so an unsorted column shows the ascending
+                mark it would take if you pressed it. */}
+            <span className="qlv-caret" aria-hidden="true">
+              {sortKey === c.sort && sortDesc ? "\u25bc" : "\u25b2"}
+            </span>
           </button>
         ) : (
-          /* Actions states no order of its own, so it is not a control — right-aligned, inert */
-          <span key={i} className={`qlv-h${c.label === "Actions" ? " qlv-h--end" : ""}`}>{c.label}</span>
+          /* the three that name no order: rendered, muted, inert, and out of the tab order */
+          <span key={i} className="qlv-h qlv-h--dead">{c.label}</span>
         ),
       )}
     </div>

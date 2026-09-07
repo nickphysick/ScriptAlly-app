@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — List column headers</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#1c130f;--body-ink:#3a1c14;--label:#9c8878;--burgundy:#7c3a2a;--sage-accent:#8a9e88;--hairline:#ece0d2;--field-border:#e0d5c8;--pink:#f5e2da;--pink-border:#e8c8bc;
+    --sand:#f7efe3;--sage:#e0e5dd;--pinkS:#f5e6df;--closed:#e4e1db;--sand-d:#e7d9bd;--sage-d:#c7d0c2;--pink-d:#e8c9bb}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ground);font-family:'Inter',sans-serif;color:var(--body-ink);font-size:13px;padding:26px 32px 90px}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+  h1{font-family:'Playfair Display',serif;font-weight:500;font-size:25px;color:var(--ink)}
+  .lede{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#6a5a50;margin:6px 0 14px;max-width:860px;line-height:1.5}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--field-border);border-radius:10px;padding:3px;margin:0 0 12px;flex-wrap:wrap}
+  .seg button{border:none;background:transparent;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#6a5a50;padding:8px 13px;border-radius:7px}
+  .seg button.on{background:var(--pink);color:var(--body-ink)}
+  .desc{color:#6a5a50;max-width:860px;line-height:1.55;margin-bottom:14px;min-height:52px}
+  .desc b{font-weight:500;color:var(--body-ink)}
+  .list{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 22px rgba(58,28,20,.09);overflow:hidden}
+  .lh,.lr{display:grid;grid-template-columns:170px 1.15fr 76px 104px 120px 1.35fr 232px;gap:14px;align-items:center;padding:12px 18px 12px 22px}
+  .lr{border-top:.5px solid var(--hairline);position:relative}
+  .lr::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:4px;border-radius:0 3px 3px 0;background:var(--bar)}
+  .lh span{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+  .lh span:last-child{justify-content:flex-end;cursor:default}
+  .ar{font-size:9px;color:var(--burgundy)}
+  .st{display:inline-flex;align-items:center;gap:8px;font-family:'Playfair Display',serif;font-size:13.5px;color:var(--ink)}
+  .dot{width:20px;height:20px;border-radius:50%;border:1.4px solid var(--burgundy);background:#f5e2da;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:var(--burgundy);flex:none}
+  .dot.in{border-color:var(--sage-accent);background:#e2e7e0;color:#4c6249}
+  .chip{width:34px;height:34px;border-radius:50%;background:var(--parchment);box-shadow:0 1px 2px rgba(58,28,20,.08),0 2px 6px rgba(58,28,20,.10);border:.5px solid #e6dccf;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;flex:none}
+  .who{display:flex;align-items:center;gap:10px;min-width:0}
+  .nm{font-family:'Playfair Display',serif;font-weight:500;font-size:15px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:12px;color:#6a5a50;margin-top:2px}
+  .leaf{width:40px;border-radius:7px;background:#fff;border:.5px solid #dccfc0;text-align:center;overflow:hidden}
+  .leaf .mo{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;text-transform:uppercase;padding:3px 0 2px;border-bottom:.5px solid rgba(0,0,0,.08);background:var(--sand)}
+  .leaf .dy{font-family:'Playfair Display',serif;font-size:16px;color:var(--ink);line-height:1;padding:4px 0 3px}
+  .leaf .cap{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);padding-bottom:3px}
+  .mats{display:inline-flex;gap:4px}.mats i{width:18px;height:18px;border-radius:5px;border:.5px solid #e6dccf;background:var(--parchment);display:inline-block}.mats i.off{opacity:.28}
+  .none{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#c8b8a8}
+  .ev{width:22px;height:22px;border-radius:50%;background:#fff;border:1.3px solid #cdbfae;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#6a5a50}
+  .stand{display:flex;align-items:center;gap:11px}
+  .stand .illo{width:42px;height:42px;border-radius:50%;background:repeating-linear-gradient(135deg,rgba(58,28,20,.05) 0 6px,transparent 6px 12px);border:1px dashed rgba(58,28,20,.22);flex:none}
+  .stand .s{font-size:12.5px}.stand .m{color:var(--label);margin-top:3px}
+  .acts{display:grid;grid-template-columns:126px 28px 28px 28px;gap:6px;justify-content:end;align-items:center}
+  .act{border-radius:8px;padding:7px 0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;background:var(--pink);border:1px solid var(--pink-border);color:var(--body-ink)}
+  .icb{width:28px;height:28px;border-radius:8px;border:1px solid var(--field-border);background:#fff;display:inline-flex;align-items:center;justify-content:center;color:#a08a78;font-size:11px}
+
+  /* ---------- header treatments ---------- */
+  /* 1 · Mono caps, one weight (Linear / Notion) */
+  .h1 .lh{background:#fff;border-bottom:1px solid #ddd2c4;padding-top:14px;padding-bottom:12px}
+  .h1 .lh span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#a08a78}
+  .h1 .lh span.sorted{color:var(--ink)}
+  /* 2 · Playfair, one size, sorted underlined */
+  .h2 .lh{background:var(--parchment);border-bottom:1px solid #ddd2c4;padding-top:13px;padding-bottom:11px}
+  .h2 .lh span{font-family:'Playfair Display',serif;font-size:14px;color:#8a7a6c}
+  .h2 .lh span.sorted{color:var(--ink);box-shadow:inset 0 -2px 0 var(--burgundy)}
+  .h2 .lh span:hover{color:var(--body-ink)}
+  /* 3 · Small caps Playfair with letterspacing */
+  .h3 .lh{background:#fff;border-bottom:1px solid #ddd2c4;padding-top:15px;padding-bottom:11px}
+  .h3 .lh span{font-family:'Playfair Display',serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8a7a6c;font-weight:500}
+  .h3 .lh span.sorted{color:var(--ink)}
+  /* 4 · Eyebrow + rule per column (each header sits over its own hairline) */
+  .h4 .lh{background:#fff;padding-top:16px;padding-bottom:0;border-bottom:none}
+  .h4 .lh span{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:#a08a78;border-bottom:1.5px solid var(--hairline);padding-bottom:9px;width:100%}
+  .h4 .lh span.sorted{color:var(--ink);border-bottom-color:var(--burgundy)}
+  /* 5 · Sticky parchment strip, mono, tighter */
+  .h5 .lh{background:var(--parchment);border-bottom:.5px solid #ddd2c4;padding-top:11px;padding-bottom:10px}
+  .h5 .lh span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#8a7a6c}
+  .h5 .lh span.sorted{color:var(--ink);background:#fff;border:.5px solid var(--field-border);border-radius:99px;padding:3px 9px;margin:-3px 0}
+  /* 6 · No header row — first column labelled inline (Stripe-ish) */
+  .h6 .lh{display:none}
+  .h6 .lr:first-of-type{border-top:none}
+  .h6 .cap6{display:flex;align-items:center;gap:10px;padding:12px 22px;border-bottom:1px solid #ddd2c4;background:var(--parchment)}
+  .h6 .cap6 .t{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink)}
+  .h6 .cap6 .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:#6a5a50;background:#fff;border:.5px solid var(--field-border);border-radius:99px;padding:2px 8px}
+  .h6 .cap6 .sortby{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--label)}
+  .h6 .cap6 .sortby b{color:var(--ink);font-weight:500}
+  .cap6{display:none}
+  .h6 .cap6{display:flex}
+  /* alignment: header cells inherit the row's justification per column */
+  .lh span{justify-content:flex-start}
+  .lh span:nth-child(3){justify-content:flex-start}
+  .lh span:nth-child(7){justify-content:flex-end}
+  .lh span.nosort{cursor:default;color:#c8b8a8}
+  .lh span.nosort:hover{color:#c8b8a8}
+  .lh span.sortable:hover{color:var(--body-ink)}
+  .lh span .ar{opacity:0}
+  .lh span.sorted .ar{opacity:1}
+  .lh span.sortable:hover .ar{opacity:.4}
+  /* guide overlay to show alignment */
+  .guides .lh span{position:relative}
+  .guides.showguides .lh span::after{content:'';position:absolute;left:0;right:0;top:-14px;bottom:-9px;outline:1px dashed rgba(124,58,42,.35);pointer-events:none}
+  .guides.showguides .lr>*{outline:1px dashed rgba(138,158,136,.45)}
+  .gtoggle{display:inline-flex;align-items:center;gap:8px;margin-left:14px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#6a5a50;cursor:pointer}
+  .rec{margin-top:24px;max-width:860px;line-height:1.6;color:#4a3a30}
+  .rec b{font-weight:500;color:var(--body-ink)}
+</style>
+</head>
+<body>
+<h1>List column headers</h1>
+<div class="lede">The row content is fixed; only the header changes. Sent is the sorted column in each.</div>
+<label class="gtoggle" style="float:right"><input type="checkbox" id="gtog"> show column guides</label>
+<div class="seg" id="seg">
+  <button class="on" data-h="h1">1 · Mono caps (locked)</button><button data-h="h2">2 · Playfair, underlined</button><button data-h="h3">3 · Playfair small caps</button>
+  <button data-h="h4">4 · Eyebrow + column rule</button><button data-h="h5">5 · Sorted chip</button><button data-h="h6">6 · No header row</button>
+</div>
+<div class="desc" id="desc"></div>
+
+<div class="list h1 guides" id="demo">
+  <div class="cap6"><span class="t">26 queries</span><span class="n">Queried 12</span><span class="sortby">Sorted by <b>Date sent</b> · newest first</span></div>
+  <div class="lh">
+    <span class="sortable">Status <span class="ar">▾</span></span><span class="sortable">Agent <span class="ar">▾</span></span><span class="sortable sorted">Sent <span class="ar">▾</span></span><span class="nosort">What went</span><span class="nosort">Since then</span><span class="sortable">Where it stands <span class="ar">▾</span></span><span class="nosort">Actions</span>
+  </div>
+  <div class="lr" style="--bar:var(--sand-d)">
+    <span class="st"><span class="dot">→</span>Queried</span>
+    <span class="who"><span class="chip">HV</span><span style="min-width:0"><div class="nm">Harriet Vane-Coe</div><div class="ag">Stillwater Reps</div></span></span>
+    <span class="leaf"><div class="mo">Aug</div><div class="dy">12</div><div class="cap">sent</div></span>
+    <span class="none">not recorded</span>
+    <span class="none">nothing yet</span>
+    <span class="stand"><span class="illo"></span><span><div class="s">Reply expected by <b>23 Sep</b></div><div class="m mono">15 days away <span style="color:#d8ccbc;margin:0 5px">|</span> Nudge in 4 weeks</div></span></span>
+    <span class="acts"><span class="act">Record response</span><span class="icb">🔔</span><span class="icb">×</span><span class="icb">⋯</span></span>
+  </div>
+  <div class="lr" style="--bar:var(--pink-d)">
+    <span class="st"><span class="dot in">←</span>Partial Requested</span>
+    <span class="who"><span class="chip">JM</span><span style="min-width:0"><div class="nm">Jonathan Marsh</div><div class="ag">The Marsh Agency</div></span></span>
+    <span class="leaf"><div class="mo">Aug</div><div class="dy">1</div><div class="cap">sent</div></span>
+    <span class="mats"><i></i><i class="off"></i><i></i><i class="off"></i></span>
+    <span><span class="ev">←</span></span>
+    <span class="stand"><span class="illo"></span><span><div class="s">Partial — <b>not yet sent</b></div><div class="m mono">15 days since request</div></span></span>
+    <span class="acts"><span class="act">Mark sent</span><span></span><span class="icb">×</span><span class="icb">⋯</span></span>
+  </div>
+  <div class="lr" style="--bar:var(--sage-d)">
+    <span class="st"><span class="dot">→</span>Full Sent</span>
+    <span class="who"><span class="chip">DO</span><span style="min-width:0"><div class="nm">Daniel O'Rourke</div><div class="ag">Inkwell &amp; Stone</div></span></span>
+    <span class="leaf"><div class="mo">Aug</div><div class="dy">14</div><div class="cap">sent</div></span>
+    <span class="mats"><i></i><i></i><i></i><i class="off"></i></span>
+    <span><span class="ev">←</span> <span class="ev">→</span></span>
+    <span class="stand"><span class="illo"></span><span><div class="s">Reply expected by <b>9 Oct</b></div><div class="m mono">5 weeks away <span style="color:#d8ccbc;margin:0 5px">|</span> Nudge in 2 weeks</div></span></span>
+    <span class="acts"><span class="act">Record response</span><span class="icb">🔔</span><span class="icb">×</span><span class="icb">⋯</span></span>
+  </div>
+</div>
+
+<div class="rec">
+  <p><b>Sorting.</b> Four columns sort, three don't. <b>Status</b> (ladder order), <b>Agent</b> (surname A–Z), <b>Sent</b> (date), <b>Where it stands</b> (by the expected-reply date, nulls last) are clickable: hover shows a faint caret, click sorts ascending, click again flips, and the caret turns burgundy. <b>What went</b>, <b>Since then</b> and <b>Actions</b> are not sortable — they're rendered pale with no caret and no pointer. Only one column is sorted at a time, and it is the same state the Sort menu drives, so the menu's label follows a header click and vice versa.</p>
+<p style="margin-top:8px"><b>Alignment.</b> Header and rows must be one grid, not two — the same `grid-template-columns` string, the same horizontal padding, rendered by the same component with the header as its first child. Each header cell inherits its column's justification (left for the six, right for Actions), so a header can never drift from its column. Tick "show column guides" above to see the header cell and row cell boundaries drawn together.</p>
+<p style="margin-top:8px"><b>My pick: 1, mono caps.</b> A column header is a label for a machine-readable column, not a piece of writing — and the app already has a voice for that: JetBrains Mono, uppercase, letterspaced, which is what every caption, tag and unit in ScriptAlly uses. It sits <i>below</i> the row content in the hierarchy, which is where a header belongs when every row carries Playfair names; the sorted column simply turns ink. The Playfair header I asked for earlier competes with the agent names directly beneath it — that's the inconsistency you're seeing, and it's a real one.</p>
+  <p style="margin-top:8px">4 is the interesting alternative: each header sits over its own hairline, and the sorted column's rule turns burgundy, so sort state reads across a wide table without a caret. 3 (Playfair small caps) keeps the serif but demotes it properly with letterspacing and uppercase — the compromise if you want Playfair to stay. 2 is the current one with the sizes evened out. 5 wraps only the sorted header in a chip, which is clear but fussy at seven columns. 6 drops the header row entirely for a summary strip — lovely for a short list, wrong once you're sorting.</p>
+</div>
+
+<script>
+const D={h1:`<b>1 · Mono caps.</b> JetBrains Mono 9px, .16em, uppercase, muted; sorted column in ink with a caret. One rule beneath the row. The app's own caption voice, used as a caption.`,
+ h2:`<b>2 · Playfair, underlined.</b> Playfair 14px on parchment, all one size and colour; the sorted column turns ink with a 2px burgundy underline rather than a caret.`,
+ h3:`<b>3 · Playfair small caps.</b> Playfair 12px, .14em, uppercase, medium weight — serif kept but clearly demoted below the row content.`,
+ h4:`<b>4 · Eyebrow + column rule.</b> Mono eyebrow sitting over its own 1.5px hairline per column; the sorted column's rule turns burgundy, so sort state is visible at the far edge of a wide table.`,
+ h5:`<b>5 · Sorted chip.</b> Mono headers on parchment; the sorted one is wrapped in a white pill with a hairline. Unmistakable, slightly fussy at seven columns.`,
+ h6:`<b>6 · No header row.</b> Replaced by a summary strip — count, active group, and "Sorted by Date sent · newest first". Reads beautifully; loses per-column sorting.`};
+document.getElementById("desc").innerHTML=D.h1;
+document.getElementById("gtog").onchange=e=>document.getElementById("demo").classList.toggle("showguides",e.target.checked);
+document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#seg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");document.getElementById("demo").className="list "+b.dataset.h;document.getElementById("desc").innerHTML=D[b.dataset.h];});
+</script>
+</body>
+</html>

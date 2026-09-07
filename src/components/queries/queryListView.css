@@ -17,31 +17,48 @@
 /* v14 §2: Status · Agent · Sent · What went · Since then · Where it stands · Actions.
    Court is retired — the Status column's dot and word already said it, and the standing sentence
    says it again in prose. The Actions track is FIXED so the four slots align down the page. */
+/* ⚠️ ONE TEMPLATE AND ONE HORIZONTAL PADDING, DECLARED HERE AND NOWHERE ELSE (toolbar v2 §3).
+   The header and the rows are the same grid; the only thing either may state separately is its
+   own VERTICAL padding. This is not tidiness — the two drifted apart in the 1380px media query,
+   where `.qlv-row` took `padding-left: 22px` and `.qlv-head` kept 26, so every header cell sat
+   4px right of its column at 1280 and the page looked correct at 1440. A shared declaration
+   cannot go out of step; two declarations only agree until someone edits one of them. */
 .qlv-head, .qlv-row {
   display: grid;
   grid-template-columns: 170px 1.25fr 74px 108px 132px 1.5fr 240px; gap: 14px;
+  padding-left: 26px; padding-right: 18px;
   align-items: center; border-bottom: 0.5px solid #ece0d2;
 }
-/* §3 (v2 toolbar) — the header is PLAYFAIR on parchment, with its own rule beneath. It used to be
-   mono capitals, which reads as a database's column names; these read as the page's own words. */
-.qlv-head { padding: 14px 18px 12px 26px; background: var(--parchment, #fdfaf5); border-bottom: 1px solid #ddd2c4; }
-.qlv-row { padding: 13px 18px 13px 26px; cursor: pointer; text-align: left; position: relative; }
+/* ⚠️ MONO CAPITALS ON WHITE — and the Playfair it replaces was withdrawn for a reason worth
+   keeping: set in the page's own serif, the header competed with the Playfair agent NAMES
+   directly beneath it, so the eye could not tell the label from the data. Mono at 9px is
+   unmistakably a column name and cannot be mistaken for a row. (§3, superseding v2's Playfair.) */
+.qlv-head { padding-top: 14px; padding-bottom: 12px; background: #fff; border-bottom: 1px solid #ddd2c4; }
+.qlv-row { padding-top: 13px; padding-bottom: 13px; cursor: pointer; text-align: left; position: relative; }
 .qlv-row:last-child { border-bottom: none; }
 .qlv-row:hover { background: #fffdf9; }
 /* selection is a ring, never a fill — the palette's own rule */
 .qlv-row--on { box-shadow: inset 0 0 0 1.5px #e8c8bc; }
 
 .qlv-h {
-  font-family: var(--font-serif); font-size: 14px; letter-spacing: 0; text-transform: none;
-  color: #6a5a50; display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: #a08a78; display: flex; align-items: center; gap: 6px;
 }
 .qlv-h--btn { background: none; border: none; padding: 0; cursor: pointer; text-align: left; font: inherit; color: inherit; }
-.qlv-h--btn:hover { color: var(--ink, #1c130f); }
+.qlv-h--btn:hover { color: #3a1c14; }
 .qlv-h--on { color: var(--ink, #1c130f); }
-/* the caret is the ONE burgundy mark in the header — it says which column is sorted, and which way */
-.qlv-caret { font-size: 9px; color: #7c3a2a; }
-/* Actions names no order, so it is right-aligned and inert rather than a control that does nothing */
-.qlv-h--end { justify-content: flex-end; cursor: default; }
+/* ⚠️ THE CARET IS ALWAYS RENDERED AND ALWAYS OPACITY-STEPPED — never conditionally mounted.
+   A caret that only exists on the sorted column cannot fade in at 40% under the pointer, so the
+   hover would have to grow an element and the row would reflow by the caret's width as the
+   pointer crossed it. Present at 0, .4 on hover, 1 when sorted: nothing moves, and the column
+   still says which way it is going only where it is actually sorting. */
+.qlv-caret { font-size: 9px; color: #7c3a2a; opacity: 0; }
+.qlv-h--btn:hover .qlv-caret { opacity: 0.4; }
+.qlv-h--on .qlv-caret { opacity: 1; }
+/* ⚠️ NOT A CONTROL, AND NOT FOCUSABLE. What went, Since then and Actions state no order of their
+   own, so they render as spans — a disabled button would still be a button in the tab order's
+   eyes on some engines, and a control that cannot do anything is worse than a label. */
+.qlv-h--dead { color: #c8b8a8; cursor: default; }
 
 /* the status pill takes the row's own state fill — the one place colour appears in a list row */
 /* ⚠️ THE ROW'S COLOUR IS THE BAR, NOT A PILL (v14 §2). One device per fact: the bar states the
@@ -136,7 +153,10 @@
 /* ⚠️ A FIXED FOUR-SLOT TRACK — 132px primary then three 30px icons — so the ⋯ shares one
    x-coordinate down the page and every primary shares one width. An absent verb is HIDDEN in its
    slot, never removed: removal would shuffle the others left and the column would stop being one. */
-.qlv-acts { display: grid; grid-template-columns: 132px 30px 30px 30px; gap: 6px; justify-content: end; align-items: center; }
+/* ⚠️ LEFT-ALIGNED, like the other six (§4.1). It was `end`, which made Actions the one column
+   whose contents did not start where its header did — and the quick-action popovers anchor to
+   these controls, so a right-aligned cluster put every popover against the window's edge. */
+.qlv-acts { display: grid; grid-template-columns: 132px 30px 30px 30px; gap: 6px; justify-content: start; align-items: center; }
 .qlv-pri {
   height: 30px; border-radius: 8px; border: 1px solid #e8c8bc; background: #f5e2da; cursor: pointer;
   font: inherit; font-size: 12px; color: #3a1c14; text-align: center; padding: 0 6px;
@@ -152,8 +172,9 @@
 .qlv-ib:hover { background: #f6efe6; color: #3a1c14; }
 
 @media (max-width: 1380px) {
-  .qlv-head, .qlv-row { grid-template-columns: 150px 1.1fr 62px 96px 108px 1.3fr 240px; gap: 10px; }
-  .qlv-row { padding-left: 22px; }
+  /* ⚠️ BOTH, ALWAYS — the padding is shared, so it narrows for the header and the rows together.
+     This block used to name `.qlv-row` alone, which is the 4px misalignment described above. */
+  .qlv-head, .qlv-row { grid-template-columns: 150px 1.1fr 62px 96px 108px 1.3fr 240px; gap: 10px; padding-left: 22px; }
 }
 
 /* ── group headings (toolbar v2, §2) ──────────────────────────────────────────────────────────
