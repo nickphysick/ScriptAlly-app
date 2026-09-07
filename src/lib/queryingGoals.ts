@@ -387,3 +387,36 @@ export const prospectiveBounds = (cadence: GoalCadence, at: Date): PeriodBounds 
 /** The day the count starts again — the sheet's second preview line. */
 export const nextPeriodStart = (cadence: GoalCadence, at: Date): string =>
   dayAndMonth(addDays(prospectiveBounds(cadence, at).end, 1));
+
+/**
+ * ⚠️ THE RINGS REPLACE THE METER, AND THERE ARE `target` OF THEM — NOT FIVE (dashboard redesign,
+ * Phase 7). The pack said "five slots"; five is the REF's example, and hard-coding it would draw a
+ * five-ring row beside a card reading "3 of 10", which is the page contradicting itself in the same
+ * breath. One ring is one query the writer said they would send.
+ *
+ * ⚠️ AND THERE IS A CEILING, BECAUSE A ROW OF FORTY RINGS IS NOT A READING. Above `RING_MAX` the
+ * card states the figures and the history strip alone — it does NOT fall back to the meter, which
+ * is the thing being retired, and it does not draw a truncated row, which would understate a target
+ * the writer set. Absence is the honest answer at that size: the numeral already says it.
+ */
+export const RING_MAX = 12;
+
+/** One entry per ring: `true` once that query has gone out. Empty when the target is unset or big. */
+export function goalRings(count: number, target: number | null): boolean[] {
+  if (target === null || target <= 0 || target > RING_MAX) return [];
+  /* ⚠️ CLAMPED AT THE TARGET, NOT AT THE COUNT. Sending twelve against a target of ten fills ten
+     rings and does not grow an eleventh — the row is the promise, and the count beside it is what
+     states the overshoot. */
+  return Array.from({ length: target }, (_, i) => i < count);
+}
+
+/**
+ * ⚠️ THE HISTORY BARS ARE PROPORTIONAL TO THE TALLEST PERIOD ON SHOW, NOT TO THE TARGET. A month
+ * that beat the target would otherwise draw past the top of its own track, and a run of quiet
+ * months against a big target would draw four invisible stubs. The strip reports what was sent; the
+ * target is a different fact, stated above it.
+ */
+export function historyBars(history: readonly GoalPeriodCount[]): { label: string; count: number; pct: number }[] {
+  const top = Math.max(1, ...history.map((h) => h.count));
+  return history.map((h) => ({ label: h.label, count: h.count, pct: Math.round((h.count / top) * 100) }));
+}

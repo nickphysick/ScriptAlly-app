@@ -19,7 +19,7 @@ import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, User, Us
 import { StatusDot } from "../StatusDot";
 import { AnchoredPanel } from "../todo/AnchoredPanel";
 import { GoalTargetSheet } from "./GoalTargetSheet";
-import { appendGoalEntry, CADENCE_TAG, formatReached, londonDay, unsetLine } from "../../lib/queryingGoals";
+import { appendGoalEntry, CADENCE_TAG, formatReached, goalRings, historyBars, londonDay, unsetLine } from "../../lib/queryingGoals";
 import type { GoalProgress } from "../../lib/queryingGoals";
 import type { GoalCadence } from "../../types";
 import "./queryingGoals.css";
@@ -477,10 +477,17 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
    * the dashboard would turn a pleasant thing into an irritating one within a day.
    */
   const justReached = reached && goal.reachedOn === londonDay(now);
+  const rings = goalRings(goal.count, goal.target);
 
   return (
     <div className={`os-colR${expanded ? " os-rail-expanded" : ""}`}>
       {/* ══ querying goals ══ */}
+      {/* ⚠️ `stowable`, AND STOWED IT IS A STRIP RATHER THAN NOTHING (Phase 7). Expanding the feed
+          collapses this card; the strip keeps the count and its rings on screen, because a card that
+          VANISHES when its neighbour grows teaches that the two are alternatives. The goal is still
+          running — it is just not the thing you are reading. All of that is CSS on
+          `.os-rail-expanded`: the render is identical in both states, so there is no second markup
+          for a stowed card to drift from. */}
       <OneScreenPanel variant="os-goal stowable" loading={loading} skel={["h", "", ""]}>
         {/* ⚠️ NO BAND AND NO MARK BOX HERE — both were tried and rejected. The goals header is a
             LABEL, not an instrument: it names the card and gets out of the way, and the band gave
@@ -551,26 +558,37 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
               <span className="os-goal-of">of {goal.target}</span>
             </div>
             <div className="os-goal-sub">Queries sent · {goal.periodLabel}</div>
-            {/* ⚠️ ONE FILL COLOUR AT EVERY WIDTH — see queryingGoals.css. No notch, no pace line. */}
-            <div
-              className="os-goal-meter"
-              role="img"
-              aria-label={`${goal.count} of ${goal.target} queries sent`}
-            >
-              <i style={{ width: `${Math.min(100, (goal.count / goal.target) * 100)}%` }} />
-            </div>
+            {/* ⚠️ RINGS, NOT A BAR (dashboard redesign, Phase 7) — one ring per query the writer
+                said they would send, filling one at a time. A bar states a proportion; a row of
+                slots states a plan, which is what a target is.
+
+                ⚠️ AND THERE ARE `target` OF THEM, NOT FIVE. Five is the ref's example; hard-coding
+                it would draw five rings beside a card reading "3 of 10". Above `RING_MAX` there are
+                NONE — not a truncated row, which would understate a target the writer set, and not
+                the meter, which is the thing being retired. The numeral above already says it. */}
+            {rings.length > 0 && (
+              <div className="os-goal-rings" role="img" aria-label={`${goal.count} of ${goal.target} queries sent`}>
+                {rings.map((on, i) => <i key={i} className={on ? "on" : undefined} />)}
+              </div>
+            )}
           </>
         )}
 
         {/* ⚠️ IT DRAWS IN EVERY STATE, INCLUDING THE UNSET ONE. What you sent last month is true
             whether or not you have declared a target — the strip is not a goal artefact. */}
+        {/* ⚠️ BARS, PROPORTIONAL TO THE TALLEST PERIOD ON SHOW — never to the target. A month that
+            beat the target would draw past the top of its own track, and a quiet run against a big
+            target would be four invisible stubs. The strip reports what was SENT; the target is a
+            different fact, stated above it. Beneath a hairline, because it is a different period
+            from the one the rings are about. */}
         {goal.history.length > 0 && (
           <div className={`os-goal-hist${reached ? " mid" : ""}`}>
-            {goal.history.map((h, i) => (
-              <React.Fragment key={h.label}>
-                {i > 0 && <span className="os-goal-dot">·</span>}
-                <span>{h.label} <b>{h.count}</b></span>
-              </React.Fragment>
+            {historyBars(goal.history).map((h) => (
+              <span className="os-goal-hb" key={h.label}>
+                <span className="os-goal-hbt" aria-hidden="true"><i style={{ height: `${h.pct}%` }} /></span>
+                <b>{h.count}</b>
+                <em>{h.label}</em>
+              </span>
             ))}
           </div>
         )}

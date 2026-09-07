@@ -38,6 +38,14 @@ export const COMMUNITY_EMPTY =
 export const OneScreenCommunity: React.FC<{ loading: boolean }> = ({ loading }) => (
   <div className={`os-card os-comm${loading ? " isload" : ""}`}>
     {loading && <Skel bars={["h", "", ""]} />}
+    {/* ⚠️ NO BAND (dashboard redesign, Phase 7) — matching every other card. `.os-ahead` still
+        supplies the header's GEOMETRY (its 51px height and its padding, so four headers agree
+        structurally rather than by four values kept in step by hand); what it no longer supplies is
+        a fill, because Phase 2 took the gradient and the hairline off the class itself.
+
+        ⚠️ AND THE BETA PILL SITS ON THE CARD NOW, which is a change of ground rather than of
+        meaning: it is still a statement about the DATA's maturity, not the code's, and it stays
+        until the cohorts are populated enough that most readers see real figures. */}
     <div className="os-ahead os-commhead">
       {/* ⚠️ THE SHARED SLOT, NOT A FOURTH COPY. This was a bespoke `.os-commic` span holding a
           lucide `<Users />` at its own size with no plate; the other three bands already shared

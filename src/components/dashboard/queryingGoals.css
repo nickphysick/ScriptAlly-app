@@ -66,8 +66,8 @@
 /* ── the meter (in-progress only) ─────────────────────────────────────────────────────────── */
 
 /* ⚠️ THE FILL IS ONE COLOUR AT EVERY WIDTH. See the header note. */
-.os-goal-meter { margin-top: 12px; height: 8px; border-radius: 5px; background: #efe4dc; overflow: hidden; }
-.os-goal-meter i { display: block; height: 100%; border-radius: 5px; background: #bf8a7b; transition: width 0.4s cubic-bezier(0.22, 0.68, 0.36, 1); }
+
+
 
 /* ── the reached state ────────────────────────────────────────────────────────────────────── */
 
@@ -98,11 +98,42 @@
 
 /* ⚠️ IT IS NOT A GOAL ARTEFACT — it draws in every state, including the unset one, because what
    you sent last month is true whether or not you have declared a target. */
+/* ⚠️ THE METER IS RETIRED, RULE AND ELEMENT TOGETHER (dashboard redesign, Phase 7). It stated a
+   PROPORTION; a target is a plan, and a row of slots is what a plan looks like. Nothing renders
+   `.os-goal-meter` any more and a rule with no subject is how a retired control comes back.
+
+   ⚠️ THE HISTORY STRIP IS BARS NOW, BENEATH A HAIRLINE — a different period from the one the rings
+   are about, so it is separated rather than merely spaced. */
 .os-goal-hist {
-  margin-top: 12px; padding-top: 11px; border-top: 1px solid #e7ddd2;
-  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.05em;
-  color: #9a8c80; display: flex; gap: 9px; flex-wrap: wrap;
+  display: flex; align-items: flex-end; gap: 10px;
+  margin-top: 12px; padding-top: 10px; border-top: 1px solid #efe4dc;
 }
+.os-goal-hb { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; min-width: 0; }
+/* ⚠️ THE TRACK HAS A HEIGHT AND THE FILL IS A PERCENTAGE OF IT — a bar with no track cannot show a
+   quiet period, and a quiet period is exactly what this strip is the right place to say. */
+.os-goal-hbt {
+  width: 100%; height: 26px; border-radius: 3px; background: #f4ede4;
+  display: flex; align-items: flex-end; overflow: hidden;
+}
+.os-goal-hbt i { display: block; width: 100%; background: #bf8a7b; border-radius: 3px; }
+.os-goal-hb b { font-weight: 600; font-size: 11.5px; color: #3a1c14; font-variant-numeric: tabular-nums; }
+.os-goal-hb em {
+  font-style: normal; font-family: "JetBrains Mono", monospace;
+  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: #b0a294;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;
+}
+
+/* ⚠️ ONE RING PER QUERY THE WRITER SAID THEY WOULD SEND. `flex-wrap` because a target of twelve at
+   the rail's narrowest step will not sit on one line, and a ring row that overflows its card is
+   worse than one that takes two lines. */
+.os-goal-rings { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.os-goal-rings i {
+  width: 13px; height: 13px; border-radius: 50%;
+  border: 1.5px solid #e3d9cc; background: transparent;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+.os-goal-rings i.on { background: #bf8a7b; border-color: #bf8a7b; }
+
 .os-goal-hist b { color: #3a1c14; font-weight: 500; }
 .os-goal-hist .os-goal-dot { color: #cbbcae; }
 .os-goal-hist.mid { justify-content: center; }
@@ -126,7 +157,12 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .os-goal-fade { animation: none; }
-  .os-goal-meter i { transition: none; }
+  /* ⚠️ THE RINGS CARRY THE CARD'S ONLY TRANSITION NOW — the meter is retired and its cancellation
+     MOVES rather than being deleted, or a reader who asked for stillness would watch ten circles
+     fill. Folded into THIS block rather than a second one: the lock reads the LAST
+     `prefers-reduced-motion` in the file, so a new block below would hide this one entirely — the
+     first-match slicing fault, arriving from the far end. */
+  .os-goal-rings i { transition: none; }
 }
 
 /* ══════════════════════════ THE SET-TARGET SHEET ══════════════════════════ */

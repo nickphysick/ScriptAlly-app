@@ -108,7 +108,14 @@ describe("dashboard — the entrances are cancelled, not merely shortened", () =
     const gblk = goals.slice(goals.lastIndexOf("prefers-reduced-motion"));
     expect(gblk, "the card declares a reduced-motion block at all").toContain("prefers-reduced-motion");
     expect(gblk, "the reached-state entrance").toContain(".os-goal-fade");
-    expect(gblk, "the meter's width transition").toContain(".os-goal-meter i");
+    /* ⚠️ RETARGETED (dashboard redesign, Phase 7): the meter is retired and the RINGS carry the
+       card's only transition, so its cancellation moved with it. A reader who asked for stillness
+       must not watch ten circles fill.
+       ⚠️ AND THE SLICE STILL READS THE *LAST* `prefers-reduced-motion` IN THE FILE, which is why the
+       rings' rule was folded into the existing block rather than given one of its own — a second
+       block below would become this slice and hide everything above it. */
+    expect(gblk, "the rings' fill transition").toContain(".os-goal-rings i");
+    expect(gblk, "the retired meter must not survive its replacement").not.toContain(".os-goal-meter");
     expect(gblk).toContain("animation: none");
     expect(gblk).toContain("transition: none");
   });

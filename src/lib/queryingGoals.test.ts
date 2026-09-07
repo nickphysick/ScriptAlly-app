@@ -10,6 +10,7 @@ import {
   deriveGoalProgress, formatReached, londonDay, periodBounds, resolveGoal, sentDay,
 } from "./queryingGoals";
 import type { QueryingGoalEntry } from "../types";
+import { goalRings, historyBars, RING_MAX } from "./queryingGoals";
 
 const q = (dateSent?: string) => ({ dateSent });
 const entry = (target: number | null, cadence: "week" | "fortnight" | "month" | null, effectiveFrom: string): QueryingGoalEntry =>
@@ -375,5 +376,55 @@ describe("deriveGoalProgress — the history strip", () => {
   it("history never exceeds four", () => {
     const sends = Array.from({ length: 12 }, (_, i) => q(`2026-0${i < 9 ? i + 1 : 1}-05`));
     expect(deriveGoalProgress(sends, monthly, now).history.length).toBeLessThanOrEqual(4);
+  });
+});
+
+/* ══ THE RINGS AND THE HISTORY BARS (dashboard redesign, Phase 7) ═════════════════════════════ */
+
+describe("the rings replace the meter, and there are `target` of them", () => {
+  it("one ring per query the writer said they would send, filled left to right", () => {
+    expect(goalRings(0, 5)).toEqual([false, false, false, false, false]);
+    expect(goalRings(3, 5)).toEqual([true, true, true, false, false]);
+    expect(goalRings(5, 5)).toEqual([true, true, true, true, true]);
+  });
+
+  /* ⚠️ CLAMPED AT THE TARGET, NOT THE COUNT — the row is the promise; the numeral states overshoot */
+  it("beating the target fills the row and grows no extra ring", () => {
+    expect(goalRings(9, 5)).toEqual([true, true, true, true, true]);
+  });
+
+  /**
+   * ⚠️ NOT FIVE. The pack said "five slots"; five is the ref's example, and hard-coding it would
+   * draw five rings beside a card reading "3 of 10" — the page contradicting itself in one breath.
+   */
+  it("⚠️ the row is the TARGET's length, whatever the target is", () => {
+    expect(goalRings(1, 3)).toHaveLength(3);
+    expect(goalRings(1, 10)).toHaveLength(10);
+  });
+
+  /* ⚠️ ABOVE THE CEILING THERE ARE NO RINGS, AND NO METER EITHER — the numeral carries it. A
+     truncated row would understate a target the writer actually set. */
+  it("no rings for an unset target, or one too big to draw honestly", () => {
+    expect(goalRings(4, null)).toEqual([]);
+    expect(goalRings(4, 0)).toEqual([]);
+    expect(goalRings(4, RING_MAX + 1)).toEqual([]);
+    expect(goalRings(4, RING_MAX)).toHaveLength(RING_MAX);
+  });
+});
+
+describe("the history bars report what was sent, not what was promised", () => {
+  /* ⚠️ PROPORTIONAL TO THE TALLEST PERIOD ON SHOW. Against the TARGET, a month that beat it would
+     draw past the top of its track and a quiet run against a big target would be four invisible
+     stubs. The strip is a record; the target is stated above it. */
+  it("the tallest period is the full height and the rest are relative to it", () => {
+    const bars = historyBars([{ label: "Jul", count: 8 }, { label: "Jun", count: 4 }, { label: "May", count: 0 }]);
+    expect(bars.map((b) => b.pct)).toEqual([100, 50, 0]);
+    expect(bars.map((b) => b.count)).toEqual([8, 4, 0]);
+  });
+
+  it("an all-quiet run does not divide by zero", () => {
+    expect(historyBars([{ label: "Jul", count: 0 }, { label: "Jun", count: 0 }]).map((b) => b.pct))
+      .toEqual([0, 0]);
+    expect(historyBars([])).toEqual([]);
   });
 });

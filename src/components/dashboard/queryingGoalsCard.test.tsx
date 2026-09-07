@@ -83,10 +83,21 @@ describe("state B — in progress", () => {
     expect(html).toContain("Queries sent · August");
   });
 
-  it("the meter is drawn to the proportion, and labelled for a screen reader", () => {
-    expect(html).toContain("os-goal-meter");
-    expect(html).toContain("width:30%");
+  /* ⚠️ RETARGETED (dashboard redesign, Phase 7) — RINGS, NOT A BAR. A bar states a proportion; a
+     target is a plan, and a row of slots is what a plan looks like. The SCREEN-READER label is
+     unchanged and is the half that matters most: the row is `role="img"` with the figures spoken,
+     because ten circles are nothing to a reader who cannot see them.
+
+     ⚠️ AND THERE ARE `target` OF THEM. The pack said "five slots"; five is the ref's example, and
+     hard-coding it would draw five rings beside a card reading "3 of 10". */
+  it("the rings are one per target, filled to the count, and labelled for a screen reader", () => {
+    expect(html).toContain("os-goal-rings");
+    expect(html).not.toContain("os-goal-meter");
     expect(html).toContain('aria-label="3 of 10 queries sent"');
+    const row = html.slice(html.indexOf("os-goal-rings"));
+    const block = row.slice(0, row.indexOf("</div>"));
+    expect((block.match(/<i/g) ?? []).length, "one ring per target").toBe(10);
+    expect((block.match(/class="on"/g) ?? []).length, "filled to the count").toBe(3);
   });
 
   it("the cadence tag and the ⋯ appear once there is a target", () => {
@@ -165,12 +176,15 @@ describe("⚠️ the card reports — it never appraises", () => {
 });
 
 describe("⚠️ nothing on this card changes colour with progress", () => {
-  it("the meter fill is ONE declaration and no variant restates it", () => {
-    /* A meter that warms as a deadline nears turns a record into a verdict. The fill is stated
-       once; a second `background` on `.os-goal-meter i` anywhere would be the tell. */
-    const fills = cssDecls.match(/\.os-goal-meter i[^{]*\{[^}]*background:[^;]+;/g) ?? [];
-    expect(fills).toHaveLength(1);
-    expect(fills[0]).toContain("#bf8a7b");
+  /* ⚠️ RETARGETED, AND THE LAW IS UNCHANGED: a fill that warms as a deadline nears turns a record
+     into a verdict. It was the meter's; it is the ring's, and the history bar's — all three state
+     the same one colour, and a second `background` on any of them anywhere is the tell. */
+  it("the filled fill is ONE colour across ring and bar, and no variant restates it", () => {
+    const fills = cssDecls.match(/\.os-goal-(?:rings i\.on|hbt i)[^{]*\{[^}]*background:[^;]+;/g) ?? [];
+    expect(fills, "both the ring's filled state and the history bar must declare it").toHaveLength(2);
+    for (const f of fills) expect(f).toContain("#bf8a7b");
+    /* the retired meter must not survive its replacement */
+    expect(cssDecls).not.toContain(".os-goal-meter");
   });
 
   it("⚠️ the palette is a CLOSED SET — an amber cannot arrive without failing here", () => {

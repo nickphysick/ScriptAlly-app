@@ -732,6 +732,30 @@
 .os-ahead .os-ctrls { margin-left: auto; }
 /* §10: the headline counts up once — tabular numerals so the width never jitters */
 
+/* ⚠️ THE STOWED GOALS CARD IS A SLIM STRIP, NOT A HIDDEN ONE (dashboard redesign, Phase 7; the
+   other half of Phase 6's expander). Expanding the feed collapses this card — and the point of the
+   strip is that the goal STAYS ON THE PAGE. A card that vanishes when its neighbour grows teaches
+   that the two are alternatives; a strip carrying the count and its rings says the goal is still
+   running, just not the thing you are reading. */
+.os-rail-expanded .os-goal.stowable {
+  max-height: 34px; opacity: 1; visibility: visible;
+  padding-top: 7px; padding-bottom: 7px; margin-bottom: 13px; border-top-width: 0;
+  overflow: hidden;
+}
+/* everything but the count and the rings gives way */
+.os-rail-expanded .os-goal .os-goal-r1,
+.os-rail-expanded .os-goal .os-goal-sub,
+.os-rail-expanded .os-goal .os-goal-hist,
+.os-rail-expanded .os-goal .os-goal-line,
+.os-rail-expanded .os-goal .os-goal-set,
+.os-rail-expanded .os-goal .os-goal-moment { display: none; }
+.os-rail-expanded .os-goal .os-goal-count { display: flex; align-items: baseline; gap: 5px; }
+.os-rail-expanded .os-goal .os-goal-count .os-goal-n { font-size: 15px; }
+/* ⚠️ THE RINGS SHRINK RATHER THAN THINNING OUT — five of ten at 9px still reads as five of ten;
+   a truncated row would say something the target does not. */
+.os-rail-expanded .os-goal .os-goal-rings { margin-top: 0; margin-left: auto; gap: 4px; flex-wrap: nowrap; }
+.os-rail-expanded .os-goal .os-goal-rings i { width: 9px; height: 9px; border-width: 1.2px; }
+
 /* ══ §6 · THE ACTIVITY FEED, AS A CONVERSATION (dashboard redesign, Phase 6) ═════════════════
  *
  * ⚠️ THE TIMELINE MARKUP IS RETIRED, RULE AND ELEMENT TOGETHER — `.os-tlev` and its thread, dot,
@@ -1544,10 +1568,15 @@
    leftover rule for a fourth copy is how the copy comes back. */
 /* ⚠️ A STATEMENT ABOUT THE DATA, NOT THE CODE — it goes when the cohorts are populated enough
    that most readers see real figures, not when the feature is "finished". */
+/* ⚠️ THE PILL SITS ON THE CARD NOW, NOT ON A BAND (dashboard redesign, Phase 7). Its fill was
+   translucent white — a wash designed to read AGAINST the sage gradient behind it — and on the
+   card's own paper a 62% white is very nearly nothing. It takes a solid parchment step and keeps
+   its sage edge and ink, so it still reads as a tag rather than as a word that happens to be
+   boxed. Same meaning, same colours, one surface further out. */
 .os-commbeta {
   margin-left: auto; flex: none;
   font-family: "JetBrains Mono", monospace; font-size: 8.5px; letter-spacing: 0.16em;
-  background: rgba(255, 255, 255, 0.62); border: 1px solid rgba(138, 158, 136, 0.42); color: #5a6e58;
+  background: #f4efe8; border: 1px solid rgba(138, 158, 136, 0.42); color: #5a6e58;
   border-radius: 11px; padding: 4px 8px;
 }
 /* ⚠️ THE REF'S BAND AND PLATE VALUES ARE NOT FOLLOWED, AND THE REF SAYS SO ITSELF. Both are SHARED

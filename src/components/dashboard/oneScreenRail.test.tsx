@@ -315,6 +315,72 @@ describe("the feed is a conversation", () => {
   });
 });
 
+/* ══ §7 · THE GOALS CARD (dashboard redesign, Phase 7) ═══════════════════════════════════════ */
+
+describe("the goal is a row of slots, and it survives being stowed", () => {
+  /* ⚠️ THE METER IS RETIRED, RULE AND ELEMENT TOGETHER. A bar states a PROPORTION; a target is a
+     plan, and a row of slots is what a plan looks like. */
+  it("⚠️ no progress bar survives anywhere in the goals card", () => {
+    const goals = readFileSync(resolve(__dirname, "./queryingGoals.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(cssRuleCount(goals, ".os-goal-meter")).toBe(0);
+    expect(cssRuleCount(goals, ".os-goal-meter i")).toBe(0);
+    const rail = readFileSync(resolve(__dirname, "./OneScreenRail.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+    expect(rail, "the meter is still rendered").not.toMatch(/["\`\s]os-goal-meter["\`\s]/);
+    expect(rail).toContain("goalRings(goal.count, goal.target)");
+    expect(rail).toContain("historyBars(goal.history)");
+  });
+
+  /**
+   * ⚠️ THE GOALS CARD IS A DECLARED EXCEPTION TO THE STOW, AND IT WOULD OTHERWISE PASS ON
+   * SPECIFICITY ALONE. `.os-rail-expanded .stowable` collapses to `max-height: 0` and
+   * `visibility: hidden`; `.os-rail-expanded .os-goal.stowable` overrides it to a 34px strip. That
+   * is the other half of Phase 6's expander — the goal STAYS ON THE PAGE, because a card that
+   * vanishes when its neighbour grows teaches that the two are alternatives. Stated here so the
+   * exception is a decision somebody reads rather than a cascade nobody noticed.
+   */
+  it("⚠️ stowed, the goal is a slim strip rather than nothing", () => {
+    const strip = cssRule(cssRules, ".os-rail-expanded .os-goal.stowable", "oneScreen.css");
+    expect(strip).toContain("max-height: 34px");
+    expect(strip).toContain("visibility: visible");
+    expect(strip).toContain("opacity: 1");
+    /* and what it keeps is the count and the rings — the goal's two facts */
+    expect(cssRules).toContain(".os-rail-expanded .os-goal .os-goal-count { display: flex;");
+    expect(cssRule(cssRules, ".os-rail-expanded .os-goal .os-goal-rings", "oneScreen.css"))
+      .toContain("flex-wrap: nowrap");
+  });
+});
+
+describe("the community tile keeps its one state, and gains only chrome", () => {
+  const comm = readFileSync(resolve(__dirname, "./OneScreenCommunity.tsx"), "utf8");
+
+  /**
+   * ⚠️ THE THREE-CELL EM-DASH STRIP WAS WITHDRAWN, AND THAT IS THE POINT OF THIS CASE. There is no
+   * cohort, no aggregate collection and no cross-user data anywhere behind this tile, so a strip of
+   * `Writers · Queries logged · Median wait` reading em-dashes would be a shape promising numbers
+   * that do not exist — which is precisely the ghost-preview alternative this component's own
+   * header records as REJECTED. Asserted absent so it cannot arrive as a "small addition".
+   */
+  it("⚠️ no ghost stat strip — the empty state does not mimic a populated one", () => {
+    for (const gone of ["Median wait", "Queries logged", "os-commstats", "os-commcell"]) {
+      expect(comm, `${gone} arrived`).not.toContain(gone);
+      expect(cssRules, `${gone} has a rule`).not.toContain(gone);
+    }
+    expect(comm).toContain("COMMUNITY_EMPTY");
+  });
+
+  /* ⚠️ CHROME ONLY: the band's fill went with `.os-ahead`'s (Phase 2), and the Beta pill takes a
+     solid step because a 62% white designed to read against a sage gradient is very nearly nothing
+     on the card's own paper. Same meaning, same colours, one surface further out. */
+  it("the Beta pill reads on the card rather than on a band", () => {
+    const pill = cssRule(cssRules, ".os-commbeta", "oneScreen.css");
+    expect(pill, "a translucent wash has nothing to sit against now").not.toContain("rgba(255, 255, 255");
+    expect(pill).toContain("color: #5a6e58");
+    expect(comm).toContain("os-commbeta");
+  });
+});
+
 describe("§6 · the collapse mechanics in CSS", () => {
   it("⚠️ the stowables collapse padding, borders AND the margin the rail spaces with", () => {
     const collapsed = cssRules.slice(cssRules.indexOf(".os-rail-expanded .stowable {"));
