@@ -117,11 +117,16 @@ describe("the rendered panel", () => {
   });
 
   /* ⚠️ THE BADGE AND THE TICKETS ARE ONE SET. At rest the badge is the open total; the fault it
-     forecloses is a badge stating a number the visible tickets contradict. */
+     forecloses is a badge stating a number the visible tickets contradict.
+     ⚠️ AND AT REST IT IS THE NUMBER ALONE (refdiff pass, Phase 6) — "0 open" restated the card's
+     own name in the card's own header. The word returns under a filter, where the figure is a
+     SUBSET and nothing else on the card says which; that reading is asserted below. */
   it("an empty board states nothing needs you, and the badge agrees", () => {
     const h = html();
     expect(h).toContain("Nothing needs you today.");
-    expect(h).toContain("<b>0</b> open");
+    expect(h).toContain("<b>0</b>");
+    expect(h).not.toContain("open</span>");
+    expect(h).not.toMatch(/<b>0<\/b>\s*open/);
   });
 
   it("day one explains where tasks come from and offers the two first moves", () => {
@@ -195,18 +200,34 @@ describe("the panel's stylesheet", () => {
     expect(rule(".os-rule")).toContain("gap: 2px");
   });
 
-  /* ⚠️ THE FAMILY PAPERS ARE DECLARED WHERE THIS GRID CAN SEE THEM. `--u-now-1` and its two
-     siblings are declared only on `.tpn`, the task pane's root, and this grid is not inside one —
-     so the tag's `var()` resolved to nothing and painted transparent. Measured, not read. */
-  it("⚠️ the ticket grid declares the three family papers it reads", () => {
-    const g = rule(".os-tkgrid");
+  /**
+   * ⚠️ THE FAMILY PAPERS RESOLVE FOR EVERY TICKET, NOT JUST THIS GRID'S.
+   *
+   * They were declared only on `.tpn` — the task pane — and `TaskTicket` renders outside a pane on
+   * both surfaces that mount it, so the tag's `var()` resolved to nothing and painted transparent.
+   * This grid then carried a private copy, which fixed the dashboard and left `/todo` broken: 28
+   * tickets measured with a computed `rgba(0, 0, 0, 0)` behind a label whose only job is to be a
+   * coloured paper. A page-scoped workaround is worse than the bug it patches, because it removes
+   * the symptom from the page someone is looking at.
+   *
+   * ⚠️ SO THE CLAIM IS ABOUT THE DECLARATION'S SCOPE, AND BOTH HALVES MATTER: the tokens are at
+   * `:root` in the ticket's own sheet, and this grid does NOT restate them — a copy here would
+   * silently make the hoist untestable from this page again.
+   */
+  it("⚠️ the family papers are declared at :root, and this grid does not restate them", () => {
+    const ticketCss = readFileSync(resolve(__dirname, "../todo/taskTicket.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    const root = /(?:^|\n):root\s*\{([^}]*)\}/m.exec(ticketCss);
+    expect(root, "taskTicket.css must declare the papers at :root").not.toBeNull();
     for (const t of ["--u-now-1", "--u-house-1", "--u-yours-1"]) {
-      expect(g, `${t} does not resolve for a ticket outside a pane`).toContain(t);
+      expect(root![1], `${t} must resolve for a ticket outside a pane`).toContain(t);
     }
     /* the values are the app tokens the PANE resolves to, never the ported hexes above them */
-    expect(g).toContain("var(--pink)");
-    expect(g).toContain("var(--sage-band)");
-    expect(g).toContain("var(--gold-t)");
+    expect(root![1]).toContain("var(--pink)");
+    expect(root![1]).toContain("var(--sage-band)");
+    expect(root![1]).toContain("var(--gold-t)");
+    /* and the grid's own copy is gone */
+    expect(rule(".os-tkgrid")).not.toContain("--u-now-1");
   });
 
   it("three tickets across, top-aligned, and the grid scrolls inside the card", () => {

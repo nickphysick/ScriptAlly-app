@@ -8,6 +8,31 @@
    the page's text alignment, no UA border or background. A div with a click handler would have
    cost the keyboard its access to a control that opens the pane. ── */
 
+/**
+ * ⚠️ THE THREE FAMILY PAPERS ARE DECLARED HERE, AT `:root`, BECAUSE THE TICKET IS THE SURFACE THAT
+ * CANNOT REACH THEM ANYWHERE ELSE.
+ *
+ * `.tkt .tag.now|.house|.yours` read `--u-*-1`, and those were declared ONLY on `.tpn` — the task
+ * pane. `TaskTicket` renders outside the pane on both surfaces that mount it, so on `/todo` the
+ * `var()` resolved to nothing and the tag painted transparent: measured, 28 tickets with a computed
+ * `rgba(0, 0, 0, 0)` behind a label whose whole job is to be a coloured paper. The dashboard did not
+ * show it, because its grid carried a private copy of the three values — which is the tell, and the
+ * reason a page-scoped workaround is worse than the bug: it makes the fault invisible on the page
+ * someone is looking at.
+ *
+ * ⚠️ THE `-1` STOPS ONLY. `--u-*-2` and `--u-*-ink` are the pane's gradient and ink, and nothing
+ * outside `.tpn` reads them; hoisting a token nobody reads is the orphan half of the token law.
+ *
+ * ⚠️ AND `.tpn` STILL WINS INSIDE THE PANE. These are inherited custom properties, so a declaration
+ * on a nearer ancestor takes precedence — the pane's own block is untouched and still substitutes
+ * the app's palette by name.
+ */
+:root {
+  --u-now-1: var(--pink);
+  --u-house-1: var(--sage-band);
+  --u-yours-1: var(--gold-t);
+}
+
 .tkt-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));

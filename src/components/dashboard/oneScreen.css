@@ -864,15 +864,24 @@
  * before they went. A retired rule left in a sheet is how a deleted layout comes back.
  */
 
-/* the badge: the count and what it is counting, in the filtered category's own paper */
+/* the badge: the count, and — under a filter only — what it is counting, in that category's paper.
+   Ref `.badge`: 3/11 padding, a 99px pill on `#f1e7da` with an `#e6d8c6` hairline, the figure in
+   the serif at 16/600/1 and the label in mono at 9.5/.09em. */
 .os-tbadge {
   display: inline-flex; align-items: baseline; gap: 5px; flex: none;
-  border-radius: 99px; padding: 3px 10px;
-  font-size: 11px; color: #5c5148; white-space: nowrap;
-  background: #f4efe8;
+  border-radius: 99px; padding: 3px 11px;
+  color: #2a1f18; white-space: nowrap;
+  background: #f1e7da; border: 1px solid #e6d8c6;
   transition: background 0.16s ease;
 }
-.os-tbadge b { font-weight: 600; font-size: 12.5px; color: #241811; font-variant-numeric: tabular-nums; }
+.os-tbadge b {
+  font-family: var(--font-serif); font-weight: 600; font-size: 16px; line-height: 1;
+  color: #2a1f18; font-variant-numeric: tabular-nums;
+}
+.os-tbadge span {
+  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.09em;
+  text-transform: uppercase; color: #6b5d54;
+}
 
 /* ⚠️ THE ZONE IS TALLER THAN THE RULE, DELIBERATELY. The rule is 9px; the zone reserves the hover
    target and the 18px of air between it and the first ticket, so thickening on hover happens
@@ -922,38 +931,28 @@
    spreading down it — the grid would otherwise distribute its rows into the height the card gives.
    `minmax(0, 1fr)` because a ticket's headline is a sentence and `1fr` alone would let the longest
    one set every column's width. */
-/**
- * ⚠️ THE FAMILY PAPERS ARE RE-DECLARED HERE BECAUSE THEIR ONLY DECLARING SCOPE IS `.tpn`, AND THIS
- * GRID IS NOT INSIDE ONE — found by measurement, not by reading.
- *
- * `taskTicket.css` paints the tag `background: var(--u-now-1)` and its own comment says those are
- * "the first stop of the pane's own family gradients". They are declared on `.tpn` (the task pane's
- * root) and nowhere else, so outside a pane the `var()` resolves to nothing and the tag paints
- * TRANSPARENT — the rule applying cleanly, with nothing to point at. P5.4 measured one tinted region
- * on a ticket that must have two.
- *
- * ⚠️ SCOPED TO THIS GRID RATHER THAN WIDENED TO `:root`, DELIBERATELY. `:root` is the better fix and
- * has a precedent in this repo (`--state-*` was widened out of `.t-f12` for exactly this reason) —
- * but `.tkt` is the To-do page's component in another stream's sheet, and widening would change
- * what that page renders. I could not confirm the To-do page's own tickets on the harness account
- * (its board showed none this session), so I am not making a change whose effect there I have not
- * seen. The finding is in the run report for that stream; this line becomes redundant the day the
- * tokens move up, and deleting it is then a one-line change.
- *
- * ⚠️ AND THE VALUES ARE THE APP TOKENS THE PANE ITSELF RESOLVES TO, not the ported hexes above them
- * in `taskPane.css`. `.tpn` declares the mockup's literals and then overrides them with
- * `var(--pink)` / `var(--sage-band)` / `var(--gold-t)`; the later block wins, so those are what a
- * pane actually paints and what a tag must match to be "the same paper by construction".
- */
+/* ⚠️ THE FAMILY PAPERS ARE NOT DECLARED HERE ANY MORE — they are at `:root` in `taskTicket.css`,
+   beside the rules that read them. This grid carried a private copy because the tokens lived only
+   on `.tpn`; that copy fixed the dashboard and left `/todo`'s own tickets painting transparent
+   tags, which is why a page-scoped workaround was the worse of the two options: it made the fault
+   invisible on the page someone was looking at. See the hoist's note in `taskTicket.css`. */
+/* ⚠️ THE TICKET'S TITLE IS THE CARD'S OWN FACE HERE, AND THIS IS A DELIBERATE PER-SURFACE
+   DIVERGENCE — the two refs disagree. `todo-qc-style.html`'s brief specifies Inter 600 for the
+   To-do page's ticket, and `TaskTicket` renders on both surfaces; this page's ref sets
+   `.tk .ttl{font-weight:600;font-size:15px;line-height:1.3}` with no family, so it inherits the
+   card's, and `--ink` rather than the muted step. Scoped to the dashboard's grid so the To-do
+   page's contract is untouched. Raised in the run report: one component reading two ways on two
+   pages is a question for Nick, not a thing to settle by editing whichever file is open. */
+.os-tkgrid .tkt .ttl { font-family: inherit; font-size: 15px; color: #2a1f18; }
+
 .os-tkgrid {
-  --u-now-1: var(--pink);
-  --u-house-1: var(--sage-band);
-  --u-yours-1: var(--gold-t);
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px; align-content: start; padding: 0 18px 14px;
 }
-@media (max-width: 1360px) { .os-tkgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 1024px) { .os-tkgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* ⚠️ THREE ACROSS AT THE REF'S OWN BREAKPOINT — its `@media (max-width:1700px)` takes `.tgrid.c3`
+   to two columns, which is the same 1700 that steps the stat slot and the brush. It was 1360 here,
+   so between 1360 and 1700 the dashboard drew three columns where the ref draws two. */
+@media (max-width: 1699px) { .os-tkgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 720px) { .os-tkgrid { grid-template-columns: minmax(0, 1fr); } }
 
 /* the drawer's pane takes the whole sheet — `SlideOver` supplies the chrome around it */
@@ -1074,7 +1073,12 @@
 .os-pin { cursor: pointer; }
 .os-pin circle.hit { transition: r 0.16s ease, fill 0.16s ease; }
 .os-pin:hover circle.hit { r: 9; fill: #e8c8bc; }
-.os-xlabels { display: flex; justify-content: space-between; padding: 5px 4px 0; flex: none; }
+/* ⚠️ INSIDE THE PLOT'S BOX, IN THE BAND `PADY` RESERVES — see the constant. Absolute, so the
+   labels take no height of their own and the card's height is the ratio's alone. */
+.os-xlabels {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  display: flex; justify-content: space-between; padding: 0 4px 4px;
+}
 .os-xlabels span {
   font-family: "JetBrains Mono", monospace;
   font-size: 8px; letter-spacing: 0.05em; color: #b3a596; text-transform: uppercase;
