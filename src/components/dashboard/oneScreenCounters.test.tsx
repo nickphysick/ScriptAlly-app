@@ -119,11 +119,15 @@ describe("the card's CSS", () => {
      it shrink-wrap (`flex: 0 1 auto`) and the GROUP centres. Inside the card each took an equal
      third of a fixed box and filled it exactly, so `justify-content` had nothing to do — which is
      why "centred in the remaining width" needed the flex change to become a statement at all. */
-  it("takes the remaining width; the three stats shrink-wrap and the group centres", () => {
+  it("takes the remaining width; the three stats sit left, on the ref's 36px gap", () => {
     const c = rule(".os-counters");
     expect(c).toContain("flex: 1");
     expect(c).toContain("min-width: 0");
-    expect(c).toContain("justify-content: center");
+    /* ⚠️ LEFT-ALIGNED, NOT CENTRED (refdiff pass, Phase 3). The ref's own shipping value is
+       `justify-content:flex-start!important`, and the stats sit in the second track of a two-column
+       hero grid rather than in "the space left over" — which is what put their left edge 66px out. */
+    expect(c).toContain("justify-content: flex-start");
+    expect(c).toContain("gap: 36px");
     /* the card is gone: no paper, no radius, no shadow, no padding of its own */
     expect(c).toContain("padding: 0");
     /* ⚠️ COMMENTS STRIPPED FIRST — house rule, and it caught this on its first run. The file's own
@@ -133,10 +137,11 @@ describe("the card's CSS", () => {
       .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
     expect(src, "the stats must not carry the card class").not.toMatch(/["\s`]os-card["\s`]/);
     const col = rule(".os-counter");
-    expect(col).toContain("flex: 0 1 auto");
-    expect(col).toContain("justify-content: center");
-    expect(col).toContain("border-left: 1px solid");
-    expect(cssRules).toContain(".os-counter:first-child { border-left: none; }");
+    expect(col).toContain("flex: 0 0 auto");
+    expect(col).toContain("gap: 18px");
+    /* ⚠️ THE DIVIDER IS GONE. The ref's `.stat` is `display:flex; align-items:center; gap:18px` and
+       nothing else — the rule between stats was the container's furniture, and the container went. */
+    expect(col).not.toContain("border-left");
   });
 
   /* ⚠️ READOUTS, NOT CONTROLS — a hover lift promises a click that does not happen. Asserted even
@@ -146,11 +151,16 @@ describe("the card's CSS", () => {
     expect(rule(".os-card.os-counters:hover, .os-card.os-counters.os-lift:hover")).toContain("transform: none");
   });
 
-  it("the header is a centred flex row and the greeting sizes to its content", () => {
+  /* ⚠️ RETARGETED: the ref's hero is a two-track GRID (`auto 1fr`, 40px gap), not a flex row. The
+     difference is not cosmetic — in a flex row the stats took "whatever is left", so their left edge
+     moved with the greeting's length; in the grid they have a track of their own and start where the
+     design puts them whatever the writer is called. */
+  it("the hero is the ref's two-track grid, and the greeting sizes to its content", () => {
     const g = rule(".os-greet");
-    expect(g).toContain("display: flex");
+    expect(g).toContain("display: grid");
+    expect(g).toContain("grid-template-columns: auto 1fr");
+    expect(g).toContain("gap: 40px");
     expect(g).toContain("align-items: center");
-    expect(g).toContain("gap: 32px");
     expect(rule(".os-greet .os-gl")).toContain("flex: 0 0 auto");
   });
 

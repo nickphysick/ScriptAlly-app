@@ -190,8 +190,15 @@ describe("the tile fills a row it does not size", () => {
      whose height tasks set; a centred hero stretched by a row it does not own is a tile pretending
      to be taller than its content. Natural height now, and the left column's slack is Pro's. */
   it("⚠️ the tile is a column card at its natural height — it never fills a row it does not size", () => {
-    expect(cssRules).toContain("grid-template-columns: 302px minmax(0, 1fr) 287px");
-    expect(rule(".os-colL .os-comm")).toContain("flex: 0 0 auto");
+    expect(cssRules).toContain("grid-template-columns: 440px minmax(0, 1fr) 420px");
+    /* ⚠️ REVERSED (refdiff pass, Phase 3), AND THE REASON REVERSED WITH IT. The tile stopped
+       stretching when the grid gave the columns a shared row box and the cards were natural height —
+       and the three column bottoms then sat 658px apart, which is the fault the ref's
+       `align-items: stretch` exists to prevent. The LAST card in a side column closes it: Pro when
+       it renders, Community when it does not. Both are `flex: 1 1 auto` so whichever is last takes
+       the slack; the tile is no longer pretending to a height it does not own, it is closing a
+       column that would otherwise end in a hole. */
+    expect(rule(".os-colL .os-comm")).toContain("flex: 1 1 auto");
     expect(rule(".os-colL .os-probanner")).toContain("flex: 1 1 auto");
     /* the retired spine must not survive — a leftover rule is how a deleted layout comes back */
     expect(cssRuleCount(cssRules, ".os-midrow, .os-lowrow")).toBe(0);

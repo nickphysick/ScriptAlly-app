@@ -157,6 +157,19 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
      the top bar's controls. Three booleans would be three things to get out of step; the class on
      `.ws-app` is what the stylesheet keys every one of them off. */
   const settingsMode = isAccountPath(pathname);
+  /**
+   * ⚠️ THE DASHBOARD IS A MODE TOO, AND IT IS THE SETTINGS MODE'S PATTERN RATHER THAN A SECOND ONE.
+   * One condition, DERIVED from the route and never held as state — a boolean would have to be
+   * cleared on every exit (a browser Back, a deep link, a redirect) and the day it is not, the
+   * window dissolves under a page that still expects it.
+   *
+   * ⚠️ IT DISSOLVES THE WINDOW AND THE CRUMB, AND NOTHING ELSE. Settings also swaps the panel's
+   * contents; this does not — the left rail is unchanged, because the dashboard is still a place in
+   * the app rather than a mode of it. What goes is the white panel, the breadcrumb and the save
+   * whisper: the ref draws its cards on the ground, and a card on a panel on a ground is two
+   * surfaces where the design has one.
+   */
+  const dashMode = pathname === "/dashboard";
   const settingsSection: AccountSectionId | null = accountSectionForPath(pathname);
 
   /* ⚠️ THE EXIT GOES TO THE DASHBOARD, NOT `history.back()`. Back is where you CAME from, which on
@@ -432,7 +445,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
        `.ws-panel`, which is a SIBLING of the workspace — so no page can see it from a descendant
        selector, and a page that wants to redistribute the width the panel gave back has nothing to
        key on. Same boolean, second mount, on the common ancestor. */
-    <div className={`ws-app${sidebar.collapsed ? " sb-shut" : ""}${settingsMode ? " set-mode" : ""}`}>
+    <div className={`ws-app${sidebar.collapsed ? " sb-shut" : ""}${settingsMode ? " set-mode" : ""}${dashMode ? " dash-mode" : ""}`}>
 
       {/* ⚠️ `sb-ready` GATES THE WIDTH TRANSITION (sidebar-collapse pack, Phase 1). The collapsed
           state is read synchronously, so the first render is already narrow — but a transition

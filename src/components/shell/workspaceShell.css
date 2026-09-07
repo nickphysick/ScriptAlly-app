@@ -1218,6 +1218,36 @@
 
 /* ⚠️ LAST IN THE FILE, DELIBERATELY — equal specificity means source order decides, so a rule
    added below this block would be exempt from it without anyone noticing. */
+/* ══ THE DASHBOARD MODE (dash refdiff pass, Phase 3) ═════════════════════════════════════════
+ *
+ * ⚠️ ONE CONDITION, AND IT IS THE SETTINGS MODE'S PATTERN RATHER THAN A SECOND MECHANISM.
+ * `.dash-mode` is derived from the route in `WorkspaceShell` and published on `.ws-app`, exactly as
+ * `.set-mode` is. What it does is narrower: the window's surface dissolves and the crumb row loses
+ * its crumb, and NOTHING else moves. The left rail is untouched, because the dashboard is still a
+ * place in the app rather than a mode of it.
+ *
+ * ⚠️ THE GROUND IS THE REF'S, STATED. `#f4f0ea` is `--ground` in `dashboard-cappuccino-v14.html`;
+ * the cards sit directly on it. A card on a white panel on a ground is two surfaces where the
+ * design has one, which is what the review saw as "the ground was white".
+ */
+.dash-mode .ws-main { background: #f4f0ea; }
+.dash-mode .ws-window {
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  transition-delay: 0s;
+}
+.dash-mode .ws-window::after { opacity: 0; transition-delay: 0s; }
+.dash-mode .ws-work { background: transparent; }
+
+/* ⚠️ THE CRUMB GOES; THE ROW STAYS, AND THE ACTIONS STAY IN IT. Search, Feedback and New are not in
+   the ref because the ref never drew the nav — they are chrome above the hero, and they are already
+   right-aligned in the very row the crumb used. Moving them into the page would mean a second mount
+   of three components that exist once. `visibility` rather than `display` so the row keeps its
+   height and the hero starts where the ref puts it. */
+.dash-mode .ws-crumb, .dash-mode .ws-sync { visibility: hidden; }
+
 @media (prefers-reduced-motion: reduce) {
   .ws-app *, .ws-app *::before, .ws-app *::after {
     animation-duration: 0.01ms !important;

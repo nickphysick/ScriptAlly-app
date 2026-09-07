@@ -64,72 +64,31 @@ describe("OneScreenPanel — the shell the four containers had", () => {
  * border. jsdom cannot render, so what is pinned here is the shape of the fix — an overlay that
  * paints above descendants — and the two things that would silently undo it.
  */
-describe("the container rim is an overlay, not a border", () => {
-  const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
-  const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
-  const blk = (sel: string) => {
-    const i = bare.indexOf(`${sel} {`);
-    expect(i, `${sel} must exist`).toBeGreaterThan(-1);
-    return bare.slice(i, bare.indexOf("}", i));
-  };
-
-  it("the rim is drawn by ::after, above descendants", () => {
-    const r = blk(".os-card::after");
-    expect(r).toContain("position: absolute");
-    expect(r).toContain("inset: 0");
-    expect(r).toContain("box-shadow: inset 0 0 0 1px");
-    expect(r).toContain("border-radius: inherit"); // or the rim squares off the corners
+/**
+ * ⚠️ THE `::after` RIM IS RETIRED, AND THE LAW IT CARRIED IS INVERTED RATHER THAN LOST (refdiff
+ * pass, Phase 3). The overlay ring existed so a card's hairline could sit ABOVE its descendants
+ * without a border adding 2px to the box. The ref draws a plain `1px solid var(--line)` border with
+ * an 18px radius, and the refdiff reported the difference on every card at every width — bg, radius
+ * and border width, three misses each.
+ *
+ * So the rule is now the mirror of what it was: ONE owner for the hairline, and it is the border.
+ * A surviving `::after` ring beside it would be the two-owners fault the old law was written
+ * against, arriving from the other side.
+ */
+describe("the container rim is the card's own border, and there is only one of it", () => {
+  const bare = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  it("⚠️ the card draws a real border — the ref's 1px line, not an overlay ring", () => {
+    const c = cssRule(bare, ".os-card", "oneScreen.css");
+    expect(c).toContain("border: 1px solid #e6dfd6");
+    expect(c).toContain("border-radius: 18px");
+    expect(c).toContain("background: #fdfbf7");
   });
 
-  it("⚠️ the overlay never eats a click meant for the card", () => {
-    expect(blk(".os-card::after")).toContain("pointer-events: none");
-  });
-
-  it("⚠️ the card is the positioning context — without it the overlay escapes the card", () => {
-    expect(blk(".os-card")).toContain("position: relative");
-  });
-
-  it("⚠️ THE RING IS THE ONLY RIM — no border alongside it, or one hairline has two owners", () => {
-    /* An earlier pass kept a border "for geometry". That made the next retune of the rim token a
-       two-place edit, and the second place is the one that gets missed. Measured cost of dropping
-       it: card size unchanged, contents 1px further out. */
-    expect(blk(".os-card")).not.toMatch(/(^|;|\s)border:\s*[\d.]+px/);
-  });
-
-  it("⚠️ the rim is NOT a bare inset shadow on the element — that paints beneath children", () => {
-    // the whole fault: an opaque band child covers anything painted on the element's own layer
-    const card = blk(".os-card");
-    expect(card).not.toContain("box-shadow: inset");
-  });
-
-  it("⚠️ NO TRANSFORM ON A CARD HOVER — the column clips, and the lifted 2px takes the rim with it", () => {
-    /* `.os-colM`/`.os-colR` are overflow:hidden and the cards sit flush to the top of the column,
-       so a lift pushes the card's top edge — ring included — past the clip. This asserts across
-       EVERY `.os-card...:hover` rule in the sheet, because the bug was a SECOND such rule 870
-       lines below the first: reading only the first is what produced a wrong diagnosis. */
-    const rules = bare.match(/\.os-card[^{}]*:hover\s*\{[^}]*\}/g) ?? [];
-    expect(rules.length).toBeGreaterThan(0);
-    for (const r of rules) {
-      if (r.includes("::after")) continue; // the ring's own hover is a shadow swap, not a move
-      /* ⚠️ `transform: none` is a GUARD, not a lift — the counters card states it so a future
-         `os-lift` cannot quietly re-arm a movement. Read the VALUE rather than lookahead-ing past
-         the colon, which backtracks and matches the guard itself. */
-      for (const [, value] of r.matchAll(/transform:\s*([^;}]+)/g)) {
-        expect(value.trim(), `a card hover must not move:\n${r}`).toBe("none");
-      }
-    }
-  });
-
-  it("hover transitions the PSEUDO-ELEMENT's shadow, not the container's rim", () => {
-    expect(bare).toContain(".os-card.os-lift:hover::after");
-    expect(blk(".os-card.os-lift:hover")).not.toContain("border-color");
-  });
-
-  it("hover warms the rim and moves nothing — no transform on a container", () => {
-    expect(bare).toContain(".os-card.os-lift:hover::after");
-    expect(blk(".os-card.os-lift:hover")).not.toContain("transform");
+  it("⚠️ and the retired ring did not survive it — one hairline, one owner", () => {
+    expect(bare, "the ::after ring is back alongside the border").not.toMatch(/\.os-card::after\s*\{/);
   });
 });
+
 
 /**
  * ⚠️ EVERY CONTAINER'S BAND IS THE SAME OBJECT (§2).

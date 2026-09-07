@@ -191,7 +191,11 @@ describe("the sage band and the timeline (app-shell-v2)", () => {
     expect(block).not.toContain("linear-gradient");
     expect(block).not.toContain("border-bottom");
     expect(block).not.toContain("background");
-    expect(cssRule(cssRules, ".os-ahead h2", "oneScreen.css")).toContain("color: #2b3a29");
+    /* ⚠️ THE INK IS THE REF'S `--ink` NOW, AND IT IS ONE INK FOR EVERY CARD. Sage-for-a-container
+       and pink-for-a-surface distinguished two BANDS, and the bands went in Phase 2; the ref gives
+       every `.hd h3` the same serif 500/23 in `--ink`, so the distinction has nothing left to ride
+       on and keeping two heading inks would be a grammar with no bands to explain it. */
+    expect(cssRule(cssRules, ".os-ahead h2", "oneScreen.css")).toContain("color: #2a1f18");
   });
 
   /* ⚠️ RETARGETED (dashboard redesign, Phase 6). The dot is now the bubble's KNOT, hung off the

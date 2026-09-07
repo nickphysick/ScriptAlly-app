@@ -116,13 +116,29 @@ const READ = `(() => {
     };
   }
   /* ── the four page-level checks ── */
-  out.checks.ground = getComputedStyle(document.body).backgroundColor;
+  /* The ground is what is PAINTED BEHIND main, not whatever body happens to carry. The ref paints
+     it on body; the app paints it on a shell element several levels up, and both are the same fact.
+     Reading body alone reported the app transparent while the page was the right colour.
+     NO BACKTICKS IN HERE — this whole block is a template literal and one ends it. */
+  const painted = (el) => {
+    for (let n = el; n; n = n.parentElement) {
+      const c = getComputedStyle(n).backgroundColor;
+      if (c && c !== "rgba(0, 0, 0, 0)" && c !== "transparent") return c;
+    }
+    return getComputedStyle(document.body).backgroundColor;
+  };
+  const mainEl = document.querySelector("[data-probe='main']");
+  out.checks.ground = mainEl ? painted(mainEl) : getComputedStyle(document.body).backgroundColor;
   out.checks.hScroll = document.documentElement.scrollWidth - document.documentElement.clientWidth;
-  const col = (k) => out.probes[k] ? out.probes[k].y + out.probes[k].h : null;
-  /* the three column bottoms — the LAST card in each column, which the ref and the app agree on */
-  const bottoms = ["community-card", "todo-card", "activity-card"].map(col).filter((v) => v !== null);
+  /* The three column bottoms, read from the COLUMNS rather than from named cards. The first
+     version named community/todo/activity — and Community stopped being the left column's last
+     card the moment Pro rendered beneath it, so the check reported a 490px spread about three
+     columns that were closing correctly. A column's bottom is the column's, whatever is in it. */
+  const cols = [...document.querySelectorAll(".col, .os-colL, .os-colM, .os-colR")]
+    .filter((e) => e.getBoundingClientRect().height > 0);
+  const bottoms = cols.map((e) => { const r = e.getBoundingClientRect(); return num(r.y + r.height); });
   out.checks.columnBottoms = bottoms;
-  out.checks.columnSpread = bottoms.length === 3 ? num(Math.max(...bottoms) - Math.min(...bottoms)) : null;
+  out.checks.columnSpread = bottoms.length >= 3 ? num(Math.max(...bottoms) - Math.min(...bottoms)) : null;
   /* ⚠️ THE BLEND TRAP: a transform on ANY ancestor isolates the blend group and the stat artwork's
      white field returns, silently, with the rule applying cleanly. */
   const marks = [...document.querySelectorAll("[data-probe='stats'] img, .os-greet .os-mark-il img")];
@@ -137,6 +153,14 @@ const READ = `(() => {
   out.checks.transformedAncestors = [...new Set(bad)];
   return out;
 })()`;
+
+/* ⚠️ THE GUARD FOR THE TRAP ABOVE, AND IT IS HERE BECAUSE I FELL INTO IT TWICE IN ONE PHASE.
+   A backtick anywhere inside READ ends the template literal, and the file then dies at PARSE time
+   with a message pointing at whatever word followed it — which reads like a typo in the browser
+   code rather than what it is. Checked once, at load, naming the fault. */
+if (READ.includes("\u0060")) {
+  throw new Error("dash-refdiff: READ contains a backtick — it is a template literal and a backtick ends it.");
+}
 
 async function readPage(page, url, { app } = {}) {
   await page.goto(url, { waitUntil: "domcontentloaded" });
@@ -194,13 +218,27 @@ async function signIn(page) {
 
 const rgb = (v) => (v || "").replace(/\s+/g, " ").trim();
 
-function diffOne(key, ref, app) {
+/**
+ * ⚠️ POSITION IS COMPARED RELATIVE TO `main`, NOT TO THE VIEWPORT — and this is a decision, not a
+ * loosening. The ref never drew the app's nav: it has no rail and no bar, so its `main` starts at
+ * the top of the window while the app's starts below a 77px control row the pack explicitly keeps
+ * ("they are not in the ref because the ref did not draw the nav"). Comparing absolute `y` would
+ * report that one fact as a miss on EVERY probe, at every width, forever — a number that can never
+ * go to zero and tells you nothing about the design.
+ *
+ * `main`'s own box is still compared absolutely for SIZE, so the page cannot quietly shrink; what
+ * moves to a relative datum is where things sit INSIDE it, which is what a design ref specifies.
+ */
+function diffOne(key, ref, app, refOrigin, appOrigin) {
   const misses = [];
   if (!ref) return [{ key, field: "ref", why: "the ref has no such probe" }];
   if (!app) return [{ key, field: "present", why: "the app renders no visible element for this probe" }];
+  const off = (f, o) => (f === "x" ? o.x : f === "y" ? o.y : 0);
   const near = (f, tol) => {
-    const d = Math.round((app[f] - ref[f]) * 10) / 10;
-    if (Math.abs(d) > tol) misses.push({ key, field: f, ref: ref[f], app: app[f], delta: d, tol });
+    const rv = Math.round((ref[f] - off(f, refOrigin)) * 10) / 10;
+    const av = Math.round((app[f] - off(f, appOrigin)) * 10) / 10;
+    const d = Math.round((av - rv) * 10) / 10;
+    if (Math.abs(d) > tol) misses.push({ key, field: f, ref: rv, app: av, delta: d, tol });
   };
   near("x", TOL.edge); near("y", TOL.edge);
   near("w", TOL.size); near("h", TOL.size);
@@ -237,7 +275,7 @@ function diffChecks(app) {
     m.push({ key: "page", field: "hScroll", ref: 0, app: app.checks.hScroll });
   }
   if (app.checks.columnSpread === null) {
-    m.push({ key: "page", field: "columnBottoms", why: "fewer than three column cards were visible" });
+    m.push({ key: "page", field: "columnBottoms", why: "fewer than three columns were visible" });
   } else if (app.checks.columnSpread > 1) {
     m.push({ key: "page", field: "columnBottoms", ref: "≤1", app: app.checks.columnSpread });
   }
@@ -301,7 +339,14 @@ try {
     const appData = await readPage(appPage, `${APP}/dashboard`, { app: true });
 
     const misses = [];
-    for (const k of PROBES) misses.push(...diffOne(k, refData.probes[k], appData.probes[k]));
+    /* the datum: each side's own `main`. Absent on either side and the comparison falls back to
+       the viewport, which is honest — a page with no `main` has bigger problems than an offset. */
+    const rO = refData.probes.main ?? { x: 0, y: 0 };
+    const aO = appData.probes.main ?? { x: 0, y: 0 };
+    for (const k of PROBES) {
+      misses.push(...diffOne(k, refData.probes[k], appData.probes[k],
+        k === "main" ? { x: 0, y: 0 } : rO, k === "main" ? { x: 0, y: 0 } : aO));
+    }
     for (const k of TEXT_PROBES) misses.push(...diffText(k, refData.text[k], appData.text[k]));
     misses.push(...diffChecks(appData));
 

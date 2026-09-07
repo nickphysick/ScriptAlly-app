@@ -116,18 +116,23 @@ describe("§1 · the lock", () => {
   /* ⚠️ RETARGETED (dashboard redesign, Phase 2) — THREE columns, and the CENTRE is the elastic
      one. The law is unchanged in substance: the page is one capped, centred grid whose side
      columns are fixed and whose middle takes the rest. What moved is which track is `1fr`. */
-  it("the grid is three columns, the centre elastic, capped 1660 and centred", () => {
-    const c = rule(".os-content");
-    expect(c).toContain("grid-template-columns: 302px minmax(0, 1fr) 287px");
+  /* ⚠️ RETARGETED (refdiff pass, Phase 3). The grid left `.os-content` for its own `.os-grid`,
+     because the hero used to be a grid ROW — so its height was a track and the three columns could
+     never have a row of their own. The tracks are now the REF's: 440/1fr/420, with its own
+     340/1fr/360 below 1700. The cap went with the move: the ref's content is uncapped and the
+     harness compares `main`'s box against it. */
+  it("the grid is three columns on the ref's tracks, and it is its own element", () => {
+    const c = rule(".os-grid");
+    expect(c).toContain("grid-template-columns: 440px minmax(0, 1fr) 420px");
     /* ⚠️ THE COLUMN BOTTOMS AGREE BY ONE WORD, not by three heights. Every column is handed the
        same row box; there is no number to keep in step. */
     expect(c).toContain("align-items: stretch");
-    expect(c).toContain("max-width: var(--work-max)");
-    /* ⚠️ THE FIGURE MOVED TO A TOKEN SO QUERY CENTRE CAN READ THE SAME ONE. Two pages agreeing by
-       literal agree until one is edited; the value is asserted where it is now declared. */
-    expect(readFileSync(resolve(__dirname, "../../index.css"), "utf8"), "the shared cap changed value")
-      .toContain("--work-max: 1660px;");
-    expect(c).toContain("margin: 0 auto");
+    expect(cssRules).toContain(".os-grid { grid-template-columns: 340px minmax(0, 1fr) 360px; }");
+    /* ⚠️ THE CAP IS GONE, DELIBERATELY. `--work-max` centred the page inside 1660 and the ref does
+       not cap its content at all — at 2520 that put the app's `main` 494px narrower than the ref's
+       and every column 250px in from where the design puts it. The token is untouched and Query
+       Centre still reads it; the dashboard simply no longer does. */
+    expect(rule(".os-content")).not.toContain("--work-max");
   });
 
   /* ⚠️ THE HEADER IS ITS OWN ROW, AND THE ROWS ARE `auto auto`. With `1fr` the RAIL would drive
@@ -138,15 +143,20 @@ describe("§1 · the lock", () => {
      `flex: 1` (basis 0) and contributes nothing to max-content — a coincidence of one shorthand,
      not a design. `minmax(0, 1fr)` says it outright, and `align-content: start` had to go because
      it stops the second row filling. */
-  it("⚠️ the header spans all three columns; row 2 is minmax(0,1fr), never auto", () => {
+  /* ⚠️ RETARGETED: `main` is a flex COLUMN now — hero, then grid — rather than a two-row grid with
+     the hero spanning it. The property that mattered is unchanged and is asserted where it now
+     lives: the grid takes the space the hero leaves and never sizes to its content. */
+  it("⚠️ main is hero-then-grid, and the grid takes what the hero leaves", () => {
     const c = rule(".os-content");
-    expect(c).toContain("grid-template-rows: auto minmax(0, 1fr)");
-    expect(c).not.toContain("align-content: start");
+    expect(c).toContain("flex-direction: column");
     expect(c).toContain("height: 100%");
-    expect(cssRules).toContain(".os-greet { grid-column: 1 / -1; grid-row: 1; }");
-    expect(cssRules).toContain(".os-colL { grid-column: 1; grid-row: 2; }");
-    expect(cssRules).toContain(".os-colM { grid-column: 2; grid-row: 2; }");
-    expect(cssRules).toContain(".os-colR { grid-column: 3; grid-row: 2; }");
+    expect(c).not.toContain("align-content: start");
+    const g = rule(".os-grid");
+    expect(g).toContain("flex: 1");
+    expect(g).toContain("min-height: 0");
+    expect(cssRules).toContain(".os-colL { grid-column: 1; }");
+    expect(cssRules).toContain(".os-colM { grid-column: 2; }");
+    expect(cssRules).toContain(".os-colR { grid-column: 3; }");
   });
 
   /* the columns take the row they are given and nothing escapes them */
@@ -193,11 +203,13 @@ describe("§1 · the lock", () => {
      steps with them, so the two sides narrow together and the centre keeps the width it gains. A
      breakpoint that moved one side and not the other would re-proportion the page at that width
      only, which is the fault the original 25% rule was written against. */
-  it("both side columns step together at every breakpoint; the centre stays elastic", () => {
-    for (const [l, r] of [["302px", "287px"], ["276px", "262px"], ["256px", "240px"]]) {
+  /* ⚠️ RETARGETED: TWO regimes now, not four, and both are the ref's own — 440/420 at ≥1700 and
+     340/360 below it, which is where the ref collapses. The app's old four-step ladder was its own
+     invention and none of its widths were the design's. */
+  it("two regimes, both the ref's, and the centre stays elastic in each", () => {
+    for (const [l, r] of [["440px", "420px"], ["340px", "360px"]]) {
       expect(cssRules, `${l} / ${r}`).toContain(`grid-template-columns: ${l} minmax(0, 1fr) ${r}`);
     }
-    /* the old two-column form must not survive anywhere — it would win at whichever width it sat */
     expect(cssRules).not.toMatch(/grid-template-columns: minmax\(0, 1fr\) \d+px/);
   });
 
@@ -223,7 +235,7 @@ describe("§1 · the lock", () => {
     /* the shared `.os-colM, .os-colR` rule sits first, so the naive first-match lookup lands on
        it; assert the standalone declarations verbatim instead */
     expect(cssRules).toContain(".os-colR { gap: 0; }");
-    expect(rule(".os-colR > *")).toContain("margin-bottom: 13px");
+    expect(rule(".os-colR > *")).toContain("margin-bottom: 22px");
   });
 
   /* ⚠️ RETARGETED (dashboard redesign, Phase 2). The budget INVERTED: the chart is now the card

@@ -92,45 +92,39 @@
    inside it.
 
    ⚠️ `align-content: start` IS GONE. It stops the second row filling, which is the whole point. */
+/**
+ * ⚠️ `main` IS THE PAGE, `grid` IS THE THREE COLUMNS, AND THEY ARE TWO ELEMENTS NOW (refdiff pass,
+ * Phase 3). `.os-content` used to be the grid itself, with the hero as its first row — so the
+ * hero's height was a grid TRACK and the columns could never be given a row of their own. The ref
+ * draws `main` holding a `hero` and a `grid3`; this is that.
+ *
+ * ⚠️ THE VALUES ARE THE REF'S, READ OUT OF IT RATHER THAN MATCHED BY EYE — `.main{padding-left:22px}`
+ * and no cap, because the ref's own content is uncapped and the harness compares `main`'s box.
+ */
 .os-content {
   flex: 1;
   height: 100%;
   min-height: 0;
-  display: grid;
-  /* ⚠️ THREE COLUMNS (dashboard redesign, Phase 2). The CENTRE column is the elastic one and it
-     owns the row's height; the two sides are fixed and stretch to whatever it decides. That is the
-     inversion this phase performs — `.os-midrow` used to be a fixed 302px row whose LEFT column
-     owned the height, with its own rule warning "never `1fr`, the rail would then drive the row".
-     The warning was right about the OLD shape and does not survive the restructure: with the three
-     columns as grid tracks, no column can drive another's height, because they are siblings in one
-     row rather than two rows sharing a spine.
-
-     ⚠️ THE SIDE WIDTHS ARE THE ONES ALREADY IN THE PAGE, not the ref's 440/420. The ref is drawn
-     at its own scale on a bare page; here 302 is the manuscript tile's existing width and 287 the
-     rail's, so the two side columns keep every rule already written against them. Taking the ref's
-     numbers would have moved both for no reason a reader could see. */
-  grid-template-columns: 302px minmax(0, 1fr) 287px;
-  grid-template-rows: auto minmax(0, 1fr);
-  /* ⚠️ `stretch` IS THE COLUMN-BOTTOM LAW, AND IT IS ONE WORD RATHER THAN THREE HEIGHTS. Every
-     column is handed the same row box, so the three bottoms agree by construction — there is no
-     number to keep in step and nothing to re-measure when a card's content changes. The ref
-     reaches the same place with `align-items: stretch` on `.grid3`; the prompt described it as
-     `height:0; min-height:100%` on the side columns, which is not what the ref does and is not
-     needed once the tracks are the columns. */
-  align-items: stretch;
-  column-gap: 16px;
-  row-gap: 0;
-  padding: 16px 26px 24px;
-  /* ⚠️ THE CAP IS A TOKEN NOW — Query Centre reads the same one, so the two pages agree by
-     reading one value rather than by two literals that match today. */
-  max-width: var(--work-max);
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 0 22px;
   width: 100%;
 }
-.os-greet { grid-column: 1 / -1; grid-row: 1; }
-.os-colL { grid-column: 1; grid-row: 2; }
-.os-colM { grid-column: 2; grid-row: 2; }
-.os-colR { grid-column: 3; grid-row: 2; }
+/* ⚠️ THE REF'S OWN TRACKS AND GAP. 440/1fr/420 at ≥1700, 340/1fr/360 below — its `.grid3` and its
+   own narrow override, not values chosen here. `align-items: stretch` is the column-bottom law in
+   one word: every column is handed the same row box, so the three bottoms agree by construction. */
+.os-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 440px minmax(0, 1fr) 420px;
+  gap: 22px;
+  align-items: stretch;
+}
+@media (max-width: 1699px) { .os-grid { grid-template-columns: 340px minmax(0, 1fr) 360px; } }
+.os-colL { grid-column: 1; }
+.os-colM { grid-column: 2; }
+.os-colR { grid-column: 3; }
 /* ⚠️ `height:100%` + `overflow:hidden` — the columns take the row they are given and nothing
    escapes them. Without the overflow, a tall card pushes past its column silently. */
 /**
@@ -151,11 +145,11 @@
   padding: var(--os-bleed);
   margin: calc(var(--os-bleed) * -1);
 }
-.os-colL, .os-colM { gap: var(--os-cardgap); }
+.os-colL, .os-colM { gap: 22px; }
 /* ⚠️ THE RAIL USES MARGINS, NOT GAP (§6) — a collapsing panel must take its slot's spacing with
    it, and `gap` leaves a ghost gutter behind a max-height:0 panel. */
 .os-colR { gap: 0; }
-.os-colR > * { margin-bottom: 13px; }
+.os-colR > * { margin-bottom: 22px; }
 .os-colR > *:last-child { margin-bottom: 0; }
 
 /* ══ THE COLUMNS' VERTICAL BUDGET (dashboard redesign, Phase 2) ══════════════════════════════
@@ -186,8 +180,14 @@
    can honestly grow. ⚠️ WHERE PRO IS ABSENT — a Pro subscriber, or a viewport below its own gate —
    THE COLUMN'S FOOT IS SHORT, and that gap is reported rather than filled: inventing a spacer to
    close it would put a shape on the page that stands for nothing. */
+/* ⚠️ THE LAST CARD IN EACH SIDE COLUMN CLOSES IT. The columns are stretched by the grid, so a
+   column whose cards are all natural height leaves a hole at its foot and the three bottoms do not
+   agree — measured 658px apart before this. Which card is last depends on whether Pro renders:
+   `OneScreenPro` returns null for a subscriber and is display:none below its own viewport gate, so
+   Community takes the slack in those cases and Pro takes it otherwise. Both are stated, and the one
+   that is not last is `flex: 0 0 auto`. */
 .os-colL .os-aut { flex: 0 0 auto; }
-.os-colL .os-comm { flex: 0 0 auto; }
+.os-colL .os-comm { flex: 1 1 auto; min-height: 0; }
 .os-colL .os-probanner { flex: 1 1 auto; }
 
 /* ⚠️ THE FEED FLEXES TO ITS COLUMN AND NEVER SETS IT. `.os-colR` is stretched by the grid, the
@@ -202,13 +202,18 @@
      rule. A separate block is how this sheet has been bitten twice: the smoke test's slice takes
      the FIRST match, so the second rule's declarations are invisible to it. One element, one rule. */
   position: relative;
-  background: #fffdf9;
+  /* ⚠️ THE REF'S CARD, VALUE FOR VALUE: `--card #fdfbf7`, a REAL 1px `--line #e6dfd6` border, an
+     18px radius and its two-stop shadow. The app had #fffdf9, no border at all (an `::after` inset
+     ring) and a 15px radius — three differences the refdiff reported on every card at every width. */
+  background: #fdfbf7;
+  border: 1px solid #e6dfd6;
   /* ⚠️ NO `border` — THE RIM IS THE ::after RING BELOW, and it is the only thing that declares it.
      A border here would be a second source of truth for one hairline, and the next person to
      retune the rim token would move one and miss the other. Measured cost of removing it: card
      size unchanged, contents sit 1px further out. */
-  border-radius: 15px;
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06);
+  border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(42, 31, 24, 0.03), 0 8px 24px rgba(42, 31, 24, 0.04);
+  overflow: hidden;
   min-height: 0;
   /* border-color is no longer set on this element — the ring owns the rim */
   transition: box-shadow 0.18s ease;
@@ -235,15 +240,8 @@
  * Measured across banded and band-less cards: child offsets identical, so this is a no-op on the
  * cards that have no band — which is the case the primitive will meet most often elsewhere.
  */
-.os-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 0 0 1px #e3d9cc;
-  pointer-events: none; /* the rim must never intercept a click meant for the card */
-  transition: box-shadow 0.16s ease;
-}
+/* ⚠️ THE `::after` RIM IS RETIRED — the card draws a REAL border now, which is what the ref does.
+   Two sources for one hairline is how the next retune moves one and misses the other. */
 /* §10: hover deepens the DROP shadow only — no movement, no transform on a container. The RIM's
    hover lives on the ::after (below), because the ring is the rim's single source of truth. */
 .os-card.os-lift:hover {
@@ -293,7 +291,10 @@
    a top-aligned card beside a 46px name reads as two unrelated blocks. */
 /* ⚠️ THE BOTTOM PADDING IS THE INTER-CARD GAP — see --os-cardgap. It was 26px, nearly
    double the gap between every other pair of cards, for no reason the card could state. */
-.os-greet { display: flex; align-items: center; gap: 32px; padding: 14px 2px var(--os-cardgap); flex: none; }
+/* ⚠️ THE REF'S HERO: a two-track grid (`auto 1fr`), 40px gap, `padding: 10px 4px 6px`. It was a
+   flex row with 32px and its own bottom padding — which put the stats' left edge 66px out and the
+   hero 27px short at every width. */
+.os-greet { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; padding: 10px 4px 6px; flex: none; }
 /* ⚠️ THE GREETING SIZES TO ITS CONTENT so the card can have the rest. It was `flex: 1` in the
    pre-counters ref, which would split the row down the middle instead. */
 .os-greet .os-gl { flex: 0 0 auto; min-width: 0; }
@@ -302,10 +303,8 @@
    date itself. A subtitle sits BELOW the name instead; the header is shorter for it. */
 .os-sub2 { font-size: 13.5px; color: #8a7a6c; margin-top: 6px; letter-spacing: 0.005em; }
 .os-greet .os-grow2 { display: flex; align-items: center; gap: 14px; }
-.os-greet h1 {
-  font-family: var(--font-serif); font-weight: 700; font-size: 46px;
-  letter-spacing: -0.025em; color: #241811; line-height: 1; margin: 0;
-}
+/* the ref's `.hero h1`: serif 700 / 52px / 1.05, in `--ink #2a1f18` */
+.os-greet h1 { font-family: var(--font-serif); font-weight: 700; font-size: 52px; letter-spacing: -0.02em; color: #2a1f18; line-height: 1.05; margin: 0; }
 .os-greet .os-spacer { flex: 1; }
 .os-datechip {
   display: flex; align-items: center; gap: 8px;
@@ -498,9 +497,12 @@
    center` centres them INSIDE that. Pushing right (`margin-left: auto` on a shrink-wrapped row)
    would tie their position to the greeting's length, so the row would shift every time the writer's
    name or the date changed underneath it. */
+/* ⚠️ THE REF'S STATS: flex, 36px gap, LEFT-aligned in the track the hero's second column gives it.
+   The app centred them in the remaining width; the ref's own `justify-content:flex-start!important`
+   is the shipping value. */
 .os-counters {
   flex: 1; min-width: 0;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: flex-start; gap: 36px;
   padding: 0;
 }
 /* ⚠️ READOUTS, NOT CONTROLS — no lift, ever. Kept after the card came off (Phase 3): the element
@@ -526,11 +528,9 @@
    ground the three shrink-wrap and the GROUP is what centres — which is what makes "centred in
    the remaining width" a statement rather than a no-op. Padding widens to carry the space the
    card's own used to. */
-.os-counter {
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-  flex: 0 1 auto; min-width: 0; padding: 2px 26px; border-left: 1px solid #f0e7db;
-}
-.os-counter:first-child { border-left: none; }
+/* ⚠️ NO DIVIDER, NO PADDING — the ref's `.stat` is `display:flex; align-items:center; gap:18px` and
+   nothing else. The rule between stats was the container's furniture and the container is gone. */
+.os-counter { display: flex; align-items: center; gap: 18px; flex: 0 0 auto; min-width: 0; }
 /**
  * ⚠️ ILLUSTRATED MARKS, BARE ON THE CARD — and two traps, each of which cost a round to find.
  *
@@ -628,10 +628,12 @@
 .os-cv { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; }
 /* ⚠️ TABULAR NUMERALS — a counting figure whose glyph widths change re-lays-out the row on
    every frame. */
+/* the ref's `.fig b`: serif 600 / 34px, in `--ink`. Tabular numerals stay — a counting figure whose
+   glyph widths change re-lays-out its row on every frame. */
 .os-cn {
   font-variant-numeric: tabular-nums;
-  font-family: var(--font-serif); font-size: 24px; font-weight: 500; color: #241811;
-  line-height: 1; font-variant-numeric: tabular-nums;
+  font-family: var(--font-serif); font-size: 34px; font-weight: 600; color: #2a1f18;
+  line-height: 1;
 }
 .os-cd {
   font-size: 10px; border-radius: 99px; padding: 2px 8px; white-space: nowrap;
@@ -724,7 +726,7 @@
 /* ⚠️ 38px AND WEIGHT 600 — the stat block's figure (Phase 4), up from 21 in the flat row. Tabular
    numerals stay: a counting figure whose glyph widths change re-lays-out the row on every frame. */
 .os-ahead .os-n {
-  font-family: var(--font-serif); font-weight: 600; font-size: 38px; color: #241811;
+  font-family: var(--font-serif); font-weight: 600; font-size: 38px; color: #2a1f18;
   line-height: 1; font-variant-numeric: tabular-nums; flex: none;
 }
 .os-ahead .os-chip { flex: none; }
@@ -1083,7 +1085,7 @@
   display: flex; align-items: center; gap: 12px; margin: 0;
 }
 .os-th2 h2 {
-  font-family: var(--font-serif); font-size: 15.5px; font-weight: 600; color: #3a241a;
+  font-family: var(--font-serif); font-size: 23px; font-weight: 500; color: #2a1f18;
   margin: 0; white-space: nowrap;
 }
 
@@ -1268,7 +1270,7 @@
 /* ══ §6 · QUERYING GOALS ══ */
 .os-goal { padding: 13px 16px 14px; flex: none; }
 .os-goal-r1 { display: flex; align-items: baseline; gap: 10px; }
-.os-goal-r1 h2 { font-family: var(--font-serif); font-size: 14.5px; font-weight: 600; color: #241811; flex: 1; margin: 0; }
+.os-goal-r1 h2 { font-family: var(--font-serif); font-size: 23px; font-weight: 500; color: #2a1f18; flex: 1; margin: 0; }
 /* ⚠️ `.os-goal-num`, `.os-blocks` AND `.os-goal-edit` ARE RETIRED (goals pack).
    `.os-goal-num` was the count rendered as a BUTTON that opened an inline editor — an editing
    surface inside a reporting one, which made the number look like a control. `.os-blocks` was the
@@ -1301,8 +1303,9 @@
 /* ⚠️ NOWRAP, AND THE CONTROLS SHRINK FIRST. A title wrapping to two lines was what broke the band
    height at narrower widths — with a stated height it would now clip instead, which is worse. */
 .os-ahead h2, .os-th2 h2 { white-space: nowrap; flex: none; }
+/* the ref's `.hd h3`: serif 500 / 23px, in `--ink` — one heading treatment for every card */
 .os-ahead h2 {
-  font-family: var(--font-serif); font-size: 15px; font-weight: 600; color: #2b3a29;
+  font-family: var(--font-serif); font-size: 23px; font-weight: 500; color: #2a1f18;
   margin: 0;
 }
 .os-exp {

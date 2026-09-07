@@ -243,7 +243,7 @@ describe("the pink band (app-shell-v2)", () => {
     expect(block).not.toContain("linear-gradient");
     expect(block).not.toContain("border-bottom");
     expect(block).not.toContain("background");
-    expect(cssRule(cssRules, ".os-th2 h2", "oneScreen.css")).toContain("color: #3a241a");
+    expect(cssRule(cssRules, ".os-th2 h2", "oneScreen.css")).toContain("color: #2a1f18");
   });
 
   /* the band is edge-to-edge, so the card has to clip or it overhangs the radius */

@@ -279,6 +279,11 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             `grid-template-columns`, so neither pair could drift. With the columns as the grid's own
             tracks there is nothing left to drift — the law is kept by the structure rather than by
             a shared declaration, which is why the declaration goes rather than being retargeted. */}
+        {/* ⚠️ THE GRID IS ITS OWN ELEMENT NOW (refdiff pass, Phase 3). It used to BE `.os-content`,
+            with the hero as its first row — which meant the hero's height was a grid track and the
+            three columns could not be given a row of their own. The ref draws `main` holding a
+            `hero` and a `grid3`; this is that, and it is what `data-probe="grid"` measures. */}
+        <div className="os-grid" data-probe="grid">
         <div className="os-colL">
           <OneScreenAuthor
             loading={loading} manuscripts={manuscripts}
@@ -342,6 +347,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           onOpenTask={(queryId) => setFeedOpenQueryId(queryId)}
           now={now}
         />
+        </div>
       </div>
       {/* ⚠️ LAST CHILD, OVER THE MOUNTED PAGE. The cards stay in the tree beneath it, which is what
           makes "no layout shift" structural rather than a matter of matching numbers — and it is

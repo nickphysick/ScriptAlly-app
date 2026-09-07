@@ -1,0 +1,2724 @@
+{
+ "when": "2026-09-07T22:40:30.553Z",
+ "ref": "design-refs/dashboard-cappuccino-v14.html",
+ "app": "http://127.0.0.1:4173",
+ "widths": [
+  1536,
+  1920,
+  2520
+ ],
+ "byWidth": {
+  "1536": {
+   "ref": {
+    "probes": {
+     "main": {
+      "x": 238,
+      "y": 34,
+      "w": 1274,
+      "h": 1490.4,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "hero": {
+      "x": 260,
+      "y": 34,
+      "w": 1252,
+      "h": 210.4,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "stats": {
+      "x": 264,
+      "y": 142.4,
+      "w": 1244,
+      "h": 96,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "grid": {
+      "x": 260,
+      "y": 244.4,
+      "w": 1252,
+      "h": 1280,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "manuscript-card": {
+      "x": 260,
+      "y": 244.4,
+      "w": 340,
+      "h": 362.2,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "community-card": {
+      "x": 260,
+      "y": 628.6,
+      "w": 340,
+      "h": 895.8,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "chart-card": {
+      "x": 622,
+      "y": 244.4,
+      "w": 508,
+      "h": 348.2,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "brush": {
+      "x": 799.3,
+      "y": 308.7,
+      "w": 285.4,
+      "h": 48,
+      "bg": "rgb(255, 255, 255)",
+      "borderTopW": 1,
+      "borderTop": "rgba(0, 0, 0, 0.08)",
+      "radius": "14px"
+     },
+     "plot": {
+      "x": 643,
+      "y": 374.7,
+      "w": 466,
+      "h": 153.8,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "todo-card": {
+      "x": 622,
+      "y": 614.6,
+      "w": 508,
+      "h": 909.8,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "todo-badge": {
+      "x": 800.2,
+      "y": 633.7,
+      "w": 40.2,
+      "h": 24,
+      "bg": "rgb(241, 231, 218)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 216, 198)",
+      "radius": "99px"
+     },
+     "todo-rule": {
+      "x": 623,
+      "y": 665.8,
+      "w": 506,
+      "h": 35,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "goals-card": {
+      "x": 1152,
+      "y": 244.4,
+      "w": 360,
+      "h": 294.7,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "activity-card": {
+      "x": 1152,
+      "y": 561.1,
+      "w": 360,
+      "h": 963.3,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "activity-tabs": {
+      "x": 1153,
+      "y": 612.3,
+      "w": 358,
+      "h": 39.9,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "feed": {
+      "x": 1153,
+      "y": 652.1,
+      "w": 358,
+      "h": 830.9,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     }
+    },
+    "text": {
+     "hero-h1": {
+      "family": "Playfair Display",
+      "size": 52,
+      "weight": "700",
+      "color": "rgb(42, 31, 24)"
+     },
+     "stat-figure": {
+      "family": "Playfair Display",
+      "size": 34,
+      "weight": "600",
+      "color": "rgb(42, 31, 24)"
+     },
+     "card-h3": {
+      "family": "Playfair Display",
+      "size": 23,
+      "weight": "500",
+      "color": "rgb(42, 31, 24)"
+     },
+     "chart-figure": {
+      "family": "Playfair Display",
+      "size": 38,
+      "weight": "600",
+      "color": "rgb(42, 31, 24)"
+     },
+     "ticket-title": {
+      "family": "Source Sans 3",
+      "size": 14.5,
+      "weight": "600",
+      "color": "rgb(42, 31, 24)"
+     },
+     "bubble-sentence": {
+      "family": "Source Sans 3",
+      "size": 15,
+      "weight": "400",
+      "color": "rgb(42, 31, 24)"
+     }
+    },
+    "checks": {
+     "ground": "rgb(244, 240, 234)",
+     "hScroll": 0,
+     "columnBottoms": [
+      1524.4,
+      1524.4,
+      1524.4
+     ],
+     "columnSpread": 0,
+     "markCount": 0,
+     "transformedAncestors": []
+    }
+   },
+   "app": {
+    "probes": {
+     "main": {
+      "x": 247,
+      "y": 111,
+      "w": 1266,
+      "h": 1324,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "hero": {
+      "x": 269,
+      "y": 111,
+      "w": 1244,
+      "h": 96.8,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "stats": {
+      "x": 655.4,
+      "y": 131.4,
+      "w": 853.6,
+      "h": 60,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "grid": {
+      "x": 269,
+      "y": 207.8,
+      "w": 1244,
+      "h": 1227.2,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "manuscript-card": {
+      "x": 269,
+      "y": 207.8,
+      "w": 340,
+      "h": 308.9,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "community-card": {
+      "x": 269,
+      "y": 538.7,
+      "w": 340,
+      "h": 352.4,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "chart-card": {
+      "x": 631,
+      "y": 207.8,
+      "w": 500,
+      "h": 340,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "brush": {
+      "x": 987.1,
+      "y": 223.3,
+      "w": 132,
+      "h": 22,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "plot": {
+      "x": 650,
+      "y": 271.8,
+      "w": 462,
+      "h": 223.5,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "todo-card": {
+      "x": 631,
+      "y": 569.8,
+      "w": 500,
+      "h": 865.2,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "todo-badge": {
+      "x": 801.2,
+      "y": 584,
+      "w": 61.4,
+      "h": 24.8,
+      "bg": "rgb(244, 239, 232)",
+      "borderTopW": 0,
+      "borderTop": "rgb(92, 81, 72)",
+      "radius": "99px"
+     },
+     "todo-rule": {
+      "x": 632,
+      "y": 621.8,
+      "w": 498,
+      "h": 32,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "goals-card": {
+      "x": 1153,
+      "y": 207.8,
+      "w": 360,
+      "h": 216.8,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "activity-card": {
+      "x": 1153,
+      "y": 446.6,
+      "w": 360,
+      "h": 988.4,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "activity-tabs": {
+      "x": 1154,
+      "y": 498.6,
+      "w": 358,
+      "h": 33,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "feed": {
+      "x": 1154,
+      "y": 531.6,
+      "w": 358,
+      "h": 876.9,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     }
+    },
+    "text": {
+     "hero-h1": {
+      "family": "Playfair Display",
+      "size": 52,
+      "weight": "700",
+      "color": "rgb(42, 31, 24)"
+     },
+     "stat-figure": {
+      "family": "Playfair Display",
+      "size": 34,
+      "weight": "600",
+      "color": "rgb(42, 31, 24)"
+     },
+     "card-h3": {
+      "family": "Playfair Display",
+      "size": 23,
+      "weight": "500",
+      "color": "rgb(42, 31, 24)"
+     },
+     "chart-figure": {
+      "family": "Playfair Display",
+      "size": 38,
+      "weight": "600",
+      "color": "rgb(42, 31, 24)"
+     },
+     "ticket-title": {
+      "family": "Inter",
+      "size": 14.5,
+      "weight": "600",
+      "color": "rgb(58, 28, 20)"
+     },
+     "bubble-sentence": {
+      "family": "Source Sans Pro",
+      "size": 12.5,
+      "weight": "400",
+      "color": "rgb(36, 24, 17)"
+     }
+    },
+    "checks": {
+     "ground": "rgb(244, 240, 234)",
+     "hScroll": 0,
+     "columnBottoms": [
+      1445,
+      1445,
+      1445
+     ],
+     "columnSpread": 0,
+     "markCount": 3,
+     "transformedAncestors": []
+    }
+   },
+   "misses": [
+    {
+     "key": "main",
+     "field": "x",
+     "ref": 238,
+     "app": 247,
+     "delta": 9,
+     "tol": 3
+    },
+    {
+     "key": "main",
+     "field": "y",
+     "ref": 34,
+     "app": 111,
+     "delta": 77,
+     "tol": 3
+    },
+    {
+     "key": "main",
+     "field": "w",
+     "ref": 1274,
+     "app": 1266,
+     "delta": -8,
+     "tol": 4
+    },
+    {
+     "key": "main",
+     "field": "h",
+     "ref": 1490.4,
+     "app": 1324,
+     "delta": -166.4,
+     "tol": 4
+    },
+    {
+     "key": "hero",
+     "field": "w",
+     "ref": 1252,
+     "app": 1244,
+     "delta": -8,
+     "tol": 4
+    },
+    {
+     "key": "hero",
+     "field": "h",
+     "ref": 210.4,
+     "app": 96.8,
+     "delta": -113.6,
+     "tol": 4
+    },
+    {
+     "key": "stats",
+     "field": "x",
+     "ref": 26,
+     "app": 408.4,
+     "delta": 382.4,
+     "tol": 3
+    },
+    {
+     "key": "stats",
+     "field": "y",
+     "ref": 108.4,
+     "app": 20.4,
+     "delta": -88,
+     "tol": 3
+    },
+    {
+     "key": "stats",
+     "field": "w",
+     "ref": 1244,
+     "app": 853.6,
+     "delta": -390.4,
+     "tol": 4
+    },
+    {
+     "key": "stats",
+     "field": "h",
+     "ref": 96,
+     "app": 60,
+     "delta": -36,
+     "tol": 4
+    },
+    {
+     "key": "grid",
+     "field": "y",
+     "ref": 210.4,
+     "app": 96.8,
+     "delta": -113.6,
+     "tol": 3
+    },
+    {
+     "key": "grid",
+     "field": "w",
+     "ref": 1252,
+     "app": 1244,
+     "delta": -8,
+     "tol": 4
+    },
+    {
+     "key": "grid",
+     "field": "h",
+     "ref": 1280,
+     "app": 1227.2,
+     "delta": -52.8,
+     "tol": 4
+    },
+    {
+     "key": "manuscript-card",
+     "field": "y",
+     "ref": 210.4,
+     "app": 96.8,
+     "delta": -113.6,
+     "tol": 3
+    },
+    {
+     "key": "manuscript-card",
+     "field": "h",
+     "ref": 362.2,
+     "app": 308.9,
+     "delta": -53.3,
+     "tol": 4
+    },
+    {
+     "key": "community-card",
+     "field": "y",
+     "ref": 594.6,
+     "app": 427.7,
+     "delta": -166.9,
+     "tol": 3
+    },
+    {
+     "key": "community-card",
+     "field": "h",
+     "ref": 895.8,
+     "app": 352.4,
+     "delta": -543.4,
+     "tol": 4
+    },
+    {
+     "key": "chart-card",
+     "field": "y",
+     "ref": 210.4,
+     "app": 96.8,
+     "delta": -113.6,
+     "tol": 3
+    },
+    {
+     "key": "chart-card",
+     "field": "w",
+     "ref": 508,
+     "app": 500,
+     "delta": -8,
+     "tol": 4
+    },
+    {
+     "key": "chart-card",
+     "field": "h",
+     "ref": 348.2,
+     "app": 340,
+     "delta": -8.2,
+     "tol": 4
+    },
+    {
+     "key": "plot",
+     "field": "y",
+     "ref": 340.7,
+     "app": 160.8,
+     "delta": -179.9,
+     "tol": 3
+    },
+    {
+     "key": "plot",
+     "field": "h",
+     "ref": 153.8,
+     "app": 223.5,
+     "delta": 69.7,
+     "tol": 4
+    },
+    {
+     "key": "brush",
+     "field": "x",
+     "ref": 561.3,
+     "app": 740.1,
+     "delta": 178.8,
+     "tol": 3
+    },
+    {
+     "key": "brush",
+     "field": "y",
+     "ref": 274.7,
+     "app": 112.3,
+     "delta": -162.4,
+     "tol": 3
+    },
+    {
+     "key": "brush",
+     "field": "w",
+     "ref": 285.4,
+     "app": 132,
+     "delta": -153.4,
+     "tol": 4
+    },
+    {
+     "key": "brush",
+     "field": "h",
+     "ref": 48,
+     "app": 22,
+     "delta": -26,
+     "tol": 4
+    },
+    {
+     "key": "brush",
+     "field": "bg",
+     "ref": "rgb(255, 255, 255)",
+     "app": "rgba(0, 0, 0, 0)"
+    },
+    {
+     "key": "brush",
+     "field": "radius",
+     "ref": "14px",
+     "app": "0px"
+    },
+    {
+     "key": "brush",
+     "field": "borderW",
+     "ref": 1,
+     "app": 0
+    },
+    {
+     "key": "todo-card",
+     "field": "y",
+     "ref": 580.6,
+     "app": 458.8,
+     "delta": -121.8,
+     "tol": 3
+    },
+    {
+     "key": "todo-card",
+     "field": "w",
+     "ref": 508,
+     "app": 500,
+     "delta": -8,
+     "tol": 4
+    },
+    {
+     "key": "todo-card",
+     "field": "h",
+     "ref": 909.8,
+     "app": 865.2,
+     "delta": -44.6,
+     "tol": 4
+    },
+    {
+     "key": "todo-badge",
+     "field": "x",
+     "ref": 562.2,
+     "app": 554.2,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "todo-badge",
+     "field": "y",
+     "ref": 599.7,
+     "app": 473,
+     "delta": -126.7,
+     "tol": 3
+    },
+    {
+     "key": "todo-badge",
+     "field": "w",
+     "ref": 40.2,
+     "app": 61.4,
+     "delta": 21.2,
+     "tol": 4
+    },
+    {
+     "key": "todo-badge",
+     "field": "bg",
+     "ref": "rgb(241, 231, 218)",
+     "app": "rgb(244, 239, 232)"
+    },
+    {
+     "key": "todo-badge",
+     "field": "borderW",
+     "ref": 1,
+     "app": 0
+    },
+    {
+     "key": "todo-rule",
+     "field": "y",
+     "ref": 631.8,
+     "app": 510.8,
+     "delta": -121,
+     "tol": 3
+    },
+    {
+     "key": "todo-rule",
+     "field": "w",
+     "ref": 506,
+     "app": 498,
+     "delta": -8,
+     "tol": 4
+    },
+    {
+     "key": "goals-card",
+     "field": "x",
+     "ref": 914,
+     "app": 906,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "goals-card",
+     "field": "y",
+     "ref": 210.4,
+     "app": 96.8,
+     "delta": -113.6,
+     "tol": 3
+    },
+    {
+     "key": "goals-card",
+     "field": "h",
+     "ref": 294.7,
+     "app": 216.8,
+     "delta": -77.9,
+     "tol": 4
+    },
+    {
+     "key": "activity-card",
+     "field": "x",
+     "ref": 914,
+     "app": 906,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "activity-card",
+     "field": "y",
+     "ref": 527.1,
+     "app": 335.6,
+     "delta": -191.5,
+     "tol": 3
+    },
+    {
+     "key": "activity-card",
+     "field": "h",
+     "ref": 963.3,
+     "app": 988.4,
+     "delta": 25.1,
+     "tol": 4
+    },
+    {
+     "key": "activity-tabs",
+     "field": "x",
+     "ref": 915,
+     "app": 907,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "activity-tabs",
+     "field": "y",
+     "ref": 578.3,
+     "app": 387.6,
+     "delta": -190.7,
+     "tol": 3
+    },
+    {
+     "key": "activity-tabs",
+     "field": "h",
+     "ref": 39.9,
+     "app": 33,
+     "delta": -6.9,
+     "tol": 4
+    },
+    {
+     "key": "feed",
+     "field": "x",
+     "ref": 915,
+     "app": 907,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "feed",
+     "field": "y",
+     "ref": 618.1,
+     "app": 420.6,
+     "delta": -197.5,
+     "tol": 3
+    },
+    {
+     "key": "feed",
+     "field": "h",
+     "ref": 830.9,
+     "app": 876.9,
+     "delta": 46,
+     "tol": 4
+    },
+    {
+     "key": "ticket-title",
+     "field": "family",
+     "ref": "Source Sans 3",
+     "app": "Inter"
+    },
+    {
+     "key": "ticket-title",
+     "field": "color",
+     "ref": "rgb(42, 31, 24)",
+     "app": "rgb(58, 28, 20)"
+    },
+    {
+     "key": "bubble-sentence",
+     "field": "family",
+     "ref": "Source Sans 3",
+     "app": "Source Sans Pro"
+    },
+    {
+     "key": "bubble-sentence",
+     "field": "size",
+     "ref": 15,
+     "app": 12.5,
+     "tol": 0.5
+    },
+    {
+     "key": "bubble-sentence",
+     "field": "color",
+     "ref": "rgb(42, 31, 24)",
+     "app": "rgb(36, 24, 17)"
+    }
+   ]
+  },
+  "1920": {
+   "ref": {
+    "probes": {
+     "main": {
+      "x": 250,
+      "y": 34,
+      "w": 1634,
+      "h": 1408,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "hero": {
+      "x": 280,
+      "y": 34,
+      "w": 1604,
+      "h": 128,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "stats": {
+      "x": 674.9,
+      "y": 44,
+      "w": 1205.1,
+      "h": 112,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "grid": {
+      "x": 280,
+      "y": 162,
+      "w": 1604,
+      "h": 1280,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "manuscript-card": {
+      "x": 280,
+      "y": 162,
+      "w": 440,
+      "h": 362.2,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "community-card": {
+      "x": 280,
+      "y": 546.2,
+      "w": 440,
+      "h": 895.8,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "chart-card": {
+      "x": 742,
+      "y": 162,
+      "w": 700,
+      "h": 392,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "brush": {
+      "x": 919.3,
+      "y": 226.3,
+      "w": 345.4,
+      "h": 48,
+      "bg": "rgb(255, 255, 255)",
+      "borderTopW": 1,
+      "borderTop": "rgba(0, 0, 0, 0.08)",
+      "radius": "14px"
+     },
+     "plot": {
+      "x": 763,
+      "y": 292.3,
+      "w": 658,
+      "h": 217.1,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "todo-card": {
+      "x": 742,
+      "y": 576,
+      "w": 700,
+      "h": 866,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "todo-badge": {
+      "x": 920.2,
+      "y": 595.1,
+      "w": 40.2,
+      "h": 24,
+      "bg": "rgb(241, 231, 218)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 216, 198)",
+      "radius": "99px"
+     },
+     "todo-rule": {
+      "x": 743,
+      "y": 627.2,
+      "w": 698,
+      "h": 35,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "goals-card": {
+      "x": 1464,
+      "y": 162,
+      "w": 420,
+      "h": 294.7,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "activity-card": {
+      "x": 1464,
+      "y": 478.7,
+      "w": 420,
+      "h": 963.3,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "activity-tabs": {
+      "x": 1465,
+      "y": 529.9,
+      "w": 418,
+      "h": 39.9,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "feed": {
+      "x": 1465,
+      "y": 569.8,
+      "w": 418,
+      "h": 830.9,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     }
+    },
+    "text": {
+     "hero-h1": {
+      "family": "Playfair Display",
+      "size": 52,
+      "weight": "700",
+      "color": "rgb(42, 31, 24)"
+     },
+     "stat-figure": {
+      "family": "Playfair Display",
+      "size": 34,
+      "weight": "600",
+      "color": "rgb(42, 31, 24)"
+     },
+     "card-h3": {
+      "family": "Playfair Display",
+      "size": 23,
+      "weight": "500",
+      "color": "rgb(42, 31, 24)"
+     },
+     "chart-figure": {
+      "family": "Playfair Display",
+      "size": 38,
+      "weight": "600",
+      "color": "rgb(42, 31, 24)"
+     },
+     "ticket-title": {
+      "family": "Source Sans 3",
+      "size": 14.5,
+      "weight": "600",
+      "color": "rgb(42, 31, 24)"
+     },
+     "bubble-sentence": {
+      "family": "Source Sans 3",
+      "size": 15,
+      "weight": "400",
+      "color": "rgb(42, 31, 24)"
+     }
+    },
+    "checks": {
+     "ground": "rgb(244, 240, 234)",
+     "hScroll": 0,
+     "columnBottoms": [
+      1442,
+      1442,
+      1442
+     ],
+     "columnSpread": 0,
+     "markCount": 0,
+     "transformedAncestors": []
+    }
+   },
+   "app": {
+    "probes": {
+     "main": {
+      "x": 247,
+      "y": 111,
+      "w": 1650,
+      "h": 1324,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "hero": {
+      "x": 269,
+      "y": 111,
+      "w": 1628,
+      "h": 96.8,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "stats": {
+      "x": 655.4,
+      "y": 131.4,
+      "w": 1237.6,
+      "h": 60,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "grid": {
+      "x": 269,
+      "y": 207.8,
+      "w": 1628,
+      "h": 1227.2,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "manuscript-card": {
+      "x": 269,
+      "y": 207.8,
+      "w": 440,
+      "h": 308.9,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "community-card": {
+      "x": 269,
+      "y": 538.7,
+      "w": 440,
+      "h": 405.5,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "chart-card": {
+      "x": 731,
+      "y": 207.8,
+      "w": 724,
+      "h": 340,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "brush": {
+      "x": 1208,
+      "y": 223.3,
+      "w": 132,
+      "h": 22,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "plot": {
+      "x": 750,
+      "y": 271.8,
+      "w": 686,
+      "h": 223.5,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "todo-card": {
+      "x": 731,
+      "y": 569.8,
+      "w": 724,
+      "h": 865.2,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "todo-badge": {
+      "x": 901.2,
+      "y": 584,
+      "w": 61.4,
+      "h": 24.8,
+      "bg": "rgb(244, 239, 232)",
+      "borderTopW": 0,
+      "borderTop": "rgb(92, 81, 72)",
+      "radius": "99px"
+     },
+     "todo-rule": {
+      "x": 732,
+      "y": 621.8,
+      "w": 722,
+      "h": 32,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "goals-card": {
+      "x": 1477,
+      "y": 207.8,
+      "w": 420,
+      "h": 216.8,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "activity-card": {
+      "x": 1477,
+      "y": 446.6,
+      "w": 420,
+      "h": 988.4,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "activity-tabs": {
+      "x": 1478,
+      "y": 498.6,
+      "w": 418,
+      "h": 33,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "feed": {
+      "x": 1478,
+      "y": 531.6,
+      "w": 418,
+      "h": 876.9,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     }
+    },
+    "text": {
+     "hero-h1": {
+      "family": "Playfair Display",
+      "size": 52,
+      "weight": "700",
+      "color": "rgb(42, 31, 24)"
+     },
+     "stat-figure": {
+      "family": "Playfair Display",
+      "size": 34,
+      "weight": "600",
+      "color": "rgb(42, 31, 24)"
+     },
+     "card-h3": {
+      "family": "Playfair Display",
+      "size": 23,
+      "weight": "500",
+      "color": "rgb(42, 31, 24)"
+     },
+     "chart-figure": {
+      "family": "Playfair Display",
+      "size": 38,
+      "weight": "600",
+      "color": "rgb(42, 31, 24)"
+     },
+     "ticket-title": {
+      "family": "Inter",
+      "size": 14.5,
+      "weight": "600",
+      "color": "rgb(58, 28, 20)"
+     },
+     "bubble-sentence": {
+      "family": "Source Sans Pro",
+      "size": 12.5,
+      "weight": "400",
+      "color": "rgb(36, 24, 17)"
+     }
+    },
+    "checks": {
+     "ground": "rgb(244, 240, 234)",
+     "hScroll": 0,
+     "columnBottoms": [
+      1445,
+      1445,
+      1445
+     ],
+     "columnSpread": 0,
+     "markCount": 3,
+     "transformedAncestors": []
+    }
+   },
+   "misses": [
+    {
+     "key": "main",
+     "field": "y",
+     "ref": 34,
+     "app": 111,
+     "delta": 77,
+     "tol": 3
+    },
+    {
+     "key": "main",
+     "field": "w",
+     "ref": 1634,
+     "app": 1650,
+     "delta": 16,
+     "tol": 4
+    },
+    {
+     "key": "main",
+     "field": "h",
+     "ref": 1408,
+     "app": 1324,
+     "delta": -84,
+     "tol": 4
+    },
+    {
+     "key": "hero",
+     "field": "x",
+     "ref": 30,
+     "app": 22,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "hero",
+     "field": "w",
+     "ref": 1604,
+     "app": 1628,
+     "delta": 24,
+     "tol": 4
+    },
+    {
+     "key": "hero",
+     "field": "h",
+     "ref": 128,
+     "app": 96.8,
+     "delta": -31.2,
+     "tol": 4
+    },
+    {
+     "key": "stats",
+     "field": "x",
+     "ref": 424.9,
+     "app": 408.4,
+     "delta": -16.5,
+     "tol": 3
+    },
+    {
+     "key": "stats",
+     "field": "y",
+     "ref": 10,
+     "app": 20.4,
+     "delta": 10.4,
+     "tol": 3
+    },
+    {
+     "key": "stats",
+     "field": "w",
+     "ref": 1205.1,
+     "app": 1237.6,
+     "delta": 32.5,
+     "tol": 4
+    },
+    {
+     "key": "stats",
+     "field": "h",
+     "ref": 112,
+     "app": 60,
+     "delta": -52,
+     "tol": 4
+    },
+    {
+     "key": "grid",
+     "field": "x",
+     "ref": 30,
+     "app": 22,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "grid",
+     "field": "y",
+     "ref": 128,
+     "app": 96.8,
+     "delta": -31.2,
+     "tol": 3
+    },
+    {
+     "key": "grid",
+     "field": "w",
+     "ref": 1604,
+     "app": 1628,
+     "delta": 24,
+     "tol": 4
+    },
+    {
+     "key": "grid",
+     "field": "h",
+     "ref": 1280,
+     "app": 1227.2,
+     "delta": -52.8,
+     "tol": 4
+    },
+    {
+     "key": "manuscript-card",
+     "field": "x",
+     "ref": 30,
+     "app": 22,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "manuscript-card",
+     "field": "y",
+     "ref": 128,
+     "app": 96.8,
+     "delta": -31.2,
+     "tol": 3
+    },
+    {
+     "key": "manuscript-card",
+     "field": "h",
+     "ref": 362.2,
+     "app": 308.9,
+     "delta": -53.3,
+     "tol": 4
+    },
+    {
+     "key": "community-card",
+     "field": "x",
+     "ref": 30,
+     "app": 22,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "community-card",
+     "field": "y",
+     "ref": 512.2,
+     "app": 427.7,
+     "delta": -84.5,
+     "tol": 3
+    },
+    {
+     "key": "community-card",
+     "field": "h",
+     "ref": 895.8,
+     "app": 405.5,
+     "delta": -490.3,
+     "tol": 4
+    },
+    {
+     "key": "chart-card",
+     "field": "x",
+     "ref": 492,
+     "app": 484,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "chart-card",
+     "field": "y",
+     "ref": 128,
+     "app": 96.8,
+     "delta": -31.2,
+     "tol": 3
+    },
+    {
+     "key": "chart-card",
+     "field": "w",
+     "ref": 700,
+     "app": 724,
+     "delta": 24,
+     "tol": 4
+    },
+    {
+     "key": "chart-card",
+     "field": "h",
+     "ref": 392,
+     "app": 340,
+     "delta": -52,
+     "tol": 4
+    },
+    {
+     "key": "plot",
+     "field": "x",
+     "ref": 513,
+     "app": 503,
+     "delta": -10,
+     "tol": 3
+    },
+    {
+     "key": "plot",
+     "field": "y",
+     "ref": 258.3,
+     "app": 160.8,
+     "delta": -97.5,
+     "tol": 3
+    },
+    {
+     "key": "plot",
+     "field": "w",
+     "ref": 658,
+     "app": 686,
+     "delta": 28,
+     "tol": 4
+    },
+    {
+     "key": "plot",
+     "field": "h",
+     "ref": 217.1,
+     "app": 223.5,
+     "delta": 6.4,
+     "tol": 4
+    },
+    {
+     "key": "brush",
+     "field": "x",
+     "ref": 669.3,
+     "app": 961,
+     "delta": 291.7,
+     "tol": 3
+    },
+    {
+     "key": "brush",
+     "field": "y",
+     "ref": 192.3,
+     "app": 112.3,
+     "delta": -80,
+     "tol": 3
+    },
+    {
+     "key": "brush",
+     "field": "w",
+     "ref": 345.4,
+     "app": 132,
+     "delta": -213.4,
+     "tol": 4
+    },
+    {
+     "key": "brush",
+     "field": "h",
+     "ref": 48,
+     "app": 22,
+     "delta": -26,
+     "tol": 4
+    },
+    {
+     "key": "brush",
+     "field": "bg",
+     "ref": "rgb(255, 255, 255)",
+     "app": "rgba(0, 0, 0, 0)"
+    },
+    {
+     "key": "brush",
+     "field": "radius",
+     "ref": "14px",
+     "app": "0px"
+    },
+    {
+     "key": "brush",
+     "field": "borderW",
+     "ref": 1,
+     "app": 0
+    },
+    {
+     "key": "todo-card",
+     "field": "x",
+     "ref": 492,
+     "app": 484,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "todo-card",
+     "field": "y",
+     "ref": 542,
+     "app": 458.8,
+     "delta": -83.2,
+     "tol": 3
+    },
+    {
+     "key": "todo-card",
+     "field": "w",
+     "ref": 700,
+     "app": 724,
+     "delta": 24,
+     "tol": 4
+    },
+    {
+     "key": "todo-badge",
+     "field": "x",
+     "ref": 670.2,
+     "app": 654.2,
+     "delta": -16,
+     "tol": 3
+    },
+    {
+     "key": "todo-badge",
+     "field": "y",
+     "ref": 561.1,
+     "app": 473,
+     "delta": -88.1,
+     "tol": 3
+    },
+    {
+     "key": "todo-badge",
+     "field": "w",
+     "ref": 40.2,
+     "app": 61.4,
+     "delta": 21.2,
+     "tol": 4
+    },
+    {
+     "key": "todo-badge",
+     "field": "bg",
+     "ref": "rgb(241, 231, 218)",
+     "app": "rgb(244, 239, 232)"
+    },
+    {
+     "key": "todo-badge",
+     "field": "borderW",
+     "ref": 1,
+     "app": 0
+    },
+    {
+     "key": "todo-rule",
+     "field": "x",
+     "ref": 493,
+     "app": 485,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "todo-rule",
+     "field": "y",
+     "ref": 593.2,
+     "app": 510.8,
+     "delta": -82.4,
+     "tol": 3
+    },
+    {
+     "key": "todo-rule",
+     "field": "w",
+     "ref": 698,
+     "app": 722,
+     "delta": 24,
+     "tol": 4
+    },
+    {
+     "key": "goals-card",
+     "field": "x",
+     "ref": 1214,
+     "app": 1230,
+     "delta": 16,
+     "tol": 3
+    },
+    {
+     "key": "goals-card",
+     "field": "y",
+     "ref": 128,
+     "app": 96.8,
+     "delta": -31.2,
+     "tol": 3
+    },
+    {
+     "key": "goals-card",
+     "field": "h",
+     "ref": 294.7,
+     "app": 216.8,
+     "delta": -77.9,
+     "tol": 4
+    },
+    {
+     "key": "activity-card",
+     "field": "x",
+     "ref": 1214,
+     "app": 1230,
+     "delta": 16,
+     "tol": 3
+    },
+    {
+     "key": "activity-card",
+     "field": "y",
+     "ref": 444.7,
+     "app": 335.6,
+     "delta": -109.1,
+     "tol": 3
+    },
+    {
+     "key": "activity-card",
+     "field": "h",
+     "ref": 963.3,
+     "app": 988.4,
+     "delta": 25.1,
+     "tol": 4
+    },
+    {
+     "key": "activity-tabs",
+     "field": "x",
+     "ref": 1215,
+     "app": 1231,
+     "delta": 16,
+     "tol": 3
+    },
+    {
+     "key": "activity-tabs",
+     "field": "y",
+     "ref": 495.9,
+     "app": 387.6,
+     "delta": -108.3,
+     "tol": 3
+    },
+    {
+     "key": "activity-tabs",
+     "field": "h",
+     "ref": 39.9,
+     "app": 33,
+     "delta": -6.9,
+     "tol": 4
+    },
+    {
+     "key": "feed",
+     "field": "x",
+     "ref": 1215,
+     "app": 1231,
+     "delta": 16,
+     "tol": 3
+    },
+    {
+     "key": "feed",
+     "field": "y",
+     "ref": 535.8,
+     "app": 420.6,
+     "delta": -115.2,
+     "tol": 3
+    },
+    {
+     "key": "feed",
+     "field": "h",
+     "ref": 830.9,
+     "app": 876.9,
+     "delta": 46,
+     "tol": 4
+    },
+    {
+     "key": "ticket-title",
+     "field": "family",
+     "ref": "Source Sans 3",
+     "app": "Inter"
+    },
+    {
+     "key": "ticket-title",
+     "field": "color",
+     "ref": "rgb(42, 31, 24)",
+     "app": "rgb(58, 28, 20)"
+    },
+    {
+     "key": "bubble-sentence",
+     "field": "family",
+     "ref": "Source Sans 3",
+     "app": "Source Sans Pro"
+    },
+    {
+     "key": "bubble-sentence",
+     "field": "size",
+     "ref": 15,
+     "app": 12.5,
+     "tol": 0.5
+    },
+    {
+     "key": "bubble-sentence",
+     "field": "color",
+     "ref": "rgb(42, 31, 24)",
+     "app": "rgb(36, 24, 17)"
+    }
+   ]
+  },
+  "2520": {
+   "ref": {
+    "probes": {
+     "main": {
+      "x": 290,
+      "y": 34,
+      "w": 2154,
+      "h": 1408,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "hero": {
+      "x": 320,
+      "y": 34,
+      "w": 2124,
+      "h": 128,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "stats": {
+      "x": 714.9,
+      "y": 44,
+      "w": 1725.1,
+      "h": 112,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "grid": {
+      "x": 320,
+      "y": 162,
+      "w": 2124,
+      "h": 1280,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "manuscript-card": {
+      "x": 320,
+      "y": 162,
+      "w": 440,
+      "h": 362.2,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "community-card": {
+      "x": 320,
+      "y": 546.2,
+      "w": 440,
+      "h": 895.8,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "chart-card": {
+      "x": 782,
+      "y": 162,
+      "w": 1220,
+      "h": 514.3,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "brush": {
+      "x": 1635.6,
+      "y": 177,
+      "w": 345.4,
+      "h": 48,
+      "bg": "rgb(255, 255, 255)",
+      "borderTopW": 1,
+      "borderTop": "rgba(0, 0, 0, 0.08)",
+      "radius": "14px"
+     },
+     "plot": {
+      "x": 803,
+      "y": 243,
+      "w": 1178,
+      "h": 388.7,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "todo-card": {
+      "x": 782,
+      "y": 698.3,
+      "w": 1220,
+      "h": 743.7,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "todo-badge": {
+      "x": 960.2,
+      "y": 717.4,
+      "w": 40.2,
+      "h": 24,
+      "bg": "rgb(241, 231, 218)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 216, 198)",
+      "radius": "99px"
+     },
+     "todo-rule": {
+      "x": 783,
+      "y": 749.5,
+      "w": 1218,
+      "h": 35,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "goals-card": {
+      "x": 2024,
+      "y": 162,
+      "w": 420,
+      "h": 294.7,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "activity-card": {
+      "x": 2024,
+      "y": 478.7,
+      "w": 420,
+      "h": 963.3,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "activity-tabs": {
+      "x": 2025,
+      "y": 529.9,
+      "w": 418,
+      "h": 39.9,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     },
+     "feed": {
+      "x": 2025,
+      "y": 569.8,
+      "w": 418,
+      "h": 830.9,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(42, 31, 24)",
+      "radius": "0px"
+     }
+    },
+    "text": {
+     "hero-h1": {
+      "family": "Playfair Display",
+      "size": 52,
+      "weight": "700",
+      "color": "rgb(42, 31, 24)"
+     },
+     "stat-figure": {
+      "family": "Playfair Display",
+      "size": 34,
+      "weight": "600",
+      "color": "rgb(42, 31, 24)"
+     },
+     "card-h3": {
+      "family": "Playfair Display",
+      "size": 23,
+      "weight": "500",
+      "color": "rgb(42, 31, 24)"
+     },
+     "chart-figure": {
+      "family": "Playfair Display",
+      "size": 38,
+      "weight": "600",
+      "color": "rgb(42, 31, 24)"
+     },
+     "ticket-title": {
+      "family": "Source Sans 3",
+      "size": 14.5,
+      "weight": "600",
+      "color": "rgb(42, 31, 24)"
+     },
+     "bubble-sentence": {
+      "family": "Source Sans 3",
+      "size": 15,
+      "weight": "400",
+      "color": "rgb(42, 31, 24)"
+     }
+    },
+    "checks": {
+     "ground": "rgb(244, 240, 234)",
+     "hScroll": 0,
+     "columnBottoms": [
+      1442,
+      1442,
+      1442
+     ],
+     "columnSpread": 0,
+     "markCount": 0,
+     "transformedAncestors": []
+    }
+   },
+   "app": {
+    "probes": {
+     "main": {
+      "x": 247,
+      "y": 111,
+      "w": 2250,
+      "h": 1324,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "hero": {
+      "x": 269,
+      "y": 111,
+      "w": 2228,
+      "h": 96.8,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "stats": {
+      "x": 655.4,
+      "y": 131.4,
+      "w": 1837.6,
+      "h": 60,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "grid": {
+      "x": 269,
+      "y": 207.8,
+      "w": 2228,
+      "h": 1227.2,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "manuscript-card": {
+      "x": 269,
+      "y": 207.8,
+      "w": 440,
+      "h": 308.9,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "community-card": {
+      "x": 269,
+      "y": 538.7,
+      "w": 440,
+      "h": 405.5,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "chart-card": {
+      "x": 731,
+      "y": 207.8,
+      "w": 1324,
+      "h": 340,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "brush": {
+      "x": 1808,
+      "y": 223.3,
+      "w": 132,
+      "h": 22,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "plot": {
+      "x": 750,
+      "y": 271.8,
+      "w": 1286,
+      "h": 223.5,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "todo-card": {
+      "x": 731,
+      "y": 569.8,
+      "w": 1324,
+      "h": 865.2,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "todo-badge": {
+      "x": 901.2,
+      "y": 584,
+      "w": 61.4,
+      "h": 24.8,
+      "bg": "rgb(244, 239, 232)",
+      "borderTopW": 0,
+      "borderTop": "rgb(92, 81, 72)",
+      "radius": "99px"
+     },
+     "todo-rule": {
+      "x": 732,
+      "y": 621.8,
+      "w": 1322,
+      "h": 32,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "goals-card": {
+      "x": 2077,
+      "y": 207.8,
+      "w": 420,
+      "h": 216.8,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "activity-card": {
+      "x": 2077,
+      "y": 446.6,
+      "w": 420,
+      "h": 988.4,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "activity-tabs": {
+      "x": 2078,
+      "y": 498.6,
+      "w": 418,
+      "h": 33,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     },
+     "feed": {
+      "x": 2078,
+      "y": 531.6,
+      "w": 418,
+      "h": 876.9,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(58, 28, 20)",
+      "radius": "0px"
+     }
+    },
+    "text": {
+     "hero-h1": {
+      "family": "Playfair Display",
+      "size": 52,
+      "weight": "700",
+      "color": "rgb(42, 31, 24)"
+     },
+     "stat-figure": {
+      "family": "Playfair Display",
+      "size": 34,
+      "weight": "600",
+      "color": "rgb(42, 31, 24)"
+     },
+     "card-h3": {
+      "family": "Playfair Display",
+      "size": 23,
+      "weight": "500",
+      "color": "rgb(42, 31, 24)"
+     },
+     "chart-figure": {
+      "family": "Playfair Display",
+      "size": 38,
+      "weight": "600",
+      "color": "rgb(42, 31, 24)"
+     },
+     "ticket-title": {
+      "family": "Inter",
+      "size": 14.5,
+      "weight": "600",
+      "color": "rgb(58, 28, 20)"
+     },
+     "bubble-sentence": {
+      "family": "Source Sans Pro",
+      "size": 12.5,
+      "weight": "400",
+      "color": "rgb(36, 24, 17)"
+     }
+    },
+    "checks": {
+     "ground": "rgb(244, 240, 234)",
+     "hScroll": 0,
+     "columnBottoms": [
+      1445,
+      1445,
+      1445
+     ],
+     "columnSpread": 0,
+     "markCount": 3,
+     "transformedAncestors": []
+    }
+   },
+   "misses": [
+    {
+     "key": "main",
+     "field": "x",
+     "ref": 290,
+     "app": 247,
+     "delta": -43,
+     "tol": 3
+    },
+    {
+     "key": "main",
+     "field": "y",
+     "ref": 34,
+     "app": 111,
+     "delta": 77,
+     "tol": 3
+    },
+    {
+     "key": "main",
+     "field": "w",
+     "ref": 2154,
+     "app": 2250,
+     "delta": 96,
+     "tol": 4
+    },
+    {
+     "key": "main",
+     "field": "h",
+     "ref": 1408,
+     "app": 1324,
+     "delta": -84,
+     "tol": 4
+    },
+    {
+     "key": "hero",
+     "field": "x",
+     "ref": 30,
+     "app": 22,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "hero",
+     "field": "w",
+     "ref": 2124,
+     "app": 2228,
+     "delta": 104,
+     "tol": 4
+    },
+    {
+     "key": "hero",
+     "field": "h",
+     "ref": 128,
+     "app": 96.8,
+     "delta": -31.2,
+     "tol": 4
+    },
+    {
+     "key": "stats",
+     "field": "x",
+     "ref": 424.9,
+     "app": 408.4,
+     "delta": -16.5,
+     "tol": 3
+    },
+    {
+     "key": "stats",
+     "field": "y",
+     "ref": 10,
+     "app": 20.4,
+     "delta": 10.4,
+     "tol": 3
+    },
+    {
+     "key": "stats",
+     "field": "w",
+     "ref": 1725.1,
+     "app": 1837.6,
+     "delta": 112.5,
+     "tol": 4
+    },
+    {
+     "key": "stats",
+     "field": "h",
+     "ref": 112,
+     "app": 60,
+     "delta": -52,
+     "tol": 4
+    },
+    {
+     "key": "grid",
+     "field": "x",
+     "ref": 30,
+     "app": 22,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "grid",
+     "field": "y",
+     "ref": 128,
+     "app": 96.8,
+     "delta": -31.2,
+     "tol": 3
+    },
+    {
+     "key": "grid",
+     "field": "w",
+     "ref": 2124,
+     "app": 2228,
+     "delta": 104,
+     "tol": 4
+    },
+    {
+     "key": "grid",
+     "field": "h",
+     "ref": 1280,
+     "app": 1227.2,
+     "delta": -52.8,
+     "tol": 4
+    },
+    {
+     "key": "manuscript-card",
+     "field": "x",
+     "ref": 30,
+     "app": 22,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "manuscript-card",
+     "field": "y",
+     "ref": 128,
+     "app": 96.8,
+     "delta": -31.2,
+     "tol": 3
+    },
+    {
+     "key": "manuscript-card",
+     "field": "h",
+     "ref": 362.2,
+     "app": 308.9,
+     "delta": -53.3,
+     "tol": 4
+    },
+    {
+     "key": "community-card",
+     "field": "x",
+     "ref": 30,
+     "app": 22,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "community-card",
+     "field": "y",
+     "ref": 512.2,
+     "app": 427.7,
+     "delta": -84.5,
+     "tol": 3
+    },
+    {
+     "key": "community-card",
+     "field": "h",
+     "ref": 895.8,
+     "app": 405.5,
+     "delta": -490.3,
+     "tol": 4
+    },
+    {
+     "key": "chart-card",
+     "field": "x",
+     "ref": 492,
+     "app": 484,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "chart-card",
+     "field": "y",
+     "ref": 128,
+     "app": 96.8,
+     "delta": -31.2,
+     "tol": 3
+    },
+    {
+     "key": "chart-card",
+     "field": "w",
+     "ref": 1220,
+     "app": 1324,
+     "delta": 104,
+     "tol": 4
+    },
+    {
+     "key": "chart-card",
+     "field": "h",
+     "ref": 514.3,
+     "app": 340,
+     "delta": -174.3,
+     "tol": 4
+    },
+    {
+     "key": "plot",
+     "field": "x",
+     "ref": 513,
+     "app": 503,
+     "delta": -10,
+     "tol": 3
+    },
+    {
+     "key": "plot",
+     "field": "y",
+     "ref": 209,
+     "app": 160.8,
+     "delta": -48.2,
+     "tol": 3
+    },
+    {
+     "key": "plot",
+     "field": "w",
+     "ref": 1178,
+     "app": 1286,
+     "delta": 108,
+     "tol": 4
+    },
+    {
+     "key": "plot",
+     "field": "h",
+     "ref": 388.7,
+     "app": 223.5,
+     "delta": -165.2,
+     "tol": 4
+    },
+    {
+     "key": "brush",
+     "field": "x",
+     "ref": 1345.6,
+     "app": 1561,
+     "delta": 215.4,
+     "tol": 3
+    },
+    {
+     "key": "brush",
+     "field": "y",
+     "ref": 143,
+     "app": 112.3,
+     "delta": -30.7,
+     "tol": 3
+    },
+    {
+     "key": "brush",
+     "field": "w",
+     "ref": 345.4,
+     "app": 132,
+     "delta": -213.4,
+     "tol": 4
+    },
+    {
+     "key": "brush",
+     "field": "h",
+     "ref": 48,
+     "app": 22,
+     "delta": -26,
+     "tol": 4
+    },
+    {
+     "key": "brush",
+     "field": "bg",
+     "ref": "rgb(255, 255, 255)",
+     "app": "rgba(0, 0, 0, 0)"
+    },
+    {
+     "key": "brush",
+     "field": "radius",
+     "ref": "14px",
+     "app": "0px"
+    },
+    {
+     "key": "brush",
+     "field": "borderW",
+     "ref": 1,
+     "app": 0
+    },
+    {
+     "key": "todo-card",
+     "field": "x",
+     "ref": 492,
+     "app": 484,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "todo-card",
+     "field": "y",
+     "ref": 664.3,
+     "app": 458.8,
+     "delta": -205.5,
+     "tol": 3
+    },
+    {
+     "key": "todo-card",
+     "field": "w",
+     "ref": 1220,
+     "app": 1324,
+     "delta": 104,
+     "tol": 4
+    },
+    {
+     "key": "todo-card",
+     "field": "h",
+     "ref": 743.7,
+     "app": 865.2,
+     "delta": 121.5,
+     "tol": 4
+    },
+    {
+     "key": "todo-badge",
+     "field": "x",
+     "ref": 670.2,
+     "app": 654.2,
+     "delta": -16,
+     "tol": 3
+    },
+    {
+     "key": "todo-badge",
+     "field": "y",
+     "ref": 683.4,
+     "app": 473,
+     "delta": -210.4,
+     "tol": 3
+    },
+    {
+     "key": "todo-badge",
+     "field": "w",
+     "ref": 40.2,
+     "app": 61.4,
+     "delta": 21.2,
+     "tol": 4
+    },
+    {
+     "key": "todo-badge",
+     "field": "bg",
+     "ref": "rgb(241, 231, 218)",
+     "app": "rgb(244, 239, 232)"
+    },
+    {
+     "key": "todo-badge",
+     "field": "borderW",
+     "ref": 1,
+     "app": 0
+    },
+    {
+     "key": "todo-rule",
+     "field": "x",
+     "ref": 493,
+     "app": 485,
+     "delta": -8,
+     "tol": 3
+    },
+    {
+     "key": "todo-rule",
+     "field": "y",
+     "ref": 715.5,
+     "app": 510.8,
+     "delta": -204.7,
+     "tol": 3
+    },
+    {
+     "key": "todo-rule",
+     "field": "w",
+     "ref": 1218,
+     "app": 1322,
+     "delta": 104,
+     "tol": 4
+    },
+    {
+     "key": "goals-card",
+     "field": "x",
+     "ref": 1734,
+     "app": 1830,
+     "delta": 96,
+     "tol": 3
+    },
+    {
+     "key": "goals-card",
+     "field": "y",
+     "ref": 128,
+     "app": 96.8,
+     "delta": -31.2,
+     "tol": 3
+    },
+    {
+     "key": "goals-card",
+     "field": "h",
+     "ref": 294.7,
+     "app": 216.8,
+     "delta": -77.9,
+     "tol": 4
+    },
+    {
+     "key": "activity-card",
+     "field": "x",
+     "ref": 1734,
+     "app": 1830,
+     "delta": 96,
+     "tol": 3
+    },
+    {
+     "key": "activity-card",
+     "field": "y",
+     "ref": 444.7,
+     "app": 335.6,
+     "delta": -109.1,
+     "tol": 3
+    },
+    {
+     "key": "activity-card",
+     "field": "h",
+     "ref": 963.3,
+     "app": 988.4,
+     "delta": 25.1,
+     "tol": 4
+    },
+    {
+     "key": "activity-tabs",
+     "field": "x",
+     "ref": 1735,
+     "app": 1831,
+     "delta": 96,
+     "tol": 3
+    },
+    {
+     "key": "activity-tabs",
+     "field": "y",
+     "ref": 495.9,
+     "app": 387.6,
+     "delta": -108.3,
+     "tol": 3
+    },
+    {
+     "key": "activity-tabs",
+     "field": "h",
+     "ref": 39.9,
+     "app": 33,
+     "delta": -6.9,
+     "tol": 4
+    },
+    {
+     "key": "feed",
+     "field": "x",
+     "ref": 1735,
+     "app": 1831,
+     "delta": 96,
+     "tol": 3
+    },
+    {
+     "key": "feed",
+     "field": "y",
+     "ref": 535.8,
+     "app": 420.6,
+     "delta": -115.2,
+     "tol": 3
+    },
+    {
+     "key": "feed",
+     "field": "h",
+     "ref": 830.9,
+     "app": 876.9,
+     "delta": 46,
+     "tol": 4
+    },
+    {
+     "key": "ticket-title",
+     "field": "family",
+     "ref": "Source Sans 3",
+     "app": "Inter"
+    },
+    {
+     "key": "ticket-title",
+     "field": "color",
+     "ref": "rgb(42, 31, 24)",
+     "app": "rgb(58, 28, 20)"
+    },
+    {
+     "key": "bubble-sentence",
+     "field": "family",
+     "ref": "Source Sans 3",
+     "app": "Source Sans Pro"
+    },
+    {
+     "key": "bubble-sentence",
+     "field": "size",
+     "ref": 15,
+     "app": 12.5,
+     "tol": 0.5
+    },
+    {
+     "key": "bubble-sentence",
+     "field": "color",
+     "ref": "rgb(42, 31, 24)",
+     "app": "rgb(36, 24, 17)"
+    }
+   ]
+  }
+ },
+ "total": 184
+}
