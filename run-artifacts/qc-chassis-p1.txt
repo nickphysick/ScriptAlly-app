@@ -1,16 +1,16 @@
 ── qc chassis · Phase 1 · 15 assertions · 0 RED · 15 green
 green  · P1.-1 · the visible To-do page was found, so the readings below are about it
          scoped via visiblePage('.tdb-wrap')
-green  · P1.0 · the tiles rendered, and so did the list
-         tiles 7 · rows 27
+green  · P1.0 · the tiles rendered, and so did the card's body
+         tiles 7 · body items 28
 green  · P1.1 · seven tiles, in the contract's order
          ["All tasks","Urgent","Agent requests","Nudges","Gone quiet","Housekeeping","Your tasks"]
 green  · P1.2 · the five categories partition All — their sum IS the All count
-         five sum 27 · All 27 · {"All tasks":27,"Urgent":6,"Agent requests":9,"Nudges":9,"Gone quiet":5,"Housekeeping":2,"Your tasks":2}
+         five sum 28 · All 28 · {"All tasks":28,"Urgent":6,"Agent requests":9,"Nudges":9,"Gone quiet":6,"Housekeeping":2,"Your tasks":2}
 green  · P1.2b · the tile's total and the card footer's total are the SAME number
-         tile 27 · footer "27 tasks · 18 need you now" -> 27
+         tile 28 · footer "28 tasks · 19 need you now" -> 28
 green  · P1.2c · [REPORTED] the rail badge's figure, beside the page's
-         rail badge "29" · page 27  — they DISAGREE (known, Nick's call)
+         rail badge "30" · page 28  — they DISAGREE (known, Nick's call)
 green  · P1.3 · Urgent is a LENS, not a sixth part — it is not in that sum
          urgent 6 · agent requests 9
 green  · P1.4 · the header carries the title, the subtitle and one primary
@@ -26,5 +26,5 @@ green  · P1.9 · the tiles and the toolbar are SHARED — both pages import the
          QueryStatTiles→StatTiles · ToDoPage→StatTiles · Queries→ToolbarButton · ToDoPage→ToolbarButton
 green  · P1.10 · selecting a tile rings it, and only it
          ["Housekeeping"]
-green  · P1.11 · and the list narrows to exactly the number the tile stated
-         tile said 2 · rows 27 -> 2
+green  · P1.11 · and the body narrows to exactly the number the tile stated
+         tile said 2 · body items 28 -> 2

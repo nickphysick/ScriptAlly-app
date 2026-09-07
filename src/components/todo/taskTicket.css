@@ -1,0 +1,115 @@
+/* ── THE TICKET GRID (QC-chassis round, Phase 3; ref todo-qc-style.html `.cards` / `.card`) ──────
+   Every rule here is scoped under `.tkt` or `.tkt-grid`. The inner names — `.av`, `.ttl`, `.tfoot`
+   — are deliberately the ref's own and are shared with other surfaces in this app; they collide
+   with nothing because no stylesheet declares any of them BARE (checked before minting them, the
+   `.unitrow` lesson). Anyone flattening one of these to a bare selector breaks three pages.
+
+   ⚠️ THE CARD IS A <button>, so it needs the reset a button does not get for free: the app's font,
+   the page's text alignment, no UA border or background. A div with a click handler would have
+   cost the keyboard its access to a control that opens the pane. ── */
+
+.tkt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+  gap: 14px;
+  align-content: start;
+  padding: 2px 0 8px;
+}
+
+.tkt {
+  position: relative;
+  display: flex;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  background: var(--white);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  transition: border-color .16s, box-shadow .16s;
+}
+.tkt:hover { border-color: #d8c8bd; box-shadow: 0 2px 10px rgba(58, 28, 20, 0.07); }
+.tkt:focus-visible { outline: 2px solid var(--burg); outline-offset: 2px; }
+
+/* the status tint, as a flat fill the card's own radius clips */
+.tkt > .edge { flex: 0 0 4px; align-self: stretch; }
+
+.tkt > .in {
+  display: flex; flex-direction: column; gap: 9px;
+  padding: 14px 16px 12px; min-width: 0; flex: 1 1 auto;
+}
+
+.tkt .top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tkt .tag {
+  height: 22px; padding: 0 9px; border-radius: 999px;
+  font-size: 10.5px; font-weight: 500; white-space: nowrap;
+  display: inline-flex; align-items: center; flex: 0 0 auto;
+}
+/* ⚠️ THE APP'S THREE FAMILY PAPERS, NOT THE REF'S NAMES. The contract calls them --now1/--house1/
+   --yours1; this app has never had those, and copying them straight from the artefact meant three
+   rules reading tokens nothing defines — a `var()` with no fallback drops the declaration entirely,
+   so the tags would have rendered with NO background at all, silently, through a green build. The
+   token lock caught it, which is exactly what it is for.
+   These are `--u-{family}-1`, the first stop of the pane's own family gradients, so a tag on a
+   ticket and the pill on that task's pane are the same paper by construction. */
+.tkt .tag.now { background: var(--u-now-1); color: var(--burg); }
+.tkt .tag.house { background: var(--u-house-1); color: #2e3a2c; }
+.tkt .tag.yours { background: var(--u-yours-1); color: #8a7440; }
+
+.tkt .msc {
+  margin-left: auto; min-width: 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.09em;
+  text-transform: uppercase; color: #bfb2a3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ⚠️ INTER 600, NOT PLAYFAIR — the ref declares `.card .ttl` twice and RENDERS the second
+   (Playfair 18/500) while the brief specifies Inter 600. The brief wins; see TaskTicket.tsx.
+   ⚠️ AND `line-height` STAYS AT OR ABOVE 1.3 — the house floor. A deed is a whole sentence and
+   full of descenders. */
+.tkt .ttl {
+  font-family: 'Inter', sans-serif;
+  font-size: 14.5px; font-weight: 600; line-height: 1.3; color: var(--ink2);
+}
+
+.tkt .facts {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px;
+  padding: 9px 0 0; border-top: 1px dashed var(--hair2);
+}
+.tkt .cell { min-width: 0; display: flex; flex-direction: column; }
+.tkt .cell .k {
+  font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tkt .cell .v { font-size: 12px; font-weight: 500; color: var(--ink2); margin-top: 2px; }
+/* ⚠️ BURGUNDY IS "A CLOCK YOU ARE ANSWERABLE TO", and only an agent request sets it — see
+   `ticketFacts`. It is not "this number is big". */
+.tkt .cell .v.late { color: var(--burg); }
+
+.tkt .tfoot {
+  display: flex; align-items: center; gap: 8px; min-width: 0;
+  padding-top: 9px; border-top: 1px dashed var(--hair2);
+}
+.tkt .tfoot .av {
+  flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--pink); color: var(--burg);
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; font-weight: 500;
+}
+.tkt .tfoot .n {
+  font-size: 11.5px; font-weight: 500; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tkt .tfoot .n.own { color: var(--muted2); font-weight: 300; }
+.tkt .tfoot .qs { margin-left: auto; display: inline-flex; align-items: center; flex: 0 0 auto; }
+
+/* the selected ticket, matching the list's own selection weight */
+.tkt.sel { border-color: var(--pink-b); box-shadow: 0 0 0 2px var(--pink-b), 0 10px 26px rgba(58, 28, 20, 0.10); }
+
+/* ⚠️ THE URGENT MARK IS PHASE 6's, and this is only its resting state: a burgundy hairline at the
+   card's head. The motion that joins it there is declared with the rest of the app's motion, not
+   here, so `prefers-reduced-motion` has ONE place to answer. */
+.tkt.urgent { border-color: #e3c4b8; }

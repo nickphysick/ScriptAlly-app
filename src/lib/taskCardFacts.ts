@@ -161,6 +161,14 @@ export function listRowInputs(c: BoardCard, db: TaskData) {
   return {
     agency: ag?.agency ?? null,
     days: Number.isFinite(anchorMs) ? daysBetween(anchorMs, Date.now()) : null,
+    /* ⚠️ ADDITIVE, AND IT IS THE SAME ANCHOR `days` IS COUNTED FROM (QC-chassis round, Phase 3).
+       The ticket states a date beside its elapsed figure — "Asked on 2 April · 7 weeks waiting" —
+       and formatting that date anywhere else would be a SECOND derivation of the anchor, free to
+       name a different day from the one the span is measured against. Absent where the anchor is,
+       which becomes the ticket's em dash rather than an invented date. */
+    anchorDate: Number.isFinite(anchorMs)
+      ? new Date(anchorMs).toLocaleDateString("en-GB", { day: "numeric", month: "long" })
+      : null,
     partial: spec?.material === "partial",
     /* the ask, through the ONE materials formatter — absent when the request recorded none */
     ask: formatQueryMaterials(q?.materialsWanted),

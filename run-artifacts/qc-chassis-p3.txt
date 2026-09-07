@@ -1,0 +1,15 @@
+── qc chassis · Phase 3 · 7 assertions · 0 RED · 7 green
+green  · P3.0 · the Grid view renders tickets, and the list is not also on screen
+         tickets 28 · list rows present: false
+green  · P3.1 · pressing the switch CHANGES the content, and Grid comes back
+         grid on Grid true · grid on Board false · grid again true
+green  · P3.2 · the ticket title is Inter 600 — the brief, not the ref's second `.ttl`
+         Inter|14.5px|600
+green  · P3.3 · every ticket's status edge is painted and has width
+         tickets 28 · unpainted 0 · distinct colours ["rgb(215, 224, 232)","rgb(245, 230, 223)","rgb(224, 229, 221)","rgb(247, 239, 227)","rgb(228, 225, 219)"]
+green  · P3.4 · a ticket carries at most one status dot, never two
+         with an agent 24 · more than one dot 0
+green  · P3.5 · more than one label pair rendered — the labels track the act, not one shape
+         ["Came in / Since then","Asked on / Waiting","Their window closed / Past it","Quiet since / That’s","Noticed / Age","Added / Age"]
+green  · P3.6 · the burgundy figures ARE the urgent cards — the same set, not the same count
+         burgundy 6 · urgent 6

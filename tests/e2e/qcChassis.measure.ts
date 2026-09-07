@@ -67,7 +67,7 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
       /* and no second copy of any of them on THIS page */
       pageSearches: root.querySelectorAll(".qcc-tb-search").length,
       cardBar: root.querySelectorAll(".tlc .l-search").length,
-      rows: root.querySelectorAll(".tlc .row").length,
+      rows: root.querySelectorAll(".tlc .row, .tkt").length,
       /* the card's own footer, which states a total of its own */
       foot: ((root.querySelector(".tlc .l-foot .c") || {}).textContent || "").trim(),
       /* THE RAIL BADGE — the third surface that names a number of tasks. REPORTED, not asserted:
@@ -78,8 +78,13 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
     };
   })()`) as any;
 
-  add("P1.0 · the tiles rendered, and so did the list", r.row && r.tiles.length > 0 && r.rows > 0,
-      "tiles " + r.tiles.length + " · rows " + r.rows);
+  /* ⚠️ "ITEMS", NOT "ROWS" (retargeted in Phase 3). The card's BODY is the list's rows in List
+     view and the ticket grid in Grid view, and Grid is the default — so a probe pinned to
+     `.tlc .row` measured zero on a page full of work and reported the tiles as broken. The claim
+     was never about which element the body draws; it is about how many things it shows, which is
+     what the tile counted. Counting both is what makes it survive the view. */
+  add("P1.0 · the tiles rendered, and so did the card's body", r.row && r.tiles.length > 0 && r.rows > 0,
+      "tiles " + r.tiles.length + " · body items " + r.rows);
 
   add("P1.1 · seven tiles, in the contract's order",
       r.tiles.length === 7
@@ -179,7 +184,7 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
   const after = await page.evaluate(`(() => {
     const root = __saVisRoot();
     return {
-      rows: root.querySelectorAll(".tlc .row").length,
+      rows: root.querySelectorAll(".tlc .row, .tkt").length,
       on: [...root.querySelectorAll(".qct .qct-tile--on")]
         .map((t) => ((t.querySelector(".qct-k") || {}).textContent || "").trim()),
     };
@@ -189,9 +194,9 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
       after.on.length === 1 && after.on[0] === "Housekeeping", JSON.stringify(after.on));
   /* ⚠️ THE LIST SHOWS WHAT THE TILE COUNTED — the same number, not merely fewer rows. A tile that
      narrowed to a different set than it counted is the disagreement this asserts against. */
-  add("P1.11 · and the list narrows to exactly the number the tile stated",
+  add("P1.11 · and the body narrows to exactly the number the tile stated",
       picked !== null && after.rows === picked && after.rows < before,
-      "tile said " + picked + " · rows " + before + " -> " + after.rows);
+      "tile said " + picked + " · body items " + before + " -> " + after.rows);
 
   const lines = out.map((x) => (x.ok ? "green  " : "RED    ") + "· " + x.id + (x.note ? "\n         " + x.note : ""));
   const red = out.filter((x) => !x.ok);
@@ -373,6 +378,130 @@ test("Phase 2 — category as a grouping, and Gone quiet's two feeders", async (
   const lines = out.map((x) => (x.ok ? "green  " : "RED    ") + "· " + x.id + (x.note ? "\n         " + x.note : ""));
   const red = out.filter((x) => !x.ok);
   writeFileSync(OUT, "── qc chassis · Phase 2 · " + out.length + " assertions · " + red.length
+    + " RED · " + (out.length - red.length) + " green\n" + lines.join("\n") + "\n");
+  console.log(lines.join("\n"));
+  expect(out.length, "assertion floor").toBeGreaterThanOrEqual(6);
+  expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
+});
+
+/**
+ * Phase 3 — the ticket grid.
+ *
+ * ⚠️ NO BACKTICKS AND NO REGEX INSIDE ANY page.evaluate TEMPLATE. Patterns are matched in Node.
+ *
+ * ⚠️ AND THE SWITCH IS DRIVEN, NOT INSPECTED. Phase 1 asserted the view switch OFFERED Grid and
+ * Board while `todoView` was read nowhere — a control that looked like a choice and changed
+ * nothing, passing a lock that counted options instead of checking that either did anything. P3.0
+ * presses it and requires the content to CHANGE.
+ */
+test("Phase 3 — the ticket grid", async ({ page }) => {
+  const out: R[] = [];
+  const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
+  const OUT = process.env.SA_QC_OUT3 ?? "run-artifacts/qc-chassis-p3.txt";
+  rmSync(OUT, { force: true });
+
+  await ensureSignedIn(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/todo");
+  await page.waitForFunction("document.querySelectorAll('.qct-tile').length > 0", null, { timeout: 45_000 }).catch(() => {});
+  await liftMotionSuppression(page);
+  await visiblePage(page, ".tdb-wrap");
+  await page.waitForTimeout(700);
+
+  const read = () => page.evaluate(`(() => {
+    const root = __saVisRoot();
+    const t = [...root.querySelectorAll(".tkt")];
+    const one = t[0];
+    return {
+      grid: !!root.querySelector(".tkt-grid"),
+      list: !!root.querySelector(".tlc .row"),
+      n: t.length,
+      cards: t.map((x) => ({
+        tag: ((x.querySelector(".tag") || {}).textContent || "").trim(),
+        title: ((x.querySelector(".ttl") || {}).textContent || "").trim(),
+        keys: [...x.querySelectorAll(".cell .k")].map((k) => (k.textContent || "").trim()),
+        lates: x.querySelectorAll(".cell .v.late").length,
+        dots: x.querySelectorAll(".tfoot svg").length,
+        own: !!x.querySelector(".tfoot .n.own"),
+        edge: getComputedStyle(x.querySelector(".edge")).backgroundColor,
+        edgeW: Math.round(x.querySelector(".edge").getBoundingClientRect().width),
+        urgent: x.classList.contains("urgent"),
+      })),
+      titleFont: one
+        ? (() => { const cs = getComputedStyle(one.querySelector(".ttl"));
+                   return cs.fontFamily.split(",")[0].replace(/["']/g, "") + "|" + cs.fontSize + "|" + cs.fontWeight; })()
+        : "",
+    };
+  })()`) as Promise<any>;
+
+  const g = await read();
+  add("P3.0 · the Grid view renders tickets, and the list is not also on screen",
+      g.grid && g.n > 0 && !g.list, "tickets " + g.n + " · list rows present: " + g.list);
+
+  /* ⚠️ THE SWITCH IS PRESSED AND THE CONTENT MUST CHANGE — the claim Phase 1's own P1.8 could not
+     make, because it counted the two options and never asked whether either did anything. */
+  await page.evaluate(`(() => {
+    const root = __saVisRoot();
+    const b = [...root.querySelectorAll(".qvs button")].find((x) => (x.textContent || "").trim() === "Board");
+    if (b) b.click();
+  })()`);
+  await page.waitForTimeout(800);
+  const onBoard = await read();
+  await page.evaluate(`(() => {
+    const root = __saVisRoot();
+    const b = [...root.querySelectorAll(".qvs button")].find((x) => (x.textContent || "").trim() === "Grid");
+    if (b) b.click();
+  })()`);
+  await page.waitForTimeout(800);
+  const back = await read();
+  add("P3.1 · pressing the switch CHANGES the content, and Grid comes back",
+      g.grid && !onBoard.grid && back.grid,
+      "grid on Grid " + g.grid + " · grid on Board " + onBoard.grid + " · grid again " + back.grid);
+
+  /* the carried decision: Inter 600, against the ref's own second declaration of Playfair */
+  add("P3.2 · the ticket title is Inter 600 — the brief, not the ref's second `.ttl`",
+      back.titleFont.indexOf("Inter") === 0 && back.titleFont.indexOf("|600") > -1,
+      back.titleFont);
+
+  const cards: any[] = back.cards;
+
+  /* ⚠️ THE EDGE IS PAINTED AND HAS WIDTH. A colour with no box is a rule that applies and shows
+     nothing — the family this repo records against a negative-z child with no stacking context. */
+  const noEdge = cards.filter((c) => c.edgeW < 3 || c.edge === "rgba(0, 0, 0, 0)");
+  add("P3.3 · every ticket's status edge is painted and has width",
+      cards.length > 0 && noEdge.length === 0,
+      "tickets " + cards.length + " · unpainted " + noEdge.length
+        + " · distinct colours " + JSON.stringify([...new Set(cards.map((c) => c.edge))]));
+
+  /* ⚠️ ONE DOT PER TICKET. The edge and the dot are the same fact; two dots would say it twice,
+     and none would leave the foot anonymous. A card with no query has neither, by design. */
+  const withAgent = cards.filter((c) => !c.own);
+  const badDots = withAgent.filter((c) => c.dots > 1);
+  add("P3.4 · a ticket carries at most one status dot, never two",
+      badDots.length === 0 && withAgent.length > 0,
+      "with an agent " + withAgent.length + " · more than one dot " + badDots.length);
+
+  /* ⚠️ THE LABEL TALLY — the monoculture guard. The fact labels key on the BUCKET, so a fixture
+     showing only sends would render one pair everywhere and pass a check that merely asserted the
+     labels were non-empty. Keying them on the category was in fact WRONG and the page said so out
+     loud: an offer read "Asked on", a claim about something nobody asked for. */
+  const pairs = [...new Set(cards.map((c) => c.keys.join(" / ")))];
+  add("P3.5 · more than one label pair rendered — the labels track the act, not one shape",
+      pairs.length > 1, JSON.stringify(pairs));
+
+  /* ⚠️ BURGUNDY IS THE URGENT LENS, ASSERTED AS AN EQUALITY BETWEEN TWO RENDERED SETS rather than
+     a count. `late` calls `isUrgentCard`, so a ticket painting burgundy on a card the Urgent tile
+     does not hold would mean the two had come apart. */
+  const lateSet = cards.filter((c) => c.lates > 0).map((c) => c.title).sort();
+  const urgentSet = cards.filter((c) => c.urgent).map((c) => c.title).sort();
+  add("P3.6 · the burgundy figures ARE the urgent cards — the same set, not the same count",
+      lateSet.join("|") === urgentSet.join("|"),
+      "burgundy " + lateSet.length + " · urgent " + urgentSet.length
+        + (lateSet.join("|") === urgentSet.join("|") ? "" : " · " + JSON.stringify({ lateSet, urgentSet })));
+
+  const lines = out.map((x) => (x.ok ? "green  " : "RED    ") + "· " + x.id + (x.note ? "\n         " + x.note : ""));
+  const red = out.filter((x) => !x.ok);
+  writeFileSync(OUT, "── qc chassis · Phase 3 · " + out.length + " assertions · " + red.length
     + " RED · " + (out.length - red.length) + " green\n" + lines.join("\n") + "\n");
   console.log(lines.join("\n"));
   expect(out.length, "assertion floor").toBeGreaterThanOrEqual(6);

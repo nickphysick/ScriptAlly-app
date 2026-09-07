@@ -117,8 +117,16 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
        from the array the rows render from. "N outstanding" went with the retired rail footer, and
        with it the second number that made "showing 13 of 12" possible. */
     expect(html).toContain("1</b> tasks");
-    expect(html).toContain('<span class="g-n">1</span>');
-    expect(html).toContain("Your tasks");                // the group heading, outside its panel
+    /* ⚠️ THE DEFAULT VIEW IS THE GRID NOW (QC-chassis round, Phase 3), so the seeded work arrives
+       as a TICKET rather than a group head and a row. The claim this case makes is unchanged —
+       *real work renders on the populated page* — and the footer above still states the count,
+       because the view swaps the card's BODY and not the card.
+       The group heads and the rows are the LIST body's shape and are asserted where that body is
+       mounted directly: `taskListWide.test.tsx` and `tasksKeys.test.tsx`, both of which render
+       `TaskList` with groups and neither of which this change touches. Checked before retargeting,
+       so this is not coverage quietly shrinking. */
+    expect(html).toContain("tkt-grid");
+    expect(html).toContain("Your task");                 // the ticket's own category tag
     /* ⚠️ THE WHITE PANEL IS THE PORTED CARD — `.tlc` with its own `.l-body`. `tdg-panel` went
        with the retired list, and the claim is unchanged: the populated page draws a card. */
     /* the card carries both words — the scope and the contract's own name */
@@ -134,9 +142,11 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
        Asserted as an absence so a second place to finish work cannot reappear. */
     expect(html, "the row grew a tick again").not.toContain("tdg-tick");
     expect(html).not.toMatch(/["\s`]tdg-split["\s`]/);
-    /* ⚠️ THE ROW IS ONE ELEMENT — never `display: contents`, which fractures hover, focus and any
-       selected band into per-cell rectangles. Asserted against RENDERED output, not source. */
-    expect(html).toContain('class="row"');   // the ported row
+    /* ⚠️ THE ROW-SHAPE CLAIMS MOVED WITH THE ROWS. "the row is one element — never
+       `display: contents`" is a claim about the LIST body, which the default view no longer draws;
+       it is asserted in `taskListWide.test.tsx`, against a directly-mounted `TaskList`. What stays
+       here is the claim this file can still make: the populated page renders the work. */
+    expect(html).toContain("Redraft the opening chapter");
   });
 
   /* tasks-pages P3 — the Calendar is REAL; its placeholder era ended. Smoke from day one,

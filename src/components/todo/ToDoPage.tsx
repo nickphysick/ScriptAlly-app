@@ -72,6 +72,9 @@ import {
    answered by the groups themselves. Neither component is deleted in this phase (the house rule
    on orphans: flag, then sweep in a commit of its own). */
 import { TaskList } from "./TaskList";
+import { TaskTicket } from "./TaskTicket";
+import { ticketFacts } from "../../lib/ticketFacts";
+import { STATE_TOKEN, stateFor } from "../../lib/queryCardFacts";
 import { TODO_ROUTES } from "../../lib/todoRoutes";
 import { StatTiles, type StatTile } from "../shared/StatTiles";
 import { ToolbarButton, ToolbarIcon, ToolbarSearch } from "../shared/ToolbarButton";
@@ -95,7 +98,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { groupColumn, TaskGroup } from "../../lib/todoGroups";
 import { paneCopy, listManuscript, showsManuscriptColumn } from "../../lib/taskListRow";
-import { daysBetween, elapsedParts } from "../../lib/elapsed";
+import { daysBetween, elapsedParts, elapsedPhrase } from "../../lib/elapsed";
 import { materialRows, materialName, anchorNoun, bandForward, holderRows } from "../../lib/todoHandoff";
 import { notifyGroups, reminderFields } from "../../lib/offerNotify";
 import { sendSpecFor } from "../../lib/todoDock";
@@ -3317,6 +3320,53 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     });
   }
 
+  /**
+   * ⚠️ THE GRID IS WHAT MAKES THE VIEW SWITCH REAL (QC-chassis round, Phase 3). Phase 1 mounted
+   * Grid/Board and read `todoView` NOWHERE — a control that looked like a choice and changed
+   * nothing, which this repo already records as worse than no control at all (a dead Undo tells
+   * you it is fixed). Phase 1's own measurement asserted the switch OFFERED two options and never
+   * asked whether either did anything: a lock that counts is not a lock that checks.
+   *
+   * ⚠️ IT WALKS THE SAME GROUPS THE LIST WALKS. `groupsForList()` is already the tile's narrowing,
+   * the view's filters and the sort applied in that order; taking the cards out of it means the
+   * grid and the list cannot show different sets, and the footer's count describes both.
+   *
+   * ⚠️ AND THE FIGURES COME FROM `listRowInputs`, the row's own. A ticket deriving its own date
+   * would be free to name a different day from the row above it.
+   */
+  function renderGrid() {
+    const cards = groupsForList().flatMap((g) => g.cards);
+    return (
+      <div className="tkt-grid">
+        {cards.map((c) => {
+          const inp = listRowInputs(c);
+          return (
+            <TaskTicket
+              key={c.key}
+              card={c}
+              /* ⚠️ THE QUERY CENTRE'S OWN STATE COLOUR, not the ref's `TINT` table. The ref carries
+                 a literal status→hex map because it is a standalone document; this app already has
+                 `stateFor` → `STATE_TOKEN`, which the Query Centre's cards, its stat tiles and its
+                 board rules all read. Copying the ref's hexes would put a SECOND status palette
+                 three inches from the first, free to drift on the next retone. A card with no
+                 query (a note, a housekeeping item) has no state and takes the closed step. */
+              edge={c.status ? STATE_TOKEN[stateFor(c.status)] : STATE_TOKEN.closed}
+              manuscript={c.msTitle}
+              selected={docked.card?.key === c.key}
+              urgent={isUrgentCard(c, inp.days)}
+              facts={ticketFacts(c, {
+                days: inp.days,
+                dateLabel: inp.anchorDate,
+                elapsed: typeof inp.days === "number" ? elapsedPhrase(inp.days) : null,
+              })}
+              onOpen={() => openDock(c.key)}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+
   function renderList() {
     /* ⚠️ `railChips` IS NO LONGER THE FILTER'S SOURCE (frame round). The contract's menu counts by
        GROUP and by TYPE, both from `railGroupsAll()` — the same array the bands and the meter read,
@@ -3324,6 +3374,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return (
       <TaskList
         groups={groupsForList()}
+        /* ⚠️ THE VIEW SWAPS THE BODY, NOT THE CARD — see `TaskList`'s `body` prop. The card's foot
+           states the count and teaches the keys, and both are true of the tickets as well as the
+           rows, so it must not go away when the reader picks Grid. */
+        body={todoView === "grid" ? renderGrid() : undefined}
         leaving={leaving ? { key: leaving.card.key, fading: leavingFading } : undefined}
         onOpen={(c) => openDock(c.key)}
         selectedKey={docked.card?.key}

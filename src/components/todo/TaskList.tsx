@@ -116,6 +116,18 @@ export interface TaskListProps {
    * computed here from the numbers rather than from a flag that could go stale.
    */
   totalUnfiltered?: number;
+  /**
+   * ⚠️ AN ALTERNATIVE BODY — the Grid view's tickets, rendered inside this card rather than
+   * instead of it (QC-chassis round, Phase 3). Absent means the rows, which is every existing
+   * call site unchanged.
+   *
+   * It takes the BODY and not the card because the card's foot states a count and teaches four
+   * keys, and both are true of whatever the body shows: `total` is derived from `groups`, which
+   * the caller has already narrowed. Handing over the whole card would have given the two views
+   * two footers, free to state different numbers for one set — which is the fault this page has
+   * closed twice.
+   */
+  body?: React.ReactNode;
 }
 
 /** the contract's three group tints, keyed by its own group ids */
@@ -139,7 +151,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   asideActive, asideCount, onAside, asideMenu, folded, leaving,
   focusedKey, onFocusRow, onStripSnooze, onStripDismiss, stripMeta,
   collapsedGroups, onToggleGroup,
-  chips, onClearFilters, totalUnfiltered,
+  chips, onClearFilters, totalUnfiltered, body,
 }) => {
   /**
    * ⚠️ ONE ARRAY, COUNTED ONCE. The rows map over `g.cards`; the head prints `g.cards.length`; the
@@ -264,7 +276,15 @@ export const TaskList: React.FC<TaskListProps> = ({
         </div>
       )}
       <div className="l-body" ref={bodyRef} onScroll={readAnchor}>
-        {groups.map((g) => (
+        {/* ⚠️ THE GRID AND THE LIST ARE TWO VIEWS OF ONE CARD (QC-chassis round, Phase 3), and this
+            one line is why. The first cut swapped the whole card for a grid, which took the card's
+            FOOTER with it — so the count "N tasks · M need you now" and the four key hints vanished
+            in Grid view, and `.tpl-zone` left the chain. Three locks went red and were right to.
+
+            Only the BODY swaps. The head, the chips, the footer and its count are the card's, and
+            `total` is still `groups`, so the number describes whatever the body is showing. Two
+            cards would have been two footers free to disagree. */}
+        {body ?? groups.map((g) => (
           <React.Fragment key={g.id}>
             {/* ⚠️ AN UNKNOWN GROUP TAKES NO FAMILY CLASS. The fallback was `?? "house"`, which gave the
                 Snoozed group a housekeeping dot AND made it indistinguishable from housekeeping to
