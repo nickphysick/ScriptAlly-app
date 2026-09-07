@@ -612,9 +612,13 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
           <div className={`os-goal-hist${reached ? " mid" : ""}`}>
             {historyBars(goal.history).map((h) => (
               <span className="os-goal-hb" key={h.label}>
-                <span className="os-goal-hbt" aria-hidden="true"><i style={{ height: `${h.pct}%` }} /></span>
-                <b>{h.count}</b>
-                <em>{h.label}</em>
+                <span className="os-goal-hbt" aria-hidden="true">
+                  <i className={h.zero ? "z" : undefined} style={{ height: `${h.px}px` }} />
+                </span>
+                {/* ⚠️ ONE LINE — "10 Aug · 3", ref `.wk .lb`. It was a figure over a label, which
+                    made the count the loudest thing in a strip whose subject is the SHAPE of four
+                    periods; the bar already states the count, in the only units that compare. */}
+                <span className="os-goal-hlb">{h.label} · {h.count}</span>
               </span>
             ))}
           </div>

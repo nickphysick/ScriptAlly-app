@@ -180,9 +180,17 @@ describe("⚠️ nothing on this card changes colour with progress", () => {
      into a verdict. It was the meter's; it is the ring's, and the history bar's — all three state
      the same one colour, and a second `background` on any of them anywhere is the tell. */
   it("the filled fill is ONE colour across ring and bar, and no variant restates it", () => {
-    const fills = cssDecls.match(/\.os-goal-(?:rings i\.on|hbt i)[^{]*\{[^}]*background:[^;]+;/g) ?? [];
+    /* ⚠️ THE ZERO BAR IS THE ONE EXEMPTION, AND IT IS EXEMPT BECAUSE IT IS NOT A FILL. `.os-goal-hbt
+       i.z` is a 2px grey hairline standing for a period with nothing in it; drawn in the sent
+       colour it would read as one query, which is the exact confusion the hairline exists to end.
+       It is matched and excluded by name rather than by loosening the sweep. */
+    const all = cssDecls.match(/\.os-goal-(?:rings i\.on|hbt i)[^{]*\{[^}]*background:[^;]+;/g) ?? [];
+    const fills = all.filter((f) => !/i\.z\b/.test(f));
+    const zero = all.filter((f) => /i\.z\b/.test(f));
     expect(fills, "both the ring's filled state and the history bar must declare it").toHaveLength(2);
     for (const f of fills) expect(f).toContain("#bf8a7b");
+    expect(zero, "the quiet-period hairline must be declared exactly once").toHaveLength(1);
+    expect(zero[0]).toContain("#e3dcd3");
     /* the retired meter must not survive its replacement */
     expect(cssDecls).not.toContain(".os-goal-meter");
   });
@@ -199,6 +207,14 @@ describe("⚠️ nothing on this card changes colour with progress", () => {
       "#b98a76", "#3a1c14", "#efe4dc", "#bf8a7b", "#c9b8a8", "#f7f3ec", "#b0a294", "#5a6e58",
       "#e7ddd2", "#cbbcae", "#ffffff", "#e3d9cc", "#c9bcae", "#faf7f2", "#6b5b4d", "#faf5ee",
       "#ece2d5",
+      /* ── added by the refdiff pass, Phase 8, all read out of the ref ──────────────────────────
+         `#2a1f18` `--ink` and `#a29587` `--ink3`, the figure and its "of 5"; `#9c8f82` `--mono-c`,
+         the two mono lines; `#eee8e0` `--line2`, the strip's hairline; `#e3dcd3`, the quiet-period
+         bar — a grey, deliberately not the sent colour. Not one of them warms with progress, which
+         is the law this list exists to hold. */
+      "#2a1f18", "#a29587", "#9c8f82", "#eee8e0", "#e3dcd3",
+      /* `#cdbfb1` — ref `.slot`'s dashed rim while a slot is still empty */
+      "#cdbfb1",
     ]);
     const found = [...cssDecls.matchAll(/#[0-9a-fA-F]{6}\b/g)].map((m) => m[0].toLowerCase());
     expect(found.length, "the sheet must contain colours for this to mean anything").toBeGreaterThan(15);

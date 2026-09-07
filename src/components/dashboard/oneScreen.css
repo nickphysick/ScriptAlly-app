@@ -635,7 +635,12 @@
    HAS NO BASELINE: it aligns on its bottom margin edge and drags the row taller than its text.
    Measured before: row 33.3px against 21.8px of text. This opts the mark out of the baseline
    group so the TEXT owns the row, which is the whole point of trap 3. */
-.os-goalmark { width: 34px; height: 34px; margin: -6px 0; position: relative; top: -2px; align-self: center; }
+/* ⚠️ 52px, THE REF'S OWN — `<div class="ill" id="ill4" style="width:52px;height:52px">`. It was 34
+   with a negative margin absorbing the overhang, which is the retired trap-3 shape: the mark hid
+   under the text so the TEXT owned the row. Here the mark is the largest thing in the row by
+   design, so the negative margin goes with it — left in place it would pull the artwork out of the
+   space the card reserves. */
+.os-goalmark { width: 52px; height: 52px; margin: 0; align-self: center; }
 .os-goal:hover .os-goalmark img { transform: rotate(-4deg) scale(1.05); }
 
 /**
@@ -1351,8 +1356,16 @@
 }
 
 /* ══ §6 · QUERYING GOALS ══ */
-.os-goal { padding: 13px 16px 14px; flex: none; }
-.os-goal-r1 { display: flex; align-items: baseline; gap: 10px; }
+/* ⚠️ THE REF'S OWN PADDINGS, AND THIS CARD HAS NO BAND TO TAKE THEM FROM. The ref splits them
+   between a head (`14px 20px`, its bottom border and padding removed) and a `.goal` body
+   (`18px 22px 20px`); this card is BARE by a measured decision recorded at its markup, so the two
+   fold into one. The card's height is the right column's whole arrangement — the activity card
+   takes what is left — so its padding is six probes' worth of cascade. */
+.os-goal { padding: 14px 20px 20px; flex: none; }
+/* ⚠️ `align-items: center`, NOT `baseline` — an image has no baseline and aligns on its bottom
+   margin edge, so a 52px mark on a baselined row drags the row taller than its own text. This
+   file's own trap-3 note is about exactly that; the row was safe at 28px and is not at 52. */
+.os-goal-r1 { display: flex; align-items: center; gap: 10px; }
 .os-goal-r1 h2 { font-family: var(--font-serif); font-size: 23px; font-weight: 500; color: #2a1f18; flex: 1; margin: 0; }
 /* ⚠️ `.os-goal-num`, `.os-blocks` AND `.os-goal-edit` ARE RETIRED (goals pack).
    `.os-goal-num` was the count rendered as a BUTTON that opened an inline editor — an editing
@@ -1417,6 +1430,8 @@
    pushing it to the far edge of a row it now occupies alone, which reads as two unrelated clusters
    at opposite ends of the band. Ref `#rcBrush`: chips then brush, from the left. */
 .os-lead > .os-ahead > .os-ctrls { margin-left: 0; }
+
+
 /* the same, for the sage band — see `.os-th2` above for why the height survives the paint */
 .os-ahead {
   display: flex; align-items: center; gap: 12px;

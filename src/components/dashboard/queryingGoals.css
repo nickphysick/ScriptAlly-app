@@ -52,15 +52,17 @@
 
 /* ── the count, shared by the in-progress and reached states ──────────────────────────────── */
 
-.os-goal-count { display: flex; align-items: baseline; gap: 7px; margin-top: 9px; }
+/* ref `.goal .fig` — the figure at 40/600 with its "of 5" at 24, both in the serif */
+.os-goal-count { display: flex; align-items: baseline; gap: 8px; margin-top: 9px; }
 .os-goal-n {
-  font-family: var(--font-serif); font-size: 31px; font-weight: 500; color: #3a1c14;
+  font-family: var(--font-serif); font-size: 40px; font-weight: 600; color: #2a1f18;
   line-height: 1; font-variant-numeric: tabular-nums;
 }
-.os-goal-of { font-family: var(--font-serif); font-size: 18px; font-weight: 400; color: #9a8c80; line-height: 1; }
+.os-goal-of { font-family: var(--font-serif); font-size: 24px; font-weight: 400; color: #a29587; line-height: 1; }
+/* ref: the mono line sits 4px under the figure */
 .os-goal-sub {
-  font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.11em;
-  text-transform: uppercase; color: #9a8c80; margin-top: 7px;
+  font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #9c8f82; margin-top: 4px;
 }
 
 /* ── the meter (in-progress only) ─────────────────────────────────────────────────────────── */
@@ -104,35 +106,46 @@
 
    ⚠️ THE HISTORY STRIP IS BARS NOW, BENEATH A HAIRLINE — a different period from the one the rings
    are about, so it is separated rather than merely spaced. */
+/* ref `.wk` — a four-column grid beneath a hairline, each cell a 32px bar box over one mono line */
 .os-goal-hist {
-  display: flex; align-items: flex-end; gap: 10px;
-  margin-top: 12px; padding-top: 10px; border-top: 1px solid #efe4dc;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid #eee8e0;
 }
-.os-goal-hb { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; min-width: 0; }
-/* ⚠️ THE TRACK HAS A HEIGHT AND THE FILL IS A PERCENTAGE OF IT — a bar with no track cannot show a
-   quiet period, and a quiet period is exactly what this strip is the right place to say. */
+.os-goal-hb { text-align: center; min-width: 0; }
+/* ⚠️ THE BAR BOX HAS THE HEIGHT AND THE BAR GROWS INSIDE IT — ref `.wk .bar{height:32px}` with the
+   bar itself a fixed-width block sitting on the box's floor. The track is not painted: a period
+   with nothing in it is a HAIRLINE rather than an empty channel, so a quiet run reads as a flat
+   line along the bottom instead of four grey boxes. */
 .os-goal-hbt {
-  width: 100%; height: 26px; border-radius: 3px; background: #f4ede4;
-  display: flex; align-items: flex-end; overflow: hidden;
+  height: 32px; display: flex; align-items: flex-end; justify-content: center;
 }
-.os-goal-hbt i { display: block; width: 100%; background: #bf8a7b; border-radius: 3px; }
-.os-goal-hb b { font-weight: 600; font-size: 11.5px; color: #3a1c14; font-variant-numeric: tabular-nums; }
-.os-goal-hb em {
-  font-style: normal; font-family: "JetBrains Mono", monospace;
-  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: #b0a294;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;
+.os-goal-hbt i { display: block; width: 26px; border-radius: 4px 4px 2px 2px; background: #bf8a7b; }
+/* ⚠️ ZERO IS 2px OF GREY, NOT NOTHING. A percentage of a track renders a zero week as an absent
+   bar, and an absent bar is indistinguishable from a period the strip did not draw. */
+.os-goal-hbt i.z { height: 2px; background: #e3dcd3; }
+/* ref `.wk .lb` — the date and the count on ONE mono line ("10 Aug · 3"). They were two lines, a
+   figure over a label, which made the count the loudest thing in a strip whose subject is the
+   SHAPE of four periods. */
+.os-goal-hb .os-goal-hlb {
+  font-family: "JetBrains Mono", monospace; font-size: 10.5px; letter-spacing: 0.06em;
+  color: #9c8f82; margin-top: 6px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
 /* ⚠️ ONE RING PER QUERY THE WRITER SAID THEY WOULD SEND. `flex-wrap` because a target of twelve at
    the rail's narrowest step will not sit on one line, and a ring row that overflows its card is
    worse than one that takes two lines. */
-.os-goal-rings { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+/* ref `.slots{gap:10px;margin:16px 0 6px}` with `.slot{width:26px;height:26px}` — a slot at 26px is
+   a place for a query to go, which is what a plan looks like; at 13 it was a bullet. */
+.os-goal-rings { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 6px; }
 .os-goal-rings i {
-  width: 13px; height: 13px; border-radius: 50%;
-  border: 1.5px solid #e3d9cc; background: transparent;
-  transition: background 0.18s ease, border-color 0.18s ease;
+  width: 26px; height: 26px; border-radius: 50%;
+  /* ⚠️ DASHED WHILE EMPTY — ref `.slot`. A solid outline reads as a control that can be pressed;
+     a dashed one reads as a space reserved, which is exactly what an unfilled slot is. */
+  border: 1.5px dashed #cdbfb1; background: transparent;
+  transition: background 0.18s ease, border-color 0.18s ease, border-style 0.18s ease;
 }
-.os-goal-rings i.on { background: #bf8a7b; border-color: #bf8a7b; }
+.os-goal-rings i.on { background: #bf8a7b; border: 1.5px solid #bf8a7b; }
 
 .os-goal-hist b { color: #3a1c14; font-weight: 500; }
 .os-goal-hist .os-goal-dot { color: #cbbcae; }

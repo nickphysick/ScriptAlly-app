@@ -55,13 +55,24 @@ describe("trap 2 — a transform on an ancestor isolates the blend", () => {
     }
   });
 
-  it("⚠️ the optical nudge is position/top, NEVER translateY", () => {
+  /* ⚠️ THE LAW IS "NEVER A TRANSFORM", AND THE NUDGE IS WHERE IT IS NEEDED (refdiff pass, Phase 8).
+     A transform on an ancestor isolates the blend group and kills `mix-blend-mode` on the mark
+     inside it — that is the trap, and it holds for both marks. The `top: -2px` is a separate,
+     OPTICAL claim about a mark sitting beside Playfair, whose optical centre is above its line-box
+     centre; the goals mark went from 34px to the ref's 52 and now centres in a row it is the
+     tallest thing in, so there is nothing left to nudge it against. Asserting a nudge that has no
+     subject is how a value survives the reason for it. */
+  it("⚠️ neither mark is moved by a transform — that would isolate the blend group", () => {
     for (const sel of [".os-cic", ".os-goalmark"]) {
-      const b = blk(sel);
-      expect(b).toContain("position: relative");
-      expect(b).toMatch(/top:\s*-2px/);
-      expect(b).not.toMatch(/translate/);
+      expect(blk(sel), sel).not.toMatch(/transform:/);
+      expect(blk(sel), sel).not.toMatch(/translate/);
     }
+  });
+
+  it("⚠️ the stat slot keeps its optical nudge, and it is position/top rather than a transform", () => {
+    const b = blk(".os-cic");
+    expect(b).toContain("position: relative");
+    expect(b).toMatch(/top:\s*-2px/);
   });
 
   it("hover transforms live on the IMG", () => {

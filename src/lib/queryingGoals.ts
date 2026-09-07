@@ -416,7 +416,25 @@ export function goalRings(count: number, target: number | null): boolean[] {
  * months against a big target would draw four invisible stubs. The strip reports what was sent; the
  * target is a different fact, stated above it.
  */
-export function historyBars(history: readonly GoalPeriodCount[]): { label: string; count: number; pct: number }[] {
+/** The bar box's height in px — ref `.wk .bar{height:32px}`. The tallest period fills it exactly. */
+export const HISTORY_BAR_PX = 32;
+/** A period with nothing in it — ref `.wk .bar i.z{height:2px}`. Never zero; see below. */
+export const HISTORY_ZERO_PX = 2;
+
+export function historyBars(
+  history: readonly GoalPeriodCount[],
+): { label: string; count: number; px: number; zero: boolean }[] {
   const top = Math.max(1, ...history.map((h) => h.count));
-  return history.map((h) => ({ label: h.label, count: h.count, pct: Math.round((h.count / top) * 100) }));
+  return history.map((h) => ({
+    label: h.label,
+    count: h.count,
+    /**
+     * ⚠️ A ZERO WEEK IS A 2px HAIRLINE, NOT AN ABSENT BAR. It was a percentage of a painted track,
+     * so a quiet period drew nothing inside a grey channel — and an empty channel is what a period
+     * the strip did not draw also looks like. Two facts, one picture. The hairline says "this week
+     * happened and it was nought", which is the whole reason a history strip is worth the space.
+     */
+    px: h.count === 0 ? HISTORY_ZERO_PX : Math.max(HISTORY_ZERO_PX, Math.round((h.count / top) * HISTORY_BAR_PX)),
+    zero: h.count === 0,
+  }));
 }

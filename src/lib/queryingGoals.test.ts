@@ -10,7 +10,7 @@ import {
   deriveGoalProgress, formatReached, londonDay, periodBounds, resolveGoal, sentDay,
 } from "./queryingGoals";
 import type { QueryingGoalEntry } from "../types";
-import { goalRings, historyBars, RING_MAX } from "./queryingGoals";
+import { goalRings, historyBars, HISTORY_BAR_PX, HISTORY_ZERO_PX, RING_MAX } from "./queryingGoals";
 
 const q = (dateSent?: string) => ({ dateSent });
 const entry = (target: number | null, cadence: "week" | "fortnight" | "month" | null, effectiveFrom: string): QueryingGoalEntry =>
@@ -416,15 +416,33 @@ describe("the history bars report what was sent, not what was promised", () => {
   /* ⚠️ PROPORTIONAL TO THE TALLEST PERIOD ON SHOW. Against the TARGET, a month that beat it would
      draw past the top of its track and a quiet run against a big target would be four invisible
      stubs. The strip is a record; the target is stated above it. */
-  it("the tallest period is the full height and the rest are relative to it", () => {
+  it("the tallest period fills the box and the rest are relative to it", () => {
     const bars = historyBars([{ label: "Jul", count: 8 }, { label: "Jun", count: 4 }, { label: "May", count: 0 }]);
-    expect(bars.map((b) => b.pct)).toEqual([100, 50, 0]);
+    expect(bars.map((b) => b.px)).toEqual([HISTORY_BAR_PX, HISTORY_BAR_PX / 2, HISTORY_ZERO_PX]);
     expect(bars.map((b) => b.count)).toEqual([8, 4, 0]);
   });
 
-  it("an all-quiet run does not divide by zero", () => {
-    expect(historyBars([{ label: "Jul", count: 0 }, { label: "Jun", count: 0 }]).map((b) => b.pct))
-      .toEqual([0, 0]);
+  /**
+   * ⚠️ A ZERO WEEK IS A HAIRLINE, NOT AN ABSENT BAR — and both halves of that are the claim.
+   *
+   * It was a percentage of a painted track, so a quiet period drew NOTHING inside a grey channel —
+   * which is also what a period the strip did not draw looks like. Two different facts, one
+   * picture. The 2px line says "this week happened and it was nought", which is the whole reason a
+   * history strip is worth its space; and `zero` is flagged separately so the bar can take the
+   * grey rather than the sent colour, since a hairline in the sent colour reads as one query.
+   */
+  it("⚠️ a quiet period is 2px of grey, never nothing", () => {
+    const bars = historyBars([{ label: "Jul", count: 0 }, { label: "Jun", count: 0 }]);
+    expect(bars.map((b) => b.px)).toEqual([HISTORY_ZERO_PX, HISTORY_ZERO_PX]);
+    expect(bars.map((b) => b.zero)).toEqual([true, true]);
     expect(historyBars([])).toEqual([]);
+  });
+
+  /* ⚠️ AND A NON-ZERO PERIOD NEVER ROUNDS DOWN INTO THE HAIRLINE — one query against a tall month
+     is a small bar, and a small bar that lands on 2px would be indistinguishable from nought. */
+  it("⚠️ one query is never drawn as a quiet week", () => {
+    const bars = historyBars([{ label: "Jul", count: 40 }, { label: "Jun", count: 1 }]);
+    expect(bars[1].px).toBeGreaterThanOrEqual(HISTORY_ZERO_PX);
+    expect(bars[1].zero).toBe(false);
   });
 });
