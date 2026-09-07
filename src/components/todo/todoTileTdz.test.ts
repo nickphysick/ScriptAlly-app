@@ -92,8 +92,18 @@ describe("the /todo render-time order rule", () => {
       + "Move the declaration above line " + deadline + ".").toEqual([]);
   });
 
-  /* ── the two that have actually bitten, named, so a regression says which one ── */
-  for (const dep of ["nudgedBefore", "viewFacts"]) {
+  /* ── the ones that have actually bitten, named, so a regression says which one ──
+     ⚠️ `nudgedBefore` LEFT THIS LIST IN PHASE 2, ON THIS LOCK'S OWN INSTRUCTION. It was the const
+     whose position took the page down; Phase 2 deleted it outright, because the fact it computed
+     now travels on the card as `reason` and the chain no longer reads anything about nudges. The
+     "still read by the chain" half went red and said so in as many words, which is exactly what
+     that half is for — an ordering assertion over a dependency nobody reads passes forever.
+
+     The general sweep above still covers it and every future member: it needs no list, because it
+     compares EVERY component-scope const against the chain's whole body. This named list is the
+     smaller, louder claim — it says WHICH one broke — and a name only belongs in it while the
+     chain genuinely reads it. */
+  for (const dep of ["viewFacts"]) {
     it(`${dep} is still read by the chain, and is declared above the first caller`, () => {
       const bodies = CHAIN.map((f) => fnBody(f)).join("\n");
       /* half one — the lock is not vacuous: the chain really does read it */

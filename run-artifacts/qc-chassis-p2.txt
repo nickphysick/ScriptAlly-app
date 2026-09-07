@@ -1,0 +1,13 @@
+── qc chassis · Phase 2 · 6 assertions · 0 RED · 6 green
+green  · P2.0 · the Group panel offers Category, and its sub-line names the five it groups by
+         Category option: "CategoryAgent requests · Nudges · Gone quiet · Housekeeping · Yours" · 6 options offered
+green  · P2.1 · grouping by Category draws heads, and every head is one of the five
+         ["Agent requests 9","Nudges 9","Gone quiet 6","Housekeeping 2","Your tasks 2"]
+green  · P2.2 · the heads run in the tiles' order, not the alphabet
+         heads ["Agent requests","Nudges","Gone quiet","Housekeeping","Your tasks"]
+green  · P2.3 · every head's count IS its tile's count
+         Agent requests 9 · Nudges 9 · Gone quiet 6 · Housekeeping 2 · Your tasks 2
+green  · P2.4 · BOTH of Gone quiet's feeders are present — the tally, not the count
+         gone-quiet rows 6 · after-a-nudge 1 · stale-window 5
+green  · P2.5 · the reason travels on the card — no surface re-derives it from the query
+         ToDoPage re-derives: false · todoCategory reads card.reason: true

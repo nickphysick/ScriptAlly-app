@@ -1010,6 +1010,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           context: `Archiving recommendation`,
           relatedRecordId: q.id,
           taskType: "no_response_close",
+          /* the silence itself — see `TaskReason`. Stated even though this type has only one
+             feeder, so a consumer reading `reason` never has to special-case which types set it. */
+          reason: "no-reply" as const,
           actionLabel: "Close Query",
           actionPath: "queries"
         });
@@ -1023,6 +1026,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           context: `Follow-up needed`,
           relatedRecordId: q.id,
           taskType: "nudge_overdue",
+          /* ⚠️ THE TWO FEEDERS, SEPARATED HERE AND NOWHERE ELSE (QC-chassis round, Phase 2).
+             `replyTask` answers "nudge" both for a first chase and for a check-in the writer booked
+             on a query they have ALREADY nudged; the type cannot tell them apart, and the second is
+             a silence rather than a nudge. `logNudge` always writes `lastNudgeSentDate` — that is
+             what "the nudge did happen" means — while `nudgeDate` is absent where the writer
+             declined a check-in, so it cannot serve. This derivation has the query in hand, so it
+             answers once, here, instead of every surface reaching for the query to re-derive it. */
+          reason: q.lastNudgeSentDate ? ("nudge-again" as const) : ("nudge-first" as const),
           actionLabel: "Log Nudge",
           actionPath: "queries"
         });

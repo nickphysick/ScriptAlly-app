@@ -15,6 +15,7 @@
 import { BoardCard } from "./todoBoard";
 import { TaskGroup } from "./todoGroups";
 import { Bucket, cardBucket } from "./todoBuckets";
+import { CATEGORIES, CATEGORY_LABEL, taskCategory } from "./todoCategory";
 
 /** the three urgency groups, by the id the page already uses */
 export type GroupId = "urgent" | "housekeeping" | "yours";
@@ -41,7 +42,12 @@ export type SortId = "needs-you" | "longest" | "newest" | "agent" | "agency" | "
  * person"; `manuscript` does the same per book (offered only when the account has more than one —
  * hidden, not greyed, the manuscript-column rule again); `flat` is one list with no heads.
  */
-export type GroupingId = "grouped" | "agent" | "type" | "manuscript" | "flat";
+/* ⚠️ `category` IS THE FIVE THE TILES COUNT, AS LIST HEADS (QC-chassis round, Phase 2), and it is
+   NOT `type` renamed. `type` partitions by the six BUCKETS — the shape of the act (send · decide ·
+   chase · close · fix · note). `category` partitions by the five the page's tiles, board columns
+   and card tags all speak — where the work CAME FROM. An offer is a `decide` under one and an
+   Agent request under the other, deliberately, and both readings are useful. */
+export type GroupingId = "grouped" | "agent" | "type" | "category" | "manuscript" | "flat";
 export type DirectionId = "asc" | "desc";
 
 export const SORT_LABEL: Record<SortId, string> = {
@@ -61,12 +67,16 @@ export const SORT_DESC: Record<SortId, string> = {
   type: "Send · nudge · close · fill in · note",
 };
 export const GROUPING_LABEL: Record<GroupingId, string> = {
-  grouped: "Urgency", agent: "Agent", type: "Task type", manuscript: "Manuscript", flat: "None",
+  grouped: "Urgency", agent: "Agent", type: "Task type", category: "Category",
+  manuscript: "Manuscript", flat: "None",
 };
 export const GROUPING_DESC: Record<GroupingId, string> = {
   grouped: "Needs you now · Housekeeping · Yours",
   agent: "What you owe each person",
-  type: "", manuscript: "One head per book", flat: "One flat list",
+  type: "",
+  /* the five the tiles count, in the order the tiles draw them — one sentence, one vocabulary */
+  category: "Agent requests · Nudges · Gone quiet · Housekeeping · Yours",
+  manuscript: "One head per book", flat: "One flat list",
 };
 /** the trigger's label — the contract's "By agent · Longest waiting" */
 export const viewButtonLabel = (v: ListView): string =>
@@ -207,10 +217,20 @@ export function applyView(
   const keyOf = (c: BoardCard): string =>
     view.grouping === "agent" ? ((c.who || "").trim() || "No agent")
     : view.grouping === "type" ? TYPE_LABEL[cardBucket(c)]
+    /* ⚠️ ONE VOCABULARY — the head reads `CATEGORY_LABEL`, the same table the tile and the board
+       column read, so a head can never call a category something the tile does not. And there is
+       no placeless case: `taskCategory` is total over every card. */
+    : view.grouping === "category" ? CATEGORY_LABEL[taskCategory(c)]
     : ((c.msTitle || "").trim() || "No manuscript");
   const heads = [...new Set(all.map(keyOf))];
   if (view.grouping === "type") {
     heads.sort((a, b) => TYPE_ORDER.findIndex((t) => TYPE_LABEL[t] === a) - TYPE_ORDER.findIndex((t) => TYPE_LABEL[t] === b));
+  } else if (view.grouping === "category") {
+    /* ⚠️ THE TILES' ORDER, NOT THE ALPHABET. The reader has just picked from a row that runs
+       Agent requests → Nudges → Gone quiet → Housekeeping → Your tasks; heads in a different
+       order would make the same five sets read as a different five. */
+    const order5 = CATEGORIES.map((c) => CATEGORY_LABEL[c]);
+    heads.sort((a, b) => order5.indexOf(a) - order5.indexOf(b));
   } else {
     heads.sort((a, b) => a.localeCompare(b));
     /* the placeless head goes LAST — "No agent" alphabetised into the Ns reads as a person */

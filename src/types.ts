@@ -852,6 +852,30 @@ export interface DismissedTask {
   dismissType: "permanent" | "fixed snooze" | "custom date";
 }
 
+/**
+ * ⚠️ WHY A TASK WAS RAISED, RECORDED WHERE IT IS RAISED (QC-chassis round, Phase 2).
+ *
+ * `nudge_overdue` has TWO feeders and one type: a first chase, and a check-in the writer booked
+ * on a query they have already nudged. The second is not a nudge at all — it is a silence the app
+ * has chased once — and the five categories put it in Gone quiet rather than Nudges.
+ *
+ * ⚠️ THE DISCRIMINATOR IS RECORDED, NOT RE-INFERRED. It lives on the QUERY (`lastNudgeSentDate`),
+ * and every surface that wanted the distinction was going to have to reach for the query and work
+ * it out again — the same fact derived in four places, which is how two of them come to disagree.
+ * The derivation that raises the task has the query in hand and knows the answer; it says so here,
+ * once, and the card carries it.
+ *
+ * Absent is a legitimate reading, not a gap: most task types have exactly one reason for existing
+ * and say nothing. A consumer treats absence as "no distinction to draw".
+ */
+export type TaskReason =
+  /** `nudge_overdue` raised on a query never chased — the ordinary first nudge */
+  | "nudge-first"
+  /** `nudge_overdue` on a query already chased — the writer's booked check-in came round */
+  | "nudge-again"
+  /** `no_response_close` — the stated window passed and nothing came back */
+  | "no-reply";
+
 export interface Task {
   id: string;
   priority: "urgent" | "overdue" | "suggested";
@@ -863,6 +887,8 @@ export interface Task {
   taskType: string;
   actionLabel: string;
   actionPath: string; // routing state context
+  /** why this task exists, where its type alone cannot say — see `TaskReason` */
+  reason?: TaskReason;
 }
 
 /**

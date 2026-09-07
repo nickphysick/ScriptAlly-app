@@ -898,28 +898,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     agency: (c: BoardCard) => (listRowInputs(c).agency ?? "").trim(),
   }), [listRowInputs]);
 
-  /* ⚠️ GONE QUIET'S DISCRIMINATOR, READ FROM THE QUERY (see `taskCategory`): a `nudge_overdue`
-     whose query has been nudged already is a SILENCE the app has chased once, not a fresh nudge.
-     `lastNudgeSentDate` is what `logNudge` always writes; `nudgeDate` is absent where the writer
-     declined a check-in, so it cannot serve. The card does not carry either, which is why this
-     reads the store here rather than the derivation reading a field that is not on a card.
+  /* ⚠️ `nudgedBefore` IS GONE, AND ITS ABSENCE IS PHASE 2 (QC-chassis round). It was a callback
+     that reached into `queries` to work out whether a nudge task had been chased before, and TWO
+     call sites used it — the tile counts and the tile's narrowing — each a fresh chance to answer
+     differently, with a third and fourth due as the board and the cards arrived.
 
-     ⚠️ AND IT IS DECLARED HERE, ABOVE `allDockable`, FOR THE REASON THE COMMENT BLOCK ABOVE GIVES
-     — the SECOND time this file has had that fault and the first time it reached dev. `railGroups()`
-     now calls `tileNarrow`, which reads this; its first render-time caller is the line below. At
-     its old home four hundred lines down, picking any tile threw `Cannot access 'nudgedBefore'
-     before initialization` and dropped the whole page into its error boundary.
-
-     ⚠️ IT LOADED PERFECTLY, WHICH IS WHY EVERY GATE PASSED. `tileNarrow` returns early while the
-     tile is `all` — the initial state — so this is never read until the first click. tsc, 7,443
-     unit tests and a clean production build were all green over a page that died the moment a
-     reader touched it, and it took the rendered measurement to find. The warning four lines above
-     describes this precise fault and did not stop it: comments are not guards, which is why
-     `todoTileTdz.test.ts` now asserts the ORDER. */
-  const nudgedBefore = React.useCallback((c: BoardCard) => {
-    if (!c.relatedRecordId) return false;
-    return !!queries.find((q) => q.id === c.relatedRecordId)?.lastNudgeSentDate;
-  }, [queries]);
+     The fact now travels ON THE CARD as `reason`, recorded by the derivation in `db.tsx` that
+     raises the task and already has the query in hand. `taskCategory(card)` takes one argument
+     again. Recorded here rather than silently deleted because this declaration is also what the
+     TDZ note above is about: it was the const whose position took the page down, and a reader
+     following that comment should find out what happened to it. */
 
   const allDockable = dockQueue(railGroups().flatMap((g) => g.cards));
   /* the chip narrows the SAME list the rail draws, so the pane walks exactly what you can see */
@@ -1772,7 +1760,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const out: Record<string, number> = { all: tileCards.length, urgent: 0 };
     for (const c of CATEGORIES) out[c] = 0;
     for (const card of tileCards) {
-      out[taskCategory(card, { nudgedBefore: nudgedBefore(card) })] += 1;
+      out[taskCategory(card)] += 1;
       if (isUrgentCard(card, listRowInputs(card).days)) out.urgent += 1;
     }
     return out;
@@ -3227,7 +3215,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     if (tile === "all") return gs;
     const keep = (c: BoardCard) => (tile === "urgent"
       ? isUrgentCard(c, listRowInputs(c).days)
-      : taskCategory(c, { nudgedBefore: nudgedBefore(c) }) === tile);
+      : taskCategory(c) === tile);
     return gs.map((g) => ({ ...g, cards: g.cards.filter(keep) })).filter((g) => g.cards.length > 0);
   }
 

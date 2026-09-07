@@ -13,7 +13,7 @@
  * Unit-tested for column membership, commit state, and the cleared union — not the prose.
  */
 
-import { Task, Query, Agent, Manuscript, UserTask, SurfaceOffset, TaskFlag, QueryStatus, Activity, ActivityType } from "../types";
+import { Task, TaskReason, Query, Agent, Manuscript, UserTask, SurfaceOffset, TaskFlag, QueryStatus, Activity, ActivityType } from "../types";
 import { OFFER_RECEIVED_DESC_RE } from "./activityUtils";
 import { queryAmbientStatus } from "./queryAmbient";
 import { agentDataQualityNeeds } from "./agentDataQuality";
@@ -103,6 +103,8 @@ export interface BoardCard {
   quiet?: boolean; // offer cards only (P4): "I need time" set — reduced emphasis until the reminder or reply-by wakes it
   // action wiring
   taskType?: string;
+  /** why the task was raised, where its type cannot say — see `TaskReason` in types.ts */
+  reason?: TaskReason;
   relatedRecordId?: string;
   /* ⚠️ IDENTITY, not presentation. The card carried the agent's NAME and the query id, so two
      queries to one agent were indistinguishable to any dedupe and identical to the eye. These two
@@ -324,6 +326,11 @@ function derivedCard(task: Task, input: BoardInput): BoardCard | null {
       ? { quiet: offerQuiet(flag?.snoozedUntil, q?.responseDeadline ? Date.parse(q.responseDeadline) : null, input.now) }
       : {}),
     taskType: task.taskType,
+    /* ⚠️ CARRIED, NOT RE-DERIVED — the dropped-facet fault above, one field along. `reason` says
+       WHY the task was raised where its type cannot (a first nudge against a check-in on a query
+       already chased); the derivation that raised it recorded the answer, and a card that arrived
+       without it would send every consumer back to the query to work it out again. */
+    reason: task.reason,
     relatedRecordId: task.relatedRecordId,
     agentId: ag?.id,
     msTitle: ms?.title || task.manuscriptTitle || undefined,

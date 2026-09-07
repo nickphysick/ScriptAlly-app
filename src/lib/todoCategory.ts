@@ -77,13 +77,20 @@ export const CATEGORY_FAMILY: Record<Category, Family> = {
  * The discriminator is `lastNudgeSentDate`, which `logNudge` always writes ("the nudge did
  * happen") while `nudgeDate` is absent where the writer declined a check-in. A `nudge_overdue`
  * on a query that has been nudged is the app asking again about a silence it already chased.
+ *
+ * ⚠️ AND IT IS READ FROM THE CARD, NOT RE-DERIVED HERE (Phase 2 — this is the whole of Phase 2's
+ * change to this file). Phase 1 took a `nudgedBefore` boolean and made every caller reach for the
+ * queries array to compute it: the tiles did it, the list did it, the board would have, and each
+ * one was a fresh chance to answer differently. The derivation that RAISES the task has the query
+ * in hand and records `reason` there; this reads it.
+ *
+ * ⚠️ ABSENT MEANS "NUDGE", AND THAT IS A DECISION RATHER THAN A DEFAULT. A `nudge_overdue` whose
+ * reason did not travel is a chase the app cannot prove it has made before, and the honest reading
+ * of an unproven chase is the ordinary one. The alternative — treating absence as "already
+ * nudged" — would move a first nudge into Gone quiet on the strength of a missing field, which is
+ * the app inventing history.
  */
-export interface CategoryInputs {
-  /** the query's `lastNudgeSentDate`, where the card has a query behind it */
-  nudgedBefore?: boolean;
-}
-
-export function taskCategory(card: BoardCard, i: CategoryInputs = {}): Category {
+export function taskCategory(card: BoardCard): Category {
   /* the writer's own item is theirs, whatever else it looks like — `cardBucket`'s own first law */
   if (cardBucket(card) === "note") return "yours";
   if (!isTaskType(card.taskType)) {
@@ -106,7 +113,7 @@ export function taskCategory(card: BoardCard, i: CategoryInputs = {}): Category 
     case "full_requested":
       return "req";
     case "nudge_overdue":
-      return i.nudgedBefore ? "quiet" : "nudge";
+      return card.reason === "nudge-again" ? "quiet" : "nudge";
     case "no_response_close":
       return "quiet";
     case "data_quality_poor":

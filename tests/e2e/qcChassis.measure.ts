@@ -201,3 +201,180 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
   expect(out.length, "assertion floor").toBeGreaterThanOrEqual(12);
   expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
 });
+
+/**
+ * Phase 2 — the five categories as a GROUPING, and Gone quiet's two feeders told apart.
+ *
+ * ⚠️ NO BACKTICKS AND NO REGEX INSIDE ANY page.evaluate TEMPLATE. A backtick terminates the
+ * string and the file fails to COLLECT (which reads as "No tests found"); a backslash escape is
+ * eaten before the browser sees it. Every pattern below is matched in Node.
+ *
+ * ⚠️ RUN `node tests/e2e/seedNudgedQuery.mjs` FIRST. Gone quiet has two feeders and this account
+ * has only ever held one — without the seed, P2.4's tally reports 5 and 0 and the branch that
+ * tells them apart is never entered, while every other assertion here passes.
+ *
+ * Read-only: it picks a grouping and a tile, and reads. It writes nothing.
+ */
+test("Phase 2 — category as a grouping, and Gone quiet's two feeders", async ({ page }) => {
+  const out: R[] = [];
+  const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
+  const OUT = process.env.SA_QC_OUT2 ?? "run-artifacts/qc-chassis-p2.txt";
+  rmSync(OUT, { force: true });
+
+  await ensureSignedIn(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/todo");
+  await page.waitForFunction("document.querySelectorAll('.qct-tile').length > 0", null, { timeout: 45_000 }).catch(() => {});
+  await liftMotionSuppression(page);
+  await visiblePage(page, ".tdb-wrap");
+
+  /* the tiles' figures first — the other surface every claim below is measured against */
+  const tiles = await page.evaluate(`(() => {
+    const root = __saVisRoot();
+    return [...root.querySelectorAll(".qct .qct-tile")].map((t) => ({
+      label: ((t.querySelector(".qct-k") || {}).textContent || "").trim(),
+      n: Number(((t.querySelector(".qct-n") || {}).textContent || "").trim()),
+    }));
+  })()`) as { label: string; n: number }[];
+  const tileN: Record<string, number> = Object.fromEntries(tiles.map((t) => [t.label, t.n]));
+
+  const openGroup = async () => {
+    await page.evaluate(`(() => {
+      const root = __saVisRoot();
+      const b = [...root.querySelectorAll(".tdb-qtool .qcc-tb-btn")]
+        .find((x) => (x.textContent || "").trim().indexOf("Group") === 0);
+      if (b) b.click();
+      return !!b;
+    })()`);
+    await page.waitForTimeout(500);
+  };
+  const pickOption = async (starts: string) => {
+    await page.evaluate(`(() => {
+      const b = [...document.querySelectorAll(".tdvp .v-opt")]
+        .find((x) => ((x.querySelector(".v-body") || x).textContent || "").indexOf(${JSON.stringify(starts)}) === 0);
+      if (b) b.click();
+    })()`);
+    await page.waitForTimeout(700);
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(400);
+  };
+
+  await openGroup();
+  const options = await page.evaluate(`(() => [...document.querySelectorAll(".tdvp .v-opt")]
+    .map((b) => ((b.querySelector(".v-body") || b).textContent || "").trim()))()`) as string[];
+  const catOpt = options.find((o) => o.indexOf("Category") === 0) ?? "";
+  add("P2.0 · the Group panel offers Category, and its sub-line names the five it groups by",
+      !!catOpt && catOpt.indexOf("Agent requests") > -1 && catOpt.indexOf("Gone quiet") > -1
+        && catOpt.indexOf("Housekeeping") > -1,
+      "Category option: " + JSON.stringify(catOpt) + " · " + options.length + " options offered");
+
+  await pickOption("Category");
+
+  const heads = await page.evaluate(`(() => {
+    const root = __saVisRoot();
+    return [...root.querySelectorAll(".tlc .grp")].map((g) => ({
+      label: (g.textContent || "").replace(/\\s+/g, " ").trim().slice(0, 40),
+      n: Number(((g.querySelector(".g-n") || {}).textContent || "").trim()),
+    }));
+  })()`) as { label: string; n: number }[];
+
+  const ORDER = ["Agent requests", "Nudges", "Gone quiet", "Housekeeping", "Your tasks"];
+  const seen = heads.map((h) => ORDER.find((k) => h.label.indexOf(k) > -1) ?? "?");
+
+  add("P2.1 · grouping by Category draws heads, and every head is one of the five",
+      heads.length > 0 && !seen.includes("?"),
+      JSON.stringify(heads.map((h, i) => seen[i] + " " + h.n)));
+
+  /* ⚠️ THE TILES' ORDER, NOT THE ALPHABET. The reader has just picked from a row running
+     Agent requests → Nudges → Gone quiet → Housekeeping → Your tasks; alphabetical heads would
+     make the same five sets read as a different five. */
+  const asOrdered = ORDER.filter((k) => seen.includes(k));
+  add("P2.2 · the heads run in the tiles' order, not the alphabet",
+      seen.length > 0 && seen.join("|") === asOrdered.join("|"), "heads " + JSON.stringify(seen));
+
+  /* ⚠️ THE COMPOSED CLAIM: each head's own count IS its tile's, read off the RENDERED page on both
+     sides. A head that counted differently from the tile the reader just clicked is the
+     two-numbers-both-called-To-do fault the tile total and the card footer already had once this
+     round — the same disease, one surface along. */
+  const mism = seen
+    .map((k, idx) => ({ k, head: heads[idx].n, tile: tileN[k] }))
+    .filter((x) => x.k !== "?" && x.head !== x.tile);
+  add("P2.3 · every head's count IS its tile's count",
+      seen.length > 0 && mism.length === 0,
+      mism.length ? JSON.stringify(mism) : seen.map((k, i) => k + " " + heads[i].n).join(" · "));
+
+  await openGroup();
+  await pickOption("Urgency");
+
+  /* ── Gone quiet's two feeders ── */
+  await page.evaluate(`(() => {
+    const root = __saVisRoot();
+    const t = [...root.querySelectorAll(".qct .qct-tile")]
+      .find((x) => ((x.querySelector(".qct-k") || {}).textContent || "").trim() === "Gone quiet");
+    if (t) t.click();
+  })()`);
+  await page.waitForTimeout(900);
+  const quietRows = await page.evaluate(`(() => {
+    const root = __saVisRoot();
+    return [...root.querySelectorAll(".tlc .row")].map((r) => (r.textContent || "").replace(/\\s+/g, " ").trim());
+  })()`) as string[];
+
+  /* ⚠️ THE TALLY IS THE POINT, NOT THE COUNT. Gone quiet has two feeders — a stale window, and a
+     check-in on a query ALREADY nudged — and a fixture holding only the first passes every other
+     assertion here while never entering the branch that separates them. Matched in NODE, because
+     a pattern written inside the evaluate template loses its escapes before the browser sees it. */
+  /* ⚠️ EACH ROW MUST MATCH ONE OF THE TWO KNOWN SHAPES, and an unmatched row is LOUD. A tally that
+     counts one pattern and calls the remainder "the other" cannot tell a third shape — or a copy
+     change — from the branch it claims to be measuring: everything unrecognised silently swells
+     the majority and the tally goes on reporting two feeders. Partitioning explicitly means a row
+     the probe does not understand fails instead of being absorbed. */
+  /* ⚠️ THE PATTERNS ARE THE ROW'S DEEDS, TAKEN FROM A RENDERED ROW — and getting here cost two
+     reds, both from reading source instead. The raise site in `db.tsx` titles the task
+     "Nudge due: {name}"; `derivedCopy` re-titles it "Nudge {name}"; and the LIST ROW shows neither,
+     because it renders the BUCKET and the DEED ("Chase · Worth a nudge" against "Close · Consider
+     closing"). Three layers, three different strings, and only the third is on the page.
+
+     ⚠️ AND `\b` IS USELESS ON A ROW'S textContent. Concatenation drops the whitespace between
+     elements, so the deed runs straight into the agent's name — "Worth a nudgeRosalind" — and
+     there is no word boundary after "nudge" at all. The second red was entirely that.
+
+     The deeds are also the better discriminator on their own terms: they are what the READER sees,
+     and they say the two feeders apart in the only way that matters — chase again, or close. */
+  const AFTER_NUDGE = /worth a nudge/i;   // the deed on a query already chased
+  const STALE = /consider closing/i;      // the deed on a window that simply lapsed
+  const afterNudge = quietRows.filter((t) => AFTER_NUDGE.test(t) && !STALE.test(t)).length;
+  const staleWindow = quietRows.filter((t) => STALE.test(t) && !AFTER_NUDGE.test(t)).length;
+  /* a row matching BOTH, or neither, is a third shape — loud either way rather than absorbed */
+  const unmatched = quietRows.filter((t) => AFTER_NUDGE.test(t) === STALE.test(t));
+  add("P2.4 · BOTH of Gone quiet's feeders are present — the tally, not the count",
+      quietRows.length > 0 && afterNudge > 0 && staleWindow > 0
+        && unmatched.length === 0 && afterNudge + staleWindow === quietRows.length,
+      "gone-quiet rows " + quietRows.length + " · after-a-nudge " + afterNudge
+        + " · stale-window " + staleWindow
+        + (afterNudge === 0 ? "   — RUN node tests/e2e/seedNudgedQuery.mjs" : "")
+        + (unmatched.length ? "   — UNRECOGNISED: " + JSON.stringify(unmatched.map((t) => t.slice(0, 60))) : ""));
+
+  /* ⚠️ AND THE REASON IS RECORDED RATHER THAN RE-INFERRED — the source half of Phase 2, and the
+     one claim here that belongs in source at all: a rendered page cannot show WHERE a fact came
+     from. No surface may reach for `lastNudgeSentDate` to decide a category, because the
+     derivation that raises the task already answered and put it on the card. */
+  const src = join(process.cwd(), "src");
+  const pageSrc = readFileSync(join(src, "components/todo/ToDoPage.tsx"), "utf8");
+  const catSrc = readFileSync(join(src, "lib/todoCategory.ts"), "utf8");
+  const strip = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const pageDecls = strip(pageSrc);
+  const catDecls = strip(catSrc);
+  add("P2.5 · the reason travels on the card — no surface re-derives it from the query",
+      !pageDecls.includes("lastNudgeSentDate") && !pageDecls.includes("nudgedBefore")
+        && !catDecls.includes("lastNudgeSentDate") && catDecls.includes("card.reason"),
+      "ToDoPage re-derives: " + (pageDecls.includes("lastNudgeSentDate") || pageDecls.includes("nudgedBefore"))
+        + " · todoCategory reads card.reason: " + catDecls.includes("card.reason"));
+
+  const lines = out.map((x) => (x.ok ? "green  " : "RED    ") + "· " + x.id + (x.note ? "\n         " + x.note : ""));
+  const red = out.filter((x) => !x.ok);
+  writeFileSync(OUT, "── qc chassis · Phase 2 · " + out.length + " assertions · " + red.length
+    + " RED · " + (out.length - red.length) + " green\n" + lines.join("\n") + "\n");
+  console.log(lines.join("\n"));
+  expect(out.length, "assertion floor").toBeGreaterThanOrEqual(6);
+  expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
+});
