@@ -12,6 +12,7 @@
  * stored fields this file used to name (`goalTarget`/`goalPeriod`) are read by nothing now.
  */
 import { Agent, Query, QueryStatus } from "../types";
+import { idleAgentCount } from "./dashboardStats";
 import { isoWeekStart, responsesReceivedCount } from "./dashboardStats";
 
 const WEEK_MS = 7 * 86400000;
@@ -206,6 +207,8 @@ export interface HeaderCounter {
   /** ⚠️ ABSENT when there is nothing to report. Never "↑ 0", never "0%" — a chip that reports
    *  nothing is worse than no chip, because it reads as a measurement rather than a silence. */
   chip?: string;
+  /** the ref's `.mini.plain` — a white capsule for a chip that states a SPLIT rather than a change */
+  plain?: boolean;
 }
 
 /** The chips look back a ROLLING month, not a calendar one — on the 1st, a calendar reading would
@@ -239,6 +242,9 @@ export const headerCounters = (queries: Query[], agents: Agent[], now: Date): He
     return t !== null && t >= since ? n + 1 : n;
   }, 0);
 
+  /* ⚠️ THE SPLIT COMES FROM THE AGENT LIST'S OWN DERIVATION, never a second count of "has this
+     agent been queried". `agentIdleCount` is what the Agents hub's pulse line states. */
+  const queried = agents.length - idleAgentCount(agents, queries);
   const responses = responsesReceivedCount(queries);
   /**
    * ⚠️ THE CHIP STATES THE DENOMINATOR, NOT A PERCENTAGE (dashboard redesign, Phase 3).
@@ -259,10 +265,26 @@ export const headerCounters = (queries: Query[], agents: Agent[], now: Date): He
    */
   const denominator = sent > 0 && responses > 0 ? sent : null;
 
+  /**
+   * ⚠️ THE PILL CARRIES CONTEXT, NOT A BARE FIGURE (refdiff pass, Phase 4). "↑ 5" said a number and
+   * left the reader to work out of what, over what period; "↑ 5 this week" is the same derivation
+   * saying what it is. The agents pill states the SPLIT rather than a movement, which is why it
+   * takes the ref's `.plain` variant — a white capsule for a fact that is not a change.
+   *
+   * ⚠️ "IDLE", NEVER "UNQUERIED". The agent list has called an unqueried agent idle since its own
+   * rebuild, and `agentIdleCount` is the derivation both surfaces read. Two words for one state on
+   * one account is the fault the whole vocabulary discipline exists to prevent.
+   *
+   * ⚠️ AND THE OMISSION RULE IS UNCHANGED: a chip that reports nothing is worse than no chip. What
+   * changed is what a chip SAYS when it has something to report.
+   */
+  const idle = agents.length - queried;
   return [
-    { key: "sent", label: "Queries sent", n: sent, ...(sentRecently > 0 ? { chip: `↑ ${sentRecently}` } : {}) },
-    { key: "agents", label: "Agents on file", n: agents.length, ...(addedRecently > 0 ? { chip: `↑ ${addedRecently}` } : {}) },
-    { key: "responses", label: "Responses", n: responses, ...(denominator !== null ? { chip: `of ${denominator}` } : {}) },
+    { key: "sent", label: "Queries sent", n: sent, ...(sentRecently > 0 ? { chip: `↑ ${sentRecently} this week` } : {}) },
+    { key: "agents", label: "Agents on file", n: agents.length,
+      ...(agents.length > 0 ? { chip: `${queried} queried · ${idle} idle`, plain: true } : {}) },
+    { key: "responses", label: "Responses", n: responses,
+      ...(denominator !== null ? { chip: `${Math.round((responses / denominator) * 100)}% response rate` } : {}) },
   ];
 };
 

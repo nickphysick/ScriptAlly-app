@@ -121,7 +121,11 @@
   gap: 22px;
   align-items: stretch;
 }
-@media (max-width: 1699px) { .os-grid { grid-template-columns: 340px minmax(0, 1fr) 360px; } }
+@media (max-width: 1699px) {
+  .os-grid { grid-template-columns: 340px minmax(0, 1fr) 360px; }
+  /* the ref's own `@media (max-width:1700px)` step for the slot */
+  .os-cic, .os-cic.plane { width: 96px; height: 96px; }
+}
 .os-colL { grid-column: 1; }
 .os-colM { grid-column: 2; }
 .os-colR { grid-column: 3; }
@@ -551,8 +555,10 @@
  * negative vertical margin absorbs the overhang so the TEXT owns the row height.
  */
 .os-mark-il { display: block; flex-shrink: 0; }
+/* ⚠️ `max-width`, NOT `width` — the artwork sits at its own sharp size inside the slot rather
+   than being stretched to fill it. */
 .os-mark-il img {
-  width: 100%; height: 100%; object-fit: contain; display: block;
+  max-width: 50px; max-height: 50px; width: auto; height: auto; object-fit: contain; display: block;
   mix-blend-mode: multiply;
   transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1);
 }
@@ -576,9 +582,16 @@
  * 100px files are re-exported at 2× the intended display size and this number moves with them.
  */
 .os-cic {
-  width: 44px; height: 44px;
-  /* the overhang is absorbed, so the counter's text sets the row height */
-  margin: -8px 0;
+  /* ⚠️ THE SLOT IS THE REF'S 112px (96 BELOW 1700); THE ARTWORK IS 50px INSIDE IT.
+     These are RASTERS at one resolution with no `srcset`, so the largest sharp size is the source's
+     own pixels at the DPR the app targets: agents-on-file 100×100 → 50, response-rate 100×100 → 50,
+     active-query 800×800 → 400. Two of three bind at 50, so the row caps there. The SLOT still
+     reserves what the design asks for and the picture centres in it — the shape that needs no change
+     the day the artwork is re-exported. Upscaling a 100px PNG into a 112px box would be softer than
+     what ships today, and the harness could not tell. */
+  width: 112px; height: 112px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0;
   /* ⚠️ `position/top`, NOT a transform — see trap 2. Playfair's optical centre sits above its
      line-box centre, so a mark beside it needs the nudge. */
   position: relative; top: -2px;
@@ -603,7 +616,8 @@
  * still well under the ~50px the label and figure occupy. Verified: the card measures 82px with
  * the plane in, as it did with the icon it replaced.
  */
-.os-cic.plane { width: 54px; height: 54px; margin: -12px 0; }
+/* the plane's source is 800px, so it is not the binding constraint — it takes the slot */
+.os-cic.plane { width: 112px; height: 112px; margin: 0; }
 .os-cic.plane img { mix-blend-mode: normal; }
 
 /* the goals mark — same rules, smaller box; `Query Target Icon.png` despite the card's name */
@@ -624,7 +638,8 @@
 .os-card.enter .os-mark-il img { opacity: 0; }
 .os-mark-il img { transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1), opacity 0.2s ease 0.1s; }
 .os-cw { min-width: 0; }
-.os-cl { font-size: 12px; color: #5c5148; white-space: nowrap; }
+/* the ref's `.lab`: 16px in `--ink2`, 3px above the figure */
+.os-cl { font-size: 16px; color: #6b5d54; margin-bottom: 3px; white-space: nowrap; }
 .os-cv { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; }
 /* ⚠️ TABULAR NUMERALS — a counting figure whose glyph widths change re-lays-out the row on
    every frame. */

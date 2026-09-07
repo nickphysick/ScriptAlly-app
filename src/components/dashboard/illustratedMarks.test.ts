@@ -76,43 +76,47 @@ describe("trap 2 — a transform on an ancestor isolates the blend", () => {
   });
 });
 
-describe("trap 3 — the mark must not set the row's height", () => {
-  it("the box is fixed and cannot shrink", () => {
-    expect(blk(".os-mark-il")).toContain("flex-shrink: 0");
-    expect(blk(".os-cic")).toMatch(/width:\s*44px/);
-    expect(blk(".os-goalmark")).toMatch(/width:\s*34px/);
+/**
+ * ⚠️ TRAP 3 IS RETIRED, AND ITS PREMISE IS WHAT WENT (refdiff pass, Phase 4).
+ *
+ * It guarded a 44px mark beside ~30px of text: the box was fixed, a negative margin absorbed the
+ * overhang, and the TEXT owned the row's height. The ref makes the slot 112px (96 below 1700) — it
+ * is the largest thing in the row by design, and the row is the slot's height now. A negative
+ * margin there would pull the artwork out of the box the design reserves for it.
+ *
+ * ⚠️ WHAT SURVIVES IS THE PART THAT WAS NEVER ABOUT THE OVERHANG: the box is FIXED and the image is
+ * BOUNDED inside it. That is what makes the slot swap-ready — the picture changes size, the layout
+ * does not — and it is the half that still has a subject.
+ */
+describe("the stat slot is fixed, and the artwork is bounded inside it", () => {
+  it("the slot is the ref's size and cannot shrink", () => {
+    const b = blk(".os-cic");
+    expect(b).toContain("width: 112px");
+    expect(b).toContain("height: 112px");
+    expect(bare).toMatch(/max-width:\s*1699px[\s\S]{0,600}?\.os-cic[^{]*\{[^}]*96px/);
   });
 
-  it("⚠️ the overhang is absorbed by a NEGATIVE margin, so the text owns the height", () => {
-    expect(blk(".os-cic")).toMatch(/margin:\s*-8px 0/);
-    expect(blk(".os-goalmark")).toMatch(/margin:\s*-6px 0/);
+  /* ⚠️ THE CEILING IS THE ARTWORK'S, NOT THE LAYOUT'S. Two of the three sources are 100×100, so
+     50px is the largest size that stays sharp; the slot still reserves what the design asks for and
+     the picture centres in it. `max-width`, never `width: 100%` — filling the slot would upscale a
+     100px PNG into a 112px box and be softer than what ships today. */
+  it("⚠️ the image is bounded at its own sharp ceiling, not stretched to the slot", () => {
+    const img = blk(".os-mark-il img");
+    expect(img).toContain("max-width: 50px");
+    expect(img).toContain("max-height: 50px");
+    expect(img).not.toContain("width: 100%");
+    expect(img).toContain("object-fit: contain");
+    expect(blk(".os-cic")).toContain("justify-content: center");
   });
 
-  /* ⚠️ A BIGGER BOX MUST BRING A BIGGER ABSORPTION WITH IT, or the counters card grows. The plane
-     is 54px against its siblings' 44, so its margin is -12px against their -8: 54 − 24 = 30px
-     effective, under the ~50px the label and figure occupy, and the card stays 82px. Setting the
-     size without the margin is the exact shape of trap 3, so both are asserted together. */
-  it("⚠️ the 54px plane absorbs 24px, so the row's height is still the TEXT's", () => {
-    const p = blk(".os-cic.plane");
-    expect(p).toMatch(/width:\s*54px/);
-    expect(p).toMatch(/height:\s*54px/);
-    expect(p).toMatch(/margin:\s*-12px 0/);
-  });
-
-  it("⚠️ AND THE GOALS MARK OPTS OUT OF A BASELINE ROW — an image has no baseline", () => {
-    /* `.os-goal-r1` is `align-items: baseline`, so the image aligned on its BOTTOM MARGIN EDGE and
-       dragged the row: measured 33.3px against 21.8px of text. `align-self: center` takes it out
-       of the baseline group; measured after, 22.0 against 21.8. The negative margin alone was not
-       enough, which is why this is asserted separately. */
-    expect(blk(".os-goalmark")).toContain("align-self: center");
-  });
-
-  it("the image is bounded and letterboxed inside its box", () => {
-    const i = blk(".os-mark-il img");
-    expect(i).toContain("object-fit: contain");
-    expect(i).toMatch(/width:\s*100%/);
+  /* ⚠️ AND NO NEGATIVE MARGIN SURVIVES — it existed to hide an overhang the design no longer has,
+     and left in place it would pull the artwork out of its reserved box. */
+  it("⚠️ the overhang absorption is retired with the overhang", () => {
+    expect(blk(".os-cic")).toContain("margin: 0");
+    expect(blk(".os-cic")).not.toMatch(/margin:\s*-/);
   });
 });
+
 
 describe("the mapping follows the TABLE, not the filenames", () => {
   const counters = readFileSync(resolve(__dirname, "./OneScreenCounters.tsx"), "utf8");

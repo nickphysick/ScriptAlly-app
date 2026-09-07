@@ -30,7 +30,10 @@ const rule = (sel: string) => cssRule(baseCss, sel, "oneScreen.css");
 const NOW = new Date(2026, 7, 7, 10, 0, 0);
 const ago = (n: number) => new Date(NOW.getTime() - n * 86400000).toISOString();
 const q = (o: Record<string, unknown> = {}) => ({ id: String(Math.random()), agentId: "a1", status: QueryStatus.QUERIED, ...o }) as any;
-const ag = (n: number) => ({ id: String(Math.random()), name: "A", dateAdded: ago(n) }) as any;
+/* ⚠️ THE ID IS A PARAMETER SO A FIXTURE CAN BE MIXED. With every agent on a random id and every
+   query on "a1", nothing is ever queried and the split chip has only one branch to report — a
+   monoculture that passes while proving a third of the behaviour. */
+const ag = (n: number, id?: string) => ({ id: id ?? String(Math.random()), name: "A", dateAdded: ago(n) }) as any;
 
 describe("what counts as SENT — one predicate, two readers", () => {
   /* ⚠️ THE COUNTER AND THE CHART MUST NOT BE ABLE TO DRIFT. Both read `sentAt`, so this is an
@@ -56,7 +59,7 @@ describe("the three figures", () => {
     q({ dateSent: ago(2) }),
     q({}), // a draft — on file, not sent
   ];
-  const agents = [ag(90), ag(40), ag(5), ag(1)];
+  const agents = [ag(90, "a1"), ag(40), ag(5), ag(1)]; // one queried (every fixture query is on a1), three idle
 
   it("figures: queries sent, agents on file, responses received", () => {
     const [sent, ags, res] = headerCounters(queries, agents, NOW);
@@ -65,24 +68,34 @@ describe("the three figures", () => {
     expect(res).toMatchObject({ label: "Responses", n: 2 });
   });
 
-  it("the chips: a rolling month of sends and of agents added", () => {
+  /* ⚠️ THE TWO CHIPS ANSWER DIFFERENT QUESTIONS, AND ONLY ONE OF THEM IS A MOVEMENT (refdiff pass).
+     Sends ask "what has changed" — a rolling-month count with the ▲ and the period named, because a
+     bare "↑ 2" left the reader to work out of what and over how long. Agents ask "what is the shape
+     of the list" — a SPLIT, which is not a change at all and therefore takes the ref's `.plain`
+     capsule rather than the tinted one. Reading the agents chip as a recency count is the mistake
+     this case exists to catch. */
+  it("the chips: a rolling month of SENDS, and the agents' standing split", () => {
     const [sent, ags] = headerCounters(queries, agents, NOW);
-    expect(sent.chip).toBe("↑ 2");  // 10 and 2 days ago
-    expect(ags.chip).toBe("↑ 2");   // 5 and 1 days ago
+    expect(sent.chip).toBe("↑ 2 this week");  // 10 and 2 days ago
+    expect(sent.plain).toBeUndefined();
+    expect(ags.chip).toBe("1 queried · 3 idle");
+    expect(ags.plain).toBe(true);
   });
 
-  /* ⚠️ RETARGETED (dashboard redesign, Phase 3) — THE CHIP STATES THE DENOMINATOR, NOT A RATE.
-     "12 · of 21" rather than "12 · 57%". The law underneath is unchanged and is the reason this
-     case exists: the denominator is queries SENT, never every query on file, so a draft sitting in
-     the system cannot quietly make the writer's record look worse. With the figure stated outright
-     the claim is now directly readable rather than inferred from a percentage — 2 of 4, not 50%. */
+  /* ⚠️ THE CLAIM IS THE DENOMINATOR, NOT THE SPELLING — and the spelling has now changed twice.
+     It has been "of 21" and it is "57% response rate" today, because the ref states a rate. What has
+     never changed, and is the only thing worth locking, is WHAT IT DIVIDES BY: queries SENT, never
+     every query on file. Dividing by all queries lets an unsent draft quietly make a writer's record
+     look worse than it is — and it would visibly disagree with the "Queries sent" figure standing
+     two cells to its left. So this asserts the arithmetic (2 of 4 → 50) and that a draft moves it
+     not at all, rather than pinning a form of words a redesign is entitled to change. */
   it("⚠️ the denominator is queries SENT, so a draft cannot drag it down", () => {
     const [, , res] = headerCounters(queries, agents, NOW);
-    expect(res.chip).toBe("of 4");
+    expect(res.chip).toBe("50% response rate"); // 2 responses of 4 SENT — the draft is not counted
     const noDraft = headerCounters(queries.filter((x) => x.dateSent), agents, NOW);
-    expect(noDraft[2].chip).toBe("of 4"); // adding a draft changes nothing
-    /* and it must not silently become a rate again */
-    expect(res.chip).not.toMatch(/%/);
+    expect(noDraft[2].chip).toBe(res.chip); // removing the draft changes nothing
+    /* the failing shape stated outright: divided by all 5 on file it would read 40% */
+    expect(res.chip).not.toBe("40% response rate");
   });
 });
 
@@ -93,12 +106,18 @@ describe("empty and early states — a chip that reports nothing is omitted", ()
     for (const c of cs) expect(c.chip, c.key).toBeUndefined();
   });
 
-  it("⚠️ never '↑ 0' and never '0%'", () => {
+  /* ⚠️ THE OMISSION RULE APPLIES TO CHIPS THAT REPORT A MOVEMENT, AND THE SPLIT IS NOT ONE.
+     "↑ 0 this week" and "0% response rate" both read as measurements of nothing, so both go. The
+     agents chip is a standing description of the list — "0 queried · 1 idle" is a true and useful
+     sentence about an account with one untouched agent, and suppressing it would leave the figure
+     bare for exactly the reader who most needs telling what it is made of. Both halves are asserted
+     together, because the interesting claim is that they differ. */
+  it("⚠️ never '↑ 0' and never '0%' — but the split still speaks", () => {
     // sends and agents exist, but all older than the window; no responses at all
     const cs = headerCounters([q({ dateSent: ago(200) })], [ag(200)], NOW);
     expect(cs[0]).toMatchObject({ n: 1 });
     expect(cs[0].chip).toBeUndefined();
-    expect(cs[1].chip).toBeUndefined();
+    expect(cs[1].chip).toBe("0 queried · 1 idle");
     expect(cs[2]).toMatchObject({ n: 0 });
     expect(cs[2].chip).toBeUndefined(); // no responses → no rate, not "0%"
   });

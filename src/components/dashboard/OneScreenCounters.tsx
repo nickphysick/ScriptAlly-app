@@ -73,7 +73,7 @@ export const OneScreenCounters: React.FC<{
           <div className="os-cv">
             <CountFigure n={c.n} />
             {/* absent, not zero — see headerCounters */}
-            {c.chip && <span className="os-cd">{c.chip}</span>}
+            {c.chip && <span className={c.plain ? "os-cd plain" : "os-cd"}>{c.chip}</span>}
           </div>
         </div>
       </div>
