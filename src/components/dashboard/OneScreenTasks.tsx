@@ -141,24 +141,30 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
   /* ── the rule ─────────────────────────────────────────────────────────────────────────────── */
   const bands = RULE_ORDER.map((c) => ({ c, n: counts[c], pct: total > 0 ? (counts[c] / total) * 100 : 0 }));
 
+  /* ⚠️ THE LABEL IS THE FILTER'S, AND AT REST THERE IS NO LABEL AT ALL (refdiff pass, Phase 6).
+     It read "32 open" beside a heading that already says "To-do list": the word was restating the
+     card's own name in the card's own header. Under a filter it earns its place, because then the
+     number is a SUBSET and nothing else on the card says which. Ref `.badge`: `<b>32</b>`, with a
+     `span` treatment that exists for exactly the second reading. */
   const badge = filter
     ? { n: counts[filter], label: CATEGORY_LABEL[filter], fam: CATEGORY_FAMILY[filter] }
-    : { n: total, label: "open", fam: null as string | null };
+    : { n: total, label: null as string | null, fam: null as string | null };
 
   return (
     <OneScreenPanel variant="os-tasks" probe="todo-card" loading={loading} skel={["h", "", "", ""]}>
       <div className="os-th2">
         <OneScreenMark name="tasks" />
         <h2>To-do list</h2>
-        {/* ⚠️ ONE BADGE, TWO READINGS. At rest it is the open total; under a filter it is that
-            category's count and name, in that category's own paper — so the badge always states
-            what the tickets beneath it are, rather than a total the visible set contradicts. */}
+        {/* ⚠️ ONE BADGE, TWO READINGS. At rest it is the open total and nothing else; under a
+            filter it is that category's count and name, in that category's own paper — so the badge
+            always states what the tickets beneath it are, rather than a total the visible set
+            contradicts. */}
         <span
           className="os-tbadge"
           data-probe="todo-badge"
           style={badge.fam ? { background: FAMILY_FILL[badge.fam] } : undefined}
         >
-          <b>{badge.n}</b> {badge.label}
+          <b>{badge.n}</b>{badge.label ? <span>{badge.label}</span> : null}
         </span>
         <button type="button" className="os-see" onClick={onSeeAll}>See all <span className="os-arr">→</span></button>
       </div>

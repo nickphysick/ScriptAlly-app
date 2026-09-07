@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
-import { elapsedPhrase, daysBetween, exactDate, ELAPSED_LABEL, DAYS_MAX, WEEKS_MAX, MONTHS_MAX } from "./elapsed";
+import { elapsedPhrase, elapsedWhole, daysBetween, exactDate, ELAPSED_LABEL, DAYS_MAX, WEEKS_MAX, MONTHS_MAX } from "./elapsed";
 
 describe("elapsedPhrase — the unit scales with the number", () => {
   it("days, up to about a fortnight", () => {
@@ -132,5 +132,40 @@ describe("§4a · every duration surface reads this one", () => {
        the component here would have asserted about a file that no longer holds the figure. */
     expect(strip(read("./queryAmbient.ts")), "Tracking's stat strip does not read it").toContain("elapsedPhrase(");
     expect(strip(read("../components/reading-pane/QueryTimeline.tsx")), "the timeline metas do not read it").toContain("elapsedPhrase(");
+  });
+});
+
+/**
+ * ⚠️ THE PROSE VARIANT, AND BOTH DIRECTIONS ARE THE CLAIM. A quarter-year figure is right where a
+ * duration is COMPARED — a column of silences read down — and wrong in a sentence, where "for 2¼
+ * years" states the length of a silence to the quarter and reads as precision about someone's
+ * rudeness. So `elapsedWhole` flattens the fraction and `elapsedPhrase` must still carry it: a
+ * variant that agreed with the original everywhere would be a rename.
+ */
+describe("elapsedWhole — the same scale, in whole units, for prose", () => {
+  it("is identical below the years tier — the fraction only exists up there", () => {
+    for (const d of [0, 1, 6, 13, 14, 40, 90, 91, 200, 400, 730]) {
+      expect(elapsedWhole(d), String(d)).toBe(elapsedPhrase(d));
+    }
+  });
+
+  it("⚠️ rounds the quarter away, and `elapsedPhrase` still states it", () => {
+    expect(elapsedPhrase(800)).toBe("2¼ years");
+    expect(elapsedWhole(800)).toBe("2 years");
+    expect(elapsedPhrase(1000)).toBe("2¾ years");
+    expect(elapsedWhole(1000)).toBe("3 years");   // rounds up, not truncates
+    expect(elapsedPhrase(1200)).toBe("3¼ years");
+    expect(elapsedWhole(1200)).toBe("3 years");
+  });
+
+  it("the unit agrees with the rounded figure, never with the one it replaced", () => {
+    /* ⚠️ 640 DAYS IS STILL THE MONTHS TIER — `MONTHS_MAX` is 730, so it reads "21 months" and the
+       fraction never arises. Picking a sample by eye from the years tier is how a case comes to
+       assert the wrong tier's behaviour. */
+    expect(elapsedWhole(640)).toBe(elapsedPhrase(640));
+    expect(elapsedWhole(730)).toBe("2 years");
+    /* the first quarter above the boundary rounds down to the same whole year */
+    expect(elapsedPhrase(830)).toMatch(/¼/);
+    expect(elapsedWhole(830)).toBe("2 years");
   });
 });

@@ -69,6 +69,28 @@ export function elapsedPhrase(days: number): string {
   return `${p.figure} ${p.unit}`;
 }
 
+/**
+ * The same scale, in WHOLE units — for prose, where a fraction reads as a measurement.
+ *
+ * ⚠️ IT IS A VARIANT, NOT A RETUNE OF `elapsedPhrase`. The quarter-year figure is right where the
+ * duration is being COMPARED — a task pane's wait, a column of silences read down — and wrong in a
+ * sentence: "No response from Priya Sen for 2¼ years" states the length of a silence to the
+ * quarter, which nobody means and which reads as precision about someone's rudeness. Changing the
+ * shared formatter would take the fraction off the surfaces that want it.
+ *
+ * ⚠️ AND IT ROUNDS THE FIGURE, NEVER THE PHRASE — `elapsedParts` decides days-versus-weeks-versus-
+ * months-versus-years and this only flattens the last of those, so the scale stays in one place.
+ */
+export function elapsedWhole(days: number): string {
+  const p = elapsedParts(days);
+  const whole = Math.max(1, Math.round(parseFloat(p.figure.replace(/[^\d.]/g, "")) + FRACTION[p.figure.slice(-1)]));
+  if (!/[¼½¾]/.test(p.figure)) return `${p.figure} ${p.unit}`;
+  return `${whole} ${whole === 1 ? p.unit.replace(/s$/, "") : p.unit.endsWith("s") ? p.unit : `${p.unit}s`}`;
+}
+
+/** the quarter glyphs `elapsedParts` appends, as the numbers they stand for */
+const FRACTION: Record<string, number> = { "¼": 0.25, "½": 0.5, "¾": 0.75 };
+
 /** Days between two instants, floored — the input every caller already has. */
 export const daysBetween = (fromMs: number, toMs: number): number => Math.max(0, Math.floor((toMs - fromMs) / DAY));
 

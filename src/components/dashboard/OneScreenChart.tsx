@@ -44,7 +44,21 @@ import { useCountUp } from "../../lib/useCountUp";
  */
 type BandStackKey = BandKey | "offer";
 
-export const PADX = 14, PADY = 16, PADTOP = 30;
+/**
+ * ⚠️ `PADY` IS THE X-AXIS BAND, NOT A MARGIN, AND IT IS WHY THE PLOT AND ITS LABELS ARE ONE BOX.
+ *
+ * The ref's chart is a single svg whose `viewBox` reserves 48 of its 330 units below the baseline
+ * and draws the period labels there — so its box IS the plot plus its scale, and the card's height
+ * follows from that one ratio. The app drew the labels as HTML beneath the svg, which is the same
+ * picture and a different box: 17px of card height the ref does not spend, on top of a plot sized
+ * from a ratio that already assumed the labels were inside it. Measured: the chart card 26px taller
+ * than the ref's, and every card below it in the middle column carrying the difference.
+ *
+ * The labels are absolutely positioned inside the plot's box now, and `PADY` reserves the room they
+ * sit in — 34 of the app's own height, the ref's 48/330 at this scale. It is the baseline's offset
+ * from the bottom, so raising it lowers nothing: it lifts the whole plot off its own footer.
+ */
+export const PADX = 14, PADY = 34, PADTOP = 30;
 export const READ_MARGIN = 10;
 
 export const chartX = (i: number, W: number, len: number): number =>
@@ -301,7 +315,7 @@ export const OneScreenChart: React.FC<{
     if (!svgRef.current || !view[i]) return;
     setFocusIdx(i);
     const r = svgRef.current.getBoundingClientRect();
-    setTipAnchor({ left: r.left + chartX(i, W, view.length), top: r.top + chartY(view[i].active, H, lo, hi), width: 0, height: 0 });
+    setTipAnchor({ left: r.left + chartX(i, W, view.length), top: r.top + chartY(total[i] ?? 0, H, lo, hi), width: 0, height: 0 });
     if (announce) {
       const w = view[i];
       setLiveText(`${periodLabel(effFreq, w.label)}. ${w.active} active ${w.active === 1 ? "query" : "queries"}. ${w.sent} sent, ${w.closed} closed.`);
@@ -514,22 +528,25 @@ export const OneScreenChart: React.FC<{
                 {focusIdx >= 0 && (
                   <>
                     <line x1={chartX(focusIdx, W, view.length)} x2={chartX(focusIdx, W, view.length)} y1={4} y2={H - 3} stroke="#c9a89e" strokeWidth={1.1} strokeDasharray="3 5" />
-                    <circle cx={chartX(focusIdx, W, view.length)} cy={chartY(view[focusIdx].active, H, lo, hi)} r={5} fill="#fdfaf5" stroke="#241811" strokeWidth={2} />
+                    <circle cx={chartX(focusIdx, W, view.length)} cy={chartY(total[focusIdx] ?? 0, H, lo, hi)} r={5} fill="#fdfaf5" stroke="#241811" strokeWidth={2} />
                   </>
                 )}
               </>
             )}
           </svg>
         )}
+        {/* ⚠️ INSIDE THE PLOT'S BOX — see `PADY`. The ref draws its period labels in the band its
+            own viewBox reserves below the baseline, so the plot and its scale are one box and the
+            card's height is that one ratio. */}
+        <div className="os-xlabels">
+          {view.map((w, i) =>
+            (i % every === 0 || i === lastIdx)
+              ? <span key={w.start.toISOString()} className={i === lastIdx ? "now" : undefined}>{w.label}</span>
+              : null,
+          )}
+        </div>
       </div>
 
-      <div className="os-xlabels">
-        {view.map((w, i) =>
-          (i % every === 0 || i === lastIdx)
-            ? <span key={w.start.toISOString()} className={i === lastIdx ? "now" : undefined}>{w.label}</span>
-            : null,
-        )}
-      </div>
       {/* §3: the keyboard walk narrates here */}
       <div className="os-sr" aria-live="polite">{liveText}</div>
 

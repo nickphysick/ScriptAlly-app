@@ -19,7 +19,7 @@ import { queryAmbientStatus } from "./queryAmbient";
 import { agentDataQualityNeeds } from "./agentDataQuality";
 import { agentPrimary, agentInitials } from "./agentDisplay";
 /* §3 — the app's one scaled elapsed figure; the stale card states its duration in it. */
-import { elapsedPhrase } from "./elapsed";
+import { elapsedPhrase, elapsedWhole } from "./elapsed";
 import { flagMatchesTask, isFlagSuppressing } from "./taskFlags";
 import { clearedTodayItems } from "./clearedToday";
 import { isoWeekStart } from "./dashboardStats";
@@ -245,7 +245,7 @@ export function derivedCopy(task: Task, q: Query | undefined, ag: Agent | undefi
      */
     case "no_response_close": {
       const days = silentDays(q, now);
-      return { kind: "STALE", title: `No response from ${name}${days != null ? ` for ${elapsedPhrase(days)}` : ""}`, who: name, subtitle: "Consider closing?", due: days != null ? `SILENT ${days} DAYS` : "SILENT", warn: true, status: q?.status, hk: false };
+      return { kind: "STALE", title: `No response from ${name}${days != null ? ` for ${elapsedWhole(days)}` : ""}`, who: name, subtitle: "Consider closing?", due: days != null ? `SILENT ${days} DAYS` : "SILENT", warn: true, status: q?.status, hk: false };
     }
     case "data_quality_poor": {
       const gap = ag ? agentDataQualityNeeds(ag)[0] : undefined;
