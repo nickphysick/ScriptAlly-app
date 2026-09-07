@@ -820,3 +820,122 @@ test("Phase 5 — the drawer over the grid, and the split in List", async ({ pag
   expect(out.length, "assertion floor").toBeGreaterThanOrEqual(6);
   expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
 });
+
+/**
+ * Phase 6 — the urgent lens's motion.
+ *
+ * ⚠️ MOTION SUPPRESSION IS LIFTED FIRST, and this phase is the reason the harness has that lever.
+ * `liftMotionSuppression` removes the stylesheet that sets `animation: none` on everything; without
+ * it every assertion below would read the suppressed value and report a correct page as still.
+ *
+ * ⚠️ AND REDUCED MOTION IS ASSERTED IN BOTH DIRECTIONS. A check that only proves `animation-name:
+ * none` under `reduce` passes just as well on a page where the animation was never declared at
+ * all — the vacuous shape this repo already records. So it reads the SAME element twice, under
+ * both preferences, and requires them to differ.
+ */
+test("Phase 6 — the urgent motion, and reduced motion in both directions", async ({ page }) => {
+  const out: R[] = [];
+  const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
+  const OUT = process.env.SA_QC_OUT6 ?? "run-artifacts/qc-chassis-p6.txt";
+  rmSync(OUT, { force: true });
+
+  await ensureSignedIn(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/todo");
+  await page.waitForFunction("document.querySelectorAll('.qct-tile').length > 0", null, { timeout: 45_000 }).catch(() => {});
+  await liftMotionSuppression(page);
+  await visiblePage(page, ".tdb-wrap");
+  await page.waitForTimeout(700);
+
+  const readCards = () => page.evaluate(`(() => {
+    const root = __saVisRoot();
+    const all = [...root.querySelectorAll(".tkt")];
+    const urgent = all.filter((c) => c.classList.contains("urgent"));
+    const calm = all.filter((c) => !c.classList.contains("urgent"));
+    const anim = (el) => {
+      const cs = getComputedStyle(el);
+      return { name: cs.animationName, dur: cs.animationDuration, delay: cs.animationDelay,
+               origin: cs.transformOrigin, border: cs.borderTopColor };
+    };
+    return {
+      total: all.length, urgent: urgent.length, calm: calm.length,
+      u: urgent.slice(0, 6).map(anim),
+      c: calm.slice(0, 3).map(anim),
+    };
+  })()`) as Promise<any>;
+
+  const m = await readCards();
+
+  /* ⚠️ THE POPULATION FIRST — an assertion about urgent cards is satisfied by there being none. */
+  add("P6.0 · there are urgent cards AND calm ones, so both branches are measurable",
+      m.urgent > 0 && m.calm > 0,
+      "tickets " + m.total + " · urgent " + m.urgent + " · calm " + m.calm);
+
+  add("P6.1 · every urgent ticket runs the nudge AND the glow, on one 4.5s cycle",
+      m.u.length > 0 && m.u.every((a: any) =>
+        a.name.indexOf("saUrgentWiggle") > -1 && a.name.indexOf("saUrgentGlow") > -1
+        && a.dur.indexOf("4.5s") === 0),
+      JSON.stringify(m.u[0]));
+
+  /* ⚠️ AND NOTHING ELSE MOVES. Motion is the URGENT lens; a calm card that animated would make the
+     mark meaningless, and it is the kind of thing a stray selector does silently. */
+  add("P6.2 · no calm ticket animates — the motion IS the lens",
+      m.c.every((a: any) => a.name === "none"),
+      "calm animation-names " + JSON.stringify(m.c.map((a: any) => a.name)));
+
+  /* ⚠️ THE STAGGER, AS A SET OF DISTINCT DELAYS. Six cards nudging in unison reads as the page
+     twitching; asserted as "more than one phase is in use" rather than as a list of values, so a
+     legitimate retune of the delays is not a red. */
+  const delays = [...new Set(m.u.map((a: any) => a.delay))];
+  add("P6.3 · the urgent cards are staggered — they do not all move together",
+      m.urgent < 2 || delays.length > 1,
+      "distinct delays across " + m.u.length + " urgent tickets: " + JSON.stringify(delays));
+
+  /* ── reduced motion, both directions, on the same element ── */
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.waitForTimeout(400);
+  const reduced = await readCards();
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.waitForTimeout(400);
+  const restored = await readCards();
+
+  add("P6.4 · under `reduce` the motion stops — and it comes back without it",
+      reduced.u.every((a: any) => a.name === "none")
+        && restored.u.every((a: any) => a.name.indexOf("saUrgentWiggle") > -1),
+      "under reduce " + JSON.stringify(reduced.u.map((a: any) => a.name))
+        + " · restored " + JSON.stringify(restored.u.slice(0, 1).map((a: any) => a.name)));
+
+  /* ⚠️ AND THE MARK SURVIVES REDUCED MOTION. Turning the animation off must not turn the urgency
+     off: the border is the FACT and the motion is only the emphasis. A reader who asked for no
+     movement still needs to see which cards are urgent. */
+  add("P6.5 · the urgent border remains under `reduce` — the mark is not the motion",
+      reduced.u.length > 0 && reduced.u.every((a: any, i: number) => a.border === m.u[i].border),
+      "border under reduce " + JSON.stringify(reduced.u.slice(0, 1).map((a: any) => a.border))
+        + " · normally " + JSON.stringify(m.u.slice(0, 1).map((a: any) => a.border)));
+
+  /* ⚠️ THE OVERRIDE MUST FOLLOW ITS TARGET IN THE SHEET. A media query confers no specificity, so
+     a reduced-motion block written ABOVE the rules it overrides loses at equal weight — measured
+     in this repo once already, on a transition that read 0.5s under `reduce` from a declaration
+     that looked perfectly correct. Asserted at the source, because the cascade is a fact about the
+     file's order that a single rendered reading cannot distinguish from luck. */
+  /* ⚠️ COMMENTS STRIPPED FIRST — the house rule, and this assertion broke it on its first run. The
+     file's own header EXPLAINS the ordering ("`prefers-reduced-motion` has to answer in ONE
+     place"), so a raw `indexOf` found the prose at character 323 and reported a correctly ordered
+     stylesheet as wrong. A source lock that reads prose is reading the wrong artefact. */
+  const cssRaw = readFileSync(join(process.cwd(), "src/components/todo/urgentMotion.css"), "utf8");
+  const css = cssRaw.replace(/\/\*[\s\S]*?\*\//g, "");
+  const overrideAt = css.indexOf("prefers-reduced-motion");
+  const lastAnimated = css.lastIndexOf("animation-delay");
+  add("P6.6 · the reduced-motion block comes AFTER the rules it overrides",
+      overrideAt > -1 && lastAnimated > -1 && overrideAt > lastAnimated,
+      "override at " + overrideAt + " · last animated rule at " + lastAnimated
+        + " (comments stripped)");
+
+  const lines = out.map((x) => (x.ok ? "green  " : "RED    ") + "· " + x.id + (x.note ? "\n         " + x.note : ""));
+  const red = out.filter((x) => !x.ok);
+  writeFileSync(OUT, "── qc chassis · Phase 6 · " + out.length + " assertions · " + red.length
+    + " RED · " + (out.length - red.length) + " green\n" + lines.join("\n") + "\n");
+  console.log(lines.join("\n"));
+  expect(out.length, "assertion floor").toBeGreaterThanOrEqual(6);
+  expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
+});

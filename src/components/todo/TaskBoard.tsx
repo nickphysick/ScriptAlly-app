@@ -34,6 +34,7 @@
  */
 import React from "react";
 import "./taskBoard.css";
+import "./urgentMotion.css";
 import { BoardCard } from "../../lib/todoBoard";
 import { StatusDot } from "../StatusDot";
 import {

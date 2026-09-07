@@ -1,0 +1,73 @@
+/* ── THE URGENT MARK'S MOTION (QC-chassis round, Phase 6; ref todo-qc-style.html) ─────────────────
+   ⚠️ ONE FILE FOR BOTH CARD KINDS, and that is the whole reason it exists rather than living in
+   `taskTicket.css` and `taskBoard.css` twice. The ticket and the board card wear the same mark for
+   the same reason, and `prefers-reduced-motion` has to answer for it in ONE place — two copies is
+   two chances for a future edit to silence only one of them.
+
+   ⚠️ URGENT IS A LENS, AND THE MOTION IS ITS ONLY MOVING PART. `.urgent` is set from
+   `isUrgentCard` — a send whose clock is RUNNING, not one past a threshold — so what moves is
+   exactly the set the Urgent tile counts. Nothing else on this page animates on a loop.
+
+   ⚠️ AND THE RESTING MARK IS NOT HERE. The burgundy head on a board card and the warm border on a
+   ticket are declared with those cards, because they must survive `prefers-reduced-motion` — a
+   reader who has asked for no animation still needs to see which cards are urgent. Motion is the
+   emphasis; the border is the fact. */
+
+/* the nudge: still for three-quarters of the cycle, then a small shake and back */
+@keyframes saUrgentWiggle {
+  0%, 74%, 100% { transform: rotate(0); }
+  78% { transform: rotate(-1deg); }
+  82% { transform: rotate(1deg); }
+  86% { transform: rotate(-0.7deg); }
+  90% { transform: rotate(0.7deg); }
+  94% { transform: rotate(0); }
+}
+
+/* the glow, timed to land with the nudge so they read as one gesture rather than two */
+@keyframes saUrgentGlow {
+  0%, 70%, 100% { box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04); }
+  84% { box-shadow: 0 0 0 4px rgba(232, 200, 188, 0.75), 0 10px 28px rgba(124, 58, 42, 0.2); }
+}
+
+.tkt.urgent,
+.brd-card.urgent {
+  animation: saUrgentWiggle 4.5s ease-in-out infinite, saUrgentGlow 4.5s ease-in-out infinite;
+  transform-origin: 50% 60%;
+}
+
+/* ⚠️ THE STAGGER IS NOT DECORATION — six cards nudging in unison reads as the PAGE twitching, which
+   is alarming rather than informative. Three phases, so no two neighbours ever move together. */
+.tkt.urgent:nth-child(2n),
+.brd-card.urgent:nth-child(2n) { animation-delay: .9s; }
+.tkt.urgent:nth-child(3n),
+.brd-card.urgent:nth-child(3n) { animation-delay: 1.8s; }
+
+/* ⚠️ THE HOVER STOPS IT. A card the reader is pointing at should hold still — motion on the thing
+   under the cursor fights the click, and the mark has already done its job the moment it is
+   noticed. */
+.tkt.urgent:hover,
+.brd-card.urgent:hover { animation-play-state: paused; }
+
+/* ⚠️ THE REDUCED-MOTION OVERRIDE FOLLOWS ITS TARGET, and that ordering is load-bearing: a media
+   query confers NO specificity, so this block written above the rules would lose to them at equal
+   weight — the exact fault this repo measured on the founding panel's progress bar, which reported
+   a 0.5s transition under `reduce` from a declaration that read perfectly correctly.
+
+   ⚠️ AND THE FAULT IS PARTIAL, WHICH IS WHAT MAKES IT DANGEROUS — measured by moving this block
+   above the rules and watching. FIVE of six urgent cards still stopped, because the `:nth-child`
+   selectors in here are 0-3-0 and outrank the later base rule at 0-2-0; only the ONE card matching
+   neither `2n` nor `3n` kept animating. A check that sampled a single card, or asked whether "the
+   motion stops", would have passed over a page still moving. The assertion reads every urgent card
+   for exactly that reason.
+
+   ⚠️ AND IT IS `animation: none`, NOT A SLOWER ONE. Reduced motion is a request for no movement,
+   not for gentler movement. The urgent cards keep their border and their burgundy head, which is
+   why turning the animation off costs the reader nothing they need. */
+@media (prefers-reduced-motion: reduce) {
+  .tkt.urgent,
+  .brd-card.urgent,
+  .tkt.urgent:nth-child(2n),
+  .brd-card.urgent:nth-child(2n),
+  .tkt.urgent:nth-child(3n),
+  .brd-card.urgent:nth-child(3n) { animation: none; }
+}

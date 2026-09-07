@@ -21,6 +21,7 @@
  */
 import React from "react";
 import "./taskTicket.css";
+import "./urgentMotion.css";
 import { BoardCard } from "../../lib/todoBoard";
 import { StatusDot } from "../StatusDot";
 import { taskCategory, CATEGORY_TAG, CATEGORY_FAMILY } from "../../lib/todoCategory";
