@@ -1148,6 +1148,18 @@
 }
 .aglist .agl-brow { display: flex; align-items: center; gap: 8px; justify-content: space-between; margin-top: 9px; }
 .aglist .agl-brow .agl-metaline { display: flex; align-items: center; gap: 6px; min-width: 0; }
+/* ⚠️ THE BOARD CARD'S FLAG TAKES THE LOCKED TREATMENT, because the treatment belongs to the FLAG
+   and not to the container it happens to sit in. `.agl-loc .fl` carried it, so the grid's flag was
+   14×10 and the board's — outside that container — fell back to `flag-icons`' own box and measured
+   13.3×10. One national flag, three sizes, is the drift a locked value exists to stop; and the
+   reason the size is locked at all is that at this scale a bevel turns a flag into a button.
+   ⚠️ THE LIST'S IS STILL UNTREATED AND MEASURES 16.7×12.5 — same cause, and out of this pack's
+   scope, so it is reported rather than quietly widened. */
+.aglist .agl-brow .fl {
+  width: 14px; height: 10px; flex: none; display: block;
+  border-radius: 1.5px; overflow: hidden;
+  background-size: cover; background-position: center;
+}
 .aglist .agl-colempty {
   font-family: 'Playfair Display', serif; font-style: italic; font-size: 13px;
   color: var(--agl-ink-muted); padding: 2px;

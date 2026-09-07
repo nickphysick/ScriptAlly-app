@@ -1012,6 +1012,46 @@
 /* ⚠️ 34 → 40 (§3). The list's filter and sort read this and so does the search FIELD, which is the
    pairing that made 34 the number in the first place — the three share a baseline because they
    share a token, not because three values were matched. They rise together or not at all. */
+:root {
+  /**
+   * ══ THE STATE PALETTE (colours v2, design-refs/query-state-colours-v2.md) ══════════════════
+   *
+   * ⚠️ AT `:root`, NOT ON `.t-f12`, AND THE MOVE IS THE FIX FOR A SILENT FAULT. These were the
+   * Query Centre's theme class's own, which is right for as long as the Query Centre is the only
+   * reader. The Contact list's board reads them through `STATE_ACCENT_TOKEN` — the map `lib/`
+   * already exports as app-wide — and `.aglist` is not under `.t-f12`, so every
+   * `var(--state-you-deep)` there resolved to NOTHING: an invalid-at-computed-value-time
+   * declaration, dropped, leaving the board's nine column rules to fall back to `currentColor`.
+   * Nine columns, one ink hairline, through a clean build and a green source lock that asserted
+   * the token's NAME. It is the third surface to hit this — the Calendar hit it first and copied
+   * the values instead, and the debt note it left says the fix is exactly this move.
+   *
+   * ⚠️ WIDENING CANNOT CHANGE AN EXISTING RENDER. `:root` is an ancestor of `.t-f12`, so every
+   * current consumer resolves the same value it always did; and no consumer of these ten reads
+   * them with a fallback, so none was relying on their absence. (`--state-accent` is a different
+   * thing — a per-element variable the callers assign — and is untouched.)
+   *
+   * FIVE FLAT FILLS, AND DEPTH IS `StatusDot`'S ALONE. Colour says whose court it is and whether
+   * the journey has started; the ladder said how FAR along it was, which is the same thing
+   * `StatusDot` already draws — so two devices were spelling one fact and the tints did it worse.
+   * Sand is the start and has no hue of its own; sage and pink arrive with the agent's first
+   * reply. Sand must never read as closed grey (locked by ΔE, not by eye).
+   */
+  --state-queried: #f7efe3;   /* sand  · Queried                                   · with the agent */
+  --state-agent:   #e0e5dd;   /* sage  · Partial Sent, Full Sent                   · with the agent */
+  --state-you:     #f5e6df;   /* pink  · Partial/Full Requested, R&R, unsent ask    · with you      */
+  --state-offer:   #d7e0e8;   /* slate · an offer, undecided                       · offer         */
+  --state-closed:  #e4e1db;   /* grey  · closed, rejected, withdrawn, no response   · closed        */
+
+  /* one deeper step of the SAME family — desk strip, active tab, target-rung ring, estimate bars.
+     Not a sixth colour: derived from the same `state`, and never used as a fill. */
+  --state-queried-deep: #e7d9bd;
+  --state-agent-deep:   #c7d0c2;
+  --state-you-deep:     #e8c9bb;
+  --state-offer-deep:   #c9d6e1;
+  --state-closed-deep:  #cfc9c1;
+}
+
 .t-f12 { --f12-icon-btn: 40px; }
 /* ── §3 · THE ONE BUTTON RULE, AS THREE TOKENS ────────────────────────────────────────────────
    Height, radius and the single border colour every control on this page reads — the header's
@@ -4694,27 +4734,10 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
   --stage-offer: #d7e0e8;   /* an offer, while it is open */
   --stage-closed: #e4e1db;  /* closed, rejected, withdrawn, no response */
 
-  /**
-   * ══ THE STATE PALETTE (colours v2, design-refs/query-state-colours-v2.md) ══════════════════
-   *
-   * FIVE FLAT FILLS, AND DEPTH IS `StatusDot`'S ALONE. Colour says whose court it is and whether
-   * the journey has started; the ladder above said how FAR along it was, which is the same thing
-   * `StatusDot` already draws — so two devices were spelling one fact and the tints did it worse.
-   * Sand is the start and has no hue of its own; sage and pink arrive with the agent's first
-   * reply. Sand must never read as closed grey (locked by ΔE, not by eye).
-   */
-  --state-queried: #f7efe3;   /* sand  · Queried                                   · with the agent */
-  --state-agent:   #e0e5dd;   /* sage  · Partial Sent, Full Sent                   · with the agent */
-  --state-you:     #f5e6df;   /* pink  · Partial/Full Requested, R&R, unsent ask    · with you      */
-  --state-offer:   #d7e0e8;   /* slate · an offer, undecided                       · offer         */
-  --state-closed:  #e4e1db;   /* grey  · closed, rejected, withdrawn, no response   · closed        */
-
-  /* one deeper step of the SAME family — desk strip, active tab, target-rung ring, estimate bars.
-     Not a sixth colour: derived from the same `state`, and never used as a fill. */
-  --state-queried-deep: #e7d9bd;
-  --state-agent-deep:   #c7d0c2;
-  --state-you-deep:     #e8c9bb;
-  --state-offer-deep:   #c9d6e1;
-  --state-closed-deep:  #cfc9c1;
+  /* ⚠️ THE STATE PALETTE MOVED TO `:root` — see the block above this rule, and the DEBT note at
+     the head of this one. It is read by a THIRD surface now (the Contact list's board), and a
+     theme class cannot serve a page that does not wear it. The eight `--stage-*` above still
+     carry the same debt and their own documented copy; they are the Calendar's migration, with a
+     lock to retire alongside it, and are deliberately untouched here. */
 }
 
