@@ -23,7 +23,10 @@ test.setTimeout(900_000);
  * ⚠️ NO BACKTICKS AND NO REGEX INSIDE ANY page.evaluate TEMPLATE.
  */
 type R = { id: string; ok: boolean; note: string };
-const FLOOR = 9;
+/* ⚠️ THE LAST RECORDED COUNT, NOT A ROUND NUMBER BELOW IT. A floor set comfortably under
+   the real figure is a guard that never fires — the suite could quietly measure half of
+   itself and still clear it. 20 is what it ran on 7 Sep — ten claims at each of two widths. */
+const FLOOR = 20;
 
 test("the index card is anchored to the drawer, at the contract's geometry", async ({ page }) => {
   const out: R[] = [];

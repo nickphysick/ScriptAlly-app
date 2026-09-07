@@ -23,7 +23,10 @@ test.setTimeout(900_000);
  */
 
 /** the last recorded assertion count — a run below it is red, whatever its cases say */
-const FLOOR = 33;
+/* ⚠️ THE LAST RECORDED COUNT, NOT A ROUND NUMBER BELOW IT. A floor set comfortably under
+   the real figure is a guard that never fires — the suite could quietly measure half of
+   itself and still clear it. 56 is what it ran on 7 Sep. */
+const FLOOR = 56;
 
 test("the drawer's anatomy matches the contract, property by property", async ({ page }) => {
   const OUT = "run-artifacts/anatomy-diff.txt";
