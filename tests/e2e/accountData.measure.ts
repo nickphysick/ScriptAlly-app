@@ -98,10 +98,21 @@ test("the modal names what goes and states the window", async ({ page }) => {
 test("export is framed as the portability right, and retention is stated", async ({ page }) => {
   await openRoute(page, "/account/data", { width: 1440, height: 900 });
   const panel = (await page.locator("#acct-panel").textContent()) ?? "";
-  expect(panel).toContain("A complete copy of everything on your account");
-  expect(panel).toContain("another program can read");
+  /* ⚠️ THREE OF THESE FOUR SENTENCES HAD ALREADY LEFT THE PAGE BEFORE THIS PACK — zero occurrences
+     at 418d7c5a — so this case was red for an unknown stretch while looking like coverage of the
+     portability right. Retargeted to what the section says NOW, and to the CLAIMS rather than the
+     wording: the copy is offered, what it contains is stated, and the retention period is given.
+     The no-legalese sweep below is untouched, because that one is about register and still holds. */
+  expect(panel).toContain("Take a copy of your data");
+  expect(panel).toContain("Download a copy");
+  /* ⚠️ THE COVERAGE LINE IS DERIVED FROM `EXPORT_COLLECTIONS`, so this asserts that the sentence
+     names more than the three collections the old hand-written blurb listed — the understatement
+     that made the page describe a file it does not produce. */
+  for (const named of ["notes", "to-dos", "packages", "manuscripts"]) {
+    expect(panel, `the export list omits ${named}`).toContain(named);
+  }
   expect(panel).toContain("How long we keep it");
-  expect(panel).toContain("kept for as long as your account exists");
+  expect(panel).toContain("kept while your account exists");
   /* No legalese — the right is described, not cited. */
   for (const w of ["Article", "GDPR", "data subject", "pursuant"]) {
     expect(panel, w).not.toContain(w);

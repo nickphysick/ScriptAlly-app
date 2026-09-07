@@ -233,3 +233,12 @@
   color: #8a7d6c;
 }
 .ap-acts { display: flex; gap: 8px; margin-top: 6px; }
+
+/* ⚠️ A VALUE INSIDE A DESCRIPTION — the reader's own address, their own count, above the sentence
+   that explains it. It is not a second label: it is the thing the row is ABOUT, and a row whose
+   subject is a value has to state that value somewhere. */
+.sc-val {
+  font-weight: 600;
+  color: #3a2b23;
+  overflow-wrap: anywhere;
+}

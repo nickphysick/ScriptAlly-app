@@ -85,13 +85,27 @@ test("the CTA opens the plans page and never promises a purchase", async ({ page
   expect(new URL(page.url()).pathname).toBe("/plans");
 });
 
-test("no usage block, no persuasion, no CSV — and the billing empty state is stated", async ({ page }) => {
+/**
+ * ⚠️ "NO USAGE BLOCK" IS NARROWED TO "NO METER ON SOMETHING UNLIMITED" (settings-mode pack, Phase 4).
+ * The card now states the Smart Import allowance, which IS a usage figure — and the distinction the
+ * ban was always making is between a finite entitlement and an invented one. Agents and queries are
+ * unlimited on both plans, so a meter on either would have to conjure a limit to measure against;
+ * the monthly import is genuinely one, and a page that will not tell you whether you have it left
+ * is withholding the one number a reader opens this section to find.
+ *
+ * The banned list is what carries the real claim, and it is unchanged: no "remaining", no "of your",
+ * no persuasion words. The allowance passes it by saying "1 available" or "Used" and stopping.
+ */
+test("no meter on the unlimited, no persuasion, no CSV — and the billing empty state is stated", async ({ page }) => {
   await openRoute(page, "/account/plan", { width: 1440, height: 900 });
   const panel = (await page.locator("#acct-panel").textContent()) ?? "";
   for (const banned of ["Most popular", "Best value", "remaining", "of your", "CSV", "Export"]) {
     expect(panel, banned).not.toContain(banned);
   }
-  expect(panel).toContain("No payment details on file");
+  /* ⚠️ THE BILLING EMPTY STATE IS A DIFFERENT SENTENCE NOW, and the old one had already stopped
+     being on the page before this pack (zero occurrences at 418d7c5a). What the claim is about is
+     that the empty state SAYS SO rather than pretending a payment method is merely missing. */
+  expect(panel).toContain("your invoices will appear here");
   /* The price is the locked copy's, not a figure nobody can pay. */
   expect(panel).toContain("Price to be confirmed");
   expect(panel).not.toContain("£3.99");

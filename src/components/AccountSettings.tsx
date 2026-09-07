@@ -876,13 +876,30 @@ export const AccountSettings: React.FC<{
             built, and a button that opens nothing is the disabled-field fault wearing a verb. This
             reuses Your data's own "Correct something we hold" route, which exists for exactly the
             case where the writer cannot change something themselves. */}
+        {/* ⚠️ THE ADDRESS ITSELF IS THE ROW'S VALUE, and leaving it out was a real regression this
+            phase's own measurement caught: the card ABOUT your email address did not say what it
+            was. Profile's identity row shows it too, which is not a reason to drop it here — that
+            is a different section answering a different question, and a reader checking which
+            address their reset link goes to should not have to navigate to find out. */}
         <SettingsRow
           label="Email address"
-          description="The address you sign in with. To change it, you'll confirm from both the old and the new address."
+          description={
+            <>
+              <span className="sc-val">{currentUser.email}</span>
+              <br />
+              The address you sign in with. To change it, you'll confirm from both the old and the
+              new address.
+            </>
+          }
           control={
             <>
               <VerifiedChip verified={authFacts?.emailVerified ?? true} />
-              <button onClick={() => onNavigate("contact")} style={ghostBtn}>Change</button>
+              {/* ⚠️ "Change email", NOT "Change". Shortening both this and the password button to
+                  the bare verb — which is what the 280px column first tempted — put TWO buttons on
+                  one page with the identical accessible name and different effects. A screen reader
+                  announcing "Change, button" twice cannot distinguish them, and neither can a voice
+                  command. The column is wide enough for the noun. */}
+              <button onClick={() => onNavigate("contact")} style={ghostBtn}>Change email</button>
             </>
           }
         />
@@ -964,7 +981,7 @@ export const AccountSettings: React.FC<{
               <>
                 {resetMsg && <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN }}>{resetMsg}</span>}
                 <button onClick={sendReset} style={ghostBtn}>
-                  <KeyRound style={{ width: 14, height: 14 }} aria-hidden="true" /> Change
+                  <KeyRound style={{ width: 14, height: 14 }} aria-hidden="true" /> Change password
                 </button>
               </>
             }
@@ -1098,7 +1115,11 @@ export const AccountSettings: React.FC<{
           description="The look of your workspace."
           control={
             <div role="radiogroup" aria-label="Workspace theme" style={{ display: "inline-flex", gap: 3, flexShrink: 0, background: "#f3ece2", border: "1px solid #e2d6c6", borderRadius: 10, padding: 3 }}>
-              {([["cappuccino", "Capp"], ["bold", "Bold"], ["editorial", "Editorial"]] as const).map(([val, label]) => {
+              {/* ⚠️ THE FULL NAMES. They were shortened to "Capp" / "Bold" to fit the control column
+                  and that renamed two themes: "Capp" is not a word, and the app calls them
+                  Cappuccino, Bold Pastille and Editorial everywhere else — including the rail's own
+                  switcher. A layout constraint is not a licence to rename a thing. */}
+              {([["cappuccino", "Cappuccino"], ["bold", "Bold"], ["editorial", "Editorial"]] as const).map(([val, label]) => {
                 const on = (currentUser?.queriesTheme ?? "cappuccino") === val;
                 return (
                   <button
@@ -1109,7 +1130,10 @@ export const AccountSettings: React.FC<{
                     /* ⚠️ THE ACCESSIBLE NAME IS THE FULL ONE. The visible labels shortened to fit
                        the 280px control column; "Capp" is not a word, and a screen reader must not
                        be handed an abbreviation the design chose for width. */
-                    aria-label={val === "cappuccino" ? "Cappuccino" : val === "bold" ? "Bold Pastille" : "Editorial"}
+                    /* Bold's full name is "Bold Pastille"; the segment shows "Bold" because the
+                       second word is the palette's name rather than the theme's, and the rail's
+                       switcher does the same. The accessible name carries both. */
+                    aria-label={val === "bold" ? "Bold Pastille" : label}
                     onClick={() => { void updateUserProfile({ queriesTheme: val }); savedReceipt("Theme"); }}
                     style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: on ? 700 : 500, color: on ? bodyInk : "#8a7d6c", background: on ? "#fffefb" : "transparent", border: on ? "1px solid #d8cebf" : "1px solid transparent", boxShadow: on ? "0 1px 2px rgba(29,23,18,.10)" : "none", borderRadius: 8, padding: "6px 11px", cursor: "pointer" }}
                   >
