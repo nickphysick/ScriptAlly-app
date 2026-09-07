@@ -25,6 +25,8 @@ export interface EdgeFadeScrollProps {
   scrollClassName?: string;
   /** DOM id for the SCROLL element — call sites address it (the activity card's is queried). */
   scrollId?: string;
+  /** the ref-diff harness's handle on the scroller — inert, and never styled */
+  scrollProbe?: string;
   scrollStyle?: React.CSSProperties;
   /** Optional external handle on the scroll element (keyboard nav / scrollIntoView call sites). */
   scrollRef?: React.MutableRefObject<HTMLDivElement | null>;
@@ -40,6 +42,7 @@ export const EdgeFadeScroll: React.FC<EdgeFadeScrollProps> = ({
   outerStyle,
   scrollClassName,
   scrollId,
+  scrollProbe,
   scrollStyle,
   scrollRef,
   role,
@@ -114,6 +117,7 @@ export const EdgeFadeScroll: React.FC<EdgeFadeScrollProps> = ({
         role={role}
         aria-label={ariaLabel}
         id={scrollId}
+        data-probe={scrollProbe}
         className={scrollClassName}
         onScroll={schedule}
         style={{ flex: "1 1 auto", minHeight: 0, overflowY: "auto", ...scrollStyle }}

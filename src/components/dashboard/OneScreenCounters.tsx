@@ -46,7 +46,7 @@ const MARK_CLASS: Partial<Record<HeaderCounter["key"], string>> = { sent: " plan
 /** ⚠️ ITS OWN COMPONENT SO THE HOOK IS NOT CALLED IN A LOOP — hooks cannot run inside `.map`
  *  with a varying count without breaking the rules of hooks the moment a counter drops out. */
 const CountFigure: React.FC<{ n: number }> = ({ n }) => (
-  <span className="os-cn">{useCountUp(n, 400).toLocaleString("en-GB")}</span>
+  <span className="os-cn" data-probe-text="stat-figure">{useCountUp(n, 400).toLocaleString("en-GB")}</span>
 );
 
 export const OneScreenCounters: React.FC<{
@@ -58,7 +58,7 @@ export const OneScreenCounters: React.FC<{
   /* ⚠️ NO `os-card` (dashboard redesign, Phase 3) — the stats sit on the page ground. The class
      carried the paper, the radius, the shadow and the `::after` rim; all four go together, because
      a readout on the ground with a rim left on it is a card that forgot its fill. */
-  <div className={`os-counters${loading ? " isload" : ""}`}>
+  <div className={`os-counters${loading ? " isload" : ""}`} data-probe="stats">
     {loading && <Skel bars={["h", ""]} />}
     {headerCounters(queries, agents, now).map((c) => (
       <div className="os-counter" key={c.key}>

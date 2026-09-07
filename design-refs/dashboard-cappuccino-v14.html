@@ -650,9 +650,9 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 
 <!-- HERO + STATS -->
 <div class="hero" data-probe="hero">
-  <div><h1>Hello, Bethany</h1><p>What's on your desk today?</p></div>
+  <div><h1 data-probe-text="hero-h1">Hello, Bethany</h1><p>What's on your desk today?</p></div>
   <div class="stats" data-probe="stats">
-    <div class="stat"><div class="ill" id="ill1"></div><div><div class="lab">Queries sent</div><div class="fig"><b>21</b><span class="mini"><svg viewBox="0 0 10 10"><path d="M5 8V2M2 5l3-3 3 3"/></svg>5 this week</span></div></div></div>
+    <div class="stat"><div class="ill" id="ill1"></div><div><div class="lab">Queries sent</div><div class="fig"><b data-probe-text="stat-figure">21</b><span class="mini"><svg viewBox="0 0 10 10"><path d="M5 8V2M2 5l3-3 3 3"/></svg>5 this week</span></div></div></div>
     <div class="stat"><div class="ill" id="ill2"></div><div><div class="lab">Agents on file</div><div class="fig"><b>16</b><span class="mini plain">11 queried · 5 idle</span></div></div></div>
     <div class="stat"><div class="ill" id="ill3"></div><div><div class="lab">Responses</div><div class="fig"><b>12</b><span class="mini">57% response rate</span></div></div></div>
   </div>
@@ -676,7 +676,7 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 
   <!-- COMMUNITY -->
   <div class="card ch-bare com" data-probe="community-card">
-    <div class="hd"><div class="tile"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0M15 20a4.5 4.5 0 0 1 7 -2"/></svg></div><h3>Community</h3><span class="sp"></span><span class="beta">Beta</span></div>
+    <div class="hd"><div class="tile"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0M15 20a4.5 4.5 0 0 1 7 -2"/></svg></div><h3 data-probe-text="card-h3">Community</h3><span class="sp"></span><span class="beta">Beta</span></div>
     <div class="body">
       <svg class="spr" viewBox="0 0 96 96" fill="none" stroke="#7f9a78" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M48 80V46"/><path d="M48 58c-8 0-16-6-18-16 10-1 18 5 18 16z" fill="#dfe8da"/><path d="M48 50c8 0 16-6 18-16-10-1-18 5-18 16z" fill="#dfe8da"/><path d="M28 82c6-6 34-6 40 0" stroke="#c9b8a6"/><path d="M34 86c4-3 24-3 28 0" stroke="#c9b8a6"/></svg>
       <p>As our community builds, you'll be able to benchmark your key stats against other writers at a similar stage.</p>
@@ -698,7 +698,7 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
       <div class="hd sand" id="chd">
         <div class="tile"><svg viewBox="0 0 24 24"><path d="M4 18l4-5 4 3 4-7 4 4"/><path d="M3 21h18"/></svg></div>
         <div id="hdA"><h3 style="display:inline">Active queries</h3><span class="num" id="cur">17</span></div>
-        <div id="hdB" class="statblk"><b id="curB">17</b><div><div class="t">Active queries</div><div class="s" id="deltaB">+5 over this range</div></div></div>
+        <div id="hdB" class="statblk"><b id="curB" data-probe-text="chart-figure">17</b><div><div class="t">Active queries</div><div class="s" id="deltaB">+5 over this range</div></div></div>
         <span class="pill sg" id="delta">↑ +5 over this range</span>
         <span class="sp"></span>
         <div class="rc" id="rcSlider" hidden><select class="sel" id="freq"><option>Weekly</option><option>Monthly</option></select>
@@ -1113,7 +1113,7 @@ function vConv(){
      <span class="knot">${sd(x.k,15)}</span>
      <div class="b ${qa?'hasqa':''}" style="background:${c.f};border-color:${c.a}">
        <div class="slab">${c.l}</div>
-       <div class="s">${x.s}</div>
+       <div class="s" data-probe-text="bubble-sentence">${x.s}</div>
        <div class="m">${g.sur} · ${g.agency}<span style="margin-left:auto">${x.t}</span></div>
        ${qa?`<button class="qa" onclick="event.stopPropagation();openJourneyFor(this,'${g.sur}','${x.k==='partial-req'?'partial':'full'}')">Mark sent</button>`:''}
      </div></div>`;
@@ -1275,7 +1275,7 @@ function renderTodo(){
     const sub=t=>opt.snip==='a'?'':`<div class="sub">${opt.snip==='b'||opt.snip==='c'?`<b class="${t.owed?'owed':''}">${t.f2[1]}</b>${t.f2[0]}`:''}${opt.snip==='c'&&t.st?`<span class="stw">${sd(t.k)}${t.st}</span>`:''}</div>`;
     b.innerHTML=`<div class="tgrid ${opt.cols==='3'?'c3':''}">${list.map((t,i)=>`<div class="tk snip" style="--edge:${EDGE[t.k]};--fam:${FAM[t.cat].f}" onclick="openDrawer(${TASKS.indexOf(t)})">
       <span class="tag">${FAM[t.cat].l}</span>
-      <p class="ttl">${t.title}</p>${sub(t)}
+      <p class="ttl" data-probe-text="ticket-title">${t.title}</p>${sub(t)}
     </div>`).join('')}</div>`; return;
     b.innerHTML=`<div class="tgrid">${list.map((t,i)=>`<div class="tk" style="--edge:${EDGE[t.k]};--fam:${FAM[t.cat].f}">
       <span class="tag">${FAM[t.cat].l}</span>${t.ms?`<span class="ms">${t.ms}</span>`:''}

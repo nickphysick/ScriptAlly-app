@@ -488,7 +488,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
           running — it is just not the thing you are reading. All of that is CSS on
           `.os-rail-expanded`: the render is identical in both states, so there is no second markup
           for a stowed card to drift from. */}
-      <OneScreenPanel variant="os-goal stowable" loading={loading} skel={["h", "", ""]}>
+      <OneScreenPanel variant="os-goal stowable" probe="goals-card" loading={loading} skel={["h", "", ""]}>
         {/* ⚠️ NO BAND AND NO MARK BOX HERE — both were tried and rejected. The goals header is a
             LABEL, not an instrument: it names the card and gets out of the way, and the band gave
             it a weight the card does not carry. A bare flex row inside the card's own padding —
@@ -627,7 +627,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
       )}
 
       {/* ══ activity ══ */}
-      <OneScreenPanel variant="os-actv" loading={loading} skel={["h", "", "", "grow"]} innerRef={actvRef}>
+      <OneScreenPanel variant="os-actv" probe="activity-card" loading={loading} skel={["h", "", "", "grow"]} innerRef={actvRef}>
         <div className="os-ahead">
           {/* ⚠️ THE FLANKING RULES ARE GONE. They existed to centre the title on a plain card
               head; on a filled band they draw two lines across a colour that is already doing
@@ -653,7 +653,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
             grammar the app's other tab rows use. The active one underlines in burgundy, which is one
             of the four places this repo permits that colour. */}
         {rows.length > 0 && (
-          <div className="os-ftabs" role="group" aria-label="Filter the feed">
+          <div className="os-ftabs" data-probe="activity-tabs" role="group" aria-label="Filter the feed">
             {FEED_TABS.map((t) => (
               <button
                 key={t.key}
@@ -671,7 +671,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
         )}
         {/* ⚠️ THE SHARED FADE (polish P2) — conditional by construction, so a short feed shows
             none and the end of a long one is honestly the end. See the tasks card for the rule. */}
-        <EdgeFadeScroll fade="#fffdf9" outerClassName="os-abodywrap" scrollClassName="os-abody" scrollId="os-actv-body">
+        <EdgeFadeScroll fade="#fffdf9" outerClassName="os-abodywrap" scrollClassName="os-abody" scrollId="os-actv-body" scrollProbe="feed">
           {shownRows.length === 0 ? (
             <div className="os-aempty">
               <span className="os-aempty-thread" aria-hidden="true" />
@@ -713,7 +713,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                           {r.count > 1 && <span className="os-runx">×{r.count}</span>}
                         </div>
                       )}
-                      <div className="os-bubsay">{runLines(r)?.line ?? r.who}</div>
+                      <div className="os-bubsay" data-probe-text="bubble-sentence">{runLines(r)?.line ?? r.who}</div>
                       {head && (
                         <div className="os-bubmeta">
                           {r.kind === "housekeeping"

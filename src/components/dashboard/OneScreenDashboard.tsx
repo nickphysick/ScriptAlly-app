@@ -223,7 +223,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
       ref={rootRef}
       className="os-root"
     >
-      <div className="os-content">
+      <div className="os-content" data-probe="main">
         {/* ⚠️ THE HEADER IS ITS OWN GRID ROW, spanning both columns — not the first thing in the
             main column. That is what lets the two columns below it start level.
 
@@ -231,7 +231,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             rest, vertically centred against it. The greeting's own stack lives inside `.os-gl` —
             without that wrapper the dateline, name and pills would each become flex items on the
             same line. */}
-        <div className={`os-greet${loading ? " isload" : ""}`}>
+        <div className={`os-greet${loading ? " isload" : ""}`} data-probe="hero">
           {loading && <Skel bars={["h", ""]} />}
           <div className="os-gl">
             {/* ⚠️ NO KICKER, AND NO DATE LINE EITHER (audit pack P2). The kicker went first,
@@ -244,7 +244,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             <div className="os-grow2">
               {/* ⚠️ PLAYFAIR 700 AT 46px, PLAIN INK. No burgundy, no italics — the third and final
                   swing of that pendulum, recorded at each turn. */}
-              <h1>Hello, {firstName}</h1>
+              <h1 data-probe-text="hero-h1">Hello, {firstName}</h1>
               <span className="os-spacer" />
               {chipShows && (
                 <button type="button" ref={tourChipRef} className="os-tourchip" onClick={() => { if (wideEnough()) { setRailExpanded(false); setTouring(true); } }}>

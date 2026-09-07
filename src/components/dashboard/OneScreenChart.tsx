@@ -299,7 +299,7 @@ export const OneScreenChart: React.FC<{
   const pinEvent = pinIdx !== null ? events.get(pinIdx) ?? null : null;
 
   return (
-    <OneScreenPanel variant="os-lead" loading={loading} skel={["h", "grow", ""]}>
+    <OneScreenPanel variant="os-lead" probe="chart-card" loading={loading} skel={["h", "grow", ""]}>
       {/**
         * ⚠️ THE SAME BAND AS EVERY OTHER CONTAINER (§2) — `.os-ahead`, not a chart-specific header.
         * Active queries was the last container on plain parchment while Tasks, Activity and Goals
@@ -325,7 +325,7 @@ export const OneScreenChart: React.FC<{
             the first fortnight it states what is out, because a two-point range delta is noise
             dressed as a trend. */}
         <span className="os-stat">
-          <span className="os-n">{shownActive}</span>
+          <span className="os-n" data-probe-text="chart-figure">{shownActive}</span>
           <span className="os-statxt">
             <h2>Active queries</h2>
             {earlyDays
@@ -356,7 +356,7 @@ export const OneScreenChart: React.FC<{
             ⚠️ IT DRAWS THE FULL LEDGER, NOT THE VIEW. The view is what the brush SELECTS; drawing
             the selection inside the selector would make the thumbnail redraw itself every time the
             handle moved, and the excluded span would have nothing to be excluded from. */}
-        <div className="os-brush">
+        <div className="os-brush" data-probe="brush">
           <svg viewBox="0 0 100 22" preserveAspectRatio="none" aria-hidden="true">
             {brushPath && <path d={brushPath} fill="#dfe4dc" />}
             <rect className="os-brushmask" x={0} y={0} width={100 - stop.p} height={22} />
@@ -397,6 +397,7 @@ export const OneScreenChart: React.FC<{
         ) : (
           <svg
             ref={svgRef}
+            data-probe="plot"
             className={reading ? "reading" : undefined}
             width={W || undefined}
             height={H || undefined}

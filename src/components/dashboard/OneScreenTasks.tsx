@@ -146,7 +146,7 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
     : { n: total, label: "open", fam: null as string | null };
 
   return (
-    <OneScreenPanel variant="os-tasks" loading={loading} skel={["h", "", "", ""]}>
+    <OneScreenPanel variant="os-tasks" probe="todo-card" loading={loading} skel={["h", "", "", ""]}>
       <div className="os-th2">
         <OneScreenMark name="tasks" />
         <h2>To-do list</h2>
@@ -155,6 +155,7 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
             what the tickets beneath it are, rather than a total the visible set contradicts. */}
         <span
           className="os-tbadge"
+          data-probe="todo-badge"
           style={badge.fam ? { background: FAMILY_FILL[badge.fam] } : undefined}
         >
           <b>{badge.n}</b> {badge.label}
@@ -169,6 +170,7 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
            tickets, so the grid's boxes are identical open or closed. */
         <div
           className={`os-rulezone${legendOpen ? " on" : ""}`}
+          data-probe="todo-rule"
           onMouseEnter={() => setLegendOpen(true)}
           onMouseLeave={() => setLegendOpen(false)}
         >
@@ -234,6 +236,7 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
                     dateLabel: inp.anchorDate,
                     elapsed: typeof inp.days === "number" ? elapsedPhrase(inp.days) : null,
                   })}
+                  probeText={shown[0] === c ? "ticket-title" : undefined}
                   onOpen={() => setOpenKey(c.key)}
                 />
               );

@@ -28,7 +28,7 @@ export const OneScreenAuthor: React.FC<{
 }> = ({ loading, manuscripts, currentUser, activeManuscript, onNavigate }) => {
   const ms = activeManuscript ?? manuscripts[0] ?? null;
   return (
-    <div className={`os-card os-lift os-aut${loading ? " isload" : ""}`}>
+    <div className={`os-card os-lift os-aut${loading ? " isload" : ""}`} data-probe="manuscript-card">
       {loading && <Skel bars={["h", "", "grow"]} />}
 
       {ms ? (

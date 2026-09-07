@@ -57,8 +57,15 @@ export const TaskTicket: React.FC<{
   edge: string;
   /** the dashboard's cut: the tag and the headline, and nothing else */
   snipped?: boolean;
+  /**
+   * ⚠️ THE REF-DIFF HARNESS'S TEXT HANDLE, AND A PROP RATHER THAN A FIXED ATTRIBUTE. This
+   * component renders on the dashboard AND on `/todo`, and every workspace page stays mounted —
+   * a hardcoded `data-probe-text` would put two of it in one document, and the harness would
+   * read whichever came first. The caller that is being measured names itself.
+   */
+  probeText?: string;
   onOpen: () => void;
-}> = ({ card, facts, manuscript, selected, urgent, edge, snipped, onOpen }) => {
+}> = ({ card, facts, manuscript, selected, urgent, edge, snipped, probeText, onOpen }) => {
   const cat = taskCategory(card);
   const cls = ["tkt", snipped ? "snip" : "", selected ? "sel" : "", urgent ? "urgent" : ""].filter(Boolean).join(" ");
   return (
@@ -71,7 +78,7 @@ export const TaskTicket: React.FC<{
           <span className={"tag " + CATEGORY_FAMILY[cat]}>{CATEGORY_TAG[cat]}</span>
           {!snipped && manuscript && <span className="msc">{manuscript}</span>}
         </span>
-        <span className="ttl">{card.title}</span>
+        <span className="ttl" data-probe-text={probeText}>{card.title}</span>
         {!snipped && <span className="facts">
           <span className="cell">
             <span className="k">{facts.dateKey}</span>

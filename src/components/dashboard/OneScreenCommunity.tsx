@@ -36,7 +36,7 @@ export const COMMUNITY_EMPTY =
   "As our community builds, you'll be able to benchmark your key stats against other writers at a similar stage.";
 
 export const OneScreenCommunity: React.FC<{ loading: boolean }> = ({ loading }) => (
-  <div className={`os-card os-comm${loading ? " isload" : ""}`}>
+  <div className={`os-card os-comm${loading ? " isload" : ""}`} data-probe="community-card">
     {loading && <Skel bars={["h", "", ""]} />}
     {/* ⚠️ NO BAND (dashboard redesign, Phase 7) — matching every other card. `.os-ahead` still
         supplies the header's GEOMETRY (its 51px height and its padding, so four headers agree
@@ -53,7 +53,7 @@ export const OneScreenCommunity: React.FC<{ loading: boolean }> = ({ loading }) 
           burgundy inset hairline, the swap-ready geometry and the 404 degrade path — and means an
           illustrated Community mark lands the same one-line way as every other header's. */}
       <OneScreenMark name="community" />
-      <h2>Community</h2>
+      <h2 data-probe-text="card-h3">Community</h2>
       {/* ⚠️ THE BETA CHIP STAYS UNTIL THE COHORTS ARE POPULATED ENOUGH THAT MOST READERS SEE REAL
           FIGURES — it is a statement about the DATA's maturity, not the code's. */}
       <span className="os-commbeta">BETA</span>

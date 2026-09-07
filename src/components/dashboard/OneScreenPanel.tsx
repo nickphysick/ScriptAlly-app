@@ -42,14 +42,23 @@ export interface OneScreenPanelProps {
   lift?: boolean;
   /** The activity card measures itself for the expand/click-away behaviour. */
   innerRef?: React.Ref<HTMLDivElement>;
+  /**
+   * ⚠️ THE REF-DIFF HARNESS'S HANDLE, AND IT IS A PROP RATHER THAN A CLASS ON PURPOSE.
+   * `scripts/dash-refdiff.mjs` reads `[data-probe]` on both the design ref and this page and
+   * compares the two boxes. A class would have to be styled by something to justify its existence;
+   * an attribute is inert, which is exactly what a measurement handle should be — it can never
+   * change what the page looks like, so it cannot be the reason a diff passes.
+   */
+  probe?: string;
   children?: React.ReactNode;
 }
 
 export const OneScreenPanel: React.FC<OneScreenPanelProps> = ({
-  variant, loading = false, skel, head, lift = true, innerRef, children,
+  variant, loading = false, skel, head, lift = true, innerRef, probe, children,
 }) => (
   <div
     ref={innerRef}
+    data-probe={probe}
     className={`os-card${lift ? " os-lift" : ""} ${variant}${loading ? " isload" : ""}`}
   >
     {loading && skel && <Skel bars={skel} />}
