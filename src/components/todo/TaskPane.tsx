@@ -107,6 +107,17 @@ export interface TaskPaneJourney {
   hand?: boolean;
   /** `.b-sub` */
   sub: React.ReactNode;
+  /* ── the drawer's hero (anatomy round, Phase 1; ref `todo-qc-style.html` `.dhero`) ──────────────
+     The contract's header block: the deed as its title, the situation and register beneath it, and
+     three chips — manuscript · agent · wait. All three are optional because a card may have no
+     manuscript, no agent and no date on record, and the contract's own render omits each rather
+     than printing a placeholder for it. */
+  /** `.dhero .line` — situation, then the journey's register sentence; see `lib/paneHero` */
+  line?: string;
+  /** the manuscript chip's label — absent where the card has no manuscript */
+  ms?: string;
+  /** the wait chip's label ("7 weeks waiting", or "No date") */
+  wait?: string;
   /** `.bandbtns` — the mockup's `btns` array, in order */
   btns?: { label: string; onPress: (anchor: HTMLElement) => void }[];
   /** `.tiles.n{N}` — `null` hides the row, as the mockup's render does */
@@ -266,6 +277,18 @@ const FAM_LABEL: Record<"u-now" | "u-house" | "u-yours", string> = {
   "u-now": "Needs you now", "u-house": "Housekeeping", "u-yours": "Your tasks",
 };
 
+/**
+ * The contract's own book mark, ported rather than redrawn — `todo-qc-style.html`'s `BOOK`, at the
+ * size its `.chip svg` rule gives it. `aria-hidden`, because the chip's text already says which
+ * manuscript this is and a reader does not need to be told there is a picture of a book beside it.
+ */
+const BookMark: React.FC = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" strokeWidth={1.6} aria-hidden="true">
+    <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z" />
+    <path d="M4 5.5v16" />
+  </svg>
+);
+
 export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, committed }) => {
   const [recAway, setRecAwayState] = React.useState(slipAwayThisSession);
   /* written through on every change, so a close-and-reopen of the pane finds the same answer */
@@ -396,6 +419,50 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, 
               </div>
             )}
           </div>
+            {/* ⚠️ THE HERO (anatomy round, Phase 1; ref `todo-qc-style.html` `.dhero`). It is the
+                centre of the contract's drawer and it was never built: Phase 5 took the drawer's
+                MECHANISM — a slide-over, over a scrim, with no reflow — and left the deed sitting
+                inside the scrolling form as a plain document title, which is what the audit meant
+                by "the anatomy is what a writer sees".
+
+                ⚠️ IT IS OUTSIDE THE SCROLLER, WHICH IS THE POINT OF IT. The contract's `.drawer` is
+                a flex column of four things — position row, hero, body, foot — and only the body
+                scrolls. A deed that scrolls away is a deed you cannot check the form against while
+                you fill it in.
+
+                ⚠️ AND ITS TINT IS THE FAMILY'S, FROM THE APP'S OWN TOKENS. The ref names
+                `--now1/--now2`; this app has never had those, and a `var()` on an undefined
+                property drops the whole declaration, so a faithful copy of the ref's token NAMES
+                would have rendered the hero with no background at all — silently, through a green
+                build. `--u-now-*` is the pair the family pill beside it already reads. */}
+            <div className={`dhero ${d.cls}`}>
+              {/* ⚠️ THE DEED SENTENCE IS THE HERO'S TITLE (tightened round, Phase 3, moved here) —
+                  Playfair, carrying NO colour of its own. Treatment C: the variables are 600, and
+                  the manuscript and the agent wear a dotted underline because they are the two
+                  things in the sentence you can go and look at. */}
+              <div className={d.hand ? "title hand" : "title"}>{d.deed}</div>
+              {/* ⚠️ THE NOTE'S OWN PROVENANCE WINS OVER THE DERIVED LINE. A note's deed is the
+                  writer's own words, so it never gained a sentence to absorb "Your own note ·
+                  added 2 days ago"; every other card gets the situation-and-register line, which
+                  `lib/paneHero` builds from the ticket's own facts. Absent, not empty — a rendered
+                  line holding nothing is a blank under the title, which reads as something that
+                  failed to load. */}
+              {(d.sub || d.line) ? <div className="line">{d.sub || d.line}</div> : null}
+              {/* ⚠️ THREE CHIPS, EACH OMITTED WHERE ITS FACT IS ABSENT — never a placeholder. The
+                  contract's own render drops the agent chip on a note and prints `No date` in the
+                  wait chip rather than an empty pill. */}
+              {(d.ms || d.agent || d.wait) && (
+                <div className="chips">
+                  {d.ms && <span className="chip"><BookMark />{d.ms}</span>}
+                  {d.agent && (
+                    <span className="chip">
+                      <span className="av" aria-hidden="true">{d.agent.initials}</span>{d.agent.name}
+                    </span>
+                  )}
+                  {d.wait && <span className="chip"><span className="m">{d.wait}</span></span>}
+                </div>
+              )}
+            </div>
             {/* ⚠️ THE WORK SCROLLS INSIDE THE RIM AND THE FOOT STAYS PUT — the rim carries
                 `overflow: hidden`, so work leaves at the object's own edge and there is nothing
                 underneath it to reappear in. The foot is a SIBLING of the scroller inside the same
@@ -409,17 +476,6 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, 
                   the `When` row's hint, which is where it is read. */}
               <div className="workscroll">
                 <div className="form">
-                  {/* ⚠️ THE DEED SENTENCE IS THE DOCUMENT'S TITLE (tightened round, Phase 3) —
-                      Playfair 21/400 in ink on white, carrying NO colour of its own. Treatment C:
-                      the variables are 600, and the manuscript and the agent wear a dotted
-                      underline because they are the two things in the sentence you can go and
-                      look at. It came out of the band, where it was a caption on a coloured
-                      strip; a document's title is the first line of the document. */}
-                  <div className={d.hand ? "title hand" : "title"}>{d.deed}</div>
-                  {/* absent, not empty — a rendered `.b-sub` holding nothing is a blank line
-                      under the title, and blank space under a heading reads as something that
-                      failed to load */}
-                  {d.sub ? <div className="b-sub">{d.sub}</div> : null}
                   {/* ⚠️ THE FORK IS THE FIRST QUESTION (journey round, Phase 2; ref
                       `design-refs/todo-journey-logic.html`). A journey starts with the DECISION, not
                       the paperwork: the pane asks what the writer wants to do, and each intent gets

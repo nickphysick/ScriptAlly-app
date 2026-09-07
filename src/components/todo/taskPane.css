@@ -168,15 +168,15 @@
    and its body is `.rtl`, both the corrected contract's own words. The RUNGS keep `.tl-e`: an entry
    is the same object wherever it is drawn, and renaming it would have moved `rung()` and the
    byte-for-byte `StatusDot` assertion for the sake of a wrapper.) */
-.tpn .tl { position:relative;padding-left:18px; }
-.tpn .tl::before { content:'';position:absolute;left:4.5px;top:7px;bottom:7px;width:1.5px;background:#e1d7d0; }
-.tpn .tl-e { position:relative;padding:6px 0; }
+.tpn .tl { position:relative;padding:2px 16px 8px 36px; }
+.tpn .tl::before { content:'';position:absolute;left:21px;top:10px;bottom:10px;width:1.5px;background:#e1d7d0; }
+.tpn .tl-e { position:relative;padding:4px 0;font-size:11.5px;font-weight:500; }
 /* ⚠️ `.sd` IS A SLOT, NOT A GLYPH (pane round, Phase 8). It positions whatever the rung puts in
    it — a real `StatusDot` on a status rung, the mark below on a nudge or the terminus — so the
    rail's geometry is stated once and the two kinds of entry cannot drift apart on the line. The
    `.dot` rules it replaces DREW a status: a white disc with a burgundy ring, which is a status
    dot recreated in CSS, and recreating one is the thing StatusDot exists to prevent. */
-.tpn .tl-e .sd { position:absolute;left:-19px;top:8px;display:flex;align-items:center;justify-content:center;width:12px;height:12px; }
+.tpn .tl-e .sd { position:absolute;left:-20px;top:7px;display:flex;align-items:center;justify-content:center;width:11px;height:11px; }
 /* ⚠️ THE NON-STATUS MARK IS `.sd` ITSELF, drawn by a pseudo-element rather than by a class of its
    own — the port adds no word the contract does not have. Smaller and hollow, so a nudge cannot be
    mistaken for a status at a glance; a status rung has a real dot INSIDE `.sd` and never matches
@@ -185,7 +185,7 @@
   content:'';width:7px;height:7px;border-radius:50%;background:#fff;border:1.5px solid #c8b8a8; }
 .tpn .tl-e.in .sd::before { border-color:var(--sage); }
 .tpn .tl-e.now .sd::before { background:var(--burg);border-color:var(--burg); }
-.tpn .tl-e .t { font-size:12px;color:var(--ink);font-weight:500;line-height:1.3; }
+.tpn .tl-e .t { font-size:11.5px;color:var(--ink);font-weight:500;line-height:1.3; }
 .tpn .tl-e.minor .t { font-weight:400;color:var(--muted2);font-size:11.5px; }
 .tpn .tl-e.now .t { color:var(--burg); }
 .tpn .tl-e .d { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-top:2px; }
@@ -345,7 +345,14 @@
    of the sheet: the header row and the foot span both tracks, and between them the document and
    the reference stand side by side, parted by the reference's own single hairline. As a flex
    column it could only have stacked them. ── */
-.tpn .sheet > .rim { display:grid;grid-template-columns:minmax(0,1fr) var(--ref-w);grid-template-rows:auto minmax(0,1fr) auto;min-height:0;width:100%;max-height:100%; }
+/* ⚠️ FOUR ROWS SINCE THE HERO (anatomy round, Phase 1), AND EVERY CHILD IS PLACED. CSS grid
+   auto-placement never overlaps: adding a fourth child to a three-row template does not stack it,
+   it pushes something into an IMPLICIT COLUMN — measured, the hero came out 42px wide at x=1456 in
+   a 1440 viewport, with all its content correct inside it. This repo already records the same
+   fault from the other end (the scroll hems, nine pages at 688px of phantom margin); the rule is
+   that a grid whose rows are declared must declare a `grid-row` for each of its children, not just
+   for the newcomer. */
+.tpn .sheet > .rim { display:grid;grid-template-columns:minmax(0,1fr) var(--ref-w);grid-template-rows:auto auto minmax(0,1fr) auto;min-height:0;width:100%;max-height:100%; }
 /* ⚠️ THREE STATES, TWO CLASSES AND NO INVENTED ONE. The column can be ABSENT (a note or a
    cohort has no query behind it), OPEN or COLLAPSED. `:has()` answers the first from the
    column's own presence — the contract has no "open" modifier because its pane always has a
@@ -366,9 +373,11 @@
    up exactly what the column gave up, so the document does not move and the desk shows to its
    right. One expression, so the two can never disagree about the amount. */
 .tpn .sheet.railClosed { margin-right:calc(var(--ref-open) - var(--ref-spine)); }
-.tpn .sheet > .rim > .dhead, .tpn .sheet > .rim > .foot { grid-column:1/3; }
-.tpn .sheet > .rim > .work { grid-column:1;grid-row:2;min-width:0; }
-.tpn .sheet > .rim > .rail { grid-column:2;grid-row:2; }
+.tpn .sheet > .rim > .dhead { grid-column:1/3;grid-row:1; }
+.tpn .sheet > .rim > .dhero { grid-column:1;grid-row:2;min-width:0; }
+.tpn .sheet > .rim > .work { grid-column:1;grid-row:3;min-width:0; }
+.tpn .sheet > .rim > .rail { grid-column:2;grid-row:2/4; }
+.tpn .sheet > .rim > .foot { grid-column:1/3;grid-row:4; }
 /* ── the document's chrome row (tightened round, Phase 3; contract `.dhead`) ─────────────────
    ⚠️ THE TINTED BAND IS RETIRED, AND ITS TINT IS NOW A PILL. The sheet is a document: the strip
    of colour under its own title made the title read as a caption on a coloured surface. What is
@@ -873,21 +882,21 @@
    value is DERIVED PER QUERY; the stylesheet cannot know which rung this card is on, and a class
    per rung would be a second copy of a mapping that already exists in one place. */
 .tpn .rail { border-left:1px solid var(--hair);background:var(--white);display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden; }
-.tpn .qhead { flex:0 0 auto;padding:12px 16px;border-bottom:1px solid rgba(58,28,20,0.10); }
+.tpn .qhead { flex:0 0 auto;padding:14px 16px 13px;border-bottom:1px solid rgba(58,28,20,0.10); }
 .tpn .qhead .lbl { display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(58,28,20,0.55); }
 .tpn .qhead .cl { cursor:pointer;width:18px;height:18px;border-radius:5px;border:0.5px solid rgba(58,28,20,0.13);background:rgba(255,253,250,0.6);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink2);padding:0;flex-shrink:0; }
 .tpn .qhead .cl:hover { background:rgba(255,255,255,0.9); }
-.tpn .qhead .st { display:flex;align-items:center;gap:8px;margin-top:8px;font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink2);line-height:1.3; }
-.tpn .qhead .since { font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(58,28,20,0.55);margin-top:3px; }
+.tpn .qhead .st { display:flex;align-items:center;gap:8px;margin-top:8px;font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink2);line-height:1.3; }
+.tpn .qhead .since { font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(58,28,20,0.55);margin-top:4px; }
 .tpn .rail .in { flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column; }
 .tpn .rail .in::-webkit-scrollbar { width:9px; }
 .tpn .rail .in::-webkit-scrollbar-thumb { background:#e2d6c8;border-radius:5px;border:2px solid var(--white); }
 
 /* the agent row — the column's one row about a person, and its one outward link */
-.tpn .who { display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--hair);flex:0 0 auto; }
-.tpn .who .av { width:30px;height:30px;border-radius:50%;background:#efe4dc;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(124,58,42,0.18);flex-shrink:0; }
-.tpn .who .n { font-size:12.5px;font-weight:500;color:var(--ink);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-.tpn .who .a { font-size:10.5px;color:var(--muted2);font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.tpn .who { display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--hair);flex:0 0 auto; }
+.tpn .who .av { width:32px;height:32px;border-radius:50%;background:#efe4dc;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(124,58,42,0.18);flex-shrink:0; }
+.tpn .who .n { font-size:13px;font-weight:500;color:var(--ink);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.tpn .who .a { font-size:11px;color:var(--muted2);font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 .tpn .who .lk { margin-left:auto;font-size:10.5px;color:#b3a494;white-space:nowrap;text-decoration:none;flex-shrink:0; }
 .tpn .who:hover .lk, .tpn .who .lk:hover { color:var(--burg); }
 
@@ -895,7 +904,7 @@
    beside it, so the eye runs down one edge for the labels and another for the answers. The slip
    stacked label over value, which at three facts read as six lines of unequal weight. */
 .tpn .facts { padding:8px 16px 6px;flex:0 0 auto; }
-.tpn .fact { display:grid;grid-template-columns:78px 1fr;gap:10px;align-items:baseline;padding:7px 0; }
+.tpn .fact { display:grid;grid-template-columns:82px 1fr;gap:10px;align-items:baseline;padding:7px 0; }
 .tpn .fact .k { font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted); }
 .tpn .fact .v { font-size:12.5px;color:var(--ink);font-weight:500;min-width:0; }
 .tpn .fact .v small { display:block;font-size:10px;color:var(--muted2);font-weight:300;margin-top:1px; }
@@ -905,7 +914,7 @@
 .tpn .rail .sub { font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#b3a494;padding:12px 16px 8px;border-top:1px solid var(--hair);margin-top:6px;flex:0 0 auto; }
 /* ⚠️ A LINK, NOT A BUTTON — going to the record is not an act ON it, and this column offers no
    acts. The dotted underline is the same affordance the title's variables wear. */
-.tpn .qbtn { margin:10px 16px 14px;font-size:11px;color:var(--burg);cursor:pointer;text-decoration:none;border-bottom:1px dotted rgba(124,58,42,0.4);align-self:flex-start;padding-bottom:1px;flex:0 0 auto; }
+.tpn .qbtn { margin:8px 16px 16px;font-size:11.5px;display:inline-block;color:var(--burg);cursor:pointer;text-decoration:none;border-bottom:1px dotted rgba(124,58,42,0.4);align-self:flex-start;padding-bottom:1px;flex:0 0 auto; }
 .tpn .qbtn:hover { border-bottom-style:solid; }
 
 /* the collapsed spine — the label vertical, and the way back */
@@ -992,3 +1001,132 @@
    (the sage head and its dismiss). The reference is a COLUMN of the sheet now, blocked above.
    The wrap law they carried is not lost — it moved INSIDE the sheet: see `.sheet.railClosed`,
    where the sheet narrows by exactly what the column gives up so the document does not move.) */
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   THE DRAWER'S ANATOMY (anatomy round, Phase 1) — ref `design-refs/todo-qc-style.html`
+   ══════════════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ PORTED, NOT TRANSLATED. Every value below is the contract's own, taken from that file rather
+   than from a brief describing it. Phase 5 of the QC-chassis round built the drawer's MECHANISM —
+   it slides, over a scrim, and the page does not reflow — and none of its ANATOMY, which is the
+   half a writer actually sees.
+
+   ⚠️ AND THE TREATMENT FOLLOWS THE HOST, which is the precedent the reference card set. `.tpn` is
+   ONE pane rendered in two places: docked beside the list (List view), where the tightened round's
+   tighter values are right for a ~400px column, and inside `.slo` (Grid and Board), where the
+   contract's own 640px drawer is what it is. A prop would have forked the component; a descendant
+   selector is the whole of it. */
+
+/* ── the phantom column ────────────────────────────────────────────────────────────────────────
+   ⚠️ THE REFERENCE LEFT THE SHEET AND ITS TRACK DID NOT. Once the card became `position: fixed` it
+   took no width from anything — but `.sheet:has(> .rim > .rail)` was still resolving `--ref-w` to
+   240px, so the rim laid out `384px 240px` and the DOCUMENT got 384 of a 640px drawer. A quarter
+   of the drawer was empty space held for a card that had popped out of it.
+
+   ⚠️ AND THE FIRST ATTEMPT AT THIS LOST ON SPECIFICITY, SILENTLY. `.slo .sheet { --ref-open: 0 }`
+   is 0-2-0 against `.tpn .sheet:has(> .rim > .rail)` at 0-3-0 — `:has()` carries the specificity of
+   its argument — so the token was set and then overwritten, the rule read perfectly correctly, and
+   the measurement said 384. Naming `:has()` on both sides is what makes this deterministic. */
+.slo .tpn .sheet:has(> .rim > .rail),
+.slo .tpn .sheet.railClosed:has(> .rim > .rail) { --ref-w: 0px; }
+.slo .tpn .sheet.railClosed { margin-right: 0; }
+
+/* ── `.dtop` — the position row (contract: padding 14px 18px 12px 24px) ── */
+.slo .tpn .dhead { padding: 14px 18px 12px 24px; }
+
+/* ── `.dhero` — the header block, and the centre of the design ────────────────────────────────
+   ⚠️ IT IS OUTSIDE THE SCROLLER. The contract's drawer is a flex column of four things and only
+   the body scrolls; a deed that scrolls away is a deed you cannot check the form against.
+
+   ⚠️ THE TINT IS THE APP'S OWN FAMILY PAIR. The ref reads `--now1`/`--now2`, which have never
+   existed here — and `var()` on an undefined custom property drops the whole declaration, so a
+   faithful copy of the ref's token NAMES would have rendered a hero with no background at all,
+   silently, through a green build. `--u-now-*` is what the family pill beside it already reads. */
+.tpn .dhero {
+  flex: 0 0 auto;
+  margin: 0 24px; border-radius: 14px; padding: 18px 20px 16px;
+  border: 1px solid rgba(58, 28, 20, 0.08);
+}
+.tpn .dhero.u-now { background: linear-gradient(135deg, var(--u-now-1), var(--u-now-2)); }
+.tpn .dhero.u-house { background: linear-gradient(135deg, var(--u-house-1), var(--u-house-2)); }
+.tpn .dhero.u-yours { background: linear-gradient(135deg, var(--u-yours-1), var(--u-yours-2)); }
+
+/* ⚠️ 22/500 AND `line-height: 1.28` ARE THE CONTRACT'S. The house floor for mixed-case Playfair is
+   1.3, and it exists because tight leading inside a box WITH A HEIGHT crops descenders — the hero
+   has no height and no clipping ancestor, so the same carve-out the marketing statements have
+   applies. It is measured rather than assumed (`anatomyDiff`, the ink-against-clip check). */
+.tpn .dhero .title { font-size: 22px; font-weight: 500; line-height: 1.28; margin-bottom: 0; }
+.tpn .dhero .line {
+  font-size: 12.5px; color: rgba(58, 28, 20, 0.72); font-weight: 300;
+  margin-top: 8px; line-height: 1.5;
+}
+.tpn .dhero .chips { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.tpn .dhero .chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px;
+  border-radius: 999px; background: rgba(255, 253, 250, 0.75);
+  border: 1px solid rgba(58, 28, 20, 0.10);
+  font-size: 11px; color: var(--ink2); font-weight: 500; white-space: nowrap;
+}
+.tpn .dhero .chip svg { width: 12px; height: 12px; flex-shrink: 0; }
+.tpn .dhero .chip .m {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #8a6558; font-weight: 500;
+}
+/* the agent chip's initials — the contract's inline 18px variant of `.av`, borderless and flat */
+.tpn .dhero .chip .av {
+  width: 18px; height: 18px; border-radius: 50%; border: 0; box-shadow: none;
+  background: #efe4dc; color: var(--burg);
+  font-family: 'JetBrains Mono', monospace; font-size: 7px; font-weight: 500;
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+/* ── `.dbody` — the scroller carries the padding, as the contract's does ───────────────────────
+   The contract puts `20px 24px 24px` on `.dbody`; this app had put its inset on `.form` inside.
+   Same ink, different owner — and the owner matters, because the padding is what stops work
+   touching the drawer's edge while the SCROLLBAR still runs the full height. */
+.slo .tpn .workscroll { padding: 20px 24px 24px; }
+.slo .tpn .form { padding: 0; }
+
+/* ── `.fk` — the fork options at the contract's own size ───────────────────────────────────────
+   ⚠️ THESE ARE THE DRAWER'S NUMBERS AND THE SPLIT KEEPS ITS OWN. The tightened round chose
+   56/13/10.5/26 by measuring a ~400px column, and it was right there; the contract's 66/14/11.5/38
+   is what a 640px drawer draws. Both decisions stand, because they are decisions about two
+   different boxes.
+
+   ⚠️ THE 9px GAP IS THE PARENT'S, NOT A MARGIN ON THE OPTION. `.fork` already spaces them with
+   `gap: 9px` — the same figure the contract writes as `margin-bottom` — and a gap cannot leave a
+   trailing margin under the last option. Recorded here because the anatomy diff waives that one
+   property and this is the reason it does. */
+.slo .tpn .fk {
+  grid-template-columns: 38px 1fr auto; column-gap: 14px;
+  padding: 14px 16px; border: 1px solid var(--edge); border-radius: 14px;
+  background: var(--white); min-height: 66px;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.03);
+}
+.slo .tpn .fk .g {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--paper); border: 1px solid var(--hair);
+  font-size: 15px; color: var(--burg);
+}
+.slo .tpn .fk .t { font-size: 14px; }
+.slo .tpn .fk .s { font-size: 11.5px; margin-top: 2px; }
+
+/* ── `.ledger` — the questions are a card, not a bare list ─────────────────────────────────────
+   ⚠️ IT IS A REAL ELEMENT NOW. The contract wraps the question rows in a white card; this app
+   rendered them straight onto the sheet, so a form with four questions had no edge of its own and
+   read as part of the page rather than as the thing being filled in. */
+.tpn .ledger {
+  background: var(--white); border: 1px solid var(--edge); border-radius: 14px;
+  padding: 4px 18px; box-shadow: 0 1px 2px rgba(58, 28, 20, 0.03);
+}
+
+/* ── `.dfoot` — the drawer's bottom edge (contract: 13px 24px, min 60, white, hairline above) ── */
+.slo .tpn .foot { padding: 13px 24px; min-height: 60px; }
+
+/* ── the drawer IS the paper, so the sheet stops being a card inside it ────────────────────────
+   ⚠️ THE CONTRACT'S DRAWER HAS NO INNER CARD. `.sheet` is white with a 12px radius, a 6px pad and
+   a burgundy rim because in the SPLIT it has to read as an object standing on a desk beside the
+   list. Inside the drawer the drawer is the object: a card within a card put a second edge 8px
+   inside the first, and cost the document 16px of measure — the fork options measured 576 against
+   the contract's 592, which is where that difference was found. */
+.slo .tpn .sheet { padding: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; }
+.slo .tpn .sheet > .rim { border: 0; border-radius: 0; }

@@ -582,6 +582,15 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
       </>
     )}
 
+    {/* ⚠️ THE LEDGER IS A CARD (anatomy round, Phase 1; ref `todo-qc-style.html` `.ledger`). The
+        contract wraps the question rows in white with a 14px rim; this app rendered them straight
+        onto the sheet, so a form of four questions had no edge of its own and read as part of the
+        page rather than as the thing being filled in.
+
+        ⚠️ ABSENT WHERE THERE ARE NO QUESTIONS, not an empty card. A journey whose fork is still
+        showing has none, and a rimmed box holding nothing reads as something that failed to load —
+        the same rule the hero's line follows two elements above. */}
+    {questions.length > 0 && <div className="ledger">
     {questions.map((q) => {
       const open = q.id === openId;
       /* the row's own answer where the form holds one; the card's where it does not */
@@ -628,6 +637,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
         </div>
       );
     })}
+    </div>}
 
     {/* ⚠️ THE OPTIONAL FIELDS ARE LINKS UNTIL THEY ARE ASKED FOR (workspace round, Phase 4). They
         were two boxes standing open under every journey, so a form of four questions presented six

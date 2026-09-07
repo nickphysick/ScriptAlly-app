@@ -63,6 +63,10 @@ const REF_BELONGS = readFileSync(join(process.cwd(), "design-refs/todo-belongs.h
  * covers both. Both are on `check-design-refs.mjs`'s watchlist, so neither can drift under it.
  */
 const REF_DRAWER = readFileSync(join(process.cwd(), "design-refs/todo-fullscreen-final.html"), "utf8");
+/* ⚠️ THE PANE'S SECOND CONTRACT (anatomy round). `todo-qc-style.html` is the page's own reference
+   and it draws the DRAWER: `.dhero`, `.chips`, `.chip` and `.ledger` are its words, not inventions.
+   Both refs are authorities for this component's vocabulary; a class in neither is still made up. */
+const REF_QC = readFileSync(join(process.cwd(), "design-refs/todo-qc-style.html"), "utf8");
 const PANE_CSS = readFileSync(join(process.cwd(), "src/components/todo/taskPane.css"), "utf8");
 const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
@@ -128,7 +132,7 @@ describe("1 · the pane's class names are the mockup's", () => {
    */
   const cssOf = (src: string) => strip(src.slice(src.indexOf("<style>"), src.indexOf("</style>")));
   const mockClasses = new Set(
-    [REF, REF_FINAL, REF_PANE, REF_MATERIALS, REF_PRIMARY, REF_DRAWER, REF_BELONGS].flatMap((r) =>
+    [REF, REF_FINAL, REF_PANE, REF_MATERIALS, REF_PRIMARY, REF_DRAWER, REF_BELONGS, REF_QC].flatMap((r) =>
       [...cssOf(r).matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1])),
   );
 
@@ -151,6 +155,11 @@ describe("1 · the pane's class names are the mockup's", () => {
       /* the root carries the bare namespace, the parts carry it hyphenated — both are its own */
       { ns: /^ssp(-|$)/, why: "SampleSpecPicker — the sample's units and amounts (Phase 3)" },
     ];
+    /* ⚠️ TWO CONTRACTS SINCE THE ANATOMY ROUND. The pane was ported from
+       `todo-actionbar-corrected.html`; its DRAWER is `todo-qc-style.html`, which is where `.dhero`,
+       `.chips`, `.chip` and `.ledger` are named. Both are authorities for this component's
+       vocabulary, so both are read — a class from either is a word the design uses, and a class
+       from neither is still invented. */
     const invented = [...rendered].filter((c) =>
       !mockClasses.has(c) && !/^tpn(-|$)/.test(c) && !MOUNTED.some((m) => m.ns.test(c)));
     expect(invented, `classes not in the mockup: ${invented.join(" ")}`).toHaveLength(0);
@@ -172,7 +181,12 @@ describe("1 · the pane's class names are the mockup's", () => {
        names are `todo-belongs`'s own words. A suite still requiring `.band` would be requiring the
        page this round deleted — and it went red on exactly that, which is the retarget being
        honest rather than convenient. */
-    for (const c of ["pane", "wcol", "sheet", "rim", "dhead", "fam", "pos", "dnav", "title", "b-sub", "work", "foot", "actbar", "willrec"]) {
+    /* ⚠️ `b-sub` → `line`, AND IT IS A RENAME WITH A REASON (anatomy round, Phase 1). The sub-line
+       moved into the hero and took the contract's own name for that slot; `.b-sub` was this app's
+       word for an element `todo-qc-style.html` calls `.line`, and two names for one thing is what
+       the port census exists to refuse. `dhero` joins the list because the hero is now structural:
+       a drawer that renders the deed without it is the fault this whole round is about. */
+    for (const c of ["pane", "wcol", "sheet", "rim", "dhead", "fam", "pos", "dnav", "dhero", "title", "line", "work", "foot", "actbar", "willrec"]) {
       expect(rendered.has(c), `${c} is missing from the rendered pane`).toBe(true);
     }
     /* ⚠️ ONE CARD, NOT THREE — REVERSED AGAIN, AND FOR THE OPPOSITE REASON (drawer round, Phase 3).
@@ -205,7 +219,19 @@ describe("1 · the pane's class names are the mockup's", () => {
        chrome row. Asserting only that both exist would have passed with the title still in the
        header, which is the arrangement this phase retired. */
     expect(title, "the title is missing").toBeGreaterThan(-1);
-    expect(title, "the title is in the header rather than in the document").toBeGreaterThan(work);
+    /* ⚠️ RETARGETED, AND THE LAW CHANGED WITH THE DESIGN (anatomy round, Phase 1). The tightened
+       round's claim was "the deed is in the DOCUMENT, not in the header row" — a correction to a
+       band that had made the title a caption on a coloured strip. The contract puts it in the HERO,
+       which is neither: a tinted block of its own between the position row and the work, OUTSIDE
+       the scroller so the deed cannot scroll away from the form it describes. So the assertion is
+       the hero's position, and the title's membership of it, rather than an ordering against
+       `.work` that the anatomy inverts. */
+    const hero = HTML.indexOf('class="dhero');
+    expect(hero, "the hero is missing").toBeGreaterThan(-1);
+    expect(hero, "the hero is above the position row").toBeGreaterThan(head);
+    expect(work, "the hero is inside the scroller rather than above it").toBeGreaterThan(hero);
+    expect(title, "the title is not in the hero").toBeGreaterThan(hero);
+    expect(title, "the title is below the work rather than in the hero").toBeLessThan(work);
     expect(bar).toBeGreaterThan(title);
     /* ⚠️ AND THE REFERENCE IS NOW A COLUMN INSIDE THE SHEET, BEFORE THE FOOT — the reversal of
        what this line used to assert. The slip was a sibling AFTER the whole sheet; the rail is a
@@ -259,7 +285,16 @@ describe("1 · the pane's class names are the mockup's", () => {
     /* ⚠️ TWO SHAPES ARE SCOPED AND NOTHING ELSE IS: `.tpn <mockup class>` — a ported rule — and
        `.tpn-<name>` — one of the named exemptions the mockup has no markup for. Both are confined
        to this pane; anything else would reach the whole app, which is the fault this guards. */
-    const unscoped = rules.filter((l) => l.trim() && !/^\s*\.tpn[-\s.{:>]/.test(l) && !/^\s*}/.test(l));
+    /* ⚠️ RETARGETED (anatomy round, Phase 1) — SAME LAW, AND IT WAS ASSERTING A SPELLING.
+       The claim is "no rule in this sheet reaches outside the pane". It was written as "the line
+       STARTS WITH .tpn", which is one way to satisfy that claim and not the only one: the drawer's
+       anatomy is scoped `.slo .tpn …` — MORE confined, not less, because it names the host as well
+       as the pane — and every one of those fourteen rules failed a lock about where rules reach
+       while reaching nowhere new. A lock that goes red on an edit which made its own claim truer is
+       the shape this repo forbids: it trains the next reader to rebaseline without looking.
+       The test is now that every selector CONTAINS a `.tpn` hook, which is what confinement means. */
+    const unscoped = rules.filter((l) => l.trim() && !/^\s*}/.test(l)
+      && !l.split("{")[0].split(",").every((sel) => /(^|[\s>])\.tpn[-\s.{:>[]/.test(sel + " ")));
     expect(unscoped, `unscoped rules would reach the whole app:\n${unscoped.slice(0, 5).join("\n")}`)
       .toHaveLength(0);
   });

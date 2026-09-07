@@ -60,6 +60,9 @@ import {
 import { paneCommits, paneCommitValues } from "../../lib/paneCommit";
 import { sendSpecFor, collapseTimelineDuplicates } from "../../lib/todoDock";
 import { cardBucket, waitAnchorMs } from "../../lib/todoBuckets";
+import { ticketFacts } from "../../lib/ticketFacts";
+import { elapsedPhrase } from "../../lib/elapsed";
+import { heroLine, heroWait, type HeroBucket } from "../../lib/paneHero";
 /* the Quick Look column's derivations (tightened round, Phase 4) — the Query Centre's own ladder
    and span, and the app's one agent-display helper; none of them re-implemented here */
 import { stageFor, span } from "../../lib/queryCardFacts";
@@ -1122,9 +1125,26 @@ export function useTaskPaneSession(
     setShowMissing(false);
   }
 
+  /* ⚠️ THE HERO'S OWN THREE FIGURES, FROM THE TICKET'S DERIVATION (anatomy round, Phase 1).
+     `ticketFacts` is what the grid's ticket prints; the hero states the same pair as a sentence
+     and the same span as a chip, so the drawer and the card behind it cannot disagree about when
+     the agent asked. A second derivation here is how a hero comes to say 1 August over a ticket
+     saying 31 July. */
+  const heroInp = card ? listRowInputs(card) : null;
+  const heroFacts = !card || !heroInp ? null : ticketFacts(card, {
+    days: heroInp.days,
+    dateLabel: heroInp.anchorDate,
+    elapsed: typeof heroInp.days === "number" ? elapsedPhrase(heroInp.days) : null,
+  });
+
   const journey: TaskPaneJourney | null = !card ? null : buildJourney({
                     card: card,
                     facts: paneFacts,
+                    ...(heroFacts ? {
+                      line: heroLine(cardBucket(card) as HeroBucket, heroFacts, { crossed: !!crossed }),
+                      wait: heroWait(heroFacts),
+                    } : {}),
+                    ...(card.msTitle ? { ms: card.msTitle } : {}),
                     sentPreviously: (() => {
                       const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
                       return formatQueryMaterials(q?.materialsWanted);

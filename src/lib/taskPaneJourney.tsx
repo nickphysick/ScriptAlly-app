@@ -34,6 +34,10 @@ export interface JourneyInputs {
   card: BoardCard;
   /** the stat pair the header already derives */
   facts: { k: string; v: string }[];
+  /* the drawer's hero — built by the session from `ticketFacts`, never re-derived here */
+  line?: string;
+  ms?: string;
+  wait?: string;
   /** what already went to this agent, formatted through the one formatter */
   sentPreviously: string | null;
   /**
@@ -305,6 +309,9 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
     sub: isNote
       ? (input.noteAdded ? `Your own note · added ${input.noteAdded}` : "Your own note")
       : "",
+    ...(input.line ? { line: input.line } : {}),
+    ...(input.ms ? { ms: input.ms } : {}),
+    ...(input.wait ? { wait: input.wait } : {}),
     btns: input.btns,
     tiles,
     /* (`actTitle`/`actSub` are RETIRED — workspace round, Phase 4. The heading restated the deed in
