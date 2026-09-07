@@ -98,8 +98,15 @@
  * hero's height was a grid TRACK and the columns could never be given a row of their own. The ref
  * draws `main` holding a `hero` and a `grid3`; this is that.
  *
- * ⚠️ THE VALUES ARE THE REF'S, READ OUT OF IT RATHER THAN MATCHED BY EYE — `.main{padding-left:22px}`
- * and no cap, because the ref's own content is uncapped and the harness compares `main`'s box.
+ * ⚠️ THE VALUES ARE THE REF'S, READ OUT OF IT RATHER THAN MATCHED BY EYE, AND THERE ARE TWO OF THEM.
+ * `.main{padding:0 0 0 30px}` is the base and `22px` is the ≤1700 step — the 22 was taken from the
+ * media block and applied at every width, which is the ref's narrow value used wide.
+ *
+ * ⚠️ IT IS ONE VALUE AND IT MOVED TWO THINGS, WHICH IS WHY IT LOOKED LIKE TWO FAULTS. The left
+ * column started 8px left of the ref's, and the middle column — the only elastic track — was 24px
+ * wide, because the 8px of padding the row did not take became 8px of extra grid, and a `1fr`
+ * middle absorbs all of it. Measured: ref `.grid3` 1604 = 440 + 22 + 700 + 22 + 420; the app's was
+ * 1628 with a 724 middle. Every card in all three columns was reported as misplaced.
  */
 .os-content {
   flex: 1;
@@ -107,7 +114,7 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 0 0 0 22px;
+  padding: 0 0 0 30px;
   width: 100%;
 }
 /* ⚠️ THE REF'S OWN TRACKS AND GAP. 440/1fr/420 at ≥1700, 340/1fr/360 below — its `.grid3` and its
@@ -123,6 +130,7 @@
 }
 @media (max-width: 1699px) {
   .os-grid { grid-template-columns: 340px minmax(0, 1fr) 360px; }
+  .os-content { padding-left: 22px; }  /* the ref's `.main{padding-left:22px!important}` step */
   /* the ref's own `@media (max-width:1700px)` step for the slot */
   .os-cic, .os-cic.plane { width: 96px; height: 96px; }
   /* the ref's own step for the brush at the same breakpoint */
@@ -748,7 +756,7 @@
    numerals stay: a counting figure whose glyph widths change re-lays-out the row on every frame. */
 .os-ahead .os-n {
   font-family: var(--font-serif); font-weight: 600; font-size: 38px; color: #2a1f18;
-  line-height: 1; font-variant-numeric: tabular-nums; flex: none;
+  line-height: 0.9; font-variant-numeric: tabular-nums; flex: none;
 }
 .os-ahead .os-chip { flex: none; }
 /* the cluster takes the slack, and gives it back first */
@@ -973,15 +981,27 @@
 /* ⚠️ THE STAT BLOCK: the figure leads, the name and the delta stack beside it. `align-items:
    baseline` is deliberately NOT used — the figure is 38px and the title 15px, so a shared baseline
    drops the two-line stack below the numeral's foot. The stack centres against the figure instead. */
-.os-stat { display: flex; align-items: center; gap: 11px; min-width: 0; flex: none; }
-.os-statxt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.os-statxt h2 { margin: 0; }
+/* ref `.statblk` — gap 12, and the figure's `line-height: .9` is what keeps the row at 39 rather
+   than 50. Measured: the whole band was 10.7px tall for exactly this, and the band's height is the
+   chart card's height, which is every card in the middle column's position. */
+.os-stat { display: flex; align-items: center; gap: 12px; min-width: 0; flex: none; }
+/* ⚠️ THE STACK IS SPACED BY THE SUB'S OWN MARGIN, NOT BY A GAP — ref `.statblk .s{margin-top:3px}`.
+   The two are interchangeable in arithmetic and not in intent: the margin belongs to the caption,
+   so a stat block with no caption closes up by itself. */
+.os-statxt { display: flex; flex-direction: column; min-width: 0; }
+/* ⚠️ 19px, NOT THE BAND'S 23 — ref `.statblk .t`. Inside a stat block the title is the SECOND thing
+   read, after the figure; at the band's own heading size it competes with a 38px numeral. This is
+   scoped to the stat block, so every other card's heading is untouched. */
+.os-statxt h2 {
+  margin: 0; font-family: var(--font-serif); font-size: 19px; font-weight: 500; line-height: 1.1;
+}
 /* ⚠️ THE DELTA IS A CAPTION, NOT A CHIP. It sat in a bordered pastille beside the title, which gave
    a derived aside the same weight as the name of the card. `.os-chip` survives untouched for the
    surfaces that still want a pill. */
+/* ref `.statblk .s` — 11px mono at .06em in a muted sage, 3px below the title */
 .os-delta {
-  font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: #8a7a6c; white-space: nowrap;
+  font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #4f6a4c; white-space: nowrap; margin-top: 3px;
   overflow: hidden; text-overflow: ellipsis;
 }
 
@@ -1027,7 +1047,23 @@
 /* the card's old padding lives here now — the band needs the card's edges */
 /* ref `.chart{padding:14px 20px 6px}` — the legend beneath supplies the card's foot */
 .os-lbody { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 14px 20px 6px; }
-.os-chartwrap { flex: 1; min-height: 120px; position: relative; }
+/**
+ * ⚠️ THE PLOT'S HEIGHT COMES FROM ITS WIDTH, NOT FROM WHAT IS LEFT OVER (refdiff pass, Phase 5).
+ *
+ * The ref's chart svg carries `viewBox="0 0 1000 330"` with `height:auto`, so its intrinsic ratio
+ * sizes it — 658 wide gives 217.1 tall — and the card's height is then the sum of its parts. The
+ * app measured the wrapper and drew into it, which is the same statement read backwards: the
+ * wrapper was `flex: 1` with a basis of 0, so it contributed nothing to the card's content height,
+ * the card fell to its own `min-height: 340`, and the plot got whatever remained. Measured: 136px
+ * of chart in a 340px card against the ref's 217 in 392 — and freeing the header made it WORSE,
+ * because the taller band came straight out of the plot.
+ *
+ * ⚠️ THE SVG IS STILL ABSOLUTE INSIDE IT, and that is why the ratio has to be on the WRAPPER. The
+ * component measures this box with a `ResizeObserver` and hands the svg an explicit `viewBox`, so
+ * the svg cannot size anything; the wrapper is the only element in the chain that can state the
+ * shape. `min-height` survives as the floor for a very narrow card.
+ */
+.os-chartwrap { aspect-ratio: 1000 / 330; flex: none; min-height: 120px; position: relative; }
 .os-chartwrap svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: default; outline: none; }
 /* the cursor flips across the reading-zone boundary — felt, not guessed (§3) */
 .os-chartwrap svg.reading { cursor: crosshair; }
@@ -1334,6 +1370,44 @@
  * 51px because it says so, and its contents centre inside whatever room that leaves.
  */
 .os-ahead, .os-th2 { height: 51px; padding: 0 16px; box-sizing: border-box; flex: none; }
+
+/**
+ * ⚠️ THE CHART'S BAND IS THE ONE EXCEPTION, AND IT IS THE REF'S OWN (refdiff pass, Phase 5).
+ *
+ * Measured in the ref: the to-do card's header is 50.2px and the activity card's is 50.2 — the
+ * shared band, and the app's 51 matches both. The chart's is **115.3**, because it carries a 38px
+ * stat readout AND the brush pill on two rows. Holding it to 51 made the whole card 52px shorter
+ * than the ref's (340 against 392, i.e. pinned to its own `min-height`), and that 52px went to the
+ * to-do card beneath it — so one clamped header moved every card in the middle column.
+ *
+ * ⚠️ THE ORIGINAL REASONING IS STILL SOUND AND NO LONGER APPLIES. The controls were moved INTO the
+ * band because a separate control row cost 45px out of a 302px card — under half the container. The
+ * card is 340–560 now, and the ref spends the height deliberately: a readout row and a controls
+ * row, rather than five things fighting for one line.
+ *
+ * ⚠️ AND IT WRAPS BY DESIGN, WHICH IS NOT THE SAME AS WRAPPING BY ACCIDENT. The two rows are the
+ * stat block and the control cluster, each whole; `.os-ctrls` keeps `margin-left: auto`, so at a
+ * width where both fit they sit on one line and the band shrinks back to the readout's height.
+ * What must never happen is a break INSIDE the cluster — hence `flex-wrap` on the band and none
+ * within it. The other two bands are untouched and still agree structurally.
+ */
+.os-lead > .os-ahead {
+  height: auto; min-height: 51px;
+  padding: 14px 20px 4px;   /* ref `#chartCard .hd` */
+  flex-wrap: wrap; gap: 10px;
+  align-items: center;
+}
+/* ⚠️ TWO ROWS BY CONSTRUCTION, NOT BY OVERFLOW, AND IT IS THE CONTROLS THAT CLAIM THE SECOND ROW.
+   `flex-wrap` alone breaks wherever the contents run out of room — a different place at every
+   width, and inside the control cluster at some of them. Forcing the break on the READOUT instead
+   looks equivalent and is not: the band's first child is the card's illustrated mark, so a
+   full-width stat block leaves the mark alone on a row above it and the band grows to THREE.
+   Measured: 170px of band that way against 115 in the ref. */
+.os-lead > .os-ahead > .os-ctrls { flex: 1 0 100%; }
+/* ⚠️ AND THE CONTROL ROW IS LEFT-ALIGNED ONCE IT HAS A ROW OF ITS OWN — `margin-left: auto` was
+   pushing it to the far edge of a row it now occupies alone, which reads as two unrelated clusters
+   at opposite ends of the band. Ref `#rcBrush`: chips then brush, from the left. */
+.os-lead > .os-ahead > .os-ctrls { margin-left: 0; }
 /* the same, for the sage band — see `.os-th2` above for why the height survives the paint */
 .os-ahead {
   display: flex; align-items: center; gap: 12px;

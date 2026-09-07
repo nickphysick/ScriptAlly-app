@@ -102,14 +102,30 @@ describe("the container rim is the card's own border, and there is only one of i
 describe("the bands are one geometry, coloured by purpose", () => {
   const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
   const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
-  const pad = (sel: string) => {
-    const i = bare.indexOf(`${sel} {`);
-    expect(i, `${sel} must exist`).toBeGreaterThan(-1);
-    return /padding:\s*([^;]+)/.exec(bare.slice(i, bare.indexOf("}", i)))?.[1].trim();
-  };
-
   it("⚠️ the sage and pink bands share their PADDING — colour differs by purpose, geometry does not", () => {
-    expect(pad(".os-th2")).toBe(pad(".os-ahead"));
+    /* ⚠️ THEY SHARE IT BY BEING ONE RULE, which is a stronger claim than two rules that agree: the
+       two cannot drift, because there is only one declaration to edit. */
+    const grouped = /(?:^|\n)\.os-ahead,\s*\.os-th2\s*\{([^}]*)\}/m.exec(bare);
+    expect(grouped, "the two bands must share ONE geometry rule").not.toBeNull();
+    expect(grouped![1]).toContain("padding: 0 16px");
+    expect(grouped![1]).toContain("height: 51px");
+    /* and neither may state a competing padding elsewhere — see the base-rule case below */
+  });
+
+  /* ⚠️ ONE EXCEPTION, SCOPED AND NAMED — the chart's band (refdiff pass, Phase 5). Measured in the
+     ref: to-do 50.2, activity 50.2, chart 115.3, because the chart's header carries a stat readout
+     AND the control cluster on two rows. Holding it to the shared 51 made the whole card 52px
+     shorter than the ref's and moved every card in the middle column. The exception is a descendant
+     selector, so the shared rule is untouched and a THIRD band cannot quietly join it. */
+  it("⚠️ the chart's band is the one exception, and it is scoped rather than a loosened default", () => {
+    expect(/(?:^|\n)\.os-ahead,\s*\.os-th2\s*\{([^}]*)\}/m.exec(bare)![1]).toContain("height: 51px");
+    const lead = /\.os-lead > \.os-ahead\s*\{([^}]*)\}/.exec(bare);
+    expect(lead, "the chart's band override must exist").not.toBeNull();
+    expect(lead![1]).toContain("height: auto");
+    expect(lead![1]).toContain("min-height: 51px");   // it never goes BELOW the shared band
+    expect(lead![1]).toContain("flex-wrap: wrap");
+    /* and no other band may take the exception */
+    expect(bare).not.toMatch(/\.os-th2\s*\{[^}]*height:\s*auto/);
   });
 
   it("Active queries wears the shared band, not a header of its own", () => {
@@ -201,10 +217,13 @@ describe("one band geometry, declared", () => {
     expect(m![1]).toContain("padding: 0 16px");
   });
 
+  /* ⚠️ THE BASE RULES, ANCHORED — see `geom`. The chart's scoped override DOES declare a padding
+     (the ref's own `#chartCard .hd`), which is the point of it; what must not happen is either
+     BASE band growing a padding of its own, because that is how the two drifted apart before. */
   it("⚠️ neither band re-declares its own padding — that is how they drifted apart before", () => {
-    for (const sel of [".os-ahead {", ".os-th2 {"]) {
-      const i = bare.indexOf(sel);
-      expect(bare.slice(i, bare.indexOf("}", i)), sel).not.toMatch(/padding:/);
+    for (const sel of [".os-ahead", ".os-th2"]) {
+      const m = new RegExp(`(?:^|\\n)\\${sel}\\s*\\{([^}]*)\\}`, "m").exec(bare);
+      if (m) expect(m[1], sel).not.toMatch(/padding:/);
     }
   });
 

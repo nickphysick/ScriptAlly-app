@@ -56,6 +56,32 @@ const PROBES = [
   "todo-card", "todo-badge", "todo-rule",
   "goals-card", "activity-card", "activity-tabs", "feed",
 ];
+
+/**
+ * ⚠️ EACH PROBE IS ANCHORED TO THE EDGE ITS DESIGN PINS IT TO, AND THIS IS THE SECOND HALF OF THE
+ * RELATIVE-DATUM DECISION — the first half moved position off the viewport and onto `main`, and
+ * left every WIDTH absolute, which reintroduced the same fault one level down.
+ *
+ * The app's `main` is 1650 wide at 1920 where the ref's is 1634: the ref draws no rail, no window
+ * and no bar, so its page padding is the only thing inset from the viewport. In a `440px 1fr 420px`
+ * grid that 16px lands entirely in the elastic middle track — which is CORRECT behaviour, and was
+ * being reported as a miss on the chart card, the to-do card, the plot, the rule, and as an x miss
+ * on all four right-column probes. Nine misses, none of them a difference anyone could fix, and all
+ * of them ones a design change could hide behind.
+ *
+ * So: a `left` probe is pinned to the left and its left inset and width are the facts. A `right`
+ * probe is pinned to the right and its RIGHT inset and width are the facts. A `span` probe fills the
+ * elastic track, so its two insets are the facts and its width is derived from them — pinning both
+ * edges pins the width too, against whatever container the shell gives it.
+ */
+const ANCHOR = {
+  main: "datum",
+  hero: "span", stats: "left", grid: "span",
+  "manuscript-card": "left", "community-card": "left",
+  "chart-card": "span", plot: "span", brush: "right",
+  "todo-card": "span", "todo-badge": "right", "todo-rule": "span",
+  "goals-card": "right", "activity-card": "right", "activity-tabs": "right", feed: "right",
+};
 const TEXT_PROBES = ["hero-h1", "card-h3", "stat-figure", "chart-figure", "ticket-title", "bubble-sentence"];
 
 /**
@@ -247,22 +273,32 @@ const rgb = (v) => (v || "").replace(/\s+/g, " ").trim();
  * report that one fact as a miss on EVERY probe, at every width, forever — a number that can never
  * go to zero and tells you nothing about the design.
  *
- * `main`'s own box is still compared absolutely for SIZE, so the page cannot quietly shrink; what
- * moves to a relative datum is where things sit INSIDE it, which is what a design ref specifies.
+ * ⚠️ `main` IS THE DATUM AND A DATUM IS NOT A SUBJECT. Its own box is REPORTED, never compared: its
+ * y differs by the 77px control row the pack explicitly keeps, its height by the same, and its
+ * width by the shell's gutters — three numbers that can never go to zero and that would sit in the
+ * table forever teaching the reader to skip the first row. The table prints them so a silent shrink
+ * is still visible; what is CHECKED is where things sit inside it, which is what a ref specifies.
  */
 function diffOne(key, ref, app, refOrigin, appOrigin) {
   const misses = [];
   if (!ref) return [{ key, field: "ref", why: "the ref has no such probe" }];
   if (!app) return [{ key, field: "present", why: "the app renders no visible element for this probe" }];
+  const anchor = ANCHOR[key] || "left";
+  if (anchor === "datum") return misses;
   const off = (f, o) => (f === "x" ? o.x : f === "y" ? o.y : 0);
-  const near = (f, tol) => {
-    const rv = Math.round((ref[f] - off(f, refOrigin)) * 10) / 10;
-    const av = Math.round((app[f] - off(f, appOrigin)) * 10) / 10;
+  const cmp = (field, rv0, av0, tol) => {
+    const rv = Math.round(rv0 * 10) / 10, av = Math.round(av0 * 10) / 10;
     const d = Math.round((av - rv) * 10) / 10;
-    if (Math.abs(d) > tol) misses.push({ key, field: f, ref: rv, app: av, delta: d, tol });
+    if (Math.abs(d) > tol) misses.push({ key, field, ref: rv, app: av, delta: d, tol });
   };
-  near("x", TOL.edge); near("y", TOL.edge);
-  near("w", TOL.size); near("h", TOL.size);
+  const near = (f, tol) => cmp(f, ref[f] - off(f, refOrigin), app[f] - off(f, appOrigin), tol);
+  /* the right inset: how far the element's right edge sits from `main`'s */
+  const rIn = (o, e) => o.x + o.w - (e.x + e.w);
+  near("y", TOL.edge);
+  if (anchor === "left") { near("x", TOL.edge); near("w", TOL.size); }
+  else if (anchor === "right") { cmp("xr", rIn(refOrigin, ref), rIn(appOrigin, app), TOL.edge); near("w", TOL.size); }
+  else { near("x", TOL.edge); cmp("xr", rIn(refOrigin, ref), rIn(appOrigin, app), TOL.edge); }
+  near("h", TOL.size);
   for (const f of ["bg", "radius"]) {
     if (rgb(ref[f]) !== rgb(app[f])) misses.push({ key, field: f, ref: ref[f], app: app[f] });
   }
@@ -326,6 +362,16 @@ function table(result) {
     if (cells.every((c) => c === "·")) { L.push(`| ${p} | ${cells.join(" | ")} |`); continue; }
     L.push(`| **${p}** | ${cells.join(" | ")} |`);
   }
+  /* ⚠️ THE DATUM IS REPORTED, NEVER COMPARED — see `diffOne`. Printing it is what stops "not
+     compared" turning into "not looked at": a `main` that silently halved would show here. */
+  L.push(`| _main (datum, not compared)_ | ` + result.widths.map((w) => {
+    const r = result.byWidth[w].ref.probes.main, a = result.byWidth[w].app.probes.main;
+    const f = result.byWidth[w].app.viewportFitted;
+    return r && a
+      ? `ref ${Math.round(r.w)}×${Math.round(r.h)} · app ${Math.round(a.w)}×${Math.round(a.h)}` +
+        (f ? ` (window ${f.width}×${f.height})` : "")
+      : "—";
+  }).join(" | ") + " |");
   L.push("");
   L.push(result.widths.map((w) => `**${w}**: ${result.byWidth[w].misses.length} misses`).join("  ·  "));
   L.push("");
@@ -353,21 +399,58 @@ try {
         if (el) el.style.width = `${el.getBoundingClientRect().width - 40}px`;
       });
       const broken = await refPage.evaluate(READ);
-      selfTestSaw = diffOne("chart-card", broken.probes["chart-card"], refData.probes["chart-card"]);
+      /* the self-test compares the ref against itself, so the datum is the SAME `main` on both
+         sides — which is what makes a 40px shrink show up as a right-inset miss under `span`. */
+      const sO = refData.probes.main ?? { x: 0, y: 0, w: 0 };
+      selfTestSaw = diffOne("chart-card", broken.probes["chart-card"], refData.probes["chart-card"], sO, sO);
     }
 
     const appPage = await ctx.newPage();
-    const appData = await readPage(appPage, `${APP}/dashboard`, { app: true });
+    let appData = await readPage(appPage, `${APP}/dashboard`, { app: true });
+
+    /**
+     * ⚠️ THE APP IS RE-READ IN A WINDOW THAT GIVES IT THE REF'S OWN CONTENT BOX, AND THIS IS A
+     * DATUM DECISION RATHER THAN A TOLERANCE.
+     *
+     * Both grids are viewport-driven — the ref's `.grid3` is `min-height: calc(100vh - 176px)` and
+     * the app's fills what the shell leaves it. The app's shell spends 84px at 1456 on a control
+     * row the pack explicitly keeps ("they are not in the ref because the ref did not draw the
+     * nav"), so its content box is 84px shorter and every card with any flex in it absorbs a share.
+     * Measured before this: the chart card 52px short, goals 78px short, and a `y` miss on every
+     * probe beneath either of them — nine numbers reporting one fact, none of them fixable, and all
+     * of them room for a real height fault to hide in.
+     *
+     * The same holds across: the app's `main` is 1650 wide at 1920 where the ref's is 1634, so its
+     * elastic middle track is 16px wider and anything whose HEIGHT derives from its width — the plot
+     * has the ref's 1000:330 ratio — is then wrong in the other axis too.
+     *
+     * ⚠️ WHAT MOVES IS THE WINDOW, NOT A TOLERANCE, AND IT MOVES BY A MEASURED DIFFERENCE RATHER
+     * THAN A CHOSEN ONE. The pack's three widths are the design intent and they are unchanged; the
+     * app is simply given a window in which the box the design describes is the same size on both
+     * sides. Both deltas stay inside the same media-query regime at all three widths (16px at 1920
+     * does not cross 1700), so the app is measured in the layout the width names. A card that is
+     * genuinely the wrong height still fails, which is the test of whether this is a datum or a
+     * fudge — and the self-test proves that on every run.
+     */
+    const rM = refData.probes.main, aM = appData.probes.main;
+    const dw = rM && aM ? Math.round(rM.w - aM.w) : 0;
+    const dh = rM && aM ? Math.round(rM.h - aM.h) : 0;
+    if (Math.abs(dw) > 1 || Math.abs(dh) > 1) {
+      const fit = await browser.newContext({
+        viewport: { width: width + dw, height: HEIGHT + dh }, deviceScaleFactor: 1,
+      });
+      const fitPage = await fit.newPage();
+      appData = await readPage(fitPage, `${APP}/dashboard`, { app: true });
+      appData.viewportFitted = { dw, dh, width: width + dw, height: HEIGHT + dh };
+      await fit.close();
+    }
 
     const misses = [];
     /* the datum: each side's own `main`. Absent on either side and the comparison falls back to
        the viewport, which is honest — a page with no `main` has bigger problems than an offset. */
-    const rO = refData.probes.main ?? { x: 0, y: 0 };
-    const aO = appData.probes.main ?? { x: 0, y: 0 };
-    for (const k of PROBES) {
-      misses.push(...diffOne(k, refData.probes[k], appData.probes[k],
-        k === "main" ? { x: 0, y: 0 } : rO, k === "main" ? { x: 0, y: 0 } : aO));
-    }
+    const rO = refData.probes.main ?? { x: 0, y: 0, w: 0 };
+    const aO = appData.probes.main ?? { x: 0, y: 0, w: 0 };
+    for (const k of PROBES) misses.push(...diffOne(k, refData.probes[k], appData.probes[k], rO, aO));
     for (const k of TEXT_PROBES) misses.push(...diffText(k, refData.text[k], appData.text[k]));
     misses.push(...diffChecks(appData));
 
@@ -381,7 +464,11 @@ try {
 }
 
 if (SELF_TEST) {
-  const ok = Array.isArray(selfTestSaw) && selfTestSaw.some((m) => m.field === "w");
+  /* ⚠️ THE CLAIM IS "A 40px BREAK IS SEEN AS 40px", NOT "A FIELD CALLED `w` IS REPORTED".
+     This asserted the field NAME and went red the day `chart-card` became a `span` probe, where a
+     width break is reported as a right-inset — the break was caught, in the right size, and the
+     self-test called the harness untrustworthy over the spelling of the column heading. */
+  const ok = Array.isArray(selfTestSaw) && selfTestSaw.some((m) => Math.abs(Math.abs(m.delta ?? 0) - 40) < 2);
   console.log(`\nself-test: a 40px width break on chart-card ${ok ? "WAS" : "was NOT"} reported`);
   if (!ok) { console.error("✗ the harness did not report a break it was shown. It cannot be trusted."); process.exit(2); }
   console.log("✓ the harness reports a miss it should. Discarding the break.");
