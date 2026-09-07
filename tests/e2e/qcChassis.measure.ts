@@ -135,9 +135,15 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
      Not fixed here: it is shell chrome, and what the badge MEANS — every live card, or only the
      ones not deliberately deferred — is a product call rather than a defect to patch in passing.
      Printed every run so it stays visible instead of being rediscovered. */
-  add("P1.2c · [REPORTED] the rail badge's figure, beside the page's",
-      true, "rail badge " + JSON.stringify(badge) + " · page " + byLabel["All tasks"]
-        + (String(badge) === String(byLabel["All tasks"]) ? "  — they now AGREE" : "  — they DISAGREE (known, Nick's call)"));
+  /* ⚠️ NOW ASSERTED, NOT REPORTED (corrections). It printed both figures and said "they DISAGREE
+     (known, Nick's call)" because what the badge MEANS was a product question and it is shell
+     chrome besides. Nick ruled: it counts what the page shows, so a snoozed card — deliberately out
+     of sight until a date, and unreachable from the list without changing a filter — is not in it.
+     `boardFigures` drops `cols.snoozed`; the two surfaces state one number and this holds them to
+     it. */
+  add("P1.2c · the rail badge states the SAME number the page does",
+      String(badge) === String(byLabel["All tasks"]),
+      "rail badge " + JSON.stringify(badge) + " · page " + byLabel["All tasks"]);
 
   add("P1.3 · Urgent is a LENS, not a sixth part — it is not in that sum",
       typeof byLabel["Urgent"] === "number" && byLabel["Urgent"] <= byLabel["Agent requests"],

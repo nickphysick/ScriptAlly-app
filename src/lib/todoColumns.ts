@@ -431,8 +431,24 @@ export function liveBoardCards(cols: BoardColumns): BoardCard[] {
   return [...cols.todo, ...cols.today, ...cols.snoozed];
 }
 
+/**
+ * ⚠️ THE BADGE COUNTS WHAT THE PAGE SHOWS, AND SNOOZED IS NOT ON THE PAGE (Nick's ruling,
+ * corrections). This read `liveBoardCards`, which includes `cols.snoozed` — so the rail said
+ * **29** beside a page saying **27**, and both were right about their own set. Nothing on either
+ * surface said which one the word "To-do" meant, which is the two-numbers fault this repo has
+ * closed twice.
+ *
+ * A snoozed card is one the writer has deliberately put out of sight until a date. Counting it in
+ * a badge that means "things needing you" is the app nagging about the thing you just deferred —
+ * and it cannot be reached from the list without changing a filter, so the number promised rows
+ * that were not there.
+ *
+ * ⚠️ `liveBoardCards` IS UNCHANGED, deliberately. It is the BOARD's population — the three columns
+ * the board actually draws, snoozed among them — and it has its own consumers. What changed is the
+ * FIGURE, which has exactly one: the rail badge.
+ */
 export function boardFigures(cols: BoardColumns): { cards: number; urgent: number } {
-  const live = liveBoardCards(cols);
+  const live = [...cols.todo, ...cols.today];
   return { cards: live.length, urgent: live.filter((c) => cardFamily(c) === "urgent").length };
 }
 

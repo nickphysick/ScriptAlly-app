@@ -9,8 +9,8 @@ green  · P1.2 · the five categories partition All — their sum IS the All cou
          five sum 28 · All 28 · {"All tasks":28,"Urgent":6,"Agent requests":9,"Nudges":9,"Gone quiet":6,"Housekeeping":2,"Your tasks":2}
 green  · P1.2b · the total is stated ONCE — the tiles say it and the content area does not restate it
          tile 28 · content-area footer ""  (no second total)
-green  · P1.2c · [REPORTED] the rail badge's figure, beside the page's
-         rail badge "30" · page 28  — they DISAGREE (known, Nick's call)
+green  · P1.2c · the rail badge states the SAME number the page does
+         rail badge "28" · page 28
 green  · P1.3 · Urgent is a LENS, not a sixth part — it is not in that sum
          urgent 6 · agent requests 9
 green  · P1.4 · the header carries the title, the subtitle and one primary
