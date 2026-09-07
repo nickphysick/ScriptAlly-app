@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ScriptAlly — Contact list v5</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#f2ede7; --paper:#fdfaf5; --ink:#1c130f; --ink-2:#4a3c34;
+  --muted:#8b7b70; --faint:#a89a8f; --hair:#e4dcd2; --hair-2:#d9cfc3;
+  --sage:#d7ddd5; --grey:#e4e1db; --pinksel:#f5e6df;
+  --shadow:0 1px 2px rgba(44,28,20,.05), 0 8px 20px -12px rgba(44,28,20,.22);
+  --shadow-lift:0 2px 4px rgba(44,28,20,.06), 0 18px 36px -18px rgba(44,28,20,.30);
+  --radius:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:14px;-webkit-font-smoothing:antialiased;padding-bottom:96px}
+button{font-family:inherit;cursor:pointer}
+.mono{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.wrap{max-width:1400px;margin:0 auto;padding:34px 32px 0}
+.masthead{display:flex;align-items:flex-start;gap:20px;padding-bottom:26px}
+.mark{width:72px;height:72px;flex:none}
+.masthead h1{font-family:'Playfair Display',serif;font-weight:700;font-size:32px;line-height:1.1;margin:6px 0 4px}
+.masthead p{margin:0;color:var(--ink-2);font-size:14.5px}
+.masthead .sp{flex:1}
+.btn-ink{background:#241813;color:#f6f0e8;border:0;border-radius:999px;padding:11px 18px;font-size:13.5px;font-weight:500;display:inline-flex;align-items:center;gap:8px;box-shadow:var(--shadow)}
+.tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+.tile{background:var(--paper);border:1px solid var(--hair);border-radius:var(--radius);padding:13px 15px;display:flex;align-items:center;gap:12px;text-align:left}
+.tile.on{border-color:#241813;box-shadow:0 0 0 1px #241813}
+.tile .disc{width:34px;height:34px;border-radius:50%;flex:none}
+.tile .lab{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:2px}
+.tile .num{font-family:'Playfair Display',serif;font-size:24px;font-weight:500;line-height:1}
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:22px;flex-wrap:wrap}
+.search{flex:1;min-width:200px;max-width:320px;position:relative}
+.search input{width:100%;background:var(--paper);border:1px solid var(--hair);border-radius:999px;padding:10px 14px 10px 36px;font-size:13.5px}
+.search svg{position:absolute;left:13px;top:11px;opacity:.4}
+.tbtn{background:var(--paper);border:1px solid var(--hair);border-radius:999px;padding:9px 14px;font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);display:inline-flex;gap:7px;align-items:center}
+.tbtn b{font-weight:500;color:var(--ink)}
+.tbtn.live{border-color:var(--ink-2);background:#fff}
+.switch{margin-left:auto;display:flex;background:var(--paper);border:1px solid var(--hair);border-radius:999px;padding:3px}
+.switch button{border:0;background:transparent;border-radius:999px;padding:7px 15px;font-size:12.5px;color:var(--muted);display:inline-flex;gap:7px;align-items:center}
+.switch button.on{background:#241813;color:#f6f0e8}
+.count{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);margin:-8px 0 14px}
+
+/* desk popovers */
+.desk{position:fixed;z-index:66;width:326px;background:var(--paper);border:1px solid var(--hair-2);border-radius:11px;box-shadow:0 22px 54px -18px rgba(44,28,20,.45);display:none;overflow:hidden}
+.desk.on{display:block}
+.deskhead{background:var(--sage);padding:13px 17px;font-family:'Playfair Display',serif;font-size:17px;font-weight:600}
+.deskbody{padding:7px;max-height:56vh;overflow:auto}
+.opt{display:flex;gap:11px;align-items:flex-start;padding:10px 12px;border-radius:8px;cursor:pointer;border:0;background:transparent;width:100%;text-align:left}
+.opt:hover{background:#f6f0e8}
+.opt.on{background:var(--pinksel)}
+.radio{width:17px;height:17px;border-radius:50%;border:1.6px solid #b9ab9e;flex:none;margin-top:1px;display:grid;place-items:center}
+.opt.on .radio{border-color:#241813}
+.opt.on .radio::after{content:"";width:8px;height:8px;border-radius:50%;background:#241813}
+.opt .txt b{display:block;font-weight:500;font-size:14px;color:var(--ink)}
+.opt .txt small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.deskfoot{border-top:1px solid var(--hair);padding:11px 14px;display:flex;align-items:center;gap:10px;background:#f9f4ed}
+.oseg{margin-left:auto;display:flex;background:#efe8df;border-radius:7px;padding:3px}
+.oseg button{border:0;background:transparent;border-radius:5px;padding:5px 11px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.oseg button.on{background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgba(44,28,20,.1)}
+.facet{padding:12px 13px 6px}
+.facet + .facet{border-top:1px solid var(--hair)}
+.facet .mono{display:block;margin-bottom:9px}
+.fchips{display:flex;flex-wrap:wrap;gap:6px}
+.fchip{font-size:12px;background:#f6f1ea;border:1px solid var(--hair);border-radius:999px;padding:5px 11px;color:var(--ink-2)}
+.fchip.on{background:#241813;border-color:#241813;color:#f6f0e8}
+.linkbtn{border:0;background:transparent;font-size:12.5px;color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;padding:0}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(366px,1fr));gap:20px}
+.card{perspective:1400px}
+.rotor{position:relative;height:388px;transition:transform .55s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.card.flipped .rotor{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--paper);border:1px solid var(--hair-2);border-radius:var(--radius);display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.face.back{transform:rotateY(180deg)}
+.card:hover .face{box-shadow:var(--shadow-lift)}
+.card.closed .face.front{opacity:.66;transition:opacity .2s}
+.card.closed:hover .face.front{opacity:1}
+.band{display:flex;align-items:center;gap:10px;padding:9px 12px 9px 14px;border-radius:9px 9px 0 0;border-bottom:1px solid rgba(0,0,0,.05);flex:none}
+.band.open{background:var(--sage)} .band.shut{background:var(--grey)} .band.back{background:#efe9e0}
+.pill{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;background:rgba(255,255,255,.62);border:1px solid rgba(0,0,0,.06);border-radius:4px;padding:4px 8px;color:var(--ink-2)}
+.band .sp{flex:1}
+.stars{display:flex;gap:1.5px}
+.iconbtn{width:27px;height:27px;border-radius:50%;background:var(--paper);border:1px solid rgba(0,0,0,.09);display:grid;place-items:center;padding:0;color:var(--ink-2)}
+.iconbtn:hover{background:#fff;color:var(--ink);border-color:rgba(0,0,0,.22)}
+.iconbtn.on{background:#241813;border-color:#241813;color:#f6f0e8}
+.body{padding:16px 18px 14px;flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;cursor:pointer}
+.who{display:flex;gap:13px;align-items:flex-start;flex:none}
+.mono-avatar{width:46px;height:46px;border-radius:50%;flex:none;background:linear-gradient(150deg,#f0e9df,#e6ded2);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:13px;color:#2a1c15}
+.who h3{font-family:'Playfair Display',serif;font-size:21px;font-weight:600;margin:1px 0 1px;letter-spacing:-.01em}
+.who .agency{font-family:'Playfair Display',serif;font-style:italic;font-size:14.5px;color:var(--ink-2);margin:0}
+.loc{display:flex;align-items:center;gap:7px;margin-top:7px}
+.flag{font-size:14px;line-height:1}
+.sect{margin-top:13px;padding-top:11px;border-top:1px solid var(--hair);flex:none}
+.sect .mono{display:block;margin-bottom:8px}
+.sect.wish{flex:1;min-height:64px;display:flex;flex-direction:column}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11.5px;background:#f6f1ea;border:1px solid var(--hair);border-radius:999px;padding:4px 10px;color:var(--ink-2)}
+.chip.match{background:#e3e9e0;border-color:#c9d3c5;color:#33492f}
+.mswl-wrap{position:relative;flex:1;min-height:0}
+.mswl{font-family:'Playfair Display',serif;font-style:italic;font-size:14.5px;line-height:1.55;color:var(--ink-2);margin:0;height:100%;overflow:hidden;scrollbar-width:none}
+.mswl::-webkit-scrollbar{display:none}
+.card:hover .mswl{overflow-y:auto}
+.mswl-wrap.more::after{content:"";position:absolute;left:0;right:0;bottom:0;height:28px;background:linear-gradient(to bottom,rgba(253,250,245,0),var(--paper));pointer-events:none}
+.empty{font-family:'Playfair Display',serif;font-style:italic;font-size:13.5px;color:var(--faint);margin:0}
+.foot{flex:none;padding:13px 18px;display:flex;gap:9px;align-items:center;border-top:1px solid var(--hair)}
+.btn-sm{background:#241813;color:#f6f0e8;border:0;border-radius:999px;padding:9px 15px;font-size:12.5px;display:inline-flex;gap:7px;align-items:center}
+.btn-ghost{background:transparent;border:1px solid var(--hair-2);border-radius:999px;padding:9px 15px;font-size:12.5px;color:var(--ink-2)}
+.btn-off{background:#f7f3ec;border:1px solid var(--hair);border-radius:999px;padding:9px 15px;font-size:12.5px;color:var(--faint);cursor:not-allowed}
+
+/* peek */
+.peek{padding:14px 18px;flex:1;display:flex;flex-direction:column;min-height:0}
+.row{display:flex;align-items:baseline;gap:10px;padding:9px 0;border-bottom:1px solid var(--hair)}
+.row .k{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);width:92px;flex:none}
+.row .v{font-size:13.5px;flex:1;word-break:break-word}
+.row .v.link{color:#2f4a5e;text-decoration:underline;text-decoration-color:rgba(47,74,94,.3);text-underline-offset:2px;cursor:pointer}
+.row .v.none{font-family:'Playfair Display',serif;font-style:italic;color:var(--faint)}
+.copy{border:1px solid var(--hair-2);background:var(--paper);border-radius:5px;padding:3px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.socials{display:flex;flex-wrap:wrap;gap:7px;padding:12px 0 0}
+.social{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--hair-2);background:#fbf7f1;border-radius:999px;padding:6px 12px 6px 9px;font-size:12.5px;color:var(--ink-2);text-decoration:none}
+
+/* material slots */
+.mslots{display:flex;gap:5px}
+.mslot{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;border:1px solid var(--hair);background:#fbf7f1;color:#4a3c34}
+.mslot.off{background:transparent;border-color:#ece5db;color:#cfc4b8}
+.mslot:hover{border-color:var(--ink-2)}
+
+/* list */
+.listwrap{overflow-x:auto;padding-bottom:6px}
+.list{background:var(--paper);border:1px solid var(--hair-2);border-radius:var(--radius);box-shadow:var(--shadow);min-width:1160px}
+.lhead,.lrow{display:grid;grid-template-columns:1.5fr 1.2fr 1.15fr 1fr 1.25fr 168px 88px 76px;gap:14px;align-items:center;padding:12px 18px}
+.lhead{background:#f7f2ea;border-bottom:1px solid var(--hair-2);border-radius:9px 9px 0 0}
+.lhead span{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:500;color:var(--ink-2)}
+.lrow{border-top:1px solid var(--hair);cursor:pointer}
+.lrow:hover{background:#faf5ee}
+.lrow.closed{opacity:.55} .lrow.closed:hover{opacity:1}
+.lrow .nm{display:flex;align-items:center;gap:11px}
+.lrow .nm .mono-avatar{width:34px;height:34px;font-size:11px}
+.lrow .nm b{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;display:block;line-height:1.2}
+.lrow .nm i{font-family:'Playfair Display',serif;font-size:12.5px;color:var(--muted);font-style:italic}
+.lk{color:#2f4a5e;text-decoration:underline;text-decoration-color:rgba(47,74,94,.28);text-underline-offset:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;font-size:12.5px}
+.locCell{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2)}
+.locCell small{display:block;color:var(--muted);font-size:11.5px}
+.lrow .acts{display:flex;gap:6px;justify-content:flex-end}
+.ellip{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* board */
+.boardwrap{overflow-x:auto;padding-bottom:10px}
+.board{display:flex;gap:26px;align-items:flex-start;min-height:220px}
+.col{width:246px;flex:none}
+.bhead{padding:0 2px 9px;border-bottom:2.5px solid var(--accent,#d9cfc3);margin-bottom:14px}
+.btop{display:flex;align-items:center;gap:9px}
+.btitle{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;flex:1;line-height:1.2}
+.bcount{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--paper);border:1px solid var(--hair);border-radius:5px;padding:3px 7px;color:var(--ink-2)}
+.bsub{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-top:5px}
+.bcard{background:var(--paper);border:1px solid var(--hair-2);border-radius:8px;padding:11px 12px;margin-bottom:10px;cursor:pointer;box-shadow:0 1px 2px rgba(44,28,20,.05)}
+.bcard.closed{opacity:.55}
+.bcard:hover{box-shadow:var(--shadow-lift);opacity:1}
+.bcard b{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:600;display:block;line-height:1.25}
+.bcard i{font-family:'Playfair Display',serif;font-size:12.5px;color:var(--muted);font-style:italic;display:block;margin-bottom:9px}
+.bcard .brow{display:flex;align-items:center;gap:8px;justify-content:space-between;margin-top:9px}
+.colempty{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:var(--faint);padding:2px}
+
+.pop{position:fixed;z-index:60;width:340px;background:var(--paper);border:1px solid var(--hair-2);border-radius:var(--radius);box-shadow:0 18px 44px -16px rgba(44,28,20,.42);display:none}
+.pop.open{display:block}
+.pop .pophead{padding:11px 14px;border-bottom:1px solid var(--hair);background:#efe9e0;border-radius:9px 9px 0 0;display:flex;align-items:center;gap:9px}
+.pop .pophead b{font-family:'Playfair Display',serif;font-size:15px;font-weight:600}
+.pop .peek{padding:6px 14px 14px}
+.tip{position:fixed;z-index:99;background:#241813;color:#f4ece1;padding:6px 10px;border-radius:6px;font-size:11.5px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s}
+.tip.on{opacity:1}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(30,20,14,.32);opacity:0;pointer-events:none;transition:opacity .28s;z-index:70}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:580px;max-width:94vw;background:var(--paper);border-left:1px solid var(--hair-2);box-shadow:-24px 0 60px -30px rgba(44,28,20,.5);transform:translateX(101%);transition:transform .34s cubic-bezier(.2,.8,.2,1);z-index:80;display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.dhead{padding:16px 20px 14px;border-bottom:1px solid var(--hair-2)}
+.dhead.open{background:var(--sage)} .dhead.shut{background:var(--grey)}
+.dtop{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.dtop .sp{flex:1}
+.dwho{display:flex;gap:13px;align-items:center}
+.dwho h2{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;margin:0}
+.dwho .agency{font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--ink-2);margin:2px 0 0}
+.tabs{display:flex;gap:22px;padding:0 20px;border-bottom:1px solid var(--hair-2);background:#f9f4ed}
+.tabs button{border:0;background:transparent;padding:13px 0 11px;font-size:13px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:var(--ink);border-bottom-color:#241813;font-weight:500}
+.dbody{padding:18px 20px 26px;overflow:auto;flex:1}
+.field{margin-bottom:14px}
+.field label{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:5px}
+.field .val{font-size:14px;padding:2px 0 8px;border-bottom:1px solid var(--hair)}
+.field input,.field textarea{width:100%;background:#fff;border:1px solid var(--hair-2);border-radius:6px;padding:9px 11px;font-size:13.5px;font-family:inherit}
+.field textarea{min-height:92px;resize:vertical;font-family:'Playfair Display',serif;font-style:italic;font-size:14.5px;line-height:1.55}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.seg2{display:flex;border:1px solid var(--hair-2);border-radius:8px;overflow:hidden}
+.seg2 button{flex:1;border:0;background:#fff;padding:10px;font-size:12.5px;color:var(--ink-2)}
+.seg2 button.on{background:#241813;color:#f6f0e8}
+.dfoot{padding:14px 20px;border-top:1px solid var(--hair-2);display:flex;gap:9px;align-items:center;background:#f9f4ed}
+
+.opts{position:fixed;left:0;right:0;bottom:0;background:#241813;color:#efe6da;padding:11px 22px;display:flex;gap:24px;align-items:center;z-index:90;flex-wrap:wrap}
+.opts .lab{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;opacity:.62}
+.opts .g{display:flex;align-items:center;gap:9px}
+.opts .seg{display:flex;background:rgba(255,255,255,.09);border-radius:999px;padding:3px}
+.opts .seg button{border:0;background:transparent;color:#cfc2b4;border-radius:999px;padding:6px 12px;font-size:12px}
+.opts .seg button.on{background:#f4ece1;color:#241813}
+.toast{position:fixed;left:50%;bottom:78px;transform:translateX(-50%) translateY(14px);background:#241813;color:#f4ece1;padding:10px 18px;border-radius:999px;font-size:13px;opacity:0;transition:.25s;z-index:95;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%)}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="masthead">
+    <svg class="mark" viewBox="0 0 72 72" fill="none">
+      <rect x="8" y="20" width="56" height="40" rx="3" fill="#fdfaf5" stroke="#3a2a22" stroke-width="1.6"/>
+      <path d="M8 30h56" stroke="#3a2a22" stroke-width="1.2"/>
+      <rect x="15" y="37" width="18" height="16" rx="2" fill="#f5e2da" stroke="#3a2a22" stroke-width="1.2"/>
+      <path d="M39 40h18M39 46h18M39 52h11" stroke="#3a2a22" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M22 20V13m14 7V13m14 7V13" stroke="#3a2a22" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="22" cy="11" r="2.4" fill="#d7ddd5" stroke="#3a2a22" stroke-width="1.2"/>
+      <circle cx="36" cy="11" r="2.4" fill="#d7ddd5" stroke="#3a2a22" stroke-width="1.2"/>
+      <circle cx="50" cy="11" r="2.4" fill="#d7ddd5" stroke="#3a2a22" stroke-width="1.2"/>
+    </svg>
+    <div><h1>Contact list</h1><p>Everyone you're querying, watching, or saving for later.</p></div>
+    <div class="sp"></div>
+    <button class="btn-ink" onclick="openDrawer(0,'contact',true)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add new agent</button>
+  </div>
+  <div class="tiles" id="tiles"></div>
+  <div class="toolbar">
+    <div class="search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" placeholder="Search names, agencies, wishlists…" oninput="render()">
+    </div>
+    <button class="tbtn" id="filterBtn" onclick="openDesk(event,'filter')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg><span id="filterLabel">Filter</span></button>
+    <button class="tbtn" id="groupBtn" onclick="openDesk(event,'group')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="6" rx="1"/><rect x="3" y="14" width="18" height="6" rx="1"/></svg>Group <b id="groupLabel">query status</b></button>
+    <button class="tbtn" id="sortBtn" onclick="openDesk(event,'sort')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h13M4 12h9M4 17h5"/></svg>Sort <b id="sortLabel">agent name</b></button>
+    <div class="switch" id="switch">
+      <button class="on" data-view="grid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Grid</button>
+      <button data-view="list"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>List</button>
+      <button data-view="board"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="14" rx="1"/></svg>Board</button>
+    </div>
+  </div>
+  <div class="count" id="count"></div>
+  <div id="view"></div>
+</div>
+
+<div class="desk" id="desk"></div>
+<div class="pop" id="pop"></div>
+<div class="tip" id="tip"></div>
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer"></aside>
+<div class="toast" id="toast"></div>
+
+<div class="opts">
+  <div class="g"><span class="lab">Card corner</span><div class="seg" id="segCorner"><button class="on" data-v="both">Contact + pencil</button><button data-v="contact">Contact only</button></div></div>
+  <div class="g"><span class="lab">Peek in grid</span><div class="seg" id="segPeek"><button class="on" data-v="spin">Spin</button><button data-v="pop">Popover</button></div></div>
+  <div class="g"><span class="lab">Genre match</span><div class="seg" id="segMatch"><button class="on" data-v="on">Tint</button><button data-v="off">Plain</button></div></div>
+</div>
+
+<script>
+const MS_GENRE="Thriller";
+const FLAG={"United Kingdom":"🇬🇧","Ireland":"🇮🇪","United States":"🇺🇸","Australia":"🇦🇺"};
+
+const A=[
+ {n:"Penhallow Literary",ag:"",note:"Agent not specified",open:true,stars:3,wks:6,method:"Email",nrn:false,
+  email:"submissions@penhallow.co.uk",site:"penhallowliterary.co.uk",city:"London",country:"United Kingdom",
+  genres:["Crime","Thriller","Book club fiction"],mswl:"",
+  mat:{letter:"Query letter",syn:"Synopsis",sample:"First 3 chapters",other:""},
+  socials:[{t:"x",h:"@penhallowlit"}],status:"Queried",added:"2026-07"},
+ {n:"Aisha Kapoor",ag:"The Lantern Agency",open:true,stars:3,wks:6,method:"Email",nrn:true,
+  email:"aisha@lanternagency.co.uk",site:"lanternagency.co.uk/submissions",city:"Bristol",country:"United Kingdom",
+  genres:["Literary fiction","Historical fiction"],
+  mswl:"Voice-led novels with an unreliable narrator, and anything set in a place I've never been. I'd love a family saga that isn't sentimental, and I'm always looking for a comic novel that earns its ending. Not for me: high fantasy, thrillers with a serial killer at the centre, or anything that opens with a dream.",
+  mat:{letter:"Query letter",syn:"Synopsis (1 page)",sample:"First 50 pages",other:"Comparable titles"},
+  socials:[{t:"x",h:"@aishareads"},{t:"bs",h:"@aishakapoor.bsky.social"}],status:"Queried",added:"2026-08"},
+ {n:"Daniel O'Rourke",ag:"Inkwell & Stone",open:true,stars:3,wks:6,method:"Email",nrn:false,
+  email:"",site:"inkwellandstone.com",city:"Dublin",country:"Ireland",
+  genres:["Thriller","Crime","Horror"],
+  mswl:"Propulsive crime with a strong sense of place — small towns, closed communities, secrets that curdle. I'd read a hundred more Irish noirs and still want another.",
+  mat:{letter:"Query letter",syn:"",sample:"First 3 chapters",other:""},
+  socials:[{t:"ig",h:"@danreadslate"}],status:"Full sent",added:"2026-06"},
+ {n:"Eleanor Whitfield",ag:"Greenfield Literary",open:true,stars:3,wks:4,method:"Email",nrn:false,
+  email:"queries@greenfieldliterary.co.uk",site:"greenfieldliterary.co.uk",city:"Edinburgh",country:"United Kingdom",
+  genres:["Thriller","Speculative fiction"],mswl:"",
+  mat:{letter:"Query letter",syn:"Synopsis",sample:"First 10 pages",other:""},
+  socials:[],status:"Queried",added:"2026-08"},
+ {n:"Fenella Str",ag:"Brightwater Books",open:false,stars:3,wks:6,method:"Email",nrn:false,
+  email:"fenella@brightwaterbooks.com",site:"",city:"London",country:"United Kingdom",
+  genres:["Historical fiction","Romance","Sci-fi"],
+  mswl:"Sweeping historicals with a romance at the centre. Nothing set in the Tudor court, please.",
+  mat:{letter:"",syn:"",sample:"",other:""},
+  socials:[{t:"x",h:"@fenellastr"},{t:"pm",h:"Publishers Marketplace"}],status:"Closed",added:"2026-03"},
+ {n:"Greg Panetta",ag:"",note:"Agent not specified",open:true,stars:3,wks:6,method:"Email",nrn:true,
+  email:"greg@panetta.agency",site:"panetta.agency",city:"Manchester",country:"United Kingdom",
+  genres:["Commercial fiction","Thriller"],mswl:"",
+  mat:{letter:"Query letter",syn:"Synopsis",sample:"",other:""},socials:[],status:"Partial requested",added:"2026-09"},
+ {n:"Harriet Vane-Coe",ag:"Stillwater Reps",open:true,stars:4,wks:8,method:"Form",nrn:false,
+  email:"",site:"stillwaterreps.com/submit",city:"Leeds",country:"United Kingdom",
+  genres:["Crime","Thriller"],
+  mswl:"Classic detective fiction, updated. Give me a series character I can live with for ten books, a puzzle that plays fair, and a setting that does more than sit there. I'm not the right home for cosy crime, and I'd rather not see another domestic noir with a wine glass on the cover.",
+  mat:{letter:"Query letter",syn:"Synopsis",sample:"First 3 chapters",other:""},
+  socials:[{t:"bs",h:"@hvc.bsky.social"}],status:"Queried",added:"2026-08"},
+ {n:"Jonathan Marsh",ag:"The Marsh Agency",open:true,stars:5,wks:10,method:"Email",nrn:false,
+  email:"jm@marshagency.co.uk",site:"marshagency.co.uk",city:"London",country:"United Kingdom",
+  genres:["Literary fiction","Thriller"],
+  mswl:"Literary suspense. Books that would sit happily beside Tana French and Sarah Waters.",
+  mat:{letter:"Query letter",syn:"Synopsis",sample:"First 3 chapters",other:"Author bio"},
+  socials:[{t:"x",h:"@marshagency"}],status:"Partial requested",added:"2026-08"},
+ {n:"Sophie Dunn",ag:"Curtis Vane",open:true,stars:4,wks:12,method:"Post",nrn:false,
+  email:"sdunn@curtisvane.com",site:"curtisvane.com",city:"New York",country:"United States",
+  genres:["Thriller","Commercial fiction"],
+  mswl:"High-concept suspense with a hook I can say in one sentence.",
+  mat:{letter:"Query letter",syn:"",sample:"First chapter",other:""},socials:[],status:"Full sent",added:"2026-05"},
+ {n:"William Tan",ag:"Foxglove Literary",open:true,stars:5,wks:6,method:"Email",nrn:false,
+  email:"will@foxgloveliterary.co.uk",site:"foxgloveliterary.co.uk",city:"London",country:"United Kingdom",
+  genres:["Thriller","Crime"],
+  mswl:"Anything that keeps me up past midnight. Strong on plot, stronger on character.",
+  mat:{letter:"Query letter",syn:"Synopsis",sample:"First 3 chapters",other:""},
+  socials:[{t:"bs",h:"@wtan.bsky.social"}],status:"Offer",added:"2026-05"},
+ {n:"Marcus Ilve",ag:"Rookery & Vale",open:false,stars:2,wks:6,method:"Email",nrn:false,
+  email:"",site:"rookeryvale.co.uk",city:"Cardiff",country:"United Kingdom",
+  genres:["Speculative fiction","Sci-fi"],mswl:"",
+  mat:{letter:"Query letter",syn:"",sample:"",other:""},socials:[],status:"",added:"2026-09"},
+ {n:"Priya Raman",ag:"Halcyon Literary",open:true,stars:4,wks:12,method:"Form",nrn:true,
+  email:"hello@halcyonliterary.com",site:"halcyonliterary.com",city:"London",country:"United Kingdom",
+  genres:["Book club fiction","Saga","Historical fiction"],
+  mswl:"Multi-generational stories about migration, food, and inheritance in every sense. I'm particularly hungry for novels set outside London, and for anything that treats work as seriously as it treats love. Please don't send me anything where the grandmother exists only to die in chapter one.",
+  mat:{letter:"Query letter",syn:"Synopsis",sample:"First chapter",other:""},
+  socials:[{t:"ig",h:"@halcyonlit"}],status:"",added:"2026-09"}
+];
+A.forEach((a,i)=>a.i=i);
+
+let view="grid",corner="both",peekMode="spin",matchMode="on",group="status",
+    sortKey="name",sortDir="asc",flipped=null,drawerIdx=null,drawerTab="contact",editing=false;
+const F={door:new Set(),genre:new Set(),history:new Set(),reply:new Set()};
+
+/* ---------- sort / filter model ---------- */
+const replyBucket=w=>w<=4?"Within 4 weeks":w<=8?"5 to 8 weeks":w<=12?"9 to 12 weeks":"Over 12 weeks";
+const histOf=a=>!a.status?"Never queried":(a.status==="Closed"?"Closed":"Active queries");
+const SORTS={
+  name:{label:"Agent name",sub:"Alphabetical",dir:["A to Z","Z to A"],val:a=>a.n.toLowerCase()},
+  agency:{label:"Agency",sub:"Alphabetical",dir:["A to Z","Z to A"],val:a=>(a.ag||"zzz").toLowerCase()},
+  added:{label:"Date added",sub:"When they joined your list",dir:["Newest","Oldest"],val:a=>a.added},
+  reply:{label:"Response time",sub:"Their stated window",dir:["Shortest","Longest"],val:a=>a.wks},
+  priority:{label:"Priority",sub:"Your star rating",dir:["Highest","Lowest"],val:a=>a.stars},
+  genre:{label:"Genres sought",sub:"First genre listed",dir:["A to Z","Z to A"],val:a=>a.genres[0].toLowerCase()}
+};
+/* Date added, response time and priority read most-useful-first by default */
+const DEFAULT_DESC={added:true,reply:false,priority:true};
+const ALLGENRES=[...new Set(A.flatMap(a=>a.genres))].sort();
+
+function visible(){
+  const q=(document.getElementById("q")?.value||"").trim().toLowerCase();
+  let out=A.filter(a=>{
+    if(F.door.size && !F.door.has(a.open?"Open to queries":"Closed to queries")) return false;
+    if(F.genre.size && !a.genres.some(g=>F.genre.has(g))) return false;
+    if(F.history.size && !F.history.has(histOf(a))) return false;
+    if(F.reply.size && !F.reply.has(replyBucket(a.wks))) return false;
+    if(q && !(a.n+" "+a.ag+" "+a.mswl+" "+a.genres.join(" ")).toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const s=SORTS[sortKey];
+  out.sort((x,y)=>{const vx=s.val(x),vy=s.val(y);return (vx<vy?-1:vx>vy?1:0)*(sortDir==="asc"?1:-1)});
+  return out;
+}
+const activeFilters=()=>F.door.size+F.genre.size+F.history.size+F.reply.size;
+
+/* ---------- desk popovers ---------- */
+function deskHTML(kind){
+  if(kind==="sort"){
+    const s=SORTS[sortKey];
+    return `<div class="deskhead">Sort</div><div class="deskbody">
+      ${Object.entries(SORTS).map(([k,o])=>`<button class="opt ${sortKey===k?'on':''}" onclick="setSort('${k}')">
+        <span class="radio"></span><span class="txt"><b>${o.label}</b>${o.sub?`<small>${o.sub}</small>`:""}</span></button>`).join("")}
+    </div>
+    <div class="deskfoot"><span class="mono">Order</span><div class="oseg">
+      <button class="${sortDir==="asc"?'on':''}" onclick="sortDir='asc';paintDesk('sort');render()">${s.dir[0]}</button>
+      <button class="${sortDir==="desc"?'on':''}" onclick="sortDir='desc';paintDesk('sort');render()">${s.dir[1]}</button>
+    </div></div>`;
+  }
+  if(kind==="group"){
+    return `<div class="deskhead">Group the board</div><div class="deskbody">
+      ${Object.entries(GROUPS).map(([k,g])=>`<button class="opt ${group===k?'on':''}" onclick="setGroup('${k}')">
+        <span class="radio"></span><span class="txt"><b>${g.label}</b>${g.sub?`<small>${g.sub}</small>`:""}</span></button>`).join("")}
+    </div>`;
+  }
+  const facet=(title,key,vals)=>`<div class="facet"><span class="mono">${title}</span><div class="fchips">
+    ${vals.map(v=>`<button class="fchip ${F[key].has(v)?'on':''}" onclick="toggleF('${key}','${v.replace(/'/g,"\\'")}')">${v}</button>`).join("")}</div></div>`;
+  return `<div class="deskhead">Filter</div><div class="deskbody" style="padding:0">
+    ${facet("Their door","door",["Open to queries","Closed to queries"])}
+    ${facet("Genres sought","genre",ALLGENRES)}
+    ${facet("Your history","history",["Active queries","Closed","Never queried"])}
+    ${facet("Response time","reply",["Within 4 weeks","5 to 8 weeks","9 to 12 weeks","Over 12 weeks"])}
+  </div>
+  <div class="deskfoot"><button class="linkbtn" onclick="clearF()">Clear all</button>
+    <span style="flex:1"></span><span class="mono">${visible().length} of ${A.length}</span></div>`;
+}
+let deskKind=null;
+function openDesk(e,kind){
+  e.stopPropagation();
+  const d=document.getElementById("desk");
+  if(deskKind===kind && d.classList.contains("on")){closeDesk();return}
+  deskKind=kind; paintDesk(kind);
+  d.classList.add("on");
+  const b=e.currentTarget.getBoundingClientRect();
+  d.style.width=kind==="filter"?"346px":"326px";
+  d.style.top=(b.bottom+8)+"px";
+  d.style.left=Math.max(12,Math.min(b.left,window.innerWidth-d.offsetWidth-14))+"px";
+}
+function paintDesk(kind){document.getElementById("desk").innerHTML=deskHTML(kind)}
+function closeDesk(){document.getElementById("desk").classList.remove("on");deskKind=null}
+function setSort(k){sortKey=k;sortDir=DEFAULT_DESC[k]?"desc":"asc";document.getElementById("sortLabel").textContent=SORTS[k].label.toLowerCase();paintDesk("sort");render()}
+function setGroup(k){group=k;document.getElementById("groupLabel").textContent=GROUPS[k].label.toLowerCase();paintDesk("group");render()}
+function toggleF(key,v){F[key].has(v)?F[key].delete(v):F[key].add(v);paintDesk("filter");render()}
+function clearF(){Object.values(F).forEach(s=>s.clear());paintDesk("filter");render()}
+
+/* ---------- grouping ---------- */
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const monthLabel=s=>`${MONTHS[+s.split("-")[1]-1]} ${s.split("-")[0]}`;
+const ACC={"No queries":"#d3cec5","Queried":"#e2cfae","Partial requested":"#e5c4b5","Partial sent":"#c2cdbd",
+  "Full requested":"#e5c4b5","Full sent":"#c2cdbd","Offer":"#b3c7d8","Closed":"#cfcac1",
+  "Active queries":"#c2cdbd","Never queried":"#d3cec5","Open to queries":"#c2cdbd","Closed to queries":"#cfcac1"};
+const SUB={"No queries":"not approached","Queried":"with the agent","Partial requested":"with you","Partial sent":"with the agent",
+  "Full requested":"with you","Full sent":"with the agent","Offer":"offer","Closed":"closed"};
+const CYCLE=["#c2cdbd","#e5c4b5","#e2cfae","#b3c7d8","#cfcac1","#d8c7b8"];
+const GROUPS={
+  status:{label:"Query status",sub:"Where each query stands",order:["No queries","Queried","Partial requested","Partial sent","Full requested","Full sent","Offer","Closed"],key:a=>a.status||"No queries"},
+  rel:{label:"Queried?",sub:"Active, closed or untouched",order:["Active queries","Closed","Never queried"],key:histOf},
+  added:{label:"Month added",sub:"Newest month first",order:null,key:a=>monthLabel(a.added),raw:true},
+  door:{label:"Open or closed",sub:"Whether they're taking queries",order:["Open to queries","Closed to queries"],key:a=>a.open?"Open to queries":"Closed to queries"},
+  loc:{label:"Location",sub:"By country",order:null,key:a=>a.country},
+  method:{label:"Submission method",sub:"How to approach them",order:["Email","Form","Post"],key:a=>a.method},
+  reply:{label:"Response time",sub:"Their stated window",order:["Within 4 weeks","5 to 8 weeks","9 to 12 weeks","Over 12 weeks"],key:a=>replyBucket(a.wks)}
+};
+
+const initials=a=>a.n.split(/[\s'’-]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+function stars(n){let s='<span class="stars">';for(let i=0;i<5;i++){s+=`<svg width="11" height="11" viewBox="0 0 24 24" fill="${i<n?'#BA7517':'none'}" stroke="${i<n?'#BA7517':'#c3b8ac'}" stroke-width="1.6"><path d="M12 3l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 9.4l6-.8z"/></svg>`}return s+'</span>'}
+const genreChips=a=>a.genres.map(g=>`<span class="chip ${matchMode==="on"&&g===MS_GENRE?'match':''}">${g}</span>`).join("");
+
+const MICON={
+ letter:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.6 6.4 8.4 6 8.4-6"/></svg>`,
+ syn:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h6"/></svg>`,
+ sample:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.5 5 8 4.5 4 4.8v13c4-.3 6.5.2 8 1.7 1.5-1.5 4-2 8-1.7v-13c-4-.3-6.5.2-8 1.7z"/><path d="M12 6.5v13"/></svg>`,
+ other:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5 12.4 19a4.2 4.2 0 0 1-6-6l7.6-7.5a2.8 2.8 0 0 1 4 4l-7.5 7.5a1.4 1.4 0 0 1-2-2l7-7"/></svg>`
+};
+const MNAME={letter:"Query letter",syn:"Synopsis",sample:"Opening sample",other:"Also asked for"};
+function matSlots(a){
+  const keys=["letter","syn","sample"].concat(a.mat.other?["other"]:[]);
+  return `<div class="mslots">${keys.map(k=>{
+    const v=a.mat[k];
+    return `<span class="mslot ${v?'':'off'}" data-tip="${v?`${MNAME[k]} — ${v}`:`${MNAME[k]} — not asked for`}">${MICON[k]}</span>`}).join("")}</div>`;
+}
+const SOC={x:"X",bs:"Bluesky",ig:"Instagram",pm:"Publishers Marketplace"};
+function socialIcon(t){
+  if(t==="ig")return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="5"/><circle cx="12" cy="12" r="3.6"/><circle cx="17" cy="7" r="1"/></svg>`;
+  const p={x:'M4 4l16 16M20 4L4 20',bs:'M12 6c-3-3-7-4-7-1s2 6 7 9c5-3 7-6 7-9s-4-2-7 1z',pm:'M4 18V6l8 6 8-6v12'}[t];
+  return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${p}"/></svg>`;
+}
+const contactIcon=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11.5" r="2.2"/><path d="M5.6 16.4c.7-1.5 2-2.2 3.4-2.2s2.7.7 3.4 2.2M15 10h4M15 14h3" stroke-linecap="round"/></svg>`;
+const pencilIcon=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4z"/></svg>`;
+
+function peekHTML(a,footer){
+  const em=a.email?`<div class="row"><span class="k">Email</span><span class="v">${a.email}</span><button class="copy" onclick="event.stopPropagation();copyIt('${a.email}')">Copy</button></div>`
+    :`<div class="row"><span class="k">Email</span><span class="v none">No email recorded</span></div>`;
+  const st=a.site?`<div class="row"><span class="k">Submissions</span><span class="v link" onclick="event.stopPropagation();toast('Opens ${a.site}')">${a.site}</span></div>`
+    :`<div class="row"><span class="k">Submissions</span><span class="v none">No page recorded</span></div>`;
+  const soc=a.socials.length?`<div class="socials">${a.socials.map(s=>`<a class="social" href="#" onclick="event.preventDefault();event.stopPropagation();toast('Opens ${SOC[s.t]}')">${socialIcon(s.t)}${s.h}</a>`).join("")}</div>`
+    :`<div class="socials"><span class="empty">No social accounts recorded</span></div>`;
+  return `<div class="peek">${em}${st}
+    <div class="row"><span class="k">Based in</span><span class="v"><span class="flag">${FLAG[a.country]||""}</span> ${a.city}, ${a.country}</span></div>
+    <div class="row"><span class="k">Approach by</span><span class="v">${a.method}</span></div>${soc}
+    ${footer?`<div style="margin-top:auto;padding-top:14px"><button class="btn-ghost" onclick="event.stopPropagation();closePeek();openDrawer(${a.i},'contact',true)">Edit contact details</button></div>`:""}</div>`;
+}
+function tiles(){
+  const T=[["All contacts",A.length,"#efe9e0"],["Open to queries",A.filter(a=>a.open).length,"#d7ddd5"],
+    ["Closed to queries",A.filter(a=>!a.open).length,"#e4e1db"],["Seeking thrillers",A.filter(a=>a.genres.includes(MS_GENRE)).length,"#e3e9e0"],
+    ["Not yet queried",A.filter(a=>!a.status).length,"#f0e9e2"]];
+  document.getElementById("tiles").innerHTML=T.map((t,i)=>`<button class="tile ${i===0?'on':''}"><span class="disc" style="background:${t[2]}"></span><span><span class="lab">${t[0]}</span><span class="num">${t[1]}</span></span></button>`).join("");
+}
+function cornerBtns(a){
+  return `<button class="iconbtn ${flipped===a.i?'on':''}" data-tip="Contact details" onclick="event.stopPropagation();peekFrom(this,${a.i})">${contactIcon}</button>
+  ${corner==="both"?`<button class="iconbtn" data-tip="Edit" onclick="event.stopPropagation();openDrawer(${a.i},'contact',true)">${pencilIcon}</button>`:""}`;
+}
+function cardHTML(a){
+  return `<div class="card ${a.open?'':'closed'}${flipped===a.i?' flipped':''}"><div class="rotor">
+    <div class="face front">
+      <div class="band ${a.open?'open':'shut'}"><span class="pill">${a.open?'Open to queries':'Closed to queries'}</span><span class="sp"></span>${stars(a.stars)}${cornerBtns(a)}</div>
+      <div class="body" onclick="openDrawer(${a.i},'contact',false)">
+        <div class="who"><span class="mono-avatar">${initials(a)}</span>
+          <div><h3>${a.n}</h3>${a.ag?`<p class="agency">${a.ag}</p>`:`<p class="agency" style="color:var(--faint)">${a.note||""}</p>`}
+            <div class="loc"><span class="flag">${FLAG[a.country]||"🏳️"}</span><span class="mono" style="color:var(--muted)">${a.city} · replies in about ${a.wks} weeks</span></div></div></div>
+        <div class="sect"><span class="mono">Genres sought</span><div class="chips">${genreChips(a)}</div></div>
+        <div class="sect wish"><span class="mono">Manuscript wishlist</span>
+          ${a.mswl?`<div class="mswl-wrap"><p class="mswl">${a.mswl}</p></div>`:`<p class="empty">Nothing recorded — check their site.</p>`}</div>
+      </div>
+      <div class="foot">
+        ${a.open?`<button class="btn-sm" onclick="event.stopPropagation();toast('Opens Log new query with ${a.n.split(' ')[0]} preselected')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 3 3 10.5l7 3 3 7z"/></svg>Log query</button>`
+          :`<button class="btn-off" disabled>Log query</button>`}
+        <button class="btn-ghost" onclick="event.stopPropagation();toast('${a.site?`Opens ${a.site}`:'No website recorded'}')">View website</button>
+        <span style="flex:1"></span>${matSlots(a)}
+      </div>
+    </div>
+    <div class="face back">
+      <div class="band back"><span class="pill">Contact details</span><span class="sp"></span>
+        <button class="iconbtn on" onclick="event.stopPropagation();closePeek()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l-6 6 6 6M3 12h15a3 3 0 0 0 3-3V6"/></svg></button></div>
+      <div style="padding:14px 18px 0"><div class="who"><span class="mono-avatar">${initials(a)}</span>
+        <div><h3 style="font-size:19px">${a.n}</h3>${a.ag?`<p class="agency">${a.ag}</p>`:""}</div></div></div>
+      ${peekHTML(a,true)}
+    </div></div></div>`;
+}
+function listHTML(rows){
+  return `<div class="listwrap"><div class="list">
+    <div class="lhead"><span>Agent</span><span>Email</span><span>Website</span><span>Location</span><span>Genres sought</span><span>Materials required</span><span>Response</span><span></span></div>
+    ${rows.map(a=>`<div class="lrow ${a.open?'':'closed'}" onclick="openDrawer(${a.i},'contact',false)">
+      <div class="nm"><span class="mono-avatar">${initials(a)}</span><span><b>${a.n}</b><i>${a.ag||a.note||""}</i></span></div>
+      <div class="ellip" style="font-size:12.5px;color:var(--ink-2)">${a.email||'<span class="empty">Not recorded</span>'}</div>
+      <div>${a.site?`<span class="lk" onclick="event.stopPropagation();toast('Opens ${a.site}')">${a.site}</span>`:'<span class="empty">No website</span>'}</div>
+      <div class="locCell"><span class="flag">${FLAG[a.country]||"🏳️"}</span><span>${a.city}<small>${a.country}</small></span></div>
+      <div class="chips">${a.genres.slice(0,2).map(g=>`<span class="chip ${matchMode==="on"&&g===MS_GENRE?'match':''}">${g}</span>`).join("")}${a.genres.length>2?`<span class="chip">+${a.genres.length-2}</span>`:""}</div>
+      <div>${matSlots(a)}</div>
+      <div class="mono">~${a.wks} wks</div>
+      <div class="acts"><button class="iconbtn" data-tip="Contact details" onclick="event.stopPropagation();peekFrom(this,${a.i},true)">${contactIcon}</button>
+        ${corner==="both"?`<button class="iconbtn" data-tip="Edit" onclick="event.stopPropagation();openDrawer(${a.i},'contact',true)">${pencilIcon}</button>`:""}</div>
+    </div>`).join("")}
+  </div></div>`;
+}
+function boardHTML(rows){
+  const g=GROUPS[group];
+  let keys;
+  if(g.order) keys=g.order;
+  else{keys=[...new Set(rows.map(g.key))];
+    if(g.raw)keys.sort((x,y)=>rows.find(a=>g.key(a)===y).added.localeCompare(rows.find(a=>g.key(a)===x).added));else keys.sort()}
+  return `<div class="boardwrap"><div class="board">${keys.map((k,idx)=>{
+    const set=rows.filter(a=>g.key(a)===k);
+    const acc=ACC[k]||CYCLE[idx%CYCLE.length];
+    const sub=SUB[k]||`${set.length} ${set.length===1?'contact':'contacts'}`;
+    return `<div class="col"><div class="bhead" style="--accent:${acc}">
+        <div class="btop"><span class="btitle">${k}</span><span class="bcount">${set.length}</span></div><div class="bsub">${sub}</div></div>
+      ${set.length?set.map(a=>`<div class="bcard ${a.open?'':'closed'}" onclick="openDrawer(${a.i},'contact',false)">
+        <b>${a.n}</b><i>${a.ag||a.note||""}</i>
+        <div class="chips">${a.genres.slice(0,2).map(x=>`<span class="chip ${matchMode==="on"&&x===MS_GENRE?'match':''}">${x}</span>`).join("")}</div>
+        <div class="brow"><span class="mono"><span class="flag">${FLAG[a.country]||"🏳️"}</span> ${a.city} · ~${a.wks} wks</span>
+          <button class="iconbtn" data-tip="Contact details" onclick="event.stopPropagation();peekFrom(this,${a.i},true)">${contactIcon}</button></div>
+      </div>`).join(""):`<p class="colempty">Nobody here.</p>`}</div>`}).join("")}</div></div>`;
+}
+
+function peekFrom(el,i,forcePop){
+  const usePop=forcePop||view!=="grid"||peekMode==="pop";
+  if(usePop){
+    const p=document.getElementById("pop"),a=A[i];
+    if(p.classList.contains("open")&&p.dataset.i==String(i)){closePeek();return}
+    p.dataset.i=i;
+    p.innerHTML=`<div class="pophead"><span class="mono-avatar" style="width:30px;height:30px;font-size:10px">${initials(a)}</span><b>${a.n}</b><span style="flex:1"></span>
+      <button class="iconbtn" onclick="closePeek()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>${peekHTML(a,true)}`;
+    p.classList.add("open");
+    const r=el.getBoundingClientRect();
+    let top=r.bottom+8,left=Math.min(r.right-340,window.innerWidth-352);
+    if(top+p.offsetHeight>window.innerHeight-96)top=Math.max(12,r.top-p.offsetHeight-8);
+    p.style.top=top+"px";p.style.left=Math.max(12,left)+"px";
+  } else {flipped=flipped===i?null:i;render()}
+}
+function closePeek(){document.getElementById("pop").classList.remove("open");if(flipped!==null){flipped=null;render()}}
+
+function openDrawer(i,tab,edit){closePeek();closeDesk();drawerIdx=i;drawerTab=tab||"contact";editing=!!edit;drawDrawer();
+  document.getElementById("drawer").classList.add("on");document.getElementById("scrim").classList.add("on")}
+function closeDrawer(){document.getElementById("drawer").classList.remove("on");document.getElementById("scrim").classList.remove("on");editing=false}
+function stepAgent(d){drawerIdx=(drawerIdx+d+A.length)%A.length;drawDrawer()}
+function drawDrawer(){
+  const a=A[drawerIdx];
+  const tabs=[["contact","Contact"],["wishlist","Wishlist"],["materials","Materials"],["notes","Notes"]];
+  let body="";
+  if(drawerTab==="contact"){
+    body=editing?`
+      <div class="field"><label>Their door</label><div class="seg2"><button class="${a.open?'on':''}">Open to queries</button><button class="${a.open?'':'on'}">Closed to queries</button></div></div>
+      <div class="two"><div class="field"><label>Agent name</label><input value="${a.n}"></div><div class="field"><label>Agency</label><input value="${a.ag}"></div></div>
+      <div class="field"><label>Email</label><input value="${a.email}" placeholder="name@agency.co.uk"></div>
+      <div class="field"><label>Submissions page</label><input value="${a.site}" placeholder="https://…"></div>
+      <div class="two"><div class="field"><label>Country</label><input value="${a.country}"></div><div class="field"><label>City</label><input value="${a.city}"></div></div>
+      <div class="two"><div class="field"><label>Typical response (weeks)</label><input value="${a.wks}"></div><div class="field"><label>Approach by</label><input value="${a.method}"></div></div>
+      <div class="field"><label>If they don't reply</label><div class="seg2"><button class="${a.nrn?'on':''}">Means no</button><button class="${a.nrn?'':'on'}">They reply</button><button>Not stated</button></div></div>
+      <div class="field"><label>X</label><input value="${(a.socials.find(s=>s.t==='x')||{}).h||''}" placeholder="@handle"></div>
+      <div class="field"><label>Bluesky</label><input value="${(a.socials.find(s=>s.t==='bs')||{}).h||''}" placeholder="@handle"></div>
+      <div class="field"><label>Instagram</label><input value="${(a.socials.find(s=>s.t==='ig')||{}).h||''}" placeholder="@handle"></div>`
+    :`<div class="field"><label>Email</label><div class="val">${a.email||'<span class="empty">No email recorded</span>'}</div></div>
+      <div class="field"><label>Submissions page</label><div class="val">${a.site||'<span class="empty">No page recorded</span>'}</div></div>
+      <div class="two"><div class="field"><label>Based in</label><div class="val"><span class="flag">${FLAG[a.country]||""}</span> ${a.city}, ${a.country}</div></div>
+      <div class="field"><label>Approach by</label><div class="val">${a.method}</div></div></div>
+      <div class="two"><div class="field"><label>Typical response</label><div class="val">About ${a.wks} weeks</div></div>
+      <div class="field"><label>If they don't reply</label><div class="val">${a.nrn?'Treat as a pass':'They reply either way'}</div></div></div>
+      <div class="field"><label>Social accounts</label><div class="val" style="border:0">${a.socials.length?`<div class="socials" style="padding:0">${a.socials.map(s=>`<span class="social">${socialIcon(s.t)}${s.h}</span>`).join("")}</div>`:'<span class="empty">None recorded</span>'}</div></div>`;
+  } else if(drawerTab==="wishlist"){
+    body=editing?`<div class="field"><label>Genres sought</label><div class="chips" style="margin-bottom:8px">${a.genres.map(g=>`<span class="chip">${g} ×</span>`).join("")}</div><input placeholder="Add a genre…"></div>
+      <div class="field"><label>Manuscript wishlist</label><textarea placeholder="Paste their MSWL…">${a.mswl}</textarea></div>`
+    :`<div class="field"><label>Genres sought</label><div class="chips" style="padding-top:2px">${genreChips(a)}</div></div>
+      <div class="field" style="margin-top:20px"><label>Manuscript wishlist</label>
+        ${a.mswl?`<p style="font-family:'Playfair Display',serif;font-style:italic;font-size:16px;line-height:1.6;margin:6px 0 0">${a.mswl}</p>`:'<p class="empty">Nothing recorded — check their site.</p>'}</div>`;
+  } else if(drawerTab==="materials"){
+    body=`<p class="mono" style="margin-bottom:12px">What they ask for with a query</p>`+
+      [["letter","Query letter"],["syn","Synopsis"],["sample","Opening sample"],["other","Other"]].map(([k,lab])=>
+        `<div class="field"><label>${lab}</label><div class="val">${a.mat[k]?a.mat[k]:'<span class="empty">Not asked for</span>'}</div></div>`).join("");
+  } else {
+    body=`<div style="background:#f7f2ea;border:1px solid var(--hair);border-radius:10px;padding:12px 14px;margin-bottom:8px;font-size:13.5px">Met at the Bath Novel Award drinks — mentioned she's building a crime list.</div><div class="mono">14 Aug 2026</div>`;
+  }
+  document.getElementById("drawer").innerHTML=`
+    <div class="dhead ${a.open?'open':'shut'}">
+      <div class="dtop"><button class="iconbtn" onclick="closeDrawer()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        <span class="pill">${a.open?'Open to queries':'Closed to queries'}</span><span class="sp"></span>
+        <button class="iconbtn" onclick="stepAgent(-1)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button class="iconbtn" onclick="stepAgent(1)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button></div>
+      <div class="dwho"><span class="mono-avatar" style="width:52px;height:52px;font-size:15px">${initials(a)}</span>
+        <div><h2>${a.n}</h2>${a.ag?`<p class="agency">${a.ag}</p>`:`<p class="agency" style="color:var(--muted)">${a.note||""}</p>`}
+        <div style="margin-top:6px">${stars(a.stars)}</div></div></div></div>
+    <div class="tabs">${tabs.map(t=>`<button class="${drawerTab===t[0]?'on':''}" onclick="drawerTab='${t[0]}';drawDrawer()">${t[1]}</button>`).join("")}</div>
+    <div class="dbody">${body}</div>
+    <div class="dfoot">${editing?`<button class="btn-sm" onclick="editing=false;drawDrawer();toast('Changes saved')">Save changes</button><button class="btn-ghost" onclick="editing=false;drawDrawer()">Cancel</button>`
+      :`${a.open?`<button class="btn-sm" onclick="toast('Opens Log new query with ${a.n.split(' ')[0]} preselected')">Log query</button>`:`<button class="btn-off" disabled>Log query</button>`}
+        <button class="btn-ghost" onclick="editing=true;drawDrawer()">Edit</button>`}
+      <span style="flex:1"></span><span class="mono">${drawerIdx+1} of ${A.length}</span></div>`;
+}
+
+/* MSWL hover drift */
+const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const anim=new WeakMap();
+function markOverflow(){document.querySelectorAll(".mswl").forEach(el=>el.parentElement.classList.toggle("more",el.scrollHeight>el.clientHeight+2))}
+function drift(el,to,speed){
+  cancelAnimationFrame(anim.get(el)||0);
+  if(reduce){el.scrollTop=to;return}
+  const start=performance.now(),from=el.scrollTop,dist=to-from;
+  if(Math.abs(dist)<1)return;
+  const dur=Math.max(260,Math.abs(dist)/speed*1000);
+  const step=t=>{const p=Math.min(1,(t-start)/dur);const e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+    el.scrollTop=from+dist*e;if(p<1)anim.set(el,requestAnimationFrame(step))};
+  anim.set(el,requestAnimationFrame(step));
+}
+let hoverTimer;
+document.addEventListener("mouseover",e=>{
+  const m=e.target.closest?.(".mswl");
+  if(m&&m.scrollHeight>m.clientHeight+2){clearTimeout(hoverTimer);hoverTimer=setTimeout(()=>drift(m,m.scrollHeight-m.clientHeight,26),420)}
+  const t=e.target.closest?.("[data-tip]");
+  if(t){const tip=document.getElementById("tip");tip.textContent=t.dataset.tip;tip.classList.add("on");
+    const r=t.getBoundingClientRect();
+    tip.style.left=Math.max(8,Math.min(r.left+r.width/2-tip.offsetWidth/2,window.innerWidth-tip.offsetWidth-8))+"px";
+    tip.style.top=(r.top-tip.offsetHeight-8<8?r.bottom+8:r.top-tip.offsetHeight-8)+"px"}
+});
+document.addEventListener("mouseout",e=>{
+  const m=e.target.closest?.(".mswl");
+  if(m&&!m.contains(e.relatedTarget)){clearTimeout(hoverTimer);drift(m,0,60)}
+  if(e.target.closest?.("[data-tip]"))document.getElementById("tip").classList.remove("on");
+});
+
+function render(){
+  const rows=visible();
+  const nf=activeFilters();
+  document.getElementById("filterLabel").innerHTML=nf?`Filter <b>${nf}</b>`:"Filter";
+  document.getElementById("filterBtn").classList.toggle("live",nf>0);
+  document.getElementById("groupBtn").classList.toggle("live",view==="board");
+  document.getElementById("count").textContent=`${rows.length} of ${A.length} contacts`;
+  document.getElementById("view").innerHTML=view==="grid"?`<div class="grid">${rows.map(cardHTML).join("")}</div>`:view==="list"?listHTML(rows):boardHTML(rows);
+  requestAnimationFrame(markOverflow);
+  if(deskKind==="filter")paintDesk("filter");
+}
+function seg(id,fn){document.getElementById(id).addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  [...e.currentTarget.children].forEach(x=>x.classList.remove("on"));b.classList.add("on");fn(b.dataset.v||b.dataset.view);flipped=null;closePeek();render()})}
+seg("switch",v=>view=v);seg("segCorner",v=>corner=v);seg("segPeek",v=>peekMode=v);seg("segMatch",v=>matchMode=v);
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){if(document.getElementById("drawer").classList.contains("on"))closeDrawer();else{closePeek();closeDesk()}}
+  if(document.getElementById("drawer").classList.contains("on")){if(e.key==="ArrowDown"){e.preventDefault();stepAgent(1)}if(e.key==="ArrowUp"){e.preventDefault();stepAgent(-1)}}});
+document.addEventListener("click",e=>{
+  const p=document.getElementById("pop");
+  if(p.classList.contains("open")&&!p.contains(e.target)&&!e.target.closest(".iconbtn"))closePeek();
+  const d=document.getElementById("desk");
+  if(d.classList.contains("on")&&!d.contains(e.target)&&!e.target.closest(".tbtn"))closeDesk();
+});
+window.addEventListener("resize",markOverflow);
+let tt;function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),1900)}
+function copyIt(v){navigator.clipboard?.writeText(v);toast("Email copied")}
+tiles();render();
+</script>
+</body>
+</html>
