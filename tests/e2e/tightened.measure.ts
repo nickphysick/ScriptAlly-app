@@ -826,8 +826,15 @@ test("Phase 4 — the Quick Look column: the ladder tint, the facts, the collaps
       seen.some((s) => !s.since) || withSince.length === seen.length,
       "without a line: " + (seen.length - withSince.length));
 
-  add("P4.6 · the facts are a definition list with the contract's 78px label column",
-      first.factCols.length > 0 && first.factCols.every((c: string) => c.startsWith("78px")),
+  /* ⚠️ 82, NOT 78 — TWO CONTRACTS DISAGREED AND THE PAGE'S OWN WON (anatomy round). The tightened
+     round took 78px from the PANE's contract; `todo-qc-style.html`, which is the contract for this
+     whole page and the one the anatomy round ported the reference card from, writes
+     `grid-template-columns: 82px 1fr`. Four pixels, on one element, in two artefacts — and the
+     round whose brief said "where a value here and the file disagree, the file wins" is the one
+     that had to choose. Recorded rather than silently rebaselined: if the pane's contract is ever
+     the authority again, this is the line that says so. */
+  add("P4.6 · the facts are a definition list with the page contract's 82px label column",
+      first.factCols.length > 0 && first.factCols.every((c: string) => c.startsWith("82px")),
       JSON.stringify([...new Set(seen.flatMap((s) => s.factCols))]));
 
   add("P4.7 · the agent row, the story and the query link are all there",
