@@ -1189,3 +1189,19 @@
     opacity: 1;
   }
 }
+
+/* ── the drawer's foot sits on the drawer's bottom edge ────────────────────────────────────────
+   ⚠️ FOUND BY LOOKING AT THE PICTURE, NOT BY THE DIFF — and that is the note worth keeping. The
+   anatomy diff compares `.dfoot`'s DECLARED properties (padding, min-height, background, the
+   hairline above it) and every one of them matched, because the contract declares nothing about
+   where the foot ENDS UP. It ends up at the bottom because `.drawer` is a flex column whose
+   `.dbody` is `flex: 1 1 auto`; ours hugged its content and left 350px of bare paper beneath the
+   Snooze and Dismiss buttons.
+
+   ⚠️ AND HUGGING IS RIGHT IN THE SPLIT, which is why this is scoped. The drawer round's own law —
+   "the sheet's height is its content's, capped at the drawer's… a short journey hugs and leaves
+   desk beneath it" — is about a sheet standing on a desk beside the list. Inside the drawer there
+   is no desk beneath it: the drawer IS the object, and its foot is its bottom edge. `finishRound`
+   P2.4 measures the hug in the split and stays green. */
+.slo .tpn .wcol { height: 100%; }
+.slo .tpn .sheet { flex: 1 1 auto; height: 100%; max-height: 100%; }
