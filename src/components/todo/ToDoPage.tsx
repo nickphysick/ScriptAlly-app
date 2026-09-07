@@ -3352,11 +3352,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * Lifting the narrowing facets is what keeps those two things separate.
    */
   function tileScope() {
-    return applyView(
+    /* ⚠️ THE SAME HOLD THE LIST APPLIES — see `withHeldCard`. A card in its receipt window is still
+       on screen and still the writer's to undo, so it is still counted; without this the tile
+       dropped to 28 above a list of 29 rows for the length of the window. */
+    return withHeldCard(applyView(
       railGroupsAll(),
       { ...view, groups: [...GROUP_IDS], types: [...TYPE_ORDER], agents: [] },
       viewFacts,
-    ).filter((g) => g.id !== "done");
+    ).filter((g) => g.id !== "done"));
   }
 
   function railGroupsAll() {
@@ -3397,6 +3400,26 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        the row EXISTS and holds, and a row holding in the wrong group satisfies both. Geometry,
        not presence — met again, one phase after it was written down. */
     gs.forEach((g) => g.cards.forEach((c, i) => rowPlaceRef.current.set(c.key, { groupId: g.id, label: g.label, index: i })));
+    return withHeldCard(gs);
+  }
+
+  /**
+   * ⚠️ THE HOLD BELONGS TO EVERY SURFACE THAT COUNTS, NOT JUST THE ONE THAT DRAWS ROWS.
+   *
+   * The injection above was written when the LIST CARD'S FOOTER was the count — its own comment
+   * still says "the one array the list renders and the footer counts". The corrections round
+   * deleted that footer and moved the count to the tiles, and the tiles read `railGroupsAll()`,
+   * which does not inject. So for the length of the receipt window the page stated two numbers: 29
+   * rows on screen and 28 on the tile above them.
+   *
+   * ⚠️ AND NOTHING SAW IT, because `completionLeaves` was one of the twenty-six blind suites. It
+   * went red the moment Phase 4 gave it back its list — which is the whole return on un-blinding
+   * them, and the reason the retarget of its count had to be a real retarget rather than a
+   * rebaseline: pointing the assertion at the tiles is what made the disagreement visible.
+   *
+   * One function, both callers, so the two cannot come apart again.
+   */
+  function withHeldCard(gs: TaskGroup[]): TaskGroup[] {
     if (!leaving) return gs;
     if (gs.some((g) => g.cards.some((c) => c.key === leaving.card.key))) return gs;
     const at = gs.findIndex((g) => g.id === leaving.groupId);
