@@ -1137,3 +1137,121 @@
 
 /* the drawer's controls reuse the card's, so a chevron and a corner button are one object */
 .agl-dhead .agl-cbtn[disabled] { opacity: .38; cursor: not-allowed; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE LIST VIEW (Phase 5)
+   ⚠️ IT SCROLLS SIDEWAYS RATHER THAN CRUSHING ITS COLUMNS. Below the minimum
+   the table keeps its widths and the wrapper scrolls; eight columns squeezing
+   until the location wraps to three lines has not degraded gracefully, it has
+   stopped being a table.
+   ══════════════════════════════════════════════════════════════════════════ */
+.aglist .agl-listwrap { overflow-x: auto; padding-bottom: 6px; margin-top: 22px; }
+.aglist .agl-list {
+  background: var(--agl-paper); border: 1px solid var(--agl-hair2); border-radius: 10px;
+  box-shadow: var(--agl-shadow); min-width: 1160px;
+}
+.aglist .agl-lhead, .aglist .agl-lrow {
+  display: grid; grid-template-columns: 1.5fr 1.2fr 1.15fr 1fr 1.25fr 168px 88px 76px;
+  gap: 14px; align-items: center; padding: 12px 18px;
+}
+.aglist .agl-lhead {
+  background: #f7f2ea; border-bottom: 1px solid var(--agl-hair2); border-radius: 9px 9px 0 0;
+}
+.aglist .agl-lhead span {
+  font-family: 'Playfair Display', serif; font-size: 13.5px; font-weight: 500; color: var(--agl-ink-body);
+}
+.aglist .agl-lrow { border-top: 1px solid var(--agl-hair); cursor: pointer; }
+.aglist .agl-lrow:hover { background: #faf5ee; }
+.aglist .agl-lrow:focus-visible { outline: 2px solid var(--agl-ink); outline-offset: -2px; }
+/* the SAME predicate the card dims on — a closed door with a live query never greys */
+.aglist .agl-lrow.s-dim { opacity: .55; }
+.aglist .agl-lrow.s-dim:hover { opacity: 1; }
+.aglist .agl-lnm { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.aglist .agl-lnmtx { min-width: 0; }
+.aglist .agl-lnmtx b {
+  font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600;
+  display: block; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.aglist .agl-lnmtx i {
+  font-family: 'Playfair Display', serif; font-size: 12.5px; color: var(--agl-ink-muted); font-style: italic;
+  display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.aglist .agl-ellip { font-size: 12.5px; color: var(--agl-ink-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aglist .agl-lk {
+  color: #2f4a5e; text-decoration: underline; text-decoration-color: rgba(47, 74, 94, .28);
+  text-underline-offset: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  display: block; font-size: 12.5px;
+}
+.aglist .agl-lloc { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--agl-ink-body); min-width: 0; }
+.aglist .agl-lloc small { display: block; color: var(--agl-ink-muted); font-size: 11.5px; }
+.aglist .agl-lwks {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--agl-ink-muted);
+}
+.aglist .agl-lacts { display: flex; gap: 6px; justify-content: flex-end; }
+/* the small avatar, shared by the list row and the popover's head */
+.aglist .agl-av-sm, .agl-av-sm { width: 34px; height: 34px; }
+.aglist .agl-av-sm .ini, .agl-av-sm .ini { font-size: 11px; }
+/* a heading that is present for a screen reader and absent to the eye */
+.aglist .agl-sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE BOARD VIEW (Phase 5) — the Query Centre's grammar, borrowed whole.
+   ⚠️ NO COLUMN CONTAINERS: a Playfair title, a count pill and a mono caption
+   over a 2.5px underline in the group's colour, on the page ground. Boxing each
+   column would draw seven frames around content already grouped by position.
+   ══════════════════════════════════════════════════════════════════════════ */
+.aglist .agl-boardwrap { overflow-x: auto; padding-bottom: 10px; margin-top: 22px; }
+.aglist .agl-board { display: flex; gap: 26px; align-items: flex-start; min-height: 220px; }
+.aglist .agl-col { width: 246px; flex: none; }
+.aglist .agl-bhead { padding: 0 2px 9px; border-bottom: 2.5px solid var(--agl-hair2); margin-bottom: 14px; }
+.aglist .agl-btop { display: flex; align-items: center; gap: 9px; }
+.aglist .agl-btitle { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; flex: 1; line-height: 1.3; }
+.aglist .agl-bcount {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; background: var(--agl-paper);
+  border: 1px solid var(--agl-hair); border-radius: 5px; padding: 3px 7px; color: var(--agl-ink-body);
+}
+.aglist .agl-bsub {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--agl-ink-label); margin-top: 5px;
+}
+.aglist .agl-bcard {
+  background: var(--agl-paper); border: 1px solid var(--agl-hair2); border-radius: 8px;
+  padding: 11px 12px; margin-bottom: 10px; cursor: pointer;
+  box-shadow: 0 1px 2px rgba(44, 28, 20, .05); transition: box-shadow .16s ease, opacity .2s ease;
+}
+.aglist .agl-bcard.s-dim { opacity: .55; }
+.aglist .agl-bcard:hover { box-shadow: var(--agl-shadow-lift); opacity: 1; }
+.aglist .agl-bcard:focus-visible { outline: 2px solid var(--agl-ink); outline-offset: 1px; }
+.aglist .agl-bcard b {
+  font-family: 'Playfair Display', serif; font-size: 15.5px; font-weight: 600; display: block; line-height: 1.3;
+}
+.aglist .agl-bcard i {
+  font-family: 'Playfair Display', serif; font-size: 12.5px; color: var(--agl-ink-muted);
+  font-style: italic; display: block; margin-bottom: 9px;
+}
+.aglist .agl-brow { display: flex; align-items: center; gap: 8px; justify-content: space-between; margin-top: 9px; }
+.aglist .agl-brow .agl-metaline { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.aglist .agl-colempty {
+  font-family: 'Playfair Display', serif; font-style: italic; font-size: 13px;
+  color: var(--agl-ink-muted); padding: 2px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE PEEK'S POPOVER (Phase 5) — the fourth container. Portalled, so it is NOT
+   scoped under `.aglist`: the List is a horizontal scroller and would clip it.
+   ══════════════════════════════════════════════════════════════════════════ */
+.agl-peekpop {
+  position: fixed; z-index: 60; width: 340px;
+  background: var(--agl-paper); border: 1px solid var(--agl-hair2); border-radius: 10px;
+  box-shadow: 0 18px 44px -16px rgba(44, 28, 20, .42);
+}
+.agl-peekpop-head {
+  padding: 11px 14px; border-bottom: 1px solid var(--agl-hair); background: #efe9e0;
+  border-radius: 9px 9px 0 0; display: flex; align-items: center; gap: 9px;
+}
+.agl-peekpop-head b { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; }
+.agl-peekpop .agl-peek { padding: 6px 14px 14px; }

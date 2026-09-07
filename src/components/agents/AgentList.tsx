@@ -76,6 +76,13 @@ import { ContactListEmptyState } from "./ContactListEmptyState";
 import { ContactPeek } from "./ContactPeek";
 import { AgentDrawer } from "./AgentDrawer";
 import { RotateCcw } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { useFixedMenu } from "../forms/useFixedMenu";
+import { AGENT_VIEWS, AgentView } from "./agentViews";
+import { AgentListView } from "./AgentListView";
+import { AgentBoardView } from "./AgentBoardView";
+import { ContactPeekPopover } from "./ContactPeekPopover";
+import { AgentGroupingKey } from "../../lib/agentBoard";
 import { RAIL_GROUPS } from "../shell/railNav";
 import { countryName } from "../../lib/territory";
 import { matchGenre } from "../../lib/genreMatch";
@@ -301,6 +308,37 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const [openId, setOpenId] = useState<string | null>(null);
   /** The card whose back face is showing the contact peek (Grid only). One at a time. */
   const [peekId, setPeekId] = useState<string | null>(null);
+
+  /**
+   * ⚠️ THE VIEW IS IN THE URL, so a view is a place you can go back to and a link you can send.
+   * It is read from the query string on every render rather than mirrored into state: two copies
+   * of "which view" is one more than can be kept in step, and the back button would move only one
+   * of them. Anything unrecognised reads as the grid — an unknown value is not an error worth a
+   * blank page.
+   */
+  const [search$, setSearch$] = useSearchParams();
+  const view: AgentView = AGENT_VIEWS.some((v) => v.key === search$.get("view")) ? (search$.get("view") as AgentView) : "grid";
+  const setView = useCallback((next: AgentView) => {
+    setSearch$((prev) => {
+      const p = new URLSearchParams(prev);
+      if (next === "grid") p.delete("view"); else p.set("view", next);
+      return p;
+    }, { replace: true });
+  }, [setSearch$]);
+
+  /** Which grouping the BOARD draws. Local: a heading arrangement is not a destination. */
+  const [grouping2, setGrouping2] = useState<AgentGroupingKey>("status");
+
+  /* the peek's popover anchor — the VIEW owns the hook because the trigger is a row's button */
+  const peekPanelRef = useRef<HTMLElement | null>(null);
+  const { triggerRef: peekTriggerRef, menuStyle: peekStyle } = useFixedMenu<HTMLElement>(!!peekId, { placement: "auto", align: "auto", menuRef: peekPanelRef });
+  const openPeekAt = useCallback((agentId: string, trigger: HTMLElement | null) => {
+    setPeekId((p) => {
+      if (p === agentId) return null;
+      (peekTriggerRef as React.MutableRefObject<HTMLElement | null>).current = trigger;
+      return agentId;
+    });
+  }, [peekTriggerRef]);
   const [draft, setDraft] = useState<AgentDraft | null>(null);
   const [tab, setTab] = useState<AgentEditorTab>("contact");
   const [error, setError] = useState<DraftError | null>(null);
@@ -960,6 +998,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
              frame rather than the row appearing first and the list dropping in under it. */
          toolbar={pageState === "list" ? (
           <AgentToolbar
+            view={view}
+            onView={setView}
             search={search}
             onSearch={setSearch}
             filters={filters}
@@ -1002,10 +1042,30 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             filtering the list. Each tag removes its own value; "Clear all" empties the set. */}
         <AgentAppliedTags tags={appliedTags} onClear={() => setFilters(emptyFilterSet())} />
 
-        {/* GROUPED or flat. Sections come from groupAgents over the ALREADY SORTED list, so the
-            chosen sort applies within each section for free. The unsaved new card is pinned to
-            the front of the flat grid and never grouped — it has no standing to group by yet. */}
-        {grouping !== "none" && shown.length > 0 ? (
+        {/* ⚠️ ONE SET OF AGENTS, THREE RENDERERS. Filter, search and sort have all been applied by
+            the time `shown` gets here, so the view changes what draws and nothing else — which is
+            what lets a reader switch views without losing their place in the set. */}
+        {view === "list" ? (
+          <AgentListView
+            agents={shown}
+            queries={queries}
+            matchGenre={tintGenre}
+            onOpen={onOpen}
+            onEdit={onEdit}
+            onPeek={openPeekAt}
+            peekId={peekId}
+          />
+        ) : view === "board" ? (
+          <AgentBoardView
+            agents={shown}
+            queries={queries}
+            grouping={grouping2}
+            matchGenre={tintGenre}
+            onOpen={onOpen}
+            onPeek={openPeekAt}
+            peekId={peekId}
+          />
+        ) : grouping !== "none" && shown.length > 0 ? (
           <div className="agl-groups">
             {groups.map((sec, si) => (
               <section key={sec.key}>
@@ -1075,6 +1135,22 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
        </div>
        </WorkspacePageGrid>
       </div>
+
+      {/* ⚠️ THE PEEK'S FOURTH CONTAINER, and the same component the card back and the drawer
+          render. It is mounted here rather than inside a row so one popover exists at a time and
+          the List's horizontal scroller cannot clip it. */}
+      {peekId && view !== "grid" && (() => {
+        const a = shown.find((x) => x.id === peekId);
+        return a ? (
+          <ContactPeekPopover
+            agent={a}
+            style={peekStyle}
+            panelRef={peekPanelRef}
+            onClose={() => setPeekId(null)}
+            onEdit={(id) => onEdit(id, "contact")}
+          />
+        ) : null;
+      })()}
 
       {/* ⚠️ ONE DRAWER, OUTSIDE THE GRID, and it is the shared `SlideOver` rather than a fourth
           private one. It hosts the editor so the DRAFT OUTLIVES A TAB SWITCH — the tabs are a view

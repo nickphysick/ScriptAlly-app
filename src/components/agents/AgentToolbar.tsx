@@ -18,6 +18,8 @@
  * The colour legend is DELETED: it taught the same vocabulary the filter list already carries, in
  * a second grammar.
  */
+import { QueryViewSwitch } from "../queries/QueryViewSwitch";
+import { AGENT_VIEWS, AgentView } from "./agentViews";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Filter, Rows3, Search, SlidersHorizontal } from "lucide-react";
 import { PageTally } from "../shell/WorkspacePageGrid";
@@ -197,11 +199,19 @@ export interface AgentToolbarProps {
   defaultSort: string;
   onSort: (k: string) => void;
   searchRef?: React.RefObject<HTMLInputElement>;
+  /**
+   * ⚠️ ADDITIVE (Phase 5) — the Query Centre's own switch, with its own three segments. Grid, List
+   * and Board are three renderers over ONE set: filter, search and sort have all been applied
+   * before the view is consulted, so switching does not move a reader within the set.
+   */
+  view: AgentView;
+  onView: (v: AgentView) => void;
 }
 
 export const AgentToolbar: React.FC<AgentToolbarProps> = ({
   search, onSearch, filters, onFilters, counts, starCounts, locCounts,
   resultCount, total, group, groupOptions, onGroup, sort, sortOptions, defaultSort, onSort, searchRef,
+  view, onView,
 }) => {
   const [openPop, setOpenPop] = useState<string | null>(null);
   const nFilters = filterCount(filters);
@@ -369,6 +379,10 @@ export const AgentToolbar: React.FC<AgentToolbarProps> = ({
           THAT BROUGHT IT HERE IS ANSWERED RATHER THAN OVERRULED. It moved down because the masthead
           scrolled out of reach and took the page's one action with it; the slim bar carries the same
           primary now, so the action survives the scroll without the toolbar having to hold it. */}
+      {/* ⚠️ THE QUERY CENTRE'S SWITCH, MOUNTED — not a second one. It already took an additive
+          `views` prop for the To-do page's two segments, so a third caller with three is one
+          array and no new component. */}
+      <QueryViewSwitch view={view} onView={(v) => onView(v as AgentView)} views={AGENT_VIEWS} />
     </div>
   );
 };

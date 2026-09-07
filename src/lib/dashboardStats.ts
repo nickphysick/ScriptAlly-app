@@ -33,7 +33,15 @@ export const isoWeekStart = (d: Date): Date => {
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
-const parseWhen = (v: unknown): number | null => {
+/**
+ * ⚠️ EXPORTED (Contact list, Phase 5) SO THERE IS ONE OF IT. The agent board has to order closed
+ * queries by when they closed, which means reading the same three derived fields in the same
+ * order; a second parser would be a fork that agrees until one of them learns about a shape the
+ * other does not. Firestore hands these back as Timestamps, as `{seconds}`, as Dates or as ISO
+ * strings depending on where they came from, which is exactly the kind of variety a second
+ * implementation gets partly right.
+ */
+export const parseWhen = (v: unknown): number | null => {
   if (!v && v !== 0) return null;
   // Firestore Timestamps (lastStatusChange / responseReceivedAt) arrive as objects.
   if (typeof v === "object" && v !== null) {
