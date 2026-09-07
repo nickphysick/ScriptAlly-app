@@ -26,6 +26,7 @@ import {
 import { parchment } from "../../lib/designTokens";
 import { ShellTopBar } from "./ShellV2";
 import { BetaStrip } from "./BetaStrip";
+import { DeletionBanner } from "../settings/DeletionBanner";
 import { FeedbackDock } from "./FeedbackDock";
 import { WorkspaceShell } from "./WorkspaceShell";
 import { workspaceSections } from "../../lib/workspaceNav";
@@ -334,6 +335,14 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           up here is outside that box entirely, so `--wpg-reclaim-pad` and the collapse trigger
           cannot see it. That separation is the condition this was allowed under. */}
       <BetaStrip onReport={() => setFeedbackOpen(true)} />
+
+      {/* ⚠️ A PENDING DELETION IS A FACT ABOUT THE WHOLE ACCOUNT, so it is stated on every page.
+          It used to live inside the Danger zone card — the one place you reach only by going
+          looking for it, and the last place someone who has changed their mind thinks to look.
+          It renders NOTHING when no deletion is scheduled, which is almost always.
+          ⚠️ SAME SLOT AS THE BETA STRIP, AND FOR THE SAME REASON: a sibling of the whole shell,
+          outside `.wpg`, so the page header's collapse arithmetic cannot see it. */}
+      <DeletionBanner />
 
       <div className="sv2-app ws-host">
 

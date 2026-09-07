@@ -119,3 +119,32 @@ export const DELETION_REMOVES = [
   "Your queries, and the whole history recorded against them",
   "Your to-do list, notes to self, and your account itself",
 ];
+
+/**
+ * The record a cancellation writes.
+ *
+ * ⚠️ CLEARED, NOT DELETED, AND IT IS A FUNCTION SO TWO CALLERS CANNOT WRITE TWO SHAPES.
+ * `updateUserProfile` merges and the rules allowlist governs which KEYS an update may touch, so
+ * writing an empty record keeps the change inside the one entry `scheduledDeletion` already
+ * occupies. `scheduledDeletion()` reads an incomplete record as "no request", which is exactly what
+ * this is. Two surfaces cancel now — the settings card and the app-wide banner — and a hand-written
+ * object at each would be free to differ by a field.
+ */
+export function deletionCancelled(): { requestedAt: string; purgeAfter: string } {
+  return { requestedAt: "", purgeAfter: "" };
+}
+
+/**
+ * The app-wide banner's sentence.
+ *
+ * ⚠️ IT DOES NOT SAY "SIGNING IN CANCELS IT", AND THE REF DOES. Nothing in this app cancels a
+ * scheduled deletion on sign-in — `scheduledDeletion` is written by the request and cleared by the
+ * cancel button, and there is no auth-time hook anywhere near it. The settings card carries that
+ * claim today and it is FALSE; it is reported rather than rewritten here, because it is copy a
+ * brief fixed. What must not happen is a second surface repeating it, so this sentence names the
+ * control that actually works and nothing else.
+ *
+ * ⚠️ AND IT DOES NOT PROMISE THE DELETION EITHER. `ACCOUNT_DELETION_ENABLED` is false: no job
+ * purges an account. "Due for deletion" is what `deletionNotice` already says, for the same reason.
+ */
+export const DELETION_BANNER_ACTION = "Cancel deletion";

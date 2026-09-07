@@ -1,0 +1,70 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The scheduled-deletion strip — a sibling of the whole workspace, above `.sv2-app`.
+ *
+ * ⚠️ IT SITS OUTSIDE THE PAGE GRID AND TAKES NO PART IN THE HEADER'S ARITHMETIC, which is the same
+ * condition `BetaStrip` ships under and for the same reason: `--wpg-reclaim-pad` and the header's
+ * collapse are computed inside `.wpg`, and neither can see a strip up here.
+ *
+ * ⚠️ AND ANYTHING ABOVE THE SHELL USED TO BREAK IT. `.ws-main` once carried `height: 100vh` while
+ * starting BELOW the beta strip, so it over-claimed by exactly that strip's height and the last
+ * 21px of every page fell below the fold — invisible to anyone who had dismissed the strip once,
+ * and reproducible in a fresh harness session every time. That declaration is gone (`.ws-main` is
+ * `flex: 1` in a flex row now, which was always the right answer), so a second strip is safe. It is
+ * recorded here because the next person adding one deserves to know it was ever a question.
+ *
+ * ⚠️ IT IS WARNING-COLOURED WITHOUT BEING LOUD. The deletion CARD in settings is a hairline and an
+ * ink rather than a fill, on the grounds that a filled warning shouts at a reader who came to
+ * download a copy of their work. This is the opposite case: nobody navigated here to see it, it is
+ * true on every page, and it has to be noticed on the one day the reader has changed their mind.
+ * So it fills — quietly, in the same warm family, with the ink doing the work.
+ */
+
+.del-banner {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 22px;
+  background: #f6e7e2;
+  border-bottom: 1px solid rgba(140, 47, 47, 0.18);
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: #6b3a30;
+}
+
+.del-banner-t { font-weight: 600; }
+
+/* ⚠️ THE REASSURANCE IS PART OF THE NOTICE, not a second sentence somewhere else. A banner that
+   states a deletion date and nothing else reads as "your work has gone"; it has not, and the
+   fortnight is precisely the window in which saying so matters. */
+.del-banner-n { color: #8a6055; }
+
+/* ⚠️ `margin-left: auto` RATHER THAN A SPACER ELEMENT, so a long date pushes the button right
+   instead of a fixed gap deciding where it sits. */
+.del-banner-a {
+  margin-left: auto;
+  flex: none;
+  padding: 5px 12px;
+  border: 1px solid rgba(140, 47, 47, 0.35);
+  border-radius: 8px;
+  background: #fffdfc;
+  color: #8c2f2f;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.14s ease, border-color 0.14s ease;
+}
+.del-banner-a:hover:not(:disabled) { background: #fff; border-color: rgba(140, 47, 47, 0.55); }
+.del-banner-a:disabled { opacity: 0.55; cursor: default; }
+.del-banner-a:focus-visible { outline: 2px solid #8c2f2f; outline-offset: 2px; }
+
+/* ⚠️ BELOW md IT WRAPS RATHER THAN SHRINKING THE SENTENCE. The date is the information; a button
+   that squeezes it onto three lines to stay on one row has the priority backwards. */
+@media (max-width: 640px) {
+  .del-banner { flex-wrap: wrap; padding: 9px 14px; gap: 6px 10px; }
+  .del-banner-a { margin-left: 0; }
+}

@@ -37,7 +37,7 @@ import {
 import { buildExport, downloadExport, exportFilename, exportCoverageLine } from "../lib/dataExport";
 import {
   DELETION_GRACE_DAYS, DELETION_CONFIRM_WORD, DELETION_REMOVES, RETENTION_LINE,
-  deletionArmed, deletionRequest, scheduledDeletion, deletionNotice,
+  deletionArmed, deletionRequest, scheduledDeletion, deletionNotice, deletionCancelled,
 } from "../lib/accountDeletion";
 import { ACCOUNT_ROUTES, AccountSectionId } from "../lib/accountRoutes";
 import { useDirtyField } from "../lib/useSaveState";
@@ -719,7 +719,7 @@ export const AccountSettings: React.FC<{
      no request, which is exactly what this writes. */
   const cancelDeletion = async () => {
     try {
-      await updateUserProfile({ scheduledDeletion: { requestedAt: "", purgeAfter: "" } });
+      await updateUserProfile({ scheduledDeletion: deletionCancelled() });
       showToast({ message: "Deletion cancelled. Nothing was removed.", replaces: "settings-saved" });
     } catch {
       showToast({ message: "Couldn't cancel that. Try again?", replaces: "settings-saved" });
