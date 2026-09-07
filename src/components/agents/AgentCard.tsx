@@ -40,6 +40,7 @@ import "flag-icons/css/flag-icons.min.css";
 import { agentCardDims, contactMetaLine, isDoorOpen } from "../../lib/agentList";
 import { isGenreMatch } from "../../lib/genreMatch";
 import { attachDrift, hasMoreToRead } from "../../lib/mswlDrift";
+import { MaterialSlots } from "./MaterialSlots";
 
 /** The empty wishlist reads as a fact about their site, never as a fault of yours. */
 export const WISHLIST_EMPTY = "Nothing recorded — check their site.";
@@ -224,6 +225,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({
                 Submissions page
               </button>
               <span className="agl-sp" />
+              <MaterialSlots agent={agent} />
             </div>
           </div>
         </div>

@@ -612,6 +612,20 @@
   .aglist .agl-mswl { overflow-y: auto; }
 }
 
+/* ── material slots: three fixed, a fourth only when there is free text ────
+   The ghost is a REAL state, not a missing icon: an outlined slot says "not asked
+   for", where a slot that vanished would say nothing at all and leave the row's
+   width shifting from card to card. */
+.aglist .agl-mslots { display: flex; gap: 5px; flex: none; }
+.aglist .agl-mslotwrap { display: inline-flex; }
+.aglist .agl-mslot {
+  width: 28px; height: 28px; border-radius: 6px; display: grid; place-items: center;
+  border: 1px solid var(--agl-hair); background: #fbf7f1; color: var(--agl-ink-body);
+  cursor: default;
+}
+.aglist .agl-mslot-off { background: transparent; border-color: #ece5db; color: #cfc4b8; }
+.aglist .agl-mslot:hover, .aglist .agl-mslot:focus-visible { border-color: var(--agl-ink-body); outline: none; }
+
 /* ── footer ─────────────────────────────────────────────────────────────── */
 .aglist .agl-foot {
   border-top: 1px solid var(--agl-hair); padding: 13px 18px;
@@ -1025,4 +1039,17 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .aglist .agl-mpush { animation: none; }
+}
+
+/* ── the material slot's tooltip ─────────────────────────────────────────────
+   ⚠️ NOT SCOPED UNDER `.aglist`, AND THAT IS NOT AN OVERSIGHT. It is portalled to
+   `document.body` so the List view's horizontal scroller cannot clip it, which puts
+   it outside the page root — a `.aglist .agl-tip` rule would never match, and the
+   tip would render unstyled at the top-left of the window. */
+.agl-tip {
+  position: fixed; z-index: 99; pointer-events: none;
+  background: #241813; color: #f4ece1;
+  padding: 6px 10px; border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .04em;
+  max-width: 260px; box-shadow: 0 6px 18px -8px rgba(44, 28, 20, .55);
 }

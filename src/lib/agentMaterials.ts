@@ -477,3 +477,85 @@ export function willRecordText(rows: readonly MaterialRow[], join: SampleJoin = 
   }
   return parts.length ? parts.join(" · ") : null;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE CARD'S MATERIAL SLOTS (contact-list v5)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * The four slots the card's footer draws, in order. THREE ARE FIXED and always render — filled
+ * when the agency asks for that material and ghosted when it does not — because a slot that
+ * disappears states nothing, while a ghost states "not asked for". The FOURTH renders only when
+ * there is free text to carry, since "Also asked for" with nothing after it is a label for an
+ * absence that already has one.
+ *
+ * ⚠️ IT READS THE SAME STORE THE MATERIALS TAB WRITES, through `materialRowsFromAgent` — never a
+ * second parse of `materialsWanted`. The Query Centre once classified these with three ad-hoc
+ * predicates whose last was a catch-all, and reported a writer's own free text back to them as an
+ * opening sample. One decoder, every reader.
+ *
+ * ⚠️ AND IT DOES NOT REINSTATE AUTHOR BIO OR FULL MANUSCRIPT. They are recognised by the parser so
+ * legacy flags can decay, and they are not slots: a legacy agent carrying one shows it as free
+ * text under "Also asked for", in the writer's own words, rather than sprouting a fifth icon for
+ * a material this app stopped offering.
+ */
+export interface MaterialSlot {
+  key: "queryLetter" | "synopsis" | "sample" | "other";
+  /** The slot's name — what the tooltip leads with. */
+  name: string;
+  /** Is this material asked for at all? */
+  asked: boolean;
+  /**
+   * ⚠️ THE DETAIL, NOT THE WHOLE ASK — the name is stated once, by the tip. The ref's own fixture
+   * stores the name inside the value, so its tooltips read "Synopsis — Synopsis (1 page)" and
+   * "Query letter — Query letter"; that is the mockup being loose with its own data rather than a
+   * treatment to reproduce. Null means "asked for, with nothing further said".
+   */
+  detail: string | null;
+}
+
+/** Slot display names. "Opening sample" is the only name true of all three sample units. */
+export const SLOT_NAMES = {
+  queryLetter: MATERIAL_ROW_NAMES.queryLetter,
+  synopsis: MATERIAL_ROW_NAMES.synopsis,
+  sample: MATERIAL_ROW_NAMES.sample,
+  other: "Also asked for",
+} as const;
+
+/** "1 page", never "1 pages" — the agreement rule this repo applies to every counted noun. */
+const plural = (n: string, unit: string): string =>
+  `${formatAmount(n)} ${parseAmount(n) === 1 ? unit.replace(/s$/, "") : unit}`;
+
+export function materialSlots(materialsWanted: readonly string[] | undefined): MaterialSlot[] {
+  const rows = materialRowsFromAgent(materialsWanted);
+  const on = (k: MaterialRow["key"]) => rows.filter((r) => r.key === k && r.on);
+
+  /* narrowed on the KEY, so the union's other binary member cannot be mistaken for this one */
+  const syn = rows.find((r): r is Extract<MaterialRow, { key: "synopsis" }> => r.key === "synopsis" && r.on);
+
+  /* ⚠️ SEVERAL SAMPLE UNITS CAN BE SET AT ONCE ON LEGACY DATA, and they are ONE slot — the agency
+     asked for an opening sample, however many ways the record spells it. Joined rather than
+     collapsed to the first, so nothing the writer stored goes unsaid. */
+  const samples = on("sample")
+    .map((r) => (r.kind === "qty" && r.amount.trim() ? plural(r.amount, r.unit.toLowerCase()) : null))
+    .filter((t): t is string => t !== null);
+
+  const other = rows.find((r): r is Extract<MaterialRow, { key: "other" }> => r.key === "other" && r.on);
+  const otherText = other && other.text.trim() ? other.text.trim() : null;
+
+  const slots: MaterialSlot[] = [
+    { key: "queryLetter", name: SLOT_NAMES.queryLetter, asked: on("queryLetter").length > 0, detail: null },
+    { key: "synopsis", name: SLOT_NAMES.synopsis, asked: !!syn, detail: syn && syn.pages.trim() ? plural(syn.pages, "pages") : null },
+    { key: "sample", name: SLOT_NAMES.sample, asked: on("sample").length > 0, detail: samples.length ? samples.join(OTHER_JOIN) : null },
+  ];
+  if (otherText) slots.push({ key: "other", name: SLOT_NAMES.other, asked: true, detail: otherText });
+  return slots;
+}
+
+/**
+ * The tooltip's sentence, and the slot's accessible name — one string, so what a reader sees and
+ * what a screen reader announces cannot come apart. A ghost says what it is and that it is not
+ * asked for; a filled slot with nothing further to say is just its name.
+ */
+export const slotTip = (s: MaterialSlot): string =>
+  !s.asked ? `${s.name} — not asked for` : s.detail ? `${s.name} — ${s.detail}` : s.name;

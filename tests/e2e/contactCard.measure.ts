@@ -202,3 +202,55 @@ test.describe("the wishlist drifts to reveal the rest", () => {
       .toBeGreaterThan(0);
   });
 });
+
+/**
+ * THE MATERIAL SLOTS — and the one thing about them that only a browser can settle.
+ *
+ * ⚠️ THE TIP HAS TO ESCAPE THE CARD. `renderToStaticMarkup` cannot see a portal at all, so the
+ * unit locks can assert what the slots SAY and not where the tip LANDS — and where it lands is
+ * the whole reason it is portalled: the List view puts these inside a horizontal scroller, and a
+ * tip parented inside the row would be clipped by the very container that makes the columns
+ * reachable. Asserted here as containment, not as a property: `document.body` is its parent and
+ * the card is not an ancestor.
+ */
+test.describe("the material slots", () => {
+  test("three ghost-or-filled slots, a fourth for free text, and the tip escapes the card", async ({ page }) => {
+    await openCast(page, 1440);
+
+    const counts = await page.evaluate(() => {
+      const n = (id: string) => document.querySelectorAll(`[data-agent-card="${id}"] .agl-mslot`).length;
+      return { withOther: n("fx-long"), withoutOther: n("fx-none") };
+    });
+    // eslint-disable-next-line no-console
+    console.log(`[slots] fx-long=${counts.withOther} fx-none=${counts.withoutOther}`);
+    expect(counts.withoutOther, "an agent with no free text should draw exactly the three fixed slots").toBe(3);
+    expect(counts.withOther, "an agent with free text should draw a fourth").toBe(4);
+
+    /* hover the last slot on the last card in the row — the one whose tip would hang off the
+       viewport without the placement clamp */
+    const slot = page.locator(`[data-agent-card="fx-long"] .agl-mslot`).last();
+    await slot.hover();
+    const tip = page.locator(".agl-tip");
+    await expect(tip).toBeVisible({ timeout: 4_000 });
+
+    const where = await page.evaluate(() => {
+      const t = document.querySelector(".agl-tip") as HTMLElement;
+      const card = document.querySelector('[data-agent-card="fx-long"]') as HTMLElement;
+      const r = t.getBoundingClientRect();
+      return {
+        parentIsBody: t.parentElement === document.body,
+        insideCard: card.contains(t),
+        text: (t.textContent ?? "").trim(),
+        onScreen: r.left >= 0 && r.top >= 0 && r.right <= window.innerWidth && r.bottom <= window.innerHeight,
+        right: r.right, vw: window.innerWidth,
+      };
+    });
+    // eslint-disable-next-line no-console
+    console.log(`[tip] "${where.text}" body=${where.parentIsBody} onScreen=${where.onScreen} right=${where.right.toFixed(1)}/${where.vw}`);
+
+    expect(where.parentIsBody, "the tip is not portalled to the body — a horizontal scroller will clip it").toBe(true);
+    expect(where.insideCard, "the tip is inside the card's subtree, so the card's own overflow can clip it").toBe(false);
+    expect(where.text, "the tip lost the writer's own words").toContain("Also asked for");
+    expect(where.onScreen, "the tip hangs off the viewport — the placement clamp is not being applied").toBe(true);
+  });
+});
