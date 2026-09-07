@@ -1,5 +1,5 @@
 {
-  "_note": "Hashes of the design refs that are ACTIVE design authorities — a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act — `--update design-refs/<file>.html` — because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
+  "_note": "Hashes of the design refs that are ACTIVE design authorities \u2014 a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act \u2014 `--update design-refs/<file>.html` \u2014 because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
   "refs": {
     "design-refs/action-journey.html": "129247fc29907b723cb4a9d58d5cab25d439220ba34eb2bb248f4eb0ba56c89d",
     "design-refs/bar-hover-states.html": "212c494a27915e2152f58122bc3301a90324ebbddba8f2c32e9e5a35fb49f1d8",
@@ -9,7 +9,6 @@
     "design-refs/hover-card-by-type.html": "f0ffe9a727a34714bcca9d3a3095327e2f976c6817360473386292b7703a41e0",
     "design-refs/kicker-cta-options.html": "b0ebc108d6c44473477991b1a9841d04697a766dee22384b8731b76a6047a5b0",
     "design-refs/manuscript-identity-band.html": "45b9a7a2af4aefda90ea77332f9e60cd7770da36f2394259d4a73a3e7c8892cf",
-    "design-refs/manuscripts-promos.html": "14e7f13c459d762325697f30d4d8b819eac255623c26f6eac657e7ec3579e89b",
     "design-refs/manuscripts-scroll-page.html": "86e9eb3ce18714a43e3f3538ca8312eac7e16199ca9fc37eaf4420c1a2814aee",
     "design-refs/masthead-sizing-bench.html": "d6f8c349a1d8a918aaabf379e4f10efc8e2ee3d893829368b27ea9c06a33b56a",
     "design-refs/qc-flip-transition.html": "27779ab4d8ffca126b96040b299bcfa8ddb801850ac9f968e5a9f0076b5c78ba",
@@ -40,6 +39,7 @@
     "design-refs/todo-card-options.html": "a84775109b5b4cd052234a1a60a2481e9d06038946a085d6f55c97dd6789caf0",
     "design-refs/todo-reference-card.html": "a93d4a078af74d98ede267d02395f47dd1e21f5cd7774ae9dc96ee5f141358b9",
     "design-refs/query-toolbar-v2-locked.html": "294f36bbfceac24f2e7db5739ebd3810e0b92aa513173ade50697ba874ac9a40",
-    "design-refs/contact-list-v5.html": "31d19010275cf77033957fd376a980bc10947a2bc0887741ac0dc3606d5542f1"
+    "design-refs/contact-list-v5.html": "31d19010275cf77033957fd376a980bc10947a2bc0887741ac0dc3606d5542f1",
+    "design-refs/manuscripts-hero-landing.html": "1053f4dc10e8e3f76512e925481347b73f3b26ccecc4ced7e5f8d8a2006691c3"
   }
 }
