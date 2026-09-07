@@ -18,15 +18,8 @@
 
 import { Agent, Query } from "../types";
 import {
-  AgentFilterSet,
-  AgentGrouping,
-  AgentListSort,
-  AGENT_SORT_OPTIONS,
-  groupAgents,
-  matchesAgentSearch,
-  matchesFilterSet,
-  sortAgentList,
-} from "./agentList";
+  AgentFilterSet, AgentGrouping, groupAgents, matchesAgentSearch } from "./agentList";
+import { AgentFilters, SortDir, SortKey, matchesFilters, sortAgents, sortSpec } from "./agentFilters";
 
 export type SaveOutcome =
   /** The card stays in the list and travels to its sorted place. */
@@ -37,9 +30,10 @@ export type SaveOutcome =
 export interface SaveContext {
   agents: Agent[];
   queries: Query[];
-  filters: AgentFilterSet;
+  filters: AgentFilters;
   search: string;
-  sort: AgentListSort;
+  sort: SortKey;
+  sortDir: SortDir;
   grouping: AgentGrouping;
   /** The section the card sat in before the save — only meaningful while grouping is on. */
   sectionBefore?: string | null;
@@ -47,10 +41,10 @@ export interface SaveContext {
 
 /** The list as it will be rendered once the save lands. */
 const listAfter = (saved: Agent, ctx: SaveContext): Agent[] =>
-  sortAgentList(
-    ctx.agents.filter((a) => matchesFilterSet(a, ctx.queries, ctx.filters) && matchesAgentSearch(a, ctx.search)),
+  sortAgents(
+    ctx.agents.filter((a) => matchesFilters(a, ctx.queries, ctx.filters) && matchesAgentSearch(a, ctx.search)),
     ctx.sort,
-    ctx.queries,
+    ctx.sortDir,
   );
 
 /** Which group section an agent lands in — null when grouping is off. */
@@ -70,12 +64,12 @@ export function sectionFor(agent: Agent, ctx: SaveContext): string | null {
  */
 export function saveOutcome(saved: Agent, ctx: SaveContext): SaveOutcome {
   const survives =
-    matchesFilterSet(saved, ctx.queries, ctx.filters) && matchesAgentSearch(saved, ctx.search);
+    matchesFilters(saved, ctx.queries, ctx.filters) && matchesAgentSearch(saved, ctx.search);
   if (!survives) return { kind: "filtered-out" };
 
   const after = listAfter(saved, ctx);
   const index = after.findIndex((a) => a.id === saved.id);
-  const sortLabel = AGENT_SORT_OPTIONS.find((o) => o.key === ctx.sort)?.label ?? String(ctx.sort);
+  const sortLabel = sortSpec(ctx.sort).label;
   const sectionAfter = sectionFor(saved, ctx);
   return {
     kind: "travel",

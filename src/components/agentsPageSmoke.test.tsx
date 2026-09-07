@@ -39,7 +39,7 @@ describe("/agents renders", () => {
 
   it("…and that state suppresses the toolbar, which has nothing to act on", () => {
     const html = renderPage(list(), "/agents");
-    expect(html).not.toContain("Filters");
+    expect(html).not.toContain("Filter");
   });
 
   /**
@@ -58,7 +58,7 @@ describe("/agents renders", () => {
   /** The toolbar's tripwire, moved here from the blank account with the empty-state build. */
   it("…and the toolbar returns as soon as there is one agent", () => {
     const html = renderPageSeeded(list(), "/agents");
-    expect(html).toContain("Filters");
+    expect(html).toContain("Filter");
     expect(html).not.toContain("These are the people who will champion your words.");
   });
 });

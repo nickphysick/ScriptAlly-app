@@ -71,7 +71,10 @@ import {
 import { BUMP_MS, EXIT_MS, SAVE_BREATH_MS, SAVE_FADE_IN_MS, SAVE_FADE_OUT_MS } from "../../lib/agentMotion";
 import { saveNotice, saveOutcome, sectionFor } from "../../lib/agentSaveOutcome";
 import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
-import { AgentToolbar, AppliedTag, AgentAppliedTags } from "./AgentToolbar";
+import { AgentToolbar, AppliedTag, AgentAppliedTags, appliedTags } from "./AgentToolbar";
+import {
+  AgentFilters, DEFAULT_SORT, SortDir, SortKey, emptyFilters, matchesFilters, sortAgents, sortSpec,
+} from "../../lib/agentFilters";
 import { ContactListEmptyState } from "./ContactListEmptyState";
 import { ContactPeek } from "./ContactPeek";
 import { AgentDrawer } from "./AgentDrawer";
@@ -128,9 +131,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return matchGenre(ms?.genre);
   }, [manuscripts]);
 
-  const [filters, setFilters] = useState<AgentFilterSet>(emptyFilterSet);
+  const [filters, setFilters] = useState<AgentFilters>(emptyFilters);
   const [search, setSearch] = useState(searchQuery?.trim() || "");
-  const [sort, setSort] = useState<AgentListSort>(DEFAULT_AGENT_SORT);
+  const [sort, setSort] = useState<SortKey>(DEFAULT_SORT);
+  const [sortDir, setSortDir] = useState<SortDir>(sortSpec(DEFAULT_SORT).defaultDir);
   const [grouping, setGrouping] = useState<AgentGrouping>("none");
   // A draft-only agent that isn't persisted until Done passes validation (decision 16).
   const [newAgent, setNewAgent] = useState<Agent | null>(null);
@@ -249,21 +253,18 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
 
   // Both axes counted over the WHOLE list — a filter row must state what it would reveal, so it
   // can never read from the already-filtered view.
-  const counts = useMemo(() => agentAxisCounts(agents, queries), [agents, queries]);
-  const starCounts = useMemo(
-    () => [4, 3].map((min) => ({ min, n: starTierCount(agents, min) })),
-    [agents],
-  );
-  const locCounts = useMemo(() => locationCounts(agents), [agents]);
-
+  /**
+   * ⚠️ FILTER, SEARCH AND SORT ARE APPLIED BEFORE THE VIEW IS CONSULTED, which is what makes the
+   * three renderers three renderers rather than three lists. A view that filtered for itself
+   * would be a second set of rules, and the counts would stop agreeing across a switch.
+   */
   const visible = useMemo(
-    () =>
-      sortAgentList(
-        agents.filter((a) => matchesFilterSet(a, queries, filters) && matchesAgentSearch(a, search)),
-        sort,
-        queries,
-      ),
-    [agents, queries, filters, search, sort],
+    () => sortAgents(
+      agents.filter((a) => matchesFilters(a, queries, filters) && matchesAgentSearch(a, search)),
+      sort,
+      sortDir,
+    ),
+    [agents, queries, filters, search, sort, sortDir],
   );
   // The unsaved new agent always rides at the front of the grid, immune to filter and sort.
   const shown = useMemo(() => (newAgent ? [newAgent, ...visible] : visible), [newAgent, visible]);
@@ -283,18 +284,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   // sort is chosen applies within each section for free.
   const groups = useMemo(() => groupAgents(shown, grouping, queries), [shown, grouping, queries]);
 
-  /** One tag per applied value, worded from the same label maps the popover reads. */
-  const appliedTags: AppliedTag[] = useMemo(() => {
-    const drop = <K extends keyof AgentFilterSet>(facet: K, v: AgentFilterSet[K][number]) => () =>
-      setFilters((f) => ({ ...f, [facet]: (f[facet] as (typeof v)[]).filter((x) => x !== v) } as AgentFilterSet));
-    return [
-      ...filters.standing.map((k) => ({ label: STANDING_LABEL[k as AgentStanding], onRemove: drop("standing", k) })),
-      ...filters.turn.map((k) => ({ label: TURN_LABEL[k as Exclude<AgentTurn, null>], onRemove: drop("turn", k) })),
-      ...filters.door.map((k) => ({ label: DOOR_LABEL[k as AgentDoor], onRemove: drop("door", k) })),
-      ...filters.stars.map((n) => ({ label: `${"★".repeat(n)} and up`, onRemove: drop("stars", n) })),
-      ...filters.loc.map((c) => ({ label: countryName(c) || c, onRemove: drop("loc", c) })),
-    ];
-  }, [filters]);
+  /** ONE tag per applied value, built from the same set the popover reads. */
+  const tags: AppliedTag[] = useMemo(() => appliedTags(filters, setFilters), [filters]);
 
   // ── Flip + buffered draft (decision 1) ────────────────────────────────────
   // ONE card is open at a time. Opening clones the agent into `draft`; every editor interaction
@@ -410,6 +401,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         filters,
         search,
         sort,
+        sortDir,
         grouping,
         sectionBefore: sectionBeforeSave.current,
       });
@@ -590,7 +582,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     // very fact the grouping is keyed on.
     const beforeAgent = agents.find((a) => a.id === draft.id) ?? newAgent;
     sectionBeforeSave.current = beforeAgent
-      ? sectionFor(beforeAgent, { agents, queries, filters, search, sort, grouping })
+      ? sectionFor(beforeAgent, { agents, queries, filters, search, sort, sortDir, grouping })
       : null;
     // Only an EXISTING agent has a previous version; a create has nothing to revert to, and
     // "Undo" there would mean deletion, which this page deliberately has no affordance for.
@@ -815,7 +807,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       notes: "",
     };
     // Clear every narrowing control so the new card can't be born hidden behind a filter.
-    setFilters(emptyFilterSet());
+    setFilters(emptyFilters());
     setSearch("");
     // FIRST + settle: where is everything now? Measured BEFORE the insert, so the cards about to
     // be displaced can be sent back to their old places and released into the bump.
@@ -998,24 +990,21 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
              frame rather than the row appearing first and the list dropping in under it. */
          toolbar={pageState === "list" ? (
           <AgentToolbar
+            agents={agents}
+            queries={queries}
             view={view}
             onView={setView}
             search={search}
             onSearch={setSearch}
             filters={filters}
             onFilters={setFilters}
-            counts={counts}
-            starCounts={starCounts}
-            locCounts={locCounts}
+            sort={sort}
+            sortDir={sortDir}
+            onSort={(k, d) => { setSort(k); setSortDir(d); }}
+            grouping={grouping2}
+            onGrouping={setGrouping2}
             resultCount={visible.length}
             total={agents.length}
-            group={grouping}
-            groupOptions={AGENT_GROUP_OPTIONS}
-            onGroup={(k) => setGrouping(k as AgentGrouping)}
-            sort={sort}
-            sortOptions={AGENT_SORT_OPTIONS}
-            defaultSort={DEFAULT_AGENT_SORT}
-            onSort={(k) => setSort(k as AgentListSort)}
           />
          ) : undefined}
        >
@@ -1040,7 +1029,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
 
         {/* Applied filters live OUTSIDE the popover — closing it must never hide what is
             filtering the list. Each tag removes its own value; "Clear all" empties the set. */}
-        <AgentAppliedTags tags={appliedTags} onClear={() => setFilters(emptyFilterSet())} />
+        <AgentAppliedTags tags={tags} onClear={() => setFilters(emptyFilters())} />
 
         {/* ⚠️ ONE SET OF AGENTS, THREE RENDERERS. Filter, search and sort have all been applied by
             the time `shown` gets here, so the view changes what draws and nothing else — which is
@@ -1109,7 +1098,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
                 type="button"
                 className="act"
                 onClick={() => {
-                  setFilters(emptyFilterSet());
+                  setFilters(emptyFilters());
                   setSearch("");
                   setNotice(null);
                   // let the cleared list render, then bring the card into view

@@ -129,7 +129,8 @@ describe("the page mounts each state", () => {
    */
   it("…with no toolbar, because none of its controls has anything to act on", () => {
     const html = render();
-    for (const control of ["Filters", "Group", "Sort"]) {
+    /* the control is "Filter" since the toolbar became the Query Centre's (Phase 6) */
+    for (const control of ["Filter", "Group", "Sort"]) {
       expect(html, `${control} rendered against an empty list`).not.toContain(control);
     }
     expect(html, "the toolbar rendered against an empty list").not.toContain("agl-toolbar");
@@ -143,13 +144,13 @@ describe("the page mounts each state", () => {
     state.collectionsReady = false;
     const html = render();
     expect(html).not.toContain(CLE_HERO.heading);
-    expect(html).not.toContain("Filters");
+    expect(html).not.toContain("Filter");
   });
 
   it("returns the toolbar and drops the empty state as soon as there is one agent", () => {
     state.agents = [AGENT];
     const html = render();
-    expect(html).toContain("Filters");
+    expect(html).toContain("Filter");
     expect(html).not.toContain(CLE_HERO.heading);
   });
 

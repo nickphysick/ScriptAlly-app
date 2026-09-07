@@ -102,6 +102,19 @@ export const ContactListLab: React.FC = () => {
           the page owns the scroll inside it. */}
       <div style={{ flex: 1, minHeight: 0, overflow: "hidden", background: "var(--shell-canvas)" }}>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        {/* ⚠️ NO ROUTER OF ITS OWN, AND THIS WAS TRIED AND REVERTED. The page keeps its view in
+            the URL, and the view switch appeared to rewrite the address to `/?view=list` and drop
+            `#/contact-lab` with it — so a MemoryRouter looked like the fix. It is not: this route
+            renders INSIDE the app's own BrowserRouter, and a second one throws "You cannot render
+            a <Router> inside another <Router>", which the error boundary catches and the whole lab
+            becomes "Something went wrong". It failed only under the signed-in harness and rendered
+            perfectly signed-out, which is the kind of difference a browser tab does not show you.
+
+            ⚠️ THE WART IT WAS MEANT TO FIX IS REAL AND IS ACCEPTED. Switching views here leaves
+            the address at `/?view=list` without the hash; the lab keeps rendering because the hash
+            is read once rather than watched, but a REFRESH then lands on the app. It is a
+            consequence of the lab being a hash route inside a router that owns the pathname, and
+            the shipped route (`/agents`) has no such problem. */}
         <DbContext.Provider value={value as any}>
           {/* remounted per view so the page's load animation and measurements run from scratch */}
           <AgentList key={view} onNavigate={() => {}} />

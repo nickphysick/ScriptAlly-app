@@ -83,15 +83,16 @@ describe("baked decision 6 — no 3D flip below md, and now no second editor hos
   });
 });
 
+/* ⚠️ THE LAW SURVIVES A REBUILT TOOLBAR (Phase 6): below md the SAME children present in the
+   sheet, one set of options in two chassis. What changed is who draws the desktop half — the
+   Query Centre's shared popover rather than this page's private one — so the assertion moved
+   from a private wrapper's markup to the chooser that picks between them. */
 describe("toolbar popovers present in the sheet below md", () => {
-  it("the same panel children render in MobileSheet, wrapped for the .aglist scope", () => {
-    expect(toolbar).toContain('from "../shell/MobileSheet"');
-    expect(toolbar).toContain('<div className="aglist agl-inpop">{children}</div>');
-    expect(toolbar).toContain("open && !isMobile");
-    // the anchored popover's outside-click/Escape machinery stands down on mobile
-    expect(toolbar).toContain("if (!open || isMobile) return;");
-    // the wrapper must not bring the page root's scroll geometry into the sheet
-    expect(css).toContain(".aglist.agl-inpop { height: auto; overflow: visible; }");
+  it("the same children render in MobileSheet, wrapped for the .aglist scope", () => {
+    expect(toolbar).toContain("<MobileSheet");
+    expect(toolbar).toContain('<div className="aglist agl-inpop">{children}{foot}</div>');
+    expect(toolbar, "the sheet builds its own option list, so the two chassis can offer different filters")
+      .not.toMatch(/isMobile \?[\s\S]{0,200}FACETS\.map/);
   });
 });
 

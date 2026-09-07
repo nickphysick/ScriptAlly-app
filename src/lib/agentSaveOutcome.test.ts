@@ -8,7 +8,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { saveNotice, saveOutcome, sectionFor } from "./agentSaveOutcome";
-import { emptyFilterSet } from "./agentList";
+import { emptyFilters } from "./agentFilters";
 import { Agent, Query, QueryStatus, SubmissionMethod, SubmissionStatus } from "../types";
 
 const mkAgent = (over: Partial<Agent>): Agent => ({
@@ -25,30 +25,33 @@ const mkQuery = (over: Partial<Query>): Query => ({
 } as Query);
 
 const ctx = (over: Partial<Parameters<typeof saveOutcome>[1]> = {}) => ({
-  agents: [] as Agent[], queries: [] as Query[], filters: emptyFilterSet(), search: "",
-  sort: "az" as const, grouping: "none" as const, ...over,
+  /* ⚠️ THE MODEL MOVED (Phase 6): four facets and six orders, so the sort keys and the facet
+     names change with it. The CLAIMS below are unchanged — a saved card travels to a knowable
+     place under the ACTIVE sort, or it leaves because it no longer matches. */
+  agents: [] as Agent[], queries: [] as Query[], filters: emptyFilters(), search: "",
+  sort: "name" as const, sortDir: "asc" as const, grouping: "none" as const, ...over,
 });
 
 describe("saveOutcome · the card travels to a KNOWABLE place", () => {
   it("states a 1-based position under the active sort — a person counts cards, not array slots", () => {
     const saved = mkAgent({ id: "b", name: "Bell, Cara" });
     const agents = [mkAgent({ id: "a", name: "Achebe, Rosalind" }), saved, mkAgent({ id: "c", name: "Dunn, Sophie" })];
-    const out = saveOutcome(saved, ctx({ agents, sort: "az" }));
-    expect(out).toMatchObject({ kind: "travel", index: 2, total: 3, sortLabel: "Name A–Z" });
+    const out = saveOutcome(saved, ctx({ agents, sort: "name" }));
+    expect(out).toMatchObject({ kind: "travel", index: 2, total: 3, sortLabel: "Agent name" });
   });
 
   it("the position follows the ACTIVE sort, not insertion order", () => {
     const saved = mkAgent({ id: "b", name: "Bell", starRating: 5 });
     const agents = [mkAgent({ id: "a", name: "Achebe", starRating: 2 }), saved];
     // by name, Bell is second; by rating, Bell is first
-    expect(saveOutcome(saved, ctx({ agents, sort: "az" }))).toMatchObject({ index: 2 });
-    expect(saveOutcome(saved, ctx({ agents, sort: "rating" }))).toMatchObject({ index: 1, sortLabel: "Star rating" });
+    expect(saveOutcome(saved, ctx({ agents, sort: "name" }))).toMatchObject({ index: 2 });
+    expect(saveOutcome(saved, ctx({ agents, sort: "priority", sortDir: "desc" }))).toMatchObject({ index: 1, sortLabel: "Priority" });
   });
 
   it("names the sort in the notice, so the position means something", () => {
     const saved = mkAgent({ id: "b", name: "Marcus Reed" });
-    const out = saveOutcome(saved, ctx({ agents: [saved], sort: "az" }));
-    expect(saveNotice("Marcus Reed", out)).toBe("Marcus Reed saved. Moved to position 1 under Name A–Z.");
+    const out = saveOutcome(saved, ctx({ agents: [saved], sort: "name" }));
+    expect(saveNotice("Marcus Reed", out)).toBe("Marcus Reed saved. Moved to position 1 under Agent name.");
   });
 });
 
@@ -57,7 +60,7 @@ describe("saveOutcome · a card that fails the filters LEAVES, and says so", () 
     const saved = mkAgent({ id: "new", name: "Marcus Reed" }); // no queries at all
     const out = saveOutcome(
       saved,
-      ctx({ agents: [saved], filters: { ...emptyFilterSet(), standing: ["active"] } }),
+      ctx({ agents: [saved], filters: { ...emptyFilters(), history: ["Active queries"] } }),
     );
     expect(
       out.kind,
@@ -71,7 +74,7 @@ describe("saveOutcome · a card that fails the filters LEAVES, and says so", () 
     const queries = [mkQuery({ agentId: "new" })];
     const out = saveOutcome(
       saved,
-      ctx({ agents: [saved], queries, filters: { ...emptyFilterSet(), standing: ["active"] } }),
+      ctx({ agents: [saved], queries, filters: { ...emptyFilters(), history: ["Active queries"] } }),
     );
     expect(out.kind).toBe("travel");
   });

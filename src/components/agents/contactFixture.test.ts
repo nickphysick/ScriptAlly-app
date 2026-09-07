@@ -107,6 +107,16 @@ describe("the Contact list fixture — a cast, not a crowd", () => {
     expect(A.some((a) => !(a.agency || "").trim()), "an agent with no agency").toBe(true);
   });
 
+  /* ⚠️ THE FIELD THAT WAS A MONOCULTURE. A shared `dateAdded` made "Date added" sort exactly like
+     "Agent name" — a control that measured as doing nothing — and put every agent in one month
+     column on the board. It was found by a measurement, not by reading the fixture. */
+  it("every agent has its OWN added date, across more than one month", () => {
+    const dates = A.map((a) => a.dateAdded);
+    expect(new Set(dates).size, "two agents share an added date — the sort falls through to the name tiebreak").toBe(A.length);
+    const months = new Set(dates.map((d) => d.slice(0, 7)));
+    expect(months.size, "every agent was added in the same month — the month grouping has one column").toBeGreaterThan(2);
+  });
+
   it("the stated case list is honest — one claim per case, none duplicated", () => {
     expect(new Set(CONTACT_FIXTURE_CASES).size).toBe(CONTACT_FIXTURE_CASES.length);
     expect(CONTACT_FIXTURE_CASES.length).toBeGreaterThan(12);

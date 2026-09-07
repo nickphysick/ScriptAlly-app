@@ -2,388 +2,239 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Agent list — THE TOOLBAR (rebuild v2, decisions 3 + 4).
+ * THE TOOLBAR — search, three desk popovers, the view switch, and a count line beneath.
  *
- * One row replaces five stacked bands (chips, two full-width selects, search, colour legend,
- * count line). Left: the search field, then three controls — Filters · Group · Sort — visually
- * IDENTICAL at rest, so the row reads as one instrument rather than three competing ones. Right:
- * the result count in mono.
+ * ⚠️ IT MOUNTS THE QUERY CENTRE'S OWN CONTROLS RATHER THAN A SECOND SET. `ToolbarSearch` and
+ * `ToolbarButton` were extracted for exactly this; `F12Popover`'s `mount` chassis is the desk —
+ * parchment rim, inset frame, sage band header — with `PRow` for the radio rows and their
+ * sub-captions; `QueryViewSwitch` is the switch. This file owns which OPTIONS there are and what
+ * they mean, and nothing about how a popover looks. The version it replaces drew its own popover,
+ * its own rows and its own chevron, which is three chances to drift from a page one click away.
  *
- * The shared active state is the whole point: a control set away from its default takes the pink
- * treatment and its label swaps to the chosen value ("Star rating", "Whose turn"), so the row
- * states what it is doing without being opened. Filters can't do that — it holds many values at
- * once — so it shows a count badge and spells the actual values out as removable tags beneath the
- * toolbar. Closing the popover must never hide what is filtering the list.
+ * ⚠️ THE ROW COUNTS READ THE WHOLE LIST, NEVER THE FILTERED VIEW — the law `StatTiles` states for
+ * the tiles, and the same reason: a count of what you would see after clicking reads 0 for every
+ * option you have not chosen.
  *
- * The colour legend is DELETED: it taught the same vocabulary the filter list already carries, in
- * a second grammar.
+ * ⚠️ APPLIED VALUES RENDER BENEATH THE ROW, OUTSIDE THE POPOVER. Closing a popover must never
+ * hide what is filtering the list.
+ *
+ * ⚠️ BELOW md THE SAME CHILDREN PRESENT IN `MobileSheet`, which is Mobile Pass 1's law and is
+ * kept: an anchored popover is a desktop idiom, and the sheet owns its own dismissal there. The
+ * CHILDREN are identical in both — one set of options, two chassis — because a mobile-only copy
+ * is how the two come to offer different filters.
+ *
+ * ⚠️ AND GROUP SAYS WHAT IT DOES. Grouping arranges the BOARD; in Grid and List it would have
+ * nothing to arrange, so the control is disabled there and its title says why — a control that
+ * silently did nothing would be worse than one that explains itself.
  */
-import { QueryViewSwitch } from "../queries/QueryViewSwitch";
-import { AGENT_VIEWS, AgentView } from "./agentViews";
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Filter, Rows3, Search, SlidersHorizontal } from "lucide-react";
+import React from "react";
 import { PageTally } from "../shell/WorkspacePageGrid";
+import { ToolbarButton, ToolbarSearch } from "../shared/ToolbarButton";
+import { QueryViewSwitch } from "../queries/QueryViewSwitch";
+import { F12Popover, PopSection, PRow } from "../shell/F12Shell";
+import { useFixedMenu } from "../forms/useFixedMenu";
+import { AGENT_VIEWS, AgentView } from "./agentViews";
+import { Agent, Query } from "../../types";
 import {
-  AgentDoor,
-  AgentFilterSet,
-  AgentStanding,
-  AgentTurn,
-  DOOR_LABEL,
-  DOOR_ORDER,
-  STANDING_LABEL,
-  STANDING_ORDER,
-  TURN_LABEL,
-  TURN_ORDER,
-  AgentAxisCounts,
-  emptyFilterSet,
-  filterCount,
-} from "../../lib/agentList";
-import { PopoverAlign, popoverAlign } from "../../lib/popoverAlign";
-import { countryName } from "../../lib/territory";
+  AgentFilters, FacetKey, SORTS, SortDir, SortKey, emptyFilters, facetOptions, filterCount, sortSpec,
+} from "../../lib/agentFilters";
+import { AgentGroupingKey, GROUPINGS } from "../../lib/agentBoard";
 import { MobileSheet } from "../shell/MobileSheet";
 import { useIsMobile } from "../shell/mobileChrome";
 
-/* ── the popover shell: click-away, Escape, one open at a time ─────────────── */
-
-interface PopProps {
-  id: string;
-  label: string;
-  icon: React.ReactNode;
-  /** Set away from its default → the shared pink treatment. */
-  active: boolean;
-  /** Filters shows a count instead of swapping its label. */
-  badge?: number;
-  width?: number;
-  open: boolean;
-  onOpen: (id: string | null) => void;
-  children: React.ReactNode;
-}
-
-const Pop: React.FC<PopProps> = ({ id, label, icon, active, badge, width = 288, open, onOpen, children }) => {
-  const wrapRef = useRef<HTMLSpanElement>(null);
-  const [align, setAlign] = useState<PopoverAlign>("left");
-  // Mobile Pass 1: below md the SAME panel children present in the MobileSheet chassis instead
-  // of the anchored popover — the sheet owns dismissal there (scrim + Escape), so the anchored
-  // popover's outside-click/align machinery stands down.
-  const isMobile = useIsMobile();
-
-  // COLLISION: left-anchored is the default because it reads as belonging to its control, but the
-  // rightmost control's panel is wider than the space beside it and would run off the container.
-  // Measured against the CONTENT COLUMN rather than the window, because the column is what the
-  // reader perceives as the page's edge. Measured in a layout effect so the flip happens before
-  // paint — deciding after would show one frame in the wrong place.
-  useLayoutEffect(() => {
-    if (!open || isMobile) return;
-    const btn = wrapRef.current?.firstElementChild as HTMLElement | undefined;
-    const container = wrapRef.current?.closest(".agl-inner") as HTMLElement | null;
-    if (!btn || !container) return;
-    const b = btn.getBoundingClientRect();
-    const c = container.getBoundingClientRect();
-    setAlign(
-      popoverAlign({
-        anchorLeft: b.left,
-        anchorRight: b.right,
-        popWidth: width,
-        containerLeft: c.left,
-        containerRight: c.right,
-      }),
-    );
-  }, [open, width, isMobile]);
-
-  useEffect(() => {
-    if (!open || isMobile) return;
-    const onDocDown = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) onOpen(null);
-    };
-    // Escape closes the popover and goes no further — a dropdown dismissal must never reach the
-    // page handler that discards an open card's draft. (The sheet's own capture-phase Escape
-    // gives the mobile presentation the same guarantee.)
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.stopImmediatePropagation();
-      e.preventDefault();
-      onOpen(null);
-    };
-    document.addEventListener("mousedown", onDocDown);
-    window.addEventListener("keydown", onKey, true);
-    return () => {
-      document.removeEventListener("mousedown", onDocDown);
-      window.removeEventListener("keydown", onKey, true);
-    };
-  }, [open, onOpen, isMobile]);
-
-  return (
-    <span className="agl-pw" ref={wrapRef}>
-      <button
-        type="button"
-        className={`agl-ctl${active ? " act" : ""}`}
-        aria-expanded={open}
-        aria-haspopup="true"
-        onClick={() => onOpen(open ? null : id)}
-      >
-        {icon}
-        {label}
-        {badge ? <span className="agl-badge">{badge}</span> : null}
-        <ChevronDown className="cv" width={12} height={12} aria-hidden="true" />
-      </button>
-      {open && !isMobile && (
-        <div className={`agl-pop${align === "right" ? " right" : ""}`} style={{ width }} role="dialog" aria-label={label}>
-          {children}
-        </div>
-      )}
-      {isMobile && (
-        <MobileSheet open={open} onClose={() => onOpen(null)} ariaLabel={label}>
-          {/* The sheet portals to body; the .aglist wrapper re-establishes the page's token
-              scope + descendant selectors (every option row is `.aglist .agl-*`-scoped). */}
-          <div className="aglist agl-inpop">{children}</div>
-        </MobileSheet>
-      )}
-    </span>
-  );
-};
-
-/** A checkbox row with its count. Zero-count rows stay VISIBLE but inert — their absence is
- *  information ("nobody is closed" is a fact worth reading), and hiding them makes the list
- *  jump as data changes. */
-const Row: React.FC<{ label: React.ReactNode; count: number; on: boolean; onToggle: () => void }> = ({
-  label, count, on, onToggle,
-}) => (
-  <button
-    type="button"
-    className={`agl-orow${on ? " sel" : ""}${count === 0 ? " off" : ""}`}
-    disabled={count === 0}
-    aria-pressed={on}
-    onClick={onToggle}
-  >
-    <span className="box">{on && <Check width={9} height={9} strokeWidth={3.4} aria-hidden="true" />}</span>
-    <span className="lb">{label}</span>
-    <span className="ct">{count}</span>
-  </button>
+const FILTER_ICON = (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <path d="M3 5h18l-7 8v6l-4 2v-8z" />
+  </svg>
+);
+const GROUP_ICON = (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <rect x="3" y="4" width="18" height="6" rx="1" /><rect x="3" y="14" width="18" height="6" rx="1" />
+  </svg>
+);
+const SORT_ICON = (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+    <path d="M4 7h13M4 12h9M4 17h5" />
+  </svg>
 );
 
-/** A single-choice row (Group / Sort), ticked rather than boxed. */
-const Choice: React.FC<{ label: string; on: boolean; onPick: () => void }> = ({ label, on, onPick }) => (
-  <button type="button" className={`agl-orow${on ? " sel" : ""}`} role="menuitemradio" aria-checked={on} onClick={onPick}>
-    <span className="lb">{label}</span>
-    {on && <Check className="tick" width={14} height={14} strokeWidth={3} aria-hidden="true" />}
-  </button>
-);
+/** The four facets, in the ref's order, with the words the popover heads them with. */
+export const FACETS: readonly { key: FacetKey; label: string }[] = [
+  { key: "door", label: "Their door" },
+  { key: "genre", label: "Genres sought" },
+  { key: "history", label: "Your history" },
+  { key: "reply", label: "Response time" },
+];
 
-const Stars: React.FC<{ n: number }> = ({ n }) => (
-  <span className="agl-fstars" aria-hidden="true">{"★".repeat(n)}</span>
-);
-
-/* ── the toolbar ───────────────────────────────────────────────────────────── */
+type Pop = "filter" | "group" | "sort" | null;
 
 export interface AgentToolbarProps {
+  agents: Agent[];
+  queries: Query[];
   search: string;
   onSearch: (v: string) => void;
-  filters: AgentFilterSet;
-  onFilters: (f: AgentFilterSet) => void;
-  counts: AgentAxisCounts;
-  starCounts: { min: number; n: number }[];
-  locCounts: { code: string; n: number }[];
-  /** How many agents the current filter set yields — the popover footer states it live. */
-  resultCount: number;
-  total: number;
-  /** ⚠️ THE PAGE'S CREATION ACTION, WHICH USED TO SIT IN THE MASTHEAD (in-flow masthead, step 1).
-   *  The masthead holds no actions, so every button that was in one moved to its page's control
-   *  row — this row. It is the rightmost thing here by the row's own grammar: tally left, verbs
-   *  right, primary last. */
-  /** Group + Sort are single-choice controls; their option lists are owned by the caller. */
-  group: string;
-  groupOptions: readonly { key: string; label: string }[];
-  onGroup: (k: string) => void;
-  sort: string;
-  sortOptions: readonly { key: string; label: string }[];
-  defaultSort: string;
-  onSort: (k: string) => void;
-  searchRef?: React.RefObject<HTMLInputElement>;
-  /**
-   * ⚠️ ADDITIVE (Phase 5) — the Query Centre's own switch, with its own three segments. Grid, List
-   * and Board are three renderers over ONE set: filter, search and sort have all been applied
-   * before the view is consulted, so switching does not move a reader within the set.
-   */
+  filters: AgentFilters;
+  onFilters: (f: AgentFilters) => void;
+  sort: SortKey;
+  sortDir: SortDir;
+  onSort: (k: SortKey, d: SortDir) => void;
+  grouping: AgentGroupingKey;
+  onGrouping: (k: AgentGroupingKey) => void;
   view: AgentView;
   onView: (v: AgentView) => void;
+  /** How many agents survive the current filter, and how many there are. */
+  resultCount: number;
+  total: number;
+  searchRef?: React.RefObject<HTMLInputElement>;
 }
 
 export const AgentToolbar: React.FC<AgentToolbarProps> = ({
-  search, onSearch, filters, onFilters, counts, starCounts, locCounts,
-  resultCount, total, group, groupOptions, onGroup, sort, sortOptions, defaultSort, onSort, searchRef,
-  view, onView,
+  agents, queries, search, onSearch, filters, onFilters, sort, sortDir, onSort,
+  grouping, onGrouping, view, onView, resultCount, total, searchRef,
 }) => {
-  const [openPop, setOpenPop] = useState<string | null>(null);
-  const nFilters = filterCount(filters);
+  const [pop, setPop] = React.useState<Pop>(null);
+  const panelRef = React.useRef<HTMLElement | null>(null);
+  /* ⚠️ ONE HOOK PER CONTROL, AND ITS OWN `triggerRef` GOES ON THE BUTTON. `useFixedMenu` RETURNS
+     the trigger ref — it does not take one — so passing a ref in the options was a type error I
+     had silenced with a cast, and the cast bought a panel anchored to an element that was never
+     attached to anything. A cast that quiets a signature is the signature telling you the shape
+     is wrong. */
+  const filterMenu = useFixedMenu<HTMLButtonElement>(pop === "filter", { placement: "auto", align: "auto", menuRef: panelRef });
+  const groupMenu = useFixedMenu<HTMLButtonElement>(pop === "group", { placement: "auto", align: "auto", menuRef: panelRef });
+  const sortMenu = useFixedMenu<HTMLButtonElement>(pop === "sort", { placement: "auto", align: "auto", menuRef: panelRef });
+  const menuStyle = pop === "filter" ? filterMenu.menuStyle : pop === "group" ? groupMenu.menuStyle : sortMenu.menuStyle;
 
-  const toggle = <K extends keyof AgentFilterSet>(facet: K, value: AgentFilterSet[K][number]) => {
-    const list = filters[facet] as (typeof value)[];
-    const next = list.includes(value) ? list.filter((x) => x !== value) : [...list, value];
-    onFilters({ ...filters, [facet]: next } as AgentFilterSet);
+  const isMobile = useIsMobile();
+  const spec = sortSpec(sort);
+  const nFilters = filterCount(filters);
+  /* the board IS grouped; in Grid and List there is nothing to arrange */
+  const groupLive = view === "board";
+
+  /**
+   * ⚠️ ONE SET OF CHILDREN, TWO CHASSIS. Below md the sheet takes them; above, the desk popover
+   * does. Writing the options twice is how a mobile reader comes to be offered a different filter
+   * from a desktop one, which is a difference nobody would ever see reported.
+   */
+  const Desk: React.FC<{ kind: Exclude<Pop, null>; title: string; width: number; foot?: React.ReactNode; children: React.ReactNode }> =
+    ({ kind, title, width, foot, children }) => {
+      if (pop !== kind) return null;
+      if (isMobile) {
+        return (
+          <MobileSheet open onClose={() => setPop(null)} ariaLabel={title}>
+            <div className="aglist agl-inpop">{children}{foot}</div>
+          </MobileSheet>
+        );
+      }
+      return (
+        <F12Popover width={width} chassis="mount" title={title} style={menuStyle} panelRef={panelRef} foot={foot} onClose={() => setPop(null)}>
+          {children}
+        </F12Popover>
+      );
+    };
+
+  const toggle = (key: FacetKey, value: string) => {
+    const on = filters[key].includes(value);
+    onFilters({ ...filters, [key]: on ? filters[key].filter((v) => v !== value) : [...filters[key], value] });
   };
 
-  const groupLabel = groupOptions.find((o) => o.key === group)?.label ?? "Group";
-  const sortLabel = sortOptions.find((o) => o.key === sort)?.label ?? "Sort";
-
   return (
-    <div className="agl-toolbar">
-      {/* ⚠️ THE TALLY LEADS THE ROW (in-flow masthead, step 1). It used to close it, on the right,
-          which was fine while the row was a strip under a header that named the page. Now that the
-          masthead scrolls away this row is what remains, and what remains should lead with the fact
-          rather than end with it. `PageTally` carries its own `margin-right: auto`, so it is also
-          what pushes everything below to the right — there is no spacer element.
-          ⚠️ AND THE FIGURES ARE UNCHANGED: `{resultCount} of {total}`, the page's own existing
-          string, moved rather than restated. */}
-      <PageTally value={`${resultCount} of ${total}`} />
-      <div className="agl-search">
-        <Search width={14} height={14} aria-hidden="true" />
-        <input
+    <>
+      <div className="agl-toolbar">
+        <PageTally value={`${resultCount} of ${total}`} />
+        <ToolbarSearch
           ref={searchRef}
-          type="text"
           value={search}
-          onChange={(e) => onSearch(e.target.value)}
-          placeholder="Search agents or agencies…"
-          aria-label="Search agents or agencies"
+          onChange={onSearch}
+          placeholder="Search names, agencies, wishlists…"
+          ariaLabel="Search agents"
         />
+        <ToolbarButton
+          ref={filterMenu.triggerRef} label="Filter" count={nFilters} icon={FILTER_ICON}
+          open={pop === "filter"} onClick={() => setPop((p) => (p === "filter" ? null : "filter"))}
+        />
+        <ToolbarButton
+          ref={groupMenu.triggerRef} label="Group" value={GROUPINGS.find((g) => g.key === grouping)?.label}
+          icon={GROUP_ICON} open={pop === "group"} disabled={!groupLive}
+          title={groupLive ? undefined : "Grouping arranges the board — switch to Board to use it"}
+          onClick={() => setPop((p) => (p === "group" ? null : "group"))}
+        />
+        <ToolbarButton
+          ref={sortMenu.triggerRef} label="Sort" value={spec.label} icon={SORT_ICON}
+          open={pop === "sort"} onClick={() => setPop((p) => (p === "sort" ? null : "sort"))}
+        />
+        <QueryViewSwitch view={view} onView={(v) => onView(v as AgentView)} views={AGENT_VIEWS} />
       </div>
 
-      <Pop
-        id="filters"
-        label="Filters"
-        icon={<Filter width={15} height={15} aria-hidden="true" />}
-        active={nFilters > 0}
-        badge={nFilters}
-        open={openPop === "filters"}
-        onOpen={setOpenPop}
+      <Desk
+        kind="filter" title="Filter" width={346}
+        foot={
+            <div className="f12-pop-mfoot">
+              <button type="button" className="f12-reset" onClick={() => onFilters(emptyFilters())}>Clear all</button>
+              <span className="agl-sp" />
+              <span className="agl-popcount">{resultCount} of {total}</span>
+            </div>
+          }
       >
-        <div className="agl-pk">
-          Where things stand
-          <span className="hint">One of these applies to each agent</span>
-        </div>
-        {STANDING_ORDER.map((k: AgentStanding) => (
-          <Row
-            key={k}
-            label={STANDING_LABEL[k]}
-            count={counts.standing[k]}
-            on={filters.standing.includes(k)}
-            onToggle={() => toggle("standing", k)}
-          />
-        ))}
+          {FACETS.map((f) => (
+            <PopSection key={f.key} label={f.label}>
+              <div className="agl-facets">
+                {facetOptions(agents, queries, f.key).map((o) => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    className={`agl-facetchip${filters[f.key].includes(o.value) ? " on" : ""}`}
+                    aria-pressed={filters[f.key].includes(o.value)}
+                    /* ⚠️ VISIBLE AND INERT AT ZERO, never hidden: its absence is information, and
+                       hiding rows makes the popover jump as the data changes. Tickable-but-empty
+                       is a dead end, so it is disabled rather than merely useless. */
+                    disabled={o.n === 0 && !filters[f.key].includes(o.value)}
+                    onClick={() => toggle(f.key, o.value)}
+                  >
+                    {o.value}<span className="n">{o.n}</span>
+                  </button>
+                ))}
+              </div>
+            </PopSection>
+          ))}
+      </Desk>
 
-        <div className="agl-pdiv" />
-        <div className="agl-pk">
-          Whose turn
-          <span className="hint">Applies within active queries</span>
-        </div>
-        {TURN_ORDER.map((k: Exclude<AgentTurn, null>) => (
-          <Row
-            key={k}
-            label={TURN_LABEL[k]}
-            count={counts.turn[k]}
-            on={filters.turn.includes(k)}
-            onToggle={() => toggle("turn", k)}
-          />
-        ))}
+      <Desk kind="group" title="Group the board" width={326}>
+          {GROUPINGS.map((g) => (
+            <PRow
+              key={g.key} kind="rad" on={grouping === g.key} label={g.label} sub={g.sub}
+              onClick={() => { onGrouping(g.key); setPop(null); }}
+            />
+          ))}
+      </Desk>
 
-        <div className="agl-pdiv" />
-        {/* THEIR DOOR — its own axis, not a value of "where things stand". Their submission
-            status and your query history are facts about different systems: an agency can shut
-            its doors while still holding your full, and both facts stay true. */}
-        <div className="agl-pk">
-          Their door
-          <span className="hint">Independent of your history with them</span>
-        </div>
-        {DOOR_ORDER.map((k: AgentDoor) => (
-          <Row
-            key={k}
-            label={DOOR_LABEL[k]}
-            count={counts.door[k]}
-            on={filters.door.includes(k)}
-            onToggle={() => toggle("door", k)}
-          />
-        ))}
-
-        <div className="agl-pdiv" />
-        <div className="agl-pk">Star rating</div>
-        {starCounts.map(({ min, n }) => (
-          <Row
-            key={min}
-            label={<><Stars n={min} /> and up</>}
-            count={n}
-            on={filters.stars.includes(min)}
-            onToggle={() => toggle("stars", min)}
-          />
-        ))}
-
-        {locCounts.length > 0 && (
-          <>
-            <div className="agl-pdiv" />
-            <div className="agl-pk">Location</div>
-            {locCounts.map(({ code, n }) => (
-              <Row
-                key={code}
-                label={countryName(code) || code}
-                count={n}
-                on={filters.loc.includes(code)}
-                onToggle={() => toggle("loc", code)}
-              />
-            ))}
-          </>
-        )}
-
-        <div className="agl-pfoot">
-          {/* emptyFilterSet(), never a literal — a hand-written list silently misses a new facet
-              the day one is added (which is exactly what happened when the door axis arrived). */}
-          <button type="button" className="lnk" onClick={() => onFilters(emptyFilterSet())}>
-            Clear all
-          </button>
-          {/* The primary states the live result, so ticking a box answers "how many?" before
-              you close the popover — the count updates as you go, it is not an Apply gate. */}
-          <button type="button" className="go" onClick={() => setOpenPop(null)}>
-            Show {resultCount} {resultCount === 1 ? "agent" : "agents"}
-          </button>
-        </div>
-      </Pop>
-
-      <Pop
-        id="group"
-        label={group === "none" ? "Group" : groupLabel}
-        icon={<Rows3 width={15} height={15} aria-hidden="true" />}
-        active={group !== "none"}
-        width={212}
-        open={openPop === "group"}
-        onOpen={setOpenPop}
+      <Desk
+        kind="sort" title="Sort" width={326}
+        foot={
+            <div className="f12-pop-mfoot">
+              <span className="f12-lbl">Order</span>
+              <span className="agl-sp" />
+              {/* ⚠️ THE SEGMENT RELABELS PER KEY. "A to Z" is meaningless over a date and
+                  "Newest" is meaningless over a name; one pair of words for all six would be
+                  wrong for four of them. */}
+              <span className="agl-oseg">
+                {(["asc", "desc"] as const).map((d, i) => (
+                  <button key={d} type="button" className={sortDir === d ? "on" : undefined} onClick={() => onSort(sort, d)}>
+                    {spec.dir[i]}
+                  </button>
+                ))}
+              </span>
+            </div>
+          }
       >
-        <div className="agl-pk">Group by</div>
-        {groupOptions.map((o) => (
-          <Choice key={o.key} label={o.label} on={group === o.key} onPick={() => { onGroup(o.key); setOpenPop(null); }} />
-        ))}
-      </Pop>
-
-      <Pop
-        id="sort"
-        label={sort === defaultSort ? "Sort" : sortLabel}
-        icon={<SlidersHorizontal width={15} height={15} aria-hidden="true" />}
-        active={sort !== defaultSort}
-        width={212}
-        open={openPop === "sort"}
-        onOpen={setOpenPop}
-      >
-        <div className="agl-pk">Sort by</div>
-        {sortOptions.map((o) => (
-          <Choice key={o.key} label={o.label} on={sort === o.key} onPick={() => { onSort(o.key); setOpenPop(null); }} />
-        ))}
-      </Pop>
-
-      {/* ⚠️ `Add new agent` HAS GONE BACK TO THE MASTHEAD (compact header, §1), AND THE ARGUMENT
-          THAT BROUGHT IT HERE IS ANSWERED RATHER THAN OVERRULED. It moved down because the masthead
-          scrolled out of reach and took the page's one action with it; the slim bar carries the same
-          primary now, so the action survives the scroll without the toolbar having to hold it. */}
-      {/* ⚠️ THE QUERY CENTRE'S SWITCH, MOUNTED — not a second one. It already took an additive
-          `views` prop for the To-do page's two segments, so a third caller with three is one
-          array and no new component. */}
-      <QueryViewSwitch view={view} onView={(v) => onView(v as AgentView)} views={AGENT_VIEWS} />
-    </div>
+          {SORTS.map((s) => (
+            <PRow
+              key={s.key} kind="rad" on={sort === s.key} label={s.label} sub={s.sub}
+              /* choosing a key takes ITS most-useful-first direction, not the last key's */
+              onClick={() => onSort(s.key, s.defaultDir)}
+            />
+          ))}
+      </Desk>
+    </>
   );
 };
 
@@ -394,16 +245,31 @@ export interface AppliedTag {
   onRemove: () => void;
 }
 
+/** Every ticked value, as a removable tag. Built from the SAME set the popover reads. */
+export function appliedTags(filters: AgentFilters, onFilters: (f: AgentFilters) => void): AppliedTag[] {
+  const out: AppliedTag[] = [];
+  for (const f of FACETS) {
+    for (const value of filters[f.key]) {
+      out.push({
+        label: value,
+        onRemove: () => onFilters({ ...filters, [f.key]: filters[f.key].filter((v) => v !== value) }),
+      });
+    }
+  }
+  return out;
+}
+
 export const AgentAppliedTags: React.FC<{ tags: AppliedTag[]; onClear: () => void }> = ({ tags, onClear }) => {
   if (!tags.length) return null;
   return (
     <div className="agl-applied">
       {tags.map((t) => (
-        <button type="button" key={t.label} className="agl-atag" onClick={t.onRemove} title={`Remove ${t.label}`}>
-          {t.label} <span className="x" aria-hidden="true">✕</span>
-        </button>
+        <span className="agl-atag" key={t.label}>
+          {t.label}
+          <button type="button" onClick={t.onRemove} aria-label={`Remove ${t.label}`} title="Remove">×</button>
+        </span>
       ))}
-      <button type="button" className="agl-clr" onClick={onClear}>Clear all</button>
+      <button type="button" className="agl-clearall" onClick={onClear}>Clear all</button>
     </div>
   );
 };

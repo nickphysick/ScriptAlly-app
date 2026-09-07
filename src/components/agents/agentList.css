@@ -214,10 +214,7 @@
    closes it — count left, verbs right, the grammar all five control rows share. Search and the
    three controls sit between them.
    ══════════════════════════════════════════════════════════════════════════ */
-.aglist .agl-toolbar {
-  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  margin: 22px 0 0; position: relative; z-index: 20;
-}
+/* (the toolbar row itself is declared in the Phase 6 block at the foot of this file) */
 
 
 .aglist .agl-search {
@@ -320,13 +317,7 @@
 }
 
 /* ── applied filters: closing the popover must never hide what's filtering ── */
-.aglist .agl-applied { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-top: 12px; }
-.aglist .agl-atag {
-  display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer;
-  padding: 5px 11px; border-radius: 999px; background: var(--agl-pink);
-  font-family: inherit; font-size: 11.5px; color: var(--agl-burg);
-}
-.aglist .agl-atag .x { opacity: .55; font-size: 10px; }
+/* (the applied-tag row is declared in the Phase 6 block at the foot of this file) */
 .aglist .agl-atag:hover .x { opacity: 1; }
 .aglist .agl-clr {
   border: none; background: none; font-family: inherit; font-size: 11.5px;
@@ -1255,3 +1246,55 @@
 }
 .agl-peekpop-head b { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; }
 .agl-peekpop .agl-peek { padding: 6px 14px 14px; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE TOOLBAR'S OWN BITS (Phase 6) — the controls, the popovers and the desk
+   itself belong to the Query Centre; what is left here is the filter chips, the
+   order segment and the applied-tag row.
+   ══════════════════════════════════════════════════════════════════════════ */
+.aglist .agl-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* the filter facets' chips — a toggle, and INERT at zero rather than hidden */
+.agl-facets { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 0 4px; }
+.agl-facetchip {
+  font-size: 12px; background: #f6f1ea; border: 1px solid var(--agl-hair);
+  border-radius: 999px; padding: 5px 11px; color: var(--agl-ink-body);
+  cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit;
+}
+.agl-facetchip .n { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--agl-ink-label); }
+.agl-facetchip.on { background: var(--agl-ink); border-color: var(--agl-ink); color: var(--agl-cream); }
+.agl-facetchip.on .n { color: var(--agl-cream); opacity: .7; }
+/* ⚠️ VISIBLE, DIMMED AND UNTICKABLE — never removed. Its absence would be information lost, and
+   hiding rows makes the popover jump as the data changes. */
+.agl-facetchip[disabled] { opacity: .4; cursor: default; }
+
+/* the sort footer's order segment — its two words relabel per key */
+.agl-oseg { display: flex; background: #efe8df; border-radius: 7px; padding: 3px; }
+.agl-oseg button {
+  border: 0; background: transparent; border-radius: 5px; padding: 5px 11px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--agl-ink-muted);
+}
+.agl-oseg button.on { background: var(--agl-paper); color: var(--agl-ink-head); box-shadow: 0 1px 2px rgba(44, 28, 20, .1); }
+/* ⚠️ `.f12-pop-mfoot` IS NOT DECLARED HERE. `shell/f12.css` already owns it — it is the desk's
+   own footer — and a second rule for it in this sheet would be a cross-file duplicate, which the
+   one-rule-per-selector sweep cannot see because that sweep reads one file. */
+.agl-popcount {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--agl-ink-muted);
+}
+
+/* the applied values, BENEATH the row — closing a popover must never hide what is filtering */
+.aglist .agl-applied { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 10px 0 0; }
+.aglist .agl-atag {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--agl-ink-body);
+  background: var(--agl-pink); border: 1px solid var(--agl-pinkline); border-radius: 999px; padding: 4px 6px 4px 11px;
+}
+.aglist .agl-atag button {
+  border: 0; background: transparent; color: var(--agl-burg); cursor: pointer;
+  font-size: 13px; line-height: 1; padding: 0 4px;
+}
+.aglist .agl-clearall {
+  border: 0; background: transparent; padding: 0 4px; cursor: pointer; font-family: inherit;
+  font-size: 12px; color: var(--agl-ink-body); text-decoration: underline; text-underline-offset: 2px;
+}

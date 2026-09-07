@@ -14,6 +14,8 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import { stripComments } from "./styleWiring";
+import { FACETS } from "../components/agents/AgentToolbar";
+import { facetOptions } from "./agentFilters";
 
 const css = readFileSync(new URL("../components/agents/agentList.css", import.meta.url), "utf8");
 const bar = readFileSync(new URL("../components/agents/AgentToolbar.tsx", import.meta.url), "utf8");
@@ -24,16 +26,21 @@ const block = (selector: string): string => {
   return css.slice(i, css.indexOf("}", i));
 };
 
+/* ⚠️ THE FORBIDDEN NAME IS BOUNDED NOW, and Phase 6 is why: the new filter facets were briefly
+   called `.agl-fchip` too, which is the RETIRED chip row's name — so this lock went red on a
+   correct file, and a bare `toContain` would equally have missed a real return of the old markup
+   wearing a longer name. The facets are `.agl-facetchip`; reusing a retired name defeats the lock
+   that retired it and misleads anyone reading the history. */
 describe("agent list · the five stacked bands are gone", () => {
   it("the chips row, its selects and the colour legend are deleted, not hidden", () => {
     expect(
       page,
-      "the filter CHIP row came back — it is what encoded the peer-of-active bug, and the toolbar's Filters popover replaced it",
-    ).not.toContain("agl-fchip");
+      "the filter CHIP row came back — it is what encoded the peer-of-active bug, and the toolbar's Filter popover replaced it",
+    ).not.toMatch(/["\s`]agl-fchip["\s`]/);
     expect(
       css,
       "the chip stylesheet survived the deletion — dead rules invite the markup back",
-    ).not.toContain(".agl-fchip");
+    ).not.toMatch(/(?:^|\n)\s*\.agl-fchip\s*[,{]/);
     expect(
       page,
       "the full-width location/sort SELECTS returned — location belongs in the Filters popover, sort in its own control",
@@ -49,103 +56,109 @@ describe("agent list · the five stacked bands are gone", () => {
   });
 });
 
-describe("agent list · the three controls are one instrument", () => {
-  it("Filters, Group and Sort share ONE resting style and ONE active treatment", () => {
-    const ctl = block(".aglist .agl-ctl");
-    expect(ctl, "the control height left 36px — the three controls and the search field share that line").toContain("height: 36px");
-    expect(ctl, "the control radius left 10px — it matches the search field, which is what makes the row read as one instrument").toContain("border-radius: 10px");
-    expect(ctl, "the controls lost their hairline — at rest they should read as quiet card-surface chips, not filled buttons").toContain("border: 1px solid var(--agl-line)");
-    const act = block(".aglist .agl-ctl.act");
-    expect(act, "the shared ACTIVE treatment lost its pink fill — a control set away from its default must announce itself the same way whichever control it is").toContain("background: var(--agl-pink)");
-    expect(act, "the active border drifted off the pink line token").toContain("border-color: var(--agl-pinkline)");
-    expect(act, "the active label lost its burgundy — pink-on-ink reads as a disabled chip").toContain("color: var(--agl-burg)");
+/**
+ * ⚠️ REWRITTEN (Phase 6). THE CONTROLS ARE THE QUERY CENTRE'S NOW, so the cases that asserted this
+ * page's OWN chip styling, its OWN popover, its OWN flip measurement and its OWN capture-phase
+ * Escape are asserting an implementation that has gone — a private toolbar one click away from a
+ * page with the same three controls. What survives, and is asserted below, is every LAW those
+ * cases stood for: a control states its value without being opened; the door is its own facet and
+ * never a kind of history; a zero-count option is visible and inert; the footer states the live
+ * result rather than gating an Apply; the panel's flip is decided by measurement in a shared
+ * place; and Escape dismisses without reaching the page.
+ */
+describe("the three controls are the Query Centre's, mounted", () => {
+  it("mount the shared button, search and switch — not a second set", () => {
+    expect(bar).toContain('from "../shared/ToolbarButton"');
+    expect(bar).toContain("<ToolbarSearch");
+    expect(bar).toContain("<QueryViewSwitch");
+    expect(stripComments(bar), "a private control chip came back beside the shared one").not.toContain("agl-ctl");
   });
 
-  it("Group and Sort swap their LABEL to the chosen value; Filters shows a count badge instead", () => {
-    // a control holding one value can state it; Filters holds many, so it counts and the tags spell them out
-    expect(bar, "the Group control stopped swapping its label — the row should say what it is doing without being opened").toContain('label={group === "none" ? "Group" : groupLabel}');
-    expect(bar, "the Sort control stopped swapping its label").toContain('label={sort === defaultSort ? "Sort" : sortLabel}');
-    expect(bar, "the Filters badge stopped counting applied values").toContain("badge={nFilters}");
-    expect(bar, "active-ness stopped being derived from 'set away from its default'").toContain("active={group !== \"none\"}");
-    expect(bar, "Sort's active state stopped comparing against the stated default").toContain("active={sort !== defaultSort}");
+  /* a control holding ONE value states it; Filter holds many, so it counts and the tags spell them out */
+  it("Group and Sort state their value; Filter carries a count", () => {
+    expect(bar).toContain("value={GROUPINGS.find((g) => g.key === grouping)?.label}");
+    expect(bar).toContain("value={spec.label}");
+    expect(bar).toContain("count={nFilters}");
   });
 
-  it("the search field is a fill, not a bordered pill", () => {
-    const s = block(".aglist .agl-search");
-    expect(s, "the search field regained a border — the mockup's field is a bare fill, which is what keeps it subordinate to the three controls").toContain("border: none");
-    expect(s, "the search fill token changed — #efe8df is the shared chrome fill").toContain("background: var(--agl-fill)");
-    expect(s, "the search field lost its 300px ceiling and will swallow the row on a wide monitor").toContain("max-width: 300px");
+  /* ⚠️ GROUP SAYS WHAT IT DOES. Grouping arranges the BOARD; in Grid and List it would have
+     nothing to arrange, and a control that silently did nothing would be worse than one that
+     explains itself. */
+  it("Group stands down outside the board, and says why", () => {
+    expect(bar).toContain("const groupLive = view === \"board\";");
+    expect(bar).toContain("disabled={!groupLive}");
+    expect(bar).toMatch(/title=\{groupLive \? undefined : "Grouping arranges the board/);
   });
 });
 
-describe("agent list · the filters popover", () => {
-  it("carries all THREE axes with their hints, and the axes are labelled from ONE source", () => {
-    expect(bar, "the 'where things stand' section lost its hint — the hint is what teaches that the axis is exclusive").toContain("One of these applies to each agent");
-    expect(bar, "the 'whose turn' section lost its hint — without it the axis reads as a peer of standing, which is the bug the rebuild fixed").toContain("Applies within active queries");
-    expect(bar, "the 'their door' section lost its hint — the hint is what stops a reader treating a closed door as a kind of history").toContain("Independent of your history with them");
-    expect(bar, "the popover started wording the standings itself instead of reading STANDING_LABEL").toContain("STANDING_LABEL[k]");
-    expect(bar, "the popover started wording the turn values itself instead of reading TURN_LABEL").toContain("TURN_LABEL[k]");
-    expect(bar, "the popover started wording the door itself instead of reading DOOR_LABEL").toContain("DOOR_LABEL[k]");
+describe("the desk popovers", () => {
+  /* ⚠️ THE DESK IS THE SHARED ONE — sage band, radio rows with sub-captions, hairline footer. A
+     second implementation of it is three chances to drift from a page one click away. */
+  it("are F12Popover's mount chassis, with PRow's rows", () => {
+    expect(bar).toContain('from "../shell/F12Shell"');
+    expect(bar).toContain('chassis="mount"');
+    expect(bar).toContain("<PRow");
+    expect(stripComments(bar), "a private popover element came back").not.toMatch(/["\s`]agl-pop["\s`]/);
   });
 
-  it("THEIR DOOR is its own section, not a value inside 'where things stand'", () => {
-    // search the RENDER body only — the file's own doc comment mentions these words too
-    const body = bar.slice(bar.indexOf("export const AgentToolbar"));
-    const stand = body.indexOf("Where things stand");
-    const door = body.indexOf("Their door");
-    const turn = body.indexOf("Whose turn");
-    expect(door, "the 'Their door' section vanished — a closed door has been folded back into the standing list, which is the precedence bug in UI form").toBeGreaterThan(-1);
-    expect(door > turn && turn > stand, "the popover's section order changed — history, then whose turn within it, then their door as a separate system").toBe(true);
-    // the door values must NOT appear among the standing rows
-    const standSection = body.slice(stand, turn);
-    expect(standSection, "a door value is being rendered inside the 'where things stand' section").not.toMatch(/DOOR_LABEL|Closed for submissions/);
+  /* ⚠️ FOUR FACETS, AND THE DOOR IS ONE OF THEM RATHER THAN A KIND OF HISTORY. That separation is
+     the precedence bug in UI form: an agency that shut its doors while holding your full must be
+     reachable as "Closed to queries" AND "Active queries" at once. */
+  it("carry the four facets, with the door as its own", () => {
+    expect(FACETS.map((f) => f.key)).toEqual(["door", "genre", "history", "reply"]);
+    expect(FACETS.map((f) => f.label)).toEqual(["Their door", "Genres sought", "Your history", "Response time"]);
+    const hist = facetOptions([], [], "history").map((o) => o.value);
+    expect(hist, "a door value is being offered inside 'Your history'").not.toContain("Closed to queries");
+    expect(hist).toEqual(["Active queries", "Closed", "Never queried"]);
   });
 
-  it("a ZERO-COUNT option stays visible and inert — never hidden", () => {
-    expect(bar, "zero-count rows stopped being disabled — a tickable row that yields nothing is a dead end").toContain("disabled={count === 0}");
-    expect(bar, "zero-count rows are being FILTERED OUT of the popover — their absence is information ('nobody is closed'), and hiding them makes the list jump as data changes").not.toMatch(/\.filter\([^)]*count\s*[>!]/);
-    const off = block(".aglist .agl-orow.off, .aglist .agl-orow[disabled]");
-    expect(off, "the zero-count rows lost their dimming, so they no longer read as unavailable").toContain("opacity: .4");
+  /* ⚠️ VISIBLE AND INERT AT ZERO, never hidden: the absence is information, and hiding rows makes
+     the popover jump as the data changes. */
+  it("a zero-count option stays visible and inert", () => {
+    const opts = facetOptions([], [], "door");
+    expect(opts.map((o) => o.value), "an empty facet hid its rows instead of showing them at zero").toEqual(["Open to queries", "Closed to queries"]);
+    expect(opts.every((o) => o.n === 0)).toBe(true);
+    expect(bar, "a tickable row that yields nothing is a dead end").toContain("disabled={o.n === 0 && !filters[f.key].includes(o.value)}");
   });
 
-  it("the footer states the LIVE result and offers a clear — it is not an Apply gate", () => {
-    expect(bar, "the footer's primary stopped stating the live count — ticking a box should answer 'how many?' before you close the popover").toContain("Show {resultCount}");
-    expect(bar, "the count stopped being singular-safe at one agent").toContain('resultCount === 1 ? "agent" : "agents"');
-    expect(
-      bar,
-      "Clear all went back to a hand-written facet list — it then silently misses any facet added later, which is exactly what happened when the door axis arrived; it must call emptyFilterSet()",
-    ).toContain("onFilters(emptyFilterSet())");
+  /* ⚠️ THE FOOTER STATES THE LIVE RESULT AND IS NOT AN APPLY GATE, and Clear all calls the
+     constructor rather than a hand-written facet list — a literal silently misses any facet added
+     later, which is exactly what happened when the door axis arrived. */
+  it("the filter footer states the live result and clears through the constructor", () => {
+    expect(bar).toContain("{resultCount} of {total}");
+    expect(bar).toContain("onFilters(emptyFilters())");
+    expect(bar, "Clear all went back to a hand-written facet list").not.toMatch(/onFilters\(\{\s*door:\s*\[\]/);
   });
 
-  it("the popover FLIPS generically when it would overflow — no per-control special case", () => {
-    expect(
-      bar,
-      "the flip decision left the shared Pop component — put back per-control and every popover added later starts overflowing again",
-    ).toContain("popoverAlign({");
-    expect(
-      bar,
-      "the flip stopped measuring against the content column (.agl-inner) — measuring the window instead lets the popover sit in the page's margin, outside what the reader perceives as the page",
-    ).toContain('closest(".agl-inner")');
-    expect(
-      bar,
-      "the measurement moved out of a LAYOUT effect — deciding after paint shows the popover in the wrong place for one frame",
-    ).toContain("useLayoutEffect");
-    expect(
-      bar,
-      "the flip is being hard-coded to a control (the pack forbids a per-Sort fix); it must come from the geometry alone",
-    ).not.toMatch(/id === "sort".{0,40}(right|align)/);
-    expect(
-      block(".aglist .agl-pop.right"),
-      "the right-anchored variant lost its `left: auto` — leaving left:0 in place means right:0 does nothing and the popover never actually flips",
-    ).toContain("left: auto");
+  /* ⚠️ THE FLIP IS DECIDED BY MEASUREMENT, IN A SHARED PLACE. Per-control and every popover added
+     later starts overflowing again. */
+  it("are anchored by the app's own utility, which measures the panel", () => {
+    expect(bar).toContain("useFixedMenu");
+    expect(bar).toContain("menuRef: panelRef");
+    /* ⚠️ THE LAW IS THAT THE SIDE COMES FROM GEOMETRY, and the honest way to assert it is that
+       EVERY control asks for `auto` — not a regex hunting for a control's name near the word
+       "align", which matches the perfectly correct line that opens each control's own hook. It
+       flagged this file's own `pop === "sort", { … align: "auto" }` on its first run. */
+    const aligns = [...bar.matchAll(/align:\s*"(\w+)"/g)].map((m) => m[1]);
+    expect(aligns.length, "no control asks for an alignment at all").toBe(3);
+    expect(new Set(aligns), "a control was pinned to a side instead of measuring").toEqual(new Set(["auto"]));
   });
 
-  it("Escape closes the popover and goes NO further", () => {
-    expect(
-      bar,
-      "the popover stopped consuming Escape on the capture phase — the key would fall through to the page handler and discard an open card's draft, so dismissing a dropdown would throw away edits",
-    ).toContain("stopImmediatePropagation");
-    expect(bar, "the capture-phase listener lost its `true` flag, so the page handler runs first").toContain('window.addEventListener("keydown", onKey, true)');
+  /* ⚠️ ESCAPE DISMISSES AND GOES NO FURTHER — and it no longer needs a capture-phase listener to
+     do it. The page's Escape handler is gated on there being a DRAFT, and a draft only exists
+     while the drawer is open, which covers the toolbar entirely. The collision the capture phase
+     defended against is now structurally impossible rather than defended against. */
+  it("Escape cannot reach the page's draft, by construction", () => {
+    const page = stripComments(readFileSync(new URL("../components/agents/AgentList.tsx", import.meta.url), "utf8"));
+    expect(page, "the page's Escape handler stopped being gated on a live draft").toContain("if (!draft) return;");
+  });
+
+  /* ⚠️ BELOW md THE SAME CHILDREN PRESENT IN A SHEET. One set of options, two chassis — a
+     mobile-only copy is how the two come to offer different filters. */
+  it("present in MobileSheet below md, with the SAME children", () => {
+    expect(bar).toContain("<MobileSheet");
+    expect(bar).toContain("{children}{foot}");
+    expect(bar, "the sheet renders its own option list rather than the popover's").not.toMatch(/isMobile \?[\s\S]{0,200}FACETS\.map/);
   });
 });
 
@@ -228,7 +241,14 @@ describe("agent list · the location line", () => {
 describe("agent list · applied tags keep the popover honest", () => {
   it("the tags render OUTSIDE the popover, one per applied value, each removable", () => {
     expect(page, "the applied-tag row left the page — closing the popover would then hide what is filtering the list").toContain("<AgentAppliedTags");
-    expect(page, "the tags stopped reading the same label maps the popover uses, so the two can now disagree").toContain("STANDING_LABEL[k as AgentStanding]");
+    /* ⚠️ THE TAGS ARE BUILT FROM THE SAME SET THE POPOVER READS (Phase 6). They used to be worded
+       from per-axis label maps, which is one place for the two to disagree; the facet values ARE
+       the words now, so a tag cannot say something the popover does not offer. */
+    expect(bar, "the tags stopped being built from the filter set itself").toContain("export function appliedTags(filters: AgentFilters");
+    expect(bar, "a tag went back to a per-axis label map, which the popover would then have to keep in step").not.toContain("STANDING_LABEL");
     expect(bar, "a tag lost its remove affordance").toContain("onClick={t.onRemove}");
+    /* every facet is walked, so a facet added later cannot go untagged — the fault that arrived
+       once already when the door axis was added to a hand-written list */
+    expect(bar, "the tag builder went back to naming its facets by hand").toContain("for (const f of FACETS)");
   });
 });

@@ -52,6 +52,10 @@ const MSWL_LONG =
 
 const MSWL_TWO_LINES = "High-concept suspense with a hook I can say in one sentence.";
 
+/* ⚠️ `dateAdded` IS SET PER ROW, NEVER LEFT ON THE DEFAULT. It was shared once, and sorting by
+   "Date added" then fell through to the name tiebreak and produced the NAME order — a sort that
+   measured as doing nothing, on a fixture that looked varied everywhere a reader would check.
+   The grouping by month had the same problem one column wide. */
 const agent = (a: Partial<Agent> & Pick<Agent, "id" | "name">): Agent => ({
   userId: "fix", agency: "", email: "", website: "", genres: [], mswlNotes: "",
   submissionStatus: SubmissionStatus.OPEN, submissionMethod: SubmissionMethod.EMAIL,
@@ -75,6 +79,7 @@ export const CONTACT_FIXTURE_AGENTS: Agent[] = [
     mswlNotes: MSWL_LONG, starRating: 4, responseTimeWeeks: 6, noResponseMeansNo: true,
     materialsWanted: ["Query letter", "Synopsis (1 pages)", "First 50 pages", "Comparable titles"],
     socials: [{ platform: "X / Twitter", handle: "@aishareads" }, { platform: "Bluesky", handle: "@aishakapoor.bsky.social" }],
+    dateAdded: "2026-08-11T00:00:00.000Z",
   }),
   /* THE TWO-LINE CASE — a wishlist that does not overflow, so the fade and the drift must BOTH
      stay off. Without it the overflow lock could pass on a card that always shows a fade. */
@@ -87,6 +92,7 @@ export const CONTACT_FIXTURE_AGENTS: Agent[] = [
     submissionMethod: SubmissionMethod.POST, /* the Post method */
     materialsWanted: ["Query letter", "First 1 chapters"],
     socials: [],
+    dateAdded: "2026-05-02T00:00:00.000Z",
   }),
   /* THE ABSENT CASE — no wishlist at all, so the empty line renders; a SINGLE matching genre;
      no Other, so exactly three material slots; no socials, so the peek's empty row renders. */
@@ -98,6 +104,7 @@ export const CONTACT_FIXTURE_AGENTS: Agent[] = [
     mswlNotes: "", starRating: 3, responseTimeWeeks: 4, noResponseMeansNo: false,
     materialsWanted: ["Query letter", "Synopsis"],
     socials: [],
+    dateAdded: "2026-08-24T00:00:00.000Z",
   }),
   /* THE NEVER-QUERIED CASE — no query references this id, so "Never queried" and the
      "Not yet queried" tile have a subject. Also the Form method, and NO matching genre at all,
@@ -112,6 +119,7 @@ export const CONTACT_FIXTURE_AGENTS: Agent[] = [
     submissionMethod: SubmissionMethod.ONLINE_FORM, /* the Form method */
     materialsWanted: ["Query letter", "Synopsis", "First 3 chapters", "A one-page author note"],
     socials: [{ platform: "Instagram", handle: "@halcyonlit" }],
+    dateAdded: "2026-09-03T00:00:00.000Z",
   }),
   /* THE CLOSED DOOR, NOTHING LIVE — the dim, the grey band, the disabled Log query. */
   agent({
@@ -120,6 +128,7 @@ export const CONTACT_FIXTURE_AGENTS: Agent[] = [
     submissionStatus: SubmissionStatus.CLOSED,
     genres: ["Speculative fiction"], mswlNotes: "", starRating: 2, responseTimeWeeks: 6,
     materialsWanted: ["Query letter"], socials: [],
+    dateAdded: "2026-02-14T00:00:00.000Z",
   }),
   /* ⚠️ THE CLOSED DOOR WITH A LIVE QUERY — THE CASE THE REF DOES NOT DRAW. Its two closed agents
      are both terminal, so the ref cannot say what happens here, and the app's own rule can:
@@ -133,6 +142,7 @@ export const CONTACT_FIXTURE_AGENTS: Agent[] = [
     starRating: 3, responseTimeWeeks: 6,
     materialsWanted: ["Query letter", "Synopsis"],
     socials: [{ platform: "Publishers Marketplace", handle: "Publishers Marketplace" }],
+    dateAdded: "2026-03-30T00:00:00.000Z",
   }),
   /* THE UNRATED, UNSTATED AGENT — absence is a first-class state: no stars, no window, no
      agency. The card must say nothing rather than invent a zero. */
@@ -143,6 +153,7 @@ export const CONTACT_FIXTURE_AGENTS: Agent[] = [
     genres: ["Crime", FIXTURE_GENRE], mswlNotes: "",
     materialsWanted: ["Query letter", "Synopsis", "First 3 chapters"],
     socials: [{ platform: "X / Twitter", handle: "@penhallowlit" }],
+    dateAdded: "2026-07-07T00:00:00.000Z",
   }),
 ];
 
@@ -190,4 +201,5 @@ export const CONTACT_FIXTURE_CASES = [
   "method: Online Form",
   "method: Post",
   "absence: no stars and no stated window",
+  "added: seven distinct dates across five months",
 ] as const;
