@@ -152,8 +152,15 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
       r.btns.length === 3 && /^Filter/.test(r.btns[0]) && /^Group/.test(r.btns[1]) && /^Sort/.test(r.btns[2]),
       JSON.stringify(r.btns));
 
-  add("P1.8 · the view switch offers Grid and Board, and nothing else",
-      r.segs.length === 2 && r.segs[0] === "Grid" && r.segs[1] === "Board",
+  /* ⚠️ THREE, NOT THE CONTRACT'S TWO — and the third is a stated departure rather than a drift
+     (Phase 4). Mounting the board made Grid and Board the only reachable states, which stranded
+     the LIST: its dense rows, their action strips, and the five keys the card's own footer teaches
+     in every view. A footer teaching `j k ↵ s d` with no rows to reach is the same fault as the
+     view switch that changed nothing, which this round fixed one phase earlier.
+     The ref draws two because its mockup has no list to strand; the Query Centre's own switch
+     offers four. Asserted as the exact three so a fourth cannot arrive unannounced. */
+  add("P1.8 · the view switch offers Grid, List and Board, and nothing else",
+      r.segs.length === 3 && r.segs[0] === "Grid" && r.segs[1] === "List" && r.segs[2] === "Board",
       JSON.stringify(r.segs));
 
   /* ⚠️ THE TILES ARE THE QUERY CENTRE'S COMPONENT, ASSERTED AT THE SOURCE AS WELL AS THE MARKUP.
@@ -505,5 +512,185 @@ test("Phase 3 — the ticket grid", async ({ page }) => {
     + " RED · " + (out.length - red.length) + " green\n" + lines.join("\n") + "\n");
   console.log(lines.join("\n"));
   expect(out.length, "assertion floor").toBeGreaterThanOrEqual(6);
+  expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
+});
+
+/**
+ * Phase 4 — the board.
+ *
+ * ⚠️ NO BACKTICKS AND NO REGEX INSIDE ANY page.evaluate TEMPLATE. Patterns are matched in Node.
+ */
+test("Phase 4 — the board's five columns", async ({ page }) => {
+  const out: R[] = [];
+  const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
+  const OUT = process.env.SA_QC_OUT4 ?? "run-artifacts/qc-chassis-p4.txt";
+  rmSync(OUT, { force: true });
+
+  await ensureSignedIn(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/todo");
+  await page.waitForFunction("document.querySelectorAll('.qct-tile').length > 0", null, { timeout: 45_000 }).catch(() => {});
+  await liftMotionSuppression(page);
+  await visiblePage(page, ".tdb-wrap");
+  await page.waitForTimeout(600);
+
+  const tiles = await page.evaluate(`(() => {
+    const root = __saVisRoot();
+    return [...root.querySelectorAll(".qct .qct-tile")].map((t) => ({
+      label: ((t.querySelector(".qct-k") || {}).textContent || "").trim(),
+      n: Number(((t.querySelector(".qct-n") || {}).textContent || "").trim()),
+    }));
+  })()`) as { label: string; n: number }[];
+  const tileN: Record<string, number> = Object.fromEntries(tiles.map((t) => [t.label, t.n]));
+
+  await page.evaluate(`(() => {
+    const root = __saVisRoot();
+    const b = [...root.querySelectorAll(".qvs button")].find((x) => (x.textContent || "").trim() === "Board");
+    if (b) b.click();
+  })()`);
+  await page.waitForTimeout(900);
+
+  const b = await page.evaluate(`(() => {
+    const root = __saVisRoot();
+    const board = root.querySelector(".brd");
+    if (!board) return { board: false, cols: [] };
+    return {
+      board: true,
+      /* the card's own foot survives the view — it counts the same array the board walks */
+      foot: ((root.querySelector(".tlc .l-foot .c") || {}).textContent || "").trim(),
+      cols: [...board.querySelectorAll(".brd-col")].map((c) => ({
+        title: ((c.querySelector(".brd-colh .t") || {}).textContent || "").trim(),
+        count: Number(((c.querySelector(".brd-colh .c") || {}).textContent || "").trim()),
+        caption: ((c.querySelector(".brd-colh .r2") || {}).textContent || "").trim(),
+        cards: c.querySelectorAll(".brd-card").length,
+        empty: c.querySelectorAll(".brd-empty").length,
+        emptyText: ((c.querySelector(".brd-empty") || {}).textContent || "").trim(),
+        urgent: c.querySelectorAll(".brd-card.urgent").length,
+      })),
+      /* a retired sheet declares .tbd-card; nothing here may be wearing it */
+      retired: board.querySelectorAll(".tbd-card, .tbd-col, .tbd-empty").length,
+    };
+  })()`) as any;
+
+  add("P4.0 · the Board view renders, with exactly five columns",
+      b.board && b.cols.length === 5,
+      "columns " + (b.cols || []).length + " · " + JSON.stringify((b.cols || []).map((c: any) => c.title)));
+
+  const ORDER = ["Agent requests", "Nudges", "Gone quiet", "Housekeeping", "Your tasks"];
+  add("P4.1 · they are the five categories, in the tiles' order",
+      b.cols.map((c: any) => c.title).join("|") === ORDER.join("|"),
+      JSON.stringify(b.cols.map((c: any) => c.title)));
+
+  /* ⚠️ THE PARTITION, AT THE SURFACE WHERE IT BECOMES VISIBLE. Each column's stated count must be
+     its tile's, and the five must sum to All — read off the rendered board on every side. This is
+     the same law Phase 1 asserted on the tiles, now measured on a second surface that could
+     disagree with the first. */
+  const mism = b.cols.filter((c: any) => c.count !== tileN[c.title]);
+  const sum = b.cols.reduce((n: number, c: any) => n + c.count, 0);
+  add("P4.2 · each column's count IS its tile's, and the five sum to All",
+      mism.length === 0 && sum === tileN["All tasks"],
+      "sum " + sum + " · All " + tileN["All tasks"]
+        + (mism.length ? " · disagreeing " + JSON.stringify(mism.map((c: any) => c.title + " " + c.count + " vs " + tileN[c.title])) : ""));
+
+  /* ⚠️ AND THE HEAD'S NUMBER IS THE STACK'S — a column stating a count it does not draw is the
+     two-numbers fault at column scale. An empty column draws its words instead, and those are
+     counted as zero cards rather than as a card. */
+  const liars = b.cols.filter((c: any) => c.cards !== c.count);
+  add("P4.3 · every column DRAWS the number it states",
+      liars.length === 0,
+      liars.length ? JSON.stringify(liars.map((c: any) => c.title + ": says " + c.count + ", draws " + c.cards))
+        : b.cols.map((c: any) => c.title + " " + c.cards).join(" · "));
+
+  /* ⚠️ AN EMPTY COLUMN SAYS SO — words, never a hole. The fixture has no empty column at rest, so
+     this ENTERS the branch rather than reporting it unexercised: picking one tile narrows the
+     board to that category, which empties the other four. The first version of this case did
+     report "not exercised" and passed, which is a tally admitting it proved nothing — better than
+     a silent vacuous green, and still not a measurement. */
+  await page.evaluate(`(() => {
+    const root = __saVisRoot();
+    const t = [...root.querySelectorAll(".qct .qct-tile")]
+      .find((x) => ((x.querySelector(".qct-k") || {}).textContent || "").trim() === "Housekeeping");
+    if (t) t.click();
+  })()`);
+  await page.waitForTimeout(900);
+  const narrowed = await page.evaluate(`(() => {
+    const root = __saVisRoot();
+    return [...root.querySelectorAll(".brd .brd-col")].map((c) => ({
+      title: ((c.querySelector(".brd-colh .t") || {}).textContent || "").trim(),
+      count: Number(((c.querySelector(".brd-colh .c") || {}).textContent || "").trim()),
+      cards: c.querySelectorAll(".brd-card").length,
+      empty: c.querySelectorAll(".brd-empty").length,
+      emptyText: ((c.querySelector(".brd-empty") || {}).textContent || "").trim(),
+    }));
+  })()`) as any[];
+  const nowEmpty = narrowed.filter((c) => c.count === 0);
+  add("P4.4 · every column still renders when narrowed, and an empty one says so in words",
+      narrowed.length === 5 && nowEmpty.length === 4
+        && nowEmpty.every((c) => c.empty === 1 && c.emptyText.length > 0 && c.cards === 0),
+      "columns after narrowing to Housekeeping " + narrowed.length
+        + " · empty " + nowEmpty.length + " · "
+        + JSON.stringify(narrowed.map((c) => c.title + " " + c.count))
+        + (nowEmpty.length ? " · says " + JSON.stringify(nowEmpty[0].emptyText) : ""));
+
+  /* put the board back to All, so nothing below reads a narrowed board */
+  await page.evaluate(`(() => {
+    const root = __saVisRoot();
+    const t = [...root.querySelectorAll(".qct .qct-tile")]
+      .find((x) => ((x.querySelector(".qct-k") || {}).textContent || "").trim() === "All tasks");
+    if (t) t.click();
+  })()`);
+  await page.waitForTimeout(700);
+
+  add("P4.5 · every column carries its caption — what the column is FOR",
+      b.cols.every((c: any) => c.caption.length > 0),
+      JSON.stringify(b.cols.map((c: any) => c.caption)));
+
+  /* ⚠️ NOTHING ON THIS BOARD WEARS THE RETIRED BOARD'S CLASSES. `todoBoard.css` still declares
+     `.tbd-col`/`.tbd-card`/`.tbd-empty` for a component mounted nowhere, and that sheet is still
+     loaded (PortalMenu imports it) — so a name collision would have dressed this board in a
+     retired one's rules silently. */
+  add("P4.6 · the board wears none of the retired four-column board's classes",
+      b.retired === 0, "elements carrying .tbd-* inside the board: " + b.retired);
+
+  /* ⚠️ URGENT IS A LENS, NOT A COLUMN — asserted as an absence AND as a presence, so it cannot
+     pass by the mark simply never rendering. */
+  const urgentTotal = b.cols.reduce((n: number, c: any) => n + c.urgent, 0);
+  add("P4.7 · Urgent is drawn ON cards, never as a sixth column",
+      b.cols.length === 5 && !b.cols.some((c: any) => c.title === "Urgent") && urgentTotal > 0,
+      "urgent-marked cards " + urgentTotal + " · Urgent tile " + tileN["Urgent"]);
+
+  /* the card's footer survives the view — the count describes whatever body is showing */
+  const footN = Number((/(\d+)\s+tasks/.exec(b.foot ?? "") ?? [])[1] ?? NaN);
+  add("P4.8 · the card's foot still states the count, and it is the tiles' total",
+      Number.isFinite(footN) && footN === tileN["All tasks"],
+      "footer " + JSON.stringify(b.foot) + " -> " + footN + " · All " + tileN["All tasks"]);
+
+  /* ⚠️ AND THE FOOT STOPS TEACHING THE ROW KEYS WHERE THERE ARE NO ROWS. `j k ↵ s d` move, open,
+     snooze and dismiss a focused ROW; the board and the grid have none, so printing the hints
+     there would advertise five shortcuts that do nothing — the same fault as the view switch that
+     changed nothing. Asserted in BOTH directions, because "absent everywhere" would pass the first
+     half while quietly removing a real affordance from the view that has it. */
+  const keysOnBoard = await page.evaluate(`(() => __saVisRoot().querySelectorAll(".tlc .l-foot .keys").length)()`) as number;
+  await page.evaluate(`(() => {
+    const root = __saVisRoot();
+    const btn = [...root.querySelectorAll(".qvs button")].find((x) => (x.textContent || "").trim() === "List");
+    if (btn) btn.click();
+  })()`);
+  await page.waitForTimeout(800);
+  const keysOnList = await page.evaluate(`(() => ({
+    keys: __saVisRoot().querySelectorAll(".tlc .l-foot .keys").length,
+    rows: __saVisRoot().querySelectorAll(".tlc .row").length,
+  }))()`) as { keys: number; rows: number };
+  add("P4.9 · the row keys are taught in List and nowhere else",
+      keysOnBoard === 0 && keysOnList.keys === 1 && keysOnList.rows > 0,
+      "hints on Board " + keysOnBoard + " · on List " + keysOnList.keys
+        + " (with " + keysOnList.rows + " rows)");
+
+  const lines = out.map((x) => (x.ok ? "green  " : "RED    ") + "· " + x.id + (x.note ? "\n         " + x.note : ""));
+  const red = out.filter((x) => !x.ok);
+  writeFileSync(OUT, "── qc chassis · Phase 4 · " + out.length + " assertions · " + red.length
+    + " RED · " + (out.length - red.length) + " green\n" + lines.join("\n") + "\n");
+  console.log(lines.join("\n"));
+  expect(out.length, "assertion floor").toBeGreaterThanOrEqual(9);
   expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
 });

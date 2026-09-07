@@ -89,14 +89,25 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
     expect(page).not.toContain("<TaskSettingsSheet");
   });
 
-  it("the body is the GROUPED LIST — the four columns, the ledger and the view toggle are all gone", () => {
+  it("the FOUR-COLUMN board and the ledger are gone, and the list is still a body", () => {
     /* ⚠️ RETIRED SURFACE, TWICE OVER. board+dock P1 retired the Lane/ledger grammar and the view
        toggle for the board; tasks-consolidation P2 retires the board itself. The pieces each
        carried survive: the housekeeping FOLD is `groupSlice`, the SNOOZED BAND is the snoozed
-       fold row, and the KIND facet is the group heading it was always approximating. */
+       fold row, and the KIND facet is the group heading it was always approximating.
+
+       ⚠️ RETARGETED (QC-chassis round, Phase 4), AND THE CLAIM IS NARROWER THAN THE SPELLING WAS.
+       This forbade `function renderBoard` outright, which stopped meaning what it said the moment
+       a board came back — a DIFFERENT board: five columns that ARE the five categories, from the
+       round's own contract, beside a grid and the list rather than instead of them. What was
+       retired is the FOUR-COLUMN lane board and its ledger, and those are named directly now:
+       `TodoBoard` (still mounted nowhere) and `renderLedger`/`groupCard`. A lock that forbids a
+       spelling fails on the next legitimate edit and teaches whoever hits it to rebaseline
+       without looking, which is how a real regression eventually walks through. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).not.toContain("function renderBoard");
+    /* the retired board was a COMPONENT, so its absence is asserted where it can actually be seen */
+    expect(page).not.toContain("<TodoBoard");
+    /* and the list is still reachable as a body — Phase 4 is what made that worth asserting */
     expect(page).toContain("function renderList");
     // the slice above already proves the call is reached from the chrome, not from a view branch
     expect(page).toContain("<TaskList");

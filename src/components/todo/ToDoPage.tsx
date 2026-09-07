@@ -73,6 +73,7 @@ import {
    on orphans: flag, then sweep in a commit of its own). */
 import { TaskList } from "./TaskList";
 import { TaskTicket } from "./TaskTicket";
+import { TaskBoard } from "./TaskBoard";
 import { ticketFacts } from "../../lib/ticketFacts";
 import { STATE_TOKEN, stateFor } from "../../lib/queryCardFacts";
 import { TODO_ROUTES } from "../../lib/todoRoutes";
@@ -328,8 +329,26 @@ const TILE_SWATCH: Record<Category, string> = {
   yours: FAMILY_PAPER[CATEGORY_FAMILY.yours],
 };
 
+/**
+ * ⚠️ THREE VIEWS, AND THE THIRD IS A DELIBERATE DEPARTURE FROM THE CONTRACT (QC-chassis round,
+ * Phase 4). `todo-qc-style.html` draws exactly two — Grid and Board — and Phase 1 built two,
+ * because that is what the artefact shows.
+ *
+ * Phase 4 made that untenable. Mounting the board as the third body meant Grid and Board were the
+ * only reachable states, so the LIST became unreachable — and with it the dense rows, their action
+ * strips, and the `j` `k` `↵` `s` `d` keys. The card's own footer teaches those five keys in every
+ * view; with no list to reach, it would have been teaching shortcuts that act on rows nobody can
+ * put on screen. A page that advertises a control it cannot honour is the fault this round has
+ * already fixed once, in the view switch that changed nothing.
+ *
+ * So the ref loses on this one point, and it loses for a reason the ref could not have: the mockup
+ * has no list to strand. The Query Centre's own switch offers four. Recorded here and in the round
+ * report rather than quietly, because a reader diffing the contract will count two buttons and
+ * find three.
+ */
 const TODO_VIEWS: readonly { key: QueryView; label: string }[] = [
   { key: "grid", label: "Grid" },
+  { key: "list", label: "List" },
   { key: "board", label: "Board" },
 ];
 
@@ -3367,6 +3386,35 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
+  /**
+   * ⚠️ THE BOARD IS THE SAME CARDS, COLUMNED (QC-chassis round, Phase 4). It walks
+   * `groupsForList()` exactly as the grid does, so the tile's narrowing, the view's filters and
+   * the sort all reach it — and the card's footer, which counts that same array, describes the
+   * board too.
+   *
+   * ⚠️ ITS FIGURES ARE THE ROW'S OWN, passed in rather than re-derived. `due` is the mono chip the
+   * list already draws; the span and its burgundy come from `elapsedPhrase` and `isUrgentCard`,
+   * the same two the ticket reads. Three surfaces, one set of numbers.
+   */
+  function renderBoard() {
+    return (
+      <TaskBoard
+        cards={groupsForList().flatMap((g) => g.cards)}
+        selectedKey={docked.card?.key}
+        factOf={(c) => c.due}
+        spanOf={(c) => {
+          const inp = listRowInputs(c);
+          return {
+            text: typeof inp.days === "number" ? elapsedPhrase(inp.days) : "—",
+            late: isUrgentCard(c, inp.days),
+          };
+        }}
+        urgentOf={(c) => isUrgentCard(c, listRowInputs(c).days)}
+        onOpen={(c) => openDock(c.key)}
+      />
+    );
+  }
+
   function renderList() {
     /* ⚠️ `railChips` IS NO LONGER THE FILTER'S SOURCE (frame round). The contract's menu counts by
        GROUP and by TYPE, both from `railGroupsAll()` — the same array the bands and the meter read,
@@ -3377,7 +3425,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         /* ⚠️ THE VIEW SWAPS THE BODY, NOT THE CARD — see `TaskList`'s `body` prop. The card's foot
            states the count and teaches the keys, and both are true of the tickets as well as the
            rows, so it must not go away when the reader picks Grid. */
-        body={todoView === "grid" ? renderGrid() : undefined}
+        body={todoView === "grid" ? renderGrid() : todoView === "board" ? renderBoard() : undefined}
         leaving={leaving ? { key: leaving.card.key, fading: leavingFading } : undefined}
         onOpen={(c) => openDock(c.key)}
         selectedKey={docked.card?.key}

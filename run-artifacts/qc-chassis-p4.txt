@@ -1,0 +1,21 @@
+── qc chassis · Phase 4 · 10 assertions · 0 RED · 10 green
+green  · P4.0 · the Board view renders, with exactly five columns
+         columns 5 · ["Agent requests","Nudges","Gone quiet","Housekeeping","Your tasks"]
+green  · P4.1 · they are the five categories, in the tiles' order
+         ["Agent requests","Nudges","Gone quiet","Housekeeping","Your tasks"]
+green  · P4.2 · each column's count IS its tile's, and the five sum to All
+         sum 28 · All 28
+green  · P4.3 · every column DRAWS the number it states
+         Agent requests 9 · Nudges 9 · Gone quiet 6 · Housekeeping 2 · Your tasks 2
+green  · P4.4 · every column still renders when narrowed, and an empty one says so in words
+         columns after narrowing to Housekeeping 5 · empty 4 · ["Agent requests 0","Nudges 0","Gone quiet 0","Housekeeping 2","Your tasks 0"] · says "Nothing here"
+green  · P4.5 · every column carries its caption — what the column is FOR
+         ["with you","worth a nudge","no reply yet","your records","your own notes"]
+green  · P4.6 · the board wears none of the retired four-column board's classes
+         elements carrying .tbd-* inside the board: 0
+green  · P4.7 · Urgent is drawn ON cards, never as a sixth column
+         urgent-marked cards 6 · Urgent tile 6
+green  · P4.8 · the card's foot still states the count, and it is the tiles' total
+         footer "28 tasks · 19 need you now" -> 28 · All 28
+green  · P4.9 · the row keys are taught in List and nowhere else
+         hints on Board 0 · on List 1 (with 28 rows)

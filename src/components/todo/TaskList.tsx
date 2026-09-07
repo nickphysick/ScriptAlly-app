@@ -400,13 +400,21 @@ export const TaskList: React.FC<TaskListProps> = ({
           ? <span className="c">Showing <b>{total}</b> of {totalUnfiltered}</span>
           : <span className="c"><b>{total}</b> tasks · {needsYouNow} need you now</span>}
         <a href="#" onClick={(e) => { e.preventDefault(); onExport(); }}>Export CSV</a>
-        {/* ⚠️ THE FOUR LIST KEYS, TAUGHT WHERE THEY WORK — the contract's footer. Each strip
-            control prints its own key beside its word; this line is the standing copy. Export
-            stays beside it: not in the contract's foot, but a live feature is not removed by a
-            mockup's silence — recorded in the round report. */}
-        <span className="keys" aria-hidden="true">
-          <kbd>j</kbd><kbd>k</kbd> move <kbd>↵</kbd> open <kbd>s</kbd> snooze <kbd>d</kbd> dismiss
-        </span>
+        {/* ⚠️ THE LIST KEYS, TAUGHT WHERE THEY WORK — and "where" now means the LIST BODY, not the
+            page (QC-chassis round, Phase 4). They move a focused ROW, open it, snooze and dismiss
+            it; with the grid or the board in the body there are no rows, so printing them there
+            would advertise five shortcuts that do nothing. That is the standing rule about copy
+            claiming only what the code does — and the same fault as the view switch that changed
+            nothing, which this round has already fixed once.
+
+            Export stays in every view: it exports the array the foot counts, which is true of all
+            three bodies. It is not in the contract's foot, but a live feature is not removed by a
+            mockup's silence. */}
+        {!body && (
+          <span className="keys" aria-hidden="true">
+            <kbd>j</kbd><kbd>k</kbd> move <kbd>↵</kbd> open <kbd>s</kbd> snooze <kbd>d</kbd> dismiss
+          </span>
+        )}
       </div>
     </div>
   );
