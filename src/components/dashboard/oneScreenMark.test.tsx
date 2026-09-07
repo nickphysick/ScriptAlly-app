@@ -49,14 +49,25 @@ describe("the mark slot", () => {
     expect(img).toContain("object-fit: contain");
   });
 
-  it("⚠️ the plate's rim is an INSET SHADOW, never a border — a border would add 2px to a 28px box", () => {
+  /* ⚠️ RETARGETED (dashboard redesign, Phase 2). THE PLATE IS GONE; THE SLOT IS NOT — and the
+     distinction is the whole component. The parchment fill and the burgundy inset ring were the
+     BAND's furniture, and the bands are gone: on a bare header a plated tile reads as a button.
+     What survives, and is what this file exists to guard, is the swap-ready box — 28px, its own
+     `flex` basis, contents bounded — so an icon at 17px and a future illustration at full bleed
+     still occupy one footprint. A `border` is still refused: it would add 2px to a 28px box. */
+  it("⚠️ the plate is RETIRED — no fill, no rim, and no border in its place", () => {
     const b = blk(".os-mark");
-    expect(b).toContain("box-shadow: inset 0 0 0 1px");
+    expect(b).not.toContain("box-shadow");
+    expect(b).not.toContain("rgba(253, 250, 245, 0.72)");
     expect(b).not.toMatch(/(^|;|\s)border:\s*[\d.]+px/);
+    expect(b).not.toContain("background");
   });
 
-  it("⚠️ ONE translucent plate serves BOTH bands — no per-band override", () => {
-    expect(blk(".os-mark")).toContain("rgba(253, 250, 245, 0.72)");
+  it("⚠️ and the SLOT survives it — the box is still 28px and still swap-ready", () => {
+    const b = blk(".os-mark");
+    expect(b).toContain("flex: 0 0 28px");
+    expect(b).toContain("width: 28px");
+    expect(b).toContain("height: 28px");
     // a `.os-th2 .os-mark` or `.os-ahead .os-mark` rule would be this becoming four rules again
     expect(css).not.toMatch(/\.os-(th2|ahead)\s+\.os-mark\s*\{/);
   });

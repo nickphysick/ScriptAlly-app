@@ -12,6 +12,7 @@ import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { UserPlan } from "../../types";
 import { OneScreenPro } from "./OneScreenPro";
+import { cssRule } from "../../test/cssRule";
 
 const cssRules = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 const render = (plan: UserPlan) => renderToStaticMarkup(
@@ -44,8 +45,9 @@ describe("§5 · it appears only where it fits", () => {
   /* ⚠️ HEIGHT **AND** WIDTH — a short window has no room beneath tasks, a narrow one stacks the
      three text lines into a column. Default display:none, switched on inside the query only. */
   it("hidden by default; shown at min-height 940 AND min-width 1025", () => {
-    const banner = cssRules.slice(cssRules.indexOf(".os-probanner {"));
-    expect(banner.slice(0, banner.indexOf("}"))).toContain("display: none");
+    /* ⚠️ ANCHORED — `.os-probanner {` matches inside `.os-colL .os-probanner {`, which is where
+       the left column states the banner's flex budget. See src/test/cssRule.ts. */
+    expect(cssRule(cssRules, ".os-probanner", "oneScreen.css")).toContain("display: none");
     expect(cssRules).toContain("@media (min-height: 940px) and (min-width: 1025px) {");
     /* ⚠️ slice to the query's OWN closing brace, not the first one — the first `}` belongs to
        the rule nested inside it, and cutting there drops the very text being asserted */
@@ -55,7 +57,7 @@ describe("§5 · it appears only where it fits", () => {
   });
 
   it("~132px tall, and pastille-blue only — no burgundy, no sage", () => {
-    const banner = sliceBetween(cssRules, ".os-probanner {", ".os-pimg2 {");
+    const banner = cssRule(cssRules, ".os-probanner", "oneScreen.css");
     expect(banner).toContain("min-height: 132px");
     expect(banner).toContain("border-top: 2px solid #c2cfda");
     expect(banner).not.toContain("#7c3a2a");

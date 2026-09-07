@@ -12,6 +12,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { QueryStatus } from "../../types";
 import { dailyLedger, headerCounters, queriesSentCount, sentAt } from "../../lib/oneScreen";
 import { OneScreenCounters } from "./OneScreenCounters";
+import { cssRule } from "../../test/cssRule";
 
 const cssRules = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
@@ -22,14 +23,9 @@ const cssRules = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").rep
 const baseCss = cssRules.replace(/@media[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, "");
 /* ⚠️ ALL the base blocks for a selector, joined — `.os-greet` is legitimately declared twice
    (its grid placement, then its layout), so taking the first block tests half the rule. */
-const rule = (sel: string) => {
-  const out: string[] = [];
-  for (let i = baseCss.indexOf(`${sel} {`); i > -1; i = baseCss.indexOf(`${sel} {`, i + 1)) {
-    out.push(baseCss.slice(i, baseCss.indexOf("}", i)));
-  }
-  expect(out.length, `${sel} must exist as a BASE rule`).toBeGreaterThan(0);
-  return out.join("\n");
-};
+/* the shared ANCHORED reader — its message claimed "BASE rule" while the search was a
+   substring; see src/test/cssRule.ts */
+const rule = (sel: string) => cssRule(baseCss, sel, "oneScreen.css");
 
 const NOW = new Date(2026, 7, 7, 10, 0, 0);
 const ago = (n: number) => new Date(NOW.getTime() - n * 86400000).toISOString();

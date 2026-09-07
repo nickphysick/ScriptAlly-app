@@ -16,11 +16,14 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { COMMUNITY_EMPTY, OneScreenCommunity } from "./OneScreenCommunity";
+import { cssRule, cssRuleCount } from "../../test/cssRule";
 
 const src = readFileSync(resolve(__dirname, "./OneScreenCommunity.tsx"), "utf8");
 const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
 const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
 const html = renderToStaticMarkup(<OneScreenCommunity loading={false} />);
+
+const rule = (sel: string) => cssRule(cssRules, sel, "oneScreen.css");
 
 describe("the empty state is the whole of Phase 1", () => {
   /* ⚠️ RETARGETED (empty-state pack): the copy changed wholesale. Both strings were stated
@@ -178,16 +181,20 @@ describe("the tile fills a row it does not size", () => {
     expect(code).not.toContain("button");
   });
 
-  /* ⚠️ ONE DECLARATION FOR BOTH ROWS — the spine. Two matched pairs of numbers drift; one rule
-     cannot. Browser-measured: tile 302 = author 302, tasks 500 = chart 500. */
-  it("⚠️ the lower row reuses the upper row's columns, never a second set of widths", () => {
-    expect(cssRules).toMatch(/\.os-midrow,\s*\.os-lowrow \{[^}]*grid-template-columns: 302px minmax\(0, 1fr\)/);
-    /* ⚠️ ANCHOR ON THE LINE START — `.os-lowrow {` also matches inside the SHARED selector
-       `.os-midrow, .os-lowrow {`, so an unanchored slice reads the shared rule and "finds" the
-       columns it is asserting are absent. The standalone rule begins a line. */
-    const own = /\n\.os-lowrow \{([^}]*)\}/.exec(cssRules);
-    expect(own, "the standalone .os-lowrow rule must exist").not.toBeNull();
-    expect(own![1]).not.toContain("grid-template-columns");
+  /* ⚠️ RETARGETED (dashboard redesign, Phase 2). The tile used to sit in the LOWER of two rows
+     that shared one `grid-template-columns` with the upper, so it could not drift from the author
+     tile's width. It is now the author tile's COLUMN-mate — same track, same width, by being in
+     the same column — and the shared declaration is retired with the rows.
+
+     ⚠️ AND THE TILE NO LONGER STRETCHES, WHICH IS THE OTHER HALF OF THE MOVE. It filled a row
+     whose height tasks set; a centred hero stretched by a row it does not own is a tile pretending
+     to be taller than its content. Natural height now, and the left column's slack is Pro's. */
+  it("⚠️ the tile is a column card at its natural height — it never fills a row it does not size", () => {
+    expect(cssRules).toContain("grid-template-columns: 302px minmax(0, 1fr) 287px");
+    expect(rule(".os-colL .os-comm")).toContain("flex: 0 0 auto");
+    expect(rule(".os-colL .os-probanner")).toContain("flex: 1 1 auto");
+    /* the retired spine must not survive — a leftover rule is how a deleted layout comes back */
+    expect(cssRuleCount(cssRules, ".os-midrow, .os-lowrow")).toBe(0);
   });
 
   /* ⚠️ THE BAND IS THE SHARED ONE. The first draft restated height/padding here and, being later

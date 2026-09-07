@@ -8,6 +8,7 @@ import { describe, it, expect } from "vitest";
 import { sliceBetween } from "../../test/sliceBetween";
 import React from "react";
 import { readFileSync } from "node:fs";
+import { cssRule } from "../../test/cssRule";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueryStatus } from "../../types";
@@ -17,14 +18,8 @@ const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
 const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
 /* ⚠️ ALL blocks for a selector, joined — a selector is legitimately declared more than once in
    this sheet, and taking the first match tests half the rule. */
-const rule = (sel: string) => {
-  const out: string[] = [];
-  for (let i = cssRules.indexOf(sel + " {"); i > -1; i = cssRules.indexOf(sel + " {", i + 1)) {
-    out.push(cssRules.slice(i, cssRules.indexOf("}", i)));
-  }
-  expect(out.length, `${sel} must exist`).toBeGreaterThan(0);
-  return out.join("\n");
-};
+/* the shared ANCHORED reader — see src/test/cssRule.ts for the substring fault it closes */
+const rule = (sel: string) => cssRule(cssRules, sel, "oneScreen.css");
 
 /* ⚠️ THE HEADER SENTENCE IS RETIRED (v16 §4) — the title states the job, the pills state the
    split. The sentence had to lead on one number and said nothing about the rest. */
@@ -143,11 +138,16 @@ describe("the pink band (app-shell-v2)", () => {
   /* ⚠️ PINK IS THE RULE, NOT THE PREFERENCE: sage heads a dashboard container, PINK marks the
      surface asking something of you — and this is the one that does. Swapping them would make
      the to-do card read like any other panel. */
-  it("⚠️ the tasks header is a PINK gradient band with its hairline", () => {
-    const h = rule(".os-th2");
-    expect(h).toContain("linear-gradient(180deg, #f5e3d8, #f2ddd2)");
-    expect(h).toContain("border-bottom: 1px solid #ebd2c4");
-    expect(rule(".os-th2 h2")).toContain("color: #3a241a");
+  it("⚠️ the tasks header carries no fill and no hairline — but keeps its ink", () => {
+    /* ⚠️ RETARGETED (dashboard redesign, Phase 2). The pink band is GONE; the header sits on the
+       card. Pink was reserved for the surface that WANTS something, against sage for a container,
+       and the ink is where that distinction survives the fill's removal. `background` is absent
+       rather than `transparent` — the shorthand resets every longhand. */
+    const block = cssRule(cssRules, ".os-th2", "oneScreen.css");
+    expect(block).not.toContain("linear-gradient");
+    expect(block).not.toContain("border-bottom");
+    expect(block).not.toContain("background");
+    expect(cssRule(cssRules, ".os-th2 h2", "oneScreen.css")).toContain("color: #3a241a");
   });
 
   /* the band is edge-to-edge, so the card has to clip or it overhangs the radius */

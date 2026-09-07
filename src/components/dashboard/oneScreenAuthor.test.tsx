@@ -11,17 +11,13 @@ import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { UserPlan } from "../../types";
 import { OneScreenAuthor } from "./OneScreenAuthor";
+import { cssRule } from "../../test/cssRule";
 
 const cssRules = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 const baseCss = cssRules.replace(/@media[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, "");
-const rule = (sel: string) => {
-  const out: string[] = [];
-  for (let i = baseCss.indexOf(`${sel} {`); i > -1; i = baseCss.indexOf(`${sel} {`, i + 1)) {
-    out.push(baseCss.slice(i, baseCss.indexOf("}", i)));
-  }
-  expect(out.length, `${sel} must exist as a BASE rule`).toBeGreaterThan(0);
-  return out.join("\n");
-};
+/* the shared ANCHORED reader — its message claimed "BASE rule" while the search was a
+   substring; see src/test/cssRule.ts */
+const rule = (sel: string) => cssRule(baseCss, sel, "oneScreen.css");
 
 const ms = (over: Record<string, unknown> = {}) => ({
   id: "m1", title: "Murphy's Day Out", ageCategory: "Young Adult", genre: "Thriller", wordCount: 50000, ...over,

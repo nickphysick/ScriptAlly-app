@@ -253,15 +253,25 @@ describe("the reference panel reads as marginalia, not as a second card", () => 
     expect(host, "a border AND a ring would draw the rim twice").toContain("border: 0");
   });
 
-  /* ⚠️ THE BAND IS THE DASHBOARD'S SAGE, NOT A NEW COLOUR — the house rule is sage for a
-     container's HEADER, pink reserved for a surface asking something of you. A reference panel
-     asks nothing. Matching `.os-ahead` is the point: two container headers in one app must not be
-     two different greens. */
-  it("the band is the dashboard's own sage, and clips to the panel's corners", () => {
+  /* ⚠️ THE BAND IS SAGE BECAUSE SAGE HEADS A CONTAINER — the house rule, with pink reserved for a
+     surface asking something of you. A reference panel asks nothing.
+
+     ⚠️ RETARGETED (dashboard redesign, Phase 2), AND THE OLD READING WAS A PROXY. This asserted the
+     gradient LITERAL inside `oneScreen.css`, to keep this band and the dashboard's `.os-ahead` from
+     being two different greens. But the dashboard restated the hexes rather than reading these
+     tokens, so the two agreed by two matching literals rather than by one source — and the lock was
+     pinning that coincidence, not the law.
+
+     ⚠️ AND THE DASHBOARD'S BAND IS NOW RETIRED OUTRIGHT: its card headers carry no fill at all.
+     There is no second container header left to disagree with, so the claim is stated where the
+     value actually lives — the tokens — and the dashboard is asserted OUT of the agreement rather
+     than silently dropped from it. If a banded container header ever returns anywhere, it reads
+     `--qc-ref-band-*` or it is a second green by construction. */
+  it("the band is the house sage, from the tokens, and clips to the panel's corners", () => {
     const dash = read("../components/dashboard/oneScreen.css");
     const index = read("../index.css");
-    expect(dash, "the dashboard band moved; these tokens must follow")
-      .toContain("linear-gradient(180deg, #dde3da, #d6dcd3)");
+    expect(dash, "the dashboard's card headers must stay unbanded — see Phase 2")
+      .not.toContain("linear-gradient(180deg, #dde3da, #d6dcd3)");
     expect(index).toContain("--qc-ref-band-a: #dde3da");
     expect(index).toContain("--qc-ref-band-b: #d6dcd3");
     expect(index).toContain("--qc-ref-band-rule: #cbd3c8");

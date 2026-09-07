@@ -23,7 +23,7 @@ const html = renderToStaticMarkup(<OneScreenSkeleton />);
 
 describe("the page skeleton mirrors the page", () => {
   it("renders the REAL layout containers, not a private copy of the grid", () => {
-    for (const cls of ["os-content", "os-greet", "os-gl", "os-colM", "os-midrow", "os-colR"]) {
+    for (const cls of ["os-content", "os-greet", "os-gl", "os-colL", "os-colM", "os-colR"]) {
       expect(html).toContain(cls);
     }
   });
@@ -43,8 +43,10 @@ describe("the page skeleton mirrors the page", () => {
   });
 
   it("stands in for every card on the page — nothing loads unannounced", () => {
-    // header counters · author tile · chart · tasks · goal · activity
-    expect(html.match(/os-sk-card/g) ?? []).toHaveLength(2);
+    // header counters · author tile · community · chart · tasks · goal · activity
+    /* ⚠️ THREE `os-sk-card` NOW (Phase 2): the author tile and the community tile in the left
+       column, the chart in the centre. Tasks, goal and activity carry their own modifiers. */
+    expect(html.match(/os-sk-card/g) ?? []).toHaveLength(3);
     for (const cls of ["os-sk-counters", "os-sk-tasks", "os-sk-goal", "os-sk-actv"]) {
       expect(html).toContain(cls);
     }

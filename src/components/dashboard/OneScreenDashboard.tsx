@@ -277,53 +277,48 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           <OneScreenCounters loading={loading} queries={scopedQueries} agents={agents} now={now} />
         </div>
 
-        <div className="os-colM">
-          {/* ⚠️ A FIXED 302px ROW, and the LEFT column owns the height. The author tile's natural
-              size sets it; the chart fills beside it. Never `1fr` — the rail would then drive the
-              row and the page would grow past the fold. */}
-          <div className="os-midrow">
-            <OneScreenAuthor
-              loading={loading} manuscripts={manuscripts}
-              currentUser={currentUser} activeManuscript={activeManuscript}
-              onNavigate={onNavigate}
-            />
-            <OneScreenChart
-              loading={loading} queries={scopedQueries} agents={agents} now={now}
-              dayOne={scopedStage === "day-one"} earlyDays={scopedStage === "early-days"}
-              onSendFirst={() => onNavigate("queries", "Send a query")}
-            />
-          </div>
+        {/* ⚠️ THREE COLUMNS, AND THE CENTRE IS THE ELASTIC ONE (dashboard redesign, Phase 2).
+            Left: the manuscript, the community tile, and Pro at the foot. Centre: the chart over
+            the to-do panel. Right: goals over activity, which `OneScreenRail` renders as `.os-colR`.
 
-          {/* ⚠️ THE LOWER ROW SHARES THE UPPER ROW'S SPINE — literally: `.os-midrow, .os-lowrow`
-              is ONE `grid-template-columns` declaration, so the Community tile is the author
-              tile's width and Tasks is the chart's width because they read the same rule, not
-              because two numbers were matched by hand. If a column moves, both rows move.
-
-              ⚠️ TASKS NARROWED; NOTHING ELSE ABOUT IT CHANGED. Its rows, chips, counts, sort and
-              `See all` are untouched — the card was already width-agnostic (it declares none) and
-              `.os-tt` already carried `min-width: 0`, so the titles ellipsise at the new width
-              rather than pushing the row wide. */}
-          <div className="os-lowrow">
-            <OneScreenCommunity loading={loading} />
-            <OneScreenTasks
-              loading={loading}
-              tasks={scopedTasks}
-              queries={queries}
-              agents={agents}
-              userTasks={userTasks}
-              now={now}
-              dayOne={scopedStage === "day-one"}
-              onAction={onTaskAction}
-              onSeeAll={() => onNavigate("todo")}
-              onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
-              onAddAgent={() => onNavigate("agents", "Add an agent")}
-            />
-          </div>
-
-          {/* ⚠️ SHOWN ONLY WHERE THE EXTRA ROW GENUINELY FITS — the CSS gates it on viewport
-              height AND width (§5). Below either threshold it is not rendered small, it is not
-              rendered at all: a squeezed upsell costs the page its one-screen promise. */}
+            ⚠️ `.os-midrow` / `.os-lowrow` ARE GONE, ELEMENT AND RULE TOGETHER. They paired the
+            author tile with the chart and the community tile with tasks across two rows sharing one
+            `grid-template-columns`, so neither pair could drift. With the columns as the grid's own
+            tracks there is nothing left to drift — the law is kept by the structure rather than by
+            a shared declaration, which is why the declaration goes rather than being retargeted. */}
+        <div className="os-colL">
+          <OneScreenAuthor
+            loading={loading} manuscripts={manuscripts}
+            currentUser={currentUser} activeManuscript={activeManuscript}
+            onNavigate={onNavigate}
+          />
+          <OneScreenCommunity loading={loading} />
+          {/* ⚠️ SHOWN ONLY WHERE THE EXTRA CARD GENUINELY FITS — the CSS gates it on viewport
+              height AND width (§5), and it returns null for a Pro subscriber. Below either
+              threshold it is not rendered small, it is not rendered at all. Where it is absent the
+              left column's foot is short, and that gap is REPORTED rather than filled. */}
           <OneScreenPro loading={loading} currentUser={currentUser} onNavigate={onNavigate} />
+        </div>
+
+        <div className="os-colM">
+          <OneScreenChart
+            loading={loading} queries={scopedQueries} agents={agents} now={now}
+            dayOne={scopedStage === "day-one"} earlyDays={scopedStage === "early-days"}
+            onSendFirst={() => onNavigate("queries", "Send a query")}
+          />
+          <OneScreenTasks
+            loading={loading}
+            tasks={scopedTasks}
+            queries={queries}
+            agents={agents}
+            userTasks={userTasks}
+            now={now}
+            dayOne={scopedStage === "day-one"}
+            onAction={onTaskAction}
+            onSeeAll={() => onNavigate("todo")}
+            onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
+            onAddAgent={() => onNavigate("agents", "Add an agent")}
+          />
         </div>
 
         <OneScreenRail

@@ -5,7 +5,7 @@
  * OneScreenSkeleton — the ghost shell shown while the dashboard's data resolves (ref
  * design-refs/dashboard-audit.html, `.skel`).
  *
- * ⚠️ IT REUSES THE REAL LAYOUT CLASSES — `os-content`, `os-greet`, `os-gl`, `os-colM`, `os-midrow`,
+ * ⚠️ IT REUSES THE REAL LAYOUT CLASSES — `os-content`, `os-greet`, `os-gl`, `os-colL`, `os-colM`,
  * `os-colR` — RATHER THAN RESTATING THE GRID. That is the whole design of this file, and it is
  * what the pack is actually asking for: "a generic grid of grey rectangles is not acceptable — the
  * point is that the layout does not jump when data lands." A second copy of the grid would agree
@@ -43,12 +43,16 @@ export const OneScreenSkeleton: React.FC<{
         <div className="os-sk os-sk-counters" />
       </div>
 
+      {/* ⚠️ THREE COLUMNS, MATCHING THE PAGE BENEATH (Phase 2). The ghosts read the real layout
+          classes, so a column width or gap that moves in the page moves here with it — the point
+          of this file. `.os-midrow` is retired with the two-row spine it belonged to. */}
+      <div className="os-colL">
+        <div className="os-sk os-sk-card os-sk-aut" />
+        <div className="os-sk os-sk-card os-sk-comm" />
+      </div>
+
       <div className="os-colM">
-        {/* the 302px row: the square author tile, then the chart beside it */}
-        <div className="os-midrow">
-          <div className="os-sk os-sk-card" />
-          <div className="os-sk os-sk-card" />
-        </div>
+        <div className="os-sk os-sk-card os-sk-chart" />
         <div className="os-sk os-sk-tasks" />
       </div>
 

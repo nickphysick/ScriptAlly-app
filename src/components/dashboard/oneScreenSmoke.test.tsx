@@ -9,6 +9,7 @@ import { describe, it, expect } from "vitest";
 import { sliceBetween } from "../../test/sliceBetween";
 import React from "react";
 import { readFileSync } from "node:fs";
+import { cssRule, cssRuleCount } from "../../test/cssRule";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueryStatus, UserPlan } from "../../types";
@@ -16,11 +17,10 @@ import { OneScreenDashboard } from "./OneScreenDashboard";
 
 const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
 const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
-const rule = (sel: string) => {
-  const i = cssRules.indexOf(sel + " {");
-  expect(i, `oneScreen.css must define ${sel}`).toBeGreaterThan(-1);
-  return cssRules.slice(i, cssRules.indexOf("}", i));
-};
+/* ⚠️ THE SHARED ANCHORED READER. This helper used to be `indexOf(sel + " {")` — a SUBSTRING
+   search, so `.os-actv {` matched inside `.os-colR .os-actv {` and every assertion about a base
+   rule silently repointed at a descendant one. See `src/test/cssRule.ts`. */
+const rule = (sel: string) => cssRule(cssRules, sel, "oneScreen.css");
 
 const NOW = new Date(2026, 7, 6, 15, 0, 0);
 const daysAgo = (n: number) => new Date(NOW.getTime() - n * 86400000).toISOString();
@@ -113,9 +113,15 @@ describe("§1 · the lock", () => {
     expect(releases.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("the grid is v16's: minmax(0,1fr) 287px, capped 1660 and centred", () => {
+  /* ⚠️ RETARGETED (dashboard redesign, Phase 2) — THREE columns, and the CENTRE is the elastic
+     one. The law is unchanged in substance: the page is one capped, centred grid whose side
+     columns are fixed and whose middle takes the rest. What moved is which track is `1fr`. */
+  it("the grid is three columns, the centre elastic, capped 1660 and centred", () => {
     const c = rule(".os-content");
-    expect(c).toContain("grid-template-columns: minmax(0, 1fr) 287px");
+    expect(c).toContain("grid-template-columns: 302px minmax(0, 1fr) 287px");
+    /* ⚠️ THE COLUMN BOTTOMS AGREE BY ONE WORD, not by three heights. Every column is handed the
+       same row box; there is no number to keep in step. */
+    expect(c).toContain("align-items: stretch");
     expect(c).toContain("max-width: var(--work-max)");
     /* ⚠️ THE FIGURE MOVED TO A TOKEN SO QUERY CENTRE CAN READ THE SAME ONE. Two pages agreeing by
        literal agree until one is edited; the value is asserted where it is now declared. */
@@ -132,18 +138,20 @@ describe("§1 · the lock", () => {
      `flex: 1` (basis 0) and contributes nothing to max-content — a coincidence of one shorthand,
      not a design. `minmax(0, 1fr)` says it outright, and `align-content: start` had to go because
      it stops the second row filling. */
-  it("⚠️ the header spans both columns; row 2 is minmax(0,1fr), never auto", () => {
+  it("⚠️ the header spans all three columns; row 2 is minmax(0,1fr), never auto", () => {
     const c = rule(".os-content");
     expect(c).toContain("grid-template-rows: auto minmax(0, 1fr)");
     expect(c).not.toContain("align-content: start");
     expect(c).toContain("height: 100%");
     expect(cssRules).toContain(".os-greet { grid-column: 1 / -1; grid-row: 1; }");
-    expect(cssRules).toContain(".os-colM { grid-column: 1; grid-row: 2; }");
+    expect(cssRules).toContain(".os-colL { grid-column: 1; grid-row: 2; }");
+    expect(cssRules).toContain(".os-colM { grid-column: 2; grid-row: 2; }");
+    expect(cssRules).toContain(".os-colR { grid-column: 3; grid-row: 2; }");
   });
 
   /* the columns take the row they are given and nothing escapes them */
-  it("both columns are height:100% with overflow hidden", () => {
-    const c = rule(".os-colM, .os-colR");
+  it("all three columns are height:100% with overflow hidden", () => {
+    const c = rule(".os-colL, .os-colM, .os-colR");
     expect(c).toContain("height: 100%");
     expect(c).toContain("min-height: 0");
     expect(c).toContain("overflow: hidden");
@@ -158,33 +166,57 @@ describe("§1 · the lock", () => {
     expect(a).not.toContain("min-height: 200px");
   });
 
-  /* ⚠️ THE TILE IS SQUARE BECAUSE BOTH NUMBERS ARE THE SAME ONE. Asserted as an identity, not
-     as two literals that happen to agree — if the row height moves and the width does not, this
-     is what says so. */
-  /* ⚠️ RETARGETED (community-tile pack, P1): the COLUMNS moved to a shared `.os-midrow, .os-lowrow`
-     declaration — the two rows' spine, one rule so the Community tile cannot drift from the author
-     tile's width — while the midrow's own rule keeps its HEIGHT. The squareness this guards is
-     unchanged: the same 302 in both places, now read from two rules instead of one. */
-  it("the midrow is a FIXED 302px, and the author tile is SQUARE", () => {
-    const cols = rule(".os-midrow, .os-lowrow");
-    const m = rule(".os-midrow");
-    const w = /grid-template-columns: (\d+)px minmax\(0, 1fr\)/.exec(cols)?.[1];
-    const h = /height: (\d+)px/.exec(m)?.[1];
-    expect(w, "the shared row rule must declare an explicit author width").toBeDefined();
-    expect(h, "the midrow must declare an explicit height").toBeDefined();
-    expect(w).toBe(h);
-    expect(m).toContain("flex: 0 0 auto");
+  /* ⚠️ RETARGETED (dashboard redesign, Phase 2), AND THE LAW IT ASSERTED IS NOW STRUCTURAL.
+     `.os-midrow, .os-lowrow` was ONE `grid-template-columns` shared by two rows, so the Community
+     tile could not drift from the author tile's width nor tasks from the chart's. With the columns
+     as the grid's own tracks there is no second row to agree with — the property is kept by the
+     shape rather than by a shared declaration, so the declaration goes rather than being repointed.
+     What survives as an assertion is that it went: a retired rule left in a sheet is how a deleted
+     layout comes back, and this sheet has been bitten by exactly that.
+
+     ⚠️ AND THE AUTHOR TILE'S SQUARENESS GOES WITH IT, DELIBERATELY. 302×302 was "the same value
+     twice" — the row's height and the column's width. There is no fixed row now, so the height
+     half has nothing to read. */
+  it("the two-row spine is RETIRED, rule and element together", () => {
+    expect(cssRuleCount(cssRules, ".os-midrow")).toBe(0);
+    expect(cssRuleCount(cssRules, ".os-lowrow")).toBe(0);
+    expect(cssRuleCount(cssRules, ".os-midrow, .os-lowrow")).toBe(0);
+    for (const src of ["./OneScreenDashboard.tsx", "./OneScreenSkeleton.tsx"]) {
+      const t = readFileSync(resolve(__dirname, src), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+      expect(t, `${src} still renders a retired row`).not.toMatch(/["\s`]os-(mid|low)row["\s`]/);
+    }
   });
 
   /* the rail narrowed 25% at every step so the chart gets the width; the proportion is the point,
      so all three steps move together or the page reads differently at each breakpoint */
-  it("the rail's three widths are one 25% reduction, not one hand-tuned number", () => {
-    for (const px of ["287px", "262px", "240px"]) {
-      expect(cssRules, px).toContain(`grid-template-columns: minmax(0, 1fr) ${px}`);
+  /* ⚠️ RETARGETED: the rail's three steps are unchanged (287 · 262 · 240) and the LEFT column now
+     steps with them, so the two sides narrow together and the centre keeps the width it gains. A
+     breakpoint that moved one side and not the other would re-proportion the page at that width
+     only, which is the fault the original 25% rule was written against. */
+  it("both side columns step together at every breakpoint; the centre stays elastic", () => {
+    for (const [l, r] of [["302px", "287px"], ["276px", "262px"], ["256px", "240px"]]) {
+      expect(cssRules, `${l} / ${r}`).toContain(`grid-template-columns: ${l} minmax(0, 1fr) ${r}`);
     }
-    for (const old of ["383px", "350px", "320px"]) {
-      expect(cssRules, old).not.toContain(`minmax(0, 1fr) ${old}`);
+    /* the old two-column form must not survive anywhere — it would win at whichever width it sat */
+    expect(cssRules).not.toMatch(/grid-template-columns: minmax\(0, 1fr\) \d+px/);
+  });
+
+  /* ⚠️ THE SWEEP, NOT THE FOUR NAMES (dashboard redesign, Phase 2). Each header's own suite asserts
+     its own rule; this asks the question of the WHOLE sheet, so a FIFTH card header added later
+     with a band cannot pass by nobody having written a case for it. The prompt phrased it as
+     ".hd carries no background or border-bottom" — `.hd` is the REF's class and this app has never
+     had one, so the claim is stated over the classes that actually head a dashboard card. */
+  it("⚠️ no card header in this sheet paints a band or a hairline", () => {
+    for (const sel of [".os-ahead", ".os-th2", ".os-goal-r1", ".os-commhead"]) {
+      const declared = cssRuleCount(cssRules, sel);
+      if (declared === 0) continue; // `.os-commhead` rides `.os-ahead`; absence is not a failure
+      const body = rule(sel);
+      expect(body, `${sel} paints a fill`).not.toMatch(/(^|;|\s)background(-color|-image)?\s*:/);
+      expect(body, `${sel} draws a hairline under itself`).not.toContain("border-bottom");
     }
+    /* the icon tile loses its plate on all of them, and there is exactly ONE rule to lose it in */
+    expect(cssRuleCount(cssRules, ".os-mark")).toBe(1);
+    expect(rule(".os-mark")).not.toContain("box-shadow");
   });
 
   it("⚠️ the rail spaces with MARGINS, not gap — a collapsing panel takes its spacing with it", () => {
@@ -194,20 +226,20 @@ describe("§1 · the lock", () => {
     expect(rule(".os-colR > *")).toContain("margin-bottom: 13px");
   });
 
-  /* ⚠️ RETARGETED (community-tile pack, P1): the 118–318 budget moved from `.os-colM .os-tasks`
-     to `.os-lowrow`, because the ROW is now the thing with a height and the tasks card fills it.
-     The numbers are the tasks card's own, carried over unchanged — what this guards is that the
-     card is still content-driven between those bounds, which is now a fact about its row. */
-  it("the vertical budget: the chart flexes, tasks are content-driven 118–318", () => {
-    expect(rule(".os-colM .os-lead")).toContain("flex: 1 1 auto");
-    /* ⚠️ NOT `rule(".os-lowrow")` — the shared selector `.os-midrow, .os-lowrow {` CONTAINS that
-       string, so the helper's indexOf finds the columns rule and the height assertions fail
-       against a rule that never had them. The standalone rule starts a line. */
-    const t = /\n\.os-lowrow \{([^}]*)\}/.exec(cssRules)?.[1] ?? "";
-    expect(t, "the standalone .os-lowrow rule must exist").not.toBe("");
-    expect(t).toContain("min-height: 118px");
-    expect(t).toContain("max-height: 318px");
-    expect(t).toContain("flex: 0 1 auto");
+  /* ⚠️ RETARGETED (dashboard redesign, Phase 2). The budget INVERTED: the chart is now the card
+     with the range (340–560) and the to-do panel takes whatever the chart does not. That is the
+     point of the redesign's centre column — the chart is bounded so the panel can be generous —
+     and it is the reverse of the old row, where tasks were bounded 118–318 and the chart flexed. */
+  it("the vertical budget: the chart is bounded 340–560, the to-do panel takes the rest", () => {
+    const chart = rule(".os-colM .os-lead");
+    expect(chart).toContain("min-height: 340px");
+    expect(chart).toContain("max-height: 560px");
+    expect(chart).toContain("flex: 0 1 auto");
+    const todo = rule(".os-colM .os-tasks");
+    expect(todo).toContain("flex: 1 1 auto");
+    expect(todo).toContain("min-height: 0");
+    /* ⚠️ THE FEED FLEXES TO ITS COLUMN AND NEVER SETS IT — the property the measurement asserts. */
+    expect(rule(".os-colR .os-actv")).toContain("flex: 1 1 auto");
   });
 });
 
@@ -365,8 +397,8 @@ describe("⚠️ the entrance class is REMOVED, and the guard is a ref", () => {
 
   /* the author tile moved to the main column in §1; its stagger delay had stayed in the rail */
   it("every stagger delay names the column its card actually lives in", () => {
-    expect(cssRules).toContain(".os-colM .os-aut.enter");
+    expect(cssRules).toContain(".os-colL .os-aut.enter");
     expect(cssRules).not.toContain(".os-colR .os-aut.enter");
-    expect(cssRules).toContain(".os-colM .os-probanner.enter");
+    expect(cssRules).toContain(".os-colL .os-probanner.enter");
   });
 });

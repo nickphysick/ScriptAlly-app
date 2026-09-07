@@ -105,8 +105,27 @@
   height: 100%;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 287px;
+  /* ⚠️ THREE COLUMNS (dashboard redesign, Phase 2). The CENTRE column is the elastic one and it
+     owns the row's height; the two sides are fixed and stretch to whatever it decides. That is the
+     inversion this phase performs — `.os-midrow` used to be a fixed 302px row whose LEFT column
+     owned the height, with its own rule warning "never `1fr`, the rail would then drive the row".
+     The warning was right about the OLD shape and does not survive the restructure: with the three
+     columns as grid tracks, no column can drive another's height, because they are siblings in one
+     row rather than two rows sharing a spine.
+
+     ⚠️ THE SIDE WIDTHS ARE THE ONES ALREADY IN THE PAGE, not the ref's 440/420. The ref is drawn
+     at its own scale on a bare page; here 302 is the manuscript tile's existing width and 287 the
+     rail's, so the two side columns keep every rule already written against them. Taking the ref's
+     numbers would have moved both for no reason a reader could see. */
+  grid-template-columns: 302px minmax(0, 1fr) 287px;
   grid-template-rows: auto minmax(0, 1fr);
+  /* ⚠️ `stretch` IS THE COLUMN-BOTTOM LAW, AND IT IS ONE WORD RATHER THAN THREE HEIGHTS. Every
+     column is handed the same row box, so the three bottoms agree by construction — there is no
+     number to keep in step and nothing to re-measure when a card's content changes. The ref
+     reaches the same place with `align-items: stretch` on `.grid3`; the prompt described it as
+     `height:0; min-height:100%` on the side columns, which is not what the ref does and is not
+     needed once the tracks are the columns. */
+  align-items: stretch;
   column-gap: 16px;
   row-gap: 0;
   padding: 16px 26px 24px;
@@ -117,8 +136,9 @@
   width: 100%;
 }
 .os-greet { grid-column: 1 / -1; grid-row: 1; }
-.os-colM { grid-column: 1; grid-row: 2; }
-.os-colR { grid-column: 2; grid-row: 2; }
+.os-colL { grid-column: 1; grid-row: 2; }
+.os-colM { grid-column: 2; grid-row: 2; }
+.os-colR { grid-column: 3; grid-row: 2; }
 /* ⚠️ `height:100%` + `overflow:hidden` — the columns take the row they are given and nothing
    escapes them. Without the overflow, a tall card pushes past its column silently. */
 /**
@@ -132,46 +152,57 @@
  * declared `height: 100%` instead of extending the box, and the negative margin then pulls the
  * content out of position rather than restoring it — the cards would sit 10px high and 10px left.
  */
-.os-colM, .os-colR {
+.os-colL, .os-colM, .os-colR {
   display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0;
   overflow: hidden;
   box-sizing: content-box;
   padding: var(--os-bleed);
   margin: calc(var(--os-bleed) * -1);
 }
-.os-colM { gap: var(--os-cardgap); }
+.os-colL, .os-colM { gap: var(--os-cardgap); }
 /* ⚠️ THE RAIL USES MARGINS, NOT GAP (§6) — a collapsing panel must take its slot's spacing with
    it, and `gap` leaves a ghost gutter behind a max-height:0 panel. */
 .os-colR { gap: 0; }
 .os-colR > * { margin-bottom: 13px; }
 .os-colR > *:last-child { margin-bottom: 0; }
 
-/* ⚠️ A FIXED 302px ROW (v16 §1). The row never stretches with the viewport, which is what keeps
-   the columns level.
+/* ══ THE COLUMNS' VERTICAL BUDGET (dashboard redesign, Phase 2) ══════════════════════════════
+ *
+ * ⚠️ `.os-midrow` / `.os-lowrow` ARE RETIRED, RULE AND ELEMENT TOGETHER. They were ONE shared
+ * `grid-template-columns` declaration across two rows, so the Community tile could not drift from
+ * the author tile's width and the tasks card could not drift from the chart's. That law is not
+ * lost — it is satisfied by CONSTRUCTION now: the columns ARE the grid's tracks, so there is no
+ * second row to agree with. A retired rule left behind is how a deleted layout comes back.
+ *
+ * ⚠️ AND THE AUTHOR TILE IS NO LONGER SQUARE. Its 302×302 was "the same value twice, not two that
+ * happen to match" — the row's height and the column's width. There is no fixed row now, so the
+ * height half has nothing to read; the tile takes its column's width and its own content's height.
+ * Stated because a reader who knows the squareness law will look for it and find it gone.
+ */
 
-   ⚠️ THE AUTHOR TILE IS A SQUARE, and it is square because BOTH numbers are 302 — the same value
-   twice, not two that happen to match. If the row's height ever moves, this width moves with it
-   or the tile silently stops being square. (Squareness is a desktop property: below 1024px the
-   row releases to `height: auto` and the tile takes the width it is given.) */
-/* ⚠️ ONE DECLARATION, TWO ROWS — the spine. The Community tile is the author tile's width and
-   the tasks card is the chart's width because both rows read THIS rule, not because two pairs of
-   numbers were matched by hand. A column that moves, moves in both. (community-tile pack, P1.) */
-.os-midrow, .os-lowrow {
-  display: grid; grid-template-columns: 302px minmax(0, 1fr); gap: 13px;
-}
-.os-midrow { flex: 0 0 auto; height: 302px; }
-.os-midrow .os-aut, .os-midrow .os-lead { height: 302px; min-height: 0; }
-/* ⚠️ THE HEIGHT RULES MOVED FROM `.os-tasks` TO THE ROW, deliberately: the row is now the thing
-   with a height, and the tasks card FILLS it. That keeps "tasks sets the row height" true — the
-   row sizes to its content, which is tasks (the tile is the shorter card by design) — while
-   giving the tile something definite to fill. The 118/318 pair is the tasks card's own, carried
-   over unchanged so its internal scroll behaves exactly as before. */
-.os-lowrow { flex: 0 1 auto; min-height: 118px; max-height: 318px; }
+/* ⚠️ THE CENTRE COLUMN OWNS THE HEIGHT, AND THE CHART IS THE ONLY CARD WITH A RANGE.
+   Chart between 340 and 560; the to-do card takes everything the chart does not. The `min-height`
+   here is on a CARD, never on `.os-root` — the §1 lock forbids it on the lock elements only, and
+   this is the ref's own `#chartCard{flex:1;min-height:340px}` translated. */
+.os-colM .os-lead { flex: 0 1 auto; min-height: 340px; max-height: 560px; }
+.os-colM .os-tasks { flex: 1 1 auto; min-height: 0; }
 
-/* the vertical budget (§1): tasks are content-driven */
-.os-colM .os-lead { flex: 1 1 auto; min-height: 0; }
-/* the card fills the row that now owns the height (see .os-lowrow) */
-.os-lowrow .os-tasks, .os-lowrow .os-comm { height: 100%; min-height: 0; }
+/* ⚠️ THE LEFT COLUMN IS THREE CARDS AT NATURAL HEIGHT, AND PRO TAKES THE SLACK.
+   Community no longer stretches — it did only because the old `.os-lowrow` gave it a row height to
+   fill, and a centred hero stretched by a row it does not own is a tile pretending to be taller
+   than its content. Pro is `flex: 1 1 auto` because it is the card at the foot and the one that
+   can honestly grow. ⚠️ WHERE PRO IS ABSENT — a Pro subscriber, or a viewport below its own gate —
+   THE COLUMN'S FOOT IS SHORT, and that gap is reported rather than filled: inventing a spacer to
+   close it would put a shape on the page that stands for nothing. */
+.os-colL .os-aut { flex: 0 0 auto; }
+.os-colL .os-comm { flex: 0 0 auto; }
+.os-colL .os-probanner { flex: 1 1 auto; }
+
+/* ⚠️ THE FEED FLEXES TO ITS COLUMN AND NEVER SETS IT. `.os-colR` is stretched by the grid, the
+   goals panel is natural, and activity takes the remainder — so the feed's CONTENT height cannot
+   reach the row. That is the property the measurement asserts: add fifty events and the three
+   column bottoms do not move. */
+.os-colR .os-actv { flex: 1 1 auto; min-height: 0; }
 
 /* ══ CARD CHROME ══ */
 .os-card {
@@ -233,13 +264,17 @@
    class declarations, which is exactly the pinned-opacity "squashed header" bug. */
 .os-card.enter, .os-greet.enter { animation: os-rise 0.42s cubic-bezier(0.22, 0.68, 0.36, 1) both; }
 @keyframes os-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-.os-colM .os-greet.enter { animation-delay: 0s; }
+/* ⚠️ `.os-greet` IS NOT IN A COLUMN — it spans the grid (`grid-column: 1 / -1`), so the
+   `.os-colM .os-greet` this used to say selected nothing and the greeting never staggered.
+   Pre-existing; corrected here because Phase 2 rewrote the block it sits in. */
+.os-greet.enter { animation-delay: 0s; }
 .os-colM .os-lead.enter { animation-delay: 0.05s; }
 .os-colM .os-tasks.enter { animation-delay: 0.1s; }
-.os-colM .os-aut.enter { animation-delay: 0.07s; }
+.os-colL .os-comm.enter { animation-delay: 0.14s; }
+.os-colL .os-aut.enter { animation-delay: 0.07s; }
 .os-colR .os-goal.enter { animation-delay: 0.12s; }
 .os-colR .os-actv.enter { animation-delay: 0.17s; }
-.os-colM .os-probanner.enter { animation-delay: 0.22s; }
+.os-colL .os-probanner.enter { animation-delay: 0.22s; }
 
 /* §10: keyboard parity with hover */
 .os-root a:focus-visible, .os-root button:focus-visible, .os-root [tabindex]:focus-visible {
@@ -392,9 +427,14 @@
 /* the counters card takes the rest of the header row, as the real one does */
 .os-sk-counters { flex: 1; min-width: 0; height: var(--os-sk-counters-h); border-radius: 14px; }
 
-/* ⚠️ NO HEIGHTS ON THE MIDROW PAIR — `.os-midrow` is a 302px grid and its items stretch, so the
-   tile and the chart are sized by the same rule that sizes the real cards. */
+/* ⚠️ NO HEIGHTS ON THE COLUMN CARDS — the columns stretch and their cards read the same flex
+   budgets that size the real ones, so the ghosts cannot drift from what they stand in for.
+   The three modifiers below carry ONLY the flex budget of the card each stands in for; every
+   width, gap and radius still comes from the rules above. */
 .os-sk-card { border-radius: 14px; }
+.os-sk-aut { flex: 0 0 auto; height: var(--os-sk-aut-h, 232px); }
+.os-sk-comm { flex: 1 1 auto; min-height: 120px; }
+.os-sk-chart { flex: 0 1 auto; min-height: 340px; max-height: 560px; }
 .os-sk-tasks { flex: none; height: var(--os-sk-tasks-h); border-radius: 14px; }
 .os-sk-goal { flex: none; height: var(--os-sk-goal-h); border-radius: 14px; }
 /* ⚠️ `flex: 1 1 auto`, AS THE REAL ACTIVITY CARD IS — which is also what makes the goal ghost's
@@ -412,7 +452,7 @@
 
 /* ══ §11 · RESPONSIVE FRAME ══ */
 @media (max-width: 1360px) {
-  .os-content { grid-template-columns: minmax(0, 1fr) 262px; column-gap: 14px; padding: 16px 22px 22px; }
+  .os-content { grid-template-columns: 276px minmax(0, 1fr) 262px; column-gap: 14px; padding: 16px 22px 22px; }
   .os-greet h1 { font-size: 40px; }
   .os-pills { gap: 6px; }
 }
@@ -420,7 +460,7 @@
   .os-greet h1 { font-size: 34px; }
 }
 @media (max-width: 1200px) {
-  .os-content { grid-template-columns: minmax(0, 1fr) 240px; }
+  .os-content { grid-template-columns: 256px minmax(0, 1fr) 240px; }
   /* the achievement slot is the softest fact — it gives ground first (§11) */
   .os-pills .os-pill:nth-child(2) { display: none; }
 }
@@ -433,14 +473,16 @@
   .os-root { height: auto !important; overflow: visible; }
   .os-content { display: flex; flex-direction: column; gap: 14px; padding: 16px 20px 28px; }
   /* the grid placements go with the grid, or the flex order is wrong */
-  .os-greet, .os-colM, .os-colR { grid-column: auto; grid-row: auto; }
-  .os-midrow { display: flex; flex-direction: column; height: auto; }
-  .os-midrow .os-aut, .os-midrow .os-lead { height: auto; }
-  .os-midrow .os-lead { min-height: 280px; }
-  .os-colM, .os-colR { gap: 14px; }
+  .os-greet, .os-colL, .os-colM, .os-colR { grid-column: auto; grid-row: auto; }
+  .os-colL, .os-colM, .os-colR { gap: 14px; }
   .os-colR > * { margin-bottom: 0; }
-  .os-colM .os-lead { flex: none; height: 280px; }
+  /* ⚠️ EVERY FLEX BUDGET FROM THE DESKTOP COLUMNS IS RELEASED HERE, not just the chart's. Below the
+     lock there is no row to divide, so a card that still said `flex: 1` would take the whole of a
+     column that is now as tall as the page. */
+  .os-colM .os-lead { flex: none; height: 280px; min-height: 0; max-height: none; }
   .os-colM .os-tasks { flex: none; max-height: none; }
+  .os-colL .os-aut, .os-colL .os-comm, .os-colL .os-probanner { flex: none; }
+  .os-colR .os-actv { flex: none; }
   .os-pills .os-pill:nth-child(2) { display: inline-flex; }
 }
 /* short desktop viewports: the promise cannot be kept, so stop pretending (§11) */
@@ -778,10 +820,17 @@
    so the pink band stood 2px taller than the other three. Nobody had noticed because until now no
    two bands sat side by side at the same height; measured 51 vs 49 across the four. The colours
    differ by purpose, the GEOMETRY does not. */
+/* ⚠️ NO FILL, NO HAIRLINE (dashboard redesign, Phase 2). The header sits ON the card: title, mark
+   and controls against the card's own paper. What is gone is a `linear-gradient` band and a
+   `border-bottom` — deliberately NOT the 51px height, which stays because it is what makes the
+   four headers agree structurally rather than by four values that happen to match (they did not:
+   measured 51 against 49 before it was stated).
+
+   ⚠️ AND `background` IS ABSENT RATHER THAN SET TO `transparent`. The shorthand resets every
+   background longhand, so a future edit adding an image here would silently take a colour with it;
+   with nothing declared there is no shorthand to mistake. The card behind it is opaque. */
 .os-th2 {
   display: flex; align-items: center; gap: 12px; margin: 0;
-  background: linear-gradient(180deg, #f5e3d8, #f2ddd2);
-  border-bottom: 1px solid #ebd2c4;
 }
 .os-th2 h2 {
   font-family: var(--font-serif); font-size: 15.5px; font-weight: 600; color: #3a241a;
@@ -1037,10 +1086,9 @@
  * 51px because it says so, and its contents centre inside whatever room that leaves.
  */
 .os-ahead, .os-th2 { height: 51px; padding: 0 16px; box-sizing: border-box; flex: none; }
+/* the same, for the sage band — see `.os-th2` above for why the height survives the paint */
 .os-ahead {
   display: flex; align-items: center; gap: 12px;
-  background: linear-gradient(180deg, #dde3da, #d6dcd3);
-  border-bottom: 1px solid #cbd3c8;
 }
 /* ⚠️ NOWRAP, AND THE CONTROLS SHRINK FIRST. A title wrapping to two lines was what broke the band
    height at narrower widths — with a stated height it would now clip instead, which is worse. */
@@ -1306,13 +1354,16 @@
    ⚠️ THE FILL IS TRANSLUCENT PARCHMENT so ONE rule serves both bands — it reads on the sage
    activity band and the pink to-do band without a per-band override, which is what stops this
    becoming four rules again. */
+/* ⚠️ THE PLATE IS GONE, THE SLOT IS NOT (dashboard redesign, Phase 2). The 28px box, its
+   `flex: 0 0 28px` and the bounded `object-fit: contain` inside it are the whole reason this
+   component exists — an icon at 17px and a future illustration at full bleed occupy one footprint,
+   so the swap moves nothing. What is removed is the parchment fill and the burgundy inset ring,
+   which were the band's furniture: on a bare header a plated tile reads as a button. */
 .os-mark {
   flex: 0 0 28px;
   width: 28px;
   height: 28px;
   border-radius: 7px;
-  background: rgba(253, 250, 245, 0.72);
-  box-shadow: inset 0 0 0 1px rgba(124, 58, 42, 0.13);
   display: flex;
   align-items: center;
   justify-content: center;

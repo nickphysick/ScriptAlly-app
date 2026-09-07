@@ -15,6 +15,7 @@ import { ActivityType, QueryStatus, UserPlan } from "../../types";
 import { feedLabel, feedRows, OneScreenRail } from "./OneScreenRail";
 import { deriveGoalProgress } from "../../lib/queryingGoals";
 import type { QueryingGoalEntry } from "../../types";
+import { cssRule } from "../../test/cssRule";
 
 const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
 const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
@@ -177,14 +178,20 @@ describe("the rendered rail", () => {
 });
 
 describe("the sage band and the timeline (app-shell-v2)", () => {
-  /* ⚠️ SAGE HEADS A CONTAINER; pink is reserved for the surface that wants something (tasks). */
-  it("⚠️ the activity header is a SAGE gradient band with its hairline", () => {
-    const h = cssRules.slice(cssRules.indexOf(".os-ahead {"));
-    const block = h.slice(0, h.indexOf("}"));
-    expect(block).toContain("linear-gradient(180deg, #dde3da, #d6dcd3)");
-    expect(block).toContain("border-bottom: 1px solid #cbd3c8");
-    const t = cssRules.slice(cssRules.indexOf(".os-ahead h2 {"));
-    expect(t.slice(0, t.indexOf("}"))).toContain("color: #2b3a29");
+  /* ⚠️ RETARGETED (dashboard redesign, Phase 2). The sage band is GONE — the header sits on the
+     card's own paper, title and mark and controls against it. The band's INK survives, which is
+     the half worth guarding: sage headed a container and pink the surface that wants something,
+     and dropping the fill must not quietly drop the distinction with it.
+
+     ⚠️ AND `background` MUST BE ABSENT, NOT `transparent`. The shorthand resets every background
+     longhand, so a later edit adding an image here would take a colour with it; with nothing
+     declared there is no shorthand to mistake. */
+  it("⚠️ the activity header carries no fill and no hairline — but keeps its ink", () => {
+    const block = cssRule(cssRules, ".os-ahead", "oneScreen.css");
+    expect(block).not.toContain("linear-gradient");
+    expect(block).not.toContain("border-bottom");
+    expect(block).not.toContain("background");
+    expect(cssRule(cssRules, ".os-ahead h2", "oneScreen.css")).toContain("color: #2b3a29");
   });
 
   /* ⚠️ THE DOTS ARE THE LOCKED COMPONENT. The mockup draws simplified circles; those are a
@@ -216,7 +223,10 @@ describe("§6 · the collapse mechanics in CSS", () => {
   });
 
   it("⚠️ the activity panel's own height is NEVER animated — flex does the work", () => {
-    const actv = sliceBetween(cssRules, ".os-actv {", ".os-ahead {");
+    /* ⚠️ ANCHORED. `sliceBetween(css, ".os-actv {", ".os-ahead {")` matched inside
+       `.os-colR .os-actv {` once the columns gained descendant rules, and swept 840 lines of other
+       rules' declarations into the slice. See src/test/cssRule.ts. */
+    const actv = cssRule(cssRules, ".os-actv", "oneScreen.css");
     expect(actv).toContain("flex: 1");
     expect(actv).not.toContain("transition: height");
     expect(actv).not.toContain("max-height");
