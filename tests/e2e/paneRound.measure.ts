@@ -7,6 +7,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync, rmSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -41,7 +42,7 @@ test("pane round", async ({ page }) => {
   const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
   await ensureSignedIn(page);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(7000);
 
   /* ══ PHASE 1 · the frame ═════════════════════════════════════════════════════════════════ */

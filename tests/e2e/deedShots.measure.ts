@@ -1,6 +1,7 @@
 /** Screenshots for the deed round. No backticks inside any evaluate template. */
 import { test } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { mkdirSync } from "node:fs";
 const VIS = `(e) => { if (!e) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; }`;
 const OPEN = (kind: string) => `(() => {
@@ -28,7 +29,7 @@ test("deed shots", async ({ page }) => {
   await ensureSignedIn(page);
   for (const w of [1440, 1920]) {
     await page.setViewportSize({ width: w, height: 900 });
-    await page.goto("/todo"); await page.waitForTimeout(6500);
+    await gotoTodo(page, "list"); await page.waitForTimeout(6500);
     if (await page.evaluate(OPEN("Send"))) {
       await page.waitForTimeout(1300);
       await page.screenshot({ path: `reports/deed-round/send-empty-${w}.png` });
@@ -41,7 +42,7 @@ test("deed shots", async ({ page }) => {
       console.log(`shot send-complete @${w}`);
     }
     for (const [name, opener] of [["note", OPEN("Note")], ["close", OPEN("Close")], ["bulk", OPEN_BULK]] as const) {
-      await page.goto("/todo"); await page.waitForTimeout(6000);
+      await gotoTodo(page, "list"); await page.waitForTimeout(6000);
       if (!(await page.evaluate(opener))) { console.log(`skip ${name} @${w} — no such row`); continue; }
       await page.waitForTimeout(1400);
       await page.screenshot({ path: `reports/deed-round/${name}-${w}.png` });

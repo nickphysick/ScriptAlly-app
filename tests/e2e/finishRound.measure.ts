@@ -31,6 +31,7 @@
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
 import { maybeMutate } from "./mutate";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync, rmSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -100,7 +101,7 @@ test("finishing round", async ({ page }) => {
      nothing, and `proveReds.mjs` for the run that walks the whole catalogue. */
   const mutation = await maybeMutate(page);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(7000);
 
   /* ── a journey's shape, read once per kind ────────────────────────────────────────────── */
@@ -364,7 +365,7 @@ test("finishing round", async ({ page }) => {
    * "Today" is only pressable while `s-when` is the open row — on this account's send the parcel is
    * satisfied by the material itself, so it is the first.
    */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(6000);
   await page.evaluate(OPEN("Send"));
   await page.waitForTimeout(1400);

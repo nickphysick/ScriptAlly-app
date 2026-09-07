@@ -30,6 +30,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn, liftMotionSuppression } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync, rmSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -49,7 +50,7 @@ test("the sheet is one object, the slip is beside it, and the band never hears a
 
   for (const w of [1440, 1920]) {
     await page.setViewportSize({ width: w, height: 900 });
-    await page.goto("/todo");
+    await gotoTodo(page, "list");
     await page.waitForFunction(
       "document.querySelectorAll('.tlc .row').length > 0", null, { timeout: 45_000 }).catch(() => {});
     await liftMotionSuppression(page);

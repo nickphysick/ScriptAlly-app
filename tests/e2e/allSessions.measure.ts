@@ -6,6 +6,7 @@
  */
 import { test } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync, rmSync, mkdirSync } from "node:fs";
 
 const OUT = "run-artifacts/all-sessions-deploy.txt";
@@ -21,7 +22,7 @@ test("five sessions on dev", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
 
   /* ── 1 · masthead / pinned chrome ─────────────────────────────────────────────────────────── */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForSelector(".tlc .row", { timeout: 30000 }).catch(() => {});
   await page.waitForTimeout(4000);
   const chrome = await page.evaluate(`(() => {

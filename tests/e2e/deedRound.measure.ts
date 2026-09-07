@@ -11,6 +11,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync, rmSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -69,7 +70,7 @@ test("deed round", async ({ page }) => {
   const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
   await ensureSignedIn(page);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(7000);
 
   const shapeOf = async (kind: string) => {
@@ -223,7 +224,7 @@ test("deed round", async ({ page }) => {
 
   /* ══ THE STRIP'S REMINDER CLAUSE — one case of each, and no date said twice ════════════════ */
   const clause = async (label: string) => {
-    await page.goto("/todo"); await page.waitForTimeout(6000);
+    await gotoTodo(page, "list"); await page.waitForTimeout(6000);
     if (!(await page.evaluate(OPEN("Send")))) return null;
     await page.waitForTimeout(1300);
     await page.evaluate(ANSWER_FORK);
@@ -323,7 +324,7 @@ test("deed round", async ({ page }) => {
      nobody ran, and `taskSurvivesMute` removed the task after `replyTask` had correctly produced
      it. With the mute cleared the pane can finally be looked at. */
   const closeShape = await (async () => {
-    await page.goto("/todo"); await page.waitForTimeout(6000);
+    await gotoTodo(page, "list"); await page.waitForTimeout(6000);
     if (!(await page.evaluate(OPEN("Close")))) return null;
     await page.waitForTimeout(1400);
     return await page.evaluate(`(() => {

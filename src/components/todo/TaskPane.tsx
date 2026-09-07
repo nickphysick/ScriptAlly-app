@@ -191,6 +191,22 @@ export interface TaskPaneJourney {
 }
 
 export interface TaskPaneProps {
+  /**
+   * ⚠️ THE HERO IS FIXED CHROME IN THE DRAWER AND SCROLLS IN THE SPLIT, AND CSS CANNOT SAY SO.
+   *
+   * The reference card's two treatments are a descendant selector, because what differs there is
+   * PAINT. What differs here is PLACEMENT: the contract's drawer is a flex column of four things
+   * and only the body scrolls — a deed that scrolls away is a deed you cannot check the form
+   * against — while the docked sheet is capped at 404px at a 900px viewport, so a hundred pixels
+   * of new fixed chrome leaves the scroller with nothing. Measured: `sheet 404 holding a 0
+   * scroller`, which is this repo's own `flex: 1 1 0%` fault arriving through a grid track.
+   *
+   * So one boolean, from the one caller that already branches on the host. Its better home is a
+   * context published by `SlideOver` — a prop is the caller's opinion, and this repo prefers the
+   * host to state its own behaviour — but `slideOver.css`/`SlideOver.tsx` are mid-edit in another
+   * session this round and must not be staged. Move it when they are free.
+   */
+  heroFixed?: boolean;
   journey: TaskPaneJourney;
   onPrimary: () => void;
   /** carried behaviour: where you are in the queue, and how to move */
@@ -289,7 +305,58 @@ const BookMark: React.FC = () => (
   </svg>
 );
 
-export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, committed }) => {
+export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, committed, heroFixed = false }) => {
+  /**
+   * ⚠️ THE DERIVED LINE IS THE DRAWER'S, AND THE NOTE'S OWN PROVENANCE IS BOTH HOSTS'.
+   *
+   * The tightened round retired the split's sub-line on purpose — "it existed to name the agent and
+   * the agency the deed could not fit; the sentence names them" — with one carve-out it stated at
+   * the value: a note's deed is the WRITER'S OWN WORDS, so it never gained a sentence to absorb
+   * "Your own note · added 2 days ago". Putting the situation line back into the docked sheet would
+   * undo that round's decision, and it cost the sheet the ~26px that stopped it hugging (measured:
+   * `bar=821 sheet=829 pane=847`, where the rule wants 40px of desk beneath).
+   */
+  const heroLine = heroFixed ? (d.sub || d.line) : d.sub;
+
+  /* the hero, placed by the host — see `heroFixed` */
+  const hero = (
+    <div className={`dhero ${d.cls}`}>
+      {/* ⚠️ THE DEED SENTENCE IS THE HERO'S TITLE (tightened round, Phase 3, moved here) —
+          Playfair, carrying NO colour of its own. Treatment C: the variables are 600, and
+          the manuscript and the agent wear a dotted underline because they are the two
+          things in the sentence you can go and look at. */}
+      <div className={d.hand ? "title hand" : "title"}>{d.deed}</div>
+      {/* ⚠️ THE NOTE'S OWN PROVENANCE WINS OVER THE DERIVED LINE. A note's deed is the
+          writer's own words, so it never gained a sentence to absorb "Your own note ·
+          added 2 days ago"; every other card gets the situation-and-register line, which
+          `lib/paneHero` builds from the ticket's own facts. Absent, not empty — a rendered
+          line holding nothing is a blank under the title, which reads as something that
+          failed to load. */}
+      {heroLine ? <div className="line">{heroLine}</div> : null}
+      {/* ⚠️ THREE CHIPS, EACH OMITTED WHERE ITS FACT IS ABSENT — never a placeholder. The
+          contract's own render drops the agent chip on a note and prints `No date` in the
+          wait chip rather than an empty pill.
+
+          ⚠️ AND THEY ARE THE DRAWER'S ALONE. In the split the ROW you clicked is still on screen
+          two inches to the left, carrying the manuscript, the agent and the wait — so the chips
+          would restate what the reader can already see, and they cost the docked sheet the 40px
+          that took it past its cap (measured: a short journey stopped hugging at 847 against a
+          839 foot). In the drawer the list is covered, and the chips are the only place that
+          context exists. */}
+      {heroFixed && (d.ms || d.agent || d.wait) && (
+        <div className="chips">
+          {d.ms && <span className="chip"><BookMark />{d.ms}</span>}
+          {d.agent && (
+            <span className="chip">
+              <span className="av" aria-hidden="true">{d.agent.initials}</span>{d.agent.name}
+            </span>
+          )}
+          {d.wait && <span className="chip"><span className="m">{d.wait}</span></span>}
+        </div>
+      )}
+    </div>
+  );
+
   const [recAway, setRecAwayState] = React.useState(slipAwayThisSession);
   /* written through on every change, so a close-and-reopen of the pane finds the same answer */
   const setRecAway = React.useCallback((v: boolean) => { slipAwayThisSession = v; setRecAwayState(v); }, []);
@@ -435,34 +502,7 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, 
                 property drops the whole declaration, so a faithful copy of the ref's token NAMES
                 would have rendered the hero with no background at all — silently, through a green
                 build. `--u-now-*` is the pair the family pill beside it already reads. */}
-            <div className={`dhero ${d.cls}`}>
-              {/* ⚠️ THE DEED SENTENCE IS THE HERO'S TITLE (tightened round, Phase 3, moved here) —
-                  Playfair, carrying NO colour of its own. Treatment C: the variables are 600, and
-                  the manuscript and the agent wear a dotted underline because they are the two
-                  things in the sentence you can go and look at. */}
-              <div className={d.hand ? "title hand" : "title"}>{d.deed}</div>
-              {/* ⚠️ THE NOTE'S OWN PROVENANCE WINS OVER THE DERIVED LINE. A note's deed is the
-                  writer's own words, so it never gained a sentence to absorb "Your own note ·
-                  added 2 days ago"; every other card gets the situation-and-register line, which
-                  `lib/paneHero` builds from the ticket's own facts. Absent, not empty — a rendered
-                  line holding nothing is a blank under the title, which reads as something that
-                  failed to load. */}
-              {(d.sub || d.line) ? <div className="line">{d.sub || d.line}</div> : null}
-              {/* ⚠️ THREE CHIPS, EACH OMITTED WHERE ITS FACT IS ABSENT — never a placeholder. The
-                  contract's own render drops the agent chip on a note and prints `No date` in the
-                  wait chip rather than an empty pill. */}
-              {(d.ms || d.agent || d.wait) && (
-                <div className="chips">
-                  {d.ms && <span className="chip"><BookMark />{d.ms}</span>}
-                  {d.agent && (
-                    <span className="chip">
-                      <span className="av" aria-hidden="true">{d.agent.initials}</span>{d.agent.name}
-                    </span>
-                  )}
-                  {d.wait && <span className="chip"><span className="m">{d.wait}</span></span>}
-                </div>
-              )}
-            </div>
+            {heroFixed ? hero : null}
             {/* ⚠️ THE WORK SCROLLS INSIDE THE RIM AND THE FOOT STAYS PUT — the rim carries
                 `overflow: hidden`, so work leaves at the object's own edge and there is nothing
                 underneath it to reappear in. The foot is a SIBLING of the scroller inside the same
@@ -476,6 +516,7 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, 
                   the `When` row's hint, which is where it is read. */}
               <div className="workscroll">
                 <div className="form">
+                  {heroFixed ? null : hero}
                   {/* ⚠️ THE FORK IS THE FIRST QUESTION (journey round, Phase 2; ref
                       `design-refs/todo-journey-logic.html`). A journey starts with the DECISION, not
                       the paperwork: the pane asks what the writer wants to do, and each intent gets

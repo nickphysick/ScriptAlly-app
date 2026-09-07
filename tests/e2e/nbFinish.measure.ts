@@ -8,6 +8,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
+import { gotoTodo } from "./todoOpen";
 
 const ROUTE = "/todo/noteboard";
 
@@ -264,7 +265,7 @@ test.describe("Phase 4 — the date lives on the note", () => {
     await expect(again.locator(".nb-taskbadge")).toContainText("On your to-do list");
 
     /* (c) the To-do board renders the SAME document as a task card — due today, so promoted */
-    await page.goto("/todo");
+    await gotoTodo(page, "list");
     await page.waitForTimeout(2500);
     const rows = await page.evaluate(() => {
       /* ⚠️ VISIBLE LIST ROWS, scoped to the list container. Two traps found live: `.tbd-card` is

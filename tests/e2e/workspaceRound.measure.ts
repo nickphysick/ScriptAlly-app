@@ -14,6 +14,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn, liftMotionSuppression } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync, rmSync, mkdirSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -72,7 +73,7 @@ test("workspace round", async ({ page }) => {
 
   await ensureSignedIn(page);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(7000);
 
   /* ⚠️ MOTION IS LIFTED FOR EVERY STATE CHANGE IN THIS FILE. `animation: none` never fires
@@ -149,7 +150,7 @@ test("workspace round", async ({ page }) => {
        · the worksheet scrolls inside the rim           → finishRound P2.1 + sheetSlip P3.3 */
 
   /* ══ PHASE 3 · one question at a time ═════════════════════════════════════════════════════ */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(6000);
   await liftMotionSuppression(page);
   await page.evaluate(OPEN("Send"));
@@ -270,7 +271,7 @@ test("workspace round", async ({ page }) => {
       "clicked " + editTarget + " -> open " + JSON.stringify(L2.rows.filter((x: any) => x.open).map((x: any) => x.id)));
 
   /* the gate: press the incomplete primary and watch it OPEN the first unanswered row */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(6000);
   await liftMotionSuppression(page);
   await page.evaluate(OPEN("Send"));
@@ -509,7 +510,7 @@ test("workspace round", async ({ page }) => {
       leftover === null, "sa.manuscriptReveal after landing = " + JSON.stringify(leftover));
 
   /* the agent half — same route, same one-shot, and it had been dead for the ⋯ menu too */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(6000);
   await liftMotionSuppression(page);
   await page.evaluate(OPEN("Send"));
@@ -536,7 +537,7 @@ test("workspace round", async ({ page }) => {
         + " -> path=" + agentLanded.path + " consumed=" + agentLanded.consumed : "the deed named no agent");
 
   /* ══ PHASE 6 · the strip ══════════════════════════════════════════════════════════════════ */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(6000);
   await liftMotionSuppression(page);
   await page.evaluate(OPEN("Send"));
@@ -622,7 +623,7 @@ test("workspace round", async ({ page }) => {
       full.chip === "", "chip=" + JSON.stringify(full.chip));
 
   /* the close and note strips, unchanged */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(6000);
   await liftMotionSuppression(page);
   await page.evaluate(OPEN("Close"));
@@ -644,7 +645,7 @@ test("workspace round", async ({ page }) => {
 
   /* ══ SCREENSHOTS ══════════════════════════════════════════════════════════════════════════ */
   const shoot = async (name: string, kind: string, steps?: () => Promise<void>) => {
-    await page.goto("/todo");
+    await gotoTodo(page, "list");
     await page.waitForTimeout(5500);
     await liftMotionSuppression(page);
     const ok = await page.evaluate(kind === "__bulk" ? OPEN_BULK : OPEN(kind));

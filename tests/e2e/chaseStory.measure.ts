@@ -10,6 +10,7 @@
  */
 import { test } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync, rmSync, mkdirSync } from "node:fs";
 const OUT = "run-artifacts/chase-story.txt";
 rmSync(OUT, { force: true });
@@ -20,7 +21,7 @@ test("chase story", async ({ page }) => {
   await ensureSignedIn(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   const out: string[] = [];
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForSelector(".tlc .row", { timeout: 30000 }).catch(() => {});
   await page.waitForTimeout(4500);
   const census = await page.evaluate(`(() => {
@@ -35,7 +36,7 @@ test("chase story", async ({ page }) => {
   out.push("census: " + JSON.stringify(census));
 
   for (const pill of ["Chase", "Send", "Close", "Fix"]) {
-    await page.goto("/todo");
+    await gotoTodo(page, "list");
     await page.waitForSelector(".tlc .row", { timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(4500);
     const clicked = await page.evaluate(`(() => {

@@ -19,6 +19,7 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync, existsSync, writeFileSync, rmSync } from "node:fs";
 import { ensureSignedIn, liftMotionSuppression } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc, deleteDoc, getDoc } from "firebase/firestore";
@@ -66,7 +67,7 @@ test("completion holds through the window, then the row leaves and the sheet mov
   try {
     await ensureSignedIn(page);
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/todo");
+    await gotoTodo(page, "list");
     await page.waitForFunction(
       "document.querySelectorAll('.tlc .row').length > 0", null, { timeout: 45_000 }).catch(() => {});
     await liftMotionSuppression(page);
@@ -75,15 +76,25 @@ test("completion holds through the window, then the row leaves and the sheet mov
       "[...document.querySelectorAll('.tlc .row')].some((r) => (r.textContent || '').indexOf('P5 fixture') > -1)",
       null, { timeout: 20_000 }).catch(() => {});
 
-    /* ⚠️ THE FOOTER HAS TWO FORMS AND `parseInt` ONLY READS ONE. It opens with its bold total
-       ("30 tasks · …") but reads "Showing 28 of 30" whenever the view is hiding rows — and
-       `parseInt("Showing…")` is NaN, so the count came back as NaN and the hold looked broken on
-       a page that was holding correctly. The first NUMBER in the line is the total in both
-       forms, which is what the footer actually promises. */
+    /* ⚠️ RETARGETED FROM THE FOOTER TO THE TILES (anatomy round, Phase 4), AND THE RETARGET IS THE
+       WHOLE REASON PHASE 4 EXISTS. The corrections round deleted the list card's footer strip — the
+       count moved to the tiles, which is where the page states it once. This suite was BLIND at the
+       time (it clicked a list row that had stopped being the default view), so nothing re-ran it and
+       nothing said the selector had died.
+
+       ⚠️ AND THREE OF THE FOUR CASES READING IT WENT ON PASSING. `.tlc .l-foot .c` matched nothing,
+       so `footN` was −1 at every reading, and "the count HELD" was satisfied by −1 === −1: an
+       absent count compared with an absent count. Only P5.9, which asserts the count FALLS, could
+       tell the difference — which is the vacuous-green family exactly, and the argument for the
+       arithmetic floor the new rule adds.
+
+       The claim is unchanged: the list's own total, as the page states it. That is the `All tasks`
+       tile's numeral now. */
     const counts = () => page.evaluate(`(() => {
-      const foot = document.querySelector(".tlc .l-foot .c");
+      const tile = [...document.querySelectorAll(".qct .qct-tile")]
+        .find((x) => ((x.querySelector(".qct-k") || {}).textContent || "").trim() === "All tasks");
       const rows = document.querySelectorAll(".tlc .row").length;
-      const txt = foot ? foot.textContent.trim() : null;
+      const txt = tile ? ((tile.querySelector(".qct-n") || {}).textContent || "").trim() : null;
       const m = txt ? txt.match(/[0-9]+/) : null;
       return { rows, foot: txt, footN: m ? parseInt(m[0], 10) : -1 };
     })()`) as Promise<any>;
@@ -312,10 +323,10 @@ test("completion holds through the window, then the row leaves and the sheet mov
       const open = document.querySelector(".tdw-split").classList.contains("open");
       return { deed: d ? d.textContent.trim().slice(0, 40) : null, open };
     })()`) as any;
-    add("P5.9 · after the window the row is GONE and the footer dropped from the one array",
+    add("P5.9 · after the window the row is GONE and the tile total dropped from the one array",
         !gone && afterExpiry.rows === preExpiry.rows - 1 && afterExpiry.footN === preExpiry.footN - 1,
         "row present = " + !!gone + " · rows " + preExpiry.rows + " → " + afterExpiry.rows
-        + " · footer " + preExpiry.footN + " → " + afterExpiry.footN);
+        + " · tile total " + preExpiry.footN + " → " + afterExpiry.footN);
     add("P5.10 · …and the sheet has moved to the next open task",
         sheetAfter.open && !!sheetAfter.deed && (sheetAfter.deed || "").indexOf("P5 fixture") === -1,
         "drawer open = " + sheetAfter.open + " · deed " + JSON.stringify(sheetAfter.deed));

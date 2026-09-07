@@ -4,6 +4,7 @@
  */
 import { test } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { mkdirSync } from "node:fs";
 
 const VIS = `(e) => { if (!e) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; }`;
@@ -24,7 +25,7 @@ test("pane shots", async ({ page }) => {
   await ensureSignedIn(page);
   for (const w of [1440, 1920, 390]) {
     await page.setViewportSize({ width: w, height: 900 });
-    await page.goto("/todo");
+    await gotoTodo(page, "list");
     await page.waitForTimeout(7000);
     for (const kind of KINDS) {
       const ok = await page.evaluate(OPEN(kind));
@@ -36,13 +37,13 @@ test("pane shots", async ({ page }) => {
   }
   /* the two overlays, at one width — they are the same control at both */
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(7000);
   /* ⚠️ THE BULK JOURNEY IS OPENED BY ITS SUB-LINE, not its pill. Both fill-ins wear "Fix", so
      "the Fix row" is whichever comes first — the SINGLE one on this account. */
   for (const w of [1440, 1920, 390]) {
     await page.setViewportSize({ width: w, height: 900 });
-    await page.goto("/todo");
+    await gotoTodo(page, "list");
     await page.waitForTimeout(7000);
     const ok = await page.evaluate(`(() => {
       const vis = ${VIS};

@@ -119,6 +119,14 @@ const SEND: TaskPaneJourney = {
 
 const NAV = { index: 2, total: 9, label: "Needs you now", onPrev: () => {}, onNext: () => {} };
 const HTML = renderToStaticMarkup(<TaskPane journey={SEND} onPrimary={() => {}} nav={NAV} />);
+/* ⚠️ THE DRAWER'S ARRANGEMENT, WHICH IS A DIFFERENT DOM (anatomy round, Phase 4). `heroFixed` puts
+   the hero ABOVE the scroller — the contract's four-part column, where only the body scrolls —
+   while the docked sheet keeps it inside the document, because a sheet capped at 404px has no room
+   for another hundred pixels of fixed chrome. Both arrangements are asserted; asserting only one
+   would leave the other free to lose its hero entirely. */
+const HTML_DRAWER = renderToStaticMarkup(
+  <TaskPane journey={SEND} onPrimary={() => {}} nav={NAV} heroFixed />,
+);
 /** every class the rendered pane actually carries */
 const rendered = new Set(
   [...HTML.matchAll(/class="([^"]+)"/g)].flatMap((m) => m[1].split(/\s+/)).filter(Boolean),
@@ -229,9 +237,23 @@ describe("1 · the pane's class names are the mockup's", () => {
     const hero = HTML.indexOf('class="dhero');
     expect(hero, "the hero is missing").toBeGreaterThan(-1);
     expect(hero, "the hero is above the position row").toBeGreaterThan(head);
-    expect(work, "the hero is inside the scroller rather than above it").toBeGreaterThan(hero);
     expect(title, "the title is not in the hero").toBeGreaterThan(hero);
-    expect(title, "the title is below the work rather than in the hero").toBeLessThan(work);
+    /* the DOCKED arrangement: the hero rides the document, inside the scroller */
+    expect(hero, "docked, the hero should be inside the work column").toBeGreaterThan(work);
+    /* the DRAWER's: the hero is fixed chrome between the position row and the work */
+    const dHead = HTML_DRAWER.indexOf('class="dhead"');
+    const dHero = HTML_DRAWER.indexOf('class="dhero');
+    const dWork = HTML_DRAWER.indexOf('class="work"');
+    const dTitle = HTML_DRAWER.indexOf('class="title"');
+    expect(dHero, "the drawer renders no hero").toBeGreaterThan(-1);
+    expect(dHero, "the drawer's hero is above the position row").toBeGreaterThan(dHead);
+    expect(dWork, "the drawer's hero is inside the scroller rather than above it").toBeGreaterThan(dHero);
+    expect(dTitle, "the drawer's title is not in its hero").toBeGreaterThan(dHero);
+    expect(dTitle, "the drawer's title is below the work rather than in the hero").toBeLessThan(dWork);
+    /* ⚠️ AND EXACTLY ONE HERO IN EACH — a component that rendered both placements would put the
+       deed on the page twice, which no assertion about ORDER can see. */
+    expect((HTML.match(/class="dhero/g) || []).length, "the docked pane has two heroes").toBe(1);
+    expect((HTML_DRAWER.match(/class="dhero/g) || []).length, "the drawer has two heroes").toBe(1);
     expect(bar).toBeGreaterThan(title);
     /* ⚠️ AND THE REFERENCE IS NOW A COLUMN INSIDE THE SHEET, BEFORE THE FOOT — the reversal of
        what this line used to assert. The slip was a sibling AFTER the whole sheet; the rail is a

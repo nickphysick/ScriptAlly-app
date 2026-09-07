@@ -19,6 +19,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn, liftMotionSuppression } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync, rmSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -35,7 +36,7 @@ test("the list at full width, the columns, and the action control", async ({ pag
 
   for (const w of WIDTHS) {
     await page.setViewportSize({ width: w, height: 900 });
-    await page.goto("/todo");
+    await gotoTodo(page, "list");
     await page.waitForFunction(
       "document.querySelectorAll('.tlc .row').length > 0", null, { timeout: 45_000 }).catch(() => {});
     await liftMotionSuppression(page);

@@ -21,6 +21,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn, liftMotionSuppression } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync, rmSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -35,7 +36,7 @@ test("the unit row commits on its own gesture, and only Enter or Next moves the 
 
   await ensureSignedIn(page);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForFunction(
     "document.querySelectorAll('.tlc .row').length > 0", null, { timeout: 45_000 }).catch(() => {});
   await liftMotionSuppression(page);

@@ -14,6 +14,7 @@
  */
 import { test } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync, rmSync, mkdirSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -150,7 +151,7 @@ test("popup round", async ({ page }) => {
 
   await ensureSignedIn(page);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForSelector(".tlc .row", { timeout: 30000 }).catch(() => {});
   await page.waitForTimeout(4000);
 
@@ -169,7 +170,7 @@ test("popup round", async ({ page }) => {
        one presses. Three runs produced results that read like app faults and were cross-talk: a
        Note case that pressed a send card's primary, and a fill-in that inherited the pane before
        it. A reload is the cheapest isolation there is. */
-    await page.goto("/todo");
+    await gotoTodo(page, "list");
     /* ⚠️ WAIT FOR THE BOARD, NOT FOR A NUMBER. A fixed 7s is ample locally and short against the
        deployed site: the FIRST case looked at a board that had not finished deriving and reported
        "no Close row would dock" while a census taken a minute later found one. A timeout that
@@ -274,7 +275,7 @@ test("popup round", async ({ page }) => {
     add("P5 a fix card with no agent hands off, as declared", false, "NOT RUN — no such row");
   }
 
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(7000);
   const openedOffer = await page.evaluate(OPEN("Decide", "", 0));
   if (openedOffer) {

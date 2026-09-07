@@ -1,6 +1,7 @@
 /** Screenshots for the steer round. Proves nothing; SHOWS. */
 import { test } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { mkdirSync } from "node:fs";
 const VIS = `(e) => { if (!e) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; }`;
 const OPEN = (kind: string) => `(() => {
@@ -23,7 +24,7 @@ test("steer shots", async ({ page }) => {
     await page.setViewportSize({ width: w, height: 900 });
 
     /* Send at three states: nothing answered, partly answered, complete */
-    await page.goto("/todo"); await page.waitForTimeout(6500);
+    await gotoTodo(page, "list"); await page.waitForTimeout(6500);
     if (await page.evaluate(OPEN("Send"))) {
       await page.waitForTimeout(1300);
       await page.screenshot({ path: `reports/steer-round/send-zero-${w}.png` });
@@ -53,7 +54,7 @@ test("steer shots", async ({ page }) => {
       await page.screenshot({ path: `reports/steer-round/send-complete-${w}.png` });
       console.log(`shot send-complete @${w}`);
       /* and the missing line, from a fresh card */
-      await page.goto("/todo"); await page.waitForTimeout(6000);
+      await gotoTodo(page, "list"); await page.waitForTimeout(6000);
       await page.evaluate(OPEN("Send")); await page.waitForTimeout(1300);
       await page.evaluate(`(() => { document.querySelectorAll(".tpn .actbar .ab.go")[0].click(); })()`);
       await page.waitForTimeout(1200);
@@ -62,7 +63,7 @@ test("steer shots", async ({ page }) => {
     }
 
     for (const [name, opener] of [["note", OPEN("Note")], ["close", OPEN("Close")], ["bulk", OPEN_BULK]] as const) {
-      await page.goto("/todo"); await page.waitForTimeout(6000);
+      await gotoTodo(page, "list"); await page.waitForTimeout(6000);
       if (!(await page.evaluate(opener))) { console.log(`skip ${name} @${w} — no such row`); continue; }
       await page.waitForTimeout(1400);
       await page.screenshot({ path: `reports/steer-round/${name}-${w}.png` });

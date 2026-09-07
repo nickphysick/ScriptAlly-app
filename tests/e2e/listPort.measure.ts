@@ -8,6 +8,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -35,7 +36,7 @@ test("list port", async ({ page }) => {
 
   await ensureSignedIn(page);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(7000);
 
   /** the list card, whichever era is rendering: the contract's `.listcard` or the current `.tdg` */

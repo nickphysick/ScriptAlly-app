@@ -15,6 +15,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn, liftMotionSuppression } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync, rmSync, mkdirSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -117,7 +118,7 @@ test("journey round", async ({ page }) => {
 
   await ensureSignedIn(page);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   const rowsAtStart = await boardReady();
   await liftMotionSuppression(page);
   /* ⚠️ THE PRECONDITION, ASSERTED FIRST. Every claim below is about a docked card; with no rows
@@ -314,7 +315,7 @@ test("journey round", async ({ page }) => {
       delay ? "primary=" + JSON.stringify(delay.primary) : "-");
 
   /* the close journey's leave-it-open — the mute's home */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await boardReady();
   await liftMotionSuppression(page);
   const gotClose = await openCard("Close");
@@ -342,7 +343,7 @@ test("journey round", async ({ page }) => {
   /* ⚠️ THE ONE WRITE, AND IT IS UNDONE. A delay must reach the SAME snooze the action bar uses —
      observable as the app's own snooze toast and the card leaving the list — and the undo must put
      it back, which is what leaves the account as it was found. */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await boardReady();
   await liftMotionSuppression(page);
   await openCard("Send");
@@ -396,7 +397,7 @@ test("journey round", async ({ page }) => {
       "undo pressed=" + undone + " · rows " + afterSnooze.rows + " -> " + restored + " (was " + rowsBefore + ")");
 
   /* ══ PHASE 4 · the send journey ═══════════════════════════════════════════════════════════ */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await boardReady();
   await liftMotionSuppression(page);
   /**
@@ -508,7 +509,7 @@ test("journey round", async ({ page }) => {
           + " · input at commit=" + JSON.stringify(typed.value));
 
   /* the crossover to close — its verb and its strip */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await boardReady();
   await liftMotionSuppression(page);
   await openCard("Send");
@@ -531,7 +532,7 @@ test("journey round", async ({ page }) => {
       "strip=" + JSON.stringify(wStrip?.strip));
 
   /* ══ PHASE 5 · the nudge journey ═══════════════════════════════════════════════════════════ */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await boardReady();
   await liftMotionSuppression(page);
   const gotNudge = await openCard("Chase");
@@ -610,7 +611,7 @@ test("journey round", async ({ page }) => {
    * than measured. Seven plausible reds about a page nobody was looking at is worse than one honest
    * "not on this board".
    */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await boardReady();
   await liftMotionSuppression(page);
 
@@ -640,7 +641,7 @@ test("journey round", async ({ page }) => {
   })()`) as string[];
   const census: string[] = [];
   for (let i = 0; i < fixTexts.length; i++) {
-    await page.goto("/todo");
+    await gotoTodo(page, "list");
     await boardReady();
     await liftMotionSuppression(page);
     await page.evaluate(`(() => {
@@ -687,7 +688,7 @@ test("journey round", async ({ page }) => {
    * reads the expected reply and the nudge reminder, two answers a delay never asks for. Measured
    * before the fix: "Not yet — hold me to it" rendered "This records —".
    */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await boardReady();
   await liftMotionSuppression(page);
   if (await openCard("Send")) {
@@ -707,7 +708,7 @@ test("journey round", async ({ page }) => {
     notes.push("no Send card — P6.2 not measured");
   }
 
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await boardReady();
   await liftMotionSuppression(page);
   if (await openCard("Close")) {
@@ -755,7 +756,7 @@ test("journey round", async ({ page }) => {
   }
 
   /* ── the two grammars that were already right, kept as regression guards ─────────────────── */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await boardReady();
   await liftMotionSuppression(page);
   if (await openCard("Close")) {
@@ -773,7 +774,7 @@ test("journey round", async ({ page }) => {
         "strip = " + JSON.stringify(s4.strip));
   }
 
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await boardReady();
   await liftMotionSuppression(page);
   if (await openCard("Send")) {
@@ -785,7 +786,7 @@ test("journey round", async ({ page }) => {
   }
 
   /* ── the note journey: no card on this account, and the absence is reported ─────────────── */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await boardReady();
   await liftMotionSuppression(page);
   if (await openCard("Note")) {
@@ -816,7 +817,7 @@ test("journey round", async ({ page }) => {
    */
   const neverDisabled: string[] = [];
   for (const kind of ["Send", "Close", "Chase", "Fix"]) {
-    await page.goto("/todo");
+    await gotoTodo(page, "list");
     await boardReady();
     await liftMotionSuppression(page);
     if (!(await openCard(kind))) continue;
@@ -839,7 +840,7 @@ test("journey round", async ({ page }) => {
       neverDisabled.join(" · ") || "no primaries were reached");
 
   /* ── the fill, measured against the required list the count reads ── */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await boardReady();
   await liftMotionSuppression(page);
   if (await openCard("Send")) {
@@ -914,7 +915,7 @@ test("journey round", async ({ page }) => {
    * route the `disabled` attribute was removing, so it is the assertion that says the removal was
    * worth making rather than merely permitted.
    */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await boardReady();
   await liftMotionSuppression(page);
   if (await openCard("Send")) {
@@ -942,7 +943,7 @@ test("journey round", async ({ page }) => {
   }
 
   /* ── the cohort's exception: faded, empty, and saying so in words ── */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await boardReady();
   await liftMotionSuppression(page);
   const bulkOpened = await page.evaluate(`(() => {
@@ -956,7 +957,7 @@ test("journey round", async ({ page }) => {
     /* the census above named which card is which; find the cohort by its counted label */
     for (let i = 0; i < census.length; i++) {
       if (census[i] !== "bulk") continue;
-      await page.goto("/todo");
+      await gotoTodo(page, "list");
       await boardReady();
       await liftMotionSuppression(page);
       await page.evaluate(`(() => {
@@ -992,7 +993,7 @@ test("journey round", async ({ page }) => {
    * If the run dies between the commit and the undo, ONE query is left closed. It is visible on the
    * Query Centre and reversible there; nothing else is touched.
    */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await boardReady();
   await liftMotionSuppression(page);
   const closeCard = await openCard("Close");
@@ -1102,7 +1103,7 @@ test("journey round", async ({ page }) => {
     expect(pressUndo, "THE UNDO WAS NOT PRESSED — this run has left a query closed. "
       + "Reopen it in the Query Centre before re-running.").toBe(true);
     await page.waitForTimeout(3200);
-    await page.goto("/todo");
+    await gotoTodo(page, "list");
     await boardReady();
     await liftMotionSuppression(page);
     const deedsBack = await closeDeeds();
@@ -1137,7 +1138,7 @@ test("journey round", async ({ page }) => {
    */
   const dialogCensus: string[] = [];
   for (const kind of ["Send", "Chase", "Close", "Fix", "Decide"]) {
-    await page.goto("/todo");
+    await gotoTodo(page, "list");
     await boardReady();
     await liftMotionSuppression(page);
     if (!(await openCard(kind))) continue;
@@ -1157,7 +1158,7 @@ test("journey round", async ({ page }) => {
 
   /* ══ SCREENSHOTS ══════════════════════════════════════════════════════════════════════════ */
   const shoot = async (name: string, kind: string, steps?: () => Promise<void>) => {
-    await page.goto("/todo");
+    await gotoTodo(page, "list");
     await boardReady();
     await liftMotionSuppression(page);
     if (!(await page.evaluate(OPEN(kind)))) { notes.push("shot " + name + ": no " + kind + " card"); return; }

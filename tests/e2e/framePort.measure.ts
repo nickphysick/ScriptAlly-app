@@ -9,6 +9,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -27,7 +28,7 @@ test("frame port", async ({ page }) => {
   /* ── 1 · the frame ─────────────────────────────────────────────────────────────────────── */
   for (const [w, h] of [[1440, 900], [1920, 1080]] as const) {
     await page.setViewportSize({ width: w, height: h });
-    await page.goto("/todo");
+    await gotoTodo(page, "list");
     await page.waitForTimeout(6500);
     const f = await page.evaluate(() => {
       const vis = (e: Element | null) => {
@@ -50,7 +51,7 @@ test("frame port", async ({ page }) => {
   }
 
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(6500);
 
   /* ── 2 · no burgundy button fill ───────────────────────────────────────────────────────── */

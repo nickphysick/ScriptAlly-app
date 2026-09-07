@@ -21,6 +21,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn, liftMotionSuppression } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync, rmSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -32,7 +33,7 @@ const SETTLED = "document.querySelector('.tdw-split').getAnimations().length ===
 
 const arrive = async (page: any, w: number) => {
   await page.setViewportSize({ width: w, height: 900 });
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForFunction(
     "document.querySelectorAll('.tlc .row').length > 0", null, { timeout: 45_000 }).catch(() => {});
   await liftMotionSuppression(page);

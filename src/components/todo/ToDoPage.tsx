@@ -3497,6 +3497,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                 <TaskPane
         journey={session.journey!}
         onPrimary={session.onPrimary}
+        /* ⚠️ THE HERO IS FIXED CHROME ONLY WHERE THERE IS ROOM FOR IT (anatomy round, Phase 4).
+           The contract's drawer holds it above the scroller, which is what stops the deed
+           scrolling away from the form it describes. The DOCKED sheet is capped at 404px at a
+           900px viewport, so the same hundred pixels of fixed chrome left the scroller at zero —
+           measured, `sheet 404 holding a 0 scroller`, with every element inside it correct. This
+           is the one host difference CSS could not express: the reference card's two treatments
+           are paint, and this is placement. */
+        heroFixed={todoView !== "list"}
         /* the receipt window's flag — while the held task is the open one, the foot
            shows the receipt instead of the primary (Phase 5) */
         committed={!!leaving && !leaving.undone && leaving.card.key === paneCard.key}

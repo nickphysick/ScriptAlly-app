@@ -6,6 +6,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -38,7 +39,7 @@ test("frame2", async ({ page }) => {
     await page.setViewportSize({ width: w, height: h });
     await page.goto("/queries"); await page.waitForTimeout(6500);
     const q = await page.evaluate(FRAME(".f12-list")) as any;
-    await page.goto("/todo"); await page.waitForTimeout(6500);
+    await gotoTodo(page, "list"); await page.waitForTimeout(6500);
     const t = await page.evaluate(FRAME(".tlc")) as any;
     if (!q || !t) { add(`P1 ${w} · both pages measurable`, false, `queries=${!!q} todo=${!!t}`); continue; }
 
@@ -55,7 +56,7 @@ test("frame2", async ({ page }) => {
 
   /* ══ PHASE 2 · one count, four places ════════════════════════════════════════════════════ */
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/todo"); await page.waitForTimeout(6500);
+  await gotoTodo(page, "list"); await page.waitForTimeout(6500);
   const readCounts = `(() => {
     const vis = ${VIS};
     const txt = (s) => { const e = [...document.querySelectorAll(s)].find(vis); return e ? (e.textContent||"").replace(/\\s+/g," ").trim() : ""; };

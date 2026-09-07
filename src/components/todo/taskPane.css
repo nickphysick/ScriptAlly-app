@@ -376,7 +376,13 @@
 .tpn .sheet > .rim > .dhead { grid-column:1/3;grid-row:1; }
 .tpn .sheet > .rim > .dhero { grid-column:1;grid-row:2;min-width:0; }
 .tpn .sheet > .rim > .work { grid-column:1;grid-row:3;min-width:0; }
-.tpn .sheet > .rim > .rail { grid-column:2;grid-row:2/4; }
+/* ⚠️ THE REFERENCE SPANS THE HERO'S ROW ONLY WHERE THERE IS A HERO IN THE GRID. Docked, the hero
+   rides inside the document (see `heroFixed`), so row 2 holds nothing — and a column SPANNING an
+   empty auto track lets that track absorb part of its height, which grew the sheet from a hugging
+   847-content to a filled 847. Measured as `bar=839 sheet=847 pane=847`: the foot stopped riding
+   the content. Row 3 alone is exactly the track it occupied before the hero existed. */
+.tpn .sheet > .rim > .rail { grid-column:2;grid-row:3; }
+.slo .tpn .sheet > .rim > .rail { grid-row:2/4; }
 .tpn .sheet > .rim > .foot { grid-column:1/3;grid-row:4; }
 /* ── the document's chrome row (tightened round, Phase 3; contract `.dhead`) ─────────────────
    ⚠️ THE TINTED BAND IS RETIRED, AND ITS TINT IS NOW A PILL. The sheet is a document: the strip
@@ -1041,20 +1047,33 @@
    existed here — and `var()` on an undefined custom property drops the whole declaration, so a
    faithful copy of the ref's token NAMES would have rendered a hero with no background at all,
    silently, through a green build. `--u-now-*` is what the family pill beside it already reads. */
-.tpn .dhero {
-  flex: 0 0 auto;
-  margin: 0 24px; border-radius: 14px; padding: 18px 20px 16px;
-  border: 1px solid rgba(58, 28, 20, 0.08);
+/* ⚠️ THE STRUCTURE IS SHARED AND THE TREATMENT IS THE DRAWER'S. `.tpn` is one component in two
+   hosts, so the hero renders in both — but the TINT and the FRAME are the contract's drawer, and
+   the tightened round retired the split's tinted band on purpose: "the sheet is a DOCUMENT, and a
+   document's first line is its title, not a coloured strip carrying one". That decision stands.
+   In the split the hero is flat and takes the document's own inset; in the drawer it is the
+   contract's rounded, bordered, family-tinted block. Same element, same contents, two hosts. */
+/* ⚠️ DOCKED, THE HERO ADDS NO INSET OF ITS OWN — it sits INSIDE `.form`, which already carries
+   `18px 26px 18px 22px`, so its own padding was added to that and put ~32px of new air at the top
+   of every docked document. Measured as the sheet ceasing to hug: `bar=821 sheet=829 pane=847`
+   against a rule that wants 40px of desk beneath the foot. What it does owe is the 16px the
+   title's own `margin-bottom` used to provide, which moved onto the hero with it. */
+.tpn .dhero { flex: 0 0 auto; padding: 0 0 16px; }
+.slo .tpn .dhero {
+  margin: 0 24px; padding: 18px 20px 16px;
+  border-radius: 14px; border: 1px solid rgba(58, 28, 20, 0.08);
 }
-.tpn .dhero.u-now { background: linear-gradient(135deg, var(--u-now-1), var(--u-now-2)); }
-.tpn .dhero.u-house { background: linear-gradient(135deg, var(--u-house-1), var(--u-house-2)); }
-.tpn .dhero.u-yours { background: linear-gradient(135deg, var(--u-yours-1), var(--u-yours-2)); }
+.slo .tpn .dhero.u-now { background: linear-gradient(135deg, var(--u-now-1), var(--u-now-2)); }
+.slo .tpn .dhero.u-house { background: linear-gradient(135deg, var(--u-house-1), var(--u-house-2)); }
+.slo .tpn .dhero.u-yours { background: linear-gradient(135deg, var(--u-yours-1), var(--u-yours-2)); }
 
 /* ⚠️ 22/500 AND `line-height: 1.28` ARE THE CONTRACT'S. The house floor for mixed-case Playfair is
    1.3, and it exists because tight leading inside a box WITH A HEIGHT crops descenders — the hero
    has no height and no clipping ancestor, so the same carve-out the marketing statements have
    applies. It is measured rather than assumed (`anatomyDiff`, the ink-against-clip check). */
-.tpn .dhero .title { font-size: 22px; font-weight: 500; line-height: 1.28; margin-bottom: 0; }
+/* the split keeps its 21px document title; 22/1.28 is the contract's, and the drawer's */
+.tpn .dhero .title { margin-bottom: 0; }
+.slo .tpn .dhero .title { font-size: 22px; font-weight: 500; line-height: 1.28; }
 .tpn .dhero .line {
   font-size: 12.5px; color: rgba(58, 28, 20, 0.72); font-weight: 300;
   margin-top: 8px; line-height: 1.5;

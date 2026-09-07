@@ -33,6 +33,7 @@
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
 import { maybeMutate } from "./mutate";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync, rmSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -113,7 +114,7 @@ test("steer round", async ({ page }) => {
      nothing, and `proveReds.mjs` for the run that walks the whole catalogue. */
   const mutation = await maybeMutate(page);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(7000);
 
   const shapeOf = async (kind: string) => {
@@ -552,7 +553,7 @@ test("steer round", async ({ page }) => {
      first card's questions, so `#s-unit` is no longer where this should land — naming it would be
      asserting the state the previous phase left behind. Reload, then take the first missing section
      from the square itself, which is the thing under test's own answer. */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForTimeout(6000);
   await page.evaluate(OPEN("Send"));
   await page.waitForTimeout(1400);

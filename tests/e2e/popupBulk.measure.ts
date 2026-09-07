@@ -10,6 +10,7 @@
  */
 import { test } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync, rmSync, mkdirSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -39,7 +40,7 @@ test("bulk ticks", async ({ page }) => {
   const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
   await ensureSignedIn(page);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForSelector(".tlc .row", { timeout: 30000 }).catch(() => {});
   await page.waitForTimeout(4500);
 

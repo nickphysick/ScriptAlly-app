@@ -15,6 +15,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn, liftMotionSuppression } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync, rmSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -28,7 +29,7 @@ test("group & order, filter, chips, footer, and the reload", async ({ page }) =>
 
   await ensureSignedIn(page);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForFunction(
     "document.querySelectorAll('.tlc .row').length > 0", null, { timeout: 45_000 }).catch(() => {});
   await liftMotionSuppression(page);
@@ -193,7 +194,7 @@ test("group & order, filter, chips, footer, and the reload", async ({ page }) =>
       !!filtered.foot && /^Showing /.test(filtered.foot), "footer = " + JSON.stringify(filtered.foot));
 
   /* ── the preferences survive a RELOAD ────────────────────────────────────────────────── */
-  await page.goto("/todo");
+  await gotoTodo(page, "list");
   await page.waitForFunction(
     "document.querySelectorAll('.tlc .fchip').length > 0", null, { timeout: 30_000 }).catch(() => {});
   await liftMotionSuppression(page);

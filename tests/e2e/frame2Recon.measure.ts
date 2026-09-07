@@ -1,5 +1,6 @@
 import { test } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { gotoTodo } from "./todoOpen";
 import { writeFileSync } from "node:fs";
 
 const VIS = `(e) => { if (!e) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; }`;
@@ -62,7 +63,7 @@ test("frame2 recon", async ({ page }) => {
   }
 
   /* ── 3 · every count on /todo ─────────────────────────────────────────────────────────── */
-  await page.goto("/todo"); await page.waitForTimeout(6500);
+  await gotoTodo(page, "list"); await page.waitForTimeout(6500);
   const counts = await page.evaluate(`(() => {
     const vis = ${VIS};
     const txt = (s) => { const e = [...document.querySelectorAll(s)].find(vis); return e ? (e.textContent||"").replace(/\\s+/g," ").trim() : "ABSENT"; };

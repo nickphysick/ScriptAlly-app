@@ -1,5 +1,6 @@
 import { test } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { gotoTodo } from "./todoOpen";
 /** /todo and /queries at both widths, plus every journey the account can reach */
 test("frame2 shots", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -12,7 +13,7 @@ test("frame2 shots", async ({ page }) => {
     }
   }
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/todo"); await page.waitForTimeout(7000);
+  await gotoTodo(page, "list"); await page.waitForTimeout(7000);
   const pills = await page.evaluate(() => {
     const vis = (e: Element) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
     return [...new Set([...document.querySelectorAll(".tlc .row .pill")].filter(vis)
