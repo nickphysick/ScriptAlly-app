@@ -61,3 +61,60 @@ export function getSmartImportEntitlement(
   }
   return { allowed: true, tier, reason: "free_available" };
 }
+
+/**
+ * How the plan card states the allowance: a short tag, and a sentence.
+ *
+ * ⚠️ IT IS DERIVED FROM `reason`, NOT RECOMPUTED FROM PLAN AND USAGE. The policy is stated once in
+ * `getSmartImportEntitlement` and mirrored server-side in the callable; a second reading of the
+ * same two fields here would be a third copy of the rule, free to disagree with both. This takes
+ * the entitlement's own answer and puts words on it.
+ *
+ * ⚠️ THE FOUR SENTENCES SAY WHAT IS TRUE OF THE STATE THEY DESCRIBE, and the ref's does not. It
+ * draws "This month's import hasn't been used. Your next one arrives on 1 October." on one row —
+ * two facts that cannot both be the point at once. If it has not been used, the next one is not
+ * what a reader needs; if it has, the next one is the only thing they need. `nextAvailable` is
+ * only ever set on `pro_month_used`, which is the model saying the same thing.
+ *
+ * ⚠️ AND `free_used` DOES NOT SELL. "You've used yours — upgrade for one a month" is a true
+ * sentence and it is an advertisement in a settings row, on a page whose plan card already carries
+ * one honest CTA. It states the fact and stops; the comparison two rows down is where the
+ * difference between the plans belongs.
+ */
+export interface SmartImportLine {
+  /** The chip — a state, in two or three words. */
+  tag: string;
+  /** The row's one explanatory sentence. */
+  note: string;
+}
+
+export function smartImportLine(
+  e: SmartImportEntitlement,
+  formatDate: (iso: string) => string,
+): SmartImportLine {
+  switch (e.reason) {
+    case "free_available":
+      return { tag: "1 available", note: "The Smart Import that comes with a free account hasn't been used." };
+    case "free_used":
+      return { tag: "Used", note: "You've used the Smart Import that comes with a free account." };
+    case "pro_available":
+      return { tag: "1 available", note: "This month's Smart Import hasn't been used." };
+    case "pro_month_used":
+      /* ⚠️ THE DATE IS THE WHOLE POINT OF THIS BRANCH, and it is the one branch that can lack it —
+         `nextAvailable` is optional on the type. Without it the sentence says WHEN nothing, so it
+         says something else instead rather than printing "arrives on undefined". */
+      return {
+        tag: "Used",
+        note: e.nextAvailable
+          ? `You've used this month's. Your next one arrives on ${formatDate(e.nextAvailable)}.`
+          : "You've used this month's. Your next one arrives at the start of next month.",
+      };
+    default: {
+      /* ⚠️ EXHAUSTIVE, AND THE DEFAULT WRITES NOTHING. A reason this function has not been taught
+         is exactly the case nobody has thought about; the house rule is that such a branch does
+         nothing rather than guessing, and `never` makes it a compile error instead. */
+      const unhandled: never = e.reason;
+      return { tag: "", note: "" };
+    }
+  }
+}

@@ -60,6 +60,9 @@ import "./settings/settings.css";
 import { CountryCombobox } from "./forms";
 import { PlanComparison } from "./plans/PlanComparison";
 import { todoPrefs, STALE_MONTHS_CHOICES } from "../lib/todoPrefs";
+import { useSmartImportEntitlement } from "../lib/useSmartImportEntitlement";
+import { smartImportLine } from "../lib/smartImportEntitlement";
+import { planAllowanceLine } from "../lib/planComparison";
 import { optionalTaskTypes, ALWAYS_ON_LINE, staleOptionLabel, STALE_NOTE } from "../lib/accountTasks";
 /* ⚠️ THE PARCHMENT/RIM/BAND TOKENS ARE GONE FROM THIS IMPORT with the chassis that read them —
    `parchment`, `PAPER_TEXTURE`, `mountShadow`, `insetBorder`, `sageBandGradient`, `sageBandRule`
@@ -561,6 +564,19 @@ export const AccountSettings: React.FC<{
      all resolve to the same stated default, so this page never needs a `?? false` of its own. */
   const prefs = todoPrefs(currentUser.todoPrefs);
 
+  /* ⚠️ THE ALLOWANCE COMES FROM THE HOOK, NEVER FROM PLAN + USAGE READ AGAIN HERE. The policy is
+     stated once in `getSmartImportEntitlement` and mirrored server-side in the callable; a third
+     reading of the same two fields on this page would be free to disagree with both — and the
+     failure is a settings page telling a writer they have an import that the function then refuses.
+     ⚠️ AND THE DATE FORMATTER IS PASSED IN. `smartImportLine` is pure and node-testable; taking a
+     locale format inside it would make its output depend on the machine running it. */
+  const smartImport = smartImportLine(
+    useSmartImportEntitlement(),
+    (iso) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", {
+      day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
+    }),
+  );
+
   /** Every task pref commits instantly with the standard receipt — the same model as every other
    *  toggle and select on this page. */
   const saveTodoPref = async (patch: Partial<typeof prefs>, what: string) => {
@@ -971,9 +987,31 @@ export const AccountSettings: React.FC<{
           rows, and forcing it into the row grammar would be re-drawing a locked component to match
           a layout — the rows here are one label, one control; a comparison is one label and TWO
           values, which the row cannot say. */}
+      {/* ⚠️ THE ALLOWANCE IS THE ONE FIGURE THIS PAGE STATES ABOUT USAGE, and it is a separate card
+          from the comparison DELIBERATELY. The comparison answers "what do I get"; this answers
+          "what have I got left", which is a different question about a different moment. Folding it
+          into the table would put a live per-account number inside a static price list.
+          ⚠️ AND IT IS THE ONLY ONE. No meter on agents, none on queries — both are unlimited on
+          both plans, so a meter would invent a limit to measure against. */}
+      <SettingsCard heading="Your plan" headingId="acct-h-plan">
+        <SettingsRow
+          label={currentUser.plan === UserPlan.PRO ? "Pro" : "Free"}
+          description={planAllowanceLine(currentUser.plan === UserPlan.PRO ? "pro" : "free") + "."}
+          control={<button onClick={() => onNavigate("plans")} style={ghostBtn}>See Pro plans</button>}
+        />
+        <SettingsRow
+          label="Smart Import"
+          description={smartImport.note}
+          control={
+            <span className={`acct-chip${smartImport.tag === "Used" ? " acct-chip--muted" : ""}`}>
+              {smartImport.tag}
+            </span>
+          }
+        />
+      </SettingsCard>
+
       <SettingsCard
         heading="What each plan includes"
-        headingId="acct-h-plan"
         note="Price to be confirmed. Nothing to pay on the Free plan — your invoices will appear here if you move to a paid plan."
       >
         <div className="sc-row sc-row--full">
