@@ -54,6 +54,18 @@ const btn = (on: boolean): React.CSSProperties => ({
 export const ContactListLab: React.FC = () => {
   const [theme, setTheme] = useState<Theme>("t-capp");
   const [view, setView] = useState<View>("blank");
+  /**
+   * ⚠️ THE CAST IS STATE, AND THE LAB IMPLEMENTS `updateAgent` OVER IT. The stub's Proxy answers
+   * every unknown member with an async no-op, so a write from the page went nowhere: quick add
+   * saved, the popover closed, and nothing changed — which is indistinguishable from a broken
+   * write path and would have made every "the value appears in all four views" claim unmeasurable.
+   * The lab is a sandbox now: it writes to its own copy, exactly as the ref's own script does, and
+   * still touches no account.
+   */
+  const [cast, setCast] = useState<Agent[]>(CONTACT_FIXTURE_AGENTS);
+  const updateAgent = React.useCallback(async (id: string, fields: Partial<Agent>) => {
+    setCast((prev) => prev.map((a) => (a.id === id ? ({ ...a, ...fields } as Agent) : a)));
+  }, []);
 
   /* ⚠️ THE STUB IS SHAPED LIKE THE CONTEXT, NOT LIKE THE PAGE'S DESTRUCTURE. A hand-listed set of
      the eight fields `AgentList` happens to read today would go stale the moment it reads a ninth,
@@ -62,12 +74,13 @@ export const ContactListLab: React.FC = () => {
     {
       currentUser: { id: "lab", name: "Nick Physick", email: "lab@example.com", plan: UserPlan.FREE, homeCountry: "GB" },
       collectionsReady: view !== "settling",
-      agents: view === "cast" ? CONTACT_FIXTURE_AGENTS : view === "list" ? [SAMPLE] : [],
+      agents: view === "cast" ? cast : view === "list" ? [SAMPLE] : [],
       queries: view === "cast" ? CONTACT_FIXTURE_QUERIES : [],
       manuscripts: view === "cast" ? CONTACT_FIXTURE_MANUSCRIPTS : [],
       activities: [], packages: [], versions: [], notes: [],
       communityAgents: [], journalEntries: [], tasks: [], userTasks: [], taskFlags: [], dismissedTasks: [],
       authReady: true, smartImportUsage: null,
+      updateAgent,
     } as Record<string, unknown>,
     {
       get: (t, k) => (typeof k === "symbol" ? undefined : k in t ? t[k as string] : asyncNoop),

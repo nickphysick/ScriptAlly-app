@@ -55,23 +55,26 @@ export const SLOT_TAB: Record<SlotField, AgentEditorTab> = {
 
 export const AddSlot = React.forwardRef<HTMLButtonElement, {
   field: SlotField;
+  /** Whose row this slot is in — the popover anchors by finding it. */
+  agentId: string;
   /** What pressing it does. Phase 4 swaps four of these for a popover. */
-  onOpen: (field: SlotField) => void;
+  onOpen: (field: SlotField, anchor: HTMLElement) => void;
   /** True while this slot's popover is open — the ref's fourth state. */
   open?: boolean;
   /** Suppressed while the drawer is editing: two editors on one record is two writers. */
   disabled?: boolean;
-}>(({ field, onOpen, open = false, disabled = false }, ref) => (
+}>(({ field, agentId, onOpen, open = false, disabled = false }, ref) => (
   <button
     ref={ref}
     type="button"
     className={`agl-gap${open ? " agl-gap-on" : ""}`}
     data-add-slot={field}
+    data-agent={agentId}
     aria-label={SLOT_LABEL[field]}
     title={SLOT_LABEL[field]}
     aria-expanded={open}
     disabled={disabled}
-    onClick={(e) => { e.stopPropagation(); onOpen(field); }}
+    onClick={(e) => { e.stopPropagation(); onOpen(field, e.currentTarget); }}
   >
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       strokeWidth="2.1" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>

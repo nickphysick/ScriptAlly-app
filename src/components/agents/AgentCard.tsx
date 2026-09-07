@@ -40,6 +40,7 @@ import "flag-icons/css/flag-icons.min.css";
 import { agentCardDims, contactMetaLine, isDoorOpen } from "../../lib/agentList";
 import { isGenreMatch } from "../../lib/genreMatch";
 import { attachDrift, hasMoreToRead } from "../../lib/mswlDrift";
+import { hrefFor } from "../../lib/quickAdd";
 import { MaterialSlots } from "./MaterialSlots";
 
 /** The empty wishlist reads as a fact about their site, never as a fault of yours. */
@@ -233,10 +234,8 @@ export const AgentCard: React.FC<AgentCardProps> = ({
                 disabled={!website}
                 title={website ? `Open ${website}` : "No submissions page on file"}
                 onClick={() => {
-                  if (website) {
-                    const href = /^https?:\/\//i.test(website) ? website : `https://${website}`;
-                    window.open(href, "_blank", "noopener,noreferrer");
-                  }
+                  const href = hrefFor(website);
+                  if (href) window.open(href, "_blank", "noopener,noreferrer");
                 }}
               >
                 Submissions page

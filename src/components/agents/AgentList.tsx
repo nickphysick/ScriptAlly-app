@@ -59,6 +59,11 @@ import {
 import { ContactListEmptyState } from "./ContactListEmptyState";
 import { ContactPeek } from "./ContactPeek";
 import { SLOT_TAB, SlotField } from "./AddSlot";
+import { QuickAddPopover, QuickDraft, emptyQuickDraft } from "./QuickAddPopover";
+import { QuickField, nextQuickField, quickDiff } from "../../lib/quickAdd";
+
+/** How long the sage flash sits on a cell that just took a value. */
+const FLASH_MS = 1200;
 import { AgentDrawer } from "./AgentDrawer";
 import { RotateCcw } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
@@ -116,6 +121,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* ⚠️ ONE READING OF THE SCOPE, TWO CONSUMERS. The chips tint through `matchGenre` and the tile
      counts through the same value, so a tile can never count an agent whose chip is not tinted. */
   const tintGenre = useMemo(() => matchGenre(scoped?.genre), [scoped]);
+  /* ⚠️ THE GENRE SUGGESTIONS ARE THE WRITER'S OWN, not a canned taxonomy. Every genre already on
+     the list, most-used first — so the fifth agent seeking crime is offered "Crime" spelled the
+     way the other four have it, which is what stops one list holding three spellings of one shelf. */
+  const genreSuggestions = useMemo(() => {
+    const tally = new Map<string, number>();
+    for (const a of agents) for (const g of a.genres) tally.set(g, (tally.get(g) ?? 0) + 1);
+    return [...tally.entries()].sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0])).map(([g]) => g);
+  }, [agents]);
+
   /* ⚠️ TOTALS, NEVER THE FILTERED VIEW — over `agents`, not `visible`. */
   const tiles = useMemo(() => agentTiles(agents, queries, scoped), [agents, queries, scoped]);
 
@@ -287,6 +301,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      exists while driving one that does. The card's own flip is `peekId` now, and what it shows is
      the read-only contact peek. */
   const [openId, setOpenId] = useState<string | null>(null);
+  /** Which slot has a quick-add popover open, if any. One at a time, page-wide. */
+  const [quick, setQuick] = useState<{ id: string; field: QuickField } | null>(null);
+  const [quickDraft, setQuickDraft] = useState<QuickDraft>(emptyQuickDraft);
+  /** The cell that just took a value — it flashes sage and settles. Never a verdict. */
+  const [justSaved, setJustSaved] = useState<{ id: string; field: QuickField } | null>(null);
+
   /** The card whose back face is showing the contact peek (Grid only). One at a time. */
   const [peekId, setPeekId] = useState<string | null>(null);
 
@@ -313,6 +333,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* the peek's popover anchor — the VIEW owns the hook because the trigger is a row's button */
   const peekPanelRef = useRef<HTMLElement | null>(null);
   const { triggerRef: peekTriggerRef, menuStyle: peekStyle } = useFixedMenu<HTMLElement>(!!peekId, { placement: "auto", align: "auto", menuRef: peekPanelRef });
+  /* the quick-add popover's anchor — the slot that was pressed, found by its own attributes so
+     the anchoring survives a re-render that replaces the button element */
+  const quickPanelRef = useRef<HTMLElement | null>(null);
+  const { triggerRef: quickTriggerRef, menuStyle: quickStyle } =
+    useFixedMenu<HTMLElement>(!!quick, { placement: "auto", align: "auto", menuRef: quickPanelRef });
+
   const openPeekAt = useCallback((agentId: string, trigger: HTMLElement | null) => {
     setPeekId((p) => {
       if (p === agentId) return null;
@@ -529,9 +555,68 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    * this path permanently, because a paragraph and four structured rows are the drawer's work and
    * a popover would be a second, smaller editor for them.
    */
-  const onAddField = useCallback((agentId: string, field: SlotField) => {
-    onEdit(agentId, SLOT_TAB[field]);
-  }, [onEdit]);
+  const onAddField = useCallback((agentId: string, field: SlotField, anchor?: HTMLElement | null) => {
+    /* ⚠️ FOUR FIELDS GET A POPOVER; THE OTHER TWO ESCALATE, permanently. A paragraph and four
+       structured rows are the drawer's work, and a popover for them would be a second, smaller
+       editor for a record the drawer already owns. */
+    if (field === "wishlist" || field === "materials") { onEdit(agentId, SLOT_TAB[field]); return; }
+    const a = agents.find((x) => x.id === agentId);
+    if (!a) return;
+    /**
+     * ⚠️ THE ANCHOR IS TAKEN HERE, SYNCHRONOUSLY, AND NEVER IN AN EFFECT. `useFixedMenu` positions
+     * from `triggerRef.current` inside a layout effect, and layout effects run in HOOK DECLARATION
+     * ORDER — so a second effect that sets the ref, written below the hook that reads it, runs one
+     * step too late. Measured: the first popover opened at `top: 900, left: 0` (no style at all,
+     * because `update()` returns early on a null trigger) and the SECOND anchored itself to the
+     * FIRST one's slot — 576px away, on the wrong side of the row, and still perfectly plausible
+     * as a popover if you were not comparing it to the button you clicked.
+     *
+     * ⚠️ AND THE FIX IS NOT TO MOVE THE EFFECT ABOVE THE HOOK. That works, and it makes the
+     * position of two lines load-bearing with no way to tell: reordering them looks like tidying
+     * and breaks the anchor silently. The element is in the DOM the moment the reader clicks it,
+     * so taking it from the event needs no ordering to be true. `andNext` has no event — its slot
+     * is a sibling still on screen — so that path resolves by query.
+     */
+    (quickTriggerRef as React.MutableRefObject<HTMLElement | null>).current =
+      anchor ?? document.querySelector<HTMLElement>(`[data-add-slot="${field}"][data-agent="${agentId}"]`);
+    setQuick({ id: agentId, field });
+    setQuickDraft({
+      ...emptyQuickDraft(),
+      value: field === "email" ? a.email : field === "website" ? a.website : "",
+      location: { city: a.city ?? "", country: a.country ?? "" },
+      genres: [...a.genres],
+    });
+  }, [agents, onEdit, quickTriggerRef]);
+
+  /**
+   * ⚠️ ONE WRITE PATH, AND THE POPOVER ONLY BUILDS THE DIFF. It hands `updateAgent` a patch and
+   * keeps nothing: the list, the grid, the board and the drawer's read view all re-render from
+   * the store, so none of them can come to disagree about what an agent's email is.
+   *
+   * ⚠️ AND A NO-OP WRITES NOTHING. `updateAgent` appends an activity per call, so saving an
+   * untouched popover would put a line in the writer's history saying something happened.
+   */
+  const saveQuick = useCallback(async (andNext: boolean) => {
+    if (!quick) return;
+    const a = agents.find((x) => x.id === quick.id);
+    if (!a) { setQuick(null); return; }
+    const diff = quickDiff(quick.field, quickDraft);
+    const changed = diff && Object.entries(diff).some(([k, v]) =>
+      JSON.stringify(v) !== JSON.stringify((a as unknown as Record<string, unknown>)[k]));
+    if (changed) {
+      setJustSaved({ id: quick.id, field: quick.field });
+      window.setTimeout(() => setJustSaved(null), FLASH_MS);
+      await updateAgent(quick.id, diff as Partial<Agent>);
+    }
+    /* ⚠️ THE NEXT FIELD IS COMPUTED FROM WHAT THE RECORD WILL BE, not from what it was — otherwise
+       Tab lands straight back on the field just filled. */
+    const after = { ...a, ...(diff ?? {}) } as Agent;
+    const next = andNext ? nextQuickField(after, quick.field) : null;
+    if (next) onAddField(quick.id, next);
+    else setQuick(null);
+  }, [quick, quickDraft, agents, updateAgent, onAddField]);
+
+
 
   /** Leave edit and return to READ — the drawer stays open on the same agent. */
   const cancelEdit = useCallback(() => { setDraft(null); setError(null); }, []);
@@ -1063,6 +1148,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             peekId={peekId}
             onAdd={onAddField}
             slotsInert={!!draft}
+            quickAt={quick}
+            justSaved={justSaved}
           />
         ) : view === "board" ? (
           <AgentBoardView
@@ -1140,6 +1227,25 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             panelRef={peekPanelRef}
             onClose={() => setPeekId(null)}
             onEdit={(id) => onEdit(id, "contact")}
+          />
+        ) : null;
+      })()}
+
+      {/* ⚠️ ONE POPOVER AT A TIME, PAGE-WIDE, and it is mounted here rather than inside a row so a
+          re-render of the list cannot take it with it. */}
+      {quick && (() => {
+        const a = agents.find((x) => x.id === quick.id);
+        return a ? (
+          <QuickAddPopover
+            agent={a}
+            field={quick.field}
+            draft={quickDraft}
+            onDraft={setQuickDraft}
+            onSave={(andNext) => void saveQuick(andNext)}
+            onCancel={() => setQuick(null)}
+            suggestions={genreSuggestions}
+            style={quickStyle}
+            panelRef={quickPanelRef}
           />
         ) : null;
       })()}

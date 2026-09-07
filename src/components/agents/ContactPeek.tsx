@@ -30,6 +30,7 @@ import React from "react";
 import { Agent } from "../../types";
 import { countryName, flagFor } from "../../lib/territory";
 import { methodShort } from "../../lib/agentList";
+import { hrefFor } from "../../lib/quickAdd";
 import "flag-icons/css/flag-icons.min.css";
 
 /** The five rows this component owns. The drawer's extra rows are NOT in here — it appends. */
@@ -84,7 +85,10 @@ export const ContactPeek: React.FC<ContactPeekProps> = ({ agent, variant = "face
   const socials = peekSocials(agent);
   const [copied, setCopied] = React.useState(false);
 
-  const href = site ? (/^https?:\/\//i.test(site) ? site : `https://${site}`) : "";
+  /* ⚠️ ONE FUNCTION DECIDES WHETHER A STORED ADDRESS MAY BE AN href, and it is the same one the
+     quick add normalises through. This used to be an inline regex here, another in the list and a
+     third on the card — three copies of a security test is two chances to fix only some of them. */
+  const href = hrefFor(site);
 
   return (
     <div className={`agl-peek agl-peek--${variant}`}>
@@ -113,7 +117,7 @@ export const ContactPeek: React.FC<ContactPeekProps> = ({ agent, variant = "face
 
       <Row field="website" label="Submissions page">
         {site ? (
-          <a className="agl-plink" href={href} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>{site}</a>
+          <a className="agl-plink" href={href ?? undefined} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>{site}</a>
         ) : (
           <Absent>No page recorded</Absent>
         )}

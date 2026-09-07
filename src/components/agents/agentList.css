@@ -1276,3 +1276,73 @@
   border: 0; background: transparent; padding: 0 4px; cursor: pointer; font-family: inherit;
   font-size: 12px; color: var(--agl-ink-body); text-decoration: underline; text-underline-offset: 2px;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   QUICK ADD (Phase 4; ref contact-list-quick-add-v1.html)
+   One field, anchored to the slot that opened it. Not scoped under `.aglist` —
+   it is portalled to the body so a row's overflow cannot clip it.
+   ══════════════════════════════════════════════════════════════════════════ */
+.agl-qa {
+  position: fixed; z-index: 62; width: 308px;
+  background: var(--agl-paper); border: 1px solid var(--agl-hair2); border-radius: 11px;
+  box-shadow: 0 22px 54px -18px rgba(44, 28, 20, .45); overflow: hidden;
+}
+.agl-qa-head {
+  background: var(--agl-sage-band); padding: 10px 14px;
+  display: flex; align-items: baseline; gap: 8px;
+}
+.agl-qa-head b { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; }
+/* the field, quietly — the row already says who the agent is */
+.agl-qa-head span {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .09em;
+  text-transform: uppercase; color: #5d6b58; margin-left: auto;
+}
+.agl-qa-body { padding: 13px 14px 6px; }
+.agl-qa-body label {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--agl-ink-label); display: block; margin-bottom: 5px;
+}
+.agl-qa-body input {
+  width: 100%; background: #fff; border: 1px solid var(--agl-hair2); border-radius: 7px;
+  padding: 9px 11px; font-size: 13.5px; font-family: inherit; color: var(--agl-ink-head);
+}
+.agl-qa-body input:focus { outline: 2px solid rgba(36, 24, 19, .4); outline-offset: 1px; }
+.agl-qa-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.agl-qa-hint { font-size: 12px; color: var(--agl-ink-muted); margin: 7px 0 0; line-height: 1.45; }
+/* ⚠️ ONE WARNING COLOUR, AND IT IS NOT RED. The value saves either way, so a refusal's colour
+   would be saying something the control does not mean. */
+.agl-qa-warn { color: #8a5a3c; }
+.agl-qa-hint code { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.agl-qa-picked { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 9px; }
+.agl-qa-picked button {
+  font-size: 11.5px; background: #eef0ea; border: 1px solid #d5dbd3; border-radius: 999px;
+  padding: 4px 9px; color: #3f5a3c; cursor: pointer; font-family: inherit;
+}
+.agl-qa-sugg { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.agl-qa-sugg button {
+  font-size: 11.5px; background: var(--agl-cream); border: 1px dashed var(--agl-hair2);
+  border-radius: 999px; padding: 4px 10px; color: var(--agl-ink-body); cursor: pointer; font-family: inherit;
+}
+.agl-qa-sugg button:hover { border-style: solid; border-color: var(--agl-ink-body); background: #fff; }
+.agl-qa-foot {
+  padding: 10px 14px; border-top: 1px solid var(--agl-hair); background: #f9f4ed;
+  display: flex; align-items: center; gap: 8px;
+}
+.agl-qa-save {
+  background: var(--agl-ink); color: var(--agl-cream); border: 0; border-radius: 999px;
+  padding: 7px 14px; font-size: 12.5px; cursor: pointer; font-family: inherit;
+}
+.agl-qa-cancel {
+  background: transparent; border: 1px solid var(--agl-hair2); border-radius: 999px;
+  padding: 7px 12px; font-size: 12.5px; color: var(--agl-ink-body); cursor: pointer; font-family: inherit;
+}
+.agl-qa-kbd {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--agl-ink-muted);
+}
+
+/* ⚠️ THE FLASH MARKS WHERE THE VALUE LANDED — sage, brief, and the ONLY colour used. It is not a
+   verdict on what was typed, so there is no second colour for a warning. */
+.aglist .agl-just { animation: aglJust 1.1s ease-out; }
+@keyframes aglJust { 0% { background: #e6ecdf; } 100% { background: transparent; } }
+@media (prefers-reduced-motion: reduce) { .aglist .agl-just { animation: none; } }

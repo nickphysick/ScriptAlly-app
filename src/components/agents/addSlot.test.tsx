@@ -26,7 +26,7 @@ const list = (slotsInert = false) => renderToStaticMarkup(
   <AgentListView
     agents={A} queries={Q} matchGenre={matchGenre(FIXTURE_GENRE)}
     onOpen={() => {}} onEdit={() => {}} onPeek={() => {}} peekId={null}
-    onAdd={() => {}} slotsInert={slotsInert}
+    onAdd={() => {}} slotsInert={slotsInert} quickAt={null} justSaved={null}
   />,
 );
 

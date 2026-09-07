@@ -21,6 +21,7 @@ import { agentCardDims, contactMetaLine, isDoorOpen } from "../../lib/agentList"
 import { isGenreMatch } from "../../lib/genreMatch";
 import { MaterialSlots } from "./MaterialSlots";
 import { AddSlot, SlotField } from "./AddSlot";
+import { hrefFor } from "../../lib/quickAdd";
 import "flag-icons/css/flag-icons.min.css";
 
 /** The chips shown inline; the rest are counted. A row is a glance, not the record. */
@@ -36,13 +37,20 @@ export const AgentListView: React.FC<{
   onPeek: (agentId: string, trigger: HTMLElement | null) => void;
   peekId: string | null;
   /** An empty cell's slot was pressed. Phase 4 gives four fields a popover; the rest escalate. */
-  onAdd: (agentId: string, field: SlotField) => void;
+  onAdd: (agentId: string, field: SlotField, anchor?: HTMLElement | null) => void;
   /**
    * ⚠️ SLOTS STAND DOWN WHILE THE DRAWER IS EDITING. Two editors on one record is two writers,
    * and the drawer already owns the dirty-confirmation logic.
    */
   slotsInert: boolean;
-}> = ({ agents, queries, matchGenre, onOpen, onEdit, onPeek, peekId, onAdd, slotsInert }) => (
+  /** Which slot has its popover open, so the slot can wear the ref's fourth state. */
+  quickAt: { id: string; field: string } | null;
+  /**
+   * ⚠️ THE FLASH MARKS WHERE THE VALUE LANDED, and it is the only colour used. Sage, brief, then
+   * gone — it is not a verdict on what was typed, so there is no second colour for a warning.
+   */
+  justSaved: { id: string; field: string } | null;
+}> = ({ agents, queries, matchGenre, onOpen, onEdit, onPeek, peekId, onAdd, slotsInert, quickAt, justSaved }) => (
   <div className="agl-listwrap">
     <div className="agl-list" role="table">
       <div className="agl-lhead" role="row">
@@ -56,6 +64,7 @@ export const AgentListView: React.FC<{
         <span role="columnheader"><span className="agl-sr">Actions</span></span>
       </div>
       {agents.map((a) => {
+        const flash = (id: string, f: string) => (justSaved?.id === id && justSaved?.field === f ? " agl-just" : "");
         const site = (a.website || "").trim();
         const flag = flagFor(a.country);
         const city = (a.city || "").trim();
@@ -82,21 +91,21 @@ export const AgentListView: React.FC<{
                 <i>{agentSecondary(a)}</i>
               </span>
             </div>
-            <div className="agl-ellip" role="cell">
-              {a.email ? a.email : <AddSlot field="email" onOpen={(f) => onAdd(a.id, f)} disabled={slotsInert} />}
+            <div className={`agl-ellip${flash(a.id, "email")}`} role="cell">
+              {a.email ? a.email : <AddSlot field="email" agentId={a.id} onOpen={(f, el) => onAdd(a.id, f, el)} disabled={slotsInert} open={quickAt?.id === a.id && quickAt?.field === "email"} />}
             </div>
-            <div role="cell">
+            <div className={flash(a.id, "website").trim()} role="cell">
               {site
-                ? <a className="agl-lk" href={/^https?:\/\//i.test(site) ? site : `https://${site}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>{site}</a>
-                : <AddSlot field="website" onOpen={(f) => onAdd(a.id, f)} disabled={slotsInert} />}
+                ? <a className="agl-lk" href={hrefFor(site) ?? undefined} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>{site}</a>
+                : <AddSlot field="website" agentId={a.id} onOpen={(f, el) => onAdd(a.id, f, el)} disabled={slotsInert} open={quickAt?.id === a.id && quickAt?.field === "website"} />}
             </div>
-            <div className="agl-lloc" role="cell">
+            <div className={`agl-lloc${flash(a.id, "location")}`} role="cell">
               {flag && <span className={`fl ${flag}`} aria-hidden="true" />}
               {city || country
                 ? <span>{city || country}{city && country && <small>{country}</small>}</span>
-                : <AddSlot field="location" onOpen={(f) => onAdd(a.id, f)} disabled={slotsInert} />}
+                : <AddSlot field="location" agentId={a.id} onOpen={(f, el) => onAdd(a.id, f, el)} disabled={slotsInert} open={quickAt?.id === a.id && quickAt?.field === "location"} />}
             </div>
-            <div className="agl-chips" role="cell">
+            <div className={`agl-chips${flash(a.id, "genres")}`} role="cell">
               {/* ⚠️ GENRES HAD NO EMPTY BRANCH AT ALL — an agent with none rendered an empty chip
                   row, which states nothing and cannot be acted on. It is the one cell whose gap
                   was invisible rather than merely wordy. */}
@@ -108,7 +117,7 @@ export const AgentListView: React.FC<{
                   {a.genres.length > ROW_GENRES && <span className="agl-chip">+{a.genres.length - ROW_GENRES}</span>}
                 </>
               ) : (
-                <AddSlot field="genres" onOpen={(f) => onAdd(a.id, f)} disabled={slotsInert} />
+                <AddSlot field="genres" agentId={a.id} onOpen={(f, el) => onAdd(a.id, f, el)} disabled={slotsInert} open={quickAt?.id === a.id && quickAt?.field === "genres"} />
               )}
             </div>
             <div role="cell"><MaterialSlots agent={a} /></div>
