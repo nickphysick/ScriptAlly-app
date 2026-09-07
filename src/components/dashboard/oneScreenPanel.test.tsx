@@ -132,8 +132,10 @@ describe("the bands are one geometry, coloured by purpose", () => {
      shrinks. */
   it("⚠️ the CONTROLS give before the title does at a narrow width", () => {
     expect(bare).toMatch(/\.os-ahead \.os-ctrls\s*\{[^}]*min-width:\s*0/);
-    /* the brush states a width rather than growing with the band */
-    expect(cssRule(bare, ".os-brush")).toMatch(/width:\s*\d+px/);
+    /* ⚠️ THE FIXED WIDTH IS THE THUMBNAIL'S, NOT THE PILL'S. The brush is a capsule around a
+       230px picture and a label, so the pill sizes to its contents while `.os-bw` is what states
+       a width — asserting it on the wrapper would pass on a pill that stretched the band. */
+    expect(cssRule(bare, ".os-bw")).toMatch(/width:\s*\d+px/);
     expect(cssRule(bare, ".os-brush")).toContain("flex: none");
     /* and the retired slider must not survive its replacement — an added control leaves the
        original reachable; a swapped one does not */
@@ -236,11 +238,18 @@ describe("one band geometry, declared", () => {
   it("⚠️ the controls carry their own edge, and the brush carries a picture", () => {
     expect(bare).toMatch(/\.os-ahead \.os-freqsel select\s*\{[^}]*#fffdf9/);
     expect(bare).toMatch(/\.os-ahead \.os-freqsel select\s*\{[^}]*#bcc7b9/);
-    /* the excluded span is SHADED, never hidden — the reader can see what they are leaving out */
-    expect(cssRule(bare, ".os-brushmask")).toMatch(/opacity:\s*0?\.\d+/);
-    /* the handle is a RULE, not a knob: it marks an edge of a selection, not a point on a line */
-    expect(bare).toMatch(/slider-thumb[\s\S]{0,200}#7c3a2a/);
-    expect(bare).toMatch(/slider-thumb[\s\S]{0,200}width:\s*3px/);
+    /* ⚠️ THE EXCLUDED SPAN IS SHADED, NEVER HIDDEN — the reader can see what they are leaving out,
+       which is the entire reason a brush beats a slider. It is card paper at 62% (ref `.shade`),
+       not a grey and not opaque; an opaque mask would hide the history it exists to show. */
+    const shade = cssRule(bare, ".os-bshade");
+    expect(shade).toMatch(/opacity:\s*0?\.\d+/);
+    expect(shade).toContain("#fdfbf7");
+    /* ⚠️ THE HANDLE IS THE SELECTION'S LEFT EDGE — a rule with a grip on it, drawn in CSS on
+       `.os-bwin`, because the native thumb cannot carry a rule AND a grip. The native thumb is
+       therefore a transparent hit area, and asserting a colour on it now would be asserting the
+       absence of the drawing. */
+    expect(cssRule(bare, ".os-bwin")).toContain("border-left: 2px solid #1c130f");
+    expect(bare).toMatch(/\.os-bwin::before\s*\{[^}]*border:\s*1\.5px solid #1c130f/);
 
     /* ⚠️ FIREFOX IGNORES -webkit- PSEUDO-ELEMENTS ENTIRELY — without these it renders the browser
        default, a blue OS slider laid over the thumbnail. The law is unchanged; the LIST is one
@@ -318,6 +327,7 @@ describe("the bands meet their cards' edges", () => {
   });
 
   it("the chart's padding lives in its body instead", () => {
-    expect(blk2(".os-lbody")).toMatch(/padding:\s*12px 18px 10px/);
+    /* ref `.chart{padding:14px 20px 6px}` — the legend beneath supplies the card's own foot */
+    expect(blk2(".os-lbody")).toMatch(/padding:\s*14px 20px 6px/);
   });
 });

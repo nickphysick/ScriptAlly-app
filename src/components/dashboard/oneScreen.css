@@ -125,6 +125,8 @@
   .os-grid { grid-template-columns: 340px minmax(0, 1fr) 360px; }
   /* the ref's own `@media (max-width:1700px)` step for the slot */
   .os-cic, .os-cic.plane { width: 96px; height: 96px; }
+  /* the ref's own step for the brush at the same breakpoint */
+  .os-bw { width: 170px; }
 }
 .os-colL { grid-column: 1; }
 .os-colM { grid-column: 2; }
@@ -728,9 +730,13 @@
  * edge — a value stranded from the control it reports. The min-width stays: the words change
  * length ("Last 14 days" → "All time"), and without it the slider shifts as you drag.
  */
+/* ⚠️ INSIDE THE PILL NOW, AND IN THE PAGE'S OWN INK. It was 11px burgundy outside the control —
+   burgundy on a label that reports rather than acts, and stranded from the thing it reports on.
+   The min-width stays: the words change length ("Last 14 days" → "All time") and without it the
+   thumbnail resizes as you drag. */
 .os-rangelbl {
-  font-size: 11px; color: #7c3a2a; font-weight: 500; white-space: nowrap;
-  min-width: 88px; text-align: left; flex: none;
+  font-size: 14px; color: #2a1f18; white-space: nowrap;
+  min-width: 96px; text-align: left; flex: none;
 }
 /* ⚠️ ONE CLUSTER, RIGHT-ALIGNED AS A UNIT — frequency · slider · label. Pushing each control
    right on its own is what let the label drift away from the slider. */
@@ -950,15 +956,19 @@
 /* ⚠️ NO STROKE, NO OPACITY. The bands are painted as cumulative areas back to front, so each one is
    the DIFFERENCE between two fills that share an identical curve; an alpha would let the fill
    beneath show through and turn two flat colours into three. */
-.os-band { stroke: none; }
+/* ⚠️ THE STROKE IS SET INLINE, PER BAND, FROM `STATE_ACCENT_TOKEN` — a single rule here could only
+   give four bands one colour, and the whole point is that each band's border is its own family's
+   deeper step. This rule exists to say so; it declares nothing. */
 
-/* ⚠️ THE LEGEND NAMES WHAT IS DRAWN — three, never four. */
+/* ⚠️ THE LEGEND NAMES WHAT IS DRAWN, and the count is not fixed — the fourth entry arrives with
+   the fourth band. Ref `.legend`: 20px gaps, 14px in `--ink2`, swatches 12px at radius 3 with a
+   near-transparent hairline rather than an inset shadow (a shadow reads as a bevel at 12px). */
 .os-bandkey {
-  display: flex; flex-wrap: wrap; gap: 4px 16px;
-  padding: 6px 18px 2px; flex: none;
+  display: flex; flex-wrap: wrap; gap: 4px 20px;
+  padding: 4px 20px 14px; flex: none;
 }
-.os-bk { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; color: #6b5c50; white-space: nowrap; }
-.os-bk i { width: 11px; height: 11px; border-radius: 3px; flex: none; box-shadow: inset 0 0 0 1px rgba(58, 28, 20, 0.08); }
+.os-bk { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; color: #6b5d54; white-space: nowrap; }
+.os-bk i { width: 12px; height: 12px; border-radius: 3px; flex: none; border: 1px solid rgba(0, 0, 0, 0.07); }
 
 /* ⚠️ THE STAT BLOCK: the figure leads, the name and the delta stack beside it. `align-items:
    baseline` is deliberately NOT used — the figure is 38px and the title 15px, so a shared baseline
@@ -975,29 +985,39 @@
   overflow: hidden; text-overflow: ellipsis;
 }
 
-/* ⚠️ THE BRUSH — a thumbnail of the whole record with the excluded span shaded, and the real
-   `input[type=range]` laid transparently over it so the control keeps its keyboard, its
-   `aria-valuetext` and its snapping. The picture is decoration; the input is the control. */
-.os-brush { position: relative; width: 132px; height: 22px; flex: none; }
-.os-brush svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; border-radius: 5px; overflow: hidden; }
-/* the excluded span, from the left edge to the handle — shaded, never hidden */
-.os-brushmask { fill: #fdfaf5; opacity: 0.72; }
-.os-brush input[type="range"] {
+/* ⚠️ THE BRUSH IS A PILL, AND THE PICTURE INSIDE IT IS THE CHART IN MINIATURE (refdiff, Phase 5).
+   Ref `.brush`: a white capsule with a hairline and a 14px radius holding a 230×34 thumbnail and
+   the range label. The old form was a 132px bare thumbnail with a burgundy rule for a handle and
+   the label outside it; the label belongs INSIDE, because it is what the control currently says. */
+.os-brush {
+  display: flex; align-items: center; gap: 12px; flex: none;
+  background: #fff; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 14px; padding: 6px 14px;
+}
+.os-bw { position: relative; width: 230px; height: 34px; cursor: ew-resize; user-select: none; flex: none; }
+.os-bw > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* ⚠️ CARD PAPER AT .62, NEVER A GREY AND NEVER OPAQUE. The excluded history must stay legible
+   through it — showing what is being left out is the whole reason a brush beats a slider. */
+.os-bshade { position: absolute; top: 0; bottom: 0; left: 0; background: #fdfbf7; opacity: 0.62; border-radius: 2px; }
+/* ⚠️ THE HANDLE IS THE SELECTION'S LEFT EDGE — a rule with a grip, not a knob on a track. A round
+   thumb over a thumbnail reads as a point ON the line, which is the one thing it is not. */
+.os-bwin { position: absolute; top: 0; bottom: 0; right: 0; border-left: 2px solid #1c130f; border-radius: 2px; pointer-events: none; }
+.os-bwin::before {
+  content: ""; position: absolute; left: -5px; top: 50%; transform: translateY(-50%);
+  width: 8px; height: 18px; border-radius: 3px; background: #fff; border: 1.5px solid #1c130f;
+}
+.os-bw input[type="range"] {
   position: absolute; inset: 0; width: 100%; height: 100%; margin: 0;
   appearance: none; -webkit-appearance: none; background: transparent; cursor: ew-resize;
 }
-.os-brush input[type="range"]::-webkit-slider-runnable-track { height: 22px; background: transparent; }
-.os-brush input[type="range"]::-moz-range-track { height: 22px; background: transparent; }
-/* ⚠️ THE HANDLE IS THE LEFT EDGE OF THE SELECTION, so it is a RULE rather than a knob: a round
-   thumb on a thumbnail reads as a point on a line, which is the one thing it is not. */
-.os-brush input[type="range"]::-webkit-slider-thumb {
+.os-bw input[type="range"]::-webkit-slider-runnable-track { height: 34px; background: transparent; }
+.os-bw input[type="range"]::-moz-range-track { height: 34px; background: transparent; }
+/* the grip is drawn by `.os-bwin::before`, so the native thumb is a hit area and nothing else */
+.os-bw input[type="range"]::-webkit-slider-thumb {
   appearance: none; -webkit-appearance: none;
-  width: 3px; height: 22px; border-radius: 2px; background: #7c3a2a; border: 0;
+  width: 10px; height: 34px; background: transparent; border: 0;
 }
-.os-brush input[type="range"]::-moz-range-thumb {
-  width: 3px; height: 22px; border-radius: 2px; background: #7c3a2a; border: 0;
-}
-.os-brush input[type="range"]:focus-visible { outline: 2px solid #b98a76; outline-offset: 2px; border-radius: 6px; }
+.os-bw input[type="range"]::-moz-range-thumb { width: 10px; height: 34px; background: transparent; border: 0; }
+.os-bw input[type="range"]:focus-visible { outline: 2px solid #b98a76; outline-offset: 2px; border-radius: 6px; }
 
 /* the tip's band swatch — the same square the legend uses, at the row's size */
 .os-tip .bsw { width: 11px; height: 11px; border-radius: 3px; flex: none; box-shadow: inset 0 0 0 1px rgba(58, 28, 20, 0.08); }
@@ -1005,13 +1025,16 @@
 .os-chip { font-size: 10px; border-radius: 99px; padding: 2.5px 9px; background: #e9ede6; border: 1px solid #d6ddd2; color: #3f5a3c; }
 /* the band runs edge to edge, so the padding belongs to the body */
 /* the card's old padding lives here now — the band needs the card's edges */
-.os-lbody { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 12px 18px 10px; }
+/* ref `.chart{padding:14px 20px 6px}` — the legend beneath supplies the card's foot */
+.os-lbody { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 14px 20px 6px; }
 .os-chartwrap { flex: 1; min-height: 120px; position: relative; }
 .os-chartwrap svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: default; outline: none; }
 /* the cursor flips across the reading-zone boundary — felt, not guessed (§3) */
 .os-chartwrap svg.reading { cursor: crosshair; }
 .os-chartwrap svg:focus-visible { outline: 2px solid #b98a76; outline-offset: -2px; border-radius: 8px; }
-.os-ylab { font: 500 8.5px "JetBrains Mono", monospace; fill: #cdc0b0; letter-spacing: 0.04em; }
+/* ref `.axis` — mono 11px, `--mono-c`, .08em. It was 8.5px in a paler tint, which on a three-tick
+   scale made the only scale furniture on the card the least legible thing on it. */
+.os-ylab { font: 400 11px "JetBrains Mono", monospace; fill: #9c8f82; letter-spacing: 0.08em; }
 .os-pin { cursor: pointer; }
 .os-pin circle.hit { transition: r 0.16s ease, fill 0.16s ease; }
 .os-pin:hover circle.hit { r: 9; fill: #e8c8bc; }

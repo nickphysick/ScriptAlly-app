@@ -8,9 +8,9 @@ import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
 import {
   achievementPill, awaitingChip, chartEvents,
-  aggregateLedger, bindEvents, dailyLedger, defaultFreq, MIN_SPAN, monotonePath,
+  aggregateLedger, bindEvents, dailyLedger, defaultFreq, monotonePath,
   nearestStop, RANGE_STOPS, rangeChip, rangeWindow, runStage, stopForDays, tenureLine,
-  tourAutoRuns, tourChipShows, yScale,
+  tourAutoRuns, tourChipShows, axisTop, axisTicks, niceStep,
 } from "./oneScreen";
 
 // Thursday 6 August 2026 — the ref's own day (ISO week starts Mon 3 Aug).
@@ -156,23 +156,52 @@ describe("⚠️ a new account opens on DAILY", () => {
 
 /* ══ §3 · y-scale ══ */
 
-describe("yScale — the minimum span is the point", () => {
-  it("never goes below zero and never spans less than MIN_SPAN", () => {
-    const s = yScale([2, 3]);
-    expect(s.lo).toBeGreaterThanOrEqual(0);
-    expect(s.hi - s.lo).toBeGreaterThanOrEqual(MIN_SPAN);
+/**
+ * ⚠️ `yScale` IS RETIRED AND ITS LAW IS NOT — the zero floor now carries alone what a ~25% pad and
+ * a `MIN_SPAN` of 5 used to carry between them. The claim these cases exist for is unchanged: a
+ * beginner's two or three queries must not read as a cliff.
+ */
+describe("the axis — zero-based, round top, and never a cliff", () => {
+  it("⚠️ a beginner's 2–3 queries do not read as a cliff", () => {
+    /* the plot runs 0..axisTop, so a 2→3 rise occupies a quarter of the height, not the whole of it */
+    const hi = axisTop(3);
+    expect(hi).toBe(4);
+    expect((3 - 2) / hi).toBeLessThanOrEqual(1 / 4);
   });
 
-  it("⚠️ a beginner's 2–3 queries do not read as a cliff (§3)", () => {
-    const s = yScale([2, 3, 2]);
-    // the data occupies at most a fifth of the axis — a gentle slope, not a mountain range
-    expect((3 - 2) / (s.hi - s.lo)).toBeLessThanOrEqual(1 / MIN_SPAN);
+  it("⚠️ the floor is zero, ALWAYS — a scale that hugs its data makes every flat stretch a crisis", () => {
+    for (const max of [0, 1, 7, 34, 210]) expect(axisTicks(max)[0]).toBe(0);
   });
 
-  it("pads a real range by ~25% and floors at zero", () => {
-    const s = yScale([0, 16]);
-    expect(s.lo).toBe(0);
-    expect(s.hi).toBeGreaterThanOrEqual(20);
+  /* ⚠️ STRICTLY ABOVE THE MAXIMUM, WHICH IS THE WHOLE REASON IT IS NOT `Math.ceil`. A peak landing
+     exactly on a step would otherwise be drawn flush against the top of the frame and read as
+     clipped. `ceil` is the tempting simplification and it fails only on the round numbers. */
+  it("⚠️ the top is strictly ABOVE the peak, so a peak on a step is not flush to the frame", () => {
+    expect(axisTop(17)).toBe(20);
+    expect(axisTop(12)).toBe(14);  // `ceil` would give 12 — the line would touch the frame
+    expect(axisTop(8)).toBe(10);
+    expect(axisTop(0)).toBe(2);
+  });
+
+  it("the step widens as the record does — 2 · 4 · 10 · 20", () => {
+    expect(niceStep(8)).toBe(2);
+    expect(niceStep(12)).toBe(2);
+    expect(niceStep(13)).toBe(4);
+    expect(niceStep(30)).toBe(4);
+    expect(niceStep(31)).toBe(10);
+    expect(niceStep(60)).toBe(10);
+    expect(niceStep(61)).toBe(20);
+  });
+
+  it("three ticks — floor, middle, top — all of them ON the plot", () => {
+    expect(axisTicks(17)).toEqual([0, 10, 20]);
+    expect(axisTicks(0)).toEqual([0, 1, 2]);
+    /* ⚠️ EVERY TICK IS AT OR BELOW THE CEILING. The ref labels its axis from one number and scales
+       its line from another, so its top label can sit above the plot; here they are one number and
+       cannot come apart. */
+    for (const max of [0, 3, 12, 17, 45, 200]) {
+      for (const t of axisTicks(max)) expect(t).toBeLessThanOrEqual(axisTop(max));
+    }
   });
 });
 

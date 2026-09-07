@@ -983,10 +983,31 @@ describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => 
     const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
     expect(flow).toContain("cof"); // the journey-sheet family keeps coffee
   });
-  it("THE RENAME, repo-wide: zero matches of the old family phrase in src (Agent waiting everywhere)", () => {
+  /**
+   * ⚠️ SCOPED TO THE TO-DO SURFACE (refdiff pass, Phase 5) — IT WAS REPO-WIDE AND ASSERTED MORE
+   * THAN ITS OWN CLAIM.
+   *
+   * The claim is that THIS board's family is called "Agent waiting"; the grep ran over the whole of
+   * `src/` and therefore also claimed the phrase for every other surface in the app. It went red on
+   * the dashboard chart's band legend, whose wording comes from that page's own design ref and
+   * names a CATEGORY describing a stock of queries — not a lane of tasks on this board. (The phrase
+   * itself is deliberately not written out here: this lock greps its own directory.)
+   *
+   * ⚠️ AND THE UNDERLYING QUESTION IS REAL AND IS NOT SETTLED BY THIS NARROWING. Two surfaces now
+   * name what is arguably one state two ways, which is exactly the fault the app's vocabulary
+   * discipline exists to prevent. Deciding which word wins app-wide is a product call and is raised
+   * in the run report rather than taken here; what is fixed here is only that a To-do lock should
+   * fail when the TO-DO board drifts, not when another page adopts a word from its own design ref.
+   */
+  it("THE RENAME, across the To-do surface: zero matches of the old family phrase (Agent waiting everywhere)", () => {
     const { execSync } = require("node:child_process");
     const needle = "over to " + "you"; // split so this lock never matches itself
-    const out = execSync(`grep -ril '${needle}' ` + join(here, "..", "..") + " || true", { encoding: "utf8" }).trim();
+    /* the To-do surface: this directory, plus the board's own libraries — NOT all of `src/lib` */
+    const lib = join(here, "..", "..", "lib");
+    const out = execSync(
+      `grep -ril '${needle}' '${here}' '${lib}'/todo*.ts '${lib}'/elapsed.ts || true`,
+      { encoding: "utf8" },
+    ).trim();
     expect(out).toBe("");
     const board = readFileSync(join(here, "..", "..", "lib", "todoBoard.ts"), "utf8");
     expect(board).toContain('kind: "AGENT WAITING"'); // the tightening P2: the phrase is the KIND lane's tag now

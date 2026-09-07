@@ -22,19 +22,27 @@ import { createPortal } from "react-dom";
 import { Agent, Query, QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
 import { activeStageBreakdown } from "../../lib/dashboardStats";
-import { bandSeries, BAND_KEYS, BAND_LABEL, type BandKey, type BandPoint } from "../../lib/chartBands";
-import { STATE_TOKEN } from "../../lib/queryCardFacts";
+import { bandSeries, bandTotal, BAND_KEYS, BAND_LABEL, UNDATED_LABEL, type BandKey, type BandPoint } from "../../lib/chartBands";
+import { STATE_TOKEN, STATE_ACCENT_TOKEN } from "../../lib/queryCardFacts";
 import { placeTooltip, Rect } from "../../lib/deskTooltip";
 import {
-  aggregateLedger, awaitingChip, bindEvents, chartEvents, ChartEvent, dailyLedger, DEFAULT_RANGE_DAYS,
+  aggregateLedger, awaitingChip, dailyLedger, DEFAULT_RANGE_DAYS,
   defaultFreq, Freq, LedgerPoint, monotonePath, nearestStop, periodLabel, RANGE_STOPS, rangeChip,
-  rangeWindow, stopForDays, yScale,
+  rangeWindow, stopForDays, axisTop, axisTicks,
 } from "../../lib/oneScreen";
 import { OneScreenPanel } from "./OneScreenPanel";
 import { OneScreenMark } from "./OneScreenMark";
 import { useCountUp } from "../../lib/useCountUp";
 
 /* ── pure geometry (exported for the node-env tests — there is no layout engine to ask) ── */
+
+/**
+ * ⚠️ THE STACK HAS A FOURTH LAYER AND IT IS NOT A `BandKey` — the residual between the three bands
+ * and the line, i.e. the queries the record cannot place. It reads the `offer` state colour because
+ * that is what it mostly is (an open offer, or an R&R with no date on the turn), and it is drawn
+ * rather than left as clear air so the top of the stack IS the line.
+ */
+type BandStackKey = BandKey | "offer";
 
 export const PADX = 14, PADY = 16, PADTOP = 30;
 export const READ_MARGIN = 10;
@@ -113,7 +121,6 @@ export const OneScreenChart: React.FC<{
   const wrapRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const lineRef = useRef<SVGPathElement>(null);
-  const areaRef = useRef<SVGPathElement>(null);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
   /* ⚠️ TWO INDEPENDENT CONTROLS: frequency is the GRAIN of a point, range is the WINDOW of days
      on show. They compose — 8 weeks of daily points and 8 weeks of weekly points are the same
@@ -122,7 +129,6 @@ export const OneScreenChart: React.FC<{
   const [rangeDays, setRangeDays] = useState<number>(DEFAULT_RANGE_DAYS);
   const [reading, setReading] = useState(false);
   const [focusIdx, setFocusIdx] = useState(-1);
-  const [pinIdx, setPinIdx] = useState<number | null>(null);
   const [tipAnchor, setTipAnchor] = useState<Rect | null>(null);
   const [liveText, setLiveText] = useState("");
   const drewIn = useRef(false);
@@ -145,16 +151,6 @@ export const OneScreenChart: React.FC<{
   const stages = useMemo(() => activeStageBreakdown(queries), [queries]);
   const activeTotal = stages.reduce((a, r) => a + r.count, 0);
 
-  const agentName = useCallback((q: Query) => {
-    const a = agents.find((x) => x.id === q.agentId);
-    return a?.name || a?.agency || "An agent";
-  }, [agents]);
-  /* ⚠️ EVENTS LAND ON REAL DATES and a point carries a pin if it CONTAINS one — so the same
-     offer pins one day at daily grain and the week that holds it at weekly, without the event
-     itself knowing anything about periods. Rebinds whenever the view changes. */
-  const allEvents = useMemo(() => chartEvents(queries, agentName), [queries, agentName]);
-  const events = useMemo(() => bindEvents(view, allEvents), [view, allEvents]);
-
   /* §3: measured, and remeasured on resize. */
   useEffect(() => {
     const el = wrapRef.current;
@@ -171,25 +167,71 @@ export const OneScreenChart: React.FC<{
 
   const W = size?.w ?? 0, H = size?.h ?? 0;
   const sparse = view.length < 2;
-  const { lo, hi } = useMemo(() => (sparse ? { lo: 0, hi: 5 } : yScale(view.map((w) => w.active))), [view, sparse]);
+  /**
+   * ⚠️ ONE SERIES. The line is the BANDS' SUM and there is no `active` series any more.
+   *
+   * They were two derivations of one number — `dailyLedger` counted active queries, `bandsAt` sorted
+   * active queries into four buckets — and they disagreed, visibly, as clear air between the top
+   * band and the line. The card carried a sentence explaining the gap. Reading the line off the
+   * bands makes the disagreement unrepresentable: `bandsAt` puts every active query in exactly one
+   * bucket, so the sum IS the count, and the top of the stack IS the line at every point.
+   */
+  const total = useMemo(() => bands.map(bandTotal), [bands]);
+  /* zero-based, round top label, headroom so the peak never touches the frame — see `axisMax` */
+  const lo = 0;
+  const hi = useMemo(() => (sparse ? 5 : axisTop(Math.max(0, ...total))), [total, sparse]);
+  const ticks = useMemo(() => (sparse ? [] : axisTicks(Math.max(0, ...total))), [total, sparse]);
   const pts = useMemo<[number, number][]>(
-    () => (sparse || !W ? [] : view.map((w, i) => [chartX(i, W, view.length), chartY(w.active, H, lo, hi)])),
-    [view, W, H, lo, hi, sparse],
+    () => (sparse || !W ? [] : total.map((v, i) => [chartX(i, W, view.length), chartY(v, H, lo, hi)])),
+    [total, view.length, W, H, lo, hi, sparse],
   );
   const path = useMemo(() => monotonePath(pts), [pts]);
-  /* ⚠️ THE BRUSH'S THUMBNAIL IS THE WHOLE LEDGER IN A 100×22 BOX, drawn with its own scale so a
-     short record still fills the strip. `preserveAspectRatio="none"` lets it stretch to whatever
-     width the control gets — a thumbnail is a shape, not a measurement. */
-  const brushPath = useMemo(() => {
-    if (ledger.length < 2) return "";
-    const top = Math.max(1, ...ledger.map((p) => p.active));
-    const pt = ledger.map((p, i) => [
-      (i * 100) / (ledger.length - 1),
-      22 - (p.active / top) * 20,
-    ] as [number, number]);
-    const line = monotonePath(pt);
-    return line ? `${line} L 100 22 L 0 22 Z` : "";
-  }, [ledger]);
+  /**
+   * ⚠️ THE THUMBNAIL IS THE CHART, NOT A SUMMARY OF IT — same three bands, same stacking, same ink
+   * line, in a 230×34 box. A brush is a control that shows what it is excluding, so it has to be
+   * recognisable as the thing above it; a single sage silhouette was a different picture of the
+   * same data and the eye had to be told they were related.
+   *
+   * ⚠️ IT DRAWS THE FULL LEDGER, NOT THE VIEW. The view is what the brush SELECTS; drawing the
+   * selection inside the selector would make the thumbnail redraw itself every time the handle
+   * moved, and the excluded span would have nothing to be excluded from.
+   */
+  const ledgerBands = useMemo(() => bandSeries(ledger, queries, now), [ledger, queries, now]);
+  const brushAreas = useMemo(() => {
+    const n = ledger.length;
+    if (n < 2) return [] as { key: BandStackKey; d: string }[];
+    const tot = ledgerBands.map(bandTotal);
+    const mx = Math.max(1, ...tot) + 1;
+    const bx = (i2: number) => 6 + (218 * i2) / (n - 1);
+    const by = (v: number) => 32 - (29 * v) / mx;
+    const areaTo = (vals: number[]) => {
+      const top = monotonePath(vals.map((v, i2) => [bx(i2), by(v)] as [number, number]));
+      return top ? `${top} L ${bx(n - 1).toFixed(1)} 34 L ${bx(0).toFixed(1)} 34 Z` : null;
+    };
+    const cum = (upTo: number) => ledgerBands.map((bp) => {
+      let acc = 0;
+      for (let k = 0; k <= upTo; k++) acc += bp[BAND_KEYS[k]];
+      return acc;
+    });
+    const out: { key: BandStackKey; d: string }[] = [];
+    if (ledgerBands.some((b) => b.undated > 0)) {
+      const d = areaTo(tot);
+      if (d) out.push({ key: "offer", d });
+    }
+    for (let k = BAND_KEYS.length - 1; k >= 0; k--) {
+      const d = areaTo(cum(k));
+      if (d) out.push({ key: BAND_KEYS[k], d });
+    }
+    return out;
+  }, [ledger, ledgerBands]);
+  const brushLine = useMemo(() => {
+    const n = ledger.length;
+    if (n < 2) return "";
+    const tot = ledgerBands.map(bandTotal);
+    const mx = Math.max(1, ...tot) + 1;
+    return monotonePath(tot.map((v, i2) => [6 + (218 * i2) / (n - 1), 32 - (29 * v) / mx] as [number, number]));
+  }, [ledger, ledgerBands]);
+
   /**
    * ⚠️ THE BANDS ARE PAINTED AS CUMULATIVE AREAS, BACK TO FRONT — never as three polygons with
    * shared edges. A stacked polygon needs its lower boundary to be the previous band's upper one
@@ -203,27 +245,33 @@ export const OneScreenChart: React.FC<{
    * Centre's cards and the To-do ticket's edge already read. A fourth copy of four hexes is how a
    * page comes to be nearly the right colour.
    */
+  const hasUndated = useMemo(() => bands.some((b) => b.undated > 0), [bands]);
   const bandAreas = useMemo(() => {
-    if (sparse || !W || !H) return [] as { key: BandKey; d: string }[];
+    if (sparse || !W || !H) return [] as { key: BandStackKey; d: string }[];
     const cum = (upTo: number) => view.map((_, i) => {
       const bp = bands[i];
       let n = 0;
       for (let k = 0; k <= upTo; k++) n += bp ? bp[BAND_KEYS[k]] : 0;
       return n;
     });
-    const out: { key: BandKey; d: string }[] = [];
+    const out: { key: BandStackKey; d: string }[] = [];
+    const areaTo = (vals: number[]) => {
+      const top = monotonePath(vals.map((v, i) => [chartX(i, W, view.length), chartY(v, H, lo, hi)] as [number, number]));
+      return top
+        ? `${top} L ${chartX(view.length - 1, W, view.length).toFixed(1)} ${H} L ${chartX(0, W, view.length).toFixed(1)} ${H} Z`
+        : null;
+    };
     /* back to front: the widest stack first, so each later fill covers the one beneath it */
+    if (hasUndated) {
+      const d = areaTo(total);
+      if (d) out.push({ key: "offer", d });
+    }
     for (let k = BAND_KEYS.length - 1; k >= 0; k--) {
-      const ys2 = cum(k).map((v, i) => [chartX(i, W, view.length), chartY(v, H, lo, hi)] as [number, number]);
-      const top = monotonePath(ys2);
-      if (!top) continue;
-      out.push({
-        key: BAND_KEYS[k],
-        d: `${top} L ${chartX(view.length - 1, W, view.length).toFixed(1)} ${H} L ${chartX(0, W, view.length).toFixed(1)} ${H} Z`,
-      });
+      const d = areaTo(cum(k));
+      if (d) out.push({ key: BAND_KEYS[k], d });
     }
     return out;
-  }, [bands, view, W, H, lo, hi, sparse]);
+  }, [bands, total, hasUndated, view, W, H, lo, hi, sparse]);
   const ys = useMemo(() => pts.map((p) => p[1]), [pts]);
 
   /* ⚠️ THE DRAW-IN RUNS ONCE, EVER (§3) — never on resize, never on range change, never under
@@ -232,17 +280,14 @@ export const OneScreenChart: React.FC<{
   useEffect(() => {
     if (drewIn.current || !path || loading) return;
     drewIn.current = true;
-    const line = lineRef.current, area = areaRef.current;
-    if (!line || !area || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const line = lineRef.current;
+    if (!line || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const L = line.getTotalLength();
     line.style.strokeDasharray = String(L);
     line.style.strokeDashoffset = String(L);
-    area.style.opacity = "0";
     requestAnimationFrame(() => {
       line.style.transition = "stroke-dashoffset .9s cubic-bezier(.4,0,.2,1)";
-      area.style.transition = "opacity .6s ease .35s";
       line.style.strokeDashoffset = "0";
-      area.style.opacity = "1";
     });
     const id = window.setTimeout(() => {
       line.style.strokeDasharray = ""; line.style.transition = "";
@@ -255,7 +300,6 @@ export const OneScreenChart: React.FC<{
   const focusPoint = useCallback((i: number, announce: boolean) => {
     if (!svgRef.current || !view[i]) return;
     setFocusIdx(i);
-    setPinIdx(null);
     const r = svgRef.current.getBoundingClientRect();
     setTipAnchor({ left: r.left + chartX(i, W, view.length), top: r.top + chartY(view[i].active, H, lo, hi), width: 0, height: 0 });
     if (announce) {
@@ -265,7 +309,7 @@ export const OneScreenChart: React.FC<{
   }, [view, W, H, lo, hi, effFreq]);
 
   const onMove = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (sparse || !svgRef.current || pinIdx !== null) return;
+    if (sparse || !svgRef.current) return;
     const r = svgRef.current.getBoundingClientRect();
     const xLocal = e.clientX - r.left, yLocal = e.clientY - r.top;
     const onOrBelow = ys.length >= 2 && yLocal >= lineYAtX(ys, xLocal, W) - READ_MARGIN;
@@ -287,16 +331,14 @@ export const OneScreenChart: React.FC<{
     focusPoint(i, true);
   };
 
-  /* every control change drops the focused point and any open pin — both index into a view that
-     is about to be a different length */
-  const resetRead = () => { blurPoint(); setPinIdx(null); };
+  /* every control change drops the focused point — it indexes into a view about to change length */
+  const resetRead = () => { blurPoint(); };
   const stop = stopForDays(rangeDays);
 
   const every = xLabelEvery(view.length, effFreq);
   const lastIdx = view.length - 1;
   const focusedWeek: LedgerPoint | null = focusIdx >= 0 ? view[focusIdx] : null;
   const focusBand: BandPoint | null = focusIdx >= 0 ? bands[focusIdx] ?? null : null;
-  const pinEvent = pinIdx !== null ? events.get(pinIdx) ?? null : null;
 
   return (
     <OneScreenPanel variant="os-lead" probe="chart-card" loading={loading} skel={["h", "grow", ""]}>
@@ -357,18 +399,30 @@ export const OneScreenChart: React.FC<{
             the selection inside the selector would make the thumbnail redraw itself every time the
             handle moved, and the excluded span would have nothing to be excluded from. */}
         <div className="os-brush" data-probe="brush">
-          <svg viewBox="0 0 100 22" preserveAspectRatio="none" aria-hidden="true">
-            {brushPath && <path d={brushPath} fill="#dfe4dc" />}
-            <rect className="os-brushmask" x={0} y={0} width={100 - stop.p} height={22} />
-          </svg>
-          <input
-            type="range" min={0} max={100} step={1} value={stop.p}
-            aria-label="Chart range"
-            aria-valuetext={stop.label}
-            onChange={(e) => { setRangeDays(nearestStop(Number(e.target.value)).days); resetRead(); }}
-          />
+          {/* ⚠️ THE SHADE IS CARD PAPER AT 62%, NOT A GREY. It has to read as "this part is not on
+              show" while the thumbnail stays legible through it — a solid mask would hide the
+              excluded history, which is the one thing the control exists to show. */}
+          <div className="os-bw">
+            <svg viewBox="0 0 230 34" preserveAspectRatio="none" aria-hidden="true">
+              {brushAreas.map((a) => (
+                <path key={a.key} d={a.d} fill={STATE_TOKEN[a.key]} />
+              ))}
+              {brushLine && <path d={brushLine} fill="none" stroke="#1c130f" strokeWidth={1.1} />}
+            </svg>
+            <div className="os-bshade" style={{ width: `${100 - stop.p}%` }} />
+            <div className="os-bwin" style={{ left: `${100 - stop.p}%` }} />
+            {/* ⚠️ THE RANGE INPUT SURVIVES, INVISIBLE, OVER THE WHOLE BOX. The ref drags with a
+                pointer and nothing else; a control that cannot be reached from the keyboard is not
+                a control. The picture is the ref's, the operation is the app's. */}
+            <input
+              type="range" min={0} max={100} step={1} value={stop.p}
+              aria-label="Chart range"
+              aria-valuetext={stop.label}
+              onChange={(e) => { setRangeDays(nearestStop(Number(e.target.value)).days); resetRead(); }}
+            />
+          </div>
+          <span className="os-rangelbl">{stop.label}</span>
         </div>
-        <span className="os-rangelbl">{stop.label}</span>
         </div>
       </div>
       {/* ⚠️ THE PADDING IS THE BODY'S, NOT THE CARD'S — the band must run edge to edge, so the
@@ -406,57 +460,42 @@ export const OneScreenChart: React.FC<{
             role="img"
             aria-label="Active queries over time. Use the arrow keys to step through each point."
             onMouseMove={onMove}
-            onMouseLeave={() => { setReading(false); blurPoint(); setPinIdx(null); }}
+            onMouseLeave={() => { setReading(false); blurPoint(); }}
             onKeyDown={onKey}
             onFocus={() => { if (focusIdx < 0 && view.length > 1) focusPoint(view.length - 1, true); }}
             onBlur={blurPoint}
           >
             {W > 0 && H > 0 && (
               <>
-                <defs>
-                  <linearGradient id="os-aqg" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stopColor="#8a9e88" stopOpacity=".26" />
-                    <stop offset="1" stopColor="#8a9e88" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                {/* the only scale furniture: axis lo and hi, faint mono, left edge (§3) */}
-                <text className="os-ylab" x={3} y={chartY(hi, H, lo, hi) + 3}>{hi}</text>
-                <text className="os-ylab" x={3} y={chartY(lo, H, lo, hi) + 3}>{lo}</text>
-                {/* ⚠️ THE BANDS SIT BENEATH THE LINE, AND THE GAP BETWEEN THEM IS A FACT.
-                    `active` counts every query on the board; the bands count the ones the record can
-                    place. Where a Revise & Resubmit's flip crossed a band with no date on it, the
-                    stack falls short of the line by exactly that many — visible, rather than folded
-                    into whichever band happened to be nearest. */}
-                {bandAreas.map((a) => (
-                  <path key={a.key} className="os-band" d={a.d} fill={STATE_TOKEN[a.key]} />
+                {/* ⚠️ THREE TICKS, ZERO-BASED, AND NO GRIDLINES. The ref writes `<line class="grid">`
+                    into its SVG and never gives that class a stroke, so nothing paints — the labels
+                    alone are the scale, and that is what ships here. Adding rules would be inventing
+                    furniture the design does not draw. */}
+                {ticks.map((t) => (
+                  <text key={t} className="os-ylab" x={3} y={chartY(t, H, lo, hi) + 3}>{t}</text>
                 ))}
-                <path ref={areaRef} d={`${path} L ${chartX(lastIdx, W, view.length).toFixed(1)} ${H} L ${chartX(0, W, view.length).toFixed(1)} ${H} Z`} fill="url(#os-aqg)" />
-                <path ref={lineRef} d={path} fill="none" stroke="#8a9e88" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-                {/* event pins — 20px above the line, priority over the crosshair (§3) */}
-                {view.map((w, i) => {
-                  const ev = events.get(i);
-                  if (!ev) return null;
-                  const x = chartX(i, W, view.length), y = chartY(w.active, H, lo, hi);
-                  return (
-                    <g
-                      key={w.start.toISOString()}
-                      className="os-pin"
-                      onMouseMove={(e) => e.stopPropagation()}
-                      onMouseEnter={(e) => {
-                        e.stopPropagation();
-                        blurPoint();
-                        setPinIdx(i);
-                        const pr = (e.currentTarget as SVGGElement).getBoundingClientRect();
-                        setTipAnchor({ left: pr.left, top: pr.top, width: pr.width, height: pr.height });
-                      }}
-                      onMouseLeave={() => { setPinIdx(null); setTipAnchor(null); }}
-                    >
-                      <line x1={x} x2={x} y1={y} y2={y - 17} stroke="#c9a89e" strokeWidth={1} />
-                      <circle className="hit" cx={x} cy={y - 20} r={6} fill="#f3e0d6" stroke="#7c3a2a" strokeWidth={1.4} />
-                      <circle cx={x} cy={y - 20} r={1.8} fill="#7c3a2a" />
-                    </g>
-                  );
-                })}
+                {/* ⚠️ THE STACK REACHES THE LINE. Every band carries a 1px border of its own deeper
+                    step — `STATE_ACCENT_TOKEN`, the same key as the fill, so the two cannot fall out
+                    of step — which is what separates two adjacent fills of similar value. */}
+                {bandAreas.map((a) => (
+                  <path
+                    key={a.key}
+                    className="os-band"
+                    d={a.d}
+                    fill={STATE_TOKEN[a.key]}
+                    stroke={STATE_ACCENT_TOKEN[a.key]}
+                    strokeWidth={1}
+                  />
+                ))}
+                {/* ⚠️ INK, NOT SAGE. The line was sage over a sage band and read as the band's own
+                    edge; in ink it is unambiguously a different kind of mark — the total, over the
+                    parts. It is the stack's own top edge, so it can never disagree with it. */}
+                <path ref={lineRef} d={path} fill="none" stroke="#1c130f" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                {/* ⚠️ THE EVENT PINS ARE GONE (refdiff pass, Phase 5). Two of them — "First
+                    request" and "First full" — were milestones the chart could only ever say once,
+                    and they hung burgundy rings over a line whose whole job is the shape of the
+                    stock. The offer pins said what the slate band now says continuously. What is
+                    left is one mark: where the line ends. */}
                 {/* ⚠️ ONE RESTING NODE — THE LATEST (audit P5). A node at every point was
                     defended as showing how many readings the line is drawn from; at daily grain
                     over a long range that is hundreds of rings, and the LINE stops being readable
@@ -495,8 +534,10 @@ export const OneScreenChart: React.FC<{
       <div className="os-sr" aria-live="polite">{liveText}</div>
 
       {/* ── the Form 11 popup: a week, or a pin ── */}
-      {/* ⚠️ THREE SWATCHES, NOT FOUR — the legend names what is drawn. A slate entry here would be
-          the first half of drawing a band whose members this chart's own `TERMINAL` set excludes. */}
+      {/* ⚠️ THE LEGEND NAMES WHAT IS DRAWN, AND THE FOURTH BAND IS DRAWN NOW. It appears only when
+          there is one to explain — a permanent "Offer or undecided" swatch on an account with
+          neither states a category the reader does not have. The old note here said three swatches
+          and reasoned from a slate band that did not exist; it does. */}
       {!dayOne && !sparse && (
         <div className="os-bandkey">
           {BAND_KEYS.map((k) => (
@@ -505,15 +546,16 @@ export const OneScreenChart: React.FC<{
               {BAND_LABEL[k]}
             </span>
           ))}
+          {hasUndated && (
+            <span className="os-bk">
+              <i style={{ background: STATE_TOKEN.offer }} aria-hidden="true" />
+              {UNDATED_LABEL}
+            </span>
+          )}
         </div>
       )}
       <ChartTip anchor={tipAnchor}>
-        {pinEvent ? (
-          <div className="frame pinframe">
-            <div className="fhdr pk"><span className="wkl">{pinEvent.kind} · {pinIdx !== null ? view[pinIdx].label : ""}</span></div>
-            <div className="fbd"><div className="pintext"><b>{pinEvent.who}</b> {pinEvent.text}</div></div>
-          </div>
-        ) : focusedWeek ? (
+        {focusedWeek ? (
           <div className="frame">
             <div className="fhdr"><span className="wkl">{periodLabel(effFreq, focusedWeek.label)}</span><span className="big">{focusedWeek.active}</span></div>
             <div className="fbd">

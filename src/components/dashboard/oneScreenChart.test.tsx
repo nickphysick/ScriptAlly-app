@@ -149,21 +149,40 @@ describe("the bands are drawn from the shared state colours, and there are three
     }
   });
 
-  /* ⚠️ THREE, AND THE SLATE ONE IS NOT DRAWN CONDITIONALLY — it is not drawn. An open offer is
-     TERMINAL to this chart's own ledger, so the band would have had no members to show. */
-  it("⚠️ the slate offer band is absent outright, not gated on there being offers", () => {
-    const html = render(spread);
-    expect(html).not.toContain("--state-offer");
-    expect(html).not.toContain("#d7e0e8");
-    expect(chart).not.toContain('"offer"');
+  /* ⚠️ THE FOURTH BAND EXISTS NOW, AND THE OLD NOTE HERE REASONED FROM A PREMISE THAT WAS FALSE.
+     It said an open offer is "TERMINAL to this chart's own ledger, so the band would have had no
+     members" — but `bandsAt` counts an open offer as ACTIVE and cannot place it, so it went into
+     `undated` and showed as clear air between the top band and the line, with a sentence in the
+     hover panel to explain the gap. The residual is drawn now, in the offer colour, which is what
+     makes the line the stack's own top edge. */
+  it("⚠️ the residual band is GATED on there being one, not permanent and not absent", () => {
+    /* the fixture has no unplaceable query, so no fourth swatch and no slate paint */
+    const plain = render(spread);
+    expect(plain).not.toContain("--state-offer");
+    expect((plain.match(/class="os-bk"/g) ?? []).length).toBe(3);
+    /* ⚠️ THE UNPLACEABLE CASE IS AN R&R, NOT AN OFFER, AND THAT IS WORTH KNOWING. `oneScreen`'s
+       `TERMINAL` set contains `OFFER`, so an open offer is treated as OFF the board entirely and
+       never reaches a band — a standing oddity this pack was told to report rather than change.
+       What genuinely cannot be placed is a query whose current state and last dated rung are in
+       different bands: a full went out (band `agent`) and the answer was Revise & Resubmit (band
+       `you`), with no date on the turn. */
+    const withResidual = render([...spread, q({
+      status: QueryStatus.REVISE_RESUBMIT, dateSent: daysAgo(40),
+      fullRequestedDate: daysAgo(20), fullSentDate: daysAgo(10),
+    })]);
+    expect(withResidual).toContain("--state-offer");
+    expect((withResidual.match(/class="os-bk"/g) ?? []).length).toBe(4);
   });
 
-  it("the legend names the three bands it draws, and no fourth", () => {
+  it("the legend names the bands it draws, and the fourth only when it is drawn", () => {
     const html = render(spread);
-    for (const label of ["Awaiting first response", "Material with the agent", "Your move"]) {
+    for (const label of ["Awaiting first response", "Material with the agent", "Over to you"]) {
       expect(html).toContain(label);
     }
-    expect(html).not.toContain("Offer open");
+    /* ⚠️ "OVER TO YOU", NOT "YOUR MOVE" — a legend names a category; "Your move" is the imperative
+       the app uses beside an action, and it must not leak into a description of a stock. */
+    expect(html).not.toContain("Your move");
+    expect(html).not.toContain("Offer or undecided");
     expect((html.match(/class="os-bk"/g) ?? []).length).toBe(3);
   });
 

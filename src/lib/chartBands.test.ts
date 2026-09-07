@@ -141,8 +141,12 @@ describe("the vocabulary", () => {
     expect(BAND_LABEL).toEqual({
       queried: "Awaiting first response",
       agent: "Material with the agent",
-      you: "Your move",
+      you: "Over to you",
     });
+    /* ⚠️ "OVER TO YOU", NOT "YOUR MOVE" (refdiff pass, Phase 5) — the ref's wording, and the app
+       says "Your move" in three other places as an IMPERATIVE beside an action. Here it is a
+       category on a legend, describing a stock of queries rather than telling anyone to do
+       something, so the phrasing steps back a register. */
     for (const v of Object.values(BAND_LABEL)) {
       expect(v[0], `"${v}" does not start with a capital`).toBe(v[0].toUpperCase());
     }

@@ -288,26 +288,41 @@ export const headerCounters = (queries: Query[], agents: Agent[], now: Date): He
   ];
 };
 
-/* ══════════════════════════ §3 · Y-SCALE ══════════════════════════ */
+/* ══════════════════════════ §3 · THE AXIS ══════════════════════════ */
 
 /**
- * ⚠️ THE MINIMUM SPAN IS THE POINT (§3): a dynamic axis that hugs the data makes a beginner's
- * two-to-three queries look like a cliff. Floor at 0, ~25% padding, and never a span under 5 —
- * do not "optimise" it away.
+ * ⚠️ THE AXIS IS ZERO-BASED, ALWAYS. A scale that hugs its data makes a beginner's two-to-three
+ * queries look like a cliff, and makes every flat stretch look like a crisis. This replaces the old
+ * `yScale`, whose ~25% padding and `MIN_SPAN` floor were two mechanisms doing the same job the zero
+ * floor does on its own.
+ *
+ * ⚠️ AND THE TOP IS A ROUND NUMBER, NOT THE DATA'S OWN MAXIMUM. A label reading 17 is a fact about
+ * one week; a label reading 18 is a scale. The step widens as the record does — a writer with 8
+ * queries wants a 2, one with 50 does not want twenty-five gridlines.
  */
-export const MIN_SPAN = 5;
-export const yScale = (values: number[]): { lo: number; hi: number } => {
-  let lo = Math.min(...values), hi = Math.max(...values);
-  const pad = Math.max(1, Math.round((hi - lo) * 0.25));
-  lo -= pad; hi += pad;
-  if (lo < 0) { hi += -lo; lo = 0; }
-  if (hi - lo < MIN_SPAN) {
-    const need = MIN_SPAN - (hi - lo);
-    hi += Math.ceil(need / 2);
-    lo = Math.max(0, lo - Math.floor(need / 2));
-    if (hi - lo < MIN_SPAN) hi = lo + MIN_SPAN;
-  }
-  return { lo, hi };
+export const niceStep = (v: number): number => (v <= 12 ? 2 : v <= 30 ? 4 : v <= 60 ? 10 : 20);
+
+/**
+ * The top of the axis: the next whole step ABOVE the data's maximum.
+ *
+ * ⚠️ STRICTLY ABOVE, WHICH IS WHY IT IS NOT `Math.ceil`. A record whose peak lands exactly on a step
+ * — 12 queries at a step of 2 — would otherwise get a ceiling of 12 and draw its highest point
+ * flush against the top of the frame, where it reads as clipped rather than as a maximum.
+ *
+ * ⚠️ AND IT IS THE PLOT'S CEILING AS WELL AS THE TOP LABEL. The ref keeps two numbers here — it
+ * scales the line to `max(total) + 2` and labels the axis at `nice(max(total))` — which on its own
+ * sample data puts the top label at 20 against a ceiling of 19, i.e. the label paints ABOVE the
+ * plot area and is only visible because the SVG does not clip. One number cannot do that, and
+ * "ticks at 0, half and top" is only a true description of the axis when the top tick is on it.
+ */
+export const axisTop = (max: number): number => {
+  const st = niceStep(max);
+  return Math.floor(max / st) * st + st;
+};
+
+export const axisTicks = (max: number): number[] => {
+  const top = axisTop(max);
+  return [...new Set([0, top / 2, top])];
 };
 
 /* ══════════════════════════ §3 · MONOTONE CUBIC PATH ══════════════════════════ */

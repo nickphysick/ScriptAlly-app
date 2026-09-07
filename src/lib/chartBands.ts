@@ -72,8 +72,25 @@ export type BandKey = (typeof BAND_KEYS)[number];
 export const BAND_LABEL: Record<BandKey, string> = {
   queried: "Awaiting first response",
   agent: "Material with the agent",
-  you: "Your move",
+  you: "Over to you",
 };
+
+/**
+ * ⚠️ THE FOURTH BUCKET IS LABELLED TOO, because it is DRAWN now rather than left as a gap.
+ * The chart used to plot `active` as its line and the three bands beneath it, so an unplaceable
+ * query showed as clear air between the top band and the line — honest, and unreadable: nothing on
+ * the card said what the gap was. It is a band in its own right now, in the offer colour, and it
+ * appears in the legend only when there is one to explain.
+ */
+export const UNDATED_LABEL = "Offer or undecided";
+
+/**
+ * ⚠️ THE LINE IS THIS SUM — there is no second series. `bandsAt` puts every ACTIVE query into
+ * exactly one of the four buckets, so the sum IS the active count at that instant, by construction
+ * rather than by two derivations that happen to agree. That is what makes "the bands do not add up
+ * to the line" an impossible sentence rather than a caveat the card had to carry.
+ */
+export const bandTotal = (b: BandPoint): number => b.queried + b.agent + b.you + b.undated;
 
 /** One period's closing stock, split three ways, with what the record cannot place. */
 export interface BandPoint {
