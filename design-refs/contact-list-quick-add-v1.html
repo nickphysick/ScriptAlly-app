@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ScriptAlly — quick add</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ground:#f2ede7;--paper:#fdfaf5;--ink:#1c130f;--ink-2:#4a3c34;--muted:#8b7b70;--faint:#a89a8f;
+--hair:#e4dcd2;--hair-2:#d9cfc3;--sage:#d7ddd5;--grey:#e4e1db;--shadow:0 1px 2px rgba(44,28,20,.05),0 8px 20px -12px rgba(44,28,20,.22)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:14px;-webkit-font-smoothing:antialiased;padding:30px 28px 90px}
+h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;margin:0 0 4px}
+.lede{color:var(--ink-2);margin:0 0 22px;max-width:80ch}
+h2{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin:28px 0 10px}
+.list{background:var(--paper);border:1px solid var(--hair-2);border-radius:10px;box-shadow:var(--shadow);overflow:hidden;max-width:1200px}
+.lhead,.lrow{display:grid;grid-template-columns:1.45fr 1.25fr 1.2fr .95fr 1.2fr 118px 74px;gap:16px;align-items:center;padding:12px 18px}
+.lhead{background:#f7f2ea;border-bottom:1px solid var(--hair-2)}
+.lhead span{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:500;color:var(--ink-2)}
+.lrow{border-top:1px solid var(--hair)}
+.lrow:first-of-type{border-top:0}
+.lrow:hover{background:#faf5ee}
+.nm{display:flex;align-items:center;gap:11px}
+.av{width:34px;height:34px;border-radius:50%;background:linear-gradient(150deg,#f0e9df,#e6ded2);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;flex:none}
+.nm b{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;display:block;line-height:1.2}
+.nm i{font-family:'Playfair Display',serif;font-size:12.5px;color:var(--muted);font-style:italic}
+.val{font-size:13px;color:var(--ink-2)}
+.lk{font-size:13px;color:#2f4a5e;text-decoration:underline;text-decoration-color:rgba(47,74,94,.28);text-underline-offset:2px}
+.chip{font-size:11.5px;background:#f6f1ea;border:1px solid var(--hair);border-radius:999px;padding:4px 10px;color:var(--ink-2)}
+.mono-c{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.mslots{display:flex;gap:5px}
+.mslot{width:26px;height:26px;border-radius:6px;display:grid;place-items:center;border:1px solid var(--hair);background:#fbf7f1;color:#4a3c34}
+.mslot.off{background:transparent;border-color:#ece5db;color:#cfc4b8}
+
+.gap{width:26px;height:26px;padding:0;border:1px dashed #ded2c6;border-radius:6px;background:transparent;color:#d0c4b7;display:grid;place-items:center;cursor:pointer;transition:border-color .14s,color .14s,background .14s}
+.gap svg{display:block}
+.lrow:hover .gap{border-color:#cabbac;color:#a89a8c}
+.gap:hover{border-style:solid;border-color:#241813;background:#fff;color:var(--ink)}
+.gap:focus-visible{outline:2px solid rgba(36,24,19,.45);outline-offset:2px}
+.gap.open{border-style:solid;border-color:#241813;background:#241813;color:#f6f0e8}
+.just{animation:flash 1.1s ease-out}
+@keyframes flash{0%{background:#e6ecdf}100%{background:transparent}}
+
+.pop{position:fixed;z-index:60;width:308px;background:var(--paper);border:1px solid var(--hair-2);border-radius:11px;box-shadow:0 22px 54px -18px rgba(44,28,20,.45);display:none;overflow:hidden}
+.pop.on{display:block}
+.pophead{background:var(--sage);padding:10px 14px;display:flex;align-items:baseline;gap:8px}
+.pophead b{font-family:'Playfair Display',serif;font-size:15px;font-weight:600}
+.pophead span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:#5d6b58;margin-left:auto}
+.popbody{padding:13px 14px 6px}
+.popbody label{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:5px}
+.popbody input{width:100%;background:#fff;border:1px solid var(--hair-2);border-radius:7px;padding:9px 11px;font-size:13.5px;font-family:inherit;color:var(--ink)}
+.popbody input:focus{outline:2px solid rgba(36,24,19,.4);outline-offset:1px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:12px;color:var(--muted);margin:7px 0 0;line-height:1.45}
+.hint.warn{color:#8a5a3c}
+.sugg{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.sugg button{font-size:11.5px;background:#f6f1ea;border:1px dashed var(--hair-2);border-radius:999px;padding:4px 10px;color:var(--ink-2);cursor:pointer}
+.sugg button:hover{border-style:solid;border-color:var(--ink-2);background:#fff}
+.picked{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.picked span{font-size:11.5px;background:#eef0ea;border:1px solid #d5dbd3;border-radius:999px;padding:4px 9px;color:#3f5a3c;display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+.popfoot{padding:10px 14px;border-top:1px solid var(--hair);display:flex;align-items:center;gap:8px;background:#f9f4ed}
+.kbd{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+.bsave{background:#241813;color:#f6f0e8;border:0;border-radius:999px;padding:7px 14px;font-size:12.5px;cursor:pointer}
+.bghost{background:transparent;border:1px solid var(--hair-2);border-radius:999px;padding:7px 12px;font-size:12.5px;color:var(--ink-2);cursor:pointer}
+.escal{padding:13px 14px;font-size:13px;color:var(--ink-2);line-height:1.5}
+.escal button{margin-top:10px}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;max-width:1200px}
+.card{background:var(--paper);border:1px solid var(--hair-2);border-radius:10px;box-shadow:var(--shadow);overflow:hidden}
+.cband{background:var(--sage);padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2)}
+.cbody{padding:13px 15px}
+.cbody h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin:0}
+.cbody .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:var(--ink-2);margin:1px 0 7px}
+.cmeta{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.csec{margin-top:11px;padding-top:9px;border-top:1px solid var(--hair)}
+.csec .mono-c{display:block;margin-bottom:6px}
+.cempty{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:var(--faint);margin:0}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);background:#241813;color:#f4ece1;padding:10px 18px;border-radius:999px;font-size:13px;opacity:0;transition:.22s;z-index:80;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+
+<h1>Quick add</h1>
+<p class="lede">Every empty cell is a dashed slot — the same idiom as the ghosted material slots — and every slot opens the same small editor anchored to it. Type, press <strong>Enter</strong> to save, <strong>Tab</strong> to save and jump to the next gap in the row, <strong>Esc</strong> to abandon. The cards below are the same records — watch them fill in as you type, because there is only one store and the popover writes to it through the same path the drawer uses.</p>
+
+<div class="list" id="L"></div>
+
+<h2>The same six records, in card view</h2>
+<div class="cards" id="C"></div>
+
+<div class="pop" id="pop"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const A=[
+ {i:"AK",n:"Aisha Kapoor",ag:"The Lantern Agency",email:"aisha@lanternagency.co.uk",site:"lanternagency.co.uk",city:"Bristol",country:"United Kingdom",genres:[],wks:6,mats:[1,1,1],mswl:""},
+ {i:"DO",n:"Daniel O'Rourke",ag:"Inkwell & Stone",email:"",site:"inkwellandstone.com",city:"",country:"",genres:[],wks:6,mats:[1,0,1],mswl:""},
+ {i:"EW",n:"Eleanor Whitfield",ag:"Greenfield Literary",email:"",site:"",city:"",country:"",genres:[],wks:4,mats:[1,1,1],mswl:""},
+ {i:"FS",n:"Fenella Str",ag:"Brightwater Books",email:"fenella@brightwater.com",site:"",city:"",country:"",genres:["Historical fiction","Romance"],wks:6,mats:[0,0,0],mswl:""},
+ {i:"GP",n:"Greg Panetta",ag:"",email:"",site:"",city:"",country:"",genres:[],wks:6,mats:[1,1,0],mswl:""},
+ {i:"HV",n:"Harriet Vane-Coe",ag:"Stillwater Reps",email:"",site:"",city:"",country:"",genres:[],wks:6,mats:[1,1,1],mswl:""}
+];
+A.forEach((a,n)=>a.id=n);
+const FLAG={"United Kingdom":"🇬🇧","Ireland":"🇮🇪","United States":"🇺🇸"};
+const GENRES=["Crime","Thriller","Literary fiction","Historical fiction","Romance","Sci-fi","Speculative fiction","Book club fiction","Commercial fiction","Saga","Horror"];
+const ICON={mail:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.6 6.4 8.4 6 8.4-6"/></svg>',
+ doc:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h6"/></svg>',
+ book:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.5 5 8 4.5 4 4.8v13c4-.3 6.5.2 8 1.7 1.5-1.5 4-2 8-1.7v-13c-4-.3-6.5.2-8 1.7z"/><path d="M12 6.5v13"/></svg>'};
+
+const FIELDS={
+  email:{label:"Email",ph:"name@agency.co.uk",order:0},
+  site:{label:"Submissions page",ph:"agency.co.uk/submissions",order:1},
+  loc:{label:"Location",order:2},
+  genres:{label:"Genres sought",order:3}
+};
+let open=null, draft=null, justSaved=null;
+
+/* the single write path — every surface reads from A, nothing keeps its own copy */
+function updateAgent(id,diff){
+  Object.assign(A.find(a=>a.id===id),diff);
+  paint();
+}
+
+const PLUS='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+function gapBtn(id,field){return `<button class="gap${open&&open.id===id&&open.field===field?' open':''}" data-id="${id}" data-field="${field}" aria-label="Add ${FIELDS[field].label.toLowerCase()}">${PLUS}</button>`}
+const flash=(id,f)=>justSaved&&justSaved.id===id&&justSaved.field===f?" just":"";
+
+function listHTML(){
+  return `<div class="lhead"><span>Agent</span><span>Email</span><span>Submissions page</span><span>Location</span><span>Genres sought</span><span>Materials</span><span>Response</span></div>`+
+  A.map(a=>`<div class="lrow">
+    <div class="nm"><span class="av">${a.i}</span><span><b>${a.n}</b><i>${a.ag||"Agent not specified"}</i></span></div>
+    <div class="${flash(a.id,'email')}">${a.email?`<span class="val">${a.email}</span>`:gapBtn(a.id,"email")}</div>
+    <div class="${flash(a.id,'site')}">${a.site?`<span class="lk">${a.site}</span>`:gapBtn(a.id,"site")}</div>
+    <div class="${flash(a.id,'loc')}">${a.city?`<span class="val">${FLAG[a.country]||""} ${a.city}</span>`:gapBtn(a.id,"loc")}</div>
+    <div class="${flash(a.id,'genres')}">${a.genres.length?a.genres.slice(0,2).map(g=>`<span class="chip">${g}</span>`).join(" "):gapBtn(a.id,"genres")}</div>
+    <div class="mslots">${["mail","doc","book"].map((k,n)=>`<span class="mslot ${a.mats[n]?"":"off"}">${ICON[k]}</span>`).join("")}</div>
+    <div class="mono-c">~${a.wks} wks</div>
+  </div>`).join("");
+}
+function cardsHTML(){
+  return A.map(a=>`<div class="card"><div class="cband">Open to queries</div><div class="cbody">
+    <h3>${a.n}</h3><p class="ag">${a.ag||"Agent not specified"}</p>
+    <span class="cmeta">${a.city?`${FLAG[a.country]||"🏳️"} ${a.city} · `:""}replies in about ${a.wks} weeks</span>
+    <div class="csec"><span class="mono-c">Genres sought</span>
+      ${a.genres.length?`<div style="display:flex;flex-wrap:wrap;gap:6px">${a.genres.map(g=>`<span class="chip">${g}</span>`).join("")}</div>`:`<p class="cempty">Nothing recorded — check their site.</p>`}</div>
+  </div></div>`).join("");
+}
+function paint(){document.getElementById("L").innerHTML=listHTML();document.getElementById("C").innerHTML=cardsHTML()}
+
+/* ---- popover ---- */
+function popHTML(a,field){
+  const f=FIELDS[field];
+  if(field==="loc"){
+    return head(a,f)+`<div class="popbody">
+      <div class="two"><div><label>City</label><input id="in1" value="${draft.city||""}" placeholder="London"></div>
+      <div><label>Country</label><input id="in2" value="${draft.country||""}" placeholder="United Kingdom"></div></div>
+      <p class="hint">The flag comes from the country.</p></div>`+foot();
+  }
+  if(field==="genres"){
+    return head(a,f)+`<div class="popbody">
+      ${draft.genres.length?`<div class="picked">${draft.genres.map(g=>`<span data-drop="${g}">${g} ×</span>`).join("")}</div>`:""}
+      <label>Add a genre</label><input id="in1" placeholder="Start typing…" autocomplete="off">
+      <div class="sugg">${GENRES.filter(g=>!draft.genres.includes(g)).slice(0,6).map(g=>`<button data-pick="${g}">${g}</button>`).join("")}</div></div>`+foot();
+  }
+  const val=draft.value||"";
+  const warn=field==="email"&&val&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val)?`<p class="hint warn">That doesn't look like an email address. You can save it anyway.</p>`
+    :field==="site"&&val&&!/^https?:\/\//i.test(val)&&val.includes(" ")?`<p class="hint warn">Addresses don't contain spaces.</p>`
+    :field==="site"?`<p class="hint">Saved as https:// if you leave the prefix off.</p>`:"";
+  return head(a,f)+`<div class="popbody"><label>${f.label}</label>
+    <input id="in1" value="${val}" placeholder="${f.ph}">${warn}</div>`+foot();
+}
+const head=(a,f)=>`<div class="pophead"><b>${a.n.split(" ")[0]}</b><span>${f.label}</span></div>`;
+const foot=()=>`<div class="popfoot"><button class="bsave" data-act="save">Save</button><button class="bghost" data-act="cancel">Cancel</button>
+  <span style="flex:1"></span><span class="kbd">↵ save · ⇥ next · esc</span></div>`;
+
+function openPop(btn){
+  const id=+btn.dataset.id, field=btn.dataset.field, a=A.find(x=>x.id===id);
+  open={id,field};
+  draft=field==="loc"?{city:a.city,country:a.country}:field==="genres"?{genres:[...a.genres]}:{value:a[field]||""};
+  const p=document.getElementById("pop");
+  p.innerHTML=popHTML(a,field);p.classList.add("on");
+  const r=btn.getBoundingClientRect();
+  p.style.top=Math.min(r.bottom+8,window.innerHeight-p.offsetHeight-12)+"px";
+  p.style.left=Math.max(12,Math.min(r.left-10,window.innerWidth-320))+"px";
+  paint();
+  setTimeout(()=>document.getElementById("in1")?.focus(),0);
+}
+function closePop(){open=null;draft=null;document.getElementById("pop").classList.remove("on");paint()}
+function save(next){
+  if(!open)return;
+  const {id,field}=open, a=A.find(x=>x.id===id);
+  let diff=null;
+  if(field==="loc"){const c=document.getElementById("in1").value.trim(),co=document.getElementById("in2").value.trim();
+    if(c||co)diff={city:c,country:co||"United Kingdom"}}
+  else if(field==="genres"){if(draft.genres.length)diff={genres:draft.genres}}
+  else{let v=document.getElementById("in1").value.trim();
+    if(field==="site"&&v&&!/^https?:\/\//i.test(v))v=v.replace(/^\/+/,"");
+    if(v)diff={[field]:v}}
+  if(diff){updateAgent(id,diff);justSaved={id,field};toast(`${FIELDS[field].label} saved for ${a.n.split(" ")[0]}`);
+    setTimeout(()=>{justSaved=null;paint()},1200)}
+  closePop();
+  if(next){const row=[...document.querySelectorAll(`.gap[data-id="${id}"]`)];if(row.length)openPop(row[0])}
+}
+document.addEventListener("click",e=>{
+  const g=e.target.closest(".gap");
+  if(g){e.stopPropagation();open&&open.id===+g.dataset.id&&open.field===g.dataset.field?closePop():openPop(g);return}
+  const act=e.target.closest("[data-act]");
+  if(act){act.dataset.act==="save"?save(false):closePop();return}
+  const pick=e.target.closest("[data-pick]");
+  if(pick){draft.genres.push(pick.dataset.pick);refresh();return}
+  const drop=e.target.closest("[data-drop]");
+  if(drop){draft.genres=draft.genres.filter(g=>g!==drop.dataset.drop);refresh();return}
+  if(open&&!e.target.closest("#pop"))closePop();
+});
+function refresh(){const a=A.find(x=>x.id===open.id);const p=document.getElementById("pop");
+  p.innerHTML=popHTML(a,open.field);setTimeout(()=>document.getElementById("in1")?.focus(),0)}
+document.addEventListener("input",e=>{
+  if(!open||e.target.id!=="in1")return;
+  if(open.field==="genres")return;
+  if(open.field==="loc"){draft.city=document.getElementById("in1").value;return}
+  draft.value=e.target.value;
+  const p=document.getElementById("pop"),pos=e.target.selectionStart,a=A.find(x=>x.id===open.id);
+  p.innerHTML=popHTML(a,open.field);
+  const i=document.getElementById("in1");i.focus();i.setSelectionRange(pos,pos);
+});
+document.addEventListener("keydown",e=>{
+  if(!open)return;
+  if(e.key==="Escape"){e.preventDefault();closePop()}
+  if(e.key==="Enter"){e.preventDefault();save(false)}
+  if(e.key==="Tab"){e.preventDefault();save(true)}
+});
+let tt;function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),1700)}
+paint();
+</script>
+</body>
+</html>
