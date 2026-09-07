@@ -2,7 +2,7 @@
 
 Run of 5–7 Sep 2026. Refs: `query-toolbar-v2-locked.html` (`294f36bb…`), `query-list-headers-v2-mono-locked.html` (`e1ac7bd0…`, §3), `query-quick-actions-v2.html` (`8179ba84…`, §4) — all three verified and the two new ones enrolled in `.refhashes.json`.
 
-**§1 and §2 landed 6 Sep (`03deb076`). §3 was rebuilt to the mono ref (`838a121f`). §4 is built and committed (`7ccd7367`) except its third anchor. §5 has not run.**
+**All five sections are in.** §1/§2 `03deb076` · §3 `838a121f` · §4 `7ccd7367` · the third anchor `24cac905` · §5 this commit.
 
 ---
 
@@ -72,7 +72,9 @@ Empty groups are omitted; headings are not sticky. **List reuses `groupLabelFor`
 
 ---
 
-## §3 · The list header (accepted 5 Sep)
+## ~~§3 · The list header, Playfair~~ — SUPERSEDED by the mono rebuild below
+
+*Kept as history. The section that replaces it is "§3 rebuilt" further down; the Playfair choice was withdrawn because it competed with the Playfair agent names beneath it.*
 
 Playfair 14px on parchment over a `1px #ddd2c4` rule; `#6a5a50` muted, ink on hover, ink + burgundy caret on the sorted column; Actions right-aligned and inert. **The headers drive the same `sortKey`/`sortDir` state the Sort menu does** — one sort, two faces.
 
@@ -80,7 +82,9 @@ Playfair 14px on parchment over a `1px #ddd2c4` rule; `#6a5a50` muted, ink on ho
 
 ---
 
-## §4 · Measured at 1440 · `tests/e2e/queryViews.measure.ts` → `toolbar v2`
+## Previous run · measured at 1440
+
+*This was numbered §4 in the earlier brief, before the quick actions took that number.*
 
 | reading | value |
 |---|---|
@@ -114,7 +118,7 @@ Measurement worktree `/Users/nickphysick/ScriptAlly-tb` at `03deb076`, `vite pre
 
 ---
 
-## Flags
+### Flags from the §1/§2 run
 
 1. **`onSetSendDate` is only wired in the dead browsing branch.** Either the date editor should be reachable from the live drawer, or that branch and its caller should go. Not this run's call — but it means `F12Popover` currently has **three** live callers, not four.
 2. **`needsTasks` is gone.** It had no setter outside the deleted popover. If a "needs tasks" filter is wanted, it needs a control as well as a predicate.
@@ -167,12 +171,58 @@ The caret is now always mounted and opacity-stepped (0 / .4 hover / 1 sorted) ra
 
 ---
 
-## What is NOT done
+## §5 · Measured
 
-1. **§4.2's third anchor — the dotted reminder phrase** (`Nudge in 4 weeks` in the list caption and the drawer's tray) does not open the popover. The other two anchors do, so the three-anchor identical-copy claim is proved for two of three. The caption is plain text built in `queryCardFacts`, so making it a control is a real change rather than a wiring line.
-2. **§5 in full** — no shots, and the four red-then-green proofs the brief lists are done for two (§2's heading count from the previous run, §3's shared sort state from the previous run, §3's alignment and §4's no-drawer this run); the rendered alignment assertion at 1280/1440/1920 and the header/column offset proof still need the harness.
+`tests/e2e/queryViews.measure.ts` → `toolbar v2`, `§5 · quick actions`, `§5 · the header sits on its columns`. Four cases, all green, against a dev build of `24cac905` served from a worktree preview bound to `127.0.0.1`.
 
-## Flags
+**The header sits on its columns — every column, three widths.**
+
+| width | Δ, worst column | Actions |
+|---|---|---|
+| 1280 | **0.00px** | `justify-content: start` |
+| 1440 | **0.00px** | `start` |
+| 1920 | **0.00px** | `start` |
+
+Seven header cells against seven row cells at each width, not a sample — the fault this replaces moved *all* of them by one padding value. `.qlv-bar` (the 4px state accent, absolutely positioned) is excluded **by name and the exclusion counted**, because filtering to "the first seven" would silently drop a real column the day one is added.
+
+**The quick actions — three anchors, one copy, nothing behind them.**
+
+| reading | value |
+|---|---|
+| list bell → popover | title `Snooze the nudge`, framed, dial present |
+| drawer open? | **0** · desk open? **0** · route unchanged · selection unchanged |
+| list cross → popover | `Close this query`, reasons exactly `They passed` · `I withdrew it` · `No reply — gone quiet` |
+| copy from all three anchors | **byte-identical `innerText`** |
+| dial axis marks | `1D · 1W · 1M · 3M` |
+
+The axis marks are the proof that it is **the To-do dial rather than a four-stop re-roll**: they come from `SNOOZE_STOPS`' own `axis` field, and 4 and 8 weeks are not stops in that table at all. Reading rendered ticks is what separates "imported the component" from "reimplemented it with the import sitting unused".
+
+Identical `innerText` from three different controls is a claim only the composition can satisfy — three components with the same words would pass a per-anchor check and fail this the moment one was edited. A floor on the length is asserted too, since three empty strings are also identical.
+
+**Red-then-green — all four the brief lists:**
+
+| claim | mutation | result |
+|---|---|---|
+| §2 heading count | List reverted to `rows.map(row)` with bucketing intact | `headings: 0` against Grid's 10 *(previous run)* |
+| §3 shared sort state | header's `onSort` pointed at a local `useState` | caret moved, Sort menu stayed at `Last activity` *(previous run)* |
+| §3 header/column alignment | header `padding-left: 26px → 30px` | **red by exactly 4px at 1440** — the original fault's own magnitude |
+| §4 no-drawer rule | snooze branch also calls `setSelectedQueryId` / `onOpenQuery` | **red on the route**: `/queries?q=seed-cal-soon-q&view=list` |
+
+The alignment mutation bit at 1440 and not 1280 — the narrow media query's shared rule is later in the file and overrode it — so the case found it at the width where it applied.
+
+**Shots at 1440** in `reports/query-toolbar-shots/`: the three menus open, Grid and List grouped by Status, the Board with Group muted, the header sorted both ways, snooze from all three anchors, close from a list row.
+
+### Two assertions from §4's list are proved at source and NOT on the page
+
+*"a snooze writes no activity … a close writes exactly one activity."* Both are locked over the write bodies — no activity primitive is reachable from `commitQuickSnooze`, and `commitClose` holds exactly one `recordQueryResponse` while the desk's save holds none. **They are not measured on the rendered page, because both mutate the shared harness account** and this repo has already paid for a writing measurement that failed to put one back. Doing them properly means a commit-then-undo with nothing navigating in between; that is real harness work rather than a line, and it is the honest next step for anyone who wants the rendered proof.
+
+### And two things worth recording from the harness itself
+
+The date-editor probe used to die with a stack trace when it could not reach its control. Every path through it now returns a **reason** — this run's was `no in-place date control on the send rung`. The reason varies with the drawer's state and every one agrees on `reachable: false`, which is the claim. But a synchronous `count()` straight after the click reported *"the card did not open the drawer"* about a drawer that opens perfectly, and **I nearly wrote that down as a regression**: a precondition still has to be stated about a *settled* page.
+
+And writing this very section hit **the first-match slicing trap this file already documents.** The report has two `## Flags` headings; `index("## Flags")` found the earlier one, so the slice ran backwards, came out empty, and `str.replace("", …)` inserted the new block between every character in the file — 73MB, 846,000 lines. Restored by path (`git show HEAD:… >`) rather than a checkout, and redone line-based with a guard that refuses an empty or suspiciously small slice. **The tell was the line count, not the diff** — which is the same lesson as verifying a removal against the post-edit file.
+
+## Flags — current
 
 1. **The gate was red from another session's WIP throughout.** `AgentList.tsx` is mid-refactor (`groupAgents`/`AgentGrouping` unwritten), so the shared tree's `tsc` fails. Provenance established by reading — every error names their file, none names mine — and my files were typechecked clean over a HEAD worktree instead. Nothing of theirs was moved or staged.
 2. **`Mark closed` became `Close`** in the drawer, per §4.5's verb list. Two locks named the old label and were retargeted.

@@ -1,0 +1,131 @@
+{
+  "align-1280": {
+    "cols": 7,
+    "rowCols": 7,
+    "dropped": 1,
+    "lefts": [
+      {
+        "label": "Status▲",
+        "head": 304,
+        "cell": 304
+      },
+      {
+        "label": "Agent▲",
+        "head": 464,
+        "cell": 464
+      },
+      {
+        "label": "Sent▲",
+        "head": 558.33,
+        "cell": 558.33
+      },
+      {
+        "label": "What went",
+        "head": 630.33,
+        "cell": 630.33
+      },
+      {
+        "label": "Since then",
+        "head": 736.33,
+        "cell": 736.33
+      },
+      {
+        "label": "Where it stands▲",
+        "head": 854.33,
+        "cell": 854.33
+      },
+      {
+        "label": "Actions",
+        "head": 963.98,
+        "cell": 963.98
+      }
+    ],
+    "actsJustify": "start"
+  },
+  "align-1440": {
+    "cols": 7,
+    "rowCols": 7,
+    "dropped": 1,
+    "lefts": [
+      {
+        "label": "Status▲",
+        "head": 308,
+        "cell": 308
+      },
+      {
+        "label": "Agent▲",
+        "head": 492,
+        "cell": 492
+      },
+      {
+        "label": "Sent▲",
+        "head": 618.72,
+        "cell": 618.72
+      },
+      {
+        "label": "What went",
+        "head": 706.72,
+        "cell": 706.72
+      },
+      {
+        "label": "Since then",
+        "head": 828.72,
+        "cell": 828.72
+      },
+      {
+        "label": "Where it stands▲",
+        "head": 974.72,
+        "cell": 974.72
+      },
+      {
+        "label": "Actions",
+        "head": 1124,
+        "cell": 1124
+      }
+    ],
+    "actsJustify": "start"
+  },
+  "align-1920": {
+    "cols": 7,
+    "rowCols": 7,
+    "dropped": 1,
+    "lefts": [
+      {
+        "label": "Status▲",
+        "head": 308,
+        "cell": 308
+      },
+      {
+        "label": "Agent▲",
+        "head": 492,
+        "cell": 492
+      },
+      {
+        "label": "Sent▲",
+        "head": 836.91,
+        "cell": 836.91
+      },
+      {
+        "label": "What went",
+        "head": 924.91,
+        "cell": 924.91
+      },
+      {
+        "label": "Since then",
+        "head": 1046.91,
+        "cell": 1046.91
+      },
+      {
+        "label": "Where it stands▲",
+        "head": 1192.91,
+        "cell": 1192.91
+      },
+      {
+        "label": "Actions",
+        "head": 1603.98,
+        "cell": 1603.98
+      }
+    ],
+    "actsJustify": "start"
+  }
+}

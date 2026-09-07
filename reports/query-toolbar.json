@@ -86,6 +86,7 @@
     "menu": "Date sent"
   },
   "tb-date-editor": {
-    "reachable": false
+    "reachable": false,
+    "stopped": "no in-place date control on the send rung"
   }
 }

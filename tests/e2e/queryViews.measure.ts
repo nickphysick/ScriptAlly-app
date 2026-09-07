@@ -336,13 +336,36 @@ test("toolbar v2 · the three menus, Group on Grid and List, the board's disable
    */
   const dateStyles = async () => {
     /* the date editor opens off the send rung's own date control, inside the drawer */
-    await page.locator('[data-qcc-id="cor-move-b"]').click();
-    await expect(page.locator(".qpn[data-on='true']")).toBeVisible({ timeout: 15_000 });
+    /* ⚠️ EVERY STEP STATES ITS PRECONDITION AND RETURNS A READING RATHER THAN THROWING. This
+       helper's whole job is to answer "can the fourth caller be reached", and a crash on the way
+       there answers it with a line number instead of with a reason — the crashing-lock fault this
+       repo records, where a throw and an honest failure look identical in a run summary. */
+    const card = page.locator('[data-qcc-id="cor-move-b"]');
+    if (!(await card.count())) return { reachable: false as const, stopped: "no cor-move-b card in the grid" };
+    await card.click();
+    /* ⚠️ WAIT, DO NOT COUNT. A synchronous `count()` straight after the click reads the DOM before
+       React has re-rendered, so it reports "the card did not open the drawer" about a drawer that
+       opens perfectly — a false regression I nearly wrote down. The precondition is still stated;
+       it just has to be stated about a settled page. */
+    const drawer = page.locator(".qpn[data-on='true']");
+    try {
+      await expect(drawer).toBeVisible({ timeout: 15_000 });
+    } catch {
+      return { reachable: false as const, stopped: "the card did not open the drawer" };
+    }
     await page.locator(".qpn-tab", { hasText: "Tracking" }).click();
     const trig = page.locator(".qpn .tl-r1 .qp-inplace").first();
-    if (!(await trig.count())) return { reachable: false as const };
+    if (!(await trig.count())) return { reachable: false as const, stopped: "no in-place date control on the send rung" };
     await trig.click();
-    await expect(page.locator(".f12-pop")).toBeVisible({ timeout: 10_000 });
+    /* ⚠️ AND THIS ONE STATES ITS REASON TOO. `.qp-inplace` on the send rung is the SEND-METHOD
+       editor, not the date; the date's `onSetSendDate` is wired only inside the retired browsing
+       branch. So finding a control here is not the same as reaching the date editor, and the
+       honest reading when no popover follows is "not reachable", not a stack trace. */
+    try {
+      await expect(page.locator(".f12-pop")).toBeVisible({ timeout: 10_000 });
+    } catch {
+      return { reachable: false as const, stopped: "the in-place control opened no F12 popover" };
+    }
     const read = await page.evaluate(() => {
       const pop = document.querySelector<HTMLElement>(".f12-pop")!;
       const cs = getComputedStyle(pop);
@@ -504,4 +527,184 @@ test("toolbar v2 · the three menus, Group on Grid and List, the board's disable
     expect(after.reachable, "the date editor is reachable now — measure its chassis here rather than trusting the source lock").toBe(false);
   }
   writeFileSync("reports/query-toolbar.json", JSON.stringify(out, null, 2));
+});
+
+/* ══ §5 · the quick actions, and the header sitting on its columns ════════════════════════════ */
+
+/** the visible list grid — three pages mount `.wpg`, and the workspace keeps them all alive */
+const tagLiveList = async (page: import("@playwright/test").Page) =>
+  page.evaluate(() => {
+    const live = [...document.querySelectorAll<HTMLElement>(".qlv")].find((e) => e.getBoundingClientRect().height > 0);
+    if (!live) throw new Error("no visible .qlv — the list view is not showing");
+    live.setAttribute("data-qlv-live", "1");
+    return true;
+  });
+
+test("§5 · quick actions — three anchors, one copy, and no drawer behind them — 1440", async ({ page }) => {
+  const SHOTS = "reports/query-toolbar-shots";
+  mkdirSync(SHOTS, { recursive: true });
+  const out: Record<string, unknown> = {};
+  await openQC(page, 1440);
+  await pickView(page, "List");
+  await tagLiveList(page);
+
+  /* ── anchor 1 · a list row's bell ── */
+  const bell = page.locator('[data-qlv-live] .qlv-row button[aria-label="Snooze the nudge"]:visible').first();
+  await expect(bell, "no snooze control on any visible row").toBeVisible({ timeout: 15_000 });
+
+  /* ⚠️ THE PRECONDITION FIRST — a "the drawer did not open" assertion is worth nothing if the
+     drawer was already open, and worth nothing again if the row was already selected. */
+  const before = await page.evaluate(() => ({
+    drawer: document.querySelectorAll(".qpn").length,
+    selected: document.querySelectorAll("[data-qlv-live] .qlv-row--on").length,
+    route: location.pathname + location.search,
+  }));
+  expect(before.drawer, "a drawer was already open — the no-drawer claim would be vacuous").toBe(0);
+
+  await bell.click();
+  await expect(page.locator(".f12-pop--mount")).toBeVisible({ timeout: 10_000 });
+
+  const fromList = await page.evaluate(() => {
+    const pop = document.querySelector<HTMLElement>(".f12-pop--mount")!;
+    return {
+      text: (pop.innerText || "").trim(),
+      title: pop.querySelector<HTMLElement>(".f12-pop-bt")?.textContent ?? "",
+      hasFrame: !!pop.querySelector(".f12-pop-frame"),
+      hasDial: !!pop.querySelector("input[type=range]"),
+      /* the section's whole claim, as an absence */
+      drawer: document.querySelectorAll(".qpn").length,
+      desk: document.querySelectorAll(".qcd, .qcd-verb").length,
+      selected: document.querySelectorAll("[data-qlv-live] .qlv-row--on").length,
+      route: location.pathname + location.search,
+    };
+  });
+  out["qa-list-snooze"] = fromList;
+  expect(fromList.title, "the list's bell opened something else").toBe("Snooze the nudge");
+  expect(fromList.hasFrame, "the popover is not on the toolbar's chassis").toBe(true);
+  expect(fromList.hasDial, "the To-do dial did not come with it").toBe(true);
+  /**
+   * ⚠️ AND IT IS THE TO-DO DIAL RATHER THAN A FOUR-STOP RE-ROLL, proved by the axis labels. Those
+   * come from `SNOOZE_STOPS`' own `axis` field — 1D · 1W · 1M · 3M — which a dial built to the
+   * brief's "1 week · 2 weeks · 4 weeks · 8 weeks" could not produce: 4 and 8 weeks are not stops
+   * in the shared table at all. Reading the RENDERED ticks is what separates "imported the
+   * component" from "reimplemented it with the same import sitting unused".
+   */
+  const ticks = fromList.text.split("\n").map((l) => l.trim()).filter(Boolean);
+  out["qa-dial-axis"] = ticks;
+  for (const a of ["1D", "1W", "1M", "3M"])
+    expect(ticks, `the dial is missing the shared table's ${a} axis mark`).toContain(a);
+  expect(fromList.drawer, "snooze opened the drawer").toBe(0);
+  expect(fromList.desk, "snooze opened the desk").toBe(0);
+  expect(fromList.route, "snooze changed the route").toBe(before.route);
+  expect(fromList.selected, "snooze changed the row's selection").toBe(before.selected);
+  await page.screenshot({ path: `${SHOTS}/qa-snooze-list-1440.png` });
+  await page.keyboard.press("Escape");
+
+  /* ── the close popover, same row, same rules ── */
+  const cross = page.locator('[data-qlv-live] .qlv-row button[aria-label="Mark closed"]:visible').first();
+  await cross.click();
+  await expect(page.locator(".f12-pop--mount")).toBeVisible({ timeout: 10_000 });
+  const closeRead = await page.evaluate(() => {
+    const pop = document.querySelector<HTMLElement>(".f12-pop--mount")!;
+    return {
+      title: pop.querySelector<HTMLElement>(".f12-pop-bt")?.textContent ?? "",
+      /* the label's OWN text nodes — `textContent` would carry the grey mark's glyph too, and the
+         claim is about the words rather than about the dot beside them */
+      reasons: [...pop.querySelectorAll(".qa-opt")].map((e) =>
+        [...e.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent || "").join("").trim()),
+      drawer: document.querySelectorAll(".qpn").length,
+      desk: document.querySelectorAll(".qcd, .qcd-verb").length,
+      route: location.pathname + location.search,
+    };
+  });
+  out["qa-list-close"] = closeRead;
+  expect(closeRead.title).toBe("Close this query");
+  expect(closeRead.reasons.slice(0, 3)).toEqual(["They passed", "I withdrew it", "No reply — gone quiet"]);
+  expect(closeRead.drawer, "close opened the drawer").toBe(0);
+  expect(closeRead.desk, "close opened the desk").toBe(0);
+  expect(closeRead.route).toBe(before.route);
+  await page.screenshot({ path: `${SHOTS}/qa-close-list-1440.png` });
+  await page.keyboard.press("Escape");
+
+  /* ── anchors 2 and 3 · inside the drawer, where opening it IS the point ── */
+  await page.locator('[data-qlv-live] .qlv-row').first().click();
+  await expect(page.locator(".qpn[data-on='true']")).toBeVisible({ timeout: 15_000 });
+
+  const verbSnooze = page.locator(".qpn .qpn-verbs button", { hasText: /^Snooze$/ });
+  await expect(verbSnooze, "the drawer's verb row has no Snooze").toBeVisible({ timeout: 10_000 });
+  await verbSnooze.click();
+  await expect(page.locator(".f12-pop--mount")).toBeVisible({ timeout: 10_000 });
+  const fromVerb = await page.evaluate(() => (document.querySelector<HTMLElement>(".f12-pop--mount")!.innerText || "").trim());
+  out["qa-verb-snooze"] = { text: fromVerb };
+  await page.screenshot({ path: `${SHOTS}/qa-snooze-verb-1440.png` });
+  await page.keyboard.press("Escape");
+
+  const dotted = page.locator(".qpn .qpn-snz");
+  await expect(dotted, "the drawer's tray states no reminder clause").toBeVisible({ timeout: 10_000 });
+  await dotted.click();
+  await expect(page.locator(".f12-pop--mount")).toBeVisible({ timeout: 10_000 });
+  const fromPhrase = await page.evaluate(() => (document.querySelector<HTMLElement>(".f12-pop--mount")!.innerText || "").trim());
+  out["qa-phrase-snooze"] = { text: fromPhrase };
+  await page.screenshot({ path: `${SHOTS}/qa-snooze-phrase-1440.png` });
+  await page.keyboard.press("Escape");
+
+  /**
+   * ⚠️ THE COPY LAW, MEASURED ON THE RENDERED TEXT rather than on three specs each checking its
+   * own strings. Identical `innerText` from three different controls is a claim only the
+   * composition can satisfy — three components with the same words would pass a per-anchor check
+   * and fail this the moment one of them was edited.
+   */
+  out["qa-copy-identical"] = { list: fromList.text, verb: fromVerb, phrase: fromPhrase };
+  expect(fromVerb, "the drawer's verb and the list's bell say different things").toBe(fromList.text);
+  expect(fromPhrase, "the dotted phrase and the list's bell say different things").toBe(fromList.text);
+  expect(fromList.text.length, "the popover rendered nothing — three empties are also identical").toBeGreaterThan(40);
+
+  writeFileSync("reports/query-toolbar-s5.json", JSON.stringify(out, null, 2));
+});
+
+test("§5 · the header sits on its columns — 1280 · 1440 · 1920", async ({ page }) => {
+  const out: Record<string, unknown> = {};
+  for (const width of [1280, 1440, 1920]) {
+    await openQC(page, width);
+    await pickView(page, "List");
+    await tagLiveList(page);
+    await expect(page.locator("[data-qlv-live] .qlv-row").first()).toBeVisible({ timeout: 15_000 });
+
+    const read = await page.evaluate(() => {
+      const grid = document.querySelector<HTMLElement>("[data-qlv-live]")!;
+      const head = grid.querySelector<HTMLElement>(".qlv-head")!;
+      const row = grid.querySelector<HTMLElement>(".qlv-row")!;
+      const hs = [...head.children] as HTMLElement[];
+      /* ⚠️ `.qlv-bar` IS NOT A COLUMN — it is the row's 4px state accent, absolutely positioned,
+         so it takes no grid slot. Excluded BY NAME and the exclusion counted, because filtering
+         to "the first seven" would silently drop a real column the day one is added. */
+      const all = [...row.children] as HTMLElement[];
+      const rs = all.filter((e) => !e.classList.contains("qlv-bar"));
+      return {
+        cols: hs.length, rowCols: rs.length, dropped: all.length - rs.length,
+        lefts: hs.map((h, i) => ({
+          label: (h.textContent || "").trim().slice(0, 18),
+          head: Math.round(h.getBoundingClientRect().left * 100) / 100,
+          cell: rs[i] ? Math.round(rs[i].getBoundingClientRect().left * 100) / 100 : null,
+        })),
+        /* §4.1 — Actions joins the other six rather than hanging off the right edge */
+        actsJustify: getComputedStyle(grid.querySelector<HTMLElement>(".qlv-acts")!).justifyContent,
+      };
+    });
+    out[`align-${width}`] = read;
+
+    expect(read.cols, `header column count at ${width}`).toBe(7);
+    expect(read.rowCols, `row cell count at ${width}`).toBe(7);
+    expect(read.dropped, `something other than the state accent was skipped at ${width}`).toBe(1);
+    /* ⚠️ EVERY column, not a sample — the fault this catches moved ALL of them by one padding */
+    for (const c of read.lefts) {
+      expect(c.cell, `no row cell under "${c.label}" at ${width}`).not.toBeNull();
+      expect(Math.abs((c.head ?? 0) - (c.cell ?? 0)), `"${c.label}" header sits off its column at ${width}`)
+        .toBeLessThanOrEqual(0.5);
+    }
+    /* ⚠️ §3's "right for Actions" is SUPERSEDED by §4.1 — asserting the right edge would now fail
+       on a correct page, so the claim is the left edge for all seven and this states why. */
+    expect(read.actsJustify, `Actions is not left-aligned at ${width}`).toBe("start");
+  }
+  writeFileSync("reports/query-toolbar-align.json", JSON.stringify(out, null, 2));
 });

@@ -1,0 +1,47 @@
+{
+  "qa-list-snooze": {
+    "text": "Snooze the nudge\n\nCurrently due 11 Sept. Pushing it back changes only the reminder — nothing is recorded on the query.\n\nTomorrow\nTUE 8 SEPT\n1D\n1W\n1M\n3M\nSnooze until Tuesday\nPick a date…\nStop nudging me",
+    "title": "Snooze the nudge",
+    "hasFrame": true,
+    "hasDial": true,
+    "drawer": 0,
+    "desk": 0,
+    "selected": 0,
+    "route": "/queries?view=list"
+  },
+  "qa-dial-axis": [
+    "Snooze the nudge",
+    "Currently due 11 Sept. Pushing it back changes only the reminder — nothing is recorded on the query.",
+    "Tomorrow",
+    "TUE 8 SEPT",
+    "1D",
+    "1W",
+    "1M",
+    "3M",
+    "Snooze until Tuesday",
+    "Pick a date…",
+    "Stop nudging me"
+  ],
+  "qa-list-close": {
+    "title": "Close this query",
+    "reasons": [
+      "They passed",
+      "I withdrew it",
+      "No reply — gone quiet"
+    ],
+    "drawer": 0,
+    "desk": 0,
+    "route": "/queries?view=list"
+  },
+  "qa-verb-snooze": {
+    "text": "Snooze the nudge\n\nCurrently due 11 Sept. Pushing it back changes only the reminder — nothing is recorded on the query.\n\nTomorrow\nTUE 8 SEPT\n1D\n1W\n1M\n3M\nSnooze until Tuesday\nPick a date…\nStop nudging me"
+  },
+  "qa-phrase-snooze": {
+    "text": "Snooze the nudge\n\nCurrently due 11 Sept. Pushing it back changes only the reminder — nothing is recorded on the query.\n\nTomorrow\nTUE 8 SEPT\n1D\n1W\n1M\n3M\nSnooze until Tuesday\nPick a date…\nStop nudging me"
+  },
+  "qa-copy-identical": {
+    "list": "Snooze the nudge\n\nCurrently due 11 Sept. Pushing it back changes only the reminder — nothing is recorded on the query.\n\nTomorrow\nTUE 8 SEPT\n1D\n1W\n1M\n3M\nSnooze until Tuesday\nPick a date…\nStop nudging me",
+    "verb": "Snooze the nudge\n\nCurrently due 11 Sept. Pushing it back changes only the reminder — nothing is recorded on the query.\n\nTomorrow\nTUE 8 SEPT\n1D\n1W\n1M\n3M\nSnooze until Tuesday\nPick a date…\nStop nudging me",
+    "phrase": "Snooze the nudge\n\nCurrently due 11 Sept. Pushing it back changes only the reminder — nothing is recorded on the query.\n\nTomorrow\nTUE 8 SEPT\n1D\n1W\n1M\n3M\nSnooze until Tuesday\nPick a date…\nStop nudging me"
+  }
+}
