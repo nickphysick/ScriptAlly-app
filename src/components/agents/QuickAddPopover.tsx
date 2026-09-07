@@ -22,6 +22,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { Agent } from "../../types";
 import {
+  commitTypedGenre,
   LocationDraft, QuickField, normaliseSubmissionsUrl, quickWarning,
 } from "../../lib/quickAdd";
 import { SLOT_LABEL } from "./AddSlot";
@@ -69,9 +70,18 @@ export const QuickAddPopover: React.FC<{
      Escape (the drawer) and its own Tab order, and a key that does two things is a key that does
      the wrong one half the time. */
   const onKey = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); onCancel(); }
-    else if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); onSave(false); }
-    else if (e.key === "Tab") { e.preventDefault(); e.stopPropagation(); onSave(true); }
+    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); onCancel(); return; }
+    if (e.key !== "Enter" && e.key !== "Tab") return;
+    e.preventDefault();
+    e.stopPropagation();
+    /* ⚠️ ON GENRES, A TYPED WORD IS COMMITTED BEFORE ANYTHING IS SAVED — see `commitTypedGenre`.
+       Without it Enter saved the picked chips and threw the field away, which closed the popover
+       having written nothing while looking exactly like a save. */
+    if (field === "genres") {
+      const next = commitTypedGenre(draft.value, draft.genres, suggestions);
+      if (next) { onDraft({ ...draft, genres: next, value: "" }); return; }
+    }
+    onSave(e.key === "Tab");
   };
 
   const warning = field === "genres" || field === "location" ? null : quickWarning(field, draft.value);

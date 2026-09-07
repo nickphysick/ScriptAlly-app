@@ -141,3 +141,34 @@ export function nextQuickField(
   const from = QUICK_ORDER.indexOf(after);
   return empty.find((f) => QUICK_ORDER.indexOf(f) > from) ?? empty[0] ?? null;
 }
+
+/**
+ * The genre a reader has TYPED but not yet picked — committed as a chip, or null when there is
+ * nothing to commit.
+ *
+ * ⚠️ ENTER MUST NOT DISCARD WHAT IS IN THE FIELD. Measured before this existed: typing
+ * "Historical fiction" into the genres popover narrowed the suggestion list to that one entry, and
+ * Enter then saved the PICKED chips — of which there were none — so the popover closed, nothing
+ * was written, and the reader had every reason to believe they had added a genre. That is the
+ * inert-control family: worse than a control that does nothing, because it looks like it worked.
+ *
+ * ⚠️ AND IT CANONICALISES AGAINST THE SUGGESTIONS, case-insensitively. The suggestions are the
+ * writer's OWN genres from elsewhere in their list, so typing "historical fiction" beside an
+ * existing "Historical fiction" would otherwise give them two genres that are the same genre —
+ * and then two filter rows, two board captions and two tiles, none of which can be reconciled
+ * afterwards. A genre that matches nothing is added exactly as typed: the list is a convenience,
+ * never a closed vocabulary.
+ */
+export function commitTypedGenre(
+  value: string,
+  genres: readonly string[],
+  suggestions: readonly string[],
+): string[] | null {
+  const typed = (value ?? "").trim();
+  if (!typed) return null;
+  const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+  const canonical = suggestions.find((g) => same(g, typed)) ?? typed;
+  if (genres.some((g) => same(g, canonical))) return null;
+  return [...genres, canonical];
+}
+

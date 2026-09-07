@@ -7,7 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import {
-  QUICK_ORDER, emptyQuickFields, hrefFor, isLiveHref, nextQuickField,
+  QUICK_ORDER, commitTypedGenre, emptyQuickFields, hrefFor, isLiveHref, nextQuickField,
   normaliseSubmissionsUrl, quickDiff, quickWarning,
 } from "./quickAdd";
 
@@ -156,5 +156,31 @@ describe("where Tab goes", () => {
     expect(nextQuickField(agent({ genres: ["Crime"] }), "genres")).toBe("email");
     const src = readFileSync(new URL("./quickAdd.ts", import.meta.url), "utf8");
     expect(src, "the walk takes a list of agents — it can only ever see one").not.toMatch(/Agent\[\]/);
+  });
+});
+
+describe("a typed genre is committed, never discarded", () => {
+  const SUGG = ["Historical fiction", "Crime", "Literary fiction"];
+
+  it("commits what is in the field", () => {
+    expect(commitTypedGenre("Saga", [], SUGG)).toEqual(["Saga"]);
+  });
+
+  /* ⚠️ THE FAULT IT EXISTS FOR: Enter used to save the PICKED chips and throw the field away, so
+     typing a genre and pressing Enter closed the popover having written nothing. */
+  it("a genre matching a suggestion takes the suggestion's own spelling", () => {
+    expect(commitTypedGenre("historical FICTION", [], SUGG)).toEqual(["Historical fiction"]);
+  });
+
+  it("a genre that matches no suggestion is kept exactly as typed — the list is a convenience", () => {
+    expect(commitTypedGenre("Nautical thriller", ["Crime"], SUGG)).toEqual(["Crime", "Nautical thriller"]);
+  });
+
+  it("an already-picked genre is not added twice, whatever the case", () => {
+    expect(commitTypedGenre("crime", ["Crime"], SUGG)).toBeNull();
+  });
+
+  it("an empty field commits nothing, so Enter falls through to the save", () => {
+    expect(commitTypedGenre("   ", ["Crime"], SUGG)).toBeNull();
   });
 });

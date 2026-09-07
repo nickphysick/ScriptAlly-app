@@ -119,8 +119,35 @@ test.describe("the popover", () => {
     await expect(page.locator(`[data-agent-card="${SPARSE}"] .agl-peek`)).toBeVisible({ timeout: 4_000 });
     seen.card = (await page.locator(`[data-agent-card="${SPARSE}"] .agl-faceb`).innerText()).includes("ottoline@frayn.co.uk");
 
+    /**
+     * ⚠️ AND THE BOARD, WHICH NEEDS A DIFFERENT FIELD TO SAY IT. The board card draws the name, the
+     * standing and the GENRES — it has no email on it — so an email saved in the list could never
+     * have proved anything about it. The surface each claim is measured on has to be one that
+     * actually renders the value; asserting four surfaces with one field would have quietly meant
+     * three, with the fourth reading as covered.
+     */
+    await page.getByRole("button", { name: "List", exact: true }).click();
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    await slot(page, "genres").click();
+    /* ⚠️ TWO PRESSES, AND THAT IS THE CONTRACT RATHER THAN A WORKAROUND: the first commits the
+       typed word as a chip, the second saves. Before `commitTypedGenre` the first press saved the
+       picked chips — none — and closed, writing nothing. */
+    await page.keyboard.type("Historical fiction");
+    await page.keyboard.press("Enter");
+    await expect(page.locator(".agl-qa-picked")).toContainText("Historical fiction", { timeout: 4_000 });
+    await page.keyboard.press("Enter");
+    await expect(page.locator(".agl-qa")).toHaveCount(0, { timeout: 4_000 });
+
+    await page.getByRole("button", { name: "Board", exact: true }).click();
+    /* wait for the board's own cards, not a frame count — two rAFs raced the view swap and
+       reported an empty board, which reads as "the board keeps its own copy" */
+    await expect(page.locator(".agl-bcard").first()).toBeVisible({ timeout: 6_000 });
+    seen.board = await page.evaluate(() =>
+      [...document.querySelectorAll(".agl-bcard")]
+        .some((c) => (c.textContent ?? "").includes("Ottoline") && (c.textContent ?? "").includes("Historical fiction")));
+
     // eslint-disable-next-line no-console
-    console.log(`[one store] list=${seen.list} drawer=${seen.drawer} card=${seen.card}`);
+    console.log(`[one store] list=${seen.list} drawer=${seen.drawer} card=${seen.card} board=${seen.board}`);
     for (const [where, ok] of Object.entries(seen)) {
       expect(ok, `the ${where} did not show the value — that surface is keeping its own copy`).toBe(true);
     }
