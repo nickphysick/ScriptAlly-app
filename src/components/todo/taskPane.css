@@ -1130,3 +1130,43 @@
    the contract's 592, which is where that difference was found. */
 .slo .tpn .sheet { padding: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; }
 .slo .tpn .sheet > .rim { border: 0; border-radius: 0; }
+
+/* ── the index card's ENTRANCE (anatomy round, Phase 2; ref `todo-qc-style.html` `.pop`) ───────
+   ⚠️ THE CARD'S GEOMETRY LIVES IN `slideOver.css` AND ITS MOTION LIVES HERE, WHICH IS ONE BLOCK
+   TOO MANY AND IS SAID SO OUT LOUD. The geometry block was written into the shared drawer's
+   stylesheet by the corrections round; a shared chassis should not know about the To-do pane's
+   reference card, and both halves belong in this file. It is not moved in this round because
+   another session is mid-edit in `slideOver.css`, and staging that file would commit their
+   unfinished work under this round's name. Move it when that file is free; the rules are
+   `.slo .rail`, `.slo .sheet` and `.slo .rail .qhead .lbl .cl` there.
+
+   ⚠️ THE ENTRANCE IS THE CONTRACT'S: `translateX(120px) rotate(-1.2deg)` → `rotate(-1.2deg)`,
+   .36s cubic-bezier(.4,0,.2,1) DELAYED .14s, opacity .28s on the same delay. The delay is what
+   makes it read as the card following the drawer out rather than the two arriving together —
+   which is the difference between a card that pops out of the drawer and one that was always
+   floating beside it. `.slo .tpn .rail` is 0-3-0 and beats the resting `transform` at 0-2-0. */
+.slo .tpn .rail {
+  transform: translateX(120px) rotate(-1.2deg);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .36s cubic-bezier(.4, 0, .2, 1) .14s, opacity .28s ease .14s;
+}
+.slo[data-on="true"] .tpn .rail {
+  transform: rotate(-1.2deg);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ⚠️ AND THE OVERRIDE FOLLOWS ITS TARGET. A media query confers no specificity — written above
+   these rules, a reduced-motion block loses to them and the card animates anyway, which is the
+   fault this repo measured at 0.5s on the founding panel's progress bar. Both directions matter:
+   no motion under `reduce`, the real entrance without it — and under `reduce` the card must still
+   ARRIVE, so it is settled into its final transform rather than left at the entry offset. */
+@media (prefers-reduced-motion: reduce) {
+  .slo .tpn .rail,
+  .slo[data-on="true"] .tpn .rail {
+    transition: none;
+    transform: rotate(-1.2deg);
+    opacity: 1;
+  }
+}
