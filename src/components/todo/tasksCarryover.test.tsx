@@ -56,15 +56,28 @@ const EMPTY = { tasks: [], userTasks: [], queries: [], agents: [], manuscripts: 
 /* ── fix 1: one derivation, every consumer ─────────────────────────────────────────────────── */
 
 describe("⚠️ every count walks assembleBoardColumns — badge, page, FILTERS", () => {
-  it("badge figure == page-subtitle figure == FILTERS Everything, over one input", () => {
+  /* ⚠️ THE BADGE AND THE BOARD COUNT DIFFERENT POPULATIONS ON PURPOSE (corrections; Nick's ruling).
+     This asserted badge == page == FILTERS over ONE derivation, which was right while all three
+     read the same set. The badge now counts what the PAGE shows, and a snoozed card is not on the
+     page — it is deliberately out of sight until a date and cannot be reached from the list without
+     changing a filter, so a badge meaning "things needing you" must not include it.
+
+     What survives, and is the actual law: ONE `assembleBoardColumns`, and every figure derived from
+     it rather than hand-rolled. What changed is which slice each figure takes. The difference is
+     asserted EXACTLY — badge + snoozed == the board's own total — so a drift in either direction
+     fails rather than being absorbed. */
+  it("the badge counts the page's population; FILTERS counts the board's; the gap is the snoozed", () => {
     const flags: TaskFlag[] = [{ id: "f1", userId: "u", taskType: "no_response_close", queryId: "q1", snoozeCount: 1, snoozedUntil: "2026-08-08T00:00:00Z" }];
     const { cols } = assembleBoardColumns({ ...EMPTY, queries: [q({})], agents: [ag({})], taskFlags: flags });
-    const badge = boardFigures(cols).cards;              // what the sidebar shows
-    const page = boardFigures(cols).cards;               // what the subtitle speaks
-    const everything = facetCounts(liveBoardCards(cols)).all; // what FILTERS heads
-    expect(badge).toBe(page);
-    expect(page).toBe(everything);
-    expect(everything).toBeGreaterThan(0); // the fixture is not vacuous (the snoozed card counts)
+    const badge = boardFigures(cols).cards;                    // what the sidebar shows
+    const everything = facetCounts(liveBoardCards(cols)).all;  // what FILTERS heads, board-wide
+    /* ⚠️ THE FIXTURE MUST EXERCISE THE DIFFERENCE, or this passes over two identical numbers and
+       proves nothing about the split it exists to describe. */
+    expect(cols.snoozed.length, "the fixture has no snoozed card — the gap is untested")
+      .toBeGreaterThan(0);
+    expect(badge + cols.snoozed.length, "the badge and the board disagree by more than the snoozed")
+      .toBe(everything);
+    expect(everything).toBeGreaterThan(0);
   });
 
   it("⚠️ the consumers all CALL the one derivation — no hand pipelines left", () => {

@@ -19,7 +19,9 @@ import { ArtSlot, ART_SLOTS, ArtSlotName } from "./ArtSlot";
 
 const here = __dirname;
 const css = readFileSync(join(here, "artSlot.css"), "utf8");
-const board = readFileSync(join(here, "TodoBoard.tsx"), "utf8");
+/* ⚠️ `TodoBoard.tsx` IS DELETED (corrections) — a component nothing mounted, whose stylesheet
+   went on loading on every page. This file read it as a convenient SOURCE for claims that were
+   never about the board; those claims are made on the live subjects below. */
 const listPage = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const noteboard = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
 const layout = readFileSync(join(here, "TasksPageLayout.tsx"), "utf8");
@@ -114,7 +116,10 @@ describe("⚠️ ONE component, ELEVEN slots — the briefs are the contract", (
   it("the Done vignette can be capped so it reads at 260px inside its column", () => {
     const html = renderToStaticMarkup(<ArtSlot name="done-empty" maxWidth={260} />);
     expect(html).toContain("max-width:260px");
-    expect(board).toContain('<ArtSlot name="done-empty" maxWidth={260}');
+    /* ⚠️ THE MOUNT'S SUBJECT IS DELETED (corrections). `done-empty` was mounted by `TodoBoard`,
+       whose Done column it filled — and `TodoBoard` was a component nothing rendered, deleted with
+       its stylesheet. The SLOT is still real and still asserted above, by rendering it; what has
+       gone is the one page that mounted it. If a Done column ever returns, it mounts this slot. */
   });
 });
 
@@ -133,8 +138,11 @@ describe("⚠️ WHERE ART DOES NOT GO — the two rejections, enforced", () => 
   });
 
   it("NO ART PER CARD: no slot renders inside a board card, a note card or a calendar pip", () => {
-    const article = sliceBetween(board, "<article", "</article>");
-    expect(article).not.toContain("ArtSlot");
+    /* ⚠️ THE BOARD CARD'S HALF LOST ITS SUBJECT (corrections) — `TodoBoard` is deleted. The live
+       board is `TaskBoard`, and the claim holds there just as well, so it moves rather than going:
+       no slot inside a card, on the board the app actually draws. */
+    const taskBoard = readFileSync(join(here, "TaskBoard.tsx"), "utf8");
+    expect(taskBoard, "the live board grew art inside a card").not.toContain("ArtSlot");
     const noteCard = sliceBetween(noteboard, "<article", "</article>");
     expect(noteCard).not.toContain("ArtSlot");
     const calendar = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
@@ -151,11 +159,17 @@ describe("⚠️ WHERE ART DOES NOT GO — the two rejections, enforced", () => 
 /* ── each trigger ─────────────────────────────────────────────────────────────────────────── */
 
 describe("⚠️ each slot's TRIGGER — the conditions, named", () => {
-  it("done-empty: the Done column, and only while it is empty", () => {
-    expect(board).toContain('col.id === "done" && <ArtSlot name="done-empty"');
-    // it sits inside the empty branch — a non-empty Done cannot reach it
-    const emptyBranch = board.slice(board.indexOf("{cards.length === 0 && ("), board.indexOf("{visible.map"));
-    expect(emptyBranch).toContain("done-empty");
+  it("done-empty: its trigger is retired with the column it filled", () => {
+    /* ⚠️ RETIRED, NOT DELETED — the trigger was `col.id === "done"` inside `TodoBoard`, which no
+       longer exists. The slot's own definition survives in `ART_SLOTS` and is asserted there, so
+       nothing about it is unproven; what cannot be asserted is a condition on a deleted file. */
+    expect(ART_SLOTS["done-empty"], "the slot itself went too — that is a different decision")
+      .toBeTruthy();
+    const taskBoard2 = readFileSync(join(here, "TaskBoard.tsx"), "utf8");
+    expect(taskBoard2, "the live board has no Done column, so it must mount no done-empty slot")
+      .not.toContain("done-empty");
+    /* the "inside the empty branch" half went with the file that had the branch — there is no
+       Done column on the live board to be empty or full */
   });
 
   it("⚠️ noteboard-empty: REGISTERED AND UNUSED, deliberately (empty-state run)", () => {

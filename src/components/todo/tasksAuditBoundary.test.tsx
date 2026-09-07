@@ -32,7 +32,6 @@ import { calendarDays } from "../../lib/todoCalendar";
    ONE parchment pip on today — is about placement and is untouched. The window producer is the
    timeline's now. */
 import { windowDays } from "../../lib/todoTimeline";
-import { TodoBoard } from "./TodoBoard";
 
 const here = __dirname;
 const db = readFileSync(join(here, "..", "..", "lib", "db.tsx"), "utf8");
@@ -111,19 +110,13 @@ describe("⚠️ THE BOUNDARY FIXTURE — snoozed-until-TODAY renders ONCE, in t
     expect(facetCounts(liveBoardCards(sleeping.cols)).all).toBe(1);
   });
 
-  it("⚠️ the DOM renders the title once, with the chip, on the return day only", () => {
-    const html = renderToStaticMarkup(
-      <TodoBoard columns={returned.cols} onPlan={() => {}} onOpen={() => {}} onVerb={() => {}} />,
-    );
-    // the TITLE NODE (aria-labels echo the title on the card and its seat — count the element)
-    expect(html.match(/>Chase the reference</g)?.length).toBe(1);
-    expect(html).toContain("🕐 SNOOZED · BACK TODAY");
-    const sleepingHtml = renderToStaticMarkup(
-      <TodoBoard columns={sleeping.cols} onPlan={() => {}} onOpen={() => {}} onVerb={() => {}} />,
-    );
-    expect(sleepingHtml.match(/>Chase the reference</g)?.length).toBe(1); // the Snoozed card
-    expect(sleepingHtml).not.toContain("BACK TODAY");
-  });
+  /* ⚠️ THE DOM HALF IS RETIRED WITH ITS SUBJECT (corrections). It rendered `TodoBoard` — a
+     component mounted nowhere, now deleted with its stylesheet — to observe the return-day chip.
+     The CLAIM was never about that board: it is that `assembleBoardColumns` sees a returning task
+     exactly once, on the right side of the day boundary, and that is asserted three cases above
+     ("the COUNTS see it exactly once either side") on the derivation itself, which is the stronger
+     artefact. The live board draws no snoozed chip, so there is nothing here to re-point at: this
+     is a case losing its instrument, not the app losing a behaviour. */
 
   it("⚠️ the CALENDAR shows one pip today — parchment (the returned family), never a second", () => {
     const AUG = windowDays("2026-08-01", 31);

@@ -1,0 +1,45 @@
+/* ── THE PORTAL MENU'S OWN RULES (corrections) ───────────────────────────────────────────────────
+   ⚠️ EXTRACTED FROM `todoBoard.css`, WHICH IS DELETED IN THE SAME COMMIT. `PortalMenu` was pulled
+   out of `TodoBoard` in tasks-pages P4 and kept importing that component's stylesheet — so a sheet
+   for a board mounted NOWHERE went on loading on every page that opens a ⋯ menu, and its `.tbd-*`
+   rules sat waiting for any element that happened to wear those names. The QC-chassis round's own
+   board had to be called `brd-` to get out of their way.
+
+   The class names keep their `tbd-` prefix deliberately: renaming them here would be a second
+   change riding a deletion, and the menu's markup, its lock and its ref all use these words. What
+   changed is which file owns them, and that nothing else is in it. ── */
+
+/* ⚠️ THE MENU IS A PORTAL — fixed-positioned on document.body (menu M2, the settled ref), so no
+   card overflow/transform can clip it. Colours are self-contained; the type inherits from body.
+   z-index 80: above the board and the toast (70-ish surfaces), below nothing it must yield to —
+   it closes on any scroll or navigation before stacking could matter. */
+.tbd-menu2 {
+  position: fixed; z-index: 80; width: 228px;
+  background: #fff; border: 1px solid #e2d8c8; border-radius: 12px;
+  box-shadow: 0 18px 44px rgba(58, 28, 20, 0.2);
+  padding: 6px;
+  font-variant-numeric: tabular-nums;  /* the portal escapes the page root, so it opts in itself */
+}
+
+.tbd-mhead {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 6.5px; letter-spacing: 0.17em; text-transform: uppercase;
+  color: #b3a394; padding: 8px 10px 4px;
+}
+
+.tbd-msep { border-top: 1px solid #f0e9dd; margin: 5px 4px; }
+
+.tbd-mi {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  height: 32px; border-radius: 8px; padding: 0 10px;
+  font: inherit; font-size: 11.5px; font-weight: 500; color: #4d4238;
+  background: transparent; border: 0; cursor: pointer;
+}
+.tbd-mi.weight { font-weight: 700; color: #2b2118; }
+.tbd-mi.danger { color: #7c3a2a; }
+.tbd-mi:hover:not(:disabled), .tbd-mi:focus-visible { background: #f7f2e9; }
+.tbd-mi:disabled { color: #c1b4a5; cursor: not-allowed; }
+.tbd-mi.insub { height: 30px; font-size: 11px; padding-left: 26px; }
+
+.tbd-mgo { margin-left: auto; color: #b3a394; font-size: 9px; }
+.tbd-mgo.open { transform: rotate(90deg); }

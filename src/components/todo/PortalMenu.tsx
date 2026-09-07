@@ -16,7 +16,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { placeMenu, MenuEntry, MenuLeaf, MenuGroup } from "../../lib/todoMenu";
-import "./todoBoard.css";
+import "./portalMenu.css";
 
 export interface PortalMenuProps {
   anchor: HTMLElement;

@@ -18,7 +18,9 @@ const list = readFileSync(join(here, "TaskList.tsx"), "utf8");
 /* the four preference fields live on /account/tasks now — the sheet that held them is retired */
 const tasksPage = readFileSync(join(here, "..", "AccountSettings.tsx"), "utf8");
 const tagsSheet = readFileSync(join(here, "TagsSheet.tsx"), "utf8");
-const board = readFileSync(join(here, "TodoBoard.tsx"), "utf8");
+/* ⚠️ `TodoBoard.tsx` IS DELETED (corrections) — a component nothing mounted, whose stylesheet
+   went on loading on every page. This file read it as a convenient SOURCE for claims that were
+   never about the board; those claims are made on the live subjects below. */
 const listPage = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const rules = readFileSync(join(here, "..", "..", "..", "firestore.rules"), "utf8");
 /** Source with its comments stripped — a retirement is explained by naming the thing it retired,
@@ -159,10 +161,12 @@ describe("⚠️ the good-day setting is RETIRED — control, reader and field",
   it("the reader is gone from the lib, and the board no longer heads a column with it", () => {
     const cols = readFileSync(join(here, "..", "..", "lib", "todoColumns.ts"), "utf8");
     expect(cols).not.toContain("export function wipLine");
-    expect(board).not.toContain("wipLine(");
+    /* ⚠️ THE BOARD IT NAMED IS DELETED (corrections) — `TodoBoard`, mounted nowhere, removed with
+       its stylesheet. The claim was that the reader is gone from the LIB, which the assertion below
+       still makes on the lib itself; the board half had no subject left to be true of. */
     /* ⚠️ ON DECLARATIONS, NOT RAW TEXT — the house style explains a retirement by naming what it
        replaced, so the file legitimately says the word in a comment. */
-    expect(code(board)).not.toContain("goodDay");
+
   });
 
   it("the control is gone from the sheet, and the field from the prefs model", () => {
