@@ -170,7 +170,28 @@ async function readPage(page, url, { app } = {}) {
   await page.waitForTimeout(app ? 2600 : 900);
   await page.addStyleTag({ content: "*,*::before,*::after{transition:none!important;animation:none!important}" });
   await page.waitForTimeout(160);
-  return page.evaluate(READ);
+  const data = await page.evaluate(READ);
+  /**
+   * ⚠️ A SIGNED-OUT PAGE MUST STOP THE RUN, NOT BE MEASURED. This caught nothing on the round it was
+   * missing from: the sign-in failed transiently, the harness measured the AUTH page, and reported
+   * 92 plausible misses — every card at x 0, the hero headline at 14px — which reads exactly like a
+   * layout regression and is nothing of the kind. That is the fault this whole pass exists to close,
+   * committed inside the harness written to close it.
+   *
+   * The tell is cheap and total: the dashboard has sixteen probes, and the auth page has none of the
+   * ones that matter. Fewer than twelve is not a page worth diffing.
+   */
+  if (app) {
+    const n = Object.keys(data.probes).length;
+    const authForm = await page.locator("#au-email, #au-pw").count();
+    if (authForm > 0 || n < 12) {
+      throw new Error(
+        `dash-refdiff: the app page is not the signed-in dashboard — ${n}/16 probes found` +
+        `${authForm ? ", and the sign-in form is on screen" : ""}. Refusing to diff it.`,
+      );
+    }
+  }
+  return data;
 }
 
 /**
