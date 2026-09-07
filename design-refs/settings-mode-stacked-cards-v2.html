@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ScriptAlly · design ref · settings mode (stacked cards) v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ground:#f4f0ea; --parchment:#fdf9f5; --paper:#fefcfb;
+    --ink:#1c130f; --ink-60:#5e534c; --ink-45:#867b71; --ink-30:#a89d94;
+    --line:rgba(28,19,15,.14); --line-soft:rgba(28,19,15,.08);
+    --sage:#d7ddd5; --sage-deep:#c2cbbf; --blush:#f6e2d9; --active-ink:#6d3e30;
+    --slate:#6A89A7; --slate-tint:#d7e0e8; --skel:#ece5dc;
+    --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+    --k:1;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:var(--sans);font-size:15px;color:var(--ink);background:var(--ground);-webkit-font-smoothing:antialiased;overflow:hidden}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  svg{display:block}
+  @media (prefers-reduced-motion:reduce){:root{--k:0}}
+  :focus-visible{outline:2px solid var(--slate);outline-offset:2px;border-radius:6px}
+
+  /* ============ SHELL ============ */
+  .app{position:fixed;inset:0;display:grid;grid-template-columns:224px 1fr;grid-template-rows:auto 80px 1fr;background:var(--ground)}
+
+  /* app-wide scheduled-deletion banner */
+  .banner{grid-column:1/-1;grid-row:1;display:none;align-items:center;gap:14px;padding:10px 28px;background:var(--slate-tint);font-size:14px;border-bottom:1px solid var(--line-soft)}
+  .banner b{font-weight:500}
+  .banner button{margin-left:auto;padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);font-size:13px}
+  .app.scheduled .banner{display:flex}
+
+  .logo{grid-column:1;grid-row:2;display:flex;align-items:center;gap:8px;padding:0 0 0 22px;font-family:var(--serif);font-weight:700;font-size:24px;letter-spacing:-.01em}
+  .topbar{grid-column:2;grid-row:2;display:flex;align-items:center;gap:14px;padding:0 28px 0 8px}
+  .crumb{font-family:var(--serif);font-size:20px;color:var(--ink-45);position:relative;height:28px;min-width:250px}
+  .crumb>span{position:absolute;left:0;top:0;white-space:nowrap}
+  .crumb b{font-weight:400;color:var(--ink)}
+  .saved{font-size:12.5px;color:var(--ink-45);margin-left:8px;padding-left:16px;border-left:1px solid var(--line)}
+  .app.dirty .saved.s{display:none}
+  .saved.d{display:none}.app.dirty .saved.d{display:inline}
+  .spacer{flex:1}
+  .right{position:relative;height:38px;width:520px}
+  .right>div{position:absolute;right:0;top:0;display:flex;gap:12px;align-items:center}
+  .btn{height:38px;padding:0 14px;border:1px solid var(--line);border-radius:9px;background:var(--paper);display:inline-flex;align-items:center;gap:8px;font-size:14px;white-space:nowrap}
+  .btn:hover{background:#fff}
+  .btn.icon{width:38px;padding:0;justify-content:center;border-color:transparent;background:transparent}
+  .btn.dark{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:500}
+  .btn.dark:hover{background:#2b1f19}
+  .btn.sm{height:34px;font-size:13.5px;padding:0 12px}
+  .btn[disabled]{opacity:.42;cursor:default}
+  .search{display:flex;align-items:center;gap:10px;width:240px;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink-45);font-size:14px}
+  .search kbd{margin-left:auto;font-size:10px;padding:2px 5px;border:1px solid var(--line);border-radius:4px}
+  .back{height:38px;padding:0 12px 0 10px;border-radius:9px;display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-60)}
+  .back:hover{background:var(--paper)}
+  .esc{font-size:10px;padding:2px 6px;border:1px solid var(--line);border-radius:4px;color:var(--ink-45)}
+
+  /* ============ LEFT COLUMN — two layers ============ */
+  .left{grid-column:1;grid-row:3;position:relative}
+  .layer{position:absolute;inset:0;padding:0 14px 16px 14px;display:flex;flex-direction:column;overflow:auto}
+  .side::before{content:"";position:absolute;left:0;top:40px;bottom:120px;width:6px;
+    background:radial-gradient(circle at 0 50%,#f8f4ee 3px,transparent 3.5px) 0 0/6px 160px repeat-y}
+  .ms{display:flex;align-items:center;gap:10px;padding:12px 10px;border:1px solid var(--line);border-radius:14px;background:var(--parchment)}
+  .ms .cover{width:28px;height:34px;border-radius:3px;background:linear-gradient(#e6e2d9,#cfc9bd);border-left:3px solid #b2a89a}
+  .ms b{display:block;font-weight:600;font-size:14px}
+  .ms small{color:var(--ink-45);font-size:12px}
+  .ms .arrows{margin-left:auto;color:var(--ink-30);font-size:12px;letter-spacing:6px}
+  .layer hr{border:0;border-top:1px solid var(--line-soft);margin:16px 4px 20px}
+  .grp{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-45);padding:0 12px;margin:14px 0 6px}
+  .item{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:10px;font-size:15.5px;color:var(--ink);width:100%;text-align:left}
+  .item:hover{background:var(--paper)}
+  .item svg{width:18px;height:18px;stroke:var(--ink);stroke-width:1.5;fill:none;flex:none}
+  .item.on{background:#fff;border:1px solid var(--line)}
+  .item .n{margin-left:auto;font-size:12px;color:var(--active-ink)}
+  .item .n::before{content:"● ";font-size:9px}
+  .me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 8px 0;border-top:1px solid var(--line-soft)}
+  .av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-size:13px;color:var(--active-ink);background:#fff;border:1px solid var(--line);flex:none}
+  .me b{display:block;font-weight:600;font-size:14px}
+  .me small{font-size:12px;color:var(--ink-45)}
+
+  .rail .backrail{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;color:var(--ink-60);font-size:14px;width:100%;text-align:left}
+  .rail .backrail:hover{background:var(--paper)}
+  .rail h2{font-family:var(--serif);font-weight:400;font-size:24px;padding:2px 12px;margin:0 0 14px}
+  .rail .item.on{background:var(--blush);border:0;color:var(--active-ink)}
+  .rail .item.on svg{stroke:var(--active-ink)}
+  .rail .item.quiet{color:var(--ink-60);font-size:14.5px}
+  .rail .item.quiet svg{stroke:var(--ink-60);width:16px;height:16px}
+  .rail .foot{margin-top:auto;padding-top:12px;border-top:1px solid var(--line-soft)}
+  .planstrip{display:flex;align-items:center;gap:12px;padding:12px 14px;margin:8px 0;border:1px solid var(--line);border-radius:12px;background:var(--parchment)}
+  .planstrip small{display:block;font-size:11px;color:var(--ink-45)}
+  .planstrip b{font-family:var(--serif);font-weight:400;font-size:18px}
+
+  /* ============ MAIN ============ */
+  .main{grid-column:2;grid-row:3;overflow:auto;padding:0 28px 28px 8px}
+  .ws{position:relative;border:1px solid var(--line);border-radius:22px;background:var(--parchment);min-height:calc(100% - 8px);padding:40px;box-shadow:inset 0 1px 0 #fff}
+  .stage{position:relative;max-width:1080px;margin:0 auto}
+  .page{max-width:760px;margin:0 auto}
+
+  .ttl{margin-bottom:26px}
+  .ttl h1{font-family:var(--serif);font-weight:400;font-size:30px;line-height:1.15}
+  .ttl p{color:var(--ink-60);margin-top:6px}
+
+  /* ---- stacked cards ---- */
+  .card{background:var(--parchment);border:1px solid var(--line);border-radius:12px;margin-top:22px;overflow:hidden}
+  .card:first-of-type{margin-top:0}
+  .ch{padding:22px 26px 6px}
+  .ch h3{font-family:var(--serif);font-weight:400;font-size:20px}
+  .ch p{color:var(--ink-60);font-size:13.5px;margin-top:4px}
+  .cb{padding:8px 26px 20px;position:relative}
+  .row{display:grid;grid-template-columns:1fr 280px;gap:24px;align-items:center;padding:14px 0;border-top:1px solid var(--line-soft)}
+  .row:first-child{border-top:0}
+  .row.full{grid-template-columns:1fr}
+  .row .ctl{display:flex;justify-content:flex-end;align-items:center;gap:10px}
+  .row .ctl .in{flex:1}
+  .lbl{font-weight:500;font-size:15px}
+  .dsc{color:var(--ink-60);font-size:13.5px;line-height:1.5;margin-top:3px;max-width:52ch}
+  .note{color:var(--ink-60);font-size:13.5px;line-height:1.55}
+  .cf{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 26px;background:rgba(28,19,15,.025);border-top:1px solid var(--line-soft);font-size:13px;color:var(--ink-60)}
+  .card.danger{border-color:rgba(28,19,15,.22)}
+
+  .in{height:40px;border:1px solid var(--line);border-radius:8px;background:var(--paper);display:flex;align-items:center;padding:0 12px;font-size:14.5px;gap:8px;min-width:0}
+  .in.sel{justify-content:space-between;color:var(--ink-45)}
+  .in.sel.set{color:var(--ink)}
+  .in.edited{border-color:var(--slate);background:#fff}
+  .chip{font-size:11.5px;font-weight:500;padding:4px 9px;border-radius:6px;background:var(--sage);color:var(--ink-60);white-space:nowrap}
+  .tog{width:38px;height:22px;border-radius:11px;background:var(--sage-deep);position:relative;flex:none;transition:background .16s}
+  .tog::after{content:"";position:absolute;top:3px;left:19px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .16s}
+  .tog.off{background:#e0dcd5}.tog.off::after{left:3px}
+  .id{display:flex;align-items:center;gap:16px}
+  .id .av{width:48px;height:48px;font-size:15px;background:var(--blush);border:0}
+  .id b{display:block;font-family:var(--serif);font-weight:400;font-size:20px}
+  .id small{color:var(--ink-60);font-size:13.5px}
+  .cover{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 20px;margin-top:8px}
+  .cover span{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink-60)}
+  .cover span::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--ink-30)}
+  .sec{display:none}.sec.on{display:block}
+  .app.dirty .cf .btn.dark{opacity:1;pointer-events:auto}
+  .cf .btn.dark{opacity:.42;pointer-events:none}
+
+  /* skeleton */
+  .skel{position:absolute;inset:8px 26px 20px;background:var(--parchment);display:none;animation:breathe 1.6s ease-in-out infinite}
+  .app.loading .skel{display:block}
+  .skel .r{display:grid;grid-template-columns:1fr 280px;gap:24px;align-items:center;padding:19px 0;border-top:1px solid var(--line-soft)}
+  .skel .r:first-child{border-top:0}
+  .skel .bar{height:11px;border-radius:6px;background:var(--skel)}
+  .skel .box{height:40px;border-radius:8px;background:var(--skel)}
+  @keyframes breathe{0%,100%{opacity:1}50%{opacity:.55}}
+
+  /* ============ TRANSITION ============ */
+  .nav-layer,.rail-layer,.appview,.setview,.right>div,.crumb>span{transition-property:opacity,transform;transition-timing-function:cubic-bezier(.2,.7,.2,1)}
+  .nav-layer{opacity:1;transition-duration:calc(.18s*var(--k));transition-delay:calc(.10s*var(--k))}
+  .rail-layer{opacity:0;transform:translateX(-8px);pointer-events:none;transition-duration:calc(.12s*var(--k))}
+  .appview{opacity:1;transition-duration:calc(.20s*var(--k));transition-delay:calc(.12s*var(--k))}
+  .setview{opacity:0;transform:translateY(6px);pointer-events:none;position:absolute;inset:0;transition-duration:calc(.12s*var(--k))}
+  .right .app-ctl,.crumb .c-app{opacity:1;transition-duration:calc(.16s*var(--k));transition-delay:calc(.10s*var(--k))}
+  .right .set-ctl,.crumb .c-set{opacity:0;pointer-events:none;transition-duration:calc(.10s*var(--k))}
+  .ws{transition:border-color calc(.24s*var(--k)) ease calc(.06s*var(--k)),background-color calc(.24s*var(--k)) ease calc(.06s*var(--k)),box-shadow calc(.24s*var(--k)) ease}
+
+  .app.settings .nav-layer{opacity:0;transform:translateX(-8px);pointer-events:none;transition-duration:calc(.12s*var(--k));transition-delay:0s}
+  .app.settings .rail-layer{opacity:1;transform:none;pointer-events:auto;transition-duration:calc(.18s*var(--k));transition-delay:calc(.10s*var(--k))}
+  .app.settings .appview{opacity:0;transform:translateY(-4px);pointer-events:none;transition-duration:calc(.12s*var(--k));transition-delay:0s}
+  .app.settings .setview{opacity:1;transform:none;pointer-events:auto;position:relative;transition-duration:calc(.22s*var(--k));transition-delay:calc(.14s*var(--k))}
+  .app.settings .right .app-ctl,.app.settings .crumb .c-app{opacity:0;pointer-events:none;transition-duration:calc(.10s*var(--k));transition-delay:0s}
+  .app.settings .right .set-ctl,.app.settings .crumb .c-set{opacity:1;pointer-events:auto;transition-duration:calc(.16s*var(--k));transition-delay:calc(.12s*var(--k))}
+  .app.settings .ws{border-color:transparent;background-color:transparent;box-shadow:none;transition-delay:0s}
+
+  /* app-mode placeholder */
+  .mast{display:flex;align-items:center;gap:22px;margin-bottom:30px}
+  .mast h1{font-family:var(--serif);font-weight:700;font-size:32px}
+  .mast p{color:var(--ink-60);margin-top:4px}
+  .dgrid{display:grid;grid-template-columns:1.4fr 1fr;gap:24px}
+  .dcard{padding:22px 26px;min-height:180px;background:var(--parchment);border:1px solid var(--line);border-radius:12px}
+  .dcard h4{font-family:var(--serif);font-weight:400;font-size:19px;margin-bottom:12px}
+  .drow{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line-soft);color:var(--ink-60);font-size:14px}
+  .drow b{font-weight:500;color:var(--ink)}
+
+  /* warn-and-continue whisper (no modal — recorded decision) */
+  .whisper{position:fixed;left:50%;bottom:74px;transform:translateX(-50%) translateY(6px);z-index:65;background:var(--parchment);border:1px solid var(--line);border-radius:10px;padding:10px 16px;font-size:13.5px;color:var(--ink-60);box-shadow:0 10px 30px rgba(28,19,15,.14);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
+  .whisper.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+
+  /* demo controls — NOT part of the design */
+  .demo{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:4px;background:var(--ink);color:#fff;border-radius:999px;padding:5px 6px;box-shadow:0 10px 30px rgba(28,19,15,.25);font-size:12.5px}
+  .demo button,.demo label{padding:7px 13px;border-radius:999px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:6px;cursor:pointer}
+  .demo button:hover,.demo label:hover{color:#fff}
+  .demo .sep{width:1px;height:16px;background:rgba(255,255,255,.2);margin:0 3px}
+  .demo .tag{padding:7px 10px;color:rgba(255,255,255,.4);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <div class="banner"><b>Your account is scheduled for permanent deletion on 21 September 2026.</b><span>Signing in cancels it.</span><button data-cancel>Cancel deletion</button></div>
+
+  <div class="logo"><svg width="30" height="26" viewBox="0 0 30 26" fill="none" stroke="#1c130f" stroke-width="1.6" stroke-linecap="round"><path d="M3 22c6-2 10-6 12-11M15 11l12-8M15 11l-2 8"/><path d="M7 10c-4 1-5 5-2 6"/></svg>ScriptAlly</div>
+
+  <div class="topbar">
+    <span class="crumb">
+      <span class="c-app">ScriptAlly <span style="margin:0 8px">/</span> <b>Dashboard</b></span>
+      <span class="c-set">ScriptAlly <span style="margin:0 8px">/</span> <b>Settings</b></span>
+    </span>
+    <span class="spacer"></span>
+    <div class="right">
+      <div class="app-ctl"><div class="search">⌕ Search <kbd>⌘K</kbd></div><button class="btn">Feedback</button><button class="btn icon">?</button><button class="btn dark">＋ New</button></div>
+      <div class="set-ctl"><span class="saved s">All changes saved</span><span class="saved d">Unsaved changes</span><button class="btn">Feedback</button><button class="btn icon">?</button><button class="back" data-exit>Back to app <span class="esc">esc</span></button></div>
+    </div>
+  </div>
+
+  <div class="left">
+    <!-- app nav (approximation of the locked component) -->
+    <aside class="layer side nav-layer">
+      <div class="ms"><div class="cover" style="display:block"></div><div><b>Murphy's Day …</b><small>Thriller · 50,000 words</small></div><div class="arrows">‹›</div></div>
+      <hr>
+      <div class="item on"><svg viewBox="0 0 18 18"><rect x="2" y="2" width="6" height="6" rx="1"/><rect x="10" y="2" width="6" height="6" rx="1"/><rect x="2" y="10" width="6" height="6" rx="1"/><rect x="10" y="10" width="6" height="6" rx="1"/></svg>Dashboard</div>
+      <div class="grp">Queries</div>
+      <div class="item"><svg viewBox="0 0 18 18"><path d="M2 9l14-6-5 13-2-5z"/></svg>Query Centre</div>
+      <div class="item"><svg viewBox="0 0 18 18"><path d="M2 15V3M2 13l4-4 3 3 7-7"/></svg>Analytics</div>
+      <div class="grp">Agents</div>
+      <div class="item"><svg viewBox="0 0 18 18"><circle cx="7" cy="6" r="2.5"/><circle cx="12.5" cy="7" r="2"/><path d="M2 15c.6-2.8 2.6-4.4 5-4.4s4.4 1.6 5 4.4M13 11c1.8.2 3 1.5 3.4 3.4"/></svg>Contact list</div>
+      <div class="item"><svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="7"/><path d="M12 6l-2 5-5 2 2-5z"/></svg>Discover</div>
+      <div class="grp">Materials</div>
+      <div class="item"><svg viewBox="0 0 18 18"><path d="M3 3v12M6 3v12M9 3v12M12 4l3 11"/></svg>Manuscripts</div>
+      <div class="item"><svg viewBox="0 0 18 18"><rect x="5" y="2" width="10" height="13" rx="1"/><path d="M3 5v11h9"/></svg>Comparable titles</div>
+      <div class="item"><svg viewBox="0 0 18 18"><rect x="4" y="2" width="11" height="14" rx="1.5"/><path d="M4 12h11"/></svg>Submission packages</div>
+      <div class="grp">Tasks</div>
+      <div class="item"><svg viewBox="0 0 18 18"><path d="M3 5l1.5 1.5L7 4M3 10l1.5 1.5L7 9M3 15l1.5 1.5L7 14M9 5h6M9 10h6M9 15h6"/></svg>To-do list<span class="n">18</span></div>
+      <div class="item"><svg viewBox="0 0 18 18"><rect x="2" y="4" width="14" height="12" rx="1.5"/><path d="M2 8h14M6 2v4M12 2v4"/></svg>Calendar</div>
+      <div class="item"><svg viewBox="0 0 18 18"><path d="M3 3h9l3 3v9H3z"/><path d="M6 8h6M6 11h4"/></svg>Noteboard</div>
+      <div class="grp">Account</div>
+      <button class="item" data-enter><svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="2.5"/><path d="M9 2v2M9 14v2M2 9h2M14 9h2M4 4l1.4 1.4M12.6 12.6L14 14M4 14l1.4-1.4M12.6 5.4L14 4"/></svg>Settings</button>
+      <div class="me"><div class="av">BC</div><div><b>Bethany Carter</b><small>Pro plan</small></div></div>
+    </aside>
+
+    <!-- settings rail -->
+    <aside class="layer rail rail-layer">
+      <button class="backrail" data-exit>← Back to app</button>
+      <hr>
+      <h2 tabindex="-1" id="railhead">Settings</h2>
+      <button class="item on" data-sec="profile"><svg viewBox="0 0 18 18"><circle cx="9" cy="6" r="3.2"/><path d="M3 16c.8-3.2 3-5 6-5s5.2 1.8 6 5"/></svg>Profile</button>
+      <button class="item" data-sec="security"><svg viewBox="0 0 18 18"><path d="M9 2l6 2.2v4.3c0 3.6-2.6 6.3-6 7.5-3.4-1.2-6-3.9-6-7.5V4.2z"/></svg>Sign-in &amp; security</button>
+      <button class="item" data-sec="plan"><svg viewBox="0 0 18 18"><rect x="2" y="4" width="14" height="10" rx="2"/><path d="M2 8h14"/></svg>Plan &amp; billing</button>
+      <button class="item" data-sec="notify"><svg viewBox="0 0 18 18"><path d="M4 13V8a5 5 0 0110 0v5l1.5 1.5h-13z"/><path d="M7.5 15.5a1.5 1.5 0 003 0"/></svg>Notifications</button>
+      <button class="item" data-sec="prefs"><svg viewBox="0 0 18 18"><path d="M3 5h12M3 9h12M3 13h12"/></svg>Preferences</button>
+      <button class="item" data-sec="tasks"><svg viewBox="0 0 18 18"><path d="M3 5l1.5 1.5L7 4M3 10l1.5 1.5L7 9M3 15l1.5 1.5L7 14M9 5h6M9 10h6M9 15h6"/></svg>Tasks</button>
+      <button class="item" data-sec="data"><svg viewBox="0 0 18 18"><ellipse cx="9" cy="4.5" rx="6" ry="2.5"/><path d="M3 4.5v9c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-9M3 9c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5"/></svg>Your data</button>
+      <div class="foot">
+        <div class="planstrip"><svg width="28" height="24" viewBox="0 0 34 30" fill="none" stroke="#6d3e30" stroke-width="1.3" stroke-linejoin="round"><path d="M3 28V10l8-7 8 7v18M19 28V14l7-5 5 5v14"/></svg><div><small>Your plan</small><b>Pro</b></div></div>
+      </div>
+    </aside>
+  </div>
+
+  <main class="main" id="main">
+    <div class="ws">
+      <div class="stage">
+        <div class="appview">
+          <div class="mast">
+            <svg width="72" height="72" viewBox="0 0 72 72" fill="none" stroke="#6d3e30" stroke-width="1.2" stroke-linejoin="round"><rect x="10" y="14" width="52" height="36" rx="2"/><path d="M10 26h52M22 14v36M30 34h20M30 40h14"/><path d="M6 60h60"/></svg>
+            <div><h1>Dashboard</h1><p>Where your querying stands today</p></div>
+          </div>
+          <div class="dgrid">
+            <div class="dcard"><h4>Fortnight in focus</h4><div class="drow"><span>Queries sent</span><b>6</b></div><div class="drow"><span>Responses received</span><b>2</b></div><div class="drow"><span>Tasks due</span><b>4</b></div></div>
+            <div class="dcard"><h4>Waiting on</h4><div class="drow"><span>Full · Hale</span><b>41 days</b></div><div class="drow"><span>Partial · Okoro</span><b>19 days</b></div><div class="drow"><span>Query · Marchetti</span><b>6 days</b></div></div>
+          </div>
+        </div>
+        <div class="setview"><div class="page" id="page"></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="whisper" id="whisper" role="status">Your display name change was saved as you left.</div>
+
+<div class="demo">
+  <span class="tag">demo</span>
+  <button id="modebtn">Enter settings</button>
+  <span class="sep"></span>
+  <button id="dirtybtn">Unsaved name</button>
+  <label><input type="checkbox" id="load"> loading</label>
+  <label><input type="checkbox" id="sched"> deletion scheduled</label>
+  <span class="sep"></span>
+  <label><input type="checkbox" id="slow"> ¼ speed</label>
+</div>
+
+<script>
+/* ---------------- content ---------------- */
+const S={
+ profile:{t:'Profile',d:'Your name and where you write from.',cards:[
+  {h:'You',rows:[{type:'id',name:'Bethany Carter',mail:'bethuswethus@bethus.com'}]},
+  {h:'Details',save:1,rows:[
+   {l:'Display name',d:'Shown in the app and on anything you export.',type:'text',v:'Bethany Carter',id:'dn'},
+   {l:'Home country',d:'The agent list uses this to tell agents in your country from international ones.',type:'sel',v:'Not set'}],
+   f:'Your name saves when you press Save. Everything else saves as you change it.'}]},
+
+ security:{t:'Sign-in &amp; security',d:'How you get into your account.',cards:[
+  {h:'Email',rows:[{l:'Email address',d:'A confirmation goes to the new address first. Nothing switches until you confirm it.',type:'text',v:'bethuswethus@bethus.com',chip:'Verified',act:'Change'}]},
+  {h:'Ways to sign in',p:'Keep more than one so you can always get back in.',rows:[
+   {l:'Google',d:'bethuswethus@bethus.com · connected 25 June 2026',type:'chip',v:'Connected'},
+   {l:'Password',d:'Not set. Adding one means you can still sign in if you lose access to Google.',type:'btn',v:'Add a password'}],
+   f:'Passkeys and two-step verification are coming after launch.'}]},
+
+ plan:{t:'Plan &amp; billing',d:'What your plan includes.',cards:[
+  {h:'Your plan',rows:[
+   {l:'Pro',d:'Unlimited manuscripts, The Comp Scout, Smart Email Drop, one Smart Import a month.',type:'btn',v:'See plans'},
+   {l:'Smart Import',d:"This month's import hasn't been used. Your next one arrives on 1 October.",type:'chip',v:'1 available'}]},
+  {h:'What each plan includes',rows:[
+   {l:'Manuscripts',type:'pair',a:'1',b:'Unlimited'},
+   {l:'Agents and queries',type:'pair',a:'Unlimited',b:'Unlimited'},
+   {l:'Smart Import',type:'pair',a:'1, at sign-up',b:'1 a month'},
+   {l:'The Comp Scout',type:'pair',a:'—',b:'Included'},
+   {l:'Smart Email Drop',type:'pair',a:'—',b:'Included'}],
+   f:'Your payment method and invoices will appear here once billing starts.'}]},
+
+ notify:{t:'Notifications',d:'What we email you, and what we never will.',cards:[
+  {h:'About your querying',rows:[
+   {l:'Nudge reminders',d:"When a query has passed the agent's stated response window.",type:'tog',v:1},
+   {l:'Weekly summary',d:"Every Monday: what went out, what came back, what's due.",type:'tog',v:1}],
+   f:'Emails about your account itself — sign-in, billing, data requests — are always sent.'},
+  {h:'News from ScriptAlly',rows:[
+   {l:'Product news',d:'Occasional updates about new features. Off unless you turn it on; one click to stop.',type:'tog',v:0}],
+   f:'Sent to bethuswethus@bethus.com.'}]},
+
+ prefs:{t:'Preferences',d:'How the workspace reads.',cards:[
+  {h:'Workspace',rows:[
+   {l:'Theme',type:'sel',v:'Cappuccino',set:1},
+   {l:'Timezone',d:'Response windows and week boundaries resolve in it.',type:'sel',v:'Europe/London',set:1},
+   {l:'Date format',type:'sel',v:'7 Sept 2026',set:1},
+   {l:'Week starts on',type:'sel',v:'Monday',set:1}]},
+  {h:'Tasks',rows:[
+   {l:'Task defaults',d:'How to-dos are generated and carried over. One place to change them.',type:'btn',v:'Open'}]}]},
+
+ data:{t:'Your data',d:'Take a copy, or leave.',cards:[
+  {h:'Take a copy of your data',p:'A structured file you can keep or move elsewhere.',rows:[
+   {l:"Everything you've put in",type:'cover',items:['Agents','Queries','Activity','Manuscripts','Notes','To-dos','Packages','Comp titles'],act:'Download a copy'}]},
+  {h:'How long we keep it',rows:[
+   {type:'note',d:"Your data stays as long as your account does. Once deletion goes ahead it's removed from our systems, and from backups within 30 days."}]},
+  {h:'Signing out',rows:[
+   {l:'Sign out',d:'Ends this session on this device. Nothing is deleted.',type:'btn',v:'Sign out'}]},
+  {h:'Delete your account',danger:1,rows:[
+   {type:'note',d:"Removes your manuscripts, agents, queries, recorded activity, notes, to-dos and packages."},
+   {type:'note',d:"You'll have 14 days to change your mind. Signing in during that time cancels it."},
+   {l:'Type DELETE to confirm',type:'del'}],
+   scheduled:{h:'Deletion scheduled',rows:[
+     {type:'note',d:'Your account will be permanently deleted on 21 September 2026. Until then everything is still here.'},
+     {l:'Changed your mind?',type:'btn',v:'Cancel deletion',cancel:1}]}}]},
+
+ tasks:{t:'Tasks',d:'How to-dos are generated and carried over.',cards:[
+  {h:'Generating to-dos',rows:[
+   {l:'Follow-up reminders',d:"Raise a to-do when a query passes the agent's stated response window.",type:'tog',v:1},
+   {l:'Carry unfinished tasks over',d:'Anything not done rolls into the next day rather than disappearing.',type:'tog',v:1}]},
+  {h:'Defaults',rows:[
+   {l:'Default nudge window',type:'sel',v:'8 weeks',set:1},
+   {l:'Show tasks due within',type:'sel',v:'A fortnight',set:1}],
+   f:'These set the defaults. Any individual query can differ.'}]},
+};
+
+const ctl=r=>{switch(r.type){
+  case 'text':return `<div class="in" ${r.id?`id="${r.id}"`:''}>${r.v}${r.chip?`<span class="chip" style="margin-left:auto">${r.chip}</span>`:''}</div>${r.act?`<button class="btn">${r.act}</button>`:''}`;
+  case 'sel':return `<div class="in sel ${r.set?'set':''}">${r.v}<span>⌄</span></div>`;
+  case 'tog':return `<span class="tog ${r.v?'':'off'}"></span>`;
+  case 'btn':return `<button class="btn" ${r.cancel?'data-cancel':''}>${r.v}</button>`;
+  case 'chip':return `<span class="chip">${r.v}</span>`;
+  case 'pair':return `<span class="note" style="width:120px;text-align:right">${r.a}</span><span style="width:110px;text-align:right;font-weight:500">${r.b}</span>`;
+  case 'del':return `<div class="in sel" style="max-width:150px">DELETE</div><button class="btn" disabled>Delete my account</button>`;
+  default:return '';}};
+
+function rowHtml(r){
+  if(r.type==='id')return `<div class="row full"><div class="id"><div class="av">BC</div><div><b>${r.name}</b><small>${r.mail}</small></div></div></div>`;
+  if(r.type==='note')return `<div class="row full"><div class="note">${r.d}</div></div>`;
+  if(r.type==='cover')return `<div class="row"><div><div class="lbl">${r.l}</div><div class="cover">${r.items.map(x=>`<span>${x}</span>`).join('')}</div></div><div class="ctl"><button class="btn">${r.act}</button></div></div>`;
+  return `<div class="row"><div><div class="lbl">${r.l}</div>${r.d?`<div class="dsc">${r.d}</div>`:''}</div><div class="ctl">${ctl(r)}</div></div>`;
+}
+function cardHtml(c){
+  const head=c.rows.some(r=>r.type==='pair')?`<div class="row" style="color:var(--ink-45);font-size:12.5px;padding-bottom:6px"><span></span><div class="ctl"><span style="width:120px;text-align:right">Free</span><span style="width:110px;text-align:right">Pro</span></div></div>`:'';
+  return `<div class="card ${c.danger?'danger':''}">
+    <div class="ch"><h3>${c.h}</h3>${c.p?`<p>${c.p}</p>`:''}</div>
+    <div class="cb">${head}${c.rows.map(rowHtml).join('')}
+      <div class="skel">${[0,1,2].map(()=>`<div class="r"><div><div class="bar" style="width:120px"></div><div class="bar" style="width:70%;margin-top:9px;height:9px"></div></div><div class="box"></div></div>`).join('')}</div>
+    </div>
+    ${(c.f||c.save)?`<div class="cf"><span>${c.f||''}</span>${c.save?`<button class="btn dark sm">Save</button>`:''}</div>`:''}
+  </div>`;
+}
+function render(){
+  const s=S[sec];
+  const cards=s.cards.map(c=>(c.scheduled&&app.classList.contains('scheduled'))?cardHtml({...c.scheduled,danger:c.danger}):cardHtml(c));
+  page.innerHTML=`<div class="ttl"><h1>${s.t}</h1><p>${s.d}</p></div>`+cards.join('');
+  bindCancel();document.getElementById('main').scrollTop=0;
+}
+
+/* ---------------- behaviour ---------------- */
+const app=document.getElementById('app'),page=document.getElementById('page'),
+      modebtn=document.getElementById('modebtn'),load=document.getElementById('load'),sched=document.getElementById('sched'),slow=document.getElementById('slow');
+let sec='profile',timer;
+
+document.querySelectorAll('[data-sec]').forEach(b=>b.addEventListener('click',()=>{
+  if(app.classList.contains('dirty')){warn();}
+  sec=b.dataset.sec;document.querySelectorAll('[data-sec]').forEach(x=>x.classList.toggle('on',x===b));
+  render();if(load.checked)fakeLoad();
+}));
+function fakeLoad(){app.classList.add('loading');clearTimeout(timer);timer=setTimeout(()=>app.classList.remove('loading'),900);}
+function enter(){app.classList.add('settings');modebtn.textContent='Back to app';setTimeout(()=>document.getElementById('railhead').focus(),200);if(load.checked)fakeLoad();}
+function exit(){if(app.classList.contains('dirty')){warn();}app.classList.remove('settings');modebtn.textContent='Enter settings';setDirty(false);}
+function warn(){const w=document.getElementById('whisper');w.classList.add('on');clearTimeout(w._t);w._t=setTimeout(()=>w.classList.remove('on'),3200);}
+document.querySelectorAll('[data-enter]').forEach(b=>b.addEventListener('click',enter));
+document.querySelectorAll('[data-exit]').forEach(b=>b.addEventListener('click',exit));
+modebtn.addEventListener('click',()=>app.classList.contains('settings')?exit():enter());
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(false){}else if(app.classList.contains('settings'))exit();}});
+
+function setDirty(on){app.classList.toggle('dirty',on);const dn=document.getElementById('dn');if(dn){dn.classList.toggle('edited',on);dn.textContent=on?'Bethany Carter-Hale':'Bethany Carter';}}
+document.getElementById('dirtybtn').addEventListener('click',()=>{if(!app.classList.contains('settings'))enter();sec='profile';document.querySelectorAll('[data-sec]').forEach(x=>x.classList.toggle('on',x.dataset.sec==='profile'));render();setTimeout(()=>setDirty(true),60);});
+
+sched.addEventListener('change',()=>{app.classList.toggle('scheduled',sched.checked);render();});
+function bindCancel(){document.querySelectorAll('[data-cancel]').forEach(b=>b.addEventListener('click',()=>{sched.checked=false;app.classList.remove('scheduled');render();}));}
+load.addEventListener('change',()=>{if(load.checked)fakeLoad();else app.classList.remove('loading');});
+slow.addEventListener('change',()=>document.documentElement.style.setProperty('--k',slow.checked?'4':'1'));
+document.addEventListener('click',e=>{const t=e.target.closest('.tog');if(t)t.classList.toggle('off');});
+render();
+</script>
+</body>
+</html>
