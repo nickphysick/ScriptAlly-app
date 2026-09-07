@@ -138,8 +138,14 @@ export const F12Popover: React.FC<{
   chassis?: "plain" | "mount";
   /** Footer content for the `mount` chassis — the direction segment on Sort. Ignored on `plain`. */
   foot?: React.ReactNode;
+  /**
+   * A glyph before the band's title on the `mount` chassis — the quick actions' bell and cross
+   * (§4.2). ADDITIVE and optional: the three toolbar menus pass nothing and render exactly as
+   * they did, so this cannot reach them, and `plain` ignores it entirely.
+   */
+  glyph?: React.ReactNode;
   children: React.ReactNode;
-}> = ({ width, title, onClose, style, headAction, footText, panelRef, chassis = "plain", foot, children }) => {
+}> = ({ width, title, onClose, style, headAction, footText, panelRef, chassis = "plain", foot, glyph, children }) => {
   const ref = useRef<HTMLDivElement>(null);
   /* one element, two holders: the outside-click handler's and the caller's placement measurement */
   useEffect(() => { if (panelRef) (panelRef as React.MutableRefObject<HTMLElement | null>).current = ref.current; });
@@ -182,6 +188,7 @@ export const F12Popover: React.FC<{
              meets the frame's own corners rather than overhanging them */
           <div className="f12-pop-frame">
             <div className="f12-pop-band">
+              {glyph}
               <span className="f12-pop-bt">{title}</span>
               {headAction}
             </div>

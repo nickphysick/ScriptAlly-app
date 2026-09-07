@@ -48,7 +48,16 @@ export interface SnoozeClamp {
  *   past clamps to 0, which the caller must read as "cannot be snoozed at all".
  * - **everything else → a year.**
  */
-export function snoozeCeilingDays(card: BoardCard, daysUntilDeadline?: number): number {
+/**
+ * ⚠️ NARROWED TO `taskType` (quick actions §4.3). These three read nothing else off a card — the
+ * offer ceiling is the only branch — and taking the whole `BoardCard` meant only something the
+ * To-do board had assembled could reach the clamp. A Query Centre row is not a board card, and
+ * the choice was either a synthetic card of a dozen invented fields or a second, unclamped
+ * snooze. A `BoardCard` still satisfies this, so every existing caller is unchanged.
+ */
+type SnoozeSubject = Pick<BoardCard, "taskType">;
+
+export function snoozeCeilingDays(card: SnoozeSubject, daysUntilDeadline?: number): number {
   if (card.taskType === "offer_received") return OFFER_SNOOZE_MAX_DAYS;
   if (typeof daysUntilDeadline === "number") return Math.max(0, Math.min(SNOOZE_MAX_DAYS, daysUntilDeadline));
   return SNOOZE_MAX_DAYS;
@@ -128,7 +137,7 @@ export function snoozeDateLabel(days: number, now = new Date()): string {
  * ceiling through the date picker. A ceiling of 0 — a deadline already past — returns none, which
  * the caller must read as "this cannot be put off", never as "put it off by nothing".
  */
-export function reachableStops(card: BoardCard, daysUntilDeadline?: number): { days: number; label: string; tick: string }[] {
+export function reachableStops(card: SnoozeSubject, daysUntilDeadline?: number): { days: number; label: string; tick: string }[] {
   const ceiling = snoozeCeilingDays(card, daysUntilDeadline);
   return SNOOZE_STOPS.filter((s) => s.days <= ceiling);
 }
@@ -154,7 +163,7 @@ export function snoozeWhenLabel(days: number): string {
  * It also re-labels: a request clamped from "next week" to tomorrow must not keep saying "next
  * week", or the toast lies about what was written.
  */
-export function clampSnooze(card: BoardCard, days: number, when: string, daysUntilDeadline?: number): SnoozeClamp {
+export function clampSnooze(card: SnoozeSubject, days: number, when: string, daysUntilDeadline?: number): SnoozeClamp {
   const ceiling = snoozeCeilingDays(card, daysUntilDeadline);
   if (days <= ceiling) return { days, when, clamped: false };
   return { days: ceiling, when: snoozeWhenLabel(ceiling), clamped: true };

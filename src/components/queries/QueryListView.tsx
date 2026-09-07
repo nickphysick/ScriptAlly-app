@@ -72,7 +72,13 @@ export const QueryListView: React.FC<{
   onOpen?: (id: string) => void;
   onMore?: (id: string, anchor: HTMLElement) => void;
   /** every action opens the desk AND the drawer behind it — see the page's handler */
-  onVerb?: (id: string, verb: "primary" | "nudge" | "closed", anchor: HTMLElement) => void;
+  /**
+   * ⚠️ `snooze` REPLACED `nudge` IN THE LIST'S SECOND SLOT (§4; the ref draws it). Nudging is a
+   * composing verb — it writes a rung and hands you a draft — and it keeps its home in the
+   * drawer's four-verb row. What a reader wants from a LIST row is the one-decision version:
+   * push the reminder back. The four-slot grid is unchanged; only which verb sits in slot two.
+   */
+  onVerb?: (id: string, verb: "primary" | "snooze" | "closed", anchor: HTMLElement) => void;
 }> = ({ rows, since, sentLeaf, sortKey, group = "none", sortDesc, selectedId, onSort, onOpen, onMore, onVerb }) => {
   /**
    * ⚠️ THE SAME PARTITION THE GRID MAKES, from the same two pure functions — never a second
@@ -190,12 +196,15 @@ export const QueryListView: React.FC<{
             title={v.primary.enabled ? undefined : "Reopening a closed query is not built yet"}
             onClick={(e) => { e.stopPropagation(); onVerb?.(r.id, "primary", e.currentTarget); }}
           >{v.primary.label}</button>
+          {/* the bell is snooze, and it is offered exactly where a reminder exists or could —
+              `v.nudge` is that same availability, since a query with nobody to chase has no
+              reminder to move */}
           <button
-            type="button" className="qlv-ib" aria-label="Nudge"
+            type="button" className="qlv-ib" aria-label="Snooze the nudge"
             style={v.nudge ? undefined : { visibility: "hidden" }}
             tabIndex={v.nudge ? 0 : -1}
-            onClick={(e) => { e.stopPropagation(); onVerb?.(r.id, "nudge", e.currentTarget); }}
-          >◔</button>
+            onClick={(e) => { e.stopPropagation(); onVerb?.(r.id, "snooze", e.currentTarget); }}
+          >{"\u2609"}</button>
           <button
             type="button" className="qlv-ib" aria-label="Mark closed"
             style={v.markClosed ? undefined : { visibility: "hidden" }}

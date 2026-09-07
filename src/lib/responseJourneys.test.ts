@@ -198,7 +198,14 @@ describe("the nudge resolves itself, so nothing resolves it", () => {
 
   it("and no resolver was built for a task that deletes itself", () => {
     const queries = read("../components/Queries.tsx");
-    const save = sliceBetween(queries, "const saveResponse = async", "/** The picker's inline quick-add");
+    /* ⚠️ NARROWED TO `saveResponse` ITSELF (quick actions §4). The far anchor was a comment three
+       hundred lines below, so the slice covered every function declared in between — and the day
+       one of them legitimately needed `dismissTask` (the quick snooze, which moves the nudge task
+       precisely because nothing else will) this lock went red about a function it was never
+       written to guard. The claim is about the RESPONSE path: answering a query deletes its nudge
+       task by itself, so a resolver there is machinery pretending to do work. Bounded at the next
+       declaration, it says exactly that and nothing more. */
+    const save = sliceBetween(queries, "const saveResponse = async", "const saveDeskResponse = async");
     expect(save).not.toBe("");
     for (const w of ["dismissTask", "resolveTaskFlag", "nudge_overdue"]) {
       expect(save, `${w} here would be machinery pretending to do work`).not.toContain(w);

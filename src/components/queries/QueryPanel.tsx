@@ -106,9 +106,17 @@ export interface QueryPanelProps {
    */
   onPrimary?: (anchor: HTMLElement) => void;
   onNudge?: (anchor: HTMLElement) => void;
-  liveAction?: "primary" | "nudge" | "closed" | null;
+  liveAction?: "primary" | "nudge" | "closed" | "snooze" | null;
   /** §2 (correction pass 3): carries the clicked control so the desk can notch to it. */
   onMarkClosed?: (anchor: HTMLElement) => void;
+  /**
+   * ⚠️ SNOOZE IS A FOURTH VERB, NOT A SECOND NUDGE (§4.5). Nudging writes a Nudged rung and hands
+   * the writer a draft; snoozing moves the reminder and records nothing. Merging them would make
+   * one control mean "chase them" and "don't chase them yet" depending on a sub-choice, which is
+   * how a verb row stops being readable. Same availability as Nudge — a query with nobody to
+   * chase has no reminder to move.
+   */
+  onSnooze?: (anchor: HTMLElement) => void;
   onClose: () => void;
   onStep: (delta: 1 | -1) => void;
   /** The two trays: elapsed, and the expected reply. */
@@ -137,7 +145,7 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
   open, mode = "detail", form,
   facts, status, name, agency, initials, sentLabel, viaLabel,
   manuscriptTitle, manuscriptMeta, versionLabel,
-  position, primaryLabel, onPrimary, onNudge, liveAction = null, onMarkClosed, onClose, onStep,
+  position, primaryLabel, onPrimary, onNudge, liveAction = null, onMarkClosed, onSnooze, onClose, onStep,
   elapsed, expectedLabel, tracking, agentTab, notesTab, noteCount,
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -307,7 +315,7 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
             * itself lived in the page — two files deciding one thing. One predicate now, and the
             * list's action grid imports the same one.
             */}
-          {(onPrimary || onNudge || onMarkClosed) && (
+          {(onPrimary || onNudge || onSnooze || onMarkClosed) && (
             <div className="qpn-verbs">
               {onPrimary && verbs.primary.enabled && (
                 <button type="button" className={`qpn-act qpn-act--pink${liveAction === "primary" ? " qpn-act--live" : ""}`}
@@ -317,9 +325,16 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
                 <button type="button" className={`qpn-act${liveAction === "nudge" ? " qpn-act--live" : ""}`}
                   onClick={(e) => onNudge(e.currentTarget)}>Nudge</button>
               )}
+              {onSnooze && verbs.nudge && (
+                <button type="button" className={`qpn-act${liveAction === "snooze" ? " qpn-act--live" : ""}`}
+                  onClick={(e) => onSnooze(e.currentTarget)}>Snooze</button>
+              )}
+              {/* ⚠️ `Close`, NOT `Mark closed` (§4.5). "Mark" is the vocabulary of the composing
+                  verbs — Mark sent records what you did — and this one asks a question and takes
+                  one answer. The row now reads as four verbs rather than three and a phrase. */}
               {onMarkClosed && verbs.markClosed && (
                 <button type="button" className={`qpn-act${liveAction === "closed" ? " qpn-act--live" : ""}`}
-                  onClick={(e) => onMarkClosed(e.currentTarget)}>Mark closed</button>
+                  onClick={(e) => onMarkClosed(e.currentTarget)}>Close</button>
               )}
               <div className="qpn-snt">Sent {sentLabel}<br />via {viaLabel}</div>
             </div>

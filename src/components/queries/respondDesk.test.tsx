@@ -11,6 +11,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { surnameKey } from "../../lib/queryCentreGrid";
+import { sliceBetween } from "../../test/sliceBetween";
 import { TimelineRows, buildTimelineRows } from "../reading-pane/QueryTimeline";
 import { deriveQueryFields } from "../../lib/queryDerivation";
 import { OUTCOME_STATUS } from "../../lib/responseDraft";
@@ -318,14 +319,28 @@ describe("§2 (pass 3) · the close menu is retired; closed is the desk's fourth
     expect((page.match(/Close this query as/g) ?? []).length).toBe(1);
   });
 
-  it("both live Mark-closed controls open the DESK with their own anchor", () => {
-    expect((page.match(/openDeskVerb\("closed", anchor\)/g) ?? []).length).toBe(2);
+  /* ⚠️ REWRITTEN BY §4, WHICH RETIRES THIS ASSERTION'S SUBJECT. Close is no longer a desk verb —
+     it is one decision and it opens a quick popover. What survives is the law the count was
+     standing for: BOTH live close controls behave the same way and each carries its own anchor,
+     so the two cannot drift into two surfaces for one verb. `openDeskVerb("closed", …)` must now
+     appear NOWHERE. */
+  it("both live close controls open the QUICK POPOVER with their own anchor — and neither the desk", () => {
+    expect((page.match(/openQuick\("close", activeQuery\.id, anchor\)/g) ?? []).length).toBe(2);
+    expect(page, "a close control went back through the desk")
+      .not.toMatch(/openDeskVerb\("closed"/);
+    /* ⚠️ AND NUDGE STAYS ON THE DESK, which is the distinction §4.5 refuses to collapse: nudging
+       composes a draft and wants the timeline; snoozing moves a date. */
+    expect((page.match(/openDeskVerb\("nudge", anchor\)/g) ?? []).length).toBeGreaterThanOrEqual(1);
   });
 
   it("closed's save is ONE recordQueryResponse — the old menu's bare updateQueryStatus is retired from this act", () => {
-    const at = page.indexOf("const saveDeskClosed");
-    expect(at).toBeGreaterThan(-1);
-    const body = page.slice(at, page.indexOf("const pickSendMethod", at));
+    /* ⚠️ RETARGETED AT `commitClose`, WHICH IS WHERE THE WRITE LIVES NOW (§4.4). The desk's save
+       and the quick popover's three reasons both call it, so asserting `saveDeskClosed`'s own
+       body would now be asserting a delegation and would pass over a popover that had grown a
+       second write. The LAW is unchanged: one close, one activity, one primitive. */
+    const at = page.indexOf("const commitClose");
+    expect(at, "the shared close primitive was renamed or removed").toBeGreaterThan(-1);
+    const body = sliceBetween(page, "const commitClose", "const saveDeskClosed");
     expect((body.match(/recordQueryResponse\(/g) ?? []).length).toBe(1);
     expect(body).not.toContain("updateQueryStatus");
     /* the reason maps the way the primitive already maps it */
@@ -912,5 +927,100 @@ describe("§2 (toolbar v2) · one partition, three views, and a board that says 
     const gcss = readFileSync(join(process.cwd(), "src/components/queries/queryCentreGrid.css"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "");
     expect(gcss.match(/\.qcc-sech \{[^}]*\}/)?.[0] ?? "", "the grid's heading sticks").not.toContain("sticky");
+  });
+});
+
+/* ══ quick actions · §4 — snooze and close are one decision each ══════════════════════════════ */
+describe("§4 (quick actions) · no drawer, no desk, no selection — and one component for all of it", () => {
+  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const pop = readFileSync(join(process.cwd(), "src/components/queries/QuickActionPopover.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const list = readFileSync(join(process.cwd(), "src/components/queries/QueryListView.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const panel = readFileSync(join(process.cwd(), "src/components/queries/QueryPanel.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  /**
+   * ⚠️ THE SECTION'S WHOLE CLAIM, AND IT IS AN ABSENCE. The rendered proof is the measurement's
+   * (no `.qpn` in the DOM, route unchanged); what a source lock can prove is that the quick pair
+   * RETURNS before the lines that open things. Asserted as order, not as presence: the drawer
+   * calls are still there for the composing verbs, and a lock that merely forbade them would go
+   * red on a correct file.
+   */
+  it("the quick pair returns BEFORE anything that opens a drawer, a desk or a selection", () => {
+    const body = sliceBetween(page, "onVerb={(id, verb, anchor) => {", "sortKey={sortKey}");
+    const guard = body.indexOf('if (verb === "snooze" || verb === "closed")');
+    const ret = body.indexOf("return;", guard);
+    expect(guard, "the quick pair is no longer intercepted").toBeGreaterThan(-1);
+    expect(ret, "the interception does not return").toBeGreaterThan(guard);
+    for (const opener of ["setSelectedQueryId(id)", "onOpenQuery?.(id)", "openDeskVerb("]) {
+      const at = body.indexOf(opener);
+      expect(at, `${opener} vanished — this lock is now asserting nothing`).toBeGreaterThan(-1);
+      expect(at, `${opener} runs before the quick pair returns`).toBeGreaterThan(ret);
+    }
+  });
+
+  /* ⚠️ ONE COMPONENT, NOT THREE. The copy law is measured on the rendered popover from each
+     anchor; here we prove there is only one thing to render. */
+  it("every anchor mounts the SAME component — the page has exactly one QuickActionPopover", () => {
+    expect((page.match(/<QuickActionPopover/g) ?? []).length).toBe(1);
+    expect(list, "the list grew its own popover").not.toContain("QuickActionPopover");
+    expect(panel, "the drawer grew its own popover").not.toContain("QuickActionPopover");
+    /* the list's slot two is snooze, and it hands the page an anchor rather than opening anything */
+    expect(list).toContain('onVerb?.(r.id, "snooze", e.currentTarget)');
+    expect(panel).toContain("onSnooze(e.currentTarget)");
+  });
+
+  /**
+   * ⚠️ SNOOZE WRITES NO ACTIVITY — the claim its own sub-line makes to the reader. Asserted over
+   * the write's body, and it names the activity primitives rather than counting calls, because
+   * "one call fewer" is not the claim: the claim is that NONE of them is reachable from here.
+   */
+  it("snooze writes no activity — the reminder moves, and nothing is recorded", () => {
+    const body = sliceBetween(page, "const commitQuickSnooze", "const commitStopNudging");
+    for (const w of ["recordQueryResponse", "addActivity", "logNudge", "recordMaterialsSent", "markSentWithReceipt"])
+      expect(body, `snooze reached ${w}`).not.toContain(w);
+    /* both halves of the one reminder — the page's caption and the board's card */
+    expect(body).toContain("updateQuery(q.id, { nudgeDate: next }");
+    expect(body).toContain('dismissTask("nudge_overdue", q.id, "fixed snooze", days)');
+    /* and it is reversible, restoring the PRIOR date rather than compensating with a negative */
+    expect(body).toContain("undo:");
+    expect(body).toContain("nudgeDate: prior");
+  });
+
+  it("close writes exactly one activity, through the one primitive both surfaces share", () => {
+    const body = sliceBetween(page, "const commitClose", "const saveDeskClosed");
+    expect((body.match(/recordQueryResponse\(/g) ?? []).length).toBe(1);
+    /* the desk delegates rather than keeping a second copy of the write */
+    const desk = sliceBetween(page, "const saveDeskClosed", "const commitExpectedDate");
+    expect(desk, "the desk grew its own close write again").not.toContain("recordQueryResponse(");
+    expect(desk).toContain("commitClose(");
+  });
+
+  /* ⚠️ THE DIAL IS THE TO-DO DIAL. A second stops table here is the thing the brief forbids, and
+     it is what a reader would reach for first — the ref draws three static rows. */
+  it("the dial is imported, never re-rolled — no second stops table", () => {
+    expect(pop).toContain('import { SnoozeDialBody } from "../todo/SnoozeDial"');
+    for (const n of ["SNOOZE_STOPS", "1 week", "2 weeks", "4 weeks", "8 weeks"])
+      expect(pop, `the popover restated a stop (${n})`).not.toContain(n);
+  });
+
+  it("the three reasons are the ref's, in the ref's order and words", () => {
+    expect(pop).toMatch(/REJECTED[\s\S]{0,40}"They passed"/);
+    expect(pop).toMatch(/WITHDRAWN[\s\S]{0,40}"I withdrew it"/);
+    expect(pop).toMatch(/NO_RESPONSE[\s\S]{0,40}"No reply — gone quiet"/);
+    /* the full path stays available rather than being replaced by four more controls */
+    expect(pop).toContain("Open the query");
+  });
+
+  /* ⚠️ THE CHASSIS IS §1'S. A bespoke rim/frame/band here would be the second chassis the toolbar
+     sections just finished removing — and the give-away is a border colour restated in this file. */
+  it("it wears the toolbar's chassis rather than a second one", () => {
+    expect(pop).toContain('chassis="mount"');
+    const css = readFileSync(join(process.cwd(), "src/components/queries/quickAction.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const own of ["rgba(124, 58, 42, 0.28)", "linear-gradient(135deg", "border-radius: 14px"])
+      expect(css, `the quick actions restated the chassis (${own})`).not.toContain(own);
   });
 });

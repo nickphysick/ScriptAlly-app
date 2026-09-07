@@ -45,7 +45,15 @@ export interface SnoozeDialProps {
 }
 
 export interface SnoozeDialBodyProps {
-  card: BoardCard;
+  /**
+   * ⚠️ NARROWED TO WHAT THE BODY ACTUALLY READS (quick actions, §4.3) — the task type, for the
+   * offer ceiling and its caption, and the title, for the slider's accessible name. It was the
+   * whole `BoardCard`, which meant the only thing that could wear this control was something the
+   * To-do board had already assembled; a Query Centre row is not that, and the alternative was
+   * either a synthetic card with a dozen invented fields or a second dial. A `BoardCard` still
+   * satisfies this, so both existing call sites are unchanged.
+   */
+  card: Pick<BoardCard, "taskType" | "title">;
   daysUntilDeadline?: number;
   onSnooze: (days: number, when: string) => void;
   /** ⚠️ THE SLIDER TAKES FOCUS AND FIRES NOTHING — see the note on the body itself. */

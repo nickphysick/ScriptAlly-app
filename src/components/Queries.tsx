@@ -141,6 +141,7 @@ import { nextIndex, typeAheadIndex, nearestSurvivor, pageSizeFor, isListNavKey, 
 import { nudgeStanding, nudgeReason, nudgeConfirm, nudgeTimes, nudgedAgo, scheduledReminder } from "../lib/nudgeState";
 import { NUDGE_NESTED_TYPE } from "../lib/logNudge";
 import { useFixedMenu } from "./forms/useFixedMenu";
+import { QuickActionPopover, type QuickActionKind } from "./queries/QuickActionPopover";
 import { PackagePicker } from "./reading-pane/PackagePicker";
 import { QueryCentreSkeleton, SKELETON_FLOOR_MS } from "./reading-pane/QueryCentreSkeleton";
 /* §2b — the shared art registry, already consumed by two other Query Centre panels. */
@@ -366,6 +367,9 @@ export const Queries: React.FC<{
     addQuery,
     addAgent,
     updateQuery,
+    /* §4 — the nudge task's own suppression, so a snooze moves the To-do board's card as well
+       as this page's caption. `logNudge` writes both; a snooze is that pair without the activity. */
+    dismissTask,
     deleteQuery,
     recordMaterialsSent,
     markSentWithReceipt,
@@ -847,32 +851,103 @@ export const Queries: React.FC<{
    * path + its closingReason). One activity, receipt with Undo — the old menu's bare status write
    * is retired with it.
    */
+  /**
+   * ⚠️ ONE CLOSE, TWO SURFACES (§4.4). The desk's close and the quick popover's three reasons
+   * write through THIS — one activity, the same reason mapping, the same receipt with Undo. The
+   * quick path differs only in what it supplies: today's date and no note. Had the popover been
+   * given its own write, the two would have been one edit away from closing a query differently
+   * depending on which control the reader pressed.
+   */
+  const commitClose = async (q: Query, reason: QueryStatus, date: string, note: string) => {
+    if (!currentUser) return;
+    const agent = agents.find((a) => a.id === q.agentId) ?? null;
+    const ms = manuscripts.find((m) => m.id === q.manuscriptId);
+    const base = emptyResponseDraft(date);
+    const draft: ResponseDraft = { ...base, outcome: reason === QueryStatus.REJECTED ? "rejected" : "noreply", dateArrived: date, notes: note };
+    const payload = {
+      ...responseDraftToPayload(draft),
+      ...(reason !== QueryStatus.REJECTED ? {
+        closingReason: reason === QueryStatus.WITHDRAWN ? "Withdrew my submission" as const : "No response after expected window" as const,
+      } : {}),
+    };
+    const res = await recordQueryResponse(
+      { userId: currentUser.id, query: q, agent, manuscript: { title: ms?.title } },
+      payload as never,
+    );
+    showToast({
+      replaces: RESPONSE_RECEIPT_CHANNEL,
+      message: `Closed — ${reason} · ${agent ? agentPrimary(agent) : "the agent"}`,
+      undo: () => res.undo(),
+    });
+  };
+
+  /**
+   * ⚠️ SNOOZE WRITES NO ACTIVITY. It is `logNudge` MINUS the activity: the same two reminder
+   * writes that path makes — the query's own `nudgeDate`, which is what this page's "Nudge agent
+   * in N" caption reads, and the `nudge_overdue` task's dated suppression, which is what the
+   * To-do board reads — and nothing else. No status, no rung, no "Since then" mark.
+   *
+   * ⚠️ BOTH WRITES, OR THE TWO SURFACES DISAGREE. Moving only `nudgeDate` leaves the To-do board
+   * still asking you to nudge tomorrow; moving only the task leaves this page still counting down
+   * to the old date. They are one reminder wearing two records, which is why the path that
+   * created them writes both.
+   *
+   * ⚠️ AND THE DAYS ARRIVE ALREADY CLAMPED — the dial applies `clampSnooze` before it calls back,
+   * so the ceiling is enforced at the one choke point rather than re-checked here.
+   */
+  const commitQuickSnooze = async (q: Query, days: number) => {
+    const prior = q.nudgeDate;
+    const next = new Date(Date.now() + days * 86400000).toISOString();
+    setQuick(null);
+    try {
+      await updateQuery(q.id, { nudgeDate: next } as Partial<Query>);
+      await dismissTask("nudge_overdue", q.id, "fixed snooze", days);
+      showToast({
+        message: `Nudge moved to ${new Date(next).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`,
+        /* ⚠️ THE UNDO RESTORES, IT DOES NOT COMPENSATE — the prior date back on the query, and the
+           suppression lifted. An undo that merely snoozed by a negative number would leave a
+           second dismissal behind. */
+        undo: async () => {
+          await updateQuery(q.id, { nudgeDate: prior } as Partial<Query>);
+          await dismissTask("nudge_overdue", q.id, "fixed snooze", 0);
+          showToast({ message: "Restored" });
+        },
+      });
+    } catch {
+      showToast({ message: "Couldn't move that reminder — please try again." });
+    }
+  };
+
+  /* ⚠️ PERMANENT, AND STILL NOT AN ACTIVITY. The nudge stops being asked for; nothing is recorded
+     about the query, because nothing about the query has changed. */
+  const commitStopNudging = async (q: Query) => {
+    const prior = q.nudgeDate;
+    setQuick(null);
+    try {
+      await dismissTask("nudge_overdue", q.id, "permanent");
+      showToast({
+        message: "Nudges stopped for this query",
+        undo: async () => {
+          await dismissTask("nudge_overdue", q.id, "fixed snooze", 0);
+          if (prior) await updateQuery(q.id, { nudgeDate: prior } as Partial<Query>);
+          showToast({ message: "Restored" });
+        },
+      });
+    } catch {
+      showToast({ message: "Couldn't stop those nudges — please try again." });
+    }
+  };
+
   const saveDeskClosed = async () => {
     if (!deskClosed?.reason || !activeQuery || !currentUser || respSaving) return;
     const q = activeQuery;
     const reason = deskClosed.reason;
     setRespSaving(true);
     try {
-      const agent = agents.find((a) => a.id === q.agentId) ?? null;
-      const base = emptyResponseDraft(deskClosed.date);
-      const draft: ResponseDraft = { ...base, outcome: reason === QueryStatus.REJECTED ? "rejected" : "noreply", dateArrived: deskClosed.date, notes: deskClosed.note };
-      const payload = {
-        ...responseDraftToPayload(draft),
-        ...(reason !== QueryStatus.REJECTED ? {
-          closingReason: reason === QueryStatus.WITHDRAWN ? "Withdrew my submission" as const : "No response after expected window" as const,
-        } : {}),
-      };
-      const res = await recordQueryResponse(
-        { userId: currentUser.id, query: q, agent, manuscript: { title: activeMs?.title } },
-        payload as never,
-      );
+      /* the desk supplies a chosen date and a note; the write itself is the shared one */
+      await commitClose(q as Query, reason, deskClosed.date, deskClosed.note);
       setDeskVerb(null);
       setDeskFreshStatus({ toStatus: reason, at: Date.now() });
-      showToast({
-        replaces: RESPONSE_RECEIPT_CHANNEL,
-        message: `Closed — ${reason} · ${agentPrimary(activeAgent ?? ({} as never)) || "the agent"}`,
-        undo: () => res.undo(),
-      });
     } catch {
       showToast({ message: "Couldn't close that query — please try again." });
     } finally {
@@ -1537,6 +1612,26 @@ export const Queries: React.FC<{
   const { triggerRef: nudgeTriggerRef, menuStyle: nudgeAskStyle } = useFixedMenu<HTMLButtonElement>(
     !!nudgeAsk, { placement: "auto", constrain: true, menuRef: nudgePanelRef },
   );
+  /**
+   * ⚠️ QUICK ACTIONS HOLD A QUERY ID, NOT THE SELECTION (§4). Snooze and close act on the row
+   * that was pressed, and on the list that row is deliberately NOT selected by pressing it — a
+   * popover that selected as a side effect would scroll the reading pane, re-render the drawer
+   * and cost the reader their place, to answer a question that takes one click. Everything this
+   * pair needs is the id, so the id is what it keeps.
+   */
+  const [quick, setQuick] = useState<{ kind: QuickActionKind; queryId: string } | null>(null);
+  const quickPanelRef = useRef<HTMLElement>(null);
+  const { triggerRef: quickTrigRef, menuStyle: quickStyle } = useFixedMenu<HTMLElement>(
+    !!quick, { placement: "auto", align: "auto", constrain: true, menuRef: quickPanelRef },
+  );
+  /* the anchor arrives as an element rather than a ref, so it is assigned into the one the hook
+     owns — the idiom `openDeskVerb` already uses for the correction trigger */
+  const openQuick = (kind: QuickActionKind, queryId: string, anchor: HTMLElement) => {
+    quickTrigRef.current = anchor;
+    setQuick((cur) => (cur && cur.kind === kind && cur.queryId === queryId ? null : { kind, queryId }));
+  };
+  const quickQuery = quick ? queries.find((q) => q.id === quick.queryId) ?? null : null;
+
   // Close every ribbon popover/modal whenever the reader moves to a different query.
   useEffect(() => { setIsNudgeOpen(false); setIsTasksOpen(false); setIsMoreOpen(false); setNudgeAsk(null); }, [selectedQueryId]);
   // 5e — the delete is now WIRED to db.deleteQuery (cascades the per-query activity log + the
@@ -5464,6 +5559,33 @@ export const Queries: React.FC<{
           * them on the page.
           */}
         {/**
+          * ══ §4 · THE QUICK ACTIONS — snooze and close, anchored to whichever control was
+          * pressed. Rendered HERE, beside the desk rather than inside the list, because the same
+          * popover is opened from three places: a list row's button, the drawer's verb row and
+          * the dotted reminder phrase. One mount, one component, one copy — three mounts would be
+          * three dialects of the same question within a release or two.
+          */}
+        {quick && quickQuery && (
+          <QuickActionPopover
+            kind={quick.kind}
+            title={agentPrimary(agents.find((a) => a.id === quickQuery.agentId) ?? ({} as never)) || "this query"}
+            dueLabel={quickQuery.nudgeDate
+              ? new Date(quickQuery.nudgeDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+              : null}
+            style={quickStyle}
+            panelRef={quickPanelRef}
+            onDismiss={() => setQuick(null)}
+            onSnooze={(days) => { void commitQuickSnooze(quickQuery as Query, days); }}
+            onStopNudging={() => { void commitStopNudging(quickQuery as Query); }}
+            onCloseQuery={(status) => {
+              setQuick(null);
+              void commitClose(quickQuery as Query, status, todayInputDate(), "");
+            }}
+            /* the full path: the drawer at Tracking, where a date and a note are available */
+            onOpenQuery={() => { setQuick(null); setSelectedQueryId(quickQuery.id); onOpenQuery?.(quickQuery.id); }}
+          />
+        )}
+        {/**
           * ══ §1/§2 (respond-nudge) · THE VERB DESK — the same host as corrections, one at a time.
           * Notched to the top-bar button that opened it (the button wears the accent ring); Escape
           * captured, focus returned — all the host's own behaviour, inherited.
@@ -5944,18 +6066,29 @@ export const Queries: React.FC<{
                 sentLeaf={listSentLeaf}
                 onVerb={(id, verb, anchor) => {
                   /**
-                   * ⚠️ THE DESK NEEDS ITS HOST, AND THE GHOST RUNG NEEDS A RAIL (v14 §2). A row
-                   * action therefore opens the DRAWER on that row first and the desk second — the
-                   * desk is anchored beside the drawer and its proposed rung is drawn on the
-                   * drawer's timeline, so firing the verb without the drawer would put a card
-                   * beside nothing and a preview nowhere.
+                   * ⚠️ SNOOZE AND CLOSE OPEN NOTHING — no drawer, no desk, no route change, and
+                   * NO CHANGE OF SELECTION (§4, correcting v14 §2). They are one decision each.
+                   * The rule below still holds for the composing verbs, and the two are separated
+                   * here rather than inside the desk, because the cheapest way to break this is
+                   * to let the quick pair fall through to the lines beneath.
+                   */
+                  if (verb === "snooze" || verb === "closed") {
+                    openQuick(verb === "snooze" ? "snooze" : "close", id, anchor);
+                    return;
+                  }
+                  /**
+                   * ⚠️ THE DESK NEEDS ITS HOST, AND THE GHOST RUNG NEEDS A RAIL (v14 §2). A
+                   * COMPOSING action therefore opens the DRAWER on that row first and the desk
+                   * second — the desk is anchored beside the drawer and its proposed rung is
+                   * drawn on the drawer's timeline, so firing the verb without the drawer would
+                   * put a card beside nothing and a preview nowhere.
                    */
                   setSelectedQueryId(id);
                   onOpenQuery?.(id);
                   const q = queries.find((x) => x.id === id);
                   const t = q ? turnFor(q.status as QueryStatus) : "sand";
-                  if (verb === "primary" && t === "offer") { if (q) openRecord(q as Query); return; }
-                  openDeskVerb(verb === "primary" ? (t === "you" ? "marksent" : "respond") : verb === "nudge" ? "nudge" : "closed", anchor);
+                  if (t === "offer") { if (q) openRecord(q as Query); return; }
+                  openDeskVerb(t === "you" ? "marksent" : "respond", anchor);
                 }}
                 sortKey={sortKey}
                 sortDesc={sortDesc}
@@ -6126,7 +6259,11 @@ export const Queries: React.FC<{
               }}
               onNudge={(anchor) => openDeskVerb("nudge", anchor)}
               liveAction={deskVerb === "nudge" ? "nudge" : deskVerb === "closed" ? "closed" : deskVerb ? "primary" : null}
-              onMarkClosed={(anchor) => openDeskVerb("closed", anchor)}
+              /* ⚠️ THE QUICK PAIR BYPASSES THE DESK HERE TOO — the drawer is already open, so the
+                 popover simply anchors to its own button. Sending these through `openDeskVerb`
+                 would put a composing surface over a one-answer question. */
+              onSnooze={(anchor) => { if (activeQuery) openQuick("snooze", activeQuery.id, anchor); }}
+              onMarkClosed={(anchor) => { if (activeQuery) openQuick("close", activeQuery.id, anchor); }}
               onClose={() => onSelectView?.("cards")}
               onStep={(delta) => {
                 if (!gridRows.length) return;
@@ -6224,9 +6361,12 @@ export const Queries: React.FC<{
                        open survives only as the mobile surface below. */
                     onNudge={(anchor) => openDeskVerb("nudge", anchor)}
                     onSetExpectedDate={(iso) => commitExpectedDate(iso)}
-                    /* §2 (correction pass 3) — the offer's "Mark closed" opens the DESK, same
-                       anchor contract as its "Nudge now" neighbour */
-                    onMarkClosed={(anchor) => openDeskVerb("closed", anchor)}
+                    /* ⚠️ §4 — the offer tray's close joins the quick pair. It was the desk, beside
+                       its "Nudge now" neighbour; Nudge STAYS on the desk (it composes a draft) and
+                       close does not. One verb, one behaviour, wherever it is pressed — two close
+                       controls that opened different surfaces would be the fork this section is
+                       correcting, wearing a second face. */
+                    onMarkClosed={(anchor) => { if (activeQuery) openQuick("close", activeQuery.id, anchor); }}
                     onEditSendMethod={sentActivity ? (anchor) => {
                       const entry = rungEntry(sentActivity.id);
                       if (entry) { correctingTriggerRef.current = anchor; setCorrecting({ step: "fork", entry }); }
