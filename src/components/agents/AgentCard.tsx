@@ -2,37 +2,47 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Agent list — the card FACE (design authority: design-refs/agent-list-mockup.html).
+ * Contact list — the card FACE (design authority: design-refs/contact-list-v5.html).
  *
- * Band (relationship pill · stars · pencil) → identity (avatar, Playfair name, italic agency, mono
- * meta) → your history → wishlist → materials wanted → note preview → footer (Log query ·
- * View website), with the closed-for-submissions stamp over the whole face when their door is
- * shut. Every value is derived in src/lib/agentList.ts; nothing here is stored.
+ * Band (their door · stars · corner buttons) → identity (monogram, Playfair name, italic agency,
+ * one mono line of place and pace) → Genres sought → Manuscript wishlist → footer (Log query ·
+ * Submissions page · the material slots).
  *
- * Two locked-component rules hold: status visuals are the real `StatusDot` (never a local SVG
- * approximation), and the scene/rotor/face nesting is the flip structure Phase 3 completes — the
- * rotor must never gain an `overflow` property.
+ * ⚠️ THE BAND CARRIES THEIR DOOR NOW, AND THAT SUPERSEDES THE TWO-SYSTEMS EXCEPTION FOR COLOUR.
+ * This card used to be tinted by YOUR HISTORY — sage for a live query, pink otherwise — with the
+ * door written in ink as a hatch and a stamp. The v5 ref reverses it: the band is sage when their
+ * door is open and grey when it is shut, and the door pill states which in words. So the hatch and
+ * the rotated stamp are retired: with a pill and a fill both saying it, a third device is two too
+ * many, which is the same argument that retired the ink pill in the first place.
+ *
+ * ⚠️ BUT THE DIM RULE KEEPS ITS CARVE-OUT, AND THE REF CANNOT OVERRULE IT — because the ref does
+ * not contain the case. Its two closed agents are both terminal, so it never draws a shut door
+ * over a live query, and its unconditional `.closed { opacity }` is silent rather than
+ * authoritative there. `agentCardDims` holds that a card with an active query never dims whatever
+ * the door is doing: an outstanding full does not matter less because the agency shut its doors.
+ * That is a recorded decision with its own locks, and a mockup that never drew the case is not
+ * evidence against it.
+ *
+ * ⚠️ NO STATUS DOTS, NO RELATIONSHIP PILL, NO HISTORY LINE. Attention and progress belong to the
+ * To-do board and the Query Centre; this page is REFERENCE DATA, and a fact with two homes is two
+ * facts that will eventually disagree.
+ *
+ * The flip structure is untouched and load-bearing: the rotor is the ONE rotating element, it
+ * carries preserve-3d, and it must never gain an `overflow` property — any value flattens the 3D
+ * context and mirrors the back face.
  */
 import React from "react";
 import { Pencil, Send } from "lucide-react";
-import { Agent, Activity, Manuscript, Query } from "../../types";
+import { Agent, Query } from "../../types";
 import { agentInitials, agentPrimary, agentSecondary } from "../../lib/agentDisplay";
-import { countryName, flagFor } from "../../lib/territory";
-import { StatusDot } from "../StatusDot";
+import { flagFor } from "../../lib/territory";
 import "flag-icons/css/flag-icons.min.css";
-import {
-  agentRelationship,
-  agentStateClass,
-  agentCardDims,
-  cardHistory,
-  closedStampDate,
-  isDoorOpen,
-  materialsSummary,
-  metaTokens,
-  notePreview,
-  relationshipLabel,
-  wishlistChips,
-} from "../../lib/agentList";
+import { agentCardDims, contactMetaLine, isDoorOpen } from "../../lib/agentList";
+import { isGenreMatch } from "../../lib/genreMatch";
+import { attachDrift, hasMoreToRead } from "../../lib/mswlDrift";
+
+/** The empty wishlist reads as a fact about their site, never as a fault of yours. */
+export const WISHLIST_EMPTY = "Nothing recorded — check their site.";
 
 /** Display-only amber stars. Per amendment A an UNRATED agent shows NO stars — never five hollow. */
 const Stars: React.FC<{ rating?: number; size?: number }> = ({ rating, size = 11 }) => {
@@ -54,22 +64,19 @@ const Stars: React.FC<{ rating?: number; size?: number }> = ({ rating, size = 11
   );
 };
 
-const PinGlyph: React.FC = () => (
-  <svg className="pinmark" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M12 17v5M6.5 12.5 5 14h14l-1.5-1.5V9a2 2 0 0 0-1-1.7L15 6V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v2l-1.5 1.3a2 2 0 0 0-1 1.7v3.5z" />
-  </svg>
-);
-
 interface AgentCardProps {
   agent: Agent;
   /** True while this card is the one flipped open (one at a time — the parent enforces it). */
   flipped?: boolean;
-  /** The editor face, mounted only for the flipped card. */
+  /** The back face, mounted only for the flipped card. */
   editor?: React.ReactNode;
   queries: Query[];
-  manuscripts: Manuscript[];
-  activities: Activity[];
-  /** Opens the flip editor (Phase 3 owns the flip itself). */
+  /**
+   * The genre to tint, already normalised by `matchGenre` — null when there is no manuscript in
+   * scope or it records no genre. A null means "no claim", and every chip renders plain.
+   */
+  matchGenre: string | null;
+  /** Opens the editor for this agent. */
   onEdit: (agentId: string) => void;
   /** Log a query against this agent — preselects them in the focus form. */
   onLogQuery: (agent: Agent) => void;
@@ -79,150 +86,125 @@ interface AgentCardProps {
   motionClass?: string;
 }
 
-export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscripts, activities, onEdit, onLogQuery, flipped = false, editor, style, motionClass }) => {
-  // Colour = your history; the door rides as ink (hatch + pill) and, when nothing of yours is
-  // live, as the dim class. Three independent facts, three independent classes.
-  const stateClass = agentStateClass(agent, queries);
+/**
+ * The wishlist, and the only part of this card that moves.
+ *
+ * ⚠️ THE BOX IS `flex: 1; min-height: 0` AND IT CLIPS — never a pixel height. A fixed height is
+ * what let a long wishlist paint straight through the footer: the text overflowed a box that had
+ * been told how tall to be instead of how much room it may take, and the card had no way to
+ * notice. The card body clips too, as a second line of defence, so a mistake here is contained
+ * rather than published.
+ *
+ * ⚠️ AND THE FADE IS TIED TO THE SAME ANSWER AS THE DRIFT. Both ask `hasMoreToRead`, so a card
+ * can never show a "there is more" fade over a wishlist that will not move — one derivation, two
+ * consumers, rather than two rules that agree until they do not.
+ */
+const Wishlist: React.FC<{ text: string; hostRef: React.RefObject<HTMLDivElement | null> }> = ({ text, hostRef }) => {
+  const boxRef = React.useRef<HTMLParagraphElement>(null);
+  const [more, setMore] = React.useState(false);
+
+  React.useEffect(() => {
+    const el = boxRef.current;
+    const host = hostRef.current;
+    if (!el || !host) return undefined;
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    const sync = () => setMore(hasMoreToRead(el.scrollHeight, el.clientHeight));
+    sync();
+    /* the element's own box changes with the column; its CONTENT changes only by re-render, so
+       observing the box is the right question here rather than the scroller trap */
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(sync) : null;
+    ro?.observe(el);
+    const detach = attachDrift(el, host, reduced);
+    return () => { ro?.disconnect(); detach(); };
+  }, [text, hostRef]);
+
+  return (
+    <div className={`agl-mswlwrap${more ? " agl-more" : ""}`}>
+      <p className="agl-mswl" ref={boxRef}>{text}</p>
+    </div>
+  );
+};
+
+export const AgentCard: React.FC<AgentCardProps> = ({
+  agent, queries, matchGenre, onEdit, onLogQuery, flipped = false, editor, style, motionClass,
+}) => {
   const open = isDoorOpen(agent);
-  // The hush and the dim answer the SAME question — closed door, nothing of yours live — so
-  // they share one derivation rather than drifting apart.
-  const hushed = agentCardDims(agent, queries);
-  const cardClasses = `${stateClass}${open ? "" : " s-closed"}${hushed ? " s-dim s-hush" : ""}`;
-  const history = cardHistory(agent, queries, manuscripts);
-  const { shown, more } = wishlistChips(agent);
-  const materials = materialsSummary(agent);
-  const preview = notePreview(agent);
+  /* THE DIM — closed door AND nothing of yours live. See the header: the ref draws neither half
+     of this case, so the app's own rule stands. */
+  const dim = agentCardDims(agent, queries);
+  const cardClasses = `${open ? "s-open" : "s-shut"}${dim ? " s-dim" : ""}`;
   const website = (agent.website || "").trim();
-  // WHERE they are. The flag comes from the installed flag-icons set (a class, not markup), so
-  // every country resolves without hand-drawing SVGs. Absent country ⇒ no flag; absent city ⇒ the
-  // country name stands in, because an empty line reads as missing data rather than as absence.
   const flagClass = flagFor(agent.country);
-  const locationText = (agent.city || "").trim() || countryName(agent.country) || "";
+  const meta = contactMetaLine(agent);
+  const mswl = (agent.mswlNotes || "").trim();
+  const hostRef = React.useRef<HTMLDivElement>(null);
+  const name = agentPrimary(agent);
 
   return (
     <div className={`agl-scene ${cardClasses}${motionClass ? ` ${motionClass}` : ""}`} style={style} data-agent-card={agent.id}>
-      <div className={`agl-rotor${flipped ? " flipped" : ""}`}>
+      <div className={`agl-rotor${flipped ? " flipped" : ""}`} ref={hostRef}>
         <div className="agl-facef">
           <div className="agl-acard">
+            {/* THEIR DOOR — the fill and the pill say the same thing, in colour and in words. */}
             <div className="agl-band">
-              <span className="agl-tag">{relationshipLabel(agentRelationship(agent.id, queries))}</span>
+              <span className="agl-doorpill">{open ? "Open to queries" : "Closed to queries"}</span>
+              <span className="agl-sp" />
               <Stars rating={agent.starRating} />
               <button
                 type="button"
-                className="agl-pencil"
+                className="agl-cbtn"
                 onClick={() => onEdit(agent.id)}
-                title={`Edit ${agentPrimary(agent)}`}
-                aria-label={`Edit ${agentPrimary(agent)}`}
+                title={`Edit ${name}`}
+                aria-label={`Edit ${name}`}
               >
-                <Pencil width={13} height={13} aria-hidden="true" />
+                <Pencil width={12} height={12} aria-hidden="true" />
               </button>
             </div>
 
-            <div className="agl-main">
-              <div className="agl-av">
-                {agent.image ? (
-                  <img src={agent.image} alt="" />
-                ) : (
-                  <div className="ini">{agentInitials(agent)}</div>
-                )}
-              </div>
+            <div className="agl-body">
               <div className="agl-who">
-                <div className="agl-name">{agentPrimary(agent)}</div>
-                <div className="agl-agency">{agentSecondary(agent)}</div>
-                {/* WHERE they are — between the agency and the mono meta line. Rendered only when
-                    the agent actually has a location: no country and no city means nothing to say,
-                    and a placeholder would be noise on every unlocated record. */}
-                {locationText && (
+                <div className="agl-av">
+                  {agent.image ? <img src={agent.image} alt="" /> : <div className="ini">{agentInitials(agent)}</div>}
+                </div>
+                <div className="agl-whotx">
+                  <div className="agl-name">{name}</div>
+                  <div className="agl-agency">{agentSecondary(agent)}</div>
+                  {/* place and pace, on one mono line. A missing location contributes no token
+                      rather than an empty one — see `contactMetaLine`. */}
                   <div className="agl-loc">
                     {flagClass && <span className={`fl ${flagClass}`} aria-hidden="true" />}
-                    <span className="ct">{locationText}</span>
+                    <span className="agl-metaline">{meta.join(" · ")}</span>
                   </div>
-                )}
-                <div className="agl-meta">
-                  {metaTokens(agent).map((t, i) => (
-                    <React.Fragment key={t}>
-                      {i > 0 && <span className="d" aria-hidden="true" />}
-                      <span>{t}</span>
-                    </React.Fragment>
-                  ))}
                 </div>
               </div>
-            </div>
 
-            {/* THE HUSHED BODY (agent-list-fixes P2): with the door closed and nothing of yours
-                live there is nothing to act on and nothing to read, so the body goes and the
-                stamp takes the vacated space. An ACTIVE query always renders in full — the same
-                exception the dim rule makes. */}
-            {!hushed && <div className="agl-body">
-              <div>
-                <div className="agl-sect">Your history</div>
-                <div className="agl-hist">
-                  {history.length ? (
-                    history.map((h) => (
-                      <React.Fragment key={h.queryId}>
-                        <span className="agl-hdot" title={h.title}>
-                          <StatusDot status={h.status} overrideSize={15} decorative />
-                        </span>
-                        <span className="lbl">{h.title}</span>
-                      </React.Fragment>
+              <div className="agl-sect">
+                <span className="agl-slab">Genres sought</span>
+                <div className="agl-chips">
+                  {agent.genres.length ? (
+                    agent.genres.map((g) => (
+                      <span className={`agl-chip${isGenreMatch(g, matchGenre) ? " agl-chip-match" : ""}`} key={g}>{g}</span>
                     ))
                   ) : (
-                    <span className="agl-none">Never queried.</span>
+                    <span className="agl-absent">No genres recorded.</span>
                   )}
                 </div>
               </div>
 
-              <div className="agl-hr" />
-
-              <div>
-                <div className="agl-sect">Wishlist</div>
-                <div className="agl-gtags">
-                  {shown.length ? (
-                    <>
-                      {shown.map((g) => (
-                        <span className="agl-gtag" key={g}>{g}</span>
-                      ))}
-                      {more > 0 && <span className="agl-gtag more">+{more}</span>}
-                    </>
-                  ) : (
-                    <span className="agl-none">No wishlist recorded.</span>
-                  )}
-                </div>
+              <div className="agl-sect agl-wish">
+                <span className="agl-slab">Manuscript wishlist</span>
+                {mswl ? <Wishlist text={mswl} hostRef={hostRef} /> : <p className="agl-absent">{WISHLIST_EMPTY}</p>}
               </div>
-
-              <div className="agl-hr" />
-
-              <div>
-                <div className="agl-sect">Materials wanted</div>
-                <div className="agl-matline">
-                  {materials ?? <span className="agl-none">Nothing recorded — check their site.</span>}
-                </div>
-              </div>
-
-              {preview && (
-                <div className="agl-notep">
-                  {preview.pinned && <PinGlyph />}
-                  {preview.text}
-                </div>
-              )}
-            </div>}
-
-            {!open && (
-              <div className="agl-stamp" aria-hidden="true">
-                <div className="agl-stamp-in">
-                  <div className="s1">Closed for submissions</div>
-                  <div className="s2">Last updated {closedStampDate(agent, activities) || "—"}</div>
-                </div>
-              </div>
-            )}
+            </div>
 
             <div className="agl-foot">
               {open ? (
                 <button type="button" className="agl-btn agl-btn-dark" onClick={() => onLogQuery(agent)}>
-                  <Send width={13} height={13} aria-hidden="true" />
+                  <Send width={12} height={12} aria-hidden="true" />
                   Log query
                 </button>
               ) : (
+                /* the full disabled grammar — paper fill, hairline, faint text, not-allowed */
                 <button type="button" className="agl-btn" disabled title="Closed for submissions at the moment">
                   Log query
                 </button>
@@ -239,13 +221,13 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
                   }
                 }}
               >
-                View website
+                Submissions page
               </button>
+              <span className="agl-sp" />
             </div>
           </div>
         </div>
-        {/* Back face — pre-rotated 180° in CSS; mounted only while flipped so the editor's
-            draft state is created fresh on open and torn down on close. */}
+        {/* Back face — pre-rotated 180° in CSS; mounted only while flipped. */}
         <div className="agl-faceb" aria-hidden={!flipped}>{flipped ? editor : null}</div>
       </div>
     </div>

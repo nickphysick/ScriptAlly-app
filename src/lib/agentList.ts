@@ -17,6 +17,7 @@ import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, Submissi
 import { materialRowsFromAgent, summaryFromRows } from "./agentMaterials";
 import { agentTerritory } from "./agentsPage";
 import { getPrimaryAction } from "./queryPrimaryAction";
+import { countryName } from "./territory";
 
 /** Terminal query statuses — everything else, INCLUDING Offer, counts as an active query. */
 export const TERMINAL_STATUSES: readonly QueryStatus[] = [
@@ -473,6 +474,31 @@ export function metaTokens(agent: Agent): string[] {
   // NO-REPLY-MEANS-NO is REMOVED from the card front: it is detail for when you are writing to
   // them, not for scanning. It stays in the editor and stays stored — nothing is lost.
   return [weeks && weeks > 0 ? `~${weeks} weeks` : "response unknown", methodShort(agent)];
+}
+
+/**
+ * THE CARD'S ONE MONO LINE — where they are, and how long they take (contact-list v5).
+ *
+ * ⚠️ IT IS NOT `metaTokens`, AND THE DIFFERENCE IS THE METHOD. That line carried the submission
+ * method as its second token; on this card the method has moved to the contact peek's "Approach
+ * by", where it is what you need while writing TO them rather than while scanning past them.
+ * Restating it here would give one fact two homes on one screen.
+ *
+ * ⚠️ ABSENCE IS STILL FIRST-CLASS, AND STILL SPOKEN. An agent with no stated window reads
+ * "response unknown" rather than inventing a number — amendment A's rule, unchanged — and an
+ * agent with no location contributes no token at all rather than an empty one.
+ *
+ * ⚠️ AND THE SINGULAR AGREES. The ref hard-codes "weeks" because every agent it drew had more
+ * than one; a real agent can state a single week, and "replies in about 1 weeks" is the app
+ * getting a detail wrong in the register where being wrong is least forgivable.
+ */
+export function contactMetaLine(agent: Pick<Agent, "city" | "country" | "responseTimeWeeks">): string[] {
+  const out: string[] = [];
+  const place = (agent.city || "").trim() || countryName(agent.country) || "";
+  if (place) out.push(place);
+  const weeks = agent.responseTimeWeeks;
+  out.push(weeks && weeks > 0 ? `replies in about ${weeks} ${weeks === 1 ? "week" : "weeks"}` : "response unknown");
+  return out;
 }
 
 /** "3 Apr 2026" — the mockup's stamp/bubble date format. */

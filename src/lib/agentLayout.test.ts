@@ -125,10 +125,25 @@ describe("the help FAB is RETIRED — Help centre lives in the shared account me
  * looks right at one size and drifts everywhere else, and it hides the cause.
  */
 describe("agent card hover — shadow, never a lift", () => {
+  /* ⚠️ RETARGETED, NOT WEAKENED (contact-list v5). The law is unchanged and is stated twice below:
+     a hover on this card may change its SHADOW and must never move it. What moved is where the
+     rule lives — the selector is `.agl-scene:hover .agl-acard` now, because the card's own hover
+     had to reach a wrapper that also hosts the wishlist drift — and what the shadow IS: the
+     letterpress cast is retired for the ref's soft depth, so the old "6 → 8" spelling could not
+     survive whatever happened to the law. Asserting the token rather than the pixels is what
+     stops this lock going red on the next legitimate retone. */
   it("the card's hover carries NO transform", () => {
-    const hover = /\.aglist \.agl-facef \.agl-acard:hover \{([^}]*)\}/.exec(css)?.[1] ?? "";
+    const hover = /\.aglist \.agl-scene:hover \.agl-acard \{([^}]*)\}/.exec(css)?.[1] ?? "";
     expect(hover, "the hover rule is gone — the census below would be checking nothing").not.toBe("");
-    expect(hover, "the hover lift came back. Inside a clipping scroller it pushes the card's top-left corner through the clip; the cast growing 6 → 8 is what reads as the lift.").not.toContain("transform");
-    expect(hover, "the cast stopped growing, so the card no longer responds to the pointer at all").toContain("box-shadow: 8px 8px 0");
+    expect(hover, "the hover lift came back. Inside a clipping scroller it pushes the card's top-left corner through the clip; the shadow deepening is what reads as the lift.").not.toContain("transform");
+    expect(hover, "the shadow stopped deepening, so the card no longer responds to the pointer at all").toContain("var(--agl-shadow-lift)");
+  });
+
+  /* the resting half of the same claim — a lift is equally wrong when it is the default */
+  it("and neither does its resting state", () => {
+    const rest = /\.aglist \.agl-acard \{([^}]*)\}/.exec(css)?.[1] ?? "";
+    expect(rest, "the card's own rule is gone").not.toBe("");
+    expect(rest, "a transform reached the card's resting state").not.toContain("transform");
+    expect(rest, "the resting shadow stopped reading its token").toContain("var(--agl-shadow)");
   });
 });

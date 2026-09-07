@@ -74,8 +74,12 @@ import { AgentToolbar, AppliedTag, AgentAppliedTags } from "./AgentToolbar";
 import { ContactListEmptyState } from "./ContactListEmptyState";
 import { RAIL_GROUPS } from "../shell/railNav";
 import { countryName } from "../../lib/territory";
+import { matchGenre } from "../../lib/genreMatch";
 import { blankDraft } from "../../lib/agentDraft";
 import { useIsMobile, useMobileChrome } from "../shell/mobileChrome";
+
+/** The shared manuscript-scope key — the same one Packages, Comps and Manuscripts read. */
+const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 /* ⚠️ THE PAGE OWNS ITS OWN MARK. `PageHeader` takes a URL rather than a `MarkName` because these
    are painted illustrations at 100px, not the registry's 20px monoline glyphs — see the prop. */
 import rolodexIcon from "../../assets/shell/agents-on-file-icon.png";
@@ -101,6 +105,17 @@ interface AgentListProps {
 export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, active = true }) => {
   const { agents, queries, manuscripts, activities, updateAgent, addAgent, currentUser, collectionsReady } =
     useScriptAllyDb();
+
+  /* ⚠️ THE GENRE TINT'S SUBJECT — the manuscript in scope, read through the SHARED key the rest
+     of the app scopes by, never a second notion of "current". Falls back to the only manuscript
+     when there is one, and to null when there is nothing to compare against; null means no claim
+     and every chip renders plain. */
+  const tintGenre = useMemo(() => {
+    let id: string | null = null;
+    try { id = window.localStorage.getItem(ACTIVE_MS_KEY); } catch { id = null; }
+    const ms = manuscripts.find((m) => m.id === id) ?? (manuscripts.length === 1 ? manuscripts[0] : undefined);
+    return matchGenre(ms?.genre);
+  }, [manuscripts]);
 
   const [filters, setFilters] = useState<AgentFilterSet>(emptyFilterSet);
   const [search, setSearch] = useState(searchQuery?.trim() || "");
@@ -822,8 +837,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
                 ].filter(Boolean).join(" ") || undefined}
                 agent={agent}
                 queries={queries}
-                manuscripts={manuscripts}
-                activities={activities}
+                matchGenre={tintGenre}
                 onEdit={onEdit}
                 onLogQuery={onLogQuery}
                 flipped={!isMobile && flippedId === agent.id && saveState?.id !== agent.id}

@@ -8,6 +8,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { sliceBetween } from "../test/sliceBetween";
+import { stripComments } from "./styleWiring";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -25,6 +26,7 @@ import {
   CLOSED_DETAIL,
   closedStampDate,
   cardHistory,
+  contactMetaLine,
   wishlistChips,
   materialsSummary,
   notePreview,
@@ -149,36 +151,93 @@ describe("agentList · the door (UNKNOWN is retired — reads OPEN)", () => {
     });
     it("hover restores full strength (CSS — the class is the contract)", () => {
       const css = readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8");
-      expect(css).toMatch(/\.s-dim \.agl-facef \.agl-acard \{ opacity: \.6; transition: opacity \.15s ease; \}/);
+      /* the VALUE moved to the ref's .66; the LAW — a dim card returns to full under the pointer,
+         so the record is always readable — is unchanged and is what both lines assert */
+      expect(css).toMatch(/\.s-dim \.agl-facef \.agl-acard \{ opacity: \.66;/);
       expect(css).toMatch(/\.s-dim \.agl-facef \.agl-acard:hover \{ opacity: 1; \}/);
-      expect(css).not.toContain(".s-grey {"); // the door's colour is gone
-    });
-    it("the DOOR is ink: a hatch overlay beneath the band's contents — and the pill is RETIRED", () => {
-      const css = readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8");
-      expect(css).toContain("repeating-linear-gradient(-45deg, rgba(46, 39, 35, 0.14) 0 3px, transparent 3px 9px)");
-      expect(css).toMatch(/\.s-closed \.agl-band::after \{[^}]*pointer-events: none/s);
-      expect(css).toMatch(/\.s-closed \.agl-band > \* \{ position: relative; z-index: 1; \}/);
-      const card = readFileSync(join(__dirname, "..", "components", "agents", "AgentCard.tsx"), "utf8");
-      expect(card).toContain("{!open && (");
-      expect(card).toContain("s-closed");
-      // agent-list-fixes P2: hatch + stamp say it; a third device is two too many
-      expect(card).not.toContain("agl-closedpill");
-      expect(css).not.toContain(".agl-closedpill");
     });
 
-    it("THE HUSHED BODY: closed + nothing live hides the body; an ACTIVE query renders in full", () => {
-      const card = readFileSync(join(__dirname, "..", "components", "agents", "AgentCard.tsx"), "utf8");
-      // the hush and the dim share ONE derivation, so they can never disagree
-      expect(card).toContain("const hushed = agentCardDims(agent, queries);");
-      expect(card).toContain('{!hushed && <div className="agl-body">');
-      // what survives the hush: identity + the meta line, which sit ABOVE the body
-      expect(card.indexOf('className="agl-meta"')).toBeLessThan(card.indexOf('{!hushed && <div className="agl-body">'));
-      // …and what does not: history, wishlist, materials all live inside the body
-      const body = sliceBetween(card, '{!hushed && <div className="agl-body">', 'className="agl-stamp"');
-      for (const gone of ["Your history", "Wishlist", "Materials wanted"]) expect(body).toContain(gone);
+    /* ⚠️ REWRITTEN, AND THE LAW IT ASSERTS IS THE ONE THAT CHANGED (contact-list v5). This case
+       used to require the door be written in INK — a hatch overlay over a band coloured by your
+       HISTORY. The v5 ref reverses it: the band's FILL is the door, sage open and grey shut, and
+       a pill states it in words. So the hatch and the rotated stamp are retired, and the case
+       that guarded them is retired with them rather than left passing over prose.
+       What is asserted instead is the new law and the same underlying principle: the door is
+       said TWICE (fill and words) and no more than twice — a third device was two too many
+       before and still is. */
+    it("THE DOOR IS THE BAND: a fill and a pill, and the hatch and stamp are RETIRED", () => {
       const css = readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8");
-      expect(css).toMatch(/\.s-hush \.agl-facef \.agl-acard \{ min-height: 210px; \}/); // never a stub
+      const decl = stripComments(css);
+      const card = stripComments(readFileSync(join(__dirname, "..", "components", "agents", "AgentCard.tsx"), "utf8"));
+      // the fill, both ways round — a rule stating only one leaves the other undefined
+      expect(decl).toMatch(/\.s-open \.agl-band \{ background: var\(--agl-band\); \}/);
+      expect(decl).toMatch(/\.s-shut \.agl-band \{ background: var\(--agl-band\); \}/);
+      // …and the colour family behind it, which the EDITOR head also reads
+      expect(decl).toMatch(/\.s-open \{ --agl-band: var\(--agl-sage-band\)/);
+      expect(decl).toMatch(/\.s-shut \{ --agl-band: var\(--agl-grey-band\)/);
+      // the words
+      expect(card).toContain('"Open to queries" : "Closed to queries"');
+      // the third, fourth and fifth devices are gone
+      expect(decl, "the hatch came back — the fill and the pill already say it").not.toContain("repeating-linear-gradient");
+      expect(decl, "the rotated stamp came back").not.toMatch(/["\s`.]agl-stamp["\s`{ ]/);
+      expect(card, "the stamp came back on the card").not.toMatch(/["\s`]agl-stamp["\s`]/);
     });
+
+    /* ⚠️ THE HUSH IS RETIRED, AND ITS INVERSE IS THE CLAIM NOW. The body used to be withheld from
+       a closed card with nothing live. The v5 card's body IS the genres and the wishlist — which
+       is precisely what you came to read about an agency whose door is shut — so withholding it
+       would hide the page's whole subject on the cards that need it most. */
+    it("THE BODY ALWAYS RENDERS — a shut door hides nothing, it only dims", () => {
+      const card = stripComments(readFileSync(join(__dirname, "..", "components", "agents", "AgentCard.tsx"), "utf8"));
+      const css = stripComments(readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8"));
+      expect(card, "the body went back behind a condition — a closed agency's genres and wishlist are the reason you opened this page").not.toMatch(/\{\s*!?\w+\s*&&\s*<div className="agl-body"/);
+      expect(card).toContain('<div className="agl-body">');
+      // both sections are inside it, unconditionally
+      const body = sliceBetween(card, '<div className="agl-body">', 'className="agl-foot"');
+      for (const kept of ["Genres sought", "Manuscript wishlist"]) expect(body).toContain(kept);
+      // and the hush's floor is gone with it
+      expect(css, "the hush min-height survived the hush").not.toContain("s-hush");
+      // the dim is still derived from the ONE function, so it cannot drift from the axis
+      expect(card).toContain("agentCardDims(agent, queries)");
+    });
+  });
+});
+
+/**
+ * `contactMetaLine` — the card's one mono line, and the home of a law that used to live in a
+ * component: the CITY is the useful half and the country name only stands in when no city is
+ * recorded. That claim was asserted by grepping `AgentCard.tsx` for its spelling; it is asserted
+ * against the function now, so a refactor that keeps the behaviour keeps the lock.
+ */
+describe("agentList · contactMetaLine", () => {
+  const base = { city: "Bristol", country: "GB", responseTimeWeeks: 6 };
+
+  it("states place then pace", () => {
+    expect(contactMetaLine(base)).toEqual(["Bristol", "replies in about 6 weeks"]);
+  });
+
+  it("the city is the useful half; the country name only stands in when no city is recorded", () => {
+    expect(contactMetaLine({ ...base, city: "" })[0]).toBe("United Kingdom");
+    expect(contactMetaLine({ ...base, city: "Bristol" })[0]).toBe("Bristol");
+  });
+
+  it("no location contributes NO token — never an empty one", () => {
+    expect(contactMetaLine({ city: "", country: "", responseTimeWeeks: 6 })).toEqual(["replies in about 6 weeks"]);
+  });
+
+  /* ⚠️ ABSENCE IS SPOKEN, NOT INVENTED. An unstated window says so rather than reading as zero
+     weeks or as an instant reply — amendment A's rule, carried across from `metaTokens`. */
+  it("an unstated window reads as unknown, never as a number", () => {
+    expect(contactMetaLine({ ...base, responseTimeWeeks: undefined })).toEqual(["Bristol", "response unknown"]);
+    expect(contactMetaLine({ ...base, responseTimeWeeks: 0 })).toEqual(["Bristol", "response unknown"]);
+  });
+
+  /* ⚠️ THE SINGULAR AGREES. The ref hard-codes "weeks" because every agent it drew had more than
+     one; a real agent can state a single week, and the app getting that wrong is a small error in
+     the one register — a personal one — where small errors are least forgivable. */
+  it("one week is a week", () => {
+    expect(contactMetaLine({ ...base, responseTimeWeeks: 1 })).toEqual(["Bristol", "replies in about 1 week"]);
+    expect(contactMetaLine({ ...base, responseTimeWeeks: 2 })[1]).toBe("replies in about 2 weeks");
   });
 });
 

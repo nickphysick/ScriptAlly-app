@@ -12,19 +12,28 @@
  *
  * ⚠️ AND IT EXISTS BECAUSE THE BLANK STATE IS OTHERWISE UNREACHABLE. It renders only on an account
  * with no agents on file, so the dev harness account (sixteen agents) cannot show it, and the
- * alternatives were emptying somebody's data or creating an account to throw away. Three toggles
+ * alternatives were emptying somebody's data or creating an account to throw away. Four toggles
  * cover the states the page can actually be in; the theme toggle is here because the Agent list is
  * deliberately theme-INDEPENDENT (`agentList.css` carries one token set and no `.t-*` override
  * anywhere), and this is where that claim is cheap to check.
+ *
+ * ⚠️ "THE CAST" IS THE MEASUREMENT TARGET, AND IT IS WHY THIS LAB NOW EARNS ITS KEEP TWICE OVER.
+ * `contactFixture` holds a purpose-built set covering the wishlist's three lengths, both genre
+ * cases, both material cases, both socials cases, a never-queried agent and a shut door BOTH with
+ * and without a live query. The dev harness ACCOUNT covers none of them — measured, it held zero
+ * wishlists, one genre and no socials across 22 agents — so a geometric lock taken there would
+ * have measured a page where every case is the same case. This route needs no sign-in and writes
+ * nothing, so `tests/e2e/contactCard.measure.ts` can open the REAL page over known content.
  */
 import React, { useState } from "react";
 import { DbContext } from "../../lib/db";
 import { AgentList } from "./AgentList";
 import { Agent, SubmissionMethod, SubmissionStatus, UserPlan } from "../../types";
+import { CONTACT_FIXTURE_AGENTS, CONTACT_FIXTURE_MANUSCRIPTS, CONTACT_FIXTURE_QUERIES } from "./contactFixture";
 import { FONT_MONO } from "../../lib/designTokens";
 
 type Theme = "t-capp" | "t-bold" | "t-edn";
-type View = "settling" | "blank" | "list";
+type View = "settling" | "blank" | "list" | "cast";
 
 const SAMPLE: Agent = {
   id: "lab-a1", userId: "lab", name: "Ada Reader", agency: "Reader & Co", email: "ada@example.com",
@@ -53,8 +62,10 @@ export const ContactListLab: React.FC = () => {
     {
       currentUser: { id: "lab", name: "Nick Physick", email: "lab@example.com", plan: UserPlan.FREE, homeCountry: "GB" },
       collectionsReady: view !== "settling",
-      agents: view === "list" ? [SAMPLE] : [],
-      queries: [], manuscripts: [], activities: [], packages: [], versions: [], notes: [],
+      agents: view === "cast" ? CONTACT_FIXTURE_AGENTS : view === "list" ? [SAMPLE] : [],
+      queries: view === "cast" ? CONTACT_FIXTURE_QUERIES : [],
+      manuscripts: view === "cast" ? CONTACT_FIXTURE_MANUSCRIPTS : [],
+      activities: [], packages: [], versions: [], notes: [],
       communityAgents: [], journalEntries: [], tasks: [], userTasks: [], taskFlags: [], dismissedTasks: [],
       authReady: true, smartImportUsage: null,
     } as Record<string, unknown>,
@@ -72,9 +83,9 @@ export const ContactListLab: React.FC = () => {
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", borderBottom: "1px solid var(--bd)", flexWrap: "wrap", flexShrink: 0 }}>
         <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)" }}>#/contact-lab</span>
         <div style={{ display: "flex", gap: 6 }}>
-          {(["settling", "blank", "list"] as View[]).map((v) => (
-            <button key={v} type="button" onClick={() => setView(v)} style={btn(view === v)}>
-              {v === "settling" ? "Loading" : v === "blank" ? "No agents" : "One agent"}
+          {(["settling", "blank", "list", "cast"] as View[]).map((v) => (
+            <button key={v} type="button" data-lab-view={v} onClick={() => setView(v)} style={btn(view === v)}>
+              {v === "settling" ? "Loading" : v === "blank" ? "No agents" : v === "list" ? "One agent" : "The cast"}
             </button>
           ))}
         </div>

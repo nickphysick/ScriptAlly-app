@@ -13,6 +13,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
+import { stripComments } from "./styleWiring";
 
 const css = readFileSync(new URL("../components/agents/agentList.css", import.meta.url), "utf8");
 const bar = readFileSync(new URL("../components/agents/AgentToolbar.tsx", import.meta.url), "utf8");
@@ -176,6 +177,14 @@ describe("agent list · group sections reuse the To-do board's pattern", () => {
  */
 describe("agent list · the location line", () => {
   const card = readFileSync(new URL("../components/agents/AgentCard.tsx", import.meta.url), "utf8");
+  /* ⚠️ SWEEPS OVER THIS FILE READ DECLARATIONS, NOT PROSE. A lock that forbids a token over RAW
+     source finds it in the comment explaining why it was removed — and this repo's comments are
+     unusually rich in exactly those words, because every retirement here is documented by quoting
+     what it retired. The attention sweep below went red on a correct card whose header explains
+     that attention belongs to the To-do board: a correct rule pointed at the wrong artefact. The
+     looseness runs both ways, and the false GREEN is the half worth fearing.
+     ⚠️ AND THE CLASS CHECK IS BOUNDED, not a substring — `agl-meta` is a PREFIX of the live
+     `agl-metaline`, so a bare `toContain` would forbid the very element this case requires. */
 
   it("THE FLAG IS FLAT — a border, ring or shadow at 14×10 reads as a bevelled button", () => {
     const fl = block(".aglist .agl-loc .fl");
@@ -187,17 +196,24 @@ describe("agent list · the location line", () => {
     expect(fl, "a SHADOW reached the flag — same objection: it bevels").not.toMatch(/box-shadow/);
   });
 
-  it("sits between the agency and the mono meta, and only when there is a location to state", () => {
-    const i = card.indexOf('className="agl-agency"');
+  /* ⚠️ RETARGETED (contact-list v5), AND THE TWO CASES BECOME ONE BECAUSE THE TWO LINES DID.
+     These asserted that the location sat between the agency and a SEPARATE mono meta line, and
+     that the city fell back to the country name. The v5 card merges the two into one mono line,
+     and the fallback moved into `contactMetaLine` — where `agentList.test.ts` now asserts it
+     against the function rather than against a spelling in a component. What survives here, and
+     is what the ordering was always standing in for: the location reads as part of the IDENTITY
+     block, under the name and the agency, from ONE derivation. */
+  it("is ONE line under the identity — flag, then place and pace together", () => {
+    const agency = card.indexOf('className="agl-agency"');
     const loc = card.indexOf('className="agl-loc"');
-    const meta = card.indexOf('className="agl-meta"');
-    expect(loc > i, "the location line moved above the agency — it belongs under the name block, not between name and agency").toBe(true);
-    expect(loc < meta, "the location line fell below the mono meta line — it reads as part of the identity, above the response/method tokens").toBe(true);
-    expect(card, "the location line renders unconditionally — an agent with no country and no city would get an empty row, which reads as missing data rather than as nothing to say").toContain("{locationText && (");
-  });
-
-  it("the city is the useful half; the country name only stands in when no city is recorded", () => {
-    expect(card, "the fallback chain changed — the city is what a writer recognises, and the country name is the stand-in, not the other way round").toContain('(agent.city || "").trim() || countryName(agent.country)');
+    expect(agency, "the agency line is gone").toBeGreaterThan(-1);
+    expect(loc > agency, "the location line moved above the agency — it belongs under the name block, not between name and agency").toBe(true);
+    expect(card, "the line stopped reading the one derivation, so the flag and the words can now disagree about who they describe").toContain("contactMetaLine(agent)");
+    expect(card, "the mono line left the location row").toContain('className="agl-metaline"');
+    expect(
+      stripComments(card),
+      "the SEPARATE mono meta line came back — the v5 card states place and pace together, and two lines would draw the same identity block twice",
+    ).not.toMatch(/["\s`]agl-meta["\s`]/);
   });
 
   it("NO attention markers on this page — the mockup's 'Your move' pill is deliberately unbuilt", () => {
@@ -205,7 +221,7 @@ describe("agent list · the location line", () => {
       card,
       "a 'Your move' pill appeared on the card — this page is REFERENCE DATA; attention and urgency belong to the To-do board alone, and duplicating them gives the same fact two homes that will disagree",
     ).not.toMatch(/Your move/);
-    expect(card, "an urgency/attention marker crept onto the card face").not.toMatch(/urgent|overdue|attention/i);
+    expect(stripComments(card), "an urgency/attention marker crept onto the card face").not.toMatch(/urgent|overdue|attention/i);
   });
 });
 
