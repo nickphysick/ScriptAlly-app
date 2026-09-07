@@ -18,6 +18,8 @@ const row = (over: Partial<FeedRow> & Pick<FeedRow, "id">): FeedRow => ({
   time: "3:00pm",
   who: "Updated Sophie Dunn at Curtis Vane",
   caption: "",
+  sentence: "Updated Sophie Dunn at Curtis Vane",
+  meta: "",
   dotStatus: null,
   scope: "agent",
   count: 1,

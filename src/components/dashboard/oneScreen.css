@@ -763,29 +763,14 @@
 .os-ahead .os-ctrls { margin-left: auto; }
 /* §10: the headline counts up once — tabular numerals so the width never jitters */
 
-/* ⚠️ THE STOWED GOALS CARD IS A SLIM STRIP, NOT A HIDDEN ONE (dashboard redesign, Phase 7; the
-   other half of Phase 6's expander). Expanding the feed collapses this card — and the point of the
-   strip is that the goal STAYS ON THE PAGE. A card that vanishes when its neighbour grows teaches
-   that the two are alternatives; a strip carrying the count and its rings says the goal is still
-   running, just not the thing you are reading. */
-.os-rail-expanded .os-goal.stowable {
-  max-height: 34px; opacity: 1; visibility: visible;
-  padding-top: 7px; padding-bottom: 7px; margin-bottom: 13px; border-top-width: 0;
-  overflow: hidden;
-}
-/* everything but the count and the rings gives way */
-.os-rail-expanded .os-goal .os-goal-r1,
-.os-rail-expanded .os-goal .os-goal-sub,
-.os-rail-expanded .os-goal .os-goal-hist,
-.os-rail-expanded .os-goal .os-goal-line,
-.os-rail-expanded .os-goal .os-goal-set,
-.os-rail-expanded .os-goal .os-goal-moment { display: none; }
-.os-rail-expanded .os-goal .os-goal-count { display: flex; align-items: baseline; gap: 5px; }
-.os-rail-expanded .os-goal .os-goal-count .os-goal-n { font-size: 15px; }
-/* ⚠️ THE RINGS SHRINK RATHER THAN THINNING OUT — five of ten at 9px still reads as five of ten;
-   a truncated row would say something the target does not. */
-.os-rail-expanded .os-goal .os-goal-rings { margin-top: 0; margin-left: auto; gap: 4px; flex-wrap: nowrap; }
-.os-rail-expanded .os-goal .os-goal-rings i { width: 9px; height: 9px; border-width: 1.2px; }
+/* ⚠️ THE GOALS CARD GOES ENTIRELY WHEN THE FEED EXPANDS — the slim strip is RETIRED (refdiff pass,
+   Phase 7). It kept the count and its rings in a 34px band, on the argument that a card which
+   vanishes when its neighbour grows teaches that the two are alternatives. They ARE alternatives:
+   expanding the feed is a request for the whole column, and a strip is a third state of a card
+   that otherwise has one, with its own paddings, its own type sizes and its own rules for which of
+   its parts survive. Nine declarations to say "not now" where `display: none` says it once, and
+   the reader who expanded the feed did not ask to keep reading their goal in miniature. */
+.os-rail-expanded .os-goal.stowable { display: none; }
 
 /* ══ §6 · THE ACTIVITY FEED, AS A CONVERSATION (dashboard redesign, Phase 6) ═════════════════
  *
@@ -796,16 +781,20 @@
 
 /* ⚠️ TABS ON A HAIRLINE, NOT PILLS — a view selector, not a row of equal-weight buttons. The
    active one underlines in BURGUNDY, which is one of the four places this repo permits it. */
-.os-ftabs { display: flex; gap: 14px; padding: 0 16px; border-bottom: 1px solid #f0e7db; flex: none; }
+/* ref `.ftabs` — 16px gaps, 20px gutter, a `--line2` base and 2px of air beneath it */
+.os-ftabs {
+  display: flex; gap: 16px; padding: 0 20px; margin-bottom: 2px;
+  border-bottom: 1px solid #eee8e0; flex: none;
+}
 .os-ftab {
   display: inline-flex; align-items: center; gap: 6px;
-  border: 0; background: none; padding: 7px 0 6px; margin-bottom: -1px; cursor: pointer;
-  font: inherit; font-size: 12px; color: #8a7a6c; white-space: nowrap;
+  border: 0; background: none; padding: 9px 0 8px; margin-bottom: -1px; cursor: pointer;
+  font: inherit; font-size: 13.5px; color: #a29587; white-space: nowrap;
   border-bottom: 2px solid transparent;
 }
-.os-ftab.on { color: #241811; border-bottom-color: #7c3a2a; }
-.os-ftab i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex: none; }
-.os-ftabn { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: #bfb2a3; }
+.os-ftab.on { color: #2a1f18; border-bottom-color: #7c3a2a; }
+.os-ftab i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+.os-ftabn { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: #9c8f82; }
 .os-ftab.on .os-ftabn { color: #8a7a6c; }
 
 /* ⚠️ THE DAY CAPTION IS CENTRED AND STICKY — it is the one thing in the column that is not a
@@ -820,11 +809,25 @@
 /* ⚠️ ALIGNMENT CARRIES DIRECTION, AND THERE IS NO LEGEND FOR IT. `in` is the agent's and hugs the
    left; `out` is the writer's and hugs the right. A legend for a thing the layout already says is
    the page explaining its own picture. */
-.os-bub { display: flex; align-items: flex-start; gap: 7px; padding: 0 16px; margin-bottom: 7px; }
-.os-bub.out { flex-direction: row-reverse; }
+/* ⚠️ THE SIDES ARE UNMISTAKABLE, AND THAT IS ASYMMETRIC PADDING RATHER THAN ALIGNMENT.
+   Ref `.cv .msg.in{padding-left:26px;padding-right:76px}` and its mirror: the 76px is what stops a
+   bubble reaching the far edge, so a glance at the column's ragged side says who spoke without
+   reading a word. Equal padding with `justify-content` alone leaves a long sentence filling the
+   width on both sides, and then the two are told apart only by colour. */
+.os-bub { display: flex; align-items: flex-start; gap: 7px; margin-bottom: 7px; position: relative; }
+.os-bub.in { padding-left: 26px; padding-right: 76px; }
+.os-bub.out { flex-direction: row-reverse; padding-right: 26px; padding-left: 76px; }
+/* ⚠️ HOUSEKEEPING IS CENTRED AND HAS NO SIDE — it is not a message between two parties, so it
+   takes neither the knot nor a ragged edge. Ref `.cv .msg.desk{padding-left:38px;padding-right:38px}`
+   with a white bubble. */
+.os-bub.desk { padding-left: 38px; padding-right: 38px; }
+.os-bub.desk .os-knot { display: none; }
 /* a tight run: same side, same day — the furniture goes, the spacing closes up */
 .os-bub.run { margin-top: -4px; }
-.os-knot { flex: none; margin-top: 7px; }
+/* ref `.cv .msg .knot{top:16px}` — the knot sits against the bubble's first line, not its top edge */
+.os-knot { flex: none; position: absolute; top: 16px; }
+.os-bub.in .os-knot { left: 0; }
+.os-bub.out .os-knot { right: 0; }
 .os-bubin {
   min-width: 0; max-width: 84%;
   border-radius: 12px; padding: 7px 10px 8px;
@@ -838,7 +841,9 @@
   font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: 0.13em;
   text-transform: uppercase; color: #8a7a6c; margin-bottom: 3px;
 }
-.os-bubsay { font-size: 12.5px; color: #241811; line-height: 1.35; }
+/* ref `.cv .msg .b .s{font-size:15px;color:var(--ink);line-height:1.35}` — the sentence is the
+   bubble's content and was set two and a half points below the ref's, at a muted ink. */
+.os-bubsay { font-size: 15px; color: #2a1f18; line-height: 1.35; }
 .os-bubmeta {
   display: flex; align-items: baseline; gap: 8px;
   font-size: 10.5px; color: #9b8c7c; margin-top: 3px;
@@ -1424,11 +1429,19 @@
   font-family: var(--font-serif); font-size: 23px; font-weight: 500; color: #2a1f18;
   margin: 0;
 }
+/* ⚠️ PINNED TO THE CARD'S CORNER, NOT PLACED IN THE BAND'S FLOW — ref `#actCard .expander`. In
+   flow it is one more item competing for the band's width, so a longer title or a wider mark moves
+   it; against the corner it is where it always is, and the band reserves its room with a padding
+   instead of a layout. */
+.os-actv { position: relative; }
 .os-exp {
+  position: absolute; top: 14px; right: 16px; z-index: 6;
   width: 24px; height: 24px; border-radius: 7px; border: 1px solid #e3d9cc; background: #ffffff;
   display: grid; place-items: center; cursor: pointer; flex: none; padding: 0;
   transition: background 0.14s ease, border-color 0.14s ease;
 }
+/* ref `#actCard .hd{padding-right:60px}` — the room the pinned control sits in */
+.os-actv > .os-ahead { padding-right: 60px; }
 .os-exp svg { width: 12px; height: 12px; stroke: #8a7a6c; fill: none; stroke-width: 1.8; transition: stroke 0.14s ease; }
 .os-exp:hover { background: #faf6ef; border-color: #cdbfae; }
 .os-exp:hover svg { stroke: #7c3a2a; }

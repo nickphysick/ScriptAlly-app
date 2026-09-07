@@ -266,7 +266,17 @@ describe("the feed is a conversation", () => {
     for (const gone of ["From agents", "From you", "From the agent"]) {
       expect(railSrc, `${gone} is back`).not.toContain(gone);
     }
-    expect(cssRules).toContain(".os-bub.out { flex-direction: row-reverse; }");
+    /* ⚠️ THE CLAIM IS THAT ALIGNMENT CARRIES DIRECTION, NOT THAT ONE DECLARATION IS SPELLED A
+       CERTAIN WAY. It pinned the whole rule text and went red the day the ref's asymmetric padding
+       arrived on the same selector — over a change that made the direction MORE legible. Two sides,
+       each pushed off the far edge by a margin the other does not have. */
+    const out = cssRule(cssRules, ".os-bub.out");
+    expect(out).toContain("flex-direction: row-reverse");
+    expect(out).toContain("padding-right: 26px");
+    expect(out).toContain("padding-left: 76px");
+    const inb = cssRule(cssRules, ".os-bub.in");
+    expect(inb).toContain("padding-left: 26px");
+    expect(inb).toContain("padding-right: 76px");
   });
 
   /* ⚠️ THE FOUR TABS SUM TO `all` BY CONSTRUCTION — `feedTabOf` gives each row exactly one tab and
@@ -337,22 +347,31 @@ describe("the goal is a row of slots, and it survives being stowed", () => {
   });
 
   /**
-   * ⚠️ THE GOALS CARD IS A DECLARED EXCEPTION TO THE STOW, AND IT WOULD OTHERWISE PASS ON
-   * SPECIFICITY ALONE. `.os-rail-expanded .stowable` collapses to `max-height: 0` and
-   * `visibility: hidden`; `.os-rail-expanded .os-goal.stowable` overrides it to a 34px strip. That
-   * is the other half of Phase 6's expander — the goal STAYS ON THE PAGE, because a card that
-   * vanishes when its neighbour grows teaches that the two are alternatives. Stated here so the
-   * exception is a decision somebody reads rather than a cascade nobody noticed.
+   * ⚠️ THE SLIM STRIP IS RETIRED, AND ITS ARGUMENT IS WHAT WENT (refdiff pass, Phase 7).
+   *
+   * It kept the count and its rings in a 34px band on the reasoning that a card which vanishes when
+   * its neighbour grows teaches that the two are alternatives. They ARE alternatives: expanding the
+   * feed is a request for the whole column, and the strip was a third state of a card that
+   * otherwise has one — nine declarations, its own paddings and type sizes, and a rule for which of
+   * its parts survive, to say "not now" where `display: none` says it once.
+   *
+   * ⚠️ THE EXCEPTION IS STILL A DECLARED ONE AND STILL NEEDS SAYING, because `.stowable`'s own
+   * collapse is `max-height: 0` plus `visibility: hidden` and this overrides it on specificity. The
+   * claim has changed from "it stays as a strip" to "it goes"; what has not changed is that a
+   * reader of the cascade should find a sentence rather than infer one.
    */
-  it("⚠️ stowed, the goal is a slim strip rather than nothing", () => {
-    const strip = cssRule(cssRules, ".os-rail-expanded .os-goal.stowable", "oneScreen.css");
-    expect(strip).toContain("max-height: 34px");
-    expect(strip).toContain("visibility: visible");
-    expect(strip).toContain("opacity: 1");
-    /* and what it keeps is the count and the rings — the goal's two facts */
-    expect(cssRules).toContain(".os-rail-expanded .os-goal .os-goal-count { display: flex;");
-    expect(cssRule(cssRules, ".os-rail-expanded .os-goal .os-goal-rings", "oneScreen.css"))
-      .toContain("flex-wrap: nowrap");
+  it("⚠️ stowed, the goals card goes entirely — no slim strip", () => {
+    const stowed = cssRule(cssRules, ".os-rail-expanded .os-goal.stowable", "oneScreen.css");
+    expect(stowed).toContain("display: none");
+    expect(stowed).not.toContain("max-height");
+    /* and the strip's per-part rules went with it — a rule for a state that cannot occur */
+    for (const gone of [
+      ".os-rail-expanded .os-goal .os-goal-count",
+      ".os-rail-expanded .os-goal .os-goal-rings",
+      ".os-rail-expanded .os-goal .os-goal-r1",
+    ]) {
+      expect(cssRules, `${gone} survived the strip it dressed`).not.toContain(gone);
+    }
   });
 });
 

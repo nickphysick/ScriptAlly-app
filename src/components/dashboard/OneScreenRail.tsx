@@ -72,6 +72,21 @@ export interface FeedRow {
   time: string;
   who: string;
   caption: string;
+  /**
+   * ⚠️ WHAT HAPPENED, AS A SENTENCE — the activity's own rendered description (refdiff pass,
+   * Phase 7). This REVERSES the earlier subject-grammar decision, deliberately and on the ref's
+   * authority: the bubble read the agent's NAME with the pill above it as the verb, so a feed of
+   * eight events was eight names in a column and the reader had to assemble each line from three
+   * places. The ref's bubble is a state label, then a sentence, then who and when — which is the
+   * order a person reads a message in.
+   *
+   * ⚠️ THE DESCRIPTION IS USED WHOLE AND NEVER PARSED. It is the sentence the writer's own action
+   * produced; picking it apart with a regex is the string-parsing this codebase forbids, and the
+   * subject lookup above already exists for the cases that need a name.
+   */
+  sentence: string;
+  /** "Sen · Curtis Vane" — the ref's `.m` line, with the time appended by the render */
+  meta: string;
   dotStatus: QueryStatus | null;
   /** What the event is ABOUT. The collapse law keys on it — query events never fold. */
   scope: "query" | "agent" | "manuscript";
@@ -264,6 +279,16 @@ export const feedRows = (
     /* ⚠️ NEVER AN EM DASH WHERE A NAME BELONGS — an unresolvable subject drops the row */
     if (!who) continue;
 
+    /* ⚠️ THE SENTENCE IS THE RECORD'S OWN, AND THE FALLBACK IS THE SUBJECT RATHER THAN A BLANK.
+       A description is written at the point of the action, so every live path has one; a legacy
+       record that does not is still worth a row, and the name it resolved to is what we know. */
+    const sentence = a.description?.trim() || who;
+    /* ⚠️ THE SURNAME, NOT THE FULL NAME — ref `.m` is `${g.sur} · ${g.agency}`. The meta line is a
+       reference back to a person already named in the sentence above it, so a full name would
+       repeat that sentence's own subject two lines apart. */
+    const surname = who.split(/\s+/).filter(Boolean).slice(-1)[0] ?? who;
+    const meta = shape.kind === "housekeeping" ? "" : captionFor(sentence, surname, caption.split(" · ")[1]);
+
     const d = new Date(t);
     rows.push({
       id: a.id,
@@ -272,6 +297,8 @@ export const feedRows = (
       sage: pill.sage,
       time: d.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true }).replace(" ", "").toLowerCase(),
       who,
+      sentence,
+      meta,
       caption,
       dotStatus: a.resultingStatus ?? null,
       scope,
@@ -713,12 +740,15 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                           {r.count > 1 && <span className="os-runx">×{r.count}</span>}
                         </div>
                       )}
-                      <div className="os-bubsay" data-probe-text="bubble-sentence">{runLines(r)?.line ?? r.who}</div>
+                      {/* ⚠️ WHAT HAPPENED, NOT WHO — see `FeedRow.sentence`. A COLLAPSED run still
+                          states its own count ("3 agents"), because a run's sentence is the thing
+                          the fold exists to replace. */}
+                      <div className="os-bubsay" data-probe-text="bubble-sentence">{runLines(r)?.line ?? r.sentence}</div>
                       {head && (
                         <div className="os-bubmeta">
                           {r.kind === "housekeeping"
                             ? "Not tied to a query"
-                            : (runLines(r)?.caption || r.caption || "")}
+                            : (runLines(r)?.caption || r.meta || "")}
                           <span className="os-bubt">{r.count > 1 && r.fromTime ? `${r.fromTime}–${r.time}` : r.time}</span>
                         </div>
                       )}
