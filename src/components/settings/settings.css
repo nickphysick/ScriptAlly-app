@@ -21,8 +21,10 @@
 
 /* ── The page: a fill column inside the stage slot ─────────────────────────── */
 .acct-page {
-  --acct-rail: 224px;
-  --acct-gap: 20px;
+  /* ⚠️ `--acct-rail` AND `--acct-gap` ARE GONE. They described a two-column grid this page no
+     longer has; the rail is in the shell's own 224px slot and reads `--shell-panelw` there, which
+     is the element that OWNS that width. A token kept here would be a second declaration of one
+     number, agreeing by coincidence until somebody moved one of them. */
   --acct-max: 1120px;
 
   /* ⚠️ ONE VERTICAL RHYTHM, DEFINED HERE AND NOWHERE ELSE (law 3). Every gap in the settings scope
@@ -52,80 +54,32 @@
   padding: 30px 40px 70px;
 }
 
-/* Everything in the plane sits inside one column, so the header and the grid share both edges. */
-.acct-hdr,
-.acct-grid {
+/* Everything in the plane sits inside one column, so the header and the work share both edges. */
+.acct-hdr {
   max-width: var(--acct-max);
   margin-inline: auto;
 }
 
-/* ── Rail + work ────────────────────────────────────────────────────────────
-   ⚠️ `align-items: stretch`, NOT `start` — AND THAT IS A REVERSAL. It was `start` so the rail card
-   could be its own height, which is exactly what made the left column look stubby beside a tall
-   work column. Both columns now run the full depth and the rail's aside fills what the nav does
-   not use (Phase 3). The rail card itself stays `flex: 0 0 auto` inside its column, so it is still
-   its own height — the column stretches, the card does not. */
+/* ── The work column ────────────────────────────────────────────────────────
+   ⚠️ THE SECOND TRACK IS GONE WITH THE RAIL (settings-mode pack, Phase 1). The rail moved into the
+   shell's 224px panel slot, so this is one column and no longer a grid in anything but name — the
+   class is kept because it is the width-and-scroll chain the sections hang off, and renaming it in
+   the same commit that moves the rail would put two unrelated changes in one diff.
+
+   ⚠️ AND THE TWO `.acct-grid` RULES ARE NOW ONE. This selector was declared twice — once for its
+   width above, once for its flex behaviour here — which is the duplicate-base-rule fault this
+   repo records at length: the cascade takes the last, a reader takes the first, and every
+   reasonable-looking edit to the earlier one is spent. The width declaration moves up here and the
+   shared block above keeps only `.acct-hdr`. */
 .acct-grid {
-  display: flex;
-  gap: var(--acct-gap);
-  align-items: stretch;
+  max-width: var(--acct-max);
+  margin-inline: auto;
 }
-
-.acct-rail {
-  width: var(--acct-rail);
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  min-width: 0;
-}
-.acct-rail > * { flex: 0 0 auto; }
-
-/* ⚠️ THE ASIDE IS THE ONE THING IN THE COLUMN THAT GROWS. The nav card stays its own height (the
-   rule above); this takes everything left over, so the left column reaches the same depth as the
-   work column instead of stopping a third of the way down. */
-.acct-rail .acct-aside { flex: 1 1 auto; min-height: 150px; }
-.acct-aside-note { max-width: 160px; }
-.acct-aside-in {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  padding: 16px;
-}
-/* ⚠️ THE MARK IS A ROW, THE SPACER IS THE GAP, THE TEXT IS THE FOOT — the ref's `.sec-foot`
-   pattern. The old build put the mark at `top: 26px` absolute and the text at the bottom, and the
-   two overlapped whenever the aside was short. In flow they cannot. */
-.acct-aside-illo { flex: 0 0 auto; display: flex; justify-content: center; padding-bottom: 12px; }
-.acct-aside-txt { flex: 0 0 auto; }
-.acct-aside-k {
-  display: block;
-  font-family: var(--font-mono, "JetBrains Mono", monospace);
-  font-size: 8.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  font-weight: 500;
-  color: #a08e7c;
-}
-.acct-aside-v {
-  display: block;
-  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
-  font-size: 17px;
-  color: #3a1c14;
-  margin: 2px 0 8px;
-}
-.acct-aside-note {
-  display: block;
-  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
-  font-size: 10.5px;
-  font-weight: 300;
-  color: #8a7a6c;
-  line-height: 1.5;
-}
+/* ⚠️ `.acct-aside*` IS GONE — `RailAside` is deleted (settings-mode pack, Phase 1). Its one real
+   statement, the plan, is the settings rail's foot strip in the shell; the rest of it existed to
+   give the left COLUMN depth beside a taller work column, and that column no longer lives on this
+   page. Rules kept for a component that no longer renders are a stylesheet selecting on nothing —
+   the `.wpg--record` fault, from the other end. */
 
 .acct-work {
   flex: 1;
@@ -164,24 +118,10 @@
 
 .acct-col:focus { outline: none; }
 
-/* ⚠️ THE RAIL GOES ABOVE THE CONTENT, NOT BESIDE IT, BELOW ~900px — and it stops sticking.
-   A sticky strip pinned to the top of a narrow plane eats the height the content needs; at this
-   width the rail is a header, not a sidebar. */
-@media (max-width: 900px) {
-  .acct-grid { flex-direction: column; }
-  .acct-rail { width: auto; }
-  .acct-plane { padding-inline: 16px; }
-  /* ⚠️ THE ASIDE HIDES RATHER THAN STACKING. Its whole purpose is to give the rail COLUMN depth
-     beside the work column; once the rail is a header strip across the top there is no column to
-     fill, and the card would become a full-width band of plan trivia between the nav and the
-     section you came to read. */
-  /* ⚠️ `!important` BECAUSE `fill` PUTS `display: flex` INLINE ON MountPanel, and an inline
-     declaration beats a stylesheet rule however specific — the aside stayed visible at 800px with
-     a `display: none` that was applying and losing. The repo already carries this footgun in
-     writing for the rail's own collapse ("inline display beats Tailwind breakpoint utilities");
-     this is the same shape from a component prop rather than a utility class. */
-  .acct-rail .acct-aside { display: none !important; }
-}
+/* ⚠️ THE ≤900px BLOCK IS GONE WITH THE RAIL IT STACKED. It turned the left column into a header
+   strip and hid the aside; there is no left column on this page any more, and the shell's own
+   below-md rules already decide what the panel does at that width. A media query re-arranging
+   elements that do not render is the same silence as a rule selecting on a class nobody emits. */
 
 /* ── Two-column section bodies ──────────────────────────────────────────────
    ⚠️ ONLY WHERE THE CONTENT IS TWO INDEPENDENT GROUPS. Profile is name | country, Security is
@@ -226,56 +166,12 @@
   .acct-two--cards > * + * { border-top: 0; padding-top: 0; margin-top: 0; }
 }
 
-/* ── Rail items ─────────────────────────────────────────────────────────────
-   ⚠️ ACTIVE IS THE DROPDOWN'S SELECTED-OPTION GRAMMAR (#f5e2da fill, burgundy text), NOT A NAV
-   PILL. Settings sections are options in a list you are choosing between, which is what the
-   locked dropdown's selected row already means; a burgundy-filled nav state would say something
-   different in the one place the two grammars sit closest together. */
-.acct-navlist {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.acct-navitem {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  text-align: left;
-  padding: 9px 12px;
-  border: none;
-  border-radius: 9px;
-  cursor: pointer;
-  background: transparent;
-  color: #6a5a50;
-  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
-  font-size: 13.5px;
-  font-weight: 500;
-  transition: background 0.12s, color 0.12s;
-}
-.acct-navitem:hover:not([aria-selected="true"]) { background: rgba(124, 58, 42, 0.05); }
-.acct-navitem[aria-selected="true"] {
-  background: #f5e2da;
-  color: #7c3a2a;
-  font-weight: 500;
-}
-
-/* ⚠️ SAGE, NOT BURGUNDY. The ring must not read as the active state arriving — burgundy is what
-   the selected row's text already is, so a burgundy ring on an unselected row says "chosen" to
-   anyone tabbing through. Sage is the app's focus colour everywhere else a field has one. */
-.acct-navitem:focus-visible {
-  outline: 2px solid #8a9e88;
-  outline-offset: 2px;
-}
-
-@media (max-width: 900px) {
-  .acct-navlist {
-    flex-direction: row;
-    overflow-x: auto;
-    gap: 4px;
-  }
-  .acct-navitem { width: auto; }
-}
+/* ⚠️ `.acct-navlist` / `.acct-navitem` ARE GONE — the rail they styled is `settings/SettingsRail`
+   now, in the shell's panel slot, and its rules live beside it in `settingsRail.css`
+   (settings-mode pack, Phase 1). The two decisions those rules recorded went across with them and
+   are restated there: the active state is the DROPDOWN's selected-option grammar (#f5e2da fill,
+   burgundy ink) rather than a nav pill, and the focus ring is sage rather than burgundy so that
+   tabbing through does not read as choosing. */
 
 /* ── The account header — the page's fixed point and its top edge ───────────
    ⚠️ THIS BLOCK WAS DELETED ONCE AND NOTHING WENT RED. A consolidation commit rewrote this file

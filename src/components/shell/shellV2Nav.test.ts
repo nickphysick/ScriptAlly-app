@@ -93,8 +93,12 @@ describe("shellV2Nav — path matching", () => {
     expect(shellCrumbForPath("/agents")).toEqual({ section: "Agents", page: "Agent list" });
     expect(shellCrumbForPath("/dashboard")).toEqual({ section: "Dashboard", page: "Dashboard" });
     expect(shellCrumbForPath("/import")).toEqual({ section: "Shelf", page: "Import" });
-    // the re-homed focus family (fixes P5): Setup crumbs, no accordion entries
-    expect(shellCrumbForPath("/account")).toEqual({ section: "Setup", page: "Account" });
+    /* the re-homed focus family (fixes P5): Setup crumbs, no accordion entries
+       ⚠️ THE PAGE READS "Settings" (settings-mode pack, Phase 1) — it had to agree with the rail
+       heading the mode now puts in the panel. The SECTION segment stays: shortening one route's
+       crumb to `ScriptAlly / Settings`, as the ref draws it, would make settings the only place in
+       the app whose crumb has a different shape. */
+    expect(shellCrumbForPath("/account")).toEqual({ section: "Setup", page: "Settings" });
     expect(shellCrumbForPath("/plans")).toEqual({ section: "Setup", page: "Plans" });
     expect(shellCrumbForPath("/help")).toEqual({ section: "Setup", page: "Help centre" });
     expect(shellCrumbForPath("/nope")).toBeNull();

@@ -123,11 +123,19 @@ const CRUMB_EXTRAS: Record<string, { section: string; page: string; rail: "dashb
    */
   "/queries/analytics": { section: "Querying", page: "Analytics", rail: "querying" },
   "/import": { section: "Shelf", page: "Import", rail: "shelf" },
-  "/account": { section: "Setup", page: "Account", rail: null },
+  /* ⚠️ THE PAGE IS "Settings", NOT "Account" (settings-mode pack, Phase 1). The word had to agree
+     with the rail heading the mode now puts in the panel; two names for one place, three inches
+     apart, is the disagreement the crumb exists to prevent rather than cause.
+
+     ⚠️ THE "Setup /" SEGMENT STAYS, AND THE REF DROPS IT. The ref draws `ScriptAlly / Settings` —
+     right for a standalone mockup, wrong here: every other crumb in this app is root / section /
+     page, and shortening exactly one route would make settings the only place whose crumb has a
+     different SHAPE. The reader would read that as a level of the app going missing. */
+  "/account": { section: "Setup", page: "Settings", rail: null },
   "/plans": { section: "Setup", page: "Plans", rail: null },
   "/help": { section: "Setup", page: "Help centre", rail: null },
   ...Object.fromEntries(
-    ACCOUNT_SECTION_PATHS.map((p) => [p, { section: "Setup", page: "Account", rail: null }] as const)
+    ACCOUNT_SECTION_PATHS.map((p) => [p, { section: "Setup", page: "Settings", rail: null }] as const)
   ),
 };
 

@@ -1,0 +1,184 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The settings rail — the second layer in the shell's 224px panel slot.
+ *
+ * ⚠️ IT DECLARES NO WIDTH. The slot's width is `--shell-panelw`, owned by `.ws-panel`, and the
+ * collapse narrows it to 72px. A width here would be a literal another element owns — the fault
+ * this repo records under "no element's position or size may be expressed as a literal that
+ * another element owns" — and it would fight the collapse rather than follow it.
+ *
+ * ⚠️ THE COLLAPSED STATE IS THE APP NAV'S, REUSED, NOT REBUILT. `.sb-collapsed` is set on the
+ * panel by the shell; the rail hides its own labels off that class exactly as `.ws-lbl` does, so
+ * a reader who collapsed the sidebar keeps a collapsed sidebar when they open settings. Forcing
+ * the rail open would be a relayout on entering the mode, which is the one thing the mode's
+ * choreography is built to avoid.
+ *
+ * The layer mechanics (position, cross-fade, visibility) live in `workspaceShell.css` beside the
+ * app nav they swap with — one mechanism, one place, so neither half can be edited alone.
+ */
+
+.set-rail {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 10px 10px;
+  min-height: 0;
+}
+
+/* ── the exit row ─────────────────────────────────────────────────────────────────────────── */
+.set-backrail {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 10px;
+  margin-top: 14px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #6a5a50;
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.14s ease, color 0.14s ease;
+}
+.set-backrail:hover { background: rgba(124, 58, 42, 0.05); color: #3a2b23; }
+.set-backrail svg { width: 15px; height: 15px; flex: none; }
+
+.set-railrule {
+  flex: none;
+  border: 0;
+  border-top: 1px solid rgba(28, 19, 15, 0.08);
+  margin: 12px 4px 14px;
+}
+
+/* ⚠️ PLAYFAIR 400, and it is a HEADING rather than a label — the ref sets it at 24px against the
+   rail items' 13.5. It is the mode's name, said once, where the wordmark would otherwise be. */
+.set-railhead {
+  flex: none;
+  margin: 0 0 12px;
+  padding: 0 10px;
+  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
+  font-weight: 400;
+  /* ⚠️ 1.3 MINIMUM ON MIXED-CASE PLAYFAIR. "Settings" has a descender in neither glyph today, and
+     that is exactly the coincidence the house rule exists to stop anyone relying on. */
+  font-size: 23px;
+  line-height: 1.3;
+  color: #3a2b23;
+}
+.set-railhead:focus-visible {
+  outline: 2px solid #9caa96;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ── the seven sections ───────────────────────────────────────────────────────────────────── */
+.set-raillist {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.set-railitem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #6a5a50;
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: background-color 0.14s ease, color 0.14s ease;
+}
+.set-railitem svg { width: 16px; height: 16px; flex: none; color: currentColor; }
+.set-railitem:hover:not([aria-selected="true"]) { background: rgba(124, 58, 42, 0.05); }
+
+/* ⚠️ BLUSH FILL, BURGUNDY INK — the app's own active state, carried over from `.acct-navitem`
+   rather than taken from the ref's `--blush`/`--active-ink`. Two near-identical pinks, one of
+   which the rest of the app already uses, is the "two literals one unit apart" fault. */
+.set-railitem[aria-selected="true"] {
+  background: #f5e2da;
+  color: #7c3a2a;
+}
+.set-railitem:focus-visible {
+  outline: 2px solid #9caa96;
+  outline-offset: -2px;
+}
+
+/* ── the foot: the plan strip ─────────────────────────────────────────────────────────────── */
+/* ⚠️ `margin-top: auto` IS WHAT PINS IT, so the rail needs no spacer element and the list above
+   keeps its own height. A `flex: 1` spacer beside a `flex: none` list is two claimants on the
+   same slack — the fault the shell's own nav records at `.ws-nav`. */
+.set-railfoot {
+  margin-top: auto;
+  flex: none;
+  padding-top: 12px;
+  border-top: 1px solid rgba(28, 19, 15, 0.08);
+}
+
+.set-planstrip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border: 1px solid rgba(28, 19, 15, 0.12);
+  border-radius: 12px;
+  background: #fdf9f5;
+}
+.set-planstrip > svg { width: 24px; height: 24px; flex: none; color: #7c3a2a; }
+.set-planstrip > div { min-width: 0; }
+.set-plank {
+  display: block;
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 11px;
+  color: #8a7d6c;
+}
+.set-planv {
+  display: block;
+  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.3;
+  color: #3a2b23;
+}
+.set-plannote {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #8a7d6c;
+}
+
+/* ══ COLLAPSED — the app nav's own idiom, applied to this layer ═══════════════════════════════
+   ⚠️ `max-width: 0` AND `margin: 0` TOGETHER, never `display: none`. The label has to be able to
+   animate back, and a display swap cannot be transitioned; this is the pattern `.ws-lbl` already
+   uses two hundred lines away in `workspaceShell.css`. */
+.sb-collapsed .set-rail { padding: 0 8px 10px; }
+.sb-collapsed .set-railitem { justify-content: center; padding: 9px 0; gap: 0; }
+.sb-collapsed .set-railitem svg { margin: 0; }
+.sb-collapsed .set-backrail { justify-content: center; padding: 10px 0; gap: 0; }
+.sb-collapsed .set-railhead,
+.sb-collapsed .set-railfoot { display: none; }
+
+/* The label itself: it is a bare text node inside the button, so the button's own overflow is
+   what hides it. Zeroing the gap above is what stops a 10px hole standing where a word was. */
+.sb-collapsed .set-railitem,
+.sb-collapsed .set-backrail { font-size: 0; }
+.sb-collapsed .set-railitem svg,
+.sb-collapsed .set-backrail svg { font-size: 13.5px; }

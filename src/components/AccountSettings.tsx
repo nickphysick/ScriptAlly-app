@@ -55,7 +55,6 @@ import "./settings/settings.css";
 import { CountryCombobox } from "./forms";
 import { PlanComparison } from "./plans/PlanComparison";
 import { AccountHeader } from "./settings/AccountHeader";
-import { RailAside } from "./settings/RailAside";
 import { SettingsIllo, hasSectionWatermark } from "./settings/SettingsIllo";
 import { accountFacts, sentCount } from "../lib/accountHeaderFacts";
 import { todoPrefs, STALE_MONTHS_CHOICES } from "../lib/todoPrefs";
@@ -101,10 +100,13 @@ const ERROR_RED = "#A32D2D";
  * `sectionBands` for the third. The page briefly kept its own icon map beside them; that was a
  * third list of the same six sections, and the rail's glyph could have drifted from the glyph on
  * the card the rail opens. The rail is the thing that WALKS between sections, not a place that
- * decides what they are. */
+ * decides what they are.
+ *
+ * ⚠️ THE PAGE'S OWN `SECTIONS` COPY IS GONE WITH THE RAIL (settings-mode pack, Phase 1). It existed
+ * to give the rail a label and a glyph; the rail is in the shell now and reads `ACCOUNT_ROUTES` and
+ * `SECTION_BANDS` directly. What is left here needs a PATH and nothing else, so it reads the route
+ * table — the same one-source rule this note has always stated, with one fewer restatement. */
 type SectionId = AccountSectionId;
-const SECTIONS: { id: SectionId; label: string; path: string; Icon: React.ComponentType<any> }[] =
-  ACCOUNT_ROUTES.map((r) => ({ id: r.id, label: r.label, path: r.path, Icon: SECTION_BANDS[r.id].Icon }));
 
 /**
  * The dirty-field keys this page registers with `saveSignal`, and the words the leave-warning
@@ -406,69 +408,11 @@ const SubCard: React.FC<{
   </MountPanel>
 );
 
-/* ── The left section rail — a lighter/secondary MountCard, keyboard-navigable (tablist) ── */
-const Rail: React.FC<{ active: SectionId; onSelect: (id: SectionId) => void }> = ({ active, onSelect }) => {
-  const idx = SECTIONS.findIndex((s) => s.id === active);
-  const focusTab = (i: number) => requestAnimationFrame(() => document.getElementById(`acct-tab-${SECTIONS[i].id}`)?.focus());
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    let next = idx;
-    switch (e.key) {
-      case "ArrowDown":
-      case "ArrowRight":
-        next = (idx + 1) % SECTIONS.length;
-        break;
-      case "ArrowUp":
-      case "ArrowLeft":
-        next = (idx - 1 + SECTIONS.length) % SECTIONS.length;
-        break;
-      case "Home":
-        next = 0;
-        break;
-      case "End":
-        next = SECTIONS.length - 1;
-        break;
-      default:
-        return;
-    }
-    e.preventDefault();
-    onSelect(SECTIONS[next].id);
-    focusTab(next);
-  };
-
-  return (
-    <MountPanel>
-      <div style={{ padding: 8 }}>
-        <p style={{ ...labelStyle, padding: "2px 8px 8px", marginBottom: 0, color: mutedInk }}>Settings</p>
-        <div
-          role="tablist"
-          aria-label="Account settings sections"
-          aria-orientation="vertical"
-          className="acct-navlist"
-        >
-          {SECTIONS.map((s) => {
-            const isActive = s.id === active;
-            return (
-              <button
-                key={s.id}
-                id={`acct-tab-${s.id}`}
-                role="tab"
-                aria-selected={isActive}
-                aria-controls="acct-panel"
-                tabIndex={isActive ? 0 : -1}
-                onClick={() => onSelect(s.id)}
-                onKeyDown={onKeyDown}
-                className="acct-navitem"
-              >
-                <s.Icon style={{ width: 16, height: 16, flexShrink: 0, color: isActive ? burgundy : mutedInk }} strokeWidth={1.9} aria-hidden="true" />
-                {s.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    </MountPanel>
-  );
-};
+/* ⚠️ THE `Rail` COMPONENT IS GONE FROM THIS FILE — it is `settings/SettingsRail.tsx`, rendered by
+   the SHELL into the panel slot (settings-mode pack, Phase 1). Settings is a mode: the panel shows
+   the app's nav or the settings rail, and a page-level copy would be a second one on screen with
+   the first. Its ids, its roving tab index and its blush active state went across unchanged, which
+   is why the page's `aria-labelledby` still resolves. */
 
 /**
  * The delete-account modal — a typed confirmation that schedules, rather than deletes.
@@ -648,7 +592,7 @@ export const AccountSettings: React.FC<{
    * toast says which field it was — so the writer can walk back to it.
    */
   const goSection = (id: SectionId) => {
-    const hit = SECTIONS.find((s) => s.id === id);
+    const hit = ACCOUNT_ROUTES.find((r) => r.id === id);
     if (!hit || hit.id === active) return;
     for (const label of dirtyFieldLabels()) {
       showToast({ message: `${label} not saved yet`, duration: 4000, replaces: "settings-dirty" });
@@ -1499,11 +1443,22 @@ export const AccountSettings: React.FC<{
           did. */}
       <div className="acct-plane" style={{ position: "relative", zIndex: 1 }}>
         <AccountHeader name={currentUser.name} email={currentUser.email} facts={headerFacts} />
+        {/* ⚠️ THE RAIL AND THE ASIDE ARE GONE FROM THIS PAGE — they moved into the SHELL's panel
+            slot (`shell/WorkspaceShell.tsx` → `settings/SettingsRail.tsx`). Settings is a mode
+            now: the panel shows the app's nav or the settings rail, never both, so a page-level
+            rail would be a second list of places to go nested inside the first.
+
+            ⚠️ THE GRID SURVIVES AS A ONE-COLUMN WRAPPER RATHER THAN BEING DELETED. `.acct-work` is
+            the scroll and width chain the sections sit in; unwrapping it here to save an element
+            would move that chain into this file in the same commit that is trying to make the page
+            smaller. Its second track is dropped in the stylesheet, where the rail's width was.
+
+            ⚠️ AND `aria-labelledby` STILL POINTS AT THE RAIL'S ITEM ID, WHICH IS NOW IN THE SHELL.
+            That is valid — an `id` reference resolves across the document, not within a subtree —
+            and it is deliberate: the panel is labelled by the thing that selected it. What it
+            breaks is a SMOKE TEST that rendered this page alone and expected both halves in one
+            string; that lock is split rather than dropped (see `settingsPageSmoke.test.tsx`). */}
         <div className="acct-grid">
-          <div className="acct-rail">
-            <Rail active={active} onSelect={goSection} />
-            <RailAside plan={currentUser.plan === UserPlan.PRO ? "pro" : "free"} />
-          </div>
           <div
             id="acct-panel"
             role="tabpanel"

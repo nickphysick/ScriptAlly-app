@@ -44,6 +44,11 @@ import { Rect as TipRect } from "../../lib/deskTooltip";
 import { invokeCapture } from "./railNav";
 import { manuscriptViewPath } from "./manuscriptScope";
 import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
+import {
+  ACCOUNT_ROUTES, accountSectionForPath, isAccountPath, AccountSectionId,
+} from "../../lib/accountRoutes";
+import { SettingsRail, SETTINGS_RAIL_HEADING_ID } from "../settings/SettingsRail";
+import { UserPlan } from "../../types";
 import "./primitives.css";
 import manuscriptMark from "../../assets/shell/manuscript-icon.png";
 import "./workspaceShell.css";
@@ -140,6 +145,75 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
      sidebar whose width narrows to an icon rail — every row keeps existing, labels collapse in
      place, the toggle lives in the pagebar at the seam. There is no second component to drift. */
   const sidebar = useSidebarCollapsed();
+
+  /* ══ SETTINGS MODE ════════════════════════════════════════════════════════════════════════
+     ⚠️ THE MODE IS DERIVED FROM THE ROUTE, NEVER HELD AS STATE. A boolean would have to be set on
+     entry and cleared on every exit — a browser Back, a deep link, an in-app navigation from the
+     account menu, the Esc key — and the one that gets forgotten leaves the app nav swapped out on
+     a page that is not settings. The pathname already knows, and `isAccountPath` is the same
+     predicate the route table itself reads.
+
+     ⚠️ AND IT IS THE ONE CONDITION FOR ALL THREE CHANGES — the nav layer, the window's surface and
+     the top bar's controls. Three booleans would be three things to get out of step; the class on
+     `.ws-app` is what the stylesheet keys every one of them off. */
+  const settingsMode = isAccountPath(pathname);
+  const settingsSection: AccountSectionId | null = accountSectionForPath(pathname);
+
+  /* ⚠️ THE EXIT GOES TO THE DASHBOARD, NOT `history.back()`. Back is where you CAME from, which on
+     a deep link into `/account/security` from an email is outside the app entirely — and on a
+     second visit is the previous settings section, so "Back to app" would walk the mode rather
+     than leave it. The desk is where the app starts. */
+  /* ⚠️ FOCUS RETURNS TO THE ACCOUNT ROW, WHICH IS NOT WHAT THE PACK ASKED FOR — because the thing
+     it asked for does not exist. There is no Settings item in the app nav: Settings came out of the
+     sidebar foot deliberately (see the note at `.ws-pfoot`) and is the FIRST ROW of `AccountMenu`,
+     a flyout that is closed by the time anyone leaves the mode. Returning focus into a menu that is
+     not open is not possible, and the nearest honest target is the row that OPENS that menu — the
+     one persistent element that is the door to settings. Substitution recorded rather than made
+     quietly; see the run report. */
+  const acctRowRef = useRef<HTMLDivElement>(null);
+
+  const leaveSettings = useCallback(() => {
+    onNavigatePath("/dashboard");
+    /* One frame, for the same reason the entry focus takes one: the app nav layer is behind a
+       cross-fade that starts hidden, and a hidden element cannot take focus. */
+    requestAnimationFrame(() => acctRowRef.current?.focus({ preventScroll: true }));
+  }, [onNavigatePath]);
+
+  /* ⚠️ FOCUS LANDS ON THE RAIL HEADING, and only when the mode TURNS ON. Keyed on the boolean
+     rather than the pathname, so moving between sections does not yank focus out of the panel the
+     reader is working in — which is the same effect as the page reloading under them.
+
+     The rAF is not decoration: the heading is behind a cross-fade that begins with the layer
+     `visibility: hidden`, and a hidden element cannot take focus. One frame is enough for the
+     class to land; `preventScroll` stops the panel jumping if it is scrolled. */
+  useEffect(() => {
+    if (!settingsMode) return;
+    const id = requestAnimationFrame(() => {
+      document.getElementById(SETTINGS_RAIL_HEADING_ID)?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [settingsMode]);
+
+  /* ⚠️ ESC LEAVES THE MODE, AND IT IS DELIBERATELY NOT CAPTURED OR STOPPED. Settings is permanent
+     chrome sitting over pages that own their own Escape — an open menu, a flyout, a field being
+     edited — and swallowing the key at shell level would reach past this handler's business. It
+     listens on the BUBBLE phase, so anything nearer the reader answers first and this only fires
+     when nothing else did.
+
+     ⚠️ AND IT IGNORES THE KEY WHILE AN EDITABLE HAS FOCUS. Escape in a text field is "abandon what
+     I am typing" to every reader; leaving the whole mode on it would discard a draft by way of a
+     shortcut nobody pressed on purpose. */
+  useEffect(() => {
+    if (!settingsMode) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      const el = document.activeElement as HTMLElement | null;
+      if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return;
+      leaveSettings();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [settingsMode, leaveSettings]);
 
   /* ── rail tooltips (sidebar-collapse pack, Phase 3) ──
      ⚠️ PORTALLED THROUGH DeskTooltip, NEVER A ::after ON THE ROW — the nav list is an internal
@@ -358,7 +432,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
        `.ws-panel`, which is a SIBLING of the workspace — so no page can see it from a descendant
        selector, and a page that wants to redistribute the width the panel gave back has nothing to
        key on. Same boolean, second mount, on the common ancestor. */
-    <div className={`ws-app${sidebar.collapsed ? " sb-shut" : ""}`}>
+    <div className={`ws-app${sidebar.collapsed ? " sb-shut" : ""}${settingsMode ? " set-mode" : ""}`}>
 
       {/* ⚠️ `sb-ready` GATES THE WIDTH TRANSITION (sidebar-collapse pack, Phase 1). The collapsed
           state is read synchronously, so the first render is already narrow — but a transition
@@ -563,6 +637,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 being a direct link (checked — the other `ws-uacct` references are its stylesheet
                 rules and three tests about position, tooltip gating and initials). */}
             <div
+              ref={acctRowRef}
               className="ws-uacct"
               role="button"
               tabIndex={0}
@@ -610,6 +685,23 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
             )}
           </div>
         </div>
+
+        {/* ══ THE SECOND LAYER — settings mode's rail, over the app nav in the SAME slot ══
+            ⚠️ A SIBLING OF `.ws-pin`, ABSOLUTELY POSITIONED OVER IT. The nav stays in flow and
+            keeps sizing the panel; this layer takes `inset: 0` and neither one can move the
+            other. That is what makes the swap a cross-fade rather than a relayout — the panel's
+            width never changes, so nothing to the right of it reflows.
+
+            ⚠️ NOT ONE MARKUP CHANGE TO THE NAV. Its outgoing state is expressed entirely from
+            `.set-mode .ws-pin` in the stylesheet, which is why the nav component is untouched
+            while the file that hosts it is not. */}
+        <SettingsRail
+          live={settingsMode}
+          active={settingsSection}
+          onSelect={(id) => onNavigatePath(ACCOUNT_ROUTES.find((r) => r.id === id)!.path)}
+          onExit={leaveSettings}
+          plan={currentUser?.plan === UserPlan.PRO ? "pro" : "free"}
+        />
       </div>
       {accountMenu}
       {/* the one rail tooltip — portalled to the fixed layer, so the panel's overflow cannot
@@ -722,8 +814,15 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               <span className="ws-vdiv" aria-hidden="true" />
               <span className="ws-sync">{saveWhisper(save)}</span>
 
+              {/* ⚠️ `ws-bright` MOVED FROM `gap` TO PER-CHILD `margin-left`, and the spacing is
+                  unchanged at 10px. A gap is charged for a child even when that child has
+                  collapsed to zero width, so the two controls that LEAVE in settings mode would
+                  have left 20px of hole behind them — the swap reading as a bar with something
+                  missing rather than a bar with different tools. A margin collapses with its
+                  element. This is the idiom `.ws-lbl` already uses for the sidebar's own labels;
+                  nothing that stays on screen moves by a pixel. */}
               <div className="ws-bright">
-                <SearchPill onOpen={onOpenSearch} anchorRef={searchAnchorRef} />
+                <span className="ws-appctl"><SearchPill onOpen={onOpenSearch} anchorRef={searchAnchorRef} /></span>
                 {/* ⚠️ LABELLED, NOT ICON-ONLY, AND THAT IS A PRE-LAUNCH DECISION ABOUT
                     DISCOVERABILITY — not a density one. A beta that hears nothing reads as "it's
                     fine" right up until people stop signing in, and a pencil glyph among three
@@ -753,6 +852,25 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   </>
                 )}
                 <HelpButton onOpen={onOpenHelp} />
+
+                {/* ⚠️ "BACK TO APP" IS MOUNTED ALWAYS, so it can fade in AND out. Rendering it on
+                    the mode alone would give the swap one direction only: arriving would animate
+                    and leaving would be a control blinking out of existence. It is inert and out
+                    of the tab order until the mode is on — see the stylesheet's `visibility`. */}
+                <button
+                  type="button"
+                  className="ws-setctl ws-backapp"
+                  onClick={leaveSettings}
+                  tabIndex={settingsMode ? 0 : -1}
+                  aria-hidden={settingsMode ? undefined : true}
+                >
+                  Back to app
+                  {/* ⚠️ AN AFFORDANCE, NOT A `<kbd>` THE PAGE ACTS ON. The key is bound in a window
+                      listener above; this only says so. */}
+                  <span className="ws-esc" aria-hidden="true">esc</span>
+                </button>
+
+                <span className="ws-appctl ws-newctl">
                 <div className="ws-newwrap" ref={newRef}>
                   <button
                     type="button"
@@ -813,6 +931,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     </MenuCard>
                   )}
                 </div>
+                </span>
               </div>
           </header>
 

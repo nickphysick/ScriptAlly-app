@@ -1035,6 +1035,187 @@
    stray lozenge of border beside the avatar; removing the element outright retires that whole
    class of leftover. The upgrade path stays reachable from the account menu and from Settings. */
 
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   SETTINGS MODE — the shell takeover
+   (ref design-refs/settings-mode-stacked-cards-v2.html; enrolled on the watchlist)
+
+   ⚠️ ONE MOMENT, THREE PARTS, ONE CLASS. The nav layer swaps, the window's surface dissolves and
+   the bar's controls change — and all three key off `.set-mode` on `.ws-app`, so they cannot fall
+   out of step. Three booleans threaded through three components would be three chances for the
+   window to dissolve on a page that still has the app nav.
+
+   ⚠️ EVERY DURATION IS `calc(<n>s * var(--set-k))`, WHICH IS THE REF'S OWN MECHANISM. Reduced
+   motion sets the multiplier to 0 and the whole choreography collapses to an instant swap — one
+   declaration instead of a shadow copy of every rule below it, which is how a reduced-motion
+   branch comes to drift from the branch it mirrors.
+
+   ⚠️ AND THE MULTIPLIER IS DECLARED ON `:root`, NOT ON `.ws-app`. `.set-rail` is a descendant of
+   the app and resolves it fine either way; declaring it at the root is what lets the media query
+   sit immediately beside it rather than inside a state block it has nothing to do with.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+:root { --set-k: 1; --set-ease: cubic-bezier(0.2, 0.7, 0.2, 1); }
+@media (prefers-reduced-motion: reduce) { :root { --set-k: 0; } }
+
+/* ── the left column: two layers in the one 224px slot ───────────────────────────────────────
+   ⚠️ `.ws-pin` KEEPS ITS PLACE IN FLOW and the settings rail lies over it. The nav is what sizes
+   the panel; making IT the absolute one would leave the panel with no content to measure and the
+   collapse transition with nothing to animate. */
+.set-rail {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateX(-8px);
+  pointer-events: none;
+  /* ⚠️ `visibility` IS WHAT TAKES THE HIDDEN LAYER OUT OF THE TAB ORDER. `opacity: 0` and
+     `pointer-events: none` both leave its buttons focusable, so without this a reader tabbing
+     through the dashboard would walk seven invisible settings items. It is stepped, not
+     transitioned: `0s linear <fade>` holds it visible for exactly as long as the fade runs. */
+  visibility: hidden;
+  transition:
+    opacity calc(0.12s * var(--set-k)) var(--set-ease),
+    transform calc(0.12s * var(--set-k)) var(--set-ease),
+    visibility 0s linear calc(0.12s * var(--set-k));
+}
+.set-mode .set-rail {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  visibility: visible;
+  transition:
+    opacity calc(0.18s * var(--set-k)) var(--set-ease) calc(0.10s * var(--set-k)),
+    transform calc(0.18s * var(--set-k)) var(--set-ease) calc(0.10s * var(--set-k)),
+    visibility 0s linear 0s;
+}
+
+/* The app nav's outgoing state — expressed ENTIRELY from here, which is what leaves the nav
+   component itself untouched. Out at 0s (the ref: outgoing leaves immediately), in at 100ms. */
+.ws-pin {
+  transition:
+    opacity calc(0.18s * var(--set-k)) var(--set-ease) calc(0.10s * var(--set-k)),
+    transform calc(0.18s * var(--set-k)) var(--set-ease) calc(0.10s * var(--set-k)),
+    visibility 0s linear 0s;
+}
+.set-mode .ws-pin {
+  opacity: 0;
+  transform: translateX(-8px);
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity calc(0.12s * var(--set-k)) var(--set-ease),
+    transform calc(0.12s * var(--set-k)) var(--set-ease),
+    visibility 0s linear calc(0.12s * var(--set-k));
+}
+
+/* ── the window: its surface goes, the element stays ─────────────────────────────────────────
+   ⚠️ `background-color`, NEVER THE `background` SHORTHAND. The shorthand resets every background
+   longhand, so an override written that way would silently take an image with it the day one is
+   added — the fault this stylesheet's own note records under the masthead wash.
+
+   ⚠️ AND `overflow: hidden` STAYS. It is the scroller's clip, not decoration; the surface is what
+   dissolves, not the box. */
+.ws-window {
+  transition:
+    background-color calc(0.24s * var(--set-k)) ease calc(0.06s * var(--set-k)),
+    border-color calc(0.24s * var(--set-k)) ease calc(0.06s * var(--set-k)),
+    box-shadow calc(0.24s * var(--set-k)) ease;
+}
+.ws-window::after { transition: opacity calc(0.24s * var(--set-k)) ease calc(0.06s * var(--set-k)); }
+.set-mode .ws-window {
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  transition-delay: 0s;
+}
+/* the inset highlight — its own element, so its own fade */
+.set-mode .ws-window::after { opacity: 0; transition-delay: 0s; }
+
+/* ── the bar: Search and New leave, Back to app arrives ──────────────────────────────────────
+   ⚠️ THE ROW'S SPACING MOVED FROM `gap` TO PER-CHILD `margin-left`, AT THE SAME 10px. A gap is
+   charged for a child that has collapsed to zero width, so the two departing controls would each
+   have left 10px of hole — the swap reading as a bar with something missing. A margin goes when
+   its element does. Nothing that stays on screen moves. */
+.ws-bright { gap: 0; }
+.ws-bright > * { margin-left: 10px; }
+.ws-bright > *:first-child { margin-left: 0; }
+
+.ws-appctl,
+.ws-setctl {
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  max-width: 340px;
+  opacity: 1;
+  transition:
+    opacity calc(0.16s * var(--set-k)) var(--set-ease) calc(0.10s * var(--set-k)),
+    max-width calc(0.16s * var(--set-k)) var(--set-ease) calc(0.10s * var(--set-k)),
+    margin-left calc(0.16s * var(--set-k)) var(--set-ease) calc(0.10s * var(--set-k)),
+    visibility 0s linear 0s;
+}
+/* ⚠️ THE COLLAPSED FORM IS SHARED BY THE TWO STATES THAT NEED IT — the settings control at rest,
+   and the app controls once the mode is on. One rule rather than two identical ones, because the
+   thing being described ("a control that has left the bar") is one thing. */
+.ws-setctl,
+.set-mode .ws-appctl {
+  max-width: 0;
+  opacity: 0;
+  margin-left: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity calc(0.10s * var(--set-k)) var(--set-ease),
+    max-width calc(0.10s * var(--set-k)) var(--set-ease),
+    margin-left calc(0.10s * var(--set-k)) var(--set-ease),
+    visibility 0s linear calc(0.10s * var(--set-k));
+}
+.set-mode .ws-setctl {
+  max-width: 200px;
+  opacity: 1;
+  margin-left: 10px;
+  pointer-events: auto;
+  visibility: visible;
+  transition:
+    opacity calc(0.16s * var(--set-k)) var(--set-ease) calc(0.12s * var(--set-k)),
+    max-width calc(0.16s * var(--set-k)) var(--set-ease) calc(0.12s * var(--set-k)),
+    margin-left calc(0.16s * var(--set-k)) var(--set-ease) calc(0.12s * var(--set-k)),
+    visibility 0s linear 0s;
+}
+
+/* "Back to app" — a quiet row, not a button competing with Feedback beside it. */
+.ws-backapp {
+  flex: none;
+  height: 34px;
+  padding: 0 11px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: #6a5a50;
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  gap: 8px;
+  transition: background-color 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+}
+.ws-backapp:hover { background: var(--ws-window); border-color: var(--ws-edge); color: #3a2b23; }
+.ws-esc {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 9.5px;
+  padding: 2px 5px;
+  border: 1px solid var(--ws-edge);
+  border-radius: 4px;
+  color: #8a7d6c;
+}
+
+/* ⚠️ BELOW md THE MODE IS THE PAGE. The pagebar is `display: none` there and the sidebar is a
+   sheet, so there is no slot to swap and no bar to change — the settings page simply renders. The
+   window's frame is already off at this width (see the media query above), so the dissolve has
+   nothing to dissolve either. Stated rather than left to coincidence. */
+@media (max-width: 767px) {
+  .set-rail { display: none; }
+  .set-mode .ws-pin { opacity: 1; transform: none; pointer-events: auto; visibility: visible; }
+}
+
 /* ⚠️ LAST IN THE FILE, DELIBERATELY — equal specificity means source order decides, so a rule
    added below this block would be exempt from it without anyone noticing. */
 @media (prefers-reduced-motion: reduce) {

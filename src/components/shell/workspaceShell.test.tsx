@@ -18,6 +18,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { UserPlan } from "../../types";
 import { ShellSection } from "../../lib/workspaceShell";
+import { sliceBetween } from "../../test/sliceBetween";
 
 const MANUSCRIPTS = [
   { id: "m1", title: "The Hollow Sea" },
@@ -281,13 +282,21 @@ describe("the breadcrumb is chrome", () => {
     expect(rule(".ws-pagebar")).toContain("flex: none");
   });
 
-  /* ⚠️ RETARGETED — both survive, on the pagebar rather than the bar. */
+  /* ⚠️ RETARGETED — both survive, on the pagebar rather than the bar.
+     ⚠️ AND THE "no `·`" CLAUSE IS NOW SCOPED TO THE CRUMB (settings-mode pack, Phase 1). It was
+     asserted over the WHOLE rendered shell, which was a proxy for "the crumb separates with `/`"
+     and held only while nothing ELSE in the shell used an interpunct. The settings rail's plan
+     strip states "1 manuscript · unlimited agents · unlimited queries" — correct, and nothing to do
+     with the breadcrumb — so the page-wide form went red over a sentence in a different component.
+     Bounded on the next sibling's class rather than on `</nav>`: a closing tag is not a delimiter
+     (the house rule about slices bounded by anchors that cannot nest). */
   it("only the current page is ink; ancestors are muted links; `/` throughout", () => {
     const html = at("/queries/analytics");
     expect(html).toContain('class="ws-cur"');
     expect(html).toContain('class="ws-seg"');
     expect(html).toContain(">/<");
-    expect(html).not.toContain("·");
+    const crumb = sliceBetween(html, 'class="ws-crumb"', 'class="ws-vdiv"', "the breadcrumb");
+    expect(crumb).not.toContain("·");
     expect(rule(".ws-cur")).toContain("color: #241811");
     expect(rule(".ws-seg")).toContain("color: #8a7a6c");
   });
@@ -351,12 +360,16 @@ describe("the sidebar", () => {
 
      What is asserted now is the SHAPE the divider promises: above it, places to go; below it, who
      you are. So the foot holds the hairline and the user row, and nothing that navigates. */
+  /* ⚠️ THE END ANCHOR MOVED FROM `{accountMenu}` TO `<SettingsRail` (settings-mode pack, Phase 1),
+     AND THE CLAIM IS UNCHANGED. `{accountMenu}` was never the foot's end — it was the next thing
+     that happened to follow it, which is a proxy, and it held only while nothing lived between the
+     two. Settings mode puts a second panel layer there, so the slice grew to cover an element that
+     is not in the foot and the assertion went red over the word "Settings" inside `SettingsRail`.
+     The foot did not change. `sliceBetween` is used rather than two `indexOf`s so a future move of
+     that component fails by NAMING the missing anchor instead of silently widening the slice to
+     the rest of the file. */
   it("⚠️ the foot is the hairline and the user row — no Settings, nothing else to go to", () => {
-    const from = srcCode.indexOf('className="ws-pfoot"');
-    const to = srcCode.indexOf("{accountMenu}", from);
-    expect(from).toBeGreaterThan(-1);
-    expect(to).toBeGreaterThan(from);
-    const foot = srcCode.slice(from, to);
+    const foot = sliceBetween(srcCode, 'className="ws-pfoot"', "<SettingsRail", "the sidebar foot");
     const div = foot.indexOf('className="ws-pdiv"');
     const user = foot.indexOf('className="ws-uacct"');
     expect(div).toBeGreaterThan(-1);

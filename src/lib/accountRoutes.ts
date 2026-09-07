@@ -86,3 +86,21 @@ export function accountRedirectFor(pathname: string): string | null {
   if (!ours) return null;
   return accountSectionForPath(pathname) ? null : ACCOUNT_DEFAULT_PATH;
 }
+
+/**
+ * Is this pathname inside settings?
+ *
+ * ⚠️ THE SHELL ASKS THIS, WHICH IS WHY IT LIVES HERE AND NOT IN THE SHELL. Settings mode swaps the
+ * nav, dissolves the window and changes the top bar; the condition for all three is "which routes
+ * ARE settings", and that is this file's question. A predicate written in `shellV2Nav` would be a
+ * fifth surface deciding whether a path exists, which is the exact failure the note at the top of
+ * this file lists four cures for.
+ *
+ * ⚠️ AND IT INCLUDES THE BARE ROOT DELIBERATELY, even though `accountRedirectFor` replaces it
+ * before anything renders. The redirect is one navigation, so there is a frame in which the
+ * pathname is `/account`; a predicate that said "no" for it would flash the app nav back for that
+ * frame, on every entry.
+ */
+export function isAccountPath(pathname: string): boolean {
+  return pathname === ACCOUNT_ROOT || accountSectionForPath(pathname) !== null;
+}
