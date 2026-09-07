@@ -36,28 +36,9 @@ import { Agent, SubmissionMethod, SubmissionStatus } from "../../types";
 import { materialsWantedFromRows } from "../../lib/agentMaterials";
 import { agentRelationship } from "../../lib/agentList";
 import {
-  AGENT_GROUP_OPTIONS,
-  AGENT_SORT_OPTIONS,
-  AgentDoor,
-  AgentFilterSet,
-  AgentGrouping,
-  AgentListSort,
-  AgentStanding,
-  AgentTurn,
-  DEFAULT_AGENT_SORT,
-  DOOR_LABEL,
-  STANDING_LABEL,
-  TURN_LABEL,
-  agentAxisCounts,
   isDoorOpen,
   contactListState,
-  emptyFilterSet,
-  groupAgents,
-  locationCounts,
   matchesAgentSearch,
-  matchesFilterSet,
-  sortAgentList,
-  starTierCount,
 } from "../../lib/agentList";
 import {
   CARDS_START_MS,
@@ -69,7 +50,7 @@ import {
   rowDelayMs,
 } from "../../lib/agentMotion";
 import { BUMP_MS, EXIT_MS, SAVE_BREATH_MS, SAVE_FADE_IN_MS, SAVE_FADE_OUT_MS } from "../../lib/agentMotion";
-import { saveNotice, saveOutcome, sectionFor } from "../../lib/agentSaveOutcome";
+import { saveNotice, saveOutcome } from "../../lib/agentSaveOutcome";
 import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
 import { AgentToolbar, AppliedTag, AgentAppliedTags, appliedTags } from "./AgentToolbar";
 import {
@@ -89,6 +70,8 @@ import { AgentGroupingKey } from "../../lib/agentBoard";
 import { RAIL_GROUPS } from "../shell/railNav";
 import { countryName } from "../../lib/territory";
 import { matchGenre } from "../../lib/genreMatch";
+import { activeTile, agentTiles, scopedManuscript } from "../../lib/agentTiles";
+import { StatTiles } from "../shared/StatTiles";
 import { blankDraft } from "../../lib/agentDraft";
 import { useIsMobile, useMobileChrome } from "../shell/mobileChrome";
 
@@ -124,18 +107,21 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      of the app scopes by, never a second notion of "current". Falls back to the only manuscript
      when there is one, and to null when there is nothing to compare against; null means no claim
      and every chip renders plain. */
-  const tintGenre = useMemo(() => {
+  const scoped = useMemo(() => {
     let id: string | null = null;
     try { id = window.localStorage.getItem(ACTIVE_MS_KEY); } catch { id = null; }
-    const ms = manuscripts.find((m) => m.id === id) ?? (manuscripts.length === 1 ? manuscripts[0] : undefined);
-    return matchGenre(ms?.genre);
+    return scopedManuscript(manuscripts, id);
   }, [manuscripts]);
+  /* ⚠️ ONE READING OF THE SCOPE, TWO CONSUMERS. The chips tint through `matchGenre` and the tile
+     counts through the same value, so a tile can never count an agent whose chip is not tinted. */
+  const tintGenre = useMemo(() => matchGenre(scoped?.genre), [scoped]);
+  /* ⚠️ TOTALS, NEVER THE FILTERED VIEW — over `agents`, not `visible`. */
+  const tiles = useMemo(() => agentTiles(agents, queries, scoped), [agents, queries, scoped]);
 
   const [filters, setFilters] = useState<AgentFilters>(emptyFilters);
   const [search, setSearch] = useState(searchQuery?.trim() || "");
   const [sort, setSort] = useState<SortKey>(DEFAULT_SORT);
   const [sortDir, setSortDir] = useState<SortDir>(sortSpec(DEFAULT_SORT).defaultDir);
-  const [grouping, setGrouping] = useState<AgentGrouping>("none");
   // A draft-only agent that isn't persisted until Done passes validation (decision 16).
   const [newAgent, setNewAgent] = useState<Agent | null>(null);
 
@@ -280,9 +266,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     adding: !!newAgent,
   });
 
-  // Sections over the ALREADY SORTED list — grouping partitions, it never reorders, so whichever
-  // sort is chosen applies within each section for free.
-  const groups = useMemo(() => groupAgents(shown, grouping, queries), [shown, grouping, queries]);
+  /* ⚠️ THE GRID DOES NOT GROUP, AND ITS GROUPING IS RETIRED RATHER THAN LEFT FROZEN (Phase 7).
+     Grouping arranges the BOARD — the pack's own division — so when the Group control moved to the
+     board this page's `grouping` state kept its initial "none" and `setGrouping` was never called
+     again: a section renderer that could not be reached, running `groupAgents` on every render to
+     produce an empty array. A frozen control is worse than a deleted one, because it reads as a
+     feature to whoever finds it next. */
 
   /** ONE tag per applied value, built from the same set the popover reads. */
   const tags: AppliedTag[] = useMemo(() => appliedTags(filters, setFilters), [filters]);
@@ -402,8 +391,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         search,
         sort,
         sortDir,
-        grouping,
-        sectionBefore: sectionBeforeSave.current,
       });
       setNotice({
         text: saveNotice(saved.name || saved.agency, outcome),
@@ -436,7 +423,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
 
         window.setTimeout(() => {
           // Beat 3 — the travel (or, for a card that has left the view, the exit).
-          if (outcome.kind === "filtered-out" || outcome.sectionChanged) {
+          if (outcome.kind === "filtered-out") {
             setLeavingId(saved.id);
             window.setTimeout(() => {
               flipBefore.current = measureFlip(gridRef.current);
@@ -453,7 +440,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         }, SAVE_FADE_IN_MS);
       }, SAVE_FADE_OUT_MS);
     },
-    [agents, queries, filters, search, sort, grouping, clearEditor],
+    [agents, queries, filters, search, sort, sortDir, clearEditor],
   );
 
   /**
@@ -582,7 +569,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     // very fact the grouping is keyed on.
     const beforeAgent = agents.find((a) => a.id === draft.id) ?? newAgent;
     sectionBeforeSave.current = beforeAgent
-      ? sectionFor(beforeAgent, { agents, queries, filters, search, sort, sortDir, grouping })
+      ? null
       : null;
     // Only an EXISTING agent has a previous version; a create has nothing to revert to, and
     // "Undo" there would mean deletion, which this page deliberately has no affordance for.
@@ -1029,6 +1016,23 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
 
         {/* Applied filters live OUTSIDE the popover — closing it must never hide what is
             filtering the list. Each tag removes its own value; "Clear all" empties the set. */}
+        {/* ⚠️ THE TILES ARE THE QUERY CENTRE'S OWN ROW (`StatTiles`), and each one is a filter the
+            popover can already express — a shortcut, never a second filtering mechanism, which is
+            what keeps the row and the applied tags from disagreeing about what is on screen. The
+            lit tile is DERIVED by comparing the sets rather than remembered from a click, so it
+            cannot stay lit while the reader edits the filter underneath it. */}
+        {pageState === "list" && (
+          <StatTiles
+            tiles={tiles}
+            selected={activeTile(tiles, filters)}
+            onPick={(key) => {
+              const t = tiles.find((x) => x.key === key);
+              if (t) setFilters(t.filters);
+            }}
+            label="Contact list totals"
+            columns={tiles.length}
+          />
+        )}
         <AgentAppliedTags tags={tags} onClear={() => setFilters(emptyFilters())} />
 
         {/* ⚠️ ONE SET OF AGENTS, THREE RENDERERS. Filter, search and sort have all been applied by
@@ -1054,23 +1058,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onPeek={openPeekAt}
             peekId={peekId}
           />
-        ) : grouping !== "none" && shown.length > 0 ? (
-          <div className="agl-groups">
-            {groups.map((sec, si) => (
-              <section key={sec.key}>
-                <div className="agl-gsec">
-                  <h2>{sec.title}</h2>
-                  {sec.stars ? <span className="st2" aria-hidden="true">{"★".repeat(sec.stars)}</span> : null}
-                  <span className="cn">{sec.agents.length}</span>
-                </div>
-                <div
-                  className="agl-grule"
-                  style={{ background: `linear-gradient(90deg, ${sec.stub} 0 88px, var(--agl-linesoft) 88px)` }}
-                />
-                <div className="agl-grid" ref={si === 0 ? gridRef : undefined}>{sec.agents.map(renderCard)}</div>
-              </section>
-            ))}
-          </div>
         ) : (
         <div className="agl-grid agl-gridwrap" ref={gridRef}>
           {/* ⚠️ THE FILTERED STATE ONLY — the blank account never reaches this branch, so the

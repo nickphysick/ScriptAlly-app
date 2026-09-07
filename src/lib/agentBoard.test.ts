@@ -11,6 +11,7 @@ import {
   historyBucket, monthAdded, replyBucket, standingColumn, GROUPINGS,
 } from "./agentBoard";
 import { CONTACT_FIXTURE_AGENTS, CONTACT_FIXTURE_QUERIES } from "../components/agents/contactFixture";
+import { agentStanding } from "./agentList";
 import { Query, QueryStatus, SubmissionMethod } from "../types";
 import { STATUS_ORDER } from "./statusOrder";
 
@@ -127,6 +128,37 @@ describe("the columns", () => {
       const total = cols.reduce((n, c) => n + c.agents.length, 0);
       expect(total, `${g.label} lost or duplicated agents`).toBe(A.length);
     }
+  });
+});
+
+/**
+ * ⚠️ TWO SHAPES OF ONE PARTITION, ASSERTED AGAINST EACH OTHER. `agentStanding` (the three-axes
+ * model's Axis A) and `agentQueryStanding().kind` answer the same question — has this agent
+ * anything live, anything closed, or nothing at all — and the board needed the richer form, which
+ * carries the STATUS as well. They agree by construction today: both read `queriesForAgent` and
+ * `isTerminalStatus`, and neither consults the door. That is exactly the kind of agreement that
+ * survives until somebody edits one of them, so it is asserted rather than assumed.
+ *
+ * Reconciling them into one function would mean `agentList` importing `agentBoard`, which already
+ * imports `agentList` — a cycle, and this repo has a standing warning about initialisation order
+ * that makes a cycle a poor trade for one saved traversal. Two derivations checked against each
+ * other is the documented alternative.
+ */
+describe("the two standings name the same partition", () => {
+  it("agree on every fixture agent", () => {
+    const map = { none: "never", open: "active", closed: "prev" } as const;
+    for (const a of CONTACT_FIXTURE_AGENTS) {
+      const rich = agentQueryStanding(a.id, CONTACT_FIXTURE_QUERIES).kind;
+      const axis = agentStanding(a, CONTACT_FIXTURE_QUERIES);
+      const expected = map[rich] === "prev" ? "noactive" : map[rich];
+      expect(axis, `${a.name}: the axis says "${axis}" and the board says "${rich}"`).toBe(expected);
+    }
+  });
+
+  /* and the fixture exercises all three, or the agreement is about one case */
+  it("over all three values, not one", () => {
+    const kinds = new Set(CONTACT_FIXTURE_AGENTS.map((a) => agentQueryStanding(a.id, CONTACT_FIXTURE_QUERIES).kind));
+    expect(kinds, "the fixture no longer covers all three standings").toEqual(new Set(["none", "open", "closed"]));
   });
 });
 

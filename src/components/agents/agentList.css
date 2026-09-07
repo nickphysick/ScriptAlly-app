@@ -217,32 +217,7 @@
 /* (the toolbar row itself is declared in the Phase 6 block at the foot of this file) */
 
 
-.aglist .agl-search {
-  display: flex; align-items: center; gap: 9px;
-  flex: 1; max-width: 300px; height: 36px; padding: 0 12px;
-  background: var(--agl-fill); border: none; border-radius: 10px;
-}
-.aglist .agl-search svg { flex: none; color: var(--agl-muted); }
 
-/* the three controls: identical at rest — icon, one-word label, chevron */
-.aglist .agl-pw { position: relative; display: inline-flex; }
-.aglist .agl-ctl {
-  display: inline-flex; align-items: center; gap: 9px; white-space: nowrap;
-  height: 36px; padding: 0 12px; border-radius: 10px;
-  background: var(--agl-card); border: 1px solid var(--agl-line);
-  font-family: inherit; font-size: 12.5px; color: var(--agl-ink-head); cursor: pointer;
-  transition: border-color .15s, background .15s;
-}
-.aglist .agl-ctl:hover { border-color: #cfc2b4; }
-.aglist .agl-ctl svg { flex: none; color: var(--agl-muted); }
-.aglist .agl-ctl .cv { opacity: .8; }
-/* the SHARED active treatment — one look for "this control is doing something" */
-.aglist .agl-ctl.act { background: var(--agl-pink); border-color: var(--agl-pinkline); color: var(--agl-burg); }
-.aglist .agl-ctl.act svg { color: var(--agl-burg); }
-.aglist .agl-badge {
-  font-family: 'JetBrains Mono', monospace; font-size: 8.5px;
-  background: var(--agl-burg); color: #fff; border-radius: 999px; padding: 2px 7px;
-}
 /* ⚠️ `.agl-count` IS DELETED — the figure moved, not the rule (in-flow masthead, step 1). It was a
    mono caption pinned right by `margin-left: auto`; the same `{resultCount} of {total}` now leads
    the row as the shared `PageTally`, whose own `margin-right: auto` does the pushing in the other
@@ -283,24 +258,6 @@
   display: block; margin-top: 3px; font-family: inherit; font-size: 10px;
   text-transform: none; letter-spacing: 0; color: #bcb0a3;
 }
-.aglist .agl-orow {
-  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
-  padding: 8px 11px; border: none; border-radius: 10px; background: none;
-  font-family: inherit; font-size: 12.5px; color: var(--agl-ink-body); cursor: pointer;
-}
-.aglist .agl-orow:not([disabled]):hover { background: var(--agl-fill); color: var(--agl-ink-head); }
-.aglist .agl-orow .box {
-  width: 15px; height: 15px; flex: none; border-radius: 4px; border: 1.5px solid #cfc2b4;
-  background: #fff; display: flex; align-items: center; justify-content: center; color: #fff;
-}
-.aglist .agl-orow.sel .box { background: var(--agl-burg); border-color: var(--agl-burg); }
-.aglist .agl-orow .lb { flex: 1; min-width: 0; }
-.aglist .agl-orow .ct { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--agl-muted); }
-.aglist .agl-orow .tick { flex: none; color: var(--agl-burg); }
-/* a zero-count option stays VISIBLE and inert — its absence is information */
-.aglist .agl-orow.off, .aglist .agl-orow[disabled] { opacity: .4; cursor: default; }
-.aglist .agl-fstars { color: #c8853f; font-size: 11px; letter-spacing: 1px; }
-.aglist .agl-pdiv { height: 1px; background: var(--agl-linesoft); margin: 7px 11px; }
 .aglist .agl-pfoot {
   display: flex; align-items: center; gap: 9px; padding: 9px 8px 4px; margin-top: 5px;
   border-top: 1px solid var(--agl-linesoft);
@@ -319,22 +276,7 @@
 /* ── applied filters: closing the popover must never hide what's filtering ── */
 /* (the applied-tag row is declared in the Phase 6 block at the foot of this file) */
 .aglist .agl-atag:hover .x { opacity: 1; }
-.aglist .agl-clr {
-  border: none; background: none; font-family: inherit; font-size: 11.5px;
-  color: var(--agl-muted); cursor: pointer;
-}
-.aglist .agl-clr:hover { color: var(--agl-ink-head); }
-/* out-specifies any global input[type=text] rule — see the cascade-trap note above */
-.aglist .agl-search input[type="text"] {
-  border: none; outline: none; background: none; box-shadow: none;
-  padding: 0; border-radius: 0; margin: 0; height: auto; min-height: 0;
-  font-family: inherit; font-size: 13px; color: var(--agl-ink-body); flex: 1; min-width: 0;
-}
 .aglist .agl-search input[type="text"]:focus,
-.aglist .agl-search input[type="text"]:focus-visible {
-  border: none; outline: none; box-shadow: none;
-}
-.aglist .agl-search input[type="text"]::placeholder { color: #c3b6a6; }
 
 /* (The colour LEGEND and the standalone COUNT LINE are deleted — the legend taught the same
    vocabulary the filter list carries, and the count moved into the toolbar's right edge.) */
@@ -349,16 +291,6 @@
    app-wide — a second one would make two lists that group differently look like
    two different products. Only the stub length differs (88px here, 96px there,
    both against their own type size). */
-.aglist .agl-gsec { display: flex; align-items: baseline; gap: 11px; margin: 38px 0 5px; }
-.aglist .agl-gsec h2 {
-  font-family: 'Playfair Display', serif; font-size: 23px; font-weight: 500;
-  color: var(--agl-ink-head); margin: 0;
-}
-.aglist .agl-gsec .cn { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--agl-muted); }
-.aglist .agl-gsec .st2 { color: #c8853f; font-size: 13px; letter-spacing: 2px; }
-.aglist .agl-grule { height: 2px; border-radius: 2px; margin-bottom: 18px; }
-/* the first section sits closer — the toolbar above it already set the distance */
-.aglist .agl-groups > section:first-child .agl-gsec { margin-top: 24px; }
 .aglist .agl-grid {
   /* THREE to a row (agent-list-fixes P3) — fixed columns, not auto-fill, so the card width is
      a consequence of the content cap rather than of a minmax floor. ~400px at the 1240 cap. */
@@ -403,7 +335,6 @@
 @media (max-width: 767.98px) {
   .aglist .agl-page { padding: 18px 0 40px; }
   .aglist .agl-h1 { font-size: 38px; }
-  .aglist .agl-search { min-width: 0; width: 100%; }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -984,11 +915,6 @@
 .aglist .agl-note-in { display: flex; gap: 7px; align-items: flex-end; margin-top: auto; padding-top: 8px; }
 .aglist .agl-note-in textarea { flex: 1; min-height: 38px; max-height: 96px; resize: none; }
 
-/* small select for the sort + location controls in the chrome row */
-.aglist .agl-select-sm {
-  width: auto; flex: none; padding: 7px 28px 7px 13px; font-size: 12px; border-radius: 999px;
-  border: 1px solid var(--agl-hair); background-color: var(--agl-cream);
-}
 
 /* pending note grammar — the interface must not claim durability it doesn't have */
 .aglist .agl-bubble.pending { background: var(--agl-paper); border-style: dashed; }
@@ -1104,10 +1030,6 @@
 .agl-dmswl {
   font-family: 'Playfair Display', serif; font-style: italic; font-size: 16px;
   line-height: 1.6; color: var(--agl-ink-body); margin: 6px 0 0;
-}
-.agl-dhint {
-  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .08em;
-  text-transform: uppercase; color: var(--agl-ink-label); margin: 14px 0 0; line-height: 1.7;
 }
 .agl-dfoot {
   padding: 14px 20px; border-top: 1px solid var(--agl-hair2); background: #f9f4ed;

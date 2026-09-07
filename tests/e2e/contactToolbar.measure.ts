@@ -33,6 +33,10 @@ const switchTo = async (page: import("@playwright/test").Page, label: string) =>
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 };
 
+/* ⚠️ FACET CLICKS ARE SCOPED TO THE POPOVER. The tile row states the same words — "Closed to
+   queries" is both a tile and a facet chip — so an unscoped role query resolves to two controls
+   with the same name and different jobs. That is the tiles doing their job (each one IS a filter
+   the popover offers), and the measurement has to say which it means. */
 const namesIn = (page: import("@playwright/test").Page, sel: string) =>
   page.evaluate((s) => [...document.querySelectorAll(s)].map((e) => (e.textContent ?? "").trim()), sel);
 
@@ -42,7 +46,7 @@ test.describe("filter and sort reach every view", () => {
 
     await page.getByRole("button", { name: /^Filter/ }).click();
     await expect(page.locator(".agl-facetchip").first()).toBeVisible({ timeout: 4_000 });
-    await page.getByRole("button", { name: /^Closed to queries/ }).click();
+    await page.locator(".f12-pop").getByRole("button", { name: /^Closed to queries/ }).click();
 
     const count = await page.locator("[data-agent-card]").count();
     // eslint-disable-next-line no-console
@@ -120,7 +124,7 @@ test.describe("the controls", () => {
     await page.getByRole("button", { name: /^Filter/ }).click();
     await expect(page.locator(".agl-facetchip").first()).toBeVisible({ timeout: 4_000 });
     /* narrow first so some option genuinely reaches zero */
-    await page.getByRole("button", { name: /^Never queried/ }).click();
+    await page.locator(".f12-pop").getByRole("button", { name: /^Never queried/ }).click();
     const zeros = await page.evaluate(() => [...document.querySelectorAll(".agl-facetchip")]
       .filter((b) => (b as HTMLButtonElement).disabled)
       .map((b) => ({ text: (b.textContent ?? "").trim(), visible: (b as HTMLElement).offsetParent !== null })));
@@ -128,5 +132,50 @@ test.describe("the controls", () => {
     console.log(`[zero rows] ${zeros.length} disabled, all visible=${zeros.every((z) => z.visible)}`);
     expect(zeros.length, "no option reached zero — this measurement has no subject").toBeGreaterThan(0);
     expect(zeros.every((z) => z.visible), "a zero-count option was hidden rather than dimmed").toBe(true);
+  });
+});
+
+/**
+ * THE TILES — counted over the whole list, on a rendered page.
+ *
+ * ⚠️ "THE COUNTS ARE TOTALS" IS A CLAIM ABOUT WHAT HAPPENS WHEN YOU FILTER, and no source lock
+ * can make it: the numbers are correct in the model either way, and what matters is that the row
+ * on screen does not move when the list beneath it does.
+ */
+test.describe("the tiles", () => {
+  test("count the whole list, and go on counting it after a filter", async ({ page }) => {
+    await openCast(page);
+
+    const read = async () => page.evaluate(() =>
+      [...document.querySelectorAll(".qct-tile")].map((t) => ({
+        label: (t.querySelector(".qct-k")?.textContent ?? "").trim(),
+        n: (t.querySelector(".qct-n")?.textContent ?? "").trim(),
+        on: t.className.includes("on") || t.getAttribute("aria-pressed") === "true",
+      })));
+
+    const before = await read();
+    // eslint-disable-next-line no-console
+    console.log(`[tiles] ${before.map((t) => `${t.label}=${t.n}`).join(" · ")}`);
+    expect(before.length, "the tile row did not render").toBe(5);
+    expect(before[0].label.toLowerCase()).toContain("all contacts");
+    /* ⚠️ THE GENRE TILE IS NAMED FROM THE MANUSCRIPT, never hard-coded */
+    expect(before[3].label.toLowerCase(), "the genre tile is not named from the manuscript in scope").toContain("seeking thriller");
+
+    await page.getByRole("button", { name: /^Filter/ }).click();
+    await expect(page.locator(".agl-facetchip").first()).toBeVisible({ timeout: 4_000 });
+    await page.locator(".f12-pop").getByRole("button", { name: /^Closed to queries/ }).click();
+    await page.keyboard.press("Escape");
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+
+    const after = await read();
+    const cards = await page.locator("[data-agent-card]").count();
+    // eslint-disable-next-line no-console
+    console.log(`[tiles after filter] ${after.map((t) => `${t.label}=${t.n}`).join(" · ")} · cards=${cards}`);
+
+    expect(cards, "the filter did not narrow the list, so this measurement has no subject").toBeLessThan(7);
+    expect(after.map((t) => t.n), "the tile counts followed the filter — they are a census of the list, not a second statement of the filter").toEqual(before.map((t) => t.n));
+    /* and the tile whose filter this IS lights up, derived rather than remembered */
+    expect(after[2].on, "the Closed to queries tile did not light for its own filter").toBe(true);
+    expect(after[0].on, "All contacts stayed lit under a narrowing filter").toBe(false);
   });
 });

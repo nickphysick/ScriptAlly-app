@@ -17,13 +17,12 @@
  */
 
 import { Agent, Query } from "../types";
-import {
-  AgentFilterSet, AgentGrouping, groupAgents, matchesAgentSearch } from "./agentList";
+import { matchesAgentSearch } from "./agentList";
 import { AgentFilters, SortDir, SortKey, matchesFilters, sortAgents, sortSpec } from "./agentFilters";
 
 export type SaveOutcome =
   /** The card stays in the list and travels to its sorted place. */
-  | { kind: "travel"; index: number; total: number; sortLabel: string; sectionChanged: boolean }
+  | { kind: "travel"; index: number; total: number; sortLabel: string }
   /** The card no longer matches the active filters: it leaves, and the notice says so. */
   | { kind: "filtered-out" };
 
@@ -34,9 +33,6 @@ export interface SaveContext {
   search: string;
   sort: SortKey;
   sortDir: SortDir;
-  grouping: AgentGrouping;
-  /** The section the card sat in before the save — only meaningful while grouping is on. */
-  sectionBefore?: string | null;
 }
 
 /** The list as it will be rendered once the save lands. */
@@ -47,12 +43,10 @@ const listAfter = (saved: Agent, ctx: SaveContext): Agent[] =>
     ctx.sortDir,
   );
 
-/** Which group section an agent lands in — null when grouping is off. */
-export function sectionFor(agent: Agent, ctx: SaveContext): string | null {
-  if (ctx.grouping === "none") return null;
-  const secs = groupAgents([agent], ctx.grouping, ctx.queries);
-  return secs[0]?.key ?? null;
-}
+/* ⚠️ `sectionFor` AND `sectionChanged` ARE RETIRED (Phase 7). They existed for the GRID's section
+   grouping, which is retired with them — grouping arranges the BOARD now, and the board is not a
+   place a saved card "travels" to a position in. The travel notice keeps its position and its
+   sort; what it loses is a clause that could only ever have been false. */
 
 /**
  * Where the saved agent ends up, and how it should get there.
@@ -70,14 +64,12 @@ export function saveOutcome(saved: Agent, ctx: SaveContext): SaveOutcome {
   const after = listAfter(saved, ctx);
   const index = after.findIndex((a) => a.id === saved.id);
   const sortLabel = sortSpec(ctx.sort).label;
-  const sectionAfter = sectionFor(saved, ctx);
   return {
     kind: "travel",
     // 1-based: the notice is read by a person counting cards, not by an array
     index: index < 0 ? 0 : index + 1,
     total: after.length,
     sortLabel,
-    sectionChanged: ctx.grouping !== "none" && (ctx.sectionBefore ?? null) !== sectionAfter,
   };
 }
 

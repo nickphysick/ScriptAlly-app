@@ -162,32 +162,18 @@ describe("the desk popovers", () => {
   });
 });
 
-describe("agent list · group sections reuse the To-do board's pattern", () => {
-  const todo = readFileSync(new URL("../components/todo/todo.css", import.meta.url), "utf8");
+/* ⚠️ THE GRID'S SECTION GROUPING IS RETIRED, AND THESE CASES GO WITH IT (Phase 7). They asserted
+   that the grid's section headings borrowed the To-do board's typographic pattern rather than
+   inventing a second grouping style — a real law, about a mechanism that no longer exists.
+   Grouping arranges the BOARD now, which is the pack's own division, and the grid is flat.
 
-  it("heading, count and stub-rule match the board's grammar — not a second grouping style", () => {
-    const sec = block(".aglist .agl-gsec h2");
-    expect(sec, "the section heading left Playfair — the board's sections are typographic, and a bar/pill here would make two lists that group differently look like two products").toContain("'Playfair Display'");
-    expect(sec, "the section heading weight drifted off the board's 500").toContain("font-weight: 500");
-    expect(block(".aglist .agl-gsec .cn"), "the section count left the mono face it shares with the board").toContain("'JetBrains Mono'");
-    expect(block(".aglist .agl-grule"), "the section rule left 2px — the board's rule is a 2px hairline, not a border").toContain("height: 2px");
-    // The board's OWN sections moved on (the tightening: one line, label · count · an inline
-    // hairline filling the width) — the agent list KEEPS the stub grammar it borrowed, so the
-    // shared-idea assertion is now historical. What still holds: the board draws a rule INSIDE
-    // its section line rather than a second grouping style.
-    expect(todo).toContain(".tdb-secrule { flex: 1; height: 1px;");
-  });
+   ⚠️ THE FROZEN STATE IS WHY THIS WAS FOUND. When the Group control moved to the board, this
+   page's `grouping` kept its initial "none" and `setGrouping` was never called again: a section
+   renderer that could not be reached, running `groupAgents` on every render to produce an empty
+   array, with four green cases still asserting its stylesheet. A frozen control is worse than a
+   deleted one, because it reads as a feature to whoever finds it next — and its locks go on
+   passing over a page nobody can reach. */
 
-  it("the 88px stub carries the section's identity colour, and the palette is NAMED", () => {
-    expect(page, "the stub stopped being drawn as a gradient stop — the rule must read as one line whose head is coloured, not two rules").toContain("0 88px, var(--agl-linesoft) 88px");
-    expect(page, "the stub colour stopped coming from the section, so every group would draw the same rule").toContain("${sec.stub}");
-  });
-});
-
-/**
- * THE CARD'S LOCATION LINE (phase 5) — and the one thing the mockup draws that we deliberately
- * do NOT build.
- */
 describe("agent list · the location line", () => {
   const card = readFileSync(new URL("../components/agents/AgentCard.tsx", import.meta.url), "utf8");
   /* ⚠️ SWEEPS OVER THIS FILE READ DECLARATIONS, NOT PROSE. A lock that forbids a token over RAW

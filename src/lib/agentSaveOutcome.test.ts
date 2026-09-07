@@ -7,7 +7,7 @@
  * the interface tells the reader one thing and does another.
  */
 import { describe, it, expect } from "vitest";
-import { saveNotice, saveOutcome, sectionFor } from "./agentSaveOutcome";
+import { saveNotice, saveOutcome } from "./agentSaveOutcome";
 import { emptyFilters } from "./agentFilters";
 import { Agent, Query, QueryStatus, SubmissionMethod, SubmissionStatus } from "../types";
 
@@ -29,7 +29,7 @@ const ctx = (over: Partial<Parameters<typeof saveOutcome>[1]> = {}) => ({
      names change with it. The CLAIMS below are unchanged — a saved card travels to a knowable
      place under the ACTIVE sort, or it leaves because it no longer matches. */
   agents: [] as Agent[], queries: [] as Query[], filters: emptyFilters(), search: "",
-  sort: "name" as const, sortDir: "asc" as const, grouping: "none" as const, ...over,
+  sort: "name" as const, sortDir: "asc" as const, ...over,
 });
 
 describe("saveOutcome · the card travels to a KNOWABLE place", () => {
@@ -90,42 +90,8 @@ describe("saveOutcome · a card that fails the filters LEAVES, and says so", () 
   });
 });
 
-describe("saveOutcome · a card that changes SECTION does not fly across the heading", () => {
-  it("sectionChanged is true when grouping is on and the card's section moved", () => {
-    const saved = mkAgent({ id: "a" });
-    const queries = [mkQuery({ agentId: "a" })]; // now has an active query
-    const out = saveOutcome(
-      saved,
-      ctx({ agents: [saved], queries, grouping: "standing", sectionBefore: "never" }),
-    );
-    expect(out).toMatchObject({ kind: "travel", sectionChanged: true });
-  });
-
-  it("sectionChanged is false when the card stays in its section", () => {
-    const saved = mkAgent({ id: "a" });
-    const queries = [mkQuery({ agentId: "a" })];
-    const out = saveOutcome(
-      saved,
-      ctx({ agents: [saved], queries, grouping: "standing", sectionBefore: "active" }),
-    );
-    expect(out).toMatchObject({ sectionChanged: false });
-  });
-
-  it("is ALWAYS false while grouping is off — there are no sections to change", () => {
-    const saved = mkAgent({ id: "a" });
-    const out = saveOutcome(saved, ctx({ agents: [saved], grouping: "none", sectionBefore: "anything" }));
-    expect(
-      out,
-      "a card was told it changed section while the list is flat — it would fall and rise instead of travelling, for a boundary that isn't on screen",
-    ).toMatchObject({ sectionChanged: false });
-  });
-});
-
-describe("sectionFor", () => {
-  it("returns null when grouping is off, and the section key when it is on", () => {
-    const a = mkAgent({ id: "a" });
-    expect(sectionFor(a, ctx({ grouping: "none" }))).toBeNull();
-    expect(sectionFor(a, ctx({ grouping: "standing" }))).toBe("never");
-    expect(sectionFor(a, ctx({ grouping: "door" }))).toBe("open");
-  });
-});
+/* ⚠️ THE SECTION CASES ARE RETIRED WITH THE THING THEY GUARDED (Phase 7). `sectionChanged` and
+   `sectionFor` existed for the GRID's section grouping; grouping arranges the BOARD now, and the
+   grid is flat, so there is no heading for a saved card to fly across. Retired rather than
+   rewritten: the claim they made cannot be restated about a page with no sections, and a case
+   kept alive over a deleted mechanism is the vacuous kind that passes forever. */
