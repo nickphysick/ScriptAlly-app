@@ -1,0 +1,57 @@
+/**
+ * ══ ALSO ON YOUR SHELF ════════════════════════════════════════════════════════════════════════
+ * Ref: design-refs/manuscripts-hero-landing.html
+ */
+.mar { --mar-sage-a: #dce0d9; --mar-sage-b: #d0d6cc; margin-top: 26px; }
+.mar-head { display: flex; align-items: baseline; gap: 9px; margin-bottom: 10px; }
+/** ⚠️ 1.3 MINIMUM ON MIXED-CASE PLAYFAIR — the annotated exception is the cover, not this. */
+.mar-title { margin: 0; font-family: var(--font-serif); font-size: 20px; font-weight: 500; line-height: 1.3; }
+.mar-count {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.11em;
+  text-transform: uppercase; color: var(--shell-muted);
+}
+
+.mar-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 8px;
+  padding: 11px 15px;
+  background: var(--ws-window);
+  border: 1px solid var(--hair);
+  border-radius: 10px;
+}
+.mar-row:hover { background: #faf7f2; }
+/** A book: spine on the left, page edge on the right. */
+.mar-cover {
+  flex: none;
+  width: 30px;
+  height: 42px;
+  border-radius: 1px 4px 4px 1px;
+  background: linear-gradient(150deg, var(--mar-sage-a), var(--mar-sage-b));
+  box-shadow: inset 2px 0 0 rgba(60, 50, 40, 0.16);
+}
+.mar-name { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.mar-rowtitle {
+  font-family: var(--font-serif); font-size: 16px; line-height: 1.3;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mar-by, .mar-status, .mar-fig {
+  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--shell-muted);
+}
+.mar-status { flex: none; width: 92px; }
+.mar-fig { flex: none; width: 84px; text-align: right; }
+/** ⚠️ THE APP'S NEAR-BLACK. No burgundy fill. */
+.mar-open {
+  flex: none; padding: 6px 15px; border: 0; border-radius: 999px; cursor: pointer;
+  background: var(--ink); color: #fffefb;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+}
+.mar-add {
+  display: block; width: 100%; margin-top: 2px; padding: 11px;
+  border: 1px dashed #cbbfae; border-radius: 10px; background: none; cursor: pointer;
+  color: var(--burg); font-family: var(--font-mono); font-size: 9.5px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.mar-add:hover { background: #faf7f2; }

@@ -1,0 +1,138 @@
+/**
+ * ══ THE LANDING'S HERO ════════════════════════════════════════════════════════════════════════
+ * Ref: design-refs/manuscripts-hero-landing.html
+ *
+ * ⚠️ THE SAGE PAIR IS DECLARED LOCALLY. The comps sheet's `--ct-*` is page-scoped and would not
+ * resolve here, and a `var()` that does not resolve paints nothing — the fault this page's token
+ * lock exists for, and the one `--mk-nearblack` walked into two passes ago.
+ */
+.mhc {
+  --mhc-sage-a: #dce0d9;
+  --mhc-sage-b: #d0d6cc;
+  display: grid;
+  grid-template-columns: 296px 1fr;
+  background: var(--ws-window);
+  border: 1px solid var(--hair);
+  border-radius: 14px;
+  overflow: hidden;
+  /* ⚠️ A REAL SHADOW — this is the only bright surface on the page and the only thing lifted off it. */
+  box-shadow: 0 10px 34px rgba(40, 28, 20, 0.13);
+}
+@media (max-width: 860px) { .mhc { grid-template-columns: 1fr; } }
+
+/** The cover well: sage, with a fine grain so it is a surface rather than a swatch. */
+.mhc-well {
+  display: grid;
+  place-items: center;
+  padding: 34px 28px;
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 1px, transparent 1px 3px),
+    linear-gradient(150deg, var(--mhc-sage-a), var(--mhc-sage-b));
+}
+
+/**
+ * ⚠️ A BOX WITH A HEIGHT, WHICH IS WHY THE TYPE IS DERIVED. Overflow here crops rather than
+ * reflows — a long title loses its bottom line and nothing looks broken. `coverType` picks the
+ * size; the clamp below is only the backstop for a title with no breakable spaces.
+ */
+.mhc-cover {
+  width: 188px;
+  height: 276px;
+  padding: 26px 20px;
+  border-radius: 2px 7px 7px 2px;
+  background: var(--ws-window);
+  /* The spine down the left, the page edge on the right. */
+  box-shadow: inset 5px 0 0 rgba(60, 50, 40, 0.13), 0 6px 18px rgba(40, 28, 20, 0.22);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+/**
+ * ⚠️ 1.18 IS THE ONE SANCTIONED EXCEPTION TO THE PLAYFAIR 1.3 FLOOR, and it is a display setting
+ * rather than an oversight: this is a fixed-height cover, not running text. The floor exists
+ * because tight leading inside a box with a height crops descenders — here the SIZE is what keeps
+ * the title inside the box, and the leading is set to make it look like a cover. Registered
+ * alongside `.msp-qmark` and `.msp-chev`, the sheet's other two.
+ */
+.mhc-covertitle {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.mhc-coverrule { width: 34px; height: 2px; margin: 11px auto; background: var(--burg); }
+.mhc-coverby {
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ── the record column ────────────────────────────────────────────────────────────────────── */
+.mhc-rec { display: flex; flex-direction: column; min-width: 0; padding: 30px 32px 26px; }
+.mhc-kicker {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--burg);
+}
+/** The manuscript-status dot — deliberately not `StatusDot`, which draws the query pipeline. */
+.mhc-dot { width: 7px; height: 7px; border-radius: 999px; background: var(--burg); }
+.mhc-dot--shelved { background: var(--shell-muted); }
+.mhc-since { color: var(--shell-muted); }
+/** ⚠️ 1.3 MINIMUM — running text, so the floor applies in full. */
+.mhc-title { margin: 9px 0 7px; font-family: var(--font-serif); font-size: 46px; font-weight: 600; line-height: 1.3; }
+.mhc-byline { font-size: 14px; color: var(--shell-muted); }
+.mhc-byline b { font-weight: 400; color: var(--ink); }
+
+/** ⚠️ THE CLAMP IS ON THE PITCH ONLY — never on the prompt below it. */
+.mhc-pitch {
+  margin: 16px 0 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 19px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.mhc-nopitch { margin: 16px 0 0; font-size: 14px; font-style: italic; color: var(--shell-muted); }
+.mhc-write {
+  padding: 0; border: 0; background: none; font-style: normal;
+  color: var(--burg); font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+}
+.mhc-write:hover { text-decoration: underline; }
+
+/** ⚠️ PINNED BY `auto`, NOT BY A HEIGHT. The card is full because there is enough in it. */
+.mhc-foot { margin-top: auto; padding-top: 20px; }
+.mhc-figs { display: flex; }
+.mhc-fig { flex: 1; min-width: 0; padding: 0 16px; border-left: 1px solid var(--hair); }
+.mhc-fig:first-child { border-left: 0; padding-left: 0; }
+.mhc-fign { font-family: var(--font-serif); font-size: 25px; line-height: 1.3; }
+.mhc-figl {
+  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--shell-muted);
+}
+.mhc-acts { display: flex; align-items: center; justify-content: flex-end; gap: 14px; margin-top: 18px; }
+.mhc-quiet {
+  padding: 0; border: 0; background: none; cursor: pointer;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.11em;
+  text-transform: uppercase; color: var(--shell-muted);
+}
+.mhc-quiet:hover { color: var(--ink); }
+.mhc-pill {
+  padding: 9px 20px; border: 0; border-radius: 999px; cursor: pointer;
+  background: var(--ink); color: #fffefb;
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
+}

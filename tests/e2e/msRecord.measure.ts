@@ -31,7 +31,9 @@ const read = (page: import("@playwright/test").Page) => page.evaluate(() => {
     /* ⚠️ RETARGETED FROM `.mcar-tile` — the shelf carousel was retired for a selector list
        (promos pack, Phase 2). The claim is unchanged: how many BOOKS the shelf offers. The add
        affordance is no longer a deck member, so there is nothing to exclude. */
-    tiles: g.querySelectorAll(".msl-table tbody tr").length,
+    /* ⚠️ RETARGETED AGAIN — the list table is retired for a hero plus rows (hero pack). The claim
+       is unchanged: how many BOOKS the shelf offers. The hero is one of them, so it counts too. */
+    tiles: g.querySelectorAll(".mhc").length + g.querySelectorAll(".mar-row").length,
     dossier: !!g.querySelector(".msv-doss"),
     back: box(".wpg-barback"),
     who: (g.querySelector(".wpg-barwho") as HTMLElement)?.innerText?.trim() ?? null,
@@ -65,7 +67,8 @@ for (const width of [1280, 1440, 1920, 2560]) {
     /* ── a tile opens the record ── */
     /* ⚠️ RETARGETED: the row's control is the Open button, not the row. The list makes every row's
        control a real button — a clickable cell is not keyboard-reachable — so the click lands on it. */
-    await page.locator(".msl-table tbody tr .msl-open").first().click();
+    /* The hero's own control opens it; the rows have their own. Either is a real button. */
+    await page.locator(".mhc-pill, .mar-open").first().click();
     await page.waitForTimeout(1100);
     const b = await read(page);
     expect(b.m, "opening a book did not set ?m=").toBeTruthy();

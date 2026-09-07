@@ -58,13 +58,21 @@ describe("/manuscripts renders", () => {
    * their own unit tests and `ManuscriptDetailTiles` its own render spec) but it is not nothing,
    * and it is recorded rather than quietly accepted.
    */
-  it("…and the manuscript reaches its tile on the shelf", () => {
+  it("…and the manuscript leads the page as the hero", () => {
     const html = renderPageSeeded(page(), "/manuscripts");
     expect(html).toContain("The Smoke Test");
-    /* The shelf is a carousel now; the grid is retired, not hidden. */
-    /* The shelf is a selector list now; the carousel is retired, not hidden. */
-    expect(html).toContain("msl-table");
-    expect(html).toContain("msl-title");
+    /**
+     * ⚠️ THE BOOK IS THE HERO. The list panel and its table are retired, not restyled — a
+     * six-column grid with headers around one or two books was spreadsheet chrome.
+     *
+     * ⚠️ AND THE THREE SUPERSEDED SHELVES ARE ASSERTED ABSENT, not merely unmentioned. This case
+     * had accumulated a stale one-line comment per retarget — "the shelf is a carousel now" sitting
+     * directly above "the shelf is a selector list now" — which is how a reader comes to trust the
+     * wrong one. One comment, three absences.
+     */
+    expect(html).toContain("mhc-title");
+    expect(html).toContain("mhc-cover");
+    expect(html, "the retired table came back").not.toContain("msl-table");
     expect(html, "the retired grid came back").not.toContain("mlib-grid");
     expect(html, "the retired carousel came back").not.toContain("mcar-");
   });
@@ -79,12 +87,14 @@ describe("/manuscripts renders", () => {
    */
   it("…with its derived counts, and the counts are the real ones", () => {
     const html = renderPageSeeded(page(), "/manuscripts");
-    /* ⚠️ RETARGETED TO THE ROW. The claim is unchanged — the shelf states the REAL derived counts,
-       so one fed constants or the wrong manuscript's queries fails — and the markup that carries
-       them moved from a tile's figure block to a table row. Sliced on the row, which cannot nest. */
-    const row = html.slice(html.indexOf("<tbody>"), html.indexOf("</tbody>"));
-    expect(row, "the shelf has no rows").not.toBe("");
-    expect(row).toContain('<td class="msl-num">1</td><td class="msl-num">0</td>');
+    /* ⚠️ RETARGETED TO THE HERO'S FIGURE STRIP. The claim is unchanged — the page states the REAL
+       derived counts, so one fed constants or the wrong manuscript's queries fails — and the markup
+       carrying them moved from a table row to the hero's foot. Sliced on two anchors that cannot
+       nest: the strip's own class, and the actions row that follows it. */
+    const figs = html.slice(html.indexOf('class="mhc-figs"'), html.indexOf('class="mhc-acts"'));
+    expect(figs, "the hero has no figures").not.toBe("");
+    expect(figs).toContain('<div class="mhc-fign">1</div><div class="mhc-figl">Queries sent</div>');
+    expect(figs).toContain('<div class="mhc-fign">0</div><div class="mhc-figl">Responses</div>');
   });
 
   /**
@@ -104,14 +114,18 @@ describe("/manuscripts renders", () => {
    * deck. That is what makes the empty shelf and the add affordance one object.
    */
   /**
-   * ⚠️ THE ADD ROW IS BENEATH THE TABLE, NOT A ROW IN IT. As a `<tr>` it would be announced as data
-   * — one more manuscript in a table of manuscripts — when it is an action.
+   * ⚠️ AND AT ONE MANUSCRIPT THERE IS NO "ALSO ON YOUR SHELF" AT ALL. The hero IS the shelf there,
+   * and a heading over nothing is exactly the empty container this pass exists to remove. The add
+   * control lives with the rows, so it arrives with them.
    */
-  it("…beneath the table, an add row that is not a table row", () => {
+  it("…with no also-on-your-shelf heading when the hero is the whole shelf", () => {
     const html = renderPageSeeded(page(), "/manuscripts");
-    expect(html).toContain("msl-add");
-    const body = html.slice(html.indexOf("<tbody>"), html.indexOf("</tbody>"));
-    expect(body, "the add control was announced as a manuscript").not.toContain("msl-add");
+    const rows = (html.match(/mar-row/g) ?? []).length;
+    if (rows === 0) {
+      expect(html, "a heading was drawn over no rows").not.toContain("Also on your shelf");
+    } else {
+      expect(html).toContain("Also on your shelf");
+    }
   });
 
   /**

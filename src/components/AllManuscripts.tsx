@@ -41,7 +41,9 @@ import { plateStats, formatPlateDate } from "../lib/manuscriptPlate";
 import { DEFAULT_MANUSCRIPT_TAB, ManuscriptTabKey } from "./manuscripts/ManuscriptTabs";
 import { ManuscriptDossier } from "./manuscripts/ManuscriptDossier";
 import { AttachmentsPanel } from "./manuscripts/AttachmentsPanel";
-import { ManuscriptShelfList } from "./manuscripts/ManuscriptShelfList";
+import { ManuscriptHeroCard } from "./manuscripts/ManuscriptHeroCard";
+import { ManuscriptAlsoRows } from "./manuscripts/ManuscriptAlsoRows";
+import { heroManuscript, alsoOnShelf } from "../lib/heroBook";
 import { ManuscriptPromos } from "./manuscripts/ManuscriptPromos";
 import { withTileDismissed } from "../lib/promoTiles";
 import { ManuscriptPager } from "./manuscripts/ManuscriptPager";
@@ -181,6 +183,11 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
     landedRef.current = true;
     navigate(manuscriptViewHref(target), { replace: true });
   }, [active, openId, ordered.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ⚠️ DERIVED, not `ordered[0]`. The hero is the book most recently sent from; a shelf with
+     nothing sent still gets one, because the hero IS the page. */
+  const hero = heroManuscript(ordered, queries);
+  const alsoRows = alsoOnShelf(ordered, hero);
 
   const selected = openId ? ordered.find((m) => m.id === openId) ?? null : null;
   /**
@@ -503,17 +510,40 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
               * owns the zero case above; the ghost is what the carousel shows at every count.
               */}
             {/**
-              * ⚠️ THE SHELF IS A LIST. The carousel is retired in this same commit — a deck showed
-              * one book at a time and made choosing between four of them a paging exercise, which
-              * is the opposite of what a selector is for.
+              * ⚠️ THE BOOK IS THE HERO. The `Your shelf` panel and its table are RETIRED, not
+              * restyled: a six-column grid with headers around what is usually one or two books was
+              * spreadsheet chrome, and the page had no focal point at all. One book leads; the rest
+              * are rows beneath it.
               *
-              * ⚠️ THE FIGURES COME FROM `bookFigures`, the derivation the BOOK page uses. A shelf
-              * that counted its own way would disagree with the page it links to about the same
-              * book, one click apart.
+              * ⚠️ THE HERO IS THE MOST RECENTLY SENT-FROM BOOK, derived — never `ordered[0]`, which
+              * is the argument that hid the Versions pitch for a whole shelf last pass.
               */}
-            {!selected && (
-              <ManuscriptShelfList
-                manuscripts={ordered}
+            {!selected && hero && (
+              <ManuscriptHeroCard
+                manuscript={hero}
+                queries={queries}
+                genres={msGenres(hero)}
+                status={isShelvedPresentation(hero) ? "Shelved" : hero.status}
+                shelved={isShelvedPresentation(hero)}
+                since={(() => {
+                  const ms = queryingSinceMs(queries.filter((q) => q.manuscriptId === hero.id));
+                  return ms === null ? null : profileDate(ms);
+                })()}
+                /* ⚠️ THE ACCOUNT HOLDER'S NAME. There is no pen-name field — logged in CLAUDE.md as
+                   an open product item, because it touches the cover, the query letter's signature
+                   and probably packages, and is not a thing to smuggle in here. */
+                author={currentUser?.name ?? ""}
+                onOpen={() => openDossier(hero.id)}
+                onEditDetails={() => startEditMs(hero)}
+                onWritePitch={() => openDossier(hero.id)}
+              />
+            )}
+
+            {/* ⚠️ ROWS ONLY WHEN THERE ARE ANY. At one manuscript the hero IS the shelf, and a
+                heading over nothing is the empty container this pass exists to remove. */}
+            {!selected && alsoRows.length > 0 && (
+              <ManuscriptAlsoRows
+                manuscripts={alsoRows}
                 queries={queries}
                 genresOf={msGenres}
                 statusOf={(m) => (isShelvedPresentation(m) ? "Shelved" : m.status)}
@@ -535,11 +565,12 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
             {!selected && (
               <ManuscriptPromos
                 user={currentUser}
-                manuscript={ordered[0] ?? null}
-                /* ⚠️ THE WHOLE SHELF. The versions rule asks about the WRITER here, not one book —
-                   passing a single manuscript let one book's nine versions hide the pitch for three
-                   books that had none. */
+                manuscript={hero}
+                /* ⚠️ THE HERO'S ID IS THE ARGUMENT NOW, and that is the whole of the Versions fix.
+                   The shelf-wide rule existed because the page had no focal book; it has one, so
+                   the card asks about THAT book — fewer than two versions, show. */
                 manuscripts={ordered}
+                heroId={hero?.id ?? null}
                 versions={versions}
                 onDismiss={(tile) => updateUserProfile({ todoPrefs: withTileDismissed(currentUser, tile) })}
                 onVersions={() => onNavigate?.("manuscripts", "Submission packages")}

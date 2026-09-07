@@ -25,8 +25,14 @@ export interface ManuscriptPromosProps {
   user: Pick<User, "todoPrefs" | "personalGenres"> | null;
   /** The book the chart marks — the shelf's first, or the open one. Null renders no marker. */
   manuscript: Manuscript | null;
-  /** ⚠️ THE WHOLE SHELF, because the versions rule asks about the WRITER on the landing, not a book. */
+  /** The whole shelf — still passed, so the rule can fall back to it when there is no hero. */
   manuscripts: Pick<Manuscript, "id">[];
+  /**
+   * ⚠️ THE HERO'S ID, AND THIS IS THE WHOLE OF THE VERSIONS FIX. The shelf-wide rule existed
+   * because the landing had no focal book; it has one now, so the card asks about THAT book —
+   * fewer than two versions, show. The threshold never changed; the argument did.
+   */
+  heroId: string | null;
   versions: Pick<ManuscriptVersion, "manuscriptId">[];
   onDismiss: (tile: PromoTile) => void;
   onVersions: () => void;
@@ -37,9 +43,9 @@ export interface ManuscriptPromosProps {
 const CONTEXT_GENRES = ["literary-fiction", "fantasy", "crime"];
 
 export const ManuscriptPromos: React.FC<ManuscriptPromosProps> = ({
-  user, manuscript, manuscripts, versions, onDismiss, onVersions, onPackages,
+  user, manuscript, manuscripts, heroId, versions, onDismiss, onVersions, onPackages,
 }) => {
-  const tiles = visibleTiles({ user, manuscripts, versions });
+  const tiles = visibleTiles({ user, manuscripts, versions, manuscriptId: heroId });
   if (!tiles.length) return null;
 
   const personal: PersonalGenre[] = user?.personalGenres ?? [];
