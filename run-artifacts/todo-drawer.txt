@@ -1,0 +1,19 @@
+── todo drawer · 9 assertions · 0 RED · 9 green
+green  · D0 · opening the drawer changes NO page rect, and does not move the scroll
+         tickets 28 · rects identical true · scrollTop 0 -> 0
+green  · D1 · the drawer is the contract's 640
+         width 640
+green  · D2 · it is over a scrim
+         scrim data-on true
+green  · D3 · the reference is a 292px card, not a column
+         card width 292
+green  · D4 · the card is rotated −1.2°
+         computed -1.200°
+green  · D5 · 14px radius and a deep shadow
+         radius 14px · shadow true
+green  · D6 · it sits to the drawer's LEFT, clear of it
+         card right 777 · drawer left 800
+green  · D7 · the card's header IS the ladder value for this query's status — derived, not stored
+         token --stage-in-2 resolves rgb(241, 219, 208) · header rgb(241, 219, 208)
+green  · D8 · the card carries a dismiss control with an accessible name
+         name "Put the quick reference away"

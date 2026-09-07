@@ -2289,12 +2289,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             open={!!paneCard}
             onClose={closeDock}
             label={paneCard ? paneCard.title : "Task"}
-            /* ⚠️ WIDER THAN THE PRIMITIVE'S DEFAULT, because the pane is a TWO-COLUMN document: the
-               deed and its ledger on the left, the Quick Reference rail on the right. At the 580 the
-               Query Centre's panel uses, the rail took nearly half and left the document a strip —
-               measured from the first screenshot of this drawer, not reasoned. The primitive's
-               `max-width: 94vw` still caps it, so a narrow window loses nothing. */
-            width={760}
+            /* ⚠️ 640, THE CONTRACT'S OWN NUMBER (corrections 2.2). Phase 5 set 760 because the pane
+               was a two-column document and its reference rail was squeezing the deed at 580. The
+               reference is not a column any more — it POPS OUT to the drawer's left as an index
+               card, which is what the contract draws and what `.pop { right: 668px }` implies about
+               the drawer beside it. With the column gone the document has the full 640 to itself. */
+            width={640}
           >
             {renderPane()}
           </SlideOver>

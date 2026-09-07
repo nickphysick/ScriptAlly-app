@@ -159,3 +159,152 @@ test("the page runs to its edges — no wrapper between the toolbar and the colu
   expect(out.length, "assertion floor").toBeGreaterThanOrEqual(8);
   expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
 });
+
+/**
+ * ⚠️ THE DRAWER AS DESIGNED (corrections 2.2).
+ *
+ * The audit found the drawer was a correct slide-over of the WRONG WIDTH whose reference was an
+ * inboard rail rather than the contract's pop-out index card. These are the four claims the brief
+ * names, each measured rather than read.
+ *
+ * ⚠️ MOTION IS LIFTED FIRST. The drawer is a transform transition and the card is a rotation; a
+ * suppressed transition reports where it STARTED, so a measurement taken with motion off would
+ * read a closed drawer as closed whatever the click did.
+ */
+test("the drawer as designed — 640, no reflow, and the index card to its left", async ({ page }) => {
+  const out: R[] = [];
+  const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
+  const OUT = "run-artifacts/todo-drawer.txt";
+  rmSync(OUT, { force: true });
+
+  await ensureSignedIn(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/todo");
+  await page.waitForFunction("document.querySelectorAll('.qct-tile').length > 0", null, { timeout: 45_000 }).catch(() => {});
+  await liftMotionSuppression(page);
+  await visiblePage(page, ".tdb-wrap");
+  await page.waitForTimeout(700);
+
+  /* ⚠️ EVERY TICKET'S RECT AND THE SCROLL POSITION, BEFORE AND AFTER. "The page does not reflow" is
+     a claim about the whole page, and sampling one card would pass over a layout that shifted
+     everything else. */
+  const SNAP = `(() => {
+    const root = __saVisRoot();
+    return {
+      rects: [...root.querySelectorAll(".tkt")].map((t) => {
+        const b = t.getBoundingClientRect();
+        return Math.round(b.left) + "," + Math.round(b.top) + "," + Math.round(b.width);
+      }),
+      scrollTop: (() => {
+        const sc = [...document.querySelectorAll(".wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0);
+        return sc ? Math.round(sc.scrollTop) : -1;
+      })(),
+    };
+  })()`;
+  const before = await page.evaluate(SNAP) as { rects: string[]; scrollTop: number };
+
+  await page.evaluate(`(function(){
+    var ts=[].slice.call(__saVisRoot().querySelectorAll(".tkt"));
+    var t=ts.filter(function(x){var e=x.querySelector(".ttl");return e && (e.textContent||"").indexOf("Send")===0;})[0];
+    if(t)t.click();
+  })()`);
+  await page.waitForTimeout(1500);
+  const after = await page.evaluate(SNAP) as { rects: string[]; scrollTop: number };
+
+  add("D0 · opening the drawer changes NO page rect, and does not move the scroll",
+      before.rects.length > 0 && before.rects.join("|") === after.rects.join("|")
+        && before.scrollTop === after.scrollTop,
+      "tickets " + before.rects.length + " · rects identical "
+        + (before.rects.join("|") === after.rects.join("|"))
+        + " · scrollTop " + before.scrollTop + " -> " + after.scrollTop);
+
+  const d = await page.evaluate(`(function(){
+    var d=document.querySelector(".slo"); var sc=document.querySelector(".slo-scrim");
+    var r=document.querySelector(".slo .rail"); var qh=r?r.querySelector(".qhead"):null;
+    if(!d) return null;
+    var cs=getComputedStyle(d);
+    /* ⚠️ THE LAYOUT WIDTH, NOT THE RECT — a rotated element's bounding rect is WIDER than its box,
+       which is the trap this repo already records about measuring around a transform. */
+    return {
+      drawerW: Math.round(parseFloat(cs.width)),
+      scrimOn: sc?sc.getAttribute("data-on"):null,
+      card: r ? {
+        w: Math.round(parseFloat(getComputedStyle(r).width)),
+        transform: getComputedStyle(r).transform,
+        radius: getComputedStyle(r).borderRadius,
+        shadow: getComputedStyle(r).boxShadow !== "none",
+        right: Math.round(r.getBoundingClientRect().right),
+        drawerLeft: Math.round(d.getBoundingClientRect().left),
+      } : null,
+      headBg: qh?getComputedStyle(qh).backgroundColor:null,
+      /* the ladder value the header is SUPPOSED to be, read from the page's own custom property */
+      stageVar: qh ? (qh.getAttribute("style")||"") : null,
+      dismiss: r ? !!r.querySelector(".qhead .lbl .cl") : false,
+      dismissName: r ? ((r.querySelector(".qhead .lbl .cl")||{}).getAttribute
+        ? r.querySelector(".qhead .lbl .cl").getAttribute("aria-label") : null) : null,
+    };
+  })()`) as any;
+
+  add("D1 · the drawer is the contract's 640", d && d.drawerW === 640, "width " + d?.drawerW);
+  add("D2 · it is over a scrim", d && d.scrimOn === "true", "scrim data-on " + d?.scrimOn);
+
+  add("D3 · the reference is a 292px card, not a column",
+      !!d?.card && d.card.w === 292, "card width " + d?.card?.w);
+
+  /* ⚠️ THE ROTATION IS READ OFF THE MATRIX, because `transform` never computes back to the
+     shorthand. cos(1.2°) = 0.999781, sin = 0.020942 — and the sign says which way. */
+  const m = /matrix\(([^)]+)\)/.exec(d?.card?.transform ?? "");
+  const parts = m ? m[1].split(",").map((x) => parseFloat(x)) : [];
+  const deg = parts.length >= 2 ? (Math.atan2(parts[1], parts[0]) * 180) / Math.PI : NaN;
+  add("D4 · the card is rotated −1.2°",
+      Math.abs(deg - -1.2) < 0.05, "computed " + (Number.isFinite(deg) ? deg.toFixed(3) : "?") + "°");
+
+  add("D5 · 14px radius and a deep shadow",
+      d?.card?.radius === "14px" && d?.card?.shadow === true,
+      "radius " + d?.card?.radius + " · shadow " + d?.card?.shadow);
+
+  add("D6 · it sits to the drawer's LEFT, clear of it",
+      !!d?.card && d.card.right < d.card.drawerLeft,
+      "card right " + d?.card?.right + " · drawer left " + d?.card?.drawerLeft);
+
+  /* ⚠️ THE HEADER'S COLOUR IS THE LADDER'S, DERIVED — asserted against the page's OWN custom
+     property rather than a hex, so a retone of the ladder moves both together and this stays true.
+     A literal here would be a second copy of the palette. */
+  /* ⚠️ THE HEADER'S COLOUR IS THE LADDER'S, DERIVED — asserted against the page's OWN custom
+     property rather than a hex, so a retone of the ladder moves both together and this stays true.
+     A literal here would be a second copy of the palette.
+
+     ⚠️ AND THE TOKEN NAME IS MATCHED IN NODE. The first version did it in the browser with
+     `[a-z-]+`, which excludes digits — and every token is `--stage-out-1`, `--stage-in-2` and so on,
+     so it matched nothing and reported "the header carries no stage token at all" about a header
+     that was plainly tinted. The house rule says patterns live on this side; this is why. */
+  const styleAttr = await page.evaluate(`(function(){
+    var qh=document.querySelector(".slo .rail .qhead");
+    return qh ? (qh.getAttribute("style") || "") : "";
+  })()`) as string;
+  const tok = /var\(\s*(--stage-[A-Za-z0-9-]+)\s*\)/.exec(styleAttr)?.[1] ?? null;
+  const ladder = tok ? await page.evaluate(`(function(){
+    var qh=document.querySelector(".slo .rail .qhead");
+    var probe=document.createElement("div");
+    probe.style.background = "var(${tok})";
+    qh.appendChild(probe);
+    var resolved=getComputedStyle(probe).backgroundColor;
+    probe.remove();
+    return JSON.stringify({resolved:resolved, actual:getComputedStyle(qh).backgroundColor});
+  })()`).then((j) => JSON.parse(j as string)) : null;
+  add("D7 · the card's header IS the ladder value for this query's status — derived, not stored",
+      !!tok && !!ladder && ladder.resolved === ladder.actual && ladder.actual !== "rgba(0, 0, 0, 0)",
+      tok ? ("token " + tok + " resolves " + ladder?.resolved + " · header " + ladder?.actual)
+          : ("no stage token in the header's style: " + JSON.stringify(styleAttr)));
+
+  add("D8 · the card carries a dismiss control with an accessible name",
+      d?.dismiss === true && !!d?.dismissName, "name " + JSON.stringify(d?.dismissName));
+
+  const lines = out.map((x) => (x.ok ? "green  " : "RED    ") + "· " + x.id + (x.note ? "\n         " + x.note : ""));
+  const red = out.filter((x) => !x.ok);
+  writeFileSync(OUT, "── todo drawer · " + out.length + " assertions · " + red.length
+    + " RED · " + (out.length - red.length) + " green\n" + lines.join("\n") + "\n");
+  console.log(lines.join("\n"));
+  expect(out.length, "assertion floor").toBeGreaterThanOrEqual(8);
+  expect(red.length, red.map((x) => x.id).join(" | ")).toBe(0);
+});

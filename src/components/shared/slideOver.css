@@ -36,3 +36,58 @@
 @media (prefers-reduced-motion: reduce) {
   .slo, .slo[data-on="true"], .slo-scrim { transition: none; }
 }
+
+/* ── THE INDEX CARD (corrections 2.2; ref todo-qc-style.html `.pop` / `.pc`) ─────────────────────
+   ⚠️ THE TREATMENT IS DECIDED BY WHERE THE COLUMN IS MOUNTED, NOT BY A PROP. `TaskPane`'s `.rail`
+   is one component with one set of contents — the contract's own `.qhead`/`.who`/`.facts`/`.tl`,
+   which it already renders. What differs is the arrangement, and the arrangement follows the
+   layout: inside the SPLIT (List view) it is an inboard column beside the document, which is the
+   tightened round's design and correct there; inside the DRAWER it pops out to the left as the
+   contract's index card, because a drawer has a page beside it and a split does not.
+
+   A prop would have made this a fork in the component. A descendant selector is the whole of it.
+
+   ⚠️ AND THE OFFSET IS DERIVED FROM THE DRAWER'S OWN WIDTH, never restated. The contract writes
+   `right: 668px` beside a 640px drawer — a 28px gap — and two numbers a gap apart is exactly the
+   pair this repo's rules say must be one expression. */
+.slo { --slo-w: 640px; --slo-gap: 28px; }
+
+.slo .rail {
+  position: fixed;
+  right: calc(var(--slo-w) + var(--slo-gap));
+  top: 118px;
+  width: 292px;
+  z-index: 69;
+  transform: rotate(-1.2deg);
+  background: var(--white);
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  box-shadow: 0 18px 44px rgba(36, 18, 9, 0.24), 0 2px 6px rgba(36, 18, 9, 0.08);
+  overflow: hidden;
+  /* it is a card now, not a column: it must not stretch to the sheet's height */
+  max-height: calc(100vh - 160px);
+  display: flex; flex-direction: column;
+}
+/* the card is out of the sheet's flow, so the sheet must not keep a column's worth of room */
+.slo .sheet { --ref-w: 0px; --ref-open: 0px; --ref-spine: 0px; margin-right: 0; }
+
+/* ⚠️ THE COLLAPSED SPINE HAS NO MEANING OUT HERE. Inside the split, putting the reference away
+   gives its width back to the document; out here the card is not taking any width from anything,
+   so "away" simply means gone — and it comes back with the next task, which is what
+   session-scoped means for a thing derived per card. */
+.slo .rail.railAway, .slo .rail .rh { display: none; }
+
+/* ⚠️ THE DISMISS IS AN ×, AND ONLY OUT HERE. Inside the split the control reads `›` because it
+   puts the column away to the RIGHT, into its own spine, and gives the width back to the document.
+   The card has no spine and takes no width from anything, so `›` would be pointing at nothing —
+   what it does here is dismiss.
+
+   ⚠️ `font-size: 0` REPLACES THE GLYPH WITHOUT TAKING THE ACCESSIBLE NAME WITH IT — `display: none`
+   on the text, or swapping the element, takes the name too. The button keeps its own `aria-label`
+   ("Put the quick reference away"), which is true of both arrangements. */
+.slo .rail .qhead .lbl .cl { font-size: 0; line-height: 1; }
+.slo .rail .qhead .lbl .cl::after { content: "×"; font-size: 13px; line-height: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .slo .rail { transform: rotate(-1.2deg); }
+}
