@@ -63,11 +63,21 @@ describe("⚠️ BOTH ARE SHEETS OVER THE PAGE, NEVER ROUTES", () => {
   });
 
   /* ⚠️ THE DOOR MOVED TO THE BOARD, because its old one was retired and took tag management with
-     it — unreachable on main and on dev until this pane restored it. */
-  it("tag management is reachable from the board's own tool row", () => {
+     it — unreachable on main and on dev until this pane restored it.
+
+     ⚠️ AND IT MOVED AGAIN (corrections 2.1) — from the LIST CARD's tool row to the PAGE's toolbar,
+     which is where `TaskList`'s own comment had promised Phase 3 would put it. The claim these
+     cases make is unchanged and is the one that matters: tag management and the ledger are
+     REACHABLE, and the door's figure is derived from the same `hiddenItems` the panel renders.
+     What changed is which row holds it, so they assert the page rather than the card — a lock
+     pinned to a location fails on every legitimate move and teaches the next reader to rebaseline
+     it without looking. */
+  it("tag management is reachable from the page's own toolbar row", () => {
     expect(panel, "the panel does not render the tags pane").toContain("<TagsPane />");
-    expect(list, "the list's tool row has no set-aside door").toContain("onAside(e.currentTarget)");
-    expect(list).toContain('aria-label="Set aside and tags"');
+    expect(listPage, "the page's toolbar has no set-aside door").toContain('label="Set aside"');
+    /* the accessible name is the PANEL's now — the trigger is a labelled toolbar button, and the
+       panel it opens carries the name (corrections 2.1) */
+    expect(listPage).toContain('ariaLabel="Set aside and tags"');
   });
 });
 
@@ -180,12 +190,18 @@ describe("⚠️ the good-day setting is RETIRED — control, reader and field",
  */
 describe("⚠️ the set-aside ledger lives on the board, and states its own count", () => {
   it("the door is on the list's tool row and carries the figure", () => {
-    expect(list).toContain('aria-label="Set aside and tags"');
+    /* the accessible name is the PANEL's now — the trigger is a labelled toolbar button, and the
+       panel it opens carries the name (corrections 2.1) */
+    expect(listPage).toContain('ariaLabel="Set aside and tags"');
     expect(list).toContain("asideCount");
   });
 
   it("the count is DERIVED from the same hiddenItems the list renders — never a second tally", () => {
-    expect(listPage).toContain("hiddenItems(currentUser?.mutedTaskRules, taskFlags, agents, queries");
+    /* ⚠️ ONE DERIVATION, wherever the door lives. Hoisted beside the trigger in Phase 2.1 so the
+       toolbar button's figure and the panel's contents read the same expression; the assertion is
+       that `hiddenItems` is called with the page's own four arguments, not where the call sits. */
+    expect(listPage.replace(/\s+/g, " "))
+      .toContain("hiddenItems( currentUser?.mutedTaskRules, taskFlags, agents, queries");
     expect(panel).toContain("hiddenItems(muted, taskFlags, agents, queries");
   });
 

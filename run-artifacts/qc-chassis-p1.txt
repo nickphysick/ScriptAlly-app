@@ -7,8 +7,8 @@ green  · P1.1 · seven tiles, in the contract's order
          ["All tasks","Urgent","Agent requests","Nudges","Gone quiet","Housekeeping","Your tasks"]
 green  · P1.2 · the five categories partition All — their sum IS the All count
          five sum 28 · All 28 · {"All tasks":28,"Urgent":6,"Agent requests":9,"Nudges":9,"Gone quiet":6,"Housekeeping":2,"Your tasks":2}
-green  · P1.2b · the tile's total and the card footer's total are the SAME number
-         tile 28 · footer "28 tasks · 19 need you now" -> 28
+green  · P1.2b · the total is stated ONCE — the tiles say it and the content area does not restate it
+         tile 28 · content-area footer ""  (no second total)
 green  · P1.2c · [REPORTED] the rail badge's figure, beside the page's
          rail badge "30" · page 28  — they DISAGREE (known, Nick's call)
 green  · P1.3 · Urgent is a LENS, not a sixth part — it is not in that sum
@@ -18,8 +18,8 @@ green  · P1.4 · the header carries the title, the subtitle and one primary
 green  · P1.5 · and the illustration slot
 green  · P1.6 · one search box on the page, and it is the toolbar's
          toolbar 1 · page 1 · card 0
-green  · P1.7 · three toolbar controls, in the contract's order
-         ["Filter","GroupUrgency","SortPriority"]
+green  · P1.7 · the toolbar's instruments, one of each, in the contract's order
+         ["Filter","GroupUrgency","SortPriority","Set aside3"]
 green  · P1.8 · the view switch offers Grid, List and Board, and nothing else
          ["Grid","List","Board"]
 green  · P1.9 · the tiles and the toolbar are SHARED — both pages import the one module

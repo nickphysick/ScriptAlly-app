@@ -1,0 +1,19 @@
+── todo edges · 9 assertions · 0 RED · 9 green
+green  · E0 · both pages rendered their content, so the chains below are about something
+         queries true · todo true
+green  · E1 · the Query Centre paints no container between its grid and its scroller
+         ["qcc-grid","qcc-stage","qcc-col","wpg-scroll"]
+green  · E2 · and neither does To-do — no border, radius, background or shadow
+         ["tkt-grid","tdw-rail","tdw-split","tdb-centre","tpl-body","tpl-cols","wpg-scroll"]
+green  · E3 · no inner scroller wraps the grid — on either page
+         queries 0 · todo 0
+green  · E4 · /todo and /queries have identical left and right content insets at 1440
+         queries 282…1382 · todo 282…1382
+green  · E5 · the board is on the page ground too — nothing paints or scrolls around it
+         painted [] · inner scrollers []
+green  · E6 · no rounded clipping ancestor between the board and the page scroller
+         []
+green  · E7 · the footer strip and the card's icon bar are gone from the content area
+         footer present false (null) · bar icons 0
+green  · E8 · Export and the set-aside door are in the toolbar row instead
+         export 1 · set-aside 1

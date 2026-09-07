@@ -136,16 +136,17 @@ describe("⚠️ NOTHING UNNAMED MAY SIT BETWEEN `.tpl-body` AND THE SCROLLER", 
   );
 
   it("the populated page renders a zone at all (or this case proves nothing)", () => {
-    /* ⚠️ THE LIST'S SCROLLER IS `.l-body` NOW, inside the ported card — `.tpl-zone` was the
-       rail's wrapper and went with it. The chain rule is unchanged and still worth guarding:
-       exactly one designated scroller, with nothing unnamed above it. */
-    expect(html).toContain("l-body");
-    /* the card's own body is the panel now */
-    expect(html).toContain("l-body"); // …with real rows in it
+    /* ⚠️ THE ZONE IS THE GRID NOW (corrections 2.1). `.tpl-zone` was the rail's wrapper and went
+       with it; `.l-body` was the list card's scroller and is only rendered in LIST view, which
+       stopped being the default when the ticket grid arrived — so this anchored on an element the
+       page no longer draws and reported "the zone must be in the rendered page" about a page full
+       of work. The chain rule is unchanged and still the point: exactly one designated scroller,
+       with nothing unnamed above it. */
+    expect(html).toContain("tkt-grid");
   });
 
   it("every element above the zone is an enumerated chain link", () => {
-    const above = ancestorClasses(html, "l-body");
+    const above = ancestorClasses(html, "tkt-grid");
     expect(above, "the zone must be in the rendered page").not.toBeNull();
     const start = above!.indexOf("tpl-body");
     expect(start, "`.tpl-body` must be an ancestor of the zone").toBeGreaterThan(-1);

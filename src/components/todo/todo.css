@@ -1607,6 +1607,18 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-qtool { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; flex-wrap: wrap; }
 .tdb-popwrap { position: relative; display: flex; align-items: center; }
 /* the switch closes the row on the right, as the contract draws it */
-.tdb-views { margin-left: auto; display: flex; align-items: center; }
+/* ⚠️ THE ROW DOES NOT WRAP, AND THE SEARCH IS WHAT GIVES (corrections 2.1). The toolbar gained two
+   members — the set-aside door and Export, both up from the list card — and with `flex-wrap: wrap`
+   the view switch's `margin-left: auto` pushed it onto a second line, which the Query Centre's own
+   row never does. The instruments are all fixed-width and meaningful; the SEARCH is the one thing
+   that can be narrower without losing anything, so it shrinks and the row stays single. */
+.tdb-qtool { flex-wrap: nowrap; }
+.tdb-qtool .qcc-tb-search { min-width: 0; flex: 0 1 auto; }
+/* ⚠️ AND THE INSTRUMENTS DO NOT WRAP INSIDE THEMSELVES. With the row held to one line the squeeze
+   lands on the buttons, and "Set aside 3" broke over two lines inside its own pill — taller than
+   its neighbours and reading as damage. The label is the shortest true name for the thing, so what
+   gives is the search, not the words. */
+.tdb-qtool .qcc-tb-btn { white-space: nowrap; flex: 0 0 auto; }
+.tdb-views { margin-left: auto; display: flex; align-items: center; flex: 0 0 auto; }
 /* the header's picture — sized by the slot, spaced by the header's own row */
 .tdb-illo { flex: none; margin-left: 18px; }

@@ -21,7 +21,7 @@ describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), 
       // confidently at the page's sort and Add while describing filters. The second is why this
       // census exists: a stop can go wrong without going missing.
       ".l-search",
-      ".l-menuwrap",
+      ".tdb-popwrap",
       ".tdb-revlink",
       ".tdb-tile, .tdb-gcard, .tdb-lrow",
       // workspace P3: Today's stop left the retired corner for the sidebar group that reaches it.
@@ -157,7 +157,10 @@ describe("⚠️ EVERY TOUR TARGET STILL EXISTS — a stop that misses is droppe
   it("⚠️ AND THE TWO THE REBUILD MOVED POINT AT THE RAIL, not at the page's tool row", () => {
     const sels = TOUR_STOPS.map((s) => s.sel);
     expect(sels).toContain(".l-search");
-    expect(sels).toContain(".l-menuwrap");
+    /* ⚠️ RE-POINTED (corrections 2.1): the card's own bar went with the set-aside door and took
+       `.l-menuwrap` with it. Filter and sort are the PAGE's, in the toolbar row — which is what
+       this stop already described, so only its selector was stale. */
+    expect(sels).toContain(".tdb-popwrap");
     /* `.tdb-bsearch` is extinct; `.tdb-tools` still exists but is no longer what this stop meant */
     expect(sels).not.toContain(".tdb-bsearch");
     expect(sels).not.toContain(".tdb-tools");

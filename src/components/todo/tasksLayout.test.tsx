@@ -246,20 +246,28 @@ describe("⚠️ every control sits above the surface it acts on, and nothing fl
       expect(bare, `${cls} is still on the page`).not.toContain(cls);
     }
     const card = readFileSync(join(here, "TaskList.tsx"), "utf8");
-    /* the page holds the instruments — one search box, one Filter, one Group, one Sort */
+    /* the page holds the instruments — one search box, and one button per instrument */
     expect(bare, "the page lost its toolbar row").toContain("tdb-qtool");
-    for (const [what, once] of [["ToolbarSearch", 1], ["ToolbarButton", 3]] as const) {
-      expect((bare.match(new RegExp("<" + what, "g")) ?? []).length,
-        `the page draws ${what} ${once} time(s)`).toBe(once);
-    }
+    expect((bare.match(/<ToolbarSearch/g) ?? []).length, "the page draws ToolbarSearch once").toBe(1);
+    /* ⚠️ THE SET, NOT THE COUNT (corrections 2.1). This pinned `ToolbarButton` at THREE, which went
+       red the moment a fourth instrument legitimately joined the row — the set-aside door, moving up
+       from the card. A count cannot tell a new instrument from a duplicated one; the labels can, and
+       they are what the claim was always about: ONE of each, no second copy. */
+    const labels = [...bare.matchAll(/<ToolbarButton[\s\S]{0,200}?label="([^"]+)"/g)].map((m) => m[1]);
+    expect([...labels].sort(), "the toolbar's instruments changed")
+      .toEqual(["Filter", "Group", "Set aside", "Sort"]);
+    expect(new Set(labels).size, "an instrument is drawn twice").toBe(labels.length);
     /* and the card holds NO second copy of any of them */
     for (const cls of ["l-search", "qcc-tb-btn", "ToolbarSearch"]) {
       expect(card, `${cls} is a second copy in the card`).not.toContain(cls);
     }
-    /* ⚠️ EXCEPT THE ONE DOOR WITH NOWHERE ELSE TO GO — asserted PRESENT, so unmounting it needs a
-       decision rather than a deletion. This page has taken the ledger and tag management offline
-       once already by unmounting the sheet that held them. */
-    expect(card, "the set-aside door left the card with no home to go to").toContain("l-icon");
+    /* ⚠️ THE DOOR HAS A HOME NOW, SO THE CARD MUST NOT KEEP A COPY (corrections 2.1). This used to
+       assert the door was PRESENT in the card — correct while the card was its only home, and the
+       card's own comment promised Phase 3 would rehome it. Phase 3 did not; 2.1 did. The claim
+       flips: the card holds no door, and the page's toolbar does, which the labels above assert.
+       Asserted as an absence so a second copy cannot quietly reappear. */
+    expect(card, "the card grew the set-aside door back — there is one, in the toolbar")
+      .not.toContain("l-icon");
   });
 
   it("⚠️ NEITHER BLOCK SCROLLS WITH WHAT IT NARROWS", () => {

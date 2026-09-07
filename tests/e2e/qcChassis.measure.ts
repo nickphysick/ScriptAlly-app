@@ -117,9 +117,16 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
   const badge = ((r.ribs as string[]) ?? [])
     .map((t) => /^To-do list\s*(\d+)$/.exec(t.replace(/\s+/g, " ").trim()))
     .find(Boolean)?.[1] ?? "(not found)";
-  add("P1.2b · the tile's total and the card footer's total are the SAME number",
-      Number.isFinite(footN) && footN === byLabel["All tasks"],
-      "tile " + byLabel["All tasks"] + " · footer " + JSON.stringify(r.foot) + " -> " + footN);
+  /* ⚠️ THE TOTAL IS STATED ONCE (corrections 2.1), which is the stronger form of what this used to
+     assert. It compared the tile's figure against the card FOOTER's — and it earned its keep, going
+     red on 29-beside-27 the day the tiles counted a population the list could not show. 2.1 removed
+     the footer strip: the count now has exactly one home, beside the tiles. So the claim becomes
+     the structural one — two numbers cannot disagree when there is only one — and it is asserted as
+     the ABSENCE of a second, so a footer restating it cannot quietly return. */
+  add("P1.2b · the total is stated ONCE — the tiles say it and the content area does not restate it",
+      byLabel["All tasks"] > 0 && !Number.isFinite(footN),
+      "tile " + byLabel["All tasks"] + " · content-area footer " + JSON.stringify(r.foot)
+        + (Number.isFinite(footN) ? "  — a SECOND total is back" : "  (no second total)"));
   /* ⚠️ AND THE RAIL BADGE IS A THIRD SURFACE THAT DOES NOT AGREE — REPORTED, NOT ASSERTED.
      It counts boardFigures(cols).cards, which keeps the snoozed and dismissed the page's own
      scope drops, so it reads 29 beside the page's 27. That predates this round (the page moved
@@ -148,8 +155,14 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
       r.searches === 1 && r.pageSearches === 1 && r.cardBar === 0,
       "toolbar " + r.searches + " · page " + r.pageSearches + " · card " + r.cardBar);
 
-  add("P1.7 · three toolbar controls, in the contract's order",
-      r.btns.length === 3 && /^Filter/.test(r.btns[0]) && /^Group/.test(r.btns[1]) && /^Sort/.test(r.btns[2]),
+  /* ⚠️ THE SET, NOT THE COUNT (corrections 2.1). This pinned THREE controls and went red the moment
+     a fourth legitimately joined the row — the set-aside door, moving up from the list card, where
+     `TaskList`'s own comment had promised Phase 3 would take it. A count cannot tell a new
+     instrument from a duplicated one; the labels can, which is what the claim was always about. */
+  const btnNames = (r.btns as string[]).map((b) => b.replace(/(Filter|Group|Sort|Set aside).*/, "$1"));
+  add("P1.7 · the toolbar's instruments, one of each, in the contract's order",
+      btnNames.join("|") === "Filter|Group|Sort|Set aside"
+        && new Set(btnNames).size === btnNames.length,
       JSON.stringify(r.btns));
 
   /* ⚠️ THREE, NOT THE CONTRACT'S TWO — and the third is a stated departure rather than a drift
@@ -676,9 +689,12 @@ test("Phase 4 — the board's five columns", async ({ page }) => {
 
   /* the card's footer survives the view — the count describes whatever body is showing */
   const footN = Number((/(\d+)\s+tasks/.exec(b.foot ?? "") ?? [])[1] ?? NaN);
-  add("P4.8 · the card's foot still states the count, and it is the tiles' total",
-      Number.isFinite(footN) && footN === tileN["All tasks"],
-      "footer " + JSON.stringify(b.foot) + " -> " + footN + " · All " + tileN["All tasks"]);
+  /* ⚠️ AND THE BOARD RESTATES NOTHING EITHER (corrections 2.1) — same claim as P1.2b, on the second
+     view. The footer strip that used to close the card is gone from the content area; the tiles
+     above are the one place the total lives. */
+  add("P4.8 · the board states no second total — the tiles are the one home",
+      !Number.isFinite(footN) && tileN["All tasks"] > 0,
+      "content-area footer " + JSON.stringify(b.foot) + " · All " + tileN["All tasks"]);
 
   /* ⚠️ AND THE FOOT STOPS TEACHING THE ROW KEYS WHERE THERE ARE NO ROWS. `j k ↵ s d` move, open,
      snooze and dismiss a focused ROW; the board and the grid have none, so printing the hints

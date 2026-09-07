@@ -534,6 +534,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [dismissOpen, setDismissOpen] = useState(false);
   const filterAnchor = React.useRef<HTMLElement | null>(null);
   const asideAnchor = React.useRef<HTMLElement | null>(null);
+  /* ⚠️ THE DOOR'S TRIGGER IS THE TOOLBAR'S NOW (corrections 2.1) — one ref, so the anchored panel
+     hangs off the button the reader actually pressed rather than a control in the card below it. */
+  const asideTrigRef = React.useRef<HTMLButtonElement | null>(null);
+  /* ⚠️ THE COUNT IS DERIVED FROM THE SAME `hiddenItems` THE PANEL RENDERS — never a second tally.
+     A door that states a figure the surface behind it disagrees with is worse than one stating
+     none. Hoisted beside the trigger so the toolbar button and the panel read one expression. */
+  const asideN = hiddenItems(
+    currentUser?.mutedTaskRules, taskFlags, agents, queries, Date.now()).length;
   const sortAnchor = React.useRef<HTMLElement | null>(null);
   /* ⚠️ THE FOCUSED ROW AND THE COLLAPSED SECTIONS (tightened round, Phase 2) — both the PAGE's
      state, because the key effect and the list must read one truth: j/k walk exactly the rows a
@@ -1889,6 +1897,29 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                     onClick={() => { setFilterOpen(false); setGroupOpen(false); setAsideOpen(false); setSortOpen((o) => !o); }}
                   />
                 </span>
+                {/* ⚠️ THE SET-ASIDE DOOR AND EXPORT LIVE HERE NOW (corrections 2.1). Both were in
+                    the list card's own chrome — the door in `.l-bar`, Export in the footer strip —
+                    and both are PAGE-level acts that apply to whatever body is showing, so the card
+                    was the wrong home for either. The door's own comment had promised Phase 3 would
+                    rehome it and Phase 3 did not; this is that move, three phases late.
+
+                    ⚠️ THE DOOR IS THE ONLY ROUTE TO THE LEDGER AND TAG MANAGEMENT, and this page has
+                    taken both offline once before by unmounting the sheet that held them — which is
+                    why it MOVES rather than going. */}
+                <span className="tdb-popwrap">
+                  <ToolbarButton
+                    ref={asideTrigRef} label="Set aside" icon={ToolbarIcon.filter}
+                    value={asideN ? String(asideN) : ""} open={asideOpen}
+                    onClick={() => { setFilterOpen(false); setGroupOpen(false); setSortOpen(false); setAsideOpen((o) => !o); }}
+                  />
+                </span>
+                <button type="button" className="tdb-export" onClick={exportRail}>Export CSV</button>
+                {asideOpen && asideTrigRef.current && (
+                  <AnchoredPanel anchor={asideTrigRef.current} ariaLabel="Set aside and tags" variant="panel"
+                    onClose={(back) => { setAsideOpen(false); if (back) asideTrigRef.current?.focus(); }}>
+                    <SetAsidePanel />
+                  </AnchoredPanel>
+                )}
                 {/* ⚠️ TWO SEGMENTS, THROUGH THE QUERY CENTRE'S OWN SWITCH — its `views` list is
                     additive and defaults to that page's four, so this is the same component
                     rather than a second one drawing two of the same buttons. */}
@@ -2168,6 +2199,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   ⚠️ It names WHAT you searched for — a bare "nothing matches" leaves you wondering
                   whether the page heard you — and states the size of the set you get back, which
                   is what makes clearing an informed choice rather than a guess. */}
+              {/* ⚠️ THE GRID AND THE BOARD RENDER ON THE PAGE GROUND (corrections 2.1). They used to
+                  ride inside `TaskList`'s card as its `body`, so the Query Centre's own layout arrived
+                  wrapped in a white, 1px-bordered, 12px-radius, shadowed box whose `.l-body` was an
+                  INNER scroller — the page looked pinched, the board's horizontal scroll happened
+                  inside a rounded box that clipped its last column, and a footer strip beneath it
+                  restated a count the tiles already give.
+
+                  Measured against `/queries` first: its chain from card to `.wpg-scroll` is
+                  transparent, borderless, unrounded and unshadowed the whole way, and only
+                  `.wpg-scroll` scrolls. This is that shape.
+
+                  ⚠️ THE LIST KEEPS ITS CARD, which is not an inconsistency — `.tlc listcard` IS the
+                  list's own contract, rows and all. What left it is everything that was never the
+                  list's: the count, Export and the set-aside door, all page-level acts. */}
               {railEmpty ? (
                 <div className="tdg-empty tdw-empty">
                   <h3>{search.trim() ? `Nothing matches “${search.trim()}”` : "Nothing in this filter"}</h3>
@@ -2176,7 +2221,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                     {search.trim() ? "Clear search" : "Show all"}
                   </button>
                 </div>
-              ) : renderList()}
+              ) : todoView === "grid" ? renderGrid()
+                : todoView === "board" ? renderBoard()
+                : renderList()}
               {/* ⚠️ THE FOOTER CLOSES THE CARD, and it states the scope the EXPORT writes. A count
                   saying "12 of 34" beside a button that wrote 34 would be two statements of one
                   scope, and the button's is the one nobody checks until the file is open. */}
@@ -3472,10 +3519,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return (
       <TaskList
         groups={groupsForList()}
-        /* ⚠️ THE VIEW SWAPS THE BODY, NOT THE CARD — see `TaskList`'s `body` prop. The card's foot
-           states the count and teaches the keys, and both are true of the tickets as well as the
-           rows, so it must not go away when the reader picks Grid. */
-        body={todoView === "grid" ? renderGrid() : todoView === "board" ? renderBoard() : undefined}
         leaving={leaving ? { key: leaving.card.key, fading: leavingFading } : undefined}
         onOpen={(c) => openDock(c.key)}
         selectedKey={docked.card?.key}
@@ -3540,15 +3583,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       /* ⚠️ THE COUNT IS DERIVED FROM THE SAME `hiddenItems` THE PANEL RENDERS — never a second
          tally. A door that states a figure the surface behind it disagrees with is worse than a
          door that states none. */
-      asideActive={asideOpen}
-      asideCount={hiddenItems(currentUser?.mutedTaskRules, taskFlags, agents, queries, Date.now()).length}
-      onAside={(el) => { asideAnchor.current = el; setFilterOpen(false); setSortOpen(false); setAsideOpen((v) => !v); }}
-      asideMenu={asideOpen && asideAnchor.current ? (
-        <AnchoredPanel anchor={asideAnchor.current} ariaLabel="Set aside and tags" variant="panel"
-          onClose={(back) => { setAsideOpen(false); if (back) asideAnchor.current?.focus(); }}>
-          <SetAsidePanel />
-        </AnchoredPanel>
-      ) : null}
     />
     );
   }

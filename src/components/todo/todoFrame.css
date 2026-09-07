@@ -117,3 +117,18 @@
    orders + the switch is a fixed inventory; if it ever outgrows 440px the panel scrolls as a
    whole rather than clipping, which overflow-y here guarantees without changing the box. */
 .tdvp { overflow-y: auto; }
+
+/* ── EXPORT, IN THE TOOLBAR ROW (corrections 2.1) ────────────────────────────────────────────────
+   It was a link in the list card's footer strip, which made a page-level act look like a property
+   of the list. It exports the array the tiles count, which is true of the grid and the board too.
+   Quiet by design: a filled button here would compete with the view switch beside it, and Export is
+   not the row's primary act. */
+.tdb-qtool .tdb-export {
+  flex: 0 0 auto; cursor: pointer;
+  background: none; border: 0; padding: 0 4px;
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.11em;
+  text-transform: uppercase; color: var(--muted2);
+  border-bottom: 1px solid transparent; transition: color .15s, border-color .15s;
+}
+.tdb-qtool .tdb-export:hover { color: var(--burg); border-bottom-color: rgba(124, 58, 42, 0.4); }
+.tdb-qtool .tdb-export:focus-visible { outline: 2px solid var(--burg); outline-offset: 2px; }

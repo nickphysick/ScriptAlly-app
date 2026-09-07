@@ -15,7 +15,7 @@ green  · P4.6 · the board wears none of the retired four-column board's classe
          elements carrying .tbd-* inside the board: 0
 green  · P4.7 · Urgent is drawn ON cards, never as a sixth column
          urgent-marked cards 6 · Urgent tile 6
-green  · P4.8 · the card's foot still states the count, and it is the tiles' total
-         footer "28 tasks · 19 need you now" -> 28 · All 28
+green  · P4.8 · the board states no second total — the tiles are the one home
+         content-area footer "" · All 28
 green  · P4.9 · the row keys are taught in List and nowhere else
          hints on Board 0 · on List 1 (with 28 rows)

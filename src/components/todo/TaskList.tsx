@@ -48,10 +48,12 @@ export interface TaskListProps {
   /** ⚠️ THE THIRD DOOR — "Set aside & tags". Same shape as filter and sort, because it is the same
    *  kind of thing: a control on the tool row that opens an anchored panel. Its count is the
    *  ledger's, so the row can say there is something waiting without being opened. */
-  asideActive?: boolean;
-  asideCount?: number;
-  onAside: (anchor: HTMLElement) => void;
-  asideMenu?: React.ReactNode;
+  /* ⚠️ `asideActive`/`asideCount`/`onAside`/`asideMenu` ARE RETIRED (corrections 2.1). The
+     set-aside door moved to the PAGE's toolbar row, where it belongs: it is the route to the ledger
+     and to tag management, both page-level and true of whatever body is showing. Its old comment
+     here promised Phase 3 would rehome it; Phase 3 did not, so it stayed in this card's bar as a
+     lone unlabelled icon above the columns. A prop with no render site is a slot a future page
+     fills without anyone deciding it should exist, so these go rather than linger. */
   /**
    * ⚠️ THE MANUSCRIPT COLUMN IS RETIRED (tightened round, Phase 2) — the 44px row has no room
    * for a cell most accounts leave blank, and the contract moves the name into the ACTION
@@ -148,7 +150,7 @@ const AsideIcon = () => (
 );
 export const TaskList: React.FC<TaskListProps> = ({
   groups, selectedKey, onOpen, rowInputs, toolbar, onExport,
-  asideActive, asideCount, onAside, asideMenu, folded, leaving,
+  folded, leaving,
   focusedKey, onFocusRow, onStripSnooze, onStripDismiss, stripMeta,
   collapsedGroups, onToggleGroup,
   chips, onClearFilters, totalUnfiltered, body,
@@ -242,24 +244,9 @@ export const TaskList: React.FC<TaskListProps> = ({
           handlers, and the masthead keeps the page's one title element (the header stream's). */}
       {toolbar}
       {/* ⚠️ THE CARD'S SEARCH, FILTER AND SORT ARE RETIRED (QC-chassis round, Phase 1) — the page
-          owns them now, in the Query Centre's own toolbar row above the tiles, so there is one
-          search box and one Filter button on the page rather than two of each.
-          ⚠️ THE SET-ASIDE DOOR STAYS, AND DELIBERATELY. It is the only route to the ledger and to
-          tag management, and this page has already taken both offline once by unmounting the sheet
-          that held them. It is not in the contract's toolbar, so it keeps the card's bar until
-          Phase 3 rehomes it with the rest of the list — recorded rather than quietly dropped. */}
-      <div className="l-bar l-bar--aside">
-        <span className="l-menuwrap" onPointerDown={(e) => e.stopPropagation()}>
-          <button type="button" title="Set aside & tags" aria-label="Set aside and tags"
-            aria-haspopup="dialog" aria-expanded={!!asideActive}
-            className={asideActive ? "l-icon active" : "l-icon"}
-            onClick={(e) => onAside(e.currentTarget)}>
-            <AsideIcon />
-            {!!asideCount && <span className="l-icondot" aria-hidden="true" />}
-          </button>
-          {asideMenu}
-        </span>
-      </div>
+        {/* ⚠️ THE CARD'S BAR IS GONE WITH ITS ONE CONTROL (corrections 2.1). It held only the
+            set-aside door, now in the page's toolbar row — an empty bar would have kept a strip of
+            padding above the body for nothing. */}
 
       {chips && chips.length > 0 && (
         <div className="l-chips">
@@ -393,29 +380,18 @@ export const TaskList: React.FC<TaskListProps> = ({
         ))}
       </div>
 
-      <div className="l-foot">
-        {/* ⚠️ ONE COUNT, FROM THE ARRAY THE ROWS RENDER FROM. No "showing X of Y" — there is no
-            second number, so the two cannot disagree. */}
-        {typeof totalUnfiltered === "number" && totalUnfiltered !== total
-          ? <span className="c">Showing <b>{total}</b> of {totalUnfiltered}</span>
-          : <span className="c"><b>{total}</b> tasks · {needsYouNow} need you now</span>}
-        <a href="#" onClick={(e) => { e.preventDefault(); onExport(); }}>Export CSV</a>
-        {/* ⚠️ THE LIST KEYS, TAUGHT WHERE THEY WORK — and "where" now means the LIST BODY, not the
-            page (QC-chassis round, Phase 4). They move a focused ROW, open it, snooze and dismiss
-            it; with the grid or the board in the body there are no rows, so printing them there
-            would advertise five shortcuts that do nothing. That is the standing rule about copy
-            claiming only what the code does — and the same fault as the view switch that changed
-            nothing, which this round has already fixed once.
-
-            Export stays in every view: it exports the array the foot counts, which is true of all
-            three bodies. It is not in the contract's foot, but a live feature is not removed by a
-            mockup's silence. */}
-        {!body && (
+      {/* ⚠️ THE FOOTER STATES ONLY THE KEYS NOW (corrections 2.1). Its count and its Export both
+          left the content area: the count is already beside the tiles — "All tasks 28" is the same
+          figure told once rather than twice — and Export is a page-level act on whatever body is
+          showing, so it sits in the toolbar row. What remains is the one thing that IS the list's:
+          the five keys, which act on a focused ROW and so print only where rows exist. */}
+      {!body && (
+        <div className="l-foot">
           <span className="keys" aria-hidden="true">
             <kbd>j</kbd><kbd>k</kbd> move <kbd>↵</kbd> open <kbd>s</kbd> snooze <kbd>d</kbd> dismiss
           </span>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

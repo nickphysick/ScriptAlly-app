@@ -68,8 +68,13 @@ export const TOUR_STOPS: TourStop[] = [
        `.tdw-chips` stopped existing. Found by grepping the built bundle before a deploy — the
        census below passed it because an orphaned CSS rule still matched, which is a hole this
        commit also closes. */
-    /* re-pointed with the list port — the filter/sort wrappers are the card's `.l-menuwrap` now */
-    sel: ".l-menuwrap",
+    /* re-pointed with the list port — the filter/sort wrappers were the card's `.l-menuwrap`.
+       ⚠️ RE-POINTED AGAIN (corrections 2.1): the card's own bar went with the set-aside door, and
+       `.l-menuwrap` with it. Filter and sort have been the PAGE's since the QC-chassis round, in
+       the toolbar row beside the search — which is what this stop already DESCRIBES, so its words
+       were right about a selector that had stopped existing. `.tdb-popwrap` is that row's own
+       wrapper. The census below is what caught it, which is the third time it has. */
+    sel: ".tdb-popwrap",
     h: "Narrow the list.",
     p: "Filter and sort sit beside the search. The filter fills with ink while a narrowing is on, so a short list is never a mystery.",
     cta: "Next →",

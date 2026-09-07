@@ -1047,7 +1047,15 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
        goes red on a correct file — this repo's most-repeated lock fault, met again. */
     expect(board.replace(/\/\*[\s\S]*?\*\//g, ""), "the rail grew a toolbar again")
       .not.toContain("renderRailTools");
-    expect(board).toContain(") : renderList()}");
+    /* ⚠️ RETARGETED FROM THE SPELLING TO THE CLAIM (corrections 2.1). This pinned the literal
+       `) : renderList()}`, which stopped existing when the grid and the board became SIBLINGS of the
+       list on the page ground rather than a `body` inside its card. The claim is that the rail's
+       narrowed-to-nothing branch falls through to a rendered view — not which view, and not how the
+       ternary is spelled. */
+    expect(board.replace(/\s+/g, " "), "the rail's empty branch no longer falls through to a view")
+      .toMatch(/\) : todoView === "grid" \? renderGrid\(\)/);
+    expect(board, "the list is no longer one of the views the rail can fall through to")
+      .toContain("renderList()");
   });
 
   /**

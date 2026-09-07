@@ -43,7 +43,7 @@ const render = (c: BoardCard, opts: {
 } = {}) => renderToStaticMarkup(
   <TaskList
     groups={groups(c)} onOpen={() => {}} rowInputs={() => ({ agency: "The Marsh Agency" })}
-    onExport={() => {}} onAside={() => {}}
+    onExport={() => {}}
     focusedKey={opts.focusedKey} selectedKey={opts.selectedKey}
     onFocusRow={() => {}} onStripSnooze={() => {}} onStripDismiss={() => {}}
     stripMeta={(x) => listManuscript({ card: x })}
@@ -96,7 +96,7 @@ describe("2 · the wiring — RENDERED, so the claims are about the markup and n
       <TaskList
         groups={[{ id: "urgent", label: "Needs you now", description: "", cards: [card(), card({ key: "k2", who: "Aisha Kapoor", initials: "AK" })] }]}
         onOpen={() => {}} rowInputs={() => ({ agency: "A" })}
-        onExport={() => {}} onAside={() => {}}
+        onExport={() => {}}
         focusedKey="k2" selectedKey="k1"
         onFocusRow={() => {}} onStripSnooze={() => {}} onStripDismiss={() => {}}
         stripMeta={() => null}
