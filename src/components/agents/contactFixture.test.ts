@@ -117,6 +117,23 @@ describe("the Contact list fixture — a cast, not a crowd", () => {
     expect(months.size, "every agent was added in the same month — the month grouping has one column").toBeGreaterThan(2);
   });
 
+  /* ⚠️ THE EMPTY CELLS NEED A SUBJECT. Every other agent here carries a city, a country and
+     genres, so the list's dashed slots — and the quick add that hangs off them — would have been
+     locked against a cast in which the case never occurs. */
+  it("carries a SPARSE record — no email, no page, no location, no genres", () => {
+    const sparse = A.filter((a) => !a.email.trim() && !a.website.trim() && !(a.city ?? "").trim() && !(a.country ?? "").trim() && a.genres.length === 0);
+    expect(sparse.length, "no agent is empty in every quick-add field — the slots have no subject").toBeGreaterThan(0);
+    expect(sparse[0].name.trim(), "even the sparse record has a name — it is a real record, not a blank").not.toBe("");
+  });
+
+  /* …and the populated case, so a lock cannot pass by every agent being empty */
+  it("…and populated counterparts for each of those fields", () => {
+    expect(A.some((a) => a.email.trim()), "no agent has an email").toBe(true);
+    expect(A.some((a) => a.website.trim()), "no agent has a submissions page").toBe(true);
+    expect(A.some((a) => (a.city ?? "").trim()), "no agent has a city").toBe(true);
+    expect(A.some((a) => a.genres.length > 0), "no agent has genres").toBe(true);
+  });
+
   it("the stated case list is honest — one claim per case, none duplicated", () => {
     expect(new Set(CONTACT_FIXTURE_CASES).size).toBe(CONTACT_FIXTURE_CASES.length);
     expect(CONTACT_FIXTURE_CASES.length).toBeGreaterThan(12);

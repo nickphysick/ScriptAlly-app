@@ -155,6 +155,19 @@ export const CONTACT_FIXTURE_AGENTS: Agent[] = [
     socials: [{ platform: "X / Twitter", handle: "@penhallowlit" }],
     dateAdded: "2026-07-07T00:00:00.000Z",
   }),
+  /* ⚠️ THE SPARSE RECORD — a name, an agency, and nothing else. It is the shape a real writer's
+     list is full of before they have filled anything in, and until it existed every fixture agent
+     had a city, a country and genres, so the list's empty cells had NO SUBJECT: the dashed slots
+     and everything Phase 4 hangs off them would have been locked against a cast where the case
+     never occurs. Found the honest way — the account this was reported from is full of these and
+     the fixture had none. */
+  agent({
+    id: "fx-sparse", name: "Ottoline Frayn", agency: "Frayn & Daughters",
+    email: "", website: "", genres: [], mswlNotes: "",
+    materialsWanted: [],
+    dateAdded: "2026-09-05T00:00:00.000Z",
+    socials: [],
+  }),
 ];
 
 const q = (id: string, agentId: string, status: QueryStatus, dateSent: string): Query => ({
@@ -201,5 +214,6 @@ export const CONTACT_FIXTURE_CASES = [
   "method: Online Form",
   "method: Post",
   "absence: no stars and no stated window",
-  "added: seven distinct dates across five months",
+  "added: distinct dates across five months",
+  "sparse: a record with a name and an agency and nothing else",
 ] as const;

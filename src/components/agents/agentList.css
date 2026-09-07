@@ -540,8 +540,12 @@
    width shifting from card to card. */
 .aglist .agl-mslots { display: flex; gap: 5px; flex: none; }
 .aglist .agl-mslotwrap { display: inline-flex; }
+/* ⚠️ 26px, DOWN FROM 28, SO THE TWO IDIOMS ARE ONE SHAPE. The quick-add ref draws the material
+   slot and the dashed add slot together at 26 apiece, and the pack asks for a 26px slot that is
+   "identical in shape and radius to the ghosted material slots already in the row" — which cannot
+   both be true while these are 28. The newer ref shows the pair, so the pair moves. */
 .aglist .agl-mslot {
-  width: 28px; height: 28px; border-radius: 6px; display: grid; place-items: center;
+  width: 26px; height: 26px; border-radius: 6px; display: grid; place-items: center;
   border: 1px solid var(--agl-hair); background: #fbf7f1; color: var(--agl-ink-body);
   cursor: default;
 }
@@ -1050,6 +1054,41 @@
 
 /* the drawer's controls reuse the card's, so a chevron and a corner button are one object */
 .agl-dhead .agl-cbtn[disabled] { opacity: .38; cursor: not-allowed; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE DASHED ADD SLOT (quick add, Phase 3; ref contact-list-quick-add-v1.html)
+
+   ⚠️ THE SAME 26px SQUARE AND 6px RADIUS AS THE MATERIAL SLOT, and that is the
+   whole idea: a hairline square is a thing they ask for, a ghosted one is a
+   thing they do not, and a DASHED one is a thing that could be here. Three
+   degrees of presence in one row, in one shape.
+
+   Four states, off the ref: resting is barely there; the ROW's hover lifts every
+   slot in it a step, so passing over a row shows what is missing without having
+   to hunt; the slot's OWN hover goes solid and white; open is filled ink.
+   ══════════════════════════════════════════════════════════════════════════ */
+.aglist .agl-gap {
+  width: 26px; height: 26px; padding: 0; border-radius: 6px;
+  border: 1px dashed #ded2c6; background: transparent; color: #d0c4b7;
+  display: grid; place-items: center; cursor: pointer;
+  transition: border-color .14s, color .14s, background .14s;
+}
+.aglist .agl-gap svg { display: block; }
+/* ⚠️ THE ROW'S HOVER EXCLUDES THE SLOT UNDER THE POINTER, and `:not(:hover)` is the fix rather
+   than a heavier selector. Hovering a slot also hovers its row, so both rules applied at once —
+   and the row's (`.aglist .agl-lrow:hover .agl-gap`, four components) OUTRANKS the slot's own
+   (`.aglist .agl-gap:hover`, three), so the pointer landed on a slot and it took the ROW's muted
+   rim instead of going solid ink. Measured: rgb(202,187,172) where the ink was expected, from two
+   declarations that each read perfectly correctly. Stated as disjoint sets there is no contest to
+   win, at any specificity and in any order. */
+.aglist .agl-lrow:hover .agl-gap:not(:hover) { border-color: #cabbac; color: #a89a8c; }
+.aglist .agl-gap:hover { border-style: solid; border-color: var(--agl-ink); background: #fff; color: var(--agl-ink); }
+.aglist .agl-gap:focus-visible { outline: 2px solid rgba(36, 24, 19, .45); outline-offset: 2px; }
+.aglist .agl-gap-on { border-style: solid; border-color: var(--agl-ink); background: var(--agl-ink); color: var(--agl-cream); }
+/* ⚠️ INERT, NOT HIDDEN, while the drawer is editing: the gap is still a fact about the record. */
+.aglist .agl-gap[disabled] { cursor: default; opacity: .45; }
+.aglist .agl-lrow:hover .agl-gap[disabled] { border-color: #ded2c6; color: #d0c4b7; }
+.aglist .agl-gap[disabled]:hover { border-style: dashed; border-color: #ded2c6; background: transparent; color: #d0c4b7; }
 
 /* ══════════════════════════════════════════════════════════════════════════
    THE LIST VIEW (Phase 5)

@@ -19,7 +19,7 @@ const A = CONTACT_FIXTURE_AGENTS;
 const Q = CONTACT_FIXTURE_QUERIES;
 const tint = matchGenre(FIXTURE_GENRE);
 const list = renderToStaticMarkup(
-  <AgentListView agents={A} queries={Q} matchGenre={tint} onOpen={() => {}} onEdit={() => {}} onPeek={() => {}} peekId={null} />,
+  <AgentListView agents={A} queries={Q} matchGenre={tint} onOpen={() => {}} onEdit={() => {}} onPeek={() => {}} peekId={null} onAdd={() => {}} slotsInert={false} />,
 );
 const board = renderToStaticMarkup(
   <AgentBoardView agents={A} queries={Q} grouping="status" matchGenre={tint} onOpen={() => {}} onPeek={() => {}} peekId={null} />,

@@ -20,6 +20,7 @@ import { countryName, flagFor } from "../../lib/territory";
 import { agentCardDims, contactMetaLine, isDoorOpen } from "../../lib/agentList";
 import { isGenreMatch } from "../../lib/genreMatch";
 import { MaterialSlots } from "./MaterialSlots";
+import { AddSlot, SlotField } from "./AddSlot";
 import "flag-icons/css/flag-icons.min.css";
 
 /** The chips shown inline; the rest are counted. A row is a glance, not the record. */
@@ -34,7 +35,14 @@ export const AgentListView: React.FC<{
   /** The contact button — the view owns the anchoring, so it hands back the element and the id. */
   onPeek: (agentId: string, trigger: HTMLElement | null) => void;
   peekId: string | null;
-}> = ({ agents, queries, matchGenre, onOpen, onEdit, onPeek, peekId }) => (
+  /** An empty cell's slot was pressed. Phase 4 gives four fields a popover; the rest escalate. */
+  onAdd: (agentId: string, field: SlotField) => void;
+  /**
+   * ⚠️ SLOTS STAND DOWN WHILE THE DRAWER IS EDITING. Two editors on one record is two writers,
+   * and the drawer already owns the dirty-confirmation logic.
+   */
+  slotsInert: boolean;
+}> = ({ agents, queries, matchGenre, onOpen, onEdit, onPeek, peekId, onAdd, slotsInert }) => (
   <div className="agl-listwrap">
     <div className="agl-list" role="table">
       <div className="agl-lhead" role="row">
@@ -74,23 +82,34 @@ export const AgentListView: React.FC<{
                 <i>{agentSecondary(a)}</i>
               </span>
             </div>
-            <div className="agl-ellip" role="cell">{a.email || <span className="agl-pnone">Not recorded</span>}</div>
+            <div className="agl-ellip" role="cell">
+              {a.email ? a.email : <AddSlot field="email" onOpen={(f) => onAdd(a.id, f)} disabled={slotsInert} />}
+            </div>
             <div role="cell">
               {site
                 ? <a className="agl-lk" href={/^https?:\/\//i.test(site) ? site : `https://${site}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>{site}</a>
-                : <span className="agl-pnone">No page</span>}
+                : <AddSlot field="website" onOpen={(f) => onAdd(a.id, f)} disabled={slotsInert} />}
             </div>
             <div className="agl-lloc" role="cell">
               {flag && <span className={`fl ${flag}`} aria-hidden="true" />}
               {city || country
                 ? <span>{city || country}{city && country && <small>{country}</small>}</span>
-                : <span className="agl-pnone">Not recorded</span>}
+                : <AddSlot field="location" onOpen={(f) => onAdd(a.id, f)} disabled={slotsInert} />}
             </div>
             <div className="agl-chips" role="cell">
-              {a.genres.slice(0, ROW_GENRES).map((g) => (
-                <span className={`agl-chip${isGenreMatch(g, matchGenre) ? " agl-chip-match" : ""}`} key={g}>{g}</span>
-              ))}
-              {a.genres.length > ROW_GENRES && <span className="agl-chip">+{a.genres.length - ROW_GENRES}</span>}
+              {/* ⚠️ GENRES HAD NO EMPTY BRANCH AT ALL — an agent with none rendered an empty chip
+                  row, which states nothing and cannot be acted on. It is the one cell whose gap
+                  was invisible rather than merely wordy. */}
+              {a.genres.length ? (
+                <>
+                  {a.genres.slice(0, ROW_GENRES).map((g) => (
+                    <span className={`agl-chip${isGenreMatch(g, matchGenre) ? " agl-chip-match" : ""}`} key={g}>{g}</span>
+                  ))}
+                  {a.genres.length > ROW_GENRES && <span className="agl-chip">+{a.genres.length - ROW_GENRES}</span>}
+                </>
+              ) : (
+                <AddSlot field="genres" onOpen={(f) => onAdd(a.id, f)} disabled={slotsInert} />
+              )}
             </div>
             <div role="cell"><MaterialSlots agent={a} /></div>
             {/* the same words as the card, through the same derivation — never a second phrasing */}

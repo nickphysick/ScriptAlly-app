@@ -58,6 +58,7 @@ import {
 } from "../../lib/agentFilters";
 import { ContactListEmptyState } from "./ContactListEmptyState";
 import { ContactPeek } from "./ContactPeek";
+import { SLOT_TAB, SlotField } from "./AddSlot";
 import { AgentDrawer } from "./AgentDrawer";
 import { RotateCcw } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
@@ -518,6 +519,19 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     },
     [agents],
   );
+
+  /**
+   * An empty cell's slot was pressed. It ESCALATES: the drawer opens on the tab that owns the
+   * field, with the record in edit so the field is there to fill.
+   *
+   * ⚠️ IT DOES SOMETHING FROM THE MOMENT THE SLOT EXISTS. Phase 4 gives email, submissions page,
+   * location and genres a popover anchored to the slot instead; the wishlist and materials keep
+   * this path permanently, because a paragraph and four structured rows are the drawer's work and
+   * a popover would be a second, smaller editor for them.
+   */
+  const onAddField = useCallback((agentId: string, field: SlotField) => {
+    onEdit(agentId, SLOT_TAB[field]);
+  }, [onEdit]);
 
   /** Leave edit and return to READ — the drawer stays open on the same agent. */
   const cancelEdit = useCallback(() => { setDraft(null); setError(null); }, []);
@@ -1047,6 +1061,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onEdit={onEdit}
             onPeek={openPeekAt}
             peekId={peekId}
+            onAdd={onAddField}
+            slotsInert={!!draft}
           />
         ) : view === "board" ? (
           <AgentBoardView
