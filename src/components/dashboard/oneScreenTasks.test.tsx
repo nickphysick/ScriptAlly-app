@@ -179,12 +179,34 @@ describe("the panel's stylesheet", () => {
     expect(rule(".os-rulezone")).toContain("position: relative");
   });
 
-  it("the rule is 9px, thickens on hover, and separates with the card's own paper", () => {
-    expect(rule(".os-rule")).toContain("height: 9px");
-    expect(cssRules).toContain(".os-rulezone.on .os-rule { height: 12px; }");
+  /* ⚠️ RETARGETED BY A MEASUREMENT. The bands were 9px and the ROW grew to 12 on hover — and the row
+     is in FLOW, so P5.3 caught every ticket moving down by exactly 3. The row now reserves 12px
+     always and the BANDS grow inside it, which is what "the thicken happens inside space that is
+     already there" was supposed to mean. Asserted where the heights now live. */
+  it("the bands are 9px and thicken inside a row that reserves the space", () => {
+    expect(rule(".os-rule")).toContain("height: 12px");
+    expect(cssRules).toContain(".os-rule > .os-rb { height: 9px; }");
+    expect(cssRules).toContain(".os-rulezone.on .os-rule > .os-rb { height: 12px; }");
+    /* ⚠️ AND THE ROW'S OWN HEIGHT MUST NOT CHANGE ON HOVER — the fault, stated directly. */
+    expect(cssRules, "the row grows again and the tickets move")
+      .not.toContain(".os-rulezone.on .os-rule { height:");
     /* the separator is the GAP — a third tint between two same-family bands would be a fourth
        colour vocabulary on one page */
     expect(rule(".os-rule")).toContain("gap: 2px");
+  });
+
+  /* ⚠️ THE FAMILY PAPERS ARE DECLARED WHERE THIS GRID CAN SEE THEM. `--u-now-1` and its two
+     siblings are declared only on `.tpn`, the task pane's root, and this grid is not inside one —
+     so the tag's `var()` resolved to nothing and painted transparent. Measured, not read. */
+  it("⚠️ the ticket grid declares the three family papers it reads", () => {
+    const g = rule(".os-tkgrid");
+    for (const t of ["--u-now-1", "--u-house-1", "--u-yours-1"]) {
+      expect(g, `${t} does not resolve for a ticket outside a pane`).toContain(t);
+    }
+    /* the values are the app tokens the PANE resolves to, never the ported hexes above them */
+    expect(g).toContain("var(--pink)");
+    expect(g).toContain("var(--sage-band)");
+    expect(g).toContain("var(--gold-t)");
   });
 
   it("three tickets across, top-aligned, and the grid scrolls inside the card", () => {

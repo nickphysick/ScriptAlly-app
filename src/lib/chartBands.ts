@@ -72,7 +72,7 @@ export type BandKey = (typeof BAND_KEYS)[number];
 export const BAND_LABEL: Record<BandKey, string> = {
   queried: "Awaiting first response",
   agent: "Material with the agent",
-  you: "your move",
+  you: "Your move",
 };
 
 /** One period's closing stock, split three ways, with what the record cannot place. */

@@ -160,7 +160,7 @@ describe("the bands are drawn from the shared state colours, and there are three
 
   it("the legend names the three bands it draws, and no fourth", () => {
     const html = render(spread);
-    for (const label of ["Awaiting first response", "Material with the agent", "your move"]) {
+    for (const label of ["Awaiting first response", "Material with the agent", "Your move"]) {
       expect(html).toContain(label);
     }
     expect(html).not.toContain("Offer open");

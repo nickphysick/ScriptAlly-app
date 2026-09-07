@@ -42,7 +42,8 @@ test.describe("P5 · the to-do panel", () => {
         pct: +((sum / (rw - gaps)) * 100).toFixed(1),
         counts: bands.map((b) => Number(/,\s*(\d+)$/.exec(b.getAttribute("aria-label") ?? "")?.[1] ?? 0)),
         badge: Number((document.querySelector(".os-tasks .os-tbadge b")?.textContent ?? "").trim()),
-        h: +rule.getBoundingClientRect().height.toFixed(1),
+        rowH: +rule.getBoundingClientRect().height.toFixed(1),
+        bandH: bands[0] ? +bands[0].getBoundingClientRect().height.toFixed(1) : -1,
       };
     });
     /* ⚠️ AN EMPTY BOARD DRAWS NO RULE, DELIBERATELY — five bands of nothing is a shape promising
@@ -55,12 +56,18 @@ test.describe("P5 · the to-do panel", () => {
       return;
     }
     // eslint-disable-next-line no-console
-    console.log(`[P5.1] bands=${r.n} fill=${r.pct}% h=${r.h} counts=${r.counts.join("+")}=${r.counts.reduce((a, b) => a + b, 0)} badge=${r.badge}`);
+    console.log(`[P5.1] bands=${r.n} fill=${r.pct}% row=${r.rowH} band=${r.bandH} counts=${r.counts.join("+")}=${r.counts.reduce((a, b) => a + b, 0)} badge=${r.badge}`);
     expect(r.n, "five categories, five bands").toBe(5);
     expect(r.pct, "the bands must fill the rule's width").toBeGreaterThan(99);
     expect(r.pct).toBeLessThan(101);
     expect(r.counts.reduce((a, b) => a + b, 0), "the five band counts must sum to the badge").toBe(r.badge);
-    expect(r.h, "the rule is 9px at rest").toBeLessThanOrEqual(10);
+    /* ⚠️ THE BAND IS 9px; THE ROW RESERVES 12 — and the distinction is the whole of the P5.3 fix.
+       The first version of this line measured the ROW and would have gone red on a correct page the
+       moment the thicken stopped reflowing the grid, which is the shape of a lock that pins the
+       symptom rather than the law. */
+    expect(r.bandH, "a band is 9px at rest").toBeLessThanOrEqual(10);
+    expect(r.rowH, "the row must reserve the thickened height, or hovering moves the tickets")
+      .toBeGreaterThanOrEqual(r.bandH);
   });
 
   test("P5.2 · the badge states the visible set, under every filter", async ({ page }) => {

@@ -847,12 +847,19 @@
    target and the 18px of air between it and the first ticket, so thickening on hover happens
    INSIDE space that is already there and no ticket moves. */
 .os-rulezone { position: relative; padding: 2px 18px 18px; flex: none; }
-.os-rule { display: flex; height: 9px; border-radius: 5px; overflow: hidden; gap: 2px; }
-/* ⚠️ THE THICKEN IS INSTANT, AND THAT IS THE HOUSE MOTION LAW RATHER THAN A COMPROMISE. The first
-   draft carried `transition: height 0.14s` and `motionPolish.test.ts` caught it on its first run:
-   motion on this sheet is transform and opacity only, because animating a layout property makes
-   every frame a reflow. A 9→12px thicken has nowhere useful to spend 140ms anyway. */
-.os-rulezone.on .os-rule { height: 12px; }
+/* ⚠️ THE ROW RESERVES THE THICKENED HEIGHT AND THE BANDS GROW INSIDE IT — measured, because the
+   first version did not. `.os-rule` was 9px and became 12 on hover, and P5.3 caught every ticket
+   moving down by exactly 3: the rule is in FLOW, so its own height change reflows the grid beneath
+   it. The zone's comment claimed the thicken happened "inside space that is already there"; it did
+   not, and only the rendered page said so. The row is 12px always, the bands are 9 and grow to 12
+   within it, and nothing below moves. */
+.os-rule { display: flex; align-items: center; height: 12px; gap: 2px; }
+.os-rule > .os-rb { height: 9px; }
+.os-rulezone.on .os-rule > .os-rb { height: 12px; }
+/* ⚠️ THE RADIUS MOVED TO THE BANDS with the overflow clip it used to need — a 12px row clipping a
+   9px band would round the ROW's corners around empty space at the ends. */
+.os-rb:first-child { border-top-left-radius: 5px; border-bottom-left-radius: 5px; }
+.os-rb:last-child { border-top-right-radius: 5px; border-bottom-right-radius: 5px; }
 /* ⚠️ THE SEPARATOR IS THE GAP, IN THE CARD'S OWN PAPER — `gap: 2px` on a container the card shows
    through. Two categories sharing a family paper sit adjacent and are told apart by this and by the
    legend; a third tint to separate them would be a fourth vocabulary on one page. */
@@ -884,7 +891,33 @@
    spreading down it — the grid would otherwise distribute its rows into the height the card gives.
    `minmax(0, 1fr)` because a ticket's headline is a sentence and `1fr` alone would let the longest
    one set every column's width. */
+/**
+ * ⚠️ THE FAMILY PAPERS ARE RE-DECLARED HERE BECAUSE THEIR ONLY DECLARING SCOPE IS `.tpn`, AND THIS
+ * GRID IS NOT INSIDE ONE — found by measurement, not by reading.
+ *
+ * `taskTicket.css` paints the tag `background: var(--u-now-1)` and its own comment says those are
+ * "the first stop of the pane's own family gradients". They are declared on `.tpn` (the task pane's
+ * root) and nowhere else, so outside a pane the `var()` resolves to nothing and the tag paints
+ * TRANSPARENT — the rule applying cleanly, with nothing to point at. P5.4 measured one tinted region
+ * on a ticket that must have two.
+ *
+ * ⚠️ SCOPED TO THIS GRID RATHER THAN WIDENED TO `:root`, DELIBERATELY. `:root` is the better fix and
+ * has a precedent in this repo (`--state-*` was widened out of `.t-f12` for exactly this reason) —
+ * but `.tkt` is the To-do page's component in another stream's sheet, and widening would change
+ * what that page renders. I could not confirm the To-do page's own tickets on the harness account
+ * (its board showed none this session), so I am not making a change whose effect there I have not
+ * seen. The finding is in the run report for that stream; this line becomes redundant the day the
+ * tokens move up, and deleting it is then a one-line change.
+ *
+ * ⚠️ AND THE VALUES ARE THE APP TOKENS THE PANE ITSELF RESOLVES TO, not the ported hexes above them
+ * in `taskPane.css`. `.tpn` declares the mockup's literals and then overrides them with
+ * `var(--pink)` / `var(--sage-band)` / `var(--gold-t)`; the later block wins, so those are what a
+ * pane actually paints and what a tag must match to be "the same paper by construction".
+ */
 .os-tkgrid {
+  --u-now-1: var(--pink);
+  --u-house-1: var(--sage-band);
+  --u-yours-1: var(--gold-t);
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px; align-content: start; padding: 0 18px 14px;
 }

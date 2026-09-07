@@ -65,7 +65,7 @@ describe("what the record cannot place, it says so about", () => {
   /**
    * ⚠️ THE INSIGHT THAT MAKES THREE BANDS USABLE, AND THE CASE THAT PROVES IT IS NOT LUCK.
    * A transition whose two sides are the SAME band needs no date. Full Requested and R&R are both
-   * "your move", so the interval reads pink whenever the flip happened.
+   * "Your move", so the interval reads pink whenever the flip happened.
    */
   it("an R&R after a request is pink throughout — the undated transition does not cross a band", () => {
     const one = [q({
@@ -133,6 +133,19 @@ describe("the vocabulary", () => {
   it("is three bands, in stack order, each with a name the legend can print", () => {
     expect(BAND_KEYS).toEqual(["queried", "agent", "you"]);
     expect(Object.keys(BAND_LABEL).sort()).toEqual([...BAND_KEYS].sort());
+    /* ⚠️ THE VALUES, NOT ONLY THE KEYS — and this case was added because the measurement caught
+       what the lock did not. A case-insensitive rename lowercased "Your move" to "your move"; every
+       assertion here passed, because they all asked whether a label EXISTED. The legend on the
+       rendered page read "Awaiting first response · Material with the agent · your move", and the
+       only thing that noticed was a browser. A label is copy: assert the copy. */
+    expect(BAND_LABEL).toEqual({
+      queried: "Awaiting first response",
+      agent: "Material with the agent",
+      you: "Your move",
+    });
+    for (const v of Object.values(BAND_LABEL)) {
+      expect(v[0], `"${v}" does not start with a capital`).toBe(v[0].toUpperCase());
+    }
     /* ⚠️ NO SLATE. The fourth band is cut from this round, and a key for it here would be the first
        half of drawing it. */
     expect(BAND_KEYS).not.toContain("offer");

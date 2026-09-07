@@ -28,6 +28,7 @@ const readBubbles = () => {
       const b = e.getBoundingClientRect();
       const inner = e.querySelector(".os-bubin") as HTMLElement | null;
       const ir = inner?.getBoundingClientRect();
+      const kr = (e.querySelector(".os-knot") as HTMLElement | null)?.getBoundingClientRect();
       return {
         side: e.classList.contains("out") ? "out" : "in",
         desk: e.classList.contains("desk"),
@@ -36,6 +37,8 @@ const readBubbles = () => {
         fill: inner ? getComputedStyle(inner).backgroundColor : "",
         l: ir ? +(ir.left - cr.left).toFixed(1) : -1,
         r: ir ? +(cr.right - ir.right).toFixed(1) : -1,
+        /* the knot's side of the bubble — the claim that holds at ANY bubble width */
+        knotLeftOfBody: kr && ir ? kr.left < ir.left : null,
         label: (e.querySelector(".os-bublab")?.textContent ?? "").trim(),
         meta: (e.querySelector(".os-bubmeta")?.textContent ?? "").trim(),
       };
@@ -58,13 +61,62 @@ test.describe("P6 · the feed", () => {
     const outs = r!.rows.filter((x) => x.side === "out");
     const desks = r!.rows.filter((x) => x.desk);
     // eslint-disable-next-line no-console
-    console.log(`[P6.1] ${r!.rows.length} bubbles · in=${ins.length} out=${outs.length} desk=${desks.length} · fills=${[...new Set(r!.rows.map((x) => x.fill))].join(" ")}`);
+    console.log(`[P6.1] ${r!.rows.length} bubbles · in=${ins.length} out=${outs.length} desk=${desks.length} · knots=${r!.rows.filter((x) => x.knotLeftOfBody !== null).length} · fills=${[...new Set(r!.rows.map((x) => x.fill))].join(" ")}`);
 
     /* ⚠️ THE POPULATION PER SIDE, or a feed that happens to be all one direction reports a clean
        sweep about a claim it never tested. */
     expect(ins.length + outs.length, "no bubbles were classified at all").toBeGreaterThan(0);
-    for (const b of ins) expect(b.l, "an agent bubble is not hugging the left").toBeLessThan(b.r);
-    for (const b of outs) expect(b.r, "a writer bubble is not hugging the right").toBeLessThan(b.l);
+
+    /**
+     * ⚠️ THE CLAIM IS THE KNOT'S SIDE, NOT THE BUBBLE'S INSET — and the first version of this case
+     * had it wrong in a way only the page could show. `.os-bubin` is capped at 84%, so a LONG
+     * message hits the cap and leaves almost the same slack on both sides: measured 50 left against
+     * 46.3 right, and `l < r` failed on a bubble that was aligned perfectly correctly. The inset
+     * asymmetry is a property of SHORT bubbles; the knot hanging off the outer edge is the property
+     * of all of them, and it is what "alignment carries direction" actually means.
+     */
+    const withKnots = r!.rows.filter((x) => x.knotLeftOfBody !== null);
+    for (const b of withKnots.filter((x) => x.side === "in")) {
+      expect(b.knotLeftOfBody, "an agent bubble's knot is not on its left").toBe(true);
+    }
+    for (const b of withKnots.filter((x) => x.side === "out")) {
+      expect(b.knotLeftOfBody, "a writer bubble's knot is not on its right").toBe(false);
+    }
+    /* ⚠️ AND THE POPULATION, or a feed of housekeeping alone would pass this having measured none. */
+    expect(withKnots.length, "no bubble carried a knot — the side claim went untested")
+      .toBeGreaterThan(0);
+
+    /**
+     * ⚠️ AND EVERY BUBBLE OF A SIDE STARTS AT THE SAME EDGE — which is what alignment MEANS, and
+     * needs no magic number. The first two versions of this both tried to compare a bubble's own
+     * left inset against its right, and both were wrong for the same reason: `.os-bubin` is capped
+     * at 84%, so a long message leaves nearly equal slack on both sides (measured 50 against 46.3)
+     * while being aligned perfectly correctly. A tolerance would have papered over it; the honest
+     * claim is that the side's bubbles share an edge.
+     */
+    /**
+     * ⚠️ AND THE GROUPING IS BY WHETHER THE BUBBLE HAS A KNOT, WHICH THE MEASUREMENT TAUGHT ME.
+     * The first version asserted one edge per SIDE and found two on the writer's: 30 and 50. Both
+     * are correct — the knot occupies the outer edge, so a bubble carrying one starts ~20px further
+     * in than a housekeeping or neutral bubble that does not. Reserving the knot's width on a
+     * bubble that will never have one would leave a permanent empty gutter down the desk events,
+     * which is worse than two edges. So the property is: every bubble of a side AND a knot-state
+     * shares an edge — and the two edges differ by the knot, which is the design saying so.
+     */
+    const edge = (rows: typeof ins, pick: (x: (typeof ins)[number]) => number) =>
+      [...new Set(rows.map((x) => Math.round(pick(x))))];
+    for (const [side, rows, pick] of [
+      ["agent", ins, (x: (typeof ins)[number]) => x.l],
+      ["writer", outs, (x: (typeof ins)[number]) => x.r],
+    ] as const) {
+      for (const knotted of [true, false]) {
+        const grp = rows.filter((x) => (x.knotLeftOfBody !== null) === knotted);
+        if (grp.length < 2) continue;
+        expect(edge(grp, pick), `${side} bubbles ${knotted ? "with" : "without"} a knot do not share an edge`)
+          .toHaveLength(1);
+      }
+    }
+
     /* ⚠️ AND THE HOUSEKEEPING RULE, WHICH IS THE ADDENDUM'S OWN — no state, so no dot. */
     for (const b of desks) expect(b.knots, "a housekeeping bubble carries a StatusDot").toBe(0);
   });
