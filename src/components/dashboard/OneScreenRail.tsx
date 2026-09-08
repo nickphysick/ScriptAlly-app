@@ -533,7 +533,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                       {/* ⚠️ WHAT HAPPENED, NOT WHO — see `FeedRow.sentence`. A COLLAPSED run still
                           states its own count ("3 agents"), because a run's sentence is the thing
                           the fold exists to replace. */}
-                      <div className="os-bubsay" data-probe-text="bubble-sentence">{runLines(r)?.line ?? r.sentence}</div>
+                      <div className="os-bubsay">{runLines(r)?.line ?? r.sentence}</div>
                       {head && (
                         <div className="os-bubmeta">
                           {r.kind === "housekeeping"

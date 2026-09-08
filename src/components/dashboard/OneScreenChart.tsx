@@ -381,7 +381,7 @@ export const OneScreenChart: React.FC<{
             the first fortnight it states what is out, because a two-point range delta is noise
             dressed as a trend. */}
         <span className="os-stat">
-          <span className="os-n" data-probe-text="chart-figure">{shownActive}</span>
+          <span className="os-n">{shownActive}</span>
           <span className="os-statxt">
             <h2>Active queries</h2>
             {earlyDays

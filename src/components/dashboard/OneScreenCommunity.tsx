@@ -53,7 +53,7 @@ export const OneScreenCommunity: React.FC<{ loading: boolean }> = ({ loading }) 
           burgundy inset hairline, the swap-ready geometry and the 404 degrade path — and means an
           illustrated Community mark lands the same one-line way as every other header's. */}
       <OneScreenMark name="community" />
-      <h2 data-probe-text="card-h3">Community</h2>
+      <h2 data-probe-text="card-title">Community</h2>
       {/* ⚠️ THE BETA CHIP STAYS UNTIL THE COHORTS ARE POPULATED ENOUGH THAT MOST READERS SEE REAL
           FIGURES — it is a statement about the DATA's maturity, not the code's. */}
       <span className="os-commbeta">BETA</span>

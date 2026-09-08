@@ -175,7 +175,7 @@ describe("the card's CSS", () => {
     const n = rule(".os-cn");
     expect(n).toContain("font-family: var(--font-serif)");
     expect(n).toContain("font-variant-numeric: tabular-nums");
-    expect(rule(".os-cd")).toContain("#e9ede6");
+    expect(rule(".os-cd")).toContain("#e6ece3");
   });
 
   /* ⚠️ THE STEPS MUST COME AFTER THE BASE RULES, not up in the page's responsive frame. Same

@@ -242,7 +242,7 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
                     dateLabel: inp.anchorDate,
                     elapsed: typeof inp.days === "number" ? elapsedPhrase(inp.days) : null,
                   })}
-                  probeText={shown[0] === c ? "ticket-title" : undefined}
+                  
                   onOpen={() => setOpenKey(c.key)}
                 />
               );

@@ -4,7 +4,18 @@
 @import "./styles/motion.css";
 
 @theme {
-  --font-sans: "Source Sans Pro", system-ui, -apple-system, sans-serif;
+  /**
+   * ⚠️ SOURCE SANS 3 IS SOURCE SANS PRO, RENAMED AT ITS OWN VERSION 3 — and the ref names the
+   * current one (ref v16, Phase 4). Every design ref in `design-refs/` declares
+   * `--sans:"Source Sans 3"`; the app declared its predecessor, so every text run the harness
+   * compares reported a family miss on a typeface that is the same design.
+   *
+   * ⚠️ PRO STAYS IN THE STACK BEHIND IT, WHICH IS WHY THIS IS ADDITIVE RATHER THAN A SWAP. If the
+   * new face fails to load for any reason the page falls back to the one it has been rendering in
+   * all along, not to a system sans — so the worst case is exactly today's rendering. Reversible by
+   * deleting one name.
+   */
+  --font-sans: "Source Sans 3", "Source Sans Pro", system-ui, -apple-system, sans-serif;
   --font-serif: "Playfair Display", Georgia, serif;
   --font-mono: "JetBrains Mono", monospace;
 

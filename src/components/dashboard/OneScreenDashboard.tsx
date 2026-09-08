@@ -238,13 +238,15 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
                 for repeating what the chrome already said; the muted date that replaced it has
                 now gone the same way, for a plainer reason — anyone reading it knows what day it
                 is. The header is shorter without it, and the greeting leads.
-                ⚠️ WHAT SITS UNDER THE NAME IS A QUESTION, NOT A FACT. Every other line in this
-                header states something derived; this one is the only piece of address on the
-                page, which is why it is a constant rather than something computed. */}
+                ⚠️ WHAT SITS UNDER THE NAME IS A QUESTION, NOT A FACT — and v16 restores it as a
+                LEDE rather than the kicker or the date the audit retired. Every other line in this
+                header states something derived; this one is the only piece of address on the page,
+                which is why it is a constant rather than something computed. */}
             <div className="os-grow2">
               {/* ⚠️ PLAYFAIR 700 AT 46px, PLAIN INK. No burgundy, no italics — the third and final
                   swing of that pendulum, recorded at each turn. */}
-              <h1 data-probe-text="hero-h1">Hello, {firstName}</h1>
+              <h1 data-probe-text="greeting">Hello, {firstName}</h1>
+              <p className="os-gsub">What&rsquo;s on your desk today?</p>
               <span className="os-spacer" />
               {chipShows && (
                 <button type="button" ref={tourChipRef} className="os-tourchip" onClick={() => { if (wideEnough()) setTouring(true); }}>

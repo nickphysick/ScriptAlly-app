@@ -48,6 +48,7 @@ const RESPONSE_RECEIPT_CHANNEL = "query-response";
 import { pickableManuscripts } from "../lib/lifecycle";
 import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
+import { PageTally } from "./shell/WorkspacePageGrid";
 import { ToolbarButton, ToolbarIcon } from "./shared/ToolbarButton";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
@@ -146,6 +147,12 @@ import { PackagePicker } from "./reading-pane/PackagePicker";
 import { QueryCentreSkeleton, SKELETON_FLOOR_MS } from "./reading-pane/QueryCentreSkeleton";
 /* §2b — the shared art registry, already consumed by two other Query Centre panels. */
 import { ArtSlot } from "./todo/ArtSlot";
+/* ⚠️ THE MASTHEAD'S OWN PICTURE, AS A URL — the same mechanism Contact list uses for its
+   rolodex (`PageHeader`'s `icon`), so the two headers are one component drawing one shape
+   rather than two pages each solving "a picture beside a title" their own way. Extracted from
+   `design-refs/query-centre-v15-contact-parity.html`'s base64; the loose copy in Downloads is
+   a re-encoding that does not match the brief's hash. */
+import qcMastheadIcon from "../assets/queries/query-centre-masthead.png";
 import {
   attachablePackages, canAttachPackages, groupByOrigin, materialName,
   packageMenuRow, detachMenuRows, detachToast, withoutPackage, linkedChips,
@@ -5193,11 +5200,6 @@ export const Queries: React.FC<{
           masthead={
           <PageHeader
             variant="workspace"
-            /* ⚠️ NO MARK — the illustration bleeding across this band IS the page's picture, and a
-               glyph beside a 47px title in front of it is a second picture competing with the
-               first. Removed with the trial's carve-out, which names mark absence as one of the
-               four things it changes; `mastheadMatrix` counts the markless pages, so a third
-               cannot drop its mark unnoticed and this one cannot silently get it back. */
             /* The workspace masthead: this page is a fixed-height master–detail surface, so
                header height is working area taken from the panes. The description is KEPT as a
                prop though compact doesn't render it — the copy stays where it lives, so bringing
@@ -5205,6 +5207,20 @@ export const Queries: React.FC<{
             /* ⚠️ RENAMED (Amendment 1, H2): "Queries Hub" → "Query Centre". The nav, the crumb
                and the page's own heading must say the same thing — a page whose sidebar entry
                and title disagree makes you check you are where you think you are. */
+            /**
+             * ⚠️ THE PAGE'S PICTURE MOVED FROM BEHIND THE WORDS TO BESIDE THEM (Contact parity §1).
+             * It was a full-width wash — the illustrated-masthead trial — and the comment that used
+             * to sit here refused a mark on the grounds that "the illustration bleeding across this
+             * band IS the page's picture, and a glyph beside the title is a second picture competing
+             * with the first". That reasoning was right about the BAND and dies with it: there is no
+             * wash to compete with now, and the 72px icon is the page's only picture.
+             *
+             * ⚠️ IT IS `icon`, NOT `mark` OR `illo`. `mark` no longer renders in the masthead at all
+             * (it survives for the collapsed bar), and `illo` is the additive slot between the text
+             * and the primary — the LEFT-hand picture beside a title is `icon`, which is precisely
+             * what Contact list passes. Same prop, same `.wsh-icon`, same box.
+             */
+            icon={qcMastheadIcon}
             title="Query Centre"
             /* ⚠️ MOVED FROM `.qc-phead`, NOT COPIED. That row is this page's control row in all but
                the grid's prop name — its own comment calls it "their seat" — so a header primary
@@ -5960,6 +5976,19 @@ export const Queries: React.FC<{
               * to find out. That is what earns the label its width.
               */}
             <div className="qcc-tb" role="group" aria-label="Query tools">
+              {/**
+                * ⚠️ THE COUNT MOVED UP FROM THE FOOTER (Contact parity §2), and it is the SHARED
+                * `PageTally` that Contact list and Analytics already mount — not a Playfair span
+                * typed here. The row is the thing that survives once the masthead scrolls away, so
+                * the count belongs on it; the footer said the same figure three hundred pixels
+                * lower, where nothing else about the page was stated.
+                *
+                * ⚠️ AND THE STRINGS ARE THIS PAGE'S OWN DERIVATION, per the component's own rule:
+                * there is no shared count function and there must not be one. `gridRows` is the
+                * filtered view and `mastheadScopedQueries` the manuscript-scoped whole — the exact
+                * two figures the footer stated, moved rather than recomputed.
+                */}
+              <PageTally value={`${gridRows.length} of ${mastheadScopedQueries.length}`} />
               <div className="qcc-tb-search">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a08a78" strokeWidth="2" aria-hidden="true">
                   <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" />
@@ -6120,10 +6149,11 @@ export const Queries: React.FC<{
               />
             )}
 
-            <div className="qcc-foot">
-              <span>
-                Showing <b>{gridRows.length}</b> of <b>{mastheadScopedQueries.length}</b>
-              </span>
+            {/* ⚠️ THE FOOT IS EXPORT ONLY NOW. Its count went to the toolbar row (§2) rather than
+                being duplicated there — the same figure in two places is one edit from disagreeing,
+                and this page has already paid for that. `Export CSV` stays exactly where it was:
+                it is an act on the filtered set, and the foot is where that set ends. */}
+            <div className="qcc-foot qcc-foot--export">
               <button
                 type="button"
                 className="qcc-foot-lnk"

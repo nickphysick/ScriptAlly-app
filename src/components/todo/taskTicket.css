@@ -67,9 +67,14 @@
 }
 
 .tkt .top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+/* ⚠️ MONO AT 9.5, NOT THE BODY FACE AT 10.5 — ref `.tk .tag{font-family:var(--mono);font-size:9.5px;
+   letter-spacing:.09em;text-transform:uppercase;padding:3px 8px;border-radius:5px}`. A tag is a
+   LABEL on a card, not a word in it, and the app was setting it in the same face as the deed above
+   it at a heavier weight. `border-radius: 5px` rather than a pill for the same reason. */
 .tkt .tag {
-  height: 22px; padding: 0 9px; border-radius: 999px;
-  font-size: 10.5px; font-weight: 500; white-space: nowrap;
+  padding: 3px 8px; border-radius: 5px;
+  font-family: "JetBrains Mono", monospace; font-size: 9.5px; font-weight: 400;
+  letter-spacing: 0.09em; text-transform: uppercase; white-space: nowrap;
   display: inline-flex; align-items: center; flex: 0 0 auto;
 }
 /* ⚠️ THE APP'S THREE FAMILY PAPERS, NOT THE REF'S NAMES. The contract calls them --now1/--house1/

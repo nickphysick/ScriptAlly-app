@@ -38,18 +38,14 @@
   /* measured: the title and description are a fixed-size object, so this is the same at every width */
   --illo-text-right: 565px;
 }
-.wpg.qc-wpg {
-  --illo-art: url(../../assets/queries/queries.jpg);
-  /**
-   * ⚠️ MEASURED TWICE, AND THE SECOND READING IS THE LESSON. The widest ink in this header is the
-   * DESCRIPTION, not the title, so the first measurement came back at 467 — WIDER than Packages'
-   * 458, the opposite of what a shorter title suggests. Then the mark came off, the text shifted
-   * left, and the true value fell to 399. Neither number is derivable from the copy by reading it;
-   * both had to be measured, and the second was caught by `illoRules`' Rule 1 case reconciling this
-   * token against the rendered ink rather than against a literal on both sides.
-   */
-  --illo-text-right: 524px;
-}
+/* ⚠️ QUERY CENTRE LEFT THE TRIAL (Contact parity §1). Its hero band is replaced by the shared
+   Contact-list masthead — a 72px icon beside the title — so the page states its picture in the
+   header's own slot rather than as a full-width wash behind it.
+
+   ⚠️ PACKAGES IS STILL IN THE TRIAL AND EVERY RULE BELOW STILL SERVES IT. This file's own header
+   says deleting it reverts BOTH pages; removing one page means taking `.wpg.qc-wpg` out of five
+   grouped selectors and nothing else — the exact shape of the removal-that-serves-two hazard, so
+   the survivors are asserted by name rather than the diff being read. */
 
 /**
  * ══ THE GEOMETRY, DERIVED — EVERY STOP IS AN OFFSET FROM THE SLAB'S LEFT EDGE ═════════════════
@@ -69,8 +65,7 @@
  * `100%` resolves at the point of USE — the slab's background positioning area — which is what
  * makes one declaration correct on both the gradient and the mask.
  */
-.wpg.pkgw-wpg,
-.wpg.qc-wpg {
+.wpg.pkgw-wpg {
   --illo-gutter: max(var(--mast-gutter), (100% - var(--work-max)) / 2);
   /* Rule 1 · the reveal opens 60px past the last glyph and is fully open 430px later */
   --illo-reveal-a: calc(var(--illo-gutter) + var(--illo-text-right) + 60px);
@@ -109,8 +104,7 @@
    the slab was in its tightened posture, where a band drawn for a 128px header would have been
    cropped to about half. There is one posture now, so the guard has nothing to exclude — and a
    `:not()` against a class that can never appear is a selector nobody can reason about. */
-.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome::after,
-.wpg.qc-wpg > .wpg-scroll > .wpg-chrome::after {
+.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome::after {
   content: '';
   position: absolute;
   /**
@@ -162,8 +156,7 @@
  * ⚠️ THE TEXT ABOVE THE PAINT. The pseudo-element is positioned and `.wsh` is not, so without this
  * the artwork paints over the title — the bench lifts its inner box for the same reason.
  */
-.wpg.pkgw-wpg .wsh,
-.wpg.qc-wpg .wsh { position: relative; z-index: 1; }
+.wpg.pkgw-wpg .wsh { position: relative; z-index: 1; }
 
 /**
  * ⚠️ AND A TOOLBAR WOULD BE UNDER THE ARTWORK TOO — NEITHER PAGE HAS ONE TODAY, WHICH IS WHY THIS
@@ -172,8 +165,7 @@
  * day either page gains `tools` the picture would run straight over its controls. One declaration
  * now, in the trial's own file, rather than a silent regression in whichever pass adds the toolbar.
  */
-.wpg.pkgw-wpg .wpg-toolband,
-.wpg.qc-wpg .wpg-toolband { position: relative; z-index: 1; }
+.wpg.pkgw-wpg .wpg-toolband { position: relative; z-index: 1; }
 
 /**
  * ⚠️ THE PER-PAGE TYPE SCALE IS RETIRED WITH THE CARVE-OUT IT BELONGED TO. These two pages ran a

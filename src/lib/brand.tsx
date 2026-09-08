@@ -24,8 +24,18 @@ export const FONT_PACKAGES: FontPackage[] = [
     id: "editorial-classic",
     name: "Editorial Classic",
     displayFont: "Playfair Display",
-    bodyFont: "Source Sans Pro",
-    importUrl: "https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap"
+    /**
+     * ⚠️ SOURCE SANS 3 IS SOURCE SANS PRO, RENAMED AT ITS OWN VERSION 3 — and THIS is what decides
+     * the app's body face, not `--font-sans` (ref v16, Phase 4).
+     *
+     * The block below injects `font-family` on a blanket `p, span, div, button, …` selector, which
+     * beats inheritance from `html`, so the token was never what any of these elements rendered in.
+     * Changing `--font-sans` alone moved `body` and nothing inside it — the sort of half-change that
+     * measures as done and renders as nothing. Both name Source Sans 3 now, and every design ref in
+     * `design-refs/` declares `--sans:"Source Sans 3"`.
+     */
+    bodyFont: "Source Sans 3",
+    importUrl: "https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap"
   },
   {
     id: "contemporary-prose",
@@ -185,7 +195,7 @@ export const BrandProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     // 1. Dynamic Font Link Loading
     const headingFontName = customHeadingFont || FONT_PACKAGES.find(p => p.id === fontPackageId)?.displayFont || "Playfair Display";
-    const bodyFontName = customBodyFont || FONT_PACKAGES.find(p => p.id === fontPackageId)?.bodyFont || "Source Sans Pro";
+    const bodyFontName = customBodyFont || FONT_PACKAGES.find(p => p.id === fontPackageId)?.bodyFont || "Source Sans 3";
 
     const fetchFontsLink = () => {
       const activePkg = FONT_PACKAGES.find(p => p.id === fontPackageId);

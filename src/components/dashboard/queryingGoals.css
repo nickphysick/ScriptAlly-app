@@ -127,7 +127,8 @@
    figure over a label, which made the count the loudest thing in a strip whose subject is the
    SHAPE of four periods. */
 .os-goal-hb .os-goal-hlb {
-  font-family: "JetBrains Mono", monospace; font-size: 10.5px; letter-spacing: 0.06em;
+  /* ref `.wk .lb` — 9.5 at .02em */
+  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.02em;
   color: #9c8f82; margin-top: 6px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }

@@ -338,6 +338,9 @@
    flex row with 32px and its own bottom padding — which put the stats' left edge 66px out and the
    hero 27px short at every width. */
 .os-greet { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; padding: 10px 4px 6px; flex: none; }
+/* ref `.hero p{margin:6px 0 0;color:var(--ink2);font-size:17px}` — the one piece of address on the
+   page, and the only line in this header that is not derived from something. */
+.os-gsub { margin: 6px 0 0; color: #6b5d54; font-size: 17px; }
 /* ⚠️ THE GREETING SIZES TO ITS CONTENT so the card can have the rest. It was `flex: 1` in the
    pre-counters ref, which would split the row down the middle instead. */
 .os-greet .os-gl { flex: 0 0 auto; min-width: 0; }
@@ -734,9 +737,11 @@
   font-family: var(--font-serif); font-size: 34px; font-weight: 600; color: #2a1f18;
   line-height: 1;
 }
+/* ref `.stat .mini` — 13px on a 3/10 pad. It was 10px on 2/8, which put the one piece of context
+   the stat row carries a full quarter below the ref's size. */
 .os-cd {
-  font-size: 10px; border-radius: 99px; padding: 2px 8px; white-space: nowrap;
-  background: #e9ede6; border: 1px solid #d6ddd2; color: #3f5a3c;
+  font-size: 13px; border-radius: 99px; padding: 3px 10px; white-space: nowrap;
+  background: #e6ece3; border: 1px solid #d3dccf; color: #4f6a4c;
 }
 
 /* ⚠️ THESE MUST SIT AFTER THE BASE RULES ABOVE, not up in the page's responsive frame. The
@@ -914,17 +919,23 @@
 }
 .os-bub.in .os-bubin { border-top-left-radius: 4px; }
 .os-bub.out .os-bubin { border-top-right-radius: 4px; }
+/* ref `.cv .msg .b .slab` — mono 9.5 at .09em, `--ink2` at .75. It was 8px at .13em, a size the
+   ref's whole scale has no instance of; its floor is 9.5. */
 .os-bublab {
   display: flex; align-items: center; gap: 6px;
-  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: 0.13em;
-  text-transform: uppercase; color: #8a7a6c; margin-bottom: 3px;
+  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.09em;
+  text-transform: uppercase; color: #6b5d54; opacity: 0.75; margin-bottom: 4px;
 }
 /* ref `.cv .msg .b .s{font-size:15px;color:var(--ink);line-height:1.35}` — the sentence is the
    bubble's content and was set two and a half points below the ref's, at a muted ink. */
 .os-bubsay { font-size: 15px; color: #2a1f18; line-height: 1.35; }
+/* ⚠️ MONO — ref `.cv .msg .b .m{font-family:var(--mono);font-size:10px;letter-spacing:.08em;
+   text-transform:uppercase}`. The app's meta line was the body face at 10.5, so the one line on a
+   bubble that is a REFERENCE rather than prose read as more prose. */
 .os-bubmeta {
   display: flex; align-items: baseline; gap: 8px;
-  font-size: 10.5px; color: #9b8c7c; margin-top: 3px;
+  font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #9c8f82; margin-top: 5px;
 }
 .os-bubt { margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 9px; color: #bfb2a3; }
 /* ⚠️ ON HOVER, AND ON FOCUS-WITHIN — a control that only appears under a pointer is unreachable

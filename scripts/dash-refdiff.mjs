@@ -115,7 +115,11 @@ const TYPE_SCALE = [
   ["tab count",       ".ftabs .n",           ".os-ftabn"],
   ["ticket title",    ".tk .ttl",            ".tkt .ttl"],
   ["ticket tag",      ".tk .tag",            ".tkt .tag"],
-  ["ticket meta",     ".tk.snip .sub",       ".tkt .msc"],
+  /* ⚠️ NO ROW FOR THE TICKET'S SUB-LINE — the ref's shipping ticket does not have one. `snip:'a'`
+     makes `sub(t)` return an empty string, so its ticket is a tag and a deed and nothing else. A
+     row for a treatment the design does not have can never pass, and leaving it in as a permanent
+     "no element in the REF" is a miss that teaches the reader to skip the table. The app's own
+     sub-line is a CONTENT question and belongs to Phase 6, not to the type scale. */
   ["bubble sentence", ".cv .msg .b .s",      ".os-bubsay"],
   ["bubble meta",     ".cv .msg .b .m",      ".os-bubmeta"],
   ["bubble label",    ".cv .msg .b .slab",   ".os-bublab"],
