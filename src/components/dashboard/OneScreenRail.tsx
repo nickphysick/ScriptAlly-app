@@ -81,6 +81,26 @@ export interface FeedRow {
    */
   sentence: string;
   /**
+   * ⚠️ THE DESCRIPTIVE SENTENCE, IN SEGMENTS, AND `null` WHEN ONE CANNOT BE BUILT (v22, Phase 7).
+   *
+   * The ref's messages read "Ruth Alderman passed on <em>Murphy's Day Out</em> without requesting
+   * pages, 24 days after you queried" where ours read "Rejected by Joan Whitfield" — a fragment
+   * with the manuscript missing, the direction implicit and no elapsed time at all. At the indented
+   * width that was survivable; at full width it leaves two thirds of the line empty and still does
+   * not say what happened to which book.
+   *
+   * ⚠️ SEGMENTS RATHER THAN A STRING, BECAUSE THE TITLE IS ITALICISED. The ref emits `<em>`; doing
+   * the same here would mean `dangerouslySetInnerHTML` on a line built partly from stored data,
+   * which this repo permits in exactly one place and should not gain a second. A segment list is
+   * typed, cannot inject, and renders as nodes.
+   *
+   * ⚠️ AND IT IS `null` RATHER THAN A GUESS WHENEVER A PART IS MISSING. No resolvable agent, no
+   * manuscript, an event type with no template — any of those and the row keeps `sentence`, the
+   * log's own words. A composed sentence with a hole in it is the "You updated details for at
+   * Penhallow" fault wearing better clothes.
+   */
+  say: FeedSeg[] | null;
+  /**
    * ⚠️ THE SURNAME AND THE AGENCY TRAVEL SEPARATELY, BECAUSE ONLY ONE OF THEM MAY ELLIPSE.
    *
    * They were joined into one string here and the whole line truncated as a unit, so a long agency
@@ -210,6 +230,82 @@ export const feedLabel = (a: Pick<Activity, "activityType" | "resultingStatus">)
  * ("Added Sophie Dunn at Curtis Vane"). Using it entire is honest; picking a name out of it with
  * a regex would be the string-parsing this codebase forbids elsewhere.
  */
+/** One run of the descriptive sentence. `em` marks the manuscript title. */
+export type FeedSeg = { t: string; em?: boolean };
+
+/**
+ * ⚠️ EVERY CLAUSE HERE IS DERIVABLE FROM THE RECORD, AND THAT IS THE WHOLE CONSTRAINT.
+ *
+ * The ref's fixture writes clauses this app cannot support — "the first 50 pages", "after reading
+ * the partial", "the full 50,000-word manuscript". Those are facts about a specific submission that
+ * our log does not carry, and inventing them would be the copy fault this repo already records
+ * three times: a sentence that names a behaviour the data cannot back is disproved by the reader at
+ * a glance, and what they learn is that the app's prose cannot be trusted.
+ *
+ * So: the SUBJECT (who acted), the VERB (what the status says they did), the OBJECT (the
+ * manuscript, when it resolves), and ONE optional clause — how long after the query went out. That
+ * last is arithmetic on `dateSent`, so it is true whenever `dateSent` exists and is omitted
+ * whenever it does not.
+ *
+ * ⚠️ THE ANCHOR IS ALWAYS "you queried", NEVER THE MOST RECENT THING YOU DID. The ref varies it
+ * ("22 days after you sent the full manuscript"), which needs the query's whole history walked and
+ * is a different claim on every row. One anchor is one derivation, always available and never
+ * wrong; a varying anchor is four derivations and a chance to state the wrong one.
+ */
+export const describeEvent = (
+  status: QueryStatus | null,
+  who: string,
+  msTitle: string,
+  daysSinceSent: number | null,
+): FeedSeg[] | null => {
+  if (!status || !who) return null;
+  const book: FeedSeg[] = msTitle ? [{ t: " " }, { t: msTitle, em: true }] : [];
+  const to: FeedSeg[] = [{ t: ` to ${who}` }];
+  let head: FeedSeg[] | null = null;
+  switch (status) {
+    case QueryStatus.QUERIED:
+      head = msTitle ? [{ t: "You sent your query for" }, ...book, ...to] : [{ t: `You queried ${who}` }];
+      break;
+    case QueryStatus.PARTIAL_REQUESTED:
+      head = [{ t: `${who} asked to read part of` }, ...book];
+      break;
+    case QueryStatus.PARTIAL_SENT:
+      head = [{ t: "You sent the partial of" }, ...book, ...to];
+      break;
+    case QueryStatus.FULL_REQUESTED:
+      head = [{ t: `${who} asked for the full manuscript of` }, ...book];
+      break;
+    case QueryStatus.FULL_SENT:
+      head = [{ t: "You sent the full manuscript of" }, ...book, ...to];
+      break;
+    case QueryStatus.REVISE_RESUBMIT:
+      head = [{ t: `${who} invited a revise and resubmit on` }, ...book];
+      break;
+    case QueryStatus.OFFER:
+      head = [{ t: `${who} offered representation for` }, ...book];
+      break;
+    case QueryStatus.REJECTED:
+      head = [{ t: `${who} passed on` }, ...book];
+      break;
+    case QueryStatus.WITHDRAWN:
+      head = [{ t: "You withdrew your query for" }, ...book, { t: ` from ${who}` }];
+      break;
+    /* ⚠️ NOT "they ignored you". The status means the stated window passed with nothing recorded,
+       which is a fact about the RECORD and not about the agent — they may have replied somewhere
+       this app never saw. */
+    case QueryStatus.NO_RESPONSE:
+      head = [{ t: `No reply recorded from ${who} about` }, ...book];
+      break;
+    default:
+      return null;
+  }
+  /* the one derived clause, and only where the query has a send date to measure from */
+  if (daysSinceSent !== null && daysSinceSent >= 1 && status !== QueryStatus.QUERIED) {
+    head.push({ t: `, ${daysSinceSent} ${daysSinceSent === 1 ? "day" : "days"} after you queried` });
+  }
+  return head;
+};
+
 export const feedRows = (
   activities: Activity[],
   queries: Query[],
@@ -234,6 +330,8 @@ export const feedRows = (
 
     let who = "";
     let caption = "";
+    let say: FeedSeg[] | null = null;
+    let queryAgency = "";
     let scope: FeedRow["scope"] = "query";
     if (AGENT_TYPES.has(a.activityType)) {
       scope = "agent";
@@ -278,6 +376,22 @@ export const feedRows = (
       who = (agent?.name || agent?.agency || "").trim();
       const msTitle = manuscripts.find((m) => m.id === a.manuscriptId)?.title;
       caption = captionFor(who, agent?.agency, msTitle);
+      /* ⚠️ THE ELAPSED CLAUSE IS ARITHMETIC ON THE QUERY'S OWN `dateSent`, and it is `null` the
+         moment that date is absent or unparseable. A query with no send date is ordinary — an
+         import can carry one without it — and the sentence simply loses its last clause rather
+         than gaining a wrong number. */
+      /* ⚠️ THE AGENCY IS THE AGENT'S OWN FIELD. `metaAgency` below used to be
+         `caption.split(" · ")[1]`, and `captionFor(who, agency, msTitle)` puts the MANUSCRIPT in
+         that slot whenever an agency exists — so the line labelled "agency" throughout this file
+         has been rendering the book's title. It read plausibly while the surname sat beside it
+         ("Whitfield · The Smoke Test" looks like a person and their book) and became obvious the
+         moment the surname came off and the meta stood alone under a sentence that already names
+         the book. Splitting a display string to recover a field is the string-parsing this file
+         forbids two hundred lines up; the field was there all along. */
+      queryAgency = (agent?.agency ?? "").trim();
+      const sentAt = q?.dateSent ? new Date(q.dateSent).getTime() : NaN;
+      const days = Number.isFinite(sentAt) ? Math.round((t - sentAt) / 86400000) : null;
+      say = describeEvent(shape.status, who, (msTitle ?? "").trim(), days);
     }
     /* ⚠️ NEVER AN EM DASH WHERE A NAME BELONGS — an unresolvable subject drops the row */
     if (!who) continue;
@@ -290,7 +404,7 @@ export const feedRows = (
        reference back to a person already named in the sentence above it, so a full name would
        repeat that sentence's own subject two lines apart. */
     const surname = who.split(/\s+/).filter(Boolean).slice(-1)[0] ?? who;
-    const metaAgency = shape.kind === "housekeeping" ? "" : (caption.split(" · ")[1] ?? "");
+    const metaAgency = shape.kind === "housekeeping" ? "" : queryAgency;
 
     const d = new Date(t);
     rows.push({
@@ -301,6 +415,7 @@ export const feedRows = (
       time: d.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true }).replace(" ", "").toLowerCase(),
       who,
       sentence,
+      say,
       surname: shape.kind === "housekeeping" ? "" : surname,
       agency: metaAgency,
       caption,
@@ -438,6 +553,12 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
   const ms = activeManuscript ?? manuscripts[0] ?? null;
   const rows = useMemo(() => feedRows(activities, queries, agents, manuscripts, now), [activities, queries, agents, manuscripts, now]);
   const [tab, setTab] = useState<FeedTab>("all");
+  /* ⚠️ THE FILTER ROW IS COLLAPSED AT REST AND THE FUNNEL OPENS IT — ref `body.ah-quiet #afilter`
+     is `max-height:0;overflow:hidden`, with `.fopen` taking it to 60px. Four view tabs and their
+     counts were standing permanently between the panel's title and the first thing that happened,
+     on the one surface whose entire job is to be read top to bottom. They are a control, so they
+     wait behind a control. */
+  const [filtersOpen, setFiltersOpen] = useState(false);
   /* ⚠️ THE COUNTS SUM TO `all` BY CONSTRUCTION, because `feedTabOf` gives each row exactly one tab
      and `all` is the length rather than a fourth sum. A tab whose count is derived separately is
      how a summary comes to disagree with the list beneath it. */
@@ -467,6 +588,33 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
               the separating. The title sits left, as the ref has it. */}
           <OneScreenMark name="activity" />
           <h2 data-probe-text="panel-title">Activity</h2>
+          {/* ⚠️ THE COUNT IS THE FEED'S OWN, NOT THE FILTERED VIEW'S — ref `.sub2`, "14 events".
+              It sits beside the title while the tabs are collapsed, so the panel still says how
+              much there is to read without the row that lets you narrow it. */}
+          {rows.length > 0 && (
+            <span className="os-asub">{rows.length} {rows.length === 1 ? "event" : "events"}</span>
+          )}
+          <span className="os-asp" />
+          {rows.length > 0 && (
+            <button
+              type="button"
+              className={`os-funnel${filtersOpen ? " on" : ""}`}
+              aria-expanded={filtersOpen}
+              aria-controls="os-actv-filters"
+              title="Filter"
+              onClick={() => setFiltersOpen((v) => !v)}
+            >
+              <span className="sr-only">Filter the feed</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4z" /></svg>
+            </button>
+          )}
+          {/* ⚠️ THE CORNER EXPANDER IS STILL NOT BUILT, AND v22 DRAWING ONE DOES NOT CHANGE THAT.
+              Its handler in the ref is `body.classList.toggle('tall')` and its tooltip is "Give the
+              feed more room" — a control that makes the feed taller. This column is already the
+              full height of the grid (`height:0; min-height:100%`), so there is no room for it to
+              give: it would toggle a class, change nothing a reader can see, and read as a feature.
+              That is the same reasoning the v16 pass retired it on, and the layout has only made it
+              more true. Reported against the ref rather than quietly omitted. */}
           {/* ⚠️ THE EXPANDER IS RETIRED (ref v16, Phase 3), AND IT IS THE MOVE THAT RETIRED IT.
               It existed to give the feed the goals card's height; the goals card is the LEFT
               column's now, and Activity already occupies this column top to bottom. Expanding
@@ -478,8 +626,18 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
             these are a view selector, and the underline says which view you are in — the same
             grammar the app's other tab rows use. The active one underlines in burgundy, which is one
             of the four places this repo permits that colour. */}
+        {/* ⚠️ THE WRAPPER IS THE PROBE, NOT THE TABS — ref `#afilter`, whose measured height at rest
+            is ZERO while the `.ftabs` inside it is a full 37.9px. That is the design: a collapsed
+            row is present, sized, and clipped to nothing. The harness had to learn the same thing —
+            a probe with one zero dimension is visible for its purposes — because requiring both
+            reported the row as absent from a page that renders it correctly. */}
+        <div
+          className={`os-afilter${filtersOpen ? " open" : ""}`}
+          id="os-actv-filters"
+          data-probe="activity-filters"
+        >
         {rows.length > 0 && (
-          <div className="os-ftabs" data-probe="activity-tabs" role="group" aria-label="Filter the feed">
+          <div className="os-ftabs" role="group" aria-label="Filter the feed">
             {FEED_TABS.map((t) => (
               <button
                 key={t.key}
@@ -495,9 +653,13 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
             ))}
           </div>
         )}
+        </div>
         {/* ⚠️ THE SHARED FADE (polish P2) — conditional by construction, so a short feed shows
             none and the end of a long one is honestly the end. See the tasks card for the rule. */}
-        <EdgeFadeScroll fade="#fffdf9" outerClassName="os-abodywrap" scrollClassName="os-abody" scrollId="os-actv-body" scrollProbe="feed">
+        {/* ⚠️ THE FADE IS THE GROUND'S TOO — ref `body.ac-hair .feedwrap:after`. Same reason as the
+            day caption above it: with no card behind the panel, a `#fffdf9` fade paints a
+            card-shaped wash at the foot of a column that has no card. */}
+        <EdgeFadeScroll fade="#f4f0ea" outerClassName="os-abodywrap" scrollClassName="os-abody" scrollId="os-actv-body" scrollProbe="feed">
           {shownRows.length === 0 ? (
             <div className="os-aempty">
               <span className="os-aempty-thread" aria-hidden="true" />
@@ -517,15 +679,13 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                       — a legend for a thing the layout already says is the page explaining its own
                       picture. */}
                   <div className={`os-bub ${r.side}${r.kind === "housekeeping" ? " desk" : ""}${head ? "" : " run"}`}>
-                    {/* ⚠️ THE KNOT IS THE REAL `StatusDot`, HUNG OFF THE OUTER EDGE — and a
-                        HOUSEKEEPING bubble has none, because it has no query state to draw. That is
-                        not a style choice: the dot is the app's one drawing of a query status, and
-                        an event not tied to a query has no status to show. */}
-                    {r.kind === "query" && r.status && (
-                      <span className="os-knot" aria-hidden="true">
-                        <StatusDot status={r.status} overrideSize={13} decorative />
-                      </span>
-                    )}
+                    {/* ⚠️ THE KNOT IS GONE AND THE DOT MOVED INTO THE STRIP — ref `body.bw-full`
+                        hides `.knot` and puts `sd(x.k,14)` at the head of `.striph`. The knot hung
+                        off the bubble's outer edge, which only reads as an edge while the bubble is
+                        indented; at full width there is no margin for it to hang in, so it would
+                        have sat on top of the first word. The dot is still the app's one drawing of
+                        a query status, and a housekeeping bubble still has none — that law is
+                        unchanged, only its position. */}
                     {/* ⚠️ THE BODY IS PARCHMENT AND THE STATE COLOUR LIVES IN A STRIP ACROSS THE TOP
                         — ref `.b.v-strip`. The fill used to be the whole bubble, which made a feed
                         of eight events eight coloured rectangles and left the reader picking
@@ -537,7 +697,17 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                           body with the sentence. Measured before this: seven housekeeping bubbles
                           rendering an empty strip, which drew a hairline across a card that has
                           nothing above the line. */}
-                      {head && r.kind === "query" && (
+                      {/* ⚠️ EVERY QUERY BUBBLE KEEPS ITS STRIP, INCLUDING INSIDE A TIGHT RUN, AND
+                          THAT REVERSES A v16 DECISION ON THE REF'S AUTHORITY. A run used to drop
+                          its furniture and read as one burst, which worked because the run's SIDE
+                          said who it came from — the layout carried the direction and the members
+                          needed nothing of their own. Full-width messages give that up, so a run
+                          member with no strip has no direction, no state and no time: measured on
+                          the harness account, four consecutive sends to THREE DIFFERENT AGENTS
+                          rendered as one attributed burst and three anonymous lines. The ref draws
+                          a strip on every message for the same reason. `head` still governs the
+                          meta line and the tightened spacing, which is where the burst reads. */}
+                      {r.kind === "query" && (
                         <div
                           className="os-bubstrip"
                           /* ⚠️ THE ONLY PLACE STATE COLOUR APPEARS ON A BUBBLE, and it is
@@ -545,9 +715,23 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                              event (one the record cannot place) takes the strip's own default. */
                           style={r.state ? { background: STATE_TOKEN[r.state], borderBottomColor: STATE_ACCENT[r.state] } : undefined}
                         >
+                          {r.status && (
+                            <span className="os-bubsd" aria-hidden="true">
+                              <StatusDot status={r.status} overrideSize={14} decorative />
+                            </span>
+                          )}
                           <span className="os-bublab">
                             {r.pill || "On this query"}
                             {r.count > 1 && <span className="os-runx">×{r.count}</span>}
+                          </span>
+                          {/* ⚠️ THE TIME RIDES THE STRIP AND MIRRORS WITH IT — ref `.tm3` is
+                              `margin-left:auto`, and `.msg.out .striph` is `row-reverse` with the
+                              time's margin flipped. So the strip reads dot, label, time on an
+                              agent's event and time, label, dot on your own: direction is carried
+                              by the ORDER of the strip rather than by which side of the column the
+                              bubble sits on, which is what full-width messages give up. */}
+                          <span className="os-bubtm">
+                            {r.count > 1 && r.fromTime ? `${r.fromTime}–${r.time}` : r.time}
                           </span>
                         </div>
                       )}
@@ -561,20 +745,45 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                       {/* ⚠️ WHAT HAPPENED, NOT WHO — see `FeedRow.sentence`. A COLLAPSED run still
                           states its own count ("3 agents"), because a run's sentence is the thing
                           the fold exists to replace. */}
-                      <div className="os-bubsay">{runLines(r)?.line ?? r.sentence}</div>
+                      {/* ⚠️ THE COMPOSED SENTENCE WINS, THE LOG'S OWN WORDS ARE THE FALLBACK, AND A
+                          FOLDED RUN OVERRIDES BOTH. A run's line is the thing the fold exists to
+                          replace ("4 agents"), so it cannot be a sentence about one event. */}
+                      <div className="os-bubsay">
+                        {runLines(r)?.line
+                          ?? (r.say
+                            ? r.say.map((seg, i) => (seg.em
+                                ? <em key={i}>{seg.t}</em>
+                                : <React.Fragment key={i}>{seg.t}</React.Fragment>))
+                            : r.sentence)}
+                      </div>
                       {head && (
                         <div className="os-bubmeta">
                           {/* ⚠️ THE AGENCY IS THE ONLY PART THAT MAY ELLIPSE. The surname and the
                               time are what place the event; the agency is context, and it is the
                               one of the three that can be arbitrarily long. */}
+                          {/* ⚠️ THE AGENCY ALONE, AND THE SURNAME IS GONE FROM HERE — ref
+                              `body.bw-full .m .who2 b{display:none}`. It is not lost: the strip now
+                              carries the state and the time, and the sentence above names the
+                              person, so a surname on this line was the third statement of a subject
+                              already given twice within two lines. What the agency adds is the one
+                              thing neither of those says. */}
                           <span className="os-bubwho">
                             {r.kind === "housekeeping"
                               ? <i>Not tied to a query</i>
                               : runLines(r)?.caption
                                 ? <i>{runLines(r)!.caption}</i>
-                                : <><b>{r.surname}</b>{r.agency && <i>&nbsp;· {r.agency}</i>}</>}
+                                : r.agency
+                                  ? <i>{r.agency}</i>
+                                  : <b>{r.surname}</b>}
                           </span>
-                          <span className="os-bubt">{r.count > 1 && r.fromTime ? `${r.fromTime}–${r.time}` : r.time}</span>
+                          {/* ⚠️ ONLY WHERE THERE IS NO STRIP TO CARRY IT. The ref hides `.tm2`
+                              outright, because every one of its messages has a strip; ours does not
+                              — a housekeeping event has no query state, so it has no strip, and
+                              hiding the time here would leave it the one kind of event with no time
+                              on it at all. */}
+                          {r.kind === "housekeeping" && (
+                            <span className="os-bubt">{r.count > 1 && r.fromTime ? `${r.fromTime}–${r.time}` : r.time}</span>
+                          )}
                         </div>
                       )}
                       {/* ⚠️ OFFERED ONLY WHILE THE REQUEST IS STILL OPEN — read from the QUERY's

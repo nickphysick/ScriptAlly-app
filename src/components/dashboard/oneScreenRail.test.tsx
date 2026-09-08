@@ -247,8 +247,20 @@ describe("the sage band and the timeline (app-shell-v2)", () => {
       "os-who", "os-cap", "os-tm", "os-tlday", "os-tlln", "os-r1l"]) {
       expect(cssRuleCount(cssRules, `.${dead}`), `.${dead} survived the timeline`).toBe(0);
     }
-    const f = cssRules.slice(cssRules.indexOf(".os-afoot {"));
-    expect(f.slice(0, f.indexOf("}"))).toContain("justify-content: center");
+    /* ⚠️ THE FOOT IS `space-between` NOW, NOT CENTRED — ref `.foot`, the same element the to-do
+       card's foot is. Centred, at 7px, in a paler ink, it read as a watermark rather than as the
+       foot of a panel; it also stood 24.8px tall against the ref's 40.4, and the missing 15px went
+       to the feed above it. With one child, `space-between` puts it left, which is where the ref
+       puts it. */
+    /* ⚠️ ANCHORED AT A LINE START, because it was not. `indexOf(".os-afoot {")` also matches the
+       TAIL of `.os-actv .os-afoot {` — the hairline chrome's own override, which is declared first
+       — so the slice read a two-property block about padding and reported that the foot had lost
+       an alignment it declares perfectly well. Third time this pass that an unanchored selector in
+       a source lock has read the wrong rule; a selector is anchored or it matches every rule that
+       ends with it. */
+    const foot = /(?:^|\n)\.os-afoot\s*\{([^}]*)\}/m.exec(cssRules);
+    expect(foot, "the foot must have a base rule of its own").not.toBeNull();
+    expect(foot![1]).toContain("justify-content: space-between");
   });
 });
 
@@ -270,8 +282,17 @@ describe("the feed is a conversation", () => {
 
   /* ⚠️ NO HOUSEKEEPING BUBBLE CONTAINS A StatusDot — it has no query state to draw, which is a
      fact about the record rather than a style choice. Asserted at the guard that enforces it. */
-  it("⚠️ the knot is drawn only for a query bubble with a real status", () => {
-    expect(railSrc).toContain('r.kind === "query" && r.status && (');
+  /* ⚠️ RETARGETED: THE KNOT IS GONE AND ITS LAW MOVED INTO THE STRIP (v22, Phase 7). The dot used
+     to hang off the bubble's outer edge, which only reads as an edge while the bubble is indented;
+     full-width messages have no margin for it to hang in. The LAW is unchanged and is the half
+     worth keeping — a status dot is drawn only where there is a query status to draw, so a
+     housekeeping event never gets one. Only its position moved. */
+  it("⚠️ the status dot is drawn only where there is a query status, and now rides the strip", () => {
+    expect(railSrc).toContain('className="os-bubsd"');
+    expect(railSrc).toMatch(/os-bubstrip[\s\S]{0,600}os-bubsd/);
+    expect(railSrc).toMatch(/\{r\.status && \([\s\S]{0,200}os-bubsd/);
+    /* and the knot is not merely unrendered — its markup is gone */
+    expect(railSrc.replace(/\{\/\*[\s\S]*?\*\/\}/g, "")).not.toMatch(/["\s`]os-knot["\s`]/);
     /* and every fill comes from the v2 table, never a local hex */
     expect(railSrc).toContain("STATE_TOKEN[r.state]");
     for (const hex of ["#f7efe3", "#e0e5dd", "#f5e6df", "#d7e0e8"]) {
@@ -421,7 +442,12 @@ describe("§6 · the collapse mechanics in CSS", () => {
     const rail = readFileSync(resolve(__dirname, "./OneScreenRail.tsx"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
     expect(rail).not.toMatch(/["\s`]os-exp["\s`]/);
-    expect(rail).not.toContain("aria-expanded");
+    /* ⚠️ `aria-expanded` IS NO LONGER FORBIDDEN, AND FORBIDDING IT WAS ALWAYS A PROXY. The claim is
+       that the CORNER EXPANDER is retired — a control that made the feed taller. `aria-expanded` is
+       the correct attribute for any disclosure, and v22's quiet header has one: the funnel, which
+       opens the filter row. Keeping the ban would have meant either a funnel with no accessible
+       state or a lock that fails on a control it was never about. The three names below are the
+       expander itself and cannot be satisfied by anything else. */
     expect(rail).not.toContain("os-rail-expanded");
     expect(rail).not.toMatch(/["\s`]os-esc["\s`]/);
     expect(cssRuleCount(cssRules, ".os-rail-expanded .stowable")).toBe(0);

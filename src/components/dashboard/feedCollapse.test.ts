@@ -18,6 +18,9 @@ const row = (over: Partial<FeedRow> & Pick<FeedRow, "id">): FeedRow => ({
   time: "3:00pm",
   who: "Updated Sophie Dunn at Curtis Vane",
   caption: "",
+  /* a housekeeping row composes no descriptive sentence — see `describeEvent`, which returns null
+     for anything with no query status. These fixtures are all housekeeping. */
+  say: null,
   sentence: "Updated Sophie Dunn at Curtis Vane",
   surname: "",
   agency: "",

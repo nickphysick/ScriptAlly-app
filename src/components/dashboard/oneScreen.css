@@ -960,7 +960,15 @@
   position: sticky; top: 0; z-index: 2;
   text-align: center; padding: 7px 0 5px;
   font-family: "JetBrains Mono", monospace; font-size: 8.5px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: #bfb2a3; background: #fffdf9;
+  text-transform: uppercase; color: #bfb2a3;
+  /* ⚠️ THE PAGE GROUND, NOT THE CARD'S — ref `body.ac-hair .day{background:linear-gradient(
+     var(--ground) 70%,rgba(244,240,234,0))}`. This caption is sticky: it sits over the events
+     scrolling beneath it and has to hide them, so it paints. With the card gone there is nothing
+     behind it but the desk, and `#fffdf9` would have drawn a pale card-coloured tablet sliding
+     down a panel that no longer has a card. The gradient rather than a flat fill is what stops
+     its lower edge reading as a rule. `--ground` is #f4f0ea, which is also the value the ref-diff
+     harness checks the page against. */
+  background: linear-gradient(#f4f0ea 70%, rgba(244, 240, 234, 0));
 }
 
 /* ⚠️ ALIGNMENT CARRIES DIRECTION, AND THERE IS NO LEGEND FOR IT. `in` is the agent's and hugs the
@@ -1066,6 +1074,59 @@
   transition: opacity 0.14s ease;
 }
 .os-bub:hover .os-bubact, .os-bub:focus-within .os-bubact { opacity: 1; }
+
+/**
+ * ⚠️ FULL-WIDTH MESSAGES — ref `body.bw-full`, v22's shipping `bw:'full'`. Declared here, at the
+ * END of the bubble block, because every rule it overrides is above it and a media query is not
+ * the only thing that confers no specificity: two rules at 0-2-0 are settled by order.
+ *
+ * ⚠️ WHAT IS GIVEN UP, AND WHAT REPLACES IT. The old grammar carried direction in the LAYOUT — an
+ * agent's event hugged the left with 76px of air on its right, yours mirrored it, and the ragged
+ * side of the column told you who spoke without your reading a word. That is a real thing to lose
+ * and the ref loses it deliberately: in a 333px column, 76px of enforced margin is a quarter of the
+ * measure spent on a signal, and the sentences are long enough now to need every pixel of it.
+ * Direction moves INTO the strip instead, as the ORDER of its three parts — dot, label, time for an
+ * agent; time, label, dot for you. The mirror is the whole mechanism, so `row-reverse` on `.out`
+ * and the time's flipped margin belong together and neither works alone.
+ */
+.os-bub.in, .os-bub.out, .os-bub.desk { padding-left: 0; padding-right: 0; }
+.os-bubin { max-width: 100%; width: 100%; border-radius: 12px; }
+/* the tail's clipped corner went with the indent — a 3px corner on a full-width block reads as a
+   mistake rather than as a tail pointing at a speaker */
+.os-bub.in .os-bubin, .os-bub.out .os-bubin { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+.os-knot { display: none; }
+
+/* the strip carries the direction now: dot, label, time — mirrored for the writer's own events */
+.os-bubstrip { display: flex; align-items: center; gap: 8px; padding: 7px 12px 6px; }
+.os-bubsd { width: 14px; height: 14px; flex: none; line-height: 0; }
+.os-bubstrip .os-bublab { margin: 0; white-space: nowrap; font-size: 9px; letter-spacing: 0.1em; }
+.os-bubtm {
+  margin-left: auto; flex: none;
+  font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.05em; color: #9c8f82;
+}
+.os-bub.out .os-bubstrip { flex-direction: row-reverse; }
+.os-bub.out .os-bubtm { margin-left: 0; margin-right: auto; }
+
+.os-bubbody { padding: 10px 12px 11px; }
+/**
+ * ⚠️ THE BODY TEXT IS ALWAYS LEFT-ALIGNED, ON BOTH SIDES AND IN BOTH KINDS, AND THIS IS THE RULE
+ * THAT MATTERS MOST HERE. `.os-bub.out` used to set `text-align: right` on the sentence and a desk
+ * bubble centred it — three alignments in one column, so a reader's eye had to find the start of
+ * every line afresh. Right-aligned prose is hard to read at any length and these sentences are now
+ * long; centred prose is worse. Direction is the strip's job, and the strip does it without
+ * touching the words.
+ */
+.os-bub.out .os-bubsay, .os-bub.desk .os-bubsay { text-align: left; }
+.os-bub.out .os-bublab, .os-bub.desk .os-bublab-desk { text-align: left; justify-content: flex-start; }
+.os-bubsay { font-size: 15px; line-height: 1.4; }
+/* the manuscript's title, italic inside the sentence — ref `<em>` */
+.os-bubsay em { font-style: italic; }
+
+/* meta: one row, reading left to right, whichever side the event came from */
+.os-bub.out .os-bubmeta, .os-bub.desk .os-bubmeta { flex-direction: row; justify-content: flex-start; text-align: left; }
+.os-bub.out .os-bubwho { flex-direction: row; }
+.os-bub.out .os-bubwho i { direction: ltr; }
+
 @media (hover: none) { .os-bubact { opacity: 1; } }
 
 /* ══ §5 · THE TO-DO PANEL (dashboard redesign, Phase 5) ══════════════════════════════════════
@@ -1717,6 +1778,56 @@
   font-family: var(--font-serif); font-size: 23px; font-weight: 500; color: #2a1f18;
   margin: 0;
 }
+/**
+ * ⚠️ THE ACTIVITY PANEL IS NOT A CARD — ref `body.ac-hair #actCard`, which is v22's shipping
+ * chrome (`ac:'hair'`). It is a column of events beside two cards, and a card around it made the
+ * page read as three objects of equal weight when two of them are surfaces you act on and this one
+ * is a record you read. What separates it is a single hairline down its left edge and 26px of air.
+ *
+ * ⚠️ AND THE CONSEQUENCE IS THAT THE DAY CAPTIONS AND THE FADE TAKE THE PAGE GROUND, NOT THE
+ * CARD'S. Both are gradients that hide what scrolls under them, and both were mixed against
+ * `#fffdf9`; with no card behind them they would have painted a pale panel-shaped block on the
+ * desk. The ref moves them to `--ground` in the same rule set, which is why these three belong
+ * together and must not be separated: take the card away without them and the fix looks worse
+ * than the fault.
+ */
+.os-actv {
+  background: transparent; border: 0; box-shadow: none; border-radius: 0;
+  padding: 0 0 0 26px; border-left: 1px solid #e6dfd6;
+}
+/* ref `body.ac-hair #actCard .hd{padding-left:0;padding-right:44px}` — but the right side clears
+   the FUNNEL alone here, because the expander it also cleared is not built (see OneScreenRail). */
+.os-actv > .os-ahead { padding-left: 0; padding-right: 0; }
+/* ref `body.ac-hair #actCard .feed{padding-left:0;padding-right:8px}` */
+.os-actv .os-abody { padding-left: 0; padding-right: 8px; }
+/* ref `body.ac-hair #actCard .foot{padding-left:0;padding-right:0}` */
+.os-actv .os-afoot { padding-left: 0; padding-right: 0; }
+
+/* ⚠️ THE COUNT, THE SPACER AND THE FUNNEL — the quiet header's three additions (ref `.sub2`,
+   `.hd .sp`, `.funnel`). The funnel is the only control in this band and it is the reason the
+   filter row may be collapsed at all. */
+.os-asub {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #9c8f82; margin-left: 10px; flex: none; white-space: nowrap;
+}
+.os-asp { flex: 1; }
+.os-funnel {
+  width: 26px; height: 26px; display: grid; place-items: center; flex: none;
+  border: 0; background: transparent; color: #b3a596; cursor: pointer; padding: 0;
+}
+.os-funnel svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.os-funnel:hover, .os-funnel.on { color: #2a1f18; }
+
+/* ⚠️ COLLAPSED TO NOTHING, NOT `display:none` — ref `#afilter{max-height:0;overflow:hidden;
+   transition:max-height .2s ease}` with `.fopen` taking it to 60px. The row keeps its width and
+   its place in the column while it is shut, which is what lets it open without the feed jumping;
+   `display:none` would remove it from layout and hand the reader a shift instead of a reveal.
+   It is also why this element is a PROBE with a height of zero — see OneScreenRail. */
+.os-afilter { max-height: 0; overflow: hidden; transition: max-height 0.2s ease; padding: 0; }
+.os-afilter.open { max-height: 60px; padding-bottom: 8px; }
+/* ref `body.ah-quiet #afilter .ftabs{border-bottom:0;padding:0 2px}` + the hairline's 0/0 */
+.os-afilter .os-ftabs { border-bottom: 0; padding-left: 0; padding-right: 0; }
+
 .os-actv { position: relative; }
 .os-abodywrap { flex: 1; min-height: 0; }
 /* ⚠️ THE BOTTOM PADDING CLEARS THE FOOT (polish P7). `.os-afoot` (LAST 30 DAYS) sits over the end
@@ -1763,10 +1874,17 @@
 
 
 /* the foot caption is CENTRED on the card's own edge — it names the window, it is not a label */
-.os-afoot { flex: none; border-top: 1px solid #ece0d2; padding: 7px 16px; display: flex; align-items: center; justify-content: center; }
+/* ⚠️ THE REF'S `.foot`, WHICH IS THE SAME ELEMENT AS THE TO-DO CARD'S — one rule's worth of
+   metrics, shared: `space-between`, 12px of air, an 11px mono line at .1em. It was 7px, centred,
+   in a paler ink, which made it read as a watermark rather than as the foot of a panel; at 7px it
+   also stood 24.8px tall against the ref's 40.4, and the 15px went to the feed above it. */
+.os-afoot {
+  flex: none; border-top: 1px solid #eee8e0; padding: 12px 22px;
+  display: flex; align-items: center; justify-content: space-between;
+}
 .os-afoot .os-ac {
   font-family: "JetBrains Mono", monospace;
-  font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase; color: #c0b2a2; text-align: center;
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9c8f82;
 }
 
 /* ══ §6 · THE EXPAND — flex does the easing; the panel's own height is never animated ══ */

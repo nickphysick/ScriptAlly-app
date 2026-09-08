@@ -298,6 +298,17 @@ const NAV_MS = 120_000;
 /* SA_REFDIFF_DUMP=<probe> — print that probe's subtree from both sides; see readPage */
 const DUMP = process.env.SA_REFDIFF_DUMP || "";
 
+/**
+ * ⚠️ SA_REFDIFF_SHOT=<dir> — A PICTURE OF EACH SIDE, BECAUSE A WHOLE CLASS OF THIS PASS'S WORK IS
+ * INVISIBLE TO THE TABLE. Moving a status dot into a strip, mirroring that strip for the writer's
+ * own events, left-aligning prose that used to be right-aligned: every one of those leaves the
+ * feed's box exactly where it was, so the diff stays green whether they landed correctly, landed
+ * wrongly, or did not land. The probe set cannot be extended to cover it either — the claim is
+ * about arrangement inside a box rather than about a box. So the phase that changes those things
+ * looks at the two images.
+ */
+const SHOT = process.env.SA_REFDIFF_SHOT || "";
+
 async function readPage(page, url, { app } = {}) {
   page.setDefaultTimeout(NAV_MS);
   page.setDefaultNavigationTimeout(NAV_MS);
@@ -325,6 +336,36 @@ async function readPage(page, url, { app } = {}) {
    * The tell is cheap and total: the dashboard has sixteen probes, and the auth page has none of the
    * ones that matter. Fewer than twelve is not a page worth diffing.
    */
+  /**
+   * ⚠️ AND A SIGNED-IN PAGE WHOSE DATA HAS NOT ARRIVED MUST STOP THE RUN TOO — the same fault as
+   * the auth page, one step further in, and it gets past the check below because the probes are
+   * all THERE. Measured on this pass: a run under load reported 15 misses that read exactly like a
+   * regression — the plot "renders no visible element", the to-do rule likewise, nine type rows
+   * find no element, and one column's bottom is 1465px out. Every one of those is the dashboard
+   * correctly drawing its EMPTY state, because Firestore had not answered inside the 2.6s settle.
+   * The next run was 1 miss.
+   *
+   * The tell is that the empty states are structurally different elements, not missing ones: no
+   * series means no `plot`, no tasks means no `todo-rule`. So the guard waits for the chart's
+   * series specifically, rather than raising the blanket settle — a longer sleep costs every run
+   * and still races on a slow one, where waiting for the thing itself cannot.
+   */
+  if (app) {
+    const plotted = await page
+      .waitForSelector('[data-probe="plot"]', { timeout: NAV_MS, state: "attached" })
+      .then(() => true)
+      .catch(() => false);
+    if (!plotted) {
+      throw new Error(
+        "dash-refdiff: the app is signed in but the chart never drew a series — the account's data " +
+        "had not arrived. This is a LOAD RACE, not a layout regression: re-run before believing " +
+        "any miss from it. (If the harness account is genuinely empty, that is the thing to fix.)",
+      );
+    }
+    /* one frame past the arrival, so the rows it brought have laid out */
+    await page.waitForTimeout(400);
+  }
+
   if (app) {
     const n = Object.keys(data.probes).length;
     const authForm = await page.locator("#au-email, #au-pw").count();
@@ -345,6 +386,15 @@ async function readPage(page, url, { app } = {}) {
    * box so the two are comparable when the boxes sit at different page positions. Wrapping is what
    * it is usually for, so flex-wrap and the computed gap are printed even where they are default.
    */
+  if (SHOT) {
+    const probe = DUMP || "main";
+    const el = await page.locator(`[data-probe="${probe}"]`).first();
+    const file = `${SHOT}/${probe}-${app ? "app" : "ref"}-${page.viewportSize().width}.png`;
+    mkdirSync(SHOT, { recursive: true });
+    if (await el.count()) await el.screenshot({ path: file });
+    else await page.screenshot({ path: file });
+    console.log(`shot: ${file}`);
+  }
   if (DUMP) {
     const sub = await page.evaluate(
       (name) => {
