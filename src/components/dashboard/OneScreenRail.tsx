@@ -80,8 +80,16 @@ export interface FeedRow {
    * subject lookup above already exists for the cases that need a name.
    */
   sentence: string;
-  /** "Sen · Curtis Vane" — the ref's `.m` line, with the time appended by the render */
-  meta: string;
+  /**
+   * ⚠️ THE SURNAME AND THE AGENCY TRAVEL SEPARATELY, BECAUSE ONLY ONE OF THEM MAY ELLIPSE.
+   *
+   * They were joined into one string here and the whole line truncated as a unit, so a long agency
+   * took the surname and the time down with it — the two facts a reader needs to place the event
+   * lost to the one that is context. Ref `.m .who2`: the surname is `flex: none`, the agency is
+   * `flex: 0 1 auto` with `text-overflow: ellipsis`, and the time is `flex: none`.
+   */
+  surname: string;
+  agency: string;
   dotStatus: QueryStatus | null;
   /** What the event is ABOUT. The collapse law keys on it — query events never fold. */
   scope: "query" | "agent" | "manuscript";
@@ -282,7 +290,7 @@ export const feedRows = (
        reference back to a person already named in the sentence above it, so a full name would
        repeat that sentence's own subject two lines apart. */
     const surname = who.split(/\s+/).filter(Boolean).slice(-1)[0] ?? who;
-    const meta = shape.kind === "housekeeping" ? "" : captionFor(sentence, surname, caption.split(" · ")[1]);
+    const metaAgency = shape.kind === "housekeeping" ? "" : (caption.split(" · ")[1] ?? "");
 
     const d = new Date(t);
     rows.push({
@@ -293,7 +301,8 @@ export const feedRows = (
       time: d.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true }).replace(" ", "").toLowerCase(),
       who,
       sentence,
-      meta,
+      surname: shape.kind === "housekeeping" ? "" : surname,
+      agency: metaAgency,
       caption,
       dotStatus: a.resultingStatus ?? null,
       scope,
@@ -517,16 +526,35 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                         <StatusDot status={r.status} overrideSize={13} decorative />
                       </span>
                     )}
-                    <div
-                      className="os-bubin"
-                      /* ⚠️ THE FILL IS THE v2 STATE, THROUGH `STATE_TOKEN` — never a local table.
-                         A neutral query bubble and a housekeeping bubble both take none, and the
-                         stylesheet's default carries them. */
-                      style={r.state ? { background: STATE_TOKEN[r.state], borderColor: STATE_ACCENT[r.state] } : undefined}
-                    >
-                      {head && (
-                        <div className="os-bublab">
-                          {r.kind === "housekeeping" ? "Housekeeping" : (r.pill || "On this query")}
+                    {/* ⚠️ THE BODY IS PARCHMENT AND THE STATE COLOUR LIVES IN A STRIP ACROSS THE TOP
+                        — ref `.b.v-strip`. The fill used to be the whole bubble, which made a feed
+                        of eight events eight coloured rectangles and left the reader picking
+                        sentences out of four different papers. In a strip the colour labels the
+                        event and the words sit on the same ground as every other word on the page. */}
+                    <div className="os-bubin">
+                      {/* ⚠️ THE STRIP IS A QUERY BUBBLE'S ALONE — a housekeeping event has no query
+                          state to name, so it has no strip to name it in, and its label sits in the
+                          body with the sentence. Measured before this: seven housekeeping bubbles
+                          rendering an empty strip, which drew a hairline across a card that has
+                          nothing above the line. */}
+                      {head && r.kind === "query" && (
+                        <div
+                          className="os-bubstrip"
+                          /* ⚠️ THE ONLY PLACE STATE COLOUR APPEARS ON A BUBBLE, and it is
+                             `STATE_TOKEN`/`STATE_ACCENT` — never a local table. A neutral query
+                             event (one the record cannot place) takes the strip's own default. */
+                          style={r.state ? { background: STATE_TOKEN[r.state], borderBottomColor: STATE_ACCENT[r.state] } : undefined}
+                        >
+                          <span className="os-bublab">
+                            {r.pill || "On this query"}
+                            {r.count > 1 && <span className="os-runx">×{r.count}</span>}
+                          </span>
+                        </div>
+                      )}
+                      <div className="os-bubbody">
+                      {head && r.kind === "housekeeping" && (
+                        <div className="os-bublab os-bublab-desk">
+                          Housekeeping
                           {r.count > 1 && <span className="os-runx">×{r.count}</span>}
                         </div>
                       )}
@@ -536,9 +564,16 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                       <div className="os-bubsay">{runLines(r)?.line ?? r.sentence}</div>
                       {head && (
                         <div className="os-bubmeta">
-                          {r.kind === "housekeeping"
-                            ? "Not tied to a query"
-                            : (runLines(r)?.caption || r.meta || "")}
+                          {/* ⚠️ THE AGENCY IS THE ONLY PART THAT MAY ELLIPSE. The surname and the
+                              time are what place the event; the agency is context, and it is the
+                              one of the three that can be arbitrarily long. */}
+                          <span className="os-bubwho">
+                            {r.kind === "housekeeping"
+                              ? <i>Not tied to a query</i>
+                              : runLines(r)?.caption
+                                ? <i>{runLines(r)!.caption}</i>
+                                : <><b>{r.surname}</b>{r.agency && <i>&nbsp;· {r.agency}</i>}</>}
+                          </span>
                           <span className="os-bubt">{r.count > 1 && r.fromTime ? `${r.fromTime}–${r.time}` : r.time}</span>
                         </div>
                       )}
@@ -550,6 +585,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                           Mark sent
                         </button>
                       )}
+                      </div>
                     </div>
                   </div>
                 </React.Fragment>

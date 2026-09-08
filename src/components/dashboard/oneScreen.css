@@ -900,31 +900,70 @@
 .os-bub { display: flex; align-items: flex-start; gap: 7px; margin-bottom: 7px; position: relative; }
 .os-bub.in { padding-left: 26px; padding-right: 76px; }
 .os-bub.out { flex-direction: row-reverse; padding-right: 26px; padding-left: 76px; }
+/* ref's ≤1700 step — 22/44, and desk 26 */
+@media (max-width: 1699px) {
+  .os-bub.in { padding-left: 22px; padding-right: 44px; }
+  .os-bub.out { padding-right: 22px; padding-left: 44px; }
+  .os-bub.desk { padding-left: 26px; padding-right: 26px; }
+}
 /* ⚠️ HOUSEKEEPING IS CENTRED AND HAS NO SIDE — it is not a message between two parties, so it
    takes neither the knot nor a ragged edge. Ref `.cv .msg.desk{padding-left:38px;padding-right:38px}`
    with a white bubble. */
-.os-bub.desk { padding-left: 38px; padding-right: 38px; }
+/* ⚠️ HOUSEKEEPING IS CENTRED, WHITE AND STRIPLESS — ref `.cv .msg.desk`. It is not a message
+   between two parties, so it takes neither a side, a knot, nor a state strip; its meta says
+   "Not tied to a query" in place of a name. */
+.os-bub.desk { padding-left: 38px; padding-right: 38px; justify-content: center; }
 .os-bub.desk .os-knot { display: none; }
+.os-bub.desk .os-bubin { background: #ffffff; }
+/* ⚠️ THE WRITER'S SIDE MIRRORS EVERY LINE, NOT JUST THE BOX — ref `.cv .msg.out .b .slab, .s`
+   and its `row-reverse` meta. A right-hand bubble whose text still ran left read as an agent's
+   bubble that had drifted across the column. */
+.os-bub.out .os-bublab, .os-bub.out .os-bubsay { text-align: right; }
+.os-bub.out .os-bublab { justify-content: flex-end; }
+.os-bub.out .os-bubmeta { flex-direction: row-reverse; }
+.os-bub.out .os-bubwho { flex-direction: row-reverse; }
+/* the ellipsis has to bite on the agency's OTHER end once the run is reversed */
+.os-bub.out .os-bubwho i { direction: rtl; }
 /* a tight run: same side, same day — the furniture goes, the spacing closes up */
 .os-bub.run { margin-top: -4px; }
 /* ref `.cv .msg .knot{top:16px}` — the knot sits against the bubble's first line, not its top edge */
 .os-knot { flex: none; position: absolute; top: 16px; }
 .os-bub.in .os-knot { left: 0; }
 .os-bub.out .os-knot { right: 0; }
+/**
+ * ⚠️ THE BODY IS PARCHMENT AND CARRIES NO STATE COLOUR — ref `.cv .msg .b`, which is `#fffdf9`
+ * with a `--line` hairline for every bubble on the feed.
+ *
+ * The state fill used to be the whole bubble, so a feed of eight events was eight coloured
+ * rectangles and the reader picked sentences out of four different papers. It is a STRIP across
+ * the top now: the colour labels the event, and the words sit on the same ground as every other
+ * word on the page. `padding: 0` because the strip and the body carry their own.
+ */
 .os-bubin {
   min-width: 0; max-width: 84%;
-  border-radius: 12px; padding: 7px 10px 8px;
-  /* the DEFAULT is the housekeeping / neutral treatment: white, a neutral hairline, no state */
-  background: #ffffff; border: 1px solid #e4dcd0;
+  border-radius: 14px; padding: 0; overflow: hidden;
+  background: #fffdf9; border: 1px solid #e6dfd6;
 }
-.os-bub.in .os-bubin { border-top-left-radius: 4px; }
-.os-bub.out .os-bubin { border-top-right-radius: 4px; }
-/* ref `.cv .msg .b .slab` — mono 9.5 at .09em, `--ink2` at .75. It was 8px at .13em, a size the
-   ref's whole scale has no instance of; its floor is 9.5. */
+.os-bub.in .os-bubin { border-bottom-left-radius: 3px; }
+.os-bub.out .os-bubin { border-bottom-right-radius: 3px; }
+/* ⚠️ THE ONE PLACE STATE COLOUR APPEARS ON A BUBBLE — ref `.b.v-strip .striph`. The fill and the
+   1px bottom border are set inline from `STATE_TOKEN`/`STATE_ACCENT`; this rule owns the geometry
+   and the neutral default a housekeeping bubble takes. */
+.os-bubstrip {
+  padding: 6px 12px 5px;
+  border-bottom: 1px solid #e6dfd6;
+}
+.os-bubbody { padding: 9px 12px 10px; }
+/* housekeeping's label sits IN the body — it has no strip — so it needs the gap a strip's border
+   would otherwise have given it, and it centres with the rest of a desk bubble */
+.os-bublab-desk { margin-bottom: 4px; justify-content: center; color: #a29587; }
+.os-bub.desk .os-bubsay, .os-bub.desk .os-bubmeta { justify-content: center; text-align: center; }
+/* ref `.cv .msg .b .slab` — mono 9.5 at .09em, `--ink2` at .75. Inside the strip it takes no
+   bottom margin and no opacity: the strip's own colour is the separation. */
 .os-bublab {
   display: flex; align-items: center; gap: 6px;
   font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.09em;
-  text-transform: uppercase; color: #6b5d54; opacity: 0.75; margin-bottom: 4px;
+  text-transform: uppercase; color: #6b5d54; margin: 0;
 }
 /* ref `.cv .msg .b .s{font-size:15px;color:var(--ink);line-height:1.35}` — the sentence is the
    bubble's content and was set two and a half points below the ref's, at a muted ink. */
@@ -937,7 +976,13 @@
   font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.08em;
   text-transform: uppercase; color: #9c8f82; margin-top: 5px;
 }
-.os-bubt { margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 9px; color: #bfb2a3; }
+/* ⚠️ THE AGENCY IS THE ONLY PART THAT MAY ELLIPSE — ref `.m .who2`. The surname and the time are
+   what place the event; the agency is context, and it is the one of the three that can be
+   arbitrarily long. `min-width: 0` on the group is what lets the `<i>` shrink at all. */
+.os-bubwho { flex: 1; min-width: 0; display: flex; white-space: nowrap; overflow: hidden; }
+.os-bubwho b { font-weight: 400; flex: none; }
+.os-bubwho i { font-style: normal; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.os-bubt { flex: none; }
 /* ⚠️ ON HOVER, AND ON FOCUS-WITHIN — a control that only appears under a pointer is unreachable
    from a keyboard, which is the fault the tasks card's own end-cell already records. */
 .os-bubact {
@@ -1558,7 +1603,11 @@
    of the scroll region, so the final entry could never be read in full — it scrolled to its limit
    still under the foot. The padding is the foot's own height (7px + 7px + ~9px line + 1px rule),
    so the last row now scrolls clear of it rather than up to it. */
-.os-abody { padding: 0 14px calc(var(--os-afoot-h) + 10px); }
+/* ⚠️ NOTHING BLEEDS SIDEWAYS — ref `.feed{overflow-x:visible}` is wrong for a bubble whose
+   asymmetric padding puts its far edge near the column's; a horizontal scrollbar on a feed is a
+   layout fault wearing a control's clothes. The gate measures the bubbles' right edges against
+   this box's inner width. */
+.os-abody { padding: 0 14px calc(var(--os-afoot-h) + 10px); overflow-x: hidden; }
 .os-aempty { min-height: 120px; display: grid; place-items: center; padding: 16px; position: relative; }
 .os-aempty span { font-family: var(--font-serif); font-style: italic; font-size: 13px; color: #b3a596; text-align: center; }
 

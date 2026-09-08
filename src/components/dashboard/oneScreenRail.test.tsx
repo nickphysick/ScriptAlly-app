@@ -216,14 +216,33 @@ describe("the sage band and the timeline (app-shell-v2)", () => {
     expect(src).not.toContain("status={r.dotStatus}");
   });
 
-  /* ⚠️ RETARGETED: the parchment CARDLET is retired with the timeline. The bubble's DEFAULT is the
-     housekeeping treatment — white, a neutral hairline, no state — and a query bubble overrides it
-     with a v2 fill inline. So the sheet asserts the neutral default and the absence of the twelve
-     retired timeline classes; the fill is asserted where it comes from, in `feedConversation`. */
-  it("the bubble's default is the housekeeping treatment: white, hairline, no state", () => {
+  /**
+   * ⚠️ THE BODY CARRIES NO STATE COLOUR AT ALL NOW, AND THAT REVERSES THIS CASE'S PREMISE (ref v16,
+   * Phase 7). It used to assert a neutral DEFAULT that a query bubble overrode with a v2 fill; the
+   * fill was the whole bubble, so a feed of eight events was eight coloured rectangles and the
+   * reader picked sentences out of four different papers. The colour is a STRIP across the top now
+   * — one place, labelling the event — and the body is parchment for every bubble on the feed.
+   *
+   * ⚠️ SO THE CLAIM IS AN ABSENCE, WHICH IS THE HARDER HALF TO KEEP: the body must not gain a fill
+   * by any route, and housekeeping's white is the one documented override.
+   */
+  it("the bubble BODY carries no state colour; the strip is the only place it appears", () => {
     const block = cssRule(cssRules, ".os-bubin", "oneScreen.css");
-    expect(block).toContain("background: #ffffff");
+    expect(block).toContain("background: #fffdf9");   // ref `.cv .msg .b`
     expect(block).toContain("border: 1px solid");
+    /* the strip exists, and it is what the inline fill lands on */
+    const strip = cssRule(cssRules, ".os-bubstrip", "oneScreen.css");
+    expect(strip).toContain("border-bottom: 1px solid");
+    const rail = readFileSync(resolve(__dirname, "./OneScreenRail.tsx"), "utf8");
+    expect(rail).toContain("className=\"os-bubstrip\"");
+    expect(rail).toMatch(/os-bubstrip[\s\S]{0,400}background: STATE_TOKEN\[r\.state\]/);
+    /* ⚠️ AND THERE IS EXACTLY ONE STATE FILL IN THE RENDER, ON THE STRIP. A proximity window is
+       the wrong instrument here — the strip is a CHILD of the body, so "os-bubin near STATE_TOKEN"
+       is true of the correct structure. The claim is the count and the owner. */
+    expect(rail.match(/background: STATE_TOKEN\[r\.state\]/g) ?? []).toHaveLength(1);
+    const upto = rail.slice(rail.indexOf('className="os-bubin"'), rail.indexOf("background: STATE_TOKEN[r.state]"));
+    expect(upto, "the fill must sit on the strip, not on the body").toContain('className="os-bubstrip"');
+    expect(cssRule(cssRules, ".os-bub.desk .os-bubin", "oneScreen.css")).toContain("#ffffff");
     for (const dead of ["os-cardlet", "os-tlev", "os-tlthread", "os-tldot", "os-r1", "os-st",
       "os-who", "os-cap", "os-tm", "os-tlday", "os-tlln", "os-r1l"]) {
       expect(cssRuleCount(cssRules, `.${dead}`), `.${dead} survived the timeline`).toBe(0);
