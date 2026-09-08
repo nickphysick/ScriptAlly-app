@@ -138,7 +138,15 @@
   font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase;
   color: #9c8878;
 }
-.qcc-foot b { color: var(--ink, #1c130f); font-weight: 500; }
+/* ⚠️ `justify-content: space-between` HOLDS TWO CHILDREN APART AND PARKS ONE CHILD ON THE LEFT.
+   The count left the foot in §2, so Export CSV was its only remaining child and would have slid
+   to where the count used to be — a control moving because its NEIGHBOUR was deleted, which is
+   the kind of change nobody writes down and everybody notices. The brief says keep Export where
+   it is; this is what keeps it there. */
+.qcc-foot--export { justify-content: flex-end; }
+/* ⚠️ `.qcc-foot b` IS DELETED WITH THE COUNT IT BOLDED. Nothing in the foot renders a `<b>` any
+   more, and a rule whose only subject has gone is the selector-with-no-emitter fault this repo
+   sweeps for elsewhere. */
 .qcc-foot-lnk { font: inherit; color: #6a5a50; cursor: pointer; background: none; border: 0; padding: 0; }
 .qcc-foot-lnk:hover { color: var(--ink, #1c130f); }
 .qcc-foot-lnk[disabled] { opacity: 0.45; cursor: default; }

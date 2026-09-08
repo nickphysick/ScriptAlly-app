@@ -683,7 +683,7 @@ describe("v14 §2–§4 · one predicate, one history, one ground", () => {
 });
 
 /* ══ toolbar v2 · §3 — the list header ════════════════════════════════════════════════════════ */
-describe("§3 (mono, superseding v2's Playfair) · the header is a column name, and it drives THE sort", () => {
+describe("§3 (sand band, superseding the mono) · the header is separated by its GROUND, and it drives THE sort", () => {
   const list = readFileSync(join(process.cwd(), "src/components/queries/QueryListView.tsx"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
   const css = readFileSync(join(process.cwd(), "src/components/queries/queryListView.css"), "utf8")
@@ -695,20 +695,31 @@ describe("§3 (mono, superseding v2's Playfair) · the header is a column name, 
      this section withdraws — so they described a retired decision and are deleted rather than
      inverted. What survives is the LAW they were standing for: the header must not be set in the
      face the agent names beneath it use, whatever that face is. */
-  it("mono capitals on white — and NOT the serif the agent names use", () => {
-    expect(css).toMatch(/\.qlv-h \{[^}]*font-family: var\(--font-mono\)/);
-    expect(css).toMatch(/\.qlv-h \{[^}]*font-size: 9px/);
-    expect(css).toMatch(/\.qlv-h \{[^}]*letter-spacing: 0\.16em/);
-    expect(css).toMatch(/\.qlv-h \{[^}]*text-transform: uppercase/);
-    expect(css).toMatch(/\.qlv-h \{[^}]*color: #a08a78/);
-    /* the law, stated so it survives the next restyle: the header and the names below it are
-       never the same family. `.qlv-nm` is the agent name. */
-    expect(css, "the header took the agent names' serif again")
-      .not.toMatch(/\.qlv-h \{[^}]*font-family: var\(--font-serif\)/);
-    expect(css).toMatch(/\.qlv-head \{[^}]*border-bottom: 1px solid #ddd2c4/);
-    expect(css).toMatch(/\.qlv-head \{[^}]*background: #fff/);
-    expect(css).toMatch(/\.qlv-head \{[^}]*padding-top: 14px/);
-    expect(css).toMatch(/\.qlv-head \{[^}]*padding-bottom: 12px/);
+  /**
+   * ⚠️ THIS CASE HAS NOW BEEN WRITTEN THREE TIMES, AND THE REASON IS WORTH MORE THAN THE VALUES.
+   * v2 asserted Playfair; query-toolbar §3 replaced it with mono and asserted "NOT the serif the
+   * agent names use"; this replaces it with Playfair again. Neither reversal was a mistake — what
+   * changed underneath both is WHAT SEPARATES THE HEADER FROM THE ROWS. On a white header sharing
+   * the rows' ground, the typeface was the only separator available, and a serif label an inch
+   * above serif data cannot be read as a label. A sand band separates them by GROUND, which frees
+   * the type to be the page's own voice.
+   *
+   * So the durable claim is the SEPARATION, and it is asserted as the band — not as a typeface,
+   * which is the term that has flipped twice.
+   */
+  it("a sand band with its own rule — the header does not share the rows' ground", () => {
+    expect(css).toMatch(/\.qlv-head \{[^}]*background: var\(--state-queried, #f7efe3\)/);
+    expect(css).toMatch(/\.qlv-head \{[^}]*border-bottom: 1px solid #e4d9c9/);
+    /* the rows keep the card's own white — if they ever took the band's ground the separation
+       would be gone and this case would still pass on the header alone */
+    expect(css, "the rows took the header's ground").not.toMatch(/(?:^|\n)\s*\.qlv-row \{[^}]*background:/);
+  });
+
+  it("names in Playfair ink, orderless names muted — the ref's own four values", () => {
+    expect(css).toMatch(/\.qlv-h \{[^}]*font-family: var\(--font-serif\)/);
+    expect(css).toMatch(/\.qlv-h \{[^}]*font-size: 14px/);
+    expect(css).toMatch(/\.qlv-h \{[^}]*color: var\(--ink/);
+    expect(css).toMatch(/\.qlv-h--dead \{[^}]*color: #9c8878/);
   });
 
   /* ⚠️ THE ALIGNMENT LAW, AS SOURCE — the rendered proof is in the measurement, which is where a
@@ -747,7 +758,10 @@ describe("§3 (mono, superseding v2's Playfair) · the header is a column name, 
     expect(css).toMatch(/\.qlv-h--btn:hover \.qlv-caret \{[^}]*opacity: 0\.4/);
     expect(css).toMatch(/\.qlv-h--on \.qlv-caret \{[^}]*opacity: 1/);
     expect(list, "the caret went back to being conditionally mounted").not.toContain("{sortKey === c.sort && (");
-    expect(css).toMatch(/\.qlv-h--btn:hover \{[^}]*color: #3a1c14/);
+    /* ⚠️ AND NO COLOUR SHIFT ON HOVER — asserted as an ABSENCE, because the inherited rule would
+       now lighten an ink label. The caret is the whole affordance, which is all the ref draws. */
+    expect(css, "a hover colour came back, and from ink it can only lighten")
+      .not.toMatch(/(?:^|\n)\s*\.qlv-h--btn:hover \{/);
   });
 
   /* ⚠️ RIGHT-ALIGNMENT IS RETIRED BY §4.1, so that half is deleted rather than kept. The law that
@@ -756,7 +770,7 @@ describe("§3 (mono, superseding v2's Playfair) · the header is a column name, 
   it("What went, Since then and Actions name no order — inert, muted, unfocusable", () => {
     expect(list).toContain('<span key={i} className="qlv-h qlv-h--dead">{c.label}</span>');
     expect(css).toMatch(/\.qlv-h--dead \{[^}]*cursor: default/);
-    expect(css).toMatch(/\.qlv-h--dead \{[^}]*color: #c8b8a8/);
+    expect(css).toMatch(/\.qlv-h--dead \{[^}]*color: #9c8878/);
     /* §4.1 — the Actions column joins the other six rather than hanging off the right edge */
     expect(css).toMatch(/\.qlv-acts \{[^}]*justify-content: start/);
     expect(css, "Actions is right-aligned again").not.toMatch(/\.qlv-acts \{[^}]*justify-content: end/);
@@ -1056,5 +1070,91 @@ describe("§4 (quick actions) · no drawer, no desk, no selection — and one co
       .replace(/\/\*[\s\S]*?\*\//g, "");
     for (const own of ["rgba(124, 58, 42, 0.28)", "linear-gradient(135deg", "border-radius: 14px"])
       expect(css, `the quick actions restated the chassis (${own})`).not.toContain(own);
+  });
+});
+
+/* ══ Contact parity · §1/§2 — one header component, one count, one trial fewer ═════════════════ */
+describe("Contact parity · the Query Centre wears Contact list's header", () => {
+  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const agl = readFileSync(join(process.cwd(), "src/components/agents/AgentList.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const trial = readFileSync(join(process.cwd(), "src/components/shell/illustratedMasthead.css"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
+
+  /**
+   * ⚠️ THE BRIEF ASKED FOR AN EXTRACTION AND THERE WAS NOTHING TO EXTRACT. Both pages already
+   * mount the shared `PageHeader`; the header was never page-local. So "assert Contact list's
+   * rendered header is byte-identical before and after" is satisfied by Contact list not being
+   * touched at all — which this asserts positively rather than by silence.
+   */
+  it("both pages mount the SAME shared component, and Contact list is untouched", () => {
+    expect(page).toContain('import { PageHeader } from "./shell/PageHeader"');
+    expect(agl).toContain('import { PageHeader } from "../shell/PageHeader"');
+    for (const src of [page, agl]) expect(src).toContain('<PageHeader\n            variant="workspace"');
+    /* Contact list still passes exactly what it passed — a per-page header would show up here */
+    expect(agl).toContain('icon={rolodexIcon}');
+    expect(agl).toContain('title="Contact list"');
+  });
+
+  /**
+   * ⚠️ THE PICTURE IS `icon`, NOT `mark` AND NOT `illo`. The brief names the `IlloSlot`/`ArtSlot`
+   * primitive and an `art` prop; neither is the masthead's left-hand picture. `mark` does not
+   * render in the masthead at all, `illo` is the slot BETWEEN the text and the primary, and
+   * `ArtSlot`'s real prop is `src`. `icon` is what Contact list passes, so `icon` is what parity
+   * means — same prop, same `.wsh-icon`, same box.
+   */
+  it("the masthead picture is the icon prop, drawn as a plain img with no placeholder chrome", () => {
+    expect(page).toContain("icon={qcMastheadIcon}");
+    expect(page).toContain('import qcMastheadIcon from "../assets/queries/query-centre-masthead.png"');
+    /* the header must NOT reach for the placeholder primitive here — that draws hatching and a
+       mono caption, which is the chrome this asset exists to retire */
+    /* ⚠️ THE END ANCHOR IS THE ELEMENT'S OWN CLOSE, and `sliceBetween` REFUSED my first one —
+       `scrollLabel=` does not appear after this point in the file, and rather than widening the
+       slice silently to the rest of the source it named the missing anchor. That is the whole
+       reason the helper exists. */
+    const mast = sliceBetween(page, "masthead={", "description=\"Every query");
+    for (const w of ["ArtSlot", "IlloSlot", "illo="])
+      expect(mast, `the masthead reached for ${w} instead of the icon prop`).not.toContain(w);
+    /* `PageHeader` renders it `alt=""` — the title beside it already names the page */
+    const ph = readFileSync(join(process.cwd(), "src/components/shell/PageHeader.tsx"), "utf8");
+    expect(ph).toContain('<img className="wsh-icon" src={icon} alt="" />');
+  });
+
+  /**
+   * ⚠️ THE HERO BAND WAS A TWO-PAGE TRIAL, and this removes ONE page from it. The file's own
+   * header says deleting it reverts BOTH pages — so the hazard here is the removal that takes out
+   * a rule serving two. Verified in both directions against the post-edit file: no live Query
+   * Centre selector survives, and all five Packages rules do.
+   */
+  it("Query Centre left the illustrated-masthead trial; Packages is entirely intact", () => {
+    expect(trial, "a live qc-wpg selector survived the removal").not.toContain("qc-wpg");
+    for (const sel of [
+      ".wpg.pkgw-wpg {",
+      ".wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome::after {",
+      ".wpg.pkgw-wpg .wsh {",
+      ".wpg.pkgw-wpg .wpg-toolband {",
+    ]) expect(trial, `Packages lost ${sel}`).toContain(sel);
+    expect(trial).toContain("--illo-art: url(../../assets/packages/packages.webp)");
+    /* and the page no longer claims a wash it does not have */
+    expect(page, "the masthead still refuses a picture on the band's behalf").not.toContain("NO MARK");
+  });
+
+  /**
+   * ⚠️ ONE COUNT, AND IT IS THE SHARED `PageTally`. The figure was in the footer and is now in the
+   * control row — moved, not copied, which is the difference between one fact and two that will
+   * eventually disagree.
+   */
+  it("N of M is stated once, by the shared tally, from this page's own two figures", () => {
+    expect(page).toContain("<PageTally value={`${gridRows.length} of ${mastheadScopedQueries.length}`} />");
+    expect((page.match(/<PageTally/g) ?? []).length).toBe(1);
+    expect(page, "the footer still states the count").not.toContain("Showing <b>{gridRows.length}</b>");
+    /* Export CSV stays in the foot, and the foot holds it to the right now that it is alone */
+    expect(page).toContain("Export CSV");
+    expect(page).toContain('className="qcc-foot qcc-foot--export"');
+    const css = readFileSync(join(process.cwd(), "src/components/queries/queryCentreGrid.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).toMatch(/\.qcc-foot--export \{[^}]*justify-content: flex-end/);
+    expect(css, "the count's bold rule outlived the count").not.toMatch(/\.qcc-foot b\s*\{/);
   });
 });

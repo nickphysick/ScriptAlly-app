@@ -29,11 +29,17 @@
   padding-left: 26px; padding-right: 18px;
   align-items: center; border-bottom: 0.5px solid #ece0d2;
 }
-/* ⚠️ MONO CAPITALS ON WHITE — and the Playfair it replaces was withdrawn for a reason worth
-   keeping: set in the page's own serif, the header competed with the Playfair agent NAMES
-   directly beneath it, so the eye could not tell the label from the data. Mono at 9px is
-   unmistakably a column name and cannot be mistaken for a row. (§3, superseding v2's Playfair.) */
-.qlv-head { padding-top: 14px; padding-bottom: 12px; background: #fff; border-bottom: 1px solid #ddd2c4; }
+/* ⚠️ A SAND BAND, AND PLAYFAIR IS BACK — which reverses this file's own previous note, so here is
+   why both were right in turn. Mono capitals were correct on WHITE: with the header and the rows
+   on one ground, the only thing that could separate a column name from an agent name was the
+   typeface, and a serif label an inch above serif data is unreadable as a label. The band does
+   that job now. Once the header has a ground of its own, the type is free to be the page's own
+   voice again — and Playfair beside Playfair reads as one table rather than as a schema bolted to
+   a list. (Contact parity §3, superseding query-toolbar §3's mono.) */
+.qlv-head {
+  padding-top: 14px; padding-bottom: 12px;
+  background: var(--state-queried, #f7efe3); border-bottom: 1px solid #e4d9c9;
+}
 .qlv-row { padding-top: 13px; padding-bottom: 13px; cursor: pointer; text-align: left; position: relative; }
 .qlv-row:last-child { border-bottom: none; }
 .qlv-row:hover { background: #fffdf9; }
@@ -41,11 +47,15 @@
 .qlv-row--on { box-shadow: inset 0 0 0 1.5px #e8c8bc; }
 
 .qlv-h {
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
-  color: #a08a78; display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-serif); font-size: 14px; letter-spacing: 0; text-transform: none;
+  color: var(--ink, #1c130f); display: flex; align-items: center; gap: 6px;
 }
 .qlv-h--btn { background: none; border: none; padding: 0; cursor: pointer; text-align: left; font: inherit; color: inherit; }
-.qlv-h--btn:hover { color: #3a1c14; }
+/* ⚠️ NO COLOUR SHIFT ON HOVER, AND THAT IS A CONSEQUENCE OF THE TYPE CHANGE RATHER THAN AN
+   OMISSION. The mono header rested at #a08a78 and darkened to #3a1c14 under the pointer; resting
+   at INK there is nothing darker to go to, and the inherited rule would have LIGHTENED the label
+   — feedback pointing the wrong way. The caret's 0 → .4 is the hover affordance now, which is the
+   only one the ref draws. */
 .qlv-h--on { color: var(--ink, #1c130f); }
 /* ⚠️ THE CARET IS ALWAYS RENDERED AND ALWAYS OPACITY-STEPPED — never conditionally mounted.
    A caret that only exists on the sorted column cannot fade in at 40% under the pointer, so the
@@ -58,7 +68,7 @@
 /* ⚠️ NOT A CONTROL, AND NOT FOCUSABLE. What went, Since then and Actions state no order of their
    own, so they render as spans — a disabled button would still be a button in the tab order's
    eyes on some engines, and a control that cannot do anything is worse than a label. */
-.qlv-h--dead { color: #c8b8a8; cursor: default; }
+.qlv-h--dead { color: #9c8878; cursor: default; }
 
 /* the status pill takes the row's own state fill — the one place colour appears in a list row */
 /* ⚠️ THE ROW'S COLOUR IS THE BAR, NOT A PILL (v14 §2). One device per fact: the bar states the
