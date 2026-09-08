@@ -2,7 +2,7 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<title>ScriptAlly · Dashboard — design ref v14</title>
+<title>ScriptAlly · Dashboard — design ref v16</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -23,7 +23,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
 
 /* Card chrome (current style) */
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 1px 2px rgba(42,31,24,.03),0 8px 24px rgba(42,31,24,.04);overflow:hidden}
-.hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid rgba(0,0,0,.05)}
+.hd{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;padding:14px 20px;border-bottom:1px solid rgba(0,0,0,.05)}
 .hd.sage{background:linear-gradient(var(--sage-h),var(--sage-h2))}
 .hd.pink{background:linear-gradient(var(--pink-h),var(--pink-h2))}
 .hd.sand{background:linear-gradient(#f5ecdd,#f1e6d4)}
@@ -71,7 +71,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
 .statblk .s{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:#4f6a4c;text-transform:uppercase;margin-top:3px}
 .callout{font-family:var(--serif);font-weight:600;font-size:34px;fill:#2a1f18}
 .calloutS{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.1em;fill:#a29587}
-.chart{position:relative;padding:14px 20px 6px}
+.chart{position:relative;padding:10px 22px 4px}
 .chart>svg{width:100%;height:330px;display:block;overflow:visible}
 .axis{font-family:var(--mono);font-size:11px;letter-spacing:.08em;fill:var(--mono-c)}
 .axis.end{fill:#7a4a3a;font-weight:500}
@@ -90,7 +90,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
 .tt .r.zero{color:#bdb2a6}
 .tt .r b{margin-left:auto;font-family:var(--serif);font-weight:500;font-size:15px}
 .tt .r:last-child{padding-bottom:12px}
-.legend{display:flex;gap:20px;padding:4px 20px 14px;font-size:14px;color:var(--ink2)}
+.legend{display:flex;gap:22px;flex-wrap:nowrap;white-space:nowrap;padding:6px 22px 14px;font-size:14px;color:var(--ink2)}
 .legend span{display:flex;align-items:center;gap:7px}.legend i{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.07)}
 .legend .gh{width:18px;height:0;border:0;border-top:1.5px dashed #b8ada2;border-radius:0}
 
@@ -132,7 +132,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
 .wk div{text-align:center}.wk .bar{height:32px;display:flex;align-items:flex-end;justify-content:center}
 .wk .bar i{display:block;width:26px;border-radius:4px 4px 2px 2px;background:var(--sage-a)}
 .wk .bar i.z{height:2px;background:#e3dcd3}
-.wk .lb{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--mono-c);margin-top:6px}
+.wk .lb{font-family:var(--mono);font-size:9.5px;letter-spacing:.02em;color:var(--mono-c);margin-top:6px;white-space:nowrap}
 .goal .try{margin-top:12px;font-size:13px;color:var(--ink3)}
 .goal .try button{font:inherit;font-size:13px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 10px;cursor:pointer;color:var(--ink2);margin-left:6px}
 
@@ -254,7 +254,7 @@ body.tall .goalslim{display:none}
 .tile2 b{font-family:var(--serif);font-weight:600;font-size:17px;color:var(--ink)}
 .tile2 i{width:9px;height:9px;border-radius:50%;display:inline-block}
 .tile2.on{background:var(--ink);color:#fff;border-color:var(--ink)}.tile2.on b{color:#fff}
-.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px 18px}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(288px,1fr));gap:12px;padding:0 20px 18px}
 .tgrid.one{grid-template-columns:1fr}
 .tk{position:relative;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px 14px 10px 18px;overflow:hidden;cursor:pointer;transition:box-shadow .15s}
 .tk:hover{box-shadow:0 6px 18px rgba(42,31,24,.07)}
@@ -336,7 +336,7 @@ body.tall .goalslim{display:none}
 
 
 /* compact tickets */
-.tgrid.c3{grid-template-columns:1fr 1fr 1fr}
+
 .tk.snip{padding:11px 14px 12px 18px}
 .tk.snip .ttl{font-size:14.5px;margin-top:7px}
 .tk.snip .sub{display:flex;align-items:center;gap:8px;margin-top:8px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--mono-c);text-transform:uppercase}
@@ -369,15 +369,24 @@ body.tall .goalslim{display:none}
 .page{max-width:2440px}
 body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{display:none!important}
 .ctlbtn{position:fixed;left:14px;bottom:14px;z-index:500;border:1px solid var(--line);background:#fff;border-radius:99px;padding:8px 14px;font:inherit;font-size:13px;color:var(--ink2);cursor:pointer;box-shadow:0 4px 14px rgba(42,31,24,.08)}
-.shell{display:grid;grid-template-columns:214px 1fr;gap:0}
+.shell{display:grid;grid-template-columns:214px minmax(0,1fr);gap:0}
 .navslot{border-right:1px solid var(--line);min-height:100%;padding:22px 16px;color:#c8bfb4;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase}
 .navslot .brand{font-family:var(--serif);font-size:22px;color:var(--ink);letter-spacing:0;text-transform:none;margin-bottom:26px}
 .navslot div{margin:12px 0}
-.main{padding:0 0 0 30px}
-@media (max-width:1700px){.hero{grid-template-columns:1fr!important;gap:14px!important}.stats{justify-content:flex-start!important}.grid3{grid-template-columns:340px 1fr 360px!important}.page{padding-left:24px!important;padding-right:24px!important}.brush .bw{width:170px!important}.main{padding-left:22px!important}.tgrid.c3{grid-template-columns:1fr 1fr!important}.stats{gap:36px!important}.stat .ill{width:96px!important;height:96px!important}}
-.grid3{display:grid;grid-template-columns:440px 1fr 420px;gap:22px;align-items:stretch;min-height:calc(100vh - 176px)}
-.col.mid > .wrapc{flex:0 1 auto;display:flex;flex-direction:column;min-height:0;max-height:560px}
-.col.mid > .wrapc > #chartCard{flex:1;display:flex;flex-direction:column;min-height:340px}
+.main{padding:0 0 0 30px;min-width:0}
+@media (max-width:1700px){.hero{grid-template-columns:1fr!important;gap:14px!important}.stats{justify-content:flex-start!important}.grid3{grid-template-columns:300px minmax(0,1fr) 340px!important}
+ #chartCard .hd{flex-wrap:wrap!important;row-gap:10px}
+ #chartCard .hd .sp{display:none}
+ #chartCard .hd #hdB{flex:1 0 100%}
+ #chartCard .hd .rc{flex:1 0 100%;justify-content:flex-start}
+ .legend{flex-wrap:wrap!important;white-space:normal!important;row-gap:6px;gap:14px!important}
+ .tgrid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))!important}
+ .cv .msg.in{padding-left:22px!important;padding-right:44px!important}
+ .cv .msg.out{padding-right:22px!important;padding-left:44px!important}
+ .cv .msg.desk{padding-left:26px!important;padding-right:26px!important}.page{padding-left:24px!important;padding-right:24px!important}.brush .bw{width:150px!important}.main{padding-left:22px!important}.stats{gap:30px!important}.stat .ill{width:96px!important;height:96px!important}}
+.grid3{display:grid;grid-template-columns:352px 1fr 420px;gap:22px;align-items:stretch;min-height:calc(100vh - 176px)}
+.col.mid > .wrapc{flex:0 0 auto;display:flex;flex-direction:column}
+.col.mid > .wrapc > #chartCard{height:clamp(400px,42vh,560px);display:flex;flex-direction:column}
 .col.mid > .wrapt{flex:1;display:flex;flex-direction:column;min-height:0}
 .col.mid > .wrapt > #todoCard{flex:1;display:flex;flex-direction:column;min-height:0}
 .col.mid > .wrapt > #todoCard #tbody{flex:1;min-height:0;overflow:auto}
@@ -387,13 +396,14 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 .com{max-height:none}
 #chartCard .chart{flex:1;display:flex;flex-direction:column;min-height:0}
 #chartCard .chart > svg{flex:1;height:auto;min-height:0}
-.grid3 > .col{display:flex;flex-direction:column;gap:22px;min-height:0}
+.grid3 > .col{display:flex;flex-direction:column;gap:22px;min-height:0;min-width:0}
 /* the centre column sets the row height; the sides contribute nothing and stretch to match */
 .grid3 > .col.side{height:0;min-height:100%;overflow:hidden}
 .grid3 > .col > .card{min-height:0}
 .com{flex:1;display:flex;flex-direction:column}
 .com .body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
 #actCard{flex:1;display:flex;flex-direction:column;min-height:0}
+.col.side:last-child{gap:0}
 #actCard .feedwrap{flex:1;min-height:0;display:flex}
 #actCard .feed{flex:1;height:auto!important;min-height:0}
 /* manuscript */
@@ -443,6 +453,32 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 
 
 
+
+/* ---- bubble colour treatments ---- */
+.cv .msg .b.v-plain{background:#fffdf9;border-color:var(--line)}
+/* header strip */
+.cv .msg .b.v-strip{padding:0;overflow:hidden}
+.cv .msg .b.v-strip .striph{padding:6px 12px 5px;background:var(--f);border-bottom:1px solid var(--a)}
+.cv .msg .b.v-strip .striph .slab{margin:0;opacity:1}
+.cv .msg .b.v-strip .sbody{padding:9px 12px 10px}
+/* chip */
+.cv .msg .b.v-chip .slab{display:inline-block;background:var(--f);border:1px solid var(--a);border-radius:99px;padding:2px 9px;margin-bottom:7px}
+/* outer edge */
+.cv .msg .b.v-edge{position:relative;padding-left:16px}
+.cv .msg.out .cv .msg .b.v-edge{padding-left:12px;padding-right:16px}
+.cv .msg .b.v-edge:before{content:"";position:absolute;top:8px;bottom:8px;left:6px;width:4px;border-radius:2px;background:var(--a)}
+.cv .msg.out .cv .msg .b.v-edge:before{left:auto;right:6px}
+/* underline under the label */
+.cv .msg .b.v-rule .slab{padding-bottom:6px;border-bottom:2px solid var(--a);display:block}
+.cv .msg.out .cv .msg .b.v-rule .slab{border-bottom-color:var(--a)}
+/* wash */
+.cv .msg .b.v-wash{background:var(--w);border-color:var(--wb)}
+/* border only */
+.cv .msg .b.v-border{background:#fffdf9;border-width:1.5px;border-color:var(--a)}
+/* dot only — colour lives in the StatusDot */
+.cv .msg .b.v-dot{background:#fffdf9;border-color:var(--line)}
+.cv .msg .b.v-dot .slab{color:var(--ink3)}
+
 /* ---- conversation: unmistakable sides ---- */
 .cv .msg.in{padding-left:26px;padding-right:76px}
 .cv .msg.out{justify-content:flex-end;padding-right:26px;padding-left:76px}
@@ -455,17 +491,23 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 
 
 
-.cv .msg .b .m{display:flex;gap:8px}
+.cv .msg .b .m{display:flex;gap:8px;align-items:baseline}
+.cv .msg .b .m .who2{flex:1;min-width:0;display:flex;gap:0;white-space:nowrap;overflow:hidden}
+.cv .msg .b .m .who2 b{font-weight:400;flex:none}
+.cv .msg .b .m .who2 i{font-style:normal;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.cv .msg .b .m .tm2{flex:none}
 .cv .msg.out .b .m{justify-content:flex-end}
-.cv .msg.out .b .m span{margin-left:0!important}
+.cv .msg.out .b .m{flex-direction:row-reverse}
+.cv .msg.out .b .m .who2{flex-direction:row-reverse}
+.cv .msg.out .b .m .who2 i{direction:rtl}
 .cv .msg.out .b .slab,.cv .msg.out .b .s{text-align:right}
 /* expander pinned to the card corner */
 #actCard{position:relative}
 #actCard .expander{position:absolute;top:14px;right:16px;z-index:6}
 #actCard .hd{padding-right:60px}
 /* left column closes at the same line */
-.col.side:first-child > .card:last-child{flex:1;display:flex;flex-direction:column}
-.col.side:first-child > .card:last-child .body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.col.side:first-child > .com{flex:1;display:flex;flex-direction:column}
+.col.side:first-child > .com .body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
 
 /* ===== ACTIVITY FILTER VARIANTS ===== */
 /* A · underlined tabs */
@@ -523,11 +565,11 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 
 .cv .day{position:sticky;top:0;z-index:2;text-align:center;padding:12px 0 8px;background:linear-gradient(var(--card) 65%,rgba(253,251,247,0))}
 .cv .msg{position:relative;display:flex;margin:0 0 9px;z-index:1}
-.cv .msg .b{max-width:100%;min-width:0;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px 12px;cursor:pointer;transition:box-shadow .15s,transform .15s}
+.cv .msg .b{max-width:100%;min-width:0;background:#fffdf9;border:1px solid var(--line);border-radius:12px;padding:9px 12px;cursor:pointer;transition:box-shadow .15s,transform .15s}
 .cv .msg .b:hover{box-shadow:0 4px 14px rgba(42,31,24,.06);transform:translateY(-1px)}
 
-.cv .msg.out .b{background:#fdf2ec;border-color:#eed9cd;border-bottom-right-radius:4px}
-.cv .msg.in .b{background:#f1f5ef;border-color:#d9e2d6;border-bottom-left-radius:4px}
+.cv .msg.out .b{border-bottom-right-radius:4px}
+.cv .msg.in .b{border-bottom-left-radius:4px}
 .cv .msg .b .s{font-size:15px;color:var(--ink);line-height:1.35}
 .cv .msg .b .m{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mono-c);margin-top:5px;display:flex;gap:8px;align-items:center}
 .cv .msg .knot{position:absolute;top:13px;background:var(--card);border-radius:50%;padding:2px;z-index:3;line-height:0}
@@ -602,7 +644,7 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 .wkc.x .chev{transform:rotate(90deg)}
 
 /* ACTIVITY (v2 grouped) */
-.feed{position:relative;height:600px;overflow-y:auto;overflow-x:visible;padding:0 18px 40px;scrollbar-width:thin;scrollbar-color:#ddd3c8 transparent}
+.feed{position:relative;height:600px;overflow-y:auto;overflow-x:hidden;padding:0 18px 40px;scrollbar-width:thin;scrollbar-color:#ddd3c8 transparent}
 .feedwrap{position:relative}
 .feedwrap:after{content:"";position:absolute;left:0;right:0;bottom:0;height:60px;background:linear-gradient(rgba(253,251,247,0),var(--card));pointer-events:none}
 .day{position:sticky;top:0;z-index:1;background:linear-gradient(var(--card) 70%,rgba(253,251,247,0));padding:14px 0 10px 32px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--mono-c);text-transform:uppercase}
@@ -650,7 +692,7 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 
 <!-- HERO + STATS -->
 <div class="hero" data-probe="hero">
-  <div><h1 data-probe-text="hero-h1">Hello, Bethany</h1><p>What's on your desk today?</p></div>
+  <div><h1 data-probe-text="greeting">Hello, Bethany</h1><p>What's on your desk today?</p></div>
   <div class="stats" data-probe="stats">
     <div class="stat"><div class="ill" id="ill1"></div><div><div class="lab">Queries sent</div><div class="fig"><b data-probe-text="stat-figure">21</b><span class="mini"><svg viewBox="0 0 10 10"><path d="M5 8V2M2 5l3-3 3 3"/></svg>5 this week</span></div></div></div>
     <div class="stat"><div class="ill" id="ill2"></div><div><div class="lab">Agents on file</div><div class="fig"><b>16</b><span class="mini plain">11 queried · 5 idle</span></div></div></div>
@@ -674,9 +716,27 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
     </div>
   </div>
 
+  <div class="goalslim"><span class="n">0</span><span class="l">of 5 queries · this week</span><span class="dots"><i></i><i></i><i></i><i></i><i></i></span></div>
+  <div class="card" id="goalCard" data-probe="goals-card">
+    <div class="hd" style="border-bottom:0;padding-bottom:0"><div class="ill" id="ill4" style="width:52px;height:52px"></div><h3>Querying goals</h3><span class="sp"></span><span class="mono">Weekly</span><span style="color:var(--ink3);letter-spacing:2px">···</span></div>
+    <div class="goal">
+      <div class="fig"><b id="gn">0</b><span>of 5</span></div>
+      <div class="mono" style="margin-top:4px">Queries sent · w/c 7 September</div>
+      <div class="slots" id="slots"></div>
+      <div class="try">Try it: <button id="plus">Send one</button><button id="reset">Reset</button></div>
+      <div class="wk">
+        <div><div class="bar"><i style="height:26px"></i></div><div class="lb">10 AUG<br><b style="font-family:var(--serif);font-size:12px;color:var(--ink)">3</b></div></div>
+        <div><div class="bar"><i style="height:9px"></i></div><div class="lb">17 AUG<br><b style="font-family:var(--serif);font-size:12px;color:var(--ink)">1</b></div></div>
+        <div><div class="bar"><i class="z"></i></div><div class="lb">24 AUG<br><b style="font-family:var(--serif);font-size:12px;color:var(--ink3)">0</b></div></div>
+        <div><div class="bar"><i class="z"></i></div><div class="lb">31 AUG<br><b style="font-family:var(--serif);font-size:12px;color:var(--ink3)">0</b></div></div>
+      </div>
+    </div>
+  </div>
+  <p class="note" id="goalNote" style="margin-top:-10px"><b>Goals.</b> Five slots that fill as queries go out this week — a StatusDot ring per query, not a progress bar. Previous weeks as bars with their counts.</p>
+
   <!-- COMMUNITY -->
   <div class="card ch-bare com" data-probe="community-card">
-    <div class="hd"><div class="tile"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0M15 20a4.5 4.5 0 0 1 7 -2"/></svg></div><h3 data-probe-text="card-h3">Community</h3><span class="sp"></span><span class="beta">Beta</span></div>
+    <div class="hd"><div class="tile"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0M15 20a4.5 4.5 0 0 1 7 -2"/></svg></div><h3>Community</h3><span class="sp"></span><span class="beta">Beta</span></div>
     <div class="body">
       <svg class="spr" viewBox="0 0 96 96" fill="none" stroke="#7f9a78" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M48 80V46"/><path d="M48 58c-8 0-16-6-18-16 10-1 18 5 18 16z" fill="#dfe8da"/><path d="M48 50c8 0 16-6 18-16-10-1-18 5-18 16z" fill="#dfe8da"/><path d="M28 82c6-6 34-6 40 0" stroke="#c9b8a6"/><path d="M34 86c4-3 24-3 28 0" stroke="#c9b8a6"/></svg>
       <p>As our community builds, you'll be able to benchmark your key stats against other writers at a similar stage.</p>
@@ -697,8 +757,8 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
     <div class="card" id="chartCard" data-probe="chart-card">
       <div class="hd sand" id="chd">
         <div class="tile"><svg viewBox="0 0 24 24"><path d="M4 18l4-5 4 3 4-7 4 4"/><path d="M3 21h18"/></svg></div>
-        <div id="hdA"><h3 style="display:inline">Active queries</h3><span class="num" id="cur">17</span></div>
-        <div id="hdB" class="statblk"><b id="curB" data-probe-text="chart-figure">17</b><div><div class="t">Active queries</div><div class="s" id="deltaB">+5 over this range</div></div></div>
+        <div id="hdA"><h3 style="display:inline" data-probe-text="card-title">Active queries</h3><span class="num" id="cur">17</span></div>
+        <div id="hdB" class="statblk"><b id="curB">17</b><div><div class="t">Active queries</div><div class="s" id="deltaB">+5 over this range</div></div></div>
         <span class="pill sg" id="delta">↑ +5 over this range</span>
         <span class="sp"></span>
         <div class="rc" id="rcSlider" hidden><select class="sel" id="freq"><option>Weekly</option><option>Monthly</option></select>
@@ -739,26 +799,11 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 
 <div class="col side">
   <!-- GOALS -->
-  <div class="goalslim"><span class="n">0</span><span class="l">of 5 queries · this week</span><span class="dots"><i></i><i></i><i></i><i></i><i></i></span></div>
-  <div class="card" id="goalCard" data-probe="goals-card">
-    <div class="hd" style="border-bottom:0;padding-bottom:0"><div class="ill" id="ill4" style="width:52px;height:52px"></div><h3>Querying goals</h3><span class="sp"></span><span class="mono">Weekly</span><span style="color:var(--ink3);letter-spacing:2px">···</span></div>
-    <div class="goal">
-      <div class="fig"><b id="gn">0</b><span>of 5</span></div>
-      <div class="mono" style="margin-top:4px">Queries sent · w/c 7 September</div>
-      <div class="slots" id="slots"></div>
-      <div class="try">Try it: <button id="plus">Send one</button><button id="reset">Reset</button></div>
-      <div class="wk">
-        <div><div class="bar"><i style="height:26px"></i></div><div class="lb">10 Aug · 3</div></div>
-        <div><div class="bar"><i style="height:9px"></i></div><div class="lb">17 Aug · 1</div></div>
-        <div><div class="bar"><i class="z"></i></div><div class="lb">24 Aug · 0</div></div>
-        <div><div class="bar"><i class="z"></i></div><div class="lb">31 Aug · 0</div></div>
-      </div>
-    </div>
-  </div>
-  <p class="note" id="goalNote" style="margin-top:-10px"><b>Goals.</b> Five slots that fill as queries go out this week — a StatusDot ring per query, not a progress bar. Previous weeks as bars with their counts.</p>
+
 
   <!-- ACTIVITY -->
   <div class="opt" style="margin-bottom:8px">
+    <label>Bubble colour <span class="seg" data-o="bub"><button data-v="fill">Full fill</button><button class="on" data-v="strip">Header strip</button><button data-v="chip">Label chip</button><button data-v="edge">Outer edge</button><button data-v="rule">Underline</button><button data-v="wash">Half wash</button><button data-v="border">Border only</button><button data-v="dot">Dot only</button></span></label>
     <label>Expanded height <span class="seg" data-o="exph"><button class="on" data-v="full">Full column</button><button data-v="chart">Level with chart</button></span></label>
     <label>Filter format <span class="seg" data-o="ffmt"><button class="on" data-v="tabs">Tabs</button><button data-v="switch">Header switch</button><button data-v="words">Mono words</button><button data-v="seg">Segmented</button><button data-v="pills">Pills</button></span></label>
     <label>Housekeeping <span class="seg" data-o="desk"><button data-v="note">Centred note</button><button class="on" data-v="quiet">White bubble</button><button data-v="filter">Behind filter</button></span></label>
@@ -815,7 +860,7 @@ const ILL={
 ill1.innerHTML=ILL.plane;ill2.innerHTML=ILL.rolodex;ill3.innerHTML=ILL.pages;ill4.innerHTML=ILL.target;
 
 /* ---------- CHART ---------- */
-const opt={bands:'1',ghost:'0',marks:'0',hdr:'b',tint:'sand',chrome:'bare',rc:'brush',stlab:'1',desk:'quiet',tall:'0',slate:'1',hov:'lite',thread:'0',link:'0',quick:'1',since:'0',rail:'0',runs:'1',exph:'full',ffmt:'tabs',hkpeek:'peek',tform:'cards',tqa:'drawer',snip:'a',cols:'3',fbar:'thin',leg:'hover'};
+const opt={bands:'1',ghost:'0',marks:'0',hdr:'b',tint:'sand',chrome:'bare',rc:'brush',stlab:'1',desk:'quiet',tall:'0',slate:'1',hov:'lite',thread:'0',link:'0',quick:'1',since:'0',rail:'0',runs:'1',bub:'strip',exph:'full',ffmt:'tabs',hkpeek:'peek',tform:'cards',tqa:'drawer',snip:'a',cols:'3',fbar:'thin',leg:'hover'};
 document.querySelectorAll('.seg[data-o]').forEach(s=>s.querySelectorAll('button').forEach(b=>b.onclick=()=>{s.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');opt[s.dataset.o]=b.dataset.v;renderChart();if(typeof renderFeed==='function')renderFeed();}));
 
 // 12 weeks of data (sand, sage, pink) ending 7 Sep, plus 12 weeks before it for the ghost
@@ -850,7 +895,7 @@ const ME={};
 // monotone cubic (Fritsch–Carlson) path
 function mono(P){const n=P.length;if(n<2)return'';const d=[],m=[];for(let i=0;i<n-1;i++)d.push((P[i+1][1]-P[i][1])/(P[i+1][0]-P[i][0]));m[0]=d[0];m[n-1]=d[n-2];for(let i=1;i<n-1;i++)m[i]=d[i-1]*d[i]<=0?0:(d[i-1]+d[i])/2;for(let i=0;i<n-1;i++){if(d[i]===0){m[i]=m[i+1]=0;continue}const a=m[i]/d[i],b=m[i+1]/d[i],s=a*a+b*b;if(s>9){const t=3/Math.sqrt(s);m[i]=t*a*d[i];m[i+1]=t*b*d[i]}}
  let p=`M${P[0][0]} ${P[0][1]}`;for(let i=0;i<n-1;i++){const dx=(P[i+1][0]-P[i][0])/3;p+=`C${P[i][0]+dx} ${P[i][1]+dx*m[i]} ${P[i+1][0]-dx} ${P[i+1][1]-dx*m[i+1]} ${P[i+1][0]} ${P[i+1][1]}`}return p}
-const W=1000,H=330,L=44,R=26,T=24,B=48;
+const W=1000,H=330,L=52,R=28,T=26,B=46;
 function renderChart(){
   const monthly=ST.monthly;
   const N=monthly?6:ST.n;
@@ -1106,15 +1151,20 @@ function vConv(){
      return;
    }
    const c=SC[x.k];
+   const V=opt.bub;
+   const mix=(h1,h2,t)=>{const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));const A=p(h1),B=p(h2);
+     return '#'+A.map((v,i)=>Math.round(v*t+B[i]*(1-t)).toString(16).padStart(2,'0')).join('')};
+   const vstyle=`--f:${c.f};--a:${c.a};--w:${mix(c.f,'#fffdf9',.45)};--wb:${mix(c.a,'#e6dfd6',.55)};`+(V==='fill'?`background:${c.f};border-color:${c.a};`:'');
+   const vcls=V==='fill'?'':'v-'+V;
    const next=e[xi+1]; const run=opt.runs==='1'&&next&&next.dir===x.dir&&next.dir!=='desk';
    const prev=e[xi-1]; const isRun=opt.runs==='1'&&prev&&prev.dir===x.dir&&prev.dir!=='desk';
    const qa=opt.quick==='1'&&(x.k==='partial-req'||x.k==='full-req')&&!x.done&&gi<=4;
    h+=`<div class="msg ${x.dir} ${isRun?'run':''} ${run?'runtop':''}" data-agent="${g.sur}" data-wk="${g.wk}">
      <span class="knot">${sd(x.k,15)}</span>
-     <div class="b ${qa?'hasqa':''}" style="background:${c.f};border-color:${c.a}">
-       <div class="slab">${c.l}</div>
-       <div class="s" data-probe-text="bubble-sentence">${x.s}</div>
-       <div class="m">${g.sur} · ${g.agency}<span style="margin-left:auto">${x.t}</span></div>
+     <div class="b ${vcls} ${qa?'hasqa':''}" style="${vstyle}">
+       ${V==='strip'
+         ? `<div class="striph"><div class="slab">${c.l}</div></div><div class="sbody"><div class="s">${x.s}</div><div class="m"><span class="who2"><b>${g.sur}</b><i>&nbsp;· ${g.agency}</i></span><span class="tm2">${x.t}</span></div></div>`
+         : `<div class="slab">${c.l}</div><div class="s">${x.s}</div><div class="m"><span class="who2"><b>${g.sur}</b><i>&nbsp;· ${g.agency}</i></span><span class="tm2">${x.t}</span></div>`}
        ${qa?`<button class="qa" onclick="event.stopPropagation();openJourneyFor(this,'${g.sur}','${x.k==='partial-req'?'partial':'full'}')">Mark sent</button>`:''}
      </div></div>`;
   });
@@ -1269,13 +1319,13 @@ function ini(n){return n.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase
 function goBtn(t,i){return `<button class="go ${t.q?'q':''}" onclick="event.stopPropagation();${t.unit?`openJourney(this,${i})`:''}">${t.go}</button>`}
 function renderTodo(){
   renderFilters();
-  const list=tvis().slice(0,opt.tform==='cards'?9:9);
+  const list=tvis().slice(0,opt.tform==='cards'?12:12);
   const b=document.getElementById('tbody'); if(!b)return;
   if(opt.tform==='cards'){
     const sub=t=>opt.snip==='a'?'':`<div class="sub">${opt.snip==='b'||opt.snip==='c'?`<b class="${t.owed?'owed':''}">${t.f2[1]}</b>${t.f2[0]}`:''}${opt.snip==='c'&&t.st?`<span class="stw">${sd(t.k)}${t.st}</span>`:''}</div>`;
     b.innerHTML=`<div class="tgrid ${opt.cols==='3'?'c3':''}">${list.map((t,i)=>`<div class="tk snip" style="--edge:${EDGE[t.k]};--fam:${FAM[t.cat].f}" onclick="openDrawer(${TASKS.indexOf(t)})">
       <span class="tag">${FAM[t.cat].l}</span>
-      <p class="ttl" data-probe-text="ticket-title">${t.title}</p>${sub(t)}
+      <p class="ttl">${t.title}</p>${sub(t)}
     </div>`).join('')}</div>`; return;
     b.innerHTML=`<div class="tgrid">${list.map((t,i)=>`<div class="tk" style="--edge:${EDGE[t.k]};--fam:${FAM[t.cat].f}">
       <span class="tag">${FAM[t.cat].l}</span>${t.ms?`<span class="ms">${t.ms}</span>`:''}
