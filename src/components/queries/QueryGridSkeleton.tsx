@@ -23,7 +23,11 @@ import "./queryGridSkeleton.css";
 /** one card's bones — the loaded card's own anatomy, emptied */
 const Bone: React.FC = () => (
   <span className="qcc qcs" aria-hidden="true">
-    <span className="qcc-band qcs-band" />
+    {/* ⚠️ THE BAND NEEDS CONTENT-HEIGHT OF ITS OWN. Its class supplies the padding and nothing
+        else — measured, an empty band was 26px against the loaded 51, because the real one is
+        sized by a 24px StatusDot beside two lines of type. Reusing a class is not the same as
+        reusing a height when the class does not set one. */}
+    <span className="qcc-band qcs-band"><span className="qcs-bandfill" /></span>
     <span className="qcc-body">
       <span className="qcc-who">
         <span className="qcc-chip qcs-b" />
@@ -33,11 +37,18 @@ const Bone: React.FC = () => (
         </span>
         <span className="qcc-leaf qcs-b qcs-leaf" />
       </span>
-      <span className="qcs-rule" />
+      {/* ⚠️ NO SEPARATE RULE ELEMENT: `.qcc-fact` CARRIES THE HAIRLINE ITSELF, as a border-top
+          with its own margin and padding. The first draft drew a `.qcs-rule` as well and was
+          still 37px SHORT of the loaded card — a double rule and a missing row at once, which is
+          what happens when a skeleton is assembled from a description of the card instead of from
+          the card. The materials row is the missing one; it sits inside the fact. */}
       <span className="qcc-fact">
         <span className="qcc-facttx">
           <span className="qcs-l" style={{ width: "54%" }} />
           <span className="qcs-l" style={{ width: "36%" }} />
+        </span>
+        <span className="qcc-mats">
+          {[...Array(4)].map((_, i) => <span key={i} className="qcc-ic qcs-b" />)}
         </span>
       </span>
     </span>

@@ -6035,8 +6035,12 @@ export const Queries: React.FC<{
               *
               * ⚠️ THE FOOT STAYS OUTSIDE: `Export CSV` acts on the filtered set as a whole.
               */}
-            <div className="qcc-well" aria-busy={showGridSkeleton ? true : undefined}>
-            <div className="qcc-controls">
+            {/* ⚠️ THE TILES SIT ABOVE THE WELL, NOT IN IT (§1/§2). They count the whole set and
+                belong to the page; the well holds the toolbar and whichever view is showing. The
+                first cut opened the well before `.qcc-controls`, which holds the tiles AND the
+                toolbar — so the recess swallowed the tiles, and only the SCREENSHOT showed it:
+                every rect assertion passed, because each measured element was exactly where it
+                should be relative to a well that was simply too big. */}
             {/**
               * ⚠️ THE STAT TILES REPLACE THE QUICK CHIPS (colours v2, Phase 2). Same two axes —
               * one court, plus the overdue flag as an independent second — and the same
@@ -6055,6 +6059,8 @@ export const Queries: React.FC<{
               onQuick={(k) => setQuickKey(k)}
               onOverdue={(next) => setNeedsOverdue(next)}
             />
+            <div className="qcc-well" aria-busy={showGridSkeleton ? true : undefined}>
+            <div className="qcc-controls">
 
             {/**
               * ⚠️ THE REF'S TOOLBAR — LABELLED, WITH THE CURRENT VALUE ON THE BUTTON'S FACE. It

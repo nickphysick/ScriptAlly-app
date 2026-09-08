@@ -1,0 +1,16 @@
+{
+  "entrance-settled": {
+    "flag": false,
+    "masthead": "none",
+    "tile": "none",
+    "well": "none",
+    "card": "none"
+  },
+  "entrance-after-mutation": {
+    "flag": false,
+    "masthead": "none",
+    "tile": "none",
+    "well": "none",
+    "card": "none"
+  }
+}

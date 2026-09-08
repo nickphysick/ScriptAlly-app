@@ -30,11 +30,21 @@
 .qcs .qcc-chip { border: none; box-shadow: none; }
 /* ⚠️ THE LEAF IS THE ONE BOX WITH ITS OWN SIZE HERE, because the loaded leaf is sized by three
    lines of text and an empty one would collapse. 38x46 is what those three lines make. */
-.qcs-leaf { width: 38px; height: 46px; border-radius: 8px; }
+/* ⚠️ EVERY ONE OF THESE FOUR NUMBERS IS MEASURED FROM THE LOADED CARD, not chosen. The boxes
+   above them are content-sized, so a bone that is merely "about right" leaves the card short — it
+   was 175px against 225 before these, and the 50px was spread across four rows in a way no amount
+   of reading the component would have found. Loaded: band content 25, leaf 65, name+agency 47,
+   fact lines 37. */
+.qcs-bandfill { display: block; height: 25px; border-radius: 6px; }
+.qcs-leaf { width: 38px; height: 65px; border-radius: 8px; }
 .qcs .qcc-whotx { display: flex; flex-direction: column; gap: 7px; justify-content: center; min-width: 0; }
 .qcs-l { height: 11px; border-radius: 5px; }
-.qcs-rule { display: block; height: 1px; background: #ece0d2; margin: 12px 0; }
+/* name + agency fill 47px with the 7px gap; fact lines fill 37 */
+.qcs .qcc-whotx .qcs-l { height: 20px; }
+.qcs .qcc-facttx .qcs-l { height: 15px; }
 .qcs .qcc-facttx { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+/* the materials icons keep their own 22px box; the bone just fills it */
+.qcs .qcc-ic { border: none; }
 
 /* the card itself keeps its real chrome so the box it occupies is the box that arrives */
 .qcs.qcc { cursor: default; }

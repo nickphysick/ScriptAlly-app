@@ -1,0 +1,36 @@
+{
+  "well-cover-observed-1440": false,
+  "well-loaded-1440": {
+    "well": {
+      "x": 265,
+      "y": 342,
+      "w": 1134,
+      "h": 4486.7
+    },
+    "toolbar": {
+      "x": 281,
+      "y": 368,
+      "w": 1102,
+      "h": 154.9
+    },
+    "firstCard": {
+      "x": 281,
+      "y": 524.9,
+      "w": 358,
+      "h": 225
+    },
+    "wellBg": "rgb(238, 232, 224)",
+    "pageBg": "rgb(254, 252, 250)",
+    "cardShadow": "rgba(58, 28, 20, 0.06) 0px 1px 2px 0px, rgba(58, 28, 20, 0.11) 0px 8px 20px 0px",
+    "busy": null,
+    "spinners": 0,
+    "pageStatus": 0,
+    "bones": 0,
+    "boneCs": {
+      "bone": null,
+      "wrap": null,
+      "grid": null,
+      "gridRect": null
+    }
+  }
+}
