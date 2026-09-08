@@ -181,28 +181,30 @@ describe("the tile fills a row it does not size", () => {
     expect(code).not.toContain("button");
   });
 
-  /* ⚠️ RETARGETED (dashboard redesign, Phase 2). The tile used to sit in the LOWER of two rows
-     that shared one `grid-template-columns` with the upper, so it could not drift from the author
-     tile's width. It is now the author tile's COLUMN-mate — same track, same width, by being in
-     the same column — and the shared declaration is retired with the rows.
-
-     ⚠️ AND THE TILE NO LONGER STRETCHES, WHICH IS THE OTHER HALF OF THE MOVE. It filled a row
-     whose height tasks set; a centred hero stretched by a row it does not own is a tile pretending
-     to be taller than its content. Natural height now, and the left column's slack is Pro's. */
-  it("⚠️ the tile is a column card at its natural height — it never fills a row it does not size", () => {
-    expect(cssRules).toContain("grid-template-columns: 352px minmax(0, 1fr) 420px");
-    /* ⚠️ COMMUNITY TAKES THE SLACK IN EVERY STATE, AND PRO NO LONGER SHARES IT (ref v16, Phase 3).
-       "Whichever card is last closes the column" needed to know which card that was, and it is three
-       different cards in three states: `OneScreenPro` returns null for a subscriber, is
-       `display: none` below its own viewport gate, and renders otherwise. A `:last-child` rule
-       cannot see the display:none case at all — it is still the last child and still takes no room.
-       So the stretch is Community's, always, and Pro sits at the foot at its natural height.
-       ⚠️ AND THE COLUMN CLOSES REGARDLESS, because the column is stretched by the grid rather than
-       by its cards adding up — see the `height: 0` / `min-height: 100%` pair in the smoke's §1. */
-    expect(rule(".os-colL .os-comm")).toContain("flex: 1 1 auto");
-    expect(rule(".os-colL .os-probanner")).toContain("flex: 0 0 auto");
-    /* the retired spine must not survive — a leftover rule is how a deleted layout comes back */
-    expect(cssRuleCount(cssRules, ".os-midrow, .os-lowrow")).toBe(0);
+  /**
+   * ⚠️ IT IS NOT IN A COLUMN AT ALL ANY MORE (ref v22, Phase 3), WHICH RETIRES THE QUESTION THIS
+   * CASE KEPT ANSWERING DIFFERENTLY.
+   *
+   * It filled a row whose height tasks set, then stopped filling, then took the left column's
+   * slack in every state — three answers to "how tall should the Community tile be", because the
+   * honest answer was that it should not be competing for height with the work. v22 makes it a
+   * STRIP beneath both columns: one row, outside the grid, stating what it is.
+   *
+   * ⚠️ THE STRIP AND THE CARD ARE ONE COMPONENT AND ONE SET OF WORDS. A fork would be two surfaces
+   * free to disagree about a feature that is a single sentence long, so the layout is a prop and
+   * the copy is asserted to be the same in both.
+   */
+  it("⚠️ community is a strip beneath both columns, not a card in one", () => {
+    const strip = rule(".os-comstrip");
+    expect(strip).toContain("display: flex");
+    expect(strip).toContain("margin-top: 22px");
+    /* it is not a grid child — the grid is two columns and neither is Community's */
+    expect(cssRules).toContain("grid-template-columns: minmax(0, 1fr) 360px");
+    const src = readFileSync(resolve(__dirname, "./OneScreenCommunity.tsx"), "utf8");
+    expect(src).toContain('data-probe="community-strip"');
+    expect(src).toContain("strip = false");
+    /* ⚠️ ONE SET OF WORDS: both layouts render the same constant, so they cannot drift */
+    expect((src.match(/COMMUNITY_EMPTY/g) ?? []).length).toBeGreaterThanOrEqual(2);
   });
 
   /* ⚠️ THE BAND IS THE SHARED ONE. The first draft restated height/padding here and, being later

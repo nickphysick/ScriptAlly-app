@@ -466,7 +466,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
               head; on a filled band they draw two lines across a colour that is already doing
               the separating. The title sits left, as the ref has it. */}
           <OneScreenMark name="activity" />
-          <h2>Activity</h2>
+          <h2 data-probe-text="panel-title">Activity</h2>
           {/* ⚠️ THE EXPANDER IS RETIRED (ref v16, Phase 3), AND IT IS THE MOVE THAT RETIRED IT.
               It existed to give the feed the goals card's height; the goals card is the LEFT
               column's now, and Activity already occupies this column top to bottom. Expanding

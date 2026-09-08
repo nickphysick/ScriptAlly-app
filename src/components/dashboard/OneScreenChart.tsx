@@ -379,7 +379,7 @@ export const OneScreenChart: React.FC<{
         <span className="os-stat">
           <span className="os-n">{shownActive}</span>
           <span className="os-statxt">
-            <h2>Active queries</h2>
+            <h2 data-probe-text="chart-title">Active queries</h2>
             {earlyDays
               ? <span className="os-delta">{awaitingChip(queries)}</span>
               : view.length >= 2 && <span className="os-delta">{rangeChip(view)}</span>}

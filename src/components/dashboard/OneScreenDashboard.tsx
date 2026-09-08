@@ -29,13 +29,11 @@ import { OneScreenTour, TOUR_BREAKPOINT } from "./OneScreenTour";
 import { OneScreenAuthor } from "./OneScreenAuthor";
 import { OneScreenChart } from "./OneScreenChart";
 import { OneScreenTasks } from "./OneScreenTasks";
-import { OneScreenPro } from "./OneScreenPro";
 import { OneScreenCounters } from "./OneScreenCounters";
 import { OneScreenCommunity } from "./OneScreenCommunity";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../lib/manuscriptScope";
 import { deriveGoalProgress } from "../../lib/queryingGoals";
 import { OneScreenRail } from "./OneScreenRail";
-import { OneScreenGoals } from "./OneScreenGoals";
 import { OneScreenSkeleton } from "./OneScreenSkeleton";
 import { useSkeleton } from "../../lib/skeletonTiming";
 import "./oneScreen.css";
@@ -245,6 +243,10 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             <div className="os-grow2">
               {/* ⚠️ PLAYFAIR 700 AT 46px, PLAIN INK. No burgundy, no italics — the third and final
                   swing of that pendulum, recorded at each turn. */}
+              {/* ⚠️ THE GREETING ALONE — v22's hero is `<div><h1>…</h1></div>` beside the stats,
+                  with no lede, no manuscript line, no goals meter and no fourth stat. The lede
+                  came back in the v16 pass and goes again; the slot has now held a kicker, a date,
+                  and a question, and the design's answer each time has been the name by itself. */}
               <h1 data-probe-text="greeting">Hello, {firstName}</h1>
               <span className="os-spacer" />
               {chipShows && (
@@ -253,7 +255,6 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
                 </button>
               )}
             </div>
-            <div className="os-sub2">What&rsquo;s on your desk today?</div>
             {/* ⚠️ THE TWO PILLS ARE RETIRED (dashboard redesign, Phase 3). "Querying since {month}"
                 and the achievement — "Best month yet", "a new fastest reply" — are gone with the
                 row that held them. Both were true and neither was work: a tenure line states how
@@ -285,33 +286,24 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             three columns could not be given a row of their own. The ref draws `main` holding a
             `hero` and a `grid3`; this is that, and it is what `data-probe="grid"` measures. */}
         <div className="os-grid" data-probe="grid">
+        {/* ⚠️ TWO COLUMNS, AND THE LEFT ONE HAS A ROW OF ITS OWN (ref v22, Phase 3). The
+            manuscript tile and the chart card share a `330px | minmax(0,1fr)` top row at equal
+            height, and the to-do card takes everything beneath it. Querying goals and the Pro
+            banner have no place in this layout and are unmounted; Community leaves the column
+            entirely and becomes a strip under both of them. */}
         <div className="os-colL">
-          <OneScreenAuthor
-            loading={loading} manuscripts={manuscripts}
-            currentUser={currentUser} activeManuscript={activeManuscript}
-            onNavigate={onNavigate}
-          />
-          {/* ⚠️ BETWEEN THE MANUSCRIPT CARD AND COMMUNITY — v16 moves Querying goals out of the
-              right column and into this one, which is what frees the right column for Activity top
-              to bottom. It was `OneScreenRail`'s only because the two shared a column. */}
-          <OneScreenGoals
-            loading={loading} goal={goalProgress} currentUser={currentUser}
-            now={now} updateUserProfile={updateUserProfile}
-          />
-          <OneScreenCommunity loading={loading} />
-          {/* ⚠️ SHOWN ONLY WHERE THE EXTRA CARD GENUINELY FITS — the CSS gates it on viewport
-              height AND width (§5), and it returns null for a Pro subscriber. Below either
-              threshold it is not rendered small, it is not rendered at all. Where it is absent the
-              left column's foot is short, and that gap is REPORTED rather than filled. */}
-          <OneScreenPro loading={loading} currentUser={currentUser} onNavigate={onNavigate} />
-        </div>
-
-        <div className="os-colM">
-          <OneScreenChart
+          <div className="os-toprow" data-probe="toprow">
+            <OneScreenAuthor
+              loading={loading} manuscripts={manuscripts} compact
+              currentUser={currentUser} activeManuscript={activeManuscript}
+              onNavigate={onNavigate}
+            />
+            <OneScreenChart
             loading={loading} queries={scopedQueries} agents={agents} now={now}
             dayOne={scopedStage === "day-one"} earlyDays={scopedStage === "early-days"}
-            onSendFirst={() => onNavigate("queries", "Send a query")}
-          />
+              onSendFirst={() => onNavigate("queries", "Send a query")}
+            />
+          </div>
           {/* ⚠️ SCOPED WHERE SCOPE MEANS SOMETHING, RAW WHERE IT DOES NOT (Phase 5). Tasks and
               activities are the manuscript's; queries, agents and manuscripts are the LOOKUP sets
               the board resolves cards against, and scoping those would hide the agent a scoped
@@ -351,6 +343,11 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           now={now}
         />
         </div>
+        {/* ⚠️ A STRIP UNDER BOTH COLUMNS, NOT A CARD IN ONE (ref v22). It is the same component
+            with a `strip` layout: an icon, a title, one line and the Beta pill on a single row.
+            As a column card it competed for height with the work; as a footer it states what it
+            is and gets out of the way. */}
+        <OneScreenCommunity loading={loading} strip />
       </div>
       {/* ⚠️ LAST CHILD, OVER THE MOUNTED PAGE. The cards stay in the tree beneath it, which is what
           makes "no layout shift" structural rather than a matter of matching numbers — and it is

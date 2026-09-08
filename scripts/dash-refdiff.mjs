@@ -120,8 +120,12 @@ const TEXT_PROBES = ["greeting", "panel-title", "chart-title", "stat-figure"];
  * weight, which is what a "scale" is.
  */
 const TYPE_SCALE = [
-  ["card title",      ".hd h3",              ".os-ahead h2, .os-th2 h2"],
-  ["chart figure",    "#hdB .statblk b",     ".os-ahead .os-n"],
+  /* ⚠️ THE TO-DO CARD'S TITLE, NOT THE FIRST `h2` IN A BAND. The chart's band holds a STAT BLOCK
+     whose title is deliberately 19px, and it comes first in the document — so a selector that
+     accepts either read the stat block and reported the card-title row at 19 against the ref's 23.
+     The two treatments have their own probes in v22 for exactly this reason. */
+  ["card title",      ".hd h3",              ".os-th2 h2"],
+  ["chart figure",    "#hdB > b",            ".os-ahead .os-n"],
   ["hero greeting",   ".hero h1",            ".os-greet h1"],
   ["stat label",      ".stat .lab",          ".os-cl"],
   ["stat figure",     ".stat .fig b",        ".os-cn"],
@@ -164,9 +168,17 @@ const GROUND = "rgb(244, 240, 234)";
 const READ = `(() => {
   const num = (v) => Math.round(v * 10) / 10;
   const roots = [...document.querySelectorAll("[data-probe]")];
+  /* ⚠️ A BOX WITH ZERO HEIGHT AND REAL WIDTH IS RENDERED, AND v22 SHIPS ONE. The activity filter
+     row is collapsed until the funnel is pressed — height 0, width 333 — which is the DESIGN, and
+     requiring BOTH dimensions reported "the ref has no such probe" about a probe the ref draws.
+     A display-none element is 0 x 0 and is still excluded, which is the case the visibility rule
+     was actually for.
+     NO BACKTICKS IN HERE: this whole block is a template literal, and one ends it — which the
+     load-time backtick guard below cannot save you from, because a stray one is a SyntaxError at
+     parse and the guard never runs. Third time in this file. */
   const visibleIn = (el) => {
     const r = el.getBoundingClientRect();
-    return r.width > 0 && r.height > 0;
+    return r.width > 0 || r.height > 0;
   };
   const box = (el) => {
     const r = el.getBoundingClientRect();
@@ -239,11 +251,17 @@ const READ = `(() => {
      version named community/todo/activity — and Community stopped being the left column's last
      card the moment Pro rendered beneath it, so the check reported a 490px spread about three
      columns that were closing correctly. A column's bottom is the column's, whatever is in it. */
-  const cols = [...document.querySelectorAll(".col, .os-colL, .os-colM, .os-colR")]
+  /* ⚠️ TWO COLUMNS SINCE v22, NOT THREE — and the floor moved with the layout rather than being
+     loosened. It required three and reported "fewer than three columns were visible" about a page
+     whose design has two, which is a check failing on a correct page: the worst kind, because the
+     honest response looks like weakening it. The CLAIM is unchanged — every column closes on the
+     same line — and it is asserted over however many the page has, with a floor of two so an empty
+     sweep still cannot pass. */
+  const cols = [...document.querySelectorAll(".col, .os-colL, .os-colR")]
     .filter((e) => e.getBoundingClientRect().height > 0);
   const bottoms = cols.map((e) => { const r = e.getBoundingClientRect(); return num(r.y + r.height); });
   out.checks.columnBottoms = bottoms;
-  out.checks.columnSpread = bottoms.length >= 3 ? num(Math.max(...bottoms) - Math.min(...bottoms)) : null;
+  out.checks.columnSpread = bottoms.length >= 2 ? num(Math.max(...bottoms) - Math.min(...bottoms)) : null;
   /* ⚠️ THE BLEND TRAP: a transform on ANY ancestor isolates the blend group and the stat artwork's
      white field returns, silently, with the rule applying cleanly. */
   const marks = [...document.querySelectorAll("[data-probe='stats'] img, .os-greet .os-mark-il img")];
@@ -447,7 +465,7 @@ function diffChecks(app) {
     m.push({ key: "page", field: "hScroll", ref: 0, app: app.checks.hScroll });
   }
   if (app.checks.columnSpread === null) {
-    m.push({ key: "page", field: "columnBottoms", why: "fewer than three columns were visible" });
+    m.push({ key: "page", field: "columnBottoms", why: "fewer than two columns were visible" });
   } else if (app.checks.columnSpread > 1) {
     m.push({ key: "page", field: "columnBottoms", ref: "≤1", app: app.checks.columnSpread });
   }

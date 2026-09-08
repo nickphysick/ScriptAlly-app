@@ -120,23 +120,58 @@
 /* ⚠️ THE REF'S OWN TRACKS AND GAP — v16's `.grid3`: 352/1fr/420 at ≥1700, 300/1fr/340 below.
    They were 440/420 and 340/360, v14's, which made the left column 88px too wide and took the
    difference out of the elastic middle. */
+/* ⚠️ TWO COLUMNS, AND 360 AT EVERY WIDTH (ref v22, Phase 3). The ref's `.grid2` declares
+   `minmax(0,1fr) 440px` and its ≤1700 block overrides to 360 — and it measures 360 at 1536, 1920
+   AND 2520, because the shipping configuration adds `.grid2.aw-360` at load. The base 440 is
+   unreachable; reading the stylesheet alone would have built a column 80px too wide at two of the
+   three widths. */
 .os-grid {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 352px minmax(0, 1fr) 420px;
+  grid-template-columns: minmax(0, 1fr) 360px;
   gap: 22px;
   align-items: stretch;
   min-width: 0;
 }
+/* ⚠️ THE TILE AND THE CHART SHARE A ROW AT EQUAL HEIGHT — ref `.toprow`, stepping to 270px at its
+   own 1700 breakpoint. `align-items: stretch` is the equal-height law in one word: both cards are
+   handed the same row box, so there is no number to keep in step. */
+.os-toprow {
+  display: grid; grid-template-columns: 330px minmax(0, 1fr);
+  gap: 22px; align-items: stretch; flex: 0 0 auto;
+}
+.os-toprow > * { min-width: 0; }
+
+/* ⚠️ COMMUNITY IS A STRIP UNDER BOTH COLUMNS — ref `.comstrip`. Icon, title, one line, Beta pill,
+   on a single row outside the grid, so it neither competes for column height nor has to be told
+   not to be the taller card. */
+.os-comstrip {
+  display: flex; align-items: center; gap: 16px;
+  margin-top: 22px; padding: 14px 20px; flex: none;
+  background: #fdfbf7; border: 1px solid #e6dfd6; border-radius: 14px;
+}
+.os-comstriptx { min-width: 0; }
+/* the skeleton's strip ghost — same box, no contents */
+.os-sk-comstrip { height: 75px; border-radius: 14px; margin-top: 22px; flex: none; }
+.os-comstrip h2 { font-family: var(--font-serif); font-weight: 500; font-size: 17px; margin: 0; }
+.os-comstrip p { margin: 2px 0 0; font-size: 14px; color: #a29587; }
+.os-comstrip .os-commbeta { margin-left: auto; flex: none; }
+
+/* ⚠️ THE COMPACT STEP IS A HOOK WITH ALMOST NOTHING IN IT, AND THAT IS THE FINDING. The ref's
+   `.mscard` takes the cover to 96px and the title to 26 beside the chart — and the app's tile
+   already draws at both (`.os-msicon` is `flex: 0 1 96px`, `.os-bt` is 26px), because it was sized
+   for a 352px column rather than the ref's old 440. So the class exists as the seam the layout
+   asked for and declares only what genuinely differs; a block of redundant declarations here would
+   read as a size step and change nothing. */
+.os-aut-compact .os-byn b { font-size: 19px; }
 @media (max-width: 1699px) {
-  .os-grid { grid-template-columns: 300px minmax(0, 1fr) 340px; }
+  .os-toprow { grid-template-columns: 270px minmax(0, 1fr); }
   .os-content { padding-left: 22px; }  /* the ref's `.main{padding-left:22px!important}` step */
 
 }
 .os-colL { grid-column: 1; }
-.os-colM { grid-column: 2; }
-.os-colR { grid-column: 3; }
+.os-colR { grid-column: 2; }
 /* ⚠️ `height:100%` + `overflow:hidden` — the columns take the row they are given and nothing
    escapes them. Without the overflow, a tall card pushes past its column silently. */
 /**
@@ -161,17 +196,21 @@
  * what it is. The three bottoms then agree by construction rather than by three cards happening
  * to add up.
  */
-.os-colL, .os-colM, .os-colR {
+.os-colL, .os-colR {
   display: flex; flex-direction: column; min-height: 100%; min-width: 0;
   overflow: hidden;
   box-sizing: content-box;
   padding: var(--os-bleed);
   margin: calc(var(--os-bleed) * -1);
 }
-.os-colL, .os-colR { height: 0; }
-/* the centre is the one that states a height, because it is the one that owns it */
-.os-colM { height: 100%; min-height: 0; }
-.os-colL, .os-colM { gap: 22px; }
+/* ⚠️ THE RIGHT COLUMN CONTRIBUTES NOTHING TO THE ROW'S HEIGHT AND STRETCHES TO MATCH IT — ref
+   `.grid2 > .col.right{height:0;min-height:100%}`. The LEFT column sets the height now (it holds
+   the top row and the to-do card); with both at `height: 100%` each asks for the row's height
+   while its own content also feeds it, which is the loop that made a tall side column grow the
+   row and the other stretch to the new total. */
+.os-colR { height: 0; }
+.os-colL { height: 100%; min-height: 0; }
+.os-colL { gap: 22px; }
 /* ⚠️ THE RAIL USES MARGINS, NOT GAP (§6) — a collapsing panel must take its slot's spacing with
    it, and `gap` leaves a ghost gutter behind a max-height:0 panel. */
 .os-colR { gap: 0; }
@@ -200,8 +239,11 @@
    A range let the chart shrink whenever the to-do card wanted more, so the plot's height was a
    function of how many tickets were open; the clamp makes it a function of the viewport, which is
    the only thing a chart's proportions should follow. */
-.os-colM .os-lead { flex: 0 0 auto; height: clamp(400px, 42vh, 560px); }
-.os-colM .os-tasks { flex: 1 1 auto; min-height: 0; }
+/* ⚠️ THE CHART'S HEIGHT IS THE ROW'S — ref `.wrapc2 > #chartCard{height:clamp(330px,33vh,430px)}`,
+   and `.toprow`'s `align-items: stretch` hands the same box to the tile beside it. It was
+   `clamp(400px, 42vh, 560px)` in a column of its own. */
+.os-toprow .os-lead { height: clamp(330px, 33vh, 430px); display: flex; flex-direction: column; }
+.os-colL .os-tasks { flex: 1 1 auto; min-height: 0; }
 
 /* ⚠️ THE LEFT COLUMN IS THREE CARDS AT NATURAL HEIGHT, AND PRO TAKES THE SLACK.
    Community no longer stretches — it did only because the old `.os-lowrow` gave it a row height to
@@ -301,8 +343,8 @@
    `.os-colM .os-greet` this used to say selected nothing and the greeting never staggered.
    Pre-existing; corrected here because Phase 2 rewrote the block it sits in. */
 .os-greet.enter { animation-delay: 0s; }
-.os-colM .os-lead.enter { animation-delay: 0.05s; }
-.os-colM .os-tasks.enter { animation-delay: 0.1s; }
+.os-toprow .os-lead.enter { animation-delay: 0.05s; }
+.os-colL .os-tasks.enter { animation-delay: 0.1s; }
 .os-colL .os-comm.enter { animation-delay: 0.14s; }
 .os-colL .os-aut.enter { animation-delay: 0.07s; }
 .os-colR .os-goal.enter { animation-delay: 0.12s; }
@@ -337,7 +379,11 @@
 /* ⚠️ THE REF'S HERO: a two-track grid (`auto 1fr`), 40px gap, `padding: 10px 4px 6px`. It was a
    flex row with 32px and its own bottom padding — which put the stats' left edge 66px out and the
    hero 27px short at every width. */
-.os-greet { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; padding: 10px 4px 6px; flex: none; }
+/* ⚠️ THE PRIORITY BLOCK'S VALUES, NOT THE BASE RULE'S — ref `.hero{gap:28px;padding:6px 4px 4px}`
+   overriding its own `gap:40px;padding:10px 4px 6px`. Six pixels of padding, and every card on the
+   page sat six pixels low because of it: the hero measured 128 against 122 and the grid, the top
+   row, both cards, the to-do card and the activity column all inherited the offset. */
+.os-greet { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; padding: 6px 4px 4px; flex: none; }
 /* ⚠️ THE GREETING SIZES TO ITS CONTENT so the card can have the rest. It was `flex: 1` in the
    pre-counters ref, which would split the row down the middle instead. */
 .os-greet .os-gl { flex: 0 0 auto; min-width: 0; }
@@ -349,8 +395,11 @@
    spoken to the reader. */
 .os-sub2 { font-size: 17px; color: #6b5d54; margin-top: 6px; }
 .os-greet .os-grow2 { display: flex; align-items: center; gap: 14px; }
-/* the ref's `.hero h1`: serif 700 / 52px / 1.05, in `--ink #2a1f18` */
-.os-greet h1 { font-family: var(--font-serif); font-weight: 700; font-size: 52px; letter-spacing: -0.02em; color: #2a1f18; line-height: 1.05; margin: 0; }
+/* ⚠️ 46px, NOT 52 — ref `.hero h1{font-size:52px}` with the v17 priority block overriding to 46,
+   which is what renders. The base is the earlier ref's value left in place, and reading the first
+   declaration would have kept the greeting a size too big at every width. The hero is 122px tall
+   because of it; at 52 it was 128, and every card on the page sat 6px low. */
+.os-greet h1 { font-family: var(--font-serif); font-weight: 700; font-size: 46px; letter-spacing: -0.02em; color: #2a1f18; line-height: 1.05; margin: 0; }
 .os-greet .os-spacer { flex: 1; }
 .os-datechip {
   display: flex; align-items: center; gap: 8px;
@@ -502,14 +551,14 @@
   .os-root { height: auto !important; overflow: visible; }
   .os-content { display: flex; flex-direction: column; gap: 14px; padding: 16px 20px 28px; }
   /* the grid placements go with the grid, or the flex order is wrong */
-  .os-greet, .os-colL, .os-colM, .os-colR { grid-column: auto; grid-row: auto; }
-  .os-colL, .os-colM, .os-colR { gap: 14px; }
+  .os-greet, .os-colL, .os-colR { grid-column: auto; grid-row: auto; }
+  .os-colL, .os-colR { gap: 14px; }
   .os-colR > * { margin-bottom: 0; }
   /* ⚠️ EVERY FLEX BUDGET FROM THE DESKTOP COLUMNS IS RELEASED HERE, not just the chart's. Below the
      lock there is no row to divide, so a card that still said `flex: 1` would take the whole of a
      column that is now as tall as the page. */
-  .os-colM .os-lead { flex: none; height: 280px; min-height: 0; max-height: none; }
-  .os-colM .os-tasks { flex: none; max-height: none; }
+  .os-toprow .os-lead { flex: none; height: 280px; min-height: 0; max-height: none; }
+  .os-colL .os-tasks { flex: none; max-height: none; }
   .os-colL .os-aut, .os-colL .os-comm, .os-colL .os-probanner { flex: none; }
   .os-colR .os-actv { flex: none; }
 }
@@ -517,14 +566,14 @@
 @media (max-height: 680px) and (min-width: 1025px) {
   .sa-dashroot { height: auto; min-height: 0; padding-bottom: 2rem; }
   .os-root { height: auto !important; overflow: visible; }
-  .os-colM .os-lead { flex: none; height: 230px; }
+  .os-toprow .os-lead { flex: none; height: 230px; }
 }
 @media (max-width: 640px) {
   .os-content { padding: 14px 14px 24px; }
   .os-greet .os-grow2 { flex-wrap: wrap; }
   .os-greet h1 { font-size: 23px; }
   .os-datechip { order: -1; }
-  .os-colM .os-lead { height: 220px; }
+  .os-toprow .os-lead { height: 220px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1138,8 +1187,15 @@
 .os-statxt { display: flex; flex-direction: column; min-width: 0; }
 /* ⚠️ 19px, NOT THE BAND'S 23 — ref `.statblk .t`. Inside a stat block the title is the SECOND thing
    read, after the figure; at the band's own heading size it competes with a 38px numeral. This is
-   scoped to the stat block, so every other card's heading is untouched. */
-.os-statxt h2 {
+   scoped to the stat block, so every other card's heading is untouched — and it is why the chart's
+   title has its OWN text probe in v22, separate from `panel-title`. */
+/* ⚠️ SCOPED TO THE BAND, AND THAT IS WHAT MAKES IT APPLY AT ALL. `.os-statxt h2` and
+   `.os-ahead h2` are both 0-1-1, this one is declared 450 lines EARLIER, and the stat block sits
+   inside the band — so the band's 23px won and the chart's title rendered at the card-title size
+   for as long as the rule existed. It measured 23 against the ref's 19 and read as a value that
+   had never been set. `.os-ahead .os-statxt h2` is 0-2-1 and states the relationship rather than
+   depending on which rule someone happens to move first. */
+.os-ahead .os-statxt h2 {
   margin: 0; font-family: var(--font-serif); font-size: 19px; font-weight: 500; line-height: 1.1;
 }
 /* ⚠️ THE DELTA IS A CAPTION, NOT A CHIP. It sat in a bordered pastille beside the title, which gave

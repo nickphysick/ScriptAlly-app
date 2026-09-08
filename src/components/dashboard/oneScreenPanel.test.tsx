@@ -297,7 +297,7 @@ describe("one band geometry, declared", () => {
 describe("the columns bleed, and nothing moves", () => {
   const bare = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   const col = (() => {
-    const i = bare.indexOf(".os-colM, .os-colR {");
+    const i = bare.indexOf(".os-colL, .os-colR {");
     expect(i, "the columns must share one rule").toBeGreaterThan(-1);
     return bare.slice(i, bare.indexOf("}", i));
   })();

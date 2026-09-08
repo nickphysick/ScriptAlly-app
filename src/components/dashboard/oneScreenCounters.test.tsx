@@ -158,15 +158,18 @@ describe("the card's CSS", () => {
     expect(rule(".os-card.os-counters:hover, .os-card.os-counters.os-lift:hover")).toContain("transform: none");
   });
 
-  /* ⚠️ RETARGETED: the ref's hero is a two-track GRID (`auto 1fr`, 40px gap), not a flex row. The
-     difference is not cosmetic — in a flex row the stats took "whatever is left", so their left edge
-     moved with the greeting's length; in the grid they have a track of their own and start where the
-     design puts them whatever the writer is called. */
+  /* ⚠️ RETARGETED: the ref's hero is a two-track GRID (`auto 1fr`), not a flex row. The difference
+     is not cosmetic — in a flex row the stats took "whatever is left", so their left edge moved with
+     the greeting's length; in the grid they have a track of their own and start where the design puts
+     them whatever the writer is called. THE LAW IS THE TWO TRACKS, NOT THE GAP: v16 gapped them at 40
+     and v22 at 28, and the geometry that decides which is right is measured against the ref by
+     `scripts/dash-refdiff.mjs`, not read out of this file. Asserting a gap here would go red on every
+     retune of a value this lock has no opinion about. */
   it("the hero is the ref's two-track grid, and the greeting sizes to its content", () => {
     const g = rule(".os-greet");
     expect(g).toContain("display: grid");
     expect(g).toContain("grid-template-columns: auto 1fr");
-    expect(g).toContain("gap: 40px");
+    expect(g).toMatch(/gap:\s*\d+px/);
     expect(g).toContain("align-items: center");
     expect(rule(".os-greet .os-gl")).toContain("flex: 0 0 auto");
   });

@@ -25,10 +25,17 @@ export const OneScreenAuthor: React.FC<{
   currentUser: User | null;
   activeManuscript: Manuscript | null;
   onNavigate: (tab: string, sub?: string) => void;
-}> = ({ loading, manuscripts, currentUser, activeManuscript, onNavigate }) => {
+  /**
+   * ⚠️ ADDITIVE, AND THE DEFAULT IS TODAY'S RENDER (ref v22, Phase 3). The tile shares a 430px row
+   * with the chart card now instead of owning a column, so it draws smaller: ref `.mscard` takes
+   * the cover to 96px, the title to 26 and the byline avatar to 44. Every other surface that mounts
+   * this component keeps exactly what it had — a size prop is the additive change, a rewrite is not.
+   */
+  compact?: boolean;
+}> = ({ loading, manuscripts, currentUser, activeManuscript, onNavigate, compact = false }) => {
   const ms = activeManuscript ?? manuscripts[0] ?? null;
   return (
-    <div className={`os-card os-lift os-aut${loading ? " isload" : ""}`} data-probe="manuscript-card">
+    <div className={`os-card os-lift os-aut${compact ? " os-aut-compact" : ""}${loading ? " isload" : ""}`} data-probe="manuscript-card">
       {loading && <Skel bars={["h", "", "grow"]} />}
 
       {ms ? (

@@ -23,7 +23,7 @@ const html = renderToStaticMarkup(<OneScreenSkeleton />);
 
 describe("the page skeleton mirrors the page", () => {
   it("renders the REAL layout containers, not a private copy of the grid", () => {
-    for (const cls of ["os-content", "os-greet", "os-gl", "os-colL", "os-colM", "os-colR"]) {
+    for (const cls of ["os-content", "os-greet", "os-gl", "os-colL", "os-toprow", "os-colR"]) {
       expect(html).toContain(cls);
     }
   });
@@ -43,13 +43,17 @@ describe("the page skeleton mirrors the page", () => {
   });
 
   it("stands in for every card on the page — nothing loads unannounced", () => {
-    // header counters · author tile · community · chart · tasks · goal · activity
-    /* ⚠️ THREE `os-sk-card` NOW (Phase 2): the author tile and the community tile in the left
-       column, the chart in the centre. Tasks, goal and activity carry their own modifiers. */
-    expect(html.match(/os-sk-card/g) ?? []).toHaveLength(3);
-    for (const cls of ["os-sk-counters", "os-sk-tasks", "os-sk-goal", "os-sk-actv"]) {
+    // header counters · manuscript tile · chart · tasks · activity · community strip
+    /* ⚠️ TWO `os-sk-card` NOW (ref v22): the manuscript tile and the chart, side by side in the top
+       row. The goal ghost is retired with its card, and Community's is the strip beneath both
+       columns — which is the whole point of this file: a card that leaves the page leaves the
+       skeleton in the same commit, or the loading state advertises something that never arrives. */
+    expect(html.match(/os-sk-card/g) ?? []).toHaveLength(2);
+    for (const cls of ["os-sk-counters", "os-sk-tasks", "os-sk-actv", "os-sk-comstrip"]) {
       expect(html).toContain(cls);
     }
+    expect(html).not.toContain("os-sk-goal");
+    expect(html).not.toContain("os-sk-comm\"");
   });
 
   it("is hidden from assistive tech — a shape tells a screen reader nothing", () => {

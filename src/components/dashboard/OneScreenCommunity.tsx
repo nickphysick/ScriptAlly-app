@@ -35,7 +35,28 @@ import seedling from "../../assets/shell/new-shoots-icon.png";
 export const COMMUNITY_EMPTY =
   "As our community builds, you'll be able to benchmark your key stats against other writers at a similar stage.";
 
-export const OneScreenCommunity: React.FC<{ loading: boolean }> = ({ loading }) => (
+/**
+ * ⚠️ TWO LAYOUTS, ONE COMPONENT AND ONE SET OF WORDS (ref v22, Phase 3).
+ *
+ * As a column card it competed for height with the work and had to be told not to be the taller
+ * card; as a STRIP under both columns it states what it is on one row and gets out of the way.
+ * What it says is identical in both, which is the argument for a layout prop over a second
+ * component: a fork here would be two surfaces free to disagree about a feature that is one
+ * sentence long.
+ */
+export const OneScreenCommunity: React.FC<{ loading: boolean; strip?: boolean }> = ({ loading, strip = false }) =>
+  strip ? (
+    <div className={`os-comstrip${loading ? " isload" : ""}`} data-probe="community-strip">
+      <OneScreenMark name="community" />
+      <div className="os-comstriptx">
+        <h2>Community</h2>
+        <p>{COMMUNITY_EMPTY}</p>
+      </div>
+      {/* ⚠️ STILL A STATEMENT ABOUT THE DATA'S MATURITY, NOT THE CODE'S — it stays until the
+          cohorts are populated enough that most readers see real figures. */}
+      <span className="os-commbeta">BETA</span>
+    </div>
+  ) : (
   <div className={`os-card os-comm${loading ? " isload" : ""}`} data-probe="community-card">
     {loading && <Skel bars={["h", "", ""]} />}
     {/* ⚠️ NO BAND (dashboard redesign, Phase 7) — matching every other card. `.os-ahead` still
@@ -53,7 +74,7 @@ export const OneScreenCommunity: React.FC<{ loading: boolean }> = ({ loading }) 
           burgundy inset hairline, the swap-ready geometry and the 404 degrade path — and means an
           illustrated Community mark lands the same one-line way as every other header's. */}
       <OneScreenMark name="community" />
-      <h2 data-probe-text="card-title">Community</h2>
+      <h2>Community</h2>
       {/* ⚠️ THE BETA CHIP STAYS UNTIL THE COHORTS ARE POPULATED ENOUGH THAT MOST READERS SEE REAL
           FIGURES — it is a statement about the DATA's maturity, not the code's. */}
       <span className="os-commbeta">BETA</span>

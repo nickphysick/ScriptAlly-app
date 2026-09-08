@@ -123,11 +123,16 @@ describe("§1 · the lock", () => {
      harness compares `main`'s box against it. */
   it("the grid is three columns on the ref's tracks, and it is its own element", () => {
     const c = rule(".os-grid");
-    expect(c).toContain("grid-template-columns: 352px minmax(0, 1fr) 420px");
+    /* ⚠️ TWO COLUMNS, AND 360 AT EVERY WIDTH (ref v22). The ref's `.grid2` declares
+       `minmax(0,1fr) 440px` with a 360 override below 1700 — and it measures 360 at all three
+       widths, because the shipping configuration adds `.grid2.aw-360` at load. The base is
+       unreachable, so there is one regime here rather than two, and the ≤1700 step belongs to the
+       TOP ROW instead. */
+    expect(c).toContain("grid-template-columns: minmax(0, 1fr) 360px");
     /* ⚠️ THE COLUMN BOTTOMS AGREE BY ONE WORD, not by three heights. Every column is handed the
        same row box; there is no number to keep in step. */
     expect(c).toContain("align-items: stretch");
-    expect(cssRules).toContain(".os-grid { grid-template-columns: 300px minmax(0, 1fr) 340px; }");
+    expect(cssRules).toMatch(/max-width:\s*1699px[\s\S]{0,300}?\.os-toprow\s*\{[^}]*270px/);
     /* ⚠️ THE CAP IS GONE, DELIBERATELY. `--work-max` centred the page inside 1660 and the ref does
        not cap its content at all — at 2520 that put the app's `main` 494px narrower than the ref's
        and every column 250px in from where the design puts it. The token is untouched and Query
@@ -155,8 +160,10 @@ describe("§1 · the lock", () => {
     expect(g).toContain("flex: 1");
     expect(g).toContain("min-height: 0");
     expect(cssRules).toContain(".os-colL { grid-column: 1; }");
-    expect(cssRules).toContain(".os-colM { grid-column: 2; }");
-    expect(cssRules).toContain(".os-colR { grid-column: 3; }");
+    expect(cssRules).toContain(".os-colR { grid-column: 2; }");
+    /* ⚠️ AND THE MIDDLE COLUMN IS RETIRED, CLASS AND RULE TOGETHER — v22 is two columns with a top
+       ROW inside the left one. A `grid-column: 3` left behind is how a deleted track comes back. */
+    expect(cssRules).not.toContain(".os-colM");
   });
 
   /**
@@ -169,12 +176,16 @@ describe("§1 · the lock", () => {
    * stretched to the new total. `height: 0` on the SIDES breaks it: the centre states the height and
    * the sides are told what it is. Both halves are asserted, because either alone is the bug.
    */
-  it("the sides are height:0 with min-height:100%; the centre states the height", () => {
-    const c = rule(".os-colL, .os-colM, .os-colR");
+  /* ⚠️ THE SIDE THAT CONTRIBUTES NOTHING SWAPPED WITH v22'S TWO COLUMNS. The LEFT column holds the
+     top row and the to-do card and therefore sets the height; the RIGHT is `height: 0` with
+     `min-height: 100%` and is told what it is. Both halves are asserted, because either alone is
+     the loop that made a tall column grow the row and the other stretch to the new total. */
+  it("the right column is height:0 with min-height:100%; the left states the height", () => {
+    const c = rule(".os-colL, .os-colR");
     expect(c).toContain("min-height: 100%");
     expect(c).toContain("overflow: hidden");
-    expect(rule(".os-colL, .os-colR")).toContain("height: 0");
-    expect(rule(".os-colM")).toContain("height: 100%");
+    expect(rule(".os-colR")).toContain("height: 0");
+    expect(rule(".os-colL")).toContain("height: 100%");
   });
 
   /* ⚠️ SMALL ON PURPOSE — its job is to stop the card collapsing, not to reserve space. A large
@@ -217,10 +228,12 @@ describe("§1 · the lock", () => {
      340/360 below it, which is where the ref collapses. The app's old four-step ladder was its own
      invention and none of its widths were the design's. */
   it("two regimes, both the ref's, and the centre stays elastic in each", () => {
-    for (const [l, r] of [["352px", "420px"], ["300px", "340px"]]) {
-      expect(cssRules, `${l} / ${r}`).toContain(`grid-template-columns: ${l} minmax(0, 1fr) ${r}`);
+    /* the TOP ROW is what has two regimes now — 330px beside the chart, 270 below 1700 */
+    for (const l of ["330px", "270px"]) {
+      expect(cssRules, l).toContain(`grid-template-columns: ${l} minmax(0, 1fr)`);
     }
-    expect(cssRules).not.toMatch(/grid-template-columns: minmax\(0, 1fr\) \d+px/);
+    /* and the grid itself has exactly one */
+    expect(cssRules.match(/grid-template-columns: minmax\(0, 1fr\) \d+px/g) ?? []).toHaveLength(1);
   });
 
   /* ⚠️ THE SWEEP, NOT THE FOUR NAMES (dashboard redesign, Phase 2). Each header's own suite asserts
@@ -257,14 +270,13 @@ describe("§1 · the lock", () => {
      a function of how many tickets were open; the clamp makes them a function of the viewport, which
      is the only thing a chart's shape should follow. */
   it("the vertical budget: the chart is a clamped height, the to-do panel takes the rest", () => {
-    const chart = rule(".os-colM .os-lead");
-    expect(chart).toContain("height: clamp(400px, 42vh, 560px)");
-    expect(chart).toContain("flex: 0 0 auto");
+    const chart = rule(".os-toprow .os-lead");
+    expect(chart).toContain("height: clamp(330px, 33vh, 430px)");
     /* ⚠️ NO NUMERIC CEILING — `max-height: none` is a REMOVAL and appears in the narrow regimes,
        where the card takes a stated height instead. The reader joins every block for the selector,
        so forbidding the property outright fails on a rule that is turning it off. */
     expect(chart).not.toMatch(/max-height:\s*\d/);
-    const todo = rule(".os-colM .os-tasks");
+    const todo = rule(".os-colL .os-tasks");
     expect(todo).toContain("flex: 1 1 auto");
     expect(todo).toContain("min-height: 0");
     /* ⚠️ THE FEED FLEXES TO ITS COLUMN AND NEVER SETS IT — the property the measurement asserts. */
@@ -273,15 +285,20 @@ describe("§1 · the lock", () => {
 });
 
 describe("§2 · the greeting", () => {
-  /* ⚠️ RETARGETED (audit pack P2). The kicker went first, for repeating what the chrome already
-     said; the muted DATE LINE that replaced it has now gone too, for a plainer reason — anyone
-     reading it knows what day it is. A subtitle sits BELOW the name instead, so the block reads
-     greeting → address → facts. */
-  it("the greeting leads, a subtitle sits under it, and the name is plain ink", () => {
+  /**
+   * ⚠️ THE SLOT UNDER THE NAME IS EMPTY AGAIN, AND IT HAS NOW HELD THREE THINGS (ref v22).
+   *
+   * A kicker went first, for repeating what the chrome already said. A muted date line replaced it
+   * and went for a plainer reason — anyone reading it knows what day it is. A subtitle replaced
+   * THAT, and v22 draws the greeting alone: its hero is `<div><h1>…</h1></div>` beside the stats,
+   * with no lede, no manuscript line and no goals meter. Three answers, and the design's has been
+   * the name by itself each time the question was asked properly.
+   */
+  it("the greeting leads ALONE, and the name is plain ink", () => {
     const html = render();
     expect(html).toContain("Hello, Nick");
-    expect(html).toContain('class="os-sub2"');
-    expect(html).toContain("on your desk today?");
+    expect(html).not.toContain('class="os-sub2"');
+    expect(html).not.toContain("on your desk today?");
     expect(html).not.toContain("os-kicker");
     // no italic-burgundy name: the h1 carries no <em>
     expect(html).not.toMatch(/<h1[^>]*>[^<]*<em/);
@@ -316,9 +333,10 @@ describe("§2 · the greeting", () => {
     expect(html).not.toContain("os-pill");
     expect(html).not.toContain("Querying since");
     expect(html).not.toContain("out with agents");
-    /* the greeting keeps its name and its question — the row went, the address did not */
+    /* ⚠️ THE GREETING KEEPS ITS NAME AND NOTHING ELSE (ref v22) — the pills went, then the date
+       line, then the address. What this case guards is that the ROW of pills has not returned, and
+       that claim does not depend on what else is or is not under the name. */
     expect(html).toContain("Hello, ");
-    expect(html).toContain("on your desk today?");
   });
 
   it('the counter says "Agents on file" — "on file", never "met"', () => {

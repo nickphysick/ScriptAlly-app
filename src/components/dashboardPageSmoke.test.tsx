@@ -51,7 +51,10 @@ describe("/dashboard renders", () => {
     const html = renderPageSeeded(page());
     expect(html).toContain("Active queries");   // the chart card, the page's spine
     expect(html).toContain("Agents on file");   // the stats, on the ground since Phase 3
-    expect(html).toContain("Querying goals");   // the rail
+    /* ⚠️ "Querying goals" IS NOT A LANDMARK ON THIS PAGE ANY MORE (ref v22) — the card leaves the
+       dashboard with the two-column layout. `Activity` is the right column's own name and is the
+       landmark that replaces it, so this census still spans all three regions of the page. */
+    expect(html).toContain("Activity");         // the right column, top to bottom
     /* ⚠️ DAY ONE HAS STOOD DOWN, asserted on the CHART's own invitation. The first try used the
        rail's "The story starts with your first query." — which is the empty ACTIVITY FEED's line and
        shows on the seeded fixture too, so it discriminated nothing. A day-one check has to name copy

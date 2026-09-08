@@ -5,7 +5,7 @@
  * OneScreenSkeleton — the ghost shell shown while the dashboard's data resolves (ref
  * design-refs/dashboard-audit.html, `.skel`).
  *
- * ⚠️ IT REUSES THE REAL LAYOUT CLASSES — `os-content`, `os-greet`, `os-gl`, `os-colL`, `os-colM`,
+ * ⚠️ IT REUSES THE REAL LAYOUT CLASSES — `os-content`, `os-greet`, `os-gl`, `os-colL`, `os-toprow`,
  * `os-colR` — RATHER THAN RESTATING THE GRID. That is the whole design of this file, and it is
  * what the pack is actually asking for: "a generic grid of grey rectangles is not acceptable — the
  * point is that the layout does not jump when data lands." A second copy of the grid would agree
@@ -43,23 +43,23 @@ export const OneScreenSkeleton: React.FC<{
         <div className="os-sk os-sk-counters" />
       </div>
 
-      {/* ⚠️ THREE COLUMNS, MATCHING THE PAGE BENEATH (Phase 2). The ghosts read the real layout
-          classes, so a column width or gap that moves in the page moves here with it — the point
-          of this file. `.os-midrow` is retired with the two-row spine it belonged to. */}
+      {/* ⚠️ TWO COLUMNS AND A TOP ROW, MATCHING THE PAGE BENEATH (ref v22, Phase 3). The ghosts
+          read the real layout classes, so a column width, a gap or a row that moves in the page
+          moves here with it — the point of this file, and the reason the skeleton had to be part
+          of the layout change rather than a follow-up. The goals ghost is retired with its card;
+          Community's is now the strip beneath both columns. */}
       <div className="os-colL">
-        <div className="os-sk os-sk-card os-sk-aut" />
-        <div className="os-sk os-sk-card os-sk-comm" />
-      </div>
-
-      <div className="os-colM">
-        <div className="os-sk os-sk-card os-sk-chart" />
+        <div className="os-toprow">
+          <div className="os-sk os-sk-card os-sk-aut" />
+          <div className="os-sk os-sk-card os-sk-chart" />
+        </div>
         <div className="os-sk os-sk-tasks" />
       </div>
 
       <div className="os-colR">
-        <div className="os-sk os-sk-goal" />
         <div className="os-sk os-sk-actv" />
       </div>
+      <div className="os-sk os-sk-comstrip" />
     </div>
   </div>
 );
