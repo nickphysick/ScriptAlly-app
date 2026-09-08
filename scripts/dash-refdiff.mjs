@@ -38,7 +38,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const REF = join(ROOT, "design-refs", "dashboard-cappuccino-v16.html");
+const REF = join(ROOT, "design-refs", "dashboard-cappuccino-v22.html");
 
 const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
@@ -50,11 +50,23 @@ const APP = process.env.SA_REFDIFF_APP_URL || "http://127.0.0.1:4173";
 
 /* ── the contract ────────────────────────────────────────────────────────────────────────────── */
 
+/**
+ * ⚠️ THE PROBE SET IS THE REF'S, AND v22 CHANGED SIX OF THEM. `activity-tabs` → `activity-filters`
+ * (the tabs are a collapsible filter row now), `community-card` → `community-strip` (it is a
+ * full-width footer strip rather than a card in a column), `goals-card` is GONE, and `toprow` is
+ * new — the manuscript tile and the chart card share a row, and the row itself is the thing that
+ * has to line up.
+ *
+ * ⚠️ A RENAMED PROBE IS REPORTED, NEVER SILENTLY DROPPED. Run against v22 with v16's list the
+ * harness said "the ref has no such probe" four times, which is the correct answer and the reason
+ * this list is worth keeping honest: a probe quietly removed is coverage quietly removed.
+ */
 const PROBES = [
-  "main", "hero", "stats", "grid",
-  "manuscript-card", "community-card", "chart-card", "plot", "brush",
+  "main", "hero", "stats", "grid", "toprow",
+  "manuscript-card", "chart-card", "plot", "brush",
   "todo-card", "todo-badge", "todo-rule",
-  "goals-card", "activity-card", "activity-tabs", "feed",
+  "activity-card", "activity-filters", "feed",
+  "community-strip",
 ];
 
 /**
@@ -76,11 +88,15 @@ const PROBES = [
  */
 const ANCHOR = {
   main: "datum",
-  hero: "span", stats: "left", grid: "span",
-  "manuscript-card": "left", "community-card": "left",
+  hero: "span", stats: "span", grid: "span", toprow: "span",
+  /* the tile is the only fixed track in the top row; everything beside it is elastic */
+  "manuscript-card": "left",
   "chart-card": "span", plot: "span", brush: "right",
   "todo-card": "span", "todo-badge": "right", "todo-rule": "span",
-  "goals-card": "right", "activity-card": "right", "activity-tabs": "right", feed: "right",
+  /* the right column is 360px pinned to the right edge, and everything in it goes with it */
+  "activity-card": "right", "activity-filters": "right", feed: "right",
+  /* the strip runs the full width beneath both columns */
+  "community-strip": "span",
 };
 /**
  * ⚠️ THE REF'S OWN THREE, NOT SIX OF MINE — v16 instruments itself and the app carries its names.
@@ -93,7 +109,7 @@ const ANCHOR = {
  * monoculture-fixture fault wearing a harness's clothes: the sample was drawn from the population
  * that was already correct. `TYPE_SCALE` below is the coverage fix, and it is the actual gate.
  */
-const TEXT_PROBES = ["greeting", "card-title", "stat-figure"];
+const TEXT_PROBES = ["greeting", "panel-title", "chart-title", "stat-figure"];
 
 /**
  * The type scale, as SELECTOR PAIRS — one row per treatment the design names, ref side and app side.
@@ -105,8 +121,8 @@ const TEXT_PROBES = ["greeting", "card-title", "stat-figure"];
  */
 const TYPE_SCALE = [
   ["card title",      ".hd h3",              ".os-ahead h2, .os-th2 h2"],
+  ["chart figure",    "#hdB .statblk b",     ".os-ahead .os-n"],
   ["hero greeting",   ".hero h1",            ".os-greet h1"],
-  ["hero lede",       ".hero p",             ".os-sub2"],
   ["stat label",      ".stat .lab",          ".os-cl"],
   ["stat figure",     ".stat .fig b",        ".os-cn"],
   ["stat chip",       ".stat .mini",         ".os-cd"],
@@ -124,9 +140,6 @@ const TYPE_SCALE = [
   ["bubble meta",     ".cv .msg .b .m",      ".os-bubmeta"],
   ["bubble label",    ".cv .msg .b .slab",   ".os-bublab"],
   ["todo badge",      ".badge b",            ".os-tbadge b"],
-  ["goal figure",     ".goal .fig b",        ".os-goal-n"],
-  ["goal of",         ".goal .fig span",     ".os-goal-of"],
-  ["goal bar label",  ".wk .lb",             ".os-goal-hlb"],
 ];
 
 /**
@@ -484,7 +497,7 @@ function table(result) {
 /* ── run ─────────────────────────────────────────────────────────────────────────────────────── */
 
 const browser = await chromium.launch();
-const result = { when: new Date().toISOString(), ref: "design-refs/dashboard-cappuccino-v16.html", app: APP, widths: WIDTHS, byWidth: {}, total: 0 };
+const result = { when: new Date().toISOString(), ref: "design-refs/dashboard-cappuccino-v22.html", app: APP, widths: WIDTHS, byWidth: {}, total: 0 };
 let selfTestSaw = null;
 
 try {
