@@ -138,17 +138,24 @@ describe("the card's CSS", () => {
      it shrink-wrap (`flex: 0 1 auto`) and the GROUP centres. Inside the card each took an equal
      third of a fixed box and filled it exactly, so `justify-content` had nothing to do — which is
      why "centred in the remaining width" needed the flex change to become a statement at all. */
-  it("takes the remaining width; the three stats sit left, on the ref's OWN two gaps", () => {
+  /* ⚠️ RETARGETED TO v22, AND THE OLD CASE CONTRADICTED ITS OWN PREAMBLE. The block above says
+     "the GROUP centres" and the assertion required `justify-content: flex-start` — written one
+     after the other, disagreeing, and green because the CSS matched the assertion rather than the
+     sentence. v22 settles it: the base CENTRES the stats in their track at 44px, a middle regime
+     tightens to 34 below 2100, and only below 1700 does it go flex-start at 32. Three regimes; the
+     old lock knew about two, and the one it was missing covers 1920. */
+  it("takes the remaining width, and the three stats have a gap and an alignment per regime", () => {
     const r = rule(".os-counters");
     expect(r).toContain("flex: 1");
-    expect(r).toContain("justify-content: flex-start");
-    /* ⚠️ TWO GAPS, ONE PER REGIME — ref `.stats{gap:56px}` with `gap:36px!important` inside its
-       `@media (max-width:1700px)`. The 36 was taken from the media block and applied at EVERY
-       width, which is the ref's narrow value used wide; the same mistake as `.main`'s padding, two
-       rules apart in the same sheet. Both are asserted, because pinning only the base would pass
-       on a sheet that had lost the narrow step. */
-    expect(r).toContain("gap: 56px");
-    expect(cssRules).toMatch(/max-width:\s*1699px[\s\S]*?\.os-counters\s*\{[^}]*gap:\s*36px/);
+    expect(r).toContain("justify-content: center");
+    expect(r).toContain("gap: 44px");
+    /* ⚠️ ALL THREE ARE ASSERTED. Pinning only the base passes on a sheet that has lost a step, and
+       a lost step is invisible to the ref-diff: `stats` probes the CONTAINER, whose box is the same
+       whether its children are centred or packed left. This lock is the only thing standing between
+       a dropped regime and nobody noticing. */
+    expect(cssRules).toMatch(/max-width:\s*2100px[\s\S]*?\.os-counters\s*\{[^}]*gap:\s*34px/);
+    expect(cssRules).toMatch(/max-width:\s*1699px[\s\S]*?\.os-counters\s*\{[^}]*justify-content:\s*flex-start/);
+    expect(cssRules).toMatch(/max-width:\s*1699px[\s\S]*?\.os-counters\s*\{[^}]*gap:\s*32px/);
   });
 
   /* ⚠️ READOUTS, NOT CONTROLS — a hover lift promises a click that does not happen. Asserted even
