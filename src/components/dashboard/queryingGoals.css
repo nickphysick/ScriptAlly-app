@@ -136,11 +136,24 @@
 /* ⚠️ ONE RING PER QUERY THE WRITER SAID THEY WOULD SEND. `flex-wrap` because a target of twelve at
    the rail's narrowest step will not sit on one line, and a ring row that overflows its card is
    worse than one that takes two lines. */
-/* ref `.slots{gap:10px;margin:16px 0 6px}` with `.slot{width:26px;height:26px}` — a slot at 26px is
-   a place for a query to go, which is what a plan looks like; at 13 it was a bullet. */
-.os-goal-rings { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 6px; }
+/**
+ * ref `.slots{gap:10px;margin:16px 0 6px}` with `.slot{width:26px;height:26px}` — a slot at 26px is
+ * a place for a query to go, which is what a plan looks like; at 13 it was a bullet.
+ *
+ * ⚠️ ONE ROW, ALWAYS, AND THE SLOTS SHRINK RATHER THAN WRAP (ref v16, Phase 8). The ref draws five
+ * because five is its demo target; the app draws one per target, so a target of eight in the left
+ * column's 300px track wrapped to a second row — measured, the card came out 336.5px against the
+ * ref's 310, and the wrap is 26px of it. Wrapping is the wrong answer for a PLAN: a second row of
+ * slots reads as a second week rather than as more of the same one.
+ *
+ * ⚠️ `flex: 0 1 26px` WITH A FLOOR, NOT A COUNT CAP. They are 26px whenever they fit and shrink
+ * toward 14 when they do not, which holds for any target the writer sets; capping the COUNT at five
+ * would draw a plan of eight as a plan of five, and no amount of styling makes that true.
+ */
+.os-goal-rings { display: flex; flex-wrap: nowrap; gap: 10px; margin: 16px 0 6px; }
 .os-goal-rings i {
-  width: 26px; height: 26px; border-radius: 50%;
+  flex: 0 1 26px; min-width: 14px; aspect-ratio: 1;
+  width: auto; height: auto; border-radius: 50%;
   /* ⚠️ DASHED WHILE EMPTY — ref `.slot`. A solid outline reads as a control that can be pressed;
      a dashed one reads as a space reserved, which is exactly what an unfilled slot is. */
   border: 1.5px dashed #cdbfb1; background: transparent;
