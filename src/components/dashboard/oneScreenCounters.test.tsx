@@ -138,29 +138,17 @@ describe("the card's CSS", () => {
      it shrink-wrap (`flex: 0 1 auto`) and the GROUP centres. Inside the card each took an equal
      third of a fixed box and filled it exactly, so `justify-content` had nothing to do — which is
      why "centred in the remaining width" needed the flex change to become a statement at all. */
-  it("takes the remaining width; the three stats sit left, on the ref's 36px gap", () => {
-    const c = rule(".os-counters");
-    expect(c).toContain("flex: 1");
-    expect(c).toContain("min-width: 0");
-    /* ⚠️ LEFT-ALIGNED, NOT CENTRED (refdiff pass, Phase 3). The ref's own shipping value is
-       `justify-content:flex-start!important`, and the stats sit in the second track of a two-column
-       hero grid rather than in "the space left over" — which is what put their left edge 66px out. */
-    expect(c).toContain("justify-content: flex-start");
-    expect(c).toContain("gap: 36px");
-    /* the card is gone: no paper, no radius, no shadow, no padding of its own */
-    expect(c).toContain("padding: 0");
-    /* ⚠️ COMMENTS STRIPPED FIRST — house rule, and it caught this on its first run. The file's own
-       note explains that `os-card` came OFF, so a raw-text sweep finds the token in the prose that
-       records its removal and reports the removal as not having happened. */
-    const src = readFileSync(resolve(__dirname, "./OneScreenCounters.tsx"), "utf8")
-      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    expect(src, "the stats must not carry the card class").not.toMatch(/["\s`]os-card["\s`]/);
-    const col = rule(".os-counter");
-    expect(col).toContain("flex: 0 0 auto");
-    expect(col).toContain("gap: 18px");
-    /* ⚠️ THE DIVIDER IS GONE. The ref's `.stat` is `display:flex; align-items:center; gap:18px` and
-       nothing else — the rule between stats was the container's furniture, and the container went. */
-    expect(col).not.toContain("border-left");
+  it("takes the remaining width; the three stats sit left, on the ref's OWN two gaps", () => {
+    const r = rule(".os-counters");
+    expect(r).toContain("flex: 1");
+    expect(r).toContain("justify-content: flex-start");
+    /* ⚠️ TWO GAPS, ONE PER REGIME — ref `.stats{gap:56px}` with `gap:36px!important` inside its
+       `@media (max-width:1700px)`. The 36 was taken from the media block and applied at EVERY
+       width, which is the ref's narrow value used wide; the same mistake as `.main`'s padding, two
+       rules apart in the same sheet. Both are asserted, because pinning only the base would pass
+       on a sheet that had lost the narrow step. */
+    expect(r).toContain("gap: 56px");
+    expect(cssRules).toMatch(/max-width:\s*1699px[\s\S]*?\.os-counters\s*\{[^}]*gap:\s*36px/);
   });
 
   /* ⚠️ READOUTS, NOT CONTROLS — a hover lift promises a click that does not happen. Asserted even

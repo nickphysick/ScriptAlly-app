@@ -107,7 +107,7 @@ describe("the bands are one geometry, coloured by purpose", () => {
        two cannot drift, because there is only one declaration to edit. */
     const grouped = /(?:^|\n)\.os-ahead,\s*\.os-th2\s*\{([^}]*)\}/m.exec(bare);
     expect(grouped, "the two bands must share ONE geometry rule").not.toBeNull();
-    expect(grouped![1]).toContain("padding: 0 16px");
+    expect(grouped![1]).toContain("padding: 0 20px");   // ref `.hd{padding:14px 20px}`
     expect(grouped![1]).toContain("height: 51px");
     /* and neither may state a competing padding elsewhere — see the base-rule case below */
   });
@@ -214,7 +214,7 @@ describe("one band geometry, declared", () => {
     expect(m, "the two bands must share ONE geometry rule").not.toBeNull();
     expect(m![1]).toContain("height: 51px");
     expect(m![1]).toContain("box-sizing: border-box");
-    expect(m![1]).toContain("padding: 0 16px");
+    expect(m![1]).toContain("padding: 0 20px");
   });
 
   /* ⚠️ THE BASE RULES, ANCHORED — see `geom`. The chart's scoped override DOES declare a padding

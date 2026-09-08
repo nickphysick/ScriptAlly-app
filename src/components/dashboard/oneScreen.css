@@ -131,10 +131,7 @@
 @media (max-width: 1699px) {
   .os-grid { grid-template-columns: 340px minmax(0, 1fr) 360px; }
   .os-content { padding-left: 22px; }  /* the ref's `.main{padding-left:22px!important}` step */
-  /* the ref's own `@media (max-width:1700px)` step for the slot */
-  .os-cic, .os-cic.plane { width: 96px; height: 96px; }
-  /* the ref's own step for the brush at the same breakpoint */
-  .os-bw { width: 170px; }
+
 }
 .os-colL { grid-column: 1; }
 .os-colM { grid-column: 2; }
@@ -514,10 +511,34 @@
 /* ⚠️ THE REF'S STATS: flex, 36px gap, LEFT-aligned in the track the hero's second column gives it.
    The app centred them in the remaining width; the ref's own `justify-content:flex-start!important`
    is the shipping value. */
+/* ⚠️ TWO GAPS, ONE PER REGIME — ref `.stats{gap:56px}` with `gap:36px!important` inside its
+   `@media (max-width:1700px)`. The 36 was taken from the media block and applied at every width,
+   which is the ref's narrow value used wide; the same mistake as `.main`'s padding, two rules
+   apart. `justify-content` is `flex-start` in both, which IS the ref's narrow override — its base
+   `center` is what the ref does with no rail beside it. */
 .os-counters {
   flex: 1; min-width: 0;
-  display: flex; align-items: center; justify-content: flex-start; gap: 36px;
+  display: flex; align-items: center; justify-content: flex-start; gap: 56px;
   padding: 0;
+}
+
+/**
+ * ⚠️ THE HERO STACKS BELOW THE REF'S OWN BREAKPOINT — and this block sits HERE, after the two
+ * rules it overrides, because a media query confers no specificity.
+ *
+ * It was written into the grid's `@media (max-width: 1699px)` two hundred lines above `.os-greet`,
+ * where both rules are 0-1-0 and the later one simply won. Measured: the hero stayed two columns at
+ * 1536, 82px shorter than the ref's stacked one, which moved the TOP OF ALL THREE COLUMNS up by
+ * that much — every card on the page reported as misplaced at 1536 and correct at 1920, which is
+ * the tell for a missing responsive step rather than a wrong value. This repo records the same trap
+ * against a `prefers-reduced-motion` override; it is the same law and it cost the same hour.
+ *
+ * Ref: `@media (max-width:1700px){ .hero{grid-template-columns:1fr!important;gap:14px!important}
+ * .stats{gap:36px!important} }`.
+ */
+@media (max-width: 1699px) {
+  .os-greet { grid-template-columns: 1fr; gap: 14px; }
+  .os-counters { gap: 36px; }
 }
 /* ⚠️ READOUTS, NOT CONTROLS — no lift, ever. Kept after the card came off (Phase 3): the element
    no longer carries `.os-card`, so these two rules select nothing TODAY, and they are the guard
@@ -629,6 +650,22 @@
 /* the plane's source is 800px, so it is not the binding constraint — it takes the slot */
 .os-cic.plane { width: 112px; height: 112px; margin: 0; }
 .os-cic.plane img { mix-blend-mode: normal; }
+
+/* ⚠️ THE REF'S ≤1700 STEP, DECLARED AFTER THE BASE RULE — a media query confers no specificity, so
+   this block sat two hundred lines ABOVE `.os-cic` and lost to it at every width. Measured: the
+   slot stayed 112px at 1536 where the ref steps to 96, and the stats row was 16px taller than the
+   ref's. Second instance of the same trap in this file in one pass; the first was the hero's own
+   stack, and both were written into the grid's media block because that is where the responsive
+   rules "live". They live after the rule they override, or they do not live at all.
+
+   ⚠️ AND IT HAD TO MOVE TWICE. Placed after `.os-cic`'s base rule it still lost, because
+   `.os-cic.plane` is declared BELOW that and is 0-2-0 — the same weight as this block's second
+   selector, and later. Specificity gets you level with the rule you are overriding; only order
+   settles it, so the step goes after the LAST of them. */
+@media (max-width: 1699px) {
+  .os-cic, .os-cic.plane { width: 96px; height: 96px; }
+}
+
 
 /* the goals mark — same rules, smaller box; `Query Target Icon.png` despite the card's name */
 /* ⚠️ `align-self: center` IS LOAD-BEARING — `.os-goal-r1` is `align-items: baseline`, and AN IMAGE
@@ -749,7 +786,11 @@
    thumbnail resizes as you drag. */
 .os-rangelbl {
   font-size: 14px; color: #2a1f18; white-space: nowrap;
-  min-width: 96px; text-align: left; flex: none;
+  /* ⚠️ 76px IS THE REF'S OWN LABEL WIDTH ("Last 8 weeks" at 14px), and the min-width is still here
+     for the reason it always was: the words change length ("Last 14 days" → "All time") and without
+     a floor the thumbnail resizes as you drag. It was 96, which made the whole pill 22px wider than
+     the ref's. */
+  min-width: 76px; text-align: left; flex: none;
 }
 /* ⚠️ ONE CLUSTER, RIGHT-ALIGNED AS A UNIT — frequency · slider · label. Pushing each control
    right on its own is what let the label drift away from the slider. */
@@ -1047,6 +1088,11 @@
 }
 .os-bw input[type="range"]::-moz-range-thumb { width: 10px; height: 34px; background: transparent; border: 0; }
 .os-bw input[type="range"]:focus-visible { outline: 2px solid #b98a76; outline-offset: 2px; border-radius: 6px; }
+/* the ref's `@media (max-width:1700px){.brush .bw{width:170px!important}}` — after the base rule,
+   for the reason recorded at `.os-cic`'s own step */
+@media (max-width: 1699px) {
+  .os-bw { width: 170px; }
+}
 
 /* the tip's band swatch — the same square the legend uses, at the row's size */
 .os-tip .bsw { width: 11px; height: 11px; border-radius: 3px; flex: none; box-shadow: inset 0 0 0 1px rgba(58, 28, 20, 0.08); }
@@ -1391,7 +1437,9 @@
  * others. A fixed height with `box-sizing: border-box` makes the agreement structural: the band is
  * 51px because it says so, and its contents centre inside whatever room that leaves.
  */
-.os-ahead, .os-th2 { height: 51px; padding: 0 16px; box-sizing: border-box; flex: none; }
+/* ref `.hd{padding:14px 20px}` — the 20px gutter, with the vertical padding replaced by the stated
+   height (see the note above). It was 16, which put every band's contents 4px left of the ref's. */
+.os-ahead, .os-th2 { height: 51px; padding: 0 20px; box-sizing: border-box; flex: none; }
 
 /**
  * ⚠️ THE CHART'S BAND IS THE ONE EXCEPTION, AND IT IS THE REF'S OWN (refdiff pass, Phase 5).
@@ -1419,17 +1467,15 @@
   flex-wrap: wrap; gap: 10px;
   align-items: center;
 }
-/* ⚠️ TWO ROWS BY CONSTRUCTION, NOT BY OVERFLOW, AND IT IS THE CONTROLS THAT CLAIM THE SECOND ROW.
-   `flex-wrap` alone breaks wherever the contents run out of room — a different place at every
-   width, and inside the control cluster at some of them. Forcing the break on the READOUT instead
-   looks equivalent and is not: the band's first child is the card's illustrated mark, so a
-   full-width stat block leaves the mark alone on a row above it and the band grows to THREE.
-   Measured: 170px of band that way against 115 in the ref. */
-.os-lead > .os-ahead > .os-ctrls { flex: 1 0 100%; }
-/* ⚠️ AND THE CONTROL ROW IS LEFT-ALIGNED ONCE IT HAS A ROW OF ITS OWN — `margin-left: auto` was
-   pushing it to the far edge of a row it now occupies alone, which reads as two unrelated clusters
-   at opposite ends of the band. Ref `#rcBrush`: chips then brush, from the left. */
-.os-lead > .os-ahead > .os-ctrls { margin-left: 0; }
+/* ⚠️ THE BAND WRAPS WHEN IT MUST AND NOT BEFORE — and forcing the break was measured wrong.
+   `.os-ctrls { flex: 1 0 100% }` gave the controls a row of their own at every width, so at 2520,
+   where the ref's header fits comfortably on ONE line with the controls pushed right, the app put
+   them on a second row at the far left: the brush's right edge measured 1184px from the content's
+   right where the ref's is 463. The ref's own `.hd` is `flex-wrap: wrap` and nothing else — it is
+   two rows at 1536 and 1920 because it runs out of room, and one row at 2520 because it does not.
+   `margin-left: auto` therefore stays: on one row it pushes the cluster right, and on two it is
+   the only thing on its row and has no effect. */
+
 
 
 /* the same, for the sage band — see `.os-th2` above for why the height survives the paint */
