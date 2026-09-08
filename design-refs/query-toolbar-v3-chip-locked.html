@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Toolbar pills, skeleton, page-open</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#1c130f;--body-ink:#3a1c14;--label:#9c8878;--burgundy:#7c3a2a;--sage-accent:#8a9e88;--hairline:#ece0d2;--field-border:#e0d5c8;--pink:#f5e2da;--pink-border:#e8c8bc;
+    --sand:#f7efe3;--sage:#e0e5dd;--pinkS:#f5e6df;--offer:#d7e0e8;--closed:#e4e1db;
+    --well:#eee8e0;--wellEdge:#e2dbd1}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ground);font-family:'Inter',sans-serif;color:var(--body-ink);font-size:13px;padding:22px 28px 90px}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+  h1{font-family:'Playfair Display',serif;font-weight:500;font-size:24px;color:var(--ink)}
+  .lede{font-family:'Playfair Display',serif;font-style:italic;font-size:13.5px;color:#6a5a50;margin:5px 0 10px;max-width:900px;line-height:1.5}
+  .ctl{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+  .ctl .k{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--label)}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--field-border);border-radius:10px;padding:3px}
+  .seg button{border:none;background:transparent;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#6a5a50;padding:7px 11px;border-radius:7px}
+  .seg button.on{background:var(--pink);color:var(--body-ink)}
+  .desc{color:#6a5a50;max-width:920px;line-height:1.55;margin:8px 0 14px;min-height:44px}
+  .desc b{font-weight:500;color:var(--body-ink)}
+
+  .page{background:var(--parchment);border-radius:18px;box-shadow:0 1px 2px rgba(58,28,20,.04),0 10px 30px rgba(58,28,20,.08);overflow:hidden;--pad:18px}
+  .shell{display:flex;align-items:center;gap:18px;padding:22px var(--pad) 14px}
+  .shell .art{width:64px;height:64px;border-radius:12px;background:repeating-linear-gradient(135deg,rgba(58,28,20,.05) 0 6px,transparent 6px 12px);border:1px dashed rgba(58,28,20,.22);flex:none}
+  .shell h2{font-family:'Playfair Display',serif;font-weight:500;font-size:30px;color:var(--ink);line-height:1}
+  .shell .sub{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#6a5a50;margin-top:6px}
+  .shell .cta{margin-left:auto;background:var(--ink);color:#fdfaf5;border-radius:99px;padding:11px 20px;font-size:13.5px;font-weight:500;flex:none}
+  .tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:0 var(--pad) 12px}
+  .tile{background:#fff;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 1px 2px rgba(58,28,20,.04),0 5px 14px rgba(58,28,20,.06)}
+  .tile .ic{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;font-size:12px}
+  .tile .k{color:var(--label);font-size:8px}
+  .tile .n{font-family:'Playfair Display',serif;font-size:21px;color:var(--ink);line-height:1;margin-top:2px}
+
+  .well{background:var(--well);border-radius:16px;margin:0 var(--pad) 18px;padding:14px 16px 16px;box-shadow:inset 0 1px 3px rgba(58,28,20,.06)}
+  .wellbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:4px 2px 16px}
+  .left{display:flex;align-items:center;gap:10px}
+  .right{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+  .showing{font-family:'Playfair Display',serif;font-size:15px;color:#6a5a50;white-space:nowrap}
+  .showing b{color:var(--ink);font-weight:500}
+  .search{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--field-border);border-radius:99px;padding:12px 20px;width:360px;justify-self:center;color:#c8b8a8;font-size:14px;box-shadow:0 1px 2px rgba(58,28,20,.05),0 3px 10px rgba(58,28,20,.06)}
+  .search .kbd{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:.5px solid var(--field-border);border-radius:99px;padding:2px 8px;color:#b8a898}
+  .views{display:inline-flex;background:#fff;border:1px solid var(--field-border);border-radius:99px;padding:4px}
+  .views span{padding:7px 14px;border-radius:99px;font-family:'Playfair Display',serif;font-size:13.5px;color:#8a7a6c}
+  .views span.on{background:var(--pink);color:var(--ink)}
+
+  /* ---- control pill treatments ---- */
+  .pill{display:inline-flex;align-items:center;background:#fff;border:1px solid var(--field-border);border-radius:99px;padding:10px 18px;white-space:nowrap;box-shadow:0 1px 2px rgba(58,28,20,.04);cursor:pointer}
+  .pill .row{display:inline-flex;align-items:center;gap:9px}
+  .pill:hover{border-color:#cdbfae}
+  .pill .lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--label)}
+  .pill .val{font-family:'Playfair Display',serif;font-size:14px;color:var(--ink)}
+  .pill .chev{color:var(--burgundy);font-size:9px}
+  .pill .n{background:var(--pink);border:1px solid var(--pink-border);border-radius:99px;font-family:'JetBrains Mono',monospace;font-size:8.5px;padding:1px 7px;color:var(--body-ink)}
+  /* p2 · stacked label above value */
+  .p2 .pill{flex-direction:column;align-items:flex-start;gap:2px;padding:7px 16px;border-radius:14px}
+  .p2 .pill .row{display:flex;align-items:center;gap:8px}
+  /* p3 · label as a leading chip inside the pill */
+  .p3 .pill{padding:5px 14px 5px 5px;gap:10px}
+  .p3 .pill .lab{background:var(--parchment);border:.5px solid var(--hairline);border-radius:99px;padding:6px 10px;color:#6a5a50}
+  /* p4 · one joined rail of pills */
+  .p4 .left{gap:0;background:#fff;border:1px solid var(--field-border);border-radius:99px;padding:4px;box-shadow:0 1px 2px rgba(58,28,20,.04)}
+  .p4 .showing{padding:0 14px 0 12px}
+  .p4 .pill{border:none;box-shadow:none;background:transparent;padding:8px 14px}
+  .p4 .pill+.pill{box-shadow:inset 1px 0 0 var(--hairline)}
+
+  /* ---- skeleton ---- */
+  @keyframes sheen{0%{background-position:-380px 0}100%{background-position:380px 0}}
+  .sk{background:linear-gradient(90deg,#efe9e1 0px,#f6f1ea 120px,#efe9e1 240px);background-size:380px 100%;animation:sheen 1.5s linear infinite;border-radius:8px}
+  .skcard{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(58,28,20,.05),0 6px 16px rgba(58,28,20,.08)}
+  .skcard .b{height:44px;background:#f4efe8}
+  .skcard .body{padding:15px 16px 14px}
+  .skrow{display:flex;align-items:center;gap:12px}
+  .skcirc{width:40px;height:40px;border-radius:50%;flex:none}
+  .skl{height:11px;border-radius:6px}
+  .skfoot{margin-top:14px;padding-top:12px;border-top:.5px solid var(--hairline)}
+  /* ---- page-open animation ---- */
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .anim .shell{animation:rise .34s cubic-bezier(.2,.8,.2,1) both}
+  .anim .tiles .tile{animation:rise .34s cubic-bezier(.2,.8,.2,1) both}
+  .anim .tiles .tile:nth-child(1){animation-delay:.04s}.anim .tiles .tile:nth-child(2){animation-delay:.07s}.anim .tiles .tile:nth-child(3){animation-delay:.10s}.anim .tiles .tile:nth-child(4){animation-delay:.13s}.anim .tiles .tile:nth-child(5){animation-delay:.16s}
+  .anim .well{animation:rise .38s cubic-bezier(.2,.8,.2,1) both;animation-delay:.10s}
+  .anim .grid>*{animation:rise .34s cubic-bezier(.2,.8,.2,1) both}
+  .anim .grid>*:nth-child(1){animation-delay:.18s}.anim .grid>*:nth-child(2){animation-delay:.21s}.anim .grid>*:nth-child(3){animation-delay:.24s}
+  .anim .grid>*:nth-child(4){animation-delay:.27s}.anim .grid>*:nth-child(5){animation-delay:.30s}.anim .grid>*:nth-child(6){animation-delay:.33s}
+
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(58,28,20,.06),0 8px 20px rgba(58,28,20,.11)}
+  .band{display:flex;align-items:center;gap:9px;padding:11px 16px;border-bottom:.5px solid rgba(0,0,0,.06)}
+  .band .w{font-family:'Playfair Display',serif;font-size:14.5px;color:var(--ink)}
+  .band .r{margin-left:auto;color:#6a5a50}
+  .dot{width:20px;height:20px;border-radius:50%;border:1.4px solid var(--burgundy);background:#f5e2da;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:var(--burgundy);flex:none}
+  .dot.in{border-color:var(--sage-accent);background:#e2e7e0;color:#4c6249}
+  .cb{padding:15px 16px 13px}
+  .who{display:flex;align-items:center;gap:12px}
+  .chip{width:40px;height:40px;border-radius:50%;background:var(--parchment);box-shadow:0 1px 2px rgba(58,28,20,.08),0 2px 6px rgba(58,28,20,.10);border:.5px solid #e6dccf;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10.5px;flex:none}
+  .nm{font-family:'Playfair Display',serif;font-weight:500;font-size:17px;color:var(--ink)}
+  .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:12px;color:#6a5a50;margin-top:2px}
+  .leaf{margin-left:auto;width:38px;border-radius:7px;background:#fff;border:.5px solid #dccfc0;text-align:center;overflow:hidden;flex:none}
+  .leaf .mo{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;text-transform:uppercase;padding:3px 0 2px;border-bottom:.5px solid rgba(0,0,0,.08)}
+  .leaf .dy{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink);line-height:1;padding:4px 0 3px}
+  .leaf .cap{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);padding-bottom:3px}
+  .fact{margin-top:13px;padding-top:11px;border-top:.5px solid var(--hairline);font-size:12px}
+  .fact .m{color:var(--label);margin-top:5px}
+  .rec{margin-top:20px;max-width:920px;line-height:1.6;color:#4a3a30}
+  .rec b{font-weight:500;color:var(--body-ink)}
+</style>
+</head>
+<body>
+<h1>Toolbar pills · skeleton · page-open</h1>
+<div class="lede">Well at the subtle shade. Pill treatments, the loading state, and the entrance — replay it with the button.</div>
+<div class="ctl">
+  <span class="k">Pills</span>
+  <div class="seg" id="pseg"><button data-p="p1">1 · Label + value</button><button data-p="p2">2 · Stacked</button><button class="on" data-p="p3">3 · Chip label (locked)</button><button data-p="p4">4 · Joined rail</button></div>
+  <span class="k">State</span>
+  <div class="seg" id="sseg"><button class="on" data-s="live">Loaded</button><button data-s="sk">Skeleton</button></div>
+  <div class="seg"><button id="replay">▶ Replay entrance</button></div>
+</div>
+<div class="desc" id="desc"></div>
+
+<div class="page p3 anim" id="page">
+  <div class="shell"><div class="art"></div><div><h2>Query Centre</h2><div class="sub">Every query, every response — track every step of your journey so far</div></div><span class="cta">+ Log new query</span></div>
+  <div class="tiles" id="tiles"></div>
+  <div class="well">
+    <div class="wellbar">
+      <span class="left">
+        <span class="showing">Showing <b>26</b> of <b>26</b></span>
+        <span class="pill"><span class="row"><span class="lab">Filter</span><span class="val">All</span><span class="chev">▾</span></span></span>
+        <span class="pill"><span class="row"><span class="lab">Group</span><span class="val">None</span><span class="chev">▾</span></span></span>
+        <span class="pill"><span class="row"><span class="lab">Sort</span><span class="val">Last activity</span><span class="chev">▾</span></span></span>
+      </span>
+      <span class="search">⌕ Search agents or agencies<span class="kbd">/</span></span>
+      <span class="right"><span class="views"><span class="on">Grid</span><span>List</span><span>Board</span><span>Calendar</span></span></span>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+
+<div class="rec">
+  <p><b>Pills.</b> Each control states its own name and its current value: mono label in `--label`, Playfair value in ink, burgundy chevron, 99px radius, 9/16 padding — the same shape family as the search and the view switch, so the row reads as one set of instruments. <b>1</b> is the straightforward version; <b>2</b> stacks the label above the value for a taller, calmer pill; <b>3</b> makes the label a parchment chip inside the pill; <b>4</b> joins all three plus the count into one white rail with hairline dividers. <b>3 is locked.</b></p>
+  <p style="margin-top:8px"><b>Defaults follow the view.</b> Grid → Sort <i>Last activity</i>, Group <i>None</i>. List → Sort <i>Date sent</i>, Group <i>None</i>. Board → Group is fixed at <i>Status</i> and the pill reads `Group Status` disabled. Calendar → Sort <i>Date sent</i>. Switching view resets the pills to that view's defaults unless the writer has changed them in this session, in which case their choice is kept and the pill shows it.</p>
+  <p style="margin-top:8px"><b>Skeleton.</b> Same geometry as the real page — nothing moves when data arrives. The masthead, tiles, well and toolbar render as solid chrome immediately (they need no data); only the counts, the search's placeholder and the cards are bones. Six card skeletons at the grid's own dimensions, band block in `#f4efe8`, a 40px circle, two lines for the name and agency, a rule, two lines for the fact — sheen sweeping left to right on a 1.5s loop. No spinner anywhere.</p>
+  <p style="margin-top:8px"><b>Entrance.</b> Everything rises 10px and fades in on `cubic-bezier(.2,.8,.2,1)`: masthead at 0, tiles staggered 40ms apart, the well at 100ms, then the cards staggered 30ms apart from 180ms. Total 520ms, and the stagger stops after the first row — cards below the fold appear without delay. Skeleton → content is a 200ms crossfade in place, not a re-entrance. `prefers-reduced-motion`: opacity only, no translate, no stagger.</p>
+</div>
+
+<script>
+const T=[["All queries",26,"#f0ebe4","✎"],["With you",4,"var(--pinkS)","←"],["With the agent",17,"var(--sage)","→"],["Offers",1,"var(--offer)","✓"],["Past expected",5,"#fff","!"]];
+document.getElementById("tiles").innerHTML=T.map(([k,n,c,g])=>`<div class="tile"><span class="ic" style="background:${c};${c==='#fff'?'border:1px solid var(--field-border);':''}">${g}</span><span><div class="k mono">${k}</div><div class="n">${n}</div></span></div>`).join("");
+const R=[["Queried","sand","→","","Harriet Vane-Coe","Stillwater Reps","Aug","12","Reply expected by <b>23 Sep</b>","14 days away · Nudge in 4 weeks","With the agent"],
+["Partial Requested","pinkS","←","in","Jonathan Marsh","The Marsh Agency","Aug","22","Partial — <b>not yet sent</b>","17 days since request","With you"],
+["Queried","sand","→","","Daniel O'Rourke","Inkwell &amp; Stone","Aug","14","Reply expected by <b>25 Sep</b>","16 days away · Nudge in 16 days","With the agent"],
+["Full Sent","sage","→","","Sophie Dunn","Curtis Vane","Jan","15","Reply expected by <b>9 Oct</b>","5 weeks away · Nudge in 2 weeks","With the agent"],
+["Queried","sand","→","","Eleanor Whitfield","Greenfield Literary","Aug","13","Reply expected by <b>10 Sep</b>","1 day away · no nudge set","With the agent"],
+["Offer","offer","✓","","Tom Ellery","Curtis Vane","Aug","29","<b>Awaiting your decision</b>","8 days since offer","Offer"]];
+const ini=n=>n.replace(/&amp;/g,'&').split(/[\s-]+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+const live=R.map(([s,c,g,dc,n,a,mo,dy,f,m,turn])=>`<div class="card">
+  <div class="band" style="background:var(--${c})"><span class="dot ${dc}">${g}</span><span class="w">${s}</span><span class="r mono">${turn}</span></div>
+  <div class="cb"><div class="who"><span class="chip">${ini(n)}</span><span style="min-width:0"><div class="nm">${n}</div><div class="ag">${a}</div></span><span class="leaf"><div class="mo" style="background:var(--${c})">${mo}</div><div class="dy">${dy}</div><div class="cap">sent</div></span></div>
+  <div class="fact">${f}<div class="m mono">${m}</div></div></div></div>`).join("");
+const skel=Array.from({length:6}).map(()=>`<div class="skcard"><div class="b"></div><div class="body">
+  <div class="skrow"><span class="sk skcirc"></span><span style="flex:1"><span class="sk skl" style="display:block;width:62%"></span><span class="sk skl" style="display:block;width:40%;height:9px;margin-top:7px"></span></span><span class="sk" style="width:38px;height:46px;border-radius:7px"></span></div>
+  <div class="skfoot"><span class="sk skl" style="display:block;width:54%"></span><span class="sk skl" style="display:block;width:36%;height:8px;margin-top:7px"></span></div></div></div>`).join("");
+const grid=document.getElementById("grid"); grid.innerHTML=live;
+const D={p1:"<b>1 · Label + value.</b> Mono label, Playfair value, burgundy chevron, in one 99px pill.",
+ p2:"<b>2 · Stacked.</b> Label above the value; taller and calmer, closer to the stat tiles' rhythm.",
+ p3:"<b>3 · Chip label.</b> The label becomes a parchment chip inside the pill — most legible at a glance, widest.",
+ p4:"<b>4 · Joined rail.</b> Count and all three pills in one white rail with hairline dividers."};
+function setDesc(){const p=document.getElementById("page").className.split(" ")[1];document.getElementById("desc").innerHTML=D[p];}
+document.querySelectorAll("#pseg button").forEach(x=>x.onclick=()=>{document.querySelectorAll("#pseg button").forEach(y=>y.classList.remove("on"));x.classList.add("on");const pg=document.getElementById("page");pg.className="page "+x.dataset.p+(pg.classList.contains("anim")?" anim":"");setDesc();});
+document.querySelectorAll("#sseg button").forEach(x=>x.onclick=()=>{document.querySelectorAll("#sseg button").forEach(y=>y.classList.remove("on"));x.classList.add("on");grid.innerHTML=x.dataset.s==="sk"?skel:live;});
+document.getElementById("replay").onclick=()=>{const pg=document.getElementById("page");pg.classList.remove("anim");void pg.offsetWidth;pg.classList.add("anim");};
+setDesc();
+</script>
+</body>
+</html>

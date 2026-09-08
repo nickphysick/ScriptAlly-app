@@ -48,6 +48,7 @@
     "design-refs/settings-mode-stacked-cards-v2.html": "09e911b2dec142bf84ba6bfefac610e1878d79efacd5c31148e52cd0497957ad",
     "design-refs/dashboard-cappuccino-v16.html": "cbc0c3249fa4de73e041d69f3ca03855b5c2e630e57dc6483b5cb398f891be27",
     "design-refs/query-centre-v15-contact-parity.html": "8198fe89cff5aaafeeff05d74fce3a8cea400339e595105ca2b8aa8c4bfc3100",
-    "design-refs/art/query-centre-masthead.png": "cdbfcd99e310f58940eff992b3586d4e5bfc69c8a7c0a9ad717994901f918d09"
+    "design-refs/art/query-centre-masthead.png": "cdbfcd99e310f58940eff992b3586d4e5bfc69c8a7c0a9ad717994901f918d09",
+    "design-refs/query-toolbar-v3-chip-locked.html": "d5c05afe4d1baa4e04860981e8a337523cdab327b324f7350c1409d34e4b079e"
   }
 }
