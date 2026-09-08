@@ -87,7 +87,12 @@ describe("Queries filter bar — artefacts", () => {
        driver — what it also does now is CLEAR the list's direction flag, because a key chosen here
        must not inherit a reversal the reader set on a list header and has since left behind. Both
        halves are asserted, so a popover that stopped writing either one fails. */
-    expect(src).toContain("onClick={() => { setSortKey(i.key); setSortDesc(false); }}");
+    /* ⚠️ RETARGETED (the well round, §3): the Sort row now marks the control as the WRITER's
+       before setting it, so a later view switch leaves their choice alone. The law is unchanged —
+       this popover is the real sort driver — and is asserted as the parts in order rather than as
+       one string, so the next thing prefixed to that handler cannot redden a claim about sorting. */
+    expect(src).toMatch(/onClick=\{\(\) => \{[^}]*touchedControls\.current\.sort = true;/);
+    expect(src).toContain("setSortKey(i.key); setSortDesc(false); }}");
     expect(src).toContain('useState<string>("last_activity")');
     expect(src).toContain("const [sortDesc, setSortDesc] = useState(false);");
   });

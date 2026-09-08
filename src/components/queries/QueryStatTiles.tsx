@@ -32,14 +32,17 @@ import { STATE_TOKEN } from "../../lib/queryCardFacts";
 const GLYPH: Partial<Record<TileKey, string>> = { all: "✎", you: "←", agent: "→", offer: "✓" };
 
 export const QueryStatTiles: React.FC<{
+  /** §4 — covers the FIGURES while the collections load; the frames stay real */
+  loading?: boolean;
   counts: Record<QuickKey, number>;
   overdueCount: number;
   quickKey: QuickKey;
   overdue: boolean;
   onQuick: (k: QuickKey) => void;
   onOverdue: (next: boolean) => void;
-}> = ({ counts, overdueCount, quickKey, overdue, onQuick, onOverdue }) => (
+}> = ({ counts, overdueCount, quickKey, overdue, onQuick, onOverdue, loading }) => (
   <StatTiles
+      loading={loading}
     label="Query totals"
     /* ⚠️ TWO AXES, SO TWO KEYS CAN BE RINGED AT ONCE — one active court PLUS the independent
        overdue flag. "With you and past expected" is the commonest question on this page and a row

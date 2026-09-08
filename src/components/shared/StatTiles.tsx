@@ -38,6 +38,14 @@ export interface StatTile {
 }
 
 export const StatTiles: React.FC<{
+  /**
+   * ⚠️ ADDITIVE, AND IT COVERS THE FIGURE ONLY (the well round, §4). The tile's frame, its disc,
+   * its glyph and its label all exist without query data, so they render immediately; the COUNT
+   * is the one thing that has to wait. A tile that skeletons whole would take the page's shape
+   * away while it loads, which is the opposite of what a skeleton is for. Optional, so the To-do
+   * page's and Contact list's mounts are unchanged.
+   */
+  loading?: boolean;
   tiles: readonly StatTile[];
   /**
    * ⚠️ WHICH TILES ARE RINGED — A SET, NOT ONE KEY, AND THAT IS THE QUERY CENTRE'S OWN LAW.
@@ -52,7 +60,7 @@ export const StatTiles: React.FC<{
   label: string;
   /** how many columns the row lays out in; the Query Centre's five, the To-do page's seven */
   columns?: number;
-}> = ({ tiles, selected, onPick, label, columns }) => {
+}> = ({ tiles, selected, onPick, label, columns, loading }) => {
   const on = (k: string) => (Array.isArray(selected) ? selected.includes(k) : selected === k);
   return (
   <div
@@ -82,7 +90,7 @@ export const StatTiles: React.FC<{
         </span>
         <span className="qct-tx">
           <span className="qct-k">{t.label}</span>
-          <span className="qct-n">{t.count}</span>
+          {loading ? <span className="qct-n qcs-l qct-n--sk" aria-hidden="true" /> : <span className="qct-n">{t.count}</span>}
         </span>
       </button>
     ))}

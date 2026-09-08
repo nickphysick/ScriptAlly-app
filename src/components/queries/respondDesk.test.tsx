@@ -11,7 +11,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { surnameKey } from "../../lib/queryCentreGrid";
-import { sliceBetween } from "../../test/sliceBetween";
+import { sliceBetween, sliceFrom } from "../../test/sliceBetween";
 import { TimelineRows, buildTimelineRows } from "../reading-pane/QueryTimeline";
 import { deriveQueryFields } from "../../lib/queryDerivation";
 import { OUTCOME_STATUS } from "../../lib/responseDraft";
@@ -496,7 +496,18 @@ describe("Phase 2 · the tiles state the whole set, and the switch changes only 
   });
 
   it("the switch is beside Sort and owns nothing else", () => {
-    expect(page).toContain("<QueryViewSwitch view={gridView} onView={setGridView} />");
+    /* ⚠️ RETARGETED (§3). The switch no longer hands `setGridView` straight to the control: it
+       routes through `applyView`, which sets the view AND that view's Sort/Group defaults. The law
+       this assertion was standing for — the switch changes the RENDERER and owns no data — is
+       unchanged and is asserted below over `applyView`'s body; what changed is that choosing a
+       view now also chooses how that view is ordered, which is the section's whole point. */
+    expect(page).toContain("<QueryViewSwitch view={gridView} onView={applyView} />");
+    /* the applier sets the view and that view's defaults — and nothing else */
+    const apply = sliceFrom(page, "const applyView = (next: QueryView)", 460);
+    expect(apply).toContain("setGridView(next)");
+    expect(apply).toContain("defaultsOnViewChange(next as QueryViewName, touchedControls.current)");
+    for (const w of ["setQuickKey", "setListSearch", "setSelectedQueryId", "onOpenQuery"])
+      expect(apply, `the switch reached ${w} — it owns the renderer, not the data`).not.toContain(w);
     const sw = readFileSync(join(process.cwd(), "src/components/queries/QueryViewSwitch.tsx"), "utf8");
     expect(sw, "the switch grew state of its own").not.toMatch(/useState|useEffect/);
   });
@@ -533,7 +544,13 @@ describe("Phase 3–5 · three renderers over one set of rows", () => {
     /* a header handing back GRID_SORTS' keys would be a second sort model over one list */
     for (const k of ["journey_depth", "agent_az", "date_newest", "due_soonest"])
       expect(list, `the list does not offer ${k}`).toContain(`"${k}"`);
-    expect(page).toContain("onSort={(k) => { if (k === sortKey) setSortDesc((d) => !d); else { setSortKey(k); setSortDesc(false); } }}");
+    /* ⚠️ RETARGETED (§3): the header's sort now marks the control as the WRITER's before routing,
+       so a later view switch leaves it alone. The law is unchanged — one sort state, the header
+       writes the page's own key and toggles direction on a repeat — and is asserted as the parts
+       in order rather than as one string, so the next thing prefixed to that handler does not
+       redden a claim about sorting. */
+    expect(page).toMatch(/onSort=\{\(k\) => \{[^}]*touchedControls\.current\.sort = true;/);
+    expect(page).toContain("if (k === sortKey) setSortDesc((d) => !d); else { setSortKey(k); setSortDesc(false); }");
     expect(page).toContain("const compareQueries = (a: Query, b: Query): number => sortDesc ? -compareQueriesAsc(a, b) : compareQueriesAsc(a, b);");
   });
 
@@ -821,7 +838,13 @@ describe("§3 (sand band, superseding the mono) · the header is separated by it
        parts were each correct and the composition was dead. Proved by that mutation. */
     expect(list, "a header no longer drives the sort").toContain("onClick={() => onSort(c.sort!)}");
     /* …the page routes it into the one sortKey, toggling direction on a repeat… */
-    expect(page).toContain("onSort={(k) => { if (k === sortKey) setSortDesc((d) => !d); else { setSortKey(k); setSortDesc(false); } }}");
+    /* ⚠️ RETARGETED (§3): the header's sort now marks the control as the WRITER's before routing,
+       so a later view switch leaves it alone. The law is unchanged — one sort state, the header
+       writes the page's own key and toggles direction on a repeat — and is asserted as the parts
+       in order rather than as one string, so the next thing prefixed to that handler does not
+       redden a claim about sorting. */
+    expect(page).toMatch(/onSort=\{\(k\) => \{[^}]*touchedControls\.current\.sort = true;/);
+    expect(page).toContain("if (k === sortKey) setSortDesc((d) => !d); else { setSortKey(k); setSortDesc(false); }");
     /* …and the Sort MENU's face is DERIVED FROM THAT SAME KEY, which is what makes it follow a
        header click. ⚠️ ASSERTED AS THE DERIVATION, NOT THE MARKUP: the trigger's spelling is the
        To-do stream's to change (it is becoming a shared ToolbarButton as this runs), and a lock
@@ -1167,9 +1190,26 @@ describe("Contact parity · the Query Centre wears Contact list's header", () =>
    * eventually disagree.
    */
   it("N of M is stated once, by the shared tally, from this page's own two figures", () => {
-    expect(page).toContain("<PageTally value={`${gridRows.length} of ${mastheadScopedQueries.length}`} />");
-    expect((page.match(/<PageTally/g) ?? []).length).toBe(1);
-    expect(page, "the footer still states the count").not.toContain("Showing <b>{gridRows.length}</b>");
+    /* ⚠️ REWRITTEN, NOT RETARGETED (the well round, §2). This asserted the SHARED `PageTally`;
+       the Query Centre now states `Showing N of M` in its own element, because the treatment
+       differs (15px, muted, figures in ink) and could not go through that component without
+       moving Contact list and Analytics with it. That is a DIVERGENCE from the Contact-parity
+       round and it is in the report. The law that survives — and it is the one that mattered —
+       is that the count is stated ONCE, from this page's own two figures. */
+    expect(page).toContain("Showing <b>{gridRows.length}</b> of <b>{mastheadScopedQueries.length}</b>");
+    expect((page.match(/<PageTally/g) ?? []).length, "the shared tally came back beside the new one").toBe(0);
+    expect((page.match(/qcc-tally/g) ?? []).length, "the count is stated more than once").toBe(1);
+    /* ⚠️ SCOPED TO THE FOOT (the well round). This forbade the string anywhere, which was fine
+       while nothing else said it; §2 puts `Showing N of M` in the TOOLBAR, so the unscoped form
+       now fails on the very element that satisfies the claim. The law is about the FOOTER not
+       restating the count, so it is asserted over the footer. */
+    /* ⚠️ THE FOOT MAY READ THE COUNT AND MAY NOT STATE IT — and the first version of this
+       forbade `gridRows.length` outright, which fails on `disabled={gridRows.length === 0}`: the
+       Export button legitimately asks how many rows there are. What the footer must not do is
+       RENDER the figure, so that is what is asserted. */
+    const foot = sliceFrom(page, 'className="qcc-foot qcc-foot--export"', 420);
+    expect(foot, "the footer states the count again").not.toContain("Showing");
+    expect(foot, "the footer renders the figure again").not.toMatch(/<b>\{gridRows\.length\}/);
     /* Export CSV stays in the foot, and the foot holds it to the right now that it is alone */
     expect(page).toContain("Export CSV");
     expect(page).toContain('className="qcc-foot qcc-foot--export"');
@@ -1177,5 +1217,126 @@ describe("Contact parity · the Query Centre wears Contact list's header", () =>
       .replace(/\/\*[\s\S]*?\*\//g, "");
     expect(css).toMatch(/\.qcc-foot--export \{[^}]*justify-content: flex-end/);
     expect(css, "the count's bold rule outlived the count").not.toMatch(/\.qcc-foot b\s*\{/);
+  });
+});
+
+/* ══ the well round · §1–§5 ═══════════════════════════════════════════════════════════════════ */
+describe("the well round · a recess, a toolbar in its head, bones, and one entrance", () => {
+  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const css = readFileSync(join(process.cwd(), "src/components/queries/queryCentreGrid.css"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
+  const cardCss = readFileSync(join(process.cwd(), "src/components/queries/queryCard.css"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
+  const btn = readFileSync(join(process.cwd(), "src/components/shared/ToolbarButton.tsx"), "utf8");
+
+  /* §1 — the recess */
+  it("the well is the page's ground stepped down, and it never clips", () => {
+    expect(css).toMatch(/\.qcc-well \{[^}]*background: #eee8e0/);
+    expect(css).toMatch(/\.qcc-well \{[^}]*border-radius: 16px/);
+    expect(css).toMatch(/\.qcc-well \{[^}]*box-shadow: inset 0 1px 3px rgba\(58, 28, 20, 0\.06\)/);
+    /* ⚠️ AN `overflow` OF ANY KIND HERE TURNS THE STICKY TOOLBAR INTO A CLAMP. Asserted as an
+       absence, because the fault is silent: the sticky computes correctly and never moves. */
+    expect(css, "the well grew an overflow — the sticky toolbar will clamp")
+      .not.toMatch(/\.qcc-well \{[^}]*overflow/);
+  });
+
+  it("the card's shadow is warm, and stays the page's own ink", () => {
+    const shadow = (cardCss.match(/\.qcc \{[^}]*box-shadow:([^;]*);/) ?? [])[1] ?? "";
+    expect(shadow).toContain("rgba(58, 28, 20");
+    /* no blue-biased cast: every rgb triple in the shadow must be warm (r > b) */
+    for (const m of shadow.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g))
+      expect(Number(m[1]), `cool shadow stop ${m[0]}`).toBeGreaterThan(Number(m[3]));
+  });
+
+  /* ⚠️ THE WELL WRAPS EVERY VIEW — asserted as ORDER, because the claim is containment and a
+     "the class exists" check cannot see it. The well opens before the toolbar and closes after
+     the last view branch, so all four renderers are inside it. */
+  it("every view is inside the well — grid, list, board and the calendar placeholder", () => {
+    /* ⚠️ BOUNDED ON THE FOOT, NOT ON A `</div>`. The well's closing tag is not distinguishable
+       from the dozen inner ones — and its marker comment is stripped before this runs, which is
+       exactly the "anchor on something that cannot nest" rule. The foot is the next thing after
+       the well, so everything between the two is inside it. */
+    const open = page.indexOf('<div className="qcc-well"');
+    const close = page.indexOf('className="qcc-foot qcc-foot--export"', open);
+    expect(open, "the well is gone").toBeGreaterThan(-1);
+    expect(close, "the export foot no longer follows the well").toBeGreaterThan(open);
+    const inside = page.slice(open, close);
+    for (const v of ["<QueryListView", "<QueryBoardView", "<QueryCentreGrid", "qcc-calph", 'className="qcc-tb"'])
+      expect(inside, `${v} is outside the well`).toContain(v);
+    /* and the foot is deliberately OUTSIDE — it is the boundary above, so what proves it is that
+       the well's own closing tag comes first */
+    expect(inside.lastIndexOf("</div>"), "the well does not close before the foot").toBeGreaterThan(
+      inside.lastIndexOf("<QueryCentreGrid"));
+  });
+
+  /* §2 — the toolbar's three tracks */
+  it("the toolbar is a three-track grid and the search sits on the row's midline", () => {
+    expect(css).toMatch(/\.qcc-tb \{[^}]*grid-template-columns: 1fr auto 1fr/);
+    expect(css).toMatch(/\.qcc-tb-search \{[^}]*width: 360px/);
+    expect(css).toMatch(/\.qcc-tb-search \{[^}]*border-radius: 99px/);
+    expect(css).toMatch(/\.qcc-tb-search \{[^}]*justify-self: center/);
+    /* the flanks are cells, not loose children — otherwise the tracks hold one item each */
+    expect(page).toContain('<div className="qcc-tb-left">');
+    expect(page).toContain('<div className="qcc-tb-right">');
+    /* the flex spacer went with the flex row */
+    expect(page, "the spacer outlived the flex row").not.toContain("qcc-tb-spacer");
+  });
+
+  /* §3 — the chip pill, and the two pages it must not reach */
+  it("the chip pill is scoped to this page's toolbar, not to the shared button", () => {
+    expect(css).toMatch(/\.qcc-tb \.qcc-tb-btn \{[^}]*border-radius: 99px/);
+    expect(css).toMatch(/\.qcc-tb \.qcc-tb-lab \{[^}]*background: var\(--parchment/);
+    /* ⚠️ THE BASE RULE MUST NOT CARRY IT. `.qcc-tb-btn` is mounted by the To-do page and by
+       Contact list's AgentToolbar; a bare restyle moves three pages on a brief naming one. */
+    const base = (css.match(/(?:^|\n)\.qcc-tb-btn \{[^}]*\}/) ?? [""])[0];
+    expect(base, "the base pill took the chip radius — To-do and Contact list moved with it")
+      .not.toMatch(/border-radius: 99px/);
+    /* the label is an element now, and that change is additive */
+    expect(btn).toContain('<span className="qcc-tb-lab">{label}</span>');
+  });
+
+  /* §4 — the bones */
+  it("the skeleton is mounted BEFORE the empty state, and there is no spinner", () => {
+    const sk = page.indexOf("showGridSkeleton ? (");
+    const none = page.indexOf("gridRows.length === 0 ? (");
+    expect(sk, "the live views have no skeleton branch").toBeGreaterThan(-1);
+    expect(sk, "'Nothing matches' answers the load again").toBeLessThan(none);
+    expect(page, "a spinner appeared").not.toMatch(/role="status"/);
+    /* it rides the shared timing lib rather than a third model */
+    expect(page).toContain("useSkeleton(!collectionsReady)");
+    expect(page).toContain("const runEntrance = !gridSkeleton.wasShown;");
+  });
+
+  it("the bones borrow the card's own classes, so the geometry cannot drift", () => {
+    const skel = readFileSync(join(process.cwd(), "src/components/queries/QueryGridSkeleton.tsx"), "utf8");
+    for (const c of ["qcc-band", "qcc-body", "qcc-who", "qcc-chip", "qcc-whotx", "qcc-leaf", "qcc-fact", "qcc-grid"])
+      expect(skel, `the skeleton stopped using the card's ${c}`).toContain(c);
+    expect(skel).toContain('aria-hidden="true"');
+    const skCss = readFileSync(join(process.cwd(), "src/components/queries/queryGridSkeleton.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    /* the sheen's keyframes take literal values — a var() there fails silently */
+    const kf = (skCss.match(/@keyframes qcs-sheen \{[\s\S]*?\n\}/) ?? [""])[0];
+    expect(kf).not.toContain("var(");
+    expect(skCss).toContain("linear-gradient(90deg, #efe9e1, #f6f1ea, #efe9e1)");
+    expect(skCss).toMatch(/animation: qcs-sheen 1\.5s linear infinite/);
+  });
+
+  /* §5 — one entrance, and it is taken off */
+  it("the entrance is removed when it ends, so nothing can replay it", () => {
+    expect(page).toContain("const pageEntering = runEntrance && !entranceDone;");
+    expect(page).toContain('className={`qc-wpg${pageEntering ? " qc-wpg--enter" : ""}`}');
+    /* the flag's lifetime is DERIVED from the table, never a second number typed beside it */
+    expect(page).toContain("QCC_ENTRANCE_TOTAL_MS");
+    const ent = readFileSync(join(process.cwd(), "src/components/queries/queryEntrance.ts"), "utf8");
+    expect(ent).toMatch(/export const QCC_ENTRANCE_TOTAL_MS = Math\.max\(/);
+    /* the keyframes are literal */
+    const kf = (css.match(/@keyframes qcc-rise \{[\s\S]*?\n\}/) ?? [""])[0];
+    expect(kf).toContain("translateY(10px)");
+    expect(kf).not.toContain("var(");
+    /* reduced motion drops the translate and the stagger, and is declared after the rules */
+    const rm = css.lastIndexOf("prefers-reduced-motion");
+    expect(rm).toBeGreaterThan(css.indexOf(".qc-wpg--enter .wsh"));
+    expect(css.slice(rm)).toContain("animation-delay: 0ms !important");
   });
 });

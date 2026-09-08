@@ -48,7 +48,6 @@ const RESPONSE_RECEIPT_CHANNEL = "query-response";
 import { pickableManuscripts } from "../lib/lifecycle";
 import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
-import { PageTally } from "./shell/WorkspacePageGrid";
 import { ToolbarButton, ToolbarIcon } from "./shared/ToolbarButton";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
@@ -145,6 +144,10 @@ import { useFixedMenu } from "./forms/useFixedMenu";
 import { QuickActionPopover, type QuickActionKind } from "./queries/QuickActionPopover";
 import { PackagePicker } from "./reading-pane/PackagePicker";
 import { QueryCentreSkeleton, SKELETON_FLOOR_MS } from "./reading-pane/QueryCentreSkeleton";
+import { useSkeleton } from "../lib/skeletonTiming";
+import { defaultsOnViewChange, type QueryViewName } from "../lib/queryViewDefaults";
+import { QueryGridSkeleton } from "./queries/QueryGridSkeleton";
+import { QCC_ENTRANCE_TOTAL_MS } from "./queries/queryEntrance";
 /* §2b — the shared art registry, already consumed by two other Query Centre panels. */
 import { ArtSlot } from "./todo/ArtSlot";
 /* ⚠️ THE MASTHEAD'S OWN PICTURE, AS A URL — the same mechanism Contact list uses for its
@@ -3611,7 +3614,7 @@ export const Queries: React.FC<{
           kind="rad"
           on={gridGroup === g.key}
           label={g.label}
-          onClick={() => { setGridGroup(g.key); setGroupPopOpen(false); }}
+          onClick={() => { touchedControls.current.group = true; setGridGroup(g.key); setGroupPopOpen(false); }}
         />
       ))}
     </F12Popover>
@@ -3671,7 +3674,7 @@ export const Queries: React.FC<{
     >
       {SORT_KEYS.map((i) => (
         <PRow key={i.key} kind="rad" on={sortKey === i.key} label={i.label} sub={i.sub}
-          onClick={() => { setSortKey(i.key); setSortDesc(false); }} />
+          onClick={() => { touchedControls.current.sort = true; setSortKey(i.key); setSortDesc(false); }} />
       ))}
     </F12Popover>
   );
@@ -4378,6 +4381,72 @@ export const Queries: React.FC<{
    * than delaying it, and so cannot leave a gap for anything else to fill.
    */
   const dataReady = collectionsReady;
+
+  /**
+   * ══ §4/§5 · THE LIVE VIEWS' SKELETON, AND THE ENTRANCE IT GOVERNS ════════════════════════════
+   *
+   * ⚠️ THE PAGE ALREADY HAD A SKELETON AND THE LIVE VIEWS COULD NOT REACH IT. `QueryCentreSkeleton`
+   * is mounted at exactly one site, inside the retired `GRID_IS_THE_PAGE === false` browsing
+   * branch, so the grid, the list and the board have always loaded with no cover at all. The
+   * component, its stylesheet, its shimmer and its floor are real work; what was missing was a
+   * mount on the page people use.
+   *
+   * ⚠️ AND THIS USES THE SHARED `useSkeleton`, NOT THE HAND-ROLLED FLOOR BESIDE IT. The app already
+   * has two skeleton timing models — `SKELETON_FLOOR_MS = 400` here and `SKELETON_MIN_MS = 500` in
+   * `lib/skeletonTiming`, which the dashboard runs — and a third would be worse than either. The
+   * lib carries the phases, the minimum, the settle beat and the dissolve, all unit-locked.
+   *
+   * ⚠️ `wasShown` IS WHY THE ENTRANCE DOES NOT RUN TWICE, and the lib says so in its own words: a
+   * cover and a stagger are two answers to "the page is arriving". Where a cover was seen the
+   * dissolve IS the arrival, so §5's entrance is gated on this exactly as the dashboard's is.
+   */
+  const gridSkeleton = useSkeleton(!collectionsReady);
+  const showGridSkeleton = gridSkeleton.phase !== "off";
+  const gridSkeletonOut = gridSkeleton.phase === "out";
+  const runEntrance = !gridSkeleton.wasShown;
+
+  /**
+   * ══ §5 · THE ENTRANCE, AND WHY IT IS TAKEN OFF AGAIN ═════════════════════════════════════════
+   *
+   * ⚠️ THE ATTRIBUTE IS REMOVED WHEN THE ENTRANCE ENDS, and that is the whole mechanism for "it
+   * must not re-run". A CSS animation does not restart on a re-render, so leaving the attribute on
+   * would LOOK correct — the drawer would open, a filter would change, and nothing would move. But
+   * every block would still carry a live `animation-name`, so any later edit that remounts a card
+   * — a key change, a re-sort, a group heading arriving — would replay the entrance for that card
+   * in the middle of a settled page. Taking it off means there is no animation left to replay, and
+   * that is what the measurement asserts.
+   *
+   * ⚠️ AND IT NEVER STARTS WHERE A SKELETON WAS SEEN. `wasShown` is the timing lib's own answer:
+   * a cover and a stagger are two answers to "the page is arriving", and running both means it
+   * arrives twice. The dissolve IS the arrival on a cold load; the entrance is for the warm one.
+   */
+  const [entranceDone, setEntranceDone] = useState(false);
+  useEffect(() => {
+    if (!runEntrance) { setEntranceDone(true); return; }
+    const t = window.setTimeout(() => setEntranceDone(true), QCC_ENTRANCE_TOTAL_MS);
+    return () => window.clearTimeout(t);
+  }, [runEntrance]);
+  const pageEntering = runEntrance && !entranceDone;
+
+  /**
+   * ══ §3 · PER-VIEW DEFAULTS, AND THE WRITER'S CHOICE BEATING THEM ═════════════════════════════
+   *
+   * ⚠️ `touched` IS A REF, NOT STATE, because nothing renders from it — it only decides what a
+   * LATER view switch is allowed to change. As state it would re-render the page on the first
+   * press of a control that has already re-rendered it.
+   *
+   * ⚠️ AND IT IS SET WHERE THE WRITER ACTS, NOT WHERE THE VALUE CHANGES. `setSortKey` is also
+   * called by the list header's own sort and by a view's default; marking touched inside the
+   * setter would make the page's own defaults count as the writer's choice and the defaults would
+   * apply exactly once, ever.
+   */
+  const touchedControls = useRef({ sort: false, group: false });
+  const applyView = (next: QueryView) => {
+    setGridView(next);
+    const d = defaultsOnViewChange(next as QueryViewName, touchedControls.current);
+    if (d.sort !== undefined) { setSortKey(d.sort); setSortDesc(false); }
+    if (d.group !== undefined) setGridGroup(d.group);
+  };
 
   /**
    * §3b — THE MINIMUM-DISPLAY FLOOR, and §3c's resolution.
@@ -5134,7 +5203,11 @@ export const Queries: React.FC<{
             ⚠️ THE MODALS STAY OUTSIDE THE GRID, below it — fixed-position overlays have no
             business inside the scrollport they cover. */}
         <WorkspacePageGrid
-          className="qc-wpg"
+          /* ⚠️ THE ENTRANCE FLAG RIDES THE GRID ROOT, NOT THE COLUMN (§5). The masthead is the
+             grid's own chrome, ABOVE the scroll row, so `.qcc-col` — which is inside it — cannot
+             reach it. This is the page's own class on the shared element, so scoping here moves
+             this page's masthead and no other's. */
+          className={`qc-wpg${pageEntering ? " qc-wpg--enter" : ""}`}
           /* ⚠️ A FILL PAGE — the panes scroll, the page does not, and this is the declaration that
              makes that true. `.f12-body` says `flex: 1; min-height: 0`, written when its parent was
              `.f12-root`; against a block scroll row both apply to nothing, so browsing grew past the
@@ -5931,7 +6004,7 @@ export const Queries: React.FC<{
            * inevitable and invisible.
            */
           <>
-          <div className="qcc-col">
+          <div className="qcc-col" data-qc-enter={pageEntering ? "1" : undefined}>
             {/* ⚠️ THE COUNTS ARE THE WHOLE SET'S, AND THE PILLS NARROW IT. A pill that stated the
                 filtered figure would read `0` for every court you were not currently in, which
                 turns a set of counts into a set of tautologies. */}
@@ -5945,6 +6018,24 @@ export const Queries: React.FC<{
               * the same handlers; what changed is that a filter you set no longer scrolls away
               * from the control that set it.
               */}
+            {/**
+              * ══ §1 · THE RECESSED WELL ═══════════════════════════════════════════════════════
+              * The toolbar and whichever view is showing sit in one recessed box, so the cards
+              * read as objects resting IN something rather than floating on the page. The ground
+              * is the page's own parchment taken one step down — #eee8e0 against #f2ede7 — so it
+              * reads as depth rather than as a second colour.
+              *
+              * ⚠️ IT WRAPS EVERY VIEW, WHICH IS THE POINT. Grid, List, Board and the Calendar
+              * placeholder are all inside it, so switching view changes what is IN the well and
+              * never whether there is one.
+              *
+              * ⚠️ AND IT MUST NOT TAKE `overflow: hidden` TO CLIP ITS RADIUS. `.qcc-controls` is
+              * `position: sticky`, and a clipping ancestor turns a sticky into a clamp — a fault
+              * this repo has already paid for on the packages builder.
+              *
+              * ⚠️ THE FOOT STAYS OUTSIDE: `Export CSV` acts on the filtered set as a whole.
+              */}
+            <div className="qcc-well" aria-busy={showGridSkeleton ? true : undefined}>
             <div className="qcc-controls">
             {/**
               * ⚠️ THE STAT TILES REPLACE THE QUICK CHIPS (colours v2, Phase 2). Same two axes —
@@ -5956,6 +6047,7 @@ export const Queries: React.FC<{
               * Whose-turn facets (checked, not assumed).
               */}
             <QueryStatTiles
+              loading={showGridSkeleton}
               counts={quickTally}
               overdueCount={overdueTally}
               quickKey={quickKey}
@@ -5988,23 +6080,23 @@ export const Queries: React.FC<{
                 * filtered view and `mastheadScopedQueries` the manuscript-scoped whole — the exact
                 * two figures the footer stated, moved rather than recomputed.
                 */}
-              <PageTally value={`${gridRows.length} of ${mastheadScopedQueries.length}`} />
-              <div className="qcc-tb-search">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a08a78" strokeWidth="2" aria-hidden="true">
-                  <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search agents or agencies"
-                  autoComplete="off"
-                  value={listSearch}
-                  onChange={(e) => setListSearch(e.target.value)}
-                  aria-label="Search agents or agencies"
-                  ref={browseSearchRef}
-                />
-                {/* the `/` hint the ref draws, inside the field */}
-                <span className="qcc-tb-kbd" aria-hidden="true">/</span>
-              </div>
+              <div className="qcc-tb-left">
+              {/**
+                * ⚠️ `Showing N of M`, AND IT IS THIS PAGE'S OWN ELEMENT RATHER THAN THE SHARED
+                * `PageTally` IT REPLACES (§2). The shared tally is 18px Playfair in shell ink; this
+                * is 15px, muted, with only the FIGURES in ink — a different TREATMENT, not a
+                * different string, so it could not go through that component without changing it
+                * for Contact list and Analytics too. Flagged: the Contact-parity round asserted
+                * these two pages state their count identically, and this brief moves one of them.
+                *
+                * ⚠️ THE FIGURES ARE THIS PAGE'S OWN DERIVATION, unchanged — `gridRows` is the
+                * filtered view, `mastheadScopedQueries` the manuscript-scoped whole.
+                */}
+              <span className="qcc-tally">
+                {showGridSkeleton
+                  ? <>Showing <span className="qcs-l qcs-num" aria-hidden="true" /> of <span className="qcs-l qcs-num" aria-hidden="true" /></>
+                  : <>Showing <b>{gridRows.length}</b> of <b>{mastheadScopedQueries.length}</b></>}
+              </span>
 
               {/* ⚠️ THESE THREE WERE INLINE MARKUP AND ARE NOW `shared/ToolbarButton` MOUNTS
                   (QC-chassis round, Phase 1). The To-do page needs the same three controls, and
@@ -6047,10 +6139,31 @@ export const Queries: React.FC<{
                 {sortPopOpen && renderSortPopover()}
               </div>
 
+              </div>{/* left track: the count and the three controls */}
+
+              {/* centre track — the search sits on the ROW's midline, not on what the flanks leave */}
+              <div className="qcc-tb-search">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a08a78" strokeWidth="2" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search agents or agencies"
+                  autoComplete="off"
+                  value={listSearch}
+                  onChange={(e) => setListSearch(e.target.value)}
+                  aria-label="Search agents or agencies"
+                  ref={browseSearchRef}
+                />
+                {/* the `/` hint the ref draws, inside the field */}
+                <span className="qcc-tb-kbd" aria-hidden="true">/</span>
+              </div>
+
+              <div className="qcc-tb-right">
               {/* ⚠️ RIGHT OF SORT, AND IT CHANGES ONLY THE RENDERER. The tiles, Filter, Group,
                   Sort, the search and the drawer are all shared — a view that owned any of them
                   would be a second page wearing a segment's clothes. */}
-              <QueryViewSwitch view={gridView} onView={setGridView} />
+              <QueryViewSwitch view={gridView} onView={applyView} />
 
               {/**
                 * ⚠️ NO PRIMARY IN THIS ROW — `Log new query` lives in the HERO and nowhere else.
@@ -6061,7 +6174,7 @@ export const Queries: React.FC<{
                 * ⚠️ THE SPACER STAYS. It is what holds Filter · Group · Sort to the left while the
                 * row runs full width, and removing it with the button would re-centre the trio.
                 */}
-              <span className="qcc-tb-spacer" />
+              </div>{/* right track */}
             </div>
 
             {activeFilterChips.length > 0 && (
@@ -6074,7 +6187,17 @@ export const Queries: React.FC<{
             )}
             </div>
 
-            {gridRows.length === 0 ? (
+            {/**
+              * ⚠️ THE SKELETON BRANCH COMES FIRST, AND THAT ORDER IS THE FIX (§4). While the
+              * collections are loading `gridRows` is empty, so the branch below it answered a
+              * loading page with "Nothing matches." — the wrong answer, stated confidently, for
+              * the whole of every cold load. It is the same fault this page's own retired 180ms
+              * grace produced on the browsing list, in a different branch: a gap at the start of
+              * the load that something else filled.
+              */}
+            {showGridSkeleton ? (
+              <QueryGridSkeleton view={gridView} out={gridSkeletonOut} />
+            ) : gridRows.length === 0 ? (
               /* ⚠️ THIS IS THE NO-MATCH STATE, NOT THE NO-QUERIES STATE. The page's own empty
                  branch already owns the latter; saying "nothing matches" to someone who has never
                  logged a query would be the worst lie this page could tell. */
@@ -6122,7 +6245,7 @@ export const Queries: React.FC<{
                 sortKey={sortKey}
                 sortDesc={sortDesc}
                 selectedId={selectedQueryId}
-                onSort={(k) => { if (k === sortKey) setSortDesc((d) => !d); else { setSortKey(k); setSortDesc(false); } }}
+                onSort={(k) => { touchedControls.current.sort = true; if (k === sortKey) setSortDesc((d) => !d); else { setSortKey(k); setSortDesc(false); } }}
                 onOpen={(id) => onOpenQuery?.(id)}
                 onMore={(id, anchor) => { setSelectedQueryId(id); onOpenQuery?.(id); void anchor; }}
               />
@@ -6148,6 +6271,8 @@ export const Queries: React.FC<{
                 selectedId={selectedQueryId}
               />
             )}
+
+            </div>{/* ── the well closes: toolbar + whichever view is showing ── */}
 
             {/* ⚠️ THE FOOT IS EXPORT ONLY NOW. Its count went to the toolbar row (§2) rather than
                 being duplicated there — the same figure in two places is one edit from disagreeing,

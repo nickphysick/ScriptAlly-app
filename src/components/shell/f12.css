@@ -1842,7 +1842,14 @@
 /* ⚠️ THE PAGE'S CONTENT GUTTER, NOT THE SCROLL ROW'S PADDING (masthead left-constant, §A). The
    value is unchanged and the content does not move; what changed is that the masthead no longer
    sits inside it. */
+/* ⚠️ 18px AT ≥1280 (the well round, §1), AND THE TIGHT GUTTER BELOW IT. The well's own margin is
+   0 because THIS is the page's side inset — the ref expresses it as `margin: 0 var(--pad)` on a
+   body with no padding, and restating it here as well would inset the well twice. Declared as an
+   override of the grid's token rather than as padding on the page, because `.qc-wpg` and `.wpg`
+   land on ONE element at equal specificity and the page's own padding would be a second
+   contribution the grid knows nothing about. */
 .qc-wpg { --wpg-gutter: var(--content-gutter-tight); }
+@media (min-width: 1280px) { .qc-wpg { --wpg-gutter: 18px; } }
 /* ⚠️ THE ONE PAGE THAT CAPS ITS WORK SURFACE, AND IT SAYS SO ONCE. `--work-max` is the shared
    work-surface measure (the dashboard's one-screen reads it too); naming it here puts the masthead,
    the mini bar and the panes on the same edges by construction. */

@@ -6,12 +6,13 @@
  * page's one selection fill; the states' own colours are never borrowed for chrome.
  */
 .qvs {
-  display: inline-flex; background: #fff; border: 1px solid #e0d5c8; border-radius: 9px; padding: 3px;
+  /* 99px outer AND inner (§2) — a rounded rail with square-ish segments reads as two shapes */
+  display: inline-flex; background: #fff; border: 1px solid #e0d5c8; border-radius: 99px; padding: 3px;
   flex: none;
 }
 .qvs button {
   border: none; background: transparent; cursor: pointer; display: inline-flex; align-items: center;
-  gap: 7px; padding: 7px 13px; border-radius: 7px; font-family: var(--font-serif); font-size: 14px;
+  gap: 7px; padding: 7px 13px; border-radius: 99px; font-family: var(--font-serif); font-size: 14px;
   color: #8a7a6c;
 }
 .qvs button:hover { color: #3a1c14; }

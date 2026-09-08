@@ -27,7 +27,8 @@
    * long unbroken agency name forcing a track wider than its share.
    */
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  /* 14px in the well (§1) — the recess supplies the breathing room the wider gap used to */
+  gap: 14px;
 }
 
 /* ⚠️ TWO BELOW 980, STATED ONCE. The only place a count is still written down rather than derived;
@@ -73,7 +74,11 @@
   position: relative;
   font: inherit;
   color: inherit;
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 8px 22px rgba(58, 28, 20, 0.09);
+  /* ⚠️ THE SHADOW STAYS WARM BECAUSE THE GROUND IS (§1). `rgba(58, 28, 20, …)` is the page's own
+     ink; a cool `rgba(35, 45, 60, …)` on a parchment well reads as dirt rather than as depth —
+     the same law this repo states for the sage desk's green-grey cast. Deepened slightly now the
+     cards sit in a recess rather than on the page: .06/.11 against the well's #eee8e0. */
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.06), 0 8px 20px rgba(58, 28, 20, 0.11);
   /* ⚠️ SHADOW ONLY — NO LIFT. A `translateY` on hover fights the FLIP that re-orders this grid:
      the inverse transform and the hover transform are the same property, and the last one written
      wins. The shadow says the same thing and cannot collide. */

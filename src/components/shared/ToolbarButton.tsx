@@ -60,7 +60,12 @@ export const ToolbarButton = React.forwardRef<HTMLButtonElement, {
     onClick={onClick}
   >
     {icon}
-    {label}
+    {/* ⚠️ THE LABEL IS AN ELEMENT NOW, AND THAT IS ALL THIS CHANGE IS (§3). It was a bare string;
+        the Query Centre wants it as a parchment chip, which needs something to style. Wrapping it
+        is ADDITIVE: with no rule attached a span around text renders identically, so the To-do
+        page's three mounts and Contact list's four are unchanged — verified by rendering them.
+        The chip treatment is scoped to `.qcc-tb` and reaches nothing else. */}
+    <span className="qcc-tb-lab">{label}</span>
     {value !== undefined && <span className="qcc-tb-val">{value}</span>}
     {!!count && <span className="qcc-tb-cnt">{count}</span>}
     <Chev />

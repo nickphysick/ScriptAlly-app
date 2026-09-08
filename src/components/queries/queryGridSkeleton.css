@@ -1,0 +1,72 @@
+/* The Query Centre's loading bones (the well round, §4).
+   ⚠️ THIS SHEET PAINTS AND EMPTIES; IT NEVER SIZES. Every dimension the skeleton has comes from
+   `queryCard.css` and `queryListView.css`, because the bones render those files' own classes. A
+   width or a height here would be a second set of measurements to keep in step with the first,
+   which is how a skeleton comes to move the page it exists to hold still. The only sizes below
+   belong to boxes the loaded card fills with TEXT — a line has no height of its own. */
+
+/* ⚠️ ONE SHEEN, AND ITS KEYFRAMES TAKE LITERAL VALUES. A `var()` inside `@keyframes` fails
+   silently in this setup — the rule parses, the build passes, nothing animates. */
+@keyframes qcs-sheen {
+  0%   { background-position: -380px 0; }
+  100% { background-position: 380px 0; }
+}
+
+.qcs-b,
+.qcs-l,
+.qcs-band,
+.qcs-colhead {
+  background-color: #efe9e1;
+  background-image: linear-gradient(90deg, #efe9e1, #f6f1ea, #efe9e1);
+  background-size: 380px 100%;
+  background-repeat: repeat-x;
+  animation: qcs-sheen 1.5s linear infinite;
+  border-radius: 6px;
+  display: block;
+}
+
+/* the card's own boxes, emptied — the band keeps the card's band height */
+.qcs .qcc-band { background: #f4efe8; border: none; }
+.qcs .qcc-chip { border: none; box-shadow: none; }
+/* ⚠️ THE LEAF IS THE ONE BOX WITH ITS OWN SIZE HERE, because the loaded leaf is sized by three
+   lines of text and an empty one would collapse. 38x46 is what those three lines make. */
+.qcs-leaf { width: 38px; height: 46px; border-radius: 8px; }
+.qcs .qcc-whotx { display: flex; flex-direction: column; gap: 7px; justify-content: center; min-width: 0; }
+.qcs-l { height: 11px; border-radius: 5px; }
+.qcs-rule { display: block; height: 1px; background: #ece0d2; margin: 12px 0; }
+.qcs .qcc-facttx { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+
+/* the card itself keeps its real chrome so the box it occupies is the box that arrives */
+.qcs.qcc { cursor: default; }
+
+/* the dense list's rows, emptied — the row's own grid supplies every column's width */
+.qcs.qlv-row { cursor: default; }
+.qcs-cell { display: flex; align-items: center; min-width: 0; }
+
+/* the board's columns */
+.qcs-board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 14px; }
+.qcs-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.qcs-colhead { height: 30px; border-radius: 8px; }
+
+/* ⚠️ THE CROSSFADE HAPPENS IN PLACE AND IS NOT A SECOND ENTRANCE (§4). The bones fade out where
+   they stand while the real cards fade in behind them; nothing rises, nothing staggers. A page
+   that skeletons and THEN plays its entrance arrives twice — which is why `useSkeleton.wasShown`
+   suppresses §5 whenever a cover was seen. */
+.qcs-wrap { transition: opacity 250ms linear; }
+.qcs-wrap--out { opacity: 0; }
+
+/* the one thing assistive tech hears */
+.qc-skel-sr {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qcs-b, .qcs-l, .qcs-band, .qcs-colhead { animation: none; }
+  .qcs-wrap { transition: none; }
+}
+
+/* the tile's figure, covered — the tile's own frame, disc and label stay real (§4) */
+.qct-n--sk { width: 42px; height: 22px; border-radius: 6px; }
+/* the `Showing N of M` figures, covered */
+.qcs-num { display: inline-block; width: 22px; height: 12px; border-radius: 5px; vertical-align: -1px; }
