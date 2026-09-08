@@ -295,6 +295,9 @@ if (READ.includes("\u0060")) {
  */
 const NAV_MS = 120_000;
 
+/* SA_REFDIFF_DUMP=<probe> — print that probe's subtree from both sides; see readPage */
+const DUMP = process.env.SA_REFDIFF_DUMP || "";
+
 async function readPage(page, url, { app } = {}) {
   page.setDefaultTimeout(NAV_MS);
   page.setDefaultNavigationTimeout(NAV_MS);
@@ -330,6 +333,63 @@ async function readPage(page, url, { app } = {}) {
         `dash-refdiff: the app page is not the signed-in dashboard — ${n}/16 probes found` +
         `${authForm ? ", and the sign-in form is on screen" : ""}. Refusing to diff it.`,
       );
+    }
+  }
+  /**
+   * ⚠️ THE DUMP IS A SUBTREE, BECAUSE A DIFF ROW NAMES A BOX AND NEVER SAYS WHICH CHILD MOVED IT.
+   * "plot y 199 to 213" is 14px of something ABOVE the plot inside a header the table has no row
+   * for; the answer is always one level down, and reconstructing that by hand in a separate script
+   * means rebuilding the sign-in, which is how a probe ends up measuring the auth page.
+   *
+   * SA_REFDIFF_DUMP=<probe> prints both sides child by child, offsets relative to the probe's own
+   * box so the two are comparable when the boxes sit at different page positions. Wrapping is what
+   * it is usually for, so flex-wrap and the computed gap are printed even where they are default.
+   */
+  if (DUMP) {
+    const sub = await page.evaluate(
+      (name) => {
+        const root = document.querySelector(`[data-probe="${name}"]`);
+        if (!root) return null;
+        const rb = root.getBoundingClientRect();
+        const rows = [];
+        const walk = (el, depth) => {
+          const cs = getComputedStyle(el);
+          if (cs.display === "none" || el.hasAttribute("hidden")) return;
+          const r = el.getBoundingClientRect();
+          const cls = el.className && el.className.baseVal !== undefined ? el.className.baseVal : el.className;
+          rows.push({
+            depth,
+            name:
+              el.tagName.toLowerCase() +
+              (el.id ? "#" + el.id : "") +
+              (cls ? "." + String(cls).trim().split(/\s+/).join(".") : ""),
+            y: +(r.y - rb.y).toFixed(1),
+            x: +(r.x - rb.x).toFixed(1),
+            w: +r.width.toFixed(1),
+            h: +r.height.toFixed(1),
+            disp: cs.display,
+            wrap: cs.flexWrap,
+            gap: cs.gap,
+            pad: cs.padding,
+            text: el.children.length === 0 ? (el.textContent || "").trim().slice(0, 30) : "",
+          });
+          if (depth < 3) for (const c of el.children) walk(c, depth + 1);
+        };
+        walk(root, 0);
+        return { w: +rb.width.toFixed(1), h: +rb.height.toFixed(1), rows };
+      },
+      DUMP,
+    );
+    console.log(`\n--- dump ${DUMP} · ${app ? "APP" : "REF"} ---`);
+    if (!sub) console.log("  (no such probe on this side)");
+    else {
+      console.log(`  box ${sub.w}x${sub.h}`);
+      for (const r of sub.rows) {
+        const extra = [r.disp, r.wrap !== "nowrap" ? `wrap=${r.wrap}` : "", r.gap && r.gap !== "normal" ? `gap=${r.gap}` : "", `pad=${r.pad}`]
+          .filter(Boolean)
+          .join(" ");
+        console.log(`  ${"  ".repeat(r.depth)}${r.name}  y=${r.y} h=${r.h} x=${r.x} w=${r.w}  ${extra}${r.text ? `  "${r.text}"` : ""}`);
+      }
     }
   }
   return data;

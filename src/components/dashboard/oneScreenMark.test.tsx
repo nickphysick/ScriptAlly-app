@@ -33,16 +33,16 @@ describe("the mark slot", () => {
     }
   });
 
-  it("⚠️ THE BOX IS 28px IN BOTH DIRECTIONS AND DOES NOT FLEX", () => {
+  it("⚠️ THE BOX IS 26px IN BOTH DIRECTIONS AND DOES NOT FLEX", () => {
     const b = blk(".os-mark");
-    expect(b).toContain("flex: 0 0 28px");
-    expect(b).toContain("width: 28px");
-    expect(b).toContain("height: 28px");
+    expect(b).toContain("flex: 0 0 26px");
+    expect(b).toContain("width: 26px");
+    expect(b).toContain("height: 26px");
   });
 
   it("⚠️ the box's size is INDEPENDENT of its contents — that is what makes the swap free", () => {
-    // the icon states its own 17px; an asset is bounded and letterboxed. Neither may size the box.
-    expect(blk(".os-mark svg")).toContain("width: 17px");
+    // the icon states its own 20px; an asset is bounded and letterboxed. Neither may size the box.
+    expect(blk(".os-mark svg")).toContain("width: 20px");
     const img = blk(".os-mark img");
     expect(img).toContain("max-width: 100%");
     expect(img).toContain("max-height: 100%");
@@ -63,11 +63,11 @@ describe("the mark slot", () => {
     expect(b).not.toContain("background");
   });
 
-  it("⚠️ and the SLOT survives it — the box is still 28px and still swap-ready", () => {
+  it("⚠️ and the SLOT survives it — the box is still 26px and still swap-ready", () => {
     const b = blk(".os-mark");
-    expect(b).toContain("flex: 0 0 28px");
-    expect(b).toContain("width: 28px");
-    expect(b).toContain("height: 28px");
+    expect(b).toContain("flex: 0 0 26px");
+    expect(b).toContain("width: 26px");
+    expect(b).toContain("height: 26px");
     // a `.os-th2 .os-mark` or `.os-ahead .os-mark` rule would be this becoming four rules again
     expect(css).not.toMatch(/\.os-(th2|ahead)\s+\.os-mark\s*\{/);
   });

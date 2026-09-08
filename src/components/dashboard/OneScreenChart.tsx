@@ -435,8 +435,13 @@ export const OneScreenChart: React.FC<{
         </div>
         </div>
       </div>
-      {/* ⚠️ THE PADDING IS THE BODY'S, NOT THE CARD'S — the band must run edge to edge, so the
-          card carries none and the chart wrapper supplies its own. */}
+      {/* ⚠️ THE CARD IS THREE SIBLINGS, NOT TWO — band, chart, legend, which is the ref's own
+          structure (`.hd` / `.chart` / `.legend`, all children of `.card`). The legend used to sit
+          INSIDE the chart body, which meant the body's padding had to be the sum of two elements'
+          gutters and the plot's height was whatever was left after the legend had taken its share.
+          Measured that way the plot came out 291 against the ref's 308.4, and there is no padding
+          value that fixes it, because the fault is a level of nesting rather than a number.
+          The padding is still the BODY's and never the card's — the band runs edge to edge. */}
       <div className="os-lbody">
       <div className="os-chartwrap" ref={wrapRef}>
         {dayOne ? (
@@ -542,6 +547,7 @@ export const OneScreenChart: React.FC<{
           )}
         </div>
       </div>
+      </div>
 
       {/* §3: the keyboard walk narrates here */}
       <div className="os-sr" aria-live="polite">{liveText}</div>
@@ -632,7 +638,6 @@ export const OneScreenChart: React.FC<{
           </div>
         ) : null}
       </ChartTip>
-      </div>
     </OneScreenPanel>
   );
 };

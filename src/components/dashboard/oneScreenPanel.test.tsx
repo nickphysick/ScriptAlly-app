@@ -111,8 +111,17 @@ describe("the bands are one geometry, coloured by purpose", () => {
        two cannot drift, because there is only one declaration to edit. */
     const grouped = /(?:^|\n)\.os-ahead,\s*\.os-th2\s*\{([^}]*)\}/m.exec(bare);
     expect(grouped, "the two bands must share ONE geometry rule").not.toBeNull();
-    expect(grouped![1]).toContain("padding: 0 20px");   // ref `.hd{padding:14px 20px}`
-    expect(grouped![1]).toContain("height: 51px");
+    /* ⚠️ RETARGETED OFF THE VALUES (v22). It read `padding: 0 20px` and `height: 51px`, which was
+       the geometry when the band was a stated height with its contents centred; the ref's band is
+       `14px 20px` with `padding-bottom:4px` from `ch-bare` and no height at all, so its contents sit
+       HIGH in the band. Centring them cost the to-do badge 4.6px at every width while the band's own
+       height stayed in tolerance — the diff blamed the badge, which was innocent.
+       THE CLAIM WAS NEVER THE NUMBERS: it is that there is ONE rule, so the two bands cannot drift.
+       The numbers are decided against the ref by `scripts/dash-refdiff.mjs` and pinning them here
+       would go red on every retune of something this lock has no opinion about. */
+    expect(grouped![1]).toMatch(/padding:\s*\d+px/);
+    expect(grouped![1]).toContain("min-height: 51px");
+    expect(grouped![1]).toContain("box-sizing: border-box");
     /* and neither may state a competing padding elsewhere — see the base-rule case below */
   });
 
@@ -121,20 +130,31 @@ describe("the bands are one geometry, coloured by purpose", () => {
      AND the control cluster on two rows. Holding it to the shared 51 made the whole card 52px
      shorter than the ref's and moved every card in the middle column. The exception is a descendant
      selector, so the shared rule is untouched and a THIRD band cannot quietly join it. */
-  it("⚠️ the chart's band is the one exception, and it is scoped rather than a loosened default", () => {
-    expect(/(?:^|\n)\.os-ahead,\s*\.os-th2\s*\{([^}]*)\}/m.exec(bare)![1]).toContain("height: 51px");
+  /* ⚠️ RETARGETED, AND THE EXCEPTION IS SMALLER THAN IT WAS (v22). This asserted that the chart's
+     band overrode the shared band's stated HEIGHT. It no longer does, and not because the exception
+     was loosened — because the shared band became faithful to the ref, which states no height
+     either. Three declarations dropped out of the override the moment that landed. What is left,
+     and what this case now asserts, is the one way the chart's band really does differ: it holds two
+     rows below the breakpoint and one above it. */
+  it("⚠️ the chart's band is the one that WRAPS, and the wrap is scoped rather than a loosened default", () => {
+    const shared = /(?:^|\n)\.os-ahead,\s*\.os-th2\s*\{([^}]*)\}/m.exec(bare)![1];
+    expect(shared).toContain("min-height: 51px");     // the floor all three share
+    expect(shared).not.toMatch(/flex-wrap:\s*wrap/); // and none of them wraps by default
     const lead = /\.os-lead > \.os-ahead\s*\{([^}]*)\}/.exec(bare);
     expect(lead, "the chart's band override must exist").not.toBeNull();
-    expect(lead![1]).toContain("height: auto");
-    expect(lead![1]).toContain("min-height: 51px");   // it never goes BELOW the shared band
     /* ⚠️ `nowrap` AT THE BASE AND THE STACK IN ITS OWN REGIME (ref v16, Phase 5) — the ref's `.hd`
        is `flex-wrap: nowrap` and its ≤1700 block turns wrapping on. Both halves are asserted,
        because a base that wraps puts the break wherever the contents run out of room, which is a
        different place at every width and inside the control cluster at some of them. */
     expect(lead![1]).toContain("flex-wrap: nowrap");
     expect(bare).toMatch(/max-width:\s*1699px[\s\S]{0,400}?\.os-lead > \.os-ahead\s*\{[^}]*flex-wrap:\s*wrap/);
-    /* and no other band may take the exception */
-    expect(bare).not.toMatch(/\.os-th2\s*\{[^}]*height:\s*auto/);
+    /* ⚠️ AND THE EXCEPTION MAY NOT SPREAD — ANCHORED, because it did not used to be. This forbade
+       `height: auto` on `.os-th2` with a bare `\.os-th2\s*\{`, which also matches the TAIL of
+       `.os-ahead, .os-th2 {` — so the moment the shared rule legitimately took `height: auto` the
+       lock reported the sage band as having stolen the chart's exception, about a declaration the
+       two bands share by design. A selector in a source lock is anchored at a line start or it
+       matches every rule that ends with it. The claim is now the wrap, which is the real exception. */
+    expect(bare).not.toMatch(/(?:^|\n)\.os-th2\s*\{[^}]*flex-wrap:\s*wrap/);
   });
 
   it("Active queries wears the shared band, not a header of its own", () => {
@@ -218,12 +238,23 @@ describe("Querying goals keeps its bare header", () => {
 describe("one band geometry, declared", () => {
   const bare = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
-  it("⚠️ the height is DECLARED and border-box — not left to the contents", () => {
+  /* ⚠️ INVERTED BY THE REF (v22), AND THE OLD CLAIM IS THE ONE THAT WAS WRONG. This required the
+     band's height to be DECLARED, "not left to the contents" — on the reasoning that three bands
+     agreeing structurally beats three bands that happen to measure the same. The reasoning holds
+     and the mechanism was the wrong one: the ref's band has no height, its air is 14px above and
+     4px below, and a stated height with centred contents is a different thing that merely measures
+     close. The agreement now comes from ONE shared rule plus a FLOOR, which is the same structural
+     guarantee — an empty band is still 51px — without contradicting the ref. */
+  it("⚠️ the band's air is the ref's, and the 51px survives as a FLOOR", () => {
     const m = /\.os-ahead,\s*\.os-th2\s*\{([^}]*)\}/.exec(bare);
     expect(m, "the two bands must share ONE geometry rule").not.toBeNull();
-    expect(m![1]).toContain("height: 51px");
+    expect(m![1]).toContain("min-height: 51px");
     expect(m![1]).toContain("box-sizing: border-box");
-    expect(m![1]).toContain("padding: 0 20px");
+    /* asymmetric: more air above the contents than below, which is what puts them high in the band */
+    const pad = /padding:\s*(\d+)px\s+\d+px\s+(\d+)px/.exec(m![1]);
+    expect(pad, "the band states a three-value padding").not.toBeNull();
+    expect(Number(pad![1])).toBeGreaterThan(Number(pad![2]));
+    expect(m![1]).not.toMatch(/(?:^|;)\s*height:\s*51px/);
   });
 
   /* ⚠️ THE BASE RULES, ANCHORED — see `geom`. The chart's scoped override DOES declare a padding
@@ -354,8 +385,19 @@ describe("the bands meet their cards' edges", () => {
     }
   });
 
-  it("the chart's padding lives in its body instead", () => {
-    /* ref `.chart{padding:14px 20px 6px}` — the legend beneath supplies the card's own foot */
-    expect(blk2(".os-lbody")).toMatch(/padding:\s*14px 20px 6px/);
+  /* ⚠️ RETARGETED TO v22's VALUE AND TO THE STRUCTURE UNDER IT. The comment quoted
+     `.chart{padding:14px 20px 6px}` from an earlier ref; v22 says `10px 22px 4px`, and the legend
+     is a SIBLING of the chart rather than a child of it. While it was a child this padding had to
+     stand in for two elements' gutters at once and the plot took whatever the legend left — 291px
+     against the ref's 308.4, with no padding value that could fix it. */
+  it("the chart's padding lives in its body, and the legend is a sibling rather than a child", () => {
+    expect(blk2(".os-lbody")).toMatch(/padding:\s*10px 22px 4px/);
+    const chart = readFileSync(resolve(__dirname, "./OneScreenChart.tsx"), "utf8");
+    const bodyOpen = chart.indexOf('<div className="os-lbody">');
+    const legend = chart.indexOf('className="os-bandkey"');
+    const bodyClose = chart.indexOf("</div>\n\n      {/* §3:", bodyOpen);
+    expect(bodyOpen, "the chart body must exist").toBeGreaterThan(-1);
+    expect(bodyClose, "the chart body must close before the live region").toBeGreaterThan(bodyOpen);
+    expect(legend, "the legend must exist").toBeGreaterThan(bodyClose);
   });
 });
