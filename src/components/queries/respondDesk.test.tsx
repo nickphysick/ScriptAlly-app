@@ -715,6 +715,27 @@ describe("§3 (sand band, superseding the mono) · the header is separated by it
     expect(css, "the rows took the header's ground").not.toMatch(/(?:^|\n)\s*\.qlv-row \{[^}]*background:/);
   });
 
+  /**
+   * ⚠️ THE BUTTON MAY NOT DECLARE A FONT AT ALL, and this is the only part of the fault a source
+   * lock can see. `.qlv-h--btn { font: inherit }` sat after `.qlv-h` at equal specificity and
+   * reset the family and size to whatever the row inherits — so the header rendered in the page's
+   * sans while the sheet said Playfair, and before that while it said JetBrains Mono. The mono
+   * only LOOKED right because `text-transform` and `letter-spacing` are not part of the `font`
+   * shorthand and came through on their own.
+   *
+   * ⚠️ AND `font-family: inherit` IS NOT THE FIX — it is the same damage spelled longhand, for the
+   * same reason. The modifier needs no font reset: `.qlv-h` is an author rule on the same element
+   * and beats the UA sheet unaided. So the assertion is an ABSENCE of any font declaration here.
+   *
+   * The rendered face is asserted where it belongs — `parity` in `queryViews.measure.ts` reads
+   * the computed `font-family`, which is the only thing that can see a cascade.
+   */
+  it("the sortable header button declares no font — the shorthand was silently winning", () => {
+    const btn = (css.match(/(?:^|\n)\.qlv-h--btn \{[^}]*\}/) ?? [""])[0];
+    expect(btn, "the .qlv-h--btn rule vanished — this lock now asserts nothing").toContain("cursor: pointer");
+    expect(btn, "a font declaration came back on the modifier").not.toMatch(/font(-family|-size|-weight)?\s*:/);
+  });
+
   it("names in Playfair ink, orderless names muted — the ref's own four values", () => {
     expect(css).toMatch(/\.qlv-h \{[^}]*font-family: var\(--font-serif\)/);
     expect(css).toMatch(/\.qlv-h \{[^}]*font-size: 14px/);

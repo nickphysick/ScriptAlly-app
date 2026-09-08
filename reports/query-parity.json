@@ -1,0 +1,191 @@
+{
+  "parity-qc-header": {
+    "shape": {
+      "tag": "header",
+      "cls": "wsh",
+      "kids": [
+        {
+          "tag": "div",
+          "cls": "wsh-toprule",
+          "kids": []
+        },
+        {
+          "tag": "div",
+          "cls": "wsh-row",
+          "kids": [
+            {
+              "tag": "img",
+              "cls": "wsh-icon",
+              "kids": []
+            },
+            {
+              "tag": "div",
+              "cls": "wsh-text",
+              "kids": [
+                {
+                  "tag": "h1",
+                  "cls": "wsh-title",
+                  "kids": []
+                },
+                {
+                  "tag": "p",
+                  "cls": "wsh-sub",
+                  "kids": []
+                }
+              ]
+            },
+            {
+              "tag": "button",
+              "cls": "wsh-cta",
+              "kids": [
+                {
+                  "tag": "svg",
+                  "cls": "lucide lucide-plus",
+                  "kids": [
+                    {
+                      "tag": "path",
+                      "cls": "",
+                      "kids": []
+                    },
+                    {
+                      "tag": "path",
+                      "cls": "",
+                      "kids": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "iconTag": "img",
+    "iconAlt": "",
+    "iconW": 72,
+    "hatching": 0,
+    "artSlot": 0,
+    "titleFont": "\"Playfair Display\", Georgia, serif",
+    "ctaBg": "rgb(28, 19, 15)"
+  },
+  "parity-contact-header": {
+    "shape": {
+      "tag": "header",
+      "cls": "wsh",
+      "kids": [
+        {
+          "tag": "div",
+          "cls": "wsh-toprule",
+          "kids": []
+        },
+        {
+          "tag": "div",
+          "cls": "wsh-row",
+          "kids": [
+            {
+              "tag": "img",
+              "cls": "wsh-icon",
+              "kids": []
+            },
+            {
+              "tag": "div",
+              "cls": "wsh-text",
+              "kids": [
+                {
+                  "tag": "h1",
+                  "cls": "wsh-title",
+                  "kids": []
+                },
+                {
+                  "tag": "p",
+                  "cls": "wsh-sub",
+                  "kids": []
+                }
+              ]
+            },
+            {
+              "tag": "button",
+              "cls": "wsh-cta",
+              "kids": [
+                {
+                  "tag": "svg",
+                  "cls": "lucide lucide-plus",
+                  "kids": [
+                    {
+                      "tag": "path",
+                      "cls": "",
+                      "kids": []
+                    },
+                    {
+                      "tag": "path",
+                      "cls": "",
+                      "kids": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "iconTag": "img",
+    "iconAlt": "",
+    "iconW": 72,
+    "hatching": 0,
+    "artSlot": 0,
+    "titleFont": "\"Playfair Display\", Georgia, serif",
+    "ctaBg": "rgb(28, 19, 15)"
+  },
+  "parity-list-1280": {
+    "bandBg": "rgb(247, 239, 227)",
+    "bandRule": "1px solid rgb(228, 217, 201)",
+    "nameFont": "\"Playfair Display\", Georgia, serif",
+    "nameSize": "14px",
+    "nameColour": "rgb(20, 20, 18)",
+    "deadColour": "rgb(156, 136, 120)",
+    "tallies": [
+      "54 of 54"
+    ],
+    "nOfM": [
+      "54 of 54"
+    ],
+    "tallyLeft": 247,
+    "rowLeft": 247,
+    "headLeft": 247
+  },
+  "parity-list-1440": {
+    "bandBg": "rgb(247, 239, 227)",
+    "bandRule": "1px solid rgb(228, 217, 201)",
+    "nameFont": "\"Playfair Display\", Georgia, serif",
+    "nameSize": "14px",
+    "nameColour": "rgb(20, 20, 18)",
+    "deadColour": "rgb(156, 136, 120)",
+    "tallies": [
+      "54 of 54"
+    ],
+    "nOfM": [
+      "54 of 54"
+    ],
+    "tallyLeft": 247,
+    "rowLeft": 247,
+    "headLeft": 247
+  },
+  "parity-list-1920": {
+    "bandBg": "rgb(247, 239, 227)",
+    "bandRule": "1px solid rgb(228, 217, 201)",
+    "nameFont": "\"Playfair Display\", Georgia, serif",
+    "nameSize": "14px",
+    "nameColour": "rgb(20, 20, 18)",
+    "deadColour": "rgb(156, 136, 120)",
+    "tallies": [
+      "54 of 54"
+    ],
+    "nOfM": [
+      "54 of 54"
+    ],
+    "tallyLeft": 392,
+    "rowLeft": 392,
+    "headLeft": 392
+  }
+}

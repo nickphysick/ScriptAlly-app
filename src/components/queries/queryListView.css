@@ -50,7 +50,24 @@
   font-family: var(--font-serif); font-size: 14px; letter-spacing: 0; text-transform: none;
   color: var(--ink, #1c130f); display: flex; align-items: center; gap: 6px;
 }
-.qlv-h--btn { background: none; border: none; padding: 0; cursor: pointer; text-align: left; font: inherit; color: inherit; }
+/* ⚠️ NO `font: inherit` HERE — IT IS THE SHORTHAND, AND IT WAS SILENTLY WINNING. `.qlv-h` sets the
+   family and size; `.qlv-h--btn` is declared after it at equal specificity, so `font: inherit`
+   reset BOTH to whatever the row inherits — measured `"source sans 3"` where the sheet said
+   Playfair, and before that where it said JetBrains Mono. The mono header only LOOKED like mono
+   because `text-transform` and `letter-spacing` are not part of the `font` shorthand and came
+   through on their own; the face never did. This is the `background`-shorthand trap this repo
+   already records, wearing `font`'s clothes — and a source lock cannot see it, which is why the
+   parity harness asserts the COMPUTED family.
+
+   ⚠️ AND THE FIX IS NO FONT DECLARATION AT ALL, not the same reset spelled longhand. `font-family:
+   inherit` here loses nothing to the shorthand and does exactly the same damage — it is declared
+   AFTER `.qlv-h` on the same element, so it still replaces the family with whatever the row
+   inherits. The button needs no font reset: `.qlv-h` is an author rule on this very element, and
+   author declarations beat the UA sheet's `font: 400 13.333px Arial` without help. */
+.qlv-h--btn {
+  background: none; border: none; padding: 0; cursor: pointer; text-align: left;
+  color: inherit;
+}
 /* ⚠️ NO COLOUR SHIFT ON HOVER, AND THAT IS A CONSEQUENCE OF THE TYPE CHANGE RATHER THAN AN
    OMISSION. The mono header rested at #a08a78 and darkened to #3a1c14 under the pointer; resting
    at INK there is nothing darker to go to, and the inherited rule would have LIGHTENED the label

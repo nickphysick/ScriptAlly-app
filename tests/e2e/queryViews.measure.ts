@@ -708,3 +708,122 @@ test("§5 · the header sits on its columns — 1280 · 1440 · 1920", async ({ 
   }
   writeFileSync("reports/query-toolbar-align.json", JSON.stringify(out, null, 2));
 });
+
+/* ══ Contact parity · §4 ══════════════════════════════════════════════════════════════════════ */
+
+/** the visible masthead's class skeleton — what a "same component, same class names" claim means */
+const headerShape = async (page: import("@playwright/test").Page) =>
+  page.evaluate(() => {
+    const mast = [...document.querySelectorAll<HTMLElement>(".wsh")].find((e) => e.getBoundingClientRect().height > 0);
+    if (!mast) throw new Error("no visible .wsh");
+    const skeleton = (el: Element): unknown => ({
+      tag: el.tagName.toLowerCase(),
+      cls: (el.getAttribute("class") || "").trim(),
+      kids: [...el.children].map(skeleton),
+    });
+    const icon = mast.querySelector<HTMLImageElement>(".wsh-icon");
+    return {
+      shape: skeleton(mast),
+      iconTag: icon?.tagName.toLowerCase() ?? null,
+      iconAlt: icon?.getAttribute("alt") ?? null,
+      iconW: icon ? Math.round(icon.getBoundingClientRect().width) : -1,
+      /* the placeholder chrome this asset exists to retire */
+      hatching: mast.querySelectorAll(".art-ph, .art-phk, .art-box").length,
+      artSlot: mast.querySelectorAll(".art").length,
+      titleFont: getComputedStyle(mast.querySelector<HTMLElement>(".wsh-title")!).fontFamily,
+      ctaBg: mast.querySelector<HTMLElement>(".wsh-cta")
+        ? getComputedStyle(mast.querySelector<HTMLElement>(".wsh-cta")!).backgroundColor : null,
+    };
+  });
+
+test("parity · one header component, one count, a sand band — 1280 · 1440 · 1920", async ({ page }) => {
+  const SHOTS = "reports/query-parity-shots";
+  mkdirSync(SHOTS, { recursive: true });
+  const out: Record<string, unknown> = {};
+
+  /* ── the two headers, same props shape ── */
+  await openQC(page, 1440);
+  const qc = await headerShape(page);
+  await openRoute(page, "/agents", { width: 1440, height: 1000 });
+  await expect(page.locator(".agl-wpg .wsh").first()).toBeVisible({ timeout: 30_000 });
+  const cl = await headerShape(page);
+  out["parity-qc-header"] = qc;
+  out["parity-contact-header"] = cl;
+
+  /**
+   * ⚠️ THE CLASS SKELETON, NOT THE TEXT. "Equals Contact list's for the same props" cannot mean
+   * identical DOM — the two pages state different words — so what is compared is the tree of
+   * ELEMENTS and CLASS NAMES the shared component builds. Two pages drawing one shape produce the
+   * same skeleton; a page that grew its own header would not, whatever its copy said.
+   */
+  const strip = (n: any): any => ({ tag: n.tag, cls: n.cls, kids: n.kids.map(strip) });
+  expect(strip(qc.shape), "the two mastheads no longer build the same element tree").toEqual(strip(cl.shape));
+  expect(qc.titleFont, "the two titles are set in different faces").toBe(cl.titleFont);
+  expect(qc.ctaBg, "the two CTAs are filled differently").toBe(cl.ctaBg);
+  expect(qc.iconW, "the two icons are different sizes").toBe(cl.iconW);
+
+  /* ── the masthead picture is real artwork, not the placeholder primitive ── */
+  expect(qc.iconTag, "the masthead picture is not an img").toBe("img");
+  expect(qc.iconAlt, "the icon names the page a second time").toBe("");
+  expect(qc.hatching, "placeholder hatching survived on the masthead").toBe(0);
+  expect(qc.artSlot, "the masthead still mounts the placeholder slot").toBe(0);
+
+  /* ── the sand band, the Playfair names, and the count stated once ── */
+  for (const width of [1280, 1440, 1920]) {
+    await openQC(page, width);
+    await pickView(page, "List");
+    await tagLiveList(page);
+    const read = await page.evaluate(() => {
+      const grid = document.querySelector<HTMLElement>("[data-qlv-live]")!;
+      const head = grid.querySelector<HTMLElement>(".qlv-head")!;
+      const hs = [...head.children] as HTMLElement[];
+      const cs = getComputedStyle(head);
+      const sortable = hs.filter((h) => h.tagName.toLowerCase() === "button");
+      const dead = hs.filter((h) => h.classList.contains("qlv-h--dead"));
+      /* ⚠️ THE COUNT IS SOUGHT ON THE VISIBLE PAGE ONLY — every workspace page stays mounted, so
+         `document` holds three of them and a page-wide sweep would count other pages' tallies. */
+      const live = [...document.querySelectorAll<HTMLElement>(".wpg")].find((e) => e.getBoundingClientRect().height > 0)!;
+      const tallies = [...live.querySelectorAll<HTMLElement>(".wpg-tally")].map((e) => (e.textContent || "").trim());
+      const body = (live.innerText || "");
+      return {
+        bandBg: cs.backgroundColor,
+        bandRule: `${cs.borderBottomWidth} ${cs.borderBottomStyle} ${cs.borderBottomColor}`,
+        nameFont: getComputedStyle(sortable[0]).fontFamily,
+        nameSize: getComputedStyle(sortable[0]).fontSize,
+        nameColour: getComputedStyle(sortable[0]).color,
+        deadColour: dead.length ? getComputedStyle(dead[0]).color : "—",
+        tallies,
+        /* "N of M" anywhere in the visible page's own text */
+        nOfM: (body.match(/\b\d+ of \d+\b/g) ?? []),
+        /* ⚠️ WHERE IT SITS, NOT JUST THAT IT EXISTS. The first form of this case asserted the
+           count appeared exactly once and passed while the tally rendered CLIPPED at the
+           column's left edge — visible in the very screenshot the same run took. A property of
+           the part, asserted while the composition was broken. */
+        tallyLeft: (() => { const t = live.querySelector<HTMLElement>(".wpg-tally"); return t ? Math.round(t.getBoundingClientRect().left) : null; })(),
+        rowLeft: (() => { const r = live.querySelector<HTMLElement>(".qcc-tb"); return r ? Math.round(r.getBoundingClientRect().left) : null; })(),
+        headLeft: (() => { const h = live.querySelector<HTMLElement>(".qlv-head"); return h ? Math.round(h.getBoundingClientRect().left) : null; })(),
+      };
+    });
+    out[`parity-list-${width}`] = read;
+
+    expect(read.bandBg, `the header band is not sand at ${width}`).toBe("rgb(247, 239, 227)");
+    expect(read.bandRule, `the band's rule at ${width}`).toBe("1px solid rgb(228, 217, 201)");
+    expect(read.nameFont.toLowerCase(), `header names are not Playfair at ${width}`).toContain("playfair");
+    expect(read.nameSize, `header name size at ${width}`).toBe("14px");
+    expect(read.deadColour, `orderless names are not muted at ${width}`).toBe("rgb(156, 136, 120)");
+    /* ⚠️ EXACTLY ONE, and both halves matter: one tally element, and one "N of M" string anywhere
+       on the page. The footer used to state the same figure, so a check for the element alone
+       would pass on a page saying it twice in two different shapes. */
+    expect(read.tallies.length, `tally elements at ${width}`).toBe(1);
+    expect(read.nOfM.length, `"N of M" appears ${read.nOfM.length} times at ${width}: ${read.nOfM.join(" · ")}`).toBe(1);
+
+    /* the tally must start no further left than the row that holds it */
+    expect(read.tallyLeft, `the tally is outside its own row at ${width}`)
+      .toBeGreaterThanOrEqual((read.rowLeft ?? 0) - 1);
+
+    await page.screenshot({ path: `${SHOTS}/list-${width}.png` });
+    await pickView(page, "Grid");
+    await page.screenshot({ path: `${SHOTS}/grid-${width}.png` });
+  }
+  writeFileSync("reports/query-parity.json", JSON.stringify(out, null, 2));
+});
