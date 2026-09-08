@@ -22,7 +22,7 @@ import { createPortal } from "react-dom";
 import { Agent, Query, QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
 import { activeStageBreakdown } from "../../lib/dashboardStats";
-import { bandSeries, bandTotal, BAND_KEYS, BAND_LABEL, UNDATED_LABEL, type BandKey, type BandPoint } from "../../lib/chartBands";
+import { bandSeries, BAND_KEYS, BAND_LABEL, type BandKey, type BandPoint } from "../../lib/chartBands";
 import { STATE_TOKEN, STATE_ACCENT_TOKEN } from "../../lib/queryCardFacts";
 import { placeTooltip, Rect } from "../../lib/deskTooltip";
 import {
@@ -35,14 +35,6 @@ import { OneScreenMark } from "./OneScreenMark";
 import { useCountUp } from "../../lib/useCountUp";
 
 /* ── pure geometry (exported for the node-env tests — there is no layout engine to ask) ── */
-
-/**
- * ⚠️ THE STACK HAS A FOURTH LAYER AND IT IS NOT A `BandKey` — the residual between the three bands
- * and the line, i.e. the queries the record cannot place. It reads the `offer` state colour because
- * that is what it mostly is (an open offer, or an R&R with no date on the turn), and it is drawn
- * rather than left as clear air so the top of the stack IS the line.
- */
-type BandStackKey = BandKey | "offer";
 
 /**
  * ⚠️ `PADY` IS THE X-AXIS BAND, NOT A MARGIN, AND IT IS WHY THE PLOT AND ITS LABELS ARE ONE BOX.
@@ -190,7 +182,18 @@ export const OneScreenChart: React.FC<{
    * bands makes the disagreement unrepresentable: `bandsAt` puts every active query in exactly one
    * bucket, so the sum IS the count, and the top of the stack IS the line at every point.
    */
-  const total = useMemo(() => bands.map(bandTotal), [bands]);
+  /**
+   * ⚠️ THE THREE BANDS' SUM, AND `undated` IS NOT IN IT (ref v16, Phase 5). The pack cuts the fourth
+   * band and holds the legend to three entries, so the queries the record cannot place have nowhere
+   * to be drawn — and adding them to the LINE while drawing them nowhere would put back the gap
+   * between the line and the top of the stack that this chart spent a whole phase closing.
+   *
+   * ⚠️ THE COST IS STATED RATHER THAN HIDDEN: an unplaceable query is not on this chart. That is a
+   * query whose current state and last dated rung are in different bands — a full went out, the
+   * answer was Revise & Resubmit, and nothing dated the turn. `undatedNow` still derives the figure
+   * for any surface that wants to say so.
+   */
+  const total = useMemo(() => bands.map((b) => b.queried + b.agent + b.you), [bands]);
   /* zero-based, round top label, headroom so the peak never touches the frame — see `axisMax` */
   const lo = 0;
   const hi = useMemo(() => (sparse ? 5 : axisTop(Math.max(0, ...total))), [total, sparse]);
@@ -213,8 +216,10 @@ export const OneScreenChart: React.FC<{
   const ledgerBands = useMemo(() => bandSeries(ledger, queries, now), [ledger, queries, now]);
   const brushAreas = useMemo(() => {
     const n = ledger.length;
-    if (n < 2) return [] as { key: BandStackKey; d: string }[];
-    const tot = ledgerBands.map(bandTotal);
+    if (n < 2) return [] as { key: BandKey; d: string }[];
+    /* the same three-band sum the chart draws — a thumbnail that included a band the chart does
+       not would be a different picture of the same data */
+    const tot = ledgerBands.map((b) => b.queried + b.agent + b.you);
     const mx = Math.max(1, ...tot) + 1;
     const bx = (i2: number) => 6 + (218 * i2) / (n - 1);
     const by = (v: number) => 32 - (29 * v) / mx;
@@ -227,11 +232,7 @@ export const OneScreenChart: React.FC<{
       for (let k = 0; k <= upTo; k++) acc += bp[BAND_KEYS[k]];
       return acc;
     });
-    const out: { key: BandStackKey; d: string }[] = [];
-    if (ledgerBands.some((b) => b.undated > 0)) {
-      const d = areaTo(tot);
-      if (d) out.push({ key: "offer", d });
-    }
+    const out: { key: BandKey; d: string }[] = [];
     for (let k = BAND_KEYS.length - 1; k >= 0; k--) {
       const d = areaTo(cum(k));
       if (d) out.push({ key: BAND_KEYS[k], d });
@@ -241,7 +242,7 @@ export const OneScreenChart: React.FC<{
   const brushLine = useMemo(() => {
     const n = ledger.length;
     if (n < 2) return "";
-    const tot = ledgerBands.map(bandTotal);
+    const tot = ledgerBands.map((b) => b.queried + b.agent + b.you);
     const mx = Math.max(1, ...tot) + 1;
     return monotonePath(tot.map((v, i2) => [6 + (218 * i2) / (n - 1), 32 - (29 * v) / mx] as [number, number]));
   }, [ledger, ledgerBands]);
@@ -259,16 +260,15 @@ export const OneScreenChart: React.FC<{
    * Centre's cards and the To-do ticket's edge already read. A fourth copy of four hexes is how a
    * page comes to be nearly the right colour.
    */
-  const hasUndated = useMemo(() => bands.some((b) => b.undated > 0), [bands]);
   const bandAreas = useMemo(() => {
-    if (sparse || !W || !H) return [] as { key: BandStackKey; d: string }[];
+    if (sparse || !W || !H) return [] as { key: BandKey; d: string }[];
     const cum = (upTo: number) => view.map((_, i) => {
       const bp = bands[i];
       let n = 0;
       for (let k = 0; k <= upTo; k++) n += bp ? bp[BAND_KEYS[k]] : 0;
       return n;
     });
-    const out: { key: BandStackKey; d: string }[] = [];
+    const out: { key: BandKey; d: string }[] = [];
     const areaTo = (vals: number[]) => {
       const top = monotonePath(vals.map((v, i) => [chartX(i, W, view.length), chartY(v, H, lo, hi)] as [number, number]));
       return top
@@ -276,16 +276,12 @@ export const OneScreenChart: React.FC<{
         : null;
     };
     /* back to front: the widest stack first, so each later fill covers the one beneath it */
-    if (hasUndated) {
-      const d = areaTo(total);
-      if (d) out.push({ key: "offer", d });
-    }
     for (let k = BAND_KEYS.length - 1; k >= 0; k--) {
       const d = areaTo(cum(k));
       if (d) out.push({ key: BAND_KEYS[k], d });
     }
     return out;
-  }, [bands, total, hasUndated, view, W, H, lo, hi, sparse]);
+  }, [bands, view, W, H, lo, hi, sparse]);
   const ys = useMemo(() => pts.map((p) => p[1]), [pts]);
 
   /* ⚠️ THE DRAW-IN RUNS ONCE, EVER (§3) — never on resize, never on range change, never under
@@ -551,10 +547,10 @@ export const OneScreenChart: React.FC<{
       <div className="os-sr" aria-live="polite">{liveText}</div>
 
       {/* ── the Form 11 popup: a week, or a pin ── */}
-      {/* ⚠️ THE LEGEND NAMES WHAT IS DRAWN, AND THE FOURTH BAND IS DRAWN NOW. It appears only when
-          there is one to explain — a permanent "Offer or undecided" swatch on an account with
-          neither states a category the reader does not have. The old note here said three swatches
-          and reasoned from a slate band that did not exist; it does. */}
+      {/* ⚠️ THREE ENTRIES, AND THE COUNT IS FIXED (ref v16, Phase 5). A fourth band and its
+          "Offer or undecided" swatch were built here twice and cut twice; the chart is the three
+          bands the design names, and the legend names exactly those. `STATE_TOKEN.offer` is still
+          the Query Centre's and the ticket edge's — it is simply not a band. */}
       {!dayOne && !sparse && (
         <div className="os-bandkey">
           {BAND_KEYS.map((k) => (
@@ -563,12 +559,6 @@ export const OneScreenChart: React.FC<{
               {BAND_LABEL[k]}
             </span>
           ))}
-          {hasUndated && (
-            <span className="os-bk">
-              <i style={{ background: STATE_TOKEN.offer }} aria-hidden="true" />
-              {UNDATED_LABEL}
-            </span>
-          )}
         </div>
       )}
       <ChartTip anchor={tipAnchor}>

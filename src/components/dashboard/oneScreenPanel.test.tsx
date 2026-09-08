@@ -127,7 +127,12 @@ describe("the bands are one geometry, coloured by purpose", () => {
     expect(lead, "the chart's band override must exist").not.toBeNull();
     expect(lead![1]).toContain("height: auto");
     expect(lead![1]).toContain("min-height: 51px");   // it never goes BELOW the shared band
-    expect(lead![1]).toContain("flex-wrap: wrap");
+    /* ⚠️ `nowrap` AT THE BASE AND THE STACK IN ITS OWN REGIME (ref v16, Phase 5) — the ref's `.hd`
+       is `flex-wrap: nowrap` and its ≤1700 block turns wrapping on. Both halves are asserted,
+       because a base that wraps puts the break wherever the contents run out of room, which is a
+       different place at every width and inside the control cluster at some of them. */
+    expect(lead![1]).toContain("flex-wrap: nowrap");
+    expect(bare).toMatch(/max-width:\s*1699px[\s\S]{0,400}?\.os-lead > \.os-ahead\s*\{[^}]*flex-wrap:\s*wrap/);
     /* and no other band may take the exception */
     expect(bare).not.toMatch(/\.os-th2\s*\{[^}]*height:\s*auto/);
   });

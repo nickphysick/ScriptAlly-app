@@ -76,21 +76,18 @@ export const BAND_LABEL: Record<BandKey, string> = {
 };
 
 /**
- * ⚠️ THE FOURTH BUCKET IS LABELLED TOO, because it is DRAWN now rather than left as a gap.
- * The chart used to plot `active` as its line and the three bands beneath it, so an unplaceable
- * query showed as clear air between the top band and the line — honest, and unreadable: nothing on
- * the card said what the gap was. It is a band in its own right now, in the offer colour, and it
- * appears in the legend only when there is one to explain.
+ * ⚠️ THE LINE IS THIS SUM, AND `undated` IS NOT IN IT (ref v16).
+ *
+ * The chart is THREE bands and its legend names exactly those three. A fourth band for the queries
+ * the record cannot place was built twice and cut twice — the second time because the design does
+ * not have one, and adding them to the line while drawing them nowhere would put back the gap
+ * between the line and the top of the stack that closing this sum was for.
+ *
+ * ⚠️ SO THE FIGURE IS "PLACEABLE ACTIVE", NOT "ACTIVE", and the name says so. `undatedNow` derives
+ * the difference for any surface that wants to state it; this one does not, and the honest reading
+ * of the chart is that a query nobody can place is not on it.
  */
-export const UNDATED_LABEL = "Offer or undecided";
-
-/**
- * ⚠️ THE LINE IS THIS SUM — there is no second series. `bandsAt` puts every ACTIVE query into
- * exactly one of the four buckets, so the sum IS the active count at that instant, by construction
- * rather than by two derivations that happen to agree. That is what makes "the bands do not add up
- * to the line" an impossible sentence rather than a caveat the card had to carry.
- */
-export const bandTotal = (b: BandPoint): number => b.queried + b.agent + b.you + b.undated;
+export const bandTotal = (b: BandPoint): number => b.queried + b.agent + b.you;
 
 /** One period's closing stock, split three ways, with what the record cannot place. */
 export interface BandPoint {

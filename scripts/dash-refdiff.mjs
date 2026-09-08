@@ -106,7 +106,7 @@ const TEXT_PROBES = ["greeting", "card-title", "stat-figure"];
 const TYPE_SCALE = [
   ["card title",      ".hd h3",              ".os-ahead h2, .os-th2 h2"],
   ["hero greeting",   ".hero h1",            ".os-greet h1"],
-  ["hero lede",       ".hero p",             ".os-greet .os-gsub"],
+  ["hero lede",       ".hero p",             ".os-sub2"],
   ["stat label",      ".stat .lab",          ".os-cl"],
   ["stat figure",     ".stat .fig b",        ".os-cn"],
   ["stat chip",       ".stat .mini",         ".os-cd"],
@@ -254,7 +254,19 @@ if (READ.includes("\u0060")) {
   throw new Error("dash-refdiff: READ contains a backtick — it is a template literal and a backtick ends it.");
 }
 
+/**
+ * ⚠️ NAVIGATION AND SIGN-IN GET A LONG LEASH, AND THAT IS NOT A TOLERANCE. This repo runs several
+ * sessions in one checkout; measured here at a load average of 17, a `file://` load of the ref and
+ * a cold Firebase auth both blew a 30s default and the run died with a TimeoutError that reads
+ * exactly like a broken page. Nothing about what is COMPARED moves — the edge, size and font
+ * tolerances are untouched. What moves is how long the harness is willing to wait for a page it has
+ * not measured yet.
+ */
+const NAV_MS = 120_000;
+
 async function readPage(page, url, { app } = {}) {
+  page.setDefaultTimeout(NAV_MS);
+  page.setDefaultNavigationTimeout(NAV_MS);
   await page.goto(url, { waitUntil: "domcontentloaded" });
   if (app) await signIn(page);
   /* fonts settled and one paint past any entrance, or type reads at its fallback size */
@@ -319,8 +331,8 @@ function envLocal(key) {
 
 async function signIn(page) {
   const settled = await Promise.race([
-    page.locator(SHELL).first().waitFor({ state: "attached", timeout: 15000 }).then(() => "shell").catch(() => null),
-    page.locator("#au-email").waitFor({ state: "attached", timeout: 15000 }).then(() => "form").catch(() => null),
+    page.locator(SHELL).first().waitFor({ state: "attached", timeout: 60000 }).then(() => "shell").catch(() => null),
+    page.locator("#au-email").waitFor({ state: "attached", timeout: 60000 }).then(() => "form").catch(() => null),
   ]);
   if (settled === "shell") return;
   const pw = process.env.SA_E2E_PASSWORD || envLocal("SA_E2E_PASSWORD");
@@ -329,7 +341,7 @@ async function signIn(page) {
   await page.locator("#au-email").fill(process.env.SA_E2E_EMAIL || envLocal("SA_E2E_EMAIL") || "harness@scriptally.test");
   await page.locator("#au-pw").fill(pw);
   await page.getByRole("button", { name: /^Sign in$/ }).last().click();
-  await page.locator(SHELL).first().waitFor({ state: "visible", timeout: 30000 });
+  await page.locator(SHELL).first().waitFor({ state: "visible", timeout: 90000 });
   await page.goto(`${APP}/dashboard`, { waitUntil: "domcontentloaded" });
 }
 

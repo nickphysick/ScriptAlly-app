@@ -149,32 +149,35 @@ describe("the bands are drawn from the shared state colours, and there are three
     }
   });
 
-  /* ⚠️ THE FOURTH BAND EXISTS NOW, AND THE OLD NOTE HERE REASONED FROM A PREMISE THAT WAS FALSE.
-     It said an open offer is "TERMINAL to this chart's own ledger, so the band would have had no
-     members" — but `bandsAt` counts an open offer as ACTIVE and cannot place it, so it went into
-     `undated` and showed as clear air between the top band and the line, with a sentence in the
-     hover panel to explain the gap. The residual is drawn now, in the offer colour, which is what
-     makes the line the stack's own top edge. */
-  it("⚠️ the residual band is GATED on there being one, not permanent and not absent", () => {
-    /* the fixture has no unplaceable query, so no fourth swatch and no slate paint */
+  /**
+   * ⚠️ THREE BANDS, AND THE FOURTH HAS NOW BEEN BUILT TWICE AND CUT TWICE — which is why this
+   * asserts its ABSENCE rather than saying nothing about it.
+   *
+   * It was drawn for the queries `bandsAt` cannot place: a query whose current state and last dated
+   * rung are in different bands, so a full went out, the answer was Revise & Resubmit, and nothing
+   * dated the turn. Drawing them in the offer colour closed the gap between the line and the top of
+   * the stack, which was a real improvement on leaving clear air there — and the design does not
+   * have a fourth band, so the honest close is the other one: the line is the three bands' SUM and
+   * an unplaceable query is not on the chart at all.
+   *
+   * ⚠️ THE COST IS REAL AND IS NOT HIDDEN. `undatedNow` still derives the figure. What must not
+   * happen is a fourth fill appearing without a fourth name beside it, or a line that counts
+   * something it does not draw.
+   */
+  it("⚠️ no fourth band, in either data state — the line is the three bands' sum", () => {
     const plain = render(spread);
     expect(plain).not.toContain("--state-offer");
     expect((plain.match(/class="os-bk"/g) ?? []).length).toBe(3);
-    /* ⚠️ THE UNPLACEABLE CASE IS AN R&R, NOT AN OFFER, AND THAT IS WORTH KNOWING. `oneScreen`'s
-       `TERMINAL` set contains `OFFER`, so an open offer is treated as OFF the board entirely and
-       never reaches a band — a standing oddity this pack was told to report rather than change.
-       What genuinely cannot be placed is a query whose current state and last dated rung are in
-       different bands: a full went out (band `agent`) and the answer was Revise & Resubmit (band
-       `you`), with no date on the turn. */
+    /* the case that USED to produce one: an R&R after a full went out, with no date on the turn */
     const withResidual = render([...spread, q({
       status: QueryStatus.REVISE_RESUBMIT, dateSent: daysAgo(40),
       fullRequestedDate: daysAgo(20), fullSentDate: daysAgo(10),
     })]);
-    expect(withResidual).toContain("--state-offer");
-    expect((withResidual.match(/class="os-bk"/g) ?? []).length).toBe(4);
+    expect(withResidual).not.toContain("--state-offer");
+    expect((withResidual.match(/class="os-bk"/g) ?? []).length).toBe(3);
   });
 
-  it("the legend names the bands it draws, and the fourth only when it is drawn", () => {
+  it("the legend names the three bands it draws, and there is no fourth", () => {
     const html = render(spread);
     for (const label of ["Awaiting first response", "Material with the agent", "Over to you"]) {
       expect(html).toContain(label);
@@ -182,7 +185,7 @@ describe("the bands are drawn from the shared state colours, and there are three
     /* ⚠️ "OVER TO YOU", NOT "YOUR MOVE" — a legend names a category; "Your move" is the imperative
        the app uses beside an action, and it must not leak into a description of a stock. */
     expect(html).not.toContain("Your move");
-    expect(html).not.toContain("Offer or undecided");
+
     expect((html.match(/class="os-bk"/g) ?? []).length).toBe(3);
   });
 

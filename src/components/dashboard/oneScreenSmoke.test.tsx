@@ -292,10 +292,12 @@ describe("§2 · the greeting", () => {
     expect(cssRules).not.toContain(".os-dateline {");
   });
 
-  it("the subtitle is 13.5px muted brown, 6px under the name", () => {
+  /* ref `.hero p{margin:6px 0 0;color:var(--ink2);font-size:17px}` — it was 13.5 in a muted step,
+     which read as a caption under the greeting rather than a line spoken to the reader */
+  it("the lede is 17px in --ink2, 6px under the name", () => {
     const r = rule(".os-sub2");
-    expect(r).toContain("font-size: 13.5px");
-    expect(r).toContain("color: #8a7a6c");
+    expect(r).toContain("font-size: 17px");
+    expect(r).toContain("#6b5d54");
     expect(r).toContain("margin-top: 6px");
   });
 
