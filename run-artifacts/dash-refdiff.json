@@ -1,6 +1,6 @@
 {
- "when": "2026-09-08T00:02:45.472Z",
- "ref": "design-refs/dashboard-cappuccino-v14.html",
+ "when": "2026-09-08T21:12:51.646Z",
+ "ref": "design-refs/dashboard-cappuccino-v16.html",
  "app": "http://127.0.0.1:4173",
  "widths": [
   1536,
@@ -54,8 +54,18 @@
      "manuscript-card": {
       "x": 260,
       "y": 244.4,
-      "w": 340,
+      "w": 300,
       "h": 362.2,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "goals-card": {
+      "x": 260,
+      "y": 628.6,
+      "w": 300,
+      "h": 310.1,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
@@ -63,28 +73,28 @@
      },
      "community-card": {
       "x": 260,
-      "y": 628.6,
-      "w": 340,
-      "h": 895.8,
+      "y": 960.7,
+      "w": 300,
+      "h": 563.7,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "chart-card": {
-      "x": 622,
+      "x": 582,
       "y": 244.4,
-      "w": 508,
-      "h": 348.2,
+      "w": 568,
+      "h": 560,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "brush": {
-      "x": 799.3,
-      "y": 308.7,
-      "w": 285.4,
+      "x": 759.3,
+      "y": 344.7,
+      "w": 265.4,
       "h": 48,
       "bg": "rgb(255, 255, 255)",
       "borderTopW": 1,
@@ -92,28 +102,28 @@
       "radius": "14px"
      },
      "plot": {
-      "x": 643,
-      "y": 374.7,
-      "w": 466,
-      "h": 153.8,
+      "x": 605,
+      "y": 406.7,
+      "w": 522,
+      "h": 353.1,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(42, 31, 24)",
       "radius": "0px"
      },
      "todo-card": {
-      "x": 622,
-      "y": 614.6,
-      "w": 508,
-      "h": 909.8,
+      "x": 582,
+      "y": 826.4,
+      "w": 568,
+      "h": 698,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "todo-badge": {
-      "x": 800.2,
-      "y": 633.7,
+      "x": 760.2,
+      "y": 845.5,
       "w": 40.2,
       "h": 24,
       "bg": "rgb(241, 231, 218)",
@@ -122,39 +132,29 @@
       "radius": "99px"
      },
      "todo-rule": {
-      "x": 623,
-      "y": 665.8,
-      "w": 506,
+      "x": 583,
+      "y": 877.6,
+      "w": 566,
       "h": 35,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(42, 31, 24)",
       "radius": "0px"
      },
-     "goals-card": {
-      "x": 1152,
-      "y": 244.4,
-      "w": 360,
-      "h": 294.7,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
      "activity-card": {
-      "x": 1152,
-      "y": 561.1,
-      "w": 360,
-      "h": 963.3,
+      "x": 1172,
+      "y": 244.4,
+      "w": 340,
+      "h": 1280,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "activity-tabs": {
-      "x": 1153,
-      "y": 612.3,
-      "w": 358,
+      "x": 1173,
+      "y": 295.6,
+      "w": 338,
       "h": 39.9,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
@@ -162,10 +162,10 @@
       "radius": "0px"
      },
      "feed": {
-      "x": 1153,
-      "y": 652.1,
-      "w": 358,
-      "h": 830.9,
+      "x": 1173,
+      "y": 335.5,
+      "w": 338,
+      "h": 1147.5,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(42, 31, 24)",
@@ -173,41 +173,118 @@
      }
     },
     "text": {
-     "hero-h1": {
+     "greeting": {
       "family": "Playfair Display",
       "size": 52,
       "weight": "700",
-      "color": "rgb(42, 31, 24)"
+      "color": "rgb(42, 31, 24)",
+      "hidden": false
      },
      "stat-figure": {
       "family": "Playfair Display",
       "size": 34,
       "weight": "600",
-      "color": "rgb(42, 31, 24)"
+      "color": "rgb(42, 31, 24)",
+      "hidden": false
      },
-     "card-h3": {
+     "card-title": {
       "family": "Playfair Display",
       "size": 23,
       "weight": "500",
-      "color": "rgb(42, 31, 24)"
-     },
-     "chart-figure": {
+      "color": "rgb(42, 31, 24)",
+      "hidden": true
+     }
+    },
+    "scale": {
+     "card title": {
       "family": "Playfair Display",
-      "size": 38,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)"
+      "size": 23,
+      "weight": "500"
      },
-     "ticket-title": {
+     "hero greeting": {
+      "family": "Playfair Display",
+      "size": 52,
+      "weight": "700"
+     },
+     "hero lede": {
+      "family": "Source Sans 3",
+      "size": 17,
+      "weight": "400"
+     },
+     "stat label": {
+      "family": "Source Sans 3",
+      "size": 16,
+      "weight": "400"
+     },
+     "stat figure": {
+      "family": "Playfair Display",
+      "size": 34,
+      "weight": "600"
+     },
+     "stat chip": {
+      "family": "Source Sans 3",
+      "size": 13,
+      "weight": "400"
+     },
+     "legend": {
+      "family": "Source Sans 3",
+      "size": 14,
+      "weight": "400"
+     },
+     "tab": {
+      "family": "Source Sans 3",
+      "size": 13.5,
+      "weight": "400"
+     },
+     "tab count": {
+      "family": "JetBrains Mono",
+      "size": 10.5,
+      "weight": "400"
+     },
+     "ticket title": {
       "family": "Source Sans 3",
       "size": 14.5,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)"
+      "weight": "600"
      },
-     "bubble-sentence": {
+     "ticket tag": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
+     },
+     "bubble sentence": {
       "family": "Source Sans 3",
       "size": 15,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)"
+      "weight": "400"
+     },
+     "bubble meta": {
+      "family": "JetBrains Mono",
+      "size": 10,
+      "weight": "400"
+     },
+     "bubble label": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
+     },
+     "todo badge": {
+      "family": "Playfair Display",
+      "size": 16,
+      "weight": "600"
+     },
+     "goal figure": {
+      "family": "Playfair Display",
+      "size": 40,
+      "weight": "600"
+     },
+     "goal of": {
+      "family": "Playfair Display",
+      "size": 24,
+      "weight": "400"
+     },
+     "goal bar label": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
      }
     },
     "checks": {
@@ -239,7 +316,7 @@
       "x": 269,
       "y": 111,
       "w": 1252,
-      "h": 206.8,
+      "h": 212.1,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(58, 28, 20)",
@@ -247,7 +324,7 @@
      },
      "stats": {
       "x": 273,
-      "y": 215.8,
+      "y": 221.1,
       "w": 1244,
       "h": 96,
       "bg": "rgba(0, 0, 0, 0)",
@@ -257,9 +334,9 @@
      },
      "grid": {
       "x": 269,
-      "y": 317.8,
+      "y": 323.1,
       "w": 1252,
-      "h": 1283.2,
+      "h": 1277.9,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(58, 28, 20)",
@@ -267,9 +344,19 @@
      },
      "manuscript-card": {
       "x": 269,
-      "y": 317.8,
-      "w": 340,
-      "h": 308.9,
+      "y": 323.1,
+      "w": 300,
+      "h": 340,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "goals-card": {
+      "x": 269,
+      "y": 685.1,
+      "w": 300,
+      "h": 298,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
@@ -277,27 +364,27 @@
      },
      "community-card": {
       "x": 269,
-      "y": 648.7,
-      "w": 340,
-      "h": 380.4,
+      "y": 1005.1,
+      "w": 300,
+      "h": 157.4,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "chart-card": {
-      "x": 631,
-      "y": 317.8,
-      "w": 508,
-      "h": 340,
+      "x": 591,
+      "y": 323.1,
+      "w": 568,
+      "h": 560,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "brush": {
-      "x": 830,
-      "y": 387.6,
+      "x": 701,
+      "y": 430.9,
       "w": 288,
       "h": 48,
       "bg": "rgb(255, 255, 255)",
@@ -306,28 +393,28 @@
       "radius": "14px"
      },
      "plot": {
-      "x": 652,
-      "y": 453.6,
-      "w": 466,
-      "h": 153.8,
+      "x": 612,
+      "y": 506.9,
+      "w": 526,
+      "h": 328.2,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(58, 28, 20)",
       "radius": "0px"
      },
      "todo-card": {
-      "x": 631,
-      "y": 679.8,
-      "w": 508,
-      "h": 921.2,
+      "x": 591,
+      "y": 905.1,
+      "w": 568,
+      "h": 695.9,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "todo-badge": {
-      "x": 805.2,
-      "y": 694.3,
+      "x": 765.2,
+      "y": 919.6,
       "w": 42.2,
       "h": 24,
       "bg": "rgb(241, 231, 218)",
@@ -336,39 +423,29 @@
       "radius": "99px"
      },
      "todo-rule": {
-      "x": 632,
-      "y": 731.8,
-      "w": 506,
+      "x": 592,
+      "y": 957.1,
+      "w": 566,
       "h": 32,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(58, 28, 20)",
       "radius": "0px"
      },
-     "goals-card": {
-      "x": 1161,
-      "y": 317.8,
-      "w": 360,
-      "h": 241,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
      "activity-card": {
-      "x": 1161,
-      "y": 580.8,
-      "w": 360,
-      "h": 1020.2,
+      "x": 1181,
+      "y": 323.1,
+      "w": 340,
+      "h": 1277.9,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "activity-tabs": {
-      "x": 1162,
-      "y": 632.8,
-      "w": 358,
+      "x": 1182,
+      "y": 375.1,
+      "w": 338,
       "h": 39.3,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
@@ -376,10 +453,10 @@
       "radius": "0px"
      },
      "feed": {
-      "x": 1162,
-      "y": 674.1,
-      "w": 358,
-      "h": 900.4,
+      "x": 1182,
+      "y": 416.3,
+      "w": 338,
+      "h": 1158.2,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(58, 28, 20)",
@@ -387,41 +464,118 @@
      }
     },
     "text": {
-     "hero-h1": {
+     "greeting": {
       "family": "Playfair Display",
       "size": 52,
       "weight": "700",
-      "color": "rgb(42, 31, 24)"
+      "color": "rgb(42, 31, 24)",
+      "hidden": false
      },
      "stat-figure": {
       "family": "Playfair Display",
       "size": 34,
       "weight": "600",
-      "color": "rgb(42, 31, 24)"
+      "color": "rgb(42, 31, 24)",
+      "hidden": false
      },
-     "card-h3": {
+     "card-title": {
       "family": "Playfair Display",
       "size": 23,
       "weight": "500",
-      "color": "rgb(42, 31, 24)"
-     },
-     "chart-figure": {
+      "color": "rgb(42, 31, 24)",
+      "hidden": false
+     }
+    },
+    "scale": {
+     "card title": {
       "family": "Playfair Display",
-      "size": 38,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)"
+      "size": 23,
+      "weight": "500"
      },
-     "ticket-title": {
-      "family": "Source Sans Pro",
-      "size": 15,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)"
+     "hero greeting": {
+      "family": "Playfair Display",
+      "size": 52,
+      "weight": "700"
      },
-     "bubble-sentence": {
-      "family": "Source Sans Pro",
+     "hero lede": {
+      "family": "Source Sans 3",
+      "size": 17,
+      "weight": "400"
+     },
+     "stat label": {
+      "family": "Source Sans 3",
+      "size": 16,
+      "weight": "400"
+     },
+     "stat figure": {
+      "family": "Playfair Display",
+      "size": 34,
+      "weight": "600"
+     },
+     "stat chip": {
+      "family": "Source Sans 3",
+      "size": 13,
+      "weight": "400"
+     },
+     "legend": {
+      "family": "Source Sans 3",
+      "size": 14,
+      "weight": "400"
+     },
+     "tab": {
+      "family": "Source Sans 3",
+      "size": 13.5,
+      "weight": "400"
+     },
+     "tab count": {
+      "family": "JetBrains Mono",
+      "size": 10.5,
+      "weight": "400"
+     },
+     "ticket title": {
+      "family": "Source Sans 3",
       "size": 15,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)"
+      "weight": "600"
+     },
+     "ticket tag": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
+     },
+     "bubble sentence": {
+      "family": "Source Sans 3",
+      "size": 15,
+      "weight": "400"
+     },
+     "bubble meta": {
+      "family": "JetBrains Mono",
+      "size": 10,
+      "weight": "400"
+     },
+     "bubble label": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
+     },
+     "todo badge": {
+      "family": "Playfair Display",
+      "size": 16,
+      "weight": "600"
+     },
+     "goal figure": {
+      "family": "Playfair Display",
+      "size": 40,
+      "weight": "600"
+     },
+     "goal of": {
+      "family": "Playfair Display",
+      "size": 24,
+      "weight": "400"
+     },
+     "goal bar label": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
      }
     },
     "checks": {
@@ -445,176 +599,100 @@
    },
    "misses": [
     {
-     "key": "stats",
-     "field": "y",
-     "ref": 108.4,
-     "app": 104.8,
-     "delta": -3.6,
-     "tol": 3
-    },
-    {
-     "key": "grid",
-     "field": "y",
-     "ref": 210.4,
-     "app": 206.8,
-     "delta": -3.6,
-     "tol": 3
-    },
-    {
-     "key": "manuscript-card",
-     "field": "y",
-     "ref": 210.4,
-     "app": 206.8,
-     "delta": -3.6,
-     "tol": 3
-    },
-    {
      "key": "manuscript-card",
      "field": "h",
      "ref": 362.2,
-     "app": 308.9,
-     "delta": -53.3,
-     "tol": 4
-    },
-    {
-     "key": "community-card",
-     "field": "y",
-     "ref": 594.6,
-     "app": 537.7,
-     "delta": -56.9,
-     "tol": 3
-    },
-    {
-     "key": "community-card",
-     "field": "h",
-     "ref": 895.8,
-     "app": 380.4,
-     "delta": -515.4,
-     "tol": 4
-    },
-    {
-     "key": "chart-card",
-     "field": "y",
-     "ref": 210.4,
-     "app": 206.8,
-     "delta": -3.6,
-     "tol": 3
-    },
-    {
-     "key": "chart-card",
-     "field": "h",
-     "ref": 348.2,
      "app": 340,
-     "delta": -8.2,
+     "delta": -22.2,
+     "tol": 4
+    },
+    {
+     "key": "community-card",
+     "field": "y",
+     "ref": 926.7,
+     "app": 894.1,
+     "delta": -32.6,
+     "tol": 3
+    },
+    {
+     "key": "community-card",
+     "field": "h",
+     "ref": 563.7,
+     "app": 157.4,
+     "delta": -406.3,
+     "tol": 4
+    },
+    {
+     "key": "plot",
+     "field": "y",
+     "ref": 372.7,
+     "app": 395.9,
+     "delta": 23.2,
+     "tol": 3
+    },
+    {
+     "key": "plot",
+     "field": "h",
+     "ref": 353.1,
+     "app": 328.2,
+     "delta": -24.9,
      "tol": 4
     },
     {
      "key": "brush",
+     "field": "y",
+     "ref": 310.7,
+     "app": 319.9,
+     "delta": 9.2,
+     "tol": 3
+    },
+    {
+     "key": "brush",
      "field": "xr",
-     "ref": 427.3,
-     "app": 403,
-     "delta": -24.3,
+     "ref": 487.3,
+     "app": 532,
+     "delta": 44.7,
      "tol": 3
     },
     {
-     "key": "todo-card",
-     "field": "y",
-     "ref": 580.6,
-     "app": 568.8,
-     "delta": -11.8,
-     "tol": 3
-    },
-    {
-     "key": "todo-card",
-     "field": "h",
-     "ref": 909.8,
-     "app": 921.2,
-     "delta": 11.4,
+     "key": "brush",
+     "field": "w",
+     "ref": 265.4,
+     "app": 288,
+     "delta": 22.6,
      "tol": 4
-    },
-    {
-     "key": "todo-badge",
-     "field": "y",
-     "ref": 599.7,
-     "app": 583.3,
-     "delta": -16.4,
-     "tol": 3
-    },
-    {
-     "key": "todo-rule",
-     "field": "y",
-     "ref": 631.8,
-     "app": 620.8,
-     "delta": -11,
-     "tol": 3
     },
     {
      "key": "goals-card",
      "field": "y",
-     "ref": 210.4,
-     "app": 206.8,
-     "delta": -3.6,
+     "ref": 594.6,
+     "app": 574.1,
+     "delta": -20.5,
      "tol": 3
     },
     {
      "key": "goals-card",
      "field": "h",
-     "ref": 294.7,
-     "app": 241,
-     "delta": -53.7,
+     "ref": 310.1,
+     "app": 298,
+     "delta": -12.1,
      "tol": 4
-    },
-    {
-     "key": "activity-card",
-     "field": "y",
-     "ref": 527.1,
-     "app": 469.8,
-     "delta": -57.3,
-     "tol": 3
-    },
-    {
-     "key": "activity-card",
-     "field": "h",
-     "ref": 963.3,
-     "app": 1020.2,
-     "delta": 56.9,
-     "tol": 4
-    },
-    {
-     "key": "activity-tabs",
-     "field": "y",
-     "ref": 578.3,
-     "app": 521.8,
-     "delta": -56.5,
-     "tol": 3
     },
     {
      "key": "feed",
      "field": "y",
-     "ref": 618.1,
-     "app": 563.1,
-     "delta": -55,
+     "ref": 301.5,
+     "app": 305.3,
+     "delta": 3.8,
      "tol": 3
     },
     {
      "key": "feed",
      "field": "h",
-     "ref": 830.9,
-     "app": 900.4,
-     "delta": 69.5,
+     "ref": 1147.5,
+     "app": 1158.2,
+     "delta": 10.7,
      "tol": 4
-    },
-    {
-     "key": "ticket-title",
-     "field": "family",
-     "ref": "Source Sans 3",
-     "app": "Source Sans Pro"
-    },
-    {
-     "key": "bubble-sentence",
-     "field": "family",
-     "ref": "Source Sans 3",
-     "app": "Source Sans Pro"
     }
    ]
   },
@@ -664,8 +742,18 @@
      "manuscript-card": {
       "x": 280,
       "y": 162,
-      "w": 440,
+      "w": 352,
       "h": 362.2,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "goals-card": {
+      "x": 280,
+      "y": 546.2,
+      "w": 352,
+      "h": 310.1,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
@@ -673,27 +761,27 @@
      },
      "community-card": {
       "x": 280,
-      "y": 546.2,
-      "w": 440,
-      "h": 895.8,
+      "y": 878.3,
+      "w": 352,
+      "h": 563.7,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "chart-card": {
-      "x": 742,
+      "x": 654,
       "y": 162,
-      "w": 700,
-      "h": 392,
+      "w": 788,
+      "h": 560,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "brush": {
-      "x": 919.3,
-      "y": 226.3,
+      "x": 1075.6,
+      "y": 177,
       "w": 345.4,
       "h": 48,
       "bg": "rgb(255, 255, 255)",
@@ -702,28 +790,28 @@
       "radius": "14px"
      },
      "plot": {
-      "x": 763,
-      "y": 292.3,
-      "w": 658,
-      "h": 217.1,
+      "x": 677,
+      "y": 239,
+      "w": 742,
+      "h": 438.4,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(42, 31, 24)",
       "radius": "0px"
      },
      "todo-card": {
-      "x": 742,
-      "y": 576,
-      "w": 700,
-      "h": 866,
+      "x": 654,
+      "y": 744,
+      "w": 788,
+      "h": 698,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "todo-badge": {
-      "x": 920.2,
-      "y": 595.1,
+      "x": 832.2,
+      "y": 763.1,
       "w": 40.2,
       "h": 24,
       "bg": "rgb(241, 231, 218)",
@@ -732,30 +820,20 @@
       "radius": "99px"
      },
      "todo-rule": {
-      "x": 743,
-      "y": 627.2,
-      "w": 698,
+      "x": 655,
+      "y": 795.2,
+      "w": 786,
       "h": 35,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(42, 31, 24)",
       "radius": "0px"
      },
-     "goals-card": {
+     "activity-card": {
       "x": 1464,
       "y": 162,
       "w": 420,
-      "h": 294.7,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "activity-card": {
-      "x": 1464,
-      "y": 478.7,
-      "w": 420,
-      "h": 963.3,
+      "h": 1280,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
@@ -763,7 +841,7 @@
      },
      "activity-tabs": {
       "x": 1465,
-      "y": 529.9,
+      "y": 213.2,
       "w": 418,
       "h": 39.9,
       "bg": "rgba(0, 0, 0, 0)",
@@ -773,9 +851,9 @@
      },
      "feed": {
       "x": 1465,
-      "y": 569.8,
+      "y": 253.1,
       "w": 418,
-      "h": 830.9,
+      "h": 1147.5,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(42, 31, 24)",
@@ -783,41 +861,118 @@
      }
     },
     "text": {
-     "hero-h1": {
+     "greeting": {
       "family": "Playfair Display",
       "size": 52,
       "weight": "700",
-      "color": "rgb(42, 31, 24)"
+      "color": "rgb(42, 31, 24)",
+      "hidden": false
      },
      "stat-figure": {
       "family": "Playfair Display",
       "size": 34,
       "weight": "600",
-      "color": "rgb(42, 31, 24)"
+      "color": "rgb(42, 31, 24)",
+      "hidden": false
      },
-     "card-h3": {
+     "card-title": {
       "family": "Playfair Display",
       "size": 23,
       "weight": "500",
-      "color": "rgb(42, 31, 24)"
-     },
-     "chart-figure": {
+      "color": "rgb(42, 31, 24)",
+      "hidden": true
+     }
+    },
+    "scale": {
+     "card title": {
       "family": "Playfair Display",
-      "size": 38,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)"
+      "size": 23,
+      "weight": "500"
      },
-     "ticket-title": {
+     "hero greeting": {
+      "family": "Playfair Display",
+      "size": 52,
+      "weight": "700"
+     },
+     "hero lede": {
+      "family": "Source Sans 3",
+      "size": 17,
+      "weight": "400"
+     },
+     "stat label": {
+      "family": "Source Sans 3",
+      "size": 16,
+      "weight": "400"
+     },
+     "stat figure": {
+      "family": "Playfair Display",
+      "size": 34,
+      "weight": "600"
+     },
+     "stat chip": {
+      "family": "Source Sans 3",
+      "size": 13,
+      "weight": "400"
+     },
+     "legend": {
+      "family": "Source Sans 3",
+      "size": 14,
+      "weight": "400"
+     },
+     "tab": {
+      "family": "Source Sans 3",
+      "size": 13.5,
+      "weight": "400"
+     },
+     "tab count": {
+      "family": "JetBrains Mono",
+      "size": 10.5,
+      "weight": "400"
+     },
+     "ticket title": {
       "family": "Source Sans 3",
       "size": 14.5,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)"
+      "weight": "600"
      },
-     "bubble-sentence": {
+     "ticket tag": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
+     },
+     "bubble sentence": {
       "family": "Source Sans 3",
       "size": 15,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)"
+      "weight": "400"
+     },
+     "bubble meta": {
+      "family": "JetBrains Mono",
+      "size": 10,
+      "weight": "400"
+     },
+     "bubble label": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
+     },
+     "todo badge": {
+      "family": "Playfair Display",
+      "size": 16,
+      "weight": "600"
+     },
+     "goal figure": {
+      "family": "Playfair Display",
+      "size": 40,
+      "weight": "600"
+     },
+     "goal of": {
+      "family": "Playfair Display",
+      "size": 24,
+      "weight": "400"
+     },
+     "goal bar label": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
      }
     },
     "checks": {
@@ -878,8 +1033,18 @@
      "manuscript-card": {
       "x": 277,
       "y": 239,
-      "w": 440,
-      "h": 308.9,
+      "w": 352,
+      "h": 340,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "goals-card": {
+      "x": 277,
+      "y": 601,
+      "w": 352,
+      "h": 283.5,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
@@ -887,19 +1052,19 @@
      },
      "community-card": {
       "x": 277,
-      "y": 569.9,
-      "w": 440,
-      "h": 432,
+      "y": 906.5,
+      "w": 352,
+      "h": 174,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "chart-card": {
-      "x": 739,
+      "x": 651,
       "y": 239,
-      "w": 700,
-      "h": 398.9,
+      "w": 788,
+      "h": 560,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
@@ -907,7 +1072,7 @@
      },
      "brush": {
       "x": 1070,
-      "y": 308.8,
+      "y": 254,
       "w": 348,
       "h": 48,
       "bg": "rgb(255, 255, 255)",
@@ -916,28 +1081,28 @@
       "radius": "14px"
      },
      "plot": {
-      "x": 760,
-      "y": 374.8,
-      "w": 658,
-      "h": 217.1,
+      "x": 672,
+      "y": 330,
+      "w": 746,
+      "h": 421,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(58, 28, 20)",
       "radius": "0px"
      },
      "todo-card": {
-      "x": 739,
-      "y": 659.9,
-      "w": 700,
-      "h": 859.1,
+      "x": 651,
+      "y": 821,
+      "w": 788,
+      "h": 698,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "todo-badge": {
-      "x": 913.2,
-      "y": 674.4,
+      "x": 825.2,
+      "y": 835.5,
       "w": 42.2,
       "h": 24,
       "bg": "rgb(241, 231, 218)",
@@ -946,30 +1111,20 @@
       "radius": "99px"
      },
      "todo-rule": {
-      "x": 740,
-      "y": 711.9,
-      "w": 698,
+      "x": 652,
+      "y": 873,
+      "w": 786,
       "h": 32,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(58, 28, 20)",
       "radius": "0px"
      },
-     "goals-card": {
+     "activity-card": {
       "x": 1461,
       "y": 239,
       "w": 420,
-      "h": 241,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "activity-card": {
-      "x": 1461,
-      "y": 502,
-      "w": 420,
-      "h": 1017,
+      "h": 1280,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
@@ -977,7 +1132,7 @@
      },
      "activity-tabs": {
       "x": 1462,
-      "y": 554,
+      "y": 291,
       "w": 418,
       "h": 39.3,
       "bg": "rgba(0, 0, 0, 0)",
@@ -987,9 +1142,9 @@
      },
      "feed": {
       "x": 1462,
-      "y": 595.3,
+      "y": 332.3,
       "w": 418,
-      "h": 897.3,
+      "h": 1160.3,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(58, 28, 20)",
@@ -997,41 +1152,118 @@
      }
     },
     "text": {
-     "hero-h1": {
+     "greeting": {
       "family": "Playfair Display",
       "size": 52,
       "weight": "700",
-      "color": "rgb(42, 31, 24)"
+      "color": "rgb(42, 31, 24)",
+      "hidden": false
      },
      "stat-figure": {
       "family": "Playfair Display",
       "size": 34,
       "weight": "600",
-      "color": "rgb(42, 31, 24)"
+      "color": "rgb(42, 31, 24)",
+      "hidden": false
      },
-     "card-h3": {
+     "card-title": {
       "family": "Playfair Display",
       "size": 23,
       "weight": "500",
-      "color": "rgb(42, 31, 24)"
-     },
-     "chart-figure": {
+      "color": "rgb(42, 31, 24)",
+      "hidden": false
+     }
+    },
+    "scale": {
+     "card title": {
       "family": "Playfair Display",
-      "size": 38,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)"
+      "size": 23,
+      "weight": "500"
      },
-     "ticket-title": {
-      "family": "Source Sans Pro",
-      "size": 15,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)"
+     "hero greeting": {
+      "family": "Playfair Display",
+      "size": 52,
+      "weight": "700"
      },
-     "bubble-sentence": {
-      "family": "Source Sans Pro",
+     "hero lede": {
+      "family": "Source Sans 3",
+      "size": 17,
+      "weight": "400"
+     },
+     "stat label": {
+      "family": "Source Sans 3",
+      "size": 16,
+      "weight": "400"
+     },
+     "stat figure": {
+      "family": "Playfair Display",
+      "size": 34,
+      "weight": "600"
+     },
+     "stat chip": {
+      "family": "Source Sans 3",
+      "size": 13,
+      "weight": "400"
+     },
+     "legend": {
+      "family": "Source Sans 3",
+      "size": 14,
+      "weight": "400"
+     },
+     "tab": {
+      "family": "Source Sans 3",
+      "size": 13.5,
+      "weight": "400"
+     },
+     "tab count": {
+      "family": "JetBrains Mono",
+      "size": 10.5,
+      "weight": "400"
+     },
+     "ticket title": {
+      "family": "Source Sans 3",
       "size": 15,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)"
+      "weight": "600"
+     },
+     "ticket tag": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
+     },
+     "bubble sentence": {
+      "family": "Source Sans 3",
+      "size": 15,
+      "weight": "400"
+     },
+     "bubble meta": {
+      "family": "JetBrains Mono",
+      "size": 10,
+      "weight": "400"
+     },
+     "bubble label": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
+     },
+     "todo badge": {
+      "family": "Playfair Display",
+      "size": 16,
+      "weight": "600"
+     },
+     "goal figure": {
+      "family": "Playfair Display",
+      "size": 40,
+      "weight": "600"
+     },
+     "goal of": {
+      "family": "Playfair Display",
+      "size": 24,
+      "weight": "400"
+     },
+     "goal bar label": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
      }
     },
     "checks": {
@@ -1074,141 +1306,73 @@
      "key": "manuscript-card",
      "field": "h",
      "ref": 362.2,
-     "app": 308.9,
-     "delta": -53.3,
+     "app": 340,
+     "delta": -22.2,
      "tol": 4
     },
     {
      "key": "community-card",
      "field": "y",
-     "ref": 512.2,
-     "app": 458.9,
-     "delta": -53.3,
+     "ref": 844.3,
+     "app": 795.5,
+     "delta": -48.8,
      "tol": 3
     },
     {
      "key": "community-card",
      "field": "h",
-     "ref": 895.8,
-     "app": 432,
-     "delta": -463.8,
-     "tol": 4
-    },
-    {
-     "key": "chart-card",
-     "field": "h",
-     "ref": 392,
-     "app": 398.9,
-     "delta": 6.9,
+     "ref": 563.7,
+     "app": 174,
+     "delta": -389.7,
      "tol": 4
     },
     {
      "key": "plot",
      "field": "y",
-     "ref": 258.3,
-     "app": 263.8,
-     "delta": 5.5,
+     "ref": 205,
+     "app": 219,
+     "delta": 14,
      "tol": 3
     },
     {
-     "key": "brush",
-     "field": "y",
-     "ref": 192.3,
-     "app": 197.8,
-     "delta": 5.5,
-     "tol": 3
-    },
-    {
-     "key": "brush",
-     "field": "xr",
-     "ref": 619.3,
-     "app": 463,
-     "delta": -156.3,
-     "tol": 3
-    },
-    {
-     "key": "todo-card",
-     "field": "y",
-     "ref": 542,
-     "app": 548.9,
-     "delta": 6.9,
-     "tol": 3
-    },
-    {
-     "key": "todo-card",
+     "key": "plot",
      "field": "h",
-     "ref": 866,
-     "app": 859.1,
-     "delta": -6.9,
+     "ref": 438.4,
+     "app": 421,
+     "delta": -17.4,
      "tol": 4
     },
     {
-     "key": "todo-rule",
+     "key": "todo-badge",
      "field": "y",
-     "ref": 593.2,
-     "app": 600.9,
-     "delta": 7.7,
+     "ref": 729.1,
+     "app": 724.5,
+     "delta": -4.6,
+     "tol": 3
+    },
+    {
+     "key": "goals-card",
+     "field": "y",
+     "ref": 512.2,
+     "app": 490,
+     "delta": -22.2,
      "tol": 3
     },
     {
      "key": "goals-card",
      "field": "h",
-     "ref": 294.7,
-     "app": 241,
-     "delta": -53.7,
+     "ref": 310.1,
+     "app": 283.5,
+     "delta": -26.6,
      "tol": 4
-    },
-    {
-     "key": "activity-card",
-     "field": "y",
-     "ref": 444.7,
-     "app": 391,
-     "delta": -53.7,
-     "tol": 3
-    },
-    {
-     "key": "activity-card",
-     "field": "h",
-     "ref": 963.3,
-     "app": 1017,
-     "delta": 53.7,
-     "tol": 4
-    },
-    {
-     "key": "activity-tabs",
-     "field": "y",
-     "ref": 495.9,
-     "app": 443,
-     "delta": -52.9,
-     "tol": 3
-    },
-    {
-     "key": "feed",
-     "field": "y",
-     "ref": 535.8,
-     "app": 484.3,
-     "delta": -51.5,
-     "tol": 3
     },
     {
      "key": "feed",
      "field": "h",
-     "ref": 830.9,
-     "app": 897.3,
-     "delta": 66.4,
+     "ref": 1147.5,
+     "app": 1160.3,
+     "delta": 12.8,
      "tol": 4
-    },
-    {
-     "key": "ticket-title",
-     "field": "family",
-     "ref": "Source Sans 3",
-     "app": "Source Sans Pro"
-    },
-    {
-     "key": "bubble-sentence",
-     "field": "family",
-     "ref": "Source Sans 3",
-     "app": "Source Sans Pro"
     }
    ]
   },
@@ -1258,8 +1422,18 @@
      "manuscript-card": {
       "x": 320,
       "y": 162,
-      "w": 440,
+      "w": 352,
       "h": 362.2,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "goals-card": {
+      "x": 320,
+      "y": 546.2,
+      "w": 352,
+      "h": 310.1,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
@@ -1267,19 +1441,19 @@
      },
      "community-card": {
       "x": 320,
-      "y": 546.2,
-      "w": 440,
-      "h": 895.8,
+      "y": 878.3,
+      "w": 352,
+      "h": 563.7,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "chart-card": {
-      "x": 782,
+      "x": 694,
       "y": 162,
-      "w": 1220,
-      "h": 514.3,
+      "w": 1308,
+      "h": 560,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
@@ -1296,28 +1470,28 @@
       "radius": "14px"
      },
      "plot": {
-      "x": 803,
-      "y": 243,
-      "w": 1178,
-      "h": 388.7,
+      "x": 717,
+      "y": 239,
+      "w": 1262,
+      "h": 438.4,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(42, 31, 24)",
       "radius": "0px"
      },
      "todo-card": {
-      "x": 782,
-      "y": 698.3,
-      "w": 1220,
-      "h": 743.7,
+      "x": 694,
+      "y": 744,
+      "w": 1308,
+      "h": 698,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "todo-badge": {
-      "x": 960.2,
-      "y": 717.4,
+      "x": 872.2,
+      "y": 763.1,
       "w": 40.2,
       "h": 24,
       "bg": "rgb(241, 231, 218)",
@@ -1326,30 +1500,20 @@
       "radius": "99px"
      },
      "todo-rule": {
-      "x": 783,
-      "y": 749.5,
-      "w": 1218,
+      "x": 695,
+      "y": 795.2,
+      "w": 1306,
       "h": 35,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(42, 31, 24)",
       "radius": "0px"
      },
-     "goals-card": {
+     "activity-card": {
       "x": 2024,
       "y": 162,
       "w": 420,
-      "h": 294.7,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "activity-card": {
-      "x": 2024,
-      "y": 478.7,
-      "w": 420,
-      "h": 963.3,
+      "h": 1280,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
@@ -1357,7 +1521,7 @@
      },
      "activity-tabs": {
       "x": 2025,
-      "y": 529.9,
+      "y": 213.2,
       "w": 418,
       "h": 39.9,
       "bg": "rgba(0, 0, 0, 0)",
@@ -1367,9 +1531,9 @@
      },
      "feed": {
       "x": 2025,
-      "y": 569.8,
+      "y": 253.1,
       "w": 418,
-      "h": 830.9,
+      "h": 1147.5,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(42, 31, 24)",
@@ -1377,41 +1541,118 @@
      }
     },
     "text": {
-     "hero-h1": {
+     "greeting": {
       "family": "Playfair Display",
       "size": 52,
       "weight": "700",
-      "color": "rgb(42, 31, 24)"
+      "color": "rgb(42, 31, 24)",
+      "hidden": false
      },
      "stat-figure": {
       "family": "Playfair Display",
       "size": 34,
       "weight": "600",
-      "color": "rgb(42, 31, 24)"
+      "color": "rgb(42, 31, 24)",
+      "hidden": false
      },
-     "card-h3": {
+     "card-title": {
       "family": "Playfair Display",
       "size": 23,
       "weight": "500",
-      "color": "rgb(42, 31, 24)"
-     },
-     "chart-figure": {
+      "color": "rgb(42, 31, 24)",
+      "hidden": true
+     }
+    },
+    "scale": {
+     "card title": {
       "family": "Playfair Display",
-      "size": 38,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)"
+      "size": 23,
+      "weight": "500"
      },
-     "ticket-title": {
+     "hero greeting": {
+      "family": "Playfair Display",
+      "size": 52,
+      "weight": "700"
+     },
+     "hero lede": {
+      "family": "Source Sans 3",
+      "size": 17,
+      "weight": "400"
+     },
+     "stat label": {
+      "family": "Source Sans 3",
+      "size": 16,
+      "weight": "400"
+     },
+     "stat figure": {
+      "family": "Playfair Display",
+      "size": 34,
+      "weight": "600"
+     },
+     "stat chip": {
+      "family": "Source Sans 3",
+      "size": 13,
+      "weight": "400"
+     },
+     "legend": {
+      "family": "Source Sans 3",
+      "size": 14,
+      "weight": "400"
+     },
+     "tab": {
+      "family": "Source Sans 3",
+      "size": 13.5,
+      "weight": "400"
+     },
+     "tab count": {
+      "family": "JetBrains Mono",
+      "size": 10.5,
+      "weight": "400"
+     },
+     "ticket title": {
       "family": "Source Sans 3",
       "size": 14.5,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)"
+      "weight": "600"
      },
-     "bubble-sentence": {
+     "ticket tag": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
+     },
+     "bubble sentence": {
       "family": "Source Sans 3",
       "size": 15,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)"
+      "weight": "400"
+     },
+     "bubble meta": {
+      "family": "JetBrains Mono",
+      "size": 10,
+      "weight": "400"
+     },
+     "bubble label": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
+     },
+     "todo badge": {
+      "family": "Playfair Display",
+      "size": 16,
+      "weight": "600"
+     },
+     "goal figure": {
+      "family": "Playfair Display",
+      "size": 40,
+      "weight": "600"
+     },
+     "goal of": {
+      "family": "Playfair Display",
+      "size": 24,
+      "weight": "400"
+     },
+     "goal bar label": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
      }
     },
     "checks": {
@@ -1472,8 +1713,18 @@
      "manuscript-card": {
       "x": 277,
       "y": 239,
-      "w": 440,
-      "h": 308.9,
+      "w": 352,
+      "h": 340,
+      "bg": "rgb(253, 251, 247)",
+      "borderTopW": 1,
+      "borderTop": "rgb(230, 223, 214)",
+      "radius": "18px"
+     },
+     "goals-card": {
+      "x": 277,
+      "y": 601,
+      "w": 352,
+      "h": 283.5,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
@@ -1481,19 +1732,19 @@
      },
      "community-card": {
       "x": 277,
-      "y": 569.9,
-      "w": 440,
-      "h": 432,
+      "y": 906.5,
+      "w": 352,
+      "h": 174,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "chart-card": {
-      "x": 739,
+      "x": 651,
       "y": 239,
-      "w": 1220,
-      "h": 515.7,
+      "w": 1308,
+      "h": 560,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
@@ -1510,28 +1761,28 @@
       "radius": "14px"
      },
      "plot": {
-      "x": 760,
-      "y": 320,
-      "w": 1178,
-      "h": 388.7,
+      "x": 672,
+      "y": 330,
+      "w": 1266,
+      "h": 421,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(58, 28, 20)",
       "radius": "0px"
      },
      "todo-card": {
-      "x": 739,
-      "y": 776.7,
-      "w": 1220,
-      "h": 742.3,
+      "x": 651,
+      "y": 821,
+      "w": 1308,
+      "h": 698,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
       "radius": "18px"
      },
      "todo-badge": {
-      "x": 913.2,
-      "y": 791.2,
+      "x": 825.2,
+      "y": 835.5,
       "w": 42.2,
       "h": 24,
       "bg": "rgb(241, 231, 218)",
@@ -1540,30 +1791,20 @@
       "radius": "99px"
      },
      "todo-rule": {
-      "x": 740,
-      "y": 828.7,
-      "w": 1218,
+      "x": 652,
+      "y": 873,
+      "w": 1306,
       "h": 32,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(58, 28, 20)",
       "radius": "0px"
      },
-     "goals-card": {
+     "activity-card": {
       "x": 1981,
       "y": 239,
       "w": 420,
-      "h": 241,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "activity-card": {
-      "x": 1981,
-      "y": 502,
-      "w": 420,
-      "h": 1017,
+      "h": 1280,
       "bg": "rgb(253, 251, 247)",
       "borderTopW": 1,
       "borderTop": "rgb(230, 223, 214)",
@@ -1571,7 +1812,7 @@
      },
      "activity-tabs": {
       "x": 1982,
-      "y": 554,
+      "y": 291,
       "w": 418,
       "h": 39.3,
       "bg": "rgba(0, 0, 0, 0)",
@@ -1581,9 +1822,9 @@
      },
      "feed": {
       "x": 1982,
-      "y": 595.3,
+      "y": 332.3,
       "w": 418,
-      "h": 897.3,
+      "h": 1160.3,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(58, 28, 20)",
@@ -1591,41 +1832,118 @@
      }
     },
     "text": {
-     "hero-h1": {
+     "greeting": {
       "family": "Playfair Display",
       "size": 52,
       "weight": "700",
-      "color": "rgb(42, 31, 24)"
+      "color": "rgb(42, 31, 24)",
+      "hidden": false
      },
      "stat-figure": {
       "family": "Playfair Display",
       "size": 34,
       "weight": "600",
-      "color": "rgb(42, 31, 24)"
+      "color": "rgb(42, 31, 24)",
+      "hidden": false
      },
-     "card-h3": {
+     "card-title": {
       "family": "Playfair Display",
       "size": 23,
       "weight": "500",
-      "color": "rgb(42, 31, 24)"
-     },
-     "chart-figure": {
+      "color": "rgb(42, 31, 24)",
+      "hidden": false
+     }
+    },
+    "scale": {
+     "card title": {
       "family": "Playfair Display",
-      "size": 38,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)"
+      "size": 23,
+      "weight": "500"
      },
-     "ticket-title": {
-      "family": "Source Sans Pro",
-      "size": 15,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)"
+     "hero greeting": {
+      "family": "Playfair Display",
+      "size": 52,
+      "weight": "700"
      },
-     "bubble-sentence": {
-      "family": "Source Sans Pro",
+     "hero lede": {
+      "family": "Source Sans 3",
+      "size": 17,
+      "weight": "400"
+     },
+     "stat label": {
+      "family": "Source Sans 3",
+      "size": 16,
+      "weight": "400"
+     },
+     "stat figure": {
+      "family": "Playfair Display",
+      "size": 34,
+      "weight": "600"
+     },
+     "stat chip": {
+      "family": "Source Sans 3",
+      "size": 13,
+      "weight": "400"
+     },
+     "legend": {
+      "family": "Source Sans 3",
+      "size": 14,
+      "weight": "400"
+     },
+     "tab": {
+      "family": "Source Sans 3",
+      "size": 13.5,
+      "weight": "400"
+     },
+     "tab count": {
+      "family": "JetBrains Mono",
+      "size": 10.5,
+      "weight": "400"
+     },
+     "ticket title": {
+      "family": "Source Sans 3",
       "size": 15,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)"
+      "weight": "600"
+     },
+     "ticket tag": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
+     },
+     "bubble sentence": {
+      "family": "Source Sans 3",
+      "size": 15,
+      "weight": "400"
+     },
+     "bubble meta": {
+      "family": "JetBrains Mono",
+      "size": 10,
+      "weight": "400"
+     },
+     "bubble label": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
+     },
+     "todo badge": {
+      "family": "Playfair Display",
+      "size": 16,
+      "weight": "600"
+     },
+     "goal figure": {
+      "family": "Playfair Display",
+      "size": 40,
+      "weight": "600"
+     },
+     "goal of": {
+      "family": "Playfair Display",
+      "size": 24,
+      "weight": "400"
+     },
+     "goal bar label": {
+      "family": "JetBrains Mono",
+      "size": 9.5,
+      "weight": "400"
      }
     },
     "checks": {
@@ -1668,96 +1986,76 @@
      "key": "manuscript-card",
      "field": "h",
      "ref": 362.2,
-     "app": 308.9,
-     "delta": -53.3,
+     "app": 340,
+     "delta": -22.2,
      "tol": 4
     },
     {
      "key": "community-card",
      "field": "y",
-     "ref": 512.2,
-     "app": 458.9,
-     "delta": -53.3,
+     "ref": 844.3,
+     "app": 795.5,
+     "delta": -48.8,
      "tol": 3
     },
     {
      "key": "community-card",
      "field": "h",
-     "ref": 895.8,
-     "app": 432,
-     "delta": -463.8,
+     "ref": 563.7,
+     "app": 174,
+     "delta": -389.7,
+     "tol": 4
+    },
+    {
+     "key": "plot",
+     "field": "y",
+     "ref": 205,
+     "app": 219,
+     "delta": 14,
+     "tol": 3
+    },
+    {
+     "key": "plot",
+     "field": "h",
+     "ref": 438.4,
+     "app": 421,
+     "delta": -17.4,
      "tol": 4
     },
     {
      "key": "todo-badge",
      "field": "y",
-     "ref": 683.4,
-     "app": 680.2,
-     "delta": -3.2,
+     "ref": 729.1,
+     "app": 724.5,
+     "delta": -4.6,
+     "tol": 3
+    },
+    {
+     "key": "goals-card",
+     "field": "y",
+     "ref": 512.2,
+     "app": 490,
+     "delta": -22.2,
      "tol": 3
     },
     {
      "key": "goals-card",
      "field": "h",
-     "ref": 294.7,
-     "app": 241,
-     "delta": -53.7,
+     "ref": 310.1,
+     "app": 283.5,
+     "delta": -26.6,
      "tol": 4
-    },
-    {
-     "key": "activity-card",
-     "field": "y",
-     "ref": 444.7,
-     "app": 391,
-     "delta": -53.7,
-     "tol": 3
-    },
-    {
-     "key": "activity-card",
-     "field": "h",
-     "ref": 963.3,
-     "app": 1017,
-     "delta": 53.7,
-     "tol": 4
-    },
-    {
-     "key": "activity-tabs",
-     "field": "y",
-     "ref": 495.9,
-     "app": 443,
-     "delta": -52.9,
-     "tol": 3
-    },
-    {
-     "key": "feed",
-     "field": "y",
-     "ref": 535.8,
-     "app": 484.3,
-     "delta": -51.5,
-     "tol": 3
     },
     {
      "key": "feed",
      "field": "h",
-     "ref": 830.9,
-     "app": 897.3,
-     "delta": 66.4,
+     "ref": 1147.5,
+     "app": 1160.3,
+     "delta": 12.8,
      "tol": 4
-    },
-    {
-     "key": "ticket-title",
-     "field": "family",
-     "ref": "Source Sans 3",
-     "app": "Source Sans Pro"
-    },
-    {
-     "key": "bubble-sentence",
-     "field": "family",
-     "ref": "Source Sans 3",
-     "app": "Source Sans Pro"
     }
    ]
   }
  },
- "total": 56
+ "total": 34
 }
