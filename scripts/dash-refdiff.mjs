@@ -38,7 +38,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const REF = join(ROOT, "design-refs", "dashboard-cappuccino-v14.html");
+const REF = join(ROOT, "design-refs", "dashboard-cappuccino-v16.html");
 
 const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
@@ -82,7 +82,48 @@ const ANCHOR = {
   "todo-card": "span", "todo-badge": "right", "todo-rule": "span",
   "goals-card": "right", "activity-card": "right", "activity-tabs": "right", feed: "right",
 };
-const TEXT_PROBES = ["hero-h1", "card-h3", "stat-figure", "chart-figure", "ticket-title", "bubble-sentence"];
+/**
+ * ⚠️ THE REF'S OWN THREE, NOT SIX OF MINE — v16 instruments itself and the app carries its names.
+ *
+ * ⚠️ AND THREE TEXT PROBES ARE NOT A TYPE GATE, WHICH IS WHAT THE LAST PASS GOT WRONG. Six probes
+ * were added by hand, and all six landed on runs that already matched: the greeting at 52, the stat
+ * figure at 34, the card title at 23, the bubble sentence at 15. The whole mono and caption band —
+ * where the app runs 8 / 8.5 / 9 against the ref's 9.5 / 10 / 11 — had no probe at all, so a page
+ * whose small type was a quarter to a third short of the ref reported clean. That is this repo's own
+ * monoculture-fixture fault wearing a harness's clothes: the sample was drawn from the population
+ * that was already correct. `TYPE_SCALE` below is the coverage fix, and it is the actual gate.
+ */
+const TEXT_PROBES = ["greeting", "card-title", "stat-figure"];
+
+/**
+ * The type scale, as SELECTOR PAIRS — one row per treatment the design names, ref side and app side.
+ *
+ * ⚠️ SELECTOR PAIRS RATHER THAN MORE `data-probe-text` ATTRIBUTES, because attributes would mean
+ * editing the ref, and a ref whose md5 moves is a ref that can no longer be checked against the one
+ * the pack named. Every row is compared for `font-size` at the pack's ±0.5px, and for family and
+ * weight, which is what a "scale" is.
+ */
+const TYPE_SCALE = [
+  ["card title",      ".hd h3",              ".os-ahead h2, .os-th2 h2"],
+  ["hero greeting",   ".hero h1",            ".os-greet h1"],
+  ["hero lede",       ".hero p",             ".os-greet .os-gsub"],
+  ["stat label",      ".stat .lab",          ".os-cl"],
+  ["stat figure",     ".stat .fig b",        ".os-cn"],
+  ["stat chip",       ".stat .mini",         ".os-cd"],
+  ["legend",          ".legend span",        ".os-bk"],
+  ["tab",             ".ftabs button",       ".os-ftab"],
+  ["tab count",       ".ftabs .n",           ".os-ftabn"],
+  ["ticket title",    ".tk .ttl",            ".tkt .ttl"],
+  ["ticket tag",      ".tk .tag",            ".tkt .tag"],
+  ["ticket meta",     ".tk.snip .sub",       ".tkt .msc"],
+  ["bubble sentence", ".cv .msg .b .s",      ".os-bubsay"],
+  ["bubble meta",     ".cv .msg .b .m",      ".os-bubmeta"],
+  ["bubble label",    ".cv .msg .b .slab",   ".os-bublab"],
+  ["todo badge",      ".badge b",            ".os-tbadge b"],
+  ["goal figure",     ".goal .fig b",        ".os-goal-n"],
+  ["goal of",         ".goal .fig span",     ".os-goal-of"],
+  ["goal bar label",  ".wk .lb",             ".os-goal-hlb"],
+];
 
 /**
  * ⚠️ TOLERANCES ARE THE PACK'S, AND THEY ARE ASYMMETRIC ON PURPOSE. An EDGE may sit ±3px out
@@ -124,21 +165,42 @@ const READ = `(() => {
       radius: cs.borderTopLeftRadius,
     };
   };
-  const out = { probes: {}, text: {}, checks: {} };
+  const out = { probes: {}, text: {}, scale: {}, checks: {} };
   for (const el of roots) {
     const k = el.getAttribute("data-probe");
     if (out.probes[k] || !visibleIn(el)) continue;   // first VISIBLE match wins
     out.probes[k] = box(el);
   }
+  /* ⚠️ A TEXT PROBE READS ITS ELEMENT WHETHER OR NOT IT IS VISIBLE, AND THE REF IS WHY.
+     v16 puts data-probe-text=card-title on the chart card's h3 inside hdA — which its own shipping
+     config sets to display:none, because hdr is b and the stat block hdB takes over. A visible-only
+     read reports "the ref has no such text probe" about a probe the ref ships. Type is readable on
+     a hidden element (getComputedStyle still resolves it) and type is all a text probe compares, so
+     the honest fix is to read it and RECORD that it was hidden. Boxes still require visibility —
+     a hidden box has no geometry to compare. */
   for (const el of document.querySelectorAll("[data-probe-text]")) {
     const k = el.getAttribute("data-probe-text");
-    if (out.text[k] || !visibleIn(el)) continue;
+    if (out.text[k]) continue;
     const cs = getComputedStyle(el);
     out.text[k] = {
       family: cs.fontFamily.split(",")[0].replace(/["']/g, "").trim(),
       size: parseFloat(cs.fontSize),
       weight: cs.fontWeight,
       color: cs.color,
+      hidden: !visibleIn(el),
+    };
+  }
+  /* the type scale — a named list of selectors handed in from Node, read the same way */
+  const scale = JSON.parse(document.documentElement.getAttribute("data-refdiff-scale") || "[]");
+  for (const [name, sel] of scale) {
+    const el = [...document.querySelectorAll(sel)].find(visibleIn)
+            || document.querySelector(sel);
+    if (!el) { out.scale[name] = null; continue; }
+    const cs = getComputedStyle(el);
+    out.scale[name] = {
+      family: cs.fontFamily.split(",")[0].replace(/["']/g, "").trim(),
+      size: parseFloat(cs.fontSize),
+      weight: cs.fontWeight,
     };
   }
   /* ── the four page-level checks ── */
@@ -196,6 +258,12 @@ async function readPage(page, url, { app } = {}) {
   await page.waitForTimeout(app ? 2600 : 900);
   await page.addStyleTag({ content: "*,*::before,*::after{transition:none!important;animation:none!important}" });
   await page.waitForTimeout(160);
+  /* the type scale's selectors for THIS side, handed to the page rather than baked into READ */
+  const which = app ? 2 : 1;
+  await page.evaluate(
+    (rows) => document.documentElement.setAttribute("data-refdiff-scale", JSON.stringify(rows)),
+    TYPE_SCALE.map((r) => [r[0], r[which]]),
+  );
   const data = await page.evaluate(READ);
   /**
    * ⚠️ A SIGNED-OUT PAGE MUST STOP THE RUN, NOT BE MEASURED. This caught nothing on the round it was
@@ -323,6 +391,24 @@ function diffText(key, ref, app) {
   return m;
 }
 
+/**
+ * ⚠️ THE SCALE IS COMPARED FOR SIZE, FAMILY AND WEIGHT — and a row missing on ONE side is a miss,
+ * not a skip. A skip is how a type gate quietly stops covering the treatment nobody rebuilt yet;
+ * the two cases are named apart so the table says which.
+ */
+function diffScale(key, ref, app) {
+  if (!ref && !app) return [{ key, field: "scale", why: "neither side has this treatment" }];
+  if (!ref) return [{ key, field: "scale", why: "no element in the REF for this row" }];
+  if (!app) return [{ key, field: "scale", why: "no element in the APP for this row" }];
+  const m = [];
+  if (Math.abs(ref.size - app.size) > TOL.font) {
+    m.push({ key, field: "size", ref: ref.size, app: app.size, delta: Math.round((app.size - ref.size) * 10) / 10, tol: TOL.font });
+  }
+  if (ref.family !== app.family) m.push({ key, field: "family", ref: ref.family, app: app.family });
+  if (String(ref.weight) !== String(app.weight)) m.push({ key, field: "weight", ref: ref.weight, app: app.weight });
+  return m;
+}
+
 function diffChecks(app) {
   const m = [];
   if (rgb(app.checks.ground) !== GROUND) {
@@ -352,7 +438,7 @@ function table(result) {
   L.push("");
   L.push("| probe | " + result.widths.map((w) => `${w}`).join(" | ") + " |");
   L.push("|---|" + result.widths.map(() => "---").join("|") + "|");
-  const rows = [...PROBES, ...TEXT_PROBES.map((t) => `text:${t}`), "page"];
+  const rows = [...PROBES, ...TEXT_PROBES.map((t) => `text:${t}`), ...TYPE_SCALE.map(([k]) => `type:${k}`), "page"];
   for (const p of rows) {
     const cells = result.widths.map((w) => {
       const misses = result.byWidth[w].misses.filter((m) => m.key === p || `text:${m.key}` === p);
@@ -382,7 +468,7 @@ function table(result) {
 /* ── run ─────────────────────────────────────────────────────────────────────────────────────── */
 
 const browser = await chromium.launch();
-const result = { when: new Date().toISOString(), ref: "design-refs/dashboard-cappuccino-v14.html", app: APP, widths: WIDTHS, byWidth: {}, total: 0 };
+const result = { when: new Date().toISOString(), ref: "design-refs/dashboard-cappuccino-v16.html", app: APP, widths: WIDTHS, byWidth: {}, total: 0 };
 let selfTestSaw = null;
 
 try {
@@ -452,6 +538,7 @@ try {
     const aO = appData.probes.main ?? { x: 0, y: 0, w: 0 };
     for (const k of PROBES) misses.push(...diffOne(k, refData.probes[k], appData.probes[k], rO, aO));
     for (const k of TEXT_PROBES) misses.push(...diffText(k, refData.text[k], appData.text[k]));
+    for (const [k] of TYPE_SCALE) misses.push(...diffScale(`type:${k}`, refData.scale[k], appData.scale[k]));
     misses.push(...diffChecks(appData));
 
     result.byWidth[width] = { ref: refData, app: appData, misses };
