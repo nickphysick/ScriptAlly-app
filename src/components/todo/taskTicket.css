@@ -50,8 +50,12 @@
   padding: 0;
   cursor: pointer;
   overflow: hidden;
-  background: var(--white);
-  border: 1px solid var(--edge);
+  /* ref `.tk{background:var(--card2);border:1px solid var(--line);border-radius:12px}` — parchment
+     with a hairline, NOT white with the state colour as its border. The border was the query's own
+     tint, which made the whole card's outline change with its state and left the 6px edge saying
+     the same thing twice. */
+  background: #fffdf9;
+  border: 1px solid #e6dfd6;
   border-radius: 12px;
   transition: border-color .16s, box-shadow .16s;
 }
@@ -59,7 +63,8 @@
 .tkt:focus-visible { outline: 2px solid var(--burg); outline-offset: 2px; }
 
 /* the status tint, as a flat fill the card's own radius clips */
-.tkt > .edge { flex: 0 0 4px; align-self: stretch; }
+/* ref `.tk:before{width:6px}` — the one place the query's state tint appears on a ticket */
+.tkt > .edge { flex: 0 0 6px; align-self: stretch; }
 
 .tkt > .in {
   display: flex; flex-direction: column; gap: 9px;

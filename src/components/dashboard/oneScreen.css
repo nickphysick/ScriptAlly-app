@@ -1039,14 +1039,18 @@
    pages is a question for Nick, not a thing to settle by editing whichever file is open. */
 .os-tkgrid .tkt .ttl { font-family: inherit; font-size: 15px; color: #2a1f18; }
 
+/* ⚠️ NO FIXED COLUMN COUNT — ref `.tgrid{grid-template-columns:repeat(auto-fill,minmax(288px,1fr));
+   gap:12px;padding:0 20px 18px}`, stepping to `minmax(240px,1fr)` at its own 1700 breakpoint. It
+   was `repeat(3, …)` and then `repeat(2, …)`, which states a COUNT where the design states a
+   minimum: at any width where three 288s do not fit, a fixed three makes them narrower than the
+   design allows rather than dropping to two. */
 .os-tkgrid {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px; align-content: start; padding: 0 18px 14px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
+  gap: 12px; align-content: start; padding: 0 20px 18px;
 }
-/* ⚠️ THREE ACROSS AT THE REF'S OWN BREAKPOINT — its `@media (max-width:1700px)` takes `.tgrid.c3`
-   to two columns, which is the same 1700 that steps the stat slot and the brush. It was 1360 here,
-   so between 1360 and 1700 the dashboard drew three columns where the ref draws two. */
-@media (max-width: 1699px) { .os-tkgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 1699px) {
+  .os-tkgrid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+}
 @media (max-width: 720px) { .os-tkgrid { grid-template-columns: minmax(0, 1fr); } }
 
 /* the drawer's pane takes the whole sheet — `SlideOver` supplies the chrome around it */

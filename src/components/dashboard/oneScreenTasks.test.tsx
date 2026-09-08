@@ -230,9 +230,16 @@ describe("the panel's stylesheet", () => {
     expect(rule(".os-tkgrid")).not.toContain("--u-now-1");
   });
 
-  it("three tickets across, top-aligned, and the grid scrolls inside the card", () => {
+  /* ⚠️ A MINIMUM, NOT A COUNT (ref v16, Phase 6) — `repeat(auto-fill, minmax(288px, 1fr))`, stepping
+     to 240 at the ref's own 1700 breakpoint. A fixed `repeat(3, …)` states how many tickets fit
+     rather than how narrow one may be, so at any width where three 288s do not fit it makes them
+     narrower than the design allows instead of dropping to two. Both regimes are asserted, and the
+     COUNT form is forbidden so it cannot come back as a tidy-up. */
+  it("the ticket grid states a minimum width, never a column count", () => {
     const g = rule(".os-tkgrid");
-    expect(g).toContain("repeat(3, minmax(0, 1fr))");
+    expect(g).toContain("repeat(auto-fill, minmax(288px, 1fr))");
+    expect(cssRules).toMatch(/max-width:\s*1699px[\s\S]{0,200}?\.os-tkgrid\s*\{[^}]*minmax\(240px/);
+    expect(g).not.toMatch(/repeat\(\d/);
     expect(g).toContain("align-content: start");
     /* ⚠️ THE SCROLL IS `EdgeFadeScroll`'s, SET INLINE — the shared fade computes "is there more
        above / below" itself and owns the overflow, so a `.os-tbody { overflow }` rule here would be
