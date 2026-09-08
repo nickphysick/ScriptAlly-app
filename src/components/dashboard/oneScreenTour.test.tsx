@@ -66,8 +66,13 @@ describe("§12 · controls and visibility (asserted at source — a portal canno
     expect(dash).toMatch(/skipped\s*\?\s*\{ tourCompletedAt[\s\S]*?\}\s*:\s*\{ tourCompletedAt/);
   });
 
-  it("the tour collapses the rail before starting, and focus returns to the launcher on end", () => {
-    expect(dash).toContain("setRailExpanded(false); setTouring(true);");
+  /* ⚠️ THERE IS NO RAIL TO COLLAPSE ANY MORE (ref v16, Phase 3) — the feed's expander is retired
+     with the state it drove, so "collapse before starting" has no subject. What the case was really
+     guarding is the pair either side of it: the tour starts, and focus comes back to the launcher
+     when it ends. Both survive; the collapse does not. */
+  it("the tour starts from the chip, and focus returns to the launcher on end", () => {
+    expect(dash).toContain("setTouring(true)");
+    expect(dash).not.toContain("setRailExpanded");
     expect(dash).toContain("tourChipRef.current?.focus()");
   });
 

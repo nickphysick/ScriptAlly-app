@@ -123,11 +123,11 @@ describe("§1 · the lock", () => {
      harness compares `main`'s box against it. */
   it("the grid is three columns on the ref's tracks, and it is its own element", () => {
     const c = rule(".os-grid");
-    expect(c).toContain("grid-template-columns: 440px minmax(0, 1fr) 420px");
+    expect(c).toContain("grid-template-columns: 352px minmax(0, 1fr) 420px");
     /* ⚠️ THE COLUMN BOTTOMS AGREE BY ONE WORD, not by three heights. Every column is handed the
        same row box; there is no number to keep in step. */
     expect(c).toContain("align-items: stretch");
-    expect(cssRules).toContain(".os-grid { grid-template-columns: 340px minmax(0, 1fr) 360px; }");
+    expect(cssRules).toContain(".os-grid { grid-template-columns: 300px minmax(0, 1fr) 340px; }");
     /* ⚠️ THE CAP IS GONE, DELIBERATELY. `--work-max` centred the page inside 1660 and the ref does
        not cap its content at all — at 2520 that put the app's `main` 494px narrower than the ref's
        and every column 250px in from where the design puts it. The token is untouched and Query
@@ -159,12 +159,22 @@ describe("§1 · the lock", () => {
     expect(cssRules).toContain(".os-colR { grid-column: 3; }");
   });
 
-  /* the columns take the row they are given and nothing escapes them */
-  it("all three columns are height:100% with overflow hidden", () => {
+  /**
+   * ⚠️ THE SIDE COLUMNS CONTRIBUTE NOTHING TO THE ROW'S HEIGHT AND STRETCH TO MATCH IT — v16's
+   * `.grid3 > .col.side{height:0;min-height:100%;overflow:hidden}`, and it is the column-bottom law
+   * in one declaration.
+   *
+   * All three were `height: 100%`, so each column asked for the row's height while its own content
+   * ALSO fed that height — a loop in which a tall side column grew the row and the other two then
+   * stretched to the new total. `height: 0` on the SIDES breaks it: the centre states the height and
+   * the sides are told what it is. Both halves are asserted, because either alone is the bug.
+   */
+  it("the sides are height:0 with min-height:100%; the centre states the height", () => {
     const c = rule(".os-colL, .os-colM, .os-colR");
-    expect(c).toContain("height: 100%");
-    expect(c).toContain("min-height: 0");
+    expect(c).toContain("min-height: 100%");
     expect(c).toContain("overflow: hidden");
+    expect(rule(".os-colL, .os-colR")).toContain("height: 0");
+    expect(rule(".os-colM")).toContain("height: 100%");
   });
 
   /* ⚠️ SMALL ON PURPOSE — its job is to stop the card collapsing, not to reserve space. A large
@@ -207,7 +217,7 @@ describe("§1 · the lock", () => {
      340/360 below it, which is where the ref collapses. The app's old four-step ladder was its own
      invention and none of its widths were the design's. */
   it("two regimes, both the ref's, and the centre stays elastic in each", () => {
-    for (const [l, r] of [["440px", "420px"], ["340px", "360px"]]) {
+    for (const [l, r] of [["352px", "420px"], ["300px", "340px"]]) {
       expect(cssRules, `${l} / ${r}`).toContain(`grid-template-columns: ${l} minmax(0, 1fr) ${r}`);
     }
     expect(cssRules).not.toMatch(/grid-template-columns: minmax\(0, 1fr\) \d+px/);
@@ -242,11 +252,18 @@ describe("§1 · the lock", () => {
      with the range (340–560) and the to-do panel takes whatever the chart does not. That is the
      point of the redesign's centre column — the chart is bounded so the panel can be generous —
      and it is the reverse of the old row, where tasks were bounded 118–318 and the chart flexed. */
-  it("the vertical budget: the chart is bounded 340–560, the to-do panel takes the rest", () => {
+  /* ⚠️ THE CHART'S HEIGHT IS FIXED, NOT A RANGE — v16's `#chartCard{height:clamp(400px,42vh,560px)}`.
+     A range let the chart shrink whenever the to-do card wanted more, so the plot's proportions were
+     a function of how many tickets were open; the clamp makes them a function of the viewport, which
+     is the only thing a chart's shape should follow. */
+  it("the vertical budget: the chart is a clamped height, the to-do panel takes the rest", () => {
     const chart = rule(".os-colM .os-lead");
-    expect(chart).toContain("min-height: 340px");
-    expect(chart).toContain("max-height: 560px");
-    expect(chart).toContain("flex: 0 1 auto");
+    expect(chart).toContain("height: clamp(400px, 42vh, 560px)");
+    expect(chart).toContain("flex: 0 0 auto");
+    /* ⚠️ NO NUMERIC CEILING — `max-height: none` is a REMOVAL and appears in the narrow regimes,
+       where the card takes a stated height instead. The reader joins every block for the selector,
+       so forbidding the property outright fails on a rule that is turning it off. */
+    expect(chart).not.toMatch(/max-height:\s*\d/);
     const todo = rule(".os-colM .os-tasks");
     expect(todo).toContain("flex: 1 1 auto");
     expect(todo).toContain("min-height: 0");

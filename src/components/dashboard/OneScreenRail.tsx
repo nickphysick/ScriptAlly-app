@@ -5,7 +5,9 @@
  * OneScreenRail — the 308px rail (spec §6): author/manuscript tile → querying goals → activity →
  * Pro mini-card.
  *
- * ⚠️ THE EXPAND IS FLEX DOING THE WORK: the arrows button collapses the two stowables
+ * ⚠️ THE EXPANDER IS RETIRED (ref v16) — the goals card moved to the left column and Activity
+ * already fills this one, so there was nothing left to expand into. What follows describes the
+ * mechanism it used, kept because the FLEX law under it is still what sizes the feed:
  * (max-height→0 with their margins, padding and borders — the rail spaces with margins so the
  * slot's spacing collapses WITH the panel), and activity, being flex:1, grows to fill what they
  * release. The flex recomputation IS the animation; the activity panel's own height is never
@@ -17,16 +19,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, User, UserTask } from "../../types";
 import { StatusDot } from "../StatusDot";
-import { AnchoredPanel } from "../todo/AnchoredPanel";
-import { GoalTargetSheet } from "./GoalTargetSheet";
-import { appendGoalEntry, CADENCE_TAG, formatReached, goalRings, historyBars, londonDay, unsetLine } from "../../lib/queryingGoals";
-import type { GoalProgress } from "../../lib/queryingGoals";
-import type { GoalCadence } from "../../types";
-import "./queryingGoals.css";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { OneScreenPanel } from "./OneScreenPanel";
 import { OneScreenMark } from "./OneScreenMark";
-import targetMark from "../../assets/shell/query-target-icon.png";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
 import { bubbleShape, markSentOffered, tightRunHeads, type Side } from "../../lib/feedConversation";
 import { STATE_TOKEN, type State } from "../../lib/queryCardFacts";
@@ -407,26 +402,14 @@ export const runPill = (r: FeedRow): string =>
 
 export interface OneScreenRailProps {
   /* lifted to the page so the tour can collapse the rail before starting (§12) */
-  expanded: boolean;
-  setExpanded: (on: boolean) => void;
   loading: boolean;
   queries: Query[];
   agents: Agent[];
   manuscripts: Manuscript[];
   userTasks: UserTask[];
   activities: Activity[];
-  currentUser: User | null;
   activeManuscript: Manuscript | null;
   onNavigate: (tab: string, sub?: string) => void;
-  updateUserProfile: (fields: Partial<User>) => Promise<void>;
-  /**
-   * ⚠️ DERIVED ABOVE THIS COMPONENT, AND THE RAW SET IS DELIBERATELY NOT PASSED DOWN. The goal is
-   * per WRITER, across every manuscript, while everything else the rail receives is scoped to the
-   * manuscript in the chip — `queries`, `activities`, all of it. Handing this component an
-   * unscoped list beside those would be an invitation to scope it by mistake, and the resulting
-   * bug — a count that drops when you switch books — is one nobody would think to check for.
-   */
-  goal: GoalProgress;
   /**
    * ⚠️ THE FEED'S ONE ACTION, AND IT OPENS THE PANEL'S DRAWER RATHER THAN A SECOND ONE. A
    * "Mark sent" here that mounted its own pane would be a second answer to what finishing a send
@@ -438,17 +421,10 @@ export interface OneScreenRailProps {
 }
 
 export const OneScreenRail: React.FC<OneScreenRailProps> = ({
-  expanded, setExpanded, loading, queries, agents, manuscripts, activities, currentUser, onOpenTask,
-  activeManuscript, onNavigate, updateUserProfile, goal, now,
+  loading, queries, agents, manuscripts, activities, onOpenTask,
+  activeManuscript, onNavigate, now,
 }) => {
-  /* ⚠️ TWO PIECES OF STATE, AND NEITHER IS A DRAFT. The old inline editor kept a `goalDraft` in
-     the card because the card WAS the editor; the sheet owns its own working values now, so all
-     this holds is whether a surface is open. */
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const moreRef = useRef<HTMLButtonElement>(null);
   const actvRef = useRef<HTMLDivElement>(null);
-  const expBtnRef = useRef<HTMLButtonElement>(null);
 
   const ms = activeManuscript ?? manuscripts[0] ?? null;
   const rows = useMemo(() => feedRows(activities, queries, agents, manuscripts, now), [activities, queries, agents, manuscripts, now]);
@@ -464,199 +440,16 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
   const shownRows = useMemo(() => (tab === "all" ? rows : rows.filter((r) => feedTabOf(r) === tab)), [rows, tab]);
   const runHeads = useMemo(() => tightRunHeads(shownRows), [shownRows]);
 
-  const setExp = useCallback((on: boolean) => {
-    setExpanded(on);
-    if (!on) expBtnRef.current?.focus();
-  }, []);
-
-  /* §6: Escape, click-away, and the breakpoint all collapse; no timer, no mouse-leave. */
-  useEffect(() => {
-    if (!expanded) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setExp(false); };
-    const onDown = (e: MouseEvent) => {
-      if (actvRef.current?.contains(e.target as Node)) return;
-      setExpanded(false); // click-away does not steal focus back
-    };
-    const onResize = () => { if (window.innerWidth <= 1024) setExpanded(false); };
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("click", onDown);
-    window.addEventListener("resize", onResize);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("click", onDown);
-      window.removeEventListener("resize", onResize);
-    };
-  }, [expanded, setExp]);
 
   /**
    * ⚠️ EVERY CHANGE APPENDS. Setting a target, changing one and removing one are the same write
    * with a different entry — which is what keeps a completed period readable with the target that
    * was actually in force while it ran. `appendGoalEntry` is the single place that shape is built.
    */
-  const writeGoal = async (next: { target: number; cadence: GoalCadence } | null) => {
-    await updateUserProfile({ queryingGoals: appendGoalEntry(currentUser?.queryingGoals, next, now) });
-  };
 
-  const reached = goal.target !== null && goal.count >= goal.target && goal.reachedOn !== null;
-  /**
-   * ⚠️ THE ENTRANCE IS GATED ON THE DAY, NOT ON THE MOUNT. `reachedOn` is derived, so nothing is
-   * stored to remember the animation ran — and a card that replayed its moment on every visit to
-   * the dashboard would turn a pleasant thing into an irritating one within a day.
-   */
-  const justReached = reached && goal.reachedOn === londonDay(now);
-  const rings = goalRings(goal.count, goal.target);
 
   return (
-    <div className={`os-colR${expanded ? " os-rail-expanded" : ""}`}>
-      {/* ══ querying goals ══ */}
-      {/* ⚠️ `stowable`, AND STOWED IT IS A STRIP RATHER THAN NOTHING (Phase 7). Expanding the feed
-          collapses this card; the strip keeps the count and its rings on screen, because a card that
-          VANISHES when its neighbour grows teaches that the two are alternatives. The goal is still
-          running — it is just not the thing you are reading. All of that is CSS on
-          `.os-rail-expanded`: the render is identical in both states, so there is no second markup
-          for a stowed card to drift from. */}
-      <OneScreenPanel variant="os-goal stowable" probe="goals-card" loading={loading} skel={["h", "", ""]}>
-        {/* ⚠️ NO BAND AND NO MARK BOX HERE — both were tried and rejected. The goals header is a
-            LABEL, not an instrument: it names the card and gets out of the way, and the band gave
-            it a weight the card does not carry. A bare flex row inside the card's own padding —
-            title, status word right-aligned, line and meter beneath.
-
-            ⚠️ RE-CONFIRMED 23 Aug, IN THE BROWSER, against a local build AND deployed dev: the
-            card renders bare on both. A banded version of it exists only in a preview harness,
-            which is what `cfccf325` says in as many words — "the band was never applied to it in
-            code — only in the preview harness". The goals pack arrived asking for the band back
-            and the measurement is why it did not get it. Two locks guard this. */}
-        <div className="os-goal-r1">
-          {/* ⚠️ BARE, and no transform on this wrapper — see the blend traps in oneScreen.css. */}
-          <span className="os-mark-il os-goalmark" aria-hidden="true"><img src={targetMark} alt="" /></span>
-          <h2>Querying goals</h2>
-          {/* the cadence and the ⋯ appear only once there is a target for them to be about */}
-          {goal.cadence !== null && (
-            <>
-              <span className="os-goal-cad">{CADENCE_TAG[goal.cadence]}</span>
-              <button
-                ref={moreRef}
-                type="button"
-                className="os-goal-more"
-                aria-label="Change this target"
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
-                onClick={() => setMenuOpen((v) => !v)}
-              >
-                ⋯
-              </button>
-            </>
-          )}
-        </div>
-
-        {goal.target === null ? (
-          /* ⚠️ NO ILLUSTRATION AND NO PROMPT TO ENGAGE. The line states a fact the writer already
-             owns; the button is there if they want it. Empty-state art here would sell a feature
-             on a card whose whole job is to report. */
-          <>
-            <div className="os-goal-line">{unsetLine(goal.count)}</div>
-            <button type="button" className="os-goal-set" onClick={() => setSheetOpen(true)}>
-              Set a target
-            </button>
-          </>
-        ) : reached ? (
-          /* ⚠️ THE METER IS ABSENT, NOT FULL — at or past the target it could only read 100%, so
-             it states nothing and the illustration takes its place. The count keeps climbing and
-             the date holds, so this stays true for the rest of the period rather than ageing into
-             a stale cheer. */
-          <div className="os-goal-moment">
-            {/* ⚠️ A DECLARED PLACEHOLDER. `Goal_Reached.png` does not exist; a second copy of the
-                target icon would read as finished work. See design-refs/goals/README.md. */}
-            <div className={`os-goal-illph${justReached ? " os-goal-fade" : ""}`} aria-hidden="true">
-              <span>Illustration</span>
-              <span>104 × 104</span>
-            </div>
-            <div className="os-goal-count">
-              <span className="os-goal-n">{goal.count}</span>
-              <span className="os-goal-of">of {goal.target}</span>
-            </div>
-            <div className="os-goal-sub">Queries sent · {goal.periodLabel}</div>
-            <div className="os-goal-reached">Target reached {formatReached(goal.reachedOn!)}</div>
-          </div>
-        ) : (
-          <>
-            <div className="os-goal-count">
-              <span className="os-goal-n">{goal.count}</span>
-              <span className="os-goal-of">of {goal.target}</span>
-            </div>
-            <div className="os-goal-sub">Queries sent · {goal.periodLabel}</div>
-            {/* ⚠️ RINGS, NOT A BAR (dashboard redesign, Phase 7) — one ring per query the writer
-                said they would send, filling one at a time. A bar states a proportion; a row of
-                slots states a plan, which is what a target is.
-
-                ⚠️ AND THERE ARE `target` OF THEM, NOT FIVE. Five is the ref's example; hard-coding
-                it would draw five rings beside a card reading "3 of 10". Above `RING_MAX` there are
-                NONE — not a truncated row, which would understate a target the writer set, and not
-                the meter, which is the thing being retired. The numeral above already says it. */}
-            {rings.length > 0 && (
-              <div className="os-goal-rings" role="img" aria-label={`${goal.count} of ${goal.target} queries sent`}>
-                {rings.map((on, i) => <i key={i} className={on ? "on" : undefined} />)}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* ⚠️ IT DRAWS IN EVERY STATE, INCLUDING THE UNSET ONE. What you sent last month is true
-            whether or not you have declared a target — the strip is not a goal artefact. */}
-        {/* ⚠️ BARS, PROPORTIONAL TO THE TALLEST PERIOD ON SHOW — never to the target. A month that
-            beat the target would draw past the top of its own track, and a quiet run against a big
-            target would be four invisible stubs. The strip reports what was SENT; the target is a
-            different fact, stated above it. Beneath a hairline, because it is a different period
-            from the one the rings are about. */}
-        {goal.history.length > 0 && (
-          <div className={`os-goal-hist${reached ? " mid" : ""}`}>
-            {historyBars(goal.history).map((h) => (
-              <span className="os-goal-hb" key={h.label}>
-                <span className="os-goal-hbt" aria-hidden="true">
-                  <i className={h.zero ? "z" : undefined} style={{ height: `${h.px}px` }} />
-                </span>
-                {/* ⚠️ ONE LINE — "10 Aug · 3", ref `.wk .lb`. It was a figure over a label, which
-                    made the count the loudest thing in a strip whose subject is the SHAPE of four
-                    periods; the bar already states the count, in the only units that compare. */}
-                <span className="os-goal-hlb">{h.label} · {h.count}</span>
-              </span>
-            ))}
-          </div>
-        )}
-      </OneScreenPanel>
-
-      {/* ⚠️ ANCHORED THROUGH THE SHARED PANEL, never a locally positioned popover — `placeMenu`
-          owns right-alignment, viewport clamping, flip-above, Escape, outside-press and returning
-          focus to the trigger. Both edit rows open the SAME sheet, pre-filled: "change the target"
-          and "change the cadence" are one decision seen from two sides. */}
-      {menuOpen && moreRef.current && (
-        <AnchoredPanel
-          anchor={moreRef.current}
-          ariaLabel="Change this target"
-          onClose={(back) => { setMenuOpen(false); if (back) moreRef.current?.focus(); }}
-        >
-          <button type="button" role="menuitem" className="m-i"
-            onClick={() => { setMenuOpen(false); setSheetOpen(true); }}>Change target</button>
-          <button type="button" role="menuitem" className="m-i"
-            onClick={() => { setMenuOpen(false); setSheetOpen(true); }}>Change cadence</button>
-          <div className="m-rule" />
-          {/* ⚠️ REMOVAL APPENDS A NULL ENTRY — it does not delete the list, so the history strip
-              survives and a past period keeps the target it ran under. */}
-          <button type="button" role="menuitem" className="m-i"
-            onClick={() => { setMenuOpen(false); void writeGoal(null); }}>Remove target</button>
-        </AnchoredPanel>
-      )}
-
-      {sheetOpen && (
-        <GoalTargetSheet
-          initialTarget={goal.target ?? 10}
-          initialCadence={goal.cadence ?? "month"}
-          now={now}
-          onCommit={(next) => writeGoal(next)}
-          onClose={() => setSheetOpen(false)}
-        />
-      )}
-
+    <div className="os-colR">
       {/* ══ activity ══ */}
       <OneScreenPanel variant="os-actv" probe="activity-card" loading={loading} skel={["h", "", "", "grow"]} innerRef={actvRef}>
         <div className="os-ahead">
@@ -665,19 +458,12 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
               the separating. The title sits left, as the ref has it. */}
           <OneScreenMark name="activity" />
           <h2>Activity</h2>
-          <button
-            ref={expBtnRef}
-            type="button"
-            className="os-exp"
-            aria-expanded={expanded}
-            aria-controls="os-actv-body"
-            title={expanded ? "Collapse the feed" : "Expand the feed"}
-            onClick={(e) => { e.stopPropagation(); setExp(!expanded); }}
-          >
-            {expanded
-              ? <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7" /></svg>
-              : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>}
-          </button>
+          {/* ⚠️ THE EXPANDER IS RETIRED (ref v16, Phase 3), AND IT IS THE MOVE THAT RETIRED IT.
+              It existed to give the feed the goals card's height; the goals card is the LEFT
+              column's now, and Activity already occupies this column top to bottom. Expanding
+              gained the feed nothing — the state's remaining effects were a heavier shadow, a
+              hidden foot and an Escape hint for a thing that had not opened. A control whose only
+              observable result is its own chrome is a control that lies about what it does. */}
         </div>
         {/* ⚠️ TABS ON A HAIRLINE, NOT PILLS. A pill row reads as a set of buttons of equal weight;
             these are a view selector, and the underline says which view you are in — the same
@@ -771,7 +557,6 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
             })
           )}
         </EdgeFadeScroll>
-        <div className="os-esc">Click the arrows, press Escape, or click away to close</div>
         {/* §6: the footer is a quiet caption ONLY — no link; the arrows are the sole route in */}
         <div className="os-afoot"><span className="os-ac">Last 30 days</span></div>
       </OneScreenPanel>

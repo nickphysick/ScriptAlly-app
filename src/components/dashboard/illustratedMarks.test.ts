@@ -131,7 +131,10 @@ describe("the stat slot is fixed, and the artwork is bounded inside it", () => {
 
 describe("the mapping follows the TABLE, not the filenames", () => {
   const counters = readFileSync(resolve(__dirname, "./OneScreenCounters.tsx"), "utf8");
-  const rail = readFileSync(resolve(__dirname, "./OneScreenRail.tsx"), "utf8");
+  /* ⚠️ THE GOALS CARD LEFT THE RAIL (ref v16, Phase 3) — it is the left column's second card now
+     and `OneScreenGoals` renders it. The claim is unchanged: the target mark is the GOALS card's
+     and the painted plane is the stat row's, despite the filenames suggesting the opposite. */
+  const rail = readFileSync(resolve(__dirname, "./OneScreenGoals.tsx"), "utf8");
 
   /* ⚠️ RETARGETED (audit pack P3): QUERIES SENT now carries the watercolour plane, which replaced
      the line-drawn `Querying Goals Icon` that had stood in for it. The target-is-GOALS half of the

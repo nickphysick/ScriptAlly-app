@@ -29,7 +29,7 @@ import React from "react";
 import { Skel } from "./OneScreenDashboard";
 
 export interface OneScreenPanelProps {
-  /** The container's own class — `os-tasks`, `os-actv`, `os-goal stowable`, `os-lead`. */
+  /** The container's own class — `os-tasks`, `os-actv`, `os-goal`, `os-lead`. */
   variant: string;
   /** Firestore still resolving → the skeleton overlay, and the content goes `opacity: 0`. */
   loading?: boolean;

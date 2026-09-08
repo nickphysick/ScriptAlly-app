@@ -190,16 +190,17 @@ describe("the tile fills a row it does not size", () => {
      whose height tasks set; a centred hero stretched by a row it does not own is a tile pretending
      to be taller than its content. Natural height now, and the left column's slack is Pro's. */
   it("⚠️ the tile is a column card at its natural height — it never fills a row it does not size", () => {
-    expect(cssRules).toContain("grid-template-columns: 440px minmax(0, 1fr) 420px");
-    /* ⚠️ REVERSED (refdiff pass, Phase 3), AND THE REASON REVERSED WITH IT. The tile stopped
-       stretching when the grid gave the columns a shared row box and the cards were natural height —
-       and the three column bottoms then sat 658px apart, which is the fault the ref's
-       `align-items: stretch` exists to prevent. The LAST card in a side column closes it: Pro when
-       it renders, Community when it does not. Both are `flex: 1 1 auto` so whichever is last takes
-       the slack; the tile is no longer pretending to a height it does not own, it is closing a
-       column that would otherwise end in a hole. */
+    expect(cssRules).toContain("grid-template-columns: 352px minmax(0, 1fr) 420px");
+    /* ⚠️ COMMUNITY TAKES THE SLACK IN EVERY STATE, AND PRO NO LONGER SHARES IT (ref v16, Phase 3).
+       "Whichever card is last closes the column" needed to know which card that was, and it is three
+       different cards in three states: `OneScreenPro` returns null for a subscriber, is
+       `display: none` below its own viewport gate, and renders otherwise. A `:last-child` rule
+       cannot see the display:none case at all — it is still the last child and still takes no room.
+       So the stretch is Community's, always, and Pro sits at the foot at its natural height.
+       ⚠️ AND THE COLUMN CLOSES REGARDLESS, because the column is stretched by the grid rather than
+       by its cards adding up — see the `height: 0` / `min-height: 100%` pair in the smoke's §1. */
     expect(rule(".os-colL .os-comm")).toContain("flex: 1 1 auto");
-    expect(rule(".os-colL .os-probanner")).toContain("flex: 1 1 auto");
+    expect(rule(".os-colL .os-probanner")).toContain("flex: 0 0 auto");
     /* the retired spine must not survive — a leftover rule is how a deleted layout comes back */
     expect(cssRuleCount(cssRules, ".os-midrow, .os-lowrow")).toBe(0);
   });

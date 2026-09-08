@@ -15,11 +15,13 @@ import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { UserPlan } from "../../types";
 import type { QueryingGoalEntry } from "../../types";
-import { OneScreenRail } from "./OneScreenRail";
+import { OneScreenGoals } from "./OneScreenGoals";
 import { deriveGoalProgress } from "../../lib/queryingGoals";
 
 const NOW = new Date("2026-08-23T12:00:00Z");
-const rail = readFileSync(resolve(__dirname, "./OneScreenRail.tsx"), "utf8");
+/* ⚠️ THE CARD'S OWN FILE NOW — v16 moved it to the left column and it was extracted with the
+   move. Every claim below is about the goals card and reads where the goals card lives. */
+const rail = readFileSync(resolve(__dirname, "./OneScreenGoals.tsx"), "utf8");
 const sheet = readFileSync(resolve(__dirname, "./GoalTargetSheet.tsx"), "utf8");
 const goalCss = readFileSync(resolve(__dirname, "./queryingGoals.css"), "utf8");
 const oneCss = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
@@ -36,12 +38,14 @@ const entry = (target: number | null, cadence: "week" | "fortnight" | "month" | 
 
 const render = (sent: string[], entries: QueryingGoalEntry[], now = NOW) =>
   renderToStaticMarkup(
-    <OneScreenRail
-      expanded={false} setExpanded={() => {}}
-      loading={false} queries={[]} agents={[]} manuscripts={[]} userTasks={[]} activities={[]}
+    /* ⚠️ THE CARD, NOT THE RAIL (ref v16, Phase 3). It was mounted through `OneScreenRail`
+       because the rail owned it; v16 moves it to the left column and it is `OneScreenGoals` now.
+       The props are the same three it always used — everything else this passed was the feed's. */
+    <OneScreenGoals
+      loading={false}
       currentUser={{ id: "u", name: "N", plan: UserPlan.FREE, queryingGoals: entries } as any}
       goal={deriveGoalProgress(sent.map((d) => ({ dateSent: d })), entries, now)}
-      activeManuscript={null} onNavigate={() => {}} updateUserProfile={async () => {}} now={now}
+      updateUserProfile={async () => {}} now={now}
     />,
   );
 
@@ -263,14 +267,15 @@ describe("⚠️ the header stays bare — the standing decision, restated where
        reads the output, so a band arriving by any route — a class, a component, a nested wrapper —
        fails here too. Two checks of one decision, from opposite ends.
 
-       ⚠️ SCOPED TO THE GOALS CARD, and it has to be: the Activity card below it in the same rail
-       LEGITIMATELY wears `os-ahead`, so an unscoped search over the rendered rail fails on a
-       correct page. It did, first run. */
+       ⚠️ THE SLICE IS GONE AND THAT IS THE POINT OF THE MOVE. It ran from the goals card to the
+       Activity card because the two shared a rail and Activity LEGITIMATELY wears `os-ahead`, so an
+       unscoped search failed on a correct page. The card renders alone now, so the whole output IS
+       the card and there is no end anchor to find — which also removes a bounded slice whose end
+       anchor could vanish and silently widen the claim to the rest of the file. */
     const open = html.indexOf('class="os-card os-lift os-goal');
     expect(open, "the goals card must be in the output for this to check anything").toBeGreaterThan(-1);
-    const next = html.indexOf('class="os-card os-lift os-actv', open);
-    expect(next, "the Activity card marks the end of the slice").toBeGreaterThan(open);
-    const card = html.slice(open, next);
+    expect(html).not.toContain('class="os-card os-lift os-actv');
+    const card = html;
     expect(card).not.toMatch(/["\s`]os-ahead["\s`]/);
     expect(card).not.toContain("os-markbox");
     expect(card).not.toContain("background");

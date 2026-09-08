@@ -117,19 +117,20 @@
   padding: 0 0 0 30px;
   width: 100%;
 }
-/* ⚠️ THE REF'S OWN TRACKS AND GAP. 440/1fr/420 at ≥1700, 340/1fr/360 below — its `.grid3` and its
-   own narrow override, not values chosen here. `align-items: stretch` is the column-bottom law in
-   one word: every column is handed the same row box, so the three bottoms agree by construction. */
+/* ⚠️ THE REF'S OWN TRACKS AND GAP — v16's `.grid3`: 352/1fr/420 at ≥1700, 300/1fr/340 below.
+   They were 440/420 and 340/360, v14's, which made the left column 88px too wide and took the
+   difference out of the elastic middle. */
 .os-grid {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 440px minmax(0, 1fr) 420px;
+  grid-template-columns: 352px minmax(0, 1fr) 420px;
   gap: 22px;
   align-items: stretch;
+  min-width: 0;
 }
 @media (max-width: 1699px) {
-  .os-grid { grid-template-columns: 340px minmax(0, 1fr) 360px; }
+  .os-grid { grid-template-columns: 300px minmax(0, 1fr) 340px; }
   .os-content { padding-left: 22px; }  /* the ref's `.main{padding-left:22px!important}` step */
 
 }
@@ -149,13 +150,27 @@
  * declared `height: 100%` instead of extending the box, and the negative margin then pulls the
  * content out of position rather than restoring it — the cards would sit 10px high and 10px left.
  */
+/**
+ * ⚠️ THE SIDE COLUMNS CONTRIBUTE NOTHING TO THE ROW'S HEIGHT AND STRETCH TO MATCH IT — v16's
+ * `.grid3 > .col.side{height:0;min-height:100%;overflow:hidden}`, and it is the whole
+ * column-bottom law in one declaration.
+ *
+ * `height: 100%` made each column ask for the row's height while its own content ALSO fed the
+ * row's height, so a tall side column grew the row and the other two then stretched to the new
+ * total. `height: 0` breaks that loop: the CENTRE column sets the height and the sides are told
+ * what it is. The three bottoms then agree by construction rather than by three cards happening
+ * to add up.
+ */
 .os-colL, .os-colM, .os-colR {
-  display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0;
+  display: flex; flex-direction: column; min-height: 100%; min-width: 0;
   overflow: hidden;
   box-sizing: content-box;
   padding: var(--os-bleed);
   margin: calc(var(--os-bleed) * -1);
 }
+.os-colL, .os-colR { height: 0; }
+/* the centre is the one that states a height, because it is the one that owns it */
+.os-colM { height: 100%; min-height: 0; }
 .os-colL, .os-colM { gap: 22px; }
 /* ⚠️ THE RAIL USES MARGINS, NOT GAP (§6) — a collapsing panel must take its slot's spacing with
    it, and `gap` leaves a ghost gutter behind a max-height:0 panel. */
@@ -181,7 +196,11 @@
    Chart between 340 and 560; the to-do card takes everything the chart does not. The `min-height`
    here is on a CARD, never on `.os-root` — the §1 lock forbids it on the lock elements only, and
    this is the ref's own `#chartCard{flex:1;min-height:340px}` translated. */
-.os-colM .os-lead { flex: 0 1 auto; min-height: 340px; max-height: 560px; }
+/* ⚠️ THE CHART'S HEIGHT IS FIXED, NOT A RANGE — v16's `#chartCard{height:clamp(400px,42vh,560px)}`.
+   A range let the chart shrink whenever the to-do card wanted more, so the plot's height was a
+   function of how many tickets were open; the clamp makes it a function of the viewport, which is
+   the only thing a chart's proportions should follow. */
+.os-colM .os-lead { flex: 0 0 auto; height: clamp(400px, 42vh, 560px); }
 .os-colM .os-tasks { flex: 1 1 auto; min-height: 0; }
 
 /* ⚠️ THE LEFT COLUMN IS THREE CARDS AT NATURAL HEIGHT, AND PRO TAKES THE SLACK.
@@ -197,14 +216,27 @@
    `OneScreenPro` returns null for a subscriber and is display:none below its own viewport gate, so
    Community takes the slack in those cases and Pro takes it otherwise. Both are stated, and the one
    that is not last is `flex: 0 0 auto`. */
-.os-colL .os-aut { flex: 0 0 auto; }
+/* ⚠️ FOUR CARDS NOW, AND THE GOAL IS THE SECOND OF THEM — v16 moves Querying goals out of the
+   right column and into the left, between the manuscript card and Community. That is what frees
+   the right column for Activity top to bottom, and it is why the expander no longer has anything
+   to displace. */
+.os-colL .os-aut { flex: 0 1 auto; min-height: 340px; }   /* ref `.col.side:first-child > .card:first-child` */
+.os-colL .os-goal { flex: 0 0 auto; }
 .os-colL .os-comm { flex: 1 1 auto; min-height: 0; }
-.os-colL .os-probanner { flex: 1 1 auto; }
+/* ⚠️ PRO SITS AT THE FOOT AT ITS NATURAL HEIGHT AND COMMUNITY TAKES THE SLACK — which is a change
+   from "whichever card is last takes it". `OneScreenPro` returns null for a subscriber and is
+   `display: none` below its own viewport gate, so "last" is three different cards in three states
+   and a `:last-child` rule cannot see the display:none case at all. Community stretches in every
+   state instead; the column closes because the column is stretched by the grid, not because its
+   cards add up. */
+.os-colL .os-probanner { flex: 0 0 auto; }
 
 /* ⚠️ THE FEED FLEXES TO ITS COLUMN AND NEVER SETS IT. `.os-colR` is stretched by the grid, the
    goals panel is natural, and activity takes the remainder — so the feed's CONTENT height cannot
    reach the row. That is the property the measurement asserts: add fifty events and the three
    column bottoms do not move. */
+/* ⚠️ ACTIVITY IS THE WHOLE RIGHT COLUMN NOW — v16's `.col.side:last-child{gap:0}` with
+   `#actCard{flex:1}` and nothing else in the track. */
 .os-colR .os-actv { flex: 1 1 auto; min-height: 0; }
 
 /* ══ CARD CHROME ══ */
@@ -816,7 +848,7 @@
    that otherwise has one, with its own paddings, its own type sizes and its own rules for which of
    its parts survive. Nine declarations to say "not now" where `display: none` says it once, and
    the reader who expanded the feed did not ask to keep reading their goal in miniature. */
-.os-rail-expanded .os-goal.stowable { display: none; }
+
 
 /* ══ §6 · THE ACTIVITY FEED, AS A CONVERSATION (dashboard redesign, Phase 6) ═════════════════
  *
@@ -1490,22 +1522,7 @@
   font-family: var(--font-serif); font-size: 23px; font-weight: 500; color: #2a1f18;
   margin: 0;
 }
-/* ⚠️ PINNED TO THE CARD'S CORNER, NOT PLACED IN THE BAND'S FLOW — ref `#actCard .expander`. In
-   flow it is one more item competing for the band's width, so a longer title or a wider mark moves
-   it; against the corner it is where it always is, and the band reserves its room with a padding
-   instead of a layout. */
 .os-actv { position: relative; }
-.os-exp {
-  position: absolute; top: 14px; right: 16px; z-index: 6;
-  width: 24px; height: 24px; border-radius: 7px; border: 1px solid #e3d9cc; background: #ffffff;
-  display: grid; place-items: center; cursor: pointer; flex: none; padding: 0;
-  transition: background 0.14s ease, border-color 0.14s ease;
-}
-/* ref `#actCard .hd{padding-right:60px}` — the room the pinned control sits in */
-.os-actv > .os-ahead { padding-right: 60px; }
-.os-exp svg { width: 12px; height: 12px; stroke: #8a7a6c; fill: none; stroke-width: 1.8; transition: stroke 0.14s ease; }
-.os-exp:hover { background: #faf6ef; border-color: #cdbfae; }
-.os-exp:hover svg { stroke: #7c3a2a; }
 .os-abodywrap { flex: 1; min-height: 0; }
 /* ⚠️ THE BOTTOM PADDING CLEARS THE FOOT (polish P7). `.os-afoot` (LAST 30 DAYS) sits over the end
    of the scroll region, so the final entry could never be read in full — it scrolled to its limit
@@ -1552,49 +1569,18 @@
   font-family: "JetBrains Mono", monospace;
   font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase; color: #c0b2a2; text-align: center;
 }
-.os-esc {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
-  color: #c4b6a7; text-align: center; padding: 7px 0 9px;
-  border-top: 1px solid #ece0d2; margin: 0 14px; display: none;
-}
 
 /* ══ §6 · THE EXPAND — flex does the easing; the panel's own height is never animated ══ */
-.stowable {
-  overflow: hidden;
-  max-height: 420px; opacity: 1;
-  transition: max-height 0.44s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.22s ease,
-              margin-bottom 0.44s cubic-bezier(0.4, 0, 0.2, 1),
-              padding 0.44s cubic-bezier(0.4, 0, 0.2, 1),
-              border-width 0.44s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-              visibility 0s linear 0.44s;
-}
-/* collapse EVERYTHING, not just the content box — padding, borders and the margin the rail
-   spaces with, then visibility once the motion is done */
-.os-rail-expanded .stowable {
-  max-height: 0; opacity: 0; margin-bottom: 0; transform: translateY(-6px);
-  padding-top: 0; padding-bottom: 0;
-  border-top-width: 0; border-bottom-width: 0;
-  box-shadow: none;
-  pointer-events: none; visibility: hidden;
-  transition-delay: 0s, 0s, 0s, 0s, 0s, 0s, 0.3s;
-}
-.os-rail-expanded .os-actv {
-  box-shadow: 0 3px 8px rgba(58, 28, 20, 0.07), 0 16px 40px rgba(58, 28, 20, 0.13);
-  border-color: #dbd0c1;
-}
-.os-rail-expanded .os-esc { display: block; }
-.os-rail-expanded .os-afoot { display: none; }
+/* ⚠️ THE EXPANDED STATE IS RETIRED WITH ITS CONTROL (ref v16, Phase 3) — `.os-rail-expanded` and
+   the `.stowable` collapse it drove. The goals card moved to the left column, so there was nothing
+   left in this one for the feed to expand INTO, and the state's only remaining effects were the
+   card's own shadow and an Escape hint for a thing that had not opened. `.os-esc` goes with it. */
 
 /* §11: nothing to expand into on a one-column layout */
 @media (max-width: 1024px) {
-  .os-exp { display: none; }
   .os-colR .os-actv { flex: none; height: 420px; }
 }
 @media (max-height: 680px) and (min-width: 1025px) {
-  .os-exp { display: none; }
   /* ⚠️ A DEFINITE HEIGHT, NOT A MIN. `flex: none` is basis AUTO, so with only a min-height the
      feed rendered every entry at full height once the lock released — a 6,446px dashboard on a
      short window, measured with 70 entries. Releasing the lock permits SCROLLING; it does not

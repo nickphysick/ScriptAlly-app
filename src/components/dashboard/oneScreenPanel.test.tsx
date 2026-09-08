@@ -27,10 +27,14 @@ describe("OneScreenPanel — the shell the four containers had", () => {
     expect(html(<OneScreenPanel variant="os-actv" />)).toContain('class="os-card os-lift os-actv"');
   });
 
-  it("⚠️ a multi-word variant survives intact — Goals is `os-goal stowable`", () => {
-    // the rail's collapse targets `.stowable`; losing it would stop the panel collapsing at all
-    expect(html(<OneScreenPanel variant="os-goal stowable" />))
-      .toContain('class="os-card os-lift os-goal stowable"');
+  it("⚠️ a multi-word variant survives intact", () => {
+    /* ⚠️ THE EXAMPLE WAS `os-goal stowable` AND THE MODIFIER IS RETIRED — nothing stows the goals
+       card since it moved to the left column. The CLAIM is about the component and is unchanged: a
+       variant with a space in it must reach the class list whole, because a panel that silently
+       drops its second word loses whatever that word was for. Asserted on a synthetic pair so the
+       case cannot lapse again when a real variant is renamed. */
+    expect(html(<OneScreenPanel variant="os-goal os-extra" />))
+      .toContain('class="os-card os-lift os-goal os-extra"');
   });
 
   it("appends ` isload` exactly as the hand-rolled shells did", () => {

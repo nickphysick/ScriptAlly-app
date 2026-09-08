@@ -13,6 +13,7 @@ import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ActivityType, QueryStatus, UserPlan } from "../../types";
 import { FEED_TABS, feedLabel, feedRows, feedTabOf, OneScreenRail } from "./OneScreenRail";
+import { OneScreenGoals } from "./OneScreenGoals";
 import { deriveGoalProgress } from "../../lib/queryingGoals";
 import type { QueryingGoalEntry } from "../../types";
 import { cssRule, cssRuleCount } from "../../test/cssRule";
@@ -113,13 +114,9 @@ describe("§6 · the 30-day feed", () => {
 describe("the rendered rail", () => {
   const html = renderToStaticMarkup(
     <OneScreenRail
-      expanded={false} setExpanded={() => {}}
       loading={false} queries={[]} agents={[]} manuscripts={manuscripts} userTasks={[]}
       activities={[act({})]}
-      currentUser={{ id: "u", name: "Nick Physick", plan: UserPlan.FREE } as any}
-      goal={goalFrom([], [])}
-      activeManuscript={manuscripts[0]} onNavigate={() => {}}
-      updateUserProfile={async () => {}} now={NOW}
+      activeManuscript={manuscripts[0]} onNavigate={() => {}} now={NOW}
     />,
   );
 
@@ -142,14 +139,6 @@ describe("the rendered rail", () => {
     expect(html).not.toMatch(/["\s`]os-goal-num["\s`]/);
   });
 
-  it("activity: the expand button wires aria-expanded/aria-controls; the footer is caption ONLY", () => {
-    expect(html).toContain('aria-expanded="false"');
-    expect(html).toContain('aria-controls="os-actv-body"');
-    expect(html).toContain("Last 30 days");
-    // §6: no link in the footer — the arrows are the sole route into the expanded feed
-    const foot = html.slice(html.indexOf("os-afoot"));
-    expect(foot.slice(0, foot.indexOf("</div>"))).not.toContain("<a");
-  });
 
   /* ⚠️ THE PRO MINI LEFT THE RAIL (v16 §5) — it is the banner beneath tasks now. This pins the
      departure so a second upsell cannot reappear here and sell the same thing twice. */
@@ -161,19 +150,30 @@ describe("the rendered rail", () => {
 
   it("no goal set → the count for the month and the way to set one, never fake progress", () => {
     const bare = renderToStaticMarkup(
-      <OneScreenRail
-        expanded={false} setExpanded={() => {}}
-        loading={false} queries={[]} agents={[]} manuscripts={[]} userTasks={[]} activities={[]}
+      /* the goals card left the rail with v16 — see `queryingGoalsCard.test.tsx` */
+      <OneScreenGoals
+        loading={false}
         currentUser={{ id: "u", name: "N", plan: UserPlan.FREE } as any}
-        goal={noGoal}
-        activeManuscript={null} onNavigate={() => {}} updateUserProfile={async () => {}} now={NOW}
+        goal={noGoal} updateUserProfile={async () => {}} now={NOW}
       />,
     );
     /* ⚠️ HTML-ESCAPED — renderToStaticMarkup emits &#x27; for an apostrophe. */
     expect(bare).toContain("You&#x27;ve sent 0 queries this month.");
     expect(bare).toContain("Set a target");
     expect(bare).not.toMatch(/["\s`]os-blocks ghost["\s`]/);
-    expect(bare).toContain("The story starts with your first query.");
+  });
+
+  /* ⚠️ THE FEED'S EMPTY LINE IS THE RAIL'S, AND IT WAS ASSERTED ON A RENDER THAT HELD BOTH CARDS.
+     The two travelled together only because they shared a column; the goal's unset state and the
+     feed's empty state are different claims about different cards and are asserted apart now. */
+  it("an empty feed says where the story starts, rather than showing nothing", () => {
+    const empty = renderToStaticMarkup(
+      <OneScreenRail
+        loading={false} queries={[]} agents={[]} manuscripts={[]} userTasks={[]} activities={[]}
+        activeManuscript={null} onNavigate={() => {}} now={NOW}
+      />,
+    );
+    expect(empty).toContain("The story starts with your first query.");
   });
 });
 
@@ -339,40 +339,19 @@ describe("the goal is a row of slots, and it survives being stowed", () => {
       .replace(/\/\*[\s\S]*?\*\//g, "");
     expect(cssRuleCount(goals, ".os-goal-meter")).toBe(0);
     expect(cssRuleCount(goals, ".os-goal-meter i")).toBe(0);
-    const rail = readFileSync(resolve(__dirname, "./OneScreenRail.tsx"), "utf8")
+    /* ⚠️ THE GOALS CARD IS ITS OWN FILE SINCE v16 — and BOTH files are checked for the retired
+       meter, because a rule with no renderer is how a deleted control comes back and the rail is
+       where it used to live. */
+    const read = (f: string) => readFileSync(resolve(__dirname, f), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
-    expect(rail, "the meter is still rendered").not.toMatch(/["\`\s]os-goal-meter["\`\s]/);
-    expect(rail).toContain("goalRings(goal.count, goal.target)");
-    expect(rail).toContain("historyBars(goal.history)");
+    const card = read("./OneScreenGoals.tsx");
+    for (const f of ["./OneScreenGoals.tsx", "./OneScreenRail.tsx"]) {
+      expect(read(f), `the meter is still rendered in ${f}`).not.toMatch(/["\`\s]os-goal-meter["\`\s]/);
+    }
+    expect(card).toContain("goalRings(goal.count, goal.target)");
+    expect(card).toContain("historyBars(goal.history)");
   });
 
-  /**
-   * ⚠️ THE SLIM STRIP IS RETIRED, AND ITS ARGUMENT IS WHAT WENT (refdiff pass, Phase 7).
-   *
-   * It kept the count and its rings in a 34px band on the reasoning that a card which vanishes when
-   * its neighbour grows teaches that the two are alternatives. They ARE alternatives: expanding the
-   * feed is a request for the whole column, and the strip was a third state of a card that
-   * otherwise has one — nine declarations, its own paddings and type sizes, and a rule for which of
-   * its parts survive, to say "not now" where `display: none` says it once.
-   *
-   * ⚠️ THE EXCEPTION IS STILL A DECLARED ONE AND STILL NEEDS SAYING, because `.stowable`'s own
-   * collapse is `max-height: 0` plus `visibility: hidden` and this overrides it on specificity. The
-   * claim has changed from "it stays as a strip" to "it goes"; what has not changed is that a
-   * reader of the cascade should find a sentence rather than infer one.
-   */
-  it("⚠️ stowed, the goals card goes entirely — no slim strip", () => {
-    const stowed = cssRule(cssRules, ".os-rail-expanded .os-goal.stowable", "oneScreen.css");
-    expect(stowed).toContain("display: none");
-    expect(stowed).not.toContain("max-height");
-    /* and the strip's per-part rules went with it — a rule for a state that cannot occur */
-    for (const gone of [
-      ".os-rail-expanded .os-goal .os-goal-count",
-      ".os-rail-expanded .os-goal .os-goal-rings",
-      ".os-rail-expanded .os-goal .os-goal-r1",
-    ]) {
-      expect(cssRules, `${gone} survived the strip it dressed`).not.toContain(gone);
-    }
-  });
 });
 
 describe("the community tile keeps its one state, and gains only chrome", () => {
@@ -405,13 +384,34 @@ describe("the community tile keeps its one state, and gains only chrome", () => 
 });
 
 describe("§6 · the collapse mechanics in CSS", () => {
-  it("⚠️ the stowables collapse padding, borders AND the margin the rail spaces with", () => {
-    const collapsed = cssRules.slice(cssRules.indexOf(".os-rail-expanded .stowable {"));
-    const block = collapsed.slice(0, collapsed.indexOf("}"));
-    for (const p of ["max-height: 0", "opacity: 0", "margin-bottom: 0", "padding-top: 0", "border-top-width: 0", "visibility: hidden"]) {
-      expect(block, p).toContain(p);
-    }
+  /**
+   * ⚠️ THE EXPANDER AND ITS WHOLE STATE ARE RETIRED (ref v16, Phase 3), AND THE MOVE RETIRED THEM.
+   *
+   * It existed to give the feed the goals card's height. v16 moves the goals card to the LEFT
+   * column and Activity already occupies this one top to bottom, so expanding gained the feed
+   * nothing: the state's remaining effects were a heavier shadow on the card, a hidden foot and an
+   * Escape hint for a thing that had not opened. A control whose only observable result is its own
+   * chrome is a control that lies about what it does.
+   *
+   * The four cases that guarded the button, the stow, the collapse mechanics and the hint swap are
+   * gone with it. This one stands in their place so the retirement is a decision somebody reads
+   * rather than four cases that quietly stopped existing — and it fails if any of it comes back
+   * without a column to expand into.
+   */
+  it("⚠️ the expander is retired — no button, no expanded state, no stow", () => {
+    const rail = readFileSync(resolve(__dirname, "./OneScreenRail.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+    expect(rail).not.toMatch(/["\s`]os-exp["\s`]/);
+    expect(rail).not.toContain("aria-expanded");
+    expect(rail).not.toContain("os-rail-expanded");
+    expect(rail).not.toMatch(/["\s`]os-esc["\s`]/);
+    expect(cssRuleCount(cssRules, ".os-rail-expanded .stowable")).toBe(0);
+    expect(cssRuleCount(cssRules, ".os-esc")).toBe(0);
+    /* ⚠️ AND THE ACTIVITY CARD STILL FILLS ITS COLUMN — the thing the expander was a workaround
+       for is now the resting state, so losing it must not lose that. */
+    expect(cssRule(cssRules, ".os-colR .os-actv", "oneScreen.css")).toContain("flex: 1 1 auto");
   });
+
 
   it("⚠️ the activity panel's own height is NEVER animated — flex does the work", () => {
     /* ⚠️ ANCHORED. `sliceBetween(css, ".os-actv {", ".os-ahead {")` matched inside
@@ -423,12 +423,6 @@ describe("§6 · the collapse mechanics in CSS", () => {
     expect(actv).not.toContain("max-height");
   });
 
-  it("the esc hint and the footer swap when expanded; the control hides at one column", () => {
-    expect(cssRules).toContain(".os-rail-expanded .os-esc { display: block; }");
-    expect(cssRules).toContain(".os-rail-expanded .os-afoot { display: none; }");
-    const m = cssRules.slice(cssRules.indexOf("@media (max-width: 1024px) {", cssRules.indexOf(".os-exp")));
-    expect(m).toContain(".os-exp { display: none; }");
-  });
 
   /* the fill-in animates the BLOCKS, whose final frame equals their natural state — never the
      card, whose stowable opacity a pinned keyframe would fight (the §6 trap) */

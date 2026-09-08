@@ -35,6 +35,7 @@ import { OneScreenCommunity } from "./OneScreenCommunity";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../lib/manuscriptScope";
 import { deriveGoalProgress } from "../../lib/queryingGoals";
 import { OneScreenRail } from "./OneScreenRail";
+import { OneScreenGoals } from "./OneScreenGoals";
 import { OneScreenSkeleton } from "./OneScreenSkeleton";
 import { useSkeleton } from "../../lib/skeletonTiming";
 import "./oneScreen.css";
@@ -112,7 +113,6 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
   /* ── §12 · the tour ── */
   const [touring, setTouring] = useState(false);
   /* the rail's expanded state is lifted here so the tour can collapse it before starting */
-  const [railExpanded, setRailExpanded] = useState(false);
   const tourChipRef = useRef<HTMLButtonElement>(null);
   const autoRan = useRef(false);
   const wideEnough = () => typeof window !== "undefined" && window.innerWidth > TOUR_BREAKPOINT;
@@ -134,7 +134,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
     if (loading || autoRan.current) return;
     if (!tourAutoRuns(currentUser?.tourCompletedAt, wideEnough())) return;
     autoRan.current = true;
-    const id = window.setTimeout(() => { setRailExpanded(false); setTouring(true); }, 700);
+    const id = window.setTimeout(() => setTouring(true), 700);
     return () => window.clearTimeout(id);
   }, [loading, currentUser?.tourCompletedAt]);
 
@@ -247,7 +247,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
               <h1 data-probe-text="hero-h1">Hello, {firstName}</h1>
               <span className="os-spacer" />
               {chipShows && (
-                <button type="button" ref={tourChipRef} className="os-tourchip" onClick={() => { if (wideEnough()) { setRailExpanded(false); setTouring(true); } }}>
+                <button type="button" ref={tourChipRef} className="os-tourchip" onClick={() => { if (wideEnough()) setTouring(true); }}>
                   Take the tour
                 </button>
               )}
@@ -290,6 +290,13 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             currentUser={currentUser} activeManuscript={activeManuscript}
             onNavigate={onNavigate}
           />
+          {/* ⚠️ BETWEEN THE MANUSCRIPT CARD AND COMMUNITY — v16 moves Querying goals out of the
+              right column and into this one, which is what frees the right column for Activity top
+              to bottom. It was `OneScreenRail`'s only because the two shared a column. */}
+          <OneScreenGoals
+            loading={loading} goal={goalProgress} currentUser={currentUser}
+            now={now} updateUserProfile={updateUserProfile}
+          />
           <OneScreenCommunity loading={loading} />
           {/* ⚠️ SHOWN ONLY WHERE THE EXTRA CARD GENUINELY FITS — the CSS gates it on viewport
               height AND width (§5), and it returns null for a Pro subscriber. Below either
@@ -331,19 +338,14 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
         </div>
 
         <OneScreenRail
-          expanded={railExpanded}
-          setExpanded={setRailExpanded}
           loading={loading}
           queries={scopedQueries}
           agents={agents}
           manuscripts={manuscripts}
           userTasks={userTasks}
           activities={scopedActivities}
-          goal={goalProgress}
-          currentUser={currentUser}
           activeManuscript={activeManuscript}
           onNavigate={onNavigate}
-          updateUserProfile={updateUserProfile}
           onOpenTask={(queryId) => setFeedOpenQueryId(queryId)}
           now={now}
         />
