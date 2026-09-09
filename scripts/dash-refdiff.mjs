@@ -450,6 +450,121 @@ const READ = `(() => {
   out.checks.brushOverflow = hdrEl && brushEl
     ? Math.round((brushEl.getBoundingClientRect().right - hdrEl.getBoundingClientRect().right) * 10) / 10
     : null;
+  /**
+   * ⚠️ THE CHART'S THREE STRUCTURAL CLAIMS (v29). Each is about a BOX or a document position, never
+   * about how the picture looks, because every one of them was reported as a look and turned out to
+   * be something else. The pack said sage was visible above the line and named two causes; both were
+   * false — the line is one series, the paint order was already right, and the sage is the resting
+   * node's own ring. What WAS wrong was 34px of band fill below the zero baseline, which nobody had
+   * reported. These are the properties, so the next report does not have to be right about the cause.
+   */
+  const plotEl = document.querySelector('[data-probe="plot"]');
+  const plotSvg = plotEl ? (plotEl.tagName.toLowerCase() === "svg" ? plotEl : plotEl.querySelector("svg")) : null;
+  out.checks.lineVsTopBand = null;
+  out.checks.lineAfterBands = null;
+  out.checks.paintBelowZero = null;
+  if (plotSvg) {
+    const inDefs = (el) => !!el.closest("defs");
+    const paths = [...plotSvg.querySelectorAll("path")].filter((el) => !inDefs(el));
+    const lineEl = paths.find((el) =>
+      (el.getAttribute("stroke") || "").toLowerCase() === "#1c130f" &&
+      (el.getAttribute("fill") || "none") === "none" &&
+      Number(el.getAttribute("stroke-width")) >= 1.6);
+    const bandEls = paths.filter((el) => {
+      const f = (el.getAttribute("fill") || "none").toLowerCase();
+      return f !== "none" && f.indexOf("fadeout") < 0 && f.indexOf("bandfade") < 0;
+    });
+    /* the line is painted AFTER every band — a document-order claim, not an appearance one */
+    if (lineEl && bandEls.length) {
+      const order = [...plotSvg.querySelectorAll("path")];
+      const li = order.indexOf(lineEl);
+      out.checks.lineAfterBands = bandEls.every((b) => order.indexOf(b) < li);
+    }
+    /**
+     * ⚠️ THE TOP BAND'S UPPER EDGE IS COMPARED AS A STRING, NOT AS TEN SAMPLED POINTS. Sampling
+     * with getPointAtLength has to guess which half of a closed area path is the top edge, and at
+     * the extreme right it guesses wrong — my own first probe reported a 47px divergence that was
+     * entirely the probe. The band's d BEGINS with the line's d when the two are one source; that
+     * is exact, cheap, and cannot be satisfied by a coincidence.
+     */
+    if (lineEl && bandEls.length) {
+      const ld = (lineEl.getAttribute("d") || "").trim();
+      const widest = bandEls.reduce((a, b) => (a && a.getBBox().y <= b.getBBox().y ? a : b), null);
+      const bd = widest ? (widest.getAttribute("d") || "").trim() : "";
+      out.checks.lineVsTopBand = ld.length > 0 && bd.indexOf(ld) === 0 ? 0 : null;
+      if (out.checks.lineVsTopBand === null && ld && bd) {
+        /* not one string — fall back to a sampled worst-case so the miss carries a number */
+        let worst = 0;
+        const L = lineEl.getTotalLength();
+        for (let k = 0; k < 10; k++) {
+          const pt = lineEl.getPointAtLength((L * k) / 9);
+          let lo = 0, hi = widest.getTotalLength() / 2, best = null;
+          for (let it = 0; it < 26; it++) {
+            const mid = (lo + hi) / 2;
+            const q = widest.getPointAtLength(mid);
+            best = q;
+            if (Math.abs(q.x - pt.x) < 0.2) break;
+            if (q.x < pt.x) lo = mid; else hi = mid;
+          }
+          if (best) worst = Math.max(worst, Math.abs(best.y - pt.y));
+        }
+        out.checks.lineVsTopBand = Math.round(worst * 100) / 100;
+      }
+    }
+    /**
+     * ⚠️ NOTHING PAINTS BELOW THE ZERO BASELINE, ASSERTED AS A BOX. The pixel proof is the separate
+     * dash-pixels script; this is the form that can run on every probe at every width without a
+     * screenshot, and it fails on the same fault. The baseline is the axis rule at zero; the claim
+     * is that no painted node's own box reaches past it.
+     */
+    const axis = [...plotSvg.querySelectorAll("line")].filter((el) => !inDefs(el))
+      .find((el) => (el.getAttribute("class") || "").indexOf("axis0") >= 0)
+      || [...plotSvg.querySelectorAll("line")].filter((el) => !inDefs(el))
+        .filter((el) => (el.getAttribute("stroke") || "") === "#d8cec2")[0];
+    if (axis) {
+      const zeroY = Number(axis.getAttribute("y1"));
+      let over = 0;
+      for (const el of plotSvg.querySelectorAll("path, rect")) {
+        if (inDefs(el)) continue;
+        if (el.getAttribute("id") === "hit") continue;               /* the transparent hit target */
+        if ((el.getAttribute("fill") || "") === "transparent") continue;
+        const bb = el.getBBox();
+        over = Math.max(over, bb.y + bb.height - zeroY);
+      }
+      out.checks.paintBelowZero = Math.round(over * 10) / 10;
+    }
+  }
+  /**
+   * ⚠️ EVERY BAND OF THE TO-DO RULE PAINTS, AND THEY FILL THE TRACK (v29, Phase 5). Both halves are
+   * needed and they fail differently: a band can be the right width and invisible (a token that does
+   * not resolve in this scope makes the declaration invalid and the element transparent), or opaque
+   * and short (percentages of a total do not add up to a box). Measured before the fix: three of
+   * five bands at rgba(0, 0, 0, 0).
+   */
+  const ruleEl = document.querySelector('[data-probe="todo-rule"]');
+  out.checks.ruleClear = null;
+  out.checks.ruleFill = null;
+  out.checks.ruleBands = null;
+  if (ruleEl) {
+    const track = ruleEl.querySelector(".os-rule, .sbar") || ruleEl.firstElementChild;
+    if (track) {
+      const kids = [...track.children];
+      out.checks.ruleBands = kids.length;
+      out.checks.ruleClear = kids.filter((k) => {
+        const bg = getComputedStyle(k).backgroundColor.replace(/\s/g, "");
+        return bg === "rgba(0,0,0,0)" || bg === "transparent";
+      }).length;
+      /* ⚠️ AGAINST THE TRACK'S CONTENT BOX, NOT ITS BORDER BOX. The track carries a 1px hairline of
+         its own, so a correct rule is 2px short of the border box for a reason that has nothing to
+         do with the bands — a tolerance would have absorbed that and hidden 2px of real shortfall
+         alongside it. */
+      const tcs = getComputedStyle(track);
+      const inner = track.getBoundingClientRect().width
+        - parseFloat(tcs.borderLeftWidth || "0") - parseFloat(tcs.borderRightWidth || "0");
+      const sum = kids.reduce((a, k) => a + k.getBoundingClientRect().width, 0);
+      out.checks.ruleFill = Math.round((sum - inner) * 10) / 10;
+    }
+  }
   /* ⚠️ A TEXT PROBE READS ITS ELEMENT WHETHER OR NOT IT IS VISIBLE, AND THE REF IS WHY.
      v16 puts data-probe-text=card-title on the chart card's h3 inside hdA — which its own shipping
      config sets to display:none, because hdr is b and the stat block hdB takes over. A visible-only
@@ -922,13 +1037,36 @@ const STANDING = [
   { k: "searchCount", why: "exactly one search control on the page", test: (v) => v === 1, want: "1" },
   { k: "illH", why: "the stat illustration has not been squashed", test: (v) => v !== null && v >= 70, want: ">= 70px" },
   { k: "statsVsGreet", why: "the stats sit on the greeting's line", test: (v) => v !== null && Math.abs(v) <= 20, want: "within 20px" },
+  /* ── v29's four ─────────────────────────────────────────────────────────────────────────────── */
+  {
+    k: "lineVsTopBand",
+    why: "the total line IS the top band's edge, and is drawn after every band — one series, one path",
+    test: (v, c) => v !== null && v <= 0.5 && c.lineAfterBands === true,
+    want: "<= 0.5px, line last",
+  },
+  { k: "paintBelowZero", why: "nothing paints below the chart's zero baseline", test: (v) => v !== null && v <= 0.5, want: "<= 0.5px" },
+  { k: "ruleClear", why: "every band of the to-do rule paints — a token that does not resolve here makes it transparent", test: (v) => v === 0, want: "0 transparent" },
+  { k: "ruleFill", why: "the rule's bands fill their track", test: (v) => v !== null && Math.abs(v) <= 3, want: "within 3px" },
+  {
+    k: "brush",
+    why: "the brush handle follows the cursor — monotonic, 1:1, and settling on the week its value implies",
+    test: (v) => !!v && v.backwards === 0 && v.worstLag <= 2 && v.repeats <= 2
+      && v.weeks.p05 === 11 && v.weeks.p50 === 6 && v.weeks.p95 === 4
+      && v.settleErr !== null && v.settleErr <= 1.5,
+    want: "0 backwards · lag <= 2px · 11/6/4 at 5/50/95% · settles on its own value",
+  },
 ];
 
 function diffChecks(app) {
   const m = [];
   for (const g of STANDING) {
     const v = app.checks[g.k];
-    if (!g.test(v)) m.push({ key: "standing", field: g.k, ref: g.want, app: v, why: g.why });
+    if (!g.test(v, app.checks)) {
+      /* an object reading prints as its fields, not as [object Object] — a gate whose failure says
+         nothing about what failed is a gate somebody rebaselines without looking */
+      const shown = v && typeof v === "object" ? JSON.stringify(v) : v;
+      m.push({ key: "standing", field: g.k, ref: g.want, app: shown, why: g.why });
+    }
   }
   if (rgb(app.checks.ground) !== GROUND) {
     m.push({ key: "page", field: "ground", ref: GROUND, app: app.checks.ground });
@@ -945,6 +1083,96 @@ function diffChecks(app) {
     m.push({ key: "page", field: "blendAncestorTransform", app: app.checks.transformedAncestors.join(", ") });
   }
   return m;
+}
+
+/**
+ * ⚠️ THE BRUSH HANDLE FOLLOWS THE CURSOR — the one standing gate that cannot be read from a static
+ * page, because the fault is a RELATIONSHIP BETWEEN FRAMES rather than a property of one.
+ *
+ * The handle's position used to be derived from N and N from the handle, with a Math.round between
+ * them, so the handle snapped to whole-week stops: a reader drags a pixel and the handle either does
+ * not move or jumps a twelfth of the track. A snapshot of that page is indistinguishable from a
+ * correct one — every value in it is right. Only driving the pointer shows it.
+ *
+ * Monotonic AND cursor-tracking, because each catches what the other cannot: a quantised handle is
+ * still monotonic, and a handle that tracked in reverse would still be smooth.
+ */
+async function brushDrag(page) {
+  const box = await page.evaluate(() => {
+    const t = document.querySelector('[data-probe="brush"] .os-bw');
+    if (!t) return null;
+    const r = t.getBoundingClientRect();
+    return { x: r.left, y: r.top + r.height / 2, w: r.width };
+  });
+  if (!box || box.w < 20) return null;
+  const STEPS = 40;
+  const at = (f) => box.x + box.w * f;
+  /**
+   * ⚠️ TWO ANIMATION FRAMES BEFORE EVERY READ, AND THIS IS THE DIFFERENCE BETWEEN MEASURING THE
+   * CONTROL AND MEASURING THE HARNESS. The handle's position is React state; a read taken in the
+   * same task as the pointer move returns the PREVIOUS frame. Without the wait this reported 8 to 10
+   * backward steps and a 7px lag on a handle that is following the cursor exactly — a stale read is
+   * indistinguishable from a control that jitters, which is the fault under test wearing the
+   * probe's clothes. Two rAFs, because one only guarantees the callback ran, not that it painted.
+   *
+   * ⚠️ AND THE LABEL IS SCOPED. `document.querySelector` with a selector LIST returns the first
+   * match in DOCUMENT order, not selector order — this file has been bitten by exactly that once
+   * already, with the app-stage scroller beating the content column for the datum.
+   */
+  const readHandle = () => page.evaluate(() => new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const h = document.querySelector('[data-probe="brush"] .os-bwin');
+      const t = document.querySelector('[data-probe="brush"] .os-bw');
+      const lbl = document.querySelector('.os-ctrls .os-rangelbl');
+      if (!h || !t) { resolve(null); return; }
+      const weeks = lbl ? Number((/(\d+)/.exec(lbl.textContent || "") || [])[1]) : null;
+      resolve({ left: Math.round((h.getBoundingClientRect().left - t.getBoundingClientRect().left) * 100) / 100, weeks });
+    }));
+  }));
+
+  const lefts = [];
+  const cursors = [];
+  const weeksAt = {};
+  await page.mouse.move(at(0.05), box.y);
+  await page.mouse.down();
+  for (let k = 0; k < STEPS; k++) {
+    const f = 0.05 + (0.9 * k) / (STEPS - 1);
+    await page.mouse.move(at(f), box.y);
+    const r = await readHandle();
+    if (!r) { await page.mouse.up(); return null; }
+    lefts.push(r.left);
+    cursors.push(Math.round(box.w * f * 100) / 100);
+    if (k === 0) weeksAt.p05 = r.weeks;
+    if (Math.abs(f - 0.5) < 0.012) weeksAt.p50 = r.weeks;
+    if (k === STEPS - 1) weeksAt.p95 = r.weeks;
+  }
+  await page.mouse.up();
+  const settled = await readHandle();
+
+  let backwards = 0;
+  let worstLag = 0;
+  let repeats = 0;
+  for (let k = 1; k < lefts.length; k++) {
+    const dh = lefts[k] - lefts[k - 1];
+    const dc = cursors[k] - cursors[k - 1];
+    if (dh < -0.5) backwards++;
+    if (Math.abs(dh) < 0.05) repeats++;
+    worstLag = Math.max(worstLag, Math.abs(dh - dc));
+  }
+  /* where the handle SHOULD settle: the boundary the final N implies, as a fraction of the track */
+  const implied = settled && settled.weeks
+    ? Math.round((1 - settled.weeks / 12) * box.w * 100) / 100
+    : null;
+  return {
+    steps: STEPS,
+    backwards,
+    repeats,
+    worstLag: Math.round(worstLag * 100) / 100,
+    weeks: weeksAt,
+    settledLeft: settled ? settled.left : null,
+    settledWeeks: settled ? settled.weeks : null,
+    settleErr: implied === null || !settled ? null : Math.round(Math.abs(settled.left - implied) * 100) / 100,
+  };
 }
 
 /* ── the table ───────────────────────────────────────────────────────────────────────────────── */
@@ -1051,6 +1279,11 @@ try {
      * genuinely the wrong height still fails, which is the test of whether this is a datum or a
      * fudge — and the self-test proves that on every run.
      */
+    /* ⚠️ DRIVEN ON THE PAGE THAT IS STILL OPEN, AND ITS RESULT SURVIVES THE FIT RE-READ BELOW. The
+       ±16px window exists to make two content boxes the same size; a drag's behaviour does not
+       depend on it, and re-driving it on a second page would double the slowest part of the run. */
+    const brush = await brushDrag(appPage);
+
     const rM = refData.probes.main, aM = appData.probes.main;
     const dw = rM && aM ? Math.round(rM.w - aM.w) : 0;
     const dh = rM && aM ? Math.round(rM.h - aM.h) : 0;
@@ -1063,6 +1296,8 @@ try {
       appData.viewportFitted = { dw, dh, width: width + dw, height: HEIGHT + dh };
       await fit.close();
     }
+
+    appData.checks.brush = brush;
 
     const misses = [];
     /* the datum: each side's own `main`. Absent on either side and the comparison falls back to
