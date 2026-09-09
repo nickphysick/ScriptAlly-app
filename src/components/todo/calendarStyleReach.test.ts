@@ -27,7 +27,23 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const here = __dirname;
-const page = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
+/**
+ * ⚠️ THE CALENDAR RENDERS FROM TWO FILES NOW, AND THE LAW IS UNCHANGED BY THAT.
+ *
+ * The board's presentational leaves — the card, the markers, the action mark — moved to
+ * `shared/timeline/boardParts.tsx` so Query Centre can mount the same board. The classes they draw
+ * did not change, so "every class the Calendar renders has a base rule in its own stylesheet" is
+ * the same claim it was; what changed is where "renders" is written. Reading one file would have
+ * silently shrunk the swept population instead — which is precisely what the floor case below
+ * caught, by naming `tl-p` and finding it gone.
+ *
+ * This is a RETARGET, not a weakening: the sweep still requires a base rule for every class, and it
+ * now sees more of them than it did before the move.
+ */
+const page = [
+  readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8"),
+  readFileSync(join(here, "..", "shared", "timeline", "boardParts.tsx"), "utf8"),
+].join("\n");
 const css = readFileSync(join(here, "todoCalendar.css"), "utf8");
 
 /** comments explain what was retired, and naming it is not declaring it */
