@@ -11,6 +11,7 @@ import React from "react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
+import { BAND_KEYS, BAND_LABEL } from "../../lib/chartBands";
 import { QueryStatus } from "../../types";
 import {
   chartX, chartY, lineYAtX, OneScreenChart, PADX, READ_MARGIN, snapIdx, STAGE_SHORT, xLabelEvery,
@@ -83,7 +84,10 @@ describe("the chart card's structure", () => {
     expect(html).toContain('aria-label="Chart frequency"');
     for (const f of ["Daily", "Weekly", "Monthly"]) expect(html).toContain(`>${f}</option>`);
     expect(html).toContain('type="range"');
-    expect(html).toContain('aria-label="Chart range"');
+    /* ⚠️ THE RANGE IS IN WEEKS NOW (v26) — the input carries 4-12 directly instead of a 0-100
+       percentage, so its thumb and the drawn handle read the SAME number. Two mirrored expressions
+       for one position is exactly how the brush came to be inverted. */
+    expect(html).toContain('aria-label="Chart range in weeks"');
     expect(html).toContain('aria-valuetext="Last 8 weeks"'); // the label is the value, spoken
     expect(html).toContain("Last 8 weeks");
     /* ⚠️ the numbers toggle's `aria-pressed` assertion lived here and the control is retired.
@@ -164,29 +168,48 @@ describe("the bands are drawn from the shared state colours, and there are three
    * happen is a fourth fill appearing without a fourth name beside it, or a line that counts
    * something it does not draw.
    */
+  /* ⚠️ RETARGETED OFF THE LEGEND, WHICH WAS A PROXY AND HAS NOW GONE (v26, Phase 5). This counted
+     LEGEND SWATCHES to prove there were three bands — so when the legend was removed the count went
+     to zero and the case failed for a reason that has nothing to do with bands. Worse, it would
+     have gone green on a chart that drew four bands and named three. The bands themselves are what
+     the claim is about, so the bands are what it counts now: `.os-band` paths in the plot. */
   it("⚠️ no fourth band, in either data state — the line is the three bands' sum", () => {
+    /* ⚠️ ASSERTED ON THE VOCABULARY, NOT ON RENDERED PATHS. This repo's specs render to a STRING
+       and there is no DOM, so the plot's `.os-band` paths — whose geometry comes from a measured
+       width — never appear here at all. Counting them would be a check that reads 0 forever and
+       passes only because 0 was written into the expectation. `BAND_KEYS` is what the chart draws
+       from and what a fourth band would have to join. */
+    expect(BAND_KEYS).toHaveLength(3);
+    expect(BAND_KEYS).not.toContain("offer");
     const plain = render(spread);
     expect(plain).not.toContain("--state-offer");
-    expect((plain.match(/class="os-bk"/g) ?? []).length).toBe(3);
     /* the case that USED to produce one: an R&R after a full went out, with no date on the turn */
     const withResidual = render([...spread, q({
       status: QueryStatus.REVISE_RESUBMIT, dateSent: daysAgo(40),
       fullRequestedDate: daysAgo(20), fullSentDate: daysAgo(10),
     })]);
     expect(withResidual).not.toContain("--state-offer");
-    expect((withResidual.match(/class="os-bk"/g) ?? []).length).toBe(3);
   });
 
-  it("the legend names the three bands it draws, and there is no fourth", () => {
+  /* ⚠️ THE LEGEND IS REMOVED (v26, Phase 5) AND THIS CASE NOW ASSERTS ITS ABSENCE — plus the half
+     of its old claim that survives the removal. Four swatches under a chart whose bands are already
+     named where the reader is looking (the tooltip on hover, the strip on every bubble) cost 39.6px
+     at every width, which was the whole of the top row's overshoot.
+     ⚠️ THE NAMES ARE STILL ASSERTED, because they did not go with the legend — `BAND_LABEL` still
+     writes them into the tooltip, and "OVER TO YOU" rather than "Your move" is still the law: a
+     legend names a category, and "Your move" is the imperative the app uses beside an action. */
+  it("the legend is gone, and the band names it used to carry are still the tooltip's", () => {
     const html = render(spread);
-    for (const label of ["Awaiting first response", "Material with the agent", "Over to you"]) {
-      expect(html).toContain(label);
-    }
-    /* ⚠️ "OVER TO YOU", NOT "YOUR MOVE" — a legend names a category; "Your move" is the imperative
-       the app uses beside an action, and it must not leak into a description of a stock. */
-    expect(html).not.toContain("Your move");
-
-    expect((html.match(/class="os-bk"/g) ?? []).length).toBe(3);
+    expect(html).not.toContain('class="os-bandkey"');
+    expect(html).not.toContain('class="os-bk"');
+    /* ⚠️ THE NAMES MOVED, THEY DID NOT GO. They were only in the rendered markup BECAUSE the legend
+       printed them; the tooltip that carries them now renders on hover, which a string render never
+       reaches. `BAND_LABEL` is where they live, and it is the artefact the claim is about. */
+    expect(Object.values(BAND_LABEL)).toEqual(
+      expect.arrayContaining(["Awaiting first response", "Material with the agent", "Over to you"]),
+    );
+    expect(Object.values(BAND_LABEL)).not.toContain("Your move");
+    expect(BAND_KEYS).toHaveLength(3);
   });
 
   /* ⚠️ THE PANEL'S STATUS ROWS RENDER THE COMPONENT, never a local circle. `StatusDot` is the app's

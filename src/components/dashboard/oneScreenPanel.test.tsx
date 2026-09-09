@@ -390,14 +390,14 @@ describe("the bands meet their cards' edges", () => {
      is a SIBLING of the chart rather than a child of it. While it was a child this padding had to
      stand in for two elements' gutters at once and the plot took whatever the legend left — 291px
      against the ref's 308.4, with no padding value that could fix it. */
-  it("the chart's padding lives in its body, and the legend is a sibling rather than a child", () => {
+  /* ⚠️ THE SIBLING HALF OF THIS CASE RETIRED WITH THE LEGEND (v26, Phase 5). It asserted that the
+     legend sat OUTSIDE the chart body — which mattered while there was a legend, because nested it
+     made the body's padding stand in for two elements' gutters and the plot took whatever was left.
+     There is no legend now, so the claim that survives is the padding's, and the absence. */
+  it("the chart's padding lives in its body, and there is no legend inside it", () => {
     expect(blk2(".os-lbody")).toMatch(/padding:\s*10px 22px 4px/);
     const chart = readFileSync(resolve(__dirname, "./OneScreenChart.tsx"), "utf8");
-    const bodyOpen = chart.indexOf('<div className="os-lbody">');
-    const legend = chart.indexOf('className="os-bandkey"');
-    const bodyClose = chart.indexOf("</div>\n\n      {/* §3:", bodyOpen);
-    expect(bodyOpen, "the chart body must exist").toBeGreaterThan(-1);
-    expect(bodyClose, "the chart body must close before the live region").toBeGreaterThan(bodyOpen);
-    expect(legend, "the legend must exist").toBeGreaterThan(bodyClose);
+    expect(chart.indexOf('<div className="os-lbody">'), "the chart body must exist").toBeGreaterThan(-1);
+    expect(chart).not.toContain('className="os-bandkey"');
   });
 });

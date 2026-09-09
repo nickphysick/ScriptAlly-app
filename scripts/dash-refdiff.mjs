@@ -189,7 +189,10 @@ const TYPE_SCALE = [
   ["stat label",      ".stat .lab",          ".os-cl"],
   ["stat figure",     ".stat .fig b",        ".os-cn"],
   ["stat chip",       ".stat .mini",         ".os-cd"],
-  ["legend",          ".legend span",        ".os-bk"],
+  /* ⚠️ THE LEGEND ROW IS RETIRED WITH THE LEGEND (v26, Phase 5). The ref still SHIPS the markup and
+     hides it with `.legend{display:none}`, so its type is still readable there and a type probe
+     would go on comparing a treatment neither page draws. Removing the row is a narrowing of
+     coverage and is recorded as one; what replaced the legend is nothing, deliberately. */
   ["tab",             ".ftabs button",       ".os-ftab"],
   ["tab count",       ".ftabs .n",           ".os-ftabn"],
   ["ticket title",    ".tk .ttl",            ".tkt .ttl"],

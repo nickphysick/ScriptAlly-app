@@ -168,6 +168,39 @@ export const RANGE_STOPS: RangeStop[] = [
 ];
 export const DEFAULT_RANGE_DAYS = 56;
 
+/**
+ * ⚠️ THE BRUSH IS WEEKS NOW, 4 TO 12, AND THE MAPPING IS THE REF'S OWN (v26, Phase 5):
+ *   `weeks = clamp(round((1 - p) * 12), 4, 12)` where p is the pointer's fraction ALONG THE TRACK.
+ *
+ * The handle sits under the cursor and the window runs from the handle to the RIGHT edge, so
+ * dragging left lengthens the range and dragging right shortens it. There is no inverted fraction
+ * anywhere: the one `1 - p` is the window's own geometry — the distance from the handle to the end
+ * — rather than a mirror applied to a value. That distinction is the whole bug it replaces, where
+ * the drawn handle sat at `100 - p` while the input's thumb sat at `p`, so the two were at opposite
+ * ends of the track and the control moved the wrong way under the cursor.
+ *
+ * The ref's own clamp order matters and is preserved: it ROUNDS first and clamps second, so the
+ * bottom of the track saturates at 4 rather than mapping linearly into it. At 5% / 50% / 95% of the
+ * track that gives 11 / 6 / 4 weeks, which is the pack's gate.
+ *
+ * ⚠️ THIS NARROWS THE CHART'S REACH AND THAT IS A REAL LOSS, RECORDED RATHER THAN HIDDEN. The
+ * landmark stops below ran 2 weeks to Everything; 4-12 weeks cannot show a year, and the monthly
+ * grain now has at most three points to draw. `RANGE_STOPS` survives for the keyboard path and its
+ * tests. Widening it is one constant — `BRUSH_WEEKS_MAX` — at the cost of the gate's exact numbers.
+ */
+export const BRUSH_WEEKS_MIN = 4;
+export const BRUSH_WEEKS_MAX = 12;
+export const weeksFromFraction = (p: number): number => {
+  const f = Math.max(0, Math.min(1, p));
+  return Math.max(BRUSH_WEEKS_MIN, Math.min(BRUSH_WEEKS_MAX, Math.round((1 - f) * BRUSH_WEEKS_MAX)));
+};
+/** the inverse, for drawing the handle where the current value says it is */
+export const fractionFromWeeks = (weeks: number): number => {
+  const w = Math.max(BRUSH_WEEKS_MIN, Math.min(BRUSH_WEEKS_MAX, weeks));
+  return 1 - w / BRUSH_WEEKS_MAX;
+};
+export const weeksLabel = (weeks: number): string => `Last ${weeks} weeks`;
+
 /** The slider is continuous but SNAPS, so every position it can rest at means something. */
 export const nearestStop = (v: number): RangeStop =>
   RANGE_STOPS.reduce((a, b) => (Math.abs(b.p - v) < Math.abs(a.p - v) ? b : a));

@@ -29,6 +29,7 @@ import {
   aggregateLedger, awaitingChip, dailyLedger, DEFAULT_RANGE_DAYS,
   defaultFreq, Freq, LedgerPoint, monotonePath, nearestStop, periodLabel, RANGE_STOPS, rangeChip,
   rangeWindow, stopForDays, axisTop, axisTicks,
+  weeksFromFraction, fractionFromWeeks, weeksLabel, BRUSH_WEEKS_MIN, BRUSH_WEEKS_MAX,
 } from "../../lib/oneScreen";
 import { OneScreenPanel } from "./OneScreenPanel";
 import { OneScreenMark } from "./OneScreenMark";
@@ -344,6 +345,21 @@ export const OneScreenChart: React.FC<{
   /* every control change drops the focused point — it indexes into a view about to change length */
   const resetRead = () => { blurPoint(); };
   const stop = stopForDays(rangeDays);
+  /* ⚠️ THE BRUSH IS WEEKS, AND THE HANDLE IS DRAWN FROM THE VALUE rather than from a second
+     expression. The inversion it replaces was exactly two expressions never reconciled: the drawn
+     handle at `100 - p`, the input's thumb at `p`. One derivation, both directions. */
+  const brushWeeks = Math.max(BRUSH_WEEKS_MIN, Math.min(BRUSH_WEEKS_MAX, Math.round(rangeDays / 7)));
+  const handleF = fractionFromWeeks(brushWeeks);
+  const bwRef = useRef<HTMLDivElement | null>(null);
+  const dragging = useRef(false);
+  const setFromPointer = useCallback((clientX: number) => {
+    const el = bwRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    if (r.width <= 0) return;
+    setRangeDays(weeksFromFraction((clientX - r.left) / r.width) * 7);
+    resetRead();
+  }, [resetRead]);
 
   const every = xLabelEvery(view.length, effFreq);
   const lastIdx = view.length - 1;
@@ -412,26 +428,47 @@ export const OneScreenChart: React.FC<{
           {/* ⚠️ THE SHADE IS CARD PAPER AT 62%, NOT A GREY. It has to read as "this part is not on
               show" while the thumbnail stays legible through it — a solid mask would hide the
               excluded history, which is the one thing the control exists to show. */}
-          <div className="os-bw">
+          {/* ⚠️ 1:1 DRAG WITH POINTER CAPTURE — the ref's own handlers. Capture on down means the
+              drag survives the pointer leaving the 150px track, which is most of a real drag;
+              without it the handle stops dead at the edge and the control feels broken exactly
+              where a reader pushes hardest. `pointercancel` clears the flag too: a touch that
+              becomes a scroll fires cancel and never fires up, so a missing cancel leaves the
+              brush armed and the next stray move jumps the range. */}
+          <div
+            className="os-bw"
+            ref={bwRef}
+            onPointerDown={(e) => {
+              dragging.current = true;
+              e.currentTarget.setPointerCapture(e.pointerId);
+              setFromPointer(e.clientX);
+            }}
+            onPointerMove={(e) => { if (dragging.current) setFromPointer(e.clientX); }}
+            onPointerUp={(e) => {
+              dragging.current = false;
+              try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* already released */ }
+            }}
+            onPointerCancel={() => { dragging.current = false; }}
+          >
             <svg viewBox="0 0 230 34" preserveAspectRatio="none" aria-hidden="true">
               {brushAreas.map((a) => (
                 <path key={a.key} d={a.d} fill={STATE_TOKEN[a.key]} />
               ))}
               {brushLine && <path d={brushLine} fill="none" stroke="#1c130f" strokeWidth={1.1} />}
             </svg>
-            <div className="os-bshade" style={{ width: `${100 - stop.p}%` }} />
-            <div className="os-bwin" style={{ left: `${100 - stop.p}%` }} />
-            {/* ⚠️ THE RANGE INPUT SURVIVES, INVISIBLE, OVER THE WHOLE BOX. The ref drags with a
-                pointer and nothing else; a control that cannot be reached from the keyboard is not
-                a control. The picture is the ref's, the operation is the app's. */}
+            {/* the window runs from the handle to the RIGHT edge; the shade is everything before it */}
+            <div className="os-bshade" style={{ width: `${handleF * 100}%` }} />
+            <div className="os-bwin" style={{ left: `${handleF * 100}%` }} />
+            {/* ⚠️ THE RANGE INPUT SURVIVES, INVISIBLE, OVER THE WHOLE BOX — a control that cannot be
+                reached from the keyboard is not a control. It carries WEEKS directly now, so its
+                thumb and the drawn handle read the same number instead of two mirrored ones. */}
             <input
-              type="range" min={0} max={100} step={1} value={stop.p}
-              aria-label="Chart range"
-              aria-valuetext={stop.label}
-              onChange={(e) => { setRangeDays(nearestStop(Number(e.target.value)).days); resetRead(); }}
+              type="range" min={BRUSH_WEEKS_MIN} max={BRUSH_WEEKS_MAX} step={1} value={brushWeeks}
+              aria-label="Chart range in weeks"
+              aria-valuetext={weeksLabel(brushWeeks)}
+              onChange={(e) => { setRangeDays(Number(e.target.value) * 7); resetRead(); }}
             />
           </div>
-          <span className="os-rangelbl">{stop.label}</span>
+          <span className="os-rangelbl">{weeksLabel(brushWeeks)}</span>
         </div>
         </div>
       </div>
@@ -486,12 +523,40 @@ export const OneScreenChart: React.FC<{
                     into its SVG and never gives that class a stroke, so nothing paints — the labels
                     alone are the scale, and that is what ships here. Adding rules would be inventing
                     furniture the design does not draw. */}
+                {/* ⚠️ THE ZERO LABEL SITS ON THE AXIS LINE, AND ZERO GETS NO GRIDLINE — v26. A
+                    gridline at zero draws a second rule a pixel from the baseline, so the foot of
+                    the chart reads as two lines that do not quite meet. The baseline is the rule;
+                    everything above it is a gridline. */}
+                <line
+                  className="os-axis0"
+                  x1={0} x2={W} y1={chartY(0, H, lo, hi)} y2={chartY(0, H, lo, hi)}
+                  stroke="#e0d7cb" strokeWidth={1}
+                />
+                {ticks.filter((t) => t > 0).map((t) => (
+                  <line
+                    key={`g${t}`} className="os-gridline"
+                    x1={0} x2={W} y1={chartY(t, H, lo, hi)} y2={chartY(t, H, lo, hi)}
+                    stroke="#efe7db" strokeWidth={1}
+                  />
+                ))}
                 {ticks.map((t) => (
                   <text key={t} className="os-ylab" x={3} y={chartY(t, H, lo, hi) + 3}>{t}</text>
                 ))}
                 {/* ⚠️ THE STACK REACHES THE LINE. Every band carries a 1px border of its own deeper
                     step — `STATE_ACCENT_TOKEN`, the same key as the fill, so the two cannot fall out
                     of step — which is what separates two adjacent fills of similar value. */}
+                {/* ⚠️ ONE GRADIENT OVER ALL THE BANDS, NOT A GRADIENT FILL PER BAND (v26). Tinting
+                    each fill separately would change the colours the strip and the tooltip name;
+                    a single overlay in the CARD's own colour, transparent at the top and ~85% at
+                    the baseline, fades the whole stack downward and leaves every band's identity
+                    exactly where `STATE_TOKEN` put it. It is drawn AFTER the bands and BEFORE the
+                    line, so the ink line stays crisp through the fade. */}
+                <defs>
+                  <linearGradient id="os-bandfade" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#fffdf9" stopOpacity="0" />
+                    <stop offset="100%" stopColor="#fffdf9" stopOpacity="0.85" />
+                  </linearGradient>
+                </defs>
                 {bandAreas.map((a) => (
                   <path
                     key={a.key}
@@ -502,6 +567,7 @@ export const OneScreenChart: React.FC<{
                     strokeWidth={1}
                   />
                 ))}
+                <rect x={0} y={0} width={W} height={chartY(0, H, lo, hi)} fill="url(#os-bandfade)" pointerEvents="none" />
                 {/* ⚠️ INK, NOT SAGE. The line was sage over a sage band and read as the band's own
                     edge; in ink it is unambiguously a different kind of mark — the total, over the
                     parts. It is the stack's own top edge, so it can never disagree with it. */}
@@ -557,16 +623,12 @@ export const OneScreenChart: React.FC<{
           "Offer or undecided" swatch were built here twice and cut twice; the chart is the three
           bands the design names, and the legend names exactly those. `STATE_TOKEN.offer` is still
           the Query Centre's and the ticket edge's — it is simply not a band. */}
-      {!dayOne && !sparse && (
-        <div className="os-bandkey">
-          {BAND_KEYS.map((k) => (
-            <span className="os-bk" key={k}>
-              <i style={{ background: STATE_TOKEN[k] }} aria-hidden="true" />
-              {BAND_LABEL[k]}
-            </span>
-          ))}
-        </div>
-      )}
+      {/* ⚠️ THE LEGEND IS REMOVED (v26, Phase 5). Four swatches naming four bands, permanently,
+          under a chart whose bands are already labelled where the reader is looking — the tooltip
+          names them on hover and the strip names them on every bubble. It cost 39.6px at every
+          width, which was the whole of the top row's overshoot once the height law landed: a
+          constant miss is the tell for an element rather than a value. `STATE_TOKEN` still owns
+          the colours; nothing about the bands changed. */}
       <ChartTip anchor={tipAnchor}>
         {focusedWeek ? (
           <div className="frame">
