@@ -2,7 +2,7 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<title>ScriptAlly · Dashboard — design ref v26</title>
+<title>ScriptAlly · Dashboard — DESIGN REF v27 (authoritative)</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -374,7 +374,7 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 .navslot .brand{font-family:var(--serif);font-size:22px;color:var(--ink);letter-spacing:0;text-transform:none;margin-bottom:26px}
 .navslot div{margin:12px 0}
 .main{padding:0 0 0 30px;min-width:0}
-@media (max-width:1700px){.hero{grid-template-columns:1fr!important;gap:14px!important}.stats{justify-content:flex-start!important}.grid3{grid-template-columns:300px minmax(0,1fr) 340px!important}
+@media (max-width:1820px){.grid3{grid-template-columns:300px minmax(0,1fr) 340px!important}
  #chartCard .hd{flex-wrap:wrap!important;row-gap:10px}
  #chartCard .hd .sp{display:none}
  #chartCard .hd #hdB{flex:1 0 100%}
@@ -383,7 +383,7 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
  .tgrid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))!important}
  .cv .msg.in{padding-left:22px!important;padding-right:44px!important}
  .cv .msg.out{padding-right:22px!important;padding-left:44px!important}
- .cv .msg.desk{padding-left:26px!important;padding-right:26px!important}.page{padding-left:24px!important;padding-right:24px!important}.brush .bw{width:150px!important}.main{padding-left:22px!important}.stats{gap:30px!important}.stat .ill{width:96px!important;height:96px!important}}
+ .cv .msg.desk{padding-left:26px!important;padding-right:26px!important}.page{padding-left:24px!important;padding-right:24px!important}.brush .bw{width:150px!important}.main{padding-left:22px!important}}
 .grid3{display:grid;grid-template-columns:352px 1fr 420px;gap:22px;align-items:stretch;min-height:calc(100vh - 176px)}
 .col.mid > .wrapc{flex:0 0 auto;display:flex;flex-direction:column}
 .col.mid > .wrapc > #chartCard{height:clamp(400px,42vh,560px);display:flex;flex-direction:column}
@@ -588,20 +588,21 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 .page2 .hero .sub2line{grid-column:1;grid-row:2}
 .page2 .hero .stats{grid-column:2;grid-row:1 / span 2;align-self:center;align-items:center;position:relative;top:-4px}
 .page2 .hero .hgreet{min-width:0}
-.page2 .hero h1{font-size:clamp(30px,2.35vw,44px);margin:0;white-space:nowrap}
+.page2 .hero h1{font-size:clamp(34px,2.3vw,46px);margin:0;white-space:nowrap}
 .page2 .hero .sub2line{margin:0;font-size:clamp(14px,0.9vw,16.5px);white-space:nowrap}
-.page2 .hero .stats{justify-content:space-between;gap:clamp(10px,1.2vw,30px);width:100%}
+.page2 .hero .stats{justify-content:space-between;gap:clamp(12px,1.1vw,30px);width:100%}
 .page2 .hero .stat{gap:clamp(8px,0.85vw,18px);flex:0 1 auto;min-width:0}
-.page2 .hero .stat .ill{width:clamp(58px,5.1vw,104px);height:clamp(58px,5.1vw,104px)}
-.page2 .hero .stat .lab{font-size:clamp(12.5px,0.82vw,16.5px);margin-bottom:3px;white-space:nowrap}
+.page2 .hero .stat .ill{width:clamp(64px,4.6vw,104px);height:clamp(64px,4.6vw,104px)}
+.page2 .hero .stat .lab{font-size:clamp(13px,0.8vw,16.5px);margin-bottom:3px;white-space:nowrap}
 .page2 .hero .stat .fig{gap:8px;margin:0}
-.page2 .hero .stat .fig b{font-size:clamp(22px,1.55vw,33px)}
+.page2 .hero .stat .fig b{font-size:clamp(23px,1.5vw,33px)}
 .page2 .hero .stat .mini{font-size:clamp(10px,0.66vw,13px);padding:3px clamp(6px,0.5vw,10px)}
-@media (max-width:1750px){
-  /* the row can no longer hold both — the stats take their own row, full width */
-  .page2 .hero{grid-template-columns:1fr!important;row-gap:16px}
-  .page2 .hero .stats{grid-column:1;grid-row:3;justify-content:space-between;width:100%}
-  .page2 .hero .stat .ill{width:clamp(72px,5.6vw,92px);height:clamp(72px,5.6vw,92px)}
+/* the long pill text is what stops the row fitting; it shortens before anything shrinks */
+.stat .mini .long{display:inline}
+.stat .mini .short{display:none}
+@media (max-width:1980px){
+  .stat .mini .long{display:none}
+  .stat .mini .short{display:inline}
 }
 
 /* ===== v23 ===== */
@@ -666,7 +667,7 @@ body.bw-full .cv .msg .b .qa{display:none!important}
 .mscard .by .av{width:44px;height:44px}
 .mscard .by b{font-size:19px}
 .mscard .rule{margin:12px auto}
-@media (max-width:1700px){.toprow{grid-template-columns:270px minmax(0,1fr)!important}}
+@media (max-width:1820px){.toprow{grid-template-columns:280px minmax(0,1fr)!important}}
 
 /* ===== full-width messages ===== */
 body.bw-full .cv .msg{padding-left:0!important;padding-right:0!important}
@@ -956,7 +957,7 @@ body.ac-rail #actCard .foot{padding-left:2px;padding-right:2px}
 .spark{width:100%;height:28px;display:block;margin-top:8px}
 </style>
 </head>
-<body>
+<body data-scriptally-ref="dashboard-cappuccino-v27">
 <div class="page"><div class="shell"><div class="navslot"><div class="brand">ScriptAlly</div><div>Locked nav — not redrawn</div><div>Dashboard</div><div>Queries</div><div>Agents</div><div>Materials</div><div>Tasks</div><div>Account</div></div><div class="main">
 
 <div class="topbar" data-probe="topbar">
@@ -970,9 +971,9 @@ body.ac-rail #actCard .foot{padding-left:2px;padding-right:2px}
   <h1 data-probe-text="greeting">Hello, Bethany</h1>
   <p class="sub2line" data-probe-text="subtitle">What's on your desk today?</p>
   <div class="stats" data-probe="stats">
-    <div class="stat"><div class="ill" id="ill1"></div><div><div class="lab">Queries sent</div><div class="fig"><b>21</b><span class="mini"><svg viewBox="0 0 10 10"><path d="M5 8V2M2 5l3-3 3 3"/></svg>5 this week</span></div></div></div>
-    <div class="stat"><div class="ill" id="ill2"></div><div><div class="lab">Agents on file</div><div class="fig"><b>16</b><span class="mini plain">11 queried · 5 idle</span></div></div></div>
-    <div class="stat"><div class="ill" id="ill3"></div><div><div class="lab">Responses</div><div class="fig"><b>12</b><span class="mini">57% response rate</span></div></div></div>
+    <div class="stat" data-probe="stat-card"><div class="ill" data-probe="stat-illustration" id="ill1"></div><div><div class="lab">Queries sent</div><div class="fig"><b>21</b><span class="mini"><svg viewBox="0 0 10 10"><path d="M5 8V2M2 5l3-3 3 3"/></svg><span class="long">5 this week</span><span class="short">5</span></span></div></div></div>
+    <div class="stat"><div class="ill" id="ill2"></div><div><div class="lab">Agents on file</div><div class="fig"><b>16</b><span class="mini plain"><span class="long">11 queried · 5 idle</span><span class="short">5 idle</span></span></div></div></div>
+    <div class="stat"><div class="ill" id="ill3"></div><div><div class="lab">Responses</div><div class="fig"><b>12</b><span class="mini"><span class="long">57% response rate</span><span class="short">57%</span></span></div></div></div>
   </div>
 </div>
 
@@ -1174,7 +1175,7 @@ function renderChart(){
   const area=(top,bot)=>mono(pts(top))+mono(pts(bot).reverse()).replace(/^M/,'L')+'Z';
   const zero=D.map(()=>0), c1=D.map(r=>r[0]), c2=D.map(r=>r[0]+r[1]), c3=D.map(r=>r[0]+r[1]+r[2]);
   let s=`<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9dfd5" stop-opacity=".9"/><stop offset="1" stop-color="#d9dfd5" stop-opacity="0"/></linearGradient>
-    <linearGradient id="fadeout" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fdfbf7" stop-opacity="0"/><stop offset=".55" stop-color="#fdfbf7" stop-opacity=".35"/><stop offset="1" stop-color="#fdfbf7" stop-opacity=".85"/></linearGradient></defs>`;
+    <linearGradient id="fadeout" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fdfbf7" stop-opacity="0"/><stop offset=".6" stop-color="#fdfbf7" stop-opacity=".18"/><stop offset="1" stop-color="#fdfbf7" stop-opacity=".5"/></linearGradient></defs>`;
   // y ticks: top & bottom only, like current
   const nice=v=>{const st=v<=12?2:v<=30?4:v<=60?10:20;return Math.ceil(v/st)*st};
   const top=nice(Math.max(...tot)); const ticks=[0,top/2,top].filter((v,i,a)=>a.indexOf(v)===i);
@@ -1182,11 +1183,11 @@ function renderChart(){
     s+=`<text class="axis" x="${L-10}" y="${y(v)+(v===0?4:4)}" text-anchor="end">${v}</text>`});
   s+=`<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="#d8cec2" stroke-width="1"/>`;
   if(opt.bands==='1'){
-    s+=`<path d="${area(c1,zero)}" fill="#f7efe3" stroke="#e6d6bf" stroke-width="1"/>`;
-    s+=`<path d="${area(c2,c1)}" fill="#e0e5dd" stroke="#b9c6b4" stroke-width="1"/>`;
-    s+=`<path d="${area(c3,c2)}" fill="#f5e6df" stroke="#e8c8bc" stroke-width="1"/>`;
+    s+=`<path d="${area(c1,zero)}" fill="#f7efe3" stroke="#dcc7a4" stroke-width="1.2"/>`;
+    s+=`<path d="${area(c2,c1)}" fill="#e0e5dd"stroke="#a9baa4"stroke-width="1.2"/>`;
+    s+=`<path d="${area(c3,c2)}" fill="#f5e6df" stroke="#dcb2a2" stroke-width="1.2"/>`;
     if(opt.slate==='1'&&D.some(r=>r[3]>0)) s+=`<path d="${area(tot,c3)}" fill="#d7e0e8" stroke="#adc2d2" stroke-width="1"/>`;
-    else s+=`<path d="${area(tot,c3)}" fill="#f5e6df" stroke="#e8c8bc" stroke-width="1"/>`;
+    else s+=`<path d="${area(tot,c3)}" fill="#f5e6df" stroke="#dcb2a2" stroke-width="1.2"/>`;
   }else{
     s+=`<path d="${area(tot,zero)}" fill="url(#g)"/>`;
   }

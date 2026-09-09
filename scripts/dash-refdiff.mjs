@@ -38,13 +38,17 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const REF = join(ROOT, "design-refs", "dashboard-cappuccino-v26.html");
+const REF = join(ROOT, "design-refs", "dashboard-cappuccino-v27.html");
 
 const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
 const SELF_TEST = argv.includes("--self-test");
 const OUT = resolve(ROOT, flag("--out", "run-artifacts/dash-refdiff.json"));
-const WIDTHS = flag("--widths", "1536,1920,2520").split(",").map(Number);
+/* ⚠️ 1710 IS IN THE DEFAULT SET BECAUSE IT IS WHERE NICK WORKS, and nothing had ever measured it.
+   Two of v27's three reported faults appear only there: the chart header stacked at ≤1700 while
+   the stats stacked at ≤1750, so 1701–1750 was a band neither rule covered. A width nobody
+   measures is a width nobody's rules are written for. */
+const WIDTHS = flag("--widths", "1536,1710,1920,2520").split(",").map(Number);
 const HEIGHT = 1456;
 const APP = process.env.SA_REFDIFF_APP_URL || "http://127.0.0.1:4173";
 
@@ -68,6 +72,10 @@ const APP = process.env.SA_REFDIFF_APP_URL || "http://127.0.0.1:4173";
    `search`, because v26 puts a 620x50 search field where the breadcrumb row was. */
 const PROBES = [
   "main", "topbar", "search", "grid", "hero", "stats", "toprow",
+  /* v27 adds the two the stats row is actually judged on — a stat's whole box and its illustration.
+     The `stats` probe is the ROW, and a row's box is identical whether its illustrations are 104px
+     or 58px, which is exactly the squash the pack is trying to gate against. */
+  "stat-card", "stat-illustration",
   "manuscript-card", "chart-card", "plot", "brush",
   "todo-card", "todo-rule",
   "activity-card", "feed",
@@ -154,6 +162,8 @@ const ANCHOR = {
      the fact, which `span` is exactly the anchor for */
   topbar: "span", search: "span",
   grid: "span", hero: "span", stats: "span", toprow: "span",
+  /* both sit at the LEFT end of the stats row, so their left inset and size are the facts */
+  "stat-card": "left", "stat-illustration": "left",
   /* the tile is the only fixed track in the top row; everything beside it is elastic */
   "manuscript-card": "left",
   "chart-card": "span", plot: "span", brush: "right",
@@ -734,7 +744,7 @@ function table(result) {
 /* ── run ─────────────────────────────────────────────────────────────────────────────────────── */
 
 const browser = await chromium.launch();
-const result = { when: new Date().toISOString(), ref: "design-refs/dashboard-cappuccino-v26.html", app: APP, widths: WIDTHS, byWidth: {}, total: 0 };
+const result = { when: new Date().toISOString(), ref: "design-refs/dashboard-cappuccino-v27.html", app: APP, widths: WIDTHS, byWidth: {}, total: 0 };
 let selfTestSaw = null;
 
 try {
