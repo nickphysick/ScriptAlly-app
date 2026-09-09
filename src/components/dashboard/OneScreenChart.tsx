@@ -626,20 +626,41 @@ export const OneScreenChart: React.FC<{
                     the baseline, fades the whole stack downward and leaves every band's identity
                     exactly where `STATE_TOKEN` put it. It is drawn AFTER the bands and BEFORE the
                     line, so the ink line stays crisp through the fade. */}
+                {/**
+                  * ⚠️ A MASK, NOT AN OVERLAY (v30, Phase 5) — ref `fadegrad` + `fademask`.
+                  *
+                  * The old form laid a card-coloured rect over the stack at up to 50% opacity. That
+                  * is a WASH: it tints every band toward the paper, so the fills lose their identity
+                  * before they lose their weight, and at the foot the three colours converge on one.
+                  * A mask removes the band instead of covering it, so what shows through at the
+                  * baseline is the card itself and the colours stay themselves all the way down.
+                  *
+                  * ⚠️ `userSpaceOnUse`, FROM THE PLOT TOP TO `y(0)`. In the default objectBounding
+                  * box the gradient would resolve against each masked shape's own bbox, so the three
+                  * bands — which have three different heights — would each fade over their own
+                  * extent and the fade would step at every band boundary. The whole point is one
+                  * gradient over the plot.
+                  *
+                  * ⚠️ AND ONLY THE BANDS ARE MASKED. The line, the markers and the axis sit outside
+                  * the group, so the ink stays at full strength through a fade that is doing its
+                  * work behind it — which is what the overlay could not do, because a rect painted
+                  * over everything beneath it.
+                  */}
                 <defs>
-                  <linearGradient id="os-bandfade" x1="0" y1="0" x2="0" y2="1">
-                    {/* ⚠️ THE FADE WAS WASHING THE BANDS OUT UNTIL ONLY THE SAND READ (v27, Phase 6).
-                        It ran to 0.85 at the baseline, which is most of the way to the card's own
-                        paper — so the two lighter fills disappeared into it and the chart stopped
-                        being three bands. Half that, with a stop at 0.6 to keep the falloff gentle
-                        rather than linear: transparent at the top, 18% at six tenths, 50% at the
-                        foot. */}
-                    <stop offset="0%" stopColor="#fffdf9" stopOpacity="0" />
-                    <stop offset="60%" stopColor="#fffdf9" stopOpacity="0.18" />
-                    <stop offset="100%" stopColor="#fffdf9" stopOpacity="0.5" />
+                  <linearGradient
+                    id="os-fadegrad" gradientUnits="userSpaceOnUse"
+                    x1={0} x2={0} y1={0} y2={chartY(0, H, lo, hi)}
+                  >
+                    <stop offset="0" stopColor="#ffffff" />
+                    <stop offset="0.55" stopColor="#e8e8e8" />
+                    <stop offset="1" stopColor="#4d4d4d" />
                   </linearGradient>
+                  <mask id="os-fademask" maskUnits="userSpaceOnUse" x={0} y={0} width={W} height={chartY(0, H, lo, hi)}>
+                    <rect x={0} y={0} width={W} height={chartY(0, H, lo, hi)} fill="url(#os-fadegrad)" />
+                  </mask>
                 </defs>
-                {bandAreas.map((a) => (
+                <g mask="url(#os-fademask)">
+                {bandAreas.map((a, i) => (
                   <path
                     key={a.key}
                     className="os-band"
@@ -649,16 +670,28 @@ export const OneScreenChart: React.FC<{
                        over the stack the `-deep` borders stopped separating two adjacent fills of
                        similar value — at 1710 the sand read and the other two did not. Still a
                        token keyed the same as the fill, so the two cannot fall out of step. */
-                    stroke={STATE_LINE_TOKEN[a.key]}
-                    strokeWidth={1.2}
+                    /**
+                     * ⚠️ THE TOPMOST BAND DOES NOT STROKE (v30, Phase 6). `bandAreas` is painted
+                     * back to front, so index 0 is the WIDEST stack — its upper edge is the total,
+                     * which the ink line already draws. Two strokes on one boundary is what makes a
+                     * sliver possible at any subpixel offset, and the two have different joins: the
+                     * line is round, a band's is miter, so at a sharp peak the thinner band stroke
+                     * can spike past the thicker line's cap. Nothing was measured escaping — this
+                     * removes the possibility rather than re-arguing the measurement.
+                     *
+                     * The bands beneath keep theirs, because THEIR upper edge is an internal
+                     * boundary that nothing else draws.
+                     */
+                    stroke={i === 0 ? "none" : STATE_LINE_TOKEN[a.key]}
+                    strokeWidth={i === 0 ? undefined : 1.2}
                   />
                 ))}
-                {/* ⚠️ THIS RECT ALREADY STOPPED AT THE BASELINE, AND THAT WAS CHECKED RATHER THAN
-                    ASSUMED (v29, Phase 4). The pack named it as the thing bleeding below zero; it
-                    was the BANDS, which closed at the SVG's foot. `height` is `chartY(0)` and has
-                    been — do not "fix" it to `H` to match the bands' old shape, and do not read the
-                    fact that it was suspected as evidence it was ever wrong. */}
-                <rect x={0} y={0} width={W} height={chartY(0, H, lo, hi)} fill="url(#os-bandfade)" pointerEvents="none" />
+                </g>
+                {/* ⚠️ THE OVERLAY RECT IS DELETED WITH THE MECHANISM IT WAS (v30, Phase 5). It was correct —
+                    it stopped at `chartY(0)` and v29 proved that at the pixels — and it is gone
+                    anyway, because a rect painted OVER the bands is a wash rather than a fade. The
+                    mask above does the same job by removing the band instead of tinting it. Its
+                    rules go with it: nothing declares `os-bandfade` any more. */}
                 {/* ⚠️ INK, NOT SAGE. The line was sage over a sage band and read as the band's own
                     edge; in ink it is unambiguously a different kind of mark — the total, over the
                     parts. It is the stack's own top edge, so it can never disagree with it. */}
@@ -679,7 +712,12 @@ export const OneScreenChart: React.FC<{
                 {lastIdx >= 0 && pts[lastIdx] && (
                   <circle
                     cx={pts[lastIdx][0].toFixed(1)} cy={pts[lastIdx][1].toFixed(1)}
-                    r={4} fill="#fdfaf5" stroke="#8a9e88" strokeWidth={2}
+                    /* ⚠️ INK, NOT SAGE (v30, Phase 6). The node marks where the ink line ends, so its ring is the
+                       line's own colour — a sage ring on a black line is a second mark claiming to be
+                       part of the first. It is also what a pixel sweep above the line kept finding: the
+                       only non-card colour up there was this ring, correctly drawn, at the one x where
+                       it sits. Matching the line removes the question. */
+                    r={4} fill="#fdfaf5" stroke="#1c130f" strokeWidth={2}
                   />
                 )}
                 {/* crosshair + black node while a week is focused */}
