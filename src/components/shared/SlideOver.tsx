@@ -35,6 +35,7 @@
  * be told.
  */
 import React from "react";
+import { createPortal } from "react-dom";
 import "./slideOver.css";
 
 export interface SlideOverProps {
@@ -66,7 +67,53 @@ export const SlideOver: React.FC<SlideOverProps> = ({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  return (
+  /**
+   * ⚠️ THE DRAWER IS PORTALLED TO `document.body`, AND THE REASON IS MEASURED (v30, Phase 4).
+   *
+   * `position: fixed` does not escape a stacking context — it escapes SCROLLING. Rendered in place,
+   * this drawer sat inside whatever card opened it, and on the dashboard that card is
+   * `.os-card { position: relative; z-index: 1 }` — the shadow fix from an earlier pack, which gives
+   * every card its own context so a card casts OVER its neighbours instead of under them. Inside
+   * one, this drawer's `z-index` is only ever compared with that card's own children: 9001 against
+   * a sibling card's 1 is a comparison that never happens.
+   *
+   * Measured on the dashboard before the portal, with the drawer open: exactly ONE stacking context
+   * between it and `<body>` — `div.os-card.os-lift.os-tasks`, `position: relative + z-index: 1` —
+   * and `document.elementFromPoint` at the drawer's own centre returning `div.os-bubsay`. An
+   * activity-feed bubble was painting over the drawer, because the activity card is a later sibling
+   * at the same z-index and document order decides.
+   *
+   * ⚠️ AND THE PORTAL IS THE FIX RATHER THAN A BIGGER NUMBER. Raising the z-index inside a trapped
+   * context changes nothing at all; that is what makes this a structural fault rather than an
+   * ordering one. `body.hasdrawer` below is belt and braces, not the mechanism.
+   *
+   * ⚠️ IT IS SAFE FOR THE OTHER TWO MOUNTS, CHECKED RATHER THAN ASSUMED. Every `.slo` rule in the
+   * app starts with `.slo` — no selector reaches it through an ancestor — so no styling depends on
+   * where it sits, and React portals carry context through, so `TaskPane`'s published session
+   * context is unaffected.
+   */
+  React.useEffect(() => {
+    if (!open) return undefined;
+    document.body.classList.add("hasdrawer");
+    return () => { document.body.classList.remove("hasdrawer"); };
+  }, [open]);
+
+  /**
+   * ⚠️ THE PORTAL FALLS BACK TO RENDERING IN PLACE WHEN THERE IS NO `body` TO PORTAL INTO, and that
+   * is not a nicety — it is what keeps this component testable in THIS repo (v30, Phase 4).
+   *
+   * `vitest.config.ts` is `environment: "node"`: there is no jsdom, and every component spec here
+   * renders through `renderToStaticMarkup` and asserts against the HTML string. `createPortal` has
+   * no server rendering — it emits NOTHING — so portalling unconditionally turned eight assertions
+   * across three files into `expected '' to contain …`, including the Agents drawer's read/edit
+   * field-parity locks, which are substantive coverage rather than shape checks.
+   *
+   * The markup is identical either way; only its PARENT differs, and the parent is exactly what the
+   * rendered-page gate checks (`dash-drawer-v30.mjs` asserts the portal and the hit test in a real
+   * browser). So the string locks keep asserting what they were written for, and the browser always
+   * gets the portal.
+   */
+  const tree = (
     <>
       {/* ⚠️ A BUTTON, NOT A DIV. The scrim is a way to close the drawer, so it is a control and the
           keyboard must reach it; a div with an onClick is a dismissal only a mouse can find. */}
@@ -83,6 +130,7 @@ export const SlideOver: React.FC<SlideOverProps> = ({
           reader tabbing into something they cannot see. */}
       <aside
         className={fullBleedBelowMd ? "slo slo--bleed" : "slo"}
+        data-probe="drawer"
         data-on={open ? "true" : "false"}
         aria-hidden={!open}
         aria-label={label}
@@ -92,4 +140,5 @@ export const SlideOver: React.FC<SlideOverProps> = ({
       </aside>
     </>
   );
+  return typeof document !== "undefined" && document.body ? createPortal(tree, document.body) : tree;
 };

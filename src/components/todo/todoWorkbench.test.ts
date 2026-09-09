@@ -23,6 +23,8 @@ const shell = readFileSync(join(here, "..", "shell", "AppShell.tsx"), "utf8");
 // Shell follow-up P3: TodoShell is deleted; todoShell.css survives TRIMMED (the chip bench +
 // Pro sticker + their tokens, relocated to the page body).
 const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
+/* the shared drawer's own sheet — the ask must outrank whatever it interrupts */
+const sloCss = readFileSync(join(here, "..", "shared", "slideOver.css"), "utf8");
 
 /* ⚠️ ON DECLARATIONS, NOT RAW TEXT — a deletion is explained by naming what it replaced, so a
    negative asserted over the raw sheet fails on a correct file that documents itself. */
@@ -352,7 +354,17 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
     const scope = page + writer;
     expect((scope.match(/await confirmAsk\(/g) ?? []).length).toBe(3); // quick-✓ duplicate · composer discard · delete-note/task confirm
     expect((flow.match(/await confirmAsk\(/g) ?? []).length).toBe(3); // exit guard + staged + quick guards
-    expect(rule(".tdb-askwrap")).toContain("z-index: 90"); // above the flow (50) + toast (60) + modal (70)
+    /* ⚠️ THE CLAIM IS "ABOVE EVERYTHING IT BLOCKS", NOT A NUMBER (v30, Phase 4). This pinned 90 and
+       went red when the drawer moved to 9001 and the ask had to follow it — a lock failing on the
+       edit that kept its own law true. It asserts the RELATION now: the confirm outranks the toast
+       and the drawer, both read from their own rules, so the three can be renumbered together and
+       only a genuine inversion goes red. */
+    const zOf = (sel: string) => Number((/z-index:\s*(\d+)/.exec(rule(sel)) ?? [])[1]);
+    const askZ = zOf(".tdb-askwrap");
+    expect(askZ, "the ask must state a z-index").toBeGreaterThan(0);
+    expect(askZ, "the ask sits above the toast").toBeGreaterThan(zOf(".tdb-toast"));
+    expect(askZ, "the ask sits above the drawer it interrupts").toBeGreaterThan(
+      Number((/z-index:\s*(\d+)/.exec(sloCss.slice(sloCss.indexOf(".slo {"))) ?? [])[1]));
     expect(page).toContain("{confirmAskNode}");
     expect(flow).toContain("{confirmAskNode}");
   });

@@ -585,7 +585,8 @@
 .tpn .ab.quiet:hover { background:#f5f2ee; }
 .tpn .ab.go { background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-weight:600; }
 .tpn .ab.go:hover { background:#efd5ca; }
-.tpn .dlg { position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(40,20,14,0.35); }
+/* ⚠️ 9100, for the same reason as `.tdb-askwrap` — see slideOver.css's ladder. */
+.tpn .dlg { position:fixed;inset:0;z-index:9100;display:none;align-items:center;justify-content:center;background:rgba(40,20,14,0.35); }
 .tpn .dlg.open { display:flex; }
 .tpn .dlg-card { width:380px;background:var(--white);border:1px solid var(--edge);border-radius:13px;box-shadow:0 20px 60px rgba(40,20,14,0.3);padding:20px 22px; }
 .tpn .dlg-card h3 { font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink2); }
