@@ -1776,7 +1776,14 @@
    band's own height was within tolerance the whole time, which is why the diff blamed the badge.
    `min-height` keeps the floor the note argues for: an empty band is still 51px. */
 .os-ahead, .os-th2 {
-  height: auto; min-height: 51px; padding: 14px 20px 4px; gap: 10px;
+  /* ⚠️ THE FLOOR IS 44px, NOT 51, AND A FLOOR THAT BINDS IS NOT A FLOOR. 51 was the v22 band's
+     stated HEIGHT, kept as a minimum when the band went content-driven — but the ref's band is
+     50.2 (14px of air, a 32.2px heading, 4px), so 51 bound on every card and every band ran 0.8px
+     tall. Small, and it pushed the to-do rule over the edge tolerance at 1536 while the card
+     itself stayed just inside it — so the diff reported the rule and not the band.
+     44 is the honest minimum: the padding plus the 26px tile, i.e. a band with nothing in it but
+     its mark. It never binds on a band that has a heading, which is the point. */
+  height: auto; min-height: 44px; padding: 14px 20px 4px; gap: 10px;
   box-sizing: border-box; flex: none;
 }
 

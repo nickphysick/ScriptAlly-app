@@ -120,7 +120,15 @@ describe("the bands are one geometry, coloured by purpose", () => {
        The numbers are decided against the ref by `scripts/dash-refdiff.mjs` and pinning them here
        would go red on every retune of something this lock has no opinion about. */
     expect(grouped![1]).toMatch(/padding:\s*\d+px/);
-    expect(grouped![1]).toContain("min-height: 51px");
+    /* ⚠️ A FLOOR, AND ITS VALUE IS DELIBERATELY BELOW THE BAND'S NATURAL HEIGHT (v26). It was 51 —
+       the v22 band's stated height, kept as a minimum when the band went content-driven — and the
+       ref's band is 50.2, so it BOUND on every card and every band ran 0.8px tall. A floor that
+       binds is not a floor. 44 is the honest one: the padding plus the 26px mark, i.e. a band with
+       nothing in it but its tile. The claim is that a floor exists and does not bind, so the
+       assertion is on the relationship rather than on the number. */
+    const floor = Number(/min-height:\s*(\d+)px/.exec(grouped![1])?.[1]);
+    expect(floor, "the shared band must state a floor").toBeGreaterThan(0);
+    expect(floor, "a floor above the band's natural 50.2px height binds on every card").toBeLessThan(50);
     expect(grouped![1]).toContain("box-sizing: border-box");
     /* and neither may state a competing padding elsewhere — see the base-rule case below */
   });
@@ -138,7 +146,7 @@ describe("the bands are one geometry, coloured by purpose", () => {
      rows below the breakpoint and one above it. */
   it("⚠️ the chart's band is the one that WRAPS, and the wrap is scoped rather than a loosened default", () => {
     const shared = /(?:^|\n)\.os-ahead,\s*\.os-th2\s*\{([^}]*)\}/m.exec(bare)![1];
-    expect(shared).toContain("min-height: 51px");     // the floor all three share
+    expect(shared).toMatch(/min-height:\s*\d+px/);     // the floor all three share
     expect(shared).not.toMatch(/flex-wrap:\s*wrap/); // and none of them wraps by default
     const lead = /\.os-lead > \.os-ahead\s*\{([^}]*)\}/.exec(bare);
     expect(lead, "the chart's band override must exist").not.toBeNull();
@@ -248,7 +256,7 @@ describe("one band geometry, declared", () => {
   it("⚠️ the band's air is the ref's, and the 51px survives as a FLOOR", () => {
     const m = /\.os-ahead,\s*\.os-th2\s*\{([^}]*)\}/.exec(bare);
     expect(m, "the two bands must share ONE geometry rule").not.toBeNull();
-    expect(m![1]).toContain("min-height: 51px");
+    expect(m![1]).toMatch(/min-height:\s*\d+px/);
     expect(m![1]).toContain("box-sizing: border-box");
     /* asymmetric: more air above the contents than below, which is what puts them high in the band */
     const pad = /padding:\s*(\d+)px\s+\d+px\s+(\d+)px/.exec(m![1]);

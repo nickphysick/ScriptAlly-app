@@ -117,6 +117,14 @@ const ALLOW = [
          "each run, not typed. A larger gap than the names account for still counts.",
   },
   {
+    /* ⚠️ I REMOVED THIS ONCE, ON THE GROUND THAT IT HAD GONE DORMANT, AND THE MEASUREMENT PUT IT
+       STRAIGHT BACK. The run reported "+1 allowed" at every width and I read that as one allowance
+       firing three times; it is one allowance firing at EACH width and they are DIFFERENT ones.
+       Above 1750 the hero is two columns, so the stats begin where the greeting ends and theirs is
+       the allowance; at 1536 the hero stacks, the stats start at the column edge and are exact, and
+       the brush's is. Deleting it turned 0 misses into 1 within a minute — which is the cheapest
+       possible demonstration that a table like this is read by running it, not by reasoning about
+       it. */
     key: "brush", field: "xr", max: 90,
     why: "the ref's frequency control is a two-button chip pair (Weekly | Monthly) at 146px; ours " +
          "is a native select, because this app offers THREE frequencies — Daily, Weekly, Monthly. " +
