@@ -172,13 +172,26 @@ describe("the card's CSS", () => {
      and v22 at 28, and the geometry that decides which is right is measured against the ref by
      `scripts/dash-refdiff.mjs`, not read out of this file. Asserting a gap here would go red on every
      retune of a value this lock has no opinion about. */
-  it("the hero is the ref's two-track grid, and the greeting sizes to its content", () => {
+  /* ⚠️ TWO COLUMNS AND TWO ROWS NOW (v26, Phase 3). The law this case has always guarded is that
+     the stats have a TRACK OF THEIR OWN rather than taking "whatever is left" — so their left edge
+     does not move with the writer's name. That is unchanged. What v26 adds is a second ROW: the
+     greeting is row 1, the question is row 2, and the stats SPAN BOTH and centre against the pair.
+     ⚠️ THE SPAN IS THE HALF WORTH ASSERTING, because the pack states it twice and contradicts
+     itself — first "row 1 / column 2 … pinned to the heading's row", then "span both hero rows …
+     not pinned to the heading's row". The ref settles it (`grid-row: 1 / span 2`) and so does the
+     pack's own gate, which requires the stats block to be taller than the greeting block. */
+  it("the hero is a two-row grid, and the stats span both rows in a track of their own", () => {
     const g = rule(".os-greet");
     expect(g).toContain("display: grid");
-    expect(g).toContain("grid-template-columns: auto 1fr");
-    expect(g).toMatch(/gap:\s*\d+px/);
+    expect(g).toContain("grid-template-columns: auto minmax(0, 1fr)");
+    expect(g).toContain("grid-template-rows: auto auto");
     expect(g).toContain("align-items: center");
-    expect(rule(".os-greet .os-gl")).toContain("flex: 0 0 auto");
+    const stats = rule(".os-greet .os-counters");
+    expect(stats).toContain("grid-column: 2");
+    expect(stats).toContain("grid-row: 1 / span 2");
+    expect(stats).toContain("align-self: center");
+    /* the optical lift, which the stacked regime must not reset */
+    expect(stats).toContain("top: -4px");
   });
 
   it("figures are Playfair with tabular numerals; the chip is sage", () => {

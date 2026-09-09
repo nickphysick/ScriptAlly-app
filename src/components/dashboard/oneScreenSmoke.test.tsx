@@ -180,10 +180,14 @@ describe("§1 · the lock", () => {
      top row and the to-do card and therefore sets the height; the RIGHT is `height: 0` with
      `min-height: 100%` and is told what it is. Both halves are asserted, because either alone is
      the loop that made a tall column grow the row and the other stretch to the new total. */
+  /* ⚠️ THE COLUMN-BOTTOM LAW IS UNCHANGED; ONLY THE CLIP WENT (v26, Phase 8). `height: 0` with
+     `min-height: 100%` on the right column is still what stops it feeding the row's height while
+     asking for it — the whole law in one declaration — and it is still asserted. What is gone is
+     `overflow: hidden`, which was slicing every card's shadow at the column edge. */
   it("the right column is height:0 with min-height:100%; the left states the height", () => {
     const c = rule(".os-colL, .os-colR");
     expect(c).toContain("min-height: 100%");
-    expect(c).toContain("overflow: hidden");
+    expect(c).toContain("overflow: visible");
     expect(rule(".os-colR")).toContain("height: 0");
     expect(rule(".os-colL")).toContain("height: 100%");
   });
@@ -254,11 +258,22 @@ describe("§1 · the lock", () => {
     expect(rule(".os-mark")).not.toContain("box-shadow");
   });
 
-  it("⚠️ the rail spaces with MARGINS, not gap — a collapsing panel takes its spacing with it", () => {
-    /* the shared `.os-colM, .os-colR` rule sits first, so the naive first-match lookup lands on
-       it; assert the standalone declarations verbatim instead */
-    expect(cssRules).toContain(".os-colR { gap: 0; }");
-    expect(rule(".os-colR > *")).toContain("margin-bottom: 22px");
+  /* ⚠️ RETIRED, AND IT WAS COSTING 22px A RUN (v26, Phase 8). The rail spaced its children with
+     margins because it once held a COLLAPSING goals panel, and a `gap` leaves a ghost gutter behind
+     a `max-height: 0` child. That column now holds an activity panel and a community tile, neither
+     of which collapses — and v26 gives the column a 22px gap, so BOTH mechanisms were applying:
+     44px between the two children, one gap and one margin, each individually correct. The panel is
+     `flex: 1`, so it absorbed the extra and measured 20.7px short of the ref at every width, with
+     the diff blaming the panel's HEIGHT for a gap beneath it. Two spacing mechanisms on one axis is
+     the fault; this case now forbids the second. */
+  it("⚠️ the right column spaces with ONE mechanism — the gap, and no margins beside it", () => {
+    expect(rule(".os-colR")).toContain("gap: 22px");
+    expect(cssRules).not.toContain(".os-colR { gap: 0; }");
+    /* ⚠️ A NON-ZERO MARGIN, not any margin: a narrow regime legitimately writes `margin-bottom: 0`
+       to turn the old spacing off, and `\d` matched that too — the assertion failed on a rule that
+       agrees with it. */
+    expect(cssRules, "a margin beside the gap doubles the spacing")
+      .not.toMatch(/\.os-colR > \*\s*\{[^}]*margin-bottom:\s*[1-9]/);
   });
 
   /* ⚠️ RETARGETED (dashboard redesign, Phase 2). The budget INVERTED: the chart is now the card
@@ -269,9 +284,17 @@ describe("§1 · the lock", () => {
      A range let the chart shrink whenever the to-do card wanted more, so the plot's proportions were
      a function of how many tickets were open; the clamp makes them a function of the viewport, which
      is the only thing a chart's shape should follow. */
-  it("the vertical budget: the chart is a clamped height, the to-do panel takes the rest", () => {
+  /* ⚠️ THE CLAMP IS GONE AND THE REF IS WHY (v26, Phase 4). v26 declares
+     `.wrapc2 > #chartCard{height:clamp(330px,33vh,430px)}` and then overrides it with
+     `.toprow .mscard, .toprow .wrapc2, .toprow .wrapc2 > #chartCard{height:100%}`, later in the
+     file — so the clamp is dead in the artefact. What drives the row is the PLOT'S ASPECT RATIO:
+     the ref's svg is `viewBox="0 0 1000 330"` with no height, so the card grows to fit it and the
+     row runs 342.8 / 353.9 / 525.5 across the three widths. A clamp cannot produce that spread. */
+  it("the vertical budget: the chart's height is its plot's ratio, and the to-do panel takes the rest", () => {
     const chart = rule(".os-toprow .os-lead");
-    expect(chart).toContain("height: clamp(330px, 33vh, 430px)");
+    expect(chart).toContain("height: 100%");
+    expect(chart).not.toContain("clamp(330px");
+    expect(rule(".os-chartwrap")).toContain("aspect-ratio: 1000 / 330");
     /* ⚠️ NO NUMERIC CEILING — `max-height: none` is a REMOVAL and appears in the narrow regimes,
        where the card takes a stated height instead. The reader joins every block for the selector,
        so forbidding the property outright fails on a rule that is turning it off. */

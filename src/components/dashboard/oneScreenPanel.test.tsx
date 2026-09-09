@@ -333,19 +333,35 @@ describe("the columns bleed, and nothing moves", () => {
     return bare.slice(i, bare.indexOf("}", i));
   })();
 
-  it("the allowance is a token, applied as equal padding and negative margin", () => {
-    expect(bare).toContain("--os-bleed: 10px");
-    expect(col).toContain("padding: var(--os-bleed)");
-    expect(col).toContain("margin: calc(var(--os-bleed) * -1)");
+  /* ⚠️ THE BLEED IS RETIRED, AND THE CLAIM INVERTS (v26, Phase 8). The columns clipped, so their
+     children's shadows ended at the column edge, and a 10px padding/negative-margin pair bought
+     10px of room before the cut. The technique was sound and the problem was the wrong one: these
+     shadows reach ~18px, so 10px of bleed sliced every one of them — a hard termination down the
+     column's edge, which is the single thing a soft shadow must never have. The ref does not clip
+     at all (`.page2 .lcol, .page2 .rcol, .toprow{overflow:visible}`), so neither do we, and there
+     is nothing left to bleed past.
+     ⚠️ THE OLD RULE'S REASON — "without the overflow, a tall card pushes past its column silently"
+     — is answered rather than dropped: it does, and now you SEE it. A clip never fixed an
+     overflowing card; it hid one. */
+  it("the columns do not clip, so nothing needs a bleed allowance", () => {
+    expect(col).toContain("overflow: visible");
+    expect(col).not.toContain("overflow: hidden");
+    expect(col).not.toContain("var(--os-bleed)");
+    expect(bare, "the top row must not clip either").toMatch(/\.os-toprow \{[^}]*overflow:\s*visible/);
+    /* and every card is in one stacking layer, so a shadow paints over an earlier sibling */
+    expect(bare).toMatch(/\.os-card \{[^}]*z-index:\s*1/);
   });
 
-  it("⚠️ `content-box` IS REQUIRED — border-box eats the padding and the margin then shifts content", () => {
-    expect(col).toContain("box-sizing: content-box");
-  });
+  /* ⚠️ RETIRED WITH THE BLEED IT EXISTED FOR (v26, Phase 8). `content-box` was required BECAUSE of
+     the padding/negative-margin pair: under `border-box` the padding ate into `height: 100%` and
+     the negative margin then pulled the content 10px out of place instead of restoring it. With no
+     padding there is nothing for the box model to eat, and the column inherits the sheet's own
+     `border-box` like everything else. The case is deleted rather than inverted: "the column is not
+     content-box" is not a law, it is the absence of one.
+     ⚠️ AND THE PADDING WAS INFLATING THE COLUMN, which is how it showed up: 20px of vertical
+     padding OUTSIDE `min-height: 100%` left the activity panel measuring short of the ref. */
 
-  it("the columns still clip — the bleed widens the clip, it does not remove it", () => {
-    expect(col).toContain("overflow: hidden");
-  });
+  /* the clip is gone entirely — see "the columns do not clip" above, which asserts its absence */
 });
 
 /**

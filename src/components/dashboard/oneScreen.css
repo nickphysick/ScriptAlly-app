@@ -148,7 +148,6 @@
   display: grid; grid-template-columns: 330px minmax(0, 1fr);
   gap: 22px; align-items: stretch; flex: 0 0 auto;
 }
-.os-toprow > * { min-width: 0; }
 
 /* ⚠️ COMMUNITY IS A STRIP UNDER BOTH COLUMNS — ref `.comstrip`. Icon, title, one line, Beta pill,
    on a single row outside the grid, so it neither competes for column height nor has to be told
@@ -203,12 +202,24 @@
  * what it is. The three bottoms then agree by construction rather than by three cards happening
  * to add up.
  */
+/**
+ * ⚠️ THE COLUMNS DO NOT CLIP (v26, Phase 8) — ref `.page2 .lcol, .page2 .rcol, .toprow{overflow:visible}`.
+ *
+ * They used to, with a 10px bleed allowance: `padding: 10px` grew the clip outward and an equal
+ * negative margin pulled the content back, so shadows had 10px of room before the edge cut them.
+ * That was a good technique for the wrong problem. The cards' shadows reach ~18px (a 5px and an
+ * 18px blur), so 10px of bleed sliced every one of them — a hard termination down the column's
+ * edge, which is the one thing a soft shadow must never have. And the padding was inflating the
+ * column: with `content-box` the 20px of vertical padding sat OUTSIDE `min-height: 100%`, so the
+ * activity panel measured 20.7px short of the ref at every width.
+ *
+ * ⚠️ WHAT THE CLIP WAS FOR IS NOT LOST, IT IS INVERTED. The old note said "without the overflow, a
+ * tall card pushes past its column silently". It does — and now you SEE it, which is strictly
+ * better than a silent slice. A clip does not fix an overflowing card; it hides one.
+ */
 .os-colL, .os-colR {
   display: flex; flex-direction: column; min-height: 100%; min-width: 0;
-  overflow: hidden;
-  box-sizing: content-box;
-  padding: var(--os-bleed);
-  margin: calc(var(--os-bleed) * -1);
+  overflow: visible;
 }
 /* ⚠️ THE RIGHT COLUMN CONTRIBUTES NOTHING TO THE ROW'S HEIGHT AND STRETCHES TO MATCH IT — ref
    `.grid2 > .col.right{height:0;min-height:100%}`. The LEFT column sets the height now (it holds
@@ -218,11 +229,18 @@
 .os-colR { height: 0; }
 .os-colL { height: 100%; min-height: 0; }
 .os-colL { gap: 22px; }
-/* ⚠️ THE RAIL USES MARGINS, NOT GAP (§6) — a collapsing panel must take its slot's spacing with
-   it, and `gap` leaves a ghost gutter behind a max-height:0 panel. */
-.os-colR { gap: 0; }
-.os-colR > * { margin-bottom: 22px; }
-.os-colR > *:last-child { margin-bottom: 0; }
+/* ⚠️ THE `gap: 0` HERE IS RETIRED WITH THE MARGINS IT PAIRED WITH (v26). Its reason — a collapsing
+   panel must take its slot's spacing with it, and a gap leaves a ghost gutter behind a
+   `max-height: 0` panel — was true of a rail that held a collapsing goals card. This column holds
+   an activity panel and a community tile, neither of which collapses, and the ref spaces it with
+   `gap: 22px`. Leaving the declaration would be a second `.os-colR` gap for the sweep to find. */
+/* ⚠️ THE MARGIN SPACING IS RETIRED — THE COLUMN HAS A `gap` NOW AND THEY WERE BOTH APPLYING.
+   The rail spaced its children with margins from a time when it held several cards and the column
+   had no gap; v26's column is `display: flex; gap: 22px`, so between the activity panel and the
+   community tile there were 44px — one gap and one margin, each individually correct. The panel
+   is `flex: 1`, so it ABSORBED the extra: it measured 1168.7 against the ref's 1189.4 at every
+   width, and the diff blamed the panel's height for a gap beneath it. Two spacing mechanisms on
+   one axis is the fault; deleting one of them is the fix, and the gap is the one the ref uses. */
 
 /* ══ THE COLUMNS' VERTICAL BUDGET (dashboard redesign, Phase 2) ══════════════════════════════
  *
@@ -249,8 +267,7 @@
 /* ⚠️ THE CHART'S HEIGHT IS THE ROW'S — ref `.wrapc2 > #chartCard{height:clamp(330px,33vh,430px)}`,
    and `.toprow`'s `align-items: stretch` hands the same box to the tile beside it. It was
    `clamp(400px, 42vh, 560px)` in a column of its own. */
-.os-toprow .os-lead { height: clamp(330px, 33vh, 430px); display: flex; flex-direction: column; }
-.os-colL .os-tasks { flex: 1 1 auto; min-height: 0; }
+/* the lead card's height is v26's `height: 100%` — see 'v26 · THE HEIGHT LAW' */
 
 /* ⚠️ THE LEFT COLUMN IS THREE CARDS AT NATURAL HEIGHT, AND PRO TAKES THE SLACK.
    Community no longer stretches — it did only because the old `.os-lowrow` gave it a row height to
@@ -286,7 +303,6 @@
    column bottoms do not move. */
 /* ⚠️ ACTIVITY IS THE WHOLE RIGHT COLUMN NOW — v16's `.col.side:last-child{gap:0}` with
    `#actCard{flex:1}` and nothing else in the track. */
-.os-colR .os-actv { flex: 1 1 auto; min-height: 0; }
 
 /* ══ CARD CHROME ══ */
 .os-card {
@@ -294,6 +310,12 @@
      rule. A separate block is how this sheet has been bitten twice: the smoke test's slice takes
      the FIRST match, so the second rule's declarations are invisible to it. One element, one rule. */
   position: relative;
+  /* ⚠️ AND A STACKING ORDER, so a card casts OVER its neighbours rather than under them (v26,
+     Phase 8). With every card at `auto`, painting order is document order: the card above always
+     drew under the card below, so the top edge of every shadow was covered by the next card's
+     opaque paper and the cast looked cut off on one side only. One shared `z-index: 1` puts them
+     all in the same layer, where a shadow paints over an earlier sibling's background. */
+  z-index: 1;
   /* ⚠️ THE REF'S CARD, VALUE FOR VALUE: `--card #fdfbf7`, a REAL 1px `--line #e6dfd6` border, an
      18px radius and its two-stop shadow. The app had #fffdf9, no border at all (an `::after` inset
      ring) and a 15px radius — three differences the refdiff reported on every card at every width. */
@@ -390,7 +412,9 @@
    overriding its own `gap:40px;padding:10px 4px 6px`. Six pixels of padding, and every card on the
    page sat six pixels low because of it: the hero measured 128 against 122 and the grid, the top
    row, both cards, the to-do card and the activity column all inherited the offset. */
-.os-greet { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; padding: 6px 4px 4px; flex: none; }
+/* ⚠️ `.os-greet`'S GEOMETRY IS THE v26 BLOCK'S — see 'v26 · THE HERO'. The v22 rule that stood
+   here (a one-row `auto 1fr` flex-none grid) was superseded declaration for declaration and is
+   deleted rather than left to be read as the live one. */
 /* ⚠️ THE GREETING SIZES TO ITS CONTENT so the card can have the rest. It was `flex: 1` in the
    pre-counters ref, which would split the row down the middle instead. */
 .os-greet .os-gl { flex: 0 0 auto; min-width: 0; }
@@ -1427,7 +1451,7 @@
    right while the card's height came from its content and wrong the moment it stopped: it capped
    the plot at width ÷ 3.03 and left the card's slack empty — measured 246px of chart in a 560px
    card. Ref `#chartCard .chart > svg{flex:1;height:auto;min-height:0}`. */
-.os-chartwrap { flex: 1 1 auto; min-height: 120px; position: relative; }
+.os-chartwrap { position: relative; }
 .os-chartwrap svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: default; outline: none; }
 /* the cursor flips across the reading-zone boundary — felt, not guessed (§3) */
 .os-chartwrap svg.reading { cursor: crosshair; }
@@ -2219,6 +2243,8 @@
  * the ref: 342.8 at 1536, 353.9 at 1920, 525.5 at 2520. A clamp cannot produce that spread, which
  * is how the app came to be 430 at all three.
  */
+/* the row does not clip either — a card's shadow has to cross it to reach its neighbour */
+.os-toprow { overflow: visible; }
 .os-toprow > * { height: 100%; min-width: 0; }
 .os-toprow .os-lead { height: 100%; display: flex; flex-direction: column; }
 /* the to-do card takes everything the row leaves — ref `.wrapt2{flex:1;min-height:0}` */
@@ -2374,7 +2400,10 @@
  */
 @media (max-width: 1750px) {
   .os-greet { grid-template-columns: minmax(0, 1fr); row-gap: 16px; }
-  .os-greet .os-counters { grid-column: 1; grid-row: 3; justify-content: space-between; width: 100%; top: 0; }
+  /* ⚠️ THE 4px LIFT SURVIVES THE STACK — the ref's ≤1750 block does not reset `top`, and I did.
+     It is an optical correction against the greeting block's high mass, which the stack does not
+     remove; zeroing it put the stats 4px low at 1536 and nowhere else. */
+  .os-greet .os-counters { grid-column: 1; grid-row: 3; justify-content: space-between; width: 100%; }
   .os-greet .os-cic { width: clamp(72px, 5.6vw, 92px); height: clamp(72px, 5.6vw, 92px); }
 }
 /**
