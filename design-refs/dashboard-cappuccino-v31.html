@@ -2,7 +2,7 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<title>ScriptAlly · Dashboard — DESIGN REF v30 (authoritative)</title>
+<title>ScriptAlly · Dashboard — DESIGN REF v31 (authoritative)</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :focus:not(:focus-visible){outline:none!important;box-shadow:none!important}
@@ -69,8 +69,8 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
 
 /* CHART */
 .statblk{display:none;align-items:center;gap:12px}
-.statblk b{font-family:var(--serif);font-weight:600;font-size:38px;line-height:.9}
-.statblk .t{white-space:nowrap;font-family:var(--serif);font-size:19px;font-weight:500;line-height:1.1}
+.statblk b{font-family:var(--serif);font-weight:600;font-size:clamp(28px,2vw,38px);line-height:.9}
+.statblk .t{white-space:nowrap;font-family:var(--serif);font-size:clamp(16px,1.05vw,19px);font-weight:500;line-height:1.1}
 .statblk .s{white-space:nowrap;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:#4f6a4c;text-transform:uppercase;margin-top:3px}
 .callout{font-family:var(--serif);font-weight:600;font-size:34px;fill:#2a1f18}
 .calloutS{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.1em;fill:#a29587}
@@ -160,19 +160,19 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
 .rc{display:flex;align-items:center;gap:10px}
 .rc[hidden]{display:none!important}
 .chips{display:inline-flex;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden}
-.chips button{white-space:nowrap;border:0;background:transparent;padding:7px clamp(8px,0.7vw,13px);font:inherit;font-size:clamp(12.5px,0.82vw,14px);color:var(--ink2);cursor:pointer;border-left:1px solid rgba(0,0,0,.05)}
+.chips button{white-space:nowrap;border:0;background:transparent;padding:7px clamp(7px,0.6vw,12px);font:inherit;font-size:clamp(12px,0.78vw,13.5px);color:var(--ink2);cursor:pointer;border-left:1px solid rgba(0,0,0,.05)}
 .chips button:first-child{border-left:0}
 .chips button.on{background:#f1e7da;color:var(--ink);font-weight:600}
 .sent{font-size:16px;color:var(--ink2)}
 .sent button{font:inherit;font-size:16px;font-weight:600;color:var(--ink);background:transparent;border:0;border-bottom:1.5px dotted #c3b5a5;padding:0 1px 1px;cursor:pointer}
 .sent button:hover{border-bottom-style:solid}
 .brush{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:6px 14px}
-.brush .bw{position:relative;width:clamp(120px,11vw,230px);height:34px;cursor:ew-resize;user-select:none}
+.brush .bw{position:relative;width:clamp(70px,6.4vw,200px);height:34px;cursor:ew-resize;user-select:none}
 .brush svg{position:absolute;inset:0;width:100%;height:100%}
 .brush .shade{position:absolute;top:0;bottom:0;left:0;background:var(--card);opacity:.62;border-radius:2px}
 .brush .win{position:absolute;top:0;bottom:0;border-left:2px solid #1c130f;background:transparent;border-radius:2px}
 .brush .win:before{content:'';position:absolute;left:-5px;top:50%;transform:translateY(-50%);width:8px;height:18px;border-radius:3px;background:#fff;border:1.5px solid #1c130f}
-.brush .lbl{font-size:clamp(12px,0.8vw,14px);color:var(--ink);white-space:nowrap}
+.brush .lbl{font-size:clamp(11px,0.72vw,14px);color:var(--ink);white-space:nowrap}
 
 /* ===== CONVERSATION: state colours ===== */
 .cv .msg .b{border-width:1px;border-style:solid}
@@ -607,6 +607,10 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
   .stat .mini .short{display:inline}
 }
 
+@media (max-width:1650px){
+  .brush .bw{display:none}
+  .brush{padding:6px 14px}
+}
 /* ===== v23 ===== */
 /* top bar with a large centred search */
 .topbar{display:flex;align-items:center;gap:16px;padding:0 0 16px;height:64px}
@@ -960,7 +964,7 @@ body.ac-rail #actCard .foot{padding-left:2px;padding-right:2px}
 .spark{width:100%;height:28px;display:block;margin-top:8px}
 </style>
 </head>
-<body data-scriptally-ref="dashboard-cappuccino-v30">
+<body data-scriptally-ref="dashboard-cappuccino-v31">
 <div class="page"><div class="shell"><div class="navslot"><div class="brand">ScriptAlly</div><div>Locked nav — not redrawn</div><div>Dashboard</div><div>Queries</div><div>Agents</div><div>Materials</div><div>Tasks</div><div>Account</div></div><div class="main">
 
 <div class="topbar" data-probe="navrow">
@@ -1003,10 +1007,10 @@ body.ac-rail #actCard .foot{padding-left:2px;padding-right:2px}
         <span class="sp"></span>
         <div class="rc" id="rcSlider" hidden><select class="sel" id="freq"><option>Weekly</option><option>Monthly</option></select>
           <div class="rng"><input type="range" id="rangeN" min="4" max="12" value="8"><span id="rangeL">Last 8 weeks</span></div></div>
-        <div class="rc" id="rcChips" hidden><div class="chips" id="freqChips"><button class="on" data-f="w">Weekly</button><button data-f="m">Monthly</button></div>
+        <div class="rc" id="rcChips" hidden><div class="chips" id="freqChips"><button data-f="d">Daily</button><button class="on" data-f="w">Weekly</button><button data-f="m">Monthly</button></div>
           <div class="chips" id="nChips"><button data-n="4">4</button><button class="on" data-n="8">8</button><button data-n="12">12</button></div><span class="mono" id="nUnit">weeks</span></div>
         <div class="rc" id="rcSent" hidden><span class="sent">Showing <button id="sFreq">weekly</button> over the last <button id="sN">8 weeks</button></span></div>
-        <div class="rc" id="rcBrush"><div class="chips" id="freqChips2"><button class="on" data-f="w">Weekly</button><button data-f="m">Monthly</button></div>
+        <div class="rc" id="rcBrush" data-probe="chart-controls"><div class="chips" id="freqChips2"><button data-f="d">Daily</button><button class="on" data-f="w">Weekly</button><button data-f="m">Monthly</button></div>
           <div class="brush" data-probe="brush"><div class="bw" id="bw"><svg id="bsvg" viewBox="0 0 230 34" preserveAspectRatio="none"></svg><div class="shade" id="bshade"></div><div class="win" id="bwin"></div></div><span class="lbl" id="bLbl">Last 8 weeks</span></div></div>
       </div>
       <div class="chart"><svg id="ch" data-probe="plot" viewBox="0 0 1000 330" preserveAspectRatio="none"></svg><div class="tt" id="tt"></div></div>
@@ -1138,7 +1142,7 @@ function renderChart(){
   const monthly=ST.monthly;
   const N=monthly?6:ST.n;
   freq.value=monthly?'Monthly':'Weekly'; rangeN.value=ST.n;
-  document.querySelectorAll('#freqChips button,#freqChips2 button').forEach(b=>b.classList.toggle('on',(b.dataset.f==='m')===monthly));
+  document.querySelectorAll('#freqChips button,#freqChips2 button').forEach(b=>b.classList.toggle('on',b.dataset.f===(monthly?'m':(ST.daily?'d':'w'))));
   document.querySelectorAll('#nChips button').forEach(b=>b.classList.toggle('on',+b.dataset.n===ST.n));
   document.getElementById('nChips').style.opacity=monthly?.4:1;
   nUnit.textContent=monthly?'months':'weeks';
@@ -1198,7 +1202,8 @@ function renderChart(){
   }else{
     s+=`<path d="${area(tot,zero)}" fill="url(#g)"/>`;
   }
-  s+=`<path d="${mono(pts(tot))}" fill="none" stroke="#1c130f" stroke-width="2" stroke-linecap="round"/>`;
+  // the line and the bands share one domain: both end at index N-1, always
+  s+=`<path d="${mono(pts(tot))}" fill="none" stroke="#1c130f" stroke-width="2" stroke-linecap="round" data-line-end="${x(N-1)}"/>`;
   if(opt.ghost==='1') s+=`<path d="${mono(pts(prior))}" fill="none" stroke="#b8ada2" stroke-width="1.5" stroke-dasharray="4 5"/>`;
   // start marker (ring) + end marker (hollow) like current
   s+=`<line x1="${x(0)}" x2="${x(0)}" y1="${y(tot[0])}" y2="${y(tot[0])-20}" stroke="#c9b8a6" stroke-width="1.2"/><circle cx="${x(0)}" cy="${y(tot[0])-24}" r="6" fill="#f5e2da" stroke="#7c3a2a" stroke-width="1.4"/><circle cx="${x(0)}" cy="${y(tot[0])-24}" r="1.8" fill="#7c3a2a"/>`;
@@ -1251,7 +1256,7 @@ function renderChart(){
   document.getElementById('lg-gh').style.display=opt.ghost==='1'?'flex':'none';
   document.getElementById('lg-sl').style.display=opt.slate==='1'?'flex':'none';
 }
-const ST={monthly:false,n:8,dragP:null};
+const ST={monthly:false,daily:false,n:8,dragP:null};
 function drawBrush(){
   const n=WD.length, mx=Math.max(...WD.map(r=>r.reduce((a,b)=>a+b,0)))+1;
   const bx=i=>6+218*i/(n-1), by=v=>32-29*v/mx;
