@@ -1429,9 +1429,26 @@
   content: ""; position: absolute; left: -5px; top: 50%; transform: translateY(-50%);
   width: 8px; height: 18px; border-radius: 3px; background: #fff; border: 1.5px solid #1c130f;
 }
+/**
+ * ⚠️ THE RANGE INPUT IS FOR THE KEYBOARD AND MUST NOT TAKE THE POINTER (v29, Phase 2) — the third
+ * and largest of this control's three loops, and the one that made the other two hard to see.
+ *
+ * It lies invisible across the whole track, so it was the topmost hit target: a pointerdown drove
+ * the NATIVE slider and bubbled to the div's own handlers, and two controls wrote the same value
+ * from one gesture. Traced at 1536 over a smooth 20-step drag, the label read
+ * 11, 4, 5, 10, 6, 9, 7, 7, 7, 8, 6, 8, 9, 4, 10, 4, 11, 4, 11, 4 — the two answers alternating,
+ * because the native map is left-to-right over 4..12 and the brush's is right-to-left over the
+ * fraction. Neither was broken; they were both working, on the same drag.
+ *
+ * `pointer-events: none` removes it from hit testing and leaves it focusable, which is the whole of
+ * what it is for: the comment at its markup says a control that cannot be reached from the keyboard
+ * is not a control, and that is still true — Tab reaches it, arrows move it, and the pointer now
+ * has exactly one handler.
+ */
 .os-bw input[type="range"] {
   position: absolute; inset: 0; width: 100%; height: 100%; margin: 0;
   appearance: none; -webkit-appearance: none; background: transparent; cursor: ew-resize;
+  pointer-events: none;
 }
 .os-bw input[type="range"]::-webkit-slider-runnable-track { height: 34px; background: transparent; }
 .os-bw input[type="range"]::-moz-range-track { height: 34px; background: transparent; }
@@ -2334,21 +2351,36 @@
    `flex: 1` and the community tile is `flex: 0 0 auto`, so the tile keeps its own height and the
    panel absorbs every pixel of the difference. That is the whole reason the tile can sit under a
    panel whose length is the writer's own record. */
-.os-colR { gap: 22px; }
+/* ⚠️ 26px, NOT 22 (v29, Phase 6) — ref `.page2 > .rcol{gap:26px}`. Every other gap on the page is
+   22; this one is deliberately larger, and the reason is what the extra four pixels buy: at 22 the
+   community tile read as the activity feed's last row rather than as an object of its own. It is
+   the separation that makes it a second card, so it is not a number to tidy back into line with
+   the others. */
+.os-colR { gap: 26px; }
 .os-colR .os-actv { flex: 1 1 auto; min-height: 0; }
 
 /* ══ v26 · THE COMMUNITY TILE ══ */
 /* ref `.comtile` — 360px (the column's width), ~95px tall, a 56px mark, a serif title, one line,
    and the Beta pill in the corner rather than in the flow. */
+/**
+ * ⚠️ THE TILE IS AN OBJECT, NOT THE FEED'S LAST ROW (v29, Phase 6) — ref `.comtile`, which in v29
+ * gained a `min-height`, its own frame and half as much air again. It had been a 94.6px strip with
+ * a 40px placeholder mark, sitting 22px under a 1,189px activity card: at that size and that
+ * distance the eye reads it as more feed. Everything here is one decision expressed four ways —
+ * height, padding, gap and separation — and the separation lives on `.os-colR` because it is a
+ * relationship between two cards rather than a property of either.
+ *
+ * ⚠️ THE FRAME AND THE SHADOW COME FROM `.os-card` AND ARE NOT RESTATED. The ref declares its own
+ * because its tile is not a card; ours is. Only the RADIUS is overridden — the ref draws 16 where
+ * every other card here is 18 — so this block states the one thing that genuinely differs.
+ */
 .os-comtile {
   position: relative; flex: 0 0 auto;
-  display: flex; align-items: center; gap: 14px;
-  padding: 14px 16px;
+  display: flex; align-items: center; gap: 18px;
+  padding: 20px 18px; min-height: 132px; border-radius: 16px;
 }
-.os-comtile .os-mark { width: 56px; height: 56px; flex: 0 0 56px; border-radius: 12px; }
-.os-comtile .os-mark svg { width: 40px; height: 40px; }
-.os-comtile h4 { font-family: var(--font-serif); font-weight: 500; font-size: 17px; margin: 0; color: #2a1f18; }
-.os-comtile p { margin: 3px 0 0; font-size: 13.5px; color: #b3a596; line-height: 1.4; }
+.os-comtile h4 { font-family: var(--font-serif); font-weight: 500; font-size: 19px; margin: 0; color: #2a1f18; }
+.os-comtile p { margin: 5px 0 0; font-size: 14px; color: #b3a596; line-height: 1.45; }
 .os-comtiletx { min-width: 0; }
 /* ⚠️ POSITIONED, NOT IN THE FLOW — ref `.beta3` is absolute at top right. In the flow it would be a
    third flex item and the one line beside it would lose its measure to a two-word pill. */

@@ -224,9 +224,13 @@ export const OneScreenChart: React.FC<{
     const mx = Math.max(1, ...tot) + 1;
     const bx = (i2: number) => 6 + (218 * i2) / (n - 1);
     const by = (v: number) => 32 - (29 * v) / mx;
+    /* ⚠️ THE THUMBNAIL CLOSES ON ITS OWN ZERO TOO (v29, Phase 4). It closed at 34 — the box's foot —
+       while `by(0)` is 32, so the same fault the chart had lived here two pixels deep, hidden by a
+       14px radius. One law, both drawings: nothing paints below zero. */
     const areaTo = (vals: number[]) => {
       const top = monotonePath(vals.map((v, i2) => [bx(i2), by(v)] as [number, number]));
-      return top ? `${top} L ${bx(n - 1).toFixed(1)} 34 L ${bx(0).toFixed(1)} 34 Z` : null;
+      const z = by(0).toFixed(1);
+      return top ? `${top} L ${bx(n - 1).toFixed(1)} ${z} L ${bx(0).toFixed(1)} ${z} Z` : null;
     };
     const cum = (upTo: number) => ledgerBands.map((bp) => {
       let acc = 0;
@@ -270,19 +274,39 @@ export const OneScreenChart: React.FC<{
       return n;
     });
     const out: { key: BandKey; d: string }[] = [];
-    const areaTo = (vals: number[]) => {
-      const top = monotonePath(vals.map((v, i) => [chartX(i, W, view.length), chartY(v, H, lo, hi)] as [number, number]));
+    /**
+     * ⚠️ EVERY BAND CLOSES ON THE ZERO BASELINE, NOT ON THE SVG'S FOOT (v29, Phase 4).
+     *
+     * This closed at `H`, and `chartY(0)` is `H - PADY` — so every fill painted straight through
+     * the baseline and filled the whole 34px strip beneath it. Measured at the pixels before the
+     * fix: 72 of 80 samples taken below the baseline came back sand `rgb(247,239,227)`, at all
+     * four widths. The pack named the FADE RECT as the cause; the fade rect was already correct
+     * (`height={chartY(0)}`) and it was the bands. The rule the pack states is the right one and
+     * it is the one asserted: nothing paints below `y(0)`.
+     */
+    const y0 = chartY(0, H, lo, hi);
+    const areaTo = (vals: number[], topOverride?: string | null) => {
+      const top = topOverride
+        ?? monotonePath(vals.map((v, i) => [chartX(i, W, view.length), chartY(v, H, lo, hi)] as [number, number]));
       return top
-        ? `${top} L ${chartX(view.length - 1, W, view.length).toFixed(1)} ${H} L ${chartX(0, W, view.length).toFixed(1)} ${H} Z`
+        ? `${top} L ${chartX(view.length - 1, W, view.length).toFixed(1)} ${y0} L ${chartX(0, W, view.length).toFixed(1)} ${y0} Z`
         : null;
     };
     /* back to front: the widest stack first, so each later fill covers the one beneath it */
     for (let k = BAND_KEYS.length - 1; k >= 0; k--) {
-      const d = areaTo(cum(k));
+      /**
+       * ⚠️ THE TOP BAND'S UPPER EDGE IS THE LINE'S OWN PATH, LITERALLY (v29, Phase 3). The widest
+       * stack is `cum(2)`, which is `total` — the same numbers the line is drawn from — so the two
+       * already agreed to the pixel. They agreed because two separate calls to one pure function
+       * over one input must; now they agree because there is one string. The distinction is the
+       * whole point: the first is a coincidence that survives until someone changes one of the two
+       * call sites, the second cannot come apart at all.
+       */
+      const d = areaTo(cum(k), k === BAND_KEYS.length - 1 ? path : undefined);
       if (d) out.push({ key: BAND_KEYS[k], d });
     }
     return out;
-  }, [bands, view, W, H, lo, hi, sparse]);
+  }, [bands, view, W, H, lo, hi, sparse, path]);
   const ys = useMemo(() => pts.map((p) => p[1]), [pts]);
 
   /* ⚠️ THE DRAW-IN RUNS ONCE, EVER (§3) — never on resize, never on range change, never under
@@ -349,17 +373,62 @@ export const OneScreenChart: React.FC<{
      expression. The inversion it replaces was exactly two expressions never reconciled: the drawn
      handle at `100 - p`, the input's thumb at `p`. One derivation, both directions. */
   const brushWeeks = Math.max(BRUSH_WEEKS_MIN, Math.min(BRUSH_WEEKS_MAX, Math.round(rangeDays / 7)));
-  const handleF = fractionFromWeeks(brushWeeks);
+  /**
+   * ⚠️ THE HANDLE'S POSITION IS THE CURSOR'S, AND `N` IS DERIVED FROM IT ONE WAY (v29, Phase 2).
+   *
+   * The jitter was a FEEDBACK LOOP, not a rendering fault. The handle was drawn from `brushWeeks`,
+   * `brushWeeks` was derived from the handle, and there is a `Math.round` on the way — so every
+   * pointer move snapped the handle to the nearest whole-week stop instead of to the cursor. The
+   * reader drags a pixel; the handle either does not move at all or jumps a twelfth of the track.
+   *
+   * `dragP` breaks the loop. While a drag is live it holds the cursor's exact fractional position
+   * and the handle renders at it; `N` is computed FROM it and never written back to it. On pointer
+   * up `dragP` clears and the handle settles onto the week boundary the value implies — which is
+   * the only moment the two are allowed to be the same number.
+   *
+   * ⚠️ IT IS STATE, NOT A REF. The handle's `left` is rendered output, so a ref would move the
+   * value without repainting the thing it positions — the loop broken in the other direction.
+   */
+  const [dragP, setDragP] = useState<number | null>(null);
+  const handleF = dragP ?? fractionFromWeeks(brushWeeks);
   const bwRef = useRef<HTMLDivElement | null>(null);
   const dragging = useRef(false);
+  /**
+   * ⚠️ THE SECOND LOOP, AND THE ONE NOBODY REPORTED: THE TRACK MOVES WHILE YOU DRAG IT.
+   *
+   * `p` was measured against the track's LIVE box. The range label sits in the same right-aligned
+   * cluster and its text is the value — so "Last 11 weeks" is 6.1px wider than "Last 4 weeks", the
+   * cluster grows leftward by exactly that, and the track slides out from under the cursor. Then
+   * `p` changes because the FRAME moved rather than because the pointer did, which changes the
+   * value, which changes the label, which moves the frame again.
+   *
+   * Measured at 1536, tracing the track's own box through a 20-step drag: `trackLeft` oscillating
+   * between 944.13 and 951.39 and the label reading 11, 4, 5, 10, 6, 9, 7, 7, 7, 8, 6, 8, 9, 4, 10,
+   * 4, 11, 4, 11, 4 as the cursor moved smoothly right. The ref does not do this — not because it
+   * solved it, but because at that width its control row is LEFT-aligned, so its capsule grows to
+   * the right and its track stays put. That is a property of the ref's alignment, not a fix, and
+   * copying the alignment would import the accident rather than the answer.
+   *
+   * ⚠️ SO THE GESTURE OWNS ITS FRAME OF REFERENCE. The track's box is captured once at pointerdown
+   * and every move is measured against it, which is the same medicine as `dragP`: a drag reads the
+   * world as it was when the finger went down, and nothing it causes can feed back into it. It also
+   * holds for any future reflow mid-drag — a wider select, a longer chip — rather than for this one.
+   */
+  const dragRect = useRef<DOMRect | null>(null);
   const setFromPointer = useCallback((clientX: number) => {
     const el = bwRef.current;
     if (!el) return;
-    const r = el.getBoundingClientRect();
+    const r = dragRect.current ?? el.getBoundingClientRect();
     if (r.width <= 0) return;
-    setRangeDays(weeksFromFraction((clientX - r.left) / r.width) * 7);
+    const p = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+    setDragP(p);
+    setRangeDays(weeksFromFraction(p) * 7);
     resetRead();
   }, [resetRead]);
+  /* ⚠️ EVERY WAY OUT OF A DRAG CLEARS `dragP`, and `pointercancel` is not optional: a touch that
+     becomes a scroll fires cancel and never fires up, so a missing branch leaves the handle frozen
+     at the cursor's last fractional position while the value says something else. */
+  const endDrag = useCallback(() => { dragging.current = false; dragRect.current = null; setDragP(null); }, []);
 
   const every = xLabelEvery(view.length, effFreq);
   const lastIdx = view.length - 1;
@@ -443,15 +512,17 @@ export const OneScreenChart: React.FC<{
             ref={bwRef}
             onPointerDown={(e) => {
               dragging.current = true;
+              /* the gesture's frame, captured BEFORE the first value change can move it */
+              dragRect.current = e.currentTarget.getBoundingClientRect();
               e.currentTarget.setPointerCapture(e.pointerId);
               setFromPointer(e.clientX);
             }}
             onPointerMove={(e) => { if (dragging.current) setFromPointer(e.clientX); }}
             onPointerUp={(e) => {
-              dragging.current = false;
+              endDrag();
               try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* already released */ }
             }}
-            onPointerCancel={() => { dragging.current = false; }}
+            onPointerCancel={endDrag}
           >
             <svg viewBox="0 0 230 34" preserveAspectRatio="none" aria-hidden="true">
               {brushAreas.map((a) => (
@@ -582,6 +653,11 @@ export const OneScreenChart: React.FC<{
                     strokeWidth={1.2}
                   />
                 ))}
+                {/* ⚠️ THIS RECT ALREADY STOPPED AT THE BASELINE, AND THAT WAS CHECKED RATHER THAN
+                    ASSUMED (v29, Phase 4). The pack named it as the thing bleeding below zero; it
+                    was the BANDS, which closed at the SVG's foot. `height` is `chartY(0)` and has
+                    been — do not "fix" it to `H` to match the bands' old shape, and do not read the
+                    fact that it was suspected as evidence it was ever wrong. */}
                 <rect x={0} y={0} width={W} height={chartY(0, H, lo, hi)} fill="url(#os-bandfade)" pointerEvents="none" />
                 {/* ⚠️ INK, NOT SAGE. The line was sage over a sage band and read as the band's own
                     edge; in ink it is unambiguously a different kind of mark — the total, over the
