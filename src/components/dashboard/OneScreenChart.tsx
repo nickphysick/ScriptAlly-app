@@ -381,7 +381,11 @@ export const OneScreenChart: React.FC<{
         * is now set by the tallest control rather than by the title; both are checked at 1440 AND
         * 1024, because a control that wraps at a narrow width breaks the uniformity outright.
         */}
-      <div className="os-ahead">
+      {/* ⚠️ PROBED (v28, Phase 3) — the header's own HEIGHT is the gate now. v27 asked whether the
+          TITLE rendered on one line; it did, while the control cluster wrapped to a second row
+          beneath it. A symptom can be true while the thing it stands for is false; a box's height
+          cannot. */}
+      <div className="os-ahead" data-probe="chart-header">
         <OneScreenMark name="active-queries" />
         {/* ⚠️ THE STAT BLOCK (dashboard redesign, Phase 4; ref `hdr:b`) — the FIGURE leads at
             Playfair 38, with the title and the delta caption stacked beside it. Before, the figure

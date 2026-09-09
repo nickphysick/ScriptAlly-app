@@ -150,17 +150,16 @@ describe("the bands are one geometry, coloured by purpose", () => {
     expect(shared).not.toMatch(/flex-wrap:\s*wrap/); // and none of them wraps by default
     const lead = /\.os-lead > \.os-ahead\s*\{([^}]*)\}/.exec(bare);
     expect(lead, "the chart's band override must exist").not.toBeNull();
-    /* ⚠️ `nowrap` AT THE BASE AND THE STACK IN ITS OWN REGIME (ref v16, Phase 5) — the ref's `.hd`
-       is `flex-wrap: nowrap` and its ≤1700 block turns wrapping on. Both halves are asserted,
-       because a base that wraps puts the break wherever the contents run out of room, which is a
-       different place at every width and inside the control cluster at some of them. */
+    /* ⚠️ THE HEADER NEVER WRAPS NOW, AT ANY WIDTH (v28, Phase 3) — and the stacked regime is
+       DELETED rather than moved. It wrapped below 1820, which put the chart header on two rows at
+       1710; the v27 gate did not see it because that gate asked whether the TITLE rendered on one
+       line. It did. What moved to a second row was the control cluster.
+       What gives way now is SIZE: every control in the row is clamped against the viewport, so it
+       narrows continuously and never re-forms. A rearrangement at a breakpoint is what produced
+       both of the last two shipped faults; a clamp cannot have a wrong side to be on. */
     expect(lead![1]).toContain("flex-wrap: nowrap");
-    /* ⚠️ 1820, NOT 1699 (v27, Phase 4). The header stacked at ≤1700 while the stats stacked at
-       ≤1750, so 1701–1750 was a band neither rule covered — which is where Nick works. Every
-       breakpoint governing the top row is at 1820 now: this one, the tile's width, the page inset
-       and the brush's track. What the case asserts is unchanged: the base does not wrap and the
-       stack has its own regime. */
-    expect(bare).toMatch(/max-width:\s*1820px[\s\S]{0,400}?\.os-lead > \.os-ahead\s*\{[^}]*flex-wrap:\s*wrap/);
+    expect(bare, "no media query may put this header back on two rows")
+      .not.toMatch(/\.os-lead > \.os-ahead\s*\{[^}]*flex-wrap:\s*wrap/);
     /* ⚠️ AND THE EXCEPTION MAY NOT SPREAD — ANCHORED, because it did not used to be. This forbade
        `height: auto` on `.os-th2` with a bare `\.os-th2\s*\{`, which also matches the TAIL of
        `.os-ahead, .os-th2 {` — so the moment the shared rule legitimately took `height: auto` the
@@ -172,7 +171,8 @@ describe("the bands are one geometry, coloured by purpose", () => {
 
   it("Active queries wears the shared band, not a header of its own", () => {
     const chart = readFileSync(resolve(__dirname, "./OneScreenChart.tsx"), "utf8");
-    expect(chart).toContain('<div className="os-ahead">');
+    /* the band is probed now — see `chart-header`, whose HEIGHT is the one-row gate */
+    expect(chart).toMatch(/<div className="os-ahead" data-probe="chart-header">/);
     expect(chart).not.toContain('className="os-lh"');
   });
 
@@ -193,7 +193,10 @@ describe("the bands are one geometry, coloured by purpose", () => {
     /* ⚠️ THE FIXED WIDTH IS THE THUMBNAIL'S, NOT THE PILL'S. The brush is a capsule around a
        230px picture and a label, so the pill sizes to its contents while `.os-bw` is what states
        a width — asserting it on the wrapper would pass on a pill that stretched the band. */
-    expect(cssRule(bare, ".os-bw")).toMatch(/width:\s*\d+px/);
+    /* ⚠️ A CLAMP, NOT A FIXED WIDTH (v28) — ref `clamp(120px, 11vw, 230px)`. The fixed width was
+       what the stacked header made room for; with the header held to one row the track narrows with
+       the viewport instead, and there is no width at which it is on the wrong side of a step. */
+    expect(cssRule(bare, ".os-bw")).toMatch(/width:\s*clamp\(/);
     expect(cssRule(bare, ".os-brush")).toContain("flex: none");
     /* and the retired slider must not survive its replacement — an added control leaves the
        original reachable; a swapped one does not */
@@ -203,7 +206,8 @@ describe("the bands are one geometry, coloured by purpose", () => {
 
   it("the controls are IN the band — no separate control row was introduced", () => {
     const chart = readFileSync(resolve(__dirname, "./OneScreenChart.tsx"), "utf8");
-    const open = chart.indexOf('<div className="os-ahead">');
+    const open = chart.indexOf('<div className="os-ahead" data-probe="chart-header">');
+    expect(open).toBeGreaterThan(-1); // a missing anchor slices from -1 and asserts over the whole file
     const band = chart.slice(open, chart.indexOf("</div>", chart.indexOf("os-rangelbl", open)));
     expect(band).toContain("os-ctrls");
     expect(bare).not.toMatch(/\.os-ctrlrow\s*\{/); // the 45px row the preview measured and rejected
@@ -286,7 +290,8 @@ describe("one band geometry, declared", () => {
 
   it("⚠️ the figure is IN the band, and the loose wrapper beneath is gone", () => {
     const chart = readFileSync(resolve(__dirname, "./OneScreenChart.tsx"), "utf8");
-    const bandOpen = chart.indexOf('<div className="os-ahead">');
+    const bandOpen = chart.indexOf('<div className="os-ahead" data-probe="chart-header">');
+    expect(bandOpen).toBeGreaterThan(-1); // ditto — the slice is worthless without its anchor
     const band = chart.slice(bandOpen, chart.indexOf("</div>", chart.indexOf("os-rangelbl", bandOpen)));
     expect(band).toContain("os-n");
     expect(chart).not.toContain('className="os-fig"'); // nothing floats beneath the header

@@ -293,7 +293,14 @@
    right column and into the left, between the manuscript card and Community. That is what frees
    the right column for Activity top to bottom, and it is why the expander no longer has anything
    to displace. */
-.os-colL .os-aut { flex: 0 1 auto; min-height: 340px; }   /* ref `.col.side:first-child > .card:first-child` */
+/* ⚠️ THE 340px FLOOR IS GONE (v28) — a leftover from the three-column layout, where this tile was
+   the first card in a side column and had nothing to take its height from. It is in the TOP ROW
+   now, sharing a row with the chart at `align-items: stretch`, so its height is the row's — and a
+   floor above the row's natural height silently became the thing that SET it. Measured: 340
+   against the ref's 312.8 at 1536 and 1710, and because this tile is the taller of the two it took
+   the chart card, the to-do card and the rule below it with it. The selector still matched, which
+   is why no sweep found it: dead by CONTEXT, not by cascade. */
+.os-colL .os-aut { flex: 0 1 auto; }
 .os-colL .os-goal { flex: 0 0 auto; }
 .os-colL .os-comm { flex: 1 1 auto; min-height: 0; }
 /* ⚠️ PRO SITS AT THE FOOT AT ITS NATURAL HEIGHT AND COMMUNITY TAKES THE SLACK — which is a change
@@ -927,7 +934,8 @@
 .os-freqsel select {
   height: 48px;
   appearance: none; -webkit-appearance: none;
-  font-family: inherit; font-size: 11.5px; color: #4a3a2e;
+  /* ref `.sel{font-size:clamp(13px,0.85vw,15px);padding:8px clamp(10px,0.8vw,14px)}` */
+  font-family: inherit; font-size: clamp(13px, 0.85vw, 15px); color: #4a3a2e;
   background: #ffffff; border: 1px solid #ece0d2; border-radius: 9px;
   padding: 6px 26px 6px 11px; cursor: pointer; line-height: 1;
   transition: border-color 0.15s, background 0.15s;
@@ -948,12 +956,16 @@
    The min-width stays: the words change length ("Last 14 days" → "All time") and without it the
    thumbnail resizes as you drag. */
 .os-rangelbl {
-  font-size: 14px; color: #2a1f18; white-space: nowrap;
+  font-size: clamp(12px, 0.8vw, 14px); color: #2a1f18; white-space: nowrap;
   /* ⚠️ 76px IS THE REF'S OWN LABEL WIDTH ("Last 8 weeks" at 14px), and the min-width is still here
      for the reason it always was: the words change length ("Last 14 days" → "All time") and without
      a floor the thumbnail resizes as you drag. It was 96, which made the whole pill 22px wider than
      the ref's. */
-  min-width: 76px; text-align: left; flex: none;
+  /* ⚠️ NO FLOOR AT ALL — the ref has none, and mine made the brush 5px wider than the ref's at both
+     narrow widths. The reason a floor existed (the label's words change length as you drag, so the
+     thumbnail resizes under the pointer) is real, and `white-space: nowrap` plus the label being
+     last in the row already holds it: what moves is the capsule's right edge, not the track. */
+  text-align: left; flex: none;
 }
 /* ⚠️ ONE CLUSTER, RIGHT-ALIGNED AS A UNIT — frequency · slider · label. Pushing each control
    right on its own is what let the label drift away from the slider. */
@@ -1399,10 +1411,13 @@
    the range label. The old form was a 132px bare thumbnail with a burgundy rule for a handle and
    the label outside it; the label belongs INSIDE, because it is what the control currently says. */
 .os-brush {
-  display: flex; align-items: center; gap: 12px; flex: none;
-  background: #fff; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 14px; padding: 6px 14px;
+  /* ref `.brush{padding:6px clamp(10px,0.9vw,16px);gap:clamp(8px,0.7vw,12px)}` — the capsule's own
+     air narrows with the row rather than holding a fixed inset while its contents shrink. */
+  display: flex; align-items: center; gap: clamp(8px, 0.7vw, 12px); flex: none;
+  background: #fff; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 14px;
+  padding: 6px clamp(10px, 0.9vw, 16px);
 }
-.os-bw { position: relative; width: 230px; height: 34px; cursor: ew-resize; user-select: none; flex: none; }
+.os-bw { position: relative; width: clamp(120px, 11vw, 230px); height: 34px; cursor: ew-resize; user-select: none; flex: none; }
 .os-bw > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 /* ⚠️ CARD PAPER AT .62, NEVER A GREY AND NEVER OPAQUE. The excluded history must stay legible
    through it — showing what is being left out is the whole reason a brush beats a slider. */
@@ -1427,18 +1442,11 @@
 }
 .os-bw input[type="range"]::-moz-range-thumb { width: 10px; height: 34px; background: transparent; border: 0; }
 .os-bw input[type="range"]:focus-visible { outline: 2px solid #b98a76; outline-offset: 2px; border-radius: 6px; }
-/* ⚠️ 150, NOT 170 — v22's value, and this rule ALREADY EXISTED carrying v16's. The law was right
-   and had been right for a pass: the brush's track is the control that gives way when the band
-   stacks, and it is declared after the base rule because a media query confers no specificity.
-   What was stale was the number, and a second rule saying 150 was written fifty lines up before
-   anyone looked here — where it lost to this one, silently, for exactly the reason this comment
-   already explained. A pass that touches a rule owns every declaration of that selector.
-   ref: `@media (max-width:1820px){.brush .bw{width:150px!important}}` — moved with the rest of the
-   top row's breakpoints in v27, and it is the reason the brush measured 348 against 269.4 at 1710:
-   the track was still at its wide 230 inside a header that had already stacked. */
-@media (max-width: 1820px) {
-  .os-bw { width: 150px; }
-}
+/* ⚠️ THE BRUSH'S TRACK IS A CLAMP NOW, NOT A STEP (v28, Phase 3) — ref
+   `clamp(120px, 11vw, 230px)`, declared on the base rule above. The step existed to give the header
+   room when it stacked; with the header held to one row the track simply narrows with the viewport,
+   and there is no width at which it is on the wrong side of a boundary. Two passes running, a
+   `!important` step on this element defeated the intended layout. */
 
 /* the tip's band swatch — the same square the legend uses, at the row's size */
 .os-tip .bsw { width: 11px; height: 11px; border-radius: 3px; flex: none; box-shadow: inset 0 0 0 1px rgba(58, 28, 20, 0.08); }
@@ -1716,14 +1724,19 @@
 }
 .os-genres { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; overflow: visible; margin-top: 10px; }
 .os-g {
-  font-size: 9.5px; background: #e9ede6; border: 1px solid #d6ddd2; color: #3f5a3c;
-  border-radius: 99px; padding: 3px 10px;
+  /* ref `.gchips span{font-size:12.5px;padding:4px 11px}` — the chips were 9.5/3/10, which made
+     the tile 6.2px shorter than the ref's and, because this tile is the taller card in the top row
+     at the narrow widths, took the whole row and everything under it with it. */
+  font-size: 12.5px; background: #e9ede6; border: 1px solid #d6ddd2; color: #3f5a3c;
+  border-radius: 99px; padding: 4px 11px;
   white-space: nowrap; overflow: visible; max-width: none;
 }
 .os-wc {
   display: block; margin-top: 8px;
   font-family: "JetBrains Mono", monospace; white-space: nowrap;
-  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: #9c8878;
+  /* ref `.msc .wc{font-size:10.5px;letter-spacing:.14em}` — 8px was a quarter short of the ref's,
+     which is the mono-band undercount this pass's own harness was built to catch. */
+  font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #9c8878;
 }
 .os-hero-add .os-msicon.ghost { opacity: 0.4; border-style: dashed; box-shadow: none; }
 .os-hero-add .os-bt { font-family: inherit; font-size: 13px; font-weight: 500; color: #8a7a6c; }
@@ -1733,7 +1746,10 @@
 /* the byline: the author beneath their book, not above it */
 .os-by { display: flex; align-items: center; gap: 12px; justify-content: center; flex: none; }
 .os-aut-pic {
-  width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0; position: relative;
+  /* ⚠️ 44px, THE REF'S — ref `.by .av{44}` in a 47px byline row. At 52 the row was 52 and the
+     tile 5px taller than the ref's, which at the two narrow widths is the tallest card in the top
+     row and therefore the height of the row, the chart beside it and everything beneath. */
+  width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; position: relative;
   background: #ffffff; border: 2px solid #ffffff;
   box-shadow: 0 1px 4px rgba(58, 28, 20, 0.12);
   display: grid; place-items: center;
@@ -1837,6 +1853,10 @@
    whole. Letting it wrap on its own put the break in a different place at every width and INSIDE
    the control cluster at some of them; measured at 2520, the brush's right edge landed 1184px from
    the content's right where the ref's is 463. */
+/* ⚠️ AND NOTHING MAY OVERRIDE THIS. Ref `.hd{flex-wrap:nowrap!important}` — the `!important` is
+   the ref defending one row against its own older blocks. There is no `!important` here because
+   there is nothing left to defend against: the block that wrapped is deleted rather than outranked,
+   which is the same guarantee without a declaration that would outrank a future legitimate one. */
 .os-lead > .os-ahead {
   /* ⚠️ WHAT IS LEFT OF THIS OVERRIDE IS THE WRAP, AND ONLY THE WRAP. It used to restate the height,
      the padding and the gap, because the shared band was a stated 51px with its air centred and the
@@ -1847,15 +1867,17 @@
      below the breakpoint and one above it. */
   flex-wrap: nowrap;
 }
-/* ⚠️ 1820, MATCHING THE TOP ROW'S OWN BREAKPOINT (v27, Phase 4) — ref
-   `@media (max-width:1820px){#chartCard .hd{flex-wrap:wrap!important;row-gap:10px}}`. This was the
-   1700 half of the gap: the header stacked at ≤1700 and the stats at ≤1750, so at 1710 the header
-   was on one row in a card sized for two. One boundary now, for the whole top row. */
-@media (max-width: 1820px) {
-  .os-lead > .os-ahead { flex-wrap: wrap; row-gap: 10px; }
-  .os-lead > .os-ahead > .os-stat { flex: 1 0 100%; }
-  .os-lead > .os-ahead > .os-ctrls { flex: 1 0 100%; justify-content: flex-start; margin-left: 0; }
-}
+/**
+ * ⚠️ THE STACKED HEADER IS DELETED, NOT MADE CONDITIONAL (v28, Phase 3). It wrapped below 1820,
+ * which put the chart header on two rows at 1710 — and the v27 gate did not see it, because that
+ * gate asked whether the TITLE rendered on one line. It did. What moved to a second row was the
+ * control cluster, so a correct answer to the wrong question let the fault through. The gate is the
+ * header's HEIGHT now, which cannot be true of a wrapped row.
+ *
+ * ⚠️ WHAT GIVES WAY IS SIZE, NOT ARRANGEMENT. Every control in this row is clamped against the
+ * viewport, so the row narrows continuously and never re-forms. A rearrangement at a breakpoint is
+ * what produced both of the last two shipped faults; a clamp cannot have a wrong side to be on.
+ */
 
 
 
@@ -2290,7 +2312,12 @@
  * 1536, 1920 and 2520 alike, and the top row runs 342.8 / 353.9 / 525.5. A clamped card cannot
  * produce that spread, which is how the app came to be a flat 430 at every width.
  */
-.os-chartwrap { flex: 0 0 auto; width: 100%; aspect-ratio: 1000 / 330; }
+/* ⚠️ THE RATIO IS THE BASIS, NOT A CEILING (v28). `flex: 0 0 auto` froze the plot at its aspect
+   height, so when the row was taller than the ratio asked for — at 1536, where the manuscript tile
+   sets the row — the chart simply left 52.8px of its own body empty and the plot measured 172.3
+   against the ref's 230.8. Growing from that basis gives both: the ratio decides the row where the
+   chart is the taller card, and the plot fills where it is not. */
+.os-chartwrap { flex: 1 1 auto; width: 100%; aspect-ratio: 1000 / 330; min-height: 0; }
 
 /**
  * ⚠️ THE REF'S `.page2{min-height:calc(100vh - 150px)}` IS DELIBERATELY NOT PORTED, AND AN EXISTING
@@ -2331,31 +2358,10 @@
   padding: 3px 9px; border-radius: 99px; background: #ffffff; border: 1px solid #e6dfd6; color: #9c8f82;
 }
 
-/* ══ v26 · THE TOP BAR ══ */
-/**
- * ⚠️ THE BAR IS THE PAGE'S OWN ROW, ABOVE THE GRID AND INSIDE THE CONTENT — ref `.topbar`, a child
- * of `.main` sharing the grid's inset. The two flex spacers are what centre the field: the search
- * is `flex: 0 1 620px` between two `flex: 1` siblings, so it sits on the CONTENT's midline and
- * shrinks before it overflows. Centring by `margin: auto` would put it on the midline of whatever
- * space happened to be left, which is the fault this repo already records against the shell bar's
- * own centred search.
- */
-.os-topbar { display: flex; align-items: center; gap: 18px; padding: 14px 0 22px; flex: none; }
-.os-tbsp { flex: 1; }
-/* ref `.searchwrap` — 620 wide, 50 tall (12px padding + a 16px line box + 1px borders) */
-.os-search {
-  flex: 0 1 620px; display: flex; align-items: center; gap: 12px;
-  background: #ffffff; border: 1px solid #e6dfd6; border-radius: 14px; padding: 12px 18px;
-  box-shadow: 0 1px 2px rgba(42, 31, 24, 0.04);
-}
-.os-search svg { width: 18px; height: 18px; stroke: #b3a596; fill: none; stroke-width: 1.7; flex: none; }
-.os-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 16px; color: #2a1f18; }
-.os-search input::placeholder { color: #b3a596; }
-.os-search:focus-within { border-color: #b98a76; }
-.os-kbd {
-  font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: #b3a596;
-  border: 1px solid #e6dfd6; border-radius: 6px; padding: 3px 7px; flex: none;
-}
+/* ⚠️ THE PAGE'S TOP BAR IS DELETED WITH ITS ROW (v28, Phase 2) — `.os-topbar`, `.os-tbsp`,
+   `.os-search`, `.os-kbd`. The search is in the NAV's row now (`.ws-bigsearch`), which is where the
+   ref puts it and where it shares a line with Feedback and New. The rules go with the element:
+   leaving a stylesheet block for markup nothing renders is the fault this sheet already records. */
 
 /* ══ v26 · THE HERO ══ */
 /**

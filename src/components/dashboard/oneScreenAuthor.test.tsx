@@ -110,7 +110,10 @@ describe("option D · the CSS it rests on", () => {
   it("the pills wrap; the rule is 56px; the photo is 52px with a 19px badge", () => {
     expect(rule(".os-genres")).toContain("flex-wrap: wrap");
     expect(rule(".os-authrule")).toContain("width: 56px");
-    expect(rule(".os-aut-pic")).toContain("width: 52px");
+    /* ⚠️ 44px, THE REF'S (v28) — ref `.by .av{44}` inside a 47px byline row. At 52 the row was 52
+       and the whole tile 5px taller than the ref's; at 1536 and 1710 this tile is the TALLER card
+       in the top row, so its height is the row's, the chart's beside it, and everything beneath. */
+    expect(rule(".os-aut-pic")).toContain("width: 44px");
     expect(rule(".os-aut-add")).toContain("width: 19px");
   });
 });
