@@ -117,6 +117,20 @@ const PROBES = [
  * the gate is forgiving something and what.
  */
 const ALLOW = [
+  /* ⚠️ THE TWO NEW PROBES SIT AT THE LEFT END OF THE STATS ROW, so their x carries EXACTLY the
+     same fixture difference as the row's own — the greeting's width. Their VALUE is their size (the
+     illustration's, which is the squash gate), and that is still compared. Allowing x on the three
+     of them is one fact forgiven once, not three allowances. */
+  {
+    key: "stat-card", field: "x", derived: "greetW", slack: 3,
+    why: "the stats row begins where the greeting ends, and this is its first item — same cause as " +
+         "`stats` x, measured from the same two headings.",
+  },
+  {
+    key: "stat-illustration", field: "x", derived: "greetW", slack: 3,
+    why: "the stats row begins where the greeting ends, and this is the first thing in its first " +
+         "item — same cause as `stats` x, measured from the same two headings.",
+  },
   {
     key: "stats", field: "x", derived: "greetW", slack: 3,
     why: "the hero is `auto 1fr`, so the stats begin where the greeting ENDS. The ref's greeting " +

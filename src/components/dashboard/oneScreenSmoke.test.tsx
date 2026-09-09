@@ -132,7 +132,10 @@ describe("§1 · the lock", () => {
     /* ⚠️ THE COLUMN BOTTOMS AGREE BY ONE WORD, not by three heights. Every column is handed the
        same row box; there is no number to keep in step. */
     expect(c).toContain("align-items: stretch");
-    expect(cssRules).toMatch(/max-width:\s*1699px[\s\S]{0,300}?\.os-toprow\s*\{[^}]*270px/);
+    /* ⚠️ 280px AT ≤1820, NOT 270px AT ≤1699 (v27, Phase 4) — ref
+       `@media (max-width:1820px){.toprow{grid-template-columns:280px minmax(0,1fr)!important}}`.
+       Both halves moved: the width and the width it moves at. */
+    expect(cssRules).toMatch(/max-width:\s*1820px[\s\S]{0,300}?\.os-toprow\s*\{[^}]*280px/);
     /* ⚠️ THE CAP IS GONE, DELIBERATELY. `--work-max` centred the page inside 1660 and the ref does
        not cap its content at all — at 2520 that put the app's `main` 494px narrower than the ref's
        and every column 250px in from where the design puts it. The token is untouched and Query
@@ -232,8 +235,8 @@ describe("§1 · the lock", () => {
      340/360 below it, which is where the ref collapses. The app's old four-step ladder was its own
      invention and none of its widths were the design's. */
   it("two regimes, both the ref's, and the centre stays elastic in each", () => {
-    /* the TOP ROW is what has two regimes now — 330px beside the chart, 270 below 1700 */
-    for (const l of ["330px", "270px"]) {
+    /* the TOP ROW is what has two regimes now — 330px beside the chart, 280 below 1820 (v27) */
+    for (const l of ["330px", "280px"]) {
       expect(cssRules, l).toContain(`grid-template-columns: ${l} minmax(0, 1fr)`);
     }
     /* and the grid itself has exactly one */

@@ -69,10 +69,22 @@ describe("trap 2 — a transform on an ancestor isolates the blend", () => {
     }
   });
 
-  it("⚠️ the stat slot keeps its optical nudge, and it is position/top rather than a transform", () => {
+  /* ⚠️ THE NUDGE IS RETIRED, AND THE LAW BEHIND IT SURVIVES (v27, Phase 3). The 2px lift was
+     written when the mark sat directly beside a Playfair heading, whose optical centre is above its
+     line-box centre. v27's hero makes the stats their own block, centred against the greeting PAIR
+     and already carrying the row's own 4px lift — so the nudge was a second correction for a
+     relationship that no longer exists, and it put the illustration 2px ABOVE its own row (measured
+     92.2 against the ref's 96.1). Two optical corrections stacked is how a mark ends up outside the
+     box it belongs to.
+     ⚠️ WHAT MUST NOT COME BACK IS A TRANSFORM. `position/top` was chosen over `translateY` because a
+     transform on any ancestor isolates the blend group and the artwork's white field returns — the
+     trap this whole file is named for. So the case now forbids the transform rather than requiring
+     the offset. */
+  it("⚠️ the stat slot carries no transform — a nudge, if one returns, is position/top", () => {
     const b = blk(".os-cic");
     expect(b).toContain("position: relative");
-    expect(b).toMatch(/top:\s*-2px/);
+    expect(b).not.toMatch(/transform:/);
+    expect(b).not.toMatch(/top:\s*-2px/);
   });
 
   it("hover transforms live on the IMG", () => {
@@ -104,7 +116,13 @@ describe("the stat slot is fixed, and the artwork is bounded inside it", () => {
     const b = blk(".os-cic");
     expect(b).toContain("width: 112px");
     expect(b).toContain("height: 112px");
-    expect(bare).toMatch(/max-width:\s*1699px[\s\S]{0,600}?\.os-cic[^{]*\{[^}]*96px/);
+    /* ⚠️ THE 96px STEP IS GONE AND ITS ABSENCE IS THE CLAIM (v27). v26's ref pinned
+       `width:96px!important` below 1700, beating its own clamp, and this mirrored it. v27 does not:
+       measured, the ref computes 70.6px at 1536, which IS `clamp(64px, 4.6vw, 104px)`. The hero's
+       own clamp governs the slot at every width now — a duplicate-declaration sweep cannot tell
+       these apart, because a media override is the cascade working; only rendering the ref can. */
+    expect(bare).not.toMatch(/max-width:\s*1699px[\s\S]{0,600}?\.os-cic[^{]*\{[^}]*96px/);
+    expect(bare).toMatch(/\.os-greet \.os-cic \{[^}]*clamp\(64px, 4\.6vw, 104px\)/);
   });
 
   /* ⚠️ THE CEILING IS THE ARTWORK'S, NOT THE LAYOUT'S. Two of the three sources are 100×100, so

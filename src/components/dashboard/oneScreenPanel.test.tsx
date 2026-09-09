@@ -155,7 +155,12 @@ describe("the bands are one geometry, coloured by purpose", () => {
        because a base that wraps puts the break wherever the contents run out of room, which is a
        different place at every width and inside the control cluster at some of them. */
     expect(lead![1]).toContain("flex-wrap: nowrap");
-    expect(bare).toMatch(/max-width:\s*1699px[\s\S]{0,400}?\.os-lead > \.os-ahead\s*\{[^}]*flex-wrap:\s*wrap/);
+    /* ⚠️ 1820, NOT 1699 (v27, Phase 4). The header stacked at ≤1700 while the stats stacked at
+       ≤1750, so 1701–1750 was a band neither rule covered — which is where Nick works. Every
+       breakpoint governing the top row is at 1820 now: this one, the tile's width, the page inset
+       and the brush's track. What the case asserts is unchanged: the base does not wrap and the
+       stack has its own regime. */
+    expect(bare).toMatch(/max-width:\s*1820px[\s\S]{0,400}?\.os-lead > \.os-ahead\s*\{[^}]*flex-wrap:\s*wrap/);
     /* ⚠️ AND THE EXCEPTION MAY NOT SPREAD — ANCHORED, because it did not used to be. This forbade
        `height: auto` on `.os-th2` with a bare `\.os-th2\s*\{`, which also matches the TAIL of
        `.os-ahead, .os-th2 {` — so the moment the shared rule legitimately took `height: auto` the

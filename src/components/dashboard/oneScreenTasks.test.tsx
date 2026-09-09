@@ -252,6 +252,7 @@ describe("the panel's stylesheet", () => {
   it("the ticket grid states a minimum width, never a column count", () => {
     const g = rule(".os-tkgrid");
     expect(g).toContain("repeat(auto-fill, minmax(288px, 1fr))");
+    /* the ticket grid's own step is untouched by v27 — it does not govern the top row */
     expect(cssRules).toMatch(/max-width:\s*1699px[\s\S]{0,200}?\.os-tkgrid\s*\{[^}]*minmax\(240px/);
     expect(g).not.toMatch(/repeat\(\d/);
     expect(g).toContain("align-content: start");

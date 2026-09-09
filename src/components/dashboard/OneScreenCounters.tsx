@@ -61,11 +61,15 @@ export const OneScreenCounters: React.FC<{
   <div className={`os-counters${loading ? " isload" : ""}`} data-probe="stats">
     {loading && <Skel bars={["h", ""]} />}
     {headerCounters(queries, agents, now).map((c) => (
-      <div className="os-counter" key={c.key}>
+      <div className="os-counter" data-probe={c.key === "sent" ? "stat-card" : undefined} key={c.key}>
         {/* ⚠️ BARE ON THE CARD — no plate, no circle, no border. And no wrapper transform: a
             transform on any ancestor isolates the blend group and the artwork's white field
             returns (see .os-mark-il in the stylesheet). */}
-        <span className={`os-mark-il os-cic${MARK_CLASS[c.key] ?? ""}`} aria-hidden="true">
+        <span
+          className={`os-mark-il os-cic${MARK_CLASS[c.key] ?? ""}`}
+          data-probe={c.key === "sent" ? "stat-illustration" : undefined}
+          aria-hidden="true"
+        >
           <img src={ICON[c.key]} alt="" />
         </span>
         <div className="os-cw">
@@ -73,7 +77,17 @@ export const OneScreenCounters: React.FC<{
           <div className="os-cv">
             <CountFigure n={c.n} />
             {/* absent, not zero — see headerCounters */}
-            {c.chip && <span className={c.plain ? "os-cd plain" : "os-cd"}>{c.chip}</span>}
+            {/* ⚠️ BOTH WORDINGS RENDER AND CSS PICKS ONE (v27, Phase 3) — the long form above 1980,
+                the short one below it, so the stats can hold the greeting's line without the row
+                giving up a figure, a label or an illustration. A CSS ellipsis was the alternative
+                and it is worse: it cuts mid-word at whatever width the box happens to be, which is
+                a different sentence at every viewport. */}
+            {c.chip && (
+              <span className={c.plain ? "os-cd plain" : "os-cd"}>
+                <span className="os-cd-long">{c.chip}</span>
+                <span className="os-cd-short">{c.chipShort ?? c.chip}</span>
+              </span>
+            )}
           </div>
         </div>
       </div>

@@ -154,8 +154,13 @@ describe("the card's CSS", () => {
        whether its children are centred or packed left. This lock is the only thing standing between
        a dropped regime and nobody noticing. */
     expect(cssRules).toMatch(/max-width:\s*2100px[\s\S]*?\.os-counters\s*\{[^}]*gap:\s*34px/);
-    expect(cssRules).toMatch(/max-width:\s*1699px[\s\S]*?\.os-counters\s*\{[^}]*justify-content:\s*flex-start/);
-    expect(cssRules).toMatch(/max-width:\s*1699px[\s\S]*?\.os-counters\s*\{[^}]*gap:\s*32px/);
+    /* ⚠️ THE ≤1700 REGIME IS SCOPED TO THE HERO NOW (v27) — `.os-greet .os-counters` rather than
+       `.os-counters`, because the stats no longer stack and the only thing that still steps at that
+       width is their gap and alignment. The regimes themselves are unchanged and still all asserted:
+       a lost step is invisible to the ref-diff, since `stats` probes the CONTAINER and its box is
+       the same whether its children are centred or packed left. */
+    expect(cssRules).toMatch(/max-width:\s*1700px[\s\S]*?\.os-greet \.os-counters\s*\{[^}]*justify-content:\s*flex-start/);
+    expect(cssRules).toMatch(/max-width:\s*1700px[\s\S]*?\.os-greet \.os-counters\s*\{[^}]*gap:\s*32px/);
   });
 
   /* ⚠️ READOUTS, NOT CONTROLS — a hover lift promises a click that does not happen. Asserted even

@@ -171,8 +171,15 @@
    asked for and declares only what genuinely differs; a block of redundant declarations here would
    read as a size step and change nothing. */
 .os-aut-compact .os-byn b { font-size: 19px; }
-@media (max-width: 1699px) {
-  .os-toprow { grid-template-columns: 270px minmax(0, 1fr); }
+/**
+ * ⚠️ 1820, NOT 1699 — AND THAT GAP IS WHERE NICK WORKS (v27, Phase 4). The chart header stacked at
+ * ≤1700 while the stats stacked at ≤1750, so 1701–1750 was a band neither rule covered: at 1710 the
+ * page inset, the tile width and the chart header were each on the wrong side of a boundary. v27
+ * puts every top-row breakpoint at 1820, so there is one boundary rather than three.
+ * ⚠️ AND THE TILE IS 280, NOT 270 — ref `.toprow{grid-template-columns:280px minmax(0,1fr)}`.
+ */
+@media (max-width: 1820px) {
+  .os-toprow { grid-template-columns: 280px minmax(0, 1fr); }
   .os-content { padding-left: 22px; }  /* the ref's `.main{padding-left:22px!important}` step */
 
 }
@@ -667,8 +674,16 @@
  * Ref: `@media (max-width:1700px){ .hero{grid-template-columns:1fr!important;gap:14px!important}
  * .stats{gap:36px!important} }`.
  */
+/**
+ * ⚠️ THE STACKING LEFTOVER IS DELETED, AND THE SWEEP COULD NOT SEE IT. `.os-greet` was being told
+ * `grid-template-columns: 1fr` here and `auto minmax(0,1fr)` by a LATER base rule — and a media
+ * query confers no specificity, so the base rule won and this one had been inert since the v26
+ * hero landed. My duplicate-declaration sweep groups by (selector, MEDIA, property), so a media
+ * rule defeated by a later BASE rule is two different keys to it and never pairs up. A dead rule
+ * that a dead-rule sweep is structurally blind to is worth more than the rule itself: found by
+ * reading the block after the measurement said the hero was already two columns at 1536.
+ */
 @media (max-width: 1699px) {
-  .os-greet { grid-template-columns: 1fr; gap: 14px; }
   /* ⚠️ 32 AND flex-start — ref `.stats{justify-content:flex-start!important;gap:32px!important}`,
      which is the LAST of three `.stats` rules inside that block: it also carries `gap:30px` and a
      bare `justify-content:flex-start` earlier, both superseded by this one. A value read off the
@@ -760,9 +775,14 @@
   width: 112px; height: 112px;
   display: flex; align-items: center; justify-content: center;
   margin: 0;
-  /* ⚠️ `position/top`, NOT a transform — see trap 2. Playfair's optical centre sits above its
-     line-box centre, so a mark beside it needs the nudge. */
-  position: relative; top: -2px;
+  /* ⚠️ THE 2px OPTICAL NUDGE IS GONE (v27, Phase 3). It was written when the mark sat directly
+     beside a Playfair heading, whose optical centre is above its line-box centre. In v27's hero the
+     stats are their own block, centred against the greeting PAIR and already carrying the row's own
+     4px lift — so the nudge was a second correction for a relationship that no longer exists, and
+     it put the illustration 2px above its own row. Measured against the ref: 92.2 where the ref
+     draws 96.1. Two optical corrections stacked is how a mark ends up outside the box it belongs
+     to. */
+  position: relative;
 }
 .os-counter:hover .os-cic img { transform: rotate(-3deg) scale(1.05); }
 
@@ -799,9 +819,9 @@
    `.os-cic.plane` is declared BELOW that and is 0-2-0 — the same weight as this block's second
    selector, and later. Specificity gets you level with the rule you are overriding; only order
    settles it, so the step goes after the LAST of them. */
-@media (max-width: 1699px) {
-  .os-cic, .os-cic.plane { width: 96px; height: 96px; }
-}
+/* ⚠️ THE 96px ILLUSTRATION OVERRIDE IS GONE. v26's ref pinned `width:96px!important` below 1700,
+   beating its own clamp, and this mirrored it. v27 does not: measured, the ref computes 70.6px at
+   1536, which IS `clamp(64px, 4.6vw, 104px)`. */
 
 
 /* the goals mark — same rules, smaller box; `Query Target Icon.png` despite the card's name */
@@ -1413,8 +1433,10 @@
    What was stale was the number, and a second rule saying 150 was written fifty lines up before
    anyone looked here — where it lost to this one, silently, for exactly the reason this comment
    already explained. A pass that touches a rule owns every declaration of that selector.
-   ref: `@media (max-width:1700px){.brush .bw{width:150px!important}}`. */
-@media (max-width: 1699px) {
+   ref: `@media (max-width:1820px){.brush .bw{width:150px!important}}` — moved with the rest of the
+   top row's breakpoints in v27, and it is the reason the brush measured 348 against 269.4 at 1710:
+   the track was still at its wide 230 inside a header that had already stacked. */
+@media (max-width: 1820px) {
   .os-bw { width: 150px; }
 }
 
@@ -1825,7 +1847,11 @@
      below the breakpoint and one above it. */
   flex-wrap: nowrap;
 }
-@media (max-width: 1699px) {
+/* ⚠️ 1820, MATCHING THE TOP ROW'S OWN BREAKPOINT (v27, Phase 4) — ref
+   `@media (max-width:1820px){#chartCard .hd{flex-wrap:wrap!important;row-gap:10px}}`. This was the
+   1700 half of the gap: the header stacked at ≤1700 and the stats at ≤1750, so at 1710 the header
+   was on one row in a card sized for two. One boundary now, for the whole top row. */
+@media (max-width: 1820px) {
   .os-lead > .os-ahead { flex-wrap: wrap; row-gap: 10px; }
   .os-lead > .os-ahead > .os-stat { flex: 1 0 100%; }
   .os-lead > .os-ahead > .os-ctrls { flex: 1 0 100%; justify-content: flex-start; margin-left: 0; }
@@ -2363,22 +2389,27 @@
   position: relative; top: -4px;
 }
 /**
- * ⚠️ 46px FLAT, NOT THE PACK'S `clamp(30px, 2.35vw, 44px)` — AND THIS IS THE ONE PLACE THE PACK AND
- * THE REF DISAGREE, so it is written down rather than decided quietly.
+ * ⚠️ 46px FLAT, AND THE v27 CLAMP IS *STILL* DEFEATED IN THE REF — THIRD PASS RUNNING.
  *
- * The pack lists six clamps and says "nothing steps". FIVE of them are live in the ref and are used
- * here. The sixth is not: `.page2 .hero h1` is declared at line 591 with the clamp and AGAIN at
- * line 623 with `font-size: 46px`, no media query, later in the file — so the ref renders 46 at
- * every width from 1536 to 2520 (measured, all five). The clamp is dead in the artefact.
+ * v27 declares `.page2 .hero h1{font-size:clamp(34px,2.3vw,46px)}` and then, later in the same
+ * sheet with no media query, `.page2 .hero h1{font-size:46px;margin-bottom:4px}`. The second wins.
+ * MEASURED on the shipped ref at 1536, 1710, 1920 and 2520: 46px at every one. The clamp would give
+ * 35.5 / 39.5 / 44.2 / 46.
  *
- * The ref wins because it is what the gate compares against: a clamp here is a `text:greeting` miss
- * of 2px at 1920 and 10px at 1536, on every run, for the life of the pack — and a standing red is
- * how a gate stops being read. It also does not step, so the reason the pack gives for clamping
- * (tiered breakpoints producing the squash) does not argue against it.
+ * The pack says to build the clamp, on the ground that "the ref and the app will compute the same
+ * value at the same width". They will not — that premise is what the measurement disproves. Build
+ * the clamp and `text:greeting` misses by 10.5px at 1536, 6.5 at 1710 and 1.8 at 1920, on every run,
+ * against a Phase 7 gate that asks for zero. A standing red is how a gate stops being read.
  *
- * ⚠️ IF THE CLAMP IS THE INTENT, THE REF NEEDS FIXING FIRST: delete lines 623-624 of
- * `dashboard-cappuccino-v26.html` and re-ship it. Then this rule becomes the clamp and the gate
- * stays green. Same for the subtitle, which is 17px flat here for exactly the same reason.
+ * ⚠️ THE FIX IS TWO LINES IN THE REF, AND THEN ONE HERE. Delete
+ * `.page2 .hero h1{font-size:46px;margin-bottom:4px}` and
+ * `.page2 .hero .sub2line{font-size:17px;...;margin:0 0 16px}` from
+ * `dashboard-cappuccino-v27.html`, re-ship it, and this rule becomes
+ * `font-size: clamp(34px, 2.3vw, 46px)` with the gate still green. The clamp is NOT written here as
+ * a defeated declaration beside the flat one: that would be the exact dead-rule shape Phase 0's
+ * sweep exists to remove, and writing one deliberately while deleting others is not a position.
+ *
+ * The same applies to the subtitle, 17px flat, for the same reason.
  */
 .os-greet > h1 {
   font-family: var(--font-serif); font-weight: 700; font-size: 46px;
@@ -2392,36 +2423,47 @@
 
 /* ⚠️ THE FIVE LIVE CLAMPS, from the ref. They scale continuously so the row never steps — which is
    what the pack asks for and what the ref actually does for these five. */
-.os-greet .os-counters { justify-content: space-between; gap: clamp(10px, 1.2vw, 30px); width: 100%; }
+.os-greet .os-counters { justify-content: space-between; gap: clamp(12px, 1.1vw, 30px); width: 100%; }
 .os-greet .os-counter { gap: clamp(8px, 0.85vw, 18px); flex: 0 1 auto; min-width: 0; }
-.os-greet .os-cic { width: clamp(58px, 5.1vw, 104px); height: clamp(58px, 5.1vw, 104px); }
-.os-greet .os-cl { font-size: clamp(12.5px, 0.82vw, 16.5px); margin-bottom: 3px; white-space: nowrap; }
-.os-greet .os-cn { font-size: clamp(22px, 1.55vw, 33px); }
+.os-greet .os-cic { width: clamp(64px, 4.6vw, 104px); height: clamp(64px, 4.6vw, 104px); }
+.os-greet .os-cl { font-size: clamp(13px, 0.8vw, 16.5px); margin-bottom: 3px; white-space: nowrap; }
+.os-greet .os-cn { font-size: clamp(23px, 1.5vw, 33px); }
 .os-greet .os-cd { font-size: clamp(10px, 0.66vw, 13px); padding: 3px clamp(6px, 0.5vw, 10px); }
+/* ⚠️ ONE WORDING AT A TIME — ref `.stat .mini .long` / `.short`, switched at 1980. Both are in the
+   DOM at every width; this decides which is displayed. */
+.os-cd-long { display: inline; }
+.os-cd-short { display: none; }
+@media (max-width: 1980px) {
+  .os-cd-long { display: none; }
+  .os-cd-short { display: inline; }
+}
 
 /**
- * ⚠️ EXACTLY ONE MEDIA QUERY IN THE HERO, AT 1750 — ref's own. Below it the stats take a row of
- * their own beneath the subtitle, still `space-between` at full width. Tiered breakpoints are what
- * produced the earlier squash: two rules for one property, the wrong one winning at some widths.
- * One step, at one width, and the clamps carry everything between.
+ * ⚠️ THE STACKING MEDIA QUERY IS DELETED (v27, Phase 3). There is no width in the supported range
+ * where the stats leave the greeting's row — measured on the ref at 1536, 1710, 1920 and 2520, the
+ * hero is two tracks and the stats are `grid-row: 1 / span 2` at every one of them, with their top
+ * within 9.7px of the greeting's at the worst.
+ *
+ * ⚠️ AND THE 96px ILLUSTRATION OVERRIDE GOES WITH IT. v26's ref pinned `width:96px!important` below
+ * 1700, which beat its own clamp, and the app mirrored it. v27 does not: at 1536 the ref computes
+ * 70.6px, which IS `clamp(64px, 4.6vw, 104px)`. Measured rather than read — a duplicate-declaration
+ * sweep cannot flag this, because a media override is the cascade working, not a dead rule. What
+ * separates them is rendering the ref.
  */
-@media (max-width: 1750px) {
-  .os-greet { grid-template-columns: minmax(0, 1fr); row-gap: 16px; }
-  /* ⚠️ THE 4px LIFT SURVIVES THE STACK — the ref's ≤1750 block does not reset `top`, and I did.
-     It is an optical correction against the greeting block's high mass, which the stack does not
-     remove; zeroing it put the stats 4px low at 1536 and nowhere else. */
-  .os-greet .os-counters { grid-column: 1; grid-row: 3; justify-content: space-between; width: 100%; }
-  .os-greet .os-cic { width: clamp(72px, 5.6vw, 92px); height: clamp(72px, 5.6vw, 92px); }
-}
+
 /**
- * ⚠️ AND BELOW 1700 THE REF PINS 96px, WHICH BEATS ITS OWN CLAMP. `.stat .ill{width:96px!important}`
- * sits in the ≤1700 block; the `clamp(72px, 5.6vw, 92px)` two rules above it never applies there.
- * Measured: the ref draws 96 at 1536 where the clamp would give 86. Third dead clamp in this ref —
- * after the greeting and the chart's height — and the same shape each time: a value stated twice
- * with the later or stronger one winning. This mirrors the artefact rather than the prose.
+ * ⚠️ THE GAP IS STILL STEPPED, AND THAT IS THE REF'S DOING, NOT A LEFTOVER. The pack lists
+ * `clamp(12px, 1.1vw, 30px)` for the row gap and v27 still carries `gap:32px!important` below 1700
+ * and `gap:34px!important` below 2100 — measured: 32 at 1536, 34 at 1710 and 1920, and only at 2520
+ * (27.72) does the clamp itself apply. The clamp is declared and defeated for three of the four
+ * widths, which is the same shape as the greeting below. Mirrored, because the gate compares
+ * computed values.
  */
+@media (max-width: 2100px) {
+  .os-greet .os-counters { gap: 34px; }
+}
 @media (max-width: 1700px) {
-  .os-greet .os-cic { width: 96px; height: 96px; }
+  .os-greet .os-counters { gap: 32px; justify-content: flex-start; }
 }
 
 /* ══ §P4 · REDUCED MOTION ═══════════════════════════════════════════════════════════════════

@@ -240,6 +240,8 @@ export interface HeaderCounter {
   /** ⚠️ ABSENT when there is nothing to report. Never "↑ 0", never "0%" — a chip that reports
    *  nothing is worse than no chip, because it reads as a measurement rather than a silence. */
   chip?: string;
+  /** the below-1980 wording — see headerCounters */
+  chipShort?: string;
   /** the ref's `.mini.plain` — a white capsule for a chip that states a SPLIT rather than a change */
   plain?: boolean;
 }
@@ -312,12 +314,33 @@ export const headerCounters = (queries: Query[], agents: Agent[], now: Date): He
    * changed is what a chip SAYS when it has something to report.
    */
   const idle = agents.length - queried;
+  /**
+   * ⚠️ EACH CHIP CARRIES TWO STRINGS, AND CSS CHOOSES (v27, Phase 3). Below 1980 the stats row has
+   * to give something up so it can stay on the greeting's line, and what gives way is the pill's
+   * WORDING — never the figure, the label or the illustration. Both strings are in the DOM at every
+   * width and a media query swaps which one displays.
+   *
+   * ⚠️ THE SHORT FORM IS A TRUE SUBSET OF THE LONG ONE, NEVER A DIFFERENT CLAIM. "5" is what "5
+   * this week" says with the period implied by the row it sits in; "5 idle" is the half of
+   * "11 queried · 5 idle" that the reader cannot get from the figure beside it (the figure is the
+   * agent total, so the queried count is a subtraction and the idle count is not). Shortening to
+   * "11 queried" would have dropped the only part that is not derivable.
+   *
+   * ⚠️ AND NEITHER FORM IS BUILT BY TRUNCATION. A CSS ellipsis would cut mid-word at whatever width
+   * the box happened to be, which is a different sentence at every viewport; these are two written
+   * strings and the switch is at one stated width.
+   */
+  const pair = (long: string, short: string) => ({ chip: long, chipShort: short });
   return [
-    { key: "sent", label: "Queries sent", n: sent, ...(sentRecently > 0 ? { chip: `↑ ${sentRecently} this week` } : {}) },
+    { key: "sent", label: "Queries sent", n: sent,
+      ...(sentRecently > 0 ? pair(`↑ ${sentRecently} this week`, `↑ ${sentRecently}`) : {}) },
     { key: "agents", label: "Agents on file", n: agents.length,
-      ...(agents.length > 0 ? { chip: `${queried} queried · ${idle} idle`, plain: true } : {}) },
+      ...(agents.length > 0 ? { ...pair(`${queried} queried · ${idle} idle`, `${idle} idle`), plain: true } : {}) },
     { key: "responses", label: "Responses", n: responses,
-      ...(denominator !== null ? { chip: `${Math.round((responses / denominator) * 100)}% response rate` } : {}) },
+      ...(denominator !== null
+        ? pair(`${Math.round((responses / denominator) * 100)}% response rate`,
+               `${Math.round((responses / denominator) * 100)}%`)
+        : {}) },
   ];
 };
 
