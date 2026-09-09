@@ -2,9 +2,12 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<title>ScriptAlly · Dashboard — DESIGN REF v29 (authoritative)</title>
+<title>ScriptAlly · Dashboard — DESIGN REF v30 (authoritative)</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+:focus:not(:focus-visible){outline:none!important;box-shadow:none!important}
+:focus-visible{outline:2px solid #8a9e88;outline-offset:2px;border-radius:6px}
+button:focus:not(:focus-visible),select:focus:not(:focus-visible),input:focus:not(:focus-visible),[tabindex]:focus:not(:focus-visible){outline:none!important}
 :root{
   --ground:#f4f0ea; --card:#fdfbf7; --card2:#fffdf9;
   --ink:#2a1f18; --ink2:#6b5d54; --ink3:#a29587; --mono-c:#9c8f82;
@@ -235,7 +238,7 @@ body.tall .goalslim{display:none}
 
 
 .cv .msg.popopen{z-index:30}
-.pop{position:fixed;z-index:200;width:262px;background:var(--card);border:1px solid #d9cfc3;border-radius:13px;box-shadow:0 14px 34px rgba(42,31,24,.14);padding:14px 16px 12px}
+.pop{position:fixed;z-index:9100;width:262px;background:var(--card);border:1px solid #d9cfc3;border-radius:13px;box-shadow:0 14px 34px rgba(42,31,24,.14);padding:14px 16px 12px}
 .pop h5{font-family:var(--serif);font-weight:500;font-size:16px;margin:0 0 2px}
 .pop .sub{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mono-c);margin-bottom:12px}
 .pop label{display:block;font-size:12.5px;color:var(--ink2);margin:8px 0 4px}
@@ -287,7 +290,7 @@ body.tall .goalslim{display:none}
 .tdo .foot{border-top:1px solid var(--line2)}
 
 /* ===== JOURNEY POPOVER (the To-do journey pane, hosted in a popover) ===== */
-.jp{position:fixed;z-index:300;width:392px;background:var(--card);border:1px solid #d9cfc3;border-radius:14px;box-shadow:0 18px 44px rgba(42,31,24,.16);overflow:hidden}
+.jp{position:fixed;z-index:9100;width:392px;background:var(--card);border:1px solid #d9cfc3;border-radius:14px;box-shadow:0 18px 44px rgba(42,31,24,.16);overflow:hidden}
 .jp .jh{padding:14px 18px 10px}
 .jp .jh .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mono-c)}
 .jp .jh h5{font-family:var(--serif);font-weight:400;font-size:17.5px;line-height:1.3;margin:4px 0 0}
@@ -344,10 +347,11 @@ body.tall .goalslim{display:none}
 .tk.snip .sub b.owed{color:#7c3a2a}
 .tk.snip .sub .stw{margin-left:auto;display:flex;align-items:center;gap:5px;color:var(--ink);text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:12.5px}
 /* drawer */
-.scrim{position:fixed;inset:0;background:rgba(42,31,24,.18);backdrop-filter:blur(1px);z-index:400;opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim{position:fixed;inset:0;background:rgba(42,31,24,.22);backdrop-filter:blur(1px);z-index:9000;opacity:0;pointer-events:none;transition:opacity .25s}
 .scrim.on{opacity:1;pointer-events:auto}
-.drawer{position:fixed;top:0;right:0;bottom:0;width:580px;visibility:hidden;background:var(--card);border-left:1px solid var(--line);box-shadow:-18px 0 44px rgba(42,31,24,.14);z-index:401;transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:580px;visibility:hidden;background:var(--card);border-left:1px solid var(--line);box-shadow:-18px 0 44px rgba(42,31,24,.18);z-index:9001;transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column}
 .drawer.on{transform:none;visibility:visible}
+body.hasdrawer .card,body.hasdrawer .comtile,body.hasdrawer .mscard{z-index:auto!important}
 .drawer .dh{padding:20px 26px 14px;border-bottom:1px solid var(--line2);display:flex;align-items:flex-start;gap:14px}
 .drawer .dh .crumb{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mono-c)}
 .drawer .dh h4{font-family:var(--serif);font-weight:400;font-size:21px;line-height:1.3;margin:6px 0 0}
@@ -433,9 +437,11 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 
 
 /* total badge beside the title */
-.badge{display:inline-flex;align-items:baseline;gap:5px;margin-left:10px;padding:3px 11px;border-radius:99px;background:#f1e7da;border:1px solid #e6d8c6;color:var(--ink)}
+.badge{cursor:default;display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 11px;border-radius:99px;background:#f1e7da;border:1px solid #e6d8c6;color:var(--ink)}
 .badge b{font-family:var(--serif);font-weight:600;font-size:16px;line-height:1}
 .badge span{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2)}
+.badge .clr{font-family:var(--sans);font-size:14px;line-height:1;letter-spacing:0;color:var(--ink2);opacity:.6;margin-left:2px}
+.badge:hover .clr{opacity:1}
 /* thin rule: legend revealed on hover of the rule zone */
 .rulezone{padding:8px 20px 18px;position:relative;z-index:5}
 .rulezone .sbar{margin:0}
@@ -954,7 +960,7 @@ body.ac-rail #actCard .foot{padding-left:2px;padding-right:2px}
 .spark{width:100%;height:28px;display:block;margin-top:8px}
 </style>
 </head>
-<body data-scriptally-ref="dashboard-cappuccino-v29">
+<body data-scriptally-ref="dashboard-cappuccino-v30">
 <div class="page"><div class="shell"><div class="navslot"><div class="brand">ScriptAlly</div><div>Locked nav — not redrawn</div><div>Dashboard</div><div>Queries</div><div>Agents</div><div>Materials</div><div>Tasks</div><div>Account</div></div><div class="main">
 
 <div class="topbar" data-probe="navrow">
@@ -1014,7 +1020,7 @@ body.ac-rail #actCard .foot{padding-left:2px;padding-right:2px}
         <div class="card tdo ch-bare" id="todoCard" data-probe="todo-card">
       <div class="hd">
         <div class="tile"><svg viewBox="0 0 24 24"><path d="M4 7h10M4 12h10M4 17h6"/><path d="M15 16l2 2 4-4"/></svg></div>
-        <h3>To-do list</h3><span class="badge" id="tbadge"><b>32</b></span>
+        <h3>To-do list</h3><span class="badge" id="tbadge" data-probe="todo-badge"><b>32</b></span>
         <span class="sp"></span><a class="link" href="#">See all →</a>
       </div>
       <div id="tfilters" data-probe="todo-rule"></div>
@@ -1063,7 +1069,7 @@ body.ac-rail #actCard .foot{padding-left:2px;padding-right:2px}
   <div class="ph" onclick="document.getElementById('acpanel').classList.toggle('min')"><b>Activity feed</b><span class="cv2">⌄</span></div>
   <div class="pb" id="acpb"></div>
 </div>
-<div class="scrim" id="scrim"></div><div class="drawer" id="drawer"><div class="dh"><div><div class="crumb" id="dcrumb"></div><h4 id="dtitle"></h4></div><span class="x" onclick="closeDrawer()">✕</span></div><div class="ctx" id="dctx"></div><div class="dbody" id="dbody"></div></div>
+<div class="scrim" id="scrim"></div><div class="drawer" id="drawer" data-probe="drawer"><div class="dh"><div><div class="crumb" id="dcrumb"></div><h4 id="dtitle"></h4></div><span class="x" onclick="closeDrawer()">✕</span></div><div class="ctx" id="dctx"></div><div class="dbody" id="dbody"></div></div>
 <script>
 /* StatusDot stand-in (locked component; rendered here for the mockup only) */
 function sd(kind,size=13){
@@ -1172,7 +1178,9 @@ function renderChart(){
   const area=(top,bot)=>mono(pts(top))+mono(pts(bot).reverse()).replace(/^M/,'L')+'Z';
   const zero=D.map(()=>0), c1=D.map(r=>r[0]), c2=D.map(r=>r[0]+r[1]), c3=D.map(r=>r[0]+r[1]+r[2]);
   let s=`<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9dfd5" stop-opacity=".9"/><stop offset="1" stop-color="#d9dfd5" stop-opacity="0"/></linearGradient>
-    <linearGradient id="fadeout" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fdfbf7" stop-opacity="0"/><stop offset=".6" stop-color="#fdfbf7" stop-opacity=".18"/><stop offset="1" stop-color="#fdfbf7" stop-opacity=".5"/></linearGradient></defs>`;
+    <linearGradient id="fadegrad" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="${T}" y2="${y(0)}">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="0.55" stop-color="#e8e8e8"/><stop offset="1" stop-color="#4d4d4d"/></linearGradient>
+    <mask id="fademask" maskUnits="userSpaceOnUse" x="${L}" y="${T}" width="${W-L-R}" height="${y(0)-T}"><rect x="${L}" y="${T}" width="${W-L-R}" height="${y(0)-T}" fill="url(#fadegrad)"/></mask></defs>`;
   // y ticks: top & bottom only, like current
   const nice=v=>{const st=v<=12?2:v<=30?4:v<=60?10:20;return Math.ceil(v/st)*st};
   const top=nice(Math.max(...tot)); const ticks=[0,top/2,top].filter((v,i,a)=>a.indexOf(v)===i);
@@ -1180,15 +1188,16 @@ function renderChart(){
     s+=`<text class="axis" x="${L-10}" y="${y(v)+(v===0?4:4)}" text-anchor="end">${v}</text>`});
   s+=`<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="#d8cec2" stroke-width="1"/>`;
   if(opt.bands==='1'){
+    s+=`<g mask="url(#fademask)">`;
     s+=`<path d="${area(c1,zero)}" fill="#f7efe3" stroke="#dcc7a4" stroke-width="1.2"/>`;
     s+=`<path d="${area(c2,c1)}" fill="#e0e5dd"stroke="#a9baa4"stroke-width="1.2"/>`;
-    s+=`<path d="${area(c3,c2)}" fill="#f5e6df" stroke="#dcb2a2" stroke-width="1.2"/>`;
+    s+=`<path d="${area(c3,c2)}" fill="#f5e6df" stroke="none"/>`;
     if(opt.slate==='1'&&D.some(r=>r[3]>0)) s+=`<path d="${area(tot,c3)}" fill="#d7e0e8" stroke="#adc2d2" stroke-width="1"/>`;
-    else s+=`<path d="${area(tot,c3)}" fill="#f5e6df" stroke="#dcb2a2" stroke-width="1.2"/>`;
+    else s+=`<path d="${area(tot,c3)}" fill="#f5e6df" stroke="none"/>`;
+    s+=`</g>`;
   }else{
     s+=`<path d="${area(tot,zero)}" fill="url(#g)"/>`;
   }
-  s+=`<rect x="${L}" y="${T}" width="${W-L-R}" height="${y(0)-T}" fill="url(#fadeout)"/>`;
   s+=`<path d="${mono(pts(tot))}" fill="none" stroke="#1c130f" stroke-width="2" stroke-linecap="round"/>`;
   if(opt.ghost==='1') s+=`<path d="${mono(pts(prior))}" fill="none" stroke="#b8ada2" stroke-width="1.5" stroke-dasharray="4 5"/>`;
   // start marker (ring) + end marker (hollow) like current
@@ -1550,12 +1559,14 @@ function renderFilters(){
   const dim=c=>tfilt!=='all'&&tfilt!==c.id?'dim':'';
   const bar=(cls='')=>`<div class="sbar ${cls}">${CATS.map(c=>`<button class="${dim(c)}" style="--f:${c.f};flex:${c.n} 1 0" onclick="setFilt('${c.id}')" title="${c.l}"><b>${c.n}</b><span>${c.l}</span></button>`).join('')}</div>`;
   const names=()=>`<div class="sbarlbl">${CATS.map(c=>`<button class="${dim(c)}" onclick="setFilt('${c.id}')"><i style="background:${c.f};border:1px solid ${c.dot}"></i><b>${c.n}</b>${c.l}</button>`).join('')}</div>`;
-  const cap=()=>`<div class="sbarcap"><span>${CTOT} open tasks</span><span>${tfilt==='all'?'All shown · click a band to filter':'Showing '+CATS.find(c=>c.id===tfilt).l+' · click again to clear'}</span></div>`;
+  const cap=()=>`<div class="sbarcap"><span>${CTOT} open tasks</span><span>${tfilt==='all'?'All shown · click a band to filter':'Click the band again, or the × on the badge, to show all'}</span></div>`;
   if(opt.fbar==='split')  el.innerHTML=bar()+cap();
   const bg=document.getElementById('tbadge');
   if(bg){const c=tfilt==='all'?null:CATS.find(x=>x.id===tfilt);
-    bg.innerHTML=c?`<b>${c.n}</b><span>${c.l}</span>`:`<b>${CTOT}</b>`;
-    bg.style.background=c?c.f:'#f1e7da'; bg.style.borderColor=c?c.dot:'#e6d8c6';}
+    bg.innerHTML=c?`<b>${c.n}</b><span>${c.l}</span><span class="clr" title="Show all tasks">×</span>`:`<b>${CTOT}</b>`;
+    bg.style.background=c?c.f:'#f1e7da'; bg.style.borderColor=c?c.dot:'#e6d8c6';
+    bg.style.cursor=c?'pointer':'default';
+    bg.onclick=c?()=>setFilt('all'):null;}
   if(opt.fbar==='thin')   el.innerHTML=`<div class="rulezone ${opt.leg==='always'?'open':''}">${bar('thin')}${names()}</div>`;
   if(opt.fbar==='inline') el.innerHTML=names();
   if(opt.fbar==='pills')  el.innerHTML=`<div class="tiles"><span class="tile2 ${tfilt==='all'?'on':''}" onclick="setFilt('all')"><b>${CTOT}</b> All</span>${CATS.map(c=>`<span class="tile2 ${tfilt===c.id?'on':''}" onclick="setFilt('${c.id}')"><i style="background:${c.dot}"></i><b>${c.n}</b> ${c.l}</span>`).join('')}</div>`;
@@ -1603,9 +1614,9 @@ function openDrawer(i){
     J={t,intent:null,mats:{ql:false,syn:false,sample:t.unit==='partial',full:t.unit==='full',other:false},unit:'pages',qty:50,other:'',when:'today',date:'',window:'2 Nov',windowEdited:false,nores:'nudge',remind:'week',notes:''};
     dbody.innerHTML='<div class="jp" id="jp"></div>'; paintJ();
   }
-  scrim.classList.add('on');drawer.classList.add('on');
+  scrim.classList.add('on');drawer.classList.add('on');document.body.classList.add('hasdrawer');
 }
-function closeDrawer(){scrim.classList.remove('on');drawer.classList.remove('on');J=null;setTimeout(()=>{dbody.innerHTML=''},300)}
+function closeDrawer(){scrim.classList.remove('on');drawer.classList.remove('on');document.body.classList.remove('hasdrawer');J=null;setTimeout(()=>{dbody.innerHTML=''},300)}
 scrim.onclick=closeDrawer;
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
 /* ---------- journey popover (kept for comparison; not the default) ---------- */
