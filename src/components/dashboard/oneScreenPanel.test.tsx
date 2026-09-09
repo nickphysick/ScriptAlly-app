@@ -313,8 +313,12 @@ describe("one band geometry, declared", () => {
      track's travelled fill existed to say where you were on an abstract scale, and a thumbnail of
      your own record with the excluded span shaded says it without a scale at all. */
   it("⚠️ the controls carry their own edge, and the brush carries a picture", () => {
-    expect(bare).toMatch(/\.os-ahead \.os-freqsel select\s*\{[^}]*#fffdf9/);
-    expect(bare).toMatch(/\.os-ahead \.os-freqsel select\s*\{[^}]*#bcc7b9/);
+    /* ⚠️ THE CONTROL IS CHIPS NOW (v31, Phase 3) — the claim is unchanged and the subject moved.
+       Both controls on this row have to READ AGAINST SAGE: a pale fill on a pale green ground
+       disappears, so the chip group takes the parchment fill and the sage edge the select used to. */
+    expect(bare).toMatch(/\.os-ahead \.os-freqchips\s*\{[^}]*#fffdf9/);
+    expect(bare).toMatch(/\.os-ahead \.os-freqchips\s*\{[^}]*#bcc7b9/);
+    expect(bare, "the select's rules went with the select").not.toContain(".os-freqsel");
     /* ⚠️ THE EXCLUDED SPAN IS SHADED, NEVER HIDDEN — the reader can see what they are leaving out,
        which is the entire reason a brush beats a slider. It is card paper at 62% (ref `.shade`),
        not a grey and not opaque; an opaque mask would hide the history it exists to show. */

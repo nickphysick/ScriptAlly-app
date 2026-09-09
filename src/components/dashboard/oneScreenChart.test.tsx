@@ -79,10 +79,16 @@ describe("the chart card's structure", () => {
 
   /* ⚠️ THE THREE-PILL RANGE GROUP IS RETIRED (v16 §3) — it spent a pill per range and left no
      room to say anything about GRAIN. Two controls now: a select for grain, a slider for span. */
-  it("frequency is a select of three; range is a snapping BRUSH that states its value", () => {
+  it("frequency is THREE CHIPS; range is a snapping BRUSH that states its value", () => {
     const html = render(twoWeeks);
+    /* ⚠️ CHIPS, NOT A SELECT (v31, Phase 3). The select was an allowance granted because the ref
+       drew two chips and the app has three frequencies; the ref draws three now and the allowance
+       is retired. The claim this case makes is unchanged — three frequencies, named, reachable —
+       and only the control they live in has moved. */
     expect(html).toContain('aria-label="Chart frequency"');
-    for (const f of ["Daily", "Weekly", "Monthly"]) expect(html).toContain(`>${f}</option>`);
+    expect(html).toContain('class="os-freqchips"');
+    for (const f of ["Daily", "Weekly", "Monthly"]) expect(html).toContain(`>${f}</button>`);
+    expect(html, "the select is gone, markup and all").not.toContain("</option>");
     expect(html).toContain('type="range"');
     /* ⚠️ THE RANGE IS IN WEEKS NOW (v26) — the input carries 4-12 directly instead of a 0-100
        percentage, so its thumb and the drawn handle read the SAME number. Two mirrored expressions
@@ -104,9 +110,14 @@ describe("the chart card's structure", () => {
 
   /* the grain the chart OPENS on was asserted through the ledger's first column; the ledger is
      retired, so it is asserted on the select — the control that now states the grain */
-  it("a short record opens DAILY and a long one WEEKLY, and the select says which", () => {
-    expect(render(twoWeeks)).toContain('value="daily"');            // 11 days on the record
-    expect(render([q({ dateSent: daysAgo(120) }), q({ dateSent: daysAgo(2) })])).toContain('value="weekly"');
+  it("a short record opens DAILY and a long one WEEKLY, and the chips say which", () => {
+    /* ⚠️ THE ACTIVE CHIP IS `aria-pressed`, NOT A SELECT'S `value` (v31). The claim is the same —
+       the opening grain follows the length of the record — and it is read from the control the app
+       now draws. Anchored on the label so it cannot be satisfied by a different chip being on. */
+    const short = render(twoWeeks);                                  // 11 days on the record
+    expect(short).toMatch(/aria-pressed="true"[^>]*>Daily</);
+    const long = render([q({ dateSent: daysAgo(120) }), q({ dateSent: daysAgo(2) })]);
+    expect(long).toMatch(/aria-pressed="true"[^>]*>Weekly</);
   });
 
   it("sparse (a single point) shows the line-begins message and no CHART svg", () => {
