@@ -55,6 +55,12 @@ export interface OneScreenDashboardProps {
   /** The manuscript the shell scope names — the kicker repeats it (§2). */
   activeManuscript: Manuscript | null;
   onNavigate: (tab: string, sub?: string) => void;
+  /* ⚠️ THE TOP BAR'S SEARCH IS THE APP'S GLOBAL QUERY, NOT A NEW CONTROL. `Dashboard` already
+     filters its query list on this value, so the field is live the moment it is typed in — which
+     is the difference between the ref's search and a decorative one. Optional so every existing
+     mount, including the tests', renders byte-identically without it. */
+  searchQuery?: string;
+  onSearchChange?: (v: string) => void;
   onTaskAction: (task: Task) => void;
   updateUserProfile: (fields: Partial<User>) => Promise<void>;
   /** Injectable for tests; defaults to the real clock. */
@@ -71,6 +77,7 @@ export const Skel: React.FC<{ bars: ("h" | "grow" | "")[] }> = ({ bars }) => (
 export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
   loading, queries, agents, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
   activeManuscript, onNavigate, onTaskAction, updateUserProfile, now = new Date(),
+  searchQuery = "", onSearchChange,
 }) => {
   /**
    * ⚠️ THE SCOPED SETS ARE DERIVED ONCE, HERE, AND HANDED DOWN (B2). Every card reading the same
@@ -229,47 +236,29 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             rest, vertically centred against it. The greeting's own stack lives inside `.os-gl` —
             without that wrapper the dateline, name and pills would each become flex items on the
             same line. */}
-        <div className={`os-greet${loading ? " isload" : ""}`} data-probe="hero">
-          {loading && <Skel bars={["h", ""]} />}
-          <div className="os-gl">
-            {/* ⚠️ NO KICKER, AND NO DATE LINE EITHER (audit pack P2). The kicker went first,
-                for repeating what the chrome already said; the muted date that replaced it has
-                now gone the same way, for a plainer reason — anyone reading it knows what day it
-                is. The header is shorter without it, and the greeting leads.
-                ⚠️ WHAT SITS UNDER THE NAME IS A QUESTION, NOT A FACT. Every other line in this
-                header states something derived; this one is the only piece of address on the page,
-                which is why it is a constant rather than something computed. It is `.os-sub2`,
-                below — v16 draws the same line and the app already had it. */}
-            <div className="os-grow2">
-              {/* ⚠️ PLAYFAIR 700 AT 46px, PLAIN INK. No burgundy, no italics — the third and final
-                  swing of that pendulum, recorded at each turn. */}
-              {/* ⚠️ THE GREETING ALONE — v22's hero is `<div><h1>…</h1></div>` beside the stats,
-                  with no lede, no manuscript line, no goals meter and no fourth stat. The lede
-                  came back in the v16 pass and goes again; the slot has now held a kicker, a date,
-                  and a question, and the design's answer each time has been the name by itself. */}
-              <h1 data-probe-text="greeting">Hello, {firstName}</h1>
-              <span className="os-spacer" />
-              {chipShows && (
-                <button type="button" ref={tourChipRef} className="os-tourchip" onClick={() => { if (wideEnough()) setTouring(true); }}>
-                  Take the tour
-                </button>
-              )}
-            </div>
-            {/* ⚠️ THE TWO PILLS ARE RETIRED (dashboard redesign, Phase 3). "Querying since {month}"
-                and the achievement — "Best month yet", "a new fastest reply" — are gone with the
-                row that held them. Both were true and neither was work: a tenure line states how
-                long you have been at it and an achievement congratulates you, on a page whose job
-                is to show what needs doing. `.os-pills` goes with them, element and rule together.
-
-                ⚠️ `tenureLine` AND `achievementPill` SURVIVE IN `lib/oneScreen`, UNREFERENCED, with
-                their tests — and that is a decision rather than an oversight. Deleting a tested pure
-                derivation is a separate act from removing a row that rendered it, and this file has
-                the precedent at hand: `dashboard/focusSlot.ts` has sat in exactly that state since
-                the settled-desk pass. Both are named in the run report so the sweep is a decision
-                somebody takes, not one that happens by omission. */}
+        {/* ⚠️ THE TOP BAR IS THE PAGE'S, NOT THE SHELL'S — ref `.topbar`, which sits INSIDE `.main`
+            and shares the grid's inset. It has to be a page element: the shell's own bar spans the
+            window rather than the content column, so a probe on it could never match the ref's
+            inset however the field were sized.
+            ⚠️ AND IT CARRIES THE SEARCH ALONE. The ref draws Feedback and + New here too, because a
+            standalone mockup has no shell to put them in; this app's shell bar already renders
+            both, and + New carries three capture contracts. Re-rendering them here would be a
+            second mount of a working control — the fault this repo records as "a replacement that
+            is ADDED leaves the original reachable". They stay in the bar above, right-aligned,
+            which is where the ref puts them anyway. */}
+        <div className="os-topbar" data-probe="topbar">
+          <span className="os-tbsp" />
+          <div className="os-search" data-probe="search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+            <input
+              value={searchQuery}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+              placeholder="Search agents, queries, manuscripts…"
+              aria-label="Search agents, queries and manuscripts"
+            />
+            <span className="os-kbd">⌘K</span>
           </div>
-          {/* ⚠️ queries SCOPED, agents NOT — "agents on file" is a person-count, not a per-book fact. */}
-          <OneScreenCounters loading={loading} queries={scopedQueries} agents={agents} now={now} />
+          <span className="os-tbsp" />
         </div>
 
         {/* ⚠️ THREE COLUMNS, AND THE CENTRE IS THE ELASTIC ONE (dashboard redesign, Phase 2).
@@ -292,6 +281,31 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             banner have no place in this layout and are unmounted; Community leaves the column
             entirely and becomes a strip under both of them. */}
         <div className="os-colL">
+          {/* ⚠️ THE HERO IS INSIDE THE LEFT COLUMN NOW (v26) — ref `.page2 > .lcol > .hero`. It used
+              to be a row of `main` spanning both columns, which put the activity panel BELOW it;
+              the ref starts the activity column level with the greeting, and the only way to do
+              that is for the greeting to be the left column's first row. */}
+          <div className={`os-greet${loading ? " isload" : ""}`} data-probe="hero">
+            {loading && <Skel bars={["h", ""]} />}
+            {/* ⚠️ THREE GRID CHILDREN, FLAT — greeting, subtitle, stats. The old `.os-gl` /
+                `.os-grow2` nesting existed to stop the dateline, name and pills becoming flex items
+                on one line; all three of those are gone, and with the hero a two-row grid the
+                wrapper would be the grid item instead of the heading it wraps. */}
+            <h1 data-probe-text="greeting">Hello, {firstName}</h1>
+            <div className="os-subrow">
+              {/* ⚠️ A QUESTION, NOT A DERIVED FACT — the one piece of address on the page, which is
+                  why it is a constant. The slot has held a kicker, a date and a lede; v26 states it
+                  as its own hero row with its own text probe. */}
+              <p className="os-sub2line" data-probe-text="subtitle">What&apos;s on your desk today?</p>
+              {chipShows && (
+                <button type="button" ref={tourChipRef} className="os-tourchip" onClick={() => { if (wideEnough()) setTouring(true); }}>
+                  Take the tour
+                </button>
+              )}
+            </div>
+            {/* ⚠️ queries SCOPED, agents NOT — "agents on file" is a person-count, not a per-book fact. */}
+            <OneScreenCounters loading={loading} queries={scopedQueries} agents={agents} now={now} />
+          </div>
           <div className="os-toprow" data-probe="toprow">
             <OneScreenAuthor
               loading={loading} manuscripts={manuscripts} compact

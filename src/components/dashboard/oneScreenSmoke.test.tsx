@@ -294,11 +294,19 @@ describe("§2 · the greeting", () => {
    * with no lede, no manuscript line and no goals meter. Three answers, and the design's has been
    * the name by itself each time the question was asked properly.
    */
-  it("the greeting leads ALONE, and the name is plain ink", () => {
+  /* ⚠️ RETARGETED: THE SUBTITLE IS BACK, AND IT IS THE ONE THING THAT CHANGED (v26). This forbade
+     "on your desk today?" outright, because the v22 hero was the greeting and nothing else. v26
+     states the question as its OWN hero row with its own text probe — row 2, column 1, beside the
+     stats that span both rows. What the case was really guarding survives unchanged and is still
+     asserted: no kicker, no `.os-sub2` lede, no italic-burgundy name. The slot has now held a
+     kicker, a date, a lede and a question; this is the fourth swing and the first with a probe on
+     it, which is what makes it checkable rather than remembered. */
+  it("the greeting leads, the question sits under it, and the name is plain ink", () => {
     const html = render();
     expect(html).toContain("Hello, Nick");
+    expect(html).toContain("os-sub2line");
+    expect(html).toContain('data-probe-text="subtitle"');
     expect(html).not.toContain('class="os-sub2"');
-    expect(html).not.toContain("on your desk today?");
     expect(html).not.toContain("os-kicker");
     // no italic-burgundy name: the h1 carries no <em>
     expect(html).not.toMatch(/<h1[^>]*>[^<]*<em/);

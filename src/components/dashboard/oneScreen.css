@@ -2165,6 +2165,108 @@
    prevent. Rule and element removed together — a `margin-top: auto` left in this file would
    silently un-centre the hero the next time someone re-added the div. */
 
+/* ══ v26 · THE TOP BAR ══ */
+/**
+ * ⚠️ THE BAR IS THE PAGE'S OWN ROW, ABOVE THE GRID AND INSIDE THE CONTENT — ref `.topbar`, a child
+ * of `.main` sharing the grid's inset. The two flex spacers are what centre the field: the search
+ * is `flex: 0 1 620px` between two `flex: 1` siblings, so it sits on the CONTENT's midline and
+ * shrinks before it overflows. Centring by `margin: auto` would put it on the midline of whatever
+ * space happened to be left, which is the fault this repo already records against the shell bar's
+ * own centred search.
+ */
+.os-topbar { display: flex; align-items: center; gap: 18px; padding: 14px 0 22px; flex: none; }
+.os-tbsp { flex: 1; }
+/* ref `.searchwrap` — 620 wide, 50 tall (12px padding + a 16px line box + 1px borders) */
+.os-search {
+  flex: 0 1 620px; display: flex; align-items: center; gap: 12px;
+  background: #ffffff; border: 1px solid #e6dfd6; border-radius: 14px; padding: 12px 18px;
+  box-shadow: 0 1px 2px rgba(42, 31, 24, 0.04);
+}
+.os-search svg { width: 18px; height: 18px; stroke: #b3a596; fill: none; stroke-width: 1.7; flex: none; }
+.os-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 16px; color: #2a1f18; }
+.os-search input::placeholder { color: #b3a596; }
+.os-search:focus-within { border-color: #b98a76; }
+.os-kbd {
+  font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: #b3a596;
+  border: 1px solid #e6dfd6; border-radius: 6px; padding: 3px 7px; flex: none;
+}
+
+/* ══ v26 · THE HERO ══ */
+/**
+ * ⚠️ TWO ROWS, AND THE STATS SPAN BOTH — ref `.page2 .hero .stats{grid-row:1 / span 2}`.
+ *
+ * THE PACK GIVES TWO OPPOSITE INSTRUCTIONS FOR THIS, back to back: first that the stats are
+ * "row 1 / column 2 … pinned to the heading's row", then that they "span both hero rows … They are
+ * not pinned to the heading's row — that squashes them into the heading's height." The ref settles
+ * it and the second is right: `grid-row: 1 / span 2`, `align-self: center`, `top: -4px`. So does
+ * the pack's own gate, which requires the stats block to be TALLER than the greeting block — which
+ * a row-1 placement cannot produce.
+ *
+ * The 4px lift is optical: the greeting block's mass sits high (a 46px heading over a 17px line),
+ * so a true centre reads low against it.
+ */
+.os-greet {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: clamp(18px, 2vw, 36px);
+  row-gap: 6px;
+  align-items: center;
+  padding: 0 2px;
+  flex: none;
+}
+.os-greet > h1 { grid-column: 1; grid-row: 1; }
+.os-greet .os-subrow { grid-column: 1; grid-row: 2; display: flex; align-items: center; gap: 12px; min-width: 0; }
+.os-greet .os-counters {
+  grid-column: 2; grid-row: 1 / span 2;
+  align-self: center; align-items: center;
+  position: relative; top: -4px;
+}
+/**
+ * ⚠️ 46px FLAT, NOT THE PACK'S `clamp(30px, 2.35vw, 44px)` — AND THIS IS THE ONE PLACE THE PACK AND
+ * THE REF DISAGREE, so it is written down rather than decided quietly.
+ *
+ * The pack lists six clamps and says "nothing steps". FIVE of them are live in the ref and are used
+ * here. The sixth is not: `.page2 .hero h1` is declared at line 591 with the clamp and AGAIN at
+ * line 623 with `font-size: 46px`, no media query, later in the file — so the ref renders 46 at
+ * every width from 1536 to 2520 (measured, all five). The clamp is dead in the artefact.
+ *
+ * The ref wins because it is what the gate compares against: a clamp here is a `text:greeting` miss
+ * of 2px at 1920 and 10px at 1536, on every run, for the life of the pack — and a standing red is
+ * how a gate stops being read. It also does not step, so the reason the pack gives for clamping
+ * (tiered breakpoints producing the squash) does not argue against it.
+ *
+ * ⚠️ IF THE CLAMP IS THE INTENT, THE REF NEEDS FIXING FIRST: delete lines 623-624 of
+ * `dashboard-cappuccino-v26.html` and re-ship it. Then this rule becomes the clamp and the gate
+ * stays green. Same for the subtitle, which is 17px flat here for exactly the same reason.
+ */
+.os-greet > h1 {
+  font-family: var(--font-serif); font-weight: 700; font-size: 46px;
+  letter-spacing: -0.02em; color: #2a1f18; line-height: 1.05; margin: 0; white-space: nowrap;
+}
+.os-sub2line { margin: 0; font-size: 17px; color: #6b5d54; white-space: nowrap; }
+
+/* ⚠️ THE FIVE LIVE CLAMPS, from the ref. They scale continuously so the row never steps — which is
+   what the pack asks for and what the ref actually does for these five. */
+.os-greet .os-counters { justify-content: space-between; gap: clamp(10px, 1.2vw, 30px); width: 100%; }
+.os-greet .os-counter { gap: clamp(8px, 0.85vw, 18px); flex: 0 1 auto; min-width: 0; }
+.os-greet .os-cic { width: clamp(58px, 5.1vw, 104px); height: clamp(58px, 5.1vw, 104px); }
+.os-greet .os-cl { font-size: clamp(12.5px, 0.82vw, 16.5px); margin-bottom: 3px; white-space: nowrap; }
+.os-greet .os-cn { font-size: clamp(22px, 1.55vw, 33px); }
+.os-greet .os-cd { font-size: clamp(10px, 0.66vw, 13px); padding: 3px clamp(6px, 0.5vw, 10px); }
+
+/**
+ * ⚠️ EXACTLY ONE MEDIA QUERY IN THE HERO, AT 1750 — ref's own. Below it the stats take a row of
+ * their own beneath the subtitle, still `space-between` at full width. Tiered breakpoints are what
+ * produced the earlier squash: two rules for one property, the wrong one winning at some widths.
+ * One step, at one width, and the clamps carry everything between.
+ */
+@media (max-width: 1750px) {
+  .os-greet { grid-template-columns: minmax(0, 1fr); row-gap: 16px; }
+  .os-greet .os-counters { grid-column: 1; grid-row: 3; justify-content: space-between; width: 100%; top: 0; }
+  .os-greet .os-cic { width: clamp(72px, 5.6vw, 92px); height: clamp(72px, 5.6vw, 92px); }
+}
+
 /* ══ §P4 · REDUCED MOTION ═══════════════════════════════════════════════════════════════════
    ⚠️ THIS BLOCK MUST STAY LAST — it wins on source order at equal specificity, and every rule
    above is equal specificity. Anything added below it is silently exempt.

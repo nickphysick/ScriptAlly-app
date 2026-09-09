@@ -110,10 +110,11 @@ const PROBES = [
  */
 const ALLOW = [
   {
-    key: "stats", field: "x", max: 12,
+    key: "stats", field: "x", derived: "greetW", slack: 3,
     why: "the hero is `auto 1fr`, so the stats begin where the greeting ENDS. The ref's greeting " +
-         "reads \"Hello, Bethany\"; the harness account's name is a different length. Closing it " +
-         "means renaming the account to flatter a diff.",
+         "reads \"Hello, Bethany\"; the harness account's name is a different length, and the " +
+         "difference between the two headings is EXACTLY the difference this forgives — measured " +
+         "each run, not typed. A larger gap than the names account for still counts.",
   },
   {
     key: "brush", field: "xr", max: 90,
@@ -125,9 +126,19 @@ const ALLOW = [
 ];
 
 /** true when this miss is one of the recorded allowances AND is no worse than the allowance says */
-const allowedBy = (m) =>
-  ALLOW.find((a) => a.key === m.key && a.field === m.field &&
-    Number.isFinite(m.ref) && Number.isFinite(m.app) && Math.abs(m.app - m.ref) <= a.max);
+const allowedBy = (m, refData, appData) =>
+  ALLOW.find((a) => {
+    if (a.key !== m.key || a.field !== m.field) return false;
+    if (!Number.isFinite(m.ref) || !Number.isFinite(m.app)) return false;
+    const gap = Math.abs(m.app - m.ref);
+    if (a.derived) {
+      /* the allowance IS the measured cause, plus a few pixels of rounding */
+      const r = refData.checks?.[a.derived], p = appData.checks?.[a.derived];
+      if (!Number.isFinite(r) || !Number.isFinite(p)) return false;
+      return gap <= Math.abs(r - p) + (a.slack ?? 0);
+    }
+    return gap <= a.max;
+  });
 
 const ANCHOR = {
   main: "datum",
@@ -266,6 +277,13 @@ const READ = `(() => {
   }
   /* the datum, under the name every diff already asks for; an explicit probe still wins */
   if (!out.probes.main && datum && visibleIn(datum)) out.probes.main = box(datum);
+  /* ⚠️ THE GREETING'S RENDERED WIDTH, so the stats allowance can be DERIVED rather than typed.
+     The hero is auto/1fr: the stats begin where the greeting ends, so the two sides differ by
+     exactly the width of the writer's name against the ref's. Recording it turns a magic tolerance
+     into arithmetic that moves with the fixture — the difference is forgiven where it equals the
+     name's, and reported the moment it does not. */
+  const greetEl = document.querySelector('[data-probe-text="greeting"]');
+  out.checks.greetW = greetEl ? Math.round(greetEl.getBoundingClientRect().width * 10) / 10 : null;
   /* ⚠️ A TEXT PROBE READS ITS ELEMENT WHETHER OR NOT IT IS VISIBLE, AND THE REF IS WHY.
      v16 puts data-probe-text=card-title on the chart card's h3 inside hdA — which its own shipping
      config sets to display:none, because hdr is b and the stat block hdB takes over. A visible-only
@@ -784,7 +802,7 @@ try {
     const allowed = [];
     const counted = [];
     for (const m of misses) {
-      const a = allowedBy(m);
+      const a = allowedBy(m, refData, appData);
       if (a) allowed.push({ ...m, allowance: a.why });
       else counted.push(m);
     }
