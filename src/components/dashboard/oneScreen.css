@@ -396,7 +396,7 @@
 
 /* §10: keyboard parity with hover */
 .os-root a:focus-visible, .os-root button:focus-visible, .os-root [tabindex]:focus-visible {
-  outline: 2px solid #b98a76;
+  outline: 2px solid #8a9e88;
   outline-offset: 2px;
   border-radius: 8px;
 }
@@ -941,7 +941,7 @@
   transition: border-color 0.15s, background 0.15s;
 }
 .os-freqsel select:hover { border-color: #cdbfae; background: #fffdf9; }
-.os-freqsel select:focus-visible { outline: 2px solid #b98a76; outline-offset: 1px; }
+.os-freqsel select:focus-visible { outline: 2px solid #8a9e88; outline-offset: 1px; }
 .os-freqsel .os-cv { position: absolute; right: 10px; font-size: 9px; color: #c0b2a2; pointer-events: none; }
 /**
  * The slider has no scale marks, so the label IS its value — never decoration.
@@ -1280,8 +1280,74 @@
 .os-rb { border: 0; border-right: 2px solid #fffdf9; padding: 0; min-width: 3px; cursor: pointer; transition: filter 0.14s ease; }
 .os-rb:last-child { border-right: 0; }
 .os-rb:hover { filter: brightness(0.96); }
-.os-rb.on { box-shadow: inset 0 0 0 1.5px #7c3a2a; }
-.os-rb:focus-visible { outline: 2px solid #b98a76; outline-offset: 1px; }
+.os-rb:focus-visible { outline: 2px solid #8a9e88; outline-offset: 1px; }
+
+/**
+ * ⚠️ ONE FOCUS RING FOR THIS PAGE, SAGE, AND ONLY FOR THE KEYBOARD (v30, Phase 2).
+ *
+ * ⚠️ THE STATED CAUSE WAS FALSE AND THE MEASUREMENT SAYS SO. The pack reported a ring left behind
+ * by a mouse click, fired on `:focus` rather than `:focus-visible`. Measured before touching
+ * anything, clicking a rule band and a ticket: `outline-style: none`, `:focus-visible` not matched.
+ * The outlines were already keyboard-only. What persists after a click is a SELECTION marker drawn
+ * as a box-shadow — `.os-rb.on`'s burgundy inset and `.tkt.sel`'s pink ring — which is the app
+ * saying what is selected, and reads as a stuck focus ring because until this pass the filter had
+ * no way back. Phase 3 is the real fix for that half.
+ *
+ * ⚠️ SO THIS BLOCK CLEARS THE OUTLINE AND DELIBERATELY DOES NOT CLEAR `box-shadow`. The ref's own
+ * rule is `:focus:not(:focus-visible){outline:none!important;box-shadow:none!important}` and the
+ * second half is safe THERE because nothing in the ref draws state with a shadow. Here it would
+ * erase the selected ticket's marker the moment it was focused — a mockup's rule that cannot be
+ * ported without reading what the app does with the property.
+ *
+ * ⚠️ AND IT IS SCOPED, NOT GLOBAL. `.tkt`'s own ring is burgundy and that component is shared with
+ * the To-do page and the Agents drawer; retinting it everywhere is a bigger call than this pack
+ * makes, so the dashboard states its ring at 0-2-0 and the shared default is untouched. `.slo` is
+ * named because the drawer is portalled to `body` (Phase 4) and is no longer inside `.sa-dashroot`.
+ */
+.sa-dashroot :focus:not(:focus-visible),
+.slo :focus:not(:focus-visible) { outline: none; }
+.sa-dashroot :focus-visible,
+.slo :focus-visible { outline: 2px solid #8a9e88; outline-offset: 2px; border-radius: 6px; }
+/* the shared ticket's own ring is burgundy; on this page and in this drawer it is the page's sage */
+.sa-dashroot .tkt:focus-visible,
+.slo .tkt:focus-visible { outline: 2px solid #8a9e88; outline-offset: 2px; }
+
+/**
+ * ⚠️ THE SELECTED BAND IS MARKED BY DIMMING THE OTHERS — the ref's own mechanism (v30, Phase 2).
+ * It was an inset `#7c3a2a` ring on the selected band, which is burgundy rather than red but reads
+ * as an error at 1.5px inside a pale tint, and is the ring the pack was seeing. The ref
+ * (`.sbar button.dim{opacity:.4}`) never rings the selection: it fades everything that is NOT
+ * selected, which says the same thing without adding a colour the palette reserves for ink.
+ */
+.os-rb.dim { opacity: 0.4; }
+
+/* ⚠️ THE CAPTION SITS IN THE ZONE'S OWN PADDING AND ADDS NO HEIGHT TO IT — the rulezone reserves
+   18px below the rule for the legend overlay's shadow, and this line lives in it. A caption that
+   pushed the tickets down would make the grid jump every time a band was clicked, which is the
+   fault the legend was made an overlay to avoid. */
+.os-rulecap {
+  position: absolute; left: 20px; right: 20px; top: calc(100% - 17px);
+  margin: 0; font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #9c8f82; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; pointer-events: none;
+}
+/* the legend overlay covers the caption when it opens — one line in that slot at a time */
+.os-rulezone.on .os-rulecap, .os-rulezone:hover .os-rulecap { opacity: 0; }
+
+/**
+ * ⚠️ THE BADGE AS A CONTROL (v30, Phase 3) — ref `.badge{cursor:default}` plus `.badge .clr`.
+ * It is a `button` only while a filter is on, so the resting badge keeps `.os-tbadge` exactly as it
+ * was: same paddings, same radius, same type. What the button adds is a pointer, the `×` and a
+ * hover that brings the glyph to full strength — the ref's own treatment, where the mark sits at
+ * .6 until the badge is hovered so it reads as an affordance rather than as part of the label.
+ */
+.os-tbadge-clr {
+  cursor: pointer; font: inherit; border: 1px solid #e6d8c6;
+  transition: filter 0.14s ease;
+}
+.os-tbadge-clr:hover { filter: brightness(0.97); }
+.os-tbadge-x { font-size: 14px; line-height: 1; letter-spacing: 0; color: #6b5d54; opacity: 0.6; margin-left: 2px; }
+.os-tbadge-clr:hover .os-tbadge-x { opacity: 1; }
 
 /* ⚠️ AN OVERLAY, NOT A ROW. Revealing the legend must not move a single ticket — a legend that
    reflows the grid makes the thing you were about to click jump out from under the pointer. */
@@ -1300,7 +1366,7 @@
 .os-lg b { font-weight: 600; color: #241811; font-variant-numeric: tabular-nums; }
 .os-lg i { width: 10px; height: 10px; border-radius: 3px; flex: none; box-shadow: inset 0 0 0 1px rgba(58, 28, 20, 0.08); }
 .os-lg.on { color: #241811; text-decoration: underline; text-underline-offset: 3px; }
-.os-lg:focus-visible { outline: 2px solid #b98a76; outline-offset: 2px; border-radius: 6px; }
+.os-lg:focus-visible { outline: 2px solid #8a9e88; outline-offset: 2px; border-radius: 6px; }
 
 /* ⚠️ THREE ACROSS, TOP-ALIGNED. `align-content: start` is what stops three tickets in a tall card
    spreading down it — the grid would otherwise distribute its rows into the height the card gives.
@@ -1458,7 +1524,7 @@
   width: 10px; height: 34px; background: transparent; border: 0;
 }
 .os-bw input[type="range"]::-moz-range-thumb { width: 10px; height: 34px; background: transparent; border: 0; }
-.os-bw input[type="range"]:focus-visible { outline: 2px solid #b98a76; outline-offset: 2px; border-radius: 6px; }
+.os-bw input[type="range"]:focus-visible { outline: 2px solid #8a9e88; outline-offset: 2px; border-radius: 6px; }
 /* ⚠️ THE BRUSH'S TRACK IS A CLAMP NOW, NOT A STEP (v28, Phase 3) — ref
    `clamp(120px, 11vw, 230px)`, declared on the base rule above. The step existed to give the header
    room when it stacked; with the header held to one row the track simply narrows with the viewport,
@@ -1502,7 +1568,7 @@
 .os-chartwrap svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: default; outline: none; }
 /* the cursor flips across the reading-zone boundary — felt, not guessed (§3) */
 .os-chartwrap svg.reading { cursor: crosshair; }
-.os-chartwrap svg:focus-visible { outline: 2px solid #b98a76; outline-offset: -2px; border-radius: 8px; }
+.os-chartwrap svg:focus-visible { outline: 2px solid #8a9e88; outline-offset: -2px; border-radius: 8px; }
 /* ref `.axis` — mono 11px, `--mono-c`, .08em. It was 8.5px in a paler tint, which on a three-tick
    scale made the only scale furniture on the card the least legible thing on it. */
 .os-ylab { font: 400 11px "JetBrains Mono", monospace; fill: #9c8f82; letter-spacing: 0.08em; }
