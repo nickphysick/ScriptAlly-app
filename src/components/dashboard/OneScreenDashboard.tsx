@@ -54,12 +54,6 @@ export interface OneScreenDashboardProps {
   /** The manuscript the shell scope names — the kicker repeats it (§2). */
   activeManuscript: Manuscript | null;
   onNavigate: (tab: string, sub?: string) => void;
-  /* ⚠️ THE TOP BAR'S SEARCH IS THE APP'S GLOBAL QUERY, NOT A NEW CONTROL. `Dashboard` already
-     filters its query list on this value, so the field is live the moment it is typed in — which
-     is the difference between the ref's search and a decorative one. Optional so every existing
-     mount, including the tests', renders byte-identically without it. */
-  searchQuery?: string;
-  onSearchChange?: (v: string) => void;
   onTaskAction: (task: Task) => void;
   updateUserProfile: (fields: Partial<User>) => Promise<void>;
   /** Injectable for tests; defaults to the real clock. */
@@ -76,7 +70,6 @@ export const Skel: React.FC<{ bars: ("h" | "grow" | "")[] }> = ({ bars }) => (
 export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
   loading, queries, agents, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
   activeManuscript, onNavigate, onTaskAction, updateUserProfile, now = new Date(),
-  searchQuery = "", onSearchChange,
 }) => {
   /**
    * ⚠️ THE SCOPED SETS ARE DERIVED ONCE, HERE, AND HANDED DOWN (B2). Every card reading the same
@@ -235,44 +228,11 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             rest, vertically centred against it. The greeting's own stack lives inside `.os-gl` —
             without that wrapper the dateline, name and pills would each become flex items on the
             same line. */}
-        {/* ⚠️ THE TOP BAR IS THE PAGE'S, NOT THE SHELL'S — ref `.topbar`, which sits INSIDE `.main`
-            and shares the grid's inset. It has to be a page element: the shell's own bar spans the
-            window rather than the content column, so a probe on it could never match the ref's
-            inset however the field were sized.
-            ⚠️ AND IT CARRIES THE SEARCH ALONE. The ref draws Feedback and + New here too, because a
-            standalone mockup has no shell to put them in; this app's shell bar already renders
-            both, and + New carries three capture contracts. Re-rendering them here would be a
-            second mount of a working control — the fault this repo records as "a replacement that
-            is ADDED leaves the original reachable". They stay in the bar above, right-aligned,
-            which is where the ref puts them anyway. */}
-        <div className="os-topbar" data-probe="topbar">
-          <span className="os-tbsp" />
-          <div className="os-search" data-probe="search">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
-            <input
-              value={searchQuery}
-              onChange={(e) => onSearchChange?.(e.target.value)}
-              placeholder="Search agents, queries, manuscripts…"
-              aria-label="Search agents, queries and manuscripts"
-            />
-            <span className="os-kbd">⌘K</span>
-          </div>
-          <span className="os-tbsp" />
-        </div>
-
-        {/* ⚠️ THREE COLUMNS, AND THE CENTRE IS THE ELASTIC ONE (dashboard redesign, Phase 2).
-            Left: the manuscript, the community tile, and Pro at the foot. Centre: the chart over
-            the to-do panel. Right: goals over activity, which `OneScreenRail` renders as `.os-colR`.
-
-            ⚠️ `.os-midrow` / `.os-lowrow` ARE GONE, ELEMENT AND RULE TOGETHER. They paired the
-            author tile with the chart and the community tile with tasks across two rows sharing one
-            `grid-template-columns`, so neither pair could drift. With the columns as the grid's own
-            tracks there is nothing left to drift — the law is kept by the structure rather than by
-            a shared declaration, which is why the declaration goes rather than being retargeted. */}
-        {/* ⚠️ THE GRID IS ITS OWN ELEMENT NOW (refdiff pass, Phase 3). It used to BE `.os-content`,
-            with the hero as its first row — which meant the hero's height was a grid track and the
-            three columns could not be given a row of their own. The ref draws `main` holding a
-            `hero` and a `grid3`; this is that, and it is what `data-probe="grid"` measures. */}
+        {/* ⚠️ THE PAGE'S OWN TOP BAR IS DELETED (v28, Phase 2). It held the search in a row of
+            its own, which cost ~90px of height before the greeting and left the NAV's row with a
+            hole in the middle where the search belongs. The field is in the nav row now, beside
+            Feedback and New — see `.ws-bigsearch` in the shell. What went with it: `.os-topbar`,
+            `.os-tbsp`, `.os-search`, `.os-kbd`, and the `searchQuery` props that fed it. */}
         <div className="os-grid" data-probe="grid">
         {/* ⚠️ TWO COLUMNS, AND THE LEFT ONE HAS A ROW OF ITS OWN (ref v22, Phase 3). The
             manuscript tile and the chart card share a `330px | minmax(0,1fr)` top row at equal

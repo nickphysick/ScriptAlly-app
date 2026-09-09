@@ -518,10 +518,17 @@ describe("one search control, not two (v27, Phase 2)", () => {
   });
 
   /* ⚠️ AND THE PAGE'S OWN FIELD IS THE ONE THAT SURVIVES — exactly one, with the probe on it. */
-  it("the dashboard renders exactly one search field", () => {
+  /* ⚠️ THE FIELD IS THE SHELL'S NOW (v28, Phase 2), so the PAGE renders none — and this case
+     asserts that, because the page having a search of its own is exactly the fault v28 exists to
+     fix. The count that matters is the whole document's, and it lives in the harness as a standing
+     gate run at every width: a unit test that renders one component can never see two controls in
+     two components, which is how v27's "exactly one search control" passed on a page with the
+     field in a row of its own. */
+  it("the dashboard page renders no search of its own — the nav row carries it", () => {
     const html = render();
-    expect((html.match(/data-probe="search"/g) ?? []).length).toBe(1);
-    expect((html.match(/class="os-search"/g) ?? []).length).toBe(1);
+    expect(html).not.toContain('data-probe="search"');
+    expect(html).not.toContain('class="os-search"');
+    expect(html).not.toContain("os-topbar");
   });
 
   /* ⚠️ ⌘K SURVIVES, and it is registered somewhere other than the button that was removed — every

@@ -1521,8 +1521,6 @@ export const Dashboard: React.FC<{
         currentUser={currentUser}
         activeManuscript={activeManuscriptForKicker}
         onNavigate={onNavigate}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
         onTaskAction={(task) => task.taskType === "data_quality_poor"
           ? openEditAgent(task.relatedRecordId, { fromTask: true })
           : onNavigate(task.actionPath, task.title)}

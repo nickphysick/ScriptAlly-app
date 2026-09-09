@@ -737,7 +737,12 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           the scroller: stageScroll's overlay locks, per-route scroll memory, the To-do board's
           saved position and MobileSheet all address it by id. */}
       <div className="ws-main">
-          <header className="ws-pagebar">
+          {/* ⚠️ `navrow` IS THE NAV'S OWN ROW, AND THE SEARCH LIVES IN IT (v28, Phase 2). v27 put
+              the field in a row of its own inside the page, which cost ~90px of height before the
+              greeting and left this row with a wide hole in the middle where the search belongs.
+              The v27 gate asked whether exactly one search control existed; it never asked WHERE,
+              so a correct answer to the wrong question let the fault through. */}
+          <header className="ws-pagebar" data-probe="navrow">
               {/* ⚠️ THE COLLAPSE TOGGLE SITS AT THE SIDEBAR/CONTENT SEAM — first in the bar, before
                   the crumb — and it does not move between states (sidebar-collapse pack, baked:
                   not in the sidebar footer, not on the panel edge, not hover-revealed; a footer
@@ -834,19 +839,30 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   missing rather than a bar with different tools. A margin collapses with its
                   element. This is the idiom `.ws-lbl` already uses for the sidebar's own labels;
                   nothing that stays on screen moves by a pixel. */}
+              {/* ⚠️ THE FIELD REPLACES THE PILL IN PLACE, ON THIS ROW (v28, Phase 2). It flexes to
+                  a 640px cap between the left group and the actions, which is what puts it on the
+                  same line as Feedback and New — the arrangement the ref draws and the one v27
+                  missed by giving the search a row of its own.
+                  ⚠️ IT IS THE DASHBOARD'S ALONE. Every other page keeps the pill: this row also
+                  carries a breadcrumb there, and a 640px field beside it would leave neither room.
+                  ⚠️ AND IT OPENS THE SAME PALETTE THE PILL DID. The field is a button dressed as an
+                  input rather than a real input, because the app's search IS the palette — a text
+                  box that looked typeable but opened an overlay on first keystroke would be a
+                  worse lie than the pill it replaces. */}
+              {dashMode && (
+                <button
+                  type="button"
+                  className="ws-bigsearch"
+                  data-probe="search"
+                  ref={searchAnchorRef}
+                  onClick={onOpenSearch}
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+                  <span className="ws-bigsearch-t">Search agents, queries, manuscripts…</span>
+                  <span className="ws-bigsearch-k" aria-hidden="true">⌘K</span>
+                </button>
+              )}
               <div className="ws-bright">
-                {/* ⚠️ NOT ON THE DASHBOARD — THAT PAGE RENDERS ITS OWN SEARCH (v27, Phase 2). The
-                    dashboard's top row carries a 620px field in the breadcrumb row, so the bar's
-                    pill was the SECOND search control on one screen. Two controls for one job is
-                    worse than either alone: the reader has to work out whether they do the same
-                    thing, and they do.
-                    ⚠️ REMOVED FROM THE DOM RATHER THAN HIDDEN. `display: none` would have left the
-                    element there, and "there is exactly one search control" is a claim about the
-                    document, not about what is painted.
-                    ⚠️ ⌘K IS UNAFFECTED. The shortcut is registered by `usePalette` at shell level,
-                    not by this button, and every read of the anchor ref is optional-chained — so
-                    the palette opens exactly as before and simply has no element to anchor to on
-                    this one route. */}
                 {!dashMode && (
                   <span className="ws-appctl"><SearchPill onOpen={onOpenSearch} anchorRef={searchAnchorRef} /></span>
                 )}

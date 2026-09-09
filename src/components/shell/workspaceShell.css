@@ -702,6 +702,36 @@
 }
 /* ⚠️ CHROME, NOT CONTENT — it sits ON the ground above the window and never scrolls. */
 .ws-pagebar { flex: none; display: flex; align-items: center; gap: 14px; padding: 16px 6px 14px; }
+/**
+ * ⚠️ THE DASHBOARD'S SEARCH SITS IN THIS ROW (v28, Phase 2) — ref `.topbar` at a fixed 64px with
+ * `.searchwrap{flex:1 1 auto;max-width:640px}` and the actions to its right.
+ *
+ * ⚠️ THE ROW IS SHORTER ON THIS ROUTE, DELIBERATELY. The bar's own padding is 16/14 for a
+ * breadcrumb; a 40px field inside that makes a 70px row, which is inside the ≤72px gate but only
+ * just. Trimming to 10/10 on the dashboard alone leaves the field its full height and the row at
+ * 60 — and no other page moves by a pixel.
+ */
+/* ⚠️ 12/12 GIVES THE REF'S 64px ROW EXACTLY — a 40px field between them. It was 10/10, which made
+   the row 60 and put every probe below it 3.1px high at all four widths: a uniform offset is always
+   the frame, never the layout. */
+.dash-mode .ws-pagebar { padding: 12px 6px 12px; }
+.ws-bigsearch {
+  flex: 1 1 auto; max-width: 640px; min-width: 0;
+  display: flex; align-items: center; gap: 10px;
+  height: 40px; padding: 0 14px;
+  background: #ffffff; border: 1px solid var(--ws-edge); border-radius: 12px;
+  font: inherit; cursor: pointer; text-align: left;
+}
+.ws-bigsearch:hover { border-color: #cdbfae; }
+.ws-bigsearch:focus-visible { outline: 2px solid #b98a76; outline-offset: 1px; }
+.ws-bigsearch svg { width: 17px; height: 17px; flex: none; stroke: #b3a596; fill: none; stroke-width: 1.7; }
+/* ⚠️ THE PROMPT ELLIPSES, THE SHORTCUT DOES NOT — the placeholder is the only part of this control
+   that can be arbitrarily long, and the ⌘K badge is the part a reader looks for. */
+.ws-bigsearch-t { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; color: #b3a596; }
+.ws-bigsearch-k {
+  flex: none; font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: #b3a596;
+  border: 1px solid var(--ws-edge); border-radius: 6px; padding: 3px 7px;
+}
 /* ── the collapse toggle — at the sidebar/content seam, first in the bar (sidebar-collapse pack).
    It does not move between states: same slot, same size, both directions. Rest is muted; hover
    takes the parchment card treatment; the ring is the house focus ring. The glyph's left-column
