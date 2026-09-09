@@ -33,7 +33,7 @@
  *   SA_E2E_PASSWORD      the harness account's password, from .env.local
  */
 import { chromium } from "playwright-core";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -1608,6 +1608,43 @@ function table(result) {
 }
 
 /* ── run ─────────────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * ⚠️ REFUSE TO MEASURE A BUNDLE OLDER THAN ITS SOURCES (v31). This harness had no freshness check,
+ * and it cost a false green within the hour it was written: a `build:dev` failed — another stream
+ * had committed one half of a change and `main` did not compile — and the run went ahead against
+ * the bundle from twenty minutes earlier and reported 0 misses at four widths. Every number was
+ * real and described a page that no longer existed.
+ *
+ * `tests/e2e`'s `bundleGuard` has enforced this for a year. The cheapest form for a local preview
+ * is the mtimes: if anything under `src/` is newer than the newest built asset, the bundle is not
+ * the code. Reporting a stale measurement is worse than reporting none.
+ */
+function assertFreshBundle() {
+  const dist = join(ROOT, "dist", "assets");
+  if (!existsSync(dist)) return;                     /* a remote target has no local dist to check */
+  const newest = (dir) => {
+    let t = 0;
+    for (const name of readdirSync(dir)) {
+      const f = join(dir, name);
+      const st = statSync(f);
+      t = Math.max(t, st.isDirectory() ? newest(f) : st.mtimeMs);
+    }
+    return t;
+  };
+  const built = newest(dist);
+  const src = newest(join(ROOT, "src"));
+  if (src > built) {
+    const mins = Math.round((src - built) / 60000);
+    throw new Error(
+      "dash-refdiff: the bundle is older than the sources by " + mins + " minute(s). "
+      + "Something under src/ changed after dist/ was built — REBUILD before measuring. "
+      + "A run against a stale bundle produces real numbers about a page that no longer exists, "
+      + "which is the one failure this harness cannot tell you about afterwards.",
+    );
+  }
+}
+assertFreshBundle();
 
 const browser = await chromium.launch();
 const result = { when: new Date().toISOString(), ref: REF_REL, app: APP, widths: WIDTHS, byWidth: {}, total: 0 };
