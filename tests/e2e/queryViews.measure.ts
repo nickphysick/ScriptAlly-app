@@ -1112,3 +1112,86 @@ test("well · §5 — the entrance runs once and cannot be replayed — 1440", a
 
   writeFileSync("reports/query-well-entrance.json", JSON.stringify(out, null, 2));
 });
+
+/* ══ the toolbar's row — the wrap regression ══════════════════════════════════════════════════ */
+/**
+ * ⚠️ THE REGRESSION WAS TWO DECLARATIONS OF MINE, AND NEITHER IS THE REF'S. `flex-wrap: wrap` on
+ * the left cluster dropped its min-content width to its widest single pill, so the `1fr` track
+ * collapsed to 357px and three pills stacked into three rows; `min-width: 0` on the flanks removed
+ * the grid's automatic minimum, which is what let the track collapse at all. The ref's tracks
+ * resolve to `562.578px 360px 365.422px` — unequal, sized to content — against our `357/360/357`.
+ *
+ * ⚠️ AND `nowrap` ALONE JUST CHANGES THE SYMPTOM. Un-wrapped, the flex children SQUASHED instead:
+ * the pills went 125/161/198 → 41/84/97 and "Last activity" wrapped inside its own pill to three
+ * lines, giving a 52.6px cluster around a 23px control. Wrapping and squashing are one overflow
+ * wearing two faces, so the pills take `flex: none` and the height assertion catches both.
+ */
+for (const width of [1280, 1440, 1920]) {
+test(`toolbar · exactly one row, and nothing past the well — ${width}`, async ({ page }) => {
+  await openRoute(page, "/queries", { width, height: 1000 });
+  await page.waitForSelector(".qcc-tb-left", { timeout: 30_000 });
+  const m = await page.evaluate(() => {
+    const live = [...document.querySelectorAll<HTMLElement>(".wpg.qc-wpg")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const tb = live.querySelector<HTMLElement>(".qcc-tb")!;
+    const left = live.querySelector<HTMLElement>(".qcc-tb-left")!;
+    const well = live.querySelector<HTMLElement>(".qcc-well")!;
+    const search = live.querySelector<HTMLElement>(".qcc-tb-search")!;
+    const pills = [...live.querySelectorAll<HTMLElement>(".qcc-tb .qcc-tb-btn")];
+    const h = (e: Element) => Math.round(e.getBoundingClientRect().height * 10) / 10;
+    const wb = well.getBoundingClientRect(), sb = search.getBoundingClientRect(), tbb = tb.getBoundingClientRect();
+    return {
+      clusterH: h(left),
+      tallestChild: Math.max(...[...left.children].map(h)),
+      pillHs: pills.map(h),
+      /* every pill on one line: their vertical centres agree */
+      pillCentres: pills.map((p) => Math.round((p.getBoundingClientRect().y + p.getBoundingClientRect().height / 2) * 10) / 10),
+      leadingIcons: pills.filter((p) => !!p.querySelector(":scope > svg:not(.qcc-tb-chev)")).length,
+      wrap: getComputedStyle(left).flexWrap,
+      searchW: Math.round(sb.width),
+      offCentre: Math.round(((sb.x + sb.width / 2) - (wb.x + wb.width / 2)) * 10) / 10,
+      pastWellEdge: Math.round((tbb.right - (wb.right - 16)) * 10) / 10,
+      clusterOverflow: left.scrollWidth - left.clientWidth,
+      /* ⚠️ THE CLAIM IS CLEARANCE, NOT `scrollWidth`. A `nowrap` flex box reports overflow whenever
+         its content is wider than its box — but the content spills into the grid's 12px gap, which
+         is empty. What matters to a reader is whether the last pill touches the search. */
+      pillToSearch: (() => {
+        const ps = [...live.querySelectorAll<HTMLElement>(".qcc-tb .qcc-tb-btn")];
+        if (!ps.length) return null;
+        const last = ps[ps.length - 1].getBoundingClientRect();
+        return Math.round((search.getBoundingClientRect().left - last.right) * 10) / 10;
+      })(),
+    };
+  });
+
+  /* ⚠️ THE ROW ITSELF — the cluster is no taller than its own tallest child. `pill height + 2px`
+     is the brief's form and would be wrong here: Filter carries a count where the others carry a
+     Playfair value, so the pills are legitimately 23 and 32.3 tall. Comparing the cluster to its
+     TALLEST CHILD says "one row" without assuming the children are identical. */
+  console.log(`ROW ${width} ` + JSON.stringify(m));
+  /* ⚠️ THE HEIGHT FIRST, AND THE MECHANISM AFTER IT. With `expect(wrap).toBe("nowrap")` above,
+     restoring the wrap fired THAT and the height claim was never evaluated — the masked-red shape
+     this repo records, in the case written to catch the regression. The primary claim goes first
+     so a mutation proves the thing the case is for. */
+  expect(m.clusterH, `the toolbar is more than one row at ${width}`).toBeLessThanOrEqual(m.tallestChild + 2);
+  expect(m.wrap, `the cluster can wrap again at ${width}`).toBe("nowrap");
+  /* and the pills share a line, which a height check alone cannot prove */
+  expect(Math.max(...m.pillCentres) - Math.min(...m.pillCentres), `the pills are not on one line at ${width}`).toBeLessThanOrEqual(2);
+  /* squashing is the other face of the same overflow */
+  /* squashing is the other face of the same overflow, and the pill must not reach the search */
+  expect(m.pillToSearch, `the last pill touches the search at ${width} (clearance ${m.pillToSearch}px)`).toBeGreaterThanOrEqual(4);
+  /* the ref's pill is chip + value + chevron; a leading glyph is a fourth thing */
+  expect(m.leadingIcons, `a leading icon came back at ${width}`).toBe(0);
+  /* nothing runs past the well's inner edge */
+  expect(m.pastWellEdge, `the toolbar overflows the well at ${width}`).toBeLessThanOrEqual(1);
+
+  /**
+   * ⚠️ THE SEARCH IS NOT CENTRED ON THE WELL, AND THE REF IS NOT EITHER — measured, the ref sits
+   * 99.0px right of its own well's centre, because `1fr auto 1fr` with content-sized flanks gives
+   * the wider flank the wider track. Asserting "centred within 2px" would pin us to the behaviour
+   * the WRAP produced: equal 357px flanks, bought by collapsing the cluster into three rows. So
+   * the claim is the ref's geometry rather than zero, and it is stated as a bound rather than a
+   * value because the offset closes as the page widens (0.0 at 1920, where both flanks fit).
+   */
+  expect(Math.abs(m.offCentre), `the search sits further off centre than the ref does at ${width}`).toBeLessThanOrEqual(100);
+});
+}

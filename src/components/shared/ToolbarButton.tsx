@@ -37,7 +37,13 @@ export const ToolbarButton = React.forwardRef<HTMLButtonElement, {
   value?: string;
   /** the count of active choices, for a control that holds a set. 0 renders nothing. */
   count?: number;
-  icon: React.ReactNode;
+  /**
+   * ⚠️ OPTIONAL SINCE THE CHIP-LABEL PILL (the well round, fix). The Query Centre's pill is
+   * chip + value + chevron, exactly as the ref draws it, and a leading glyph outside the chip is
+   * a fourth thing in a control designed around three. To-do and Contact list still pass one and
+   * are unchanged.
+   */
+  icon?: React.ReactNode;
   open: boolean;
   onClick: () => void;
   /**

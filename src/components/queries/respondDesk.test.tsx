@@ -1272,10 +1272,18 @@ describe("the well round · a recess, a toolbar in its head, bones, and one entr
 
   /* §2 — the toolbar's three tracks */
   it("the toolbar is a three-track grid and the search sits on the row's midline", () => {
-    expect(css).toMatch(/\.qcc-tb \{[^}]*grid-template-columns: 1fr auto 1fr/);
-    expect(css).toMatch(/\.qcc-tb-search \{[^}]*width: 360px/);
+    /* ⚠️ RETARGETED: the middle track is `minmax(0, 360px)`, not `auto`. A fixed-width search in an
+       `auto` track is circular — the track sizes to the item and the item to the track — and it
+       resolved to 220px at every width. The claim is unchanged: three tracks, the flanks equal
+       shares and the search bounded between them. */
+    expect(css).toMatch(/\.qcc-tb \{[^}]*grid-template-columns: 1fr minmax\(0, 360px\) 1fr/);
+    /* ⚠️ THE 360 MOVED TO THE TRACK, WHICH IS WHERE IT CAN BE A MAXIMUM. As a fixed `width` on the
+       field the middle track could not give way and the grid overflowed the well; as
+       `minmax(0, 360px)` the search is 360 wherever there is room and the first thing to shrink
+       where there is not — which is what §2 asks for. The field fills its track. */
     expect(css).toMatch(/\.qcc-tb-search \{[^}]*border-radius: 99px/);
-    expect(css).toMatch(/\.qcc-tb-search \{[^}]*justify-self: center/);
+    expect(css).toMatch(/\.qcc-tb-search \{[^}]*width: 100%/);
+    expect(css).toMatch(/\.qcc-tb-search \{[^}]*min-width: 0/);
     /* the flanks are cells, not loose children — otherwise the tracks hold one item each */
     expect(page).toContain('<div className="qcc-tb-left">');
     expect(page).toContain('<div className="qcc-tb-right">');

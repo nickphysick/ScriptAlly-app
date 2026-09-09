@@ -50,6 +50,12 @@
   margin: 0 0 18px;
   padding: 14px 16px 16px;
   box-shadow: inset 0 1px 3px rgba(58, 28, 20, 0.06);
+  /* ⚠️ THE TOOLBAR'S SIZE CONTAINER IS THIS, NOT THE TOOLBAR — a container query whose subject
+     sizes the container is circular. Declared here rather than in a second `.qcc-well` rule
+     because `cssHygiene` forbids a base selector twice in one sheet, and that lock is right: two
+     blocks for one selector is how the cascade and a reader come to disagree. */
+  container-type: inline-size;
+  container-name: qccwell;
 }
 
 /* ══ §2 · THE TOOLBAR, AS THE WELL'S HEAD ═══════════════════════════════════════════════════
@@ -60,18 +66,46 @@
    make the centre column the row's midline and keep it there. */
 .qcc-tb {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  /* ⚠️ `minmax(0, 360px)` FOR THE SEARCH, NOT `auto`. A fixed-width item inside an `auto` track is
+     circular — the track sizes to the item and the item to the track — and it resolved to 220px at
+     every width, well under the 360 the section asks for. Stated as a maximum that may shrink, the
+     track is 360 wherever there is room and gives way first when there is not. */
+  grid-template-columns: 1fr minmax(0, 360px) 1fr;
   align-items: center;
   gap: 12px;
   padding: 4px 2px 16px;
   margin-bottom: 0;
 }
 /* left and right cells: the flanks flow inside their own tracks */
-.qcc-tb-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
-.qcc-tb-right { display: flex; align-items: center; justify-content: flex-end; min-width: 0; }
-/* ⚠️ `min-width: 0` ON ALL THREE, or a flank's content sets a floor the grid cannot go below and
-   the centre column stops being the midline at the width it matters most. */
-.qcc-tb > * { min-width: 0; }
+/* ⚠️ `nowrap`, AND THE `wrap` IT REPLACES WAS THE WHOLE REGRESSION. Carried over from the old
+   FLEX toolbar into the new grid cell, it dropped the cluster's min-content width to its widest
+   single pill — so the `1fr` track collapsed to 357px and the three pills stacked into three
+   rows, 155px tall. The ref's `.left` sets no wrap at all. Measured: pills at y=372, 420 and 469
+   against a 38px pill.
+
+   ⚠️ AND `min-width: 0` ON THE FLANKS WAS THE OTHER HALF. It removes a grid item's automatic
+   minimum, which is exactly what lets a `1fr` track shrink below its content — the ref's tracks
+   resolve to `562.578px 360px 365.422px` (unequal, sized to content) where ours resolved to
+   `357px 360px 357px` (equal, because both flanks had been told they could vanish). It stays on
+   the SEARCH alone, which is the one thing that is allowed to give. */
+.qcc-tb-left { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; }
+/* ⚠️ THE PILLS MAY NOT SHRINK, AND THIS IS THE HALF THAT `nowrap` ALONE DOES NOT FIX. With the
+   row un-wrapped the flex children simply squashed instead: measured at 1440, the three pills went
+   from 125/161/198 to 41/84/97, and "Last activity" wrapped inside its own pill to three lines —
+   a 52.6px cluster around a 23px control. Wrapping and squashing are the same overflow wearing two
+   faces, and a height assertion catches both only if the pill is allowed to keep its width.
+
+   It also makes the cluster's min-content the SUM of its children, which is what lets the `1fr`
+   track grow to fit them — the behaviour the ref gets for free (its tracks resolve unequal, sized
+   to content) and ours lost when the flanks were told they could shrink to nothing. */
+.qcc-tb-left > * { flex: none; }
+/* ⚠️ AND THE PILL'S TEXT MAY NOT WRAP EITHER, or `flex: none` is not enough. A flex item's
+   min-content is its text's min-content, so the track could still size to "activity" rather than
+   to "Last activity" — the cluster then reported 30px of overflow and the last pill overlapped the
+   search by 17.7px at 1280. With the text unbreakable the cluster's min-content IS its natural
+   width, which is what the `1fr` track has to respect. */
+.qcc-tb .qcc-tb-btn { white-space: nowrap; }
+.qcc-tb-right { display: flex; align-items: center; justify-content: flex-end; }
 /* ⚠️ THE COUNT IS 15px AND MUTED, WITH ONLY THE FIGURES IN INK (§2). The sentence is chrome; the
    two numbers are the fact, and they are the only part a reader scans for. It reads `Showing 9 of
    54` rather than `9 of 54` because the row now carries three different kinds of control and a
@@ -91,7 +125,9 @@
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 3px 10px rgba(58, 28, 20, 0.06);
   /* ⚠️ STILL FIXED, AND STILL FOR THE MEASURED REASON: as `flex: 1 1 0%` it took 962px at 1440 and
      1522 at 2560. `justify-self: center` is what puts it on the row's midline inside its track. */
-  width: 360px; max-width: 100%; justify-self: center;
+  /* the track carries the cap now; the field simply fills it — and `min-width: 0` is what lets
+     the middle track give way first, which is the section's "last to shrink" expressed in CSS */
+  width: 100%; justify-self: stretch; min-width: 0;
 }
 /* ⚠️ THE `/` KEYCAP IS FULLY ROUND TOO, or a 4px-radius chip inside a 99px field reads as a
    fragment of the old control left behind. */
@@ -318,4 +354,47 @@
     animation: qcc-rise 160ms linear both !important;
     animation-delay: 0ms !important;
   }
+}
+
+
+/* ══ THE CHIP LABELS DROP ON THE TOOLBAR'S OWN WIDTH, NOT THE VIEWPORT'S ════════════════════════
+   ⚠️ §2's rule is "<1280 the pills drop their chip labels", and expressed against the VIEWPORT it
+   is wrong here by the width of the rail. The ref is drawn with no sidebar: at a 1440 viewport its
+   toolbar has 1312px where ours has 1102px. So the app at 1440 is already in the regime the brief
+   assigns to <1280, and a viewport query would never fire at the width where it is needed.
+
+   Measured, at 1440: the cluster wants 624px with the leading icons and 555 without, against a
+   357px track. Dropping the chips takes it to ~369 and the row fits. This is the same
+   container-versus-viewport error the view switch's own `max-width: 1180px` rule makes, which is
+   why it keeps its labels at 1440 while its page has less room than the query implies. */
+
+/* ⚠️ THE VIEW SWITCH DROPS ITS LABELS FIRST, NOT THE CHIPS. Hiding a chip costs FILTER its only
+   text — it carries a count rather than a value, so the chip IS its name, and the pill becomes an
+   anonymous chevron. The ref is the chip-locked one; the chips are the thing it is for.
+   `queryViewSwitch.css` already drops its labels, at `@media (max-width: 1180px)` — the same
+   viewport-versus-container error, so at a 1440 viewport it keeps four labelled segments while
+   its page has 1102px to spend. Measured, icon-only recovers ~163px, which is what buys the row.
+   Chips drop only if even that is not enough. */
+@container qccwell (max-width: 1240px) {
+  .qcc-tb .qvs button span { display: none; }
+  .qcc-tb .qvs button { padding: 7px 10px; gap: 0; }
+}
+/* ⚠️ AND THE CHIP LOSES ITS PLATE, NEVER ITS WORD. §2 says the pills "drop their chip labels"
+   before the search gives width; dropping the LABEL costs Filter its name, because it carries a
+   count rather than a value and the chip is the only text it has. Dropping the CHIP — the
+   parchment, the hairline, the padding — keeps every pill readable and returns 60px, which with
+   the switch's 163 is what buys the search its full 360 at 1440. */
+@container qccwell (max-width: 1240px) {
+  /* ⚠️ AND NO PADDING COMPENSATION. `padding-left: 14px` against the base's 5px ADDS 9px to each
+     pill — 27px across three — which is the "30px of overflow" this chased twice. The chip's own
+     10px of side padding is what goes; the pill's 5px start is already the ref's. */
+  .qcc-tb .qcc-tb-lab { background: none; border: none; padding: 0; }
+}
+
+/* ⚠️ NARROWER STILL: THE CHIP GOES ONLY WHERE THE PILL HAS A VALUE TO FALL BACK ON. Group and Sort
+   state "None" and "Last activity"; Filter carries a COUNT, so its chip is the only word it has,
+   and hiding it leaves an anonymous chevron. `:has()` asks the pill whether it has a value rather
+   than the sheet hard-coding which of the three is which. */
+@container qccwell (max-width: 1060px) {
+  .qcc-tb .qcc-tb-btn:has(.qcc-tb-val) .qcc-tb-lab { display: none; }
 }

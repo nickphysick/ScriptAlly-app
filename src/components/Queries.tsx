@@ -48,7 +48,7 @@ const RESPONSE_RECEIPT_CHANNEL = "query-response";
 import { pickableManuscripts } from "../lib/lifecycle";
 import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
-import { ToolbarButton, ToolbarIcon } from "./shared/ToolbarButton";
+import { ToolbarButton } from "./shared/ToolbarButton";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, createPlaceLine, recordPlaceLine, agentRepliesForManuscript, consequenceLine, trackingStatCells, DAY } from "../lib/queryAmbient";
@@ -6112,8 +6112,7 @@ export const Queries: React.FC<{
                   40 lines each of them used to spell out. */}
               <div className="f12-popwrap">
                 <ToolbarButton
-                  ref={filterTrigRef} label="Filter" icon={ToolbarIcon.filter}
-                  count={activeFilterCount} open={filterPopOpen}
+                  ref={filterTrigRef} label="Filter"                   count={activeFilterCount} open={filterPopOpen}
                   onClick={() => { setSortPopOpen(false); setGroupPopOpen(false); setFilterPopOpen((o) => !o); }}
                 />
                 {filterPopOpen && renderFilterPopover()}
@@ -6122,8 +6121,7 @@ export const Queries: React.FC<{
               <div className="f12-popwrap">
                 <ToolbarButton
                   ref={groupTrigRef} label="Group"
-                  icon={ToolbarIcon.group}
-                  value={gridView === "board" ? "Status" : (GRID_GROUPS.find((g) => g.key === gridGroup)?.label ?? "None")}
+                                    value={gridView === "board" ? "Status" : (GRID_GROUPS.find((g) => g.key === gridGroup)?.label ?? "None")}
                   open={groupPopOpen}
                   /* ⚠️ THE BOARD IS ALREADY GROUPED BY STATUS — its seven columns ARE the grouping.
                      Offering a second key would ask the board to reshape its columns, which is out
@@ -6137,8 +6135,7 @@ export const Queries: React.FC<{
 
               <div className="f12-popwrap">
                 <ToolbarButton
-                  ref={sortTrigRef} label="Sort" icon={ToolbarIcon.sort}
-                  value={SORT_LABELS[sortKey] ?? "Last activity"}
+                  ref={sortTrigRef} label="Sort"                   value={SORT_LABELS[sortKey] ?? "Last activity"}
                   open={sortPopOpen}
                   onClick={() => { setFilterPopOpen(false); setGroupPopOpen(false); setSortPopOpen((o) => !o); }}
                 />
