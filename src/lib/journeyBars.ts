@@ -1873,6 +1873,28 @@ const ASKED_FOR: Partial<Record<QueryStatus, { long: string; short: string }>> =
 };
 
 /** Which activities wrote a status — the join the side derivation needs, built once per render. */
+/**
+ * Which of two queries speaks for a lane.
+ *
+ * ⚠️ ONE QUERY SPEAKS FOR A LANE, and a live one always outranks a finished one. A writer who
+ * queried the same agency about the same book twice has ONE relationship about that book; the bar
+ * draws the journey still running, or the most recent one if none is.
+ *
+ * ⚠️ IT LIVES HERE BECAUSE TWO BOARDS NOW ASK IT. To-do has applied this rule since the board was
+ * built; Query Centre's Calendar has to apply the same one or the two pages would draw a different
+ * number of lanes for the same agency — and a lane count decides a row's HEIGHT, so they would not
+ * merely differ in detail, they would be visibly different objects. Restating it in the second
+ * caller is the shape this repo records more than any other: two answers to one question, correct
+ * on the day they are written and divergent by the next edit.
+ */
+export function laneWinner(held: Query | undefined, candidate: Query): Query {
+  if (!held) return candidate;
+  const heldLive = !isTerminalStatus(held.status);
+  const qLive = !isTerminalStatus(candidate.status);
+  const newer = String(candidate.dateSent ?? "") > String(held.dateSent ?? "");
+  return (qLive && !heldLive) || (qLive === heldLive && newer) ? candidate : held;
+}
+
 export function statusIndex(activities: readonly Activity[]): Map<string, QueryStatus> {
   const m = new Map<string, QueryStatus>();
   for (const a of activities) {

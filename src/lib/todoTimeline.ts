@@ -37,7 +37,7 @@ import {
 import { rowGroupOf, queryGroup, type RowGroup, type QueryFacts } from "./timelineGroups";
 import { rowSentence, rowNote, agentSurname, type RowCopy, type RowNote } from "./timelineCopy";
 import {
-  laneBars, statusIndex, sideOf, namedEndFor,
+  laneBars, statusIndex, sideOf, namedEndFor, laneWinner,
   type Segment, type BarNode, type BarWindow,
 } from "./journeyBars";
 import type { Activity, Manuscript, TaskFlag } from "../types";
@@ -514,13 +514,7 @@ export function timelineWeek(
     /* ⚠️ ONE QUERY SPEAKS FOR A LANE, and a live one always outranks a finished one. A writer who
        queried the same agency about the same book twice has one relationship about that book; the
        bar draws the journey that is still running, or the most recent one if none is. */
-    if (!held) per.set(msId, q);
-    else {
-      const heldLive = !isTerminalStatus(held.status);
-      const qLive = !isTerminalStatus(q.status);
-      const newer = String(q.dateSent ?? "") > String(held.dateSent ?? "");
-      if ((qLive && !heldLive) || (qLive === heldLive && newer)) per.set(msId, q);
-    }
+    per.set(msId, laneWinner(held, q));
     laneOf.set(key, per);
   }
 
