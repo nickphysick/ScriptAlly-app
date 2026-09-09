@@ -38,7 +38,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const REF = join(ROOT, "design-refs", "dashboard-cappuccino-v22.html");
+const REF = join(ROOT, "design-refs", "dashboard-cappuccino-v26.html");
 
 const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
@@ -61,12 +61,17 @@ const APP = process.env.SA_REFDIFF_APP_URL || "http://127.0.0.1:4173";
  * harness said "the ref has no such probe" four times, which is the correct answer and the reason
  * this list is worth keeping honest: a probe quietly removed is coverage quietly removed.
  */
+/* ⚠️ v26'S LIST. Gone from v22: `todo-badge` and `activity-filters` (both still RENDER — they are
+   simply not instrumented in v26, which is a narrowing of coverage rather than a removal of the
+   elements, and is recorded here so nobody reads their absence as a deletion); `community-strip`,
+   which really is gone, replaced by `community-tile` in the right column. New: `topbar` and
+   `search`, because v26 puts a 620x50 search field where the breadcrumb row was. */
 const PROBES = [
-  "main", "hero", "stats", "grid", "toprow",
+  "main", "topbar", "search", "grid", "hero", "stats", "toprow",
   "manuscript-card", "chart-card", "plot", "brush",
-  "todo-card", "todo-badge", "todo-rule",
-  "activity-card", "activity-filters", "feed",
-  "community-strip",
+  "todo-card", "todo-rule",
+  "activity-card", "feed",
+  "community-tile",
 ];
 
 /**
@@ -86,17 +91,57 @@ const PROBES = [
  * elastic track, so its two insets are the facts and its width is derived from them — pinning both
  * edges pins the width too, against whatever container the shell gives it.
  */
+/**
+ * ⚠️ ALLOWANCES ARE FOR DIFFERENCES THAT CANNOT BE CLOSED, NEVER FOR ONES NOBODY HAS CLOSED YET.
+ *
+ * This table is the single most dangerous thing in the file, because its whole purpose is to stop
+ * the gate counting something — which is the shape of every gate that quietly stopped working. Two
+ * defences, and neither is optional:
+ *
+ *   1. AN ALLOWANCE NAMES A PROBE **AND** A FIELD, and it carries a MAXIMUM. A difference larger
+ *      than the recorded one still counts. So an allowance forgives the fault it was written for
+ *      and cannot forgive that fault getting worse, which is the failure mode of a bare skip-list.
+ *   2. EVERY ALLOWANCE STATES WHY IT CANNOT BE CLOSED, in a sentence a reader can check. Both of
+ *      these have the same shape: closing them means changing the APP'S DATA or the APP'S FEATURE
+ *      SET to match a mockup, which is the tail wagging the dog.
+ *
+ * They are reported in the table as `(allowed)` rather than hidden, so a reader always sees that
+ * the gate is forgiving something and what.
+ */
+const ALLOW = [
+  {
+    key: "stats", field: "x", max: 12,
+    why: "the hero is `auto 1fr`, so the stats begin where the greeting ENDS. The ref's greeting " +
+         "reads \"Hello, Bethany\"; the harness account's name is a different length. Closing it " +
+         "means renaming the account to flatter a diff.",
+  },
+  {
+    key: "brush", field: "xr", max: 90,
+    why: "the ref's frequency control is a two-button chip pair (Weekly | Monthly) at 146px; ours " +
+         "is a native select, because this app offers THREE frequencies — Daily, Weekly, Monthly. " +
+         "Below the breakpoint the control row is left-aligned, so the brush starts earlier. " +
+         "Closing it means dropping a frequency the app supports.",
+  },
+];
+
+/** true when this miss is one of the recorded allowances AND is no worse than the allowance says */
+const allowedBy = (m) =>
+  ALLOW.find((a) => a.key === m.key && a.field === m.field &&
+    Number.isFinite(m.ref) && Number.isFinite(m.app) && Math.abs(m.app - m.ref) <= a.max);
+
 const ANCHOR = {
   main: "datum",
-  hero: "span", stats: "span", grid: "span", toprow: "span",
+  /* the bar spans the content, and the field is CENTRED in it — so both of the field's insets are
+     the fact, which `span` is exactly the anchor for */
+  topbar: "span", search: "span",
+  grid: "span", hero: "span", stats: "span", toprow: "span",
   /* the tile is the only fixed track in the top row; everything beside it is elastic */
   "manuscript-card": "left",
   "chart-card": "span", plot: "span", brush: "right",
-  "todo-card": "span", "todo-badge": "right", "todo-rule": "span",
-  /* the right column is 360px pinned to the right edge, and everything in it goes with it */
-  "activity-card": "right", "activity-filters": "right", feed: "right",
-  /* the strip runs the full width beneath both columns */
-  "community-strip": "span",
+  "todo-card": "span", "todo-rule": "span",
+  /* the right column is 360px pinned to the right edge, and everything in it goes with it —
+     including the community tile, which is now IN that column rather than a strip beneath both */
+  "activity-card": "right", feed: "right", "community-tile": "right",
 };
 /**
  * ⚠️ THE REF'S OWN THREE, NOT SIX OF MINE — v16 instruments itself and the app carries its names.
@@ -109,7 +154,10 @@ const ANCHOR = {
  * monoculture-fixture fault wearing a harness's clothes: the sample was drawn from the population
  * that was already correct. `TYPE_SCALE` below is the coverage fix, and it is the actual gate.
  */
-const TEXT_PROBES = ["greeting", "panel-title", "chart-title", "stat-figure"];
+/* v26 adds `subtitle` — "What's on your desk today?" is a hero row of its own now, so its size is
+   a thing the design states rather than a thing that follows the greeting. `stat-figure` is gone
+   from the ref's instrumentation; the stat figure's size is still gated, by TYPE_SCALE's own row. */
+const TEXT_PROBES = ["greeting", "subtitle", "panel-title", "chart-title"];
 
 /**
  * The type scale, as SELECTOR PAIRS — one row per treatment the design names, ref side and app side.
@@ -168,6 +216,22 @@ const GROUND = "rgb(244, 240, 234)";
 const READ = `(() => {
   const num = (v) => Math.round(v * 10) / 10;
   const roots = [...document.querySelectorAll("[data-probe]")];
+  /* ⚠️ THE DATUM IS FOUND BY SELECTOR, BECAUSE v26 STOPPED INSTRUMENTING IT. v22 carried
+     data-probe="main"; v26 does not, while the element itself is still there as .main. Losing the
+     datum is not a small thing — it is what makes every position RELATIVE to each side's own
+     content box, and without it the shell's chrome offset turns every probe on the page into a
+     miss (measured: 142, with x values like -1512 against 0). Reading it by selector keeps the
+     datum and leaves the ref's bytes alone, which matters because a ref whose md5 moves can no
+     longer be checked against the one the pack named. */
+  /* ⚠️ SINGLE QUOTES INSIDE, AND THAT IS NOT A STYLE CHOICE. This block is a TEMPLATE LITERAL, so
+     a backslash-escaped double quote is unescaped BEFORE the browser ever sees it: the string that
+     arrived carried a bare double quote inside the selector and died as "missing ) after argument
+     list". This file already warns about it for regexes; a selector is the same trap wearing
+     different clothes.
+     ⚠️ AND THE FIRST DRAFT OF THIS VERY COMMENT PUT BACKTICKS ROUND THE BROKEN SELECTOR, which
+     ended the template literal and took the file down at parse. FOURTH time in this file, written
+     into the warning about it. No backticks in here, comments included. */
+  const datum = document.querySelector('[data-probe="main"], .main, #app-stage-scroll');
   /* ⚠️ A BOX WITH ZERO HEIGHT AND REAL WIDTH IS RENDERED, AND v22 SHIPS ONE. The activity filter
      row is collapsed until the funnel is pressed — height 0, width 333 — which is the DESIGN, and
      requiring BOTH dimensions reported "the ref has no such probe" about a probe the ref draws.
@@ -200,6 +264,8 @@ const READ = `(() => {
     if (out.probes[k] || !visibleIn(el)) continue;   // first VISIBLE match wins
     out.probes[k] = box(el);
   }
+  /* the datum, under the name every diff already asks for; an explicit probe still wins */
+  if (!out.probes.main && datum && visibleIn(datum)) out.probes.main = box(datum);
   /* ⚠️ A TEXT PROBE READS ITS ELEMENT WHETHER OR NOT IT IS VISIBLE, AND THE REF IS WHY.
      v16 puts data-probe-text=card-title on the chart card's h3 inside hdA — which its own shipping
      config sets to display:none, because hdr is b and the stat block hdB takes over. A visible-only
@@ -617,6 +683,20 @@ function table(result) {
   }).join(" | ") + " |");
   L.push("");
   L.push(result.widths.map((w) => `**${w}**: ${result.byWidth[w].misses.length} misses`).join("  ·  "));
+  /* ⚠️ THE ALLOWANCES ARE PRINTED EVERY RUN. A forgiven difference that nobody can see is a
+     forgiven difference nobody re-examines, and this table exists to be re-examined. */
+  const allAllowed = result.widths.flatMap((w) => (result.byWidth[w].allowed ?? []).map((m) => [w, m]));
+  if (allAllowed.length) {
+    L.push("");
+    L.push(`**Allowed (${allAllowed.length}), not counted:**`);
+    const seen = new Set();
+    for (const [, m] of allAllowed) {
+      const id = `${m.key}.${m.field}`;
+      if (seen.has(id)) continue;
+      seen.add(id);
+      L.push(`- \`${m.key}\` ${m.field} — ${m.allowance}`);
+    }
+  }
   L.push("");
   L.push(`**total misses: ${result.total}**`);
   return L.join("\n");
@@ -625,7 +705,7 @@ function table(result) {
 /* ── run ─────────────────────────────────────────────────────────────────────────────────────── */
 
 const browser = await chromium.launch();
-const result = { when: new Date().toISOString(), ref: "design-refs/dashboard-cappuccino-v22.html", app: APP, widths: WIDTHS, byWidth: {}, total: 0 };
+const result = { when: new Date().toISOString(), ref: "design-refs/dashboard-cappuccino-v26.html", app: APP, widths: WIDTHS, byWidth: {}, total: 0 };
 let selfTestSaw = null;
 
 try {
@@ -698,10 +778,20 @@ try {
     for (const [k] of TYPE_SCALE) misses.push(...diffScale(`type:${k}`, refData.scale[k], appData.scale[k]));
     misses.push(...diffChecks(appData));
 
-    result.byWidth[width] = { ref: refData, app: appData, misses };
-    result.total += misses.length;
+    /* ⚠️ PARTITIONED, NOT FILTERED. An allowed difference stays in the record and is printed; what
+       it does not do is count. A filter here would delete the evidence that the gate is forgiving
+       anything at all, which is how an allowance becomes invisible and then becomes permanent. */
+    const allowed = [];
+    const counted = [];
+    for (const m of misses) {
+      const a = allowedBy(m);
+      if (a) allowed.push({ ...m, allowance: a.why });
+      else counted.push(m);
+    }
+    result.byWidth[width] = { ref: refData, app: appData, misses: counted, allowed };
+    result.total += counted.length;
     await ctx.close();
-    process.stdout.write(`  ${width}: ${misses.length} misses\n`);
+    process.stdout.write(`  ${width}: ${counted.length} misses` + (allowed.length ? ` (+${allowed.length} allowed)` : "") + "\n");
   }
 } finally {
   await browser.close();

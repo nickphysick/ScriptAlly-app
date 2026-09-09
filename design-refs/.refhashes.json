@@ -1,5 +1,5 @@
 {
-  "_note": "Hashes of the design refs that are ACTIVE design authorities \u2014 a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act \u2014 `--update design-refs/<file>.html` \u2014 because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
+  "_note": "Hashes of the design refs that are ACTIVE design authorities — a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act — `--update design-refs/<file>.html` — because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
   "refs": {
     "design-refs/action-journey.html": "129247fc29907b723cb4a9d58d5cab25d439220ba34eb2bb248f4eb0ba56c89d",
     "design-refs/bar-hover-states.html": "212c494a27915e2152f58122bc3301a90324ebbddba8f2c32e9e5a35fb49f1d8",
@@ -48,6 +48,6 @@
     "design-refs/query-centre-v15-contact-parity.html": "8198fe89cff5aaafeeff05d74fce3a8cea400339e595105ca2b8aa8c4bfc3100",
     "design-refs/art/query-centre-masthead.png": "cdbfcd99e310f58940eff992b3586d4e5bfc69c8a7c0a9ad717994901f918d09",
     "design-refs/query-toolbar-v3-chip-locked.html": "d5c05afe4d1baa4e04860981e8a337523cdab327b324f7350c1409d34e4b079e",
-    "design-refs/dashboard-cappuccino-v22.html": "ad8ed5cd64d0ffa9a5d86f85eca8c665280f0f480c44b9172a1e68706ca380cb"
+    "design-refs/dashboard-cappuccino-v26.html": "32fb3b1c46019c1c740a31418bbdf75c51756bb29ba8f1164a0ce19e9c352448"
   }
 }

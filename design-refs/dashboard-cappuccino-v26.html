@@ -2,7 +2,7 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<title>ScriptAlly · Dashboard — design ref v22</title>
+<title>ScriptAlly · Dashboard — design ref v26</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -443,13 +443,14 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 /* thin rule: legend revealed on hover of the rule zone */
 .rulezone{padding:8px 20px 18px;position:relative;z-index:5}
 .rulezone .sbar{margin:0}
-.rulezone .sbar.thin{height:9px}
+.rulezone .sbar.thin{height:12px;border-radius:99px;border:1px solid rgba(0,0,0,.05)}
 .rulezone .sbar.thin button{transition:filter .15s,flex-basis .3s ease,transform .15s}
-.rulezone:hover .sbar.thin{height:12px}
+.rulezone:hover .sbar.thin{height:15px}
 .rulezone .sbarlbl{position:absolute;left:20px;right:20px;top:100%;margin-top:6px;padding:9px 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 22px rgba(42,31,24,.08);justify-content:space-between;opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .16s ease,transform .16s ease}
 .rulezone.open .sbarlbl,.rulezone:hover .sbarlbl,.rulezone:focus-within .sbarlbl{opacity:1;transform:none;pointer-events:auto}
 .rulezone .sbarcap{display:none}
 .rulezone .sbar.thin button{border-right:2px solid var(--card)}
+.rulezone .sbar.thin button:last-child{border-right:0}
 
 
 
@@ -579,6 +580,81 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 
 
 
+
+
+/* hero: greeting left, stats on the same line to its right */
+.page2 .hero{display:grid!important;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:clamp(18px,2vw,36px);row-gap:6px;align-items:center;padding:0 2px}
+.page2 .hero h1{grid-column:1;grid-row:1}
+.page2 .hero .sub2line{grid-column:1;grid-row:2}
+.page2 .hero .stats{grid-column:2;grid-row:1 / span 2;align-self:center;align-items:center;position:relative;top:-4px}
+.page2 .hero .hgreet{min-width:0}
+.page2 .hero h1{font-size:clamp(30px,2.35vw,44px);margin:0;white-space:nowrap}
+.page2 .hero .sub2line{margin:0;font-size:clamp(14px,0.9vw,16.5px);white-space:nowrap}
+.page2 .hero .stats{justify-content:space-between;gap:clamp(10px,1.2vw,30px);width:100%}
+.page2 .hero .stat{gap:clamp(8px,0.85vw,18px);flex:0 1 auto;min-width:0}
+.page2 .hero .stat .ill{width:clamp(58px,5.1vw,104px);height:clamp(58px,5.1vw,104px)}
+.page2 .hero .stat .lab{font-size:clamp(12.5px,0.82vw,16.5px);margin-bottom:3px;white-space:nowrap}
+.page2 .hero .stat .fig{gap:8px;margin:0}
+.page2 .hero .stat .fig b{font-size:clamp(22px,1.55vw,33px)}
+.page2 .hero .stat .mini{font-size:clamp(10px,0.66vw,13px);padding:3px clamp(6px,0.5vw,10px)}
+@media (max-width:1750px){
+  /* the row can no longer hold both — the stats take their own row, full width */
+  .page2 .hero{grid-template-columns:1fr!important;row-gap:16px}
+  .page2 .hero .stats{grid-column:1;grid-row:3;justify-content:space-between;width:100%}
+  .page2 .hero .stat .ill{width:clamp(72px,5.6vw,92px);height:clamp(72px,5.6vw,92px)}
+}
+
+/* ===== v23 ===== */
+/* top bar with a large centred search */
+.topbar{display:flex;align-items:center;gap:18px;padding:14px 0 22px}
+.topbar .sp2{flex:1}
+.searchwrap{flex:0 1 620px;display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 18px;box-shadow:0 1px 2px rgba(42,31,24,.03)}
+.searchwrap svg{width:18px;height:18px;stroke:var(--ink3);fill:none;stroke-width:1.7;flex:none}
+.searchwrap input{flex:1;border:0;outline:0;background:transparent;font:inherit;font-size:16px;color:var(--ink)}
+.searchwrap input::placeholder{color:var(--ink3)}
+.searchwrap .kbd{font-family:var(--mono);font-size:10.5px;color:var(--ink3);border:1px solid var(--line);border-radius:6px;padding:3px 7px}
+.topbtn{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 16px;font:inherit;font-size:15px;color:var(--ink2);cursor:pointer}
+.topbtn.dark{background:var(--ink);border-color:var(--ink);color:#fff}
+/* page shell: activity column starts level with the greeting */
+.page2{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:22px;align-items:stretch;min-height:calc(100vh - 150px)}
+.page2 > .lcol{display:flex;flex-direction:column;gap:22px;min-width:0;min-height:0}
+.page2 > .rcol{display:flex;flex-direction:column;gap:22px;min-width:0;height:0;min-height:100%}
+
+.page2 .hero h1{font-size:46px;margin-bottom:4px}
+.page2 .hero .sub2line{font-size:17px;color:var(--ink2);margin:0 0 16px}
+.hero2{display:grid;grid-template-columns:auto 1fr;gap:30px;align-items:center}
+/* shadows must not be clipped by neighbours */
+.card,.comstrip,.mscard{position:relative;z-index:1}
+.page2 .lcol,.page2 .rcol,.toprow{overflow:visible}
+.feedwrap{overflow:visible}
+/* manuscript tile and chart share a bottom edge */
+.toprow{align-items:stretch}
+.toprow > *{height:100%}
+.toprow .mscard,.toprow .wrapc2,.toprow .wrapc2 > #chartCard{height:100%}
+/* to-do takes the slack */
+.wrapt2{flex:1;min-height:0}
+/* activity + community stacked on the right */
+.rcol #actCard{flex:1;min-height:0}
+.comtile{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:14px 16px}
+.comtile .spr2{width:56px;height:56px;flex:none}
+.comtile h4{font-family:var(--serif);font-weight:500;font-size:17px;margin:0}
+.comtile p{margin:3px 0 0;font-size:13.5px;color:var(--ink3);line-height:1.4}
+.comtile .beta3{position:absolute;top:12px;right:14px;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:3px 9px;border-radius:99px;background:#fff;border:1px solid var(--line);color:var(--ink2)}
+/* chart chrome */
+.legend{display:none!important}
+.sel,.rng,.brush{height:48px}
+.sel{display:flex;align-items:center}
+.brush{padding:6px 16px}
+.brush .bw{cursor:grab}
+.brush .bw:active{cursor:grabbing}
+.brush .win{background:rgba(28,19,15,.05);border-left:2px solid #1c130f;border-right:0}
+.brush .win:before{width:9px;height:20px}
+/* action lives in the strip, not on its own row */
+body.bw-full .cv .msg .b .striph .qa2{margin-left:auto;white-space:nowrap;border:1px solid #e8c8bc;background:#f0d9cd;border-radius:6px;padding:2px 8px;font:inherit;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);cursor:pointer;opacity:0;transition:opacity .15s}
+body.bw-full .cv .msg .b:hover .striph .qa2{opacity:1}
+body.bw-full .cv .msg.out .b .striph .qa2{margin-left:0;margin-right:8px}
+body.bw-full .cv .msg .b .qa{display:none!important}
+
 /* ===== top row: manuscript tile beside the chart ===== */
 .toprow{display:grid;grid-template-columns:330px minmax(0,1fr);gap:22px;align-items:stretch}
 .toprow > *{min-width:0}
@@ -599,7 +675,9 @@ body.bw-full .cv .msg .knot{display:none}
 body.bw-full .cv .msg .b .striph{display:flex;align-items:center;gap:8px;padding:7px 12px 6px}
 body.bw-full .cv .msg .b .striph .sd{width:14px;height:14px;flex:none;line-height:0}
 body.bw-full .cv .msg .b .striph .slab{margin:0}
-body.bw-full .cv .msg .b .striph .tm3{margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--mono-c)}
+body.bw-full .cv .msg .b .striph{flex-wrap:nowrap;min-height:26px}
+body.bw-full .cv .msg .b .striph .tm3{margin-left:auto;white-space:nowrap;font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--mono-c)}
+body.bw-full .cv .msg .b:hover .striph .tm3{display:none}
 body.bw-full .cv .msg.out .b .striph{flex-direction:row-reverse}
 body.bw-full .cv .msg.out .b .striph .tm3{margin-left:0;margin-right:auto}
 body.bw-full .cv .msg .b .sbody{padding:10px 12px 11px}
@@ -879,20 +957,25 @@ body.ac-rail #actCard .foot{padding-left:2px;padding-right:2px}
 </style>
 </head>
 <body>
-<div class="page"><div class="shell"><div class="navslot"><div class="brand">ScriptAlly</div><div>Locked nav — not redrawn</div><div>Dashboard</div><div>Queries</div><div>Agents</div><div>Materials</div><div>Tasks</div><div>Account</div></div><div class="main" data-probe="main">
+<div class="page"><div class="shell"><div class="navslot"><div class="brand">ScriptAlly</div><div>Locked nav — not redrawn</div><div>Dashboard</div><div>Queries</div><div>Agents</div><div>Materials</div><div>Tasks</div><div>Account</div></div><div class="main">
 
-<!-- HERO -->
+<div class="topbar" data-probe="topbar">
+  <div class="sp2"></div>
+  <div class="searchwrap" data-probe="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input placeholder="Search agents, queries, manuscripts…"><span class="kbd">⌘K</span></div>
+  <div class="sp2" style="display:flex;justify-content:flex-end;gap:10px"><button class="topbtn">Feedback</button><button class="topbtn dark">+ New</button></div>
+</div>
+<div class="page2" data-probe="grid">
+<div class="lcol">
 <div class="hero" data-probe="hero">
-  <div><h1 data-probe-text="greeting">Hello, Bethany</h1>
-  </div>
+  <h1 data-probe-text="greeting">Hello, Bethany</h1>
+  <p class="sub2line" data-probe-text="subtitle">What's on your desk today?</p>
   <div class="stats" data-probe="stats">
-    <div class="stat"><div class="ill" id="ill1"></div><div><div class="lab">Queries sent</div><div class="fig"><b data-probe-text="stat-figure">21</b><span class="mini"><svg viewBox="0 0 10 10"><path d="M5 8V2M2 5l3-3 3 3"/></svg>5 this week</span></div></div></div>
+    <div class="stat"><div class="ill" id="ill1"></div><div><div class="lab">Queries sent</div><div class="fig"><b>21</b><span class="mini"><svg viewBox="0 0 10 10"><path d="M5 8V2M2 5l3-3 3 3"/></svg>5 this week</span></div></div></div>
     <div class="stat"><div class="ill" id="ill2"></div><div><div class="lab">Agents on file</div><div class="fig"><b>16</b><span class="mini plain">11 queried · 5 idle</span></div></div></div>
     <div class="stat"><div class="ill" id="ill3"></div><div><div class="lab">Responses</div><div class="fig"><b>12</b><span class="mini">57% response rate</span></div></div></div>
   </div>
 </div>
-<div class="grid2" data-probe="grid">
-<div class="col left">
+
   <div class="toprow" data-probe="toprow">
   <div class="card ch-bare mscard" data-probe="manuscript-card" style="position:relative">
     <div class="msc">
@@ -933,7 +1016,7 @@ body.ac-rail #actCard .foot{padding-left:2px;padding-right:2px}
         <div class="card tdo ch-bare" id="todoCard" data-probe="todo-card">
       <div class="hd">
         <div class="tile"><svg viewBox="0 0 24 24"><path d="M4 7h10M4 12h10M4 17h6"/><path d="M15 16l2 2 4-4"/></svg></div>
-        <h3>To-do list</h3><span class="badge" id="tbadge" data-probe="todo-badge"><b>32</b></span>
+        <h3>To-do list</h3><span class="badge" id="tbadge"><b>32</b></span>
         <span class="sp"></span><a class="link" href="#">See all →</a>
       </div>
       <div id="tfilters" data-probe="todo-rule"></div>
@@ -941,8 +1024,8 @@ body.ac-rail #actCard .foot{padding-left:2px;padding-right:2px}
       <div class="foot"><span>Everything else is with the agents</span></div>
     </div>
       </div></div>
+<div class="rcol">
 
-<div class="col right">
   <!-- ACTIVITY -->
   <div class="opt" style="margin-bottom:8px">
     <label>Panel chrome <span class="seg" data-o="ac"><button class="on" data-v="card">Card</button><button data-v="hair">Hairline</button><button data-v="bare">Bare</button><button data-v="well">Recessed well</button><button data-v="rail">Rail, no bubbles</button></span></label>
@@ -965,16 +1048,16 @@ body.ac-rail #actCard .foot{padding-left:2px;padding-right:2px}
       <span id="hdfilter"></span>
       <div class="expander" id="exp" title="Give the feed more room"><svg viewBox="0 0 24 24"><path d="M8 14l4-4 4 4"/></svg></div>
     </div>
-    <div id="afilter" data-probe="activity-filters"></div>
+    <div id="afilter"></div>
     <div class="feedwrap" id="feedwrap"><div class="feed" id="feed" data-probe="feed"></div><div class="mrail" id="monthRail"></div></div>
     <div class="foot"><span>Last 30 days</span><span>Full log →</span></div>
   </div>
+    <div class="card ch-bare comtile" data-probe="community-tile" style="position:relative">
+    <span class="beta3">Beta</span>
+    <svg class="spr2" viewBox="0 0 96 96" fill="none" stroke="#7f9a78" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M48 80V46"/><path d="M48 58c-8 0-16-6-18-16 10-1 18 5 18 16z" fill="#dfe8da"/><path d="M48 50c8 0 16-6 18-16-10-1-18 5-18 16z" fill="#dfe8da"/><path d="M28 82c6-6 34-6 40 0" stroke="#c9b8a6"/><path d="M34 86c4-3 24-3 28 0" stroke="#c9b8a6"/></svg>
+    <div><h4>Community</h4><p>Benchmark your key stats against writers at a similar stage.</p></div>
   </div>
 </div>
-<div class="comstrip" data-probe="community-strip">
-  <div class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0M15 20a4.5 4.5 0 0 1 7 -2"/></svg></div>
-  <div><h4>Community</h4><p>As our community builds, you'll be able to benchmark your key stats against other writers at a similar stage.</p></div>
-  <span class="beta2">Beta</span>
 </div>
 </div></div></div>
 
@@ -1090,11 +1173,14 @@ function renderChart(){
   const pts=vals=>vals.map((v,i)=>[x(i),y(v)]);
   const area=(top,bot)=>mono(pts(top))+mono(pts(bot).reverse()).replace(/^M/,'L')+'Z';
   const zero=D.map(()=>0), c1=D.map(r=>r[0]), c2=D.map(r=>r[0]+r[1]), c3=D.map(r=>r[0]+r[1]+r[2]);
-  let s=`<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9dfd5" stop-opacity=".9"/><stop offset="1" stop-color="#d9dfd5" stop-opacity="0"/></linearGradient></defs>`;
+  let s=`<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9dfd5" stop-opacity=".9"/><stop offset="1" stop-color="#d9dfd5" stop-opacity="0"/></linearGradient>
+    <linearGradient id="fadeout" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fdfbf7" stop-opacity="0"/><stop offset=".55" stop-color="#fdfbf7" stop-opacity=".35"/><stop offset="1" stop-color="#fdfbf7" stop-opacity=".85"/></linearGradient></defs>`;
   // y ticks: top & bottom only, like current
   const nice=v=>{const st=v<=12?2:v<=30?4:v<=60?10:20;return Math.ceil(v/st)*st};
   const top=nice(Math.max(...tot)); const ticks=[0,top/2,top].filter((v,i,a)=>a.indexOf(v)===i);
-  ticks.forEach(v=>{s+=`<line class="grid" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${L-10}" y="${y(v)+4}" text-anchor="end">${v}</text>`});
+  ticks.forEach(v=>{if(v>0)s+=`<line class="grid" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/>`;
+    s+=`<text class="axis" x="${L-10}" y="${y(v)+(v===0?4:4)}" text-anchor="end">${v}</text>`});
+  s+=`<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="#d8cec2" stroke-width="1"/>`;
   if(opt.bands==='1'){
     s+=`<path d="${area(c1,zero)}" fill="#f7efe3" stroke="#e6d6bf" stroke-width="1"/>`;
     s+=`<path d="${area(c2,c1)}" fill="#e0e5dd" stroke="#b9c6b4" stroke-width="1"/>`;
@@ -1104,6 +1190,7 @@ function renderChart(){
   }else{
     s+=`<path d="${area(tot,zero)}" fill="url(#g)"/>`;
   }
+  s+=`<rect x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}" fill="url(#fadeout)"/>`;
   s+=`<path d="${mono(pts(tot))}" fill="none" stroke="#1c130f" stroke-width="2" stroke-linecap="round"/>`;
   if(opt.ghost==='1') s+=`<path d="${mono(pts(prior))}" fill="none" stroke="#b8ada2" stroke-width="1.5" stroke-dasharray="4 5"/>`;
   // start marker (ring) + end marker (hollow) like current
@@ -1179,10 +1266,15 @@ document.querySelectorAll('#nChips button').forEach(b=>b.onclick=()=>setN(+b.dat
 sFreq.onclick=()=>{ST.monthly=!ST.monthly;renderChart()};
 sN.onclick=()=>{if(ST.monthly)return;setN(ST.n===12?4:ST.n+4)};
 (function(){let drag=false;
- const upd=e=>{const r=bw.getBoundingClientRect();let f=1-(e.clientX-r.left)/r.width;f=Math.max(0,Math.min(1,f));setN(Math.round(4+f*8))};
+ // the handle follows the cursor 1:1; the window runs from the handle to the right edge
+ const upd=e=>{const r=bw.getBoundingClientRect();
+   let p=(e.clientX-r.left)/r.width; p=Math.max(0,Math.min(1,p));
+   const weeks=Math.round((1-p)*12);
+   setN(Math.max(4,Math.min(12,weeks)));};
  bw.addEventListener('pointerdown',e=>{drag=true;bw.setPointerCapture(e.pointerId);upd(e)});
  bw.addEventListener('pointermove',e=>{if(drag)upd(e)});
- bw.addEventListener('pointerup',()=>drag=false);})();
+ bw.addEventListener('pointerup',e=>{drag=false;try{bw.releasePointerCapture(e.pointerId)}catch(_){}});
+ bw.addEventListener('pointercancel',()=>drag=false);})();
 renderChart();
 
 /* ---------- GOALS ---------- */
@@ -1320,7 +1412,7 @@ function vConv(){
      <span class="knot">${sd(x.k,15)}</span>
      <div class="b ${vcls} ${qa?'hasqa':''}" style="${vstyle}">
        ${V==='strip'
-         ? `<div class="striph">${opt.bw==='full'?sd(x.k,14):''}<div class="slab">${c.l}</div>${opt.bw==='full'?`<span class="tm3">${x.t}</span>`:''}</div><div class="sbody"><div class="s">${opt.bw==='full'&&x.long?x.long:x.s}</div><div class="m"><span class="who2"><b>${g.sur}</b><i>${opt.bw==='full'?'':'&nbsp;· '}${g.agency}</i></span><span class="tm2">${x.t}</span></div></div>`
+         ? `<div class="striph">${opt.bw==='full'?sd(x.k,14):''}<div class="slab">${c.l}</div>${opt.bw==='full'?`<span class="tm3">${x.t}</span>`:''}${qa?`<button class="qa2" onclick="event.stopPropagation();openJourneyFor(this,'${g.sur}','${x.k==='partial-req'?'partial':'full'}')">Mark sent</button>`:''}</div><div class="sbody"><div class="s">${opt.bw==='full'&&x.long?x.long:x.s}</div><div class="m"><span class="who2"><b>${g.sur}</b><i>${opt.bw==='full'?'':'&nbsp;· '}${g.agency}</i></span><span class="tm2">${x.t}</span></div></div>`
          : `<div class="slab">${c.l}</div><div class="s">${x.s}</div><div class="m"><span class="who2"><b>${g.sur}</b><i>${opt.bw==='full'?'':'&nbsp;· '}${g.agency}</i></span><span class="tm2">${x.t}</span></div>`}
        ${qa?`<button class="qa" onclick="event.stopPropagation();openJourneyFor(this,'${g.sur}','${x.k==='partial-req'?'partial':'full'}')">Mark sent</button>`:''}
      </div></div>`;
