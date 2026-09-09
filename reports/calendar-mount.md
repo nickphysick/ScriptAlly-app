@@ -126,3 +126,168 @@ screenshots will show it either way.
 **Phase 3 — prove both boards**, including the cross-page geometry comparison for one shared wait.
 
 **Phase 4 — walk Run A's 40 numbered behaviours** and carry the five To-do follow-ups forward.
+
+
+---
+
+# Phase 3 — both boards proved
+
+## ⚠️ The assertion this whole sequence existed for: the same wait, drawn the same way
+
+`tests/e2e/qcCalendarParity.measure.ts`. It joins the two boards on `data-qid` and compares, for
+**every query that draws on both**:
+
+- the bar ENGINE's own outputs — `state`, `holder`, `namedend`, `from`, `truefrom`, `trueto` —
+  which must be **identical**, not merely close. If those agree the boards did not just land in the
+  same place, they made the same decision.
+- the bar's start and end, its row's height, and every mark on the row.
+
+**Result: 23 queries draw on both boards, all 23 shared, and all 23 agree.**
+
+### It failed first, and the failure was my instrument rather than the boards
+
+Thirteen bars reported a START disagreement — **every one of them exactly 1.435px, and every one
+carrying `fadeL`**. The numbers gave it away: `0.007426 × 808 = 6.000` and `0.005650 × 1062 =
+6.000`. Both boards were insetting the bar by **the same six real pixels**; a left-faded bar carries
+`left: 6px` so its dissolve has somewhere to happen.
+
+**A bar's left edge is two terms in two different units** — `pct(from)`, a FRACTION of the lane,
+plus a fixed pixel decoration. To-do's lane is 808px (it carries a 232px sidebar) and Query Centre's
+is 1062px, so comparing the SUM as a fraction called two identical renders different. The check now
+compares the day term as a fraction and the decoration in pixels, each in its own units.
+
+Worth stating plainly because the shape recurs: **the first red was a false one, and taking it at
+face value would have meant "stop and report a disagreement" about two boards that agree exactly.**
+The tell was that all thirteen differed by the identical amount — a real divergence does not
+produce one number.
+
+Positions are compared as a fraction of the lane rather than in raw pixels, and that is not a
+weakening: the two pages give the board different widths, so a raw pixel comparison could only ever
+fail and would be measuring the page's chrome rather than the board's derivation. The tolerance is
+stated in pixels **of the narrower lane**, so "within half a pixel" means what it says on the
+tighter of the two.
+
+## To-do, unchanged
+
+| | |
+|---|---|
+| `.tl` HTML + geometry vs the write-once `before` | **identical** at 1280 / 1440 / 1920, after every one of this run's six extractions |
+| the winbar's own `outerHTML` | **identical** (603 bytes, byte-for-byte, before and after the swap) |
+| `cal*.measure.ts` | **106 passed / 39 failed** — the same 39 name for name, nothing newly red, no sign-in flakes |
+
+⚠️ The winbar had to be captured SEPARATELY: it sits outside `.tl`, so the board capture would have
+passed a clean diff over any change to it. **A capture scoped to a subtree proves nothing about its
+siblings** — anything moved from outside the capture needs its own before/after. That hole was open
+until it was noticed, and closing it is the general rule worth keeping.
+
+*(A later capture shows one extra `style=""` on the search input — a Playwright artefact from a run
+that had interacted with the page, not a product change; the clean probe is 603 = 603.)*
+
+## Screenshots — `reports/calendar-mount-shots/`
+
+`calendar-loaded`, `calendar-grouped`, `calendar-filtered` and `todo-board` at 1280, 1440 and 1920.
+Grouped by Status draws **10 dividers** at every width; ungrouped draws **0**; the page's own search
+narrows the board **21 rows → 0** on a term that matches nothing.
+
+⚠️ **The Calendar holds no view on grouping, and that is deliberate.** `VIEW_DEFAULTS.calendar` sets
+a SORT and no group — *"a date surface: it orders by when things were sent and holds no view on
+grouping"* — so it inherits whatever the last view left. Arriving from Grid it is ungrouped. I first
+read that as a wiring gap and it is not; the grouped shot sets `Status` explicitly rather than
+assuming a default the table does not claim.
+
+---
+
+# Phase 4 — the inventory walked
+
+Run A's inventory, item by item. **Nothing is `lost`.**
+
+### A · Geometry and scale — all CARRIED
+A1 one 90-day window · A2 today at the centre (`todayAtOf`) · A3 the week pager (`WEEK_STEP`, shared)
+· A4 `cqw` against `--tl-days` · A5 lane index as data · A6 row height is density, bar height is not
+· A7 two densities · A8 `--row-h × --lanes` · A9 stage gates in days · A10 the 55px non-sticky rail
+· A11 the unconditional month tier · A12 one scrolling region · A13 the isolation and z ladder.
+All rendered from the same `TimelineBoard`; A2/A4/A5/A8 asserted directly by the parity check.
+
+### B · Marks and bars — all CARRIED
+B1–B14. The parity check asserts B1 (the card spans its own dates), B7 (open edges — it is the
+`fadeL` inset that produced the false red), and every mark's position. B2/B3 (marker kind and the
+four faces) come from `journeyBars` unchanged. B9/B10 (three-source provenance, one `namedEndFor`)
+pass through the adapter untouched and are asserted identical as `namedend`.
+
+### C · State — all CARRIED
+C1 ten bar states · C2 holder from `side` · C3 family never from age · C4 the two silences ·
+C5 weight tiers · C6 `overdueSpan` · C7 `Nudged {date}`, never a count · C8 the pill vocabulary.
+`state` and `holder` are asserted identical across the boards for all 23 shared waits.
+
+### D · Rows, sections, tabs, sorting
+| | |
+|---|---|
+| D1 five tabs | **To-do-only** — Query Centre has its own five filter tiles |
+| D2 four group modes | **ADAPTED** — Query Centre groups by its own `gridGroup` (`turn`/`status`/`agency`/`month`), read through `queryCardFacts` |
+| D3 four sort keys | **ADAPTED** — the page's own Sort orders `sortedList`, which the board draws |
+| D4 six sections | **To-do-only** — they are To-do's urgency tiers |
+| D5 facets | **To-do-only** |
+| D6 a group is a divider | **CARRIED** — 10 dividers measured |
+| D7 nothing divides the rows | **CARRIED** |
+| D8 tasks are bars | **To-do-only** — there are no tasks here |
+
+### E · Interaction
+| | |
+|---|---|
+| E1 bar click + keyboard | **ADAPTED** — opens the query drawer (`?q=…`) instead of To-do's card |
+| E2 marker click | **CARRIED** |
+| E3 nested control stops propagation | **CARRIED** |
+| E4 hover is lift and reveal | **CARRIED** (CSS); the row-level reveal has nothing to reveal here |
+| E5 the one door | **ADAPTED** — the drawer is Query Centre's one door |
+| E6 Card C | **To-do-only** — portalled from that page; the drawer replaces it |
+| E7 the drawer | **ADAPTED** — Query Centre's own drawer, at the query |
+| E8 drag a task to a new day | **To-do-only** |
+| E9 crosshair and `RIGHT NOW` | **CARRIED** — `crossAt` shared and wired |
+| E10 actions on the board | **To-do-only** — `requestAction` is optional and unwired here |
+| E11 no dissolve, no shadow | **CARRIED** |
+
+### F · Data in
+F1 activities already loaded, nothing new read · F2 exchange count over the whole query · F3 no
+reply-stated window at this level · F4 the `todoCalendar` helpers — all **CARRIED** through
+`laneBars`. F5 (`assembleBoardColumns`) and F6 (task writes) are **To-do-only**.
+
+---
+
+## ⚠️ OPEN DECISION FOR NICK — a closed query that vanishes on the calendar
+
+**Not changed in this run. Inherited, locked, and needing a ruling.**
+
+A terminal query with **no recorded close activity draws nothing**. Measured against `laneBars`: the
+same query yields one segment as `Queried` and zero as `Rejected`. A terminal bar needs a close
+EVENT to end on; with none there is no end, and the board draws nothing rather than inventing one.
+
+Defensible on To-do, where closed relationships are mostly out of view. **On Query Centre, where
+Closed is a visible state with its own filter tile, a query that exists everywhere else and vanishes
+on the calendar will read as a bug.**
+
+Two candidate fixes, both deliberately unbuilt:
+1. **A zero-length terminal mark at the last known date** — the query appears, with an honest mark
+   saying only that it ended, and no invented span.
+2. **Excluding un-dated closed queries from the calendar's row set explicitly** rather than
+   silently — the calendar states what it is not showing.
+
+---
+
+## Follow-ups for the To-do stream — none of them this run's work
+
+1. **`TEXT_INSET = 14` and `MARK_W = 22`** — dead constants whose comments assert locks that do not
+   exist, against tokens saying 13 and 16. Not carried into the shared module, not touched in To-do.
+2. **`calBar63` (d7) and (d9)** — both unprovable for want of a **nudged query in the harness
+   account's 90-day window**. (d9) reads as a size failure and is not: seven of its eight keys
+   measured exactly on target and the eighth was absent.
+3. **`calWindow58`** — presses `aria-label="Previous window"`, which the board does not have, and
+   its `if (b) b.click()` fails open, so it reports a no-op about a control it never touched. **The
+   pager works** — Phase 2 pressed the real `Back one week` and measured exactly seven days.
+4. **`calScheme62` (2)** — a v62 claim that the rail is flush with its container's left, which the
+   232px sidebar has since invalidated (`expected < 1.5, received 251`). Retarget or retire.
+5. **The 39 reds are versioned suites older than the board** (v40–v64 against v65). A case whose
+   first assertion fails is silent, so **an unknown number of assertions behind them have not
+   executed**; the real coverage is 106 cases, not 145.
+6. **`npx vitest run` can exit 1 with zero failed tests** — `[vitest-worker]: Timeout calling
+   "onTaskUpdate"`, the reporter's RPC channel timing out under load. Now recorded in CLAUDE.md
+   beside the build gate's own "a green exit code is not a clean build" note.
