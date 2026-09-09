@@ -1594,8 +1594,12 @@
    ⚠️ AND `background` IS ABSENT RATHER THAN SET TO `transparent`. The shorthand resets every
    background longhand, so a future edit adding an image here would silently take a colour with it;
    with nothing declared there is no shorthand to mistake. The card behind it is opaque. */
+/* ⚠️ NO `gap` HERE — the shared band rule below states it (v29, dead-rule sweep). This block said
+   `gap: 12px` and rendered 10: `.os-ahead, .os-th2 { gap: 10px }` is later in the file and both are
+   0-1-0, so the cascade took the grouped one while a reader scanning top-down took this. A value
+   the file states and the browser discards is worse than no value, because it reads as the answer. */
 .os-th2 {
-  display: flex; align-items: center; gap: 12px; margin: 0;
+  display: flex; align-items: center; margin: 0;
 }
 .os-th2 h2 {
   font-family: var(--font-serif); font-size: 23px; font-weight: 500; color: #2a1f18;
