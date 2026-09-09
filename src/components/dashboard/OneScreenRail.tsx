@@ -253,11 +253,46 @@ export type FeedSeg = { t: string; em?: boolean };
  * is a different claim on every row. One anchor is one derivation, always available and never
  * wrong; a varying anchor is four derivations and a chance to state the wrong one.
  */
+/**
+ * ⚠️ THE ELAPSED CLAUSE IS THE ONE THING ON THIS PAGE THAT CAN ASSERT SOMETHING UNTRUE, so it
+ * refuses far more readily than it speaks.
+ *
+ * It shipped saying "870 days after you queried" about a full manuscript sent SEVENTY-ONE MINUTES
+ * after the query — because the anchor was the query record's `dateSent`, and on that record it was
+ * a seed value rather than the date the query actually went out. The arithmetic was correct and the
+ * sentence was false, which is the worst combination available: a wrong number is read as a fact,
+ * and nothing about it looks wrong.
+ *
+ * THREE REFUSALS, and each is a case the old code printed:
+ *   · no anchor, or an unparseable one          → no clause
+ *   · NEGATIVE elapsed (event before the query) → no clause; the record contradicts itself
+ *   · elapsed longer than the query has existed → no clause; the anchor cannot be the send date
+ * A missing clause is a sentence that still says what happened. A wrong one teaches the reader that
+ * the app's prose cannot be trusted, and this repo already records that lesson twice.
+ *
+ * ⚠️ AND IT SPEAKS IN THE UNIT THE GAP DESERVES. Days was the only unit, so an hour rounded to
+ * zero and was dropped, and a minute became "0 days" or vanished — which is why a same-day sequence
+ * read as nothing at all until the seed made it read as 870.
+ */
+const MIN = 60_000, HOUR = 3_600_000, DAY = 86_400_000;
+export const elapsedClause = (ms: number | null): string | null => {
+  if (ms === null || !Number.isFinite(ms)) return null;
+  if (ms < MIN) return null;                       // the same instant, to a reader
+  const n = (v: number, unit: string) => `${v} ${unit}${v === 1 ? "" : "s"}`;
+  if (ms < 90 * MIN) return n(Math.round(ms / MIN), "minute");
+  /* ⚠️ 24, NOT 36. At 36 the singular "1 day" was UNREACHABLE — a 24-hour gap read "24 hours" and
+     the next step up rounded to two. A unit a clause can never say is a unit that will read as a
+     bug the first time somebody looks for it. */
+  if (ms < 24 * HOUR) return n(Math.round(ms / HOUR), "hour");
+  return n(Math.round(ms / DAY), "day");
+};
+
 export const describeEvent = (
   status: QueryStatus | null,
   who: string,
   msTitle: string,
-  daysSinceSent: number | null,
+  /** milliseconds between the query going out and THIS event; null when it cannot be trusted */
+  elapsedMs: number | null,
 ): FeedSeg[] | null => {
   if (!status || !who) return null;
   const book: FeedSeg[] = msTitle ? [{ t: " " }, { t: msTitle, em: true }] : [];
@@ -301,10 +336,45 @@ export const describeEvent = (
       return null;
   }
   /* the one derived clause, and only where the query has a send date to measure from */
-  if (daysSinceSent !== null && daysSinceSent >= 1 && status !== QueryStatus.QUERIED) {
-    head.push({ t: `, ${daysSinceSent} ${daysSinceSent === 1 ? "day" : "days"} after you queried` });
-  }
+  const clause = elapsedClause(elapsedMs);
+  if (clause && status !== QueryStatus.QUERIED) head.push({ t: `, ${clause} after you queried` });
   return head;
+};
+
+/** the query's own QUERIED activity, by queryId — the log's answer to "when did this go out" */
+export const queriedTimes = (activities: Activity[]): Map<string, number> => {
+  const out = new Map<string, number>();
+  for (const a of activities) {
+    if (a.resultingStatus !== QueryStatus.QUERIED || !a.queryId) continue;
+    const t = new Date(a.date).getTime();
+    if (!Number.isFinite(t)) continue;
+    /* the EARLIEST such event: a resubmission can write a second one */
+    const seen = out.get(a.queryId);
+    if (seen === undefined || t < seen) out.set(a.queryId, t);
+  }
+  return out;
+};
+
+const querySentAt = (queryId: string, fromLog: Map<string, number>, q?: Query): number | null => {
+  const logged = fromLog.get(queryId);
+  if (logged !== undefined) return logged;
+  const stored = q?.dateSent ? new Date(q.dateSent).getTime() : NaN;
+  return Number.isFinite(stored) ? stored : null;
+};
+
+/**
+ * ⚠️ AN ELAPSED THE RECORD CANNOT SUPPORT IS `null`, NOT A NUMBER. Negative means the event
+ * predates the query it belongs to; longer than the query has existed means the anchor is not a
+ * send date at all. Both are contradictions in the record rather than facts about the writer's
+ * querying, and the sentence is better off without the clause than with a confident wrong figure.
+ */
+export const trustedElapsed = (anchor: number | null, eventAt: number, nowAt: number): number | null => {
+  if (anchor === null || !Number.isFinite(anchor) || !Number.isFinite(eventAt)) return null;
+  const elapsed = eventAt - anchor;
+  if (elapsed < 0) return null;
+  const queryAge = nowAt - anchor;
+  if (queryAge < 0 || elapsed > queryAge) return null;
+  return elapsed;
 };
 
 export const feedRows = (
@@ -316,6 +386,10 @@ export const feedRows = (
 ): FeedRow[] => {
   const from = now.getTime() - 30 * 86400000;
   const rows: FeedRow[] = [];
+  /* built once over the WHOLE activity list, not the 30-day window: a query sent two months ago
+     still anchors an event from last week, and windowing the anchor would have re-created the
+     missing-anchor case on every query older than the feed. */
+  const queriedAt = queriedTimes(activities);
 
   for (const { a, t } of activities
     .map((x) => ({ a: x, t: new Date(x.date).getTime() }))
@@ -390,9 +464,20 @@ export const feedRows = (
          the book. Splitting a display string to recover a field is the string-parsing this file
          forbids two hundred lines up; the field was there all along. */
       queryAgency = (agent?.agency ?? "").trim();
-      const sentAt = q?.dateSent ? new Date(q.dateSent).getTime() : NaN;
-      const days = Number.isFinite(sentAt) ? Math.round((t - sentAt) / 86400000) : null;
-      say = describeEvent(shape.status, who, (msTitle ?? "").trim(), days);
+      /**
+       * ⚠️ THE ANCHOR IS THE QUERY'S OWN LOG FIRST, `dateSent` ONLY AS A FALLBACK — and that order
+       * is the whole fix. `dateSent` is a stored field; on the record that produced "870 days after
+       * you queried" it held a seed value while the query's QUERIED activity was timestamped 71
+       * minutes before the event being described. The log is what the feed is already reading, it
+       * is written at the moment of the action, and it cannot disagree with the events drawn beside
+       * it — which a stored field demonstrably can.
+       *
+       * ⚠️ AND THE GUARD RUNS WHICHEVER ANCHOR WINS. A better anchor is not a substitute for
+       * refusing a number that cannot be right.
+       */
+      const anchorAt = querySentAt(a.queryId ?? "", queriedAt, q);
+      const elapsed = trustedElapsed(anchorAt, t, now.getTime());
+      say = describeEvent(shape.status, who, (msTitle ?? "").trim(), elapsed);
     }
     /* ⚠️ NEVER AN EM DASH WHERE A NAME BELONGS — an unresolvable subject drops the row */
     if (!who) continue;
