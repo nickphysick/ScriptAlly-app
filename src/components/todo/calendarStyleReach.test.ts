@@ -28,10 +28,11 @@ import { join } from "node:path";
 
 const here = __dirname;
 /**
- * ⚠️ THE CALENDAR RENDERS FROM TWO FILES NOW, AND THE LAW IS UNCHANGED BY THAT.
+ * ⚠️ THE CALENDAR RENDERS FROM THREE FILES NOW, AND THE LAW IS UNCHANGED BY THAT.
  *
- * The board's presentational leaves — the card, the markers, the action mark — moved to
- * `shared/timeline/boardParts.tsx` so Query Centre can mount the same board. The classes they draw
+ * The board's leaves AND the board itself — the card, the markers, the rail and the rows — moved to
+ * `shared/timeline/` (`boardParts.tsx` and `TimelineBoard.tsx`) so Query Centre can mount the same
+ * board. The classes they draw
  * did not change, so "every class the Calendar renders has a base rule in its own stylesheet" is
  * the same claim it was; what changed is where "renders" is written. Reading one file would have
  * silently shrunk the swept population instead — which is precisely what the floor case below
@@ -43,6 +44,7 @@ const here = __dirname;
 const page = [
   readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8"),
   readFileSync(join(here, "..", "shared", "timeline", "boardParts.tsx"), "utf8"),
+  readFileSync(join(here, "..", "shared", "timeline", "TimelineBoard.tsx"), "utf8"),
 ].join("\n");
 const css = readFileSync(join(here, "todoCalendar.css"), "utf8");
 

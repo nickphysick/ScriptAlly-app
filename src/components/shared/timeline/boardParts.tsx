@@ -34,7 +34,7 @@ import { stageFor, turnWordFor } from "../../../lib/queryCardFacts";
 import { shortCalDate } from "../../../lib/todoCalendar";
 import { taskHolder } from "../../../lib/taskBars";
 import type { CalSection } from "../../../lib/calendarSections";
-import type { TimelineRow } from "../../../lib/todoTimeline";
+import type { BoardRow } from "./types";
 
 /** ⚠️ 14px — THE REF'S `.sseg svg`, AND IT SUPERSEDES §D's 20. That pass argued a glyph's legible
     size is part of the glyph and took the pack's 20; rendered, a 20px disc in a 26px band leaves
@@ -610,7 +610,7 @@ export type DrawnGroup = {
   label: string;
   purpose: string | null;
   status?: QueryStatus;
-  rows: TimelineRow[];
+  rows: BoardRow[];
 };
 
 /**

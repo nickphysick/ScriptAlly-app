@@ -55,6 +55,11 @@ const drawsAnEdge = (ruleText: string): string[] =>
 const layout = readFileSync(join(here, "TasksPageLayout.tsx"), "utf8");
 const board = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const cal = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
+/* ⚠️ THE ROW MOVED TO THE SHARED BOARD, AND ITS LAWS WENT WITH IT. `row()` — and so the lane
+   COUNT it hands down — now lives in `shared/timeline/TimelineBoard.tsx`, because Query Centre
+   mounts the same board. The claim below is unchanged: the page hands down a count, never a
+   position. Only the file that has to be read for it changed. */
+const calBoard = readFileSync(join(here, "..", "shared", "timeline", "TimelineBoard.tsx"), "utf8");
 const note = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
 
 /* ⚠️ COMMENTS ARE STRIPPED, and that is not fussiness. These rules explain themselves by QUOTING
@@ -361,7 +366,7 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
     expect(rowRule).not.toMatch(/min-height:\s*\d+px/);
     expect(rowRule).toContain("min-height: calc(var(--row-h) * var(--lanes, 1))");
     /* and the page hands down the COUNT, never a position */
-    expect(cal).toContain('["--lanes" as string]: String(lanes)');
+    expect(calBoard).toContain('["--lanes" as string]: String(lanes)');
     /* ⚠️ AND THE PAGE IS STRIPPED TOO, for the reason this repo has paid for seven times: every
        retirement here is documented by QUOTING what it retired, so the page's own comment explains
        `LANE_STEP` at length. A bare `not.toContain` over prose that names the token it forbids is

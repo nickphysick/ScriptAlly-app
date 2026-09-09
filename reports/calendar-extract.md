@@ -519,3 +519,114 @@ The leaves are out and the contract is written. Still in `TodoCalendarPage`:
 3. **The adapter direction.** `BoardRow` is written; nothing maps to it yet. To-do's mapping and
    Query Centre's (`src/lib/queryTimelineRows.ts`, Step 3) are the two callers that will prove the
    contract is honestly generic — a contract with one implementer has not been tested.
+
+
+---
+
+# Run B, first half — the board moves, and the contract gets its implementer
+
+**Landed and proved. `TodoCalendarPage.tsx` 3,456 → 2,215 lines across the two runs; 1,241 moved.**
+
+`src/components/shared/timeline/TimelineBoard.tsx` now holds the `.tl` subtree — the rail and the
+rows — plus `row()` and `SectionIcon`. The winbar (week pager, search, density) and the To-do
+sidebar are siblings of that subtree and stayed with their host, which is the seam measured at the
+end of Run A.
+
+## To-do is identical to before ANY of this work
+
+Not merely to the last commit — to the capture taken before the first line moved:
+
+| width | HTML | geometry |
+|---|---|---|
+| 1280 | identical | identical |
+| 1440 | identical | identical |
+| 1920 | identical | identical |
+
+## The locks: zero newly red, and the failure set is unchanged
+
+| | baseline | after Step 2a | after the board moved |
+|---|---|---|---|
+| passed | 105 | 106 | **109** |
+| failed | 40 | 39 | **39** |
+
+The 39 are the *same 39*, name for name — `comm` reports nothing newly red and nothing newly green.
+
+**The rise from 106 to 109 passing is not an improvement, and chasing it found a real hazard I had
+introduced.** Three cases appeared with no test written. The cause: my own capture file was named
+`calDomCapture.measure.ts`, so it matched the `cal*.measure.ts` glob every lock run uses — and its
+`SA_DOM_TAG` defaulted to `"before"`. **A lock run therefore rewrote the reference capture with the
+current DOM as its first act.**
+
+It cost nothing exactly once, because this extraction is lossless and the bytes it overwrote were
+the same bytes. Had the board changed, the run that should have caught it would have destroyed the
+evidence first and the diff afterwards would have been clean. **The tell was arithmetic: 145 cases
+became 148.**
+
+Both halves are now closed, because either alone leaves the trap armed: the file is renamed
+`boardDomCapture.measure.ts`, out of the `cal*` glob; and `SA_DOM_TAG` has no default — it throws.
+The reference is also write-once (`before` refuses to overwrite without `SA_DOM_OVERWRITE=1`). Both
+guards were fired deliberately and both were seen to fire.
+
+## ⚠️ The contract: the brief's `BoardRow` was replaced, because writing it disproved it
+
+`types.ts` began as an invented `BoardRow`/`BoardBar`/`BoardMark` trio taken from the brief. Two
+findings retired it:
+
+**1. `journeyBars.Segment` carries 43 fields against that draft's ten** — `fact`, `tail`,
+`capLeft`/`capRight`, `capWord`/`capSource`/`capOn`/`capMine`, `hollow`, `owed`, `nudgeDue`,
+`namedEndAt`, `trueFrom`/`trueTo`, `lateFrom`, `weight`, `historical`, `live`, `tip` and the rest. A
+board driven by the ten-field version would have drawn a poorer board, which is the one thing this
+extraction may not do.
+
+**2. The query→bars adapter the brief asks for already exists.** `laneBars(LaneInput, BarWindow)`
+takes a `Query` and an `Agent` and returns `Bars` — segments and nodes, carrying no domain type
+between them. That IS "a pure function from a query to what the board draws"; it has been in the
+tree the whole time, and `lib/todoTimeline.ts:995` is its single caller. **Step 3 is therefore a
+second CALLER of `laneBars`, not a new derivation** — writing one would be two answers to one
+question waiting to disagree.
+
+So what was left for a type to state is the row's IDENTITY, and the board reads exactly **nine
+fields** of it (`key`, `name`, `agency`, `lanes`, `closed`, `group`, `pressingAt`, `subjects`,
+`items`) plus nine off an item. Those numbers are measured from the render, not designed.
+
+### The implementer, in its strongest possible form: no mapping code at all
+
+Because TypeScript is structural, To-do's own seventeen-field `TimelineRow` satisfies the nine-field
+`BoardRow` **as it is**. The board was switched to import `BoardRow` from `./types` instead of
+`TimelineRow` from `lib/todoTimeline`, and **tsc passed with zero errors and zero mapping written**.
+
+That is a better result than a mapping function would have been: there is nothing to keep in step,
+so nothing can fall out of step. And it means the shared board now imports **nothing from To-do** —
+verified by sweep. Its remaining imports are `journeyBars`, `calendarSections`, `calendarPill`,
+`cardC`, `actionKind`, `stageSentence`, `queryCardFacts` (which Query Centre already uses) and
+`StatusDot`.
+
+One naming wart, recorded not fixed: `shortCalDate` lives in `lib/todoCalendar`. It is a date
+formatter — generic in behaviour, To-do-named by location. Moving it touches another file family and
+is not this run's business.
+
+## Two more locks retargeted, each proved red
+
+Both are the source-scraping family, and **both were caught by their own floor cases** rather than
+silently sweeping a smaller population:
+
+1. **`calendarStyleReach`** stopped seeing `tl-tchip` once `row()` moved. Now reads all three files.
+   Proved red by planting a ruleless class in `TimelineBoard.tsx`:
+   `rendered with no rule at all: expected [ 'tl-nosuchrule' ] to deeply equal []`.
+2. **`tasksViewport`** asserts *"a row's height comes from its lanes, never from a floor in the
+   stylesheet"* by requiring `["--lanes" as string]: String(lanes)` in the page's source. That line
+   moved with `row()`. Retargeted to the board; proved red by changing it to `String(1)`.
+
+Both laws are unchanged by the move — only the file that has to be read for them changed.
+
+## Gates
+
+tsc clean · production build read, no diagnostics · 7,689 unit tests green across 463 files.
+
+## What remains — Step 3 and Step 4
+
+The Queries adapter is now de-risked to a known shape rather than an open design: build `LaneInput`
+from the page's queries and agents, omit `flag` and `moveLabel` (both To-do-only and both already
+optional), call `laneBars`, and produce rows carrying the nine fields. It is deliberately NOT
+written here, because an adapter that nothing mounts is unproven — and this run's whole finding is
+that an unproven contract is the thing that misleads. It lands with its mount, in Step 4.
