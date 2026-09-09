@@ -1040,6 +1040,10 @@
    and the neutral default a housekeeping bubble takes. */
 .os-bubstrip {
   display: flex; align-items: center; gap: 8px;
+  /* ⚠️ A FLOOR, SO A BUBBLE WITH AN ACTION IS EXACTLY AS TALL AS ONE WITHOUT — ref's 26px. The
+     strip's height must not be a function of what it happens to contain, or the feed's rhythm
+     changes with the writer's outstanding requests. */
+  min-height: 26px;
   padding: 7px 12px 6px;
   border-bottom: 1px solid #e6dfd6;
 }
@@ -1073,15 +1077,32 @@
 .os-bubwho b { font-weight: 400; flex: none; }
 .os-bubwho i { font-style: normal; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .os-bubt { flex: none; }
-/* ⚠️ ON HOVER, AND ON FOCUS-WITHIN — a control that only appears under a pointer is unreachable
-   from a keyboard, which is the fault the tasks card's own end-cell already records. */
+/**
+ * ⚠️ THE ACTION AND THE TIMESTAMP SHARE ONE GRID CELL — the action REPLACES the time rather than
+ * joining it. Both are `grid-area: 1/1`, so the slot is the taller and wider of the two and
+ * nothing moves when one swaps for the other: no reflow on hover, and no row reserved on the
+ * bubbles that have no action at all (which is almost all of them).
+ *
+ * ⚠️ ON HOVER, AND ON FOCUS-WITHIN — a control that only appears under a pointer is unreachable
+ * from a keyboard, which is the fault the tasks card's own end-cell already records.
+ */
+.os-bubend { margin-left: auto; flex: none; display: grid; align-items: center; justify-items: end; }
+.os-bubend > * { grid-area: 1 / 1; }
 .os-bubact {
-  display: block; margin-top: 6px; opacity: 0;
+  opacity: 0; pointer-events: none;
   border: 1px solid #d8cdbd; border-radius: 99px; background: #fffdf9;
   padding: 3px 10px; font: inherit; font-size: 11px; color: #4a3a2e; cursor: pointer;
-  transition: opacity 0.14s ease;
+  white-space: nowrap; transition: opacity 0.14s ease;
 }
-.os-bub:hover .os-bubact, .os-bub:focus-within .os-bubact { opacity: 1; }
+.os-bub:hover .os-bubact, .os-bub:focus-within .os-bubact { opacity: 1; pointer-events: auto; }
+/* the time gives way to it — one slot, one occupant at a time */
+.os-bub:hover .os-bubtm, .os-bub:focus-within .os-bubtm { opacity: 0; }
+.os-bubtm { transition: opacity 0.14s ease; }
+/* ⚠️ ONLY WHERE THERE IS SOMETHING TO SWAP TO. `:has()` keeps a bubble with no action showing its
+   time under the pointer; without it every bubble's timestamp vanished on hover and the feed
+   flickered blank as the cursor crossed it. */
+.os-bub:hover .os-bubend:not(:has(.os-bubact)) .os-bubtm,
+.os-bub:focus-within .os-bubend:not(:has(.os-bubact)) .os-bubtm { opacity: 1; }
 
 /**
  * ⚠️ FULL-WIDTH MESSAGES — ref `body.bw-full`, v22's shipping `bw:'full'`. Declared here, at the
@@ -1106,12 +1127,13 @@
 /* the strip carries the direction now: dot, label, time — mirrored for the writer's own events */
 .os-bubsd { width: 14px; height: 14px; flex: none; line-height: 0; }
 .os-bubstrip .os-bublab { margin: 0; white-space: nowrap; font-size: 9px; letter-spacing: 0.1em; }
+/* ⚠️ THE AUTO MARGIN MOVED TO THE WRAPPER — the time is a grid child now and pushing it with a
+   margin of its own would fight the cell it shares with the action. */
 .os-bubtm {
-  margin-left: auto; flex: none;
   font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.05em; color: #9c8f82;
 }
 .os-bub.out .os-bubstrip { flex-direction: row-reverse; }
-.os-bub.out .os-bubtm { margin-left: 0; margin-right: auto; }
+.os-bub.out .os-bubend { margin-left: 0; margin-right: auto; justify-items: start; }
 
 /**
  * ⚠️ THE BODY TEXT IS ALWAYS LEFT-ALIGNED, ON BOTH SIDES AND IN BOTH KINDS, AND THIS IS THE RULE

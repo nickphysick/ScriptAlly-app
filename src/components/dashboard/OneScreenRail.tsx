@@ -731,8 +731,29 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                               agent's event and time, label, dot on your own: direction is carried
                               by the ORDER of the strip rather than by which side of the column the
                               bubble sits on, which is what full-width messages give up. */}
-                          <span className="os-bubtm">
-                            {r.count > 1 && r.fromTime ? `${r.fromTime}–${r.time}` : r.time}
+                          {/* ⚠️ THE ACTION TAKES THE TIMESTAMP'S PLACE ON HOVER, IN THE SAME SLOT
+                              (v26, Phase 6). It used to sit in the BODY at `opacity: 0` with a 6px
+                              top margin — which reserves its height on every bubble that has no
+                              action, i.e. almost all of them, so the feed carried a blank row of
+                              furniture per event. Opacity hides ink and keeps the box.
+                              The two share one grid cell, so the strip's height is the taller of
+                              them whether or not an action exists and NOTHING reflows on hover —
+                              which is also why the strip states a 26px floor: a bubble with no
+                              action must be exactly as tall as one with. Both are `grid-area: 1/1`;
+                              the wrapper's width is the wider of the two, so the label beside it
+                              does not shift either.
+                              ⚠️ OFFERED ONLY WHILE THE REQUEST IS STILL OPEN — read from the
+                              QUERY's current status, never stored on the event, so it disappears
+                              the moment the materials go out. */}
+                          <span className="os-bubend">
+                            <span className="os-bubtm">
+                              {r.count > 1 && r.fromTime ? `${r.fromTime}–${r.time}` : r.time}
+                            </span>
+                            {r.markSent && (
+                              <button type="button" className="os-bubact" onClick={() => onOpenTask?.(r.queryId)}>
+                                Mark sent
+                              </button>
+                            )}
                           </span>
                         </div>
                       )}
@@ -786,14 +807,6 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                             <span className="os-bubt">{r.count > 1 && r.fromTime ? `${r.fromTime}–${r.time}` : r.time}</span>
                           )}
                         </div>
-                      )}
-                      {/* ⚠️ OFFERED ONLY WHILE THE REQUEST IS STILL OPEN — read from the QUERY's
-                          current status, never stored on the event, so it disappears the moment
-                          the materials go out. */}
-                      {r.markSent && (
-                        <button type="button" className="os-bubact" onClick={() => onOpenTask?.(r.queryId)}>
-                          Mark sent
-                        </button>
                       )}
                       </div>
                     </div>

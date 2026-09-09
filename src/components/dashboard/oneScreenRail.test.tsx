@@ -480,3 +480,53 @@ describe("§6 · the collapse mechanics in CSS", () => {
     expect(cssRules).not.toContain("os-fillin");
   });
 });
+
+describe("the hover action lives in the strip (v26, Phase 6)", () => {
+  const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
+  const rail = readFileSync(resolve(__dirname, "./OneScreenRail.tsx"), "utf8");
+  const rule = (sel: string) => {
+    const m = new RegExp(`(?:^|\\n)${sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`, "m").exec(css);
+    return m ? m[1] : "";
+  };
+
+  /* ⚠️ NO BUBBLE MAY RESERVE VERTICAL SPACE FOR AN ACTION IT DOES NOT HAVE. The action used to sit
+     in the BODY at `opacity: 0` with a 6px top margin — opacity hides ink and keeps the box, so
+     every event in the feed carried a blank row of furniture for a control almost none of them
+     offer. It shares the timestamp's grid cell now, so the slot is the taller of the two whether
+     or not an action exists. */
+  it("the action is in the strip, sharing one cell with the timestamp", () => {
+    /* ⚠️ THE ORDER HERE IS A PROXY AND THE CSS BELOW IS THE REAL CLAIM. A source window only says
+       the two names are near each other; what makes the action share the timestamp's cell is the
+       grid, and that is asserted directly. The window is wide because the comment explaining the
+       swap sits between them — which is itself the reason a source lock should not be carrying a
+       structural claim on its own. */
+    const stripAt = rail.indexOf('className="os-bubstrip"');
+    const endAt = rail.indexOf('className="os-bubend"');
+    const bodyAt = rail.indexOf('className="os-bubbody"');
+    expect(stripAt, "the strip must exist").toBeGreaterThan(-1);
+    expect(endAt, "the end slot must sit inside the strip, before the body").toBeGreaterThan(stripAt);
+    expect(endAt, "the action must NOT have drifted back into the body").toBeLessThan(bodyAt);
+    expect(rule(".os-bubend")).toContain("display: grid");
+    expect(rule(".os-bubend > *")).toContain("grid-area: 1 / 1");
+    /* and it is no longer a block with a margin in the body */
+    expect(rule(".os-bubact")).not.toMatch(/margin-top/);
+    expect(rule(".os-bubact")).not.toMatch(/display:\s*block/);
+  });
+
+  /* ⚠️ A FLOOR, so the feed's rhythm is not a function of the writer's outstanding requests. */
+  it("the strip states a minimum height", () => {
+    expect(rule(".os-bubstrip")).toMatch(/min-height:\s*26px/);
+  });
+
+  /* ⚠️ AND THE SWAP IS CONDITIONAL. Hiding the timestamp on hover unconditionally made every
+     bubble's time vanish under the pointer, including the ones with nothing to swap to. */
+  it("the timestamp gives way only where there is an action to replace it", () => {
+    expect(css).toMatch(/:has\(\.os-bubact\)[\s\S]{0,160}opacity:\s*1/);
+    expect(css).toMatch(/\.os-bub:hover \.os-bubtm[\s\S]{0,80}opacity:\s*0/);
+  });
+
+  /* the expander is formally cut: it was never built, and v26 settles that it never will be */
+  it("no expander survives in the panel", () => {
+    expect(rail.replace(/\{\/\*[\s\S]*?\*\/\}/g, "")).not.toMatch(/["\s`]os-exp["\s`]/);
+  });
+});
