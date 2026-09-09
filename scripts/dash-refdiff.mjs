@@ -38,7 +38,47 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const REF = join(ROOT, "design-refs", "dashboard-cappuccino-v27.html");
+/**
+ * ⚠️ THE BACKTICK GUARD, AND IT RUNS BEFORE READ IS BUILT — AND IT WAS VACUOUS FOR SIX PASSES.
+ *
+ * It read `READ.includes(backtick)`. READ is the string the template literal EVALUATES TO, and a
+ * stray backtick is precisely what ENDS that literal — so the string it inspected could never
+ * contain one. The guard could not fire under any circumstances, in a file whose own notes warn
+ * that a green is worth what the last red was worth. Six occurrences of the fault it was written
+ * for have gone past it.
+ *
+ * ⚠️ THE SIXTH IS WHY IT HAD TO CHANGE RATHER THAN BE DELETED. The first five ended the literal
+ * mid-expression and died at PARSE, which at least pointed at the file. The sixth left a
+ * syntactically valid file that failed in the BROWSER as "appctl is not defined" — an error with no
+ * visible relationship to a comment three hundred lines away.
+ *
+ * ⚠️ AND IT SITS ABOVE THE LITERAL, NOT BELOW IT. Placed after, it still could not fire: the
+ * module dies CONSTRUCTING READ, before any statement after it runs. A guard positioned after
+ * the thing it guards is a guard for a fault that has already happened.
+ *
+ * So it reads the SOURCE. Between the opening delimiter and the closing one there must be exactly
+ * two backticks in the file: the two that delimit it. Anything else is a stray, wherever it is —
+ * code, string or comment.
+ */
+const SELF_SRC = readFileSync(fileURLToPath(import.meta.url), "utf8");
+{
+  /* ⚠️ ANCHORED AT A LINE START, because unanchored it found its OWN string two lines above and
+     inspected a 502-character slice of itself — reporting exactly two backticks, forever. A guard
+     that reads the wrong region is the same class of fault as the one it guards against, and this
+     repo already records unanchored slicing three times. */
+  const open = SELF_SRC.indexOf("\nconst READ = ") + 1;
+  const body = SELF_SRC.slice(open, SELF_SRC.indexOf("\n\n", SELF_SRC.indexOf("})()", open)));
+  const ticks = (body.match(/\u0060/g) || []).length;
+  if (ticks !== 2) {
+    throw new Error(
+      `dash-refdiff: READ's template literal holds ${ticks} backticks and must hold exactly 2 — ` +
+      "one of them is a stray, and it ends the literal early. Search the block for a backtick in " +
+      "code, in a string, or in a COMMENT: the last five were all in comments.",
+    );
+  }
+}
+
+const REF = join(ROOT, "design-refs", "dashboard-cappuccino-v28.html");
 
 const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
@@ -71,7 +111,11 @@ const APP = process.env.SA_REFDIFF_APP_URL || "http://127.0.0.1:4173";
    which really is gone, replaced by `community-tile` in the right column. New: `topbar` and
    `search`, because v26 puts a 620x50 search field where the breadcrumb row was. */
 const PROBES = [
-  "main", "topbar", "search", "grid", "hero", "stats", "toprow",
+  /* ⚠️ `topbar` IS `navrow` NOW, AND `chart-header` IS NEW. Both of the last two shipped faults
+     were invisible to the probe set that existed: the search sat in a row of its own and no probe
+     measured a row, and the chart header wrapped and no probe measured the header. A probe set is
+     the shape of what the gate can notice. */
+  "main", "navrow", "search", "grid", "hero", "stats", "toprow", "chart-header",
   /* v27 adds the two the stats row is actually judged on — a stat's whole box and its illustration.
      The `stats` probe is the ROW, and a row's box is identical whether its illustrations are 104px
      or 58px, which is exactly the squash the pack is trying to gate against. */
@@ -174,7 +218,18 @@ const ANCHOR = {
   main: "datum",
   /* the bar spans the content, and the field is CENTRED in it — so both of the field's insets are
      the fact, which `span` is exactly the anchor for */
-  topbar: "span", search: "span",
+  /**
+   * ⚠️ THE NAV ROW AND ITS SEARCH ARE DATUMS, REPORTED AND NOT COMPARED — and the ref says why in
+   * its own markup: "NAV ROW — the search sits in the nav's own row; the nav itself is locked and
+   * not drawn here". The ref's `.topbar` is a STAND-IN for a row it does not draw, positioned
+   * inside its `.main` because it has nowhere else to put it. Ours is real shell chrome above the
+   * content, so comparing the two would be comparing against a placeholder.
+   * What governs them instead is the standing gate below: one search control, a row no taller than
+   * 72px, and the greeting starting immediately under it. Those are claims about the app, checkable
+   * without the ref having an opinion.
+   */
+  navrow: "datum", search: "datum",
+  "chart-header": "span",
   grid: "span", hero: "span", stats: "span", toprow: "span",
   /* both sit at the LEFT end of the stats row, so their left inset and size are the facts */
   "stat-card": "left", "stat-illustration": "left",
@@ -277,15 +332,6 @@ const READ = `(() => {
      ⚠️ AND THE FIRST DRAFT OF THIS VERY COMMENT PUT BACKTICKS ROUND THE BROKEN SELECTOR, which
      ended the template literal and took the file down at parse. FOURTH time in this file, written
      into the warning about it. No backticks in here, comments included. */
-  const datum = document.querySelector('[data-probe="main"], .main, #app-stage-scroll');
-  /* ⚠️ A BOX WITH ZERO HEIGHT AND REAL WIDTH IS RENDERED, AND v22 SHIPS ONE. The activity filter
-     row is collapsed until the funnel is pressed — height 0, width 333 — which is the DESIGN, and
-     requiring BOTH dimensions reported "the ref has no such probe" about a probe the ref draws.
-     A display-none element is 0 x 0 and is still excluded, which is the case the visibility rule
-     was actually for.
-     NO BACKTICKS IN HERE: this whole block is a template literal, and one ends it — which the
-     load-time backtick guard below cannot save you from, because a stray one is a SyntaxError at
-     parse and the guard never runs. Third time in this file. */
   const visibleIn = (el) => {
     const r = el.getBoundingClientRect();
     return r.width > 0 || r.height > 0;
@@ -310,8 +356,37 @@ const READ = `(() => {
     if (out.probes[k] || !visibleIn(el)) continue;   // first VISIBLE match wins
     out.probes[k] = box(el);
   }
-  /* the datum, under the name every diff already asks for; an explicit probe still wins */
-  if (!out.probes.main && datum && visibleIn(datum)) out.probes.main = box(datum);
+  /**
+   * ⚠️ THE DATUM IS THE CONTENT COLUMN HORIZONTALLY AND THE NAV ROW'S TOP VERTICALLY, and it is
+   * composed from two elements because the ref's frame is genuinely both.
+   *
+   * v28 moved its topbar INSIDE its main, so every probe below sits 64px down from the datum's top.
+   * The app's os-content starts BELOW the shell's bar, so the same page measured 64px high on every
+   * probe, uniformly, at every width — the signature of a frame difference, not a layout one.
+   *
+   * ⚠️ AND SWAPPING WHOLESALE TO ws-main IS THE WRONG FIX, MEASURED. It carries the window's own
+   * ~23px of padding, which os-content was absorbing all along: Y came right and every x went 23px
+   * out at all four widths. One box could not be both, so the datum takes its horizontal frame from
+   * the content column and its top from the nav row — which is what the ref's main is.
+   * NO BACKTICKS IN HERE: fifth occurrence in this file was in a comment much like this one, and it
+   * took out the copy step so the next run measured the OLD harness and looked like a no-op.
+   */
+  /* ⚠️ IN PRIORITY ORDER, NOT AS ONE SELECTOR LIST. querySelector with a list returns the first
+     match in DOCUMENT order, not the first selector that matches — so the app-stage scroller, which
+     is only a last resort, was beating the content column and putting every x 23px out. The list
+     had been there for three passes and was harmless only because the branch never ran. */
+  const content = ['[data-probe="main"]', '.main', '#app-stage-scroll']
+    .reduce((found, sel) => found || document.querySelector(sel), null);
+  const navrowEl = document.querySelector('[data-probe="navrow"]');
+  if (content && visibleIn(content)) {
+    const c = box(content);
+    if (navrowEl && visibleIn(navrowEl)) {
+      const n = navrowEl.getBoundingClientRect();
+      /* only ever extends the frame upward — never past a nav row that is already inside it */
+      if (n.top < c.y) { c.h = num(c.y + c.h - n.top); c.y = num(n.top); }
+    }
+    out.probes.main = c;
+  }
   /* ⚠️ THE GREETING'S RENDERED WIDTH, so the stats allowance can be DERIVED rather than typed.
      The hero is auto/1fr: the stats begin where the greeting ends, so the two sides differ by
      exactly the width of the writer's name against the ref's. Recording it turns a magic tolerance
@@ -319,6 +394,58 @@ const READ = `(() => {
      name's, and reported the moment it does not. */
   const greetEl = document.querySelector('[data-probe-text="greeting"]');
   out.checks.greetW = greetEl ? Math.round(greetEl.getBoundingClientRect().width * 10) / 10 : null;
+
+  /**
+   * ⚠️ THE STANDING GATES' RAW READINGS. Five things have now regressed at least once each, and in
+   * every case a gate existed and asked about the visible SYMPTOM rather than the structural
+   * property — "is the title on one line" while the controls wrapped beneath it, "is there one
+   * search control" while it sat in a row of its own. These are the properties.
+   */
+  const r = (el) => (el ? el.getBoundingClientRect() : null);
+  const navrow = r(document.querySelector('[data-probe="navrow"]'));
+  const chdr = r(document.querySelector('[data-probe="chart-header"]'));
+  const ill = r(document.querySelector('[data-probe="stat-illustration"]'));
+  const statsB = r(document.querySelector('[data-probe="stats"]'));
+  const greetB = r(greetEl);
+  out.checks.navrowH = navrow ? Math.round(navrow.height * 10) / 10 : null;
+  out.checks.chartHeaderH = chdr ? Math.round(chdr.height * 10) / 10 : null;
+  out.checks.illH = ill ? Math.round(ill.height * 10) / 10 : null;
+  out.checks.statsVsGreet = statsB && greetB ? Math.round((statsB.top - greetB.top) * 10) / 10 : null;
+  out.checks.greetBelowNav = navrow && greetB ? Math.round((greetB.top - navrow.bottom) * 10) / 10 : null;
+  /* every element that could pass for a search control, however it is built */
+  /* ⚠️ ws-appctl IS NOT A SEARCH CLASS — it is the bar's control WRAPPER, and the + New button
+     wears it too. Counting it reported TWO search controls on a page with one, which is the same
+     species of error as the gate this run exists to replace: a selector that matches the thing you
+     are looking for AND something else is not a gate, it is a coincidence that has been right so
+     far. Named controls only.
+     NO BACKTICKS IN HERE. Sixth time in this file, and this one PARSED — the stray backtick ended
+     the template and the class name became code, so it failed at runtime as "appctl is not defined"
+     rather than at load, which puts the error a long way from the cause. */
+  out.checks.searchCount = document.querySelectorAll(
+    '[data-probe="search"], .ws-bigsearch, .sp-search, .os-search',
+  ).length;
+  /* the field and Feedback share a line — the claim v27's gate could not make */
+  const fb = [...document.querySelectorAll("button")].find((b) => /feedback/i.test(b.textContent || ""));
+  const sf = document.querySelector('[data-probe="search"]');
+  out.checks.searchVsFeedback = fb && sf
+    ? Math.round(Math.abs((sf.getBoundingClientRect().top + sf.getBoundingClientRect().height / 2)
+      - (fb.getBoundingClientRect().top + fb.getBoundingClientRect().height / 2)) * 10) / 10
+    : null;
+  /* every direct child of the chart header on the same line */
+  const hdrEl = document.querySelector('[data-probe="chart-header"]');
+  out.checks.headerRowSpread = hdrEl
+    ? (() => {
+        const tops = [...hdrEl.children]
+          .filter((c) => c.getBoundingClientRect().height > 0)
+          .map((c) => c.getBoundingClientRect().top);
+        return tops.length ? Math.round((Math.max(...tops) - Math.min(...tops)) * 10) / 10 : 0;
+      })()
+    : null;
+  /* the brush is inside the header's content box, not clipped */
+  const brushEl = document.querySelector('[data-probe="brush"]');
+  out.checks.brushOverflow = hdrEl && brushEl
+    ? Math.round((brushEl.getBoundingClientRect().right - hdrEl.getBoundingClientRect().right) * 10) / 10
+    : null;
   /* ⚠️ A TEXT PROBE READS ITS ELEMENT WHETHER OR NOT IT IS VISIBLE, AND THE REF IS WHY.
      v16 puts data-probe-text=card-title on the chart card's h3 inside hdA — which its own shipping
      config sets to display:none, because hdr is b and the stat block hdB takes over. A visible-only
@@ -396,13 +523,6 @@ const READ = `(() => {
   return out;
 })()`;
 
-/* ⚠️ THE GUARD FOR THE TRAP ABOVE, AND IT IS HERE BECAUSE I FELL INTO IT TWICE IN ONE PHASE.
-   A backtick anywhere inside READ ends the template literal, and the file then dies at PARSE time
-   with a message pointing at whatever word followed it — which reads like a typo in the browser
-   code rather than what it is. Checked once, at load, naming the fault. */
-if (READ.includes("\u0060")) {
-  throw new Error("dash-refdiff: READ contains a backtick — it is a template literal and a backtick ends it.");
-}
 
 /**
  * ⚠️ NAVIGATION AND SIGN-IN GET A LONG LEASH, AND THAT IS NOT A TOLERANCE. This repo runs several
@@ -780,8 +900,32 @@ function diffScale(key, ref, app) {
   return m;
 }
 
+/**
+ * ⚠️ THE STANDING GATES — five properties, run at every width, for the life of the dashboard.
+ *
+ * Each one encodes something that has regressed at least once, and in every case the gate that
+ * failed to catch it was written against the visible SYMPTOM rather than the structural property:
+ * "is the title on one line" while the controls wrapped beneath it; "is there exactly one search
+ * control" while it sat in a row of its own. A symptom can be true while the thing it stands for
+ * is false. A box's height cannot.
+ *
+ * ⚠️ THEY DO NOT ASK THE REF. Each is a claim about the app that holds whatever the ref happens to
+ * draw — which is what makes them permanent rather than a v28 artefact.
+ */
+const STANDING = [
+  { k: "navrowH", why: "the nav row is one row", test: (v) => v !== null && v <= 72, want: "<= 72px" },
+  { k: "chartHeaderH", why: "the chart header is one row — a wrapped one is ~150px", test: (v) => v !== null && v <= 72, want: "<= 72px" },
+  { k: "searchCount", why: "exactly one search control on the page", test: (v) => v === 1, want: "1" },
+  { k: "illH", why: "the stat illustration has not been squashed", test: (v) => v !== null && v >= 70, want: ">= 70px" },
+  { k: "statsVsGreet", why: "the stats sit on the greeting's line", test: (v) => v !== null && Math.abs(v) <= 20, want: "within 20px" },
+];
+
 function diffChecks(app) {
   const m = [];
+  for (const g of STANDING) {
+    const v = app.checks[g.k];
+    if (!g.test(v)) m.push({ key: "standing", field: g.k, ref: g.want, app: v, why: g.why });
+  }
   if (rgb(app.checks.ground) !== GROUND) {
     m.push({ key: "page", field: "ground", ref: GROUND, app: app.checks.ground });
   }
@@ -853,7 +997,7 @@ function table(result) {
 /* ── run ─────────────────────────────────────────────────────────────────────────────────────── */
 
 const browser = await chromium.launch();
-const result = { when: new Date().toISOString(), ref: "design-refs/dashboard-cappuccino-v27.html", app: APP, widths: WIDTHS, byWidth: {}, total: 0 };
+const result = { when: new Date().toISOString(), ref: "design-refs/dashboard-cappuccino-v28.html", app: APP, widths: WIDTHS, byWidth: {}, total: 0 };
 let selfTestSaw = null;
 
 try {
