@@ -78,7 +78,11 @@ const SELF_SRC = readFileSync(fileURLToPath(import.meta.url), "utf8");
   }
 }
 
-const REF = join(ROOT, "design-refs", "dashboard-cappuccino-v28.html");
+/* ⚠️ ONE NAME, READ TWICE — the report's `ref:` field used to restate this string, so repointing
+   the harness at a new ref left the table truthfully measuring v29 while its own header said v28.
+   A value that appears twice is a value that will disagree with itself; the report derives it. */
+const REF_REL = "design-refs/dashboard-cappuccino-v29.html";
+const REF = join(ROOT, REF_REL);
 
 const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
@@ -997,7 +1001,7 @@ function table(result) {
 /* ── run ─────────────────────────────────────────────────────────────────────────────────────── */
 
 const browser = await chromium.launch();
-const result = { when: new Date().toISOString(), ref: "design-refs/dashboard-cappuccino-v28.html", app: APP, widths: WIDTHS, byWidth: {}, total: 0 };
+const result = { when: new Date().toISOString(), ref: REF_REL, app: APP, widths: WIDTHS, byWidth: {}, total: 0 };
 let selfTestSaw = null;
 
 try {

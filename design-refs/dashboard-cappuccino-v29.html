@@ -2,7 +2,7 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<title>ScriptAlly · Dashboard — DESIGN REF v28 (authoritative)</title>
+<title>ScriptAlly · Dashboard — DESIGN REF v29 (authoritative)</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -256,7 +256,7 @@ body.tall .goalslim{display:none}
 .tile2.on{background:var(--ink);color:#fff;border-color:var(--ink)}.tile2.on b{color:#fff}
 .tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(288px,1fr));gap:12px;padding:0 20px 18px}
 .tgrid.one{grid-template-columns:1fr}
-.tk{position:relative;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px 14px 10px 18px;overflow:hidden;cursor:pointer;transition:box-shadow .15s}
+.tk{position:relative;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px 10px 18px;overflow:hidden;cursor:pointer;transition:box-shadow .15s}
 .tk:hover{box-shadow:0 6px 18px rgba(42,31,24,.07)}
 .tk:before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--edge,#e4e1db)}
 .tk .tag{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;padding:3px 8px;border-radius:5px;background:var(--fam,#e4e1db);color:var(--ink2)}
@@ -616,7 +616,7 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 /* page shell: activity column starts level with the greeting */
 .page2{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:22px;align-items:stretch;min-height:calc(100vh - 150px)}
 .page2 > .lcol{display:flex;flex-direction:column;gap:22px;min-width:0;min-height:0}
-.page2 > .rcol{display:flex;flex-direction:column;gap:22px;min-width:0;height:0;min-height:100%}
+.page2 > .rcol{display:flex;flex-direction:column;gap:26px;min-width:0;height:0;min-height:100%}
 
 .page2 .hero h1{font-size:46px;margin-bottom:4px}
 .page2 .hero .sub2line{font-size:17px;color:var(--ink2);margin:0 0 16px}
@@ -633,10 +633,10 @@ body.clean .opt,body.clean .note,body.clean .concepts,body.clean .goal .try{disp
 .wrapt2{flex:1;min-height:0}
 /* activity + community stacked on the right */
 .rcol #actCard{flex:1;min-height:0}
-.comtile{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:14px 16px}
-.comtile .spr2{width:56px;height:56px;flex:none}
-.comtile h4{font-family:var(--serif);font-weight:500;font-size:17px;margin:0}
-.comtile p{margin:3px 0 0;font-size:13.5px;color:var(--ink3);line-height:1.4}
+.comtile{flex:0 0 auto;display:flex;align-items:center;gap:18px;padding:20px 18px;min-height:132px;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 1px 2px rgba(42,31,24,.03),0 8px 24px rgba(42,31,24,.04)}
+.comtile .spr2{width:84px;height:84px;flex:none}
+.comtile h4{font-family:var(--serif);font-weight:500;font-size:19px;margin:0}
+.comtile p{margin:5px 0 0;font-size:14px;color:var(--ink3);line-height:1.45}
 .comtile .beta3{position:absolute;top:12px;right:14px;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:3px 9px;border-radius:99px;background:#fff;border:1px solid var(--line);color:var(--ink2)}
 /* chart chrome */
 .legend{display:none!important}
@@ -954,11 +954,11 @@ body.ac-rail #actCard .foot{padding-left:2px;padding-right:2px}
 .spark{width:100%;height:28px;display:block;margin-top:8px}
 </style>
 </head>
-<body data-scriptally-ref="dashboard-cappuccino-v28">
+<body data-scriptally-ref="dashboard-cappuccino-v29">
 <div class="page"><div class="shell"><div class="navslot"><div class="brand">ScriptAlly</div><div>Locked nav — not redrawn</div><div>Dashboard</div><div>Queries</div><div>Agents</div><div>Materials</div><div>Tasks</div><div>Account</div></div><div class="main">
 
 <div class="topbar" data-probe="navrow">
-  <span class="navnote">NAV ROW — the search sits in the nav's own row; the nav itself is locked and not drawn here</span>
+  <span class="navnote">NAV ROW — the search sits here, in the nav's own row</span>
   <div class="searchwrap" data-probe="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input placeholder="Search agents, queries, manuscripts…"><span class="kbd">⌘K</span></div>
   <button class="topbtn">Feedback</button><button class="topbtn dark">+ New</button>
 </div>
@@ -1188,7 +1188,7 @@ function renderChart(){
   }else{
     s+=`<path d="${area(tot,zero)}" fill="url(#g)"/>`;
   }
-  s+=`<rect x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}" fill="url(#fadeout)"/>`;
+  s+=`<rect x="${L}" y="${T}" width="${W-L-R}" height="${y(0)-T}" fill="url(#fadeout)"/>`;
   s+=`<path d="${mono(pts(tot))}" fill="none" stroke="#1c130f" stroke-width="2" stroke-linecap="round"/>`;
   if(opt.ghost==='1') s+=`<path d="${mono(pts(prior))}" fill="none" stroke="#b8ada2" stroke-width="1.5" stroke-dasharray="4 5"/>`;
   // start marker (ring) + end marker (hollow) like current
@@ -1242,7 +1242,7 @@ function renderChart(){
   document.getElementById('lg-gh').style.display=opt.ghost==='1'?'flex':'none';
   document.getElementById('lg-sl').style.display=opt.slate==='1'?'flex':'none';
 }
-const ST={monthly:false,n:8};
+const ST={monthly:false,n:8,dragP:null};
 function drawBrush(){
   const n=WD.length, mx=Math.max(...WD.map(r=>r.reduce((a,b)=>a+b,0)))+1;
   const bx=i=>6+218*i/(n-1), by=v=>32-29*v/mx;
@@ -1253,7 +1253,8 @@ function drawBrush(){
   let g=band(cum(0),z,'#f7efe3')+band(cum(1),cum(0),'#e0e5dd')+band(cum(2),cum(1),'#f5e6df');
   g+=`<path d="${mono(P(cum(2)))}" fill="none" stroke="#1c130f" stroke-width="1.1"/>`;
   bsvg.innerHTML=g;
-  const frac=ST.monthly?1:ST.n/12; const l=(100-frac*100);
+  const frac=ST.monthly?1:ST.n/12;
+  const l = (ST.dragP!=null) ? ST.dragP*100 : (100-frac*100);
   bwin.style.left=l+'%'; bwin.style.right='0'; bshade.style.width=l+'%';
 }
 function setN(v){ST.n=Math.max(4,Math.min(12,v));ST.monthly=false;renderChart()}
@@ -1264,15 +1265,18 @@ document.querySelectorAll('#nChips button').forEach(b=>b.onclick=()=>setN(+b.dat
 sFreq.onclick=()=>{ST.monthly=!ST.monthly;renderChart()};
 sN.onclick=()=>{if(ST.monthly)return;setN(ST.n===12?4:ST.n+4)};
 (function(){let drag=false;
- // the handle follows the cursor 1:1; the window runs from the handle to the right edge
+ // the handle's position is the cursor's position, always. N is derived from it and never
+ // feeds back into the handle while dragging — that feedback loop is what made it jitter.
  const upd=e=>{const r=bw.getBoundingClientRect();
    let p=(e.clientX-r.left)/r.width; p=Math.max(0,Math.min(1,p));
-   const weeks=Math.round((1-p)*12);
-   setN(Math.max(4,Math.min(12,weeks)));};
+   ST.dragP=p;
+   const weeks=Math.max(4,Math.min(12,Math.round((1-p)*12)));
+   if(weeks!==ST.n) setN(weeks); else drawBrush();};
+ const end=e=>{drag=false;ST.dragP=null;drawBrush();try{bw.releasePointerCapture(e.pointerId)}catch(_){}};
  bw.addEventListener('pointerdown',e=>{drag=true;bw.setPointerCapture(e.pointerId);upd(e)});
  bw.addEventListener('pointermove',e=>{if(drag)upd(e)});
- bw.addEventListener('pointerup',e=>{drag=false;try{bw.releasePointerCapture(e.pointerId)}catch(_){}});
- bw.addEventListener('pointercancel',()=>drag=false);})();
+ bw.addEventListener('pointerup',end);
+ bw.addEventListener('pointercancel',end);})();
 renderChart();
 
 /* ---------- GOALS ---------- */
