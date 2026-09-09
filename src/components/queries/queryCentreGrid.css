@@ -44,6 +44,36 @@
    `margin: 0 var(--pad)` on a body with no padding of its own; here the workspace grid supplies
    the page's side padding, so restating it as a margin would inset the well TWICE — 18 from the
    grid plus 18 from the margin. One inset, declared where the page already declares it. */
+/**
+ * ⚠️ BOARD AND CALENDAR SIT ON THE PAGE'S OWN GROUND — THE WELL IS GRID AND LIST ONLY.
+ *
+ * Settled looking at the board ON the well: its columns lost their edges against the recess and it
+ * read as scattered. The correction reached the run that built the Calendar and not the one that
+ * built the Board, so the Board was in the well by OMISSION rather than by decision. Both are out
+ * now.
+ *
+ * ⚠️ IT IS A DIFFERENT ELEMENT, NOT A TRANSPARENT WELL. `.qcc-well` is absent from the DOM in those
+ * two views — a see-through recess is still a recess to anything that measures the page, and the
+ * lock asserts absence rather than opacity.
+ *
+ * ⚠️ AND THE BOX METRICS ARE THE WELL'S, TO THE PIXEL, BECAUSE THE TOOLBAR IS INSIDE IT. Same
+ * margin, same padding, same container — so the toolbar, the search and the view switch land on the
+ * same coordinates in all four views. Only the recess itself differs: no fill, no radius, no inset
+ * shadow. If these two rules ever drift apart, the toolbar moves when the reader changes view,
+ * which is the one thing a view switch may not do.
+ *
+ * ⚠️ THE STICKY ROW STILL NEEDS A GROUND TO COVER WITH, so `--qcc-well-bg` is re-pointed rather
+ * than dropped: here it is the page's own `--ws-window`, measured (rgb(254, 252, 250)) rather than
+ * copied off a comment — every ancestor between the wrapper and the window paints nothing.
+ */
+.qcc-plain {
+  --qcc-well-bg: var(--ws-window, #fefcfa);
+  margin: 0 0 18px;
+  padding: 14px 16px 16px;
+  container-type: inline-size;
+  container-name: qccwell;
+}
+
 .qcc-well {
   /* ⚠️ THE GROUND IS A TOKEN BECAUSE TWO ELEMENTS PAINT IT. The sticky control row has to cover
      the cards that scroll beneath it, so it cannot be transparent — measured, at scrollTop 420

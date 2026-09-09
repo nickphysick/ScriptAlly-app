@@ -116,9 +116,8 @@ import "./todoCalendar.css";
 /** ⚠️ TWO DENSITIES (v64 §F). `Comfortable` IS the dev card as it stands — the 106/86 base,
     renamed — and `Regular` is retired everywhere as a word. The old 124/104 "comfortable" is
     deleted with it: three steps were two more answers to a question with one good one. */
-const DENSITY_LABEL: Record<"comfortable" | "compact", string> = {
-  comfortable: "Comfortable", compact: "Compact",
-};
+/* ⚠️ `DENSITY_LABEL` IS THE WINBAR'S NOW — imported above. Two statements of one pair of
+   words is one edit from disagreeing. */
 
 const CARD_BADGE_PX = 20;
 /* ⚠️ THE THREE STAGE CONSTANTS MOVED WITH THE ROW THAT READS THEM — `STAGE_BADGE_PX`,
@@ -216,13 +215,17 @@ const WEEK_STEP = 7;
    them stay here, because they are To-do's: this page maps its own tasks and relationships into
    the shapes below, and Query Centre will map queries into the same ones. */
 import {
-  pct, barLeft, barWidth, laneVar, Piece, Marker, ActionMark, type DrawnGroup,
+  pct, barLeft, barWidth, laneVar, crossAt, Piece, Marker, ActionMark, type DrawnGroup,
 } from "../shared/timeline/boardParts";
 /* ⚠️ AND THE BOARD ITSELF — the rail and the rows — now renders from `shared/timeline`. What
    stays on this page is the DERIVATION: the tabs, the facets, the sections, the sorts and the
    tasks are To-do's, and they are what turn To-do's data into the shapes the board draws.
    Query Centre will do the same job with queries and mount the same board. */
 import { TimelineBoard, type CardPayload } from "../shared/timeline/TimelineBoard";
+/* ⚠️ THE WINBAR IS SHARED TOO — it is a sibling of the board, and a pager that stepped
+   differently on two pages would put the same wait in two places. */
+import { TimelineWinbar, DENSITY_LABEL } from "../shared/timeline/TimelineWinbar";
+import { todayAtOf, monthsOf, dateLabelsOf } from "../shared/timeline/boardWindow";
 
 /* ⚠️ `TbMenu` AND `TbOpt` ARE DELETED WITH THE TOOLBAR ERA (v64 §E). The winbar's controls are a
    segmented pair and plain buttons; the sidebar's are the Notion panel's own rows. A dropdown
@@ -1015,18 +1018,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * date falls out of the arithmetic — so it cannot drift out of step with where the bars are
    * drawn, which are placed by the identical expression.
    */
+  /* ⚠️ THE CROSSHAIR'S MATHS IS THE BOARD'S, SHARED — see `crossAt`. Two pages computing a date
+     from a pointer x is two answers to one question, and they would disagree at the edges. */
   const onLaneMove = (e: React.MouseEvent) => {
-    const wrap = wrapRef.current;
-    const lane = (e.target as HTMLElement | null)?.closest?.(".tl-c-tl") as HTMLElement | null;
-    if (!wrap || !lane || !lane.closest(".tl-rrow")) { setCross(null); return; }
-    const wr = wrap.getBoundingClientRect();
-    const lr = lane.getBoundingClientRect();
-    const f = (e.clientX - lr.left) / lr.width;
-    if (f < 0 || f > 1) { setCross(null); return; }
-    const idx = Math.min(visible.length - 1, Math.max(0, Math.round(f * range.days)));
-    const ymd = visible[idx];
-    if (!ymd) { setCross(null); return; }
-    setCross({ x: (lr.left - wr.left) + f * lr.width, label: shortCalDate(ymd) });
+    setCross(crossAt(wrapRef.current, e.target, e.clientX, visible, range.days, shortCalDate));
   };
   const clearCross = () => setCross(null);
 
@@ -1095,38 +1090,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * today stem — the one position on the shelf where a label and a rule compete for the same
    * pixels. Every other month centres in its own span.
    */
-  const months = useMemo(() => {
-    const out: { key: string; label: string; at: number; labelAt: number; current: boolean; past: boolean }[] = [];
-    const SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
-    let i = 0;
-    while (i < visible.length) {
-      const d = new Date(`${visible[i]}T12:00:00`);
-      const key = `${d.getFullYear()}-${d.getMonth()}`;
-      let j = i;
-      while (j + 1 < visible.length) {
-        const n = new Date(`${visible[j + 1]}T12:00:00`);
-        if (`${n.getFullYear()}-${n.getMonth()}` !== key) break;
-        j += 1;
-      }
-      const nowM = new Date(`${today}T12:00:00`);
-      const current = `${nowM.getFullYear()}-${nowM.getMonth()}` === key;
-      const tAt = visible.indexOf(today);
-      /* the current month labels in the half AFTER today; every other centres in its own span */
-      const labelAt = current && tAt >= i && tAt <= j ? (tAt + j + 1) / 2 : (i + j + 1) / 2;
-      out.push({
-        key, label: SHORT[d.getMonth()], at: i, labelAt, current,
-        past: !current && visible[j] < today,
-      });
-      i = j + 1;
-    }
-    return out;
-  }, [visible, today]);
+  /* ⚠️ THE WINDOW'S ARITHMETIC IS SHARED — see `boardWindow`. The hooks stay here; only the
+     maths moved, so two pages cannot draw a different rail for the same ninety days. */
+  const months = useMemo(() => monthsOf(visible, today), [visible, today]);
 
   /** where today sits in the window, or `null` when the window does not contain it */
-  const todayAt = useMemo(() => {
-    const i = visible.indexOf(today);
-    return i < 0 ? null : i + 0.5;
-  }, [visible, today]);
+  const todayAt = useMemo(() => todayAtOf(visible, today), [visible, today]);
 
   /* ⚠️ THE TILES ARE DECLARED BELOW `todayAt` BECAUSE THEY READ IT, and that ORDER is the fix —
      not the shuffle that silenced TS2448. This repo has shipped the same fault twice in shapes
@@ -1147,34 +1116,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * (`translateX(-50%)`), so one within half a tile of the edge would hang outside the lane; the
    * ref skips anything below 1.5% or above 98.5%.
    */
-  const dateLabels = useMemo(() => {
-    const out: { ymd: string; at: number; text: string; day: string; mon: string; now: boolean }[] = [];
-    const SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
-    if (todayAt == null) return out;
-    /* ⚠️ `todayAt` IS FRACTIONAL — it is the MIDPOINT of today's day cell (`index + 0.5`), which is
-       what puts today's line half a day into the day rather than on its boundary. An array index
-       has to be a whole number, so anchoring the stride on it directly asked `visible[2.5]` and got
-       `undefined` every time: no tiles, no error, and a green build. The rail simply emptied, and
-       only the screenshot said so. `calSurface60.measure.ts` asserts the tile COUNT for exactly
-       this reason — a probe that finds no element otherwise reports no offence. */
-    const todayIdx = Math.floor(todayAt);
-    const first = todayIdx % 7;
-    for (let d = first; d < range.days; d += 7) {
-      const ymd = visible[d];
-      if (!ymd) continue;
-      const frac = d / Math.max(1, range.days - 1);
-      if (frac < 0.015 || frac > 0.985) continue;
-      const dt = new Date(`${ymd}T12:00:00`);
-      out.push({
-        ymd, at: d, text: shortCalDate(ymd),
-        day: String(dt.getDate()),
-        mon: (SHORT[dt.getMonth()] ?? "").toUpperCase(),
-        /* the tile whose week contains today — the ref's `now = (k <= 0 && 0 < k + 7)` */
-        now: d <= todayIdx && todayIdx < d + 7,
-      });
-    }
-    return out;
-  }, [range.days, visible, todayAt]);
+  const dateLabels = useMemo(
+    () => dateLabelsOf(visible, today, range.days, todayAt),
+    [range.days, visible, today, todayAt],
+  );
   /**
    * ⚠️ THE TODAY LINE IS POSITIONED IN PIXELS FROM A LANE'S OWN RECT, NEVER AS A PERCENTAGE.
    *
@@ -1984,33 +1929,17 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                 not a movement of the camera — `shiftWindow` swaps the day list and everything
                 re-derives; nothing here animates, and lock (c) measures that nothing does. */}
             {board.length > 0 && (
-              <div className="tl-winbar">
-                <div className="tl-wleft">
-                  <button type="button" className="tl-wchv" aria-label="Back one week"
-                    onClick={() => setWinStart((w) => shiftWindow(w, WEEK_STEP, -1))}>‹</button>
-                  <span className="tl-rng">{windowRangeLabel}</span>
-                  <button type="button" className="tl-wchv" aria-label="Forward one week"
-                    onClick={() => setWinStart((w) => shiftWindow(w, WEEK_STEP, 1))}>›</button>
-                  {/* ⚠️ ONLY ONCE THE WINDOW HAS MOVED — a Today link beside a board already
-                      showing today is a control that does nothing. */}
-                  {movedOffToday && (
-                    <button type="button" className="tl-todaylink" onClick={() => setWinStart(today)}>
-                      Today
-                    </button>
-                  )}
-                </div>
-                <input className="tl-search" type="search" value={view.search}
-                  aria-label="Search agents or agencies"
-                  placeholder="Search agents or agencies"
-                  onChange={(e) => setView1("search", e.target.value)} />
-                <div className="tl-dseg" role="group" aria-label="Density">
-                  {(["comfortable", "compact"] as const).map((d) => (
-                    <button key={d} type="button" data-on={d === density}
-                      aria-pressed={d === density}
-                      onClick={() => setDensity(d)}>{DENSITY_LABEL[d]}</button>
-                  ))}
-                </div>
-              </div>
+              <TimelineWinbar
+                rangeLabel={windowRangeLabel}
+                onBack={() => setWinStart((w) => shiftWindow(w, WEEK_STEP, -1))}
+                onForward={() => setWinStart((w) => shiftWindow(w, WEEK_STEP, 1))}
+                showToday={movedOffToday}
+                onToday={() => setWinStart(today)}
+                density={density}
+                onDensity={setDensity}
+                search={{ value: view.search, onChange: (v) => setView1("search", v),
+                          label: "Search agents or agencies" }}
+              />
             )}
             <TplZone className="tl-zone" hem={false} label={range.label}>
               <TimelineBoard

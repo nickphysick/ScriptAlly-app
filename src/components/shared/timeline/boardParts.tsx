@@ -44,6 +44,33 @@ import type { BoardRow } from "./types";
 const STAGE_BAND_DOT_PX = 14;
 
 
+/**
+ * Where the crosshair stands, and what date it names — from a pointer position over a lane.
+ *
+ * ⚠️ SHARED BECAUSE BOTH BOARDS DRAW IT, and because the alternative is two pages computing a
+ * date from an x and disagreeing by a day at the edges. Returns `null` for a pointer that is not
+ * over a row's lane, which is the same answer as "no crosshair".
+ */
+export function crossAt(
+  wrap: HTMLElement | null,
+  target: EventTarget | null,
+  clientX: number,
+  visible: readonly string[],
+  days: number,
+  label: (ymd: string) => string,
+): { x: number; label: string } | null {
+  const lane = (target as HTMLElement | null)?.closest?.(".tl-c-tl") as HTMLElement | null;
+  if (!wrap || !lane || !lane.closest(".tl-rrow")) return null;
+  const wr = wrap.getBoundingClientRect();
+  const lr = lane.getBoundingClientRect();
+  const f = (clientX - lr.left) / lr.width;
+  if (f < 0 || f > 1) return null;
+  const idx = Math.min(visible.length - 1, Math.max(0, Math.round(f * days)));
+  const ymd = visible[idx];
+  if (!ymd) return null;
+  return { x: (lr.left - wr.left) + f * lr.width, label: label(ymd) };
+}
+
 export const pct = (n: number) => `calc(${n} / var(--tl-days) * 100cqw)`;
 
 /**
