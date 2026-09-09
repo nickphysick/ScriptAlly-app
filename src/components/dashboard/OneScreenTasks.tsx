@@ -170,13 +170,37 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
             filter it is that category's count and name, in that category's own paper — so the badge
             always states what the tickets beneath it are, rather than a total the visible set
             contradicts. */}
-        <span
-          className="os-tbadge"
-          data-probe="todo-badge"
-          style={badge.fam ? { background: FAMILY_FILL[badge.fam] } : undefined}
-        >
-          <b>{badge.n}</b>{badge.label ? <span>{badge.label}</span> : null}
-        </span>
+        {/**
+          * ⚠️ THE BADGE IS THE CLEAR CONTROL WHILE FILTERED, AND INERT OTHERWISE (v30, Phase 3).
+          *
+          * Selecting a band left no way back to all tasks: the band toggles, but nothing said so,
+          * and the badge sat there stating a count for a set the reader could not return to. Two
+          * routes now, both the ref's — the badge carries the category's count, its name, its own
+          * tint and a `×`; and clicking the active band clears it, which the caption says.
+          *
+          * ⚠️ IT IS A `button` WHEN IT ACTS AND A `span` WHEN IT DOES NOT. A control that is
+          * sometimes clickable is worse than two elements: a permanent button that does nothing at
+          * rest teaches a reader that the badge is dead, and `disabled` on a thing whose whole
+          * resting job is to state a number is a lie about why it cannot be pressed.
+          */}
+        {filter ? (
+          <button
+            type="button"
+            className="os-tbadge os-tbadge-clr"
+            data-probe="todo-badge"
+            style={badge.fam ? { background: FAMILY_FILL[badge.fam] } : undefined}
+            onClick={() => setFilter(null)}
+            title="Show all tasks"
+            aria-label={`Showing ${badge.label} only — show all tasks`}
+          >
+            <b>{badge.n}</b>{badge.label ? <span>{badge.label}</span> : null}
+            <span className="os-tbadge-x" aria-hidden="true">×</span>
+          </button>
+        ) : (
+          <span className="os-tbadge" data-probe="todo-badge">
+            <b>{badge.n}</b>
+          </span>
+        )}
         <button type="button" className="os-see" onClick={onSeeAll}>See all <span className="os-arr">→</span></button>
       </div>
 
@@ -192,11 +216,18 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
           onMouseLeave={() => setLegendOpen(false)}
         >
           <div className="os-rule" role="group" aria-label="Filter by category">
+            {/* ⚠️ CLICKING THE ACTIVE BAND CLEARS IT, and that was already true — what was missing
+                was any way to KNOW it (v30, Phase 3). The caption below says so now, and the badge
+                is the second route. `aria-pressed` already stated the toggle to a screen reader;
+                sighted readers had nothing. */}
             {bands.map(({ c, n }) => (
               <button
                 key={c}
                 type="button"
-                className={`os-rb${filter === c ? " on" : ""}`}
+                /* ⚠️ `dim` ON THE OTHERS, NOT `on` ON THIS ONE — ref `.sbar button.dim{opacity:.4}`.
+                   The selected band used to carry a burgundy inset ring; fading the rest says the
+                   same thing without adding ink the palette reserves for something else. */
+                className={`os-rb${filter && filter !== c ? " dim" : ""}`}
                 style={{ flex: `${n} 1 0`, background: FAMILY_FILL[CATEGORY_FAMILY[c]] }}
                 aria-pressed={filter === c}
                 aria-label={`${CATEGORY_LABEL[c]}, ${n}`}
@@ -204,6 +235,13 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
               />
             ))}
           </div>
+          {/* ⚠️ THE CAPTION EXISTS ONLY WHILE FILTERED, and it names both routes out (v30, Phase 3).
+              At rest it would be instructions for a state the reader is not in — the rule's own
+              affordance is the bands, and a permanent line explaining how to undo something nobody
+              has done yet is chrome teaching the wrong thing. */}
+          {filter && (
+            <p className="os-rulecap">Click the band again, or the × on the badge, to show all</p>
+          )}
           <div className="os-legend" hidden={!legendOpen}>
             {RULE_ORDER.map((c) => (
               <button
