@@ -554,6 +554,10 @@
    height, and this is the rule that guarantees the page can scroll when it must. */
 @media (max-width: 1024px) {
   /* the wrapper goes back to being a scrolling page, bottom padding and all */
+  /* ⚠️ THE TWO `min-height` LINES ARE NOT A DUPLICATE TO SWEEP. They are the standard fallback
+     pair: a browser that does not understand `dvh` takes the `vh` value, one that does takes the
+     second. A mechanical dead-rule sweep flags this and it is the one hit that must be LEFT — the
+     "loser" is what old browsers render, and deleting it breaks them silently. */
   .sa-dashroot { height: auto; min-height: 100vh; min-height: 100dvh; padding-bottom: 4rem; }
   .os-root { height: auto !important; overflow: visible; }
   .os-content { display: flex; flex-direction: column; gap: 14px; padding: 16px 20px 28px; }
@@ -567,7 +571,6 @@
   .os-toprow .os-lead { flex: none; height: 280px; min-height: 0; max-height: none; }
   .os-colL .os-tasks { flex: none; max-height: none; }
   .os-colL .os-aut, .os-colL .os-comm, .os-colL .os-probanner { flex: none; }
-  .os-colR .os-actv { flex: none; }
 }
 /* short desktop viewports: the promise cannot be kept, so stop pretending (§11) */
 @media (max-height: 680px) and (min-width: 1025px) {
@@ -700,7 +703,8 @@
 .os-mark-il img {
   max-width: 50px; max-height: 50px; width: auto; height: auto; object-fit: contain; display: block;
   mix-blend-mode: multiply;
-  transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1);
+  /* the opacity leg is the entrance's; both live here now rather than in a second rule */
+  transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1), opacity 0.2s ease 0.1s;
 }
 /**
  * ⚠️ 44px, AND THE CEILING IS THE ARTWORK'S — MEASURED, NOT CHOSEN (dashboard redesign, Phase 3).
@@ -797,7 +801,6 @@
  * which creates no stacking context on the CARD.
  */
 .os-card.enter .os-mark-il img { opacity: 0; }
-.os-mark-il img { transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1), opacity 0.2s ease 0.1s; }
 .os-cw { min-width: 0; }
 /* the ref's `.lab`: 16px in `--ink2`, 3px above the figure */
 .os-cl { font-size: 16px; color: #6b5d54; margin-bottom: 3px; white-space: nowrap; }
@@ -1000,12 +1003,7 @@
 /* ⚠️ THE WRITER'S SIDE MIRRORS EVERY LINE, NOT JUST THE BOX — ref `.cv .msg.out .b .slab, .s`
    and its `row-reverse` meta. A right-hand bubble whose text still ran left read as an agent's
    bubble that had drifted across the column. */
-.os-bub.out .os-bublab, .os-bub.out .os-bubsay { text-align: right; }
-.os-bub.out .os-bublab { justify-content: flex-end; }
-.os-bub.out .os-bubmeta { flex-direction: row-reverse; }
-.os-bub.out .os-bubwho { flex-direction: row-reverse; }
 /* the ellipsis has to bite on the agency's OTHER end once the run is reversed */
-.os-bub.out .os-bubwho i { direction: rtl; }
 /* a tight run: same side, same day — the furniture goes, the spacing closes up */
 .os-bub.run { margin-top: -4px; }
 /* ref `.cv .msg .knot{top:16px}` — the knot sits against the bubble's first line, not its top edge */
@@ -1022,8 +1020,12 @@
  * word on the page. `padding: 0` because the strip and the body carry their own.
  */
 .os-bubin {
-  min-width: 0; max-width: 84%;
-  border-radius: 14px; padding: 0; overflow: hidden;
+  /* ⚠️ 100% AND 12px ARE v22's FULL-WIDTH VALUES, FOLDED IN. They were appended as a second
+     `.os-bubin` rule at the end of the block, where they always won — so the 84% and the 14px
+     here had been dead since the day full-width messages landed. An override that can never lose
+     is not an override, it is the value; leaving both is how the next reader learns the wrong one. */
+  min-width: 0; max-width: 100%; width: 100%;
+  border-radius: 12px; padding: 0; overflow: hidden;
   background: #fffdf9; border: 1px solid #e6dfd6;
 }
 .os-bub.in .os-bubin { border-bottom-left-radius: 3px; }
@@ -1032,10 +1034,11 @@
    1px bottom border are set inline from `STATE_TOKEN`/`STATE_ACCENT`; this rule owns the geometry
    and the neutral default a housekeeping bubble takes. */
 .os-bubstrip {
-  padding: 6px 12px 5px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 12px 6px;
   border-bottom: 1px solid #e6dfd6;
 }
-.os-bubbody { padding: 9px 12px 10px; }
+.os-bubbody { padding: 10px 12px 11px; }
 /* housekeeping's label sits IN the body — it has no strip — so it needs the gap a strip's border
    would otherwise have given it, and it centres with the rest of a desk bubble */
 .os-bublab-desk { margin-bottom: 4px; justify-content: center; color: #a29587; }
@@ -1049,7 +1052,7 @@
 }
 /* ref `.cv .msg .b .s{font-size:15px;color:var(--ink);line-height:1.35}` — the sentence is the
    bubble's content and was set two and a half points below the ref's, at a muted ink. */
-.os-bubsay { font-size: 15px; color: #2a1f18; line-height: 1.35; }
+.os-bubsay { font-size: 15px; color: #2a1f18; line-height: 1.4; }
 /* ⚠️ MONO — ref `.cv .msg .b .m{font-family:var(--mono);font-size:10px;letter-spacing:.08em;
    text-transform:uppercase}`. The app's meta line was the body face at 10.5, so the one line on a
    bubble that is a REFERENCE rather than prose read as more prose. */
@@ -1090,14 +1093,12 @@
  * and the time's flipped margin belong together and neither works alone.
  */
 .os-bub.in, .os-bub.out, .os-bub.desk { padding-left: 0; padding-right: 0; }
-.os-bubin { max-width: 100%; width: 100%; border-radius: 12px; }
 /* the tail's clipped corner went with the indent — a 3px corner on a full-width block reads as a
    mistake rather than as a tail pointing at a speaker */
 .os-bub.in .os-bubin, .os-bub.out .os-bubin { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
 .os-knot { display: none; }
 
 /* the strip carries the direction now: dot, label, time — mirrored for the writer's own events */
-.os-bubstrip { display: flex; align-items: center; gap: 8px; padding: 7px 12px 6px; }
 .os-bubsd { width: 14px; height: 14px; flex: none; line-height: 0; }
 .os-bubstrip .os-bublab { margin: 0; white-space: nowrap; font-size: 9px; letter-spacing: 0.1em; }
 .os-bubtm {
@@ -1107,7 +1108,6 @@
 .os-bub.out .os-bubstrip { flex-direction: row-reverse; }
 .os-bub.out .os-bubtm { margin-left: 0; margin-right: auto; }
 
-.os-bubbody { padding: 10px 12px 11px; }
 /**
  * ⚠️ THE BODY TEXT IS ALWAYS LEFT-ALIGNED, ON BOTH SIDES AND IN BOTH KINDS, AND THIS IS THE RULE
  * THAT MATTERS MOST HERE. `.os-bub.out` used to set `text-align: right` on the sentence and a desk
@@ -1118,7 +1118,6 @@
  */
 .os-bub.out .os-bubsay, .os-bub.desk .os-bubsay { text-align: left; }
 .os-bub.out .os-bublab, .os-bub.desk .os-bublab-desk { text-align: left; justify-content: flex-start; }
-.os-bubsay { font-size: 15px; line-height: 1.4; }
 /* the manuscript's title, italic inside the sentence — ref `<em>` */
 .os-bubsay em { font-style: italic; }
 
@@ -1465,7 +1464,6 @@
 /* ⚠️ CENTRED, not baseline-aligned, and CLOSED BY A HAIRLINE — the pills are objects on the row
    now, not a run of text beside the title, so a shared baseline no longer describes the row. */
 /* ⚠️ THE CARD CLIPS so the edge-to-edge band meets the radius instead of overhanging it. */
-.os-tasks { overflow: hidden; }
 
 /* ⚠️ PINK, BECAUSE THIS IS THE TO-DO SURFACE. The house rule is sage for a dashboard container's
    header and PINK where something is asking for you — this card is the one that does. The band
@@ -1613,7 +1611,7 @@
   border-radius: 18px; background: #ffffff; border: 1px solid #ece0d2;
   box-shadow: 0 6px 18px rgba(58, 28, 20, 0.10);
   display: grid; place-items: center; padding: 13px;
-  transition: transform 0.2s cubic-bezier(0.22, 0.68, 0.36, 1), box-shadow 0.2s ease;
+  transition: transform 0.18s cubic-bezier(0.22, 0.68, 0.36, 1);
 }
 .os-msicon img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .os-hero:hover .os-msicon { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(58, 28, 20, 0.14); }
@@ -1651,7 +1649,7 @@
   background: #ffffff; border: 2px solid #ffffff;
   box-shadow: 0 1px 4px rgba(58, 28, 20, 0.12);
   display: grid; place-items: center;
-  transition: transform 0.18s ease;
+  transition: transform 0.16s ease;
 }
 .os-aut-pic:hover { transform: scale(1.05); }
 .os-aut-pic svg { width: 24px; height: 24px; stroke: #7c3a2a; fill: none; stroke-width: 1.5; }
@@ -1697,7 +1695,6 @@
 /* ⚠️ SAGE, per the house rule: sage for a dashboard container's header, pink reserved for the
    surface that is asking something of you (the tasks card). The band runs edge to edge, so the
    card clips. */
-.os-actv { overflow: hidden; }
 /**
  * ⚠️ THE BAND'S HEIGHT IS STATED, NOT DERIVED (headers P3). All three bands used to be sized by
  * their contents and agreed only by COINCIDENCE — Tasks at 11/18 padding, the sage band at 10/16,
@@ -2006,9 +2003,7 @@
 
 
 /* author tile — the plate lifts and tips off-square as the whole card is hovered */
-.os-msicon { transition: transform 0.18s cubic-bezier(0.22, 0.68, 0.36, 1); }
 .os-aut:hover .os-msicon { transform: translateY(-3px) rotate(-2deg); }
-.os-aut-pic { transition: transform 0.16s ease; }
 .os-aut:hover .os-aut-pic { transform: scale(1.04); }
 
 /* counters — ⚠️ THE ICON MOVES, THE FIGURE NEVER DOES. A number that shifts under the cursor
