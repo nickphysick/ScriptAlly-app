@@ -85,3 +85,26 @@ export function dateLabelsOf(
     }
     return out;
 }
+
+/** The window's span in words, as the winbar states it. */
+export function windowRangeLabelOf(visible: readonly string[]): string {
+  const a = visible[0], b = visible[visible.length - 1];
+  if (!a || !b) return "";
+  const d = (ymd: string) => {
+    const [y, m, dd] = ymd.split("-").map(Number);
+    return { y, txt: `${dd} ${new Date(y, m - 1, dd).toLocaleString("en-GB", { month: "long" })}` };
+  };
+  const A = d(a), B = d(b);
+  return A.y === B.y ? `${A.txt} – ${B.txt} ${B.y}` : `${A.txt} ${A.y} – ${B.txt} ${B.y}`;
+}
+
+/**
+ * Has the reader paged away from today?
+ *
+ * ⚠️ IT ASKS WHETHER TODAY IS STILL AT THE WINDOW'S CENTRE rather than comparing the window's start
+ * to today's date — the two are the same question only while the centring never changes, and the
+ * centre is what the reader actually sees.
+ */
+export function movedOffTodayOf(todayAt: number | null, days: number): boolean {
+  return todayAt == null || Math.abs(todayAt - (days - 1) / 2) > 0.51;
+}
