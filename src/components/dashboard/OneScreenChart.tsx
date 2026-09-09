@@ -23,7 +23,7 @@ import { Agent, Query, QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
 import { activeStageBreakdown } from "../../lib/dashboardStats";
 import { bandSeries, BAND_KEYS, BAND_LABEL, type BandKey, type BandPoint } from "../../lib/chartBands";
-import { STATE_TOKEN, STATE_ACCENT_TOKEN } from "../../lib/queryCardFacts";
+import { STATE_TOKEN, STATE_ACCENT_TOKEN, STATE_LINE_TOKEN } from "../../lib/queryCardFacts";
 import { placeTooltip, Rect } from "../../lib/deskTooltip";
 import {
   aggregateLedger, awaitingChip, dailyLedger, DEFAULT_RANGE_DAYS,
@@ -553,8 +553,15 @@ export const OneScreenChart: React.FC<{
                     line, so the ink line stays crisp through the fade. */}
                 <defs>
                   <linearGradient id="os-bandfade" x1="0" y1="0" x2="0" y2="1">
+                    {/* ⚠️ THE FADE WAS WASHING THE BANDS OUT UNTIL ONLY THE SAND READ (v27, Phase 6).
+                        It ran to 0.85 at the baseline, which is most of the way to the card's own
+                        paper — so the two lighter fills disappeared into it and the chart stopped
+                        being three bands. Half that, with a stop at 0.6 to keep the falloff gentle
+                        rather than linear: transparent at the top, 18% at six tenths, 50% at the
+                        foot. */}
                     <stop offset="0%" stopColor="#fffdf9" stopOpacity="0" />
-                    <stop offset="100%" stopColor="#fffdf9" stopOpacity="0.85" />
+                    <stop offset="60%" stopColor="#fffdf9" stopOpacity="0.18" />
+                    <stop offset="100%" stopColor="#fffdf9" stopOpacity="0.5" />
                   </linearGradient>
                 </defs>
                 {bandAreas.map((a) => (
@@ -563,8 +570,12 @@ export const OneScreenChart: React.FC<{
                     className="os-band"
                     d={a.d}
                     fill={STATE_TOKEN[a.key]}
-                    stroke={STATE_ACCENT_TOKEN[a.key]}
-                    strokeWidth={1}
+                    /* ⚠️ THE LINE STEP, NOT THE DEEP ONE, AND 1.2px (v27, Phase 6). With the fade
+                       over the stack the `-deep` borders stopped separating two adjacent fills of
+                       similar value — at 1710 the sand read and the other two did not. Still a
+                       token keyed the same as the fill, so the two cannot fall out of step. */
+                    stroke={STATE_LINE_TOKEN[a.key]}
+                    strokeWidth={1.2}
                   />
                 ))}
                 <rect x={0} y={0} width={W} height={chartY(0, H, lo, hi)} fill="url(#os-bandfade)" pointerEvents="none" />

@@ -1050,6 +1050,23 @@
   --state-you-deep:     #e8c9bb;
   --state-offer-deep:   #c9d6e1;
   --state-closed-deep:  #cfc9c1;
+
+  /**
+   * ⚠️ A THIRD STEP, FOR A LINE DRAWN OVER ITS OWN FILL (dashboard v27, Phase 6). The chart's band
+   * borders need to separate two adjacent fills of similar value at 1.2px, and the `-deep` step is
+   * not dark enough to do it once a downward fade is laid over the stack: at 1710 the sand read and
+   * the other two did not.
+   *
+   * ⚠️ AND IT IS A NEW STEP RATHER THAN A DARKER `-deep`, because `-deep` is SHARED — the Contact
+   * list's board, the desk strip, the active tab, the target-rung ring and the estimate bars all
+   * read it. Darkening it for the chart would have retoned five surfaces that had not asked. Same
+   * family, same key, one more rung.
+   */
+  --state-queried-line: #dcc7a4;
+  --state-agent-line:   #a9baa4;
+  --state-you-line:     #dcb2a2;
+  --state-offer-line:   #a8bccc;
+  --state-closed-line:  #b6afa5;
 }
 
 .t-f12 { --f12-icon-btn: 40px; }

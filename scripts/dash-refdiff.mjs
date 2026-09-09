@@ -427,6 +427,8 @@ const DUMP = process.env.SA_REFDIFF_DUMP || "";
  * looks at the two images.
  */
 const SHOT = process.env.SA_REFDIFF_SHOT || "";
+/* SA_REFDIFF_BANDS=<dir> — sample the plot's own pixels; see readPage */
+const BANDS = process.env.SA_REFDIFF_BANDS || "";
 
 async function readPage(page, url, { app } = {}) {
   page.setDefaultTimeout(NAV_MS);
@@ -505,6 +507,99 @@ async function readPage(page, url, { app } = {}) {
    * box so the two are comparable when the boxes sit at different page positions. Wrapping is what
    * it is usually for, so flex-wrap and the computed gap are printed even where they are default.
    */
+  /**
+   * ⚠️ SA_REFDIFF_BANDS — THE ONE CHECK THE PROBE SET CANNOT MAKE. Every band's geometry can be
+   * correct while the chart reads as one colour: a fade laid over the stack changes what the eye
+   * gets and moves no box at all. This samples the plot's own PIXELS and asks whether the three
+   * fills are still three.
+   *
+   * ⚠️ IT READS THE COMPOSITED PAGE, NOT THE FILL TOKENS. The tokens are what the fade is applied
+   * TO, so checking them would confirm the input to the fault rather than the fault. The screenshot
+   * goes back into the browser through a canvas because that is the only decoder to hand — and it
+   * is the right one, since it is the same decoder that drew the page.
+   */
+  if (BANDS) {
+    const plot = await page.locator('[data-probe="plot"]').first();
+    const box = (await plot.count()) ? await plot.boundingBox() : null;
+    if (!box) {
+      console.log(`\nbands · ${app ? "APP" : "REF"}: no plot on this side`);
+    } else {
+      const png = (await page.screenshot({ clip: box })).toString("base64");
+      const read = await page.evaluate(async (b64) => {
+        const img = new Image();
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = "data:image/png;base64," + b64; });
+        const c = document.createElement("canvas");
+        c.width = img.width; c.height = img.height;
+        const ctx = c.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        const at = (fx, fy) => {
+          const d = ctx.getImageData(Math.round(img.width * fx), Math.round(img.height * fy), 1, 1).data;
+          return [d[0], d[1], d[2]];
+        };
+        /**
+         * ⚠️ THE BANDS ARE FOUND, NOT GUESSED AT. A first version sampled three fixed heights and
+         * reported a worst separation of ZERO on the REF — because at 93% of the plot's height the
+         * ref draws card colour, not a band. Fixed fractions land wherever the stack happens to be
+         * that day; a column scan finds the bands themselves.
+         *
+         * Walk each column from the baseline up, collect runs of near-identical colour, drop the
+         * card's own paper and anything under 6px tall (the ink line, the gridlines, antialiasing),
+         * and what is left is the stack.
+         */
+        const near = (a, b, tol) => Math.max(Math.abs(a[0]-b[0]), Math.abs(a[1]-b[1]), Math.abs(a[2]-b[2])) <= tol;
+        const cardPx = (() => { const d = ctx.getImageData(2, 2, 1, 1).data; return [d[0], d[1], d[2]]; })();
+        const out = [];
+        for (const fx of [0.25, 0.5, 0.75]) {
+          const x = Math.round(img.width * fx);
+          const runs = [];
+          let cur = null;
+          for (let y = img.height - 2; y >= 0; y--) {
+            const d = ctx.getImageData(x, y, 1, 1).data;
+            const px = [d[0], d[1], d[2]];
+            if (cur && near(px, cur.px, 2)) { cur.n++; continue; }
+            if (cur) runs.push(cur);
+            cur = { px, n: 1 };
+          }
+          if (cur) runs.push(cur);
+          /**
+           * ⚠️ CLUSTERED, BECAUSE A FADE MAKES ONE BAND READ AS SEVERAL RUNS. The first version
+           * counted raw runs and found six or seven "bands" in a three-band chart, with separations
+           * of 0 and 3 — every one of those a step of the GRADIENT inside a single fill, not a
+           * boundary between fills. It was measuring the thing under test as if it were the fault.
+           * Runs within 7 of each other are one fill seen at two depths of fade.
+           */
+          const kept = runs.filter((r) => r.n >= 5 && !near(r.px, cardPx, 4));
+          const clusters = [];
+          for (const r of kept) {
+            const hit = clusters.find((c) => near(c.px, r.px, 7));
+            if (hit) { hit.n += r.n; continue; }
+            clusters.push({ px: r.px, n: r.n });
+          }
+          /* the three tallest are the stack; anything below 8px total is an edge artefact */
+          const bands = clusters.filter((c) => c.n >= 8).sort((x, y) => y.n - x.n).slice(0, 3).map((c) => c.px);
+          out.push({ fx, bands });
+        }
+        return { cardPx, out };      }, png);
+      const spread = (a, b) => Math.max(...a.map((v, i) => Math.abs(v - b[i])));
+      console.log(`\n--- bands · ${app ? "APP" : "REF"} · ${page.viewportSize().width} ---`);
+      console.log(`  card ${read.cardPx.join(",")}`);
+      let worst = Infinity;
+      let fewest = Infinity;
+      for (const r of read.out) {
+        fewest = Math.min(fewest, r.bands.length);
+        const seps = [];
+        for (let i = 0; i < r.bands.length; i++) {
+          for (let j = i + 1; j < r.bands.length; j++) seps.push(spread(r.bands[i], r.bands[j]));
+          seps.push(spread(r.bands[i], read.cardPx));
+        }
+        if (seps.length) worst = Math.min(worst, Math.min(...seps));
+        console.log(`  x=${r.fx}  ${r.bands.length} bands: ${r.bands.map((b) => b.join(",")).join("  |  ")}`);
+        if (seps.length) console.log(`         separations: ${seps.join(" · ")}`);
+      }
+      console.log(`  bands found per column: >= ${fewest}`);
+      console.log(`  WORST SEPARATION: ${worst}  (gate: >= 6 in at least one channel)`);
+    }
+  }
   if (SHOT) {
     const probe = DUMP || "main";
     const el = await page.locator(`[data-probe="${probe}"]`).first();
