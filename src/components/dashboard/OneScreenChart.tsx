@@ -475,18 +475,33 @@ export const OneScreenChart: React.FC<{
           </span>
         </span>
         {/* ⚠️ ONE CLUSTER (audit P5) — the label must travel WITH the slider it reports. */}
-        <div className="os-ctrls">
-        <div className="os-freqsel">
-          <select
-            aria-label="Chart frequency"
-            value={effFreq}
-            onChange={(e) => { setFreq(e.target.value as Freq); resetRead(); }}
-          >
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-          </select>
-          <span className="os-cv" aria-hidden="true">▾</span>
+        <div className="os-ctrls" data-probe="chart-controls">
+        {/**
+          * ⚠️ THREE CHIPS, NOT A SELECT (v31, Phase 3) — ref `.chips`, which v31 gives a third
+          * button so its control matches the three frequencies this app has always had.
+          *
+          * The select was an ALLOWANCE granted three passes ago, and it was the wrong call: the
+          * reasoning was "the ref draws two chips and we have three frequencies, so a select is the
+          * honest divergence". What it actually did was let the ref and the app disagree about a
+          * visible control and then record the disagreement as permitted — which is the one thing
+          * this process exists to prevent. The ref has three chips now and so does this.
+          *
+          * ⚠️ `role="group"` WITH `aria-pressed`, NOT A RADIOGROUP. These are toggles that take
+          * effect immediately rather than a selection to be confirmed, and `aria-pressed` is what a
+          * screen reader reads out for a chip that is currently on.
+          */}
+        <div className="os-freqchips" role="group" aria-label="Chart frequency">
+          {(["daily", "weekly", "monthly"] as const).map((f) => (
+            <button
+              key={f}
+              type="button"
+              className={effFreq === f ? "on" : undefined}
+              aria-pressed={effFreq === f}
+              onClick={() => { setFreq(f); resetRead(); }}
+            >
+              {f === "daily" ? "Daily" : f === "weekly" ? "Weekly" : "Monthly"}
+            </button>
+          ))}
         </div>
         {/* ⚠️ THE BRUSH (dashboard redesign, Phase 4; ref `rc:brush`) REPLACES THE SLIDER. A slider
             is an abstract scale with a word beside it; a brush is a thumbnail of the writer's own
@@ -536,14 +551,22 @@ export const OneScreenChart: React.FC<{
             {/* ⚠️ THE RANGE INPUT SURVIVES, INVISIBLE, OVER THE WHOLE BOX — a control that cannot be
                 reached from the keyboard is not a control. It carries WEEKS directly now, so its
                 thumb and the drawn handle read the same number instead of two mirrored ones. */}
-            <input
-              type="range" min={BRUSH_WEEKS_MIN} max={BRUSH_WEEKS_MAX} step={1} value={brushWeeks}
-              aria-label="Chart range in weeks"
-              aria-valuetext={weeksLabel(brushWeeks)}
-              onChange={(e) => { setRangeDays(Number(e.target.value) * 7); resetRead(); }}
-            />
           </div>
           <span className="os-rangelbl">{weeksLabel(brushWeeks)}</span>
+          {/**
+            * ⚠️ THE KEYBOARD CONTROL IS THE CAPSULE'S, NOT THE TRACK'S (v31, Phase 3). It lived
+            * inside `.os-bw`, and the ref hides that thumbnail below 1650 to make room for the third
+            * frequency chip — which would have taken the only keyboard route to the range with it,
+            * at every width a laptop actually is. It is `pointer-events: none` and keyboard-only
+            * already (v30), so where it is anchored changes nothing about the pointer; anchoring it
+            * to the capsule means the control survives its own picture being hidden.
+            */}
+          <input
+            type="range" min={BRUSH_WEEKS_MIN} max={BRUSH_WEEKS_MAX} step={1} value={brushWeeks}
+            aria-label="Chart range in weeks"
+            aria-valuetext={weeksLabel(brushWeeks)}
+            onChange={(e) => { setRangeDays(Number(e.target.value) * 7); resetRead(); }}
+          />
         </div>
         </div>
       </div>
@@ -579,6 +602,24 @@ export const OneScreenChart: React.FC<{
           <svg
             ref={svgRef}
             data-probe="plot"
+            /**
+             * ⚠️ THE SERIES, PUBLISHED FOR THE HARNESS (v31, Phase 2). The chart's interior is
+             * generated at runtime, so for three passes the diff compared the plot's BOX and never
+             * what was drawn inside it — every chart change was built from prose about the ref
+             * rather than from the ref. A pixel comparison needs both sides drawing the SAME
+             * numbers, and the ref is a static mockup with its own invented fixture; the tractable
+             * direction is to feed the app's numbers into the ref, which needs the app to state
+             * them. Three arrays, the same three the bands are built from.
+             *
+             * ⚠️ IT IS INSTRUMENTATION, NOT AN API — the same species as `data-probe`, and the ref
+             * itself added `data-line-end` in this version for exactly this reason. Nothing in the
+             * app reads it.
+             */
+            data-series={JSON.stringify({
+              v: bands.map((b) => [b.queried, b.agent, b.you]),
+              lab: view.map((w) => w.label),
+              every,
+            })}
             className={reading ? "reading" : undefined}
             width={W || undefined}
             height={H || undefined}
@@ -709,6 +750,29 @@ export const OneScreenChart: React.FC<{
 
                     ⚠️ THE KEYBOARD NODE IS NOT A HOVER NODE. Arrow-key stepping renders its own
                     focus mark just below, so the chart stays fully operable with no pointer. */}
+                {/**
+                  * ⚠️ THE START MARK (v31, Phase 2) — ref: a stalk from the first point up to a
+                  * burgundy ring with a dot in it. The app had only the END node, and the pixel
+                  * comparison this pass built is what surfaced it: the ref's ring sat in the diff as
+                  * a difference nobody had ever been in a position to see.
+                  *
+                  * ⚠️ IT IS NOT A REINSTATEMENT OF THE EVENT PINS. Those were milestones the chart
+                  * could say only once and they hung over the line's whole length; this is one mark
+                  * saying where the RANGE begins, which is the counterpart of the node that says
+                  * where it ends. The two together are what make the line's extent readable without
+                  * reading the axis.
+                  */}
+                {pts[0] && (
+                  <g className="os-startmark" aria-hidden="true">
+                    <line
+                      x1={pts[0][0].toFixed(1)} x2={pts[0][0].toFixed(1)}
+                      y1={pts[0][1].toFixed(1)} y2={(pts[0][1] - 20).toFixed(1)}
+                      stroke="#c9b8a6" strokeWidth={1.2}
+                    />
+                    <circle cx={pts[0][0].toFixed(1)} cy={(pts[0][1] - 24).toFixed(1)} r={6} fill="#f5e2da" stroke="#7c3a2a" strokeWidth={1.4} />
+                    <circle cx={pts[0][0].toFixed(1)} cy={(pts[0][1] - 24).toFixed(1)} r={1.8} fill="#7c3a2a" />
+                  </g>
+                )}
                 {lastIdx >= 0 && pts[lastIdx] && (
                   <circle
                     cx={pts[lastIdx][0].toFixed(1)} cy={pts[lastIdx][1].toFixed(1)}
