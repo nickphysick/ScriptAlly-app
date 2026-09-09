@@ -45,7 +45,15 @@
    the page's side padding, so restating it as a margin would inset the well TWICE — 18 from the
    grid plus 18 from the margin. One inset, declared where the page already declares it. */
 .qcc-well {
-  background: #eee8e0;
+  /* ⚠️ THE GROUND IS A TOKEN BECAUSE TWO ELEMENTS PAINT IT. The sticky control row has to cover
+     the cards that scroll beneath it, so it cannot be transparent — measured, at scrollTop 420
+     three cards sat behind the pinned row and the mid-gap stack read straight through to
+     `qcc-facttx`. What it must not be is a DIFFERENT colour: painted `--ws-window` it was a white
+     band across the recess, a container the ref does not have. Painted the well's own ground it
+     covers and disappears. One declaration, two readers, and this repo's rule that no element's
+     colour may be a literal another element owns. */
+  --qcc-well-bg: #eee8e0;
+  background: var(--qcc-well-bg);
   border-radius: 16px;
   margin: 0 0 18px;
   padding: 14px 16px 16px;
@@ -238,9 +246,13 @@
    * as many words: "`--ws-ground` IS A DIFFERENT SURFACE … Two neighbouring tokens, two grounds;
    * the window's own fill is this one." I reached for the wrong one of the two.
    */
-  background: var(--ws-window, #fefcfa);
-  padding: 12px 8px 2px;
-  margin: 0 -8px;
+  background: var(--qcc-well-bg, #eee8e0);
+  /* ⚠️ NO BOX OF ITS OWN. The `12px 8px 2px` and the matching `0 -8px` bleed were for a wrapper
+     that sat on the PAGE, where it had to reach past the column's gutter to cover what scrolled
+     beneath it. Inside the well it shares the well's content box with the cards, so it needs
+     neither — and the ref's toolbar carries `4px 2px 16px` and nothing else. */
+  padding: 0;
+  margin: 0;
 }
 
 .qcc-stage { display: flex; flex-direction: column; gap: 26px; }

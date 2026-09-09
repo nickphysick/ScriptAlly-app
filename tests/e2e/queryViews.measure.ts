@@ -1195,3 +1195,89 @@ test(`toolbar · exactly one row, and nothing past the well — ${width}`, async
   expect(Math.abs(m.offCentre), `the search sits further off centre than the ref does at ${width}`).toBeLessThanOrEqual(100);
 });
 }
+
+/* ══ the toolbar carries no container of its own ══════════════════════════════════════════════ */
+/**
+ * ⚠️ THE TOOLBAR ELEMENT WAS ALREADY TRANSPARENT; THE CONTAINER WAS ITS STICKY WRAPPER. Measured
+ * before changing anything: `.qcc-tb` read `rgba(0, 0, 0, 0)`, no border, radius 0, shadow none
+ * and the ref's own `4px 2px 16px`. `.qcc-controls` read `rgb(254, 252, 250)` — `--ws-window`,
+ * the page's near-white — with `padding: 12px 8px 2px` and a `0 -8px` bleed. That was correct
+ * while it sat on the PAGE, where its job is to cover what scrolls beneath a pinned row; inside
+ * the well it was a white band across the recess.
+ *
+ * ⚠️ AND IT CANNOT SIMPLY BE TRANSPARENT. Measured with the background removed and the scroller at
+ * 420: three cards overlapped the pinned row and the point between two pills read straight through
+ * to `qcc-facttx`. The row has to cover; what it must not do is cover in a DIFFERENT colour. It
+ * reads the well's own ground token now, so it covers and disappears.
+ */
+for (const width of [1280, 1440, 1920]) {
+test(`toolbar · no container of its own — ${width}`, async ({ page }) => {
+  await openRoute(page, "/queries", { width, height: 1000 });
+  await page.waitForSelector(".qcc-grid > .qcc", { timeout: 30_000 });
+
+  const read = () => page.evaluate(() => {
+    const live = [...document.querySelectorAll<HTMLElement>(".wpg.qc-wpg")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const tb = live.querySelector<HTMLElement>(".qcc-tb")!;
+    const ctl = live.querySelector<HTMLElement>(".qcc-controls")!;
+    const well = live.querySelector<HTMLElement>(".qcc-well")!;
+    const cs = (e: HTMLElement) => { const c = getComputedStyle(e); return { bg: c.backgroundColor, bgImage: c.backgroundImage, shadow: c.boxShadow, radius: c.borderTopLeftRadius, borderW: c.borderTopWidth, padding: c.padding }; };
+    const pills = [...live.querySelectorAll<HTMLElement>(".qcc-tb .qcc-tb-btn")];
+    const a = pills[0].getBoundingClientRect(), b = pills[1].getBoundingClientRect();
+    const gap = { x: Math.round((a.right + b.left) / 2), y: Math.round(a.top + a.height / 2) };
+    /* every element between the gap point and the well, and what each of them paints */
+    const stack = document.elementsFromPoint(gap.x, gap.y);
+    const wellIdx = stack.indexOf(well);
+    const above = wellIdx < 0 ? [] : stack.slice(0, wellIdx).map((e) => ({
+      cls: (e.className || e.tagName).toString().slice(0, 24),
+      bg: getComputedStyle(e as HTMLElement).backgroundColor,
+      bgImage: getComputedStyle(e as HTMLElement).backgroundImage,
+    }));
+    return { tb: cs(tb), ctl: cs(ctl), wellBg: getComputedStyle(well).backgroundColor, gap, above, wellInStack: wellIdx >= 0 };
+  });
+
+  const rest = await read();
+
+  /* the toolbar row itself: transparent, unframed, and the ref's padding — nothing else */
+  expect(rest.tb.bg, `the toolbar grew a background at ${width}`).toBe("rgba(0, 0, 0, 0)");
+  expect(rest.tb.bgImage, `the toolbar grew a background image at ${width}`).toBe("none");
+  expect(rest.tb.shadow, `the toolbar grew a shadow at ${width}`).toBe("none");
+  expect(rest.tb.radius, `the toolbar grew a radius at ${width}`).toBe("0px");
+  expect(rest.tb.borderW, `the toolbar grew a border at ${width}`).toBe("0px");
+  expect(rest.tb.padding, `the toolbar's padding is not the ref's at ${width}`).toBe("4px 2px 16px");
+
+  /**
+   * ⚠️ THE STICKY WRAPPER MAY PAINT, AND ONLY IN THE WELL'S OWN GROUND. This is the assertion that
+   * replaces "the wrapper is transparent": transparent is measurably wrong — the pinned row would
+   * show the cards through it — so the claim is that whatever it paints is indistinguishable from
+   * the well. Asserted against the WELL's computed colour, never a literal, so the two cannot
+   * drift apart the day the recess is retoned.
+   */
+  expect(rest.ctl.bg, `the control row paints something other than the well at ${width}`).toBe(rest.wellBg);
+  expect(rest.ctl.shadow, `the control row grew a shadow at ${width}`).toBe("none");
+  expect(rest.ctl.radius, `the control row grew a radius at ${width}`).toBe("0px");
+  expect(rest.ctl.borderW, `the control row grew a border at ${width}`).toBe("0px");
+  expect(rest.ctl.padding, `the control row kept a box of its own at ${width}`).toBe("0px");
+
+  /**
+   * ⚠️ `elementFromPoint` AT THE MID-GAP CANNOT RETURN THE WELL, AND THAT IS GEOMETRY RATHER THAN
+   * A FAULT. The point between two pills lies inside `.qcc-tb-left`, whose box spans its own
+   * children — so the topmost element there is the cluster, then the toolbar, then the wrapper,
+   * whatever any of them paint. Hit testing answers "which box covers this point"; the claim is
+   * about what is PAINTED there. So the assertion is that every element between the point and the
+   * well is fully transparent, which is the same statement without the false premise.
+   */
+  expect(rest.wellInStack, `the well is not beneath the toolbar's gap at ${width}`).toBe(true);
+  for (const el of rest.above) {
+    if (el.cls.includes("qcc-controls")) continue; // the sticky cover, asserted as the well's own ground above
+    expect(el.bg, `${el.cls} paints in the toolbar's gap at ${width}`).toBe("rgba(0, 0, 0, 0)");
+    expect(el.bgImage, `${el.cls} paints an image in the toolbar's gap at ${width}`).toBe("none");
+  }
+
+  /* and the same holds once the row is PINNED, which is the state the cover exists for */
+  await page.evaluate(() => { const s = document.querySelector<HTMLElement>(".wpg-scroll"); if (s) s.scrollTop = 420; else window.scrollTo(0, 420); });
+  await page.waitForTimeout(300);
+  const pinned = await read();
+  expect(pinned.tb.bg, `the toolbar grew a background when pinned at ${width}`).toBe("rgba(0, 0, 0, 0)");
+  expect(pinned.ctl.bg, `the pinned row paints something other than the well at ${width}`).toBe(pinned.wellBg);
+});
+}

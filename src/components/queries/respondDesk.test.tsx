@@ -1232,7 +1232,15 @@ describe("the well round · a recess, a toolbar in its head, bones, and one entr
 
   /* §1 — the recess */
   it("the well is the page's ground stepped down, and it never clips", () => {
-    expect(css).toMatch(/\.qcc-well \{[^}]*background: #eee8e0/);
+    /* ⚠️ RETARGETED: the ground is a TOKEN now, because two elements paint it. The sticky control
+       row has to cover the cards that scroll beneath it — transparent, three of them showed
+       through the pinned row — so it reads the well's own `--qcc-well-bg` rather than a second
+       literal. The claim is unchanged and is now stated in both halves: the token holds the
+       colour, and the well reads it. */
+    expect(css).toMatch(/\.qcc-well \{[^}]*--qcc-well-bg: #eee8e0/);
+    expect(css).toMatch(/\.qcc-well \{[^}]*background: var\(--qcc-well-bg\)/);
+    /* and nothing inside the well may paint a DIFFERENT ground */
+    expect(css, "the control row went back to the page's white").not.toMatch(/\.qcc-controls \{[^}]*--ws-window/);
     expect(css).toMatch(/\.qcc-well \{[^}]*border-radius: 16px/);
     expect(css).toMatch(/\.qcc-well \{[^}]*box-shadow: inset 0 1px 3px rgba\(58, 28, 20, 0\.06\)/);
     /* ⚠️ AN `overflow` OF ANY KIND HERE TURNS THE STICKY TOOLBAR INTO A CLAMP. Asserted as an
