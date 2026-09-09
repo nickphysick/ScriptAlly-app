@@ -36,6 +36,7 @@ import { chromium } from "playwright-core";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { spawnSync } from "node:child_process";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 /**
@@ -98,7 +99,7 @@ const SELF_SRC = readFileSync(fileURLToPath(import.meta.url), "utf8");
 /* ⚠️ ONE NAME, READ TWICE — the report's `ref:` field used to restate this string, so repointing
    the harness at a new ref left the table truthfully measuring v29 while its own header said v28.
    A value that appears twice is a value that will disagree with itself; the report derives it. */
-const REF_REL = "design-refs/dashboard-cappuccino-v30.html";
+const REF_REL = "design-refs/dashboard-cappuccino-v31.html";
 const REF = join(ROOT, REF_REL);
 
 const argv = process.argv.slice(2);
@@ -142,6 +143,11 @@ const PROBES = [
      or 58px, which is exactly the squash the pack is trying to gate against. */
   "stat-card", "stat-illustration",
   "manuscript-card", "chart-card", "plot", "brush",
+  /* ⚠️ v31 ADDS THE CONTROL CLUSTER AS A BOX. The frequency control and the brush were compared
+     one at a time, so a divergence in what the cluster CONTAINS could hide inside two probes that
+     each measured correctly — which is how a select stood where the ref draws three chips for
+     three passes. The cluster's own box is the claim. */
+  "chart-controls",
   "todo-card", "todo-rule",
   /* ⚠️ v30 ADDS THE BADGE AND THE DRAWER. The badge became a CONTROL this pass — it clears the
      filter — and a control that changes shape when it gains a job is exactly the thing a box probe
@@ -209,26 +215,30 @@ const ALLOW = [
          "difference between the two headings is EXACTLY the difference this forgives — measured " +
          "each run, not typed. A larger gap than the names account for still counts.",
   },
-  {
-    /* ⚠️ I REMOVED THIS ONCE, ON THE GROUND THAT IT HAD GONE DORMANT, AND THE MEASUREMENT PUT IT
-       STRAIGHT BACK. The run reported "+1 allowed" at every width and I read that as one allowance
-       firing three times; it is one allowance firing at EACH width and they are DIFFERENT ones.
-       Above 1750 the hero is two columns, so the stats begin where the greeting ends and theirs is
-       the allowance; at 1536 the hero stacks, the stats start at the column edge and are exact, and
-       the brush's is. Deleting it turned 0 misses into 1 within a minute — which is the cheapest
-       possible demonstration that a table like this is read by running it, not by reasoning about
-       it. */
-    key: "brush", field: "xr", max: 90,
-    why: "the ref's frequency control is a two-button chip pair (Weekly | Monthly) at 146px; ours " +
-         "is a native select, because this app offers THREE frequencies — Daily, Weekly, Monthly. " +
-         "Below the breakpoint the control row is left-aligned, so the brush starts earlier. " +
-         "Closing it means dropping a frequency the app supports.",
-  },
+  /* ⚠️ THE `brush xr` ALLOWANCE IS RETIRED (v31, Phase 3), AND ITS EPITAPH IS THE POINT. It read:
+     "the ref's frequency control is a two-button chip pair and ours is a native select, because
+     this app offers THREE frequencies — closing it means dropping a frequency the app supports."
+     Every clause of that was true and the conclusion was wrong. The ref draws three chips now, the
+     app draws three chips, and there is nothing left to forgive.
+     An allowance is a record of a difference somebody decided to keep. This one was a record of a
+     difference nobody had put to the ref's author — which is how a divergence in a visible control
+     survived three passes inside the gate that exists to catch exactly that. */
 ];
 
 /** true when this miss is one of the recorded allowances AND is no worse than the allowance says */
+/* the `vw` coefficients of the two probes whose width is viewport-relative — the brush's track is
+   `clamp(70px, 6.4vw, 200px)` and the cluster is the brush plus fixed-width chips, so both move by
+   the same 6.4% of any window difference. */
+const VW_ALLOW = [
+  { key: "brush", field: "w", vw: 0.064, slack: 1.5,
+    why: "the track is 6.4vw and the app is measured in a window sized to match the CONTENT boxes; " +
+         "where those windows differ, a viewport-relative width differs by exactly vw x dw" },
+  { key: "chart-controls", field: "w", vw: 0.064, slack: 1.5,
+    why: "the cluster is the brush plus fixed chips, so it carries the brush's own vw difference" },
+];
+
 const allowedBy = (m, refData, appData) =>
-  ALLOW.find((a) => {
+  [...ALLOW, ...VW_ALLOW].find((a) => {
     if (a.key !== m.key || a.field !== m.field) return false;
     if (!Number.isFinite(m.ref) || !Number.isFinite(m.app)) return false;
     const gap = Math.abs(m.app - m.ref);
@@ -237,6 +247,22 @@ const allowedBy = (m, refData, appData) =>
       const r = refData.checks?.[a.derived], p = appData.checks?.[a.derived];
       if (!Number.isFinite(r) || !Number.isFinite(p)) return false;
       return gap <= Math.abs(r - p) + (a.slack ?? 0);
+    }
+    /**
+     * ⚠️ A `vw` VALUE MEASURED IN TWO DIFFERENT WINDOWS CANNOT AGREE, AND THE DISAGREEMENT IS
+     * ARITHMETIC RATHER THAN A TOLERANCE (v31). The app is re-read in a window sized so the two
+     * CONTENT boxes match — a datum decision, recorded at length above — and at 2520 that window is
+     * 96px narrower than the ref's. Any element sized in `vw` then resolves against a different
+     * viewport by exactly `vw × dw`. The brush's track is `6.4vw`, so 6.4% of 96 is 6.14px, and the
+     * measured gap was 6.1.
+     * So this allowance is COMPUTED from the window delta and the element's own `vw` coefficient,
+     * not typed: it forgives precisely what the datum costs and nothing else, and it disappears on
+     * its own at any width where the two windows agree.
+     */
+    if (a.vw) {
+      const dw = appData.viewportFitted?.dw;
+      if (!Number.isFinite(dw)) return gap <= (a.slack ?? 0);
+      return gap <= Math.abs(dw) * a.vw + (a.slack ?? 0);
     }
     return gap <= a.max;
   });
@@ -263,6 +289,8 @@ const ANCHOR = {
   /* the tile is the only fixed track in the top row; everything beside it is elastic */
   "manuscript-card": "left",
   "chart-card": "span", plot: "span", brush: "right",
+  /* the cluster is pinned to the header's right edge, so its right inset and size are the facts */
+  "chart-controls": "right",
   "todo-card": "span", "todo-rule": "span",
   /* the badge sits after the title in a left-to-right header, so its left inset and size are the
      facts; its right inset is wherever the title's length leaves it */
@@ -560,6 +588,65 @@ const READ = `(() => {
       out.checks.paintBelowZero = Math.round(over * 10) / 10;
     }
   }
+  /**
+   * ⚠️ THE PLOT'S STRUCTURE, ASSERTED (v31, Phase 2). The chart's interior is generated at runtime,
+   * so for three passes the diff compared its BOX and nothing inside it: every chart change was
+   * built from prose about the ref rather than from the ref. These hold whatever the data is, which
+   * is what makes them a gate rather than a snapshot.
+   */
+  out.checks.plotStruct = (() => {
+    const host = document.querySelector('[data-probe="plot"]');
+    const svg = host && (host.tagName.toLowerCase() === "svg" ? host : host.querySelector("svg"));
+    if (!svg) return null;
+    const inDefs = (el) => !!el.closest("defs");
+    const paths = [...svg.querySelectorAll("path")].filter((el) => !inDefs(el));
+    const bands = paths.filter((el) => {
+      const f = (el.getAttribute("fill") || "none").toLowerCase();
+      return f !== "none" && f.indexOf("fade") < 0;
+    });
+    const line = paths.find((el) => (el.getAttribute("stroke") || "").toLowerCase() === "#1c130f"
+      && (el.getAttribute("fill") || "none") === "none" && Number(el.getAttribute("stroke-width")) >= 1.6);
+    const masked = svg.querySelector("g[mask]");
+    const maskId = masked ? (masked.getAttribute("mask") || "").replace("url(#", "").replace(")", "") : "";
+    const mask = maskId ? svg.querySelector("mask#" + maskId) : null;
+    const gradId = mask ? (() => {
+      const r = mask.querySelector("rect");
+      return r ? (r.getAttribute("fill") || "").replace("url(#", "").replace(")", "") : "";
+    })() : "";
+    const grad = gradId ? svg.querySelector("linearGradient#" + gradId) : null;
+    const axis = [...svg.querySelectorAll("line")].filter((el) => !inDefs(el))
+      .find((el) => (el.getAttribute("class") || "").indexOf("axis0") >= 0);
+    const zeroY = axis ? Number(axis.getAttribute("y1")) : null;
+    const circles = [...svg.querySelectorAll("circle")].filter((el) => !inDefs(el) && !el.closest("#cross"));
+    const kids = [...svg.children];
+    /* the extreme x of a path, walked from its own geometry rather than a bbox */
+    const endX = (el) => {
+      if (!el) return null;
+      const L = el.getTotalLength();
+      let hi = -Infinity;
+      for (let k = 0; k <= 200; k++) { const q = el.getPointAtLength((L * k) / 200); if (q.x > hi) hi = q.x; }
+      return Math.round(hi * 100) / 100;
+    };
+    const cxs = circles.map((c) => Math.round(Number(c.getAttribute("cx")) * 100) / 100);
+    return {
+      bands: bands.length,
+      allMasked: !!masked && bands.every((b) => masked.contains(b)),
+      gradUnits: grad ? grad.getAttribute("gradientUnits") : null,
+      gradY1: grad ? Number(grad.getAttribute("y1")) : null,
+      gradY2: grad ? Number(grad.getAttribute("y2")) : null,
+      zeroY,
+      lines: paths.filter((el) => (el.getAttribute("fill") || "none") === "none"
+        && (el.getAttribute("stroke") || "").toLowerCase() === "#1c130f").length,
+      lineAfterMask: (!!line && !!masked) ? kids.indexOf(masked) < kids.indexOf(line) : null,
+      topStroke: bands.length ? (bands[0].getAttribute("stroke") || "none") : null,
+      markers: circles.length,
+      markerXs: cxs,
+      fadeRects: [...svg.querySelectorAll("rect")].filter((r) => !inDefs(r)
+        && (r.getAttribute("fill") || "").indexOf("url(") === 0).length,
+      lineEndX: endX(line),
+      bandEndX: bands.length ? endX(bands[0]) : null,
+    };
+  })();
   /**
    * ⚠️ NO RED RING, ANYWHERE, IN ANY STATE (v30, Phase 2). The house palette has burgundy for ink
    * and no red at all; a ring in either reads as an error on a control that is merely selected or
@@ -1123,6 +1210,30 @@ const STANDING = [
   { k: "paintBelowZero", why: "nothing paints below the chart's zero baseline", test: (v) => v !== null && v <= 0.5, want: "<= 0.5px" },
   { k: "ruleClear", why: "every band of the to-do rule paints — a token that does not resolve here makes it transparent", test: (v) => v === 0, want: "0 transparent" },
   { k: "ruleFill", why: "the rule's bands fill their track", test: (v) => v !== null && Math.abs(v) <= 3, want: "within 3px" },
+  /**
+   * ⚠️ THE SIX CHART STRUCTURAL CLAIMS AS ONE GATE (v31, Phase 2). One entry rather than six because
+   * they describe one construction and a failure in any of them means the same thing — the chart is
+   * no longer built the way the ref builds it. The reading prints every field, so the message names
+   * which part moved.
+   */
+  {
+    k: "plotStruct",
+    why: "the plot is three masked bands, one gradient, one line after them, no fade rect, two marks",
+    test: (v) => !!v
+      && v.bands === 3
+      && v.allMasked === true
+      && v.gradUnits === "userSpaceOnUse"
+      && v.gradY1 === 0 && v.zeroY !== null && Math.abs(v.gradY2 - v.zeroY) <= 0.5
+      && v.lines === 1
+      && v.lineAfterMask === true
+      && v.topStroke === "none"
+      && v.markers >= 2
+      && v.fadeRects === 0
+      /* Phase 4's claim: the line and the bands end together, and the end mark sits on both */
+      && v.lineEndX !== null && v.bandEndX !== null && Math.abs(v.lineEndX - v.bandEndX) <= 0.5
+      && v.markerXs.some((x) => Math.abs(x - v.lineEndX) <= 0.5),
+    want: "3 masked bands · userSpaceOnUse 0→y(0) · 1 line after · no fade rect · ≥2 marks · line ends with the bands",
+  },
   { k: "redRings", why: "no control computes a red outline or box-shadow, in any state", test: (v) => v === 0, want: "0" },
   {
     k: "focusMouse",
@@ -1147,9 +1258,13 @@ const STANDING = [
   {
     k: "brush",
     why: "the brush handle follows the cursor — monotonic, 1:1, and settling on the week its value implies",
-    test: (v) => !!v && v.backwards === 0 && v.worstLag <= 2 && v.repeats <= 2
-      && v.weeks.p05 === 11 && v.weeks.p50 === 6 && v.weeks.p95 === 4
-      && v.settleErr !== null && v.settleErr <= 1.5,
+    test: (v) => !!v && (
+      /* where the ref hides the thumbnail, the keyboard route is the claim */
+      v.noTrack === true
+        ? v.keyboard === true
+        : (v.backwards === 0 && v.worstLag <= 2 && v.repeats <= 2
+          && v.weeks.p05 === 11 && v.weeks.p50 === 6 && v.weeks.p95 === 4
+          && v.settleErr !== null && v.settleErr <= 1.5)),
     want: "0 backwards · lag <= 2px · 11/6/4 at 5/50/95% · settles on its own value",
   },
 ];
@@ -1201,7 +1316,23 @@ async function brushDrag(page) {
     const r = t.getBoundingClientRect();
     return { x: r.left, y: r.top + r.height / 2, w: r.width };
   });
-  if (!box || box.w < 20) return null;
+  /**
+   * ⚠️ NO TRACK IS A STATE, NOT A FAILURE (v31). Below 1650 the ref hides the brush's thumbnail to
+   * make room for the third frequency chip, and the app follows it — so there is no handle to drag
+   * and the claim "the handle follows the cursor" is vacuous rather than false. What must still hold
+   * at those widths is the OTHER half of the same control: the range is reachable from the keyboard.
+   * Reporting `noTrack` with that check is the honest reading; returning null made the gate fail on
+   * a page that is behaving exactly as the ref does.
+   */
+  if (!box || box.w < 20) {
+    const keyboard = await page.evaluate(() => {
+      const el = document.querySelector('[data-probe="brush"] input[type="range"]');
+      if (!el) return false;
+      el.focus();
+      return document.activeElement === el;
+    });
+    return { noTrack: true, keyboard };
+  }
   const STEPS = 40;
   const at = (f) => box.x + box.w * f;
   /**
@@ -1393,6 +1524,24 @@ async function driven(page) {
   return out;
 }
 
+/**
+ * ⚠️ THE PLOT'S PIXELS, RUN BY DEFAULT (v31, Phase 2). The region comparison lives in its own script
+ * because it needs a REF PAGE BUILT FROM SUBSTITUTED HTML — the app's own series pushed into the
+ * mockup's fixture — which is a different page from the one this file measures. It is spawned rather
+ * than imported so it stays independently runnable, and its JSON is folded back in as a gate.
+ *
+ * ⚠️ IF IT CANNOT MAKE THE FIXTURES MATCH IT REPORTS `skipped` AND CLAIMS NOTHING. Diffing pixels of
+ * two different datasets and calling the difference a miss is worse than not looking.
+ */
+function plotDiff() {
+  const r = spawnSync(process.execPath, [join(ROOT, "scripts", "dash-plotdiff-v31.mjs")], {
+    encoding: "utf8", env: { ...process.env, SA_WIDTHS: WIDTHS.join(",") }, timeout: 15 * 60 * 1000,
+  });
+  const f = join(ROOT, "run-artifacts", "plotdiff", "plotdiff.json");
+  if (!existsSync(f)) return { error: (r.stderr || "").slice(-300) || "no plotdiff.json" };
+  try { return { rows: JSON.parse(readFileSync(f, "utf8")) }; } catch (e) { return { error: String(e) }; }
+}
+
 /* ── the table ───────────────────────────────────────────────────────────────────────────────── */
 
 function table(result) {
@@ -1438,6 +1587,20 @@ function table(result) {
       seen.add(id);
       L.push(`- \`${m.key}\` ${m.field} — ${m.allowance}`);
     }
+  }
+  L.push("");
+  /* the plot region's own row, printed whether or not it counted */
+  if (result.plotDiff && result.plotDiff.rows) {
+    L.push("");
+    L.push("**Plot region (same data, both sides):**");
+    for (const r of result.plotDiff.rows) {
+      L.push(r.skipped
+        ? `- ${r.width}: SKIPPED — ${r.skipped}`
+        : `- ${r.width}: mean **${r.mean}** · max ${r.max} · ${r.points} points · fixture substituted (${(r.substitutions || []).join("+")})`);
+    }
+  } else if (result.plotDiff && result.plotDiff.error) {
+    L.push("");
+    L.push(`**Plot region: NOT MEASURED — ${result.plotDiff.error}**`);
   }
   L.push("");
   L.push(`**total misses: ${result.total}**`);
@@ -1565,6 +1728,35 @@ if (SELF_TEST) {
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, `${JSON.stringify(result, null, 1)}\n`);
+/**
+ * ⚠️ THE PLOT REGION, MEASURED AND GATED (v31). Today's numbers are 5.4–7.2 mean and ~232 max, and
+ * the causes are known and reported: the ref's plot insets are FRACTIONS of a stretched fixed
+ * viewBox (5.2% left, 7.9% top, 13.9% bottom) while this app's are fixed PIXELS (14/30/34), so every
+ * drawn thing sits a few px apart and the two never converge at any width.
+ *
+ * ⚠️ SO THE THRESHOLD IS A NO-REGRESSION LINE, NOT THE TARGET, AND IT SAYS SO. 8 is above every
+ * measured value and below anything a new fault would produce; the pack's target of 6 needs the
+ * inset question settled, which is a design decision rather than a build one. A gate calibrated to
+ * today's number would be a snapshot; a gate at the target would be red for a reason nobody is
+ * acting on. This one catches the chart getting WORSE, which is the claim that can be made honestly.
+ */
+const plot = plotDiff();
+result.plotDiff = plot;
+if (plot.rows) {
+  for (const row of plot.rows) {
+    if (row.skipped) continue;
+    if (!(row.mean < 8)) {
+      const w = row.width;
+      result.byWidth[w] = result.byWidth[w] || { misses: [], allowed: [] };
+      result.byWidth[w].misses.push({
+        key: "plot-region", field: "mean", ref: "< 8", app: row.mean,
+        why: "the plot's rendered pixels drifted from the ref's with the same data",
+      });
+      result.total++;
+    }
+  }
+}
+
 const md = table(result);
 writeFileSync(OUT.replace(/\.json$/, ".md"), `${md}\n`);
 console.log(`\n${md}\n`);
