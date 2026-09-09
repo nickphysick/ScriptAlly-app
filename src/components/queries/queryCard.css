@@ -68,7 +68,17 @@
   padding: 0;
   text-align: left;
   background: #fff;
-  border: 0;
+  /* ⚠️ A HAIRLINE, AND IT IS A DEPARTURE FROM THE REF — which draws the card on shadow alone
+     (`.card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:…}`). Nick's call: on
+     the recessed well the shadow alone leaves the card's edge soft, and a line gives it one.
+     `0.5px #e6dccf` is the card's OWN hairline — the value `.qcc-chip`, `.qcc-mats` and `.qcc-tip`
+     already use — so the card gains an edge rather than a second vocabulary.
+
+     ⚠️ AND IT MUST NOT DOUBLE UP WITH THE SELECTION RING. `.qcc--sel` draws a 1.5px pink ring as a
+     `box-shadow`, which paints OUTSIDE the border box; a hairline left underneath it would read as
+     two lines a pixel apart. The selected card takes the ring's colour on its border instead, so
+     the edge stays one line whichever state it is in. */
+  border: 0.5px solid #e6dccf;
   border-radius: 14px;
   cursor: pointer;
   position: relative;
@@ -89,6 +99,9 @@
 .qcc:focus-visible { outline: 2px solid var(--sage, #8a9e88); outline-offset: 2px; }
 /* Selected adds a ring; it never adds a fill. A filled card would compete with the band. */
 .qcc--sel {
+  /* the ring is the edge when selected — the hairline takes its colour so there is one line, not
+     a pink ring a pixel outside a grey one */
+  border-color: var(--pink-b, #e8c8bc);
   box-shadow: 0 0 0 1.5px var(--pink-b, #e8c8bc), 0 2px 4px rgba(58, 28, 20, 0.06),
     0 14px 32px rgba(58, 28, 20, 0.13);
 }
