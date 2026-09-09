@@ -30,7 +30,6 @@ import { OneScreenAuthor } from "./OneScreenAuthor";
 import { OneScreenChart } from "./OneScreenChart";
 import { OneScreenTasks } from "./OneScreenTasks";
 import { OneScreenCounters } from "./OneScreenCounters";
-import { OneScreenCommunity } from "./OneScreenCommunity";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../lib/manuscriptScope";
 import { deriveGoalProgress } from "../../lib/queryingGoals";
 import { OneScreenRail } from "./OneScreenRail";
@@ -361,7 +360,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             with a `strip` layout: an icon, a title, one line and the Beta pill on a single row.
             As a column card it competed for height with the work; as a footer it states what it
             is and gets out of the way. */}
-        <OneScreenCommunity loading={loading} strip />
+
       </div>
       {/* ⚠️ LAST CHILD, OVER THE MOUNTED PAGE. The cards stay in the tree beneath it, which is what
           makes "no layout shift" structural rather than a matter of matching numbers — and it is

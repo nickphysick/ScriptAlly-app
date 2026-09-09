@@ -29,11 +29,20 @@ describe("the empty state is the whole of Phase 1", () => {
   /* ⚠️ RETARGETED (empty-state pack): the copy changed wholesale. Both strings were stated
      verbatim by their own pack; this one is current. Locked as an exact string because "verbatim"
      is the whole contract — a paraphrase is the failure this catches. */
-  it("renders the pack's copy verbatim", () => {
+  /* ⚠️ RETARGETED TO v26's SENTENCE, WHICH IS SHORTER FOR A REASON THE GEOMETRY MADE UNARGUABLE.
+     The old line opened "As our community builds, you'll be able to…" — a lead-in a full-width
+     strip had room for and a 360px tile does not: it wrapped to three lines and made the tile
+     113.5px against the ref's 94.6. The verbatim lock is KEPT rather than loosened, because the
+     point of it is that this sentence is a factual claim about a feature that does not exist yet
+     and must not drift into a promise. It is still one sentence, for one feature, in one
+     component — and the appraisal cases below it are untouched. */
+  it("renders the ref's copy verbatim", () => {
     expect(COMMUNITY_EMPTY).toBe(
-      "As our community builds, you'll be able to benchmark your key stats against other writers at a similar stage.",
+      "Benchmark your key stats against writers at a similar stage.",
     );
-    expect(html).toContain("benchmark your key stats against other writers");
+    expect(html).toContain("Benchmark your key stats against writers");
+    /* the preamble is gone, and its absence is the thing worth asserting */
+    expect(COMMUNITY_EMPTY).not.toMatch(/you'll be able to|as our community builds/i);
   });
 
   /* ⚠️ NO EXCLAMATION MARK, ANYWHERE — nothing else in the app uses one. Originally this also

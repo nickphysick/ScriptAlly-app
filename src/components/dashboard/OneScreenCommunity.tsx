@@ -32,8 +32,13 @@ import seedling from "../../assets/shell/new-shoots-icon.png";
  * note on the body below. A sentence that was written to sit above a call to action is carrying the
  * whole tile on its own, so it must keep reading as a statement rather than a lead-in.
  */
+/* ⚠️ SHORTENED TO THE REF'S OWN SENTENCE (v26). The old line opened "As our community builds,
+   you'll be able to…" — a lead-in that a full-width strip had room for and a 360px tile does not:
+   it wrapped to three lines and made the tile 113.5px against the ref's 94.6. The fact is
+   unchanged and still stated as a fact rather than a promise; what went is the preamble. ONE
+   sentence still, for one feature, in one component. */
 export const COMMUNITY_EMPTY =
-  "As our community builds, you'll be able to benchmark your key stats against other writers at a similar stage.";
+  "Benchmark your key stats against writers at a similar stage.";
 
 /**
  * ⚠️ TWO LAYOUTS, ONE COMPONENT AND ONE SET OF WORDS (ref v22, Phase 3).
@@ -44,8 +49,21 @@ export const COMMUNITY_EMPTY =
  * component: a fork here would be two surfaces free to disagree about a feature that is one
  * sentence long.
  */
-export const OneScreenCommunity: React.FC<{ loading: boolean; strip?: boolean }> = ({ loading, strip = false }) =>
-  strip ? (
+export const OneScreenCommunity: React.FC<{ loading: boolean; strip?: boolean; tile?: boolean }> = ({ loading, strip = false, tile = false }) =>
+  /* ⚠️ THE TILE IS v26's, AND IT REPLACES THE STRIP RATHER THAN JOINING IT. v22 put Community in a
+     full-width band under both columns; v26 puts it back in the right column, beneath Activity, at
+     the column's own 360px. Same one sentence, same one component — a fork here would be two
+     surfaces free to disagree about a feature that is one sentence long. */
+  tile ? (
+    <div className={`os-card os-comtile${loading ? " isload" : ""}`} data-probe="community-tile">
+      <span className="os-commbeta">Beta</span>
+      <OneScreenMark name="community" />
+      <div className="os-comtiletx">
+        <h4>Community</h4>
+        <p>{COMMUNITY_EMPTY}</p>
+      </div>
+    </div>
+  ) : strip ? (
     <div className={`os-comstrip${loading ? " isload" : ""}`} data-probe="community-strip">
       <OneScreenMark name="community" />
       <div className="os-comstriptx">

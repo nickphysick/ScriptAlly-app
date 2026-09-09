@@ -22,6 +22,7 @@ import { StatusDot } from "../StatusDot";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { OneScreenPanel } from "./OneScreenPanel";
 import { OneScreenMark } from "./OneScreenMark";
+import { OneScreenCommunity } from "./OneScreenCommunity";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
 import { bubbleShape, markSentOffered, tightRunHeads, type Side } from "../../lib/feedConversation";
 import { STATE_TOKEN, type State } from "../../lib/queryCardFacts";
@@ -809,6 +810,10 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
       {/* ⚠️ THE PRO MINI LEFT THE RAIL (v16 §5) — it is the full-width banner beneath tasks now
           (OneScreenPro). Do not reinstate one here: two upsells on one screen sell the same thing
           twice, and the rail's job is goals and the record. */}
+      {/* ⚠️ THE COMMUNITY TILE CLOSES THE COLUMN (v26) — ref `.rcol > .comtile`, `flex: 0 0 auto`
+          beneath an activity panel that is `flex: 1`. It is the same component as the strip it
+          replaces, in its tile variant. */}
+      <OneScreenCommunity loading={loading} tile />
     </div>
   );
 };

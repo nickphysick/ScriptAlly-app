@@ -2165,6 +2165,71 @@
    prevent. Rule and element removed together — a `margin-top: auto` left in this file would
    silently un-centre the hero the next time someone re-added the div. */
 
+/* ══ v26 · THE HEIGHT LAW ══ */
+/**
+ * ⚠️ THE TOP ROW IS NO LONGER CLAMPED, AND THAT IS THE REF'S OWN CORRECTION. v22 gave the chart
+ * `height: clamp(330px, 33vh, 430px)`; v26 declares that rule and then OVERRIDES it —
+ * `.toprow .mscard, .toprow .wrapc2, .toprow .wrapc2 > #chartCard { height: 100% }`, later in the
+ * file and therefore the winner. The clamp is dead in the ref exactly as the greeting's is.
+ *
+ * The consequence is that the row's height is its CONTENT's, and both cards stretch to it — which
+ * is what makes the two bottoms equal by construction rather than by a shared number. Measured on
+ * the ref: 342.8 at 1536, 353.9 at 1920, 525.5 at 2520. A clamp cannot produce that spread, which
+ * is how the app came to be 430 at all three.
+ */
+.os-toprow > * { height: 100%; min-width: 0; }
+.os-toprow .os-lead { height: 100%; display: flex; flex-direction: column; }
+/* the to-do card takes everything the row leaves — ref `.wrapt2{flex:1;min-height:0}` */
+.os-colL .os-tasks { flex: 1 1 auto; min-height: 0; }
+
+/**
+ * ⚠️ THE PLOT'S HEIGHT IS ITS ASPECT RATIO, NOT A CLAMP — and this is what makes the top row grow
+ * with the page. The ref's chart svg carries `viewBox="0 0 1000 330"` with no height, so it takes
+ * its intrinsic 1000:330 and the card grows to fit it: measured, plot width / height is 3.03 at
+ * 1536, 1920 and 2520 alike, and the top row runs 342.8 / 353.9 / 525.5. A clamped card cannot
+ * produce that spread, which is how the app came to be a flat 430 at every width.
+ */
+.os-chartwrap { flex: 0 0 auto; width: 100%; aspect-ratio: 1000 / 330; }
+
+/**
+ * ⚠️ THE REF'S `.page2{min-height:calc(100vh - 150px)}` IS DELIBERATELY NOT PORTED, AND AN EXISTING
+ * LOCK IS WHY. `100vh` on an element that does not start at y=0 over-claims by exactly its offset —
+ * the fault this repo records as the Tasks chassis's unreachable 21px — and here the offset is the
+ * shell's chrome plus a top bar, i.e. a number the ref cannot know. The ref can write it because
+ * the ref IS the whole page. `.os-grid` is already `flex: 1; min-height: 0` inside a flex `main`,
+ * which is the same claim made honestly: take what is left, whatever that turns out to be.
+ * `oneScreenSmoke`'s "min-height is FORBIDDEN on the lock elements" caught this within a minute of
+ * my writing it, which is the lock doing precisely the job it was written for.
+ */
+
+/* ⚠️ THE RIGHT COLUMN IS A FLEX COLUMN WITH TWO CHILDREN NOW — ref `.page2 > .rcol`. Activity is
+   `flex: 1` and the community tile is `flex: 0 0 auto`, so the tile keeps its own height and the
+   panel absorbs every pixel of the difference. That is the whole reason the tile can sit under a
+   panel whose length is the writer's own record. */
+.os-colR { gap: 22px; }
+.os-colR .os-actv { flex: 1 1 auto; min-height: 0; }
+
+/* ══ v26 · THE COMMUNITY TILE ══ */
+/* ref `.comtile` — 360px (the column's width), ~95px tall, a 56px mark, a serif title, one line,
+   and the Beta pill in the corner rather than in the flow. */
+.os-comtile {
+  position: relative; flex: 0 0 auto;
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+}
+.os-comtile .os-mark { width: 56px; height: 56px; flex: 0 0 56px; border-radius: 12px; }
+.os-comtile .os-mark svg { width: 40px; height: 40px; }
+.os-comtile h4 { font-family: var(--font-serif); font-weight: 500; font-size: 17px; margin: 0; color: #2a1f18; }
+.os-comtile p { margin: 3px 0 0; font-size: 13.5px; color: #b3a596; line-height: 1.4; }
+.os-comtiletx { min-width: 0; }
+/* ⚠️ POSITIONED, NOT IN THE FLOW — ref `.beta3` is absolute at top right. In the flow it would be a
+   third flex item and the one line beside it would lose its measure to a two-word pill. */
+.os-comtile .os-commbeta {
+  position: absolute; top: 12px; right: 14px;
+  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.12em;
+  padding: 3px 9px; border-radius: 99px; background: #ffffff; border: 1px solid #e6dfd6; color: #9c8f82;
+}
+
 /* ══ v26 · THE TOP BAR ══ */
 /**
  * ⚠️ THE BAR IS THE PAGE'S OWN ROW, ABOVE THE GRID AND INSIDE THE CONTENT — ref `.topbar`, a child
@@ -2265,6 +2330,16 @@
   .os-greet { grid-template-columns: minmax(0, 1fr); row-gap: 16px; }
   .os-greet .os-counters { grid-column: 1; grid-row: 3; justify-content: space-between; width: 100%; top: 0; }
   .os-greet .os-cic { width: clamp(72px, 5.6vw, 92px); height: clamp(72px, 5.6vw, 92px); }
+}
+/**
+ * ⚠️ AND BELOW 1700 THE REF PINS 96px, WHICH BEATS ITS OWN CLAMP. `.stat .ill{width:96px!important}`
+ * sits in the ≤1700 block; the `clamp(72px, 5.6vw, 92px)` two rules above it never applies there.
+ * Measured: the ref draws 96 at 1536 where the clamp would give 86. Third dead clamp in this ref —
+ * after the greeting and the chart's height — and the same shape each time: a value stated twice
+ * with the later or stronger one winning. This mirrors the artefact rather than the prose.
+ */
+@media (max-width: 1700px) {
+  .os-greet .os-cic { width: 96px; height: 96px; }
 }
 
 /* ══ §P4 · REDUCED MOTION ═══════════════════════════════════════════════════════════════════
