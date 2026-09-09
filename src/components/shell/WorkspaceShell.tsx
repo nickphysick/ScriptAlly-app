@@ -835,7 +835,21 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   element. This is the idiom `.ws-lbl` already uses for the sidebar's own labels;
                   nothing that stays on screen moves by a pixel. */}
               <div className="ws-bright">
-                <span className="ws-appctl"><SearchPill onOpen={onOpenSearch} anchorRef={searchAnchorRef} /></span>
+                {/* ⚠️ NOT ON THE DASHBOARD — THAT PAGE RENDERS ITS OWN SEARCH (v27, Phase 2). The
+                    dashboard's top row carries a 620px field in the breadcrumb row, so the bar's
+                    pill was the SECOND search control on one screen. Two controls for one job is
+                    worse than either alone: the reader has to work out whether they do the same
+                    thing, and they do.
+                    ⚠️ REMOVED FROM THE DOM RATHER THAN HIDDEN. `display: none` would have left the
+                    element there, and "there is exactly one search control" is a claim about the
+                    document, not about what is painted.
+                    ⚠️ ⌘K IS UNAFFECTED. The shortcut is registered by `usePalette` at shell level,
+                    not by this button, and every read of the anchor ref is optional-chained — so
+                    the palette opens exactly as before and simply has no element to anchor to on
+                    this one route. */}
+                {!dashMode && (
+                  <span className="ws-appctl"><SearchPill onOpen={onOpenSearch} anchorRef={searchAnchorRef} /></span>
+                )}
                 {/* ⚠️ LABELLED, NOT ICON-ONLY, AND THAT IS A PRE-LAUNCH DECISION ABOUT
                     DISCOVERABILITY — not a density one. A beta that hears nothing reads as "it's
                     fine" right up until people stop signing in, and a pencil glyph among three

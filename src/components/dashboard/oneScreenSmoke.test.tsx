@@ -491,3 +491,42 @@ describe("⚠️ the entrance class is REMOVED, and the guard is a ref", () => {
     expect(cssRules).toContain(".os-colL .os-probanner.enter");
   });
 });
+
+describe("one search control, not two (v27, Phase 2)", () => {
+  const shell = readFileSync(resolve(__dirname, "../shell/WorkspaceShell.tsx"), "utf8");
+
+  /* ⚠️ THE DASHBOARD RENDERS ITS OWN 620px FIELD, so the bar's pill was the SECOND search control
+     on one screen. Two controls for one job is worse than either alone: the reader has to work out
+     whether they do the same thing, and they do. */
+  it("the bar's search pill does not render on /dashboard", () => {
+    const at = shell.indexOf("<SearchPill");
+    expect(at, "the pill must still exist for every other route").toBeGreaterThan(-1);
+    /* it is gated, and on the dashboard flag specifically */
+    const before = shell.slice(Math.max(0, at - 400), at);
+    expect(before, "the pill must be conditional on NOT being in dash mode").toMatch(/\{!dashMode && \(/);
+  });
+
+  /* ⚠️ REMOVED FROM THE DOM, NOT HIDDEN. "There is exactly one search control" is a claim about the
+     document; `display: none` leaves the element there and the claim false. */
+  it("it is removed rather than hidden", () => {
+    const css = readFileSync(resolve(__dirname, "../shell/workspaceShell.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).not.toMatch(/dash-mode[^{]*\.ws-appctl[^{]*\{[^}]*display:\s*none/);
+  });
+
+  /* ⚠️ AND THE PAGE'S OWN FIELD IS THE ONE THAT SURVIVES — exactly one, with the probe on it. */
+  it("the dashboard renders exactly one search field", () => {
+    const html = render();
+    expect((html.match(/data-probe="search"/g) ?? []).length).toBe(1);
+    expect((html.match(/class="os-search"/g) ?? []).length).toBe(1);
+  });
+
+  /* ⚠️ ⌘K SURVIVES, and it is registered somewhere other than the button that was removed — every
+     read of the anchor ref is optional-chained, so the palette opens as before with nothing to
+     anchor to on this route. */
+  it("the keyboard route does not live on the removed button", () => {
+    const palette = readFileSync(resolve(__dirname, "../shell/usePalette.tsx"), "utf8");
+    expect(palette).toContain("openPalette");
+    expect(shell).not.toMatch(/SearchPill[\s\S]{0,200}registerShortcut/);
+  });
+});
