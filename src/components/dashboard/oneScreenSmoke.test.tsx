@@ -270,7 +270,18 @@ describe("§1 · the lock", () => {
      the diff blaming the panel's HEIGHT for a gap beneath it. Two spacing mechanisms on one axis is
      the fault; this case now forbids the second. */
   it("⚠️ the right column spaces with ONE mechanism — the gap, and no margins beside it", () => {
-    expect(rule(".os-colR")).toContain("gap: 22px");
+    /* ⚠️ THE CLAIM IS ONE MECHANISM, NOT ONE NUMBER (v29, Phase 6). This pinned `gap: 22px` and went
+       red when the ref legitimately moved it to 26 — a lock failing on an edit that made its own law
+       no less true, which is the shape that trains the next reader to rebaseline without looking.
+       What must hold is that the column states a gap and states it ONCE; the value is the ref's and
+       is asserted by the geometry diff, which is where a claim about pixels belongs. */
+    expect(rule(".os-colR"), "the column must state a gap").toMatch(/gap:\s*\d/);
+    /* ⚠️ AND NOT A COUNT OF DECLARATIONS. The first attempt at this asserted "declared once" and
+       went red on a correct file: the narrow regime legitimately restates the gap at 14px inside a
+       media query, and an unanchored `.os-colR\s*\{` also matches the TAIL of the grouped selector
+       `.os-colL, .os-colR {` — this repo's own two standing traps, both in one line. The mechanism
+       claim is carried by the two assertions below, which are about gap VERSUS margins; that is what
+       the case was written for. */
     expect(cssRules).not.toContain(".os-colR { gap: 0; }");
     /* ⚠️ A NON-ZERO MARGIN, not any margin: a narrow regime legitimately writes `margin-bottom: 0`
        to turn the old spacing off, and `\d` matched that too — the assertion failed on a rule that

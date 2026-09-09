@@ -50,11 +50,19 @@
   padding: 0;
   cursor: pointer;
   overflow: hidden;
-  /* ref `.tk{background:var(--card2);border:1px solid var(--line);border-radius:12px}` — parchment
-     with a hairline, NOT white with the state colour as its border. The border was the query's own
-     tint, which made the whole card's outline change with its state and left the 6px edge saying
-     the same thing twice. */
-  background: #fffdf9;
+  /* ref `.tk{background:#fff;border:1px solid var(--line);border-radius:12px}` — white with a
+     hairline, NOT white with the state colour as its border. The border was the query's own tint,
+     which made the whole card's outline change with its state and left the 6px edge saying the
+     same thing twice.
+     ⚠️ WHITE, NOT PARCHMENT, AND BOTH OF THIS COMPONENT'S HOMES ASKED FOR IT (v29, Phase 6). It was
+     `#fffdf9` — the card colour — which on the dashboard put a parchment ticket inside a parchment
+     card and left the ticket with no edge but its hairline. The change was checked against the
+     OTHER surface before it was made rather than scoped away from it: `todo-qc-style.html`, which
+     governs the To-do page, draws `.card{background:var(--white)}` with `--white:#fff`, and
+     `dashboard-cappuccino-v29.html` moved `.tk` from `var(--card2)` to `#fff`. Two refs, one
+     component, the same answer — so this is one declaration rather than a dashboard override, and
+     the To-do page's tickets come white too, which is what its own ref has always drawn. */
+  background: #ffffff;
   border: 1px solid #e6dfd6;
   border-radius: 12px;
   transition: border-color .16s, box-shadow .16s;

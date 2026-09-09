@@ -57,7 +57,16 @@ export const OneScreenCommunity: React.FC<{ loading: boolean; strip?: boolean; t
   tile ? (
     <div className={`os-card os-comtile${loading ? " isload" : ""}`} data-probe="community-tile">
       <span className="os-commbeta">Beta</span>
-      <OneScreenMark name="community" />
+      {/* ⚠️ THE REAL PLANT, AT 84px — NOT `OneScreenMark` (v29, Phase 6). The tile was drawing the
+          header-mark slot's 40px monoline placeholder while the card variant of this same component
+          rendered the finished asset a few lines below. Two branches of one component, one of them
+          on the placeholder: the tile is what ships, so the tile gets the artwork.
+          ⚠️ AND THE REF'S SVG IS NOT PORTED. The ref draws its own inline plant because a mockup has
+          no asset pipeline; ours is a committed PNG, and porting the placeholder over the finished
+          thing would be shipping the mockup's stand-in on top of the real one.
+          Decorative, so `alt=""` AND `aria-hidden` — a decorative image with a filename-derived
+          accessible name is the usual way this leaks. */}
+      <img className="os-commseed" src={seedling} alt="" aria-hidden="true" />
       <div className="os-comtiletx">
         <h4>Community</h4>
         <p>{COMMUNITY_EMPTY}</p>
