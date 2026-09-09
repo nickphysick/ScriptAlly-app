@@ -188,16 +188,30 @@ describe("the panel's stylesheet", () => {
      is in FLOW, so P5.3 caught every ticket moving down by exactly 3. The row now reserves 12px
      always and the BANDS grow inside it, which is what "the thicken happens inside space that is
      already there" was supposed to mean. Asserted where the heights now live. */
-  it("the bands are 9px and thicken inside a row that reserves the space", () => {
+  /* ⚠️ RETARGETED, AND THE LAW IT GUARDS IS UNCHANGED (v26, Phase 7). v26 states the rule as ONE
+     object — 12px, pill radius, a single hairline, full card width, growing to 15px on hover — so
+     the old mechanism (a 12px row holding 9px bands that thickened inside it) cannot express it:
+     that gives a 12px ROW and a 9px RULE, where the ref's resting rule IS 12.
+     ⚠️ WHAT MUST NOT CHANGE IS THAT NOTHING BELOW MOVES, which is the fault P5.3 measured — every
+     ticket dropping by 3px on hover. The ref does not solve it: it raises `.sbar.thin` to 15 and
+     its zone grows by 3. Here the ink grows and the FLOW height does not, via a negative block
+     margin of exactly half the growth. That is the claim, and it is what this case asserts now. */
+  it("the rule is 12px and grows to 15 without moving anything below it", () => {
     expect(rule(".os-rule")).toContain("height: 12px");
-    expect(cssRules).toContain(".os-rule > .os-rb { height: 9px; }");
-    expect(cssRules).toContain(".os-rulezone.on .os-rule > .os-rb { height: 12px; }");
-    /* ⚠️ AND THE ROW'S OWN HEIGHT MUST NOT CHANGE ON HOVER — the fault, stated directly. */
-    expect(cssRules, "the row grows again and the tickets move")
-      .not.toContain(".os-rulezone.on .os-rule { height:");
-    /* the separator is the GAP — a third tint between two same-family bands would be a fourth
-       colour vocabulary on one page */
-    expect(rule(".os-rule")).toContain("gap: 2px");
+    expect(rule(".os-rule")).toContain("border-radius: 99px");
+    /* the grown state, and the margin that pays for it */
+    const grown = /\.os-rulezone:hover \.os-rule[^{]*\{([^}]*)\}/.exec(cssRules);
+    expect(grown, "the rule must have a grown state").not.toBeNull();
+    expect(grown![1]).toContain("height: 15px");
+    expect(grown![1], "the growth must be paid for, or the tickets move")
+      .toMatch(/margin-block:\s*-1\.5px/);
+    /* ⚠️ AND NO LAYOUT TRANSITION. Animating height or margin puts the whole card through layout on
+       every frame of a hover; the ref transitions filter, flex-basis and transform and lets the
+       height snap. The sheet's own motion lock forbids it too — this states the reason. */
+    expect(rule(".os-rule")).not.toMatch(/transition:[^;]*(height|margin)/);
+    /* the separator belongs to the band, and the last one has none */
+    expect(rule(".os-rb")).toContain("border-right: 2px solid");
+    expect(rule(".os-rb:last-child")).toContain("border-right: 0");
   });
 
   /**

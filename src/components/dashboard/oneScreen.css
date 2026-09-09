@@ -1190,24 +1190,39 @@
 /* ⚠️ THE ZONE IS TALLER THAN THE RULE, DELIBERATELY. The rule is 9px; the zone reserves the hover
    target and the 18px of air between it and the first ticket, so thickening on hover happens
    INSIDE space that is already there and no ticket moves. */
-.os-rulezone { position: relative; padding: 2px 18px 18px; flex: none; }
-/* ⚠️ THE ROW RESERVES THE THICKENED HEIGHT AND THE BANDS GROW INSIDE IT — measured, because the
-   first version did not. `.os-rule` was 9px and became 12 on hover, and P5.3 caught every ticket
-   moving down by exactly 3: the rule is in FLOW, so its own height change reflows the grid beneath
-   it. The zone's comment claimed the thicken happened "inside space that is already there"; it did
-   not, and only the rendered page said so. The row is 12px always, the bands are 9 and grow to 12
-   within it, and nothing below moves. */
-.os-rule { display: flex; align-items: center; height: 12px; gap: 2px; }
-.os-rule > .os-rb { height: 9px; }
-.os-rulezone.on .os-rule > .os-rb { height: 12px; }
-/* ⚠️ THE RADIUS MOVED TO THE BANDS with the overflow clip it used to need — a 12px row clipping a
-   9px band would round the ROW's corners around empty space at the ends. */
-.os-rb:first-child { border-top-left-radius: 5px; border-bottom-left-radius: 5px; }
-.os-rb:last-child { border-top-right-radius: 5px; border-bottom-right-radius: 5px; }
-/* ⚠️ THE SEPARATOR IS THE GAP, IN THE CARD'S OWN PAPER — `gap: 2px` on a container the card shows
-   through. Two categories sharing a family paper sit adjacent and are told apart by this and by the
-   legend; a third tint to separate them would be a fourth vocabulary on one page. */
-.os-rb { border: 0; padding: 0; min-width: 3px; cursor: pointer; transition: filter 0.14s ease; }
+/* ref `.rulezone{padding:8px 20px 18px}` — 8 above the rule and 18 below, which is what makes the
+   zone 38px at rest with a 12px rule in it. */
+.os-rulezone { position: relative; padding: 8px 20px 18px; flex: none; }
+/**
+ * ⚠️ 12px, PILL RADIUS, ONE HAIRLINE, FULL CARD WIDTH — ref `.rulezone .sbar.thin`. The rule is a
+ * single object now rather than a row of five: the border and the radius are ITS, and the bands
+ * fill it edge to edge and are clipped by it.
+ *
+ * ⚠️ AND IT GROWS TO 15px ON HOVER WITHOUT REFLOWING ANYTHING, which is the part the ref does not
+ * solve. The ref simply raises `.sbar.thin` to 15px, so its zone grows by 3 and every ticket below
+ * moves down by 3 — the exact fault P5.3 measured here once already, when the rule was 9 and became
+ * 12. The negative block margin is what keeps both: the ink is 15px, the FLOW height stays 12, and
+ * nothing beneath it moves. The old fix (a 12px row with 9px bands growing inside it) is retired
+ * because it cannot give the ref's 12px resting rule and its 15px hover at the same time.
+ */
+.os-rule {
+  display: flex; align-items: stretch; height: 12px; gap: 0;
+  border-radius: 99px; border: 1px solid rgba(0, 0, 0, 0.05); overflow: hidden;
+  /* ⚠️ NO TRANSITION ON THE HEIGHT, and the sheet's own lock is right to forbid one: `height` and
+     `margin` are layout properties and animating them puts the whole card through layout on every
+     frame of a hover. The ref does not transition them either — its `.sbar.thin` transitions
+     `filter`, `flex-basis` and `transform`, and the height simply snaps. */
+}
+.os-rulezone:hover .os-rule, .os-rulezone.on .os-rule, .os-rulezone:focus-within .os-rule {
+  height: 15px; margin-block: -1.5px;
+}
+/* ⚠️ THE SEPARATOR IS A BORDER ON EACH BAND, IN THE CARD'S OWN PAPER — ref
+   `.sbar.thin button{border-right:2px solid var(--card)}` with none on the last. It was a 2px flex
+   GAP, which is the same picture until the rule gains a border and a radius: a gap shows the ZONE
+   through, and the zone is now behind a clipped pill, so the last band's gap became a 2px notch in
+   the rim. A border belongs to the band and is clipped with it. */
+.os-rb { border: 0; border-right: 2px solid #fffdf9; padding: 0; min-width: 3px; cursor: pointer; transition: filter 0.14s ease; }
+.os-rb:last-child { border-right: 0; }
 .os-rb:hover { filter: brightness(0.96); }
 .os-rb.on { box-shadow: inset 0 0 0 1.5px #7c3a2a; }
 .os-rb:focus-visible { outline: 2px solid #b98a76; outline-offset: 1px; }
