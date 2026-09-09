@@ -69,6 +69,23 @@ const SELF_SRC = readFileSync(fileURLToPath(import.meta.url), "utf8");
   const open = SELF_SRC.indexOf("\nconst READ = ") + 1;
   const body = SELF_SRC.slice(open, SELF_SRC.indexOf("\n\n", SELF_SRC.indexOf("})()", open)));
   const ticks = (body.match(/\u0060/g) || []).length;
+  /**
+   * ⚠️ AND NO REGEX ESCAPE MAY LIVE IN HERE EITHER (v30). Same cause as the backtick, opposite
+   * symptom: a template literal eats the backslash, so `\s` reaches the browser as the letter s and
+   * `\d` as the letter d. It has now cost this file two faults — a thrown "unterminated group" that
+   * stopped a run, and, worse, a gate that could never go red because its comparison could never be
+   * true. The first announces itself; the second is a green nobody has watched work.
+   * The rule is that a pattern does not belong in here at all: parse with `split`, or pass the
+   * pattern in from Node.
+   */
+  const escapes = body.match(/(?<!\\)\\[sdwSDWbnrt]/g);
+  if (escapes) {
+    throw new Error(
+      `dash-refdiff: READ contains ${escapes.length} single-escaped sequence(s) — ${[...new Set(escapes)].join(" ")}. `
+      + "A template literal eats the backslash, so the browser receives the bare letter. "
+      + "Parse with split, or pass the pattern in from Node.",
+    );
+  }
   if (ticks !== 2) {
     throw new Error(
       `dash-refdiff: READ's template literal holds ${ticks} backticks and must hold exactly 2 — ` +
@@ -81,7 +98,7 @@ const SELF_SRC = readFileSync(fileURLToPath(import.meta.url), "utf8");
 /* ⚠️ ONE NAME, READ TWICE — the report's `ref:` field used to restate this string, so repointing
    the harness at a new ref left the table truthfully measuring v29 while its own header said v28.
    A value that appears twice is a value that will disagree with itself; the report derives it. */
-const REF_REL = "design-refs/dashboard-cappuccino-v29.html";
+const REF_REL = "design-refs/dashboard-cappuccino-v30.html";
 const REF = join(ROOT, REF_REL);
 
 const argv = process.argv.slice(2);
@@ -126,6 +143,12 @@ const PROBES = [
   "stat-card", "stat-illustration",
   "manuscript-card", "chart-card", "plot", "brush",
   "todo-card", "todo-rule",
+  /* ⚠️ v30 ADDS THE BADGE AND THE DRAWER. The badge became a CONTROL this pass — it clears the
+     filter — and a control that changes shape when it gains a job is exactly the thing a box probe
+     should be watching. The drawer is measured only while OPEN, and its anchor is the viewport
+     rather than the content datum, because a `position: fixed` panel pinned to the window's right
+     edge is not positioned relative to anything the datum describes. */
+  "todo-badge",
   "activity-card", "feed",
   "community-tile",
 ];
@@ -241,6 +264,9 @@ const ANCHOR = {
   "manuscript-card": "left",
   "chart-card": "span", plot: "span", brush: "right",
   "todo-card": "span", "todo-rule": "span",
+  /* the badge sits after the title in a left-to-right header, so its left inset and size are the
+     facts; its right inset is wherever the title's length leaves it */
+  "todo-badge": "left",
   /* the right column is 360px pinned to the right edge, and everything in it goes with it —
      including the community tile, which is now IN that column rather than a strip beneath both */
   "activity-card": "right", feed: "right", "community-tile": "right",
@@ -535,6 +561,42 @@ const READ = `(() => {
     }
   }
   /**
+   * ⚠️ NO RED RING, ANYWHERE, IN ANY STATE (v30, Phase 2). The house palette has burgundy for ink
+   * and no red at all; a ring in either reads as an error on a control that is merely selected or
+   * focused. This counts every focusable element whose outline or box-shadow computes red-dominant
+   * — measured with a margin over both channels rather than against a list of hexes, so a new tint
+   * nobody has named yet is caught too.
+   *
+   * ⚠️ IT IS A RESTING SWEEP AND THAT IS ON PURPOSE. The one this pass removed was not a focus ring
+   * at all: it was the selected band's own marker, present with nothing focused. A gate that only
+   * looked at :focus would have found nothing wrong.
+   */
+  out.checks.redRings = (() => {
+    /* NO REGEX IN HERE. READ is a browser-side template literal, so every backslash is eaten before
+       the browser sees it: this was written as a regex first and reached Chromium as an
+       unterminated group, thrown at runtime. Seventh occurrence of that family in this file — and
+       the comment saying so was the EIGHTH, because it quoted the identifier in backticks and ended
+       the template. The parse below uses split, which has nothing to escape. */
+    const isRed = (c) => {
+      const i = (c || "").indexOf("rgb");
+      if (i < 0) return false;
+      const open = (c || "").indexOf("(", i);
+      const shut = (c || "").indexOf(")", open);
+      if (open < 0 || shut < 0) return false;
+      const parts = (c || "").slice(open + 1, shut).split(",").map((x) => parseFloat(x.trim()));
+      if (parts.length < 3) return false;
+      const R = parts[0], G = parts[1], B = parts[2];
+      return R > 110 && R - G > 45 && R - B > 45;
+    };
+    let n = 0;
+    for (const el of document.querySelectorAll("button, select, input, textarea, a[href], [tabindex]")) {
+      const cs = getComputedStyle(el);
+      if (cs.outlineStyle !== "none" && isRed(cs.outlineColor)) n++;
+      else if (isRed(cs.boxShadow)) n++;
+    }
+    return n;
+  })();
+  /**
    * ⚠️ EVERY BAND OF THE TO-DO RULE PAINTS, AND THEY FILL THE TRACK (v29, Phase 5). Both halves are
    * needed and they fail differently: a band can be the right width and invisible (a token that does
    * not resolve in this scope makes the declaration invalid and the element transparent), or opaque
@@ -550,9 +612,23 @@ const READ = `(() => {
     if (track) {
       const kids = [...track.children];
       out.checks.ruleBands = kids.length;
+      /* ⚠️ THIS GATE COULD NOT GO RED, AND THE ESCAPE SWEEP FOUND IT (v30). It read
+         backgroundColor.replace(SPACE_REGEX, "") to compare against a spaceless rgba string — and
+         inside this template literal the backslash was eaten, so the browser ran a regex matching
+         the LETTER s. Spaces survived, the comparison could never be true, and a transparent band
+         would have been counted as opaque. Proved by evaluation rather than argued: the string
+         "rgba(0, 0, 0, 0)" put through the regex the browser actually received comes back
+         unchanged and does not equal "rgba(0,0,0,0)".
+         The alpha is parsed now — no escapes, and it catches any transparent colour rather than one
+         spelling of one. */
       out.checks.ruleClear = kids.filter((k) => {
-        const bg = getComputedStyle(k).backgroundColor.replace(/\s/g, "");
-        return bg === "rgba(0,0,0,0)" || bg === "transparent";
+        const bg = getComputedStyle(k).backgroundColor;
+        if (bg === "transparent") return true;
+        const open = bg.indexOf("(");
+        const shut = bg.indexOf(")", open);
+        if (open < 0 || shut < 0) return false;
+        const parts = bg.slice(open + 1, shut).split(",").map((x) => parseFloat(x.trim()));
+        return parts.length >= 4 && parts[3] === 0;
       }).length;
       /* ⚠️ AGAINST THE TRACK'S CONTENT BOX, NOT ITS BORDER BOX. The track carries a 1px hairline of
          its own, so a correct rule is 2px short of the border box for a reason that has nothing to
@@ -1047,6 +1123,27 @@ const STANDING = [
   { k: "paintBelowZero", why: "nothing paints below the chart's zero baseline", test: (v) => v !== null && v <= 0.5, want: "<= 0.5px" },
   { k: "ruleClear", why: "every band of the to-do rule paints — a token that does not resolve here makes it transparent", test: (v) => v === 0, want: "0 transparent" },
   { k: "ruleFill", why: "the rule's bands fill their track", test: (v) => v !== null && Math.abs(v) <= 3, want: "within 3px" },
+  { k: "redRings", why: "no control computes a red outline or box-shadow, in any state", test: (v) => v === 0, want: "0" },
+  {
+    k: "focusMouse",
+    why: "a mouse click leaves no ring; Tab leaves a sage one",
+    test: (v, c) => !!v && v.outline === "none"
+      && !!c.focusTab && c.focusTab.outline === "solid" && c.focusTab.colour === "rgb(138, 158, 136)",
+    want: "none on click, solid sage on Tab",
+  },
+  {
+    k: "drawer",
+    why: "an open drawer is above everything — portalled out of every card's stacking context",
+    test: (v) => !!v && v.open === true && v.portalled === true && v.contexts === 0
+      && v.inside === true && v.z > v.scrimZ,
+    want: "portalled · 0 contexts · hit inside · above the scrim",
+  },
+  {
+    k: "fade",
+    why: "the band fill fades toward the baseline — 85% of the painted span under half of 15%",
+    test: (v) => !!v && v.ratio < 0.5,
+    want: "ratio < 0.5",
+  },
   {
     k: "brush",
     why: "the brush handle follows the cursor — monotonic, 1:1, and settling on the week its value implies",
@@ -1175,6 +1272,127 @@ async function brushDrag(page) {
   };
 }
 
+/**
+ * ⚠️ THE THREE v30 GATES THAT CANNOT BE READ FROM A STATIC PAGE. Each is a claim about what happens
+ * when something is DONE to the page — a mouse click, a keyboard press, a drawer opened — and a
+ * snapshot of the broken version is indistinguishable from a correct one in all three cases.
+ */
+async function driven(page) {
+  const out = {};
+
+  /* ── focus: a mouse click leaves no ring, Tab leaves a sage one ───────────────────────────── */
+  const chip = page.locator('[data-probe="todo-rule"] .os-rb').first();
+  if (await chip.count()) {
+    await chip.click({ position: { x: 5, y: 5 } }).catch(() => {});
+    await page.waitForTimeout(120);
+    out.focusMouse = await page.evaluate(() => {
+      const el = document.activeElement;
+      if (!el || el === document.body) return { outline: "none", fv: false };
+      const cs = getComputedStyle(el);
+      return { outline: cs.outlineStyle, colour: cs.outlineColor, fv: el.matches(":focus-visible") };
+    });
+    await page.keyboard.press("Tab");
+    await page.waitForTimeout(120);
+    out.focusTab = await page.evaluate(() => {
+      const el = document.activeElement;
+      if (!el || el === document.body) return { outline: "none", fv: false };
+      const cs = getComputedStyle(el);
+      return { outline: cs.outlineStyle, colour: cs.outlineColor, fv: el.matches(":focus-visible") };
+    });
+    /* put the filter back — a gate that leaves the page filtered changes what every later probe sees */
+    const badge = page.locator('[data-probe="todo-badge"]');
+    if (await badge.count() && await badge.evaluate((b) => b.tagName === "BUTTON").catch(() => false)) {
+      await badge.click().catch(() => {});
+      await page.waitForTimeout(150);
+    }
+  }
+
+  /* ── the drawer is above everything ───────────────────────────────────────────────────────── */
+  const tk = page.locator('[data-probe="todo-card"] .tkt').first();
+  if (await tk.count()) {
+    await tk.click().catch(() => {});
+    await page.waitForTimeout(700);
+    out.drawer = await page.evaluate(() => {
+      /* ⚠️ THE OPEN ONE. Every workspace page stays mounted and the drawer portals to body, so the
+         document holds all three of the app's drawers at once; the first in document order is
+         routinely a closed one belonging to another page. */
+      const d = document.querySelector('.slo[data-on="true"]');
+      const sc = document.querySelector('.slo-scrim[data-on="true"]');
+      if (!d) return { open: false };
+      const r = d.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+      const ctx = [];
+      for (let el = d.parentElement; el && el !== document.documentElement; el = el.parentElement) {
+        const cs = getComputedStyle(el);
+        if (cs.transform !== "none" || cs.filter !== "none" || parseFloat(cs.opacity) < 1
+          || (cs.zIndex !== "auto" && cs.position !== "static") || cs.isolation === "isolate"
+          || cs.willChange !== "auto") ctx.push(el.tagName.toLowerCase());
+      }
+      return {
+        open: true,
+        portalled: d.parentElement === document.body,
+        contexts: ctx.length,
+        inside: !!(hit && (hit === d || d.contains(hit))),
+        z: Number(getComputedStyle(d).zIndex),
+        scrimZ: sc ? Number(getComputedStyle(sc).zIndex) : null,
+      };
+    });
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(420);
+  }
+
+  /**
+   * ⚠️ THE FILL ACTUALLY FADES (v30, Phase 5) — read from the rendered pixels, because a mask's
+   * effect exists nowhere else. A column at mid-plot from the top down to the baseline; the PAINTED
+   * span is whatever in that column is more than 2 units from the card colour, so the sample cannot
+   * land in the empty sky above the stack. The pack's gate says "15% and 85% of the plot's height";
+   * at this data 15% of the PLOT is above the stack entirely and reads as card, so the honest form
+   * is 15% and 85% of the painted span — the same claim, measured where there is something to
+   * measure.
+   */
+  const col = await page.evaluate(() => {
+    const host = document.querySelector('[data-probe="plot"]');
+    const svg = host && (host.tagName.toLowerCase() === "svg" ? host : host.querySelector("svg"));
+    if (!svg) return null;
+    const hb = host.getBoundingClientRect(), sb = svg.getBoundingClientRect();
+    const vb = (svg.getAttribute("viewBox") || "0 0 1 1").split(/\s+/).map(Number);
+    const toY = (uy) => (sb.top - hb.top) + (uy - vb[1]) * (sb.height / vb[3]);
+    const lines = [...svg.querySelectorAll("line")].filter((l) => !l.closest("defs"));
+    const axis = lines.find((l) => (l.getAttribute("class") || "").indexOf("axis0") >= 0);
+    if (!axis) return null;
+    const zero = toY(Number(axis.getAttribute("y1"))), top = toY(vb[1]);
+    const pts = [];
+    for (let k = 0; k < 40; k++) pts.push([Math.round(hb.width * 0.5), top + ((zero - top) * k) / 39]);
+    return pts;
+  });
+  if (col) {
+    const shot = await page.locator('[data-probe="plot"]').first().screenshot();
+    const cols = await page.evaluate((arg) => new Promise((res) => {
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement("canvas");
+        c.width = img.width; c.height = img.height;
+        const ctx = c.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        res(arg.points.map(([x, y]) => {
+          if (x < 0 || y < 0 || x >= c.width || y >= c.height) return null;
+          const d = ctx.getImageData(Math.round(x), Math.round(y), 1, 1).data;
+          return [d[0], d[1], d[2]];
+        }));
+      };
+      img.src = arg.url;
+    }), { url: "data:image/png;base64," + shot.toString("base64"), points: col });
+    const dist = (c) => (c ? Math.sqrt((c[0] - 253) ** 2 + (c[1] - 251) ** 2 + (c[2] - 247) ** 2) : null);
+    const painted = cols.map(dist).filter((d) => d !== null && d > 2);
+    if (painted.length >= 6) {
+      const at = (t) => painted[Math.min(painted.length - 1, Math.round(t * (painted.length - 1)))];
+      const hi = at(0.15), lo = at(0.85);
+      out.fade = { hi: Math.round(hi * 10) / 10, lo: Math.round(lo * 10) / 10, ratio: Math.round((lo / hi) * 100) / 100 };
+    }
+  }
+  return out;
+}
+
 /* ── the table ───────────────────────────────────────────────────────────────────────────────── */
 
 function table(result) {
@@ -1283,6 +1501,7 @@ try {
        ±16px window exists to make two content boxes the same size; a drag's behaviour does not
        depend on it, and re-driving it on a second page would double the slowest part of the run. */
     const brush = await brushDrag(appPage);
+    const drivenChecks = await driven(appPage);
 
     const rM = refData.probes.main, aM = appData.probes.main;
     const dw = rM && aM ? Math.round(rM.w - aM.w) : 0;
@@ -1298,6 +1517,10 @@ try {
     }
 
     appData.checks.brush = brush;
+    appData.checks.focusMouse = drivenChecks.focusMouse ?? null;
+    appData.checks.focusTab = drivenChecks.focusTab ?? null;
+    appData.checks.drawer = drivenChecks.drawer ?? null;
+    appData.checks.fade = drivenChecks.fade ?? null;
 
     const misses = [];
     /* the datum: each side's own `main`. Absent on either side and the comparison falls back to
