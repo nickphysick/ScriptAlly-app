@@ -62,12 +62,35 @@ import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitle";
 import { activityEventLabel } from "../lib/activityEvent";
-import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
+import { agentLabel, agentAgencyLine, agentPrimary, agentSecondary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
 import { QueryCentreGrid, type GridCard } from "./queries/QueryCentreGrid";
 import { QueryStatTiles } from "./queries/QueryStatTiles";
 import { QueryListView } from "./queries/QueryListView";
 import { QueryBoardView } from "./queries/QueryBoardView";
 import { QueryViewSwitch, type QueryView } from "./queries/QueryViewSwitch";
+/* ══ THE CALENDAR VIEW (Run C) — the SAME board To-do draws ═══════════════════════════════════
+   Every piece below is shared: the board, its winbar, the window's arithmetic and the bar engine's
+   own assembler. Nothing about the calendar is implemented on this page — a second implementation
+   would not disagree in detail, it would disagree in STRUCTURE, and the two pages would draw the
+   same wait in two different places. */
+import { TimelineBoard } from "./shared/timeline/TimelineBoard";
+import { TimelineWinbar, WEEK_STEP, type BoardDensity } from "./shared/timeline/TimelineWinbar";
+import {
+  todayAtOf, monthsOf, dateLabelsOf, windowRangeLabelOf, movedOffTodayOf,
+} from "./shared/timeline/boardWindow";
+import { crossAt } from "./shared/timeline/boardParts";
+/* ⚠️ THE BOARD'S STYLESHEET, IMPORTED EXPLICITLY. It is already in the bundle at runtime —
+   every workspace page stays mounted, so `TodoCalendarPage` has loaded it — and relying on
+   that is an invisible dependency on another page continuing to exist. Named here so the
+   calendar keeps its styling if that page is ever unmounted or split out. */
+import "./todo/todoCalendar.css";
+import { queryTimelineRows, rowKeyFor } from "../lib/queryTimelineRows";
+/* the section a row is filed under reads the CARD's own vocabulary — never a second table */
+import { turnWordFor } from "../lib/queryCardFacts";
+import { TIMELINE_RANGES, DEFAULT_RANGE_INDEX, pastDaysOf } from "../lib/timelineRanges";
+import { windowDays, shiftWindow } from "../lib/todoTimeline";
+import { shortCalDate } from "../lib/todoCalendar";
+import { localYMD } from "../lib/shellSidebar";
 import { QueryPanel } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
 import { CorrectionDesk, MaterialsFields } from "./queries/CorrectionDesk";
@@ -3313,6 +3336,103 @@ export const Queries: React.FC<{
     };
   });
 
+  /* ══ THE CALENDAR (Run C) ═══════════════════════════════════════════════════════════════════
+     ⚠️ THE SAME BOARD TO-DO DRAWS, NOT A SECOND ONE. Every derivation below either comes from
+     `shared/timeline` or from `queryTimelineRows`, which is itself only an assembler for
+     `laneBars`. Nothing here computes a date, a position or a lane — if it did, the two pages
+     could draw the same wait differently, which is the fault this whole sequence exists to
+     prevent.
+
+     ⚠️ AND THE WINDOW IS DERIVED EXACTLY AS TO-DO DERIVES IT: `winStart` defaults to today,
+     `pastDaysOf` centres it, and the pager steps by `WEEK_STEP`. The raw fractional `pastDays` is
+     passed through UNROUNDED because To-do passes it unrounded — rounding here would shift the
+     whole board by half a day against the other page. */
+  const calRange = TIMELINE_RANGES[DEFAULT_RANGE_INDEX];
+  const calToday = useMemo(() => localYMD(Date.now()), []);
+  const [calWinStart, setCalWinStart] = useState<string>(calToday);
+  const [calDensity, setCalDensity] = useState<BoardDensity>("comfortable");
+  const [calSel, setCalSel] = useState<string | null>(null);
+  const [calHover, setCalHover] = useState<string | null>(null);
+  const [calCollapsed, setCalCollapsed] = useState<ReadonlySet<string>>(new Set());
+  const [calCross, setCalCross] = useState<{ x: number; label: string } | null>(null);
+  const calWrapRef = useRef<HTMLDivElement | null>(null);
+
+  const calPastDays = useMemo(() => pastDaysOf(calRange), [calRange]);
+  const calWinFrom = useMemo(
+    () => (calPastDays > 0 ? shiftWindow(calWinStart, calPastDays, -1) : calWinStart),
+    [calWinStart, calPastDays],
+  );
+  const calVisible = useMemo(() => windowDays(calWinFrom, calRange.days), [calWinFrom, calRange.days]);
+  const calTodayAt = useMemo(() => todayAtOf(calVisible, calToday), [calVisible, calToday]);
+  const calMonths = useMemo(() => monthsOf(calVisible, calToday), [calVisible, calToday]);
+  const calDateLabels = useMemo(
+    () => dateLabelsOf(calVisible, calToday, calRange.days, calTodayAt),
+    [calVisible, calToday, calRange.days, calTodayAt],
+  );
+  const calDayDate = useMemo(
+    () => (d: number) => shortCalDate(shiftWindow(calWinFrom, Math.round(d), 1)),
+    [calWinFrom],
+  );
+
+  /* ⚠️ IT READS `sortedList` — THE PAGE'S OWN FILTERED, SORTED SET, the same one Grid, List and
+     Board render. Filter and search therefore narrow the calendar for free, and Sort orders it,
+     because there is one collection and four ways of drawing it. */
+  const calData = useMemo(() => queryTimelineRows({
+    queries: sortedList as Query[],
+    agents, activities,
+    winFrom: calWinFrom, days: calRange.days, today: calToday,
+    manuscriptTitle: (id) => manuscripts.find((m) => m.id === id)?.title ?? "",
+  }), [sortedList, agents, activities, calWinFrom, calRange.days, calToday, manuscripts]);
+
+  /* ⚠️ ONE GROUP WITH NO LABEL DRAWS NO DIVIDER — the board's own `No grouping` shape. A heading
+     reading "everything" over every row states nothing, which is the same silence-wins rule an
+     empty section follows. */
+  /* ⚠️ THE GROUP CONTROL SAYS WHAT IT GROUPS BY, AND THE BOARD MUST OBEY THE SAME KEY. The first
+     cut grouped by agency whatever the control said — so the pill read `Status` over sections
+     divided by agency, which is a control stating something untrue about what is on screen. The
+     board's sections are built from the SAME `gridGroup` the other three views read.
+
+     ⚠️ AND `none` DRAWS NO DIVIDER AT ALL — one group with an empty label, the board's own
+     `No grouping` shape. A heading reading "everything" over every row states nothing. */
+  const calGroups = useMemo(() => {
+    if (gridGroup === "none") {
+      return [{ key: "all", tone: null, label: "", purpose: null, rows: calData.rows }];
+    }
+    /* the row's own queries decide its section; a row is filed by its FIRST query's fact, which is
+       the same query the row's identity comes from */
+    const keyOf = (rowKey: string): string => {
+      const q = (sortedList as Query[]).find((x) => rowKeyFor(x) === rowKey);
+      if (!q) return "—";
+      const agent = agents.find((a) => a.id === q.agentId);
+      switch (gridGroup) {
+        case "status": return String(q.status);
+        case "turn": return turnWordFor(q.status as QueryStatus);
+        case "agency": return agentSecondary(agent) || agentPrimary(agent) || "—";
+        case "month": return q.dateSent ? new Date(q.dateSent as string).toLocaleString("en-GB", { month: "long", year: "numeric" }) : "Not sent";
+        default: return "—";
+      }
+    };
+    const by = new Map<string, typeof calData.rows>();
+    for (const r of calData.rows) {
+      const k = keyOf(r.key);
+      const list = by.get(k) ?? [];
+      list.push(r);
+      by.set(k, list);
+    }
+    return [...by.entries()].map(([k, rows]) => ({ key: k, tone: null, label: k, purpose: null, rows }));
+  }, [calData.rows, gridGroup, sortedList, agents]);
+
+  const calRowNumber = useMemo(() => {
+    const n = new Map<string, number>();
+    let i = 0;
+    for (const g of calGroups) for (const r of g.rows) n.set(r.key, ++i);
+    return n;
+  }, [calGroups]);
+
+  const calWindowLabel = useMemo(() => windowRangeLabelOf(calVisible), [calVisible]);
+  const calMovedOff = movedOffTodayOf(calTodayAt, calRange.days);
+
+
   /**
    * ⚠️ THE PANEL READS THE SAME ROW THE GRID BUILT. `gridRows` is already derived from
    * `sortedList`, so the card and the panel cannot disagree about a status, a date or a stage —
@@ -6059,7 +6179,15 @@ export const Queries: React.FC<{
               onQuick={(k) => setQuickKey(k)}
               onOverdue={(next) => setNeedsOverdue(next)}
             />
-            <div className="qcc-well" aria-busy={showGridSkeleton ? true : undefined}>
+            {/* ⚠️ THE WELL IS GRID AND LIST ONLY. Board and Calendar sit on the page's own
+                ground — `.qcc-plain` carries the well's box metrics to the pixel, so the
+                toolbar lands on the same coordinates in all four views, and it is a DIFFERENT
+                ELEMENT rather than a see-through well, because a transparent recess still has
+                its box to anything measuring the page. */}
+            <div
+              className={gridView === "board" || gridView === "calendar" ? "qcc-plain" : "qcc-well"}
+              aria-busy={showGridSkeleton ? true : undefined}
+            >
             <div className="qcc-controls">
 
             {/**
@@ -6257,13 +6385,81 @@ export const Queries: React.FC<{
                 <QueryBoardView rows={gridRows} selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} />
               </div>
             ) : gridView === "calendar" ? (
-              /* ⚠️ A PLACEHOLDER, AND IT SAYS SO IN THE ONE SENTENCE IT HAS (Phase 5). The calendar
-                 is the Tasks page's timeline board re-hosted with queries as rows; that board is
-                 not extractable today (it is built inside TodoCalendarPage, from To-do data), and
-                 a second implementation here would be the fork the ref's own caution warns
-                 against. The recon, the adapter sketch and the moment to run it are in
-                 reports/query-views.md. */
-              <p className="qcc-calph">Calendar — coming with the timeline board</p>
+              /* ══ THE CALENDAR — THE SAME BOARD TO-DO DRAWS ═══════════════════════════════════
+                 ⚠️ `.tl-board` IS NOT DECORATION, IT IS THE BOARD'S TOKEN SCOPE. That one class
+                 declares about a hundred and fifty custom properties — `--row-h`, `--badge`,
+                 `--mk`, every `--card-*`, every `--pill-*`, the whole stage ladder. Mount the
+                 board without it and every `var()` resolves to nothing: the board renders, the
+                 build is clean, and it is unstyled. `data-dens` rides the same element because the
+                 density rules are `.tl-board[data-dens="compact"]`.
+
+                 ⚠️ AND THE WINBAR IS A SIBLING OF THE BOARD, not a child — the same arrangement
+                 To-do has, and the reason `.tl` is what the DOM capture is scoped to. */
+              <div className="tl-board" data-dens={calDensity}>
+                <TimelineWinbar
+                  rangeLabel={calWindowLabel}
+                  onBack={() => setCalWinStart((w) => shiftWindow(w, WEEK_STEP, -1))}
+                  onForward={() => setCalWinStart((w) => shiftWindow(w, WEEK_STEP, 1))}
+                  showToday={calMovedOff}
+                  onToday={() => setCalWinStart(calToday)}
+                  density={calDensity}
+                  onDensity={setCalDensity}
+                  /* ⚠️ NO SEARCH HERE — the page's toolbar owns it, and it already narrows
+                     `sortedList`, which is what the calendar draws. Two fields narrowing one set
+                     is two answers to one question. */
+                />
+                <div className="tl-zone">
+                  <TimelineBoard
+                    range={calRange}
+                    today={calToday}
+                    todayAt={calTodayAt}
+                    months={calMonths}
+                    dateLabels={calDateLabels}
+                    dayDate={calDayDate}
+                    board={calData.rows}
+                    drawnGroups={calGroups}
+                    rows={calData.rows}
+                    rowNumber={calRowNumber}
+                    barsByRow={calData.barsByRow}
+                    sparse={<p className="qcc-calph">No queries in this window</p>}
+                    collapsedGroups={calCollapsed}
+                    toggleGroup={(k) => setCalCollapsed((c) => {
+                      const n = new Set(c);
+                      if (n.has(k)) n.delete(k); else n.add(k);
+                      return n;
+                    })}
+                    sel={calSel}
+                    setSel={setCalSel}
+                    hoverSeg={calHover}
+                    /* ⚠️ A ROW CLICK OPENS THE QUERY, which is this page's whole answer to what a
+                       bar is for. The board hands back the segment it was pressed on, and the
+                       segment carries its own `queryId` — so the drawer opens on the query the
+                       reader actually pointed at, not on the row's first. */
+                    pickSeg={(_rowKey, sg) => {
+                      setCalSel(sg.key);
+                      setCalHover(sg.key);
+                      if (sg.queryId) onOpenQuery?.(sg.queryId);
+                    }}
+                    /* Card C is To-do's own read overlay and is portalled from that page; this
+                       view opens the drawer instead, so there is nothing to anchor. */
+                    openCardOver={() => {}}
+                    cardAt={null}
+                    closeCard={() => {}}
+                    nudgeCountFor={() => 0}
+                    wrapRef={calWrapRef}
+                    onLaneMove={(e) => setCalCross(
+                      crossAt(calWrapRef.current, e.target, e.clientX, calVisible, calRange.days, shortCalDate),
+                    )}
+                    clearCross={() => setCalCross(null)}
+                    dragWindow={{}}
+                    onRowsOver={() => {}}
+                    onRowsOut={() => {}}
+                    cross={calCross}
+                    actToast={null}
+                    onNavigatePath={(path) => onNavigate("queries", path)}
+                  />
+                </div>
+              </div>
             ) : (
               <QueryCentreGrid
                 ghost={ghostRow}

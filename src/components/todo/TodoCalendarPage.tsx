@@ -207,7 +207,9 @@ const CONTENT_MARGIN_R = 12;
  * board slides rather than jumping — a whole-window step leaves no overlap for the eye to carry
  * across, which is what the ‹ WEEK / WEEK › labels promise and a page-jump does not deliver.
  */
-const WEEK_STEP = 7;
+/* ⚠️ `WEEK_STEP` IS THE WINBAR'S NOW — imported above. Two pages stepping the window by
+   different amounts would put the same wait in two places. */
+
 
 /* ⚠️ THE BOARD'S LEAVES NOW LIVE IN `shared/timeline` — the card, the markers and the action
    mark, moved VERBATIM so the rendered DOM is unchanged (proof: the byte-identical `.tl`
@@ -224,8 +226,10 @@ import {
 import { TimelineBoard, type CardPayload } from "../shared/timeline/TimelineBoard";
 /* ⚠️ THE WINBAR IS SHARED TOO — it is a sibling of the board, and a pager that stepped
    differently on two pages would put the same wait in two places. */
-import { TimelineWinbar, DENSITY_LABEL } from "../shared/timeline/TimelineWinbar";
-import { todayAtOf, monthsOf, dateLabelsOf } from "../shared/timeline/boardWindow";
+import { TimelineWinbar, DENSITY_LABEL, WEEK_STEP } from "../shared/timeline/TimelineWinbar";
+import {
+  todayAtOf, monthsOf, dateLabelsOf, windowRangeLabelOf, movedOffTodayOf,
+} from "../shared/timeline/boardWindow";
 
 /* ⚠️ `TbMenu` AND `TbOpt` ARE DELETED WITH THE TOOLBAR ERA (v64 §E). The winbar's controls are a
    segmented pair and plain buttons; the sidebar's are the Notion panel's own rows. A dropdown
@@ -1619,18 +1623,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   /* ⚠️ THE HEADLINE SAYS THE MONTHS IN FULL AND THE YEAR ONCE — "19 July – 17 October 2026", the
      ref's own text. `shortCalDate` abbreviates for cells; a 24px Playfair headline has the room,
      and the year belongs at the end unless the window spans two, when each end carries its own. */
-  const windowRangeLabel = React.useMemo(() => {
-    const a = visible[0], b = visible[visible.length - 1];
-    if (!a || !b) return "";
-    const d = (ymd: string) => {
-      const [y, m, dd] = ymd.split("-").map(Number);
-      return { y, txt: `${dd} ${new Date(y, m - 1, dd).toLocaleString("en-GB", { month: "long" })}` };
-    };
-    const A = d(a), B = d(b);
-    return A.y === B.y ? `${A.txt} – ${B.txt} ${B.y}` : `${A.txt} ${A.y} – ${B.txt} ${B.y}`;
-  }, [visible]);
-  const movedOffToday = todayAt == null
-    || Math.abs(todayAt - (range.days - 1) / 2) > 0.51;
+  /* ⚠️ BOTH ARE THE WINDOW'S OWN, SHARED — see `boardWindow`. Two pages wording one span
+     differently, or disagreeing about whether the reader has paged away, is the same
+     structural divergence the rest of this board is shared to avoid. */
+  const windowRangeLabel = React.useMemo(() => windowRangeLabelOf(visible), [visible]);
+  const movedOffToday = movedOffTodayOf(todayAt, range.days);
 
   /* ⚠️ `glance` IS DELETED WITH ITS TILES (v64 §E) — a derivation kept alive for a surface that no
      longer renders is what a later reader resurrects by accident. */

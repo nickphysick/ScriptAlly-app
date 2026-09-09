@@ -26,6 +26,15 @@ import React from "react";
 export const DENSITY_LABEL: Record<"comfortable" | "compact", string> = {
   comfortable: "Comfortable", compact: "Compact",
 };
+/**
+ * ⚠️ THE WINDOW STEPS BY A WEEK (v58). The ref moves its own window seven days a click, so the
+ * board SLIDES rather than jumping — a whole-window step leaves no overlap for the eye to carry
+ * across, which is what the ‹ WEEK / WEEK › labels promise and a page-jump does not deliver. It
+ * lives with the pager because the pager is the only thing that may decide it, and both pages now
+ * page with it.
+ */
+export const WEEK_STEP = 7;
+
 export type BoardDensity = "comfortable" | "compact";
 
 export interface TimelineWinbarProps {
@@ -56,12 +65,18 @@ export const TimelineWinbar: React.FC<TimelineWinbarProps> = ({
         </button>
       )}
     </div>
-    {search && (
+    {/* ⚠️ THE MIDDLE COLUMN IS HELD OPEN EVEN WITH NO SEARCH IN IT. `.tl-winbar` is
+        `grid-template-columns: auto 1fr auto`, so a bar with only two children puts the density
+        pair in the FLEXIBLE middle and it stretches the width of the bar — measured on the first
+        mount, where it ran from the pager to the right edge. An empty, `aria-hidden` span keeps the
+        density in the third column, so the bar reads the same on a page that has no search of its
+        own as on the one that does. */}
+    {search ? (
       <input className="tl-search" type="search" value={search.value}
         aria-label={search.label}
         placeholder={search.label}
         onChange={(e) => search.onChange(e.target.value)} />
-    )}
+    ) : <span aria-hidden />}
     <div className="tl-dseg" role="group" aria-label="Density">
       {(["comfortable", "compact"] as const).map((d) => (
         <button key={d} type="button" data-on={d === density}

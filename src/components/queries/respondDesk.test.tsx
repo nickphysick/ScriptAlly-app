@@ -596,11 +596,12 @@ describe("Phase 3–5 · three renderers over one set of rows", () => {
     expect(css.match(/\.qbv-h \{[^}]*\}/)?.[0] ?? "", "the column header grew a filled bar").not.toMatch(/background/);
   });
 
-  it("the Calendar renders a placeholder and nothing else (Phase 5)", () => {
-    expect(page).toContain('<p className="qcc-calph">Calendar — coming with the timeline board</p>');
-    /* it must not have grown a second timeline board here — the fork the ref cautions against */
-    expect(page).not.toMatch(/TodoCalendarPage|timeline-v57|<TimelineBoard/);
-  });
+  /* ⚠️ THE PLACEHOLDER CASE IS DELETED, NOT INVERTED. It asserted that the Calendar rendered one
+     sentence and nothing else — true while the board could not be mounted, and a statement about a
+     decision that no longer stands now that it can. This repo's rule is that an assertion
+     describing a retired decision is deleted; inverting it into "the placeholder is gone" would
+     leave a lock whose subject is an absence nobody is tempted to restore. What replaced it is
+     `tests/e2e/qcCalendar.measure.ts`, which asserts the board actually mounts and draws. */
 });
 
 /* ══ views pass 4 (v14) — the row, the verbs, the scrim and the motion ════════════════════════ */
@@ -1260,22 +1261,26 @@ describe("the well round · a recess, a toolbar in its head, bones, and one entr
   /* ⚠️ THE WELL WRAPS EVERY VIEW — asserted as ORDER, because the claim is containment and a
      "the class exists" check cannot see it. The well opens before the toolbar and closes after
      the last view branch, so all four renderers are inside it. */
-  it("every view is inside the well — grid, list, board and the calendar placeholder", () => {
-    /* ⚠️ BOUNDED ON THE FOOT, NOT ON A `</div>`. The well's closing tag is not distinguishable
-       from the dozen inner ones — and its marker comment is stripped before this runs, which is
-       exactly the "anchor on something that cannot nest" rule. The foot is the next thing after
-       the well, so everything between the two is inside it. */
-    const open = page.indexOf('<div className="qcc-well"');
+  it("⚠️ the well is GRID AND LIST ONLY — board and calendar sit on the page's own ground", () => {
+    /* ⚠️ RETARGETED, AND THE LAW CHANGED RATHER THAN THE SPELLING. This case used to require all
+       four renderers inside the well. Settled since, looking at the board ON the well ground: its
+       columns lost their edges and it read as scattered, so Board and Calendar moved out. The
+       Board was in the well by OMISSION — the correction reached the Calendar's run and not its
+       own — which is why this case was green over a state nobody had chosen.
+
+       ⚠️ AND THE WRAPPER IS CHOSEN, NOT CONDITIONALLY STYLED. `.qcc-plain` is a different element
+       carrying the well's box metrics to the pixel; a transparent well would still have its box,
+       and the rendered check (`qcCalendar.measure.ts`) asserts ABSENCE for exactly that reason. */
+    expect(page, "the wrapper no longer chooses between the two grounds")
+      .toContain('gridView === "board" || gridView === "calendar" ? "qcc-plain" : "qcc-well"');
+    /* the toolbar is inside whichever wrapper is chosen, so it cannot move between views */
+    const open = page.indexOf("qcc-plain\" : \"qcc-well");
     const close = page.indexOf('className="qcc-foot qcc-foot--export"', open);
-    expect(open, "the well is gone").toBeGreaterThan(-1);
-    expect(close, "the export foot no longer follows the well").toBeGreaterThan(open);
+    expect(open, "the wrapper is gone").toBeGreaterThan(-1);
+    expect(close, "the export foot no longer follows the wrapper").toBeGreaterThan(open);
     const inside = page.slice(open, close);
-    for (const v of ["<QueryListView", "<QueryBoardView", "<QueryCentreGrid", "qcc-calph", 'className="qcc-tb"'])
-      expect(inside, `${v} is outside the well`).toContain(v);
-    /* and the foot is deliberately OUTSIDE — it is the boundary above, so what proves it is that
-       the well's own closing tag comes first */
-    expect(inside.lastIndexOf("</div>"), "the well does not close before the foot").toBeGreaterThan(
-      inside.lastIndexOf("<QueryCentreGrid"));
+    for (const v of ["<QueryListView", "<QueryBoardView", "<QueryCentreGrid", "<TimelineBoard", 'className="qcc-tb"'])
+      expect(inside, `${v} is outside the wrapper`).toContain(v);
   });
 
   /* §2 — the toolbar's three tracks */

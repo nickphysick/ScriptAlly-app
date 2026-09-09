@@ -60,7 +60,7 @@ describe("the adapter assembles laneBars' inputs and derives nothing itself", ()
     const lanes = rows.reduce((n, r) => n + r.lanes, 0);
     expect(lanes, "one lane per (agent, manuscript) that draws").toBe(3);
     const drawnQueryIds = new Set(
-      [...barsByRow.values()].flatMap((b) => b.segments.map((s) => s.queryId)),
+      [...barsByRow.values()].flatMap((b) => b.segs.map((s) => s.queryId)),
     );
     expect([...drawnQueryIds].sort()).toEqual(["q1", "q2", "q3"]);
   });
@@ -71,7 +71,7 @@ describe("the adapter assembles laneBars' inputs and derives nothing itself", ()
     const { rows, barsByRow } = run([finished, live]);
     expect(rows.length).toBe(1);
     expect(rows[0].lanes, "two queries on one manuscript are ONE relationship").toBe(1);
-    const ids = new Set(barsByRow.get(rows[0].key)!.segments.map((s) => s.queryId));
+    const ids = new Set(barsByRow.get(rows[0].key)!.segs.map((s) => s.queryId));
     expect([...ids], "the live query speaks for the lane").toEqual(["new"]);
   });
 

@@ -25,7 +25,7 @@
  */
 import type { Query, Agent, Activity } from "../types";
 import type { BoardRow } from "../components/shared/timeline/types";
-import { laneBars, statusIndex, laneWinner, type Bars, type BarWindow } from "./journeyBars";
+import { laneBars, statusIndex, laneWinner, type Segment, type BarNode, type BarWindow } from "./journeyBars";
 import { recordDays } from "./todoCalendar";
 import { windowDays } from "./todoTimeline";
 import { agentPrimary, agentSecondary } from "./agentDisplay";
@@ -43,9 +43,13 @@ export interface QueryTimelineInput {
   manuscriptTitle: (id: string) => string;
 }
 
+/** ⚠️ `segs`, NOT `segments` — the board's own field name. `laneBars` returns `Bars` with
+    `segments`; the board reads `segs`. Converting here rather than at the mount keeps the mount a
+    wiring site with no reshaping in it. */
+export interface QueryBars { segs: Segment[]; nodes: BarNode[] }
 export interface QueryTimelineResult {
   rows: BoardRow[];
-  barsByRow: Map<string, Bars>;
+  barsByRow: Map<string, QueryBars>;
 }
 
 /** the key a row is addressed by — the agent, or the query itself where no agent resolves */
@@ -78,7 +82,7 @@ export function queryTimelineRows(input: QueryTimelineInput): QueryTimelineResul
   }
 
   const rows: BoardRow[] = [];
-  const barsByRow = new Map<string, Bars>();
+  const barsByRow = new Map<string, QueryBars>();
 
   for (const [rowKey, per] of perAgent) {
     const first = [...per.values()][0];
@@ -88,8 +92,8 @@ export function queryTimelineRows(input: QueryTimelineInput): QueryTimelineResul
     const pairs = [...per.entries()].sort((a, b) =>
       manuscriptTitle(a[0]).localeCompare(manuscriptTitle(b[0]), "en-GB", { sensitivity: "base" }));
 
-    const segs: Bars["segments"] = [];
-    const nodes: Bars["nodes"] = [];
+    const segs: Segment[] = [];
+    const nodes: BarNode[] = [];
     let drawn = 0;
 
     pairs.forEach(([, q], lane) => {
@@ -111,7 +115,7 @@ export function queryTimelineRows(input: QueryTimelineInput): QueryTimelineResul
        relationship that has gone quiet rather than as one that simply started later. */
     if (drawn === 0) continue;
 
-    barsByRow.set(rowKey, { segments: segs, nodes });
+    barsByRow.set(rowKey, { segs, nodes });
     rows.push({
       key: rowKey,
       name: agentPrimary(agent),
