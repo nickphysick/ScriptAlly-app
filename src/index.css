@@ -50,6 +50,25 @@
   --pink-h: #efd5ca;
 
   /**
+   * ⚠️ THE GOLD AND SAGE BAND PAPERS LIVE HERE BECAUSE THEY ARE READ FROM OUTSIDE `.t-f12` (v29,
+   * Phase 5). They were declared inside that theme class — one definition each, never overridden,
+   * so they were never theme-VARIANT, only theme-LOCATED. The cost of the location was invisible
+   * and total: `taskTicket.css` declares `--u-house-1: var(--sage-band)` at `:root`, so on any page
+   * not under `.t-f12` that resolved to nothing, `background: var(--u-house-1)` became invalid at
+   * computed-value time, and the element painted TRANSPARENT with every rule reading correctly.
+   *
+   * Measured on the dashboard before the move: three of the to-do rule's five bands came back
+   * `rgba(0, 0, 0, 0)`, and so did every ticket tag in the house and yours families. The two that
+   * DID paint were the two whose paper is `--pink`, which is declared here.
+   *
+   * ⚠️ THE TEST IS NOT "IS IT A TOKEN" BUT WHERE IS IT EVALUATED — this file already states that
+   * law for `--content-top-gap`. A `:root` declaration may only read `:root`-resolvable tokens;
+   * `dashboardTokenScope.test.ts` asserts exactly that over every `:root` block in the app.
+   */
+  --gold-t: #f6efdd; --gold-b: #e7d9b8; --gold-i: #7d621d;   /* housekeeping (gold advisory) band */
+  --sage-band: #dce0d9; --sage-band-2: #d0d6cc; --sage-edge: #c8d0c5;  /* card header bands + the agent-header spine */
+
+  /**
    * ⚠️ THE APP'S NEAR-BLACK BUTTON, AS ONE TOKEN, BECAUSE IT WAS TWO LITERALS ONE UNIT APART.
    * The top bar's `+ New` was `#1c130e` and the masthead's new primary is specified as `#1c130f` —
    * a difference nobody can see and nobody could have found, on two buttons whose whole rationale is
@@ -1008,12 +1027,13 @@
   --pink-hero: #f9e8e2;   /* To-do hero gradient start (board rebuild — see below) */
 
   /* To-do board advisory + note bands. ADDITIVE (nothing existing consumed these) — continues the
-     "copy the mockup :root into .t-f12" pattern; values from design-refs/todo-workspace-v10.html. */
-  --gold-t: #f6efdd; --gold-b: #e7d9b8; --gold-i: #7d621d;   /* housekeeping (gold advisory) band */
+     "copy the mockup :root into .t-f12" pattern; values from design-refs/todo-workspace-v10.html.
+     ⚠️ THE GOLD AND SAGE BAND TRIPLES MOVED TO `:root` (v29, Phase 5) — they are read from surfaces
+     that are NOT under `.t-f12` and were resolving to nothing there. See the note at their new
+     home. `--note-*` stayed: every reader of those is inside this theme. */
   --note-t: #faf0c8; --note-b: #ecdda4; --note-i: #7a6420;   /* post-it — Your-tasks band */
 
   /* sage — card header bands + the agent-header spine (LIVE diary values, see block comment) */
-  --sage-band: #dce0d9; --sage-band-2: #d0d6cc; --sage-edge: #c8d0c5;
   --sage: #8a9e88; --sageC: #e9ede6; --sageD: #5a6e58;
 
   --burg: #7c3a2a; --pinkC: #f8e7dc;

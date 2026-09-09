@@ -139,7 +139,18 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
 
 
   /* ── the rule ─────────────────────────────────────────────────────────────────────────────── */
-  const bands = RULE_ORDER.map((c) => ({ c, n: counts[c], pct: total > 0 ? (counts[c] / total) * 100 : 0 }));
+  /**
+   * ⚠️ A CATEGORY WITH NOTHING IN IT IS NOT DRAWN (v29, Phase 5). It used to render at `width: 0%`
+   * and come out 3px wide against `.os-rb`'s floor — a visible sliver standing for nothing, which
+   * is a worse statement than silence. Absent, not zero-width.
+   *
+   * ⚠️ AND THE WIDTHS ARE FLEX GROW FACTORS, NOT PERCENTAGES — ref `flex:${c.n} 1 0`. Percentages
+   * of a total are correct arithmetic that does not fill a box: five rounded values plus four 2px
+   * separators left the bands 1.9px short of the track, and the shortfall grew with the number of
+   * bands. Grow factors distribute what is actually there, so the rule is full by construction at
+   * any count and any width.
+   */
+  const bands = RULE_ORDER.map((c) => ({ c, n: counts[c] })).filter((b) => b.n > 0);
 
   /* ⚠️ THE LABEL IS THE FILTER'S, AND AT REST THERE IS NO LABEL AT ALL (refdiff pass, Phase 6).
      It read "32 open" beside a heading that already says "To-do list": the word was restating the
@@ -181,12 +192,12 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
           onMouseLeave={() => setLegendOpen(false)}
         >
           <div className="os-rule" role="group" aria-label="Filter by category">
-            {bands.map(({ c, n, pct }) => (
+            {bands.map(({ c, n }) => (
               <button
                 key={c}
                 type="button"
                 className={`os-rb${filter === c ? " on" : ""}`}
-                style={{ width: `${pct}%`, background: FAMILY_FILL[CATEGORY_FAMILY[c]] }}
+                style={{ flex: `${n} 1 0`, background: FAMILY_FILL[CATEGORY_FAMILY[c]] }}
                 aria-pressed={filter === c}
                 aria-label={`${CATEGORY_LABEL[c]}, ${n}`}
                 onClick={() => setFilter((f) => (f === c ? null : c))}
