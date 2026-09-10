@@ -1697,8 +1697,19 @@ function table(result) {
   for (const [name, r] of [["skeletonRegions", result.skeletonGate], ["railBoundary", result.railGate]]) {
     if (!r) continue;
     L.push("");
+    /* ⚠️ THE CLAUSES, NOT THE WHOLE OBJECT — a verdict printed raw is either a wall of JSON or,
+       once its shape changes, an empty `{}` that reads as "nothing to report". The rail's line
+       printed exactly that for one pass, because the table only knew the skeleton's shape. */
+    const brief = r.verdict && (r.verdict.rows
+      ? { worst: r.verdict.worst, tol: r.verdict.tolerance, widths: r.verdict.widths,
+          caught: r.verdict.allCaught, removed: r.verdict.allRemoved,
+          noLive: r.verdict.noLive, reducedMotionStill: r.verdict.rmStill, shimmer: r.verdict.animated }
+      : { flush: r.verdict.flush, width18: r.verdict.width18, belowCards: r.verdict.belowCards,
+          inert: r.verdict.inert, columnBare: r.verdict.columnBare, railBare: r.verdict.railBare,
+          spansColumn: r.verdict.spansColumn, railUnchanged: r.verdict.railUnchanged,
+          scrimOffOtherRoute: r.verdict.scrimOffOtherRoute });
     L.push(r.verdict
-      ? `**${name}: ${r.verdict.pass ? "pass" : "FAIL"}** — ${JSON.stringify(r.verdict.rows ? { worst: r.verdict.worst, widths: r.verdict.widths, caught: r.verdict.allCaught, removed: r.verdict.allRemoved, shimmer: r.verdict.animated } : r.verdict)}`
+      ? `**${name}: ${r.verdict.pass ? "pass" : "FAIL"}** — ${JSON.stringify(brief)}`
       : `**${name}: NOT MEASURED — ${r.error}**`);
   }
   /**
@@ -1717,7 +1728,13 @@ function table(result) {
 /* ⚠️ DERIVED FROM THE ARRAYS, NEVER TYPED OUT. A hand-written list agrees with the harness on the
    day it is written; this one cannot disagree with it at all. */
 const PAGE_GATES = ["ground", "hScroll", "columnBottoms", "blendAncestorTransform"];
-const SPAWNED_GATES = ["plotRegion", "skeletonRegions", "railBoundary"];
+/* ⚠️ FOUR NAMES OVER TWO ARTEFACTS, DELIBERATELY (v33.2). The pack asks for four gates and two of
+   them are read from the same run as their sibling — the skeleton's liveness comes out of the same
+   pass as its regions, and the column's edge treatment out of the same pass as the rail's. Naming
+   them separately is not bookkeeping: a failure has to say WHICH claim broke, and "railBoundary
+   failed" over a nine-clause verdict is the object-Object failure message this harness already
+   forbids. */
+const SPAWNED_GATES = ["plotRegion", "skeletonRegions", "noLiveInColumn", "railBoundary", "columnBare"];
 const GATE_ROSTER = [...STANDING.map((g) => g.k), ...PAGE_GATES, ...SPAWNED_GATES];
 
 /* ── run ─────────────────────────────────────────────────────────────────────────────────────── */
@@ -1962,13 +1979,22 @@ if (plot.rows) {
 result.skeletonGate = spawnedGate("dash-skeleton-v33.mjs", join("skeleton-v33", "skeleton.json"),
   { SA_WIDTHS: WIDTHS.join(",") });
 result.railGate = spawnedGate("dash-rail-v33.mjs", join("rail-v33", "rail.json"), {});
-for (const [name, r, why] of [
+for (const [name, r, why, clause] of [
   ["skeletonRegions", result.skeletonGate,
-    "the loading shell's regions disagree with the loaded page's — the jump it exists to prevent"],
+    "the loading shell's regions disagree with the loaded page's — the jump it exists to prevent",
+    (v) => v.allCaught && v.noneMissing && v.allRemoved && v.animated && v.rmStill && v.worst <= v.tolerance],
+  ["noLiveInColumn", result.skeletonGate,
+    "something in the content column is still readable or reachable while the ghost is up",
+    (v) => v.noLive === true],
   ["railBoundary", result.railGate,
-    "the sidebar boundary moved, or the dashboard's scrim leaked onto another page"],
+    "the rail's own treatment moved, or the dashboard's scrim leaked onto another page",
+    (v) => v.flush && v.width18 && v.belowCards && v.inert && v.railBare && v.spansColumn
+      && v.railUnchanged && v.scrimOffOtherRoute],
+  ["columnBare", result.railGate,
+    "the content column grew an edge treatment of its own — the fault the shadow's direction fixes",
+    (v) => v.columnBare === true],
 ]) {
-  if (r && r.verdict && r.verdict.pass) continue;
+  if (r && r.verdict && clause(r.verdict)) continue;
   const w = WIDTHS[0];
   result.byWidth[w] = result.byWidth[w] || { misses: [], allowed: [] };
   result.byWidth[w].misses.push({

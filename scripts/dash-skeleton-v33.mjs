@@ -25,7 +25,18 @@ const WIDTHS = (process.env.SA_WIDTHS || "1536,1710,1920,2520").split(",").map(N
 function envLocal(k){const f=join(ROOT,".env.local");if(!existsSync(f))return null;
   for(const l of readFileSync(f,"utf8").split("\n")){const m=new RegExp("^\\s*"+k+"\\s*=\\s*(.*)$").exec(l);if(m)return m[1].trim().replace(/^["']|["']$/g,"")||null;}return null;}
 
-const REGIONS = ["grid", "toprow", "todo-card", "activity-card", "community-tile"];
+/**
+ * ⚠️ SEVEN REGIONS, AND TWO OF THEM ARE READ FROM THE SAME ELEMENT IN BOTH STATES (v33.2).
+ * `navrow` and `search` are the SHELL's controls, and the loading state keeps their boxes and
+ * hides their ink — which is the only way the row's geometry can be the live one rather than six
+ * numbers copied out of a measurement. So for those two the comparison is the element against
+ * ITSELF across the state change, and what it proves is that the row does not move or resize when
+ * the ghosts come off. That is exactly the claim: a nav row that changed height between states
+ * would shift everything under it, which is the jump this whole phase exists to remove.
+ */
+const REGIONS = ["navrow", "search", "grid", "toprow", "todo-card", "activity-card", "community-tile"];
+const LIVE_IN_BOTH = new Set(["navrow", "search"]);
+const TOL = Number(process.env.SA_SKEL_TOL || 4);
 
 /**
  * ⚠️ THE GHOST'S OWN REGIONS, NOT THE PAGE'S. The skeleton is an OVERLAY with the real page MOUNTED
@@ -48,14 +59,60 @@ const REGIONS = ["grid", "toprow", "todo-card", "activity-card", "community-tile
 function readRegions(names) {
   const out = { boxes: {}, skeleton: null };
   const ghostUp = !!document.querySelector(".os-skelpage");
+  const liveInBoth = { navrow: 1, search: 1 };
   for (const n of names) {
-    const el = ghostUp
+    const el = (ghostUp && !liveInBoth[n])
       ? document.querySelector('.os-skelpage [data-sk="' + n + '"]')
       : document.querySelector('[data-probe="' + n + '"]');
     if (!el) { out.boxes[n] = null; continue; }
     const r = el.getBoundingClientRect();
     out.boxes[n] = { x: Math.round(r.x * 10) / 10, y: Math.round(r.y * 10) / 10,
                      w: Math.round(r.width * 10) / 10, h: Math.round(r.height * 10) / 10 };
+  }
+  /**
+   * ⚠️ THE LIVENESS READING IS INK AND CONTROLS, NOT `display` (v33.2). The pack's gate says every
+   * child of the content column other than the skeleton computes `display: none`. Those children
+   * ARE the live containers the ghost is built from — the bar that owns the row's 64px, the window
+   * chain that owns the column's width — so hiding them forces the skeleton to restate every
+   * dimension, which is the parallel tree the same pack spends a paragraph forbidding. What the
+   * gate is FOR is that nothing live is on screen, so that is what is measured: no readable text
+   * from the page or the row, and no control with a box.
+   */
+  const col = document.querySelector(".ws-main");
+  out.live = null;
+  if (col) {
+    const inSkel = (el) => !!el.closest(".os-skelpage");
+    const boxed = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+    const vis = (el) => { const cs = getComputedStyle(el); return cs.visibility !== "hidden" && cs.display !== "none"; };
+    /* ⚠️ REACHABLE, NOT MERELY PRESENT. The nav row's controls keep their BOXES on purpose — that
+       is how the row's geometry stays the live one — so "does it exist" is the wrong question and
+       would fail on a correct build. `pointer-events: none` is what makes them shapes. */
+    const clickable = (el) => getComputedStyle(el).pointerEvents !== "none";
+    const controls = [...col.querySelectorAll("a[href], button, input, select, textarea, [role='button']")]
+      .filter((el) => !inSkel(el) && boxed(el) && vis(el) && clickable(el));
+    const inked = [];
+    const walk = document.createTreeWalker(col, NodeFilter.SHOW_TEXT);
+    for (let node = walk.nextNode(); node; node = walk.nextNode()) {
+      const s = (node.nodeValue || "").trim();
+      if (!s) continue;
+      const el = node.parentElement;
+      if (!el || inSkel(el)) continue;
+      const cs = getComputedStyle(el);
+      if (cs.visibility === "hidden" || cs.display === "none") continue;
+      /* transparent ink is not ink — `New` is a bare text node in its button and is hidden that way */
+      if (/^rgba\(\s*\d+,\s*\d+,\s*\d+,\s*0\s*\)$/.test(cs.color)) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) continue;
+      inked.push(s.slice(0, 40));
+    }
+    out.live = {
+      controls: controls.length,
+      controlNames: controls.slice(0, 6).map((el) => (String(el.className).trim().split(/\s+/)[0] || el.tagName.toLowerCase())),
+      inked: inked.length,
+      inkedText: inked.slice(0, 6),
+      /* the population, so a clean reading cannot mean "I measured nothing" */
+      scanned: col.querySelectorAll("*").length,
+    };
   }
   const sk = document.querySelector('.os-skelpage, [data-probe="skeleton"]');
   if (sk) {
@@ -74,6 +131,7 @@ function readRegions(names) {
 const OUT = join(ROOT, "run-artifacts", "skeleton-v33");
 mkdirSync(OUT, { recursive: true });
 const rows = [];
+let verdictRM = null;
 const browser = await chromium.launch();
 for (const W of WIDTHS) {
   const page = await browser.newPage({ viewport: { width: W, height: 1150 }, deviceScaleFactor: 1 });
@@ -121,14 +179,64 @@ for (const W of WIDTHS) {
     console.log("   " + n.padEnd(16) + " Δx " + String(d[0]).padStart(7) + "  Δy " + String(d[1]).padStart(7)
       + "  Δw " + String(d[2]).padStart(7) + "  Δh " + String(d[3]).padStart(7));
   }
-  console.log("   WORST region delta: " + Math.round(worst * 10) / 10 + "px   (gate: <= 8)");
+  console.log("   WORST region delta: " + Math.round(worst * 10) / 10 + "px   (gate: <= " + TOL + ")");
+  console.log("   live in the column : " + (during.live ? during.live.controls + " controls · " + during.live.inked + " inked  " + JSON.stringify(during.live.controlNames) + " " + JSON.stringify(during.live.inkedText) : "not read"));
   rows.push({
     width: W, caught: true, worst: Math.round(worst * 10) / 10,
+    live: during.live,
     removed: !after.skeleton,
     tickets: during.skeleton.tickets, stats: during.skeleton.stats,
     animated: during.skeleton.animated, blocks: during.skeleton.blocks,
     missing: REGIONS.filter((n) => !during.boxes[n] || !after.boxes[n]),
   });
+  await page.close();
+}
+/**
+ * ⚠️ REDUCED MOTION IS ITS OWN PASS, BECAUSE IT IS ITS OWN PAGE. The preference is a browser
+ * context option, not something to toggle mid-run — and the claim covers the NAV ROW's ghosts as
+ * well as the page's, which are painted by a different sheet and could easily be given the
+ * animation and not the exemption.
+ */
+{
+  const page = await browser.newPage({
+    viewport: { width: 1710, height: 1150 }, deviceScaleFactor: 1, reducedMotion: "reduce",
+  });
+  page.setDefaultTimeout(120000);
+  await page.goto(APP + "/dashboard", { waitUntil: "domcontentloaded" });
+  const s = await Promise.race([
+    page.locator(SHELL).first().waitFor({state:"attached",timeout:60000}).then(()=>"shell").catch(()=>null),
+    page.locator("#au-email").waitFor({state:"attached",timeout:60000}).then(()=>"form").catch(()=>null)]);
+  if (s !== "shell") {
+    await page.goto(APP + "/#/signin");
+    await page.locator("#au-email").fill(envLocal("SA_E2E_EMAIL") || "harness@scriptally.test");
+    await page.locator("#au-pw").fill(envLocal("SA_E2E_PASSWORD"));
+    await page.getByRole("button",{name:/^Sign in$/}).last().click();
+    await page.locator(SHELL).first().waitFor({state:"visible",timeout:90000});
+  }
+  await page.goto(APP + "/dashboard", { waitUntil: "domcontentloaded" });
+  let rm = null;
+  for (let i = 0; i < 200; i++) {
+    rm = await page.evaluate(() => {
+      const sk = document.querySelector(".os-skelpage");
+      if (!sk) return null;
+      const bar = document.querySelector('[data-probe="navrow"]');
+      const running = (root) => [...root.querySelectorAll("*")]
+        .filter((e) => e.getAnimations && e.getAnimations().length > 0).length;
+      const named = (root) => [...root.querySelectorAll("*")]
+        .filter((e) => getComputedStyle(e).animationName !== "none").length;
+      return {
+        skeletonBlocks: sk.querySelectorAll("*").length,
+        skeletonRunning: running(sk), skeletonNamed: named(sk),
+        barBlocks: bar ? bar.querySelectorAll("*").length : 0,
+        barRunning: bar ? running(bar) : 0, barNamed: bar ? named(bar) : 0,
+        skFill: (() => { const b = sk.querySelector(".os-sk"); if (!b) return null;
+          const cs = getComputedStyle(b); return cs.backgroundImage + " | " + cs.backgroundColor; })(),
+      };
+    });
+    if (rm) break;
+    await page.waitForTimeout(25);
+  }
+  verdictRM = rm;
   await page.close();
 }
 await browser.close();
@@ -151,11 +259,18 @@ const verdict = {
   noneMissing: rows.every((r) => (r.missing ?? []).length === 0),
   animated: rows.every((r) => (r.animated ?? 0) > 0),
 };
+verdict.tolerance = TOL;
+verdict.reducedMotion = verdictRM;
+/* ⚠️ THE POPULATION IS ASSERTED FIRST — "0 running" is also what an empty scan reports. */
+verdict.rmStill = !!verdictRM && verdictRM.skeletonBlocks > 20 && verdictRM.barBlocks > 3
+  && verdictRM.skeletonNamed === 0 && verdictRM.barNamed === 0;
+verdict.noLive = rows.every((r) => r.live && r.live.controls === 0 && r.live.inked === 0 && r.live.scanned > 50);
 verdict.pass = verdict.allCaught && verdict.noneMissing && verdict.allRemoved
-  && verdict.animated && verdict.worst <= 8;
+  && verdict.animated && verdict.noLive && verdict.rmStill && verdict.worst <= TOL;
 writeFileSync(join(OUT, "skeleton.json"), JSON.stringify(verdict, null, 2));
 console.log("");
 console.log("GATE skeletonRegions: " + (verdict.pass ? "pass" : "FAIL")
-  + "  worst " + verdict.worst + "px across " + verdict.widths + " widths"
-  + " · caught " + verdict.allCaught + " · removed " + verdict.allRemoved
+  + "  worst " + verdict.worst + "px across " + verdict.widths + " widths (tol " + TOL + ")"
+  + " · caught " + verdict.allCaught + " · removed " + verdict.allRemoved + " · noLive " + verdict.noLive
+  + " · reducedMotionStill " + verdict.rmStill
   + " · shimmer " + verdict.animated);
