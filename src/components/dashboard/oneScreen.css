@@ -59,21 +59,27 @@
    * first-run body. Copying the ref's numbers would have produced a ghost that matched the mockup
    * and jumped in the app — the exact failure the harness rule in CLAUDE.md exists to catch.
    *
-   *   · counters — 82px. Invariant, not incidental: the row's height is set by its TEXT (label +
-   *     figure ≈ 50px inside 32px of padding), and every mark's box is absorbed below that by its
-   *     negative margin. P3's 54px plane is 30px effective and so does not touch it.
-   *   · goal — 115px, its first-run height. A goal that has been SET renders a different body, and
-   *     no number can be right for both while we are still waiting to learn which. It does not
-   *     matter: `.os-sk-actv` beneath it is `flex: 1 1 auto`, so any error is absorbed INSIDE the
-   *     rail column and cannot move anything else on the page.
-   *   · tasks — 200px, likewise approximate (the real card is `flex: 0 1 auto` between 118 and
-   *     318). It is the LAST block in its column with slack beneath it, so its error moves nothing.
+   * ⚠️ AND THERE IS ONLY ONE OF THEM LEFT (v33, Phase 4). The counters, goal and tasks ghosts each
+   * carried a stated height because each was a bare grey rectangle standing in for a card; the
+   * ghosts wear the real card classes now, so their boxes come from the same flex budgets and the
+   * same `aspect-ratio` that size the loaded ones. Nothing is left to state but the one height the
+   * page genuinely derives from its own CONTENT:
+   *
+   *   · aut — 312px, the manuscript tile's measured intrinsic height, and the tile is the taller
+   *     card in the top row at 1536 and 1710, so it is what the row's height IS at those widths.
+   *     Measured on the loaded page at all four widths (`aut intrinsic height: 312.3` at 1536,
+   *     1710, 1920 and 2520 alike — a constant, because the tile's content does not reflow).
+   *     ⚠️ It cannot be derived: the tile is a mark, a wrapped title, chips and a byline, and
+   *     reproducing that in ghosts to two decimal places would be a second implementation of the
+   *     card. It is a MEASURED number guarded by a measurement — `scripts/dash-skeleton-v33.mjs`
+   *     re-reads the loaded row every run, so drift is a red gate rather than a silent jump.
+   *     ⚠️ AND IT IS A FLOOR, NOT A HEIGHT. At 1920 and 2520 the chart is the taller card (359.2
+   *     and 557.2), so the floor does not bind and the ratio decides the row, exactly as it does
+   *     on the page.
    *
    * The paper matches `.ws-window`'s white, so the overlay covers rather than tints.
    */
-  --os-sk-counters-h: 82px;
-  --os-sk-goal-h: 115px;
-  --os-sk-tasks-h: 200px;
+  --os-sk-aut-h: 312px;
   --os-skel-paper: #ffffff;
   height: 100%;
   overflow: hidden;
@@ -159,7 +165,6 @@
 }
 .os-comstriptx { min-width: 0; }
 /* the skeleton's strip ghost — same box, no contents */
-.os-sk-comstrip { height: 75px; border-radius: 14px; margin-top: 22px; flex: none; }
 .os-comstrip h2 { font-family: var(--font-serif); font-weight: 500; font-size: 17px; margin: 0; }
 .os-comstrip p { margin: 2px 0 0; font-size: 14px; color: #a29587; }
 .os-comstrip .os-commbeta { margin-left: auto; flex: none; }
@@ -429,9 +434,17 @@
 /* ⚠️ `.os-greet`'S GEOMETRY IS THE v26 BLOCK'S — see 'v26 · THE HERO'. The v22 rule that stood
    here (a one-row `auto 1fr` flex-none grid) was superseded declaration for declaration and is
    deleted rather than left to be read as the live one. */
-/* ⚠️ THE GREETING SIZES TO ITS CONTENT so the card can have the rest. It was `flex: 1` in the
-   pre-counters ref, which would split the row down the middle instead. */
-.os-greet .os-gl { flex: 0 0 auto; min-width: 0; }
+/* ⚠️ `.os-greet .os-gl` IS DELETED (v33, Phase 4). The page's own hero note has said since v26 that
+   "the old `.os-gl` / `.os-grow2` nesting is gone" — and it was gone from the PAGE and still
+   rendered by the SKELETON, which is the only reason the rule had a subject at all. The ghost is
+   three flat grid children now, matching the hero, so the wrapper went with it. `grep -rn os-gl
+   src/` returns nothing.
+
+   ⚠️ `.os-greet .os-grow2` (below) and seven more classes in this sheet are ALSO named nowhere in
+   `src/` — a full sweep of the file's 237 selectors found `.os-chip`, `.os-datechip`, `.os-grow2`,
+   `.os-lbl`, `.os-pill-o`, `.os-pin`, `.os-spacer` and `.pintext`. They are reported and NOT
+   removed: none was orphaned by this pass, and a skeleton commit that sweeps eight unrelated rules
+   is how a removal scoped to one surface takes out a rule serving two. */
 /* ⚠️ `.os-dateline` IS DELETED, NOT HIDDEN (audit pack P2). Its rule said the date line "says the
    one thing the chrome does not" — which was true of the kicker it replaced and never true of the
    date itself. A subtitle sits BELOW the name instead; the header is shorter for it. */
@@ -511,61 +524,125 @@
    `pointer-events: none` the moment it starts leaving: the page is usable before it is invisible. */
 .os-skelpage.out { opacity: 0; pointer-events: none; }
 .os-sk {
-  background: #f0eae1;
+  /**
+   * ⚠️ THE REF'S OWN SHIMMER, MECHANISM AND ALL (v33, Phase 4) — `.sk`, a 600px gradient swept by
+   * `background-position` at 1.4s linear. The app ran a `::after` overlay translating at 1.25s,
+   * which looks similar and is not the same thing, and it cost two real problems:
+   *   · a pseudo-element on every ghost, on ghosts that now wear REAL card classes — one
+   *     `::after` in a card rule and the two collide in silence;
+   *   · `getComputedStyle(el)` without a pseudo argument cannot see an animation declared on
+   *     `::after`, so the Phase 4 probe reported `animated: 0` about a shimmer that was running
+   *     perfectly. A gate that cannot see the thing it guards is not a gate.
+   *
+   * ⚠️ COLOUR AND IMAGE AS LONGHANDS, NEVER THE `background` SHORTHAND. The shorthand resets every
+   * background longhand, so a future edit that mistypes the gradient would leave the block
+   * transparent rather than flat — the see-through-header family this repo records four times over.
+   * The ref itself writes `background:#ece6de` and then `background-image:…`, which works only
+   * because of the order.
+   */
+  background-color: #ece6de;
+  background-image: linear-gradient(90deg, #ece6de 0%, #f5f1ea 40%, #ece6de 80%);
+  background-size: 600px 100%;
+  animation: os-sk-shimmer 1.4s linear infinite;
   border-radius: 8px;
   position: relative;
   overflow: hidden;
 }
-/* ⚠️ THE SWEEP IS A PSEUDO-ELEMENT AND ITS KEYFRAMES ARE LITERAL PERCENTAGES. A `var()` in a
-   keyframe SELECTOR is not a thing CSS resolves — the whole block is dropped, with no error and no
-   red build, and the shimmer simply never runs. */
-.os-sk::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
-  animation: os-sk-sweep 1.25s linear infinite;
-}
-@keyframes os-sk-sweep {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+/* ⚠️ KEYFRAME SELECTORS ARE LITERAL PERCENTAGES. A `var()` in a keyframe SELECTOR is not a thing
+   CSS resolves — the whole block is dropped, with no error and no red build, and the shimmer
+   simply never runs. */
+@keyframes os-sk-shimmer {
+  0% { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
 }
 
-/* The greeting stack — h1, the subtitle beneath it, then the fact pills. The MARGINS here are the
-   real ones (`.os-greet h1` line box 46, `.os-sub2` 6, `.os-pills` 14 + 6), so the three ghosts
-   sit at the same three baselines as the text they cover. Widths are approximate by nature: the
-   name is exactly what we are still waiting to learn. */
-.os-sk-h1 { width: 300px; height: 46px; border-radius: 10px; }
-/* 20.3px is `.os-sub2`'s measured line box (13.5px Inter at the sheet's line-height), not a round
-   number — and rounding it to 19 is what put the whole second row 1.3px low. */
-.os-sk-sub { width: 206px; height: 20.3px; margin-top: 6px; }
-.os-sk-pills { display: flex; gap: 7px; margin-top: 14px; padding-bottom: 6px; }
-/* ⚠️ THE PILL WIDTHS SET WHERE THE COUNTERS CARD STARTS, which is not obvious and is why they are
-   measured rather than picked. `.os-gl` is `flex: 0 0 auto`, so the greeting column is exactly as
-   wide as its widest child — the pills row — and the counters card takes the rest after the 32px
-   gap. Ghost pills 20px narrow put the whole counters card 20px out. Measured against the real
-   pair ("Querying since {month year}" · "{n} queries out with agents"): 184 + 7 + 136 = 327.
-   These two follow the writer's own tenure and count, so they can only ever match the common
-   case — but the common case is what a load actually shows. */
-.os-sk-pill { width: 184px; height: 31.5px; border-radius: 99px; }
-.os-sk-pill.narrow { width: 136px; }
-/* the counters card takes the rest of the header row, as the real one does */
-.os-sk-counters { flex: 1; min-width: 0; height: var(--os-sk-counters-h); border-radius: 14px; }
+/* ══ THE HERO ══ */
+/* ⚠️ PLACED, NOT AUTO-PLACED. `.os-greet` is `grid-template-columns: auto minmax(0, 1fr)`, so three
+   auto-placed children land at (1,1), (1,2) and (2,1) — the stats block beside the heading and the
+   subtitle underneath it, which is the hero upside down. These three mirror `.os-greet > h1`,
+   `.os-subrow` and `.os-counters` exactly. */
+.os-skelpage .os-greet > .os-sk-h1 { grid-column: 1; grid-row: 1; }
+.os-skelpage .os-greet > .os-sk-sub { grid-column: 1; grid-row: 2; }
+.os-skelpage .os-greet > .os-sk-stats {
+  grid-column: 2; grid-row: 1 / span 2; align-self: center; position: relative; top: -4px;
+}
+/* ⚠️ 48.3 IS THE h1's LINE BOX (46px × 1.05) AND THE 4px IS ITS OWN MARGIN — the two together are
+   what make the hero's first grid row 52.3 rather than 48.3. Taking the size and leaving the
+   margin behind is half a port, and it put the whole second row 4px high. */
+.os-sk-h1 { width: 300px; height: 48.3px; margin-bottom: 4px; border-radius: 10px; }
+/* ⚠️ 39.8 IS THE SUBROW's BOX, NOT THE SUBTITLE's LINE. `.os-subrow` is a flex row holding the
+   17px line (whose own 16px bottom margin counts toward the row) and, on a young account, the
+   tour chip. Measured 39.8 at all four widths with the chip up and 35.6 without — a 4.2px spread,
+   inside the 8px the Phase 4 gate allows, so one value serves both. */
+.os-sk-sub { width: 206px; height: 39.8px; }
+/* ⚠️ THE FIVE CLAMPS ARE THE COUNTERS' OWN. `.os-cic` is `clamp(64px, 4.6vw, 104px)` and IT is what
+   the counters card's height is — 70.6 / 78.7 / 88.3 / 104 across the four widths, and at 2520 it
+   is what the whole hero's height is. A fixed 88px ghost was right at 1920 and nowhere else. */
+.os-sk-stats {
+  display: flex; justify-content: space-between; align-items: center;
+  width: 100%; gap: clamp(12px, 1.1vw, 30px);
+}
+.os-sk-stat { display: flex; align-items: center; gap: clamp(8px, 0.85vw, 18px); min-width: 0; }
+.os-sk-ill {
+  width: clamp(64px, 4.6vw, 104px); height: clamp(64px, 4.6vw, 104px);
+  border-radius: 14px; flex: none;
+}
+.os-sk-statlab { width: 110px; height: 15px; margin-bottom: 9px; }
+.os-sk-statfig { width: 150px; height: 26px; }
 
-/* ⚠️ NO HEIGHTS ON THE COLUMN CARDS — the columns stretch and their cards read the same flex
-   budgets that size the real ones, so the ghosts cannot drift from what they stand in for.
-   The three modifiers below carry ONLY the flex budget of the card each stands in for; every
-   width, gap and radius still comes from the rules above. */
-.os-sk-card { border-radius: 14px; }
-.os-sk-aut { flex: 0 0 auto; height: var(--os-sk-aut-h, 232px); }
-.os-sk-comm { flex: 1 1 auto; min-height: 120px; }
-.os-sk-chart { flex: 0 1 auto; min-height: 340px; max-height: 560px; }
-.os-sk-tasks { flex: none; height: var(--os-sk-tasks-h); border-radius: 14px; }
-.os-sk-goal { flex: none; height: var(--os-sk-goal-h); border-radius: 14px; }
-/* ⚠️ `flex: 1 1 auto`, AS THE REAL ACTIVITY CARD IS — which is also what makes the goal ghost's
-   approximation harmless: this block eats the difference. */
-.os-sk-actv { flex: 1 1 auto; min-height: 120px; border-radius: 14px; }
+/* ══ THE TOP ROW ══ */
+/* ⚠️ NO HEIGHTS ON THE GHOST CARDS THEMSELVES — they wear `.os-card`, `.os-aut`, `.os-lead`,
+   `.os-tasks`, `.os-actv` and `.os-comtile`, so the paper, the hairline, the radius, the padding
+   and every flex budget below them are the page's own, declared once, further up this sheet.
+   What is left here is the size of the grey blocks INSIDE them, and one floor. */
+.os-sk-row { display: flex; align-items: center; gap: 6px; }
+/* the tile's floor — see `--os-sk-aut-h` at the top of this sheet for why it is a measured number */
+.os-sk-aut { min-height: var(--os-sk-aut-h); gap: 14px; }
+.os-sk-autpic { width: 96px; height: 96px; border-radius: 18px; flex: none; }
+.os-sk-autttl { width: 190px; height: 26px; }
+.os-sk-autchip { width: 84px; height: 24px; border-radius: 99px; }
+.os-sk-autchip.narrow { width: 66px; }
+.os-sk-autcap { width: 120px; height: 13px; }
+/* ⚠️ 48px ON THE BRUSH BLOCK IS WHAT MAKES THE BAND 66. `.os-ahead` is `padding: 14px 20px 4px`
+   around its tallest child, and the chart's band measures 66 on the loaded page — the same figure
+   the standing `chartHeader` gate holds at ≤72. The band is part of the row's height at the two
+   widths where the chart is the taller card, so it is not decoration. */
+.os-sk-chmark { width: 34px; height: 34px; border-radius: 9px; flex: none; }
+.os-sk-chttl { width: 190px; height: 30px; flex: none; }
+.os-sk-chchips { width: 230px; height: 38px; border-radius: 12px; margin-left: auto; flex: none; }
+.os-sk-chbrush { width: 250px; height: 48px; border-radius: 14px; flex: none; }
+.os-sk-chplot { border-radius: 10px; }
+
+/* ══ THE TO-DO CARD ══ */
+.os-sk-tkmark { width: 30px; height: 30px; border-radius: 9px; flex: none; }
+.os-sk-tkttl { width: 150px; height: 28px; flex: none; }
+.os-sk-tkbadge { width: 52px; height: 24px; border-radius: 99px; flex: none; }
+.os-sk-tkall { width: 80px; height: 16px; margin-left: auto; flex: none; }
+/* ⚠️ NO TICKET GRID HERE, DELIBERATELY — the ghost wears `.os-tkgrid`, the card's own. A copy of
+   `repeat(auto-fill, minmax(288px, 1fr))` lived here for one pass and had already drifted: the real
+   grid steps to `minmax(240px, 1fr)` below 1700 and the copy did not. The `no grid of its own` lock
+   in `oneScreenSkeleton.test.ts` is what refuses the copy, and it was right. */
+.os-sk-tkrule { height: 12px; border-radius: 99px; flex: none; }
+.os-sk-ticket { height: 82px; border-radius: 12px; }
+
+/* ══ THE ACTIVITY COLUMN ══ */
+.os-sk-acmark { width: 26px; height: 26px; border-radius: 8px; flex: none; }
+.os-sk-acttl { width: 110px; height: 26px; flex: none; }
+.os-sk-account { width: 70px; height: 13px; flex: none; }
+/* ref `body.ac-hair #actCard .feed{padding-left:0;padding-right:8px}`, as the real feed is */
+.os-sk-acfeed {
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 0 8px 0 0; min-height: 0; overflow: hidden;
+}
+.os-sk-acday { width: 120px; height: 13px; margin: 6px auto; flex: none; }
+.os-sk-acbub { border-radius: 12px; flex: none; }
+
+/* ══ THE COMMUNITY TILE ══ */
+.os-sk-comill { width: 84px; height: 84px; border-radius: 14px; flex: none; }
+.os-sk-comtx { flex: 1; min-width: 0; }
+.os-sk-comttl { width: 130px; height: 22px; margin-bottom: 10px; }
+.os-sk-comln { height: 14px; margin-bottom: 7px; }
+.os-sk-comln.short { width: 70%; margin-bottom: 0; }
 
 /**
  * ⚠️ BELOW 1650 THE THUMBNAIL GOES AND THE CAPSULE KEEPS ITS LABEL (v31, Phase 3) — ref
@@ -587,10 +664,15 @@
 /* ⚠️ THE SWEEP IS SUPPRESSED BY NAME, NOT BY DURATION. This sheet's blanket reduced-motion rule
    sets `animation-duration: .01ms !important` on everything inside `.os-root`, which would leave
    an infinite sweep running at 100 frames a second — a strobe, not a stillness. Killing the
-   animation-NAME is what actually stops it, and the blocks then carry the wait at rest. */
+   animation-NAME is what actually stops it, and the blocks then carry the wait at rest.
+
+   ⚠️ AND THE GRADIENT GOES WITH IT, or a stopped sweep leaves every block frozen mid-highlight at
+   whatever `background-position` it was declared with — a pale stripe across each ghost that reads
+   as a rendering fault rather than as stillness. `#ece6de` flat is the ref's own base stop.
+   ⚠️ THE 0.62 OPACITY IS RETIRED. It was the app's, not the ref's, and it made the reduced-motion
+   ghost a fainter object than the moving one — quieter motion, not quieter ink. */
 @media (prefers-reduced-motion: reduce) {
-  .os-sk::after { animation-name: none !important; opacity: 0; }
-  .os-sk { opacity: 0.62; }
+  .os-sk { animation-name: none !important; background-image: none; background-color: #ece6de; }
 }
 
 /* ══ §11 · RESPONSIVE FRAME ══ */
@@ -1454,17 +1536,42 @@
 @media (max-width: 1699px) {
   .os-bandkey { flex-wrap: wrap; white-space: normal; row-gap: 6px; gap: 14px; }
 }
-/* ⚠️ THE TO-DO CARD'S FOOT — ref `.foot` plus `.tdo .foot{border-top:1px solid var(--line2)}`.
-   The card had none at all, so its body simply ran 40px longer and the card's own height stayed in
-   tolerance; nothing in the diff table could say that a whole element was missing, because the
-   element that would have reported it does not exist on our side to be measured.
-   `space-between` with ONE child leaves it left, which is the ref's own arrangement here. */
-.os-tkfoot {
-  display: flex; justify-content: space-between; align-items: center; flex: none;
-  padding: 12px 22px; border-top: 1px solid #eee8e0;
-  font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 0.1em;
-  color: #9c8f82; text-transform: uppercase;
+/**
+ * ══════════════════════════ v33 · THE SIDEBAR BOUNDARY — SOFT SCRIM ══════════════════════════
+ *
+ * ⚠️ TWO OF THIS PHASE'S THREE REQUIREMENTS WERE ALREADY TRUE, AND MEASURING SAID SO. The pack asks
+ * for the rail's right border to be removed and for the rail to keep the page's background.
+ * Measured on both /dashboard and /queries before anything was written: `.ws-panel` computes
+ * `border-right-width: 0px` and `background-color: rgba(0, 0, 0, 0)` on both. There is no hairline
+ * to remove and no tonal step to flatten — which is exactly WHY the two surfaces read as one, and
+ * why the scrim is the whole of the fix rather than one third of it.
+ *
+ * ⚠️ IT IS A `::before` ON THE WINDOW, NOT AN ELEMENT. The scrim has no content, no semantics and
+ * no interaction; a div would put a node in the tree that a reader's cursor, a screen reader and
+ * every future `elementFromPoint` probe has to be told to ignore. `.ws-window` is already
+ * `position: relative` and already clips, so the scrim inherits the window's own rounded edge for
+ * free — which a child div would have had to restate.
+ *
+ * ⚠️ Z-INDEX 0, DELIBERATELY, NOT A NEGATIVE. A negative-z pseudo-element paints behind the
+ * BACKGROUNDS of every ancestor up to the nearest stacking context — this repo has recorded that
+ * twice, on the marketing halo and the hero's firework — and `.ws-window` paints its own ground.
+ * At 0 the scrim sits above that ground and below the cards, which are `z-index: 1`.
+ *
+ * ⚠️ AND IT IS SCOPED TO `.dash-mode`. Every other page has a card at its left edge for the content
+ * to cast against; the dashboard is the one route whose content meets the rail directly.
+ */
+.dash-mode .ws-window::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 16px;
+  background: linear-gradient(90deg, rgba(42, 31, 24, 0.055), rgba(42, 31, 24, 0));
+  pointer-events: none;
+  z-index: 0;
 }
+
+/* ⚠️ `.os-tkfoot` IS DELETED WITH ITS ELEMENT (v33, Phase 2). A rule left behind for markup
+   nothing renders is the fault this sheet already records twice. */
 .os-bk { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; color: #6b5d54; white-space: nowrap; }
 .os-bk i { width: 12px; height: 12px; border-radius: 3px; flex: none; border: 1px solid rgba(0, 0, 0, 0.07); }
 

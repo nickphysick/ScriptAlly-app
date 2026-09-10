@@ -300,16 +300,11 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
         )}
       </EdgeFadeScroll>
 
-      {/* ⚠️ ONE CLAUSE, AND THE COUNT DELIBERATELY DOES NOT JOIN IT. The ref's `.foot` is
-          `justify-content: space-between` and its other users put a figure on the right — the
-          activity panel's reads "Last 30 days · Full log →". This one holds a single span, so the
-          sentence sits left and the right side stays empty on purpose. A count here would be the
-          THIRD statement of the same number on one card: the badge in the band already says how
-          many tasks there are, and the rule beneath it already draws their split. What the line is
-          for is the tasks that are NOT on this card, which is the one fact nothing else states. */}
-      <div className="os-tkfoot">
-        <span>Everything else is with the agents</span>
-      </div>
+      {/* ⚠️ THE FOOTER IS DELETED (v33, Phase 2) — element, rule and styles together. It read
+          "Everything else is with the agents", which is a true sentence about a set this card does
+          not draw; the ref no longer carries it and the card's grid takes the reclaimed height.
+          ⚠️ IT EXISTED ONLY HERE. `.os-tkfoot` and that string are the dashboard's alone — /todo has
+          no such element, so nothing on that page moves and its own ref keeps governing it. */}
 
       {/* ⚠️ MOUNTED ONLY ONCE A TICKET IS OPEN — with no fallback, deliberately. The drawer's own
           entrance is what announces it; a spinner in the sheet's place would be a second arrival. */}
