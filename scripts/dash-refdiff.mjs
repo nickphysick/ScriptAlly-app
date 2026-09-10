@@ -36,6 +36,7 @@ import { chromium } from "playwright-core";
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { REF_REL as SHARED_REF_REL } from "./dash-ref.mjs";
 import { spawnSync } from "node:child_process";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -99,7 +100,9 @@ const SELF_SRC = readFileSync(fileURLToPath(import.meta.url), "utf8");
 /* ⚠️ ONE NAME, READ TWICE — the report's `ref:` field used to restate this string, so repointing
    the harness at a new ref left the table truthfully measuring v29 while its own header said v28.
    A value that appears twice is a value that will disagree with itself; the report derives it. */
-const REF_REL = "design-refs/dashboard-cappuccino-v32.html";
+/* ⚠️ STATED ONCE, IN `dash-ref.mjs` — the plot diff reads the same constant. Two copies meant
+   two edits per version bump, and the second was remembered by hand. */
+const REF_REL = SHARED_REF_REL;
 const REF = join(ROOT, REF_REL);
 
 const argv = process.argv.slice(2);
@@ -1243,7 +1246,7 @@ function diffScale(key, ref, app) {
 }
 
 /**
- * ⚠️ THE STANDING GATES — five properties, run at every width, for the life of the dashboard.
+ * ⚠️ THE STANDING GATES — properties run at every width, for the life of the dashboard.
  *
  * Each one encodes something that has regressed at least once, and in every case the gate that
  * failed to catch it was written against the visible SYMPTOM rather than the structural property:
@@ -1608,6 +1611,28 @@ function plotDiff() {
   try { return { rows: JSON.parse(readFileSync(f, "utf8")) }; } catch (e) { return { error: String(e) }; }
 }
 
+/**
+ * ⚠️ TWO GATES THAT CANNOT BE READ FROM A LOADED PAGE, SPAWNED THE WAY THE PLOT DIFF IS (v33).
+ *
+ * `skeletonRegions` needs the page in a state this harness never sees — the cover is up for a few
+ * hundred milliseconds during a load, and the claim is about the difference between THAT state and
+ * the settled one. `railBoundary` needs TWO ROUTES in one run, because a scrim that reached every
+ * page would be a dashboard decision applied to nine pages nobody asked about, and a one-route
+ * check cannot tell a scoped feature from a global one.
+ *
+ * ⚠️ THEY RUN BY DEFAULT OR THEY ARE NOT GATES. Both existed as scripts somebody could run; that is
+ * a measurement, not a gate, and the difference is whether it goes on being true without anybody
+ * finding out. Each writes a verdict JSON and this reads it.
+ */
+function spawnedGate(script, artefact, envExtra) {
+  const r = spawnSync(process.execPath, [join(ROOT, "scripts", script)], {
+    encoding: "utf8", env: { ...process.env, ...envExtra }, timeout: 20 * 60 * 1000,
+  });
+  const f = join(ROOT, "run-artifacts", artefact);
+  if (!existsSync(f)) return { error: (r.stderr || "").slice(-300) || `no ${artefact}` };
+  try { return { verdict: JSON.parse(readFileSync(f, "utf8")) }; } catch (e) { return { error: String(e) }; }
+}
+
 /* ── the table ───────────────────────────────────────────────────────────────────────────────── */
 
 function table(result) {
@@ -1668,10 +1693,32 @@ function table(result) {
     L.push("");
     L.push(`**Plot region: NOT MEASURED — ${result.plotDiff.error}**`);
   }
+  /* the two spawned gates get their own lines, printed whether or not they counted */
+  for (const [name, r] of [["skeletonRegions", result.skeletonGate], ["railBoundary", result.railGate]]) {
+    if (!r) continue;
+    L.push("");
+    L.push(r.verdict
+      ? `**${name}: ${r.verdict.pass ? "pass" : "FAIL"}** — ${JSON.stringify(r.verdict.rows ? { worst: r.verdict.worst, widths: r.verdict.widths, caught: r.verdict.allCaught, removed: r.verdict.allRemoved, shimmer: r.verdict.animated } : r.verdict)}`
+      : `**${name}: NOT MEASURED — ${r.error}**`);
+  }
+  /**
+   * ⚠️ THE ROSTER IS PRINTED, NOT CLAIMED. "All twenty-two standing gates run by default" is the
+   * kind of sentence that stays in a report for six months after one of them stopped being wired
+   * in. Printing the names, from the arrays themselves, makes the count a MEASUREMENT of the
+   * harness rather than a statement about it.
+   */
+  L.push("");
+  L.push(`**Standing gates run this pass: ${GATE_ROSTER.length}** — ${GATE_ROSTER.join(" · ")}`);
   L.push("");
   L.push(`**total misses: ${result.total}**`);
   return L.join("\n");
 }
+
+/* ⚠️ DERIVED FROM THE ARRAYS, NEVER TYPED OUT. A hand-written list agrees with the harness on the
+   day it is written; this one cannot disagree with it at all. */
+const PAGE_GATES = ["ground", "hScroll", "columnBottoms", "blendAncestorTransform"];
+const SPAWNED_GATES = ["plotRegion", "skeletonRegions", "railBoundary"];
+const GATE_ROSTER = [...STANDING.map((g) => g.k), ...PAGE_GATES, ...SPAWNED_GATES];
 
 /* ── run ─────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -1711,6 +1758,54 @@ function assertFreshBundle() {
   }
 }
 assertFreshBundle();
+
+/**
+ * ⚠️ AND THE SERVER MUST BE SERVING *THAT* BUNDLE (v33). `assertFreshBundle` proves the dist on disk
+ * is newer than the source; it says nothing about which dist the URL is pointing at, and that is a
+ * different question with the same failure shape.
+ *
+ * ⚠️ IT COST A WHOLE BASELINE RUN, and it read as a REAL result. `vite preview --port 4174` found
+ * the port already taken by a server left over from earlier in the session, printed
+ * "Port 4174 is in use, trying another one…" to a log nobody was reading, and bound 4176. The run
+ * against 4174 therefore measured the FIXED tree and reported the baseline as already perfect —
+ * `skeletonRegions: pass, worst 0.3px` about an app whose skeleton has no `.os-grid` at all.
+ * `lsof -iTCP:4174 -sTCP:LISTEN` said a server was listening, which is true and is the wrong
+ * question: the honest check is WHICH BUNDLE it hands back.
+ *
+ * ⚠️ THE CHECK IS THE DEPLOY DISCIPLINE'S, POINTED AT A MEASUREMENT. This repo already refuses to
+ * believe a deploy until the served bundle hash matches the build; a measurement deserves the same,
+ * because a plausible number about the wrong subject is the most expensive failure there is.
+ * It is skipped for a REMOTE target, where there is no local dist to compare against.
+ */
+async function assertServedBundle() {
+  const dist = join(ROOT, "dist", "assets");
+  if (!existsSync(dist)) return;
+  let html;
+  try {
+    const res = await fetch(APP.replace(/\/$/, "") + "/dashboard");
+    html = await res.text();
+  } catch (e) {
+    throw new Error(
+      "dash-refdiff: could not reach " + APP + " (" + String(e && e.message) + "). "
+      + "Start a preview for THIS tree and point SA_REFDIFF_APP_URL at it.",
+    );
+  }
+  const m = /assets\/(index-[A-Za-z0-9_-]+\.js)/.exec(html);
+  if (!m) {
+    throw new Error("dash-refdiff: " + APP + " served no built entry bundle — is it a dev server rather than a preview?");
+  }
+  if (!existsSync(join(dist, m[1]))) {
+    throw new Error(
+      "dash-refdiff: " + APP + " is serving `" + m[1] + "`, which is NOT in this tree's dist/assets. "
+      + "The URL points at somebody else's build — commonly a preview that found its port taken and "
+      + "silently moved to the next one. Read the preview's own log for the port it actually bound, "
+      + "and re-point SA_REFDIFF_APP_URL. Measuring the wrong build produces real numbers about the "
+      + "wrong page, which no later check can tell you about.",
+    );
+  }
+  console.log("bundle: " + APP + " serves " + m[1] + " (this tree's build)");
+}
+await assertServedBundle();
 
 const browser = await chromium.launch();
 const result = { when: new Date().toISOString(), ref: REF_REL, app: APP, widths: WIDTHS, byWidth: {}, total: 0 };
@@ -1830,7 +1925,6 @@ if (SELF_TEST) {
 }
 
 mkdirSync(dirname(OUT), { recursive: true });
-writeFileSync(OUT, `${JSON.stringify(result, null, 1)}\n`);
 /**
  * ⚠️ THE PLOT REGION, MEASURED AND GATED (v31). Today's numbers are 5.4–7.2 mean and ~232 max, and
  * the causes are known and reported: the ref's plot insets are FRACTIONS of a stretched fixed
@@ -1860,7 +1954,39 @@ if (plot.rows) {
   }
 }
 
+/**
+ * ⚠️ A FAILED SPAWNED GATE IS A MISS, AND SO IS A GATE THAT DID NOT RUN. `NOT MEASURED` reported as
+ * a neutral line is exactly the silent-skip shape this repo keeps rebuilding: the run goes green
+ * because nothing looked. Both land in the total.
+ */
+result.skeletonGate = spawnedGate("dash-skeleton-v33.mjs", join("skeleton-v33", "skeleton.json"),
+  { SA_WIDTHS: WIDTHS.join(",") });
+result.railGate = spawnedGate("dash-rail-v33.mjs", join("rail-v33", "rail.json"), {});
+for (const [name, r, why] of [
+  ["skeletonRegions", result.skeletonGate,
+    "the loading shell's regions disagree with the loaded page's — the jump it exists to prevent"],
+  ["railBoundary", result.railGate,
+    "the sidebar boundary moved, or the dashboard's scrim leaked onto another page"],
+]) {
+  if (r && r.verdict && r.verdict.pass) continue;
+  const w = WIDTHS[0];
+  result.byWidth[w] = result.byWidth[w] || { misses: [], allowed: [] };
+  result.byWidth[w].misses.push({
+    key: "standing", field: name, ref: "pass",
+    app: r && r.verdict ? JSON.stringify(r.verdict).slice(0, 220) : `NOT MEASURED — ${r ? r.error : "no result"}`,
+    why,
+  });
+  result.total++;
+}
+
+/**
+ * ⚠️ THE JSON IS WRITTEN LAST, WITH THE MARKDOWN (v33). It used to be written before the plot diff
+ * and the two spawned gates had run, so the two artefacts of one run DISAGREED: the table said
+ * `total misses: 2` and the JSON beside it said `0`. A reader who trusts the machine-readable half
+ * gets the wrong answer, and nothing about either file says which one is stale.
+ */
 const md = table(result);
+writeFileSync(OUT, `${JSON.stringify(result, null, 1)}\n`);
 writeFileSync(OUT.replace(/\.json$/, ".md"), `${md}\n`);
 console.log(`\n${md}\n`);
 console.log(`written: ${OUT}`);

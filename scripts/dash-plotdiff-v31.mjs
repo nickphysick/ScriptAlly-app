@@ -19,10 +19,12 @@ import { chromium } from "playwright-core";
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+/* ⚠️ the ref path is `dash-ref.mjs`'s, never a copy — see that file */
+import { REF_REL } from "./dash-ref.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const APP = process.env.SA_REFDIFF_APP_URL || "http://127.0.0.1:4173";
-const REF = join(ROOT, "design-refs", "dashboard-cappuccino-v32.html");
+const REF = join(ROOT, REF_REL);
 const SHELL = ".ws-panel, .ws-work, .ws-window, #app-stage-scroll";
 const OUT = process.env.SA_PLOTDIFF_OUT || join(ROOT, "run-artifacts", "plotdiff");
 const WIDTHS = (process.env.SA_WIDTHS || "1536,1710,1920,2520").split(",").map(Number);
