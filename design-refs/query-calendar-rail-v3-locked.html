@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Calendar with a control rail</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#1c130f;--body-ink:#3a1c14;--label:#9c8878;--burgundy:#7c3a2a;--sage-accent:#8a9e88;--hairline:#ece0d2;--field-border:#e0d5c8;--pink:#f5e2da;--pink-border:#e8c8bc;
+    --sand:#f7efe3;--sage:#e0e5dd;--pinkS:#f5e6df;--offer:#d7e0e8;--closed:#e4e1db;--sand-d:#e7d9bd;--sage-d:#c7d0c2;--pink-d:#e8c9bb}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ground);font-family:'Inter',sans-serif;color:var(--body-ink);font-size:13px;padding:20px 24px 70px}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+  h1{font-family:'Playfair Display',serif;font-weight:500;font-size:23px;color:var(--ink)}
+  .lede{font-family:'Playfair Display',serif;font-style:italic;font-size:13.5px;color:#6a5a50;margin:5px 0 10px;max-width:940px;line-height:1.5}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--field-border);border-radius:10px;padding:3px;margin-bottom:8px}
+  .seg button{border:none;background:transparent;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#6a5a50;padding:7px 12px;border-radius:7px}
+  .seg button.on{background:var(--pink);color:var(--body-ink)}
+  .desc{color:#6a5a50;max-width:940px;line-height:1.55;margin:6px 0 12px;min-height:44px}
+  .desc b{font-weight:500;color:var(--body-ink)}
+  .page{background:var(--parchment);border-radius:18px;padding:14px 16px 16px;box-shadow:0 1px 2px rgba(58,28,20,.04),0 10px 30px rgba(58,28,20,.08)}
+  .head{display:flex;align-items:center;gap:14px;padding:4px 2px 12px}
+  .head .art{width:52px;height:52px;border-radius:11px;background:repeating-linear-gradient(135deg,rgba(58,28,20,.05) 0 6px,transparent 6px 12px);border:1px dashed rgba(58,28,20,.22);flex:none}
+  .head h2{font-family:'Playfair Display',serif;font-weight:500;font-size:25px;color:var(--ink);line-height:1}
+  .head .sub{font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:#6a5a50;margin-top:4px}
+  .head .cta{margin-left:auto;background:var(--ink);color:#fdfaf5;border-radius:99px;padding:9px 16px;font-size:12.5px;font-weight:500}
+  .views{display:inline-flex;background:#fff;border:1px solid var(--field-border);border-radius:99px;padding:3px;margin-left:12px}
+  .views span{padding:6px 12px;border-radius:99px;font-family:'Playfair Display',serif;font-size:12.5px;color:#8a7a6c}
+  .views span.on{background:var(--pink);color:var(--ink)}
+
+  .split{display:grid;grid-template-columns:var(--railw) 1fr;gap:14px;align-items:start}
+  .railcol{padding-top:52px}
+  .boardcol{min-width:0}
+  .rail{background:#fff;border-radius:14px;padding:12px;box-shadow:0 1px 2px rgba(58,28,20,.04),0 5px 14px rgba(58,28,20,.06)}
+  .rail .grp{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--label);padding:8px 6px 5px}
+  .qf{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:9px;cursor:pointer;font-size:12.5px}
+  .qf:hover{background:var(--parchment)}
+  .qf.on{background:var(--parchment);box-shadow:inset 0 0 0 1px var(--ink)}
+  .qf .sw{width:11px;height:11px;border-radius:50%;border:.5px solid rgba(0,0,0,.08);flex:none}
+  .qf .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--label)}
+  .rail .field{margin:4px 6px 8px}
+  .rail .lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);margin-bottom:5px;display:block}
+  .rail .ctrl{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--field-border);border-radius:9px;padding:8px 11px;font-family:'Playfair Display',serif;font-size:13.5px;color:var(--ink)}
+  .rail .ctrl .chev{color:var(--burgundy);font-size:9px}
+  .rail .search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--field-border);border-radius:99px;padding:9px 13px;color:#c8b8a8;font-size:12.5px;margin:2px 6px 6px}
+  .rail .sep{height:.5px;background:var(--hairline);margin:8px 6px}
+  .rail .showing{font-family:'Playfair Display',serif;font-size:13.5px;color:#6a5a50;padding:6px 8px 2px}
+  .rail .showing b{color:var(--ink);font-weight:500}
+
+  /* board */
+  .board{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(58,28,20,.05),0 6px 16px rgba(58,28,20,.08);height:var(--boardh);display:flex;flex-direction:column}
+  .winbar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:.5px solid var(--hairline);flex:none}
+  .winbar h3{font-family:'Playfair Display',serif;font-weight:500;font-size:16px;color:var(--ink)}
+  .winbar .nav span{width:26px;height:26px;border-radius:8px;border:1px solid var(--field-border);display:inline-flex;align-items:center;justify-content:center;color:#a08a78;margin-left:4px;font-size:11px}
+  .winbar .dens{margin-left:auto;display:inline-flex;background:var(--parchment);border:.5px solid var(--field-border);border-radius:99px;padding:3px}
+  .winbar .dens span{padding:5px 11px;border-radius:99px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#6a5a50}
+  .winbar .dens span.on{background:#fff;color:var(--ink)}
+  .ruler{height:34px;display:grid;grid-template-columns:repeat(13,1fr);border-bottom:.5px solid var(--hairline);flex:none;position:relative}
+  .ruler span{display:flex;flex-direction:column;justify-content:center;padding-left:7px;border-left:.5px solid var(--hairline);font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;color:#c0b0a0}
+  .ruler span b{font-family:'Playfair Display',serif;font-weight:500;font-size:11.5px;color:#6a5a50;letter-spacing:0}
+  .lanes{position:relative;flex:1;overflow:auto;background:repeating-linear-gradient(90deg,transparent 0 calc(7.69% - .5px),#f4eee6 calc(7.69% - .5px) 7.69%)}
+  .today{position:absolute;top:0;bottom:0;width:1.5px;background:var(--burgundy);z-index:5}
+  .today::before{content:'';position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:26px;height:22px;border-radius:99px;background:var(--ink)}
+  .today::after{content:'10';position:absolute;top:-27px;left:50%;transform:translateX(-50%);color:#fdfaf5;font-family:'JetBrains Mono',monospace;font-size:10px}
+  .cross{position:absolute;top:0;bottom:0;width:1px;background:rgba(58,28,20,.35);z-index:4;border-left:1px dashed rgba(58,28,20,.35);background:transparent}
+  .cross .tip{position:absolute;top:6px;left:6px;background:var(--ink);color:#fdfaf5;border-radius:7px;padding:3px 8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;white-space:nowrap}
+  .lane{height:44px;border-bottom:.5px solid var(--hairline);position:relative}
+  .bar{position:absolute;top:11px;height:22px;border-radius:99px;display:flex;align-items:center;gap:8px;padding:0 10px;font-size:11.5px;color:#4a3a30;white-space:nowrap;overflow:hidden}
+  .bar .who{font-family:'Playfair Display',serif;font-size:12.5px;color:var(--ink)}
+  .bar.est{background:repeating-linear-gradient(90deg,var(--sand) 0 7px,transparent 7px 11px);border:1px dashed var(--sand-d)}
+  .mk{position:absolute;top:13px;width:18px;height:18px;border-radius:50%;background:#fff;border:1.3px solid var(--burgundy);color:var(--burgundy);display:flex;align-items:center;justify-content:center;font-size:8px;z-index:3}
+  .mk.in{border-color:var(--sage-accent);color:#4c6249}
+  .mk.gh{border-style:dashed;border-color:#c8bcae;color:#b0a090;background:transparent}
+  .sect{padding:8px 12px;background:var(--parchment);border-bottom:.5px solid var(--hairline);font-family:'Playfair Display',serif;font-size:14px;color:var(--ink);position:sticky;top:0;z-index:2}
+  .sect .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:#6a5a50;margin-left:8px}
+  .calhead{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:0 2px 12px;height:52px}
+  .calhead .hleft{display:flex;align-items:center;gap:10px}
+  .calhead h3{font-family:'Playfair Display',serif;font-weight:500;font-size:19px;color:var(--ink);white-space:nowrap}
+  .calhead .nav span{width:28px;height:28px;border-radius:9px;border:1px solid var(--field-border);background:#fff;display:inline-flex;align-items:center;justify-content:center;color:#a08a78;font-size:12px;margin-right:4px}
+  .hsearch{justify-self:center;width:340px;border-radius:99px;padding:11px 18px;background:#fff;border:1px solid var(--field-border);box-shadow:0 1px 2px rgba(58,28,20,.05),0 3px 10px rgba(58,28,20,.06);margin:0}
+  .hsearch .kbd{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;border:.5px solid var(--field-border);border-radius:99px;padding:2px 7px;color:#b8a898}
+  .calhead .views{justify-self:end;margin-left:0}
+  .board{position:relative}
+  .denspill{position:absolute;right:14px;bottom:14px;z-index:8;display:inline-flex;background:rgba(253,250,245,.92);border:1px solid var(--field-border);border-radius:99px;padding:3px;box-shadow:0 2px 6px rgba(58,28,20,.10),0 8px 20px rgba(58,28,20,.12);backdrop-filter:blur(6px);opacity:.35;transition:opacity .18s}
+  .board:hover .denspill{opacity:1}
+  .denspill span{padding:6px 13px;border-radius:99px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#6a5a50}
+  .denspill span.on{background:var(--pink);color:var(--body-ink)}
+  /* variants */
+  .v1{--railw:250px;--boardh:560px}
+  .v2{--railw:236px;--boardh:600px}
+  .v2 .rail{background:transparent;box-shadow:none;padding:4px}
+  .v2 .rail .ctrl,.v2 .rail .search{background:#fff}
+  .v3{--railw:64px;--boardh:560px}
+  .v3 .rail .grp,.v3 .qf span:not(.sw),.v3 .field,.v3 .showing,.v3 .search{display:none}
+  .v3 .qf{justify-content:center;padding:10px 0}
+  .rec{margin-top:18px;max-width:940px;line-height:1.6;color:#4a3a30}
+  .rec b{font-weight:500;color:var(--body-ink)}
+</style>
+</head>
+<body>
+<h1>Calendar — layout changes only</h1>
+<div class="lede" style="color:#7c3a2a">The board inside the white card is drawn loosely and is <b>not normative</b>. Only the four numbered changes below are specified; everything inside the board stays exactly as v65 renders it.</div>
+<div class="seg" id="seg"><button data-v="v1">1 · Card rail</button><button class="on" data-v="v2">2 · Bare rail (locked)</button><button data-v="v3">3 · Icon rail</button></div>
+<div class="desc" id="desc"></div>
+
+<div class="page v2" id="page">
+  <div class="head"><div class="art"></div><div><h2>Query Centre</h2><div class="sub">Every query, every response — track every step of your journey so far</div></div>
+    <span class="cta">+ Log new query</span></div>
+  <div class="split">
+    <div class="railcol">
+    <div class="rail">
+      <div class="showing">Showing <b>26</b> of <b>26</b></div>
+      <div class="grp">Whose court</div>
+      <div class="qf on"><span class="sw" style="background:#f0ebe4"></span>All queries<span class="n">26</span></div>
+      <div class="qf"><span class="sw" style="background:var(--pinkS)"></span>With you<span class="n">4</span></div>
+      <div class="qf"><span class="sw" style="background:var(--sage)"></span>With the agent<span class="n">17</span></div>
+      <div class="qf"><span class="sw" style="background:var(--offer)"></span>Offers<span class="n">1</span></div>
+      <div class="qf"><span class="sw" style="background:#fff;border:1px solid var(--field-border)"></span>Past expected<span class="n">5</span></div>
+      <div class="sep"></div>
+      <div class="field"><span class="lab">Filter</span><span class="ctrl">All<span class="chev">▾</span></span></div>
+      <div class="field"><span class="lab">Group</span><span class="ctrl">Status<span class="chev">▾</span></span></div>
+      <div class="field"><span class="lab">Sort</span><span class="ctrl">Date sent<span class="chev">▾</span></span></div>
+    </div>
+    </div>
+    <div class="boardcol">
+    <div class="calhead">
+      <span class="hleft"><span class="nav"><span>‹</span><span>›</span></span><h3>28 July – 25 October 2026</h3></span>
+      <span class="search hsearch">⌕ Search agents or agencies<span class="kbd">/</span></span>
+      <span class="views"><span>Grid</span><span>List</span><span>Board</span><span class="on">Calendar</span></span>
+    </div>
+    <div class="board">
+      <div class="ruler" id="ruler"></div>
+      <div class="lanes" id="lanes"></div>
+      <span class="denspill"><span class="on">Comfortable</span><span>Compact</span></span>
+    </div>
+    </div>
+  </div>
+</div>
+
+<div class="rec">
+  <p><b>What this ref specifies — and nothing else:</b></p>
+  <p style="margin-top:6px">1. A <b>bare control rail</b> at the left of the Calendar view only, 236px: count, the five quick filters as a vertical list with swatches and counts, then Filter / Group / Sort as labelled controls. No card behind them; only the fields are white.</p>
+  <p style="margin-top:4px">2. The <b>calendar header row</b> sits on the page ground, <b>above the board only</b> — it starts at the board's left edge, not above the rail. Pager and date range left, search centred on the board's width, view switch right.</p>
+  <p style="margin-top:4px">3. The <b>density control</b> becomes a sticky pill at the board's bottom-right, faded to 35% until the board is hovered.</p>
+  <p style="margin-top:4px">4. The board card contains <b>only the ruler and the lanes</b>; the page toolbar and the board's own winbar are gone from this view.</p>
+  <p style="margin-top:10px"><b>Everything inside the board is unchanged.</b> Rows, bars, marks, ruler, sections, today line, crosshair, tinting, row heights — all v65, exactly as To-do renders them. The drawing here is loose and must not be copied. Separately: the today line and the crosshair are missing on dev and are wiring defects to fix, not design.</p>
+</div>
+
+<script>
+const weeks=["30 Jul","6","13","20","27","3 Sep","10","17","24","1 Oct","8","15","22"];
+document.getElementById("ruler").innerHTML=weeks.map((w,i)=>`<span>${w.includes(" ")?`<b>${w.split(" ")[0]}</b>${w.split(" ")[1]}`:`<b>${w}</b>`}</span>`).join("");
+const rows=[
+ ["Queried",7,[["Harriet Vane-Coe","Stillwater Reps","sand",14,58,[[13,"→","out"],[58,"⌛","gh"]]],
+  ["Daniel O'Rourke","Inkwell & Stone","sand",18,62,[[17,"→","out"],[62,"⌛","gh"]]],
+  ["Eleanor Whitfield","Greenfield Literary","sand",16,54,[[15,"→","out"],[54,"⌛","gh"]]],
+  ["William Tan","Foxglove Literary","sand",2,40,[[1,"→","out"],[40,"⌛","gh"]]]]],
+ ["Partial Requested",3,[["Jonathan Marsh","The Marsh Agency","est",30,58,[[29,"←","in"]]]]],
+ ["Full Sent",3,[["Sophie Dunn","Curtis Vane","sage",6,74,[[5,"→","out"],[44,"🔔","out"],[74,"⌛","gh"]]],
+  ["Daniel O'Rourke","Inkwell & Stone","sage",20,86,[[19,"→","out"],[86,"⌛","gh"]]]]],
+ ["Offer",1,[["Tom Ellery","Curtis Vane","offer",52,72,[[51,"✓","out"]]]]],
+];
+const pc=v=>v/100*100;
+let h=`<div class="today" style="left:52%"></div><div class="cross" style="left:66%"><span class="tip">Tue 22 Sept</span></div>`;
+rows.forEach(([sect,n,rs])=>{
+  h+=`<div class="sect">${sect}<span class="n">${n}</span></div>`;
+  rs.forEach(([nm,ag,tone,s,e,marks])=>{
+    const bar = tone==="est"
+      ? `<div class="bar est" style="left:${s}%;width:${e-s}%"><span class="who">${nm}</span> ${ag}</div>`
+      : `<div class="bar" style="left:${s}%;width:${e-s}%;background:var(--${tone})"><span class="who">${nm}</span> ${ag}</div>`;
+    h+=`<div class="lane">${bar}${marks.map(([at,g,k])=>`<span class="mk ${k==='in'?'in':k==='gh'?'gh':''}" style="left:calc(${at}% - 9px)">${g}</span>`).join("")}</div>`;
+  });
+});
+document.getElementById("lanes").innerHTML=h;
+const D={v1:"<b>1 · Card rail.</b> A white 250px rail: count, search, the five quick filters as a vertical list with swatches and counts, then Filter / Group / Sort as labelled controls. Board takes full height with internal scroll.",
+ v2:"<b>2 · Bare rail (locked).</b> No card — the controls sit directly on the page ground; only the fields are white. Calendar header sits on the page ground too: pager and range left, search centred, view switch right. Density is a sticky pill at the board's bottom-right, faded until hover.",
+ v3:"<b>3 · Icon rail.</b> Collapsed to 64px: swatches only, everything else in popovers. Better as the rail's collapsed state than as its default."};
+document.getElementById("desc").innerHTML=D.v2;
+document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#seg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");document.getElementById("page").className="page "+b.dataset.v;document.getElementById("desc").innerHTML=D[b.dataset.v];});
+</script>
+</body>
+</html>
