@@ -414,6 +414,94 @@ export const monotonePath = (p: [number, number][]): string => {
   return d;
 };
 
+/**
+ * ══════════════════════════ §3 · THE SAMPLED, CLAMPED STACK ══════════════════════════
+ *
+ * ⚠️ INTERPOLATING EACH CUMULATIVE BOUNDARY INDEPENDENTLY LETS ADJACENT BOUNDARIES CROSS BETWEEN
+ * KNOTS, AND THAT IS THE WHOLE FAULT. A monotone fit is GLOBAL: each series' tangents come from its
+ * own neighbouring values, so two series that are equal at every knot still take different paths
+ * between them. The sage boundary (sand + sage) could therefore rise above the total line
+ * (sand + sage + pink) in the gaps while agreeing exactly at every data point.
+ *
+ * ⚠️ REPRODUCED NUMERICALLY AGAINST THIS FILE'S OWN TANGENT MATHS BEFORE ANYTHING WAS CHANGED:
+ *
+ *     sand+sage    9   9   9  10  12  15  15  15  15
+ *     total        9   9   9  10  12  15  16  16  15     (pink is 0 for the first six)
+ *
+ * Equal at knots 0–5. Between knots 4 and 5 the sage curve exceeds the total by 0.2963 units — about
+ * 3px on a 16-unit axis at this chart's height. It needs a band that is zero for a stretch and
+ * non-zero later, which is an ordinary shape for a writer: several quiet weeks, then a request.
+ *
+ * ⚠️ AND IT IS WHY EVERY PIXEL SWEEP ABOVE THE LINE CAME BACK CLEAN. With the harness account's own
+ * data the crossing does not occur, so three passes of "nothing paints above the line" were true
+ * readings of a page that happened not to be showing the fault. Four different causes were proposed
+ * and measured away — paint order, two data sources, a stroke on the top band, the marker's ring —
+ * and all four were genuinely innocent.
+ *
+ * THE FIX IS NOT TO FIT AT ALL AFTER CLAMPING: sample every boundary from the same interpolation,
+ * clamp each to the one above it, then draw polylines through the clamped samples. Nothing is
+ * re-fitted, so nothing can cross; and the line IS the topmost sampled array, so it cannot disagree
+ * with the stack by construction rather than by agreement.
+ */
+
+/** Fritsch–Carlson tangents for one series of evenly spaced values. */
+export const hermiteCoeffs = (vals: readonly number[]): number[] => {
+  const n = vals.length;
+  if (n < 2) return vals.map(() => 0);
+  const d: number[] = [];
+  for (let i = 0; i < n - 1; i++) d.push(vals[i + 1] - vals[i]);
+  const m: number[] = new Array(n).fill(0);
+  m[0] = d[0];
+  m[n - 1] = d[n - 2];
+  for (let i = 1; i < n - 1; i++) m[i] = d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2;
+  for (let i = 0; i < n - 1; i++) {
+    if (d[i] === 0) { m[i] = 0; m[i + 1] = 0; continue; }
+    const a = m[i] / d[i], b = m[i + 1] / d[i], q = a * a + b * b;
+    if (q > 9) { const t = 3 / Math.sqrt(q); m[i] = t * a * d[i]; m[i + 1] = t * b * d[i]; }
+  }
+  return m;
+};
+
+/** Evaluate that Hermite spline at `steps + 1` evenly spaced positions across the series. */
+export const sampleCurve = (vals: readonly number[], steps: number): number[] => {
+  const n = vals.length;
+  if (n === 0) return [];
+  if (n === 1) return new Array(steps + 1).fill(vals[0]);
+  const m = hermiteCoeffs(vals);
+  const out: number[] = [];
+  for (let k = 0; k <= steps; k++) {
+    const u = (k / steps) * (n - 1);
+    const i = Math.min(n - 2, Math.floor(u));
+    const t = u - i;
+    const h00 = 2 * t * t * t - 3 * t * t + 1;
+    const h10 = t * t * t - 2 * t * t + t;
+    const h01 = -2 * t * t * t + 3 * t * t;
+    const h11 = t * t * t - t * t;
+    out.push(h00 * vals[i] + h10 * m[i] + h01 * vals[i + 1] + h11 * m[i + 1]);
+  }
+  return out;
+};
+
+/**
+ * Sample every cumulative boundary from one interpolation, then walk each sample index from the TOP
+ * DOWN applying `boundary[b] = min(boundary[b], boundary[b + 1])`, and clamp to ≥ 0.
+ *
+ * ⚠️ TOP DOWN, NOT BOTTOM UP. Clamping upward would raise a lower boundary to meet an overshooting
+ * one above it, which fixes the crossing by inflating a band's value; clamping downward pulls the
+ * overshoot back to the ceiling it must not exceed. The order is the difference between correcting
+ * the fault and hiding it under a bigger number.
+ */
+export const sampleStack = (series: readonly (readonly number[])[], steps: number): number[][] => {
+  const curves = series.map((v) => sampleCurve(v, steps));
+  if (!curves.length) return [];
+  const len = curves[0].length;
+  for (let k = 0; k < len; k++) {
+    for (let b = curves.length - 2; b >= 0; b--) curves[b][k] = Math.min(curves[b][k], curves[b + 1][k]);
+    for (let b = 0; b < curves.length; b++) curves[b][k] = Math.max(0, curves[b][k]);
+  }
+  return curves;
+};
+
 /* ══════════════════════════ §3 · EVENT PINS ══════════════════════════ */
 
 export interface ChartEvent {

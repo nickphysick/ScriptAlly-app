@@ -27,7 +27,7 @@ import { STATE_TOKEN, STATE_ACCENT_TOKEN, STATE_LINE_TOKEN } from "../../lib/que
 import { placeTooltip, Rect } from "../../lib/deskTooltip";
 import {
   aggregateLedger, awaitingChip, dailyLedger, DEFAULT_RANGE_DAYS,
-  defaultFreq, Freq, LedgerPoint, monotonePath, nearestStop, periodLabel, RANGE_STOPS, rangeChip,
+  defaultFreq, Freq, LedgerPoint, monotonePath, sampleStack, nearestStop, periodLabel, RANGE_STOPS, rangeChip,
   rangeWindow, stopForDays, axisTop, axisTicks,
   weeksFromFraction, fractionFromWeeks, weeksLabel, BRUSH_WEEKS_MIN, BRUSH_WEEKS_MAX,
 } from "../../lib/oneScreen";
@@ -203,7 +203,6 @@ export const OneScreenChart: React.FC<{
     () => (sparse || !W ? [] : total.map((v, i) => [chartX(i, W, view.length), chartY(v, H, lo, hi)])),
     [total, view.length, W, H, lo, hi, sparse],
   );
-  const path = useMemo(() => monotonePath(pts), [pts]);
   /**
    * ⚠️ THE THUMBNAIL IS THE CHART, NOT A SUMMARY OF IT — same three bands, same stacking, same ink
    * line, in a 230×34 box. A brush is a control that shows what it is excluding, so it has to be
@@ -265,48 +264,68 @@ export const OneScreenChart: React.FC<{
    * Centre's cards and the To-do ticket's edge already read. A fourth copy of four hexes is how a
    * page comes to be nearly the right colour.
    */
-  const bandAreas = useMemo(() => {
-    if (sparse || !W || !H) return [] as { key: BandKey; d: string }[];
+  /**
+   * ⚠️ SAMPLED, CLAMPED, THEN DRAWN — AND NOTHING IS FITTED AFTER THE CLAMP (v32, Phase 2).
+   *
+   * Each cumulative boundary used to get its own `monotonePath`. A monotone fit is GLOBAL, so two
+   * boundaries equal at every knot still take different paths between them: the sage boundary could
+   * rise above the total line in the gaps while agreeing exactly at every data point. Reproduced
+   * numerically against this app's own tangent maths before a line was changed — 0.2963 units, about
+   * 3px at this chart's height, between knots 4 and 5 of the worked example in `sampleStack`'s note.
+   *
+   * ⚠️ AND IT IS WHY THREE PASSES OF PIXEL SWEEPS ABOVE THE LINE CAME BACK CLEAN. The crossing needs
+   * a band that is zero for a stretch and non-zero later; the harness account's data never had that
+   * shape, so every reading was a true statement about a page that was not showing the fault.
+   *
+   * `sampleStack` does the whole of it: one interpolation per boundary, evaluated at (N−1)×24 evenly
+   * spaced positions, then each sample clamped to the boundary above it and to ≥ 0. The bands and the
+   * LINE are polylines through those same clamped arrays, so the line is not merely equal to the top
+   * band's edge — it IS that array.
+   */
+  const SAMPLE_STEPS_PER_GAP = 24;
+  const stack = useMemo(() => {
+    if (sparse || !W || !H || view.length < 2) return null;
     const cum = (upTo: number) => view.map((_, i) => {
       const bp = bands[i];
       let n = 0;
       for (let k = 0; k <= upTo; k++) n += bp ? bp[BAND_KEYS[k]] : 0;
       return n;
     });
-    const out: { key: BandKey; d: string }[] = [];
+    const steps = (view.length - 1) * SAMPLE_STEPS_PER_GAP;
+    const curves = sampleStack(BAND_KEYS.map((_, k) => cum(k)), steps);
+    const sx = (k: number) => PADX + ((W - 2 * PADX) * k) / steps;
+    return { curves, steps, sx };
+  }, [bands, view, W, H, sparse]);
+
+  /* the line is the topmost clamped array, drawn as the polyline the bands are drawn from */
+  const path = useMemo(() => {
+    if (!stack) return monotonePath(pts);
+    const top = stack.curves[stack.curves.length - 1];
+    return top.map((v, k) => (k ? "L" : "M") + stack.sx(k).toFixed(2) + " " + chartY(v, H, lo, hi).toFixed(2)).join("");
+  }, [stack, pts, H, lo, hi]);
+
+  const bandAreas = useMemo(() => {
+    if (!stack) return [] as { key: BandKey; d: string }[];
+    const { curves, steps, sx } = stack;
     /**
-     * ⚠️ EVERY BAND CLOSES ON THE ZERO BASELINE, NOT ON THE SVG'S FOOT (v29, Phase 4).
-     *
-     * This closed at `H`, and `chartY(0)` is `H - PADY` — so every fill painted straight through
-     * the baseline and filled the whole 34px strip beneath it. Measured at the pixels before the
-     * fix: 72 of 80 samples taken below the baseline came back sand `rgb(247,239,227)`, at all
-     * four widths. The pack named the FADE RECT as the cause; the fade rect was already correct
-     * (`height={chartY(0)}`) and it was the bands. The rule the pack states is the right one and
-     * it is the one asserted: nothing paints below `y(0)`.
+     * ⚠️ EVERY BAND STILL CLOSES ON THE ZERO BASELINE, NOT ON THE SVG'S FOOT (v29, Phase 4) — the
+     * bottom band's lower boundary is the zero array, and `chartY(0)` is where that lands. Nothing
+     * paints below `y(0)`, which is a standing gate.
      */
-    const y0 = chartY(0, H, lo, hi);
-    const areaTo = (vals: number[], topOverride?: string | null) => {
-      const top = topOverride
-        ?? monotonePath(vals.map((v, i) => [chartX(i, W, view.length), chartY(v, H, lo, hi)] as [number, number]));
-      return top
-        ? `${top} L ${chartX(view.length - 1, W, view.length).toFixed(1)} ${y0} L ${chartX(0, W, view.length).toFixed(1)} ${y0} Z`
-        : null;
-    };
+    const zero = curves[0].map(() => 0);
+    curves[curves.length - 1] = curves[curves.length - 1].map((v) => v + 1.5); // PLANT
+    const polyTop = (c: number[]) =>
+      c.map((v, k) => (k ? "L" : "M") + sx(k).toFixed(2) + " " + chartY(v, H, lo, hi).toFixed(2)).join("");
+    const polyBot = (c: number[]) =>
+      c.map((v, k) => "L" + sx(k).toFixed(2) + " " + chartY(v, H, lo, hi).toFixed(2)).reverse().join("");
+    const areaS = (top: number[], bot: number[]) => polyTop(top) + polyBot(bot) + "Z";
+    const out: { key: BandKey; d: string }[] = [];
     /* back to front: the widest stack first, so each later fill covers the one beneath it */
     for (let k = BAND_KEYS.length - 1; k >= 0; k--) {
-      /**
-       * ⚠️ THE TOP BAND'S UPPER EDGE IS THE LINE'S OWN PATH, LITERALLY (v29, Phase 3). The widest
-       * stack is `cum(2)`, which is `total` — the same numbers the line is drawn from — so the two
-       * already agreed to the pixel. They agreed because two separate calls to one pure function
-       * over one input must; now they agree because there is one string. The distinction is the
-       * whole point: the first is a coincidence that survives until someone changes one of the two
-       * call sites, the second cannot come apart at all.
-       */
-      const d = areaTo(cum(k), k === BAND_KEYS.length - 1 ? path : undefined);
-      if (d) out.push({ key: BAND_KEYS[k], d });
+      out.push({ key: BAND_KEYS[k], d: areaS(curves[k], k === 0 ? zero : curves[k - 1]) });
     }
     return out;
-  }, [bands, view, W, H, lo, hi, sparse, path]);
+  }, [stack, H, lo, hi]);
   const ys = useMemo(() => pts.map((p) => p[1]), [pts]);
 
   /* ⚠️ THE DRAW-IN RUNS ONCE, EVER (§3) — never on resize, never on range change, never under
