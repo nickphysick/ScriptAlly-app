@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8">
+<title>ScriptAlly · Query Centre calendar — rail & controls</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ground:#f4f0ea;--card:#fdfbf7;--ink:#2a1f18;--ink2:#6b5d54;--ink3:#a29587;--mono-c:#9c8f82;
+--line:#e6dfd6;--line2:#efe8e0;--sand:#f7efe3;--sand-a:#e6d6bf;--sage:#e0e5dd;--sage-a:#b9c6b4;
+--pink:#f5e6df;--pink-a:#e8c8bc;--slate:#d7e0e8;--slate-a:#adc2d2;--grey:#e4e1db;--grey-a:#cfc9c0;
+--serif:"Playfair Display",serif;--sans:"Source Sans 3",sans-serif;--mono:"JetBrains Mono",monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:16px}
+.wrap{max-width:1560px;margin:0 auto;padding:28px 30px 90px}
+h1{font-family:var(--serif);font-weight:600;font-size:24px;margin:0 0 4px}
+.lede{color:var(--ink3);margin:0 0 26px;font-size:15px}
+.opt{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 18px}
+.opt label{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden}
+.seg button{border:0;background:transparent;padding:5px 11px;font:inherit;font-family:var(--mono);font-size:11px;color:var(--ink3);cursor:pointer}
+.seg button.on{background:var(--ink);color:#fff}
+.note{font-size:14px;color:var(--ink3);line-height:1.55;margin:14px 2px 0}
+.note b{color:var(--ink2);font-weight:500}
+
+/* ---------- header row ---------- */
+.page{display:grid;grid-template-columns:236px minmax(0,1fr);column-gap:22px;align-items:start}
+.page > .railtop, .page > .hdrow{align-self:end}
+.railtop{grid-column:1;grid-row:1;display:flex;align-items:flex-end;padding:0 0 17px}
+.railtop .showing{font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.1;color:var(--ink3);white-space:nowrap}
+.railtop .showing b{font-weight:600;color:var(--ink)}
+.hdrow{grid-column:2;grid-row:1;display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:end;padding:0 0 14px}
+.railcol{grid-column:1;grid-row:2}
+.boardcol{grid-column:2;grid-row:2;min-width:0}
+.guides .hdrow,.guides .railcol,.guides .boardcol,.guides .railtop{outline:1px dashed rgba(124,58,42,.35);outline-offset:2px}
+.left{display:flex;align-items:baseline;gap:14px;min-width:0}
+.nav{display:flex;gap:2px}
+.nav span{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;color:var(--ink3);cursor:pointer;font-size:14px}
+.range{font-family:var(--serif);font-weight:500;font-size:26px;line-height:1.1;white-space:nowrap}
+.showing{font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.1;color:var(--ink3);white-space:nowrap}
+.showing b{font-weight:600;color:var(--ink)}
+.searchbox{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 14px;max-width:420px;width:100%;justify-self:center}
+.searchbox svg{width:16px;height:16px;stroke:var(--ink3);fill:none;stroke-width:1.7}
+.searchbox input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:15px}
+.searchbox .kbd{font-family:var(--mono);font-size:10px;color:var(--ink3);border:1px solid var(--line);border-radius:5px;padding:2px 6px}
+.views{display:inline-flex;background:#f0ebe3;border-radius:11px;padding:3px;gap:2px}
+.views button{border:0;background:none;border-radius:8px;padding:7px 14px;font:inherit;font-size:14.5px;color:var(--ink2);cursor:pointer;display:flex;align-items:center;gap:7px}
+.views button.on{background:#f5e2da;color:var(--ink)}
+
+/* ---------- body ---------- */
+
+.rail{padding-top:2px}
+.court{margin:0 0 22px}
+.court h4{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mono-c);margin:0 0 8px}
+.crow{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;font-size:15px;color:var(--ink2);cursor:pointer}
+.crow i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.crow b{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink3);font-weight:400}
+.crow.on{background:#fff;border:1px solid var(--line);color:var(--ink);font-weight:500}
+.crow.on b{color:var(--ink)}
+.crow:not(.on):hover{background:rgba(255,255,255,.6)}
+
+/* control fields */
+.field{margin-bottom:14px}
+.field .lab{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mono-c);margin:0 0 6px 2px}
+.trig{width:100%;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit;font-size:15px;color:var(--ink);cursor:pointer;text-align:left}
+.trig .v{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trig .cnt{font-family:var(--mono);font-size:11px;color:var(--ink3)}
+.trig svg{width:11px;height:11px;stroke:var(--ink3);fill:none;stroke-width:1.6;flex:none}
+.trig.open{border-color:#cdbfb1;box-shadow:0 0 0 3px rgba(124,58,42,.07)}
+/* inline label variant */
+.field.inline{display:grid;grid-template-columns:56px minmax(0,1fr);align-items:center;gap:12px}
+.field.inline .lab{margin:0;text-align:right}
+
+/* ---------- popover ---------- */
+.pop{position:absolute;z-index:60;background:var(--card);border:1px solid #d9cfc3;border-radius:14px;box-shadow:0 16px 40px rgba(42,31,24,.16);padding:14px 16px 12px;display:none}
+.pop.show{display:block}
+.pop h5{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mono-c);margin:0 0 9px}
+.pop .sec+.sec{margin-top:14px;padding-top:12px;border-top:1px solid var(--line2)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(176px,1fr));gap:2px 16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:4px 14px}
+.oneCol{display:grid;grid-template-columns:1fr;gap:2px}
+.o{display:flex;align-items:center;gap:9px;white-space:nowrap;padding:6px 8px;border-radius:8px;font-size:14.5px;color:var(--ink);cursor:pointer}
+.o:hover{background:#f6f2ec}
+.o .cb{width:15px;height:15px;border:1.5px solid #cdbfb1;border-radius:4px;background:#fff;display:grid;place-items:center;flex:none}
+.o.radio .cb{border-radius:50%}
+.o.radio.on .cb{background:#fff;border-color:#7c3a2a}
+.o.radio.on .cb:after{content:"";width:7px;height:7px;border:0;border-radius:50%;background:#7c3a2a;transform:none}
+.o.on .cb{background:#f5e2da;border-color:#7c3a2a}
+.o.on .cb:after{content:"";width:7px;height:4px;border-left:1.5px solid #7c3a2a;border-bottom:1.5px solid #7c3a2a;transform:rotate(-45deg) translate(1px,-1px)}
+.o .n{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink3)}
+.sd{width:13px;height:13px;flex:none;display:inline-block}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:#fff;border-radius:99px;padding:5px 11px;font-size:14px;cursor:pointer}
+.chip.on{background:#fff;border-color:#7c3a2a;box-shadow:inset 0 0 0 1px #7c3a2a}
+.chip.on:before{content:"";width:7px;height:4px;border-left:1.5px solid #7c3a2a;border-bottom:1.5px solid #7c3a2a;transform:rotate(-45deg) translate(1px,-1px);margin-right:1px}
+.chip .n{font-family:var(--mono);font-size:10.5px;color:var(--ink3)}
+.popfoot{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:11px;border-top:1px solid var(--line2)}
+.popfoot .clear{font:inherit;font-size:13.5px;color:#7a4a3a;background:none;border:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:#d4c8bc}
+.popfoot .done{margin-left:auto;border:1px solid #e8c8bc;background:#f0d9cd;border-radius:9px;padding:6px 14px;font:inherit;font-size:14px;cursor:pointer;color:var(--ink)}
+.sortrow{display:flex;align-items:center;gap:8px;margin-top:10px}
+.dirseg{display:inline-flex;background:#f0ebe3;border-radius:8px;padding:2px}
+.dirseg button{border:0;background:none;border-radius:6px;padding:5px 10px;font:inherit;font-size:13px;color:var(--ink2);cursor:pointer}
+.dirseg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(42,31,24,.08)}
+
+/* ---------- board ---------- */
+.board{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;position:relative;box-shadow:0 1px 2px rgba(42,31,24,.03),0 8px 24px rgba(42,31,24,.04)}
+.ruler{position:relative;height:74px;border-bottom:1px solid var(--line2)}
+.months{position:absolute;top:10px;left:0;right:0;height:16px}
+.months span{position:absolute;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--mono-c);padding-left:8px;border-left:1px solid var(--line)}
+.days{position:absolute;top:38px;left:0;right:0;height:22px}
+.days span{position:absolute;transform:translateX(-50%);font-family:var(--mono);font-size:11px;color:var(--mono-c)}
+.todaydot{position:absolute;top:34px;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--mono);font-size:12px;transform:translateX(-50%);z-index:3}
+.todayline{position:absolute;top:64px;bottom:0;width:0;border-left:1.5px dashed #2a1f18;opacity:.75;z-index:2}
+.todayline.bad{border-left-color:#b6483a;opacity:.9}
+.lanes{position:relative;height:330px;overflow:hidden}
+.lane{position:absolute;left:0;right:0;height:96px}
+.qcard{position:absolute;background:#fff;border:1px solid var(--line);border-radius:12px;padding:0;overflow:hidden;box-shadow:0 2px 6px rgba(42,31,24,.05)}
+.qcard .cap{display:flex;align-items:center;gap:8px;padding:6px 12px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.qcard .cap .who{margin-left:auto;color:var(--ink2);opacity:.7}
+.qcard .bd{padding:9px 12px 11px}
+.qcard .nm{font-family:var(--serif);font-size:18px}
+.qcard .nm em{font-style:italic;font-size:15px;color:var(--ink2);margin-left:8px}
+.qcard .mt{font-size:14px;color:var(--ink2);margin-top:2px}
+.qcard .mt span{font-family:var(--mono);font-size:10.5px;color:var(--mono-c);margin-left:8px}
+.marker{position:absolute;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ink3);background:#fff;transform:translate(-50%,-50%);z-index:3}
+</style></head>
+<body data-scriptally-ref="qc-calendar-ref-v1">
+<div class="wrap">
+<h1>Query Centre · calendar rail &amp; controls</h1>
+<p class="lede">Four fixes. Toggles show the alternatives where there's a choice to make.</p>
+
+<div class="opt" style="display:none">
+  <label>Guides <span class="seg" data-o="gd"><button data-v="1">On</button><button class="on" data-v="0">Off</button></span></label>
+  <label>Today line <span class="seg" data-o="today"><button data-v="bad">As built (off by half a cell)</button><button class="on" data-v="ok">Aligned to the dot</button></span></label>
+  <label>Rail labels <span class="seg" data-o="lab"><button class="on" data-v="above">Above the field</button><button data-v="inline">Inline, right-aligned</button></span></label>
+  <label>Popover layout <span class="seg" data-o="pop"><button data-v="col">One column (as built)</button><button data-v="grid">Grouped grid</button><button class="on" data-v="chips">Chips</button></span></label>
+</div>
+
+<div class="page" data-probe="page">
+<div class="railtop" data-probe="railtop"><div class="showing" id="showing" data-probe-text="showing"></div></div>
+<div class="hdrow" data-probe="header-row">
+  <div class="left">
+    <div class="nav"><span>‹</span><span>›</span></div>
+    <div class="range" data-probe-text="range">28 July – 25 October 2026</div>
+  </div>
+  <div class="searchbox" data-probe="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input placeholder="Search agents or agencies"><span class="kbd">/</span></div>
+  <div class="views" data-probe="views">
+    <button>Grid</button><button>List</button><button>Board</button><button class="on">Calendar</button>
+  </div>
+</div>
+
+  <div class="railcol" data-probe="rail"><div class="rail">
+    <div class="court" data-probe="court-list">
+      <h4>Whose court</h4>
+      <div class="crow on"><i style="background:#cdc3b7"></i>All queries<b>26</b></div>
+      <div class="crow"><i style="background:#e8c8bc"></i>With you<b>4</b></div>
+      <div class="crow"><i style="background:#b9c6b4"></i>With the agent<b>17</b></div>
+      <div class="crow"><i style="background:#adc2d2"></i>Offers<b>1</b></div>
+      <div class="crow"><i style="background:#cfc9c0"></i>Past expected<b>0</b></div>
+    </div>
+
+    <div class="field" data-probe="field-filter" id="f-filter">
+      <span class="lab">Filter</span>
+      <button class="trig" onclick="openPop('filter',this)"><span class="v">All</span><span class="cnt"></span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+    </div>
+    <div class="field" id="f-group">
+      <span class="lab">Group</span>
+      <button class="trig" onclick="openPop('group',this)"><span class="v">None</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+    </div>
+    <div class="field" id="f-sort">
+      <span class="lab">Sort</span>
+      <button class="trig" onclick="openPop('sort',this)"><span class="v">Date sent</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+    </div>
+  </div>
+
+  </div>
+  <div class="boardcol"><div class="board" data-probe="board">
+    <div class="ruler" id="ruler" data-probe="ruler"></div>
+    <div class="lanes" id="lanes" data-probe="lanes"></div>
+  </div></div>
+</div>
+
+<p class="note" id="note"></p>
+</div>
+
+<div class="pop" id="pop" data-probe="popover"></div>
+
+<script>
+const opt={today:'ok',lab:'above',pop:'chips',gd:'0'};
+document.querySelectorAll('.seg[data-o]').forEach(sg=>sg.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+  sg.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  opt[sg.dataset.o]=b.dataset.v;render();}));
+
+function sd(kind,size=13){
+  const out=['queried','partial-sent','full-sent'].includes(kind);
+  const ring=out?'#7c3a2a':'#7f9a78',c=out?'#f5e2da':'#dfe8da',m=out?'#7c3a2a':'#3f5a3c';
+  const depth={queried:0,'partial-req':.5,'partial-sent':.5,'full-req':1,'full-sent':1,rr:1}[kind]||0;
+  let fill='';
+  if(depth===.5)fill=`<path d="M6.5 1.6A4.9 4.9 0 0 1 6.5 11.4Z" fill="${ring}" opacity=".35"/>`;
+  if(depth===1)fill=`<circle cx="6.5" cy="6.5" r="4.9" fill="${ring}" opacity=".35"/>`;
+  const mark=out?`<path d="M4.3 6.5h4.2M7 5l1.5 1.5L7 8" stroke="${m}" stroke-width="1.2" fill="none" stroke-linecap="round"/>`
+                :`<path d="M8.7 6.5H4.5M6 5L4.5 6.5 6 8" stroke="${m}" stroke-width="1.2" fill="none" stroke-linecap="round"/>`;
+  return `<svg class="sd" width="${size}" height="${size}" viewBox="0 0 13 13"><circle cx="6.5" cy="6.5" r="5.7" fill="${c}" stroke="${ring}" stroke-width="1.3"/>${fill}${mark}</svg>`;
+}
+
+/* ---- ruler + lanes ---- */
+const DAYS=['30','6','13','20','27','3','10','17','24','1','8','15','22'];
+const MONTHS=[[0,'Jul'],[2,'Aug'],[6,'Sept'],[9,'Oct']];
+const TODAY=6; // index of the 10 Sept tick
+function renderBoard(){
+  const r=document.getElementById('ruler'),w=r.clientWidth,n=DAYS.length;
+  // cell width and cell centres — the ruler labels sit at centres
+  const cw=w/n, cx=i=>cw*i+cw/2;
+  let m='<div class="months">'+MONTHS.map(([i,t])=>`<span style="left:${cw*i}px">${t}</span>`).join('')+'</div>';
+  m+='<div class="days">'+DAYS.map((d,i)=>i===TODAY?'':`<span style="left:${cx(i)}px">${d}</span>`).join('')+'</div>';
+  m+=`<div class="todaydot" data-probe="today-dot" style="left:${cx(TODAY)}px">10</div>`;
+  // as built: the line is drawn from the cell's left edge, the dot from its centre
+  const lineX = opt.today==='ok' ? cx(TODAY) : cw*TODAY;
+  m+=`<div class="todayline" data-probe="today-line" ${opt.today==='bad'?'bad':''}" style="left:${lineX}px"></div>`;
+  r.innerHTML=m;
+  const L=document.getElementById('lanes');
+  const rows=[
+    {k:'partial-req',lab:'Partial requested',who:'With you',nm:'Jonathan Marsh',ag:'The Marsh Agency',mt:'Due 3 Oct',sub:'3 weeks left',a:3.2,b:9.4,tint:'#f5e6df',edge:'#e8c8bc'},
+    {k:'queried',lab:'Queried',who:'With the agent',nm:"Daniel O'Rourke",ag:'Inkwell & Stone',mt:'Reply expected 25 Sept',sub:'15 days waiting',a:2.1,b:8.1,tint:'#e0e5dd',edge:'#b9c6b4'},
+    {k:'queried',lab:'Queried',who:'With the agent',nm:'Eleanor Whitfield',ag:'Greenfield Literary',mt:'Reply expected 10 Sept',sub:'0 days waiting',a:1.7,b:6.4,tint:'#e0e5dd',edge:'#b9c6b4'},
+    {k:'queried',lab:'Queried',who:'With the agent',nm:'Harriet Vane-Coe',ag:'Stillwater Reps',mt:'Reply expected 23 Sept',sub:'13 days waiting',a:1.4,b:7.6,tint:'#e0e5dd',edge:'#b9c6b4'}];
+  L.innerHTML=rows.map((q,i)=>{
+    const x1=cx(q.a),x2=cx(q.b);
+    return `<div class="lane" style="top:${i*84}px">
+      <div class="qcard" style="left:${x1}px;width:${x2-x1}px">
+        <div class="cap" style="background:${q.tint};border-bottom:1px solid ${q.edge}">${sd(q.k,14)}<span>${q.lab}</span><span class="who">${q.who}</span></div>
+        <div class="bd"><div class="nm">${q.nm}<em>${q.ag}</em></div><div class="mt">${q.mt}<span>${q.sub}</span></div></div>
+      </div>
+      <div class="marker" style="left:${x2}px;top:48px"></div></div>`;
+  }).join('');
+}
+
+/* ---- popovers ---- */
+const STATUSES=[['queried','Queried',12],['partial-req','Partial requested',3],['partial-sent','Partial sent',2],
+ ['full-req','Full requested',1],['full-sent','Full sent',3],['rr','Revise & resubmit',0],['offer','Offer',1],['closed','Closed',4]];
+const GROUPS=[['none','None'],['status','Status'],['agency','Agency'],['month','Month sent'],['manuscript','Manuscript'],['court','Whose court']];
+const SORTS=[['sent','Date sent'],['expected','Reply expected'],['waiting','Days waiting'],['agent','Agent name'],['agency','Agency'],['status','Status']];
+let picked=new Set(), grp='none', srt='sent', dir='desc';
+
+function optRow(id,label,count,on,type){
+  const dot=STATUSES.some(s=>s[0]===id)?sd(id):'';
+  const single=(type==='group'||type==='sort');
+  return `<div class="o ${on?'on':''} ${single?'radio':''}" onclick="toggle('${type}','${id}')"><span class="cb"></span>${dot}<span>${label}</span>${count!=null?`<span class="n">${count}</span>`:''}</div>`;
+}
+function chipRow(id,label,count,on,type){
+  const dot=STATUSES.some(s=>s[0]===id)?sd(id,12):'';
+  return `<button class="chip ${on?'on':''}" onclick="toggle('${type}','${id}')">${dot}<span>${label}</span>${count!=null?`<span class="n">${count}</span>`:''}</button>`;
+}
+function toggle(type,id){
+  if(type==='filter'){picked.has(id)?picked.delete(id):picked.add(id)}
+  if(type==='group'){grp=id}
+  if(type==='sort'){srt=id}
+  paintTriggers(); if(cur) openPop(cur.kind,cur.el,true);
+}
+function setDir(d){dir=d;paintTriggers();if(cur)openPop(cur.kind,cur.el,true)}
+let cur=null;
+function openPop(kind,el,keep){
+  const pop=document.getElementById('pop');
+  if(!keep&&cur&&cur.kind===kind){closePop();return}
+  cur={kind,el};
+  document.querySelectorAll('.trig').forEach(t=>t.classList.remove('open'));
+  el.classList.add('open');
+  const cols = opt.pop==='col' ? 'oneCol' : (kind==='filter'?'grid2':'grid2');
+  let body='';
+  if(kind==='filter'){
+    if(opt.pop==='chips'){
+      body=`<div class="sec"><h5>Status</h5><div class="chips">${STATUSES.map(([id,l,c])=>chipRow(id,l,c,picked.has(id),'filter')).join('')}</div></div>
+            <div class="sec"><h5>Whose court</h5><div class="chips">${[['wy','With you',4],['wa','With the agent',17],['of','Offers',1]].map(([id,l,c])=>chipRow(id,l,c,picked.has(id),'filter')).join('')}</div></div>`;
+    }else{
+      body=`<div class="sec"><h5>Status</h5><div class="${cols}">${STATUSES.map(([id,l,c])=>optRow(id,l,c,picked.has(id),'filter')).join('')}</div></div>
+            <div class="sec"><h5>Whose court</h5><div class="${cols}">${[['wy','With you',4],['wa','With the agent',17],['of','Offers',1],['pe','Past expected',0]].map(([id,l,c])=>optRow(id,l,c,picked.has(id),'filter')).join('')}</div></div>`;
+    }
+    body+=`<div class="popfoot"><button class="clear" onclick="picked.clear();paintTriggers();openPop('filter',cur.el,true)">Clear all</button><button class="done" onclick="closePop()">Done</button></div>`;
+  }
+  if(kind==='group'){
+    body=`<div class="sec"><h5>Group by</h5><div class="${opt.pop==='col'?'oneCol':'grid2'}">${GROUPS.map(([id,l])=>optRow(id,l,null,grp===id,'group')).join('')}</div></div>`;
+  }
+  if(kind==='sort'){
+    const list = `<div class="${opt.pop==='col'?'oneCol':'grid2'}">${SORTS.map(([id,l])=>optRow(id,l,null,srt===id,'sort')).join('')}</div>`;
+    body=`<div class="sec"><h5>Sort by</h5>${list}
+      <div class="sortrow"><span style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mono-c)">Direction</span>
+      <span class="dirseg"><button class="${dir==='desc'?'on':''}" onclick="setDir('desc')">Newest first</button><button class="${dir==='asc'?'on':''}" onclick="setDir('asc')">Oldest first</button></span></div></div>`;
+  }
+  pop.innerHTML=body;
+  pop.style.width = kind!=='filter' ? '452px' : (opt.pop==='chips' ? '440px' : (opt.pop==='col' ? '256px' : '452px'));
+  pop.classList.add('show');
+  const r=el.getBoundingClientRect();
+  pop.style.left=(window.scrollX+r.left)+'px';
+  pop.style.top=(window.scrollY+r.bottom+8)+'px';
+  const pr=pop.getBoundingClientRect();
+  if(pr.right>window.innerWidth-16) pop.style.left=(window.scrollX+window.innerWidth-16-pr.width)+'px';
+}
+function closePop(){document.getElementById('pop').classList.remove('show');document.querySelectorAll('.trig').forEach(t=>t.classList.remove('open'));cur=null}
+document.addEventListener('click',e=>{if(!e.target.closest('.pop')&&!e.target.closest('.trig'))closePop()});
+function paintShowing(){
+  const el=document.getElementById('showing'); if(!el)return;
+  const total=26, shown = picked.size ? 12 : total;   // stand-in for the filtered count
+  el.innerHTML = shown===total ? `<b>${total}</b> queries` : `Showing <b>${shown}</b> of <b>${total}</b>`;
+}
+function paintCensus(){
+  const el=document.getElementById('showing'); if(!el)return;
+  const total=26, shown = picked.size? 12 : 26;
+  el.innerHTML = shown===total ? `<b>${total}</b> queries` : `Showing <b>${shown}</b> of <b>${total}</b>`;
+}
+function paintTriggers(){
+  paintCensus();
+  paintShowing();
+  const f=document.querySelector('#f-filter .trig');
+  f.querySelector('.v').textContent = picked.size? [...picked].length+' selected' : 'All';
+  f.querySelector('.cnt').textContent = picked.size? '' : '';
+  document.querySelector('#f-group .trig .v').textContent = (GROUPS.find(g=>g[0]===grp)||[])[1];
+  document.querySelector('#f-sort .trig .v').textContent = (SORTS.find(s=>s[0]===srt)||[])[1] + (dir==='asc'?' ↑':' ↓');
+}
+const NOTES={
+ today:{bad:'<b>As built.</b> The dot is placed at the day cell’s <em>centre</em> and the line at its <em>left edge</em> — half a cell apart, which is what you’re seeing. Two mappings for one date.',
+        ok:'<b>Fixed.</b> One mapping. The dot and the line both take the cell centre, so they cannot drift. The gate is that their x-coordinates are equal, not merely close.'},
+ lab:{above:'<b>Labels above.</b> Mono caption over the field, 6px of air, left-aligned with it. The label stops fighting the box for the same horizontal space.',
+      inline:'<b>Labels inline.</b> Right-aligned in a fixed 56px column with a 12px gap. Tidier if you like the alignment, but it costs the field width the rail can’t spare.'},
+ pop:{col:'<b>As built.</b> One column, so eight statuses plus four courts is a twelve-item scroll.',
+      grid:'<b>Grouped grid.</b> Two columns per section, sections separated by a hairline, a count against each option and a Clear all. Everything visible without scrolling.',
+      chips:'<b>Chips.</b> The same options as a wrapped chip set. Fastest to scan, but selection state is carried by fill alone, which competes with the state colours elsewhere on this page.'}
+};
+function render(){
+  document.body.classList.toggle('guides',opt.gd==='1');
+  document.querySelectorAll('.field').forEach(f=>f.classList.toggle('inline',opt.lab==='inline'));
+  renderBoard(); paintTriggers(); if(cur) openPop(cur.kind,cur.el,true);
+  document.getElementById('note').innerHTML=[NOTES.today[opt.today],NOTES.lab[opt.lab],NOTES.pop[opt.pop]].join('<br><br>');
+}
+render(); window.addEventListener('resize',()=>{renderBoard();if(cur)openPop(cur.kind,cur.el,true)});
+</script>
+</body></html>
