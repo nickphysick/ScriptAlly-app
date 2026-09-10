@@ -5,6 +5,19 @@
    would have dressed this board in a retired one's rules with nothing to point at. See
    `TaskBoard.tsx`'s header. ── */
 
+/* ⚠️ THE TOKENS THIS SHEET READS, DEFINED WHERE IT CAN REACH THEM (three-views round, Phase 3).
+   `--edge`, `--muted2` and `--paper` were read by five rules here and defined by none of this
+   board's ancestors, so a `var()` on an unresolved property made each declaration invalid at
+   computed-value time: the column count's border fell to `none` at width 0, the caption's colour
+   fell back to `currentColor` — measured as `rgb(58,28,20)`, which is the signature — and the
+   card's disc lost its rim. Three rules reading perfectly correctly, through a green build. It is
+   the same fault the ticket's dashed rules had one phase earlier, on a third surface: `.tlc`,
+   `.tpn` and `.tdf` each define these on their own root and the board is a sibling of all three.
+   `--hair` and `--white` happen to resolve from further up; they are stated here too, so this
+   sheet does not depend on which ancestor a future layout hands it. */
+.brd { --hair:#e7ddd2; --hair2:#e0d5c8; --edge:#e8e0d8; --paper:#fdfaf5; --white:#ffffff;
+       --muted:#9c8878; --muted2:#8a7a6c; }
+
 .brd {
   display: grid;
   grid-auto-flow: column;
@@ -80,37 +93,34 @@
 /* the urgent card's resting mark — the burgundy head. Phase 6 adds the motion, elsewhere. */
 .brd-card.urgent { border-top-color: var(--burg); }
 
-.brd-card .main { display: flex; align-items: center; gap: 10px; padding: 10px 12px 9px; min-width: 0; }
+.brd-card .main { display: flex; align-items: center; gap: 10px; padding: 11px 12px; min-width: 0; }
 .brd-card .disc {
-  flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%;
+  flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
-  background: var(--pink); color: var(--burg);
-  font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 500;
+  background: var(--paper); border: 1px solid var(--edge); color: #7a6551;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500;
 }
 .brd-card .who { min-width: 0; display: flex; flex-direction: column; }
 /* ⚠️ 1.3, NOT THE REF'S 1.15 — the house floor for mixed-case Playfair. A deed is a sentence. */
 .brd-card .nm {
-  font-family: 'Playfair Display', serif; font-size: 16px; color: var(--ink2); line-height: 1.3;
+  font-family: 'Playfair Display', serif; font-size: 16px; color: var(--ink2); line-height: 1.15;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .brd-card .ag {
-  font-size: 11px; color: #6a584a; font-weight: 300; margin-top: 2px;
+  font-size: 11px; color: #6a584a; font-weight: 300; margin-top: 3px;
+  display: flex; align-items: center; gap: 6px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-.brd-card .fact {
-  display: flex; align-items: center; gap: 8px; min-width: 0;
-  padding: 7px 12px 8px; border-top: 1px solid var(--hair);
-}
-.brd-card .fact .l {
-  display: flex; align-items: center; gap: 7px; min-width: 0;
-  font-size: 11.5px; color: var(--ink2);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.brd-card .fact .m2 {
-  margin-left: auto; flex-shrink: 0;
-  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--muted2); white-space: nowrap;
-}
-/* burgundy is the urgent lens — the same rule the ticket's figures follow */
-.brd-card .fact .m2.late { color: var(--burg); }
+
+/* ── the wait, at the card's right (three-views round, Phase 3; ref `.bcard .bw`) ────────────────
+   ⚠️ A PLAYFAIR NUMERAL OVER A MONO UNIT, which is why the span travels as two halves rather than
+   as one formatted string. The burgundy is the urgent lens and nothing else: a silence that has
+   run two years is a fact about the agency, not a debt the writer is behind on. */
+.brd-card .bw { margin-left: auto; flex-shrink: 0; text-align: right; line-height: 1.1; }
+.brd-card .bw b { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--ink2); font-weight: 500; display: block; }
+.brd-card .bw b.late { color: var(--burg); }
+.brd-card .bw span { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.brd-card .bw .none { color: #c8bcae; }
+.brd-card .ag b { font-weight: 500; color: var(--ink2); }
+.brd-card .ag svg { width: 11px; height: 11px; flex-shrink: 0; }

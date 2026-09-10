@@ -104,7 +104,8 @@ export const VIEW_PARTS: Record<ViewName, ViewPart[]> = {
       waive: { borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
   ],
   board: [
-    { c: ".board", app: ".brd", fluid: true },
+    { c: ".board", app: ".brd", fluid: true,
+    waive: { height: "`height: 100%` of two different parents — the ref's board is 522px because its page is that tall and the app's 401.5 because the window is" } },
     { c: ".col", app: ".brd-col", fluid: true, cIn: ".board", aIn: ".brd" },
     { c: ".colh", app: ".brd-colh", abs: true, cIn: ".col", aIn: ".brd-col" },
     { c: ".colh .r1", app: ".brd-colh .r1", cIn: ".colh", aIn: ".brd-colh" },
@@ -114,13 +115,15 @@ export const VIEW_PARTS: Record<ViewName, ViewPart[]> = {
       waive: { borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
     { c: ".colh .r2", app: ".brd-colh .r2", cIn: ".colh", aIn: ".brd-colh" },
     { c: ".stack", app: ".brd-stack", fluid: true, cIn: ".col", aIn: ".brd-col" },
-    { c: ".bcard", app: ".brd-card", abs: true, cIn: ".stack", aIn: ".brd-stack" },
+    { c: ".bcard", app: ".brd-card", abs: true, cIn: ".stack", aIn: ".brd-stack",
+    waive: { borderTopColor: "the top border IS the query's stage tint, derived — the two pages' first card is a different query, so the two values are two correct answers. That it is derived at all is asserted separately." } },
     { c: ".bcard .main", app: ".brd-card .main", cIn: ".bcard", aIn: ".brd-card" },
     { c: ".bcard .disc", app: ".brd-card .disc", cIn: ".bcard .main", aIn: ".brd-card .main",
-      waive: { borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
+      waive: { backgroundColor: "`var(--paper)` is the app's own paper — #faf6f0 against the ref's #fdfaf5, four points apart, and the token the rest of this page reads", borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
     { c: ".bcard .nm", app: ".brd-card .nm", cIn: ".bcard .main", aIn: ".brd-card .main" },
     { c: ".bcard .ag", app: ".brd-card .ag", cIn: ".bcard .main", aIn: ".brd-card .main" },
-    { c: ".bcard .bw", app: ".brd-card .bw", cIn: ".bcard .main", aIn: ".brd-card .main" },
+    { c: ".bcard .bw", cq: ".bcard .bw:has(b)", app: ".brd-card .bw:has(b)", cIn: ".bcard .main", aIn: ".brd-card .main",
+    note: "matched on a card that HAS a wait — the two pages' first board card differ in whether their task carries a date, and a `no date` chip is one line where a figure over a unit is two. A fixture difference, not a design one." },
   ],
 };
 

@@ -19,7 +19,7 @@ test.setTimeout(900_000);
 type R = { id: string; ok: boolean; note: string };
 /* ⚠️ THE LAST RECORDED COUNT, NOT A ROUND NUMBER BELOW IT — a floor set under the real figure is a
    guard that cannot fire, and the suite could measure half of itself and still clear it. */
-const FLOOR = 10;
+const FLOOR = 14;
 
 test("the three views' own claims", async ({ page }) => {
   const out: R[] = [];
@@ -238,6 +238,54 @@ test("the three views' own claims", async ({ page }) => {
   add("L4 · the row's edge IS a ladder token, resolved — the same derivation as the ticket's",
     rs.tok.startsWith("--state-") && rgbOf(rs.resolved) === rs.painted,
     (rs.tok || "no var()") + " resolves " + (rs.resolved || "—") + " · painted " + rs.painted);
+
+  /* ── the board ────────────────────────────────────────────────────────────────────────────── */
+  await selectTodoView(page, "board");
+  await page.waitForTimeout(500);
+
+  const board = await page.evaluate(() => {
+    const cards = [...document.querySelectorAll(".brd-card")].filter((e) => e.getBoundingClientRect().height > 0);
+    if (!cards.length) return null;
+    const first = cards[0];
+    const sizeOf = (sel: string) => {
+      const e = first.querySelector(sel);
+      return e ? Math.round(Number.parseFloat(getComputedStyle(e).fontSize) * 10) / 10 : 0;
+    };
+    /* every text leaf's rendered size, so "the task is the largest" is a claim about the CARD and
+       not about the two elements someone remembered to compare */
+    const leaves = [...first.querySelectorAll("*")]
+      .filter((e) => e.children.length === 0 && (e.textContent || "").trim().length > 1)
+      .map((e) => ({ cls: String((e as HTMLElement).className || "").split(" ")[0],
+        px: Math.round(Number.parseFloat(getComputedStyle(e).fontSize) * 10) / 10 }));
+    return {
+      tallest: Math.round(Math.max(...cards.map((c) => c.getBoundingClientRect().height)) * 10) / 10,
+      count: cards.length,
+      facts: document.querySelectorAll(".brd-card .fact").length,
+      nm: sizeOf(".nm"),
+      leaves,
+      dotBeforeAg: !!first.querySelector(".ag svg"),
+      /* ⚠️ THE FIRST CHILD IS `StatusDot`'s OWN WRAPPER, not the svg — the app draws the real
+         component where the ref inlines a bare `<svg>`, so a `tagName === "svg"` test reported
+         "the dot does not lead" about a dot that plainly does. The claim is that the MARK leads. */
+      agFirstChildIsDot: !!first.querySelector(".ag")?.firstElementChild?.querySelector("svg")
+        || first.querySelector(".ag")?.firstElementChild?.tagName === "svg",
+    };
+  });
+  expect(board, "no visible board card").not.toBeNull();
+  const b = board!;
+  add("B1 · every board card is one row — 70px or less at 1440",
+    b.tallest <= 70, "tallest of " + b.count + " cards: " + b.tallest + "px");
+  /* ⚠️ DELETED, NOT HIDDEN. The ref's own stylesheet says `display:none` on `.fact`, which is a
+     mockup keeping something it stopped drawing; a hidden element is still in the document, still
+     in the tab order of anything focusable, and still a thing the next reader has to account for. */
+  add("B2 · the fact row is GONE from the DOM, not hidden",
+    b.facts === 0, b.facts + " `.fact` elements in the board");
+  add("B3 · the task is the card's largest text",
+    b.nm > 0 && b.leaves.every((l) => l.px <= b.nm),
+    "task " + b.nm + "px · leaves " + JSON.stringify(b.leaves));
+  add("B4 · the status dot leads the agent line, inside it",
+    b.dotBeforeAg && b.agFirstChildIsDot,
+    "dot in `.ag` " + b.dotBeforeAg + " · it is the first child " + b.agFirstChildIsDot);
 
   await cpage.close();
 

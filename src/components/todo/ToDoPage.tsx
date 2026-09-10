@@ -99,7 +99,7 @@ import {
 } from "../../lib/todoListView";
 import { useNavigate, useLocation } from "react-router-dom";
 import { groupColumn, TaskGroup } from "../../lib/todoGroups";
-import { paneCopy, listManuscript, showsManuscriptColumn } from "../../lib/taskListRow";
+import { paneCopy, listManuscript, showsManuscriptColumn, listFragment } from "../../lib/taskListRow";
 import { daysBetween, elapsedParts, elapsedPhrase } from "../../lib/elapsed";
 import { materialRows, materialName, anchorNoun, bandForward, holderRows } from "../../lib/todoHandoff";
 import { notifyGroups, reminderFields } from "../../lib/offerNotify";
@@ -3498,11 +3498,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       <TaskBoard
         cards={groupsForList().flatMap((g) => g.cards)}
         selectedKey={docked.card?.key}
-        factOf={(c) => c.due}
         spanOf={(c) => {
           const inp = listRowInputs(c);
+          /* ⚠️ THE FIGURE AND ITS UNIT FROM THE ONE SPAN DERIVATION — `listFragment`, which the
+             list's stamp and the ticket's figures both read. `elapsedPhrase` returned them joined,
+             and the contract sets the numeral in Playfair over a mono unit, which a single string
+             cannot carry. */
+          const f = listFragment({ card: c, ...inp });
           return {
-            text: typeof inp.days === "number" ? elapsedPhrase(inp.days) : "—",
+            figure: f.absent ? "" : (f.figure ?? ""),
+            unit: f.absent ? "" : (f.tail ?? ""),
             late: isUrgentCard(c, inp.days),
           };
         }}

@@ -50,12 +50,14 @@ export const TaskBoard: React.FC<{
   cards: BoardCard[];
   selectedKey?: string;
   /** the mono fact under each card — the row's own `due` chip, passed in rather than re-derived */
-  factOf: (c: BoardCard) => string;
+
   /** the elapsed figure, and whether it is a clock the writer is answerable to */
-  spanOf: (c: BoardCard) => { text: string; late: boolean };
+  /* the wait, as its two halves — a Playfair numeral over a mono unit, which is what the contract
+     draws and what a single formatted string could not carry */
+  spanOf: (c: BoardCard) => { figure: string; unit: string; late: boolean };
   urgentOf: (c: BoardCard) => boolean;
   onOpen: (c: BoardCard) => void;
-}> = ({ cards, selectedKey, factOf, spanOf, urgentOf, onOpen }) => {
+}> = ({ cards, selectedKey, spanOf, urgentOf, onOpen }) => {
   /* ⚠️ ONE PASS, NOT FIVE FILTERS. Five `cards.filter(…)` calls would each re-derive the category
      of every card — the same answer computed five times, and five chances for one of them to be
      asked differently. */
@@ -87,19 +89,26 @@ export const TaskBoard: React.FC<{
                 return (
                   <button type="button" className={cls} key={c.key} onClick={() => onOpen(c)}
                           aria-pressed={selectedKey === c.key}>
+                    {/* ⚠️ ONE ROW (three-views round, Phase 3). The card carried a second row —
+                        a hairline, a fact sentence and a mono span — and the contract draws the top
+                        block alone: disc, task, the agent line WITH THE STATUS DOT IN FRONT OF IT,
+                        and the wait at the right. The fact row is deleted rather than hidden; the
+                        ref's own stylesheet says `display:none`, which is a mockup keeping a thing
+                        it stopped drawing, not an instruction to ship one. */}
                     <span className="main">
                       <span className="disc" aria-hidden>{c.who ? c.initials : "✍"}</span>
                       <span className="who">
                         <span className="nm">{c.title}</span>
-                        <span className="ag">{c.who ? c.record || c.who : "Your own note"}</span>
+                        <span className="ag">
+                          {c.status && <StatusDot status={c.status} overrideSize={11} />}
+                          {c.who ? <><b>{c.who}</b>{c.record ? ` · ${c.record}` : ""}</> : "Your own note"}
+                        </span>
                       </span>
-                    </span>
-                    <span className="fact">
-                      <span className="l">
-                        {c.status && <StatusDot status={c.status} overrideSize={11} />}
-                        {factOf(c)}
+                      <span className="bw">
+                        {span.figure
+                          ? <><b className={span.late ? "late" : ""}>{span.figure}</b><span>{span.unit}</span></>
+                          : <span className="none">no date</span>}
                       </span>
-                      <span className={span.late ? "m2 late" : "m2"}>{span.text}</span>
                     </span>
                   </button>
                 );
