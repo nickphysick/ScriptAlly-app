@@ -278,12 +278,35 @@
 }
 /* ⚠️ THE OVERDUE MARKER IS INK, AND IT IS THE ONLY THING THAT MARKS LATENESS. No red, no fifth
    band tint, no pill. `design-refs/query-overdue-marker.html` shows what was refused. */
-.qcc-mk {
-  display: inline-flex; align-items: center; justify-content: center; flex: none;
-  width: 16px; height: 16px; border-radius: 50%; border: 1.4px solid var(--ink, #1c130f);
-  font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: var(--ink, #1c130f);
-  line-height: 1;
+/* ── the register chip ──────────────────────────────────────────────────────────────────────────
+   ⚠️ THIS REPLACES THE `!` RING (`.qcc-mk`), WHICH IS RETIRED RATHER THAN HIDDEN — the component
+   stopped emitting it in the same commit, so a surviving rule here would be a selector with no
+   subject. The ring marked that something needed attention; the chip NAMES which of five registers
+   a query is in, which is the thing a reader scanning a grid is actually looking for.
+
+   ⚠️ THE VALUES ARE `query-fact-register-v1.html`'s treatment C, and the fills are the app's own
+   state tokens rather than the ref's local copies: `--state-you` IS the ref's `--pinkS`, and
+   `--state-offer` its `--offer`, to the byte. Reading the tokens means a retone reaches the chip;
+   restating the hex would make this the one surface that stayed behind. */
+.qcc-rc {
+  display: inline-flex; align-items: center; gap: 5px; flex: none;
+  border-radius: 99px; padding: 3px 9px; margin-top: 1px;
+  font-family: var(--font-mono); font-size: 8px; letter-spacing: .12em; text-transform: uppercase;
+  line-height: 1.35; white-space: nowrap;
 }
+.qcc-fact--calm   .qcc-rc { background: var(--parchment, #fdfaf5); border: .5px solid var(--hairline, #ece0d2); color: #8a7a6c; }
+.qcc-fact--late   .qcc-rc { background: #fff; border: 1.2px solid var(--ink, #1c130f); color: var(--ink, #1c130f); }
+.qcc-fact--you    .qcc-rc { background: var(--state-you); border: .5px solid var(--state-you-deep); color: var(--body-ink, #3a1c14); }
+.qcc-fact--offer  .qcc-rc { background: var(--state-offer); border: .5px solid var(--state-offer-deep); color: var(--body-ink, #3a1c14); }
+.qcc-fact--closed .qcc-rc { background: var(--state-closed); border: .5px solid #d0c9c0; color: #6a5a50; }
+
+/* the sentence takes its weight from the register: the three that ask something of the reader are
+   ink and medium; the two that do not are quieter. The ref's own split. */
+.qcc-fact--calm   .qcc-s { color: #6a5a50; }
+.qcc-fact--late   .qcc-s,
+.qcc-fact--you    .qcc-s,
+.qcc-fact--offer  .qcc-s { color: var(--ink, #1c130f); font-weight: 500; }
+.qcc-fact--closed .qcc-s { color: #8a7a6c; }
 
 /* ── the materials cluster ──────────────────────────────────────────────────────────────────── */
 .qcc-mats { position: relative; display: inline-flex; align-items: center; gap: 4px; flex: none; }

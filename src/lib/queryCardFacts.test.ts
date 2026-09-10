@@ -79,13 +79,19 @@ describe("turn — five courts, and the counts must partition", () => {
   });
 });
 
+/* ⚠️ THESE STRINGS ARE THE COPY, AND THE COPY IS NORMATIVE FROM A REF.
+   `design-refs/query-verbs-copy-v2-locked.html`'s C · Relational column is the authority; the
+   sentences are pinned verbatim here the same way `landingCopy` is, because a sentence that reads
+   slightly better than the artefact it was signed off from no longer matches it.
+   No agent name is passed in these fixtures, so every one reads "The agent" — the documented
+   fallback, and the case that proves a nameless record still produces a sentence about a person. */
 describe("the six sentence shapes", () => {
   it("agent-side, inside the window — v14's standing copy: what is coming, and when you would chase", () => {
     /* ⚠️ RETARGETED (v14). The caption stated how long it had been WAITING — a fact about the past
        the leaf already shows. It now states the two things the reader can act on: how far off the
        reply is, and when the next nudge falls. The sentence is unchanged. */
     const f = cardFacts(q({ dateSent: ago(14) }), TODAY, { agencyWeeks: 8 });
-    expect(sentenceText(f.sentence)).toBe("Reply expected by 16 Oct");
+    expect(sentenceText(f.sentence)).toBe("Waiting on The agent — reply expected by 16 Oct");
     expect(f.caption).toBe("6 weeks away · no nudge set");
     expect(f.captionParts).toEqual(["6 weeks away", "no nudge set"]);
     expect(f.attention).toBe(false);
@@ -107,14 +113,14 @@ describe("the six sentence shapes", () => {
 
   it("agent-side, past the window — the marker and the nudge", () => {
     const f = cardFacts(q({ dateSent: ago(70) }), TODAY, { agencyWeeks: 8 });
-    expect(sentenceText(f.sentence)).toBe("Reply was expected by 21 Aug — 14 days past");
+    expect(sentenceText(f.sentence)).toBe("The agent is 14 days past the window");
     expect(f.caption).toBe("2 months waiting · nudge available");
     expect(f.attention).toBe(true);
   });
 
   it("⚠️ nobody stated a window — the card says so and invents nothing", () => {
     const f = cardFacts(q({ dateSent: ago(30) }), TODAY, { agencyWeeks: null });
-    expect(sentenceText(f.sentence)).toBe("Waiting — no reply window stated");
+    expect(sentenceText(f.sentence)).toBe("Waiting on The agent — no reply window stated");
     expect(f.expectedReply).toBeNull();
     expect(f.attention).toBe(false);
   });
@@ -124,7 +130,7 @@ describe("the six sentence shapes", () => {
       q({ status: QueryStatus.FULL_REQUESTED, lastStatusChange: ago(9), dateSent: ago(60) }),
       TODAY,
     );
-    expect(sentenceText(f.sentence)).toBe("Full — not yet sent");
+    expect(sentenceText(f.sentence)).toBe("The agent is waiting on your full");
     expect(f.caption).toBe("9 days since request");
     expect(f.leaf?.caption).toBe("requested");
     expect(f.attention).toBe(false);
@@ -132,19 +138,19 @@ describe("the six sentence shapes", () => {
 
   it("R&R reads Revisions", () => {
     const f = cardFacts(q({ status: QueryStatus.REVISE_RESUBMIT, lastStatusChange: ago(3) }), TODAY);
-    expect(sentenceText(f.sentence)).toBe("Revisions — not yet sent");
+    expect(sentenceText(f.sentence)).toBe("The agent is waiting on your revisions");
   });
 
   it("an offer awaits the writer", () => {
     const f = cardFacts(q({ status: QueryStatus.OFFER, lastStatusChange: ago(2) }), TODAY);
-    expect(sentenceText(f.sentence)).toBe("Awaiting your decision");
+    expect(sentenceText(f.sentence)).toBe("The agent is waiting on your answer");
     expect(f.caption).toBe("2 days since offer");
     expect(f.leaf?.caption).toBe("received");
   });
 
   it("no response states the window it waited out", () => {
     const f = cardFacts(q({ status: QueryStatus.NO_RESPONSE, dateSent: ago(120) }), TODAY, { agencyWeeks: 8 });
-    expect(sentenceText(f.sentence)).toBe("No reply — window was 8 weeks");
+    expect(sentenceText(f.sentence)).toBe("The agent went quiet — window closed 2 Jul");
     expect(f.caption).toBe("4 months since sending");
     expect(f.leaf?.caption).toBe("sent");
   });
@@ -154,7 +160,7 @@ describe("the six sentence shapes", () => {
       q({ status: QueryStatus.REJECTED, dateSent: ago(60), fullSentDate: ago(40), lastStatusChange: ago(5) }),
       TODAY,
     );
-    expect(sentenceText(f.sentence)).toBe("Pass after full");
+    expect(sentenceText(f.sentence)).toBe("The agent passed — after the full");
     expect(f.caption).toBe("replied after 5 weeks");
     expect(f.leaf?.caption).toBe("closed");
   });
@@ -195,7 +201,7 @@ describe("the writer's own expected date beats the agency's window", () => {
       writerExpectedSetAt: TODAY.toISOString(),
     } as Partial<Query>);
     const f = cardFacts(withOverride, TODAY, { agencyWeeks: 8 });
-    expect(sentenceText(f.sentence)).toBe("Reply expected by 25 Dec");
+    expect(sentenceText(f.sentence)).toBe("Waiting on The agent — reply expected by 25 Dec");
     expect(f.expectedSource).toBe("writer");
 
     /* Same query, no override: the agency's window is what shows. */
@@ -206,20 +212,27 @@ describe("the writer's own expected date beats the agency's window", () => {
 });
 
 describe("closedSentence — the token never reaches the card", () => {
+  /* ⚠️ RETARGETED, NOT REBASELINED. The claim is unchanged — the stage comes from `recomputeQuery`'s
+     own dates and no internal token reaches the card — but the copy is now RELATIONAL, so a pass
+     names the agent and the writer's own act names the writer. The old strings were the neutral
+     register ("Pass after full"); the law they guarded is the mapping, not the wording. */
   it("maps the tokens and derives the rejection stage from recomputeQuery output", () => {
-    expect(closedSentence({ status: QueryStatus.WITHDRAWN } as Query)).toBe("Withdrawn by you");
-    expect(closedSentence({ status: QueryStatus.REJECTED, closingReason: "agentClosedSubmissions" } as Query)).toBe(
-      "Agency closed to submissions",
-    );
-    expect(closedSentence({ status: QueryStatus.REJECTED, fullSentDate: ago(1) } as Query)).toBe("Pass after full");
-    expect(closedSentence({ status: QueryStatus.REJECTED, partialSentDate: ago(1) } as Query)).toBe("Pass after partial");
-    expect(closedSentence({ status: QueryStatus.REJECTED } as Query)).toBe("Pass");
+    expect(closedSentence({ status: QueryStatus.WITHDRAWN } as Query, "Marcus", "6 Jun")).toBe("You withdrew — 6 Jun");
+    /* ⚠️ WITHDRAWN NAMES THE WRITER EVEN WITH AN AGENT TO HAND — the writer is who acted */
+    expect(closedSentence({ status: QueryStatus.WITHDRAWN } as Query, "Marcus", null)).toBe("You withdrew");
+    expect(closedSentence({ status: QueryStatus.REJECTED, closingReason: "agentClosedSubmissions" } as Query, "Fenella", null))
+      .toBe("Fenella closed to submissions");
+    expect(closedSentence({ status: QueryStatus.REJECTED, fullSentDate: ago(1) } as Query, "Marcus", null))
+      .toBe("Marcus passed — after the full");
+    expect(closedSentence({ status: QueryStatus.REJECTED, partialSentDate: ago(1) } as Query, "Marcus", null))
+      .toBe("Marcus passed — after the partial");
+    expect(closedSentence({ status: QueryStatus.REJECTED } as Query, "Marcus", null)).toBe("Marcus passed — after the query");
   });
 
   it("⚠️ never prints a raw internal token", () => {
     const tokens = ["noResponseAfterWindow", "withdrew", "agentClosedSubmissions", "other"];
     for (const t of tokens) {
-      const out = closedSentence({ status: QueryStatus.REJECTED, closingReason: t } as Query);
+      const out = closedSentence({ status: QueryStatus.REJECTED, closingReason: t } as Query, "Marcus", null);
       expect(out).not.toContain(t);
       expect(out).not.toMatch(/[a-z][A-Z]/); /* no camelCase survives */
     }
@@ -414,7 +427,7 @@ describe("⚠️ a decided offer reads as closed, without rewriting the record",
     expect(f.stage).toBe("offer");
     expect(f.turn).toBe("offer");
     expect(f.turnWord).toBe("Offer");
-    expect(sentenceText(f.sentence)).toBe("Awaiting your decision");
+    expect(sentenceText(f.sentence)).toBe("The agent is waiting on your answer");
   });
 
   it("accepted goes grey and names the decision", () => {
@@ -436,7 +449,7 @@ describe("⚠️ a decided offer reads as closed, without rewriting the record",
        status closes itself. Without the decision the card would say "Withdrawn by you" — true, and
        silent about the offer, which is the more useful fact. */
     const withdrawn = q({ status: QueryStatus.WITHDRAWN, lastStatusChange: ago(2), dateSent: ago(60) });
-    expect(sentenceText(cardFacts(withdrawn, TODAY).sentence)).toBe("Withdrawn by you");
+    expect(sentenceText(cardFacts(withdrawn, TODAY).sentence)).toBe("You withdrew — 2 Sep");
     expect(sentenceText(cardFacts(withdrawn, TODAY, { offerDecision: "declined" }).sentence)).toBe("Offer declined");
   });
 
@@ -469,7 +482,7 @@ describe("⚠️ a decided offer reads as closed, without rewriting the record",
 describe("⚠️ a closed card does not invent how long the reply took", () => {
   it("says nothing when there is no last activity to measure to", () => {
     const f = cardFacts(q({ status: QueryStatus.REJECTED, dateSent: ago(60) }), TODAY);
-    expect(sentenceText(f.sentence)).toBe("Pass");
+    expect(sentenceText(f.sentence)).toBe("The agent passed — after the query");
     expect(f.caption, "the card invented an interval").toBe("");
   });
 

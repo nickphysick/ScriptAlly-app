@@ -20,7 +20,7 @@ import "./queryCard.css";
 import { StatusDot } from "../StatusDot";
 import type { QueryStatus } from "../../types";
 import { MATERIAL_ROW_NAMES, type MaterialKind } from "../../lib/agentMaterials";
-import { MATERIAL_SLOTS, sentenceText, type CardFacts } from "../../lib/queryCardFacts";
+import { MATERIAL_SLOTS, REGISTER_LABEL, sentenceText, type CardFacts } from "../../lib/queryCardFacts";
 
 /* ── the four marks ─────────────────────────────────────────────────────────────────────────── */
 /* Line-drawn at 1.8, matching the ref. `currentColor` so the faded state is one opacity rule
@@ -131,17 +131,18 @@ export const QueryCard: React.FC<QueryCardProps> = ({
           )}
         </span>
 
-        <span className="qcc-fact">
+        <span className={`qcc-fact qcc-fact--${facts.register}`}>
+          {/* ⚠️ THE CHIP REPLACES THE `!` RING, AND IT IS NOT THE RING WITH WORDS ADDED.
+              The ring said "something is wrong here" in one shape and left the reader to find out
+              what; the chip NAMES the register, so a reader scanning a grid reads the state without
+              parsing the sentence. It leads the line for that reason — the first thing on the row
+              is what kind of thing this is.
+
+              ⚠️ AND IT NEEDS NO `aria-label`. The ring's did, because "!" is a shape; the chip's
+              own text IS its label, and adding one would make a screen reader say it twice. */}
+          <span className="qcc-rc">{REGISTER_LABEL[facts.register]}</span>
           <span className="qcc-facttx">
             <span className="qcc-s">
-              {/* ⚠️ THE MARKER CARRIES ITS OWN WORDS. A bare "!" is a shape to a screen reader;
-                  the sentence beside it already states the fact, so the label names the CONDITION
-                  rather than repeating it. */}
-              {facts.attention && (
-                <span className="qcc-mk" role="img" aria-label="Needs attention">
-                  !
-                </span>
-              )}
               <span>
                 {facts.sentence.map((run, i) =>
                   run.strong ? <b key={i}>{run.text}</b> : <React.Fragment key={i}>{run.text}</React.Fragment>,

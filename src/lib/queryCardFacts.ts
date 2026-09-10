@@ -42,6 +42,37 @@ export const WRITER_TURN_ATTENTION_DAYS = 14;
 export type Turn = "sand" | "you" | "agent" | "offer" | "closed";
 
 /**
+ * ⚠️ THE REGISTER IS WHAT THE CARD, THE LIST AND THE DRAWER ALL READ — one derivation, five values.
+ *
+ * It is NOT a sixth state and it is not `Turn` renamed. `Turn` is whose court a query sits in and
+ * knows nothing about dates; the register splits the agent's court by whether the stated window has
+ * passed, which is the distinction a reader actually acts on. Deriving it at each surface is how
+ * three of them come to disagree about whether the same query needs attention — the fault this repo
+ * records more than any other.
+ */
+export type Register = "calm" | "late" | "you" | "offer" | "closed";
+
+/** the chip's words, per register — the one place they are spelled */
+export const REGISTER_LABEL: Record<Register, string> = {
+  calm: "Waiting",
+  late: "Past expected",
+  you: "Your move",
+  offer: "Offer",
+  closed: "Closed",
+};
+
+/**
+ * ⚠️ DERIVED FROM THE TURN AND THE WINDOW, NEVER FROM THE STATUS DIRECTLY. `attention` is already
+ * the "past the stated window" fact and is computed once, from the resolved expected date; reading
+ * the status here would be a second answer to a question `cardFacts` has already asked.
+ */
+export const registerOf = (turn: Turn, pastWindow: boolean): Register =>
+  turn === "you" ? "you"
+    : turn === "offer" ? "offer"
+      : turn === "closed" ? "closed"
+        : pastWindow ? "late" : "calm";
+
+/**
  * How far the query has travelled, and in which direction — the tint ladder's rung.
  *
  * ⚠️ FINER THAN `Turn`, AND BOTH ARE KEPT. `Turn` answers "whose move" in five courts and drives
@@ -93,6 +124,8 @@ export type CardMaterials = Record<MaterialKind, string | null>;
 
 export interface CardFacts {
   turn: Turn;
+  /** the reader-facing register — see `registerOf`; the chip, the list and the drawer read this */
+  register: Register;
   /** ⚠️ RETIRED FROM THE QUERY CENTRE, LIVE FOR THE TO-DO STREAM — see `State` above. */
   stage: Stage;
   /** The state colour's key — the token, and the card's `qcc--st-{state}` class (colours v2). */
@@ -157,6 +190,12 @@ export interface CardFactsInput {
   agencyWeeks?: number | null;
   /** A window the agent stated in a reply, if the caller has the events to derive one. */
   replyStated?: { ms: number; statedAt: number } | null;
+  /**
+   * ⚠️ THE AGENT'S DISPLAY NAME, FOR THE RELATIONAL COPY — passed in, never looked up.
+   * `cardFacts` takes a `Query` and knows nothing about agents; giving it a lookup would put the
+   * agent store behind a pure function two views call on every render.
+   */
+  agentName?: string | null;
 }
 
 /* ── the two scales ──────────────────────────────────────────────────────────────────────────── */
@@ -304,13 +343,31 @@ export function turnWordFor(status: QueryStatus): string {
  * ⚠️ AND AN UNRECOGNISED TOKEN FALLS BACK TO THE STATUS, which is always true. `other` carries
  * `closingNotes` — the writer's own unbounded prose — and a card is not where that belongs.
  */
-export function closedSentence(query: Pick<Query, "status" | "closingReason" | "partialSentDate" | "fullSentDate">): string {
-  if (query.status === QueryStatus.WITHDRAWN) return "Withdrawn by you";
-  if (query.closingReason === "agentClosedSubmissions") return "Agency closed to submissions";
+export /**
+ * ⚠️ RELATIONAL, AND STILL NOT AN APPRAISAL. "Marcus passed — after the full" states what happened
+ * between two people; "Rejected after full" states a verdict on the writer. The register is the
+ * same and the sentence does a different job — which is the whole point of the copy pass.
+ *
+ * ⚠️ WITHDRAWN NAMES THE WRITER, NOT THE AGENT, because the writer is who acted. Reading "Marcus
+ * withdrew" off a query the writer withdrew would be false, and it is the one row in the ref's
+ * table with no agent in it for exactly that reason.
+ *
+ * ⚠️ AND THE AGENCY-CLOSED CASE HAS NO ROW IN THE BRIEF'S TABLE. It is kept, relationally worded,
+ * rather than folded into "passed" — an agency shutting its list did not pass on this book, and
+ * saying it did would be the app inventing a rejection. Reported as a gap.
+ */
+function closedSentence(
+  query: Pick<Query, "status" | "closingReason" | "partialSentDate" | "fullSentDate">,
+  who: string,
+  closedOn: string | null,
+): string {
+  if (query.status === QueryStatus.WITHDRAWN) {
+    return closedOn ? `You withdrew — ${closedOn}` : "You withdrew";
+  }
+  if (query.closingReason === "agentClosedSubmissions") return `${who} closed to submissions`;
   if (query.status === QueryStatus.REJECTED) {
-    if (query.fullSentDate) return "Pass after full";
-    if (query.partialSentDate) return "Pass after partial";
-    return "Pass";
+    const stage = query.fullSentDate ? "full" : query.partialSentDate ? "partial" : "query";
+    return `${who} passed — after the ${stage}`;
   }
   return query.status;
 }
@@ -357,6 +414,22 @@ export function cardMaterials(items: Query["materialsWanted"]): {
 }
 
 /* ── the whole card ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * ⚠️ FIRST NAME, AND THE TWO FALLBACKS ARE NOT DECORATION. A card reading "is waiting on your
+ * partial" with no subject reads as a system message; "The agent" keeps it a sentence about a
+ * person even when the record has no name. A single-token name is returned whole — an agency with
+ * no named contact is still who the writer is waiting on.
+ *
+ * ⚠️ AND NEVER A PRONOUN. The record holds no gender and never will, so every sentence names the
+ * person or says "the window". `queryCopy.test.ts` greps this module for the three pronouns and
+ * for the appraisal words, because a comment cannot stop the next edit.
+ */
+export const firstNameOf = (name: string | null | undefined): string => {
+  const full = (name ?? "").trim();
+  if (!full) return "The agent";
+  return full.split(/\s+/)[0] || full;
+};
 
 export function cardFacts(query: Query, today: Date, input: CardFactsInput = {}): CardFacts {
   const nowMs = today.getTime();
@@ -446,6 +519,7 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
   let captionParts: string[] | null = null;
   let nudgePartIndex: number | null = null;
   let attention = false;
+  const who = firstNameOf(input.agentName);
 
   if (expectedApplies) {
     if (expectedReply) {
@@ -453,8 +527,9 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
       if (past > 0) {
         attention = true;
         sentence = [
-          { text: `Reply was expected by ${shortDate(expectedReply)} — ` },
-          { text: `${past} ${past === 1 ? "day" : "days"} past`, strong: true },
+          { text: `${who} is ` },
+            { text: `${past} ${past === 1 ? "day" : "days"}`, strong: true },
+            { text: " past the window" },
         ];
         caption = `${spanWords(sinceSend)} waiting · nudge available`;
       } else {
@@ -468,7 +543,7 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
          * re-derives it through `reconcileNudge` — so counting to it here is one derivation with
          * two readers rather than a second reminder rule living on a card.
          */
-        sentence = [{ text: "Reply expected by " }, { text: shortDate(expectedReply), strong: true }];
+        sentence = [{ text: `Waiting on ${who} — reply expected by ` }, { text: shortDate(expectedReply), strong: true }];
         const away = Math.max(0, daysBetween(nowMs, expectedReply.getTime()));
         const nudgeMs = query.nudgeDate ? new Date(query.nudgeDate).getTime() : NaN;
         const nudgeIn = Number.isNaN(nudgeMs) ? null : daysBetween(nowMs, nudgeMs);
@@ -489,24 +564,26 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
        * returns `null` precisely so this case exists; a house fallback here would put a date on the
        * card attributed to no one, which is the fault that resolver was written to end.
        */
-      sentence = [{ text: "Waiting — " }, { text: "no reply window stated", strong: true }];
+      sentence = [{ text: `Waiting on ${who} — ` }, { text: "no reply window stated", strong: true }];
       caption = `${spanWords(sinceSend)} waiting`;
     }
   } else if (turn === "you") {
     const what =
-      status === QueryStatus.PARTIAL_REQUESTED ? "Partial" : status === QueryStatus.FULL_REQUESTED ? "Full" : "Revisions";
-    sentence = [{ text: `${what} — ` }, { text: "not yet sent", strong: true }];
+      status === QueryStatus.PARTIAL_REQUESTED ? "partial" : status === QueryStatus.FULL_REQUESTED ? "full" : "revisions";
+    sentence = [{ text: `${who} is waiting on your ` }, { text: what, strong: true }];
     caption = `${sinceLeaf} ${sinceLeaf === 1 ? "day" : "days"} since request`;
     attention = sinceLeaf > WRITER_TURN_ATTENTION_DAYS;
   } else if (turn === "offer") {
-    sentence = [{ text: "Awaiting your decision", strong: true }];
+    sentence = [{ text: `${who} is waiting on your ` }, { text: "answer", strong: true }];
     caption = `${sinceLeaf} ${sinceLeaf === 1 ? "day" : "days"} since offer`;
   } else if (status === QueryStatus.NO_RESPONSE) {
     const weeks = input.agencyWeeks;
-    sentence = [
-      { text: "No reply", strong: true },
-      { text: weeks ? ` — window was ${weeks} weeks` : " — no window was stated" },
-    ];
+    sentence = resolved.ms != null
+        ? [{ text: `${who} went quiet — window closed ` }, { text: shortDate(new Date(resolved.ms)), strong: true }]
+        /* ⚠️ NO WINDOW WAS EVER STATED, so there is no date to close. The brief's row assumes one;
+           stating the span the record does hold is the honest form, and inventing a date here is
+           what `resolveExpectedDate` returns null to prevent. */
+        : [{ text: `${who} went quiet — ` }, { text: weeks ? `the window was ${weeks} weeks` : "no window was stated", strong: true }];
     caption = `${spanWords(sinceSend)} since sending`;
   } else {
     /* ⚠️ THE DECISION NAMES ITSELF. "Withdrawn by you" is true of a declined offer and says nothing
@@ -515,7 +592,7 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
       input.offerDecision === "accepted" ? "Offer accepted"
         : input.offerDecision === "declined" ? "Offer declined"
           : null;
-    sentence = [{ text: decisionWord ?? closedSentence(query) }];
+    sentence = [{ text: decisionWord ?? closedSentence(query, who, leaf ? `${leaf.day} ${MON[new Date(leafMs).getMonth()]}` : null) }];
     /**
      * ⚠️ "REPLIED AFTER 0 DAYS" WAS A FALSE FIGURE, AND IT REACHED THE PAGE. Measured on two
      * Rejected cards: both printed it, because `lastStatusChange` was ABSENT, so the leaf fell back
@@ -542,6 +619,8 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
 
   return {
     turn,
+    /* ⚠️ a DECIDED offer is closed here too — same reason as `state` below */
+    register: registerOf(decided ? "closed" : turn, attention),
     stage: decided ? "closed" : stageFor(status),
     /* a DECIDED offer is closed in both keys — the decision is what ended it, and the status
        string still says Offer, which is why neither key can read the status alone */

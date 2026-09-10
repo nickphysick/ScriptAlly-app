@@ -3323,7 +3323,7 @@ export const Queries: React.FC<{
 
   const gridRows: GridCard[] = sortedList.map((q) => {
     const agent = agents.find((a) => a.id === q.agentId);
-    const facts = cardFacts(q as Query, new Date(), { agencyWeeks: agent?.responseTimeWeeks });
+    const facts = cardFacts(q as Query, new Date(), { agencyWeeks: agent?.responseTimeWeeks, agentName: agentPrimary(agent) });
     return {
       id: q.id,
       status: q.status as QueryStatus,
@@ -3487,7 +3487,7 @@ export const Queries: React.FC<{
       dateSent: createDraft.dateSent ? new Date(createDraft.dateSent).toISOString() : new Date().toISOString(),
       ...(overrideIso ? { writerExpectedDate: overrideIso } : {}),
     } as unknown as Query;
-    const facts = cardFacts(stub, new Date(), { agencyWeeks: agent?.responseTimeWeeks });
+    const facts = cardFacts(stub, new Date(), { agencyWeeks: agent?.responseTimeWeeks, agentName: agentPrimary(agent) });
     return {
       id: "__ghost",
       status: QueryStatus.QUERIED,

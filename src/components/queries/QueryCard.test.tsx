@@ -204,15 +204,30 @@ describe("the band, the leaf and the marker say what the facts say", () => {
     }
   });
 
-  it("the ! marker appears only when the facts say so, and carries a name", () => {
+  /* ⚠️ RETARGETED FROM THE `!` RING, WHICH IS RETIRED. The ring said "something here" in one shape
+     and made the reader parse the sentence to find out what; the chip NAMES the register. The law
+     is unchanged in kind — a marker appears exactly when the facts say so — and stronger in effect,
+     because it now appears on EVERY card and the claim is that it says the right thing.
+
+     ⚠️ AND THE CHIP CARRIES NO `aria-label`, DELIBERATELY. The ring needed one because "!" is a
+     shape with no reading; the chip's own text is its name, and labelling it would make a screen
+     reader say the register twice. Asserted, so nobody "restores" the label the ring had. */
+  it("the register chip states the register, on every card, and is never double-labelled", () => {
     const late = render({ dateSent: ago(200) });
-    expect(late.facts.attention).toBe(true);
-    expect(late.html).toContain("qcc-mk");
-    expect(late.html).toContain('aria-label="Needs attention"');
+    expect(late.facts.register).toBe("late");
+    expect(late.html).toContain("qcc-fact--late");
+    expect(late.html).toContain("Past expected");
 
     const fine = render({ dateSent: ago(14) });
-    expect(fine.facts.attention).toBe(false);
-    expect(fine.html).not.toContain("qcc-mk");
+    expect(fine.facts.register).toBe("calm");
+    expect(fine.html).toContain("qcc-fact--calm");
+    expect(fine.html).toContain("Waiting");
+
+    /* the ring is gone from the render, not hidden by a rule */
+    for (const h of [late.html, fine.html]) {
+      expect(h, "the retired ! ring still renders").not.toMatch(/["\s]qcc-mk["\s]/);
+      expect(h, "the chip is labelled twice").not.toContain('aria-label="Needs attention"');
+    }
   });
 });
 
