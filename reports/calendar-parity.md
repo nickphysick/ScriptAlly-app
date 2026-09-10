@@ -167,11 +167,30 @@ decision — not an inference — so nothing has been changed.**
 - **Phase 4 proofs** — To-do byte-identity, lock counts and side-by-side screenshots all prove a
   change. There is no change.
 
-## Open, for Nick
+## Ruled, 10 September — these are decisions, not open questions
 
-1. **Queried: sand or sage?** The only cross-family disagreement, and the reported symptom.
-2. **Does the board's three-rung ramp survive** a move onto the five flat tokens, or is the
-   progression worth keeping and the palette the thing that gains rungs?
-3. **`--panel` in Query Centre** — board-declares-its-own, or `.qc-neutral` exempts the board?
-4. Two dead rules to sweep whenever the CSS pass runs: `.t-f12 .tl-gracebar .tl-sweep` has no
-   renderer at all, and `todoCalendar.css:508`'s comment is stale.
+Recorded here so nobody re-opens them from the table above.
+
+1. **Queried is SAND.** The locked palette wins: Grid, List and Board already render it sand, and a
+   query that is sand on three views and sage on the fourth is the bug. A palette mismatch, not a
+   rendering one.
+
+2. **The board moves onto the five flat tokens; the palette does not gain rungs.** The three-rung
+   ramp was the board's own answer to depth before the ladder was retired — **depth is `StatusDot`'s
+   job now**, and the five states are locked across seven surfaces. Target: sand Queried · sage
+   Partial/Full Sent · pink Partial/Full Requested and R&R · slate Offer · grey the closed family.
+   `stageFor` keeps its DIRECTION (sends sage, requests pink), gains a sand rung for Queried, and
+   loses the intermediate steps.
+   - ⚠️ **This changes To-do's calendar as well as Query Centre's, and that is the point** — it is
+     the one place in this sequence where To-do's board is *supposed* to move. It therefore needs
+     its own run with the DOM reference **re-captured same-day** (the board's DOM is date-bound),
+     and it belongs to the **To-do stream**, not inside a Queries pack.
+
+3. **`--panel` stays as it is.** A two-point white is not worth the board overriding a page's own
+   token decision. Logged, with the stale comment at `todoCalendar.css:508`, which claims `.t-f12`
+   declares `#fffdfb` without saying that `.t-f12.qc-neutral` then overrides it — the reason the two
+   pages differ at all.
+
+4. **The two dead rules go on the CSS sweep, not on any calendar run.** `.t-f12 .tl-gracebar
+   .tl-sweep` (no renderer anywhere in `src`) and the `.tpl-zone.tl-zone` compound. There is no
+   standing sweep list in `reports/`; this section is it until there is.
