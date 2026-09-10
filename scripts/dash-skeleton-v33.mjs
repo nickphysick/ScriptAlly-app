@@ -128,6 +128,45 @@ function readRegions(names) {
   return out;
 }
 
+/**
+ * ⚠️ THE PAGE SLOT'S OWN ENTRANCE IS WHAT MOVED THE MEASUREMENT, AND IT IS NOT THE PAGE'S.
+ *
+ * `StagePage` puts `stage-page-on` on the dashboard's slot — a shell-level entrance that
+ * TRANSFORMS the whole slot and self-clears on `animationend`. `getBoundingClientRect` returns the
+ * transformed box, so a reading taken while it runs reports every region on the page 4px low,
+ * uniformly, with all four heights correct and the shell chain above it byte-identical. It sat
+ * this gate exactly ON its 4px threshold, intermittently, on about one run in three.
+ *
+ * ⚠️ THE SCOPE IS `.ws-work > *`, NOT `.os-root *`. The first attempt suppressed inside the page
+ * and changed nothing, because the animating element is the SLOT — one level above the page root
+ * and outside anything the dashboard owns. Measured: `stage-page-on y110.8` during, a bare slot at
+ * `y106.8` after.
+ *
+ * ⚠️ AND IT MUST NOT REACH THE SKELETON, or the shimmer clause reads its own suppression as a dead
+ * animation. Direct children only.
+ *
+ * ⚠️ WAITING FOR `getAnimations()` TO DRAIN WAS TRIED AND CANNOT WORK HERE: this page carries
+ * INFINITE decorative animations — the attention chip's 2s pulse among them — so the drain never
+ * completes and a gate written that way is red forever on a correct page.
+ */
+function settleSlot() {
+  let s = document.getElementById("sa-skel-settle");
+  if (!s) {
+    s = document.createElement("style");
+    s.id = "sa-skel-settle";
+    s.textContent = ".ws-work > *, .os-root { animation: none !important; transition: none !important; }";
+    document.head.appendChild(s);
+  }
+  void document.body.offsetHeight;
+  const slot = document.querySelector(".ws-work > :not(.ws-mobilebar)");
+  return {
+    suppressed: !!document.getElementById("sa-skel-settle"),
+    slotClass: slot ? String(slot.className).trim().slice(0, 40) : null,
+    stillRunning: slot && slot.getAnimations
+      ? slot.getAnimations().filter((a) => a.playState === "running").length : 0,
+  };
+}
+
 const OUT = join(ROOT, "run-artifacts", "skeleton-v33");
 mkdirSync(OUT, { recursive: true });
 const rows = [];
@@ -151,12 +190,38 @@ for (const W of WIDTHS) {
   /* a fresh navigation, then poll fast for the skeleton */
   await page.goto(APP + "/dashboard", { waitUntil: "domcontentloaded" });
   let during = null;
+  let settleDuring = null;
   for (let i = 0; i < 160; i++) {
-    const r = await page.evaluate(readRegions, REGIONS);
-    if (r.skeleton && r.skeleton.present) { during = r; break; }
+    const up = await page.evaluate(() => !!document.querySelector(".os-skelpage"));
+    if (up) {
+      settleDuring = await page.evaluate(settleSlot);
+      during = await page.evaluate(readRegions, REGIONS);
+      break;
+    }
     await page.waitForTimeout(25);
   }
+  /**
+   * ⚠️ THE LOADED READING SETTLES THE ENTRANCE FIRST, AND WITHOUT THAT THE GATE FLICKERS.
+   *
+   * The reveal staggers the cards in with `os-rise`, which TRANSLATES them — and
+   * `getBoundingClientRect` returns the transformed box. Caught mid-flight, every region below the
+   * nav row reads a few pixels off its resting place, uniformly, with all four heights correct.
+   * Measured: an intermittent +4 on grid, toprow, todo-card, activity-card AND community-tile at
+   * one width, on roughly one run in three — exactly the shape of one animation still running
+   * rather than a layout fault. It sat the gate ON its 4px threshold.
+   *
+   * ⚠️ AND WAITING FOR `getAnimations()` TO DRAIN DOES NOT WORK HERE, WHICH IS WORTH THE LINE.
+   * That was tried first and reported `settled: false` on every run: this page carries INFINITE
+   * decorative animations — the attention chip's 2s pulse, the urgent ticket's — so the drain can
+   * never complete and a gate written that way is red forever on a correct page.
+   *
+   * Suppression is the house idiom (`.sa-settled`, `src/styles/motion.css`): `animation: none`
+   * returns an element running a `fill-mode: both` keyframe to its UNTRANSFORMED box, which is its
+   * resting place. Everything is suppressed before anything is measured, because adding a rule can
+   * itself reflow.
+   */
   await page.waitForTimeout(3200);
+  const settle = await page.evaluate(settleSlot);
   const after = await page.evaluate(readRegions, REGIONS);
 
   console.log("──── " + W);
@@ -180,9 +245,11 @@ for (const W of WIDTHS) {
       + "  Δw " + String(d[2]).padStart(7) + "  Δh " + String(d[3]).padStart(7));
   }
   console.log("   WORST region delta: " + Math.round(worst * 10) / 10 + "px   (gate: <= " + TOL + ")");
+  console.log("   slot settled       : during " + JSON.stringify(settleDuring) + " · after " + JSON.stringify(settle));
   console.log("   live in the column : " + (during.live ? during.live.controls + " controls · " + during.live.inked + " inked  " + JSON.stringify(during.live.controlNames) + " " + JSON.stringify(during.live.inkedText) : "not read"));
   rows.push({
     width: W, caught: true, worst: Math.round(worst * 10) / 10,
+    settle, settleDuring,
     live: during.live,
     removed: !after.skeleton,
     tickets: during.skeleton.tickets, stats: during.skeleton.stats,
@@ -264,13 +331,18 @@ verdict.reducedMotion = verdictRM;
 /* ⚠️ THE POPULATION IS ASSERTED FIRST — "0 running" is also what an empty scan reports. */
 verdict.rmStill = !!verdictRM && verdictRM.skeletonBlocks > 20 && verdictRM.barBlocks > 3
   && verdictRM.skeletonNamed === 0 && verdictRM.barNamed === 0;
+/* ⚠️ A RUN THAT MEASURED A MOVING PAGE IS NOT A GREEN RUN, IT IS AN UNKNOWN ONE. */
+verdict.settled = rows.every((r) => r.settle && r.settleDuring
+  && r.settle.suppressed && r.settleDuring.suppressed
+  && r.settle.stillRunning === 0 && r.settleDuring.stillRunning === 0);
 verdict.noLive = rows.every((r) => r.live && r.live.controls === 0 && r.live.inked === 0 && r.live.scanned > 50);
 verdict.pass = verdict.allCaught && verdict.noneMissing && verdict.allRemoved
-  && verdict.animated && verdict.noLive && verdict.rmStill && verdict.worst <= TOL;
+  && verdict.animated && verdict.noLive && verdict.rmStill && verdict.settled
+  && verdict.worst <= TOL;
 writeFileSync(join(OUT, "skeleton.json"), JSON.stringify(verdict, null, 2));
 console.log("");
 console.log("GATE skeletonRegions: " + (verdict.pass ? "pass" : "FAIL")
   + "  worst " + verdict.worst + "px across " + verdict.widths + " widths (tol " + TOL + ")"
   + " · caught " + verdict.allCaught + " · removed " + verdict.allRemoved + " · noLive " + verdict.noLive
-  + " · reducedMotionStill " + verdict.rmStill
+  + " · reducedMotionStill " + verdict.rmStill + " · settled " + verdict.settled
   + " · shimmer " + verdict.animated);
