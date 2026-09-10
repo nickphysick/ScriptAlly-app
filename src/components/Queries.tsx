@@ -6209,13 +6209,14 @@ export const Queries: React.FC<{
               onOverdue={(next) => setNeedsOverdue(next)}
             />
             )}
-            {/* ⚠️ THE WELL IS GRID AND LIST ONLY. Board and Calendar sit on the page's own
-                ground — `.qcc-plain` carries the well's box metrics to the pixel, so the
-                toolbar lands on the same coordinates in all four views, and it is a DIFFERENT
-                ELEMENT rather than a see-through well, because a transparent recess still has
-                its box to anything measuring the page. */}
+            {/* ⚠️ THE WELL IS GONE FROM ALL FOUR VIEWS (§1) — from the DOM, not hidden.
+                `.qcc-plain` was already the board's and the calendar's, carrying the well's box
+                metrics to the pixel so the toolbar lands on the same coordinates whichever view is
+                open; making it unconditional is therefore a DELETION rather than a new layout, and
+                the toolbar does not move. A see-through well would have been the wrong answer: a
+                transparent recess still has its box to anything measuring the page. */}
             <div
-              className={gridView === "board" || gridView === "calendar" ? "qcc-plain" : "qcc-well"}
+              className="qcc-plain"
               aria-busy={showGridSkeleton ? true : undefined}
             >
             {/* ⚠️ AND THE TOOLBAR ROW DOES NOT RENDER IN THE CALENDAR EITHER (§2). That view puts

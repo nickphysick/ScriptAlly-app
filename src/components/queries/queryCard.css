@@ -86,9 +86,13 @@
   color: inherit;
   /* ⚠️ THE SHADOW STAYS WARM BECAUSE THE GROUND IS (§1). `rgba(58, 28, 20, …)` is the page's own
      ink; a cool `rgba(35, 45, 60, …)` on a parchment well reads as dirt rather than as depth —
-     the same law this repo states for the sage desk's green-grey cast. Deepened slightly now the
-     cards sit in a recess rather than on the page: .06/.11 against the well's #eee8e0. */
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.06), 0 8px 20px rgba(58, 28, 20, 0.11);
+     the same law this repo states for the sage desk's green-grey cast.
+
+     ⚠️ AND IT IS BACK TO .05/.09 BECAUSE THE WELL IS GONE (§1). The pair was deepened to .06/.11
+     when the cards sat in a recess — a shadow has to work harder against #eee8e0 than against the
+     page. On the ground the ref's own values are right again, and they are the values two refs
+     state independently (`query-grid-ground-v1` treatment A and `query-fact-register-v1`). */
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 8px 22px rgba(58, 28, 20, 0.09);
   /* ⚠️ SHADOW ONLY — NO LIFT. A `translateY` on hover fights the FLIP that re-orders this grid:
      the inverse transform and the hover transform are the same property, and the last one written
      wins. The shadow says the same thing and cannot collide. */

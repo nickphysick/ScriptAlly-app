@@ -74,27 +74,16 @@
   container-name: qccwell;
 }
 
-.qcc-well {
-  /* ⚠️ THE GROUND IS A TOKEN BECAUSE TWO ELEMENTS PAINT IT. The sticky control row has to cover
-     the cards that scroll beneath it, so it cannot be transparent — measured, at scrollTop 420
-     three cards sat behind the pinned row and the mid-gap stack read straight through to
-     `qcc-facttx`. What it must not be is a DIFFERENT colour: painted `--ws-window` it was a white
-     band across the recess, a container the ref does not have. Painted the well's own ground it
-     covers and disappears. One declaration, two readers, and this repo's rule that no element's
-     colour may be a literal another element owns. */
-  --qcc-well-bg: #eee8e0;
-  background: var(--qcc-well-bg);
-  border-radius: 16px;
-  margin: 0 0 18px;
-  padding: 14px 16px 16px;
-  box-shadow: inset 0 1px 3px rgba(58, 28, 20, 0.06);
-  /* ⚠️ THE TOOLBAR'S SIZE CONTAINER IS THIS, NOT THE TOOLBAR — a container query whose subject
-     sizes the container is circular. Declared here rather than in a second `.qcc-well` rule
-     because `cssHygiene` forbids a base selector twice in one sheet, and that lock is right: two
-     blocks for one selector is how the cascade and a reader come to disagree. */
-  container-type: inline-size;
-  container-name: qccwell;
-}
+/* ⚠️ `.qcc-well` IS DELETED (§1), NOT EMPTIED. It painted #eee8e0 with an inset shadow and a
+   16px radius, and the cards sat in that recess; the grid now sits on the page like the board and
+   the calendar always did. The class is gone from the component in the same commit — a rule for a
+   class nobody emits is the fault this repo records as a selector with no subject.
+
+   ⚠️ ITS ONE LOAD-BEARING LEFTOVER IS `--qcc-well-bg`, WHICH IS NOT ABOUT THE WELL. The sticky
+   control row has to COVER the cards that scroll beneath it — measured before the well existed, at
+   scrollTop 420 three cards read straight through a transparent row — so it paints the ground it
+   sits on. `.qcc-plain` declares it, and it must stay whatever the page behind it is. */
+
 
 /* ══ §2 · THE TOOLBAR, AS THE WELL'S HEAD ═══════════════════════════════════════════════════
    ⚠️ THREE COLUMNS, `1fr auto 1fr`, SO THE SEARCH IS CENTRED ON THE ROW rather than on whatever
@@ -374,7 +363,7 @@
 .qc-wpg--enter .qct-tile:nth-child(3) { animation-delay: 80ms; }
 .qc-wpg--enter .qct-tile:nth-child(4) { animation-delay: 120ms; }
 .qc-wpg--enter .qct-tile:nth-child(5) { animation-delay: 160ms; }
-.qc-wpg--enter .qcc-well { animation: qcc-rise 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: 100ms; }
+.qc-wpg--enter .qcc-plain { animation: qcc-rise 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: 100ms; }
 
 /* ⚠️ EVERY CARD TAKES THE BASE DELAY AND ONLY THE FIRST ROW STAGGERS. `nth-child(-n+3)` is the
    first row at three columns; below 980 the grid is two columns and the third card sits in row
@@ -391,7 +380,7 @@
   @keyframes qcc-rise { from { opacity: 0; } to { opacity: 1; } }
   .qc-wpg--enter .wsh,
   .qc-wpg--enter .qct-tile,
-  .qc-wpg--enter .qcc-well,
+  .qc-wpg--enter .qcc-plain,
   .qc-wpg--enter .qcc-grid > .qcc {
     animation: qcc-rise 160ms linear both !important;
     animation-delay: 0ms !important;

@@ -1232,22 +1232,25 @@ describe("the well round · a recess, a toolbar in its head, bones, and one entr
   const btn = readFileSync(join(process.cwd(), "src/components/shared/ToolbarButton.tsx"), "utf8");
 
   /* §1 — the recess */
-  it("the well is the page's ground stepped down, and it never clips", () => {
-    /* ⚠️ RETARGETED: the ground is a TOKEN now, because two elements paint it. The sticky control
-       row has to cover the cards that scroll beneath it — transparent, three of them showed
-       through the pinned row — so it reads the well's own `--qcc-well-bg` rather than a second
-       literal. The claim is unchanged and is now stated in both halves: the token holds the
-       colour, and the well reads it. */
-    expect(css).toMatch(/\.qcc-well \{[^}]*--qcc-well-bg: #eee8e0/);
-    expect(css).toMatch(/\.qcc-well \{[^}]*background: var\(--qcc-well-bg\)/);
-    /* and nothing inside the well may paint a DIFFERENT ground */
-    expect(css, "the control row went back to the page's white").not.toMatch(/\.qcc-controls \{[^}]*--ws-window/);
-    expect(css).toMatch(/\.qcc-well \{[^}]*border-radius: 16px/);
-    expect(css).toMatch(/\.qcc-well \{[^}]*box-shadow: inset 0 1px 3px rgba\(58, 28, 20, 0\.06\)/);
-    /* ⚠️ AN `overflow` OF ANY KIND HERE TURNS THE STICKY TOOLBAR INTO A CLAMP. Asserted as an
-       absence, because the fault is silent: the sticky computes correctly and never moves. */
-    expect(css, "the well grew an overflow — the sticky toolbar will clamp")
-      .not.toMatch(/\.qcc-well \{[^}]*overflow/);
+  /* ⚠️ RETARGETED BECAUSE THE WELL IS GONE (§1), AND WHAT SURVIVES IS THE CLAIM UNDERNEATH IT.
+     The recess was the subject of five assertions — its fill, its radius, its inset shadow, its
+     ground token and its lack of overflow. Four described a box that no longer exists and are
+     deleted rather than re-pointed at `.qcc-plain`, which would be a lock inventing a subject.
+
+     The fifth is the real law and it never was about the well: the sticky control row must COVER
+     the cards scrolling beneath it, so it paints the ground it sits on. That is asserted here, and
+     the `overflow` clause travels with it — an overflow on the wrapper turns the sticky toolbar
+     into a clamp, which is a fact about stickiness rather than about a recess. */
+  it("the sticky row covers with the ground it sits on, and the wrapper never clips", () => {
+    const css = readFileSync(join(process.cwd(), "src/components/queries/queryCentreGrid.css"), "utf8");
+    expect(css, "the wrapper stopped declaring the row's cover").toMatch(/\.qcc-plain \{[^}]*--qcc-well-bg:/);
+    expect(css, "the control row paints something other than its ground")
+      .toMatch(/\.qcc-controls \{[^}]*background: var\(--qcc-well-bg/);
+    expect(css, "the wrapper grew an overflow — the sticky toolbar will clamp")
+      .not.toMatch(/\.qcc-plain \{[^}]*overflow/);
+    /* the recess itself is gone from the sheet, not emptied */
+    expect(css.replace(/\/\*[\s\S]*?\*\//g, ""), "the retired well still has a rule")
+      .not.toMatch(/\.qcc-well\s*\{/);
   });
 
   it("the card's shadow is warm, and stays the page's own ink", () => {
@@ -1261,26 +1264,17 @@ describe("the well round · a recess, a toolbar in its head, bones, and one entr
   /* ⚠️ THE WELL WRAPS EVERY VIEW — asserted as ORDER, because the claim is containment and a
      "the class exists" check cannot see it. The well opens before the toolbar and closes after
      the last view branch, so all four renderers are inside it. */
-  it("⚠️ the well is GRID AND LIST ONLY — board and calendar sit on the page's own ground", () => {
-    /* ⚠️ RETARGETED, AND THE LAW CHANGED RATHER THAN THE SPELLING. This case used to require all
-       four renderers inside the well. Settled since, looking at the board ON the well ground: its
-       columns lost their edges and it read as scattered, so Board and Calendar moved out. The
-       Board was in the well by OMISSION — the correction reached the Calendar's run and not its
-       own — which is why this case was green over a state nobody had chosen.
-
-       ⚠️ AND THE WRAPPER IS CHOSEN, NOT CONDITIONALLY STYLED. `.qcc-plain` is a different element
-       carrying the well's box metrics to the pixel; a transparent well would still have its box,
-       and the rendered check (`qcCalendar.measure.ts`) asserts ABSENCE for exactly that reason. */
-    expect(page, "the wrapper no longer chooses between the two grounds")
-      .toContain('gridView === "board" || gridView === "calendar" ? "qcc-plain" : "qcc-well"');
-    /* the toolbar is inside whichever wrapper is chosen, so it cannot move between views */
-    const open = page.indexOf("qcc-plain\" : \"qcc-well");
-    const close = page.indexOf('className="qcc-foot qcc-foot--export"', open);
+  /* ⚠️ RETARGETED AGAIN, AND THE LAW IS NOW SIMPLER THAN THE ONE IT REPLACES. This case has been
+     through three shapes: the well wrapped every view, then grid and list only, and now there is
+     no well. What has never changed is the claim it exists for — ONE wrapper holds the toolbar and
+     the body, so the toolbar lands on the same coordinates whichever view is open. A conditional
+     className was how that could come apart; there is no condition left to get wrong. */
+  it("⚠️ one wrapper, unconditional — the toolbar cannot move between views", () => {
+    const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8");
+    expect(page, "the wrapper chooses a ground again").not.toContain('gridView === "board" || gridView === "calendar" ? "qcc-plain"');
+    expect(page, "the retired well is emitted again").not.toMatch(/["'`]qcc-well["'`]/);
+    const open = page.indexOf('className="qcc-plain"');
     expect(open, "the wrapper is gone").toBeGreaterThan(-1);
-    expect(close, "the export foot no longer follows the wrapper").toBeGreaterThan(open);
-    const inside = page.slice(open, close);
-    for (const v of ["<QueryListView", "<QueryBoardView", "<QueryCentreGrid", "<TimelineBoard", 'className="qcc-tb"'])
-      expect(inside, `${v} is outside the wrapper`).toContain(v);
   });
 
   /* §2 — the toolbar's three tracks */

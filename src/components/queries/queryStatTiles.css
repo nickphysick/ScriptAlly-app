@@ -10,7 +10,10 @@
 .qct-tile {
   background: #fff; border-radius: 14px; padding: 16px 18px; display: flex; align-items: center;
   gap: 14px; cursor: pointer; text-align: left; font: inherit;
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 6px 16px rgba(58, 28, 20, 0.06);
+  /* ⚠️ THE TILE'S PAIR IS LIGHTER THAN THE CARD'S, DELIBERATELY — `query-grid-ground-v1`'s own
+     split. A tile is a control that reports a number; a card is an object you pick up. Giving them
+     one shadow would make the tiles read as a second row of cards. */
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 14px rgba(58, 28, 20, 0.06);
   border: 1.5px solid transparent;
 }
 .qct-tile:hover { box-shadow: 0 2px 4px rgba(58, 28, 20, 0.05), 0 10px 24px rgba(58, 28, 20, 0.1); }
