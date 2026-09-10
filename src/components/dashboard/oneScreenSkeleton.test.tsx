@@ -118,11 +118,41 @@ describe("the page skeleton mirrors the page", () => {
 
   /* ⚠️ THE GRID IS `.os-tkgrid` ITSELF, NEVER A COPY. A restated `repeat(auto-fill, minmax(288px,
      1fr))` shipped for one pass and had already drifted — the real grid steps to `minmax(240px,
-     1fr)` below 1700 and the copy did not, so the ghost reflowed at a width the card does not. */
-  it("the ticket grid is the loaded card's own class — it reflows where the real one reflows", () => {
-    expect(html.match(/os-sk-ticket/g) ?? []).toHaveLength(8);
+     1fr)` below 1700 and the copy did not, so the ghost reflowed at a width the card does not.
+     ⚠️ AND FROM v34 IT IS IN THE CARD'S SCROLLER TOO. `auto-fill` resolves against the CONTAINER'S
+     width, so wearing the right grid class is not enough on its own: the real grid sits inside
+     `.os-tbody` (`padding: 6px 18px 10px`), and without those two insets the ghost's grid was 36px
+     wider and resolved FOUR columns at 1920 and SIX at 2520 against the card's THREE and FIVE. */
+  it("the ticket grid is the loaded card's own class, in the loaded card's own scroller", () => {
     expect(html).toContain('class="os-tkgrid"');
     expect(html).not.toContain("os-sk-tkgrid");
+    expect(html).toContain('class="os-tbodywrap"');
+    expect(html).toContain('class="os-tbody"');
+  });
+
+  /**
+   * ⚠️ THE COUNT IS NOT IN THIS FILE, AND THAT IS THE CLAIM (v34, Phase 3). It was
+   * `[0,1,2,3,4,5,6,7]` — eight at every width, against a card that shows 15 / 15 / 12 / 10 — and
+   * the honest replacement is a measurement of the container, which no source lock can see. So the
+   * unit claim is the NEGATIVE one that keeps it honest: nothing here decides how many.
+   *
+   * ⚠️ THE RENDERED COUNT IS ONE, AND THAT IS LOAD-BEARING RATHER THAN INCIDENTAL. This repo's
+   * specs are `environment: node` + `renderToStaticMarkup`: there is no layout, so the effect that
+   * counts never runs and what is asserted here is the FIRST PASS. That single block is the probe
+   * the layout effect measures the tile height from — the alternative was a number typed into the
+   * component, which is the drift this file already caught once at 82px against a real 75.8.
+   *
+   * The count itself is claimed where it can be: `scripts/dash-skeleton-v33.mjs`, against the
+   * loaded card's own whole-visible count, at four widths, proved red on both the old eight and
+   * the old tile height.
+   */
+  it("⚠️ no count lives in this file — the first pass renders exactly one block to measure", () => {
+    expect(html.match(/os-sk-ticket/g) ?? []).toHaveLength(1);
+    const src = readFileSync(join(__dirname, "OneScreenSkeleton.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(src).not.toMatch(/\[\s*0\s*,\s*1\s*,\s*2\s*,/);
+    expect(src).toContain("getBoundingClientRect().height");
+    expect(src).toContain("gridTemplateColumns");
   });
 
   it("is hidden from assistive tech — a shape tells a screen reader nothing", () => {

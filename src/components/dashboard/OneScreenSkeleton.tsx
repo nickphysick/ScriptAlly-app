@@ -31,12 +31,85 @@
  * to exist for the entrance stagger to find them when the skeleton lifts, and keeping them means
  * "no layout shift" is true by construction rather than by matching numbers.
  */
-import React from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
+import { EdgeFadeScroll } from "../EdgeFadeScroll";
 
 /** ⚠️ THE REF'S OWN FEED RHYTHM — `#skeleton .sk-r` alternates a centred day caption with event
  *  blocks at 96 / 86 / 110 / 96 / 86. A single repeated height reads as a list of identical rows,
  *  which is the one thing the activity column never is. */
 const FEED: Array<"cap" | number> = ["cap", 96, 86, "cap", 110, 96, 86, "cap", 96, 86];
+
+/**
+ * ⚠️ THE COUNT IS DERIVED FROM THE CONTAINER, NEVER WRITTEN DOWN (v34, Phase 3).
+ *
+ * It was `[0,1,2,3,4,5,6,7].map(...)` — eight blocks, at every width, chosen by hand. The loaded
+ * card shows 15 / 15 / 12 / 10 whole tickets at 1536 / 1710 / 1920 / 2520, so the cover stopped
+ * short by seven at the narrow end and left a void at the card's foot that the real card fills.
+ *
+ * ⚠️ AND THE CONTAINER HAD TO BE THE SAME CONTAINER FIRST, WHICH IS THE REAL FAULT THIS FIXES.
+ * The ghost put `.os-tkgrid` DIRECTLY IN THE CARD; the real card puts it inside an
+ * `EdgeFadeScroll` — `.os-tbodywrap` > `.os-tbody`, and `.os-tbody` carries `padding: 6px 18px
+ * 10px`. Those two 18px insets are 36px the ghost's grid did not have, and `auto-fill` resolves
+ * against the container's width: measured, the ghost resolved FOUR columns at 1920 and SIX at 2520
+ * where the real card resolves THREE and FIVE. The cover was laying out a differently-shaped grid
+ * from the card it stands for, at half the widths we measure, and no gate asked.
+ *
+ * ⚠️ SO IT MOUNTS THE REAL `EdgeFadeScroll` RATHER THAN TWO DIVS WEARING ITS CLASS NAMES. That
+ * component supplies `flex: 1 1 auto`, `min-height: 0` and `overflow-y: auto` as INLINE styles;
+ * restating them here would put three declarations in this file that have to be kept in step with
+ * a component nobody would think to check. Same argument as wearing `.os-tkgrid` itself.
+ *
+ * ⚠️ THE TILE HEIGHT IS READ OFF A RENDERED TILE, NOT TYPED. The first pass renders exactly one
+ * block so there is something to measure; `useLayoutEffect` runs BEFORE paint, so the corrected
+ * count is on screen in the same frame and nothing flashes. A number here would be a restated
+ * value of the kind this file's own header warns about — and `.os-sk-ticket` was 82px against a
+ * real ticket of 75.8, which is that drift already committed.
+ *
+ * ⚠️ THE OBSERVER WATCHES THE PORT'S OWN BOX, AND THAT CANNOT LOOP. `.os-tbodywrap` is `flex: 1;
+ * min-height: 0`, so the scrollport's height is set by the card and is independent of what is
+ * inside it — adding blocks cannot change the measurement that decided how many to add. (The
+ * standing warning about a `ResizeObserver` on a scroller is the opposite case: it says nothing
+ * when the CONTENT grows, which is exactly the reading we do not want.)
+ */
+const SkeletonTicketGrid: React.FC = () => {
+  const gridRef = useRef<HTMLDivElement | null>(null);
+  const [count, setCount] = useState(1);
+
+  useLayoutEffect(() => {
+    const grid = gridRef.current;
+    const port = grid?.parentElement;
+    if (!grid || !port) return undefined;
+
+    const fit = () => {
+      const probe = grid.firstElementChild as HTMLElement | null;
+      if (!probe) return;
+      const gs = getComputedStyle(grid);
+      const ps = getComputedStyle(port);
+      const tile = probe.getBoundingClientRect().height;
+      if (!tile) return;
+      const cols = gs.gridTemplateColumns.split(" ").filter(Boolean).length;
+      const rowGap = parseFloat(gs.rowGap) || 0;
+      const avail = port.clientHeight - parseFloat(ps.paddingTop) - parseFloat(ps.paddingBottom)
+        - parseFloat(gs.paddingBottom);
+      const rows = Math.max(1, Math.floor((avail + rowGap) / (tile + rowGap)));
+      setCount(cols * rows);
+    };
+
+    fit();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(fit);
+    ro.observe(port);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <EdgeFadeScroll fade="#fffdf9" outerClassName="os-tbodywrap" scrollClassName="os-tbody">
+      <div className="os-tkgrid" ref={gridRef}>
+        {Array.from({ length: count }, (_, i) => <div className="os-sk os-sk-ticket" key={i} />)}
+      </div>
+    </EdgeFadeScroll>
+  );
+};
 
 export const OneScreenSkeleton: React.FC<{
   /** Dissolving — mounted, on its way out, with the finished page live beneath it. */
@@ -117,15 +190,13 @@ export const OneScreenSkeleton: React.FC<{
             <div className="os-rulezone">
               <div className="os-sk os-sk-tkrule" />
             </div>
-            {/* ⚠️ EIGHT TICKET BLOCKS IN THE CARD'S OWN GRID (v33, Phase 4) — ref `.sk-tickets`.
-                ⚠️ AND IT IS `.os-tkgrid` ITSELF, NOT A COPY OF IT. The ghost restated
-                `repeat(auto-fill, minmax(288px, 1fr))` for one pass and had ALREADY drifted: the
-                real grid steps to `minmax(240px, 1fr)` below 1700 and the copy did not, so the
-                ghost reflowed at a different width from the card it stands for. Exactly the fault
-                this file's own header warns about, committed by the file. */}
-            <div className="os-tkgrid">
-              {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => <div className="os-sk os-sk-ticket" key={i} />)}
-            </div>
+            {/* ⚠️ THE CARD'S OWN GRID, IN THE CARD'S OWN SCROLLER, AT A COUNT DERIVED FROM BOTH —
+                ref `.sk-tickets`, and see `SkeletonTicketGrid` above for what each of those three
+                words had to be fixed to make the next one mean anything. `.os-tkgrid` ITSELF, not a
+                copy of it: the ghost restated `repeat(auto-fill, minmax(288px, 1fr))` for one pass
+                and had ALREADY drifted, because the real grid steps to `minmax(240px, 1fr)` below
+                1700 and the copy did not. */}
+            <SkeletonTicketGrid />
           </div>
         </div>
 

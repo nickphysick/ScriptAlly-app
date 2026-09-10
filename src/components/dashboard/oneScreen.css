@@ -644,7 +644,13 @@
    grid steps to `minmax(240px, 1fr)` below 1700 and the copy did not. The `no grid of its own` lock
    in `oneScreenSkeleton.test.ts` is what refuses the copy, and it was right. */
 .os-sk-tkrule { height: 12px; border-radius: 99px; flex: none; }
-.os-sk-ticket { height: 82px; border-radius: 12px; }
+/* ⚠️ 76px BECAUSE THE REAL TICKET IS 75.8, AND IT WAS 82 (v34, Phase 3). `.tkt` states no height —
+   it is a two-track grid sized by its own content — so this number cannot be shared with it as a
+   token without pinning a box that is meant to be content-driven. It is instead GUARDED: the
+   skeleton gate reads both tiles and fails when they disagree, so a drift in either goes red
+   rather than quietly changing how many blocks the cover draws. The 6.2px it was out is one row
+   at some widths, which is the whole reason the count could not be derived until this moved. */
+.os-sk-ticket { height: 76px; border-radius: 12px; }
 
 /* ══ THE ACTIVITY COLUMN ══ */
 .os-sk-acmark { width: 26px; height: 26px; border-radius: 8px; flex: none; }

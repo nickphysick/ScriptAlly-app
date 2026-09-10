@@ -204,6 +204,59 @@ function readRegions(names) {
  * INFINITE decorative animations — the attention chip's 2s pulse among them — so the drain never
  * completes and a gate written that way is red forever on a correct page.
  */
+/**
+ * ⚠️ THE TICKET GRID, READ IN WHICHEVER STATE IS UP (v34, Phase 3).
+ *
+ * The cover's job here is to stand for what the reader will SEE, so the claim is against the
+ * loaded card's WHOLE-VISIBLE count, never its total: the real card scrolls, holds 20, and shows
+ * 15 / 15 / 12 / 10 at our four widths. Reproducing the 20 would reproduce the overflow the cover
+ * exists to hide, and would break the containment clause at every width by 118-178px.
+ *
+ * ⚠️ THE BOUND IS THE SCROLLPORT'S CONTENT BOX, NOT THE CARD'S PADDING BOX. The grid sits inside
+ * `.os-tbody` (`padding: 6px 18px 10px`, `overflow-y: auto`) inside `.os-tbodywrap`; the card's
+ * own padding box is BELOW that and forgiving by tens of pixels. Measured against the card, a
+ * ghost that ends 87px above the scrollport's foot reads as a 0px overflow and passes — which is
+ * the vacuous shape, arriving as a bound that is simply in the wrong place.
+ *
+ * ⚠️ AND IT READS THE COLUMN COUNT AND THE TILE HEIGHT ON BOTH SIDES BECAUSE BOTH HAD DRIFTED.
+ * `auto-fill` resolves against the container's width, and the ghost's grid was 36px wider than the
+ * real one (the scroller's two 18px insets, which the ghost did not have), so it laid out FOUR
+ * columns at 1920 and SIX at 2520 against the real card's THREE and FIVE. The tile was 82px
+ * against a real 75.8. Neither had a gate; both are cheap to state and each is one row's worth of
+ * error at some width.
+ */
+function readTickets() {
+  const ghost = document.querySelector(".os-skelpage");
+  const card = ghost
+    ? ghost.querySelector('[data-sk="todo-card"]')
+    : document.querySelector('[data-probe="todo-card"]');
+  const grid = card && card.querySelector(".os-tkgrid");
+  if (!card || !grid) return { present: false, ghost: !!ghost };
+  const port = grid.parentElement;
+  const gs = getComputedStyle(grid), ps = getComputedStyle(port);
+  const r1 = (n) => Math.round(n * 10) / 10;
+  const kids = [...grid.children];
+  const rowGap = parseFloat(gs.rowGap) || 0;
+  const portRect = port.getBoundingClientRect();
+  /* the last y a block may occupy and still be wholly on screen */
+  const portFoot = portRect.bottom - parseFloat(ps.paddingBottom) - parseFloat(ps.borderBottomWidth);
+  const last = kids.length ? kids[kids.length - 1].getBoundingClientRect() : null;
+  return {
+    present: true, ghost: !!ghost,
+    scroller: port.className || "(none)",
+    count: kids.length,
+    cols: gs.gridTemplateColumns.split(" ").filter(Boolean).length,
+    tileH: kids[0] ? r1(kids[0].getBoundingClientRect().height) : null,
+    gridW: r1(grid.getBoundingClientRect().width),
+    rowGap,
+    portFoot: r1(portFoot),
+    lastBottom: last ? r1(last.bottom) : null,
+    /* positive = spills past the scrollport; negative = stops short of it */
+    overflow: last ? r1(last.bottom - portFoot) : null,
+    wholeVisible: kids.filter((k) => k.getBoundingClientRect().bottom <= portFoot + 0.5).length,
+  };
+}
+
 function settleSlot() {
   let s = document.getElementById("sa-skel-settle");
   if (!s) {
@@ -246,11 +299,13 @@ for (const W of WIDTHS) {
   await page.goto(APP + "/dashboard", { waitUntil: "domcontentloaded" });
   let during = null;
   let settleDuring = null;
+  let ticketsDuring = null;
   for (let i = 0; i < 160; i++) {
     const up = await page.evaluate(() => !!document.querySelector(".os-skelpage"));
     if (up) {
       settleDuring = await page.evaluate(settleSlot);
       during = await page.evaluate(readRegions, REGIONS);
+      ticketsDuring = await page.evaluate(readTickets);
       break;
     }
     await page.waitForTimeout(25);
@@ -278,6 +333,7 @@ for (const W of WIDTHS) {
   await page.waitForTimeout(3200);
   const settle = await page.evaluate(settleSlot);
   const after = await page.evaluate(readRegions, REGIONS);
+  const ticketsAfter = await page.evaluate(readTickets);
 
   console.log("──── " + W);
   /* ⚠️ NEVER CAUGHT IS A FAILURE, NOT A SKIP. A probe that finds no subject and reports nothing is
@@ -318,6 +374,7 @@ for (const W of WIDTHS) {
     live: during.live,
     removed: !after.skeleton,
     tickets: during.skeleton.tickets, stats: during.skeleton.stats,
+    tk: { during: ticketsDuring, after: ticketsAfter },
     animated: during.skeleton.animated, blocks: during.skeleton.blocks,
     missing: REGIONS.filter((n) => !during.boxes[n] || !after.boxes[n]),
   });
@@ -409,6 +466,23 @@ verdict.footMatches = rows.every((r) => r.edges && r.edges.during && r.edges.aft
   && near(r.edges.during.colLast && r.edges.during.colLast.bottom, r.edges.after.colLast && r.edges.after.colLast.bottom, 4)
   && near(r.edges.during.bodyBottom, r.edges.after.bodyBottom, 4));
 verdict.nothingClipped = rows.every((r) => r.clip && r.clip.worstCut <= 1);
+/**
+ * ⚠️ FOUR CLAIMS ABOUT THE GHOST'S TICKET GRID (v34, Phase 3), each stated against the LOADED
+ * reading taken in the same run at the same width — never against 15 / 15 / 12 / 10 written down.
+ * Those numbers are what the fixture happens to yield today; the claim is that the cover draws
+ * what the card will show, which survives a change to either.
+ */
+const tkRows = rows.filter((r) => r.tk && r.tk.during && r.tk.during.present && r.tk.after && r.tk.after.present);
+verdict.tkWidths = tkRows.length;
+verdict.tkCountMatches = tkRows.length === rows.length
+  && tkRows.every((r) => r.tk.during.count === r.tk.after.wholeVisible);
+verdict.tkColsMatch = tkRows.every((r) => r.tk.during.cols === r.tk.after.cols);
+/* the ghost's block is a declared height standing for a content-driven one — guarded, not shared */
+verdict.tkTileMatches = tkRows.every((r) => near(r.tk.during.tileH, r.tk.after.tileH, 1));
+/* inside the scrollport, and no void larger than the row it would have held */
+verdict.tkContained = tkRows.every((r) => r.tk.during.overflow !== null
+  && r.tk.during.overflow <= 0.5
+  && -r.tk.during.overflow <= r.tk.during.tileH + r.tk.during.rowGap);
 verdict.settled = rows.every((r) => r.settle && r.settleDuring
   && r.settle.suppressed && r.settleDuring.suppressed
   && r.settle.stillRunning === 0 && r.settleDuring.stillRunning === 0);
@@ -416,6 +490,7 @@ verdict.noLive = rows.every((r) => r.live && r.live.controls === 0 && r.live.ink
 verdict.pass = verdict.allCaught && verdict.noneMissing && verdict.allRemoved
   && verdict.animated && verdict.noLive && verdict.rmStill && verdict.settled
   && verdict.headMatches && verdict.footMatches && verdict.nothingClipped
+  && verdict.tkCountMatches && verdict.tkColsMatch && verdict.tkTileMatches && verdict.tkContained
   && verdict.worst <= TOL;
 writeFileSync(join(OUT, "skeleton.json"), JSON.stringify(verdict, null, 2));
 console.log("");
@@ -425,3 +500,9 @@ console.log("GATE skeletonRegions: " + (verdict.pass ? "pass" : "FAIL")
   + " · reducedMotionStill " + verdict.rmStill + " · settled " + verdict.settled
   + " · head " + verdict.headMatches + " · foot " + verdict.footMatches + " · unclipped " + verdict.nothingClipped
   + " · shimmer " + verdict.animated);
+console.log("GATE ticketFill: " + (verdict.tkCountMatches && verdict.tkColsMatch && verdict.tkTileMatches && verdict.tkContained ? "pass" : "FAIL")
+  + "  count==wholeVisible " + verdict.tkCountMatches + " · cols " + verdict.tkColsMatch
+  + " · tile " + verdict.tkTileMatches + " · contained " + verdict.tkContained
+  + "  [" + tkRows.map((r) => r.width + ": ghost " + r.tk.during.count + "x" + r.tk.during.cols
+      + " vs whole " + r.tk.after.wholeVisible + "x" + r.tk.after.cols
+      + " gap " + (-r.tk.during.overflow)).join(" · ") + "]");
