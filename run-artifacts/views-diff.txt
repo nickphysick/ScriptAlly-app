@@ -1,0 +1,2 @@
+148 assertions · 398 properties matched · 15 waived · 49 places compared
+ABSENT list .lgh .rule — the app draws the head's hairline as `.grp::after` — a pseudo-element it already had for exactly that job. The ref needs an element because it has no `::after` to hand; a span here would be markup added to satisfy a drawing.

@@ -1,0 +1,30 @@
+PASS G1 · the ticket paints the same set of regions the contract paints — the edge and the tag by name
+        dev ["av","edge","tag"] · contract ["av","edge","tag"]
+PASS G2 · and they are different colours, from different derivations
+        edge rgb(215, 224, 232) · tag rgb(245, 226, 218) (tag now)
+PASS G3 · the ticket's edge IS a ladder token, resolved — never a stored colour
+        --state-offer resolves #d7e0e8 · painted rgb(215, 224, 232)
+PASS G4 · the status is a dot and its WORD, in ink — never a fill
+        bg rgba(0, 0, 0, 0) · 1 dot · word "Offer"
+PASS G5 · the ticket's height is the contract's, within 1px
+        contract 169.5 · dev 169.3
+PASS G6 · the facts and the foot each sit on a dashed rule that actually paints
+        ["facts:1px dashed","tfoot:1px dashed"]
+PASS L1 · the group head is white, with no disc — the name, a bordered count, one hairline
+        bg rgb(255, 255, 255) · children ["g-lbl","g-n","g-cv"] · dots 0 · name "Playfair Display", serif · count border 1px · rule 832px
+PASS L2 · every row's verb is one the contract prints, and the column is genuinely contextual
+        29 rows · 6 distinct verbs · ["Agent request → Decide","Agent request → Mark sent","Nudge → Log a nudge","Gone quiet → Log a nudge","Gone quiet → Close it","Housekeeping → Fill it in","Your task → Tick it off"]
+PASS L3 · six tracks, five named cells, and a 5px status edge
+        6 tracks · cells ["ltask","lag","lchip","lstands","lact"] · edge 5px
+PASS L4 · the row's edge IS a ladder token, resolved — the same derivation as the ticket's
+        --state-offer resolves #d7e0e8 · painted rgb(215, 224, 232)
+PASS B1 · every board card is one row — 70px or less at 1440
+        tallest of 29 cards: 62.9px
+PASS B2 · the fact row is GONE from the DOM, not hidden
+        0 `.fact` elements in the board
+PASS B3 · the task is the card's largest text
+        task 16px · leaves [{"cls":"disc","px":10},{"cls":"nm","px":16},{"cls":"","px":11},{"cls":"none","px":7}]
+PASS B4 · the status dot leads the agent line, inside it
+        dot in `.ag` true · it is the first child true
+
+14/14

@@ -101,7 +101,18 @@ export const TaskBoard: React.FC<{
                         <span className="nm">{c.title}</span>
                         <span className="ag">
                           {c.status && <StatusDot status={c.status} overrideSize={11} />}
-                          {c.who ? <><b>{c.who}</b>{c.record ? ` · ${c.record}` : ""}</> : "Your own note"}
+                          {/* ⚠️ `record` IS ALREADY `name · agency` — it is joined from exactly
+                              that pair at the derivation, so appending it to the name printed
+                              "Noah Bright · Noah Bright · Bright Literary". Found by looking at
+                              the screenshot, which is the only thing that could have: every
+                              property and every position of `.ag` was correct. The contract bolds
+                              the name and leaves the agency plain, so the name is bolded IN the
+                              line rather than prepended to it. */}
+                          {c.who
+                            ? (c.record.startsWith(c.who)
+                                ? <><b>{c.who}</b>{c.record.slice(c.who.length)}</>
+                                : <b>{c.who}</b>)
+                            : "Your own note"}
                         </span>
                       </span>
                       <span className="bw">
