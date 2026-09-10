@@ -26,6 +26,10 @@ import { OneScreenSkeleton } from "./OneScreenSkeleton";
 
 const css = readFileSync(join(__dirname, "oneScreen.css"), "utf8");
 const dash = readFileSync(join(__dirname, "OneScreenDashboard.tsx"), "utf8");
+/* the loading state is ONE mechanism across three files, so it is locked in one place */
+const shell = readFileSync(join(__dirname, "..", "shell", "WorkspaceShell.tsx"), "utf8");
+const shellCss = readFileSync(join(__dirname, "..", "shell", "workspaceShell.css"), "utf8");
+const rootCss = readFileSync(join(__dirname, "..", "..", "index.css"), "utf8");
 const html = renderToStaticMarkup(<OneScreenSkeleton />);
 
 describe("the page skeleton mirrors the page", () => {
@@ -124,6 +128,26 @@ describe("the page skeleton mirrors the page", () => {
   it("is hidden from assistive tech — a shape tells a screen reader nothing", () => {
     expect(html).toContain('aria-hidden="true"');
   });
+
+  /**
+   * ⚠️ THE GHOST TAKES THE FLOW; THE PAGE STANDS DOWN (v33.2, Phase 4) — and this REVERSES v33.1's
+   * overlay, so the reasoning is stated rather than left as a silent edit. The overlay's argument
+   * was that the real cards must stay mounted for the reveal's stagger to find them; `display:
+   * none` keeps them mounted, so nothing is lost. What the overlay could never do is cover the NAV
+   * ROW, which is the shell's element and outside this page's tree — so the loading state was a
+   * live header above a ghost body, which is what the phase retires.
+   */
+  it("⚠️ takes the flow rather than covering the page, and the page stands down", () => {
+    const at = css.indexOf(".os-skelpage {");
+    expect(at).toBeGreaterThan(-1);
+    const decl = css.slice(at, css.indexOf("}", at));
+    expect(decl).toContain("position: static");
+    expect(decl).toContain("flex: 1 1 auto");
+    expect(decl).not.toContain("inset: 0");
+    expect(css).toContain(".os-root.os-loading > .os-content { display: none; }");
+    /* the class is the COVER's phase, not the raw flag: the page must be back before the fade */
+    expect(dash).toContain('skeleton.phase === "on" ? " os-loading" : ""');
+  });
 });
 
 describe("the shimmer", () => {
@@ -144,15 +168,15 @@ describe("the shimmer", () => {
      shimmer that was running — and the ghosts now wear real card classes, where one `::after` in a
      card rule and the ghost's collide in silence. */
   it("⚠️ sweeps the ELEMENT's own background, never a pseudo-element", () => {
-    const at = css.indexOf("  background-color: #ece6de;");
+    const at = css.indexOf("  background-color: var(--sa-sk-base);");
     expect(at).toBeGreaterThan(-1);
     const decl = css.slice(css.lastIndexOf(".os-sk {", at), css.indexOf("}", at));
     expect(decl).toContain("animation: os-sk-shimmer 1.4s linear infinite");
     expect(decl).toContain("background-size: 600px 100%");
     /* ⚠️ LONGHANDS. The `background` shorthand resets every longhand, so a mistyped gradient would
        leave the block TRANSPARENT rather than flat — the see-through family this repo records. */
-    expect(decl).toContain("background-color: #ece6de");
-    expect(decl).toContain("background-image: linear-gradient(90deg, #ece6de 0%, #f5f1ea 40%, #ece6de 80%)");
+    expect(decl).toContain("background-color: var(--sa-sk-base)");
+    expect(decl).toContain("background-image: var(--sa-sk-sheen)");
     expect(decl).not.toMatch(/\n\s+background: /);
     expect(css).not.toContain(".os-sk::after");
   });
@@ -162,7 +186,7 @@ describe("the shimmer", () => {
     // which would leave an infinite sweep strobing rather than stopped.
     expect(css).toContain("animation-name: none !important");
     // …and a stopped gradient sweep freezes mid-highlight, which reads as a rendering fault.
-    expect(css).toContain(".os-sk { animation-name: none !important; background-image: none; background-color: #ece6de; }");
+    expect(css).toContain(".os-sk { animation-name: none !important; background-image: none; background-color: var(--sa-sk-base); }");
   });
 });
 
@@ -196,7 +220,10 @@ describe("the reveal — one arrival, not two", () => {
     const at = css.indexOf(".os-skelpage {");
     expect(at).toBeGreaterThan(-1);
     expect(css.slice(at, css.indexOf("}", at))).toContain("transition: opacity 250ms ease");
-    expect(css).toContain(".os-skelpage.out { opacity: 0; pointer-events: none; }");
+    /* ⚠️ AND IT LEAVES THE FLOW TO DO IT (v33.2). The ghost is in the flow while it holds — that
+       is what makes its containers the page's own — so a fade alone would keep its box and push
+       the arriving page BELOW it for the 250ms of the dissolve. */
+    expect(css).toContain(".os-skelpage.out { opacity: 0; pointer-events: none; position: absolute; inset: 0; }");
   });
 
   /* ⚠️ THE HOOK IS READ ABOVE THE EFFECT THAT USES IT. A `const` referenced before its declaration
@@ -229,5 +256,96 @@ describe("the timing is the lib's, not the component's", () => {
     for (const t of ["--os-sk-counters-h", "--os-sk-goal-h", "--os-sk-tasks-h"]) {
       expect(css).not.toContain(t);
     }
+  });
+});
+
+/**
+ * ⚠️ THE NAV ROW IS PART OF THE LOADING STATE (v33.2, Phase 4), AND IT IS THE SHELL'S ELEMENT.
+ *
+ * A page-owned skeleton can only ever cover the body, so the dashboard used to load with a live
+ * header above a ghost page — a search field and two buttons that answered nothing, over a page
+ * that plainly had no data. The row is `.ws-pagebar`, a child of `.ws-main`; the shell derives the
+ * loading state from the same `collectionsReady` the page derives it from, rather than being told.
+ */
+describe("the nav row loads with the page", () => {
+  it("⚠️ the shell READS the flag rather than being handed it", () => {
+    expect(shell).toContain("collectionsReady");
+    expect(shell).toContain("const dashLoading = dashMode && !collectionsReady;");
+    /* published beside the other modes, on the same element, by the same expression shape */
+    expect(shell).toContain('${dashLoading ? " dash-loading" : ""}');
+  });
+
+  it("⚠️ the row is a shape while it loads, and says so", () => {
+    expect(shell).toContain('data-probe="navrow" aria-hidden={dashLoading || undefined}');
+    expect(shellCss).toContain(".dash-loading .ws-pagebar { pointer-events: none; }");
+  });
+
+  /* ⚠️ THE PLACEHOLDERS ARE THE REAL CONTROLS, INK HIDDEN — which is why the row's geometry is the
+     live one. Ghost blocks would restate six widths, one of which (the search) is a flex remainder
+     that does not exist as a number to copy. */
+  it("⚠️ hides the CHILDREN, paints the parents, and kills the bare text nodes", () => {
+    expect(shellCss).toMatch(/\.dash-loading \.ws-pagebar \.ws-bigsearch > \*/);
+    expect(shellCss).toMatch(/\.dash-loading \.ws-pagebar \.ws-nbtn > \*/);
+    expect(shellCss).toContain("{ visibility: hidden; }");
+    /* `New` is a bare text node beside its icon, so `> *` cannot reach it */
+    expect(shellCss).toContain("color: transparent;");
+  });
+
+  /**
+   * ⚠️ ONE SHIMMER, TWO SHEETS, ONE PAIR OF TOKENS. The page's ghosts are painted by
+   * `oneScreen.css` and the row's by `workspaceShell.css`; a second literal gradient would drift a
+   * quarter-tone from the body beneath it and nothing grepping either sheet alone would find the
+   * pair. Both halves are asserted, because a token with one consumer is the state it replaced.
+   */
+  it("⚠️ the shimmer is one token pair, read by both sheets", () => {
+    expect(rootCss).toContain("--sa-sk-base: #ece6de;");
+    expect(rootCss).toContain("--sa-sk-sheen: linear-gradient(90deg, #ece6de 0%, #f5f1ea 40%, #ece6de 80%);");
+    expect(css).toContain("var(--sa-sk-sheen)");
+    expect(shellCss).toContain("var(--sa-sk-sheen)");
+    /* and the animation is the same one, by name */
+    expect(shellCss).toContain("animation: os-sk-shimmer 1.4s linear infinite");
+  });
+
+  it("⚠️ reduced motion reaches the row too, not only the page", () => {
+    const at = shellCss.indexOf("@media (prefers-reduced-motion: reduce) {", shellCss.indexOf(".dash-loading .ws-pagebar"));
+    expect(at).toBeGreaterThan(-1);
+    const block = shellCss.slice(at, shellCss.indexOf("\n}", at));
+    expect(block).toContain("animation-name: none !important");
+    expect(block).toContain("background-image: none");
+  });
+});
+
+/**
+ * ⚠️ THE SIDEBAR BOUNDARY IS THE RAIL'S SHADOW, AND THE ELEMENT IS THE CLAIM (v33.2, Phase 3).
+ *
+ * v33.1 put it on `.ws-window`, whose left edge is 22px inside the column — so it read as the
+ * page's own edge treatment, i.e. the page as the raised object resting on the rail. `.ws-main` is
+ * the rail's flex sibling and starts exactly where the rail ends.
+ */
+describe("the sidebar boundary", () => {
+  it("⚠️ is on the column that is flush with the rail, not on the window", () => {
+    expect(shellCss).toContain(".dash-mode .ws-main::before {");
+    expect(shellCss).toContain(".dash-mode .ws-main { position: relative; }");
+    /* ⚠️ THE WINDOW'S COPY IS GONE FROM BOTH SHEETS, AND BOTH READS STRIP COMMENTS FIRST — this
+       repo documents every retirement by quoting what it retired, so the prose explaining the move
+       names the very selector the lock forbids. It went red on a correct sheet once already. */
+    const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(strip(shellCss)).not.toContain(".ws-window::before");
+    expect(strip(css)).not.toContain(".ws-window::before");
+  });
+
+  it("⚠️ 18px, three stops, inert, and below every card", () => {
+    const at = shellCss.indexOf(".dash-mode .ws-main::before {");
+    const decl = shellCss.slice(at, shellCss.indexOf("\n}", at));
+    expect(decl).toContain("left: 0;");
+    expect(decl).toContain("width: 18px;");
+    expect(decl).toContain("rgba(42, 31, 24, 0.07)");
+    expect(decl).toContain("rgba(42, 31, 24, 0.028) 45%");
+    expect(decl).toContain("rgba(42, 31, 24, 0)");
+    expect(decl).toContain("pointer-events: none;");
+    /* ⚠️ 0, NOT THE PACK'S 2 — `.os-card` here is `z-index: 1`, so 2 would put the scrim ABOVE
+       every card, which is the opposite of what the same sentence asks for. */
+    expect(decl).toContain("z-index: 0;");
+    expect(decl).not.toContain("100vh");
   });
 });

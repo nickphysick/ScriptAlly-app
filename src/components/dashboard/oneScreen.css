@@ -503,8 +503,25 @@
    already declared once, further up this sheet. Nothing here restates the grid — only the blocks'
    own heights, and each of those is the measured height of the card it covers. */
 .os-skelpage {
-  position: absolute;
-  inset: 0;
+  /**
+   * ⚠️ IN THE FLOW, NOT OVER THE PAGE (v33.2, Phase 4) — and this reverses v33.1's overlay.
+   *
+   * The overlay's argument was that the real cards must stay mounted so the entrance stagger can
+   * find them. That is still true and still works: `display: none` leaves them mounted. What the
+   * overlay could NOT do is cover the nav row, which is the shell's element and outside this
+   * page's tree entirely — so the loading state was a live header above a ghost body, which is
+   * what this phase retires. With the page stood down and the ghost in the flow, the ghost is
+   * sized by the very containers the page uses, and there is one loading state on the screen.
+   *
+   * ⚠️ IT GOES ABSOLUTE AGAIN TO DISSOLVE. An in-flow element that fades still occupies its box,
+   * so for the 250ms of the fade the page would sit BELOW the ghost rather than under it. `.out`
+   * takes it out of the flow for exactly that window; `.os-root` is already `position: relative`.
+   */
+  position: static;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   z-index: 30;
   /* the window's own paper, so the page beneath is covered rather than tinted */
   background: var(--os-skel-paper);
@@ -522,7 +539,11 @@
    OneScreenDashboard. So this is a dissolve onto a settled page, not a crossfade between two
    moving things; nothing beneath it is animating while it goes.
    `pointer-events: none` the moment it starts leaving: the page is usable before it is invisible. */
-.os-skelpage.out { opacity: 0; pointer-events: none; }
+.os-skelpage.out { opacity: 0; pointer-events: none; position: absolute; inset: 0; }
+/* ⚠️ THE PAGE STANDS DOWN, IT IS NOT UNMOUNTED. `display: none` keeps every card in the tree for
+   the reveal's stagger to find, and takes it out of the flow so the ghost's own containers resolve
+   against the same box the page's do. */
+.os-root.os-loading > .os-content { display: none; }
 .os-sk {
   /**
    * ⚠️ THE REF'S OWN SHIMMER, MECHANISM AND ALL (v33, Phase 4) — `.sk`, a 600px gradient swept by
@@ -540,8 +561,8 @@
    * The ref itself writes `background:#ece6de` and then `background-image:…`, which works only
    * because of the order.
    */
-  background-color: #ece6de;
-  background-image: linear-gradient(90deg, #ece6de 0%, #f5f1ea 40%, #ece6de 80%);
+  background-color: var(--sa-sk-base);
+  background-image: var(--sa-sk-sheen);
   background-size: 600px 100%;
   animation: os-sk-shimmer 1.4s linear infinite;
   border-radius: 8px;
@@ -672,7 +693,7 @@
    ⚠️ THE 0.62 OPACITY IS RETIRED. It was the app's, not the ref's, and it made the reduced-motion
    ghost a fainter object than the moving one — quieter motion, not quieter ink. */
 @media (prefers-reduced-motion: reduce) {
-  .os-sk { animation-name: none !important; background-image: none; background-color: #ece6de; }
+  .os-sk { animation-name: none !important; background-image: none; background-color: var(--sa-sk-base); }
 }
 
 /* ══ §11 · RESPONSIVE FRAME ══ */
@@ -1537,38 +1558,19 @@
   .os-bandkey { flex-wrap: wrap; white-space: normal; row-gap: 6px; gap: 14px; }
 }
 /**
- * ══════════════════════════ v33 · THE SIDEBAR BOUNDARY — SOFT SCRIM ══════════════════════════
+ * ══════════════════ v33 · THE SIDEBAR BOUNDARY IS NOT DECLARED HERE ══════════════════
  *
- * ⚠️ TWO OF THIS PHASE'S THREE REQUIREMENTS WERE ALREADY TRUE, AND MEASURING SAID SO. The pack asks
- * for the rail's right border to be removed and for the rail to keep the page's background.
- * Measured on both /dashboard and /queries before anything was written: `.ws-panel` computes
- * `border-right-width: 0px` and `background-color: rgba(0, 0, 0, 0)` on both. There is no hairline
- * to remove and no tonal step to flatten — which is exactly WHY the two surfaces read as one, and
- * why the scrim is the whole of the fix rather than one third of it.
+ * ⚠️ IT USED TO BE, AND THAT WAS THE FAULT (v33.2, Phase 3). The scrim was
+ * `.dash-mode .ws-window::before` — the content WINDOW, whose left edge measures 246 against the
+ * rail's right edge at 224. It therefore began 22px inside the page and read as a band down the
+ * content's own edge: the page as the raised object resting on the rail, which is the reading
+ * upside down. A shadow belongs to its caster, and falls away from it.
  *
- * ⚠️ IT IS A `::before` ON THE WINDOW, NOT AN ELEMENT. The scrim has no content, no semantics and
- * no interaction; a div would put a node in the tree that a reader's cursor, a screen reader and
- * every future `elementFromPoint` probe has to be told to ignore. `.ws-window` is already
- * `position: relative` and already clips, so the scrim inherits the window's own rounded edge for
- * free — which a child div would have had to restate.
- *
- * ⚠️ Z-INDEX 0, DELIBERATELY, NOT A NEGATIVE. A negative-z pseudo-element paints behind the
- * BACKGROUNDS of every ancestor up to the nearest stacking context — this repo has recorded that
- * twice, on the marketing halo and the hero's firework — and `.ws-window` paints its own ground.
- * At 0 the scrim sits above that ground and below the cards, which are `z-index: 1`.
- *
- * ⚠️ AND IT IS SCOPED TO `.dash-mode`. Every other page has a card at its left edge for the content
- * to cast against; the dashboard is the one route whose content meets the rail directly.
+ * The column that IS flush with the rail is `.ws-main` — x = 224 at every width, measured — so the
+ * rule now lives beside the other `.dash-mode` rules in `shell/workspaceShell.css`, where the
+ * element it styles is declared. A page sheet reaching into one shell element to position
+ * something against a THIRD shell element is how the wrong one gets picked; it is what happened.
  */
-.dash-mode .ws-window::before {
-  content: "";
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 16px;
-  background: linear-gradient(90deg, rgba(42, 31, 24, 0.055), rgba(42, 31, 24, 0));
-  pointer-events: none;
-  z-index: 0;
-}
 
 /* ⚠️ `.os-tkfoot` IS DELETED WITH ITS ELEMENT (v33, Phase 2). A rule left behind for markup
    nothing renders is the fault this sheet already records twice. */

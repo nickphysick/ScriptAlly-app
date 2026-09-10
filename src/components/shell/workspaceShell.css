@@ -1271,12 +1271,127 @@
 .dash-mode .ws-window::after { opacity: 0; transition-delay: 0s; }
 .dash-mode .ws-work { background: transparent; }
 
+/**
+ * ══ THE SIDEBAR BOUNDARY — A SHADOW CAST *BY* THE RAIL (v33.2, Phase 3) ══
+ *
+ * ⚠️ THE DIRECTION IS THE WHOLE POINT, AND v33.1 HAD IT BACKWARDS. The scrim was on
+ * `.dash-mode .ws-window::before`. Measured: the rail's right edge is x = 224 and the window's
+ * left edge is x = 246, so the effect began 22px INSIDE the page — a band down the content's own
+ * edge, which reads as the page being the raised object sitting on top of the rail. Same pixels,
+ * opposite meaning, and the difference is visible.
+ *
+ * ⚠️ `.ws-main` IS THE ELEMENT BECAUSE IT IS THE ONE THAT IS FLUSH. It is the rail's flex sibling,
+ * so its border box starts exactly where the rail's ends — 224 at 1536, 1710, 1920 and 2520 alike.
+ * `left: 0` therefore begins precisely at the rail's right edge, with nothing to keep in step.
+ * The 18px falls across the column's own 22px left padding — the desk between the two capsules —
+ * and is gone before the window begins. A shadow falls away from its caster; it does not sit in a
+ * band, and it does not need to reach the content to say the rail is above it.
+ *
+ * ⚠️ `position: relative` IS SCOPED TO `.dash-mode`, NOT ADDED TO `.ws-main` OUTRIGHT. `.ws-main`
+ * is static on every route today; making it a containing block app-wide would re-anchor every
+ * absolutely-positioned descendant on ten pages, silently, for one route's decoration.
+ *
+ * ⚠️ Z-INDEX 0, NOT THE 2 THE PACK NAMES. The pack's 2 is chosen against cards at 3, which is the
+ * REF's numbering; `.os-card` in this app is `z-index: 1`, so 2 would put the scrim ABOVE every
+ * card — the opposite of what the pack asks for in the same sentence. 0 is the value that
+ * satisfies the stated rule here: above the ground, below every card. And it is not negative,
+ * because a negative-z pseudo-element paints behind the BACKGROUNDS of every ancestor up to the
+ * nearest stacking context — recorded twice in this repo already.
+ *
+ * ⚠️ NO `min-height: 100vh`, DELIBERATELY. `.ws-main` measures 1108.3 in a 1150 viewport — the
+ * beta strip sits above the shell — so `100vh` would over-claim by 41.7px and push the last of the
+ * page below the fold with nothing to scroll it. That is the Tasks chassis's unreachable 21px, to
+ * the letter. `top: 0; bottom: 0` already spans the column's full height, which IS the full window
+ * below the strip, at any page length: the column is a flex child that fills the chassis.
+ */
+.dash-mode .ws-main { position: relative; }
+.dash-mode .ws-main::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 18px;
+  background: linear-gradient(
+    90deg,
+    rgba(42, 31, 24, 0.07),
+    rgba(42, 31, 24, 0.028) 45%,
+    rgba(42, 31, 24, 0)
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* ⚠️ THE CRUMB GOES; THE ROW STAYS, AND THE ACTIONS STAY IN IT. Search, Feedback and New are not in
    the ref because the ref never drew the nav — they are chrome above the hero, and they are already
    right-aligned in the very row the crumb used. Moving them into the page would mean a second mount
    of three components that exist once. `visibility` rather than `display` so the row keeps its
    height and the hero starts where the ref puts it. */
 .dash-mode .ws-crumb, .dash-mode .ws-sync { visibility: hidden; }
+
+/**
+ * ══ THE NAV ROW IS PART OF THE LOADING STATE (v33.2, Phase 4) ══
+ *
+ * ⚠️ THE PLACEHOLDERS ARE THE REAL CONTROLS WITH THEIR INK HIDDEN, NOT NEW BLOCKS BESIDE THEM —
+ * and that is the pack's own principle applied to the one row it could not reach. "Take every
+ * dimension from the live containers": the toggle is 34, the crumb 186.8, the search 574.1 at
+ * 1536 and 640 above it, the right cluster 270.5, the row 64. Ghost blocks would have to restate
+ * all six, and the search's width is a `flex: 1 1 auto` against a 640px cap — a number that does
+ * not exist to be copied, because it is whatever is left after the other five.
+ *
+ * `visibility: hidden` on the CHILDREN keeps every one of those boxes exactly where it is while
+ * removing everything readable; the parent then carries the shimmer. Measured: the row is 64px
+ * loading and 64px loaded, at every width, because it is the same row.
+ *
+ * ⚠️ AND NOTHING IN IT IS REACHABLE. `pointer-events: none` on the row, and `aria-hidden` from the
+ * shell — a search field and two buttons that answer nothing are worse than three grey shapes.
+ *
+ * ⚠️ THE SHIMMER IS `--sa-sk-*`, THE SAME PAIR THE PAGE'S GHOSTS READ. A second gradient here
+ * would drift a quarter-tone from the body beneath it, and nothing grepping either sheet alone
+ * would find the pair.
+ */
+.dash-loading .ws-pagebar { pointer-events: none; }
+.dash-loading .ws-pagebar .sb-toggle,
+.dash-loading .ws-pagebar .ws-crumb,
+.dash-loading .ws-pagebar .ws-bigsearch,
+.dash-loading .ws-pagebar .ws-fbpill,
+.dash-loading .ws-pagebar .ws-nbtn,
+.dash-loading .ws-pagebar .sp-help {
+  background-color: var(--sa-sk-base);
+  background-image: var(--sa-sk-sheen);
+  background-size: 600px 100%;
+  border-color: transparent;
+  box-shadow: none;
+  animation: os-sk-shimmer 1.4s linear infinite;
+  /* ⚠️ `color: transparent` AS WELL AS HIDING THE CHILDREN, because `> *` reaches ELEMENTS and
+     `New` is a bare text node beside its icon. The gate caught exactly that: five ghosts and one
+     word still legible in the middle of them. */
+  color: transparent;
+}
+/* ⚠️ THE CHILDREN, NOT THE ELEMENTS — hiding the element hides its background, and the background
+   is the shimmer. `visibility` rather than `display` because the layout is the point. */
+.dash-loading .ws-pagebar .sb-toggle > *,
+.dash-loading .ws-pagebar .ws-crumb > *,
+.dash-loading .ws-pagebar .ws-sync,
+.dash-loading .ws-pagebar .ws-bigsearch > *,
+.dash-loading .ws-pagebar .ws-fbpill > *,
+.dash-loading .ws-pagebar .ws-nbtn > *,
+.dash-loading .ws-pagebar .sp-help > * { visibility: hidden; }
+/* the hairline dividers say nothing on their own and would read as stray marks between ghosts */
+.dash-loading .ws-pagebar .ws-vdiv,
+.dash-loading .ws-pagebar .ws-bdiv { visibility: hidden; }
+/* ⚠️ `.ws-sync` IS IN BOTH LISTS DELIBERATELY: it is a text node's parent with no element child,
+   so hiding "its children" reaches nothing. It is hidden outright and carries no shimmer. */
+@media (prefers-reduced-motion: reduce) {
+  .dash-loading .ws-pagebar .sb-toggle,
+  .dash-loading .ws-pagebar .ws-crumb,
+  .dash-loading .ws-pagebar .ws-bigsearch,
+  .dash-loading .ws-pagebar .ws-fbpill,
+  .dash-loading .ws-pagebar .ws-nbtn,
+  .dash-loading .ws-pagebar .sp-help {
+    animation-name: none !important;
+    background-image: none;
+    background-color: var(--sa-sk-base);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .ws-app *, .ws-app *::before, .ws-app *::after {

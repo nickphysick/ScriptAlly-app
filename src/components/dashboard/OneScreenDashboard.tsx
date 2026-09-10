@@ -218,7 +218,13 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
   return (
     <div
       ref={rootRef}
-      className="os-root"
+      /**
+       * ⚠️ `os-loading` STANDS THE PAGE DOWN WHILE THE GHOST HOLDS THE FLOW (v33.2, Phase 4). It is
+       * keyed off the cover's own phase rather than off `loading`, so the page comes back at the
+       * moment the ghost starts dissolving — `out` is the 250ms where both are on screen and the
+       * ghost is absolute over a page that is once again laid out.
+       */
+      className={`os-root${skeleton.phase === "on" ? " os-loading" : ""}`}
     >
       <div className="os-content" data-probe="main">
         {/* ⚠️ THE HEADER IS ITS OWN GRID ROW, spanning both columns — not the first thing in the
