@@ -99,7 +99,7 @@ const SELF_SRC = readFileSync(fileURLToPath(import.meta.url), "utf8");
 /* ⚠️ ONE NAME, READ TWICE — the report's `ref:` field used to restate this string, so repointing
    the harness at a new ref left the table truthfully measuring v29 while its own header said v28.
    A value that appears twice is a value that will disagree with itself; the report derives it. */
-const REF_REL = "design-refs/dashboard-cappuccino-v31.html";
+const REF_REL = "design-refs/dashboard-cappuccino-v32.html";
 const REF = join(ROOT, REF_REL);
 
 const argv = process.argv.slice(2);
@@ -594,6 +594,66 @@ const READ = `(() => {
    * built from prose about the ref rather than from the ref. These hold whatever the data is, which
    * is what makes them a gate rather than a snapshot.
    */
+  /**
+   * ⚠️ NO BAND MAY EVER RISE ABOVE THE LINE, COMPARED AS ARRAYS RATHER THAN SAMPLED (v32).
+   *
+   * The bands and the line are polylines through one clamped sample set now, so their d strings are
+   * lists of the same x positions in the same order — which means this does not have to sample a
+   * curve or guess which half of a closed area path is its top edge. It reads the numbers.
+   *
+   * The band's own top edge is the first (steps + 1) points of its d; the line's d is exactly that
+   * many. A positive worst value is a band standing above the line in SVG y, which is the fault this
+   * pass exists to close and which no pixel sweep of the harness account's data could ever show.
+   */
+  out.checks.bandCrossing = (() => {
+    const host = document.querySelector('[data-probe="plot"]');
+    const svg = host && (host.tagName.toLowerCase() === "svg" ? host : host.querySelector("svg"));
+    if (!svg) return null;
+    const inDefs = (el) => !!el.closest("defs");
+    const nums = (d) => {
+      const out2 = [];
+      let i = 0;
+      while (i < d.length) {
+        const c = d.charCodeAt(i);
+        if ((c >= 48 && c <= 57) || c === 45 || c === 46) {
+          let j = i + 1;
+          while (j < d.length) {
+            const c2 = d.charCodeAt(j);
+            if ((c2 >= 48 && c2 <= 57) || c2 === 46) j++;
+            else break;
+          }
+          out2.push(parseFloat(d.slice(i, j)));
+          i = j;
+        } else i++;
+      }
+      return out2;
+    };
+    const paths = [...svg.querySelectorAll("path")].filter((el) => !inDefs(el));
+    const lineEl = paths.find((el) => (el.getAttribute("stroke") || "").toLowerCase() === "#1c130f"
+      && (el.getAttribute("fill") || "none") === "none" && Number(el.getAttribute("stroke-width")) >= 1.6);
+    const bandEls = paths.filter((el) => {
+      const f = (el.getAttribute("fill") || "none").toLowerCase();
+      return f !== "none" && f.indexOf("fade") < 0;
+    });
+    if (!lineEl || !bandEls.length) return null;
+    const ln = nums(lineEl.getAttribute("d") || "");
+    const pts2 = ln.length / 2;
+    if (pts2 < 8) return { skipped: "the line is not a polyline at this data size" };
+    let worst = -1e9;
+    let samples = 0;
+    for (const b of bandEls) {
+      const bd = nums(b.getAttribute("d") || "");
+      for (let k = 0; k < pts2; k++) {
+        const by = bd[k * 2 + 1], ly = ln[k * 2 + 1];
+        if (by === undefined || ly === undefined) continue;
+        /* SVG y grows downward: a band ABOVE the line has the SMALLER y */
+        const over = ly - by;
+        if (over > worst) worst = over;
+        samples++;
+      }
+    }
+    return { worst: Math.round(worst * 1000) / 1000, samples, points: pts2, bands: bandEls.length };
+  })();
   out.checks.plotStruct = (() => {
     const host = document.querySelector('[data-probe="plot"]');
     const svg = host && (host.tagName.toLowerCase() === "svg" ? host : host.querySelector("svg"));
@@ -1233,6 +1293,12 @@ const STANDING = [
       && v.lineEndX !== null && v.bandEndX !== null && Math.abs(v.lineEndX - v.bandEndX) <= 0.5
       && v.markerXs.some((x) => Math.abs(x - v.lineEndX) <= 0.5),
     want: "3 masked bands · userSpaceOnUse 0→y(0) · 1 line after · no fade rect · ≥2 marks · line ends with the bands",
+  },
+  {
+    k: "bandCrossing",
+    why: "no band rises above the total line — the fault that survived three passes of pixel sweeps",
+    test: (v) => !!v && !v.skipped && v.samples > 200 && v.worst <= 0.05,
+    want: "no band above the line, > 200 compared points",
   },
   { k: "redRings", why: "no control computes a red outline or box-shadow, in any state", test: (v) => v === 0, want: "0" },
   {
