@@ -10,7 +10,24 @@
  * ⚠️ AND THE FIX IS THE SCOPE, NEVER A SECOND COPY OF THE HEX. Writing #1c130f into the tab rule
  * would have made one colour two sources, which is the fault the token exists to prevent.
  */
-.cal-timeline {
+/**
+ * ⚠️ AND THE SAME FAULT AGAIN, FROM THE OTHER END, THE DAY A SECOND PAGE MOUNTED THE BOARD
+ * (10 Sep). `.cal-timeline` is the TO-DO calendar page's root. Query Centre mounts the board
+ * without it, so all TWENTY-NINE rules reading `--tl-nearblack` resolved to nothing there — and
+ * the one a reader notices is the today line, whose `border-left: 1.5px dashed var(--tl-nearblack)`
+ * is invalid at computed-value time when the token is missing. An invalid border shorthand does not
+ * fall back to a default width: every longhand reverts to initial, `border-left-style` becomes
+ * `none`, and the element computes to width 0. **Measured: the line is in the DOM on both pages,
+ * 1px wide on To-do and 0px wide in Query Centre.** Present, correct in source, and invisible.
+ *
+ * ⚠️ THE FIX IS THE SCOPE AGAIN, AND STILL NOT A SECOND COPY OF THE HEX. `.tl-board` joins the
+ * SAME rule rather than getting a declaration of its own: the board carries its own token scope
+ * wherever it is mounted, and the page root keeps covering the To-do chrome that sits outside the
+ * board — which is what moved this declaration up here in the first place. One value, one place to
+ * change it, two scopes that need it.
+ */
+.cal-timeline,
+.tl-board {
   --tl-nearblack: #1c130f;
 }
 
