@@ -12,7 +12,7 @@ Phase 0's full table — the contract's computed value beside the page's, per se
 | 1 · the grid | `afffb576` | the ticket cards, and two dashed rules that had never rendered |
 | 2 · the list | `28e7899c` | the Query Centre's table |
 | 3 · the board | `7baad795` | one row per card, and three more unresolved tokens |
-| 4 · the lock | *(below)* | the diff that sees arrangement |
+| 4 · the lock | `0acfc22d` | the diff that sees arrangement |
 
 ---
 
