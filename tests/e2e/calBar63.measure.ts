@@ -181,19 +181,23 @@ test.describe("v63 · D — the bar", () => {
     for (const h of raw) expect(h, `a card is ${h}px, not the token's 86`).toBeCloseTo(86, 0);
   });
 
-  test("⚠️ (d2) the band's tint is the ladder's rung, and the census is not a monoculture", async ({ page }) => {
+  test("⚠️ (d2) the band's tint is its state's locked colour, and the census is not a monoculture", async ({ page }) => {
     await openRoute(page, CAL, { width: 1440, height: 900 });
     const cs = (await cards(page))!.filter((c) => c.band);
     expect(cs.length).toBeGreaterThan(5);
 
-    /* the eight rungs, read from the stylesheet so the lock does not restate a hex */
-    const css = readFileSync("src/components/todo/todoCalendar.css", "utf8")
+    /* ⚠️ FIVE STATES NOW, NOT EIGHT RUNGS, and they are read from the file that DECLARES them.
+       The eight-rung ramp retired on 10 Sep: the app's five flat state colours are locked across
+       seven surfaces and the calendar was the last one disagreeing. The tokens live at `:root` in
+       `f12.css`, which is why the calendar can read them directly and carries no copy — so this
+       lock reads them from there rather than restating a hex on both sides. */
+    const css = readFileSync("src/components/shell/f12.css", "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "");
     const rung: Record<string, string> = {};
-    for (const m of css.matchAll(/--tl-stage-([a-z0-9-]+)\s*:\s*(#[0-9a-f]{6})/gi)) {
+    for (const m of css.matchAll(/--state-(queried|agent|you|offer|closed)\s*:\s*(#[0-9a-f]{6})/gi)) {
       rung[`tl-st-${m[1]}`] = m[2];
     }
-    expect(Object.keys(rung).length, "the ladder is not declared").toBe(8);
+    expect(Object.keys(rung).length, "the five state colours are not declared").toBe(5);
     const hex = (rgb: string) => {
       const [r, g, b] = rgb.match(/\d+/g)!.map(Number);
       return "#" + [r, g, b].map((n) => n.toString(16).padStart(2, "0")).join("");
@@ -204,15 +208,15 @@ test.describe("v63 · D — the bar", () => {
          submission is", which is a sentence about a task's nothing; its band is the note's yellow.
          `calTask63` asserts that paper against its own token, so the band is checked either way. */
       if (c.isTask) continue;
-      expect(c.rung, `a band carries no rung class (${c.status})`).not.toBeNull();
+      expect(c.rung, `a band carries no state class (${c.status})`).not.toBeNull();
       seen[c.rung!] = (seen[c.rung!] ?? 0) + 1;
-      expect(hex(c.bandBg!), `${c.status}: band is ${c.bandBg}, rung ${c.rung} is ${rung[c.rung!]}`)
+      expect(hex(c.bandBg!), `${c.status}: band is ${c.bandBg}, state ${c.rung} is ${rung[c.rung!]}`)
         .toBe(rung[c.rung!]);
     }
     /* ⚠️ A MONOCULTURE PASSES EVERY LINE ABOVE. If every card is on one rung the mapping is
        unexercised and this case proves that one rung paints. The set is printed for that reason. */
-    console.log("rungs seen:", JSON.stringify(seen));
-    expect(Object.keys(seen).length, `every card is on one rung: ${JSON.stringify(seen)}`)
+    console.log("states seen:", JSON.stringify(seen));
+    expect(Object.keys(seen).length, `every card is on one state: ${JSON.stringify(seen)}`)
       .toBeGreaterThan(2);
   });
 

@@ -42,7 +42,7 @@ import { pillText } from "../../../lib/calendarPill";
 import { cardCFor, type CardKind } from "../../../lib/cardC";
 import { actionKindFor, type ActionKind, type ActionSubject, type ActionPrefill } from "../../../lib/actionKind";
 import { stageSentence, type StageEnd } from "../../../lib/stageSentence";
-import { stageFor } from "../../../lib/queryCardFacts";
+import { stateFor } from "../../../lib/queryCardFacts";
 import { shortCalDate } from "../../../lib/todoCalendar";
 import { pct, pctOfRows, barLeft, barWidth, laneVar, Piece, Marker, ActionMark, type DrawnGroup } from "./boardParts";
 
@@ -436,7 +436,7 @@ data-rowkey={r.key}
                             const stageDays = Math.round(to - from);
                             openCardOver({
                               key: `js-${a.key}`, rowKey: a.rowKey, isTask: false,
-                              bandClass: `tl-st-${stageFor(a.status ?? QueryStatus.QUERIED)}`,
+                              bandClass: `tl-st-${stateFor(a.status ?? QueryStatus.QUERIED)}`,
                               bandStatus: stage, holder: "", dotStatus: a.status ?? QueryStatus.QUERIED,
                               name: stageSentence({ stage, end, next: b?.status ? String(b.status) : undefined,
                                 days: stageDays }),

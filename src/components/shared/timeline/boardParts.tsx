@@ -30,7 +30,7 @@ import type { Segment, BarNode } from "../../../lib/journeyBars";
 import { barLines, familyOf, holderOf } from "../../../lib/journeyBars";
 import { pillText, type CapKind } from "../../../lib/calendarPill";
 import { fadesFor, cardBounds } from "../../../lib/calendarFade";
-import { stageFor, turnWordFor } from "../../../lib/queryCardFacts";
+import { stateFor, turnWordFor } from "../../../lib/queryCardFacts";
 import { shortCalDate } from "../../../lib/todoCalendar";
 import { taskHolder } from "../../../lib/taskBars";
 import type { CalSection } from "../../../lib/calendarSections";
@@ -401,19 +401,23 @@ export const Piece: React.FC<{
           a transform on an SVG element, so a scaled badge is the right size in one browser and the
           wrong size in another; the ref states `transform: none` on it for the same reason. */}
       {/* ══ THE STATUS BAND (v63, section D) ══════════════════════════════════════════════════
-          ⚠️ IT IS QUERY CENTRE'S LANGUAGE, READ FROM QUERY CENTRE'S OWN FUNCTIONS. `stageFor` gives
-          the tint ladder's rung and `turnWordFor` gives the holder's words — the same two the cards
-          on that page draw from. A second mapping here is how two surfaces come to disagree about
+          ⚠️ IT IS QUERY CENTRE'S LANGUAGE, READ FROM QUERY CENTRE'S OWN FUNCTIONS. `stateFor` gives
+          the fill's state and `turnWordFor` gives the holder's words — the same two the cards on
+          that page draw from. A second mapping here is how two surfaces come to disagree about
           whose court a query is in, which is the fault this board has already paid for twice.
 
-          ⚠️ AND THE TINT COMES FROM THE CALENDAR'S OWN COPY OF THE LADDER, not from a `var()` on
-          `--stage-*`: those are declared on `.t-f12`, which is not an ancestor here, so a direct
-          read paints nothing at all through a clean build. See the note at the tokens.
+          ⚠️ IT IS `stateFor`, NOT `stageFor`, AND THAT IS THE WHOLE OF THIS CHANGE. The board used
+          to paint an eight-rung ramp — three deepening sages out, three pinks in — which was its
+          own answer to depth before `StatusDot` took that job. The app has five flat states locked
+          across seven surfaces, so a Queried query read sand on Grid, List and Board and sage here.
+          `stateFor` is the mapping those three already use; the board is now its fourth caller
+          rather than the owner of a second ladder. `stageFor` is untouched — the task pane still
+          reads it for its own column tint, which is a different claim about a different surface.
 
           ⚠️ THE BAND REPLACES THE FREE-STANDING BADGE. v61's disc burst past the card's left edge
           and every ancestor was held `overflow: visible` for it; the mark is inside the band now,
           so that overhang, its reserved padding and the whole escape route go with it. */}
-      <span className={sg.isTask ? "tl-sband tl-sband--task" : `tl-sband tl-st-${stageFor(sg.status)}`}>
+      <span className={sg.isTask ? "tl-sband tl-sband--task" : `tl-sband tl-st-${stateFor(sg.status)}`}>
         {/* ⚠️ THE APP'S OWN `StatusDot`, AT 20px — the pack's value, and a deliberate departure
             from the ref's 14px `.sseg svg`. The ref sizes a flat glyph of its own making; this
             app's dot carries DIRECTION AND STAGE in its shape, and 14px loses that. A glyph's

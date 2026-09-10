@@ -48,10 +48,10 @@ import {
 } from "../../lib/calendarToolbar";
 import type { CalSection, CalSectionFacts } from "../../lib/calendarSections";
 /* ⚠️ THE QUERY CENTRE'S OWN TWO DERIVATIONS, IMPORTED RATHER THAN RESTATED (v63, section D).
-   `stageFor` gives the tint ladder's rung and `turnWordFor` gives the holder's words; the cards on
+   `stateFor` gives the fill's state and `turnWordFor` gives the holder's words; the cards on
    that page read the same two. A calendar-local mapping is how two surfaces come to disagree about
    whose court a query is in — which is a fault this board has already paid for. */
-import { stageFor, turnWordFor } from "../../lib/queryCardFacts";
+import { stateFor, turnWordFor } from "../../lib/queryCardFacts";
 import { fadesFor, cardBounds } from "../../lib/calendarFade";
 import type { CapKind } from "../../lib/calendarPill";
 import { taskBar, taskHolder, taskTail } from "../../lib/taskBars";
@@ -697,7 +697,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     const agent = agents.find((a) => a.id === rows.find((r) => r.key === sg.rowKey)?.agentId);
     return {
       key: sg.key, rowKey: sg.rowKey, isTask: !!sg.isTask,
-      bandClass: sg.isTask ? "tl-sband--task" : `tl-st-${stageFor(sg.status)}`,
+      bandClass: sg.isTask ? "tl-sband--task" : `tl-st-${stateFor(sg.status)}`,
       bandStatus: sg.isTask ? "Task" : String(sg.status),
       holder: sg.isTask ? taskHolder(!!sg.owed) : turnWordFor(sg.status),
       dotStatus: sg.isTask ? null : sg.status,

@@ -344,31 +344,27 @@
      is the one place to remove. */
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
 
-  /* ══ THE TINT LADDER — A DOCUMENTED COPY, NEVER A `var()` REFERENCE (v63, section D) ═══════
-     ⚠️ THE LADDER IS SCOPED TO `.t-f12` AND THE CALENDAR IS NOT UNDER IT. `f12.css` declares
-     `--stage-out-1`…`--stage-closed` on the Query Centre's own theme class, and its own comment
-     records why that matters: a `var()` whose defining scope is not an ancestor paints NOTHING,
-     silently. Reading them from here would give every band no fill at all, through a clean build.
+  /* ⚠️ THE CALENDAR'S EIGHT-RUNG TINT LADDER IS RETIRED, AND ITS LOCAL COPY WITH IT.
 
-     ⚠️ AND A COPY IS RIGHT RATHER THAN A CROSS-SURFACE READ, on the precedent `--mk-hero-ground`
-     already sets: one cross-tier read is what a refactor deletes without knowing another surface
-     depended on it. `calendarStageTints.test.ts` asserts these EQUAL what `f12.css` declares —
-     against that file, never a literal on both sides — so a retone there fails here.
+     `--tl-stage-out-1/2/3` and `--tl-stage-in-1/2/3` painted a deepening ramp per direction — the
+     board's own answer to "how far along is this" before `StatusDot` took that job. The app has
+     since locked FIVE FLAT STATES (`design-refs/query-state-colours-v2.md`), read by Grid, List,
+     Board, the cards, the tiles and the drawer, so the calendar was the last surface disagreeing:
+     a Queried query was sand on three views and sage here.
 
-     Source: `design-refs/query-tint-ladder.md`, locked 4 Sep 2026, which supersedes the band values
-     in `query-centre.html` AND the `dk-*` families in `timeline-v63.html`. The ref's bar draws the
-     superseded scheme; colour is the app's, per the authority split.
+     ⚠️ THE COPY EXISTED FOR A REASON THAT WAS NO LONGER TRUE. It was made because `--stage-*` is
+     declared on `.t-f12` and the Calendar was believed not to sit under it — a read would then
+     paint nothing, silently. The Calendar's own root is `t-f12 spine-root cal-timeline`, so it
+     does sit under it, and `--state-*` is declared at `:root` besides. Measured before the change:
+     `--panel`, declared on `.t-f12`, resolves on both calendars.
 
-     ⚠️ CONSOLIDATION IS OWED AND IS NOT THIS PASS'S: the ladder belongs at `:root` with `.t-f12`
-     reading it, which would retire this copy. `f12.css` is another session's live file. */
-  --tl-stage-out-1: #e6eae3;   /* Queried */
-  --tl-stage-out-2: #d7ddd3;   /* Partial Sent */
-  --tl-stage-out-3: #c7d0c2;   /* Full Sent */
-  --tl-stage-in-1: #f8e9e2;    /* Partial Requested */
-  --tl-stage-in-2: #f1dbd0;    /* Full Requested */
-  --tl-stage-in-3: #e8c9bb;    /* Revise & Resubmit */
-  --tl-stage-offer: #d7e0e8;   /* an offer, while it is open */
-  --tl-stage-closed: #e4e1db;  /* closed, rejected, withdrawn, no response */
+     So the five states are read directly, from one place, by both pages. Nothing is copied here
+     and there is nothing left to keep in step. `--state-*` lives at `:root` in `f12.css`.
+
+     ⚠️ `#e8c9bb` WAS `--tl-stage-in-3` AND IS NOW ONLY AN ACCENT. It is `--state-you-deep` — the
+     locked pink accent for desk strips, active tabs and target rings. It is no longer any state's
+     fill, and a reader finding it in two roles should take the accent one. The same goes for
+     `#c7d0c2`, which was `out-3` and is `--state-agent-deep`. */
 
   /* ⚠️ THE TASK BAND'S PAPER, NAMED FOR WHAT IT IS RATHER THAN FOR ITS COLOUR. A task is written
      by the writer, so it wears the note's yellow — the same reason the Noteboard does. */
@@ -1927,14 +1923,16 @@ button.tl-tchip { cursor: pointer; }
 .tl-board[data-dens="compact"] .tl-sband .tl-snote { display: none; }
 .tl-board[data-dens="compact"] .tl-sh { font-size: 6.5px; }
 /* the 4px status edge — `--st` from the band's own class, task yellow included */
-.tl-p:has(> .tl-st-out-1) { --st: var(--tl-stage-out-1); }
-.tl-p:has(> .tl-st-out-2) { --st: var(--tl-stage-out-2); }
-.tl-p:has(> .tl-st-out-3) { --st: var(--tl-stage-out-3); }
-.tl-p:has(> .tl-st-in-1) { --st: var(--tl-stage-in-1); }
-.tl-p:has(> .tl-st-in-2) { --st: var(--tl-stage-in-2); }
-.tl-p:has(> .tl-st-in-3) { --st: var(--tl-stage-in-3); }
-.tl-p:has(> .tl-st-offer) { --st: var(--tl-stage-offer); }
-.tl-p:has(> .tl-st-closed) { --st: var(--tl-stage-closed); }
+/* ⚠️ FIVE STATES, NOT EIGHT RUNGS, AND THE TOKENS ARE THE APP'S OWN. `--state-*` is declared at
+   `:root` in `f12.css`, so it resolves on BOTH calendars — the copy this file used to carry existed
+   because the ladder it copied (`--stage-*`) sits on `.t-f12`. These do not, so there is nothing to
+   keep in step and nothing to drift. `queryCard.css` maps the same five onto `--band-a` for the
+   cards; this is the same mapping, one surface along. */
+.tl-p:has(> .tl-st-queried) { --st: var(--state-queried); }
+.tl-p:has(> .tl-st-agent)   { --st: var(--state-agent); }
+.tl-p:has(> .tl-st-you)     { --st: var(--state-you); }
+.tl-p:has(> .tl-st-offer)   { --st: var(--state-offer); }
+.tl-p:has(> .tl-st-closed)  { --st: var(--state-closed); }
 .tl-p:has(> .tl-sband--task) { --st: var(--tl-task-band); }
 .tl-board[data-dens="compact"] .tl-frame {
   background-image: linear-gradient(var(--st, transparent), var(--st, transparent));
@@ -2398,14 +2396,11 @@ button.tl-tchip { cursor: pointer; }
 }
 
 /* the eight rungs of the ladder — see the tokens, and `calendarStageTints.test.ts` */
-.tl-st-out-1 { background: var(--tl-stage-out-1); }
-.tl-st-out-2 { background: var(--tl-stage-out-2); }
-.tl-st-out-3 { background: var(--tl-stage-out-3); }
-.tl-st-in-1  { background: var(--tl-stage-in-1); }
-.tl-st-in-2  { background: var(--tl-stage-in-2); }
-.tl-st-in-3  { background: var(--tl-stage-in-3); }
-.tl-st-offer { background: var(--tl-stage-offer); }
-.tl-st-closed { background: var(--tl-stage-closed); }
+.tl-st-queried { background: var(--state-queried); }
+.tl-st-agent   { background: var(--state-agent); }
+.tl-st-you     { background: var(--state-you); }
+.tl-st-offer   { background: var(--state-offer); }
+.tl-st-closed  { background: var(--state-closed); }
 /* ⚠️ A CARD WHOSE RIGHT EDGE DISSOLVES SQUARES THE BAND'S CORNER AND STOPS SHORT OF THE NOTCH, so
    the band does not run out through the chevron the frame opens. */
 /* ⚠️ THE BAND SPANS THE WHOLE CARD, CUT OR NOT (fidelity 4). It stopped 16px short to clear the

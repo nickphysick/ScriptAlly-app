@@ -110,16 +110,25 @@ describe("⚠️ the ladder is gone from the Query Centre — and still alive fo
   });
 
   /**
-   * ⚠️ AND THE LADDER IS NOT DELETED, DELIBERATELY. `stageFor` is a SHARED export: TodoCalendarPage
-   * reads it at three sites and TaskPane at one, and `calendarStageTints.test.ts` locks the
-   * calendar's mirror against `.t-f12`'s copy. Deleting the tokens here would blank another
-   * stream's live surfaces silently and redden their lock, mid-flight. This case states the
-   * survivors so the next reader knows the leftovers are load-bearing rather than missed — and
-   * fails the day the To-do stream stops needing them, which is when they can go.
+   * ⚠️ AND THE LADDER IS NOT DELETED, DELIBERATELY. `stageFor` is a SHARED export and the TASK PANE
+   * still reads it. Deleting the tokens would blank another stream's live surface silently. This
+   * case states the survivors so the next reader knows the leftovers are load-bearing rather than
+   * missed — and fails the day the last one stops needing them, which is when they can go.
+   *
+   * ⚠️ THE CENSUS SHRANK FROM TWO TO ONE ON 10 SEP, AND THIS CASE IS WHAT CAUGHT IT — working
+   * exactly as written. The CALENDAR left: its eight-rung tint ladder retired onto the app's five
+   * flat state colours, so `TodoCalendarPage` now calls `stateFor`, not `stageFor`. What remains
+   * is the task pane, which uses the ladder for a different claim about a different surface — a
+   * column tint, not a state fill — and is untouched by that change.
+   *
+   * ⚠️ RE-MEASURED, NOT INHERITED. The owner list is the set that actually matches today: the pane
+   * splits across two files, `useTaskPaneSession` making the call and `TaskPane` reading the token.
+   * A carve-out naming a page that has stopped reading is a census quietly shrinking its own
+   * population — the fault this repo records against exemptions nobody re-checks.
    */
   it("the ladder's remaining consumers are named, and they are all outside this page", () => {
     expect(f12, "the ladder tokens went — the To-do stream reads them").toContain("--stage-out-1:");
-    const owners = ["src/components/todo/TodoCalendarPage.tsx", "src/components/todo/TaskPane.tsx"];
+    const owners = ["src/components/todo/useTaskPaneSession.tsx", "src/components/todo/TaskPane.tsx"];
     let live = 0;
     for (const f of owners) {
       const src = strip(readFileSync(join(process.cwd(), f), "utf8"));

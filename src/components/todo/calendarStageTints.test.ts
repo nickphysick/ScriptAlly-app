@@ -2,63 +2,77 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ⚠️ THE CALENDAR'S TINT LADDER IS A COPY, AND THIS IS WHAT STOPS IT DRIFTING.
+ * ⚠️ THE CALENDAR READS THE APP'S FIVE STATE COLOURS AND DECLARES NONE OF ITS OWN.
  *
- * `f12.css` declares the ladder on `.t-f12` — the Query Centre's theme class, which the Calendar
- * does not sit under. A `var(--stage-out-1)` on a calendar band would therefore paint NOTHING,
- * silently, through a clean build; so `todoCalendar.css` carries its own `--tl-stage-*` set.
+ * This file used to lock the opposite: the calendar carried a COPY of the eight-rung tint ladder
+ * (`--tl-stage-*`), asserted rung-for-rung against `f12.css`'s `--stage-*`. That copy existed
+ * because `--stage-*` is declared on `.t-f12` and the Calendar was believed not to sit under it —
+ * a read would then paint nothing at all, silently, through a clean build.
  *
- * ⚠️ THE ASSERTION IS AGAINST THE OTHER FILE, NEVER A LITERAL ON BOTH SIDES. A test that pinned
- * `#e6eae3` in two places would go green while the two surfaces disagreed — which is the whole
- * failure a copy invites, and the reason `--mk-hero-ground` is locked exactly this way.
+ * ⚠️ THE PREMISE WAS FALSE BY THE TIME IT MATTERED, and the old third case predicted exactly this:
+ * *"if the tokens move to `:root`, this copy becomes unnecessary and the consolidation the CSS
+ * comment flags is owed; the lock fails so somebody decides rather than drifting."* The Calendar's
+ * own root is `t-f12 spine-root cal-timeline`, so it DOES sit under `.t-f12`; and the five state
+ * colours are declared at `:root`, so they resolve on both calendars regardless. Measured before
+ * the change: `--panel`, declared on `.t-f12`, resolves on To-do's calendar and Query Centre's.
+ *
+ * ⚠️ SO THE LAW ASSERTED HERE IS THE INVERSE OF THE OLD ONE, deliberately, and it is a stronger
+ * claim: there is no copy to keep in step, so there is nothing that can drift. What must not come
+ * back is a local declaration — that is the regression this file now guards.
+ *
+ * The RENDERED claim — that a band actually paints its state's colour — is not a fact about a file
+ * and does not live here. `tests/e2e/calBar63.measure.ts` (d2) asks the browser.
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { STATE_TOKEN, stateFor } from "../../lib/queryCardFacts";
+import { QueryStatus } from "../../types";
 
 const here = new URL(".", import.meta.url).pathname;
 const cal = readFileSync(join(here, "todoCalendar.css"), "utf8");
 const f12 = readFileSync(join(here, "../shell/f12.css"), "utf8");
+/** comments name what was retired; naming a token is not declaring one */
+const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "");
 
-/** every `--name: value` in a file, comments stripped so a commented example cannot answer */
-const tokens = (src: string, prefix: string) => {
-  const out = new Map<string, string>();
-  const decls = src.replace(/\/\*[\s\S]*?\*\//g, "");
-  for (const m of decls.matchAll(new RegExp(`(${prefix}[a-z0-9-]+)\\s*:\\s*([^;]+);`, "g"))) {
-    out.set(m[1].replace(prefix, ""), m[2].trim());
-  }
-  return out;
-};
+describe("the calendar's state colours", () => {
+  it("⚠️ declares no local copy — the ladder and its tokens are retired", () => {
+    expect(decls(cal), "the calendar has re-declared the retired ladder")
+      .not.toMatch(/--tl-stage-[a-z0-9-]+\s*:/);
+  });
 
-describe("the calendar's copy of the tint ladder", () => {
-  it("⚠️ agrees with `.t-f12`'s, rung for rung — read from that file, not restated here", () => {
-    const mine = tokens(cal, "--tl-stage-");
-    const theirs = tokens(f12, "--stage-");
-    /* ⚠️ THE POPULATION FIRST. If either sweep found nothing the comparison below is vacuous and
-       passes — an empty map equals an empty map. */
-    expect(mine.size, "the calendar declares no ladder").toBe(8);
-    expect(theirs.size, "`.t-f12` declares no ladder — did the tokens move?").toBe(8);
-    expect([...mine.keys()].sort(), "the rungs differ").toEqual([...theirs.keys()].sort());
-    for (const [rung, hex] of mine) {
-      expect(hex, `rung ${rung}: the calendar says ${hex}, .t-f12 says ${theirs.get(rung)}`)
-        .toBe(theirs.get(rung));
+  it("reads `--state-*` for every one of the five, and never a hex of its own", () => {
+    const body = decls(cal);
+    for (const state of ["queried", "agent", "you", "offer", "closed"] as const) {
+      const rule = new RegExp(`\\.tl-st-${state}\\s*\\{[^}]*background:\\s*var\\(--state-${state}\\)`);
+      expect(body, `.tl-st-${state} does not read var(--state-${state})`).toMatch(rule);
+      const st = new RegExp(`\\.tl-p:has\\(>\\s*\\.tl-st-${state}\\)\\s*\\{[^}]*--st:\\s*var\\(--state-${state}\\)`);
+      expect(body, `--st for ${state} does not read var(--state-${state})`).toMatch(st);
     }
   });
 
-  it("⚠️ and the calendar NEVER reads `--stage-*` directly — that would paint nothing", () => {
-    const decls = cal.replace(/\/\*[\s\S]*?\*\//g, "");
-    /* the defining scope is `.t-f12`, which is not an ancestor of this page: a read here resolves
-       to nothing at all, and the band would be transparent with the rule looking perfectly correct */
-    expect(decls, "the calendar reads the Query Centre's own token")
-      .not.toMatch(/var\(\s*--stage-/);
+  it("⚠️ and the eight rung classes are gone — a stale rule would paint nothing", () => {
+    /* the components emit `tl-st-${stateFor(...)}`, so a surviving `.tl-st-out-2` rule has no
+       subject: the fault this repo records as a class the stylesheet selects on and nobody emits */
+    expect(decls(cal), "a retired rung still has a rule").not.toMatch(/\.tl-st-(out|in)-[123]\b/);
   });
 
-  it("⚠️ `.t-f12` is still where the ladder is declared — the copy names a real source", () => {
-    /* if the tokens move to `:root`, this copy becomes unnecessary and the consolidation the CSS
-       comment flags is owed; the lock fails so somebody decides rather than drifting */
-    const decls = f12.replace(/\/\*[\s\S]*?\*\//g, "");
-    const block = decls.slice(decls.indexOf(".t-f12 {"), decls.indexOf("--stage-closed"));
-    expect(block, "the ladder left `.t-f12` — re-point or retire the calendar's copy")
-      .toContain("--stage-out-1");
+  it("⚠️ `--state-*` is declared at `:root`, which is what makes the direct read safe", () => {
+    /* the whole reason the copy existed was a defining scope that was not an ancestor. If these
+       ever move under a theme class, the calendar's read silently paints nothing again. */
+    const root = decls(f12).slice(decls(f12).indexOf(":root {"));
+    const block = root.slice(0, root.indexOf("}"));
+    for (const state of ["queried", "agent", "you", "offer", "closed"] as const) {
+      expect(block, `--state-${state} is not declared at :root`).toMatch(new RegExp(`--state-${state}\\s*:\\s*#`));
+    }
+  });
+
+  it("⚠️ the five states the CSS serves are exactly the five `stateFor` can return", () => {
+    /* two derivations against each other, never a literal on both sides: the CSS is asserted to
+       carry a rule for every state the mapping can produce, over every status the app has */
+    const produced = new Set(Object.values(QueryStatus).map((s) => stateFor(s as QueryStatus)));
+    expect([...produced].sort(), "stateFor produces a state the sheet does not serve")
+      .toEqual(["agent", "closed", "offer", "queried", "you"]);
+    expect(Object.keys(STATE_TOKEN).sort()).toEqual([...produced].sort());
   });
 });
