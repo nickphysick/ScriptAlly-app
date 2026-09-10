@@ -2,7 +2,7 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<title>ScriptAlly · Dashboard — DESIGN REF v31 (authoritative)</title>
+<title>ScriptAlly · Dashboard — DESIGN REF v32 (authoritative)</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :focus:not(:focus-visible){outline:none!important;box-shadow:none!important}
@@ -964,7 +964,7 @@ body.ac-rail #actCard .foot{padding-left:2px;padding-right:2px}
 .spark{width:100%;height:28px;display:block;margin-top:8px}
 </style>
 </head>
-<body data-scriptally-ref="dashboard-cappuccino-v31">
+<body data-scriptally-ref="dashboard-cappuccino-v32">
 <div class="page"><div class="shell"><div class="navslot"><div class="brand">ScriptAlly</div><div>Locked nav — not redrawn</div><div>Dashboard</div><div>Queries</div><div>Agents</div><div>Materials</div><div>Tasks</div><div>Account</div></div><div class="main">
 
 <div class="topbar" data-probe="navrow">
@@ -1134,6 +1134,36 @@ const MS=[{q:4,pr:0,ps:0,fr:0,fs:0,rr:0,of:0,sent:4,closed:0},{q:5,pr:1,ps:0,fr:
 const MP=[1,2,2,3,4,5];
 const ME={};
 
+
+/* ---- stacked-curve sampler ----------------------------------------------
+   Interpolating each cumulative boundary independently lets adjacent
+   boundaries cross between knots: the monotone fit is global, so two series
+   that are equal at the knots still take different paths between them. That
+   is why sage appeared above the ink line. Fix: sample every boundary from
+   the same interpolation, then clamp each to the one above, then draw
+   polylines. Nothing can cross because nothing is fitted after clamping. */
+function hermiteCoeffs(vals){
+  const n=vals.length, d=[], m=[];
+  for(let i=0;i<n-1;i++) d.push(vals[i+1]-vals[i]);
+  m[0]=d[0]; m[n-1]=d[n-2];
+  for(let i=1;i<n-1;i++) m[i]=d[i-1]*d[i]<=0?0:(d[i-1]+d[i])/2;
+  for(let i=0;i<n-1;i++){
+    if(d[i]===0){m[i]=0;m[i+1]=0;continue}
+    const a=m[i]/d[i], b=m[i+1]/d[i], q=a*a+b*b;
+    if(q>9){const t=3/Math.sqrt(q); m[i]=t*a*d[i]; m[i+1]=t*b*d[i];}
+  }
+  return m;
+}
+function sampleCurve(vals, steps){
+  const n=vals.length, m=hermiteCoeffs(vals), out=[];
+  for(let k=0;k<=steps;k++){
+    const u=k/steps*(n-1); let i=Math.min(n-2,Math.floor(u)); const t=u-i;
+    const h00=2*t*t*t-3*t*t+1, h10=t*t*t-2*t*t+t, h01=-2*t*t*t+3*t*t, h11=t*t*t-t*t;
+    out.push({u, v:h00*vals[i]+h10*m[i]+h01*vals[i+1]+h11*m[i+1]});
+  }
+  return out;
+}
+
 // monotone cubic (Fritsch–Carlson) path
 function mono(P){const n=P.length;if(n<2)return'';const d=[],m=[];for(let i=0;i<n-1;i++)d.push((P[i+1][1]-P[i][1])/(P[i+1][0]-P[i][0]));m[0]=d[0];m[n-1]=d[n-2];for(let i=1;i<n-1;i++)m[i]=d[i-1]*d[i]<=0?0:(d[i-1]+d[i])/2;for(let i=0;i<n-1;i++){if(d[i]===0){m[i]=m[i+1]=0;continue}const a=m[i]/d[i],b=m[i+1]/d[i],s=a*a+b*b;if(s>9){const t=3/Math.sqrt(s);m[i]=t*a*d[i];m[i+1]=t*b*d[i]}}
  let p=`M${P[0][0]} ${P[0][1]}`;for(let i=0;i<n-1;i++){const dx=(P[i+1][0]-P[i][0])/3;p+=`C${P[i][0]+dx} ${P[i][1]+dx*m[i]} ${P[i+1][0]-dx} ${P[i+1][1]-dx*m[i+1]} ${P[i+1][0]} ${P[i+1][1]}`}return p}
@@ -1179,8 +1209,24 @@ function renderChart(){
   const max=Math.max(...tot,...(opt.ghost==='1'?prior:[0]))+2, min=0;
   const x=i=>L+(W-L-R)*i/(N-1), y=v=>T+(H-T-B)*(1-(v-min)/(max-min));
   const pts=vals=>vals.map((v,i)=>[x(i),y(v)]);
+  const STEPS=(N-1)*24;
+  const SX=k=>L+(W-L-R)*(k/STEPS);
+  // sample every boundary from one interpolation, then clamp so none can cross
+  const sampleStack=series=>{
+    const curves=series.map(v=>sampleCurve(v,STEPS).map(p=>p.v));
+    for(let k=0;k<=STEPS;k++){
+      for(let b=curves.length-2;b>=0;b--) curves[b][k]=Math.min(curves[b][k],curves[b+1][k]);
+      for(let b=0;b<curves.length;b++) curves[b][k]=Math.max(0,curves[b][k]);
+    }
+    return curves;
+  };
+  const polyTop=c=>c.map((v,k)=>`${k?'L':'M'}${SX(k).toFixed(2)} ${y(v).toFixed(2)}`).join('');
+  const polyBot=c=>c.map((v,k)=>`L${SX(k).toFixed(2)} ${y(v).toFixed(2)}`).reverse().join('');
+  const areaS=(top,bot)=>polyTop(top)+polyBot(bot)+'Z';
   const area=(top,bot)=>mono(pts(top))+mono(pts(bot).reverse()).replace(/^M/,'L')+'Z';
   const zero=D.map(()=>0), c1=D.map(r=>r[0]), c2=D.map(r=>r[0]+r[1]), c3=D.map(r=>r[0]+r[1]+r[2]);
+  const [S1,S2,S3,STOT]=sampleStack([c1,c2,c3,tot]);
+  const SZERO=S1.map(()=>0);
   let s=`<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9dfd5" stop-opacity=".9"/><stop offset="1" stop-color="#d9dfd5" stop-opacity="0"/></linearGradient>
     <linearGradient id="fadegrad" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="${T}" y2="${y(0)}">
       <stop offset="0" stop-color="#ffffff"/><stop offset="0.55" stop-color="#e8e8e8"/><stop offset="1" stop-color="#4d4d4d"/></linearGradient>
@@ -1193,17 +1239,17 @@ function renderChart(){
   s+=`<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="#d8cec2" stroke-width="1"/>`;
   if(opt.bands==='1'){
     s+=`<g mask="url(#fademask)">`;
-    s+=`<path d="${area(c1,zero)}" fill="#f7efe3" stroke="#dcc7a4" stroke-width="1.2"/>`;
-    s+=`<path d="${area(c2,c1)}" fill="#e0e5dd"stroke="#a9baa4"stroke-width="1.2"/>`;
-    s+=`<path d="${area(c3,c2)}" fill="#f5e6df" stroke="none"/>`;
-    if(opt.slate==='1'&&D.some(r=>r[3]>0)) s+=`<path d="${area(tot,c3)}" fill="#d7e0e8" stroke="#adc2d2" stroke-width="1"/>`;
-    else s+=`<path d="${area(tot,c3)}" fill="#f5e6df" stroke="none"/>`;
+    s+=`<path d="${areaS(S1,SZERO)}" fill="#f7efe3" stroke="#dcc7a4" stroke-width="1.2"/>`;
+    s+=`<path d="${areaS(S2,S1)}" fill="#e0e5dd" stroke="#a9baa4" stroke-width="1.2"/>`;
+    s+=`<path d="${areaS(S3,S2)}" fill="#f5e6df" stroke="none"/>`;
+    if(opt.slate==='1'&&D.some(r=>r[3]>0)) s+=`<path d="${areaS(STOT,S3)}" fill="#d7e0e8" stroke="none"/>`;
+    else s+=`<path d="${areaS(STOT,S3)}" fill="#f5e6df" stroke="none"/>`;
     s+=`</g>`;
   }else{
-    s+=`<path d="${area(tot,zero)}" fill="url(#g)"/>`;
+    s+=`<path d="${areaS(STOT,SZERO)}" fill="url(#g)"/>`;
   }
   // the line and the bands share one domain: both end at index N-1, always
-  s+=`<path d="${mono(pts(tot))}" fill="none" stroke="#1c130f" stroke-width="2" stroke-linecap="round" data-line-end="${x(N-1)}"/>`;
+  s+=`<path d="${polyTop(STOT)}" fill="none" stroke="#1c130f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-line-end="${SX(STEPS).toFixed(2)}"/>`;
   if(opt.ghost==='1') s+=`<path d="${mono(pts(prior))}" fill="none" stroke="#b8ada2" stroke-width="1.5" stroke-dasharray="4 5"/>`;
   // start marker (ring) + end marker (hollow) like current
   s+=`<line x1="${x(0)}" x2="${x(0)}" y1="${y(tot[0])}" y2="${y(tot[0])-20}" stroke="#c9b8a6" stroke-width="1.2"/><circle cx="${x(0)}" cy="${y(tot[0])-24}" r="6" fill="#f5e2da" stroke="#7c3a2a" stroke-width="1.4"/><circle cx="${x(0)}" cy="${y(tot[0])-24}" r="1.8" fill="#7c3a2a"/>`;
