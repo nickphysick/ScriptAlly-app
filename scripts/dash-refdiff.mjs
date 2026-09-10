@@ -1738,7 +1738,7 @@ const PAGE_GATES = ["ground", "hScroll", "columnBottoms", "blendAncestorTransfor
    them separately is not bookkeeping: a failure has to say WHICH claim broke, and "railBoundary
    failed" over a nine-clause verdict is the object-Object failure message this harness already
    forbids. */
-const SPAWNED_GATES = ["plotRegion", "skeletonRegions", "noLiveInColumn", "railBoundary", "columnBare"];
+const SPAWNED_GATES = ["plotRegion", "skeletonRegions", "skeletonEdges", "noLiveInColumn", "railBoundary", "columnBare"];
 const GATE_ROSTER = [...STANDING.map((g) => g.k), ...PAGE_GATES, ...SPAWNED_GATES];
 
 /* ── run ─────────────────────────────────────────────────────────────────────────────────────── */
@@ -1986,7 +1986,14 @@ result.railGate = spawnedGate("dash-rail-v33.mjs", join("rail-v33", "rail.json")
 for (const [name, r, why, clause] of [
   ["skeletonRegions", result.skeletonGate,
     "the loading shell's regions disagree with the loaded page's — the jump it exists to prevent",
-    (v) => v.allCaught && v.noneMissing && v.allRemoved && v.animated && v.rmStill && v.worst <= v.tolerance],
+    (v) => v.allCaught && v.noneMissing && v.allRemoved && v.animated && v.rmStill
+      && v.settled && v.worst <= v.tolerance],
+  /* ⚠️ THE COLUMN'S ENDS GET THEIR OWN NAME because "reads as cut off" is a reported SYMPTOM, and
+     a symptom deserves a failure line that names it rather than one clause inside a nine-clause
+     verdict about regions. */
+  ["skeletonEdges", result.skeletonGate,
+    "the loading state's first or last pixel is not where the loaded page's is, or something is clipped off",
+    (v) => v.headMatches && v.footMatches && v.nothingClipped],
   ["noLiveInColumn", result.skeletonGate,
     "something in the content column is still readable or reachable while the ghost is up",
     (v) => v.noLive === true],

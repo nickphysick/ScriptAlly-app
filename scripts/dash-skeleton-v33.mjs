@@ -114,6 +114,61 @@ function readRegions(names) {
       scanned: col.querySelectorAll("*").length,
     };
   }
+  /**
+   * ⚠️ THE HEAD AND THE FOOT OF THE COLUMN (v33.3). The reported symptom was a ghost that "reads as
+   * cut off": its first block hard against the top of the content region with nothing above it.
+   * The named cause — no nav-row skeleton — was fixed in v33.2, so what this measures is the claim
+   * rather than the cause: the loading state's first and last pixels are where the loaded page's
+   * are. Read from the CONTENT COLUMN's own children, because the column is the region the reader
+   * sees framed, and the nav row is its first child.
+   */
+  const colEl = document.querySelector(".ws-main");
+  out.edges = null;
+  if (colEl) {
+    const shown = [...colEl.children].filter((c) => getComputedStyle(c).display !== "none");
+    const box = (e) => { const r = e.getBoundingClientRect();
+      return { cls: String(e.className).trim().split(/\s+/)[0] || e.tagName.toLowerCase(),
+               top: Math.round(r.top * 10) / 10, bottom: Math.round(r.bottom * 10) / 10 }; };
+    /* and the page BODY's own ends, one level in — the ghost replaces the body, not the column */
+    const bodyEl = document.querySelector(".os-skelpage") || document.querySelector(".os-root > .os-content");
+    const bk = bodyEl ? [...bodyEl.children].filter((c) => getComputedStyle(c).display !== "none") : [];
+    out.edges = {
+      colFirst: shown[0] ? box(shown[0]) : null,
+      colLast: shown.length ? box(shown[shown.length - 1]) : null,
+      bodyTop: bodyEl ? Math.round(bodyEl.getBoundingClientRect().top * 10) / 10 : null,
+      bodyBottom: bodyEl ? Math.round(bodyEl.getBoundingClientRect().bottom * 10) / 10 : null,
+      bodyFirst: bk[0] ? box(bk[0]) : null,
+      bodyLast: bk.length ? box(bk[bk.length - 1]) : null,
+      shown: shown.length,
+    };
+  }
+
+  /**
+   * ⚠️ THE CLIPPING CLAIM IS MEASURED AS A CUT, NOT AS A PROPERTY. "No ancestor computes
+   * `overflow: hidden` or `clip`" cannot hold in this shell and never could: `.ws-window` is the
+   * content capsule and clips at its own radius, `.ws-main` clips the column, `.os-root` clips the
+   * page — on every route, loading or not, by design. What the claim is FOR is that nothing of the
+   * ghost is cut off, so the ancestry is walked and the actual overhang reported at each clipper.
+   */
+  const skEl = document.querySelector(".os-skelpage");
+  out.clip = null;
+  if (skEl) {
+    const s = skEl.getBoundingClientRect();
+    const clippers = [];
+    for (let e = skEl.parentElement; e && e !== document.documentElement; e = e.parentElement) {
+      const cs = getComputedStyle(e);
+      if (!/hidden|clip|auto|scroll/.test(cs.overflowY + cs.overflowX)) continue;
+      const r = e.getBoundingClientRect();
+      clippers.push({
+        cls: String(e.className).trim().split(/\s+/)[0] || e.tagName.toLowerCase(),
+        overflow: cs.overflowX + "/" + cs.overflowY,
+        cutTop: Math.round(Math.max(0, r.top - s.top) * 10) / 10,
+        cutBottom: Math.round(Math.max(0, s.bottom - r.bottom) * 10) / 10,
+      });
+    }
+    out.clip = { clippers, worstCut: clippers.reduce((a, c) => Math.max(a, c.cutTop, c.cutBottom), 0) };
+  }
+
   const sk = document.querySelector('.os-skelpage, [data-probe="skeleton"]');
   if (sk) {
     const r = sk.getBoundingClientRect();
@@ -246,10 +301,20 @@ for (const W of WIDTHS) {
   }
   console.log("   WORST region delta: " + Math.round(worst * 10) / 10 + "px   (gate: <= " + TOL + ")");
   console.log("   slot settled       : during " + JSON.stringify(settleDuring) + " · after " + JSON.stringify(settle));
+  const E = { during: during.edges, after: after.edges };
+  console.log("   column head/foot   : ghost " + (E.during && E.during.colFirst ? E.during.colFirst.cls + " " + E.during.colFirst.top : "?")
+    + " → " + (E.during && E.during.colLast ? E.during.colLast.bottom : "?")
+    + "  ·  loaded " + (E.after && E.after.colFirst ? E.after.colFirst.cls + " " + E.after.colFirst.top : "?")
+    + " → " + (E.after && E.after.colLast ? E.after.colLast.bottom : "?"));
+  console.log("   page body head/foot: ghost " + (E.during ? E.during.bodyTop + " → " + E.during.bodyBottom : "?")
+    + "  ·  loaded " + (E.after ? E.after.bodyTop + " → " + E.after.bodyBottom : "?"));
+  console.log("   clipped off        : " + (during.clip ? during.clip.worstCut + "px  " + JSON.stringify(during.clip.clippers.filter((c) => c.cutTop || c.cutBottom)) : "not read"));
   console.log("   live in the column : " + (during.live ? during.live.controls + " controls · " + during.live.inked + " inked  " + JSON.stringify(during.live.controlNames) + " " + JSON.stringify(during.live.inkedText) : "not read"));
   rows.push({
     width: W, caught: true, worst: Math.round(worst * 10) / 10,
     settle, settleDuring,
+    edges: { during: during.edges, after: after.edges },
+    clip: during.clip,
     live: during.live,
     removed: !after.skeleton,
     tickets: during.skeleton.tickets, stats: during.skeleton.stats,
@@ -332,12 +397,25 @@ verdict.reducedMotion = verdictRM;
 verdict.rmStill = !!verdictRM && verdictRM.skeletonBlocks > 20 && verdictRM.barBlocks > 3
   && verdictRM.skeletonNamed === 0 && verdictRM.barNamed === 0;
 /* ⚠️ A RUN THAT MEASURED A MOVING PAGE IS NOT A GREEN RUN, IT IS AN UNKNOWN ONE. */
+/**
+ * ⚠️ THREE CLAIMS ABOUT THE COLUMN'S ENDS (v33.3), each stated over the LOADED reading rather than
+ * over a number: the head within 2px, the foot within 4px, and nothing actually cut off.
+ */
+const near = (a, b, tol) => a !== null && a !== undefined && b !== null && b !== undefined && Math.abs(a - b) <= tol;
+verdict.headMatches = rows.every((r) => r.edges && r.edges.during && r.edges.after
+  && near(r.edges.during.colFirst && r.edges.during.colFirst.top, r.edges.after.colFirst && r.edges.after.colFirst.top, 2)
+  && near(r.edges.during.bodyTop, r.edges.after.bodyTop, 2));
+verdict.footMatches = rows.every((r) => r.edges && r.edges.during && r.edges.after
+  && near(r.edges.during.colLast && r.edges.during.colLast.bottom, r.edges.after.colLast && r.edges.after.colLast.bottom, 4)
+  && near(r.edges.during.bodyBottom, r.edges.after.bodyBottom, 4));
+verdict.nothingClipped = rows.every((r) => r.clip && r.clip.worstCut <= 1);
 verdict.settled = rows.every((r) => r.settle && r.settleDuring
   && r.settle.suppressed && r.settleDuring.suppressed
   && r.settle.stillRunning === 0 && r.settleDuring.stillRunning === 0);
 verdict.noLive = rows.every((r) => r.live && r.live.controls === 0 && r.live.inked === 0 && r.live.scanned > 50);
 verdict.pass = verdict.allCaught && verdict.noneMissing && verdict.allRemoved
   && verdict.animated && verdict.noLive && verdict.rmStill && verdict.settled
+  && verdict.headMatches && verdict.footMatches && verdict.nothingClipped
   && verdict.worst <= TOL;
 writeFileSync(join(OUT, "skeleton.json"), JSON.stringify(verdict, null, 2));
 console.log("");
@@ -345,4 +423,5 @@ console.log("GATE skeletonRegions: " + (verdict.pass ? "pass" : "FAIL")
   + "  worst " + verdict.worst + "px across " + verdict.widths + " widths (tol " + TOL + ")"
   + " · caught " + verdict.allCaught + " · removed " + verdict.allRemoved + " · noLive " + verdict.noLive
   + " · reducedMotionStill " + verdict.rmStill + " · settled " + verdict.settled
+  + " · head " + verdict.headMatches + " · foot " + verdict.footMatches + " · unclipped " + verdict.nothingClipped
   + " · shimmer " + verdict.animated);
