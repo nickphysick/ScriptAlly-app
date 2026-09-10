@@ -2,7 +2,12 @@ import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
 
 const SHOTS = "/Users/nickphysick/ScriptAlly-app/reports/calendar-mount-shots";
-const VIEWS = ["Grid", "List", "Board", "Calendar"] as const;
+/* ⚠️ THE TOOLBAR NOW COVERS THREE VIEWS, NOT FOUR. The Calendar's layout run gave that view its own
+   header row — pager and range left, search centred on the board, view switch right — so the page
+   toolbar deliberately does not render in it. The law "the toolbar does not move between views"
+   still holds for every view that HAS one; asserting it over a view that has none by design would
+   be asserting a retired decision. The Calendar's own absence is asserted instead. */
+const VIEWS = ["Grid", "List", "Board"] as const;
 
 /** the visible Query Centre page — every workspace page stays mounted */
 const scope = async (page: import("@playwright/test").Page) =>
@@ -46,8 +51,23 @@ test("§2 · the toolbar does not move between views, and the well is Grid and L
   expect(rects.Grid.well, "Grid must keep the well").toBe(true);
   expect(rects.List.well, "List must keep the well").toBe(true);
   expect(rects.Board.well, "Board must have NO well element").toBe(false);
-  expect(rects.Calendar.well, "Calendar must have NO well element").toBe(false);
-  expect(rects.Board.plain && rects.Calendar.plain, "Board and Calendar sit on the plain ground").toBe(true);
+  expect(rects.Board.plain, "Board sits on the plain ground").toBe(true);
+
+  /* the Calendar: no well, no page toolbar, and its own header row instead */
+  await pick(page, "Calendar");
+  const cal = await page.evaluate((sel) => ({
+    well: !!document.querySelector(sel + ".qcc-well"),
+    plain: !!document.querySelector(sel + ".qcc-plain"),
+    toolbar: !!document.querySelector(sel + ".qcc-tb"),
+    head: !!document.querySelector(sel + ".qcc-calhead"),
+    rail: !!document.querySelector(sel + ".qcc-cal-rail"),
+  }), s);
+  console.log("CAL " + JSON.stringify(cal));
+  expect(cal.well, "Calendar must have NO well element").toBe(false);
+  expect(cal.plain, "Calendar sits on the plain ground").toBe(true);
+  expect(cal.toolbar, "the page toolbar must not render in the Calendar").toBe(false);
+  expect(cal.head, "the Calendar has no header row").toBe(true);
+  expect(cal.rail, "the Calendar has no rail").toBe(true);
 
   /* ⚠️ THE TOOLBAR ROW AND THE VIEW SWITCH MAY NOT MOVE — they are the page's furniture and the
      reader's hand is on them. Both are identical to the pixel in all four views. */
@@ -99,22 +119,29 @@ test("§2 · the calendar draws the page's own filtered set, and a row opens its
   expect(before, "no rows drawn — the calendar has nothing to assert about").toBeGreaterThan(2);
 
   /* the toolbar's own search narrows `sortedList`, which is what the calendar draws */
-  await page.locator("[data-qc-live] .qcc-tb-search input").first().fill("zzzz-no-such-agent");
+  await page.locator("[data-qc-live] .qcc-calsearch input").first().fill("zzzz-no-such-agent");
   await page.waitForTimeout(800);
   const after = await page.evaluate((sel) => document.querySelectorAll(sel + ".tl-rrow").length, s);
   console.log(`ROWS ${before} -> ${after} under a search that matches nothing`);
   expect(after, "filtering the page did not narrow the calendar").toBeLessThan(before);
 
-  await page.locator("[data-qc-live] .qcc-tb-search input").first().fill("");
-  await page.waitForTimeout(800);
-  /* a bar click opens the drawer on that query */
-  const bar = page.locator("[data-qc-live] .tl-p").first();
+  /* ⚠️ THE CASE STOPS HERE, AND THE BAR CLICK GETS ITS OWN. Clearing the search after the board
+     has emptied leaves the field unactionable for the full timeout — measured twice, once on
+     `fill` and once on `click`. Rather than nurse a reset, the second claim starts from a fresh
+     page: two cases, each proving one thing from a known state, which is cheaper than one case
+     carrying the other's leftovers. */
+});
+
+test("§2 · a bar click opens the drawer on that query — 1440", async ({ page }) => {
+  await openRoute(page, "/queries", { width: 1440, height: 1000 });
+  const s = await scope(page);
+  await pick(page, "Calendar");
+  const bar = page.locator(s + ".tl-p").first();
   await bar.click();
   await page.waitForTimeout(900);
   const url = page.url();
-  const opened = await page.evaluate(() => !!document.querySelector(".qcd, .f12-drawer, [data-query-drawer]"));
-  console.log(`AFTER CLICK url=${url} drawerish=${opened}`);
-  expect(url.includes("q=") || opened, "clicking a bar opened nothing").toBe(true);
+  console.log(`AFTER CLICK url=${url}`);
+  expect(url.includes("q="), "clicking a bar opened no query").toBe(true);
 });
 
 test("§2 · the week pager moves the window by exactly seven days — 1440", async ({ page }) => {
@@ -128,7 +155,11 @@ test("§2 · the week pager moves the window by exactly seven days — 1440", as
     const d = document.querySelector<HTMLElement>(sel + ".tl-dt");
     return d?.getAttribute("data-at") ? (document.querySelectorAll(sel + ".tl-dt")[0] as HTMLElement).textContent?.trim() : null;
   }, s);
-  const label = async () => page.evaluate((sel) => document.querySelector(sel + ".tl-rng")?.textContent?.trim() ?? "", s);
+    /* ⚠️ THE RANGE MOVED TO THE HEADER ROW — `.tl-rng` is the winbar's, and the winbar does not
+     render in this view. Read empty, the old selector made both readings "" and the case reported
+     that the window had not moved: a stale selector wearing a product defect's clothes, which is
+     exactly what `calWindow58` does with its own pager label. */
+  const label = async () => page.evaluate((sel) => document.querySelector(sel + ".qcc-calhead-rng")?.textContent?.trim() ?? "", s);
   const l0 = await label();
   await page.locator('[data-qc-live] button[aria-label="Back one week"]').first().click();
   await page.waitForTimeout(700);

@@ -106,7 +106,16 @@ describe("Queries Hub chrome — artefact locks (F12 shell, overnight run)", () 
        assertion against the raw text and it failed on the notes describing the retired variant,
        one edit after fixing the identical fault in the anchor scanner. */
     const code = queries.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-    expect(code, 'the compact variant came back — it has no callers and is deleted').not.toContain('compact');
+    /* ⚠️ THE CLAIM IS ABOUT THE VARIANT, NOT ABOUT THE WORD — and a bare `not.toContain('compact')`
+       is the substring fault this repo records at length. It went red on 10 Sep over the Calendar's
+       DENSITY control, whose two values are `comfortable` and `compact`: a legitimate use of the
+       same seven letters, nothing to do with a retired `PageHeader` variant. The looseness ran both
+       ways, as it always does — it would equally have passed a variant spelled any other way.
+       Bounded on the two forms the variant could actually return in. */
+    expect(code, 'the compact PageHeader variant came back — it has no callers and is deleted')
+      .not.toContain('variant="compact"');
+    expect(code, 'the compact variant came back as a boolean prop').not.toMatch(/\bcompact\s*=\s*\{/);
+    expect(code, 'the retired `full` variant came back').not.toContain('variant="full"');
     expect(queries.includes('className="qhbar"')).toBe(false);
   });
 

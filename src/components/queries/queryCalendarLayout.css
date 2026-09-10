@@ -1,0 +1,201 @@
+/**
+ * The Calendar view's own layout — the rail, the header row and the density pill.
+ *
+ * ⚠️ NOTHING HERE REACHES INSIDE THE BOARD. Every rule is about where the board SITS and what
+ * stands beside it; the board renders from v65, exactly as it does on To-do, and its interior is
+ * `todoCalendar.css`'s business. Values come from `design-refs/query-calendar-rail-v3-locked.html`.
+ *
+ * ⚠️ AND THE REF CONTRADICTS ITSELF ABOUT THE RAIL, so read its prose rather than its CSS. The
+ * artefact carries a `background:#fff` card treatment for the rail; its own text says "No card
+ * behind them; only the fields are white". The card is the stale half — left over from a variant
+ * that was locked away — and the brief settles it: the rail is BARE.
+ */
+
+/* the split: a fixed rail beside a board that takes the rest */
+.qcc-cal {
+  --qcc-railw: 236px;
+  --qcc-calhead-h: 52px;
+  /**
+   * ⚠️ WHAT THIS PAGE PUTS ABOVE THE BOARD INSIDE THE SCROLLPORT — the masthead and the header row.
+   * MEASURED at 1440 on 10 Sep: the scrollport's top is 111 and the board's is 314, so 203.
+   *
+   * ⚠️ AND IT IS A LITERAL THAT ANOTHER ELEMENT OWNS, WHICH THIS REPO OTHERWISE FORBIDS. The honest
+   * form is `flex: 1` in a scroll row that is a flex column — the grid's `fill` mode — and opting
+   * this page into `fill` changes all four views, which is outside a Calendar-only run. So the
+   * number stands, with a MEASUREMENT guarding it: `qcCalLayout` asserts the card's bottom lands
+   * inside the scrollport and within 40px of its foot, so a masthead that changes height fails the
+   * lock instead of silently clipping the board or leaving a band of dead ground beneath it.
+   */
+  --qcc-cal-above: 203px;
+  display: grid;
+  grid-template-columns: var(--qcc-railw) 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+/**
+ * ⚠️ THE RAIL'S COLUMN IS PADDED DOWN BY THE HEADER'S HEIGHT, which is what makes the two tops
+ * align without the header spanning both columns. The header belongs to the board — it carries the
+ * board's pager and a search centred on the BOARD's width — so it starts at the board's left edge.
+ * One number, read by both: the header sets the height, the rail pays it as padding.
+ */
+.qcc-cal-railcol { padding-top: var(--qcc-calhead-h); min-width: 0; }
+.qcc-cal-boardcol { min-width: 0; display: flex; flex-direction: column; }
+
+/* ── the rail ─────────────────────────────────────────────────────────────────────────────── */
+/* bare: no fill, no radius, no shadow — only the fields below carry white */
+.qcc-cal-rail { display: block; }
+
+.qcc-cal-showing {
+  font-family: var(--font-serif); font-size: 13.5px; color: #6a5a50; padding: 6px 8px 2px;
+}
+.qcc-cal-showing b { color: var(--ink, #1c130f); font-weight: 500; }
+
+.qcc-cal-grp {
+  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: #9c8878; padding: 8px 6px 5px;
+}
+
+/**
+ * A quick filter. ⚠️ TWO AXES SURVIVE THE CHANGE OF SHAPE: one active court PLUS the independent
+ * overdue flag, so `Past expected` rings alongside a court rather than replacing it. The active
+ * row is an INK INSET RING on parchment — not a fill — so a ringed row and a hovered one are
+ * distinguishable.
+ */
+.qcc-qf {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 8px 9px; border-radius: 9px; cursor: pointer; font-size: 12.5px;
+  background: none; border: 0; text-align: left; color: var(--ink, #1c130f);
+  font-family: inherit;
+}
+.qcc-qf:hover { background: var(--parchment, #fdfaf5); }
+.qcc-qf.on { background: var(--parchment, #fdfaf5); box-shadow: inset 0 0 0 1px var(--ink, #1c130f); }
+.qcc-qf .sw {
+  width: 11px; height: 11px; border-radius: 50%;
+  border: 0.5px solid rgba(0, 0, 0, 0.08); flex: none;
+  background: #f0ebe4;
+}
+.qcc-qf .n { margin-left: auto; font-family: var(--font-mono); font-size: 9px; color: #9c8878; }
+
+.qcc-cal-sep { height: 0.5px; background: var(--hairline, #ece0d2); margin: 8px 6px; }
+
+.qcc-cal-field { margin: 4px 6px 8px; }
+.qcc-cal-lab {
+  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: #9c8878; margin-bottom: 5px; display: block;
+}
+/* the one white thing on the rail */
+.qcc-cal-ctrl {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  background: #fff; border: 1px solid #e0d5c8; border-radius: 9px; padding: 8px 11px;
+  font-family: var(--font-serif); font-size: 13.5px; color: var(--ink, #1c130f);
+  cursor: pointer; text-align: left;
+}
+.qcc-cal-chev { color: #7c3a2a; font-size: 9px; }
+
+/* ── the header row, above the board only ─────────────────────────────────────────────────── */
+/**
+ * ⚠️ THE REF'S `1fr auto 1fr` CANNOT HOLD BELOW A ~950px BOARD, AND THE OVERLAP IS WHAT IT LOOKS
+ * LIKE WHEN IT DOES NOT. `1fr` is `minmax(auto, 1fr)`, so each flank gets `(board - 340 - 24) / 2`
+ * — and the left cluster needs 293px for two chevrons and a nowrap Playfair-19 range. Measured:
+ * board 692 at 1280 gives each flank 162 and the range ran 119.1px UNDER the search; 852 at 1440
+ * gives 242 and it ran 39.1px under; 1332 at 1920 gives 482 and it cleared by 200.9. The board
+ * reaches 950 — where the two first coexist — at roughly a 1538px viewport.
+ *
+ * ⚠️ SO THE FLANKS TAKE WHAT THEY NEED AND THE SEARCH TAKES WHAT IS LEFT, UP TO 340. The
+ * alternative was truncating the range, and the range is the board's primary orientation: a reader
+ * who cannot see which ninety days they are looking at has lost more than one who has a narrower
+ * search box. Stated as a deviation from the brief's flat 340px rather than taken quietly — the
+ * width is now a CEILING.
+ *
+ * ⚠️ AND THE CONSEQUENCE IS THAT THE SEARCH IS CENTRED ON THE BOARD ONLY WHERE THE FLANKS AGREE.
+ * Where they do not, it sits off-centre by half their difference. `qcCalLayout` measures and
+ * reports that offset rather than asserting a centring that the arithmetic above forbids.
+ */
+.qcc-calhead {
+  display: grid; grid-template-columns: auto minmax(0, 340px) auto; align-items: center; gap: 12px;
+  justify-content: space-between;
+  padding: 0 2px 12px; height: var(--qcc-calhead-h); box-sizing: border-box;
+}
+.qcc-calhead-l { display: flex; align-items: center; gap: 10px; }
+.qcc-calhead-r { display: flex; align-items: center; justify-content: flex-end; min-width: 0; }
+.qcc-calhead-rng {
+  font-family: var(--font-serif); font-weight: 500; font-size: 19px;
+  color: var(--ink, #1c130f); white-space: nowrap; margin: 0;
+}
+
+/**
+ * ⚠️ CENTRED ON THE BOARD'S WIDTH, NOT THE PAGE'S. The header is inside the board's column, so
+ * `justify-self: center` centres the field on the board and the rail never enters the arithmetic.
+ * That is the whole reason the header does not span both columns.
+ */
+.qcc-calsearch {
+  justify-self: center; width: 100%; max-width: 340px; box-sizing: border-box;
+  display: flex; align-items: center; gap: 8px;
+  border-radius: 99px; padding: 11px 18px;
+  background: #fff; border: 1px solid #e0d5c8;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 3px 10px rgba(58, 28, 20, 0.06);
+}
+.qcc-calsearch input {
+  flex: 1; min-width: 0; border: 0; outline: none; background: none;
+  font-family: inherit; font-size: 12.5px; color: var(--ink, #1c130f);
+}
+.qcc-calsearch input::placeholder { color: #c8b8a8; }
+
+/* ── the board card ───────────────────────────────────────────────────────────────────────── */
+/**
+ * ⚠️ THE CARD IS RULER + LANES AND NOTHING ELSE (§4) — `TimelineWinbar` does not render in this
+ * view, because its pager is in the header row and its density pair is the pill below.
+ *
+ * ⚠️ THE HEIGHT COMES FROM THE SCROLLPORT, NEVER `100vh`. `--wpg-port-h` is the grid's own
+ * published scrollport height; `100vh` would over-claim by everything above the scrollport, which
+ * is the fault this repo records as the Tasks chassis's unreachable 21px. `--qcc-cal-above` is what
+ * this page puts above the board INSIDE that port — the masthead and the header row — and it is
+ * declared here rather than guessed at, so the one number lives in one place.
+ */
+.qcc-calboard {
+  position: relative;
+  background: #fff; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 6px 16px rgba(58, 28, 20, 0.08);
+  /* ⚠️ `flex: none` IS LOAD-BEARING AND IS NOT TIDINESS. This element also carries `.tl-board`,
+     whose own rule says `flex: 1` — and inside a column flex parent a grown flex item's main size
+     comes from `flex-grow`, NOT from `height`. Measured before this line existed: the card stood
+     2533px tall against a 636px scrollport, height declared and ignored, with the density pill
+     2800px down the page. The board's `flex: 1` is right where To-do mounts it, in a parent that
+     HAS a definite height; here the height is this card's own. */
+  flex: none;
+  height: calc(var(--wpg-port-h, 70vh) - var(--qcc-cal-above));
+  min-height: 360px;
+  display: flex; flex-direction: column;
+}
+/* the zone takes the remaining height; the board's own rows region does the scrolling */
+.qcc-calzone { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+/**
+ * ⚠️ DENSITY RESTS AT .35 AND COMES TO 1 ON HOVER **OR FOCUS**, and the focus half is what keeps it
+ * reachable without a pointer. A hover-only control is invisible to a keyboard and cannot be
+ * described to a screen reader as anything other than present.
+ */
+.qcc-denspill {
+  position: absolute; right: 14px; bottom: 14px; z-index: 8;
+  display: inline-flex; gap: 0;
+  background: rgba(253, 250, 245, 0.92);
+  border: 1px solid #e0d5c8; border-radius: 99px; padding: 3px;
+  box-shadow: 0 2px 6px rgba(58, 28, 20, 0.10), 0 8px 20px rgba(58, 28, 20, 0.12);
+  backdrop-filter: blur(6px);
+  opacity: 0.35; transition: opacity 0.18s;
+}
+.qcc-calboard:hover .qcc-denspill,
+.qcc-denspill:focus-within { opacity: 1; }
+.qcc-denspill button {
+  padding: 6px 13px; border-radius: 99px; border: 0; background: none; cursor: pointer;
+  font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #6a5a50;
+}
+.qcc-denspill button[data-on="true"] { background: var(--pink, #f5e2da); color: #3a1c14; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* ⚠️ ALWAYS 1, NOT "NO TRANSITION" — a control that fades in is a control somebody may not see
+     arrive. Under reduced motion it simply stands there. */
+  .qcc-denspill { opacity: 1; transition: none; }
+}

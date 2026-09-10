@@ -1,0 +1,326 @@
+{
+ "laneWidth": 1542,
+ "tlDays": "90",
+ "rowH": "106px",
+ "bars": [
+  {
+   "qid": "cor-move-a",
+   "cls": "tl-at2 tl-p req owed fadeR",
+   "box": [
+    0.294443,
+    0.199994,
+    86
+   ]
+  },
+  {
+   "qid": "cor-move-b",
+   "cls": "tl-at2 tl-p quiet fadeL fadeR",
+   "box": [
+    0.003891,
+    0.490546,
+    86
+   ]
+  },
+  {
+   "qid": "seed-cal-bang-q",
+   "cls": "tl-at2 tl-p out owed fadeL fadeR clipR",
+   "box": [
+    0.003891,
+    0.490546,
+    86
+   ]
+  },
+  {
+   "qid": "seed-cal-near-q",
+   "cls": "tl-at2 tl-p quiet fadeL fadeR",
+   "box": [
+    0.003891,
+    0.490546,
+    86
+   ]
+  },
+  {
+   "qid": "seed-cal-passed20-q",
+   "cls": "tl-at2 tl-p quiet fadeL fadeR",
+   "box": [
+    0.003891,
+    0.490546,
+    86
+   ]
+  },
+  {
+   "qid": "seed-cal-passed865-q",
+   "cls": "tl-at2 tl-p req hollow owed fadeL fadeR",
+   "box": [
+    0.003891,
+    0.490546,
+    86
+   ]
+  },
+  {
+   "qid": "seed-cal-soon-q",
+   "cls": "tl-at2 tl-p remind",
+   "box": [
+    0.127776,
+    0.377776,
+    86
+   ]
+  },
+  {
+   "qid": "seed-pkgq-1",
+   "cls": "tl-at2 tl-p out fadeL",
+   "box": [
+    0.003891,
+    0.590548,
+    86
+   ]
+  },
+  {
+   "qid": "seed-pkgq-10",
+   "cls": "tl-at2 tl-p out",
+   "box": [
+    0.116661,
+    0.466663,
+    86
+   ]
+  },
+  {
+   "qid": "seed-pkgq-2",
+   "cls": "tl-at2 tl-p out fadeL",
+   "box": [
+    0.003891,
+    0.61277,
+    86
+   ]
+  },
+  {
+   "qid": "seed-pkgq-7",
+   "cls": "tl-at2 tl-p out",
+   "box": [
+    0.083333,
+    0.622213,
+    86
+   ]
+  },
+  {
+   "qid": "seed-pkgq-9",
+   "cls": "tl-at2 tl-p out",
+   "box": [
+    0.061102,
+    0.466663,
+    86
+   ]
+  },
+  {
+   "qid": "seed-query-11",
+   "cls": "tl-at2 tl-p req owed fadeR",
+   "box": [
+    0.294443,
+    0.199994,
+    86
+   ]
+  },
+  {
+   "qid": "seed-query-12",
+   "cls": "tl-at2 tl-p decide owed fadeR",
+   "box": [
+    0.194441,
+    0.299996,
+    86
+   ]
+  },
+  {
+   "qid": "seed-query-20",
+   "cls": "tl-at2 tl-p req",
+   "box": [
+    0.083333,
+    0.086008,
+    86
+   ]
+  },
+  {
+   "qid": "seed-query-5",
+   "cls": "tl-at2 tl-p quiet fadeL fadeR",
+   "box": [
+    0.003891,
+    0.490546,
+    86
+   ]
+  },
+  {
+   "qid": "seed-query-6",
+   "cls": "tl-at2 tl-p quiet fadeL fadeR",
+   "box": [
+    0.003891,
+    0.490546,
+    86
+   ]
+  },
+  {
+   "qid": "seed-query-ms2-a",
+   "cls": "tl-at2 tl-p quiet fadeL fadeR",
+   "box": [
+    0.003891,
+    0.490546,
+    86
+   ]
+  },
+  {
+   "qid": "seed-query-ms2-b",
+   "cls": "tl-at2 tl-p quiet fadeL fadeR",
+   "box": [
+    0.003891,
+    0.490546,
+    86
+   ]
+  },
+  {
+   "qid": "thin-q-chase",
+   "cls": "tl-at2 tl-p quiet fadeL fadeR",
+   "box": [
+    0.003891,
+    0.490546,
+    86
+   ]
+  },
+  {
+   "qid": "thin-q-cohort-5",
+   "cls": "tl-at2 tl-p out hollow fadeL",
+   "box": [
+    0.003891,
+    0.26833,
+    86
+   ]
+  },
+  {
+   "qid": "thin-q-gap-solo",
+   "cls": "tl-at2 tl-p out",
+   "box": [
+    0.027774,
+    0.522222,
+    86
+   ]
+  },
+  {
+   "qid": "thin-q-remind",
+   "cls": "tl-at2 tl-p out owed fadeL",
+   "box": [
+    0.003891,
+    0.490546,
+    86
+   ]
+  }
+ ],
+ "rows": [
+  {
+   "key": "qc-seed-agent-1",
+   "h": 212,
+   "lanes": "2"
+  },
+  {
+   "key": "qc-seed-agent-10",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-seed-agent-11",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-seed-agent-12",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-seed-agent-2",
+   "h": 212,
+   "lanes": "2"
+  },
+  {
+   "key": "qc-seed-agent-3",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-seed-agent-4",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-seed-agent-5",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-seed-agent-6",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-seed-agent-7",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-seed-agent-8",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-seed-agent-9",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-seed-cal-bang",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-seed-cal-near",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-seed-cal-passed20",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-seed-cal-passed865",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-seed-cal-soon",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-thin-ag-chase",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-thin-ag-close",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-thin-ag-gap",
+   "h": 106,
+   "lanes": "1"
+  },
+  {
+   "key": "qc-thin-ag-remind",
+   "h": 106,
+   "lanes": "1"
+  }
+ ],
+ "marks": [
+  0.122588,
+  0.267033
+ ],
+ "railTiles": 13
+}

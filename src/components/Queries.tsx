@@ -74,7 +74,7 @@ import { QueryViewSwitch, type QueryView } from "./queries/QueryViewSwitch";
    would not disagree in detail, it would disagree in STRUCTURE, and the two pages would draw the
    same wait in two different places. */
 import { TimelineBoard } from "./shared/timeline/TimelineBoard";
-import { TimelineWinbar, WEEK_STEP, type BoardDensity } from "./shared/timeline/TimelineWinbar";
+import { WEEK_STEP, DENSITY_LABEL, type BoardDensity } from "./shared/timeline/TimelineWinbar";
 import {
   todayAtOf, monthsOf, dateLabelsOf, windowRangeLabelOf, movedOffTodayOf,
 } from "./shared/timeline/boardWindow";
@@ -84,9 +84,10 @@ import { crossAt } from "./shared/timeline/boardParts";
    that is an invisible dependency on another page continuing to exist. Named here so the
    calendar keeps its styling if that page is ever unmounted or split out. */
 import "./todo/todoCalendar.css";
+import "./queries/queryCalendarLayout.css";
 import { queryTimelineRows, rowKeyFor } from "../lib/queryTimelineRows";
 /* the section a row is filed under reads the CARD's own vocabulary — never a second table */
-import { turnWordFor } from "../lib/queryCardFacts";
+import { turnWordFor, STATE_TOKEN} from "../lib/queryCardFacts";
 import { TIMELINE_RANGES, DEFAULT_RANGE_INDEX, pastDaysOf } from "../lib/timelineRanges";
 import { windowDays, shiftWindow } from "../lib/todoTimeline";
 import { shortCalDate } from "../lib/todoCalendar";
@@ -113,6 +114,7 @@ import {
   QUICK_FILTERS, quickCounts, GRID_GROUPS, GRID_SORTS,
   emptyGridFilters, gridFiltersAreEmpty, gridFilterCount, matchesGridFilters, type GridFilters,
   surnameKey,
+  STAT_TILES,
   type QuickKey, type GroupKey,
 } from "../lib/queryCentreGrid";
 import { measureFlip, playFlip, clearFlip, type FlipRects } from "../lib/flip";
@@ -3429,6 +3431,29 @@ export const Queries: React.FC<{
     return n;
   }, [calGroups]);
 
+  /* ⚠️ ONE SEARCH, TWO HOSTS, AND `browseSearchRef` IS WHY IT IS A FUNCTION RATHER THAN A COPY.
+     The Calendar puts the field in its own header row and the other three views keep it in the
+     toolbar; typing the markup twice would fork a field that ⌘K and `/` both target through a
+     SINGLE ref. Only one host renders at a time, so the ref has exactly one subject — which is
+     also why this may never become two mounted fields. */
+  const searchField = (cls: string) => (
+    <div className={cls}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a08a78" strokeWidth="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" />
+      </svg>
+      <input
+        type="text"
+        placeholder="Search agents or agencies"
+        autoComplete="off"
+        value={listSearch}
+        onChange={(e) => setListSearch(e.target.value)}
+        aria-label="Search agents or agencies"
+        ref={browseSearchRef}
+      />
+      {/* the `/` hint the ref draws, inside the field */}
+      <span className="qcc-tb-kbd" aria-hidden="true">/</span>
+    </div>
+  );
   const calWindowLabel = useMemo(() => windowRangeLabelOf(calVisible), [calVisible]);
   const calMovedOff = movedOffTodayOf(calTodayAt, calRange.days);
 
@@ -6170,6 +6195,10 @@ export const Queries: React.FC<{
               * row's job is what is LIVE, and closed stays reachable through Filter's Status and
               * Whose-turn facets (checked, not assumed).
               */}
+            {/* ⚠️ NOT IN THE CALENDAR — the five tiles ARE that view's quick filters, drawn down
+                the rail instead. Same table, same counts, same handlers; a second row of them
+                above the board would be the same five questions asked twice. */}
+            {gridView !== "calendar" && (
             <QueryStatTiles
               loading={showGridSkeleton}
               counts={quickTally}
@@ -6179,6 +6208,7 @@ export const Queries: React.FC<{
               onQuick={(k) => setQuickKey(k)}
               onOverdue={(next) => setNeedsOverdue(next)}
             />
+            )}
             {/* ⚠️ THE WELL IS GRID AND LIST ONLY. Board and Calendar sit on the page's own
                 ground — `.qcc-plain` carries the well's box metrics to the pixel, so the
                 toolbar lands on the same coordinates in all four views, and it is a DIFFERENT
@@ -6188,6 +6218,12 @@ export const Queries: React.FC<{
               className={gridView === "board" || gridView === "calendar" ? "qcc-plain" : "qcc-well"}
               aria-busy={showGridSkeleton ? true : undefined}
             >
+            {/* ⚠️ AND THE TOOLBAR ROW DOES NOT RENDER IN THE CALENDAR EITHER (§2). That view puts
+                the pager and the range where the toolbar's left cluster would be, the search on the
+                board's own midline, and the view switch at the right — one header row, above the
+                board and not above the rail. Two rows of controls, one of them empty of its own
+                purpose, is chrome stating nothing. */}
+            {gridView !== "calendar" && (
             <div className="qcc-controls">
 
             {/**
@@ -6273,22 +6309,7 @@ export const Queries: React.FC<{
               </div>{/* left track: the count and the three controls */}
 
               {/* centre track — the search sits on the ROW's midline, not on what the flanks leave */}
-              <div className="qcc-tb-search">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a08a78" strokeWidth="2" aria-hidden="true">
-                  <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search agents or agencies"
-                  autoComplete="off"
-                  value={listSearch}
-                  onChange={(e) => setListSearch(e.target.value)}
-                  aria-label="Search agents or agencies"
-                  ref={browseSearchRef}
-                />
-                {/* the `/` hint the ref draws, inside the field */}
-                <span className="qcc-tb-kbd" aria-hidden="true">/</span>
-              </div>
+              {searchField("qcc-tb-search")}
 
               <div className="qcc-tb-right">
               {/* ⚠️ RIGHT OF SORT, AND IT CHANGES ONLY THE RENDERER. The tiles, Filter, Group,
@@ -6317,6 +6338,7 @@ export const Queries: React.FC<{
               </div>
             )}
             </div>
+            )}
 
             {/**
               * ⚠️ THE SKELETON BRANCH COMES FIRST, AND THAT ORDER IS THE FIX (§4). While the
@@ -6385,79 +6407,178 @@ export const Queries: React.FC<{
                 <QueryBoardView rows={gridRows} selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} />
               </div>
             ) : gridView === "calendar" ? (
-              /* ══ THE CALENDAR — THE SAME BOARD TO-DO DRAWS ═══════════════════════════════════
-                 ⚠️ `.tl-board` IS NOT DECORATION, IT IS THE BOARD'S TOKEN SCOPE. That one class
-                 declares about a hundred and fifty custom properties — `--row-h`, `--badge`,
-                 `--mk`, every `--card-*`, every `--pill-*`, the whole stage ladder. Mount the
-                 board without it and every `var()` resolves to nothing: the board renders, the
-                 build is clean, and it is unstyled. `data-dens` rides the same element because the
-                 density rules are `.tl-board[data-dens="compact"]`.
+              /* ══ THE CALENDAR — RAIL, HEADER ROW, BOARD ═══════════════════════════════════════
+                 Ref `query-calendar-rail-v3-locked.html`. ⚠️ THE BOARD INSIDE THAT REF'S WHITE CARD
+                 IS A SKETCH AND IS NOT NORMATIVE — the board renders from v65, exactly as it does on
+                 To-do, and nothing here reaches inside it.
 
-                 ⚠️ AND THE WINBAR IS A SIBLING OF THE BOARD, not a child — the same arrangement
-                 To-do has, and the reason `.tl` is what the DOM capture is scoped to. */
-              <div className="tl-board" data-dens={calDensity}>
-                <TimelineWinbar
-                  rangeLabel={calWindowLabel}
-                  onBack={() => setCalWinStart((w) => shiftWindow(w, WEEK_STEP, -1))}
-                  onForward={() => setCalWinStart((w) => shiftWindow(w, WEEK_STEP, 1))}
-                  showToday={calMovedOff}
-                  onToday={() => setCalWinStart(calToday)}
-                  density={calDensity}
-                  onDensity={setCalDensity}
-                  /* ⚠️ NO SEARCH HERE — the page's toolbar owns it, and it already narrows
-                     `sortedList`, which is what the calendar draws. Two fields narrowing one set
-                     is two answers to one question. */
-                />
-                <div className="tl-zone">
-                  <TimelineBoard
-                    range={calRange}
-                    today={calToday}
-                    todayAt={calTodayAt}
-                    months={calMonths}
-                    dateLabels={calDateLabels}
-                    dayDate={calDayDate}
-                    board={calData.rows}
-                    drawnGroups={calGroups}
-                    rows={calData.rows}
-                    rowNumber={calRowNumber}
-                    barsByRow={calData.barsByRow}
-                    sparse={<p className="qcc-calph">No queries in this window</p>}
-                    collapsedGroups={calCollapsed}
-                    toggleGroup={(k) => setCalCollapsed((c) => {
-                      const n = new Set(c);
-                      if (n.has(k)) n.delete(k); else n.add(k);
-                      return n;
+                 ⚠️ AND THE REF CONTRADICTS ITSELF ABOUT THE RAIL. Its CSS carries
+                 `.rail{background:#fff;border-radius:14px;box-shadow:…}` — a white card — while its
+                 own prose says "No card behind them; only the fields are white". The prose is right
+                 and the CSS is the stale half, left over from a card-rail variant that was locked
+                 away. Bare rail; only the fields carry white. */
+              <div className="qcc-cal">
+                <div className="qcc-cal-railcol">
+                  {/* ⚠️ THE RAIL IS BARE — no card, no fill, no shadow. Only the three fields are
+                      white, which is what makes them read as the touchable things on it. */}
+                  <div className="qcc-cal-rail">
+                    <div className="qcc-cal-showing">
+                      Showing <b>{gridRows.length}</b> of <b>{mastheadScopedQueries.length}</b>
+                    </div>
+                    <div className="qcc-cal-grp">Whose court</div>
+                    {/* ⚠️ THE SAME FIVE TILES, DOWN INSTEAD OF ACROSS — `STAT_TILES` is the one
+                        table, `quickTally`/`overdueTally` the one pair of counts, and the handlers
+                        are the tiles' own. Two axes survive the change of shape: one active court
+                        PLUS the independent overdue flag, so `Past expected` rings alongside a
+                        court rather than replacing it. */}
+                    {STAT_TILES.map((t) => {
+                      const on = t.key === "past" ? needsOverdue : quickKey === t.key;
+                      const n = t.key === "past" ? overdueTally : quickTally[t.key as QuickKey];
+                      return (
+                        <button
+                          key={t.key}
+                          type="button"
+                          className={`qcc-qf${on ? " on" : ""}`}
+                          aria-pressed={on}
+                          onClick={() => (t.key === "past" ? setNeedsOverdue(!needsOverdue) : setQuickKey(t.key as QuickKey))}
+                        >
+                          <span className="sw" style={t.swatch ? { background: STATE_TOKEN[t.swatch] } : undefined} />
+                          {t.label}
+                          <span className="n">{n}</span>
+                        </button>
+                      );
                     })}
-                    sel={calSel}
-                    setSel={setCalSel}
-                    hoverSeg={calHover}
-                    /* ⚠️ A ROW CLICK OPENS THE QUERY, which is this page's whole answer to what a
-                       bar is for. The board hands back the segment it was pressed on, and the
-                       segment carries its own `queryId` — so the drawer opens on the query the
-                       reader actually pointed at, not on the row's first. */
-                    pickSeg={(_rowKey, sg) => {
-                      setCalSel(sg.key);
-                      setCalHover(sg.key);
-                      if (sg.queryId) onOpenQuery?.(sg.queryId);
-                    }}
-                    /* Card C is To-do's own read overlay and is portalled from that page; this
-                       view opens the drawer instead, so there is nothing to anchor. */
-                    openCardOver={() => {}}
-                    cardAt={null}
-                    closeCard={() => {}}
-                    nudgeCountFor={() => 0}
-                    wrapRef={calWrapRef}
-                    onLaneMove={(e) => setCalCross(
-                      crossAt(calWrapRef.current, e.target, e.clientX, calVisible, calRange.days, shortCalDate),
-                    )}
-                    clearCross={() => setCalCross(null)}
-                    dragWindow={{}}
-                    onRowsOver={() => {}}
-                    onRowsOut={() => {}}
-                    cross={calCross}
-                    actToast={null}
-                    onNavigatePath={(path) => onNavigate("queries", path)}
-                  />
+                    <div className="qcc-cal-sep" />
+                    {/* ⚠️ THE SAME POPOVERS, THROUGH THE SAME TRIGGER REFS. The toolbar does not
+                        render in this view, so each ref has exactly one anchor — which is the only
+                        reason this is a relocation rather than a second set of controls. */}
+                    <div className="f12-popwrap qcc-cal-field">
+                      <span className="qcc-cal-lab">Filter</span>
+                      <button
+                        type="button" ref={filterTrigRef} className="qcc-cal-ctrl"
+                        aria-expanded={filterPopOpen}
+                        onClick={() => { setSortPopOpen(false); setGroupPopOpen(false); setFilterPopOpen((o) => !o); }}
+                      >
+                        {activeFilterCount > 0 ? `${activeFilterCount} applied` : "All"}
+                        <span className="qcc-cal-chev" aria-hidden="true">▾</span>
+                      </button>
+                      {filterPopOpen && renderFilterPopover()}
+                    </div>
+                    <div className="f12-popwrap qcc-cal-field">
+                      <span className="qcc-cal-lab">Group</span>
+                      <button
+                        type="button" ref={groupTrigRef} className="qcc-cal-ctrl"
+                        aria-expanded={groupPopOpen}
+                        onClick={() => { setFilterPopOpen(false); setSortPopOpen(false); setGroupPopOpen((o) => !o); }}
+                      >
+                        {GRID_GROUPS.find((g) => g.key === gridGroup)?.label ?? "None"}
+                        <span className="qcc-cal-chev" aria-hidden="true">▾</span>
+                      </button>
+                      {groupPopOpen && renderGroupPopover()}
+                    </div>
+                    <div className="f12-popwrap qcc-cal-field">
+                      <span className="qcc-cal-lab">Sort</span>
+                      <button
+                        type="button" ref={sortTrigRef} className="qcc-cal-ctrl"
+                        aria-expanded={sortPopOpen}
+                        onClick={() => { setFilterPopOpen(false); setGroupPopOpen(false); setSortPopOpen((o) => !o); }}
+                      >
+                        {GRID_SORTS.find((o) => o.key === sortKey)?.label ?? "Date sent"}
+                        <span className="qcc-cal-chev" aria-hidden="true">▾</span>
+                      </button>
+                      {sortPopOpen && renderSortPopover()}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="qcc-cal-boardcol">
+                  {/* ⚠️ THE HEADER ROW STARTS AT THE BOARD'S LEFT EDGE, NOT ABOVE THE RAIL — the
+                      rail's column is padded down by this row's height so the two tops align. */}
+                  <div className="qcc-calhead">
+                    <div className="qcc-calhead-l">
+                      <button type="button" className="tl-wchv" aria-label="Back one week"
+                        onClick={() => setCalWinStart((w) => shiftWindow(w, WEEK_STEP, -1))}>‹</button>
+                      <button type="button" className="tl-wchv" aria-label="Forward one week"
+                        onClick={() => setCalWinStart((w) => shiftWindow(w, WEEK_STEP, 1))}>›</button>
+                      <h3 className="qcc-calhead-rng">{calWindowLabel}</h3>
+                      {calMovedOff && (
+                        <button type="button" className="tl-todaylink" onClick={() => setCalWinStart(calToday)}>
+                          Today
+                        </button>
+                      )}
+                    </div>
+                    {searchField("qcc-calsearch")}
+                    <div className="qcc-calhead-r">
+                      <QueryViewSwitch view={gridView} onView={applyView} />
+                    </div>
+                  </div>
+
+                  {/* ⚠️ `.tl-board` IS THE BOARD'S TOKEN SCOPE — about a hundred and fifty custom
+                      properties. Mount the board without it and every `var()` resolves to nothing:
+                      it renders, the build is clean, and it is unstyled. `data-dens` rides the same
+                      element because the density rules are attribute selectors on it.
+
+                      ⚠️ AND `TimelineWinbar` DOES NOT RENDER HERE (§4). Its pager is in the header
+                      row and its density pair is the pill below; a winbar carrying neither would be
+                      an empty bar across the top of the card. */}
+                  <div className="tl-board qcc-calboard" data-dens={calDensity}>
+                    <div className="tl-zone qcc-calzone">
+                      <TimelineBoard
+                        range={calRange}
+                        today={calToday}
+                        todayAt={calTodayAt}
+                        months={calMonths}
+                        dateLabels={calDateLabels}
+                        dayDate={calDayDate}
+                        board={calData.rows}
+                        drawnGroups={calGroups}
+                        rows={calData.rows}
+                        rowNumber={calRowNumber}
+                        barsByRow={calData.barsByRow}
+                        sparse={<p className="qcc-calph">No queries in this window</p>}
+                        collapsedGroups={calCollapsed}
+                        toggleGroup={(k) => setCalCollapsed((c) => {
+                          const n = new Set(c);
+                          if (n.has(k)) n.delete(k); else n.add(k);
+                          return n;
+                        })}
+                        sel={calSel}
+                        setSel={setCalSel}
+                        hoverSeg={calHover}
+                        pickSeg={(_rowKey, sg) => {
+                          setCalSel(sg.key);
+                          setCalHover(sg.key);
+                          if (sg.queryId) onOpenQuery?.(sg.queryId);
+                        }}
+                        openCardOver={() => {}}
+                        cardAt={null}
+                        closeCard={() => {}}
+                        nudgeCountFor={() => 0}
+                        wrapRef={calWrapRef}
+                        onLaneMove={(e) => setCalCross(
+                          crossAt(calWrapRef.current, e.target, e.clientX, calVisible, calRange.days, shortCalDate),
+                        )}
+                        clearCross={() => setCalCross(null)}
+                        dragWindow={{}}
+                        onRowsOver={() => {}}
+                        onRowsOut={() => {}}
+                        cross={calCross}
+                        actToast={null}
+                        onNavigatePath={(path) => onNavigate("queries", path)}
+                      />
+                    </div>
+                    {/* ⚠️ DENSITY IS A HOVER PILL ON THE CARD, NOT A CONTROL IN A BAR (§3). It rests
+                        at .35 and comes to 1 when the board is hovered or the pill itself is
+                        focused — so it is reachable by keyboard at all times, which a hover-only
+                        control would not be. `prefers-reduced-motion` holds it at 1. */}
+                    <div className="qcc-denspill" role="group" aria-label="Density">
+                      {(["comfortable", "compact"] as const).map((d) => (
+                        <button key={d} type="button" data-on={d === calDensity}
+                          aria-pressed={d === calDensity}
+                          onClick={() => setCalDensity(d)}>{DENSITY_LABEL[d]}</button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (
