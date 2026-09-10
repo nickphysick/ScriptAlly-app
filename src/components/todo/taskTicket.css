@@ -148,7 +148,10 @@
   text-transform: uppercase; color: var(--muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.tkt .cell .v { font-size: 12px; font-weight: 500; color: var(--ink2); margin-top: 2px; }
+/* ⚠️ `line-height: normal` IS THE REF'S OWN COMPUTED VALUE, taken rather than invented. The ref
+   declares none, so its 12px figure sits in a 15px line box; an ancestor in this app sets 1.5,
+   which made the same figure 18px tall and pushed everything below it down by three. */
+.tkt .cell .v { font-size: 12px; line-height: normal; font-weight: 500; color: var(--ink2); margin-top: 2px; }
 /* ⚠️ BURGUNDY IS "A CLOCK YOU ARE ANSWERABLE TO", and only an agent request sets it — see
    `ticketFacts`. It is not "this number is big". */
 .tkt .cell .v.late { color: var(--burg); }

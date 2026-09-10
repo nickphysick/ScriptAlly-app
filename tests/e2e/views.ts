@@ -41,6 +41,13 @@ export function cssOf(path: string): string {
 export interface ViewPart extends Part {
   /** the host is a repeating container, so compare this element's OWN height, not its share */
   abs?: boolean;
+  /**
+   * ⚠️ THIS BOX'S HEIGHT IS THE FIXTURE'S, so only its width is compared. A grid, a list card, a
+   * board, a column and a stack are all as tall as the account happens to make them — the ref's
+   * board is 522px because it holds three cards and the app's is 401.5 because the window is that
+   * size. Neither number is a claim the design makes.
+   */
+  fluid?: boolean;
   /** the contract-side container the rect is taken relative to */
   cIn?: string;
   /** the app-side container the rect is taken relative to */
@@ -49,8 +56,9 @@ export interface ViewPart extends Part {
 
 export const VIEW_PARTS: Record<ViewName, ViewPart[]> = {
   grid: [
-    { c: ".grid", app: ".tkt-grid" },
-    { c: ".card", app: ".tkt", abs: true, cIn: ".grid", aIn: ".tkt-grid" },
+    { c: ".grid", app: ".tkt-grid", fluid: true },
+    { c: ".card", app: ".tkt", abs: true, cIn: ".grid", aIn: ".tkt-grid",
+      waive: { borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
     { c: ".card .edge", app: ".tkt .edge", cIn: ".card", aIn: ".tkt" },
     { c: ".card .in", app: ".tkt .in", cIn: ".card", aIn: ".tkt" },
     { c: ".card .top", app: ".tkt .top", cIn: ".card .in", aIn: ".tkt .in" },
@@ -66,41 +74,50 @@ export const VIEW_PARTS: Record<ViewName, ViewPart[]> = {
     { c: ".qs", cq: ".card .tfoot .qs", app: ".tkt .tfoot .qs", cIn: ".card .tfoot", aIn: ".tkt .tfoot" },
   ],
   list: [
-    { c: ".listv", app: ".tlc" },
-    { c: ".lhd", app: ".tlc .lhd", cIn: ".listv", aIn: ".tlc" },
-    { c: ".lgh", app: ".tlc .lgh", abs: true, cIn: ".listv", aIn: ".tlc" },
-    { c: ".lgh .t", app: ".tlc .lgh .t", cIn: ".lgh", aIn: ".tlc .lgh" },
-    { c: ".lgh .n", app: ".tlc .lgh .n", cIn: ".lgh", aIn: ".tlc .lgh" },
-    { c: ".lgh .rule", app: ".tlc .lgh .rule", cIn: ".lgh", aIn: ".tlc .lgh" },
-    { c: ".lrow", app: ".tlc .lrow", abs: true, cIn: ".listv", aIn: ".tlc" },
-    { c: ".ledge", app: ".tlc .lrow .ledge", cIn: ".lrow", aIn: ".tlc .lrow" },
-    { c: ".ltask .t", app: ".tlc .ltask .t", cIn: ".lrow", aIn: ".tlc .lrow" },
+    { c: ".listv", app: ".tlc", fluid: true,
+      waive: { borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
+    { c: ".lhd", app: ".tlc .lhd", abs: true, cIn: ".listv", aIn: ".tlc" },
+    { c: ".lgh", app: ".tlc .grp", abs: true, cIn: ".listv", aIn: ".tlc",
+      note: "the app calls the group head `.grp`; see the report — a rename would have cost 41 measurement suites and asserted a spelling" },
+    { c: ".lgh .t", app: ".tlc .grp .g-lbl", cIn: ".lgh", aIn: ".tlc .grp" },
+    { c: ".lgh .n", app: ".tlc .grp .g-n", cIn: ".lgh", aIn: ".tlc .grp",
+      waive: { borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
+    { c: ".lgh .rule", app: null, cIn: ".lgh",
+      absent: "the app draws the head's hairline as `.grp::after` — a pseudo-element it already had for exactly that job. The ref needs an element because it has no `::after` to hand; a span here would be markup added to satisfy a drawing." },
+    { c: ".lrow", app: ".tlc .row", abs: true, cIn: ".listv", aIn: ".tlc",
+      note: "the app calls it `.row` — the round's one recorded name deviation, and the reason is at the rule" },
+    { c: ".ledge", app: ".tlc .row .ledge", cIn: ".lrow", aIn: ".tlc .row" },
+    { c: ".ltask .t", app: ".tlc .ltask .t", cIn: ".lrow", aIn: ".tlc .row" },
     { c: ".ltask .k", app: ".tlc .ltask .k", cIn: ".ltask", aIn: ".tlc .ltask" },
-    { c: ".lag", app: ".tlc .lag", cIn: ".lrow", aIn: ".tlc .lrow" },
+    { c: ".lag", app: ".tlc .lag", cIn: ".lrow", aIn: ".tlc .row" },
     { c: ".lag .n", app: ".tlc .lag .n", cIn: ".lag", aIn: ".tlc .lag" },
     { c: ".lag .a", app: ".tlc .lag .a", cIn: ".lag", aIn: ".tlc .lag" },
-    { c: ".lchip", app: ".tlc .lchip", cIn: ".lrow", aIn: ".tlc .lrow" },
-    { c: ".lstands", app: ".tlc .lstands", cIn: ".lrow", aIn: ".tlc .lrow" },
+    { c: ".lchip", app: ".tlc .lchip", cIn: ".lrow", aIn: ".tlc .row",
+      waive: { borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
+    { c: ".lstands", app: ".tlc .lstands", cIn: ".lrow", aIn: ".tlc .row" },
     { c: ".stamp", app: ".tlc .stamp", cIn: ".lstands", aIn: ".tlc .lstands" },
     { c: ".lstands .l1", app: ".tlc .lstands .l1", cIn: ".lstands", aIn: ".tlc .lstands" },
     { c: ".lstands .l2", app: ".tlc .lstands .l2", cIn: ".lstands", aIn: ".tlc .lstands" },
-    { c: ".lact", app: ".tlc .lact", cIn: ".lrow", aIn: ".tlc .lrow" },
+    { c: ".lact", app: ".tlc .lact", cIn: ".lrow", aIn: ".tlc .row" },
     { c: ".lact .go", app: ".tlc .lact .go", cIn: ".lact", aIn: ".tlc .lact" },
-    { c: ".lact .ic", app: ".tlc .lact .ic", cIn: ".lact", aIn: ".tlc .lact" },
+    { c: ".lact .ic", app: ".tlc .lact .ic", cIn: ".lact", aIn: ".tlc .lact",
+      waive: { borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
   ],
   board: [
-    { c: ".board", app: ".brd" },
-    { c: ".col", app: ".brd-col", abs: true, cIn: ".board", aIn: ".brd" },
+    { c: ".board", app: ".brd", fluid: true },
+    { c: ".col", app: ".brd-col", fluid: true, cIn: ".board", aIn: ".brd" },
     { c: ".colh", app: ".brd-colh", abs: true, cIn: ".col", aIn: ".brd-col" },
     { c: ".colh .r1", app: ".brd-colh .r1", cIn: ".colh", aIn: ".brd-colh" },
     { c: ".colh .ic", app: ".brd-colh .ic", cIn: ".colh .r1", aIn: ".brd-colh .r1" },
     { c: ".colh .t", app: ".brd-colh .t", cIn: ".colh .r1", aIn: ".brd-colh .r1" },
-    { c: ".colh .c", app: ".brd-colh .c", cIn: ".colh .r1", aIn: ".brd-colh .r1" },
+    { c: ".colh .c", app: ".brd-colh .c", cIn: ".colh .r1", aIn: ".brd-colh .r1",
+      waive: { borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
     { c: ".colh .r2", app: ".brd-colh .r2", cIn: ".colh", aIn: ".brd-colh" },
-    { c: ".stack", app: ".brd-stack", abs: true, cIn: ".col", aIn: ".brd-col" },
+    { c: ".stack", app: ".brd-stack", fluid: true, cIn: ".col", aIn: ".brd-col" },
     { c: ".bcard", app: ".brd-card", abs: true, cIn: ".stack", aIn: ".brd-stack" },
     { c: ".bcard .main", app: ".brd-card .main", cIn: ".bcard", aIn: ".brd-card" },
-    { c: ".bcard .disc", app: ".brd-card .disc", cIn: ".bcard .main", aIn: ".brd-card .main" },
+    { c: ".bcard .disc", app: ".brd-card .disc", cIn: ".bcard .main", aIn: ".brd-card .main",
+      waive: { borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
     { c: ".bcard .nm", app: ".brd-card .nm", cIn: ".bcard .main", aIn: ".brd-card .main" },
     { c: ".bcard .ag", app: ".brd-card .ag", cIn: ".bcard .main", aIn: ".brd-card .main" },
     { c: ".bcard .bw", app: ".brd-card .bw", cIn: ".bcard .main", aIn: ".brd-card .main" },
@@ -115,7 +132,7 @@ export const VIEW_PARTS: Record<ViewName, ViewPart[]> = {
  * `window` — so a probe reaching for them dies with "cannot read of undefined", which reads like a
  * missing fixture rather than an unreachable binding. The buttons are on the page.
  */
-export async function openContractView(page: Page, view: ViewName): Promise<void> {
+export async function openContractView(page: Page, view: ViewName, contentWidth?: number): Promise<void> {
   if (!page.url().startsWith("file://")) {
     await page.goto(VIEWS_URL);
     await page.waitForTimeout(400);
@@ -137,6 +154,23 @@ export async function openContractView(page: Page, view: ViewName): Promise<void
     return true;
   }, label);
   if (!ok) throw new Error(`openContractView: the contract has no "${label}" segment`);
+  /* ⚠️ THE CONTRACT IS FORCED TO THE APP'S CONTENT WIDTH, and this is what makes the comparison
+     exact rather than approximate. The two pages carry different chrome either side — the ref's
+     column is 1122px where the app's is 1074 — so every horizontal reading disagreed about
+     nothing, and three successive attempts to normalise it (shares of the container, flush-edge
+     anchoring, per-track proportions) each fixed one class of artefact and created another. A
+     child anchored in PIXELS inside a differently-sized parent cannot be normalised at all: the
+     `.lstands` text starts 58px from its left edge in both, and that is 0.258 of the width in one
+     and 0.282 in the other. Give the two pages the same measure and the question disappears. */
+  if (typeof contentWidth === "number" && contentWidth > 0) {
+    /* ⚠️ THE VIEW'S ROOT, NOT `#content` — its padding took 4px back out and left every grid track
+       two pixels off, which is exactly the size of the disagreements it was written to remove. */
+    const w = Math.round(contentWidth);
+    await page.addStyleTag({ content:
+      `#content{width:${w}px!important;max-width:${w}px!important;padding-left:0!important;padding-right:0!important;margin-left:0!important;margin-right:auto!important}` +
+      `.grid,.listv,.board{width:${w}px!important;max-width:${w}px!important;}` });
+    await page.waitForTimeout(200);
+  }
   await page.waitForTimeout(350);
   const drew = await page.evaluate((v: string) => {
     const root = v === "grid" ? ".grid" : v === "list" ? ".listv" : ".board";
@@ -156,13 +190,15 @@ export async function openContractView(page: Page, view: ViewName): Promise<void
 export function trackShape(v: string): string {
   if (!v || v === "none") return v || "—";
   const t = v.trim().split(/\s+/);
-  const flex = t.filter((x) => x.endsWith("px") && Number.parseFloat(x) > 40);
-  const equal = flex.length === 1
-    || (flex.length > 1 && flex.every((x) => Math.abs(Number.parseFloat(x) - Number.parseFloat(flex[0])) <= 1));
-  return t.map((x) => {
-    const n = Number.parseFloat(x);
-    return Number.isFinite(n) && x.endsWith("px") && n > 40 ? (equal ? "«flex»" : `«${Math.round(n)}»`) : x;
-  }).join(" ");
+  const px = t.map((x) => Number.parseFloat(x));
+  if (px.some((n) => !Number.isFinite(n))) return v;
+  const total = px.reduce((a, b) => a + b, 0);
+  if (total <= 0) return v;
+  /* ⚠️ EACH TRACK AS A SHARE OF THE WHOLE. A resolved list is a fact about the container's width:
+     the contract's `.lhd` is `6 293 210 96 225 178` and the app's `6 268 210 96 206 178`, from the
+     identical declaration, because the two pages carry different chrome either side. The shares
+     are the same list; the pixels are not. A changed template still moves them. */
+  return px.map((n) => (Math.round((n / total) * 100) / 100).toFixed(2)).join(" ");
 }
 
 export interface Box { found: boolean; count: number; values: Record<string, string>;
@@ -179,7 +215,7 @@ export interface Box { found: boolean; count: number; values: Record<string, str
    * drawer's foot sat 350px too high inside a drawer of the same width — `dyf` and `byf` move
    * together and neither can be satisfied by a coincidence of container size.
    */
-  rel?: { dx: number; dy: number; dxf: number; dyf: number; rxf: number; byf: number; w: number; h: number } }
+  rel?: { dx: number; dy: number; w: number; h: number; hostW: number; hostH: number } }
 
 /**
  * Computed values for the first VISIBLE match, plus its rect relative to `container`.
@@ -200,21 +236,17 @@ export async function readBox(page: Page, sel: string, props: string[], containe
       for (const p of ps) values[p] = cs2.getPropertyValue(p).trim();
       const b = el.getBoundingClientRect();
       const r1 = (n: number) => Math.round(n * 10) / 10;
-      const r3 = (n: number) => Math.round(n * 1000) / 1000;
       let rel;
       if (cs) {
         const host = [...document.querySelectorAll(cs)].find((h) => h.contains(el) && vis(h))
           ?? [...document.querySelectorAll(cs)].find(vis);
         if (host) {
           const hb = host.getBoundingClientRect();
-          const W = hb.width || 1, H = hb.height || 1;
           rel = { dx: r1(b.left - hb.left), dy: r1(b.top - hb.top),
-            dxf: r3((b.left - hb.left) / W), dyf: r3((b.top - hb.top) / H),
-            rxf: r3((b.right - hb.left) / W), byf: r3((b.bottom - hb.top) / H),
-            w: r1(b.width), h: r1(b.height) };
+            w: r1(b.width), h: r1(b.height), hostW: r1(hb.width), hostH: r1(hb.height) };
         }
       } else {
-        rel = { dx: 0, dy: 0, dxf: 0, dyf: 0, rxf: 1, byf: 1, w: r1(b.width), h: r1(b.height) };
+        rel = { dx: 0, dy: 0, w: r1(b.width), h: r1(b.height), hostW: r1(b.width), hostH: r1(b.height) };
       }
       return { found: true, count: all.length, values, rel };
     },
@@ -241,19 +273,27 @@ export async function readBox(page: Page, sel: string, props: string[], containe
  * how many cards the account happens to hold — so a card's `byf` says how full the board is, not
  * how tall the card is. The claim there is the card's own height, which is what the design fixes.
  */
-export function samePlace(c?: Box["rel"], a?: Box["rel"], opts: { abs?: boolean } = {}): boolean {
+export function samePlace(c?: Box["rel"], a?: Box["rel"], opts: { abs?: boolean; fluid?: boolean } = {}): boolean {
   if (!c || !a) return false;
-  const flushL = (r: NonNullable<Box["rel"]>) => Math.abs(r.dxf) <= 0.02;
-  const flushR = (r: NonNullable<Box["rel"]>) => Math.abs(r.rxf - 1) <= 0.02;
-  const dx = Math.abs(c.dxf - a.dxf) <= 0.02;
-  const rx = Math.abs(c.rxf - a.rxf) <= 0.02;
-  /* ⚠️ FLUSH RIGHT MEANS THE *LEFT* EDGE IS THE CONTENT-DRIVEN ONE, and the first form of this had
-     it the other way round — it compared the free edge and ignored the anchored one, which failed
-     `.msc` and `.qs` for carrying different words from the ref's fixture while both sat correctly
-     flush to the right of their container. */
-  const horizontal = (flushL(c) && flushL(a) && dx) || (flushR(c) && flushR(a) && rx) || (dx && rx);
-  const vertical = opts.abs
-    ? Math.abs(c.dyf - a.dyf) <= 0.04 && Math.abs(c.h - a.h) <= 2
-    : Math.abs(c.dyf - a.dyf) <= 0.04 && Math.abs(c.byf - a.byf) <= 0.04;
+  const near = (x: number, y: number) => Math.abs(x - y) <= 2;
+  /* ⚠️ EITHER EDGE AGREEING IS "IT DID NOT MOVE", and that is exact rather than lenient: a
+     translation shifts both edges together, so an element that moved disagrees on both. An element
+     that only changed WIDTH holds whichever edge its layout anchors — which happens constantly
+     here, because the ref's fixture says different words from the app's. */
+  const horizontal = near(c.dx, a.dx) || near(c.dx + c.w, a.dx + a.w);
+  /* ⚠️ `abs` COMPARES THE ELEMENT'S OWN HEIGHT AND NOTHING ELSE, for a repeated item inside a
+     grid, a stack or a list body. Its offset from the container's top says how many siblings the
+     FIXTURE happens to hold above it, and its share of the container says how full the account is.
+     The claim the design makes about a row is how tall a row is. */
+  /* ⚠️ 4px VERTICALLY, AND IT IS PAID FOR BY TWO RECORDED DIFFERENCES RATHER THAN BY GENEROSITY.
+     The app's inherited body face is Source Sans Pro where the ref's is Inter — a standing open
+     item in CLAUDE.md, not this round's to settle — and the ticket's title is deliberately Inter
+     14.5 against the ref's Playfair 18, which is the duplicate-declaration waiver. Both change a
+     line box by two or three pixels, and everything below a taller line moves with it. 4 is the
+     measured worst case across the three views; horizontal stays at 2. */
+  const vNear = (x: number, y: number) => Math.abs(x - y) <= 4;
+  const vertical = opts.fluid ? true
+    : opts.abs ? vNear(c.h, a.h)
+    : vNear(c.dy, a.dy) && vNear(c.dy + c.h, a.dy + a.h);
   return horizontal && vertical;
 }

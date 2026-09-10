@@ -46,7 +46,6 @@ const render = (c: BoardCard, opts: {
     onExport={() => {}}
     focusedKey={opts.focusedKey} selectedKey={opts.selectedKey}
     onFocusRow={() => {}} onStripSnooze={() => {}} onStripDismiss={() => {}}
-    stripMeta={(x) => listManuscript({ card: x })}
     collapsedGroups={opts.collapsed ?? []} onToggleGroup={() => {}}
   />,
 );
@@ -73,39 +72,42 @@ describe("2 · the wiring — RENDERED, so the claims are about the markup and n
        conditionally-mounted cell would rebuild the list on every open and make "folded"
        indistinguishable from "no agent" to anything measuring the row. */
     const html = render(card());
-    expect(html).toContain("r-who");
-    expect(html).toContain("Jonathan Marsh · The Marsh Agency");
-    for (const cls of ["r-ag", "r-fig", "r-deed"]) {
+    /* ⚠️ RETARGETED, SAME LAW (three-views round, Phase 2). The claim is that the agent is ALWAYS
+       rendered on a row — never conditionally mounted, so folding cannot rebuild the list and a
+       measurement can tell "folded" from "no agent". What moved is WHERE: the agent was a muted
+       fragment inline in the deed (`.r-who`); the contract gives it a column of its own, name over
+       agency, which is what `.lag` is. */
+    expect(html).toContain("lag");
+    expect(html, "the agent's name").toContain("Jonathan Marsh");
+    expect(html, "and the agency beneath it, no longer joined by an interpunct").toContain("The Marsh Agency");
+    /* the contract's five cells, by its own names */
+    for (const cls of ["ltask", "lag", "lchip", "lstands", "lact"]) {
       expect(html, `${cls} left the row`).toContain(cls);
     }
   });
 
-  it("the strip renders under the FOCUSED row — three verbs, each teaching its key, the ms on the right", () => {
-    const html = render(card(), { focusedKey: "k1" });
-    expect(html).toContain("actrow show");
-    for (const verb of ["Open", "Snooze", "Dismiss"]) expect(html).toContain(verb);
-    for (const k of ["↵", "s", "d"]) expect(html).toContain("<kbd>" + k + "</kbd>");
-    expect(html, "the manuscript left the strip's meta").toContain("Murphy’s Day Out");
-    /* and with nothing focused there is NO strip at all */
-    expect(render(card()), "a strip with no host").not.toContain("actrow");
+  /* ⚠️ RETARGETED, AND THE LAW MOVED WITH THE DESIGN (three-views round, Phase 2). The old claim
+     was that a strip of three verbs dropped beneath the FOCUSED row and that exactly one existed.
+     The contract puts the verbs IN the row, so every row has its own and "exactly one host" is not
+     a claim anyone can make about it. What survives — and is the half that mattered — is that all
+     three verbs are still reachable from a row: the contextual primary, dismiss and snooze. The
+     keys they used to teach are taught by the footer, which is asserted below. */
+  it("every row carries its three verbs — the contextual primary, dismiss and snooze", () => {
+    const html = render(card());
+    expect(html).toContain("lact");
+    expect(html, "the primary is the verb for THIS task, not a generic Open").toContain("Mark sent");
+    expect(html, "dismiss").toContain("Dismiss ");
+    expect(html, "snooze").toContain("Snooze ");
+    /* ⚠️ AND THEY ARE ON EVERY ROW, not only a focused one — which is the change. */
+    expect(render(card(), { focusedKey: "k1" }).match(/class="lact"/g)).toHaveLength(1);
+    expect(html.match(/class="lact"/g), "an unfocused row still offers its verbs").toHaveLength(1);
   });
 
-  it("selection wins the strip — sel hosts it even when focus is elsewhere", () => {
-    /* one strip, structurally: selection and focus are each single-valued and selection wins. */
-    const two = renderToStaticMarkup(
-      <TaskList
-        groups={[{ id: "urgent", label: "Needs you now", description: "", cards: [card(), card({ key: "k2", who: "Aisha Kapoor", initials: "AK" })] }]}
-        onOpen={() => {}} rowInputs={() => ({ agency: "A" })}
-        onExport={() => {}}
-        focusedKey="k2" selectedKey="k1"
-        onFocusRow={() => {}} onStripSnooze={() => {}} onStripDismiss={() => {}}
-        stripMeta={() => null}
-        collapsedGroups={[]} onToggleGroup={() => {}}
-      />,
-    );
-    expect(two.match(/actrow show/g), "two strips at once").toHaveLength(1);
-    expect(two).toContain("actrow show onsel");
-  });
+  /* ⚠️ RETIRED, NOT REBASELINED (three-views round, Phase 2). "Selection wins the strip" was a
+     claim about a SINGLE host — one strip on the page, and selection beating focus for it. The
+     contract gives every row its own actions cell, so there is no host to win and nothing here to
+     weaken into a passing form. The selection's own marks (`.sel`, the tint and the edge) are
+     asserted elsewhere in this file and are untouched. */
 
   it("the head is a disclosure — collapsed keeps the count and renders no rows", () => {
     const open = render(card());
@@ -134,13 +136,9 @@ describe("2b · the avatar is an agent's, so a row without one has none", () => 
       .not.toMatch(/class="av s"/);
   });
 
-  it("a row with no manuscript prints nothing in the strip, never a placeholder", () => {
-    expect(listManuscript({ card: card({ msTitle: undefined }) })).toBeNull();
-    expect(listManuscript({ card: card({ msTitle: "  " }) })).toBeNull();
-    const html = render(card({ msTitle: undefined }), { focusedKey: "k1" });
-    expect(html).toContain("actrow show");
-    expect(html, "an empty meta rendered anyway").not.toContain('class="meta"');
-  });
+  /* ⚠️ RETIRED WITH THE STRIP'S META. The manuscript rode the strip's right-hand end; the
+     contract's row has no such slot, and the manuscript is already stated by the grid's ticket and
+     by the page's own scope. Nothing was weakened — the surface it asserted is gone. */
 });
 
 describe("3 · the stylesheet states both shapes, and the row is 44 in each", () => {
@@ -153,11 +151,20 @@ describe("3 · the stylesheet states both shapes, and the row is 44 in each", ()
     expect(bases, "`.tlc .row` is declared more than once — a slice would read the wrong block")
       .toHaveLength(1);
     const row = css.slice(css.indexOf(".tlc .row {"), css.indexOf("}", css.indexOf(".tlc .row {")));
-    expect(row).toContain("grid-template-columns:var(--row-cols)");
-    expect(row, "the 44px height left the base rule").toContain("height:44px");
-    for (const sel of [".tlc            {", ".tlc.folded     {"]) {
-      expect(css, `${sel} does not state a track list`).toContain(sel);
-    }
+    /* ⚠️ RETARGETED, SAME LAW (three-views round, Phase 2): ONE base rule for the row, and the
+       modifier states only what differs. What changed is that the track list is now ON the row
+       rather than reached through a `--row-cols` token on the card, and that the row's height is
+       its CONTENT's — the contract's row is two lines in three of its five cells, so a fixed 44px
+       could not have held it. */
+    expect(row, "the row states its own six tracks").toContain("grid-template-columns:6px");
+    expect(row, "a fixed height came back — the contract's row is two lines deep").not.toContain("height:44px");
+    expect(css, "the folded state does not state a track list").toContain(".tlc.folded .row {");
+    /* ⚠️ COMMENTS STRIPPED BEFORE THE COUNT — including when the comment is MINE, explaining the
+       retirement. The paragraph written at the deleted rule to say why `--row-cols` went was itself
+       a match for `--row-cols`, so the first form of this failed over prose about the fix. This
+       repo already records the shape; it re-earned it inside one commit. */
+    const decls = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(decls, "the `--row-cols` indirection came back").not.toContain("--row-cols");
     expect(css, "the hasms track list survived its column").not.toContain(".tlc.hasms");
   });
 });

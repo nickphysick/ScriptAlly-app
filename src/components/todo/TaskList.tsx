@@ -20,8 +20,12 @@
  */
 import React from "react";
 import { BoardCard } from "../../lib/todoBoard";
+import { taskCategory, CATEGORY_TAG, CATEGORY_FAMILY } from "../../lib/todoCategory";
+import { dateChip, listStands, listSub, listVerb } from "../../lib/listCells";
+import { STATE_TOKEN, stateFor } from "../../lib/queryCardFacts";
+import { StatusDot } from "../StatusDot";
 import { TaskGroup } from "../../lib/todoGroups";
-import { BUCKET_LABEL, cardBucket } from "../../lib/todoBuckets";
+import { cardBucket } from "../../lib/todoBuckets";
 import {
   listAgency, listAgent, listAvatarInitials, listDeed, listFragment,
   RowInputs,
@@ -33,7 +37,12 @@ export interface TaskListProps {
   selectedKey?: string;
   onOpen: (card: BoardCard) => void;
   /** everything a row needs beyond the card — supplied by the page, never re-derived here */
-  rowInputs: (card: BoardCard) => Omit<RowInputs, "card">;
+  /* ⚠️ `anchorDate` IS PART OF THE CONTRACT NOW (three-views round, Phase 2). `listRowInputs`
+     has always returned it; this prop's type simply omitted it, so the row could not reach the
+     one date the Asked chip and the "where it stands" sentence both state. Widened rather than
+     re-derived — a second date derivation is how a chip comes to say a different day from the
+     sentence beside it. */
+  rowInputs: (card: BoardCard) => Omit<RowInputs, "card"> & { anchorDate?: string | null };
   /* ⚠️ `search`/`onSearch`/`filterActive`/`onFilter`/`filterMenu`/`sortActive`/`onSort`/
      `sortMenu`/`filterCount`/`sortLabel` are RETIRED with the card's own bar (QC-chassis round,
      Phase 1) — the page's toolbar owns all of them. A prop with no render site is a slot a future
@@ -77,7 +86,6 @@ export interface TaskListProps {
   onStripSnooze: (anchor: HTMLElement, card: BoardCard) => void;
   onStripDismiss: (card: BoardCard) => void;
   /** the strip's quiet right meta — the manuscript name, derived by the page's own inputs */
-  stripMeta: (card: BoardCard) => string | null;
   /**
    * ⚠️ COLLAPSE IS THE PAGE'S STATE TOO, for the same reason focus is: j/k must skip the rows a
    * closed section does not render, and only the page can hand the key effect the same visible
@@ -151,7 +159,7 @@ const AsideIcon = () => (
 export const TaskList: React.FC<TaskListProps> = ({
   groups, selectedKey, onOpen, rowInputs, toolbar, onExport,
   folded, leaving,
-  focusedKey, onFocusRow, onStripSnooze, onStripDismiss, stripMeta,
+  focusedKey, onFocusRow, onStripSnooze, onStripDismiss,
   collapsedGroups, onToggleGroup,
   chips, onClearFilters, totalUnfiltered, body,
 }) => {
@@ -262,6 +270,15 @@ export const TaskList: React.FC<TaskListProps> = ({
           )}
         </div>
       )}
+      {/* ⚠️ THE COLUMN HEADER IS OUTSIDE THE SCROLLER, which is what makes it a table header rather
+          than a first row. The contract puts it directly inside `.listv`, above the group heads; the
+          empty first span holds the 6px status-edge track open so the five labels land over the five
+          cells. It is `aria-hidden` because the row beneath is not a `<table>` — a screen reader
+          reading five stray words before every group would be told a structure that is not there. */}
+      {!body && <div className="lhd" aria-hidden="true">
+        <span /><span>Task</span><span>Agent</span><span>Asked</span>
+        <span>Where it stands</span><span className="right">Actions</span>
+      </div>}
       <div className="l-body" ref={bodyRef} onScroll={readAnchor}>
         {/* ⚠️ THE GRID AND THE LIST ARE TWO VIEWS OF ONE CARD (QC-chassis round, Phase 3), and this
             one line is why. The first cut swapped the whole card for a grid, which took the card's
@@ -290,28 +307,32 @@ export const TaskList: React.FC<TaskListProps> = ({
               onClick={() => onToggleGroup(g.id)}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggleGroup(g.id); } }}
             >
-              <span className="g-dot" />
+              {/* ⚠️ THE ICON DISC IS GONE (three-views round, Phase 2). The contract's group head
+                  is three things — the name, a bordered count, and one hairline to the right edge —
+                  on white, with no band, no disc, no subtitle and no mono caps. The family classes
+                  stay on the HEAD because other surfaces select on them; what left is the dot. */}
               <span className="g-lbl">{GRP_LABEL[g.id] ?? g.label}</span>
               <span className="g-n">{g.cards.length}</span>
               <span className="g-cv" aria-hidden="true">⌄</span>
             </div>
             {!collapsedGroups.includes(g.id) && g.cards.map((c) => {
-              const inputs: RowInputs = { card: c, ...rowInputs(c) };
+              const ri = rowInputs(c);
+              const inputs: RowInputs = { card: c, ...ri };
               const bucket = cardBucket(c);
               const frag = listFragment(inputs);
               const avatarInitials = listAvatarInitials(c);
               const agent = listAgent(inputs);
               const agency = listAgency(inputs);
-              /* ⚠️ THE STRIP'S HOST: the selected row while the sheet is open, else the focused
-                 row. ONE expression, so "exactly one strip" is structural — selection and focus
-                 are each single-valued and selection wins.
-                 ⚠️ AND IT IS THE ONLY CONDITION ON THE STRIP. It first rendered as
-                 `hostsStrip && stripOn`, where the second term is implied by the first: a
-                 redundant guard, which a mutation aimed at the host then could not redden —
-                 the strip stayed correct for the wrong reason and the probe proved nothing.
-                 `stripOn` survives for the row's CLICK GRAMMAR, which is a different question
-                 (has this row been reached at all), not as a second gate on the strip. */
-              const hostsStrip = selectedKey ? c.key === selectedKey : c.key === focusedKey;
+              /* the row's CLICK GRAMMAR: first activation focuses, the second opens */
+              const cat = taskCategory(c);
+              const anchorDate = ri.anchorDate ?? null;
+              const chip = dateChip(anchorDate);
+              const stands = listStands(inputs, anchorDate);
+              const sub = listSub(inputs, anchorDate);
+              const verb = listVerb(inputs);
+              /* ⚠️ THE EDGE IS THE QUERY'S STAGE, DERIVED — the same ladder the ticket's edge and
+                 the Query Centre's own cards read, never a colour stored on the card. */
+              const edgeTint = c.status ? STATE_TOKEN[stateFor(c.status)] : STATE_TOKEN.closed;
               const stripOn = c.key === selectedKey || c.key === focusedKey;
               return (
                 <React.Fragment key={c.key}>
@@ -330,28 +351,58 @@ export const TaskList: React.FC<TaskListProps> = ({
                   onClick={() => { if (folded || stripOn) onOpen(c); else onFocusRow(c); }}
                   onDoubleClick={() => onOpen(c)}
                 >
-                  <span className={`pill ${bucket}`}>{BUCKET_LABEL[bucket]}</span>
-                  {/* ⚠️ ONE LINE: the deed with the agent INLINE and muted — the contract's
-                      `.deed span`. The two-line meta is retired with the row's height. */}
-                  <div className="r-deed">
-                    {bucket === "note" ? c.title : listDeed(inputs)}
-                    {(agent || agency) && (
-                      <span className="r-who">{[agent, agency].filter(Boolean).join(" · ")}</span>
-                    )}
+                  {/* ⚠️ THE STATUS EDGE IS ABSOLUTE AND THE 6px TRACK IS EMPTY — the contract's
+                      own shape. The edge is out of flow so it can run the row's full height
+                      whatever the tallest cell turns out to be; the empty span holds the track
+                      open so the five real cells land in columns two to six. */}
+                  <span className="ledge" style={{ background: edgeTint }} aria-hidden="true" />
+                  <span aria-hidden="true" />
+                  <div className="ltask">
+                    <div className="t">{bucket === "note" ? c.title : listDeed(inputs)}</div>
+                    <div className={`k ${CATEGORY_FAMILY[cat]}`}>
+                      {c.status && <StatusDot status={c.status} overrideSize={12} />}
+                      {CATEGORY_TAG[cat]}
+                    </div>
                   </div>
                   {/* ⚠️ THE AGENT CELL RENDERS ALWAYS AND HIDES IN CSS when the drawer folds the
                       row — never conditionally mounted, so folding cannot rebuild the list and a
                       measurement can tell "folded" from "no agent". */}
-                  <div className="cell r-ag">
-                    {avatarInitials && (
-                      <span className="av s" aria-hidden="true">{avatarInitials}</span>
-                    )}
-                    <span className="r-agname">{agent}</span>
+                  <div className="lag">
+                    <span className="av" aria-hidden="true">{avatarInitials ?? "\u270d"}</span>
+                    <div className="lagtx">
+                      <div className="n">{agent || "You"}</div>
+                      <div className="a">{agency || (agent ? "" : "Your own note")}</div>
+                    </div>
                   </div>
-                  <div className={`cell keep r-fig${frag.hot ? " hot" : ""}${frag.absent ? " absent" : ""}`}>
-                    {frag.absent
-                      ? frag.lead
-                      : <>{frag.lead}{frag.lead && <br />}<b>{frag.figure}</b> {frag.tail}</>}
+                  <div className="lchip">
+                    <div className="m">{chip.mon}</div>
+                    <div className="d">{chip.day}</div>
+                  </div>
+                  <div className="lstands">
+                    <span className="stamp">
+                      {frag.absent || !frag.figure
+                        ? <>no<br />date</>
+                        : <><b className={frag.hot ? "late" : ""}>{frag.figure}</b>{frag.tail}</>}
+                    </span>
+                    <div className="txt">
+                      <div className="l1">{stands.before}<b>{stands.strong}</b>{stands.after}</div>
+                      <div className="l2">{sub}</div>
+                    </div>
+                  </div>
+                  {/* ⚠️ THE ROW'S OWN VERBS (three-views round, Phase 2), which is where the
+                      contract puts them — this replaces the action STRIP that used to drop beneath
+                      the focused row. All three of the strip's verbs survive: the contextual
+                      primary opens the task, `×` dismisses, and `⋯` is the snooze door. The strip's
+                      key hints move to the footer, which already teaches them.
+                      ⚠️ AND EACH CARRIES A REAL ACCESSIBLE NAME: the two glyphs are the contract's
+                      drawing, and a reader who cannot see them is owed the word. */}
+                  <div className="lact">
+                    <button type="button" className="go"
+                      onClick={(e) => { e.stopPropagation(); onOpen(c); }}>{verb}</button>
+                    <button type="button" className="ic" aria-label={`Dismiss ${c.title}`}
+                      onClick={(e) => { e.stopPropagation(); onStripDismiss(c); }}>&#215;</button>
+                    <button type="button" className="ic" aria-label={`Snooze ${c.title}`}
+                      onClick={(e) => { e.stopPropagation(); onStripSnooze(e.currentTarget, c); }}>&#8943;</button>
                   </div>
                 </div>
                 {/* ⚠️ THE ACTION STRIP — a SIBLING beneath the row, never an overlay: nothing may
@@ -359,20 +410,6 @@ export const TaskList: React.FC<TaskListProps> = ({
                     the sheet is open is what anchors the sheet to its row. Its verbs go through
                     the page's own doors (the snooze panel, the dismiss confirm) — the same
                     writers as the sheet's, so there is no second path to a write. */}
-                {hostsStrip && (
-                  <div className={`actrow show${c.key === selectedKey ? " onsel" : ""}`}>
-                    <button type="button" className="go" onClick={() => onOpen(c)}>
-                      Open <kbd>↵</kbd>
-                    </button>
-                    <button type="button" data-act="snooze" onClick={(e) => onStripSnooze(e.currentTarget, c)}>
-                      Snooze <kbd>s</kbd>
-                    </button>
-                    <button type="button" data-act="dismiss" onClick={() => onStripDismiss(c)}>
-                      Dismiss <kbd>d</kbd>
-                    </button>
-                    {stripMeta(c) && <span className="meta">{stripMeta(c)}</span>}
-                  </div>
-                )}
                 </React.Fragment>
               );
             })}

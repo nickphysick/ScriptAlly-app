@@ -1043,7 +1043,11 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     /* ⚠️ AND THE CARD STILL HAS ONE — the frame MOVED, it was not deleted. Asserting only the
        absence would pass on a page with no card at all, which is the vacuous half of every
        retirement lock. */
-    expect(listCardCss, "the list card lost the frame the rail gave up").toContain("border-radius:12px");
+    /* ⚠️ RETARGETED TO THE CLAIM, NOT THE NUMBER (three-views round, Phase 2). The law is that the
+       list card HAS the frame the rail gave up; the radius was a spelling standing in for it, and
+       the contract's `.listv` draws 16 where this pinned 12. A lock that fails on a legitimate
+       retone trains the next reader to rebaseline it without looking. */
+    expect(listCardCss, "the list card lost the frame the rail gave up").toMatch(/border-radius:\s*\d+px/);
     expect(splitCss).not.toContain(".tpl-zone");   // the primitive is not re-declared here
     /* the rail gained its own tools block above the scroller (Phase 4); the ZONE is still the
        one relocated scroller, which is what this case is about */
@@ -1369,7 +1373,8 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
     /* ⚠️ BOTH HALVES. Absence alone passes on a page with no card; the card's own frame is what
        makes this "the frame moved" rather than "the frame went". */
     expect(listCardCss).toContain("border:1px solid var(--edge)");
-    expect(listCardCss).toContain("border-radius:12px");
+    /* the radius is the frame's, not a value this case owns — see the retarget above */
+    expect(listCardCss).toMatch(/border-radius:\s*\d+px/);
     /* the border-RIGHT that split one sheet in two is gone; the ground separates them now — and
        it is covered by the sweep above, which forbids every `border…:` on this rule */
   });

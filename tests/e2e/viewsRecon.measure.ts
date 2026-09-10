@@ -40,7 +40,12 @@ test("views recon — the contract beside the page, three views", async ({ page 
   for (const view of ["grid", "list", "board"] as ViewName[]) {
     await selectTodoView(page, view);
     await page.waitForTimeout(500);
-    await openContractView(cpage, view);
+    /* the ref is forced to the app's own content width, so every reading below is in pixels */
+    const appW = await page.evaluate((sel: string) => {
+      const el = [...document.querySelectorAll(sel)].find((e) => e.getBoundingClientRect().width > 0);
+      return el ? Math.round(el.getBoundingClientRect().width) : 0;
+    }, view === "grid" ? ".tkt-grid" : view === "list" ? ".tlc" : ".brd");
+    await openContractView(cpage, view, appW);
 
     const parts = VIEW_PARTS[view];
     let missing = 0, differP = 0, matchP = 0, differPos = 0, present = 0;
@@ -72,7 +77,7 @@ test("views recon — the contract beside the page, three views", async ({ page 
         if (ok) matchP++; else { bad++; differP++; }
         rows.push(`| \`${q}\` | \`${cv || "—"}\` | \`${av || "—"}\` | ${ok ? "=" : "**≠**"} |`);
       }
-      const posOk = samePlace(c.rel, a.rel, { abs: p.abs });
+      const posOk = samePlace(c.rel, a.rel, { abs: p.abs, fluid: p.fluid });
       if (!posOk) differPos++;
       L.push("");
       L.push(`present · ${bad} of ${props.length} properties differ · position ${posOk ? "matches" : "**DIFFERS**"}`);
@@ -80,7 +85,7 @@ test("views recon — the contract beside the page, three views", async ({ page 
       L.push("| property | contract | dev | |"); L.push("|---|---|---|---|");
       L.push(...rows);
       L.push(`| *offset in \`${p.cIn ?? "itself"}\`* | \`${c.rel?.dx},${c.rel?.dy}\` · \`${c.rel?.w}×${c.rel?.h}\` | \`${a.rel?.dx},${a.rel?.dy}\` · \`${a.rel?.w}×${a.rel?.h}\` | ${posOk ? "=" : "**≠**"} |`);
-      L.push(`| *edges as fractions of it* | \`L${c.rel?.dxf} T${c.rel?.dyf} R${c.rel?.rxf} B${c.rel?.byf}\` | \`L${a.rel?.dxf} T${a.rel?.dyf} R${a.rel?.rxf} B${a.rel?.byf}\` | ${posOk ? "=" : "**≠**"} |`);
+      L.push(`| *host* | \`${c.rel?.hostW}×${c.rel?.hostH}\` | \`${a.rel?.hostW}×${a.rel?.hostH}\` | |`);
       L.push("");
     }
     missingAll[view] = miss;

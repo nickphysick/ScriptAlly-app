@@ -3569,7 +3569,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         onFocusRow={(c) => setFocusKey(c.key)}
         onStripSnooze={(anchor, card) => setStripSnooze({ anchor, card })}
         onStripDismiss={(card) => setStripDismiss(card)}
-        stripMeta={(c) => listManuscript({ card: c, ...listRowInputs(c) })}
         collapsedGroups={collapsedGroups}
         onToggleGroup={(id) => setCollapsedGroups((xs) =>
           xs.includes(id) ? xs.filter((x) => x !== id) : [...xs, id])}

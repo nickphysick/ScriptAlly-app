@@ -152,18 +152,26 @@ describe("⚠️ EACH CLUSTER KEY CALLS WHAT ITS ICON CALLS", () => {
     expect(list, "the cluster keys came back to the row").not.toContain('cardMenu(c, column-query")) fire(c, column, "open-query");');
   });
 
-  it("⚠️ EVERY KEY THE STRIP PRINTS IS ANSWERED, AND EVERY ONE IS IN THE MAP", () => {
-    /* ⚠️ THE TEACHING SURFACE IS THE STRIP NOW (tightened round, Phase 2) — its three buttons
-       print ↵, s and d; the footer prints the four list keys. Every printed key is answered by
-       listKey and present in the map, so the chrome cannot advertise a dead key. */
+  it("⚠️ EVERY KEY THE FOOTER PRINTS IS ANSWERED, AND EVERY ANSWERED KEY IS PRINTED", () => {
+    /* ⚠️ RETARGETED, SAME LAW (three-views round, Phase 2): the chrome may not advertise a dead
+       key, and no live key may go untaught. What changed is the TEACHING SURFACE. The action strip
+       printed ↵, s and d beside its three buttons and has been retired — the contract puts the
+       row's verbs in the row, where they carry words rather than keys — so the footer is now the
+       one place the keys are printed, and it prints all five.
+       ⚠️ AND BOTH DIRECTIONS ARE ASSERTED, because either alone is satisfiable by an empty set:
+       every key the footer prints is answered, AND every key `listKey` answers is printed. */
     expect(listKey(K("Enter"), false)).toBe("primary");
     for (const [key, action] of [["s", "snooze"], ["d", "dismiss"]] as const) {
       expect(listKey(K(key), false)).toBe(action);
     }
-    const strip = list.slice(list.indexOf('className={`actrow'), list.indexOf("</React.Fragment>"));
-    for (const kbd of ["<kbd>↵</kbd>", "<kbd>s</kbd>", "<kbd>d</kbd>"]) {
-      expect(strip, kbd + " left the strip").toContain(kbd);
+    const foot = list.slice(list.indexOf('className="keys"'), list.indexOf("</span>", list.indexOf('className="keys"')));
+    expect(foot.length, "the footer's key line was not found — the slice is reading nothing")
+      .toBeGreaterThan(20);
+    for (const kbd of ["<kbd>j</kbd>", "<kbd>k</kbd>", "<kbd>↵</kbd>", "<kbd>s</kbd>", "<kbd>d</kbd>"]) {
+      expect(foot, kbd + " left the footer").toContain(kbd);
     }
+    /* nothing else prints a key, so there is exactly one teaching surface */
+    expect(list.replace(foot, ""), "a second surface prints keys").not.toContain("<kbd>");
   });
 });
 
