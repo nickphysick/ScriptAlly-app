@@ -107,6 +107,7 @@ import { useOpenEditAgent } from "./EditAgentHost";
 import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
+import { compareAttention, type AttentionRow } from "../lib/queryAttentionSort";
 import { cardFacts, cardMaterials, turnFor, stateFor, MATERIAL_SLOTS, MON as MONTHS_SHORT, type Turn, type CardLeaf } from "../lib/queryCardFacts";
 import { sinceThen, type SinceEvent } from "../lib/queryRowFacts";
 import { MATERIAL_ROW_NAMES, type MaterialRow } from "../lib/agentMaterials";
@@ -3256,6 +3257,24 @@ export const Queries: React.FC<{
         return aD - bD;
       }
       case "journey_depth": return journeyRank(a) - journeyRank(b);
+      /* ⚠️ §4 · THE REGISTER DECIDES THE ORDER, AND IT IS THE CARD'S OWN REGISTER. `cardFacts`
+         derives it; this reads it, so the sort and the chip cannot disagree about the same query.
+         The comparator itself is pure and lives in `queryAttentionSort`, which is where the
+         judgement about which register leads is written down and locked. */
+      case "attention": {
+        const row = (x: Query): AttentionRow => {
+          const ag = agents.find((g) => g.id === x.agentId);
+          const expected = resolveExpectedDate(x, lastSendMs(x), ag?.responseTimeWeeks);
+          const f = cardFacts(x, new Date(), { agencyWeeks: ag?.responseTimeWeeks, agentName: agentPrimary(ag) });
+          return {
+            register: f.register,
+            expectedMs: expected.ms ?? null,
+            closedMs: x.lastStatusChange ? new Date(x.lastStatusChange).getTime() : null,
+            lastActivityMs: lastActivityMs(x),
+          };
+        };
+        return compareAttention(row(a), row(b));
+      }
       case "last_activity":
       default: return lastActivityMs(b) - lastActivityMs(a);
     }
@@ -3726,7 +3745,8 @@ export const Queries: React.FC<{
 
   const F12_SORT_GROUPS: { group: string; items: { key: string; label: string; sub?: string }[] }[] = [
     { group: "Activity", items: [
-      { key: "last_activity", label: "Last activity", sub: "Most recently moved first" },
+      { key: "attention", label: "Attention", sub: "What needs you, first" },
+    { key: "last_activity", label: "Last activity", sub: "Most recently moved first" },
     ]},
     { group: "Dates", items: [
       { key: "date_newest", label: "Date sent · newest", sub: "Your latest queries first" },
@@ -3777,6 +3797,7 @@ export const Queries: React.FC<{
    * the segment reads `A–Z / Z–A` there. Same state, honest words.
    */
   const SORT_KEYS: { key: string; label: string; sub?: string }[] = [
+    { key: "attention", label: "Attention", sub: "What needs you, first" },
     { key: "last_activity", label: "Last activity", sub: "Most recently moved first" },
     { key: "date_newest", label: "Date sent", sub: "When it went out" },
     { key: "due_soonest", label: "Reply expected", sub: "Soonest first" },
@@ -3784,6 +3805,16 @@ export const Queries: React.FC<{
     { key: "agency_az", label: "Agency" },
   ];
   const SORT_IS_NAME = (k: string) => k === "agent_az" || k === "agency_az";
+  /**
+   * ⚠️ §4 · THE DIRECTION SEGMENT NAMES WHAT THE DIRECTION DOES, PER KEY — the same law that made
+   * `A–Z / Z–A` replace `Newest / Oldest` over a surname. "Newest" is nonsense over a register
+   * ladder: reversing an attention sort does not give you older queries, it gives you the calm ones
+   * first. Three wordings now, one state, and each is honest about its own key.
+   */
+  const SORT_DIR_WORDS = (k: string): [string, string] =>
+    k === "attention" ? ["Needs me first", "Needs me last"]
+      : SORT_IS_NAME(k) ? ["A–Z", "Z–A"]
+        : ["Newest", "Oldest"];
   /**
    * ⚠️ EVERY KEY THE APP CAN SET, NOT ONLY THE FIVE THE MENU OFFERS. The list's Status header sorts
    * by `journey_depth`, which the menu deliberately does not list — so a trigger that read the
@@ -3810,9 +3841,9 @@ export const Queries: React.FC<{
           <span className="f12-dirlab">Order</span>
           <span className="f12-dirseg" role="group" aria-label="Sort direction">
             <button type="button" className={sortDesc ? "" : "is-on"} aria-pressed={!sortDesc}
-              onClick={() => setSortDesc(false)}>{SORT_IS_NAME(sortKey) ? "A–Z" : "Newest"}</button>
+              onClick={() => setSortDesc(false)}>{SORT_DIR_WORDS(sortKey)[0]}</button>
             <button type="button" className={sortDesc ? "is-on" : ""} aria-pressed={sortDesc}
-              onClick={() => setSortDesc(true)}>{SORT_IS_NAME(sortKey) ? "Z–A" : "Oldest"}</button>
+              onClick={() => setSortDesc(true)}>{SORT_DIR_WORDS(sortKey)[1]}</button>
           </span>
         </div>
       }

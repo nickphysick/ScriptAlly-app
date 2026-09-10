@@ -31,7 +31,10 @@ export interface ViewDefault {
 }
 
 export const VIEW_DEFAULTS: Record<QueryViewName, ViewDefault> = {
-  grid: { sort: "last_activity", group: "none" },
+  /* ⚠️ §4 · THE GRID OPENS ON WHAT NEEDS YOU. The other three views keep their own
+     defaults: a list is read chronologically, a board is grouped by status, and a calendar is a
+     window on dates — attention ordering says nothing in any of them. */
+  grid: { sort: "attention", group: "none" },
   list: { sort: "date_newest", group: "none" },
   /* the board IS grouped by status — the control is disabled and states that value */
   board: { group: "status" },

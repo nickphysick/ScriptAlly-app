@@ -917,15 +917,22 @@ describe("§1 (toolbar v2) · an OPT-IN chassis, and a fourth caller that must n
     expect(page).not.toContain("needsTasks");
   });
 
-  it("Sort is five keys plus ONE footer control, and the labels flip for the name keys", () => {
+  it("Sort is six keys plus ONE footer control, and the labels name what each direction does", () => {
     const at = page.indexOf("const SORT_KEYS");
     const keys = [...page.slice(at, page.indexOf("SORT_IS_NAME", at)).matchAll(/key: "([^"]+)"/g)].map((m) => m[1]);
-    expect(keys).toEqual(["last_activity", "date_newest", "due_soonest", "agent_az", "agency_az"]);
-    expect(page).toContain('SORT_IS_NAME(sortKey) ? "A–Z" : "Newest"');
-    expect(page).toContain('SORT_IS_NAME(sortKey) ? "Z–A" : "Oldest"');
+    /* ⚠️ SIX SINCE §4 — `attention` leads, and it is the grid's default. */
+    expect(keys).toEqual(["attention", "last_activity", "date_newest", "due_soonest", "agent_az", "agency_az"]);
+/* ⚠️ THREE WORDINGS NOW, ONE STATE. "Newest" is nonsense over a register ladder — reversing
+       an attention sort gives the calm ones first, not older ones — so the segment names what the
+       direction does for the key in hand. The same law that made A–Z replace Newest for a surname. */
+    expect(page).toContain('["Needs me first", "Needs me last"]');
+    expect(page).toContain('["A–Z", "Z–A"]');
+    expect(page).toContain('["Newest", "Oldest"]');
     /* ⚠️ A KEY THE MENU OFFERS IS A KEY THE SORT CAN DO — `agency_az` came with its own case, or
        it would have fallen through and ordered by something else under an honest-looking label. */
     expect(page).toMatch(/case "agency_az": \{/);
+    /* the same guard for the new key: a key the menu offers is a key the sort can do */
+    expect(page).toMatch(/case "attention": \{/);
   });
 });
 

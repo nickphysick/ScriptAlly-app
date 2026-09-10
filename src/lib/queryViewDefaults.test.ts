@@ -5,7 +5,10 @@ const UNTOUCHED = { sort: false, group: false };
 
 describe("§3 · per-view defaults, and the writer's choice beating them", () => {
   it("each view's stated defaults are the brief's", () => {
-    expect(VIEW_DEFAULTS.grid).toEqual({ sort: "last_activity", group: "none" });
+    /* ⚠️ §4 · THE GRID OPENS ON ATTENTION. Retargeted, not rebaselined: the law is that each
+       view states its OWN default and the other three are unchanged, which the cases below still
+       assert one by one. */
+    expect(VIEW_DEFAULTS.grid).toEqual({ sort: "attention", group: "none" });
     expect(VIEW_DEFAULTS.list).toEqual({ sort: "date_newest", group: "none" });
     expect(VIEW_DEFAULTS.board).toEqual({ group: "status" });
     expect(VIEW_DEFAULTS.calendar).toEqual({ sort: "date_newest" });
@@ -22,7 +25,7 @@ describe("§3 · per-view defaults, and the writer's choice beating them", () =>
 
   it("branch A — untouched: the view's defaults apply", () => {
     expect(defaultsOnViewChange("list", UNTOUCHED)).toEqual({ sort: "date_newest", group: "none" });
-    expect(defaultsOnViewChange("grid", UNTOUCHED)).toEqual({ sort: "last_activity", group: "none" });
+    expect(defaultsOnViewChange("grid", UNTOUCHED)).toEqual({ sort: "attention", group: "none" });
   });
 
   it("branch B — touched: the writer's choice survives every switch", () => {
