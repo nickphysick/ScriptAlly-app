@@ -56,7 +56,14 @@ for (const w of [1280, 1440, 1920]) {
 
     /* ── the header starts at the board's left edge, and the rail is padded down by it ──── */
     expect(Math.abs(m.head!.x - m.board!.x), `header left ${m.head!.x} vs board left ${m.board!.x}`).toBeLessThanOrEqual(0.5);
-    expect(Math.abs((m.rail!.y - m.railcol!.y) - m.head!.h), "the rail is not padded down by the header's height").toBeLessThanOrEqual(0.5);
+    /* ⚠️ RETARGETED — THE LAW, NOT THE MECHANISM. This asserted that the rail's column was padded
+       down by the header's height, which was HOW the two tops were made to align when the header
+       lived inside the board's column. The grid has a first row now: the census sits in it beside
+       the header, and the rail's body starts at the board's top edge because they are both row 2.
+       The old assertion pinned a padding that no longer exists; the law it stood for is unchanged
+       and is what is asserted instead — and it is a stronger claim, because two boxes being the
+       same box cannot be satisfied by a number that happens to match. */
+    expect(Math.abs(m.railcol!.y - m.board!.y), `rail body top ${m.railcol!.y} vs board top ${m.board!.y}`).toBeLessThanOrEqual(1);
 
     /* ── the density pill sits at the board's bottom-right, 14px in ─────────────────────── */
     expect(Math.abs(m.board!.r - m.pill!.r - 14), `pill right inset ${(m.board!.r - m.pill!.r).toFixed(2)}`).toBeLessThanOrEqual(1);

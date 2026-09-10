@@ -6418,13 +6418,26 @@ export const Queries: React.FC<{
                  and the CSS is the stale half, left over from a card-rail variant that was locked
                  away. Bare rail; only the fields carry white. */
               <div className="qcc-cal">
+                {/* ⚠️ THE CENSUS IS THE FIRST THING IN THE RAIL, IN THE RAIL'S OWN COLUMN, ON THE
+                    RANGE'S BASELINE. It is not in the header row and not beside the range: the two
+                    sit in different columns of one grid and share a baseline, which is what lets
+                    the rail's body start at the board's top edge below it.
+
+                    ⚠️ AND THE COPY IS CONDITIONAL, because "Showing 26 of 26" is a sentence that
+                    states a filter nobody applied. Unfiltered it counts; narrowed it says what it
+                    is showing of what. */}
+                <div className="qcc-cal-railtop">
+                  <div className="qcc-cal-showing">
+                    {gridRows.length === mastheadScopedQueries.length
+                      ? <><b>{mastheadScopedQueries.length}</b> {mastheadScopedQueries.length === 1 ? "query" : "queries"}</>
+                      : <>Showing <b>{gridRows.length}</b> of <b>{mastheadScopedQueries.length}</b></>}
+                  </div>
+                </div>
+
                 <div className="qcc-cal-railcol">
                   {/* ⚠️ THE RAIL IS BARE — no card, no fill, no shadow. Only the three fields are
                       white, which is what makes them read as the touchable things on it. */}
                   <div className="qcc-cal-rail">
-                    <div className="qcc-cal-showing">
-                      Showing <b>{gridRows.length}</b> of <b>{mastheadScopedQueries.length}</b>
-                    </div>
                     <div className="qcc-cal-grp">Whose court</div>
                     {/* ⚠️ THE SAME FIVE TILES, DOWN INSTEAD OF ACROSS — `STAT_TILES` is the one
                         table, `quickTally`/`overdueTally` the one pair of counts, and the handlers
@@ -6455,11 +6468,11 @@ export const Queries: React.FC<{
                     <div className="f12-popwrap qcc-cal-field">
                       <span className="qcc-cal-lab">Filter</span>
                       <button
-                        type="button" ref={filterTrigRef} className="qcc-cal-ctrl"
+                        type="button" ref={filterTrigRef} className={`qcc-cal-ctrl${filterPopOpen ? " open" : ""}`}
                         aria-expanded={filterPopOpen}
                         onClick={() => { setSortPopOpen(false); setGroupPopOpen(false); setFilterPopOpen((o) => !o); }}
                       >
-                        {activeFilterCount > 0 ? `${activeFilterCount} applied` : "All"}
+                        <span className="qcc-cal-val">{activeFilterCount > 0 ? `${activeFilterCount} applied` : "All"}</span>
                         <span className="qcc-cal-chev" aria-hidden="true">▾</span>
                       </button>
                       {filterPopOpen && renderFilterPopover()}
@@ -6467,11 +6480,11 @@ export const Queries: React.FC<{
                     <div className="f12-popwrap qcc-cal-field">
                       <span className="qcc-cal-lab">Group</span>
                       <button
-                        type="button" ref={groupTrigRef} className="qcc-cal-ctrl"
+                        type="button" ref={groupTrigRef} className={`qcc-cal-ctrl${groupPopOpen ? " open" : ""}`}
                         aria-expanded={groupPopOpen}
                         onClick={() => { setFilterPopOpen(false); setSortPopOpen(false); setGroupPopOpen((o) => !o); }}
                       >
-                        {GRID_GROUPS.find((g) => g.key === gridGroup)?.label ?? "None"}
+                        <span className="qcc-cal-val">{GRID_GROUPS.find((g) => g.key === gridGroup)?.label ?? "None"}</span>
                         <span className="qcc-cal-chev" aria-hidden="true">▾</span>
                       </button>
                       {groupPopOpen && renderGroupPopover()}
@@ -6479,11 +6492,11 @@ export const Queries: React.FC<{
                     <div className="f12-popwrap qcc-cal-field">
                       <span className="qcc-cal-lab">Sort</span>
                       <button
-                        type="button" ref={sortTrigRef} className="qcc-cal-ctrl"
+                        type="button" ref={sortTrigRef} className={`qcc-cal-ctrl${sortPopOpen ? " open" : ""}`}
                         aria-expanded={sortPopOpen}
                         onClick={() => { setFilterPopOpen(false); setGroupPopOpen(false); setSortPopOpen((o) => !o); }}
                       >
-                        {GRID_SORTS.find((o) => o.key === sortKey)?.label ?? "Date sent"}
+                        <span className="qcc-cal-val">{GRID_SORTS.find((o) => o.key === sortKey)?.label ?? "Date sent"}</span>
                         <span className="qcc-cal-chev" aria-hidden="true">▾</span>
                       </button>
                       {sortPopOpen && renderSortPopover()}
@@ -6491,28 +6504,33 @@ export const Queries: React.FC<{
                   </div>
                 </div>
 
-                <div className="qcc-cal-boardcol">
-                  {/* ⚠️ THE HEADER ROW STARTS AT THE BOARD'S LEFT EDGE, NOT ABOVE THE RAIL — the
-                      rail's column is padded down by this row's height so the two tops align. */}
-                  <div className="qcc-calhead">
-                    <div className="qcc-calhead-l">
-                      <button type="button" className="tl-wchv" aria-label="Back one week"
-                        onClick={() => setCalWinStart((w) => shiftWindow(w, WEEK_STEP, -1))}>‹</button>
-                      <button type="button" className="tl-wchv" aria-label="Forward one week"
-                        onClick={() => setCalWinStart((w) => shiftWindow(w, WEEK_STEP, 1))}>›</button>
-                      <h3 className="qcc-calhead-rng">{calWindowLabel}</h3>
-                      {calMovedOff && (
-                        <button type="button" className="tl-todaylink" onClick={() => setCalWinStart(calToday)}>
-                          Today
-                        </button>
-                      )}
-                    </div>
-                    {searchField("qcc-calsearch")}
-                    <div className="qcc-calhead-r">
-                      <QueryViewSwitch view={gridView} onView={applyView} />
-                    </div>
+                {/* ⚠️ THE HEADER ROW STARTS AT THE BOARD'S LEFT EDGE, NOT ABOVE THE RAIL — the
+                    rail's column is padded down by this row's height so the two tops align. */}
+                <div className="qcc-calhead">
+                  <div className="qcc-calhead-l">
+                    <button type="button" className="tl-wchv" aria-label="Back one week"
+                      onClick={() => setCalWinStart((w) => shiftWindow(w, WEEK_STEP, -1))}>‹</button>
+                    <button type="button" className="tl-wchv" aria-label="Forward one week"
+                      onClick={() => setCalWinStart((w) => shiftWindow(w, WEEK_STEP, 1))}>›</button>
+                    <h3 className="qcc-calhead-rng">{calWindowLabel}</h3>
+                    {calMovedOff && (
+                      <button type="button" className="tl-todaylink" onClick={() => setCalWinStart(calToday)}>
+                        Today
+                      </button>
+                    )}
                   </div>
+                  {searchField("qcc-calsearch")}
+                  <div className="qcc-calhead-r">
+                    <QueryViewSwitch view={gridView} onView={applyView} />
+                  </div>
+                </div>
 
+                {/* ⚠️ THE HEADER ROW IS A DIRECT CHILD OF THE GRID, NOT OF THE BOARD COLUMN.
+                    It was nested one level deeper and its `grid-row: 1` therefore addressed
+                    nothing — a grid property on a grandchild is inert, silently — so the census
+                    sat alone in row 1 and the range stayed in row 2 with the board. Measured:
+                    58.6px apart at every width, where the two are meant to share a baseline. */}
+                <div className="qcc-cal-boardcol">
                   {/* ⚠️ `.tl-board` IS THE BOARD'S TOKEN SCOPE — about a hundred and fifty custom
                       properties. Mount the board without it and every `var()` resolves to nothing:
                       it renders, the build is clean, and it is unstyled. `data-dens` rides the same

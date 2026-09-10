@@ -17,7 +17,13 @@
   --qcc-calhead-h: 52px;
   /**
    * ⚠️ WHAT THIS PAGE PUTS ABOVE THE BOARD INSIDE THE SCROLLPORT — the masthead and the header row.
-   * MEASURED at 1440 on 10 Sep: the scrollport's top is 111 and the board's is 314, so 203.
+   * MEASURED 207.3 on 10 Sep, at 1280, 1710 and 2520 alike; 208 so the board never overshoots.
+   *
+   * ⚠️ IT WAS 203 UNTIL THE CENSUS MOVED, and the guard below is what caught it. Putting the census
+   * in a first grid row made the header content-driven rather than a fixed 52px — it measures 56.3
+   * now — so the board ran 4.3px past the scrollport's foot. That is precisely the drift this
+   * number was said to be vulnerable to, and the lock reported it rather than the board clipping in
+   * silence. Deriving it properly is its own prompt.
    *
    * ⚠️ AND IT IS A LITERAL THAT ANOTHER ELEMENT OWNS, WHICH THIS REPO OTHERWISE FORBIDS. The honest
    * form is `flex: 1` in a scroll row that is a flex column — the grid's `fill` mode — and opting
@@ -26,11 +32,43 @@
    * inside the scrollport and within 40px of its foot, so a masthead that changes height fails the
    * lock instead of silently clipping the board or leaving a band of dead ground beneath it.
    */
-  --qcc-cal-above: 203px;
+  --qcc-cal-above: 208px;
+  /* the bottom padding of BOTH row-1 cells, so the census and the range share a baseline */
+  --qcc-calrow-pad: 14px;
+  /**
+   * ⚠️ TWO ROWS NOW, AND THAT IS WHAT PUTS THE CENSUS ON THE RANGE'S BASELINE WITHOUT PUTTING IT
+   * IN THE HEADER ROW. Row 1 is the census (column 1) beside the header row (column 2); row 2 is
+   * the rail's body beside the board. Both row-1 cells are `align-self: end`, so their contents
+   * sit on one line while belonging to different columns — the census stays over the rail, the
+   * range stays over the board, and neither has to know the other's width.
+   */
   display: grid;
-  grid-template-columns: var(--qcc-railw) 1fr;
-  gap: 14px;
+  grid-template-columns: var(--qcc-railw) minmax(0, 1fr);
+  column-gap: 22px;
   align-items: start;
+}
+.qcc-cal > .qcc-cal-railtop,
+.qcc-cal > .qcc-calhead { align-self: end; }
+/* the board column carries the board alone now — the header is the grid's own child */
+
+/**
+ * ⚠️ ONE PADDING, READ BY BOTH CELLS — and this is a DEPARTURE FROM THE REF, which sets 17px here
+ * against the header's 14px.
+ *
+ * The ref's three pixels are an optical correction for two differently-composed rows. Measured in
+ * this app they are not a correction, they are a MISALIGNMENT: the census and the range are the
+ * same face at the same size, so their baselines sit at a fixed offset from their box bottoms, and
+ * two cells that end-align with different bottom padding put those baselines exactly that
+ * difference apart. Measured with the ref's values: 2.29px, against a gate of ±1px.
+ *
+ * So the two read ONE token. They cannot drift apart, and if the row's composition ever changes
+ * enough to need an optical correction, it is one value to change rather than two to remember.
+ */
+.qcc-cal-railtop {
+  grid-column: 1; grid-row: 1;
+  display: flex; align-items: flex-end;
+  padding: 0 0 var(--qcc-calrow-pad);
+  min-width: 0;
 }
 
 /**
@@ -39,17 +77,24 @@
  * board's pager and a search centred on the BOARD's width — so it starts at the board's left edge.
  * One number, read by both: the header sets the height, the rail pays it as padding.
  */
-.qcc-cal-railcol { padding-top: var(--qcc-calhead-h); min-width: 0; }
-.qcc-cal-boardcol { min-width: 0; display: flex; flex-direction: column; }
+/* ⚠️ NO PADDING-TOP ANY MORE — the grid's first row is what holds the rail's body down to the
+   board's top edge, so the two tops align by construction rather than by a number copied from the
+   header's height. That number was `--qcc-calhead-h` and it is retired with this. */
+.qcc-cal-railcol { grid-column: 1; grid-row: 2; min-width: 0; }
+.qcc-cal-boardcol { grid-column: 2; grid-row: 2; min-width: 0; display: flex; flex-direction: column; }
 
 /* ── the rail ─────────────────────────────────────────────────────────────────────────────── */
 /* bare: no fill, no radius, no shadow — only the fields below carry white */
-.qcc-cal-rail { display: block; }
+.qcc-cal-rail { display: block; padding-top: 2px; }
 
+/* ⚠️ THE SAME SIZE AS THE RANGE, which is what makes the two read as one line across the page
+   rather than as a caption beside a heading. Muted ink for the words, full ink for the numerals —
+   the figures are the sentence's content and the rest is grammar. */
 .qcc-cal-showing {
-  font-family: var(--font-serif); font-size: 13.5px; color: #6a5a50; padding: 6px 8px 2px;
+  font-family: var(--font-serif); font-weight: 400; font-size: 26px; line-height: 1.1;
+  color: #a29587; white-space: nowrap;
 }
-.qcc-cal-showing b { color: var(--ink, #1c130f); font-weight: 500; }
+.qcc-cal-showing b { font-weight: 600; color: #2a1f18; }
 
 .qcc-cal-grp {
   font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase;
@@ -79,19 +124,41 @@
 
 .qcc-cal-sep { height: 0.5px; background: var(--hairline, #ece0d2); margin: 8px 6px; }
 
-.qcc-cal-field { margin: 4px 6px 8px; }
+/**
+ * ⚠️ THE CAPTION STANDS OFF ITS FIELD — 6px of air, and 2px of optical indent so its first letter
+ * sits over the field's text rather than over the field's border. It read as part of the control
+ * when it was hard against it; a caption touching its field is a label nobody separates from the
+ * value.
+ */
+/**
+ * ⚠️ `display: block` IS AN OVERRIDE, NOT A DEFAULT, AND WITHOUT IT THE CAPTION NEVER LEAVES THE
+ * FIELD'S SIDE. This element is also `.f12-popwrap`, which the shell declares
+ * `display: flex; align-items: center` so a trigger and its popover can share an anchor. Under
+ * that, the caption and the field are flex siblings on ONE line: measured, the caption's bottom sat
+ * 25.13px BELOW the field's top, which is what "the label sits hard against the field" looks like
+ * from underneath. Six pixels of margin cannot move a flex item to the row above.
+ */
+.qcc-cal-field { display: block; margin: 0 0 14px; }
 .qcc-cal-lab {
-  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
-  color: #9c8878; margin-bottom: 5px; display: block;
+  display: block;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #9c8f82; margin: 0 0 6px 2px;
 }
 /* the one white thing on the rail */
+/* the field itself — full width, so the three read as one column of controls */
 .qcc-cal-ctrl {
-  display: flex; align-items: center; justify-content: space-between; width: 100%;
-  background: #fff; border: 1px solid #e0d5c8; border-radius: 9px; padding: 8px 11px;
-  font-family: var(--font-serif); font-size: 13.5px; color: var(--ink, #1c130f);
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  background: #fff; border: 1px solid #e6dfd6; border-radius: 10px; padding: 9px 12px;
+  font: inherit; font-size: 15px; color: #2a1f18;
   cursor: pointer; text-align: left;
 }
-.qcc-cal-chev { color: #7c3a2a; font-size: 9px; }
+/* ⚠️ THE VALUE TRUNCATES, THE CHEVRON DOES NOT. `min-width: 0` is what lets a flex child shrink
+   below its content — without it a long value pushes the chevron off the field's end. */
+.qcc-cal-val { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qcc-cal-chev { color: #a29587; font-size: 11px; flex: none; }
+/* ⚠️ THE TRIGGER SAYS ITS POPOVER IS OPEN. Without it the only thing on screen that knows is the
+   panel, and a reader who has scrolled past it has no way back to the control that opened it. */
+.qcc-cal-ctrl.open { border-color: #cdbfb1; box-shadow: 0 0 0 3px rgba(124, 58, 42, 0.07); }
 
 /* ── the header row, above the board only ─────────────────────────────────────────────────── */
 /**
@@ -113,14 +180,15 @@
  * reports that offset rather than asserting a centring that the arithmetic above forbids.
  */
 .qcc-calhead {
-  display: grid; grid-template-columns: auto minmax(0, 340px) auto; align-items: center; gap: 12px;
+  grid-column: 2; grid-row: 1;
+  display: grid; grid-template-columns: auto minmax(0, 340px) auto; align-items: end; gap: 22px;
   justify-content: space-between;
-  padding: 0 2px 12px; height: var(--qcc-calhead-h); box-sizing: border-box;
+  padding: 0 2px var(--qcc-calrow-pad); box-sizing: border-box;
 }
 .qcc-calhead-l { display: flex; align-items: center; gap: 10px; }
 .qcc-calhead-r { display: flex; align-items: center; justify-content: flex-end; min-width: 0; }
 .qcc-calhead-rng {
-  font-family: var(--font-serif); font-weight: 500; font-size: 19px;
+  font-family: var(--font-serif); font-weight: 500; font-size: 26px; line-height: 1.1;
   color: var(--ink, #1c130f); white-space: nowrap; margin: 0;
 }
 
