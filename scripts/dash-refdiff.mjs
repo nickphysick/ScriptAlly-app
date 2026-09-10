@@ -1700,7 +1700,11 @@ function table(result) {
     /* ⚠️ THE CLAUSES, NOT THE WHOLE OBJECT — a verdict printed raw is either a wall of JSON or,
        once its shape changes, an empty `{}` that reads as "nothing to report". The rail's line
        printed exactly that for one pass, because the table only knew the skeleton's shape. */
-    const brief = r.verdict && (r.verdict.rows
+    /* ⚠️ DISCRIMINATE ON A FIELD ONLY ONE OF THEM HAS. `rows` looked like the skeleton's marker
+       and BOTH verdicts carry one, so the rail took the skeleton's branch, read six fields it does
+       not have, and printed `{}` — a verdict that reads as "nothing to report" on a gate that had
+       nine clauses to report. `railDrift` belongs to the rail alone. */
+    const brief = r.verdict && (r.verdict.railDrift === undefined
       ? { worst: r.verdict.worst, tol: r.verdict.tolerance, widths: r.verdict.widths,
           caught: r.verdict.allCaught, removed: r.verdict.allRemoved,
           noLive: r.verdict.noLive, reducedMotionStill: r.verdict.rmStill, shimmer: r.verdict.animated }
