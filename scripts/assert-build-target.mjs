@@ -68,7 +68,23 @@ if (!hasIntended || hasForbidden) {
   console.error(`\n✖ BUILD TARGET MISMATCH for "${target}"`);
   console.error(`  intended projectId : ${intended}   ${hasIntended ? "(present ✓)" : "(MISSING ✗)"}`);
   console.error(`  forbidden projectId: ${forbidden}   ${hasForbidden ? "(PRESENT ✗ — wrong-project bundle!)" : "(absent ✓)"}`);
-  console.error(`  The built bundle does not cleanly target the ${target} project. Aborting before deploy.\n`);
+  console.error(`  The built bundle does not cleanly target the ${target} project. Aborting before deploy.`);
+  /**
+   * ⚠️ SHOW WHERE IT IS, BECAUSE THE ANSWER IS USUALLY A COMMENT (10 Sep). This repo's block
+   * comments SURVIVE MINIFICATION — esbuild preserves legal comments, and every source file here
+   * opens with one — so a project id written in PROSE lands in the bundle verbatim and fails this
+   * check on a bundle that is perfectly correct. Three files were doing it, the gate had been
+   * failing since at least `51910fc3`, and the message said only "wrong-project bundle!", which
+   * sends the reader looking at the config. Printing the context answers it in one line.
+   */
+  if (hasForbidden) {
+    const at = bundle.indexOf(forbidden);
+    const ctx = bundle.slice(Math.max(0, at - 160), at + 80).replace(/\s+/g, " ");
+    console.error(`\n  found at offset ${at}:`);
+    console.error(`    …${ctx}…`);
+    console.error(`  If that reads as PROSE, it is a comment: name the host by role instead of by id.`);
+  }
+  console.error("");
   process.exit(1);
 }
 

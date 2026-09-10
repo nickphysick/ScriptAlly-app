@@ -9,8 +9,21 @@
  * serve a single-page app behind a `** → /index.html` catch-all, so a request to an API path that
  * has no rewrite does not 404 — it returns **200 with `text/html`**. Measured on both:
  *
- *     GET https://scriptally-dev.web.app/api/waitlist → 200 text/html
- *     GET https://scriptally-app.web.app/api/waitlist → 200 text/html
+ *     GET <the dev host>/api/waitlist      → 200 text/html
+ *     GET <the prod app host>/api/waitlist → 200 text/html
+ *
+ * ⚠️ THE TWO HOSTS ARE NAMED BY ROLE, AND WRITING EITHER ID HERE BREAKS `npm run build:prod`.
+ * This repo's block comments SURVIVE MINIFICATION and reach the bundle verbatim;
+ * `scripts/assert-build-target.mjs` then reads the bundle for the OTHER project's id and aborts.
+ * So the dev host written out in this note failed the prod build on a bundle that was perfectly
+ * correct — and it failed identically at `51910fc3`, which means the house commit gate ("tsc +
+ * production build + full Vitest") had been unrunnable for at least that long. A gate people
+ * learn to step past is a gate that has been removed.
+ *
+ * ⚠️ AND IT IS THE WORDING, NOT THE COMMENT'S SHAPE. Splitting the `@license` header into its own
+ * block was tried first, on the reasoning that esbuild preserves legal comments and strips the
+ * rest; measured, the prose is emitted either way and the build still failed. Two lines of
+ * wording is the whole fix. The literal ids live in `.firebaserc`.
  *
  * `res.ok` is therefore `true` for a route that does not exist, and `res.json()` throws on
  * `<!doctype`. A client that trusted `res.ok` would tell a reader they were on the list because
