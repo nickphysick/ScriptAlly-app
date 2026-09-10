@@ -44,7 +44,7 @@ import { actionKindFor, type ActionKind, type ActionSubject, type ActionPrefill 
 import { stageSentence, type StageEnd } from "../../../lib/stageSentence";
 import { stageFor } from "../../../lib/queryCardFacts";
 import { shortCalDate } from "../../../lib/todoCalendar";
-import { pct, barLeft, barWidth, laneVar, Piece, Marker, ActionMark, type DrawnGroup } from "./boardParts";
+import { pct, pctOfRows, barLeft, barWidth, laneVar, Piece, Marker, ActionMark, type DrawnGroup } from "./boardParts";
 
 /** ⚠️ THE REF'S TWO GATES, IN DAYS — moved with the row that reads them. The ref states them as
     lane fractions; the standing rule is that a stage gate is a day count, never a lane fraction. */
@@ -643,8 +643,19 @@ data-rowkey={r.key}
                     the bars use, no measurement, and it scrolls with the rows by construction. */}
                 <div className="tl-rowsin">
                 {todayAt != null && (
+                  /* ⚠️ THE SAME DAY THE TICK USES, THROUGH THE SAME MAPPING. This read
+                     `todayAt` — `i + 0.5`, the day's MIDPOINT — while `dateLabelsOf` pushes the
+                     tick at `at: d`, the whole index, and `.tl-dt` centres itself on it with
+                     `translateX(-50%)`. One date, two x's, half a day apart: measured 3.13 / 4.55 /
+                     5.52 / 6.67 / 6.94px at the five widths against half-days of 3.62 / 5.04 /
+                     6.01 / 7.18 / 7.43 — the shortfall being this element's own 1px border pulled
+                     back 1px so the line straddles its date.
+                     The line adopts the TICK's day rather than the tick adopting the line's: the
+                     numerals run on a seven-day stride and moving them would shift every week
+                     marker on the ruler, which is the board's interior and not this pack's to
+                     redraw. */
                   <div className="tl-todayline" aria-hidden
-                    style={{ left: `${((todayAt / range.days) * 100).toFixed(4)}%` }} />
+                    style={{ left: pctOfRows(Math.floor(todayAt), range.days) }} />
                 )}
                 {board.length === 0 ? sparse : (
                   /* ══ SIX SECTIONS, EACH A CONTAINER (v60) ═══════════════════════════════════

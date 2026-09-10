@@ -71,7 +71,32 @@ export function crossAt(
   return { x: (lr.left - wr.left) + f * lr.width, label: label(ymd) };
 }
 
+/**
+ * ⚠️ ONE DATE→X MAPPING, AND IT IS THIS FRACTION. Everything on the board that stands on a date —
+ * a tick numeral, the today dot, the today line, a card's left edge, a card's width — converts the
+ * same way: the day index over the window's span. Two mappings is what this replaced, and the fault
+ * it produced is the reason to keep them together.
+ *
+ * ⚠️ TWO UNIT RENDERINGS, BECAUSE ONE ELEMENT SITS OUTSIDE THE LANE'S CONTAINER — and that is a
+ * constraint, not a second mapping. `.tl-c-tl` is the size container, so `100cqw` is the lane's
+ * width for anything INSIDE it. The today line is a child of `.tl-rowsin`, which is an ANCESTOR of
+ * the lanes rather than a descendant, so `cqw` there would find no container and silently resolve
+ * against the small viewport — a third origin, and a worse one. It takes `%` instead.
+ *
+ * ⚠️ THE TWO ARE EQUAL, AND IT IS MEASURED RATHER THAN ASSUMED: `.tl-rowsin` and a row's lane are
+ * the same box — x 551, width 1082 at 1710, `originDx: 0`. `qcCalToday.measure.ts` asserts the two
+ * renderings land on the same pixel, so the day they stop being one box the lock says so.
+ */
+export const dayFraction = (day: number, days = 90) => day / days;
+
+/** the lane's own children — `100cqw` is the lane's width at any depth inside it */
 export const pct = (n: number) => `calc(${n} / var(--tl-days) * 100cqw)`;
+
+/**
+ * `.tl-rowsin`'s children — the today line alone. Same mapping, expressed as a percentage of the
+ * box that element is actually positioned against.
+ */
+export const pctOfRows = (n: number, days: number) => `${(dayFraction(n, days) * 100).toFixed(4)}%`;
 
 /**
  * ⚠️ A CARD SPANS EXACTLY ITS OWN DATES — NO CLEARANCE AT EITHER END, AND THE REMOVAL IS THE
