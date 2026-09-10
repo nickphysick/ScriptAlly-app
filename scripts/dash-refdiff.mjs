@@ -1707,7 +1707,9 @@ function table(result) {
     const brief = r.verdict && (r.verdict.railDrift === undefined
       ? { worst: r.verdict.worst, tol: r.verdict.tolerance, widths: r.verdict.widths,
           caught: r.verdict.allCaught, removed: r.verdict.allRemoved,
-          noLive: r.verdict.noLive, reducedMotionStill: r.verdict.rmStill, shimmer: r.verdict.animated }
+          noLive: r.verdict.noLive, reducedMotionStill: r.verdict.rmStill, shimmer: r.verdict.animated,
+          tkCount: r.verdict.tkCountMatches, tkCols: r.verdict.tkColsMatch,
+          tkTile: r.verdict.tkTileMatches, tkContained: r.verdict.tkContained }
       : { flush: r.verdict.flush, width18: r.verdict.width18, belowCards: r.verdict.belowCards,
           inert: r.verdict.inert, columnBare: r.verdict.columnBare, railBare: r.verdict.railBare,
           spansColumn: r.verdict.spansColumn, railUnchanged: r.verdict.railUnchanged,
@@ -1738,7 +1740,7 @@ const PAGE_GATES = ["ground", "hScroll", "columnBottoms", "blendAncestorTransfor
    them separately is not bookkeeping: a failure has to say WHICH claim broke, and "railBoundary
    failed" over a nine-clause verdict is the object-Object failure message this harness already
    forbids. */
-const SPAWNED_GATES = ["plotRegion", "skeletonRegions", "skeletonEdges", "noLiveInColumn", "railBoundary", "columnBare"];
+const SPAWNED_GATES = ["plotRegion", "skeletonRegions", "skeletonEdges", "noLiveInColumn", "ticketFill", "railBoundary", "columnBare"];
 const GATE_ROSTER = [...STANDING.map((g) => g.k), ...PAGE_GATES, ...SPAWNED_GATES];
 
 /* ── run ─────────────────────────────────────────────────────────────────────────────────────── */
@@ -1997,6 +1999,14 @@ for (const [name, r, why, clause] of [
   ["noLiveInColumn", result.skeletonGate,
     "something in the content column is still readable or reachable while the ghost is up",
     (v) => v.noLive === true],
+  /* ⚠️ AND THE TICKET GRID GETS ITS OWN NAME FOR THE SAME REASON (v34). "The cover stops short and
+     leaves a void at the card's foot" is a reported symptom too, and it has four independent
+     causes — the count, the column count, the tile height and containment — any of which alone
+     produces it. A failure line naming which is worth more than a truth value inside a verdict
+     about regions, and the regions all lined up to 0.3px while the grid was three columns wrong. */
+  ["ticketFill", result.skeletonGate,
+    "the ghost's ticket grid is not the shape the loaded card will be — count, columns, tile height or containment",
+    (v) => v.tkCountMatches && v.tkColsMatch && v.tkTileMatches && v.tkContained],
   ["railBoundary", result.railGate,
     "the rail's own treatment moved, or the dashboard's scrim leaked onto another page",
     (v) => v.flush && v.width18 && v.belowCards && v.inert && v.railBare && v.spansColumn
