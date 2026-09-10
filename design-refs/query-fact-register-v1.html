@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Fact line with a register</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#1c130f;--body-ink:#3a1c14;--label:#9c8878;--burgundy:#7c3a2a;--sage-accent:#8a9e88;--hairline:#ece0d2;--field-border:#e0d5c8;--pink:#f5e2da;--pink-border:#e8c8bc;
+    --sand:#f7efe3;--sage:#e0e5dd;--pinkS:#f5e6df;--offer:#d7e0e8;--closed:#e4e1db;--sand-d:#e7d9bd;--sage-d:#c7d0c2;--pink-d:#e8c9bb;--offer-d:#c9d6e1}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ground);font-family:'Inter',sans-serif;color:var(--body-ink);font-size:13px;padding:22px 26px 90px}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+  h1{font-family:'Playfair Display',serif;font-weight:500;font-size:24px;color:var(--ink)}
+  .lede{font-family:'Playfair Display',serif;font-style:italic;font-size:13.5px;color:#6a5a50;margin:5px 0 10px;max-width:960px;line-height:1.5}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--field-border);border-radius:10px;padding:3px;margin-bottom:8px}
+  .seg button{border:none;background:transparent;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#6a5a50;padding:7px 12px;border-radius:7px}
+  .seg button.on{background:var(--pink);color:var(--body-ink)}
+  .desc{color:#6a5a50;max-width:960px;line-height:1.55;margin:6px 0 14px;min-height:56px}
+  .desc b{font-weight:500;color:var(--body-ink)}
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 22px rgba(58,28,20,.09);transition:transform .18s,box-shadow .18s}
+  .card:hover{transform:translateY(-2px);box-shadow:0 2px 4px rgba(58,28,20,.06),0 14px 32px rgba(58,28,20,.13)}
+  .band{display:flex;align-items:center;gap:9px;padding:11px 16px;border-bottom:.5px solid rgba(0,0,0,.06)}
+  .band .w{font-family:'Playfair Display',serif;font-size:14.5px;color:var(--ink)}
+  .band .r{margin-left:auto;color:#6a5a50}
+  .dot{width:20px;height:20px;border-radius:50%;border:1.4px solid var(--burgundy);background:#f5e2da;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:var(--burgundy);flex:none}
+  .dot.in{border-color:var(--sage-accent);background:#e2e7e0;color:#4c6249}
+  .dot.g{border-color:#b8aa9a;background:transparent;color:#b8aa9a}
+  .dot.o{border-color:var(--burgundy);background:var(--burgundy);color:#fdfaf5}
+  .cb{padding:15px 16px 13px}
+  .who{display:flex;align-items:center;gap:12px}
+  .chip{width:40px;height:40px;border-radius:50%;background:var(--parchment);box-shadow:0 1px 2px rgba(58,28,20,.08),0 2px 6px rgba(58,28,20,.10);border:.5px solid #e6dccf;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10.5px;flex:none}
+  .nm{font-family:'Playfair Display',serif;font-weight:500;font-size:17px;color:var(--ink)}
+  .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:12px;color:#6a5a50;margin-top:2px}
+  .leaf{margin-left:auto;width:38px;border-radius:7px;background:#fff;border:.5px solid #dccfc0;text-align:center;overflow:hidden;flex:none}
+  .leaf .mo{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;text-transform:uppercase;padding:3px 0 2px;border-bottom:.5px solid rgba(0,0,0,.08)}
+  .leaf .dy{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink);line-height:1;padding:4px 0 3px}
+  .leaf .cap{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);padding-bottom:3px}
+  .fact{margin-top:13px;padding-top:11px;border-top:.5px solid var(--hairline);display:flex;align-items:flex-start;gap:9px}
+  .fact .txt{flex:1;min-width:0}
+  .fact .s{font-size:12.5px;line-height:1.45}
+  .fact .m{color:var(--label);margin-top:5px}
+  .mk{width:16px;height:16px;border-radius:50%;border:1.4px solid var(--ink);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none;margin-top:1px;color:var(--ink)}
+  .mats{display:inline-flex;gap:4px;align-self:flex-end}.mats i{width:18px;height:18px;border-radius:5px;border:.5px solid #e6dccf;background:var(--parchment);display:inline-block}.mats i.off{opacity:.28}
+
+  .rc{display:none}
+  /* ===== register systems ===== */
+  /* A · Weight & warmth: calm = muted italic; attention = ink, medium; your move = ink + pink wash on the verb */
+  .rA .fact.calm .s{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:#7a6a5c}
+  .rA .fact.calm .m{color:#b0a090}
+  .rA .fact.late .s{font-weight:500;color:var(--ink)}
+  .rA .fact.late .s b{background:linear-gradient(transparent 55%,var(--pinkS) 55%)}
+  .rA .fact.you .s{font-weight:500;color:var(--ink)}
+  .rA .fact.you .s b{background:linear-gradient(transparent 55%,var(--pink-d) 55%)}
+  .rA .fact.offer .s{font-family:'Playfair Display',serif;font-size:14px;color:var(--ink)}
+  .rA .fact.offer .s b{font-weight:600}
+  .rA .fact.closed .s{color:#8a7a6c}.rA .fact.closed .m{color:#c0b0a0}
+  /* B · Highlighter: the key phrase gets a marker in the state tint; calm has none */
+  .rB .fact .s{font-size:12.5px;color:var(--body-ink)}
+  .rB .fact.calm .s{color:#6a5a50}
+  .rB .fact.late .s b{background:var(--sand);border-radius:4px;padding:1px 5px;margin:0 -2px;color:var(--ink);font-weight:500;box-shadow:inset 0 0 0 1px var(--sand-d)}
+  .rB .fact.you .s b{background:var(--pinkS);border-radius:4px;padding:1px 5px;margin:0 -2px;color:var(--ink);font-weight:500;box-shadow:inset 0 0 0 1px var(--pink-d)}
+  .rB .fact.offer .s b{background:var(--offer);border-radius:4px;padding:1px 5px;margin:0 -2px;color:var(--ink);font-weight:500;box-shadow:inset 0 0 0 1px var(--offer-d)}
+  .rB .fact.closed .s{color:#8a7a6c}
+  /* C · Register chip: a small leading chip states the register in words */
+  .rC .fact{align-items:flex-start}
+  .rC .rc{display:inline-flex!important;align-items:center;gap:5px;border-radius:99px;padding:3px 9px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;flex:none;margin-top:1px}
+  .rC .calm .rc{background:var(--parchment);border:.5px solid var(--hairline);color:#8a7a6c}
+  .rC .late .rc{background:#fff;border:1.2px solid var(--ink);color:var(--ink)}
+  .rC .you .rc{background:var(--pinkS);border:.5px solid var(--pink-d);color:var(--body-ink)}
+  .rC .offer .rc{background:var(--offer);border:.5px solid var(--offer-d);color:var(--body-ink)}
+  .rC .closed .rc{background:var(--closed);border:.5px solid #d0c9c0;color:#6a5a50}
+  .rC .fact.calm .s{color:#6a5a50}
+  .rC .fact.late .s,.rC .fact.you .s,.rC .fact.offer .s{color:var(--ink);font-weight:500}
+  .rC .mk{display:none}
+  .rec{margin-top:22px;max-width:960px;line-height:1.6;color:#4a3a30}
+  .rec b{font-weight:500;color:var(--body-ink)}
+</style>
+</head>
+<body>
+<h1>The fact line, with a register</h1>
+<div class="lede">Same six cards, Notion styling, no well. Three ways to let the sentence carry tone — calm when nothing is asked of you, louder when something is — without a verdict word or a red anywhere.</div>
+<div class="seg" id="seg"><button class="on" data-r="rA">A · Weight & warmth</button><button data-r="rB">B · Highlighter</button><button data-r="rC">C · Register chip</button></div>
+<div class="desc" id="desc"></div>
+<div class="grid rA" id="grid"></div>
+
+<div class="rec">
+  <p><b>The registers, and what each is allowed to do.</b> Five: <i>calm</i> (with the agent, in window), <i>late</i> (with the agent, past the window), <i>your move</i> (with you), <i>offer</i>, <i>closed</i>. The rule that keeps this honest is that the sentence stays a fact in every register — "Reply was expected by 10 Sep — 1 day past" is louder than "Reply expected by 23 Sep" because of <b>how it's set</b>, not because a word was added. No "overdue", no red, no exclamations beyond the ring you already have.</p>
+  <p style="margin-top:8px"><b>My pick: A, weight and warmth.</b> Calm queries set their sentence in muted Playfair italic — it reads like a note in a margin, the eye passes over it. Anything that wants you goes to Inter medium in ink, and the phrase that matters — the days past, "not yet sent" — takes a marker underline in the state's tint: sand-pink for late, the deeper pink for your move. Offer goes Playfair at reading size, because an offer deserves the good typeface. Closed fades. Six cards on a wall now sort themselves by tone before you read a word, and nothing on the card is a colour it wasn't already.</p>
+  <p style="margin-top:8px"><b>B</b> is the same idea with a marker-pen block behind the phrase rather than an underline — clearer at a glance, a touch loud at 26 cards. <b>C</b> states the register in words on a chip (Waiting · Past expected · Your move · Offer · Closed); it's the most explicit, but it adds a fourth element to the fact line and it repeats the turn caption in the band.</p>
+</div>
+
+<script>
+const R=[
+ ["Queried","sand","→","","Harriet Vane-Coe","Stillwater Reps","Aug","12","calm","Reply expected by <b>23 Sep</b>","12 days away · Nudge agent in 4 weeks","With the agent","Waiting",0],
+ ["Queried","sand","→","","Eleanor Whitfield","Greenfield Literary","Aug","13","late","Reply was expected by 10 Sep — <b>1 day past</b>","4 weeks waiting · nudge available","With the agent","Past expected",1],
+ ["Partial Requested","pinkS","←","in","Jonathan Marsh","The Marsh Agency","Aug","22","you","Partial — <b>not yet sent</b>","19 days since request","With you","Your move",1],
+ ["Full Requested","pinkS","←","in","Greg Panetta","No agency","Aug","18","you","Full — <b>not yet sent</b>","23 days since request","With you","Your move",1],
+ ["Offer","offer","✓","o","Tom Ellery","Curtis Vane","Aug","29","offer","<b>Awaiting your decision</b>","12 days since offer","Offer","Offer",0],
+ ["Closed","closed","×","g","Marcus Reed","Hartley &amp; Co","Apr","20","closed","Pass after full","replied after 11 weeks","Closed","Closed",0]];
+const ini=n=>n.replace(/&amp;/g,'&').split(/[\s-]+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+document.getElementById("grid").innerHTML=R.map(([s,c,g,dc,n,a,mo,dy,reg,f,m,turn,chipTxt,mk])=>`<div class="card">
+  <div class="band" style="background:var(--${c})"><span class="dot ${dc}">${g}</span><span class="w">${s}</span><span class="r mono">${turn}</span></div>
+  <div class="cb"><div class="who"><span class="chip">${ini(n)}</span><span style="min-width:0"><div class="nm">${n}</div><div class="ag">${a}</div></span><span class="leaf"><div class="mo" style="background:var(--${c})">${mo}</div><div class="dy">${dy}</div><div class="cap">sent</div></span></div>
+  <div class="fact ${reg}"><span class="rc">${chipTxt}</span>${mk?'<span class="mk">!</span>':''}<span class="txt"><div class="s">${f}</div><div class="m mono">${m}</div></span><span class="mats"><i></i><i></i><i></i><i class="off"></i></span></div></div></div>`).join("");
+const D={rA:"<b>A · Weight & warmth.</b> Calm = muted Playfair italic. Late = Inter medium in ink with a sand-pink marker under the days-past phrase, plus the ring. Your move = the same in the deeper pink. Offer = Playfair at reading size. Closed = faded. No new element.",
+ rB:"<b>B · Highlighter.</b> The key phrase sits on a marker block in the state tint — sand for late, pink for your move, slate for offer — with a hairline inset. Calm and closed carry no marker. Clearer at a glance; louder across a wall.",
+ rC:"<b>C · Register chip.</b> A leading chip names the register: Waiting · Past expected · Your move · Offer · Closed, styled by state. The ring goes; the chip does its job. Most explicit; one more element per card."};
+document.getElementById("desc").innerHTML=D.rA;
+document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#seg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");document.getElementById("grid").className="grid "+b.dataset.r;document.getElementById("desc").innerHTML=D[b.dataset.r];});
+</script>
+</body>
+</html>

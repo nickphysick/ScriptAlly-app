@@ -52,6 +52,10 @@
     "design-refs/query-calendar-rail-v3-locked.html": "1b4657ca32061d9fe5bbeb39b88cf5d80831413c87eadc50b57928122bfb776d",
     "design-refs/dashboard-cappuccino-v33.html": "83ba574d093301a0dd0ad2bba7a56825ccd175da85c931a71f6564d1e21a5ce0",
     "design-refs/qc-calendar-ref-v1.html": "c931cb90944c850c505b5d83952aa8b28be22c552b537c0954f8257004706b94",
-    "design-refs/todo-three-views-contract.html": "6114fc83eebf5abdf6a05412f93678b27dfe4903aa9cd20548dd1212b233fb4e"
+    "design-refs/todo-three-views-contract.html": "6114fc83eebf5abdf6a05412f93678b27dfe4903aa9cd20548dd1212b233fb4e",
+    "design-refs/query-grid-ground-v1.html": "cfe1db9a31d4e51a1a25f474aaec74c0d3eaf73a389c89457ec2f81eb947d45c",
+    "design-refs/query-fact-register-v1.html": "377277f3dd8c1ffb04b05bea44b1ec2250b0f59c0a5cf2b9a132796b33d0ed9c",
+    "design-refs/query-verbs-copy-v2-locked.html": "570f90fe6b51b541fef66e2c28c9a4de9b969360f2f592ab9fe24910a681f80a",
+    "design-refs/query-grid-enhancements-v1.html": "4f1e8948c481323a90289fc7ac59f1996f22df2152b6ee7be18fa3394dbfff24"
   }
 }
