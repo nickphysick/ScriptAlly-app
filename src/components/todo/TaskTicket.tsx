@@ -24,6 +24,7 @@ import "./taskTicket.css";
 import "./urgentMotion.css";
 import { BoardCard } from "../../lib/todoBoard";
 import { StatusDot } from "../StatusDot";
+import { getStatusLabel } from "../StatusPill";
 import { taskCategory, CATEGORY_TAG, CATEGORY_FAMILY } from "../../lib/todoCategory";
 import type { TicketFacts } from "../../lib/ticketFacts";
 
@@ -94,9 +95,15 @@ export const TaskTicket: React.FC<{
             <>
               <span className="av" aria-hidden>{card.initials}</span>
               <span className="n">{card.who}</span>
+              {/* ⚠️ THE DOT AND ITS WORD (three-views round, Phase 1). The ticket drew the dot
+                  alone, so the card's own status was legible only to a reader who already knew the
+                  glyph vocabulary — 12px of mark against the contract's 93px of dot-and-word. The
+                  word comes from `getStatusLabel`, which is what the Query Centre's pill reads, so
+                  a ticket and that pill cannot come to call one status two things. */}
               {card.status && (
                 <span className="qs">
                   <StatusDot status={card.status} overrideSize={11} />
+                  {getStatusLabel(card.status)}
                 </span>
               )}
             </>

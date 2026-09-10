@@ -3462,7 +3462,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                  three inches from the first, free to drift on the next retone. A card with no
                  query (a note, a housekeeping item) has no state and takes the closed step. */
               edge={c.status ? STATE_TOKEN[stateFor(c.status)] : STATE_TOKEN.closed}
-              manuscript={c.msTitle}
+              /* ⚠️ THE MANUSCRIPT IS A DISAMBIGUATOR, SO IT IS ABSENT WHERE THERE IS NOTHING TO
+                 DISAMBIGUATE (three-views round, Phase 1). On a one-book account every ticket
+                 carried the same title, which is a column of noise saying nothing. The rule is
+                 `showsManuscriptColumn`, the same predicate the list's own column already reads —
+                 not a second test of the same thing. */
+              {...(showsManuscriptColumn(manuscripts.length) ? { manuscript: c.msTitle } : {})}
               selected={docked.card?.key === c.key}
               urgent={isUrgentCard(c, inp.days)}
               facts={ticketFacts(c, {
