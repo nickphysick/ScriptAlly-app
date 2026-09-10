@@ -313,7 +313,6 @@ export const OneScreenChart: React.FC<{
      * paints below `y(0)`, which is a standing gate.
      */
     const zero = curves[0].map(() => 0);
-    curves[curves.length - 1] = curves[curves.length - 1].map((v) => v + 1.5); // PLANT
     const polyTop = (c: number[]) =>
       c.map((v, k) => (k ? "L" : "M") + sx(k).toFixed(2) + " " + chartY(v, H, lo, hi).toFixed(2)).join("");
     const polyBot = (c: number[]) =>
