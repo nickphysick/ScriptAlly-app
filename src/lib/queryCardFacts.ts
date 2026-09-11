@@ -219,8 +219,8 @@ const spanWords = (n: number): string => {
 /** Whole days between two instants, rounded — the ref's `days()`. */
 const daysBetween = (fromMs: number, toMs: number): number => Math.round((toMs - fromMs) / DAY);
 
-/** `12 Aug`. */
-const shortDate = (d: Date): string => `${d.getDate()} ${MON[d.getMonth()]}`;
+/** `12 Aug`. Exported for the empty grid's line (Grid pass §6), so its date reads as the cards'. */
+export const shortDate = (d: Date): string => `${d.getDate()} ${MON[d.getMonth()]}`;
 
 /* ── whose court ─────────────────────────────────────────────────────────────────────────────── */
 

@@ -23,7 +23,9 @@ const watch = async (page: any) => {
         s[k] += 1;
         if (s[k] === 1) s.log.push(`${k}@${Date.now() - t0}ms`);
       };
-      mark("firstRun", /first query starts here|No queries yet/i.test(txt));
+      /* the first-query card's words since the Grid pass (§6); the retired welcome's stay listed so a
+         resurrection of either still counts as the flash */
+      mark("firstRun", /first query goes here|first query starts here|No queries yet/i.test(txt));
       mark("skeleton", !!document.querySelector(".qc-skel"));
       mark("rows", !!document.querySelector(".f12-row:not(.qc-skel-row)"));
       mark("unselected", !!document.querySelector(".qc-unsel"));
@@ -85,7 +87,7 @@ const watchLife = (page: any) => page.addInitScript(() => {
     const sk = !!document.querySelector(".qc-skel");
     if (sk && !L.on) L.on = Date.now() - t0;
     if (!sk && L.on && !L.off) L.off = Date.now() - t0;
-    if (!L.firstRun && /first query starts here|No queries yet/i.test(document.body?.textContent || "")) L.firstRun = Date.now() - t0;
+    if (!L.firstRun && /first query goes here|first query starts here|No queries yet/i.test(document.body?.textContent || "")) L.firstRun = Date.now() - t0;
     if (!L.unselAt && document.querySelector(".qc-unsel")) L.unselAt = Date.now() - t0;
     if (!L.selAt && document.querySelector(".f12-row[aria-selected=true]")) L.selAt = Date.now() - t0;
   };

@@ -20,6 +20,7 @@ import "./queryCentreGrid.css";
 import { QueryCard } from "./QueryCard";
 import { measureFlip, playFlip, clearFlip, type FlipRects } from "../../lib/flip";
 import { compareGroupLabels, groupLabelFor, groupAccentClass, type GroupKey, type GridRow } from "../../lib/queryCentreGrid";
+import { queryVerbs } from "../../lib/queryRowFacts";
 import type { CardFacts } from "../../lib/queryCardFacts";
 import type { QueryStatus } from "../../types";
 
@@ -49,7 +50,14 @@ export const QueryCentreGrid: React.FC<{
   group: GroupKey;
   selectedId?: string | null;
   onOpen?: (id: string) => void;
-}> = ({ rows, ghost, freshId = null, group, selectedId, onOpen }) => {
+  /**
+   * §5 (Grid pass) — the band verbs. The page hands the grid THE SAME two functions it hands the
+   * list, so a verb cannot open one thing from a row and another from a card. Without them the
+   * cards draw no verb row at all.
+   */
+  onVerb?: (id: string, verb: "primary" | "snooze" | "closed", anchor: HTMLElement) => void;
+  onMore?: (id: string, anchor: HTMLElement) => void;
+}> = ({ rows, ghost, freshId = null, group, selectedId, onOpen, onVerb, onMore }) => {
   const stageRef = useRef<HTMLDivElement>(null);
   /**
    * ⚠️ RECTS ARE CAPTURED AFTER EACH COMMIT, NEVER DURING RENDER. `measureFlip` writes to the DOM
@@ -107,6 +115,10 @@ export const QueryCentreGrid: React.FC<{
       fresh={freshId === r.id}
       selected={selectedId === r.id}
       onOpen={onOpen}
+      /* availability is `queryVerbs`', from the card's own turn — the list's table, not a second one */
+      verbs={onVerb ? queryVerbs(r.facts.turn) : null}
+      onVerb={onVerb}
+      onMore={onMore}
     />
   );
 

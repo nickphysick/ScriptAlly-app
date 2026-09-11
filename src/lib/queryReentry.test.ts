@@ -82,7 +82,14 @@ describe("a first-run draft actually renders", () => {
     /* ⚠️ THE CONDITION, NOT ITS POSITION IN THE CHAIN. This pinned the opening brace too, so §3
        putting the load skeleton AHEAD of the empty branch turned it red — a change that leaves the
        claim ("the empty branch yields to create mode") exactly as true. */
-    expect(queries).toContain("queries.length === 0 && !creating ? (");
+    /* ⚠️ RETARGETED 11 Sep (Grid pass §6): the condition moved into `gridEmptyKind`, which decides
+       both empty states at once. Asserted in both halves, because either alone passes on a page that
+       stopped honouring it — the page must branch on the selector AND hand it `creating`, and the
+       selector must yield to create mode when there are no queries. */
+    expect(queries).toContain('emptyKind === "first" ? (');
+    expect(queries).toMatch(/gridEmptyKind\(\{[\s\S]{0,200}\bcreating,/);
+    const sel = read("./queryGridEmpty.ts");
+    expect(sel).toContain('if (i.total === 0) return i.creating ? null : "first";');
   });
 
   it("an empty list during a first-run draft isn't blamed on filters", () => {

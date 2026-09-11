@@ -46,7 +46,10 @@
   --band-b: var(--state-closed);
 
   /**
-   * ⚠️ A COLUMN FLEX, NOT A BLOCK — AND THE REASON IS THAT THIS CARD IS A `<button>`.
+   * ⚠️ A COLUMN FLEX, NOT A BLOCK — AND THE REASON WAS THAT THIS CARD WAS A `<button>`. It has been a
+   * `<div>` since the Grid pass (§5): the band holds buttons now, and a button may not contain one.
+   * The column flex stays — it is still the true statement of this layout — and what follows is the
+   * history of why it was first written.
    *
    * A button CENTRES its content whenever it is taller than that content, whatever its `display`
    * says: the UA gives its anonymous content box its own alignment, and `display: block` does not
@@ -100,7 +103,23 @@
   will-change: transform;
 }
 .qcc:hover { box-shadow: 0 2px 4px rgba(58, 28, 20, 0.06), 0 14px 32px rgba(58, 28, 20, 0.13); }
-.qcc:focus-visible { outline: 2px solid var(--sage, #8a9e88); outline-offset: 2px; }
+/**
+ * §5 (Grid pass) — THE CARD'S ONE OPEN CONTROL, first in the card so that Tab reaches the verbs
+ * next. It covers the card so its focus ring IS the card's ring — the ring the root drew when the
+ * root was the button — and it takes no pointer: a click lands on the card itself and opens it by
+ * bubbling, so hover still reaches everything underneath, the materials tip included.
+ */
+.qcc-open {
+  position: absolute;
+  inset: -0.5px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  pointer-events: none;
+}
+.qcc-open:focus-visible { outline: 2px solid var(--sage, #8a9e88); outline-offset: 2px; }
 /* Selected adds a ring; it never adds a fill. A filled card would compete with the band. */
 .qcc--sel {
   /* the ring is the edge when selected — the hairline takes its colour so there is one line, not
@@ -137,6 +156,8 @@
 
 /* ── the band ───────────────────────────────────────────────────────────────────────────────── */
 .qcc-band {
+  /* §5 — the verb row's containing block: the row is placed against the band, never the card */
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -164,13 +185,85 @@
 }
 .qcc-turn { margin-left: auto; color: #6a5a50; font-family: var(--font-mono); font-size: 9px;
   /* .13em — the ref's, measured at 1.17px against 0.9px here. */
-  letter-spacing: 0.13em; text-transform: uppercase; line-height: 1.3; }
+  letter-spacing: 0.13em; text-transform: uppercase; line-height: 1.3;
+  /* §5 — it fades as the verb row arrives in its place */
+  transition: opacity 0.12s; }
+
+/* ── the band's verbs (Grid pass §5; ref `query-verbs-copy-v2-locked.html`, verbs 4) ────────── */
+/**
+ * ⚠️ THE ROW TAKES NO HEIGHT FROM THE BAND. It is placed absolutely against it, centred on its
+ * middle, 10px off its right edge as the ref draws it — so the band is exactly as tall hovered as at
+ * rest, and the row cannot reach the fact line below. Both are measured on the page
+ * (`qcGridPass.measure.ts`), because a stylesheet can only say what it asked for.
+ *
+ * ⚠️ AND IT STANDS WHERE THE TURN CAPTION STOOD. The caption fades as the row arrives: both answer
+ * "what now", and one of them saying it at a time is the design. Focus reveals it as hover does, so
+ * the keyboard reaches what the pointer reaches.
+ */
+.qcc:hover .qcc-turn,
+.qcc:focus-within .qcc-turn { opacity: 0; }
+.qcc-verbs {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s;
+}
+.qcc:hover .qcc-verbs,
+.qcc:focus-within .qcc-verbs { opacity: 1; pointer-events: auto; }
+/* the 26px squares — the ref's v4 values; the hover is the list's (`.qlv-ib`), the same verb */
+.qcc-vb {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #e0d5c8;
+  border-radius: 7px;
+  background: #fff;
+  color: #a08a78;
+  font: inherit;
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+}
+.qcc-vb:hover { background: #f6efe6; color: #3a1c14; }
+.qcc-vb:focus-visible { outline: 2px solid var(--sage, #8a9e88); outline-offset: 2px; }
+/* the primary — the app's one near-black fill, carrying its name in mono capitals */
+.qcc-vb--p,
+.qcc-vb--p:hover {
+  width: auto;
+  padding: 0 11px;
+  border-color: var(--btn-ink, #1c130f);
+  background: var(--btn-ink, #1c130f);
+  color: #fdfaf5;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+/* `Reopen` — drawn and greyed, the list's `.qlv-pri--off` treatment: a slot that states the verb
+   will exist, not an empty space claiming a closed query has no primary */
+.qcc-vb--off,
+.qcc-vb--off:hover { border-color: #e0d5c8; background: #f1ece4; color: #b0a293; cursor: default; }
+@media (prefers-reduced-motion: reduce) {
+  .qcc-turn,
+  .qcc-verbs { transition: none; }
+}
 
 /* ── the body ───────────────────────────────────────────────────────────────────────────────── */
 /**
  * ⚠️ EVERY BOX IN THIS CARD DECLARES ITS OWN `display`, AND THE REASON IS THE ROOT ELEMENT.
  *
- * The card is a `<button>`, which may not contain block content, so every part of it is authored
+ * The card was a `<button>` (a `<div>` since Grid pass §5), which may not contain block content, so every part of it is authored
  * as a `<span>` — and a span's initial `display` is `inline`. The ref uses `<div>`s and gets block
  * for free; this file has to say so. Measured on the deployed build before the fix: the name and
  * agency shared one line (8px apart, not 27), the leaf's day rendered ABOVE its month (−15px), and

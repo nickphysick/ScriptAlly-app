@@ -5,9 +5,10 @@
  * Queries Hub v4 · PHASE 3 locks — the reading pane's three states (ref empty-states-ref.html,
  * option 1 for the zero-state).
  *
- * The distinction that matters: a page with NO queries gets the ghost preview (here is what this
- * becomes); a page whose FILTERS emptied the view does not (the page isn't empty, the view is) —
- * it gets a quiet note and a way back. Confusing the two is the classic empty-state mistake.
+ * The distinction that matters: a page with NO queries gets one card (the first-query card since
+ * the Grid pass, §6 — the ghost preview it replaced is retired); a page whose FILTERS emptied the
+ * view gets another (the page isn't empty, the view is). Confusing the two is the classic
+ * empty-state mistake, and the choice between them is `gridEmptyKind`'s, locked in its own suite.
  */
 import { describe, it, expect } from "vitest";
 import { sliceBetween } from "../test/sliceBetween";
@@ -16,29 +17,31 @@ import { readFileSync } from "fs";
 const queries = readFileSync(new URL("../components/Queries.tsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../components/shell/f12.css", import.meta.url), "utf8");
 
-describe("zero queries → ghost preview behind a welcome card", () => {
-  it("renders the skeleton of the REAL anatomy: a hero and three columns", () => {
-    expect(queries).toContain("qc-ghost");
-    expect(queries).toContain("qc-ghost-hero");
-    expect(queries).toContain("qc-ghost-cols");
+/**
+ * ⚠️ RETARGETED 11 Sep (Grid pass §6). The ghost preview and the welcome card over it are REPLACED
+ * by the ref's first-query card, as the brief asks. Their locks are not repointed at the new card —
+ * a lock aimed at a different subject is a lock inventing a claim — so the anatomy locks become the
+ * statement that the anatomy is gone, and the two claims that outlive it stay: one primary that
+ * enters create mode, and the routes that survived the last swap survive this one.
+ */
+describe("zero queries → the first-query card (the ghost preview is retired)", () => {
+  const code = queries.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  it("the ghost preview is gone from the page and its rules from the sheet, not hidden", () => {
+    expect(code).not.toMatch(/["\s`]qc-ghost["\s`]/);
+    expect(code).not.toContain("qc-welcome");
+    expect(css).not.toMatch(/(?:^|\n)\.qc-ghost \{/);
+    expect(css).not.toMatch(/(?:^|\n)\.qc-welcome \{/);
   });
 
-  it("the ghost is inert — faded, and it can never take a click", () => {
-    const ghost = css.slice(css.indexOf(".qc-ghost {"), css.indexOf("}", css.indexOf(".qc-ghost {")));
-    expect(ghost).toContain("pointer-events: none");
-    expect(ghost).toContain("opacity: 0.38");
-    expect(queries, "the ghost must also be hidden from assistive tech").toContain('className="qc-ghost" aria-hidden="true"');
-  });
-
-  it("the welcome card carries the ref's copy and ONE primary, which enters create mode", () => {
-    expect(queries).toContain("Your first query starts here");
-    expect(queries).toContain("Log your first query");
-    expect(queries).toContain('className="f12-btn-pri" onClick={() => openCreate()}');
+  it("the card's ONE primary enters create mode", () => {
+    expect(code).toContain('<QueryEmptyCard kind="first" logRef={logTriggerRef} onLog={() => openCreate()}');
   });
 
   it("the old welcome pane's routes survive as quiet alternatives, not deletions", () => {
-    expect(queries).toContain("Import a spreadsheet");
-    expect(queries).toContain("ScriptAlly-pipeline-import-template.xlsx");
+    expect(code).toContain('onImport={() => onNavigate?.("import")}');
+    const card = readFileSync(new URL("../components/queries/QueryEmptyCard.tsx", import.meta.url), "utf8");
+    expect(card).toContain("ScriptAlly-pipeline-import-template.xlsx");
   });
 });
 

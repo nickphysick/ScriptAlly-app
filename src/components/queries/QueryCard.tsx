@@ -6,7 +6,8 @@
  *
  * ⚠️ IT IS PURE AND IT DERIVES NOTHING. Every word on it arrives as `facts` from `cardFacts`; this
  * file decides where things sit and never what they say. A card that computed its own elapsed
- * figure would be a second derivation of the one thing the panel behind it also states.
+ * figure would be a second derivation of the one thing the panel behind it also states. The verbs
+ * follow the same rule: which ones a card offers arrives as `verbs`, from `queryVerbs`.
  *
  * ⚠️ THE DOT IS `StatusDot` AND NOTHING ELSE. `design-refs/query-centre.html` draws its own inline
  * SVG circles because a standalone mockup has no component to import — they are stand-ins, not a
@@ -15,12 +16,13 @@
  * ⚠️ NO BURGUNDY. Not in the band, not in the marker, not on hover. On this page burgundy belongs
  * to `StatusDot` and the Form 11 chrome; anything else wearing it reads as a control.
  */
-import React from "react";
+import React, { useRef } from "react";
 import "./queryCard.css";
 import { StatusDot } from "../StatusDot";
 import type { QueryStatus } from "../../types";
 import { MATERIAL_ROW_NAMES, type MaterialKind } from "../../lib/agentMaterials";
 import { MATERIAL_SLOTS, REGISTER_LABEL, sentenceText, type CardFacts } from "../../lib/queryCardFacts";
+import type { QueryVerbs } from "../../lib/queryRowFacts";
 
 /* ── the four marks ─────────────────────────────────────────────────────────────────────────── */
 /* Line-drawn at 1.8, matching the ref. `currentColor` so the faded state is one opacity rule
@@ -60,6 +62,25 @@ export const Mark: React.FC<{ kind: MaterialKind }> = ({ kind }) => (
   </svg>
 );
 
+/** §5 (Grid pass) — the snooze verb's bell: the page's own line-drawn bell, at the marks' weight. */
+const BELL = (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" />
+  </svg>
+);
+
+export type CardVerb = "primary" | "snooze" | "closed";
+
 export interface QueryCardProps {
   id: string;
   status: QueryStatus;
@@ -78,6 +99,14 @@ export interface QueryCardProps {
   ghost?: boolean;
   /** §3 (log-sheet) — one pulse as the saved card takes the ghost's place. Presentation only. */
   fresh?: boolean;
+  /**
+   * §5 (Grid pass) — THE BAND'S VERBS. Which verbs, from `queryVerbs`; the card only places them.
+   * No `verbs` or no `onVerb` means no verb row at all: the ghost has none, and a host with nowhere
+   * to send a press must not draw controls that do nothing.
+   */
+  verbs?: QueryVerbs | null;
+  onVerb?: (id: string, verb: CardVerb, anchor: HTMLElement) => void;
+  onMore?: (id: string, anchor: HTMLElement) => void;
 }
 
 export const QueryCard: React.FC<QueryCardProps> = ({
@@ -91,7 +120,13 @@ export const QueryCard: React.FC<QueryCardProps> = ({
   entering = false,
   onOpen,
   ghost = false, fresh = false,
+  verbs = null,
+  onVerb,
+  onMore,
 }) => {
+  /* the card's one open control — where Escape in the verb row hands focus back to */
+  const openRef = useRef<HTMLButtonElement>(null);
+
   const cls = [
     "qcc",
     /* ⚠️ THE STAGE, NOT THE TURN. The band is the tint ladder's rung — eight of them — while the
@@ -105,12 +140,76 @@ export const QueryCard: React.FC<QueryCardProps> = ({
     .filter(Boolean)
     .join(" ");
 
+  /**
+   * §5 (Grid pass) — THE VERB ROW, INSIDE THE BAND. Placed absolutely against the band, so it
+   * takes no height from it, and at the band's right — where the turn caption stood, which fades
+   * as the row arrives. The band is its containing block, which is why it cannot reach the fact
+   * line; both are measured on the page rather than argued here.
+   *
+   * ⚠️ ESCAPE HANDS FOCUS BACK TO THE CARD, AND STOPS THERE. Leaving the row is this row's
+   * business; a keypress that also closed whatever else was listening would do two things at once.
+   */
+  const verbRow =
+    !ghost && verbs && onVerb ? (
+      <span
+        className="qcc-verbs"
+        role="group"
+        aria-label={`Actions for ${name}`}
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          if (e.key !== "Escape") return;
+          e.preventDefault();
+          e.stopPropagation();
+          openRef.current?.focus();
+        }}
+      >
+        <button
+          type="button"
+          className={`qcc-vb qcc-vb--p${verbs.primary.enabled ? "" : " qcc-vb--off"}`}
+          disabled={!verbs.primary.enabled}
+          title={verbs.primary.enabled ? undefined : "Reopening a closed query is not built yet"}
+          onClick={(e) => onVerb(id, "primary", e.currentTarget)}
+        >
+          {verbs.primary.label}
+        </button>
+        {verbs.nudge && (
+          <button
+            type="button"
+            className="qcc-vb"
+            aria-label="Snooze the nudge"
+            onClick={(e) => onVerb(id, "snooze", e.currentTarget)}
+          >
+            {BELL}
+          </button>
+        )}
+        {verbs.markClosed && (
+          <button
+            type="button"
+            className="qcc-vb"
+            aria-label="Mark closed"
+            onClick={(e) => onVerb(id, "closed", e.currentTarget)}
+          >
+            ×
+          </button>
+        )}
+        <button
+          type="button"
+          className="qcc-vb"
+          aria-label={`More actions for ${name}`}
+          onClick={(e) => onMore?.(id, e.currentTarget)}
+        >
+          ⋯
+        </button>
+      </span>
+    ) : null;
+
   const body = (
     <>
       <span className="qcc-band">
         <StatusDot status={status} overrideSize={24} />
         <span className="qcc-word">{status}</span>
         <span className="qcc-turn">{facts.turnWord}</span>
+        {verbRow}
       </span>
 
       <span className="qcc-body">
@@ -190,17 +289,22 @@ export const QueryCard: React.FC<QueryCardProps> = ({
     );
   }
 
+  /**
+   * ⚠️ A CONTAINER, NOT A CONTROL, SINCE §5 OF THE GRID PASS. The band holds buttons now, and a
+   * button may not contain another — so the card's open action is `.qcc-open`, its FIRST child:
+   * first, so that Tab from the card reaches this card's verbs next. It carries the card's whole
+   * name. A click anywhere else on the card reaches the handler below by bubbling; the verb row
+   * stops its own clicks, so pressing a verb never opens the card underneath it.
+   */
   return (
-    <button
-      type="button"
-      className={cls}
-      data-qcc-id={id}
-      data-qcc-turn={facts.turn}
-      /* The whole card is one control, so its name is the whole card: who, and where it stands. */
-      aria-label={`${name}, ${agency} — ${status}. ${sentenceText(facts.sentence)}`}
-      onClick={() => onOpen?.(id)}
-    >
+    <div className={cls} data-qcc-id={id} data-qcc-turn={facts.turn} onClick={() => onOpen?.(id)}>
+      <button
+        ref={openRef}
+        type="button"
+        className="qcc-open"
+        aria-label={`${name}, ${agency} — ${status}. ${sentenceText(facts.sentence)}`}
+      />
       {body}
-    </button>
+    </div>
   );
 };

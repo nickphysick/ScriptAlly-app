@@ -660,8 +660,14 @@ describe("v14 §2–§4 · one predicate, one history, one ground", () => {
     expect(lcss).toMatch(/\.qlv-acts \{[^}]*grid-template-columns: 132px 30px 30px 30px/);
     expect(list).toContain('style={v.nudge ? undefined : { visibility: "hidden" }}');
     expect(list).toContain('style={v.markClosed ? undefined : { visibility: "hidden" }}');
-    /* a row action opens the DRAWER first — the desk needs its host and the ghost needs a rail */
-    expect(page).toContain("setSelectedQueryId(id);\n                  onOpenQuery?.(id);");
+    /* a row action opens the DRAWER first — the desk needs its host and the ghost needs a rail.
+       ⚠️ RETARGETED 11 Sep (Grid pass §5): the row's handler is the page's shared `handleRowVerb`
+       now, so the claim is asserted as ORDER inside it rather than as two lines at one indentation. */
+    const verb = sliceBetween(page, "const handleRowVerb = (", "const handleRowMore = (");
+    const drawer = verb.indexOf("setSelectedQueryId(id);");
+    expect(drawer, "the handler no longer selects the row").toBeGreaterThan(-1);
+    expect(verb.indexOf("onOpenQuery?.(id);"), "the handler no longer opens the drawer").toBeGreaterThan(drawer);
+    expect(verb.indexOf("openDeskVerb("), "the desk opens before its host").toBeGreaterThan(verb.indexOf("onOpenQuery?.(id);"));
   });
 
   it("⚠️ §3 · the top bar carries NO verbs — navigation only", () => {
@@ -1015,7 +1021,11 @@ describe("§4 (quick actions) · no drawer, no desk, no selection — and one co
    * red on a correct file.
    */
   it("the quick pair returns BEFORE anything that opens a drawer, a desk or a selection", () => {
-    const body = sliceBetween(page, "onVerb={(id, verb, anchor) => {", "sortKey={sortKey}");
+    /* ⚠️ RETARGETED 11 Sep (Grid pass §5): the list's inline closure became `handleRowVerb`, the ONE
+       handler both views mount. The claim is unchanged — the quick pair returns before anything
+       opens — and is asserted on that function; that both views mount it is asserted below. */
+    const body = sliceBetween(page, "const handleRowVerb = (", "const handleRowMore = (");
+    expect((page.match(/onVerb=\{handleRowVerb\}/g) ?? []).length, "a view stopped mounting the shared handler").toBe(2);
     const guard = body.indexOf('if (verb === "snooze" || verb === "closed")');
     const ret = body.indexOf("return;", guard);
     expect(guard, "the quick pair is no longer intercepted").toBeGreaterThan(-1);
@@ -1321,8 +1331,11 @@ describe("the well round · a recess, a toolbar in its head, bones, and one entr
   /* §4 — the bones */
   it("the skeleton is mounted BEFORE the empty state, and there is no spinner", () => {
     const sk = page.indexOf("showGridSkeleton ? (");
-    const none = page.indexOf("gridRows.length === 0 ? (");
+    /* ⚠️ RETARGETED 11 Sep (Grid pass §6): the empty state is the selector's now — the filtered card
+       first, then the no-match line — and it must still come after the skeleton. */
+    const none = page.indexOf('emptyKind === "filtered" ? (');
     expect(sk, "the live views have no skeleton branch").toBeGreaterThan(-1);
+    expect(none, "the view slot's empty state is missing").toBeGreaterThan(-1);
     expect(sk, "'Nothing matches' answers the load again").toBeLessThan(none);
     expect(page, "a spinner appeared").not.toMatch(/role="status"/);
     /* it rides the shared timing lib rather than a third model */

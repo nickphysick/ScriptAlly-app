@@ -40,9 +40,14 @@ describe("the list → detail push", () => {
     expect(css).toContain(".f12-root .f12-body .f12-pane { transition: none; }");
   });
 
-  it("the empty state opts out of the pusher and stacks", () => {
-    expect(hub).toContain('className="f12-body f12-body-empty"');
-    expect(css).toContain(".f12-root .f12-body.f12-body-empty { position: static;");
+  /* ⚠️ RETARGETED 11 Sep (Grid pass §6). The empty state is no longer an F12 split — it is one card
+     in the page's own view frame, outside the list/pane body — so there is no pusher for it to opt
+     out of. The claim this guarded, that a first-run writer's only CTA can never hide behind a push,
+     now holds by construction; it is asserted as the absence of the split and of its rules. */
+  it("the empty state is not inside the pusher at all", () => {
+    expect(hub).not.toContain("f12-body-empty");
+    expect(css).not.toContain("f12-body-empty");
+    expect(hub).toContain('<QueryEmptyCard kind="first"');
   });
 });
 

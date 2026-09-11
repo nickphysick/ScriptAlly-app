@@ -66,6 +66,8 @@ import { agentLabel, agentAgencyLine, agentPrimary, agentSecondary, agentInitial
 import { QueryCentreGrid, type GridCard } from "./queries/QueryCentreGrid";
 import { QueryStatTiles } from "./queries/QueryStatTiles";
 import { QueryListView } from "./queries/QueryListView";
+import { QueryEmptyCard } from "./queries/QueryEmptyCard";
+import { gridEmptyKind, waitingSummary, waitingLine } from "../lib/queryGridEmpty";
 import { QueryBoardView } from "./queries/QueryBoardView";
 import { QueryViewSwitch, type QueryView } from "./queries/QueryViewSwitch";
 /* ══ THE CALENDAR VIEW (Run C) — the SAME board To-do draws ═══════════════════════════════════
@@ -1666,6 +1668,35 @@ export const Queries: React.FC<{
     quickTrigRef.current = anchor;
     setQuick((cur) => (cur && cur.kind === kind && cur.queryId === queryId ? null : { kind, queryId }));
   };
+  /**
+   * §5 (Grid pass) — ONE HANDLER FOR BOTH VIEWS' VERBS. This was the list row's inline closure; the
+   * grid's band verbs call the same function now, so a verb cannot come to open one thing from a
+   * row and another from a card. It carries the list's two rules unchanged:
+   *
+   * ⚠️ SNOOZE AND CLOSE OPEN NOTHING — no drawer, no desk, no route change, and NO CHANGE OF
+   * SELECTION (§4, correcting v14 §2). They are one decision each. The rule below still holds for
+   * the composing verbs, and the two are separated here rather than inside the desk, because the
+   * cheapest way to break this is to let the quick pair fall through to the lines beneath.
+   *
+   * ⚠️ THE DESK NEEDS ITS HOST, AND THE GHOST RUNG NEEDS A RAIL (v14 §2). A COMPOSING action
+   * therefore opens the DRAWER on that query first and the desk second — the desk is anchored
+   * beside the drawer and its proposed rung is drawn on the drawer's timeline, so firing the verb
+   * without the drawer would put a card beside nothing and a preview nowhere.
+   */
+  const handleRowVerb = (id: string, verb: "primary" | "snooze" | "closed", anchor: HTMLElement) => {
+    if (verb === "snooze" || verb === "closed") {
+      openQuick(verb === "snooze" ? "snooze" : "close", id, anchor);
+      return;
+    }
+    setSelectedQueryId(id);
+    onOpenQuery?.(id);
+    const q = queries.find((x) => x.id === id);
+    const t = q ? turnFor(q.status as QueryStatus) : "sand";
+    if (t === "offer") { if (q) openRecord(q as Query); return; }
+    openDeskVerb(t === "you" ? "marksent" : "respond", anchor);
+  };
+  /** ⋯ — the drawer on that query, from either view. */
+  const handleRowMore = (id: string, anchor: HTMLElement) => { setSelectedQueryId(id); onOpenQuery?.(id); void anchor; };
   const quickQuery = quick ? queries.find((q) => q.id === quick.queryId) ?? null : null;
 
   // Close every ribbon popover/modal whenever the reader moves to a different query.
@@ -3518,6 +3549,38 @@ export const Queries: React.FC<{
       facts,
     };
   })();
+
+  /**
+   * §6 (Grid pass) — WHICH EMPTY STATE, decided once for both of its slots: the empty-database
+   * branch and the view slot. The summary is taken over `mastheadScopedQueries` — the set the tiles
+   * count — and never over the filtered view, which is the thing that has just come to zero.
+   */
+  const ghostShowing = !!ghostRow && gridView === "grid";
+  const emptyWaiting = gridRows.length === 0 && queries.length > 0
+    ? waitingSummary(mastheadScopedQueries.map((q) => {
+        const ag = agents.find((a) => a.id === q.agentId);
+        return cardFacts(q as Query, new Date(), { agencyWeeks: ag?.responseTimeWeeks, agentName: agentPrimary(ag) });
+      }))
+    : null;
+  const emptyKind = gridEmptyKind({
+    total: queries.length,
+    visible: gridRows.length,
+    needsYou: emptyWaiting?.needsYou ?? 0,
+    creating,
+    ghost: ghostShowing,
+  });
+  /**
+   * "See what's waiting" — the With-the-agent tile, exactly as pressing the tile sets it, with the
+   * other narrowing lifted so the view shows the queries the line just counted. The manuscript
+   * scope stays: it is the set the count was taken over.
+   */
+  const seeWaiting = () => {
+    setStatusSel([]);
+    setGridFilters(emptyGridFilters());
+    setNeedsOverdue(false);
+    setListSearch("");
+    setQuickKey("agent");
+  };
 
   /**
    * §1 (log-sheet) — THE READ-BACK SENTENCE, built where the draft lives. Playfair prose stating
@@ -5528,7 +5591,7 @@ export const Queries: React.FC<{
              *                   page, not on the column"; the call disagreed with the note.
              *
              *   `Log query`   → DROPPED. It rendered only in the empty branch, where
-             *                   `.qc-welcome` already draws `Log your first query` calling the same
+             *                   the first-query card draws `+ Log your first query`, calling the same
              *                   `openCreate()`. One control, two seats, one screen.
              *
              * ⚠️ AND THE JOURNEY CASE DISSOLVES WITH THEM. The band emptied its actions on
@@ -5539,9 +5602,10 @@ export const Queries: React.FC<{
           }
         >
 
-        {/* `&& !creating`: create mode lives in the populated branch, so without this a
-            first-run "Log your first query" set a draft that NOTHING rendered — the CTA read as
-            dead. Found during the re-entry work; see the report. */}
+        {/* `creating` still decides it, now inside `gridEmptyKind`: create mode lives in the
+            populated branch, so a first-run "Log your first query" that left this branch mounted
+            set a draft that NOTHING rendered — the CTA read as dead. Found during the re-entry
+            work; see the report. */}
         {/**
           * §3 — ⚠️ THE SKELETON GOES AHEAD OF THE EMPTY-DATABASE BRANCH, because that branch is what
           * currently renders during the load. `queries` is `[]` until the first snapshot arrives, so
@@ -5554,70 +5618,19 @@ export const Queries: React.FC<{
           * grace so a fast load never flashes the skeleton — a second mechanism here would be a
           * second answer to one question.
           */}
-        {showSkeleton ? <QueryCentreSkeleton head={listHead} /> : queries.length === 0 && !creating ? (
-          /* ── Empty database — F12 shell: a list pane with a "No queries yet" placeholder
-             (Export disabled) beside the welcome pane (Smart Import + manual add). ── */
-          <>
-          {/* Empty split — list placeholder + welcome pane in the centred column. f12-body-empty
-              opts OUT of the mobile pusher: at <md the two panes stack instead (the welcome pane
-              must never hide behind a push that has nothing to push to). */}
-          <div data-qc-fade={fadeIn ? "in" : undefined} className="f12-body f12-body-empty" style={{ paddingTop: "var(--gut)" }}>
-
-            {/* List pane — search + centred placeholder + disabled CSV foot */}
-            <div className="f12-list">
-              <div className="f12-lsearch">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-                <input type="text" placeholder="Search queries…" value={listSearch} onChange={(e) => setListSearch(e.target.value)} aria-label="Search queries" />
-              </div>
-              <div className="f12-rows" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 24, gap: 8 }}>
-                <span style={{ color: "var(--faint)", display: "flex" }}>
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
-                </span>
-                <span style={{ fontFamily: "var(--f12-serif)", fontWeight: 600, fontSize: 15, color: "var(--ink)" }}>No queries yet</span>
-                <span style={{ fontSize: 12, lineHeight: 1.5, color: "var(--muted)", maxWidth: 200 }}>Your queries will appear here once you log or import them.</span>
-              </div>
-              <div className="f12-lfoot">
-                <span><b>SHOWING 0 OF 0</b></span>
-                <span style={{ opacity: 0.5 }}>EXPORT CSV</span>
-              </div>
-            </div>
-
-            {/* Welcome pane — centred onboarding */}
-            {/* GHOST PREVIEW zero-state (v4 P3; ref empty-states-ref.html, option 1) — a faded,
-                non-interactive skeleton of the real anatomy (hero + three columns) behind a centred
-                welcome card, so the CTA lands with context: you can see what the page becomes.
-                The two secondary routes (Smart Import, the import template) are kept as quiet links
-                rather than dropped with the old welcome pane. */}
-            <div className="f12-pane f12-detail" style={{ position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-              <div className="qc-ghost" aria-hidden="true">
-                <div className="qc-ghost-hero"><span className="qc-ghost-av" /><span className="qc-ghost-line" /></div>
-                <div className="qc-ghost-cols">
-                  {[60, 70, 50].map((w, i) => (
-                    <div className="qc-ghost-col" key={i}>
-                      <div className="qc-ghost-band" />
-                      <div className="qc-ghost-ln" />
-                      <div className="qc-ghost-ln" style={{ width: `${w}%` }} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="qc-welcome">
-                <h3>Your first query starts here</h3>
-                <p>Track every submission — who has it, what you sent, and when to follow up.</p>
-                <button ref={logTriggerRef} type="button" className="f12-btn-pri" onClick={() => openCreate()}>
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
-                  Log your first query
-                </button>
-                <div className="qc-welcome-alt">
-                  <button type="button" onClick={() => onNavigate?.("import")}>Import a spreadsheet</button>
-                  <span aria-hidden="true">·</span>
-                  <a href="/ScriptAlly-pipeline-import-template.xlsx" download>Download the template</a>
-                </div>
-              </div>
-            </div>
+        {showSkeleton ? <QueryCentreSkeleton head={listHead} /> : emptyKind === "first" ? (
+          /**
+           * §6 (Grid pass) — THE FIRST-QUERY CARD, AND NOTHING ELSE ON THE PAGE. The ref's
+           * section-4 card replaces the split this branch used to draw (a placeholder list beside a
+           * ghost of the pane, behind a welcome card). It sits in the view's own frame — the box the
+           * grid and the filtered card sit in — so the two empty moments land in one place.
+           *
+           * ⚠️ NO TILES AND NO TOOLBAR ABOVE IT, DELIBERATELY. Five zeros and a Filter over nothing
+           * are controls with nothing to act on; the masthead above still names the page.
+           */
+          <div data-qc-fade={fadeIn ? "in" : undefined} className="qcc-plain">
+            <QueryEmptyCard kind="first" logRef={logTriggerRef} onLog={() => openCreate()} onImport={() => onNavigate?.("import")} />
           </div>
-          </>
         ) : (
         <>
 
@@ -6382,10 +6395,26 @@ export const Queries: React.FC<{
               */}
             {showGridSkeleton ? (
               <QueryGridSkeleton view={gridView} out={gridSkeletonOut} />
-            ) : gridRows.length === 0 ? (
-              /* ⚠️ THIS IS THE NO-MATCH STATE, NOT THE NO-QUERIES STATE. The page's own empty
-                 branch already owns the latter; saying "nothing matches" to someone who has never
-                 logged a query would be the worst lie this page could tell. */
+            ) : emptyKind === "filtered" ? (
+              /**
+               * §6 (Grid pass) — FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER. The ref's
+               * card, and only where its headline is true: `gridEmptyKind` returns this only when no
+               * query in the set the tiles count sits in a register that needs the writer. Its line
+               * is built from the facts the cards themselves state, over that same set, so its
+               * number IS the With-the-agent tile's.
+               */
+              <QueryEmptyCard
+                kind="filtered"
+                line={emptyWaiting ? waitingLine(emptyWaiting) : null}
+                onSeeWaiting={emptyWaiting && emptyWaiting.withAgents > 0 ? seeWaiting : null}
+                onClear={resetAllFilters}
+              />
+            ) : emptyKind === "nomatch" ? (
+              /* ⚠️ THIS IS THE NO-MATCH STATE, NOT THE NO-QUERIES STATE — and since §6 of the Grid
+                 pass it is also what shows wherever "Nothing needs you right now" would be false: a
+                 view filtered to zero while a query waits on the writer. The page's own empty branch
+                 owns the no-queries case; saying "nothing matches" to someone who has never logged a
+                 query would be the worst lie this page could tell. */
               <p className="qcc-none">
                 Nothing matches.
                 <button type="button" className="qcc-none-btn" onClick={resetAllFilters}>
@@ -6401,38 +6430,13 @@ export const Queries: React.FC<{
                 group={gridGroup}
                 since={listSince}
                 sentLeaf={listSentLeaf}
-                onVerb={(id, verb, anchor) => {
-                  /**
-                   * ⚠️ SNOOZE AND CLOSE OPEN NOTHING — no drawer, no desk, no route change, and
-                   * NO CHANGE OF SELECTION (§4, correcting v14 §2). They are one decision each.
-                   * The rule below still holds for the composing verbs, and the two are separated
-                   * here rather than inside the desk, because the cheapest way to break this is
-                   * to let the quick pair fall through to the lines beneath.
-                   */
-                  if (verb === "snooze" || verb === "closed") {
-                    openQuick(verb === "snooze" ? "snooze" : "close", id, anchor);
-                    return;
-                  }
-                  /**
-                   * ⚠️ THE DESK NEEDS ITS HOST, AND THE GHOST RUNG NEEDS A RAIL (v14 §2). A
-                   * COMPOSING action therefore opens the DRAWER on that row first and the desk
-                   * second — the desk is anchored beside the drawer and its proposed rung is
-                   * drawn on the drawer's timeline, so firing the verb without the drawer would
-                   * put a card beside nothing and a preview nowhere.
-                   */
-                  setSelectedQueryId(id);
-                  onOpenQuery?.(id);
-                  const q = queries.find((x) => x.id === id);
-                  const t = q ? turnFor(q.status as QueryStatus) : "sand";
-                  if (t === "offer") { if (q) openRecord(q as Query); return; }
-                  openDeskVerb(t === "you" ? "marksent" : "respond", anchor);
-                }}
+                onVerb={handleRowVerb}
                 sortKey={sortKey}
                 sortDesc={sortDesc}
                 selectedId={selectedQueryId}
                 onSort={(k) => { touchedControls.current.sort = true; if (k === sortKey) setSortDesc((d) => !d); else { setSortKey(k); setSortDesc(false); } }}
                 onOpen={(id) => onOpenQuery?.(id)}
-                onMore={(id, anchor) => { setSelectedQueryId(id); onOpenQuery?.(id); void anchor; }}
+                onMore={handleRowMore}
               />
             ) : gridView === "board" ? (
               <div className="qcc-boardwrap">
@@ -6639,6 +6643,8 @@ export const Queries: React.FC<{
                 group={gridGroup}
                 onOpen={(id) => onOpenQuery?.(id)}
                 selectedId={selectedQueryId}
+                onVerb={handleRowVerb}
+                onMore={handleRowMore}
               />
             )}
 

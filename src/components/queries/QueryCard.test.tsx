@@ -56,7 +56,8 @@ describe("⚠️ the dot is StatusDot — never a recreation", () => {
   it("imports the canonical component and draws no circle of its own", () => {
     expect(decls(tsx)).toMatch(/import \{[^}]*\bStatusDot\b[^}]*\} from "\.\.\/StatusDot"/);
     /* The ref draws inline SVG circles because a standalone mockup has nothing to import. The four
-       material marks are the only SVG this file may contain, and none of them is a circle. */
+       material marks and the snooze verb's bell (Grid pass §5) are the only SVG this file may
+       contain, and none of them is a circle. */
     expect(decls(tsx)).not.toContain("<circle");
     expect(decls(tsx)).not.toContain("borderRadius: \"50%\"");
   });
@@ -244,11 +245,17 @@ describe("⚠️ the ghost is inert and silent", () => {
     expect(html).not.toContain("<button");
   });
 
-  it("a real card IS a button, and names itself", () => {
+  /* ⚠️ RETARGETED 11 Sep (Grid pass §5). The card carries buttons of its own now, and a button may
+     not contain another, so the ROOT stopped being the control. The claim survives in the form that
+     matters: exactly ONE open control, first in the card, carrying the card's whole name. */
+  it("a real card has exactly one open control, first, and it names the card", () => {
     const { html, facts } = render({});
-    expect(html.startsWith("<button")).toBe(true);
-    expect(html).toContain("Harriet Vane-Coe, Stillwater Reps");
-    expect(html).toContain(sentenceText(facts.sentence));
+    expect(html.startsWith("<div")).toBe(true);
+    const opens = html.match(/<button[^>]*class="qcc-open"[^>]*>/g) ?? [];
+    expect(opens, "the card has no open control, or two").toHaveLength(1);
+    expect(html.indexOf("<button"), "the open control is not the card's first").toBe(html.indexOf(opens[0]));
+    expect(opens[0]).toContain("Harriet Vane-Coe, Stillwater Reps");
+    expect(opens[0]).toContain(sentenceText(facts.sentence));
   });
 });
 

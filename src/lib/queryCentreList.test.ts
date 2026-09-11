@@ -68,9 +68,12 @@ describe("the head reuses To-do's values, it does not approximate them", () => {
 });
 
 describe("the list is de-carded", () => {
-  it("it is no longer a .f12-pane in either branch", () => {
+  /* ⚠️ RETARGETED 11 Sep (Grid pass §6): the empty-database branch no longer draws a list column —
+     it is the ref's first-query card now, with no placeholder list beside it — so ONE branch renders
+     `.f12-list` where two did. The claim is unchanged: wherever the list is drawn, it is not a card. */
+  it("it is no longer a .f12-pane in the branch that draws it", () => {
     expect(queries, "the list is still carded").not.toContain('className="f12-pane f12-list"');
-    expect(queries.match(/className="f12-list"/g)?.length ?? 0).toBe(2);
+    expect(queries.match(/className="f12-list"/g)?.length ?? 0).toBe(1);
   });
 
   /**
