@@ -11,4 +11,4 @@
  * that draws the PIXEL comparison would eventually diff a new app against an old mockup and report
  * the difference as the app's.
  */
-export const REF_REL = "design-refs/dashboard-cappuccino-v33.html";
+export const REF_REL = "design-refs/dashboard-cappuccino-v34.html";

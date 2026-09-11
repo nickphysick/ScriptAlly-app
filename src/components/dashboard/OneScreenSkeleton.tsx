@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * OneScreenSkeleton — the ghost shell shown while the dashboard's data resolves
- * (ref design-refs/dashboard-cappuccino-v33.html, `#skeleton`).
+ * (ref design-refs/dashboard-cappuccino-v34.html, `#skeleton`).
  *
  * ⚠️ IT REUSES THE REAL LAYOUT CLASSES — `os-content`, `os-grid`, `os-greet`, `os-colL`,
  * `os-toprow`, `os-colR` — RATHER THAN RESTATING THE GRID. That is the whole design of this file:
