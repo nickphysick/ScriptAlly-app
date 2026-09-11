@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — To-do list and card</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f4efe7;--white:#fff;--paper:#fdfaf5;--ink:#241209;--ink2:#3a1c14;--muted:#9c8878;--muted2:#8a7a6c;--hair:#e7ddd2;--hair2:#e0d5c8;--edge:#e8e0d8;--burg:#7c3a2a;--sage:#5a6e58;--pink:#f5e2da;--pink-b:#e8c8bc;--now1:#f6e3da;--house1:#dde4db;--yours1:#f7efe0;}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);padding:28px 30px 90px;}
+.wrap{max-width:1560px;margin:0 auto;}
+h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;color:var(--ink2);margin-bottom:4px;}
+.cap{font-size:12.5px;color:#6a584a;font-weight:300;line-height:1.6;max-width:940px;margin-bottom:16px;}
+.cap b{font-weight:500;color:var(--ink2);}
+
+/* ═══ shared bits, taken from the Query Centre's list ═══ */
+.av{width:44px;height:44px;border-radius:50%;background:var(--paper);border:1px solid var(--edge);color:#7a6551;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+.dot{width:14px;height:14px;flex-shrink:0;}
+.mono{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#b3a494;font-weight:500;}
+.btn{height:36px;padding:0 16px;border-radius:9px;background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-size:12.5px;font-weight:500;white-space:nowrap;cursor:pointer;}
+.ib{width:36px;height:36px;border-radius:9px;border:1px solid var(--edge);background:var(--white);color:#b3a494;font-size:13px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;}
+.ib:hover{border-color:#c9a89e;color:var(--burg);}
+
+/* ═══ THE LIST ═══ */
+.list{background:var(--white);border:1px solid var(--edge);border-radius:16px;box-shadow:0 1px 2px rgba(58,28,20,0.04),0 6px 20px rgba(58,28,20,0.05);overflow:hidden;}
+.hd{display:grid;grid-template-columns:5px minmax(0,1.4fr) 250px minmax(0,1.3fr) 190px;gap:20px;padding:16px 24px 13px;border-bottom:1px solid var(--hair);}
+.hd span{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink2);}
+.gh{display:flex;align-items:center;gap:12px;padding:20px 24px 12px;}
+.gh .t{font-family:'Playfair Display',serif;font-size:21px;color:var(--ink2);font-weight:500;}
+.gh .n{font-family:'Playfair Display',serif;font-size:13px;color:var(--ink2);border:1px solid var(--edge);border-radius:999px;padding:2px 11px;}
+.gh .rule{flex:1;height:1px;background:#e9e0d2;}
+.row{display:grid;grid-template-columns:5px minmax(0,1.4fr) 250px minmax(0,1.3fr) 190px;gap:20px;align-items:center;padding:14px 24px;border-top:1px solid #f1eae1;cursor:pointer;position:relative;min-height:74px;}
+.row:hover{background:#fdfbf8;}
+.edge{position:absolute;left:0;top:0;bottom:0;width:5px;}
+/* task */
+.task{min-width:0;display:flex;align-items:center;gap:12px;}
+.task .glyph{width:34px;height:34px;border-radius:50%;border:1.5px solid currentColor;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.task.now .glyph{color:var(--burg);background:var(--now1);}
+.task.house .glyph{color:#4c5f4a;background:var(--house1);}
+.task.yours .glyph{color:#8a7440;background:var(--yours1);}
+.task .t{font-family:'Playfair Display',serif;font-size:18px;color:var(--ink2);font-weight:500;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.task .k{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted2);margin-top:4px;}
+/* agent */
+.agent{display:flex;align-items:center;gap:12px;min-width:0;}
+.agent .n{font-family:'Playfair Display',serif;font-size:17px;color:var(--ink2);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.agent .a{font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:#6a584a;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* where it stands */
+.stands{display:flex;align-items:center;gap:14px;min-width:0;}
+.stamp{width:44px;height:44px;border-radius:50%;border:1px dashed #cfc1ae;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;line-height:1;}
+.stamp b{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink2);font-weight:500;}
+.stamp b.late{color:var(--burg);}
+.stamp span{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:0.1em;text-transform:uppercase;color:#b3a494;margin-top:3px;}
+.stands .txt{min-width:0;}
+.stands .l1{font-size:13.5px;color:var(--ink2);display:flex;align-items:center;gap:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stands .l1 b{font-weight:600;}
+.stands .l2{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#b3a494;margin-top:4px;white-space:nowrap;}
+.stands .l2 u{text-decoration:none;border-bottom:1px solid #d9ccbc;}
+/* actions */
+.acts{display:flex;align-items:center;gap:7px;justify-content:flex-end;}
+
+/* ═══ THE CARD ═══ */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(296px,1fr));gap:14px;}
+.card{background:var(--white);border:1px solid var(--edge);border-radius:12px;display:grid;grid-template-columns:6px 1fr;overflow:hidden;box-shadow:0 1px 2px rgba(58,28,20,0.04);cursor:pointer;transition:box-shadow .15s,transform .15s;}
+.card:hover{box-shadow:0 8px 22px rgba(58,28,20,0.09);transform:translateY(-1px);}
+.card .in{padding:14px 16px 13px;display:flex;flex-direction:column;gap:10px;min-width:0;}
+.card .top{display:flex;align-items:center;gap:8px;}
+.card .tag{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.12em;text-transform:uppercase;font-weight:500;padding:4px 9px;border-radius:999px;}
+.card .tag.now{background:var(--now1);color:var(--burg);}
+.card .tag.house{background:var(--house1);color:#3c4a3a;}
+.card .tag.yours{background:var(--yours1);color:#8a7440;}
+.card .qs{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ink2);font-weight:500;white-space:nowrap;}
+.card .qs .dot{width:12px;height:12px;}
+.card .ttl{font-size:15px;font-weight:600;color:var(--ink2);line-height:1.3;}
+.card .facts{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;padding:10px 0 0;border-top:1px dashed var(--hair2);}
+.card .k{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);}
+.card .v{font-size:12.5px;font-weight:500;color:var(--ink2);margin-top:3px;}
+.card .v.late{color:var(--burg);}
+.card .foot{display:flex;align-items:center;gap:9px;padding-top:10px;border-top:1px dashed var(--hair2);min-width:0;}
+.card .foot .av{width:26px;height:26px;font-size:8px;background:#efe4dc;color:var(--burg);border-color:rgba(124,58,42,0.18);}
+.card .foot .n{font-size:12px;font-weight:500;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card .foot .n small{display:block;font-size:10px;color:var(--muted2);font-weight:300;margin-top:1px;}
+.card .foot .go{margin-left:auto;height:28px;padding:0 11px;border-radius:8px;background:var(--white);border:1px solid var(--edge);color:#b3a494;font-size:11px;font-weight:500;white-space:nowrap;}
+.card:hover .foot .go{background:var(--pink);border-color:var(--pink-b);color:var(--burg);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>The list</h1>
+<div class="cap">Your Query Centre's row, with the two tallest things taken out — the 62px date chip and the 24px padding either side of it. The date folds into the where-it-stands sub-line, where it reads as a sentence. <b>Rows drop from 110px to 74px; eight fit where three did.</b> Everything else is the Query Centre's: Playfair for the headline and the person, italic agency, the dashed stamp, the pink verb, × and ⋯.</div>
+
+<div class="list">
+  <div class="hd"><span></span><span>Task</span><span>Agent</span><span>Where it stands</span><span style="text-align:right">Actions</span></div>
+
+  <div class="gh"><span class="t">Needs you now</span><span class="n">5</span><span class="rule"></span></div>
+
+  <div class="row"><span class="edge" style="background:#f1dbd0"></span>
+    <div class="task now"><span class="glyph">←</span><div style="min-width:0"><div class="t">Send your full manuscript</div><div class="k">Agent request</div></div></div>
+    <div class="agent"><span class="av">JM</span><div style="min-width:0"><div class="n">Jonathan Marsh</div><div class="a">The Marsh Agency</div></div></div>
+    <div class="stands"><span class="stamp"><b class="late">7</b><span>weeks</span></span><div class="txt"><div class="l1"><b>Full</b> — not yet sent</div><div class="l2">Asked 2 April · <u>Full requested</u></div></div></div>
+    <div class="acts"><button class="btn">Mark sent</button><button class="ib">×</button><button class="ib">⋯</button></div></div>
+
+  <div class="row"><span class="edge" style="background:#f8e9e2"></span>
+    <div class="task now"><span class="glyph">←</span><div style="min-width:0"><div class="t">Send your partial</div><div class="k">Agent request</div></div></div>
+    <div class="agent"><span class="av">DO</span><div style="min-width:0"><div class="n">Daniel O'Rourke</div><div class="a">Inkwell &amp; Stone</div></div></div>
+    <div class="stands"><span class="stamp"><span style="margin:0">no<br>date</span></span><div class="txt"><div class="l1"><b>Partial</b> — not yet sent</div><div class="l2">No date on record · <u>Partial requested</u></div></div></div>
+    <div class="acts"><button class="btn">Mark sent</button><button class="ib">×</button><button class="ib">⋯</button></div></div>
+
+  <div class="row"><span class="edge" style="background:#f8e9e2"></span>
+    <div class="task now"><span class="glyph">←</span><div style="min-width:0"><div class="t">Send your partial</div><div class="k">Agent request</div></div></div>
+    <div class="agent"><span class="av">GP</span><div style="min-width:0"><div class="n">Greg Panetta</div><div class="a">No agency</div></div></div>
+    <div class="stands"><span class="stamp"><b class="late">10</b><span>weeks</span></span><div class="txt"><div class="l1"><b>Partial</b> — not yet sent</div><div class="l2">Asked 28 June · <u>Partial requested</u></div></div></div>
+    <div class="acts"><button class="btn">Mark sent</button><button class="ib">×</button><button class="ib">⋯</button></div></div>
+
+  <div class="row"><span class="edge" style="background:#e6eae3"></span>
+    <div class="task now"><span class="glyph">↻</span><div style="min-width:0"><div class="t">Worth a nudge</div><div class="k">Nudge</div></div></div>
+    <div class="agent"><span class="av">WT</span><div style="min-width:0"><div class="n">William Tan</div><div class="a">Foxglove Literary</div></div></div>
+    <div class="stands"><span class="stamp"><b>6</b><span>wks past</span></span><div class="txt"><div class="l1">Their window closed <b>29 July</b></div><div class="l2">Queried 17 June · <u>Queried</u></div></div></div>
+    <div class="acts"><button class="btn">Log a nudge</button><button class="ib">×</button><button class="ib">⋯</button></div></div>
+
+  <div class="gh"><span class="t">Housekeeping</span><span class="n">7</span><span class="rule"></span></div>
+
+  <div class="row"><span class="edge" style="background:#e6eae3"></span>
+    <div class="task house"><span class="glyph">…</span><div style="min-width:0"><div class="t">No response from Jonathan Marsh</div><div class="k">Gone quiet</div></div></div>
+    <div class="agent"><span class="av">JM</span><div style="min-width:0"><div class="n">Jonathan Marsh</div><div class="a">The Marsh Agency</div></div></div>
+    <div class="stands"><span class="stamp"><b>2½</b><span>years</span></span><div class="txt"><div class="l1">Quiet since <b>9 April 2024</b></div><div class="l2">Their window was 6 weeks · <u>Queried</u></div></div></div>
+    <div class="acts"><button class="btn">Decide</button><button class="ib">×</button><button class="ib">⋯</button></div></div>
+
+  <div class="row"><span class="edge" style="background:#e6eae3"></span>
+    <div class="task house"><span class="glyph">…</span><div style="min-width:0"><div class="t">Still nothing after your nudge</div><div class="k">Gone quiet</div></div></div>
+    <div class="agent"><span class="av">RV</span><div style="min-width:0"><div class="n">Rosalind Vale</div><div class="a">Foxglove Literary</div></div></div>
+    <div class="stands"><span class="stamp"><b>3</b><span>weeks</span></span><div class="txt"><div class="l1">Nudged <b>12 August</b> — still nothing</div><div class="l2">You asked to be checked in with today · <u>Queried</u></div></div></div>
+    <div class="acts"><button class="btn">Decide</button><button class="ib">×</button><button class="ib">⋯</button></div></div>
+
+  <div class="row"><span class="edge" style="background:#e6eae3"></span>
+    <div class="task house"><span class="glyph">⚙</span><div style="min-width:0"><div class="t">Fill in what you sent</div><div class="k">Housekeeping</div></div></div>
+    <div class="agent"><span class="av">PR</span><div style="min-width:0"><div class="n">Priya Raman</div><div class="a">No agency</div></div></div>
+    <div class="stands"><span class="stamp"><span style="margin:0">not<br>set</span></span><div class="txt"><div class="l1">Materials <b>not recorded</b></div><div class="l2">Imported 12 August · <u>Queried</u></div></div></div>
+    <div class="acts"><button class="btn">Fill it in</button><button class="ib">×</button><button class="ib">⋯</button></div></div>
+
+  <div class="gh"><span class="t">Your tasks</span><span class="n">2</span><span class="rule"></span></div>
+
+  <div class="row"><span class="edge" style="background:#efe7db"></span>
+    <div class="task yours"><span class="glyph">✎</span><div style="min-width:0"><div class="t">Nudge Marcus Reed</div><div class="k">Your task</div></div></div>
+    <div class="agent"><span class="av">✎</span><div style="min-width:0"><div class="n">You</div><div class="a">Your own note</div></div></div>
+    <div class="stands"><span class="stamp"><b>2</b><span>days</span></span><div class="txt"><div class="l1">Ticking it off is what finishes it</div><div class="l2">Added 8 September</div></div></div>
+    <div class="acts"><button class="btn">Tick it off</button><button class="ib">×</button><button class="ib">⋯</button></div></div>
+</div>
+
+<h1 style="margin-top:42px;">The card</h1>
+<div class="cap">The ticket you chose, with two corrections and nothing else: <b>the title is the act, the footer is the person</b> — so the agent's name appears once — and the manuscript is gone from a one-book account. The status sits beside the tag on the top line, dot and word in ink; the edge carries its tint.</div>
+
+<div class="cards">
+  <div class="card"><span style="background:#f1dbd0"></span><div class="in">
+    <div class="top"><span class="tag now">Agent request</span><span class="qs"><svg class="dot" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#5a6e58" stroke-width="1.5" fill="#8a9e88"/><path d="M9.5 7H4.8M6.6 5.2L4.8 7l1.8 1.8" stroke="#fdfaf5" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Full requested</span></div>
+    <div class="ttl">Send your full manuscript</div>
+    <div class="facts"><div><div class="k">Asked on</div><div class="v">2 April</div></div><div><div class="k">Waiting</div><div class="v late">7 weeks</div></div></div>
+    <div class="foot"><span class="av">JM</span><span class="n">Jonathan Marsh<small>The Marsh Agency</small></span><button class="go">Mark sent</button></div>
+  </div></div>
+
+  <div class="card"><span style="background:#f8e9e2"></span><div class="in">
+    <div class="top"><span class="tag now">Agent request</span><span class="qs"><svg class="dot" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#5a6e58" stroke-width="1.5" fill="#8a9e88"/><path d="M9.5 7H4.8M6.6 5.2L4.8 7l1.8 1.8" stroke="#fdfaf5" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Partial requested</span></div>
+    <div class="ttl">Send your partial</div>
+    <div class="facts"><div><div class="k">Asked on</div><div class="v">28 June</div></div><div><div class="k">Waiting</div><div class="v late">10 weeks</div></div></div>
+    <div class="foot"><span class="av">GP</span><span class="n">Greg Panetta<small>No agency</small></span><button class="go">Mark sent</button></div>
+  </div></div>
+
+  <div class="card"><span style="background:#e6eae3"></span><div class="in">
+    <div class="top"><span class="tag now">Nudge</span><span class="qs"><svg class="dot" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#7c3d3d" stroke-width="1.5" fill="#f5e2da"/><path d="M4.5 7h4.7M7.4 5.2L9.2 7l-1.8 1.8" stroke="#7c3d3d" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Queried</span></div>
+    <div class="ttl">Worth a nudge</div>
+    <div class="facts"><div><div class="k">Window closed</div><div class="v">29 July</div></div><div><div class="k">Past it</div><div class="v">6 weeks</div></div></div>
+    <div class="foot"><span class="av">WT</span><span class="n">William Tan<small>Foxglove Literary</small></span><button class="go">Log a nudge</button></div>
+  </div></div>
+
+  <div class="card"><span style="background:#e6eae3"></span><div class="in">
+    <div class="top"><span class="tag house">Gone quiet</span><span class="qs"><svg class="dot" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#7c3d3d" stroke-width="1.5" fill="#f5e2da"/><path d="M4.5 7h4.7M7.4 5.2L9.2 7l-1.8 1.8" stroke="#7c3d3d" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Queried</span></div>
+    <div class="ttl">No response for 2½ years</div>
+    <div class="facts"><div><div class="k">Quiet since</div><div class="v">9 April 2024</div></div><div><div class="k">Their window</div><div class="v">6 weeks</div></div></div>
+    <div class="foot"><span class="av">JM</span><span class="n">Jonathan Marsh<small>The Marsh Agency</small></span><button class="go">Decide</button></div>
+  </div></div>
+
+  <div class="card"><span style="background:#e6eae3"></span><div class="in">
+    <div class="top"><span class="tag house">Gone quiet</span><span class="qs"><svg class="dot" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#7c3d3d" stroke-width="1.5" fill="#f5e2da"/><path d="M4.5 7h4.7M7.4 5.2L9.2 7l-1.8 1.8" stroke="#7c3d3d" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Queried</span></div>
+    <div class="ttl">Still nothing after your nudge</div>
+    <div class="facts"><div><div class="k">Nudged on</div><div class="v">12 August</div></div><div><div class="k">Since then</div><div class="v">3 weeks</div></div></div>
+    <div class="foot"><span class="av">RV</span><span class="n">Rosalind Vale<small>Foxglove Literary</small></span><button class="go">Decide</button></div>
+  </div></div>
+
+  <div class="card"><span style="background:#efe7db"></span><div class="in">
+    <div class="top"><span class="tag yours">Your task</span></div>
+    <div class="ttl">Nudge Marcus Reed</div>
+    <div class="facts"><div><div class="k">Added</div><div class="v">8 September</div></div><div><div class="k">Age</div><div class="v">2 days</div></div></div>
+    <div class="foot"><span class="av" style="background:var(--yours1);color:#8a7440;border-color:#e8dcc0">✎</span><span class="n">Your own note<small>Ticking it off is what finishes it</small></span><button class="go">Tick it off</button></div>
+  </div></div>
+</div>
+
+</div>
+</body>
+</html>

@@ -56,6 +56,8 @@
     "design-refs/query-grid-ground-v1.html": "cfe1db9a31d4e51a1a25f474aaec74c0d3eaf73a389c89457ec2f81eb947d45c",
     "design-refs/query-fact-register-v1.html": "377277f3dd8c1ffb04b05bea44b1ec2250b0f59c0a5cf2b9a132796b33d0ed9c",
     "design-refs/query-verbs-copy-v2-locked.html": "570f90fe6b51b541fef66e2c28c9a4de9b969360f2f592ab9fe24910a681f80a",
-    "design-refs/query-grid-enhancements-v1.html": "4f1e8948c481323a90289fc7ac59f1996f22df2152b6ee7be18fa3394dbfff24"
+    "design-refs/query-grid-enhancements-v1.html": "4f1e8948c481323a90289fc7ac59f1996f22df2152b6ee7be18fa3394dbfff24",
+    "design-refs/todo-list-view-contract.html": "b5cc117818a01182c8e65bf1791b09a6c140fc11548801c69e33f726a6eece0d",
+    "design-refs/todo-list-and-card.html": "453404a6a8bdd388601ef29c6e6f2c59c0eb603e23857fe25d3cdf7b7b8882e6"
   }
 }

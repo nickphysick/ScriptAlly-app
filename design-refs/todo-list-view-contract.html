@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Task · Agent · Due · Overdue by</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f4efe7;--white:#fff;--paper:#fdfaf5;--ink:#241209;--ink2:#3a1c14;--muted:#9c8878;--muted2:#8a7a6c;--hair:#e7ddd2;--hair2:#e0d5c8;--edge:#e8e0d8;--burg:#7c3a2a;--sage:#5a6e58;--pink:#f5e2da;--pink-b:#e8c8bc;--now1:#f6e3da;--house1:#dde4db;--yours1:#f7efe0;}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);padding:28px 30px 90px;}
+.wrap{max-width:1360px;margin:0 auto;}
+h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;color:var(--ink2);margin-bottom:4px;}
+.cap{font-size:12.5px;color:#6a584a;font-weight:300;line-height:1.6;max-width:900px;margin-bottom:14px;}
+.cap b{font-weight:500;color:var(--ink2);}
+button{font:inherit;cursor:pointer;}
+.tool{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.qb{height:40px;padding:0 15px;border:1px solid var(--edge);border-radius:11px;background:var(--white);display:inline-flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink2);}
+.qb.on{background:var(--pink);border-color:var(--pink-b);color:var(--burg);}
+.qb select{border:0;background:transparent;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:#6a584a;outline:none;}
+.box{background:var(--white);border:1px solid var(--edge);border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(58,28,20,0.04),0 6px 20px rgba(58,28,20,0.05);}
+.hd,.r{display:grid;grid-template-columns:5px minmax(0,1.5fr) 220px 92px 170px 40px;column-gap:18px;align-items:center;}
+.hd{padding:11px 20px 11px 0;border-bottom:1px solid var(--hair);background:var(--paper);}
+.hd button{background:none;border:0;padding:0;text-align:left;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.15em;text-transform:uppercase;color:#b3a494;font-weight:500;display:inline-flex;align-items:center;gap:6px;}
+.hd button .arr{font-size:8px;color:#d0c4b4;}
+.hd button.on{color:var(--ink2);}
+.hd button.on .arr{color:var(--burg);}
+.gh{display:flex;align-items:center;gap:10px;padding:16px 20px 8px;}
+.gh .t{font-family:'Playfair Display',serif;font-size:19px;color:var(--ink2);}
+.gh .t.over{color:var(--burg);}
+.gh .n{font-family:'Playfair Display',serif;font-size:12px;color:var(--ink2);border:1px solid var(--edge);border-radius:999px;padding:1px 9px;}
+.gh .rule{flex:1;height:1px;background:#e9e0d2;}
+.r{height:62px;padding:0 20px 0 0;border-top:1px solid #f3ece3;cursor:pointer;}
+.r:hover{background:#fdfbf8;}
+.e{align-self:stretch;}
+.t{display:flex;align-items:center;gap:11px;min-width:0;}
+.g{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;border:1.5px solid currentColor;}
+.g.now{color:var(--burg);background:var(--now1);}
+.g.house{color:#4c5f4a;background:var(--house1);}
+.g.yours{color:#8a7440;background:var(--yours1);}
+.t .h{font-size:14px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.t .s{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted2);margin-top:3px;}
+.a{display:flex;align-items:center;gap:9px;min-width:0;}
+.av{width:30px;height:30px;border-radius:50%;background:#efe4dc;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(124,58,42,0.18);flex-shrink:0;}
+.a .n{font-size:12.5px;font-weight:500;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.a .n small{display:block;font-size:10.5px;color:var(--muted2);font-weight:300;}
+/* due — the Query Centre's calendar chip */
+.chip{width:52px;border:1px solid var(--edge);border-radius:9px;overflow:hidden;text-align:center;background:var(--white);}
+.chip .m{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.12em;text-transform:uppercase;color:#6a584a;background:var(--paper);padding:3px 0;border-bottom:1px solid var(--hair);}
+.chip .d{font-family:'Playfair Display',serif;font-size:17px;color:var(--ink2);padding:3px 0 2px;line-height:1;}
+.chip .y{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:0.08em;color:#b3a494;padding-bottom:3px;}
+.chip.none{border-style:dashed;}
+.chip.none .d{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;padding:8px 0;}
+/* overdue by — number, unit, one word */
+.ov{line-height:1.05;white-space:nowrap;}
+.ov b{font-family:'Playfair Display',serif;font-size:22px;color:var(--ink2);font-weight:500;margin-right:4px;}
+.ov .u{font-size:12.5px;color:var(--ink2);font-weight:500;}
+.ov .w{display:none;}
+.ov.owed b,.ov.owed .u{color:var(--burg);}
+.ov.owed .w{color:var(--burg);opacity:.8;}
+.ov.ahead b,.ov.ahead .u{color:var(--muted2);font-weight:400;}
+.ov.none{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;}
+.more{color:#c8bcae;font-size:16px;text-align:right;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>To-do list — list view (contract)</h1>
+<div class="cap"><b>Landing state:</b> grouped by When (Overdue · Due this week · Coming up · No date), sorted Overdue by, longest first. Columns: Task · Agent · Due (calendar chip) · Overdue by (numeral + unit). Colour on the numeral is ownership only — burgundy where the writer owes the date, ink where it is the agent's window, muted ahead of today. No sub-words. Column heads sort; sorting uses real days.</div>
+
+<div class="tool">
+  <span class="qb">☰ Group <select id="grp" onchange="render()"><option value="time">When</option><option value="cat">Category</option><option value="none">None</option></select></span>
+  <span class="qb">⇅ Sort <b id="sortlbl" style="font-weight:500;color:#6a584a"></b></span>
+</div>
+
+<div class="box">
+  <div class="hd"><span></span>
+    <button onclick="sortBy('task')" id="h-task">Task <span class="arr">▲</span></button>
+    <button onclick="sortBy('agent')" id="h-agent">Agent <span class="arr">▲</span></button>
+    <button onclick="sortBy('due')" id="h-due">Due <span class="arr">▲</span></button>
+    <button onclick="sortBy('over')" id="h-over" class="on">Overdue by <span class="arr">▼</span></button>
+    <span></span>
+  </div>
+  <div id="rows"></div>
+</div>
+
+
+</div>
+<script>
+const D=(y,m,d)=>new Date(y,m-1,d);const today=D(2026,9,10);
+const dd=a=>Math.round((today-a)/864e5);   /* positive = overdue */
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const T=[
+ {c:'req',cls:'now',g:'\u2190',task:'Send your full manuscript',cat:'Agent request',ag:'Jonathan Marsh',agc:'The Marsh Agency',due:D(2026,4,2),owner:'owed',edge:'#f1dbd0'},
+ {c:'req',cls:'now',g:'\u2190',task:'Send your partial',cat:'Agent request',ag:'Daniel O\u2019Rourke',agc:'Inkwell & Stone',due:null,owner:'owed',edge:'#f8e9e2'},
+ {c:'req',cls:'now',g:'\u2190',task:'Send your partial',cat:'Agent request',ag:'Jonathan Marsh',agc:'The Marsh Agency',due:D(2026,9,11),owner:'owed',edge:'#f8e9e2'},
+ {c:'req',cls:'now',g:'\u2190',task:'Send your partial',cat:'Agent request',ag:'Greg Panetta',agc:'No agency',due:D(2026,6,28),owner:'owed',edge:'#f8e9e2'},
+ {c:'nudge',cls:'now',g:'\u21bb',task:'Worth a nudge',cat:'Nudge',ag:'William Tan',agc:'Foxglove Literary',due:D(2026,7,29),owner:'theirs',edge:'#e6eae3'},
+ {c:'nudge',cls:'now',g:'\u21bb',task:'Nudge reminder',cat:'Nudge',ag:'Sophie Dunn',agc:'Curtis Vane',due:D(2026,9,18),owner:'theirs',edge:'#c7d0c2'},
+ {c:'quiet',cls:'house',g:'\u2026',task:'No response from Jonathan Marsh',cat:'Gone quiet',ag:'Jonathan Marsh',agc:'The Marsh Agency',due:D(2024,5,21),owner:'theirs',edge:'#e6eae3'},
+ {c:'quiet',cls:'house',g:'\u2026',task:'Still nothing after your nudge',cat:'Gone quiet',ag:'Rosalind Vale',agc:'Foxglove Literary',due:D(2026,9,9),owner:'theirs',edge:'#e6eae3'},
+ {c:'quiet',cls:'house',g:'\u2026',task:'No response from Sophie Dunn',cat:'Gone quiet',ag:'Sophie Dunn',agc:'Curtis Vane',due:D(2026,9,3),owner:'theirs',edge:'#e6eae3'},
+ {c:'house',cls:'house',g:'\u2699',task:'Fill in what you sent',cat:'Housekeeping',ag:'Priya Raman',agc:'No agency',due:null,owner:'none',edge:'#e6eae3'},
+ {c:'yours',cls:'yours',g:'\u270e',task:'Update comp titles list',cat:'Your task',ag:null,agc:null,due:D(2026,9,14),owner:'owed',edge:'#efe7db'},
+ {c:'yours',cls:'yours',g:'\u270e',task:'Nudge Marcus Reed',cat:'Your task',ag:null,agc:null,due:null,owner:'none',edge:'#efe7db'},
+];
+const ini=n=>n.split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+function unit(d){d=Math.abs(d);if(d<14)return [d,d===1?'day':'days'];const w=Math.round(d/7);if(w<9)return [w,w===1?'week':'weeks'];const mo=Math.round(d/30.4);if(mo<18)return [mo,mo===1?'month':'months'];const q=Math.round(d/365.25*4)/4;return [Math.floor(q)+({0:'',0.25:'\u00bc',0.5:'\u00bd',0.75:'\u00be'}[q%1]),'years'];}
+function chip(t){if(!t.due)return '<div class="chip none"><div class="d">none</div></div>';return '<div class="chip"><div class="m">'+MON[t.due.getMonth()]+'</div><div class="d">'+t.due.getDate()+'</div>'+(t.due.getFullYear()!==today.getFullYear()?'<div class="y">'+t.due.getFullYear()+'</div>':'')+'</div>';}
+function over(t){
+  if(!t.due)return '<div class="ov none">no date</div>';
+  const n=dd(t.due);
+  if(n===0)return '<div class="ov"><b>Due</b><span class="u">today</span></div>';
+  const [v,u]=unit(n);
+  if(n<0)return '<div class="ov ahead"><b>'+v+'</b><span class="u">'+u+' to go</span></div>';
+  return '<div class="ov '+t.owner+'"><b>'+v+'</b><span class="u">'+u+'</span></div>';
+}
+const bucket=t=>{if(!t.due)return 'none';const n=dd(t.due);if(n>0)return 'over';if(n>=-7)return 'week';return 'later';};
+const BUCK={over:['Overdue','over'],week:['Due this week',''],later:['Coming up',''],none:['No date','']};
+const CAT={req:'Agent requests',nudge:'Nudges',quiet:'Gone quiet',house:'Housekeeping',yours:'Your tasks'};
+let sort={key:'over',dir:-1};
+function preset(n,b){document.querySelectorAll('.tool .qb').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  const g=document.getElementById('grp');
+  if(n===1){g.value='time';sort={key:'over',dir:-1};}
+  if(n===2){g.value='none';sort={key:'over',dir:-1};}
+  if(n===3){g.value='cat';sort={key:'over',dir:-1};}
+  if(n===4){g.value='none';sort={key:'owner',dir:-1};}
+  render();}
+function sortBy(k){if(sort.key===k)sort.dir*=-1;else sort={key:k,dir:k==='over'?-1:1};render();}
+const keyOf={task:t=>t.task,agent:t=>t.ag||'\uffff',due:t=>t.due?t.due.getTime():Infinity,over:t=>t.due?dd(t.due):-1e9,owner:t=>(t.owner==='owed'?1e6:0)+(t.due?dd(t.due):-1e9)};
+function render(){
+  const grp=document.getElementById('grp').value;
+  const names={task:'Task',agent:'Agent',due:'Due',over:'Overdue by'};document.getElementById('sortlbl').textContent=names[sort.key]+(sort.dir<0?' · longest first':' · A–Z');
+  document.querySelectorAll('.hd button').forEach(b=>{const k=b.id.slice(2);b.classList.toggle('on',k===sort.key);b.querySelector('.arr').textContent=(k===sort.key&&sort.dir<0)?'\u25bc':'\u25b2';});
+  const sorted=[...T].sort((a,b)=>{const x=keyOf[sort.key](a),y=keyOf[sort.key](b);return (x>y?1:x<y?-1:0)*sort.dir;});
+  let groups;
+  if(grp==='time')groups=['over','week','later','none'].map(k=>[BUCK[k][0],BUCK[k][1],sorted.filter(t=>bucket(t)===k)]);
+  else if(grp==='cat')groups=Object.keys(CAT).map(k=>[CAT[k],'',sorted.filter(t=>t.c===k)]);
+  else groups=[[null,'',sorted]];
+  document.getElementById('rows').innerHTML=groups.filter(g=>g[2].length).map(([name,cls,items])=>(name?'<div class="gh"><span class="t '+cls+'">'+name+'</span><span class="n">'+items.length+'</span><span class="rule"></span></div>':'')+items.map(row).join('')).join('');
+}
+function row(t){
+  return '<div class="r"><span class="e" style="background:'+t.edge+'"></span>'
+   +'<div class="t"><span class="g '+t.cls+'">'+t.g+'</span><div style="min-width:0"><div class="h">'+t.task+'</div><div class="s">'+t.cat+'</div></div></div>'
+   +'<div class="a">'+(t.ag?'<span class="av">'+ini(t.ag)+'</span><span class="n">'+t.ag+'<small>'+t.agc+'</small></span>':'<span class="av" style="background:var(--yours1);color:#8a7440;border-color:#e8dcc0">\u270e</span><span class="n">You<small>Your own note</small></span>')+'</div>'
+   +chip(t)+over(t)+'<span class="more">\u22ef</span></div>';
+}
+render();
+</script>
+</body>
+</html>
