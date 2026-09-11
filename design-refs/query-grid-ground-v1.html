@@ -67,6 +67,11 @@
   .tA .page{background:transparent}
   .tA .tile{box-shadow:0 1px 2px rgba(58,28,20,.04),0 5px 14px rgba(58,28,20,.06)}
   .tA .card{box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 22px rgba(58,28,20,.09)}
+  /* ⚠️ FENCED 11 Sep 2026 (Grid pass §1, Nick's ruling) — the translateY(-2px) LIFT on the next
+     line is DELIBERATELY UNBUILT. The app's grid re-orders with a FLIP, and a hover transform and
+     the FLIP's inverse transform are the same property on the same element: the last write wins.
+     The re-order animation is worth more than a 2px lift. The hover SHADOW is built as drawn and is
+     the whole affordance. Do not recover the lift with a wrapper or by composing the FLIP. */
   .tA .card:hover{transform:translateY(-2px);box-shadow:0 2px 4px rgba(58,28,20,.06),0 14px 32px rgba(58,28,20,.13)}
   /* B · Linear: parchment page, flat hairline cards, no shadow, tight gap */
   .tB .page{background:var(--parchment);box-shadow:0 1px 2px rgba(58,28,20,.04),0 10px 30px rgba(58,28,20,.08);--gap:12px}
@@ -125,6 +130,7 @@
 <div class="rec">
   <p><b>What the research says.</b> The products that make white cards look intentional all solve the same problem one of two ways. Either the <b>page is not white</b> — Notion, Stripe, Apple, Airtable put cards on a visibly darker ground so the card's own colour is the contrast — or the <b>card has a drawn edge</b> — Linear, Figma, Craft rely on a 1px hairline (or a paper-edge highlight) and keep shadows for hover. Nobody who does it well relies on a soft shadow alone against a near-white sheet, which is what you had, and the well was an attempt to fix that by adding a fourth surface. Removing a surface works better than adding one.</p>
   <p style="margin-top:8px"><b>My pick: A, the Notion pattern.</b> Drop the parchment page card so the grid sits on the app ground <code style="font-family:'JetBrains Mono';font-size:11px">#f2ede7</code>; the white cards, tiles and toolbar are then the only light surfaces, and the whole page reads as objects on a desk. It's the least work (one surface removed), it needs no new colour, and it makes Contact list and Query Centre agree — Contact list already sits on the ground. <b>E</b> is the same idea with more air and deeper shadows; it's handsome and it costs a fifth of the vertical density. <b>D</b>'s paper edge is the most on-brand if you want to keep the parchment page — it reads as stationery — and it's my second choice. <b>B</b> and <b>C</b> are the flat, product-y versions; both clean, both a little cold against Playfair. <b>F</b> outlines each card in its state colour, which is striking but doubles what the band already says.</p>
+  <p style="margin-top:8px;border-left:2px solid #c9b8a6;padding-left:10px"><b>⚠️ Fenced 11 Sep 2026 (Grid pass §1).</b> Two things above do not transfer to the app. <b>The ground is not <code style="font-family:'JetBrains Mono';font-size:11px">#f2ede7</code></b>: that is this page's own <code style="font-family:'JetBrains Mono';font-size:11px">--ground</code>, a value from a standalone artefact. The app's ground is <code style="font-family:'JetBrains Mono';font-size:11px">--ws-ground #f7f4ee</code>, which is locked, and the Query Centre already sat on it, as Contact list does. <b>The lift is not built</b>: the grid re-orders with a FLIP, and a hover transform and the FLIP's inverse are the same property, so the hover shadow alone is the affordance. What A asks for that <i>is</i> built: the recessed well removed, and these two shadows.</p>
 </div>
 
 <script>
