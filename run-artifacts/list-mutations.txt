@@ -1,0 +1,48 @@
+# List round — mutation table
+
+Each mutation is one named break, applied to the app (never to a check), its anchor asserted to exist and to CHANGE the file, the suite run, and the original restored and compared byte-for-byte. `RED` lines are the assertions that noticed.
+
+## Phase 1 · every task has a due date — `src/lib/taskDue.test.ts` (27 cases)
+
+M1.1 · the hold is ignored — the ask date comes back
+    exit 1 · Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+    RED  × src/lib/taskDue.test.ts > the date they set wins > a 'hold me to it' date overrides the ask date
+    RED  × src/lib/taskDue.test.ts > the date they set wins > a hold on a nudge overrides the window, and stays the agent's clock
+
+M1.2 · a housekeeping gap borrows the query's send date — a fabricated due date
+    exit 1 · Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+    RED  × src/lib/taskDue.test.ts > every task type derives a due date or a deliberate null > materials_unrecorded: no natural date when the record holds it · null when it does not
+    RED  × src/lib/taskDue.test.ts > every task type derives a due date or a deliberate null > materials_unrecorded_bulk: no natural date when the record holds it · null when it does not
+
+M1.3 · a dated note loses its date
+    exit 1 · Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+    RED  × src/lib/taskDue.test.ts > the date they set wins > a dated note's date is its due date; an undated one has none
+
+M1.4 · a YYYY-MM-DD is parsed as UTC midnight
+    exit 1 · Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+    RED  × src/lib/taskDue.test.ts > real days, on the local calendar > a YYYY-MM-DD names its own day — never UTC midnight, which is the day before in the Americas
+
+M1.5 · owner by magnitude — old dates become the writer's
+    exit 1 · Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+    RED  × src/lib/taskDue.test.ts > every task type derives a due date or a deliberate null > whenever the engine would raise a nudge or a close, the due date exists
+    RED  × src/lib/taskDue.test.ts > owner follows the task's kind > the same distance from today gives the same owner it would at any other distance
+
+M1.6 · the booked check-in is ignored after a nudge
+    exit 1 · Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+    RED  × src/lib/taskDue.test.ts > the date they set wins > the check-in after a nudge is its due date — exactly the day `buildNudgeWrites` booked
+
+M1.7 · a request with no date on record stops being owed
+    exit 1 · Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+    RED  × src/lib/taskDue.test.ts > every task type derives a due date or a deliberate null > offer_received: arrived when the record holds it · null when it does not
+    RED  × src/lib/taskDue.test.ts > every task type derives a due date or a deliberate null > partial_requested: ask when the record holds it · null when it does not
+    RED  × src/lib/taskDue.test.ts > every task type derives a due date or a deliberate null > full_requested: ask when the record holds it · null when it does not
+    RED  × src/lib/taskDue.test.ts > every task type derives a due date or a deliberate null > revise_resubmit: ask when the record holds it · null when it does not
+    RED  × src/lib/taskDue.test.ts > owner follows the task's kind > a request is owed with or without a date; everything else needs a date to be anybody's
+
+M1.8 · the natural date is taken from the send, not the ask
+    exit 1 · Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+    RED  × src/lib/taskDue.test.ts > every task type derives a due date or a deliberate null > partial_requested: ask when the record holds it · null when it does not
+    RED  × src/lib/taskDue.test.ts > every task type derives a due date or a deliberate null > full_requested: ask when the record holds it · null when it does not
+    RED  × src/lib/taskDue.test.ts > every task type derives a due date or a deliberate null > the natural dates are the days the records name — the ask, the arrival, the window
+    RED  × src/lib/taskDue.test.ts > the date they set wins > a 'hold me to it' date overrides the ask date
+    RED  × src/lib/taskDue.test.ts > the date they set wins > a mute is not a date, and a dismissal is the later word

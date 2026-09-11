@@ -24,7 +24,8 @@
 import type { Activity, Agent, Manuscript, Query, QueryStatus, TaskFlag, UserTask } from "../types";
 import type { BoardCard } from "./todoBoard";
 import { rowFigure, daysSince, waitAnchorMs, RowFigure, cardBucket } from "./todoBuckets";
-import { snoozedCards, boardEligible } from "./todoColumns";
+import { snoozedCards, boardEligible, flagForCard } from "./todoColumns";
+import { taskDue, type DueFact } from "./taskDue";
 import { queriesMissingMaterials } from "./queryMaterialsGap";
 import { recordSweepRow, type RecordSweepRow } from "./materialsSweep";
 import { sendSpecFor } from "./todoDock";
@@ -180,6 +181,46 @@ export function listRowInputs(c: BoardCard, db: TaskData) {
         }).length
       : null,
   };
+}
+
+/**
+ * The card's due date, with whose clock it is on (list round, Phase 1) — `taskDue` over the records
+ * the card points at.
+ *
+ * ⚠️ THE FLAGS ARE THEIR OWN ARGUMENT, FOR THE SAME REASON `figureFor`'s ARE. `listRowInputs` is
+ * handed to the list as `rowInputs` and its identity decides when the rows re-render, so it must not
+ * start depending on flags; the hold lives on a flag, so the due date is its own accessor.
+ *
+ * ⚠️ AND THE AGENT IS THE QUERY'S. `replyTaskFor` states the split — the window belongs to the
+ * agent, the dates to the query — and a card collapsed by `dedupeAgentCards` still points at one
+ * query, whose own agent owns the window being counted.
+ */
+export function dueFor(c: BoardCard, db: TaskData, flags: TaskFlag[]): DueFact {
+  const q = c.relatedRecordId ? db.queries.find((x) => x.id === c.relatedRecordId) : undefined;
+  const agentId = q?.agentId ?? c.agentId;
+  const ag = agentId ? db.agents.find((a) => a.id === agentId) : undefined;
+  const ut = c.userTaskId ? db.userTasks.find((t) => t.id === c.userTaskId) : undefined;
+  const flag = flagForCard(c, flags);
+  return taskDue({
+    card: c,
+    ...(q ? { query: {
+      status: q.status,
+      dateSent: q.dateSent,
+      responseDeadline: q.responseDeadline,
+      partialRequestedDate: q.partialRequestedDate,
+      fullRequestedDate: q.fullRequestedDate,
+      partialSentDate: q.partialSentDate,
+      fullSentDate: q.fullSentDate,
+      nudgeDate: q.nudgeDate,
+      lastNudgeSentDate: q.lastNudgeSentDate,
+      sendReminderDate: isoOf(q.sendReminderDate),
+      statusMovedAt: isoOf(q.lastStatusChange),
+      lastReplyAt: isoOf(q.responseReceivedAt),
+    } } : {}),
+    ...(ag ? { agent: { responseTimeWeeks: ag.responseTimeWeeks, noResponseMeansNo: ag.noResponseMeansNo } } : {}),
+    ...(ut ? { userTask: { dueDate: ut.dueDate } } : {}),
+    ...(flag ? { flag: { snoozedUntil: flag.snoozedUntil, skippedAt: flag.skippedAt } } : {}),
+  });
 }
 
 /** The cohort's rows — the SAME derivation the bulk card was raised by, never a second one. */

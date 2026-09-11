@@ -316,6 +316,19 @@ export interface BoardColumns {
   dismissed: BoardCard[];
 }
 
+/**
+ * The flag that states the writer's stance on this card — or undefined.
+ *
+ * ⚠️ ONE LOOKUP, SHARED. The return chip below and the due derivation (`taskCardFacts.dueFor`) both
+ * need "which flag is this card's", and two hand-written `find`s are two chances to disagree about a
+ * user task (keyed by its own id under `user_task`) versus a derived one (keyed by type and record).
+ */
+export function flagForCard(c: BoardCard, flags: TaskFlag[]): TaskFlag | undefined {
+  return flags.find((f) =>
+    (c.userTaskId && flagMatchesTask(f, USER_TASK_FLAG_TYPE, c.userTaskId))
+    || (!c.userTaskId && c.taskType && c.relatedRecordId && flagMatchesTask(f, c.taskType, c.relatedRecordId)));
+}
+
 export function boardColumns(input: ColumnInput): BoardColumns {
   /* The SWEEP CARDS stand in for their groups' members. The grouped hk cards are removed from
      the flat lane set first, so a member is never both inside a sweep and loose on the board —
@@ -332,9 +345,7 @@ export function boardColumns(input: ColumnInput): BoardColumns {
      this one day — a row that reappears with no explanation reads as a bug in a list you
      thought you had cleared. Derived from the flag's own expiry against the same clock. */
   const withReturn = (c: BoardCard): BoardCard => {
-    const flag = input.flags.find((f) =>
-      (c.userTaskId && flagMatchesTask(f, USER_TASK_FLAG_TYPE, c.userTaskId))
-      || (!c.userTaskId && c.taskType && c.relatedRecordId && flagMatchesTask(f, c.taskType, c.relatedRecordId)));
+    const flag = flagForCard(c, input.flags);
     return flag && flagReturnedToday(flag, input.nowMs) ? { ...c, returnedToday: true } : c;
   };
 

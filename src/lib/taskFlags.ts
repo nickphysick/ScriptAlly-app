@@ -51,7 +51,9 @@ export function flagMatchesTask(flag: TaskFlag, taskType: string, relatedRecordI
    once, in the lanes, carrying the return chip on the return day only. No stored state flips:
    the same derivation answers differently after midnight. */
 
-const localYmdOf = (ms: number): string => {
+/* exported for the due derivation (`taskDue`), which reads the writer's hold on this same clock —
+   one local day, one function, so a hold that returns "today" here is due today there */
+export const localYmdOf = (ms: number): string => {
   const d = new Date(ms);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
