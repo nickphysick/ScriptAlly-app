@@ -1328,68 +1328,78 @@
 .dash-mode .ws-crumb, .dash-mode .ws-sync { visibility: hidden; }
 
 /**
- * ══ THE NAV ROW IS PART OF THE LOADING STATE (v33.2, Phase 4) ══
+ * ══ THE NAV ROW LOADS WITH THE PAGE — ON THE COVER'S CLOCK, NOT THE DATA'S (v34) ══
  *
- * ⚠️ THE PLACEHOLDERS ARE THE REAL CONTROLS WITH THEIR INK HIDDEN, NOT NEW BLOCKS BESIDE THEM —
- * and that is the pack's own principle applied to the one row it could not reach. "Take every
- * dimension from the live containers": the toggle is 34, the crumb 186.8, the search 574.1 at
- * 1536 and 640 above it, the right cluster 270.5, the row 64. Ghost blocks would have to restate
- * all six, and the search's width is a `flex: 1 1 auto` against a 640px cap — a number that does
- * not exist to be copied, because it is whatever is left after the other five.
+ * The ref: "the skeleton buffers the whole content column — nav row included. Only the rail stays
+ * live." The row is `.ws-pagebar`, the SHELL's element, outside the dashboard's tree entirely, so
+ * the page's cover cannot reach it. What it can do is be read.
  *
- * `visibility: hidden` on the CHILDREN keeps every one of those boxes exactly where it is while
- * removing everything readable; the parent then carries the shimmer. Measured: the row is 64px
- * loading and 64px loaded, at every width, because it is the same row.
+ * ⚠️ `:has(.os-skelpage)` IS THE WHOLE MECHANISM, AND IT REPLACES A FLAG THAT RAN ON A DIFFERENT
+ * CLOCK. v33 keyed this block to a class the shell set from the data flag — the moment DATA lands.
+ * The cover does not leave then: `useSkeleton` holds it at least 500ms, adds a 200ms settle beat
+ * and dissolves it over 250ms. Measured on warm reloads of `main`, three out of three: 13 frames
+ * of the body fully covered under a LIVE nav row, then 17 frames of dissolve with the row already
+ * live — the top of the screen outside the loading state for about half a second on every load.
+ * Every gate passed, because every gate sampled the cover's FIRST frame, where the two clocks
+ * agree. Keyed to the cover's own element there is one clock and nothing to send:
+ *   · cover up (`.os-skelpage` without `.out`) — the row is shapes: ink hidden, nothing reachable;
+ *   · cover dissolving (`.os-skelpage.out`) — the row's shimmer layers dissolve WITH it, on the
+ *     same class and the same 250ms, over live controls, exactly as the body's ghost does;
+ *   · no cover — nothing here applies.
+ * `.dash-mode` scopes it to the route: every page stays mounted, and a refetch under the
+ * dashboard's hidden slot must not grey out another page's row.
  *
- * ⚠️ AND NOTHING IN IT IS REACHABLE. `pointer-events: none` on the row, and `aria-hidden` from the
- * shell — a search field and two buttons that answer nothing are worse than three grey shapes.
+ * ⚠️ THE PLACEHOLDERS ARE STILL THE REAL CONTROLS, and that is why the row's geometry is the live
+ * one: the toggle is 34, the search a `flex: 1 1 auto` remainder against a 640px cap — a number
+ * that does not exist to be copied. Their CHILDREN go `visibility: hidden` (the boxes stay, the
+ * ink goes, and so do they from the accessibility tree and the tab order — which is why no
+ * `aria-hidden` is set from script any more); `color: transparent` reaches the bare text node
+ * `New` beside its icon, which `> *` cannot.
  *
- * ⚠️ THE SHIMMER IS `--sa-sk-*`, THE SAME PAIR THE PAGE'S GHOSTS READ. A second gradient here
- * would drift a quarter-tone from the body beneath it, and nothing grepping either sheet alone
- * would find the pair.
+ * ⚠️ THE SHIMMER IS A LAYER OVER EACH CONTROL — `::after`, which none of them otherwise uses —
+ * BECAUSE A LAYER CAN DISSOLVE AND A BACKGROUND CANNOT. v33 painted the gradient as the control's
+ * own background, and a `background-image` does not interpolate to `none`, so the row could only
+ * ever snap while the body faded. The layer exists for the whole of the cover's life, at full
+ * opacity while it is up, so that `.out` has something to transition FROM; it covers the padding
+ * box, and while the cover is up the control's own fill and border are taken to the base colour,
+ * so the 1px ring around the layer is the sheen's own end stop and each block reads as one shape.
+ * The hairline dividers fade in on the same beat rather than popping.
+ *
+ * ⚠️ THE SHIMMER IS `--sa-sk-*`, THE SAME PAIR THE PAGE'S GHOSTS READ — a second gradient here would
+ * drift a quarter-tone from the body beneath it, and nothing grepping either sheet alone would find
+ * the pair. And `250ms ease` IS `SKELETON_FADE_MS`, locked to the constant in the skeleton spec.
  */
-.dash-loading .ws-pagebar { pointer-events: none; }
-.dash-loading .ws-pagebar .sb-toggle,
-.dash-loading .ws-pagebar .ws-crumb,
-.dash-loading .ws-pagebar .ws-bigsearch,
-.dash-loading .ws-pagebar .ws-fbpill,
-.dash-loading .ws-pagebar .ws-nbtn,
-.dash-loading .ws-pagebar .sp-help {
+.dash-mode .ws-main:has(.os-skelpage:not(.out)) .ws-pagebar { pointer-events: none; }
+.dash-mode .ws-main:has(.os-skelpage:not(.out)) .ws-pagebar :is(.sb-toggle, .ws-bigsearch, .ws-fbpill, .ws-nbtn, .sp-help) {
+  background-color: var(--sa-sk-base);
+  border-color: transparent;
+  box-shadow: none;
+  color: transparent;
+}
+.dash-mode .ws-main:has(.os-skelpage:not(.out)) .ws-pagebar :is(.sb-toggle, .ws-bigsearch, .ws-fbpill, .ws-nbtn, .sp-help) > *,
+.dash-mode .ws-main:has(.os-skelpage:not(.out)) .ws-pagebar .ws-sync { visibility: hidden; }
+.dash-mode .ws-main:has(.os-skelpage) .ws-pagebar :is(.ws-vdiv, .ws-bdiv) { transition: opacity 250ms ease; }
+.dash-mode .ws-main:has(.os-skelpage:not(.out)) .ws-pagebar :is(.ws-vdiv, .ws-bdiv) { opacity: 0; }
+/* the layer — present for the cover's whole life, so the dissolve has somewhere to start */
+.dash-mode .ws-main:has(.os-skelpage) .ws-pagebar :is(.sb-toggle, .ws-bigsearch, .ws-fbpill, .ws-nbtn, .sp-help) { position: relative; }
+.dash-mode .ws-main:has(.os-skelpage) .ws-pagebar :is(.sb-toggle, .ws-bigsearch, .ws-fbpill, .ws-nbtn, .sp-help)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   background-color: var(--sa-sk-base);
   background-image: var(--sa-sk-sheen);
   background-size: 600px 100%;
-  border-color: transparent;
-  box-shadow: none;
   animation: os-sk-shimmer 1.4s linear infinite;
-  /* ⚠️ `color: transparent` AS WELL AS HIDING THE CHILDREN, because `> *` reaches ELEMENTS and
-     `New` is a bare text node beside its icon. The gate caught exactly that: five ghosts and one
-     word still legible in the middle of them. */
-  color: transparent;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 250ms ease;
 }
-/* ⚠️ THE CHILDREN, NOT THE ELEMENTS — hiding the element hides its background, and the background
-   is the shimmer. `visibility` rather than `display` because the layout is the point. */
-.dash-loading .ws-pagebar .sb-toggle > *,
-.dash-loading .ws-pagebar .ws-crumb > *,
-.dash-loading .ws-pagebar .ws-sync,
-.dash-loading .ws-pagebar .ws-bigsearch > *,
-.dash-loading .ws-pagebar .ws-fbpill > *,
-.dash-loading .ws-pagebar .ws-nbtn > *,
-.dash-loading .ws-pagebar .sp-help > * { visibility: hidden; }
-/* the hairline dividers say nothing on their own and would read as stray marks between ghosts */
-.dash-loading .ws-pagebar .ws-vdiv,
-.dash-loading .ws-pagebar .ws-bdiv { visibility: hidden; }
-/* ⚠️ `.ws-sync` IS IN BOTH LISTS DELIBERATELY: it is a text node's parent with no element child,
-   so hiding "its children" reaches nothing. It is hidden outright and carries no shimmer. */
+.dash-mode .ws-main:has(.os-skelpage.out) .ws-pagebar :is(.sb-toggle, .ws-bigsearch, .ws-fbpill, .ws-nbtn, .sp-help)::after { opacity: 0; }
 @media (prefers-reduced-motion: reduce) {
-  .dash-loading .ws-pagebar .sb-toggle,
-  .dash-loading .ws-pagebar .ws-crumb,
-  .dash-loading .ws-pagebar .ws-bigsearch,
-  .dash-loading .ws-pagebar .ws-fbpill,
-  .dash-loading .ws-pagebar .ws-nbtn,
-  .dash-loading .ws-pagebar .sp-help {
+  .dash-mode .ws-main:has(.os-skelpage) .ws-pagebar :is(.sb-toggle, .ws-bigsearch, .ws-fbpill, .ws-nbtn, .sp-help)::after {
     animation-name: none !important;
     background-image: none;
-    background-color: var(--sa-sk-base);
   }
 }
 

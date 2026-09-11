@@ -33,7 +33,7 @@
  *   SA_E2E_PASSWORD      the harness account's password, from .env.local
  */
 import { chromium } from "playwright-core";
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { REF_REL as SHARED_REF_REL } from "./dash-ref.mjs";
@@ -1603,11 +1603,14 @@ async function driven(page) {
  * two different datasets and calling the difference a miss is worse than not looking.
  */
 function plotDiff() {
+  const f = join(ROOT, "run-artifacts", "plotdiff", "plotdiff.json");
+  /* ⚠️ DELETED BEFORE THE RUN, FOR THE SAME REASON AS `spawnedGate` BELOW (v34): a crash shows only as
+     a missing file, and a file left behind by the last run is never missing. */
+  rmSync(f, { force: true });
   const r = spawnSync(process.execPath, [join(ROOT, "scripts", "dash-plotdiff-v31.mjs")], {
     encoding: "utf8", env: { ...process.env, SA_WIDTHS: WIDTHS.join(",") }, timeout: 15 * 60 * 1000,
   });
-  const f = join(ROOT, "run-artifacts", "plotdiff", "plotdiff.json");
-  if (!existsSync(f)) return { error: (r.stderr || "").slice(-300) || "no plotdiff.json" };
+  if (!existsSync(f)) return { error: `exit ${r.status} · ` + ((r.stderr || "").slice(-300) || "no plotdiff.json") };
   try { return { rows: JSON.parse(readFileSync(f, "utf8")) }; } catch (e) { return { error: String(e) }; }
 }
 
@@ -1625,11 +1628,20 @@ function plotDiff() {
  * finding out. Each writes a verdict JSON and this reads it.
  */
 function spawnedGate(script, artefact, envExtra) {
+  const f = join(ROOT, "run-artifacts", artefact);
+  /* ⚠️ THE LAST RUN'S VERDICT IS DELETED BEFORE THIS RUN STARTS (v34). These gates exit 0 whatever
+     their verdict, so a crash shows ONLY as a missing file — and the file was never missing: the
+     previous run's JSON sat where this run's should have been and was read as current. It happened
+     on the v34 pass itself: a four-width run died after its loop, and the file on disk was a
+     one-width RED run from minutes earlier. The next crash could as easily have left a green one.
+     A verdict this run did not write is not this run's verdict. */
+  rmSync(f, { force: true });
   const r = spawnSync(process.execPath, [join(ROOT, "scripts", script)], {
     encoding: "utf8", env: { ...process.env, ...envExtra }, timeout: 20 * 60 * 1000,
   });
-  const f = join(ROOT, "run-artifacts", artefact);
-  if (!existsSync(f)) return { error: (r.stderr || "").slice(-300) || `no ${artefact}` };
+  if (!existsSync(f)) {
+    return { error: `exit ${r.status}${r.signal ? " " + r.signal : ""} · ` + ((r.stderr || "").slice(-300) || `no ${artefact}`) };
+  }
   try { return { verdict: JSON.parse(readFileSync(f, "utf8")) }; } catch (e) { return { error: String(e) }; }
 }
 
@@ -1709,13 +1721,14 @@ function table(result) {
           caught: r.verdict.allCaught, removed: r.verdict.allRemoved,
           noLive: r.verdict.noLive, reducedMotionStill: r.verdict.rmStill, shimmer: r.verdict.animated,
           tkCount: r.verdict.tkCountMatches, tkCols: r.verdict.tkColsMatch,
-          tkTile: r.verdict.tkTileMatches, tkContained: r.verdict.tkContained }
+          tkTile: r.verdict.tkTileMatches, tkContained: r.verdict.tkContained,
+          navHeld: r.verdict.navHeld, navDissolves: r.verdict.navDissolves, navLiveAfter: r.verdict.navLiveAfter }
       : { flush: r.verdict.flush, width18: r.verdict.width18, belowCards: r.verdict.belowCards,
           inert: r.verdict.inert, columnBare: r.verdict.columnBare, railBare: r.verdict.railBare,
           spansColumn: r.verdict.spansColumn, railUnchanged: r.verdict.railUnchanged,
           scrimOffOtherRoute: r.verdict.scrimOffOtherRoute });
     L.push(r.verdict
-      ? `**${name}: ${r.verdict.pass ? "pass" : "FAIL"}** — ${JSON.stringify(brief)}`
+      ? `**${name}: ${(r.verdict.regionsPass ?? r.verdict.pass) ? "pass" : "FAIL"}** — ${JSON.stringify(brief)}`
       : `**${name}: NOT MEASURED — ${r.error}**`);
   }
   /**
@@ -1740,7 +1753,7 @@ const PAGE_GATES = ["ground", "hScroll", "columnBottoms", "blendAncestorTransfor
    them separately is not bookkeeping: a failure has to say WHICH claim broke, and "railBoundary
    failed" over a nine-clause verdict is the object-Object failure message this harness already
    forbids. */
-const SPAWNED_GATES = ["plotRegion", "skeletonRegions", "skeletonEdges", "noLiveInColumn", "ticketFill", "railBoundary", "columnBare"];
+const SPAWNED_GATES = ["plotRegion", "skeletonRegions", "skeletonEdges", "noLiveInColumn", "ticketFill", "navInStep", "railBoundary", "columnBare"];
 const GATE_ROSTER = [...STANDING.map((g) => g.k), ...PAGE_GATES, ...SPAWNED_GATES];
 
 /* ── run ─────────────────────────────────────────────────────────────────────────────────────── */
@@ -2007,6 +2020,13 @@ for (const [name, r, why, clause] of [
   ["ticketFill", result.skeletonGate,
     "the ghost's ticket grid is not the shape the loaded card will be — count, columns, tile height or containment",
     (v) => v.tkCountMatches && v.tkColsMatch && v.tkTileMatches && v.tkContained],
+  /* ⚠️ AND THE NAV ROW'S CLOCK GETS ITS OWN NAME (v34). "The top of the screen is excluded from the
+     skeleton" is a reported symptom, and it lived for a whole version behind a green
+     `noLiveInColumn`, which samples the cover's FIRST frame — the one moment the retired data flag
+     agreed with it. This one is read at every frame of the cover's life. */
+  ["navInStep", result.skeletonGate,
+    "the nav row is not in the body's state at some frame of the cover's life — the top of the screen escaping the loading state",
+    (v) => v.navHeld && v.navDissolves && v.navLiveAfter],
   ["railBoundary", result.railGate,
     "the rail's own treatment moved, or the dashboard's scrim leaked onto another page",
     (v) => v.flush && v.width18 && v.belowCards && v.inert && v.railBare && v.spansColumn

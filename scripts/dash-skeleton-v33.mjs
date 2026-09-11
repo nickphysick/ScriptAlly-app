@@ -37,6 +37,9 @@ function envLocal(k){const f=join(ROOT,".env.local");if(!existsSync(f))return nu
 const REGIONS = ["navrow", "search", "grid", "toprow", "todo-card", "activity-card", "community-tile"];
 const LIVE_IN_BOTH = new Set(["navrow", "search"]);
 const TOL = Number(process.env.SA_SKEL_TOL || 4);
+/* how far the nav row's shimmer may sit from the cover's own opacity on any dissolving frame —
+   both are one class change and one `opacity 250ms ease`, so the honest reading is ~0 */
+const NAV_STEP_TOL = 0.1;
 
 /**
  * ⚠️ THE GHOST'S OWN REGIONS, NOT THE PAGE'S. The skeleton is an OVERLAY with the real page MOUNTED
@@ -257,6 +260,80 @@ function readTickets() {
   };
 }
 
+/**
+ * ⚠️ THE WHOLE LIFE OF THE COVER, EVERY FRAME (v34). Every other reading in this file is taken at
+ * the cover's FIRST frame — which is exactly the moment the retired nav-row mechanism agreed with
+ * it. That mechanism put the row into the loading state from the DATA flag, so the row went live
+ * when data landed and the cover left about half a second later; a snapshot at the start cannot
+ * see that, and `noLiveInColumn` passed through all of it. So this reading is installed before the
+ * page exists and samples every animation frame until the cover has been gone a while, asking one
+ * question of each: is the top of the screen in the same state as the body?
+ *
+ * ⚠️ IT ASKS WHAT THE READER SEES, NOT WHICH MECHANISM PAINTS IT. "Painted" is the shimmer's opacity
+ * over a control whether that shimmer is a layer or the control's own background, and "ink hidden"
+ * is the control's first child hidden AND its own colour transparent (the bare text node `New`).
+ * So the gate reddens the retired mechanism for what it did — live controls over a covered body —
+ * and cannot be satisfied by a particular spelling of the fix.
+ */
+function recordFrames() {
+  const t0 = performance.now();
+  const frames = [];
+  let goneAt = null;
+  window.__navFrames = frames;
+  const read = (el) => {
+    if (!el) return null;
+    const own = getComputedStyle(el);
+    const a = getComputedStyle(el, "::after");
+    const hasLayer = a.content !== "none" && a.content !== "normal";
+    const painted = hasLayer ? parseFloat(a.opacity) : (own.backgroundImage.indexOf("gradient") >= 0 ? 1 : 0);
+    const kid = el.firstElementChild;
+    const inkHidden = (!kid || getComputedStyle(kid).visibility === "hidden") && own.color === "rgba(0, 0, 0, 0)";
+    return { painted, inkHidden };
+  };
+  const tick = () => {
+    const sk = document.querySelector(".os-skelpage");
+    const row = document.querySelector(".ws-pagebar");
+    const f = {
+      t: Math.round(performance.now() - t0),
+      shell: !!document.querySelector(".ws-app.dash-mode"),
+      cover: sk ? (sk.classList.contains("out") ? "out" : "on") : "off",
+      coverOpacity: sk ? parseFloat(getComputedStyle(sk).opacity) : 0,
+      search: read(document.querySelector(".ws-pagebar .ws-bigsearch")),
+      nbtn: read(document.querySelector(".ws-pagebar .ws-nbtn")),
+      rowInert: !!row && getComputedStyle(row).pointerEvents === "none",
+    };
+    frames.push(f);
+    if (f.shell && f.cover === "off" && frames.some((x) => x.cover !== "off") && goneAt === null) goneAt = f.t;
+    if (performance.now() - t0 > 9000 || (goneAt !== null && f.t - goneAt > 400)) { window.__navDone = true; return; }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+/* ⚠️ THREE STATES, EACH WITH ITS POPULATION ASSERTED — zero frames in a state is a failure, not a pass */
+function judgeNav(frames) {
+  const live = frames.filter((f) => f.shell);
+  const on = live.filter((f) => f.cover === "on");
+  const out = live.filter((f) => f.cover === "out");
+  const seen = live.findIndex((f) => f.cover !== "off");
+  const off = seen < 0 ? [] : live.slice(seen).filter((f) => f.cover === "off");
+  const okOn = (f) => !!(f.search && f.nbtn) && f.search.inkHidden && f.nbtn.inkHidden
+    && f.search.painted >= 0.99 && f.nbtn.painted >= 0.99 && f.rowInert;
+  const delta = (f) => Math.max(Math.abs((f.search ? f.search.painted : 0) - f.coverOpacity),
+    Math.abs((f.nbtn ? f.nbtn.painted : 0) - f.coverOpacity));
+  const okOff = (f) => !!(f.search && f.nbtn) && f.search.painted === 0 && f.nbtn.painted === 0
+    && !f.search.inkHidden && !f.nbtn.inkHidden && !f.rowInert;
+  const badOn = on.filter((f) => !okOn(f));
+  const badOut = out.filter((f) => delta(f) > NAV_STEP_TOL);
+  const badOff = off.filter((f) => !okOff(f));
+  return {
+    frames: live.length, on: on.length, out: out.length, off: off.length,
+    badOn: badOn.length, badOut: badOut.length, badOff: badOff.length,
+    maxOutDelta: out.length ? Math.round(Math.max(...out.map(delta)) * 1000) / 1000 : null,
+    firstBadOn: badOn.length ? badOn[0].t : null, firstBadOut: badOut.length ? badOut[0].t : null,
+  };
+}
+
 function settleSlot() {
   let s = document.getElementById("sa-skel-settle");
   if (!s) {
@@ -366,6 +443,15 @@ for (const W of WIDTHS) {
     + "  ·  loaded " + (E.after ? E.after.bodyTop + " → " + E.after.bodyBottom : "?"));
   console.log("   clipped off        : " + (during.clip ? during.clip.worstCut + "px  " + JSON.stringify(during.clip.clippers.filter((c) => c.cutTop || c.cutBottom)) : "not read"));
   console.log("   live in the column : " + (during.live ? during.live.controls + " controls · " + during.live.inked + " inked  " + JSON.stringify(during.live.controlNames) + " " + JSON.stringify(during.live.inkedText) : "not read"));
+  /* ── the whole life of the cover, every frame, on a clean navigation (v34) ── */
+  await page.addInitScript(recordFrames);
+  await page.goto(APP + "/dashboard", { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => window.__navDone === true, null, { timeout: 15000 }).catch(() => {});
+  const nav = judgeNav(await page.evaluate(() => window.__navFrames || []));
+  console.log("   nav row vs cover   : " + nav.frames + " frames · on " + nav.on + " (" + nav.badOn + " out of step)"
+    + " · dissolving " + nav.out + " (" + nav.badOut + " out of step, worst Δ " + nav.maxOutDelta + ")"
+    + " · after " + nav.off + " (" + nav.badOff + " not live)"
+    + (nav.firstBadOn !== null ? " · first live-header frame t=" + nav.firstBadOn : ""));
   rows.push({
     width: W, caught: true, worst: Math.round(worst * 10) / 10,
     settle, settleDuring,
@@ -375,6 +461,7 @@ for (const W of WIDTHS) {
     removed: !after.skeleton,
     tickets: during.skeleton.tickets, stats: during.skeleton.stats,
     tk: { during: ticketsDuring, after: ticketsAfter },
+    nav,
     animated: during.skeleton.animated, blocks: during.skeleton.blocks,
     missing: REGIONS.filter((n) => !during.boxes[n] || !after.boxes[n]),
   });
@@ -411,13 +498,22 @@ for (const W of WIDTHS) {
       const bar = document.querySelector('[data-probe="navrow"]');
       const running = (root) => [...root.querySelectorAll("*")]
         .filter((e) => e.getAnimations && e.getAnimations().length > 0).length;
+      /* ⚠️ THE ROW'S SHIMMER IS AN `::after` LAYER SINCE v34, and `getComputedStyle(e)` cannot see a
+         pseudo-element's animation — the permanent, meaningless `0` this reading was written to end,
+         reintroduced by moving the shimmer. So each element AND its `::after` are read, and the
+         layers are counted: a reduced-motion claim over a row with no layers asserts nothing. */
       const named = (root) => [...root.querySelectorAll("*")]
-        .filter((e) => getComputedStyle(e).animationName !== "none").length;
+        .filter((e) => getComputedStyle(e).animationName !== "none"
+          || getComputedStyle(e, "::after").animationName !== "none").length;
+      const layers = (root) => [...root.querySelectorAll("*")]
+        .filter((e) => { const c = getComputedStyle(e, "::after").content; return c !== "none" && c !== "normal"; }).length;
       return {
         skeletonBlocks: sk.querySelectorAll("*").length,
         skeletonRunning: running(sk), skeletonNamed: named(sk),
         barBlocks: bar ? bar.querySelectorAll("*").length : 0,
-        barRunning: bar ? running(bar) : 0, barNamed: bar ? named(bar) : 0,
+        barLayers: bar ? layers(bar) : 0,
+        barRunning: bar && bar.getAnimations ? bar.getAnimations({ subtree: true }).length : 0,
+        barNamed: bar ? named(bar) : 0,
         skFill: (() => { const b = sk.querySelector(".os-sk"); if (!b) return null;
           const cs = getComputedStyle(b); return cs.backgroundImage + " | " + cs.backgroundColor; })(),
       };
@@ -452,7 +548,7 @@ verdict.tolerance = TOL;
 verdict.reducedMotion = verdictRM;
 /* ⚠️ THE POPULATION IS ASSERTED FIRST — "0 running" is also what an empty scan reports. */
 verdict.rmStill = !!verdictRM && verdictRM.skeletonBlocks > 20 && verdictRM.barBlocks > 3
-  && verdictRM.skeletonNamed === 0 && verdictRM.barNamed === 0;
+  && verdictRM.barLayers >= 5 && verdictRM.skeletonNamed === 0 && verdictRM.barNamed === 0;
 /* ⚠️ A RUN THAT MEASURED A MOVING PAGE IS NOT A GREEN RUN, IT IS AN UNKNOWN ONE. */
 /**
  * ⚠️ THREE CLAIMS ABOUT THE COLUMN'S ENDS (v33.3), each stated over the LOADED reading rather than
@@ -483,18 +579,33 @@ verdict.tkTileMatches = tkRows.every((r) => near(r.tk.during.tileH, r.tk.after.t
 verdict.tkContained = tkRows.every((r) => r.tk.during.overflow !== null
   && r.tk.during.overflow <= 0.5
   && -r.tk.during.overflow <= r.tk.during.tileH + r.tk.during.rowGap);
+/**
+ * ⚠️ THE TOP OF THE SCREEN IS IN THE SAME STATE AS THE BODY AT EVERY FRAME (v34) — held while the
+ * cover is up, dissolving with it within NAV_STEP_TOL of its opacity, live once it is gone.
+ * Every width must have entered all three states; a width that never did proves nothing.
+ */
+verdict.navHeld = rows.length > 0 && rows.every((r) => r.nav && r.nav.on > 0 && r.nav.badOn === 0);
+verdict.navDissolves = rows.every((r) => r.nav && r.nav.out > 0 && r.nav.badOut === 0);
+verdict.navLiveAfter = rows.every((r) => r.nav && r.nav.off > 0 && r.nav.badOff === 0);
+verdict.navInStep = verdict.navHeld && verdict.navDissolves && verdict.navLiveAfter;
 verdict.settled = rows.every((r) => r.settle && r.settleDuring
   && r.settle.suppressed && r.settleDuring.suppressed
   && r.settle.stillRunning === 0 && r.settleDuring.stillRunning === 0);
 verdict.noLive = rows.every((r) => r.live && r.live.controls === 0 && r.live.inked === 0 && r.live.scanned > 50);
+/* ⚠️ THE HARNESS'S OWN `skeletonRegions` CLAUSE, VERBATIM — so this file's printed line and the roster's
+   line cannot disagree about one run. `pass` below is every gate this file feeds; `ticketFill` and
+   `navInStep` each print a line of their own and are not a region failure. */
+verdict.regionsPass = verdict.allCaught && verdict.noneMissing && verdict.allRemoved && verdict.animated
+  && verdict.rmStill && verdict.settled && verdict.worst <= TOL;
 verdict.pass = verdict.allCaught && verdict.noneMissing && verdict.allRemoved
   && verdict.animated && verdict.noLive && verdict.rmStill && verdict.settled
   && verdict.headMatches && verdict.footMatches && verdict.nothingClipped
   && verdict.tkCountMatches && verdict.tkColsMatch && verdict.tkTileMatches && verdict.tkContained
+  && verdict.navInStep
   && verdict.worst <= TOL;
 writeFileSync(join(OUT, "skeleton.json"), JSON.stringify(verdict, null, 2));
 console.log("");
-console.log("GATE skeletonRegions: " + (verdict.pass ? "pass" : "FAIL")
+console.log("GATE skeletonRegions: " + (verdict.regionsPass ? "pass" : "FAIL")
   + "  worst " + verdict.worst + "px across " + verdict.widths + " widths (tol " + TOL + ")"
   + " · caught " + verdict.allCaught + " · removed " + verdict.allRemoved + " · noLive " + verdict.noLive
   + " · reducedMotionStill " + verdict.rmStill + " · settled " + verdict.settled
@@ -506,3 +617,7 @@ console.log("GATE ticketFill: " + (verdict.tkCountMatches && verdict.tkColsMatch
   + "  [" + tkRows.map((r) => r.width + ": ghost " + r.tk.during.count + "x" + r.tk.during.cols
       + " vs whole " + r.tk.after.wholeVisible + "x" + r.tk.after.cols
       + " gap " + (-r.tk.during.overflow)).join(" · ") + "]");
+console.log("GATE navInStep: " + (verdict.navInStep ? "pass" : "FAIL")
+  + "  held " + verdict.navHeld + " · dissolves " + verdict.navDissolves + " · liveAfter " + verdict.navLiveAfter
+  + "  [" + rows.filter((r) => r.nav).map((r) => r.width + ": on " + r.nav.on + "/" + r.nav.badOn + " bad · out "
+    + r.nav.out + "/" + r.nav.badOut + " bad Δ" + r.nav.maxOutDelta + " · off " + r.nav.off + "/" + r.nav.badOff + " bad").join(" · ") + "]");

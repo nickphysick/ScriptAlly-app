@@ -134,7 +134,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   onNavigate, scrollId, scrollRef, onScroll, footFade, fit = false, accountMenu, children,
 }) => {
   const { pathname, search } = useLocation();
-  const { manuscripts, queries, agents, currentUser, updateUserProfile, collectionsReady } = useScriptAllyDb();
+  const { manuscripts, queries, agents, currentUser, updateUserProfile } = useScriptAllyDb();
 
   const hit = useMemo(() => shellHitFor(sections, pathname, search), [sections, pathname, search]);
 
@@ -171,18 +171,20 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
    */
   const dashMode = pathname === "/dashboard";
   /**
-   * ⚠️ THE SHELL READS THE FLAG DIRECTLY RATHER THAN BEING TOLD (v33.2, Phase 4). The dashboard's
-   * loading state is `!collectionsReady`, which is the db context's — the same value
-   * `Dashboard.tsx` passes down as `loading`. So the shell computes it the way it already computes
-   * `dashMode`: from what it can see. The alternative is a signal travelling UPWARD from a child,
-   * which is a second mechanism for a fact both components can already read, and one that goes
-   * stale the day either side forgets to send it.
+   * ⚠️ THE SHELL COMPUTES NO LOADING STATE, AND THAT IS THE FIX (v34). The nav row's loading
+   * treatment is keyed in `workspaceShell.css` to the dashboard's COVER — its `.os-skelpage`
+   * element — through `:has()`, so the row and the body leave the loading state on one clock.
    *
-   * ⚠️ IT EXISTS BECAUSE THE NAV ROW IS PART OF THE LOADING STATE. The row is the shell's, not the
-   * page's — so a page-owned skeleton could only ever cover the body, which is the "live header
-   * above a loading body" the pack is retiring.
+   * This used to read the data flag directly, on the argument that the shell should compute the
+   * loading state "from what it can see". It could see the wrong thing. The flag drops the moment
+   * data lands; the cover (lib/skeletonTiming) holds at least 500ms, adds a 200ms settle beat, and
+   * dissolves over 250ms. Measured on warm reloads: 13 frames of a live nav row above a fully
+   * covered body, then 17 frames of dissolve with the row already live — the top of the screen
+   * outside the loading state for about half a second, on every load, through every gate, because
+   * every gate sampled the cover's FIRST frame, where the two clocks agree. What the shell can see,
+   * with `:has()`, is the cover itself: no signal travels upward, and there is nothing to forget to
+   * send.
    */
-  const dashLoading = dashMode && !collectionsReady;
   const settingsSection: AccountSectionId | null = accountSectionForPath(pathname);
 
   /* ⚠️ THE EXIT GOES TO THE DASHBOARD, NOT `history.back()`. Back is where you CAME from, which on
@@ -458,7 +460,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
        `.ws-panel`, which is a SIBLING of the workspace — so no page can see it from a descendant
        selector, and a page that wants to redistribute the width the panel gave back has nothing to
        key on. Same boolean, second mount, on the common ancestor. */
-    <div className={`ws-app${sidebar.collapsed ? " sb-shut" : ""}${settingsMode ? " set-mode" : ""}${dashMode ? " dash-mode" : ""}${dashLoading ? " dash-loading" : ""}`}>
+    <div className={`ws-app${sidebar.collapsed ? " sb-shut" : ""}${settingsMode ? " set-mode" : ""}${dashMode ? " dash-mode" : ""}`}>
 
       {/* ⚠️ `sb-ready` GATES THE WIDTH TRANSITION (sidebar-collapse pack, Phase 1). The collapsed
           state is read synchronously, so the first render is already narrow — but a transition
@@ -755,11 +757,14 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               greeting and left this row with a wide hole in the middle where the search belongs.
               The v27 gate asked whether exactly one search control existed; it never asked WHERE,
               so a correct answer to the wrong question let the fault through. */}
-          {/* ⚠️ WHILE THE DASHBOARD LOADS THIS ROW IS A SHAPE, AND IT SAYS SO (v33.2, Phase 4).
-              Its controls keep their boxes — that is how the row's geometry stays the live one —
-              but nothing in it is readable or reachable, so announcing a search field and two
-              buttons to a screen reader would offer three controls that do nothing. */}
-          <header className="ws-pagebar" data-probe="navrow" aria-hidden={dashLoading || undefined}>
+          {/* ⚠️ THE ROW LOADS WITH THE PAGE, ON THE PAGE'S CLOCK (v34). While the dashboard's cover is up,
+              `workspaceShell.css` keys this row to the cover's own element through `:has()`: its controls
+              keep their boxes (that is how the row's geometry stays the live one), their ink is hidden, and
+              a shimmer layer sits over each; when the cover dissolves, the layers dissolve with it. Hidden
+              ink is `visibility: hidden`, which also takes the controls out of the accessibility tree and
+              the tab order — so there is no `aria-hidden` here, and none set from a flag, because a flag is
+              what ran on the wrong clock. */}
+          <header className="ws-pagebar" data-probe="navrow">
               {/* ⚠️ THE COLLAPSE TOGGLE SITS AT THE SIDEBAR/CONTENT SEAM — first in the bar, before
                   the crumb — and it does not move between states (sidebar-collapse pack, baked:
                   not in the sidebar footer, not on the panel edge, not hover-revealed; a footer

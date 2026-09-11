@@ -23,6 +23,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
 import { describe, expect, it } from "vitest";
 import { OneScreenSkeleton } from "./OneScreenSkeleton";
+import { SKELETON_FADE_MS } from "../../lib/skeletonTiming";
 
 const css = readFileSync(join(__dirname, "oneScreen.css"), "utf8");
 const dash = readFileSync(join(__dirname, "OneScreenDashboard.tsx"), "utf8");
@@ -290,35 +291,57 @@ describe("the timing is the lib's, not the component's", () => {
 });
 
 /**
- * ⚠️ THE NAV ROW IS PART OF THE LOADING STATE (v33.2, Phase 4), AND IT IS THE SHELL'S ELEMENT.
+ * ⚠️ THE NAV ROW IS PART OF THE LOADING STATE, AND IT LEAVES ON THE COVER'S CLOCK (v34).
  *
- * A page-owned skeleton can only ever cover the body, so the dashboard used to load with a live
- * header above a ghost page — a search field and two buttons that answered nothing, over a page
- * that plainly had no data. The row is `.ws-pagebar`, a child of `.ws-main`; the shell derives the
- * loading state from the same `collectionsReady` the page derives it from, rather than being told.
+ * A page-owned skeleton can only ever cover the body, so the row — `.ws-pagebar`, the shell's
+ * element — has to be put into the loading state from outside the page. v33 did that from the data
+ * flag, which drops the moment data lands while the cover holds for its minimum, its settle beat
+ * and its dissolve: measured, about half a second of live header above a covered body on every
+ * warm load. These locks were retargeted rather than rebaselined, and the law they state is ONE
+ * CLOCK: the shell computes no loading state, and the row reads the cover's own element through
+ * `:has()`. The timing itself is measured every frame in `scripts/dash-skeleton-v33.mjs`
+ * (`navInStep`), because no source lock can see a clock.
  */
 describe("the nav row loads with the page", () => {
-  it("⚠️ the shell READS the flag rather than being handed it", () => {
-    expect(shell).toContain("collectionsReady");
-    expect(shell).toContain("const dashLoading = dashMode && !collectionsReady;");
-    /* published beside the other modes, on the same element, by the same expression shape */
-    expect(shell).toContain('${dashLoading ? " dash-loading" : ""}');
+  const strip = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
+  const NAV_ON = ".dash-mode .ws-main:has(.os-skelpage:not(.out)) .ws-pagebar";
+  const NAV_ANY = ".dash-mode .ws-main:has(.os-skelpage) .ws-pagebar";
+  const NAV_OUT = ".dash-mode .ws-main:has(.os-skelpage.out) .ws-pagebar";
+  const CONTROLS = ":is(.sb-toggle, .ws-bigsearch, .ws-fbpill, .ws-nbtn, .sp-help)";
+  const ruleAt = (src: string, head: string) => {
+    const at = src.indexOf(head);
+    expect(at, `rule not found: ${head}`).toBeGreaterThan(-1);
+    return src.slice(at, src.indexOf("}", at));
+  };
+
+  it("⚠️ the shell computes NO loading state — the data flag is not the cover's phase", () => {
+    const code = strip(shell);
+    expect(code).not.toContain("collectionsReady");
+    expect(code).not.toContain("dashLoading");
+    expect(code).not.toContain("dash-loading");
+    expect(strip(shellCss)).not.toContain(".dash-loading");
   });
 
-  it("⚠️ the row is a shape while it loads, and says so", () => {
-    expect(shell).toContain('data-probe="navrow" aria-hidden={dashLoading || undefined}');
-    expect(shellCss).toContain(".dash-loading .ws-pagebar { pointer-events: none; }");
-  });
-
-  /* ⚠️ THE PLACEHOLDERS ARE THE REAL CONTROLS, INK HIDDEN — which is why the row's geometry is the
-     live one. Ghost blocks would restate six widths, one of which (the search) is a flex remainder
-     that does not exist as a number to copy. */
-  it("⚠️ hides the CHILDREN, paints the parents, and kills the bare text nodes", () => {
-    expect(shellCss).toMatch(/\.dash-loading \.ws-pagebar \.ws-bigsearch > \*/);
-    expect(shellCss).toMatch(/\.dash-loading \.ws-pagebar \.ws-nbtn > \*/);
-    expect(shellCss).toContain("{ visibility: hidden; }");
+  it("⚠️ while the cover is up the row is a shape: inert, ink hidden, keyed to the cover's element", () => {
+    const c = strip(shellCss);
+    expect(c).toContain(`${NAV_ON} { pointer-events: none; }`);
+    expect(c).toContain(`${NAV_ON} ${CONTROLS} > *`);
     /* `New` is a bare text node beside its icon, so `> *` cannot reach it */
-    expect(shellCss).toContain("color: transparent;");
+    expect(ruleAt(c, `${NAV_ON} ${CONTROLS} {`)).toContain("color: transparent;");
+  });
+
+  /* ⚠️ A LAYER, BECAUSE A BACKGROUND CANNOT DISSOLVE — and it must exist while the cover is up, or
+     `.out` has nothing to transition from and the row snaps while the body fades. */
+  it("⚠️ the shimmer is a layer for the cover's whole life, and it dissolves on the cover's `.out`", () => {
+    const c = strip(shellCss);
+    const layer = ruleAt(c, `${NAV_ANY} ${CONTROLS}::after {`);
+    expect(layer).toContain('content: "";');
+    expect(layer).toContain("opacity: 1;");
+    expect(layer).toContain("pointer-events: none;");
+    /* the SAME number the hook unmounts the cover on — a different one leaves the top of the screen
+       out of step with the body for the difference */
+    expect(layer).toContain(`transition: opacity ${SKELETON_FADE_MS}ms ease`);
+    expect(c).toContain(`${NAV_OUT} ${CONTROLS}::after { opacity: 0; }`);
   });
 
   /**
@@ -337,9 +360,11 @@ describe("the nav row loads with the page", () => {
   });
 
   it("⚠️ reduced motion reaches the row too, not only the page", () => {
-    const at = shellCss.indexOf("@media (prefers-reduced-motion: reduce) {", shellCss.indexOf(".dash-loading .ws-pagebar"));
+    const c = strip(shellCss);
+    const at = c.indexOf("@media (prefers-reduced-motion: reduce) {", c.indexOf(`${NAV_ANY} ${CONTROLS}::after {`));
     expect(at).toBeGreaterThan(-1);
-    const block = shellCss.slice(at, shellCss.indexOf("\n}", at));
+    const block = c.slice(at, c.indexOf("\n}", at));
+    expect(block).toContain(`${NAV_ANY} ${CONTROLS}::after`);
     expect(block).toContain("animation-name: none !important");
     expect(block).toContain("background-image: none");
   });
