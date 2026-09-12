@@ -25,7 +25,7 @@ test.setTimeout(900_000);
 
 const OUT = "run-artifacts/list-round.txt";
 /** the last recorded count — a run producing fewer is red, whatever its cases say */
-const FLOOR = 16;
+const FLOOR = 17;
 
 const REF = readFileSync("design-refs/todo-list-view-contract.html", "utf8");
 const UNIT_SRC = REF.match(/function unit\(d\)\{[^\n]*\}/)?.[0] ?? "";
@@ -44,7 +44,7 @@ const utc = (ymd: string) => { const [y, m, d] = ymd.split("-").map(Number); ret
 const daysOver = (ymd: string) => Math.round((utc(TODAY) - utc(ymd)) / 86400000);
 
 interface Row {
-  key: string; h: number; group: string; cat: string; task: string;
+  key: string; h: number; group: string; cat: string; task: string; agent: string;
   chipNone: boolean; chipBorder: string; mon: string; day: string; year: string;
   lovCls: string; lovText: string; fig: string; unit: string; figColor: string; figWeight: string;
 }
@@ -59,12 +59,15 @@ async function readRows(page: Page, scope: string): Promise<Row[]> {
       const chip = r.querySelector(".lchip");
       const lov = r.querySelector(".lov");
       const b = lov?.querySelector("b");
+      const n = r.querySelector(".lag .n");
+      const small = n?.querySelector("small");
       return {
         key: r.getAttribute("data-rowkey") ?? "",
         h: Math.round(r.getBoundingClientRect().height * 10) / 10,
         group: txt(p?.querySelector(".g-lbl")),
         cat: txt(r.querySelector(".ltask .s")),
         task: txt(r.querySelector(".ltask .h")),
+        agent: txt(n).replace(txt(small), ""),
         chipNone: !!chip?.classList.contains("none"),
         chipBorder: chip ? getComputedStyle(chip).borderTopStyle : "",
         mon: txt(r.querySelector(".lchip .m")),
@@ -240,6 +243,19 @@ test("the list view — Phase 2", async ({ page }) => {
     add("P2.8c · Due: within every group, the dates run soonest first, undated last",
       Object.values(byGroup(s3)).every((rs) => rs.every((r, i) => i === 0 || dueKey(r) >= dueKey(rs[i - 1]))),
       Object.entries(byGroup(s3)).map(([g, rs]) => g + ": " + rs.map(dueKey).join(" ")).join(" | "));
+
+    /* ⚠️ THE TASK CELL DOES NOT NAME THE AGENT, AND THIS IS A DELIBERATE DEVIATION FROM THE
+       CONTRACT'S OWN SAMPLE STRINGS. The artefact's rows read "No response from Jonathan Marsh"
+       and "Still nothing after your nudge" beside an Agent column that already says Jonathan Marsh
+       — the name twice in one row, which is exactly the fault Phase 4 removed from the card. The
+       app's deed vocabulary is agent-free ("Consider closing", "Worth a nudge") and stays that way.
+       Those strings are a mockup's invented content rather than a rule about the column, so the
+       deviation is LOCKED here rather than left for the next reader diffing the two to rediscover. */
+    const named = s3.filter((r) => r.agent && r.agent !== "You" && r.task.includes(r.agent));
+    add("P2.8e · no row's task names the agent its own Agent cell names",
+      s3.filter((r) => r.agent).length > 3 && named.length === 0,
+      s3.filter((r) => r.agent).length + " rows name an agent · offenders "
+      + JSON.stringify(named.map((r) => [r.agent, r.task])));
 
     /* the stored view moved with each click — the SAME stored view the Sort menu edits */
     const stored = await readListView();

@@ -784,14 +784,33 @@ test("Phase 5 — the drawer over the grid, and the split in List", async ({ pag
       "data-on " + rest.on + " · aria-hidden " + rest.hidden + " · onScreen " + rest.onScreen
         + " · left " + rest.left + " · scrim tabindex " + rest.scrimTab);
 
-  /* open a ticket */
-  const opened = await page.evaluate(`(() => {
-    const t = __saVisRoot().querySelector(".tkt");
+  /**
+   * Open a ticket, and take the card's OWN identity with it.
+   *
+   * ⚠️ THIS USED TO TAKE THE TICKET'S HEADLINE AND REQUIRE THE DRAWER'S LABEL TO EQUAL IT, and that
+   * was a string comparison standing in for an identity claim. It held only while the grid's
+   * headline WAS the card's title; the list round made the headline the ACT — "Reply to the offer"
+   * — because the contract's card names the person once, in its foot. The drawer still names the
+   * task ("Noah Bright has made an offer"), so both were right about the same card and the
+   * assertion failed on two correct derivations disagreeing about a spelling.
+   *
+   * What "named for the task it holds" actually claims is identity: this drawer is about THIS card
+   * and not the one beside it. So the card hands over the person its foot names, and the claim is
+   * that the label names that person AND that a different card gives a different label.
+   */
+  const pick = (i: number) => page.evaluate(`((i) => {
+    const all = [...__saVisRoot().querySelectorAll(".tkt")]
+      .filter((t) => t.getBoundingClientRect().height > 0);
+    const t = all[i];
     if (!t) return null;
-    const title = ((t.querySelector(".ttl") || {}).textContent || "").trim();
+    const n = t.querySelector(".tfoot .n");
+    const small = n ? n.querySelector("small") : null;
+    const who = n ? n.textContent.replace(small ? small.textContent : "", "").trim() : "";
     t.click();
-    return title;
-  })()`) as string | null;
+    return { who: who, ttl: ((t.querySelector(".ttl") || {}).textContent || "").trim() };
+  })(${i})`) as Promise<{ who: string; ttl: string } | null>;
+
+  const opened = await pick(0);
   await page.waitForTimeout(1200);
   const open = await drawerState();
 
@@ -801,9 +820,24 @@ test("Phase 5 — the drawer over the grid, and the split in List", async ({ pag
       "data-on " + open.on + " · onScreen " + open.onScreen + " · left " + open.left
         + " · panes inside " + open.pane + " · scrim " + open.scrimOn);
 
+  /* a second card, so the claim cannot be satisfied by a label that never changes */
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(600);
+  const second = await pick(1);
+  await page.waitForTimeout(1200);
+  const open2 = await drawerState();
+  /* and back to the first, so the phases below run on the card they were written against */
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(600);
+  await pick(0);
+  await page.waitForTimeout(1200);
+
+  const names = (label: string, who: string) => !!who && !!label && label.includes(who);
   add("P5.2 · the drawer is named for the task it holds",
-      !!opened && open.label === opened, "label " + JSON.stringify(open.label)
-        + " · ticket " + JSON.stringify(opened));
+      !!opened && !!second && names(open.label, opened.who)
+        && names(open2.label, second.who) && open.label !== open2.label,
+      "first " + JSON.stringify(open.label) + " for " + JSON.stringify(opened?.who)
+        + " · second " + JSON.stringify(open2.label) + " for " + JSON.stringify(second?.who));
 
   /* ⚠️ ONE PANE ON SCREEN, NOT TWO. The split hosts the pane in List view and the drawer hosts it
      everywhere else; rendering both would put two panes on screen for one card, each with its own

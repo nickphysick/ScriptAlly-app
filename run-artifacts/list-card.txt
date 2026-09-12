@@ -1,0 +1,16 @@
+list round · Phase 4 · the grid's card — 1440×900
+
+PASS P4.1 · no card names its agent twice
+        30 cards · []
+PASS P4.2 · no card's title contains any agent's name — the title is the act
+        ["Reply to the offer","Send your full manuscript","Send your partial","Worth a nudge","Consider closing","Fill in what you sent","Chase the Blaine partial","Reread the O'Rourke pages before Thursday"]
+PASS P4.3 · the status is a dot and its word on the TOP line, never in the foot
+        26 cards state a status · wrong: []
+PASS P4.4 · the foot names the person, with their agency beneath
+        26 name a person · 26 state an agency · misplaced [] · [["Noah Bright","Bright Literary"],["Ottoline Frayn","Frayn Agency"],["Marcus Reed","Reed & Partners"],["Ana Duarte","Duarte Words"]]
+PASS P4.5 · every card's verb is one the contract prints
+        30 of 30 · ["Decide","Mark sent","Log a nudge","Fill it in","Tick it off"]
+PASS P4.6 · and it is quiet at rest — the pink is the hover's
+        ["rgb(179, 164, 148)"]
+
+6/6

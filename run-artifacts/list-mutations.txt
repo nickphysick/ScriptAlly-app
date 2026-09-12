@@ -81,3 +81,91 @@ M2.12 · the retired verb button comes back to the row
 M2.13 · the undated sort first instead of last
     exit 1 · Tests 1 ⎯⎯⎯⎯⎯⎯⎯
     RED  × src/lib/todoListView.test.ts > the column heads sort by what the columns print (list round, Phase 2) > Overdue by: real days, longest first — then due today, the soonest ahead, the undated last
+
+## Phase 2 · the list view — the RENDERED page (`listRound.measure.ts`, 16 claims)
+
+M2.1 · the row's five cells lose a track — the header and the row stop agreeing
+    (proved · see run-artifacts/list-round.txt at the time · P2.1b/P2.1c red)
+M2.5 · the header's tracks stop matching the row's — `.lhd` 220px → 200px
+    14/16
+    RED  P2.1b · the header and the row resolve the SAME six tracks
+             header 5px 481px 200px 92px 170px 40px · row 5px 461px 220px 92px 170px 40px
+    RED  P2.1c · each head sits over its own column, to the pixel
+             heads [306,805,1023,1133] · cells [306,785,1023,1133]
+    ⚠️ THIS WAS "NOTHING WENT RED" FOR TWO RUNS AND THE CAUSE WAS NOT THE MUTATION. `auth.setup`
+    died on `auth/quota-exceeded`, the measurement never started, and the runner read the PREVIOUS
+    run's report off disk. Re-run with the report deleted first and the session reused — two claims,
+    and the second is the stronger one: a head standing 20px off its own column.
+
+## Phase 3 · the landing state (`todoListView.test.ts`, `taskListWide.test.tsx`, rendered)
+
+M3.1 · "this week" swallows a month                          RED (whenBucket, 3 cases)
+M3.2 · the heads run out of chronological order              RED (WHEN_ORDER)
+M3.3 · the default goes back to the urgency partition        RED (VIEW_DEFAULT)
+M3.4 · finished work is admitted again                       RED (keptGroups, over every grouping)
+M3.5 · no head takes the Overdue colour                      RED (rendered)
+M3.6 · the Overdue head is painted ink                       RED (rendered)
+M3.7 · a first visit lands on urgency instead of When        RED · 3/8 · five claims
+M3.8 · the Overdue head is painted like every other head     RED · 7/8 · one claim
+
+## Phase 4 · the grid's card (`taskTicket.test.tsx` + `listRound.measure.ts`, 6 rendered claims)
+
+M4.1 · the headline goes back to the card's own title, which names the agent
+    4/6 · RED P4.1 (the agent named twice) · RED P4.2 (the title names them)
+M4.3 · the status leaves the top line for the foot            4/6 · RED P4.3
+M4.4 · the foot names the person and drops the agency beneath 5/6 · RED P4.4
+    ⚠️ P4.4 COULD NOT BE REDDENED UNTIL IT WAS FIXED. It read "the foot names the person, with their
+    agency beneath" and asserted only the person — which the population floor five lines above
+    already throws on, so the agency half had no fault of its own to fail on. The first two attempts
+    at this mutation both died on that floor. It asserts the agency now.
+M4.5 · a verb the contract does not print                     5/6 · RED P4.5
+M4.6 · the verb is loud at rest rather than on hover          5/6 · RED P4.6
+M4.7 · the headline goes back to the card's own title         RED (unit · the title is the ACT)
+M4.8 · the status is a dot with no word                       RED (unit · after the fix below)
+    ⚠️ UNPROVED TWICE FIRST, AND THE ASSERTION WAS THE FAULT. `StatusDot` renders `aria-label` AND
+    `title` carrying the status name, so a card drawing the dot and NO word satisfied a plain
+    `toContain` over markup. Stripping `<svg>…</svg>` was not enough — the WRAPPING SPAN holds both
+    attributes. The claim is made against the text with every tag removed now, which is the only
+    form of it an attribute cannot satisfy.
+M4.9  · the verb becomes a nested control inside the card      RED (unit, 2 cases)
+M4.10 · a verb the contract does not print                     RED (unit, 2 cases)
+M4.11 · a writer's own item stops saying what finishes it      RED (unit)
+M4.12 · the snipped panel loses the only place it names anybody RED (unit)
+M4.13 · the verb never takes the pink under the pointer        RED (unit)
+
+## Phase 6 · the diff lock (`viewsDiff.measure.ts`)
+
+M6.1 · a selector leaves the parts table
+    NO REPORT — and that is correct: the coverage case is a PRECONDITION and refuses to measure.
+    Error: design-refs/todo-list-and-card.html: grid declares selectors this lock does not compare
+    and does not name a home for
+M6.2 · the APP bends a value the contract states (`.tkt` radius 12 → 10)
+    244 assertions · DIFF grid .card · Error: grid .card → .tkt differs from the contract
+M6.3 · the APP moves an element without changing the moved one's own properties (the foot's avatar
+       widened to 60px)
+    244 assertions · PLACE grid .card · .card .in · .card .foot
+    Error: grid .card → .tkt sits somewhere else inside `.cards`
+    ⚠️ M6.2 and M6.3 are the APP's side. The contract's side — a bent value and a moved element on
+    the ref's own copy — is `viewsDiff`'s second test and was already proved; both directions now.
+
+## Phase 7 · the one red this round caused, and the one claim it added
+
+M7.1 · the drawer is named the same thing whatever it holds (`SlideOver label` → a constant)
+    RED  · P5.2 · the drawer is named for the task it holds
+             first "Task" for "Noah Bright" · second "Task" for "Ottoline Frayn"
+    ⚠️ THE CLAIM IT REPLACED COULD NOT BE REDDENED BY THIS AT ALL — it compared the drawer's label
+    against the ticket's headline, so a drawer named the same thing for every card would have
+    matched a ticket headline that was also the same, and a drawer named for the WRONG card would
+    have passed the moment the two derivations happened to agree. It asserts identity now: two
+    cards, two labels, each naming the person its own card's foot names.
+
+M7.2 · the task cell names the agent the Agent cell already names
+    16/17
+    RED  · P2.8e · no row's task names the agent its own Agent cell names
+             33 rows name an agent · 26 offenders, e.g. ["Ottoline Frayn","Send your full
+             manuscript — Ottoline Frayn"], ["Noah Bright","Reply to the offer — Noah Bright"]
+    ⚠️ THE FIRST ATTEMPT AT THIS MUTATION NEVER APPLIED, AND THE RUN AFTER IT READ "PASS". The
+    anchor matched a `function` declaration where the source has an arrow `const`, the edit silently
+    did nothing, and the measurement then reported a clean 17/17 about an unmutated build — the
+    "nothing went red" shape arriving by a third route. The assert in the edit script is what named
+    it; the run that followed would have recorded a proof that never happened.

@@ -1,0 +1,20 @@
+list round · Phase 3 · the landing state — 1440×900 · today 2026-09-12
+
+PASS P3.1 · a fresh visit lands grouped by When, in the contract's order
+        ["Overdue","Due this week","Coming up","No date"]
+PASS P3.2 · the Overdue head is burgundy, and no other head is
+        [["Overdue","rgb(124, 58, 42)"],["Due this week","rgb(58, 28, 20)"],["Coming up","rgb(58, 28, 20)"],["No date","rgb(58, 28, 20)"]]
+PASS P3.3 · every row sits under the head its own date names — Overdue only past, Coming up only beyond the week
+        Overdue 25 · Due this week 2 · Coming up 1 · No date 5
+PASS P3.4 · sorted by Overdue by, longest first, inside every head
+        Overdue: 457 185 180 148 125 54 49 47 47 45 43 40 35 31 23 20 19 18 13 8 8 8 8 4 1 | Due this week: 0 -4 | Coming up: -12 | No date: · · · · ·
+PASS P3.5 · today is Due this week, four days ahead is Due this week, twelve days ahead is Coming up
+        seed-due-today → Due this week · seed-due-ahead4 → Due this week · seed-due-ahead12 → Coming up
+PASS P3.6 · a later choice replaces the landing state
+        ["Agent requests","Nudges","Gone quiet","Housekeeping","Your tasks"]
+PASS P3.7 · and it persists across a reload — the stored view wins over the default
+        ["Agent requests","Nudges","Gone quiet","Housekeeping","Your tasks"]
+PASS P3.8 · what persisted is the view the menu edited
+        "category"
+
+8/8
