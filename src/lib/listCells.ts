@@ -2,119 +2,101 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE LIST ROW'S FIVE CELLS — ported from `design-refs/todo-three-views-contract.html`.
+ * THE LIST ROW'S DATE CELLS — ported from `design-refs/todo-list-view-contract.html` (list round,
+ * Phase 2; that contract supersedes the list in every earlier one).
  *
- * The contract's list is the Query Centre's table: Task · Agent · Asked · Where it stands ·
- * Actions. Three of those need a derivation, and this is it — the verb the row offers, the
- * sentence about where the query stands, the mono line beneath it, and the date chip's two halves.
+ * The row is Task · Agent · Due · Overdue by · ⋯, and two of those cells need a derivation of their
+ * own: the Due chip's month, day and year, and the Overdue-by figure. Both are PRESENTATIONS of one
+ * fact — `taskDue`'s day — so the chip and the figure beside it cannot come to name different days.
  *
- * ⚠️ THE SPAN IS `listFragment`'s, NEVER RE-DERIVED. That function already answers "how long, in
- * what unit" for every bucket, and the board's card and the grid's ticket both read it. A second
- * derivation here is how a list comes to say 15 months beside a board saying 16 weeks about one
- * query — and both would be defensible on their own terms, which is what makes it expensive.
+ * ⚠️ THE UNIT FUNCTION IS THE CONTRACT'S, LINE FOR LINE, AND ITS TEST RUNS THE CONTRACT'S OWN COPY.
+ * It is deliberately NOT `elapsedParts`, which is the app's duration formatter everywhere else and
+ * scales on different boundaries (weeks until 91 days, months until 730) — at 60 days one says
+ * "9 weeks" and the other "2 months". The contract states the list's figure as its own function, so
+ * the list's figure is that function; reusing the neighbour would have been a translation.
  *
- * ⚠️ AND THE COPY IS THE CONTRACT'S OWN, EXCEPT WHERE THE CONTRACT HAS NO CARD OF THAT KIND. The
- * ref draws six task verbs — Send · Nudge · Close · Quiet · Fix · Note — and this app buckets by
- * six that are not quite the same six: it has `decide` (an offer or an R&R) where the ref has
- * `Quiet` (a silence after a nudge). Every string below is the ref's except `decide`'s, which is
- * built from words the card already carries — its own `Came in` anchor — rather than invented.
+ * ⚠️ AND THE RETIRED CELLS WENT WITH THEIR COLUMNS. `listStands`, `listSub`, `dateChip` and the row's
+ * verb table rendered only the "Where it stands" and "Actions" cells, which this contract does not
+ * draw. Deleted rather than left unmounted — a derivation with no reader is the next surface's
+ * accidental source, and the grid card's verb (Phase 4) is its own derivation over its own words.
  */
-import { cardBucket, type Bucket } from "./todoBuckets";
-import { listFragment, type RowInputs } from "./taskListRow";
+import { overdueDays, type DueFact } from "./taskDue";
 
-/**
- * The row's contextual verb.
- *
- * ⚠️ A VERB PER BUCKET, EXHAUSTIVELY — never a default. An unrecognised bucket is the case nobody
- * has thought about, and this repo's standing rule is that such a case does nothing rather than
- * offering the nearest neighbour's action. Declared as a `Record` so a new bucket fails to compile.
- */
-export const LIST_VERB: Record<Bucket, string> = {
-  send: "Mark sent",
-  chase: "Log a nudge",
-  close: "Close it",
-  decide: "Decide",
-  fix: "Fill it in",
-  note: "Tick it off",
-};
+/** the contract's own month table — the chip's CSS uppercases it, so the DOM holds "Sep" */
+const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-/** `.l1` — a plain sentence with one emphasised fragment, as the contract writes it */
-export interface StandsLine { before: string; strong: string; after: string }
-
-const EM_DASH = "—";
-
-/**
- * ⚠️ THE BUCKET IS DERIVED HERE, NOT PASSED IN — and the first form of this took it as an argument.
- * `listFragment` derives its own from the card, so a caller handing in a different one would have
- * had the sentence and the figure beneath it describing two different kinds of task, silently. Its
- * own unit test caught it: a fixture card that buckets as `fix` returned a send's sentence over a
- * fix's figure. One derivation, one answer.
- */
-export function listStands(i: RowInputs, anchorDate: string | null): StandsLine {
-  const bucket = cardBucket(i.card);
-  const on = anchorDate && anchorDate !== EM_DASH ? anchorDate : "";
-  switch (bucket) {
-    /* the ref's own: the MATERIAL is the emphasis, because what is owed is what has not gone */
-    case "send": return { before: "", strong: i.partial ? "Partial" : "Full", after: " — not yet sent" };
-    case "chase": return on
-      ? { before: "Their window closed ", strong: on, after: "" }
-      : { before: "Past their stated window", strong: "", after: "" };
-    case "close": return on
-      ? { before: "No reply since ", strong: on, after: "" }
-      : { before: "No reply on record", strong: "", after: "" };
-    /* ⚠️ THE ONE LINE THE REF DOES NOT DRAW. Its `Quiet` card is a silence after a nudge; this
-       app's `decide` is an offer or an R&R, which is a different thing entirely and must not
-       borrow that sentence. Both fragments here are already on the card. */
-    case "decide": return on
-      ? { before: "Came in ", strong: on, after: "" }
-      : { before: "Came in", strong: "", after: "" };
-    case "fix": return { before: "Materials ", strong: "not recorded", after: "" };
-    case "note": return { before: "Ticking it off is what finishes it", strong: "", after: "" };
-    default: { const unhandled: never = bucket; return unhandled; }
-  }
+export interface OverdueFigure {
+  /** "13" · "7" · "1½" — never contains a space */
+  figure: string;
+  /** "days" · "weeks" · "months" · "years" — already agreed with the figure */
+  unit: string;
 }
 
 /**
- * `.l2` — the mono sub-line.
+ * The contract's `unit(d)`, ported by value.
  *
- * The figure and its unit come from `listFragment`; the phrasing around them is the ref's. Where
- * the fragment has no figure at all it states the absence in its own words rather than printing a
- * sentence with a hole in it.
+ * Days under 14; then weeks while the ROUNDED week count is under 9; then months (a 30.4-day month)
+ * while the rounded month count is under 18; then years to the nearest quarter. The rounding is the
+ * contract's and it is the whole of where the boundaries fall — 59 days is "8 weeks" and 60 is
+ * "2 months"; 531 is "17 months" and 532 is "1½ years".
+ *
+ * ⚠️ NO SUB-WORDS. The contract's `.ov .w` is `display: none` — a word it stopped drawing — so no
+ * third element exists here to hide.
  */
-export function listSub(i: RowInputs, anchorDate: string | null): string {
-  const bucket = cardBucket(i.card);
-  const f = listFragment(i);
-  if (bucket === "fix") {
-    const on = anchorDate && anchorDate !== EM_DASH ? anchorDate : "";
-    return on ? `imported ${on}` : f.lead;
-  }
-  if (f.absent || !f.figure) return f.lead;
-  const span = `${f.figure} ${f.tail ?? ""}`.trim();
-  switch (bucket) {
-    case "send": return `${span} since request`;
-    case "chase": return `${span} past window`;
-    case "close": return `silent ${span}`;
-    case "decide": return `open ${span}`;
-    case "note": return `added ${span}`;
-    default: return span;
-  }
+export function overdueUnit(days: number): OverdueFigure {
+  const d = Math.abs(days);
+  if (d < 14) return { figure: String(d), unit: d === 1 ? "day" : "days" };
+  const w = Math.round(d / 7);
+  if (w < 9) return { figure: String(w), unit: w === 1 ? "week" : "weeks" };
+  const mo = Math.round(d / 30.4);
+  if (mo < 18) return { figure: String(mo), unit: mo === 1 ? "month" : "months" };
+  const q = Math.round((d / 365.25) * 4) / 4;
+  const quarter: Record<string, string> = { "0": "", "0.25": "¼", "0.5": "½", "0.75": "¾" };
+  return { figure: `${Math.floor(q)}${quarter[String(q % 1)]}`, unit: "years" };
 }
 
 /**
- * The Query Centre's date chip, as two halves.
+ * The Overdue-by cell — four states, and the burgundy belongs to exactly one of them.
  *
- * ⚠️ IT SPLITS THE DATE THE ROW ALREADY HOLDS rather than re-formatting from a timestamp. The
- * anchor is whatever `listRowInputs` resolved — "1 August", "14 March 2024" — and the chip is a
- * PRESENTATION of it, so a chip and the sentence beside it cannot come to name two different days.
+ * ⚠️ COLOUR IS OWNERSHIP, NEVER MAGNITUDE. An overdue figure is burgundy because the WRITER owes the
+ * date, and ink because the date is the agent's window — whatever the number says. A silence that has
+ * run two years is a fact about the agency, not a debt, and painting it burgundy for being large
+ * would tell the writer off for somebody else's inaction. So the state carries `owner` and nothing
+ * about the size of the figure.
+ *
+ * `today` has no owner colour at all (the contract draws it plain), `ahead` is muted whoever owns it,
+ * and `none` is the dateless row — no numeral, the words "no date".
  */
-/** the row's verb, from the card — one derivation, as above */
-export const listVerb = (i: RowInputs): string => LIST_VERB[cardBucket(i.card)];
+export type OverdueCell =
+  | { kind: "none" }
+  | { kind: "today" }
+  | { kind: "ahead"; figure: string; unit: string }
+  | { kind: "over"; figure: string; unit: string; owner: "owed" | "theirs" };
 
-export function dateChip(anchorDate: string | null): { mon: string; day: string } {
-  const raw = (anchorDate ?? "").trim();
-  if (!raw || raw === EM_DASH) return { mon: "", day: EM_DASH };
-  const parts = raw.split(/\s+/);
-  const day = parts[0] ?? EM_DASH;
-  const mon = parts[1] ? parts[1].slice(0, 3).toUpperCase() : "";
-  return { mon, day };
+export function overdueCell(due: DueFact, todayYmd: string): OverdueCell {
+  if (!due.ymd) return { kind: "none" };
+  const n = overdueDays(due.ymd, todayYmd);
+  if (n === 0) return { kind: "today" };
+  const u = overdueUnit(n);
+  if (n < 0) return { kind: "ahead", figure: u.figure, unit: `${u.unit} to go` };
+  /* a dated fact is never `none` — `dueOwner` answers none only for a null day — so anything that is
+     not the writer's clock is painted as the agent's, never as the dateless row */
+  return { kind: "over", figure: u.figure, unit: u.unit, owner: due.owner === "owed" ? "owed" : "theirs" };
+}
+
+/**
+ * The Query Centre's calendar chip — month over day, and the year only when it is not this year.
+ *
+ * ⚠️ A NULL DAY IS ITS OWN CHIP, NOT AN EMPTY ONE. The contract draws a dashed chip reading "none",
+ * which says the record holds no date; a blank chip would say the app failed to show one.
+ */
+export type DueChip =
+  | { kind: "none" }
+  | { kind: "date"; mon: string; day: string; year: string | null };
+
+export function dueChip(ymd: string | null, todayYmd: string): DueChip {
+  if (!ymd) return { kind: "none" };
+  const [y, m, d] = ymd.split("-").map(Number);
+  const year = String(y);
+  return { kind: "date", mon: MON[m - 1], day: String(d), year: year === todayYmd.slice(0, 4) ? null : year };
 }

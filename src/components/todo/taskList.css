@@ -2,166 +2,140 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * taskList — THE PORT of `design-refs/todo-tasklist-contract.html`.
+ * taskList — the list view, ported from `design-refs/todo-list-view-contract.html` (list round,
+ * Phase 2; the card's chrome and chips predate it and are the drawer round's).
  *
- * ⚠️ EVERY DECLARATION IS THE CONTRACT'S, MECHANICALLY EXTRACTED FROM ITS `<style>` BLOCK. Two
- * edits, the same two the pane port needed and for the same reasons:
+ * ⚠️ EVERY ROW AND CELL DECLARATION IS THE CONTRACT'S, BY VALUE. Two edits, the same two every port
+ * on this page has needed:
  *
- * ⚠️ 1 · EVERY RULE IS SCOPED UNDER `.tlc`, AND THE CLASS NAMES ARE UNTOUCHED. `.row`, `.pill`,
- * `.grp`, `.dot` and `.c` are words a standalone page can afford and an app bundle cannot — the
- * pane port already carries its own `.row` and `.pill` under `.tpn`. The card itself IS `.tlc`,
- * so `.listcard`'s rule lands on the scope root rather than nesting inside itself.
+ * ⚠️ 1 · EVERY RULE IS SCOPED UNDER `.tlc`, AND THE INNER CLASS NAMES ARE THE CONTRACT'S. `.h`, `.s`,
+ * `.g`, `.n`, `.m`, `.d`, `.y`, `.u` are words a standalone page can afford and an app bundle cannot,
+ * and the three the app already addressed keep their recorded names — `.row` for the contract's
+ * `.r`, `.grp` for its `.gh`, `.lhd` for its `.hd` (143 assertions in 41 suites address `.tlc .row`).
+ * The new cells take the same `l` prefix the last port set: `.lov` is `.ov`, `.lmore` is `.more`.
  *
- * ⚠️ 2 · `:root` IS SCOPED TOO — `--ink`, `--muted`, `--hair`, `--pink` and `--burg` all exist
- * app-wide at different values, and redefining them at `:root` would repaint every page.
+ * ⚠️ 2 · `:root` IS SCOPED TOO — `--ink`, `--muted`, `--hair`, `--paper`, `--edge` all exist app-wide
+ * at different values, and redefining them at `:root` would repaint every page. The block below is
+ * the contract's own `:root`, less the tokens the app already owns under other names: its three
+ * family papers (`--now1`/`--house1`/`--yours1`) are the app's `--u-*-1`, which the ticket's tags and
+ * the pane's pills read, so a glyph and that task's tag are the same paper by construction.
  *
- * ⚠️ AND THE CONTRACT'S `max-height: calc(100vh - 130px)` IS NOT PORTED. It is how a standalone
- * page caps a card against the viewport; here the card lives in a workspace column that already
- * has a definite height, and a second cap measured from the WINDOW would ignore the header, the
- * crumb and the shell's own padding. The column gives the height; the card fills it.
+ * ⚠️ THE ONE-BASE-RULE LAW HOLDS: one rule per selector, a modifier states only what differs, and no
+ * grouped selector a lock could slice the wrong half of.
  */
 
 .tlc {
-  --ground:#f7f4ee; --white:#ffffff; --field:#fdfbf7;
+  --ground:#f7f4ee; --white:#ffffff; --field:#fdfbf7; --paper:#fdfaf5;
   --ink:#241209; --ink2:#3a1c14; --muted:#9c8878; --muted2:#8a7a6c;
-  --hair:#e7ddd2; --hair2:#e0d5c8; --edge:#e6dccd;
+  --hair:#e7ddd2; --hair2:#e0d5c8; --edge:#e8e0d8;
   --burg:#7c3a2a; --sage:#5a6e58;
   --pink:#f5e2da; --pink-b:#e8c8bc;
 }
 
-/* the card, at the contract's own radius and lift (ref `.listv`) */
+/* the card, at the contract's own radius and lift (ref `.box`) */
 .tlc { background:var(--white);border:1px solid var(--edge);border-radius:16px; box-shadow:0 1px 2px rgba(58,28,20,0.04),0 6px 20px rgba(58,28,20,0.05); overflow:hidden;display:flex;flex-direction:column; }
-/* ⚠️ TWO OF THE CONTRACT'S OWN DECLARATIONS ARE DROPPED FROM THIS RULE, AND BOTH ARE THE SAME
-   MISTAKE IF KEPT — a standalone page sizing itself against the window.
-   `width: 392px` is the design width, and it belongs to the COLUMN: the card fills what it is
-   given, and `.tdw-split`'s rail track carries the 392 so there is one number rather than two that
-   have to agree. `max-height: calc(100vh - 130px)` measured from the WINDOW, which here would
-   ignore the header, the crumb and the shell's padding; the column already has a definite height
-   and the card fills it. */
+/* ⚠️ THE COLUMN GIVES THE HEIGHT; THE CARD FILLS IT. A standalone page caps a card against the window;
+   here the card lives in a workspace column that already has a definite height. */
 .tlc { height:100%; min-height:0; width:100%; }
 .tlc .l-bar { display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--hair);flex:0 0 auto; }
 .tlc .l-icon { cursor:pointer;width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--white);border:0.5px solid var(--hair2);border-radius:9px;color:var(--muted2);transition:all .16s; }
 .tlc .l-icon:hover { border-color:#c9a89e;color:var(--burg); }
-/* ── THE CARD'S OWN TOOLBAR IS GONE, AND SO ARE ITS RULES (QC-chassis round, Phase 1) ──────────
-   `.l-toolbar`, `.l-tbsp`, `.meterMini` (track/legend/b) and the `.cb` cluster went with
-   `TodoToolbar.tsx`; `.l-search` went with the card's search box. The page owns all of it now: the
-   meter's three families became the header's seven tiles, the three actions became the header's
-   one primary plus the rail, and the search moved to the page toolbar so there is one of it.
-
-   Deleted rather than left inert, because a styled class with no renderer is one a future element
-   wears by accident — and because a replacement that is ADDED leaves the original reachable, which
-   this repo has three recorded instances of. Verified against the RENDERED page, not the source:
-   a source scan reported `grp` and `l-icon` as dead too, and both are live behind interpolated
-   class names. `l-fbadge`, `l-slbl`, `l-wide` and `fchip` were left alone deliberately — they are
-   the drawer round's filter chrome and may be conditional on filters this probe did not set. ── */
 .tlc .l-body { overflow-y:auto;flex:1 1 auto;min-height:0;padding-bottom:4px; }
 .tlc .l-body::-webkit-scrollbar { width:9px; }
 .tlc .l-body::-webkit-scrollbar-thumb { background:#e2d6c8;border-radius:5px;border:2px solid var(--white); }
-/* the head is a DISCLOSURE now (tightened round, Phase 2): click folds the section, the chevron
-   says which way, the count stays on the closed head */
-/* ── the group head, as the Query Centre draws it (three-views round, Phase 2; ref `.lgh`) ──────
-   ⚠️ THREE THINGS ON WHITE: the name in Playfair, the count in a plain bordered pill, and one
-   hairline to the right edge. What went was the coloured dot, the mono caps and the 9px tracking —
-   the head had been a system label, and the contract makes it a heading. The `::after` IS the
-   contract's `.rule`; it was already here doing that job, so it stays as a pseudo-element rather
-   than gaining an element the ref only needs because it has no `::after` to hand.
-   ⚠️ THE CHEVRON IS A FOURTH CHILD AND THE CONTRACT DRAWS THREE. This head is a DISCLOSURE — the
-   tightened round made it collapse the section — and the ref's is not, so the ref has nothing to
-   say about it. Recorded rather than dropped: removing it would take a working control off the
-   page to satisfy a drawing that never had one. */
-.tlc .grp { position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:12px; padding:22px 22px 12px;background:var(--white);cursor:pointer;user-select:none;border:0;width:100%;text-align:left; }
+
+/* ── the column header, outside the scroller (ref `.hd` / `.hd button`) ──────────────────────────
+   ⚠️ THE SAME SIX TRACKS AS THE ROW, STATED ON EACH — never through a shared token or a grouped
+   selector, so each rule reads whole. A head sits over its own column because the two templates
+   are the same list, and the header and the row are both padded 0 on the left and 20 on the right. */
+.tlc .lhd { display:grid;grid-template-columns:5px minmax(0,1.5fr) 220px 92px 170px 40px;column-gap:18px;align-items:center;padding:11px 20px 11px 0;border-bottom:1px solid var(--hair);background:var(--paper);box-sizing:border-box;flex:0 0 auto; }
+.tlc .lhd button { background:none;border:0;padding:0;text-align:left;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.15em;text-transform:uppercase;color:#b3a494;font-weight:500;display:inline-flex;align-items:center;gap:6px;cursor:pointer; }
+.tlc .lhd button .arr { font-size:8px;color:#d0c4b4; }
+.tlc .lhd button.on { color:var(--ink2); }
+.tlc .lhd button.on .arr { color:var(--burg); }
+
+/* ── the group head, as the Query Centre draws it (ref `.gh`) ─────────────────────────────────────
+   ⚠️ THREE THINGS ON WHITE: the name in Playfair, a plain bordered count, and one hairline to the
+   right edge. The `::after` IS the contract's `.rule` — a pseudo-element the head already had for
+   exactly that job — and the chevron is this app's recorded fourth child: the head is a disclosure
+   and the contract's is not. Sticky and white so a scrolled list keeps its heading. */
+.tlc .grp { position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:10px;padding:16px 20px 8px;background:var(--white);cursor:pointer;user-select:none;border:0;width:100%;text-align:left;box-sizing:border-box; }
 .tlc .grp::after { content:'';height:1px;background:#e9e0d2;flex:1; }
 .tlc .grp .g-cv { font-size:10px;color:#c0b0a0;transition:transform .2s;transform-origin:center;align-self:center;order:3; }
 .tlc .grp.closed .g-cv { transform:rotate(-90deg); }
-.tlc .grp .g-lbl { font-family:'Playfair Display',serif;font-size:21px;color:var(--ink2);font-weight:500;letter-spacing:0;text-transform:none;white-space:nowrap; }
-.tlc .grp .g-n { font-family:'Playfair Display',serif;font-size:13px;color:var(--ink2);border:1px solid var(--edge);border-radius:999px;padding:2px 11px;background:var(--white);letter-spacing:0;text-transform:none; }
-/* ⚠️ ONE BASE RULE FOR `.tlc .row`, AND THE COLUMNS ARE THE ONLY THING THE TWO WIDTHS ARGUE
-   ABOUT (tightened round, Phase 2 — the contract's 44px SINGLE-LINE row, both states). The rest
-   grid is `todo-belongs.html`'s own track list; folded is its `.stage.open .row`, which drops
-   the agent cell. Everything else — the height, the selection border, the hover — is shared, so
-   a change to the row's feel cannot land in one width and not the other. The HEIGHT is stated,
-   not inherited from padding: a 44px row in both states is the whole density claim, and the
-   fold no longer changes any row's height (the drawer round's row-anchor restore now restores
-   an unchanged position — harmless, and its comment says so). */
-/* ── the row is the Query Centre's table row (three-views round, Phase 2; ref `.lrow`) ──────────
-   ⚠️ THE ROW KEEPS THE NAME `.row` AND THE CONTRACT CALLS IT `.lrow` — a recorded deviation, and
-   the only one in this port. 143 assertions across 41 measurement suites address `.tlc .row`, and
-   renaming it would be a change of SPELLING with no claim behind it, which is exactly what this
-   repo's locks exist to refuse. Every child inside it is the contract's own word.
-   ⚠️ AND THE HEIGHT IS THE CONTENT'S NOW. It was a fixed 44px, which is why the row could only
-   ever hold one line per cell; the contract's row is two lines in three of its five cells. */
-.tlc .row { display:grid;grid-template-columns:6px minmax(0,1.5fr) 210px 96px minmax(0,1.15fr) 178px;gap:18px;align-items:center; padding:16px 22px;cursor:pointer; border-bottom:1px solid #f3ece3;transition:background .13s;position:relative;box-sizing:border-box; }
-.tlc .row:last-child { border-bottom:0; }
-/* the status edge, out of flow so it runs the row's full height whatever the tallest cell is */
-.tlc .ledge { position:absolute;left:0;top:0;bottom:0;width:5px; }
+.tlc .grp .g-lbl { font-family:'Playfair Display',serif;font-size:19px;color:var(--ink2);white-space:nowrap; }
+.tlc .grp .g-n { font-family:'Playfair Display',serif;font-size:12px;color:var(--ink2);border:1px solid var(--edge);border-radius:999px;padding:1px 9px; }
 
-.tlc .ltask { min-width:0; }
-.tlc .ltask .t { font-family:'Playfair Display',serif;font-size:17.5px;color:var(--ink2);font-weight:500;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-.tlc .ltask .k { display:inline-flex;align-items:center;gap:7px;margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.13em;text-transform:uppercase;font-weight:500; }
-.tlc .ltask .k.now { color:var(--burg); }
-.tlc .ltask .k.house { color:#4c5f4a; }
-.tlc .ltask .k.yours { color:#8a7440; }
-.tlc .ltask .k svg { width:12px;height:12px; }
+/* ── the row (ref `.r`) ───────────────────────────────────────────────────────────────────────────
+   ⚠️ 62px, STATED, AND THE BOX MODEL WITH IT. The contract's `*{box-sizing:border-box}` puts the 1px
+   rule above the row inside its 62px; this declares it rather than trusting an ancestor. The rule is
+   on the TOP now — the contract's — so there is no last-child exception to state. */
+.tlc .row { display:grid;grid-template-columns:5px minmax(0,1.5fr) 220px 92px 170px 40px;column-gap:18px;align-items:center;height:62px;padding:0 20px 0 0;border-top:1px solid #f3ece3;cursor:pointer;position:relative;box-sizing:border-box;transition:background .13s; }
+.tlc .row:hover { background:#fdfbf8; }
+.tlc .row.focus { background:#fbf8f3; }
+.tlc .row.sel { background:#f5e6df; }
+/* the status edge — the first grid cell, stretched to the row's height (ref `.e`) */
+.tlc .ledge { align-self:stretch; }
 
-.tlc .lag { display:flex;align-items:center;gap:11px;min-width:0; }
-.tlc .lagtx { min-width:0; }
-.tlc .lag .n { font-family:'Playfair Display',serif;font-size:16px;color:var(--ink2);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-.tlc .lag .a { font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:#6a584a;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+/* the task: the family glyph, the act, the category (ref `.t` / `.g` / `.t .h` / `.t .s`) */
+.tlc .ltask { display:flex;align-items:center;gap:11px;min-width:0; }
+.tlc .ltask .g { width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;border:1.5px solid currentColor;box-sizing:border-box; }
+.tlc .ltask .g.now { color:var(--burg);background:var(--u-now-1); }
+.tlc .ltask .g.house { color:#4c5f4a;background:var(--u-house-1); }
+.tlc .ltask .g.yours { color:#8a7440;background:var(--u-yours-1); }
+.tlc .ltask .tx { min-width:0; }
+.tlc .ltask .h { font-size:14px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.tlc .ltask .s { font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted2);margin-top:3px; }
 
-.tlc .lchip { width:52px;border:1px solid var(--edge);border-radius:9px;overflow:hidden;text-align:center; }
-.tlc .lchip .m { font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.12em;text-transform:uppercase;color:#6a584a;background:var(--paper);padding:3px 0; }
-.tlc .lchip .d { font-family:'Playfair Display',serif;font-size:17px;color:var(--ink2);padding:3px 0 5px; }
+/* the person: disc, name, and the agency beneath it (ref `.a` / `.av` / `.a .n` / `.a .n small`) */
+.tlc .lag { display:flex;align-items:center;gap:9px;min-width:0; }
+.tlc .lag .av { width:30px;height:30px;border-radius:50%;background:#efe4dc;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(124,58,42,0.18);flex-shrink:0;box-sizing:border-box; }
+.tlc .lag .av.yours { background:var(--u-yours-1);color:#8a7440;border-color:#e8dcc0; }
+.tlc .lag .n { font-size:12.5px;font-weight:500;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0; }
+.tlc .lag .n small { display:block;font-size:10.5px;color:var(--muted2);font-weight:300; }
 
-.tlc .lstands { min-width:0;display:flex;align-items:center;gap:12px; }
-/* ⚠️ THE URGENT GLOW LIVES ON THE STAMP, NOT THE ROW — a whole row pulsing in a table reads as the
-   table redrawing itself; a mark pulsing reads as one task asking for attention. */
-.tlc .stamp { width:46px;height:46px;border-radius:50%;border:1px dashed #d8cbbb;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:0.08em;text-transform:uppercase;color:#b3a494;line-height:1.35;text-align:center; }
-.tlc .stamp b { font-family:'Playfair Display',serif;font-size:13px;color:var(--ink2);font-weight:500;letter-spacing:0; }
-.tlc .stamp b.late { color:var(--burg); }
-.tlc .lstands .txt { min-width:0; }
-.tlc .lstands .l1 { font-size:12.5px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-.tlc .lstands .l1 b { font-weight:600; }
-.tlc .lstands .l2 { font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#b3a494;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+/* ── Due — the Query Centre's calendar chip (ref `.chip`) ────────────────────────────────────────── */
+.tlc .lchip { width:52px;border:1px solid var(--edge);border-radius:9px;overflow:hidden;text-align:center;background:var(--white);box-sizing:border-box; }
+.tlc .lchip .m { font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.12em;text-transform:uppercase;color:#6a584a;background:var(--paper);padding:3px 0;border-bottom:1px solid var(--hair); }
+.tlc .lchip .d { font-family:'Playfair Display',serif;font-size:17px;color:var(--ink2);padding:3px 0 2px;line-height:1; }
+.tlc .lchip .y { font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:0.08em;color:#b3a494;padding-bottom:3px; }
+/* ⚠️ A DATELESS TASK IS A DASHED CHIP READING "none" — the record holds no date, and the chip says so
+   rather than drawing a blank that reads as the app failing to show one */
+.tlc .lchip.none { border-style:dashed; }
+.tlc .lchip.none .d { font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;padding:8px 0; }
 
-.tlc .lact { display:flex;align-items:center;gap:7px;justify-content:flex-end; }
-.tlc .lact .go { cursor:pointer;height:34px;padding:0 15px;border-radius:9px;background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-size:12px;font-weight:500;white-space:nowrap; }
-.tlc .lact .ic { cursor:pointer;width:34px;height:34px;border-radius:9px;border:1px solid var(--edge);background:var(--white);color:var(--muted2);font-size:12px;display:inline-flex;align-items:center;justify-content:center; }
-.tlc .lact .ic:hover { border-color:#c9a89e;color:var(--burg); }
+/* ── Overdue by — a numeral and a unit, no sub-words (ref `.ov`) ────────────────────────────────────
+   ⚠️ BURGUNDY IS OWNERSHIP AND NOTHING ELSE. `.owed` is the writer's clock; the agent's window has no
+   rule of its own and stays ink; ahead of today is muted whoever owns it. No class here is keyed to
+   the size of the number, and `listCells.overdueCell` carries no magnitude to key one on. */
+.tlc .lov { line-height:1.05;white-space:nowrap; }
+.tlc .lov b { font-family:'Playfair Display',serif;font-size:22px;color:var(--ink2);font-weight:500;margin-right:4px; }
+.tlc .lov .u { font-size:12.5px;color:var(--ink2);font-weight:500; }
+.tlc .lov.owed b { color:var(--burg); }
+.tlc .lov.owed .u { color:var(--burg); }
+.tlc .lov.ahead b { color:var(--muted2);font-weight:400; }
+.tlc .lov.ahead .u { color:var(--muted2);font-weight:400; }
+.tlc .lov.none { font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0; }
 
-/* ── the column header, outside the scroller (ref `.lhd`) ── */
-.tlc .lhd { display:grid;grid-template-columns:6px minmax(0,1.5fr) 210px 96px minmax(0,1.15fr) 178px;gap:18px;align-items:center;padding:16px 22px 12px;border-bottom:1px solid var(--hair); }
-.tlc .lhd span { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.16em;text-transform:uppercase;color:#b3a494;font-weight:500; }
-.tlc .lhd .right { text-align:right; }
+/* ⋯ — the row's one control, the snooze door (ref `.more`). A button, so it takes the reset a span
+   does not need; it fills its 40px track so `text-align: right` puts the glyph on the edge. */
+.tlc .lmore { background:none;border:0;padding:0;width:100%;cursor:pointer;font-family:inherit;color:#c8bcae;font-size:16px;text-align:right; }
+.tlc .lmore:hover { color:var(--burg); }
 
-/* the track lists — a token on the card, so the row never learns which state it is in */
-/* ⚠️ THE TRACK LIST IS ON THE ROW NOW, NOT A TOKEN ON THE CARD (three-views round, Phase 2). The
-   `--row-cols` pair existed so one base rule could serve two states; the contract's row states its
-   own six tracks, and the folded state overrides that one property. Same law — ONE base rule, the
-   modifier stating only what differs — expressed without the indirection. */
-.tlc.folded .row { grid-template-columns:6px minmax(0,1fr) 46px; }
+/* ── folded: a task is open in the split and the card is narrow ──────────────────────────────────
+   ⚠️ THE ROW KEEPS THE TASK AND HOW FAR PAST ITS DATE IT IS — the two things a narrow column can hold.
+   The header folds with it, so a head never sits over a column that is not drawn. The modifier states
+   only the track list; the row's height, rule and feel are the base rule's in both states. */
+.tlc.folded .row { grid-template-columns:5px minmax(0,1fr) 92px; }
+.tlc.folded .lhd { grid-template-columns:5px minmax(0,1fr) 92px; }
+.tlc.folded .lag { display:none; }
+.tlc.folded .lchip { display:none; }
+.tlc.folded .lmore { display:none; }
+.tlc.folded .lhd .h-agent { display:none; }
+.tlc.folded .lhd .h-due { display:none; }
+.tlc.folded .lhd .lhd-more { display:none; }
 
-/* ── the wide row's three cells ─────────────────────────────────────────────────────────── */
-.tlc .cell { font-size:12px;color:var(--ink2);font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0; }
-.tlc .r-ag { display:flex;align-items:center;gap:8px; }
-.tlc .r-ag .r-agname { white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0; }
-/* the contract's `.av.s` — a person-shaped disc, blush with a hairline burgundy edge */
-.tlc .av { display:inline-flex;align-items:center;justify-content:center;border-radius:50%; background:#efe4dc;color:var(--burg);font-family:'JetBrains Mono',monospace;font-weight:500; letter-spacing:0.02em;flex-shrink:0;border:1px solid rgba(124,58,42,0.18);overflow:hidden; }
-.tlc .av.s { width:22px;height:22px;font-size:8px; }
-/* ⚠️ THE ROW'S AVATAR CARRIES NO `.s`, so it needs its own size — without one it collapsed to its
-   text and dragged the agent's name 11px left of where the contract puts it. The ref's `.av` is
-   24×24 at 8px, which is what the ticket's foot already uses. */
-.tlc .lag .av { width:24px;height:24px;font-size:8px; }
-
-/* ⚠️ THE ACTION STRIP IS RETIRED (three-views round, Phase 2). It was a sibling that dropped
-   beneath the focused row carrying Open · Snooze · Dismiss; the contract puts the row's verbs IN
-   the row, as an Actions cell, always visible. All three survive there — the contextual primary
-   opens, `×` dismisses, `⋯` is the snooze door — and the key hints stay in the footer, which is
-   the one surface that teaches them. `tlDropIn`, the strip's own entrance, goes with it rather
-   than sitting unreferenced. */
-
-/* ── the view's chrome — the badge, the label, the chips (drawer round, Phase 6) ────────── */
-/* every name minted here was grepped first (the `.unitrow` lesson): l-fbadge, l-slbl, l-wide,
-   l-chips, fchip, l-clear — all clean across the todo and materials sheets */
+/* ── the view's chrome — the badge, the label, the chips (drawer round, Phase 6) ────────────────── */
 .tlc .l-fbadge { position:absolute;top:-5px;right:-5px;min-width:15px;height:15px;padding:0 4px;border-radius:999px; background:var(--burg);color:#fff;font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:500; display:inline-flex;align-items:center;justify-content:center;border:1.5px solid var(--white); }
 /* the badge SUPERSEDES the bare active dot — two markers on one button would say one thing twice */
 .tlc .l-icon.active .l-fbadge ~ .l-icondot, .tlc .l-icon .l-fbadge ~ .l-icondot { display:none; }
@@ -176,62 +150,28 @@
 .tlc .fchip .x:hover { opacity:1; }
 .tlc .l-clear { margin-left:auto;font-size:10.5px;color:var(--muted2);cursor:pointer;background:none;border:0;padding:0; border-bottom:1px dashed rgba(124,58,42,0.3); }
 
-/* ── the receipt window's row (drawer round, Phase 5; retimed for the 44px row) ─────────── */
-/* ⚠️ THE ROW STATES ITS HEIGHT NOW, so the fade animates the real property — 44 to 0 — instead
-   of the max-height stand-in the auto-height row needed. `held` gives the transition its
-   from-value; `leaving` is the fade. Applied only to the ONE held row, never rows at large. */
+/* ── the receipt window's row (drawer round, Phase 5) ────────────────────────────────────────────
+   ⚠️ THE ROW STATES ITS HEIGHT, so the fade animates the real property — 62 to 0 — rather than a
+   max-height stand-in. `held` gives the transition its from-value; `leaving` is the fade. */
 .tlc .row.held { transition:opacity .3s ease,height .3s ease,padding .3s ease,border-width .3s ease; }
 .tlc .row.held.leaving { opacity:0;height:0;padding-top:0;padding-bottom:0;border-width:0;overflow:hidden;pointer-events:none; }
 
-/* ── folded: the drawer is open and the card is 520px — SAME 44px single-line row, minus the
-   agent cell (the deed's inline `.r-who` still names them). The contract's .stage.open .row. ── */
-/* folded, the row keeps the deed and the wait numeral — the two things a 520px column can hold */
-.tlc.folded .lag, .tlc.folded .lchip, .tlc.folded .lact { display:none; }
-.tlc.folded .lstands .txt { display:none; }
-.tlc .row:hover, .tlc .row.focus { background:#fbf8f3; }
-.tlc .row.sel { background:#f5e6df;border-left-color:var(--burg); }
-/* the strip joins its row: the host row's own rule goes transparent so the pair reads as one */
-.tlc .row.focus, .tlc .row.sel { border-bottom-color:transparent; }
-/* one line, both states — the deed with the agent INLINE and muted (the contract's .deed span) */
-.tlc .r-deed { font-size:12.5px;font-weight:500;color:var(--ink);line-height:1.3; white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0; }
-.tlc .r-deed .r-who { font-weight:300;color:var(--muted2);margin-left:6px; }
-
-.tlc .r-fig { text-align:right;min-width:0;white-space:normal;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.07em;line-height:1.55;color:var(--muted2);text-transform:uppercase; }
-.tlc .r-fig b { font-family:'Playfair Display',serif;font-size:15px;letter-spacing:0;text-transform:none;font-weight:500;color:var(--ink2);padding-right:1px;font-variant-numeric:lining-nums; }
-.tlc .r-fig.hot b { color:var(--burg); }
-.tlc .r-fig.absent { color:#c0b0a0;font-size:8.5px;letter-spacing:0.09em; }
 .tlc .l-foot { display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-top:1px solid var(--hair);flex:0 0 auto;background:var(--white); }
-.tlc .l-foot .c { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted); }
-.tlc .l-foot .c b { color:var(--ink2);font-weight:500; }
-.tlc .l-foot a { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none; }
-/* ⚠️ THE FOUR LIST KEYS, TAUGHT IN THE FOOT (tightened round, Phase 2; the contract's `.keys`).
-   It shipped as bare markup with no rule for one commit and rendered at the page's inherited
-   size — the largest thing in the footer, teaching keys in a voice louder than the count beside
-   them. Found in a screenshot, which is the only instrument that shows it: every assertion about
-   the footer was about its text, and the text was right. */
+/* ⚠️ THE FIVE LIST KEYS, TAUGHT IN THE FOOT (tightened round, Phase 2), at the mono caption's size —
+   the footer's teaching must not be louder than the list it teaches. */
 .tlc .l-foot .keys { display:flex;gap:9px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted); }
 .tlc .l-foot .keys kbd { font-family:'JetBrains Mono',monospace;font-size:8px;background:var(--field);border:1px solid var(--hair2);border-radius:4px;padding:1px 5px;color:#a89684;text-transform:none;letter-spacing:0; }
-/* ⚠️ AND THEY GO WHEN THE DRAWER FOLDS THE CARD TO 520 — measured in a screenshot, not reasoned:
-   five caps and their words beside the count and Export CSV wrapped BOTH of those onto two
-   lines, so the row's only two pieces of information were broken up to make room for its
-   teaching. The hints are chrome and the count is a fact; at the width where one must go, it is
-   the chrome. They return the moment the drawer closes. */
+/* ⚠️ AND THEY GO WHEN THE DRAWER FOLDS THE CARD — at the width where one must go, it is the chrome. */
 .tlc.folded .l-foot .keys { display:none; }
 
-/* ⚠️ THE ACTIVE FUNNEL LIVES HERE, NOT IN `todoFrame.css`, BECAUSE THE BUTTON DOES. The frame
-   contract states `.l-icon.active` and its badge dot, and porting them under `.tdf` put the rule in
-   a scope the toolbar is not inside — the class landed on the element and painted nothing.
-   Measured: `cls="l-icon active"` with `background: rgb(255,255,255)`. A scoped port has to follow
-   the element, not the document the rule was read from. */
+/* ⚠️ THE ACTIVE FUNNEL LIVES HERE, NOT IN `todoFrame.css`, BECAUSE THE BUTTON DOES — a scoped port has
+   to follow the element, not the document the rule was read from. */
 .tlc .l-icon { position: relative; }
 .tlc .l-icon.active { background:var(--pink);border-color:var(--pink-b);color:var(--burg); }
 .tlc .l-icon.active::after { content:'';position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--burg);border:1.5px solid var(--white); }
 
-/* ⚠️ THE SET-ASIDE DOT MARKS CONTENT, NOT AN ACTIVE STATE. `.l-icon.active::after` says "this
-   control is open"; this says "there is something waiting behind it", which the writer needs to
-   know WITHOUT opening it — the door is always reachable now, so without a mark a full ledger and
-   an empty one look identical. It is muted rather than burgundy so it reads as a note, not an
-   alert, and it yields to the active dot when the panel is open. */
+/* ⚠️ THE SET-ASIDE DOT MARKS CONTENT, NOT AN ACTIVE STATE — muted rather than burgundy so it reads as
+   a note, and it yields to the active dot when the panel is open. */
 .tlc .l-icon .l-icondot {
   position: absolute; top: -2px; right: -2px; width: 7px; height: 7px; border-radius: 50%;
   background: var(--muted2); border: 1.5px solid var(--white);

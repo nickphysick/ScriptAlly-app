@@ -16,6 +16,7 @@ import { BoardCard } from "./todoBoard";
 import { TaskGroup } from "./todoGroups";
 import { Bucket, cardBucket } from "./todoBuckets";
 import { CATEGORIES, CATEGORY_LABEL, taskCategory } from "./todoCategory";
+import { overdueDays } from "./taskDue";
 
 /** the three urgency groups, by the id the page already uses */
 export type GroupId = "urgent" | "housekeeping" | "yours";
@@ -35,7 +36,10 @@ export const TYPE_ORDER: Bucket[] = ["send", "decide", "chase", "close", "fix", 
  * GROUPING, where it gathers rather than interleaves; a stored `sort: "manuscript"` falls back to
  * the default through `parseView`, which is what an unrecognised value has always done.
  */
-export type SortId = "needs-you" | "longest" | "newest" | "agent" | "agency" | "type";
+/* ⚠️ `over`, `due` AND `task` ARE THE LIST CONTRACT'S COLUMN HEADS (list round, Phase 2), with `agent`
+   the fourth — each head sorts by exactly what its column prints. They lead the union because the
+   Sort menu enumerates it in order, and the contract's heads are the list's own vocabulary. */
+export type SortId = "over" | "due" | "task" | "agent" | "needs-you" | "longest" | "newest" | "agency" | "type";
 /**
  * ⚠️ GROUPING IS THE PRIMARY SORT, AND THE PANEL SAYS SO BY PUTTING IT FIRST. `grouped` is the
  * urgency partition the page already draws; `agent` turns the list into "what do I owe each
@@ -51,21 +55,53 @@ export type GroupingId = "grouped" | "agent" | "type" | "category" | "manuscript
 export type DirectionId = "asc" | "desc";
 
 export const SORT_LABEL: Record<SortId, string> = {
+  over: "Overdue by",
+  due: "Due date",
+  task: "Task A–Z",
+  agent: "Agent A–Z",
   "needs-you": "Priority",
   longest: "Longest waiting",
   newest: "Most recent activity",
-  agent: "Agent A–Z",
   agency: "Agency A–Z",
   type: "Task type",
 };
 /** the panel's sub-lines — the contract's own words, empty where it draws none */
 export const SORT_DESC: Record<SortId, string> = {
+  over: "Longest overdue first, then what falls due soonest",
+  due: "Soonest first",
+  task: "",
   "needs-you": "Urgency groups, then longest waiting",
   longest: "By how long the ball has been in someone’s court",
   newest: "By the last thing that happened on the query",
   agent: "", agency: "",
   type: "Send · nudge · close · fill in · note",
 };
+
+/** the four sortable column heads, in the contract's left-to-right order */
+export type HeadKey = "task" | "agent" | "due" | "over";
+export const HEAD_KEYS: HeadKey[] = ["task", "agent", "due", "over"];
+export const HEAD_LABEL: Record<HeadKey, string> = { task: "Task", agent: "Agent", due: "Due", over: "Overdue by" };
+
+/**
+ * A head click — the contract's `sortBy(k)`: the same head flips, a new head starts in its natural
+ * order.
+ *
+ * ⚠️ "NATURAL" IS THE ORDER THE COLUMN MEANS, and for Overdue by that is longest first. The model's
+ * `direction` already flips the RESULT rather than the comparator (see `applyView`), so a new head is
+ * always `asc` — natural — and the arrow, not the direction, says which way the numbers run.
+ */
+export function sortByHead(v: ListView, key: HeadKey): ListView {
+  return v.sort === key
+    ? { ...v, direction: v.direction === "asc" ? "desc" : "asc" }
+    : { ...v, sort: key, direction: "asc" };
+}
+
+/** the head's arrow — ▼ where the column's own quantity runs largest-first, ▲ otherwise and at rest */
+export function headArrow(sort: SortId, direction: DirectionId, key: HeadKey): "▲" | "▼" {
+  if (sort !== key) return "▲";
+  const largestFirst = (key === "over") !== (direction === "desc");
+  return largestFirst ? "▼" : "▲";
+}
 export const GROUPING_LABEL: Record<GroupingId, string> = {
   grouped: "Urgency", agent: "Agent", type: "Task type", category: "Category",
   manuscript: "Manuscript", flat: "None",
@@ -148,6 +184,12 @@ export const viewTotal = (groups: TaskGroup[]): number =>
 export interface ViewFacts {
   days: (c: BoardCard) => number | null;
   agency: (c: BoardCard) => string;
+  /** the Task cell's own text (`listTaskText`) — the head sorts by exactly what the cell prints */
+  task: (c: BoardCard) => string;
+  /** the card's due day (`dueFor`) — the Due and Overdue-by heads count real days from it */
+  due: (c: BoardCard) => { ymd: string | null };
+  /** today, as a local "YYYY-MM-DD" — the day real days are counted to */
+  today: string;
 }
 
 export function applyView(
@@ -174,7 +216,27 @@ export function applyView(
       switch (view.sort) {
         case "longest": return by.sort((a, b) => (days(b) ?? -1) - (days(a) ?? -1));
         case "newest": return by.sort((a, b) => (days(a) ?? Infinity) - (days(b) ?? Infinity));
-        case "agent": return by.sort((a, b) => (a.who || "").localeCompare(b.who || ""));
+        /* ⚠️ THE AGENTLESS SORT LAST, as the contract's head does (`t.ag || '\uffff'`) — an empty
+           name alphabetised first would put "You" rows above every agent the list is about. */
+        case "agent": return by.sort((a, b) => {
+          const x = (a.who || "").trim(), y = (b.who || "").trim();
+          if (!x !== !y) return x ? -1 : 1;
+          return x.localeCompare(y);
+        });
+        /* ⚠️ REAL DAYS, NEVER THE ROUNDED FIGURE. The cell prints "7 weeks" for 49 days and for 52;
+           this orders by 49 and 52, so two rows reading the same figure still sit in the right order.
+           Natural is longest first, then today, then the soonest ahead — and the undated last, the
+           contract's `-1e9`. */
+        case "over": {
+          const k = (c: BoardCard) => { const y = facts.due(c).ymd; return y ? overdueDays(y, facts.today) : -1e9; };
+          return by.sort((a, b) => k(b) - k(a));
+        }
+        /* soonest first, undated last — the contract's `Infinity`; a YYYY-MM-DD orders as its text */
+        case "due": {
+          const k = (c: BoardCard) => facts.due(c).ymd ?? "\uffff";
+          return by.sort((a, b) => (k(a) < k(b) ? -1 : k(a) > k(b) ? 1 : 0));
+        }
+        case "task": return by.sort((a, b) => facts.task(a).localeCompare(facts.task(b)));
         case "agency": return by.sort((a, b) => facts.agency(a).localeCompare(facts.agency(b)));
         /* the contract's own sequence for the kinds — TYPE_ORDER, not the alphabet */
         case "type": return by.sort((a, b) => TYPE_ORDER.indexOf(cardBucket(a)) - TYPE_ORDER.indexOf(cardBucket(b)));

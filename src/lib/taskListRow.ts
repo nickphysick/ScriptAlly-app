@@ -57,6 +57,16 @@ export interface RowInputs {
  */
 export const listDeed = (i: RowInputs): string => taskDeed(i.card, i.partial);
 
+/**
+ * The Task cell's text — what the row prints, and what the Task head sorts by (list round, Phase 2).
+ *
+ * ⚠️ ONE EXPRESSION FOR BOTH. The head ordering by one string while the cell printed another is the
+ * "Agency A–Z" fault the view's facts already close for the agency column. A writer's own item keeps
+ * its own words; everything else is the short deed.
+ */
+export const listTaskText = (i: RowInputs): string =>
+  cardBucket(i.card) === "note" ? i.card.title : listDeed(i);
+
 /* ── the meta ─────────────────────────────────────────────────────────────────────────────── */
 
 /** the contract's separator — a soft dot with its own colour, so it is markup rather than text */
@@ -251,6 +261,12 @@ export const paneCopy = (c: BoardCard): PaneCopy => PANE_COPY[cardBucket(c)];
  */
 export const listAgent = (i: RowInputs): string => agentOf(i.card);
 export const listAgency = (i: RowInputs): string => agencyOf(i);
+/**
+ * The agency as a line of its OWN, beneath the agent's name (list round, Phase 2) — the contract's
+ * "No agency", sentence case because it starts a line. The presence test is `agencyOf`'s, so the
+ * cell and the meta cannot disagree about whether there is one; only the absence's capital differs.
+ */
+export const listAgencyLine = (i: RowInputs): string => (i.agency || "").trim() || "No agency";
 
 /**
  * The manuscript this row's work belongs to. Absent on a user task, which is not about a book.

@@ -1,107 +1,109 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE LIST ROW'S DATE CELLS — list round, Phase 2.
+ *
+ * ⚠️ THE UNIT FUNCTION IS COMPARED AGAINST THE CONTRACT'S OWN COPY, RUN — never against a table typed
+ * here. The contract carries `function unit(d){…}` in its script; this reads it out of the file and
+ * evaluates it, so a divergence on ANY day from 0 to 4,000 fails naming the day. A literal on both
+ * sides is a test that agrees with itself.
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
-import { LIST_VERB, listStands, listSub, dateChip } from "./listCells";
-import type { RowInputs } from "./taskListRow";
-import type { BoardCard } from "./todoBoard";
+import { overdueUnit, overdueCell, dueChip } from "./listCells";
+import type { DueFact } from "./taskDue";
 
-/**
- * ⚠️ THE VERBS ARE ASSERTED AGAINST THE CONTRACT FILE, NOT AGAINST LITERALS HERE. A literal on both
- * sides is a test that agrees with itself: it goes green the day someone edits the app and the test
- * together, which is precisely the edit it exists to catch.
- */
-const REF = readFileSync("design-refs/todo-three-views-contract.html", "utf8")
-  .replace(/\\u([0-9a-fA-F]{4})/g, (_, h: string) => String.fromCharCode(parseInt(h, 16)));
+const REF = readFileSync("design-refs/todo-list-view-contract.html", "utf8");
+const UNIT_SRC = REF.match(/function unit\(d\)\{[^\n]*\}/)?.[0];
+const contractUnit = (): ((d: number) => [number | string, string]) => {
+  expect(UNIT_SRC, "the contract no longer carries `function unit(d)` — re-read it before trusting this").toBeTruthy();
+  return new Function(`${UNIT_SRC}; return unit;`)() as (d: number) => [number | string, string];
+};
+const said = (d: number) => { const u = overdueUnit(d); return `${u.figure} ${u.unit}`; };
 
-/* ⚠️ THE FIXTURE CARDS BUCKET FOR REAL — `taskType` is what `cardBucket` reads, so a card built
-   without one is a `fix` whatever the test calls it. Handing the bucket in separately was the flaw
-   this file found on its first run. */
-const card = (taskType: string, over: Partial<BoardCard> = {}) => ({ key: "k", stream: "q", title: "t",
-  who: "w", subtitle: "", due: "", warn: false, snoozes: 0, hk: false, initials: "W", record: "",
-  committed: false, done: false, taskType, ...over } as unknown as BoardCard);
-const NOTE = { key: "n", stream: "nt", title: "t", who: "", subtitle: "", due: "", warn: false,
-  snoozes: 0, hk: false, initials: "", record: "", committed: false, done: false,
-  nature: "task" } as unknown as BoardCard;
-const inp = (taskType: string, over: Partial<RowInputs> = {}): RowInputs =>
-  ({ card: card(taskType), days: 112, ...over });
+describe("Overdue by — the contract's unit function", () => {
+  it("is the contract's own function, at every day from 0 to 4,000", () => {
+    const ref = contractUnit();
+    const wrong: string[] = [];
+    for (let d = 0; d <= 4000; d++) {
+      const [v, u] = ref(d);
+      const app = overdueUnit(d);
+      if (String(v) !== app.figure || u !== app.unit) wrong.push(`${d}: contract ${v} ${u} · app ${app.figure} ${app.unit}`);
+    }
+    expect(wrong.slice(0, 8), `${wrong.length} days disagree`).toEqual([]);
+  });
 
-describe("the row's verb is the contract's own word for that task", () => {
-  it("every verb the ref prints is in the table", () => {
-    /* the ref's own six, as its `act` expression writes them */
-    for (const v of ["Mark sent", "Log a nudge", "Close it", "Decide", "Fill it in", "Tick it off"]) {
-      expect(REF, `${v} is not a verb the contract prints`).toContain(v);
-      expect(Object.values(LIST_VERB), `${v} is missing from the table`).toContain(v);
+  /**
+   * ⚠️ THE BRIEF'S SIX PROBE DAYS, AND A FALSE PREMISE THEY CARRY. 13/14, 62/63 and 547/548 were
+   * offered as the unit boundaries — "weeks under 9, months under 18" read as raw quotients. The
+   * contract ROUNDS before it compares, so its boundaries fall at 13/14, 59/60 and 531/532: 62 and 63
+   * are both "2 months", 547 and 548 both "1½ years". The contract's function wins; both sets are
+   * asserted, the six against the function as well as by value.
+   */
+  it("the six probe days — each the contract's answer", () => {
+    const ref = contractUnit();
+    const table: Record<number, string> = {
+      13: "13 days", 14: "2 weeks", 62: "2 months", 63: "2 months", 547: "1½ years", 548: "1½ years",
+    };
+    for (const [d, want] of Object.entries(table)) {
+      expect(said(Number(d)), `${d} days`).toBe(want);
+      expect(ref(Number(d)).join(" "), `${d} days, the contract's own`).toBe(want);
     }
   });
 
-  it("⚠️ every bucket has one, so a new kind cannot fall through to a neighbour's action", () => {
-    const all = ["send", "chase", "close", "decide", "fix", "note"];
-    expect(Object.keys(LIST_VERB).sort()).toEqual([...all].sort());
-    for (const b of all) expect(LIST_VERB[b as keyof typeof LIST_VERB].length).toBeGreaterThan(2);
+  it("and the boundaries where the contract's rounding actually puts them", () => {
+    expect([said(13), said(14)]).toEqual(["13 days", "2 weeks"]);
+    expect([said(59), said(60)]).toEqual(["8 weeks", "2 months"]);
+    expect([said(531), said(532)]).toEqual(["17 months", "1½ years"]);
+    expect([said(1), said(7), said(21)]).toEqual(["1 day", "7 days", "3 weeks"]);
   });
 });
 
-describe("where it stands", () => {
-  it("a send emphasises the MATERIAL, because what is owed is what has not gone", () => {
-    expect(listStands(inp("full_requested", { partial: true }), "1 August"))
-      .toEqual({ before: "", strong: "Partial", after: " — not yet sent" });
-    expect(listStands(inp("full_requested", { partial: false }), "1 August").strong).toBe("Full");
+describe("the Overdue-by cell", () => {
+  const TODAY = "2026-09-11";
+  const f = (ymd: string | null, owner: DueFact["owner"] = "owed"): DueFact => ({ ymd, owner, source: ymd ? "ask" : "none" });
+
+  it("four states: no date · due today · ahead (muted, 'to go') · overdue with its owner", () => {
+    expect(overdueCell(f(null), TODAY)).toEqual({ kind: "none" });
+    expect(overdueCell(f(TODAY), TODAY)).toEqual({ kind: "today" });
+    expect(overdueCell(f("2026-09-15"), TODAY)).toEqual({ kind: "ahead", figure: "4", unit: "days to go" });
+    expect(overdueCell(f("2026-09-12"), TODAY)).toEqual({ kind: "ahead", figure: "1", unit: "day to go" });
+    expect(overdueCell(f("2026-04-02"), TODAY)).toEqual({ kind: "over", figure: "5", unit: "months", owner: "owed" });
+    expect(overdueCell(f("2024-05-21", "theirs"), TODAY)).toEqual({ kind: "over", figure: "2¼", unit: "years", owner: "theirs" });
   });
 
-  it("a nudge and a close emphasise the DATE, and the ref's wording carries it", () => {
-    expect(listStands(inp("nudge_overdue"), "26 August"))
-      .toEqual({ before: "Their window closed ", strong: "26 August", after: "" });
-    expect(listStands(inp("no_response_close"), "14 March 2024"))
-      .toEqual({ before: "No reply since ", strong: "14 March 2024", after: "" });
-    expect(REF).toContain("Their window closed");
-    expect(REF).toContain("No reply since");
-  });
-
-  it("⚠️ with no date it states the fact WITHOUT one — never a sentence with a hole in it", () => {
-    expect(listStands(inp("nudge_overdue"), null).strong).toBe("");
-    expect(listStands(inp("no_response_close"), "—").strong).toBe("");
-    expect(listStands(inp("no_response_close"), null).before).not.toContain("since ");
-  });
-
-  it("fix and note are the ref's, verbatim", () => {
-    expect(listStands(inp("dq_materials"), null)).toEqual({ before: "Materials ", strong: "not recorded", after: "" });
-    expect(REF).toContain("Materials <b>not recorded</b>");
-    expect(listStands({ card: NOTE, days: 3 }, null).before).toBe("Ticking it off is what finishes it");
-    expect(REF).toContain("Ticking it off is what finishes it");
-  });
-
-  it("⚠️ decide does NOT borrow the ref's Quiet sentence — an offer is not a silence", () => {
-    const s = listStands(inp("offer_received"), "3 September");
-    expect(s.before).toBe("Came in ");
-    expect(`${s.before}${s.strong}${s.after}`).not.toContain("still nothing");
-    expect(`${s.before}${s.strong}${s.after}`).not.toContain("Nudged");
+  /**
+   * ⚠️ COLOUR IS OWNERSHIP, NEVER MAGNITUDE — asserted as a property over the whole range. The cell
+   * carries the owner it was handed and nothing derived from the size of the number, so no stylesheet
+   * rule CAN key a colour to magnitude: there is no field to key it on.
+   */
+  it("the owner the cell carries is the owner it was handed, at every distance", () => {
+    for (const days of [1, 13, 14, 60, 400, 900, 3000]) {
+      const ymd = new Date(Date.UTC(2026, 8, 11 - days)).toISOString().slice(0, 10);
+      for (const owner of ["owed", "theirs"] as const) {
+        const c = overdueCell(f(ymd, owner), TODAY);
+        expect(c.kind).toBe("over");
+        expect(c.kind === "over" && c.owner, `${days} days, ${owner}`).toBe(owner);
+        expect(Object.keys(c).sort()).toEqual(["figure", "kind", "owner", "unit"]);
+      }
+    }
   });
 });
 
-describe("the mono sub-line takes its figure from the one span derivation", () => {
-  it("phrases the ref's way around `listFragment`'s figure", () => {
-    expect(listSub(inp("full_requested", { days: 112 }), "1 August")).toMatch(/ since request$/);
-    expect(listSub(inp("nudge_overdue", { days: 112 }), "1 August")).toMatch(/ past window$/);
-    expect(listSub(inp("no_response_close", { days: 800 }), "1 August")).toMatch(/^silent /);
-    expect(listSub({ card: NOTE, days: 3 }, null)).toMatch(/^added /);
+describe("the Due chip — month, day, and the year only when it is not this year", () => {
+  it("this year states no year; another year states it; no day is its own chip", () => {
+    expect(dueChip("2026-04-02", "2026-09-11")).toEqual({ kind: "date", mon: "Apr", day: "2", year: null });
+    expect(dueChip("2024-05-21", "2026-09-11")).toEqual({ kind: "date", mon: "May", day: "21", year: "2024" });
+    expect(dueChip("2027-01-05", "2026-09-11")).toEqual({ kind: "date", mon: "Jan", day: "5", year: "2027" });
+    expect(dueChip(null, "2026-09-11")).toEqual({ kind: "none" });
   });
 
-  it("⚠️ states the absence in its own words where there is no figure at all", () => {
-    expect(listSub(inp("full_requested", { days: null }), null)).toBe("no date on record");
-    expect(listSub(inp("full_requested", { days: null }), null)).not.toContain("since request");
-  });
-});
-
-describe("the date chip splits the date the row already holds", () => {
-  it("month to three letters, upper, and the day", () => {
-    expect(dateChip("1 August")).toEqual({ mon: "AUG", day: "1" });
-    expect(dateChip("14 March 2024")).toEqual({ mon: "MAR", day: "14" });
-  });
-  it("⚠️ an absent date is an em dash, never a blank chip", () => {
-    expect(dateChip(null)).toEqual({ mon: "", day: "—" });
-    expect(dateChip("—")).toEqual({ mon: "", day: "—" });
+  it("the month is the contract's own three letters", () => {
+    const months = Array.from({ length: 12 }, (_, i) => dueChip(`2026-${String(i + 1).padStart(2, "0")}-01`, "2026-09-11"));
+    const table = REF.match(/const MON=\[([^\]]+)\]/)?.[1] ?? "";
+    expect(table, "the contract's MON table").toBeTruthy();
+    const refMonths = table.split(",").map((s) => s.trim().replace(/^'|'$/g, ""));
+    expect(months.map((m) => m.kind === "date" ? m.mon : "")).toEqual(refMonths);
   });
 });

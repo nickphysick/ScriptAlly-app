@@ -1475,14 +1475,16 @@ describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () 
     expect(fn).not.toContain('"Requested"');
   });
 
-  it("the figure is stated ONCE, on the rail, in the contract's two registers", () => {
-    /* ⚠️ THE RAIL'S HALF IS THE PORTED `.r-fig` NOW — a mono line with a Playfair figure inside
-       it, which is the contract's own two registers. `.tdg-figlab`/`.tdg-fignum` went with the
-       retired sheet. The comparison this case exists for — that the rail and the card set the SAME
-       two registers — is unchanged; both sides moved. */
+  it("the figure is stated ONCE, on the list, in the contract's two registers", () => {
+    /* ⚠️ RETARGETED (list round, Phase 2), AND IT HAD BEEN READING A RULE NOTHING RENDERED. `.r-fig`
+       left the list's markup with the three-views round; its CSS stayed, and this case went on
+       asserting a rule about an element no component drew — the doubly vacuous shape CLAUDE.md
+       records. The list's figure is `.lov` now (`todo-list-view-contract.html`, Overdue by): a
+       Playfair numeral and a plain unit beside it — the contract's two registers. The pane half is
+       unchanged: it still has no figure of its own to disagree with. */
     const listCss = readFileSync(join(here, "taskList.css"), "utf8");
-    const railLab = rule(listCss, ".tlc .r-fig {");
-    const railNum = rule(listCss, ".tlc .r-fig b {");
+    const railLab = rule(listCss, ".tlc .lov .u {");
+    const railNum = rule(listCss, ".tlc .lov b {");
     /* ⚠️ AND THE CARD NO LONGER HAS A HALF (pane round, Phase 2) — which is the strongest form
        this case has taken. It began as "the two figures agree", was re-pointed twice as the card's
        figure moved between strips, and each time it guarded against a DIVERGENCE that was still
@@ -1496,8 +1498,9 @@ describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () 
        quotes and no space after the colon. Normalise before comparing, or this asserts a coding
        style rather than a typographic register. */
     const font = (r: string) => r.replace(/['"]/g, "").replace(/:\s*/g, ":");
-    expect(font(railLab)).toContain("font-family:JetBrains Mono");
-    expect(font(railLab)).toContain("text-transform:uppercase");
+    /* the unit is the body face at the contract's 12.5px — a plain word, no longer a mono caption */
+    expect(font(railLab)).toContain("font-size:12.5px");
+    expect(font(railLab)).not.toContain("JetBrains Mono");
     expect(font(railNum)).toContain("font-family:Playfair Display");
   });
 
@@ -1515,7 +1518,9 @@ describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () 
        excluded by naming the numeral's own size register rather than the family. */
     const numerals = [...dockCss.matchAll(/font-size:\s*3\d(?:\.\d+)?px/g)].length;
     expect(numerals, "the pane grew a display numeral").toBe(0);
-    expect(rule(readFileSync(join(here, "taskList.css"), "utf8"), ".tlc .r-fig.hot b {")).toContain("var(--burg)");
+    /* ⚠️ RETARGETED WITH THE CASE ABOVE: the list's burgundy is `.lov.owed` — the writer's clock —
+       where it was the retired `.r-fig.hot` */
+    expect(rule(readFileSync(join(here, "taskList.css"), "utf8"), ".tlc .lov.owed b {")).toContain("var(--burg)");
   });
 });
 

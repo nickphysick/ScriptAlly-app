@@ -46,3 +46,38 @@ M1.8 · the natural date is taken from the send, not the ask
     RED  × src/lib/taskDue.test.ts > every task type derives a due date or a deliberate null > the natural dates are the days the records name — the ask, the arrival, the window
     RED  × src/lib/taskDue.test.ts > the date they set wins > a 'hold me to it' date overrides the ask date
     RED  × src/lib/taskDue.test.ts > the date they set wins > a mute is not a date, and a dismissal is the later word
+
+## Phase 2 · the list view — the pure cells (`listCells.test.ts`, `todoListView.test.ts`, `taskListWide.test.tsx`)
+
+M2.7 · the weeks/months boundary moves — the contract's own function no longer agrees
+    exit 1 · Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+    RED  × src/lib/listCells.test.ts > Overdue by — the contract's unit function > is the contract's own function, at every day from 0 to 4,000
+    RED  × src/lib/listCells.test.ts > Overdue by — the contract's unit function > the six probe days — each the contract's answer
+    RED  × src/lib/listCells.test.ts > Overdue by — the contract's unit function > and the boundaries where the contract's rounding actually puts them
+
+M2.8 · the chip states its year always, including this year
+    exit 1 · Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+    RED  × src/lib/listCells.test.ts > the Due chip — month, day, and the year only when it is not this year > this year states no year; another year states it; no day is its own chip
+    RED  × src/components/todo/taskListWide.test.tsx > 2 · the wiring — RENDERED, so the claims are about the markup and not the props > Due is the calendar chip: month over day, the year only when it is not this year, dashed for none
+
+M2.9 · the Task cell prints the card's raw title instead of the act
+    exit 1 · Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+    RED  × src/components/todo/taskListWide.test.tsx > 2 · the wiring — RENDERED, so the claims are about the markup and not the props > the task is the act and its category; the agent is always rendered, the agency on its own line
+
+M2.10 · a new head starts flipped rather than in its natural order
+    exit 1 · Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+    RED  × src/lib/todoListView.test.ts > the column heads sort by what the columns print (list round, Phase 2) > a head click: a new head starts in its natural order, the same head flips
+
+M2.11 · the arrow never says which way the numbers run
+    exit 1 · Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+    RED  × src/lib/todoListView.test.ts > the column heads sort by what the columns print (list round, Phase 2) > the arrow says which way the column's own numbers run — ▼ for longest overdue first
+    RED  × src/components/todo/taskListWide.test.tsx > 2 · the wiring — RENDERED, so the claims are about the markup and not the props > the header: four heads that SORT, in the contract's order — and the active one says so
+
+M2.12 · the retired verb button comes back to the row
+    exit 1 · Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+    RED  × src/components/todo/taskListWide.test.tsx > 2 · the wiring — RENDERED, so the claims are about the markup and not the props > the contract's five cells, by their names — and the retired cells gone, bounded
+    RED  × src/components/todo/taskListWide.test.tsx > 2 · the wiring — RENDERED, so the claims are about the markup and not the props > the row keeps ONE control — the ⋯, the snooze door; the verb and the × are not rebuilt
+
+M2.13 · the undated sort first instead of last
+    exit 1 · Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+    RED  × src/lib/todoListView.test.ts > the column heads sort by what the columns print (list round, Phase 2) > Overdue by: real days, longest first — then due today, the soonest ahead, the undated last

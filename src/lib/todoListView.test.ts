@@ -14,7 +14,7 @@
 import { describe, it, expect } from "vitest";
 import {
   applyView, filterBadge, isFiltered, isSorted, parseView, VIEW_DEFAULT, viewButtonLabel,
-  viewLeaving, ViewFacts, ListView, TYPE_ORDER,
+  viewLeaving, ViewFacts, ListView, TYPE_ORDER, sortByHead, headArrow, HEAD_KEYS,
 } from "./todoListView";
 import { BoardCard } from "./todoBoard";
 import { TaskGroup } from "./todoGroups";
@@ -26,10 +26,16 @@ const card = (key: string, over: Partial<BoardCard> = {}): BoardCard => ({
 const grp = (id: string, label: string, cards: BoardCard[]): TaskGroup =>
   ({ id: id as TaskGroup["id"], label, description: "", cards });
 
-/** stable facts: days from a table, agency from a table — the page's accessors in miniature */
-const facts = (days: Record<string, number> = {}, agency: Record<string, string> = {}): ViewFacts => ({
+/** stable facts: days, agency, due day and task text from tables — the page's accessors in miniature */
+const facts = (
+  days: Record<string, number> = {}, agency: Record<string, string> = {},
+  due: Record<string, string | null> = {}, task: Record<string, string> = {}, today = "2026-09-11",
+): ViewFacts => ({
   days: (c) => days[c.key] ?? null,
   agency: (c) => agency[c.key] ?? "",
+  task: (c) => task[c.key] ?? c.title,
+  due: (c) => ({ ymd: due[c.key] ?? null }),
+  today,
 });
 
 const G = () => [
@@ -127,5 +133,61 @@ describe("the flags, the badge, the label, the parse", () => {
     expect(parseView({ sort: "manuscript" }).sort).toBe(VIEW_DEFAULT.sort);
     expect(parseView({ agents: "a1" }).agents).toEqual([]);
     expect(parseView({ direction: "sideways" }).direction).toBe("asc");
+  });
+});
+
+describe("the column heads sort by what the columns print (list round, Phase 2)", () => {
+  const TODAY = "2026-09-11";
+  /* ⚠️ THE FIGURES COLLIDE ON PURPOSE: 49 and 52 days both print "7 weeks", so an order read off the
+     rounded figure could not tell them apart — a sort by real days must */
+  const dues: Record<string, string | null> = {
+    a: "2026-07-24", b: "2026-07-21", c: "2026-09-11", d: "2026-09-15", e: "2026-09-12", f: null,
+  };
+  const one = () => [grp("urgent", "Needs you now",
+    ["f", "a", "d", "c", "b", "e"].map((k) => card(k, { who: k.toUpperCase(), agentId: k })))];
+  const keys = (v: ListView, t: Record<string, string> = {}) =>
+    applyView(one(), v, facts({}, {}, dues, t, TODAY))[0].cards.map((c) => c.key);
+
+  it("Overdue by: real days, longest first — then due today, the soonest ahead, the undated last", () => {
+    expect(keys({ ...VIEW_DEFAULT, sort: "over" })).toEqual(["b", "a", "c", "e", "d", "f"]);
+  });
+
+  it("Due: soonest first, undated last — and the direction mirrors it exactly", () => {
+    expect(keys({ ...VIEW_DEFAULT, sort: "due" })).toEqual(["b", "a", "c", "e", "d", "f"]);
+    expect(keys({ ...VIEW_DEFAULT, sort: "due", direction: "desc" })).toEqual(["f", "d", "e", "c", "a", "b"]);
+  });
+
+  it("Task: the text the cell prints, not the card's own title", () => {
+    const text = { a: "Worth a nudge", b: "Send your partial", c: "Consider closing",
+      d: "Fill in what you sent", e: "Reply to the offer", f: "Send your full manuscript" };
+    expect(keys({ ...VIEW_DEFAULT, sort: "task" }, text)).toEqual(["c", "d", "e", "f", "b", "a"]);
+  });
+
+  it("Agent A–Z puts the agentless LAST, as the contract's head does", () => {
+    const gs = [grp("yours", "Your tasks", [card("n", { who: "" }), card("z", { who: "Zhou" }), card("a", { who: "Abbott" })])];
+    expect(applyView(gs, { ...VIEW_DEFAULT, sort: "agent" }, facts())[0].cards.map((c) => c.key))
+      .toEqual(["a", "z", "n"]);
+  });
+
+  it("a head click: a new head starts in its natural order, the same head flips", () => {
+    const v1 = sortByHead(VIEW_DEFAULT, "over");
+    expect([v1.sort, v1.direction]).toEqual(["over", "asc"]);
+    const v2 = sortByHead(v1, "over");
+    expect([v2.sort, v2.direction]).toEqual(["over", "desc"]);
+    const v3 = sortByHead(v2, "due");
+    expect([v3.sort, v3.direction]).toEqual(["due", "asc"]);
+    expect(HEAD_KEYS).toEqual(["task", "agent", "due", "over"]);
+  });
+
+  it("the arrow says which way the column's own numbers run — ▼ for longest overdue first", () => {
+    expect(headArrow("over", "asc", "over")).toBe("▼");
+    expect(headArrow("over", "desc", "over")).toBe("▲");
+    expect(headArrow("due", "asc", "due")).toBe("▲");
+    expect(headArrow("due", "desc", "due")).toBe("▼");
+    expect(headArrow("over", "asc", "task"), "an idle head rests on ▲").toBe("▲");
+  });
+
+  it("the new orders survive the round trip through the user document", () => {
+    for (const sort of ["over", "due", "task"] as const) expect(parseView({ sort }).sort).toBe(sort);
   });
 });

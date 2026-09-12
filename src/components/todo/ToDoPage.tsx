@@ -95,11 +95,11 @@ import {
   applyView, groupCounts as viewGroupCounts, GroupId, isFiltered, isSorted, ListView, parseView,
   typeCounts as viewTypeCounts, viewTotal, VIEW_DEFAULT,
   viewLeaving, viewButtonLabel, filterBadge, TYPE_ORDER, TYPE_LABEL, GROUP_IDS,
-  SORT_LABEL, GROUPING_LABEL,
+  SORT_LABEL, GROUPING_LABEL, sortByHead,
 } from "../../lib/todoListView";
 import { useNavigate, useLocation } from "react-router-dom";
 import { groupColumn, TaskGroup } from "../../lib/todoGroups";
-import { paneCopy, listManuscript, showsManuscriptColumn, listFragment } from "../../lib/taskListRow";
+import { paneCopy, listManuscript, showsManuscriptColumn, listFragment, listTaskText } from "../../lib/taskListRow";
 import { daysBetween, elapsedParts, elapsedPhrase } from "../../lib/elapsed";
 import { materialRows, materialName, anchorNoun, bandForward, holderRows } from "../../lib/todoHandoff";
 import { notifyGroups, reminderFields } from "../../lib/offerNotify";
@@ -159,6 +159,7 @@ import {
   figureFor as libFigureFor,
   listRowInputs as libListRowInputs,
   recordSweepFor as libRecordSweepFor,
+  dueFor as libDueFor,
   isoOf,
 } from "../../lib/taskCardFacts";
 import { rowPrimaryLabel } from "../../lib/taskRow";
@@ -924,10 +925,22 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      declaration, and above it this was a same-scope TDZ tsc rightly refused (TS2448 — and per the
      house rule, the refusal triggered an audit of the memo's other render-time reads: there are
      none). */
+  /* ⚠️ THE DUE DAY IS ITS OWN ACCESSOR (list round, Phase 2). `dueFor` reads the card's FLAG for the
+     writer's hold, and `listRowInputs` must not start depending on flags — its identity decides when
+     the rows re-render. Declared ABOVE `viewFacts`, which reads it: the order rule again, and the
+     same shape the TS2448 note above records. `taskFlags` and `today` are both declared far above. */
+  const dueOf = React.useCallback(
+    (c: BoardCard) => libDueFor(c, taskData, taskFlags),
+    [taskData, taskFlags],
+  );
   const viewFacts = React.useMemo(() => ({
     days: (c: BoardCard) => listRowInputs(c).days ?? null,
     agency: (c: BoardCard) => (listRowInputs(c).agency ?? "").trim(),
-  }), [listRowInputs]);
+    /* the heads sort by exactly what the Task cell prints and the day the Due chip names */
+    task: (c: BoardCard) => listTaskText({ card: c, ...listRowInputs(c) }),
+    due: dueOf,
+    today,
+  }), [listRowInputs, dueOf, today]);
 
   /* ⚠️ `nudgedBefore` IS GONE, AND ITS ABSENCE IS PHASE 2 (QC-chassis round). It was a callback
      that reached into `queries` to work out whether a nudge task had been chased before, and TWO
@@ -1416,8 +1429,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         ?? visibleFlatRef.current.find((c) => c.key === key);
       if (!card) return;
       e.preventDefault();
-      const anchor = (document.querySelector(".tlc .actrow.show [data-act=" + (act === "snooze" ? "snooze" : "dismiss") + "]")
-        ?? document.querySelector(".tlc .row[data-rowkey=\"" + card.key + "\"]")) as HTMLElement | null;
+      /* ⚠️ THE ROW'S OWN ⋯ IS THE ANCHOR NOW (list round, Phase 2) — the retired strip's buttons are
+         gone, so the panel hangs off the one control the row keeps, and the row itself is the
+         fallback while the list is folded and the ⋯ is not drawn. */
+      const row = document.querySelector(".tlc .row[data-rowkey=\"" + card.key + "\"]");
+      const anchor = ((act === "snooze" ? row?.querySelector(".lmore") : null) ?? row) as HTMLElement | null;
       if (act === "snooze") { if (anchor) setStripSnooze({ anchor, card }); return; }
       setStripDismiss(card);
     };
@@ -3564,6 +3580,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         onOpen={(c) => openDock(c.key)}
         selectedKey={docked.card?.key}
         rowInputs={listRowInputs}
+        /* ⚠️ THE DUE DAY AND THE ORDER, BOTH THE VIEW'S OWN (list round, Phase 2) — `dueOf` is the
+           accessor the sort reads, so a chip names the day that placed its row; a head click edits
+           the SAME stored view the Sort menu edits. */
+        dueOf={dueOf}
+        today={today}
+        sort={view.sort}
+        direction={view.direction}
+        onSortBy={(k) => setView(sortByHead(view, k))}
         /* ⚠️ THE SAME EXPRESSION THE SPLIT'S OWN CLASS READS — `!!paneCard`. Two derivations of
            "is a task open" is how a folded row ends up in a full-width card. */
         folded={!!paneCard}
@@ -3573,7 +3597,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         focusedKey={focusKey ?? undefined}
         onFocusRow={(c) => setFocusKey(c.key)}
         onStripSnooze={(anchor, card) => setStripSnooze({ anchor, card })}
-        onStripDismiss={(card) => setStripDismiss(card)}
+        /* (`onStripDismiss` is retired with the row's ×. Dismissal is the `d` key — which still opens
+           the SAME confirm through `setStripDismiss` — and the drawer's own door.) */
         collapsedGroups={collapsedGroups}
         onToggleGroup={(id) => setCollapsedGroups((xs) =>
           xs.includes(id) ? xs.filter((x) => x !== id) : [...xs, id])}

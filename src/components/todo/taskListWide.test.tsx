@@ -2,32 +2,33 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE DENSE ROW — the tightened round's Phase 2, locked where each half can be locked.
- * (Supersedes the drawer round's wide-row suite in place: the manuscript COLUMN this file used
- * to guard is retired — the name rides the ACTION STRIP's meta now — and the two-line meta went
- * with the 44px height. What survives unchanged: the avatar-is-an-agent's law, the
- * always-rendered-cells law, and the one-base-rule stylesheet discipline.)
+ * THE LIST ROW — list round, Phase 2 (`design-refs/todo-list-view-contract.html`). Supersedes the
+ * three-views round's retarget of this suite in place: "Where it stands" and the Actions cell are
+ * retired, the row is Task · Agent · Due · Overdue by · ⋯.
  *
  * ⚠️ THREE LINKS, PROVED IN THREE PLACES BECAUSE ONE ARTEFACT CANNOT CARRY THEM ALL.
- *   1 · the RULE       — `showsManuscriptColumn(n)`, pure, both branches, here. Its consumer is
- *                        the SORT MENU's manuscript-grouping gate now, not a column.
- *   2 · the WIRING     — the strip under the focused row, the inline agent, the disclosure
- *                        heads: RENDERED here, because "the prop is passed" and "the markup
- *                        lands" are different claims and only the second matters.
- *   3 · the GEOMETRY   — 44px in both states, the strip below the row covering nothing:
- *                        `tests/e2e/tightened.measure.ts` Phase 2. A stylesheet cannot be asked
- *                        what a browser did with it.
+ *   1 · the RULES     — the date cells' derivations, pure: `listCells.test.ts` (the contract's own
+ *                       unit function, run) and `taskDue.test.ts` (the day and its owner).
+ *   2 · the WIRING    — the five cells, the four sorting heads, the one control: RENDERED here,
+ *                       because "the prop is passed" and "the markup lands" are different claims.
+ *   3 · the GEOMETRY  — 62px rows, the heads over their columns, colour against ownership on real
+ *                       data: `tests/e2e/listRound.measure.ts`. A stylesheet cannot be asked what a
+ *                       browser did with it.
  */
 import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
+import { readFileSync } from "node:fs";
 import { TaskList } from "./TaskList";
-import { showsManuscriptColumn, listAvatarInitials, listManuscript } from "../../lib/taskListRow";
+import { showsManuscriptColumn, listAvatarInitials } from "../../lib/taskListRow";
 import { BoardCard } from "../../lib/todoBoard";
 import { TaskGroup } from "../../lib/todoGroups";
+import type { DueFact } from "../../lib/taskDue";
+import type { ListView } from "../../lib/todoListView";
+import { sliceBetween } from "../../test/sliceBetween";
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
-  key: "k1", stream: "do", title: "Send your full manuscript", who: "Jonathan Marsh",
+  key: "k1", stream: "do", title: "Send your full to Jonathan Marsh", who: "Jonathan Marsh",
   subtitle: "", due: "", warn: false, snoozes: 0, hk: false, initials: "JM",
   record: "Jonathan Marsh · The Marsh Agency", committed: false, done: false,
   taskType: "full_requested", relatedRecordId: "q1", agentId: "a1",
@@ -38,17 +39,26 @@ const groups = (c: BoardCard): TaskGroup[] => [
   { id: "urgent", label: "Needs you now", description: "", cards: [c] },
 ];
 
+const TODAY = "2026-09-11";
+const owedOn = (ymd: string | null, owner: DueFact["owner"] = "owed"): DueFact =>
+  ({ ymd, owner, source: ymd ? "ask" : "none" });
+
 const render = (c: BoardCard, opts: {
-  focusedKey?: string; selectedKey?: string; collapsed?: string[];
+  focusedKey?: string; selectedKey?: string; collapsed?: string[]; due?: DueFact;
+  sort?: ListView["sort"]; direction?: ListView["direction"];
 } = {}) => renderToStaticMarkup(
   <TaskList
     groups={groups(c)} onOpen={() => {}} rowInputs={() => ({ agency: "The Marsh Agency" })}
+    dueOf={() => opts.due ?? owedOn("2026-04-02")} today={TODAY}
+    sort={opts.sort ?? "needs-you"} direction={opts.direction ?? "asc"} onSortBy={() => {}}
     onExport={() => {}}
     focusedKey={opts.focusedKey} selectedKey={opts.selectedKey}
-    onFocusRow={() => {}} onStripSnooze={() => {}} onStripDismiss={() => {}}
+    onFocusRow={() => {}} onStripSnooze={() => {}}
     collapsedGroups={opts.collapsed ?? []} onToggleGroup={() => {}}
   />,
 );
+/** the one row, bounded on two anchors that cannot nest — its key, and the foot that follows it */
+const rowOf = (html: string) => sliceBetween(html, 'data-rowkey="k1"', 'class="l-foot"');
 
 describe("1 · the rule — manuscript grouping is a property of the account", () => {
   it("more than one book to tell apart, and zero falls on the hidden side with one", () => {
@@ -60,54 +70,74 @@ describe("1 · the rule — manuscript grouping is a property of the account", (
 });
 
 describe("2 · the wiring — RENDERED, so the claims are about the markup and not the props", () => {
-  it("the retired cells are gone, bounded: no ms column, no agency column, no action chip", () => {
-    const html = render(card(), { focusedKey: "k1" });
-    for (const cls of ["r-ms", "r-agc", "actb", "r-meta", "hasms"]) {
-      expect(html, `${cls} came back`).not.toMatch(new RegExp('["\\s]' + cls + '["\\s]'));
+  it("the contract's five cells, by their names — and the retired cells gone, bounded", () => {
+    const row = rowOf(render(card()));
+    for (const cls of ["ledge", "ltask", "lag", "lchip", "lov", "lmore"]) {
+      expect(row, `${cls} left the row`).toMatch(new RegExp('class="' + cls + '[" ]'));
+    }
+    /* ⚠️ BOUNDED, BOTH SIDES — `lstands` must not be satisfied by some longer class that happens to
+       start with it, and the retired verb `go` is a two-letter word that appears inside everything */
+    for (const cls of ["lstands", "lact", "stamp", "go", "ic", "actrow"]) {
+      expect(row, `${cls} came back`).not.toMatch(new RegExp('["\\s`]' + cls + '["\\s`]'));
     }
   });
 
-  it("the agent rides the deed inline and the agent cell is ALWAYS rendered", () => {
-    /* ⚠️ hiding the cell when the drawer folds the row is CSS's job, never the tree's — a
-       conditionally-mounted cell would rebuild the list on every open and make "folded"
-       indistinguishable from "no agent" to anything measuring the row. */
-    const html = render(card());
-    /* ⚠️ RETARGETED, SAME LAW (three-views round, Phase 2). The claim is that the agent is ALWAYS
-       rendered on a row — never conditionally mounted, so folding cannot rebuild the list and a
-       measurement can tell "folded" from "no agent". What moved is WHERE: the agent was a muted
-       fragment inline in the deed (`.r-who`); the contract gives it a column of its own, name over
-       agency, which is what `.lag` is. */
-    expect(html).toContain("lag");
-    expect(html, "the agent's name").toContain("Jonathan Marsh");
-    expect(html, "and the agency beneath it, no longer joined by an interpunct").toContain("The Marsh Agency");
-    /* the contract's five cells, by its own names */
-    for (const cls of ["ltask", "lag", "lchip", "lstands", "lact"]) {
-      expect(html, `${cls} left the row`).toContain(cls);
-    }
+  it("the task is the act and its category; the agent is always rendered, the agency on its own line", () => {
+    const row = rowOf(render(card()));
+    expect(row).toContain('<div class="h">Send your full manuscript</div>');
+    expect(row).toContain('<div class="s">Agent request</div>');
+    expect(row, "the agent's name, then the agency beneath it").toContain("Jonathan Marsh<small>The Marsh Agency</small>");
+    expect(row, "the family glyph, in the family's paper").toContain('class="g now"');
   });
 
-  /* ⚠️ RETARGETED, AND THE LAW MOVED WITH THE DESIGN (three-views round, Phase 2). The old claim
-     was that a strip of three verbs dropped beneath the FOCUSED row and that exactly one existed.
-     The contract puts the verbs IN the row, so every row has its own and "exactly one host" is not
-     a claim anyone can make about it. What survives — and is the half that mattered — is that all
-     three verbs are still reachable from a row: the contextual primary, dismiss and snooze. The
-     keys they used to teach are taught by the footer, which is asserted below. */
-  it("every row carries its three verbs — the contextual primary, dismiss and snooze", () => {
-    const html = render(card());
-    expect(html).toContain("lact");
-    expect(html, "the primary is the verb for THIS task, not a generic Open").toContain("Mark sent");
-    expect(html, "dismiss").toContain("Dismiss ");
-    expect(html, "snooze").toContain("Snooze ");
-    /* ⚠️ AND THEY ARE ON EVERY ROW, not only a focused one — which is the change. */
-    expect(render(card(), { focusedKey: "k1" }).match(/class="lact"/g)).toHaveLength(1);
-    expect(html.match(/class="lact"/g), "an unfocused row still offers its verbs").toHaveLength(1);
+  it("a writer's own item reads You, in the contract's pencil disc", () => {
+    const row = rowOf(render(card({ userTaskId: "t1", who: "", initials: "✓", nature: "task",
+      title: "Update comp titles list", taskType: undefined, relatedRecordId: undefined, agentId: undefined })));
+    expect(row).toContain('class="av yours"');
+    expect(row).toContain("You<small>Your own note</small>");
+    expect(row).toContain('<div class="h">Update comp titles list</div>');
   });
 
-  /* ⚠️ RETIRED, NOT REBASELINED (three-views round, Phase 2). "Selection wins the strip" was a
-     claim about a SINGLE host — one strip on the page, and selection beating focus for it. The
-     contract gives every row its own actions cell, so there is no host to win and nothing here to
-     weaken into a passing form. The selection's own marks (`.sel`, the tint and the edge) are
-     asserted elsewhere in this file and are untouched. */
+  it("the row keeps ONE control — the ⋯, the snooze door; the verb and the × are not rebuilt", () => {
+    const row = rowOf(render(card()));
+    expect(row.match(/<button/g) ?? [], "controls in the row").toHaveLength(1);
+    expect(row).toContain('class="lmore" aria-label="Snooze Send your full to Jonathan Marsh"');
+    expect(row, "dismiss is the d key and the drawer's, not a row button").not.toContain("Dismiss ");
+  });
+
+  it("Due is the calendar chip: month over day, the year only when it is not this year, dashed for none", () => {
+    const thisYear = rowOf(render(card(), { due: owedOn("2026-04-02") }));
+    expect(thisYear).toContain('<div class="lchip"><div class="m">Apr</div><div class="d">2</div></div>');
+    const lastYear = rowOf(render(card(), { due: owedOn("2024-05-21", "theirs") }));
+    expect(lastYear).toContain('<div class="m">May</div><div class="d">21</div><div class="y">2024</div>');
+    const none = rowOf(render(card(), { due: owedOn(null) }));
+    expect(none).toContain('<div class="lchip none"><div class="d">none</div></div>');
+  });
+
+  it("Overdue by is a numeral and a unit — burgundy only as a CLASS of ownership, never of size", () => {
+    expect(rowOf(render(card(), { due: owedOn("2026-04-02") })))
+      .toContain('<div class="lov owed"><b>5</b><span class="u">months</span></div>');
+    expect(rowOf(render(card(), { due: owedOn("2024-05-21", "theirs") })))
+      .toContain('<div class="lov theirs"><b>2¼</b><span class="u">years</span></div>');
+    expect(rowOf(render(card(), { due: owedOn("2026-09-15") })))
+      .toContain('<div class="lov ahead"><b>4</b><span class="u">days to go</span></div>');
+    expect(rowOf(render(card(), { due: owedOn(TODAY) })))
+      .toContain('<div class="lov"><b>Due</b><span class="u">today</span></div>');
+    const none = rowOf(render(card(), { due: owedOn(null) }));
+    expect(none).toContain('<div class="lov none">no date</div>');
+    expect(none, "a dateless row prints no numeral").not.toContain("<b>");
+  });
+
+  it("the header: four heads that SORT, in the contract's order — and the active one says so", () => {
+    const html = render(card(), { sort: "over" });
+    const hd = sliceBetween(html, 'class="lhd"', 'class="l-body"');
+    const labels = [...hd.matchAll(/aria-label="Sort by ([^"]+)"/g)].map((m) => m[1]);
+    expect(labels).toEqual(["Task", "Agent", "Due", "Overdue by"]);
+    expect(hd).toContain('class="h-over on" aria-pressed="true"');
+    expect(hd.match(/aria-pressed="true"/g) ?? []).toHaveLength(1);
+    expect(hd, "longest overdue first reads ▼").toContain(">▼</span>");
+    expect(hd, "a header of controls cannot be hidden from the reader it serves").not.toMatch(/class="lhd"[^>]*aria-hidden/);
+  });
 
   it("the head is a disclosure — collapsed keeps the count and renders no rows", () => {
     const open = render(card());
@@ -118,7 +148,7 @@ describe("2 · the wiring — RENDERED, so the claims are about the markup and n
     expect(closed, "a closed group still drew its rows").not.toContain("data-rowkey");
   });
 
-  it("the footer teaches the four list keys", () => {
+  it("the footer teaches the list keys", () => {
     const html = render(card());
     for (const k of ["j", "k", "s", "d"]) expect(html).toContain("<kbd>" + k + "</kbd>");
   });
@@ -127,44 +157,44 @@ describe("2 · the wiring — RENDERED, so the claims are about the markup and n
 describe("2b · the avatar is an agent's, so a row without one has none", () => {
   it("an agent card wears the disc; a user task and an agentless card do not", () => {
     expect(listAvatarInitials(card())).toBe("JM");
-    /* ⚠️ `✎` AND `•` ARE GLYPHS, NOT INITIALS. Both are meaningful in the board's own chip and
-       neither is a person's; a person-shaped disc around either claims the row is about somebody
-       it is not. */
+    /* ⚠️ `✎` AND `•` ARE GLYPHS, NOT INITIALS — a person-shaped disc around either claims the row is
+       about somebody it is not. The user task's pencil is the contract's `yours` disc, asserted above. */
     expect(listAvatarInitials(card({ userTaskId: "t1", initials: "✎", who: "" }))).toBeNull();
     expect(listAvatarInitials(card({ who: "", initials: "•" }))).toBeNull();
-    expect(render(card({ who: "", initials: "•", agentId: undefined })))
-      .not.toMatch(/class="av s"/);
+    expect(rowOf(render(card({ who: "", initials: "•", agentId: undefined }))))
+      .not.toMatch(/class="av"/);
   });
-
-  /* ⚠️ RETIRED WITH THE STRIP'S META. The manuscript rode the strip's right-hand end; the
-     contract's row has no such slot, and the manuscript is already stated by the grid's ticket and
-     by the page's own scope. Nothing was weakened — the surface it asserted is gone. */
 });
 
-describe("3 · the stylesheet states both shapes, and the row is 44 in each", () => {
-  it("one base rule, the height stated on it, and a track list per state", () => {
-    /* ⚠️ ONE BASE RULE FOR THE ROW. A `.folded` copy of the whole rule is how two rows drift; the
-       modifier states ONLY the columns, which is what actually differs. */
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const css = require("node:fs").readFileSync(require("node:path").join(__dirname, "taskList.css"), "utf8") as string;
-    const bases = css.match(/(?:^|\n)\.tlc \.row \{/g) ?? [];
-    expect(bases, "`.tlc .row` is declared more than once — a slice would read the wrong block")
-      .toHaveLength(1);
-    const row = css.slice(css.indexOf(".tlc .row {"), css.indexOf("}", css.indexOf(".tlc .row {")));
-    /* ⚠️ RETARGETED, SAME LAW (three-views round, Phase 2): ONE base rule for the row, and the
-       modifier states only what differs. What changed is that the track list is now ON the row
-       rather than reached through a `--row-cols` token on the card, and that the row's height is
-       its CONTENT's — the contract's row is two lines in three of its five cells, so a fixed 44px
-       could not have held it. */
-    expect(row, "the row states its own six tracks").toContain("grid-template-columns:6px");
-    expect(row, "a fixed height came back — the contract's row is two lines deep").not.toContain("height:44px");
-    expect(css, "the folded state does not state a track list").toContain(".tlc.folded .row {");
-    /* ⚠️ COMMENTS STRIPPED BEFORE THE COUNT — including when the comment is MINE, explaining the
-       retirement. The paragraph written at the deleted rule to say why `--row-cols` went was itself
-       a match for `--row-cols`, so the first form of this failed over prose about the fix. This
-       repo already records the shape; it re-earned it inside one commit. */
-    const decls = css.replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(decls, "the `--row-cols` indirection came back").not.toContain("--row-cols");
-    expect(css, "the hasms track list survived its column").not.toContain(".tlc.hasms");
+describe("3 · the stylesheet states the contract's row, once", () => {
+  const css = readFileSync("src/components/todo/taskList.css", "utf8");
+  /* ⚠️ COMMENTS STRIPPED BEFORE ANYTHING IS COUNTED — this file's prose names the retired cells */
+  const decls = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const rule = (sel: string) => {
+    const hits = decls.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + " \\{", "g")) ?? [];
+    expect(hits, `\`${sel}\` must be declared exactly once — a slice would read the wrong block`).toHaveLength(1);
+    const at = decls.search(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + " \\{"));
+    return decls.slice(at, decls.indexOf("}", at));
+  };
+
+  it("one base rule for the row: the contract's six tracks and its 62px, and the header on the same list", () => {
+    const TRACKS = "grid-template-columns:5px minmax(0,1.5fr) 220px 92px 170px 40px";
+    expect(rule(".tlc .row")).toContain(TRACKS);
+    expect(rule(".tlc .row")).toContain("height:62px");
+    expect(rule(".tlc .row"), "the box model the height depends on is stated, not inherited").toContain("box-sizing:border-box");
+    expect(rule(".tlc .lhd"), "the heads sit over the columns because it is the same list").toContain(TRACKS);
+    expect(rule(".tlc.folded .row"), "the folded modifier states only its tracks").not.toContain("height");
+  });
+
+  it("burgundy is ownership: `.owed` is the only coloured state, and nothing is keyed to magnitude", () => {
+    expect(rule(".tlc .lov.owed b")).toContain("color:var(--burg)");
+    for (const sel of [".tlc .lov b", ".tlc .lov.ahead b"]) expect(rule(sel)).not.toContain("--burg");
+    expect(decls, "a theirs rule would be a second colour meaning the same thing").not.toMatch(/\.lov\.theirs/);
+  });
+
+  it("the retired cells' rules went with them", () => {
+    for (const cls of ["lstands", "lact", "stamp", "r-deed", "r-fig", "r-ag"]) {
+      expect(decls, `.${cls} survived its cell`).not.toMatch(new RegExp("\\." + cls + "[\\s{.:,]"));
+    }
   });
 });

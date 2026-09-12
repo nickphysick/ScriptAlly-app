@@ -197,7 +197,15 @@ describe("⚠️ the set-aside ledger lives on the board, and states its own cou
     /* the accessible name is the PANEL's now — the trigger is a labelled toolbar button, and the
        panel it opens carries the name (corrections 2.1) */
     expect(listPage).toContain('ariaLabel="Set aside and tags"');
-    expect(list).toContain("asideCount");
+    /* ⚠️ RETARGETED (list round, Phase 2) — THIS LINE WAS PASSING ON PROSE. It read `asideCount` out
+       of `TaskList.tsx`, a prop corrections 2.1 RETIRED when the door moved to the page's toolbar; the
+       only occurrence left was the comment recording that retirement. So for four rounds it asserted
+       the opposite of the truth and stayed green, and it went red the day the comment was rewritten.
+       The claim it stood for — the door carries the ledger's figure — is asserted where the door is,
+       on CODE with comments stripped, and the card is asserted not to have a second one. */
+    expect(code(listPage), "the toolbar's Set aside door stopped stating its figure")
+      .toContain('value={asideN ? String(asideN) : ""}');
+    expect(code(list), "the list card grew its own set-aside door back").not.toContain("asideCount");
   });
 
   it("the count is DERIVED from the same hiddenItems the list renders — never a second tally", () => {
