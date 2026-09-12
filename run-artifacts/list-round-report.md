@@ -22,7 +22,7 @@ The mutation table is `run-artifacts/list-mutations.txt`; the measurements are
 | 4 · the card says the agent once | `8c5b7c99` | the title is the act, the footer is the person |
 | 5 · the board card is one row | *(no code — landed in the three-views round; B1–B4 re-proved under 6)* | `.fact` deleted, the dot on the agent line, 62.9px |
 | 6 · the diff lock | `6a33010f` | properties and positions, over three contracts |
-| 7 · re-prove | PHASE7_SHA | every suite that read the old list rows |
+| 7 · re-prove | `27f0fea1` | every suite that read the old list rows |
 
 
 Two harness commits ride with them, each with its own story below: `67b17da6` (the saved session is
