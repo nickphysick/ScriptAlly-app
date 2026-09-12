@@ -34,8 +34,24 @@ describe("zero queries → the first-query card (the ghost preview is retired)",
     expect(css).not.toMatch(/(?:^|\n)\.qc-welcome \{/);
   });
 
-  it("the card's ONE primary enters create mode", () => {
-    expect(code).toContain('<QueryEmptyCard kind="first" logRef={logTriggerRef} onLog={() => openCreate()}');
+  /**
+   * ⚠️ THE COUNT CHANGED AND THE LAW DID NOT (empty-states pack, Phase 2). The card had ONE primary;
+   * the feature-led page has TWO — the hero's and the closing's — because the ref draws both, and a
+   * page that scrolls needs the ask at the end as well as the top. What matters was never the count
+   * but that every CTA enters the SAME create mode, so the assertion is now over the write path
+   * rather than over a number: one `onLog`, wired to `openCreate()`, and both buttons on it.
+   */
+  it("every primary enters create mode, through one handler", () => {
+    /* bounded: a tag name is a prefix of every longer one — see `queryEmptyFeatures.test.tsx` */
+    expect(code, "the feature-led empty state is not mounted").toMatch(/<QueryEmptyFeatures[\s/>]/);
+    expect(code).toContain("onLog={() => openCreate()}");
+    /* the component routes both of its CTAs through that one prop — asserted at the component, so
+       a third CTA cannot arrive with a handler of its own */
+    const feat = readFileSync(new URL("../components/queries/QueryEmptyFeatures.tsx", import.meta.url), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    const clicks = feat.match(/onClick=\{([^}]*)\}/g) ?? [];
+    expect(clicks.length).toBeGreaterThan(0);
+    for (const c of clicks) expect(c, `a CTA has a handler of its own: ${c}`).toMatch(/onLog|onImport/);
   });
 
   it("the old welcome pane's routes survive as quiet alternatives, not deletions", () => {

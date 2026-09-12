@@ -40,14 +40,19 @@ describe("the list → detail push", () => {
     expect(css).toContain(".f12-root .f12-body .f12-pane { transition: none; }");
   });
 
-  /* ⚠️ RETARGETED 11 Sep (Grid pass §6). The empty state is no longer an F12 split — it is one card
-     in the page's own view frame, outside the list/pane body — so there is no pusher for it to opt
-     out of. The claim this guarded, that a first-run writer's only CTA can never hide behind a push,
-     now holds by construction; it is asserted as the absence of the split and of its rules. */
+  /* ⚠️ RETARGETED TWICE, AND THE CLAIM HAS NOT MOVED EITHER TIME: a first-run writer's only CTA can
+     never hide behind a mobile push. 11 Sep (Grid pass §6) the empty state stopped being an F12
+     split and became one card in the page's own view frame; 12 Sep (empty-states pack, Phase 2) that
+     card became the feature-led page. Both times the SUBJECT changed and the law did not, which is
+     the only reason a retarget is legitimate rather than a rebaseline.
+
+     ⚠️ AND THE SPELLING IS WHAT KEEPS BREAKING, NOT THE LAW — which is this repo's own argument for
+     stating the claim over the ABSENCE of the split (structural, survives any future swap) and
+     naming the mount separately. */
   it("the empty state is not inside the pusher at all", () => {
     expect(hub).not.toContain("f12-body-empty");
     expect(css).not.toContain("f12-body-empty");
-    expect(hub).toContain('<QueryEmptyCard kind="first"');
+    expect(hub, "the feature-led empty state is not mounted").toMatch(/<QueryEmptyFeatures[\s/>]/);
   });
 });
 

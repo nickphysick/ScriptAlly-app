@@ -5,10 +5,14 @@
  * QueryEmptyCard — the Query Centre's two empty moments (Grid pass §6; ref
  * `design-refs/query-grid-enhancements-v1.html`, section 4).
  *
- * ⚠️ TWO CARDS FOR TWO MOMENTS, AND WHICH ONE IS NOT THIS FILE'S DECISION. A brand-new account and a
- * filtered-to-zero grid are different facts; `gridEmptyKind` decides between them and this only
- * draws what it is told. Nothing here counts anything either — the filtered card's line arrives
- * already built, from the same facts the cards themselves state.
+ * ⚠️ ONE CARD NOW, AND THE `first` VARIANT IS RETIRED (empty-states pack, Phase 2). The blank
+ * account is the feature-led page — `QueryEmptyFeatures` — so the card that used to answer it is
+ * DELETED rather than left reachable: a replacement that is added keeps its original alive, and
+ * the two would have read almost the same. `gridEmptyKind` still decides which empty moment it is
+ * and still returns "first"; the PAGE now branches on that ahead of this component.
+ *
+ * ⚠️ WHAT STAYS IS THE FILTERED CARD, whose claim is narrower and whose line arrives already
+ * built, from the same facts the cards themselves state. Nothing here counts anything.
  *
  * ⚠️ THE ILLUSTRATION IS A PLACEHOLDER UNTIL ARTWORK EXISTS, AND IT SAYS SO. `IlloSlot` draws the
  * hatched slot with its name on it; dropping the art in later is one prop, and the chrome that
@@ -20,13 +24,9 @@ import { IlloSlot } from "./IlloSlot";
 
 /** The ref's words, verbatim — section 4 of the enhancements ref. The spec reads them back from it. */
 export const EMPTY_COPY = {
-  first: {
-    slot: "empty · first",
-    title: "Your first query goes here",
-    line: "Log the agents you've written to and ScriptAlly will keep the dates, the nudges and the replies straight for you.",
-    cta: "+ Log your first query",
-    alt: "or import a spreadsheet",
-  },
+  /* ⚠️ `first` IS GONE WITH ITS CARD (Phase 2) — its words live in `queryEmptyCopy.ts` now, where
+     the feature-led hero reads them. Two copies of a first-run sentence is two sentences the day
+     one is edited. */
   filtered: {
     slot: "empty · filtered",
     title: "Nothing needs you right now",
@@ -36,41 +36,19 @@ export const EMPTY_COPY = {
 } as const;
 
 /**
- * ⚠️ NOT IN THE REF, AND KEPT ON PURPOSE. The welcome pane this card replaces offered the import
- * template beside the importer, and an earlier pack locked that route as surviving "as a quiet
- * alternative, not a deletion". The importer does not offer the template itself, so dropping it here
- * would remove the only in-app way to it. It rides the alternative line, in that line's own voice.
+ * ⚠️ EXPORTED, AND ITS ONE CONSUMER IS NOW THE FEATURE-LED HERO (Phase 2). An earlier pack locked
+ * this route as surviving "as a quiet alternative, not a deletion": the importer does not offer the
+ * template itself, so dropping it would remove the only in-app way to it. The hero's second link is
+ * that route; the constant stays HERE because this file is where the lock that guards it looks.
  */
 export const TEMPLATE_HREF = "/ScriptAlly-pipeline-import-template.xlsx";
 
+/** ⚠️ NO LONGER A UNION — the `first` member went with its card (Phase 2). Kept as a named type so
+ *  the call site reads the same and a future second moment has somewhere to go. */
 export type QueryEmptyCardProps =
-  | { kind: "first"; onLog: () => void; onImport: () => void; logRef?: React.Ref<HTMLButtonElement> }
-  | { kind: "filtered"; line: string | null; onSeeWaiting: (() => void) | null; onClear: () => void };
+  { kind: "filtered"; line: string | null; onSeeWaiting: (() => void) | null; onClear: () => void };
 
 export const QueryEmptyCard: React.FC<QueryEmptyCardProps> = (p) => {
-  if (p.kind === "first") {
-    const c = EMPTY_COPY.first;
-    return (
-      <div className="qce qce--first">
-        <IlloSlot className="qce-illo" name={c.slot} width={96} height={96} round />
-        <h3 className="qce-h">{c.title}</h3>
-        <p className="qce-p">{c.line}</p>
-        <button ref={p.logRef} type="button" className="qce-cta" onClick={p.onLog}>
-          {c.cta}
-        </button>
-        <span className="qce-alts">
-          <button type="button" className="qce-alt" onClick={p.onImport}>
-            {c.alt}
-          </button>
-          <span className="qce-dot" aria-hidden="true">·</span>
-          <a className="qce-alt" href={TEMPLATE_HREF} download>
-            download the template
-          </a>
-        </span>
-      </div>
-    );
-  }
-
   const c = EMPTY_COPY.filtered;
   return (
     <div className="qce qce--filtered">

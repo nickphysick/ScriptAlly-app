@@ -66,7 +66,9 @@ import { agentLabel, agentAgencyLine, agentPrimary, agentSecondary, agentInitial
 import { QueryCentreGrid, type GridCard } from "./queries/QueryCentreGrid";
 import { QueryStatTiles } from "./queries/QueryStatTiles";
 import { QueryListView } from "./queries/QueryListView";
-import { QueryEmptyCard } from "./queries/QueryEmptyCard";
+import { QueryEmptyCard, TEMPLATE_HREF } from "./queries/QueryEmptyCard";
+import { QueryEmptyFeatures } from "./queries/QueryEmptyFeatures";
+import { heroBookTitle } from "./queries/queryEmptyCopy";
 import { gridEmptyKind, waitingSummary, waitingLine } from "../lib/queryGridEmpty";
 import { QueryBoardView } from "./queries/QueryBoardView";
 import { QueryViewSwitch, type QueryView } from "./queries/QueryViewSwitch";
@@ -5629,7 +5631,24 @@ export const Queries: React.FC<{
            * are controls with nothing to act on; the masthead above still names the page.
            */
           <div data-qc-fade={fadeIn ? "in" : undefined} className="qcc-plain">
-            <QueryEmptyCard kind="first" logRef={logTriggerRef} onLog={() => openCreate()} onImport={() => onNavigate?.("import")} />
+            {/**
+              * ⚠️ SWAPPED, NOT ADDED (empty-states pack, Phase 2). `QueryEmptyCard`'s `first`
+              * variant is RETIRED in the same commit rather than left reachable — this repo has
+              * three recorded cases of a replacement that was added and left the original alive,
+              * and the camouflage is always that the two read almost the same. The `filtered`
+              * variant is untouched and still answers a view narrowed to zero, further down.
+              *
+              * ⚠️ AND THE NOTE ABOVE THIS BRANCH STILL HOLDS: no tiles and no toolbar over it. The
+              * feature-led page is longer than the card was, which makes five zeros and a Filter
+              * over nothing worse, not better.
+              */}
+            <QueryEmptyFeatures
+              logRef={logTriggerRef}
+              onLog={() => openCreate()}
+              onImport={() => onNavigate?.("import")}
+              manuscriptTitle={heroBookTitle(trackedManuscript, manuscripts)}
+              templateHref={TEMPLATE_HREF}
+            />
           </div>
         ) : (
         <>

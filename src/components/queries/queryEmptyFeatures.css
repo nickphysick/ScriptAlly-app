@@ -1,0 +1,298 @@
+/*
+ * The Query Centre's feature-led empty state (empty-states pack, Phase 2; ref
+ * `design-refs/scriptally-empty-states-v3-feature-led.html`).
+ *
+ * ⚠️ SCOPED UNDER `.qcf`, WHICH RENDERS ONLY INSIDE THE ZERO-QUERY BRANCH. Nothing here selects on
+ * a class the populated page emits, so a Query Centre with one query in it cannot be reached by any
+ * of this — the pack's scope boundary stated in the stylesheet rather than trusted to review.
+ *
+ * ⚠️ THE REF'S PALETTE IS THIS PAGE'S PALETTE, TO THE DIGIT, so almost nothing here is a literal.
+ * `--sand/sage/pink/slate/grey` are `--state-queried/agent/you/offer/closed`; `--parchment` is
+ * `--paper`, `--cream` is `--oat`, and the ref's four ink levels and two rules are `--ink`,
+ * `--ink-2`, `--muted`, `--faint`, `--line` and `--hairline`. Those all come from `.t-f12`
+ * (`f12.css`), which is an ancestor of every element here — the use-site question this repo's notes
+ * insist on asking, and the answer is yes, so none of these needs a fallback.
+ *
+ * ⚠️ TWO VALUES HAVE NO TOKEN AND ARE DECLARED LOCALLY, FLAGGED. The ref's two band grounds
+ * (`#eef1ec` sage, `#f9f0eb` pink) are paler washes than any `--state-*` tint — a band painted
+ * `--state-agent` would be four times the weight and would read as a selected surface rather than
+ * as a section ground. They are the same decision `contactListEmpty.css` records for its two
+ * brief-only colours: local, named, and one line to retoken if Nick wants them on the ramp.
+ */
+
+.qcf {
+  --qcf-band-sage: #eef1ec;
+  --qcf-band-pink: #f9f0eb;
+  /* the illustration plate's inner rim — the ref's `inset 0 0 0 1px rgba(124,58,42,.05)`, the
+     burgundy accent at 5%, which is what stops the plate reading as a plain box */
+  --qcf-plate-rim: rgba(124, 58, 42, 0.05);
+
+  box-sizing: border-box;
+  /* ⚠️ THE TYPE IS STATED, NOT INHERITED — the same note `queryEmptyCard.css` carries. This page's
+     theme class sets a base size the rest of the app does not, so a section taking its size from
+     there would be a different section on this page than the ref drew. */
+  font-family: var(--f12-body, "Inter", sans-serif);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.qcf *, .qcf *::before, .qcf *::after { box-sizing: border-box; }
+
+/* ── the shared furniture ──────────────────────────────────────────────────────────────────── */
+
+/* ⚠️ MIXED-CASE PLAYFAIR NEVER BELOW 1.3 — the house floor. The ref draws 1.08 on the hero and
+   1.15 on the row headings, both of which crop the descenders in "Every query", "don't" and
+   "yours"; and every one of these strings has one. The floor is not negotiable here because the
+   headings are the largest type on the page. */
+.qcf-h2 {
+  margin: 0;
+  font-family: var(--f12-serif, "Playfair Display", serif);
+  font-weight: 600; font-size: 40px; line-height: 1.3; letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.qcf-h3 {
+  margin: 0;
+  font-family: var(--f12-serif, "Playfair Display", serif);
+  font-weight: 600; font-size: 30px; line-height: 1.3;
+  color: var(--ink);
+}
+.qcf-h3--close { font-size: 24px; }
+.qcf-lede { margin: 14px 0 22px; font-size: 15px; line-height: 1.6; color: var(--ink-2); max-width: 48ch; }
+.qcf-lede em { font-style: italic; }
+/* ref `.row .txt p` — the subheading is serif italic, which is what keeps it a sentence rather
+   than a second heading */
+.qcf-sub {
+  margin: 9px 0 0;
+  font-family: var(--f12-serif, "Playfair Display", serif);
+  font-style: italic; font-size: 16px; line-height: 1.45; color: var(--ink-2); max-width: 40ch;
+}
+.qcf-sub--close { font-family: var(--f12-body, "Inter", sans-serif); font-style: normal; font-size: 13.5px; max-width: none; }
+/* the handwritten aside — the app's Caveat convention, which Editorial re-faces elsewhere */
+.qcf-caveat {
+  display: block; margin-top: 12px;
+  font-family: "Caveat", cursive; font-size: 18px; line-height: 1.2; color: var(--ink-2);
+}
+.qcf-acts { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.qcf-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border: 0; border-radius: 99px;
+  background: var(--btn-ink, #1c130f); color: #fdfaf5;
+  font: inherit; font-size: 13px; font-weight: 500; line-height: 1.3; cursor: pointer;
+}
+.qcf-cta:hover { background: #3a2d22; }
+.qcf-links { display: inline-flex; align-items: center; gap: 12px; font-size: 12.5px; color: var(--ink-2); }
+.qcf-links i { font-style: normal; color: var(--faint); }
+.qcf-link {
+  padding: 0; border: 0; background: none; font: inherit; font-size: 12.5px; color: var(--ink-2);
+  text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--faint);
+  cursor: pointer;
+}
+.qcf-link:hover { color: var(--ink); text-decoration-color: var(--ink-2); }
+.qcf-cta:focus-visible,
+.qcf-link:focus-visible { outline: 2px solid var(--sage, #8a9e88); outline-offset: 2px; }
+
+/* ── the sections ──────────────────────────────────────────────────────────────────────────── */
+
+/* ref `.hero` 1.1fr 1fr / `.row` 1fr 1fr */
+.qcf-hero {
+  display: grid; grid-template-columns: 1.1fr 1fr; gap: 44px; align-items: center;
+  padding: 44px 40px 40px; border-bottom: 1px solid var(--hairline);
+}
+.qcf-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+  padding: 40px; border-bottom: 1px solid var(--hairline);
+}
+.qcf-row--sage { background: var(--qcf-band-sage); }
+.qcf-row--pink { background: var(--qcf-band-pink); }
+/* ⚠️ `order` ON TWO CHILDREN, NEVER A SECOND MARKUP ORDER — the same mechanism `comps.css` and
+   `contactListEmpty.css` use. Reversing the DOM would put the illustration ahead of the heading
+   that names it for a screen reader, which is the reading order changing to serve a visual one. */
+.qcf-row--flip .qcf-txt { order: 2; }
+.qcf-row--flip .qcf-ill { order: 1; }
+.qcf-closing { display: flex; align-items: center; gap: 24px; padding: 34px 40px 40px; flex-wrap: wrap; }
+.qcf-acts--close { margin-left: auto; }
+
+/* ── the illustration plate ────────────────────────────────────────────────────────────────── */
+.qcf-ill {
+  position: relative; background: var(--paper); border: 1px solid var(--line);
+  border-radius: 14px; padding: 22px;
+  box-shadow: inset 0 0 0 1px var(--qcf-plate-rim);
+}
+/* ⚠️ THE PILL IS WHAT STOPS A LEGIBLE PICTURE READING AS DATA, so it is absolutely positioned
+   INSIDE the plate rather than in its flow: in the flow it would push the drawing down by its own
+   height, and the ref draws it over the plate's corner. Dashed, because on this page dashed means
+   provisional — the grammar the ghost-nudge and the writer's own expected date already use. */
+.qcf-tag {
+  position: absolute; top: 10px; right: 12px; z-index: 2;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace);
+  font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint);
+  border: 1px dashed var(--qc-rim-dash, rgba(28, 19, 15, 0.22)); border-radius: 99px;
+  padding: 3px 9px; background: var(--white);
+}
+.qcf-under { display: flex; justify-content: space-between; gap: 16px; margin-top: 12px; }
+.qcf-under .qcf-caveat { margin-top: 0; font-size: 16px; max-width: 34ch; }
+.qcf-under-r { text-align: right; }
+
+/* ── the example record card ───────────────────────────────────────────────────────────────── */
+.qcf-rc { border: 1px solid var(--line); border-radius: 12px; background: var(--white); overflow: hidden; }
+.qcf-rc-head { display: flex; align-items: center; gap: 10px; padding: 10px 13px; }
+.qcf-rc-hp {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace);
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  background: var(--white); border: 1px solid var(--hairline); border-radius: 99px;
+  padding: 5px 10px; color: var(--ink-2);
+}
+.qcf-rc-court {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace);
+  font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+  white-space: nowrap;
+}
+.qcf-rc-head .qcf-rc-court { margin-left: auto; }
+.qcf-rc-bd { padding: 15px 16px 11px; }
+.qcf-rc-who { display: flex; gap: 11px; align-items: flex-start; }
+.qcf-rc-av {
+  width: 40px; height: 40px; flex: none; border-radius: 50%;
+  border: 1px solid var(--line); background: var(--paper);
+  display: grid; place-items: center;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 10.5px; color: var(--ink-2);
+}
+.qcf-rc-nm { display: block; font-family: var(--f12-serif, "Playfair Display", serif); font-weight: 700; font-size: 18px; line-height: 1.3; }
+.qcf-rc-ag { display: block; font-family: var(--f12-serif, "Playfair Display", serif); font-style: italic; font-size: 13px; color: var(--ink-2); margin-top: 1px; }
+.qcf-rc-meta {
+  display: block; margin-top: 4px;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace);
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+}
+.qcf-rc-sec { margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--hairline); }
+.qcf-rc-sl {
+  display: block;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace);
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+}
+.qcf-rc-sv { display: block; margin-top: 5px; font-size: 12.5px; line-height: 1.5; }
+.qcf-sd { display: inline-flex; gap: 7px; align-items: center; }
+.qcf-rc-ft { display: flex; gap: 8px; padding: 11px 16px 15px; border-top: 1px solid var(--hairline); }
+/* ⚠️ SPANS, NOT BUTTONS — these are pictures of buttons. A `<button>` here would be keyboard
+   focusable and would answer nothing, and the page already has two real CTAs saying the same
+   thing. Structural, so nobody has to remember `tabindex`. */
+.qcf-b1 { background: var(--btn-ink, #1c130f); color: #fdfaf5; border-radius: 9px; padding: 8px 14px; font-size: 12px; font-weight: 500; }
+.qcf-b2 { border: 1px solid var(--line); border-radius: 9px; padding: 8px 14px; font-size: 12px; color: var(--ink-2); }
+
+/* ── the shades ────────────────────────────────────────────────────────────────────────────── */
+.qcf-swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; }
+.qcf-sw { border-radius: 10px; padding: 13px 11px 11px; border: 1px solid var(--hairline); }
+.qcf-sw b { display: block; font-family: var(--f12-serif, "Playfair Display", serif); font-size: 14px; font-weight: 600; }
+.qcf-sw span { display: block; font-size: 11px; color: var(--ink-2); margin-top: 3px; line-height: 1.35; }
+.qcf-depth { display: flex; gap: 16px; align-items: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--hairline); }
+.qcf-depth > div { display: flex; flex-direction: column; align-items: center; gap: 7px; flex: 1; }
+/* ⚠️ `pre-line`, BECAUSE THE BREAK IS IN THE COPY. The ref sets these labels over two lines with a
+   `<br>`; the newline lives in `QCF_DEPTH` so the copy module owns the whole string and a lock can
+   read it back. */
+.qcf-depth span {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace);
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+  text-align: center; white-space: pre-line; line-height: 1.4;
+}
+
+/* ── the move strip ────────────────────────────────────────────────────────────────────────── */
+.qcf-moves { display: flex; flex-direction: column; gap: 10px; }
+.qcf-mv {
+  display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center;
+  background: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px;
+}
+.qcf-mv-l { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.qcf-mv-l b { font-size: 13.5px; font-weight: 600; }
+.qcf-mv-l b .qcf-rc-court { margin-left: 6px; }
+.qcf-mv-l > span { font-size: 12px; color: var(--ink-2); }
+
+/* ── the four views ────────────────────────────────────────────────────────────────────────── */
+.qcf-views {
+  display: inline-flex; border: 1px solid var(--line); border-radius: 10px;
+  overflow: hidden; background: var(--white); margin-bottom: 14px;
+}
+.qcf-views span { padding: 7px 13px; font-size: 12.5px; color: var(--ink-2); }
+.qcf-views span.on { background: var(--oat); color: var(--ink); font-weight: 600; }
+.qcf-twov { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.qcf-lst { background: var(--white); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.qcf-lst > div {
+  display: grid; grid-template-columns: 14px 1fr auto; gap: 9px; align-items: center;
+  padding: 8px 11px; border-bottom: 1px solid var(--hairline); font-size: 12px;
+}
+.qcf-lst > div:last-child { border-bottom: 0; }
+.qcf-lst > div > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qcf-lst i {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace);
+  font-size: 9px; color: var(--muted); font-style: normal; letter-spacing: 0.06em;
+}
+.qcf-brd { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.qcf-col { background: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 7px; }
+.qcf-col h5 {
+  margin: 0;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace);
+  font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+  padding: 2px 3px 7px; font-weight: 500;
+}
+.qcf-stub { border-radius: 7px; padding: 7px 8px; font-size: 11px; margin-bottom: 5px; line-height: 1.3; }
+.qcf-stub:last-child { margin-bottom: 0; }
+.qcf-stub b { display: block; font-weight: 600; }
+
+/* ── the calendar excerpt ──────────────────────────────────────────────────────────────────── */
+.qcf-tlx {
+  position: relative; height: 300px; background: var(--white);
+  border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+}
+.qcf-ax { display: grid; grid-template-columns: repeat(8, 1fr); height: 32px; border-bottom: 1px solid var(--line); }
+.qcf-ax i {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace);
+  font-size: 9px; color: var(--muted); font-style: normal;
+  padding: 10px 0 0 7px; border-right: 1px solid var(--hairline); letter-spacing: 0.06em;
+}
+/* ⚠️ THE TODAY MARK IS A FILLED DISC, NOT A TINT — the ref's `.ax i.today`. It has to be legible
+   against the axis's own rule, and a tint at this size reads as a wash. */
+.qcf-ax i.today {
+  background: var(--ink); color: var(--white); border-radius: 99px;
+  padding: 0; height: 20px; width: 20px; display: grid; place-items: center;
+  margin: 6px 0 0 7px; border: 0;
+}
+/* ⚠️ DASHED, AND THAT IS THE PAGE'S OWN GRAMMAR: on this surface dashed means provisional, and
+   "today" on a board of expected dates is the line everything to the right has not reached yet. */
+.qcf-today { position: absolute; top: 0; bottom: 0; left: calc(50% + 17px); border-left: 1.5px dashed var(--ink); z-index: 2; }
+.qcf-qc {
+  position: absolute; background: var(--white); border: 1px solid var(--line);
+  border-radius: 9px; overflow: hidden; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05);
+}
+.qcf-qc-h {
+  display: flex; align-items: center; gap: 8px; padding: 6px 11px;
+  font-family: var(--f12-serif, "Playfair Display", serif); font-size: 13px;
+}
+.qcf-qc-h .qcf-rc-court { margin-left: auto; }
+.qcf-qc-b { padding: 7px 11px 9px; }
+.qcf-qc-b b { font-family: var(--f12-serif, "Playfair Display", serif); font-size: 14px; font-weight: 600; }
+.qcf-qc-b em { font-family: var(--f12-serif, "Playfair Display", serif); font-size: 12px; color: var(--ink-2); margin-left: 6px; }
+.qcf-qc-b > span { display: block; font-size: 11.5px; margin-top: 3px; }
+.qcf-qc-b > span i {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace);
+  font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+  font-style: normal; margin-left: 6px;
+}
+.qcf-qc-end {
+  position: absolute; right: -4px; top: 50%; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--white); border: 1.5px solid var(--muted); transform: translateY(-50%);
+}
+
+/* ── narrow ────────────────────────────────────────────────────────────────────────────────── */
+/* ⚠️ THE FLIP IS RESET WHEN THE ROWS STACK, or the text lands BELOW the picture it introduces on
+   every flipped row — the reading order the `order` swap was written to preserve, lost at the one
+   width where the two columns become one. */
+@media (max-width: 1040px) {
+  .qcf-hero, .qcf-row { grid-template-columns: 1fr; gap: 28px; padding: 32px 24px; }
+  .qcf-row--flip .qcf-txt, .qcf-row--flip .qcf-ill { order: 0; }
+  .qcf-closing { padding: 28px 24px 32px; }
+  .qcf-acts--close { margin-left: 0; }
+  .qcf-h2 { font-size: 32px; }
+  .qcf-h3 { font-size: 25px; }
+  .qcf-swatches { grid-template-columns: repeat(2, 1fr); }
+  .qcf-twov { grid-template-columns: 1fr; }
+  .qcf-under { flex-direction: column; }
+  .qcf-under-r { text-align: left; }
+}
