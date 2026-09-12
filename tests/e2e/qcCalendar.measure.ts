@@ -39,7 +39,7 @@ test("§2 · the toolbar does not move between views, and the well is Grid and L
       };
       return {
         tb: r(".qcc-tb"), search: r(".qcc-tb-search"), sw: r(".qvs"), left: r(".qcc-tb-left"),
-        well: !!document.querySelector(sel + ".qcc-well"),
+        well: !!document.querySelector(sel + ".qcc-plain"),
         plain: !!document.querySelector(sel + ".qcc-plain"),
       };
     }, s);
@@ -56,7 +56,7 @@ test("§2 · the toolbar does not move between views, and the well is Grid and L
   /* the Calendar: no well, no page toolbar, and its own header row instead */
   await pick(page, "Calendar");
   const cal = await page.evaluate((sel) => ({
-    well: !!document.querySelector(sel + ".qcc-well"),
+    well: !!document.querySelector(sel + ".qcc-plain"),
     plain: !!document.querySelector(sel + ".qcc-plain"),
     toolbar: !!document.querySelector(sel + ".qcc-tb"),
     head: !!document.querySelector(sel + ".qcc-calhead"),

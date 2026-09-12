@@ -32,7 +32,7 @@ for (const w of [1280, 1440, 1920]) {
         board: R(".qcc-calboard"), rows: R(".tl-rows"), rail0: R(".tl-rail"),
         pill: R(".qcc-denspill"),
         toolbar: !!q(".qcc-tb"), tiles: !!q("[aria-label='Query totals']"),
-        well: !!q(".qcc-well"),
+        well: !!q(".qcc-plain"),
         qf: document.querySelectorAll("[data-qc-live] .qcc-qf").length,
         fields: document.querySelectorAll("[data-qc-live] .qcc-cal-field").length,
         todayline: (() => { const e = q(".tl-todayline"); return e ? +e.getBoundingClientRect().width.toFixed(2) : null; })(),

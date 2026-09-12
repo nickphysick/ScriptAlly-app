@@ -437,7 +437,14 @@ test("toolbar v2 · the three menus, Group on Grid and List, the board's disable
     }
     if (key === "sort") {
       expect(chassis.rows, `Sort is ${chassis.rows} rows`).toBeLessThanOrEqual(10);
-      expect(chassis.rows).toBe(5);
+      /* ⚠️ SIX SINCE THE GRID PASS §4 (`d64824d3`), WHICH ADDED `Attention` AND DID NOT COME BACK
+         HERE — found by this run, not by that one. Asserted by NAME as well as by count now: a
+         count alone cannot tell a key that was added from one that was renamed away. */
+      const labels = await page.evaluate(() =>
+        [...document.querySelectorAll<HTMLElement>(".f12-pop--mount .f12-prow")].map((e) => (e.textContent ?? "").trim()),
+      );
+      expect(chassis.rows, `Sort is ${chassis.rows} rows: ${labels.join(" · ")}`).toBe(6);
+      expect(labels[0], "Attention is no longer the key the menu leads with").toContain("Attention");
       expect(chassis.foot).toBe(1);
     }
     await page.screenshot({ path: `${SHOTS2}/pop-${key}-1440.png` });
@@ -870,16 +877,16 @@ const frameRects = (page: import("@playwright/test").Page) =>
       return { x: Math.round(b.left * 10) / 10, y: Math.round(b.top * 10) / 10, w: Math.round(b.width * 10) / 10, h: Math.round(b.height * 10) / 10 };
     };
     return {
-      well: r(live.querySelector(".qcc-well")),
+      well: r(live.querySelector(".qcc-plain")),
       toolbar: r(live.querySelector(".qcc-tb")),
       firstCard: r(live.querySelector(".qcc-grid > .qcc")),
-      wellBg: getComputedStyle(live.querySelector<HTMLElement>(".qcc-well")!).backgroundColor,
+      wellBg: getComputedStyle(live.querySelector<HTMLElement>(".qcc-plain")!).backgroundColor,
       /* ⚠️ THE GROUND IS THE FIRST PAINTED ANCESTOR, NOT THE NEAREST BOX. `.wpg-scroll` is
          transparent, so reading it gave `rgba(0,0,0,0)` — luminance 0 — and the well came out
          "lighter than the page" by 232 points. A transparent element has no colour to compare
          against; the ground is whatever actually paints behind the well. */
       pageBg: (() => {
-        let el: HTMLElement | null = live.querySelector<HTMLElement>(".qcc-well");
+        let el: HTMLElement | null = live.querySelector<HTMLElement>(".qcc-plain");
         while (el) {
           el = el.parentElement;
           if (!el) break;
@@ -892,7 +899,7 @@ const frameRects = (page: import("@playwright/test").Page) =>
         const c = live.querySelector<HTMLElement>(".qcc-grid > .qcc");
         return c ? getComputedStyle(c).boxShadow : "";
       })(),
-      busy: live.querySelector(".qcc-well")?.getAttribute("aria-busy") ?? null,
+      busy: live.querySelector(".qcc-plain")?.getAttribute("aria-busy") ?? null,
       /* ⚠️ SCOPED TO THE PAGE, AND TO SPINNER-SHAPED THINGS. The first form swept the whole
          document for `role="status"` and caught the shell's TOAST region — a live region, not a
          spinner, and nothing to do with this page. The claim is that the Query Centre shows no
@@ -953,7 +960,7 @@ test(`well · the recess, the toolbar's tracks, and the bones that do not move �
        explicitly the moment it has measured, so a long hold costs nothing. */
     await holdData(page, 6000);
     await openRoute(page, "/queries", { width, height: 1000 });
-    await expect(page.locator(".qcc-well").first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.locator(".qcc-plain").first()).toBeVisible({ timeout: 30_000 });
     /* ⚠️ THE COVER, NOT THE DISSOLVE — and this is the precondition the first version omitted.
        `toBeVisible()` is satisfied by a non-empty box, and Playwright does not treat `opacity: 0`
        as hidden; the bones stay MOUNTED through the fade, so every rect assertion passed while
@@ -987,7 +994,12 @@ test(`well · the recess, the toolbar's tracks, and the bones that do not move �
       /* the claim is recorded as unmeasured, and the case still proves everything it can */
       const loadedOnly = await frameRects(page);
       out[`well-loaded-${width}`] = loadedOnly;
-      expect(loadedOnly.wellBg, `the well is not #eee8e0 at ${width}`).toBe("rgb(238, 232, 224)");
+      /* ⚠️ RETARGETED 12 Sep (Grid pass §1): the recess is DELETED, not repainted. `.qcc-well` is
+         absent from the DOM and `.qcc-plain`, which carries the same box to the pixel, paints
+         nothing — so the claim inverts: the frame has no fill of its own, and what shows through it
+         is the window's own ground. */
+      expect(loadedOnly.wellBg, `the recess came back at ${width}`).toBe("rgba(0, 0, 0, 0)");
+      expect(loadedOnly.pageBg, `the ground behind the grid moved at ${width}`).toBe("rgb(254, 252, 250)");
       await page.screenshot({ path: `${SHOTS}/loaded-grid-${width}.png` });
       await pickView(page, "List");
       await page.screenshot({ path: `${SHOTS}/loaded-list-${width}.png` });
@@ -1047,7 +1059,7 @@ test(`well · the recess, the toolbar's tracks, and the bones that do not move �
     await page.screenshot({ path: `${SHOTS}/loaded-list-${width}.png` });
     out[`well-list-${width}`] = await page.evaluate(() => {
       const live = [...document.querySelectorAll<HTMLElement>(".wpg.qc-wpg")].find((e) => e.getBoundingClientRect().height > 0)!;
-      const w = live.querySelector(".qcc-well");
+      const w = live.querySelector(".qcc-plain");
       return { listInWell: !!w?.querySelector(".qlv"), wellBg: getComputedStyle(w as HTMLElement).backgroundColor };
     });
     expect((out[`well-list-${width}`] as any).listInWell, `the list is outside the well at ${width}`).toBe(true);
@@ -1056,7 +1068,7 @@ test(`well · the recess, the toolbar's tracks, and the bones that do not move �
     await page.screenshot({ path: `${SHOTS}/loaded-board-${width}.png` });
     const board = await page.evaluate(() => {
       const live = [...document.querySelectorAll<HTMLElement>(".wpg.qc-wpg")].find((e) => e.getBoundingClientRect().height > 0)!;
-      return !!live.querySelector(".qcc-well .qbv, .qcc-well .qcc-boardwrap");
+      return !!live.querySelector(".qcc-plain .qbv, .qcc-plain .qcc-boardwrap");
     });
     out[`well-board-${width}`] = { boardInWell: board };
     expect(board, `the board is outside the well at ${width}`).toBe(true);
@@ -1081,7 +1093,7 @@ test("well · §5 — the entrance runs once and cannot be replayed — 1440", a
       flag: live.className.includes("qc-wpg--enter"),
       masthead: of(".wsh"),
       tile: of(".qct-tile"),
-      well: of(".qcc-well"),
+      well: of(".qcc-plain"),
       card: of(".qcc-grid > .qcc"),
     };
   });
@@ -1134,7 +1146,7 @@ test(`toolbar · exactly one row, and nothing past the well — ${width}`, async
     const live = [...document.querySelectorAll<HTMLElement>(".wpg.qc-wpg")].find((e) => e.getBoundingClientRect().height > 0)!;
     const tb = live.querySelector<HTMLElement>(".qcc-tb")!;
     const left = live.querySelector<HTMLElement>(".qcc-tb-left")!;
-    const well = live.querySelector<HTMLElement>(".qcc-well")!;
+    const well = live.querySelector<HTMLElement>(".qcc-plain")!;
     const search = live.querySelector<HTMLElement>(".qcc-tb-search")!;
     const pills = [...live.querySelectorAll<HTMLElement>(".qcc-tb .qcc-tb-btn")];
     const h = (e: Element) => Math.round(e.getBoundingClientRect().height * 10) / 10;
@@ -1219,7 +1231,7 @@ test(`toolbar · no container of its own — ${width}`, async ({ page }) => {
     const live = [...document.querySelectorAll<HTMLElement>(".wpg.qc-wpg")].find((e) => e.getBoundingClientRect().height > 0)!;
     const tb = live.querySelector<HTMLElement>(".qcc-tb")!;
     const ctl = live.querySelector<HTMLElement>(".qcc-controls")!;
-    const well = live.querySelector<HTMLElement>(".qcc-well")!;
+    const well = live.querySelector<HTMLElement>(".qcc-plain")!;
     const cs = (e: HTMLElement) => { const c = getComputedStyle(e); return { bg: c.backgroundColor, bgImage: c.backgroundImage, shadow: c.boxShadow, radius: c.borderTopLeftRadius, borderW: c.borderTopWidth, padding: c.padding }; };
     const pills = [...live.querySelectorAll<HTMLElement>(".qcc-tb .qcc-tb-btn")];
     const a = pills[0].getBoundingClientRect(), b = pills[1].getBoundingClientRect();
