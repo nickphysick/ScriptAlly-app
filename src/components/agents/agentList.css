@@ -62,6 +62,34 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   THE PORTAL SCOPE
+
+   ⚠️ EVERY RULE ON THIS PAGE IS `.aglist .agl-…` AND EVERY TOKEN IS DECLARED ON `.aglist`, SO
+   ANYTHING THAT PORTALS TO `document.body` LEAVES BOTH BEHIND. It is not one failure but two, and
+   they are invisible in opposite ways: the descendant selectors simply stop matching, and every
+   `var(--agl-…)` becomes an unresolvable read, which CSS drops the whole declaration for — no
+   error, no warning, a valid stylesheet, and a drawer wearing nothing.
+
+   It arrived from another page. `SlideOver` gained `createPortal(tree, document.body)` on
+   2026-09-09 so the DASHBOARD's drawer could sit above everything; this page's drawer is a mount
+   of that same shared chassis, and it was carried out of `.aglist` by a change that had no reason
+   to think about it. Nothing here changed, nothing went red, and the deployed CSS still contains
+   every rule — they have nothing left to match.
+
+   So a portalled tree carries `aglist agl-scope`: `.aglist` brings the tokens and the descendant
+   ancestry, and `display: contents` takes the page LAYOUT back off — `height: 100%`,
+   `overflow: hidden` and the column flex are the page root's business, not a drawer's. An element
+   with `display: contents` generates no box at all, so it is an ancestor for selector matching and
+   for inheritance while being nothing at all for layout, which is exactly and only what is wanted
+   here. `color` still inherits, which the drawer wants.
+
+   ⚠️ THE SCOPE GOES ON A WRAPPER, NEVER ON THE PANEL ITSELF. The popovers' portal roots are
+   `position: fixed`; `display: contents` on a positioned element discards the box it was
+   positioning, so the class would take the panel off the screen it was meant to place.
+   ══════════════════════════════════════════════════════════════════════════ */
+.aglist.agl-scope { display: contents; }
+
+/* ══════════════════════════════════════════════════════════════════════════
    PAGE-LOAD MOTION (motion pack, Baked 1)
 
    The vocabulary is the app's shared `rise` — defined ONCE in src/styles/motion.css and consumed

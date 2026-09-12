@@ -88,6 +88,10 @@ export const QuickAddPopover: React.FC<{
   const preview = field === "website" && draft.value.trim() ? normaliseSubmissionsUrl(draft.value) : null;
 
   return createPortal(
+    /* ⚠️ THE PAGE SCOPE, CARRIED THROUGH THE PORTAL — see `.aglist.agl-scope`. The class goes on
+       this WRAPPER and never on the panel: the panel is `position: fixed`, and `display: contents`
+       on a positioned element throws away the box it was positioning. */
+    <div className="aglist agl-scope">
     <div
       className="agl-qa"
       role="dialog"
@@ -161,6 +165,7 @@ export const QuickAddPopover: React.FC<{
         <span className="agl-sp" />
         <span className="agl-qa-kbd">↵ save · ⇥ next · esc</span>
       </div>
+    </div>
     </div>,
     document.body,
   );

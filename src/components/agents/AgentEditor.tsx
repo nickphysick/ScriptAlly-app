@@ -119,7 +119,15 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
   };
 
   return (
-    <div className="agl-acard">
+    /**
+     * ⚠️ THE DOOR STATE IS ON THE ROOT BECAUSE THE HEADER'S BAND IS A TOKEN, NOT A COLOUR.
+     * `.agl-ehead` reads `background: var(--agl-band)`, and `--agl-band` is declared by `.s-open` /
+     * `.s-shut` — so without one of them above it the read is unresolvable and CSS drops the whole
+     * declaration. The header had been transparent since the editor was first built: the rule was
+     * right, the token was right, and nothing connected them. Found by measuring the rendered
+     * header rather than by reading either file, because both read correctly on their own.
+     */
+    <div className={`agl-acard ${draft.open ? "s-open" : "s-shut"}`}>
       <div className="agl-ehead">
         <div
           className="agl-av"

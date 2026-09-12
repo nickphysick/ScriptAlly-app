@@ -162,6 +162,8 @@ export const AgentDrawer: React.FC<AgentDrawerProps> = ({
 
   return (
     <SlideOver open={open} onClose={onClose} label={`${name} — contact record`} width={580} fullBleedBelowMd>
+      {/* ⚠️ THE PAGE SCOPE, CARRIED THROUGH THE PORTAL — see `.aglist.agl-scope`. */}
+      <div className="aglist agl-scope">
       {editing ? (
         /* THE FORM, WHOLE — see the header. It brings its own head, tabs, Done and Discard. */
         <div className="agl-dedit">{editor}</div>
@@ -246,6 +248,7 @@ export const AgentDrawer: React.FC<AgentDrawerProps> = ({
           </div>
         </>
       )}
+    </div>
     </SlideOver>
   );
 };

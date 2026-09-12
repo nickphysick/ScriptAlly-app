@@ -56,6 +56,10 @@ export const ContactPeekPopover: React.FC<{
   }, [onClose]);
 
   return createPortal(
+    /* ⚠️ THE PAGE SCOPE, CARRIED THROUGH THE PORTAL — see `.aglist.agl-scope`. The class goes on
+       this WRAPPER and never on the panel: the panel is `position: fixed`, and `display: contents`
+       on a positioned element throws away the box it was positioning. */
+    <div className="aglist agl-scope">
     <div
       className="agl-peekpop"
       role="dialog"
@@ -80,6 +84,7 @@ export const ContactPeekPopover: React.FC<{
           </button>
         }
       />
+    </div>
     </div>,
     document.body,
   );
