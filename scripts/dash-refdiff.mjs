@@ -900,10 +900,37 @@ async function readPage(page, url, { app } = {}) {
   page.setDefaultNavigationTimeout(NAV_MS);
   await page.goto(url, { waitUntil: "domcontentloaded" });
   if (app) await signIn(page);
+  /**
+   * ⚠️ THE LOADED PAGE IS WAITED FOR, NOT RACED (v34). Since v33.2 the dashboard stands its content
+   * down to `display: none` while the loading cover is up, so a read taken under the cover finds 3
+   * probes of 16 — and the chart guard below cannot catch that, because a plot beneath the cover is
+   * still ATTACHED. A slow load at 1920 did exactly this on the v34 pass and stopped the run with
+   * "not the signed-in dashboard". The cover's own element is the signal: it leaves the DOM when the
+   * page is live and not before. The shell is waited for first, because a cover that has not been
+   * rendered yet is also "detached", and would let the read straight through.
+   */
+  if (app) {
+    await page.waitForSelector(".ws-app.dash-mode", { state: "attached", timeout: NAV_MS }).catch(() => {});
+    await page.waitForSelector(".os-skelpage", { state: "detached", timeout: NAV_MS }).catch(() => {});
+  }
   /* fonts settled and one paint past any entrance, or type reads at its fallback size */
   await page.evaluate(() => document.fonts.ready).catch(() => {});
   await page.waitForTimeout(app ? 2600 : 900);
   await page.addStyleTag({ content: "*,*::before,*::after{transition:none!important;animation:none!important}" });
+  /**
+   * ⚠️ THE REF'S `.main` IS MEASURED AS A CONTENT BOX, SO ITS SCRIM-ONLY `min-height` IS LIFTED (v34).
+   * v34 gave the ref's content column `min-height: 100vh` for one reason, in the pack's own words:
+   * so the scrim's `height: 100%` "runs the full window whether the page is short or long". At this
+   * harness's 1456px viewport that stretched `.main` from its content (nav row + grid = 1370) to the
+   * viewport (1456) — and `.main` IS the datum, so the app was re-read in a window 86px taller and
+   * every card with flex in it grew by exactly that: grid, to-do card, activity card and feed +85,
+   * the community tile 86 lower. Five misses that were one number, none of them the app's. The ref's
+   * grid never moved (`min-height: calc(100vh - 150px)` = 1306); only the column holding it did.
+   * Lifting the one rule for the read restores the datum to what this file defines it as — the
+   * content column — and leaves the ref's bytes alone. The scrim is gated where it lives, on the
+   * app, by `railBoundary`.
+   */
+  if (!app) await page.addStyleTag({ content: ".main{min-height:0!important}" });
   await page.waitForTimeout(160);
   /* the type scale's selectors for THIS side, handed to the page rather than baked into READ */
   const which = app ? 2 : 1;
@@ -938,7 +965,8 @@ async function readPage(page, url, { app } = {}) {
    */
   if (app) {
     const plotted = await page
-      .waitForSelector('[data-probe="plot"]', { timeout: NAV_MS, state: "attached" })
+      /* VISIBLE, not attached — a plot under the loading cover is attached and draws nothing */
+      .waitForSelector('[data-probe="plot"]', { timeout: NAV_MS, state: "visible" })
       .then(() => true)
       .catch(() => false);
     if (!plotted) {
