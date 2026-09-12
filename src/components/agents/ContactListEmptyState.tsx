@@ -2,437 +2,406 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Contact list — the editorial empty state (blank account, zero agents).
+ * Contact list — the feature-led empty state (blank account, zero agents; empty-states pack,
+ * Phase 3; ref `design-refs/scriptally-empty-states-v3-feature-led.html`, the Contact list screen).
  *
- * ⚠️ IT IS THE COMPARABLE TITLES PAGE'S GRAMMAR, NOT A SECOND ONE. Structure, measures, block
- * rhythm and the dashed placeholder plate are `compsMarketing.tsx` + `comps.css` verbatim in
- * intent: two measures that deliberately do NOT align (1060 for copy, 1240 for the three-across
- * stages), 96px between blocks, a 4:3 dashed plate carrying the illustrator's brief, `flip` as
- * `order` on two grid children and never a second markup order. Anything that reads as a
- * near-copy of a `ct-` rule is that on purpose; the day the two pages should differ, they differ
- * by a value, not by a mechanism.
+ * ⚠️ THIS REPLACES THE EDITORIAL SIX-ROW PAGE, AND WHAT IT REPLACES IS DELETED HERE. Three sections
+ * went: the `cle-stages` trio of dashed illustrator plates, the "What makes a strong agent record?"
+ * band, and its six numbered rows with their six drawn scenes. The pack names the band explicitly
+ * ("section 2 replaces it"); the stages went because the ref draws no equivalent and keeping them
+ * would put a three-plate section inside a four-block structure that has no slot for it.
  *
- * ⚠️ THE COPY LIVES IN EXPORTED CONSTANTS, NOT IN THE JSX. Same reason as `noteboardEmptyState`:
- * a sentence in two places is two sentences the day one is edited, and a lock can only read what
- * it can name. `body` is a SEGMENT LIST rather than a string because four of the six rows carry
- * mid-sentence emphasis — a plain string would have forced the emphasis into the JSX, which is
- * exactly where copy stops being lockable.
+ * ⚠️ THE STAGES CARRIED THREE NAMED ILLUSTRATOR COMMISSIONS — `agent-stage-add`,
+ * `agent-stage-discover`, `agent-stage-track` — and deleting them retires those briefs. That is a
+ * real cost and it is Nick's to reverse: the whole previous page is one `git show` away and is named
+ * in the run report. Nothing else in the repo referenced those slot names.
  *
- * ⚠️ EMPHASIS IS WEIGHT AND VALUE, NEVER HUE. `<strong>` steps the body's soft ink up to the
- * page's full ink at 600; it does not change colour. The house law forbids colour-shifted
- * emphasis inside a heading, and the reason it gives — a sentence that changes colour reads as
- * two things — applies to a paragraph the same way.
+ * ⚠️ IT IS A PARALLEL IMPLEMENTATION OF THE QUERY CENTRE'S GRAMMAR, NOT A SHARED ONE, and that is
+ * this file's own standing precedent — it was written as a deliberate near-copy of `comps.css` with
+ * the note "the day the two pages should differ, they differ by a value, not by a mechanism". The
+ * two pages sit under different token layers (`.aglist`'s `--agl-*` against the Query Centre's
+ * `--n*` ramp) and a shared primitive would have to be parameterised over both, which is the
+ * coupling the marketing tier's `MobileSheet` rejection already argued against.
  *
- * ⚠️ THE ILLUSTRATIONS ARE BUILT FROM THE PAGE'S OWN FURNITURE, and the sample record is ONE
- * record. Amara Osei of Osei Literary, London, appears in all six: the section is a single agent
- * record being assembled field by field, so a second name in row four would break the only idea
- * the six rows share. The three STAGE plates are named dashed placeholders at the ref's
- * dimensions — no stock art, no generated images, no emoji; the names are the illustrator's brief.
+ * ⚠️ THE COPY LIVES IN EXPORTED CONSTANTS, NOT IN THE JSX — the reason the previous version gave,
+ * unchanged: a sentence in two places is two sentences the day one is edited, and a lock can only
+ * read what it can name. The ref is normative and its punctuation is part of it.
  *
- * ⚠️ NO ROUTER HOOK HERE. The page is handed `onNavigate` — App.tsx's bridge — and Discover is
- * reached as `("agents", "Discover new agents")`, the same call `railNav` makes. A `useNavigate`
- * inside this component would be a second way to reach one route, and the bridge is the one that
- * also clears the global search query.
+ * ⚠️ NO STAR RATINGS IN ANY ILLUSTRATION HERE. The live agent card's rating is a separate question
+ * and is deliberately untouched; what the pack forbids is a drawn one, and the retired
+ * `PersonalisationArt` carried a `★` (a bookmark metaphor, not a rating) which goes with it.
+ *
+ * ⚠️ THE ILLUSTRATIONS ARE DRAWN MARKUP AND SAY SO — a dashed "Example" pill on every plate, at
+ * full opacity. Same pattern as the Query Centre's, deliberately NOT the dashboard's faded one.
+ *
+ * ⚠️ THE SAMPLE RECORD IS ONE PERSON PER SECTION, WHICH THE PREVIOUS VERSION ALSO INSISTED ON.
+ * Amara Osei is the complete record; Aisha Kapoor is the incomplete one. A third name inside either
+ * section would break the only idea the section has.
+ *
+ * ⚠️ NO ROUTER HOOK HERE. The page is handed `onNavigate`'s narrowed results — `onAddAgent` and
+ * `onDiscover` — so Discover is reached the way `railNav` reaches it. A `useNavigate` inside this
+ * component would be a second way to one route, and the bridge is the one that also clears the
+ * global search query.
  */
 import React from "react";
 import { Plus } from "lucide-react";
 import "./contactListEmpty.css";
+import { StatusDot } from "../StatusDot";
+import { QueryStatus } from "../../types";
 
 /* ────────────────────────────── copy ────────────────────────────── */
 
-/** A run of body copy: plain text, or a span the row emphasises. */
-export type CleSeg = string | { em: string };
-
 export const CLE_HERO = {
   heading: "These are the people who will champion your words.",
-  body:
-    "Grow your list. Gather all the detail you can. This is the data that everything is built on — " +
-    "the bedrock of your campaign. The right agent is out there, so let's get them on file.",
+  lede: "One card per agent — what they want, what they ask for, and everything you've sent them.",
   cta: "Add your first agent",
+  discoverLink: "Find agents in Discover",
+  importLink: "Import a spreadsheet",
+  caveat: "one agent is a start — not a campaign",
 } as const;
 
-export interface CleStage {
-  /** The illustrator's brief — rendered in the plate, and the name the artwork ships under. */
-  slot: string;
-  label: string;
-  heading: string;
-  body: string;
-}
-
-export const CLE_STAGES: readonly CleStage[] = [
-  {
-    slot: "agent-stage-add",
-    label: "Stage one",
-    heading: "Add agents from your own research",
-    body:
-      "Record the agents already on your radar — from acknowledgements pages, wishlists, and pitch " +
-      "events — with their agency, genres, and submission guidelines.",
-  },
-  {
-    slot: "agent-stage-discover",
-    label: "Stage two",
-    heading: "Discover agents who match your manuscript",
-    body:
-      "Discover reads your manuscript's genre and comps and surfaces open agents representing books " +
-      "like yours — each with their wishlist shown.",
-  },
-  {
-    slot: "agent-stage-track",
-    label: "Stage three",
-    heading: "Query them and follow every response",
-    body:
-      "Send queries straight from your list, watch statuses move from Queried to Offer, and get a " +
-      "nudge when it's time to follow up.",
-  },
-];
-
-/** ⚠️ NO SUBHEADING UNDER IT, DELIBERATELY (the brief's own instruction) — the six rows are the
- *  explanation, and a standfirst saying the same thing is a second voice for one idea. */
-export const CLE_RECORD_HEADING = "What makes a strong agent record?";
+/** the ref's `.ill .under` note beside the complete card */
+export const CLE_HERO_NOTE = "↖ six segments, one per field — sage once the record's complete";
 
 export interface CleRow {
-  n: string;
-  title: string;
-  body: readonly CleSeg[];
-  /** copy on the right */
+  key: "gaps" | "next";
+  heading: string;
+  sub: string;
+  caveat: string;
+  band: "sage" | "plain";
+  /** the ref's `.row.flip` — `order` on two grid children, never a second markup order */
   flip: boolean;
-  Art: React.FC;
 }
-
-/* ───────────────────────── the sample record ─────────────────────────
- * ⚠️ ONE AGENT, SIX ROWS. The identity block is a component rather than six copies, so the name,
- * the agency and the initials cannot drift apart between illustrations.
- * ⚠️ AND EVERY VALUE IS INVENTED. No real agent, no real agency, no real submission address —
- * `oseiliterary.co.uk` is not a domain anybody holds, and it must stay that way.
- * ⚠️ NO GENDERED PRONOUN REACHES THE READER. The app never stores an agent's pronouns, so the
- * illustrations say "the agent" or address the writer; the two microcopy lines that name a person
- * ("How to reach them", "From their MSWL") use they/them. */
-const SAMPLE = { initials: "AO", name: "Amara Osei", agency: "Osei Literary", city: "London" } as const;
-
-/* ───────────────────────── illustration atoms ───────────────────────── */
-
-const Micro: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="cle-micro">{children}</div>
-);
-
-const Chip: React.FC<{ children: React.ReactNode; hot?: boolean }> = ({ children, hot }) => (
-  <span className={`cle-chip${hot ? " cle-chip--hot" : ""}`}>{children}</span>
-);
-
-/**
- * ⚠️ THE TWO PILLS DEPICT REAL PAGE STATES AND ARE STILL ILLUSTRATION. Sage = a standing the app
- * really draws; sand = a nudge really falling due. They carry no live value and must never be
- * mistaken for the real components — which is why they are `aria-hidden` along with the rest of
- * each card and why nothing here imports `StatusDot`.
- */
-const Pill: React.FC<{ tone: "sage" | "sand"; children: React.ReactNode }> = ({ tone, children }) => (
-  <span className={`cle-pill cle-pill--${tone}`}>
-    <span className="cle-pill-dot" />
-    {children}
-  </span>
-);
-
-/** The floating record card the six scenes are built from. */
-const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
-  <div className={`cle-card${className ? ` ${className}` : ""}`}>{children}</div>
-);
-
-const Identity: React.FC = () => (
-  <div className="cle-ident">
-    <span className="cle-ident-mono">{SAMPLE.initials}</span>
-    <span className="cle-ident-txt">
-      <span className="cle-ident-name">{SAMPLE.name}</span>
-      <Micro>{`${SAMPLE.agency} · ${SAMPLE.city}`}</Micro>
-    </span>
-  </div>
-);
-
-/* ─────────────────────────── the six scenes ─────────────────────────── */
-
-const GenresArt: React.FC = () => (
-  <div className="cle-art cle-art--genres">
-    <Card className="cle-card--tilt-a">
-      <Identity />
-      <div className="cle-chips">
-        <Chip hot>Crime</Chip>
-        <Chip>Literary thriller</Chip>
-        <Chip>Book club fiction</Chip>
-      </div>
-    </Card>
-    <span className="cle-badge">
-      <Pill tone="sage">Strong fit</Pill>
-    </span>
-  </div>
-);
-
-const MaterialsArt: React.FC = () => (
-  <div className="cle-art">
-    <Card className="cle-card--tilt-b">
-      <Micro>Send with your query</Micro>
-      <div className="cle-chips">
-        <Chip hot>Query letter</Chip>
-        <Chip>Synopsis · 1 pg</Chip>
-        <Chip>First three chapters</Chip>
-      </div>
-      <p className="cle-cardnote">Pasted in the body — no attachments.</p>
-    </Card>
-  </div>
-);
-
-const WishlistArt: React.FC = () => (
-  <div className="cle-art">
-    <Card className="cle-card--tilt-c cle-card--quote">
-      <span className="cle-quotemark" aria-hidden="true">&ldquo;</span>
-      <p className="cle-quote">
-        Crime rooted in a real place — towns that have lost something. Give me two men with a grudge
-        and a reason to go home.
-      </p>
-      <Micro>From their MSWL · updated Mar</Micro>
-    </Card>
-  </div>
-);
-
-const ResponseArt: React.FC = () => (
-  <div className="cle-art">
-    <Card className="cle-card--tilt-d">
-      <div className="cle-kv">
-        <span className="cle-kv-k">Responds within</span>
-        <span className="cle-kv-v">8–10 weeks</span>
-      </div>
-      <div className="cle-kv cle-kv--last">
-        <span className="cle-kv-k">Worth chasing</span>
-        <span className="cle-kv-v">yes · once, politely</span>
-      </div>
-      <div className="cle-pillrow">
-        <Pill tone="sand">Nudge due · ~11 Aug</Pill>
-      </div>
-    </Card>
-  </div>
-);
-
-/* ⚠️ THE GLYPHS ARE TEXT AND THEREFORE `aria-hidden` ON THE TILE, not in the row's label. A "✉"
-   read aloud before an address is noise; the address itself is the content. */
-const ContactLine: React.FC<{ glyph: string; children: React.ReactNode }> = ({ glyph, children }) => (
-  <div className="cle-cline">
-    <span className="cle-cline-g" aria-hidden="true">{glyph}</span>
-    <span className="cle-cline-t">{children}</span>
-  </div>
-);
-
-const ContactArt: React.FC = () => (
-  <div className="cle-art">
-    <Card className="cle-card--tilt-e">
-      <Micro>How to reach them</Micro>
-      <div className="cle-clines">
-        <ContactLine glyph="✉"><span className="cle-mono">submissions@oseiliterary.co.uk</span></ContactLine>
-        <ContactLine glyph="⌘"><span className="cle-mono">oseiliterary.co.uk</span></ContactLine>
-        <ContactLine glyph="◎">London, UK</ContactLine>
-        <ContactLine glyph="☍">
-          <span className="cle-socials">
-            {["@amaraosei", "bsky", "in"].map((s) => (
-              <span className="cle-social" key={s}>{s}</span>
-            ))}
-          </span>
-        </ContactLine>
-      </div>
-    </Card>
-  </div>
-);
-
-const PersonalisationArt: React.FC = () => (
-  <div className="cle-art cle-art--stack">
-    <Card className="cle-card--tilt-f cle-card--behind">
-      <Identity />
-    </Card>
-    <Card className="cle-card--tilt-g cle-card--note">
-      <Micro>
-        <span className="cle-star" aria-hidden="true">★</span> Your note
-      </Micro>
-      <p className="cle-hand">
-        Repped Dead Weight — same post-industrial setting as mine. Said on the Bookseller podcast
-        they read openings twice.
-      </p>
-    </Card>
-  </div>
-);
-
-/* ──────────────────────────── the six rows ──────────────────────────── */
 
 export const CLE_ROWS: readonly CleRow[] = [
   {
-    n: "01",
-    title: "Genres sought",
+    key: "gaps",
+    heading: "Fill the gaps.",
+    sub: "Six fields make a strong record. Anything missing becomes a button, not a blank.",
+    caveat: "their own words are the best opening line you'll get",
+    band: "sage",
     flip: false,
-    Art: GenresArt,
-    body: [
-      "What they actually represent, in their words — not the agency's blurb. This is ",
-      { em: "the first filter" },
-      " on whether your manuscript belongs on their desk at all, and it powers how Discover matches agents to your book.",
-    ],
   },
   {
-    n: "02",
-    title: "Materials requested",
+    key: "next",
+    heading: "Who's next?",
+    sub: "Your history with every agent sits on their card — and idle ones are the ones still to send to.",
+    caveat: "group by court to see at a glance who's waiting on whom",
+    band: "plain",
     flip: true,
-    Art: MaterialsArt,
-    body: [
-      "Exactly what they ask for, and ",
-      { em: "exactly how they want it sent" },
-      " — synopsis length, how many chapters, pasted or attached. Record it here and your submission package is built to their rules before you write a word.",
-    ],
-  },
-  {
-    n: "03",
-    title: "Manuscript wish list",
-    flip: false,
-    Art: WishlistArt,
-    body: [
-      "The stories they're openly asking for. ",
-      { em: "Match a line of your book to a line of their wish list" },
-      " and the opening of your query letter writes itself. Paste it in exactly as they wrote it — the wording matters.",
-    ],
-  },
-  {
-    n: "04",
-    title: "Response policy",
-    flip: true,
-    Art: ResponseArt,
-    body: [
-      "How long they take, and whether it's worth chasing if you hear nothing back. Record it once and ScriptAlly ",
-      { em: "sets your nudge dates for you" },
-      " — so you follow up when it's polite, and never chase too early.",
-    ],
-  },
-  {
-    n: "05",
-    title: "Contact details",
-    flip: false,
-    Art: ContactArt,
-    body: [
-      "Where they are and how to reach them — ",
-      { em: "the submission address, the agency site, and the accounts they post from" },
-      ". Their socials are usually where a wish list is announced first, so keep them to hand.",
-    ],
-  },
-  {
-    n: "06",
-    title: "Personalisation notes",
-    flip: true,
-    Art: PersonalisationArt,
-    body: [
-      "Anything from their profile you can use to set yourself apart — a client you admire, an interview, a shared reference. ",
-      { em: "Two specific sentences beat a generic page." },
-      " Star the detail now; it becomes your opening line later.",
-    ],
   },
 ];
 
 export const CLE_CLOSING = {
-  note: "one record like this is worth ten names on a list",
+  heading: "Add the first name.",
+  sub: "One is enough to log a query against.",
   cta: "Add your first agent",
   link: "Find agents in Discover",
 } as const;
 
-/** Flattened copy — what a reader actually reads, for locks and for nothing else. */
-export const cleRowText = (row: CleRow): string =>
-  row.body.map((s) => (typeof s === "string" ? s : s.em)).join("");
+export const CLE_EXAMPLE_TAG = "Example";
+
+/**
+ * The completeness rail.
+ *
+ * ⚠️ SIX SEGMENTS BECAUSE THE COPY SAYS SIX FIELDS, AND THE TWO READ ONE CONSTANT. The ref draws
+ * six `<i>` and writes "Six fields make a strong record" beside them; a rail of five under that
+ * sentence is the drawn-count-disagrees-with-the-words fault in its smallest form.
+ */
+export const CLE_RAIL_SEGMENTS = 6;
+
+/** the complete record — the hero's card */
+export const CLE_CARD_FULL = {
+  pill: "Active queries",
+  initials: "AO",
+  name: "Amara Osei",
+  agency: "Osei Literary",
+  meta: "London · ~8 weeks · Email",
+  historyLabel: "Your history",
+  historyStatus: QueryStatus.QUERIED,
+  historyBook: "The Backpack on the Seat",
+  historyWhen: " · queried 04 Sep",
+  wishlistLabel: "Wishlist",
+  wishlist: "Big-hearted fantasy with a found family at its core — voice first, always.",
+  materialsLabel: "Materials wanted",
+  materials: "Query · synopsis (1pg) · first three chapters, pasted in body.",
+  primary: "Log query",
+  secondary: "View website",
+} as const;
+
+/** the incomplete record — "Fill the gaps." */
+export const CLE_CARD_GAPS = {
+  pill: "Idle",
+  /** ⚠️ TWO OF SIX, AND THE REF DRAWS EXACTLY TWO FILLED SEGMENTS. The card states three empty
+   *  fields below, which is what the other four segments are. */
+  filled: 2,
+  initials: "AK",
+  name: "Aisha Kapoor",
+  agency: "The Lantern Agency",
+  meta: "Edinburgh · Form",
+  historyLabel: "Your history",
+  historyEmpty: "Nothing sent yet.",
+  wishlistLabel: "Wishlist",
+  /* ⚠️ NO GENDERED PRONOUN FOR AN AGENT — the house law, and the ref breaks it. Its buttons read
+     "Add her wishlist" about a name this app stores no pronouns for; on a real record that is a
+     50% error rate about a real person. "their" is the neutral form the rest of the app uses. */
+  wishlistAdd: "Add their wishlist",
+  wishlistHint: "Copy it from their agency page or #MSWL.",
+  materialsLabel: "Materials wanted",
+  materialsAdd: "Add from their site",
+  primary: "Log query",
+  secondary: "View website",
+} as const;
+
+/**
+ * The grouped mini-cards — "Who's next?".
+ *
+ * ⚠️ EACH HEADING'S COUNT IS ITS OWN LIST'S LENGTH, never typed beside it. The ref heads its last
+ * group "Idle · 3" and draws TWO cards under it — a drawn count that disagrees with what is drawn,
+ * on a page whose whole argument is that the numbers are real. Deriving it means the picture reads
+ * "Idle · 2" and cannot be wrong; adding a third card is one entry here if Nick wants the 3.
+ */
+export const CLE_GROUPS: readonly {
+  key: string;
+  name: string;
+  cards: readonly { who: string; line: string; status?: QueryStatus; band: "sage" | "pink" | "slate" }[];
+}[] = [
+  {
+    key: "agent",
+    name: "With the agent",
+    cards: [
+      { who: "Amara Osei", line: "Queried · day 7", status: QueryStatus.QUERIED, band: "sage" },
+      { who: "Aisha Kapoor", line: "Partial sent · day 18", status: QueryStatus.PARTIAL_SENT, band: "sage" },
+    ],
+  },
+  {
+    key: "you",
+    name: "With you",
+    cards: [
+      { who: "Daniel O'Rourke", line: "Full requested", status: QueryStatus.FULL_REQUESTED, band: "pink" },
+      { who: "Rosa Bellamy", line: "Offer · decide by Fri", status: QueryStatus.OFFER, band: "slate" },
+    ],
+  },
+  {
+    key: "idle",
+    name: "Idle",
+    cards: [
+      { who: "Jo Hartley", line: "Hartley & Co · ~10 weeks", band: "pink" },
+      { who: "Penhallow Literary", line: "Agent not specified", band: "pink" },
+    ],
+  },
+];
+
+/* ──────────────────────────── the drawn examples ──────────────────────────── */
+
+const Tag: React.FC = () => <span className="cle-tag">{CLE_EXAMPLE_TAG}</span>;
+
+/** the ref's `.rail` — six segments, all sage when the record is complete */
+const Rail: React.FC<{ filled?: number }> = ({ filled }) => (
+  <div className={`cle-rail${filled === undefined ? " complete" : ""}`} aria-hidden="true">
+    {Array.from({ length: CLE_RAIL_SEGMENTS }, (_, i) => (
+      <i key={i} className={filled !== undefined && i < filled ? "on" : undefined} />
+    ))}
+  </div>
+);
+
+const CardFull: React.FC = () => {
+  const c = CLE_CARD_FULL;
+  return (
+    <div className="cle-rc">
+      <div className="cle-rc-head cle-rc-head--sage">
+        <span className="cle-rc-pill">{c.pill}</span>
+        <span className="cle-rc-edit" aria-hidden="true">✎</span>
+      </div>
+      <Rail />
+      <div className="cle-rc-bd">
+        <div className="cle-rc-who">
+          <span className="cle-rc-av">{c.initials}</span>
+          <span>
+            <span className="cle-rc-nm">{c.name}</span>
+            <span className="cle-rc-ag">{c.agency}</span>
+            <span className="cle-rc-meta">{c.meta}</span>
+          </span>
+        </div>
+        <div className="cle-rc-sec">
+          <span className="cle-rc-sl">{c.historyLabel}</span>
+          <span className="cle-rc-sv cle-sd">
+            <StatusDot status={c.historyStatus} overrideSize={13} decorative />
+            <em>{c.historyBook}</em>{c.historyWhen}
+          </span>
+        </div>
+        <div className="cle-rc-sec">
+          <span className="cle-rc-sl">{c.wishlistLabel}</span>
+          <span className="cle-rc-sv">{c.wishlist}</span>
+        </div>
+        <div className="cle-rc-sec">
+          <span className="cle-rc-sl">{c.materialsLabel}</span>
+          <span className="cle-rc-sv">{c.materials}</span>
+        </div>
+      </div>
+      <div className="cle-rc-ft">
+        <span className="cle-b1">➤ {c.primary}</span>
+        <span className="cle-b2">{c.secondary}</span>
+      </div>
+    </div>
+  );
+};
+
+const CardGaps: React.FC = () => {
+  const c = CLE_CARD_GAPS;
+  return (
+    <div className="cle-rc">
+      <div className="cle-rc-head cle-rc-head--pink">
+        <span className="cle-rc-pill">{c.pill}</span>
+        <span className="cle-rc-edit" aria-hidden="true">✎</span>
+      </div>
+      <Rail filled={c.filled} />
+      <div className="cle-rc-bd">
+        <div className="cle-rc-who">
+          <span className="cle-rc-av">{c.initials}</span>
+          <span>
+            <span className="cle-rc-nm">{c.name}</span>
+            <span className="cle-rc-ag">{c.agency}</span>
+            <span className="cle-rc-meta">{c.meta}</span>
+          </span>
+        </div>
+        <div className="cle-rc-sec">
+          <span className="cle-rc-sl">{c.historyLabel}</span>
+          <span className="cle-rc-hint">{c.historyEmpty}</span>
+        </div>
+        <div className="cle-rc-sec">
+          <span className="cle-rc-sl">{c.wishlistLabel}</span>
+          {/* ⚠️ DASHED, WHICH ON A CARD MEANS "not stated yet" — the same grammar the live card's
+              own add-inline slots use. It is a picture of that control, not the control. */}
+          <span className="cle-add">＋ {c.wishlistAdd}</span>
+          <span className="cle-rc-hint">{c.wishlistHint}</span>
+        </div>
+        <div className="cle-rc-sec">
+          <span className="cle-rc-sl">{c.materialsLabel}</span>
+          <span className="cle-add">＋ {c.materialsAdd}</span>
+        </div>
+      </div>
+      <div className="cle-rc-ft">
+        <span className="cle-b1">➤ {c.primary}</span>
+        <span className="cle-b2">{c.secondary}</span>
+      </div>
+    </div>
+  );
+};
+
+const Groups: React.FC = () => (
+  <div className="cle-grp">
+    {CLE_GROUPS.map((g) => (
+      <React.Fragment key={g.key}>
+        {/* the count IS the list's length — see `CLE_GROUPS` */}
+        <h5>{g.name} · {g.cards.length}</h5>
+        <div className="cle-grp-cards">
+          {g.cards.map((c) => (
+            <div key={c.who} className="cle-cc">
+              <span className={`cle-cc-strip cle-cc-strip--${c.band}`} aria-hidden="true" />
+              <span className="cle-cc-in">
+                <b>{c.who}</b>
+                {c.status ? (
+                  <span className="cle-sd">
+                    <StatusDot status={c.status} overrideSize={11} decorative />
+                    {c.line}
+                  </span>
+                ) : (
+                  <span>{c.line}</span>
+                )}
+              </span>
+            </div>
+          ))}
+        </div>
+      </React.Fragment>
+    ))}
+  </div>
+);
+
+const ILLO: Record<CleRow["key"], React.FC> = { gaps: CardGaps, next: Groups };
 
 /* ──────────────────────────── the page ──────────────────────────── */
-
-const Body: React.FC<{ segs: readonly CleSeg[] }> = ({ segs }) => (
-  <>
-    {segs.map((s, i) =>
-      typeof s === "string" ? (
-        <React.Fragment key={i}>{s}</React.Fragment>
-      ) : (
-        <strong key={i}>{s.em}</strong>
-      ),
-    )}
-  </>
-);
 
 export interface ContactListEmptyStateProps {
   /** The same opener the toolbar's `Add new agent` uses — one flow, two doors. */
   onAddAgent: () => void;
   /** App's navigate bridge, already narrowed to the Discover route by the caller. */
   onDiscover: () => void;
+  /** The importer, reached the same way every other surface reaches it. */
+  onImport?: () => void;
 }
 
-export const ContactListEmptyState: React.FC<ContactListEmptyStateProps> = ({ onAddAgent, onDiscover }) => (
+export const ContactListEmptyState: React.FC<ContactListEmptyStateProps> = ({
+  onAddAgent, onDiscover, onImport,
+}) => (
   <div className="cle">
-    {/* ⚠️ THE HERO PAYS ITS OWN OPENING, WHICH IS A DECLARED DEPARTURE — see the stylesheet. The
-        grid's `--wpg-chrome-gap` is 16px and was the ONLY thing between the header rule and the
-        headline (measured: 17px), which is right for a working page and crowded for this one. The
-        token was named `--wpg-gap` in this comment and no such token exists — corrected. */}
+    {/* ── the hero ── */}
     <section className="cle-hero">
-      <h2 className="cle-hero-h">{CLE_HERO.heading}</h2>
-      <p className="cle-hero-p">{CLE_HERO.body}</p>
-      <button type="button" className="agl-btn agl-btn-dark cle-hero-cta" onClick={onAddAgent}>
-        <Plus width={14} height={14} aria-hidden="true" />
-        {CLE_HERO.cta}
-      </button>
-    </section>
-
-    {/* ⚠️ THE WIDER MEASURE, DELIBERATELY (comps §1). A three-across grid of plates needs 1240;
-        the copy blocks cap at 1060. The left edges therefore do not align down the page — that is
-        intended, and unifying them is the thing not to "fix". */}
-    <section className="cle-stages" aria-labelledby="cle-stages-h">
-      <h3 className="cle-sr-only" id="cle-stages-h">How the contact list works</h3>
-      <div className="cle-stages-grid">
-        {CLE_STAGES.map((s) => (
-          <div className="cle-stage" key={s.slot}>
-            <div className="cle-slot"><span>{s.slot}</span></div>
-            <span className="cle-lbl">{s.label}</span>
-            <h4>{s.heading}</h4>
-            <p>{s.body}</p>
-          </div>
-        ))}
+      <div className="cle-hero-tx">
+        <h2 className="cle-hero-h">{CLE_HERO.heading}</h2>
+        <p className="cle-hero-p">{CLE_HERO.lede}</p>
+        <div className="cle-acts">
+          {/* ⚠️ `cle-hero-cta` IS KEPT BECAUSE A MEASUREMENT QUERIES IT BY NAME — `emptyStateSpacing`
+              dereferences it unguarded, so renaming it would turn that spec into a CRASH rather
+              than a failure, and a crash names a line number where a failure names a property. */}
+          <button type="button" className="agl-btn agl-btn-dark cle-cta cle-hero-cta" onClick={onAddAgent}>
+            <Plus width={14} height={14} aria-hidden="true" />
+            {CLE_HERO.cta}
+          </button>
+          <span className="cle-links">
+            <button type="button" className="cle-link" onClick={onDiscover}>{CLE_HERO.discoverLink}</button>
+            {/* ⚠️ OMITTED, NOT DISABLED, when the caller wires no importer — a link that goes
+                nowhere teaches a route that does not exist, which is this repo's standing rule
+                about nav items with no destination. */}
+            {onImport && (
+              <>
+                <i aria-hidden="true">·</i>
+                <button type="button" className="cle-link" onClick={onImport}>{CLE_HERO.importLink}</button>
+              </>
+            )}
+          </span>
+        </div>
+        <span className="cle-caveat">{CLE_HERO.caveat}</span>
+      </div>
+      <div className="cle-ill">
+        <Tag />
+        <CardFull />
+        <div className="cle-under">
+          <span className="cle-caveat">{CLE_HERO_NOTE}</span>
+        </div>
       </div>
     </section>
 
-    {/* ⚠️ A SURFACE CHANGE IS ALLOWED HERE AND WAS RETIRED ON COMPS FOR A REASON THAT DOES NOT
-        APPLY. Comps dropped its band when the stages moved to the TOP of the page — "a wash that
-        made sense as a closing section reads as a header treatment there". This band IS the
-        closing section, which is the case that note sanctions. */}
-    <section className="cle-band" aria-labelledby="cle-band-h">
-      <div className="cle-band-inner">
-        <h2 className="cle-band-h" id="cle-band-h">{CLE_RECORD_HEADING}</h2>
-
-        {CLE_ROWS.map((row) => (
-          /* ⚠️ `flip` REORDERS THE GRID'S CHILDREN AND NOTHING ELSE — `order` on the two children,
-             never `direction: rtl` (which inverts punctuation and the scrollbar) and never a second
-             markup order (which is the duplication the copy constants exist to prevent). Below the
-             breakpoint every row puts its copy first; see the stylesheet. */
-          <div className={`cle-row${row.flip ? " flip" : ""}`} key={row.n}>
-            <div className="cle-row-l">
-              <div className="cle-eyebrow">
-                <b>{row.n}</b> / {String(CLE_ROWS.length).padStart(2, "0")}
-              </div>
-              <h3 className="cle-row-h">{row.title}</h3>
-              <p className="cle-row-p"><Body segs={row.body} /></p>
-            </div>
-            {/* ⚠️ THE SCENE IS DECORATION AND LEAVES THE ACCESSIBILITY TREE WHOLE. Every word in it
-                is either restated in the copy beside it or is invented sample data; narrating
-                "AO Amara Osei Osei Literary London Crime Literary thriller…" six times is how an
-                explanatory page becomes unusable with a screen reader. */}
-            <div className="cle-row-art" aria-hidden="true">
-              <row.Art />
-            </div>
+    {/* ── the two feature rows ── */}
+    {CLE_ROWS.map((r) => {
+      const Illo = ILLO[r.key];
+      return (
+        <section key={r.key} className={`cle-row cle-row--${r.band}${r.flip ? " cle-row--flip" : ""}`}>
+          <div className="cle-txt">
+            <h3 className="cle-row-h">{r.heading}</h3>
+            <p className="cle-row-p">{r.sub}</p>
+            <span className="cle-caveat">{r.caveat}</span>
           </div>
-        ))}
-
-        <div className="cle-close">
-          <span className="cle-close-note">{CLE_CLOSING.note}</span>
-          <div className="cle-close-acts">
-            <button type="button" className="cle-btn-pink" onClick={onAddAgent}>
-              <Plus width={14} height={14} aria-hidden="true" />
-              {CLE_CLOSING.cta}
-            </button>
-            <button type="button" className="cle-close-link" onClick={onDiscover}>
-              {CLE_CLOSING.link}
-            </button>
+          <div className="cle-ill">
+            <Tag />
+            <Illo />
           </div>
-        </div>
+        </section>
+      );
+    })}
+
+    {/* ── the closing ── */}
+    <section className="cle-closing">
+      <div>
+        <h3 className="cle-close-h">{CLE_CLOSING.heading}</h3>
+        <p className="cle-close-p">{CLE_CLOSING.sub}</p>
+      </div>
+      <div className="cle-acts cle-acts--close">
+        <button type="button" className="cle-link" onClick={onDiscover}>{CLE_CLOSING.link}</button>
+        <button type="button" className="agl-btn agl-btn-dark cle-cta" onClick={onAddAgent}>
+          <Plus width={14} height={14} aria-hidden="true" />
+          {CLE_CLOSING.cta}
+        </button>
       </div>
     </section>
   </div>

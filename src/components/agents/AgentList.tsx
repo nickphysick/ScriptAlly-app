@@ -1109,6 +1109,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onAddAgent={onAddAgent}
             /* the bridge App.tsx already maps to `/agents/discover` — not a second router call */
             onDiscover={() => DISCOVER && onNavigate?.(DISCOVER.tab, DISCOVER.sub)}
+            /* ⚠️ THE SAME ROUTE EVERY OTHER SURFACE USES — `onNavigate("import")`, the bridge that
+               also clears the global search query. The hero OMITS the link when this is absent
+               rather than disabling it, so a page mounted without the bridge advertises no route
+               it cannot take. */
+            onImport={() => onNavigate?.("import")}
           />
         ) : pageState === "settling" ? null : (
         <>

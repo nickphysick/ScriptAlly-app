@@ -2,7 +2,22 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Contact list — the editorial empty state, measured on the running app.
+ * Contact list — the empty state, measured on the running app (retargeted by the empty-states
+ * pack's Phase 3, which replaced the editorial six-row page with the ref's feature-led one).
+ *
+ * ⚠️ THREE THINGS HERE WERE BOUND TO THE RETIRED STRUCTURE AND TWO OF THEM WOULD HAVE THROWN.
+ * `.cle-row-l` and `.cle-row-art` were dereferenced with a non-null `!` and are now `.cle-txt` and
+ * `.cle-ill`; the closing's `.cle-btn-pink` and `.cle-close-link` are now the shared `.cle-cta` and
+ * `.cle-link`. A retirement that turns a lock into a CRASH is worse than one that turns it red — a
+ * crash names a line number where a failure names a property, and it vanishes into a noisy run.
+ *
+ * ⚠️ WHAT DID NOT NEED TOUCHING IS THE PART WORTH KEEPING: the overflow belt and the no-text-over-
+ * text scan are stated over `.cle *` generally, with a population floor, so they carried the whole
+ * restructure without an edit. That is the difference between a claim about a layout and a claim
+ * about the classes that happened to implement it.
+ *
+ * ⚠️ THIS FILE HAS NOT BEEN RUN SINCE THE RETARGET — it needs `npx vite` and the lab route, and the
+ * run report says so rather than implying a green.
  *
  * ⚠️ THIS ONE NEEDS THE VITE DEV SERVER, NOT A BUILD, AND WILL FAIL AGAINST `SA_E2E_BASE_URL=dev`.
  * It opens `#/contact-lab`, and EVERY `#/…-lab` route in this app is behind `import.meta.env.DEV`
@@ -73,21 +88,38 @@ test("the blank Contact list, at three widths", async ({ page }) => {
        order: `order` is exactly the property that makes those two disagree. */
     const rows = await page.evaluate(() =>
       [...document.querySelectorAll(".cle-row")].map((r) => {
-        const l = r.querySelector(".cle-row-l")!.getBoundingClientRect();
-        const a = r.querySelector(".cle-row-art")!.getBoundingClientRect();
-        return { flip: r.classList.contains("flip"), copyTop: Math.round(l.top), artTop: Math.round(a.top), copyLeft: Math.round(l.left), artLeft: Math.round(a.left) };
+        /* ⚠️ GUARDED, NOT `!` — the retirement of the old class names would otherwise have made
+           this line a stack trace instead of a reading. A `null` here is a FAILURE that names the
+           selector it could not find. */
+        const l = r.querySelector(".cle-txt")?.getBoundingClientRect();
+        const a = r.querySelector(".cle-ill")?.getBoundingClientRect();
+        return {
+          flip: r.className.includes("cle-row--flip"),
+          found: !!l && !!a,
+          copyTop: l ? Math.round(l.top) : -1,
+          artTop: a ? Math.round(a.top) : -1,
+          copyLeft: l ? Math.round(l.left) : -1,
+          artLeft: a ? Math.round(a.left) : -1,
+        };
       }),
     );
-    expect(rows.length, "six rows rendered").toBe(6);
+    /* the population, and that every row gave up both of its halves */
+    expect(rows.length, "the ref's two feature rows rendered").toBe(2);
+    for (const [i, r] of rows.entries()) {
+      expect(r.found, `${v.name} row ${i + 1}: both the copy and the illustration were found`).toBe(true);
+    }
+    /* ⚠️ AND THE FLIP IS ASSERTED TO EXIST BEFORE ITS EFFECT IS. One row flips and one does not; a
+       check over a page where nothing flipped would pass the alternation trivially. */
+    expect(rows.map((r) => r.flip), "the second row is the flipped one").toEqual([false, true]);
     if (v.width <= 1040) {
       for (const [i, r] of rows.entries()) {
         expect(r.copyTop, `${v.name} row ${i + 1}: copy above its illustration`).toBeLessThan(r.artTop);
       }
-      console.log(`${v.name} — all six rows read copy-then-illustration`);
+      console.log(`${v.name} — both rows read copy-then-illustration`);
     } else {
       const sides = rows.map((r) => (r.copyLeft < r.artLeft ? "L" : "R"));
       console.log(`${v.name} — copy sides: ${sides.join(" ")}`);
-      expect(sides).toEqual(["L", "R", "L", "R", "L", "R"]);
+      expect(sides).toEqual(["L", "R"]);
     }
 
     /**
@@ -104,7 +136,11 @@ test("the blank Contact list, at three widths", async ({ page }) => {
      * question and the tilt does not enter it. (`offsetHeight` reports the honest 21 here — the
      * same divergence the house notes record for transformed panes.)
      */
-    await page.addStyleTag({ content: ".cle-card, .cle-badge { transform: none !important; }" });
+    /* ⚠️ THE ROTATION-FLATTENING STYLE TAG IS RETIRED WITH THE ROTATIONS, and the paragraph above
+       is kept because the LESSON is not: `getBoundingClientRect()` returns an axis-aligned box, so
+       any future tilted illustration reintroduces the same bookkeeping overlap and the same wrong
+       diagnosis. The feature-led plates have no transform — asserted at source in
+       `contactListEmptyState.test.tsx` — so there is nothing left to neutralise here. */
     const clashes = await page.evaluate(() => {
       const leaves = [...document.querySelectorAll<HTMLElement>(".cle *")].filter(
         (e) => e.children.length === 0 && (e.textContent || "").trim().length > 1,
@@ -155,7 +191,13 @@ test("the blank Contact list, at three widths", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const focus = await page.evaluate(() => {
     const out: Record<string, string> = {};
-    for (const [k, sel] of [["hero", ".cle-hero-cta"], ["closing", ".cle-btn-pink"], ["discover", ".cle-close-link"]] as const) {
+    /* the three controls, at their post-restructure classes: the hero's CTA keeps `.cle-hero-cta`
+       precisely so this query survives; the closing pair are the shared `.cle-cta` / `.cle-link` */
+    for (const [k, sel] of [
+      ["hero", ".cle-hero-cta"],
+      ["closing", ".cle-closing .cle-cta"],
+      ["discover", ".cle-closing .cle-link"],
+    ] as const) {
       const el = document.querySelector<HTMLElement>(sel);
       if (!el) { out[k] = "MISSING"; continue; }
       el.focus();
