@@ -18,7 +18,7 @@
  * writer is answerable to, so it is only ever set where there IS a clock.
  */
 import { BoardCard } from "./todoBoard";
-import { isUrgentCard } from "./todoCategory";
+import { isUrgentCard, taskCategory, type Category } from "./todoCategory";
 import { Bucket, cardBucket } from "./todoBuckets";
 
 export interface TicketFacts {
@@ -78,3 +78,31 @@ export function ticketFacts(
     late: isUrgentCard(card, inputs.days),
   };
 }
+
+/**
+ * THE CARD'S VERB — what the card leads to, in the contract's own words
+ * (`design-refs/todo-list-and-card.html`, the `.go` button; list round, Phase 4).
+ *
+ * ⚠️ KEYED ON THE CATEGORY, NOT THE BUCKET, because that is how the contract prints it: BOTH of its
+ * Gone quiet cards read "Decide" — the one that is a close and the one that is a silence after a
+ * nudge — where a bucket table would have said "Close it" for one and "Log a nudge" for the other.
+ * The one split inside a category is `req`, which holds a request (send) beside an offer or an R&R
+ * (decide), and the contract gives those two different words.
+ *
+ * ⚠️ AND IT IS A LABEL, NOT A CONTROL. The card is the button; this names where pressing it goes, so
+ * the word must describe the journey that opens rather than promise a write.
+ */
+export function ticketVerb(card: BoardCard): string {
+  const cat: Category = taskCategory(card);
+  switch (cat) {
+    case "req": return cardBucket(card) === "send" ? "Mark sent" : "Decide";
+    case "nudge": return "Log a nudge";
+    case "quiet": return "Decide";
+    case "house": return "Fill it in";
+    case "yours": return "Tick it off";
+    default: { const unhandled: never = cat; return unhandled; }
+  }
+}
+
+/** the contract's own line beneath "Your own note" — what finishes a writer's own item */
+export const OWN_NOTE_LINE = "Ticking it off is what finishes it";

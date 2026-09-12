@@ -75,7 +75,7 @@ import { TaskList } from "./TaskList";
 import { TaskTicket } from "./TaskTicket";
 import { TaskBoard } from "./TaskBoard";
 import { SlideOver } from "../shared/SlideOver";
-import { ticketFacts } from "../../lib/ticketFacts";
+import { ticketFacts, ticketVerb } from "../../lib/ticketFacts";
 import { STATE_TOKEN, stateFor } from "../../lib/queryCardFacts";
 import { TODO_ROUTES } from "../../lib/todoRoutes";
 import { StatTiles, type StatTile } from "../shared/StatTiles";
@@ -3302,18 +3302,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        all read the SAME post-filter array. Applying it in the component would give the meter a
        different array from the rows, which is the disagreement this page has already been caught
        by twice. */
-    /* ⚠️ THE DONE GROUP DOES NOT RENDER IN THE LIST (drawer round, Phase 5). Completion leaves
-       the list — the row holds for the receipt window and then fades, and the footer drops from
-       the one array. A "done" group re-admitting the card three groups down would mean the row
-       LEAVES and ARRIVES in one gesture, and the footer would never drop at all. The cleared log
-       is untouched — `deskState` and the desk-cleared band read `boardCols.done` directly. */
+    /* ⚠️ THE DONE GROUP DOES NOT RENDER IN THE LIST (drawer round, Phase 5), AND THE LAW MOVED INTO
+       `applyView` (list round, Phase 3). It used to be a `.filter()` on the RESULT of this call,
+       which only worked while the grouping kept the group's id: every other grouping flattens the
+       groups and re-heads them, so a done card arrived inside a generated head and the filter could
+       not see it. The membership rule is stated beside the snoozed and dismissed ones now. The
+       cleared log is untouched — `deskState` and the desk-cleared band read `boardCols.done`. */
     /* ⚠️ THE TILE NARROWS AFTER THE VIEW AND BEFORE THE RENDER (QC-chassis round, Phase 1) — so
        one selection reaches the Grid, the Board, the pane's queue and the footer at once, which is
        the same reason the view itself is applied here rather than in a component. It is NOT applied
        to `railGroupsAll`, which is what the tiles count: a tile that counted its own selection
        would read 0 for every category you are not in. */
-    return tileNarrow(applyView(generatedGroups(chipGroups(taskGroups(narrowed), chip)), view, viewFacts))
-      .filter((g) => g.id !== "done");
+    return tileNarrow(applyView(generatedGroups(chipGroups(taskGroups(narrowed), chip)), view, viewFacts));
   }
 
   /** the selected tile's narrowing — `all` passes everything, `urgent` is the lens, the rest are
@@ -3375,7 +3375,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       railGroupsAll(),
       { ...view, groups: [...GROUP_IDS], types: [...TYPE_ORDER], agents: [] },
       viewFacts,
-    ).filter((g) => g.id !== "done"));
+    ));
   }
 
   function railGroupsAll() {
@@ -3486,6 +3486,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               {...(showsManuscriptColumn(manuscripts.length) ? { manuscript: c.msTitle } : {})}
               selected={docked.card?.key === c.key}
               urgent={isUrgentCard(c, inp.days)}
+              /* ⚠️ THE ACT, THE PERSON AND THE VERB (list round, Phase 4) — the card's title is the
+                 deed the LIST's Task cell prints (one expression, so the two views cannot name one
+                 task two things), the agency is the row's own accessor, and the verb is the
+                 category's word. The agent's name then appears once, in the foot. */
+              deed={listTaskText({ card: c, ...inp })}
+              {...(inp.agency ? { agency: inp.agency } : {})}
+              verb={ticketVerb(c)}
               facts={ticketFacts(c, {
                 days: inp.days,
                 dateLabel: inp.anchorDate,
