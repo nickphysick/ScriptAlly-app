@@ -263,7 +263,10 @@ test("§6 · filtered to zero — the card only where its headline is true, the 
   for (const r of regs) tally[r] = (tally[r] ?? 0) + 1;
   const needsYou = regs.filter((r) => ["Your move", "Past expected", "Offer"].includes(r)).length;
 
-  const search = page.locator('input[aria-label="Search queries"]:visible').first();
+  /* ⚠️ THE TOOLBAR'S SEARCH, NOT THE LIST HEAD'S. Both exist in the document; the list head's
+     (`aria-label="Search queries"`) is the hidden column's, and targeting it waited out the whole
+     test timeout on a page whose search box was on screen the whole time. */
+  const search = page.locator('input[aria-label="Search agents or agencies"]:visible').first();
   await search.fill("zz-no-such-query-qq");
   await page.waitForTimeout(600);
   const state = await page.evaluate(() => ({
