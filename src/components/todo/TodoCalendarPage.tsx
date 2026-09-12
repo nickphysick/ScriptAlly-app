@@ -227,6 +227,7 @@ import { TimelineBoard, type CardPayload } from "../shared/timeline/TimelineBoar
 /* ⚠️ THE WINBAR IS SHARED TOO — it is a sibling of the board, and a pager that stepped
    differently on two pages would put the same wait in two places. */
 import { TimelineWinbar, DENSITY_LABEL, WEEK_STEP } from "../shared/timeline/TimelineWinbar";
+import { useSegHover } from "../shared/timeline/useSegHover";
 import {
   todayAtOf, monthsOf, dateLabelsOf, windowRangeLabelOf, movedOffTodayOf,
 } from "../shared/timeline/boardWindow";
@@ -585,21 +586,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      box names its segment; leaving it (to anywhere that is not the same bar) clears. The action
      and its symbol follow the named segment through the `on` class; the lift itself is pure CSS
      `:hover` on the bar. Comfortable and Compact behave identically — the v64 peek is retired,
-     and the reveal that replaced it is §C's CLICK card. Hover never writes or navigates. */
-  const [hoverSeg, setHoverSeg] = useState<string | null>(null);
-  const segOf = (t: EventTarget | null): string | null => {
-    const bar = t instanceof Element ? (t.closest(".tl-p, .tl-jc") as HTMLElement | null) : null;
-    return bar?.dataset.seg ?? null;
-  };
-  const onRowsOver = (e: React.MouseEvent) => {
-    const k = segOf(e.target);
-    if (k !== hoverSeg) setHoverSeg(k);
-  };
-  const onRowsOut = (e: React.MouseEvent) => {
-    const from = segOf(e.target);
-    const to = segOf(e.relatedTarget);
-    if (from && from !== to) setHoverSeg(to);
-  };
+     and the reveal that replaced it is §C's CLICK card. Hover never writes or navigates.
+     ⚠️ THE PAIR MOVED TO `useSegHover` (four-fixes §4) — this page had the only copy, and the
+     Query Centre's Calendar mounts the same board and had none, so the caveat label opened on a
+     click there. It is the same mechanism with a grace on it; what changed here is that a bar
+     merely crossed no longer names itself. */
+  const { seg: hoverSeg, onRowsOver, onRowsOut } = useSegHover();
 
   /* ══ THE ONE DOOR (v65 §E ruling) ═══════════════════════════════════════════════════════════
    *

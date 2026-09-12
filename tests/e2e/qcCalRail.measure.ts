@@ -44,12 +44,19 @@ for (const w of WIDTHS) {
       };
     });
 
-    /* ── exactly one census, on the rail, on the range's baseline, at the range's size ──── */
+    /* ── exactly one census, on the rail, closing on the range's line ─────────────────────── */
     expect(m.censusCount, "there must be exactly one census element").toBe(1);
     expect(m.tally, "the toolbar's own tally must not render in this view").toBe(0);
     expect(Math.abs(m.census!.x - m.rail!.x), `census left ${m.census!.x} vs rail left ${m.rail!.x}`).toBeLessThanOrEqual(1);
     expect(Math.abs(m.census!.bot - m.range!.bot), `census baseline ${m.census!.bot} vs range ${m.range!.bot}`).toBeLessThanOrEqual(1);
-    expect(m.census!.fs, "the census is not the range's size").toBe(m.range!.fs);
+    /* ⚠️ RETARGETED BY THE FOUR-FIXES RUN, AND THE CLAIM IT DROPS IS DEAD RATHER THAN WEAKENED.
+       This asserted `census.fs === range.fs` — a real law while the range was a Playfair-26
+       SENTENCE and the pair read as one line of type across the page. The range is two calendar
+       leaves now (§3), so it has no type size of its own to share and the equality would be
+       comparing a heading's inherited size against a caption's. What the two still do is close on
+       ONE LINE, which the bottom-alignment above asserts directly and which is the thing a reader
+       can see. The census's own size is pinned here rather than borrowed, so it cannot drift. */
+    expect(m.census!.fs, "the census has left Playfair 26").toBe("26px");
     expect(m.census!.w, `the census is ${m.census!.w}px wide against a 236px rail`).toBeLessThanOrEqual(236);
 
     /* ── unfiltered says no "of" ─────────────────────────────────────────────────────────── */

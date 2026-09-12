@@ -231,11 +231,51 @@ describe("⚠️ the today line is a drawn rule, and its width is a source claim
   it("1.5px, dashed, in ink, in the rows only (v64 §C)", () => {
     /* ⚠️ RETARGETED BY v64: the line is `data-tl="dash"` — 1.5px DASHED INK, a child of
        `.tl-rowsin` so it cannot reach the date row or the winbar, and BELOW the sealed group bars
-       (z 3 against their 25) rather than above everything. The v54 values (solid rose #e6c3b4,
-       z 60) described a line that crossed the whole board; that line is retired. */
+       rather than above everything. The v54 values (solid rose #e6c3b4, z 60) described a line
+       that crossed the whole board; that line is retired. */
     const r = ruleFor(".tl-todayline");
     expect(r).toMatch(/border-left\s*:\s*1\.5px dashed var\(--tl-nearblack\)/i);
-    expect(r).toMatch(/z-index\s*:\s*3\b/);
+  });
+
+  /**
+   * ⚠️ RETARGETED BY THE FOUR-FIXES RUN: the z-index was pinned at a LITERAL 3, and 3 was wrong.
+   *
+   * The law that value stood for is "above the lane, below the sealed group bars" — and 3 clears a
+   * card at REST (z 2) while losing to `.tl-p:hover` (5) and `.tl-jc:hover` (12), so the line
+   * disappeared behind whichever card the pointer was on: always the card being read. Measured by
+   * the painted pixels in a strip over the line at 1440 — 46 dark through a resting card, 0
+   * through the same card hovered.
+   *
+   * So the lock states the RELATION rather than the number. It reads every z-index the sheet
+   * declares on lane content and requires the line to beat all of them, and requires it to stay
+   * under the sticky group bar — which is a claim a legitimate retune cannot break and a wrong one
+   * cannot satisfy. Proved red both ways: at 3 the hover pair beats it; at 30 the group bar loses.
+   */
+  it("⚠️ the today line beats every z-index in the lane, and still passes under the group bar", () => {
+    /* ⚠️ EVERY BLOCK FOR A SELECTOR, NOT THE FIRST — `.tl-p` and `.tl-at2` are each declared more
+       than once in this sheet, so a first-match read would answer about whichever happened to come
+       first and a one-rule reader refuses them outright. The claim is about the HIGHEST z a lane
+       element ever reaches, which is exactly the set of blocks that mention it. */
+    const src = decls(readFileSync(CSS, "utf8"));
+    const blocks = [...src.matchAll(/([^{}]+)\{([^}]*)\}/g)]
+      .map((m) => ({ sel: m[1].trim(), body: m[2] }));
+    const maxZ = (needle: string) => {
+      const zs = blocks
+        .filter((b) => b.sel.split(",").some((one) => one.trim() === needle || one.trim().startsWith(needle + ":")))
+        .map((b) => /z-index\s*:\s*(-?\d+)/.exec(b.body))
+        .filter((m): m is RegExpExecArray => !!m)
+        .map((m) => Number(m[1]));
+      expect(zs.length, `no z-index declared for ${needle}`).toBeGreaterThan(0);
+      return Math.max(...zs);
+    };
+    const line = maxZ(".tl-todayline");
+    /* every positioned thing a lane holds — the bars, the past stages, the lead-in, the action
+       mark, and the two HOVER states, which are the ones a literal 3 was losing to */
+    for (const sel of [".tl-leadin", ".tl-p", ".tl-p:hover", ".tl-jc", ".tl-jc:hover", ".tl-act"]) {
+      expect(line, `the today line (${line}) does not clear ${sel} (${maxZ(sel)})`).toBeGreaterThan(maxZ(sel));
+    }
+    /* and the furniture it must stay under: the sticky group bar covers what scrolls beneath it */
+    expect(maxZ(".tl-gdiv"), "the group bar no longer covers the today line").toBeGreaterThan(line);
   });
 
   it("⚠️ AND THE PAST WASH IS GONE FROM THE SHEET, not merely unset by the page", () => {

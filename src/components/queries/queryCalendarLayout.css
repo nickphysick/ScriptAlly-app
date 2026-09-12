@@ -19,10 +19,12 @@
    * ⚠️ WHAT THIS PAGE PUTS ABOVE THE BOARD INSIDE THE SCROLLPORT — the masthead and the header row.
    * MEASURED 207.3 on 10 Sep, at 1280, 1710 and 2520 alike; 208 so the board never overshoots.
    *
-   * ⚠️ IT WAS 203 UNTIL THE CENSUS MOVED, and the guard below is what caught it. Putting the census
-   * in a first grid row made the header content-driven rather than a fixed 52px — it measures 56.3
-   * now — so the board ran 4.3px past the scrollport's foot. That is precisely the drift this
-   * number was said to be vulnerable to, and the lock reported it rather than the board clipping in
+   * ⚠️ IT WAS 203 UNTIL THE CENSUS MOVED, AND 208 UNTIL THE RANGE BECAME TWO LEAVES — and the
+   * guard below has now caught the same drift twice, which is the argument for the guard rather
+   * than for the number. Putting the census in a first grid row made the header content-driven
+   * rather than a fixed 52px (56.3), so the board ran 4.3px past the scrollport's foot. The
+   * leaves are 44.42 tall against the Playfair sentence's 42.3, so the header went to 58.42 and
+   * the board ran 2.12px past. Both times the lock reported it rather than the board clipping in
    * silence. Deriving it properly is its own prompt.
    *
    * ⚠️ AND IT IS A LITERAL THAT ANOTHER ELEMENT OWNS, WHICH THIS REPO OTHERWISE FORBIDS. The honest
@@ -32,8 +34,8 @@
    * inside the scrollport and within 40px of its foot, so a masthead that changes height fails the
    * lock instead of silently clipping the board or leaving a band of dead ground beneath it.
    */
-  --qcc-cal-above: 208px;
-  /* the bottom padding of BOTH row-1 cells, so the census and the range share a baseline */
+  --qcc-cal-above: 211px;
+  /* the bottom padding of BOTH row-1 cells, so the census and the range close on one line */
   --qcc-calrow-pad: 14px;
   /**
    * ⚠️ TWO ROWS NOW, AND THAT IS WHAT PUTS THE CENSUS ON THE RANGE'S BASELINE WITHOUT PUTTING IT
@@ -87,9 +89,12 @@
 /* bare: no fill, no radius, no shadow — only the fields below carry white */
 .qcc-cal-rail { display: block; padding-top: 2px; }
 
-/* ⚠️ THE SAME SIZE AS THE RANGE, which is what makes the two read as one line across the page
-   rather than as a caption beside a heading. Muted ink for the words, full ink for the numerals —
-   the figures are the sentence's content and the rest is grammar. */
+/* ⚠️ PLAYFAIR 26 — AND IT IS NO LONGER "THE SAME SIZE AS THE RANGE" (four-fixes §3). It was
+   written that way because the range was a Playfair-26 sentence and the pair read as one line
+   across the page; the range is two calendar leaves now, so there is no shared type size left to
+   state. What survives is the LINE: both row-1 cells end-align on one bottom padding, so the
+   census's baseline and the leaves' feet still close on it. Muted ink for the words, full ink for
+   the numerals — the figures are the sentence's content and the rest is grammar. */
 .qcc-cal-showing {
   font-family: var(--font-serif); font-weight: 400; font-size: 26px; line-height: 1.1;
   color: #a29587; white-space: nowrap;
@@ -162,35 +167,83 @@
 
 /* ── the header row, above the board only ─────────────────────────────────────────────────── */
 /**
- * ⚠️ THE REF'S `1fr auto 1fr` CANNOT HOLD BELOW A ~950px BOARD, AND THE OVERLAP IS WHAT IT LOOKS
- * LIKE WHEN IT DOES NOT. `1fr` is `minmax(auto, 1fr)`, so each flank gets `(board - 340 - 24) / 2`
- * — and the left cluster needs 293px for two chevrons and a nowrap Playfair-19 range. Measured:
- * board 692 at 1280 gives each flank 162 and the range ran 119.1px UNDER the search; 852 at 1440
- * gives 242 and it ran 39.1px under; 1332 at 1920 gives 482 and it cleared by 200.9. The board
- * reaches 950 — where the two first coexist — at roughly a 1538px viewport.
+ * ⚠️ THE COLLISION WAS REAL, AND IT WAS THE RANGE (four-fixes §3; ref query-calendar-header-v1).
  *
- * ⚠️ SO THE FLANKS TAKE WHAT THEY NEED AND THE SEARCH TAKES WHAT IS LEFT, UP TO 340. The
- * alternative was truncating the range, and the range is the board's primary orientation: a reader
- * who cannot see which ninety days they are looking at has lost more than one who has a narrower
- * search box. Stated as a deviation from the brief's flat 340px rather than taken quietly — the
- * width is now a CEILING.
+ * The row was `auto minmax(0, 340px) auto` with the left cell holding a nowrap Playfair-26 date
+ * range. That range is the widest possible rendering of the most variable content in the row —
+ * 292.7px of it — and an `auto` track never shrinks below its content, so everything else paid.
+ * The right cell carried `min-width: 0`, which sets its automatic minimum to zero: measured at
+ * 1440 its TRACK resolved to 211.6px while the view switch inside it is 342.6px, and with
+ * `justify-content: flex-end` the surplus overflowed LEFTWARDS, across the search. The gap between
+ * the search's right edge and the switch's left edge measured **−108.9 at 1440, −188.9 at 1280 and
+ * −250.6 at 1100** — an overlap at the three commonest widths, clearing only at 1920 (+132.4).
+ * Every cell-level reading looked innocent, because the CELLS did not intersect; the control
+ * overflowing its cell did.
  *
- * ⚠️ AND THE CONSEQUENCE IS THAT THE SEARCH IS CENTRED ON THE BOARD ONLY WHERE THE FLANKS AGREE.
- * Where they do not, it sits off-centre by half their difference. `qcCalLayout` measures and
- * reports that offset rather than asserting a centring that the arithmetic above forbids.
+ * THE THREE PARTS OF THE FIX, each answering a different half:
+ *   · the range is two calendar LEAVES — a fixed ~108px whatever the dates say, so the left flank
+ *     stops being a variable;
+ *   · the centre is `minmax(0, 1fr)` with the search at `width: min(340px, 100%)`, so the search
+ *     SHRINKS to whatever is left rather than anything overlapping — the width is a ceiling;
+ *   · the right cell's `min-width: 0` is GONE, so its automatic minimum is the switch's own width
+ *     again and the track can no longer collapse under the control standing in it.
+ *
+ * ⚠️ AND BELOW 1180 THE SWITCH GOES ICON-ONLY, which is what makes the arithmetic close at the
+ * narrow end. At 1100 the board column is 470px: leaves and chevrons take 188, the two gaps 44,
+ * and a labelled switch at 290.6 leaves the search −41px. Dropping the four labels takes the
+ * switch to ~136 and the search to ~102 — small, and present, which is the point: a search that
+ * resolves to zero width is the same failure as an overlap, one step quieter.
+ *
+ * ⚠️ THE SEARCH IS STILL CENTRED ON ITS OWN TRACK, NOT ON THE BOARD. Where the flanks differ it
+ * sits off-centre by half their difference; `qcCalLayout` reports that offset rather than
+ * asserting a centring the arithmetic forbids.
  */
 .qcc-calhead {
   grid-column: 2; grid-row: 1;
-  display: grid; grid-template-columns: auto minmax(0, 340px) auto; align-items: end; gap: 22px;
-  justify-content: space-between;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: end; gap: 22px;
   padding: 0 2px var(--qcc-calrow-pad); box-sizing: border-box;
 }
+/* ⚠️ NO `min-width: 0` ON EITHER FLANK — that is the whole bug, above. The centre track is where
+   the shrinking happens, and it is the only one told it may reach zero. */
 .qcc-calhead-l { display: flex; align-items: center; gap: 10px; }
-.qcc-calhead-r { display: flex; align-items: center; justify-content: flex-end; min-width: 0; }
+.qcc-calhead-r { display: flex; align-items: center; justify-content: flex-end; }
+
+/* ── the range: two calendar leaves ──────────────────────────────────────────────────────── */
+/**
+ * ⚠️ THE SAME LEAF THE CARDS AND THE LIST DRAW, AT THE REF'S 44px. This page already states a date
+ * as a leaf in three places — `.qcc-leaf` at 46px on the card, `.qlv-leaf` at 40px in the list,
+ * `.qbv-leaf` on the board — one derivation, `CardLeaf`, sized per surface. This is that object at
+ * the header's size; what it is not is a fourth kind of date chip.
+ *
+ * ⚠️ ITS MONTH STRIP IS `#f7efe3` AS A LITERAL, AND DELIBERATELY NOT `var(--state-queried)`, WHICH
+ * IS THE SAME VALUE. The leaves on the cards read `--band-a`, the query's own state, because a
+ * card's leaf is a date IN a state. A window boundary is in no state at all — so reading the token
+ * would make a retone of "with the agent" move a piece of chrome, and would be telling a reader,
+ * in the one vocabulary this app reserves for it, that the last day of October is queried. Same
+ * hex, different fact. The ref draws its own `--sand` here for exactly that reason.
+ */
 .qcc-calhead-rng {
-  font-family: var(--font-serif); font-weight: 500; font-size: 26px; line-height: 1.1;
-  color: var(--ink, #1c130f); white-space: nowrap; margin: 0;
+  display: inline-flex; align-items: stretch; gap: 6px; margin: 0;
+  font-weight: 400; /* an h3 — the leaves set their own type */
 }
+.qcc-calleaf {
+  width: 44px; flex: none; border-radius: 8px; overflow: hidden; text-align: center;
+  background: #fff; border: 0.5px solid #dccfc0; box-shadow: 0 1px 2px rgba(58, 28, 20, 0.06);
+}
+.qcc-calleaf-mo {
+  display: block; font-family: var(--font-mono); font-size: 6.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink, #1c130f); padding: 3px 0 2px;
+  background-color: #f7efe3; border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+/* ⚠️ `line-height: 1` IS THE REF'S, AND THE 5px OF BOTTOM PADDING IS WHAT MAKES IT SAFE — the same
+   measured exception the card's leaf carries. Playfair ships old-style figures, so its numerals
+   spill below the line box; the padding absorbs the spill inside a leaf that clips. Do not tighten
+   it to close the leaf up. */
+.qcc-calleaf-dy {
+  display: block; font-family: var(--font-serif); font-size: 17px; line-height: 1;
+  color: var(--ink, #1c130f); padding: 5px 0;
+}
+.qcc-calleaf-arr { align-self: center; color: #c0b0a0; font-size: 11px; }
 
 /**
  * ⚠️ CENTRED ON THE BOARD'S WIDTH, NOT THE PAGE'S. The header is inside the board's column, so
@@ -198,7 +251,7 @@
  * That is the whole reason the header does not span both columns.
  */
 .qcc-calsearch {
-  justify-self: center; width: 100%; max-width: 340px; box-sizing: border-box;
+  justify-self: center; width: min(340px, 100%); min-width: 0; box-sizing: border-box;
   display: flex; align-items: center; gap: 8px;
   border-radius: 99px; padding: 11px 18px;
   background: #fff; border: 1px solid #e0d5c8;
@@ -209,6 +262,16 @@
   font-family: inherit; font-size: 12.5px; color: var(--ink, #1c130f);
 }
 .qcc-calsearch input::placeholder { color: #c8b8a8; }
+
+/* ⚠️ THE SWITCH LOSES ITS WORDS BEFORE THE SEARCH LOSES ITS BOX. `font-size: 0` takes the label off
+   the glyph and leaves the accessible name where it was — the text node is still in the button, so
+   the control still announces "Calendar"; `display: none` on the words would take the name with it.
+   The breakpoint is the one `.qvs` already steps at, so this is a second step on an existing ladder
+   rather than a new one, and it is scoped to this header: the other three views put their switch in
+   a toolbar with room for it. */
+@media (max-width: 1180px) {
+  .qcc-calhead .qvs button { font-size: 0; gap: 0; padding: 7px 9px; }
+}
 
 /* ── the board card ───────────────────────────────────────────────────────────────────────── */
 /**

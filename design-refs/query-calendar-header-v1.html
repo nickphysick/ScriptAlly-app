@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Calendar header, compact range</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#f7f4ee;--parchment:#fdfaf5;--ink:#1c130f;--body-ink:#3a1c14;--label:#9c8878;--burgundy:#7c3a2a;--sage-accent:#8a9e88;--hairline:#ece0d2;--field-border:#e0d5c8;--pink:#f5e2da;--pink-border:#e8c8bc;
+    --sand:#f7efe3;--sage:#e0e5dd;--pinkS:#f5e6df;--offer:#d7e0e8;--closed:#e4e1db;--sand-d:#e7d9bd}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ground);font-family:'Inter',sans-serif;color:var(--body-ink);font-size:13px;padding:22px 26px 80px}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+  h1{font-family:'Playfair Display',serif;font-weight:500;font-size:24px;color:var(--ink)}
+  h2{font-family:'Playfair Display',serif;font-weight:500;font-size:15px;color:#2e3a2c;margin:26px 0 6px}
+  .lede{font-family:'Playfair Display',serif;font-style:italic;font-size:13.5px;color:#6a5a50;margin:5px 0 10px;max-width:960px;line-height:1.5}
+  .note{font-size:12.5px;color:#6a5a50;max-width:960px;line-height:1.6;margin-bottom:12px}
+  .note b{font-weight:500;color:var(--body-ink)} .note code{font-family:'JetBrains Mono',monospace;font-size:11px}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--field-border);border-radius:10px;padding:3px;margin-bottom:10px}
+  .seg button{border:none;background:transparent;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#6a5a50;padding:7px 12px;border-radius:7px}
+  .seg button.on{background:var(--pink);color:var(--body-ink)}
+
+  .wrap{background:#fefcfa;border-radius:16px;padding:16px 18px;box-shadow:0 1px 2px rgba(58,28,20,.04),0 8px 24px rgba(58,28,20,.07)}
+  .calhead{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:0 0 12px}
+  .hl{display:flex;align-items:center;gap:10px;min-width:0}
+  .search{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--field-border);border-radius:99px;padding:11px 18px;width:min(340px,100%);justify-self:center;color:#c8b8a8;font-size:13.5px;box-shadow:0 1px 2px rgba(58,28,20,.05),0 3px 10px rgba(58,28,20,.06)}
+  .views{display:inline-flex;background:#fff;border:1px solid var(--field-border);border-radius:99px;padding:4px;justify-self:end;flex:none}
+  .views span{padding:6px 13px;border-radius:99px;font-family:'Playfair Display',serif;font-size:13px;color:#8a7a6c;white-space:nowrap}
+  .views span.on{background:var(--pink);color:var(--ink)}
+  .nav span{width:28px;height:28px;border-radius:9px;border:1px solid var(--field-border);background:#fff;display:inline-flex;align-items:center;justify-content:center;color:#a08a78;font-size:12px}
+  .today{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#6a5a50;border-bottom:.5px solid #cdbfae;margin-left:2px}
+
+  /* range renderings */
+  .r-long{font-family:'Playfair Display',serif;font-weight:500;font-size:19px;color:var(--ink);white-space:nowrap}
+  .r-leaf{display:inline-flex;align-items:stretch;gap:6px}
+  .leafbox{width:44px;border-radius:8px;background:#fff;border:.5px solid #dccfc0;text-align:center;overflow:hidden;box-shadow:0 1px 2px rgba(58,28,20,.06)}
+  .leafbox .mo{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;text-transform:uppercase;padding:3px 0 2px;border-bottom:.5px solid rgba(0,0,0,.08);background:var(--sand)}
+  .leafbox .dy{font-family:'Playfair Display',serif;font-size:17px;color:var(--ink);line-height:1;padding:5px 0 5px}
+  .r-leaf .arrow{align-self:center;color:#c0b0a0;font-size:11px}
+  .r-pill{display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--field-border);border-radius:99px;padding:7px 14px}
+  .r-pill .mono{color:var(--label)}
+  .r-pill .v{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink);white-space:nowrap}
+  .r-mono{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--ink);white-space:nowrap}
+  .r-mono b{font-weight:700}
+
+  /* board sketch */
+  .board{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(58,28,20,.05),0 6px 16px rgba(58,28,20,.08)}
+  .ruler{height:34px;display:grid;grid-template-columns:repeat(12,1fr);border-bottom:.5px solid var(--hairline);position:relative}
+  .ruler span{display:flex;align-items:center;padding-left:8px;border-left:.5px solid var(--hairline);font-family:'JetBrains Mono',monospace;font-size:8px;color:#c0b0a0}
+  .lanes{position:relative;padding:10px 0;background:repeating-linear-gradient(90deg,transparent 0 calc(8.333% - .5px),#f4eee6 calc(8.333% - .5px) 8.333%)}
+  .todayline{position:absolute;top:0;bottom:0;width:1.5px;background:var(--burgundy);z-index:9}
+  .lane{height:42px;position:relative}
+  .bar{position:absolute;top:9px;height:24px;border-radius:99px;display:flex;align-items:center;padding:0 12px;font-size:12px;color:var(--ink);white-space:nowrap;z-index:2}
+  .bar.hist{opacity:.34;transition:opacity .15s}
+  .bar.hist:hover{opacity:1;z-index:6}
+  .rec{margin-top:22px;max-width:960px;line-height:1.6;color:#4a3a30}
+  .rec b{font-weight:500;color:var(--body-ink)}
+</style>
+</head>
+<body>
+<h1>Calendar header — a range that can't collide</h1>
+<div class="lede">Four renderings of the date range. The header is a three-column grid; the range must be a fixed or bounded width so the centre column never gets squeezed.</div>
+<div class="seg" id="seg"><button data-r="long">Now · Playfair range</button><button class="on" data-r="leaf">A · Two leaves</button><button data-r="pill">B · Range pill</button><button data-r="mono">C · Mono range</button></div>
+
+<div class="wrap">
+  <div class="calhead">
+    <span class="hl"><span class="nav"><span>‹</span><span>›</span></span><span id="range"></span><span class="today">Today</span></span>
+    <span class="search">⌕ Search agents or agencies</span>
+    <span class="views"><span>Grid</span><span>List</span><span>Board</span><span class="on">Calendar</span></span>
+  </div>
+  <div class="board">
+    <div class="ruler" id="ruler"></div>
+    <div class="lanes">
+      <div class="todayline" style="left:52%"></div>
+      <div class="lane"><div class="bar hist" style="left:4%;width:26%;background:var(--sand)">Queried · Stillwater Reps</div><div class="bar" style="left:32%;width:34%;background:var(--pinkS)">Partial requested</div></div>
+      <div class="lane"><div class="bar hist" style="left:10%;width:22%;background:var(--sand)">Queried · Inkwell &amp; Stone</div><div class="bar" style="left:34%;width:44%;background:var(--sage)">Full sent · advise 8 weeks</div></div>
+    </div>
+  </div>
+</div>
+
+<h2>The four fixes</h2>
+<div class="note">
+<b>1 · Historic bars.</b> v65 draws a past bar in <b>its own state colour, faded</b> — <code>opacity .34</code> at rest, <code>1</code> on hover with a raised z-index — not white, not grey. The two faded bars above are the behaviour. Whatever is currently turning them into a colourless form is the fault.<br>
+<b>2 · Today line.</b> It must sit <b>above the bars</b>: its z-index is higher than any lane content, and the stacking context it lives in must not be created inside a lane. It is currently being painted behind cards.<br>
+<b>3 · The header must not collide.</b> The range is the left column of a <code>auto 1fr auto</code> grid; a Playfair 19px range grows with its content and squeezes the centre. Make the range a <b>bounded width</b> and give the centre column <code>min-width:0</code> with the search at <code>width:min(340px,100%)</code>, so the search shrinks rather than anything overlapping. Never let the three columns total more than the row.<br>
+<b>4 · The caveat flag opens on click.</b> It should reveal on <b>hover and focus</b>, like the board's other marks, with a short delay in and out so it doesn't flicker as the pointer crosses the lane.
+</div>
+
+<div class="rec">
+  <p><b>My pick for the range: A, two leaves.</b> The window's start and end as two 44px calendar leaves with an arrow between — the same leaf the cards and list already use, so the page gains no new object. It's a fixed 100px whatever the dates say, so the header can't be squeezed by a long month name, and it reads as "a window between two dates" faster than a sentence does. The mono caption under each leaf is unnecessary here; the month strip carries it.</p>
+  <p style="margin-top:8px"><b>B</b> is a single pill — <span class="mono">window</span> then "30 Jul – 27 Oct" in Playfair 15px — which is compact and bounded but still varies by about 40px across the year. <b>C</b> sets the range in mono at 11px, which is the smallest and the most machine-like; it loses the warmth the header currently has. The current Playfair 19px is the thing to drop: it's the widest possible rendering of the most variable content in the row.</p>
+</div>
+
+<script>
+const weeks=["27 Jun","4 Jul","11","18","25","1 Aug","8","15","22","29","5 Sep","12"];
+document.getElementById("ruler").innerHTML=weeks.map(w=>`<span>${w}</span>`).join("");
+const R={long:`<span class="r-long">30 July – 27 October 2026</span>`,
+ leaf:`<span class="r-leaf"><span class="leafbox"><span class="mo">Jul</span><div class="dy">30</div></span><span class="arrow">→</span><span class="leafbox"><span class="mo">Oct</span><div class="dy">27</div></span></span>`,
+ pill:`<span class="r-pill"><span class="mono">Window</span><span class="v">30 Jul – 27 Oct</span></span>`,
+ mono:`<span class="r-mono"><b>30 JUL</b> → <b>27 OCT 2026</b></span>`};
+function set(k){document.getElementById("range").innerHTML=R[k];}
+document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#seg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");set(b.dataset.r);});
+set("leaf");
+</script>
+</body>
+</html>

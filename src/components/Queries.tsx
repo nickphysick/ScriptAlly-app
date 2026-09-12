@@ -79,8 +79,9 @@ import { QueryViewSwitch, type QueryView } from "./queries/QueryViewSwitch";
    same wait in two different places. */
 import { TimelineBoard } from "./shared/timeline/TimelineBoard";
 import { WEEK_STEP, DENSITY_LABEL, type BoardDensity } from "./shared/timeline/TimelineWinbar";
+import { useSegHover } from "./shared/timeline/useSegHover";
 import {
-  todayAtOf, monthsOf, dateLabelsOf, windowRangeLabelOf, movedOffTodayOf,
+  todayAtOf, monthsOf, dateLabelsOf, windowRangeLabelOf, windowLeavesOf, movedOffTodayOf,
 } from "./shared/timeline/boardWindow";
 import { crossAt } from "./shared/timeline/boardParts";
 /* ⚠️ THE BOARD'S STYLESHEET, IMPORTED EXPLICITLY. It is already in the bundle at runtime —
@@ -3406,7 +3407,12 @@ export const Queries: React.FC<{
   const [calWinStart, setCalWinStart] = useState<string>(calToday);
   const [calDensity, setCalDensity] = useState<BoardDensity>("comfortable");
   const [calSel, setCalSel] = useState<string | null>(null);
-  const [calHover, setCalHover] = useState<string | null>(null);
+  /* ⚠️ THE BOARD'S OWN HOVER PAIRING, NOT A LOCAL STATE SET FROM A CLICK (four-fixes §4). This was
+     a `useState` written only by `pickSeg`, so on this page a bar's action mark — the Caveat label
+     and its button — opened on a CLICK, and the same click opened the query: one gesture, two
+     answers. `useSegHover` is the mechanism To-do already had; both hosts now share it, delay and
+     all, so the board cannot behave differently depending on which page mounted it. */
+  const { seg: calHover, onRowsOver: calRowsOver, onRowsOut: calRowsOut } = useSegHover();
   const [calCollapsed, setCalCollapsed] = useState<ReadonlySet<string>>(new Set());
   const [calCross, setCalCross] = useState<{ x: number; label: string } | null>(null);
   const calWrapRef = useRef<HTMLDivElement | null>(null);
@@ -3507,6 +3513,7 @@ export const Queries: React.FC<{
     </div>
   );
   const calWindowLabel = useMemo(() => windowRangeLabelOf(calVisible), [calVisible]);
+  const calLeaves = useMemo(() => windowLeavesOf(calVisible), [calVisible]);
   const calMovedOff = movedOffTodayOf(calTodayAt, calRange.days);
 
 
@@ -6567,7 +6574,30 @@ export const Queries: React.FC<{
                       onClick={() => setCalWinStart((w) => shiftWindow(w, WEEK_STEP, -1))}>‹</button>
                     <button type="button" className="tl-wchv" aria-label="Forward one week"
                       onClick={() => setCalWinStart((w) => shiftWindow(w, WEEK_STEP, 1))}>›</button>
-                    <h3 className="qcc-calhead-rng">{calWindowLabel}</h3>
+                    {/* ⚠️ TWO LEAVES, NOT A SENTENCE (four-fixes §3; ref query-calendar-header-v1,
+                        treatment A). `30 July – 27 October 2026` in Playfair 26 is 292.7px and it
+                        is the most variable content in the row, so the left column never gave way
+                        and the view switch overflowed its own cell leftwards ACROSS the search —
+                        measured at 1100, 1280 and 1440. The leaves are a fixed ~106px whatever the
+                        dates say, which is what makes the row's arithmetic hold at every width.
+                        ⚠️ THE SENTENCE SURVIVES AS THE ACCESSIBLE NAME. Two date leaves and an
+                        arrow are a picture of a span; a reader on a screen reader gets the words,
+                        and `windowRangeLabelOf` is still the one place they are composed. */}
+                    <h3 className="qcc-calhead-rng" aria-label={calWindowLabel}>
+                      {calLeaves && (
+                        <>
+                          <span className="qcc-calleaf" aria-hidden="true">
+                            <span className="qcc-calleaf-mo">{calLeaves.from.mon}</span>
+                            <span className="qcc-calleaf-dy">{calLeaves.from.day}</span>
+                          </span>
+                          <span className="qcc-calleaf-arr" aria-hidden="true">→</span>
+                          <span className="qcc-calleaf" aria-hidden="true">
+                            <span className="qcc-calleaf-mo">{calLeaves.to.mon}</span>
+                            <span className="qcc-calleaf-dy">{calLeaves.to.day}</span>
+                          </span>
+                        </>
+                      )}
+                    </h3>
                     {calMovedOff && (
                       <button type="button" className="tl-todaylink" onClick={() => setCalWinStart(calToday)}>
                         Today
@@ -6618,9 +6648,12 @@ export const Queries: React.FC<{
                         sel={calSel}
                         setSel={setCalSel}
                         hoverSeg={calHover}
+                        /* ⚠️ A CLICK SELECTS AND OPENS; IT NO LONGER SETS THE HOVER (four-fixes
+                           §4). `setCalHover(sg.key)` here was the whole reason the action mark
+                           needed a click: the reveal followed a state only this handler wrote, so
+                           the label appeared at the same moment the query opened over it. */
                         pickSeg={(_rowKey, sg) => {
                           setCalSel(sg.key);
-                          setCalHover(sg.key);
                           if (sg.queryId) onOpenQuery?.(sg.queryId);
                         }}
                         openCardOver={() => {}}
@@ -6633,8 +6666,8 @@ export const Queries: React.FC<{
                         )}
                         clearCross={() => setCalCross(null)}
                         dragWindow={{}}
-                        onRowsOver={() => {}}
-                        onRowsOut={() => {}}
+                        onRowsOver={calRowsOver}
+                        onRowsOut={calRowsOut}
                         cross={calCross}
                         actToast={null}
                         onNavigatePath={(path) => onNavigate("queries", path)}

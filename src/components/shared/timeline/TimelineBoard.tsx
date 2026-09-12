@@ -428,6 +428,17 @@ data-rowkey={r.key}
                         : b.dir === "in" ? "in" : b.dir === "close" ? "none" : "out";
                       out.push(
                         <div key={`js-${a.key}`} className={`tl-jc${narrow ? " narrow" : ""}`} data-seg={`js-${a.key}`}
+                          /* ⚠️ THE STAGE'S OWN STATE, SO ITS FILL CAN BE ITS STATE COLOUR (four-fixes §1).
+                             A past stage was drawn `#fff` at low opacity — colourless, so the one thing
+                             history still has to say (which state it WAS) was carried by the drained
+                             medallion alone. It is the SAME call the payload two lines below already
+                             makes, `stateFor(a.status)`: one derivation, two readers, so the fill and the
+                             card that opens from it cannot come to disagree about the state.
+                             ⚠️ AND IT IS AN ATTRIBUTE RATHER THAN THE `tl-st-*` CLASS. That class carries
+                             a `background` of its own for the status BAND, declared later in the sheet —
+                             putting it here would fill the stage by source order rather than by rule, and
+                             a reordering of the file would silently change what a stage looks like. */
+                          data-st={stateFor(a.status ?? QueryStatus.QUERIED)}
                           /* v65 §C — clicking a ghost opens ITS card: the finished-stage form
                              (full gauge, no today, stage counters, no action). The facts are the
                              loop's own — the same numbers this stage is painted from. */

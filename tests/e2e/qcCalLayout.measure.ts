@@ -32,7 +32,12 @@ for (const w of [1280, 1440, 1920]) {
         board: R(".qcc-calboard"), rows: R(".tl-rows"), rail0: R(".tl-rail"),
         pill: R(".qcc-denspill"),
         toolbar: !!q(".qcc-tb"), tiles: !!q("[aria-label='Query totals']"),
-        well: !!q(".qcc-plain"),
+        /* ⚠️ THE RETIRED CLASS BY NAME. This read `.qcc-plain` after a rename swept it in, and
+           `.qcc-plain` is the wrapper EVERY view sits on — so the case asserted the Calendar had
+           no wrapper, and went red on a correct page. `.qcc-well` is gone from the app; that is
+           the claim worth keeping. */
+        well: !!q(".qcc-well"),
+        plain: !!q(".qcc-plain"),
         qf: document.querySelectorAll("[data-qc-live] .qcc-qf").length,
         fields: document.querySelectorAll("[data-qc-live] .qcc-cal-field").length,
         todayline: (() => { const e = q(".tl-todayline"); return e ? +e.getBoundingClientRect().width.toFixed(2) : null; })(),
@@ -52,7 +57,8 @@ for (const w of [1280, 1440, 1920]) {
     /* ── the page toolbar and tiles do not render in this view ──────────────────────────── */
     expect(m.toolbar, "the page toolbar still renders in the Calendar").toBe(false);
     expect(m.tiles, "the stat tiles still render above the Calendar").toBe(false);
-    expect(m.well, "the Calendar must have no well").toBe(false);
+    expect(m.well, "the Calendar grew a well back").toBe(false);
+    expect(m.plain, "the Calendar does not sit on the plain ground").toBe(true);
 
     /* ── the header starts at the board's left edge, and the rail is padded down by it ──── */
     expect(Math.abs(m.head!.x - m.board!.x), `header left ${m.head!.x} vs board left ${m.board!.x}`).toBeLessThanOrEqual(0.5);

@@ -1629,11 +1629,29 @@ button.tl-tchip { cursor: pointer; }
    ⚠️ `width: 0` WITH A BORDER, per the ref — a 1.5px BACKGROUND rounds to 1 or 2 at whole-pixel
    positions; a border keeps its sub-pixel width. `translateX(-1px)` centres it on the date. */
 .tl-rowsin { position: relative; }
+/* ⚠️ IT MUST BEAT EVERY LANE Z-INDEX, INCLUDING THE HOVER ONES — AND AT 3 IT DID NOT (four-fixes
+   §2). No ancestor of this line creates a stacking context (walked, both hosts: `.tl-rowsin`,
+   `.tl-rows`, `.tl-wrap`, the zone and the board are all `z: auto` with no transform, filter or
+   isolation), so the line and the lane's cards compete directly on z-index — and the trap the
+   brief suspected, a context created inside a lane, is not what was happening.
+   What was happening is smaller and worse: a card RESTS at 2 and the line's 3 cleared it, but
+   `.tl-p:hover` is 5 and `.tl-jc:hover` is 12, so the line vanished behind whichever card the
+   pointer was on — which is always the card being read. Measured at 1440 by sampling the painted
+   pixels in a 6px strip over the line: 46 dark pixels through a resting card, 0 through the same
+   card hovered.
+   ⚠️ 20 IS ABOVE THE LANE AND BELOW THE FURNITURE. The lane's ladder tops out at `.tl-jc:hover`'s
+   12 (`.tl-act` 6, `.tl-p:hover` 5, `.tl-p` 2, `.tl-jc`/`.tl-leadin` 1); the sticky group bar is
+   25 and the rail 50, and the line passes UNDER both by the idiom two rules down. A lock sweeps
+   this stylesheet for every z-index declared on lane content and fails if any reaches this one.
+   ⚠️ AND IT STAYS `pointer-events: none`, so `elementFromPoint` still answers "the card" here and
+   always will — a decorative line that swallowed a click over a card would be a worse bug than
+   the one being fixed. What the line is ABOVE is a question about paint, and it is measured as
+   paint. */
 .tl-todayline {
   position: absolute; top: 0; bottom: 0; width: 0;
   border-left: 1.5px dashed var(--tl-nearblack);
   transform: translateX(-1px);
-  z-index: 3; pointer-events: none;
+  z-index: 20; pointer-events: none;
 }
 /* ⚠️ THE FLAG SITS ABOVE THE BOARD, CLEAR OF THE FIRST GROUP TITLE. It was 2px above it —
    not overlapping, and not clear either, which on a 19px Playfair title reads as a collision. It
@@ -2175,11 +2193,11 @@ button.tl-tchip { cursor: pointer; }
   .tl-pulsedot { animation: none; }
 }
 
-/* ⚠️ A PAST STAGE IS A GHOST — 32% until you look at it (v63, §D, the ref's `data-past="ghost"`).
+/* ⚠️ A PAST STAGE IS A GHOST — 34% until you look at it (four-fixes §1; was 32%).
    It is history: it should be legible when asked and never compete with the live card beside it,
    which is what a full-strength past stage was doing. `z-index` on hover so a ghost brought to
    full strength sits above its neighbours rather than under them. */
-.tl-jc { opacity: .32; transition: opacity .15s; }
+.tl-jc { opacity: .34; transition: opacity .15s; }
 .tl-jc:hover { opacity: 1; z-index: 12; }
 @media (prefers-reduced-motion: reduce) {
   .tl-jc { transition: none; }
@@ -2212,16 +2230,31 @@ button.tl-tchip { cursor: pointer; }
    was a 44px transparent box with a 1.5px dotted edge: a different shape, a different size and a
    different grammar for the same thing, which is why history read as a diagram rather than as
    cards behind cards. */
+/* ⚠️ ITS OWN STATE COLOUR, FADED — NOT WHITE (four-fixes §1). The fill was `#fff`, so a stage
+   said nothing about which state it had been except through a medallion drained to .22 opacity,
+   and a board's history read as a row of blank boxes. The fill is now the same five-token
+   vocabulary every other surface in the app states a query's state in; `.34` is what says "past".
+   ⚠️ THE MAPPING IS OFF `data-st`, WHICH THE STAGE PUBLISHES FROM `stateFor(status)` — the same
+   call the card it opens is built from. `--st` is the board's own name for "this thing's state
+   tint" (`.tl-p` lifts it off its band's class through `:has()`); a stage carries its state on
+   itself, so it sets the token directly rather than through a child.
+   ⚠️ AND THE FALLBACK IS THE OLD WHITE, deliberately: a stage whose status does not map is drawn
+   as it always was rather than as a transparent box. */
+.tl-jc[data-st="queried"] { --st: var(--state-queried); }
+.tl-jc[data-st="agent"]   { --st: var(--state-agent); }
+.tl-jc[data-st="you"]     { --st: var(--state-you); }
+.tl-jc[data-st="offer"]   { --st: var(--state-offer); }
+.tl-jc[data-st="closed"]  { --st: var(--state-closed); }
 .tl-jc {
   --tl-jc-gap: calc(var(--badge) * 0.79 + 12px);
   position: absolute; top: 50%; transform: translateY(-50%);
   height: var(--bar-h); z-index: 1; overflow: hidden;
-  background: #fff; border: 1px solid var(--tl-frame-bd); border-radius: 9px;
+  background: var(--st, #fff); border: 1px solid var(--tl-frame-bd); border-radius: 9px;
   box-shadow: none;
   /* ⚠️ THE CARD'S OWN HAIRLINE, NOT A SEPARATE PAST-BORDER TOKEN. `--tl-cs-pastbd` was a second
-     edge colour for the same object — a past stage IS a card, drawn at 32% — and it restated the
+     edge colour for the same object — a past stage IS a card, drawn at 34% — and it restated the
      border two declarations after the shorthand set it, which is how the ghost ended up with an
-     edge no live card has. The 32% opacity is what says "past"; the edge is not a second signal. */
+     edge no live card has. The 34% opacity is what says "past"; the edge is not a second signal. */
 }
 /* ⚠️ A NARROW STAGE DROPS ITS BADGE AND STARTS ITS TEXT AT THE CARD'S OWN INSET — the ref's
    `.jc.narrow`. Below the second gate there is not room for a disc AND a sentence, and the sentence
@@ -2292,18 +2325,26 @@ button.tl-tchip { cursor: pointer; }
   border: 1px solid #d3c8b6; color: #b3a48f; background: transparent;
   transition: border-color .16s, color .16s, background .16s;
 }
-.tl-act.on .tl-actsym { border-color: #2a1f17; color: var(--tl-nearblack); background: #fff; }
+.tl-act.on .tl-actsym,
+.tl-act:focus-within .tl-actsym { border-color: #2a1f17; color: var(--tl-nearblack); background: #fff; }
 @media (prefers-reduced-motion: reduce) { .tl-actsym { transition: none; } }
 
 /* ⚠️ THE LABEL AND THE BUTTON ARE ABSENT UNTIL THE ROW IS HOVERED, AND THEY DO NOT MOVE WHEN THEY
    ARRIVE. The ref slides them 6px; a label sliding in the corner of the eye on every pointer move is
    motion about something the reader has not asked for yet. They appear, and that is all. */
+/* ⚠️ AND `:focus-within` REVEALS IT TOO (four-fixes §4). The button is an element the keyboard can
+   reach, and `opacity: 0` does not take it out of the tab order — so before this a Tab landed on an
+   invisible control with `pointer-events: none`, which is worse than a hidden one: the focus ring
+   was drawn around nothing a reader could read. The mark is revealed by hover OR by focus, which is
+   the pair the rest of the app already uses (the density pill's `:focus-within`, the stat panels'
+   `useHoverShow`). */
 .tl-act .tl-actlab, .tl-act .tl-actbtn { opacity: 0; pointer-events: none; }
-.tl-act.on .tl-actlab, .tl-act.on .tl-actbtn { opacity: 1; pointer-events: auto; }
+.tl-act.on .tl-actlab, .tl-act.on .tl-actbtn,
+.tl-act:focus-within .tl-actlab, .tl-act:focus-within .tl-actbtn { opacity: 1; pointer-events: auto; }
 /* ⚠️ AN URGENT ACTION HIDES ENTIRELY AT REST — ring included, because it draws none. The pulse dot
    on its open end is the only thing an urgent row says until you look at it. */
 .tl-act--od { opacity: 0; }
-.tl-act--od.on { opacity: 1; }
+.tl-act--od.on, .tl-act--od:focus-within { opacity: 1; }
 
 .tl-actlab {
   font-family: Caveat, cursive; font-size: 17px; font-weight: 600;

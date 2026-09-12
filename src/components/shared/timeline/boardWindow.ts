@@ -12,9 +12,12 @@
  */
 
 import { shortCalDate } from "../../../lib/todoCalendar";
+import { MON } from "../../../lib/queryCardFacts";
 
 export type BoardMonth = { key: string; label: string; at: number; labelAt: number; current: boolean; past: boolean };
 export type BoardDateLabel = { ymd: string; at: number; text: string; day: string; mon: string; now: boolean };
+/** one end of the window, as the header's calendar leaf draws it */
+export type BoardLeaf = { mon: string; day: string };
 
 /**
  * ⚠️ FRACTIONAL, AND DELIBERATELY: today's MIDPOINT (`index + 0.5`), which is what puts the line
@@ -84,6 +87,32 @@ export function dateLabelsOf(
       });
     }
     return out;
+}
+
+/**
+ * The window's two ends as calendar LEAVES — `{ mon: "JUL", day: "30" }` a side (four-fixes §3).
+ *
+ * ⚠️ A SECOND RENDERING OF THE SAME FACT, NOT A SECOND DERIVATION. `windowRangeLabelOf` states the
+ * span as a sentence and the winbar uses it; the Query Centre's Calendar header states it as two
+ * leaves because a sentence there is the widest possible rendering of the row's most variable
+ * content, and it was pushing the view switch over the search. Both read `visible`, so the two
+ * cannot name different days.
+ *
+ * ⚠️ THE MONTH TABLE IS `MON` FROM `queryCardFacts`, which the cards' and the list's leaves
+ * already build their strips from — a second array of month names is a second thing to keep in
+ * step, and these leaves sit on the same page as those.
+ */
+export function windowLeavesOf(visible: readonly string[]): { from: BoardLeaf; to: BoardLeaf } | null {
+  const a = visible[0], b = visible[visible.length - 1];
+  if (!a || !b) return null;
+  const leaf = (ymd: string): BoardLeaf | null => {
+    const [y, m, d] = ymd.split("-").map(Number);
+    if (!y || !m || !d) return null;
+    const mon = MON[m - 1];
+    return mon ? { mon: mon.toUpperCase(), day: String(d) } : null;
+  };
+  const from = leaf(a), to = leaf(b);
+  return from && to ? { from, to } : null;
 }
 
 /** The window's span in words, as the winbar states it. */

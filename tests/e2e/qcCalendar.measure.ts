@@ -24,10 +24,14 @@ const pick = async (page: import("@playwright/test").Page, name: string) => {
   await page.waitForTimeout(700);
 };
 
-test("§2 · the toolbar does not move between views, and the well is Grid and List only — 1440", async ({ page }) => {
+test("§2 · the toolbar does not move between views, and every view sits on the plain ground — 1440", async ({ page }) => {
   await openRoute(page, "/queries", { width: 1440, height: 1000 });
   const s = await scope(page);
   const rects: Record<string, { tb: DOMRect; search: DOMRect; sw: DOMRect; left: DOMRect; well: boolean; plain: boolean }> = {} as never;
+  /* ⚠️ `.qcc-well` IS GONE FROM THE APP, so `well` asks the DOM for the retired class by name
+     rather than for whatever replaced it. It used to read `.qcc-plain` — the same selector `plain`
+     reads — after a rename swept the two readings together, which left this case asserting that
+     one element was both present and absent. See the note at the assertions. */
   for (const v of VIEWS) {
     await pick(page, v);
     rects[v] = await page.evaluate((sel) => {
@@ -39,24 +43,31 @@ test("§2 · the toolbar does not move between views, and the well is Grid and L
       };
       return {
         tb: r(".qcc-tb"), search: r(".qcc-tb-search"), sw: r(".qvs"), left: r(".qcc-tb-left"),
-        well: !!document.querySelector(sel + ".qcc-plain"),
+        well: !!document.querySelector(sel + ".qcc-well"),
         plain: !!document.querySelector(sel + ".qcc-plain"),
       };
     }, s);
   }
   console.log("RECTS " + JSON.stringify(rects));
 
-  /* ⚠️ THE WELL IS ABSENT, NOT TRANSPARENT — a see-through recess still has its box, and anything
-     measuring the page still sees it. */
-  expect(rects.Grid.well, "Grid must keep the well").toBe(true);
-  expect(rects.List.well, "List must keep the well").toBe(true);
-  expect(rects.Board.well, "Board must have NO well element").toBe(false);
-  expect(rects.Board.plain, "Board sits on the plain ground").toBe(true);
+  /* ⚠️ RETARGETED: THE WELL IS GONE FROM ALL FOUR VIEWS, NOT FROM TWO OF THEM. This asserted that
+     Grid and List kept a recess the Board and the Calendar did not have — true until the Grid pass
+     made `.qcc-plain` unconditional and deleted `.qcc-well` from the app. That pass renamed the
+     selector in this file mechanically, INCLUDING in the `well` reading, so `well` and `plain`
+     became the same query asserted to opposite values and four cases across two files went red
+     claiming the Calendar had a well. The claim now is the one the app makes: no view has a well,
+     every view sits on the plain ground.
+     ⚠️ AND THE WELL IS ABSENT, NOT TRANSPARENT — a see-through recess still has its box, and
+     anything measuring the page still sees it. */
+  for (const v of VIEWS) {
+    expect(rects[v].well, `${v} still renders a well element`).toBe(false);
+    expect(rects[v].plain, `${v} does not sit on the plain ground`).toBe(true);
+  }
 
   /* the Calendar: no well, no page toolbar, and its own header row instead */
   await pick(page, "Calendar");
   const cal = await page.evaluate((sel) => ({
-    well: !!document.querySelector(sel + ".qcc-plain"),
+    well: !!document.querySelector(sel + ".qcc-well"),
     plain: !!document.querySelector(sel + ".qcc-plain"),
     toolbar: !!document.querySelector(sel + ".qcc-tb"),
     head: !!document.querySelector(sel + ".qcc-calhead"),
@@ -159,7 +170,15 @@ test("§2 · the week pager moves the window by exactly seven days — 1440", as
      render in this view. Read empty, the old selector made both readings "" and the case reported
      that the window had not moved: a stale selector wearing a product defect's clothes, which is
      exactly what `calWindow58` does with its own pager label. */
-  const label = async () => page.evaluate((sel) => document.querySelector(sel + ".qcc-calhead-rng")?.textContent?.trim() ?? "", s);
+  /* ⚠️ THE WORDS MOVED TO THE ACCESSIBLE NAME (four-fixes §3). The range is two calendar leaves
+     now, so its `textContent` is "JUL30→OCT27" and the parse below would read a month out of it by
+     accident. `aria-label` carries the same sentence `windowRangeLabelOf` always composed — it is
+     the one place the window is stated in words, and it is what a reader without the picture gets.
+     The law is unchanged: the pager steps seven days. */
+  const label = async () => page.evaluate((sel) => {
+    const e = document.querySelector(sel + ".qcc-calhead-rng");
+    return (e?.getAttribute("aria-label") ?? e?.textContent ?? "").trim();
+  }, s);
   const l0 = await label();
   await page.locator('[data-qc-live] button[aria-label="Back one week"]').first().click();
   await page.waitForTimeout(700);
