@@ -15,8 +15,14 @@
    `.tpn` and `.tdf` each define these on their own root and the board is a sibling of all three.
    `--hair` and `--white` happen to resolve from further up; they are stated here too, so this
    sheet does not depend on which ancestor a future layout hands it. */
+/* ⚠️ `--ink2` AND `--sage` JOINED THEM IN THE LIST ROUND, and both were resolving to something.
+   `--ink2` did not resolve at all, so the agent's name in a card's foot fell back to the muted
+   agency colour beside it; `--sage` resolved from further up the app to #8a9e88 — the status dot's
+   sage — where this board's contract states #5a6e58, so the Gone-quiet column's ring was drawn in
+   a sage that belongs to a different system. A token that resolves to the WRONG value is worse
+   than one that resolves to nothing: nothing leaves a mark somebody eventually notices. */
 .brd { --hair:#e7ddd2; --hair2:#e0d5c8; --edge:#e8e0d8; --paper:#fdfaf5; --white:#ffffff;
-       --muted:#9c8878; --muted2:#8a7a6c; }
+       --ink2:#3a1c14; --muted:#9c8878; --muted2:#8a7a6c; --sage:#5a6e58; }
 
 .brd {
   display: grid;

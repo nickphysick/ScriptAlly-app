@@ -33,7 +33,7 @@
 }
 
 /* the card, at the contract's own radius and lift (ref `.box`) */
-.tlc { background:var(--white);border:1px solid var(--edge);border-radius:16px; box-shadow:0 1px 2px rgba(58,28,20,0.04),0 6px 20px rgba(58,28,20,0.05); overflow:hidden;display:flex;flex-direction:column; }
+.tlc { line-height:normal;background:var(--white);border:1px solid var(--edge);border-radius:14px; box-shadow:0 1px 2px rgba(58,28,20,0.04),0 6px 20px rgba(58,28,20,0.05); overflow:hidden;display:flex;flex-direction:column; }
 /* ⚠️ THE COLUMN GIVES THE HEIGHT; THE CARD FILLS IT. A standalone page caps a card against the window;
    here the card lives in a workspace column that already has a definite height. */
 .tlc { height:100%; min-height:0; width:100%; }
@@ -85,15 +85,20 @@
 .tlc .ltask .g.house { color:#4c5f4a;background:var(--u-house-1); }
 .tlc .ltask .g.yours { color:#8a7440;background:var(--u-yours-1); }
 .tlc .ltask .tx { min-width:0; }
-.tlc .ltask .h { font-size:14px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+/* ⚠️ THE ROW STATES ITS OWN LEADING (list round, Phase 6). The page hands the list
+   `line-height: 24px` — 1.5 of a 16px body — so a 12.5px agent name took a 34.5px box where the
+   contract's takes 28, and the two lines of every cell sat lower in a row whose height is fixed at
+   62px. The contract declares none of these because ITS page inherits `normal`; ours does not, and
+   a format that inherits its typography is not a format. 1.2 is what the contract renders them at. */
+.tlc .ltask .h { font-size:14px;line-height:1.2;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 .tlc .ltask .s { font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted2);margin-top:3px; }
 
 /* the person: disc, name, and the agency beneath it (ref `.a` / `.av` / `.a .n` / `.a .n small`) */
 .tlc .lag { display:flex;align-items:center;gap:9px;min-width:0; }
 .tlc .lag .av { width:30px;height:30px;border-radius:50%;background:#efe4dc;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(124,58,42,0.18);flex-shrink:0;box-sizing:border-box; }
 .tlc .lag .av.yours { background:var(--u-yours-1);color:#8a7440;border-color:#e8dcc0; }
-.tlc .lag .n { font-size:12.5px;font-weight:500;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0; }
-.tlc .lag .n small { display:block;font-size:10.5px;color:var(--muted2);font-weight:300; }
+.tlc .lag .n { font-size:12.5px;line-height:1.2;font-weight:500;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0; }
+.tlc .lag .n small { display:block;font-size:10.5px;line-height:1.2;color:var(--muted2);font-weight:300; }
 
 /* ── Due — the Query Centre's calendar chip (ref `.chip`) ────────────────────────────────────────── */
 .tlc .lchip { width:52px;border:1px solid var(--edge);border-radius:9px;overflow:hidden;text-align:center;background:var(--white);box-sizing:border-box; }

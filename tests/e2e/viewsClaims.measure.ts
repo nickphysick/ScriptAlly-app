@@ -79,7 +79,16 @@ test("the three views' own claims", async ({ page }) => {
         if (e.closest(".qs")) return false;
         const bg = getComputedStyle(e).backgroundColor;
         return bg !== "rgba(0, 0, 0, 0)" && bg !== "rgb(255, 255, 255)";
-      }).map((e) => String((e as HTMLElement).className || "").split(" ")[0]).sort();
+      /* ⚠️ THE CONTRACT'S EDGE CARRIES NO CLASS — it is the card's first child, a bare span holding
+         an inline background in the 6px grid track. Naming it here is the mapping, not a fudge: the
+         alternative is a set comparison in which one side has an empty string for the one region
+         the claim is most about, which is what this reported before the card's contract changed. */
+      }).map((e) => {
+        const cls = String((e as HTMLElement).className || "").split(" ")[0];
+        if (cls) return cls;
+        return e.parentElement && e.parentElement.classList.contains("card")
+          && e === e.parentElement.firstElementChild ? "edge" : "";
+      }).sort();
     });
     await cp.close();
     return v;
@@ -133,10 +142,19 @@ test("the three views' own claims", async ({ page }) => {
     "bg " + (statusFill?.bg || "—") + " · " + (statusFill?.dots || 0) + " dot · word " + JSON.stringify(statusFill?.text || ""));
 
   /* ⚠️ THE CARD'S HEIGHT IS COMPARED AGAINST THE CONTRACT AT THE SAME VIEWPORT, not pinned. A
-     literal would go green the day the contract's own card changed. */
+     literal would go green the day the contract's own card changed.
+     ⚠️ AND AGAINST THE CONTRACT THAT BINDS THE CARD, which is `todo-list-and-card.html` and was the
+     three-views contract until this round. That file's superseded card is 169.5px against a card
+     this app builds at 185; every property matched, so the run stayed green for weeks while
+     agreeing with a drawing the card was no longer made from. `openContractView` reads the
+     per-view contract now, so this follows it. */
   const cpage = await page.context().newPage();
   await cpage.setViewportSize({ width: 1440, height: 900 });
-  await openContractView(cpage, "grid");
+  const gridW = await page.evaluate(() => {
+    const el = [...document.querySelectorAll(".tkt-grid")].find((e) => e.getBoundingClientRect().width > 0);
+    return el ? Math.round(el.getBoundingClientRect().width) : 0;
+  });
+  await openContractView(cpage, "grid", gridW);
   const cCard = await readBox(cpage, ".card", []);
   const aCard = await readBox(page, ".tkt-grid .tkt", []);
   add("G5 · the ticket's height is the contract's, within 1px",
@@ -189,30 +207,31 @@ test("the three views' own claims", async ({ page }) => {
     "bg " + h.bg + " · children " + JSON.stringify(h.kids) + " · dots " + h.dots
     + " · name " + h.lbl + " · count border " + h.n + " · rule " + Math.round(h.afterW) + "px");
 
-  /* ⚠️ THE VERB IS THE ONE THE CONTRACT GIVES FOR THAT TASK TYPE — asserted by reading the ref's
-     own `act` expression and the app's rendered rows together, never against a list typed here. */
-  const verbs = await page.evaluate(() => {
-    const rows = [...document.querySelectorAll(".tlc .row")].slice(0, 40);
+  /* ⚠️ THIS CLAIM WAS INVERTED BY THE LIST ROUND, AND IT WAS VACUOUS FOR THE WEEK IN BETWEEN. It
+     read `.lact .go` — a verb button in every row — and the list-view contract has no such cell:
+     its row is Task · Agent · Due · Overdue by · ⋯, and the ⋯ is the row's only control. The old
+     form did not go red when the cell was retired; it found no rows with a verb, filtered them all
+     away, and asserted over an empty list, which is the vacuous-probe family exactly.
+     So the claim is now the RETIREMENT, and it is stated so an empty page cannot satisfy it: a
+     population of real rows, no verb anywhere in any of them, and exactly one control each. */
+  const rowControls = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll(".tlc .row")]
+      .filter((r) => r.getBoundingClientRect().height > 0).slice(0, 40);
     return rows.map((r) => ({
-      cat: (r.querySelector(".ltask .k")?.textContent || "").trim(),
-      verb: (r.querySelector(".lact .go")?.textContent || "").trim(),
-    })).filter((x) => x.verb);
+      verbs: r.querySelectorAll(".lact, .go, .lact .go").length,
+      controls: r.querySelectorAll("button").length,
+      more: r.querySelectorAll(".lmore").length,
+    }));
   });
-  const REF_VERBS = ["Mark sent", "Log a nudge", "Close it", "Decide", "Fill it in", "Tick it off"];
-  /* ⚠️ THE VERB IS A FUNCTION OF THE BUCKET, NOT OF THE CATEGORY — and the first form of this
-     asserted the second, which is false by design. `category` partitions by where the work came
-     from (the tiles, the columns and the tag all speak it); `bucket` partitions by the shape of the
-     act. An offer is a `decide` under one and an "Agent request" under the other, so that tag
-     legitimately draws both `Decide` and `Mark sent`, and "Gone quiet" draws both `Log a nudge` and
-     `Close it`. The app records that split in its own words and the check had walked straight into
-     it. What is asserted here is that every verb is one the contract prints and that the column is
-     genuinely contextual; that it is a pure function of the bucket is `listCells.test.ts`'s claim,
-     where the bucket is in hand rather than inferred from a tag. */
-  add("L2 · every row's verb is one the contract prints, and the column is genuinely contextual",
-    verbs.length > 3 && verbs.every((v) => REF_VERBS.includes(v.verb))
-      && new Set(verbs.map((v) => v.verb)).size >= 4,
-    verbs.length + " rows · " + new Set(verbs.map((v) => v.verb)).size + " distinct verbs · "
-    + JSON.stringify([...new Set(verbs.map((v) => v.cat + " → " + v.verb))]));
+  /* the verb the contract DOES print is the ticket's, and that it is one of the contract's own set
+     is `listRound` P4.5's claim, where the ref's buttons are read rather than a list typed here */
+  add("L2 · the row states no verb, and its one control is the ⋯ door",
+    rowControls.length > 3
+      && rowControls.every((r) => r.verbs === 0 && r.controls === 1 && r.more === 1),
+    rowControls.length + " rows · verbs "
+    + rowControls.reduce((n, r) => n + r.verbs, 0) + " · controls "
+    + JSON.stringify([...new Set(rowControls.map((r) => r.controls))])
+    + " · ⋯ " + JSON.stringify([...new Set(rowControls.map((r) => r.more))]));
 
   /* the row's six tracks, and the status edge that is derived like the ticket's */
   const rowShape = await page.evaluate(() => {
@@ -224,7 +243,11 @@ test("the three views' own claims", async ({ page }) => {
     const tok = i < 0 ? "" : inline.slice(i + 4, inline.indexOf(")", i));
     return {
       cols: getComputedStyle(r).gridTemplateColumns.split(" ").length,
-      cells: ["ltask", "lag", "lchip", "lstands", "lact"].filter((c) => r.querySelector("." + c)),
+      /* ⚠️ THE CONTRACT'S OWN FIVE, AND THEY CHANGED WITH IT: `lstands` and `lact` are retired and
+         `lov` (Overdue by) and `lmore` (the ⋯) took their tracks. The old list was three-of-five
+         present and reported as a failure, which is what a cell list retyped from a superseded
+         drawing looks like from the outside. */
+      cells: ["ltask", "lag", "lchip", "lov", "lmore"].filter((c) => r.querySelector("." + c)),
       tok, painted: edge ? getComputedStyle(edge).backgroundColor : "",
       resolved: tok && edge ? getComputedStyle(edge).getPropertyValue(tok).trim() : "",
       edgeW: edge ? Math.round(edge.getBoundingClientRect().width) : -1,

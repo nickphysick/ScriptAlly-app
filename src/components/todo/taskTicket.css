@@ -36,7 +36,16 @@
    signature. `.tlc`, `.tpn` and `.tdf` each define the pair on their own root; the ticket is a
    sibling of all three and inherits from none of them — this repo's own "the token exists is not
    the token resolves HERE", arriving on a fourth surface. */
-.tkt { --hair: #e7ddd2; --hair2: #e0d5c8; }
+/* ⚠️ AND `--ink2`, `--muted2` AND `--muted` WERE THE SAME FAULT, FOUND THE SAME WAY ONE ROUND LATER
+   (list round, Phase 6). Four rules here read `var(--ink2)` and one reads `var(--muted2)`; neither
+   resolved at this scope, so the ticket's agency line fell back to `currentColor` and rendered INK
+   where the contract states muted — the declaration reading perfectly correctly in the file, and
+   the ink being close enough to the intended colour on the other four that nothing looked wrong.
+   `--muted` DID resolve, to a different value (#7d7469) from the one `.tlc` and `.brd` declare
+   (#9c8878), so one page drew two muteds three inches apart: the grid's mono captions and the
+   list's. Stated here, at the same values its two siblings use, so the three views cannot disagree
+   about a colour they all call the same thing. */
+.tkt { --hair: #e7ddd2; --hair2: #e0d5c8; --ink2: #3a1c14; --muted: #9c8878; --muted2: #8a7a6c; }
 
 :root {
   --u-now-1: var(--pink);
@@ -53,6 +62,20 @@
 }
 
 .tkt {
+  /* ⚠️ `normal`, WHICH IS THE CONTRACT'S PAGE AND NOT THIS APP'S. Tailwind's preflight sets a
+     UNITLESS 1.5 on the root, so it is inherited as a ratio and every leaf that states no leading
+     of its own recomputes it against its own size: the tag's line box came out 11.25 where the
+     contract's is 10, the mono key 10.5 where the contract's is 9.2. Stating `normal` here is the
+     ref's own computed value taken rather than invented, and it fixes both at once. The four leaves
+     below still state 1.2 because our body FACE is taller than the ref's at the same `normal` —
+     Source Sans 3 against Inter, a standing open item in CLAUDE.md rather than this round's.
+
+     ⚠️ AND IT IS DECLARED AFTER `font: inherit`, WHICH IS THE WHOLE OF WHY IT TOOK TWO GOES. `font`
+     is a SHORTHAND and resets every longhand it does not mention, `line-height` included — so
+     written above it this read perfectly correctly, computed to the page's 24px, and the card went
+     on being 2.8px too tall with the declaration sitting right there in the file. It is the same
+     law this repo already records against the `background` shorthand silently taking a colour with
+     it, arriving on a different property. */
   position: relative;
   /* ⚠️ A GRID OF TWO TRACKS, NOT A FLEX ROW (three-views round, Phase 1; ref `.card`). The contract
      writes `grid-template-columns: 6px 1fr`, and the difference is not cosmetic: as a flex row the
@@ -62,6 +85,7 @@
   grid-template-columns: 6px 1fr;
   text-align: left;
   font: inherit;
+  line-height: normal;
   color: inherit;
   padding: 0;
   cursor: pointer;
@@ -100,10 +124,12 @@
 /* ⚠️ THE STATUS RIDES THE TOP LINE and takes the space, so the row is a flow with one auto margin
    rather than `space-between` between two things — the contract's `.card .top` + `.card .qs`. */
 .tkt .top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+/* the status line takes the card's own leading too — at the page's 24px it stood 3px taller than
+   the contract's and pushed everything under it down by the same */
 .tkt .top .qs {
   margin-left: auto; flex: 0 0 auto;
   display: inline-flex; align-items: center; gap: 6px;
-  font-size: 11px; font-weight: 500; color: var(--ink2); white-space: nowrap;
+  font-size: 11px; line-height: 1.2; font-weight: 500; color: var(--ink2); white-space: nowrap;
 }
 /* ⚠️ MONO AT 9.5, NOT THE BODY FACE AT 10.5 — ref `.tk .tag{font-family:var(--mono);font-size:9.5px;
    letter-spacing:.09em;text-transform:uppercase;padding:3px 8px;border-radius:5px}`. A tag is a
@@ -123,7 +149,7 @@
    These are `--u-{family}-1`, the first stop of the pane's own family gradients, so a tag on a
    ticket and the pill on that task's pane are the same paper by construction. */
 .tkt .tag.now { background: var(--u-now-1); color: var(--burg); }
-.tkt .tag.house { background: var(--u-house-1); color: #2e3a2c; }
+.tkt .tag.house { background: var(--u-house-1); color: #3c4a3a; }
 .tkt .tag.yours { background: var(--u-yours-1); color: #8a7440; }
 
 .tkt .msc {
@@ -155,10 +181,16 @@
   text-transform: uppercase; color: var(--muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-/* ⚠️ `line-height: normal` IS THE REF'S OWN COMPUTED VALUE, taken rather than invented. The ref
+/* ⚠️ THE CARD STATES ITS OWN LEADING, because a format that inherits its typography is not a
+   format. The page hands the ticket `line-height: 24px` — 1.5 of the app's 16px body — so a 12px
+   name in the foot took a 34px box where the contract's takes 28, and the card came out 11.8px
+   taller than the design with every one of its own declarations correct. 1.2 is what the contract
+   renders these three leaves at; stating it makes the card's height the card's.
+
+   ⚠️ `line-height: normal` IS THE REF'S OWN COMPUTED VALUE, taken rather than invented. The ref
    declares none, so its 12px figure sits in a 15px line box; an ancestor in this app sets 1.5,
    which made the same figure 18px tall and pushed everything below it down by three. */
-.tkt .cell .v { font-size: 12.5px; line-height: normal; font-weight: 500; color: var(--ink2); margin-top: 3px; }
+.tkt .cell .v { font-size: 12.5px; line-height: 1.2; font-weight: 500; color: var(--ink2); margin-top: 3px; }
 /* ⚠️ BURGUNDY IS "A CLOCK YOU ARE ANSWERABLE TO", and only an agent request sets it — see
    `ticketFacts`. It is not "this number is big". */
 .tkt .cell .v.late { color: var(--burg); }
@@ -177,11 +209,11 @@
 /* the writer's own item wears the family's pencil, as the list's row does */
 .tkt .tfoot .av.yours { background: var(--u-yours-1); color: #8a7440; border-color: #e8dcc0; }
 .tkt .tfoot .n {
-  font-size: 12px; font-weight: 500; color: var(--ink2); min-width: 0;
+  font-size: 12px; line-height: 1.2; font-weight: 500; color: var(--ink2); min-width: 0;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .tkt .tfoot .n small {
-  display: block; font-size: 10px; color: var(--muted2); font-weight: 300; margin-top: 1px;
+  display: block; font-size: 10px; line-height: 1.2; color: var(--muted2); font-weight: 300; margin-top: 1px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 /* ⚠️ THE VERB IS QUIET UNTIL THE CARD IS HOVERED — the contract's `.card .foot .go` and

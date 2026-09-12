@@ -52,60 +52,219 @@ export interface ViewPart extends Part {
   cIn?: string;
   /** the app-side container the rect is taken relative to */
   aIn?: string;
+  /**
+   * ⚠️ THIS ELEMENT'S HORIZONTAL GEOMETRY IS ENTIRELY TEXT, so the vertical claim is the whole
+   * claim. A count pill sits after a group's NAME and is as wide as its own digits; a unit sits
+   * after a NUMERAL and is as wide as its own word. Neither page states either number, so both
+   * terms of the horizontal test report the DATA as a design difference — the fault the
+   * anchor-aware rule already removes for elements flush to an edge, arriving on elements flush to
+   * nothing. Use it only where BOTH terms are content; where the element is flush to something —
+   * the board's agent name, which starts one gap after a fixed-size dot — the ordinary rule holds
+   * and this would give away a real claim.
+   */
+  own?: boolean;
 }
 
+/**
+ * ⚠️ EACH VIEW NAMES THE CONTRACT THAT BINDS IT, AND WHERE TWO DRAW THE SAME THING THE NEWER WINS.
+ * Three artefacts describe this page and they overlap: `todo-list-and-card.html` redraws the grid's
+ * card, `todo-list-view-contract.html` redraws the list and its landing state, and the three-views
+ * contract — the oldest — keeps the board and the column heads, which neither newer file touches.
+ *
+ * This used to be one file for all three views, and that is how the ticket's height came to be
+ * measured against a superseded card: every property matched, the run went green for weeks, and the
+ * number it agreed with was 16px out from the design the card was actually built to. A lock pointed
+ * at the wrong artefact is not a weak lock, it is a confident wrong one.
+ *
+ * `block` is the part of each file this lock owns. The rest of every contract is page furniture —
+ * a heading, a caption, a segmented switch that exists so a mockup can be read — and asserting it
+ * would hold the app to a drawing's own chrome.
+ */
+export interface ContractDoc {
+  path: string;
+  md5: string;
+  /** the element the view draws into, on the contract's page */
+  root: string;
+  /** the segment to click on a multi-view contract; `null` where the document draws one view */
+  segment: string | null;
+  /** which of the file's selectors this lock is answerable for */
+  block: (sel: string) => boolean;
+}
+
+/* two reasons stated once, because both are structural rather than decisions about this design */
+const AUTO = "`margin-left: auto` RESOLVED — it is the space left over beside a neighbour whose width is its own text, so it is a fact about the fixture's words rather than a value either page states";
+const TOKEN = "the app's own family token against the ref's literal — one point apart, and it is the token every tinted region on this page reads. A literal here would be a second value for one colour";
+
+const FURNITURE = new Set([
+  "*", ":root", "body", ".wrap", "h1", ".cap", ".cap b", "button",
+  ".tool", ".qb", ".qb.on", ".qb select", ".av", ".dot", ".mono", ".btn", ".ib", ".ib:hover",
+]);
+
+export const VIEW_CONTRACT: Record<ViewName, ContractDoc> = {
+  /* the card contract's `.card` block ONLY — its own `.list` half is superseded by the list-view
+     contract, which is newer and which this lock reads for the list */
+  grid: {
+    path: "design-refs/todo-list-and-card.html",
+    md5: "25858ab2cb53bda89e714a3b597d8e2b",
+    root: ".cards", segment: null,
+    block: (s) => s.startsWith(".card"),
+  },
+  /* everything the list-view contract draws below its own page furniture */
+  list: {
+    path: "design-refs/todo-list-view-contract.html",
+    md5: "ebaee862e5d90cdd7562b431c6cc717a",
+    root: ".box", segment: null,
+    block: (s) => !FURNITURE.has(s),
+  },
+  /* the board's card and the column heads — the only blocks of the three-views contract that no
+     newer artefact redraws */
+  board: {
+    path: VIEWS_PATH,
+    md5: VIEWS_MD5,
+    root: ".board", segment: "Board",
+    block: (s) => (s.startsWith(".bcard") || s.startsWith(".colh") || s === ".board" || s === ".col" || s === ".stack")
+      && !s.startsWith(".bcard .fact") && !s.startsWith(".bcard .date"),
+  },
+};
+
+/**
+ * Every selector a contract's own block declares, grouped rules split, in file order.
+ *
+ * ⚠️ IT IS READ FROM THE FILE SO THE COVERAGE CLAIM CANNOT BE SATISFIED BY A SHORT LIST. A parts
+ * table is a census of what somebody remembered; this is a census of what the artefact contains,
+ * and the difference between them is exactly what a coverage assertion is for.
+ */
+export function blockSelectors(doc: ContractDoc): string[] {
+  const css = cssOf(doc.path);
+  const out: string[] = [];
+  const re = /([^{}]+)\{([^{}]*)\}/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(css))) {
+    for (const raw of m[1].split(",")) {
+      const sel = raw.replace(/\s+/g, " ").trim();
+      if (!sel || sel.startsWith("@") || sel.startsWith("from") || sel.startsWith("to")) continue;
+      if (!doc.block(sel)) continue;
+      if (!out.includes(sel)) out.push(sel);
+    }
+  }
+  return out;
+}
+
+/**
+ * Selectors inside a block that this lock does NOT compare, each with where the claim lives instead.
+ *
+ * ⚠️ A HOVER RULE CANNOT BE READ AT REST, and driving the pointer over one element of each kind
+ * would make the diff a different instrument. They are not dropped: each names the check that does
+ * hold it, so an unowned one fails the coverage case rather than quietly leaving the block.
+ */
+export const COVERED_ELSEWHERE: Record<string, string> = {
+  ".card:hover": "`taskTicket.test.tsx` — the lift and the shadow are read off the stylesheet's own hover rule",
+  ".card:hover .foot .go": "`taskTicket.test.tsx` asserts the pink arrives on hover, and `listRound` P4.6 asserts it is NOT there at rest",
+  ".r:hover": "`taskListWide.test.tsx` — the row's hover wash is read off the stylesheet",
+  ".bcard:hover": "`viewsClaims` B1 holds the card's resting height; the lift is a stylesheet claim",
+  ".bcard.sel": "selection is `todoSelection`'s claim, driven rather than read at rest",
+  ".ov .w": "the contract hides it (`display:none`) — a word the design stopped drawing. Deliberately not built.",
+  ".ov.owed .w": "the same hidden word, given a colour it never shows. Not built; see `.ov .w`.",
+};
+
 export const VIEW_PARTS: Record<ViewName, ViewPart[]> = {
+  /* ── the grid's card, from `todo-list-and-card.html` ──────────────────────────────────────── */
   grid: [
-    { c: ".grid", app: ".tkt-grid", fluid: true },
-    { c: ".card", app: ".tkt", abs: true, cIn: ".grid", aIn: ".tkt-grid",
+    { c: ".cards", app: ".tkt-grid", fluid: true },
+    { c: ".card", app: ".tkt", abs: true, cIn: ".cards", aIn: ".tkt-grid",
       waive: { borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
-    { c: ".card .edge", app: ".tkt .edge", cIn: ".card", aIn: ".tkt",
-      waive: { backgroundColor: "the edge IS the query's stage tint, DERIVED through the Query Centre's own ladder — so the two pages are two correct answers about two different queries, and pinning either would be pinning a fixture. That it is derived at all, and resolves to the ladder's value, is asserted in `viewsClaims` where the derivation is in hand rather than inferred from a colour" } },
     { c: ".card .in", app: ".tkt .in", cIn: ".card", aIn: ".tkt" },
     { c: ".card .top", app: ".tkt .top", cIn: ".card .in", aIn: ".tkt .in" },
-    { c: ".tag", cq: ".card .tag", app: ".tkt .tag", cIn: ".card .top", aIn: ".tkt .top" },
-    { c: ".msc", cq: ".card .msc", app: ".tkt .msc", cIn: ".card .top", aIn: ".tkt .top" },
-    { c: ".card .ttl", app: ".tkt .ttl", cIn: ".card .in", aIn: ".tkt .in",
-      waive: { fontFamily: "SEE THE REPORT — the contract declares `.card .ttl` TWICE inside its own cards section: Inter 14.5/600 for the ticket, then Playfair 18/500 thirty lines later as a leftover of the superseded `.card .body`/`.desc`/`.foot` card. The cascade takes the last, so the ref RENDERS Playfair; the brief and this app take Inter 600, which is the standing ruling already recorded in CLAUDE.md for the identical duplicate in `todo-qc-style.html`", fontSize: "same duplicate", fontWeight: "same duplicate", lineHeight: "same duplicate" } },
+    { c: ".card .tag", cq: ".card .tag", app: ".tkt .tag", cIn: ".card .top", aIn: ".tkt .top" },
+    { c: ".card .tag.now", app: ".tkt .tag.now", cIn: ".card .top", aIn: ".tkt .top",
+      waive: { backgroundColor: TOKEN } },
+    { c: ".card .tag.house", app: ".tkt .tag.house", cIn: ".card .top", aIn: ".tkt .top",
+      waive: { backgroundColor: TOKEN } },
+    { c: ".card .tag.yours", app: ".tkt .tag.yours", cIn: ".card .top", aIn: ".tkt .top",
+      waive: { backgroundColor: TOKEN } },
+    { c: ".card .qs", app: ".tkt .top .qs", cIn: ".card .top", aIn: ".tkt .top",
+      waive: { marginLeft: AUTO } },
+    { c: ".card .qs .dot", app: ".tkt .top .qs > span", cIn: ".card .qs", aIn: ".tkt .top .qs",
+      note: "the app's dot is `StatusDot`'s own ROOT — the component draws a sized span holding the glyph, so the ref's 12px `.dot` is that span and not the svg inside it. Reading the svg compared a 12px square against the 7px picture in the middle of it, which is a true reading of the wrong box." },
+    { c: ".card .ttl", app: ".tkt .ttl", cIn: ".card .in", aIn: ".tkt .in" },
     { c: ".card .facts", app: ".tkt .facts", cIn: ".card .in", aIn: ".tkt .in" },
-    { c: ".card .cell .k", app: ".tkt .cell .k", cIn: ".card .facts", aIn: ".tkt .facts",
-      waive: { color: "`var(--muted)` is the app's own muted at this scope — #7d7469 against the ref's #9c8878 — and it is the token every mono caption on this page reads. A literal here would be a second muted three inches from the first" } },
-    { c: ".card .cell .v", app: ".tkt .cell .v", cIn: ".card .facts", aIn: ".tkt .facts" },
-    { c: ".card .tfoot", app: ".tkt .tfoot", cIn: ".card .in", aIn: ".tkt .in" },
-    { c: ".av", cq: ".card .tfoot .av", app: ".tkt .tfoot .av", cIn: ".card .tfoot", aIn: ".tkt .tfoot" },
-    { c: ".qs", cq: ".card .tfoot .qs", app: ".tkt .tfoot .qs", cIn: ".card .tfoot", aIn: ".tkt .tfoot" },
+    /* the muted this reads used to resolve to a DIFFERENT value here from the one the list and the
+       board read — one page, two muteds. `.tkt` states it now, so the waiver that covered it is gone. */
+    { c: ".card .k", app: ".tkt .k", cIn: ".card .facts", aIn: ".tkt .facts" },
+    { c: ".card .v", app: ".tkt .v", cIn: ".card .facts", aIn: ".tkt .facts" },
+    { c: ".card .v.late", app: ".tkt .v.late", cIn: ".card .facts", aIn: ".tkt .facts" },
+    { c: ".card .foot", app: ".tkt .tfoot", cIn: ".card .in", aIn: ".tkt .in",
+      note: "the app calls the foot `.tfoot` — it predates this contract and is read by four suites; a rename would assert a spelling" },
+    { c: ".card .foot .av", app: ".tkt .tfoot .av", cIn: ".card .foot", aIn: ".tkt .tfoot" },
+    { c: ".card .foot .n", app: ".tkt .tfoot .n", cIn: ".card .foot", aIn: ".tkt .tfoot" },
+    { c: ".card .foot .n small", app: ".tkt .tfoot .n small", cIn: ".card .foot .n", aIn: ".tkt .tfoot .n" },
+    { c: ".card .foot .go", app: ".tkt .tfoot .go", cIn: ".card .foot", aIn: ".tkt .tfoot",
+      waive: { marginLeft: AUTO,
+        borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads" } },
   ],
+  /* ── the list, from `todo-list-view-contract.html` ────────────────────────────────────────── */
   list: [
-    { c: ".listv", app: ".tlc", fluid: true,
+    { c: ".box", app: ".tlc", fluid: true,
       waive: { borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
-    { c: ".lhd", app: ".tlc .lhd", abs: true, cIn: ".listv", aIn: ".tlc" },
-    { c: ".lgh", app: ".tlc .grp", abs: true, cIn: ".listv", aIn: ".tlc",
+    { c: ".hd", app: ".tlc .lhd", abs: true, cIn: ".box", aIn: ".tlc" },
+    { c: ".hd button", app: ".tlc .lhd button", cIn: ".hd", aIn: ".tlc .lhd" },
+    { c: ".hd button .arr", app: ".tlc .lhd button .arr", cIn: ".hd button", aIn: ".tlc .lhd button" },
+    { c: ".hd button.on", app: ".tlc .lhd button.on", cIn: ".hd", aIn: ".tlc .lhd" },
+    { c: ".hd button.on .arr", app: ".tlc .lhd button.on .arr", cIn: ".hd button.on", aIn: ".tlc .lhd button.on" },
+    { c: ".gh", app: ".tlc .grp", abs: true, cIn: ".box", aIn: ".tlc",
       note: "the app calls the group head `.grp`; see the report — a rename would have cost 41 measurement suites and asserted a spelling" },
-    { c: ".lgh .t", app: ".tlc .grp .g-lbl", cIn: ".lgh", aIn: ".tlc .grp" },
-    { c: ".lgh .n", app: ".tlc .grp .g-n", cIn: ".lgh", aIn: ".tlc .grp",
+    /* ⚠️ THE PLAIN HEAD, EXPLICITLY. Both pages' FIRST head is the Overdue one, which is burgundy
+       on the contract and — correctly — burgundy here too; but `readBox` takes the first VISIBLE
+       match either side, so whichever page's landing state puts a different group first turns the
+       base rule's colour into a fixture. The variant is asserted on its own line below. */
+    { c: ".gh .t", cq: ".gh .t:not(.over)", app: ".tlc .grp .g-lbl:not(.over)", cIn: ".gh", aIn: ".tlc .grp" },
+    { c: ".gh .t.over", app: ".tlc .grp .g-lbl.over", cIn: ".gh", aIn: ".tlc .grp" },
+    { c: ".gh .n", app: ".tlc .grp .g-n", cIn: ".gh", aIn: ".tlc .grp", own: true,
       waive: { borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
-    { c: ".lgh .rule", app: null, cIn: ".lgh",
+    { c: ".gh .rule", app: null, cIn: ".gh",
       absent: "the app draws the head's hairline as `.grp::after` — a pseudo-element it already had for exactly that job. The ref needs an element because it has no `::after` to hand; a span here would be markup added to satisfy a drawing." },
-    { c: ".lrow", app: ".tlc .row", abs: true, cIn: ".listv", aIn: ".tlc",
+    { c: ".r", app: ".tlc .row", abs: true, cIn: ".box", aIn: ".tlc",
       note: "the app calls it `.row` — the round's one recorded name deviation, and the reason is at the rule" },
-    { c: ".ledge", app: ".tlc .row .ledge", cIn: ".lrow", aIn: ".tlc .row",
+    { c: ".e", cq: ".r .e", app: ".tlc .row .ledge", cIn: ".r", aIn: ".tlc .row",
       waive: { backgroundColor: "the edge IS the query's stage tint, DERIVED through the Query Centre's own ladder — so the two pages are two correct answers about two different queries, and pinning either would be pinning a fixture. That it is derived at all, and resolves to the ladder's value, is asserted in `viewsClaims` where the derivation is in hand rather than inferred from a colour" } },
-    { c: ".ltask .t", app: ".tlc .ltask .t", cIn: ".lrow", aIn: ".tlc .row" },
-    { c: ".ltask .k", app: ".tlc .ltask .k", cIn: ".ltask", aIn: ".tlc .ltask" },
-    { c: ".lag", app: ".tlc .lag", cIn: ".lrow", aIn: ".tlc .row" },
-    { c: ".lag .n", app: ".tlc .lag .n", cIn: ".lag", aIn: ".tlc .lag" },
-    { c: ".lag .a", app: ".tlc .lag .a", cIn: ".lag", aIn: ".tlc .lag" },
-    { c: ".lchip", app: ".tlc .lchip", cIn: ".lrow", aIn: ".tlc .row",
+    { c: ".t", cq: ".r .t", app: ".tlc .ltask", cIn: ".r", aIn: ".tlc .row" },
+    { c: ".g", cq: ".r .g", app: ".tlc .ltask .g", cIn: ".t", aIn: ".tlc .ltask",
+      waive: { borderTopColor: "`border: 1.5px solid currentColor` — the ring IS the family's own colour, so this reads whichever family the page's first row happens to be. The three families are compared on their own lines below.", color: "same: `currentColor`, and the families are asserted separately" } },
+    { c: ".g.now", cq: ".r .g.now", app: ".tlc .ltask .g.now", cIn: ".t", aIn: ".tlc .ltask",
+      waive: { backgroundColor: TOKEN } },
+    { c: ".g.house", cq: ".r .g.house", app: ".tlc .ltask .g.house", cIn: ".t", aIn: ".tlc .ltask",
+      waive: { backgroundColor: TOKEN } },
+    { c: ".g.yours", cq: ".r .g.yours", app: ".tlc .ltask .g.yours", cIn: ".t", aIn: ".tlc .ltask",
+      waive: { backgroundColor: TOKEN } },
+    { c: ".t .h", cq: ".r .t .h", app: ".tlc .ltask .h", cIn: ".t", aIn: ".tlc .ltask" },
+    { c: ".t .s", cq: ".r .t .s", app: ".tlc .ltask .s", cIn: ".t", aIn: ".tlc .ltask" },
+    { c: ".a", cq: ".r .a", app: ".tlc .lag", cIn: ".r", aIn: ".tlc .row" },
+    { c: ".av", cq: ".r .av", app: ".tlc .lag .av", cIn: ".a", aIn: ".tlc .lag" },
+    { c: ".a .n", cq: ".r .a .n", app: ".tlc .lag .n", cIn: ".a", aIn: ".tlc .lag" },
+    { c: ".a .n small", cq: ".r .a .n small", app: ".tlc .lag .n small", cIn: ".a .n", aIn: ".tlc .lag .n" },
+    /* ⚠️ A DATED CHIP EITHER SIDE. `.chip.none` is a different box — dashed, one line, half the
+       height — and whichever page happens to put an undated task first was being compared against
+       the other page's dated one. The `none` variant has its own two lines below. */
+    { c: ".chip", cq: ".r .chip:not(.none)", app: ".tlc .lchip:not(.none)", cIn: ".r", aIn: ".tlc .row",
       waive: { borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
-    { c: ".lstands", app: ".tlc .lstands", cIn: ".lrow", aIn: ".tlc .row" },
-    { c: ".stamp", app: ".tlc .stamp", cIn: ".lstands", aIn: ".tlc .lstands" },
-    { c: ".lstands .l1", app: ".tlc .lstands .l1", cIn: ".lstands", aIn: ".tlc .lstands" },
-    { c: ".lstands .l2", app: ".tlc .lstands .l2", cIn: ".lstands", aIn: ".tlc .lstands" },
-    { c: ".lact", app: ".tlc .lact", cIn: ".lrow", aIn: ".tlc .row" },
-    { c: ".lact .go", app: ".tlc .lact .go", cIn: ".lact", aIn: ".tlc .lact" },
-    { c: ".lact .ic", app: ".tlc .lact .ic", cIn: ".lact", aIn: ".tlc .lact",
-      waive: { borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
+    { c: ".chip .m", cq: ".r .chip:not(.none) .m", app: ".tlc .lchip:not(.none) .m", cIn: ".chip:not(.none)", aIn: ".tlc .lchip:not(.none)" },
+    { c: ".chip .d", cq: ".r .chip:not(.none) .d", app: ".tlc .lchip:not(.none) .d", cIn: ".chip:not(.none)", aIn: ".tlc .lchip:not(.none)" },
+    { c: ".chip .y", cq: ".r .chip:not(.none) .y", app: ".tlc .lchip:not(.none) .y", cIn: ".chip:not(.none)", aIn: ".tlc .lchip:not(.none)" },
+    { c: ".chip.none", cq: ".r .chip.none", app: ".tlc .lchip.none", cIn: ".r", aIn: ".tlc .row" },
+    { c: ".chip.none .d", cq: ".r .chip.none .d", app: ".tlc .lchip.none .d", cIn: ".chip.none", aIn: ".tlc .lchip.none" },
+    /* the base rule on a cell wearing none of the three variants — `.none` is mono at 8px and
+       `.owed`/`.ahead` restate the colour, so any of them standing first makes the base a fixture */
+    { c: ".ov", cq: ".r .ov:not(.none):not(.owed):not(.ahead)", app: ".tlc .lov:not(.none):not(.owed):not(.ahead)", cIn: ".r", aIn: ".tlc .row" },
+    { c: ".ov b", cq: ".r .ov:not(.none):not(.owed):not(.ahead) b", app: ".tlc .lov:not(.none):not(.owed):not(.ahead) b", cIn: ".r", aIn: ".tlc .row" },
+    { c: ".ov .u", cq: ".r .ov:not(.none):not(.owed):not(.ahead) .u", app: ".tlc .lov:not(.none):not(.owed):not(.ahead) .u", cIn: ".r", aIn: ".tlc .row", own: true },
+    { c: ".ov.owed b", cq: ".r .ov.owed b", app: ".tlc .lov.owed b", cIn: ".r", aIn: ".tlc .row" },
+    { c: ".ov.owed .u", cq: ".r .ov.owed .u", app: ".tlc .lov.owed .u", cIn: ".r", aIn: ".tlc .row", own: true },
+    { c: ".ov.ahead b", cq: ".r .ov.ahead b", app: ".tlc .lov.ahead b", cIn: ".r", aIn: ".tlc .row" },
+    { c: ".ov.ahead .u", cq: ".r .ov.ahead .u", app: ".tlc .lov.ahead .u", cIn: ".r", aIn: ".tlc .row", own: true },
+    { c: ".ov.none", cq: ".r .ov.none", app: ".tlc .lov.none", cIn: ".r", aIn: ".tlc .row" },
+    { c: ".more", cq: ".r .more", app: ".tlc .lmore", cIn: ".r", aIn: ".tlc .row" },
   ],
+  /* ── the board, from the three-views contract ────────────────────────────────── */
   board: [
     { c: ".board", app: ".brd", fluid: true,
     waive: { height: "`height: 100%` of two different parents — the ref's board is 522px because its page is that tall and the app's 401.5 because the window is" } },
@@ -113,6 +272,11 @@ export const VIEW_PARTS: Record<ViewName, ViewPart[]> = {
     { c: ".colh", app: ".brd-colh", abs: true, cIn: ".col", aIn: ".brd-col" },
     { c: ".colh .r1", app: ".brd-colh .r1", cIn: ".colh", aIn: ".brd-colh" },
     { c: ".colh .ic", app: ".brd-colh .ic", cIn: ".colh .r1", aIn: ".brd-colh .r1" },
+    /* ⚠️ THE CONTRACT NAMES THE ICON'S VARIANTS BY COLOUR AND THE APP NAMES THEM BY FAMILY — `.s`
+       and `.y` against `.house` and `.yours`. The app's is the better name and the mapping is
+       stated here rather than either side being renamed to match the other. */
+    { c: ".colh .ic.s", app: ".brd-colh .ic.house", cIn: ".colh .r1", aIn: ".brd-colh .r1" },
+    { c: ".colh .ic.y", app: ".brd-colh .ic.yours", cIn: ".colh .r1", aIn: ".brd-colh .r1" },
     { c: ".colh .t", app: ".brd-colh .t", cIn: ".colh .r1", aIn: ".brd-colh .r1" },
     { c: ".colh .c", app: ".brd-colh .c", cIn: ".colh .r1", aIn: ".brd-colh .r1",
       waive: { marginLeft: "`margin-left: auto` RESOLVED — it is the space left over beside the column's name, so it is a fact about how long that name is rather than a value either page states. The two differ by 0.17px.", borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
@@ -125,6 +289,12 @@ export const VIEW_PARTS: Record<ViewName, ViewPart[]> = {
       waive: { backgroundColor: "`var(--paper)` is the app's own paper — #faf6f0 against the ref's #fdfaf5, four points apart, and the token the rest of this page reads", borderTopColor: "the app's own `--edge` is #e6dccd against the ref's #e8e0d8 — three points, and it is the token every surface on this page already reads. Copying the ref's literal would put a second edge colour beside the first, which is the fault the family-token note in `taskTicket.css` records" } },
     { c: ".bcard .nm", app: ".brd-card .nm", cIn: ".bcard .main", aIn: ".brd-card .main" },
     { c: ".bcard .ag", app: ".brd-card .ag", cIn: ".bcard .main", aIn: ".brd-card .main" },
+    { c: ".bcard .ag svg", app: ".brd-card .ag svg", cIn: ".bcard .ag", aIn: ".brd-card .ag",
+      note: "the status dot leading the agent line — the ref draws an inline glyph, the app draws `StatusDot`, and that it leads the line is `viewsClaims` B4" },
+    { c: ".bcard .ag b", app: ".brd-card .ag b", cIn: ".bcard .ag", aIn: ".brd-card .ag" },
+    { c: ".bcard .bw b", cq: ".bcard .bw b", app: ".brd-card .bw b", cIn: ".bcard .bw:has(b)", aIn: ".brd-card .bw:has(b)" },
+    { c: ".bcard .bw b.late", cq: ".bcard .bw b.late", app: ".brd-card .bw b.late", cIn: ".bcard .bw:has(b)", aIn: ".brd-card .bw:has(b)" },
+    { c: ".bcard .bw span", cq: ".bcard .bw:has(b) span", app: ".brd-card .bw:has(b) span", cIn: ".bcard .bw:has(b)", aIn: ".brd-card .bw:has(b)" },
     { c: ".bcard .bw", cq: ".bcard .bw:has(b)", app: ".brd-card .bw:has(b)", cIn: ".bcard .main", aIn: ".brd-card .main",
     note: "matched on a card that HAS a wait — the two pages' first board card differ in whether their task carries a date, and a `no date` chip is one line where a figure over a unit is two. A fixture difference, not a design one." },
   ],
@@ -139,8 +309,14 @@ export const VIEW_PARTS: Record<ViewName, ViewPart[]> = {
  * missing fixture rather than an unreachable binding. The buttons are on the page.
  */
 export async function openContractView(page: Page, view: ViewName, contentWidth?: number): Promise<void> {
-  if (!page.url().startsWith("file://")) {
-    await page.goto(VIEWS_URL);
+  const doc = VIEW_CONTRACT[view];
+  const url = `file://${process.cwd()}/${doc.path}`;
+  /* ⚠️ THE PAGE IS RE-NAVIGATED WHENEVER THE VIEW'S CONTRACT IS NOT THE ONE ALREADY LOADED. One
+     `cpage` walks all three views and they no longer share a document, so a "have I loaded a file
+     yet" guard would have measured the grid's card against whatever file the previous view left
+     open — which is the superseded-artefact fault one level down. */
+  if (page.url() !== url) {
+    await page.goto(url);
     await page.waitForTimeout(400);
     /* ⚠️ THE CONTRACT'S MOTION IS SUPPRESSED, EXACTLY AS THE HARNESS SUPPRESSES THE APP'S — or the
        two pages are compared in different postures. The ref's first board card is URGENT, and the
@@ -151,15 +327,17 @@ export async function openContractView(page: Page, view: ViewName, contentWidth?
       "*,*::before,*::after{animation:none!important;transition:none!important}" });
     await page.waitForTimeout(120);
   }
-  const label = view === "grid" ? "Grid" : view === "list" ? "List" : "Board";
-  const ok = await page.evaluate((l: string) => {
-    const b = [...document.querySelectorAll(".views button")]
-      .find((x) => (x.textContent || "").includes(l)) as HTMLElement | undefined;
-    if (!b) return false;
-    b.click();
-    return true;
-  }, label);
-  if (!ok) throw new Error(`openContractView: the contract has no "${label}" segment`);
+  /* a single-view document draws its view on load; only the three-views contract has a switch */
+  if (doc.segment) {
+    const ok = await page.evaluate((l: string) => {
+      const b = [...document.querySelectorAll(".views button")]
+        .find((x) => (x.textContent || "").includes(l)) as HTMLElement | undefined;
+      if (!b) return false;
+      b.click();
+      return true;
+    }, doc.segment);
+    if (!ok) throw new Error(`openContractView: ${doc.path} has no "${doc.segment}" segment`);
+  }
   /* ⚠️ THE CONTRACT IS FORCED TO THE APP'S CONTENT WIDTH, and this is what makes the comparison
      exact rather than approximate. The two pages carry different chrome either side — the ref's
      column is 1122px where the app's is 1074 — so every horizontal reading disagreed about
@@ -173,16 +351,13 @@ export async function openContractView(page: Page, view: ViewName, contentWidth?
        two pixels off, which is exactly the size of the disagreements it was written to remove. */
     const w = Math.round(contentWidth);
     await page.addStyleTag({ content:
-      `#content{width:${w}px!important;max-width:${w}px!important;padding-left:0!important;padding-right:0!important;margin-left:0!important;margin-right:auto!important}` +
-      `.grid,.listv,.board{width:${w}px!important;max-width:${w}px!important;}` });
+      `#content,.wrap{width:${w}px!important;max-width:${w}px!important;padding-left:0!important;padding-right:0!important;margin-left:0!important;margin-right:auto!important}` +
+      `.grid,.listv,.board,.cards,.box{width:${w}px!important;max-width:${w}px!important;}` });
     await page.waitForTimeout(200);
   }
   await page.waitForTimeout(350);
-  const drew = await page.evaluate((v: string) => {
-    const root = v === "grid" ? ".grid" : v === "list" ? ".listv" : ".board";
-    return document.querySelectorAll(root).length;
-  }, view);
-  if (!drew) throw new Error(`openContractView: clicked "${label}" and the contract drew no ${view}`);
+  const drew = await page.evaluate((root: string) => document.querySelectorAll(root).length, doc.root);
+  if (!drew) throw new Error(`openContractView: ${doc.path} drew no ${doc.root}`);
 }
 
 /**
@@ -279,14 +454,17 @@ export async function readBox(page: Page, sel: string, props: string[], containe
  * how many cards the account happens to hold — so a card's `byf` says how full the board is, not
  * how tall the card is. The claim there is the card's own height, which is what the design fixes.
  */
-export function samePlace(c?: Box["rel"], a?: Box["rel"], opts: { abs?: boolean; fluid?: boolean } = {}): boolean {
+export function samePlace(c?: Box["rel"], a?: Box["rel"], opts: { abs?: boolean; fluid?: boolean; own?: boolean } = {}): boolean {
   if (!c || !a) return false;
   const near = (x: number, y: number) => Math.abs(x - y) <= 2;
   /* ⚠️ EITHER EDGE AGREEING IS "IT DID NOT MOVE", and that is exact rather than lenient: a
      translation shifts both edges together, so an element that moved disagrees on both. An element
      that only changed WIDTH holds whichever edge its layout anchors — which happens constantly
      here, because the ref's fixture says different words from the app's. */
-  const horizontal = near(c.dx, a.dx) || near(c.dx + c.w, a.dx + a.w);
+  /* `own`: BOTH horizontal terms are the fixture's words — the element starts where its neighbour's
+     text ends and is as wide as its own — so the vertical claim is the whole claim. Comparing width
+     was tried first and is wrong for the same reason: "14" against "3", "weeks" against "days". */
+  const horizontal = opts.own ? true : near(c.dx, a.dx) || near(c.dx + c.w, a.dx + a.w);
   /* ⚠️ `abs` COMPARES THE ELEMENT'S OWN HEIGHT AND NOTHING ELSE, for a repeated item inside a
      grid, a stack or a list body. Its offset from the container's top says how many siblings the
      FIXTURE happens to hold above it, and its share of the container says how full the account is.

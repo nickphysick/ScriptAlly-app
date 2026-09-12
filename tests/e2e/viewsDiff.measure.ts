@@ -2,8 +2,9 @@ import { test, expect } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
 import { gotoTodo, selectTodoView, assertCount } from "./todoOpen";
 import { propsFor, camel } from "./anatomy";
-import { VIEW_PARTS, VIEWS_PATH, VIEWS_MD5, cssOf, openContractView, readBox, trackShape,
-  samePlace, type ViewName } from "./views";
+import { VIEW_PARTS, VIEW_CONTRACT, VIEWS_PATH, blockSelectors, COVERED_ELSEWHERE, cssOf,
+  openContractView, readBox, trackShape, samePlace, type ViewName } from "./views";
+import { seedDueDates, cleanDueDates, readListView, restoreListView } from "./seedDueDates.mjs";
 import { writeFileSync, rmSync, readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 test.setTimeout(1_200_000);
@@ -29,7 +30,7 @@ test.setTimeout(1_200_000);
 /** the last recorded count — a run producing fewer is red, whatever its cases say */
 /* ⚠️ THE LAST RECORDED COUNT, NOT A ROUND NUMBER BELOW IT. A floor set comfortably under the real
    figure is a guard that cannot fire — the suite could measure half of itself and still clear it. */
-const FLOOR = 148;
+const FLOOR = 244;
 
 async function bothPages(page: import("@playwright/test").Page) {
   const cpage = await page.context().newPage();
@@ -43,14 +44,59 @@ test("the three views match the contract — property by property AND place by p
   const log: string[] = [];
   let ran = 0, compared = 0, waived = 0, placed = 0;
 
-  const md5 = createHash("md5").update(readFileSync(VIEWS_PATH)).digest("hex");
-  expect(md5, "the contract changed under this lock — re-run the recon before trusting it").toBe(VIEWS_MD5);
-  const css = cssOf(VIEWS_PATH);
+  /* ⚠️ ALL THREE CONTRACTS ARE HASHED, not the one this file used to read. Three artefacts describe
+     this page and each binds a different part of it; a hash over one of them says nothing about
+     whether the other two still draw what these parts were written against. */
+  for (const v of ["grid", "list", "board"] as ViewName[]) {
+    const doc = VIEW_CONTRACT[v];
+    const md5 = createHash("md5").update(readFileSync(doc.path)).digest("hex");
+    expect(md5, `${doc.path} changed under this lock — re-run the recon before trusting it`).toBe(doc.md5);
+  }
+
+  /* ⚠️ COVERAGE FIRST, AND IT IS READ OUT OF THE FILES. A parts table is a census of what somebody
+     remembered to put in it, so a contract can gain a rule and every assertion below goes on passing
+     about the rules that were already there. Each selector in each block must be a part, a part's
+     `also`, or a named entry in `COVERED_ELSEWHERE` saying which check holds it instead. */
+  for (const v of ["grid", "list", "board"] as ViewName[]) {
+    const doc = VIEW_CONTRACT[v];
+    const held = new Set<string>();
+    for (const part of VIEW_PARTS[v]) {
+      held.add(part.c);
+      for (const a of part.also ?? []) held.add(a);
+    }
+    const orphans = blockSelectors(doc).filter((sel) => !held.has(sel) && !COVERED_ELSEWHERE[sel]);
+    expect(orphans, `${doc.path}: ${v} declares selectors this lock does not compare and does not `
+      + "name a home for — add a part, or an entry in COVERED_ELSEWHERE saying where the claim lives")
+      .toEqual([]);
+    log.push(`COVER ${v} ${doc.path} — ${blockSelectors(doc).length} selectors in its block, all held`);
+    ran++;
+  }
 
   await ensureSignedIn(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await gotoTodo(page, "grid");
   const cpage = await bothPages(page);
+
+  /**
+   * ⚠️ THE LIST IS PUT IN THE STATE THE CONTRACT DRAWS, AND PUT BACK. The contract's list is the
+   * LANDING state — grouped by When, sorted by Overdue by — and the harness account carries a
+   * writer's own later choice, which is the behaviour Phase 3 built. Measured against that, five
+   * parts of the contract had no counterpart on the page at all: no head was active because the
+   * stored sort is not a column, there was no Overdue head because the stored grouping is the
+   * urgency partition, and nothing was due in the future. All five reported MISSING — a true
+   * reading of a page in a state this artefact does not draw.
+   *
+   * ⚠️ AND IT RESTORES IN THE SAME RUN, EXACTLY. `readListView` takes the stored object before and
+   * `restoreListView` writes it back or deletes the key where there was none; the seeded tasks go
+   * the same way. A measurement whose fixture is the account it is changing stops being a
+   * measurement the moment it fails to put it back.
+   */
+  const savedView = await readListView();
+  const seeded = await seedDueDates();
+  await restoreListView(null);
+  await page.reload();
+  await page.waitForTimeout(1200);
+  await gotoTodo(page, "grid");
 
   for (const view of ["grid", "list", "board"] as ViewName[]) {
     await selectTodoView(page, view);
@@ -61,6 +107,8 @@ test("the three views match the contract — property by property AND place by p
     }, view === "grid" ? ".tkt-grid" : view === "list" ? ".tlc" : ".brd");
     expect(appW, `${view}: the app draws no view root to measure`).toBeGreaterThan(200);
     await openContractView(cpage, view, appW);
+    /* the stylesheet is the one that BINDS this view, not one file for all three */
+    const css = cssOf(VIEW_CONTRACT[view].path);
 
     for (const p of VIEW_PARTS[view]) {
       const props = propsFor(css, p);
@@ -96,7 +144,7 @@ test("the three views match the contract — property by property AND place by p
       if (diffs.length) log.push(`DIFF ${view} ${p.c}\n    ${diffs.join("\n    ")}`);
 
       ran++; placed++;
-      const ok = samePlace(c.rel, a.rel, { abs: p.abs, fluid: p.fluid });
+      const ok = samePlace(c.rel, a.rel, { abs: p.abs, fluid: p.fluid, own: p.own });
       expect.soft(ok, `${view} ${p.c} → ${p.app} sits somewhere else inside \`${p.cIn ?? "itself"}\``
         + `\n  contract ${c.rel?.dx},${c.rel?.dy} ${c.rel?.w}×${c.rel?.h}`
         + `\n  dev      ${a.rel?.dx},${a.rel?.dy} ${a.rel?.w}×${a.rel?.h}`).toBe(true);
@@ -107,6 +155,16 @@ test("the three views match the contract — property by property AND place by p
     }
   }
   await cpage.close();
+
+  /* the account goes back exactly as it was found — before the report is written, so a restore that
+     throws cannot be mistaken for a clean run */
+  await restoreListView(savedView);
+  await cleanDueDates();
+  const back = await readListView();
+  const canon = (v: unknown) => JSON.stringify(v, Object.keys((v ?? {}) as object).sort());
+  expect(canon(back), "the stored view was NOT put back — this account has been changed")
+    .toBe(canon(savedView));
+  log.push(`RESTORED the stored view and removed ${seeded.length} seeded tasks`);
 
   log.unshift(`${ran} assertions · ${compared} properties matched · ${waived} waived · ${placed} places compared`);
   writeFileSync(OUT, log.join("\n") + "\n");
