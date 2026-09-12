@@ -1,0 +1,22 @@
+{
+  "card": {
+    "w": 640,
+    "h": 331
+  },
+  "slot": {
+    "w": 96,
+    "h": 96,
+    "radius": "50%"
+  },
+  "h": {
+    "size": "21px",
+    "family": "\"Playfair Display\"",
+    "text": "Nothing needs you right now"
+  },
+  "line": "30 queries are with agents; 10 are inside their windows. The next reply is expected on 13 Sep.",
+  "cta": "See what's waiting",
+  "alt": [
+    "or clear the filter"
+  ],
+  "tiles": true
+}

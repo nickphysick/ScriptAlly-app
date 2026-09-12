@@ -1,0 +1,23 @@
+{
+  "card": {
+    "w": 640,
+    "h": 351
+  },
+  "slot": {
+    "w": 96,
+    "h": 96,
+    "radius": "50%"
+  },
+  "h": {
+    "size": "21px",
+    "family": "\"Playfair Display\"",
+    "text": "Your first query goes here"
+  },
+  "line": "Log the agents you've written to and ScriptAlly will keep the dates, the nudges and the replies straight for you.",
+  "cta": "+ Log your first query",
+  "alt": [
+    "or import a spreadsheet",
+    "download the template"
+  ],
+  "tiles": false
+}

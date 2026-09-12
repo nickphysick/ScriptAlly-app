@@ -1,0 +1,96 @@
+{
+  "1280": {
+    "cards": 54,
+    "sentenceCut": 34,
+    "captionCut": 22,
+    "byRegister": {
+      "Waiting": {
+        "n": 10,
+        "cut": 10
+      },
+      "Closed": {
+        "n": 15,
+        "cut": 5
+      },
+      "Past expected": {
+        "n": 20,
+        "cut": 19
+      },
+      "Your move": {
+        "n": 8,
+        "cut": 0
+      },
+      "Offer": {
+        "n": 1,
+        "cut": 0
+      }
+    },
+    "examples": [
+      "Waiting on Hester — reply expected by 31 Oct",
+      "Waiting on Imogen — reply expected by 16 Sep",
+      "Imogen passed — after the query",
+      "Waiting on Alasdair — reply expected by 8 Nov"
+    ]
+  },
+  "1440": {
+    "cards": 54,
+    "sentenceCut": 4,
+    "captionCut": 3,
+    "byRegister": {
+      "Waiting": {
+        "n": 10,
+        "cut": 1
+      },
+      "Closed": {
+        "n": 15,
+        "cut": 1
+      },
+      "Past expected": {
+        "n": 20,
+        "cut": 2
+      },
+      "Your move": {
+        "n": 8,
+        "cut": 0
+      },
+      "Offer": {
+        "n": 1,
+        "cut": 0
+      }
+    },
+    "examples": [
+      "Waiting on Imogen — reply expected by 16 Sep",
+      "Imogen passed — after the query",
+      "Rosalind is 380 days past the window",
+      "Tobias is 54 days past the window"
+    ]
+  },
+  "1920": {
+    "cards": 54,
+    "sentenceCut": 0,
+    "captionCut": 0,
+    "byRegister": {
+      "Waiting": {
+        "n": 10,
+        "cut": 0
+      },
+      "Closed": {
+        "n": 15,
+        "cut": 0
+      },
+      "Past expected": {
+        "n": 20,
+        "cut": 0
+      },
+      "Your move": {
+        "n": 8,
+        "cut": 0
+      },
+      "Offer": {
+        "n": 1,
+        "cut": 0
+      }
+    },
+    "examples": []
+  }
+}
