@@ -1,0 +1,453 @@
+{
+  "geometry-1280": [
+    {
+      "id": "seed-query-20",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": -14.7,
+      "rowW": 135
+    },
+    {
+      "id": "thin-q-close",
+      "turn": "sand",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": -14.8,
+      "rowW": 198.6
+    },
+    {
+      "id": "cor-pair",
+      "turn": "agent",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": -37.9,
+      "rowW": 198.6
+    },
+    {
+      "id": "seed-query-12",
+      "turn": "offer",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 36.3,
+      "rowW": 167.6
+    },
+    {
+      "id": "rej-query-1",
+      "turn": "closed",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 93.2,
+      "rowW": 87.6
+    },
+    {
+      "id": "cor-move-a",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": -14.7,
+      "rowW": 135
+    },
+    {
+      "id": "seed-pkgq-4",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": -14.7,
+      "rowW": 135
+    },
+    {
+      "id": "seed-query-11",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": -23.8,
+      "rowW": 135
+    },
+    {
+      "id": "seed-pkgq-3",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 3.8,
+      "rowW": 135
+    },
+    {
+      "id": "seed-query-9",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 3.7,
+      "rowW": 135
+    }
+  ],
+  "geometry-1440": [
+    {
+      "id": "seed-query-20",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 38.6,
+      "rowW": 135
+    },
+    {
+      "id": "thin-q-close",
+      "turn": "sand",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 38.6,
+      "rowW": 198.6
+    },
+    {
+      "id": "cor-pair",
+      "turn": "agent",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 15.4,
+      "rowW": 198.6
+    },
+    {
+      "id": "seed-query-12",
+      "turn": "offer",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 89.6,
+      "rowW": 167.6
+    },
+    {
+      "id": "rej-query-1",
+      "turn": "closed",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 146.5,
+      "rowW": 87.6
+    },
+    {
+      "id": "cor-move-a",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 38.6,
+      "rowW": 135
+    },
+    {
+      "id": "seed-pkgq-4",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 38.6,
+      "rowW": 135
+    },
+    {
+      "id": "seed-query-11",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 29.5,
+      "rowW": 135
+    },
+    {
+      "id": "seed-pkgq-3",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 57.1,
+      "rowW": 135
+    },
+    {
+      "id": "seed-query-9",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 57.1,
+      "rowW": 135
+    }
+  ],
+  "geometry-1920": [
+    {
+      "id": "seed-query-20",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 198.6,
+      "rowW": 135
+    },
+    {
+      "id": "thin-q-close",
+      "turn": "sand",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 198.6,
+      "rowW": 198.6
+    },
+    {
+      "id": "cor-pair",
+      "turn": "agent",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 175.4,
+      "rowW": 198.6
+    },
+    {
+      "id": "seed-query-12",
+      "turn": "offer",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 249.6,
+      "rowW": 167.6
+    },
+    {
+      "id": "rej-query-1",
+      "turn": "closed",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 306.5,
+      "rowW": 87.6
+    },
+    {
+      "id": "cor-move-a",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 198.6,
+      "rowW": 135
+    },
+    {
+      "id": "seed-pkgq-4",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 198.6,
+      "rowW": 135
+    },
+    {
+      "id": "seed-query-11",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 189.5,
+      "rowW": 135
+    },
+    {
+      "id": "seed-pkgq-3",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 217.1,
+      "rowW": 135
+    },
+    {
+      "id": "seed-query-9",
+      "turn": "you",
+      "bandRest": 51,
+      "bandHover": 51,
+      "rowRest": 0,
+      "rowHover": 1,
+      "capHover": 0,
+      "meetsFact": false,
+      "inBand": true,
+      "wordGap": 217.1,
+      "rowW": 135
+    }
+  ],
+  "opens-list": "snooze popover, then drawer and desk from the primary",
+  "keyboard": {
+    "id": "thin-q-close",
+    "f0": {
+      "card": "thin-q-close",
+      "open": true,
+      "inRow": false,
+      "name": "Rosalind Vale, Vale & Marchetti — Queried. Rosalind is 380 days past the window"
+    },
+    "f1": {
+      "card": "thin-q-close",
+      "open": false,
+      "inRow": true,
+      "name": "Record response"
+    },
+    "f2": {
+      "card": "thin-q-close",
+      "open": true,
+      "inRow": false,
+      "name": "Rosalind Vale, Vale & Marchetti — Queried. Rosalind is 380 days past the window"
+    }
+  },
+  "opens-grid": {
+    "Snooze the nudge": {
+      "gap": 0,
+      "button": {
+        "x": 1284,
+        "y": 400.015625,
+        "width": 26,
+        "height": 26
+      },
+      "panel": {
+        "x": 1042,
+        "y": 422.015625,
+        "width": 268,
+        "height": 357.515625
+      }
+    },
+    "Mark closed": {
+      "gap": 0,
+      "button": {
+        "x": 1315,
+        "y": 400.015625,
+        "width": 26,
+        "height": 26
+      },
+      "panel": {
+        "x": 1091,
+        "y": 422.015625,
+        "width": 250,
+        "height": 287.515625
+      }
+    },
+    "primary": "drawer, then the desk"
+  }
+}
