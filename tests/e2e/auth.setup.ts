@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Log in ONCE, reuse the session.
+ * Log in ONCE, reuse the session — and it now does, rather than saying so (see `savedSessionStillWorks`).
  *
  * ⚠️ THE PASSWORD IS READ FROM THE ENVIRONMENT AND APPEARS IN NO TRACKED FILE. It lives in
  * `.env.local`, which `.gitignore` has covered since before Playwright existed. If it is missing
@@ -13,7 +13,7 @@
  * ⚠️ AND THE SAVED SESSION IS A CREDENTIAL TOO. `storageState` is a logged-in Firebase session;
  * `tests/e2e/.auth/` is gitignored for the same reason the password is.
  */
-import { test as setup, expect } from "@playwright/test";
+import { test as setup, expect, type Browser } from "@playwright/test";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { STORAGE_STATE } from "../../playwright.config";
@@ -34,8 +34,45 @@ function passwordFromEnvLocal(): string | null {
 }
 
 
-setup("authenticate", async ({ page }) => {
+/**
+ * ⚠️ THE SAVED SESSION IS TRIED BEFORE ANOTHER SIGN-IN, AND THE FIRST LINE OF THIS FILE HAS SAID SO
+ * SINCE IT WAS WRITTEN. It said "log in ONCE, reuse the session" and signed in on every single run.
+ *
+ * Firebase's password-sign-in quota is per project and it is genuinely reachable: a mutation sweep
+ * is a dozen runs inside twenty minutes, and the eighth came back `auth/quota-exceeded`. What that
+ * looks like is the trap — the page renders "Something went wrong. Please try again.", the shell
+ * never appears, and the run dies in SETUP, so the measurement it was carrying never starts and
+ * writes no report. A runner that then reads the report FILE reads the previous run's and records
+ * the mutation as proved. Two of this round's mutations were logged that way before it was found.
+ *
+ * So: load the workspace with whatever session is on disk. If the shell comes up, that session is
+ * live and nothing is spent. The password path stays exactly as it was for every other case — no
+ * file, an expired session, a different account, a bundle that has moved on.
+ *
+ * ⚠️ AND IT PROBES `/dashboard`, NEVER `/`. A signed-in user is deliberately never redirected off
+ * the marketing landing, so `/` renders the public page in both states and would answer "not signed
+ * in" for a perfectly good session. `/dashboard` is a workspace route: signed out it renders `Auth`,
+ * signed in it renders the shell, and those are the two answers this needs to tell apart.
+ */
+async function savedSessionStillWorks(browser: Browser): Promise<boolean> {
+  if (!existsSync(STORAGE_STATE)) return false;
+  const ctx = await browser.newContext({ storageState: STORAGE_STATE });
+  try {
+    const p = await ctx.newPage();
+    await p.goto("/dashboard");
+    return await p
+      .locator(".ws-panel, .sv2-app, #app-stage-scroll")
+      .first()
+      .waitFor({ state: "visible", timeout: 15_000 })
+      .then(() => true, () => false);
+  } finally {
+    await ctx.close();
+  }
+}
+
+setup("authenticate", async ({ page, browser }) => {
   await assertLocalBundleIsDev();
+  if (await savedSessionStillWorks(browser)) return;
   const password = passwordFromEnvLocal();
   if (!password) {
     throw new Error(
