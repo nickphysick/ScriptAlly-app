@@ -143,6 +143,13 @@ test("the element difference list — ref against dev", async ({ page }) => {
     "card (ongoing):br": "ref base radius 10 on the uncut corners — dev is 9 everywhere",
     "card:br": "same 9-vs-10 as the kind rows",
     "winbar:br": "the container clips its corners (overflow hidden); the ref rounds the bar itself — same painted result",
+    /* ⚠️ DELIBERATE, AND THE REF IS THE STALE HALF (four-fixes §1). v65's `data-past="ghost"` draws
+       a past stage `#fff` at low opacity, so history was a row of blank boxes and the only thing
+       still naming the state was a medallion at .22. The build draws the stage in its own state
+       token now — the same five the rest of the app states a query's state in — at .34. Ruled by
+       Nick in the four-fixes brief; the fill this reports is whichever state the fixture's first
+       ghost happens to be in, which is why the reason and not the value is what is recorded. */
+    "ghost stage:bg": "the stage is its own state colour at .34 now, not white — four-fixes §1, and the ref predates the ruling",
     "pulse dot:bg": "the app's own near-black (#1c130f) — colour is the app's per the authority split; the ref's ink is #2a1f17",
     "range headline:x": "the headline's width follows its text; the ref draws a different range string",
     "range headline:w": "same — fixture range string",

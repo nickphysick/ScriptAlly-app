@@ -1,0 +1,87 @@
+{
+  "x": 952,
+  "y": 540,
+  "lineColour": "rgb(28, 19, 15)",
+  "barRect": {
+    "x": 608.1,
+    "y": 497.3,
+    "w": 500.3,
+    "h": 86
+  },
+  "control": {
+    "x": 638,
+    "y": 540
+  },
+  "barAncestors": [
+    {
+      "cls": "tl-at2 tl-p out",
+      "pos": "absolute",
+      "z": "2",
+      "ctx": [
+        "position+z:2",
+        "transform"
+      ]
+    },
+    {
+      "cls": "tl-c-tl",
+      "pos": "relative",
+      "z": "auto",
+      "ctx": []
+    },
+    {
+      "cls": "tl-rrow",
+      "pos": "static",
+      "z": "auto",
+      "ctx": []
+    },
+    {
+      "cls": "tl-glanes",
+      "pos": "static",
+      "z": "auto",
+      "ctx": []
+    },
+    {
+      "cls": "tl-gwrap",
+      "pos": "static",
+      "z": "auto",
+      "ctx": []
+    },
+    {
+      "cls": "tl-grp",
+      "pos": "static",
+      "z": "auto",
+      "ctx": []
+    },
+    {
+      "cls": "tl-rowsin",
+      "pos": "relative",
+      "z": "auto",
+      "ctx": []
+    },
+    {
+      "cls": "tl-rows",
+      "pos": "relative",
+      "z": "auto",
+      "ctx": []
+    },
+    {
+      "cls": "tl tl-wrap",
+      "pos": "relative",
+      "z": "auto",
+      "ctx": []
+    }
+  ],
+  "candCount": 2,
+  "painted": {
+    "onLine": {
+      "r": 255,
+      "g": 255,
+      "b": 255
+    },
+    "control": {
+      "r": 255,
+      "g": 255,
+      "b": 255
+    }
+  }
+}

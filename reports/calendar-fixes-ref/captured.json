@@ -1,0 +1,5 @@
+{
+  "captured": "2026-09-12",
+  "commit": "aef24f73",
+  "why": "The board draws a rolling window centred on TODAY, so this reference is date-bound and has a shelf life of hours. It was captured from unmodified HEAD before any edit of the four-fixes run. A later run must capture its own from ITS unmodified HEAD, today \u2014 calFixes.measure.ts \u00a75 refuses a reference that is not from the day it runs."
+}

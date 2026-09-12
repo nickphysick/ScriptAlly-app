@@ -5,6 +5,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
+import { SEG_HOVER_DELAY_MS } from "../../src/components/shared/timeline/useSegHover";
 
 const CAL = "/todo/calendar";
 
@@ -109,9 +110,12 @@ test("⚠️ (§B) hover lifts 2px up-right, reveals THE BAR'S OWN action, wakes
   expect(hov.onElsewhere, "another bar's action revealed").toBe(0);
   expect(hov.overlays, "an overlay mounted on hover").toBe(0);
   expect(hov.frameSh, "hover grew a shadow").toBe("none");
-  /* leave ends it */
+  /* ⚠️ LEAVE ENDS IT, AFTER THE GRACE — AND THE WAIT READS THE GRACE RATHER THAN GUESSING AT IT.
+     The reveal clears 120ms after the pointer goes (four-fixes §4), so a hand-written 150ms sat
+     30ms from being an intermittent red that the next session would chase as a product fault. The
+     constant is exported for exactly this; the law is unchanged. */
   await page.mouse.move(10, 400);
-  await page.waitForTimeout(150);
+  await page.waitForTimeout(SEG_HOVER_DELAY_MS + 250);
   expect(await act.evaluate((a) => a.classList.contains("on")), "the reveal survived leave").toBe(false);
 });
 

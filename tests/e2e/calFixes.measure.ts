@@ -350,6 +350,21 @@ for (const host of ["qc", "todo"] as const) {
 
 test("§5 · To-do's board and winbar, against the reference taken from unmodified HEAD today", async ({ page }) => {
   test.setTimeout(360_000);
+  /* ⚠️ THE REFERENCE IS DATE-BOUND AND IS REFUSED THE DAY AFTER IT WAS TAKEN. This board draws a
+     rolling window centred on today, so a reference captured yesterday differs at every width with
+     no code change at all — and the failure reads as damage from whatever the next session happened
+     to be doing. Measured once already in this repo: a byte-identical calendar reference differed
+     at three widths overnight, first rail date 29 → 30, every bar left by one day's 8.98px. The
+     capture stamps its own date; this refuses to compare against any other. */
+  const stamp = `${REF}/captured.json`;
+  expect(existsSync(stamp), "no capture stamp — take the reference from unmodified HEAD, today").toBe(true);
+  const captured = JSON.parse(readFileSync(stamp, "utf8")).captured as string;
+  const today = new Date();
+  const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  expect(captured,
+    `the reference was captured on ${captured} and it is ${iso} — the board's window has moved; ` +
+    "re-capture it from unmodified HEAD before comparing").toBe(iso);
+
   const diffs: Record<string, unknown> = {};
   for (const w of [1280, 1440, 1920]) {
     const refBoard = `${REF}/todo-board-${w}.html`;
