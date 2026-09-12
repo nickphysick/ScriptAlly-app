@@ -478,6 +478,9 @@ export const Dashboard: React.FC<{
     manuscripts,
     agents,
     queries,
+    /* read by ONE thing: the getting-started `materials` deed's tick on the empty dashboard
+       (empty-states pack, Phase 1). The provider already loads it; this only reads it. */
+    versions,
     activities,
     tasks,
     taskFlags,
@@ -1520,6 +1523,7 @@ export const Dashboard: React.FC<{
         taskFlags={taskFlags}
         currentUser={currentUser}
         activeManuscript={activeManuscriptForKicker}
+        versions={versions}
         onNavigate={onNavigate}
         onTaskAction={(task) => task.taskType === "data_quality_poor"
           ? openEditAgent(task.relatedRecordId, { fromTask: true })

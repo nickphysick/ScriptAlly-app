@@ -23,6 +23,7 @@ import { Agent, Query, QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
 import { activeStageBreakdown } from "../../lib/dashboardStats";
 import { bandSeries, BAND_KEYS, BAND_LABEL, type BandKey, type BandPoint } from "../../lib/chartBands";
+import { OneScreenChartEmpty } from "./OneScreenChartEmpty";
 import { STATE_TOKEN, STATE_ACCENT_TOKEN, STATE_LINE_TOKEN } from "../../lib/queryCardFacts";
 import { placeTooltip, Rect } from "../../lib/deskTooltip";
 import {
@@ -123,8 +124,14 @@ export const OneScreenChart: React.FC<{
   now: Date;
   dayOne?: boolean;
   earlyDays?: boolean;
+  /**
+   * ⚠️ THE PAGE'S ZERO-QUERY BRANCH (empty-states pack, Phase 1), and it is NOT `dayOne`. `dayOne`
+   * needs no manuscript either, so the account the ref was drawn for — a book on the shelf, nothing
+   * sent — never reached it. Default `false`: every existing call site is unchanged.
+   */
+  empty?: boolean;
   onSendFirst?: () => void;
-}> = ({ loading, queries, agents, now, dayOne = false, earlyDays = false, onSendFirst }) => {
+}> = ({ loading, queries, agents, now, dayOne = false, earlyDays = false, empty = false, onSendFirst }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const lineRef = useRef<SVGPathElement>(null);
@@ -452,6 +459,23 @@ export const OneScreenChart: React.FC<{
   const lastIdx = view.length - 1;
   const focusedWeek: LedgerPoint | null = focusIdx >= 0 ? view[focusIdx] : null;
   const focusBand: BandPoint | null = focusIdx >= 0 ? bands[focusIdx] ?? null : null;
+
+  /**
+   * ⚠️ THE PANEL IS THE SAME PANEL — only its interior swaps (empty-states pack, Phase 1). The
+   * variant, the probe, the loading flag and the skeleton are identical on both branches, because
+   * the pack's boundary is that no panel moves or resizes; what changes is what is inside it.
+   *
+   * ⚠️ AND IT SITS BELOW EVERY HOOK, WHICH IS WHY IT IS AN EARLY RETURN RATHER THAN A TERNARY.
+   * The alternative wraps 450 lines in a conditional to save four; this file's hooks all run above
+   * line 463 and none of them is skipped by returning here, so the order is unchanged.
+   */
+  if (empty) {
+    return (
+      <OneScreenPanel variant="os-lead" probe="chart-card" loading={loading} skel={["h", "grow", ""]}>
+        <OneScreenChartEmpty onLogFirst={onSendFirst} />
+      </OneScreenPanel>
+    );
+  }
 
   return (
     <OneScreenPanel variant="os-lead" probe="chart-card" loading={loading} skel={["h", "grow", ""]}>

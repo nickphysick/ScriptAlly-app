@@ -2738,6 +2738,173 @@
    ⚠️ NOTHING IS HOVER-REVEALED ON THIS PAGE, so collapsing the motion hides nothing. If a future
    affordance is ever revealed by a hover or an animation, it must be made permanently visible
    here — an affordance you can only reach by moving is unusable when motion is switched off. */
+/* ⚠️ THIS BLOCK SITS ABOVE THE `prefers-reduced-motion` BLOCK BELOW, AND THAT IS NOT TIDINESS.
+   A media query confers no specificity, so the reduce block only reaches rules DECLARED BEFORE IT.
+   Appending the empty state to the end of this file exempted every one of its rules from reduced
+   motion — silently, with the reduce block reading perfectly correctly — and `motionPolish`'s
+   "the reduced-motion block is LAST" caught it on the first full run. Anything added to this sheet
+   goes here, above that block, not at the bottom. */
+
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   THE EMPTY DASHBOARD (empty-states pack, Phase 1; ref scriptally-empty-states-v2.html)
+
+   ⚠️ EVERY RULE IN THIS BLOCK IS REACHED ONLY FROM A ZERO-QUERY BRANCH. Nothing here selects on a
+   class the populated page emits, so a dashboard with one query on it cannot be touched by any of
+   it — which is the pack's own scope boundary expressed in the stylesheet rather than trusted.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/* ── the stat tiles' handwritten caveat ────────────────────────────────────────────────────── */
+/* ref `.stat .hand{font-size:17px;margin-top:2px;color:var(--ink-3)}`. The FACE is the app's
+   Caveat convention, not the ref's literal stack — `.qcaveat` is the same decision on the Query
+   Centre, and Editorial re-faces it to a quiet serif there. */
+.os-ccav {
+  display: block; margin-top: 2px;
+  font-family: "Caveat", cursive; font-size: 17px; line-height: 1.15;
+  color: #8a7a6c;
+}
+
+/* ── the Active-queries panel's faded example ──────────────────────────────────────────────── */
+.os-cempty { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+
+/* ⚠️ THE WHOLE DRAWN LAYER IS INERT, AND BOTH HALVES ARE LOAD-BEARING. `pointer-events: none`
+   stops the press; `user-select: none` stops a drag selecting the example's text, which is what
+   makes a picture feel like a picture. `aria-hidden` is on the element in the TSX — a stylesheet
+   cannot state that. */
+.os-cefade {
+  flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
+  pointer-events: none; user-select: none;
+}
+
+/* ⚠️ THE FADE IS ON THE BAND'S CHILDREN, NEVER THE BAND. The ref fades its whole `.hd`, which
+   here would pale the sage header band — and §2's law is that every container closes on the SAME
+   band, so a faded one would make this the one panel whose header reads differently. The controls
+   and the readout fade; the band stays the band. Ref `.stage .faded{opacity:.28;filter:saturate(.85)}`. */
+.os-ce-head > * { opacity: 0.28; filter: saturate(0.85); }
+.os-ce-plot,
+.os-ce-legend { opacity: 0.28; filter: saturate(0.85); }
+
+/* the drawn frequency chips — `.os-freqchips button`'s values, for a span it cannot match */
+.os-ce-seg > span {
+  padding: 7px clamp(7px, 0.6vw, 12px); font-size: clamp(12px, 0.78vw, 13.5px);
+  color: #6b5d54; border-left: 1px solid rgba(0, 0, 0, 0.05); white-space: nowrap;
+}
+.os-ce-seg > span:first-child { border-left: 0; }
+.os-ce-seg > span.on { background: #f1e7da; color: #2a1f18; font-weight: 600; }
+/* the drawn range capsule — ref `.range` with its `.slider` and centre thumb */
+.os-ce-range { font-size: clamp(12px, 0.78vw, 13.5px); color: #6b5d54; white-space: nowrap; }
+.os-ce-sl { position: relative; width: 70px; height: 2px; background: rgba(0, 0, 0, 0.12); flex: none; }
+.os-ce-sl::after {
+  content: ""; position: absolute; left: 50%; top: -8px;
+  width: 3px; height: 18px; background: #2b2118; border-radius: 2px;
+}
+
+/* ⚠️ THE PLOT KEEPS THE REAL CHART'S RATIO. `.os-chartwrap` is `aspect-ratio: 1000/330`, and the
+   example sitting at a different one would change the panel's height the moment the first query
+   landed — the panel would visibly resize on an event that is supposed to swap its contents. */
+.os-ce-plot { position: relative; flex: 1 1 auto; min-height: 0; aspect-ratio: 1000 / 330; margin: 10px 22px 4px; }
+.os-ce-y { position: absolute; left: 0; top: 0; bottom: 16px; width: 26px; border-right: 1px dashed rgba(0, 0, 0, 0.12); }
+/* the ticks read bottom-up, so the first is pinned to the floor and the last to the ceiling */
+.os-ce-y i {
+  position: absolute; left: 0; font: 400 10px "JetBrains Mono", monospace;
+  font-style: normal; color: #9c8f82; letter-spacing: 0.06em;
+}
+.os-ce-y i:nth-child(1) { bottom: -5px; }
+.os-ce-y i:nth-child(2) { bottom: calc(25% - 5px); }
+.os-ce-y i:nth-child(3) { bottom: calc(50% - 5px); }
+.os-ce-y i:nth-child(4) { bottom: calc(75% - 5px); }
+.os-ce-y i:nth-child(5) { top: -4px; }
+.os-ce-grid {
+  position: absolute; left: 34px; right: 0; top: 0; bottom: 16px;
+  display: grid; grid-template-columns: repeat(8, 1fr);
+}
+.os-ce-grid i { border-left: 1px dashed rgba(0, 0, 0, 0.07); }
+.os-ce-svg { position: absolute; left: 34px; top: 0; width: calc(100% - 34px); height: calc(100% - 16px); display: block; }
+.os-ce-x {
+  position: absolute; left: 34px; right: 0; bottom: 0;
+  display: grid; grid-template-columns: repeat(8, 1fr);
+  font: 400 10px "JetBrains Mono", monospace; letter-spacing: 0.06em; color: #9c8f82;
+}
+.os-ce-x i { font-style: normal; }
+
+.os-ce-legend { display: flex; gap: 22px; flex-wrap: nowrap; white-space: nowrap; padding: 6px 22px 14px; font-size: 12px; color: #6b5d54; }
+.os-ce-legend span { display: inline-flex; align-items: center; gap: 7px; }
+.os-ce-legend i { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0, 0, 0, 0.08); flex: none; }
+
+/* ── the one live control, over the picture ────────────────────────────────────────────────── */
+/* ref `.stage .over{position:absolute;inset:0;…;z-index:3}` */
+.os-ceover { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 3; }
+/* ⚠️ ref `.over-glow` verbatim, and `pointer-events: none` is not optional — the glow covers the
+   button it exists to lift, so without it the press lands on the gradient. */
+.os-ceg {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 64%; height: 80%; pointer-events: none;
+  background: radial-gradient(ellipse at center,
+    rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.75) 45%, rgba(255, 255, 255, 0) 72%);
+}
+/* the CTA is the panel's one primary, so it is taller than `.os-btn-mini`'s 24px row height and
+   carries the ref's plane glyph beside the words */
+.os-ce-cta { position: relative; gap: 8px; height: 34px; padding: 0 16px; font-size: 12.5px; }
+
+/* ── the getting-started list, in the to-do card ────────────────────────────────────────────── */
+/* ref `.todo .hd .mono` — the eyebrow that names WHICH list this is, so the badge's outstanding
+   count is not read as a count of real tasks */
+.os-tgs-eyebrow {
+  font: 400 10px "JetBrains Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #9c8f82; margin-left: 6px; white-space: nowrap;
+}
+.os-tgs { display: flex; flex-direction: column; }
+.os-tgs-list { list-style: none; margin: 0; padding: 0; }
+/* ref `.tl li` — a three-column grid, so the chip column holds its width whether or not the row's
+   chip is visible (see the `visibility` note below) */
+.os-tgs-list li {
+  display: grid; grid-template-columns: 22px 1fr auto; gap: 14px; align-items: center;
+  padding: 12px 18px; border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+.os-tgs-list li:last-child { border-bottom: 0; }
+/* ref `.tl .ck` — an open ring, filling sage with a tick once the record exists */
+.os-tgs-ck {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 1.5px solid #b3a596; box-sizing: border-box;
+}
+.os-tgs-list li.done .os-tgs-ck { position: relative; background: #e0e5dd; border-color: #8a9e88; }
+.os-tgs-list li.done .os-tgs-ck::after {
+  content: ""; position: absolute; left: 6px; top: 3px; width: 5px; height: 9px;
+  border: solid #2b2118; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg);
+}
+.os-tgs-deed { font-size: 13px; line-height: 1.35; color: #2b2118; }
+.os-tgs-deed small { display: block; margin-top: 3px; font-size: 11px; line-height: 1.4; color: #8a7a6c; }
+/* ⚠️ THE STRIKE IS ON THE DEED AND NEVER ON ITS NOTE — ref `.tl li.done .deed small{text-decoration:none}`.
+   The note is what the row says ABOUT being done ("Done — … is on the shelf"); striking through the
+   sentence that reports the outcome makes the outcome look cancelled. */
+.os-tgs-list li.done .os-tgs-deed { color: #8a7a6c; text-decoration: line-through; text-decoration-color: rgba(0, 0, 0, 0.3); }
+.os-tgs-list li.done .os-tgs-deed small { text-decoration: none; }
+/* ref `.tl .go` — a quiet capsule naming the page the deed is done on */
+.os-tgs-go {
+  padding: 6px 12px; border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 99px;
+  background: #ffffff; font: inherit; font-size: 11px; color: #6b5d54;
+  white-space: nowrap; cursor: pointer;
+}
+.os-tgs-go:hover { border-color: #b9a893; color: #3a1c14; }
+/* ⚠️ HIDDEN, NOT REMOVED — ref `.tl li.done .go{visibility:hidden}`. `display: none` collapses the
+   grid's third column, so the remaining chips jump left the instant a deed is finished: the control
+   under the pointer would move because of something the reader did elsewhere. */
+.os-tgs-list li.done .os-tgs-go { visibility: hidden; }
+/* ref `.todo .foot` */
+.os-tgs-foot {
+  margin: 0; padding: 12px 18px 16px; border-top: 1px solid rgba(0, 0, 0, 0.06);
+  font-family: "Caveat", cursive; font-size: 17px; line-height: 1.2; color: #8a7a6c;
+}
+
+/* ── the activity feed's ghost tail ────────────────────────────────────────────────────────── */
+/* ref `.act .rest` */
+.os-aghost { padding: 28px 22px 8px; display: flex; flex-direction: column; gap: 10px; align-items: center; text-align: center; }
+.os-aghost-lanes { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-bottom: 4px; }
+/* ⚠️ `.ghost` IS THE REF'S DASHED PLATE, AND DASHED MEANS PROVISIONAL — which is what these are.
+   Ref `.ghost{border:1.5px dashed rgba(28,19,15,.22);border-radius:10px}` with `height:58px`. */
+.os-aghost-lane { height: 52px; border: 1.5px dashed rgba(28, 19, 15, 0.22); border-radius: 10px; flex: none; }
+.os-aghost-cav { margin: 0; font-family: "Caveat", cursive; font-size: 17px; line-height: 1.2; color: #8a7a6c; max-width: 30ch; }
+
 @media (prefers-reduced-motion: reduce) {
   .os-root *,
   .os-root *::before,

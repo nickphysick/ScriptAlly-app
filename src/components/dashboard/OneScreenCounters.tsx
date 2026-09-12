@@ -20,6 +20,7 @@ import sentMark from "../../assets/shell/active-query-image.png";
 import agentsMark from "../../assets/shell/agents-on-file-icon.png";
 import replyMark from "../../assets/shell/response-rate-icon.png";
 import { useCountUp } from "../../lib/useCountUp";
+import { counterCaveat } from "../../lib/dashEmpty";
 
 /**
  * ⚠️ THE FILENAMES DO NOT MATCH THE CARDS, AND THE TABLE WINS. `Query Target Icon` (a target) is
@@ -54,7 +55,14 @@ export const OneScreenCounters: React.FC<{
   queries: Query[];
   agents: Agent[];
   now: Date;
-}> = ({ loading, queries, agents, now }) => (
+  /**
+   * ⚠️ THE PAGE'S EMPTY MOMENT, HANDED DOWN — never re-derived from `queries` here. The dashboard
+   * decides it once from the scoped set and every card reads that one answer, which is what stops
+   * the caveats appearing on a card whose figures came from a different set. Default `false`, so
+   * every existing call site renders byte-identically.
+   */
+  empty?: boolean;
+}> = ({ loading, queries, agents, now, empty = false }) => (
   /* ⚠️ NO `os-card` (dashboard redesign, Phase 3) — the stats sit on the page ground. The class
      carried the paper, the radius, the shadow and the `::after` rim; all four go together, because
      a readout on the ground with a rim left on it is a card that forgot its fill. */
@@ -89,6 +97,16 @@ export const OneScreenCounters: React.FC<{
               </span>
             )}
           </div>
+          {/**
+            * ⚠️ NULL WHEN THE FIGURE IS NOT ZERO, WHICH IS NOT THE SAME AS "the page is empty".
+            * Agents are deliberately unscoped and are not gated by the query count, so a writer
+            * with nine on file and nothing sent yet reaches this branch with a 9 on screen — and
+            * "build it in Contact list" under a 9 is a caveat about a list that is not empty.
+            * `counterCaveat` owns both conditions; this only renders what it returns.
+            */}
+          {counterCaveat(c.key, c.n, empty) && (
+            <span className="os-ccav">{counterCaveat(c.key, c.n, empty)}</span>
+          )}
         </div>
       </div>
     ))}

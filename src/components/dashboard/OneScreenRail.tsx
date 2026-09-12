@@ -25,6 +25,7 @@ import { OneScreenMark } from "./OneScreenMark";
 import { OneScreenCommunity } from "./OneScreenCommunity";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
 import { bubbleShape, markSentOffered, tightRunHeads, type Side } from "../../lib/feedConversation";
+import { FEED_GHOST_CAVEAT, FEED_GHOST_OPACITY } from "../../lib/dashEmpty";
 import { STATE_TOKEN, type State } from "../../lib/queryCardFacts";
 
 /* ── the 30-day feed, pure (exported for tests) ── */
@@ -627,12 +628,18 @@ export interface OneScreenRailProps {
    * to a card and the to-do panel opens on it — one drawer, one session, one write path.
    */
   onOpenTask?: (queryId: string) => void;
+  /**
+   * ⚠️ THE PAGE'S ZERO-QUERY BRANCH (empty-states pack, Phase 1) — the feed's ghost tail. It is
+   * ADDITIVE: whatever real events the account has still render above it, because a new account
+   * already has the "added a manuscript" housekeeping event and the ref draws exactly that.
+   */
+  empty?: boolean;
   now: Date;
 }
 
 export const OneScreenRail: React.FC<OneScreenRailProps> = ({
   loading, queries, agents, manuscripts, activities, onOpenTask,
-  activeManuscript, onNavigate, now,
+  activeManuscript, onNavigate, empty = false, now,
 }) => {
   const actvRef = useRef<HTMLDivElement>(null);
 
@@ -746,7 +753,10 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
             day caption above it: with no card behind the panel, a `#fffdf9` fade paints a
             card-shaped wash at the foot of a column that has no card. */}
         <EdgeFadeScroll fade="#f4f0ea" outerClassName="os-abodywrap" scrollClassName="os-abody" scrollId="os-actv-body" scrollProbe="feed">
-          {shownRows.length === 0 ? (
+          {/* ⚠️ WHILE EMPTY, THE TAIL BELOW IS THE MESSAGE AND THIS LINE WOULD BE A SECOND ONE —
+              but only on the `all` tab. A narrowed tab with nothing in it is a fact about the
+              FILTER, which the tail's generic caveat does not state, so that keeps its own line. */}
+          {shownRows.length === 0 && !(empty && tab === "all") ? (
             <div className="os-aempty">
               <span className="os-aempty-thread" aria-hidden="true" />
               <span>{tab === "all" ? "The story starts with your first query." : "Nothing here yet."}</span>
@@ -899,6 +909,20 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                 </React.Fragment>
               );
             })
+          )}
+          {/* ⚠️ THE GHOST LANES ARE DRAWN, NOT SKELETONS. A skeleton says "loading"; these say
+              "this is where the rest goes", which is a different claim — and the panel's real
+              loading state is `OneScreenPanel`'s own skeleton, above. `aria-hidden`, because three
+              empty boxes read to a screen reader as three items. */}
+          {empty && (
+            <div className="os-aghost">
+              <div className="os-aghost-lanes" aria-hidden="true">
+                {FEED_GHOST_OPACITY.map((o) => (
+                  <span key={o} className="os-aghost-lane" style={{ opacity: o }} />
+                ))}
+              </div>
+              <p className="os-aghost-cav">{FEED_GHOST_CAVEAT}</p>
+            </div>
           )}
         </EdgeFadeScroll>
         {/* §6: the footer is a quiet caption ONLY — no link; the arrows are the sole route in */}

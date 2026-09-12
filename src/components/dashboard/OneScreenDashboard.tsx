@@ -23,7 +23,7 @@
  * scrollbar. Locked in the smoke test against the stylesheet.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { Activity, Agent, Manuscript, Query, Task, TaskFlag, User, UserTask } from "../../types";
+import { Activity, Agent, Manuscript, ManuscriptVersion, Query, Task, TaskFlag, User, UserTask } from "../../types";
 import { runStage, tourAutoRuns, tourChipShows } from "../../lib/oneScreen";
 import { OneScreenTour, TOUR_BREAKPOINT } from "./OneScreenTour";
 import { OneScreenAuthor } from "./OneScreenAuthor";
@@ -43,6 +43,12 @@ export interface OneScreenDashboardProps {
   queries: Query[];
   agents: Agent[];
   manuscripts: Manuscript[];
+  /**
+   * ⚠️ READ BY EXACTLY ONE THING — the getting-started `materials` deed's tick (Phase 1). It is
+   * optional and defaults to empty, so nothing that does not pass it changes, and the deed reads
+   * `PACKAGE_MATERIALS` rather than a list of its own. See `lib/dashEmpty`.
+   */
+  versions?: ManuscriptVersion[];
   tasks: Task[];
   userTasks: UserTask[];
   activities: Activity[];
@@ -69,7 +75,7 @@ export const Skel: React.FC<{ bars: ("h" | "grow" | "")[] }> = ({ bars }) => (
 
 export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
   loading, queries, agents, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
-  activeManuscript, onNavigate, onTaskAction, updateUserProfile, now = new Date(),
+  activeManuscript, onNavigate, onTaskAction, updateUserProfile, versions = [], now = new Date(),
 }) => {
   /**
    * ⚠️ THE SCOPED SETS ARE DERIVED ONCE, HERE, AND HANDED DOWN (B2). Every card reading the same
@@ -94,6 +100,23 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
    * beside four scoped ones is an invitation to scope it by mistake, and the resulting bug — a
    * goal count that drops when you switch books — is not one anybody would think to look for.
    */
+  /**
+   * ⚠️ THE PAGE'S EMPTY MOMENT, DERIVED ONCE AND HANDED DOWN (empty-states pack, Phase 1) — the
+   * same discipline as the scoped sets above, and for the same reason: four cards each deciding
+   * "am I empty" from a different array is four answers to one question. It is the SCOPED set,
+   * because every figure the empty state sits beside is scoped.
+   *
+   * ⚠️ AND IT IS NOT `scopedStage === "day-one"`. Day one needs no manuscript EITHER, so the
+   * commonest first-run state there is — a book on the shelf, nothing sent — never reached it. The
+   * ref is drawn for exactly that account: its manuscript card is populated and its first
+   * getting-started deed renders done.
+   *
+   * ⚠️ `loading` IS NOT PART OF IT. The three-way loading / empty / populated split already exists
+   * and is `loading`'s job; folding it in here would make one flag answer two questions, and the
+   * skeleton would stop showing the moment the empty pack could.
+   */
+  const empty = scopedQueries.length === 0;
+
   const goalProgress = React.useMemo(
     () => deriveGoalProgress(queries, currentUser?.queryingGoals, now),
     [queries, currentUser?.queryingGoals, now],
@@ -269,7 +292,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
               )}
             </div>
             {/* ⚠️ queries SCOPED, agents NOT — "agents on file" is a person-count, not a per-book fact. */}
-            <OneScreenCounters loading={loading} queries={scopedQueries} agents={agents} now={now} />
+            <OneScreenCounters loading={loading} queries={scopedQueries} agents={agents} now={now} empty={empty} />
           </div>
           <div className="os-toprow" data-probe="toprow">
             <OneScreenAuthor
@@ -280,6 +303,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             <OneScreenChart
             loading={loading} queries={scopedQueries} agents={agents} now={now}
             dayOne={scopedStage === "day-one"} earlyDays={scopedStage === "early-days"}
+            empty={empty}
               onSendFirst={() => onNavigate("queries", "Send a query")}
             />
           </div>
@@ -300,6 +324,9 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             currentUser={currentUser}
             now={now}
             dayOne={scopedStage === "day-one"}
+            empty={empty}
+            versions={versions}
+            activeManuscript={activeManuscript}
             onSeeAll={() => onNavigate("todo")}
             onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
             onAddAgent={() => onNavigate("agents", "Add an agent")}
@@ -311,6 +338,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
 
         <OneScreenRail
           loading={loading}
+          empty={empty}
           queries={scopedQueries}
           agents={agents}
           manuscripts={manuscripts}

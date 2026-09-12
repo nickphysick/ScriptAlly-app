@@ -33,9 +33,20 @@ describe("/dashboard renders", () => {
        which are the page's actual first-run content rather than a badge over it.
 
        ⚠️ AND A SMOKE PINS THE MINIMUM, NOT THE APPEARANCE — this repo's own rule for page smokes,
-       and this line is the third time that has had to be re-learned on one page. */
-    expect(html).toContain("Every query you send and every reply that comes back will be charted here.");
-    expect(html).toContain("Send your first query");
+       and this line is the third time that has had to be re-learned on one page.
+       ⚠️ AND RETARGETED A THIRD TIME (empty-states pack, Phase 1). The chart's invitation and the
+       tasks card's own day-one lines are SUPERSEDED by the faded-example pack: the chart draws a
+       populated example with "Log your first query" over it, and the tasks card draws the five
+       getting-started deeds. The old two lines are not dead code — `OneScreenChart`'s `dayOne` and
+       `OneScreenTasks`'s `dayOne` branches both survive for every caller that does not pass
+       `empty` — they are simply not what THIS page renders any more.
+
+       ⚠️ WHY THE PACK OUTRANKS DAY ONE, since that is the decision this line records: the ref's
+       own first getting-started deed is "Add your first manuscript". That row is addressed to an
+       account with no manuscript — which is day one exactly — so gating the pack behind day-one's
+       survival would leave row one permanently ticked and decorative. */
+    expect(html).toContain("Log your first query");
+    expect(html).toContain("Add your first manuscript");
   });
 
   /**

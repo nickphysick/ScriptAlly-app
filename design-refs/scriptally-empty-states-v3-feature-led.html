@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — feature-led empty states v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f5f1eb; --parchment:#fdfaf5; --white:#ffffff;
+    --ink:#1c130f; --ink-2:rgba(28,19,15,.72); --ink-3:rgba(28,19,15,.48); --ink-4:rgba(28,19,15,.30);
+    --line:rgba(28,19,15,.12); --line-2:rgba(28,19,15,.07);
+    --frame:#7c3a2a;                 /* 1px MountCard frame only — never a fill */
+    --sand:#f7efe3; --sage:#e0e5dd; --pink:#f5e6df; --slate:#d7e0e8; --grey:#e4e1db; --pink-2:#e8c8bc;
+    --sb:300px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;font-size:14px}
+  .serif{font-family:'Playfair Display',serif}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+  .hand{font-family:'Caveat',cursive;font-size:19px;color:var(--ink-2);line-height:1.15}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  a{color:inherit}
+
+  /* ---------- shell ---------- */
+  .app{display:grid;grid-template-columns:var(--sb) 1fr;min-height:100vh}
+  .side{padding:22px 20px;border-right:1px solid var(--line-2)}
+  .logo{display:flex;align-items:center;gap:10px;padding:4px 8px 22px}
+  .logo .serif{font-size:26px;font-weight:600}
+  .ms{display:flex;align-items:center;gap:10px;background:var(--white);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:22px}
+  .ms .thumb{width:36px;height:36px;border-radius:8px;background:var(--sage)}
+  .ms b{display:block;font-weight:600;font-size:14.5px}
+  .ms span{font-size:12.5px;color:var(--ink-3)}
+  .ms .arr{margin-left:auto;color:var(--ink-4);font-size:14px;letter-spacing:6px}
+  .nav-group{margin:22px 0 8px 12px}
+  .nav a{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:10px;font-size:16px;text-decoration:none;color:var(--ink-2)}
+  .nav a.on{background:var(--white);border:1px solid var(--line);color:var(--ink)}
+  .nav svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+  .acct{margin-top:26px;padding-top:18px;border-top:1px solid var(--line-2);display:flex;gap:12px;align-items:center;padding-left:12px}
+  .acct .av{width:38px;height:38px;border-radius:50%;background:var(--white);border:1px solid var(--line);display:grid;place-items:center;font-size:12px;color:var(--ink-3)}
+  .acct b{display:block;font-weight:600}
+  .acct span{font-size:12.5px;color:var(--ink-3)}
+  .upgrade{display:block;width:100%;margin-top:18px;padding:16px;border-radius:999px;background:var(--pink);border:1px solid var(--pink-2);font-weight:600;font-size:14px;text-align:center}
+
+  .main{padding:16px 24px 24px 12px;display:flex;flex-direction:column;gap:16px}
+  .top{display:flex;align-items:center;gap:18px;height:44px}
+  .crumb{display:flex;align-items:center;gap:12px;font-size:20px}
+  .crumb .sep{color:var(--ink-4)}
+  .crumb .here{font-weight:600}
+  .saved{padding-left:16px;border-left:1px solid var(--line)}
+  .search{margin-left:auto;display:flex;align-items:center;gap:10px;width:300px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--white);color:var(--ink-3)}
+  .search kbd{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 6px;border:1px solid var(--line);border-radius:5px;background:var(--cream)}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:999px;border:1px solid var(--line);background:var(--white);font-weight:500}
+  .pill.dark{background:var(--ink);color:var(--white);border-color:var(--ink)}
+  .page{background:var(--white);border:1px solid var(--line);border-radius:16px;flex:1;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 1px 0 rgba(28,19,15,.03)}
+  .ph{display:flex;align-items:flex-start;gap:22px;padding:34px 48px 26px;border-bottom:1px solid var(--line-2)}
+  .ph h1{font-size:44px;font-weight:600;line-height:1}
+  .ph p{margin-top:10px;font-family:'Playfair Display',serif;font-style:italic;font-size:19px;color:var(--ink-2)}
+  .ph .cta{margin-left:auto}
+  .body{padding:28px 48px 40px;flex:1}
+
+  /* ---------- MountCard (Form 11) ---------- */
+  .mount{background:var(--parchment);padding:8px;border-radius:14px}
+  .mount .frame{border:1px solid var(--frame);border-radius:9px;overflow:hidden;background:var(--white)}
+  .mount .band{background:var(--sage);padding:14px 20px;border-bottom:1px solid var(--line)}
+  .mount .band h3{font-size:20px;font-weight:600}
+  .mount .band p{margin-top:2px;font-size:13px;color:var(--ink-2)}
+  .mount .inner{padding:20px}
+
+  /* ---------- ghosts ---------- */
+  .ghost{border:1.5px dashed rgba(28,19,15,.22);border-radius:10px;background:transparent}
+  .bar{height:10px;border-radius:5px;background:var(--grey)}
+  .dot{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink-3);display:inline-block;flex:none}
+  .dot.ghost{border-style:dashed;border-color:var(--ink-4)}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border-radius:999px;font-weight:600;font-size:15px}
+  .btn.primary{background:var(--ink);color:var(--white)}
+  .btn.soft{background:var(--cream);border:1px solid var(--line)}
+  .btn.ghostbtn{border:1px solid var(--line);color:var(--ink-3)}
+  .links{display:flex;gap:14px;font-size:13.5px;color:var(--ink-2)}
+  .links a{text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--ink-4)}
+  .links i{font-style:normal;color:var(--ink-4)}
+  .plane{width:34px;height:34px;stroke:var(--ink-3);fill:none;stroke-width:1.4;stroke-linejoin:round}
+
+  /* ---------- switcher (mockup chrome only) ---------- */
+  .switch{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:4px;padding:5px;background:var(--ink);border-radius:999px;box-shadow:0 8px 30px rgba(28,19,15,.25);z-index:9}
+  .switch button{color:rgba(255,255,255,.7);padding:8px 16px;border-radius:999px;font-size:13px;font-weight:500}
+  .switch button.on{background:var(--white);color:var(--ink)}
+  .screen{display:none}.screen.on{display:contents}
+
+  /* ---------- DASHBOARD ---------- */
+  .dash{display:grid;grid-template-columns:minmax(0,1fr) 460px;gap:20px}
+  .dash-l{display:flex;flex-direction:column;gap:20px}
+  .hello{display:grid;grid-template-columns:auto minmax(0,1fr);gap:36px;align-items:center;padding:8px 8px 0}
+  .hello h1{white-space:nowrap}
+  .hello h1{font-size:64px;line-height:1;font-weight:600}
+  .hello .sub{display:flex;align-items:center;gap:16px;margin-top:10px;font-size:20px;color:var(--ink-2);white-space:nowrap}
+  .tour{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--line);border-radius:10px;background:var(--white);font-size:13.5px;color:var(--ink)}
+  .tour::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--frame)}
+  .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .stat{display:flex;gap:14px;align-items:flex-start}
+  .stat .ico{width:56px;height:56px;border-radius:12px;background:var(--sand);display:grid;place-items:center}
+  .stat .ico svg{width:30px;height:30px;stroke:var(--ink-2);fill:none;stroke-width:1.3}
+  .stat .lab{font-size:15.5px;color:var(--ink-2)}
+  .stat .num{font-family:'Playfair Display',serif;font-size:34px;line-height:1.05;color:var(--ink-4);margin-top:2px}
+  .stat .hand{font-size:17px;margin-top:2px;color:var(--ink-3)}
+  .stat .lab{white-space:nowrap}
+  .row2{display:grid;grid-template-columns:380px 1fr;gap:20px}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:14px;box-shadow:inset 0 0 0 1px rgba(124,58,42,.05)}
+  .card .hd{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line-2)}
+  .card .hd h2{font-size:24px;font-weight:600}
+  .msc{padding:34px 24px 26px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+  .msc .hero{width:120px;height:120px;border-radius:24px;background:var(--parchment);border:1px solid var(--line-2);display:grid;place-items:center}
+  .msc .hero svg{width:64px;height:64px;stroke:var(--ink-2);fill:var(--sage);stroke-width:1.2}
+  .msc h2{font-size:30px;font-weight:600;line-height:1.1}
+  .chips{display:flex;gap:8px}
+  .chip{padding:6px 14px;border-radius:999px;background:var(--sage);font-size:13.5px;font-weight:500}
+  .by{display:flex;align-items:center;gap:12px;margin-top:8px;padding-top:16px;border-top:1px solid var(--line-2);width:100%;justify-content:center}
+  .by .av{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-3)}
+  .by .name{text-align:left;font-size:13px;color:var(--ink-2)}
+  .by .name b{display:block;font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--ink)}
+  .chart .hd{flex-wrap:wrap;row-gap:12px}
+  .chart .hd .n{font-family:'Playfair Display',serif;font-size:36px;line-height:1;color:var(--ink-4)}
+  .chart .hd .t{font-size:19px;font-weight:500;white-space:nowrap}
+  .seg{margin-left:auto;display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{padding:7px 12px;font-size:13.5px;color:var(--ink-2);white-space:nowrap}
+  .seg button.on{background:var(--cream);font-weight:600;color:var(--ink)}
+  .range{display:flex;align-items:center;gap:12px;padding:7px 12px;border:1px solid var(--line);border-radius:10px;font-size:13.5px;white-space:nowrap}
+  .range .slider{width:70px;height:2px;background:var(--line);position:relative}
+  .range .slider::after{content:"";position:absolute;left:50%;top:-8px;width:3px;height:18px;background:var(--ink);border-radius:2px}
+  .plot{position:relative;height:300px;margin:26px 26px 18px 26px}
+  .plot .y{position:absolute;left:0;top:0;bottom:24px;width:28px;border-right:1px dashed var(--line)}
+  .plot .y i{position:absolute;left:0;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-4);font-style:normal}
+  .plot .grid{position:absolute;left:36px;right:0;top:0;bottom:24px;display:grid;grid-template-columns:repeat(8,1fr)}
+  .plot .grid i{border-left:1px dashed var(--line-2)}
+  .plot .x{position:absolute;left:36px;right:0;bottom:0;display:grid;grid-template-columns:repeat(8,1fr);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--ink-4)}
+  .plot .zero{position:absolute;left:36px;right:0;bottom:24px;border-top:1.5px dotted var(--ink-4)}
+  .plot .sketch{position:absolute;left:36px;right:0;top:0;bottom:24px;width:calc(100% - 36px);height:calc(100% - 24px)}
+  .plot .note{position:absolute;left:44%;top:26%;max-width:260px}
+  .plot .note svg{position:absolute;left:-52px;top:26px;width:52px;height:40px;stroke:var(--ink-3);fill:none;stroke-width:1.4}
+  .todo .hd .badge{padding:3px 12px;border-radius:999px;background:var(--pink);font-family:'JetBrains Mono',monospace;font-size:12px}
+  .todo .hd .all{margin-left:auto;font-size:14px;color:var(--ink-2)}
+  .tl{list-style:none}
+  .tl li{display:grid;grid-template-columns:28px 1fr auto;gap:16px;align-items:center;padding:16px 22px;border-bottom:1px solid var(--line-2)}
+  .tl li:last-child{border-bottom:0}
+  .tl .ck{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--ink-3)}
+  .tl li.done .ck{background:var(--sage);border-color:var(--ink-3);position:relative}
+  .tl li.done .ck::after{content:"";position:absolute;left:7px;top:3px;width:5px;height:10px;border:solid var(--ink);border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+  .tl .deed{font-size:16px}
+  .tl .deed em{font-style:italic}
+  .tl .deed small{display:block;font-size:12.5px;color:var(--ink-3);margin-top:3px}
+  .tl li.done .deed{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--ink-4)}
+  .tl li.done .deed small{text-decoration:none}
+  .tl .go{padding:8px 14px;border:1px solid var(--line);border-radius:999px;font-size:13px;color:var(--ink-2);background:var(--white)}
+  .tl li.done .go{visibility:hidden}
+  .tl .foot{padding:16px 22px 22px;border-top:1px solid var(--line-2);display:flex;gap:10px;align-items:center;color:var(--ink-3)}
+  .dash-r{display:flex;flex-direction:column;gap:20px}
+  .act .hd h2{font-size:30px;font-weight:500}
+  .act .hd .cnt{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--ink-3);margin-left:4px}
+  .act .day{text-align:center;padding:14px 0 6px}
+  .ev{margin:6px 18px;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--parchment)}
+  .ev p{font-size:16px;margin:6px 0 10px}
+  .ev .meta{display:flex;justify-content:space-between}
+  .act .rest{padding:40px 30px 10px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
+  .act .rest .lanes{width:100%;display:flex;flex-direction:column;gap:12px;margin-bottom:6px}
+  .act .rest .lanes .ghost{height:58px}
+  .comm{display:grid;grid-template-columns:96px 1fr;gap:18px;padding:26px 24px;align-items:center;position:relative}
+  .comm .beta{position:absolute;top:18px;right:18px;font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 10px;border:1px solid var(--line);border-radius:999px;color:var(--ink-3)}
+  .comm h2{font-size:30px;font-weight:600}
+  .comm p{font-size:16px;color:var(--ink-2);margin-top:4px}
+  .comm .sprout{width:96px;height:96px;border-radius:20px;background:var(--parchment);display:grid;place-items:center}
+  .comm .sprout svg{width:52px;height:52px;stroke:var(--ink-2);fill:none;stroke-width:1.3}
+</style>
+</head>
+<body>
+
+<div class="switch" aria-label="Mockup screen switcher">
+  <button class="on" data-s="qc">Query Centre</button>
+  <button data-s="cl">Contact list</button>
+</div>
+
+<div class="app">
+  <!-- ============ SIDEBAR (shared) ============ -->
+  <aside class="side">
+    <div class="logo">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#1c130f" stroke-width="1.6" stroke-linejoin="round"><path d="M6 20 L34 8 L26 34 L20 22 Z"/><path d="M20 22 L34 8"/><path d="M10 33c-3 0-4-3-2-4s5 0 3 2-4 2-4 2"/></svg>
+      <span class="serif">ScriptAlly</span>
+    </div>
+    <div class="ms"><div class="thumb"></div><div><b>The Backpack …</b><span>Fantasy · 90,000 wo…</span></div><span class="arr">‹›</span></div>
+    <nav class="nav">
+      <a href="#"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</a>
+      <div class="mono nav-group">Queries</div>
+      <a href="#" id="nav-qc"><svg viewBox="0 0 24 24"><path d="M3 11 21 3l-8 18-3-8z"/></svg>Query Centre</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M3 20h18M4 16l5-6 4 3 7-8"/></svg>Analytics</a>
+      <div class="mono nav-group">Agents</div>
+      <a href="#" id="nav-cl"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M21.5 19c0-2.6-2-4.6-4.5-4.6"/></svg>Contact list</a>
+      <a href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 14 14l-5.5 1.5L10 10z"/></svg>Discover</a>
+      <div class="mono nav-group">Materials</div>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 4v16M9 4v16M14 4l4 16"/></svg>Manuscripts</a>
+      <a href="#"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="13" height="17" rx="1.5"/><path d="M3 7v14h13"/></svg>Comparable titles</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>Submission packages</a>
+      <div class="mono nav-group">Tasks</div>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M3 6.5l1.5 1.5L7 5.5M3 12.5l1.5 1.5L7 11.5M3 18.5l1.5 1.5L7 17.5M10 7h11M10 13h11M10 19h11"/></svg>To-do list</a>
+      <a href="#"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M5 3h9l5 5v13H5z"/><path d="M14 3v5h5"/></svg>Noteboard</a>
+      <div class="mono nav-group">Account</div>
+    </nav>
+    <div class="acct"><div class="av">SE</div><div><b>September Example</b><span>Free plan</span></div></div>
+    <button class="upgrade">Upgrade</button>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <style>
+  /* ---------- feature-led empty state ---------- */
+  .page .body{padding:0}
+  .hero{display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center;padding:52px 56px 48px;border-bottom:1px solid var(--line-2)}
+  .hero h2{font-size:44px;font-weight:600;line-height:1.08;letter-spacing:-.01em}
+  .hero .lede{margin:16px 0 26px;font-size:17px;line-height:1.6;color:var(--ink-2);max-width:48ch}
+  .hero .acts{display:flex;align-items:center;gap:18px}
+  .hero .hand{font-size:20px;margin-top:22px;display:block}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;padding:48px 56px;border-bottom:1px solid var(--line-2)}
+  .row.sage{background:#eef1ec}.row.pink{background:#f9f0eb}
+  .row .txt h3{font-size:28px;font-weight:600;line-height:1.15}
+  .row .txt h3{font-size:34px}
+  .row .txt p{margin-top:10px;font-size:18px;line-height:1.5;color:var(--ink-2);max-width:40ch;font-family:'Playfair Display',serif;font-style:italic}
+  .court{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+  .tlx{position:relative;height:300px;background:var(--white);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .tlx .ax{display:grid;grid-template-columns:repeat(8,1fr);height:34px;border-bottom:1px solid var(--line)}
+  .tlx .ax i{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink-3);font-style:normal;padding:11px 0 0 8px;border-right:1px solid var(--line-2);letter-spacing:.06em}
+  .tlx .ax i.today{background:var(--ink);color:var(--white);border-radius:999px;padding:0;height:22px;width:22px;display:grid;place-items:center;margin:6px 0 0 8px;border:0}
+  .tlx .tl{position:absolute;top:0;bottom:0;left:calc(50% + 19px);border-left:1.5px dashed var(--ink);z-index:2}
+  .qc-card{position:absolute;background:var(--white);border:1px solid var(--line);border-radius:9px;overflow:hidden;box-shadow:0 1px 2px rgba(28,19,15,.05)}
+  .qc-card .h{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--sand);font-family:'Playfair Display',serif;font-size:13.5px}
+  .qc-card .h.pink{background:var(--pink)}
+  .qc-card .h .court{margin-left:auto}
+  .qc-card .b{padding:8px 12px 10px}
+  .qc-card .b b{font-family:'Playfair Display',serif;font-size:15px;font-weight:600}
+  .qc-card .b em{font-family:'Playfair Display',serif;font-size:12.5px;color:var(--ink-2);margin-left:6px}
+  .qc-card .b span{display:block;font-size:12px;margin-top:3px}
+  .qc-card .b span i{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-style:normal;margin-left:6px}
+  .qc-card .end{position:absolute;right:-5px;top:50%;width:9px;height:9px;border-radius:50%;background:var(--white);border:1.5px solid var(--ink-3);transform:translateY(-50%)}
+  .mv .l b .court{margin-left:8px}
+  .row .txt .hand{margin-top:14px;display:block}
+  .row.flip .txt{order:2}.row.flip .ill{order:1}
+  .ill{position:relative;background:var(--parchment);border:1px solid var(--line);border-radius:14px;padding:26px;box-shadow:inset 0 0 0 1px rgba(124,58,42,.05)}
+  .ill .tag{position:absolute;top:12px;right:14px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-4);border:1px dashed rgba(28,19,15,.22);border-radius:999px;padding:3px 9px;background:var(--white)}
+  .closing{display:flex;align-items:center;gap:26px;padding:40px 56px 48px}
+  .closing h3{font-size:26px;font-weight:600}
+  .closing p{margin-top:6px;color:var(--ink-2);font-size:15px}
+  .closing .acts{margin-left:auto;display:flex;align-items:center;gap:18px}
+  .sec-eyebrow{padding:44px 56px 0;text-align:center}
+  .sec-eyebrow h3{font-size:30px;font-weight:600}
+  .sec-eyebrow p{color:var(--ink-2);margin-top:6px}
+
+  /* ---------- record cards (contact parity) ---------- */
+  .rc{border:1px solid var(--line);border-radius:12px;background:var(--white);overflow:hidden;display:flex;flex-direction:column}
+  .rc .head{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--sage)}
+  .rc .head.sand{background:var(--sand)}.rc .head.pink{background:var(--pink)}.rc .head.slate{background:var(--slate)}.rc .head.grey{background:var(--grey)}
+  .rc .hp{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;background:var(--white);border:1px solid var(--line-2);border-radius:999px;padding:5px 11px;color:var(--ink-2)}
+  .rc .hd-r{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--ink-3)}
+  .rc .rail{display:flex;gap:2px}.rc .rail i{flex:1;height:3px;background:var(--grey)}.rc .rail i.on{background:var(--ink-3)}.rc .rail.complete i{background:rgba(122,143,106,.5)}
+  .rc .bd{padding:16px 18px 12px;flex:1}
+  .rc .who{display:flex;gap:12px;align-items:flex-start}
+  .rc .av{width:42px;height:42px;flex:none;border-radius:50%;border:1px solid var(--line);background:var(--parchment);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-2)}
+  .rc .nm{font-family:'Playfair Display',serif;font-weight:700;font-size:19px;line-height:1.15}
+  .rc .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--ink-2);margin-top:2px}
+  .rc .meta{margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+  .rc .sec{margin-top:12px;padding-top:11px;border-top:1px solid var(--line-2)}
+  .rc .sl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+  .rc .sv{margin-top:6px;font-size:13px;line-height:1.5}
+  .rc .ft{display:flex;gap:8px;padding:12px 18px 16px;border-top:1px solid var(--line-2)}
+  .rc .b1{background:var(--ink);color:var(--white);border-radius:9px;padding:9px 15px;font-size:12.5px;font-weight:500}
+  .rc .b2{border:1px solid var(--line);border-radius:9px;padding:9px 15px;font-size:12.5px}
+  .sd{display:inline-flex;gap:8px;align-items:center}
+  .sdot{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink);flex:none;background:conic-gradient(var(--ink) var(--fill,0%),transparent 0)}
+  .sdot.closed{background:var(--ink-3);border-color:var(--ink-3)}
+  .add-inline{display:inline-flex;align-items:center;gap:7px;border:1px dashed rgba(28,19,15,.35);border-radius:8px;padding:6px 11px;font-size:12.5px;color:var(--ink-2);margin-top:6px}
+  .add-hint{margin-top:6px;font-size:11.5px;color:var(--ink-3)}
+
+  /* annotations */
+  .ill .under{display:flex;justify-content:space-between;gap:18px;margin-top:14px}
+  .ill .under .hand{font-size:17px;max-width:34ch}
+  .anno{position:absolute;font-family:'Caveat',cursive;font-size:18px;color:var(--ink-2);line-height:1.15;max-width:170px}
+  .anno svg{position:absolute;width:40px;height:40px;stroke:var(--ink-3);fill:none;stroke-width:1.4}
+
+  /* state swatches */
+  .swatches{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .sw{border-radius:10px;padding:14px 12px 12px;border:1px solid var(--line-2)}
+  .sw b{display:block;font-family:'Playfair Display',serif;font-size:15px;font-weight:600}
+  .sw span{display:block;font-size:11.5px;color:var(--ink-2);margin-top:3px;line-height:1.35}
+  .depth{display:flex;gap:18px;align-items:flex-end;margin-top:22px;padding-top:18px;border-top:1px solid var(--line-2)}
+  .depth div{display:flex;flex-direction:column;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);text-align:center}
+  .depth .sdot{width:18px;height:18px}
+
+  /* move strip */
+  .moves{display:flex;flex-direction:column;gap:12px}
+  .mv{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;background:var(--white);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+  .mv .l{display:flex;flex-direction:column;gap:3px}
+  .mv .l b{font-size:14.5px;font-weight:600}
+  .mv .l span{font-size:12.5px;color:var(--ink-2)}
+  .mv .b1{background:var(--ink);color:var(--white);border-radius:9px;padding:9px 15px;font-size:12.5px;font-weight:500}
+  .mv .b2{border:1px solid var(--line);border-radius:9px;padding:9px 15px;font-size:12.5px;color:var(--ink-2)}
+
+  /* views */
+  .views{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--white);margin-bottom:16px}
+  .views span{padding:8px 14px;font-size:13px;color:var(--ink-2)}.views span.on{background:var(--cream);color:var(--ink);font-weight:600}
+  .twov{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .lst{background:var(--white);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .lst div{display:grid;grid-template-columns:16px 1fr auto;gap:10px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line-2);font-size:12.5px}
+  .lst div:last-child{border-bottom:0}
+  .lst div i{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink-3);font-style:normal;letter-spacing:.06em}
+  .brd{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .brd .col{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:8px}
+  .brd .col h5{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:2px 4px 8px;font-weight:500}
+  .brd .stub{border-radius:7px;padding:8px 9px;font-size:11.5px;margin-bottom:6px;line-height:1.3}
+  .brd .stub b{display:block;font-weight:600}
+
+  /* grouped contacts */
+  .grp h5{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);font-weight:500;display:flex;align-items:center;gap:10px;margin:14px 0 8px}
+  .grp h5:first-child{margin-top:0}
+  .grp h5::after{content:"";flex:1;height:1px;background:var(--line-2)}
+  .grp .cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .cc{background:var(--white);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .cc .strip{height:8px;background:var(--sage)}.cc .strip.pink{background:var(--pink)}.cc .strip.slate{background:var(--slate)}
+  .cc .in{padding:10px 12px}
+  .cc b{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;display:block}
+  .cc span{font-size:12px;color:var(--ink-2);display:block;margin-top:2px}
+  .cc span.sd{display:inline-flex}
+  .cc span.sd .sdot{width:11px;height:11px}
+</style>
+
+    <!-- ================= QUERY CENTRE — feature-led ================= -->
+    <section class="screen on" id="s-qc">
+      <div class="top">
+        <span style="color:var(--ink-3);font-size:18px">▯</span>
+        <div class="crumb serif"><span>ScriptAlly</span><span class="sep">/</span><span>Queries</span><span class="sep">/</span><span class="here">Query Centre</span></div>
+        <span class="mono saved">All changes saved</span>
+        <div class="search">⌕ <span>Search</span><kbd>⌘K</kbd></div>
+        <span class="pill">✎ Feedback</span><span class="pill">?</span><span class="pill dark">＋ New</span>
+      </div>
+      <div class="page">
+        <div class="ph">
+          <svg width="88" height="80" viewBox="0 0 88 80" fill="none" stroke="#1c130f" stroke-width="1.2" stroke-linejoin="round"><path d="M8 40l30-8 8 28-24 12z" fill="#f5e6df"/><path d="M38 32l40-20-28 30z" fill="#e0e5dd"/><path d="M50 42l-4 18"/></svg>
+          <div><h1 class="serif">Query Centre</h1><p>Every query, every response — track every step of your journey so far</p></div>
+          <span class="btn primary cta">＋ Log new query</span>
+        </div>
+        <div class="body">
+
+          <div class="hero">
+            <div>
+              <h2 class="serif">Every query. Every reply. One place.</h2>
+              <p class="lede">Log who has <em>The Backpack on the Seat</em> and what you sent them. ScriptAlly keeps the status, the dates and whose court it's in straight for you.</p>
+              <div class="acts"><span class="btn primary"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 11 21 3l-8 18-3-8z"/></svg>Log your first query</span><div class="links"><a href="#">Import a spreadsheet</a><i>·</i><a href="#">Download the template</a></div></div>
+              <span class="hand">already tracking in a spreadsheet? import it and pick up where you left off</span>
+            </div>
+            <div class="ill">
+              <span class="tag">Example</span>
+              <div class="rc"><div class="head pink"><span class="hp">Full requested</span><span class="hd-r">With you</span></div>
+                <div class="bd"><div class="who"><div class="av">DO</div><div><div class="nm">Daniel O'Rourke</div><div class="ag">Inkwell &amp; Stone</div><div class="meta">~6 weeks · Email</div></div></div>
+                  <div class="sec"><div class="sl">Sent</div><div class="sv">Query · synopsis · first 10 pages</div></div>
+                  <div class="sec"><div class="sl">Next</div><div class="sv sd"><span class="sdot" style="--fill:75%"></span>Due 3 Oct <span class="court">3 weeks left</span></div></div></div>
+                <div class="ft"><span class="b1">Mark sent</span><span class="b2">Open</span></div></div>
+              <div class="under"><span class="hand">↖ the shade is the status</span><span class="hand" style="text-align:right">the button is always your next move ↙</span></div>
+            </div>
+          </div>
+
+          <div class="row sage">
+            <div class="txt">
+              <h3 class="serif">Show, don't tell.</h3>
+              <p>Five simple shades to show every status.</p>
+              <span class="hand">and the ring fills as a query gets further along</span>
+            </div>
+            <div class="ill"><span class="tag">Example</span>
+              <div class="swatches">
+                <div class="sw" style="background:var(--sand)"><b>Queried</b><span>Sent, no reply yet</span></div>
+                <div class="sw" style="background:var(--sage)"><b>Sent</b><span>Partial or full, with them</span></div>
+                <div class="sw" style="background:var(--pink)"><b>Requested</b><span>They want more — your move</span></div>
+                <div class="sw" style="background:var(--slate)"><b>Offer</b><span>Representation on the table</span></div>
+                <div class="sw" style="background:var(--grey)"><b>Closed</b><span>Passed, withdrawn, or no response</span></div>
+              </div>
+              <div class="depth">
+                <div><span class="sdot"></span>Queried</div>
+                <div><span class="sdot" style="--fill:25%"></span>Partial<br>requested</div>
+                <div><span class="sdot" style="--fill:50%"></span>Partial<br>sent</div>
+                <div><span class="sdot" style="--fill:75%"></span>Full<br>requested</div>
+                <div><span class="sdot" style="--fill:100%"></span>Full<br>sent</div>
+                <div><span class="sdot closed"></span>Closed</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row flip">
+            <div class="txt">
+              <h3 class="serif">Whose court is it in?</h3>
+              <p>Every query says whether the next move is yours or theirs.</p>
+              <span class="hand">you record what happened — the rest is worked out</span>
+            </div>
+            <div class="ill"><span class="tag">Example</span>
+              <div class="moves">
+                <div class="mv"><div class="l"><b class="sd"><span class="sdot"></span>Amara Osei<span class="court">With the agent</span></b><span>Reply expected 30 Oct · 7 days waiting</span></div><span class="b2">Record response</span></div>
+                <div class="mv"><div class="l"><b class="sd"><span class="sdot" style="--fill:75%"></span>Daniel O'Rourke<span class="court">With you</span></b><span>Full requested 09 Sep · due 3 Oct</span></div><span class="b1">Mark sent</span></div>
+                <div class="mv"><div class="l"><b class="sd"><span class="sdot" style="--fill:100%"></span>Penhallow Literary<span class="court">With you</span></b><span>Revision notes received 28 Aug</span></div><span class="b1">Record resubmission</span></div>
+                <div class="mv"><div class="l"><b class="sd"><span class="sdot" style="--fill:100%"></span>Rosa Bellamy<span class="court">Offer</span></b><span>Offer received 02 Sep · call booked Tue</span></div><span class="b1">Record decision</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row pink">
+            <div class="txt">
+              <h3 class="serif">Your queries, four ways.</h3>
+              <p>Grid, list, board or calendar — the same queries, in whichever view suits the job.</p>
+              <span class="hand">filters, groups and sorts carry across all four</span>
+            </div>
+            <div class="ill"><span class="tag">Example</span>
+              <div class="views"><span>Grid</span><span class="on">List</span><span>Board</span><span>Calendar</span></div>
+              <div class="twov">
+                <div class="lst">
+                  <div><span class="sdot"></span>Amara Osei · Osei Literary<i>04 Sep</i></div>
+                  <div><span class="sdot" style="--fill:75%"></span>Daniel O'Rourke · Inkwell &amp; Stone<i>12 Aug</i></div>
+                  <div><span class="sdot" style="--fill:50%"></span>Aisha Kapoor · The Lantern Agency<i>21 Jul</i></div>
+                  <div><span class="sdot" style="--fill:100%"></span>Rosa Bellamy · Bellamy &amp; Vane<i>15 Jun</i></div>
+                  <div><span class="sdot closed"></span>Tom Marlow · Marlow Rights<i>02 Jun</i></div>
+                </div>
+                <div class="brd">
+                  <div class="col"><h5>Queried · 2</h5><div class="stub" style="background:var(--sand)"><b>Amara Osei</b>day 7</div><div class="stub" style="background:var(--sand)"><b>Jo Hartley</b>day 3</div></div>
+                  <div class="col"><h5>Requested · 2</h5><div class="stub" style="background:var(--pink)"><b>Daniel O'Rourke</b>full</div><div class="stub" style="background:var(--pink)"><b>Penhallow</b>R&amp;R</div></div>
+                  <div class="col"><h5>Offer · 1</h5><div class="stub" style="background:var(--slate)"><b>Rosa Bellamy</b>02 Sep</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row flip">
+            <div class="txt">
+              <h3 class="serif">See the wait.</h3>
+              <p>The calendar lays every query out by date — what's expected back, and when.</p>
+              <span class="hand">today is the dashed line; everything to the right is still to come</span>
+            </div>
+            <div class="ill"><span class="tag">Example</span>
+              <div class="tlx">
+                <div class="ax"><i>Aug 4</i><i>14</i><i>21</i><i>28</i><i class="today">11</i><i>18</i><i>25</i><i>Oct 2</i></div>
+                <div class="tl"></div>
+                <div class="qc-card" style="left:30%;width:52%;top:52px"><div class="h pink">Partial requested<span class="court">With you</span></div><div class="b"><b>Jonathan Marsh</b><em>The Marsh Agency</em><span>Due 3 Oct<i>3 weeks left</i></span></div><span class="end"></span></div>
+                <div class="qc-card" style="left:14%;width:56%;top:136px"><div class="h">Queried<span class="court">With the agent</span></div><div class="b"><b>Daniel O'Rourke</b><em>Inkwell &amp; Stone</em><span>Reply expected 25 Sept<i>14 days waiting</i></span></div><span class="end"></span></div>
+                <div class="qc-card" style="left:4%;width:60%;top:220px"><div class="h">Queried<span class="court">With the agent</span></div><div class="b"><b>Harriet Vane-Coe</b><em>Stillwater Reps</em><span>Reply expected 23 Sept<i>12 days waiting</i></span></div><span class="end"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="closing">
+            <div><h3 class="serif">Start with one.</h3><p>This page stops explaining itself the moment your first query lands.</p></div>
+            <div class="acts"><div class="links"><a href="#">Import a spreadsheet</a></div><span class="btn primary">Log your first query</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CONTACT LIST — feature-led ================= -->
+    <section class="screen" id="s-cl">
+      <div class="top">
+        <span style="color:var(--ink-3);font-size:18px">▯</span>
+        <div class="crumb serif"><span>ScriptAlly</span><span class="sep">/</span><span>Agents</span><span class="sep">/</span><span class="here">Contact list</span></div>
+        <span class="mono saved">All changes saved</span>
+        <div class="search">⌕ <span>Search</span><kbd>⌘K</kbd></div>
+        <span class="pill">✎ Feedback</span><span class="pill">?</span><span class="pill dark">＋ New</span>
+      </div>
+      <div class="page">
+        <div class="ph">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="#1c130f" stroke-width="1.2" stroke-linejoin="round"><rect x="14" y="20" width="52" height="40" rx="4" fill="#f5e6df"/><path d="M14 32h52M26 20v-6M54 20v-6"/><circle cx="34" cy="44" r="5" fill="#e0e5dd"/><path d="M44 42h14M44 48h10"/></svg>
+          <div><h1 class="serif">Contact list</h1><p>Everyone you're querying, watching, or saving for later.</p></div>
+          <span class="btn primary cta">＋ Add new agent</span>
+        </div>
+        <div class="body">
+
+          <div class="hero">
+            <div>
+              <h2 class="serif">These are the people who will champion your words.</h2>
+              <p class="lede">One card per agent — what they want, what they ask for, and everything you've sent them.</p>
+              <div class="acts"><span class="btn primary">＋ Add your first agent</span><div class="links"><a href="#">Find agents in Discover</a><i>·</i><a href="#">Import a spreadsheet</a></div></div>
+              <span class="hand">one agent is a start — not a campaign</span>
+            </div>
+            <div class="ill">
+              <span class="tag">Example</span>
+              <div class="rc"><div class="head"><span class="hp">Active queries</span><span class="hd-r">✎</span></div><div class="rail complete"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="bd"><div class="who"><div class="av">AO</div><div><div class="nm">Amara Osei</div><div class="ag">Osei Literary</div><div class="meta">London · ~8 weeks · Email</div></div></div>
+                  <div class="sec"><div class="sl">Your history</div><div class="sv sd"><span class="sdot"></span><em>The Backpack on the Seat</em> · queried 04 Sep</div></div>
+                  <div class="sec"><div class="sl">Wishlist</div><div class="sv">Big-hearted fantasy with a found family at its core — voice first, always.</div></div>
+                  <div class="sec"><div class="sl">Materials wanted</div><div class="sv">Query · synopsis (1pg) · first three chapters, pasted in body.</div></div></div>
+                <div class="ft"><span class="b1">➤ Log query</span><span class="b2">View website</span></div></div>
+              <div class="under"><span class="hand">↖ six segments, one per field — sage once the record's complete</span></div>
+            </div>
+          </div>
+
+          <div class="row sage">
+            <div class="txt">
+              <h3 class="serif">Fill the gaps.</h3>
+              <p>Six fields make a strong record. Anything missing becomes a button, not a blank.</p>
+              <span class="hand">their own words are the best opening line you'll get</span>
+            </div>
+            <div class="ill"><span class="tag">Example</span>
+              <div class="rc"><div class="head pink"><span class="hp">Idle</span><span class="hd-r">✎</span></div><div class="rail"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i></div>
+                <div class="bd"><div class="who"><div class="av">AK</div><div><div class="nm">Aisha Kapoor</div><div class="ag">The Lantern Agency</div><div class="meta">Edinburgh · Form</div></div></div>
+                  <div class="sec"><div class="sl">Your history</div><div class="add-hint" style="margin-top:6px">Nothing sent yet.</div></div>
+                  <div class="sec"><div class="sl">Wishlist</div><span class="add-inline">＋ Add her wishlist</span><div class="add-hint">Copy it from her agency page or #MSWL.</div></div>
+                  <div class="sec"><div class="sl">Materials wanted</div><span class="add-inline">＋ Add from their site</span></div></div>
+                <div class="ft"><span class="b1">➤ Log query</span><span class="b2">View website</span></div></div>
+            </div>
+          </div>
+
+          <div class="row flip">
+            <div class="txt">
+              <h3 class="serif">Who's next?</h3>
+              <p>Your history with every agent sits on their card — and idle ones are the ones still to send to.</p>
+              <span class="hand">group by court to see at a glance who's waiting on whom</span>
+            </div>
+            <div class="ill"><span class="tag">Example</span>
+              <div class="grp">
+                <h5>With the agent · 2</h5>
+                <div class="cards">
+                  <div class="cc"><div class="strip"></div><div class="in"><b>Amara Osei</b><span class="sd"><span class="sdot"></span>Queried · day 7</span></div></div>
+                  <div class="cc"><div class="strip"></div><div class="in"><b>Aisha Kapoor</b><span class="sd"><span class="sdot" style="--fill:50%"></span>Partial sent · day 18</span></div></div>
+                </div>
+                <h5>With you · 2</h5>
+                <div class="cards">
+                  <div class="cc"><div class="strip pink"></div><div class="in"><b>Daniel O'Rourke</b><span class="sd"><span class="sdot" style="--fill:75%"></span>Full requested</span></div></div>
+                  <div class="cc"><div class="strip slate"></div><div class="in"><b>Rosa Bellamy</b><span class="sd"><span class="sdot" style="--fill:100%"></span>Offer · decide by Fri</span></div></div>
+                </div>
+                <h5>Idle · 3</h5>
+                <div class="cards">
+                  <div class="cc"><div class="strip pink"></div><div class="in"><b>Jo Hartley</b><span>Hartley &amp; Co · ~10 weeks</span></div></div>
+                  <div class="cc"><div class="strip pink"></div><div class="in"><b>Penhallow Literary</b><span>Agent not specified</span></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="closing">
+            <div><h3 class="serif">Add the first name.</h3><p>One is enough to log a query against.</p></div>
+            <div class="acts"><div class="links"><a href="#">Find agents in Discover</a></div><span class="btn primary">＋ Add your first agent</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const nav={qc:'nav-qc',cl:'nav-cl'};
+  function show(k){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==='s-'+k));
+    document.querySelectorAll('.switch button').forEach(b=>b.classList.toggle('on',b.dataset.s===k));
+    document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('on'));
+    document.getElementById(nav[k]).classList.add('on');
+    location.hash=k;
+  }
+  document.querySelectorAll('.switch button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.s)));
+  Object.entries(nav).forEach(([k,id])=>document.getElementById(id).addEventListener('click',e=>{e.preventDefault();show(k)}));
+  const h=(location.hash||'#qc').slice(1); show(h in nav?h:'qc');
+</script>
+</body>
+</html>

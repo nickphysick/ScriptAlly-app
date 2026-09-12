@@ -35,12 +35,15 @@ import React, { Suspense, useMemo, useState } from "react";
  */
 const DashTaskDrawer = React.lazy(() =>
   import("./DashTaskDrawer").then((m) => ({ default: m.DashTaskDrawer })));
-import { Activity, Agent, Manuscript, Query, Task, TaskFlag, User, UserTask } from "../../types";
+import { Activity, Agent, Manuscript, ManuscriptVersion, Query, Task, TaskFlag, User, UserTask } from "../../types";
 import { OneScreenPanel } from "./OneScreenPanel";
 import { OneScreenMark } from "./OneScreenMark";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
 import { TaskTicket } from "../todo/TaskTicket";
 import { assembleBoardColumns } from "../../lib/todoColumns";
+import {
+  GETTING_STARTED_EYEBROW, GETTING_STARTED_FOOT, gettingStartedOpen, gettingStartedRows,
+} from "../../lib/dashEmpty";
 import { BoardCard } from "../../lib/todoBoard";
 import { CATEGORIES, CATEGORY_FAMILY, CATEGORY_LABEL, isUrgentCard, taskCategory, type Category } from "../../lib/todoCategory";
 import { listRowInputs } from "../../lib/taskCardFacts";
@@ -80,6 +83,16 @@ export interface OneScreenTasksProps {
   currentUser: User | null;
   now: Date;
   dayOne?: boolean;
+  /**
+   * ⚠️ THE PAGE'S ZERO-QUERY BRANCH — the getting-started list (empty-states pack, Phase 1). It
+   * OUTRANKS `dayOne` where both are true, because the getting-started list is what day one should
+   * have been: five deeds with their own destinations, rather than two mini-CTAs and a sentence.
+   */
+  empty?: boolean;
+  /** the manuscript's versions — read ONLY for the `materials` deed's tick */
+  versions?: ManuscriptVersion[];
+  /** the manuscript the page is scoped to, for the two book-bound deeds */
+  activeManuscript?: Manuscript | null;
   onSeeAll: () => void;
   onAddManuscript?: () => void;
   onAddAgent?: () => void;
@@ -96,7 +109,8 @@ export interface OneScreenTasksProps {
 
 export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
   loading, tasks, queries, agents, manuscripts, userTasks, activities, taskFlags, currentUser,
-  now, dayOne = false, onSeeAll, onAddManuscript, onAddAgent, onNavigate,
+  now, dayOne = false, empty = false, versions = [], activeManuscript = null,
+  onSeeAll, onAddManuscript, onAddAgent, onNavigate,
   openForQueryId, onOpenHandled,
 }) => {
   const [filter, setFilter] = useState<Category | null>(null);
@@ -157,9 +171,30 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
      card's own name in the card's own header. Under a filter it earns its place, because then the
      number is a SUBSET and nothing else on the card says which. Ref `.badge`: `<b>32</b>`, with a
      `span` treatment that exists for exactly the second reading. */
-  const badge = filter
-    ? { n: counts[filter], label: CATEGORY_LABEL[filter], fam: CATEGORY_FAMILY[filter] }
-    : { n: total, label: null as string | null, fam: null as string | null };
+  /**
+   * ⚠️ DERIVED, NEVER STORED, AND `assembleBoardColumns` NEVER SEES IT. These five rows are a
+   * projection of "does this record exist" over data the page already holds — so the To-do page's
+   * own figures cannot move, there is nothing to tick by hand, and nothing goes stale when a writer
+   * deletes the record a row was reading. See `lib/dashEmpty`.
+   */
+  const started = useMemo(
+    () => (empty
+      ? gettingStartedRows({
+        manuscripts,
+        agentCount: agents.length,
+        queryCount: queries.length,
+        versions,
+        activeManuscript,
+      })
+      : []),
+    [empty, manuscripts, agents.length, queries.length, versions, activeManuscript],
+  );
+
+  const badge = empty
+    ? { n: gettingStartedOpen(started), label: null as string | null, fam: null as string | null }
+    : filter
+      ? { n: counts[filter], label: CATEGORY_LABEL[filter], fam: CATEGORY_FAMILY[filter] }
+      : { n: total, label: null as string | null, fam: null as string | null };
 
   return (
     <OneScreenPanel variant="os-tasks" probe="todo-card" loading={loading} skel={["h", "", "", ""]}>
@@ -201,10 +236,16 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
             <b>{badge.n}</b>
           </span>
         )}
+        {/* ref `.todo .hd` — the mono eyebrow naming WHICH list this is, so the badge's 4 is not
+            read as four real tasks. It sits after the badge, as the ref draws it. */}
+        {empty && <span className="os-tgs-eyebrow">{GETTING_STARTED_EYEBROW}</span>}
         <button type="button" className="os-see" onClick={onSeeAll}>See all <span className="os-arr">→</span></button>
       </div>
 
-      {!dayOne && total > 0 && (
+      {/* ⚠️ `!empty` TOO: the category rule filters real cards, and while the getting-started list
+          is showing there are none of those on screen to filter. A rule over a set the reader
+          cannot see is a control that does nothing. */}
+      {!empty && !dayOne && total > 0 && (
         /* ⚠️ THE LEGEND IS AN OVERLAY, AND THAT IS THE REQUIREMENT RATHER THAN A STYLE. Revealing it
            must not move a single ticket — a legend that reflows the grid makes the thing you were
            about to click jump out from under the pointer. It is absolutely positioned over the
@@ -260,7 +301,41 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
       )}
 
       <EdgeFadeScroll fade="#fffdf9" outerClassName="os-tbodywrap" scrollClassName="os-tbody">
-        {dayOne ? (
+        {empty ? (
+          /**
+           * ⚠️ AHEAD OF `dayOne`, DELIBERATELY. Both can be true (no queries and no manuscript) and
+           * this is the better answer to that moment: five deeds each naming where it is done,
+           * against two mini-CTAs and a sentence. The day-one branch below survives untouched for
+           * every caller that does not pass `empty`.
+           */
+          <div className="os-tgs">
+            <ul className="os-tgs-list">
+              {started.map((r) => (
+                <li key={r.key} className={r.done ? "done" : undefined}>
+                  {/* the tick is a mark, not a control — the row states a record, and pressing it
+                      could only ever disagree with the record. `aria-hidden`: the row's own text
+                      already says "Done —" when it is done. */}
+                  <span className="os-tgs-ck" aria-hidden="true" />
+                  <span className="os-tgs-deed">
+                    {r.deed}
+                    <small>{r.done ? r.doneNote : r.note}</small>
+                  </span>
+                  {/* ⚠️ HIDDEN, NOT REMOVED, on a finished row — ref `.tl li.done .go{visibility:hidden}`.
+                      Removing it collapses the row's third column and the four remaining chips
+                      shift, so finishing a deed would move the controls under the pointer. */}
+                  {r.done ? (
+                    <span className="os-tgs-go" aria-hidden="true">{r.chip}</span>
+                  ) : (
+                    <button type="button" className="os-tgs-go" onClick={() => onNavigate(r.tab, r.sub)}>
+                      {r.chip}
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+            <p className="os-tgs-foot">{GETTING_STARTED_FOOT}</p>
+          </div>
+        ) : dayOne ? (
           <div className="os-tempty os-dayone-tasks">
             <span>Tasks appear here as your queries progress.</span>
             <div className="os-dayone-ctas">

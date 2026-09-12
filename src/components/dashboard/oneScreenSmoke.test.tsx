@@ -25,7 +25,14 @@ const rule = (sel: string) => cssRule(cssRules, sel, "oneScreen.css");
 const NOW = new Date(2026, 7, 6, 15, 0, 0);
 const daysAgo = (n: number) => new Date(NOW.getTime() - n * 86400000).toISOString();
 
-const q = (over: Record<string, unknown>) => ({ id: String(Math.random()), status: QueryStatus.QUERIED, ...over }) as any;
+/* ⚠️ `manuscriptId` IS PART OF THE FACTORY NOW, AND IT WAS ALWAYS MISSING (empty-states pack,
+   Phase 1). `Query.manuscriptId` is a required string in `types.ts` AND in `firestore.rules`, so a
+   query without one is not a value this system can produce — and `scopeQueries` filters strictly on
+   it, so every fixture here reached the cards as an EMPTY scoped set. Two cases below were named for
+   queries that never arrived ("a single point on the record" over a scoped record of zero points);
+   they passed because the outcome they asserted happened to be the zero-scoped-query outcome. The
+   id matches `base.activeManuscript`, so the fixtures now produce what their names claim. */
+const q = (over: Record<string, unknown>) => ({ id: String(Math.random()), status: QueryStatus.QUERIED, manuscriptId: "m1", ...over }) as any;
 
 const base = {
   queries: [q({ dateSent: daysAgo(30) }), q({ dateSent: daysAgo(2) })],
@@ -444,16 +451,28 @@ describe("§9 · first-run states", () => {
      and the tasks card now, which is where `scopedStage` was always the input. The ACCOUNT-wide
      `stage` that drove the pills is deleted with them; the SCOPED one is not, and that split was
      already the file's own documented decision (B3). */
-  it("day one: the invitation chart and the two ghost CTAs", () => {
+  it("day one: the faded example and the getting-started deeds", () => {
     const html = render({ queries: [], manuscripts: [], agents: [], activeManuscript: null });
-    expect(html).toContain("Every query you send and every reply that comes back will be charted here.");
-    expect(html).toContain("Send your first query");
-    /* ⚠️ RETARGETED (Phase 5): the header's "Nothing needs you" was the retired count trio's empty
-       slot. Day one states its case in the BODY, which is where the two first moves are. */
-    expect(html).toContain("Tasks appear here as your queries progress.");
-    expect(html).toContain("Add your manuscript");
-    expect(html).toContain("Add an agent");
-    expect(html).toContain("The story starts with your first query.");
+    /* ⚠️ RETARGETED (empty-states pack, Phase 1) — and this is a SUPERSESSION, not a rebaseline.
+       Day one used to draw the chart's invitation ("Every query you send …") and the tasks card's
+       two ghost CTAs. Both branches still exist and still render for any caller that does not pass
+       `empty`; the dashboard now passes it, because the ref's first getting-started deed is "Add
+       your first manuscript" — a row addressed to an account with no manuscript, i.e. this one.
+       Behind the old two-CTA state that row could only ever have been ticked and decorative.
+
+       ⚠️ THE OLD LINES ARE ASSERTED ABSENT, not merely unmentioned: a supersession that leaves the
+       superseded thing on screen is two first-run states on one page. */
+    expect(html).toContain("Log your first query");
+    expect(html).toContain("Add your first manuscript");
+    expect(html).toContain("Getting started");
+    expect(html).not.toContain("Every query you send and every reply that comes back will be charted here.");
+    expect(html).not.toContain("Tasks appear here as your queries progress.");
+    /* ⚠️ THE FEED'S ZERO-ROWS LINE IS SUPERSEDED TOO, and only on the `all` tab. The ghost tail's
+       caveat is the message now; keeping both would put two sentences about an empty feed in one
+       column. A NARROWED tab with nothing in it still keeps its own line, because that is a fact
+       about the filter, which the generic caveat does not state — asserted in `dashEmptyState`. */
+    expect(html).not.toContain("The story starts with your first query.");
+    expect(html).toContain("every send, reply and note you record lands here");
     /* the retired pill row must not come back on the one state that had a pill of its own */
     expect(html).not.toContain(">Day one<");
   });

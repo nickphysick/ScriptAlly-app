@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — empty states v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f5f1eb; --parchment:#fdfaf5; --white:#ffffff;
+    --ink:#1c130f; --ink-2:rgba(28,19,15,.72); --ink-3:rgba(28,19,15,.48); --ink-4:rgba(28,19,15,.30);
+    --line:rgba(28,19,15,.12); --line-2:rgba(28,19,15,.07);
+    --frame:#7c3a2a;                 /* 1px MountCard frame only — never a fill */
+    --sand:#f7efe3; --sage:#e0e5dd; --pink:#f5e6df; --slate:#d7e0e8; --grey:#e4e1db; --pink-2:#e8c8bc;
+    --sb:300px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;font-size:14px}
+  .serif{font-family:'Playfair Display',serif}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+  .hand{font-family:'Caveat',cursive;font-size:19px;color:var(--ink-2);line-height:1.15}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  a{color:inherit}
+
+  /* ---------- shell ---------- */
+  .app{display:grid;grid-template-columns:var(--sb) 1fr;min-height:100vh}
+  .side{padding:22px 20px;border-right:1px solid var(--line-2)}
+  .logo{display:flex;align-items:center;gap:10px;padding:4px 8px 22px}
+  .logo .serif{font-size:26px;font-weight:600}
+  .ms{display:flex;align-items:center;gap:10px;background:var(--white);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:22px}
+  .ms .thumb{width:36px;height:36px;border-radius:8px;background:var(--sage)}
+  .ms b{display:block;font-weight:600;font-size:14.5px}
+  .ms span{font-size:12.5px;color:var(--ink-3)}
+  .ms .arr{margin-left:auto;color:var(--ink-4);font-size:14px;letter-spacing:6px}
+  .nav-group{margin:22px 0 8px 12px}
+  .nav a{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:10px;font-size:16px;text-decoration:none;color:var(--ink-2)}
+  .nav a.on{background:var(--white);border:1px solid var(--line);color:var(--ink)}
+  .nav svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+  .acct{margin-top:26px;padding-top:18px;border-top:1px solid var(--line-2);display:flex;gap:12px;align-items:center;padding-left:12px}
+  .acct .av{width:38px;height:38px;border-radius:50%;background:var(--white);border:1px solid var(--line);display:grid;place-items:center;font-size:12px;color:var(--ink-3)}
+  .acct b{display:block;font-weight:600}
+  .acct span{font-size:12.5px;color:var(--ink-3)}
+  .upgrade{display:block;width:100%;margin-top:18px;padding:16px;border-radius:999px;background:var(--pink);border:1px solid var(--pink-2);font-weight:600;font-size:14px;text-align:center}
+
+  .main{padding:16px 24px 24px 12px;display:flex;flex-direction:column;gap:16px}
+  .top{display:flex;align-items:center;gap:18px;height:44px}
+  .crumb{display:flex;align-items:center;gap:12px;font-size:20px}
+  .crumb .sep{color:var(--ink-4)}
+  .crumb .here{font-weight:600}
+  .saved{padding-left:16px;border-left:1px solid var(--line)}
+  .search{margin-left:auto;display:flex;align-items:center;gap:10px;width:300px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--white);color:var(--ink-3)}
+  .search kbd{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 6px;border:1px solid var(--line);border-radius:5px;background:var(--cream)}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:999px;border:1px solid var(--line);background:var(--white);font-weight:500}
+  .pill.dark{background:var(--ink);color:var(--white);border-color:var(--ink)}
+  .page{background:var(--white);border:1px solid var(--line);border-radius:16px;flex:1;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 1px 0 rgba(28,19,15,.03)}
+  .ph{display:flex;align-items:flex-start;gap:22px;padding:34px 48px 26px;border-bottom:1px solid var(--line-2)}
+  .ph h1{font-size:44px;font-weight:600;line-height:1}
+  .ph p{margin-top:10px;font-family:'Playfair Display',serif;font-style:italic;font-size:19px;color:var(--ink-2)}
+  .ph .cta{margin-left:auto}
+  .body{padding:28px 48px 40px;flex:1}
+
+  /* ---------- MountCard (Form 11) ---------- */
+  .mount{background:var(--parchment);padding:8px;border-radius:14px}
+  .mount .frame{border:1px solid var(--frame);border-radius:9px;overflow:hidden;background:var(--white)}
+  .mount .band{background:var(--sage);padding:14px 20px;border-bottom:1px solid var(--line)}
+  .mount .band h3{font-size:20px;font-weight:600}
+  .mount .band p{margin-top:2px;font-size:13px;color:var(--ink-2)}
+  .mount .inner{padding:20px}
+
+  /* ---------- ghosts ---------- */
+  .ghost{border:1.5px dashed rgba(28,19,15,.22);border-radius:10px;background:transparent}
+  .bar{height:10px;border-radius:5px;background:var(--grey)}
+  .dot{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink-3);display:inline-block;flex:none}
+  .dot.ghost{border-style:dashed;border-color:var(--ink-4)}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border-radius:999px;font-weight:600;font-size:15px}
+  .btn.primary{background:var(--ink);color:var(--white)}
+  .btn.soft{background:var(--cream);border:1px solid var(--line)}
+  .btn.ghostbtn{border:1px solid var(--line);color:var(--ink-3)}
+  .links{display:flex;gap:14px;font-size:13.5px;color:var(--ink-2)}
+  .links a{text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--ink-4)}
+  .links i{font-style:normal;color:var(--ink-4)}
+  .plane{width:34px;height:34px;stroke:var(--ink-3);fill:none;stroke-width:1.4;stroke-linejoin:round}
+
+  /* ---------- switcher (mockup chrome only) ---------- */
+  .switch{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:4px;padding:5px;background:var(--ink);border-radius:999px;box-shadow:0 8px 30px rgba(28,19,15,.25);z-index:9}
+  .switch button{color:rgba(255,255,255,.7);padding:8px 16px;border-radius:999px;font-size:13px;font-weight:500}
+  .switch button.on{background:var(--white);color:var(--ink)}
+  .screen{display:none}.screen.on{display:contents}
+
+  /* ---------- DASHBOARD ---------- */
+  .dash{display:grid;grid-template-columns:minmax(0,1fr) 460px;gap:20px}
+  .dash-l{display:flex;flex-direction:column;gap:20px}
+  .hello{display:grid;grid-template-columns:auto minmax(0,1fr);gap:36px;align-items:center;padding:8px 8px 0}
+  .hello h1{white-space:nowrap}
+  .hello h1{font-size:64px;line-height:1;font-weight:600}
+  .hello .sub{display:flex;align-items:center;gap:16px;margin-top:10px;font-size:20px;color:var(--ink-2);white-space:nowrap}
+  .tour{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--line);border-radius:10px;background:var(--white);font-size:13.5px;color:var(--ink)}
+  .tour::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--frame)}
+  .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .stat{display:flex;gap:14px;align-items:flex-start}
+  .stat .ico{width:56px;height:56px;border-radius:12px;background:var(--sand);display:grid;place-items:center}
+  .stat .ico svg{width:30px;height:30px;stroke:var(--ink-2);fill:none;stroke-width:1.3}
+  .stat .lab{font-size:15.5px;color:var(--ink-2)}
+  .stat .num{font-family:'Playfair Display',serif;font-size:34px;line-height:1.05;color:var(--ink-4);margin-top:2px}
+  .stat .hand{font-size:17px;margin-top:2px;color:var(--ink-3)}
+  .stat .lab{white-space:nowrap}
+  .row2{display:grid;grid-template-columns:380px 1fr;gap:20px}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:14px;box-shadow:inset 0 0 0 1px rgba(124,58,42,.05)}
+  .card .hd{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line-2)}
+  .card .hd h2{font-size:24px;font-weight:600}
+  .msc{padding:34px 24px 26px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+  .msc .hero{width:120px;height:120px;border-radius:24px;background:var(--parchment);border:1px solid var(--line-2);display:grid;place-items:center}
+  .msc .hero svg{width:64px;height:64px;stroke:var(--ink-2);fill:var(--sage);stroke-width:1.2}
+  .msc h2{font-size:30px;font-weight:600;line-height:1.1}
+  .chips{display:flex;gap:8px}
+  .chip{padding:6px 14px;border-radius:999px;background:var(--sage);font-size:13.5px;font-weight:500}
+  .by{display:flex;align-items:center;gap:12px;margin-top:8px;padding-top:16px;border-top:1px solid var(--line-2);width:100%;justify-content:center}
+  .by .av{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-3)}
+  .by .name{text-align:left;font-size:13px;color:var(--ink-2)}
+  .by .name b{display:block;font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--ink)}
+  .chart .hd{flex-wrap:wrap;row-gap:12px}
+  .chart .hd .n{font-family:'Playfair Display',serif;font-size:36px;line-height:1;color:var(--ink-4)}
+  .chart .hd .t{font-size:19px;font-weight:500;white-space:nowrap}
+  .seg{margin-left:auto;display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{padding:7px 12px;font-size:13.5px;color:var(--ink-2);white-space:nowrap}
+  .seg button.on{background:var(--cream);font-weight:600;color:var(--ink)}
+  .range{display:flex;align-items:center;gap:12px;padding:7px 12px;border:1px solid var(--line);border-radius:10px;font-size:13.5px;white-space:nowrap}
+  .range .slider{width:70px;height:2px;background:var(--line);position:relative}
+  .range .slider::after{content:"";position:absolute;left:50%;top:-8px;width:3px;height:18px;background:var(--ink);border-radius:2px}
+  .plot{position:relative;height:300px;margin:26px 26px 18px 26px}
+  .plot .y{position:absolute;left:0;top:0;bottom:24px;width:28px;border-right:1px dashed var(--line)}
+  .plot .y i{position:absolute;left:0;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-4);font-style:normal}
+  .plot .grid{position:absolute;left:36px;right:0;top:0;bottom:24px;display:grid;grid-template-columns:repeat(8,1fr)}
+  .plot .grid i{border-left:1px dashed var(--line-2)}
+  .plot .x{position:absolute;left:36px;right:0;bottom:0;display:grid;grid-template-columns:repeat(8,1fr);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--ink-4)}
+  .plot .zero{position:absolute;left:36px;right:0;bottom:24px;border-top:1.5px dotted var(--ink-4)}
+  .plot .sketch{position:absolute;left:36px;right:0;top:0;bottom:24px;width:calc(100% - 36px);height:calc(100% - 24px)}
+  .plot .note{position:absolute;left:44%;top:26%;max-width:260px}
+  .plot .note svg{position:absolute;left:-52px;top:26px;width:52px;height:40px;stroke:var(--ink-3);fill:none;stroke-width:1.4}
+  .todo .hd .badge{padding:3px 12px;border-radius:999px;background:var(--pink);font-family:'JetBrains Mono',monospace;font-size:12px}
+  .todo .hd .all{margin-left:auto;font-size:14px;color:var(--ink-2)}
+  .tl{list-style:none}
+  .tl li{display:grid;grid-template-columns:28px 1fr auto;gap:16px;align-items:center;padding:16px 22px;border-bottom:1px solid var(--line-2)}
+  .tl li:last-child{border-bottom:0}
+  .tl .ck{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--ink-3)}
+  .tl li.done .ck{background:var(--sage);border-color:var(--ink-3);position:relative}
+  .tl li.done .ck::after{content:"";position:absolute;left:7px;top:3px;width:5px;height:10px;border:solid var(--ink);border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+  .tl .deed{font-size:16px}
+  .tl .deed em{font-style:italic}
+  .tl .deed small{display:block;font-size:12.5px;color:var(--ink-3);margin-top:3px}
+  .tl li.done .deed{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--ink-4)}
+  .tl li.done .deed small{text-decoration:none}
+  .tl .go{padding:8px 14px;border:1px solid var(--line);border-radius:999px;font-size:13px;color:var(--ink-2);background:var(--white)}
+  .tl li.done .go{visibility:hidden}
+  .tl .foot{padding:16px 22px 22px;border-top:1px solid var(--line-2);display:flex;gap:10px;align-items:center;color:var(--ink-3)}
+  .dash-r{display:flex;flex-direction:column;gap:20px}
+  .act .hd h2{font-size:30px;font-weight:500}
+  .act .hd .cnt{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--ink-3);margin-left:4px}
+  .act .day{text-align:center;padding:14px 0 6px}
+  .ev{margin:6px 18px;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--parchment)}
+  .ev p{font-size:16px;margin:6px 0 10px}
+  .ev .meta{display:flex;justify-content:space-between}
+  .act .rest{padding:40px 30px 10px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
+  .act .rest .lanes{width:100%;display:flex;flex-direction:column;gap:12px;margin-bottom:6px}
+  .act .rest .lanes .ghost{height:58px}
+  .comm{display:grid;grid-template-columns:96px 1fr;gap:18px;padding:26px 24px;align-items:center;position:relative}
+  .comm .beta{position:absolute;top:18px;right:18px;font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 10px;border:1px solid var(--line);border-radius:999px;color:var(--ink-3)}
+  .comm h2{font-size:30px;font-weight:600}
+  .comm p{font-size:16px;color:var(--ink-2);margin-top:4px}
+  .comm .sprout{width:96px;height:96px;border-radius:20px;background:var(--parchment);display:grid;place-items:center}
+  .comm .sprout svg{width:52px;height:52px;stroke:var(--ink-2);fill:none;stroke-width:1.3}
+  /* ---------- ANALYTICS ---------- */
+  .an-strip{display:flex;align-items:center;gap:22px;margin-bottom:22px}
+  .an-strip .n{font-family:'Playfair Display',serif;font-size:34px;color:var(--ink-4)}
+  .an-strip .seg{margin-left:auto}
+  .an-strip .seg button{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:12px 20px}
+  .an-strip .seg button.on{background:var(--pink)}
+  .notice{display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;padding:20px 26px;margin-bottom:22px}
+  .notice .ico{width:60px;height:60px;border-radius:14px;background:var(--sand);display:grid;place-items:center}
+  .notice h3{font-size:22px;font-weight:600}
+  .notice p{color:var(--ink-2);margin-top:4px}
+  .tiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+  .tile{padding:22px 24px;min-height:230px;display:flex;flex-direction:column;gap:14px}
+  .tile.wide{grid-column:span 2}
+  .tile h4{font-size:19px;font-weight:600;color:var(--ink-2)}
+  .tile .fig{flex:1;position:relative;display:flex;align-items:flex-end}
+  .tile .foot{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+  .tile .foot .hand{font-size:17px}
+  .gnum{font-family:'Playfair Display',serif;font-size:56px;line-height:1;color:var(--ink-4)}
+  .gnum small{font-size:22px;color:var(--ink-4)}
+  .gbars{display:flex;align-items:flex-end;gap:10px;width:100%;height:110px}
+  .gbars i{flex:1;border:1.5px dashed rgba(28,19,15,.22);border-bottom:0;border-radius:6px 6px 0 0}
+  .gbars i:nth-child(1){height:100%}.gbars i:nth-child(2){height:70%}.gbars i:nth-child(3){height:45%}.gbars i:nth-child(4){height:28%}.gbars i:nth-child(5){height:14%}
+  .gline{width:100%;height:120px}
+  .gline path{fill:none;stroke:rgba(28,19,15,.22);stroke-width:1.5;stroke-dasharray:2 7}
+  .gline line{stroke:var(--line)}
+  .gring{width:110px;height:110px;border-radius:50%;border:12px dashed rgba(28,19,15,.18)}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12.5px;color:var(--ink-3)}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+  </style>
+</head>
+<body>
+
+<div class="switch" aria-label="Mockup screen switcher">
+  <button class="on" data-s="dash">Dashboard</button>
+  <button data-s="qc">Query Centre</button>
+  <button data-s="cl">Contact list</button>
+  <button data-s="an">Analytics</button>
+</div>
+
+<div class="app">
+  <!-- ============ SIDEBAR (shared) ============ -->
+  <aside class="side">
+    <div class="logo">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#1c130f" stroke-width="1.6" stroke-linejoin="round"><path d="M6 20 L34 8 L26 34 L20 22 Z"/><path d="M20 22 L34 8"/><path d="M10 33c-3 0-4-3-2-4s5 0 3 2-4 2-4 2"/></svg>
+      <span class="serif">ScriptAlly</span>
+    </div>
+    <div class="ms"><div class="thumb"></div><div><b>The Backpack …</b><span>Fantasy · 90,000 wo…</span></div><span class="arr">‹›</span></div>
+    <nav class="nav">
+      <a href="#" id="nav-dash"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</a>
+      <div class="mono nav-group">Queries</div>
+      <a href="#" id="nav-qc"><svg viewBox="0 0 24 24"><path d="M3 11 21 3l-8 18-3-8z"/></svg>Query Centre</a>
+      <a href="#" id="nav-an"><svg viewBox="0 0 24 24"><path d="M3 20h18M4 16l5-6 4 3 7-8"/></svg>Analytics</a>
+      <div class="mono nav-group">Agents</div>
+      <a href="#" id="nav-cl"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M21.5 19c0-2.6-2-4.6-4.5-4.6"/></svg>Contact list</a>
+      <a href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 14 14l-5.5 1.5L10 10z"/></svg>Discover</a>
+      <div class="mono nav-group">Materials</div>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 4v16M9 4v16M14 4l4 16"/></svg>Manuscripts</a>
+      <a href="#"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="13" height="17" rx="1.5"/><path d="M3 7v14h13"/></svg>Comparable titles</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>Submission packages</a>
+      <div class="mono nav-group">Tasks</div>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M3 6.5l1.5 1.5L7 5.5M3 12.5l1.5 1.5L7 11.5M3 18.5l1.5 1.5L7 17.5M10 7h11M10 13h11M10 19h11"/></svg>To-do list</a>
+      <a href="#"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M5 3h9l5 5v13H5z"/><path d="M14 3v5h5"/></svg>Noteboard</a>
+      <div class="mono nav-group">Account</div>
+    </nav>
+    <div class="acct"><div class="av">SE</div><div><b>September Example</b><span>Free plan</span></div></div>
+    <button class="upgrade">Upgrade</button>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <style>
+  /* ---------- shared: faded example + centred overlay ---------- */
+  .stage{position:relative}
+  .stage .faded{opacity:.28;pointer-events:none;user-select:none;filter:saturate(.85)}
+  .stage .over{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3}
+  .over-glow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64%;height:80%;background:radial-gradient(ellipse at center,rgba(255,255,255,.95) 0%,rgba(255,255,255,.75) 45%,rgba(255,255,255,0) 72%);pointer-events:none}
+  .over-card{position:relative;text-align:center;max-width:520px;padding:6px 20px}
+  .over-card h3{font-size:34px;font-weight:600;line-height:1.1}
+  .over-card p{margin:12px auto 22px;font-size:16px;color:var(--ink-2);line-height:1.55;max-width:42ch}
+  .over-card .links{justify-content:center;margin-top:16px}
+
+  /* ---------- DASHBOARD chart, populated ---------- */
+  .plot2{position:relative;height:300px;margin:22px 26px 18px 26px}
+  .plot2 .y{position:absolute;left:0;top:0;bottom:24px;width:28px;border-right:1px solid var(--line-2)}
+  .plot2 .y i{position:absolute;right:8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-4);font-style:normal}
+  .plot2 .grid{position:absolute;left:36px;right:0;top:0;bottom:24px;display:grid;grid-template-rows:repeat(4,1fr)}
+  .plot2 .grid i{border-top:1px solid var(--line-2)}
+  .plot2 .x{position:absolute;left:36px;right:0;bottom:0;display:grid;grid-template-columns:repeat(8,1fr);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--ink-4)}
+  .plot2 svg{position:absolute;left:36px;top:0;width:calc(100% - 36px);height:calc(100% - 24px)}
+  .chart .legend{padding:0 26px 18px;justify-content:flex-end}
+  .chart .hd.faded,.chart .plot2.faded,.chart .legend.faded{opacity:.42}
+  .chart .stage .over .btn{box-shadow:0 10px 30px rgba(28,19,15,.18)}
+
+  /* ---------- toolbar (contact parity) ---------- */
+  .tb{display:flex;align-items:center;gap:10px;padding:0 0 22px;border-bottom:1px solid var(--line-2);margin-bottom:24px}
+  .tb .count{font-family:'Playfair Display',serif;font-size:22px;font-weight:500}
+  .tb .r{margin-left:auto;display:flex;align-items:center;gap:9px}
+  .tb .field{border:1px solid var(--line);border-radius:10px;background:var(--parchment);padding:10px 15px;font-size:13.5px;color:var(--ink-3);min-width:240px}
+  .tb .g{border:1px solid var(--line);border-radius:10px;background:var(--white);padding:10px 15px;font-size:13.5px}
+  .tb .views{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .tb .views span{padding:9px 13px;font-size:13.5px;color:var(--ink-2)}
+  .tb .views span.on{background:var(--cream);color:var(--ink);font-weight:600}
+  .tb .add{background:var(--pink);border:1px solid var(--pink-2);border-radius:10px;padding:10px 16px;font-size:13.5px;font-weight:500}
+  .tb.faded{opacity:.4}
+
+  /* ---------- card grid + record cards ---------- */
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  .rc{border:1px solid var(--line);border-radius:12px;background:var(--white);overflow:hidden;display:flex;flex-direction:column}
+  .rc .head{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--sage)}
+  .rc .head.sand{background:var(--sand)}.rc .head.pink{background:var(--pink)}.rc .head.slate{background:var(--slate)}.rc .head.grey{background:var(--grey)}
+  .rc .hp{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;background:var(--white);border:1px solid var(--line-2);border-radius:999px;padding:5px 11px;color:var(--ink-2)}
+  .rc .hd-r{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--ink-3)}
+  .rc .rail{display:flex;gap:2px}.rc .rail i{flex:1;height:3px;background:var(--grey)}.rc .rail i.on{background:var(--ink-3)}.rc .rail.complete i{background:rgba(122,143,106,.5)}
+  .rc .bd{padding:18px 18px 14px;flex:1}
+  .rc .who{display:flex;gap:13px;align-items:flex-start}
+  .rc .av{width:46px;height:46px;flex:none;border-radius:50%;border:1px solid var(--line);background:var(--parchment);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-2)}
+  .rc .nm{font-family:'Playfair Display',serif;font-weight:700;font-size:21px;line-height:1.15}
+  .rc .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:14.5px;color:var(--ink-2);margin-top:2px}
+  .rc .meta{margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+  .rc .sec{margin-top:14px;padding-top:12px;border-top:1px solid var(--line-2)}
+  .rc .sl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+  .rc .sv{margin-top:7px;font-size:13px;line-height:1.5}
+  .rc .sv em{font-style:italic}
+  .rc .ft{display:flex;gap:9px;padding:14px 18px 18px;border-top:1px solid var(--line-2)}
+  .rc .b1{background:var(--ink);color:var(--white);border-radius:9px;padding:10px 17px;font-size:13px;font-weight:500}
+  .rc .b2{border:1px solid var(--line);border-radius:9px;padding:10px 17px;font-size:13px}
+  .rc .sd{display:inline-flex;gap:8px;align-items:center}
+  .sdot{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink);position:relative;flex:none;background:conic-gradient(var(--ink) var(--fill,0%),transparent 0)}
+  .sdot.closed{background:var(--ink-3);border-color:var(--ink-3)}
+  .sdot.offer{background:var(--ink)}
+
+  /* contact list hero */
+  .hero-over h2{font-size:34px;font-weight:600;line-height:1.12;max-width:26ch;margin:0 auto}
+  #s-cl .grid3{padding:64px 0}
+  .hero-over p{margin:12px auto 20px;font-size:16px;color:var(--ink-2);max-width:50ch;line-height:1.5}
+  .hero-over .hand{margin-top:16px;display:block}
+  .cl-note{margin-top:28px;padding-top:22px;border-top:1px solid var(--line-2);text-align:center}
+</style>
+
+    <!-- ================= DASHBOARD ================= -->
+    <section class="screen on" id="s-dash">
+      <div class="top">
+        <div class="search" style="margin-left:0;width:760px">⌕ <span>Search agents, queries, manuscripts…</span><kbd>⌘K</kbd></div>
+        <span class="pill" style="margin-left:auto">✎ Feedback</span><span class="pill">?</span><span class="pill dark">＋ New</span>
+      </div>
+
+      <div class="dash" style="padding-top:8px">
+        <div class="dash-l">
+          <div class="hello">
+            <div>
+              <h1 class="serif">Hello, September</h1>
+              <div class="sub">What's on your desk today? <span class="tour">Take the tour</span></div>
+            </div>
+            <div class="stats">
+              <div class="stat"><div class="ico"><svg viewBox="0 0 24 24"><path d="M3 11 21 3l-8 18-3-8z"/></svg></div><div><div class="lab">Queries sent</div><div class="num">0</div><div class="hand">starts with your first send</div></div></div>
+              <div class="stat"><div class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 10h16M9 5v4"/></svg></div><div><div class="lab">Agents on file</div><div class="num">0</div><div class="hand">build it in Contact list</div></div></div>
+              <div class="stat"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg></div><div><div class="lab">Responses</div><div class="num">0</div><div class="hand">arrive once queries are out</div></div></div>
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="card msc">
+              <div class="hero"><svg viewBox="0 0 24 24"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M4 6h2M4 10h2M4 14h2M4 18h2M9 8h6M9 12h4"/></svg></div>
+              <h2 class="serif">The Backpack on the Seat</h2>
+              <div class="chips"><span class="chip">Adult</span><span class="chip">Fantasy</span></div>
+              <div class="mono" style="color:var(--ink-2)">90,000 words</div>
+              <div class="by"><div class="av">＋</div><div class="name">by<b>September Exa…</b></div></div>
+            </div>
+
+            <!-- active queries chart — faded populated example, CTA centred -->
+            <div class="card chart stage">
+              <div class="hd faded">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1c130f" stroke-width="1.5"><path d="M3 20h18M4 16l5-6 4 3 7-8"/></svg>
+                <span class="n" style="color:var(--ink)">14</span>
+                <div><div class="t">Active queries</div><div class="mono">9 awaiting a reply</div></div>
+                <div class="seg"><button class="on">Daily</button><button>Weekly</button><button>Monthly</button></div>
+                <div class="range"><span class="slider"></span>Last 8 weeks</div>
+              </div>
+              <div class="plot2 faded">
+                <div class="y"><i style="bottom:-6px">0</i><i style="bottom:calc(25% - 6px)">5</i><i style="bottom:calc(50% - 6px)">10</i><i style="bottom:calc(75% - 6px)">15</i><i style="top:-4px">20</i></div>
+                <div class="grid"><i></i><i></i><i></i><i></i></div>
+                <svg viewBox="0 0 800 276" preserveAspectRatio="none">
+                  <path d="M0 276 L0 276 L60 262 L60 248 L110 248 L110 235 L150 235 L150 221 L190 221 L190 207 L240 207 L240 180 L290 180 L290 166 L340 166 L340 152 L400 152 L400 138 L450 138 L450 124 L500 124 L500 110 L560 110 L560 97 L620 97 L620 83 L680 83 L680 83 L740 83 L740 83 L800 83 L800 276 Z" fill="#d3dbcf"/>
+                  <path d="M0 276 L60 276 L60 262 L110 262 L110 248 L150 248 L150 235 L190 235 L190 221 L240 221 L240 207 L290 207 L290 193 L340 193 L340 180 L400 180 L400 166 L450 166 L450 152 L500 152 L500 152 L560 152 L560 138 L620 138 L620 152 L680 152 L680 152 L740 152 L740 152 L800 152 L800 276 Z" fill="#efd6c9"/>
+                  <path d="M0 276 L60 262 L60 248 L110 248 L110 235 L150 235 L150 221 L190 221 L190 207 L240 207 L240 180 L290 180 L290 166 L340 166 L340 152 L400 152 L400 138 L450 138 L450 124 L500 124 L500 110 L560 110 L560 97 L620 97 L620 83 L800 83" fill="none" stroke="#1c130f" stroke-width="1.8"/>
+                  <g fill="#fff" stroke="#1c130f" stroke-width="1.5"><circle cx="60" cy="248" r="3.5"/><circle cx="150" cy="221" r="3.5"/><circle cx="240" cy="180" r="3.5"/><circle cx="340" cy="152" r="3.5"/><circle cx="450" cy="124" r="3.5"/><circle cx="560" cy="97" r="3.5"/><circle cx="620" cy="83" r="3.5"/></g>
+                </svg>
+                <div class="x"><i>20 Jul</i><i>27 Jul</i><i>03 Aug</i><i>10 Aug</i><i>17 Aug</i><i>24 Aug</i><i>31 Aug</i><i>07 Sep</i></div>
+              </div>
+              <div class="legend faded"><span><i style="background:#1c130f"></i>Active</span><span><i style="background:var(--pink)"></i>Awaiting reply</span><span><i style="background:var(--sage)"></i>Requested</span></div>
+              <div class="over"><span class="over-glow"></span><span class="btn primary" style="position:relative"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 11 21 3l-8 18-3-8z"/></svg>Log your first query</span></div>
+            </div>
+          </div>
+
+          <div class="card todo">
+            <div class="hd">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1c130f" stroke-width="1.5"><path d="M4 7h10M4 12h7M4 17h6M15 15l2 2 4-5"/></svg>
+              <h2 class="serif">To-do list</h2><span class="badge">4</span>
+              <span class="mono" style="margin-left:6px">Getting started</span>
+              <a href="#" class="all">See all →</a>
+            </div>
+            <ul class="tl">
+              <li class="done"><span class="ck"></span><div class="deed">Add your first manuscript<small>Done — <em>The Backpack on the Seat</em> is on the shelf.</small></div><span class="go">Manuscripts</span></li>
+              <li><span class="ck"></span><div class="deed">Add an agent to your contact list<small>Even one is enough to start. Discover has UK agents to browse.</small></div><span class="go">Contact list</span></li>
+              <li><span class="ck"></span><div class="deed">Log your first query<small>Already tracking in a spreadsheet? Import it and pick up where you left off.</small></div><span class="go">Query Centre</span></li>
+              <li><span class="ck"></span><div class="deed">Add your query letter, synopsis and opening sample<small>So each query records exactly what was sent.</small></div><span class="go">Submission packages</span></li>
+              <li><span class="ck"></span><div class="deed">Add three comparable titles<small>Most agents ask for them; they go straight into your packages.</small></div><span class="go">Comparable titles</span></li>
+            </ul>
+            <div class="foot hand">these tick themselves off as you go — no need to come back and mark them</div>
+          </div>
+        </div>
+
+        <div class="dash-r">
+          <div class="card act">
+            <div class="hd"><span style="font-size:22px">◷</span><h2 class="serif">Activity</h2><span class="cnt">1 event</span><span style="margin-left:auto;color:var(--ink-4)">⏷</span></div>
+            <div class="day mono">Fri 11 Sep</div>
+            <div class="ev"><div class="mono">Housekeeping</div><p>You added a new title <em>The Backpack on the Seat</em> to your manuscripts</p><div class="meta mono"><span>Not tied to a query</span><span>11:14am</span></div></div>
+            <div class="rest">
+              <div class="lanes"><div class="ghost" style="opacity:.7"></div><div class="ghost" style="opacity:.4"></div><div class="ghost" style="opacity:.2"></div></div>
+              <div class="hand">every send, reply and note you record lands here — the feed becomes your querying history</div>
+              <div class="mono" style="margin-top:14px">Last 30 days</div>
+            </div>
+          </div>
+          <div class="card comm">
+            <span class="beta">Beta</span>
+            <div class="sprout"><svg viewBox="0 0 24 24"><path d="M12 21v-9M12 12c0-3 2-5 5-5-0 3-2 5-5 5zM12 15c0-3-2-5-5-5 0 3 2 5 5 5z"/><path d="M5 21h14"/></svg></div>
+            <div><h2 class="serif">Community</h2><p>Benchmark your key stats against writers at a similar stage.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= QUERY CENTRE (grid view) ================= -->
+    <section class="screen" id="s-qc">
+      <div class="top">
+        <span style="color:var(--ink-3);font-size:18px">▯</span>
+        <div class="crumb serif"><span>ScriptAlly</span><span class="sep">/</span><span>Queries</span><span class="sep">/</span><span class="here">Query Centre</span></div>
+        <span class="mono saved">All changes saved</span>
+        <div class="search">⌕ <span>Search</span><kbd>⌘K</kbd></div>
+        <span class="pill">✎ Feedback</span><span class="pill">?</span><span class="pill dark">＋ New</span>
+      </div>
+      <div class="page">
+        <div class="ph">
+          <svg width="88" height="80" viewBox="0 0 88 80" fill="none" stroke="#1c130f" stroke-width="1.2" stroke-linejoin="round"><path d="M8 40l30-8 8 28-24 12z" fill="#f5e6df"/><path d="M38 32l40-20-28 30z" fill="#e0e5dd"/><path d="M50 42l-4 18"/></svg>
+          <div><h1 class="serif">Query Centre</h1><p>Every query, every response — track every step of your journey so far</p></div>
+          <span class="btn primary cta">＋ Log new query</span>
+        </div>
+        <div class="body">
+          <div class="tb faded">
+            <span class="count">0 queries</span>
+            <div class="r">
+              <div class="views"><span class="on">Grid</span><span>List</span><span>Board</span></div>
+              <div class="field">Search queries…</div>
+              <span class="g">Filters</span><span class="g">Group</span><span class="g">Sort</span>
+            </div>
+          </div>
+
+          <div class="stage">
+            <div class="grid3 faded">
+              <!-- 1 Queried -->
+              <div class="rc"><div class="head sand"><span class="hp">Queried</span><span class="hd-r">Sent 04 Sep</span></div>
+                <div class="bd"><div class="who"><div class="av">AO</div><div><div class="nm">Amara Osei</div><div class="ag">Osei Literary</div><div class="meta">~8 weeks · Email</div></div></div>
+                  <div class="sec"><div class="sl">Manuscript</div><div class="sv"><em>The Backpack on the Seat</em></div></div>
+                  <div class="sec"><div class="sl">Sent</div><div class="sv">Query · synopsis · first three chapters</div></div>
+                  <div class="sec"><div class="sl">Where it's got to</div><div class="sv sd"><span class="sdot"></span>Waiting on Amara · day 7</div></div></div>
+                <div class="ft"><span class="b1">Record response</span><span class="b2">Open</span></div></div>
+              <!-- 2 Full requested -->
+              <div class="rc"><div class="head pink"><span class="hp">Full requested</span><span class="hd-r">Sent 12 Aug</span></div>
+                <div class="bd"><div class="who"><div class="av">DO</div><div><div class="nm">Daniel O'Rourke</div><div class="ag">Inkwell &amp; Stone</div><div class="meta">~6 weeks · Email</div></div></div>
+                  <div class="sec"><div class="sl">Manuscript</div><div class="sv"><em>The Backpack on the Seat</em></div></div>
+                  <div class="sec"><div class="sl">Sent</div><div class="sv">Query · synopsis · first 10 pages</div></div>
+                  <div class="sec"><div class="sl">Where it's got to</div><div class="sv sd"><span class="sdot" style="--fill:75%"></span>Your move — full requested 09 Sep</div></div></div>
+                <div class="ft"><span class="b1">Mark sent</span><span class="b2">Open</span></div></div>
+              <!-- 3 Partial sent -->
+              <div class="rc"><div class="head"><span class="hp">Partial sent</span><span class="hd-r">Sent 21 Jul</span></div>
+                <div class="bd"><div class="who"><div class="av">AK</div><div><div class="nm">Aisha Kapoor</div><div class="ag">The Lantern Agency</div><div class="meta">~12 weeks · Form</div></div></div>
+                  <div class="sec"><div class="sl">Manuscript</div><div class="sv"><em>The Backpack on the Seat</em></div></div>
+                  <div class="sec"><div class="sl">Sent</div><div class="sv">Query · synopsis · first 50 pages</div></div>
+                  <div class="sec"><div class="sl">Where it's got to</div><div class="sv sd"><span class="sdot" style="--fill:50%"></span>Waiting on Aisha · day 18</div></div></div>
+                <div class="ft"><span class="b1">Record response</span><span class="b2">Open</span></div></div>
+              <!-- 4 R&R -->
+              <div class="rc"><div class="head pink"><span class="hp">Revise &amp; resubmit</span><span class="hd-r">Sent 30 Jun</span></div>
+                <div class="bd"><div class="who"><div class="av">PL</div><div><div class="nm">Penhallow Literary</div><div class="ag">Agent not specified</div><div class="meta">~10 weeks · Email</div></div></div>
+                  <div class="sec"><div class="sl">Manuscript</div><div class="sv"><em>The Backpack on the Seat</em></div></div>
+                  <div class="sec"><div class="sl">Sent</div><div class="sv">Full manuscript · round 1</div></div>
+                  <div class="sec"><div class="sl">Where it's got to</div><div class="sv sd"><span class="sdot" style="--fill:75%"></span>Your move — notes received 28 Aug</div></div></div>
+                <div class="ft"><span class="b1">Record resubmission</span><span class="b2">Open</span></div></div>
+              <!-- 5 Offer -->
+              <div class="rc"><div class="head slate"><span class="hp">Offer</span><span class="hd-r">Sent 15 Jun</span></div>
+                <div class="bd"><div class="who"><div class="av">RB</div><div><div class="nm">Rosa Bellamy</div><div class="ag">Bellamy &amp; Vane</div><div class="meta">~6 weeks · Email</div></div></div>
+                  <div class="sec"><div class="sl">Manuscript</div><div class="sv"><em>The Backpack on the Seat</em></div></div>
+                  <div class="sec"><div class="sl">Sent</div><div class="sv">Full manuscript</div></div>
+                  <div class="sec"><div class="sl">Where it's got to</div><div class="sv sd"><span class="sdot offer"></span>Offer received 02 Sep · call booked</div></div></div>
+                <div class="ft"><span class="b1">Record decision</span><span class="b2">Open</span></div></div>
+              <!-- 6 Closed -->
+              <div class="rc"><div class="head grey"><span class="hp">Closed</span><span class="hd-r">Sent 02 Jun</span></div>
+                <div class="bd"><div class="who"><div class="av">TM</div><div><div class="nm">Tom Marlow</div><div class="ag">Marlow Rights</div><div class="meta">~8 weeks · Email</div></div></div>
+                  <div class="sec"><div class="sl">Manuscript</div><div class="sv"><em>The Backpack on the Seat</em></div></div>
+                  <div class="sec"><div class="sl">Sent</div><div class="sv">Query · synopsis · first three chapters</div></div>
+                  <div class="sec"><div class="sl">Where it's got to</div><div class="sv sd"><span class="sdot closed"></span>Passed 19 Aug · form reply</div></div></div>
+                <div class="ft"><span class="b2">Open</span><span class="b2">Reopen</span></div></div>
+            </div>
+
+            <div class="over"><span class="over-glow"></span>
+              <div class="over-card">
+                <h3 class="serif">Your first query starts here</h3>
+                <p>Each one you log takes a card — who has it, what you sent, and whose move it is. Everything else is worked out for you.</p>
+                <span class="btn primary"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 11 21 3l-8 18-3-8z"/></svg>Log your first query</span>
+                <div class="links"><a href="#">Import a spreadsheet</a><i>·</i><a href="#">Download the template</a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CONTACT LIST ================= -->
+    <section class="screen" id="s-cl">
+      <div class="top">
+        <span style="color:var(--ink-3);font-size:18px">▯</span>
+        <div class="crumb serif"><span>ScriptAlly</span><span class="sep">/</span><span>Agents</span><span class="sep">/</span><span class="here">Contact list</span></div>
+        <span class="mono saved">All changes saved</span>
+        <div class="search">⌕ <span>Search</span><kbd>⌘K</kbd></div>
+        <span class="pill">✎ Feedback</span><span class="pill">?</span><span class="pill dark">＋ New</span>
+      </div>
+      <div class="page">
+        <div class="ph">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="#1c130f" stroke-width="1.2" stroke-linejoin="round"><rect x="14" y="20" width="52" height="40" rx="4" fill="#f5e6df"/><path d="M14 32h52M26 20v-6M54 20v-6"/><circle cx="34" cy="44" r="5" fill="#e0e5dd"/><path d="M44 42h14M44 48h10"/></svg>
+          <div><h1 class="serif">Contact list</h1><p>Everyone you're querying, watching, or saving for later.</p></div>
+          <span class="btn primary cta">＋ Add new agent</span>
+        </div>
+        <div class="body">
+          <div class="tb faded">
+            <span class="count">0 agents</span>
+            <div class="r"><div class="field">Search agents or agencies…</div><span class="g">Filters</span><span class="g">Group</span><span class="g">Sort</span></div>
+          </div>
+
+          <div class="stage">
+            <div class="grid3 faded">
+              <div class="rc"><div class="head"><span class="hp">Active queries</span><span class="hd-r">✎</span></div><div class="rail complete"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="bd"><div class="who"><div class="av">AO</div><div><div class="nm">Amara Osei</div><div class="ag">Osei Literary</div><div class="meta">London · ~8 weeks · Email</div></div></div>
+                  <div class="sec"><div class="sl">Your history</div><div class="sv sd"><span class="sdot"></span><em>The Backpack on the Seat</em> · queried 04 Sep</div></div>
+                  <div class="sec"><div class="sl">Wishlist</div><div class="sv">Crime rooted in a real place — towns that have lost something.</div></div>
+                  <div class="sec"><div class="sl">Materials wanted</div><div class="sv">Query · synopsis (1pg) · first three chapters, pasted in body.</div></div></div>
+                <div class="ft"><span class="b1">➤ Log query</span><span class="b2">View website</span></div></div>
+              <div class="rc"><div class="head"><span class="hp">Active queries</span><span class="hd-r">✎</span></div><div class="rail"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div>
+                <div class="bd"><div class="who"><div class="av">DO</div><div><div class="nm">Daniel O'Rourke</div><div class="ag">Inkwell &amp; Stone</div><div class="meta">~6 weeks · Email</div></div></div>
+                  <div class="sec"><div class="sl">Your history</div><div class="sv sd"><span class="sdot" style="--fill:75%"></span><em>The Backpack on the Seat</em> · full requested</div></div>
+                  <div class="sec"><div class="sl">Wishlist</div><div class="sv">Voice-led thrillers with a strong sense of place.</div></div>
+                  <div class="sec"><div class="sl">Materials wanted</div><div class="sv" style="color:var(--ink-3)">＋ Add from their site</div></div></div>
+                <div class="ft"><span class="b1">➤ Log query</span><span class="b2">View website</span></div></div>
+              <div class="rc"><div class="head pink"><span class="hp">Idle</span><span class="hd-r">✎</span></div><div class="rail"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i></div>
+                <div class="bd"><div class="who"><div class="av">AK</div><div><div class="nm">Aisha Kapoor</div><div class="ag">The Lantern Agency</div><div class="meta">Edinburgh · ~12 weeks · Form</div></div></div>
+                  <div class="sec"><div class="sl">Your history</div><div class="sv" style="color:var(--ink-3)">Nothing sent yet.</div></div>
+                  <div class="sec"><div class="sl">Wishlist</div><div class="sv">Big-hearted fantasy with a found family at its core.</div></div>
+                  <div class="sec"><div class="sl">Materials wanted</div><div class="sv" style="color:var(--ink-3)">＋ Add from their site</div></div></div>
+                <div class="ft"><span class="b1">➤ Log query</span><span class="b2">View website</span></div></div>
+            </div>
+
+            <div class="over"><span class="over-glow"></span>
+              <div class="over-card hero-over">
+                <h2 class="serif">These are the people who will champion your words.</h2>
+                <p>Every agent you're querying, watching, or saving for later lives here — with what they want, what they ask for, and what you've sent them.</p>
+                <span class="btn primary">＋ Add your first agent</span>
+                <div class="links"><a href="#">Find agents in Discover</a><i>·</i><a href="#">Import a spreadsheet</a></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cl-note"><span class="hand">the "What makes a strong agent record?" section continues below, unchanged</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ANALYTICS ================= -->
+    <section class="screen" id="s-an">
+      <div class="top">
+        <span style="color:var(--ink-3);font-size:18px">▯</span>
+        <div class="crumb serif"><span>ScriptAlly</span><span class="sep">/</span><span>Queries</span><span class="sep">/</span><span class="here">Analytics</span></div>
+        <span class="mono saved">All changes saved</span>
+        <div class="search">⌕ <span>Search</span><kbd>⌘K</kbd></div>
+        <span class="pill">✎ Feedback</span><span class="pill">?</span><span class="pill dark">＋ New</span>
+      </div>
+      <div class="page">
+        <div class="ph"><div><h1 class="serif">Analytics</h1><p>How your querying is going — response rates, timings, and what the numbers can and can't tell you.</p></div></div>
+        <div class="body">
+          <div class="an-strip">
+            <span class="n">0 queries</span><span class="mono">0 awaiting reply</span>
+            <div class="seg"><button class="on">All time</button><button>Last 6 months</button><button>Last 3 months</button></div>
+            <span class="btn ghostbtn">⭳ Export</span>
+          </div>
+
+          <div class="mount notice-wrap"><div class="frame"><div class="notice">
+            <div class="ico"><svg class="plane" viewBox="0 0 24 24"><path d="M3 11 21 3l-8 18-3-8z"/></svg></div>
+            <div><h3 class="serif">No queries logged for <em>The Backpack on the Seat</em> yet</h3><p>Once the first one goes out, this page starts keeping its history. Each panel below fills in at the point it has enough to show — the threshold is written on it.</p></div>
+            <span class="btn primary">Log your first query</span>
+          </div></div></div>
+
+          <div class="tiles">
+            <div class="tile ghost"><h4 class="serif">Response rate</h4><div class="fig"><div class="gnum">— <small>%</small></div></div><div class="foot"><span class="mono">Shows after your first reply</span></div></div>
+            <div class="tile ghost"><h4 class="serif">Time to first reply</h4><div class="fig"><div class="gnum">— <small>days</small></div></div><div class="foot"><span class="mono">Shows after your first reply</span><span class="hand">median, not average — one slow agent won't skew it</span></div></div>
+            <div class="tile ghost"><h4 class="serif">Where your queries are</h4><div class="fig"><div class="gbars"><i></i><i></i><i></i><i></i><i></i></div></div><div class="foot"><span class="mono">Shows after your first query</span></div>
+              <div class="legend"><span><i style="background:var(--sand)"></i>Queried</span><span><i style="background:var(--pink)"></i>Requested</span><span><i style="background:var(--sage)"></i>Sent</span><span><i style="background:var(--slate)"></i>Offer</span><span><i style="background:var(--grey)"></i>Closed</span></div></div>
+            <div class="tile ghost wide"><h4 class="serif">Queries over time</h4><div class="fig"><svg class="gline" viewBox="0 0 600 120" preserveAspectRatio="none"><line x1="0" y1="119" x2="600" y2="119"/><line x1="150" y1="0" x2="150" y2="119" stroke-dasharray="2 5"/><line x1="300" y1="0" x2="300" y2="119" stroke-dasharray="2 5"/><line x1="450" y1="0" x2="450" y2="119" stroke-dasharray="2 5"/><path d="M0 119C90 115 130 100 190 92S330 60 400 52 540 30 600 22"/></svg></div><div class="foot"><span class="mono">Shows after your first query</span><span class="hand">sends and replies, week by week — the shape of your campaign</span></div></div>
+            <div class="tile ghost"><h4 class="serif">Outcomes</h4><div class="fig" style="justify-content:center;align-items:center"><div class="gring"></div></div><div class="foot"><span class="mono">Shows after 5 replies</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    
+  </main>
+</div>
+
+<script>
+  const nav={dash:'nav-dash',qc:'nav-qc',cl:'nav-cl',an:'nav-an'};
+  function show(k){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==='s-'+k));
+    document.querySelectorAll('.switch button').forEach(b=>b.classList.toggle('on',b.dataset.s===k));
+    document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('on'));
+    document.getElementById(nav[k]).classList.add('on');
+    location.hash=k;
+  }
+  document.querySelectorAll('.switch button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.s)));
+  Object.entries(nav).forEach(([k,id])=>document.getElementById(id).addEventListener('click',e=>{e.preventDefault();show(k)}));
+  const h=(location.hash||'#dash').slice(1); show(h in nav?h:'dash');
+</script>
+</body>
+</html>
