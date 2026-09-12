@@ -15,6 +15,7 @@ import { describe, it, expect } from "vitest";
 import {
   applyView, filterBadge, isFiltered, isSorted, parseView, VIEW_DEFAULT, viewButtonLabel,
   viewLeaving, ViewFacts, ListView, TYPE_ORDER, sortByHead, headArrow, HEAD_KEYS,
+  GROUPING_LABEL, GroupingId,
 } from "./todoListView";
 import { BoardCard } from "./todoBoard";
 import { TaskGroup } from "./todoGroups";
@@ -51,7 +52,10 @@ const G = () => [
 
 describe("grouping partitions; ordering runs within", () => {
   it("an order never moves a card across a group boundary", () => {
-    const out = applyView(G(), { ...VIEW_DEFAULT, sort: "agent" }, facts());
+    /* ⚠️ THE GROUPING IS PINNED (list round, Phase 3): this case is about ORDER inside the urgency
+       partition, and the default grouping is When now. A case that reads the default silently
+       changes subject the day the default moves. */
+    const out = applyView(G(), { ...VIEW_DEFAULT, grouping: "grouped", sort: "agent" }, facts());
     expect(out.map((g) => g.id)).toEqual(["urgent", "housekeeping"]);
     /* membership identical; only the internal order may differ */
     expect(out[0].cards.map((c) => c.key).sort()).toEqual(["u1", "u2"]);
@@ -61,8 +65,8 @@ describe("grouping partitions; ordering runs within", () => {
   });
 
   it("direction reverses the result per group — asc and desc are exact mirrors", () => {
-    const asc = applyView(G(), { ...VIEW_DEFAULT, sort: "agent", direction: "asc" }, facts());
-    const desc = applyView(G(), { ...VIEW_DEFAULT, sort: "agent", direction: "desc" }, facts());
+    const asc = applyView(G(), { ...VIEW_DEFAULT, grouping: "grouped", sort: "agent", direction: "asc" }, facts());
+    const desc = applyView(G(), { ...VIEW_DEFAULT, grouping: "grouped", sort: "agent", direction: "desc" }, facts());
     expect(desc[0].cards.map((c) => c.key)).toEqual([...asc[0].cards.map((c) => c.key)].reverse());
   });
 
@@ -119,10 +123,11 @@ describe("the flags, the badge, the label, the parse", () => {
   });
 
   it("the trigger's label is the contract's two-part sentence", () => {
-    expect(viewButtonLabel(VIEW_DEFAULT)).toBe("By urgency · Priority");
+    expect(viewButtonLabel(VIEW_DEFAULT)).toBe("By when · Overdue by");
+    expect(viewButtonLabel({ ...VIEW_DEFAULT, grouping: "grouped", sort: "needs-you" })).toBe("By urgency · Priority");
     expect(viewButtonLabel({ ...VIEW_DEFAULT, grouping: "agent", sort: "longest" }))
       .toBe("By agent · Longest waiting");
-    expect(viewButtonLabel({ ...VIEW_DEFAULT, grouping: "flat" })).toBe("Flat · Priority");
+    expect(viewButtonLabel({ ...VIEW_DEFAULT, grouping: "flat" })).toBe("Flat · Overdue by");
   });
 
   it("parseView round-trips the new fields and retires the old sort by falling back", () => {
@@ -145,8 +150,9 @@ describe("the column heads sort by what the columns print (list round, Phase 2)"
   };
   const one = () => [grp("urgent", "Needs you now",
     ["f", "a", "d", "c", "b", "e"].map((k) => card(k, { who: k.toUpperCase(), agentId: k })))];
+  /* the grouping is pinned for the same reason as above — these are claims about ORDER */
   const keys = (v: ListView, t: Record<string, string> = {}) =>
-    applyView(one(), v, facts({}, {}, dues, t, TODAY))[0].cards.map((c) => c.key);
+    applyView(one(), { ...v, grouping: "grouped" }, facts({}, {}, dues, t, TODAY))[0].cards.map((c) => c.key);
 
   it("Overdue by: real days, longest first — then due today, the soonest ahead, the undated last", () => {
     expect(keys({ ...VIEW_DEFAULT, sort: "over" })).toEqual(["b", "a", "c", "e", "d", "f"]);
@@ -170,7 +176,9 @@ describe("the column heads sort by what the columns print (list round, Phase 2)"
   });
 
   it("a head click: a new head starts in its natural order, the same head flips", () => {
-    const v1 = sortByHead(VIEW_DEFAULT, "over");
+    /* ⚠️ FROM A VIEW THAT IS NOT ALREADY SORTED BY THE HEAD BEING CLICKED — the landing state sorts
+       by Overdue by, so starting there would test the FLIP and call it the first click. */
+    const v1 = sortByHead({ ...VIEW_DEFAULT, sort: "needs-you" }, "over");
     expect([v1.sort, v1.direction]).toEqual(["over", "asc"]);
     const v2 = sortByHead(v1, "over");
     expect([v2.sort, v2.direction]).toEqual(["over", "desc"]);
@@ -189,5 +197,58 @@ describe("the column heads sort by what the columns print (list round, Phase 2)"
 
   it("the new orders survive the round trip through the user document", () => {
     for (const sort of ["over", "due", "task"] as const) expect(parseView({ sort }).sort).toBe(sort);
+  });
+});
+
+describe("the landing state — grouped by When (list round, Phase 3)", () => {
+  const TODAY = "2026-09-11";
+  const dues: Record<string, string | null> = {
+    old: "2024-05-21", yest: "2026-09-10", now: "2026-09-11", wk: "2026-09-18", far: "2026-09-19", non: null,
+  };
+  const gs = () => [grp("urgent", "Needs you now",
+    ["non", "far", "now", "old", "wk", "yest"].map((k) => card(k, { who: k, agentId: k })))];
+  const F = () => facts({}, {}, dues, {}, TODAY);
+
+  it("the default IS the landing state — When, Overdue by, longest first", () => {
+    expect([VIEW_DEFAULT.grouping, VIEW_DEFAULT.sort, VIEW_DEFAULT.direction]).toEqual(["time", "over", "asc"]);
+    expect(viewButtonLabel(VIEW_DEFAULT)).toBe("By when · Overdue by");
+    /* and it is not "filtered" or "sorted" — the funnel and the order marker rest at the landing */
+    expect(isFiltered(VIEW_DEFAULT)).toBe(false);
+    expect(isSorted(VIEW_DEFAULT)).toBe(false);
+  });
+
+  it("four heads in the contract's order, and an empty bucket draws none", () => {
+    const out = applyView(gs(), VIEW_DEFAULT, F());
+    expect(out.map((g) => g.label)).toEqual(["Overdue", "Due this week", "Coming up", "No date"]);
+    expect(out.map((g) => g.id)).toEqual(["when-over", "when-week", "when-later", "when-none"]);
+    const fewer = applyView([grp("urgent", "Needs you now", [card("old"), card("non")])],
+      VIEW_DEFAULT, facts({}, {}, { old: "2024-05-21", non: null }, {}, TODAY));
+    expect(fewer.map((g) => g.label), "an empty bucket states nothing").toEqual(["Overdue", "No date"]);
+  });
+
+  it("Overdue holds only past days; Coming up only days past the week; and the order runs longest first", () => {
+    const out = applyView(gs(), VIEW_DEFAULT, F());
+    const by = Object.fromEntries(out.map((g) => [g.id, g.cards.map((c) => c.key)]));
+    expect(by["when-over"]).toEqual(["old", "yest"]);
+    expect(by["when-week"]).toEqual(["now", "wk"]);
+    expect(by["when-later"]).toEqual(["far"]);
+    expect(by["when-none"]).toEqual(["non"]);
+  });
+
+  /**
+   * ⚠️ COMPLETION LEAVES THE LIST UNDER EVERY GROUPING, and this is the case that would have caught
+   * the fault: the page's own `done` filter ran AFTER the view, so a regrouping — which flattens the
+   * groups and re-heads them — carried the card straight past it.
+   */
+  it("a done card never survives the view, whichever grouping is asked for", () => {
+    const withDone = [
+      grp("urgent", "Needs you now", [card("live", { who: "Marsh", agentId: "a1" })]),
+      grp("done", "Done", [card("gone", { who: "Marsh", agentId: "a1", done: true })]),
+    ];
+    for (const g of Object.keys(GROUPING_LABEL) as GroupingId[]) {
+      const keys = applyView(withDone, { ...VIEW_DEFAULT, grouping: g }, F()).flatMap((x) => x.cards.map((c) => c.key));
+      expect(keys, `grouping ${g} admitted a finished card`).not.toContain("gone");
+      expect(keys, `grouping ${g} lost the live card`).toContain("live");
+    }
   });
 });

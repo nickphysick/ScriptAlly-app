@@ -35,8 +35,8 @@ const card = (over: Partial<BoardCard> = {}): BoardCard => ({
   msTitle: "Murphy’s Day Out", ...over,
 });
 
-const groups = (c: BoardCard): TaskGroup[] => [
-  { id: "urgent", label: "Needs you now", description: "", cards: [c] },
+const groups = (c: BoardCard, id = "urgent", label = "Needs you now"): TaskGroup[] => [
+  { id: id as TaskGroup["id"], label, description: "", cards: [c] },
 ];
 
 const TODAY = "2026-09-11";
@@ -46,9 +46,10 @@ const owedOn = (ymd: string | null, owner: DueFact["owner"] = "owed"): DueFact =
 const render = (c: BoardCard, opts: {
   focusedKey?: string; selectedKey?: string; collapsed?: string[]; due?: DueFact;
   sort?: ListView["sort"]; direction?: ListView["direction"];
+  groupId?: string; groupLabel?: string;
 } = {}) => renderToStaticMarkup(
   <TaskList
-    groups={groups(c)} onOpen={() => {}} rowInputs={() => ({ agency: "The Marsh Agency" })}
+    groups={groups(c, opts.groupId, opts.groupLabel)} onOpen={() => {}} rowInputs={() => ({ agency: "The Marsh Agency" })}
     dueOf={() => opts.due ?? owedOn("2026-04-02")} today={TODAY}
     sort={opts.sort ?? "needs-you"} direction={opts.direction ?? "asc"} onSortBy={() => {}}
     onExport={() => {}}
@@ -139,6 +140,21 @@ describe("2 · the wiring — RENDERED, so the claims are about the markup and n
     expect(hd, "a header of controls cannot be hidden from the reader it serves").not.toMatch(/class="lhd"[^>]*aria-hidden/);
   });
 
+  /**
+   * ⚠️ THE OVERDUE HEAD IS THE ONE COLOURED HEADING (list round, Phase 3), and it is keyed to the
+   * BUCKET rather than to how many rows it holds or how late they are — so it reads the same with one
+   * row in it as with twenty. The colour itself is the stylesheet's, asserted below.
+   */
+  it("the Overdue head wears the contract's colour class; no other head does", () => {
+    const over = render(card(), { groupId: "when-over", groupLabel: "Overdue" });
+    expect(over).toContain('class="g-lbl over">Overdue<');
+    for (const [id, label] of [["when-week", "Due this week"], ["when-later", "Coming up"],
+      ["when-none", "No date"], ["urgent", "Needs you now"]]) {
+      const html = render(card(), { groupId: id, groupLabel: label });
+      expect(html, `${id} took the Overdue head's colour`).toContain('class="g-lbl">');
+    }
+  });
+
   it("the head is a disclosure — collapsed keeps the count and renders no rows", () => {
     const open = render(card());
     expect(open).toContain('aria-expanded="true"');
@@ -190,6 +206,11 @@ describe("3 · the stylesheet states the contract's row, once", () => {
     expect(rule(".tlc .lov.owed b")).toContain("color:var(--burg)");
     for (const sel of [".tlc .lov b", ".tlc .lov.ahead b"]) expect(rule(sel)).not.toContain("--burg");
     expect(decls, "a theirs rule would be a second colour meaning the same thing").not.toMatch(/\.lov\.theirs/);
+  });
+
+  it("the Overdue head's colour is burgundy, and it is the only head colour stated", () => {
+    expect(rule(".tlc .grp .g-lbl.over")).toContain("color:var(--burg)");
+    expect(rule(".tlc .grp .g-lbl"), "the base head takes the ink, not the accent").toContain("color:var(--ink2)");
   });
 
   it("the retired cells' rules went with them", () => {

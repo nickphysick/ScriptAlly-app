@@ -136,6 +136,28 @@ export function daysBetweenYmd(from: string, to: string): number {
 export const overdueDays = (ymd: string, todayYmd: string): number => daysBetweenYmd(ymd, todayYmd);
 
 /**
+ * WHEN a task falls, as the landing state groups it (list round, Phase 3) — the contract's own
+ * `bucket()`: anything past its day is Overdue, today and the next seven days are Due this week,
+ * further ahead is Coming up, and a task with no date is No date.
+ *
+ * ⚠️ "THIS WEEK" IS A ROLLING SEVEN DAYS, NOT THE CALENDAR'S. The contract counts from today, so a
+ * task due on Sunday is in this week on Monday and still in it on Friday — which is the question a
+ * writer is asking ("what is coming"), and it cannot empty itself as the week runs out.
+ */
+export type WhenBucket = "over" | "week" | "later" | "none";
+export const WHEN_ORDER: WhenBucket[] = ["over", "week", "later", "none"];
+export const WHEN_LABEL: Record<WhenBucket, string> = {
+  over: "Overdue", week: "Due this week", later: "Coming up", none: "No date",
+};
+
+export function whenBucket(ymd: string | null, todayYmd: string): WhenBucket {
+  if (!ymd) return "none";
+  const n = overdueDays(ymd, todayYmd);
+  if (n > 0) return "over";
+  return n >= -7 ? "week" : "later";
+}
+
+/**
  * The writer's hold, as the day it returns — or null.
  *
  * ⚠️ A MUTE IS NOT A DATE AND A DISMISSAL IS THE LATER WORD. `MUTED_UNTIL` is "stop asking" wearing a

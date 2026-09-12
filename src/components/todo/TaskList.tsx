@@ -226,7 +226,12 @@ export const TaskList: React.FC<TaskListProps> = ({
               onClick={() => onToggleGroup(g.id)}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggleGroup(g.id); } }}
             >
-              <span className="g-lbl">{GRP_LABEL[g.id] ?? g.label}</span>
+              {/* ⚠️ THE OVERDUE HEAD IS THE ONE COLOURED HEADING (list round, Phase 3) — the
+                  contract's `.gh .t.over`. It is keyed to the BUCKET's id, not to a count or a
+                  distance, so an Overdue head with one row in it reads exactly as one with twenty. */}
+              {/* the generated ids are cast into `TaskGroupId` at the producer, so a consumer
+                  comparing one has to widen — `String(...)` rather than a second cast */}
+              <span className={`g-lbl${String(g.id) === "when-over" ? " over" : ""}`}>{GRP_LABEL[g.id] ?? g.label}</span>
               <span className="g-n">{g.cards.length}</span>
               <span className="g-cv" aria-hidden="true">⌄</span>
             </div>

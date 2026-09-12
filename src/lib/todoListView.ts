@@ -16,7 +16,7 @@ import { BoardCard } from "./todoBoard";
 import { TaskGroup } from "./todoGroups";
 import { Bucket, cardBucket } from "./todoBuckets";
 import { CATEGORIES, CATEGORY_LABEL, taskCategory } from "./todoCategory";
-import { overdueDays } from "./taskDue";
+import { overdueDays, whenBucket, WHEN_LABEL, WHEN_ORDER } from "./taskDue";
 
 /** the three urgency groups, by the id the page already uses */
 export type GroupId = "urgent" | "housekeeping" | "yours";
@@ -51,7 +51,10 @@ export type SortId = "over" | "due" | "task" | "agent" | "needs-you" | "longest"
    chase · close · fix · note). `category` partitions by the five the page's tiles, board columns
    and card tags all speak — where the work CAME FROM. An offer is a `decide` under one and an
    Agent request under the other, deliberately, and both readings are useful. */
-export type GroupingId = "grouped" | "agent" | "type" | "category" | "manuscript" | "flat";
+/* ⚠️ `time` IS THE LANDING STATE'S GROUPING (list round, Phase 3) — When, which the contract's own
+   toolbar offers beside Category and None. It leads the union because the Sort menu enumerates the
+   record in order, and those three are the contract's; the four this app added stay behind them. */
+export type GroupingId = "time" | "category" | "flat" | "grouped" | "agent" | "type" | "manuscript";
 export type DirectionId = "asc" | "desc";
 
 export const SORT_LABEL: Record<SortId, string> = {
@@ -103,10 +106,11 @@ export function headArrow(sort: SortId, direction: DirectionId, key: HeadKey): "
   return largestFirst ? "▼" : "▲";
 }
 export const GROUPING_LABEL: Record<GroupingId, string> = {
-  grouped: "Urgency", agent: "Agent", type: "Task type", category: "Category",
-  manuscript: "Manuscript", flat: "None",
+  time: "When", category: "Category", flat: "None",
+  grouped: "Urgency", agent: "Agent", type: "Task type", manuscript: "Manuscript",
 };
 export const GROUPING_DESC: Record<GroupingId, string> = {
+  time: "Overdue · Due this week · Coming up · No date",
   grouped: "Needs you now · Housekeeping · Yours",
   agent: "What you owe each person",
   type: "",
@@ -141,11 +145,21 @@ export interface ListView {
   direction: DirectionId;
 }
 
-/** everything on, needs-you-first, grouped — the state the funnel calls "not filtered" */
+/**
+ * THE LANDING STATE (list round, Phase 3) — grouped by When, ordered by Overdue by, longest first;
+ * everything shown, which is what the funnel calls "not filtered".
+ *
+ * ⚠️ IT IS A DEFAULT, NOT A SETTING. A writer's own choice is stored in `todoPrefs.listView` and
+ * wins field by field through `parseView`, so this decides only what a first visit sees.
+ *
+ * ⚠️ AND `direction: "asc"` IS LONGEST FIRST, because that is Overdue by's natural order — the
+ * direction flips the RESULT rather than the comparator (see `applyView`), and the head's arrow, not
+ * the direction's name, says which way the numbers run.
+ */
 export const VIEW_DEFAULT: ListView = {
   groups: [...GROUP_IDS], types: [...TYPE_ORDER], includeSnoozed: false, includeDismissed: false,
   agents: [],
-  sort: "needs-you", grouping: "grouped", direction: "asc",
+  sort: "over", grouping: "time", direction: "asc",
 };
 
 /**
@@ -207,6 +221,13 @@ export function applyView(
     if ((GROUP_IDS as string[]).includes(g.id)) return view.groups.includes(g.id as GroupId);
     if (g.id === "snoozed") return view.includeSnoozed;
     if (g.id === "dismissed") return view.includeDismissed;
+    /* ⚠️ COMPLETION LEAVES THE LIST, AND IT HAS TO LEAVE HERE (list round, Phase 3). The page used to
+       drop the `done` group AFTER this function — which worked only while the grouping was the
+       urgency partition and the group kept its id. Every other grouping FLATTENS these groups and
+       re-heads them, so a done card walked straight into a generated head and out the far side of
+       that filter: latent under "By agent" since the day regrouping shipped, and about to become the
+       default's behaviour. One membership rule, stated where the others are. */
+    if (g.id === "done") return false;
     return true;
   });
 
@@ -275,6 +296,19 @@ export function applyView(
   if (!all.length) return [];
   if (view.grouping === "flat") {
     return [{ id: "flat" as TaskGroup["id"], label: "", description: "", cards: all }];
+  }
+  /**
+   * ⚠️ WHEN IS A FIXED FOUR, IN ITS OWN ORDER — never the generated heads below, which sort
+   * alphabetically. "Coming up" before "Due this week" would read as a list that had given up on
+   * chronology. An empty bucket draws no head: a "No date" heading over nothing states nothing.
+   */
+  if (view.grouping === "time") {
+    return WHEN_ORDER
+      .map((w) => ({
+        id: `when-${w}` as TaskGroup["id"], label: WHEN_LABEL[w], description: "",
+        cards: all.filter((c) => whenBucket(facts.due(c).ymd, facts.today) === w),
+      }))
+      .filter((g) => g.cards.length > 0);
   }
   const keyOf = (c: BoardCard): string =>
     view.grouping === "agent" ? ((c.who || "").trim() || "No agent")

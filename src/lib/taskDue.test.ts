@@ -12,7 +12,8 @@
  * card no board can produce is testing a function nobody runs.
  */
 import { describe, it, expect, afterEach } from "vitest";
-import { taskDue, dueOwner, ymdOf, daysBetweenYmd, overdueDays, type DueSource, type DueOwner } from "./taskDue";
+import { readFileSync } from "node:fs";
+import { taskDue, dueOwner, ymdOf, daysBetweenYmd, overdueDays, whenBucket, WHEN_LABEL, WHEN_ORDER, type DueSource, type DueOwner } from "./taskDue";
 import { dueFor, type TaskData } from "./taskCardFacts";
 import { assembleBoard, type BoardCard } from "./todoBoard";
 import { TASK_TYPES, type TaskType } from "./todoActions";
@@ -310,5 +311,31 @@ describe("real days, on the local calendar", () => {
     expect(ymdOf(new Date(2026, 8, 20, 23, 59).getTime())).toBe("2026-09-20");
     expect(ymdOf("2026-09-20")).toBe("2026-09-20");
     for (const v of [undefined, null, "", "not a date", {}]) expect(ymdOf(v)).toBeNull();
+  });
+});
+
+/* ── when a task falls: the landing state's four buckets (Phase 3) ────────────────────────────── */
+
+describe("when a task falls", () => {
+  const TODAY = "2026-09-11";
+
+  it("past is Overdue; today and the next seven days are this week; further is Coming up", () => {
+    expect(whenBucket("2024-05-21", TODAY)).toBe("over");
+    expect(whenBucket("2026-09-10", TODAY)).toBe("over");
+    expect(whenBucket(TODAY, TODAY), "due today is not overdue").toBe("week");
+    expect(whenBucket("2026-09-18", TODAY), "seven days ahead is still this week").toBe("week");
+    expect(whenBucket("2026-09-19", TODAY), "eight days ahead is Coming up").toBe("later");
+    expect(whenBucket(null, TODAY)).toBe("none");
+  });
+
+  /* ⚠️ THE LABELS ARE READ OUT OF THE CONTRACT, not typed here — its own `BUCK` table. A literal on
+     both sides is a test that agrees with itself. */
+  it("the four heads, in the contract's own order and its own words", () => {
+    const ref = readFileSync("design-refs/todo-list-view-contract.html", "utf8");
+    const table = ref.match(/const BUCK=\{([^;]+)\};/)?.[1] ?? "";
+    expect(table, "the contract no longer carries its BUCK table").not.toBe("");
+    /* each entry is `key:['Label','class']` — the FIRST string of each pair is the head's word */
+    const words = [...table.matchAll(/\w+:\['([^']*)'/g)].map((m) => m[1]);
+    expect(WHEN_ORDER.map((w) => WHEN_LABEL[w])).toEqual(words);
   });
 });

@@ -64,8 +64,21 @@ describe("the receipt window — the drawer closes on the last task, and only th
     expect(decls, "the map is replaced wholesale").not.toMatch(/rowPlaceRef\.current = m\b/);
   });
 
+  /**
+   * ⚠️ RETARGETED, AND THE LAW IS STRONGER WHERE IT WENT (list round, Phase 3). This read the PAGE's
+   * own `.filter((g) => g.id !== "done")`, which sat AFTER `applyView` — so it only held while the
+   * grouping kept the group's id. Every other grouping flattens the groups and re-heads them, and a
+   * finished card walked straight past that filter into a generated head: latent under "By agent"
+   * since regrouping shipped, and about to become the default's behaviour when When landed. The
+   * membership rule is stated in `applyView` now, beside the snoozed and dismissed ones, and it is
+   * asserted over EVERY grouping in `todoListView.test.ts`. What is asserted here is that the page
+   * has not grown a second one: two filters for one law is how they come to disagree.
+   */
   it("the done group does not render in the list — completion LEAVES, it does not re-file", () => {
-    const i = decls.indexOf('.filter((g) => g.id !== "done")');
-    expect(i, "the done group is back in the list").toBeGreaterThan(-1);
+    const view = readFileSync(join(__dirname, "..", "..", "lib", "todoListView.ts"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(view, "the view stopped dropping the done group").toContain('if (g.id === "done") return false;');
+    expect(decls, "the page grew its own done filter back beside the view's")
+      .not.toContain('.filter((g) => g.id !== "done")');
   });
 });

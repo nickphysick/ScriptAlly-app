@@ -64,6 +64,7 @@
 .tlc .grp .g-cv { font-size:10px;color:#c0b0a0;transition:transform .2s;transform-origin:center;align-self:center;order:3; }
 .tlc .grp.closed .g-cv { transform:rotate(-90deg); }
 .tlc .grp .g-lbl { font-family:'Playfair Display',serif;font-size:19px;color:var(--ink2);white-space:nowrap; }
+.tlc .grp .g-lbl.over { color:var(--burg); }
 .tlc .grp .g-n { font-family:'Playfair Display',serif;font-size:12px;color:var(--ink2);border:1px solid var(--edge);border-radius:999px;padding:1px 9px; }
 
 /* ── the row (ref `.r`) ───────────────────────────────────────────────────────────────────────────
