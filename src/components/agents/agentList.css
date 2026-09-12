@@ -1260,6 +1260,41 @@
    ══════════════════════════════════════════════════════════════════════════ */
 .aglist .agl-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
+/* ⚠️ THE SEARCH TAKES ITS CAP HERE, BECAUSE THE SHARED FIELD ASSUMES A GRID TRACK AND THIS ROW IS
+   FLEX. `.qcc-tb-search` is the Query Centre's, and on 2026-09-09 `12dd553e` moved its cap off the
+   field and onto the TRACK that holds it there — `width: 360px; max-width: 100%` became
+   `width: 100%`, with a note saying "the track carries the cap now". That is right for a grid and
+   has nothing to catch it in a flex row: the field claimed the whole line — measured 1120px at
+   1440 and 1600px at 1920 — and folded the buttons and the switch onto rows of their own.
+
+   The values are the ref's `.search` (contact-list-v5.html): `flex: 1; min-width: 200px;
+   max-width: 320px`. `max-width` alone is what holds the row today — proved by removing `width:
+   auto` and measuring the field still at 320, because `flex: 1` sets a 0% basis and `width` never
+   enters the main-size calculation. `width: auto` stays so the fix does not depend on `flex: 1`
+   surviving: drop that and the shared `width: 100%` is live again.
+
+   ⚠️ AND THE OVERRIDE IS HERE RATHER THAN IN THE SHARED SHEET. Capping `.qcc-tb-search` itself
+   would shrink the Query Centre's own field, which is stretched to its track on purpose — the
+   same page that commit was fixing. A consumer whose layout differs supplies the difference. */
+.aglist .agl-toolbar .qcc-tb-search { flex: 1; width: auto; min-width: 200px; max-width: 320px; }
+
+/* ⚠️ THE COUNT DOES NOT PUSH THE ROW HERE, AND THAT IS A DELIBERATE DIVERGENCE FROM THE SHELL.
+   `.wpg-tally { margin-right: auto }` is an app-wide convention whose own note calls it "THE ROW'S
+   WHOLE LAYOUT" — the count pushes every control after it to the right, so five toolbars share one
+   arrangement and none has to remember a spacer. This page's ref draws a different row: the search
+   sits BESIDE the count, the three buttons beside that, and only the switch is pushed right
+   (`.switch { margin-left: auto }`). With both autos live the free space SPLITS between them —
+   measured, 253px either side at 1920 — which leaves the search stranded mid-row with a gap on
+   each side, matching neither the ref nor the shell.
+
+   So the tally's auto is taken off on this toolbar only, and the switch's is what moves. If the
+   shell's one-arrangement law is to win instead, this is the rule to delete — and the ref is then
+   the thing that needs changing, not the code. */
+.aglist .agl-toolbar .wpg-tally { margin-right: 0; }
+
+/* the ref's `.switch { margin-left: auto }` — the view switch is pushed to the row's right edge */
+.aglist .agl-toolbar .qvs { margin-left: auto; }
+
 /* the filter facets' chips — a toggle, and INERT at zero rather than hidden */
 .agl-facets { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 0 4px; }
 .agl-facetchip {
