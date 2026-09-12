@@ -392,8 +392,14 @@ touched, all dirty in the shared checkout from another session's list round.
     asserts six *and* that Attention leads, because a count cannot tell an added key from a renamed
     one.
 
-  With those repointed, `well · the recess`, `toolbar v2` and `parity` pass. What is left red is
-  two cases about the DRAWER's verb row, below.
+  Re-run cleanly against the committed build afterwards — **5 passed, 1 failed, zero stale
+  refusals** — the three repointed `well` cases and the retargeted `toolbar v2` all pass. What is
+  left red is `parity` (below) and three cases about the DRAWER's verb row.
+
+  ⚠️ **And the run that first reported those fixes as still-red was contaminated by me**: I started
+  the base-vs-commit A/B, which checks out commits and rebuilds, while that run was still going.
+  `bundleGuard` did exactly its job — ten tests refused with *"dist/ is STALE"* — and six cases read
+  as failures. One measurement at a time against one worktree; the clean re-run is the number above.
 
   The one thing worth saying about `card.display`: now that the root is a `<div>`, `display: block`
   is finally *possible* — it was a flex column because a `<button>` centres its own content box. It
@@ -409,9 +415,15 @@ touched, all dirty in the shared checkout from another session's list round.
 Every red in these suites is either **identical at base** — the card's `display` and the tiles' count
 of 16, both checked against the base run rather than assumed — or **this pass's own stale lock**,
 repaired in `ac0daf54`. The one case that directly tests what §5 changed — the drawer opening from
-Grid, List and Board — passes. The two remaining reds are about the DRAWER's verb row, and no file
-the drawer renders from is in this pass's diff; an A/B against the base build is the last word on
-them and is running as this is written (result in `ab2-*.log` beside this report).
+Grid, List and Board — passes. The three remaining reds — the scrim case at 1440 and 2560, and the quick-actions case — are all
+about the DRAWER's verb row, which this pass touches no file of. **A/B'd against the base build with
+the same spec file and the same seeded fixtures, both checkouts verified: base 3 failed / 1 passed,
+commit 3 failed / 1 passed, the same three by name.** Pre-existing, measured rather than inferred.
+
+`parity · one header component, one count, a sand band` also fails, at the first width: it expects
+one `.wpg-tally` element and finds none. That element is rendered by `WorkspacePageGrid` — shared
+page chrome, last touched by the compact-header work on 4 September and absent from this pass's diff
+entirely. Not A/B'd, and stated as read rather than as measured.
 
 **⚠️ And the first A/B was void, which is worth more than its result.** The script checked out the
 base commit, the checkout ABORTED on a stray spec file in the worktree — and the loop carried on and
