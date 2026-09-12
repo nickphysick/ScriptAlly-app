@@ -19,7 +19,7 @@
  * finds nothing and says nothing is the fault this file exists to end.
  */
 import type { Page } from "@playwright/test";
-import { liftMotionSuppression, visiblePage } from "./measure";
+import { liftMotionSuppression, visiblePage, KILL_MOTION, KILL_MOTION_ID } from "./measure";
 
 export type TodoView = "grid" | "list" | "board";
 
@@ -42,6 +42,21 @@ const TARGET: Record<TodoView, string> = {
  */
 export async function gotoTodo(page: Page, view: TodoView = "list"): Promise<string> {
   await page.goto("/todo");
+  /**
+   * ⚠️ THE MOTION SUPPRESSION IS RE-INJECTED, BECAUSE THIS IS A NAVIGATION AND A NAVIGATION DROPS
+   * IT. `openRoute` injects it after its own `goto` and 148 call sites reach `/todo` that way; the
+   * 32 files that come through HERE got it once from `ensureSignedIn` and then lost it to this
+   * line's `page.goto`, so each of those has been reading an ANIMATING page. It is the trap this
+   * repo already records from the contract's side: a transitioned property reports where it
+   * started, and an animated one reports wherever the frame happened to land.
+   *
+   * It was invisible for as long as it was, because the urgent glow's resting frames stated a
+   * literal shadow: a card mid-animation read back a stable-looking value that happened to equal
+   * the grid card's own. The moment those frames were corrected to take the element's own shadow,
+   * the same measurement started reporting `0.879095px` blurs — the fault had not arrived, it had
+   * become visible.
+   */
+  await page.addStyleTag({ content: `/*${KILL_MOTION_ID}*/${KILL_MOTION}` });
   await page.waitForTimeout(3000);
   return selectTodoView(page, view);
 }

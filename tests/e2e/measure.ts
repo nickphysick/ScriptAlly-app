@@ -56,7 +56,7 @@ const FORCE_CLASSIC_SCROLLBARS = `
  * the deployed build, where the CSS is one linked file.
  */
 export const KILL_MOTION_ID = "sa-e2e-kill-motion";
-const KILL_MOTION = `
+export const KILL_MOTION = `
   *, *::before, *::after {
     transition: none !important;
     animation: none !important;
