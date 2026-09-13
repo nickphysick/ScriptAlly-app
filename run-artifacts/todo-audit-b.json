@@ -1,0 +1,39 @@
+{
+ "rows": 28,
+ "fork": {
+  "pane": true,
+  "deed": "Send your full manuscript for The Smoke Test to Ottoline Frayn at Frayn Agency",
+  "forklbl": "Where are you with it?",
+  "options": [
+   "✓I’ve sent itNote what went, and set the clock",
+   "⏱Not yet — hold me to itPick a day and it land",
+   "×I’m not going to send itRecord that, and clos"
+  ],
+  "anyChosen": 0,
+  "primePresent": false,
+  "primeText": null,
+  "primeDisabled": null,
+  "steppers": 0,
+  "forkClasses": [
+   "fk",
+   "fk",
+   "fk"
+  ]
+ },
+ "afterIntent": {
+  "primeText": "Log as sent",
+  "primeDisabled": false,
+  "hasFill": true,
+  "fillWidth": "21.7812px",
+  "primeOpacity": "1",
+  "questions": 4,
+  "missText": "",
+  "pills": [
+   "3 still to answer"
+  ]
+ },
+ "crossover": {
+  "mentionsClose": false,
+  "snippet": "Needs you nowTask 3 of 28‹›EscSend your full manuscript for The Smoke Test to Ottoline Frayn at Frayn AgencyYou choseI’ve sent itChangeWhat you sentThe full manuscript✓EditWhenTodayYesterdayAnother date…Reply expectedNud"
+ }
+}

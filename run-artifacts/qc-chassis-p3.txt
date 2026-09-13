@@ -12,4 +12,4 @@ green  · P3.4 · a ticket carries at most one status dot, never two
 green  · P3.5 · more than one label pair rendered — the labels track the act, not one shape
          ["Came in / Since then","Asked on / Waiting","Their window closed / Past it","Quiet since / That’s","Noticed / Age","Added / Age"]
 green  · P3.6 · the burgundy figures ARE the urgent cards — the same set, not the same count
-         burgundy 6 · urgent 6
+         burgundy 7 · urgent 7

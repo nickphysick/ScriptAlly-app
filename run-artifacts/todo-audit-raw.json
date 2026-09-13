@@ -1,0 +1,182 @@
+{
+ "queries": {
+  "card": {
+   "l": 282,
+   "r": 1382,
+   "w": 1100
+  },
+  "scroll": {
+   "l": 247,
+   "r": 1417,
+   "w": 1170
+  },
+  "wrap": {
+   "l": 247,
+   "r": 1417,
+   "w": 1170
+  },
+  "chain": [
+   {
+    "cls": "qcc-grid",
+    "bg": "rgba(0, 0, 0, 0)",
+    "border": "0px 0px",
+    "radius": "0px",
+    "shadow": "none",
+    "overflow": "visible/visible"
+   },
+   {
+    "cls": "qcc-stage",
+    "bg": "rgba(0, 0, 0, 0)",
+    "border": "0px 0px",
+    "radius": "0px",
+    "shadow": "none",
+    "overflow": "visible/visible"
+   },
+   {
+    "cls": "qcc-col",
+    "bg": "rgba(0, 0, 0, 0)",
+    "border": "0px 0px",
+    "radius": "0px",
+    "shadow": "none",
+    "overflow": "visible/visible"
+   },
+   {
+    "cls": "wpg-scroll",
+    "bg": "rgba(0, 0, 0, 0)",
+    "border": "0px 0px",
+    "radius": "0px",
+    "shadow": "none",
+    "overflow": "auto/auto"
+   }
+  ]
+ },
+ "todoGrid": {
+  "grid": {
+   "l": 283,
+   "r": 1381,
+   "w": 1098
+  },
+  "scroll": {
+   "l": 247,
+   "r": 1417,
+   "w": 1170
+  },
+  "chain": [
+   {
+    "cls": "tkt-grid",
+    "bg": "rgba(0, 0, 0, 0)",
+    "border": "0px 0px",
+    "radius": "0px",
+    "shadow": "none",
+    "overflow": "visible/visible"
+   },
+   {
+    "cls": "l-body",
+    "bg": "rgba(0, 0, 0, 0)",
+    "border": "0px 0px",
+    "radius": "0px",
+    "shadow": "none",
+    "overflow": "auto/auto"
+   },
+   {
+    "cls": "tlc listcard",
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px 1px",
+    "radius": "12px",
+    "shadow": "yes",
+    "overflow": "hidden/hidden"
+   },
+   {
+    "cls": "tdw-rail",
+    "bg": "rgba(0, 0, 0, 0)",
+    "border": "0px 0px",
+    "radius": "0px",
+    "shadow": "none",
+    "overflow": "visible/visible"
+   },
+   {
+    "cls": "tdw-split",
+    "bg": "rgba(0, 0, 0, 0)",
+    "border": "0px 0px",
+    "radius": "0px",
+    "shadow": "none",
+    "overflow": "visible/visible"
+   },
+   {
+    "cls": "tdb-centre",
+    "bg": "rgba(0, 0, 0, 0)",
+    "border": "0px 0px",
+    "radius": "0px",
+    "shadow": "none",
+    "overflow": "visible/visible"
+   },
+   {
+    "cls": "tpl-body",
+    "bg": "rgba(0, 0, 0, 0)",
+    "border": "0px 0px",
+    "radius": "0px",
+    "shadow": "none",
+    "overflow": "visible/visible"
+   },
+   {
+    "cls": "tpl-cols",
+    "bg": "rgba(0, 0, 0, 0)",
+    "border": "0px 0px",
+    "radius": "0px",
+    "shadow": "none",
+    "overflow": "visible/visible"
+   }
+  ],
+  "foot": "28 tasks · 19 need you nowExport CSV",
+  "footPresent": true,
+  "archiveIcon": 1,
+  "barText": ""
+ },
+ "drawer": {
+  "before": {
+   "n": 28,
+   "first": 357,
+   "gridR": 1381,
+   "scrollTop": 0
+  },
+  "after": {
+   "n": 28,
+   "first": 357,
+   "gridR": 1381,
+   "scrollTop": 0,
+   "drawer": {
+    "l": 680,
+    "w": 760
+   },
+   "drawerRadius": "0px",
+   "scrim": "rgba(58, 28, 20, 0.14)",
+   "popOut": false,
+   "railInside": true,
+   "railW": 240,
+   "railRot": "none",
+   "hero": false,
+   "paneHeadCls": "dhead",
+   "chips": 0
+  }
+ },
+ "board": {
+  "scrollerIs": "auto",
+  "w": 1098,
+  "scrollW": 1580,
+  "clientW": 1098,
+  "parent": {
+   "cls": "l-body",
+   "overflow": "auto",
+   "radius": "0px",
+   "border": "0px"
+  },
+  "cardHeights": [
+   89,
+   89,
+   89,
+   89,
+   89,
+   89
+  ]
+ }
+}

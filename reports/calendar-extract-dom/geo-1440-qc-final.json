@@ -1,0 +1,17 @@
+{
+  "innerWidth": 1440,
+  "tlWidth": 848,
+  "laneWidth": 808,
+  "rowH": "106px",
+  "days": "90",
+  "geo": [
+    "tl-at2 tl-p req hollow owed fadeL fadeR|559.00,393.50,86.00",
+    "tl-at2 tl-p req owed fadeR|790.91,161.59,86.00",
+    "tl-at2 tl-p req owed fadeR|790.91,161.59,86.00",
+    "tl-at2 tl-p out owed fadeL fadeR clipR|559.00,393.50,86.00",
+    "tl-at2 tl-p decide owed fadeR|710.11,242.39,86.00",
+    "tl-at2 tl-p out owed fadeL|559.00,393.50,86.00",
+    "tl-at2 tl-p quiet fadeL fadeR|559.00,393.50,86.00",
+    "tl-at2 tl-p out fadeL|559.00,474.30,86.00"
+  ]
+}

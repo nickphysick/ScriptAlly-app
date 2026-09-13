@@ -1,0 +1,22 @@
+PASS P2.1@1440 — gap to the drawer 28 (contract 668 − 640 = 28)
+PASS P2.2@1440 — top 118 (contract 118)
+PASS P2.3@1440 — width 292 (contract 292)
+PASS P2.4@1440 — rotation -1.2° (contract −1.2°)
+PASS P2.5@1440 — drawer 640 + gap 28 = 668 (contract 668)
+PASS P2.6@1440 — fixed · z 69
+PASS P2.7@1440 — radius 14px · overflow hidden · shadow rgba(36, 18, 9, 0.24) 0px 18px 44px 0px, rgba(36, 18, 9, 0.0
+PASS P2.8@1440 — scrim on true at z 60 (card z 69) · 2 tickets pass under the card, as the contract's own do
+PASS P2.9@1440 — .fact columns 82px 166px
+PASS P2.10@1440 — --stage-in-2 resolves #f1dbd0 · painted rgb(241, 219, 208)
+PASS P2.1@1920 — gap to the drawer 28 (contract 668 − 640 = 28)
+PASS P2.2@1920 — top 118 (contract 118)
+PASS P2.3@1920 — width 292 (contract 292)
+PASS P2.4@1920 — rotation -1.2° (contract −1.2°)
+PASS P2.5@1920 — drawer 640 + gap 28 = 668 (contract 668)
+PASS P2.6@1920 — fixed · z 69
+PASS P2.7@1920 — radius 14px · overflow hidden · shadow rgba(36, 18, 9, 0.24) 0px 18px 44px 0px, rgba(36, 18, 9, 0.0
+PASS P2.8@1920 — scrim on true at z 60 (card z 69) · 2 tickets pass under the card, as the contract's own do
+PASS P2.9@1920 — .fact columns 82px 166px
+PASS P2.10@1920 — --stage-in-2 resolves #f1dbd0 · painted rgb(241, 219, 208)
+
+20/20

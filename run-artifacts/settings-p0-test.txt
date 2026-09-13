@@ -1,0 +1,40 @@
+ ✓ src/components/shell/newMenu.test.ts (10 tests) 4ms
+ ✓ src/lib/queryTaskBadge.test.ts (6 tests) 3ms
+ ✓ functions/src/compCatalogue.test.ts (11 tests) 80ms
+ ✓ src/components/manuscripts/compsPhase2.test.ts (13 tests) 13ms
+ ✓ src/lib/todoTiers.test.ts (13 tests) 6ms
+ ✓ src/components/agents/contactFields.test.tsx (6 tests) 7ms
+ ✓ src/lib/smartImport.test.ts (9 tests) 8ms
+ ✓ src/components/todo/todoTagLaw.test.ts (2 tests) 2ms
+ ✓ src/lib/agentIdentityRule.test.ts (2 tests) 1ms
+ ✓ src/components/dashboard/oneScreenTour.test.tsx (10 tests) 5ms
+ ✓ src/lib/queryReentry.test.ts (7 tests) 7ms
+ ✓ src/components/shell/railTokens.test.ts (7 tests) 4ms
+ ✓ src/lib/homeCountryRule.test.ts (4 tests) 2ms
+ ✓ src/lib/agentImage.test.ts (8 tests) 75ms
+ ✓ src/lib/compsCap.test.ts (4 tests) 6ms
+ ✓ src/lib/agentReplyPolicy.test.ts (6 tests) 3ms
+ ✓ src/lib/agentSaveOutcome.test.ts (7 tests) 78ms
+ ✓ src/lib/calendarToolbar.test.ts (6 tests) 6ms
+ ✓ src/lib/queryCentreChips.test.ts (5 tests) 4ms
+ ✓ src/lib/correctionUndo.test.ts (8 tests) 5ms
+ ✓ src/lib/todoWorkspaceP0B.test.ts (2 tests) 21ms
+ ✓ src/lib/responseToastTitle.test.ts (8 tests) 2ms
+ ✓ src/test/pageStructure.test.ts (26 tests) 52106ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/Dashboard.tsx declares nothing below its return that the JSX above it touches  655ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/Queries.tsx declares nothing below its return that the JSX above it touches  35644ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/agents/AgentList.tsx declares nothing below its return that the JSX above it touches  873ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/DiscoverNewAgents.tsx declares nothing below its return that the JSX above it touches  400ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/AllManuscripts.tsx declares nothing below its return that the JSX above it touches  1086ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/manuscripts/ComparableTitlesPage.tsx declares nothing below its return that the JSX above it touches  939ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/SubmissionPackages.tsx declares nothing below its return that the JSX above it touches  1016ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/ImportCsv.tsx declares nothing below its return that the JSX above it touches  848ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/HelpCentre.tsx declares nothing below its return that the JSX above it touches  327ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/todo/ToDoPage.tsx declares nothing below its return that the JSX above it touches  7493ms
+   ✓ ⚠️ no page reads a post-return const from its render (the crash's shape) > components/todo/TodoCalendarPage.tsx declares nothing below its return that the JSX above it touches  1856ms
+
+ Test Files  455 passed (455)
+      Tests  7532 passed | 3 skipped (7535)
+   Start at  19:28:47
+   Duration  52.73s (transform 29.02s, setup 0ms, collect 120.27s, tests 71.38s, environment 124ms, prepare 40.74s)
+

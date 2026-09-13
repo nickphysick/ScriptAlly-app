@@ -1,0 +1,59 @@
+── finishing round · 29 assertions · 0 RED · 29 green
+  green  P1.1 · every journey draws ONE rim — the sheet is one framed object
+           send=1 close=1 · NOT RUN for the cohort — the board is in its SPARSE shape (single fill-in cards) note=1
+  green  P1.2 · the pane is transparent on the ground, gap 14
+           bg=rgba(0, 0, 0, 0) gap=14px
+  green  P1.3 · the band tint reaches all four corners inside the rim, which clips
+           onScreen=true hits=[1,1,1,1] rimOverflow=hidden
+  green  P1.4 · the only scrollers in the pane are the worksheet's and the reference's
+           ["workscroll","in"] (either may be quiet while its content fits)
+  green  P2.1 · the scroller sits inside the SHEET and absorbs the content
+           sheet 404 holding a 242 scroller
+  green  P2.2 · no card in the pane declares a minimum height
+           send=["0px"] note=["0px"]
+  green  P2.3 · a note's sheet holds its scroller, like every other journey's
+           note 370/252
+  green  P2.4 · the foot rides the content — a short journey leaves desk beneath the sheet
+           note: bar=805 sheet=813 pane=847
+  green  P3.1 · no option is pre-selected on first render, on any journey reached
+           send=0 close=0 · NOT RUN for the cohort — the board is in its SPARSE shape (single fill-in cards) note=0
+  green  P3.2 · the strip starts at an em dash and states nothing unchosen
+           will="This records—"
+  green  P3.3 · the agent's stated window is shown, not chosen
+           present · pre-chosen options=0
+  green  P3.4 · expect-back offers Another date
+           occurrences on the expect row=1
+  green  P3.5 · the strip grows with a choice — the day stays in the ledger, the consequence arrives
+           "This records—" → after the day "This records—" → after the window "This recordsreply expected around 5 October."
+  green  P3.6 · each date question offers Another date, and only one picker is ever mounted
+           when=1 expect=1 · pickers mounted=0
+  green  P4.1 · the primaries are the owner's override wording
+           send="Log as sent" close="Log the close" · NOT RUN for the cohort — the board is in its SPARSE shape (single fill-in cards) note="Tick it off"
+  green  P4.2 · no asterisk marks a required field anywhere in the pane
+           first * at: send=-1 close=-1 · NOT RUN for the cohort — the board is in its SPARSE shape (single fill-in cards) note=-1
+  green  P4.3 · optional fields are OFFERED as links, and carry no tag until one is opened
+           add-links: send=2 close=1 bulk=undefined · OPTIONAL tags at rest: send=0 close=0 bulk=undefined note=1/0
+  green  P4.4 · bulk is the stated exception — not live at zero, with its count showing
+           NOT RUN for the cohort — the board is in its SPARSE shape (single fill-in cards)
+  green  P4.5 · every other primary stays clickable while incomplete
+           disabled: send=false close=false note=false
+  green  P4.6 · an incomplete click writes nothing and lands focus in the form
+           scrollTop 0→242 · active=BUTTON inPane=true tookOver=false
+  green  P5.1 · the finishing sentence is rendered exactly once in the pane
+           elements carrying it = 1
+  green  P5.2 · a note has no When segment
+           segs=0
+  green  P5.3 · the note's own words are the centrepiece, Caveat at 26px
+           26px Caveat, cursive
+  green  P6.1 · the bulk table renders one row per query, five visible with the rest folded
+           no bulk table
+  green  P6.2 · its columns are the contract's six
+           NOT RUN for the cohort — the board is in its SPARSE shape (single fill-in cards)
+  green  P6.3 · rows are ordered oldest sent first
+           NOT RUN for the cohort — the board is in its SPARSE shape (single fill-in cards)
+  green  P6.4 · both fill actions are offered, with the requirements caveat verbatim
+           NOT RUN for the cohort — the board is in its SPARSE shape (single fill-in cards)
+  green  P6.5 · the band states the cohort, and never a single query's wording
+           NOT RUN for the cohort — the board is in its SPARSE shape (single fill-in cards)
+  green  P6.6 · the bar offers Dismiss all beside the counted primary
+           NOT RUN for the cohort — the board is in its SPARSE shape (single fill-in cards)

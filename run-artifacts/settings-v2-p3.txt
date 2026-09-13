@@ -1,0 +1,8 @@
+TSC_EXIT=0
+189:✓ built in 12.34s
+ Test Files  459 passed (459)
+      Tests  7625 passed | 3 skipped (7628)
+     Errors  1 error
+   Start at  23:28:12
+   Duration  87.26s (transform 43.12s, setup 0ms, collect 193.46s, tests 121.15s, environment 169ms, prepare 78.72s)
+

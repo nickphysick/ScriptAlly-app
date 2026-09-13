@@ -1,0 +1,5 @@
+ABSENT .fk kbd — the contract prints a keycap 1/2/3 on each fork option. This app has NO SHORTCUT REGISTRY, so those keys do nothing — and the standing rule here is that a hint advertising a key that does nothing is worse than no hint (the same call that kept the panel foot's ⌘L/⌘N unrendered). It ships when the keys do.
+SKIP .ledger — the contract does not draw it in this state
+SKIP .q .head — the contract does not draw it in this state
+ABSENT .gapl — the contract prints a silence label BETWEEN rungs ("7 weeks of nothing"). This app's story column has no silence line at all — its nearest neighbour is the lesser rung `.tl-e.minor`, which is a different claim and must not be equated with it. Unbuilt, and named so that building it is a decision.
+compared 234 properties across 31 parts · 6 waived · 0 parts differ

@@ -1,0 +1,21 @@
+544:⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+545-
+546-Vitest caught 1 unhandled error during the test run.
+547-This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+548-
+549:⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+550-Error: [vitest-worker]: Timeout calling "onTaskUpdate"
+551- ❯ Object.onTimeoutError node_modules/vitest/dist/chunks/rpc.-pEldfrD.js:53:10
+552- ❯ Timeout._onTimeout node_modules/vitest/dist/chunks/index.B521nVV-.js:59:62
+553- ❯ listOnTimeout node:internal/timers:605:17
+554- ❯ processTimers node:internal/timers:541:7
+555-
+556-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+557-
+558-
+559- Test Files  458 passed (458)
+560-      Tests  7597 passed | 3 skipped (7600)
+561-     Errors  1 error
+562-   Start at  22:37:25
+563-   Duration  96.76s (transform 45.85s, setup 0ms, collect 201.80s, tests 128.62s, environment 211ms, prepare 95.39s)
+564-

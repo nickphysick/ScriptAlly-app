@@ -1,0 +1,7 @@
+TSC_EXIT=0
+ Test Files  458 passed (458)
+      Tests  7597 passed | 3 skipped (7600)
+     Errors  1 error
+   Start at  22:35:54
+   Duration  77.36s (transform 43.32s, setup 0ms, collect 180.45s, tests 103.62s, environment 117ms, prepare 67.43s)
+

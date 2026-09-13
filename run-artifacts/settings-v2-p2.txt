@@ -1,0 +1,9 @@
+189:✓ built in 1m 38s
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 457 passed (458)
+      Tests  2 failed | 7607 passed | 3 skipped (7612)
+   Start at  23:15:40
+   Duration  52.86s (transform 27.21s, setup 0ms, collect 116.99s, tests 75.14s, environment 118ms, prepare 38.84s)
+

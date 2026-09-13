@@ -17,7 +17,7 @@ green  · P3.7a · at 1440 no fork row is under 56, and none runs away
 green  · P3.8a · at 1440 the title leaves the work the greater share
          title 109 · scroller 286 · doc column 306
 green  · P3.9a · at 1440 no ledger row is under the contract's 42px floor
-         [42,42,42,42]
+         [45.5,42,42,42]
 green  · P3.10a · at 1440 the content exceeds the drawer, and the sheet stops AT the cap
          sheet 404 · cap 404
 green  · P3.0 @1920 · a journey with a fork was found to measure
@@ -29,6 +29,6 @@ green  · P3.7b · at 1920 the fork row is the contract's height — 56, within 
 green  · P3.9b · at 1920 the ledger's rows ARE the contract's 42px
          [42,42,42,42]
 green  · P3.10b · at 1920, with the reference put aside, the sheet HUGS its document — the fork and the ledger are different heights, both under the cap
-         fork (3 options) 448.1 · ledger (4 rows) 505.8 · cap 554
+         fork (3 options) 448.1 · ledger (4 rows) 515.8 · cap 554
 green  · P3.11 · both widths were measured
          branches ["1440","1920"]
