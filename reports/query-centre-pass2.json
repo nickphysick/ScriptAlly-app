@@ -184,223 +184,195 @@
     }
   ],
   "built@1280": {
-    "quick": {
-      "w": 1010,
-      "left": 247,
-      "cols": 1
-    },
+    "quick": null,
     "toolbar": {
-      "w": 1010,
-      "left": 247,
-      "cols": 1
+      "w": 942,
+      "left": 281,
+      "cols": 3
     },
     "stage": {
-      "w": 1010,
-      "left": 247,
+      "w": 942,
+      "left": 281,
       "cols": 1
     },
     "grid": {
-      "w": 1010,
-      "left": 247,
+      "w": 942,
+      "left": 281,
       "cols": 3
     },
     "foot": {
-      "w": 1010,
-      "left": 247,
+      "w": 974,
+      "left": 265,
       "cols": 1
     }
   },
   "rowShape@1280": {
     "perRow": 3,
-    "template": "323.328px 323.328px 323.344px",
-    "leftGap": 0,
-    "rightGap": 0,
-    "toolbarLeft": 247,
-    "gridLeft": 247
+    "template": "304.656px 304.672px 304.656px",
+    "leftGap": 34,
+    "rightGap": 34,
+    "toolbarLeft": 281,
+    "gridLeft": 281
   },
-  "builtSearch@1280": {
-    "w": 260,
-    "flex": "0 0 260px"
-  },
+  "builtSearch@1280": null,
   "built@1440": {
-    "quick": {
-      "w": 1170,
-      "left": 247,
-      "cols": 1
-    },
+    "quick": null,
     "toolbar": {
-      "w": 1170,
-      "left": 247,
-      "cols": 1
+      "w": 1102,
+      "left": 281,
+      "cols": 3
     },
     "stage": {
-      "w": 1170,
-      "left": 247,
+      "w": 1102,
+      "left": 281,
       "cols": 1
     },
     "grid": {
-      "w": 1170,
-      "left": 247,
+      "w": 1102,
+      "left": 281,
       "cols": 3
     },
     "foot": {
-      "w": 1170,
-      "left": 247,
+      "w": 1134,
+      "left": 265,
       "cols": 1
     }
   },
   "rowShape@1440": {
     "perRow": 3,
-    "template": "376.656px 376.672px 376.656px",
-    "leftGap": 0,
-    "rightGap": 0,
-    "toolbarLeft": 247,
-    "gridLeft": 247
+    "template": "358px 358px 358px",
+    "leftGap": 34,
+    "rightGap": 34,
+    "toolbarLeft": 281,
+    "gridLeft": 281
   },
-  "builtSearch@1440": {
-    "w": 260,
-    "flex": "0 0 260px"
-  },
+  "builtSearch@1440": null,
   "built@1920": {
-    "quick": {
-      "w": 1360,
-      "left": 392,
-      "cols": 1
-    },
+    "quick": null,
     "toolbar": {
-      "w": 1360,
-      "left": 392,
-      "cols": 1
+      "w": 1582,
+      "left": 281,
+      "cols": 3
     },
     "stage": {
-      "w": 1360,
-      "left": 392,
+      "w": 1582,
+      "left": 281,
       "cols": 1
     },
     "grid": {
-      "w": 1360,
-      "left": 392,
+      "w": 1582,
+      "left": 281,
       "cols": 3
     },
     "foot": {
-      "w": 1360,
-      "left": 392,
+      "w": 1614,
+      "left": 265,
       "cols": 1
     }
   },
   "rowShape@1920": {
     "perRow": 3,
-    "template": "440px 440px 440px",
-    "leftGap": 145,
-    "rightGap": 145,
-    "toolbarLeft": 392,
-    "gridLeft": 392
+    "template": "518px 518px 518px",
+    "leftGap": 34,
+    "rightGap": 34,
+    "toolbarLeft": 281,
+    "gridLeft": 281
   },
-  "builtSearch@1920": {
-    "w": 260,
-    "flex": "0 0 260px"
-  },
+  "builtSearch@1920": null,
   "built@2560": {
-    "quick": {
-      "w": 1360,
-      "left": 712,
-      "cols": 1
-    },
+    "quick": null,
     "toolbar": {
-      "w": 1360,
-      "left": 712,
-      "cols": 1
+      "w": 1628,
+      "left": 578,
+      "cols": 3
     },
     "stage": {
-      "w": 1360,
-      "left": 712,
+      "w": 1628,
+      "left": 578,
       "cols": 1
     },
     "grid": {
-      "w": 1360,
-      "left": 712,
+      "w": 1628,
+      "left": 578,
       "cols": 3
     },
     "foot": {
-      "w": 1360,
-      "left": 712,
+      "w": 1660,
+      "left": 562,
       "cols": 1
     }
   },
   "rowShape@2560": {
     "perRow": 3,
-    "template": "440px 440px 440px",
-    "leftGap": 465,
-    "rightGap": 465,
-    "toolbarLeft": 712,
-    "gridLeft": 712
+    "template": "533.328px 533.328px 533.328px",
+    "leftGap": 331,
+    "rightGap": 331,
+    "toolbarLeft": 578,
+    "gridLeft": 578
   },
-  "builtSearch@2560": {
-    "w": 260,
-    "flex": "0 0 260px"
-  },
+  "builtSearch@2560": null,
   "leaves": {
     "total": 54,
     "withLeaf": 54,
     "missing": [],
     "heights": [
-      225
+      227
     ]
   },
   "builtCardBands": [
     {
-      "cls": "qcc--s-out-1",
+      "cls": "qcc--st-queried",
       "status": "Queried",
-      "band": "rgb(230, 234, 227)",
+      "band": "rgb(247, 239, 227)",
       "image": "none"
     },
     {
-      "cls": "qcc--s-out-1",
+      "cls": "qcc--st-queried",
       "status": "Queried",
-      "band": "rgb(230, 234, 227)",
+      "band": "rgb(247, 239, 227)",
       "image": "none"
     },
     {
-      "cls": "qcc--s-closed",
+      "cls": "qcc--st-closed",
       "status": "Rejected",
       "band": "rgb(228, 225, 219)",
       "image": "none"
     },
     {
-      "cls": "qcc--s-out-1",
+      "cls": "qcc--st-queried",
       "status": "Queried",
-      "band": "rgb(230, 234, 227)",
+      "band": "rgb(247, 239, 227)",
       "image": "none"
     },
     {
-      "cls": "qcc--s-out-1",
+      "cls": "qcc--st-queried",
       "status": "Queried",
-      "band": "rgb(230, 234, 227)",
+      "band": "rgb(247, 239, 227)",
       "image": "none"
     },
     {
-      "cls": "qcc--s-in-1",
-      "status": "Partial Requested",
-      "band": "rgb(248, 233, 226)",
+      "cls": "qcc--st-closed",
+      "status": "No Response",
+      "band": "rgb(228, 225, 219)",
       "image": "none"
     },
     {
-      "cls": "qcc--s-out-1",
-      "status": "Queried",
-      "band": "rgb(230, 234, 227)",
+      "cls": "qcc--st-closed",
+      "status": "No Response",
+      "band": "rgb(228, 225, 219)",
       "image": "none"
     },
     {
-      "cls": "qcc--s-out-1",
-      "status": "Queried",
-      "band": "rgb(230, 234, 227)",
+      "cls": "qcc--st-closed",
+      "status": "No Response",
+      "band": "rgb(228, 225, 219)",
       "image": "none"
     }
   ],
   "popovers": {
     "Filter": {
       "open": true,
-      "right": 625,
+      "right": 483,
       "bottom": 888,
       "vw": 1280,
       "vh": 900,
@@ -408,26 +380,26 @@
       "overflowsBottom": false,
       "offsetParent": "(none/body)",
       "clippingAncestor": null,
-      "rows": 29,
+      "rows": 12,
       "columns": "none"
     },
     "Group": {
       "open": true,
-      "right": 887,
-      "bottom": 615,
+      "right": 745,
+      "bottom": 644,
       "vw": 1280,
       "vh": 900,
       "overflowsRight": false,
       "overflowsBottom": false,
       "offsetParent": "(none/body)",
       "clippingAncestor": null,
-      "rows": 6,
+      "rows": 5,
       "columns": "none"
     },
     "Sort": {
       "open": true,
-      "right": 952,
-      "bottom": 888,
+      "right": 854,
+      "bottom": 795,
       "vw": 1280,
       "vh": 900,
       "overflowsRight": false,
@@ -438,15 +410,15 @@
       "columns": "none"
     }
   },
-  "toolbarText": "/FilterGroup NoneSort Last activity",
+  "toolbarText": "Showing 54 of 54FilterGroupNoneSortLast activity/GridListBoardCalendar",
   "filterHasAgency": false,
   "popoversNarrow": {
     "Filter": {
       "open": true,
-      "triggerLeft": 517,
-      "pastMidline": true,
-      "right": 625,
-      "bottom": 708,
+      "triggerLeft": 420,
+      "pastMidline": false,
+      "right": 500,
+      "bottom": 467,
       "vw": 1024,
       "vh": 720,
       "overflowsRight": false,
@@ -454,10 +426,10 @@
     },
     "Group": {
       "open": true,
-      "triggerLeft": 635,
-      "pastMidline": true,
-      "right": 771,
-      "bottom": 628,
+      "triggerLeft": 510,
+      "pastMidline": false,
+      "right": 762,
+      "bottom": 463,
       "vw": 1024,
       "vh": 720,
       "overflowsRight": false,
@@ -465,10 +437,10 @@
     },
     "Sort": {
       "open": true,
-      "triggerLeft": 781,
+      "triggerLeft": 595,
       "pastMidline": true,
-      "right": 952,
-      "bottom": 708,
+      "right": 712,
+      "bottom": 463,
       "vw": 1024,
       "vh": 720,
       "overflowsRight": false,
@@ -477,7 +449,7 @@
   },
   "tintAudit": {
     "ran": true,
-    "cardStageClass": "qcc--s-out-1",
+    "cardStageClass": "(none)",
     "recordViewReached": false,
     "headerFound": false,
     "headerBand": null,
@@ -494,77 +466,5 @@
       "closed": ""
     },
     "stageTokenUsersInRecord": 0
-  },
-  "logButtons": {
-    "all": [
-      "wpg-barcta",
-      "wsh-cta"
-    ],
-    "inControls": []
-  },
-  "cardShape": {
-    "total": 54,
-    "badLeaf": [],
-    "stripAbove": [],
-    "gaps": [
-      {
-        "id": "seed-cal-soon-q",
-        "gap": 0,
-        "cardTransform": "none",
-        "cardAnim": "none",
-        "bandPos": "static"
-      },
-      {
-        "id": "thin-q-remind",
-        "gap": 0,
-        "cardTransform": "none",
-        "cardAnim": "none",
-        "bandPos": "static"
-      },
-      {
-        "id": "rej-query-1",
-        "gap": 0,
-        "cardTransform": "none",
-        "cardAnim": "none",
-        "bandPos": "static"
-      },
-      {
-        "id": "seed-cal-bang-q",
-        "gap": 0,
-        "cardTransform": "none",
-        "cardAnim": "none",
-        "bandPos": "static"
-      },
-      {
-        "id": "seed-pkgq-7",
-        "gap": 0,
-        "cardTransform": "none",
-        "cardAnim": "none",
-        "bandPos": "static"
-      },
-      {
-        "id": "seed-query-20",
-        "gap": 0,
-        "cardTransform": "none",
-        "cardAnim": "none",
-        "bandPos": "static"
-      },
-      {
-        "id": "seed-query-19",
-        "gap": 0,
-        "cardTransform": "none",
-        "cardAnim": "none",
-        "bandPos": "static"
-      },
-      {
-        "id": "seed-pkgq-2",
-        "gap": 0,
-        "cardTransform": "none",
-        "cardAnim": "none",
-        "bandPos": "static"
-      }
-    ],
-    "badCaption": [],
-    "zeroDay": []
   }
 }

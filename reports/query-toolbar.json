@@ -33,7 +33,7 @@
     "frameOverflow": "hidden",
     "bandImage": "linear-gradient(135deg, rgb(220, 224, 217), rgb(208, 214, 204))",
     "groups": 0,
-    "rows": 5,
+    "rows": 6,
     "foot": 1
   },
   "tb-group-grid": {
@@ -76,17 +76,17 @@
     "value": "Status"
   },
   "tb-header-asc": {
-    "caret": "▲",
+    "caret": "▼",
     "colour": "rgb(124, 58, 42)",
     "menu": "Date sent"
   },
   "tb-header-desc": {
-    "caret": "▼",
+    "caret": "▲",
     "colour": "rgb(124, 58, 42)",
     "menu": "Date sent"
   },
   "tb-date-editor": {
     "reachable": false,
-    "stopped": "no in-place date control on the send rung"
+    "stopped": "the in-place control opened no F12 popover"
   }
 }

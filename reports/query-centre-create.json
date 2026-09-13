@@ -7,16 +7,16 @@
     "ghostHidden": false,
     "ghostIsButton": false,
     "ghostFocusable": false,
-    "foot": "Showing 54 of 54Export CSV"
+    "foot": "Export CSV"
   },
   "after": {
     "journeyOpen": true,
     "cardCount": 55,
-    "ghostPresent": false,
-    "ghostIsFirst": false,
-    "ghostHidden": false,
+    "ghostPresent": true,
+    "ghostIsFirst": true,
+    "ghostHidden": true,
     "ghostIsButton": false,
     "ghostFocusable": false,
-    "foot": "Showing 54 of 54Export CSV"
+    "foot": "Export CSV"
   }
 }

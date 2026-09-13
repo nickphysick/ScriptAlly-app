@@ -63,14 +63,14 @@
       "_box": "580x61"
     },
     "pband": {
-      "padding": "14px 26px",
-      "borderBottomWidth": "1px",
-      "borderBottomColor": "rgba(0, 0, 0, 0.06)",
-      "_box": "580x57"
+      "padding": "14px 170px 8px 26px",
+      "borderBottomWidth": "0px",
+      "borderBottomColor": "rgb(20, 20, 18)",
+      "_box": "580x50"
     },
     "word": {
       "fontSize": "20px",
-      "_box": "104x27"
+      "_box": "158x27"
     },
     "icb": {
       "width": "32px",
@@ -96,17 +96,17 @@
     "actPink": {
       "backgroundColor": "rgb(245, 226, 218)",
       "borderColor": "rgb(232, 200, 188)",
-      "_box": "120x32"
+      "_box": "82x32"
     }
   },
-  "sources": {},
+  "sources": {
+    "pband": {
+      "padding": ".qpn-band { padding: 14px 170px 8px 26px }",
+      "borderBottomWidth": "*, ::after, ::before, ::backdrop { border: 0 solid }",
+      "borderBottomColor": "*, ::after, ::before, ::backdrop { border: 0 solid }"
+    }
+  },
   "perStage": {
-    "out-2": "rgb(253, 250, 245) | band rgb(215, 221, 211)",
-    "offer": "rgb(253, 250, 245) | band rgb(215, 224, 232)",
-    "out-1": "rgb(253, 250, 245) | band rgb(230, 234, 227)",
-    "in-1": "rgb(253, 250, 245) | band rgb(248, 233, 226)",
-    "in-3": "rgb(253, 250, 245) | band rgb(232, 201, 187)",
-    "in-2": "rgb(253, 250, 245) | band rgb(241, 219, 208)",
-    "out-3": "rgb(253, 250, 245) | band rgb(199, 208, 194)"
+    "?": "rgb(253, 250, 245) | band rgb(224, 229, 221)"
   }
 }

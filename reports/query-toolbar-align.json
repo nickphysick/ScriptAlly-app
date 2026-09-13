@@ -6,38 +6,38 @@
     "lefts": [
       {
         "label": "Status▲",
-        "head": 304,
-        "cell": 304
+        "head": 303,
+        "cell": 303
       },
       {
         "label": "Agent▲",
-        "head": 464,
-        "cell": 464
+        "head": 463,
+        "cell": 463
       },
       {
         "label": "Sent▲",
-        "head": 558.33,
-        "cell": 558.33
+        "head": 558.25,
+        "cell": 558.25
       },
       {
         "label": "What went",
-        "head": 630.33,
-        "cell": 630.33
+        "head": 630.25,
+        "cell": 630.25
       },
       {
         "label": "Since then",
-        "head": 736.33,
-        "cell": 736.33
+        "head": 736.25,
+        "cell": 736.25
       },
       {
         "label": "Where it stands▲",
-        "head": 854.33,
-        "cell": 854.33
+        "head": 854.25,
+        "cell": 854.25
       },
       {
         "label": "Actions",
-        "head": 963.98,
-        "cell": 963.98
+        "head": 965,
+        "cell": 965
       }
     ],
     "actsJustify": "start"
@@ -49,38 +49,38 @@
     "lefts": [
       {
         "label": "Status▲",
-        "head": 308,
-        "cell": 308
+        "head": 307,
+        "cell": 307
       },
       {
         "label": "Agent▲",
-        "head": 492,
-        "cell": 492
+        "head": 491,
+        "cell": 491
       },
       {
         "label": "Sent▲",
-        "head": 618.72,
-        "cell": 618.72
+        "head": 618.63,
+        "cell": 618.63
       },
       {
         "label": "What went",
-        "head": 706.72,
-        "cell": 706.72
+        "head": 706.63,
+        "cell": 706.63
       },
       {
         "label": "Since then",
-        "head": 828.72,
-        "cell": 828.72
+        "head": 828.63,
+        "cell": 828.63
       },
       {
         "label": "Where it stands▲",
-        "head": 974.72,
-        "cell": 974.72
+        "head": 974.63,
+        "cell": 974.63
       },
       {
         "label": "Actions",
-        "head": 1124,
-        "cell": 1124
+        "head": 1125,
+        "cell": 1125
       }
     ],
     "actsJustify": "start"
@@ -92,38 +92,38 @@
     "lefts": [
       {
         "label": "Status▲",
-        "head": 308,
-        "cell": 308
+        "head": 307,
+        "cell": 307
       },
       {
         "label": "Agent▲",
-        "head": 492,
-        "cell": 492
+        "head": 491,
+        "cell": 491
       },
       {
         "label": "Sent▲",
-        "head": 836.91,
-        "cell": 836.91
+        "head": 836.81,
+        "cell": 836.81
       },
       {
         "label": "What went",
-        "head": 924.91,
-        "cell": 924.91
+        "head": 924.81,
+        "cell": 924.81
       },
       {
         "label": "Since then",
-        "head": 1046.91,
-        "cell": 1046.91
+        "head": 1046.81,
+        "cell": 1046.81
       },
       {
         "label": "Where it stands▲",
-        "head": 1192.91,
-        "cell": 1192.91
+        "head": 1192.81,
+        "cell": 1192.81
       },
       {
         "label": "Actions",
-        "head": 1603.98,
-        "cell": 1603.98
+        "head": 1605,
+        "cell": 1605
       }
     ],
     "actsJustify": "start"
