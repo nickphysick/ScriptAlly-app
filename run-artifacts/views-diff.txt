@@ -1,2 +1,15 @@
-148 assertions · 398 properties matched · 15 waived · 49 places compared
-ABSENT list .lgh .rule — the app draws the head's hairline as `.grp::after` — a pseudo-element it already had for exactly that job. The ref needs an element because it has no `::after` to hand; a span here would be markup added to satisfy a drawing.
+244 assertions · 463 properties matched · 14 waived · 80 places compared
+COVER grid design-refs/todo-list-and-card.html — 22 selectors in its block, all held
+COVER list design-refs/todo-list-view-contract.html — 41 selectors in its block, all held
+COVER board design-refs/todo-three-views-contract.html — 24 selectors in its block, all held
+PLACE grid .card — contract 0,0 357.3×173.5 · dev 0,2 357.3×205.5
+PLACE grid .card .in — contract 7,1 349.3×171.5 · dev 7,1 349.3×203.5
+PLACE grid .card .foot — contract 16,119.5 317.3×39 · dev 16,119.5 317.3×71
+DIFF grid .card .foot .av
+    width: contract 26px · dev 60px
+    height: contract 26px · dev 60px
+PLACE grid .card .foot .av — contract 0,12 26×26 · dev 0,11 60×60
+PLACE grid .card .foot .n — contract 35,11 92.8×28 · dev 69,27.3 70.9×27.4
+PLACE grid .card .foot .go — contract 245,11 72.3×28 · dev 248.5,27 68.8×28
+ABSENT list .gh .rule — the app draws the head's hairline as `.grp::after` — a pseudo-element it already had for exactly that job. The ref needs an element because it has no `::after` to hand; a span here would be markup added to satisfy a drawing.
+RESTORED the stored view and removed 3 seeded tasks

@@ -1,25 +1,54 @@
 import { test } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
-import { pathToFileURL } from "node:url";
-import { join } from "node:path";
-/** the contract from disk and the page beside it, at both widths */
-test("list shots", async ({ page }) => {
-  /* ⚠️ SIGN IN AT DESKTOP WIDTH FIRST. The sign-in wait keys on `.ws-panel`, which is hidden below
-     the mobile breakpoint — the contract loop below leaves the viewport at 390, and doing it the
-     other way round times out on a page that is working. */
-  await page.setViewportSize({ width: 1440, height: 900 });
+import { gotoTodo, selectTodoView } from "./todoOpen";
+import { openContractView } from "./views";
+import { seedDueDates, cleanDueDates, readListView, restoreListView } from "./seedDueDates.mjs";
+import { mkdirSync } from "node:fs";
+test.setTimeout(900_000);
+
+/**
+ * THE LANDING STATE, BESIDE THE CONTRACT, AT ONE WIDTH.
+ *
+ * ⚠️ THE SAME SIZE IS THE POINT, and so is the same STATE. The contract draws a first visit —
+ * grouped by When, Overdue first — and the harness account carries a writer's own later choice,
+ * which is the behaviour Phase 3 built. A screenshot of the app in its stored view beside a
+ * drawing of the landing state is two pictures of two different things, which is the shape of
+ * "it looks like the mockup" this round exists to stop.
+ *
+ * ⚠️ AND IT PUTS THE ACCOUNT BACK. The stored view is read before, cleared, and written back
+ * exactly; the seeded tasks go the same way. The restore is asserted, not hoped for.
+ */
+const DIR = "reports/todo-list-round";
+
+test("the landing state beside its contract, at 1440", async ({ page }) => {
+  mkdirSync(DIR, { recursive: true });
   await ensureSignedIn(page);
-  const ref = pathToFileURL(join(process.cwd(), "design-refs/todo-tasklist-contract.html")).href;
-  for (const [w, h] of [[1440, 900], [390, 844]] as const) {
-    await page.setViewportSize({ width: w, height: h });
-    await page.goto(ref);
+  await page.setViewportSize({ width: 1440, height: 900 });
+
+  const savedView = await readListView();
+  const seeded = await seedDueDates();
+  try {
+    await restoreListView(null);
+    await gotoTodo(page, "grid");
+    await selectTodoView(page, "list");
     await page.waitForTimeout(900);
-    await page.screenshot({ path: `reports/list-port/contract-${w}.png` });
+    await page.screenshot({ path: `${DIR}/app-landing-1440.png` });
+
+    const cpage = await page.context().newPage();
+    await cpage.setViewportSize({ width: 1440, height: 900 });
+    await openContractView(cpage, "list");
+    await cpage.waitForTimeout(500);
+    await cpage.screenshot({ path: `${DIR}/contract-landing-1440.png`, fullPage: false });
+    await cpage.close();
+  } finally {
+    await restoreListView(savedView);
+    await cleanDueDates();
   }
-  for (const [w, h] of [[1440, 900], [390, 844]] as const) {
-    await page.setViewportSize({ width: w, height: h });
-    await page.goto("/todo");
-    await page.waitForTimeout(7000);
-    await page.screenshot({ path: `reports/list-port/page-${w}.png` });
+  const back = await readListView();
+  const canon = (v: unknown) => JSON.stringify(v, Object.keys((v ?? {}) as object).sort());
+  if (canon(back) !== canon(savedView)) {
+    throw new Error("the stored view was NOT put back — this account has been changed");
   }
+  // eslint-disable-next-line no-console
+  console.log(`\nSHOTS → ${DIR}/{app,contract}-landing-1440.png · ${seeded.length} seeds cleaned\n`);
 });

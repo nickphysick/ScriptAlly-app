@@ -1,0 +1,38 @@
+list round · Phase 2 · the list view — 1440×900 · today 2026-09-12
+
+PASS P2.1a · the heads are Task · Agent · Due · Overdue by, in that order
+        ["Sort by Task","Sort by Agent","Sort by Due","Sort by Overdue by"]
+PASS P2.1b · the header and the row resolve the SAME six tracks
+        header 5px 461px 220px 92px 170px 40px · row 5px 461px 220px 92px 170px 40px
+PASS P2.1c · each head sits over its own column, to the pixel
+        heads [306,785,1023,1133] · cells [306,785,1023,1133]
+PASS P2.2 · every row is 62px ± 1
+        33 rows · heights [62]
+PASS P2.3a · an overdue numeral is burgundy exactly when the writer owes the date, ink otherwise
+        25 overdue rows · wrong: []
+PASS P2.3b · the cell's owner is the one the row's KIND implies — derived, and it reached the class
+        tally [["Agent request → owed",6],["Nudge → theirs",11],["Gone quiet → theirs",6],["Your task → owed",2]]
+PASS P2.3c · both colours occur across the same range of days — so size cannot be what decides
+        owed days [13,20,23,40,43,45,49,457] · theirs days [1,4,8,8,8,8,18,19,31,35,47,47,54,125,148,180,185]
+PASS P2.4a · a row not yet due reads 'N days to go', muted, at 400
+        2 ahead · ["12 days to go rgb(138, 122, 108)","4 days to go rgb(138, 122, 108)"]
+PASS P2.4b · a row due today reads 'Due today', with no owner's colour
+        1 today · [["Due probe · due today","lov","rgb(58, 28, 20)"]]
+PASS P2.5 · a dateless row draws the dashed 'none' chip and no numeral
+        5 dateless · ["Agent request","Housekeeping"]
+PASS P2.6 · a chip states its year only when the year is not this one
+        1 chips with a year · ["2025"]
+PASS P2.7 · every figure is the contract's own unit() of the real days its chip names
+        27 figures · wrong: []
+PASS P2.8a · Overdue by: within every group, real days never increase down the list (undated last)
+        Needs you now: 457 54 49 47 45 43 40 35 31 23 19 18 8 8 8 8 4 1 · · · | Housekeeping: 185 180 148 125 47 · · | Your tasks: 20 13 0 -4 -12
+PASS P2.8b · the same head again flips it — and the arrow says so
+        arrows Overdue by ▼ → Overdue by ▲
+PASS P2.8c · Due: within every group, the dates run soonest first, undated last
+        Needs you now: 2025-06-12 2026-07-20 2026-07-25 2026-07-27 2026-07-29 2026-07-31 2026-08-03 2026-08-08 2026-08-12 2026-08-20 2026-08-24 2026-08-25 2026-09-04 2026-09-04 2026-09-04 2026-09-04 2026-09-08 2026-09-11 9999-99-99 9999-99-99 9999-99-99 | Housekeeping: 2026-03-11 2026-03-16 2026-04-17 2026-05-10 2026-07-27 9999-99-99 9999-99-99 | Your tasks: 2026-08-23 2026-08-30 2026-09-12 2026-09-16 2026-09-24
+PASS P2.8e · no row's task names the agent its own Agent cell names
+        33 rows name an agent · offenders []
+PASS P2.8d · a head click edits the stored view, as the Sort menu does
+        stored sort "due"
+
+17/17
