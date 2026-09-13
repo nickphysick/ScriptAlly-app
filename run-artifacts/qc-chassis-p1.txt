@@ -2,15 +2,15 @@
 green  · P1.-1 · the visible To-do page was found, so the readings below are about it
          scoped via visiblePage('.tdb-wrap')
 green  · P1.0 · the tiles rendered, and so did the card's body
-         tiles 7 · body items 28
+         tiles 7 · body items 30
 green  · P1.1 · seven tiles, in the contract's order
          ["All tasks","Urgent","Agent requests","Nudges","Gone quiet","Housekeeping","Your tasks"]
 green  · P1.2 · the five categories partition All — their sum IS the All count
-         five sum 28 · All 28 · {"All tasks":28,"Urgent":6,"Agent requests":9,"Nudges":9,"Gone quiet":6,"Housekeeping":2,"Your tasks":2}
+         five sum 30 · All 30 · {"All tasks":30,"Urgent":6,"Agent requests":9,"Nudges":11,"Gone quiet":6,"Housekeeping":2,"Your tasks":2}
 green  · P1.2b · the total is stated ONCE — the tiles say it and the content area does not restate it
-         tile 28 · content-area footer ""  (no second total)
+         tile 30 · content-area footer ""  (no second total)
 green  · P1.2c · the rail badge states the SAME number the page does
-         rail badge "28" · page 28
+         rail badge "30" · page 30
 green  · P1.3 · Urgent is a LENS, not a sixth part — it is not in that sum
          urgent 6 · agent requests 9
 green  · P1.4 · the header carries the title, the subtitle and one primary
@@ -19,7 +19,7 @@ green  · P1.5 · and the illustration slot
 green  · P1.6 · one search box on the page, and it is the toolbar's
          toolbar 1 · page 1 · card 0
 green  · P1.7 · the toolbar's instruments, one of each, in the contract's order
-         ["Filter","GroupUrgency","SortPriority","Set aside3"]
+         ["Filter","GroupUrgency","SortPriority","Set aside2"]
 green  · P1.8 · the view switch offers Grid, List and Board, and nothing else
          ["Grid","List","Board"]
 green  · P1.9 · the tiles and the toolbar are SHARED — both pages import the one module
@@ -27,4 +27,4 @@ green  · P1.9 · the tiles and the toolbar are SHARED — both pages import the
 green  · P1.10 · selecting a tile rings it, and only it
          ["Housekeeping"]
 green  · P1.11 · and the body narrows to exactly the number the tile stated
-         tile said 2 · body items 28 -> 2
+         tile said 2 · body items 30 -> 2
