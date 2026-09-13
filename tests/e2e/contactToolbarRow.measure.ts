@@ -2,95 +2,86 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE TOOLBAR IS ONE ROW (design authority: design-refs/contact-list-v5.html).
+ * THE TOOLBAR IS ONE ROW — ON THE PAGE, NOT IN THE LAB (design authority: design-refs/contact-list-v5.html).
  *
- * ⚠️ THE REF PUTS EVERY CONTROL ON ONE LINE and caps the search: `.search { flex: 1;
- * min-width: 200px; max-width: 320px }`, `.switch { margin-left: auto }`, `.toolbar { gap: 10px }`.
- * The cap is the load-bearing half — an uncapped flex child with `width: 100%` claims the whole
- * row and folds everything after it onto lines of its own.
+ * ⚠️ THIS LOCK USED TO MEASURE THE LAB, AND THE LAB IS 270px WIDER. `/#/contact-lab` renders the page
+ * without the workspace shell, so at a 1440 viewport its toolbar had 1120px — while the real /agents
+ * page, behind the shell's 224px panel and inside the grid's gutters, gives it 850. The ref's controls
+ * need 1098. The lab passed, aef24f73 reported "the toolbar goes back on one row", and on the page
+ * people use at 1440 the view switch was still on a line of its own. The surface census, which runs
+ * the real route, is what saw it. A geometry claim is measured where the geometry is — here.
  *
- * ⚠️ AND IT ARRIVED FROM ANOTHER PAGE, AS THE PORTAL DID. `.qcc-tb-search` is the QUERY CENTRE's
- * shared field; on 2026-09-09, `12dd553e` ("toolbar: the row was wrapping, and the two
- * declarations that did it were mine") moved its cap off the field and onto the grid TRACK that
- * holds it there — correct for a grid, and this page's toolbar is a FLEX row with no track. The
- * field went from `width: 360px; max-width: 100%` to `width: 100%`, and took the row with it.
+ * ⚠️ THE REF CAPS THE SEARCH: `.search { flex: 1; min-width: 200px; max-width: 320px }`, with
+ * `.switch { margin-left: auto }`. The cap arrived here from another page's change: on 2026-09-09
+ * `12dd553e` moved `.qcc-tb-search`'s cap onto the Query Centre's grid TRACK, which a flex row does not
+ * have, and the field took the whole line. agentList.css restores it for this row.
  *
- * ⚠️ SO THE ASSERTION IS `offsetTop`, NOT A COUNT OF CHILDREN. Counting elements says the toolbar
- * mounted, which it did — it mounted perfectly, on three rows. Only the rendered geometry can tell
- * one row from three, which is the same lesson the portalled drawer taught: every gate was green,
- * the page mounted, and the layout was wrong in a way only a computed read catches.
+ * ⚠️ CENTRE LINES, NOT TOPS. `align-items: center` gives controls of different heights different tops on
+ * the SAME line — measured, the switch at 277 beside buttons at 281. Controls sharing a line share a
+ * centre, and the row states the same claim from its own side: one line means the row is exactly as
+ * tall as its tallest control.
+ *
+ * ⚠️ AND THE ARRANGEMENT, NOT JUST THE LINE COUNT. Everything clustered at the right is also one line —
+ * it is what the shell's `.wpg-tally { margin-right: auto }` gives. The ref seats the search beside the
+ * count, so the gap between them is the row's own 10px.
+ *
+ * ONE TEST LOOPING BOTH WIDTHS, SOFT ASSERTIONS: every test password-signs-in, and a hard failure at 1440
+ * would hide the 1920 reading.
  */
 import { expect, test } from "@playwright/test";
+import { openRoute, visiblePage } from "./measure";
 
-test.setTimeout(120_000);
+test.setTimeout(240_000);
 
-/** The ref's own cap, read off `.search` in contact-list-v5.html. */
+/** the ref's own cap, read off `.search` in contact-list-v5.html */
 const SEARCH_MAX = 320;
-/** The widths this page is designed and reviewed at. */
+/** the widths this page is designed and reviewed at */
 const WIDTHS = [1440, 1920];
 
-for (const w of WIDTHS) {
-  test(`the toolbar is one row at ${w}`, async ({ page }) => {
-    await page.setViewportSize({ width: w, height: 900 });
-    await page.goto("/#/contact-lab");
-    await page.locator('[data-lab-view="cast"]').click();
-    await expect(page.locator('[data-agent-card="fx-long"]')).toBeVisible({ timeout: 30_000 });
+test("the Contact list toolbar is one row on the real page, at the design widths", async ({ page }) => {
+  for (const w of WIDTHS) {
+    await openRoute(page, "/agents", { width: w, height: 900 });
+    await page.waitForFunction(() => [...document.querySelectorAll(".agl-wpg")].some((e) => e.getBoundingClientRect().height > 0), null, { timeout: 25_000 });
+    const scope = await visiblePage(page, ".agl-wpg");
     await page.evaluate(() => document.fonts.ready);
     await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 
-    const r = await page.evaluate(() => {
-      const bar = document.querySelector(".agl-toolbar") as HTMLElement;
+    const r = await page.evaluate((sc) => {
+      const bar = document.querySelector(`${sc} .agl-toolbar`) as HTMLElement;
       const kids = [...bar.children] as HTMLElement[];
       const rows = kids.map((k) => {
         const b = k.getBoundingClientRect();
-        return {
-          cls: (k.className || k.tagName).toString().split(" ")[0],
-          top: Math.round(b.top),
-          h: Math.round(b.height),
-          /* ⚠️ THE CENTRE, NOT THE TOP. `align-items: center` gives children of different heights
-             different `top`s ON THE SAME LINE — measured, the switch at 277 beside buttons at 281,
-             four pixels apart and both on row three. Raw tops would call a correct toolbar wrapped.
-             Items sharing a flex line share a centre line, so that is what identifies a row. */
-          mid: Math.round(b.top + b.height / 2),
-          w: Math.round(b.width),
-        };
+        return { cls: String(k.className || k.tagName).split(" ")[0], mid: b.top + b.height / 2, h: Math.round(b.height), w: Math.round(b.width) };
       });
+      const mids = rows.map((x) => x.mid).sort((a, b) => a - b);
+      let lines = mids.length ? 1 : 0;
+      for (let i = 1; i < mids.length; i++) if (mids[i] - mids[i - 1] > 3) lines++;
       const search = bar.querySelector(".qcc-tb-search") as HTMLElement;
       const sw = bar.querySelector(".qvs") as HTMLElement;
+      const tally = bar.querySelector(".wpg-tally") as HTMLElement;
       const bb = bar.getBoundingClientRect();
+      const gap = parseFloat(getComputedStyle(bar).columnGap) || 0;
       return {
-        rows,
-        /* ⚠️ DISTINCT `offsetTop`s ARE THE WHOLE CLAIM — one value means one row. */
-        distinctMids: [...new Set(rows.map((x) => x.mid))].sort((a, b) => a - b),
-        tallest: Math.max(...rows.map((x) => x.h)),
-        barH: Math.round(bb.height),
+        rows: rows.map((x) => `${x.cls}@${Math.round(x.mid)}/${x.w}`),
+        count: rows.length, lines,
+        barH: Math.round(bb.height), tallest: Math.max(...rows.map((x) => x.h)),
+        barW: Math.round(bb.width), need: Math.round(rows.reduce((n, x) => n + x.w, 0) + gap * Math.max(0, rows.length - 1)),
         searchW: Math.round(search.getBoundingClientRect().width),
-        /* ⚠️ THE ARRANGEMENT, NOT JUST THE ROW COUNT. Everything after the count clustered at the
-           right is ALSO one row, and is what the shell's `.wpg-tally { margin-right: auto }` gives
-           — measured, a 480px hole between the count and the search at 1920. The ref seats the
-           search beside the count, so the gap between them is the row's own 10px. */
-        tallyRight: Math.round((bar.querySelector(".wpg-tally") as HTMLElement).getBoundingClientRect().right),
-        searchLeft: Math.round(search.getBoundingClientRect().left),
-        switchRight: sw ? Math.round(sw.getBoundingClientRect().right) : -1,
-        barRight: Math.round(bb.right),
+        switchRight: Math.round(sw.getBoundingClientRect().right), barRight: Math.round(bb.right),
+        tallyRight: Math.round(tally.getBoundingClientRect().right), searchLeft: Math.round(search.getBoundingClientRect().left),
       };
-    });
+    }, scope);
     // eslint-disable-next-line no-console
-    console.log(`[toolbar ${w}] countToSearchGap=${r.searchLeft - r.tallyRight} rowCentres=${JSON.stringify(r.distinctMids)} barH=${r.barH} tallestChild=${r.tallest} search=${r.searchW} switchRight=${r.switchRight} barRight=${r.barRight}`);
+    console.log(`[toolbar ${w}] lines=${r.lines} barH=${r.barH} tallest=${r.tallest} · room=${r.barW} need=${r.need} · search=${r.searchW} countToSearchGap=${r.searchLeft - r.tallyRight} switchRight=${r.switchRight} barRight=${r.barRight}`);
     // eslint-disable-next-line no-console
-    console.log(`[toolbar ${w}] children: ${r.rows.map((x) => `${x.cls}@${x.mid}/${x.w}px`).join("  ")}`);
+    console.log(`[toolbar ${w}] children: ${r.rows.join("  ")}`);
 
     /* the population first — an empty toolbar would satisfy every claim below */
-    expect(r.rows.length, "the toolbar rendered too few controls to be measuring anything").toBeGreaterThan(4);
-    expect(r.distinctMids.length, `the toolbar wrapped onto ${r.distinctMids.length} rows`).toBe(1);
-    /* ⚠️ AND THE SAME CLAIM FROM THE CONTAINER'S SIDE: one row means the bar is exactly as tall as
-       its tallest control. A wrapped bar is the sum of its lines plus the gaps between them. */
-    expect(r.barH - r.tallest, "the toolbar is taller than its tallest control — it has wrapped").toBeLessThanOrEqual(1);
-    expect(r.searchW, `the search is over the ref's ${SEARCH_MAX}px cap`).toBeLessThanOrEqual(SEARCH_MAX);
-    /* ⚠️ AND THE SWITCH IS PUSHED RIGHT — `margin-left: auto` in the ref. Without it the controls
-       bunch left and the row is "one row" while looking nothing like the design. */
-    expect(Math.abs(r.switchRight - r.barRight), "the view switch is not flush with the row's right edge").toBeLessThanOrEqual(1);
-    /* the search sits BESIDE the count — one gap, not a hole the free space fell into */
-    expect(r.searchLeft - r.tallyRight, "the search is not beside the count — the free space is in the wrong place").toBeLessThanOrEqual(12);
-  });
-}
+    expect.soft(r.count, `${w}: the toolbar rendered too few controls to be measuring anything`).toBeGreaterThan(4);
+    expect.soft(r.lines, `${w}: the toolbar wrapped onto ${r.lines} lines (room ${r.barW}px, controls need ${r.need}px)`).toBe(1);
+    expect.soft(r.barH - r.tallest, `${w}: the toolbar is taller than its tallest control — it has wrapped`).toBeLessThanOrEqual(1);
+    expect.soft(r.searchW, `${w}: the search is over the ref's ${SEARCH_MAX}px cap`).toBeLessThanOrEqual(SEARCH_MAX);
+    expect.soft(Math.abs(r.switchRight - r.barRight), `${w}: the view switch is not flush with the row's right edge`).toBeLessThanOrEqual(1);
+    expect.soft(r.searchLeft - r.tallyRight, `${w}: the search is not beside the count — the free space is in the wrong place`).toBeLessThanOrEqual(12);
+  }
+});
