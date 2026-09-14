@@ -293,126 +293,72 @@ export const FOUNDING_NOTE: CopyRun[] = [
 
 export const DOCUMENT_TITLE = "ScriptAlly — Take control of your querying journey";
 
-/** Feature-row copy: heading + body segments (bold parts marked) + action labels. */
+/**
+ * Feature-row copy — six rows, top to bottom, each an illustration, a heading and ONE paragraph.
+ * Rebuilt 14 Sep from a written brief, which is the source of truth for these strings in place of
+ * landing-v13.html: headings, paragraphs and alt text are verbatim from it.
+ *
+ * ⚠️ `body` IS A PLAIN STRING ON PURPOSE. It used to be segments so a phrase could be set bold, and
+ * the brief rules out bold inside these paragraphs — a type that can still express a retired choice
+ * is how the choice comes back. Likewise the retired CTA, link, Pro-badge and flip fields: a row has
+ * none, and a lock asserts the key set.
+ *
+ * ⚠️ `alt` IS COPY — the only thing a screen reader says about the picture — so it lives here beside
+ * the heading it describes. `image` is a path under public/images/: unhashed, so the file name is the
+ * URL.
+ */
 export interface FeatureRow {
   key: string;
   heading: string;
-  /** Body as segments — { b: true } renders 500-weight ink (the ref's <b>). */
-  body: Array<{ text: string; b?: boolean }>;
-  primary: string;
-  /** Text-link action; Notes to self has none. */
-  link?: string;
-  /** Visual sits left of the copy (the ref's .flip rows). */
-  flip?: boolean;
-  /** Inline PRO badge after the heading (Smart email drop). */
-  pro?: boolean;
+  body: string;
+  image: string;
+  alt: string;
 }
 
 export const FEATURE_ROWS: FeatureRow[] = [
   {
     key: "import",
-    /* Retitled with the pulse section: the row now leads with what the reader gets rather than
-       with the feature's name, which the body still carries in bold. */
-    heading: "Your journey so far comes with you",
-    body: [
-      { text: "Already deep in the trenches? Bring your history with you. Upload the spreadsheet you've been fighting with and " },
-      { text: "Smart Import", b: true },
-      { text: " turns it into a living database — every agent, query and response, ready to track from today." },
-    ],
-    primary: "Import your history",
-    link: "Download the import template",
+    heading: "Bring your spreadsheet with you",
+    body: "Upload the tracker you've been keeping and it comes back sorted. Muddled dates fixed, the rows you entered twice merged into one.",
+    image: "/images/journey-so-far.png",
+    alt: "A messy submissions spreadsheet beside the same queries imported as a clean, dated list.",
   },
   {
     key: "track",
-    heading: "Track every query",
-    body: [
-      { text: "Log a submission once and follow its whole journey. The " },
-      { text: "live pipeline", b: true },
-      { text: " always knows what's queried, what's requested and what's out — and every reply you record writes itself into a " },
-      { text: "timeline", b: true },
-      { text: " of the whole campaign." },
-    ],
-    primary: "Start tracking",
-    link: "See how tracking works",
-    flip: true,
+    heading: "Always know where a query stands",
+    body: "Queried, partial requested, full out with an agent. Every step dated, so you're not doing the maths in your head at midnight.",
+    image: "/images/track-agent-queries.png",
+    alt: "A hawk pointing to a query record showing a submission's full timeline.",
   },
   {
     key: "agents",
-    heading: "A home for your agents",
-    body: [
-      { text: "Wish lists, submission routes, response times and your own starred notes — every agent you're courting, kept properly. Then let " },
-      { text: "Discover", b: true },
-      { text: " find the UK agents who want your manuscript, matched on " },
-      { text: "genre, age category and wish list", b: true },
-      { text: ", with open-to-submissions status front and centre." },
-    ],
-    primary: "Find your agents",
-    link: "About the agent list",
-  },
-  {
-    key: "pulse",
-    /* ⚠️ RETITLED BECAUSE THE PHRASE WAS PROMOTED. "A finger on the pulse" is the centred section
-       heading above the showreel now, and a row repeating it three screens later would read as a
-       stutter. The row's key stays `pulse` — it names the visual and the copy, not the heading. */
-    heading: "From beginning to end",
-    body: [
-      { text: "Open any query and its whole story is there — " },
-      { text: "every event date-stamped", b: true },
-      { text: ", " },
-      { text: "every material accounted for", b: true },
-      { text: ", response windows measured, and a " },
-      { text: "nudge reminder", b: true },
-      { text: " when it's polite to follow up. Nothing forgotten, nothing left blank." },
-    ],
-    primary: "Start tracking",
-    link: "See a query's story",
-    flip: true,
-  },
-  {
-    key: "packages",
-    heading: "Curate and compare",
-    body: [
-      { text: "Build " },
-      { text: "submission packages", b: true },
-      { text: " from your letters, synopses and sample pages — version them, reuse them, and see at a glance " },
-      { text: "which version went where", b: true },
-      { text: ". When an agent asks what you sent, you'll know in one look." },
-    ],
-    primary: "Build a package",
-    link: "More on materials",
+    heading: "Every agent, properly filed",
+    body: "Their wish list, their submission rules, how long they usually take. Look it up in seconds instead of hunting round their website again.",
+    image: "/images/home-for-your-agents.png",
+    alt: "An agent record showing a wish list, submission route and requested materials.",
   },
   {
     key: "email",
-    heading: "Smart email drop",
-    pro: true,
-    body: [
-      { text: "The best moments in querying arrive by email. Forward one to ScriptAlly and it becomes a tracked update — " },
-      { text: "who it's from, what they've asked for, when they need it", b: true },
-      { text: " — without you transcribing a word of your good news." },
-    ],
-    primary: "See what Pro adds",
-    link: "How email drop works",
-    flip: true,
+    heading: "Forward the email. It logs itself.",
+    body: "An agent asks for three chapters by Friday. Send the message across and the ask, the date and the deadline are already recorded.",
+    image: "/images/smart-email-drop.png",
+    alt: "A hawk transcribing an agent's email into a query record showing what was requested.",
   },
   {
-    key: "notes",
-    heading: "Notes to self",
-    body: [
-      { text: "Querying is a head full of loose threads. Jot them down as they come — " },
-      { text: "pin the ones that matter", b: true },
-      { text: " and they'll wait for you, right beside the work, until you need them." },
-    ],
-    primary: "Start tracking",
+    key: "packages",
+    heading: "Find out what's actually working",
+    body: "Bundle your letter, synopsis and opening pages into a package. Then see which one agents keep asking more from.",
+    image: "/images/curate-and-compare.png",
+    alt: "Two submission package records side by side with response figures for each.",
+  },
+  {
+    key: "comps",
+    heading: "Comps that hold up",
+    body: "Keep the books you're pitching alongside, and get pointed at new ones the agents on your list already talk about.",
+    image: "/images/comparable-titles.png",
+    alt: "A list of comparable titles beside suggested books to read next.",
   },
 ];
-
-/**
- * Alt text for Track every query's illustration — the one feature visual a reader HEARS. The other
- * rows draw decorative tableaux that are `aria-hidden`; this image replaced one and carries the
- * row's meaning, so it is copy like any other sentence on the page.
- */
-export const TRACK_ILLUSTRATION_ALT =
-  "A hawk pointing to a query record showing a submission's full timeline from query sent to full manuscript sent.";
 
 /* ══════════════ Pricing (public, marketing tier) ══════════════
    ⚠️ THREE FIGURES ARE UNSET AND NOTHING HERE MAY INVENT THEM. The design this page was rebuilt

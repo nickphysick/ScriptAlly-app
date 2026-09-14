@@ -81,11 +81,6 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   --mk-centre: #f6e4da;
   --mk-sage: #e9ede6;
   --mk-sage-t: #5a6e58;
-  --mk-pink-a: #f3ddd2;
-  --mk-pink-b: #eed2c5;
-  /* ⚠️ THE MONOGRAM PAIR ABOVE IS A GRADIENT, NOT A BUTTON. `--mk-cta`/`--mk-cta-bd` are the
-     app-wide soft-pink CTA pair (the same #f5e2da/#e8c8bc the workspace uses); the two are four
-     points apart and swapping one for the other reads as a mistake rather than a variant. */
   --mk-cta: #f5e2da;
   --mk-cta-bd: #e8c8bc;
   --mk-cta-hov: #f8e9e2;
@@ -949,166 +944,31 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    OVERSIGHT. The brief said to add back whatever the removed header was contributing IF the first
    row ended up against the band edge. It does not: `.mk-frow` carries its own 60px of top padding
    and centres its content, so with this padding untouched the first heading still sits 122.6px
-   below the parchment's top hairline (measured at 1440; the row box itself is 31px down). Adding
+   below the parchment's top hairline (measured at 1440 before the 14 Sep rebuild, which changed the rows' content but neither this padding nor theirs; the row box itself is 31px down). Adding
    the header's 120px back on top of that gave 152.6px, which read as a hole where a heading used
    to be. The band's hairline and its change of paper are the separator — it does not need a
    run-up as well. */
 .mk-rows { max-width: 1180px; margin: 0 auto; padding: 16px 56px 30px; }
-.mk-frow { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; padding: 60px 0; }
+.mk-frow { display: grid; grid-template-columns: 1.6fr 1fr; gap: 80px; align-items: center; padding: 60px 0; }
 .mk-frow + .mk-frow { border-top: 1px solid var(--mk-hair); }
-.mk-frow h3 { font-family: "Playfair Display", Georgia, serif; font-size: 27px; font-weight: 500; color: var(--mk-head); line-height: 1.25; }
-.mk-fcopy p { font-size: 14px; font-weight: 300; line-height: 1.75; color: #5a4a40; margin-top: 14px; max-width: 440px; }
-.mk-fcopy p b { font-weight: 500; color: var(--mk-ink); }
-.mk-factions { display: flex; gap: 18px; align-items: center; margin-top: 22px; }
-.mk-fv { position: relative; height: 260px; }
-.mk-frow.mk-flip .mk-fcopy { order: 2; }
-.mk-frow.mk-flip .mk-fv { order: 1; }
-/* Row 2 · Track every query shows a finished illustration where the other rows draw a tableau, so
-   its image column is the wider one and the image sits straight on the band's ground at its own
-   16:9 — no crop, no frame, no fill.
-   ⚠️ THE SPLIT STAYS ABOVE THE 1080px BLOCK, which stacks every row with an equal-specificity
-   `.mk-frow` rule and wins only by coming later. Declared below it, this row would keep two
-   columns on a phone. Locked in marketingTokens.test.ts.
-   ⚠️ AND THE IMAGE IS DELIBERATELY NOT `.mk-fv`, whose 260px box, stacked min-height and phone
-   scale(.82) are all written for absolutely-positioned cards. The flip rules' `order` does not
-   reach it either: at order 0 it comes first in both layouts — left of the copy, above it stacked. */
-.mk-frow--illo { grid-template-columns: 1.25fr 1fr; }
+/* The section-heading style — `.mk-sect h2`, the band's own heading above these rows — at its desktop
+   size. Fixed here rather than its clamp, because the copy column stops growing at the 1180px cap
+   while 3.2vw would keep climbing until 1400px; stacked, where the column is fluid again, the 1080px
+   block gives the heading the clamp back. Locked against `.mk-sect h2` in marketingTokens.test.ts. */
+.mk-frow h3 {
+  font-family: "Playfair Display", Georgia, serif; font-weight: 600; color: var(--mk-nearblack);
+  font-size: 2.8rem; line-height: 1.2; letter-spacing: -.018em;
+}
+.mk-fcopy p { font-size: 19px; font-weight: 300; line-height: 1.7; color: #5a4a40; margin-top: 14px; max-width: 460px; }
+/* The illustration at its own ratio: no crop, no frame, no fill — straight onto the band's ground. */
 .mk-rowillo { width: 100%; height: auto; min-width: 0; }
-.mk-protag {
-  display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 6.5px; font-weight: 700;
-  letter-spacing: .12em; text-transform: uppercase; color: #fdfaf5; background: var(--mk-burg);
-  border-radius: 99px; padding: 3px 8px; vertical-align: 2px; margin-left: 8px;
-}
-
-/* shared faithful atoms for the row visuals */
-.mk-scard {
-  position: absolute; background: var(--mk-card); border: 1px solid var(--mk-hair); border-radius: 14px;
-  box-shadow: 0 3px 8px rgba(58, 28, 20, 0.07), 0 18px 44px rgba(58, 28, 20, 0.10);
-}
-.mk-sdot {
-  width: 12px; height: 12px; border-radius: 50%; position: relative; display: inline-block; flex: none;
-  background: conic-gradient(#7c3a2a 50%, rgba(124, 58, 42, 0.28) 0);
-}
-.mk-sdot .mk-c {
-  position: absolute; inset: 2px; border-radius: 50%; background: #f6e4da; color: #7c3a2a;
-  display: flex; align-items: center; justify-content: center; font-size: 6px; font-weight: 700;
-}
-.mk-spill {
-  display: inline-flex; align-items: center; gap: 7px; font-family: "JetBrains Mono", monospace;
-  font-size: 7.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--mk-sage-t);
-  background: var(--mk-sage); border-radius: 5px; padding: 4px 9px;
-}
-
-/* Row 1 · messy spreadsheet → orderly database */
-.mk-xls {
-  position: absolute; width: 250px; background: #ffffff; border: 1px solid #cfc9c0; border-radius: 4px;
-  padding: 8px; transform: rotate(-2.4deg); left: 0; top: 6%;
-  box-shadow: 0 3px 8px rgba(58, 28, 20, 0.09), 0 14px 30px rgba(58, 28, 20, 0.10);
-}
-.mk-xls table { width: 100%; border-collapse: collapse; font-family: "JetBrains Mono", monospace; font-size: 6.5px; color: #6a6a66; }
-.mk-xls td, .mk-xls th { border: 1px solid #e4e0da; padding: 3px 4px; text-align: left; white-space: nowrap; overflow: hidden; max-width: 64px; }
-.mk-xls th { background: #f2f0ec; font-weight: 700; color: #4a4a46; }
-.mk-xls .mk-bad { color: #b05a4a; font-weight: 700; }
-.mk-xarrow { position: absolute; left: 41%; top: 42%; font-size: 24px; color: var(--mk-burg); transform: rotate(-6deg); z-index: 2; }
-.mk-xarrow .mk-xcap {
-  display: block; font-family: "JetBrains Mono", monospace; font-size: 6.5px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--mk-label); margin-top: 2px;
-}
-.mk-dbclean { position: absolute; width: 262px; right: 0; bottom: 2%; transform: rotate(1.6deg); padding: 6px 0; z-index: 2; }
-.mk-dbrow { display: flex; align-items: center; gap: 10px; padding: 9px 15px; border-bottom: 1px solid #f2e9db; }
-.mk-dbrow:last-child { border-bottom: none; }
-.mk-dbrow .mk-monoinit { width: 26px; height: 26px; font-size: 11px; }
-.mk-dbrow .mk-dn { font-family: "Playfair Display", Georgia, serif; font-size: 14px; line-height: 1.1; }
-.mk-dbrow .mk-da { font-family: "JetBrains Mono", monospace; font-size: 6px; letter-spacing: .12em; text-transform: uppercase; color: var(--mk-label); margin-top: 1px; }
-.mk-dbrow .mk-sdot { margin-left: auto; }
-
-/* Query card — Row 6's email drop places it (`.mk-mailqc`). */
-.mk-qc { width: 262px; padding: 15px 17px; }
-.mk-qc .mk-nm { font-family: "Playfair Display", Georgia, serif; font-size: 16.5px; margin-left: 10px; vertical-align: middle; }
-.mk-qc .mk-ag {
-  font-family: "JetBrains Mono", monospace; font-size: 7px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--mk-label); margin: 10px 0 11px;
-}
-
-/* Row 3 · Discover match cards */
-.mk-disc1 { left: 2%; top: 4%; transform: rotate(-1.6deg); }
-.mk-disc2 { left: 16%; bottom: 4%; transform: rotate(1.2deg); z-index: 2; }
-.mk-ccard { width: 290px; padding: 14px 16px; }
-.mk-crow { display: flex; align-items: center; gap: 10px; }
-.mk-cname { font-family: "Playfair Display", Georgia, serif; font-size: 15.5px; }
-.mk-cag { font-family: "JetBrains Mono", monospace; font-size: 6.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--mk-label); margin-top: 2px; }
-.mk-cwhy { font-size: 10.5px; font-weight: 300; color: #6a5a50; margin-top: 9px; line-height: 1.5; }
-.mk-fitb {
-  margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 7px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase; border-radius: 99px; padding: 4px 10px;
-}
-.mk-fit-strong { background: var(--mk-sage); color: #4f7a4a; }
-.mk-fit-good { background: #f3ecd9; color: #a8842c; }
-
-/* Row 4 · rich Tracking snippet (reading-pane faithful) */
-.mk-trackc { position: absolute; width: 330px; left: 6%; top: 0; padding: 0; overflow: hidden; transform: rotate(-1.2deg); }
-.mk-trackband {
-  display: flex; align-items: center; gap: 9px;
-  background: linear-gradient(135deg, var(--mk-pink-a), var(--mk-pink-b));
-  border-bottom: 1px solid rgba(124, 58, 42, 0.15); padding: 11px 18px;
-}
-.mk-trackband h4 { font-family: "Playfair Display", Georgia, serif; font-size: 15px; font-weight: 500; color: #6b2f20; }
-.mk-trackband svg { width: 14px; height: 14px; stroke: #6b2f20; }
-.mk-trackbody { padding: 14px 18px 16px; position: relative; }
-.mk-trackbody::before { content: ''; position: absolute; left: 29px; top: 22px; bottom: 64px; width: 2px; background: var(--mk-hair); }
-.mk-tev { display: flex; gap: 12px; align-items: flex-start; padding: 7px 0; position: relative; }
-.mk-tev .mk-tic {
-  width: 24px; height: 24px; border-radius: 50%; background: var(--mk-centre); color: var(--mk-burg);
-  display: flex; align-items: center; justify-content: center; font-size: 10px; flex: none;
-  box-shadow: 0 0 0 3px var(--mk-card); z-index: 1;
-}
-.mk-tev .mk-tn2 { font-size: 12.5px; font-weight: 600; color: var(--mk-ink); }
-.mk-tev .mk-ts { font-size: 10.5px; font-weight: 300; color: #7a6a5e; margin-top: 2px; }
-.mk-tev .mk-tdate { margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 7.5px; color: var(--mk-label); flex: none; padding-top: 3px; }
-.mk-matpill {
-  display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 6.5px; letter-spacing: .06em;
-  text-transform: uppercase; color: var(--mk-muted); border: 1px solid var(--mk-hair); border-radius: 5px;
-  padding: 2px 7px; margin: 5px 4px 0 0;
-}
-.mk-waitchip {
-  display: inline-flex; align-items: center; gap: 7px; margin: 10px 0 0 36px;
-  font-family: "JetBrains Mono", monospace; font-size: 7.5px; letter-spacing: .08em; text-transform: uppercase;
-  background: var(--mk-sage); color: var(--mk-sage-t); border-radius: 99px; padding: 6px 12px;
-}
-
-/* Row 5 · package panel */
-.mk-pkgc { width: 300px; left: 14%; top: 8%; padding: 15px 17px; transform: rotate(-1.5deg); }
-.mk-pkgc .mk-pt2 { font-family: "Playfair Display", Georgia, serif; font-size: 14.5px; color: var(--mk-head); }
-.mk-pkr { display: flex; align-items: center; gap: 9px; padding: 8px 0; border-top: 1px solid var(--mk-hair); font-size: 11.5px; color: #5a4a40; }
-.mk-pkr:first-of-type { border-top: none; margin-top: 8px; }
-.mk-pkr svg { width: 13px; height: 13px; stroke: var(--mk-burg); flex: none; }
-.mk-pkr .mk-pv { margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 7px; letter-spacing: .08em; color: var(--mk-label); text-transform: uppercase; }
-
-/* Row 6 · email → query card */
-.mk-mailc { position: absolute; width: 270px; left: 8%; top: 8%; padding: 14px 16px; background: #fff; transform: rotate(1.8deg); z-index: 1; }
-.mk-mailc .mk-mh {
-  font-family: "JetBrains Mono", monospace; font-size: 7px; letter-spacing: .06em; color: var(--mk-label);
-  border-bottom: 1px solid var(--mk-hair); padding-bottom: 7px; margin-bottom: 8px; line-height: 1.8;
-}
-.mk-mailc .mk-mh b { color: var(--mk-ink); font-weight: 500; }
-.mk-mailc .mk-mb { font-size: 10.5px; font-weight: 300; line-height: 1.6; color: #5a4a40; }
-.mk-mailc .mk-hl { background: #f8e7dc; border-radius: 3px; padding: 0 3px; }
-.mk-mailqc { position: absolute; right: 4%; bottom: 0; transform: rotate(1.6deg); z-index: 2; }
-
-/* Row 7 · notes to self */
-.mk-notesv { position: relative; height: 240px; }
-.mk-pnote { position: absolute; width: 132px; padding: 14px 13px; box-shadow: 0 3px 10px rgba(58, 28, 20, 0.16); }
-.mk-pnote .mk-cv { font-family: "Caveat", cursive; font-size: 15px; line-height: 1.3; color: #4a3a30; }
-.mk-pnote.mk-y { background: #f7eec4; left: 4%; top: 8%; transform: rotate(-4deg); }
-.mk-pnote.mk-g { background: #dfeadb; left: 34%; bottom: 4%; transform: rotate(2.5deg); }
-.mk-pinned {
-  position: absolute; right: 6%; top: 14%; width: 190px; background: var(--mk-card); border: 1px solid var(--mk-hair);
-  border-radius: 12px; padding: 18px 15px 12px; transform: rotate(1.5deg);
-  box-shadow: 0 3px 8px rgba(58, 28, 20, 0.08), 0 16px 38px rgba(58, 28, 20, 0.10);
-}
-.mk-pinned::before { content: ''; position: absolute; top: -5px; left: 50%; width: 10px; height: 10px; border-radius: 50%; background: var(--mk-burg); }
-.mk-pinned .mk-cv { font-family: "Caveat", cursive; font-size: 16px; line-height: 1.35; color: #4a3a30; }
-.mk-pinned .mk-pt3 { font-family: "JetBrains Mono", monospace; font-size: 6.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--mk-label); margin-top: 9px; }
+/* ⚠️ EVERY SECOND ROW PUTS ITS IMAGE ON THE RIGHT BY FLIPPING THE GRID'S DIRECTION, not by reordering
+   markup: the first track — the 1.6fr image column — then starts from the right. The children are set
+   back to ltr, or the copy would lay out right to left and a sentence's full stop would jump to its
+   start. The 1080px block sets the grid back to ltr when rows stack, which is what ignores the
+   alternation there; it wins only by coming later, so it must stay below this. */
+.mk-frow:nth-child(even) { direction: rtl; }
+.mk-frow:nth-child(even) > * { direction: ltr; }
 
 /* ── /founders: the Founding Writers page ──────────────────────────────────── */
 .mk-fwpad { max-width: 1180px; margin: 0 auto; padding: 0 56px; }
@@ -1420,14 +1280,10 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 @media (max-width: 1080px) {
   .mk-rows { padding: 10px 26px 22px; }
   .mk-frow { grid-template-columns: 1fr; gap: 28px; padding: 44px 0; }
-  .mk-frow.mk-flip .mk-fcopy { order: 1; }
-  .mk-frow.mk-flip .mk-fv { order: 2; }
-  .mk-fv { min-height: 260px; }
+  .mk-frow:nth-child(even) { direction: ltr; }
+  .mk-frow h3 { font-size: clamp(1.9rem, 3.2vw, 2.8rem); }
   .mk-beta { padding-left: 18px; padding-right: 18px; }
   .mk-foot { padding: 30px 26px 40px; flex-wrap: wrap; }
-}
-@media (max-width: 560px) {
-  .mk-fv { transform: scale(.82); transform-origin: top left; }
 }
 
 /* ══════════════ Pricing (public marketing route) ══════════════

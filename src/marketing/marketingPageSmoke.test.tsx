@@ -31,7 +31,7 @@ import { AboutPage } from "./AboutPage";
 import { ContactPage } from "./ContactPage";
 import { FoundersPage } from "./FoundersPage";
 import { LEGAL_COPY_REVIEWED } from "./legalCopy";
-import { HERO_H1, TRACK_ILLUSTRATION_ALT } from "./landingCopy";
+import { HERO_H1, FEATURE_ROWS } from "./landingCopy";
 import { SUPPORT_EMAIL } from "../lib/companyInfo";
 import { sliceBetween } from "../test/sliceBetween";
 
@@ -673,35 +673,49 @@ describe("the italic run is additive — the pages that do not use it are unchan
 });
 
 /**
- * ⚠️ THE TRACK ROW'S VISUAL IS AN IMAGE A READER HEARS; THE ROWS EITHER SIDE ARE DECORATION.
- * The tableaux sit in an `aria-hidden` box, and an illustration placed inside that box would render
- * perfectly while its alt text was never read out. So the claim is the ABSENCE of that wrapper —
- * asserted beside its PRESENCE on both neighbours, or "no aria-hidden" would also pass on a page
- * that had stopped emitting the attribute anywhere.
+ * ⚠️ SIX ROWS, AND EACH IS AN IMAGE, A HEADING AND ONE PARAGRAPH — NOTHING ELSE. Asserted on the
+ * rendered band rather than on the copy module, because the failure this guards is a row picking up
+ * markup the copy never asked for: a button, a link, a bold run, a badge, or the aria-hidden wrapper
+ * the retired mockups sat in — which would silence the alt text.
  */
-describe("the Track every query row carries one finished illustration", () => {
+describe("the feature rows: six images, six headings, six paragraphs", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
-  const row = (from: string, to: string) => sliceBetween(html(), `>${from}<`, `>${to}<`, `the ${from} row`);
+  const band = () => sliceBetween(html(), 'id="mk-features"', 'class="mk-beta"', "the features band");
+  const rowsOf = (markup: string) => markup.split('<div class="mk-frow">').slice(1);
+  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
 
-  it("renders exactly one image, with its alt text and no tableau or aria-hidden box", () => {
-    const track = row("Track every query", "A home for your agents");
-    expect(track.match(/<img\b/g) ?? []).toHaveLength(1);
-    expect(track).toContain(`alt="${TRACK_ILLUSTRATION_ALT.replace(/'/g, "&#x27;")}"`);
-    expect(track).toMatch(/src="[^"]*track-agent-queries-feature[^"]*"/);
-    expect(track).not.toMatch(/["\s]mk-(fv|scard)["\s]/);
-    expect(track).not.toContain("aria-hidden");
+  it("renders the six rows in order, each an image, then its heading, then its paragraph", () => {
+    const rows = rowsOf(band());
+    expect(rows).toHaveLength(6);
+    rows.forEach((markup, i) => {
+      const row = FEATURE_ROWS[i];
+      const img = markup.indexOf('src="' + row.image + '"');
+      const h3 = markup.indexOf("<h3>" + esc(row.heading) + "</h3>");
+      const p = markup.indexOf("<p>" + esc(row.body) + "</p>");
+      expect(img, row.key + ": its image").toBeGreaterThan(-1);
+      expect(h3, row.key + ": its heading, after the image").toBeGreaterThan(img);
+      expect(p, row.key + ": its paragraph, after the heading").toBeGreaterThan(h3);
+      expect(markup, row.key + ": its alt text").toContain('alt="' + esc(row.alt) + '"');
+      expect(markup.match(/<img\b/g) ?? [], row.key + ": one image").toHaveLength(1);
+      expect(markup.match(/<p\b/g) ?? [], row.key + ": one paragraph").toHaveLength(1);
+    });
   });
 
-  it("…while the rows either side keep their aria-hidden tableaux", () => {
-    expect(row("Your journey so far comes with you", "Track every query")).toContain('aria-hidden="true"');
-    expect(row("A home for your agents", "From beginning to end")).toContain('aria-hidden="true"');
+  it("carries no action, no link, no emphasis, no badge and no hidden wrapper", () => {
+    const markup = band();
+    for (const forbidden of ["<button", "<a ", "<b>", "<strong", "aria-hidden", "mk-protag", "mk-btn", "mk-tlink"]) {
+      expect(markup, "the band renders " + forbidden).not.toContain(forbidden);
+    }
   });
 
-  /** A hand-typed ratio that disagreed with the file would reserve the wrong box until it loaded. */
-  it("states the asset's own pixel size, read from the PNG header", () => {
-    const png = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), "../assets/marketing/track-agent-queries-feature.png"));
-    expect(png.toString("latin1", 12, 16), "the header was read").toBe("IHDR");
-    const [w, h] = [png.readUInt32BE(16), png.readUInt32BE(20)];
-    expect(row("Track every query", "A home for your agents")).toContain(`width="${w}" height="${h}"`);
+  /** A hand-typed ratio that disagreed with a file would reserve the wrong box until it loaded. */
+  it("states each image's own pixel size, read from its PNG header", () => {
+    const here = dirname(fileURLToPath(import.meta.url));
+    const rows = rowsOf(band());
+    FEATURE_ROWS.forEach((row, i) => {
+      const png = readFileSync(resolve(here, "../../public", "." + row.image));
+      expect(png.toString("latin1", 12, 16), row.image + ": the header was read").toBe("IHDR");
+      expect(rows[i], row.image).toContain('width="' + png.readUInt32BE(16) + '" height="' + png.readUInt32BE(20) + '"');
+    });
   });
 });

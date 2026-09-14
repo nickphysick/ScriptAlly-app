@@ -610,23 +610,48 @@ describe("no base selector states the same property twice", () => {
 });
 
 /**
- * ⚠️ SOURCE ORDER IS THE MECHANISM, SO SOURCE ORDER IS THE LOCK. The Track row's wide split and the
- * 1080px block's one-column `.mk-frow` rule are equal specificity: the stacked rule wins only by
- * coming later. Moved below that block, the split would beat it and the row would keep two columns
- * on a phone — a fault no desktop render can show.
+ * ⚠️ SOURCE ORDER IS THE MECHANISM, SO SOURCE ORDER IS THE LOCK. Every second feature row flips its
+ * grid's direction to put the image on the right, and the 1080px block puts it back when rows stack.
+ * Both are the same selector at the same specificity, so the stacked rule wins only by coming later:
+ * moved above it, phones would keep the flip. The children's reset is asserted too, because without it
+ * an rtl row lays out its own sentences right to left.
  */
-describe("the illustrated row's wide split yields to the stacked layout", () => {
-  it("declares its split above the block that stacks every row", () => {
-    const split = marketing.search(/(?:^|\n)\.mk-frow--illo\s*\{/);
-    expect(split, "the split rule exists").toBeGreaterThan(-1);
-    /* A RELATION, not the ratio: the image column is the wider one. Retuning the 1.25 is then a
-       one-number change to the stylesheet, not a lock to rewrite. */
-    const cols = /grid-template-columns:\s*([\d.]+)fr\s+1fr/.exec(ruleFor(".mk-frow--illo"));
+describe("the feature rows alternate only while they sit side by side", () => {
+  it("flips every second row with direction, and the stacked block puts it back", () => {
+    const cols = /grid-template-columns:\s*([\d.]+)fr\s+1fr/.exec(ruleFor(".mk-frow"));
     expect(cols, "the split is an fr pair with the image column first").toBeTruthy();
     expect(parseFloat(cols![1]), "the image column is the wider one").toBeGreaterThan(1);
+    expect(ruleFor(".mk-frow:nth-child(even)")).toMatch(/direction:\s*rtl/);
+    expect(ruleFor(".mk-frow:nth-child(even) > *")).toMatch(/direction:\s*ltr/);
+    const flip = marketing.search(/(?:^|\n)\.mk-frow:nth-child\(even\)\s*\{/);
+    expect(flip, "the flip rule exists").toBeGreaterThan(-1);
     const stacking = [...marketing.matchAll(/@media \(max-width: 1080px\) \{([\s\S]*?)\n\}/g)]
       .find((m) => /(?:^|\n)\s*\.mk-frow\s*\{[^}]*grid-template-columns:\s*1fr;/.test(m[1]));
     expect(stacking, "a 1080px block stacks the rows").toBeTruthy();
-    expect(split).toBeLessThan(stacking!.index!);
+    expect(stacking![1], "the stacked block undoes the flip").toMatch(/\.mk-frow:nth-child\(even\)\s*\{\s*direction:\s*ltr;?\s*\}/);
+    expect(flip).toBeLessThan(stacking!.index!);
+  });
+
+  /**
+   * The row heading IS the section-heading style, and the two are asserted against each other rather
+   * than against literals: retune `.mk-sect h2` and this says the rows were meant to follow it.
+   */
+  it("the row heading is the section heading's style — its ceiling side by side, its clamp stacked", () => {
+    const sect = ruleFor(".mk-sect h2");
+    const row = ruleFor(".mk-frow h3");
+    const clamp = /font-size:\s*(clamp\([^;]+\))/.exec(sect);
+    expect(clamp, ".mk-sect h2 sizes with a clamp").toBeTruthy();
+    const ceiling = /,\s*([\d.]+rem)\s*\)$/.exec(clamp![1]);
+    expect(ceiling, "the clamp has a rem ceiling").toBeTruthy();
+    expect(row).toMatch(new RegExp("font-size:\\s*" + ceiling![1].replace(".", "\\.") + ";"));
+    for (const prop of ["font-weight", "color", "letter-spacing", "line-height"]) {
+      const want = new RegExp("(?:^|[;\\s])" + prop + ":\\s*([^;]+);").exec(sect);
+      expect(want, ".mk-sect h2 states " + prop).toBeTruthy();
+      expect(row, ".mk-frow h3 matches its " + prop).toContain(prop + ": " + want![1].trim());
+    }
+    const stacking = [...marketing.matchAll(/@media \(max-width: 1080px\) \{([\s\S]*?)\n\}/g)]
+      .find((m) => /\.mk-frow h3\s*\{/.test(m[1]));
+    expect(stacking, "the stacked block resizes the row heading").toBeTruthy();
+    expect(stacking![1]).toContain(".mk-frow h3 { font-size: " + clamp![1] + "; }");
   });
 });

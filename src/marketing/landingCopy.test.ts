@@ -1,6 +1,7 @@
 /**
  * Copy locks for the landing. The hero is word-authoritative from
- * design-refs/scriptally-landing-hero-v3.html; everything below it from landing-v13.html. These
+ * design-refs/scriptally-landing-hero-v3.html; the feature rows from the written
+ * brief they were rebuilt to (14 Sep); everything else below it from landing-v13.html. These
  * tests pin the exact strings the components render (repo convention: pure node tests; the
  * components consume these same constants, so a drift in either place fails here).
  *
@@ -12,7 +13,7 @@
 import { describe, it, expect } from "vitest";
 import {
   HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_LEAD, HERO_TURN_BODY,
-  DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING, TRACK_ILLUSTRATION_ALT,
+  DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING,
   FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_CTA,
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
   FOUNDING_NOTE, FOUNDING_INVALID, foundingCounterLabel,
@@ -174,7 +175,8 @@ describe("landing copy — verbatim locks", () => {
     const said = [
       PULSE_HEADING,
       ...FEATURE_ROWS.map((r) => r.heading),
-      ...FEATURE_ROWS.flatMap((r) => r.body.map((b) => b.text)),
+      /* Retarget, same law: a row's body is one string now, and its alt text is rendered too. */
+      ...FEATURE_ROWS.flatMap((r) => [r.body, r.alt]),
       HERO_H1, ledeText(), HERO_TURN_LEAD, turnBodyText(),
       FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL,
     ].filter((t) => t.toLowerCase().includes("finger on the pulse"));
@@ -303,22 +305,66 @@ describe("landing copy — verbatim locks", () => {
     expect(link).toEqual({ link: "Privacy", to: "privacy" });
   });
 
-  it("seven feature rows, alternating from the second, Pro badge only on the email drop", () => {
-    expect(FEATURE_ROWS).toHaveLength(7);
-    expect(FEATURE_ROWS.map((r) => r.heading)).toEqual([
-      "Your journey so far comes with you", "Track every query", "A home for your agents",
-      "From beginning to end", "Curate and compare", "Smart email drop", "Notes to self",
+  /**
+   * ⚠️ VERBATIM FROM THE WRITTEN BRIEF THE ROWS WERE REBUILT TO (14 Sep) — headings, paragraphs,
+   * image files and alt text, in page order. Edit landingCopy.ts and here only, and together.
+   */
+  it("six feature rows, verbatim, in order", () => {
+    expect(FEATURE_ROWS).toEqual([
+      {
+        key: "import",
+        heading: "Bring your spreadsheet with you",
+        body: "Upload the tracker you've been keeping and it comes back sorted. Muddled dates fixed, the rows you entered twice merged into one.",
+        image: "/images/journey-so-far.png",
+        alt: "A messy submissions spreadsheet beside the same queries imported as a clean, dated list.",
+      },
+      {
+        key: "track",
+        heading: "Always know where a query stands",
+        body: "Queried, partial requested, full out with an agent. Every step dated, so you're not doing the maths in your head at midnight.",
+        image: "/images/track-agent-queries.png",
+        alt: "A hawk pointing to a query record showing a submission's full timeline.",
+      },
+      {
+        key: "agents",
+        heading: "Every agent, properly filed",
+        body: "Their wish list, their submission rules, how long they usually take. Look it up in seconds instead of hunting round their website again.",
+        image: "/images/home-for-your-agents.png",
+        alt: "An agent record showing a wish list, submission route and requested materials.",
+      },
+      {
+        key: "email",
+        heading: "Forward the email. It logs itself.",
+        body: "An agent asks for three chapters by Friday. Send the message across and the ask, the date and the deadline are already recorded.",
+        image: "/images/smart-email-drop.png",
+        alt: "A hawk transcribing an agent's email into a query record showing what was requested.",
+      },
+      {
+        key: "packages",
+        heading: "Find out what's actually working",
+        body: "Bundle your letter, synopsis and opening pages into a package. Then see which one agents keep asking more from.",
+        image: "/images/curate-and-compare.png",
+        alt: "Two submission package records side by side with response figures for each.",
+      },
+      {
+        key: "comps",
+        heading: "Comps that hold up",
+        body: "Keep the books you're pitching alongside, and get pointed at new ones the agents on your list already talk about.",
+        image: "/images/comparable-titles.png",
+        alt: "A list of comparable titles beside suggested books to read next.",
+      },
     ]);
-    expect(FEATURE_ROWS.map((r) => !!r.flip)).toEqual([false, true, false, true, false, true, false]);
-    expect(FEATURE_ROWS.filter((r) => r.pro).map((r) => r.key)).toEqual(["email"]);
-    // Notes to self is the one row without a text link (per the ref markup).
-    expect(FEATURE_ROWS.filter((r) => !r.link).map((r) => r.key)).toEqual(["notes"]);
   });
 
-  /** The one feature visual with alt text: Track every query's illustration, verbatim. */
-  it("the Track every query illustration's alt text, verbatim", () => {
-    expect(TRACK_ILLUSTRATION_ALT).toBe(
-      "A hawk pointing to a query record showing a submission's full timeline from query sent to full manuscript sent.",
-    );
+  /**
+   * ⚠️ A ROW IS AN IMAGE, A HEADING AND ONE PARAGRAPH. The key set is the lock: the retired CTA, link,
+   * Pro-badge and flip fields cannot come back without this failing, and a body that is one string
+   * cannot carry a bold run.
+   */
+  it("a row carries nothing but its heading, paragraph, image and alt text", () => {
+    for (const row of FEATURE_ROWS) {
+      expect(Object.keys(row).sort(), row.key).toEqual(["alt", "body", "heading", "image", "key"]);
+      expect(typeof row.body, row.key).toBe("string");
+    }
   });
 });

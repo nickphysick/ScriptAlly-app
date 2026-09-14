@@ -1,18 +1,16 @@
 /**
  * Landing — the public front page at "/" (design ref: design-refs/landing-v13.html,
- * pixel-authoritative). Hero → the band header →
- * the feature rows → the founding-members band → footer. Pure presentation over static data — no Firebase, no
- * stores, no workspace imports.
+ * pixel-authoritative, except the feature rows — rebuilt to a written brief on 14 Sep). Hero → the
+ * band header → the feature rows → the founding-members band → footer. Pure presentation over static
+ * data — no Firebase, no stores, no workspace imports.
  *
  * ⚠️ THE PAGE CLOSES ON THE FOUNDING-MEMBERS LETTER, NOT ON A SECOND CTA BAND. `CtaBand` restated
  * the hero's "start tracking" three screens later; a page that ends by repeating its own opening
  * call to action is looping rather than closing.
  *
- * Action wiring: every "start" CTA opens Create account via the pre-auth hash transport
- * (#/signup — App.tsx renders Auth for it; a signed-in visitor is bounced straight to the
- * workspace instead). "See pricing"/Pricing → /pricing; "See what Pro adds" → /pricing;
- * the import-template link downloads the real template; the remaining row text-links point
- * at sign-up (the app is the explainer). Privacy/Terms are real public routes now.
+ * Action wiring: the feature rows carry no actions since that rebuild — an illustration, a heading
+ * and a paragraph each — so the page's actions are the hero's founding panel, the founding band and
+ * the nav. Privacy/Terms are real public routes now.
  * The footer deliberately has NO Help link: /help is a workspace
  * route, so for a logged-out visitor it dead-ended on the signup screen (Tier 2 · Phase 3);
  * no marketing help page exists, and inventing one is a separate decision.
@@ -24,9 +22,7 @@ import { BandHeader } from "./BandHeader";
 import { FeatureRows } from "./FeatureRows";
 import { FoundingBand } from "./FoundingBand";
 import { MarketingFooter } from "./MarketingFooter";
-import { DOCUMENT_TITLE, FeatureRow } from "./landingCopy";
-
-const openSignup = () => { window.location.hash = "#/signup"; };
+import { DOCUMENT_TITLE } from "./landingCopy";
 
 export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
   useEffect(() => {
@@ -34,19 +30,6 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
     document.title = DOCUMENT_TITLE;
     return () => { document.title = prev; };
   }, []);
-
-  const onRowLink = (row: FeatureRow) => {
-    if (row.key === "import") {
-      // The real import template served from public/ (same asset the in-app empty state offers).
-      const a = document.createElement("a");
-      a.href = "/ScriptAlly-pipeline-import-template.xlsx";
-      a.download = "ScriptAlly-pipeline-import-template.xlsx";
-      a.click();
-      return;
-    }
-    if (row.key === "email") { onNavigate("pricing"); return; }
-    openSignup();
-  };
 
   return (
     <div>
@@ -56,7 +39,7 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
           there is deliberately no rule at the join. */}
       <div className="mk-lower">
         <BandHeader />
-        <FeatureRows onStart={openSignup} onRowLink={onRowLink} />
+        <FeatureRows />
         <FoundingBand onNavigate={onNavigate} />
       {/* ⚠️ LINKS, NOT SPANS. These were inert text for as long as the pages did not exist — which
           is a worse answer than an unfinished page, because a reader cannot tell the difference
