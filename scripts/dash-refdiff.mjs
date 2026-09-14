@@ -1364,6 +1364,13 @@ const STANDING = [
           && v.settleErr !== null && v.settleErr <= 1.5)),
     want: "0 backwards · lag <= 2px · 11/6/4 at 5/50/95% · settles on its own value",
   },
+  {
+    k: "plotDraws",
+    why: "the plot draws at every reachable range and frequency — sized, no NaN, a line of non-zero length",
+    test: (v) => !!v && v.readings >= 12 && v.drawn > 0
+      && v.unsized === 0 && v.nan === 0 && v.noLine === 0,
+    want: "every range × frequency: SVG sized · 0 NaN · line length > 0 (>= 12 readings)",
+  },
 ];
 
 function diffChecks(app) {
@@ -1505,6 +1512,90 @@ async function brushDrag(page) {
  * when something is DONE to the page — a mouse click, a keyboard press, a drawer opened — and a
  * snapshot of the broken version is indistinguishable from a correct one in all three cases.
  */
+/**
+ * ⚠️ THE PLOT DRAWS AT EVERY REACHABLE RANGE, AT EVERY FREQUENCY (v35) — the gate that was missing.
+ *
+ * Every chart check before this read the chart once, at its default range. The blank chart on dev
+ * drew nothing at ANY range, so even a default read would have caught it — `plotStruct` would have gone
+ * red — but the stream that changed the chart never ran this harness. So this gate asks the question
+ * over the whole control surface, and asserts the three things a painted plot cannot fake:
+ *
+ *   · the SVG carries a size — the direct signature of the unmeasured chart, which renders an SVG with
+ *     no width, height or viewBox inside a wrapper that has a perfectly good box;
+ *   · its markup holds no NaN — the signature the v35 pack predicted, which a range outrunning its
+ *     series would still produce;
+ *   · a line path exists and getTotalLength() is above zero — present, and actually drawn.
+ *
+ * A reading where the chart renders its sparse message instead of an SVG is counted and skipped, not
+ * failed: that is the chart telling the truth about too few points. The population is asserted, so a
+ * sweep that drove nothing cannot pass.
+ */
+async function plotSweep(page) {
+  const controls = await page.evaluate(() => {
+    const sl = document.querySelector('[data-probe="brush"] input[type="range"]');
+    if (!sl) return null;
+    const chips = Array.from(document.querySelectorAll('[data-probe="chart-controls"] button'))
+      .map((b) => ({ t: b.textContent.trim(), disabled: b.disabled, on: b.getAttribute("aria-pressed") === "true" }))
+      .filter((c) => c.t === "Daily" || c.t === "Weekly" || c.t === "Monthly");
+    return { min: Number(sl.min), max: Number(sl.max), value: Number(sl.value), chips };
+  });
+  if (!controls) return null;
+
+  const setRange = (v) => page.evaluate(async (v) => {
+    const sl = document.querySelector('[data-probe="brush"] input[type="range"]');
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(sl, String(v));
+    sl.dispatchEvent(new Event("input", { bubbles: true }));
+    await new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
+  }, v);
+  const clickChip = (t) => page.evaluate(async (t) => {
+    const b = Array.from(document.querySelectorAll('[data-probe="chart-controls"] button')).find((x) => x.textContent.trim() === t);
+    if (b) b.click();
+    await new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
+  }, t);
+  const readPlot = () => page.evaluate(() => {
+    const svg = document.querySelector('svg[data-probe="plot"]');
+    if (!svg) return { sparse: true };
+    const lines = Array.from(svg.querySelectorAll("path")).filter((el) => el.getAttribute("fill") === "none" && el.getAttribute("stroke"));
+    let lineLen = 0;
+    for (const el of lines) { try { lineLen = Math.max(lineLen, el.getTotalLength()); } catch (e) { /* unmeasurable counts as zero */ } }
+    return {
+      sparse: false,
+      sized: !!(svg.getAttribute("width") && svg.getAttribute("height") && svg.getAttribute("viewBox")),
+      nan: svg.outerHTML.indexOf("NaN") !== -1,
+      lineLen: Math.round(lineLen * 10) / 10,
+      paths: svg.querySelectorAll("path").length,
+    };
+  });
+
+  const readings = [];
+  for (const chip of controls.chips) {
+    if (chip.disabled) continue;
+    await clickChip(chip.t);
+    for (let v = controls.min; v <= controls.max; v++) {
+      await setRange(v);
+      readings.push({ freq: chip.t, weeks: v, ...(await readPlot()) });
+    }
+  }
+  /* put the chart back the way the page opened it */
+  const opened = controls.chips.find((c) => c.on);
+  if (opened) await clickChip(opened.t);
+  await setRange(controls.value);
+
+  const drawn = readings.filter((r) => !r.sparse);
+  const failing = drawn.filter((r) => !r.sized || r.nan || !(r.lineLen > 0));
+  return {
+    readings: readings.length,
+    drawn: drawn.length,
+    sparse: readings.length - drawn.length,
+    freqs: Array.from(new Set(readings.map((r) => r.freq))),
+    range: [controls.min, controls.max],
+    unsized: drawn.filter((r) => !r.sized).length,
+    nan: drawn.filter((r) => r.nan).length,
+    noLine: drawn.filter((r) => !(r.lineLen > 0)).length,
+    firstFailing: failing[0] || null,
+  };
+}
+
 async function driven(page) {
   const out = {};
 
@@ -1927,6 +2018,7 @@ try {
        depend on it, and re-driving it on a second page would double the slowest part of the run. */
     const brush = await brushDrag(appPage);
     const drivenChecks = await driven(appPage);
+    const plotDraws = await plotSweep(appPage);
 
     const rM = refData.probes.main, aM = appData.probes.main;
     const dw = rM && aM ? Math.round(rM.w - aM.w) : 0;
@@ -1946,6 +2038,7 @@ try {
     appData.checks.focusTab = drivenChecks.focusTab ?? null;
     appData.checks.drawer = drivenChecks.drawer ?? null;
     appData.checks.fade = drivenChecks.fade ?? null;
+    appData.checks.plotDraws = plotDraws;
 
     const misses = [];
     /* the datum: each side's own `main`. Absent on either side and the comparison falls back to

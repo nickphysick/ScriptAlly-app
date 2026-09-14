@@ -132,7 +132,6 @@ export const OneScreenChart: React.FC<{
   empty?: boolean;
   onSendFirst?: () => void;
 }> = ({ loading, queries, agents, now, dayOne = false, earlyDays = false, empty = false, onSendFirst }) => {
-  const wrapRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const lineRef = useRef<SVGPathElement>(null);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
@@ -165,15 +164,30 @@ export const OneScreenChart: React.FC<{
   const stages = useMemo(() => activeStageBreakdown(queries), [queries]);
   const activeTotal = stages.reduce((a, r) => a + r.count, 0);
 
-  /* §3: measured, and remeasured on resize. */
-  useEffect(() => {
-    const el = wrapRef.current;
-    if (!el) return;
+  /**
+   * ⚠️ §3: MEASURED BY THE WRAPPER'S OWN REF, NEVER BY A MOUNT-ONCE EFFECT (v35).
+   *
+   * This was an effect with `[]` deps that read the wrapper through an object ref and bailed when it
+   * was null. The empty-states pack then put an early return above the wrapper — below the hooks, so
+   * their ORDER stayed safe — and the dashboard passes `empty = scopedQueries.length === 0`, which is
+   * true on the first render of EVERY account because the queries collection has not loaded yet. The
+   * effect ran once against nothing, bailed, and never ran again: the data landed, the chart mounted,
+   * nothing measured it, W and H stayed 0, and the draw guard below painted nothing. The blank chart on
+   * dev, at every range, for everyone. Proved by bisect: `aef24f73` draws and `f0a2368c` does not.
+   *
+   * ⚠️ HOOK ORDER IS NOT MOUNT ORDER. Keeping hooks above an early return makes the hooks safe and does
+   * nothing for an effect that needs an ELEMENT. A callback ref runs when the element arrives, however
+   * late and through whichever branch, and React 19 runs the cleanup it returns when the element goes —
+   * so the observer can never be attached to nothing, nor left watching a node that has gone.
+   */
+  const wrapRef = useCallback((el: HTMLDivElement | null) => {
+    if (!el) return undefined;
     const measure = () => {
       const r = el.getBoundingClientRect();
       if (r.width && r.height) setSize({ w: Math.round(r.width), h: Math.round(r.height) });
     };
     measure();
+    if (typeof ResizeObserver === "undefined") return undefined;
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
