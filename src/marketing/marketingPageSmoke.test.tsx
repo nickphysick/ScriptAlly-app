@@ -31,8 +31,9 @@ import { AboutPage } from "./AboutPage";
 import { ContactPage } from "./ContactPage";
 import { FoundersPage } from "./FoundersPage";
 import { LEGAL_COPY_REVIEWED } from "./legalCopy";
-import { HERO_H1 } from "./landingCopy";
+import { HERO_H1, TRACK_ILLUSTRATION_ALT } from "./landingCopy";
 import { SUPPORT_EMAIL } from "../lib/companyInfo";
+import { sliceBetween } from "../test/sliceBetween";
 
 /** The public marketing routes and a string each must actually render. */
 const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain: string][] = [
@@ -668,5 +669,39 @@ describe("the italic run is additive — the pages that do not use it are unchan
   it("/founders renders exactly one italic, and it is `quite`", () => {
     const html = renderPage(<FoundersPage onNavigate={noNavigate} />, "/founders");
     expect([...html.matchAll(/<em>([^<]*)<\/em>/g)].map((m) => m[1])).toEqual(["quite"]);
+  });
+});
+
+/**
+ * ⚠️ THE TRACK ROW'S VISUAL IS AN IMAGE A READER HEARS; THE ROWS EITHER SIDE ARE DECORATION.
+ * The tableaux sit in an `aria-hidden` box, and an illustration placed inside that box would render
+ * perfectly while its alt text was never read out. So the claim is the ABSENCE of that wrapper —
+ * asserted beside its PRESENCE on both neighbours, or "no aria-hidden" would also pass on a page
+ * that had stopped emitting the attribute anywhere.
+ */
+describe("the Track every query row carries one finished illustration", () => {
+  const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
+  const row = (from: string, to: string) => sliceBetween(html(), `>${from}<`, `>${to}<`, `the ${from} row`);
+
+  it("renders exactly one image, with its alt text and no tableau or aria-hidden box", () => {
+    const track = row("Track every query", "A home for your agents");
+    expect(track.match(/<img\b/g) ?? []).toHaveLength(1);
+    expect(track).toContain(`alt="${TRACK_ILLUSTRATION_ALT.replace(/'/g, "&#x27;")}"`);
+    expect(track).toMatch(/src="[^"]*track-agent-queries-feature[^"]*"/);
+    expect(track).not.toMatch(/["\s]mk-(fv|scard)["\s]/);
+    expect(track).not.toContain("aria-hidden");
+  });
+
+  it("…while the rows either side keep their aria-hidden tableaux", () => {
+    expect(row("Your journey so far comes with you", "Track every query")).toContain('aria-hidden="true"');
+    expect(row("A home for your agents", "From beginning to end")).toContain('aria-hidden="true"');
+  });
+
+  /** A hand-typed ratio that disagreed with the file would reserve the wrong box until it loaded. */
+  it("states the asset's own pixel size, read from the PNG header", () => {
+    const png = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), "../assets/marketing/track-agent-queries-feature.png"));
+    expect(png.toString("latin1", 12, 16), "the header was read").toBe("IHDR");
+    const [w, h] = [png.readUInt32BE(16), png.readUInt32BE(20)];
+    expect(row("Track every query", "A home for your agents")).toContain(`width="${w}" height="${h}"`);
   });
 });

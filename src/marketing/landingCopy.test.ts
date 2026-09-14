@@ -12,7 +12,7 @@
 import { describe, it, expect } from "vitest";
 import {
   HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_LEAD, HERO_TURN_BODY,
-  DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING,
+  DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING, TRACK_ILLUSTRATION_ALT,
   FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_CTA,
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
   FOUNDING_NOTE, FOUNDING_INVALID, foundingCounterLabel,
@@ -313,5 +313,12 @@ describe("landing copy — verbatim locks", () => {
     expect(FEATURE_ROWS.filter((r) => r.pro).map((r) => r.key)).toEqual(["email"]);
     // Notes to self is the one row without a text link (per the ref markup).
     expect(FEATURE_ROWS.filter((r) => !r.link).map((r) => r.key)).toEqual(["notes"]);
+  });
+
+  /** The one feature visual with alt text: Track every query's illustration, verbatim. */
+  it("the Track every query illustration's alt text, verbatim", () => {
+    expect(TRACK_ILLUSTRATION_ALT).toBe(
+      "A hawk pointing to a query record showing a submission's full timeline from query sent to full manuscript sent.",
+    );
   });
 });

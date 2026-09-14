@@ -2,11 +2,13 @@
  * FeatureRows — the full-bleed parchment features band (design ref:
  * design-refs/landing-v13.html .featband): seven alternating rows with hairline separators, and
  * NO header of its own — the pulse section above the band is its heading. Copy comes verbatim from
- * landingCopy.ts; each visual is a faithful static tableau from the ref markup.
+ * landingCopy.ts. Six visuals are faithful static tableaux from the ref markup; Track every query's
+ * is a finished illustration that replaced its tableau outright.
  */
 
 import React from "react";
-import { FEATURE_ROWS, FeatureRow } from "./landingCopy";
+import { FEATURE_ROWS, FeatureRow, TRACK_ILLUSTRATION_ALT } from "./landingCopy";
+import trackIllustration from "../assets/marketing/track-agent-queries-feature.png";
 
 /* ── Row visuals (static tableaux, keyed by row) ── */
 
@@ -42,26 +44,6 @@ const ImportVisual: React.FC = () => (
       <div className="mk-dbrow"><span className="mk-monoinit">MA</span><div><div className="mk-dn">Margaret Atwood</div><div className="mk-da">Pickwick Editorial</div></div><SDot glyph="←" /></div>
       <div className="mk-dbrow"><span className="mk-monoinit">EW</span><div><div className="mk-dn">Eleanor Whitfield</div><div className="mk-da">Greenfield Literary</div></div><SDot glyph="←" fill="full" /></div>
       <div className="mk-dbrow"><span className="mk-monoinit">TE</span><div><div className="mk-dn">Tom Ellery</div><div className="mk-da">Curtis Vane</div></div><SDot glyph="✓" fill="solid" /></div>
-    </div>
-  </>
-);
-
-const TrackVisual: React.FC = () => (
-  <>
-    <div className="mk-scard mk-pipec">
-      <div className="mk-pt">What's live right now?</div>
-      <div className="mk-piperow">
-        <div className="mk-pnode mk-fill">→</div><div className="mk-pdots" />
-        <div className="mk-pnode">‹</div><div className="mk-pdots" />
-        <div className="mk-pnode">›</div><div className="mk-pdots" />
-        <div className="mk-pnode">«</div>
-      </div>
-      <div className="mk-pl"><span>8 queried</span><span>3 partials req.</span><span>1 sent</span><span>fulls</span></div>
-    </div>
-    <div className="mk-scard mk-qc mk-qc2">
-      <span className="mk-monoinit">GP</span><span className="mk-nm">Greg Panetta</span>
-      <div className="mk-ag">Panetta &amp; Co · Queried 2 Jun</div>
-      <span className="mk-spill"><SDot glyph="←" />Partial requested</span>
     </div>
   </>
 );
@@ -172,7 +154,6 @@ const NotesVisual: React.FC = () => (
 
 const VISUALS: Record<string, React.ReactNode> = {
   import: <ImportVisual />,
-  track: <TrackVisual />,
   agents: <AgentsVisual />,
   pulse: <PulseVisual />,
   packages: <PackagesVisual />,
@@ -180,8 +161,32 @@ const VISUALS: Record<string, React.ReactNode> = {
   notes: <NotesVisual />,
 };
 
+/* ── Finished illustrations, keyed by row: each REPLACES that row's tableau ──
+   `width`/`height` are the asset's own pixels. CSS sizes the image to its column, so all they
+   contribute is the ratio — the row reserves its height before the lazily-loaded file arrives
+   instead of jumping when it does. A smoke test reads them against the PNG's own header. */
+const ILLUSTRATIONS: Record<string, { src: string; alt: string; width: number; height: number }> = {
+  track: { src: trackIllustration, alt: TRACK_ILLUSTRATION_ALT, width: 2880, height: 1620 },
+};
+
+/**
+ * A tableau is decoration, so its box is `aria-hidden`. An illustration renders as the image itself
+ * and never inside that box: there, its alt text would never be read out.
+ */
+const RowVisual: React.FC<{ row: FeatureRow }> = ({ row }) => {
+  const illo = ILLUSTRATIONS[row.key];
+  if (illo) {
+    return <img className="mk-rowillo" src={illo.src} alt={illo.alt} width={illo.width} height={illo.height} loading="lazy" />;
+  }
+  return (
+    <div className={"mk-fv" + (row.key === "notes" ? " mk-notesv" : "")} style={row.key === "pulse" ? { height: 300 } : undefined} aria-hidden="true">
+      {VISUALS[row.key]}
+    </div>
+  );
+};
+
 const Row: React.FC<{ row: FeatureRow; onPrimary: () => void; onLink?: (row: FeatureRow) => void }> = ({ row, onPrimary, onLink }) => (
-  <div className={"mk-frow" + (row.flip ? " mk-flip" : "")}>
+  <div className={"mk-frow" + (row.flip ? " mk-flip" : "") + (ILLUSTRATIONS[row.key] ? " mk-frow--illo" : "")}>
     <div className="mk-fcopy">
       <h3>
         {row.heading}
@@ -197,9 +202,7 @@ const Row: React.FC<{ row: FeatureRow; onPrimary: () => void; onLink?: (row: Fea
         )}
       </div>
     </div>
-    <div className={"mk-fv" + (row.key === "notes" ? " mk-notesv" : "")} style={row.key === "pulse" ? { height: 300 } : undefined} aria-hidden="true">
-      {VISUALS[row.key]}
-    </div>
+    <RowVisual row={row} />
   </div>
 );
 

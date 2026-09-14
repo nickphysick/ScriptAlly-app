@@ -963,6 +963,17 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 .mk-fv { position: relative; height: 260px; }
 .mk-frow.mk-flip .mk-fcopy { order: 2; }
 .mk-frow.mk-flip .mk-fv { order: 1; }
+/* Row 2 · Track every query shows a finished illustration where the other rows draw a tableau, so
+   its image column is the wider one and the image sits straight on the band's ground at its own
+   16:9 — no crop, no frame, no fill.
+   ⚠️ THE SPLIT STAYS ABOVE THE 1080px BLOCK, which stacks every row with an equal-specificity
+   `.mk-frow` rule and wins only by coming later. Declared below it, this row would keep two
+   columns on a phone. Locked in marketingTokens.test.ts.
+   ⚠️ AND THE IMAGE IS DELIBERATELY NOT `.mk-fv`, whose 260px box, stacked min-height and phone
+   scale(.82) are all written for absolutely-positioned cards. The flip rules' `order` does not
+   reach it either: at order 0 it comes first in both layouts — left of the copy, above it stacked. */
+.mk-frow--illo { grid-template-columns: 1.25fr 1fr; }
+.mk-rowillo { width: 100%; height: auto; min-width: 0; }
 .mk-protag {
   display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 6.5px; font-weight: 700;
   letter-spacing: .12em; text-transform: uppercase; color: #fdfaf5; background: var(--mk-burg);
@@ -1011,27 +1022,13 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 .mk-dbrow .mk-da { font-family: "JetBrains Mono", monospace; font-size: 6px; letter-spacing: .12em; text-transform: uppercase; color: var(--mk-label); margin-top: 1px; }
 .mk-dbrow .mk-sdot { margin-left: auto; }
 
-/* Row 2 · pipeline + query card */
-.mk-pipec { width: 340px; left: 6%; top: 8%; padding: 16px 20px; transform: rotate(-1.2deg); }
-.mk-pipec .mk-pt { font-family: "Playfair Display", Georgia, serif; font-size: 14px; color: var(--mk-head); margin-bottom: 13px; }
-.mk-piperow { display: flex; align-items: center; }
-.mk-pnode {
-  width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--mk-burg); background: var(--mk-parch);
-  color: var(--mk-burg); display: flex; align-items: center; justify-content: center; font-size: 11px; flex: none;
-}
-.mk-pnode.mk-fill { background: var(--mk-centre); }
-.mk-pdots { flex: 1; border-top: 2px dotted #cdb9aa; margin: 0 6px; }
-.mk-pipec .mk-pl {
-  display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace;
-  font-size: 6.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--mk-label); margin-top: 9px;
-}
+/* Query card — Row 6's email drop places it (`.mk-mailqc`). */
 .mk-qc { width: 262px; padding: 15px 17px; }
 .mk-qc .mk-nm { font-family: "Playfair Display", Georgia, serif; font-size: 16.5px; margin-left: 10px; vertical-align: middle; }
 .mk-qc .mk-ag {
   font-family: "JetBrains Mono", monospace; font-size: 7px; letter-spacing: .14em;
   text-transform: uppercase; color: var(--mk-label); margin: 10px 0 11px;
 }
-.mk-qc2 { left: 36%; bottom: 0; transform: rotate(1.8deg); z-index: 2; }
 
 /* Row 3 · Discover match cards */
 .mk-disc1 { left: 2%; top: 4%; transform: rotate(-1.6deg); }

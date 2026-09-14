@@ -608,3 +608,25 @@ describe("no base selector states the same property twice", () => {
     expect(mine).toEqual([]);
   });
 });
+
+/**
+ * ⚠️ SOURCE ORDER IS THE MECHANISM, SO SOURCE ORDER IS THE LOCK. The Track row's wide split and the
+ * 1080px block's one-column `.mk-frow` rule are equal specificity: the stacked rule wins only by
+ * coming later. Moved below that block, the split would beat it and the row would keep two columns
+ * on a phone — a fault no desktop render can show.
+ */
+describe("the illustrated row's wide split yields to the stacked layout", () => {
+  it("declares its split above the block that stacks every row", () => {
+    const split = marketing.search(/(?:^|\n)\.mk-frow--illo\s*\{/);
+    expect(split, "the split rule exists").toBeGreaterThan(-1);
+    /* A RELATION, not the ratio: the image column is the wider one. Retuning the 1.25 is then a
+       one-number change to the stylesheet, not a lock to rewrite. */
+    const cols = /grid-template-columns:\s*([\d.]+)fr\s+1fr/.exec(ruleFor(".mk-frow--illo"));
+    expect(cols, "the split is an fr pair with the image column first").toBeTruthy();
+    expect(parseFloat(cols![1]), "the image column is the wider one").toBeGreaterThan(1);
+    const stacking = [...marketing.matchAll(/@media \(max-width: 1080px\) \{([\s\S]*?)\n\}/g)]
+      .find((m) => /(?:^|\n)\s*\.mk-frow\s*\{[^}]*grid-template-columns:\s*1fr;/.test(m[1]));
+    expect(stacking, "a 1080px block stacks the rows").toBeTruthy();
+    expect(split).toBeLessThan(stacking!.index!);
+  });
+});

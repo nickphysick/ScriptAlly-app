@@ -406,6 +406,14 @@ export const FEATURE_ROWS: FeatureRow[] = [
   },
 ];
 
+/**
+ * Alt text for Track every query's illustration — the one feature visual a reader HEARS. The other
+ * rows draw decorative tableaux that are `aria-hidden`; this image replaced one and carries the
+ * row's meaning, so it is copy like any other sentence on the page.
+ */
+export const TRACK_ILLUSTRATION_ALT =
+  "A hawk pointing to a query record showing a submission's full timeline from query sent to full manuscript sent.";
+
 /* ══════════════ Pricing (public, marketing tier) ══════════════
    ⚠️ THREE FIGURES ARE UNSET AND NOTHING HERE MAY INVENT THEM. The design this page was rebuilt
    from carries £7/mo, £70/yr and £3.50/mo, plus a sentence about what happens when six free
