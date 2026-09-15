@@ -15,6 +15,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
 import { readFileSync } from "fs";
+import { createHash } from "crypto";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { renderPage, noNavigate, SMOKE_USER, useSignedOutDb, restoreSmokeUser, stripComments } from "../test/pageSmoke";
@@ -683,14 +684,18 @@ describe("the feature rows: six images, six headings, six paragraphs", () => {
   const band = () => sliceBetween(html(), 'id="mk-features"', 'class="mk-beta"', "the features band");
   const rowsOf = (markup: string) => markup.split('<div class="mk-frow">').slice(1);
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
+  const unesc = (s: string) => s.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
 
   it("renders the six rows in order, each an image, then its heading, then its paragraph", () => {
     const rows = rowsOf(band());
     expect(rows).toHaveLength(6);
     rows.forEach((markup, i) => {
       const row = FEATURE_ROWS[i];
-      const img = markup.indexOf('src="' + row.image + '"');
-      const h3 = markup.indexOf("<h3>" + esc(row.heading) + "</h3>");
+      const img = markup.indexOf('src="' + row.image + "?v=");
+      const h3 = markup.indexOf("<h3>");
+      const heading = /<h3>([\s\S]*?)<\/h3>/.exec(markup);
+      expect(heading, row.key + ": a heading").toBeTruthy();
+      expect(unesc(heading![1].replace(/<[^>]+>/g, "")), row.key + ": its heading, word for word").toBe(row.heading);
       const p = markup.indexOf("<p>" + esc(row.body) + "</p>");
       expect(img, row.key + ": its image").toBeGreaterThan(-1);
       expect(h3, row.key + ": its heading, after the image").toBeGreaterThan(img);
@@ -720,16 +725,31 @@ describe("the feature rows: six images, six headings, six paragraphs", () => {
   });
 
   /**
-   * ⚠️ THE STYLESHEET BLEEDS AN ILLUSTRATION RIGHT, AND ONLY RIGHT — the side every second row puts its
-   * image. Moved into a left-image row, a bleeding image would grow across the gap and over its own copy
-   * while the class, the rule and this markup all still read correctly.
+   * ⚠️ AT 13ch, THREE HEADINGS WOULD END ON ONE WORD — "stands", "itself." and "working" — so every heading
+   * holds its last two words together on one line. That is typesetting, not copy: the heading, markup
+   * stripped, is still the sentence word for word (asserted above), and the held run is exactly its last
+   * two words.
    */
-  it("bleeds an illustration only where its row puts the image on the right", () => {
+  it("holds each heading's last two words together on one line", () => {
     const rows = rowsOf(band());
-    const bleeding = rows.flatMap((markup, i) => (/["\s]mk-rowillo--bleed["\s]/.test(markup) ? [i] : []));
-    for (const i of bleeding) {
-      expect((i + 1) % 2, FEATURE_ROWS[i].key + " is row " + (i + 1) + ", which puts its image on the left").toBe(0);
-    }
-    expect(bleeding.map((i) => FEATURE_ROWS[i].key), "the rows whose illustration bleeds").toEqual(["track"]);
+    rows.forEach((markup, i) => {
+      const held = FEATURE_ROWS[i].heading.split(" ").slice(-2).join(" ");
+      expect(markup, FEATURE_ROWS[i].key + ": its last two words, held").toContain('<span class="mk-fkeep">' + esc(held) + "</span></h3>");
+    });
+  });
+
+  /**
+   * ⚠️ AN IMAGE REPLACED UNDER THE SAME FILENAME MUST NOT BE SERVED FROM A CACHE. Nothing under public/ is
+   * fingerprinted by the build and prod hosting lets a browser keep a file for an hour, so each URL carries
+   * the first eight hex digits of its file's own md5. A file re-exported without its version following
+   * fails here.
+   */
+  it("versions each image's URL by the file's own content", () => {
+    const here = dirname(fileURLToPath(import.meta.url));
+    const rows = rowsOf(band());
+    FEATURE_ROWS.forEach((row, i) => {
+      const version = createHash("md5").update(readFileSync(resolve(here, "../../public", "." + row.image))).digest("hex").slice(0, 8);
+      expect(rows[i], row.image).toContain('src="' + row.image + "?v=" + version + '"');
+    });
   });
 });

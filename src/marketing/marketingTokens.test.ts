@@ -387,14 +387,16 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
    * The hero's rules are not contiguous, and a positional slice over a file that does not group
    * by feature answers a question nobody asked.
    */
-  it("…and the whole sheet's negative margins are the six that are meant to be there", () => {
+  it("…and the whole sheet's negative margins are the seven that are meant to be there", () => {
     const owners = new Set<string>();
     for (const m of marketing.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)) {
       if (/margin[^:]*:\s*[^;]*-\d/.test(m[2])) m[1].split(",").forEach((x) => owners.add(x.trim()));
     }
     expect([...owners].sort()).toEqual([
-      /* the Track illustration, bleeding past the rows' gutter into the page margin — the plate's kind */
-      ".mk-frow:nth-child(even) .mk-rowillo--bleed",
+      /* every feature illustration, bleeding past the rows' gutter into the page margin away from its copy
+         — the plate's kind, one margin for each side of the alternation */
+      ".mk-frow:nth-child(even) .mk-rowillo",
+      ".mk-frow:nth-child(odd) .mk-rowillo",
       /* the plate, bleeding past the container's own gutter to the page edge */
       ".mk-hero .mk-illo--tall",
       /* the burst, pulled back over the headline's last word */
@@ -527,7 +529,7 @@ describe("every specific rule on /founders outranks the generic one beside it", 
  * measure in the sheet and be the one place that must not be.
  */
 describe("measures that must track their type are expressed in `em`", () => {
-  const IN_EM = [".mk-turn", ".mk-fwhonest .mk-fwlead"];
+  const IN_EM = [".mk-turn", ".mk-fwhonest .mk-fwlead", ".mk-frow h3"];
 
   it("each is declared with a max-width in `em` or `ch`, never `rem` or `px`", () => {
     for (const sel of IN_EM) {
@@ -633,53 +635,108 @@ describe("the feature rows alternate only while they sit side by side", () => {
     expect(stacking![1], "the stacked block undoes the flip").toMatch(/\.mk-frow:nth-child\(even\)\s*\{\s*direction:\s*ltr;?\s*\}/);
     expect(flip).toBeLessThan(stacking!.index!);
   });
+});
+
+/**
+ * ⚠️ THE FEATURE ROWS SET THEIR OWN TYPE, AND ITS TWO FAMILIES BELONG TO THEM ALONE (15 Sep). The heading
+ * is Special Elite and the paragraph Source Serif 4, both at full ink, replacing a heading that followed
+ * the section heading's Playfair and a muted paragraph. The values are asserted as written because they
+ * are the brief; the families are swept across every stylesheet and component, because "nowhere else on
+ * the page" is a claim about the whole source tree, not about these two rules.
+ */
+describe("the feature rows set their own type, and nothing else uses its families", () => {
+  const decl = (body: string, prop: string) => new RegExp("(?:^|[;\\s{])" + prop + ":\\s*([^;]+);").exec(body)?.[1].trim();
+
+  it("the heading is Special Elite 400 at 38px, 1.18, -0.005em, full ink, on a 13ch measure", () => {
+    const h3 = ruleFor(".mk-frow h3");
+    expect(decl(h3, "font-family"), "important, or the runtime brand rule owns every h3").toBe('"Special Elite", cursive !important');
+    expect(decl(h3, "font-weight")).toBe("400");
+    expect(decl(h3, "font-size")).toBe("38px");
+    expect(decl(h3, "line-height")).toBe("1.18");
+    expect(decl(h3, "letter-spacing")).toBe("-0.005em");
+    expect(decl(h3, "color")).toBe("var(--mk-nearblack)");
+    expect(value(marketing, "--mk-nearblack"), "full ink").toBe("#1c130f");
+    expect(decl(h3, "max-width"), "the 13ch measure is deliberate").toBe("13ch");
+    const keep = ruleFor(".mk-frow h3 .mk-fkeep");
+    expect(keep, "the held last two words").toMatch(/white-space:\s*nowrap/);
+    expect(keep, "…in the heading's own family, not the runtime span rule's").toMatch(/font-family:\s*inherit/);
+  });
 
   /**
-   * The row heading IS the section-heading style, and the two are asserted against each other rather
-   * than against literals: retune `.mk-sect h2` and this says the rows were meant to follow it.
+   * ⚠️ WHY THE HEADING'S FAMILY CARRIES !important. src/lib/brand.tsx injects, at runtime and on every
+   * route, a style element whose heading rule sets every bare h2 and h3 in the brand heading font with
+   * !important, and a plain rule that sets every span in the body font. A normal declaration cannot beat
+   * the first however specific it is, and the held run cannot inherit past the second. Measured: without
+   * the flag the feature heading drew in Playfair. If brand.tsx stops reaching bare headings this way, this
+   * fails — and the flag on the feature heading can go.
    */
-  it("the row heading is the section heading's style — its ceiling side by side, its clamp stacked", () => {
-    const sect = ruleFor(".mk-sect h2");
-    const row = ruleFor(".mk-frow h3");
-    const clamp = /font-size:\s*(clamp\([^;]+\))/.exec(sect);
-    expect(clamp, ".mk-sect h2 sizes with a clamp").toBeTruthy();
-    const ceiling = /,\s*([\d.]+rem)\s*\)$/.exec(clamp![1]);
-    expect(ceiling, "the clamp has a rem ceiling").toBeTruthy();
-    expect(row).toMatch(new RegExp("font-size:\\s*" + ceiling![1].replace(".", "\\.") + ";"));
-    for (const prop of ["font-weight", "color", "letter-spacing", "line-height"]) {
-      const want = new RegExp("(?:^|[;\\s])" + prop + ":\\s*([^;]+);").exec(sect);
-      expect(want, ".mk-sect h2 states " + prop).toBeTruthy();
-      expect(row, ".mk-frow h3 matches its " + prop).toContain(prop + ": " + want![1].trim());
-    }
+  it("the runtime brand rule that makes the flag necessary still forces bare h3s and spans", () => {
+    const brand = decls(readFileSync(resolve(here, "../lib/brand.tsx"), "utf8"));
+    expect(brand, "brand.tsx forces every h3's family with !important").toMatch(/[,\s]h3\s*,[^{]*\{\s*font-family:[^;]*!important/);
+    expect(brand, "brand.tsx sets every span's family").toMatch(/[,\s]span\s*,[^{]*\{\s*font-family:/);
+  });
+
+  it("the paragraph is Source Serif 4 400 at 19px, 1.7, full ink, 460px at most", () => {
+    const p = ruleFor(".mk-fcopy p");
+    expect(decl(p, "font-family")).toBe('"Source Serif 4", Georgia, serif');
+    expect(decl(p, "font-weight")).toBe("400");
+    expect(decl(p, "font-size")).toBe("19px");
+    expect(decl(p, "line-height")).toBe("1.7");
+    expect(decl(p, "color")).toBe("var(--mk-nearblack)");
+    expect(decl(p, "max-width")).toBe("460px");
+  });
+
+  it("stacked, the heading is 30px and the paragraph 17px", () => {
     const stacking = [...marketing.matchAll(/@media \(max-width: 1080px\) \{([\s\S]*?)\n\}/g)]
-      .find((m) => /\.mk-frow h3\s*\{/.test(m[1]));
-    expect(stacking, "the stacked block resizes the row heading").toBeTruthy();
-    expect(stacking![1]).toContain(".mk-frow h3 { font-size: " + clamp![1] + "; }");
+      .find((m) => /(?:^|\n)\s*\.mk-frow h3\s*\{/.test(m[1]));
+    expect(stacking, "a 1080px block resizes the feature type").toBeTruthy();
+    expect(stacking![1]).toMatch(/(?:^|\n)\s*\.mk-frow h3\s*\{\s*font-size:\s*30px;?\s*\}/);
+    expect(stacking![1]).toMatch(/(?:^|\n)\s*\.mk-fcopy p\s*\{\s*font-size:\s*17px;?\s*\}/);
+  });
+
+  it("no other rule, stylesheet or component names either family", () => {
+    const ruleOwners = (family: string) => [...marketing.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
+      .filter((m) => m[2].includes(family)).map((m) => m[1].trim());
+    expect(ruleOwners("Special Elite")).toEqual([".mk-frow h3"]);
+    expect(ruleOwners("Source Serif 4")).toEqual([".mk-fcopy p"]);
+    const src = resolve(here, "..");
+    const walk = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
+      d.isDirectory() ? walk(resolve(dir, d.name))
+        : /\.(css|tsx?)$/.test(d.name) && !/\.test\.tsx?$/.test(d.name) ? [resolve(dir, d.name)] : []);
+    const files = walk(src);
+    expect(files.length, "the sweep found the source tree").toBeGreaterThan(100);
+    const elsewhere = files
+      .filter((f) => !f.replace(/\\/g, "/").endsWith("/marketing/marketing.css"))
+      .filter((f) => /Special Elite|Source Serif 4/.test(decls(readFileSync(f, "utf8"))));
+    expect(elsewhere.map((f) => f.slice(src.length + 1))).toEqual([]);
   });
 });
 
 /**
- * ⚠️ A BLEEDING ILLUSTRATION GROWS ONLY WHILE ROWS SIT SIDE BY SIDE, ONLY TO THE BAND'S EDGE, AND ONLY
- * WHERE THE UNIT IT MEASURES WITH EXISTS. The stacked block zeroes the bleed and wins only by coming
- * later — without it a phone keeps an image wider than its screen — and it zeroes it as 0px, because
- * calc(100% + 0) is invalid and an invalid width is the file's natural 2880px. The @supports guard is
- * there for the same reason: a browser without container units would otherwise draw the natural size.
- * The cap reads 100cqw, which means the band only because the band is the query container. And
- * max-width: none is what lets the growth happen at all, against the global img reset.
+ * ⚠️ EVERY ILLUSTRATION BLEEDS ONLY WHILE ROWS SIT SIDE BY SIDE, ONLY TO THE BAND'S EDGE, ONLY AWAY FROM
+ * ITS COPY, AND ONLY WHERE THE UNIT IT MEASURES WITH EXISTS. The stacked block zeroes the bleed and wins
+ * only by coming later — without it a phone keeps images wider than its screen — and it zeroes it as 0px,
+ * because calc(100% + 0) is invalid and an invalid width is the file's natural 2880px. The @supports guard
+ * is there for the same reason. The cap reads 100cqw, which means the band only because the band is the
+ * query container. The two margins follow the flip's parity: odd rows keep their image on the left and
+ * grow left, even rows are the ones flipped right and grow right. And max-width: none is what lets the
+ * growth happen at all, against the global img reset.
  */
-describe("a bleeding illustration grows only side by side, and only to the band's edge", () => {
-  it("bleeds right, capped by the band, behind a container-unit guard, and is zeroed when rows stack", () => {
+describe("every illustration bleeds only side by side, away from its copy, and only to the band's edge", () => {
+  it("grows on both sides of the alternation, capped by the band, behind a guard, and zeroed when rows stack", () => {
     expect(ruleFor(".mk-featband")).toMatch(/container-type:\s*inline-size/);
     const guards = [...marketing.matchAll(/@supports \(width: 1cqw\) \{([\s\S]*?)\n\}/g)];
     expect(guards, "one container-unit guard").toHaveLength(1);
-    const bleed = /(?:^|\n)\s*\.mk-rowillo--bleed\s*\{([^}]*)\}/.exec(guards[0][1]);
+    const bleed = /(?:^|\n)\s*\.mk-rowillo\s*\{([^}]*)\}/.exec(guards[0][1]);
     expect(bleed, "the guard holds the bleed").toBeTruthy();
     expect(bleed![1]).toMatch(/--mk-bleed:\s*min\(33%,[^;]*100cqw/);
     expect(bleed![1]).toMatch(/(?:^|[;\s])width:\s*calc\(100% \+ var\(--mk-bleed\)\)/);
     expect(bleed![1]).toMatch(/max-width:\s*none/);
-    expect(guards[0][1]).toMatch(/(?:^|\n)\s*\.mk-frow:nth-child\(even\) \.mk-rowillo--bleed\s*\{\s*margin-right:\s*calc\(-1 \* var\(--mk-bleed\)\);?\s*\}/);
+    expect(guards[0][1]).toMatch(/(?:^|\n)\s*\.mk-frow:nth-child\(odd\) \.mk-rowillo\s*\{\s*margin-left:\s*calc\(-1 \* var\(--mk-bleed\)\);?\s*\}/);
+    expect(guards[0][1]).toMatch(/(?:^|\n)\s*\.mk-frow:nth-child\(even\) \.mk-rowillo\s*\{\s*margin-right:\s*calc\(-1 \* var\(--mk-bleed\)\);?\s*\}/);
+    expect(ruleFor(".mk-frow:nth-child(even)"), "the right-hand margin belongs to the rows flipped to the right").toMatch(/direction:\s*rtl/);
     const stacking = [...marketing.matchAll(/@media \(max-width: 1080px\) \{([\s\S]*?)\n\}/g)]
-      .find((m) => /(?:^|\n)\s*\.mk-rowillo--bleed\s*\{\s*--mk-bleed:\s*0px;?\s*\}/.test(m[1]));
+      .find((m) => /(?:^|\n)\s*\.mk-rowillo\s*\{\s*--mk-bleed:\s*0px;?\s*\}/.test(m[1]));
     expect(stacking, "the stacked block zeroes the bleed, with a unit").toBeTruthy();
     expect(guards[0].index!, "the zero comes after the bleed it overrides").toBeLessThan(stacking!.index!);
   });

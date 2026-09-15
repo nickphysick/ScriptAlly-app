@@ -953,24 +953,40 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 .mk-rows { --mk-rows-cap: 1180px; --mk-rows-gutter: 56px; max-width: var(--mk-rows-cap); margin: 0 auto; padding: 16px var(--mk-rows-gutter) 30px; }
 .mk-frow { display: grid; grid-template-columns: 1.6fr 1fr; gap: 80px; align-items: center; padding: 60px 0; }
 .mk-frow + .mk-frow { border-top: 1px solid var(--mk-hair); }
-/* The section-heading style — `.mk-sect h2`, the band's own heading above these rows — at its desktop
-   size. Fixed here rather than its clamp, because the copy column stops growing at the 1180px cap
-   while 3.2vw would keep climbing until 1400px; stacked, where the column is fluid again, the 1080px
-   block gives the heading the clamp back. Locked against `.mk-sect h2` in marketingTokens.test.ts. */
+/* THE FEATURE ROWS' OWN TYPE (15 Sep): a typewriter face for the heading and a text serif for the
+   paragraph, both at full ink. Neither family is used anywhere else on the page; index.html loads both for
+   these two rules alone, and marketingTokens.test.ts fails if any other rule, stylesheet or component
+   names either.
+   ⚠️ THE HEADING'S FAMILY IS !important, AND IT HAS TO BE. src/lib/brand.tsx injects a style element at
+   runtime, on every route, whose heading rule gives every bare h2 and h3 the brand heading font with
+   !important — so without the flag this family never reaches the page (measured 15 Sep: the heading drew
+   in Playfair, and so had the previous heading's own family, unnoticed because both were Playfair).
+   Between two important declarations specificity decides, and .mk-frow h3 outranks a bare h3. The held
+   run inherits its family for the same reason: the injection's plain span rule would otherwise set those
+   two words in the body sans.
+   ⚠️ max-width: 13ch IS DELIBERATE AND STAYS. It is measured in the heading's own ch, so it tracks the
+   stacked 30px as well. On its own it does not prevent orphans — at 13ch "stands", "itself." and
+   "working" would each end a heading alone — so FeatureRows.tsx holds every heading's last two words on
+   one line. The longest held pair, "actually working", runs past the measure and stays inside the copy
+   column. */
 .mk-frow h3 {
-  font-family: "Playfair Display", Georgia, serif; font-weight: 600; color: var(--mk-nearblack);
-  font-size: 2.8rem; line-height: 1.2; letter-spacing: -.018em;
+  font-family: "Special Elite", cursive !important; font-weight: 400; color: var(--mk-nearblack);
+  font-size: 38px; line-height: 1.18; letter-spacing: -0.005em; max-width: 13ch;
 }
-.mk-fcopy p { font-size: 19px; font-weight: 300; line-height: 1.7; color: #5a4a40; margin-top: 14px; max-width: 460px; }
+.mk-frow h3 .mk-fkeep { white-space: nowrap; font-family: inherit; }
+.mk-fcopy p {
+  font-family: "Source Serif 4", Georgia, serif; font-weight: 400; color: var(--mk-nearblack);
+  font-size: 19px; line-height: 1.7; margin-top: 14px; max-width: 460px;
+}
 /* The illustration at its own ratio: no crop, no frame, no fill — straight onto the band's ground. */
 .mk-rowillo { width: 100%; height: auto; min-width: 0; }
-/* A BLEEDING ILLUSTRATION grows a third wider than its column, so a third taller at its own ratio, out
-   past the rows' gutter into the page margin; its copy keeps its column. The growth is capped at the room
-   left to the band's edge (the gutter, plus whatever the rows' cap leaves outside them), so a narrower
-   screen gets less rather than a scrollbar: the whole third from ~1470px, +31% at 1440, +17% at 1280.
-   ⚠️ IT BLEEDS RIGHT ONLY — the side every second row puts its image. In a left-image row the same width
-   would push across the gap and over its own copy; marketingPageSmoke.test.tsx fails on that, and a left
-   rule is not written ahead of a row that needs one.
+/* EVERY ILLUSTRATION BLEEDS: it grows a third wider than its column, so a third taller at its own ratio,
+   out past the rows' gutter into the page margin on the side away from its copy — left in rows 1, 3 and
+   5, right in 2, 4 and 6 — while the copy keeps its column. The growth is capped at the room left to the
+   band's edge (the gutter, plus whatever the rows' cap leaves outside them), so a narrower screen gets
+   less rather than a scrollbar: the whole third from ~1470px, +31% at 1440, +17% at 1280.
+   ⚠️ THE SIDE FOLLOWS THE SAME PARITY AS THE FLIP BELOW. If the alternation ever stops being every second
+   row, these two margins move with it, or an image grows across the gap and over its own copy.
    ⚠️ max-width: none is load-bearing — the global image reset caps every img at 100% and would cancel the
    growth without a sound. The negative margin hands the extra width back, so the margin box is still
    exactly its column and the grid sizes its tracks as though nothing had grown.
@@ -978,11 +994,12 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    invalid at computed-value time, falls back to auto, and the image draws at its natural 2880px. 100vw is
    no substitute — it counts a classic scrollbar as room and overflows by half of one. */
 @supports (width: 1cqw) {
-  .mk-rowillo--bleed {
+  .mk-rowillo {
     --mk-bleed: min(33%, var(--mk-rows-gutter) + max(0px, (100cqw - var(--mk-rows-cap)) / 2));
     width: calc(100% + var(--mk-bleed)); max-width: none;
   }
-  .mk-frow:nth-child(even) .mk-rowillo--bleed { margin-right: calc(-1 * var(--mk-bleed)); }
+  .mk-frow:nth-child(odd) .mk-rowillo { margin-left: calc(-1 * var(--mk-bleed)); }
+  .mk-frow:nth-child(even) .mk-rowillo { margin-right: calc(-1 * var(--mk-bleed)); }
 }
 /* ⚠️ EVERY SECOND ROW PUTS ITS IMAGE ON THE RIGHT BY FLIPPING THE GRID'S DIRECTION, not by reordering
    markup: the first track — the 1.6fr image column — then starts from the right. The children are set
@@ -1304,8 +1321,9 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   .mk-frow { grid-template-columns: 1fr; gap: 28px; padding: 44px 0; }
   .mk-frow:nth-child(even) { direction: ltr; }
   /* 0px, never a bare 0: calc(100% + 0) is invalid, and an invalid width draws the file's natural 2880px */
-  .mk-rowillo--bleed { --mk-bleed: 0px; }
-  .mk-frow h3 { font-size: clamp(1.9rem, 3.2vw, 2.8rem); }
+  .mk-rowillo { --mk-bleed: 0px; }
+  .mk-frow h3 { font-size: 30px; }
+  .mk-fcopy p { font-size: 17px; }
   .mk-beta { padding-left: 18px; padding-right: 18px; }
   .mk-foot { padding: 30px 26px 40px; flex-wrap: wrap; }
 }

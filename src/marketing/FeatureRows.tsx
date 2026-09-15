@@ -10,51 +10,66 @@
  *
  * ⚠️ THE IMAGE COMES FIRST IN THE MARKUP AND THE ALTERNATION IS CSS. Stacked, a row reads image then
  * copy with no reordering at all; side by side, every second row is flipped by `direction` on its
- * grid in marketing.css — so all six rows are the same markup.
+ * grid in marketing.css — so all six rows are the same markup. Each illustration's bleed into the page
+ * margin, away from its copy, is CSS too, keyed to the same alternation.
  */
 
 import React from "react";
 import { FEATURE_ROWS } from "./landingCopy";
 
-/* Each illustration's own pixel size. CSS sizes the image to its column, so these state only the
-   ratio — enough for a row to reserve its height before the lazily-loaded file arrives rather than
-   jump when it does. They are NOT all one size (the Track artwork is 2880×2100, the rest 2880×1620),
-   which is why this is keyed by file rather than one constant. A smoke test reads each PNG's own
-   header against them, so a re-exported file that changes shape fails there first. */
-const ILLUSTRATION_SIZE: Record<string, { width: number; height: number }> = {
-  "/images/journey-so-far.png": { width: 2880, height: 1620 },
-  "/images/track-agent-queries.png": { width: 2880, height: 2100 },
-  "/images/home-for-your-agents.png": { width: 2880, height: 1620 },
-  "/images/smart-email-drop.png": { width: 2880, height: 1620 },
-  "/images/curate-and-compare.png": { width: 2880, height: 1620 },
-  "/images/comparable-titles.png": { width: 2880, height: 1620 },
+/* Each illustration's own facts, keyed by file.
+   The SIZE is the file's pixel size. CSS sizes the image to its column, so it states only the ratio —
+   enough for a row to reserve its height before the lazily-loaded file arrives rather than jump when it
+   does. They are NOT all one size (the Track artwork is 2880×2100, the rest 2880×2250).
+   ⚠️ THE VERSION IS THE FIRST EIGHT HEX DIGITS OF THE FILE'S OWN MD5, AND IT RIDES THE URL. Nothing under
+   public/ is fingerprinted by the build and prod hosting lets a browser keep a file for an hour, so an
+   image replaced under the same filename would otherwise be served stale. Replace a file, change its
+   version. A smoke test reads every PNG — its header against the size, its hash against the version —
+   so a file that changes without this table following fails there first. */
+const ILLUSTRATIONS: Record<string, { width: number; height: number; version: string }> = {
+  "/images/journey-so-far.png": { width: 2880, height: 2250, version: "37351265" },
+  "/images/track-agent-queries.png": { width: 2880, height: 2100, version: "675a97ef" },
+  "/images/home-for-your-agents.png": { width: 2880, height: 2250, version: "126e2e66" },
+  "/images/smart-email-drop.png": { width: 2880, height: 2250, version: "7f983545" },
+  "/images/curate-and-compare.png": { width: 2880, height: 2250, version: "50923a72" },
+  "/images/comparable-titles.png": { width: 2880, height: 2250, version: "b8ea39cf" },
 };
 
-/* Illustrations that grow a third larger than their column, out past the gutter into the page margin
-   (capped at the screen edge, off when rows stack — see .mk-rowillo--bleed). ⚠️ The stylesheet bleeds
-   RIGHT only, so a file listed here must sit in an image-right row, i.e. every second one; a smoke test
-   fails otherwise. A per-file presentation choice: the Track artwork, 15 Sep. */
-const BLEEDS_INTO_MARGIN = new Set(["/images/track-agent-queries.png"]);
+/* A heading split so that its last two words can be held on one line. At the heading's deliberate 13ch
+   measure three of the six would otherwise end on a single word. The words are untouched: the break
+   before the held pair stays an ordinary space, outside the held run. */
+const lastTwoWords = (heading: string): [string, string] => {
+  const last = heading.lastIndexOf(" ");
+  const cut = last > 0 ? heading.lastIndexOf(" ", last - 1) : -1;
+  return cut >= 0 ? [heading.slice(0, cut + 1), heading.slice(cut + 1)] : ["", heading];
+};
 
 export const FeatureRows: React.FC = () => (
   <section className="mk-featband" id="mk-features">
     <div className="mk-rows">
-      {FEATURE_ROWS.map((row) => (
-        <div className="mk-frow" key={row.key}>
-          <img
-            className={"mk-rowillo" + (BLEEDS_INTO_MARGIN.has(row.image) ? " mk-rowillo--bleed" : "")}
-            src={row.image}
-            alt={row.alt}
-            width={ILLUSTRATION_SIZE[row.image].width}
-            height={ILLUSTRATION_SIZE[row.image].height}
-            loading="lazy"
-          />
-          <div className="mk-fcopy">
-            <h3>{row.heading}</h3>
-            <p>{row.body}</p>
+      {FEATURE_ROWS.map((row) => {
+        const art = ILLUSTRATIONS[row.image];
+        const [lead, held] = lastTwoWords(row.heading);
+        return (
+          <div className="mk-frow" key={row.key}>
+            <img
+              className="mk-rowillo"
+              src={row.image + "?v=" + art.version}
+              alt={row.alt}
+              width={art.width}
+              height={art.height}
+              loading="lazy"
+            />
+            <div className="mk-fcopy">
+              <h3>
+                {lead}
+                <span className="mk-fkeep">{held}</span>
+              </h3>
+              <p>{row.body}</p>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   </section>
 );
