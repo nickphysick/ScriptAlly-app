@@ -16,11 +16,19 @@
 import React from "react";
 import { FEATURE_ROWS } from "./landingCopy";
 
-/* Every illustration is exported at 2880×1620. CSS sizes the image to its column, so these state
-   only the ratio — enough for a row to reserve its height before the lazily-loaded file arrives
-   rather than jump when it does. A smoke test reads each PNG's own header against them. */
-const ILLUSTRATION_WIDTH = 2880;
-const ILLUSTRATION_HEIGHT = 1620;
+/* Each illustration's own pixel size. CSS sizes the image to its column, so these state only the
+   ratio — enough for a row to reserve its height before the lazily-loaded file arrives rather than
+   jump when it does. They are NOT all one size (the Track artwork is 2880×2100, the rest 2880×1620),
+   which is why this is keyed by file rather than one constant. A smoke test reads each PNG's own
+   header against them, so a re-exported file that changes shape fails there first. */
+const ILLUSTRATION_SIZE: Record<string, { width: number; height: number }> = {
+  "/images/journey-so-far.png": { width: 2880, height: 1620 },
+  "/images/track-agent-queries.png": { width: 2880, height: 2100 },
+  "/images/home-for-your-agents.png": { width: 2880, height: 1620 },
+  "/images/smart-email-drop.png": { width: 2880, height: 1620 },
+  "/images/curate-and-compare.png": { width: 2880, height: 1620 },
+  "/images/comparable-titles.png": { width: 2880, height: 1620 },
+};
 
 export const FeatureRows: React.FC = () => (
   <section className="mk-featband" id="mk-features">
@@ -31,8 +39,8 @@ export const FeatureRows: React.FC = () => (
             className="mk-rowillo"
             src={row.image}
             alt={row.alt}
-            width={ILLUSTRATION_WIDTH}
-            height={ILLUSTRATION_HEIGHT}
+            width={ILLUSTRATION_SIZE[row.image].width}
+            height={ILLUSTRATION_SIZE[row.image].height}
             loading="lazy"
           />
           <div className="mk-fcopy">
