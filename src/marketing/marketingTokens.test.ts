@@ -379,7 +379,7 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
    * The claim is the SET, not the values. `.mk-fw`'s offsets are fixed pixels against type that
    * is not, so they will legitimately be re-tuned; pinning them would be a lock that has to be
    * rewritten every time the headline's clamp moves, which is a lock being weakened on schedule.
-   * A sixth selector appearing here is the thing worth failing on.
+   * A selector appearing here that the list does not name is the thing worth failing on.
    *
    * ⚠️ SWEPT OVER THE WHOLE SHEET, NOT A SLICE OF IT. The first version of this sliced from
    * `.mk-hero {` to `.mk-featband` — and the plate's rule lives eight hundred lines further down,
@@ -387,12 +387,14 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
    * The hero's rules are not contiguous, and a positional slice over a file that does not group
    * by feature answers a question nobody asked.
    */
-  it("…and the whole sheet's negative margins are the five that are meant to be there", () => {
+  it("…and the whole sheet's negative margins are the six that are meant to be there", () => {
     const owners = new Set<string>();
     for (const m of marketing.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)) {
       if (/margin[^:]*:\s*[^;]*-\d/.test(m[2])) m[1].split(",").forEach((x) => owners.add(x.trim()));
     }
     expect([...owners].sort()).toEqual([
+      /* the Track illustration, bleeding past the rows' gutter into the page margin — the plate's kind */
+      ".mk-frow:nth-child(even) .mk-rowillo--bleed",
       /* the plate, bleeding past the container's own gutter to the page edge */
       ".mk-hero .mk-illo--tall",
       /* the burst, pulled back over the headline's last word */
@@ -653,5 +655,32 @@ describe("the feature rows alternate only while they sit side by side", () => {
       .find((m) => /\.mk-frow h3\s*\{/.test(m[1]));
     expect(stacking, "the stacked block resizes the row heading").toBeTruthy();
     expect(stacking![1]).toContain(".mk-frow h3 { font-size: " + clamp![1] + "; }");
+  });
+});
+
+/**
+ * ⚠️ A BLEEDING ILLUSTRATION GROWS ONLY WHILE ROWS SIT SIDE BY SIDE, ONLY TO THE BAND'S EDGE, AND ONLY
+ * WHERE THE UNIT IT MEASURES WITH EXISTS. The stacked block zeroes the bleed and wins only by coming
+ * later — without it a phone keeps an image wider than its screen — and it zeroes it as 0px, because
+ * calc(100% + 0) is invalid and an invalid width is the file's natural 2880px. The @supports guard is
+ * there for the same reason: a browser without container units would otherwise draw the natural size.
+ * The cap reads 100cqw, which means the band only because the band is the query container. And
+ * max-width: none is what lets the growth happen at all, against the global img reset.
+ */
+describe("a bleeding illustration grows only side by side, and only to the band's edge", () => {
+  it("bleeds right, capped by the band, behind a container-unit guard, and is zeroed when rows stack", () => {
+    expect(ruleFor(".mk-featband")).toMatch(/container-type:\s*inline-size/);
+    const guards = [...marketing.matchAll(/@supports \(width: 1cqw\) \{([\s\S]*?)\n\}/g)];
+    expect(guards, "one container-unit guard").toHaveLength(1);
+    const bleed = /(?:^|\n)\s*\.mk-rowillo--bleed\s*\{([^}]*)\}/.exec(guards[0][1]);
+    expect(bleed, "the guard holds the bleed").toBeTruthy();
+    expect(bleed![1]).toMatch(/--mk-bleed:\s*min\(33%,[^;]*100cqw/);
+    expect(bleed![1]).toMatch(/(?:^|[;\s])width:\s*calc\(100% \+ var\(--mk-bleed\)\)/);
+    expect(bleed![1]).toMatch(/max-width:\s*none/);
+    expect(guards[0][1]).toMatch(/(?:^|\n)\s*\.mk-frow:nth-child\(even\) \.mk-rowillo--bleed\s*\{\s*margin-right:\s*calc\(-1 \* var\(--mk-bleed\)\);?\s*\}/);
+    const stacking = [...marketing.matchAll(/@media \(max-width: 1080px\) \{([\s\S]*?)\n\}/g)]
+      .find((m) => /(?:^|\n)\s*\.mk-rowillo--bleed\s*\{\s*--mk-bleed:\s*0px;?\s*\}/.test(m[1]));
+    expect(stacking, "the stacked block zeroes the bleed, with a unit").toBeTruthy();
+    expect(guards[0].index!, "the zero comes after the bleed it overrides").toBeLessThan(stacking!.index!);
   });
 });

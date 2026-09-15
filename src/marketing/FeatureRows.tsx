@@ -30,13 +30,19 @@ const ILLUSTRATION_SIZE: Record<string, { width: number; height: number }> = {
   "/images/comparable-titles.png": { width: 2880, height: 1620 },
 };
 
+/* Illustrations that grow a third larger than their column, out past the gutter into the page margin
+   (capped at the screen edge, off when rows stack — see .mk-rowillo--bleed). ⚠️ The stylesheet bleeds
+   RIGHT only, so a file listed here must sit in an image-right row, i.e. every second one; a smoke test
+   fails otherwise. A per-file presentation choice: the Track artwork, 15 Sep. */
+const BLEEDS_INTO_MARGIN = new Set(["/images/track-agent-queries.png"]);
+
 export const FeatureRows: React.FC = () => (
   <section className="mk-featband" id="mk-features">
     <div className="mk-rows">
       {FEATURE_ROWS.map((row) => (
         <div className="mk-frow" key={row.key}>
           <img
-            className="mk-rowillo"
+            className={"mk-rowillo" + (BLEEDS_INTO_MARGIN.has(row.image) ? " mk-rowillo--bleed" : "")}
             src={row.image}
             alt={row.alt}
             width={ILLUSTRATION_SIZE[row.image].width}

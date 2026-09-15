@@ -867,7 +867,9 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    again would put a third surface inside the second. The top padding still holds the trace clear
    of the band's top edge. */
 /* The section break above now opens this region, so the band itself only closes it. */
-.mk-featband { padding: 0 0 26px; margin-top: 0; }
+/* container-type: the band is the query container the Track image's bleed measures the page against
+   (100cqw is the band's own width, so a classic scrollbar is never counted as room). */
+.mk-featband { padding: 0 0 26px; margin-top: 0; container-type: inline-size; }
 
 /* ── The full-width section break: eyebrow, heading, and a trace behind them ── */
 /* ⚠️ `scroll-margin-top` IS THE NAV'S HEIGHT, OR THE HEADING LANDS UNDERNEATH IT. The marketing
@@ -948,7 +950,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    the header's 120px back on top of that gave 152.6px, which read as a hole where a heading used
    to be. The band's hairline and its change of paper are the separator — it does not need a
    run-up as well. */
-.mk-rows { max-width: 1180px; margin: 0 auto; padding: 16px 56px 30px; }
+.mk-rows { --mk-rows-cap: 1180px; --mk-rows-gutter: 56px; max-width: var(--mk-rows-cap); margin: 0 auto; padding: 16px var(--mk-rows-gutter) 30px; }
 .mk-frow { display: grid; grid-template-columns: 1.6fr 1fr; gap: 80px; align-items: center; padding: 60px 0; }
 .mk-frow + .mk-frow { border-top: 1px solid var(--mk-hair); }
 /* The section-heading style — `.mk-sect h2`, the band's own heading above these rows — at its desktop
@@ -962,6 +964,26 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 .mk-fcopy p { font-size: 19px; font-weight: 300; line-height: 1.7; color: #5a4a40; margin-top: 14px; max-width: 460px; }
 /* The illustration at its own ratio: no crop, no frame, no fill — straight onto the band's ground. */
 .mk-rowillo { width: 100%; height: auto; min-width: 0; }
+/* A BLEEDING ILLUSTRATION grows a third wider than its column, so a third taller at its own ratio, out
+   past the rows' gutter into the page margin; its copy keeps its column. The growth is capped at the room
+   left to the band's edge (the gutter, plus whatever the rows' cap leaves outside them), so a narrower
+   screen gets less rather than a scrollbar: the whole third from ~1470px, +31% at 1440, +17% at 1280.
+   ⚠️ IT BLEEDS RIGHT ONLY — the side every second row puts its image. In a left-image row the same width
+   would push across the gap and over its own copy; marketingPageSmoke.test.tsx fails on that, and a left
+   rule is not written ahead of a row that needs one.
+   ⚠️ max-width: none is load-bearing — the global image reset caps every img at 100% and would cancel the
+   growth without a sound. The negative margin hands the extra width back, so the margin box is still
+   exactly its column and the grid sizes its tracks as though nothing had grown.
+   ⚠️ BEHIND @supports BECAUSE THIS FAILS LOUDLY, NOT GRACEFULLY: without container units the width is
+   invalid at computed-value time, falls back to auto, and the image draws at its natural 2880px. 100vw is
+   no substitute — it counts a classic scrollbar as room and overflows by half of one. */
+@supports (width: 1cqw) {
+  .mk-rowillo--bleed {
+    --mk-bleed: min(33%, var(--mk-rows-gutter) + max(0px, (100cqw - var(--mk-rows-cap)) / 2));
+    width: calc(100% + var(--mk-bleed)); max-width: none;
+  }
+  .mk-frow:nth-child(even) .mk-rowillo--bleed { margin-right: calc(-1 * var(--mk-bleed)); }
+}
 /* ⚠️ EVERY SECOND ROW PUTS ITS IMAGE ON THE RIGHT BY FLIPPING THE GRID'S DIRECTION, not by reordering
    markup: the first track — the 1.6fr image column — then starts from the right. The children are set
    back to ltr, or the copy would lay out right to left and a sentence's full stop would jump to its
@@ -1281,6 +1303,8 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   .mk-rows { padding: 10px 26px 22px; }
   .mk-frow { grid-template-columns: 1fr; gap: 28px; padding: 44px 0; }
   .mk-frow:nth-child(even) { direction: ltr; }
+  /* 0px, never a bare 0: calc(100% + 0) is invalid, and an invalid width draws the file's natural 2880px */
+  .mk-rowillo--bleed { --mk-bleed: 0px; }
   .mk-frow h3 { font-size: clamp(1.9rem, 3.2vw, 2.8rem); }
   .mk-beta { padding-left: 18px; padding-right: 18px; }
   .mk-foot { padding: 30px 26px 40px; flex-wrap: wrap; }

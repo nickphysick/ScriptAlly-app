@@ -718,4 +718,18 @@ describe("the feature rows: six images, six headings, six paragraphs", () => {
       expect(rows[i], row.image).toContain('width="' + png.readUInt32BE(16) + '" height="' + png.readUInt32BE(20) + '"');
     });
   });
+
+  /**
+   * ⚠️ THE STYLESHEET BLEEDS AN ILLUSTRATION RIGHT, AND ONLY RIGHT — the side every second row puts its
+   * image. Moved into a left-image row, a bleeding image would grow across the gap and over its own copy
+   * while the class, the rule and this markup all still read correctly.
+   */
+  it("bleeds an illustration only where its row puts the image on the right", () => {
+    const rows = rowsOf(band());
+    const bleeding = rows.flatMap((markup, i) => (/["\s]mk-rowillo--bleed["\s]/.test(markup) ? [i] : []));
+    for (const i of bleeding) {
+      expect((i + 1) % 2, FEATURE_ROWS[i].key + " is row " + (i + 1) + ", which puts its image on the left").toBe(0);
+    }
+    expect(bleeding.map((i) => FEATURE_ROWS[i].key), "the rows whose illustration bleeds").toEqual(["track"]);
+  });
 });
