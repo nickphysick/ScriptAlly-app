@@ -12,8 +12,19 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import "./marketing.css";
-import scriptallyLogo from "../assets/marketing/scriptally-logo.png";
 import { marketingNavState, MarketingNavUser } from "./marketingNav";
+
+/* The QueryHawk mark. It sits in public/ rather than src/assets/ so it is served at a stable path —
+   and public/ is NOT fingerprinted by the build, so the URL carries the first eight hex digits of
+   the file's own md5. Replace the file, change the version.
+   ⚠️ THIS LEAVES `src/assets/marketing/scriptally-logo.png` REFERENCED BY NOTHING, and the note that
+   stood here first claimed the opposite — that four app files still imported it. They do not. They
+   render `/scriptally-logo-v2.png` and `/scriptally-logo-new.png`, which are DIFFERENT files living
+   in public/; a substring search for "scriptally-logo" matches all three names, which is how the
+   wrong claim was reached. Checked with a bounded search before this was written.
+   The orphan is left in place deliberately: deleting an app asset is outside this pass, and it
+   belongs with the rename that is still to come. */
+const LOGO = { src: "/images/queryhawk-logo.png", version: "f95f44c3" };
 
 export const MarketingShell: React.FC<{
   user: MarketingNavUser | null | undefined;
@@ -150,14 +161,16 @@ export const MarketingShell: React.FC<{
       <div className={"mk-navwrap" + (scrolled ? " mk-scrolled" : "")}>
         <nav className="mk-nav" aria-label="Marketing">
           <button type="button" className="mk-brand mk-brand-link" onClick={() => onNavigate("landing")} aria-label="ScriptAlly home">
-            {/* ⚠️ SHIPPED AS SUPPLIED — BLACK, UNTINTED. The ref carries two recoloured variants
-                beside this one; Nick chose the black. Do not add a CSS filter or swap the fill:
-                the mark is artwork, not an icon that takes the tier's ink.
-                `alt=""` because the wordmark beside it already says ScriptAlly — a second
+            {/* ⚠️ SHIPPED AS SUPPLIED — NO FILTER, NO RECOLOUR. The mark is artwork, not an icon that
+                takes the tier's ink, and its transparency is part of the drawing.
+                `alt=""` because the wordmark beside it already names the site — a second
                 announcement is noise to a screen reader, and the button's own aria-label names
                 the destination. */}
-            <img className="mk-logo" src={scriptallyLogo} alt="" />
-            <span className="mk-wordmark">ScriptAlly</span>
+            <img className="mk-logo" src={LOGO.src + "?v=" + LOGO.version} alt="" />
+            {/* ⚠️ THE CAPS ARE HERE, NOT IN CSS. `text-transform` would leave the drawn word and the
+                announced word saying different things; this way they are one string. The word
+                itself is unchanged — renaming the site is a separate job. */}
+            <span className="mk-wordmark">SCRIPTALLY</span>
           </button>
           {/* ⚠️ THE NAV AND THE FOOTER MUST NOT DISAGREE ABOUT WHAT THE SITE CONTAINS. About and
               Contact are real public routes; leaving them footer-only would put the two company

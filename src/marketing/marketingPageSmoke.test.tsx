@@ -277,6 +277,38 @@ describe("the marketing chrome renders in both of its states", () => {
   it("…and offers the signed-in pair instead", () => {
     expect(renderPage(shell(SMOKE_USER), "/")).toContain("Open dashboard");
   });
+
+  /**
+   * ⚠️ THE MARK IS A public/ FILE, SO ITS URL CARRIES ITS OWN HASH. Nothing under public/ is
+   * fingerprinted by the build and prod hosting lets a browser keep a file for an hour, so a logo
+   * replaced under the same name would go on being served stale. The version is the first eight hex
+   * digits of the file's own md5, and this reads BOTH sides — the rendered URL and the bytes on
+   * disk — so a file swapped without the constant following it fails here rather than in a browser.
+   */
+  it("wears the QueryHawk mark at its own content hash", () => {
+    const html = renderPage(shell(null), "/");
+    const img = /<img[^>]*class="mk-logo"[^>]*>/.exec(html);
+    expect(img, "the nav renders a mark").toBeTruthy();
+    const src = /src="([^"]+)"/.exec(img![0]);
+    expect(src, "…with a source").toBeTruthy();
+    const [path, version] = src![1].split("?v=");
+    const bytes = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), "../..", "public" + path));
+    expect(version, "the version IS the file, not a number kept in step by hand")
+      .toBe(createHash("md5").update(bytes).digest("hex").slice(0, 8));
+    expect(img![0], 'alt="" — the wordmark beside it already names the site').toMatch(/alt=""/);
+  });
+
+  /**
+   * ⚠️ THE CAPS ARE IN THE MARKUP, NOT `text-transform`. A CSS transform leaves what a screen reader
+   * announces and what the page draws saying different things, and only one of them is reviewable.
+   * The word itself is UNCHANGED: this pass replaced the mark, not the name — renaming the site is
+   * a separate job, and this asserts it has not quietly begun.
+   */
+  it("sets the wordmark in caps as text, and has not renamed the site", () => {
+    const html = renderPage(shell(null), "/");
+    expect(html, "drawn in caps because the markup says so").toContain(">SCRIPTALLY<");
+    expect(html, "the accessible name is untouched").toContain('aria-label="ScriptAlly home"');
+  });
 });
 
 /**

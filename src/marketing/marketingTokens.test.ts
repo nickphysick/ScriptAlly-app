@@ -373,15 +373,20 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
    * The hero's rules are not contiguous, and a positional slice over a file that does not group
    * by feature answers a question nobody asked.
    */
-  it("…and the whole sheet's negative margins are the four that are meant to be there", () => {
+  it("…and the whole sheet's negative margins are the six that are meant to be there", () => {
     const owners = new Set<string>();
     for (const m of marketing.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)) {
       if (/margin[^:]*:\s*[^;]*-\d/.test(m[2])) m[1].split(",").forEach((x) => owners.add(x.trim()));
     }
     expect([...owners].sort()).toEqual([
+      /* the copy column reaching outward on its own side so a row reads as one centred unit — the
+         mirror of the illustration opposite it, on the same alternation (16 Sep). It is what closes
+         the middle gap: the image did not move, the copy stopped leaving slack against it. */
+      ".mk-frow:nth-child(even) .mk-fcopy",
       /* every feature illustration, bleeding past the rows' gutter into the page margin away from its copy
          — the plate's kind, one margin for each side of the alternation */
       ".mk-frow:nth-child(even) .mk-rowillo",
+      ".mk-frow:nth-child(odd) .mk-fcopy",
       ".mk-frow:nth-child(odd) .mk-rowillo",
       /* both sentinels cancel their own height so they occupy no space */
       ".mk-navsentinel--condense",
@@ -586,11 +591,11 @@ describe("the feature rows alternate only while they sit side by side", () => {
 describe("the feature rows set their own type, and nothing else uses its families", () => {
   const decl = (body: string, prop: string) => new RegExp("(?:^|[;\\s{])" + prop + ":\\s*([^;]+);").exec(body)?.[1].trim();
 
-  it("the heading is Special Elite 400 at 38px, 1.18, -0.005em, full ink, on a 13ch measure", () => {
+  it("the heading is Special Elite 400 at 44px, 1.18, -0.005em, full ink, on a 13ch measure", () => {
     const h3 = ruleFor(".mk-frow h3");
     expect(decl(h3, "font-family"), "important, or the runtime brand rule owns every h3").toBe('"Special Elite", cursive !important');
     expect(decl(h3, "font-weight")).toBe("400");
-    expect(decl(h3, "font-size")).toBe("38px");
+    expect(decl(h3, "font-size")).toBe("44px");
     expect(decl(h3, "line-height")).toBe("1.18");
     expect(decl(h3, "letter-spacing")).toBe("-0.005em");
     expect(decl(h3, "color")).toBe("var(--mk-nearblack)");
@@ -615,22 +620,31 @@ describe("the feature rows set their own type, and nothing else uses its familie
     expect(brand, "brand.tsx sets every span's family").toMatch(/[,\s]span\s*,[^{]*\{\s*font-family:/);
   });
 
-  it("the paragraph is Source Serif 4 400 at 19px, 1.7, full ink, 460px at most", () => {
+  it("the paragraph is Source Serif 4 400 at 21px, 1.7, full ink, 520px at most", () => {
     const p = ruleFor(".mk-fcopy p");
     expect(decl(p, "font-family")).toBe('"Source Serif 4", Georgia, serif');
     expect(decl(p, "font-weight")).toBe("400");
-    expect(decl(p, "font-size")).toBe("19px");
+    expect(decl(p, "font-size")).toBe("21px");
     expect(decl(p, "line-height")).toBe("1.7");
     expect(decl(p, "color")).toBe("var(--mk-nearblack)");
-    expect(decl(p, "max-width")).toBe("460px");
+    expect(decl(p, "max-width")).toBe("520px");
   });
 
-  it("stacked, the heading is 30px and the paragraph 17px", () => {
+  it("stacked, the heading is 34px capped to the held pair, and the paragraph 18px", () => {
     const stacking = [...marketing.matchAll(/@media \(max-width: 1080px\) \{([\s\S]*?)\n\}/g)]
       .find((m) => /(?:^|\n)\s*\.mk-frow h3\s*\{/.test(m[1]));
     expect(stacking, "a 1080px block resizes the feature type").toBeTruthy();
-    expect(stacking![1]).toMatch(/(?:^|\n)\s*\.mk-frow h3\s*\{\s*font-size:\s*30px;?\s*\}/);
-    expect(stacking![1]).toMatch(/(?:^|\n)\s*\.mk-fcopy p\s*\{\s*font-size:\s*17px;?\s*\}/);
+    const h3 = /(?:^|\n)\s*\.mk-frow h3\s*\{([^}]*)\}/.exec(stacking![1]);
+    expect(h3, "the stacked heading rule").toBeTruthy();
+    /* ⚠️ BOTH DECLARATIONS, AND THE ORDER IS THE FALLBACK. The held pair is a `nowrap` run that
+       cannot break, so a flat 34px overflowed a 320px phone by 8.9px; the cap sizes the heading to
+       whatever keeps that run inside the column. The plain value must come FIRST, so a browser
+       without container units drops the cap as invalid and keeps a sane size rather than falling
+       back to the 44px base. */
+    expect(h3![1], "the plain size, for a browser without cqw").toMatch(/font-size:\s*34px\s*;/);
+    expect(h3![1], "…then capped so the unbreakable pair fits the column")
+      .toMatch(/font-size:\s*min\(34px,\s*calc\(\(100cqw - 52px\) \/ 9\)\)/);
+    expect(stacking![1]).toMatch(/(?:^|\n)\s*\.mk-fcopy p\s*\{\s*font-size:\s*18px;?\s*\}/);
   });
 
   it("no other rule, stylesheet or component names either family", () => {
@@ -681,5 +695,115 @@ describe("every illustration bleeds only side by side, away from its copy, and o
       .find((m) => /(?:^|\n)\s*\.mk-rowillo\s*\{\s*--mk-bleed:\s*0px;?\s*\}/.test(m[1]));
     expect(stacking, "the stacked block zeroes the bleed, with a unit").toBeTruthy();
     expect(guards[0].index!, "the zero comes after the bleed it overrides").toBeLessThan(stacking!.index!);
+  });
+});
+
+/**
+ * ⚠️ THE WORDMARK'S FACE IS SELF-HOSTED, SCOPED TO THE NAV, AND USED NOWHERE ELSE (16 Sep).
+ * Three separate claims, and each fails in its own quiet way. A hotlinked face is a third-party
+ * request on a public page and a privacy question nobody asked for. A bare `.mk-wordmark` rule
+ * would restyle the SHARED FOOTER's wordmark too, because both mounts carry that class — the
+ * brief said the nav only. And a `@font-face` whose `src` disagrees with the preload in index.html
+ * by so much as a query string fetches the file TWICE, which looks like a slow page rather than
+ * like a mistake.
+ */
+describe("the nav wordmark's face is self-hosted, nav-scoped, and named nowhere else", () => {
+  const face = () => {
+    const m = /@font-face\s*\{([^}]*)\}/.exec(marketing);
+    expect(m, "marketing.css declares a @font-face").toBeTruthy();
+    return m![1];
+  };
+
+  it("is declared locally, swaps rather than blocking, and ships its licence", () => {
+    const body = face();
+    expect(body).toMatch(/font-family:\s*"Archivo Expanded"/);
+    expect(body, "swap, so the wordmark never blocks first paint").toMatch(/font-display:\s*swap/);
+    /* Local path, not a CDN. The whole point of self-hosting is that no third party sees the reader. */
+    const src = /src:\s*url\("([^"]+)"\)/.exec(body);
+    expect(src, "the face names a file").toBeTruthy();
+    expect(src![1], "served from our own origin, never hotlinked").toMatch(/^\/fonts\//);
+    expect(src![1], "…and specifically not from a font aggregator").not.toMatch(/^https?:|gstatic|googleapis|fontstruct/);
+    /* The file is really there and is really a woff2 — a src pointing at nothing is a silent
+       fallback to the system sans, which on this page looks like a design choice. */
+    const file = src![1].split("?")[0];
+    const bytes = readFileSync(resolve(here, "../..", "public" + file));
+    expect(bytes.subarray(0, 4).toString("latin1"), "a real woff2").toBe("wOF2");
+    expect(bytes.length, "the latin subset, well under the 30KB threshold").toBeLessThan(30 * 1024);
+    /* Serving a webfont is redistribution under the OFL, so the licence travels with the file. */
+    const ofl = readFileSync(resolve(here, "../../public/fonts/OFL.txt"), "utf8");
+    expect(ofl).toMatch(/SIL OPEN FONT LICENSE Version 1\.1/);
+  });
+
+  it("the preload names the SAME url, character for character", () => {
+    const html = readFileSync(resolve(here, "../../index.html"), "utf8");
+    const src = /src:\s*url\("([^"]+)"\)/.exec(face())![1];
+    const pre = /<link rel="preload" href="([^"]+)"[^>]*as="font"[^>]*>/.exec(html);
+    expect(pre, "index.html preloads the face").toBeTruthy();
+    expect(pre![1], "a different spelling is a second fetch, not a cache hit").toBe(src);
+    expect(pre![0], "fonts are fetched in CORS mode even same-origin").toMatch(/crossorigin/);
+  });
+
+  it("dresses the nav's wordmark and leaves the footer's in Playfair", () => {
+    expect(ruleFor(".mk-nav .mk-wordmark"), "the nav's own rule").toMatch(/font-family:\s*"Archivo Expanded"/);
+    expect(ruleFor(".mk-wordmark"), "the shared base — the footer reads this").toMatch(/font-family:\s*"Playfair Display"/);
+    expect(ruleFor(".mk-wordmark"), "…and must not name the display face").not.toMatch(/Archivo/);
+  });
+
+  it("no other rule or file names Archivo", () => {
+    /* ⚠️ THE @font-face NAMES IT TOO, AND THAT IS A DECLARATION RATHER THAN A USE. This sweep's
+       pattern starts at a newline, so the blank line before `@font-face` lets it capture the
+       at-rule as though it were a selector — which made this read "two owners" about a sheet with
+       one consumer. Dropping at-rules keeps the assertion about who USES the family, which is the
+       claim that matters: a second consumer is the leak, the face that defines it is not. */
+    const owners = [...marketing.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
+      .filter((m) => m[2].includes("Archivo")).map((m) => m[1].trim())
+      .filter((sel) => !sel.startsWith("@"));
+    expect(owners).toEqual([".mk-nav .mk-wordmark"]);
+    const src = resolve(here, "..");
+    const walk = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
+      d.isDirectory() ? walk(resolve(dir, d.name))
+        : /\.(css|tsx?)$/.test(d.name) && !/\.test\.tsx?$/.test(d.name) ? [resolve(dir, d.name)] : []);
+    const elsewhere = walk(src)
+      .filter((f) => !f.replace(/\\/g, "/").endsWith("/marketing/marketing.css"))
+      .filter((f) => /Archivo/.test(decls(readFileSync(f, "utf8"))));
+    expect(elsewhere.map((f) => f.slice(src.length + 1))).toEqual([]);
+  });
+});
+
+/**
+ * ⚠️ THE IMAGE COLUMN DID NOT MOVE, AND THAT IS THE CONSTRAINT THE REBALANCE WAS BUILT UNDER
+ * (16 Sep). The rows were rebalanced by widening the COPY outward on its own side; the grid ratio,
+ * the gap, the cap and the gutter were all left alone so `--mk-bleed` — which reads the cap and the
+ * gutter — resolves exactly as it did and the illustration keeps its width and its overflow past
+ * the viewport edge. The 80px gap is part of that: it divides the fr tracks, so changing it shrinks
+ * the image. Anyone closing the middle gap by touching these four numbers is shrinking the artwork,
+ * which is the thing this pass was told not to do.
+ */
+describe("the rebalance moved the copy, not the image", () => {
+  it("the grid ratio, the gap, the cap and the gutter are all unchanged", () => {
+    const row = ruleFor(".mk-frow");
+    expect(row, "the image track keeps its share").toMatch(/grid-template-columns:\s*1\.6fr 1fr/);
+    expect(row, "the gap divides the fr tracks — changing it shrinks the image").toMatch(/gap:\s*80px/);
+    const rows = ruleFor(".mk-rows");
+    expect(rows).toMatch(/--mk-rows-cap:\s*1180px/);
+    expect(rows).toMatch(/--mk-rows-gutter:\s*56px/);
+  });
+
+  it("the copy reaches outward inside the bleed's own guard, capped, with a floor", () => {
+    const guards = [...marketing.matchAll(/@supports \(width: 1cqw\) \{([\s\S]*?)\n\}/g)];
+    expect(guards, "still one container-unit guard, shared with the bleed").toHaveLength(1);
+    const pull = /(?:^|\n)\s*\.mk-fcopy\s*\{([^}]*)\}/.exec(guards[0][1]);
+    expect(pull, "the guard holds the pull").toBeTruthy();
+    /* 140px is 520 less the 380px track; the 20px is the gutter it may never eat into, so a narrow
+       screen gets less pull rather than a scrollbar. */
+    expect(pull![1]).toMatch(/--mk-copy-pull:\s*min\(140px,[^;]*100cqw[^;]*20px\)/);
+    expect(pull![1]).toMatch(/(?:^|[;\s])width:\s*calc\(100% \+ var\(--mk-copy-pull\)\)/);
+    expect(pull![1], "against the global img/box reset, as the bleed does").toMatch(/max-width:\s*none/);
+    /* Outward means AWAY from the image, so the side follows the same parity as the flip. */
+    expect(guards[0][1]).toMatch(/\.mk-frow:nth-child\(odd\) \.mk-fcopy\s*\{\s*margin-right:\s*calc\(-1 \* var\(--mk-copy-pull\)\);?\s*\}/);
+    expect(guards[0][1]).toMatch(/\.mk-frow:nth-child\(even\) \.mk-fcopy\s*\{\s*margin-left:\s*calc\(-1 \* var\(--mk-copy-pull\)\);?\s*\}/);
+    const stacking = [...marketing.matchAll(/@media \(max-width: 1080px\) \{([\s\S]*?)\n\}/g)]
+      .find((m) => /(?:^|\n)\s*\.mk-fcopy\s*\{\s*--mk-copy-pull:\s*0px;?\s*\}/.test(m[1]));
+    expect(stacking, "stacked there is no copy side to reach into, zeroed with a unit").toBeTruthy();
   });
 });

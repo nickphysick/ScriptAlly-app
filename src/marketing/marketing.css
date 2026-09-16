@@ -10,6 +10,27 @@
  * All tints are pre-computed hexes — no colour-mix() (repo rule).
  */
 
+/* ⚠️ SELF-HOSTED, NOT HOTLINKED, AND THE LICENCE TRAVELS WITH IT. Archivo — SIL Open Font License
+   1.1, © The Archivo Project Authors — is the only face on this site that is not either a system
+   font or a Google stylesheet link. This is the LATIN subset of the wdth-125 "Expanded" instance,
+   taken from Google's own woff2 and served from public/fonts. Serving a webfont is redistribution
+   under the OFL, so the licence text sits beside the file at public/fonts/OFL.txt; if the file ever
+   moves, that goes with it.
+   ⚠️ 14.5KB, SO NO FURTHER SUBSETTING. The threshold set for this work was ~30KB and the latin
+   subset is half of it. A nine-glyph `text=` subset would be 1.5KB and was refused: it fails
+   SILENTLY, because one changed letter in the wordmark falls back to the system sans with nothing
+   on the page to point at.
+   ⚠️ THE VERSION QUERY IS THE FILE'S OWN md5. Nothing under public/ is fingerprinted by the build,
+   and the preload in index.html names this exact URL — the two must match or the file is fetched
+   twice, once for each spelling. */
+@font-face {
+  font-family: "Archivo Expanded";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/archivo-expanded-700.woff2?v=7b773c44") format("woff2");
+}
+
 /* ⚠️ SCOPED WITH `:has()`, NOT SET GLOBALLY ON `html`. `scroll-behavior` has to sit on the
    scrolling box, and for marketing that is the viewport — but this stylesheet is global once
    loaded, so a bare `html { scroll-behavior: smooth }` would follow the reader into the app. The
@@ -244,10 +265,12 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   max-width: 1300px; margin: 0 auto; transition: padding .2s ease;
 }
 .mk-navwrap.mk-scrolled .mk-nav { padding: 12px 56px; }
-.mk-brand { display: flex; align-items: center; gap: 13px; }
+.mk-brand { display: flex; align-items: center; gap: 12px; }
 .mk-brand-link { cursor: pointer; background: none; border: none; padding: 0; font-family: inherit; }
-.mk-logo { height: 34px; width: auto; display: block; flex: none; transition: height .2s ease; }
-.mk-navwrap.mk-scrolled .mk-logo { height: 29px; }
+.mk-logo { height: 40px; width: auto; display: block; flex: none; transition: height .2s ease; }
+/* The condensed height keeps the same ratio to the full one as before (0.85), so the nav's two
+   states still shrink by the same proportion rather than by a number picked twice. */
+.mk-navwrap.mk-scrolled .mk-logo { height: 34px; }
 /* ⚠️ `.mk-monogram` STAYS, AND DELETING IT BREAKS THE FOOTER. The circled "S" was this nav's mark
    and the only blue on the site — but the SHARED FOOTER renders the same class, and the footer's
    internals are not this pass's to change. It looks orphaned here and is not.
@@ -261,13 +284,24 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 1.62rem;
   letter-spacing: -.012em; color: var(--mk-nearblack); line-height: 1;
 }
+/* ⚠️ THE NAV'S WORDMARK IS THE ONLY ARCHIVO EXPANDED ON THE SITE, AND THE NAV SCOPE IS WHY.
+   `.mk-wordmark` is ALSO the shared footer's wordmark, which keeps Playfair — restyling the bare
+   class would put the display face in both places, and the brief says the nav only.
+   ⚠️ THE CAPS ARE IN THE MARKUP, NOT `text-transform`. What a screen reader announces and what the
+   page draws should be the same string; a CSS transform makes them differ silently.
+   The size is below the Playfair it replaces because a wide grotesque set in caps runs far wider
+   per letter — measured against the nav's collapse budget, not chosen by eye. */
+.mk-nav .mk-wordmark {
+  font-family: "Archivo Expanded", Archivo, system-ui, sans-serif; font-weight: 700;
+  font-size: 1.4rem; letter-spacing: .035em;
+}
 
 /* ⚠️ THE LINKS ARE THE BODY FACE, NOT PLAYFAIR. The display face was tried here and rejected —
    the wordmark is the only Playfair in the bar, which is what makes it read as the brand rather
    than as the first item in a list. */
 .mk-links { display: flex; align-items: center; gap: 30px; }
 .mk-links button, .mk-login {
-  font-family: inherit; font-size: 1.06rem; font-weight: 500; color: var(--mk-ink);
+  font-family: inherit; font-size: 1.15rem; font-weight: 500; color: var(--mk-ink);
   background: none; border: none; cursor: pointer; padding: 4px 0; line-height: 1.2;
   position: relative;
 }
@@ -290,7 +324,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   padding: 6px 22px 18px; background: var(--mk-hero-ground);
 }
 .mk-navpanel button {
-  font-family: inherit; font-size: 1.06rem; font-weight: 500; color: var(--mk-ink);
+  font-family: inherit; font-size: 1.15rem; font-weight: 500; color: var(--mk-ink);
   background: none; border: none; cursor: pointer; text-align: left; padding: 12px 0;
   border-bottom: 1px solid var(--mk-hair);
 }
@@ -325,15 +359,26 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   flex: none;
 }
 
-/* ⚠️ 960, NOT THE 720 THIS TIER USED OR THE 820 THE REF USES — AND IT IS MEASURED, NOT CHOSEN.
-   This pass makes the nav's content substantially wider (wordmark 21px → 1.62rem, links 13px →
-   1.06rem, an ink pill with 24px of side padding), and the four links plus Log in plus the pill
-   now need 831.7px of content width — 943.7 with the gutters. Measured slack against available
-   width: −169 at 721, −130 at 760, −70 at 820, −10 at 880, and only positive from 960.
-   ⚠️ THE 900–940 READINGS SHOW SLACK OF EXACTLY 0, WHICH IS NOT "FITS". Flex was compressing the
-   children to the available width — the tell is the nav standing 88.7px tall there against 88.0
-   from 960 up. A slack of zero across three consecutive widths is a squeeze, not a fit. */
-@media (max-width: 960px) {
+/* ⚠️ 1080, RAISED FROM 960 ON 16 SEP, AND IT IS MEASURED RATHER THAN CHOSEN — AS 960 WAS.
+   The QueryHawk pass widened the brand by about 88px: the mark went 34 → 40px, the wordmark became
+   SCRIPTALLY set in a WIDE grotesque at caps (180.2px of ink where Playfair's mixed case was far
+   narrower), and the links went 1.06 → 1.15rem. The nav's content is now 938px against the 831.7px
+   the 960 boundary was measured for, and that boundary only ever carried 17.3px of slack — so any
+   growth at all breaks it. Measured slack against available width, links showing:
+     961 −71 · 1000 −32 · 1024 −11 · 1050 0 · 1060 +10 · 1080 +30
+   ⚠️ 1050's SLACK OF EXACTLY 0 IS NOT "FITS", AND THIS FILE ALREADY SAYS SO ONCE. Flex compresses
+   the children instead of overflowing, so the tell is the bar's HEIGHT: 92.2px across 961–1050
+   against 88.0 clear of it, with `.mk-brand` rendering 192px against its natural 232px. 1080 is the
+   first value with slack comparable to what 960 used to carry.
+   ⚠️ AND IT COULD NOT BE FIXED BY SHRINKING THE WORDMARK. At 1.15rem the brand still needs ~1020px
+   of viewport, and at 1rem it is still ~20px over 960's budget. The boundary had to move; the only
+   choice was where.
+   ⚠️ 1080 IS ALSO THE ROWS' STACKING BREAKPOINT, SO THIS VALUE NOW HAS TWO BLOCKS. That is this
+   file's norm rather than a slip — 900px has four and 960px has two — and every lock that reads a
+   breakpoint's body already `.find()`s the block it means by a rule inside it. A future one that
+   takes `matchAll(...)[0]` would silently read whichever comes first, which is the first-match
+   fault this file records elsewhere. Find by content, never by position. */
+@media (max-width: 1080px) {
   .mk-nav { padding: 14px 22px; gap: 18px; }
   .mk-navwrap.mk-scrolled .mk-nav { padding: 10px 22px; }
   .mk-links, .mk-login { display: none; }
@@ -343,7 +388,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 }
 
 /* ⚠️ DECLARED AFTER THE 960 BLOCK, AND THAT ORDER IS LOAD-BEARING. Both are single-class media
-   queries at equal specificity, so the LATER one wins — with this above, the 960 rule's
+   queries at equal specificity, so the LATER one wins — with this above, the 1080 rule's
    `--mk-nav-h` for the burger regime overrode this regime's much taller value and the anchor
    offset was wrong by the whole difference on every phone (59px at the values of the day, 53 at
    today's 76 vs 129). Measured, not spotted: the override was live and losing.
@@ -355,9 +400,21 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    ⚠️ SHRINKING THE PILL CANNOT FIX IT. "Start tracking — it's free" needs ~208px at 1rem and
    ~160px even at 0.82rem, against the 144px left once the lockup and burger are placed. The label
    is normative copy, so the row is what gives. Brand and burger share the first row; the CTA
-   takes the second, full width, where it is more tappable than it was squeezed. */
-@media (max-width: 560px) {
+   takes the second, full width, where it is more tappable than it was squeezed.
+   ⚠️ 600, RAISED FROM 560 ON 16 SEP, FOR THE SAME CAUSE AS THE OTHER BOUNDARY. The QueryHawk brand
+   measures 232px where the old lockup was far narrower, so the single-row burger regime ran out of
+   room BEFORE it reached 560: measured slack at 561 was −15px, with `.mk-brand` rendering 217px
+   against its natural 232. Wrapping from 600 restores the margin — slack +24 at 601. */
+@media (max-width: 600px) {
   .mk-nav { flex-wrap: wrap; row-gap: 12px; }
+  /* ⚠️ THE CAPS WORDMARK SHRINKS HERE, OR A 320px PHONE GETS A SCROLLBAR — and that is this exact
+     regression, from this exact cause, arriving a second time. Archivo Expanded set in caps runs
+     about 57% wider per unit of size than the Playfair mixed case it replaced: measured, 180.2px of
+     ink at 22.4px against 114.9px at 25.92px, which took the brand from 164.8px to 232.2px. At 320
+     that pushed the burger onto a row of its OWN — the bar stood 180.8px tall against 128.8 — and
+     overflowed the document by 9px. A/B'd against the committed build, which was 0 at every phone
+     width, so it was introduced here rather than found here. */
+  .mk-nav .mk-wordmark { font-size: 1.05rem; }
   .mk-burger { margin-left: auto; order: 2; }
   .mk-navright { order: 3; width: 100%; margin-left: 0; }
   .mk-navright .mk-btn { width: 100%; justify-content: center; }
@@ -588,12 +645,12 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    column. */
 .mk-frow h3 {
   font-family: "Special Elite", cursive !important; font-weight: 400; color: var(--mk-nearblack);
-  font-size: 38px; line-height: 1.18; letter-spacing: -0.005em; max-width: 13ch;
+  font-size: 44px; line-height: 1.18; letter-spacing: -0.005em; max-width: 13ch;
 }
 .mk-frow h3 .mk-fkeep { white-space: nowrap; font-family: inherit; }
 .mk-fcopy p {
   font-family: "Source Serif 4", Georgia, serif; font-weight: 400; color: var(--mk-nearblack);
-  font-size: 19px; line-height: 1.7; margin-top: 14px; max-width: 460px;
+  font-size: 21px; line-height: 1.7; margin-top: 14px; max-width: 520px;
 }
 /* The illustration at its own ratio: no crop, no frame, no fill — straight onto the band's ground. */
 .mk-rowillo { width: 100%; height: auto; min-width: 0; }
@@ -617,6 +674,28 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   }
   .mk-frow:nth-child(odd) .mk-rowillo { margin-left: calc(-1 * var(--mk-bleed)); }
   .mk-frow:nth-child(even) .mk-rowillo { margin-right: calc(-1 * var(--mk-bleed)); }
+  /* THE COPY COLUMN REACHES OUTWARD; THE IMAGE COLUMN DOES NOT MOVE (16 Sep). A row reads as one
+     centred unit because the copy grows toward the page edge on its OWN side — the mirror of the
+     illustration's bleed above it — rather than by shrinking the image or re-dividing the grid.
+     ⚠️ IT SHARES THE BLEED'S GUARD ON PURPOSE. "One container-unit guard" is a law this file locks,
+     and it is the right one: a second @supports block testing the same condition reads as a second
+     mechanism when this is the same mechanism pointed the other way.
+     ⚠️ THE GRID, THE CAP AND THE GUTTER ARE UNTOUCHED. The image track is still 1.6fr of the same
+     box, so `--mk-bleed` — which reads the cap and the gutter — resolves exactly as it did before,
+     and the illustration keeps both its width and its overflow past the viewport edge. The 80px
+     gap stays for the same reason: changing it re-divides the fr tracks, and the image shrinks.
+     ⚠️ SO THE MIDDLE GAP CLOSES BY LOSING ITS SLACK, NOT BY ANYTHING MOVING INWARD. A flipped row's
+     copy is left-aligned in a track wider than its text, so the spare width piled against the
+     middle — measured 91.4px and 103.2px there against the odd rows' 80. Filling the column
+     empties it.
+     The pull is capped at 140px (the 520px target less the 380px track) and never leaves under
+     20px of gutter, so a narrow screen gets less pull rather than a scrollbar. */
+  .mk-fcopy {
+    --mk-copy-pull: min(140px, max(0px, var(--mk-rows-gutter) + max(0px, (100cqw - var(--mk-rows-cap)) / 2) - 20px));
+    width: calc(100% + var(--mk-copy-pull)); max-width: none;
+  }
+  .mk-frow:nth-child(odd) .mk-fcopy { margin-right: calc(-1 * var(--mk-copy-pull)); }
+  .mk-frow:nth-child(even) .mk-fcopy { margin-left: calc(-1 * var(--mk-copy-pull)); }
 }
 /* ⚠️ EVERY SECOND ROW PUTS ITS IMAGE ON THE RIGHT BY FLIPPING THE GRID'S DIRECTION, not by reordering
    markup: the first track — the 1.6fr image column — then starts from the right. The children are set
@@ -941,8 +1020,23 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   .mk-frow:nth-child(even) { direction: ltr; }
   /* 0px, never a bare 0: calc(100% + 0) is invalid, and an invalid width draws the file's natural 2880px */
   .mk-rowillo { --mk-bleed: 0px; }
-  .mk-frow h3 { font-size: 30px; }
-  .mk-fcopy p { font-size: 17px; }
+  /* Stacked there is no copy side to reach into — one column, both gutters equal. 0px, never a
+     bare 0, for the same reason as the bleed above. */
+  .mk-fcopy { --mk-copy-pull: 0px; }
+  /* ⚠️ CAPPED SO THE HELD PAIR FITS THE NARROWEST PHONE. The heading's last two words are one
+     `nowrap` run, so they cannot break — at 34px the longest of them, "actually working", measures
+     302.9px against a 268px column at 320 and hung 8.9px past the viewport with a real horizontal
+     scrollbar. It was never far off: at the previous 30px it measured 267.3px in that same 268px
+     column, clearing by 0.7px, and at 375 today's 34px clears by 1.1px. A size that fits by a
+     rounding error is not fitting, it is getting away with it.
+     The divisor is the pair's own width in units of font-size (302.9 / 34 = 8.91, rounded up to 9
+     for margin), and 52px is the rows' two 26px gutters — so the size is whatever keeps the run
+     inside the column, and 34px wherever that is not binding: 29.8px at 320, the full 34 from ~360.
+     ⚠️ TWO DECLARATIONS, AND THE ORDER IS THE FALLBACK. A browser without container units drops the
+     second as invalid and keeps the plain 34px; it is written this way rather than behind a second
+     `@supports` because this sheet locks "one container-unit guard" and that is the right law. */
+  .mk-frow h3 { font-size: 34px; font-size: min(34px, calc((100cqw - 52px) / 9)); }
+  .mk-fcopy p { font-size: 18px; }
   .mk-beta { padding-left: 18px; padding-right: 18px; }
   .mk-foot { padding: 30px 26px 40px; flex-wrap: wrap; }
 }
