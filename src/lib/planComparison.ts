@@ -9,10 +9,15 @@
  * pair of surfaces that will eventually disagree about what someone is paying for.
  *
  * ⚠️ THE PRICE IS NOT HERE. It comes from `marketing/landingCopy.PRICING_TIERS`, which is
- * verbatim-locked and currently reads "Price to be confirmed · no payment path yet" — and that is
- * the truth: there is no Stripe, no checkout, and `firestore.rules` denies a client-side plan
- * change as its central guard. `PlansPage`'s £3.99/£35 was a duplicate of a figure nobody could
- * pay, and it is deleted rather than moved.
+ * verbatim-locked and now reads **£4.99 per month** — set 16 Sep, after a year of deliberately
+ * saying "Price to be confirmed" so that no figure could appear before one was decided.
+ *
+ * ⚠️ AND A PRICE IS STILL NOT A PAYMENT PATH. `PRO_PRICE_YEARLY` remains null, there is no Stripe,
+ * no checkout, and `firestore.rules` denies a client-side plan change as its central guard — so
+ * every surface goes on saying Pro is not on sale. Those are two different facts and collapsing
+ * them is how a page starts implying something can be bought. `PlansPage`'s old £3.99/£35 was a
+ * duplicate of a figure nobody could pay, and stays deleted rather than revived now that a real
+ * one exists: one source, read by both tiers.
  *
  * ⚠️ TWO ROWS WERE CLAIMING A GATE THAT DOES NOT EXIST. `GROUPS` listed "Submission package
  * builder" and "Agent matching & community access" as Pro-only. Neither is gated: grep

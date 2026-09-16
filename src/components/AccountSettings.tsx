@@ -1029,7 +1029,13 @@ export const AccountSettings: React.FC<{
 
       <SettingsCard
         heading="What each plan includes"
-        note="Price to be confirmed. Nothing to pay on the Free plan — your invoices will appear here if you move to a paid plan."
+        /* ⚠️ "Price to be confirmed." IS DELETED RATHER THAN UPDATED, AND DELIBERATELY NOT REPLACED
+           WITH THE FIGURE. Pro is £4.99 now, so the old sentence was flatly contradicted by the
+           comparison table directly beneath it — but typing the number here would make this the
+           SECOND hardcoded price on one page, which is the exact fault the table below was built to
+           end ("four statements of what Pro includes, none of them reading the same source"). The
+           table states the price, from the locked constant; this states what a Free user owes. */
+        note="Nothing to pay on the Free plan — your invoices will appear here if you move to a paid plan."
       >
         <div className="sc-row sc-row--full">
           <PlanComparison

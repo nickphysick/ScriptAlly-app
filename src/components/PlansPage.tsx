@@ -148,7 +148,11 @@ const FounderCard: React.FC = () => (
         <div style={{ flexShrink: 0, display: "flex", alignItems: "center" }}>
           <p style={{ fontFamily: "'Caveat', cursive", fontSize: 25, fontWeight: 600, color: burgundy, lineHeight: 1.25, margin: 0 }}>
             Free Pro through beta —<br />
-            <span style={{ color: sageText }}>then locked at half price for life.</span>
+            {/* ⚠️ "for as long as you need it", NOT "for life". The landing banner, /founders and
+                /pricing all say the softer form; this was one of the two surfaces still promising
+                a permanent rate, and one offer worded two ways across two tiers of the app is how
+                a reader starts wondering which one binds. */}
+            <span style={{ color: sageText }}>then half price for as long as you need it.</span>
           </p>
         </div>
         {/* divider */}
@@ -162,7 +166,12 @@ const FounderCard: React.FC = () => (
             {[
               "Full Pro, no card required, throughout beta",
               "A couple of feedback questions now and then + a direct channel",
-              "Permanent founder rate once Pro launches (e.g. 50% for life)",
+              /* ⚠️ THE "e.g. 50%" WENT WITH THE "for life", AND IT WAS THE WORSE OF THE TWO. It is
+                 an invented figure on a page about what something costs — the same class as the
+                 £7/mo and £3.50/mo this repo deliberately refuses to print, and worse for carrying
+                 an "e.g." that reads as an illustration while a reader takes it as the number.
+                 Half price is the rate the other three surfaces state, so this states it too. */
+              "Founder rate once Pro launches — half price, for as long as you need it",
             ].map((b) => (
               <li key={b} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                 <span aria-hidden="true" style={{ color: AMBER, fontFamily: FONT_MONO, fontSize: 13, lineHeight: 1.5, flexShrink: 0 }}>→</span>
@@ -205,10 +214,14 @@ export const PlansPage: React.FC = () => {
           and a four-item feature list each — above a separate `GROUPS` matrix with a THIRD list of
           features. Four statements of what Pro includes, on one page, none of them reading the
           same source.
-          ⚠️ AND THE PRICE WAS FICTION. There is no Stripe, no checkout, and `firestore.rules`
-          denies a client-side plan change as its central guard; the locked marketing copy has said
-          "Price to be confirmed · no payment path yet" the whole time. The figure is deleted
-          rather than moved.
+          ⚠️ AND THE PRICE THAT STOOD HERE WAS FICTION. The £3.99/£35 was a figure nobody could
+          pay, invented for a card. It stays deleted rather than revived now that a REAL one exists
+          (£4.99, set 16 Sep in the locked marketing copy): the point was never that there was no
+          price, it was that this page must not be a second place one is typed.
+          ⚠️ AND A PRICE IS STILL NOT A PAYMENT PATH. There is no Stripe, no checkout, and
+          `firestore.rules` denies a client-side plan change as its central guard, so every surface
+          goes on saying Pro is not on sale. Two different facts; collapsing them is how a page
+          starts implying something can be bought.
           No `onSeePlans` here — the CTA would point at this page, so the slot states the tier's
           own locked action word. */}
       <div style={{ marginBottom: 20 }}>

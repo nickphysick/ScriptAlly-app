@@ -63,13 +63,17 @@ const Column: React.FC<{
         {current && <span className="plc-chip" style={{ fontFamily: FONT_MONO }}>{CURRENT_PLAN_CHIP}</span>}
       </div>
 
-      {/* ⚠️ THE PRICE IS THE LOCKED MARKETING COPY'S, WORD FOR WORD. Today that is "Price to be
-          confirmed", with its own note saying there is no payment path — and the card must never
-          be the one surface in the app quoting a figure nobody can pay. */}
+      {/* ⚠️ THE PRICE IS THE LOCKED MARKETING COPY'S, WORD FOR WORD. Today that is £4.99 a month,
+          set 16 Sep; for the year before it, "Price to be confirmed". The rule is unchanged by the
+          figure arriving and is the reason this reads `tier.price` rather than holding its own:
+          this card must never be a SECOND place a price is typed, because the day the two disagree
+          nobody can tell which one a reader was shown. */}
       <p className="plc-price" style={{ fontFamily: FONT_SERIF, color: bodyInk }}>{tier.price}</p>
       {/* ⚠️ THE NOTE'S LINE IS RESERVED IN BOTH COLUMNS, EVEN WHEN EMPTY — the same rule as the CTA
-          slot below, and the one I missed first time. Only Pro carries a note today ("no payment
-          path yet"), and rendering it conditionally pushed the Pro column's rows 16.75px down:
+          slot below, and the one I missed first time. NO tier carries a note now: `priceNote` was
+          Pro's "no payment path yet" and it is `undefined` since the price was set, so the reserved
+          line is doing its whole job invisibly and is easier than ever to delete as dead weight.
+          When it did render, conditionally, it pushed the Pro column's rows 16.75px down:
           browser-measured, every row offset by exactly the note's height, so the two feature lists
           could not be read across. The heights of the rows themselves were already identical — it
           was one optional line above them that sheared the lot. */}
