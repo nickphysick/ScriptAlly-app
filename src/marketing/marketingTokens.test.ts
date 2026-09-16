@@ -155,59 +155,12 @@ describe("two surfaces, and the step between them is real", () => {
     expect(rule![1]).not.toMatch(/border/);
   });
 });
-
-/**
- * ⚠️ THE CONTAINER-CAP PRE-CHECK, AS A TEST RATHER THAN AS A HABIT. A `clamp(min, Nvw, max)` must
- * reach its ceiling at or BEFORE the container it sits in stops growing. Past the cap the measure
- * is frozen, so anything still climbing is type growing against a fixed column — invisible at the
- * width a ref was drawn at, and the reason the landing statement broke to three lines at 1440
- * while holding two at 1280.
- *
- * This has now decided five numbers in this project (the statement's 5rem → 3.65rem → 3rem, the
- * lede's constant, `.mk-turn-b`'s 1.7rem, About's mission 2.65rem). It is one division —
- * `max / N` against the cap — so it belongs in a lock, not in a paragraph someone has to
- * remember to re-read.
- *
- * ⚠️ IT ASSERTS THE RELATION, NOT THE VALUES. Pinning "3rem" and "1300" would go red on every
- * legitimate redesign and train the next person to rebaseline it without reading it; pinning the
- * relation stays true through any redesign that is correct and fails every one that is not.
- */
-describe("every viewport-scaled clamp reaches its ceiling before its container stops growing", () => {
-  /** `max-width` of the box each token's text is measured inside. */
-  const CONTAINERS: Record<string, { selector: string; token: string }> = {
-    "--mk-hero-h1": { selector: ".mk-heroinner", token: "--mk-hero-h1" },
-  };
-
-  /** The `max-width` a selector declares, in px. */
-  const capOf = (selector: string) => {
-    const m = /max-width\s*:\s*([\d.]+)px/.exec(ruleFor(selector));
-    expect(m, `${selector} declares a px max-width`).toBeTruthy();
-    return parseFloat(m![1]);
-  };
-
-  /** The viewport width at which `clamp(min, Nvw, max)` first reaches `max`. */
-  const ceilingReachedAt = (token: string) => {
-    const raw = value(marketing, token);
-    expect(raw, `${token} is declared`).toBeTruthy();
-    const m = /clamp\(\s*[\d.]+rem\s*,\s*([\d.]+)vw\s*,\s*([\d.]+)rem\s*\)/.exec(raw!);
-    expect(m, `${token} is a clamp(min, Nvw, max)`).toBeTruthy();
-    const vw = parseFloat(m![1]);
-    const maxPx = parseFloat(m![2]) * 16;
-    return maxPx / (vw / 100);
-  };
-
-  for (const [name, { selector, token }] of Object.entries(CONTAINERS)) {
-    it(`${name} tops out inside ${selector}'s cap`, () => {
-      const reached = ceilingReachedAt(token);
-      const cap = capOf(selector);
-      expect(
-        reached,
-        `${name} reaches its ceiling at ${Math.round(reached)}px, past ${selector}'s ${cap}px cap — ` +
-        `between those widths the type grows against a frozen measure`,
-      ).toBeLessThanOrEqual(cap);
-    });
-  }
-});
+/* ⚠️ THE CONTAINER-CAP LOCK IS RETIRED WITH ITS LAST SUBJECT (16 Sep). It ran the arithmetic for
+   `--mk-hero-h1`, the statement hero's headline: a `clamp(min, Nvw, max)` whose ceiling is reached
+   past its container's cap grows type against a frozen measure. The rebuilt hero sizes from its own
+   container instead, and no viewport-scaled clamp on this page sets type inside a capped box any
+   more, so the table had nothing left in it. The law still stands and is recorded in CLAUDE.md —
+   reinstate this describe the moment a `vw` clamp goes back inside a capped container. */
 
 /**
  * ⚠️ EVERY `var(--mk-…)` THIS SHEET READS MUST RESOLVE TO A DECLARATION — the missing-custom-
@@ -274,6 +227,80 @@ describe("the founding band is the lower surface's only repaint", () => {
 });
 
 /**
+ * ⚠️ THE HERO IS TWO EQUAL COLUMNS AND ONE DELIBERATE OVERFLOW (brief, 16 Sep). The shadow is wider
+ * than its own column and pushed further right, so the only thing keeping it off the document's
+ * scroll width is the hero's own clip — that pairing is the lock, because either half alone is a
+ * horizontal scrollbar or a cropped column.
+ *
+ * ⚠️ AND THE HEADLINE'S FAMILY IS !important FOR THE SAME REASON THE FEATURE HEADINGS' IS: brand.tsx
+ * injects a rule at runtime that gives every bare h1, h2 and h3 the brand heading font with
+ * !important. Two classes outrank its `h1:not(.wsh-title)`; a normal declaration would not.
+ */
+describe("the hero is two columns, and its shadow overflows on purpose", () => {
+  it("two equal columns, centred, clipped, and measured against itself", () => {
+    const hero = ruleFor(".mk-hero");
+    expect(hero).toMatch(/grid-template-columns:\s*1fr 1fr/);
+    expect(hero).toMatch(/align-items:\s*center/);
+    expect(hero, "the clip is what makes the overflow safe").toMatch(/overflow:\s*hidden/);
+    expect(hero, "the headline sizes against the hero, never the viewport").toMatch(/container-type:\s*inline-size/);
+    expect(hero).toMatch(/min-height:\s*660px/);
+    expect(ruleFor(".mk-herocopy")).toMatch(/padding:\s*0 40px 0 80px/);
+  });
+
+  it("the art fills its column and the image leaves it", () => {
+    expect(ruleFor(".mk-heroart")).toMatch(/height:\s*100%/);
+    const img = ruleFor(".mk-heroart img");
+    expect(img).toMatch(/position:\s*absolute/);
+    expect(img).toMatch(/right:\s*-14%/);
+    expect(img).toMatch(/width:\s*118%/);
+    expect(img, "the global image reset would cancel the 118% in silence").toMatch(/max-width:\s*none/);
+    expect(img).toMatch(/opacity:\s*0?\.20/);
+  });
+
+  it("the headline: Special Elite 400, important, on the brief's 11ch measure", () => {
+    const h1 = ruleFor(".mk-hero .mk-herotitle");
+    expect(h1).toMatch(/font-family:\s*"Special Elite", cursive !important/);
+    expect(h1).toMatch(/font-weight:\s*400/);
+    expect(h1, "56px, stepping down only to keep the held pair in its column").toMatch(/font-size:\s*min\(56px,/);
+    expect(h1).toMatch(/line-height:\s*1\.14/);
+    expect(h1).toMatch(/letter-spacing:\s*-0\.01em/);
+    expect(h1).toMatch(/max-width:\s*11ch/);
+    expect(h1).toMatch(/color:\s*var\(--mk-nearblack\)/);
+    expect(ruleFor(".mk-hero .mk-herotitle .mk-hkeep")).toMatch(/white-space:\s*nowrap/);
+    expect(ruleFor(".mk-hero .mk-herotitle .mk-hkeep"), "…in the heading's own family").toMatch(/font-family:\s*inherit/);
+  });
+
+  it("the sub and the two actions carry their own family, because the injection sets theirs", () => {
+    const sub = ruleFor(".mk-herosub");
+    expect(sub).toMatch(/font-family:\s*"Source Serif 4", Georgia, serif/);
+    expect(sub).toMatch(/font-size:\s*20px/);
+    expect(sub).toMatch(/line-height:\s*1\.7/);
+    expect(sub).toMatch(/max-width:\s*480px/);
+    expect(sub).toMatch(/color:\s*var\(--mk-nearblack\)/);
+    const pill = ruleFor(".mk-heropill");
+    expect(pill).toMatch(/font-family:\s*"Source Serif 4"/);
+    expect(pill).toMatch(/background:\s*var\(--mk-nearblack\)/);
+    expect(pill).toMatch(/border-radius:\s*30px/);
+    expect(pill).toMatch(/padding:\s*16px 30px/);
+    const link = ruleFor(".mk-herolink");
+    expect(link).toMatch(/font-family:\s*"Source Serif 4"/);
+    expect(link).toMatch(/text-underline-offset:\s*5px/);
+    expect(ruleFor(".mk-heroctas")).toMatch(/gap:\s*22px/);
+  });
+
+  it("stacked, the copy comes first and the shadow sits behind it", () => {
+    const block = [...marketing.matchAll(/@media \(max-width: 900px\) \{([\s\S]*?)\n\}/g)]
+      .find((m) => /\.mk-hero\s*\{/.test(m[1]));
+    expect(block, "a 900px block stacks the hero").toBeTruthy();
+    expect(block![1]).toMatch(/grid-template-columns:\s*1fr/);
+    expect(block![1], "the copy takes a context of its own so the words stay above the shadow")
+      .toMatch(/\.mk-herocopy\s*\{[^}]*z-index:\s*1/);
+    expect(block![1], "the shadow is behind the copy, not beneath it").toMatch(/\.mk-heroart\s*\{[^}]*position:\s*absolute/);
+    expect(block![1]).toMatch(/\.mk-heroart img\s*\{\s*opacity:\s*0?\.12/);
+  });
+});
+
+/**
  * ⚠️ `align-items` ON A GRID IS A ROW DEFAULT; PER-ITEM ALIGNMENT BELONGS ON THE ITEM. The hero
  * needs `start` for the copy column and `center` for the artwork, and the way to get both is one
  * container default plus one `align-self` override — not a container set to `center` and the copy
@@ -286,47 +313,6 @@ describe("the founding band is the lower surface's only repaint", () => {
  */
 describe("the hero grid aligns per item, and overlaps by construction", () => {
   const rule = ruleFor;
-
-  it("the container states the row default and the artwork overrides it on itself", () => {
-    expect(rule(".mk-heroinner")).toMatch(/align-items:\s*start/);
-    const art = rule(".mk-hero .mk-illo--tall");
-    expect(art).toMatch(/align-self:\s*center/);
-    /* The container must NOT be the thing that centres — that would move the copy column too. */
-    expect(rule(".mk-heroinner")).not.toMatch(/align-items:\s*center/);
-  });
-
-  /**
-   * ⚠️ RETARGET, AND THE CLAIM NARROWS RATHER THAN RELAXES. The rule was "no negative margin
-   * anywhere in the hero", written when one would only ever have been faking an alignment the
-   * layout should produce. The artwork now carries `margin-right: -56px` DELIBERATELY: it is the
-   * bleed itself, cancelling the container's own 56px gutter so the plate reaches the page edge.
-   * That is the effect, not a substitute for it.
-   *
-   * So the text items keep the absolute prohibition, and the plate is allowed exactly one — a
-   * right margin that equals the gutter it cancels. A different value, or a negative margin on any
-   * other side, is back to faking.
-   */
-  it("no text item in the hero fakes the layout with a negative margin", () => {
-    for (const sel of [".mk-heroinner", ".mk-hcopy", ".mk-statement", ".mk-statementrow", ".mk-turn"]) {
-      expect(rule(sel), `${sel} uses no negative margin`).not.toMatch(/margin[^:]*:\s*[^;]*-\d/);
-    }
-  });
-
-  /**
-   * ⚠️ THE ISOLATION AND THE NEGATIVE Z ARE ONE MECHANISM AND FAIL TOGETHER. The burst is
-   * `z-index: -1` so it tucks behind the headline; a negative-z child paints behind the
-   * BACKGROUNDS of every ancestor up to the nearest stacking context, so without `isolation` on
-   * the row it sinks behind the hero's own ground and disappears — the rule applying perfectly
-   * and nothing painted, which is the marketing halo's fault exactly.
-   *
-   * Asserted as a PAIR rather than as two properties, because either one alone is meaningless
-   * and someone removing the isolation as an unused declaration is the way this breaks.
-   */
-  it("the burst's negative z-index is paired with a stacking context to live in", () => {
-    expect(rule(".mk-heroburst"), "the burst tucks behind the words").toMatch(/z-index:\s*-1/);
-    expect(rule(".mk-statementrow"), "…and the row gives it a context to be behind them IN")
-      .toMatch(/isolation:\s*isolate/);
-  });
 
   /**
    * ══════════════ One class, one surface ══════════════
@@ -387,7 +373,7 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
    * The hero's rules are not contiguous, and a positional slice over a file that does not group
    * by feature answers a question nobody asked.
    */
-  it("…and the whole sheet's negative margins are the seven that are meant to be there", () => {
+  it("…and the whole sheet's negative margins are the four that are meant to be there", () => {
     const owners = new Set<string>();
     for (const m of marketing.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)) {
       if (/margin[^:]*:\s*[^;]*-\d/.test(m[2])) m[1].split(",").forEach((x) => owners.add(x.trim()));
@@ -397,39 +383,10 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
          — the plate's kind, one margin for each side of the alternation */
       ".mk-frow:nth-child(even) .mk-rowillo",
       ".mk-frow:nth-child(odd) .mk-rowillo",
-      /* the plate, bleeding past the container's own gutter to the page edge */
-      ".mk-hero .mk-illo--tall",
-      /* the burst, pulled back over the headline's last word */
-      ".mk-heroburst",
       /* both sentinels cancel their own height so they occupy no space */
       ".mk-navsentinel--condense",
       ".mk-navsentinel--release",
-      /* the highlighter stroke reaches past the text it marks */
-      ".mk-turn-lead",
     ]);
-  });
-
-  it("…and the plate's one negative margin is exactly the gutter it cancels", () => {
-    const art = rule(".mk-hero .mk-illo--tall");
-    const gutter = /padding:\s*0\s+(\d+)px/.exec(rule(".mk-heroinner"));
-    expect(gutter, ".mk-heroinner declares a horizontal padding").toBeTruthy();
-    const m = /margin-right:\s*-(\d+)px/.exec(art);
-    expect(m, "the plate declares a negative right margin").toBeTruthy();
-    expect(m![1], "the bleed must equal the gutter, or it is not a bleed").toBe(gutter![1]);
-    /* …and nothing else negative on it. */
-    expect(art).not.toMatch(/margin-(top|bottom|left)[^:]*:\s*-\d/);
-  });
-
-  /**
-   * ⚠️ THE ARTWORK PASSES BEHIND THE WORDS, AND THE LAYERING IS THE GUARANTEE RATHER THAN THE
-   * EFFECT. Measured, the plate does not currently reach the headline — its top sits ~54px below
-   * the statement's bottom at 1440. Remove the z-indexes and a taller asset, or a shorter copy
-   * column, silently prints artwork over the largest text on the site.
-   */
-  it("the words are layered above the artwork", () => {
-    expect(rule(".mk-statement")).toMatch(/z-index:\s*2/);
-    expect(rule(".mk-hcopy")).toMatch(/z-index:\s*2/);
-    expect(rule(".mk-hero .mk-illo--tall")).toMatch(/z-index:\s*1/);
   });
 
   /**
@@ -437,24 +394,6 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
    * never overlaps: leaving a two-column template on a one-column grid pushes every `"x x"` row
    * into an implicit SECOND column, and nothing errors.
    */
-  /**
-   * ⚠️ RETARGET, SAME LAW: the hero places every item by hand now, because the artwork spans rows
-   * and a named area cannot overlap another item's. So the thing that must collapse with the
-   * columns is the PLACEMENTS, not a template. An item left at `grid-column: 2` on a one-column
-   * grid is pushed into an implicit second column and the grid grows sideways in silence — the
-   * same auto-placement trap, reached by a different route.
-   */
-  it("the stacked hero collapses its placements as well as its columns", () => {
-    const block = /@media \(max-width: 900px\) \{([\s\S]*?)\n\}/.exec(marketing);
-    expect(block, "the 900px block exists").toBeTruthy();
-    expect(block![1]).toMatch(/grid-template-columns:\s*1fr/);
-    /* Every item the two-column grid places by hand is put back into column 1. */
-    for (const sel of [".mk-statement", ".mk-hcopy", ".mk-turn", ".mk-found"]) {
-      expect(block![1], `${sel} returns to column 1 when stacked`).toContain(sel);
-    }
-    /* And the areas are gone entirely — a stale template is worse than none. */
-    expect(marketing).not.toContain("grid-template-areas");
-  });
 });
 
 /**
@@ -529,7 +468,7 @@ describe("every specific rule on /founders outranks the generic one beside it", 
  * measure in the sheet and be the one place that must not be.
  */
 describe("measures that must track their type are expressed in `em`", () => {
-  const IN_EM = [".mk-turn", ".mk-fwhonest .mk-fwlead", ".mk-frow h3"];
+  const IN_EM = [".mk-fwhonest .mk-fwlead", ".mk-frow h3"];
 
   it("each is declared with a max-width in `em` or `ch`, never `rem` or `px`", () => {
     for (const sel of IN_EM) {
@@ -608,7 +547,7 @@ describe("no base selector states the same property twice", () => {
 
   it("the hero and the panel are clean without exemption", () => {
     const mine = Object.keys(repeats())
-      .filter((s) => /^\.mk-(hero|hcopy|statement|turn|illo|found|fm)/.test(s));
+      .filter((s) => /^\.mk-(hero|illo|fm)/.test(s));
     expect(mine).toEqual([]);
   });
 });
@@ -697,8 +636,11 @@ describe("the feature rows set their own type, and nothing else uses its familie
   it("no other rule, stylesheet or component names either family", () => {
     const ruleOwners = (family: string) => [...marketing.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
       .filter((m) => m[2].includes(family)).map((m) => m[1].trim());
-    expect(ruleOwners("Special Elite")).toEqual([".mk-frow h3"]);
-    expect(ruleOwners("Source Serif 4")).toEqual([".mk-fcopy p"]);
+    /* ⚠️ THE HERO NAMES BOTH FAMILIES TOO SINCE 16 SEP, so this is no longer "exactly one rule" —
+       it is exactly these rules. Sorted, because the assertion is the SET of owners rather than the
+       order they happen to appear in the sheet. */
+    expect(ruleOwners("Special Elite").sort()).toEqual([".mk-frow h3", ".mk-hero .mk-herotitle"]);
+    expect(ruleOwners("Source Serif 4").sort()).toEqual([".mk-fcopy p", ".mk-herolink", ".mk-heropill", ".mk-herosub"]);
     const src = resolve(here, "..");
     const walk = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
       d.isDirectory() ? walk(resolve(dir, d.name))

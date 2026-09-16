@@ -32,7 +32,7 @@ import { AboutPage } from "./AboutPage";
 import { ContactPage } from "./ContactPage";
 import { FoundersPage } from "./FoundersPage";
 import { LEGAL_COPY_REVIEWED } from "./legalCopy";
-import { HERO_H1, FEATURE_ROWS } from "./landingCopy";
+import { HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK, FEATURE_ROWS } from "./landingCopy";
 import { SUPPORT_EMAIL } from "../lib/companyInfo";
 import { sliceBetween } from "../test/sliceBetween";
 
@@ -46,7 +46,7 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
      tick inside a `nowrap` span, so the full sentence is no longer one uninterrupted run of text
      in the markup. That the sentence still reads whole is a stronger claim than a landmark can
      make, and it is asserted below against the h1's stripped text. */
-  ["/", () => <Landing onNavigate={noNavigate} />, "You&#x27;ve written a"],
+  ["/", () => <Landing onNavigate={noNavigate} />, "A bird&#x27;s-eye view"],
   /* Retarget, same law: the page is three tiers now and its h1 changed with them. */
   ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "Pick the plan that fits"],
   /* Retarget, same law: the mission statement replaced the old About headline as this page's h1. */
@@ -355,133 +355,91 @@ describe("the nav's condense is triggered by sentinels ahead of the nav", () => 
 });
 
 /**
- * ⚠️ THE HEADLINE IS SPLIT IN THE COMPONENT AND MUST NOT BE EDITED BY THE SPLIT. `HERO_H1` stays
- * one locked string; `Hero` cuts it at its last space so the final word and the ticked box can be
- * bound into one unbreakable unit. The risk that buys is a silent copy change — a dropped space, a
- * lost full stop — which no verbatim lock on the constant can see, because the constant is still
- * right. So this reads the RENDERED h1, strips the markup, and requires the sentence back.
+ * ⚠️ THE HERO IS A HEADLINE, A SUB AND TWO ACTIONS (brief, 16 Sep). `HERO_H1` stays one locked
+ * string; `Hero` cuts it at its second-to-last space so the final two words can be held on one line
+ * at the brief's 11ch measure. The risk that buys is a silent copy change — a dropped space, a lost
+ * apostrophe — which no verbatim lock on the constant can see, because the constant is still right.
+ * So this reads the RENDERED h1, strips the markup, and requires the sentence back.
  *
- * The mark's placement — that it sits on the same line as the last word at every width, and that
- * the row clears the column — is a rendered-page claim and is measured, not read out of a file.
+ * Where the lines break, and that the held pair stays inside its column, are rendered-page claims
+ * and are measured rather than read out of a file.
  */
-/**
- * ⚠️ THE TICKED BOX IS GONE AND THE HEADLINE IS ONE STRING AGAIN. It was split at its last space so
- * the final word and the mark could be bound in a `nowrap` span; with no mark there is nothing to
- * bind, so `.mk-tickword`, `STATEMENT_HEAD` and `STATEMENT_TAIL` all went with it.
- *
- * The claim that survives is the one that mattered throughout: the headline reads as the whole
- * sentence. It used to need markup-stripping because of the split — it does not now, which is why
- * the assertion gets simpler rather than disappearing.
- */
-describe("the statement", () => {
+describe("the hero", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
   const heading = () => {
-    const m = html().match(/<h1[^>]*class="[^"]*mk-statement[^"]*"[^>]*>([\s\S]*?)<\/h1>/);
-    expect(m, "the hero renders an h1.mk-statement").toBeTruthy();
+    const m = html().match(/<h1[^>]*class="[^"]*mk-herotitle[^"]*"[^>]*>([\s\S]*?)<\/h1>/);
+    expect(m, "the hero renders an h1.mk-herotitle").toBeTruthy();
     return m![1];
   };
+  const unesc = (s: string) => s.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
 
-  it("reads as the whole sentence, with no markup inside it", () => {
+  it("reads as the whole sentence, with its last two words held together", () => {
     const h = heading();
-    expect(h).not.toContain("<");
-    expect(h.replace(/&#x27;/g, "'")).toBe(HERO_H1);
+    expect(unesc(h.replace(/<[^>]+>/g, "")), "word for word").toBe(HERO_H1);
+    const held = HERO_H1.split(" ").slice(-2).join(" ");
+    expect(h, "the held run is exactly the last two words").toContain('<span class="mk-hkeep">' + held + "</span>");
   });
 
-  /** ⚠️ Asserting the ABSENCE is what stops the mark and its binding returning from a diff. */
-  it("carries no mark and no binding span", () => {
+  it("carries the sub and both actions, and the shadow is decorative", () => {
     const h = html();
-    expect(h).not.toMatch(/["\s`]mk-tick["\s`]/);
-    expect(h).not.toMatch(/["\s`]mk-tickword["\s`]/);
-    expect(h).not.toContain("hero-tick-placeholder");
+    expect(h).toContain(HERO_SUB);
+    expect(h).toContain(HERO_CTA);
+    expect(h).toContain(HERO_LINK);
+    expect(h, "the link is an in-page jump to the section break").toContain('href="#pulse"');
+    expect(h, "an empty alt, because the shadow says nothing the copy does not").toMatch(/<img[^>]*src="\/images\/hawk-shadow\.png\?v=[0-9a-f]{8}"[^>]*alt=""/);
+  });
+
+  /**
+   * ⚠️ AN IMAGE REPLACED UNDER THE SAME FILENAME MUST NOT BE SERVED FROM A CACHE — the same rule the
+   * feature illustrations carry. Nothing under public/ is fingerprinted and prod hosting lets a
+   * browser keep a file for an hour, so the URL carries the first eight hex digits of the file's md5.
+   */
+  it("versions the shadow's URL by the file's own content", () => {
+    const here = dirname(fileURLToPath(import.meta.url));
+    const png = readFileSync(resolve(here, "../../public/images/hawk-shadow.png"));
+    const version = createHash("md5").update(png).digest("hex").slice(0, 8);
+    expect(png.toString("latin1", 12, 16), "the header was read").toBe("IHDR");
+    expect(html()).toContain('src="/images/hawk-shadow.png?v=' + version + '"');
+  });
+
+  /** ⚠️ Asserting the ABSENCE is what stops the statement hero returning from a diff. */
+  it("carries none of the statement hero it replaced", () => {
+    const h = html();
+    for (const gone of ["mk-statement", "mk-heroburst", "mk-slip", "mk-lede", "mk-turn", "mk-found", "mk-illoart"]) {
+      expect(h, `${gone} is retired`).not.toMatch(new RegExp('["\\s`]' + gone + '["\\s`]'));
+    }
+    expect(h).not.toContain("You&#x27;ve written a book.");
+    expect(h).not.toContain("Introducing ScriptAlly");
   });
 });
 
-describe("the founding sign-up — one component, mounted more than once", () => {
+/**
+ * ⚠️ THE SIGN-UP LEFT THE HERO WITH THE PANEL THAT HELD IT, AND THE PAGE STILL HAS ONE. The form is
+ * unchanged and mounted twice across the site — the sealed band at the foot of this page, and
+ * `/founders` — so the landing carries exactly one, and the hero's solid button is the way to the
+ * other. Counting the mounts is the claim: two would put two different asks on one page again.
+ */
+describe("the founding sign-up — one on the landing, in the band", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
 
-  it("the hero's panel is the page's action, and the CTA band is gone", () => {
+  it("one form, and it is the band's", () => {
     const h = html();
-    expect(h).toContain("Get involved");
-    expect(h).toContain("100 Founding Writers");
+    expect(h.match(/mk-trap/g) ?? [], "one honeypot, so one form").toHaveLength(1);
+    expect(h).toContain("Claim your place");
+    expect(h, "the panel's own ask went with it").not.toContain("Claim your spot");
     expect(h).toContain("Founding members");
     expect(h).toContain("Be one of the first hundred.");
-    expect(h).not.toMatch(/["\s`]mk-ctaband["\s`]/);
-    expect(h).not.toContain("Free to start. Take control of your querying journey today.");
   });
 
-  /**
-   * ⚠️ THE HERO'S OLD ACTIONS ROW IS GONE, BOTH HALVES. `Start tracking — it's free` left because
-   * pre-launch nothing self-serve sits behind it; `Learn more` left with the row it shared. A
-   * hero with a real offer and an in-page anchor competing three inches below it is the shape
-   * this replaced.
-   */
-  it("neither half of the old actions row survives on the page", () => {
+  it("the hero points at the offer rather than asking for an address", () => {
     const h = html();
-    /* ⚠️ THE FULL LABEL, NOT THE PREFIX. "Start tracking" on its own is still legitimate copy on
-       this page — three feature rows use it as their action — so a substring check goes red on a
-       correct page. The claim is about the HERO's CTA, which is the whole string. */
-    expect(h).not.toContain("Start tracking — it&#x27;s free");
-    expect(h).not.toMatch(/["\s`]mk-hctas["\s`]/);
-    expect(h).not.toMatch(/["\s`]mk-learn["\s`]/);
-    expect(h).not.toContain("Learn more");
-  });
-
-  /**
-   * ⚠️ THE PERKS ARE ONE ROW AT >=1280 AND THE WORDING IS LENGTH-CONSTRAINED BECAUSE OF IT — each
-   * item is `nowrap`, so a longer phrase does not shrink, it drops the row to two lines. This
-   * pins the three phrases; the ROW's fit is a rendered-page claim and is measured.
-   */
-  /**
-   * ⚠️ RETARGETED, AND THE LAW IT ASSERTS IS THE SAME ONE: three perks on ONE ROW. What changed is
-   * the width available to hold them. This lock used to pin the SHORTENED first perk ("6 months
-   * free Pro"), because at 512px the panel could not fit the full phrasing; the panel is now its
-   * own 48rem row beneath the turn, so the full wording fits and the abbreviation was costing
-   * clarity for nothing. The constraint did not go away — it moved — so the one-row measurement at
-   * 1280 and 1180 is still the gate, and anyone narrowing the panel re-measures before shortening
-   * the copy again.
-   */
-  it("three perks, in their full wording — the row is wide enough for it now", () => {
-    const h = html();
-    expect(h).toContain("Six months&#x27; free Pro access");
-    expect(h).toContain("Half price for life");
-    expect(h).toContain("A direct line to the founder");
-    expect(h).not.toContain("6 months free Pro");
-  });
-
-  /**
-   * ⚠️ THE PERKS ARE READ BEFORE THE ASK IS MADE. They used to sit under the form, which put the
-   * reason to sign up after the thing to sign up with. Asserted by ORDER in the rendered document,
-   * because a lock that merely finds both strings cannot tell which comes first.
-   */
-  it("the perks come above the form", () => {
-    const h = html();
-    const perks = h.indexOf("mk-fmperks");
-    const form = h.indexOf("mk-fmrow");
-    expect(perks, "the perks list renders").toBeGreaterThan(-1);
-    expect(form, "the form row renders").toBeGreaterThan(-1);
-    expect(perks).toBeLessThan(form);
-  });
-
-  /**
-   * ⚠️ THE WAY THROUGH SITS INSIDE THE FORM'S ROW AND LEAVES WITH IT. It used to be pinned to the
-   * panel's bottom-right corner with `position: absolute`, which is why the panel carried bottom
-   * padding whose only job was to keep the tally out from under it. Both are gone.
-   */
-  it("`How it works` is inside the form's row, not pinned beneath the counter", () => {
-    const h = html();
-    const row = h.indexOf("mk-fmrow");
-    const learn = h.indexOf("mk-fmlearn");
-    const count = h.indexOf("mk-fmcount");
-    expect(learn, "the link renders").toBeGreaterThan(row);
-    /* No counter renders before a real figure comes back, so this is an absence either way — the
-       assertion is that the link is not AFTER it, which is where the pinned version sat. */
-    expect(count === -1 || learn < count).toBe(true);
-  });
-
-  it("the panel's button asks for a spot; the band's asks for a place", () => {
-    const h = html();
-    expect(h).toContain("Claim your spot");
-    expect(h).toContain("Claim your place");
+    expect(h).toContain(HERO_CTA);
+    for (const gone of ["mk-fmperks", "mk-fmrow", "mk-fmlearn", "mk-found-panel"]) {
+      expect(h, `${gone} is retired`).not.toMatch(new RegExp('["\\s`]' + gone + '["\\s`]'));
+    }
+    expect(h).not.toContain("Get involved");
+    expect(h).not.toContain("100 Founding Writers");
+    expect(h).not.toContain("How it works");
   });
 
   it("renders no counter and no number, because there is no count yet", () => {
@@ -494,16 +452,38 @@ describe("the founding sign-up — one component, mounted more than once", () =>
   });
 
   /**
+   * ⚠️ THE PERKS ARE STILL LOCKED, ON THE PAGE THAT STILL RENDERS THEM. They were the hero panel's
+   * three lines and `PRICING_TIERS` spreads them into the founding tier, so /pricing is where the
+   * wording now has to hold — moved rather than deleted, because the constant did not go.
+   */
+  it("the founding perks, in full, on the pricing page", () => {
+    const h = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
+    expect(h).toContain("Six months&#x27; free Pro access");
+    expect(h).toContain("Half price for life");
+    expect(h).toContain("A direct line to the founder");
+    expect(h).not.toContain("6 months free Pro");
+  });
+});
+
+  /**
    * ⚠️ TWO MOUNTS ON ONE PAGE, AND THEIR IDS MUST DIFFER. `<label for>` and `aria-describedby`
    * resolve to whichever element comes first in the document, so a shared id would silently point
    * the second form's label at the first form's field — and duplicate ids are invalid HTML
    * besides. `idPrefix` is what stops it, and this is the assertion that says so.
    */
+/**
+ * ⚠️ THE LANDING CARRIES ONE SIGN-UP AND THESE ARE ITS CLAIMS. They were written when the hero held a
+ * second mount and they outlived it: ids and labels are still per-mount, because `/founders` renders
+ * the form twice on one document and the primitive is shared.
+ */
+describe("the sign-up the landing does carry", () => {
+  const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
+
   it("every sign-up on the page has its own ids and its own label", () => {
     const h = html();
     const ids = [...h.matchAll(/<input[^>]*id="([^"]+)"[^>]*type="email"/g)].map((m) => m[1]);
-    expect(ids.length, "the landing carries two sign-ups").toBe(2);
-    expect(new Set(ids).size, `ids collide: ${ids.join(", ")}`).toBe(2);
+    expect(ids.length, "the landing carries one sign-up — the band's").toBe(1);
+    expect(new Set(ids).size, `ids collide: ${ids.join(", ")}`).toBe(1);
     for (const id of ids) {
       const label = h.match(new RegExp(`<label[^>]*for="${id}"[^>]*>([^<]*)<`));
       expect(label, `${id} has its own label`).toBeTruthy();
@@ -514,7 +494,7 @@ describe("the founding sign-up — one component, mounted more than once", () =>
 
   it("…and one live region each, mounted empty before there is anything to announce", () => {
     const regions = [...html().matchAll(/<div class="mk-betamsgwrap"([^>]*)>([\s\S]*?)<\/div>/g)];
-    expect(regions.length).toBe(2);
+    expect(regions.length, "one mount, one region").toBe(1);
     for (const [, attrs, body] of regions) {
       expect(attrs).toContain('aria-live="polite"');
       expect(attrs).toContain('role="status"');
@@ -544,8 +524,8 @@ describe("the founding sign-up — one component, mounted more than once", () =>
 });
 
 /**
- * `/founders` — the page the landing hero's panel and the sealed band both point at, and the page
- * that forced the sign-up's generalisation: it mounts the form TWICE on one document.
+ * `/founders` — the page the hero's button and the sealed band both point at, and the page that
+ * forced the sign-up's generalisation: it mounts the form TWICE on one document.
  */
 describe("the Founding Writers page", () => {
   const html = () => renderPage(<FoundersPage onNavigate={noNavigate} />, "/founders");

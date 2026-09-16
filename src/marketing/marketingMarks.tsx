@@ -34,7 +34,7 @@ import React from "react";
  * dashed rim and the caption come off together and the label stops saying "placeholder". Without
  * it the finished illustration would ship inside the chrome that means "not drawn yet".
  */
-export type MarketingIlloKey = "landingHero" | "mission" | "simplify" | "waste" | "time";
+export type MarketingIlloKey = "mission" | "simplify" | "waste" | "time";
 
 /** Which tinted ground the plate sits on. `plate` is the parchment. */
 export type IlloGround = "blush" | "sage" | "plate";
@@ -62,13 +62,6 @@ const PLANE_OVER_LETTERS = (
 );
 
 const MARKETING_ILLOS: Record<MarketingIlloKey, MarketingIlloSpec> = {
-  landingHero: {
-    caption: "Illustration · Hero",
-    subject: "desk scene, paper plane over stacked query letters",
-    ground: "blush",
-    tall: true,
-    art: PLANE_OVER_LETTERS,
-  },
   mission: {
     caption: "Illustration · Mission",
     subject: "desk scene, paper plane over stacked query letters",

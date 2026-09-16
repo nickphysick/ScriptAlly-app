@@ -36,7 +36,6 @@ import {
 
 const json = (status: number, body: unknown): RawResponse =>
   ({ kind: "json", status, ok: status >= 200 && status < 300, body });
-import { FoundingPanel } from "./FoundingPanel";
 import { FoundingBand } from "./FoundingBand";
 import { FoundersPage } from "./FoundersPage";
 
@@ -116,7 +115,6 @@ describe("the request body carries exactly four fields", () => {
 /* ══════════════ 2 · The honeypot is rendered, and is unreachable by a person ══════════════ */
 
 const pages: Array<[string, () => string, number]> = [
-  ["the landing panel", () => renderPage(React.createElement(FoundingPanel, { onNavigate: noNavigate }), "/"), 1],
   ["the sealed band", () => renderPage(React.createElement(FoundingBand, { onNavigate: noNavigate }), "/"), 1],
   /* ⚠️ TWO — `/founders` renders the hero's form and the sealed band's on one document. */
   ["/founders", () => renderPage(React.createElement(FoundersPage, { onNavigate: noNavigate }), "/founders"), 2],
@@ -170,9 +168,8 @@ describe("every mount renders the trap, and no person can reach it", () => {
 
 /* ══════════════ 3 · Each mount names its own surface ══════════════ */
 
-describe("the three surfaces identify themselves, and never by inference", () => {
+describe("the two surfaces identify themselves, and never by inference", () => {
   const MOUNTS: Array<[string, string, WaitlistSource]> = [
-    ["FoundingPanel.tsx", "mk-panel", "landing-panel"],
     ["FoundersPage.tsx", "mk-fw", "founders-hero"],
     ["FoundingBand.tsx", "mk-band", "sealed-band"],
   ];
@@ -181,7 +178,7 @@ describe("the three surfaces identify themselves, and never by inference", () =>
     for (const [file, , source] of MOUNTS) {
       expect(decls(src(file)), `${file} names its surface`).toContain(`source="${source}"`);
     }
-    expect(new Set(MOUNTS.map(([, , s]) => s)).size, "three distinct values").toBe(3);
+    expect(new Set(MOUNTS.map(([, , s]) => s)).size, "two distinct values").toBe(2);
   });
 
   /**

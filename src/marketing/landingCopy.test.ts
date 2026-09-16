@@ -12,125 +12,72 @@
 
 import { describe, it, expect } from "vitest";
 import {
-  HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_LEAD, HERO_TURN_BODY,
+  HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK, FOUNDING_PERKS,
   DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING,
   FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_CTA,
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
   FOUNDING_NOTE, FOUNDING_INVALID, foundingCounterLabel,
 } from "./landingCopy";
 
-/** The lede is segments now (one is bold); this is the sentence a reader actually sees. */
-const ledeText = () => HERO_LEDE.map((s) => s.text).join("");
-/**
- * ⚠️ THE TURN'S BODY IS `CopyRun[]` NOW — one word in it is bold — so every lock below reads the
- * SENTENCE rather than the structure. A verbatim lock that asserted the array shape would go red
- * on a copy edit that only moved the emphasis, which is a lock about the wrong thing.
- */
-const turnBodyText = () =>
-  HERO_TURN_BODY.map((r) => (typeof r === "string" ? r : "b" in r ? r.b : "")).join("");
-
 describe("landing copy — verbatim locks", () => {
-  it("strapline", () => {
-    expect(HERO_H1).toBe("You've written a book.");
+  /**
+   * ⚠️ THE HERO IS FOUR STRINGS NOW (brief, 16 Sep), AND THE PUNCTUATION IS PART OF EACH. The
+   * apostrophe in "bird's-eye", its hyphen, and the em dash in the sub are all deliberate. The
+   * statement hero's lede, postscript and turn are deleted, and their absence is asserted below —
+   * a lock on a string only catches an edit to the string; a lock on the export catches the
+   * constant being reinstated from a diff.
+   */
+  it("the headline", () => {
+    expect(HERO_H1).toBe("A bird's-eye view of your querying campaign");
   });
 
-  it("the lede resumes the headline's sentence, word for word", () => {
-    expect(ledeText()).toBe(
-      "but here your quest for agent representation begins; an endless, gruelling campaign of " +
-        "self-promotion in a fiercely competitive, ever-changing market."
+  it("the sub, word for word, with its em dash", () => {
+    expect(HERO_SUB).toBe(
+      "Every query, every agent, every reply — logged once and tracked to the end. No spreadsheet, " +
+        "no guesswork, nothing forgotten.",
     );
+    expect(HERO_SUB).toContain("—");
+    expect(HERO_SUB).not.toContain(" - ");
   });
 
-  /** ⚠️ ONE bold phrase, and it is the thing the sentence is about. */
-  it("sets `agent representation` in the heavier ink, and nothing else", () => {
-    expect(HERO_LEDE.filter((s) => s.b).map((s) => s.text)).toEqual(["agent representation"]);
-  });
-
-  /**
-   * ⚠️ THE LOWERCASE OPENING IS THE DEVICE, AND IT IS THE THING MOST LIKELY TO BE "CORRECTED".
-   * Asserted on its own so the failure names the cause rather than diffing a 200-character string.
-   */
-  /**
-   * ⚠️ RETARGET, SAME LAW: the lede now opens "but here" rather than "and now" — it turns against
-   * the congratulation above it instead of continuing the headline's sentence. It is still
-   * lowercase, and the ellipsis is still a separate positioned element rather than a character in
-   * the string; those are the two claims, and both survive the rewording.
-   */
-  it("opens lowercase, and hides no ellipsis in the string", () => {
-    expect(ledeText().startsWith("but here")).toBe(true);
-    expect(ledeText()).not.toContain("…");
-    expect(ledeText()).not.toContain("...");
+  /** Two actions, and they ask for different things: one claims a place, one explains the product. */
+  it("the two actions", () => {
+    expect(HERO_CTA).toBe("Become a founding writer");
+    expect(HERO_LINK).toBe("See how it works");
   });
 
   /**
-   * ⚠️ RETARGET: `robots` is UNDERLINED now, not mono. The postscript became Caveat, and a
-   * monospace word inside a handwritten line reads as a rendering fault. Same claim as before —
-   * exactly one word carries the treatment — asserted against the flag that now names it.
+   * ⚠️ THE STATEMENT HERO'S COPY IS GONE, CONSTANT AND ALL. The lede on its paper slip, the
+   * postscript, and the turn behind the burgundy rule were the old hero's argument; the rebuild
+   * replaced them with one headline and one sub. Asserting the exports are absent is what stops
+   * any of them being reinstated without the layout that carried them.
    */
-  it("marks `robots`, and nothing else, inside an otherwise plain sentence", () => {
-    expect(HERO_GRIND.map((s) => s.text).join("")).toBe("…and these days, you're up against robots, too.");
-    expect(HERO_GRIND.filter((s) => s.underline).map((s) => s.text)).toEqual(["robots"]);
-  });
-
-  /**
-   * ⚠️ RETARGET: the turn is ONE line. `HERO_TURN_A` ("You are not alone.") is deleted, so the
-   * old two-register claim no longer has a subject. Asserting its ABSENCE is the stronger
-   * replacement — it is what stops the softening line being reinstated from a diff.
-   */
-  /**
-   * ⚠️ RETARGET TO THE STRONGER CLAIM, SAME LAW: the congratulation is DELETED, so this asserts
-   * its absence rather than its wording. The law it was protecting — that the lede turns against
-   * something — is unchanged and still asserted; what it turns against is the STATEMENT now, and
-   * the acknowledgement is carried by the ticked box on the statement's row. Asserting the two
-   * strings are gone from every export is what stops them being reinstated from a diff and giving
-   * the hero three lines of praise before the argument starts again.
-   */
-  it("the lede turns against the statement, and the congratulation is gone", async () => {
-    expect(HERO_H1.endsWith(".")).toBe(true);
-    expect(ledeText().startsWith("but here")).toBe(true);
+  it("the statement hero's lede, postscript and turn are gone", async () => {
     const copy = await import("./landingCopy");
-    expect("HERO_CONGRATS" in copy).toBe(false);
-    expect("HERO_CONGRATS_SUB" in copy).toBe(false);
+    for (const k of ["HERO_LEDE", "HERO_GRIND", "HERO_TURN_LEAD", "HERO_TURN_BODY"]) {
+      expect(k in copy, `${k} is retired`).toBe(false);
+    }
     const strings = Object.values(copy).filter((v): v is string => typeof v === "string");
-    expect(strings).not.toContain("Congratulations.");
-    expect(strings).not.toContain("You've got further than most.");
+    expect(strings).not.toContain("Introducing ScriptAlly");
+    expect(strings).not.toContain("You've written a book.");
   });
 
   /**
-   * ⚠️ 89 CHARACTERS, AND THE LENGTH IS THE CONSTRAINT. It cannot hold one line at any readable
-   * size, so it must never be given `nowrap`; the target is two lines and the failure mode is a
-   * third carrying two or three orphaned words. The rendered line count is measured on a page —
-   * this asserts the property that makes the measurement possible to reason about.
+   * ⚠️ AND SO IS THE HERO'S FOUNDING PANEL — the form itself is untouched and still mounted twice,
+   * on the sealed band and `/founders`, but the panel's own wording went with the layout. The
+   * perks did NOT: `PRICING_TIERS` spreads them into the founding tier, so /pricing renders them.
    */
-  /**
-   * ⚠️ TWO SPANS, NOT A WRAP. The lead is a sentence of its own and must never share a line with
-   * the body however wide the page gets; a wrap cannot guarantee that and two elements can. The
-   * body's own line count is a rendered-page claim and is measured.
-   */
-  it("the turn is two sentences, and the lead is short enough never to wrap", () => {
-    expect(HERO_TURN_LEAD).toBe("Introducing ScriptAlly");
-    expect(turnBodyText()).toBe(
-      "An end-to-end querying companion built to help your manuscript fly.",
-    );
-    expect(HERO_TURN_LEAD.length).toBeLessThan(30);
-    expect(turnBodyText()).not.toContain("  ");
-    /* ⚠️ ONE EMPHASISED RUN, AND IT IS THE PAYLOAD WORD. The sentence's whole point is `fly`;
-       a second bold run would leave the reader deciding which half to weigh. The full stop is
-       deliberately outside it — bolding a stop reads as a typographic slip at this size. */
-    expect(HERO_TURN_BODY.filter((r) => typeof r !== "string")).toEqual([{ b: "fly" }]);
-  });
-
-  it("the turn is one line, and the reassurance in front of it is gone", async () => {
-    /* ⚠️ NO FULL STOP AFTER `ScriptAlly` — a blinking caret closes that line instead, and it is
-       an `aria-hidden` element rather than a character. If someone puts the stop back, this is
-       the assertion that says the caret then follows a finished sentence. */
-    expect(`${HERO_TURN_LEAD} ${turnBodyText()}`).toBe(
-      "Introducing ScriptAlly An end-to-end querying companion built to help your manuscript fly.",
-    );
+  it("the hero panel's wording is gone, and the perks it shared with pricing are not", async () => {
     const copy = await import("./landingCopy");
-    expect("HERO_TURN_A" in copy).toBe(false);
-    expect(Object.values(copy).filter((v): v is string => typeof v === "string"))
-      .not.toContain("You are not alone.");
+    for (const k of ["FOUNDING_PANEL_KICKER", "FOUNDING_ASK", "FOUNDING_PANEL_CTA", "FOUNDING_LEARN",
+      "FOUNDING_PANEL_SENT_H", "FOUNDING_PANEL_DUPE_H", "FOUNDING_PANEL_ERROR", "FOUNDING_PANEL_DOWN"]) {
+      expect(k in copy, `${k} is retired`).toBe(false);
+    }
+    expect(FOUNDING_PERKS).toEqual([
+      "Six months' free Pro access",
+      "Half price for life",
+      "A direct line to the founder",
+    ]);
   });
 
   /**
@@ -177,7 +124,7 @@ describe("landing copy — verbatim locks", () => {
       ...FEATURE_ROWS.map((r) => r.heading),
       /* Retarget, same law: a row's body is one string now, and its alt text is rendered too. */
       ...FEATURE_ROWS.flatMap((r) => [r.body, r.alt]),
-      HERO_H1, ledeText(), HERO_TURN_LEAD, turnBodyText(),
+      HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK,
       FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL,
     ].filter((t) => t.toLowerCase().includes("finger on the pulse"));
     expect(said).toEqual(["A finger on the pulse of your querying journey"]);

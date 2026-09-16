@@ -1,12 +1,13 @@
 /**
- * Landing copy — word-authoritative from the design refs. The HERO block comes from
- * design-refs/scriptally-landing-hero-v3.html; everything below it (the showreel, the CTA band,
- * pricing) still comes from design-refs/landing-v13.html.
+ * Landing copy — word-authoritative from its source. The HERO block comes from the brief of 16 Sep,
+ * which replaced the statement hero and the ref it had been drawn from; everything below it (the
+ * showreel, the CTA band, pricing) still comes from design-refs/landing-v13.html.
  *
- * ⚠️ MARKETING HEADLINE COPY IS NORMATIVE FROM THE REF AND IS NOT PARAPHRASED. Punctuation is part
- * of it — the semicolon in "traditional publication; an endless", the lowercase `a` opening the
- * lede, the real ellipsis character. A sentence here that reads slightly better than the ref is a
- * sentence that no longer matches the artefact it was signed off from.
+ * ⚠️ MARKETING HEADLINE COPY IS NORMATIVE FROM ITS SOURCE AND IS NOT PARAPHRASED. Punctuation is
+ * part of it — the semicolon in "traditional publication; an endless", the real ellipsis character.
+ * A sentence that reads slightly better than the artefact it was signed off from no longer matches
+ * it. (The third example here used to be the lowercase `a` opening the lede, which resumed the
+ * statement's sentence rather than starting its own; it went with the statement.)
  *
  * Kept as pure constants so the copy tests can lock the strapline and sub-copy exactly
  * (repo test convention: node environment, no DOM rendering). UK spelling throughout.
@@ -15,92 +16,25 @@
 import { CopyRun } from "./CopyRuns";
 import { supportMailto } from "../lib/companyInfo";
 
-/* ⚠️ `HERO_EYEBROW` ("For querying writers") IS DELETED, NOT RELOCATED. The headline says who
-   the page is for; a mono label above it was the page introducing its own first sentence.
-   `landingCopy.test.ts` asserts the export is absent rather than pinning the string — the
-   same shape as the four constants the actions row took with it. */
+/* ⚠️ THE HERO IS ONE HEADLINE, ONE SUB, TWO ACTIONS (brief, 16 Sep). The statement hero's copy —
+   `HERO_LEDE` on its paper slip, `HERO_GRIND`'s postscript, `HERO_TURN_LEAD` / `HERO_TURN_BODY`
+   behind the burgundy rule — went with the layout that carried it, and so did the founding panel's
+   own wording. The sign-up itself is unchanged and still mounted twice: the sealed band at the foot
+   of this page and `/founders`.
+   ⚠️ THE HEADLINE'S LAST TWO WORDS ARE HELD ON ONE LINE BY `Hero.tsx`, at the brief's 11ch measure —
+   typesetting, not copy. This string stays whole, and the rendered heading is asserted back to it
+   word for word. */
+export const HERO_H1 = "A bird's-eye view of your querying campaign";
 
-export const HERO_H1 = "You've written a book.";
+export const HERO_SUB =
+  "Every query, every agent, every reply — logged once and tracked to the end. No spreadsheet, " +
+  "no guesswork, nothing forgotten.";
 
-/* ⚠️ THE CONGRATULATION IS DELETED AND IS NOT COMING BACK AS WORDS. `HERO_CONGRATS`
-   ("Congratulations.") and `HERO_CONGRATS_SUB` ("You've got further than most.") were a two-line
-   beat between the statement and the lede, and the note here argued they were load-bearing —
-   that the slip's "but here your quest… begins" had nothing to turn against without them.
-   It turns against the STATEMENT, which is the stronger reading: "You've written a book." is
-   itself the thing the lede undercuts. Three lines of praise before the argument starts was the
-   page clearing its throat.
-   ⚠️ AND THE TICK THAT REPLACED THE WORDS HAS ITSELF GONE. The acknowledgement was briefly
-   carried by a ticked box beside the headline; that mark is retired too, so the statement now
-   carries the beat alone. `hero-tick-placeholder.png` is RETAINED in the assets folder but is
-   imported by nothing — see CLAUDE.md, and do not read its presence as evidence it is in use. */
+/** The solid pill. It goes to `/founders`, which is where the sign-up it asks for lives. */
+export const HERO_CTA = "Become a founding writer";
 
-/**
- * ⚠️ THE LEDE RESUMES THE HEADLINE'S SENTENCE, SO IT OPENS LOWERCASE. That `a` is the signature of
- * the page, not a typo: the h1 ends in a full stop, a hanging ellipsis sits in the left margin,
- * and the sentence picks up mid-flow. Anyone "fixing" the capital is removing the device.
- *
- * ⚠️ THE ELLIPSIS IS NOT IN THIS STRING. It is a separately positioned, `aria-hidden` element —
- * a screen reader meeting "… and now your querying journey begins" would read punctuation that
- * is really a piece of layout, and the glyph has to sit outside the text block to hang.
- */
-export const HERO_LEDE: Array<{ text: string; b?: boolean }> = [
-  { text: "but here your quest for " },
-  { text: "agent representation", b: true },
-  { text: " begins; an endless, gruelling campaign of self-promotion in a fiercely competitive, " +
-          "ever-changing market." },
-];
-
-/**
- * The postscript, rendered outside the lede's paper slip.
- *
- * ⚠️ `robots` IS UNDERLINED, NOT SET IN MONO. It was mono when the postscript was body copy; the
- * postscript is Caveat now, and a monospace word inside a handwritten line reads as a rendering
- * fault rather than as emphasis. The flag names the treatment so the two cannot drift apart.
- *
- * ⚠️ AND THERE IS NO `P.S.` LABEL. An earlier draft had one; it is cut. The tilt and the hand do
- * the work a label would have done.
- */
-export const HERO_GRIND: Array<{ text: string; underline?: boolean }> = [
-  { text: "…and these days, you're up against " },
-  { text: "robots", underline: true },
-  { text: ", too." },
-];
-
-/**
- * ⚠️ THE TURN IS ONE LINE. "You are not alone." preceded it and is deleted — the promise carries
- * itself, and a flat reassurance in front of it softened the thing it was introducing.
- */
-/**
- * The turn, in two spans rather than one wrapping string.
- *
- * ⚠️ TWO SPANS, NOT A WRAP, BECAUSE THE BREAK IS STRUCTURAL. The lead is a sentence of its own and
- * must never share a line with the body, however wide the page gets — a wrap cannot guarantee
- * that and two elements can. The body may wrap within itself; the lead may not join it.
- *
- * ⚠️ AND THE LEAD CARRIES A SAGE WASH, WHICH IS WHY IT IS `display: inline-block` WITH NEGATIVE
- * SIDE MARGINS. The gradient has to bleed a little past the glyphs to read as a highlighter stroke
- * rather than a label with a background; an inline box would break the wash across lines and a
- * block would run it to the full measure.
- */
-/* ⚠️ NO FULL STOP, AND THAT IS THE POINT RATHER THAN AN OMISSION. A blinking caret follows this
-   line, and a caret after a full stop reads as a sentence that has ended and is being typed into
-   anyway. The caret is CHROME, not copy — it is an `aria-hidden` element in `Hero.tsx`, never a
-   character in this string, because a screen reader announcing a decorative bar is noise and a
-   character could not blink. */
-export const HERO_TURN_LEAD = "Introducing ScriptAlly";
-/**
- * ⚠️ `CopyRun[]`, NOT A STRING, AND THE REASON IS ONE WORD. `fly` is the sentence's whole payload
- * and carries the emphasis; `CopyRuns`' existing `{ b }` member renders it, rather than markup in
- * the component or a second constant holding the tail. The tier has ONE copy-rendering path and
- * this stays on it.
- * ⚠️ AND THE FULL STOP BELONGS TO THE PLAIN RUN, NOT TO THE BOLD ONE. Bolding the stop makes the
- * emphasis look like a typographic accident at the size this renders.
- */
-export const HERO_TURN_BODY: CopyRun[] = [
-  "An end-to-end querying companion built to help your manuscript ",
-  { b: "fly" },
-  ".",
-];
+/** The plain link beside it: an in-page jump to the section break above the feature rows. */
+export const HERO_LINK = "See how it works";
 
 /**
  * ⚠️ THE HERO ENDS ON ONE CTA. `See pricing` and the `Free to start` microline are both gone —
@@ -158,82 +92,21 @@ export const FOUNDING_BLURB =
   "ScriptAlly opens in stages. Founding members get in first, keep every feature free through " +
   "the beta, and help decide what gets built next.";
 
-/* ══════════════ The hero's founding panel ══════════════
-   ⚠️ VERBATIM FROM `design-refs/scriptally-landing-v16.html` .found-panel. This is the landing
-   hero's PRIMARY ACTION now — `Start tracking — it's free` has left the hero, because pre-launch
-   there is no self-serve product behind it.
-
-   ⚠️ AND THE OFFER IS A PRICING COMMITMENT, STATED ON TWO PAGES. "then half price for life" here
-   and "for as long as you're querying your manuscript" on `/founders` are the same promise in two
-   wordings; if the terms change, both change together, and the `/founders` sweetener card is the
-   one that carries the detail. */
-export const FOUNDING_PANEL_KICKER = "Get involved";
-
-/**
- * The ask. `100 Founding Writers` is the marked run — semibold near-black under a burgundy
- * hairline, which is a `border-bottom` rather than `text-decoration` so it clears the descenders
- * in `g`.
- *
- * ⚠️ `FOUNDING_OFFER_LEAD` / `FOUNDING_OFFER_REST` ARE DELETED. The panel used to open with
- * "Become a Founding Writer." as a statement and then explain the offer in prose; it asks a
- * question of the reader now and answers it in the perks beneath, which is a shorter route to the
- * same three facts.
- */
-export const FOUNDING_ASK: CopyRun[] = [
-  "We're looking for ",
-  { b: "100 Founding Writers" },
-  " to put ScriptAlly through its paces.",
-];
-
-/**
- * ⚠️ THESE THREE MUST FIT ON ONE ROW AND THE WORDING IS LENGTH-CONSTRAINED BECAUSE OF IT. Each
- * item is `white-space: nowrap`, so the row wraps as whole items rather than mid-phrase — which
- * means a longer phrase does not shrink, it drops the row to two lines. "6 months free Pro" is
- * already the shortened form of "Six months' free Pro access", cut for exactly this reason.
- * ⚠️ ANYONE LENGTHENING ONE OF THESE RE-MEASURES THE ROW against the panel's inner width at 1280,
- * which is the narrowest width where one row is required. Do not lengthen them on the assumption
- * that a few characters are free; the first perk lost eleven to buy the row.
- */
+/* ══════════════ The founding offer's perks ══════════════
+   ⚠️ READ BY `PRICING_TIERS` BELOW, which spreads them into the founding tier's `includes`. They were
+   the hero panel's three lines as well until the hero was rebuilt (16 Sep); /pricing renders them now,
+   and `marketingPageSmoke` locks the wording there. */
 export const FOUNDING_PERKS = [
   "Six months' free Pro access",
   "Half price for life",
   "A direct line to the founder",
 ] as const;
 
-/* ══════════════ The panel's outcomes ══════════════
-   ⚠️ ITS OWN WORDING, THE SAME STATE MACHINE. `foundingStore` decides WHICH state; these decide
-   what the panel says in it, and the sealed band keeps its own — two surfaces asking in two
-   registers off one list. The rendering is `FoundingSignup`'s `messages` prop, not a second
-   component: forking the render is how two surfaces come to disagree about what happened.
-
-   ⚠️ AND THE SUCCESS COPY NEVER REVEALS MORE THAN THE READER ASKED. "You're already on the list"
-   confirms without disclosing when, or from where, or anything else about the address — a sign-up
-   form that tells you what it knows about you is a disclosure, not a courtesy. */
-export const FOUNDING_PANEL_SENT_H = "You're on board.";
-export const FOUNDING_PANEL_SENT_B = "We'll email your invite when your place opens.";
-export const FOUNDING_PANEL_DUPE_H = "You're already on the list.";
-export const FOUNDING_PANEL_DUPE_B = "No need to sign up twice — your invite is still coming.";
-
-/** ⚠️ EM DASH, and `email us` resolves through `SUPPORT_EMAIL` — never a spelled address. */
-export const FOUNDING_PANEL_ERROR: CopyRun[] = [
-  "That didn't send. Check the address and try again, or ",
-  { link: "email us", mailto: supportMailto("ScriptAlly founding members") },
-  ".",
-];
-export const FOUNDING_PANEL_DOWN: CopyRun[] = [
-  "Sign-ups are briefly unavailable — try again shortly, or ",
-  { link: "email us", mailto: supportMailto("ScriptAlly founding members") },
-  ".",
-];
-
-export const FOUNDING_LEARN = "How it works";
 
 export const FOUNDING_FIELD_LABEL = "Email address";
 export const FOUNDING_PLACEHOLDER = "you@example.com";
 export const FOUNDING_CTA = "Claim your place";
 
-/** The panel's button. The sealed band keeps `FOUNDING_CTA`; two surfaces, two asks. */
-export const FOUNDING_PANEL_CTA = "Claim your spot";
 
 /**
  * ⚠️ THE INVALID-ADDRESS MESSAGE IS NOT ONE OF THE OUTCOME STATES. It is what the field says
