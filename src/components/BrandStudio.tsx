@@ -59,7 +59,7 @@ export const BrandStudio: React.FC = () => {
 
   const handleResetToDefault = () => {
     resetToDefault();
-    showNotice("Applied the classic cozy Terracotta ScriptAlly branding.");
+    showNotice("Applied the classic cozy Terracotta QueryHawk branding.");
   };
 
   const showNotice = (msg: string) => {
@@ -101,7 +101,7 @@ export const BrandStudio: React.FC = () => {
             <span>DESIGN THEATER</span>
           </div>
           <h1 className="font-serif text-3xl md:text-4xl font-extrabold text-[#3a1c14] tracking-tight leading-tight">
-            ScriptAlly Brand Room
+            QueryHawk Brand Room
           </h1>
           <p className="text-sm text-[#3a1c14]/70 mt-3 leading-relaxed">
             Welcome to your visual identity workspace! You do not need any coding or design experience to adapt this platform to your creative taste. Pick from curated editorial presets, customize typography, or pick your distinct brand colors to paint beautiful backgrounds, cards, buttons, and borders.
@@ -465,7 +465,7 @@ export const BrandStudio: React.FC = () => {
                       S
                     </div>
                     <span className="font-serif text-xs font-bold transition-all duration-300" style={{ color: textColor }}>
-                      ScriptAlly App
+                      QueryHawk App
                     </span>
                   </div>
                   
@@ -542,7 +542,7 @@ export const BrandStudio: React.FC = () => {
               <span>How Consistent Brand Kits Work</span>
             </h4>
             <p className="text-[11px] text-stone-600 leading-relaxed">
-              When you adjust colors or fonts, ScriptAlly compiles your customized branding into standardized **CSS Custom Properties** (often called CSS Variables). 
+              When you adjust colors or fonts, QueryHawk compiles your customized branding into standardized **CSS Custom Properties** (often called CSS Variables). 
             </p>
             <p className="text-[11px] text-stone-600 leading-relaxed">
               Because the entire application uses these variables for colors and layout styles, everything updates dynamically. These properties are **automatically persisted to your browser**, ensuring your website remains gorgeous, tailored and on-brand each time you come on!

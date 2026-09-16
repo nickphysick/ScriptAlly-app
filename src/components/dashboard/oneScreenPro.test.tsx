@@ -22,7 +22,7 @@ const render = (plan: UserPlan) => renderToStaticMarkup(
 describe("§5 · the Pro banner", () => {
   it("free: the headline, the sentence and the route to plans", () => {
     const html = render(UserPlan.FREE);
-    expect(html).toContain("ScriptAlly Pro");
+    expect(html).toContain("QueryHawk Pro");
     expect(html).toContain("More room for the journey");
     expect(html).toContain("Unlimited manuscripts");
     expect(html).toContain("See what");
@@ -37,7 +37,7 @@ describe("§5 · the Pro banner", () => {
   it("a user with no plan on file is treated as free, never assumed Pro", () => {
     expect(renderToStaticMarkup(
       <OneScreenPro loading={false} currentUser={null} onNavigate={() => {}} />,
-    )).toContain("ScriptAlly Pro");
+    )).toContain("QueryHawk Pro");
   });
 });
 

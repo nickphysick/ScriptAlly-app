@@ -123,7 +123,7 @@ export interface EditAgentDrawerProps {
 const NEED_INFO: Record<AgentDataNeed, { label: string; why: string; where: string }> = {
   responseTime: {
     label: "response time",
-    why: "Their typical turnaround lets ScriptAlly tell you when a query has gone cold and a chaser is due.",
+    why: "Their typical turnaround lets QueryHawk tell you when a query has gone cold and a chaser is due.",
     where: "Their submission page or QueryTracker usually states a window (often 8–12 weeks). Not stated anywhere? Mark it Unknown.",
   },
   materials: {

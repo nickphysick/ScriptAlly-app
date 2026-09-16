@@ -121,7 +121,7 @@ export const UpsellExplainer: React.FC<{ onSeeHow?: () => void; onUpgrade?: () =
     <EmailBandHeader title="Import from email" meta="A faster way to log — on Pro" Emblem={Mail} pro />
     <div style={{ padding: "18px 20px 20px" }}>
       <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, color: bodyInk, lineHeight: 1.55, margin: 0 }}>
-        Paste an agent's email and ScriptAlly reads it into your log for you — matched to the right
+        Paste an agent's email and QueryHawk reads it into your log for you — matched to the right
         agent, with the request and its date already filled in. You just glance over it and confirm.
       </p>
 

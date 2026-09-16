@@ -27,7 +27,7 @@ describe("briefing-slot P2 — THE ASSISTANT BAND (supersedes the Pro strip)", (
   it("the component IS the band: slate PRO pill, Playfair title, one derived line, slate button", () => {
     expect(band).toContain('<div className="tdb-asst">');
     expect(band).toContain('<span className="tdb-asstpill">');
-    expect(band).toContain("SCRIPTALLY PRO");
+    expect(band).toContain("QUERYHAWK PRO");
     expect(band).toContain('<div className="tdb-asstt">Hand over the housekeeping</div>');
     expect(band).toContain('className="tdb-asstbtn" onClick={onPreview}>Meet the assistant</button>');
     // every earlier Pro surface on this page is extinct
@@ -96,7 +96,7 @@ describe("briefing-slot P2 — THE ASSISTANT BAND (supersedes the Pro strip)", (
 describe("v4 P5 — the Meet-the-assistant preview modal (stands unchanged)", () => {
   it("letterhead-framed dialog over the scrim; kicker + honesty sub-line; Esc + Not now + ✕ close", () => {
     expect(promo).toContain('role="dialog" aria-modal="true" aria-label="Meet the assistant"');
-    expect(promo).toContain(">SCRIPTALLY PRO · A PREVIEW USING YOUR ACTUAL TASKS</div>");
+    expect(promo).toContain(">QUERYHAWK PRO · A PREVIEW USING YOUR ACTUAL TASKS</div>");
     expect(promo).toContain("Nothing is saved");
     expect(promo).toContain('if (e.key === "Escape") { e.stopPropagation(); onClose(); }');
     expect(promo).toContain(">Not now</button>");
@@ -117,9 +117,9 @@ describe("v4 P5 — the Meet-the-assistant preview modal (stands unchanged)", ()
     expect(promo).toContain('window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;');
     expect(promo).toContain("const cap = Math.max(1, theatre.length - 1);");
   });
-  it("the upgrade routes to /plans; NO price string anywhere; the footer reads Part of ScriptAlly Pro", () => {
+  it("the upgrade routes to /plans; NO price string anywhere; the footer reads Part of QueryHawk Pro", () => {
     expect(page).toContain('onUpgrade={() => { setAssistantOpen(false); onNavigate("plans"); }}');
-    expect(promo).toContain(">Part of ScriptAlly Pro</span>");
+    expect(promo).toContain(">Part of QueryHawk Pro</span>");
     expect(promo).toContain(">Upgrade &amp; set it working →</button>");
     expect(promo).not.toMatch(/£|\$\d|per month|\/mo|a month|annually/i); // no price FIGURE (the word 'price' appears only in the honesty comment)
   });

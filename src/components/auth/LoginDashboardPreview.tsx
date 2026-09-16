@@ -38,7 +38,7 @@ export const LoginDashboardPreview: React.FC = () => (
               <path d="M20 5c1 5-2 11-8 13" />
             </svg>
           </div>
-          <span className="dword">ScriptAlly</span>
+          <span className="dword">QueryHawk</span>
         </div>
         <div className="dash-av">LS</div>
       </div>

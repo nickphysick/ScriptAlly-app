@@ -47,7 +47,7 @@ export const BETA_STRIP_DISMISSED_KEY = "sa.betaStripDismissed";
 export const BETA_PILL = "Beta";
 
 export const BETA_STRIP_LEAD =
-  "You're using ScriptAlly before it's finished. Your data is real and kept safely — but expect " +
+  "You're using QueryHawk before it's finished. Your data is real and kept safely — but expect " +
   "the odd rough edge, and ";
 
 export const BETA_STRIP_REPORT_LINK = "tell us when you find one";

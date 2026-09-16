@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * StatusDot — ScriptAlly's canonical, permanent query-status glyph. Every visual
+ * StatusDot — QueryHawk's canonical, permanent query-status glyph. Every visual
  * representation of a QueryStatus anywhere in the app renders through this component
  * (query list rows, sidebar filter rows, the reading-pane masthead, the dashboard,
  * timelines, import reviews). No render site ever draws its own dot.

@@ -87,7 +87,7 @@ describe("the mailto", () => {
 
   it("addresses the support inbox and states the topic in the subject", () => {
     expect(href()).toContain("mailto:hello@scriptally.ink?subject=");
-    expect(href()).toContain(encodeURIComponent(`ScriptAlly — ${CONTACT_TOPICS[0]}`));
+    expect(href()).toContain(encodeURIComponent(`QueryHawk — ${CONTACT_TOPICS[0]}`));
   });
 
   /**

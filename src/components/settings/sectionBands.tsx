@@ -44,7 +44,7 @@ export const SECTION_BANDS: Record<AccountSectionId, SectionBand> = {
   profile: { name: "Profile", sub: "Your name and where you write from", Icon: UserIcon },
   security: { name: "Sign-in & security", sub: "How you access your account", Icon: Shield },
   plan: { name: "Plan & billing", sub: "What your plan includes", Icon: CreditCard },
-  notifications: { name: "Notifications", sub: "What ScriptAlly emails you about", Icon: Bell },
+  notifications: { name: "Notifications", sub: "What QueryHawk emails you about", Icon: Bell },
   preferences: { name: "Preferences", sub: "How your workspace behaves", Icon: SlidersHorizontal },
   tasks: { name: "Tasks", sub: "What reaches your to-do list", Icon: ListChecks },
   data: { name: "Your data", sub: "Export or remove what's stored", Icon: Database },

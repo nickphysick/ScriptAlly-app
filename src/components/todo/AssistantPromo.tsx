@@ -7,7 +7,7 @@
  * (design-refs/todo-assistant-modal.html, unchanged).
  * A preview only: the theatre is CANNED content driven by the user's real task names — nothing
  * reads beyond the names passed in, and NOTHING writes to the user's data from this path. No
- * price appears anywhere (the footer reads "Part of ScriptAlly Pro").
+ * price appears anywhere (the footer reads "Part of QueryHawk Pro").
  */
 import React, { useEffect, useState } from "react";
 
@@ -40,7 +40,7 @@ export const AssistantBand: React.FC<{
 }> = ({ hkCount, totalCount, onPreview }) => (
   <div className="tdb-asst">
     <div className="tdb-asstmid">
-      <span className="tdb-asstpill"><span aria-hidden>✦</span> SCRIPTALLY PRO</span>
+      <span className="tdb-asstpill"><span aria-hidden>✦</span> QUERYHAWK PRO</span>
       <div className="tdb-asstt">Hand over the housekeeping</div>
       <div className="tdb-asstd">
         {hkCount} of your {totalCount} tasks could run in the background whilst you write.
@@ -80,7 +80,7 @@ export const AssistantModal: React.FC<{
       <div className="tdb-amscrim" onClick={onClose} />
       <div className="tdb-amodal">
         <button type="button" className="tdb-amx" aria-label="Close" onClick={onClose}>✕</button>
-        <div className="tdb-amk">SCRIPTALLY PRO · A PREVIEW USING YOUR ACTUAL TASKS</div>
+        <div className="tdb-amk">QUERYHAWK PRO · A PREVIEW USING YOUR ACTUAL TASKS</div>
         <h2>Meet the assistant</h2>
         <p className="tdb-amsub">
           It researches your agents for you — reading agency pages, filling wish lists and
@@ -112,7 +112,7 @@ export const AssistantModal: React.FC<{
           <div><b>Your desk clears</b>{hkCount} of your {totalCount} housekeeping tasks, done in the background.</div>
         </div>
         <div className="tdb-amfoot">
-          <span className="tdb-ampart">Part of ScriptAlly Pro</span>
+          <span className="tdb-ampart">Part of QueryHawk Pro</span>
           <button type="button" className="tdb-amlater" onClick={onClose}>Not now</button>
           <button type="button" className="tdb-amgo" onClick={onUpgrade}>Upgrade &amp; set it working →</button>
         </div>

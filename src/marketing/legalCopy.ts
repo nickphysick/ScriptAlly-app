@@ -80,7 +80,7 @@ const supportLink = (subject?: string): CopyRun => ({
 
 export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
   privacy: {
-    documentTitle: "Privacy Policy — ScriptAlly",
+    documentTitle: "Privacy Policy — QueryHawk",
     eyebrow: "Legal · Privacy",
     title: "Privacy Policy",
     lastUpdated: LEGAL_LAST_UPDATED,
@@ -96,7 +96,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
         heading: "Who we are",
         blocks: [
           p(
-            "ScriptAlly is operated by ", { b: LEGAL_ENTITY_NAME }, " of ", { b: REGISTERED_ADDRESS },
+            "QueryHawk is operated by ", { b: LEGAL_ENTITY_NAME }, " of ", { b: REGISTERED_ADDRESS },
             ", United Kingdom (\"we\", \"us\"). We are the data controller for the personal data " +
             "described in this policy. You can reach us at ", supportLink("Privacy"), ". ",
             ICO_REGISTRATION_NOTE,
@@ -149,7 +149,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
             "transient.",
           ),
           callout(
-            "Your manuscripts, pitches, and notes stored in ScriptAlly are ", { b: "not" },
+            "Your manuscripts, pitches, and notes stored in QueryHawk are ", { b: "not" },
             " sent to any AI service unless you explicitly run a feature that says so on its face.",
           ),
         ],
@@ -170,7 +170,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
         heading: "Cookies and local storage",
         blocks: [
           p(
-            "ScriptAlly uses only what's strictly necessary to work: authentication tokens that " +
+            "QueryHawk uses only what's strictly necessary to work: authentication tokens that " +
             "keep you signed in, and local storage that remembers interface preferences (like a " +
             "collapsed sidebar) on your own device. There are no advertising cookies, no " +
             "cross-site trackers, and no third-party analytics — which is why you won't find a " +
@@ -229,7 +229,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
       {
         heading: "Children",
         blocks: [
-          p("ScriptAlly is not directed at children and is intended for users aged 16 and over."),
+          p("QueryHawk is not directed at children and is intended for users aged 16 and over."),
         ],
       },
       {
@@ -245,7 +245,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
   },
 
   terms: {
-    documentTitle: "Terms of Service — ScriptAlly",
+    documentTitle: "Terms of Service — QueryHawk",
     eyebrow: "Legal · Terms",
     title: "Terms of Service",
     lastUpdated: LEGAL_LAST_UPDATED,
@@ -254,7 +254,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
       "are pending confirmation.",
     lede:
       "The plain-English promise underneath the legal text: you own everything you put into " +
-      "ScriptAlly, we'll be straight with you about what the service does, and neither of us " +
+      "QueryHawk, we'll be straight with you about what the service does, and neither of us " +
       "should need a lawyer to understand this page.",
     sections: [
       {
@@ -263,7 +263,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
           p(
             "These terms are an agreement between you and ", { b: LEGAL_ENTITY_NAME }, " of ",
             { b: REGISTERED_ADDRESS },
-            ", United Kingdom. By creating an account or using ScriptAlly, you accept them. How we " +
+            ", United Kingdom. By creating an account or using QueryHawk, you accept them. How we " +
             "handle your personal data is set out separately in the ", privacyLink(), ".",
           ),
         ],
@@ -272,14 +272,14 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
         heading: "The service",
         blocks: [
           p(
-            "ScriptAlly is a tool for tracking your literary agent querying process: your agents, " +
+            "QueryHawk is a tool for tracking your literary agent querying process: your agents, " +
             "queries, manuscripts, submission packages, and the history of each exchange. It's a " +
             "record-keeper, not an adviser — it reports what you've recorded, and it doesn't " +
             "guarantee any outcome with any agent or publisher.",
           ),
           callout(
             { b: "Early-access notice." },
-            " ScriptAlly is newly launched and actively developed. Features may change, and " +
+            " QueryHawk is newly launched and actively developed. Features may change, and " +
             "occasional rough edges are part of the deal at this stage. We'll flag significant " +
             "changes rather than spring them on you.",
           ),
@@ -299,7 +299,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
         heading: "Your content",
         blocks: [
           p(
-            "Everything you put into ScriptAlly — manuscripts, pitches, notes, querying records — " +
+            "Everything you put into QueryHawk — manuscripts, pitches, notes, querying records — " +
             "remains yours. You grant us only the limited licence needed to store, process, and " +
             "display it back to you, which is what running the service means. We claim no other " +
             "rights in your writing, and we do not use your content to train AI models.",
@@ -310,7 +310,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
         heading: "Acceptable use",
         blocks: [
           list(
-            ["Don't use ScriptAlly to store or transmit anything unlawful, or content you don't have the right to hold."],
+            ["Don't use QueryHawk to store or transmit anything unlawful, or content you don't have the right to hold."],
             ["Don't attempt to breach, probe, or overload the service, or access another user's data."],
             ["Don't resell or scrape the service."],
           ),
@@ -332,7 +332,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
         heading: "Fees",
         blocks: [
           p(
-            "ScriptAlly is currently free to use. A paid Pro tier is planned; when it arrives, its " +
+            "QueryHawk is currently free to use. A paid Pro tier is planned; when it arrives, its " +
             "price and what it includes will be stated clearly before you're asked to pay " +
             "anything, and the free tier will remain genuinely useful. These terms will be updated " +
             "before any payment is taken.",
@@ -343,13 +343,13 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
         heading: "Availability, and things going wrong",
         blocks: [
           p(
-            "We work to keep ScriptAlly available and your data safe, but as a small, early-stage " +
+            "We work to keep QueryHawk available and your data safe, but as a small, early-stage " +
             "service it's provided \"as is\" — we can't promise uninterrupted availability. Nothing " +
             "in these terms excludes liability that can't legally be excluded (such as for death " +
             "or personal injury caused by negligence, or fraud). Beyond that, our total liability " +
             "to you is limited to the greater of £100 or the amount you've paid us in the twelve " +
             "months before the claim. You should keep your own copies of any manuscript files: " +
-            "ScriptAlly tracks your querying, it is not your manuscript's only home.",
+            "QueryHawk tracks your querying, it is not your manuscript's only home.",
           ),
         ],
       },

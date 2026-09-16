@@ -841,7 +841,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         });
         setCommunityAgents(list);
       } catch (error) {
-        console.error("[ScriptAlly] Failed to fetch community agents from Firestore: ", error);
+        console.error("[QueryHawk] Failed to fetch community agents from Firestore: ", error);
         // Fallback to local seeds
         setCommunityAgents(localSeedCommunityAgents);
       }
@@ -1192,7 +1192,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       (agentId) => agents.find((a) => a.id === agentId)?.responseTimeWeeks,
     );
     console.log(
-      `[ScriptAlly] expected-date migration — ${plan.drop.length} agency-derived date${plan.drop.length === 1 ? "" : "s"} dropped, `
+      `[QueryHawk] expected-date migration — ${plan.drop.length} agency-derived date${plan.drop.length === 1 ? "" : "s"} dropped, `
       + `${plan.adopt.length} adopted as the writer's, of which ${plan.unresolvable.length} `
       + `unresolvable (agent states no window now, so the stored date is either the writer's or debris from a cleared one)`,
     );
@@ -1208,7 +1208,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           await updateDoc(doc(db, "users", currentUser.id, "queries", id), { writerExpectedDate: iso, responseDeadline: deleteField() });
         } catch (e) { handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${id}`); }
       }
-      console.log("[ScriptAlly] expected-date migration — writes attempted");
+      console.log("[QueryHawk] expected-date migration — writes attempted");
     })();
   }, [currentUser, queries, agents]);
 
@@ -1248,7 +1248,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           await updateDoc(doc(db, "users", currentUser.id, "versions", id), { status: "Retired" });
         } catch (e) { handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/versions/${id}`); }
       }
-      console.log(`[ScriptAlly] sample-pages retirement — ${plan.archive.length} archive write${plan.archive.length === 1 ? "" : "s"} attempted`);
+      console.log(`[QueryHawk] sample-pages retirement — ${plan.archive.length} archive write${plan.archive.length === 1 ? "" : "s"} attempted`);
     })();
   }, [currentUser, versions, packages]);
 
@@ -1336,7 +1336,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           });
         } catch (err) {
           // Never heal blind on a read error — that could create a duplicate.
-          console.error("[ScriptAlly Backfill] Could not read per-query log; skipping heal:", err);
+          console.error("[QueryHawk Backfill] Could not read per-query log; skipping heal:", err);
           continue;
         }
         if (hasStatusBearing) continue;
@@ -1385,14 +1385,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           );
           // Log changed → derive status/dates/flags from it. Stored status is unchanged.
           await recomputeQueryOnline(currentUser.id, q.id);
-          console.log(`[ScriptAlly Backfill] Healed missing per-query log for ${q.id} (${q.status}).`);
+          console.log(`[QueryHawk Backfill] Healed missing per-query log for ${q.id} (${q.status}).`);
         } catch (err) {
-          console.error("[ScriptAlly Backfill] Online heal failed for query:", q.id, err);
+          console.error("[QueryHawk Backfill] Online heal failed for query:", q.id, err);
         }
       }
 
       if (missingActivities.length > 0) {
-        console.log(`[ScriptAlly Backfill] Auto-healing ${missingActivities.length} missing activities.`);
+        console.log(`[QueryHawk Backfill] Auto-healing ${missingActivities.length} missing activities.`);
         for (const act of missingActivities) {
           await addActivity(act);
         }
@@ -1901,7 +1901,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (currentUser.plan === UserPlan.FREE) {
       return {
         success: false,
-        error: "Custom Submission Packages & A/B Tracking are premium features. Upgrade to ScriptAlly Pro!"
+        error: "Custom Submission Packages & A/B Tracking are premium features. Upgrade to QueryHawk Pro!"
       };
     }
 
@@ -2046,7 +2046,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (!bypassLimits && currentUser.plan === UserPlan.FREE && agents.length >= 5) {
       return {
         success: false,
-        error: "Free tier is capped at 5 agents. Upgrade to ScriptAlly Pro for unlimited research!"
+        error: "Free tier is capped at 5 agents. Upgrade to QueryHawk Pro for unlimited research!"
       };
     }
 
@@ -2758,7 +2758,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             "Automatically closed — no response by the deadline you set."
           );
         } catch (err) {
-          console.error("[ScriptAlly] Auto-close failed:", err);
+          console.error("[QueryHawk] Auto-close failed:", err);
         }
       });
     }, 2500);

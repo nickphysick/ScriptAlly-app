@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The ScriptAlly template's column contract — ONE constant, read by the generator that writes the
+ * The QueryHawk template's column contract — ONE constant, read by the generator that writes the
  * sheet and by the parser that reads it back.
  *
  * ⚠️ TWO PLACES THAT MUST AGREE, SO THEY READ THE SAME LIST. A template whose columns are typed
@@ -11,7 +11,7 @@
  * error anyone can trace. That is the entire reason this file exists.
  *
  * ⚠️ THERE IS ALREADY A DIFFERENT TEMPLATE IN THE REPO, AND THIS IS NOT IT.
- * `public/ScriptAlly-pipeline-import-template.xlsx` is a THREE-tab workbook (Instructions, Agents,
+ * `public/QueryHawk-pipeline-import-template.xlsx` is a THREE-tab workbook (Instructions, Agents,
  * Queries) with a richer per-stage date model — Partial requested / Partial sent / Full requested
  * / Full sent as separate columns. It is what the landing page and the Queries empty state link to,
  * and it goes through Smart Import. The contract below is the single flat sheet the capture fork

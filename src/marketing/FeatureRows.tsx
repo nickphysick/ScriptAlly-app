@@ -2,7 +2,7 @@
  * FeatureRows — the landing page's features band: six rows, each one illustration beside a heading
  * and a single paragraph, alternating sides down the page (rows 1, 3 and 5 image left). Every word,
  * image path and alt text comes from `FEATURE_ROWS` in landingCopy.ts. The band's heading is
- * `BandHeader`, its own full-width section above this one, which also owns the trace and its observer.
+ * `StatusBand`, its own section above this one, which carries the heading and the six status marks.
  *
  * ⚠️ A ROW IS THE IMAGE, THE HEADING AND THE PARAGRAPH — NOTHING ELSE. The card mockups, the CTA
  * buttons, the text links and the Pro badge were retired together when the rows were rebuilt
@@ -31,8 +31,8 @@ const ILLUSTRATIONS: Record<string, { width: number; height: number; version: st
   "/images/track-agent-queries.png": { width: 2880, height: 2100, version: "675a97ef" },
   "/images/home-for-your-agents.png": { width: 2880, height: 2250, version: "126e2e66" },
   "/images/smart-email-drop.png": { width: 2880, height: 2250, version: "7f983545" },
-  "/images/curate-and-compare.png": { width: 2880, height: 2250, version: "50923a72" },
-  "/images/comparable-titles.png": { width: 2880, height: 2250, version: "b8ea39cf" },
+  "/images/curate-and-compare.png": { width: 2880, height: 2250, version: "87dd6edb" },
+  "/images/comparable-titles.png": { width: 2880, height: 2250, version: "c3647412" },
 };
 
 /* A heading split so that its last two words can be held on one line. At the heading's deliberate 13ch

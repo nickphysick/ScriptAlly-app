@@ -85,7 +85,7 @@ export const CAPTURE_CHOICES: Record<CaptureOption, CaptureChoice> = {
   },
   template: {
     key: "template",
-    title: "Use the ScriptAlly template",
+    title: "Use the QueryHawk template",
     desc:
       "Download a ready-made sheet, fill in your agents, upload it back. Set columns mean we read " +
       "it exactly, every time.",

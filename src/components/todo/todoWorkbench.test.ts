@@ -253,7 +253,7 @@ describe("detail P5 — sweep", () => {
     expect(tour).not.toContain("bartext");
     expect(tour).not.toContain("Showing");
     expect(tour).not.toContain("tdb-colo");
-    expect(tour).not.toContain("SCRIPTALLY PRO");
+    expect(tour).not.toContain("QUERYHAWK PRO");
   });
 });
 

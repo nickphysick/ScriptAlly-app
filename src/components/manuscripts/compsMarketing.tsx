@@ -288,7 +288,7 @@ export const StagesBlock: React.FC = () => (
      copy measure makes each image too small to read. The left edges therefore do NOT align down
      the page — that is intended, and unifying them is the thing not to "fix". */
   <section className="ct-stageswide ct-stages" aria-labelledby="ct-stages-h">
-    <h3 className="ct-stages-h" id="ct-stages-h">Curate your comps with ScriptAlly</h3>
+    <h3 className="ct-stages-h" id="ct-stages-h">Curate your comps with QueryHawk</h3>
     <p className="ct-stages-p">Gather them, grow them, and put them to work in your queries.</p>
     <div className="ct-stages-grid">
       {COMP_STAGES.map((s, i) => (

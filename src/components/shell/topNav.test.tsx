@@ -118,7 +118,7 @@ describe("the masthead", () => {
   it("the brand is the ink tile + Playfair wordmark, and it is the route home", () => {
     const html = at();
     expect(html).toContain("tn-tile");
-    expect(html).toContain("ScriptAlly");
+    expect(html).toContain("QueryHawk");
     expect(html).not.toContain("scriptally-title-v2.png");
     expect(src).toContain('onNavigatePath("/dashboard")');
     expect(NAV_MENUS.map((m) => m.label)).not.toContain("Dashboard");

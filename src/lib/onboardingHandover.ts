@@ -57,7 +57,7 @@ const spell = (n: number): string => (n >= 0 && n < WORDS.length ? WORDS[n] : St
 export const HANDOVER_HEADING = "That's everything captured";
 export const HANDOVER_EYEBROW = "Ready";
 export const HANDOVER_SUB =
-  "Here's what's now in ScriptAlly. Nothing is fixed — you can add, edit or remove any of it " +
+  "Here's what's now in QueryHawk. Nothing is fixed — you can add, edit or remove any of it " +
   "whenever you like.";
 export const HANDOVER_PRIMARY = "Open Query Centre";
 export const HANDOVER_GHOST = "Take me to the dashboard instead";

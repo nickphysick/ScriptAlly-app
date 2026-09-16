@@ -1,5 +1,5 @@
 /**
- * ScriptAlly shared form foundation — the locked "Form 11" design system.
+ * QueryHawk shared form foundation — the locked "Form 11" design system.
  * Build forms by composing these; never reach for a native <select> or <input type=date>.
  * See design-reference/scriptally-form-spec.md.
  */

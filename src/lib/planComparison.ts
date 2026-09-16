@@ -83,7 +83,7 @@ export const PLAN_ROWS: PlanRow[] = [
   },
   {
     label: "Smart Email Drop",
-    sub: "Drop your email straight into ScriptAlly and we'll log the details in your database, completely hassle-free.",
+    sub: "Drop your email straight into QueryHawk and we'll log the details in your database, completely hassle-free.",
     free: NO,
     pro: YES,
   },

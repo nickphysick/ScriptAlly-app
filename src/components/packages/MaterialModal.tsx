@@ -266,7 +266,7 @@ export const MaterialModal: React.FC<MaterialModalProps> = ({
                       * never made.
                       */}
                     <div className="pkgf-sub">
-                      Which version of the manuscript these pages come from. ScriptAlly records the
+                      Which version of the manuscript these pages come from. QueryHawk records the
                       reference — it can&rsquo;t check that the text matches.
                     </div>
                   </div>

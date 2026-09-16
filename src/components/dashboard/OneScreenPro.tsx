@@ -32,7 +32,7 @@ export const OneScreenPro: React.FC<{
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></svg>
       </span>
       <span className="os-ptxt">
-        <span className="os-plab2">ScriptAlly Pro</span>
+        <span className="os-plab2">QueryHawk Pro</span>
         <span className="os-phead">More room for the journey</span>
         <span className="os-pline">Unlimited manuscripts, deeper querying analytics and live agent wishlist matching.</span>
       </span>

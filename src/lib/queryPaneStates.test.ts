@@ -57,7 +57,7 @@ describe("zero queries → the first-query card (the ghost preview is retired)",
   it("the old welcome pane's routes survive as quiet alternatives, not deletions", () => {
     expect(code).toContain('onImport={() => onNavigate?.("import")}');
     const card = readFileSync(new URL("../components/queries/QueryEmptyCard.tsx", import.meta.url), "utf8");
-    expect(card).toContain("ScriptAlly-pipeline-import-template.xlsx");
+    expect(card).toContain("QueryHawk-pipeline-import-template.xlsx");
   });
 });
 

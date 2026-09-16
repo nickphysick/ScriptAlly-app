@@ -8,7 +8,7 @@
  * ⚠️ THE DEFECT THIS FIXES IS THE EXIT'S PROMINENCE. What shipped had "Skip setup" as the ONLY
  * thing above the card — no wordmark, no position, no end in sight — so the loudest element on a
  * writer's first screen was the way out of the product. It is now a quiet underlined link in the
- * right-hand slot, and the two things that ground you (you are in ScriptAlly; here is how far is
+ * right-hand slot, and the two things that ground you (you are in QueryHawk; here is how far is
  * left) are the ones with visual weight.
  *
  * ⚠️ IT IS NOT `MarketingShell`. The ref calls this `mk-head`, and the marketing tier's real

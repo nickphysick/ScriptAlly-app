@@ -45,7 +45,7 @@ import { WriteErrorCode, classifyWriteError, saveErrorCopy } from "../../lib/tod
 import { groupHousekeeping, hkGapCount, HkGroup, HkRule, HK_RULES, laterHideKey } from "../../lib/todoHousekeeping";
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
 import { sortLedgerDo, sortLedgerHk } from "../../lib/todoLedger";
-// VI P2 — the review cup (original ScriptAlly artwork; currentColor → inlined so it inherits ink)
+// VI P2 — the review cup (original QueryHawk artwork; currentColor → inlined so it inherits ink)
 import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";
 import { useConfirmAsk } from "./ConfirmAsk";
 import { HeroSession } from "./FocusedSession";

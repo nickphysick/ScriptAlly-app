@@ -30,7 +30,7 @@ export const MarketingFooter: React.FC<{
         <div className="mk-footbrand">
           <div className="mk-brand">
             <span className="mk-monogram">S</span>
-            <span className="mk-wordmark">ScriptAlly</span>
+            <span className="mk-wordmark">QueryHawk</span>
           </div>
           <p className="mk-foottag">{FOOTER_TAGLINE}</p>
         </div>
@@ -38,7 +38,7 @@ export const MarketingFooter: React.FC<{
         <div className="mk-footcol">
           <h4>Product</h4>
           <button type="button" onClick={() => onNavigate("pricing")}>Pricing</button>
-          <button type="button" onClick={openSignup}>Open ScriptAlly</button>
+          <button type="button" onClick={openSignup}>Open QueryHawk</button>
         </div>
 
         <div className="mk-footcol">
@@ -58,7 +58,7 @@ export const MarketingFooter: React.FC<{
       <div className="mk-footbase">
         {/* The year is read rather than written: a hardcoded one is wrong every January, and it is
             the single value on this page that has a correct answer the app already knows. */}
-        <span>© {new Date().getFullYear()} ScriptAlly · Made in the UK</span>
+        <span>© {new Date().getFullYear()} QueryHawk · Made in the UK</span>
         <span>{SITE_HOST}</span>
       </div>
     </footer>

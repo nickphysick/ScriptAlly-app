@@ -219,7 +219,7 @@ describe("§4 · the draft is the ONE template, and the nudge is one activity wi
 
   it("the derived line states record + unchanged status + never-sends, in the ref's words", () => {
     expect(page).toContain("Records a <b>Nudged</b> rung on the timeline. Status stays <b>{activeQuery.status}</b>.");
-    expect(page).toContain("draft is copied for your mail client — ScriptAlly never sends.");
+    expect(page).toContain("draft is copied for your mail client — QueryHawk never sends.");
   });
 });
 

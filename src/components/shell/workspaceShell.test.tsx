@@ -337,7 +337,7 @@ describe("the sidebar", () => {
   it("⚠️ the brand appears ONCE, in the sidebar, above the manuscript selector", () => {
     const html = at("/dashboard");
     expect(html).toContain('class="ws-bmark"');
-    expect(html).toContain("ScriptAlly");
+    expect(html).toContain("QueryHawk");
     expect(srcCode.indexOf('className="ws-brand"')).toBeLessThan(srcCode.indexOf('className="ws-phead"'));
     // and NOT in the breadcrumb
     expect(html).not.toContain("ws-logotype");

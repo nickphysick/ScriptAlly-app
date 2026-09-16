@@ -21,14 +21,15 @@ import { supportMailto } from "../lib/companyInfo";
    behind the burgundy rule — went with the layout that carried it, and so did the founding panel's
    own wording. The sign-up itself is unchanged and still mounted twice: the sealed band at the foot
    of this page and `/founders`.
-   ⚠️ THE HEADLINE'S LAST TWO WORDS ARE HELD ON ONE LINE BY `Hero.tsx`, at the brief's 11ch measure —
-   typesetting, not copy. This string stays whole, and the rendered heading is asserted back to it
-   word for word. */
-export const HERO_H1 = "A bird's-eye view of your querying campaign";
+   ⚠️ THE HEADLINE IS THREE WORDS NOW, AND THE HELD PAIR WENT WITH THE LONG ONE. "A bird's-eye view
+   of your querying campaign" needed its last two words held on one line at an 11ch measure, or it
+   broke four deep and stranded "campaign"; that phrase is the BAND's heading below, and this is a
+   short headline that wraps where it likes. `Hero.tsx` renders the string plainly — see its note. */
+export const HERO_H1 = "The hunt begins.";
 
 export const HERO_SUB =
-  "Every query, every agent, every reply — logged once and tracked to the end. No spreadsheet, " +
-  "no guesswork, nothing forgotten.";
+  "No more winging it. QueryHawk is your expert querying companion, ready to take you on a " +
+  "data-driven journey to land your manuscript in the right agent's hands.";
 
 /** The solid pill. It goes to `/founders`, which is where the sign-up it asks for lives. */
 export const HERO_CTA = "Become a founding writer";
@@ -49,21 +50,19 @@ export const HERO_LINK = "See how it works";
    action label — so a lock asserting the WORDING has left the site would be wrong. The claim is
    about the constants and the hero. */
 
-/* ══════════════ The parchment band's header ══════════════ */
+/* ══════════════ The status band, between the hero and the rows ══════════════ */
 
 /**
- * ⚠️ ONE PLAIN STRING — the word "pulse" is no longer a segment. It used to be marked so a blush
- * halo could animate behind it; the halo is replaced by the ECG trace running behind the WHOLE
- * heading, so there is nothing left to mark and a segment would only invite the halo back.
+ * ⚠️ THIS PHRASE MOVED DOWN THE PAGE RATHER THAN BEING WRITTEN (16 Sep). It was the hero's headline
+ * until the hero took "The hunt begins."; putting it here is what stops the two stating the same
+ * sentence twice, six hundred pixels apart.
  *
- * ⚠️ AND `and so much more…` IS DELETED. It was this heading's Caveat subtitle in the cream
- * section; the heading is the band's header now, and a subtitle under it competed with the first
- * feature row for the same job.
+ * ⚠️ AND IT REPLACED `PULSE_HEADING` AND `SECTION_EYEBROW`. "A finger on the pulse of your querying
+ * journey" and its mono eyebrow went with the ECG band they titled — the six status marks below
+ * this heading say what the trace was gesturing at, in the product's own vocabulary. The band has
+ * no eyebrow, no sub-copy and no CTA: one heading and the marks.
  */
-export const PULSE_HEADING = "A finger on the pulse of your querying journey";
-
-/** The break's mono eyebrow. One element, one string — delete both together if it ever goes. */
-export const SECTION_EYEBROW = "What ScriptAlly does";
+export const BAND_HEADING = "A bird's-eye view of your querying campaign";
 
 /* ⚠️ THE FEATURES HEADER IS DELETED AND SHOULD NOT COME BACK. `FEATURES_H2` ("The querying
    trenches, organised") and `FEATURES_SUB` ("Ditch the spreadsheet. It's time to get serious.")
@@ -89,7 +88,7 @@ export const SECTION_EYEBROW = "What ScriptAlly does";
 export const FOUNDING_EYEBROW = "Founding members";
 export const FOUNDING_HEADING = "Be one of the first hundred.";
 export const FOUNDING_BLURB =
-  "ScriptAlly opens in stages. Founding members get in first, keep every feature free through " +
+  "QueryHawk opens in stages. Founding members get in first, keep every feature free through " +
   "the beta, and help decide what gets built next.";
 
 /* ══════════════ The founding offer's perks ══════════════
@@ -140,12 +139,12 @@ export const FOUNDING_FULL =
   "next stage opens.";
 export const FOUNDING_ERROR: CopyRun[] = [
   "That didn't send. Check the address and try again, or ",
-  { link: "email us", mailto: supportMailto("ScriptAlly founding members") },
+  { link: "email us", mailto: supportMailto("QueryHawk founding members") },
   " and we'll add you by hand.",
 ];
 export const FOUNDING_DOWN: CopyRun[] = [
   "Sign-ups are briefly unavailable. Try again shortly, or ",
-  { link: "email us", mailto: supportMailto("ScriptAlly founding members") },
+  { link: "email us", mailto: supportMailto("QueryHawk founding members") },
   " and we'll add you by hand.",
 ];
 
@@ -164,7 +163,7 @@ export const FOUNDING_NOTE: CopyRun[] = [
   ".",
 ];
 
-export const DOCUMENT_TITLE = "ScriptAlly — Take control of your querying journey";
+export const DOCUMENT_TITLE = "QueryHawk — Take control of your querying journey";
 
 /**
  * Feature-row copy — six rows, top to bottom, each an illustration, a heading and ONE paragraph.
@@ -246,7 +245,7 @@ export const FEATURE_ROWS: FeatureRow[] = [
    key. The `founding` entry is additive and that page never sees it; `pro.price` and
    `pro.priceNote` are asserted there and must keep saying there is no payment path. */
 
-export const PRICING_DOCUMENT_TITLE = "ScriptAlly — Plans";
+export const PRICING_DOCUMENT_TITLE = "QueryHawk — Plans";
 export const PRICING_EYEBROW = "Pricing";
 export const PRICING_H1 = "Pick the plan that fits the search you're on.";
 export const PRICING_SUB =
@@ -315,7 +314,7 @@ export const PRICING_TIERS: PricingTier[] = [
     tag: "Available now · 100 places",
     price: "Free",
     priceUnit: "for six months",
-    summary: "For the hundred writers who put ScriptAlly through its paces.",
+    summary: "For the hundred writers who put QueryHawk through its paces.",
     /* ⚠️ NO FIGURE AND NO STRUCK-THROUGH PRICE. The ref draws "£0 for six months" against a
        struck "£7/mo" and then "half price for life"; both halves of that are arithmetic on a
        number nobody has set. `FOUNDING_RATE_AFTER` is where a real one goes. */

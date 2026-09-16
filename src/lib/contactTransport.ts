@@ -91,7 +91,7 @@ export function looksAutomated(draft: ContactDraft): boolean {
  * already carries a regression test for.
  */
 export function contactMailto(to: string, draft: ContactDraft): string {
-  const subject = `ScriptAlly — ${draft.topic}`;
+  const subject = `QueryHawk — ${draft.topic}`;
   const name = draft.name.trim();
   const body = [
     draft.message.trim(),

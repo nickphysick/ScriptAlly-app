@@ -732,7 +732,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
           <button type="button" className="tdb-ffcopy" onClick={() => { navigator.clipboard?.writeText(draft); setCopied(true); window.setTimeout(() => setCopied(false), 1400); }}>
             {copied ? "✓ Copied" : "⧉  Copy the draft"}
           </button>
-          <div className="tdb-ffsmall">ScriptAlly never sends anything for you. Copy it, send it from your own email, then record it below.</div>
+          <div className="tdb-ffsmall">QueryHawk never sends anything for you. Copy it, send it from your own email, then record it below.</div>
         </div>
       ),
       steps: [{
@@ -1079,7 +1079,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const needs: AgentDataNeed[] = ag ? agentDataQualityNeeds(ag) : [];
     if (step === 0) return sheet(
       <>
-        <div className="tdb-ffqsub">Clean data is how ScriptAlly judges fit and checks your package — worth most before you query. Fill what you know; skip what you don’t.</div>
+        <div className="tdb-ffqsub">Clean data is how QueryHawk judges fit and checks your package — worth most before you query. Fill what you know; skip what you don’t.</div>
         {whoRow(ag, c.initials)}
       </>,
       <>

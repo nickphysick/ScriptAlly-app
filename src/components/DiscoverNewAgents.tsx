@@ -711,7 +711,7 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
                 <span className="dv-eyebrow">Pro · Discover new agents</span>
                 <h2>The right agents are already looking for a book like yours.</h2>
                 <p className="lead">
-                  ScriptAlly scores every agent in its hand-checked catalogue against your
+                  QueryHawk scores every agent in its hand-checked catalogue against your
                   manuscript — genre, age category and wish-list overlap — and shows you why each
                   one fits before you query.
                 </p>

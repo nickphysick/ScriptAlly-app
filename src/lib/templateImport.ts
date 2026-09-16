@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The ScriptAlly template's parser — deterministic, client-side, and it makes NO network call.
+ * The QueryHawk template's parser — deterministic, client-side, and it makes NO network call.
  *
  * ⚠️ NO CLOUD FUNCTION, NO ANTHROPIC CALL, NO TASTER SPENT. That is the whole reason this path
  * exists beside Smart Import: the template's columns are set, so reading it needs no model, and a

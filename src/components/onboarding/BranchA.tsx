@@ -148,7 +148,7 @@ export const BranchA: React.FC<BranchAProps> = ({ onExit, onSaveReady, onSaveSti
             <circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v4h1" />
           </svg>
           <p style={{ fontFamily: FONT_SANS, fontSize: 12, lineHeight: 1.55, color: "#44563a", margin: 0 }}>
-            ScriptAlly comes into its own once you're ready to query. While you finish the book, get a
+            QueryHawk comes into its own once you're ready to query. While you finish the book, get a
             head start by researching agents who'd suit it — your manuscript stays right here.
           </p>
         </div>

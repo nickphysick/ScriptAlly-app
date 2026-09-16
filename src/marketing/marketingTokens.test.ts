@@ -220,7 +220,7 @@ describe("the founding band is the lower surface's only repaint", () => {
 
   it("and it is the only ground repaint under the wrapper", () => {
     /* Sections that sit inside `.mk-lower`, by the classes `Landing` renders there. */
-    const INSIDE = [".mk-sect", ".mk-featband", ".mk-beta", ".mk-foot"];
+    const INSIDE = [".mk-statband", ".mk-featband", ".mk-beta", ".mk-foot"];
     const painted = INSIDE.filter((sel) => /background(?!-image)\s*:/.test(ruleFor(sel)));
     expect(painted).toEqual([".mk-beta"]);
   });
@@ -237,37 +237,52 @@ describe("the founding band is the lower surface's only repaint", () => {
  * !important. Two classes outrank its `h1:not(.wsh-title)`; a normal declaration would not.
  */
 describe("the hero is two columns, and its shadow overflows on purpose", () => {
-  it("two equal columns, centred, clipped, and measured against itself", () => {
+  it("two equal columns, centred, clipped, in the feature rows' own container", () => {
     const hero = ruleFor(".mk-hero");
     expect(hero).toMatch(/grid-template-columns:\s*1fr 1fr/);
     expect(hero).toMatch(/align-items:\s*center/);
     expect(hero, "the clip is what makes the overflow safe").toMatch(/overflow:\s*hidden/);
-    expect(hero, "the headline sizes against the hero, never the viewport").toMatch(/container-type:\s*inline-size/);
     expect(hero).toMatch(/min-height:\s*660px/);
-    expect(ruleFor(".mk-herocopy")).toMatch(/padding:\s*0 40px 0 80px/);
+    expect(hero).toMatch(/margin:\s*0 auto/);
+    /* ⚠️ READ OFF `.mk-rows` RATHER THAN PINNED AS LITERALS ON BOTH SIDES. The claim is that the
+       page has ONE gutter, not that it has two numbers that happen to be 1180 and 56 today — a lock
+       spelling them twice goes green the day someone moves the rows and forgets the hero. */
+    const rows = ruleFor(".mk-rows");
+    const cap = /--mk-rows-cap:\s*(\d+px)/.exec(rows)![1];
+    const gutter = /--mk-rows-gutter:\s*(\d+px)/.exec(rows)![1];
+    expect(hero, "the hero caps where the rows cap").toContain("max-width: " + cap);
+    expect(hero, "and gutters where they gutter").toContain("padding: 0 " + gutter);
+    expect(ruleFor(".mk-herocopy"), "the container supplies the outer gutter now")
+      .toMatch(/padding:\s*0 40px 0 0/);
   });
 
   it("the art fills its column and the image leaves it", () => {
     expect(ruleFor(".mk-heroart")).toMatch(/height:\s*100%/);
     const img = ruleFor(".mk-heroart img");
     expect(img).toMatch(/position:\s*absolute/);
-    expect(img).toMatch(/right:\s*-14%/);
-    expect(img).toMatch(/width:\s*118%/);
-    expect(img, "the global image reset would cancel the 118% in silence").toMatch(/max-width:\s*none/);
+    /* Inside the container now: it leaves its own column into the gutter, not off the page. */
+    expect(img).toMatch(/right:\s*-6%/);
+    expect(img).toMatch(/width:\s*112%/);
+    expect(img, "the global image reset would cancel the 112% in silence").toMatch(/max-width:\s*none/);
     expect(img).toMatch(/opacity:\s*0?\.20/);
   });
 
-  it("the headline: Special Elite 400, important, on the brief's 11ch measure", () => {
+  it("the headline: Special Elite 400, important, at a flat 56px", () => {
     const h1 = ruleFor(".mk-hero .mk-herotitle");
     expect(h1).toMatch(/font-family:\s*"Special Elite", cursive !important/);
     expect(h1).toMatch(/font-weight:\s*400/);
-    expect(h1, "56px, stepping down only to keep the held pair in its column").toMatch(/font-size:\s*min\(56px,/);
+    expect(h1, "flat: there is no unbreakable run left to size against").toMatch(/font-size:\s*56px/);
     expect(h1).toMatch(/line-height:\s*1\.14/);
     expect(h1).toMatch(/letter-spacing:\s*-0\.01em/);
-    expect(h1).toMatch(/max-width:\s*11ch/);
     expect(h1).toMatch(/color:\s*var\(--mk-nearblack\)/);
-    expect(ruleFor(".mk-hero .mk-herotitle .mk-hkeep")).toMatch(/white-space:\s*nowrap/);
-    expect(ruleFor(".mk-hero .mk-herotitle .mk-hkeep"), "…in the heading's own family").toMatch(/font-family:\s*inherit/);
+    /* ⚠️ THE 11ch MEASURE, THE cqw STEP-DOWN AND `.mk-hkeep` WENT TOGETHER, AND THEIR ABSENCE IS THE
+       ASSERTION. All three existed for one reason — keeping the held pair "querying campaign" inside
+       a column half the hero wide. On "The hunt begins." the same machinery stops being protection
+       and becomes the fault: an unbreakable "hunt begins." forces the break in front of it and
+       strands "The". Re-adding any one of them is the regression this catches. */
+    expect(h1, "no measure for a three-word headline to be stranded against").not.toMatch(/max-width/);
+    expect(h1, "and no container-query step-down").not.toMatch(/cqw/);
+    expect(marketing, "the held-pair rule went with the span that carried it").not.toMatch(/mk-hkeep/);
   });
 
   it("the sub and the two actions carry their own family, because the injection sets theirs", () => {
@@ -296,7 +311,18 @@ describe("the hero is two columns, and its shadow overflows on purpose", () => {
     expect(block![1], "the copy takes a context of its own so the words stay above the shadow")
       .toMatch(/\.mk-herocopy\s*\{[^}]*z-index:\s*1/);
     expect(block![1], "the shadow is behind the copy, not beneath it").toMatch(/\.mk-heroart\s*\{[^}]*position:\s*absolute/);
-    expect(block![1]).toMatch(/\.mk-heroart img\s*\{\s*opacity:\s*0?\.12/);
+    /* ⚠️ THE RULE'S BODY, NOT ITS FIRST DECLARATION. This used to read
+       `/\.mk-heroart img\s*\{\s*opacity:/` — which pinned `opacity` as the OPENING property and went
+       red the moment two more were added in front of it, over a change that made the rule more
+       correct rather than less. That is a lock on a spelling; the claim is what the rule does.
+       ⚠️ AND THE SQUARING-UP IS PART OF THE CLAIM NOW. Stacked, the art box IS the hero rather than a
+       half-width column, so the desktop -6%/112% pushed the shadow 22.5px past the viewport at 375 —
+       clipped rather than scrolling, but still art cut off at the page edge. */
+    const stackedArt = /\.mk-heroart img\s*\{([^}]*)\}/.exec(block![1]);
+    expect(stackedArt, "the stacked block sizes the art").toBeTruthy();
+    expect(stackedArt![1], "quiet enough to sit behind the words").toMatch(/opacity:\s*0?\.12/);
+    expect(stackedArt![1], "squared up, or it runs past a phone's right edge").toMatch(/right:\s*0/);
+    expect(stackedArt![1]).toMatch(/width:\s*100%/);
   });
 });
 
@@ -534,7 +560,12 @@ describe("no base selector states the same property twice", () => {
     for (const m of baseCss.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)) {
       m[1].split(",").forEach((s) => sels.add(s.trim()));
     }
-    expect(sels.size, "base selectors scanned").toBeGreaterThan(300);
+    /* ⚠️ A FLOOR, NOT A COUNT, AND IT MOVED BECAUSE THE SHEET GOT SMALLER. It exists so a sweep that
+       matched nothing cannot pass as a clean result; 300 was set when the ECG band's dozen rules
+       were still in the file, and deleting them took the real figure to 297. Lowered to 250 rather
+       than re-pinned at 297 — a floor that tracks the exact current number fails on every
+       legitimate deletion and teaches the next reader to rebaseline it without looking. */
+    expect(sels.size, "base selectors scanned").toBeGreaterThan(250);
     expect(baseCss).not.toContain("@media");
   });
 
@@ -653,7 +684,9 @@ describe("the feature rows set their own type, and nothing else uses its familie
     /* ⚠️ THE HERO NAMES BOTH FAMILIES TOO SINCE 16 SEP, so this is no longer "exactly one rule" —
        it is exactly these rules. Sorted, because the assertion is the SET of owners rather than the
        order they happen to appear in the sheet. */
-    expect(ruleOwners("Special Elite").sort()).toEqual([".mk-frow h3", ".mk-hero .mk-herotitle"]);
+    /* Three owners since the status band took the same typewriter face for its heading (16 Sep). */
+    expect(ruleOwners("Special Elite").sort())
+      .toEqual([".mk-frow h3", ".mk-hero .mk-herotitle", ".mk-stattitle"]);
     expect(ruleOwners("Source Serif 4").sort()).toEqual([".mk-fcopy p", ".mk-herolink", ".mk-heropill", ".mk-herosub"]);
     const src = resolve(here, "..");
     const walk = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((d) =>

@@ -219,7 +219,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
             <div className="col-form">
               <div className="brand-lock">
                 <div className="chip"><QuillMark size={17} /></div>
-                <span className="word">ScriptAlly</span>
+                <span className="word">QueryHawk</span>
               </div>
 
               {view === "auth" ? (
@@ -228,7 +228,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
                   <p className="lead-s">
                     {isSignin
                       ? "Sign in to pick up your querying where you left off."
-                      : "Let’s put ScriptAlly to work on organising your pipeline."}
+                      : "Let’s put QueryHawk to work on organising your pipeline."}
                   </p>
 
                   <div className="seg" role="tablist">
@@ -336,7 +336,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
 
                   <div className="foot">
                     {isSignin ? (
-                      <>New to ScriptAlly? <button type="button" className="link" onClick={() => switchMode("signup")}>Create an account</button></>
+                      <>New to QueryHawk? <button type="button" className="link" onClick={() => switchMode("signup")}>Create an account</button></>
                     ) : (
                       <>Already have an account? <button type="button" className="link" onClick={() => switchMode("signin")}>Sign in</button></>
                     )}
@@ -396,7 +396,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
               <div className="feat-head">
                 <div className="feat-eyebrow">Query with confidence</div>
                 <h2 className="feat-h">Every query, request &amp; submission, slotted into a <em>clear, orderly database</em>.</h2>
-                <p className="feat-s">Build your agent list, curate your submission packages, set reminders for important dates — ScriptAlly tracks your querying journey from start to finish, so you can get back to writing.</p>
+                <p className="feat-s">Build your agent list, curate your submission packages, set reminders for important dates — QueryHawk tracks your querying journey from start to finish, so you can get back to writing.</p>
               </div>
               <div className="preview-wrap">
                 <LoginDashboardPreview />

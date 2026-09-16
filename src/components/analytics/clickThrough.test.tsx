@@ -108,7 +108,7 @@ describe("the share card", () => {
     const html = render();
     expect(html).toContain("Murphy&#x27;s Day Out — the journey so far");
     for (const s of ["Queried", "Material requested", "Full manuscript", "Offer"]) expect(html).toContain(s);
-    expect(html).toContain("Tracked with ScriptAlly");
+    expect(html).toContain("Tracked with QueryHawk");
     expect(html).toMatch(/\d+ \w+ 2026/);
   });
 

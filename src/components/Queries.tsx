@@ -2617,7 +2617,7 @@ export const Queries: React.FC<{
   })();
   const deskNudgeDerived = activeQuery ? (
     <>Records a <b>Nudged</b> rung on the timeline. Status stays <b>{activeQuery.status}</b>. The
-      draft is copied for your mail client — ScriptAlly never sends.</>
+      draft is copied for your mail client — QueryHawk never sends.</>
   ) : null;
 
   /**
@@ -4184,7 +4184,7 @@ export const Queries: React.FC<{
   };
 
   const handleExportFilteredCSV = () => {
-    exportQueriesToCSV(sortedList, `ScriptAlly_Filtered_Queries_${new Date().toISOString().slice(0, 10)}`);
+    exportQueriesToCSV(sortedList, `QueryHawk_Filtered_Queries_${new Date().toISOString().slice(0, 10)}`);
   };
 
   const renderContextualActionBanner = () => null;
@@ -4343,7 +4343,7 @@ export const Queries: React.FC<{
         doc.line(margin, yPos, pageWidth - margin, yPos);
       };
 
-      const logoImg = document.querySelector('nav img, header img, .logo img, img[alt*="ScriptAlly"], img[alt*="Script"]') as HTMLImageElement | null;
+      const logoImg = document.querySelector('nav img, header img, .logo img, img[alt*="QueryHawk"], img[alt*="Script"]') as HTMLImageElement | null;
       if (logoImg && logoImg.naturalWidth && logoImg.naturalHeight) {
         const logoCanvas = document.createElement('canvas');
         logoCanvas.width = logoImg.naturalWidth;
@@ -4358,11 +4358,11 @@ export const Queries: React.FC<{
           y += logoH + 4;
         } else {
           doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.setTextColor(124, 61, 61);
-          doc.text('ScriptAlly', 105, y, { align: 'center' }); y += 8;
+          doc.text('QueryHawk', 105, y, { align: 'center' }); y += 8;
         }
       } else {
         doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.setTextColor(124, 61, 61);
-        doc.text('ScriptAlly', 105, y, { align: 'center' }); y += 8;
+        doc.text('QueryHawk', 105, y, { align: 'center' }); y += 8;
       }
 
       doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(201, 168, 158);
@@ -4464,7 +4464,7 @@ export const Queries: React.FC<{
 
       checkPageBreak(10); y += 4; addLine(y); y += 6;
       doc.setFontSize(10); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'normal');
-      doc.text('ScriptAlly', margin, y);
+      doc.text('QueryHawk', margin, y);
       doc.text(`Generated ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`, pageWidth - margin, y, { align: 'right' });
 
       const pdfFilename = `${(agentName || 'agent').toLowerCase().replace(/\s+/g, '-')}-${(manuscriptTitle || 'manuscript').toLowerCase().replace(/\s+/g, '-')}-query.pdf`;
@@ -5419,7 +5419,7 @@ export const Queries: React.FC<{
            <button
              type="button"
              onClick={() => {
-               exportQueriesToCSV(queries, `ScriptAlly_Queries_${new Date().toISOString().slice(0, 10)}`);
+               exportQueriesToCSV(queries, `QueryHawk_Queries_${new Date().toISOString().slice(0, 10)}`);
              }}
              className="w-full py-2 px-3 bg-white hover:bg-[#FAF1EF] text-[#7c3a2a] border border-[#d1d5db] rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-3xs"
            >

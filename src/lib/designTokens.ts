@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ScriptAlly design tokens — the single source of truth for the parchment design system.
+ * QueryHawk design tokens — the single source of truth for the parchment design system.
  *
  * Status colours below are consumed by the canonical StatusDot component as SVG attribute
  * values. IMPORTANT (known footgun): critical colours/borders must be applied as inline

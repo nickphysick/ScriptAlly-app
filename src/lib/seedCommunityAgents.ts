@@ -619,9 +619,9 @@ export async function seedCommunityAgentsIfEmpty(currentUid?: string): Promise<v
       }
     }
     if (seededCount > 0) {
-      console.log(`[ScriptAlly Seeding] Seeded ${seededCount} missing community agent records.`);
+      console.log(`[QueryHawk Seeding] Seeded ${seededCount} missing community agent records.`);
     }
   } catch (error) {
-    console.error("[ScriptAlly Seeding] Failed seeding communityAgents collection:", error);
+    console.error("[QueryHawk Seeding] Failed seeding communityAgents collection:", error);
   }
 }

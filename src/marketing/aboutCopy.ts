@@ -16,10 +16,10 @@
 
 import { CopyRun } from "./CopyRuns";
 
-export const ABOUT_DOCUMENT_TITLE = "About — ScriptAlly";
+export const ABOUT_DOCUMENT_TITLE = "About — QueryHawk";
 
 /* ══════════════ The mission hero ══════════════
-   ⚠️ "Hello, we're ScriptAlly." IS GONE AND WAS NOT RELOCATED. The page used to open by
+   ⚠️ "Hello, we're QueryHawk." IS GONE AND WAS NOT RELOCATED. The page used to open by
    introducing the company; it opens with the reason the company exists instead. There is nowhere
    else on the page that sentence belongs, and moving it somewhere would be the compromise the
    change was made to avoid. */
@@ -53,7 +53,7 @@ export const ABOUT_GAP_HIT = "That gap is where good stories go to die.";
 export const ABOUT_TURN = "So, why don't we bridge it?";
 
 /** The centred header that owns the break above the vision rows. */
-export const ABOUT_SECTION_H2 = "Why ScriptAlly exists";
+export const ABOUT_SECTION_H2 = "Why QueryHawk exists";
 
 export interface VisionBand {
   key: string;
@@ -70,7 +70,7 @@ export const ABOUT_VISIONS: VisionBand[] = [
     heading: "Simplify the querying process.",
     body: [
       "Who you've queried, what you sent, when a nudge is due, which version went where — the " +
-      "search generates a hundred small facts, and losing one costs you. ScriptAlly keeps every " +
+      "search generates a hundred small facts, and losing one costs you. QueryHawk keeps every " +
       "fact in its place, so the state of your search is one glance away instead of one " +
       "spreadsheet archaeology dig.",
     ],
@@ -84,7 +84,7 @@ export const ABOUT_VISIONS: VisionBand[] = [
       "process defeated the writer. Queries fizzle out half-sent, nudges never happen, promising " +
       "fulls sit forgotten. We think of that as ",
       { b: "story waste" },
-      ", and it's the thing ScriptAlly exists to reduce: a search that stays organised is a search " +
+      ", and it's the thing QueryHawk exists to reduce: a search that stays organised is a search " +
       "that gets finished.",
     ],
   },
@@ -94,13 +94,13 @@ export const ABOUT_VISIONS: VisionBand[] = [
     heading: "Give writers more time to write.",
     body: [
       "Every hour spent maintaining a tracking spreadsheet is an hour not spent on the next book. " +
-      "ScriptAlly takes the admin — the dates, the counts, the who-has-what — so the only thing " +
+      "QueryHawk takes the admin — the dates, the counts, the who-has-what — so the only thing " +
       "left on your desk is the writing.",
     ],
   },
 ];
 
-export const ABOUT_COMMITMENTS_EYEBROW = "How ScriptAlly behaves";
+export const ABOUT_COMMITMENTS_EYEBROW = "How QueryHawk behaves";
 
 export interface Commitment {
   heading: string;
@@ -111,7 +111,7 @@ export const ABOUT_COMMITMENTS: Commitment[] = [
   {
     heading: "It reports; it never appraises.",
     body:
-      "ScriptAlly states facts about your search — dates, counts, waits. It never grades your " +
+      "QueryHawk states facts about your search — dates, counts, waits. It never grades your " +
       "manuscript or scores your chances. That's between you and your work.",
   },
   {
@@ -129,7 +129,7 @@ export const ABOUT_COMMITMENTS: Commitment[] = [
 ];
 
 export const ABOUT_FOUNDER_BODY: CopyRun[] = [
-  "ScriptAlly is designed, built, and run by one person, from the UK, around a manuscript of his " +
+  "QueryHawk is designed, built, and run by one person, from the UK, around a manuscript of his " +
   "own. If you write in, it's him who answers — ",
   { link: "say hello", to: "contact" },
   ".",

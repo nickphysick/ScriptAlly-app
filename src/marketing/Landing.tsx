@@ -18,7 +18,7 @@
 
 import React, { useEffect } from "react";
 import { Hero } from "./Hero";
-import { BandHeader } from "./BandHeader";
+import { StatusBand } from "./StatusBand";
 import { FeatureRows } from "./FeatureRows";
 import { FoundingBand } from "./FoundingBand";
 import { MarketingFooter } from "./MarketingFooter";
@@ -38,7 +38,7 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
           app's content ground above it and the boundary is marked by the colour change alone —
           there is deliberately no rule at the join. */}
       <div className="mk-lower">
-        <BandHeader />
+        <StatusBand />
         <FeatureRows />
         <FoundingBand onNavigate={onNavigate} />
       {/* ⚠️ LINKS, NOT SPANS. These were inert text for as long as the pages did not exist — which

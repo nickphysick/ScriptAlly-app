@@ -12,11 +12,11 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * communityStats — the CONTRACT for comparing a writer's results against other ScriptAlly writers,
+ * communityStats — the CONTRACT for comparing a writer's results against other QueryHawk writers,
  * and a flag that keeps the whole surface switched off.
  *
  * ⚠️ THIS DATA DOES NOT EXIST. There is no aggregation pipeline, and pre-launch there is no community
- * to aggregate. The design reference shows percentile claims ("higher than 78% of ScriptAlly
+ * to aggregate. The design reference shows percentile claims ("higher than 78% of QueryHawk
  * writers", "TOP 10%", "BEATS 71%") — those figures are illustrative placeholders in the mock, and
  * this module exists so the presentation layer can be built without any of them becoming real-looking
  * in the product. See reports/community-percentiles.md for what a real pipeline would need.
@@ -96,7 +96,7 @@ export function displayablePercentile(
 
 /** The ranking sentence. Kept here so the wording can never drift into a causal claim. */
 export const percentileSentence = (p: DisplayablePercentile, subject: string): string =>
-  `This ${subject}'s reply rate is higher than ${p.percentile}% of comparable ${subject}s in the ScriptAlly community.`;
+  `This ${subject}'s reply rate is higher than ${p.percentile}% of comparable ${subject}s in the QueryHawk community.`;
 
 /** The pill label ("TOP 10%" past the ninetieth, otherwise "BEATS 71%"). */
 export const percentileLabel = (p: DisplayablePercentile): string =>

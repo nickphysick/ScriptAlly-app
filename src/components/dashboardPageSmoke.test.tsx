@@ -22,7 +22,7 @@ describe("/dashboard renders", () => {
     expect(() => renderPage(page())).not.toThrow();
   });
 
-  /* ⚠️ RETARGETED (one-screen dashboard): the guided "Welcome to ScriptAlly" panel is replaced
+  /* ⚠️ RETARGETED (one-screen dashboard): the guided "Welcome to QueryHawk" panel is replaced
      by §9's DAY ONE — Getting started kicker, the chart as an invitation, the ghost CTAs. */
   it("…and produces the day-one chrome, so it is not an empty shell that merely did not crash", () => {
     const html = renderPage(page());

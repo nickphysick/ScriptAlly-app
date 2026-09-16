@@ -890,7 +890,7 @@ const CoachmarkIntro: React.FC<{
   // "{x} need a check" + a single warm reason line — used by both the agents (gold) and queries (pink)
   // intros; only the ring/dot colour differs by tier.
   const checkHd = checkCount === 1 ? "One needs a check" : `${checkCount} need a check`;
-  const checkBody = <>We're missing some details we need to give you the best possible ScriptAlly experience. <b>Let's work through these now — it won't take a second.</b></> as React.ReactNode;
+  const checkBody = <>We're missing some details we need to give you the best possible QueryHawk experience. <b>Let's work through these now — it won't take a second.</b></> as React.ReactNode;
   const checkBase = gold
     ? { ring: "#e5d29a", dot: "!", dotBg: { background: "#f4ead0", color: "#6f5618" }, hd: checkHd, body: checkBody }
     : { ring: "#e8c8bc", dot: "✦", dotBg: { background: "#f5e2da", color: "#7c3a2a" }, hd: checkHd, body: checkBody };
@@ -1428,7 +1428,7 @@ const BANNER: Record<"agents" | "queries", { line: React.ReactNode; faqs: Banner
     faqs: [
       { q: "Do I have to add dates?", a: "No — dates are optional. Anything missing just says ‘add a date for full tracking’, and you can fill it any time." },
       { q: "What does ‘to check’ mean?", a: "We weren't fully sure how to read something — give it a glance and mark it checked." },
-      { q: "What happens when I import?", a: "Your agents and their queries are added to ScriptAlly with their statuses and any dates you've set." },
+      { q: "What happens when I import?", a: "Your agents and their queries are added to QueryHawk with their statuses and any dates you've set." },
       { q: "Why are some queries not included?", a: "Queries for agents you removed aren't imported — they're listed at the bottom for reference." },
     ],
   },
@@ -1677,7 +1677,7 @@ export const OnbNav: React.FC<{ userInitial: string }> = ({ userInitial }) => (
   <nav style={{ height: 76, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 100px", background: "#fdfaf5", borderBottom: "1px solid #e8dfd1", position: "sticky", top: 0, zIndex: 40 }}>
     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
       <img src="/scriptally-logo-v2.png" alt="" aria-hidden="true" style={{ height: 34, width: "auto", display: "block" }} />
-      <img src="/scriptally-title-v2.png" alt="ScriptAlly" style={{ height: 34, width: "auto", display: "block", maxWidth: "none" }} />
+      <img src="/scriptally-title-v2.png" alt="QueryHawk" style={{ height: 34, width: "auto", display: "block", maxWidth: "none" }} />
     </div>
     <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
       <button aria-label="Search" style={{ background: "none", border: "none", color: "#b1a596", cursor: "pointer", padding: 8, borderRadius: 8, lineHeight: 0 }}

@@ -49,7 +49,7 @@ const warnUnknownType = (value: string): void => {
   if (warnedTypes.has(value)) return;
   warnedTypes.add(value);
   console.warn(
-    `[ScriptAlly] timeline: activity type "${value}" is not in this build's ActivityType. `
+    `[QueryHawk] timeline: activity type "${value}" is not in this build's ActivityType. `
     + `Its events are drawn as "unknown" and cut from the story feed rather than guessed at — `
     + `this client is older than the record.`,
   );

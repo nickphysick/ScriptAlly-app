@@ -14,20 +14,20 @@ const labels = (p: string) => crumbForPath(p)?.map((s) => s.label).join(" / ");
 
 describe("crumbForPath — the route table", () => {
   it("renders the pack's crumb string per route", () => {
-    expect(labels("/queries")).toBe("SCRIPTALLY / QUERYING / QUERIES HUB");
-    expect(labels("/todo")).toBe("SCRIPTALLY / QUERYING / TO-DO");
-    expect(labels("/agents")).toBe("SCRIPTALLY / AGENTS / AGENT LIST"); // DATABASE → CONTACT LIST → AGENT LIST
-    expect(labels("/agents/discover")).toBe("SCRIPTALLY / AGENTS / DISCOVER");
-    expect(labels("/manuscripts")).toBe("SCRIPTALLY / MANUSCRIPTS / YOUR MANUSCRIPTS");
-    expect(labels("/manuscripts/comps")).toBe("SCRIPTALLY / MANUSCRIPTS / COMPARABLE TITLES");
-    expect(labels("/manuscripts/packages")).toBe("SCRIPTALLY / MANUSCRIPTS / SUBMISSION PACKAGES");
-    expect(labels("/import")).toBe("SCRIPTALLY / IMPORT");
+    expect(labels("/queries")).toBe("QUERYHAWK / QUERYING / QUERIES HUB");
+    expect(labels("/todo")).toBe("QUERYHAWK / QUERYING / TO-DO");
+    expect(labels("/agents")).toBe("QUERYHAWK / AGENTS / AGENT LIST"); // DATABASE → CONTACT LIST → AGENT LIST
+    expect(labels("/agents/discover")).toBe("QUERYHAWK / AGENTS / DISCOVER");
+    expect(labels("/manuscripts")).toBe("QUERYHAWK / MANUSCRIPTS / YOUR MANUSCRIPTS");
+    expect(labels("/manuscripts/comps")).toBe("QUERYHAWK / MANUSCRIPTS / COMPARABLE TITLES");
+    expect(labels("/manuscripts/packages")).toBe("QUERYHAWK / MANUSCRIPTS / SUBMISSION PACKAGES");
+    expect(labels("/import")).toBe("QUERYHAWK / IMPORT");
   });
 
   it("is pathname-only (the ?q= deep-selection route keeps the QUERIES HUB crumb)", () => {
     // The router hands the strip location.pathname — /queries?q=abc has pathname /queries.
-    expect(labels("/queries")).toBe("SCRIPTALLY / QUERYING / QUERIES HUB");
-    expect(labels("/queries/")).toBe("SCRIPTALLY / QUERYING / QUERIES HUB");
+    expect(labels("/queries")).toBe("QUERYHAWK / QUERYING / QUERIES HUB");
+    expect(labels("/queries/")).toBe("QUERYHAWK / QUERYING / QUERIES HUB");
   });
 
   it("dashboard is EXEMPT (its floating top bar owns that band) — and unknowns render nothing", () => {
@@ -43,7 +43,7 @@ describe("crumbForPath — the route table", () => {
   it("every segment except the last navigates; the last is inert; root goes to the desk", () => {
     for (const p of ["/queries", "/todo", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/import"]) {
       const segs = crumbForPath(p)!;
-      expect(segs[0]).toEqual({ label: "SCRIPTALLY", tab: "dashboard" });
+      expect(segs[0]).toEqual({ label: "QUERYHAWK", tab: "dashboard" });
       for (const seg of segs.slice(0, -1)) expect(seg.tab).toBeTruthy();
       expect(segs[segs.length - 1].tab).toBeUndefined();
     }

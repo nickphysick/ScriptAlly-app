@@ -4,7 +4,7 @@
  *
  * todoHandoff — where the work actually happens (rail + workspace, Phase 5).
  *
- * ⚠️ SCRIPTALLY DOES NOT SEND ANYTHING, AND THIS MODULE IS THE APP ADMITTING IT. The send happens
+ * ⚠️ QUERYHAWK DOES NOT SEND ANYTHING, AND THIS MODULE IS THE APP ADMITTING IT. The send happens
  * in the writer's own email client or on the agency's portal; the app's job is to hand them over
  * with the recipient and the subject already composed, and then to be told what happened. A page
  * that quietly implied it had sent the full would be lying about the one act that matters.

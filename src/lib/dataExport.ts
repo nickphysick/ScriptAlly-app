@@ -84,7 +84,7 @@ export interface ExportBundle {
   format: 1;
   exportedAt: string;
   /** What produced it — a file found on a hard drive in three years should say where it came from. */
-  source: "ScriptAlly";
+  source: "QueryHawk";
   data: ExportSources;
 }
 
@@ -96,7 +96,7 @@ export function buildExport(sources: ExportSources, now: Date): ExportBundle {
   return {
     format: 1,
     exportedAt: now.toISOString(),
-    source: "ScriptAlly",
+    source: "QueryHawk",
     data: {
       user: sources.user ?? null,
       manuscripts: sources.manuscripts ?? [],
@@ -111,9 +111,9 @@ export function buildExport(sources: ExportSources, now: Date): ExportBundle {
   };
 }
 
-/** `ScriptAlly-export-2026-08-17.json` — dated, because a writer will end up with several. */
+/** `QueryHawk-export-2026-08-17.json` — dated, because a writer will end up with several. */
 export function exportFilename(now: Date): string {
-  return `ScriptAlly-export-${now.toISOString().slice(0, 10)}.json`;
+  return `QueryHawk-export-${now.toISOString().slice(0, 10)}.json`;
 }
 
 /**

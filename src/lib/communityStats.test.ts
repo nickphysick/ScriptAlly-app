@@ -78,7 +78,7 @@ describe("copy discipline", () => {
     expect(percentileLabel({ percentile: 94, cohortSize: 100 })).toBe("TOP 6%");
     expect(percentileLabel({ percentile: 71, cohortSize: 100 })).toBe("BEATS 71%");
     const sentence = percentileSentence({ percentile: 78, cohortSize: 100 }, "package");
-    expect(sentence).toBe("This package's reply rate is higher than 78% of comparable packages in the ScriptAlly community.");
+    expect(sentence).toBe("This package's reply rate is higher than 78% of comparable packages in the QueryHawk community.");
     expect(sentence).not.toMatch(/because|caused|thanks to|leads to/i);
   });
 });

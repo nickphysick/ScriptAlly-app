@@ -21,7 +21,7 @@ import {
   TEMPLATE_STATUS_COMMENT, TEMPLATE_COMMENT_PREFIX,
 } from "./templateColumns";
 
-export const TEMPLATE_FILENAME = "ScriptAlly-template.xlsx";
+export const TEMPLATE_FILENAME = "QueryHawk-template.xlsx";
 
 /** The rows the sheet ships with: headings, the hint row, and one marked example. */
 export function templateRows(): string[][] {

@@ -361,7 +361,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 
 /* ⚠️ 1080, RAISED FROM 960 ON 16 SEP, AND IT IS MEASURED RATHER THAN CHOSEN — AS 960 WAS.
    The QueryHawk pass widened the brand by about 88px: the mark went 34 → 40px, the wordmark became
-   SCRIPTALLY set in a WIDE grotesque at caps (180.2px of ink where Playfair's mixed case was far
+   QUERYHAWK set in a WIDE grotesque at caps (180.2px of ink where Playfair's mixed case was far
    narrower), and the links went 1.06 → 1.15rem. The nav's content is now 938px against the 831.7px
    the 960 boundary was measured for, and that boundary only ever carried 17.3px of slack — so any
    growth at all breaks it. Measured slack against available width, links showing:
@@ -428,39 +428,41 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 
 /* ═══════════════ Landing page (design-refs/landing-v13.html, values verbatim) ═══════════════ */
 
-/* ── Hero: a copy column beside the hawk's shadow (brief, 16 Sep) ──
-   Two equal columns, vertically centred, full width — no container cap, because the shadow is meant
-   to run off the right-hand edge of the page rather than stop at a measure.
-   ⚠️ `overflow: hidden` IS WHAT MAKES THE OVERFLOW SAFE. The image is 118% of its column and pushed
-   14% further right, so it leaves the hero on purpose; clipping it here is what keeps that off the
-   document's scroll width. Without it the page gains a horizontal scrollbar at every width.
-   ⚠️ `container-type` IS FOR THE HEADLINE'S SIZE, NOT FOR THE ART. The held pair must fit the copy
-   column, so the size is computed from the hero's own width — cqw, never vw, because vw counts a
-   classic scrollbar as room the column does not have. */
+/* ── Hero: a copy column beside the hawk's shadow ──
+   ⚠️ IT SHARES THE FEATURE ROWS' CONTAINER. 1180px capped, 56px gutters, centred — the SAME two
+   numbers `.mk-rows` uses, so the page has one gutter rather than two that merely look alike. It
+   was full-bleed with an 80px pad on the copy, which put the headline hard against the page's left
+   edge while the shadow ran off the right: one block reading as two different margins.
+   ⚠️ `overflow: hidden` STAYS AS THE BACKSTOP. The shadow is sized to sit inside the container now,
+   so nothing should need clipping — but the clip is the guarantee that the art can never reach the
+   document's scroll width, and keeping it costs nothing.
+   ⚠️ `container-type` WENT WITH THE HEADLINE THAT NEEDED IT. It existed so the size could be
+   computed from the hero's own width in cqw; the headline is three short words at a flat 56px now
+   and measures against nothing. */
 .mk-hero {
-  position: relative; overflow: hidden; container-type: inline-size;
+  max-width: 1180px; margin: 0 auto; padding: 0 56px;
+  position: relative; overflow: hidden;
   display: grid; grid-template-columns: 1fr 1fr; align-items: center;
   min-height: 660px;
 }
-.mk-herocopy { padding: 0 40px 0 80px; min-width: 0; }
+/* The container supplies the outer gutter now; this is only the gap across to the art column. */
+.mk-herocopy { padding: 0 40px 0 0; min-width: 0; }
 
 /* ⚠️ THE FAMILY IS !important, AND IT HAS TO BE. src/lib/brand.tsx injects a style element at runtime,
    on every route, whose heading rule gives every bare h1, h2 and h3 the brand heading font with
    !important — so without the flag this family never reaches the page. Between two important
    declarations specificity decides, and .mk-hero .mk-herotitle (two classes) outranks the
-   injection's h1:not(.wsh-title). The held run inherits for the same reason: the injection's plain
-   span rule would otherwise set those two words in the body sans.
-   ⚠️ THE SIZE IS CAPPED AT THE BRIEF'S 56px AND STEPS DOWN ONLY TO KEEP THE HELD PAIR IN ITS COLUMN.
-   "querying campaign" is 9.54x the font-size wide; the column's text box is half the hero less its
-   120px of padding. So 56px holds from ~1310px of hero width, ~41px at 1024, and the three lines
-   never change — the measure is in the heading's own ch, so it scales with the type. */
+   injection's h1:not(.wsh-title).
+   ⚠️ A FLAT 56px NOW, AND THE 11ch MEASURE, THE cqw STEP-DOWN AND `.mk-hkeep` ALL WENT TOGETHER.
+   Every one of them existed to keep "querying campaign" — a held, unbreakable pair — inside a column
+   half the hero wide. The headline is "The hunt begins.": three short words, nothing held, nothing
+   that can be stranded. The span is no longer rendered, so a rule for it would style nothing. */
 .mk-hero .mk-herotitle {
   font-family: "Special Elite", cursive !important; font-weight: 400;
-  font-size: min(56px, calc((50cqw - 120px) / 9.6));
+  font-size: 56px;
   line-height: 1.14; letter-spacing: -0.01em; color: var(--mk-nearblack);
-  max-width: 11ch; margin: 0;
+  margin: 0;
 }
-.mk-hero .mk-herotitle .mk-hkeep { white-space: nowrap; font-family: inherit; }
 .mk-herosub {
   font-family: "Source Serif 4", Georgia, serif; font-weight: 400; font-size: 20px;
   line-height: 1.7; color: var(--mk-nearblack); max-width: 480px; margin: 26px 0 0;
@@ -480,8 +482,11 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 /* ⚠️ THE IMAGE OVERFLOWS ITS COLUMN BY DESIGN, AND `max-width: none` IS LOAD-BEARING. The global
    image reset caps every img at 100% of its box, which would cancel the 118% silently. */
 .mk-heroart { position: relative; height: 100%; }
+/* ⚠️ THE OVERFLOW IS INTO THE GUTTER NOW, NOT OFF THE PAGE. At -14%/118% the shadow cleared the
+   viewport's right edge, which is what made the hero read as uncentred; inside a 1180px container
+   it leaves its own column by ~32px at 1440 and stops well short of the page edge. */
 .mk-heroart img {
-  position: absolute; top: 50%; right: -14%; width: 118%; max-width: none;
+  position: absolute; top: 50%; right: -6%; width: 112%; max-width: none;
   transform: translateY(-50%); opacity: 0.20; display: block;
 }
 
@@ -523,12 +528,17 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    on. The copy takes a stacking context of its own so the words stay above it. */
 @media (max-width: 900px) {
   .mk-hero {
-    grid-template-columns: 1fr; min-height: 0; padding: 56px 0 64px;
+    grid-template-columns: 1fr; min-height: 0; padding: 56px 26px 64px;
   }
-  .mk-herocopy { position: relative; z-index: 1; padding: 0 26px; }
-  .mk-hero .mk-herotitle { font-size: min(56px, calc((100cqw - 52px) / 9.6)); }
+  .mk-herocopy { position: relative; z-index: 1; padding: 0; }
+  /* A flat step rather than a computed one: there is no unbreakable run left to fit. */
+  .mk-hero .mk-herotitle { font-size: 40px; }
   .mk-heroart { position: absolute; inset: 0; height: 100%; z-index: 0; pointer-events: none; }
-  .mk-heroart img { opacity: 0.12; }
+  /* ⚠️ SQUARED UP HERE, OR THE SHADOW RUNS OFF A PHONE. Stacked, the art box IS the hero rather than
+     a half-width column, so the desktop -6%/112% pushed the image 22.5px past the viewport at 375.
+     It never scrolled — the hero clips it — but clipped art at the page edge is the same fault the
+     desktop change was made to fix, just quieter. */
+  .mk-heroart img { right: 0; width: 100%; opacity: 0.12; }
 }
 
 
@@ -551,70 +561,56 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    76.5px behind the bar. The mobile value differs because the nav re-wraps to 92px, and the
    override is tied to the SAME breakpoint at which `.mk-links` hides — so the two cannot drift
    apart without someone seeing both. */
-/* ⚠️ DORMANT, DELIBERATELY — DO NOT SWEEP THIS AS DEAD CODE. `Learn more` was the only in-page
-   anchor on the site and it left with the hero's actions row, so `scroll-margin-top` currently has
-   nothing to serve and `--mk-nav-h` currently has no other reader. Both are kept because they are
-   RIGHT and were expensive to get right: the token is derived from the CONDENSED nav height, and
-   the intuition is inverted — see the token's own note, where the measurement is. Delete them and
-   the next person to add an anchor re-derives the offset from scratch and gets it wrong the same
-   way, because "the nav has already condensed by the time the scroll happens" is the reading that
-   sounds correct and is not. Any future in-page anchor on any marketing page is already served. */
-.mk-sect { position: relative; padding: 70px 0 96px; scroll-margin-top: var(--mk-nav-h); }
-.mk-sectinner { max-width: 1300px; margin: 0 auto; padding: 0 56px; }
-.mk-seyebrow {
-  font-family: "JetBrains Mono", monospace; font-size: .66rem; letter-spacing: .26em;
-  text-transform: uppercase; color: var(--mk-muted); margin: 0 0 20px;
-  position: relative; z-index: 2; text-align: center;
+/* ── The status band: the break between the hero and the feature rows ──
+   ⚠️ IT REPLACED THE ECG BAND, WHICH IS DELETED ENTIRELY: `.mk-sect`, `.mk-sectinner`,
+   `.mk-seyebrow`, `.mk-sect h2`, the whole `.mk-ecg` trace with its radial mask, the `mkSweep`
+   sweep, the reduced-motion still and the 900px block that hid it. Nothing rendered any of them
+   once `BandHeader.tsx` went — checked by grep before the deletion rather than inferred from the
+   diff, because `.mk-sectitle` is LEGALPAGE'S heading and shares the prefix.
+   ⚠️ `scroll-margin-top` IS LIVE AGAIN, AND THE NOTE IT REPLACES SAID IT WAS DORMANT. The hero's
+   "See how it works" is an in-page jump to `#pulse`, which this section now carries, so the offset
+   has something to serve for the first time since the statement hero went. `--mk-nav-h` is derived
+   from the FULL nav height, not the condensed one — the browser computes the target before the
+   condense runs, so the intuition is inverted; the measurement is at the token. */
+.mk-statband {
+  max-width: 1180px; margin: 0 auto; padding: 96px 56px 80px;
+  border-top: 1px solid var(--mk-hair);
+  text-align: center;
+  scroll-margin-top: var(--mk-nav-h);
 }
-/* ⚠️ NO `background` ON THIS HEADING, DELIBERATELY, AND DO NOT PUT A TIGHTER RECTANGLE BACK.
-   It used to paint a parchment gradient to clear itself space in the trace. A rectangle is always
-   wider and taller than the letterforms it covers, so it reads as a visible block — and it only
-   ever passed review because the band behind it happened to be the same colour. The moment the
-   page became two surfaces it was a pale slab across the section. Space is cleared by MASKING the
-   trace below, which paints over nothing and does not care what colour is behind it. */
-.mk-sect h2 {
-  font-family: "Playfair Display", Georgia, serif; font-weight: 600; color: var(--mk-nearblack);
-  font-size: clamp(1.9rem, 3.2vw, 2.8rem); line-height: 1.2; letter-spacing: -.018em;
-  margin: 0 auto; max-width: 24ch; position: relative; z-index: 2; text-align: center;
-  padding: 0 10px;
+/* ⚠️ THE FAMILY IS !important FOR THE SAME REASON THE HERO'S AND THE ROWS' ARE: brand.tsx injects a
+   runtime rule giving every bare h2 the brand heading font with !important, and only a selector of
+   two classes outranks it. Without the flag this heading silently draws in Playfair. */
+.mk-stattitle {
+  font-family: "Special Elite", cursive !important; font-weight: 400;
+  font-size: 38px; line-height: 1.2; letter-spacing: -0.005em;
+  color: var(--mk-nearblack); margin: 0; white-space: nowrap;
 }
+/* The six marks: one row, evenly spaced, quiet enough to read as punctuation rather than as UI. */
+.mk-statglyphs {
+  display: flex; justify-content: center; align-items: center; gap: 34px;
+  margin: 34px 0 0; color: var(--mk-nearblack); opacity: .8;
+}
+.mk-statglyph { width: 26px; height: 26px; flex: none; display: block; }
 
-/* ⚠️ THE TRACE SPANS THE VIEWPORT, NOT THE CONTENT COLUMN — it is absolutely positioned across
-   the full-bleed section while the words above it stay in the normal gutters. */
-.mk-ecg {
-  position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
-  height: 190px; pointer-events: none; z-index: 1;
-  /* ⚠️ THE MASK IS WHAT CLEARS SPACE FOR THE WORDS. The trace dissolves as it nears them and
-     resumes beyond, so nothing is painted over anything. Both prefixes ship: older Safari needs
-     `-webkit-`, and without it the trace would simply run through the heading there. */
-  -webkit-mask-image: radial-gradient(ellipse 30% 62% at 50% 50%, transparent 0 46%, #000 100%);
-          mask-image: radial-gradient(ellipse 30% 62% at 50% 50%, transparent 0 46%, #000 100%);
-}
-.mk-ecg svg { display: block; width: 100%; height: 100%; }
-.mk-ecg-base, .mk-ecg-live {
-  fill: none; stroke: var(--mk-burg); stroke-linejoin: round; stroke-linecap: round;
-}
-.mk-ecg-base { stroke-width: 1.4; opacity: .16; }
-/* The dash pattern is the animation: one pulse of ink travelling the path. Clearing the dasharray
-   (as reduced motion does) leaves the whole path drawn, which is the correct still. */
-.mk-ecg-live {
-  stroke-width: 1.9; opacity: .85;
-  stroke-dasharray: 130 4600; animation: mkSweep 6s linear infinite;
-  animation-play-state: paused;
-}
-.mk-sect.mk-inview .mk-ecg-live { animation-play-state: running; }
-@keyframes mkSweep { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -4730; } }
-
-@media (prefers-reduced-motion: reduce) {
-  /* Inert, not slower: no sweep, no dash, the full trace left a little stronger than the base. */
-  .mk-ecg-live { animation: none !important; stroke-dasharray: none; opacity: .34; }
+/* ⚠️ THE BOUNDARY IS 1099.98, NOT 1100, BECAUSE `max-width` IS INCLUSIVE. The brief says the heading
+   releases BELOW 1100, so at exactly 1100 it must still be held — and `@media (max-width: 1100px)`
+   matches at 1100 and wraps it a pixel early. Measured rather than reasoned: the probe read
+   `normal` at 1100 where it should have read `nowrap`.
+   ⚠️ AND A NOWRAP FAILS BY OVERFLOW RATHER THAN BY WRAPPING. Held on one line the heading needs more
+   width than the container has below this point; past it the text does not break, it spills into
+   the gutter — silently, because the spill lands inside the page's own padding rather than past the
+   viewport, so no scrollbar ever appears to report it. */
+@media (max-width: 1099.98px) {
+  .mk-stattitle { white-space: normal; }
 }
 @media (max-width: 900px) {
-  .mk-sectinner { padding-inline: 26px; }
-  /* ⚠️ NO TRACE BELOW 900. The mask is an ellipse in percentages of the trace box, so it cannot
-     follow a heading that wraps — and here the heading is three lines. There is no hole that
-     works for both; the eyebrow and the vertical space carry the break instead. */
-  .mk-ecg { display: none; }
+  .mk-statband { padding: 64px 26px 56px; }
+  .mk-stattitle { font-size: 28px; }
+  /* ⚠️ THE GAP TIGHTENS OR THE ROW OVERFLOWS A NARROW PHONE. Six 26px marks at 34px gaps need
+     6×26 + 5×34 = 326px against the 323px a 375 screen leaves inside its gutters — three pixels
+     over, which a flex row answers by overflowing rather than by wrapping. */
+  .mk-statglyphs { gap: 22px; margin-top: 28px; }
 }
 /* ⚠️ UNCHANGED WHEN `.mk-feathead` WAS DELETED, AND THAT IS A MEASURED DECISION RATHER THAN AN
    OVERSIGHT. The brief said to add back whatever the removed header was contributing IF the first

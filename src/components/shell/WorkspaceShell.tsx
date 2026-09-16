@@ -410,7 +410,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const crumb = shellCrumb(sections, hit);
   /**
    * ⚠️ THE CRUMB FOLLOWS THE RECORD, AND IT IS RESOLVED HERE BECAUSE THE SHELL ALREADY HAS THE DATA.
-   * On `/queries?q=<id>` the page is showing one query, so the trail is `ScriptAlly / Queries / Greg
+   * On `/queries?q=<id>` the page is showing one query, so the trail is `QueryHawk / Queries / Greg
    * Panetta` rather than `… / Query Centre` — the page name is what the grid is called, and over a
    * record it states the one thing the reader can already see while omitting the one they cannot.
    *
@@ -494,9 +494,9 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               ⚠️ SO THE ~51.7%-INK TRAP LEAVES THIS FILE WITH THE ASSET. It still applies wherever
               the title PNG is used (SmartImportReview, SidebarNav, ScriptAllyLogo) — this mount
               simply no longer has an ink ratio to keep in step. */}
-          <button type="button" className="ws-brand" onClick={() => go("/dashboard")} aria-label="ScriptAlly — go to dashboard">
+          <button type="button" className="ws-brand" onClick={() => go("/dashboard")} aria-label="QueryHawk — go to dashboard">
             <img className="ws-bmark" src="/scriptally-logo-new.png" alt="" aria-hidden="true" />
-            <span className="ws-bwm">ScriptAlly</span>
+            <span className="ws-bwm">QueryHawk</span>
           </button>
 
           <div className="ws-phead">
@@ -796,7 +796,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 {/* ⚠️ THE CRUMB'S ROOT IS BACK — AS WORDS, NEVER AS THE MARK (audit pack P4).
                     Removing the logotype from here was right and stays right; removing the ROOT
                     with it was not, and it left the bar opening on a bare `/ Dashboard`, a
-                    separator with nothing on its left. It reads `ScriptAlly / Dashboard` again.
+                    separator with nothing on its left. It reads `QueryHawk / Dashboard` again.
 
                     ⚠️ THE ONE-BRAND RULE IS ABOUT THE MARK, and the mark still appears exactly
                     once, in the sidebar. A breadcrumb root is the name of the place you are in;
@@ -811,7 +811,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                       className="ws-seg ws-croot"
                       onClick={() => go("/dashboard")}
                     >
-                      ScriptAlly
+                      QueryHawk
                     </button>
                     <span className="ws-sep" aria-hidden="true">/</span>
                     {crumb.child ? (
@@ -826,7 +826,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                         <span className="ws-sep" aria-hidden="true">/</span>
                         {/**
                           * ⚠️ THE RECORD TAKES THE LAST SEGMENT AND THE PAGE NAME BECOMES A LINK.
-                          * `ScriptAlly / Queries / Greg Panetta` — and `Query Centre` drops out
+                          * `QueryHawk / Queries / Greg Panetta` — and `Query Centre` drops out
                           * rather than becoming a fourth segment, because the trail is where you
                           * ARE and the grid is not somewhere you are while reading a record. The
                           * section above it already returns there, as does the bar's back-link.

@@ -82,7 +82,7 @@ describe("the copy the brief fixed, verbatim", () => {
     "The address you sign in with.",
     "One email each Monday with what happened in the past week.",
     "Emails about your account itself (sign-in, billing, your data) are always sent.",
-    "Downloads everything ScriptAlly holds about your querying",
+    "Downloads everything QueryHawk holds about your querying",
     "This removes your account and everything in it",
     "Long-waiting tasks drop to the back so your list leads with what's current. Nothing is deleted.",
     "Decisions you need to make always appear.",

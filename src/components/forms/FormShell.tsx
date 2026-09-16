@@ -54,7 +54,7 @@ const initialsFrom = (name: React.ReactNode): string =>
     .toUpperCase();
 
 /**
- * The locked ScriptAlly form shell: dimmed overlay → parchment card → inset burgundy mount →
+ * The locked QueryHawk form shell: dimmed overlay → parchment card → inset burgundy mount →
  * sage header band (avatar chip + name block + corner-motif slot) → body → centred soft-pink
  * button, with an inherited Cancel/discard exit. Every form is this shell with its header text,
  * motif, fields, and button label swapped.

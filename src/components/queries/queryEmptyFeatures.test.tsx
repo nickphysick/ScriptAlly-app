@@ -27,7 +27,15 @@ import {
   QCF_MOVES, QCF_ROWS, QCF_SWATCHES, QCF_VIEWS, heroBookTitle,
 } from "./queryEmptyCopy";
 
-const REF = readFileSync(join(process.cwd(), "design-refs/scriptally-empty-states-v3-feature-led.html"), "utf8");
+/* ⚠️ THE REF PREDATES THE RENAME, AND IT IS DELIBERATELY NOT EDITED TO CATCH UP. This artefact was
+   signed off saying "ScriptAlly", its hash is pinned in design-refs/.refhashes.json, and
+   `check-design-refs` runs on every build — rewriting a word inside it would falsify the record of
+   what was actually approved, which is the whole reason the hashes exist.
+   The product name is the ONE deliberate divergence between this copy and the artefact (16 Sep), so
+   it is normalised HERE, at the read, and every other claim this file makes still has to match the
+   ref verbatim: the wording, the sentence split, and the straight apostrophes asserted below. */
+const REF = readFileSync(join(process.cwd(), "design-refs/scriptally-empty-states-v3-feature-led.html"), "utf8")
+  .replace(/ScriptAlly/g, "QueryHawk");
 const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
   .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const src = readFileSync(resolve(__dirname, "./QueryEmptyFeatures.tsx"), "utf8")
@@ -47,7 +55,7 @@ const rule = (sel: string) => cssRule(css, sel, "queryEmptyFeatures.css");
 const MOUNTED = /<QueryEmptyFeatures[\s/>]/;
 
 const noop = () => {};
-const TEMPLATE = "/ScriptAlly-pipeline-import-template.xlsx";
+const TEMPLATE = "/QueryHawk-pipeline-import-template.xlsx";
 const html = renderToStaticMarkup(
   <QueryEmptyFeatures onLog={noop} onImport={noop} templateHref={TEMPLATE} manuscriptTitle="The Backpack on the Seat" />,
 );

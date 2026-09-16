@@ -1,7 +1,7 @@
 import React from "react";
 
 /**
- * ScriptAlly wordmark — renders the designed "ScriptAlly" title artwork
+ * QueryHawk wordmark — renders the designed "QueryHawk" title artwork
  * (/scriptally-title-v2.png) at the requested height. The image is height-locked and
  * keeps its own aspect ratio. `iconColor`/`textColor` are accepted for backwards-compat
  * with existing call sites but no longer apply (the artwork has fixed colours).
@@ -34,7 +34,7 @@ export const ScriptAllyLogo: React.FC<{
     >
       <img
         src="/scriptally-title-v2.png"
-        alt="ScriptAlly"
+        alt="QueryHawk"
         className="h-full w-auto"
         style={{ maxWidth: "none" }}
       />

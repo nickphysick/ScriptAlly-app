@@ -31,7 +31,7 @@ export const app = initializeApp(firebaseConfig);
 // Non-prod safety beacon: make the active backend obvious at a glance, so "which project am I on?"
 // is never a guessing game again. Production builds (import.meta.env.PROD) stay silent.
 if (!import.meta.env.PROD) {
-  console.info(`[ScriptAlly] backend project: ${firebaseConfig.projectId} (mode=${import.meta.env.MODE}) — NON-PROD`);
+  console.info(`[QueryHawk] backend project: ${firebaseConfig.projectId} (mode=${import.meta.env.MODE}) — NON-PROD`);
 }
 
 // Firestore database id. Production uses a NAMED database (ai-studio-…, CRITICAL — the default

@@ -127,7 +127,7 @@ const CRUMB_EXTRAS: Record<string, { section: string; page: string; rail: "dashb
      with the rail heading the mode now puts in the panel; two names for one place, three inches
      apart, is the disagreement the crumb exists to prevent rather than cause.
 
-     ⚠️ THE "Setup /" SEGMENT STAYS, AND THE REF DROPS IT. The ref draws `ScriptAlly / Settings` —
+     ⚠️ THE "Setup /" SEGMENT STAYS, AND THE REF DROPS IT. The ref draws `QueryHawk / Settings` —
      right for a standalone mockup, wrong here: every other crumb in this app is root / section /
      page, and shortening exactly one route would make settings the only place whose crumb has a
      different SHAPE. The reader would read that as a level of the app going missing. */
@@ -228,7 +228,7 @@ export function journeyCrumb(
   act: string,
 ): { label: string; current: boolean }[] {
   const crumb = shellCrumbForPath(pathname);
-  const parts = ["ScriptAlly"];
+  const parts = ["QueryHawk"];
   if (crumb) {
     parts.push(crumb.section);
     /* a flat page states one name for both halves — do not print it twice */

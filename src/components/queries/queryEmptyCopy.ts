@@ -32,11 +32,11 @@ export const QCF_HERO = {
   /** the manuscript's title is interpolated where the ref emphasises it */
   ledeBefore: "Log who has ",
   ledeAfter:
-    " and what you sent them. ScriptAlly keeps the status, the dates and whose court it's in straight for you.",
+    " and what you sent them. QueryHawk keeps the status, the dates and whose court it's in straight for you.",
   /** ⚠️ the fallback when no manuscript is scoped — the ref's sentence names a book, and a
    *  sentence naming nobody's book would read as a missing value */
   ledeNoBook:
-    "Log who you've written to and what you sent them. ScriptAlly keeps the status, the dates and whose court it's in straight for you.",
+    "Log who you've written to and what you sent them. QueryHawk keeps the status, the dates and whose court it's in straight for you.",
   cta: "Log your first query",
   importLink: "Import a spreadsheet",
   templateLink: "Download the template",

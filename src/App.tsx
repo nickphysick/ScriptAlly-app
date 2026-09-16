@@ -530,7 +530,7 @@ function AppContent() {
             opacity: 0.45,
           }}
         >
-          ScriptAlly
+          QueryHawk
         </span>
       </div>
     );
@@ -819,7 +819,7 @@ function AppContent() {
           <StagePage active contentVariant="read"><ImportCsv onNavigate={handleNavigate} /></StagePage>
         )}
 
-        {/* The legacy site footer ("ScriptAlly · The Literary Querying Companion" + Help Centre)
+        {/* The legacy site footer ("QueryHawk · The Literary Querying Companion" + Help Centre)
             is RETIRED from the workspace tier — a marketing artefact that had no business on a
             workspace page, and on the taller pages it printed over the content. Help Centre is
             reached from the shell rail. The MARKETING footer (Landing.tsx `.mk-foot`) is a

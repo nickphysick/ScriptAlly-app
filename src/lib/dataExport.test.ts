@@ -59,7 +59,7 @@ describe("⚠️ the export carries everything the policy says it does", () => {
   /** A file found on a hard drive in three years should say what produced it and when. */
   it("stamps its own provenance", () => {
     const bundle = buildExport(sources, NOW);
-    expect(bundle.source).toBe("ScriptAlly");
+    expect(bundle.source).toBe("QueryHawk");
     expect(bundle.format).toBe(1);
     expect(bundle.exportedAt).toBe(NOW.toISOString());
   });
@@ -73,7 +73,7 @@ describe("⚠️ the export carries everything the policy says it does", () => {
   });
 
   it("dates the filename", () => {
-    expect(exportFilename(NOW)).toBe("ScriptAlly-export-2026-08-17.json");
+    expect(exportFilename(NOW)).toBe("QueryHawk-export-2026-08-17.json");
   });
 });
 

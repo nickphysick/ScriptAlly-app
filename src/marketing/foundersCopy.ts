@@ -24,14 +24,14 @@
 
 import { CopyRun } from "./CopyRuns";
 
-export const FOUNDERS_DOCUMENT_TITLE = "Founding Writers — ScriptAlly";
+export const FOUNDERS_DOCUMENT_TITLE = "Founding Writers — QueryHawk";
 
 /* ══════════════ Hero ══════════════ */
 export const FOUNDERS_EYEBROW = "For founding writers";
 export const FOUNDERS_H1 = "Help build our world.";
 /**
  * ⚠️ THE COMMAS AROUND "totally free of charge" ARE LOAD-BEARING. Without them the phrase can be
- * read as attached to "the full version of ScriptAlly" — i.e. as describing the product rather
+ * read as attached to "the full version of QueryHawk" — i.e. as describing the product rather
  * than the offer, which is a claim this app does not make. A comma is exactly what a well-meaning
  * edit removes, so a lock asserts the punctuation as well as the sentence.
  *
@@ -42,7 +42,7 @@ export const FOUNDERS_H1 = "Help build our world.";
 export const FOUNDERS_LEDE: CopyRun[] = [
   "We're looking for ",
   { b: "one hundred writers" },
-  " to bring their querying journey into the full version of ScriptAlly, totally free of charge, " +
+  " to bring their querying journey into the full version of QueryHawk, totally free of charge, " +
   "and let us know how it does. Interested? Sign up below and we'll be in touch.",
 ];
 export const FOUNDERS_CTA = "Become a Founding Writer";
@@ -66,7 +66,7 @@ export const FOUNDERS_DEAL: DealCard[] = [
     kicker: "The deal",
     heading: "Six months of Pro, free",
     body:
-      "The full force of ScriptAlly is yours. Be amongst the first to supercharge your campaign " +
+      "The full force of QueryHawk is yours. Be amongst the first to supercharge your campaign " +
       "for agent representation, backed by an arsenal of time-saving Pro features and a tailored " +
       "suite of querying analytics.",
   },
@@ -75,7 +75,7 @@ export const FOUNDERS_DEAL: DealCard[] = [
     kicker: "The sweetener",
     heading: "Half price, for as long as you need it.",
     body:
-      "If you choose to stick with ScriptAlly, you'll never pay full price. You'll pay a founding " +
+      "If you choose to stick with QueryHawk, you'll never pay full price. You'll pay a founding " +
       "writers' rate for as long as you're querying your manuscript.",
   },
   {
@@ -83,7 +83,7 @@ export const FOUNDERS_DEAL: DealCard[] = [
     kicker: "A direct line",
     heading: "You shape what's built",
     body:
-      "You'll be in direct contact with ScriptAlly's founder, giving feedback, shaping new " +
+      "You'll be in direct contact with QueryHawk's founder, giving feedback, shaping new " +
       "features, helping to design and refine a tool that works for you and for the whole " +
       "writing community.",
   },
@@ -113,7 +113,7 @@ export const FOUNDERS_HONEST_LEAD = "Your data is never the experiment.";
  */
 export const FOUNDERS_HONEST: CopyRun[][] = [
   [
-    "ScriptAlly isn't ",
+    "QueryHawk isn't ",
     { em: "quite" },
     " finished. Things will shift. Features will be tweaked. The look and feel might change. But " +
     "the security of your data will be ensured — your queries, your agents, your materials. They " +
@@ -125,4 +125,4 @@ export const FOUNDERS_HONEST: CopyRun[][] = [
   ],
 ];
 
-export const FOUNDERS_SIGNOFF = "Nick — ScriptAlly's founder";
+export const FOUNDERS_SIGNOFF = "Nick — QueryHawk's founder";

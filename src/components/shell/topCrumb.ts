@@ -20,7 +20,7 @@ export interface CrumbSegment {
   title?: string;
 }
 
-const ROOT: CrumbSegment = { label: "SCRIPTALLY", tab: "dashboard" };
+const ROOT: CrumbSegment = { label: "QUERYHAWK", tab: "dashboard" };
 
 const CRUMB_TABLE: Record<string, CrumbSegment[]> = {
   "/queries": [ROOT, { label: "QUERYING", tab: "queries" }, { label: "QUERIES HUB", title: "Queries Hub" }],

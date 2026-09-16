@@ -38,15 +38,15 @@ import { sliceBetween } from "../test/sliceBetween";
 
 /** The public marketing routes and a string each must actually render. */
 const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain: string][] = [
-  /* ⚠️ RETARGET, SAME LAW: the landmark is the hero's h1, and the statement hero replaced the
-     strapline it used to name. The claim is unchanged — this route must render real content, not
-     a null. `DOCUMENT_TITLE` still carries the old words, but it is set in an effect and never
-     reaches the static markup, so it cannot stand in as the landmark.
-     ⚠️ AND IT STOPS BEFORE THE LAST WORD ON PURPOSE. The headline's final word is bound to the
-     tick inside a `nowrap` span, so the full sentence is no longer one uninterrupted run of text
-     in the markup. That the sentence still reads whole is a stronger claim than a landmark can
-     make, and it is asserted below against the h1's stripped text. */
-  ["/", () => <Landing onNavigate={noNavigate} />, "A bird&#x27;s-eye view"],
+  /* ⚠️ RETARGET, SAME LAW: the landmark is the hero's h1, and the h1 changed. The claim is
+     unchanged — this route must render real content rather than a null. `DOCUMENT_TITLE` still
+     carries other words, but it is set in an effect and never reaches the static markup, so it
+     cannot stand in as the landmark.
+     ⚠️ AND IT IS THE WHOLE STRING NOW, WHERE IT USED TO STOP SHORT. The old headline's last two
+     words sat inside a `nowrap` span, so the sentence was not one uninterrupted run of text in the
+     markup and the landmark had to avoid the split. Nothing is held any more — see the hero's own
+     describe, which asserts that absence. */
+  ["/", () => <Landing onNavigate={noNavigate} />, "The hunt begins."],
   /* Retarget, same law: the page is three tiers now and its h1 changed with them. */
   ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "Pick the plan that fits"],
   /* Retarget, same law: the mission statement replaced the old About headline as this page's h1. */
@@ -101,7 +101,7 @@ describe("the public pricing page sells nothing and writes nothing", () => {
   );
 
   it("does not reach the db at all", () => {
-    expect(source).not.toContain("useScriptAllyDb");
+    expect(source).not.toContain("useQueryHawkDb");
   });
 
   for (const forbidden of ["upgradeToPro", "downgradeToFree", "updateUserProfile", "plan:"]) {
@@ -306,8 +306,8 @@ describe("the marketing chrome renders in both of its states", () => {
    */
   it("sets the wordmark in caps as text, and has not renamed the site", () => {
     const html = renderPage(shell(null), "/");
-    expect(html, "drawn in caps because the markup says so").toContain(">SCRIPTALLY<");
-    expect(html, "the accessible name is untouched").toContain('aria-label="ScriptAlly home"');
+    expect(html, "drawn in caps because the markup says so").toContain(">QUERYHAWK<");
+    expect(html, "the accessible name is untouched").toContain('aria-label="QueryHawk home"');
   });
 });
 
@@ -405,16 +405,23 @@ describe("the hero", () => {
   };
   const unesc = (s: string) => s.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
 
-  it("reads as the whole sentence, with its last two words held together", () => {
+  it("reads as the whole sentence, with nothing held", () => {
     const h = heading();
     expect(unesc(h.replace(/<[^>]+>/g, "")), "word for word").toBe(HERO_H1);
-    const held = HERO_H1.split(" ").slice(-2).join(" ");
-    expect(h, "the held run is exactly the last two words").toContain('<span class="mk-hkeep">' + held + "</span>");
+    /* ⚠️ THE ABSENCE IS THE CLAIM NOW. The held pair stopped a four-line headline stranding
+       "campaign"; on three short words the identical span strands "The" instead, because the break
+       has to fall in front of a run that cannot break inside. It was removed with the headline that
+       needed it, and this is what stops it returning from a diff. */
+    expect(h, "no held run — a three-word headline wraps where it likes").not.toContain("mk-hkeep");
   });
 
   it("carries the sub and both actions, and the shadow is decorative", () => {
     const h = html();
-    expect(h).toContain(HERO_SUB);
+    /* ⚠️ UNESCAPED FIRST, AND THE OLD SUB HID THIS. `renderToStaticMarkup` writes an apostrophe as
+       `&#x27;`, so a raw `toContain` fails on a page that renders the string perfectly. The previous
+       sub contained no apostrophe; this one ends "in the right agent's hands", so the comparison
+       had to start unescaping the markup rather than the assertion being loosened. */
+    expect(unesc(h)).toContain(HERO_SUB);
     expect(h).toContain(HERO_CTA);
     expect(h).toContain(HERO_LINK);
     expect(h, "the link is an in-page jump to the section break").toContain('href="#pulse"');
@@ -441,7 +448,7 @@ describe("the hero", () => {
       expect(h, `${gone} is retired`).not.toMatch(new RegExp('["\\s`]' + gone + '["\\s`]'));
     }
     expect(h).not.toContain("You&#x27;ve written a book.");
-    expect(h).not.toContain("Introducing ScriptAlly");
+    expect(h).not.toContain("Introducing QueryHawk");
   });
 });
 
@@ -592,8 +599,8 @@ describe("the Founding Writers page", () => {
     expect(h).toContain("Six months of Pro, free");
     expect(h).toContain("Half price, for as long as you need it.");
     expect(h).toContain("You shape what&#x27;s built");
-    expect(h).toContain("You&#x27;ll be in direct contact with ScriptAlly&#x27;s founder");
-    expect(h).toContain("Nick — ScriptAlly&#x27;s founder");
+    expect(h).toContain("You&#x27;ll be in direct contact with QueryHawk&#x27;s founder");
+    expect(h).toContain("Nick — QueryHawk&#x27;s founder");
   });
 
   /**

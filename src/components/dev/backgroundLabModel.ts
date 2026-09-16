@@ -146,7 +146,7 @@ export function buildLabCss(state: BgLabState): string {
 
 /** Human summary for the clipboard — tells the next session exactly what to change where. */
 export function labSummary(state: BgLabState): string {
-  const lines: string[] = ["ScriptAlly background lab — chosen overrides"];
+  const lines: string[] = ["QueryHawk background lab — chosen overrides"];
   let any = false;
   for (const theme of LAB_THEMES) {
     const o = state.overrides[theme];

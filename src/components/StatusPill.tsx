@@ -24,7 +24,7 @@ export const getStatusLabel = (status: QueryStatus | string): string => {
 
 /**
  * Canonical one-line description for each QueryStatus — the user-facing teaching copy for
- * ScriptAlly's vocabulary (first used on the Smart Import review, reusable anywhere a status
+ * QueryHawk's vocabulary (first used on the Smart Import review, reusable anywhere a status
  * needs explaining). Single source: never hardcode these per screen.
  */
 export const STATUS_DESCRIPTIONS: Record<QueryStatus, string> = {

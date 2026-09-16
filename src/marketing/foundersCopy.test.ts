@@ -13,7 +13,7 @@
  *
  * ⚠️ AND THE PUNCTUATION IS PART OF THE COPY. Em dashes are em dashes, apostrophes are curly, and
  * the commas around "totally free of charge" are load-bearing — without them the phrase reads as
- * attached to "the full version of ScriptAlly" rather than to the offer.
+ * attached to "the full version of QueryHawk" rather than to the offer.
  */
 import { describe, it, expect } from "vitest";
 import {
@@ -28,7 +28,7 @@ const text = (runs: CopyRun[]) =>
 
 describe("the hero", () => {
   it("eyebrow, headline, CTA", () => {
-    expect(FOUNDERS_DOCUMENT_TITLE).toBe("Founding Writers — ScriptAlly");
+    expect(FOUNDERS_DOCUMENT_TITLE).toBe("Founding Writers — QueryHawk");
     expect(FOUNDERS_EYEBROW).toBe("For founding writers");
     expect(FOUNDERS_H1).toBe("Help build our world.");
     expect(FOUNDERS_CTA).toBe("Become a Founding Writer");
@@ -37,14 +37,14 @@ describe("the hero", () => {
   it("the subheading, verbatim", () => {
     expect(text(FOUNDERS_LEDE)).toBe(
       "We're looking for one hundred writers to bring their querying journey into the full " +
-      "version of ScriptAlly, totally free of charge, and let us know how it does. Interested? " +
+      "version of QueryHawk, totally free of charge, and let us know how it does. Interested? " +
       "Sign up below and we'll be in touch.",
     );
   });
 
   /**
    * ⚠️ THE COMMAS AROUND "totally free of charge" ARE LOAD-BEARING. Without them the phrase can be
-   * read as attached to "the full version of ScriptAlly" — i.e. as describing the product rather
+   * read as attached to "the full version of QueryHawk" — i.e. as describing the product rather
    * than the offer. This asserts the punctuation rather than trusting the sentence above to carry
    * it, because a comma is exactly what a well-meaning edit removes.
    */
@@ -99,12 +99,12 @@ describe("the deal", () => {
    */
   it("the offer and the sweetener, verbatim", () => {
     expect(FOUNDERS_DEAL[0].body).toBe(
-      "The full force of ScriptAlly is yours. Be amongst the first to supercharge your campaign " +
+      "The full force of QueryHawk is yours. Be amongst the first to supercharge your campaign " +
       "for agent representation, backed by an arsenal of time-saving Pro features and a tailored " +
       "suite of querying analytics.",
     );
     expect(FOUNDERS_DEAL[1].body).toBe(
-      "If you choose to stick with ScriptAlly, you'll never pay full price. You'll pay a founding " +
+      "If you choose to stick with QueryHawk, you'll never pay full price. You'll pay a founding " +
       "writers' rate for as long as you're querying your manuscript.",
     );
   });
@@ -112,7 +112,7 @@ describe("the deal", () => {
   /** ⚠️ RETARGET: the third card's body was rewritten; the heading is unchanged. */
   it("the direct line, verbatim", () => {
     expect(FOUNDERS_DEAL[2].body).toBe(
-      "You'll be in direct contact with ScriptAlly's founder, giving feedback, shaping new " +
+      "You'll be in direct contact with QueryHawk's founder, giving feedback, shaping new " +
       "features, helping to design and refine a tool that works for you and for the whole " +
       "writing community.",
     );
@@ -122,7 +122,7 @@ describe("the deal", () => {
 
 describe("the sign-off", () => {
   it("is one person, named, with an em dash", () => {
-    expect(FOUNDERS_SIGNOFF).toBe("Nick — ScriptAlly's founder");
+    expect(FOUNDERS_SIGNOFF).toBe("Nick — QueryHawk's founder");
     expect(FOUNDERS_SIGNOFF).toContain("—");
     expect(FOUNDERS_SIGNOFF).not.toContain(" - ");
   });
@@ -140,7 +140,7 @@ describe("the disclosure", () => {
   it("two paragraphs, verbatim", () => {
     expect(FOUNDERS_HONEST).toHaveLength(2);
     expect(text(FOUNDERS_HONEST[0])).toBe(
-      "ScriptAlly isn't quite finished. Things will shift. Features will be tweaked. The look and " +
+      "QueryHawk isn't quite finished. Things will shift. Features will be tweaked. The look and " +
       "feel might change. But the security of your data will be ensured — your queries, your " +
       "agents, your materials. They won't be lost, they won't be shared. Writers — and their " +
       "writing — are our absolute priority.",

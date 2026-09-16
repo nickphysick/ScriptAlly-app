@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * nudgeDraft — the ONE follow-up-nudge draft generator. A copyable starting point the writer pastes
- * into their OWN email client; ScriptAlly never sends anything. Extracted from NudgeModal so the
+ * into their OWN email client; QueryHawk never sends anything. Extracted from NudgeModal so the
  * modal and the focus flow share one text (no duplication). Deliberately brief + warm + UK-voiced;
  * built ONLY from what we actually know — the base case (agent name + send date) is byte-identical
  * to the original; the optional manuscript title / requested-material facts, when present, make the

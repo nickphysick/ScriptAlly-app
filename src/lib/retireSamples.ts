@@ -51,6 +51,6 @@ export const planSampleRetirement = (
 
 /** What the console prints, so a run can be checked against the recon's prediction (D10's gate). */
 export const retirementReport = (p: SampleRetirementPlan): string =>
-  `[ScriptAlly] sample-pages retirement — ${p.archive.length} material${p.archive.length === 1 ? "" : "s"} archived`
+  `[QueryHawk] sample-pages retirement — ${p.archive.length} material${p.archive.length === 1 ? "" : "s"} archived`
   + ` (${p.alreadyArchived} already), ${p.packagesAffected.length} package${p.packagesAffected.length === 1 ? "" : "s"}`
   + ` hold a sample slot that is no longer read (no package document is written)`;

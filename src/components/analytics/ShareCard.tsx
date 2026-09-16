@@ -71,7 +71,7 @@ export const ShareCard: React.FC<{
         </div>
 
         <div className="an-swm">
-          <span>Tracked with ScriptAlly</span>
+          <span>Tracked with QueryHawk</span>
           <span>{shortDateYear(nowMs)}</span>
         </div>
 

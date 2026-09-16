@@ -949,10 +949,10 @@ export const ImportCsv: React.FC<{
             <div className="border-b border-stone-100 pb-4">
               <h3 className="font-serif text-lg font-bold text-[#3a1c14] flex items-center gap-2">
                 <Columns className="w-4.5 h-4.5 text-[#7c3a2a]" />
-                <span>Map spreadsheet headers to ScriptAlly fields</span>
+                <span>Map spreadsheet headers to QueryHawk fields</span>
               </h3>
               <p className="text-xs text-[#3a1c14]/70 mt-1">
-                We scanned your table's columns. Specify which source column should populate each ScriptAlly target field.
+                We scanned your table's columns. Specify which source column should populate each QueryHawk target field.
               </p>
             </div>
 
@@ -1032,7 +1032,7 @@ export const ImportCsv: React.FC<{
               <div className="p-4 bg-blue-50/70 border border-blue-150-100/50 rounded-xl flex items-start gap-3">
                 <HelpCircle className="w-5 h-5 text-blue-700 shrink-0 mt-0.5" />
                 <p className="text-xs text-blue-900 leading-relaxed">
-                  <strong>Smart Match linking is active:</strong> historical queries refer to agents and manuscripts by text name. The ScriptAlly migration desk will scan your database for matching Agent names and Book titles. If a matching agent or manuscript isn't registered yet, we will <em>auto-populate directory entries</em> for you so that pitch relationships link correctly!
+                  <strong>Smart Match linking is active:</strong> historical queries refer to agents and manuscripts by text name. The QueryHawk migration desk will scan your database for matching Agent names and Book titles. If a matching agent or manuscript isn't registered yet, we will <em>auto-populate directory entries</em> for you so that pitch relationships link correctly!
                 </p>
               </div>
             )}

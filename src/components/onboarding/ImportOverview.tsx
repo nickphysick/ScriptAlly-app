@@ -138,7 +138,7 @@ export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, userN
           <div style={{ display: "flex", gap: 11, alignItems: "flex-start", background: C.pinkWash, border: `1px solid ${C.pinkEdge}`, borderRadius: 12, padding: "13px 17px", marginTop: 18 }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill={C.burgundy} style={{ flexShrink: 0, marginTop: 1 }}><path d="M12 2l1.6 6.4L20 10l-6.4 1.6L12 18l-1.6-6.4L4 10l6.4-1.6L12 2z" /></svg>
             <p style={{ margin: 0, fontSize: 13, color: "#7a4636", lineHeight: 1.45 }}>
-              <b style={{ color: C.ink }}>Why sharpen?</b> The fuller your records, the smarter ScriptAlly gets — accurate response counts, nudges at the right moment, and a clear picture of where you stand. Nothing here is required; it just makes everything that follows work better for you.
+              <b style={{ color: C.ink }}>Why sharpen?</b> The fuller your records, the smarter QueryHawk gets — accurate response counts, nudges at the right moment, and a clear picture of where you stand. Nothing here is required; it just makes everything that follows work better for you.
             </p>
           </div>
         )}

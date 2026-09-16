@@ -82,7 +82,7 @@ describe("the card draws its own moment", () => {
   it("the import template's constant survives the retirement — its consumer moved, it did not go", () => {
     /* ⚠️ ASSERTED HERE BECAUSE THIS FILE IS WHERE THE CONSTANT LIVES; that the HERO renders it is
        `queryEmptyFeatures.test.tsx`'s claim. Two halves of one route, each asserted where it is. */
-    expect(TEMPLATE_HREF).toBe("/ScriptAlly-pipeline-import-template.xlsx");
+    expect(TEMPLATE_HREF).toBe("/QueryHawk-pipeline-import-template.xlsx");
   });
 });
 

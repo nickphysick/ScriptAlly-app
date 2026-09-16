@@ -113,8 +113,8 @@ export function HelpCentre() {
     {
       id: "agents-1",
       category: "agents",
-      question: "How does ScriptAlly suggest agents who might suit a manuscript?",
-      answer: "Open any manuscript from the Manuscripts tab and look for 'Agents who might suit this manuscript'. ScriptAlly scores verified agents from the community catalogue against that manuscript's genre and wish-list (MSWL) fit, shows the closest few ranked by fit, and lets you add any of them to your own agent list in one click. Matching uses genre and wish list for now — response-time data will follow.",
+      question: "How does QueryHawk suggest agents who might suit a manuscript?",
+      answer: "Open any manuscript from the Manuscripts tab and look for 'Agents who might suit this manuscript'. QueryHawk scores verified agents from the community catalogue against that manuscript's genre and wish-list (MSWL) fit, shows the closest few ranked by fit, and lets you add any of them to your own agent list in one click. Matching uses genre and wish list for now — response-time data will follow.",
       tags: ["suggestions", "agents", "mswl", "match"],
     },
     {
@@ -135,21 +135,21 @@ export function HelpCentre() {
       id: "manuscripts-2",
       category: "manuscripts",
       question: "What are 'Query Letter Variants' and why use them?",
-      answer: "A single novel might appeal to different agents for different reasons. ScriptAlly lets you draft custom variations of your query letter—such as focusing on the romance aspect for a character-driven agent, or highlighting high-concept thriller elements for a plot-oriented agent. Associating these with individual queries lets you find your highest-performing hook.",
+      answer: "A single novel might appeal to different agents for different reasons. QueryHawk lets you draft custom variations of your query letter—such as focusing on the romance aspect for a character-driven agent, or highlighting high-concept thriller elements for a plot-oriented agent. Associating these with individual queries lets you find your highest-performing hook.",
       tags: ["manuscripts", "query-letter", "variants"],
     },
     {
       id: "migration-1",
       category: "migration",
       question: "What is the 'Migration Desk' and how does it support CSV uploads?",
-      answer: "If you are transitioning from another spreadsheet or tracking tool like QueryTracker, the CSV Migration Desk allows you to upload existing logs. It maps headers like 'Agent Name', 'Manuscript Title', 'Date Sent', and 'Agency' into your ScriptAlly Firestore database to let you hit the ground running without entering historical data manually.",
+      answer: "If you are transitioning from another spreadsheet or tracking tool like QueryTracker, the CSV Migration Desk allows you to upload existing logs. It maps headers like 'Agent Name', 'Manuscript Title', 'Date Sent', and 'Agency' into your QueryHawk Firestore database to let you hit the ground running without entering historical data manually.",
       tags: ["csv", "import", "migration", "querytracker"],
     },
     {
       id: "migration-2",
       category: "migration",
       question: "How do I troubleshoot unmapped columns during a CSV import?",
-      answer: "ScriptAlly features an interactive column-mapper interface. If a column is named differently (e.g., 'Submission Date' vs 'Date Sent'), you can drag and drop headers to reconcile the differences. Always confirm that Dates are in an recognizable format (e.g. YYYY-MM-DD or MM/DD/YYYY) for seamless timeline generation.",
+      answer: "QueryHawk features an interactive column-mapper interface. If a column is named differently (e.g., 'Submission Date' vs 'Date Sent'), you can drag and drop headers to reconcile the differences. Always confirm that Dates are in an recognizable format (e.g. YYYY-MM-DD or MM/DD/YYYY) for seamless timeline generation.",
       tags: ["csv", "mapping", "import", "troubleshooting"],
     }
   ];
@@ -172,7 +172,7 @@ export function HelpCentre() {
           zero-action: nothing here warrants a header verb (flagged for a browser check). */}
       <PageHeader
         variant="full"
-        title="ScriptAlly Help Centre"
+        title="QueryHawk Help Centre"
         description="Welcome to your querying command centre manual. Discover expert tips and tools for tracking submissions, discovering literary representation, and moving closer to publication."
       />
 

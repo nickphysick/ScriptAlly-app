@@ -13,7 +13,7 @@
 import { describe, it, expect } from "vitest";
 import {
   HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK, FOUNDING_PERKS,
-  DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING,
+  DOCUMENT_TITLE, FEATURE_ROWS, BAND_HEADING,
   FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_CTA,
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
   FOUNDING_NOTE, FOUNDING_INVALID, foundingCounterLabel,
@@ -28,16 +28,25 @@ describe("landing copy — verbatim locks", () => {
    * constant being reinstated from a diff.
    */
   it("the headline", () => {
-    expect(HERO_H1).toBe("A bird's-eye view of your querying campaign");
+    expect(HERO_H1).toBe("The hunt begins.");
   });
 
-  it("the sub, word for word, with its em dash", () => {
+  /**
+   * ⚠️ THE OLD HEADLINE MOVED DOWN THE PAGE RATHER THAN BEING DELETED, and both are asserted here
+   * so the two surfaces cannot drift back into stating the same sentence twice. That duplication is
+   * exactly what the move was for: the band's heading and the hero's headline were word for word
+   * identical for as long as both existed.
+   */
+  it("the band's heading, which used to be the headline", () => {
+    expect(BAND_HEADING).toBe("A bird's-eye view of your querying campaign");
+    expect(HERO_H1).not.toBe(BAND_HEADING);
+  });
+
+  it("the sub, word for word", () => {
     expect(HERO_SUB).toBe(
-      "Every query, every agent, every reply — logged once and tracked to the end. No spreadsheet, " +
-        "no guesswork, nothing forgotten.",
+      "No more winging it. QueryHawk is your expert querying companion, ready to take you on a " +
+        "data-driven journey to land your manuscript in the right agent's hands.",
     );
-    expect(HERO_SUB).toContain("—");
-    expect(HERO_SUB).not.toContain(" - ");
   });
 
   /** Two actions, and they ask for different things: one claims a place, one explains the product. */
@@ -58,7 +67,7 @@ describe("landing copy — verbatim locks", () => {
       expect(k in copy, `${k} is retired`).toBe(false);
     }
     const strings = Object.values(copy).filter((v): v is string => typeof v === "string");
-    expect(strings).not.toContain("Introducing ScriptAlly");
+    expect(strings).not.toContain("Introducing QueryHawk");
     expect(strings).not.toContain("You've written a book.");
   });
 
@@ -118,16 +127,16 @@ describe("landing copy — verbatim locks", () => {
    * claim and it is unchanged — exactly one occurrence across every string the page renders — so
    * this survives the move and still fails if the row heading is restored.
    */
-  it("says `a finger on the pulse` in exactly one place", () => {
+  it("says `a finger on the pulse` nowhere at all", () => {
     const said = [
-      PULSE_HEADING,
+      BAND_HEADING,
       ...FEATURE_ROWS.map((r) => r.heading),
       /* Retarget, same law: a row's body is one string now, and its alt text is rendered too. */
       ...FEATURE_ROWS.flatMap((r) => [r.body, r.alt]),
       HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK,
       FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL,
     ].filter((t) => t.toLowerCase().includes("finger on the pulse"));
-    expect(said).toEqual(["A finger on the pulse of your querying journey"]);
+    expect(said).toEqual([]);
   });
 
   /**
@@ -137,9 +146,12 @@ describe("landing copy — verbatim locks", () => {
    * shape and the subtitle are GONE is what stops either being reinstated — a marked word would
    * invite the halo back, and a subtitle under a band header competes with the first row.
    */
-  it("the band header is one plain string, with no marked word and no subtitle", async () => {
-    expect(PULSE_HEADING).toBe("A finger on the pulse of your querying journey");
+  it("the band header is one plain string, and the ECG band's copy is retired", async () => {
+    expect(BAND_HEADING).toBe("A bird's-eye view of your querying campaign");
     const copy = await import("./landingCopy");
+    /* The trace's heading and its mono eyebrow went with the section that carried them. */
+    expect("PULSE_HEADING" in copy, "PULSE_HEADING is retired").toBe(false);
+    expect("SECTION_EYEBROW" in copy, "SECTION_EYEBROW is retired").toBe(false);
     expect("PULSE_SUB" in copy).toBe(false);
     expect(Object.values(copy).filter((v): v is string => typeof v === "string"))
       .not.toContain("and so much more…");
@@ -176,7 +188,7 @@ describe("landing copy — verbatim locks", () => {
   });
 
   it("document title", () => {
-    expect(DOCUMENT_TITLE).toBe("ScriptAlly — Take control of your querying journey");
+    expect(DOCUMENT_TITLE).toBe("QueryHawk — Take control of your querying journey");
   });
 
   /**
@@ -197,7 +209,7 @@ describe("landing copy — verbatim locks", () => {
     expect(FOUNDING_EYEBROW).toBe("Founding members");
     expect(FOUNDING_HEADING).toBe("Be one of the first hundred.");
     expect(FOUNDING_BLURB).toBe(
-      "ScriptAlly opens in stages. Founding members get in first, keep every feature free " +
+      "QueryHawk opens in stages. Founding members get in first, keep every feature free " +
       "through the beta, and help decide what gets built next.",
     );
     expect(FOUNDING_CTA).toBe("Claim your place");

@@ -160,7 +160,7 @@ export const MarketingShell: React.FC<{
       <div className="mk-navsentinel mk-navsentinel--release" ref={releaseRef} aria-hidden="true" />
       <div className={"mk-navwrap" + (scrolled ? " mk-scrolled" : "")}>
         <nav className="mk-nav" aria-label="Marketing">
-          <button type="button" className="mk-brand mk-brand-link" onClick={() => onNavigate("landing")} aria-label="ScriptAlly home">
+          <button type="button" className="mk-brand mk-brand-link" onClick={() => onNavigate("landing")} aria-label="QueryHawk home">
             {/* ⚠️ SHIPPED AS SUPPLIED — NO FILTER, NO RECOLOUR. The mark is artwork, not an icon that
                 takes the tier's ink, and its transparency is part of the drawing.
                 `alt=""` because the wordmark beside it already names the site — a second
@@ -170,7 +170,7 @@ export const MarketingShell: React.FC<{
             {/* ⚠️ THE CAPS ARE HERE, NOT IN CSS. `text-transform` would leave the drawn word and the
                 announced word saying different things; this way they are one string. The word
                 itself is unchanged — renaming the site is a separate job. */}
-            <span className="mk-wordmark">SCRIPTALLY</span>
+            <span className="mk-wordmark">QUERYHAWK</span>
           </button>
           {/* ⚠️ THE NAV AND THE FOOTER MUST NOT DISAGREE ABOUT WHAT THE SITE CONTAINS. About and
               Contact are real public routes; leaving them footer-only would put the two company

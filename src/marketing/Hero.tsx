@@ -8,11 +8,12 @@
  * through to /founders. The form still exists twice — the sealed band at the foot of this page, and
  * /founders — so the funnel is intact, and the solid button here is the way to it.
  *
- * ⚠️ THE HEADLINE'S LAST TWO WORDS ARE HELD ON ONE LINE. At the brief's deliberate 11ch measure the
- * natural break is four lines ending on "campaign" alone; holding the pair gives three lines with no
- * orphan. The words are untouched — the break before the pair stays an ordinary space outside the
- * held run — and the heading's size steps down only where that line would not fit its column, so the
- * three lines are the same three at every width.
+ * ⚠️ THE HELD PAIR WENT WITH THE HEADLINE THAT NEEDED IT. "A bird's-eye view of your querying
+ * campaign" broke four lines deep at an 11ch measure and stranded "campaign" alone, so its last two
+ * words were held on one line. The headline is three short words now, and the SAME mechanism would
+ * strand "The": the held run becomes "hunt begins.", and a line that cannot break inside it forces
+ * the break in front of it. A three-word headline wraps where it likes — there is nothing to hold,
+ * and the 11ch measure that made the pair necessary is gone with it.
  *
  * ⚠️ THE SHADOW IS DECORATIVE: `alt=""`, and nothing in the copy depends on it. It is tinted in the
  * file; it takes no filter and no recolour here, and its transparency is the artwork.
@@ -27,25 +28,13 @@ import { HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK } from "./landingCopy";
    version — a smoke test reads the PNG's header against the size and its hash against the version. */
 const SHADOW = { src: "/images/hawk-shadow.png", version: "2be9c10c", width: 2880, height: 2100 };
 
-/* The heading, split so its last two words can be held together. Untouched words: the split falls on
-   an ordinary space, and the held run is the last two words whatever the sentence is. */
-const lastTwoWords = (heading: string): [string, string] => {
-  const last = heading.lastIndexOf(" ");
-  const cut = last > 0 ? heading.lastIndexOf(" ", last - 1) : -1;
-  return cut >= 0 ? [heading.slice(0, cut + 1), heading.slice(cut + 1)] : ["", heading];
-};
-
 export const Hero: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
 }> = ({ onNavigate }) => {
-  const [lead, held] = lastTwoWords(HERO_H1);
   return (
     <section className="mk-hero">
       <div className="mk-herocopy">
-        <h1 className="mk-herotitle">
-          {lead}
-          <span className="mk-hkeep">{held}</span>
-        </h1>
+        <h1 className="mk-herotitle">{HERO_H1}</h1>
         <p className="mk-herosub">{HERO_SUB}</p>
         <div className="mk-heroctas">
           {/* ⚠️ A BUTTON, NOT AN ANCHOR. Marketing routes are driven by `onNavigate`; an `<a href>`

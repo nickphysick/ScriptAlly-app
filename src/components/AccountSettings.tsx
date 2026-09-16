@@ -958,7 +958,7 @@ export const AccountSettings: React.FC<{
 
         {pwMode === "federated-only" ? (
           /* ⚠️ THIS ROW USED TO BE A DEAD END, AND THAT WAS THE WHOLE DEFECT. It read "there's no
-              ScriptAlly password on this account, so there's nothing here to change" — true, and an
+              QueryHawk password on this account, so there's nothing here to change" — true, and an
               account whose only sign-in route is one provider is one lost Google account away from
               losing every manuscript in it, with no way back the app could offer.
               ⚠️ THE ROW GOES FULL-WIDTH: two labelled fields and two buttons do not belong in a
@@ -1055,7 +1055,7 @@ export const AccountSettings: React.FC<{
           component emits and nothing selects on, which is the `.wpg--record` fault from the other
           end and just as silent. `InertNotice` already owns its own spacing. */}
       <InertNotice>
-          ScriptAlly doesn't send these emails yet. What you choose here is stored and will be
+          QueryHawk doesn't send these emails yet. What you choose here is stored and will be
         honoured from the day it does.
       </InertNotice>
 
@@ -1080,10 +1080,10 @@ export const AccountSettings: React.FC<{
           ⚠️ ITS OWN CARD RATHER THAN A GROUP INSIDE THE ONE ABOVE, because the separation is the
           legal point — transactional and marketing email are different things with different rules,
           and a shared card says they are two settings of one kind. */}
-      <SettingsCard heading="News from ScriptAlly" note={`Sent to ${currentUser.email}.`}>
+      <SettingsCard heading="News from QueryHawk" note={`Sent to ${currentUser.email}.`}>
         <SettingsRow
           label="Product news"
-          description="Occasional news about new ScriptAlly features. Off unless you turn it on, and one click to stop."
+          description="Occasional news about new QueryHawk features. Off unless you turn it on, and one click to stop."
           control={<Toggle on={marketingOn} onChange={saveMarketing} label="Product news" />}
         />
       </SettingsCard>
@@ -1264,7 +1264,7 @@ export const AccountSettings: React.FC<{
            question rather than answering it. Overruling copy a brief fixed is not a layout
            decision, so the sentence stands and the enumeration is ADDED, which understates
            nothing. */
-        blurb="Downloads everything ScriptAlly holds about your querying — your agents, queries, and history — as files you can open anywhere."
+        blurb="Downloads everything QueryHawk holds about your querying — your agents, queries, and history — as files you can open anywhere."
         headingId="acct-h-data"
         note={exportMsg ? <span style={{ color: SUCCESS_GREEN, fontWeight: 500 }}>{exportMsg}</span> : undefined}
       >
@@ -1318,7 +1318,7 @@ export const AccountSettings: React.FC<{
       <SettingsCard heading="Signing out" headingId="acct-h-signout">
         <SettingsRow
           label="Sign out"
-          description="Ends this session and takes you back to the ScriptAlly home page. Your work stays where it is."
+          description="Ends this session and takes you back to the QueryHawk home page. Your work stays where it is."
           /* No confirm: leaving is not destructive, and signing back in costs a password. */
           control={
             <button onClick={() => { void logout(); }} style={ghostBtn}>

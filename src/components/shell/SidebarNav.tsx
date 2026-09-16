@@ -141,7 +141,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, onNavigate, a
         className="qbrand"
         onClick={() => onNavigate("dashboard")}
         style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3, padding: "2px 4px 18px", background: "transparent", border: "none", cursor: "pointer", width: "100%" }}
-        aria-label="ScriptAlly — go to dashboard"
+        aria-label="QueryHawk — go to dashboard"
       >
         <img src="/scriptally-logo-v2.png" alt="" style={{ height: 27, width: "auto", flexShrink: 0 }} />
         <span className="qbrand-wm" style={{ display: "flex" }}><ScriptAllyLogo size="md" /></span>

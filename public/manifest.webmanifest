@@ -1,6 +1,6 @@
 {
-  "name": "ScriptAlly",
-  "short_name": "ScriptAlly",
+  "name": "QueryHawk",
+  "short_name": "QueryHawk",
   "description": "The literary querying companion for fiction authors.",
   "start_url": "/dashboard",
   "display": "standalone",

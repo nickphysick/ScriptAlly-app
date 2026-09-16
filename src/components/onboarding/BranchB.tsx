@@ -122,7 +122,7 @@ const TemplateNote: React.FC = () => (
     </svg>
     <p style={{ fontFamily: FONT_SANS, fontSize: 12, lineHeight: 1.5, color: "#44563a", margin: 0 }}>
       Don't have a spreadsheet set up?{" "}
-      <a href="/ScriptAlly-pipeline-import-template.xlsx" download style={{ color: "#3f5237", fontWeight: 500 }}>
+      <a href="/QueryHawk-pipeline-import-template.xlsx" download style={{ color: "#3f5237", fontWeight: 500 }}>
         Download our template →
       </a>{" "}
       It captures each query's status and key dates — so your "responses received" count is right from day one.
@@ -540,7 +540,7 @@ export const BranchB: React.FC<BranchBProps> = ({
         step={bandStep}
         pre="Your pipeline"
         name={ok ? "Brought across" : "That didn't work"}
-        sub={ok ? "Here's what landed in ScriptAlly" : "Nothing was imported — here's why"}
+        sub={ok ? "Here's what landed in QueryHawk" : "Nothing was imported — here's why"}
         motif={<InboxMotif />}
         onBack={() => setScreen("review")}
         primaryLabel={ok ? "Continue →" : "Back to the review →"}
@@ -627,8 +627,8 @@ export const BranchB: React.FC<BranchBProps> = ({
       primaryLabel="Download template →"
       onPrimary={() => {
         const a = document.createElement("a");
-        a.href = "/ScriptAlly-pipeline-import-template.xlsx";
-        a.download = "ScriptAlly-pipeline-import-template.xlsx";
+        a.href = "/QueryHawk-pipeline-import-template.xlsx";
+        a.download = "QueryHawk-pipeline-import-template.xlsx";
         a.click();
       }}
     >

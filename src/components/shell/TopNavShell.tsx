@@ -191,7 +191,7 @@ export const TopNavShell: React.FC<TopNavShellProps> = ({
             title="Dashboard"
           >
             <span className="tn-tile" aria-hidden="true">S</span>
-            <span className="tn-wm">ScriptAlly</span>
+            <span className="tn-wm">QueryHawk</span>
           </button>
 
           {/* ⚠️ THREE HEADINGS, not four. `Learn` is gone: no route exists for it anywhere in the

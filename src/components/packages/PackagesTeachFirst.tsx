@@ -95,7 +95,7 @@ export const TEACH_STAGES: TeachStage[] = [
 
 export const TEACH_HEADLINE = "Fed up of guessing which materials are landing with agents?";
 export const TEACH_CTA = "Add your first material";
-export const STAGES_HEADING = "Managing your packages with ScriptAlly";
+export const STAGES_HEADING = "Managing your packages with QueryHawk";
 export const STAGES_SUB = "Gather your materials, bundle them, and let the replies report back.";
 
 const AUTOPLAY_MS = 4200;
@@ -168,7 +168,7 @@ export const PackagesTeachFirst: React.FC<PackagesTeachFirstProps> = ({ onAddMat
         <h2 className="pkgt-h">{TEACH_HEADLINE}</h2>
         <div className="pkgt-body">
           A package is one covering letter, one synopsis and one sample, bundled under a name. Every
-          package keeps its own scorecard — ScriptAlly records{" "}
+          package keeps its own scorecard — QueryHawk records{" "}
           <b>which letter, synopsis and pages went to each agent</b>, so the answer sits on the page,
           not in your head.
         </div>

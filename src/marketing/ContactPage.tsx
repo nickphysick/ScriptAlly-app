@@ -209,7 +209,7 @@ export const ContactPage: React.FC<{
 
         <div className="mk-svcline">
           <p>
-            <strong>Service information.</strong> ScriptAlly is operated by {LEGAL_ENTITY_NAME},{" "}
+            <strong>Service information.</strong> QueryHawk is operated by {LEGAL_ENTITY_NAME},{" "}
             {REGISTERED_ADDRESS}, United Kingdom.
           </p>
         </div>

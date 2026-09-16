@@ -12,12 +12,12 @@
 
 import { CopyRun } from "./CopyRuns";
 
-export const CONTACT_DOCUMENT_TITLE = "Contact — ScriptAlly";
+export const CONTACT_DOCUMENT_TITLE = "Contact — QueryHawk";
 
 export const CONTACT_EYEBROW = "Company · Contact";
 export const CONTACT_H1 = "Get in touch";
 export const CONTACT_LEDE =
-  "Email, or use the form — either way it lands on the same desk. ScriptAlly is run by one " +
+  "Email, or use the form — either way it lands on the same desk. QueryHawk is run by one " +
   "person, so expect a reply within two working days.";
 
 export interface ContactWay {

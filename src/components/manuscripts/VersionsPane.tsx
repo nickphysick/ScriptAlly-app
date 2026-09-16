@@ -6,7 +6,7 @@
  *
  * Reference: `design-refs/manuscripts-book-profile.html`, `#pane-versions`.
  *
- * ⚠️ THE PERMANENT LIMITATION IS STATED ON THE PAGE, NOT ONLY IN A REPORT. ScriptAlly records which
+ * ⚠️ THE PERMANENT LIMITATION IS STATED ON THE PAGE, NOT ONLY IN A REPORT. QueryHawk records which
  * version a sample was SENT AS; it cannot open the file and check the text matches. That is a
  * property of the feature rather than a gap to close, so the surface that would otherwise read as a
  * guarantee says what it is: reported, not guaranteed.
@@ -34,7 +34,7 @@ import "./bookProfile.css";
 
 /** What the app can and cannot promise about a version. Verbatim on the page, by ruling. */
 export const VERSION_LIMITATION =
-  "ScriptAlly records which version a sample was sent as — it can't check the text itself matches. " +
+  "QueryHawk records which version a sample was sent as — it can't check the text itself matches. " +
   "Reported, not guaranteed.";
 
 export interface VersionsPaneProps {
