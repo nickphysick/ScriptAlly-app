@@ -11,7 +11,9 @@
  * than adjectives, in the same class as the About page's:
  *   · six months of Pro, free
  *   · a founding rate "for as long as you're querying your manuscript" — a PERMANENT pricing
- *     commitment, stated here and again in the landing panel's "then half price for life"
+ *     commitment, stated here and on three other surfaces as "half price for as long as you need
+ *     it" (16 Sep: "for life" is retired everywhere, being a stronger promise than the product
+ *     needs to make)
  *   · "your data is never the experiment … exportable from day one"
  * If one stops being true the fix is the product, not the sentence.
  *
