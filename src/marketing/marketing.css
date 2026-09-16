@@ -105,16 +105,14 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   --mk-cta: #f5e2da;
   --mk-cta-bd: #e8c8bc;
   --mk-cta-hov: #f8e9e2;
-  /* ── The founding-members band ──
-     ⚠️ EVERY COLOUR THIS BAND PAINTS IS A TOKEN, AND THAT IS NOT TIDINESS. A `var()` naming a
+  /* ── The blush surfaces: /pricing's tier cards, and the sign-up's own messages ──
+     ⚠️ EVERY COLOUR THESE PAINT IS A TOKEN, AND THAT IS NOT TIDINESS. A `var()` naming a
      custom property nobody declares does not error and does not warn — the declaration is simply
      dropped, so a mistyped token is a surface that paints NOTHING, on a public page, through a
      green build and a green suite. `marketingTokens.test.ts` asserts that every `var(--mk-…)`
      this sheet READS resolves to a declaration; declaring them together here is what makes that
      guard cheap to keep satisfied. */
   --mk-blush: #f8e8e1;
-  --mk-panel-sh: rgba(124, 58, 42, .08);
-  --mk-blush-line: #eed6cb;
   /* ⚠️ THE QUIET LABEL TREATMENT ON CARD KICKERS, AND IT IS DELIBERATELY NOT EITHER NEIGHBOUR.
      Mono uppercase at wide tracking is a high-attention treatment, and on the deal cards the
      HEADING is the offer — the kicker only says which of the three you are reading. This sits
@@ -127,19 +125,24 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   --mk-blush-body: #6d5348;
   --mk-blush-note: #8a6c5f;
   --mk-blush-ph: #b08e80;
-  --mk-letter-bd: rgba(58, 28, 20, .11);
-  --mk-letter-fold: rgba(58, 28, 20, .09);
-  --mk-letter-sh: rgba(124, 58, 42, .13);
-  --mk-letter-rim: rgba(255, 255, 255, .85);
-  /* ⚠️ THE SEAL IS THE ONE BURGUNDY FILL AT SCALE ON THIS SITE. Every other burgundy fill here is
-     a mark under 12px — the Pro tag, the status dot, the pinned-note pin, a few hairlines at half
-     opacity. The exception is about SIZE, not hue, and it does not travel: no button is
-     burgundy-filled, here or anywhere. */
-  --mk-seal-sh: rgba(124, 58, 42, .34);
-  --mk-seal-ring: rgba(253, 250, 245, .42);
   --mk-msg-ok-bg: rgba(233, 237, 230, .8);
   --mk-msg-ok-bd: rgba(138, 158, 136, .5);
-  --mk-counter-track: rgba(124, 58, 42, .15);
+  /* ── The founding-writers banner ──
+     ⚠️ `--mk-claim-accent` (#8a4a3c) IS NOT `--mk-burg` (#7c3a2a), AND THE FOURTEEN POINTS
+     BETWEEN THEM ARE A FLAG RATHER THAN A DECISION I MADE. The brief specifies this value; the
+     page already carries a burgundy for exactly this job. Two near-identical reds on one page is
+     the shape of the `#1c130e`/`#1c130f` fault recorded in CLAUDE.md — invisible, unfindable,
+     and on the two marks whose whole justification is that they match. Reported to Nick, not
+     quietly snapped to the neighbour: a colour decision made by convenience is still a colour
+     decision made by the wrong person.
+     ⚠️ AND THE BUTTON'S TEXT DELIBERATELY DOES *NOT* GET A TOKEN. The brief asks for #f5f1eb on
+     the ink pill; `--mk-cta-ink` is #f7f0e9 and already means "the cream the ink pill prints in".
+     Two points apart, one job — so this reads the existing token and the brief's value is not
+     introduced. That IS the fault above, avoided in the one place it could be. */
+  --mk-claim-ground: #f5f1eb;
+  --mk-claim-accent: #8a4a3c;
+  --mk-claim-track: #f7e8e2;
+  --mk-claim-sh: rgba(28, 19, 15, .11);
   /* The display ink for statement type. `--mk-head` (mocha) is the page-furniture heading colour
      and stays; a 52px+ statement wants the darker end, and the two are not interchangeable. */
   --mk-nearblack: #1c130f;
@@ -422,9 +425,23 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   .mk-scope { --mk-nav-h: 129px; }
 }
 
-/* ⚠️ EVERYTHING FROM THE SECTION BREAK DOWN, FOOTER INCLUDED. One wrapper, one token, no
-   hairline — see the note on the tokens. Nothing inside this may repaint the ground. */
-.mk-lower { background: var(--mk-lower); }
+/* ⚠️ EVERYTHING FROM THE SECTION BREAK DOWN, FOOTER INCLUDED. One wrapper, one token — see the
+   note on the tokens. Nothing inside this may repaint the ground.
+   ⚠️ THE JOIN IS AN 80px FADE NOW, AND THE HAIRLINE THAT MARKED IT IS DELETED FROM `.mk-statband`.
+   Two separators at one boundary is one too many: a rule says "a section ends here" and a fade
+   says "the ground changes over the next eighty pixels", and drawn together the rule wins and the
+   fade is wasted. The colour change is still the whole signal — it is just no longer an EDGE,
+   which is what lets the hero's shadow cross it without being cut in half by a line.
+   ⚠️ COLOUR AND IMAGE ARE DECLARED SEPARATELY, NEVER AS THE `background` SHORTHAND. The shorthand
+   resets every longhand including the colour, so a gradient that fails to parse leaves the whole
+   lower surface TRANSPARENT — through a green build, on a public page, with the rule still
+   reading correctly. This stylesheet has had four rounds of a see-through surface from exactly
+   that, and the colour here is the gradient's own end stop so the worst case is a flat fill. */
+.mk-lower {
+  background-color: var(--mk-lower);
+  background-image: linear-gradient(180deg, var(--mk-hero-ground), var(--mk-lower) 80px);
+  background-repeat: no-repeat;
+}
 
 /* ═══════════════ Landing page (design-refs/landing-v13.html, values verbatim) ═══════════════ */
 
@@ -439,14 +456,31 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    ⚠️ `container-type` WENT WITH THE HEADLINE THAT NEEDED IT. It existed so the size could be
    computed from the hero's own width in cqw; the headline is three short words at a flat 56px now
    and measures against nothing. */
+/* ⚠️ THE SLACK IS ARITHMETIC, NOT TASTE, AND THE TWO HALVES OF THE BRIEF CANNOT BOTH HOLD.
+   The row is `align-items: center` over copy that measures 308.8px at 1440, so
+     slack (each side) = (min-height - 308.8) / 2      band top = 88 + min-height
+   Less slack therefore ALWAYS means a lower band top and MORE band visible, never less. Showing
+   only 100px of band needs min-height 712, which RAISES the slack to 201.6 — more than the 175.6
+   the brief asked to close. There is no value satisfying both. 520 was chosen on the stated
+   weighting (slack first): 105.6px each side, down from 175.6, with the band's top edge at 608.
+   It is one number to change if the other reading was meant.
+   ⚠️ `overflow-x: clip; overflow-y: visible` IS THE ONLY PAIR THAT DOES THIS. `hidden` on one axis
+   forces the other to `auto` — so `overflow-x: hidden; overflow-y: visible` would give a scroll
+   container, not a spill. The x-clip is still the guarantee that the art can never reach the
+   document's scroll width; the y-visible is what lets the shadow cross into the band below. */
 .mk-hero {
   max-width: 1180px; margin: 0 auto; padding: 0 56px;
-  position: relative; overflow: hidden;
+  position: relative;
+  overflow-x: clip; overflow-y: visible;
   display: grid; grid-template-columns: 1fr 1fr; align-items: center;
-  min-height: 660px;
+  min-height: 520px;
 }
-/* The container supplies the outer gutter now; this is only the gap across to the art column. */
-.mk-herocopy { padding: 0 40px 0 0; min-width: 0; }
+/* ⚠️ THE STACKING CONTEXT IS LOAD-BEARING AT EVERY WIDTH NOW, not just stacked. The shadow is
+   169% of its column and grows LEFTWARD from a fixed right edge, so it reaches back across the
+   copy; the art is the later grid item, so without this it would paint a 20% wash over the
+   headline. It was already doing exactly this below 900px, where the art becomes the full hero —
+   the rule has simply stopped being a mobile special case. */
+.mk-herocopy { padding: 0 40px 0 0; min-width: 0; position: relative; z-index: 1; }
 
 /* ⚠️ THE FAMILY IS !important, AND IT HAS TO BE. src/lib/brand.tsx injects a style element at runtime,
    on every route, whose heading rule gives every bare h1, h2 and h3 the brand heading font with
@@ -485,8 +519,20 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 /* ⚠️ THE OVERFLOW IS INTO THE GUTTER NOW, NOT OFF THE PAGE. At -14%/118% the shadow cleared the
    viewport's right edge, which is what made the hero read as uncentred; inside a 1180px container
    it leaves its own column by ~32px at 1440 and stops well short of the page edge. */
+/* ⚠️ IT GROWS SYMMETRICALLY, BECAUSE IT IS CENTRED — `top: 50%` plus `translateY(-50%)`, which
+   is the thing that reads well and was not to be moved. So an overhang past the hero's BOTTOM is
+   an equal overhang past its TOP, and the arithmetic is
+     shadow height = min-height + 2 x overhang        width = height x 2880/2100
+   For 520 and ~70px: 660 tall, 905 wide, which is 169% of the 534px art column. The top overhang
+   slides under the sticky nav (z-index 60, opaque ground) and is never seen; the bottom crosses
+   into the band, which is the whole point of the change.
+   ⚠️ AND GROWING IT VERTICALLY GROWS IT SIDEWAYS — the aspect ratio is fixed, so there is no
+   version of this that gets taller alone. `right` is anchored, so the extra 300px all arrives on
+   the LEFT, over the copy column. That is why `.mk-herocopy` now takes a stacking context at
+   every width. Reported rather than absorbed: it is a real consequence of "grow it", not a
+   detail. */
 .mk-heroart img {
-  position: absolute; top: 50%; right: -6%; width: 112%; max-width: none;
+  position: absolute; top: 50%; right: -6%; width: 169%; max-width: none;
   transform: translateY(-50%); opacity: 0.20; display: block;
 }
 
@@ -530,7 +576,8 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   .mk-hero {
     grid-template-columns: 1fr; min-height: 0; padding: 56px 26px 64px;
   }
-  .mk-herocopy { position: relative; z-index: 1; padding: 0; }
+  /* The stacking context is on the base rule now; only the padding is a stacked concern. */
+  .mk-herocopy { padding: 0; }
   /* A flat step rather than a computed one: there is no unbreakable run left to fit. */
   .mk-hero .mk-herotitle { font-size: 40px; }
   .mk-heroart { position: absolute; inset: 0; height: 100%; z-index: 0; pointer-events: none; }
@@ -572,9 +619,12 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    has something to serve for the first time since the statement hero went. `--mk-nav-h` is derived
    from the FULL nav height, not the condensed one — the browser computes the target before the
    condense runs, so the intuition is inverted; the measurement is at the token. */
+/* ⚠️ NO `border-top`. It drew a hairline at the exact boundary `.mk-lower` now fades across, and
+   a fade behind a rule is a fade nobody can see. It also cut the hero's shadow in half at the one
+   place the shadow is meant to cross. Deleted rather than made transparent — a border set to
+   `none` is a declaration describing a decision twice. */
 .mk-statband {
   max-width: 1180px; margin: 0 auto; padding: 96px 56px 80px;
-  border-top: 1px solid var(--mk-hair);
   text-align: center;
   scroll-margin-top: var(--mk-nav-h);
 }
@@ -592,6 +642,57 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   margin: 34px 0 0; color: var(--mk-nearblack); opacity: .8;
 }
 .mk-statglyph { width: 26px; height: 26px; flex: none; display: block; }
+
+/* ── The glyphs arrive in sequence, once ──
+   ⚠️ THE HIDDEN STATE IS OPT-IN, AND THAT IS THE WHOLE SAFETY ARGUMENT. `.mk-statglyphs` on its
+   own paints six visible marks; only `--armed` hides them, and `StatusBand` adds that class
+   during its first render ONLY where `IntersectionObserver` exists. A browser without the API,
+   and `renderToStaticMarkup`, both get the plain class and six visible glyphs — so nothing can
+   leave a reader looking at an empty row under a heading that introduces one. The ECG trace this
+   section replaced carried the same rule from the other end: its play-state default was
+   "running", never "paused".
+   ⚠️ AND ARMING HAPPENS DURING RENDER RATHER THAN IN AN EFFECT, or the first paint would show the
+   glyphs, the effect would hide them, and every load would open with a flash. */
+.mk-statglyphs--armed .mk-statglyph { opacity: 0; transform: translateY(10px) scale(.86); }
+
+/* ⚠️ NO `var()` INSIDE THE KEYFRAMES. A custom property in a keyframe block fails silently in
+   this setup — no error, no warning, no animation — so frames carry opacity and transform only,
+   and any colour is declared on the rule. The overshoot to 1.06 at 60% is what makes the spring
+   read as an arrival rather than a fade; the easing already overshoots, and the two together are
+   the pop. */
+@keyframes mkGlyphIn {
+  0% { opacity: 0; transform: translateY(10px) scale(.86); }
+  60% { opacity: 1; transform: translateY(0) scale(1.06); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* `forwards`, because the last frame is the resting state and without it every glyph would snap
+   back to `opacity: 0` the instant the animation ended. */
+.mk-statglyphs--in .mk-statglyph {
+  opacity: 0; transform: translateY(10px) scale(.86);
+  animation: mkGlyphIn .5s cubic-bezier(.34, 1.56, .64, 1) forwards;
+}
+/* 90ms apart. Stated per child rather than through an inline custom property: six is a fixed
+   number set by the pipeline, and an inline style would have to be written in the component,
+   where a media query could not reach it. */
+.mk-statglyphs--in .mk-statglyph:nth-child(1) { animation-delay: 0ms; }
+.mk-statglyphs--in .mk-statglyph:nth-child(2) { animation-delay: 90ms; }
+.mk-statglyphs--in .mk-statglyph:nth-child(3) { animation-delay: 180ms; }
+.mk-statglyphs--in .mk-statglyph:nth-child(4) { animation-delay: 270ms; }
+.mk-statglyphs--in .mk-statglyph:nth-child(5) { animation-delay: 360ms; }
+.mk-statglyphs--in .mk-statglyph:nth-child(6) { animation-delay: 450ms; }
+
+/* ⚠️ AFTER THE RULES IT OVERRIDES, NOT WITH THE OTHER REDUCED-MOTION BLOCKS AT THE TOP OF THE
+   FILE. A media query confers NO specificity, so an override placed earlier loses on source order
+   — measured on this stylesheet last pass at 0.5s under `reduce`, from a declaration that read
+   perfectly correctly. It forces the end state rather than only killing the animation, because
+   `animation: none` alone would leave `--armed`'s `opacity: 0` standing and hide the row for
+   exactly the readers who asked for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .mk-statglyphs--armed .mk-statglyph,
+  .mk-statglyphs--in .mk-statglyph {
+    opacity: 1; transform: none; animation: none;
+  }
+}
 
 /* ⚠️ THE BOUNDARY IS 1099.98, NOT 1100, BECAUSE `max-width` IS INCLUSIVE. The brief says the heading
    releases BELOW 1100, so at exactly 1100 it must still be held — and `@media (max-width: 1100px)`
@@ -702,101 +803,93 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 .mk-frow:nth-child(even) > * { direction: ltr; }
 
 /* ── /founders: the Founding Writers page ──────────────────────────────────── */
+/* ⚠️ THIS WHOLE REGION WAS REWRITTEN RATHER THAN PATCHED, per the house rule: where a section
+   needs more than a one-line change, delete every rule for its selectors and write one
+   authoritative block. It is the only form that cannot accumulate a second declaration of a
+   selector, which is the fault `ruleFor` refuses and `.mk-foot` shipped for months. */
 .mk-fwpad { max-width: 1180px; margin: 0 auto; padding: 0 56px; }
 
-/* ⚠️ `align-items: stretch` IS THE WHOLE POINT OF THIS ROW, and neither column declares a height
-   because of it. The earth is exactly as tall as headline + lede + field because the row makes it
-   so; a fixed height would set the proportion from the wrong end and stop tracking the copy the
-   moment the copy changes. (Contrast the landing hero, where `start` is the row default and the
-   ARTWORK overrides to `center` on itself — two rows, two answers, each stated where it belongs.) */
+/* ⚠️ `center`, WHERE IT WAS `stretch`, AND THE ARTWORK IS WHY. The earth was sized to match the
+   copy's height and needed `max-height` + `object-fit` not to crop; this picture takes its size
+   from its column's width and its own ratio, so a stretched row would hand it a height it cannot
+   use. Two rows, two answers, each stated where it belongs — the landing hero's `center` is a
+   different decision about a different picture. */
 .mk-fwhero {
-  display: grid; grid-template-columns: 1.08fr 1fr; gap: 56px;
-  align-items: stretch; padding: 64px 0 56px;
+  display: grid; grid-template-columns: 1.02fr 0.98fr; gap: 56px;
+  align-items: center; padding: 88px 0 76px;
 }
 .mk-fwcol { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 .mk-fweyebrow {
   font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .26em;
   text-transform: uppercase; color: var(--mk-muted); margin: 0 0 22px;
 }
-/* ⚠️ `4.2vw` REACHES 3.3rem AT 1257px, INSIDE `.mk-fwpad`'s 1180 cap — the container-cap
-   pre-check, and it FAILS it. The ceiling is 3.1rem instead, reached at 1181: one pixel inside the
-   cap, so the headline stops growing at the same moment its measure does. At 3.3rem the type would
-   have gone on climbing from 1181 to 1257 against a frozen column, which is the fault that has now
-   decided six numbers in this project.
-   ⚠️ AND `13ch` IS ONLY MEANINGFUL BECAUSE THIS ELEMENT CARRIES ITS OWN FONT-SIZE. */
-.mk-fwh1 {
-  font-family: "Playfair Display", Georgia, serif; font-weight: 700;
-  font-size: clamp(2.2rem, 4.2vw, 3.1rem); line-height: 1.3; letter-spacing: -.02em;
+/* ⚠️ TWO CLASSES AND `!important`, AND BOTH ARE REQUIRED. `src/lib/brand.tsx` injects a rule at
+   runtime on every route giving `h1:not(.wsh-title)` the brand heading font with `!important`.
+   That selector is 0-1-1; a bare `.mk-fwh1` is 0-1-0, so between two important declarations it
+   LOSES and this headline would silently draw in Playfair. `.mk-fw .mk-fwh1` is 0-2-0 and wins.
+   The old rule got away with one class only because it asked for Playfair anyway.
+   ⚠️ A FLAT 52px, NOT A CLAMP, SO THE CONTAINER-CAP CHECK HAS NOTHING TO SAY. The retired
+   `clamp(2.2rem, 4.2vw, 3.1rem)` reached its ceiling inside `.mk-fwpad`'s 1180 cap by exactly one
+   pixel, which is a tuned coincidence rather than a property; a fixed size with breakpoints
+   cannot drift against a frozen measure at all. */
+.mk-fw .mk-fwh1 {
+  font-family: "Special Elite", cursive !important; font-weight: 400;
+  font-size: 52px; line-height: 1.12; letter-spacing: -.015em;
   color: var(--mk-nearblack); margin: 0; max-width: 13ch;
 }
 .mk-fwlede {
-  margin: 22px 0 0; max-width: 46ch; font-size: 1.12rem; line-height: 1.6; color: var(--mk-muted);
+  margin: 22px 0 0; max-width: 46ch; font-size: 19px; line-height: 1.7; color: var(--mk-muted);
 }
 .mk-fwlede strong { color: var(--mk-nearblack); font-weight: 600; }
-/* Same shared form, this page's layout. The pink primary, as on the landing panel — this ground is
-   the page's cream, not the band's pink. */
-.mk-fwform { display: flex; gap: 11px; margin: 28px 0 0; max-width: 31rem; flex-wrap: wrap; }
-.mk-fwform input {
-  flex: 1 1 210px; min-width: 0; font-family: inherit; font-size: .98rem; color: var(--mk-ink);
-  background: #fff; border: 1px solid var(--mk-cta-bd); border-radius: 11px; padding: 13px 15px;
-}
-.mk-fwform input::placeholder { color: var(--mk-blush-ph); }
-.mk-fwform .mk-btn--ink {
-  flex: none; font-size: .98rem; font-weight: 500; padding: 13px 22px; border-radius: 11px;
-  color: var(--mk-nearblack); background: var(--mk-cta); border-color: var(--mk-cta-bd);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 2px 6px var(--mk-panel-sh);
-}
-.mk-fwform .mk-btn--ink:hover { background: var(--mk-cta-hov); }
-/* ⚠️ A WRAPPER-SCOPED WIDTH, AND THAT IS THE WHOLE OVERRIDE. The founders hero renders the SAME
-   `tally` counter as the landing panel — same bar, same fill, same mono tally — and differs only
-   in how wide the column it sits in is. The panel caps at 380px inside a 48rem card; this sits
-   under a 31rem form. A fourth variant for one `max-width` would be a component forked over a
-   number.
-   ⚠️ `.mk-foundcnt` AND THE `line` VARIANT ARE GONE WITH IT. That class rendered the bare sentence
-   this replaces, `/founders` was its only consumer, and a replacement is swapped rather than
-   added. Verified against the post-edit tree: nothing in `src/` renders it, and the smoke's
-   assertion that no counter appears without a live figure still names it. */
-.mk-fwcol .mk-fmcount { max-width: 31rem; margin: 18px 0 0; }
-.mk-fwillo { display: flex; align-items: center; justify-content: center; min-height: 320px; }
-/* ⚠️ BARE, AND NOT THROUGH `MarketingIllustration`. No rim, no caption, no tinted ground: this
-   asset arrived finished, and the slot primitive exists to render the chrome that says an asset
-   has NOT. `max-height: 100%` is what stops a short row cropping it — the row's height comes from
-   the copy column beside it. */
-.mk-fwearth { width: 100%; max-width: 460px; height: auto; max-height: 100%; object-fit: contain; display: block; }
+
+/* ⚠️ THE HERO'S FORM IS `.mk-claimform` — THE BANNER'S — AND `.mk-fwform` IS DELETED. The brief
+   said "the same form", and two rules that merely look alike are how two surfaces come to
+   disagree about a radius. Only the WIDTH is this page's business, and it is a wrapper-scoped
+   override exactly as `.mk-fwcol .mk-fmcount` was: 0-2-0, so it wins on specificity wherever it
+   sits in the file. */
+.mk-fwcol .mk-claimform,
+.mk-fwcol .mk-claimcount,
+.mk-fwcol .mk-betanote { max-width: 520px; }
+
+/* ⚠️ BARE, AND NOT THROUGH `MarketingIllustration`. No rim, no caption, no tinted ground, no
+   crop, no border, no shadow: the asset arrived finished, and that primitive exists to draw the
+   chrome that says an asset has NOT. `.mk-fwillo` and `.mk-fwearth` are both deleted — the
+   picture is a direct grid child now, so there is no flex wrapper to centre it inside and no
+   `min-height` reserving a row it no longer shares. */
+.mk-fwart { width: 100%; height: auto; display: block; }
 
 /* ⚠️ EQUAL HEIGHT BY `stretch` PLUS A FLEX COLUMN INSIDE, not by a height. Three headings of
    different lengths would otherwise push three bodies out of line with one another. */
 .mk-fwdeal {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
   margin: 56px 0 0; align-items: stretch;
 }
+/* ⚠️ NO BORDER AND NO SHADOW. They were parchment cards with a hairline and a 26px cast, framed
+   to carry paragraphs; these carry two lines each and sit under a hero rather than filling the
+   page. White on the page's cream is enough of a step to read as a card at this size, and a
+   border plus a shadow plus a fill is three edges on one object. */
 .mk-fwcard {
   display: flex; flex-direction: column;
-  background: var(--mk-parch); border: 1px solid var(--mk-hair); border-radius: 14px;
-  padding: 28px 26px 26px; box-shadow: 0 10px 26px rgba(58, 28, 20, .06);
+  background: #fff; border-radius: 14px; padding: 26px 28px 24px;
 }
-/* ⚠️ QUIETER THAN IT WAS, ON PURPOSE — .6rem/.22em/blush-label arrived BEFORE the heading and
-   out-shouted it. The heading is the offer; the kicker names which of the three cards you are in.
-   Everything else about the cards is unchanged.
-   ⚠️ AND IT IS SCOPED TO `.mk-fwcard`, WHICH IS THE ONLY REASON IT APPLIES AT ALL. `.mk-fwcard p`
-   is 0-1-1 and a bare `.mk-fwk` is 0-1-0, so the generic paragraph rule was winning on font-size
-   and colour — measured, the kicker rendered at 15.68px (0.98rem) in `--mk-muted` where the rule
-   asks for .55rem in `--mk-kicker`. The mono face, the tracking and the uppercase came through,
-   because `.mk-fwcard p` does not set those, which is exactly why it looked like a kicker and
-   nobody noticed. Same fault as the one in the disclosure below, one section over; I fixed that
-   one first and did not sweep for the class, which is how this survived a whole phase written to
-   change it. */
+/* ⚠️ SCOPED TO `.mk-fwcard`, AND THAT IS THE ONLY REASON IT APPLIES. `.mk-fwcard p` is 0-1-1 — a
+   class and an element — while a bare `.mk-fwk` is 0-1-0, so the generic paragraph rule OUTRANKS
+   the specific one on every property it happens to set. Measured before that was fixed: the
+   kicker rendered at 15.68px in `--mk-muted` where its own rule asked for .55rem in
+   `--mk-kicker`. The mono face, the tracking and the uppercase came through — because the generic
+   rule does not set those — which is exactly why it still looked like a kicker and nobody
+   noticed. A half-applied treatment looks intentional. */
 .mk-fwcard .mk-fwk {
-  font-family: "JetBrains Mono", monospace; font-size: .55rem; letter-spacing: .2em;
-  text-transform: uppercase; color: var(--mk-kicker); margin: 0 0 9px;
+  font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--mk-claim-accent); margin: 0 0 10px;
 }
-/* 1.3, the house floor for mixed-case Playfair — "Half price, for as long as you need it." has a
-   descender in it, and this is copy that can change. */
-.mk-fwcard h2 {
-  font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 1.32rem;
+/* Two classes and `!important` for the same reason as the h1 — brand.tsx forces every bare `h2`
+   to the brand family, and only a selector of two classes outranks it. */
+.mk-fw .mk-fwcard h2 {
+  font-family: "Special Elite", cursive !important; font-weight: 400; font-size: 22px;
   line-height: 1.3; color: var(--mk-nearblack); margin: 0 0 10px;
 }
-.mk-fwcard p { margin: 0; font-size: .98rem; color: var(--mk-muted); line-height: 1.6; }
+.mk-fwcard p { margin: 0; font-size: 16.5px; color: var(--mk-muted); line-height: 1.6; }
 
 /* ── Full disclosure: a pull-quote on the page ground ──
    ⚠️ THE PARCHMENT CARD IS DELETED, ALONG WITH ITS BORDER, RADIUS, PADDING AND SHADOW. A bordered
@@ -809,17 +902,12 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    the lifted line now, and emphasising it in both places says it twice and means it less. */
 .mk-fwhonest { max-width: 760px; margin: 86px auto 0; text-align: center; }
 /* ⚠️ EVERY ONE OF THE THREE RULES BELOW IS SCOPED TO `.mk-fwhonest`, AND THAT IS NOT DECORATION —
-   IT IS THE ONLY THING THAT MAKES THEM APPLY. `.mk-fwhonest p` is 0-1-1 (a class and an element)
-   and a bare `.mk-fwlead` is 0-1-0, so the broad paragraph rule OUTRANKS the specific one on every
-   property it happens to set. Measured before the fix: the lifted line and the quote mark both
-   computed at 16px against intended 28px and 3.4rem.
-   ⚠️ AND THIS FAULT PREDATES THIS PASS — `.mk-fwsign` has been losing its COLOUR to the same rule
-   since the page shipped. Measured on the deployed build: `rgb(138, 122, 108)`, which is
-   `--mk-muted`, where the rule asks for burgundy. It survived review because `.mk-fwhonest p` did
-   not set a font-size then, so the Caveat face and its size came through and the signature looked
-   right at a glance. A glance is what it survived; a measurement is what caught it.
-   The lesson generalises: a single-class rule for ONE element inside a section that also styles
-   its elements generically will lose. Scope it, or the generic rule is the one that ships. */
+   IT IS THE ONLY THING THAT MAKES THEM APPLY. Same 0-1-1 versus 0-1-0 arithmetic as the card
+   kicker above. Measured before the fix: the lifted line and the quote mark both computed at 16px
+   against intended 28px and 3.4rem, and `.mk-fwsign` had been losing its COLOUR to the same rule
+   since the page shipped — `rgb(138, 122, 108)` on the deployed build, where the rule asks for
+   burgundy. It survived review because the Caveat face and its size came through and the
+   signature looked right at a glance. A glance is what it survived; a measurement caught it. */
 .mk-fwhonest .mk-fwmark {
   font-family: "Playfair Display", Georgia, serif; font-size: 3.4rem; line-height: 1;
   color: rgba(124, 58, 42, .28); margin: 0 0 4px;
@@ -829,11 +917,9 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    that is the exact arithmetic that has decided six numbers in this project. It is not that fault
    here. The rule bites when type grows against a measure that has STOPPED growing; this line's
    measure is `24ch` set on the element that also sets the font-size, so the two are expressed in
-   the same units and cannot diverge. The line count is fixed however wide the page gets. Lowering
-   the ceiling would shrink the statement for no reason at all.
+   the same units and cannot diverge. Lowering the ceiling would shrink the statement for nothing.
    ⚠️ 1.32 CLEARS THE 1.3 PLAYFAIR FLOOR, AND HERE THAT IS LOAD-BEARING RATHER THAN LUCKY — "Your
-   data is never the experiment." contains a `y` and a `p`, unlike the landing statement, whose
-   tighter leading rests on having no descender at all. Verified rendered, not calculated. */
+   data is never the experiment." contains a `y` and a `p`. Verified rendered, not calculated. */
 .mk-fwhonest .mk-fwlead {
   font-family: "Playfair Display", Georgia, serif; font-weight: 600;
   font-size: clamp(1.35rem, 2.1vw, 1.75rem); line-height: 1.32; letter-spacing: -.012em;
@@ -841,163 +927,196 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 }
 .mk-fwhonest p { margin: 0 auto 13px; color: var(--mk-muted); max-width: 54ch; font-size: 1rem; line-height: 1.66; }
 /* ⚠️ IN THE SAME INK. Emphasis here is a change of voice, not of ink — a burgundy word inside the
-   paragraph would pull the eye off the statement above it, which is the one thing on this section
-   that should hold it. */
+   paragraph would pull the eye off the statement above it. */
 .mk-fwhonest em { font-style: italic; }
-/* The same hand as the landing's postscript — it is one person asking, and the signature says so.
-   ⚠️ THE ROTATION IS REMOVED, NOT OVERRIDDEN. It belonged to a signature at the foot of a bordered
-   card, where a tilt read as ink set down on paper; on open ground with everything above it
-   centred, the same rotation reads as a rendering fault. A `transform: none` sitting on top of a
-   `rotate()` would be two declarations describing one decision. */
+/* The same hand as the landing's postscript — it is one person asking, and the signature says so. */
 .mk-fwhonest .mk-fwsign {
   font-family: "Caveat", cursive; font-size: 1.45rem; color: var(--mk-burg);
   margin: 24px auto 0; text-align: center;
 }
 
-/* ⚠️ THE BAND KEEPS ITS OWN TOP MARGIN HERE. On the landing it closes a page that has just ended
-   a features band; here it follows the disclosure pull-quote, and the band's own blush edge needs
-   air between it and the sign-off.
-   ⚠️ THIS NOTE USED TO SAY "here it follows a bordered card" — true until the card was deleted,
-   and then read as current for exactly as long as nobody checked. The margin was still right; the
-   reason had stopped being. A comment that outlives the thing it describes is worse than no
-   comment, because it is read as fact. */
-.mk-fw .mk-beta { margin-top: 100px; }
+/* ⚠️ THE BANNER KEEPS ITS OWN TOP MARGIN HERE. On the landing it closes a page that has just
+   ended a features band; here it follows the disclosure pull-quote, and its own edge needs air
+   between it and the sign-off. */
+.mk-fw .mk-claimband { margin-top: 100px; }
 
-@media (max-width: 880px) {
-  .mk-fwpad { padding: 0 22px; }
-  .mk-fwhero { grid-template-columns: 1fr; gap: 32px; padding: 40px 0 44px; }
-  /* The artwork goes below the copy, and stops reserving a row it no longer shares. */
-  .mk-fwillo { min-height: 0; order: 2; }
+/* ⚠️ 1000 AND 560 NOW, NOT 880 — the brief's two steps for this page. The hero stacks
+   IMAGE-FIRST: the picture is what the page is about, and a reader arriving on a phone should
+   meet it before the ask rather than after the form. */
+@media (max-width: 1000px) {
+  .mk-fwpad { padding: 0 26px; }
+  .mk-fwhero { grid-template-columns: 1fr; gap: 32px; padding: 48px 0 44px; }
+  .mk-fwart { order: -1; }
+  .mk-fw .mk-fwh1 { font-size: 42px; }
   .mk-fwdeal { grid-template-columns: 1fr; }
-  /* No card, so no padding to tighten — only the gap above it. */
   .mk-fwhonest { margin-top: 54px; }
 }
-
-/* ── The founding-members band + footer ── */
-/* ⚠️ THIS REPLACES `.mk-ctaband`, WHICH IS DELETED. That band restated the hero's CTA three
-   screens later inside a parchment card; the page closes on an offer now. The `.mk-ctainner`
-   double-rule treatment went with it and should not be revived here — the letter's fold and its
-   seal are what say "document", and a second inset frame would be a third edge on one card.
-   ⚠️ AND THIS IS THE ONE PLACE INSIDE `.mk-lower` THAT REPAINTS THE GROUND. The two-surface rule
-   says nothing within the wrapper may lay a third surface over the desk — and it says that
-   because the retired parchment band did it by accident, over its whole height, flattening the
-   cards on it. This is a deliberate, bounded band with a hairline declaring its top edge, which
-   is the difference between a section and a seam. */
-.mk-beta {
-  background: var(--mk-blush); border-top: 1px solid var(--mk-blush-line);
-  padding: clamp(96px, 12vh, 128px) 0 clamp(84px, 10vh, 112px); margin: 0;
-}
-.mk-betacard {
-  position: relative; max-width: 790px; margin: 0 auto; background: var(--mk-parch);
-  border: 1px solid var(--mk-letter-bd); border-radius: 6px;
-  padding: 74px 58px 52px; text-align: center;
-  box-shadow: 0 22px 52px var(--mk-letter-sh), 0 1px 0 var(--mk-letter-rim) inset;
-}
-/* The fold, 44px down — a letter that has been in an envelope. */
-.mk-betacard::before {
-  content: ""; position: absolute; left: 0; right: 0; top: 44px; height: 1px;
-  background: var(--mk-letter-fold);
-}
-/* Paper grain. Inline SVG turbulence rather than an asset: it is 300 bytes, it never 404s, and
-   it is the only way to get noise without a network request under this tier's self-contained
-   palette rule. */
-.mk-betacard::after {
-  content: ""; position: absolute; inset: 0; border-radius: 6px; pointer-events: none; opacity: .5;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");
+/* ⚠️ AFTER THE 1000 BLOCK. Both are 0-2-0 and a media query confers no specificity, so the
+   narrower query must come later or the wider one wins and every phone gets the 42px headline.
+   This stylesheet already shipped that inversion once, in the nav, and it was live for weeks. */
+@media (max-width: 560px) {
+  .mk-fwpad { padding: 0 22px; }
+  .mk-fw .mk-fwh1 { font-size: 32px; }
+  .mk-fwlede { font-size: 17px; }
 }
 
-/* The wax seal, breaking the card's top edge. */
-.mk-wax {
-  position: absolute; top: -40px; left: 50%; transform: translateX(-50%) rotate(-4deg);
-  width: 92px; height: 92px; display: grid; place-items: center; z-index: 2;
+/* ── The founding-writers banner + footer ── */
+/* ⚠️ THIS REPLACES `.mk-beta` AND THE SEALED LETTER ENTIRELY. Deleted with it: `.mk-betacard` and
+   its fold and grain pseudo-elements, `.mk-wax`, `.mk-waxblob`, `.mk-betaeyebrow`,
+   `.mk-betablurb`, `.mk-betaform`, and the whole `.mk-counter` family. What SURVIVES, and must:
+   `.mk-betanote`, `.mk-betainvalid` and the `.mk-betamsg` family are `FoundingSignup`'s OWN
+   classes, rendered on all three surfaces including `/pricing`-adjacent mounts — sweeping them
+   with the band would have taken the form's error states down with the chrome.
+   ⚠️ AND THE SEAL'S EXCEPTION IS RETIRED, NOT RELOCATED. This sheet recorded the wax as "the one
+   burgundy fill at scale on this site", an exception about SIZE rather than hue. There is no
+   burgundy fill at scale here, so the exception has no subject and the plain rule stands again:
+   every burgundy on these pages is a mark under 12px, a hairline, or type.
+   ⚠️ THE ARTWORK IS A BACKGROUND AND THE `?v=` LIVES HERE, IN THE STYLESHEET. It has to disappear
+   entirely below 1000px, and an inline style — which is where a version-stamped `src` would have
+   to live — BEATS a media query however the query is written. Nothing under `public/` is
+   fingerprinted by the build, so the hash is what stops an hour of stale cache after a re-export;
+   a lock reads this string back against the file on disk. Replace the picture, change the eight
+   hex digits.
+   ⚠️ COLOUR AND IMAGE SEPARATELY, NEVER THE SHORTHAND — same reason as `.mk-lower`. Here it
+   matters more: the shorthand would take the ground with the picture, and below 1000px the
+   picture is deliberately removed, so a shorthand `background-image: none` would blank the band. */
+.mk-claimband {
+  background-color: var(--mk-claim-ground);
+  background-image: url("/images/founding-writers.png?v=fa0e900f");
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: auto 100%;
+  padding: 72px 0;
 }
-.mk-waxblob { position: absolute; inset: 0; }
-.mk-waxblob svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 5px 10px var(--mk-seal-sh)); }
-/* ⚠️ THE BLOB IS DELIBERATELY IRREGULAR — a circle reads as a badge, and a badge is a UI element.
-   Wax is poured, so the outline has to be slightly wrong on every side. */
-.mk-waxblob path { fill: var(--mk-burg); }
-.mk-waxblob circle { fill: none; stroke: var(--mk-seal-ring); stroke-width: 1.3; }
-/* ⚠️ THE MARK SHIPS PRE-TINTED AND TAKES NO FILTER. It is a parchment-coloured PNG so it reads on
-   the wax; recolouring it in CSS would fork one illustration in two. Placeholder, like the hero
-   artwork and the tick — the filename is the only thing on the page that says so. */
-.mk-wax img { position: relative; width: 46px; height: auto; opacity: .95; }
+/* ⚠️ THE LEFT COLUMN IS EMPTY AND HAS NO ELEMENT — the card is placed in column 2 and column 1 is
+   simply the track the artwork shows through. A spacer `<div>` would be a node in the
+   accessibility tree standing in for a background. */
+.mk-claimgrid {
+  max-width: 1180px; margin: 0 auto; padding: 0 56px;
+  display: grid; grid-template-columns: 0.72fr 1.28fr; gap: 40px; align-items: center;
+}
+.mk-claimcard {
+  grid-column: 2;
+  background: #fff; border-radius: 18px; padding: 38px 42px 34px;
+  box-shadow: 0 8px 28px var(--mk-claim-sh);
+}
+.mk-claimkicker {
+  font-family: "JetBrains Mono", monospace; font-size: 13px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--mk-claim-accent); margin: 0 0 14px;
+}
+/* Two classes and `!important`: brand.tsx forces every bare `h2` to the brand family, so one
+   class would lose between two important declarations and this would draw in Playfair.
+   ⚠️ `16ch` IS ONLY MEANINGFUL BECAUSE THIS ELEMENT CARRIES ITS OWN FONT-SIZE. On a container
+   that inherits 16px while its child paints at 36, the same number is well over half out — the
+   trap this stylesheet has already paid for three times. */
+.mk-claimband .mk-claimh2 {
+  font-family: "Special Elite", cursive !important; font-weight: 400;
+  font-size: 36px; line-height: 1.18; color: var(--mk-nearblack); margin: 0; max-width: 16ch;
+}
+.mk-claimlead { margin: 20px 0 12px; font-size: 17.5px; color: var(--mk-ink); }
+.mk-claimlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; }
+.mk-claimlist li {
+  position: relative; padding-left: 30px; font-size: 17.5px; line-height: 1.45; color: var(--mk-ink);
+}
+/* The ring and its centre dot are two pseudo-elements on one item rather than a marker glyph: a
+   bullet is not content, and a character would take the text's colour and leading with it.
+   `top: .28em` puts the ring on the first line's optical centre at this size; the dot's offsets
+   are the ring's own geometry — (14 - 3.5) / 2 = 5.25 from each edge — rather than two numbers
+   tuned to match, so the pair cannot drift if the ring resizes. */
+.mk-claimlist li::before {
+  content: ""; position: absolute; left: 0; top: .28em;
+  width: 14px; height: 14px; border-radius: 50%; box-sizing: border-box;
+  border: 2px solid var(--mk-claim-accent);
+}
+.mk-claimlist li::after {
+  content: ""; position: absolute; left: 5.25px; top: calc(.28em + 5.25px);
+  width: 3.5px; height: 3.5px; border-radius: 50%; background: var(--mk-claim-accent);
+}
+/* The hairline belongs to this paragraph rather than sitting between the two as an element: a
+   rule that exists to separate two blocks is one of them having an edge. */
+.mk-claimask {
+  border-top: 1px solid var(--mk-hair); margin: 24px 0 0; padding-top: 18px;
+  font-size: 16px; line-height: 1.6; color: var(--mk-muted); max-width: 52ch;
+}
+/* ⚠️ ONE FORM RULE FOR TWO SURFACES — the banner card and the `/founders` hero both pass
+   `formClass="mk-claimform"`. The button override is scoped to the FORM, not to the band, which
+   is what lets the hero mount take it while sitting on the page's cream. */
+.mk-claimform { display: flex; gap: 10px; margin: 24px 0 0; flex-wrap: wrap; }
+.mk-claimform input {
+  flex: 1 1 220px; min-width: 0; font-family: inherit; font-size: 17px; color: var(--mk-ink);
+  background: #fff; border: 1px solid var(--mk-cta-bd); border-radius: 30px; padding: 15px 22px;
+}
+.mk-claimform input::placeholder { color: var(--mk-blush-ph); }
+/* ⚠️ THE TEXT READS `--mk-cta-ink`, NOT THE BRIEF'S #f5f1eb. The token already means "the cream
+   the ink pill prints in" and is #f7f0e9 — two points away, one job. A second value for it would
+   be the `#1c130e`/`#1c130f` fault this repo records: invisible, unfindable, and on the two
+   marks whose entire justification is that they match. */
+.mk-claimform .mk-btn--ink {
+  flex: none; font-size: 17px; font-weight: 500; padding: 15px 22px; border-radius: 30px;
+}
 
-.mk-betaeyebrow {
-  font-family: "JetBrains Mono", monospace; font-size: .66rem; letter-spacing: .28em;
-  text-transform: uppercase; color: var(--mk-blush-label); margin: 0 0 16px;
+/* ── The counter, live or absent ──
+   ⚠️ THESE RULES ONLY EVER PAINT REAL NUMBERS. `FoundingCounter` renders nothing at all until the
+   endpoint answers with a count — no empty track, no zero, no dash. An empty scarcity bar is a
+   claim about how many people have signed up. */
+.mk-claimcount { border-top: 1px solid var(--mk-hair); margin: 22px 0 0; padding-top: 18px; }
+/* `baseline`, so the 26px figure and the 16px "N left" sit on one line rather than on two
+   centres. */
+.mk-claimfigures { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.mk-claimtally { margin: 0; }
+.mk-claimnum { font-size: 26px; font-weight: 700; color: var(--mk-nearblack); }
+.mk-claimof { font-size: 16px; font-weight: 400; color: var(--mk-muted); }
+.mk-claimleft { margin: 0; font-size: 16px; color: var(--mk-muted); white-space: nowrap; }
+.mk-claimtrack {
+  height: 10px; border-radius: 999px; background: var(--mk-claim-track);
+  overflow: hidden; margin: 12px 0 0;
 }
-/* ⚠️ THE REF'S CEILING STANDS, AND THE CONTAINER-CAP RULE DOES NOT APPLY HERE — worth stating,
-   because at a glance it looks like it should. `2.6vw` reaches 2.35rem at 1446px, well past the
-   790px card, which is exactly the shape that fault takes. It is not that fault, because this
-   heading's MEASURE is `18ch` set on the element itself: `ch` resolves against the element's own
-   font-size, so the measure grows in lockstep with the type and the line count never changes. The
-   rule bites when a capped CONTAINER sets the measure while a viewport-relative size keeps
-   climbing — the shape the retired statement hero had, and what its own lock guarded until the hero
-   was rebuilt (16 Sep). No clamp left on this page sets type inside a capped box, so that lock went
-   with its subject and the law is recorded in CLAUDE.md; reinstate it the day one does. A
-   self-scaled `ch` measure is immune by construction.
-   ⚠️ AND `18ch` IS ONLY MEANINGFUL BECAUSE THIS ELEMENT CARRIES ITS OWN FONT-SIZE. On a container
-   that inherits 16px while its child paints at 37, the same number is 60% out — the trap this
-   stylesheet has already paid for three times. */
-.mk-beta h2 {
-  font-family: "Playfair Display", Georgia, serif; font-weight: 600;
-  font-size: clamp(1.75rem, 2.6vw, 2.35rem); line-height: 1.3; letter-spacing: -.018em;
-  color: var(--mk-nearblack); margin: 0 auto; max-width: 18ch;
+.mk-claimfill { height: 100%; background: var(--mk-claim-accent); border-radius: 999px; transition: width .5s ease; }
+/* ⚠️ AFTER `.mk-claimfill`, NOT WITH THE OTHER REDUCED-MOTION RULES AT THE TOP OF THE FILE. Both
+   are 0-1-0 and a media query confers no specificity, so an override placed earlier loses —
+   measured last pass at 0.5s under `reduce`, from a declaration that read correctly. */
+@media (prefers-reduced-motion: reduce) {
+  .mk-claimfill { transition: none; }
 }
-/* ⚠️ 1.3, NOT THE REF'S 1.18, AND NOT BECAUSE OF THIS STRING. "Be one of the first hundred."
-   happens to contain no descender, so 1.18 would render it fine — which is precisely the reason
-   not to fit the value to it. The house floor for mixed-case Playfair is 1.3, and this is copy
-   that can change; a value tuned to the sentence someone typed is how the largest text on three
-   pages ended up cropped. */
-.mk-betablurb {
-  margin: 16px auto 0; max-width: 44ch; color: var(--mk-blush-body);
-  font-size: 1.02rem; line-height: 1.62;
-}
-.mk-betaform {
-  display: flex; gap: 12px; justify-content: center; margin: 30px auto 0;
-  max-width: 490px; flex-wrap: wrap;
-}
-.mk-betaform input {
-  flex: 1 1 240px; min-width: 0; font-family: inherit; font-size: 1rem; color: var(--mk-ink);
-  background: #fff; border: 1px solid var(--mk-cta-bd); border-radius: 11px; padding: 13px 16px;
-}
-.mk-betaform input::placeholder { color: var(--mk-blush-ph); }
-/* ⚠️ INK ON PINK, AND THE GRAMMAR GENERALISES RATHER THAN BREAKS. `.mk-btn--ink` is the nav's
-   fill and `.mk-btn--cta` is every page primary — on cream and parchment. This band's ground IS
-   the pink, so a pink button would have nothing to sit against. Primaries are pink on cream and
-   parchment grounds, ink on pink ones. */
-.mk-betaform .mk-btn--ink { flex: none; }
 
+/* ── `FoundingSignup`'s own chrome: three surfaces, one set of rules ── */
 /* The reader is told what went wrong beneath the form, never instead of the page. */
-.mk-betainvalid { margin: 12px auto 0; max-width: 44ch; font-size: .92rem; color: var(--mk-burg); }
-/* ⚠️ THE LIVE REGION IS ALWAYS MOUNTED AND USUALLY EMPTY — see `FoundingBand`. An empty box must
-   therefore contribute nothing, or every reader pays for the announcement. */
+.mk-betainvalid { margin: 12px 0 0; max-width: 44ch; font-size: .92rem; color: var(--mk-burg); }
+/* ⚠️ THE LIVE REGION IS ALWAYS MOUNTED AND USUALLY EMPTY. An empty box must therefore contribute
+   nothing, or every reader pays for the announcement in vertical space. */
 .mk-betamsgwrap:empty { display: none; }
 .mk-betamsg {
-  margin: 28px auto 0; max-width: 44ch; font-size: .99rem; line-height: 1.55;
+  margin: 28px 0 0; max-width: 44ch; font-size: .99rem; line-height: 1.55;
   padding: 14px 18px; border-radius: 11px;
 }
 .mk-betamsg--ok { background: var(--mk-msg-ok-bg); border: 1px solid var(--mk-msg-ok-bd); color: var(--mk-ink); }
 .mk-betamsg--warn { background: #fff; border: 1px solid var(--mk-cta-bd); color: var(--mk-ink); }
 .mk-betamsg a { color: var(--mk-burg); }
-
-/* ⚠️ LIVE OR ABSENT. These rules only ever paint real numbers — `FoundingBand` renders nothing at
-   all until the endpoint answers with a count. There is no empty-bar state and there must not be
-   one: an empty scarcity bar is a claim about how many people have signed up. */
-.mk-counter { margin: 30px auto 0; max-width: 390px; }
-.mk-counterbar { height: 6px; border-radius: 999px; background: var(--mk-counter-track); overflow: hidden; }
-.mk-counterfill { height: 100%; background: var(--mk-burg); opacity: .82; border-radius: 999px; }
-.mk-counterlab {
-  font-family: "JetBrains Mono", monospace; font-size: .66rem; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--mk-blush-label); margin: 10px 0 0;
-}
-.mk-betanote { font-size: .86rem; color: var(--mk-blush-note); margin: 22px 0 0; }
+.mk-betanote { font-size: 14.5px; color: var(--mk-blush-note); margin: 16px 0 0; }
 .mk-betanote .mk-doclink { color: var(--mk-burg); }
 
-@media (max-width: 820px) {
-  .mk-betacard { padding: 64px 26px 44px; }
-  .mk-wax { width: 78px; height: 78px; top: -34px; }
-  .mk-wax img { width: 38px; }
+/* ⚠️ THE THREE BREAKPOINTS ARE IN WIDENING-TO-NARROWING ORDER AND MUST STAY THAT WAY. All three
+   are equal specificity and a media query confers none, so source order is the whole cascade. */
+@media (max-width: 1280px) {
+  /* The artwork's smudge sits further left as the band narrows; the card follows it. */
+  .mk-claimgrid { grid-template-columns: 0.58fr 1.42fr; }
+}
+@media (max-width: 1000px) {
+  /* ⚠️ THE PICTURE LEAVES ENTIRELY. `background-size: auto 100%` scales it by the band's HEIGHT,
+     so a narrow viewport does not crop it — it keeps the same width and simply covers the card.
+     There is no width at which a left-anchored full-height image and a single column coexist. */
+  .mk-claimband { background-image: none; padding: 56px 0; }
+  .mk-claimgrid { grid-template-columns: 1fr; padding: 0 26px; }
+  .mk-claimcard { grid-column: 1; }
+  .mk-claimform { flex-direction: column; }
+  .mk-claimform input, .mk-claimform .mk-btn--ink { flex: none; width: 100%; }
+}
+@media (max-width: 560px) {
+  .mk-claimcard { padding: 26px 22px 24px; }
+  .mk-claimband .mk-claimh2 { font-size: 27px; }
+  /* The tally and the remainder stack rather than squeezing onto one line. */
+  .mk-claimfigures { display: block; }
+  .mk-claimleft { margin-top: 4px; }
 }
 
 /* ⚠️ ONE RULE. `display` was stated twice — a flex row here for the single-row footer the
@@ -1033,7 +1152,10 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
      `@supports` because this sheet locks "one container-unit guard" and that is the right law. */
   .mk-frow h3 { font-size: 34px; font-size: min(34px, calc((100cqw - 52px) / 9)); }
   .mk-fcopy p { font-size: 18px; }
-  .mk-beta { padding-left: 18px; padding-right: 18px; }
+  /* ⚠️ `.mk-beta`'s 18px padding is DELETED rather than retargeted. That band was a centred card
+     needing side room inside a full-width section; `.mk-claimband` sets its own gutter at 1000 and
+     its own card padding at 560, both in its own block. A rule here would be a third statement of
+     the same inset, in a media query nobody editing the banner would think to look in. */
   .mk-foot { padding: 30px 26px 40px; flex-wrap: wrap; }
 }
 

@@ -137,10 +137,36 @@ describe("two surfaces, and the step between them is real", () => {
     expect(mean(hero) - mean(lower)).toBeGreaterThanOrEqual(4);
   });
 
-  /** One token, so changing the surface is one line. */
-  it("--mk-lower has exactly one definition and one reader", () => {
+  /**
+   * ⚠️ ONE DEFINITION, AND BOTH READERS ARE `.mk-lower`'S OWN — the flat fill, and the end stop of
+   * the 80px fade that now marks the join. This used to require exactly ONE reader, which would go
+   * red over a change that made the boundary softer: a lock on a count rather than on the claim.
+   * The claim is that changing the lower surface is still one line, so nothing OUTSIDE this rule
+   * may read the token — that is what would give the colour two homes again.
+   */
+  it("--mk-lower has one definition, and only its own rule reads it", () => {
     expect(marketing.match(/--mk-lower\s*:/g) ?? []).toHaveLength(1);
-    expect(marketing.match(/var\(--mk-lower\)/g) ?? []).toHaveLength(1);
+    const own = ruleFor(".mk-lower");
+    expect((own.match(/var\(--mk-lower\)/g) ?? []).length, "the fill and the fade's end stop").toBe(2);
+    expect((marketing.match(/var\(--mk-lower\)/g) ?? []).length, "and nothing else reads it").toBe(2);
+    expect(own, "the fade replaced the hairline that used to mark the join")
+      .toMatch(/linear-gradient\(180deg,\s*var\(--mk-hero-ground\),\s*var\(--mk-lower\)\s*80px\)/);
+    /* ⚠️ SEPARATE LONGHANDS, NEVER THE SHORTHAND. `background:` resets every longhand including
+       the colour, so a gradient that failed to parse would leave the whole lower surface
+       transparent — through a green build, on a public page. */
+    expect(own).toMatch(/background-color:\s*var\(--mk-lower\)/);
+    expect(own).not.toMatch(/background:\s/);
+  });
+
+  /**
+   * ⚠️ AND THE HAIRLINE AT THE JOIN IS GONE, WHICH IS HALF OF WHAT MAKES THE FADE VISIBLE. The
+   * status band carried `border-top: 1px solid var(--mk-hair)` at exactly the boundary the fade
+   * now crosses. Two separators at one edge is one too many — the rule wins and the fade is
+   * wasted — and the line also cut the hero's shadow in half at the one place it is meant to pass
+   * through. Asserting its absence is what stops it returning from a diff.
+   */
+  it("the status band declares no top rule, so the fade has the boundary to itself", () => {
+    expect(ruleFor(".mk-statband")).not.toMatch(/border-top/);
   });
 
   /**
@@ -155,6 +181,92 @@ describe("two surfaces, and the step between them is real", () => {
     expect(rule![1]).not.toMatch(/border/);
   });
 });
+/**
+ * ⚠️ THE GLYPH ROW CAN HIDE ITSELF, AND THIS IS THE LOCK THAT STOPS IT DOING SO PERMANENTLY.
+ *
+ * The six marks animate in when they are scrolled to, which means their CSS start state is
+ * `opacity: 0`. Anything that stops the observer firing therefore leaves six invisible glyphs
+ * under a heading that introduces them — on a public page, with nothing to point at and no way
+ * back. The defence is that hiding is OPT-IN: `.mk-statglyphs` alone paints six visible marks, and
+ * only `--armed` hides them, which `StatusBand` adds during its first render and ONLY where
+ * `IntersectionObserver` exists. A browser without the API and `renderToStaticMarkup` both get the
+ * plain class.
+ *
+ * This is the same law the ECG trace it replaced carried from the other end: its play-state
+ * default was "running", never "paused", because a browser with no way to start the animation must
+ * not be left with a dead line.
+ *
+ * ⚠️ AND A CLASS THE STYLESHEET SELECTS ON THAT NO COMPONENT EMITS IS A RULE WITH NO SUBJECT —
+ * silent in both directions. So this asserts the pair: the rules exist, and the component renders
+ * both class names.
+ */
+describe("the status glyphs animate in once, and the hidden state is opt-in", () => {
+  const source = async () => {
+    const { readFileSync } = await import("fs");
+    const { resolve, dirname } = await import("path");
+    const { fileURLToPath } = await import("url");
+    return readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), "StatusBand.tsx"), "utf8");
+  };
+
+  it("the base class paints nothing hidden — only `--armed` does", () => {
+    expect(ruleFor(".mk-statglyph"), "the mark itself is simply a 26px box")
+      .not.toMatch(/opacity|animation/);
+    expect(ruleFor(".mk-statglyphs"), "the row does not hide its own children")
+      .not.toMatch(/opacity:\s*0\b/);
+    expect(ruleFor(".mk-statglyphs--armed .mk-statglyph")).toMatch(/opacity:\s*0\b/);
+  });
+
+  it("the keyframes overshoot and carry no token", () => {
+    const frames = /@keyframes mkGlyphIn\s*\{([\s\S]*?)\n\}/.exec(marketing);
+    expect(frames, "the animation is declared").toBeTruthy();
+    expect(frames![1]).toMatch(/60%\s*\{[^}]*scale\(1\.06\)/);
+    expect(frames![1]).toMatch(/100%\s*\{[^}]*scale\(1\)/);
+    /* ⚠️ A `var()` INSIDE `@keyframes` FAILS SILENTLY IN THIS SETUP — no error, no warning, no
+       animation. Frames carry opacity and transform only; any colour is declared on the rule. */
+    expect(frames![1], "a token in a keyframe block kills the animation with no diagnostic")
+      .not.toMatch(/var\(/);
+  });
+
+  it("runs once, forwards, staggered 90ms apart across all six", () => {
+    const run = ruleFor(".mk-statglyphs--in .mk-statglyph");
+    expect(run, "without `forwards` every glyph snaps back to opacity 0 as it ends")
+      .toMatch(/animation:\s*mkGlyphIn \.5s cubic-bezier\(\.34, 1\.56, \.64, 1\) forwards/);
+    for (let i = 1; i <= 6; i++) {
+      const decls = ruleFor(`.mk-statglyphs--in .mk-statglyph:nth-child(${i})`);
+      expect(decls, `glyph ${i} is delayed`).toMatch(new RegExp(`animation-delay:\\s*${(i - 1) * 90}ms`));
+    }
+  });
+
+  /**
+   * ⚠️ IT FORCES THE END STATE RATHER THAN ONLY KILLING THE ANIMATION. `animation: none` alone
+   * would leave `--armed`'s `opacity: 0` standing and hide the row for exactly the readers who
+   * asked for less motion. And it must sit AFTER the rules it overrides: a media query confers no
+   * specificity, so an override placed earlier in the file loses on source order — measured on
+   * this stylesheet last pass at 0.5s under `reduce`, from a declaration that read correctly.
+   */
+  it("reduced motion shows them, rather than merely not moving them", () => {
+    const at = marketing.indexOf(".mk-statglyphs--in .mk-statglyph:nth-child(6)");
+    const block = marketing.slice(at).match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/);
+    expect(block, "the override comes after the rules it overrides").toBeTruthy();
+    expect(block![1]).toMatch(/\.mk-statglyphs--armed \.mk-statglyph/);
+    expect(block![1]).toMatch(/\.mk-statglyphs--in \.mk-statglyph/);
+    expect(block![1]).toMatch(/opacity:\s*1/);
+    expect(block![1]).toMatch(/animation:\s*none/);
+  });
+
+  it("…and the component emits both classes, so neither rule is a rule with no subject", async () => {
+    const src = await source();
+    expect(src).toContain("mk-statglyphs--${phase}");
+    expect(src, "`rest` renders the bare class").toMatch(/phase === "rest" \? "mk-statglyphs"/);
+    /* ⚠️ THE FALLBACK IS "SHOWN". `typeof` is what makes the reference safe where the global does
+       not exist, and the initialiser runs during RENDER rather than in an effect — arming from an
+       effect would paint the glyphs, hide them, then animate them in, flashing on every load. */
+    expect(src).toMatch(/useState<GlyphPhase>\(\s*\(\) => \(typeof IntersectionObserver === "undefined" \? "rest" : "armed"\)/);
+    expect(src, "fires once and lets go").toContain("io.disconnect()");
+    expect(src).toMatch(/threshold: 0\.6/);
+  });
+});
+
 /* ⚠️ THE CONTAINER-CAP LOCK IS RETIRED WITH ITS LAST SUBJECT (16 Sep). It ran the arithmetic for
    `--mk-hero-h1`, the statement hero's headline: a `clamp(min, Nvw, max)` whose ceiling is reached
    past its container's cap grows type against a frozen measure. The rebuilt hero sizes from its own
@@ -211,18 +323,50 @@ describe("no marketing rule reads a token that does not exist", () => {
  * hairline declaring its top edge is a section; an unbounded repaint is a seam. This asserts the
  * count is ONE, so a second one has to be argued for rather than added.
  */
-describe("the founding band is the lower surface's only repaint", () => {
-  it("declares a ground and a top hairline", () => {
-    const decls = ruleFor(".mk-beta");
-    expect(decls).toMatch(/background:\s*var\(--mk-blush\)/);
-    expect(decls).toMatch(/border-top:\s*1px solid var\(--mk-blush-line\)/);
+describe("the founding-writers banner is the lower surface's only repaint", () => {
+  /**
+   * ⚠️ RETARGETED, AND THE HAIRLINE HALF IS DELETED RATHER THAN MOVED. `.mk-beta` was a blush band
+   * with a `border-top` declaring its top edge; `.mk-claimband` is full-bleed and carries the
+   * artwork, so its own ground IS its edge and it has no top rule at all. Asserting a hairline it
+   * does not have would be a lock on the retired shape.
+   */
+  it("declares its own ground, and the artwork that sits on it", () => {
+    const decls = ruleFor(".mk-claimband");
+    expect(decls).toMatch(/background-color:\s*var\(--mk-claim-ground\)/);
+    expect(decls).toMatch(/background-image:\s*url\(/);
+    /* ⚠️ THE SHORTHAND WOULD BE A REAL BUG HERE, not a style point: the picture is deliberately
+       removed below 1000px, and a shorthand would have taken the ground with it — blanking the
+       band on every phone while the source read correctly. */
+    expect(decls, "separate longhands, so removing the image keeps the ground").not.toMatch(/background:\s/);
   });
 
   it("and it is the only ground repaint under the wrapper", () => {
     /* Sections that sit inside `.mk-lower`, by the classes `Landing` renders there. */
-    const INSIDE = [".mk-statband", ".mk-featband", ".mk-beta", ".mk-foot"];
-    const painted = INSIDE.filter((sel) => /background(?!-image)\s*:/.test(ruleFor(sel)));
-    expect(painted).toEqual([".mk-beta"]);
+    const INSIDE = [".mk-statband", ".mk-featband", ".mk-claimband", ".mk-foot"];
+    const painted = INSIDE.filter((sel) => /background(?:-color)?\s*:/.test(ruleFor(sel)));
+    expect(painted).toEqual([".mk-claimband"]);
+  });
+
+  /**
+   * ⚠️ THE ARTWORK'S CACHE-BUSTING VERSION LIVES IN THE STYLESHEET, AND THIS READS BOTH SIDES.
+   * Nothing under `public/` is fingerprinted by the build and hosting lets a browser keep a file
+   * for an hour, so a re-export served under the same name goes on being served stale. It is a CSS
+   * background rather than an `<img>` because it has to LEAVE below 1000px, and an inline style —
+   * where a version-stamped `src` would have to live — beats a media query however the query is
+   * written. So the hash cannot ride a component constant, and this is the lock that keeps it
+   * honest: the eight hex digits in the URL against the bytes on disk.
+   */
+  it("versions the banner's background by the file's own content", async () => {
+    const { readFileSync } = await import("fs");
+    const { createHash } = await import("crypto");
+    const { resolve, dirname } = await import("path");
+    const { fileURLToPath } = await import("url");
+    const here = dirname(fileURLToPath(import.meta.url));
+    const url = /url\("(\/images\/[^"?]+)\?v=([0-9a-f]{8})"\)/.exec(ruleFor(".mk-claimband"));
+    expect(url, "the background states a path and a version").toBeTruthy();
+    const bytes = readFileSync(resolve(here, "../..", "public" + url![1]));
+    expect(url![2], "the version IS the file, not a number kept in step by hand")
+      .toBe(createHash("md5").update(bytes).digest("hex").slice(0, 8));
   });
 });
 
@@ -241,8 +385,19 @@ describe("the hero is two columns, and its shadow overflows on purpose", () => {
     const hero = ruleFor(".mk-hero");
     expect(hero).toMatch(/grid-template-columns:\s*1fr 1fr/);
     expect(hero).toMatch(/align-items:\s*center/);
-    expect(hero, "the clip is what makes the overflow safe").toMatch(/overflow:\s*hidden/);
-    expect(hero).toMatch(/min-height:\s*660px/);
+    /* ⚠️ `clip` ON ONE AXIS AND `visible` ON THE OTHER IS THE ONLY PAIR THAT DOES THIS, and the
+       obvious spelling does not work: `overflow-x: hidden` with `overflow-y: visible` FORCES the
+       visible axis to `auto`, which makes the hero a scroll container instead of letting the
+       shadow spill. Both halves are the lock — x still guarantees the art can never reach the
+       document's scroll width, y is what lets the shadow cross into the band. */
+    expect(hero, "the clip is what makes the horizontal overflow safe").toMatch(/overflow-x:\s*clip/);
+    expect(hero, "and `hidden` here would force x to `auto`").toMatch(/overflow-y:\s*visible/);
+    expect(hero, "no single-axis shorthand, which would clip both").not.toMatch(/overflow:\s*hidden/);
+    /* ⚠️ 520, NOT 660, AND THE NUMBER IS ARITHMETIC RATHER THAN TASTE. The row centres copy that
+       measures 308.8px at 1440, so slack = (min-height - 308.8) / 2 and band top = 88 +
+       min-height. Less slack therefore always means MORE band visible, never less; there is no
+       value that both closes the slack and shows only 100px of band. */
+    expect(hero).toMatch(/min-height:\s*520px/);
     expect(hero).toMatch(/margin:\s*0 auto/);
     /* ⚠️ READ OFF `.mk-rows` RATHER THAN PINNED AS LITERALS ON BOTH SIDES. The claim is that the
        page has ONE gutter, not that it has two numbers that happen to be 1180 and 56 today — a lock
@@ -252,8 +407,14 @@ describe("the hero is two columns, and its shadow overflows on purpose", () => {
     const gutter = /--mk-rows-gutter:\s*(\d+px)/.exec(rows)![1];
     expect(hero, "the hero caps where the rows cap").toContain("max-width: " + cap);
     expect(hero, "and gutters where they gutter").toContain("padding: 0 " + gutter);
-    expect(ruleFor(".mk-herocopy"), "the container supplies the outer gutter now")
-      .toMatch(/padding:\s*0 40px 0 0/);
+    const copy = ruleFor(".mk-herocopy");
+    expect(copy, "the container supplies the outer gutter now").toMatch(/padding:\s*0 40px 0 0/);
+    /* ⚠️ THE STACKING CONTEXT IS A DESKTOP CONCERN NOW, NOT A STACKED ONE. At 169% the shadow
+       grows LEFTWARD from a fixed right edge and reaches back across the copy column; the art is
+       the later grid item, so without this it paints a 20% wash over the headline. It moved up out
+       of the 900px block rather than being duplicated in both. */
+    expect(copy, "the words stay above the shadow at every width").toMatch(/z-index:\s*1/);
+    expect(copy).toMatch(/position:\s*relative/);
   });
 
   it("the art fills its column and the image leaves it", () => {
@@ -262,8 +423,15 @@ describe("the hero is two columns, and its shadow overflows on purpose", () => {
     expect(img).toMatch(/position:\s*absolute/);
     /* Inside the container now: it leaves its own column into the gutter, not off the page. */
     expect(img).toMatch(/right:\s*-6%/);
-    expect(img).toMatch(/width:\s*112%/);
-    expect(img, "the global image reset would cancel the 112% in silence").toMatch(/max-width:\s*none/);
+    /* ⚠️ 169% IS DERIVED, NOT PICKED. The shadow is vertically CENTRED, so an overhang past the
+       hero's bottom is an equal overhang past its top: height = min-height + 2 x overhang, and
+       width = height x 2880/2100. For 520 and ~70px that is 660 tall, 905 wide, 169% of the 534px
+       art column. The ratio is the asset's; the only free number is the overhang. */
+    expect(img).toMatch(/width:\s*169%/);
+    expect(img, "the global image reset would cancel the 169% in silence").toMatch(/max-width:\s*none/);
+    /* Centred, and deliberately not moved — growing it is what makes it cross the boundary. */
+    expect(img).toMatch(/top:\s*50%/);
+    expect(img).toMatch(/translateY\(-50%\)/);
     expect(img).toMatch(/opacity:\s*0?\.20/);
   });
 
@@ -308,8 +476,12 @@ describe("the hero is two columns, and its shadow overflows on purpose", () => {
       .find((m) => /\.mk-hero\s*\{/.test(m[1]));
     expect(block, "a 900px block stacks the hero").toBeTruthy();
     expect(block![1]).toMatch(/grid-template-columns:\s*1fr/);
-    expect(block![1], "the copy takes a context of its own so the words stay above the shadow")
-      .toMatch(/\.mk-herocopy\s*\{[^}]*z-index:\s*1/);
+    /* ⚠️ RETARGET: the stacking context MOVED to the base rule (asserted above) rather than being
+       deleted. The shadow now reaches across the copy at every width, so a context declared only
+       inside this block would have left the desktop hero unprotected — the claim is unchanged and
+       its home is one rule further up. Restating it here would be the same decision in two
+       places, which is how the two come to disagree. */
+    expect(block![1], "stated once, on the base rule").not.toMatch(/\.mk-herocopy\s*\{[^}]*z-index/);
     expect(block![1], "the shadow is behind the copy, not beneath it").toMatch(/\.mk-heroart\s*\{[^}]*position:\s*absolute/);
     /* ⚠️ THE RULE'S BODY, NOT ITS FIRST DECLARATION. This used to read
        `/\.mk-heroart img\s*\{\s*opacity:/` — which pinned `opacity` as the OPENING property and went
@@ -684,9 +856,24 @@ describe("the feature rows set their own type, and nothing else uses its familie
     /* ⚠️ THE HERO NAMES BOTH FAMILIES TOO SINCE 16 SEP, so this is no longer "exactly one rule" —
        it is exactly these rules. Sorted, because the assertion is the SET of owners rather than the
        order they happen to appear in the sheet. */
-    /* Three owners since the status band took the same typewriter face for its heading (16 Sep). */
-    expect(ruleOwners("Special Elite").sort())
-      .toEqual([".mk-frow h3", ".mk-hero .mk-herotitle", ".mk-stattitle"]);
+    /* ⚠️ SIX OWNERS NOW, AND THE GROWTH IS THE TYPEWRITER FACE BECOMING THE SITE'S DISPLAY VOICE
+       RATHER THAN THE FEATURE ROWS' ALONE — the status band's heading (16 Sep), then the founding
+       banner's, the founders headline and its three perk cards. The claim is still the SET: a
+       seventh owner appearing here is a deliberate decision to make, not a diff to wave through.
+       ⚠️ AND EVERY ONE OF THEM IS A TWO-CLASS SELECTOR CARRYING `!important`, WHICH IS NOT STYLE.
+       brand.tsx injects a runtime rule giving every bare h1/h2/h3 the brand family with
+       `!important`; its `h1:not(.wsh-title)` is 0-1-1, so a single-class rule LOSES between two
+       important declarations and the heading silently draws in Playfair. `.mk-frow h3` and
+       `.mk-stattitle` are the exceptions that prove it — one is an element inside a class, the
+       other styles no bare heading at all. */
+    expect(ruleOwners("Special Elite").sort()).toEqual([
+      ".mk-claimband .mk-claimh2",
+      ".mk-frow h3",
+      ".mk-fw .mk-fwcard h2",
+      ".mk-fw .mk-fwh1",
+      ".mk-hero .mk-herotitle",
+      ".mk-stattitle",
+    ]);
     expect(ruleOwners("Source Serif 4").sort()).toEqual([".mk-fcopy p", ".mk-herolink", ".mk-heropill", ".mk-herosub"]);
     const src = resolve(here, "..");
     const walk = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((d) =>

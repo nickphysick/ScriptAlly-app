@@ -52,7 +52,8 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
   /* Retarget, same law: the mission statement replaced the old About headline as this page's h1. */
   ["/about", () => <AboutPage onNavigate={noNavigate} />, "Get good stories told."],
   ["/contact", () => <ContactPage onNavigate={noNavigate} />, "Get in touch"],
-  ["/founders", () => <FoundersPage onNavigate={noNavigate} />, "Help build our world."],
+  /* Retarget, same law: the founders headline changed with the hero rebuild (16 Sep). */
+  ["/founders", () => <FoundersPage onNavigate={noNavigate} />, "Help get things off the ground."],
   ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Terms of Service"],
   ["/privacy", () => <LegalPage doc="privacy" onNavigate={noNavigate} />, "Privacy Policy"],
 ];
@@ -466,8 +467,50 @@ describe("the founding sign-up — one on the landing, in the band", () => {
     expect(h.match(/mk-trap/g) ?? [], "one honeypot, so one form").toHaveLength(1);
     expect(h).toContain("Claim your place");
     expect(h, "the panel's own ask went with it").not.toContain("Claim your spot");
-    expect(h).toContain("Founding members");
-    expect(h).toContain("Be one of the first hundred.");
+    expect(h).toContain("Founding writers");
+    expect(h).toContain("Join as a founding writer");
+    /* ⚠️ "members" IS ASSERTED ABSENT, NOT JUST "writers" PRESENT. `/founders` has always said
+       founding WRITERS while this band said founding MEMBERS — one offer, two nouns, on two pages
+       a reader crosses in one click. Both read fine alone, which is why only the absence catches
+       the old word coming back. */
+    expect(h, "the band and /founders name the same people").not.toContain("Founding members");
+    expect(h).not.toContain("Be one of the first hundred.");
+  });
+
+  /**
+   * ⚠️ THE OFFER IS A LIST, AND IT IS A REAL ONE. Four `<li>` under "You get:", so a screen reader
+   * announces four items rather than four sentences, and the ring-and-dot marker stays in CSS
+   * where a marker belongs. The ask beneath the hairline is the only thing asked in return, and
+   * the page says so in one sentence.
+   */
+  it("states the four things a founding writer gets, and the one thing asked back", () => {
+    const h = html();
+    expect(h).toContain("You get:");
+    const list = /<ul class="mk-claimlist">([\s\S]*?)<\/ul>/.exec(h);
+    expect(list, "the offer renders as a list").toBeTruthy();
+    expect(list![1].match(/<li>/g) ?? [], "four items").toHaveLength(4);
+    expect(list![1]).toContain("Early access to QueryHawk");
+    expect(list![1]).toContain("The full experience free of charge for 6 months");
+    expect(h).toContain("All we ask is that you give us occasional feedback");
+  });
+
+  /**
+   * ⚠️ THE EMPTY COLUMN HAS NO ELEMENT. The card is placed in column 2 and column 1 is simply the
+   * track the artwork shows through; a spacer `<div>` would be a node in the accessibility tree
+   * standing in for a background. Asserting the grid holds exactly one child is what stops one
+   * being added back for convenience.
+   */
+  it("the banner is a card in the second column, with nothing holding the first", () => {
+    const grid = /<div class="mk-claimgrid">([\s\S]*?)<section|<div class="mk-claimgrid">([\s\S]*)$/.exec(html());
+    expect(grid, "the banner renders its grid").toBeTruthy();
+    const inner = grid![1] ?? grid![2];
+    expect(inner.slice(0, 40), "the card is the grid's first and only child")
+      .toContain('<div class="mk-claimcard">');
+    expect(inner).not.toContain("mk-claimart");
+    /* The wax seal and its parchment letter went with the band they decorated. */
+    expect(html()).not.toMatch(/["\s`]mk-wax["\s`]/);
+    expect(html()).not.toMatch(/["\s`]mk-betacard["\s`]/);
+    expect(html()).not.toContain("founding-seal-mark");
   });
 
   it("the hero points at the offer rather than asking for an address", () => {
@@ -481,13 +524,22 @@ describe("the founding sign-up — one on the landing, in the band", () => {
     expect(h).not.toContain("How it works");
   });
 
+  /**
+   * ⚠️ LIVE OR ABSENT, AND THE BANNER'S COUNTER IS THE SHAPE MOST TEMPTED TO FAKE IT. It draws a
+   * 26px figure, a remainder and a filled track — the design reads as the point of the card — and
+   * the ref it descends from hardcodes "37 of 100". Rendered with no count in the store, NONE of
+   * it exists: no track, no number, no "0 left", no dash. A fabricated scarcity number on a public
+   * page is a factual claim about how many people have signed up, made by nobody.
+   */
   it("renders no counter and no number, because there is no count yet", () => {
     const h = html();
-    expect(h).not.toMatch(/["\s`]mk-counter["\s`]/);
-    expect(h).not.toMatch(/["\s`]mk-fmcount["\s`]/);
-    expect(h).not.toMatch(/["\s`]mk-foundcnt["\s`]/);
+    for (const cls of ["mk-claimcount", "mk-claimtrack", "mk-claimfill", "mk-claimnum", "mk-claimleft",
+                       "mk-counter", "mk-fmcount", "mk-foundcnt"]) {
+      expect(h, `${cls} renders nothing without a live figure`).not.toMatch(new RegExp('["\\s`]' + cls + '["\\s`]'));
+    }
     expect(h).not.toContain("places claimed");
     expect(h).not.toMatch(/\d+\s+of\s+\d+/);
+    expect(h).not.toMatch(/\d+\s+left/);
   });
 
   /**
@@ -541,12 +593,22 @@ describe("the sign-up the landing does carry", () => {
     }
   });
 
-  /** The wax seal says nothing the heading beneath it does not. */
-  it("the seal is decorative throughout", () => {
-    const seal = html().match(/<span class="mk-wax"[^>]*>/);
-    expect(seal, "the seal is rendered").toBeTruthy();
-    expect(seal![0]).toContain('aria-hidden="true"');
-    expect(html()).toMatch(/<img[^>]*src="[^"]*founding-seal-mark[^"]*"[^>]*alt=""/);
+  /**
+   * ⚠️ THE ARTWORK IS A CSS BACKGROUND AND THEREFORE RENDERS NO ELEMENT AT ALL — this asserts that,
+   * because "no `<img>` in the band" looks exactly like "the picture was forgotten". It is a
+   * background because it has to LEAVE below 1000px, and an inline style (where a version-stamped
+   * `src` would have to live to stay in step with the file) BEATS a media query however the query
+   * is written. `marketingTokens` holds the other half: the URL and its content hash.
+   */
+  it("the banner's artwork is a background, so the band renders no image element", () => {
+    const h = html();
+    const band = /<section class="mk-claimband"([\s\S]*?)<\/section>/.exec(h);
+    expect(band, "the banner renders").toBeTruthy();
+    expect(band![1], "no <img>, and no inline style that a breakpoint could not override")
+      .not.toMatch(/<img|style="/);
+    expect(band![1], "the offer is labelled by its own heading").toBeTruthy();
+    expect(band![0]).toContain('aria-labelledby="mk-band-h"');
+    expect(band![1]).toMatch(/id="mk-band-h"/);
   });
 
   /** No outcome is stated before anything has been sent, on either mount. */
@@ -587,20 +649,32 @@ describe("the Founding Writers page", () => {
     }
   });
 
-  /** Two buttons, two jobs: the hero asks you to become one, the band asks you to claim a place. */
-  it("the hero's button and the band's read differently", () => {
+  /**
+   * ⚠️ RETARGETED, AND THE CLAIM IS NOW THAT THEY READ THE SAME. Both buttons used to be asserted
+   * different: the hero said "Become a Founding Writer" — the NAV's words for the link that brings
+   * a reader HERE — above a form on the page they had already reached. Two mounts of one act, so
+   * both now say "Claim your place", and the old label's ABSENCE is what stops it returning.
+   */
+  it("both sign-ups ask for the same thing, in the same words", () => {
     const h = html();
-    expect(h).toContain("Become a Founding Writer");
-    expect(h).toContain("Claim your place");
+    expect(h.match(/Claim your place/g) ?? [], "the hero and the banner").toHaveLength(2);
+    expect(h, "the nav's wording does not belong above a form on this page")
+      .not.toContain("Become a Founding Writer");
   });
 
   it("states the offer, the sweetener and the direct line", () => {
     const h = html();
-    expect(h).toContain("Six months of Pro, free");
-    expect(h).toContain("Half price, for as long as you need it.");
+    expect(h).toContain("Six months free");
+    expect(h).toContain("Half price after that");
     expect(h).toContain("You shape what&#x27;s built");
-    expect(h).toContain("You&#x27;ll be in direct contact with QueryHawk&#x27;s founder");
+    expect(h).toContain("Straight to the founder.");
     expect(h).toContain("Nick — QueryHawk&#x27;s founder");
+    /* ⚠️ THE SELLING WENT AND MUST NOT COME BACK. These cards state terms; "the full force of
+       QueryHawk" and "an arsenal of time-saving Pro features" were the product selling itself
+       inside the one section whose job is to say plainly what the deal is. */
+    for (const sell of ["full force", "arsenal", "supercharge", "tailored suite"]) {
+      expect(h, `${sell} is sales copy, not a term`).not.toContain(sell);
+    }
   });
 
   /**
@@ -641,15 +715,42 @@ describe("the Founding Writers page", () => {
   });
 
   /**
-   * ⚠️ THE EARTH IS BARE AND MUST NOT ACQUIRE PLACEHOLDER CHROME. It arrived finished; the slot
+   * ⚠️ THE ARTWORK IS BARE AND MUST NOT ACQUIRE PLACEHOLDER CHROME. It arrived finished; the slot
    * primitive exists to draw a dashed rim and a caption that say an asset has NOT, and wrapping
    * this one would mean passing `finished` to switch off everything the component does.
+   *
+   * ⚠️ AND IT CARRIES REAL ALT TEXT, WHERE `founders-earth.png` WAS `alt=""`. That one was
+   * decorative — a globe beside a headline about building a world — and is DELETED from
+   * `src/assets/marketing/` rather than left unimported, so its name is asserted absent too. This
+   * picture IS the page's argument, so an empty alt would leave a reader who cannot see it with a
+   * gap where the argument is.
    */
-  it("the artwork is bare and decorative", () => {
+  it("the artwork is bare, and describes itself", () => {
     const h = html();
-    expect(h).toMatch(/<img class="mk-fwearth" src="[^"]*founders-earth[^"]*" alt=""/);
+    const img = /<img class="mk-fwart"[^>]*>/.exec(h);
+    expect(img, "the founders hero renders its artwork").toBeTruthy();
+    expect(img![0]).toMatch(/src="\/images\/off-the-ground\.png\?v=[0-9a-f]{8}"/);
+    expect(img![0]).toContain("An older hawk and two others helping a young hawk into the air");
+    expect(img![0], "an empty alt would drop the page's own argument").not.toMatch(/alt=""/);
     expect(h).not.toMatch(/["\s`]mk-illo["\s`]/);
     expect(h).not.toContain("Illustration placeholder");
+    expect(h, "the earth is deleted, not merely unrendered").not.toContain("founders-earth");
+    expect(h).not.toMatch(/["\s`]mk-fwearth["\s`]/);
+  });
+
+  /**
+   * ⚠️ THE VERSION IS THE FILE. Nothing under `public/` is fingerprinted by the build and prod
+   * hosting lets a browser keep a file for an hour, so a re-export served under the same name goes
+   * on being served stale. This reads BOTH sides — the rendered URL and the bytes on disk — so a
+   * picture swapped without its constant following it fails here rather than in a browser.
+   */
+  it("versions the artwork's URL by the file's own content", () => {
+    const src = /<img class="mk-fwart"[^>]*src="([^"]+)"/.exec(html());
+    expect(src, "the artwork has a source").toBeTruthy();
+    const [path, version] = src![1].split("?v=");
+    const bytes = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), "../..", "public" + path));
+    expect(version, "the version IS the file, not a number kept in step by hand")
+      .toBe(createHash("md5").update(bytes).digest("hex").slice(0, 8));
   });
 
   /** It carries the shared footer, so every other public page is one click away. */
@@ -657,6 +758,59 @@ describe("the Founding Writers page", () => {
     const h = html();
     expect(h).toMatch(/["\s`]mk-foot["\s`]/);
     expect(h).toContain("Founding writers");
+  });
+});
+
+/**
+ * ⚠️ TWO COUNTER VARIANTS, AND EVERY ONE OF THEM HAS A CALLER. `FoundingCounter` has already grown
+ * a shape nobody drew: `line` rendered a bare sentence, `/founders` was its only consumer, and the
+ * branch outlived it. A variant surviving its last caller is how this component comes to carry a
+ * form nobody has looked at in a year, so the claim is a RECONCILIATION — the union's members
+ * against the props actually rendered — rather than a count on either side alone, which would go
+ * green the day both were changed in the same wrong direction.
+ *
+ * `claim` is the offer's own counter (the banner and the `/founders` hero); `tally` is the compact
+ * bar in `/pricing`'s narrow tier column. `bar` was SWAPPED for `claim`, not added beside it.
+ */
+describe("the founding counter has two variants and no orphans", () => {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const read = (f: string) => readFileSync(resolve(here, f), "utf8");
+
+  it("the union's members are exactly the variants the site renders", () => {
+    const union = /FoundingCounter: React\.FC<\{ variant: ([^}]+) \}>/.exec(read("FoundingSignup.tsx"));
+    expect(union, "the counter declares its variants").toBeTruthy();
+    const declared = [...union![1].matchAll(/"([a-z]+)"/g)].map((m) => m[1]).sort();
+
+    const rendered = new Set<string>();
+    for (const f of ["FoundingBand.tsx", "FoundersPage.tsx", "PricingPage.tsx"]) {
+      for (const m of read(f).matchAll(/<FoundingCounter variant="([a-z]+)"/g)) rendered.add(m[1]);
+    }
+    expect(declared, "every declared variant is rendered somewhere").toEqual([...rendered].sort());
+    expect(declared).toEqual(["claim", "tally"]);
+    /* The retired shapes, asserted absent so neither returns from a diff. */
+    expect(union![1]).not.toContain('"bar"');
+    expect(union![1]).not.toContain('"line"');
+  });
+
+  it("the banner and the founders hero draw the same shape, and pricing keeps its own", () => {
+    expect(read("FoundingBand.tsx")).toContain('<FoundingCounter variant="claim" />');
+    expect(read("FoundersPage.tsx")).toContain('<FoundingCounter variant="claim" />');
+    expect(read("PricingPage.tsx")).toContain('<FoundingCounter variant="tally" />');
+  });
+
+  /**
+   * ⚠️ NEITHER FIGURE IS COMPOSED AT THE RENDER SITE. `cap - claimed` written into the component
+   * is a number no copy lock can see — and it is the one that prints "-3 left" the day the cap is
+   * lowered under a live count. Both builders live in `landingCopy`, where the sweep for a
+   * hardcoded count can reach them.
+   */
+  it("builds both figures from the copy module, never from arithmetic in the component", () => {
+    const src = read("FoundingSignup.tsx");
+    expect(src).toContain("foundingRemainingLabel(count.claimed, count.cap)");
+    expect(src).toContain("foundingCounterRest(count.cap)");
+    expect(src, "no subtraction at the render site").not.toMatch(/count\.cap\s*-\s*count\.claimed/);
+    /* Still the one gate that matters: no figure at all until the endpoint answers. */
+    expect(src).toContain('if (!count || state === "down") return null;');
   });
 });
 
@@ -700,7 +854,10 @@ describe("the italic run is additive — the pages that do not use it are unchan
  */
 describe("the feature rows: six images, six headings, six paragraphs", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
-  const band = () => sliceBetween(html(), 'id="mk-features"', 'class="mk-beta"', "the features band");
+  /* Retarget, same law: the band the rows end at is the founding-writers banner now, and its
+     class changed with the rebuild. The slice's END anchor is what stops it running to the foot of
+     the document — which is exactly what `sliceBetween` refused to let happen silently here. */
+  const band = () => sliceBetween(html(), 'id="mk-features"', 'class="mk-claimband"', "the features band");
   const rowsOf = (markup: string) => markup.split('<div class="mk-frow">').slice(1);
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
   const unesc = (s: string) => s.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&amp;/g, "&");

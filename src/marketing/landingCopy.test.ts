@@ -14,9 +14,9 @@ import { describe, it, expect } from "vitest";
 import {
   HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK, FOUNDING_PERKS,
   DOCUMENT_TITLE, FEATURE_ROWS, BAND_HEADING,
-  FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_CTA,
+  FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_GET_LEAD, FOUNDING_GETS, FOUNDING_IN_RETURN, FOUNDING_CTA,
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
-  FOUNDING_NOTE, FOUNDING_INVALID, foundingCounterLabel,
+  FOUNDING_NOTE, FOUNDING_INVALID, foundingCounterLabel, foundingCounterRest, foundingRemainingLabel,
 } from "./landingCopy";
 
 describe("landing copy — verbatim locks", () => {
@@ -134,7 +134,9 @@ describe("landing copy — verbatim locks", () => {
       /* Retarget, same law: a row's body is one string now, and its alt text is rendered too. */
       ...FEATURE_ROWS.flatMap((r) => [r.body, r.alt]),
       HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK,
-      FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL,
+      /* Retarget, same law: the band's blurb is four list items and an ask now. */
+      FOUNDING_HEADING, ...FOUNDING_GETS, FOUNDING_IN_RETURN,
+      FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL,
     ].filter((t) => t.toLowerCase().includes("finger on the pulse"));
     expect(said).toEqual([]);
   });
@@ -204,13 +206,32 @@ describe("landing copy — verbatim locks", () => {
     expect(strings).not.toContain("Free to start. Take control of your querying journey today.");
   });
 
-  /** ⚠️ Verbatim from `design-refs/scriptally-landing-v13.html` .beta. Edit there and here only. */
-  it("the founding-members band, verbatim", () => {
-    expect(FOUNDING_EYEBROW).toBe("Founding members");
-    expect(FOUNDING_HEADING).toBe("Be one of the first hundred.");
-    expect(FOUNDING_BLURB).toBe(
-      "QueryHawk opens in stages. Founding members get in first, keep every feature free " +
-      "through the beta, and help decide what gets built next.",
+  /**
+   * ⚠️ NO LONGER FROM `design-refs/scriptally-landing-v13.html` — the band was rebuilt to a
+   * written brief (16 Sep) and that brief is the source. The ref's `.beta` copy is SUPERSEDED, so
+   * a lock quoting it would pin the page to an artefact it has left behind.
+   *
+   * ⚠️ AND IT IS "writers", NOT "members". `/founders` has always called them founding WRITERS
+   * while this band called them founding MEMBERS: one offer, two nouns, on two pages a reader
+   * moves between in one click. Asserting the old word's ABSENCE is what stops it coming back
+   * from a diff, because both read perfectly well in isolation.
+   */
+  it("the founding-writers band, verbatim", () => {
+    expect(FOUNDING_EYEBROW).toBe("Founding writers");
+    expect(FOUNDING_HEADING).toBe("Join as a founding writer");
+    expect(FOUNDING_GET_LEAD).toBe("You get:");
+    expect(FOUNDING_GETS).toEqual([
+      "Early access to QueryHawk",
+      "A direct line to the founder",
+      "The full experience free of charge for 6 months",
+      "Half price for as long as you need it after that",
+    ]);
+    /* ⚠️ `FOUNDING_IN_RETURN`, NOT `FOUNDING_ASK` — that name belongs to the retired hero panel and
+       is held in the absent-exports list above. Reusing it would have left that lock green about a
+       constant that exists, for a reason that had stopped being true. */
+    expect(FOUNDING_IN_RETURN).toBe(
+      "All we ask is that you give us occasional feedback to help shape and refine QueryHawk " +
+      "for when it opens to the wider writing community.",
     );
     expect(FOUNDING_CTA).toBe("Claim your place");
     expect(FOUNDING_SENT).toBe(
@@ -246,10 +267,33 @@ describe("landing copy — verbatim locks", () => {
    */
   it("no hardcoded count anywhere in the copy", async () => {
     expect(foundingCounterLabel(37, 100)).toBe("37 of 100 places claimed");
+    /* The banner sets the figure and the words at different sizes, so the words are their own
+       builder and the full label is built FROM it — one home for "places claimed", not two. */
+    expect(foundingCounterRest(100)).toBe(" of 100 places claimed");
+    expect(foundingCounterLabel(37, 100)).toBe("37" + foundingCounterRest(100));
+    expect(foundingRemainingLabel(37, 100)).toBe("63 left");
+    /* ⚠️ CLAMPED, BECAUSE THE SUBTRACTION CAN GO NEGATIVE. Lower the cap under a live count and an
+       unclamped builder prints "-3 left" on a public page — a number nobody wrote and nobody could
+       explain. The server decides `full`; this only decides what the arithmetic may say. */
+    expect(foundingRemainingLabel(120, 100)).toBe("0 left");
+
     const copy = await import("./landingCopy");
     const strings = Object.values(copy).filter((v): v is string => typeof v === "string");
-    expect(strings.some((t) => /\bplaces claimed\b/.test(t))).toBe(false);
-    expect(strings.some((t) => /\b\d+ of \d+\b/.test(t))).toBe(false);
+    /**
+     * ⚠️ ARRAYS TOO, AND THAT IS A REAL HOLE BEING CLOSED RATHER THAN A TIDY-UP. The sweep filtered
+     * to bare strings, so `FOUNDING_GETS` — four sentences about the offer, rendered on the band —
+     * was invisible to it. "37 of 100 places claimed" written into one of those would have shipped
+     * through a green lock whose whole purpose is to forbid exactly that. Flattening one level
+     * reaches every export a reader can see.
+     */
+    const flat = Object.values(copy).flatMap((v) =>
+      typeof v === "string" ? [v]
+        : Array.isArray(v) ? v.filter((x): x is string => typeof x === "string")
+        : []);
+    expect(flat.length, "the sweep sees more than the bare strings").toBeGreaterThan(strings.length);
+    expect(flat.some((t) => /\bplaces claimed\b/.test(t))).toBe(false);
+    expect(flat.some((t) => /\b\d+ of \d+\b/.test(t))).toBe(false);
+    expect(flat.some((t) => /\b\d+ left\b/.test(t))).toBe(false);
   });
 
   /** The invalid-address line is field feedback, not an outcome — it never displaces the form. */

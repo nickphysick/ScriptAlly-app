@@ -1,25 +1,38 @@
 /**
- * FoundingBand — the page's closing offer (design ref: design-refs/scriptally-landing-v13.html
- * `.beta`): a parchment letter on a soft-pink band, sealed with wax.
+ * FoundingBand — the founding-writers banner that closes the landing page and `/founders`: a
+ * full-bleed band carrying the artwork, with the offer on a white card sitting over it.
  *
- * It REPLACES `CtaBand`, which restated the hero's "start tracking" three screens later. A page
- * that ends by repeating its own opening CTA is not closing, it is looping.
+ * ⚠️ IT REPLACES THE SEALED LETTER WHOLESALE, AND THE WAX WENT WITH THE CARD. The band was a
+ * centred parchment letter — a paper fold, an SVG turbulence grain, and a burgundy wax seal
+ * breaking its top edge — on a plain blush ground. All of it is deleted: `.mk-betacard` and its
+ * two pseudo-elements, `.mk-wax`, `.mk-waxblob`, `.mk-betaeyebrow`, `.mk-betablurb`,
+ * `.mk-betaform`, and the whole `.mk-counter` family. `founding-seal-mark-placeholder.png` is
+ * deleted with them; it was the last renderer of the retired paper-plane mark, so nothing on the
+ * site draws it now.
  *
- * ⚠️ THE SEAL IS THE ONE BURGUNDY FILL AT SCALE ON THIS SITE, and that is an exception worth
- * naming rather than a colour rule being relaxed. Every other burgundy fill in `marketing.css` is
- * a mark under 12px — the Pro tag, the status dot, the pinned-note pin, a few hairlines at half
- * opacity. The exception is about SIZE, not hue, and it does not travel: no button is
- * burgundy-filled, here or anywhere.
+ * ⚠️ THE SEAL'S EXCEPTION IS RETIRED RATHER THAN RELOCATED. `marketing.css` recorded it as "the
+ * one burgundy fill at scale on this site", an exception about SIZE and not hue. There is no
+ * burgundy fill at scale here at all, so the exception has no subject and the plain rule stands
+ * again: every burgundy on these pages is a mark under 12px, a hairline, or type.
  *
- * ⚠️ THE BUTTON IS INK, ON A PINK GROUND, AND THAT CROSSES THE HOUSE GRAMMAR ON PURPOSE. The rule
- * was "ink in the nav, pink for page primaries"; it generalises rather than breaks — primaries are
- * pink on cream and parchment grounds, ink on pink ones. A pink button on this band would have
- * nothing to sit against.
+ * ⚠️ THE ARTWORK IS A CSS BACKGROUND, NOT AN `<img>`, AND THAT IS LOAD-BEARING RATHER THAN
+ * CONVENIENT. It has to leave entirely below 1000px, and an inline `style` — which is where a
+ * version-stamped `src` would have to live to stay in step with the file — BEATS a media query
+ * whatever the query says. This repo has paid for that exact inversion twice, in the rail's
+ * collapse and in the help FAB's offset. In the stylesheet the breakpoint simply wins.
  *
- * ⚠️ THE FORM ITSELF IS `FoundingSignup`, MOUNTED HERE — one component, three places on the site.
- * The chrome is this file's; the field, the states, the announcement and the count are shared, so
- * signing up in the landing hero's panel leaves this band already answered rather than asking a
- * second time. Copying the form instead would give the site three sign-ups that drift apart.
+ * ⚠️ WHICH MEANS THE CACHE-BUSTING VERSION LIVES IN `marketing.css`. Nothing under `public/` is
+ * fingerprinted by the build, so a replaced file is served stale for an hour; the `?v=` is the
+ * first eight hex digits of the file's md5 and a lock reads the stylesheet against the file on
+ * disk. Replace the picture, change the version — in the CSS, not here.
+ *
+ * ⚠️ THE LEFT COLUMN IS EMPTY AND HAS NO ELEMENT. The card is placed in column 2 and column 1 is
+ * simply the track the artwork shows through. An empty `<div>` to hold the space would be a node
+ * in the accessibility tree standing in for a background.
+ *
+ * ⚠️ THE FORM IS `FoundingSignup`, MOUNTED HERE — one component, three places on the site. The
+ * chrome is this file's; the field, the states, the announcement and the count are shared, so
+ * signing up in this band leaves `/founders` already answered rather than asking a second time.
  *
  * ⚠️ THE COUNTER IS LIVE OR ABSENT. There is no bar, no number and no placeholder until a real
  * figure comes back from the endpoint. A fabricated scarcity number on a public page is a factual
@@ -34,42 +47,45 @@
  */
 
 import React from "react";
-import { Runs } from "./CopyRuns";
 import {
-  FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_BLURB,
+  FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_GET_LEAD, FOUNDING_GETS, FOUNDING_IN_RETURN,
 } from "./landingCopy";
 import { FoundingSignup, FoundingCounter } from "./FoundingSignup";
-import sealMark from "../assets/marketing/founding-seal-mark-placeholder.png";
 
 export const FoundingBand: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
 }> = ({ onNavigate }) => (
-  <section className="mk-beta" aria-labelledby="mk-band-h">
-    <div className="mk-betacard">
-      {/* The wax seal, breaking the card's top edge. Decorative in full: the blob, the ring and
-          the mark say nothing the heading beneath them does not. */}
-      <span className="mk-wax" aria-hidden="true">
-        <span className="mk-waxblob">
-          <svg viewBox="0 0 92 92">
-            <path d="M46 3c12 0 20 5 28 12s15 18 15 31-5 22-12 30-18 13-31 13-22-5-30-12S3 59 3 46 8 24 15 16 34 3 46 3z" />
-            <circle cx="46" cy="46" r="32" />
-          </svg>
-        </span>
-        <img src={sealMark} alt="" />
-      </span>
+  <section className="mk-claimband" aria-labelledby="mk-band-h">
+    <div className="mk-claimgrid">
+      <div className="mk-claimcard">
+        <p className="mk-claimkicker">{FOUNDING_EYEBROW}</p>
+        <h2 id="mk-band-h" className="mk-claimh2">{FOUNDING_HEADING}</h2>
 
-      <p className="mk-betaeyebrow">{FOUNDING_EYEBROW}</p>
-      <h2 id="mk-band-h">{FOUNDING_HEADING}</h2>
-      <p className="mk-betablurb">{FOUNDING_BLURB}</p>
+        <p className="mk-claimlead">{FOUNDING_GET_LEAD}</p>
+        {/* A real list, so it is announced as four items rather than four sentences. The ring and
+            its centre dot are drawn in CSS — a marker is not content. */}
+        <ul className="mk-claimlist">
+          {FOUNDING_GETS.map((get) => <li key={get}>{get}</li>)}
+        </ul>
 
-      <FoundingSignup
-        idPrefix="mk-band"
-        source="sealed-band"
-        formClass="mk-betaform"
-        onNavigate={onNavigate}
-      />
-      <FoundingCounter variant="bar" />
+        {/* The hairline above this is the paragraph's own `border-top`, not an element between
+            them: a rule that exists to separate two blocks belongs to one of them. */}
+        <p className="mk-claimask">{FOUNDING_IN_RETURN}</p>
 
+        {/* ⚠️ `source` IS A DATA CONTRACT, NOT A CLASS NAME, AND "sealed-band" STAYS. It is written
+            into every waitlist document this band produces and into every one it has already
+            produced; `WaitlistSource` is the union the server reads, and anything outside it folds
+            to `unknown`. Renaming it to match the artwork would silently split one surface's
+            history in two, which is a worse fault than a stale word in an enum. Flagged rather
+            than changed — it is an analytics migration, not a rename. */}
+        <FoundingSignup
+          idPrefix="mk-band"
+          source="sealed-band"
+          formClass="mk-claimform"
+          onNavigate={onNavigate}
+        />
+        <FoundingCounter variant="claim" />
+      </div>
     </div>
   </section>
 );

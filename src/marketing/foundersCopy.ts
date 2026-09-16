@@ -28,24 +28,43 @@ export const FOUNDERS_DOCUMENT_TITLE = "Founding Writers — QueryHawk";
 
 /* ══════════════ Hero ══════════════ */
 export const FOUNDERS_EYEBROW = "For founding writers";
-export const FOUNDERS_H1 = "Help build our world.";
+export const FOUNDERS_H1 = "Help get things off the ground.";
 /**
- * ⚠️ THE COMMAS AROUND "totally free of charge" ARE LOAD-BEARING. Without them the phrase can be
- * read as attached to "the full version of QueryHawk" — i.e. as describing the product rather
- * than the offer, which is a claim this app does not make. A comma is exactly what a well-meaning
- * edit removes, so a lock asserts the punctuation as well as the sentence.
+ * ⚠️ IT NO LONGER SAYS "totally free of charge", AND THE LOCK ON THOSE COMMAS WENT WITH THE PHRASE.
+ * They were load-bearing while the clause sat mid-sentence — without them it read as attached to
+ * "the full version of QueryHawk", i.e. as describing the PRODUCT rather than the OFFER. The lede
+ * states the ask now and the terms are on the perk cards beneath it, where "Six months free" is
+ * unambiguous because it is a heading rather than a clause. A lock asserting punctuation that no
+ * longer exists is a lock on a sentence the page has left behind.
  *
- * ⚠️ AND "We're almost done. The app works." IS DELETED, NOT RELOCATED. The subheading states the
- * ask; reporting on the state of the build first spent two sentences on the wrong subject and
- * asked a reader to take reassurance from a claim they cannot check.
+ * ⚠️ "use it properly" IS THE ASK AND IT IS DELIBERATELY BLUNT. The earlier lede said "let us know
+ * how it does", which asks for a report; this asks for the use that makes a report worth anything.
+ *
+ * ⚠️ AND "We're almost done. The app works." STAYS DELETED. The subheading states the ask;
+ * reporting on the state of the build spent two sentences on the wrong subject and asked a reader
+ * to take reassurance from a claim they cannot check.
  */
 export const FOUNDERS_LEDE: CopyRun[] = [
   "We're looking for ",
   { b: "one hundred writers" },
-  " to bring their querying journey into the full version of QueryHawk, totally free of charge, " +
-  "and let us know how it does. Interested? Sign up below and we'll be in touch.",
+  " to bring their querying campaign into QueryHawk, use it properly, and tell us what they find. " +
+  "Sign up below and we'll be in touch.",
 ];
-export const FOUNDERS_CTA = "Become a Founding Writer";
+
+/**
+ * ⚠️ `FOUNDERS_CTA` IS DELETED AND THE FORM TAKES ITS DEFAULT — `FOUNDING_CTA`, "Claim your place".
+ * It read "Become a Founding Writer", which is the NAV's wording for the link that brings a reader
+ * HERE; on the page itself, above the form, it asks someone already reading about the offer to
+ * become the thing they came to become. The band and this hero now say the same three words,
+ * because they are the same act.
+ *
+ * ⚠️ THE ARTWORK'S ALT TEXT IS REAL DESCRIPTION, NOT `alt=""`. The founders hero's old earth was
+ * decorative — a globe beside a headline about building a world. This picture is the page's
+ * metaphor stated in full, and a reader who cannot see it should get the metaphor rather than a
+ * gap where the argument is.
+ */
+export const FOUNDERS_ART_ALT =
+  "An older hawk and two others helping a young hawk into the air for its first flight.";
 
 /* ══════════════ The deal ══════════════ */
 export interface DealCard {
@@ -60,32 +79,37 @@ export interface DealCard {
    its conditional class and `.mk-fwcard--hl` all went together — a flag with no true value is a
    knob nobody turns, and the next reader would have gone looking for what sets it. */
 
+/* ⚠️ ALL THREE BODIES ARE SHORTER THAN THEY WERE, AND THE CARDS ARE WHY. They were paragraphs in
+   a three-up grid of bordered cards with room for them; the cards are flat now, sitting under a
+   hero rather than filling the page, and a card whose body runs to four lines stops being a card.
+   Every clause that survived is a term of the offer — what you get, what it costs, what you do.
+   The adjectives went: "the full force of QueryHawk", "an arsenal of time-saving Pro features",
+   "a tailored suite of querying analytics" were the product selling itself inside the one section
+   that is supposed to be stating terms plainly. */
 export const FOUNDERS_DEAL: DealCard[] = [
   {
     key: "deal",
     kicker: "The deal",
-    heading: "Six months of Pro, free",
+    heading: "Six months free",
     body:
-      "The full force of QueryHawk is yours. Be amongst the first to supercharge your campaign " +
-      "for agent representation, backed by an arsenal of time-saving Pro features and a tailored " +
-      "suite of querying analytics.",
+      "The full version of QueryHawk, with nothing held back. Every feature, every tool, no card " +
+      "needed.",
   },
   {
     key: "sweetener",
     kicker: "The sweetener",
-    heading: "Half price, for as long as you need it.",
+    heading: "Half price after that",
     body:
-      "If you choose to stick with QueryHawk, you'll never pay full price. You'll pay a founding " +
-      "writers' rate for as long as you're querying your manuscript.",
+      "If you stay, you'll never pay full price. A founding writer's rate for as long as you're " +
+      "querying.",
   },
   {
     key: "line",
     kicker: "A direct line",
     heading: "You shape what's built",
     body:
-      "You'll be in direct contact with QueryHawk's founder, giving feedback, shaping new " +
-      "features, helping to design and refine a tool that works for you and for the whole " +
-      "writing community.",
+      "Straight to the founder. Tell us what's missing, what's wrong, and what you'd build " +
+      "instead.",
   },
 ];
 

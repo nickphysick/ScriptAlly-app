@@ -2,22 +2,31 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * FoundersPage — `/founders` (design ref: design-refs/scriptally-founders-v4.html). The page the
- * landing hero's panel and the sealed band both point at: what a founding writer gets, what is
- * asked in return, and the same sign-up.
+ * FoundersPage — `/founders`. The page the landing band points at: what a founding writer gets,
+ * what is asked in return, and the same sign-up.
  *
- * ⚠️ IT MOUNTS `FoundingSignup` TWICE — once in the hero, once inside the sealed band at the foot
- * — so this is the page that forced the generalisation. Two forms on one document need two id
+ * ⚠️ IT MOUNTS `FoundingSignup` TWICE — once in the hero, once inside the band at the foot — so
+ * this is the page that forced the generalisation. Two forms on one document need two id
  * prefixes, and one shared store, or the page states two different counts and asks a reader who
  * has already signed up to do it again. See `FoundingSignup` and `foundingStore`.
  *
+ * ⚠️ THE HERO AND THE BAND NOW RENDER THE SAME FORM, THE SAME FINE PRINT AND THE SAME COUNTER,
+ * which is why the hero no longer passes a `ctaLabel`. It said "Become a Founding Writer" — the
+ * NAV's words for the link that brings a reader here — above a form on the page they had already
+ * reached. Both say "Claim your place" now, because both do the same thing.
+ *
+ * ⚠️ THE ARTWORK CARRIES REAL ALT TEXT, AND THE EARTH IT REPLACES DID NOT. `founders-earth.png`
+ * was decorative — a globe beside a headline about building a world — and is DELETED from
+ * `src/assets/marketing/` rather than left as an unimported file. This picture is the page's
+ * argument stated as a picture, so a reader who cannot see it gets the argument.
+ *
+ * ⚠️ IT DOES NOT GO THROUGH `MarketingIllustration`, AND THAT IS UNCHANGED FROM THE EARTH. The
+ * asset is finished and renders bare — no rim, no caption, no tinted ground. That primitive
+ * exists to draw the chrome that says an asset has NOT arrived; wrapping this one would mean
+ * passing `finished` to switch off every part of the component that does anything.
+ *
  * ⚠️ THE REF'S NAV IS A SIMPLIFIED STAND-IN AND IS NOT REPRODUCED. This page renders inside
  * `MarketingShell` like every other public route, and takes the shared footer with it.
- *
- * ⚠️ THE EARTH IS BARE — no rim, no caption, no tinted ground — which is why it does NOT go
- * through `MarketingIllustration`. That primitive exists to render placeholder chrome; this asset
- * arrived finished, and wrapping it would mean passing `finished` to switch off every part of the
- * component that does anything.
  */
 
 import React, { useEffect } from "react";
@@ -26,10 +35,17 @@ import { FoundingSignup, FoundingCounter } from "./FoundingSignup";
 import { FoundingBand } from "./FoundingBand";
 import { MarketingFooter } from "./MarketingFooter";
 import {
-  FOUNDERS_DOCUMENT_TITLE, FOUNDERS_EYEBROW, FOUNDERS_H1, FOUNDERS_LEDE, FOUNDERS_CTA,
+  FOUNDERS_DOCUMENT_TITLE, FOUNDERS_EYEBROW, FOUNDERS_H1, FOUNDERS_LEDE, FOUNDERS_ART_ALT,
   FOUNDERS_DEAL, FOUNDERS_HONEST_LEAD, FOUNDERS_HONEST, FOUNDERS_SIGNOFF,
 } from "./foundersCopy";
-import earth from "../assets/marketing/founders-earth.png";
+
+/**
+ * The artwork's own facts. The version is the first eight hex digits of the file's md5 and rides
+ * the URL: nothing under `public/` is fingerprinted by the build and prod hosting lets a browser
+ * keep a file for an hour, so a replaced file would otherwise be served stale. Replace the file,
+ * change the version — a smoke test reads the hash back against the file on disk.
+ */
+const ART = { src: "/images/off-the-ground.png", version: "430029d2", width: 1200, height: 1200 };
 
 export const FoundersPage: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
@@ -43,10 +59,11 @@ export const FoundersPage: React.FC<{
   return (
     <div className="mk-fw">
       <div className="mk-fwpad">
-        {/* ⚠️ `align-items: stretch` IS WHAT MAKES THE ARTWORK MATCH THE COPY, and it is why
-            neither column declares a height. The earth is as tall as headline + lede + field
-            because the row makes it so; a fixed height would decide the proportion from the wrong
-            end and stop tracking the copy the moment the copy changes. */}
+        {/* ⚠️ `align-items: center` NOW, WHERE IT WAS `stretch`. The old row made the earth exactly
+            as tall as the copy beside it, which is what a `max-height` illustration wants; this
+            artwork sizes itself from the column's width and the two columns are simply centred
+            against each other. A `stretch` here would hand the picture a height it has no way to
+            use and reintroduce the crop the earth needed `object-fit` to avoid. */}
         <header className="mk-fwhero">
           <div className="mk-fwcol">
             <p className="mk-fweyebrow">{FOUNDERS_EYEBROW}</p>
@@ -56,20 +73,23 @@ export const FoundersPage: React.FC<{
             <FoundingSignup
               idPrefix="mk-fw"
               source="founders-hero"
-              ctaLabel={FOUNDERS_CTA}
-              formClass="mk-fwform"
+              formClass="mk-claimform"
               onNavigate={onNavigate}
             />
-            {/* ⚠️ THE SAME COUNTER THE LANDING PANEL DRAWS, not a second shape for one number.
-                This hero showed a bare mono line while the panel showed a bar and a tally, so one
-                figure had two appearances across two pages. Width is a wrapper-scoped override
-                below — the component is reused, never restyled in place. */}
-            <FoundingCounter variant="tally" />
+            {/* ⚠️ THE SAME COUNTER THE BAND DRAWS, not a second shape for one number. This hero
+                showed the pricing card's compact `tally` while the band showed something else, so
+                one figure had two appearances on one page. Width is a wrapper-scoped override in
+                the stylesheet — the component is reused, never restyled in place. */}
+            <FoundingCounter variant="claim" />
           </div>
 
-          <div className="mk-fwillo">
-            <img className="mk-fwearth" src={earth} alt="" />
-          </div>
+          <img
+            className="mk-fwart"
+            src={ART.src + "?v=" + ART.version}
+            alt={FOUNDERS_ART_ALT}
+            width={ART.width}
+            height={ART.height}
+          />
         </header>
 
         {/* Equal-height cards: `stretch` on the grid, flex-column inside, so three headings of

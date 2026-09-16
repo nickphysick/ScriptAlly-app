@@ -27,7 +27,7 @@ import { isValidEmail } from "../lib/authActions";
 import {
   FOUNDING_FIELD_LABEL, FOUNDING_PLACEHOLDER, FOUNDING_CTA, FOUNDING_INVALID,
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
-  foundingCounterLabel,
+  foundingCounterLabel, foundingCounterRest, foundingRemainingLabel,
 } from "./landingCopy";
 import { useFounding, ensureCount, submitFounding, FoundingState } from "./foundingStore";
 import { WAITLIST_HONEYPOT_FIELD, WaitlistSource } from "./waitlist";
@@ -189,12 +189,22 @@ export const FoundingSignup: React.FC<{
  * where its own layout wants it; the figure itself comes from the one shared store.
  */
 /**
- * ⚠️ TWO VARIANTS, NOT THREE. `line` rendered a bare `.mk-foundcnt` sentence and `/founders` was
- * its only consumer; that hero now uses `tally`, so the branch went with it rather than being
- * left as a shape nothing draws. A replacement is SWAPPED, not added — a third variant surviving
- * its last caller is exactly how this file would grow a form nobody has looked at in a year.
+ * ⚠️ STILL TWO VARIANTS, AND `bar` IS GONE RATHER THAN RETIRED BESIDE ITS REPLACEMENT. `claim`
+ * takes its place on the founding band and takes the `/founders` hero off `tally` as well, so
+ * `tally` is now the PRICING CARD's shape and nothing else. A replacement is SWAPPED, not added —
+ * a variant surviving its last caller is exactly how this file would grow a form nobody has
+ * looked at in a year, and `line` already went that way once.
+ *
+ * ⚠️ AND THE NAME MOVED WITH THE SHAPE. Keeping `bar` for something whose defining feature is a
+ * 26px numeral would be a name outliving its subject, which this repo has paid for often enough
+ * to have a rule about it.
+ *
+ * `claim` — the offer's own counter: the figure, what is left, and a track beneath. Wide enough
+ * to be read as the point of the card it closes.
+ * `tally` — a 5px bar and one mono line, for a pricing tier's narrow column, where the counter is
+ * a detail of a card rather than its subject.
  */
-export const FoundingCounter: React.FC<{ variant: "bar" | "tally" }> = ({ variant }) => {
+export const FoundingCounter: React.FC<{ variant: "claim" | "tally" }> = ({ variant }) => {
   /* ⚠️ THE COUNTER ASKS FOR ITS OWN FIGURE. It used to rely on a `FoundingSignup` being mounted
      beside it, which held on every surface until the pricing page rendered a counter with no form
      — and the failure is silent, because "no count yet" and "never asked" both render nothing.
@@ -229,10 +239,25 @@ export const FoundingCounter: React.FC<{ variant: "bar" | "tally" }> = ({ varian
       </div>
     );
   }
+  /**
+   * ⚠️ THE TRACK IS `aria-hidden` HERE AND LABELLED IN `tally`, AND THE DIFFERENCE IS THE TEXT
+   * BESIDE IT. This variant states the figure in readable prose — "1", " of 100 places claimed",
+   * "99 left" — so a labelled track would have a reader hear the same sentence twice in a row.
+   * `tally`'s own line is `aria-hidden` for the mirror image of the reason: there the bar carries
+   * the label because the text under it is decorative.
+   */
   return (
-    <div className="mk-counter">
-      <div className="mk-counterbar"><div className="mk-counterfill" style={{ width: `${pct}%` }} /></div>
-      <p className="mk-counterlab">{label}</p>
+    <div className="mk-claimcount">
+      <div className="mk-claimfigures">
+        <p className="mk-claimtally">
+          <span className="mk-claimnum">{count.claimed}</span>
+          <span className="mk-claimof">{foundingCounterRest(count.cap)}</span>
+        </p>
+        <p className="mk-claimleft">{foundingRemainingLabel(count.claimed, count.cap)}</p>
+      </div>
+      <div className="mk-claimtrack" aria-hidden="true">
+        <div className="mk-claimfill" style={{ width: `${pct}%` }} />
+      </div>
     </div>
   );
 };

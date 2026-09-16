@@ -76,20 +76,55 @@ export const BAND_HEADING = "A bird's-eye view of your querying campaign";
    the three: a band that repeats "start tracking" beneath a band that asks you to claim a place
    gives the foot of the page two competing primaries. */
 
-/* ══════════════ The founding-members band ══════════════
-   ⚠️ VERBATIM FROM `design-refs/scriptally-landing-v13.html` .beta, under the same discipline as
-   the rest of this file: the words are edited here or nowhere.
+/* ══════════════ The founding-writers band ══════════════
+   ⚠️ NO LONGER FROM `design-refs/scriptally-landing-v13.html` — the band was rebuilt to a written
+   brief (16 Sep) and that brief is the source of truth for these strings. The ref's `.beta` copy
+   ("Be one of the first hundred.", the blurb about opening in stages) is superseded, not merely
+   restyled: a locked ref quote here would now be a lock on an artefact the page has left behind.
+   The discipline is unchanged — the words are edited here or nowhere.
 
-   ⚠️ AND THE OFFER IS A PROMISE THE PRODUCT HAS TO KEEP. "keep every feature free through the
-   beta" and "help decide what gets built next" are commitments, not adjectives — the same class
-   as the About page's three, and the same rule applies: if one stops being true the fix is the
-   product, not the sentence. The number in the heading is the cap the backend carries; if that
-   number ever changes, this heading changes with it. */
-export const FOUNDING_EYEBROW = "Founding members";
-export const FOUNDING_HEADING = "Be one of the first hundred.";
-export const FOUNDING_BLURB =
-  "QueryHawk opens in stages. Founding members get in first, keep every feature free through " +
-  "the beta, and help decide what gets built next.";
+   ⚠️ IT IS "writers", NOT "members", AND THE TWO ARE NOT INTERCHANGEABLE. `/founders` has always
+   called them founding WRITERS; the landing band called them founding MEMBERS; one offer, two
+   nouns, on two pages a reader moves between in one click. The page they land on is the one that
+   was right.
+
+   ⚠️ AND THE FOUR LINES BELOW ARE PROMISES THE PRODUCT HAS TO KEEP, in the same class as the
+   About page's: early access, a direct line, six months free, and half price afterwards for as
+   long as they need it. The last is a PERMANENT pricing commitment and it is stated on two pages
+   — `FOUNDERS_DEAL`'s sweetener is the same promise in different words. If the terms change, both
+   change together. If one stops being true the fix is the product, not the sentence. */
+export const FOUNDING_EYEBROW = "Founding writers";
+export const FOUNDING_HEADING = "Join as a founding writer";
+
+/** The line that introduces the list. A colon, because a list follows it. */
+export const FOUNDING_GET_LEAD = "You get:";
+
+/**
+ * ⚠️ THESE ARE NOT `FOUNDING_PERKS` AND MUST NOT BE COLLAPSED INTO THEM. `FOUNDING_PERKS` is three
+ * terse bullets inside /pricing's founding TIER CARD, where they sit beside other tiers' feature
+ * lists and have to scan at the same length. These are four full sentences in a band whose whole
+ * job is the offer. Same offer, two registers, two surfaces — merging them would make one of the
+ * two read wrong, and the shorter one is the one that would win.
+ */
+export const FOUNDING_GETS = [
+  "Early access to QueryHawk",
+  "A direct line to the founder",
+  "The full experience free of charge for 6 months",
+  "Half price for as long as you need it after that",
+] as const;
+
+/**
+ * What is asked in return. It is the only thing asked, and the sentence says so.
+ *
+ * ⚠️ IT IS NOT CALLED `FOUNDING_ASK`, AND THAT NAME IS NOT FREE. `FOUNDING_ASK` belonged to the
+ * retired hero panel and `landingCopy.test.ts` holds it in a list of exports asserted ABSENT, so
+ * that the old panel cannot be reinstated from a diff. Taking the name back for a different
+ * sentence would have made that lock permanently unable to fire — it would have been green about
+ * a constant that exists, for a reason that had stopped being true. A retired name stays retired.
+ */
+export const FOUNDING_IN_RETURN =
+  "All we ask is that you give us occasional feedback to help shape and refine QueryHawk for " +
+  "when it opens to the wider writing community.";
 
 /* ══════════════ The founding offer's perks ══════════════
    ⚠️ READ BY `PRICING_TIERS` BELOW, which spreads them into the founding tier's `includes`. They were
@@ -154,8 +189,27 @@ export const FOUNDING_DOWN: CopyRun[] = [
  * worse than no number, and this one would sit on a public page making a factual claim about how
  * many people had signed up.
  */
+/**
+ * ⚠️ SPLIT IN TWO BECAUSE THE BANNER SETS THE FIGURE AND THE WORDS AT DIFFERENT SIZES — the count
+ * at 26px, the rest at 16px and muted — and a component cannot typeset half a string it is handed
+ * whole. The words live HERE, once: `foundingCounterLabel` is built from this rather than
+ * restating it, so the band's `26` and `/pricing`'s `26 of 100 places claimed` cannot come to
+ * disagree about the wording. Composing ` of ${cap} places claimed` at the render site instead
+ * would put copy in a component, where no copy lock can see it.
+ */
+export const foundingCounterRest = (cap: number) => ` of ${cap} places claimed`;
 export const foundingCounterLabel = (claimed: number, cap: number) =>
-  `${claimed} of ${cap} places claimed`;
+  `${claimed}${foundingCounterRest(cap)}`;
+
+/**
+ * How many are left. A BUILDER RATHER THAN ARITHMETIC AT THE RENDER SITE, for the same reason as
+ * the others: both figures a reader sees derive from the two the endpoint answered with, and
+ * neither the sum nor the word is composed anywhere but here. `cap - claimed` written into a
+ * component is a number the copy lock cannot see — and it is the number that would go negative
+ * and print "-3 left" the day the cap is lowered under a count, which is why it clamps.
+ */
+export const foundingRemainingLabel = (claimed: number, cap: number) =>
+  `${Math.max(0, cap - claimed)} left`;
 
 export const FOUNDING_NOTE: CopyRun[] = [
   "We'll only use your address to send your invite. ",

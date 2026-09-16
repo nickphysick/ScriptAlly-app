@@ -27,7 +27,7 @@
  * already states, and six unlabelled marks read out in sequence would be noise rather than content.
  */
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BAND_HEADING } from "./landingCopy";
 
 /**
@@ -90,23 +90,73 @@ const GLYPHS: Array<{ key: string; paths: React.ReactNode }> = [
   },
 ];
 
-export const StatusBand: React.FC = () => (
-  <section className="mk-statband" id="pulse">
-    <h2 className="mk-stattitle">{BAND_HEADING}</h2>
-    <div className="mk-statglyphs">
-      {GLYPHS.map((g) => (
-        <svg
-          key={g.key}
-          className="mk-statglyph"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          aria-hidden="true"
-        >
-          {g.paths}
-        </svg>
-      ))}
-    </div>
-  </section>
-);
+/**
+ * The row's three postures, and the order matters more than the names.
+ *
+ * `rest`  — no animation machinery at all: the glyphs are simply there. This is what a browser
+ *           WITHOUT `IntersectionObserver` gets, and what `renderToStaticMarkup` produces.
+ * `armed` — hidden and offset, waiting to be scrolled to.
+ * `in`    — running, once, and never re-armed.
+ */
+type GlyphPhase = "rest" | "armed" | "in";
+
+export const StatusBand: React.FC = () => {
+  const rowRef = useRef<HTMLDivElement>(null);
+  /**
+   * ⚠️ THE FALLBACK IS "SHOWN", NOT "HIDDEN", AND THAT IS THE WHOLE RISK OF THIS FEATURE. The CSS
+   * start state is `opacity: 0` — so anything that stops the observer from ever firing leaves six
+   * invisible marks under a heading that introduces them, permanently, with no way back. The ECG
+   * trace this section replaced carried the same rule from the other end (its play-state default
+   * was "running", not "paused") for exactly this reason.
+   *
+   * ⚠️ AND IT IS DECIDED DURING THE FIRST RENDER, NOT IN AN EFFECT. Arming from `useEffect` would
+   * paint the glyphs, then hide them, then animate them in — a visible flash on every load. A
+   * lazy `useState` initialiser runs while rendering, so the browser's first paint is already
+   * armed and node's is already at rest. `typeof` is what makes the reference safe where the
+   * global does not exist.
+   */
+  const [phase, setPhase] = useState<GlyphPhase>(
+    () => (typeof IntersectionObserver === "undefined" ? "rest" : "armed"),
+  );
+
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        /* Once. The row does not re-animate on the way back up, because a mark that replays every
+           time it is scrolled past stops reading as an arrival and starts reading as a fault. */
+        setPhase("in");
+        io.disconnect();
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <section className="mk-statband" id="pulse">
+      <h2 className="mk-stattitle">{BAND_HEADING}</h2>
+      <div
+        ref={rowRef}
+        className={phase === "rest" ? "mk-statglyphs" : `mk-statglyphs mk-statglyphs--${phase}`}
+      >
+        {GLYPHS.map((g) => (
+          <svg
+            key={g.key}
+            className="mk-statglyph"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            aria-hidden="true"
+          >
+            {g.paths}
+          </svg>
+        ))}
+      </div>
+    </section>
+  );
+};
