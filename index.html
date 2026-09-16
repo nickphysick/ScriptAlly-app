@@ -16,13 +16,6 @@
     <!-- (The Tabler icons webfont is GONE — Tier 3+4 · Phase 9: zero .ti consumers anywhere in
          src, TypeGlyph is hand-rolled SVG, and the CDN stylesheet was a render-blocking external
          request on every page load.) -->
-    <!-- The marketing nav's wordmark face, self-hosted (see the @font-face in marketing.css).
-         PRELOADED BECAUSE `font-display: swap` GUARANTEES A FLASH BY DESIGN — it paints the
-         fallback and swaps when the file lands. At 14.5KB, starting the fetch here rather than
-         after the CSS that references it has been parsed is what makes the swap land before first
-         paint instead of after it. `crossorigin` is required even same-origin: fonts are fetched
-         in CORS mode, and without it the preload misses and the file is fetched twice. -->
-    <link rel="preload" href="/fonts/archivo-expanded-700.woff2?v=7b773c44" as="font" type="font/woff2" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- App font stack: Playfair Display (serif/display) + Source Sans 3 (sans/body) + JetBrains Mono (labels) + Caveat (handwriting).

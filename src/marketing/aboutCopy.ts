@@ -44,13 +44,29 @@ export const ABOUT_MISSION_MAIN = "Get good stories told.";
  * the gap once and lets the hit line do the work instead. The two below it are UNCHANGED and must
  * stay — the hit line only lands because something named the gap immediately before it.
  */
+/* ⚠️ PLAINER THAN IT WAS, DELIBERATELY. "There exists a gap between the skills required for
+   writing…" is the register of a report; this is the register of a person. The sentence makes the
+   same claim in the same order and the hit line beneath it still lands because something named the
+   gap immediately before it — which is the only property of this paragraph that is load-bearing. */
 export const ABOUT_GAP_BODY =
-  "There exists a gap between the skills required for writing a captivating story and the skills " +
-  "required to manage an effective querying campaign.";
+  "There's a gap between the skills it takes to write a captivating story and the skills it takes " +
+  "to run an effective querying campaign.";
 
 export const ABOUT_GAP_HIT = "That gap is where good stories go to die.";
 
-export const ABOUT_TURN = "So, why don't we bridge it?";
+/* ⚠️ A STATEMENT NOW, NOT A QUESTION. "So, why don't we bridge it?" invites an answer the reader
+   cannot give; "So let's bridge it." is the turn the two lines above it have been building to.
+   The lightbulb that used to sit beside it is deleted — a mark saying "here is an idea" beside a
+   sentence that IS the idea says it twice. */
+export const ABOUT_TURN = "So let's bridge it.";
+
+/**
+ * ⚠️ REAL DESCRIPTION, NOT `alt=""`. The watercolour handshake this replaces was decorative and
+ * carried an empty alt; this drawing is the page's argument in a picture — a story being told, and
+ * heard — so a reader who cannot see it should get the argument rather than a gap where it was.
+ */
+export const ABOUT_STORY_ALT =
+  "An older hawk reading aloud from a book by the fire while a young hawk listens, astonished.";
 
 /** The centred header that owns the break above the vision rows. */
 export const ABOUT_SECTION_H2 = "Why QueryHawk exists";
@@ -75,27 +91,30 @@ export const ABOUT_VISIONS: VisionBand[] = [
       "spreadsheet archaeology dig.",
     ],
   },
+  /* ⚠️ 02 AND 03 ARE REWRITTEN; 01 IS UNTOUCHED. The two that changed were both about the writer's
+     experience of the process; these two are about what the product will and will not do, which is
+     a harder thing to say and the reason the page exists. The `key`s are kept — they name the
+     illustration slots in `marketingMarks`, so renaming them would break three plates to rename
+     two ideas. */
   {
     key: "waste",
     eyebrow: "The vision · 02",
-    heading: "Reduce story waste.",
+    heading: "Show you what's actually working.",
     body: [
-      "Good stories go unrepresented every year — not because they weren't good, but because the " +
-      "process defeated the writer. Queries fizzle out half-sent, nudges never happen, promising " +
-      "fulls sit forgotten. We think of that as ",
-      { b: "story waste" },
-      ", and it's the thing QueryHawk exists to reduce: a search that stays organised is a search " +
-      "that gets finished.",
+      "Which letter draws requests. Which opening gets read. Which comps the agents on your list " +
+      "already talk about. Querying is usually run on instinct and a vague sense of how it's " +
+      "going — we'd rather show you the numbers, and be honest about how small they are.",
     ],
   },
   {
     key: "time",
     eyebrow: "The vision · 03",
-    heading: "Give writers more time to write.",
+    heading: "Never make the writer the product.",
     body: [
-      "Every hour spent maintaining a tracking spreadsheet is an hour not spent on the next book. " +
-      "QueryHawk takes the admin — the dates, the counts, the who-has-what — so the only thing " +
-      "left on your desk is the writing.",
+      "Your manuscript, your agent list and your rejections are yours. We don't train on them, " +
+      "sell them, or show them to anyone. QueryHawk earns its money from writers paying for a " +
+      "tool that works — which is the only business model that keeps our interests and yours " +
+      "pointing the same way.",
     ],
   },
 ];

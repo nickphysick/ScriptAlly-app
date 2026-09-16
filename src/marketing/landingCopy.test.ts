@@ -13,7 +13,7 @@
 import { describe, it, expect } from "vitest";
 import {
   HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK, FOUNDING_PERKS,
-  DOCUMENT_TITLE, FEATURE_ROWS, BAND_HEADING,
+  DOCUMENT_TITLE, FEATURE_ROWS, BAND_EYEBROW, BAND_HEADING,
   FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_GET_LEAD, FOUNDING_GETS, FOUNDING_IN_RETURN, FOUNDING_CTA,
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
   FOUNDING_NOTE, FOUNDING_INVALID, foundingCounterLabel, foundingCounterRest, foundingRemainingLabel,
@@ -37,9 +37,15 @@ describe("landing copy — verbatim locks", () => {
    * exactly what the move was for: the band's heading and the hero's headline were word for word
    * identical for as long as both existed.
    */
-  it("the band's heading, which used to be the headline", () => {
-    expect(BAND_HEADING).toBe("A bird's-eye view of your querying campaign");
+  it("the band's eyebrow and heading", () => {
+    expect(BAND_EYEBROW).toBe("No more winging it.");
+    expect(BAND_HEADING).toBe("QueryHawk gives a bird's-eye view of your entire querying campaign.");
     expect(HERO_H1).not.toBe(BAND_HEADING);
+    /* ⚠️ THE EYEBROW REPEATS THE HERO SUB'S OPENING SENTENCE, ON PURPOSE AND ON THE SAME PAGE. The
+       brief specifies both verbatim and changes neither, so this asserts the repetition is
+       INTENTIONAL by naming its two owners — which is what stops it quietly becoming three. Which
+       of the two gives the phrase up is an editorial call, not a copy fix. */
+    expect(HERO_SUB.startsWith(BAND_EYEBROW), "the hero sub opens with the same sentence").toBe(true);
   });
 
   it("the sub, word for word", () => {
@@ -82,9 +88,13 @@ describe("landing copy — verbatim locks", () => {
       "FOUNDING_PANEL_SENT_H", "FOUNDING_PANEL_DUPE_H", "FOUNDING_PANEL_ERROR", "FOUNDING_PANEL_DOWN"]) {
       expect(k in copy, `${k} is retired`).toBe(false);
     }
+    /* ⚠️ "for life" IS RETIRED ACROSS ALL FOUR SURFACES. This list, the pricing tier's after-line,
+       the landing banner and /founders each worded the same offer differently and two of them
+       promised "for life" — a stronger commitment than the product needs to make. The wording is
+       standardised; if the terms change, all four change together. */
     expect(FOUNDING_PERKS).toEqual([
       "Six months' free Pro access",
-      "Half price for life",
+      "Half price for as long as you need it",
       "A direct line to the founder",
     ]);
   });
@@ -149,7 +159,7 @@ describe("landing copy — verbatim locks", () => {
    * invite the halo back, and a subtitle under a band header competes with the first row.
    */
   it("the band header is one plain string, and the ECG band's copy is retired", async () => {
-    expect(BAND_HEADING).toBe("A bird's-eye view of your querying campaign");
+    expect(BAND_HEADING).toBe("QueryHawk gives a bird's-eye view of your entire querying campaign.");
     const copy = await import("./landingCopy");
     /* The trace's heading and its mono eyebrow went with the section that carried them. */
     expect("PULSE_HEADING" in copy, "PULSE_HEADING is retired").toBe(false);
@@ -315,48 +325,53 @@ describe("landing copy — verbatim locks", () => {
   it("six feature rows, verbatim, in order", () => {
     expect(FEATURE_ROWS).toEqual([
       {
-        key: "import",
-        heading: "Bring your spreadsheet with you",
-        body: "Upload the tracker you've been keeping and it comes back sorted. Muddled dates fixed, the rows you entered twice merged into one.",
-        image: "/images/journey-so-far.png",
-        alt: "A messy submissions spreadsheet beside the same queries imported as a clean, dated list.",
-      },
-      {
         key: "track",
-        heading: "Always know where a query stands",
-        body: "Queried, partial requested, full out with an agent. Every step dated, so you're not doing the maths in your head at midnight.",
+        heading: "Every query tracked, from start to finish",
+        body: "A full history for everything you've sent, plus timely nudge reminders so that nothing slips through the cracks.",
         image: "/images/track-agent-queries.png",
-        alt: "A hawk pointing to a query record showing a submission's full timeline.",
+        alt: "A hawk pointing to a query record showing a submission's full history from first letter to reply.",
       },
       {
         key: "agents",
-        heading: "Every agent, properly filed",
-        body: "Their wish list, their submission rules, how long they usually take. Look it up in seconds instead of hunting round their website again.",
+        heading: "Your agents on file",
+        body: "Not just a name and an email. Their wish list, their response time, the specific sample they ask for — and a timeline of every interaction you've had with them.",
         image: "/images/home-for-your-agents.png",
-        alt: "An agent record showing a wish list, submission route and requested materials.",
+        alt: "An agent record showing a wish list, a response time and the sample that agent asks for.",
       },
       {
-        key: "email",
-        heading: "Forward the email. It logs itself.",
-        body: "An agent asks for three chapters by Friday. Send the message across and the ask, the date and the deadline are already recorded.",
-        image: "/images/smart-email-drop.png",
-        alt: "A hawk transcribing an agent's email into a query record showing what was requested.",
+        key: "import",
+        heading: "Your list so far comes with you",
+        body: "Spreadsheet? Notes? All in your head? We have two handy methods for bringing your querying history with you — or, of course, the option to start from scratch.",
+        image: "/images/journey-so-far.png",
+        alt: "A messy submissions spreadsheet beside the same queries brought across as a clean, dated list.",
       },
       {
         key: "packages",
-        heading: "Find out what's actually working",
-        body: "Bundle your letter, synopsis and opening pages into a package. Then see which one agents keep asking more from.",
+        heading: "Curate and compare with Submission Packages",
+        body: "Bundle your query letters, synopses and manuscript samples into packages. Attach them to queries and see which combinations or materials are generating most interest.",
         image: "/images/curate-and-compare.png",
-        alt: "Two submission package records side by side with response figures for each.",
+        alt: "Two submission packages side by side, each showing which materials it holds and how many replies it drew.",
+      },
+      {
+        key: "email",
+        heading: "Updates log themselves with Smart Email Drop",
+        body: "Sent another query? Had a reply? Copy and paste a sent or received email and QueryHawk will suggest the updates needed. Don't worry — you'll always have final say.",
+        image: "/images/smart-email-drop.png",
+        alt: "A pasted agent email beside the update QueryHawk suggests from it, waiting to be approved.",
       },
       {
         key: "comps",
-        heading: "Comps that hold up",
-        body: "Keep the books you're pitching alongside, and get pointed at new ones the agents on your list already talk about.",
+        heading: "Compile your Comparable Titles",
+        body: "Build a library of comparable titles and add them to your query letters to position yourself in the market. Track which ones resonate, and have the Scout suggest new ones for your reading list.",
         image: "/images/comparable-titles.png",
-        alt: "A list of comparable titles beside suggested books to read next.",
+        alt: "A library of comparable titles beside new ones the Scout suggests for a reading list.",
       },
     ]);
+    /* ⚠️ THE ORDER IS PART OF THE LOCK, BECAUSE THE ORDER IS THE PAGE'S. `FEATURE_ROWS` renders
+       straight through with no sort, and `.mk-frow:nth-child(even)` flips the row — so this array's
+       INDEX decides which illustrations sit left. Rows 1, 3 and 5 are image-left by construction,
+       and reordering the array silently reassigns every side on the page. */
+    expect(FEATURE_ROWS.map((r) => r.key)).toEqual(["track", "agents", "import", "packages", "email", "comps"]);
   });
 
   /**

@@ -25,6 +25,21 @@ import { marketingNavState, MarketingNavUser } from "./marketingNav";
    The orphan is left in place deliberately: deleting an app asset is outside this pass, and it
    belongs with the rename that is still to come. */
 const LOGO = { src: "/images/queryhawk-logo.png", version: "f95f44c3" };
+/**
+ * ⚠️ THE WORDMARK IS ARTWORK NOW, NOT TYPE. It was "QUERYHAWK" set in Archivo Expanded — a
+ * self-hosted webfont whose ONLY consumer anywhere on the site was that one span. Drawn letterforms
+ * mean the brand cannot be restyled by a stray rule or shifted by a fallback face mid-load, and the
+ * 14.5KB file, its preload, its licence and its four locks all leave with it.
+ *
+ * ⚠️ IT DOES NOT TAKE `.mk-wordmark`. That class is ALSO the shared footer's wordmark, which stays
+ * in Playfair — restyling the bare class would put the picture in both places, and the footer is
+ * not this pass's to change. `.mk-wordmarkart` is the nav's alone.
+ *
+ * ⚠️ AND THE ALT IS THE WORD, BECAUSE THE IMAGE IS THE WORD. The hawk beside it keeps `alt=""` —
+ * it says nothing the wordmark does not — and the button's own aria-label names the destination,
+ * so a reader hears the site once rather than three times.
+ */
+const WORDMARK = { src: "/images/queryhawk_title.png", version: "5c96a4f3" };
 
 export const MarketingShell: React.FC<{
   user: MarketingNavUser | null | undefined;
@@ -167,10 +182,11 @@ export const MarketingShell: React.FC<{
                 announcement is noise to a screen reader, and the button's own aria-label names
                 the destination. */}
             <img className="mk-logo" src={LOGO.src + "?v=" + LOGO.version} alt="" />
-            {/* ⚠️ THE CAPS ARE HERE, NOT IN CSS. `text-transform` would leave the drawn word and the
-                announced word saying different things; this way they are one string. The word
-                itself is unchanged — renaming the site is a separate job. */}
-            <span className="mk-wordmark">QUERYHAWK</span>
+            <img
+              className="mk-wordmarkart"
+              src={WORDMARK.src + "?v=" + WORDMARK.version}
+              alt="QueryHawk"
+            />
           </button>
           {/* ⚠️ THE NAV AND THE FOOTER MUST NOT DISAGREE ABOUT WHAT THE SITE CONTAINS. About and
               Contact are real public routes; leaving them footer-only would put the two company

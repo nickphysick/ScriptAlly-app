@@ -39,8 +39,24 @@ import { Runs } from "./CopyRuns";
 import { FoundingCounter } from "./FoundingSignup";
 import { MarketingFooter } from "./MarketingFooter";
 
+/**
+ * Each tier's bird. The words live in `PRICING_TIERS` (`illoAlt`); the file, its pixel size and its
+ * hash live here — the same split `FeatureRows` uses, so copy stays in copy modules and asset facts
+ * stay next to each other.
+ *
+ * ⚠️ THE VERSION IS THE FILE'S OWN md5 AND RIDES THE URL. Nothing under `public/` is fingerprinted
+ * by the build and hosting lets a browser keep a file for an hour, so a re-export under the same
+ * name is served stale. A smoke test reads both sides.
+ */
+const TIER_ART: Record<string, { src: string; version: string; width: number; height: number }> = {
+  free: { src: "/images/tier-free.png", version: "6c11c444", width: 800, height: 800 },
+  founding: { src: "/images/tier-founding.png", version: "e9d308a4", width: 800, height: 800 },
+  pro: { src: "/images/tier-pro.png", version: "a11fb5f2", width: 800, height: 800 },
+};
+
 const Tier: React.FC<{ tier: PricingTier; onNavigate: (tab: string, sub?: string) => void }> = ({ tier, onNavigate }) => {
   const live = tier.cta === "live";
+  const art = TIER_ART[tier.key];
   return (
     <div
       className={`mk-tier mk-tier--${tier.key}`}
@@ -49,6 +65,20 @@ const Tier: React.FC<{ tier: PricingTier; onNavigate: (tab: string, sub?: string
       aria-disabled={live ? undefined : true}
     >
       {tier.tag && <span className="mk-tiertag">{tier.tag}</span>}
+      {/* ⚠️ A FIXED-HEIGHT SLOT, AND THE HEIGHT IS THE POINT. Three birds drawn at three different
+          scales would otherwise push three plan names onto three different lines, and a three-card
+          layout exists to be read ACROSS. The slot bottom-aligns its image (`flex-end`, and
+          `object-position: bottom left` on the art) so each bird stands on the same floor whatever
+          its own proportions. Founding's is taller because its card is the lifted one. */}
+      <div className="mk-tierillo">
+        <img
+          src={art.src + "?v=" + art.version}
+          alt={tier.illoAlt}
+          width={art.width}
+          height={art.height}
+          loading="lazy"
+        />
+      </div>
       <p className="mk-tiername">{tier.name}</p>
       <p className="mk-tierline">{tier.summary}</p>
 
@@ -61,9 +91,16 @@ const Tier: React.FC<{ tier: PricingTier; onNavigate: (tab: string, sub?: string
 
       <ul className="mk-tierfeats">
         {tier.includes.map((f) => <li key={f}>{f}</li>)}
-        {/* ⚠️ SHOWN AND MUTED, NOT OMITTED. What a tier does not have is the reason to read the
-            next card along; leaving it out makes three lists that look the same length. */}
-        {tier.excludes?.map((f) => <li key={f} className="mk-tieroff">{f}</li>)}
+        {/* ⚠️ SHOWN AND MUTED, NOT OMITTED — and each carries its own sub-line. What a tier does
+            not have is the reason to read the next card along; leaving it out makes three lists
+            that look the same length, and showing a greyed-out name alone says something is
+            missing without saying what. */}
+        {tier.excludes?.map((f) => (
+          <li key={f.label} className="mk-tieroff">
+            {f.label}
+            <span className="mk-tieroffnote">{f.note}</span>
+          </li>
+        ))}
       </ul>
 
       {live && <div className="mk-tierplaces"><FoundingCounter variant="tally" /></div>}

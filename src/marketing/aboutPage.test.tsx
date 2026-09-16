@@ -83,11 +83,22 @@ describe("About is built from bands, not the document card", () => {
    * pages, so the key names which panel it is rather than where it sits. The claim is unchanged
    * (every band reserves its plate) and it is still read off rendered output.
    */
-  it("reserves an illustration slot in each band", () => {
+  /**
+   * ⚠️ THE MISSION SLOT IS GONE FROM THE LIST BECAUSE IT IS GONE FROM THE PRODUCT. The hero rendered
+   * a watercolour handshake through `MarketingIllustration` with `finished` set — which is the
+   * component doing nothing except drawing an image, since `finished` switches off the rim, the
+   * ground and the caption that are its entire purpose. It renders a finished drawing directly now,
+   * so the `mission` key, its art and the `tall` flag only it set are all deleted. The three VISION
+   * bands still reserve their slots, and that is the claim that survives.
+   */
+  it("reserves an illustration slot in each vision band, and none for the hero", () => {
     const page = html();
-    for (const slot of ["mission", ...ABOUT_VISIONS.map((v) => v.key)]) {
+    for (const slot of ABOUT_VISIONS.map((v) => v.key)) {
       expect(page).toContain(`data-illo="${slot}"`);
     }
+    expect(page, "the hero draws its own picture, not a slot").not.toContain('data-illo="mission"');
+    expect(page, "and it is a real image with real alt text")
+      .toMatch(/<img class="mk-missionart"[^>]*alt="An older hawk reading aloud/);
   });
 });
 

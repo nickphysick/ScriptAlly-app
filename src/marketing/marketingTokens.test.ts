@@ -181,26 +181,7 @@ describe("two surfaces, and the step between them is real", () => {
     expect(rule![1]).not.toMatch(/border/);
   });
 });
-/**
- * ⚠️ THE GLYPH ROW CAN HIDE ITSELF, AND THIS IS THE LOCK THAT STOPS IT DOING SO PERMANENTLY.
- *
- * The six marks animate in when they are scrolled to, which means their CSS start state is
- * `opacity: 0`. Anything that stops the observer firing therefore leaves six invisible glyphs
- * under a heading that introduces them — on a public page, with nothing to point at and no way
- * back. The defence is that hiding is OPT-IN: `.mk-statglyphs` alone paints six visible marks, and
- * only `--armed` hides them, which `StatusBand` adds during its first render and ONLY where
- * `IntersectionObserver` exists. A browser without the API and `renderToStaticMarkup` both get the
- * plain class.
- *
- * This is the same law the ECG trace it replaced carried from the other end: its play-state
- * default was "running", never "paused", because a browser with no way to start the animation must
- * not be left with a dead line.
- *
- * ⚠️ AND A CLASS THE STYLESHEET SELECTS ON THAT NO COMPONENT EMITS IS A RULE WITH NO SUBJECT —
- * silent in both directions. So this asserts the pair: the rules exist, and the component renders
- * both class names.
- */
-describe("the status glyphs animate in once, and the hidden state is opt-in", () => {
+describe("the status carousel: six controls, one at a time, only while in view", () => {
   const source = async () => {
     const { readFileSync } = await import("fs");
     const { resolve, dirname } = await import("path");
@@ -208,64 +189,72 @@ describe("the status glyphs animate in once, and the hidden state is opt-in", ()
     return readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), "StatusBand.tsx"), "utf8");
   };
 
-  it("the base class paints nothing hidden — only `--armed` does", () => {
-    expect(ruleFor(".mk-statglyph"), "the mark itself is simply a 26px box")
-      .not.toMatch(/opacity|animation/);
-    expect(ruleFor(".mk-statglyphs"), "the row does not hide its own children")
-      .not.toMatch(/opacity:\s*0\b/);
-    expect(ruleFor(".mk-statglyphs--armed .mk-statglyph")).toMatch(/opacity:\s*0\b/);
-  });
-
-  it("the keyframes overshoot and carry no token", () => {
-    const frames = /@keyframes mkGlyphIn\s*\{([\s\S]*?)\n\}/.exec(marketing);
-    expect(frames, "the animation is declared").toBeTruthy();
-    expect(frames![1]).toMatch(/60%\s*\{[^}]*scale\(1\.06\)/);
-    expect(frames![1]).toMatch(/100%\s*\{[^}]*scale\(1\)/);
-    /* ⚠️ A `var()` INSIDE `@keyframes` FAILS SILENTLY IN THIS SETUP — no error, no warning, no
-       animation. Frames carry opacity and transform only; any colour is declared on the rule. */
-    expect(frames![1], "a token in a keyframe block kills the animation with no diagnostic")
-      .not.toMatch(/var\(/);
-  });
-
-  it("runs once, forwards, staggered 90ms apart across all six", () => {
-    const run = ruleFor(".mk-statglyphs--in .mk-statglyph");
-    expect(run, "without `forwards` every glyph snaps back to opacity 0 as it ends")
-      .toMatch(/animation:\s*mkGlyphIn \.5s cubic-bezier\(\.34, 1\.56, \.64, 1\) forwards/);
-    for (let i = 1; i <= 6; i++) {
-      const decls = ruleFor(`.mk-statglyphs--in .mk-statglyph:nth-child(${i})`);
-      expect(decls, `glyph ${i} is delayed`).toMatch(new RegExp(`animation-delay:\\s*${(i - 1) * 90}ms`));
-    }
+  /**
+   * ⚠️ THE GLYPHS ARE CONTROLS NOW, NOT DECORATION, AND THE WHOLE PREVIOUS DESCRIBE WENT WITH THAT.
+   * It guarded a row that hid itself and animated in once — `--armed`, `mkGlyphIn`, six staggered
+   * delays — and every one of those claims was about a static row that no longer exists. What
+   * replaces them is the property that matters for a carousel: it must be operable, it must not
+   * move the page as it turns, and it must not rotate at a reader who asked for less motion.
+   */
+  it("each mark is a real button, and the active one is the only one at full strength", () => {
+    const base = ruleFor(".mk-carglyph");
+    /* The transition sits on the BUTTON, not on the active modifier — otherwise the mark being
+       LEFT snaps while the one arriving eases. Both directions, one rule. */
+    expect(base).toMatch(/transition:\s*opacity \.35s ease, transform \.35s ease/);
+    expect(base).toMatch(/opacity:\s*\.34/);
+    expect(base).toMatch(/transform:\s*scale\(\.9\)/);
+    const on = ruleFor(".mk-carglyph--on");
+    expect(on).toMatch(/opacity:\s*1/);
+    expect(on).toMatch(/transform:\s*scale\(1\.16\)/);
+    expect(ruleFor(".mk-carglyph:focus-visible"), "operable by keyboard, so it must show focus")
+      .toMatch(/outline:/);
   });
 
   /**
-   * ⚠️ IT FORCES THE END STATE RATHER THAN ONLY KILLING THE ANIMATION. `animation: none` alone
-   * would leave `--armed`'s `opacity: 0` standing and hide the row for exactly the readers who
-   * asked for less motion. And it must sit AFTER the rules it overrides: a media query confers no
-   * specificity, so an override placed earlier in the file loses on source order — measured on
-   * this stylesheet last pass at 0.5s under `reduce`, from a declaration that read correctly.
+   * ⚠️ A MIN-HEIGHT ON THE COPY, OR THE PAGE JUMPS FOUR TIMES A MINUTE. Six descriptions of
+   * different lengths in a box that sizes to its content move everything beneath them on every
+   * turn — the feature rows, the banner, the footer. This is the one declaration that makes an
+   * auto-advancing carousel tolerable on a page you are trying to read past.
    */
-  it("reduced motion shows them, rather than merely not moving them", () => {
-    const at = marketing.indexOf(".mk-statglyphs--in .mk-statglyph:nth-child(6)");
-    const block = marketing.slice(at).match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/);
-    expect(block, "the override comes after the rules it overrides").toBeTruthy();
-    expect(block![1]).toMatch(/\.mk-statglyphs--armed \.mk-statglyph/);
-    expect(block![1]).toMatch(/\.mk-statglyphs--in \.mk-statglyph/);
-    expect(block![1]).toMatch(/opacity:\s*1/);
+  it("the copy reserves its height and rises as it changes", () => {
+    expect(ruleFor(".mk-carcopy")).toMatch(/min-height:/);
+    const frames = /@keyframes mkCarIn\s*\{([\s\S]*?)\n\}/.exec(marketing);
+    expect(frames, "the fade is declared").toBeTruthy();
+    expect(frames![1]).toMatch(/translateY\(6px\)/);
+    /* No `var()` in a keyframe block — it fails silently in this setup, with no animation and no
+       diagnostic. */
+    expect(frames![1]).not.toMatch(/var\(/);
+    expect(ruleFor(".mk-carcopyin")).toMatch(/animation:\s*mkCarIn \.45s ease forwards/);
+  });
+
+  /**
+   * ⚠️ REDUCED MOTION STOPS THE ADVANCE IN THE COMPONENT, NOT ONLY THE FADE IN CSS. A stylesheet can
+   * silence a transition and cannot stop a timer — the page would go on changing under a reader
+   * every 4.5 seconds, which is exactly the motion they asked not to have. It stays fully
+   * clickable, so nothing becomes unreachable; it simply waits to be asked.
+   */
+  it("reduced motion stops the rotation and keeps the controls", async () => {
+    const src = await source();
+    expect(src).toMatch(/matchMedia\("\(prefers-reduced-motion: reduce\)"\)/);
+    expect(src, "the timer is gated on it, not just the CSS").toMatch(/if \(!inView \|\| reduced\) return;/);
+    const block = marketing.slice(marketing.indexOf(".mk-cardash--on"))
+      .match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/);
+    expect(block, "and the override sits after the rules it overrides").toBeTruthy();
     expect(block![1]).toMatch(/animation:\s*none/);
   });
 
-  it("…and the component emits both classes, so neither rule is a rule with no subject", async () => {
+  it("advances only while in view, and a click restarts the dwell", async () => {
     const src = await source();
-    expect(src).toContain("mk-statglyphs--${phase}");
-    expect(src, "`rest` renders the bare class").toMatch(/phase === "rest" \? "mk-statglyphs"/);
-    /* ⚠️ THE FALLBACK IS "SHOWN". `typeof` is what makes the reference safe where the global does
-       not exist, and the initialiser runs during RENDER rather than in an effect — arming from an
-       effect would paint the glyphs, hide them, then animate them in, flashing on every load. */
-    expect(src).toMatch(/useState<GlyphPhase>\(\s*\(\) => \(typeof IntersectionObserver === "undefined" \? "rest" : "armed"\)/);
-    expect(src, "fires once and lets go").toContain("io.disconnect()");
-    expect(src).toMatch(/threshold: 0\.6/);
+    expect(src).toMatch(/threshold: 0\.4/);
+    expect(src, "no observer means run, rather than sit paused forever").toMatch(/setInView\(true\); return;/);
+    expect(src).toMatch(/DWELL_MS = 4500/);
+    /* `active` and `restart` are both dependencies: changing either restarts the timer, so a click
+       gets a full turn rather than whatever was left of the previous one. */
+    expect(src).toMatch(/\[inView, active, restart, reduced\]/);
+    expect(src, "clicking the ACTIVE mark must still restart it").toMatch(/setActive\(i\); setRestart\(/);
   });
 });
+
 
 /* ⚠️ THE CONTAINER-CAP LOCK IS RETIRED WITH ITS LAST SUBJECT (16 Sep). It ran the arithmetic for
    `--mk-hero-h1`, the statement hero's headline: a `clamp(min, Nvw, max)` whose ceiling is reached
@@ -390,9 +379,18 @@ describe("the hero is two columns, and its shadow overflows on purpose", () => {
        visible axis to `auto`, which makes the hero a scroll container instead of letting the
        shadow spill. Both halves are the lock — x still guarantees the art can never reach the
        document's scroll width, y is what lets the shadow cross into the band. */
-    expect(hero, "the clip is what makes the horizontal overflow safe").toMatch(/overflow-x:\s*clip/);
-    expect(hero, "and `hidden` here would force x to `auto`").toMatch(/overflow-y:\s*visible/);
-    expect(hero, "no single-axis shorthand, which would clip both").not.toMatch(/overflow:\s*hidden/);
+    /* ⚠️ THE CLIP MOVED UP TO `html`/`body`, AND THE HERO NOW DECLARES NO `overflow` AT ALL. The
+       shadow is meant to spill off the right edge of the PAGE rather than out of its own column,
+       and any overflow value here makes the hero the box that clips it. `clip` rather than
+       `hidden` one level up, because `hidden` would make the document a scroll container — which
+       traps the sticky nav and breaks every in-page anchor. Scoped with `:has(.mk-scope)` so it
+       cannot follow a reader into the workspace, where the rail's peek panel and the timeline
+       drawer both escape their boxes on purpose. */
+    expect(hero, "the hero clips nothing — the page does").not.toMatch(/overflow/);
+    const clip = /html:has\(\.mk-scope\), body:has\(\.mk-scope\)\s*\{([^}]*)\}/.exec(marketing);
+    expect(clip, "html and body clip the x axis while a marketing page is mounted").toBeTruthy();
+    expect(clip![1]).toMatch(/overflow-x:\s*clip/);
+    expect(clip![1], "`hidden` would make the document a scroll container").not.toMatch(/hidden/);
     /* ⚠️ 520, NOT 660, AND THE NUMBER IS ARITHMETIC RATHER THAN TASTE. The row centres copy that
        measures 308.8px at 1440, so slack = (min-height - 308.8) / 2 and band top = 88 +
        min-height. Less slack therefore always means MORE band visible, never less; there is no
@@ -421,25 +419,34 @@ describe("the hero is two columns, and its shadow overflows on purpose", () => {
     expect(ruleFor(".mk-heroart")).toMatch(/height:\s*100%/);
     const img = ruleFor(".mk-heroart img");
     expect(img).toMatch(/position:\s*absolute/);
-    /* Inside the container now: it leaves its own column into the gutter, not off the page. */
-    expect(img).toMatch(/right:\s*-6%/);
+    /* ⚠️ ANCHORED FROM THE LEFT NOW. At `right: -6%` the shadow grew LEFTWARD across the copy as it
+       got bigger; from `left: 54%` it grows rightward, off the page, which is what the clip on
+       `html` absorbs. The `-46%` lift is deliberately not `-50%` — it sits the bird fractionally
+       high against the copy's optical centre. */
+    expect(img).toMatch(/left:\s*54%/);
+    expect(img, "anchored from one side only, or the two fight").not.toMatch(/right:/);
+    expect(img).toMatch(/translateY\(-46%\)/);
     /* ⚠️ 169% IS DERIVED, NOT PICKED. The shadow is vertically CENTRED, so an overhang past the
        hero's bottom is an equal overhang past its top: height = min-height + 2 x overhang, and
        width = height x 2880/2100. For 520 and ~70px that is 660 tall, 905 wide, 169% of the 534px
        art column. The ratio is the asset's; the only free number is the overhang. */
-    expect(img).toMatch(/width:\s*169%/);
-    expect(img, "the global image reset would cancel the 169% in silence").toMatch(/max-width:\s*none/);
-    /* Centred, and deliberately not moved — growing it is what makes it cross the boundary. */
+    expect(img).toMatch(/width:\s*58%/);
+    expect(img, "the global image reset would cancel the width in silence").toMatch(/max-width:\s*none/);
     expect(img).toMatch(/top:\s*50%/);
-    expect(img).toMatch(/translateY\(-50%\)/);
-    expect(img).toMatch(/opacity:\s*0?\.20/);
+    expect(img).toMatch(/opacity:\s*0?\.16/);
   });
 
   it("the headline: Special Elite 400, important, at a flat 56px", () => {
     const h1 = ruleFor(".mk-hero .mk-herotitle");
     expect(h1).toMatch(/font-family:\s*"Special Elite", cursive !important/);
     expect(h1).toMatch(/font-weight:\s*400/);
-    expect(h1, "flat: there is no unbreakable run left to size against").toMatch(/font-size:\s*56px/);
+    /* ⚠️ 74px AND `nowrap`, AND THE OVERFLOW IS THE DESIGN. Held on one line the headline is wider
+       than its 560px column, so it runs across the shadow beside it — intended, and the reason the
+       hero stopped clipping. The page cannot scroll sideways because `html`/`body` clip that axis.
+       It releases at 560px rather than spilling past a phone's viewport, where the clip would
+       simply eat it. */
+    expect(h1).toMatch(/font-size:\s*74px/);
+    expect(h1, "one line, across the shadow").toMatch(/white-space:\s*nowrap/);
     expect(h1).toMatch(/line-height:\s*1\.14/);
     expect(h1).toMatch(/letter-spacing:\s*-0\.01em/);
     expect(h1).toMatch(/color:\s*var\(--mk-nearblack\)/);
@@ -456,9 +463,12 @@ describe("the hero is two columns, and its shadow overflows on purpose", () => {
   it("the sub and the two actions carry their own family, because the injection sets theirs", () => {
     const sub = ruleFor(".mk-herosub");
     expect(sub).toMatch(/font-family:\s*"Source Serif 4", Georgia, serif/);
-    expect(sub).toMatch(/font-size:\s*20px/);
-    expect(sub).toMatch(/line-height:\s*1\.7/);
-    expect(sub).toMatch(/max-width:\s*480px/);
+    expect(sub).toMatch(/font-size:\s*21px/);
+    expect(sub).toMatch(/line-height:\s*1\.65/);
+    /* ⚠️ THE MEASURE BELONGS TO THE COLUMN NOW, NOT THE PARAGRAPH. Two caps on one block is how
+       they come to disagree; `.mk-herocopy` carries the 560px and the sub simply fills it. */
+    expect(sub, "the column carries the measure").not.toMatch(/max-width/);
+    expect(ruleFor(".mk-herocopy")).toMatch(/max-width:\s*560px/);
     expect(sub).toMatch(/color:\s*var\(--mk-nearblack\)/);
     const pill = ruleFor(".mk-heropill");
     expect(pill).toMatch(/font-family:\s*"Source Serif 4"/);
@@ -493,8 +503,16 @@ describe("the hero is two columns, and its shadow overflows on purpose", () => {
     const stackedArt = /\.mk-heroart img\s*\{([^}]*)\}/.exec(block![1]);
     expect(stackedArt, "the stacked block sizes the art").toBeTruthy();
     expect(stackedArt![1], "quiet enough to sit behind the words").toMatch(/opacity:\s*0?\.12/);
-    expect(stackedArt![1], "squared up, or it runs past a phone's right edge").toMatch(/right:\s*0/);
-    expect(stackedArt![1]).toMatch(/width:\s*100%/);
+    /* ⚠️ RETARGETED TO THE CLAIM, NOT THE SPELLING. This asserted `right: 0`, which was how the art
+       was squared up while the base rule anchored from the RIGHT. The base anchors from the LEFT
+       now (`left: 54%`), so `right: 0` alone would over-constrain the box — the browser keeps
+       `left` and the width, and the shadow lands 203px past a 375px viewport. Squaring it up is
+       therefore `left: 0; right: auto`, which is the same claim spelled the only way that works
+       against the new base. Measured at 375: the art's right edge is exactly 375.
+       A lock that fails over a change making its own claim MORE true is a lock on a spelling. */
+    expect(stackedArt![1], "anchored from one side only, or the two fight").toMatch(/left:\s*0/);
+    expect(stackedArt![1], "…and the other side released, or the width is over-constrained").toMatch(/right:\s*auto/);
+    expect(stackedArt![1], "full width, so it cannot run past a phone's right edge").toMatch(/width:\s*100%/);
   });
 });
 
@@ -851,8 +869,16 @@ describe("the feature rows set their own type, and nothing else uses its familie
   });
 
   it("no other rule, stylesheet or component names either family", () => {
-    const ruleOwners = (family: string) => [...marketing.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
-      .filter((m) => m[2].includes(family)).map((m) => m[1].trim());
+    /* ⚠️ COMMENTS ARE STRIPPED BEFORE THIS COUNTS, AND THAT IS A REAL FAULT BEING CLOSED RATHER
+       THAN A TIDY-UP. The pattern starts at a newline and a CSS comment contains no braces, so a
+       rule with a docblock directly above it captures the entire comment as part of its SELECTOR.
+       Measured: this returned eleven owners, five of them multi-line prose rather than a selector,
+       because the pass that added those rules put a comment immediately above each one. It is the
+       house rule this repo states in several places and had not applied here — a source slicer
+       strips comments before it counts. */
+    const ruleOwners = (family: string) => [...decls(marketing).matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
+      .filter((m) => m[2].includes(family)).map((m) => m[1].trim())
+      .filter((sel) => !sel.startsWith("@"));
     /* ⚠️ THE HERO NAMES BOTH FAMILIES TOO SINCE 16 SEP, so this is no longer "exactly one rule" —
        it is exactly these rules. Sorted, because the assertion is the SET of owners rather than the
        order they happen to appear in the sheet. */
@@ -867,11 +893,16 @@ describe("the feature rows set their own type, and nothing else uses its familie
        `.mk-stattitle` are the exceptions that prove it — one is an element inside a class, the
        other styles no bare heading at all. */
     expect(ruleOwners("Special Elite").sort()).toEqual([
+      ".mk-cartitle",
       ".mk-claimband .mk-claimh2",
       ".mk-frow h3",
       ".mk-fw .mk-fwcard h2",
       ".mk-fw .mk-fwh1",
       ".mk-hero .mk-herotitle",
+      ".mk-mission .mk-mission-main",
+      ".mk-missionturn",
+      ".mk-sechead h2",
+      ".mk-stateyebrow",
       ".mk-stattitle",
     ]);
     expect(ruleOwners("Source Serif 4").sort()).toEqual([".mk-fcopy p", ".mk-herolink", ".mk-heropill", ".mk-herosub"]);
@@ -927,68 +958,43 @@ describe("every illustration bleeds only side by side, away from its copy, and o
  * by so much as a query string fetches the file TWICE, which looks like a slow page rather than
  * like a mistake.
  */
-describe("the nav wordmark's face is self-hosted, nav-scoped, and named nowhere else", () => {
-  const face = () => {
-    const m = /@font-face\s*\{([^}]*)\}/.exec(marketing);
-    expect(m, "marketing.css declares a @font-face").toBeTruthy();
-    return m![1];
-  };
-
-  it("is declared locally, swaps rather than blocking, and ships its licence", () => {
-    const body = face();
-    expect(body).toMatch(/font-family:\s*"Archivo Expanded"/);
-    expect(body, "swap, so the wordmark never blocks first paint").toMatch(/font-display:\s*swap/);
-    /* Local path, not a CDN. The whole point of self-hosting is that no third party sees the reader. */
-    const src = /src:\s*url\("([^"]+)"\)/.exec(body);
-    expect(src, "the face names a file").toBeTruthy();
-    expect(src![1], "served from our own origin, never hotlinked").toMatch(/^\/fonts\//);
-    expect(src![1], "…and specifically not from a font aggregator").not.toMatch(/^https?:|gstatic|googleapis|fontstruct/);
-    /* The file is really there and is really a woff2 — a src pointing at nothing is a silent
-       fallback to the system sans, which on this page looks like a design choice. */
-    const file = src![1].split("?")[0];
-    const bytes = readFileSync(resolve(here, "../..", "public" + file));
-    expect(bytes.subarray(0, 4).toString("latin1"), "a real woff2").toBe("wOF2");
-    expect(bytes.length, "the latin subset, well under the 30KB threshold").toBeLessThan(30 * 1024);
-    /* Serving a webfont is redistribution under the OFL, so the licence travels with the file. */
-    const ofl = readFileSync(resolve(here, "../../public/fonts/OFL.txt"), "utf8");
-    expect(ofl).toMatch(/SIL OPEN FONT LICENSE Version 1\.1/);
-  });
-
-  it("the preload names the SAME url, character for character", () => {
+describe("the nav wordmark is artwork, and the display face it replaced is gone", () => {
+  /**
+   * ⚠️ FOUR CASES RETIRED WITH THEIR SUBJECT, NOT WEAKENED. They asserted that Archivo Expanded was
+   * self-hosted, that its `@font-face` and index.html's preload named the SAME url character for
+   * character, that it dressed the nav and left the footer in Playfair, and that nothing else named
+   * it. Every one of those claims is about a webfont that no longer exists — the nav renders drawn
+   * letterforms, so the face, its 14.5KB woff2, its OFL licence and its preload are all deleted. A
+   * lock kept alive over a deleted subject is the vacuous kind this repo keeps finding: it passes
+   * because the probe has nothing left to object to.
+   */
+  it("no rule, file or preload names the retired display face", () => {
+    expect(marketing, "the @font-face went with the wordmark").not.toMatch(/@font-face/);
+    expect(marketing).not.toMatch(/Archivo/);
     const html = readFileSync(resolve(here, "../../index.html"), "utf8");
-    const src = /src:\s*url\("([^"]+)"\)/.exec(face())![1];
-    const pre = /<link rel="preload" href="([^"]+)"[^>]*as="font"[^>]*>/.exec(html);
-    expect(pre, "index.html preloads the face").toBeTruthy();
-    expect(pre![1], "a different spelling is a second fetch, not a cache hit").toBe(src);
-    expect(pre![0], "fonts are fetched in CORS mode even same-origin").toMatch(/crossorigin/);
-  });
-
-  it("dresses the nav's wordmark and leaves the footer's in Playfair", () => {
-    expect(ruleFor(".mk-nav .mk-wordmark"), "the nav's own rule").toMatch(/font-family:\s*"Archivo Expanded"/);
-    expect(ruleFor(".mk-wordmark"), "the shared base — the footer reads this").toMatch(/font-family:\s*"Playfair Display"/);
-    expect(ruleFor(".mk-wordmark"), "…and must not name the display face").not.toMatch(/Archivo/);
-  });
-
-  it("no other rule or file names Archivo", () => {
-    /* ⚠️ THE @font-face NAMES IT TOO, AND THAT IS A DECLARATION RATHER THAN A USE. This sweep's
-       pattern starts at a newline, so the blank line before `@font-face` lets it capture the
-       at-rule as though it were a selector — which made this read "two owners" about a sheet with
-       one consumer. Dropping at-rules keeps the assertion about who USES the family, which is the
-       claim that matters: a second consumer is the leak, the face that defines it is not. */
-    const owners = [...marketing.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
-      .filter((m) => m[2].includes("Archivo")).map((m) => m[1].trim())
-      .filter((sel) => !sel.startsWith("@"));
-    expect(owners).toEqual([".mk-nav .mk-wordmark"]);
+    expect(html, "the preload pointed at a file that is gone").not.toMatch(/archivo/i);
+    expect(html).not.toMatch(/fonts\/[^"]*\.woff2/);
     const src = resolve(here, "..");
     const walk = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
       d.isDirectory() ? walk(resolve(dir, d.name))
         : /\.(css|tsx?)$/.test(d.name) && !/\.test\.tsx?$/.test(d.name) ? [resolve(dir, d.name)] : []);
-    const elsewhere = walk(src)
-      .filter((f) => !f.replace(/\\/g, "/").endsWith("/marketing/marketing.css"))
-      .filter((f) => /Archivo/.test(decls(readFileSync(f, "utf8"))));
-    expect(elsewhere.map((f) => f.slice(src.length + 1))).toEqual([]);
+    expect(walk(src).filter((f) => /Archivo/.test(decls(readFileSync(f, "utf8"))))).toEqual([]);
+  });
+
+  /**
+   * ⚠️ THE NAV AND THE FOOTER MUST NOT CONVERGE, AND THAT IS WHY THERE ARE TWO CLASSES. `.mk-wordmark`
+   * is SHARED — the footer renders it in Playfair — so restyling the bare class, which is the obvious
+   * way to do this, would have put the artwork in both places. The nav has its own element instead.
+   */
+  it("the nav wears the picture and the footer keeps its type", () => {
+    const art = ruleFor(".mk-wordmarkart");
+    expect(art, "a fixed height with `width: auto` — the file is 500x100").toMatch(/height:\s*34px/);
+    expect(art).toMatch(/width:\s*auto/);
+    expect(ruleFor(".mk-wordmark"), "the footer's, untouched").toMatch(/font-family:\s*"Playfair Display"/);
+    expect(marketing, "the nav no longer restyles the shared class").not.toMatch(/\.mk-nav \.mk-wordmark\s*\{/);
   });
 });
+
 
 /**
  * ⚠️ THE IMAGE COLUMN DID NOT MOVE, AND THAT IS THE CONSTRAINT THE REBALANCE WAS BUILT UNDER

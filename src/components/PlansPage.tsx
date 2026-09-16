@@ -133,10 +133,15 @@ const ComingSoonPill: React.FC = () => (
    Two of the deleted matrix's claims were also wrong: it listed "Submission package builder" and
    "Agent matching & community access" as Pro-only, and neither is gated anywhere in the code. */
 
-/* ── Founding-members card (pink band) ───────────────────────────────────── */
+/* ── Founding-writers card (pink band) ───────────────────────────────────── */
 const FounderCard: React.FC = () => (
   <MountPanel>
-    <BandHeader title="Founding members" Emblem={Heart} variant="pink" />
+    {/* ⚠️ "writers", NOT "members". The landing banner, /founders and /pricing all say founding
+        WRITERS; this card was the last surface still saying members, and one offer with two nouns
+        across two tiers of the app is how a reader starts wondering whether they are the same
+        thing. Found by grepping the DEPLOYED bundle for the retired word rather than the source —
+        a marketing-scoped sweep would never have looked at /plans. */}
+    <BandHeader title="Founding writers" Emblem={Heart} variant="pink" />
     <div style={{ padding: 22, display: "flex", flexDirection: "column" }}>
       <div className="founder-row" style={{ display: "flex", gap: 22, alignItems: "stretch" }}>
         {/* handwritten note */}

@@ -36,10 +36,23 @@ import {
   ABOUT_COMMITMENTS_EYEBROW, ABOUT_COMMITMENTS,
   ABOUT_FOUNDER_BODY, ABOUT_FOUNDER_NAME, ABOUT_FOUNDER_ROLE,
 } from "./aboutCopy";
+import { ABOUT_STORY_ALT } from "./aboutCopy";
 import { Runs } from "./CopyRuns";
-import { MarketingIllustration, CommitmentTick, IdeaBulb } from "./marketingMarks";
-import missionIllustration from "../assets/marketing/mission-illustration-placeholder.png";
+import { MarketingIllustration, CommitmentTick } from "./marketingMarks";
 import { MarketingFooter } from "./MarketingFooter";
+
+/**
+ * The mission illustration's own facts. The version is the first eight hex digits of the file's
+ * md5 and rides the URL: nothing under `public/` is fingerprinted by the build and hosting lets a
+ * browser keep a file for an hour, so a re-export under the same name would be served stale.
+ *
+ * ⚠️ IT REPLACES A PLACEHOLDER, AND THE PLACEHOLDER'S CHROME GOES WITH IT. The watercolour
+ * handshake rendered through `MarketingIllustration` with `finished` set — which is the component
+ * doing nothing except drawing an image, since `finished` switches off the rim, the ground and the
+ * caption that are its entire purpose. A finished asset does not need the primitive that exists to
+ * say an asset is unfinished.
+ */
+const STORY = { src: "/images/about-story.png", version: "a35cb880", width: 1000, height: 1000 };
 
 export const AboutPage: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
@@ -59,19 +72,25 @@ export const AboutPage: React.FC<{
               the same sheet, which is what makes it read as a page rather than as a heading in a
               box with prose underneath. */}
           <div className="mk-missioncol">
-            <div className="mk-kickrule" aria-hidden="true" />
             <p className="mk-mission-kicker">{ABOUT_MISSION_PRE}</p>
             <h1 className="mk-mission-main">{ABOUT_MISSION_MAIN}</h1>
             <p className="mk-gapbody">{ABOUT_GAP_BODY}</p>
+            {/* The hit line's rust rule is a `border-left` on this paragraph, not an element
+                between it and the lede — a rule that exists to mark one sentence belongs to that
+                sentence, and a separate div would drift the moment the copy rewrapped. */}
             <p className="mk-gaphit">{ABOUT_GAP_HIT}</p>
-            {/* The bulb is a flex sibling aligned to the first line's top — see marketing.css. */}
-            <p className="mk-missionturn"><IdeaBulb /><span>{ABOUT_TURN}</span></p>
+            {/* ⚠️ THE LIGHTBULB IS DELETED, NOT HIDDEN. A mark saying "here is an idea" beside a
+                sentence that IS the idea says it twice, and the smaller voice wins. The turn is a
+                plain paragraph now, so it needs no flex row to align a mark against. */}
+            <p className="mk-missionturn">{ABOUT_TURN}</p>
           </div>
-          {/* ⚠️ A PLACEHOLDER AWAITING THE ILLUSTRATOR, like the hero's — and with the dashed
-              plate gone nothing on the page says so. Recorded in CLAUDE.md. */}
-          <MarketingIllustration slot="mission" finished>
-            <img className="mk-missionart" src={missionIllustration} alt="" />
-          </MarketingIllustration>
+          <img
+            className="mk-missionart"
+            src={STORY.src + "?v=" + STORY.version}
+            alt={ABOUT_STORY_ALT}
+            width={STORY.width}
+            height={STORY.height}
+          />
         </section>
 
         {/* ⚠️ THE HEADER OWNS THE BREAK, WHICH IS WHY THE FIRST BAND GIVES ONE UP. A centred

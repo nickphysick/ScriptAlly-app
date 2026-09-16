@@ -23,13 +23,10 @@
    ⚠️ THE VERSION QUERY IS THE FILE'S OWN md5. Nothing under public/ is fingerprinted by the build,
    and the preload in index.html names this exact URL — the two must match or the file is fetched
    twice, once for each spelling. */
-@font-face {
-  font-family: "Archivo Expanded";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("/fonts/archivo-expanded-700.woff2?v=7b773c44") format("woff2");
-}
+/* ⚠️ THE @font-face IS DELETED WITH THE WORDMARK IT DRESSED. "QUERYHAWK" was set in Archivo
+   Expanded and that span was the face's only consumer anywhere on the site; the nav renders drawn
+   letterforms now, so the 14.5KB woff2, its licence file and its preload in index.html all go.
+   Nothing else on these pages names a self-hosted face. */
 
 /* ⚠️ SCOPED WITH `:has()`, NOT SET GLOBALLY ON `html`. `scroll-behavior` has to sit on the
    scrolling box, and for marketing that is the viewport — but this stylesheet is global once
@@ -39,6 +36,15 @@
    marketing page is mounted, and degrades to today's behaviour where it is unsupported — the
    anchor still works, it just jumps. */
 html:has(.mk-scope) { scroll-behavior: smooth; }
+
+/* ⚠️ SCOPED THE SAME WAY, AND FOR THE SAME REASON. The hero's shadow is deliberately wider than the
+   page and must spill off the right edge without producing a scrollbar. `overflow-x: clip` does
+   that where `hidden` would not — `hidden` makes the element a scroll CONTAINER, which would trap
+   the sticky nav and break every in-page anchor. But this stylesheet is global once loaded, so a
+   bare `html, body { overflow-x: clip }` would follow the reader into the workspace and clip the
+   rail's peek panel and the timeline drawer, both of which escape their boxes on purpose.
+   `:has(.mk-scope)` turns it on only while a marketing page is mounted. */
+html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 @media (prefers-reduced-motion: reduce) { html:has(.mk-scope) { scroll-behavior: auto; } }
 
 .mk-scope {
@@ -287,17 +293,14 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 1.62rem;
   letter-spacing: -.012em; color: var(--mk-nearblack); line-height: 1;
 }
-/* ⚠️ THE NAV'S WORDMARK IS THE ONLY ARCHIVO EXPANDED ON THE SITE, AND THE NAV SCOPE IS WHY.
-   `.mk-wordmark` is ALSO the shared footer's wordmark, which keeps Playfair — restyling the bare
-   class would put the display face in both places, and the brief says the nav only.
-   ⚠️ THE CAPS ARE IN THE MARKUP, NOT `text-transform`. What a screen reader announces and what the
-   page draws should be the same string; a CSS transform makes them differ silently.
-   The size is below the Playfair it replaces because a wide grotesque set in caps runs far wider
-   per letter — measured against the nav's collapse budget, not chosen by eye. */
-.mk-nav .mk-wordmark {
-  font-family: "Archivo Expanded", Archivo, system-ui, sans-serif; font-weight: 700;
-  font-size: 1.4rem; letter-spacing: .035em;
-}
+/* ⚠️ THE NAV'S WORDMARK IS A PICTURE; `.mk-wordmark` ABOVE IS STILL THE FOOTER'S TYPE. Two
+   different classes on purpose — the footer keeps Playfair, and restyling the shared bare class
+   would have put the artwork in both places.
+   ⚠️ `width: auto` WITH A FIXED HEIGHT IS WHAT KEEPS THE LOCKUP HONEST. The file is 500×100, so at
+   34px tall it draws 170px wide — narrower than the 232px the Archivo caps needed, which gives the
+   nav's collapse budget room it did not have before. */
+.mk-wordmarkart { height: 34px; width: auto; display: block; flex: none; transition: height .2s ease; }
+.mk-navwrap.mk-scrolled .mk-wordmarkart { height: 29px; }
 
 /* ⚠️ THE LINKS ARE THE BODY FACE, NOT PLAYFAIR. The display face was tried here and rejected —
    the wordmark is the only Playfair in the bar, which is what makes it read as the brand rather
@@ -410,14 +413,16 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    against its natural 232. Wrapping from 600 restores the margin — slack +24 at 601. */
 @media (max-width: 600px) {
   .mk-nav { flex-wrap: wrap; row-gap: 12px; }
-  /* ⚠️ THE CAPS WORDMARK SHRINKS HERE, OR A 320px PHONE GETS A SCROLLBAR — and that is this exact
-     regression, from this exact cause, arriving a second time. Archivo Expanded set in caps runs
-     about 57% wider per unit of size than the Playfair mixed case it replaced: measured, 180.2px of
-     ink at 22.4px against 114.9px at 25.92px, which took the brand from 164.8px to 232.2px. At 320
-     that pushed the burger onto a row of its OWN — the bar stood 180.8px tall against 128.8 — and
-     overflowed the document by 9px. A/B'd against the committed build, which was 0 at every phone
-     width, so it was introduced here rather than found here. */
-  .mk-nav .mk-wordmark { font-size: 1.05rem; }
+  /* ⚠️ THE STEP-DOWN SURVIVES ITS SUBJECT, AND THE PRESSURE THAT CAUSED IT IS LARGELY GONE. It was
+     written because Archivo Expanded set in caps runs ~57% wider per unit of size than the Playfair
+     it replaced — measured, 180.2px of ink at 22.4px against 114.9px at 25.92px, taking the brand
+     lockup from 164.8px to 232.2px, which pushed the burger onto a row of its own at 320 and
+     overflowed the document by 9px. The wordmark is a 500×100 picture now: at 34px tall it draws
+     170px, NARROWER than the type it replaced, so the collapse budget has room it did not have.
+     The step-down is kept anyway because it costs nothing and this exact regression has arrived
+     twice — but it now sizes the image, and the measurement confirms the width rather than
+     assuming it. */
+  .mk-wordmarkart { height: 26px; }
   .mk-burger { margin-left: auto; order: 2; }
   .mk-navright { order: 3; width: 100%; margin-left: 0; }
   .mk-navright .mk-btn { width: 100%; justify-content: center; }
@@ -468,10 +473,13 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    forces the other to `auto` — so `overflow-x: hidden; overflow-y: visible` would give a scroll
    container, not a spill. The x-clip is still the guarantee that the art can never reach the
    document's scroll width; the y-visible is what lets the shadow cross into the band below. */
+/* ⚠️ NO `overflow` AT ALL NOW — IT MOVED TO `html`/`body`. The shadow is meant to spill off the
+   right edge of the PAGE, not merely out of its column, and any overflow value here makes the hero
+   the box that clips it. The scrollbar it would otherwise cause is prevented one level up, where
+   clipping costs nothing. */
 .mk-hero {
   max-width: 1180px; margin: 0 auto; padding: 0 56px;
   position: relative;
-  overflow-x: clip; overflow-y: visible;
   display: grid; grid-template-columns: 1fr 1fr; align-items: center;
   min-height: 520px;
 }
@@ -480,7 +488,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    copy; the art is the later grid item, so without this it would paint a 20% wash over the
    headline. It was already doing exactly this below 900px, where the art becomes the full hero —
    the rule has simply stopped being a mobile special case. */
-.mk-herocopy { padding: 0 40px 0 0; min-width: 0; position: relative; z-index: 1; }
+.mk-herocopy { padding: 0 40px 0 0; min-width: 0; max-width: 560px; position: relative; z-index: 1; }
 
 /* ⚠️ THE FAMILY IS !important, AND IT HAS TO BE. src/lib/brand.tsx injects a style element at runtime,
    on every route, whose heading rule gives every bare h1, h2 and h3 the brand heading font with
@@ -491,15 +499,23 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    Every one of them existed to keep "querying campaign" — a held, unbreakable pair — inside a column
    half the hero wide. The headline is "The hunt begins.": three short words, nothing held, nothing
    that can be stranded. The span is no longer rendered, so a rule for it would style nothing. */
+/* ⚠️ 74px AND `nowrap`, AND THE OVERFLOW IS THE DESIGN. "The hunt begins." at this size is wider
+   than the 560px copy column, so it runs across the shadow beside it — intended, and the reason
+   the hero no longer clips. The page cannot scroll sideways because `html`/`body` clip that axis.
+   ⚠️ IT RELEASES AT 560px, NOT EARLIER. Held on one line the headline needs ~590px of ink; a phone
+   has 323px inside its gutters, so below the break it wraps at 38px rather than spilling past the
+   viewport where the clip would simply eat it. */
 .mk-hero .mk-herotitle {
   font-family: "Special Elite", cursive !important; font-weight: 400;
-  font-size: 56px;
+  font-size: 74px; white-space: nowrap;
   line-height: 1.14; letter-spacing: -0.01em; color: var(--mk-nearblack);
   margin: 0;
 }
+/* The column carries the measure now, so the paragraph does not restate it — two caps on one
+   block is how they come to disagree. */
 .mk-herosub {
-  font-family: "Source Serif 4", Georgia, serif; font-weight: 400; font-size: 20px;
-  line-height: 1.7; color: var(--mk-nearblack); max-width: 480px; margin: 26px 0 0;
+  font-family: "Source Serif 4", Georgia, serif; font-weight: 400; font-size: 21px;
+  line-height: 1.65; color: var(--mk-nearblack); margin: 26px 0 0;
 }
 .mk-heroctas { display: flex; align-items: center; gap: 22px; margin-top: 34px; }
 /* ⚠️ BOTH DECLARE THEIR OWN FAMILY. The button is caught by the injection's plain `button` rule and
@@ -531,9 +547,13 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    the LEFT, over the copy column. That is why `.mk-herocopy` now takes a stacking context at
    every width. Reported rather than absorbed: it is a real consequence of "grow it", not a
    detail. */
+/* ⚠️ ANCHORED FROM THE LEFT NOW, NOT THE RIGHT. At `right: -6%` the shadow grew leftward across
+   the copy as it got bigger; from `left: 54%` it grows RIGHTWARD, off the page, which is what the
+   clip on `html` is there to absorb. The `-46%` lift is deliberately not `-50%`: it sits the bird
+   fractionally high against the copy's optical centre. */
 .mk-heroart img {
-  position: absolute; top: 50%; right: -6%; width: 169%; max-width: none;
-  transform: translateY(-50%); opacity: 0.20; display: block;
+  position: absolute; top: 50%; left: 54%; width: 58%; max-width: none;
+  transform: translateY(-46%); opacity: 0.16; display: block;
 }
 
 /* ⚠️ THE RULE BELOW IS NOT THE HERO'S. `.mk-eyebrow` is the mono kicker About, Contact and Pricing
@@ -578,14 +598,32 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   }
   /* The stacking context is on the base rule now; only the padding is a stacked concern. */
   .mk-herocopy { padding: 0; }
-  /* A flat step rather than a computed one: there is no unbreakable run left to fit. */
+  /* A flat step rather than a computed one: there is no unbreakable run left to fit. It is still
+     held on one line here — 40px of "The hunt begins." is ~320px of ink, which fits a 900px hero
+     with room. The release comes at 560, below. */
   .mk-hero .mk-herotitle { font-size: 40px; }
   .mk-heroart { position: absolute; inset: 0; height: 100%; z-index: 0; pointer-events: none; }
   /* ⚠️ SQUARED UP HERE, OR THE SHADOW RUNS OFF A PHONE. Stacked, the art box IS the hero rather than
      a half-width column, so the desktop -6%/112% pushed the image 22.5px past the viewport at 375.
      It never scrolled — the hero clips it — but clipped art at the page edge is the same fault the
      desktop change was made to fix, just quieter. */
-  .mk-heroart img { right: 0; width: 100%; opacity: 0.12; }
+  /* ⚠️ `left: 0` IS STATED, NOT INHERITED. The base rule anchors from the LEFT at 54%, and leaving
+     that standing while setting `right: 0` over-constrains the box — the browser keeps `left` and
+     the width, which put the shadow 203px past a 375px viewport. It was clipped rather than
+     scrolling, but art cut off at the page edge is the fault the squaring-up was measured to fix
+     in the first place. */
+  .mk-heroart img { left: 0; right: auto; width: 100%; opacity: 0.12; }
+}
+
+/* ⚠️ THE HEADLINE RELEASES HERE, AND ONLY HERE. Held on one line it needs ~590px of ink at 74px and
+   ~320px at 40px; a 375px phone leaves 323px inside its gutters, so 40px is already sitting on the
+   boundary and anything narrower spills into a clip that would simply eat the words. At 38px and
+   `normal` it wraps to two lines and stays inside the column.
+   ⚠️ AFTER THE 900px BLOCK, NOT BEFORE IT. Both are equal specificity and a media query confers
+   none, so the narrower query must come later or the wider one wins and every phone keeps 40px
+   held on one line. This stylesheet has shipped that inversion once already, in the nav. */
+@media (max-width: 560px) {
+  .mk-hero .mk-herotitle { font-size: 38px; white-space: normal; }
 }
 
 
@@ -631,67 +669,67 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 /* ⚠️ THE FAMILY IS !important FOR THE SAME REASON THE HERO'S AND THE ROWS' ARE: brand.tsx injects a
    runtime rule giving every bare h2 the brand heading font with !important, and only a selector of
    two classes outranks it. Without the flag this heading silently draws in Playfair. */
+/* ⚠️ SPECIAL ELITE, NOT THE MONO KICKER THE OTHER PAGES USE. This eyebrow is a sentence in the
+   brand's own voice rather than a label, so it takes the display face at a size that reads as
+   speech; `.mk-eyebrow` stays what About, Contact and Pricing wear. */
+.mk-stateyebrow {
+  font-family: "Special Elite", cursive; font-weight: 400; font-size: 21px;
+  letter-spacing: .13em; text-transform: uppercase; color: var(--mk-claim-accent);
+  margin: 0 0 18px;
+}
 .mk-stattitle {
   font-family: "Special Elite", cursive !important; font-weight: 400;
-  font-size: 38px; line-height: 1.2; letter-spacing: -0.005em;
+  font-size: 31px; line-height: 1.25; letter-spacing: -0.005em;
   color: var(--mk-nearblack); margin: 0; white-space: nowrap;
 }
-/* The six marks: one row, evenly spaced, quiet enough to read as punctuation rather than as UI. */
-.mk-statglyphs {
-  display: flex; justify-content: center; align-items: center; gap: 34px;
-  margin: 34px 0 0; color: var(--mk-nearblack); opacity: .8;
+/* ── The status carousel ──
+   ⚠️ THE GLYPHS ARE CONTROLS, NOT DECORATION. Each one jumps to its state, so each is a real
+   button: focusable, named, and carrying `aria-selected`. The row is a tablist; the copy beneath
+   is a polite live region, because this is ambient content that must not interrupt a reader. */
+.mk-carousel { margin: 38px 0 0; }
+.mk-carglyphs { display: flex; justify-content: center; align-items: center; gap: 34px; }
+/* ⚠️ THE TRANSITION IS ON THE BUTTON, NOT ON A CLASS THAT ONLY THE ACTIVE ONE CARRIES — otherwise
+   the mark being LEFT would snap while the one arriving eases. Both directions, one rule. */
+.mk-carglyph {
+  background: none; border: 0; padding: 4px; cursor: pointer; line-height: 0;
+  color: var(--mk-nearblack); opacity: .34; transform: scale(.9);
+  transition: opacity .35s ease, transform .35s ease;
 }
-.mk-statglyph { width: 26px; height: 26px; flex: none; display: block; }
+.mk-carglyph svg { width: 26px; height: 26px; display: block; }
+.mk-carglyph--on { opacity: 1; transform: scale(1.16); color: var(--mk-claim-accent); }
+.mk-carglyph:hover { opacity: .7; }
+.mk-carglyph--on:hover { opacity: 1; }
+.mk-carglyph:focus-visible { outline: 2px solid var(--mk-burg); outline-offset: 4px; border-radius: 50%; }
 
-/* ── The glyphs arrive in sequence, once ──
-   ⚠️ THE HIDDEN STATE IS OPT-IN, AND THAT IS THE WHOLE SAFETY ARGUMENT. `.mk-statglyphs` on its
-   own paints six visible marks; only `--armed` hides them, and `StatusBand` adds that class
-   during its first render ONLY where `IntersectionObserver` exists. A browser without the API,
-   and `renderToStaticMarkup`, both get the plain class and six visible glyphs — so nothing can
-   leave a reader looking at an empty row under a heading that introduces one. The ECG trace this
-   section replaced carried the same rule from the other end: its play-state default was
-   "running", never "paused".
-   ⚠️ AND ARMING HAPPENS DURING RENDER RATHER THAN IN AN EFFECT, or the first paint would show the
-   glyphs, the effect would hide them, and every load would open with a flash. */
-.mk-statglyphs--armed .mk-statglyph { opacity: 0; transform: translateY(10px) scale(.86); }
-
-/* ⚠️ NO `var()` INSIDE THE KEYFRAMES. A custom property in a keyframe block fails silently in
-   this setup — no error, no warning, no animation — so frames carry opacity and transform only,
-   and any colour is declared on the rule. The overshoot to 1.06 at 60% is what makes the spring
-   read as an arrival rather than a fade; the easing already overshoots, and the two together are
-   the pop. */
-@keyframes mkGlyphIn {
-  0% { opacity: 0; transform: translateY(10px) scale(.86); }
-  60% { opacity: 1; transform: translateY(0) scale(1.06); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+/* ⚠️ A MIN-HEIGHT, OR THE PAGE JUMPS ON EVERY TURN. Six descriptions of different lengths in a box
+   that sizes to its content move everything beneath them four times a minute. Measured against the
+   longest of the six at the narrowest width the row still holds. */
+.mk-carcopy { margin: 26px auto 0; max-width: 46rem; min-height: 8.5rem; }
+@keyframes mkCarIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-/* `forwards`, because the last frame is the resting state and without it every glyph would snap
-   back to `opacity: 0` the instant the animation ended. */
-.mk-statglyphs--in .mk-statglyph {
-  opacity: 0; transform: translateY(10px) scale(.86);
-  animation: mkGlyphIn .5s cubic-bezier(.34, 1.56, .64, 1) forwards;
+.mk-carcopyin { animation: mkCarIn .45s ease forwards; }
+.mk-cartitle {
+  font-family: "Special Elite", cursive; font-weight: 400; font-size: 23px;
+  color: var(--mk-nearblack); margin: 0 0 10px;
 }
-/* 90ms apart. Stated per child rather than through an inline custom property: six is a fixed
-   number set by the pipeline, and an inline style would have to be written in the component,
-   where a media query could not reach it. */
-.mk-statglyphs--in .mk-statglyph:nth-child(1) { animation-delay: 0ms; }
-.mk-statglyphs--in .mk-statglyph:nth-child(2) { animation-delay: 90ms; }
-.mk-statglyphs--in .mk-statglyph:nth-child(3) { animation-delay: 180ms; }
-.mk-statglyphs--in .mk-statglyph:nth-child(4) { animation-delay: 270ms; }
-.mk-statglyphs--in .mk-statglyph:nth-child(5) { animation-delay: 360ms; }
-.mk-statglyphs--in .mk-statglyph:nth-child(6) { animation-delay: 450ms; }
+.mk-carbody { font-size: 17px; line-height: 1.65; color: var(--mk-muted); margin: 0; }
 
-/* ⚠️ AFTER THE RULES IT OVERRIDES, NOT WITH THE OTHER REDUCED-MOTION BLOCKS AT THE TOP OF THE
-   FILE. A media query confers NO specificity, so an override placed earlier loses on source order
-   — measured on this stylesheet last pass at 0.5s under `reduce`, from a declaration that read
-   perfectly correctly. It forces the end state rather than only killing the animation, because
-   `animation: none` alone would leave `--armed`'s `opacity: 0` standing and hide the row for
-   exactly the readers who asked for less motion. */
+.mk-cardashes { display: flex; justify-content: center; gap: 8px; margin: 26px 0 0; }
+.mk-cardash {
+  width: 26px; height: 3px; border-radius: 999px; background: var(--mk-hair);
+  transition: background .35s ease;
+}
+.mk-cardash--on { background: var(--mk-claim-accent); }
+
+/* ⚠️ AFTER THE RULES IT OVERRIDES — a media query confers no specificity, so an override placed
+   earlier in the file loses on source order. The auto-advance is stopped in the COMPONENT rather
+   than here, because CSS can silence a fade and cannot stop a timer; this only removes the motion
+   that remains. Everything stays clickable. */
 @media (prefers-reduced-motion: reduce) {
-  .mk-statglyphs--armed .mk-statglyph,
-  .mk-statglyphs--in .mk-statglyph {
-    opacity: 1; transform: none; animation: none;
-  }
+  .mk-carglyph, .mk-cardash { transition: none; }
+  .mk-carcopyin { animation: none; }
 }
 
 /* ⚠️ THE BOUNDARY IS 1099.98, NOT 1100, BECAUSE `max-width` IS INCLUSIVE. The brief says the heading
@@ -702,16 +740,20 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    width than the container has below this point; past it the text does not break, it spills into
    the gutter — silently, because the spill lands inside the page's own padding rather than past the
    viewport, so no scrollbar ever appears to report it. */
-@media (max-width: 1099.98px) {
-  .mk-stattitle { white-space: normal; }
+/* ⚠️ 999.98, NOT 1000, BECAUSE `max-width` IS INCLUSIVE. The heading must still be held AT 1000
+   and release below it; `max-width: 1000px` matches at 1000 and wraps it a pixel early. Measured
+   the same way the 1099.98 boundary it replaces was. */
+@media (max-width: 999.98px) {
+  .mk-stattitle { white-space: normal; font-size: 27px; }
 }
 @media (max-width: 900px) {
   .mk-statband { padding: 64px 26px 56px; }
-  .mk-stattitle { font-size: 28px; }
+  .mk-stateyebrow { font-size: 18px; }
+  .mk-carglyphs { gap: 18px; }
+  .mk-carcopy { min-height: 11rem; }
   /* ⚠️ THE GAP TIGHTENS OR THE ROW OVERFLOWS A NARROW PHONE. Six 26px marks at 34px gaps need
      6×26 + 5×34 = 326px against the 323px a 375 screen leaves inside its gutters — three pixels
      over, which a flex row answers by overflowing rather than by wrapping. */
-  .mk-statglyphs { gap: 22px; margin-top: 28px; }
 }
 /* ⚠️ UNCHANGED WHEN `.mk-feathead` WAS DELETED, AND THAT IS A MEASURED DECISION RATHER THAN AN
    OVERSIGHT. The brief said to add back whatever the removed header was contributing IF the first
@@ -1186,9 +1228,16 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 /* ⚠️ `1fr 1.16fr 1fr`, AND THE WIDE ONE IS THE MIDDLE. The tier a reader can act on is the one
    with room for a places bar and a real button; the other two carry a label. */
 .mk-tiers {
-  display: grid; grid-template-columns: 1fr 1.16fr 1fr; gap: 20px;
+  display: grid; grid-template-columns: 1fr 1.1fr 1fr; gap: 20px;
   align-items: stretch; padding: 22px 0 0;
 }
+/* ⚠️ A FIXED HEIGHT, AND IT IS WHAT LETS THE THREE CARDS BE READ ACROSS. Three birds at three
+   natural scales would put three plan names on three different lines. `flex-end` plus
+   `object-position: bottom left` stands each one on the same floor whatever its own proportions,
+   and the image is capped by HEIGHT with `width: auto` so none of them is stretched. */
+.mk-tierillo { height: 104px; display: flex; align-items: flex-end; margin: 0 0 14px; }
+.mk-tierillo img { max-height: 100%; width: auto; object-fit: contain; object-position: bottom left; display: block; }
+.mk-tier--founding .mk-tierillo { height: 124px; }
 .mk-tier {
   position: relative; display: flex; flex-direction: column;
   background: var(--mk-parch); border: 1px solid var(--mk-hair); border-radius: 16px;
@@ -1244,6 +1293,9 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   transform: rotate(-45deg); opacity: .8;
 }
 .mk-tierfeats li.mk-tieroff { color: var(--mk-kicker); }
+/* The sub-line says what the reader would be missing — a greyed-out name alone says only that
+   something is absent, which is half a sentence. */
+.mk-tieroffnote { display: block; font-size: .8rem; line-height: 1.4; color: var(--mk-kicker); opacity: .85; margin: 2px 0 0; }
 .mk-tierfeats li.mk-tieroff::before { border-color: var(--mk-kicker); transform: rotate(-45deg) scale(.85); opacity: .7; }
 
 .mk-tierplaces { margin: 16px 0 0; }
@@ -1458,55 +1510,31 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    side leaves ~23px of headroom, which is a coincidence rather than a margin and would evaporate
    the first time anyone touched the padding or the gap. 44 returns ~16px. The asymmetry against
    the 48/50 vertical padding is deliberate — it still reads as a page rather than a card. */
+/* ⚠️ THE SHEET IS GONE — no fill, no border, no radius, no shadow, no padding. It was a card drawn
+   around the argument, and a card around the one passage asking to be believed reads as a
+   disclaimer. The copy sits on the page ground now; the measure and the rhythm hold it.
+   `.mk-kickrule` went with it: a 38px rule above a kicker on open ground is a mark with nothing
+   to mark. */
 .mk-missioncol {
   display: flex; flex-direction: column; justify-content: center; min-width: 0;
-  background: var(--mk-parch); border: 1px solid rgba(58, 28, 20, .09); border-radius: 8px;
-  padding: 48px 44px 50px;
-  box-shadow: 0 16px 40px rgba(58, 28, 20, .10), 0 1px 0 rgba(255, 255, 255, .8) inset;
 }
-.mk-kickrule { width: 38px; height: 2px; background: var(--mk-burg); opacity: .5; margin: 0 0 18px; }
 /* ⚠️ A LABEL, SO NO COLON — see aboutCopy.ts. */
 .mk-mission-kicker {
   font-family: "JetBrains Mono", monospace; font-weight: 400; font-size: .72rem;
   letter-spacing: .24em; text-transform: uppercase; color: var(--mk-muted); margin: 0 0 20px;
 }
-.mk-mission-main {
-  display: block; font-family: "Playfair Display", Georgia, serif; font-weight: 700;
-  /* ⚠️ 1.02 IS BELOW THE HOUSE FLOOR OF 1.3 FOR MIXED-CASE PLAYFAIR, AND IT WAS MEASURED BEFORE IT
-     WAS KEPT. That floor exists because a tight leading inside a box with a HEIGHT crops
-     descenders — which is how a cropped masthead reached dev once already. Neither condition holds
-     here: this is one line (`nowrap` above 900), nothing in its ancestry declares a height or an
-     overflow, and the sweep over every Playfair leaf on both pages found no ancestor clipping it.
-     The two `g` descenders in "Get good stories told." paint in full, into 24px+ of margin below.
-     ⚠️ IF THIS EVER WRAPS TO TWO LINES the floor applies again immediately — descenders would meet
-     the next line's ascenders. The `nowrap` above and the release below 900 are what keep that
-     from happening; do not remove one without raising this. */
-  /* ⚠️ 2.65rem BECAUSE `3.6vw` REACHES IT AT 1178 AND THE CONTAINER CAPS AT 1180 — the
-     container-cap rule, not a value tuned to a measurement. 2.75rem also passes the 20px gate,
-     and passes it while carrying the exact latent fault the rule exists to prevent: it is not
-     reached until 1222, so between 1180 and 1222 the type keeps growing against a sheet frozen at
-     430.7 and headroom decays 37.9 → 23.8. At 2.65rem headroom sits FLAT at ~37.9 above 1180
-     instead, for a headline 1.5px smaller than nobody will notice. */
-  font-size: clamp(1.95rem, 3.6vw, 2.65rem); line-height: 1.3; letter-spacing: -.022em;
+/* ⚠️ SPECIAL ELITE AT A FLAT 50px, AND THE SELECTOR NEEDS TWO CLASSES. brand.tsx injects
+   `h1:not(.wsh-title)` with `!important` at 0-1-1, so a bare `.mk-mission-main` (0-1-0) loses
+   between two important declarations and this would silently draw in Playfair.
+   ⚠️ AND A FLAT SIZE RETIRES THE WHOLE CLAMP APPARATUS. The old value was
+   `clamp(1.95rem, 3.6vw, 2.65rem)` with a `nowrap` above 1100 and a 1.02 leading that was only
+   safe on one line — three coupled decisions, each tuned against a sheet width that no longer
+   exists. A fixed size with a normal leading cannot crop a descender or grow against a frozen
+   measure, so none of it is needed. */
+.mk-mission .mk-mission-main {
+  display: block; font-family: "Special Elite", cursive !important; font-weight: 400;
+  font-size: 50px; line-height: 1.2; letter-spacing: -.018em;
   color: var(--mk-nearblack); margin: 0;
-}
-/* ⚠️ 1100, NOT 901 — AND IT IS THE SHEET'S INNER WIDTH THAT MOVED IT, NOT THE COLUMN'S. Once the
-   headline sits inside 44px of padding a side, the measure it must fit is the sheet's inner width,
-   and below ~1082 that shrinks faster than `3.6vw` shrinks the type: measured −12.7px of headroom
-   at 901 and +5.2 at 1000. 1100 gives 23.5 and clears the band with room rather than sitting on
-   its edge.
-   ⚠️ AND RAISING THIS COULD NEVER HAVE FIXED THE LARGE-WIDTH FAILURE — that one needs an UPPER
-   bound, which does not exist. Two separate bands, two separate fixes: the boundary here, the
-   clamp ceiling above. Below 1100 the line wraps to two inside the sheet, as it already did at
-   390. */
-/* ⚠️ THE TIGHT LEADING AND THE `nowrap` ARE ONE DECLARATION, DELIBERATELY. `line-height: 1.02` is
-   only safe on mixed-case Playfair while the text is a SINGLE LINE — the house floor is 1.3 —
-   and this headline now wraps below the boundary. Measured at 901 before this was split: the two
-   lines' ink boxes overlapped by 10px and `scrollHeight > clientHeight`, i.e. the descenders of
-   "good" ran into "told.". Binding both to the same media query is what stops one being changed
-   without the other; the base above carries the 1.3 floor for every width that wraps. */
-@media (min-width: 1100px) {
-  .mk-mission-main { white-space: nowrap; line-height: 1.02; }
 }
 
 /* The three registers. Measured paragraph → flat sentence → the turn. */
@@ -1514,30 +1542,29 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   margin: clamp(24px, 3vh, 28px) 0 0; max-width: 52ch;
   font-size: 1.05rem; line-height: 1.72; color: var(--mk-muted);
 }
+/* ⚠️ THE RULE IS THIS PARAGRAPH'S OWN BORDER, not an element beside it. A rule that exists to mark
+   one sentence belongs to that sentence — a separate div drifts the moment the copy rewraps. */
 .mk-gaphit {
-  margin: 16px 0 0; max-width: 44ch;
-  font-size: 1.1rem; line-height: 1.55; font-weight: 600; color: var(--mk-nearblack);
+  margin: 22px 0 0; max-width: 44ch; padding-left: 18px;
+  border-left: 3px solid var(--mk-claim-accent);
+  font-size: 20px; line-height: 1.5; font-weight: 600; color: var(--mk-nearblack);
 }
-/* ⚠️ THE BULB REPLACES THE BURGUNDY LEFT RULE. The rule said "pull quote"; the bulb says "here
-   is the idea", which is what this line is.
-   ⚠️ AND THE MEASURE IS `rem`, NOT `ch` — WRONG TWICE OVER HERE. `ch` resolves against this
-   container's inherited 16px while the text paints at ~29px, and the icon eats width the measure
-   knows nothing about. Third time this class has bitten the tier. */
+/* ⚠️ THE BULB IS DELETED AND SO IS ITS ROW. The turn was a flex container aligning a 30px icon
+   against the first line; with the mark gone it is a paragraph, and `.mk-bulb`'s rule has no
+   renderer. Special Elite in rust is what marks it as the turn now. */
 .mk-missionturn {
-  margin: 26px 0 0; display: flex; align-items: flex-start; gap: 16px; max-width: 30rem;
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: clamp(1.35rem, 1.9vw, 1.7rem); line-height: 1.24; letter-spacing: -.012em;
-  color: var(--mk-nearblack);
+  margin: 30px 0 0; max-width: 30rem;
+  font-family: "Special Elite", cursive; font-weight: 400;
+  font-size: 24px; line-height: 1.35; color: var(--mk-claim-accent);
 }
-/* Aligned to the first line's TOP, not centred on the block — a centred icon drifts down the
-   moment the line wraps. */
-.mk-bulb {
-  flex: 0 0 auto; margin-top: .1em; display: block; width: 30px; height: 38px;
-  fill: none; stroke: var(--mk-burg); stroke-width: 1.6; opacity: .85;
+
+/* ⚠️ LETTERBOXED AT 4:3, NOT CROPPED. The drawing is square and the slot is 4:3, so `contain`
+   leaves ground either side rather than cutting the fireplace off — the whole picture, with space,
+   in preference to a tighter frame missing part of it. */
+.mk-missionart {
+  width: 100%; aspect-ratio: 4 / 3; height: auto;
+  object-fit: contain; object-position: center; display: block;
 }
-/* The mission plate holds a real image now, so it drops the placeholder plate's floor. */
-.mk-mission .mk-illo { min-height: 0; }
-.mk-missionart { width: 100%; max-width: 520px; height: auto; object-fit: contain; display: block; }
 
 /* The centred header above the vision rows.
    ⚠️ ITS TOP PADDING IS A CONSTANT, AND THAT IS THE ONLY WAY THE GAP CAN BE BOUNDED. The distance
@@ -1550,12 +1577,14 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   max-width: 1180px; margin: 0 auto; text-align: center;
   padding: 28px 56px clamp(8px, 1.5vh, 14px);
 }
+/* Special Elite at 38px, centred, with the rust rule beneath it widened to 64px. Two classes are
+   not needed here: `.mk-sechead h2` is 0-1-1 and brand.tsx's bare `h2` is 0-0-1. */
 .mk-sechead h2 {
-  font-family: "Playfair Display", Georgia, serif; font-weight: 600;
-  font-size: clamp(1.75rem, 3vw, 2.6rem); line-height: 1.18; letter-spacing: -.018em;
+  font-family: "Special Elite", cursive !important; font-weight: 400;
+  font-size: 38px; line-height: 1.25; letter-spacing: -.005em;
   color: var(--mk-nearblack); margin: 0;
 }
-.mk-secrule { width: 46px; height: 2px; background: var(--mk-burg); opacity: .5; margin: 20px auto 0; }
+.mk-secrule { width: 64px; height: 2px; background: var(--mk-claim-accent); opacity: .75; margin: 20px auto 0; }
 
 .mk-band {
   max-width: 1180px; margin: 0 auto; padding: 54px 56px;
@@ -1610,8 +1639,6 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    is what stops a long copy column dictating the artwork's proportions; `align-self` is what
    keeps the shorter plate centred against it instead of hanging from the top. The `min-height`
    floors below still win, so a short row cannot collapse it. */
-.mk-illo--tall { min-height: 340px; align-self: center; height: min(100%, 620px); }
-.mk-illo--tall svg { width: min(56%, 300px); stroke-width: 1.4; opacity: .62; }
 /* ⚠️ `--done` DROPS THE GROUND AS WELL AS THE RIM AND THE CAPTION. All three are placeholder
    chrome: a tinted plate behind finished artwork is as much of a lie as a dashed rim around it.
    Callers that do not pass `finished` — the About page's three vision plates — keep all of it. */
@@ -1671,7 +1698,6 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
      only the heroes carry `--tall`, so taking them to 230 made the biggest object on the page
      SHORTER than the three vision plates beneath it — measured, and the wrong way round. The
      stacked floor still tightens from 340, it just cannot go under the plates it outranks. */
-  .mk-illo--tall { min-height: 280px; }
   .mk-bandcopy h1 { font-size: 32px; }
   .mk-commitinner { padding: 34px 26px; }
   .mk-commitgrid { grid-template-columns: 1fr; }

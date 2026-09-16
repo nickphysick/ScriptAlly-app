@@ -62,7 +62,68 @@ export const HERO_LINK = "See how it works";
  * this heading say what the trace was gesturing at, in the product's own vocabulary. The band has
  * no eyebrow, no sub-copy and no CTA: one heading and the marks.
  */
-export const BAND_HEADING = "A bird's-eye view of your querying campaign";
+/**
+ * ⚠️ "No more winging it." ALSO OPENS `HERO_SUB`, SO THE LANDING PAGE SAYS IT TWICE. The brief
+ * specifies it here verbatim and does not change the hero, so it is built as asked and flagged
+ * rather than silently deduplicated — which of the two gives the phrase up is an editorial call,
+ * not a copy fix. A lock below asserts the repetition is INTENTIONAL by naming both owners, so it
+ * cannot drift to three.
+ */
+export const BAND_EYEBROW = "No more winging it.";
+export const BAND_HEADING =
+  "QueryHawk gives a bird's-eye view of your entire querying campaign.";
+
+/**
+ * The six pipeline states, as the carousel tells them.
+ *
+ * ⚠️ THE ORDER IS THE PIPELINE'S AND IS NOT A PRESENTATION CHOICE. It is the same progression
+ * `StatusDot` draws in the app and the same one the glyph row drew before it — queried, partial
+ * requested, partial sent, full requested, full sent, offer. A reordering here would teach a
+ * sequence the product does not have.
+ *
+ * ⚠️ AND EVERY DESCRIPTION STATES WHAT QUERYHAWK RECORDS, never how the writer should feel about
+ * it. "The best email in querying" is the one line that comes close, and it is about the EMAIL
+ * rather than about the reader's chances — the house rule is that the app reports and never
+ * appraises, and these are the only six sentences on the landing page describing the pipeline.
+ */
+export interface StatusStep {
+  key: string;
+  title: string;
+  body: string;
+}
+
+export const STATUS_STEPS: StatusStep[] = [
+  {
+    key: "queried",
+    title: "Queried",
+    body: "Your letter is out. The clock starts, and the reply window is worked out from that agent's usual turnaround.",
+  },
+  {
+    key: "partial-requested",
+    title: "Partial requested",
+    body: "They've asked to read part of it. Whatever they asked for is logged, and the ball is back in your court.",
+  },
+  {
+    key: "partial-sent",
+    title: "Partial sent",
+    body: "Chapters are away. The version you sent is recorded, so you know exactly what they're reading.",
+  },
+  {
+    key: "full-requested",
+    title: "Full requested",
+    body: "They want the whole manuscript. The best email in querying, and one you'll want dated.",
+  },
+  {
+    key: "full-sent",
+    title: "Full sent",
+    body: "The manuscript is with them. Now it's waiting — and QueryHawk counts the days so you don't have to.",
+  },
+  {
+    key: "offer",
+    title: "Offer",
+    body: "An offer of representation. Everything that led here is already written down, in order, with dates.",
+  },
+];
 
 /* ⚠️ THE FEATURES HEADER IS DELETED AND SHOULD NOT COME BACK. `FEATURES_H2` ("The querying
    trenches, organised") and `FEATURES_SUB` ("Ditch the spreadsheet. It's time to get serious.")
@@ -130,9 +191,14 @@ export const FOUNDING_IN_RETURN =
    ⚠️ READ BY `PRICING_TIERS` BELOW, which spreads them into the founding tier's `includes`. They were
    the hero panel's three lines as well until the hero was rebuilt (16 Sep); /pricing renders them now,
    and `marketingPageSmoke` locks the wording there. */
+/* ⚠️ "for life" IS RETIRED EVERYWHERE, AND THIS IS ONE OF FOUR SURFACES IT WAS ON. The offer was
+   worded four different ways — this list, the pricing tier's after-line, the landing banner and
+   /founders — and two of them promised "for life", which is a stronger commitment than the product
+   needs to make. Standardised on "for as long as you need it": warmer, and it does not promise
+   anything we might regret. If the terms change, all four change together. */
 export const FOUNDING_PERKS = [
   "Six months' free Pro access",
-  "Half price for life",
+  "Half price for as long as you need it",
   "A direct line to the founder",
 ] as const;
 
@@ -241,48 +307,55 @@ export interface FeatureRow {
   alt: string;
 }
 
+/* ⚠️ THE ORDER IS THE ARGUMENT, AND IT CHANGED (16 Sep). It used to open on importing a
+   spreadsheet — an onboarding chore — and close on comps. It opens on TRACKING now, which is what
+   the product is, and the import sits third as the bridge from whatever you are doing today. The
+   array's order IS the page's order; there is no separate sort.
+   ⚠️ AND THE SIDES FOLLOW THE INDEX, NOT THE KEY. `.mk-frow:nth-child(even)` flips the row, so
+   reordering this array reassigns which illustrations sit left — rows 1, 3 and 5 are image-left by
+   construction. Nothing in the markup changes. */
 export const FEATURE_ROWS: FeatureRow[] = [
   {
-    key: "import",
-    heading: "Bring your spreadsheet with you",
-    body: "Upload the tracker you've been keeping and it comes back sorted. Muddled dates fixed, the rows you entered twice merged into one.",
-    image: "/images/journey-so-far.png",
-    alt: "A messy submissions spreadsheet beside the same queries imported as a clean, dated list.",
-  },
-  {
     key: "track",
-    heading: "Always know where a query stands",
-    body: "Queried, partial requested, full out with an agent. Every step dated, so you're not doing the maths in your head at midnight.",
+    heading: "Every query tracked, from start to finish",
+    body: "A full history for everything you've sent, plus timely nudge reminders so that nothing slips through the cracks.",
     image: "/images/track-agent-queries.png",
-    alt: "A hawk pointing to a query record showing a submission's full timeline.",
+    alt: "A hawk pointing to a query record showing a submission's full history from first letter to reply.",
   },
   {
     key: "agents",
-    heading: "Every agent, properly filed",
-    body: "Their wish list, their submission rules, how long they usually take. Look it up in seconds instead of hunting round their website again.",
+    heading: "Your agents on file",
+    body: "Not just a name and an email. Their wish list, their response time, the specific sample they ask for — and a timeline of every interaction you've had with them.",
     image: "/images/home-for-your-agents.png",
-    alt: "An agent record showing a wish list, submission route and requested materials.",
+    alt: "An agent record showing a wish list, a response time and the sample that agent asks for.",
   },
   {
-    key: "email",
-    heading: "Forward the email. It logs itself.",
-    body: "An agent asks for three chapters by Friday. Send the message across and the ask, the date and the deadline are already recorded.",
-    image: "/images/smart-email-drop.png",
-    alt: "A hawk transcribing an agent's email into a query record showing what was requested.",
+    key: "import",
+    heading: "Your list so far comes with you",
+    body: "Spreadsheet? Notes? All in your head? We have two handy methods for bringing your querying history with you — or, of course, the option to start from scratch.",
+    image: "/images/journey-so-far.png",
+    alt: "A messy submissions spreadsheet beside the same queries brought across as a clean, dated list.",
   },
   {
     key: "packages",
-    heading: "Find out what's actually working",
-    body: "Bundle your letter, synopsis and opening pages into a package. Then see which one agents keep asking more from.",
+    heading: "Curate and compare with Submission Packages",
+    body: "Bundle your query letters, synopses and manuscript samples into packages. Attach them to queries and see which combinations or materials are generating most interest.",
     image: "/images/curate-and-compare.png",
-    alt: "Two submission package records side by side with response figures for each.",
+    alt: "Two submission packages side by side, each showing which materials it holds and how many replies it drew.",
+  },
+  {
+    key: "email",
+    heading: "Updates log themselves with Smart Email Drop",
+    body: "Sent another query? Had a reply? Copy and paste a sent or received email and QueryHawk will suggest the updates needed. Don't worry — you'll always have final say.",
+    image: "/images/smart-email-drop.png",
+    alt: "A pasted agent email beside the update QueryHawk suggests from it, waiting to be approved.",
   },
   {
     key: "comps",
-    heading: "Comps that hold up",
-    body: "Keep the books you're pitching alongside, and get pointed at new ones the agents on your list already talk about.",
+    heading: "Compile your Comparable Titles",
+    body: "Build a library of comparable titles and add them to your query letters to position yourself in the market. Track which ones resonate, and have the Scout suggest new ones for your reading list.",
     image: "/images/comparable-titles.png",
-    alt: "A list of comparable titles beside suggested books to read next.",
+    alt: "A library of comparable titles beside new ones the Scout suggests for a reading list.",
   },
 ];
 
@@ -311,7 +384,18 @@ export const PRICING_SUB =
  * wording that states no number rather than to a guess. Set one to a string — `"£7"` — and it
  * appears wherever it belongs; that is the whole change.
  */
-export const PRO_PRICE_MONTHLY: string | null = null;
+/**
+ * ⚠️ SET, AS OF 16 Sep — AND THE INVARIANT IT RETIRES WAS REAL WHILE IT LASTED. This was `null` so
+ * that no price could appear before one had been decided, and `marketingPageSmoke` swept the
+ * rendered page for ANY currency amount and required the set to be exactly `["£0"]`. The figure is
+ * decided, so the guard changes to match rather than being deleted: the sweep now allows this one
+ * value and still fails on a fourth. `planComparison.test.ts` moves with it — the SIGNED-IN /plans
+ * page reads the same constant, so the price reaches both surfaces from one line.
+ * ⚠️ `PRO_PRICE_YEARLY` STAYS NULL, which is what keeps Pro's sentence "Not on sale yet". A monthly
+ * figure is what something will cost; a payment path is whether it can be bought, and only the
+ * first of those exists.
+ */
+export const PRO_PRICE_MONTHLY: string | null = "£4.99";
 export const PRO_PRICE_YEARLY: string | null = null;
 export const FOUNDING_RATE_AFTER: string | null = null;
 
@@ -328,9 +412,18 @@ export interface PricingTier {
   summary: string;
   /** The sentence under the price. `b` is the one emphasised run. */
   after: CopyRun[];
+  /** The tier's bird. The file, its pixel size and its hash live in `PricingPage`; the words here. */
+  illoAlt: string;
   includes: string[];
-  /** Features this tier does NOT have, rendered muted rather than omitted. */
-  excludes?: string[];
+  /**
+   * Features this tier does NOT have, rendered muted rather than omitted — what a tier lacks is
+   * the reason to read the next card along, and leaving it out makes three lists that look the
+   * same length.
+   * ⚠️ EACH CARRIES ITS OWN SUB-LINE NOW. A greyed-out "Smart Email Drop" says only that something
+   * is missing; the note says what the reader would be missing, which is the entire reason to show
+   * an absence rather than omit it.
+   */
+  excludes?: { label: string; note: string }[];
   action: string;
   /**
    * ⚠️ `later` IS NOT A DISABLED BUTTON. A tier that cannot be bought renders a label, not a
@@ -344,19 +437,36 @@ export const PRICING_TIERS: PricingTier[] = [
   {
     key: "free",
     name: "Free",
+    illoAlt: "A young hawk perched on a post, holding a single query letter.",
     price: "£0",
     priceUnit: "forever",
     summary: "Everything you need to run one manuscript's campaign.",
-    after: ["No card, no trial clock. Stays free."],
+    after: ["No card, no trial clock. It stays free."],
+    /* ⚠️ TWENTY AGENTS, NOT UNLIMITED — and the comparison table's row moves with it. The two are
+       one fact stated twice, so a change here that stops there makes the page argue with itself. */
     includes: [
       "One manuscript",
-      "Unlimited agents and queries",
-      "The full query pipeline, with dates and response windows",
-      "Submission packages and comparable titles",
-      "Notes to self, and your to-do list",
-      "One Smart Import to bring your history across",
+      "Up to twenty agents",
+      "Every query tracked end to end",
+      "The full query pipeline",
+      "Agent records",
+      /* ⚠️ "Submission packages" IS RESTORED TO FREE AGAINST THE BRIEF'S LITERAL LIST, BECAUSE THE
+         CODE IS THE FACT AND THE COPY HAS TO AGREE. Packages are deliberately NOT Pro-gated —
+         `planComparison.ts` says so at length, CLAUDE.md records it as a decision, and nothing in
+         `SubmissionPackages.tsx` checks `isProUser`. Dropping it here while Pro's list names it
+         advertises a gate that does not exist, which is exactly what `planComparison.test.ts`
+         exists to catch. The brief's line was previously "Submission packages and comparable
+         titles" and kept only the comps half, so this reads as an oversight rather than a decision
+         to gate them — flagged, and a one-line reversal if the gate is really wanted. */
+      "Submission packages",
+      "Comparable titles",
+      "Notes and your to-do list",
+      "One Smart Import",
     ],
-    excludes: ["Smart Email Drop", "The Comp Scout"],
+    excludes: [
+      { label: "Smart Email Drop", note: "Paste an email, get the update written for you" },
+      { label: "The Comp Scout", note: "Comparable titles suggested from your own manuscript" },
+    ],
     action: "Available at launch",
     cta: "later",
   },
@@ -365,6 +475,7 @@ export const PRICING_TIERS: PricingTier[] = [
        The order is by what a reader can DO, not by price. */
     key: "founding",
     name: "Founding Writer",
+    illoAlt: "A hawk wearing a scarf, holding a rolled manuscript under one wing.",
     tag: "Available now · 100 places",
     price: "Free",
     priceUnit: "for six months",
@@ -372,9 +483,12 @@ export const PRICING_TIERS: PricingTier[] = [
     /* ⚠️ NO FIGURE AND NO STRUCK-THROUGH PRICE. The ref draws "£0 for six months" against a
        struck "£7/mo" and then "half price for life"; both halves of that are arithmetic on a
        number nobody has set. `FOUNDING_RATE_AFTER` is where a real one goes. */
+    /* ⚠️ "for life" IS RETIRED HERE TOO — see `FOUNDING_PERKS`. Both branches carried it, so both
+       change; leaving the filled branch promising "for life" would mean the wording reverted the
+       day a real figure was set, which is the worst possible moment for it to change. */
     after: FOUNDING_RATE_AFTER
-      ? ["Then ", { b: FOUNDING_RATE_AFTER }, " for life — a founding rate that never expires."]
-      : ["Then ", { b: "a founding writers' rate for life" }, " — set before launch, and kept."],
+      ? ["Then ", { b: FOUNDING_RATE_AFTER }, " for as long as you need it — set before launch, and kept."]
+      : ["Then ", { b: "a founding writer's rate for as long as you need it" }, " — set before launch, and kept."],
     includes: [
       "Everything in Pro",
       ...FOUNDING_PERKS,
@@ -386,20 +500,27 @@ export const PRICING_TIERS: PricingTier[] = [
   {
     key: "pro",
     name: "Pro",
-    /* ⚠️ BOTH OF THESE ARE ASSERTED BY `planComparison.test.ts`, which renders them in the app. */
+    illoAlt: "A hawk in spectacles at a desk stacked with manuscript boxes.",
+    /* ⚠️ BOTH OF THESE ARE ASSERTED BY `planComparison.test.ts`, which renders them in the app —
+       so setting `PRO_PRICE_MONTHLY` reaches the signed-in /plans page from this one line. */
     price: PRO_PRICE_MONTHLY ?? "Price to be confirmed",
     priceUnit: PRO_PRICE_MONTHLY ? "per month" : undefined,
     priceNote: PRO_PRICE_MONTHLY ? undefined : "no payment path yet",
     summary: "For writers running several manuscripts, or querying hard.",
+    /* ⚠️ A PRICE IS NOT A PAYMENT PATH, AND THIS SENTENCE IS THE DIFFERENCE. `PRO_PRICE_YEARLY` is
+       still null, so the page states what Pro will cost and that it cannot yet be bought — two
+       facts, both true, and the second is the one that stops the first reading as a sales page. */
     after: PRO_PRICE_YEARLY
       ? [`Or ${PRO_PRICE_YEARLY} a year. Cancel whenever you like.`]
       : ["Not on sale yet. Nothing here charges you, and nothing changes on your account."],
     includes: [
-      "Unlimited manuscripts",
-      "A Smart Import every month",
-      "Smart email drop — forward a reply and it becomes a tracked update",
-      "Comparable-title suggestions from your manuscript",
       "Everything in Free",
+      "Unlimited manuscripts",
+      "Unlimited agents",
+      "Submission packages",
+      "Hand over the housekeeping",
+      "Smart email drop",
+      "Comparable title scout",
     ],
     action: "Available at launch",
     cta: "later",
@@ -426,8 +547,12 @@ export const PRICING_COMPARISON_H2 = "What's in each plan";
 export interface ComparisonRow { label: string; free: string; founding: string; pro: string }
 /** `—` is an absence; `✓` is presence. Both are rendered as text, not as glyphs to be announced. */
 export const PRICING_COMPARISON: ComparisonRow[] = [
+  /* ⚠️ FREE'S AGENT LIMIT IS TWENTY NOW, NOT UNLIMITED, and this row is the one place the table
+     could have gone on contradicting the card above it. The tier list and this table are two
+     statements of the same fact, so they move together or the page argues with itself. */
   { label: "Manuscripts", free: "1", founding: "Unlimited", pro: "Unlimited" },
-  { label: "Agents & queries", free: "Unlimited", founding: "Unlimited", pro: "Unlimited" },
+  { label: "Agents", free: "Up to 20", founding: "Unlimited", pro: "Unlimited" },
+  { label: "Queries", free: "Unlimited", founding: "Unlimited", pro: "Unlimited" },
   { label: "Smart Import", free: "Once", founding: "Monthly", pro: "Monthly" },
   { label: "Smart Email Drop", free: "—", founding: "✓", pro: "✓" },
   { label: "The Comp Scout", free: "—", founding: "✓", pro: "✓" },

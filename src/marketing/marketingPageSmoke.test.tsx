@@ -163,9 +163,19 @@ describe("the public pricing page sells nothing and writes nothing", () => {
    */
   it("quotes no price but £0, because no other price exists yet", () => {
     const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
+    /* ⚠️ TWO FIGURES NOW, AND THE SWEEP IS KEPT RATHER THAN DELETED. It existed so that no price
+       could appear before one had been decided — £7/mo, £70/yr and £3.50/mo were all invented for
+       a mockup. Pro's monthly price IS decided, so the set grows by exactly that one value and a
+       third figure still fails here. The yearly rate and the founding rate remain unset, which is
+       why neither appears. */
     const amounts = [...html.matchAll(/£\s*[\d.,]+/g)].map((m) => m[0]);
-    expect(amounts).toEqual(["£0"]);
-    expect(html).toContain("Price to be confirmed");
+    expect(amounts).toEqual(["£0", "£4.99"]);
+    /* ⚠️ "Price to be confirmed" IS ASSERTED ABSENT NOW, WHICH IS THE SAME CLAIM POINTED THE OTHER
+       WAY. It was the placeholder Pro wore while `PRO_PRICE_MONTHLY` was null; the constant is set,
+       so the placeholder must not survive beside a real figure — a page showing both would be
+       stating two different things about one price. */
+    expect(html, "the placeholder went when the figure arrived").not.toContain("Price to be confirmed");
+    expect(html, "a price is still not a payment path").toContain("Not on sale yet");
   });
 
   /**
@@ -305,10 +315,25 @@ describe("the marketing chrome renders in both of its states", () => {
    * The word itself is UNCHANGED: this pass replaced the mark, not the name — renaming the site is
    * a separate job, and this asserts it has not quietly begun.
    */
-  it("sets the wordmark in caps as text, and has not renamed the site", () => {
+  /**
+   * ⚠️ RETARGETED: THE WORDMARK IS A PICTURE NOW, SO THE CAPS CLAIM HAS NO SUBJECT. It used to be
+   * "QUERYHAWK" set in Archivo Expanded, with the capitals in the MARKUP rather than in CSS so the
+   * drawn word and the announced word could not differ. Drawn letterforms make that moot — but the
+   * claim underneath it survives and is asserted here: what a reader SEES and what a screen reader
+   * HEARS are still the same word, because the alt text carries it.
+   */
+  it("wears the drawn wordmark, named for a screen reader, at its own content hash", () => {
     const html = renderPage(shell(null), "/");
-    expect(html, "drawn in caps because the markup says so").toContain(">QUERYHAWK<");
+    const img = /<img[^>]*class="mk-wordmarkart"[^>]*>/.exec(html);
+    expect(img, "the nav renders the wordmark as artwork").toBeTruthy();
+    expect(img![0], "the picture IS the word, so the alt is the word").toContain('alt="QueryHawk"');
+    const src = /src="([^"]+)"/.exec(img![0]);
+    const [path, version] = src![1].split("?v=");
+    const bytes = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), "../..", "public" + path));
+    expect(version, "the version IS the file, not a number kept in step by hand")
+      .toBe(createHash("md5").update(bytes).digest("hex").slice(0, 8));
     expect(html, "the accessible name is untouched").toContain('aria-label="QueryHawk home"');
+    expect(html, "the type it replaced is gone from the nav").not.toContain(">QUERYHAWK<");
   });
 });
 
@@ -550,9 +575,13 @@ describe("the founding sign-up — one on the landing, in the band", () => {
   it("the founding perks, in full, on the pricing page", () => {
     const h = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
     expect(h).toContain("Six months&#x27; free Pro access");
-    expect(h).toContain("Half price for life");
+    expect(h).toContain("Half price for as long as you need it");
     expect(h).toContain("A direct line to the founder");
     expect(h).not.toContain("6 months free Pro");
+    /* ⚠️ "for life" ASSERTED ABSENT FROM THE WHOLE PAGE, not just from the perk list. It was on
+       this tier twice — once in the perks and once in the after-line — so a lock naming only the
+       list would go green with the promise still printed two lines below it. */
+    expect(h, "the stronger promise is retired everywhere").not.toContain("for life");
   });
 });
 

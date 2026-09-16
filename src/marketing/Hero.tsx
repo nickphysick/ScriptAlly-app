@@ -26,7 +26,7 @@ import { HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK } from "./landingCopy";
    URL: nothing under public/ is fingerprinted by the build and prod hosting lets a browser keep a
    file for an hour, so a replaced file would otherwise be served stale. Replace the file, change the
    version — a smoke test reads the PNG's header against the size and its hash against the version. */
-const SHADOW = { src: "/images/hawk-shadow.png", version: "2be9c10c", width: 2880, height: 2100 };
+const SHADOW = { src: "/images/hawk-shadow.png", version: "db6fc6e7", width: 2200, height: 1604 };
 
 export const Hero: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;

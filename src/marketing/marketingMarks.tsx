@@ -34,7 +34,11 @@ import React from "react";
  * dashed rim and the caption come off together and the label stops saying "placeholder". Without
  * it the finished illustration would ship inside the chrome that means "not drawn yet".
  */
-export type MarketingIlloKey = "mission" | "simplify" | "waste" | "time";
+/* ⚠️ `mission` IS GONE, AND SO IS EVERY PART THAT ONLY IT USED. About's mission hero renders a
+   finished drawing directly now, so the slot, its `PLANE_OVER_LETTERS` art and the `tall` flag that
+   existed solely to give the statement heroes a bigger plate all left with it. A key that no page
+   passes is a branch nobody can reach; a flag no entry sets is a knob nobody turns. */
+export type MarketingIlloKey = "simplify" | "waste" | "time";
 
 /** Which tinted ground the plate sits on. `plate` is the parchment. */
 export type IlloGround = "blush" | "sage" | "plate";
@@ -45,30 +49,10 @@ interface MarketingIlloSpec {
   /** The illustrator's subject, from the refs' own markup. */
   subject: string;
   ground: IlloGround;
-  /** The statement heroes take the taller plate and the larger art. */
-  tall?: boolean;
   art: React.ReactNode;
 }
 
-/* The two statement heroes share one drawing: the landing and the About mission are the same
-   promise told twice, and the refs draw the same paper plane over the same stacked letters. */
-const PLANE_OVER_LETTERS = (
-  <svg viewBox="0 0 200 150">
-    <path d="M18 74 L176 26 L104 118 L88 84 Z" strokeLinejoin="round" />
-    <path d="M88 84 L176 26" />
-    <rect x="74" y="104" width="76" height="15" rx="4" />
-    <rect x="74" y="126" width="56" height="15" rx="4" />
-  </svg>
-);
-
 const MARKETING_ILLOS: Record<MarketingIlloKey, MarketingIlloSpec> = {
-  mission: {
-    caption: "Illustration · Mission",
-    subject: "desk scene, paper plane over stacked query letters",
-    ground: "blush",
-    tall: true,
-    art: PLANE_OVER_LETTERS,
-  },
   simplify: {
     caption: "Illustration · The tangle, untangled",
     subject: "tangled thread resolving into a straight line / tidy index card",
@@ -126,7 +110,8 @@ export const MarketingIllustration: React.FC<{
     <div
       className={
         `mk-illo mk-illo--${illo.ground}`
-        + (illo.tall ? " mk-illo--tall" : "")
+        /* `tall` went with the `mission` slot — it was the only entry that set it, so the class it
+           produced had no subject and its three rules had no renderer. */
         + (finished ? " mk-illo--done" : "")
       }
       role="img"
@@ -168,13 +153,10 @@ export const ContactWayPlate: React.FC<{ way: "questions" | "broken" | "privacy"
  * quote"; the bulb says "here is the idea", which is what the line actually is. Same drawn hand
  * as the planes and the handshake — stroke-only, coloured by CSS.
  */
-export const IdeaBulb: React.FC = () => (
-  <svg className="mk-bulb" viewBox="0 0 36 46" aria-hidden="true">
-    <path d="M11.5 27.5a9.5 9.5 0 1 1 13 0c-1.7 1.6-2.6 3-2.9 4.9h-7.2c-.3-1.9-1.2-3.3-2.9-4.9z" strokeLinejoin="round" />
-    <path d="M14 36.5h8M15 40.5h6" strokeLinecap="round" />
-    <path d="M18 3.5V.5M5.5 15.5h-3M30.5 15.5h3M8.6 6.6 6.5 4.5M27.4 6.6l2.1-2.1" strokeLinecap="round" />
-  </svg>
-);
+/* ⚠️ `IdeaBulb` IS DELETED, NOT LEFT UNIMPORTED. Its only consumer was About's turn line, where a
+   mark saying "here is an idea" sat beside a sentence that IS the idea — said twice, and the
+   smaller voice won. An exported component nothing renders is a thing the next reader has to trace
+   before they can be sure it is safe to touch. `.mk-bulb`'s rule goes with it. */
 
 /** The tick inside a commitment card. */
 export const CommitmentTick: React.FC = () => (

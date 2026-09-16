@@ -26,13 +26,21 @@ import { FEATURE_ROWS } from "./landingCopy";
    image replaced under the same filename would otherwise be served stale. Replace a file, change its
    version. A smoke test reads every PNG — its header against the size, its hash against the version —
    so a file that changes without this table following fails there first. */
+/* ⚠️ ALL SIX WERE 2880 WIDE AND 13.4MB BETWEEN THEM (16 Sep). They render at ~545px — a 1fr column
+   of `1.6fr 1fr` inside an 1180 container, plus the 33% bleed — so 2880 was five times more picture
+   than any screen asks for, and the page paid for it on every visit. Re-encoded at 1600 (still ~2.9x
+   the render size) as dithered 256-colour PNGs: 2116KB -> 290KB and the like, 87% off, with no
+   visible loss checked at full size.
+   ⚠️ `smart-email-drop` IS ALSO NEW ARTWORK, not just a smaller file. The repo shipped the previous
+   drawing because the replacement could not be got under budget with the tooling that existed; that
+   is no longer true, so the row finally shows what it was meant to. */
 const ILLUSTRATIONS: Record<string, { width: number; height: number; version: string }> = {
-  "/images/journey-so-far.png": { width: 2880, height: 2250, version: "37351265" },
-  "/images/track-agent-queries.png": { width: 2880, height: 2100, version: "675a97ef" },
-  "/images/home-for-your-agents.png": { width: 2880, height: 2250, version: "126e2e66" },
-  "/images/smart-email-drop.png": { width: 2880, height: 2250, version: "7f983545" },
-  "/images/curate-and-compare.png": { width: 2880, height: 2250, version: "87dd6edb" },
-  "/images/comparable-titles.png": { width: 2880, height: 2250, version: "c3647412" },
+  "/images/track-agent-queries.png": { width: 1600, height: 1166, version: "10aedb0e" },
+  "/images/home-for-your-agents.png": { width: 1600, height: 1250, version: "2e426b48" },
+  "/images/journey-so-far.png": { width: 1600, height: 1250, version: "c7f381b1" },
+  "/images/curate-and-compare.png": { width: 1600, height: 1250, version: "70fd47b2" },
+  "/images/smart-email-drop.png": { width: 1600, height: 1250, version: "3a2f3b16" },
+  "/images/comparable-titles.png": { width: 1600, height: 1250, version: "f4514d2e" },
 };
 
 /* A heading split so that its last two words can be held on one line. At the heading's deliberate 13ch

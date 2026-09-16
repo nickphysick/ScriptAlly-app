@@ -110,8 +110,17 @@ describe("the CTA cannot promise a purchase that has no path", () => {
      no payment path. The card must never contradict it. */
   it("the Pro price is whatever landingCopy says, and it says there is no path yet", () => {
     const pro = PRICING_TIERS.find((t) => t.key === "pro")!;
-    expect(pro.price).toBe("Price to be confirmed");
-    expect(pro.priceNote).toContain("no payment path");
+    /* ⚠️ RETARGETED, AND THE CLAIM NARROWED RATHER THAN LAPSING. `PRO_PRICE_MONTHLY` was `null` so
+       that no figure could appear before one was decided; it is decided, so the price is a real
+       £4.99 and this asserts it reaches the signed-in page from the same constant the public one
+       reads. What must NOT change is the second half: a price is what something will cost, and a
+       payment path is whether it can be bought. `PRO_PRICE_YEARLY` is still null, so the card goes
+       on saying there is no way to pay — which is the assertion that actually protects a reader. */
+    expect(pro.price).toBe("£4.99");
+    expect(pro.priceUnit).toBe("per month");
+    const after = pro.after.map((r) => (typeof r === "string" ? r : "b" in r ? r.b : "")).join("");
+    expect(after, "a price is not a payment path").toContain("Not on sale yet");
+    expect(after).toContain("nothing changes on your account");
   });
 });
 
