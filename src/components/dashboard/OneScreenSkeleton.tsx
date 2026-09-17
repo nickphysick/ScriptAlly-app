@@ -89,8 +89,14 @@ const SkeletonTicketGrid: React.FC = () => {
       if (!tile) return;
       const cols = gs.gridTemplateColumns.split(" ").filter(Boolean).length;
       const rowGap = parseFloat(gs.rowGap) || 0;
-      const avail = port.clientHeight - parseFloat(ps.paddingTop) - parseFloat(ps.paddingBottom)
-        - parseFloat(gs.paddingBottom);
+      /* ⚠️ THE GRID'S OWN BOTTOM PADDING IS NOT SUBTRACTED (17 Sep). It sits at the END of the
+         scrolled content. When the card holds more tickets than fit (the only case where the space
+         decides how many rows show), that padding is below the fold and a row may end anywhere
+         down to the scrollport's foot.
+         Subtracting it drew one row short whenever the spare space was under 18px: at 1920, once
+         the stage-1 header had taken 64px from the card, 13px were spare and the cover left a
+         101px void where the card shows a fourth row. The skeleton gate's ticketFill caught it. */
+      const avail = port.clientHeight - parseFloat(ps.paddingTop) - parseFloat(ps.paddingBottom);
       const rows = Math.max(1, Math.floor((avail + rowGap) / (tile + rowGap)));
       setCount(cols * rows);
     };
