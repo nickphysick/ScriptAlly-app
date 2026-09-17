@@ -1,54 +1,59 @@
-# dash-refdiff · 2026-09-09T13:45:15.407Z
+# dash-refdiff · 2026-09-17T13:06:04.084Z
 
-ref: `design-refs/dashboard-cappuccino-v27.html`  ·  app: `http://127.0.0.1:4173`
+ref: `design-refs/dashboard-build-2026-09-17.html`  ·  app: `http://127.0.0.1:4390`
 
-| probe | 1710 |
-|---|---|
-| main | · |
-| topbar | · |
-| search | · |
-| grid | · |
-| hero | · |
-| stats | · |
-| toprow | · |
-| stat-card | · |
-| stat-illustration | · |
-| manuscript-card | · |
-| chart-card | · |
-| plot | · |
-| brush | · |
-| todo-card | · |
-| todo-rule | · |
-| activity-card | · |
-| feed | · |
-| community-tile | · |
-| text:greeting | · |
-| text:subtitle | · |
-| text:panel-title | · |
-| text:chart-title | · |
-| type:card title | · |
-| type:chart figure | · |
-| type:hero greeting | · |
-| type:stat label | · |
-| type:stat figure | · |
-| type:stat chip | · |
-| type:tab | · |
-| type:tab count | · |
-| type:ticket title | · |
-| type:ticket tag | · |
-| type:bubble sentence | · |
-| type:bubble meta | · |
-| type:bubble label | · |
-| type:todo badge | · |
-| page | · |
-| _main (datum, not compared)_ | ref 1448×1392 · app 1448×1392 (window 1718×1524) |
+| probe | 1536 | 1710 | 1920 | 2520 |
+|---|---|---|---|---|
+| main | · | · | · | · |
+| navrow | · | · | · | · |
+| search | · | · | · | · |
+| grid | · | · | · | · |
+| hero | · | · | · | · |
+| toprow | · | · | · | · |
+| chart-header | · | · | · | · |
+| header-illustration | · | · | · | · |
+| manuscript-card | · | · | · | · |
+| chart-card | · | · | · | · |
+| plot | · | · | · | · |
+| brush | · | · | · | · |
+| chart-controls | · | · | · | · |
+| todo-card | · | · | · | · |
+| todo-rule | · | · | · | · |
+| todo-badge | · | · | · | · |
+| activity-card | · | · | · | · |
+| feed | · | · | · | · |
+| community-tile | · | · | · | · |
+| text:greeting | · | · | · | · |
+| text:header-counts | · | · | · | · |
+| text:panel-title | · | · | · | · |
+| text:chart-title | · | · | · | · |
+| type:card title | · | · | · | · |
+| type:chart figure | · | · | · | · |
+| type:hero greeting | · | · | · | · |
+| type:tab | · | · | · | · |
+| type:tab count | · | · | · | · |
+| type:ticket title | · | · | · | · |
+| type:ticket tag | · | · | · | · |
+| type:bubble sentence | · | · | · | · |
+| type:bubble meta | · | · | · | · |
+| type:bubble label | · | · | · | · |
+| type:todo badge | · | · | · | · |
+| page | · | · | · | · |
+| _main (datum, not compared)_ | ref 1266×1393 · app 1266×1393 | ref 1440×1393 · app 1440×1393 | ref 1650×1393 · app 1650×1393 | ref 2250×1393 · app 2250×1393 |
 
-**1710**: 0 misses
+**1536**: 0 misses  ·  **1710**: 0 misses  ·  **1920**: 0 misses  ·  **2520**: 0 misses
 
-**Allowed (4), not counted:**
-- `stats` x — the hero is `auto 1fr`, so the stats begin where the greeting ENDS. The ref's greeting reads "Hello, Bethany"; the harness account's name is a different length, and the difference between the two headings is EXACTLY the difference this forgives — measured each run, not typed. A larger gap than the names account for still counts.
-- `stat-card` x — the stats row begins where the greeting ends, and this is its first item — same cause as `stats` x, measured from the same two headings.
-- `stat-illustration` x — the stats row begins where the greeting ends, and this is the first thing in its first item — same cause as `stats` x, measured from the same two headings.
-- `brush` xr — the ref's frequency control is a two-button chip pair (Weekly | Monthly) at 146px; ours is a native select, because this app offers THREE frequencies — Daily, Weekly, Monthly. Below the breakpoint the control row is left-aligned, so the brush starts earlier. Closing it means dropping a frequency the app supports.
+
+**Plot region (same data, both sides):**
+- 1536: SKIPPED — the reference is a build snapshot — no data fixture to substitute; the chart is held structurally until stage 3's chart ref
+- 1710: SKIPPED — the reference is a build snapshot — no data fixture to substitute; the chart is held structurally until stage 3's chart ref
+- 1920: SKIPPED — the reference is a build snapshot — no data fixture to substitute; the chart is held structurally until stage 3's chart ref
+- 2520: SKIPPED — the reference is a build snapshot — no data fixture to substitute; the chart is held structurally until stage 3's chart ref
+
+**skeletonRegions: pass** — {"worst":0.3,"tol":4,"widths":4,"caught":true,"removed":true,"noLive":true,"reducedMotionStill":true,"shimmer":true,"tkCount":true,"tkCols":true,"tkTile":true,"tkContained":true,"navHeld":true,"navDissolves":true,"navLiveAfter":true}
+
+**railBoundary: pass** — {"flush":true,"width18":true,"belowCards":true,"inert":true,"columnBare":true,"railBare":true,"spansColumn":true,"railUnchanged":true,"scrimOffOtherRoute":true}
+
+**Standing gates run this pass: 26** — navrowH · chartHeaderH · searchCount · lineVsTopBand · paintBelowZero · ruleClear · ruleFill · plotStruct · bandCrossing · redRings · focusMouse · drawer · fade · brush · plotDraws · ground · hScroll · columnBottoms · plotRegion · skeletonRegions · skeletonEdges · noLiveInColumn · ticketFill · navInStep · railBoundary · columnBare
 
 **total misses: 0**

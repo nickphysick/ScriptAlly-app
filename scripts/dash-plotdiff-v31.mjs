@@ -108,6 +108,14 @@ for (const W of WIDTHS) {
 
   /* ── the ref, with the app's numbers substituted in memory ───────────────────────────────── */
   let html = readFileSync(REF, "utf8");
+  /* ⚠️ A REFERENCE TAKEN FROM THE BUILD HAS NO FIXTURE TO SUBSTITUTE (stage 1, 17 Sep) — its plot is the
+     app's own, frozen at capture, while the app's chart is a rolling window. Comparing the two would
+     report the calendar as a regression. Skipped by name, with the reason, and the chart is held by
+     the standing structural gates (plotStruct, bandCrossing, plotDraws) until stage 3's chart ref. */
+  if (html.includes('<meta name="dash-ref-source" content="build">')) {
+    line.skipped = "the reference is a build snapshot — no data fixture to substitute; the chart is held structurally until stage 3's chart ref";
+    results.push(line); await ctx.close(); continue;
+  }
   const subs = [];
   const wd = JSON.stringify(series.v.map((r) => [r[0], r[1], r[2], 0]));
   const before = html;

@@ -11,4 +11,12 @@
  * that draws the PIXEL comparison would eventually diff a new app against an old mockup and report
  * the difference as the app's.
  */
-export const REF_REL = "design-refs/dashboard-cappuccino-v34.html";
+/*
+ * ⚠️ SINCE 17 SEP IT POINTS AT A SNAPSHOT OF THE BUILD, NOT A DRAWN MOCKUP. Stage 1 of the dashboard
+ * rebuild replaced v34's header (its stat cards are gone by design), so v34 could no longer be the
+ * oracle for the whole page. `dash-ref-snapshot.mjs` made this file from e3c63f60; it is a regression
+ * baseline between stages — a green run means nothing moved since that build, never that the page is
+ * right. v34 stays on the design-ref watchlist as the authority for what is not yet rebuilt, and
+ * stages 2 and 3 bring their own refs.
+ */
+export const REF_REL = "design-refs/dashboard-build-2026-09-17.html";

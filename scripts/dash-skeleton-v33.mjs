@@ -179,7 +179,6 @@ function readRegions(names) {
     out.skeleton = { present: true, position: cs.position, z: cs.zIndex,
       w: Math.round(r.width), h: Math.round(r.height),
       tickets: sk.querySelectorAll(".os-sk-ticket, .sk-ticket").length,
-      stats: sk.querySelectorAll(".os-sk-stat, .sk-stat").length,
       blocks: sk.querySelectorAll(".os-sk, .sk").length,
       animated: [...sk.querySelectorAll("*")].filter((e) => getComputedStyle(e).animationName !== "none").length };
   }
@@ -418,7 +417,7 @@ for (const W of WIDTHS) {
      otherwise be indistinguishable from a cover that lines up perfectly. */
   if (!during) {
     console.log("   the skeleton was never caught on screen");
-    rows.push({ width: W, caught: false, worst: null, removed: null, tickets: null, stats: null, animated: null });
+    rows.push({ width: W, caught: false, worst: null, removed: null, tickets: null, animated: null });
     await page.close(); continue;
   }
   console.log("   skeleton: " + JSON.stringify(during.skeleton));
@@ -459,7 +458,8 @@ for (const W of WIDTHS) {
     clip: during.clip,
     live: during.live,
     removed: !after.skeleton,
-    tickets: during.skeleton.tickets, stats: during.skeleton.stats,
+    /* the stat-row ghosts' count is retired with them (dashboard header, stage 1) */
+    tickets: during.skeleton.tickets,
     tk: { during: ticketsDuring, after: ticketsAfter },
     nav,
     animated: during.skeleton.animated, blocks: during.skeleton.blocks,

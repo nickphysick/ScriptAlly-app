@@ -140,11 +140,11 @@ const PROBES = [
      were invisible to the probe set that existed: the search sat in a row of its own and no probe
      measured a row, and the chart header wrapped and no probe measured the header. A probe set is
      the shape of what the gate can notice. */
-  "main", "navrow", "search", "grid", "hero", "stats", "toprow", "chart-header",
-  /* v27 adds the two the stats row is actually judged on — a stat's whole box and its illustration.
-     The `stats` probe is the ROW, and a row's box is identical whether its illustrations are 104px
-     or 58px, which is exactly the squash the pack is trying to gate against. */
-  "stat-card", "stat-illustration",
+  "main", "navrow", "search", "grid", "hero", "toprow", "chart-header",
+  /* ⚠️ THE STAT ROW'S THREE PROBES ARE RETIRED WITH THE ROW (dashboard header, stage 1, 17 Sep) —
+     `stats`, `stat-card` and `stat-illustration`. The header's illustration takes a probe of its own,
+     because its box is the claim the stat illustration's was: a squashed picture is a smaller box. */
+  "header-illustration",
   "manuscript-card", "chart-card", "plot", "brush",
   /* ⚠️ v31 ADDS THE CONTROL CLUSTER AS A BOX. The frequency control and the brush were compared
      one at a time, so a divergence in what the cluster CONTAINS could hide inside two probes that
@@ -197,27 +197,10 @@ const PROBES = [
  * the gate is forgiving something and what.
  */
 const ALLOW = [
-  /* ⚠️ THE TWO NEW PROBES SIT AT THE LEFT END OF THE STATS ROW, so their x carries EXACTLY the
-     same fixture difference as the row's own — the greeting's width. Their VALUE is their size (the
-     illustration's, which is the squash gate), and that is still compared. Allowing x on the three
-     of them is one fact forgiven once, not three allowances. */
-  {
-    key: "stat-card", field: "x", derived: "greetW", slack: 3,
-    why: "the stats row begins where the greeting ends, and this is its first item — same cause as " +
-         "`stats` x, measured from the same two headings.",
-  },
-  {
-    key: "stat-illustration", field: "x", derived: "greetW", slack: 3,
-    why: "the stats row begins where the greeting ends, and this is the first thing in its first " +
-         "item — same cause as `stats` x, measured from the same two headings.",
-  },
-  {
-    key: "stats", field: "x", derived: "greetW", slack: 3,
-    why: "the hero is `auto 1fr`, so the stats begin where the greeting ENDS. The ref's greeting " +
-         "reads \"Hello, Bethany\"; the harness account's name is a different length, and the " +
-         "difference between the two headings is EXACTLY the difference this forgives — measured " +
-         "each run, not typed. A larger gap than the names account for still counts.",
-  },
+  /* ⚠️ THE THREE `greetW` ALLOWANCES ARE RETIRED WITH THE STAT ROW (stage 1). They forgave the
+     stats' x by exactly the difference between the ref's greeting and the harness account's, because
+     the stats began where the greeting ended. There is no stats row, and on a build reference the
+     greeting is the harness account's on both sides — there is no difference left to forgive. */
   /* ⚠️ THE `brush xr` ALLOWANCE IS RETIRED (v31, Phase 3), AND ITS EPITAPH IS THE POINT. It read:
      "the ref's frequency control is a two-button chip pair and ours is a native select, because
      this app offers THREE frequencies — closing it means dropping a frequency the app supports."
@@ -286,9 +269,10 @@ const ANCHOR = {
    */
   navrow: "datum", search: "datum",
   "chart-header": "span",
-  grid: "span", hero: "span", stats: "span", toprow: "span",
-  /* both sit at the LEFT end of the stats row, so their left inset and size are the facts */
-  "stat-card": "left", "stat-illustration": "left",
+  grid: "span", hero: "span", toprow: "span",
+  /* the header's illustration is pinned to the RIGHT end of its row, so its right inset and size are
+     the facts — the greeting's length decides nothing about where it sits */
+  "header-illustration": "right",
   /* the tile is the only fixed track in the top row; everything beside it is elastic */
   "manuscript-card": "left",
   "chart-card": "span", plot: "span", brush: "right",
@@ -313,10 +297,9 @@ const ANCHOR = {
  * monoculture-fixture fault wearing a harness's clothes: the sample was drawn from the population
  * that was already correct. `TYPE_SCALE` below is the coverage fix, and it is the actual gate.
  */
-/* v26 adds `subtitle` — "What's on your desk today?" is a hero row of its own now, so its size is
-   a thing the design states rather than a thing that follows the greeting. `stat-figure` is gone
-   from the ref's instrumentation; the stat figure's size is still gated, by TYPE_SCALE's own row. */
-const TEXT_PROBES = ["greeting", "subtitle", "panel-title", "chart-title"];
+/* ⚠️ `subtitle` IS RETIRED WITH "What's on your desk today?" (stage 1), and the header's counts line
+   takes its place — it is the row the header's second size belongs to. */
+const TEXT_PROBES = ["greeting", "header-counts", "panel-title", "chart-title"];
 
 /**
  * The type scale, as SELECTOR PAIRS — one row per treatment the design names, ref side and app side.
@@ -326,34 +309,36 @@ const TEXT_PROBES = ["greeting", "subtitle", "panel-title", "chart-title"];
  * the pack named. Every row is compared for `font-size` at the pack's ±0.5px, and for family and
  * weight, which is what a "scale" is.
  */
+/* ⚠️ ON A BUILD REFERENCE BOTH COLUMNS ARE THE APP'S OWN SELECTORS (stage 1, 17 Sep). The left column
+   named the drawn mockup's classes (".hd h3", "#hdB > b", ".hero h1" …); a reference taken from the
+   build carries the app's classes, so each row names the same element on both sides. When a stage
+   brings a drawn ref again, the left column goes back to that ref's names — the three-column shape is
+   kept for exactly that. The three STAT rows are retired with the stat row. */
 const TYPE_SCALE = [
   /* ⚠️ THE TO-DO CARD'S TITLE, NOT THE FIRST `h2` IN A BAND. The chart's band holds a STAT BLOCK
      whose title is deliberately 19px, and it comes first in the document — so a selector that
      accepts either read the stat block and reported the card-title row at 19 against the ref's 23.
      The two treatments have their own probes in v22 for exactly this reason. */
-  ["card title",      ".hd h3",              ".os-th2 h2"],
-  ["chart figure",    "#hdB > b",            ".os-ahead .os-n"],
-  ["hero greeting",   ".hero h1",            ".os-greet h1"],
-  ["stat label",      ".stat .lab",          ".os-cl"],
-  ["stat figure",     ".stat .fig b",        ".os-cn"],
-  ["stat chip",       ".stat .mini",         ".os-cd"],
+  ["card title",      ".os-th2 h2",          ".os-th2 h2"],
+  ["chart figure",    ".os-ahead .os-n",     ".os-ahead .os-n"],
+  ["hero greeting",   ".os-greet h1",        ".os-greet h1"],
   /* ⚠️ THE LEGEND ROW IS RETIRED WITH THE LEGEND (v26, Phase 5). The ref still SHIPS the markup and
      hides it with `.legend{display:none}`, so its type is still readable there and a type probe
      would go on comparing a treatment neither page draws. Removing the row is a narrowing of
      coverage and is recorded as one; what replaced the legend is nothing, deliberately. */
-  ["tab",             ".ftabs button",       ".os-ftab"],
-  ["tab count",       ".ftabs .n",           ".os-ftabn"],
-  ["ticket title",    ".tk .ttl",            ".tkt .ttl"],
-  ["ticket tag",      ".tk .tag",            ".tkt .tag"],
+  ["tab",             ".os-ftab",            ".os-ftab"],
+  ["tab count",       ".os-ftabn",           ".os-ftabn"],
+  ["ticket title",    ".tkt .ttl",           ".tkt .ttl"],
+  ["ticket tag",      ".tkt .tag",           ".tkt .tag"],
   /* ⚠️ NO ROW FOR THE TICKET'S SUB-LINE — the ref's shipping ticket does not have one. `snip:'a'`
      makes `sub(t)` return an empty string, so its ticket is a tag and a deed and nothing else. A
      row for a treatment the design does not have can never pass, and leaving it in as a permanent
      "no element in the REF" is a miss that teaches the reader to skip the table. The app's own
      sub-line is a CONTENT question and belongs to Phase 6, not to the type scale. */
-  ["bubble sentence", ".cv .msg .b .s",      ".os-bubsay"],
-  ["bubble meta",     ".cv .msg .b .m",      ".os-bubmeta"],
-  ["bubble label",    ".cv .msg .b .slab",   ".os-bublab"],
-  ["todo badge",      ".badge b",            ".os-tbadge b"],
+  ["bubble sentence", ".os-bubsay",          ".os-bubsay"],
+  ["bubble meta",     ".os-bubmeta",         ".os-bubmeta"],
+  ["bubble label",    ".os-bublab",          ".os-bublab"],
+  ["todo badge",      ".os-tbadge b",        ".os-tbadge b"],
 ];
 
 /**
@@ -448,13 +433,9 @@ const READ = `(() => {
     }
     out.probes.main = c;
   }
-  /* ⚠️ THE GREETING'S RENDERED WIDTH, so the stats allowance can be DERIVED rather than typed.
-     The hero is auto/1fr: the stats begin where the greeting ends, so the two sides differ by
-     exactly the width of the writer's name against the ref's. Recording it turns a magic tolerance
-     into arithmetic that moves with the fixture — the difference is forgiven where it equals the
-     name's, and reported the moment it does not. */
+  /* the greeting, for the nav-row reading below. Its WIDTH is no longer recorded: it existed to
+     derive the stats allowances, which are retired with the stat row (stage 1). */
   const greetEl = document.querySelector('[data-probe-text="greeting"]');
-  out.checks.greetW = greetEl ? Math.round(greetEl.getBoundingClientRect().width * 10) / 10 : null;
 
   /**
    * ⚠️ THE STANDING GATES' RAW READINGS. Five things have now regressed at least once each, and in
@@ -465,13 +446,10 @@ const READ = `(() => {
   const r = (el) => (el ? el.getBoundingClientRect() : null);
   const navrow = r(document.querySelector('[data-probe="navrow"]'));
   const chdr = r(document.querySelector('[data-probe="chart-header"]'));
-  const ill = r(document.querySelector('[data-probe="stat-illustration"]'));
-  const statsB = r(document.querySelector('[data-probe="stats"]'));
   const greetB = r(greetEl);
   out.checks.navrowH = navrow ? Math.round(navrow.height * 10) / 10 : null;
   out.checks.chartHeaderH = chdr ? Math.round(chdr.height * 10) / 10 : null;
-  out.checks.illH = ill ? Math.round(ill.height * 10) / 10 : null;
-  out.checks.statsVsGreet = statsB && greetB ? Math.round((statsB.top - greetB.top) * 10) / 10 : null;
+  /* illH and statsVsGreet are RETIRED with the stat row (stage 1) — their subjects are deleted */
   out.checks.greetBelowNav = navrow && greetB ? Math.round((greetB.top - navrow.bottom) * 10) / 10 : null;
   /* every element that could pass for a search control, however it is built */
   /* ⚠️ ws-appctl IS NOT A SEARCH CLASS — it is the bar's control WRAPPER, and the + New button
@@ -853,18 +831,11 @@ const READ = `(() => {
   const bottoms = cols.map((e) => { const r = e.getBoundingClientRect(); return num(r.y + r.height); });
   out.checks.columnBottoms = bottoms;
   out.checks.columnSpread = bottoms.length >= 2 ? num(Math.max(...bottoms) - Math.min(...bottoms)) : null;
-  /* ⚠️ THE BLEND TRAP: a transform on ANY ancestor isolates the blend group and the stat artwork's
-     white field returns, silently, with the rule applying cleanly. */
-  const marks = [...document.querySelectorAll("[data-probe='stats'] img, .os-greet .os-mark-il img")];
-  const bad = [];
-  for (const m of marks) {
-    for (let el = m.parentElement; el; el = el.parentElement) {
-      const t = getComputedStyle(el).transform;
-      if (t && t !== "none") { bad.push(el.className || el.tagName); break; }
-    }
-  }
-  out.checks.markCount = marks.length;
-  out.checks.transformedAncestors = [...new Set(bad)];
+  /* ⚠️ THE BLEND-TRAP READING IS RETIRED WITH THE STAT ROW (stage 1). Its subject was the stat
+     illustrations, multiplied onto the page; the only blended mark left in the dashboard's code is on
+     the goals card, which the page does not mount, and the header's art is transparent and unblended.
+     A reading over zero marks passes forever, so it goes rather than stays; it comes back when a
+     multiplied mark returns to the page. */
   return out;
 })()`;
 
@@ -1289,8 +1260,9 @@ const STANDING = [
   { k: "navrowH", why: "the nav row is one row", test: (v) => v !== null && v <= 72, want: "<= 72px" },
   { k: "chartHeaderH", why: "the chart header is one row — a wrapped one is ~150px", test: (v) => v !== null && v <= 72, want: "<= 72px" },
   { k: "searchCount", why: "exactly one search control on the page", test: (v) => v === 1, want: "1" },
-  { k: "illH", why: "the stat illustration has not been squashed", test: (v) => v !== null && v >= 70, want: ">= 70px" },
-  { k: "statsVsGreet", why: "the stats sit on the greeting's line", test: (v) => v !== null && Math.abs(v) <= 20, want: "within 20px" },
+  /* ⚠️ `illH` AND `statsVsGreet` ARE RETIRED WITH THE STAT ROW (dashboard header, stage 1, 17 Sep).
+     Both measured an element that no longer exists; kept, they would read null and fail forever. The
+     header's illustration is held by its own probe above, and by tests/e2e/dashHeader.measure.ts. */
   /* ── v29's four ─────────────────────────────────────────────────────────────────────────────── */
   {
     k: "lineVsTopBand",
@@ -1394,9 +1366,6 @@ function diffChecks(app) {
     m.push({ key: "page", field: "columnBottoms", why: "fewer than two columns were visible" });
   } else if (app.checks.columnSpread > 1) {
     m.push({ key: "page", field: "columnBottoms", ref: "≤1", app: app.checks.columnSpread });
-  }
-  if (app.checks.transformedAncestors.length) {
-    m.push({ key: "page", field: "blendAncestorTransform", app: app.checks.transformedAncestors.join(", ") });
   }
   return m;
 }
@@ -1865,7 +1834,8 @@ function table(result) {
 
 /* ⚠️ DERIVED FROM THE ARRAYS, NEVER TYPED OUT. A hand-written list agrees with the harness on the
    day it is written; this one cannot disagree with it at all. */
-const PAGE_GATES = ["ground", "hScroll", "columnBottoms", "blendAncestorTransform"];
+/* `blendAncestorTransform` is retired with the stat row's marks — see the end of READ */
+const PAGE_GATES = ["ground", "hScroll", "columnBottoms"];
 /* ⚠️ FOUR NAMES OVER TWO ARTEFACTS, DELIBERATELY (v33.2). The pack asks for four gates and two of
    them are read from the same run as their sibling — the skeleton's liveness comes out of the same
    pass as its regions, and the column's edge treatment out of the same pass as the rail's. Naming
