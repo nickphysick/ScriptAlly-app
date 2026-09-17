@@ -65,20 +65,18 @@ const Tier: React.FC<{ tier: PricingTier; onNavigate: (tab: string, sub?: string
       aria-disabled={live ? undefined : true}
     >
       {tier.tag && <span className="mk-tiertag">{tier.tag}</span>}
-      {/* ⚠️ A FIXED-HEIGHT SLOT, AND THE HEIGHT IS THE POINT. Three birds drawn at three different
-          scales would otherwise push three plan names onto three different lines, and a three-card
-          layout exists to be read ACROSS. The slot bottom-aligns its image (`flex-end`, and
-          `object-position: bottom left` on the art) so each bird stands on the same floor whatever
-          its own proportions. Founding's is taller because its card is the lifted one. */}
-      <div className="mk-tierillo">
-        <img
-          src={art.src + "?v=" + art.version}
-          alt={tier.illoAlt}
-          width={art.width}
-          height={art.height}
-          loading="lazy"
-        />
-      </div>
+      {/* ⚠️ PERCHED ON THE CORNER, OUT OF FLOW (17 Sep). The fixed-height slot this replaced existed
+          so three birds drawn at three scales could not push three plan names onto three lines;
+          positioned absolutely, they cannot push anything at all. It stays here in the source, ahead
+          of the name, so a screen reader meets the bird where it always has. */}
+      <img
+        className="mk-tierbird"
+        src={art.src + "?v=" + art.version}
+        alt={tier.illoAlt}
+        width={art.width}
+        height={art.height}
+        loading="lazy"
+      />
       <p className="mk-tiername">{tier.name}</p>
       <p className="mk-tierline">{tier.summary}</p>
 

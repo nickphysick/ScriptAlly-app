@@ -154,6 +154,24 @@ describe("the public pricing page sells nothing and writes nothing", () => {
   });
 
   /**
+   * ⚠️ THE BIRDS PERCH; THEY NO LONGER HAVE A ROW (17 Sep). The fixed-height slot above each plan
+   * name is gone, and each bird is the card's own positioned image. It stays AHEAD of the name in
+   * the markup, so a screen reader still meets it where it always did, and it keeps its words.
+   */
+  it("perches each tier's bird on its card rather than in a slot above the name", () => {
+    const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
+    expect(html, "the slot is retired").not.toMatch(/["\s`]mk-tierillo["\s`]/);
+    for (const key of ["free", "founding", "pro"]) {
+      const card = tierCard(html, key);
+      const bird = /<img class="mk-tierbird"[^>]*>/.exec(card);
+      expect(bird, `${key} carries a perched bird`).toBeTruthy();
+      expect(card.indexOf(bird![0]), `${key}: the bird reads before the plan name`)
+        .toBeLessThan(card.indexOf('class="mk-tiername"'));
+      expect(bird![0], `${key}: and it keeps its description`).toMatch(/alt="[^"]+"/);
+    }
+  });
+
+  /**
    * ⚠️ NO INVENTED FIGURE, ANYWHERE ON THE PAGE. The design this was rebuilt from carries £7/mo,
    * £70/yr and £3.50/mo; none has been set, and a price on a public page is a claim about what
    * something costs. `£0` is the one figure that is true today.
@@ -520,18 +538,18 @@ describe("the founding sign-up — one on the landing, in the band", () => {
   });
 
   /**
-   * ⚠️ THE EMPTY COLUMN HAS NO ELEMENT. The card is placed in column 2 and column 1 is simply the
-   * track the artwork shows through; a spacer `<div>` would be a node in the accessibility tree
-   * standing in for a background. Asserting the grid holds exactly one child is what stops one
-   * being added back for convenience.
+   * ⚠️ THE DRAWING HOLDS THE FIRST COLUMN AND THE CARD THE SECOND (17 Sep). Column 1 used to be an
+   * empty track a CSS background showed through; the re-drawn picture is an element there now, and
+   * the grid holds exactly those two things, drawing first — the order a phone stacks them in too.
    */
-  it("the banner is a card in the second column, with nothing holding the first", () => {
+  it("the banner is the drawing in its first column and the card in its second", () => {
     const grid = /<div class="mk-claimgrid">([\s\S]*?)<section|<div class="mk-claimgrid">([\s\S]*)$/.exec(html());
     expect(grid, "the banner renders its grid").toBeTruthy();
     const inner = grid![1] ?? grid![2];
-    expect(inner.slice(0, 40), "the card is the grid's first and only child")
+    const img = /^\s*<img[^>]*class="mk-claimart"[^>]*>/.exec(inner);
+    expect(img, "the drawing is the grid's first child").toBeTruthy();
+    expect(inner.slice(img![0].length, img![0].length + 40), "…and the card comes straight after it")
       .toContain('<div class="mk-claimcard">');
-    expect(inner).not.toContain("mk-claimart");
     /* The wax seal and its parchment letter went with the band they decorated. */
     expect(html()).not.toMatch(/["\s`]mk-wax["\s`]/);
     expect(html()).not.toMatch(/["\s`]mk-betacard["\s`]/);
@@ -623,19 +641,30 @@ describe("the sign-up the landing does carry", () => {
   });
 
   /**
-   * ⚠️ THE ARTWORK IS A CSS BACKGROUND AND THEREFORE RENDERS NO ELEMENT AT ALL — this asserts that,
-   * because "no `<img>` in the band" looks exactly like "the picture was forgotten". It is a
-   * background because it has to LEAVE below 1000px, and an inline style (where a version-stamped
-   * `src` would have to live to stay in step with the file) BEATS a media query however the query
-   * is written. `marketingTokens` holds the other half: the URL and its content hash.
+   * ⚠️ ONE IMAGE IN THE BAND, AT ITS OWN CONTENT HASH (17 Sep). The drawing used to be a CSS
+   * background with its version in the stylesheet; as an `<img>` both halves are asserted here —
+   * the URL's eight hex digits against the bytes on disk, and the pixel size against the PNG's own
+   * header, since a hand-typed ratio that disagreed with the file would reserve the wrong box until
+   * it loaded. Decorative, so `alt=""`; below the fold, so lazy; and still no inline style.
    */
-  it("the banner's artwork is a background, so the band renders no image element", () => {
+  it("the banner's drawing is one lazy, decorative image at its own content hash", () => {
     const h = html();
     const band = /<section class="mk-claimband"([\s\S]*?)<\/section>/.exec(h);
     expect(band, "the banner renders").toBeTruthy();
-    expect(band![1], "no <img>, and no inline style that a breakpoint could not override")
-      .not.toMatch(/<img|style="/);
-    expect(band![1], "the offer is labelled by its own heading").toBeTruthy();
+    const imgs = band![1].match(/<img[^>]*>/g) ?? [];
+    expect(imgs, "exactly one image in the band").toHaveLength(1);
+    const img = imgs[0];
+    expect(img, "decorative: the card states the offer in words").toContain('alt=""');
+    expect(img).toContain('loading="lazy"');
+    const [path, version] = /src="([^"]+)"/.exec(img)![1].split("?v=");
+    expect(path).toBe("/images/founding-writers.png");
+    const png = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), "../..", "public" + path));
+    expect(version, "the version IS the file, not a number kept in step by hand")
+      .toBe(createHash("md5").update(png).digest("hex").slice(0, 8));
+    expect(png.toString("latin1", 12, 16), "the header was read").toBe("IHDR");
+    expect(img).toContain('width="' + png.readUInt32BE(16) + '" height="' + png.readUInt32BE(20) + '"');
+    expect(png.readUInt32BE(16), "the re-drawn picture is square").toBe(png.readUInt32BE(20));
+    expect(band![1], "no inline style that a breakpoint could not override").not.toMatch(/style="/);
     expect(band![0]).toContain('aria-labelledby="mk-band-h"');
     expect(band![1]).toMatch(/id="mk-band-h"/);
   });
@@ -930,10 +959,11 @@ describe("the feature rows: six images, six headings, six paragraphs", () => {
   });
 
   /**
-   * ⚠️ AT 13ch, THREE HEADINGS WOULD END ON ONE WORD — "stands", "itself." and "working" — so every heading
-   * holds its last two words together on one line. That is typesetting, not copy: the heading, markup
-   * stripped, is still the sentence word for word (asserted above), and the held run is exactly its last
-   * two words.
+   * ⚠️ EVERY HEADING HOLDS ITS LAST TWO WORDS TOGETHER ON ONE LINE. The 13ch measure that made this
+   * necessary is gone (17 Sep) and the headings wrap with `text-wrap: balance`, which avoids a lone last
+   * word by itself — but an engine without `balance` does not, and there the held pair still does. That
+   * is typesetting, not copy: the heading, markup stripped, is still the sentence word for word
+   * (asserted above), and the held run is exactly its last two words.
    */
   it("holds each heading's last two words together on one line", () => {
     const rows = rowsOf(band());

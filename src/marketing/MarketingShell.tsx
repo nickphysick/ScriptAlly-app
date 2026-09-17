@@ -13,33 +13,28 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./marketing.css";
 import { marketingNavState, MarketingNavUser } from "./marketingNav";
+import { BRAND_MARK, BRAND_WORDMARK, artUrl } from "./brandArt";
 
-/* The QueryHawk mark. It sits in public/ rather than src/assets/ so it is served at a stable path —
-   and public/ is NOT fingerprinted by the build, so the URL carries the first eight hex digits of
-   the file's own md5. Replace the file, change the version.
+/* ── The brand artwork: the hawk and the drawn wordmark ──
+   Both sit in public/ rather than src/assets/ so they are served at stable paths — and public/ is
+   NOT fingerprinted by the build, so each URL carries the first eight hex digits of its file's own
+   md5. The files, sizes and versions live in `brandArt.ts`, which the footer reads too: replace a
+   file, change its version there.
    ⚠️ THIS LEAVES `src/assets/marketing/scriptally-logo.png` REFERENCED BY NOTHING, and the note that
    stood here first claimed the opposite — that four app files still imported it. They do not. They
    render `/scriptally-logo-v2.png` and `/scriptally-logo-new.png`, which are DIFFERENT files living
    in public/; a substring search for "scriptally-logo" matches all three names, which is how the
-   wrong claim was reached. Checked with a bounded search before this was written.
-   The orphan is left in place deliberately: deleting an app asset is outside this pass, and it
-   belongs with the rename that is still to come. */
-const LOGO = { src: "/images/queryhawk-logo.png", version: "f95f44c3" };
-/**
- * ⚠️ THE WORDMARK IS ARTWORK NOW, NOT TYPE. It was "QUERYHAWK" set in Archivo Expanded — a
- * self-hosted webfont whose ONLY consumer anywhere on the site was that one span. Drawn letterforms
- * mean the brand cannot be restyled by a stray rule or shifted by a fallback face mid-load, and the
- * 14.5KB file, its preload, its licence and its four locks all leave with it.
- *
- * ⚠️ IT DOES NOT TAKE `.mk-wordmark`. That class is ALSO the shared footer's wordmark, which stays
- * in Playfair — restyling the bare class would put the picture in both places, and the footer is
- * not this pass's to change. `.mk-wordmarkart` is the nav's alone.
- *
- * ⚠️ AND THE ALT IS THE WORD, BECAUSE THE IMAGE IS THE WORD. The hawk beside it keeps `alt=""` —
- * it says nothing the wordmark does not — and the button's own aria-label names the destination,
- * so a reader hears the site once rather than three times.
- */
-const WORDMARK = { src: "/images/queryhawk_title.png", version: "5c96a4f3" };
+   wrong claim was reached. The orphan is left in place deliberately: deleting an app asset is
+   outside this pass, and it belongs with the rename that is still to come.
+   ⚠️ THE WORDMARK IS ARTWORK, NOT TYPE. It was "QUERYHAWK" set in Archivo Expanded — a self-hosted
+   webfont whose ONLY consumer was that one span. Drawn letterforms mean the brand cannot be
+   restyled by a stray rule or shifted by a fallback face mid-load.
+   ⚠️ IT DOES NOT TAKE `.mk-wordmark`. That class is the footer's name in type, which stays in
+   Playfair — restyling the bare class would put one treatment in both places. `.mk-wordmarkart` is
+   the nav's alone.
+   ⚠️ AND THE ALT IS THE WORD, BECAUSE THE IMAGE IS THE WORD. The hawk beside it keeps `alt=""` —
+   it says nothing the wordmark does not — and the button's own aria-label names the destination,
+   so a reader hears the site once rather than three times. */
 
 export const MarketingShell: React.FC<{
   user: MarketingNavUser | null | undefined;
@@ -181,10 +176,10 @@ export const MarketingShell: React.FC<{
                 `alt=""` because the wordmark beside it already names the site — a second
                 announcement is noise to a screen reader, and the button's own aria-label names
                 the destination. */}
-            <img className="mk-logo" src={LOGO.src + "?v=" + LOGO.version} alt="" />
+            <img className="mk-logo" src={artUrl(BRAND_MARK)} alt="" />
             <img
               className="mk-wordmarkart"
-              src={WORDMARK.src + "?v=" + WORDMARK.version}
+              src={artUrl(BRAND_WORDMARK)}
               alt="QueryHawk"
             />
           </button>

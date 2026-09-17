@@ -26,7 +26,13 @@
 /** The address every peripheral surface offers, and the one the legal copy names. */
 export const SUPPORT_EMAIL = "hello@scriptally.ink";
 
-/** The public host, stated in the footer base line. */
+/**
+ * The public host.
+ *
+ * ⚠️ NOTHING RENDERS IT SINCE 17 SEP. The footer's base line printed it in mono capitals — which put
+ * "SCRIPTALLY.INK" on every public page — and now states the support address instead. Kept, value
+ * untouched, because it names infrastructure; a new reader should know it is currently unread.
+ */
 export const SITE_HOST = "scriptally.ink";
 
 /** Operating entity — pending confirmation; rendered verbatim, brackets and all. */
@@ -60,9 +66,10 @@ export const DELETION_WINDOW_DAYS = 30;
 /** The date both legal documents state at the top of the band. */
 export const LEGAL_LAST_UPDATED = "15 Aug 2026";
 
-/** One-line description of the product, used in the footer's brand column. */
+/** The footer's strapline, under the hawk and the name (17 Sep). */
 export const FOOTER_TAGLINE =
-  "Query with confidence. A tracker for fiction writers seeking literary agents.";
+  "A bird's-eye view of your querying campaign. Built in the UK for writers looking for a " +
+  "literary agent.";
 
 /** `mailto:` with a subject pre-filled — the one place a support link is composed. */
 export const supportMailto = (subject?: string): string =>

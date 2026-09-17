@@ -43,9 +43,10 @@ const ILLUSTRATIONS: Record<string, { width: number; height: number; version: st
   "/images/comparable-titles.png": { width: 1600, height: 1250, version: "f4514d2e" },
 };
 
-/* A heading split so that its last two words can be held on one line. At the heading's deliberate 13ch
-   measure three of the six would otherwise end on a single word. The words are untouched: the break
-   before the held pair stays an ordinary space, outside the held run. */
+/* A heading split so that its last two words can be held on one line. The headings wrap with
+   `text-wrap: balance` now (17 Sep), which already avoids a lone last word — but an engine without
+   it (Safari before 17.5) does not, and there the held pair is what still does. The words are
+   untouched: the break before the held pair stays an ordinary space, outside the held run. */
 const lastTwoWords = (heading: string): [string, string] => {
   const last = heading.lastIndexOf(" ");
   const cut = last > 0 ? heading.lastIndexOf(" ", last - 1) : -1;

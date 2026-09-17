@@ -306,56 +306,60 @@ describe("no marketing rule reads a token that does not exist", () => {
 });
 
 /**
- * ⚠️ THE FOUNDING BAND IS THE ONE PLACE INSIDE `.mk-lower` THAT REPAINTS THE GROUND, and that is
- * a decision rather than a drift. The two-surface rule exists because the retired parchment band
- * repainted by accident, over its whole height, flattening the cards on it. A bounded band with a
- * hairline declaring its top edge is a section; an unbounded repaint is a seam. This asserts the
- * count is ONE, so a second one has to be argued for rather than added.
+ * ⚠️ TWO BANDS INSIDE `.mk-lower` PAINT THEIR OWN GROUND, AND EACH IS A DECISION RATHER THAN A DRIFT.
+ * The two-surface rule exists because the retired parchment band repainted by accident, over its
+ * whole height, flattening the cards on it. A bounded band whose edge is declared is a section; an
+ * unbounded repaint is a seam. The founding banner was the only one until 17 Sep, when the footer
+ * became a band of its own — this asserts the SET, so a third has to be argued for, not added.
  */
-describe("the founding-writers banner is the lower surface's only repaint", () => {
+describe("the lower surface's repaints are the banner and the footer, and no others", () => {
   /**
-   * ⚠️ RETARGETED, AND THE HAIRLINE HALF IS DELETED RATHER THAN MOVED. `.mk-beta` was a blush band
-   * with a `border-top` declaring its top edge; `.mk-claimband` is full-bleed and carries the
-   * artwork, so its own ground IS its edge and it has no top rule at all. Asserting a hairline it
-   * does not have would be a lock on the retired shape.
+   * ⚠️ COLOUR ONLY, AND NEVER THE SHORTHAND. The banner's picture is an `<img>` in its grid now, so
+   * the band paints nothing but its ground — and the shorthand, which resets every longhand, would
+   * take the ground with it the day someone added an image here.
    */
-  it("declares its own ground, and the artwork that sits on it", () => {
+  it("the banner declares its own ground and nothing else", () => {
     const decls = ruleFor(".mk-claimband");
     expect(decls).toMatch(/background-color:\s*var\(--mk-claim-ground\)/);
-    expect(decls).toMatch(/background-image:\s*url\(/);
-    /* ⚠️ THE SHORTHAND WOULD BE A REAL BUG HERE, not a style point: the picture is deliberately
-       removed below 1000px, and a shorthand would have taken the ground with it — blanking the
-       band on every phone while the source read correctly. */
-    expect(decls, "separate longhands, so removing the image keeps the ground").not.toMatch(/background:\s/);
+    expect(decls, "the drawing is an element in the grid, not a background").not.toMatch(/background-image/);
+    expect(decls, "separate longhands, never the shorthand").not.toMatch(/background:\s/);
   });
 
-  it("and it is the only ground repaint under the wrapper", () => {
+  /**
+   * ⚠️ THE FOOTER QUALIFIES ON THE BANNER'S OWN TERMS: bounded, with a hairline stating its top edge.
+   * Its ground is a token three points below `--mk-lower`, so the hairline carries the edge and the
+   * fill only confirms it.
+   */
+  it("the footer is the second, and a hairline states where it starts", () => {
+    const foot = ruleFor(".mk-foot");
+    expect(foot).toMatch(/background-color:\s*var\(--mk-foot-ground\)/);
+    expect(foot, "its top edge is declared").toMatch(/border-top:\s*1px solid var\(--mk-hair\)/);
+    expect(foot).not.toMatch(/background:\s/);
+    expect(value(marketing, "--mk-foot-ground")).toBe("#efeae3");
+  });
+
+  it("and nothing else under the wrapper repaints the ground", () => {
     /* Sections that sit inside `.mk-lower`, by the classes `Landing` renders there. */
     const INSIDE = [".mk-statband", ".mk-featband", ".mk-claimband", ".mk-foot"];
     const painted = INSIDE.filter((sel) => /background(?:-color)?\s*:/.test(ruleFor(sel)));
-    expect(painted).toEqual([".mk-claimband"]);
+    expect(painted).toEqual([".mk-claimband", ".mk-foot"]);
   });
 
   /**
-   * ⚠️ THE ARTWORK'S CACHE-BUSTING VERSION LIVES IN THE STYLESHEET, AND THIS READS BOTH SIDES.
-   * Nothing under `public/` is fingerprinted by the build and hosting lets a browser keep a file
-   * for an hour, so a re-export served under the same name goes on being served stale. It is a CSS
-   * background rather than an `<img>` because it has to LEAVE below 1000px, and an inline style —
-   * where a version-stamped `src` would have to live — beats a media query however the query is
-   * written. So the hash cannot ride a component constant, and this is the lock that keeps it
-   * honest: the eight hex digits in the URL against the bytes on disk.
+   * ⚠️ WHOLE, CAPPED AND CENTRED — "nothing crops" is a property of the rule, so the rule is what is
+   * asserted: a width with `height: auto` keeps the drawing's own ratio, and there is no
+   * `object-fit` or fixed height that could cut it. The file and its version are the smoke test's.
    */
-  it("versions the banner's background by the file's own content", async () => {
-    const { readFileSync } = await import("fs");
-    const { createHash } = await import("crypto");
-    const { resolve, dirname } = await import("path");
-    const { fileURLToPath } = await import("url");
-    const here = dirname(fileURLToPath(import.meta.url));
-    const url = /url\("(\/images\/[^"?]+)\?v=([0-9a-f]{8})"\)/.exec(ruleFor(".mk-claimband"));
-    expect(url, "the background states a path and a version").toBeTruthy();
-    const bytes = readFileSync(resolve(here, "../..", "public" + url![1]));
-    expect(url![2], "the version IS the file, not a number kept in step by hand")
-      .toBe(createHash("md5").update(bytes).digest("hex").slice(0, 8));
+  it("the banner's drawing is capped at 430px and never cropped", () => {
+    const art = ruleFor(".mk-claimart");
+    expect(art).toMatch(/max-width:\s*430px/);
+    expect(art).toMatch(/width:\s*100%/);
+    expect(art).toMatch(/height:\s*auto/);
+    expect(art, "nothing that could crop it").not.toMatch(/object-fit|aspect-ratio|overflow/);
+    expect(art, "centred in its own column").toMatch(/justify-self:\s*center/);
+    expect(art, "with room above and below").toMatch(/margin:\s*24px 0/);
+    expect(ruleFor(".mk-claimgrid"), "a column wide enough for the cap to bind")
+      .toMatch(/grid-template-columns:\s*minmax\(0, 1fr\) minmax\(0, 1\.3fr\)/);
   });
 });
 
@@ -430,7 +434,8 @@ describe("the hero is two columns, and its shadow overflows on purpose", () => {
        hero's bottom is an equal overhang past its top: height = min-height + 2 x overhang, and
        width = height x 2880/2100. For 520 and ~70px that is 660 tall, 905 wide, 169% of the 534px
        art column. The ratio is the asset's; the only free number is the overhang. */
-    expect(img).toMatch(/width:\s*58%/);
+    /* 72% since 17 Sep (it was 58): 384px of a 534px column. */
+    expect(img).toMatch(/width:\s*72%/);
     expect(img, "the global image reset would cancel the width in silence").toMatch(/max-width:\s*none/);
     expect(img).toMatch(/top:\s*50%/);
     expect(img).toMatch(/opacity:\s*0?\.16/);
@@ -589,7 +594,7 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
    * The hero's rules are not contiguous, and a positional slice over a file that does not group
    * by feature answers a question nobody asked.
    */
-  it("…and the whole sheet's negative margins are the six that are meant to be there", () => {
+  it("…and the whole sheet's negative margins are the seven that are meant to be there", () => {
     const owners = new Set<string>();
     for (const m of marketing.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)) {
       if (/margin[^:]*:\s*[^;]*-\d/.test(m[2])) m[1].split(",").forEach((x) => owners.add(x.trim()));
@@ -607,6 +612,10 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
       /* both sentinels cancel their own height so they occupy no space */
       ".mk-navsentinel--condense",
       ".mk-navsentinel--release",
+      /* the founding tier's lift (17 Sep): the 12px of extra top padding its flag needs, given back
+         as a negative top margin, so the card grows upward and its feature list starts on exactly
+         the line its neighbours' do. The transform it replaced moved the content with the card. */
+      ".mk-tier--founding",
     ]);
   });
 
@@ -689,7 +698,10 @@ describe("every specific rule on /founders outranks the generic one beside it", 
  * measure in the sheet and be the one place that must not be.
  */
 describe("measures that must track their type are expressed in `em`", () => {
-  const IN_EM = [".mk-fwhonest .mk-fwlead", ".mk-frow h3"];
+  /* ⚠️ `.mk-frow h3` LEFT THIS LIST ON 17 SEP BECAUSE IT HAS NO MEASURE AT ALL — it wraps with
+     `text-wrap: balance`, asserted with the feature rows' type. The contact lede and the footer's
+     strapline joined it: both are `ch` measures, and both set the size they count. */
+  const IN_EM = [".mk-fwhonest .mk-fwlead", ".mk-clede", ".mk-foottag"];
 
   it("each is declared with a max-width in `em` or `ch`, never `rem` or `px`", () => {
     for (const sel of IN_EM) {
@@ -812,7 +824,7 @@ describe("the feature rows alternate only while they sit side by side", () => {
 describe("the feature rows set their own type, and nothing else uses its families", () => {
   const decl = (body: string, prop: string) => new RegExp("(?:^|[;\\s{])" + prop + ":\\s*([^;]+);").exec(body)?.[1].trim();
 
-  it("the heading is Special Elite 400 at 44px, 1.18, -0.005em, full ink, on a 13ch measure", () => {
+  it("the heading is Special Elite 400 at 44px, 1.18, -0.005em, full ink, balanced rather than measured", () => {
     const h3 = ruleFor(".mk-frow h3");
     expect(decl(h3, "font-family"), "important, or the runtime brand rule owns every h3").toBe('"Special Elite", cursive !important');
     expect(decl(h3, "font-weight")).toBe("400");
@@ -821,7 +833,10 @@ describe("the feature rows set their own type, and nothing else uses its familie
     expect(decl(h3, "letter-spacing")).toBe("-0.005em");
     expect(decl(h3, "color")).toBe("var(--mk-nearblack)");
     expect(value(marketing, "--mk-nearblack"), "full ink").toBe("#1c130f");
-    expect(decl(h3, "max-width"), "the 13ch measure is deliberate").toBe("13ch");
+    /* ⚠️ THE 13ch MEASURE IS GONE (17 Sep). It broke every heading early and left most of the copy
+       column unused; `balance` sets the same words in even lines across the whole column. */
+    expect(decl(h3, "max-width"), "no measure narrows the heading").toBeUndefined();
+    expect(decl(h3, "text-wrap"), "the lines are balanced instead").toBe("balance");
     const keep = ruleFor(".mk-frow h3 .mk-fkeep");
     expect(keep, "the held last two words").toMatch(/white-space:\s*nowrap/);
     expect(keep, "…in the heading's own family, not the runtime span rule's").toMatch(/font-family:\s*inherit/);
@@ -863,8 +878,11 @@ describe("the feature rows set their own type, and nothing else uses its familie
        without container units drops the cap as invalid and keeps a sane size rather than falling
        back to the 44px base. */
     expect(h3![1], "the plain size, for a browser without cqw").toMatch(/font-size:\s*34px\s*;/);
+    /* 11 since 17 Sep: the widest held pair is "Submission Packages" at 10.54em. That width is a
+       fact about the FONT, so the rendered check (no row wider than a phone's column) is what
+       proves the divisor; this only pins the construction. */
     expect(h3![1], "…then capped so the unbreakable pair fits the column")
-      .toMatch(/font-size:\s*min\(34px,\s*calc\(\(100cqw - 52px\) \/ 9\)\)/);
+      .toMatch(/font-size:\s*min\(34px,\s*calc\(\(100cqw - 52px\) \/ 11\)\)/);
     expect(stacking![1]).toMatch(/(?:^|\n)\s*\.mk-fcopy p\s*\{\s*font-size:\s*18px;?\s*\}/);
   });
 
@@ -892,9 +910,15 @@ describe("the feature rows set their own type, and nothing else uses its familie
        important declarations and the heading silently draws in Playfair. `.mk-frow h3` and
        `.mk-stattitle` are the exceptions that prove it — one is an element inside a class, the
        other styles no bare heading at all. */
+    /* ⚠️ FOUR MORE ON 17 SEP: the contact page's headline, its three reasons and its form heading,
+       and the footer's column heads. The footer's is the one owner without `!important`, and
+       correctly — it styles h4s, which brand.tsx does not force. */
     expect(ruleOwners("Special Elite").sort()).toEqual([
       ".mk-cartitle",
       ".mk-claimband .mk-claimh2",
+      ".mk-contact .mk-ch1",
+      ".mk-footcol h4",
+      ".mk-formcard .mk-formh2",
       ".mk-frow h3",
       ".mk-fw .mk-fwcard h2",
       ".mk-fw .mk-fwh1",
@@ -904,6 +928,7 @@ describe("the feature rows set their own type, and nothing else uses its familie
       ".mk-sechead h2",
       ".mk-stateyebrow",
       ".mk-stattitle",
+      ".mk-way .mk-wayh",
     ]);
     expect(ruleOwners("Source Serif 4").sort()).toEqual([".mk-fcopy p", ".mk-herolink", ".mk-heropill", ".mk-herosub"]);
     const src = resolve(here, "..");

@@ -11,10 +11,9 @@
  * jump to `#pulse`; the id has moved section twice now and losing it silently breaks that link.
  * The `scroll-margin-top` in the CSS is what keeps this heading clear of the sticky nav.
  *
- * ⚠️ THE GLYPHS ARE THIS PAGE'S OWN, NOT `StatusDot`'s. The app's dot draws a tinted disc with a
- * ring and a plane/chevron/star inside it — a different vocabulary from this outline → half-disc →
- * full-disc progression. Nothing was reused because there was nothing to reuse, and `StatusDot` is
- * deliberately untouched.
+ * ⚠️ THE GLYPHS ARE THE MARKETING TIER'S OWN, NOT `StatusDot`'s, and they live in `marketingMarks`
+ * since the footer drew them too (17 Sep). The app's dot is a tinted disc with a plane, chevron or
+ * star inside — a different vocabulary from this outline → half-disc → full-disc progression.
  *
  * ⚠️ THE ADVANCE STOPS WHEN THE SECTION IS OUT OF VIEW. A timer that runs down the whole page means
  * a reader who scrolls back finds the carousel somewhere they never left it, and it burns a render
@@ -23,40 +22,10 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { BAND_EYEBROW, BAND_HEADING, STATUS_STEPS } from "./landingCopy";
+import { StatusGlyph } from "./marketingMarks";
 
 /** How long each state holds before the carousel moves on. */
 const DWELL_MS = 4500;
-
-/**
- * The six marks, in pipeline order. `currentColor` throughout rather than the literal ink, so the
- * colour is set once on the row in CSS — and so the active mark can take a different one without
- * eleven hexes having to follow it.
- */
-const GLYPHS: React.ReactNode[] = [
-  <circle cx={12} cy={12} r={10} key="g" />,
-  <>
-    <circle cx={12} cy={12} r={10} strokeDasharray="6 4" />
-    <path d="M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z" fill="currentColor" stroke="none" />
-  </>,
-  <>
-    <circle cx={12} cy={12} r={10} />
-    <path d="M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z" fill="currentColor" stroke="none" />
-  </>,
-  <>
-    <circle cx={12} cy={12} r={10} strokeDasharray="6 4" />
-    <circle cx={12} cy={12} r={6.5} fill="currentColor" stroke="none" />
-  </>,
-  <>
-    <circle cx={12} cy={12} r={10} />
-    <circle cx={12} cy={12} r={6.5} fill="currentColor" stroke="none" />
-  </>,
-  <>
-    <path d="M5.5 2.5h9l4.5 4.5v14.5h-13.5z" strokeLinejoin="round" />
-    <path d="M14 2.5V7.5h5" strokeLinejoin="round" />
-    <path d="M8.5 12h7M8.5 15.5h7" strokeLinecap="round" />
-    <path d="M8.5 18.8c1.5-1.6 2.6 1.4 4-.2 1-1.1 2 .6 3 .2" strokeWidth={1.7} strokeLinecap="round" />
-  </>,
-];
 
 export const StatusBand: React.FC = () => {
   const [active, setActive] = useState(0);
@@ -128,9 +97,7 @@ export const StatusBand: React.FC = () => {
               onClick={() => { setActive(i); setRestart((n) => n + 1); }}
             >
               <span className="mk-sr">{s.title}</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                {GLYPHS[i]}
-              </svg>
+              <StatusGlyph index={i} />
             </button>
           ))}
         </div>

@@ -1,6 +1,6 @@
 /**
  * FoundingBand — the founding-writers banner that closes the landing page and `/founders`: a
- * full-bleed band carrying the artwork, with the offer on a white card sitting over it.
+ * full-bleed band with the artwork in one column and the offer on a white card in the other.
  *
  * ⚠️ IT REPLACES THE SEALED LETTER WHOLESALE, AND THE WAX WENT WITH THE CARD. The band was a
  * centred parchment letter — a paper fold, an SVG turbulence grain, and a burgundy wax seal
@@ -15,20 +15,16 @@
  * burgundy fill at scale here at all, so the exception has no subject and the plain rule stands
  * again: every burgundy on these pages is a mark under 12px, a hairline, or type.
  *
- * ⚠️ THE ARTWORK IS A CSS BACKGROUND, NOT AN `<img>`, AND THAT IS LOAD-BEARING RATHER THAN
- * CONVENIENT. It has to leave entirely below 1000px, and an inline `style` — which is where a
- * version-stamped `src` would have to live to stay in step with the file — BEATS a media query
- * whatever the query says. This repo has paid for that exact inversion twice, in the rail's
- * collapse and in the help FAB's offset. In the stylesheet the breakpoint simply wins.
+ * ⚠️ THE ARTWORK IS AN `<img>` AGAIN (17 Sep), and the reason it was ever a CSS background is
+ * gone with the old drawing. That one was a 3:1 banner whose smudge the card sat on, and it had to
+ * leave below 1000px — which a version-stamped inline style could not do, since an inline style
+ * beats any media query. The re-drawn picture is square, sits in its own column, and stays at every
+ * width, stacking above the card on a phone. So it is an image like every other on the site: lazy,
+ * with its real pixel size, and its `?v=` beside it here, where the smoke test reads it against the
+ * file on disk. Replace the picture, change the version below.
  *
- * ⚠️ WHICH MEANS THE CACHE-BUSTING VERSION LIVES IN `marketing.css`. Nothing under `public/` is
- * fingerprinted by the build, so a replaced file is served stale for an hour; the `?v=` is the
- * first eight hex digits of the file's md5 and a lock reads the stylesheet against the file on
- * disk. Replace the picture, change the version — in the CSS, not here.
- *
- * ⚠️ THE LEFT COLUMN IS EMPTY AND HAS NO ELEMENT. The card is placed in column 2 and column 1 is
- * simply the track the artwork shows through. An empty `<div>` to hold the space would be a node
- * in the accessibility tree standing in for a background.
+ * ⚠️ `alt=""`, AS THE BACKGROUND HAD NONE. The card beside it states the offer in words; the
+ * drawing — an older hawk pointing the way for a young one holding a scroll — decorates it.
  *
  * ⚠️ THE FORM IS `FoundingSignup`, MOUNTED HERE — one component, three places on the site. The
  * chrome is this file's; the field, the states, the announcement and the count are shared, so
@@ -52,11 +48,22 @@ import {
 } from "./landingCopy";
 import { FoundingSignup, FoundingCounter } from "./FoundingSignup";
 
+/** The banner's drawing. The version is the first eight hex digits of the file's md5. */
+const ART = { src: "/images/founding-writers.png", version: "c3533e30", width: 1100, height: 1100 };
+
 export const FoundingBand: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
 }> = ({ onNavigate }) => (
   <section className="mk-claimband" aria-labelledby="mk-band-h">
     <div className="mk-claimgrid">
+      <img
+        className="mk-claimart"
+        src={ART.src + "?v=" + ART.version}
+        alt=""
+        width={ART.width}
+        height={ART.height}
+        loading="lazy"
+      />
       <div className="mk-claimcard">
         <p className="mk-claimkicker">{FOUNDING_EYEBROW}</p>
         <h2 id="mk-band-h" className="mk-claimh2">{FOUNDING_HEADING}</h2>

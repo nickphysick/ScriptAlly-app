@@ -149,6 +149,23 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   --mk-claim-accent: #8a4a3c;
   --mk-claim-track: #f7e8e2;
   --mk-claim-sh: rgba(28, 19, 15, .11);
+  /* The rust at low alpha — the contact form's focus ring. Pre-computed from `--mk-claim-accent`'s
+     own channels, per the no-`color-mix()` rule. */
+  --mk-claim-ring: rgba(138, 74, 60, .2);
+  /* ── The footer and the contact page (17 Sep) ──
+     ⚠️ `--mk-foot-ground` IS THE SECOND BAND BELOW THE HERO THAT PAINTS ITS OWN GROUND, and the
+     lock that used to say there was only one now names both. It qualifies for the same reason the
+     banner does: it is bounded, and a hairline states its top edge. Three points darker than
+     `--mk-lower`, so the hairline carries the edge and the fill only confirms it. */
+  --mk-foot-ground: #efeae3;
+  /* The ink pill's hover, shared by the nav's CTA and the contact form's button — one value for
+     one job, rather than the same literal typed twice. */
+  --mk-ink-hov: #2c1f19;
+  /* The contact page's icon tiles: the grey behind the warning mark, and the pale slate and slate
+     of the privacy mark — the app's own Pro-chip pair. The rose tile reads `--mk-centre`. */
+  --mk-tile-grey: #eceae7;
+  --mk-slate: #6a89a7;
+  --mk-slate-pale: #e7eef3;
   /* The display ink for statement type. `--mk-head` (mocha) is the page-furniture heading colour
      and stays; a 52px+ statement wants the darker end, and the two are not interchangeable. */
   --mk-nearblack: #1c130f;
@@ -196,7 +213,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   white-space: nowrap;
 }
 .mk-btn--ink:hover {
-  background: #2c1f19; transform: translateY(-1px); box-shadow: 0 6px 14px rgba(28, 19, 15, .18);
+  background: var(--mk-ink-hov); transform: translateY(-1px); box-shadow: 0 6px 14px rgba(28, 19, 15, .18);
 }
 @media (prefers-reduced-motion: reduce) {
   .mk-btn--ink { transition: none; }
@@ -274,31 +291,24 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   max-width: 1300px; margin: 0 auto; transition: padding .2s ease;
 }
 .mk-navwrap.mk-scrolled .mk-nav { padding: 12px 56px; }
-.mk-brand { display: flex; align-items: center; gap: 12px; }
+/* ⚠️ 6px, DOWN FROM 12 (17 Sep), AND THE VISIBLE GAP IS NOT 6. The mark's drawing stops 2.6px
+   short of its box, and the re-drawn wordmark's letters start 5px inside theirs — where the old
+   file's started 22px in. So the eye reads about 14px, down from about 37: most of the change is
+   the new artwork, not this number. The footer's lockup states its own 11px. */
+.mk-brand { display: flex; align-items: center; gap: 6px; }
 .mk-brand-link { cursor: pointer; background: none; border: none; padding: 0; font-family: inherit; }
 .mk-logo { height: 40px; width: auto; display: block; flex: none; transition: height .2s ease; }
 /* The condensed height keeps the same ratio to the full one as before (0.85), so the nav's two
    states still shrink by the same proportion rather than by a number picked twice. */
 .mk-navwrap.mk-scrolled .mk-logo { height: 34px; }
-/* ⚠️ `.mk-monogram` STAYS, AND DELETING IT BREAKS THE FOOTER. The circled "S" was this nav's mark
-   and the only blue on the site — but the SHARED FOOTER renders the same class, and the footer's
-   internals are not this pass's to change. It looks orphaned here and is not.
-   (`.mk-avatar` is a third, different thing — the signed-in user's initial chip.) */
-.mk-monogram {
-  width: 32px; height: 32px; border-radius: 50%; background: #dfe7ec;
-  display: flex; align-items: center; justify-content: center;
-  font-family: "Playfair Display", Georgia, serif; font-size: 17px; color: #3a4650; flex: none;
-}
-.mk-wordmark {
-  font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 1.62rem;
-  letter-spacing: -.012em; color: var(--mk-nearblack); line-height: 1;
-}
-/* ⚠️ THE NAV'S WORDMARK IS A PICTURE; `.mk-wordmark` ABOVE IS STILL THE FOOTER'S TYPE. Two
-   different classes on purpose — the footer keeps Playfair, and restyling the shared bare class
-   would have put the artwork in both places.
+/* ⚠️ `.mk-monogram` IS DELETED (17 Sep). The circled "S" survived the nav's change of mark only
+   because the shared footer still drew it; the footer now carries the hawk, so the class has no
+   renderer. (`.mk-avatar` is a different thing — the signed-in user's initial chip.)
+   ⚠️ THE NAV'S WORDMARK IS A PICTURE AND THE FOOTER'S IS TYPE — `.mk-wordmark`, declared once in
+   the footer's block. Two classes on purpose: restyling the shared bare class would put one
+   treatment in both places.
    ⚠️ `width: auto` WITH A FIXED HEIGHT IS WHAT KEEPS THE LOCKUP HONEST. The file is 500×100, so at
-   34px tall it draws 170px wide — narrower than the 232px the Archivo caps needed, which gives the
-   nav's collapse budget room it did not have before. */
+   34px tall it draws 170px wide whatever the lettering inside it does. */
 .mk-wordmarkart { height: 34px; width: auto; display: block; flex: none; transition: height .2s ease; }
 .mk-navwrap.mk-scrolled .mk-wordmarkart { height: 29px; }
 
@@ -423,6 +433,11 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      twice — but it now sizes the image, and the measurement confirms the width rather than
      assuming it. */
   .mk-wordmarkart { height: 26px; }
+  /* ⚠️ AND ITS CONDENSED STATE, WHICH WAS TALLER THAN ITS RESTING ONE. The desktop condense rule
+     (`.mk-navwrap.mk-scrolled .mk-wordmarkart`, 29px) outranks the bare 26px above on specificity,
+     so on a phone the wordmark GREW as the bar shrank — measured 17 Sep. 22 is 26 at the nav's
+     own 0.85 condense ratio. */
+  .mk-navwrap.mk-scrolled .mk-wordmarkart { height: 22px; }
   .mk-burger { margin-left: auto; order: 2; }
   .mk-navright { order: 3; width: 100%; margin-left: 0; }
   .mk-navright .mk-btn { width: 100%; justify-content: center; }
@@ -550,9 +565,13 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 /* ⚠️ ANCHORED FROM THE LEFT NOW, NOT THE RIGHT. At `right: -6%` the shadow grew leftward across
    the copy as it got bigger; from `left: 54%` it grows RIGHTWARD, off the page, which is what the
    clip on `html` is there to absorb. The `-46%` lift is deliberately not `-50%`: it sits the bird
-   fractionally high against the copy's optical centre. */
+   fractionally high against the copy's optical centre.
+   ⚠️ 72%, UP FROM 58% (17 Sep). Against the 534px art column that is 384px, and the box's right
+   edge lands at 1393 on a 1440 page and 1313 on a 1280 one — past that viewport's edge. The
+   drawing stops 10% short of its own right edge, so at 1280 the ink still clears the page; below
+   ~1275 the clip takes the tip of the wing. Measured, and reported rather than capped. */
 .mk-heroart img {
-  position: absolute; top: 50%; left: 54%; width: 58%; max-width: none;
+  position: absolute; top: 50%; left: 54%; width: 72%; max-width: none;
   transform: translateY(-46%); opacity: 0.16; display: block;
 }
 
@@ -624,6 +643,16 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    held on one line. This stylesheet has shipped that inversion once already, in the nav. */
 @media (max-width: 560px) {
   .mk-hero .mk-herotitle { font-size: 38px; white-space: normal; }
+}
+/* ⚠️ AND IT STEPS DOWN TWICE MORE, SO IT NEVER ENDS ON ONE WORD (17 Sep). "The hunt begins." is
+   317px at 38 with the face loaded, and a three-word headline that wraps always leaves one word
+   alone — so on a narrower phone the line gets smaller instead of breaking. 34px (284) holds one
+   line from 372 down to 341; 31px (259) holds it on a 320. Copy untouched; sizes only. */
+@media (max-width: 372px) {
+  .mk-hero .mk-herotitle { font-size: 34px; }
+}
+@media (max-width: 340px) {
+  .mk-hero .mk-herotitle { font-size: 31px; }
 }
 
 
@@ -744,7 +773,14 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    and release below it; `max-width: 1000px` matches at 1000 and wraps it a pixel early. Measured
    the same way the 1099.98 boundary it replaces was. */
 @media (max-width: 999.98px) {
-  .mk-stattitle { white-space: normal; font-size: 27px; }
+  /* ⚠️ `text-wrap` ONLY HERE, AND AFTER `white-space`. Both are shorthands that set the wrap mode,
+     so in the base rule it would quietly undo the desktop `nowrap`. Released, it stops the sentence
+     ending on "campaign." alone, as it did at 375. */
+  .mk-stattitle { white-space: normal; font-size: 27px; text-wrap: balance; }
+}
+/* On a 320 phone even balanced lines of 27px left "campaign." alone; a size down fixes the count. */
+@media (max-width: 340px) {
+  .mk-stattitle { font-size: 24px; }
 }
 @media (max-width: 900px) {
   .mk-statband { padding: 64px 26px 56px; }
@@ -777,14 +813,14 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    Between two important declarations specificity decides, and .mk-frow h3 outranks a bare h3. The held
    run inherits its family for the same reason: the injection's plain span rule would otherwise set those
    two words in the body sans.
-   ⚠️ max-width: 13ch IS DELIBERATE AND STAYS. It is measured in the heading's own ch, so it tracks the
-   stacked 30px as well. On its own it does not prevent orphans — at 13ch "stands", "itself." and
-   "working" would each end a heading alone — so FeatureRows.tsx holds every heading's last two words on
-   one line. The longest held pair, "actually working", runs past the measure and stays inside the copy
-   column. */
+   ⚠️ NO MEASURE, AND `text-wrap: balance` IN ITS PLACE (17 Sep). The 13ch cap broke every heading
+   early and left most of the copy column unused; balancing sets the same words in lines of even
+   length across the whole column. The held last pair in FeatureRows.tsx stays: `balance` is
+   ignored by older engines (Safari before 17.5), and there the pair is still what stops a heading
+   ending on a single word. */
 .mk-frow h3 {
   font-family: "Special Elite", cursive !important; font-weight: 400; color: var(--mk-nearblack);
-  font-size: 44px; line-height: 1.18; letter-spacing: -0.005em; max-width: 13ch;
+  font-size: 44px; line-height: 1.18; letter-spacing: -0.005em; text-wrap: balance;
 }
 .mk-frow h3 .mk-fkeep { white-space: nowrap; font-family: inherit; }
 .mk-fcopy p {
@@ -1013,29 +1049,31 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    burgundy fill at scale on this site", an exception about SIZE rather than hue. There is no
    burgundy fill at scale here, so the exception has no subject and the plain rule stands again:
    every burgundy on these pages is a mark under 12px, a hairline, or type.
-   ⚠️ THE ARTWORK IS A BACKGROUND AND THE `?v=` LIVES HERE, IN THE STYLESHEET. It has to disappear
-   entirely below 1000px, and an inline style — which is where a version-stamped `src` would have
-   to live — BEATS a media query however the query is written. Nothing under `public/` is
-   fingerprinted by the build, so the hash is what stops an hour of stale cache after a re-export;
-   a lock reads this string back against the file on disk. Replace the picture, change the eight
-   hex digits.
-   ⚠️ COLOUR AND IMAGE SEPARATELY, NEVER THE SHORTHAND — same reason as `.mk-lower`. Here it
-   matters more: the shorthand would take the ground with the picture, and below 1000px the
-   picture is deliberately removed, so a shorthand `background-image: none` would blank the band. */
+   ⚠️ THE ARTWORK IS AN `<img>` AGAIN, NOT A BACKGROUND (17 Sep). It was a background because the
+   old 3:1 drawing, smudge and all, had to vanish below 1000px, and a version-stamped inline style
+   would have beaten the media query. The re-drawn picture is square and stays at every width, so
+   that reason is gone: the file, its size and its `?v=` hash live in `FoundingBand.tsx`, like
+   every other picture on the site, and the smoke test reads the hash against the file.
+   ⚠️ COLOUR ONLY, AND STILL NEVER THE SHORTHAND — same reason as `.mk-lower`: the shorthand resets
+   every longhand, so the next person to add an image here would take the ground with it. */
 .mk-claimband {
   background-color: var(--mk-claim-ground);
-  background-image: url("/images/founding-writers.png?v=fa0e900f");
-  background-repeat: no-repeat;
-  background-position: left center;
-  background-size: auto 100%;
   padding: 72px 0;
 }
-/* ⚠️ THE LEFT COLUMN IS EMPTY AND HAS NO ELEMENT — the card is placed in column 2 and column 1 is
-   simply the track the artwork shows through. A spacer `<div>` would be a node in the
-   accessibility tree standing in for a background. */
+/* ⚠️ `1fr 1.3fr` SO THE 430px CAP ACTUALLY BINDS. The old `0.72fr` column was 370px wide at 1440,
+   which would have held the picture under its cap at every width; this one is 447px, so the
+   drawing stops at 430 and sits centred in it. The 1280 override that followed the old smudge
+   leftward is deleted — there is no smudge to follow. */
 .mk-claimgrid {
   max-width: 1180px; margin: 0 auto; padding: 0 56px;
-  display: grid; grid-template-columns: 0.72fr 1.28fr; gap: 40px; align-items: center;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 40px; align-items: center;
+}
+/* The whole drawing, at its own ratio, never cropped: a width with `height: auto`, capped, and
+   centred in its track, with room above and below so it never touches the band's edge however
+   short the card beside it is. Decorative — the card beside it states the offer in words. */
+.mk-claimart {
+  grid-column: 1; justify-self: center; display: block;
+  width: 100%; max-width: 430px; height: auto; margin: 24px 0;
 }
 .mk-claimcard {
   grid-column: 2;
@@ -1054,6 +1092,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-claimband .mk-claimh2 {
   font-family: "Special Elite", cursive !important; font-weight: 400;
   font-size: 36px; line-height: 1.18; color: var(--mk-nearblack); margin: 0; max-width: 16ch;
+  /* Balanced (17 Sep): at 16ch "Join as a founding writer" broke before its last word at every
+     width, so the heading ended on "writer" alone. */
+  text-wrap: balance;
 }
 .mk-claimlead { margin: 20px 0 12px; font-size: 17.5px; color: var(--mk-ink); }
 .mk-claimlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; }
@@ -1137,18 +1178,16 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-betanote { font-size: 14.5px; color: var(--mk-blush-note); margin: 16px 0 0; }
 .mk-betanote .mk-doclink { color: var(--mk-burg); }
 
-/* ⚠️ THE THREE BREAKPOINTS ARE IN WIDENING-TO-NARROWING ORDER AND MUST STAY THAT WAY. All three
-   are equal specificity and a media query confers none, so source order is the whole cascade. */
-@media (max-width: 1280px) {
-  /* The artwork's smudge sits further left as the band narrows; the card follows it. */
-  .mk-claimgrid { grid-template-columns: 0.58fr 1.42fr; }
-}
+/* ⚠️ THE TWO BREAKPOINTS ARE IN WIDENING-TO-NARROWING ORDER AND MUST STAY THAT WAY. Both are
+   equal specificity and a media query confers none, so source order is the whole cascade. */
 @media (max-width: 1000px) {
-  /* ⚠️ THE PICTURE LEAVES ENTIRELY. `background-size: auto 100%` scales it by the band's HEIGHT,
-     so a narrow viewport does not crop it — it keeps the same width and simply covers the card.
-     There is no width at which a left-anchored full-height image and a single column coexist. */
-  .mk-claimband { background-image: none; padding: 56px 0; }
-  .mk-claimgrid { grid-template-columns: 1fr; padding: 0 26px; }
+  /* ⚠️ STACKED, THE PICTURE STAYS — it used to leave here, because a left-anchored 3:1 drawing and
+     a single column could not coexist. The square one sits above the card at the same cap; on a
+     phone the column is narrower than 430, so there it simply takes the column. The band's own
+     padding is the room above it and the grid gap the room below. */
+  .mk-claimband { padding: 56px 0; }
+  .mk-claimgrid { grid-template-columns: 1fr; padding: 0 26px; gap: 28px; }
+  .mk-claimart { margin: 0; }
   .mk-claimcard { grid-column: 1; }
   .mk-claimform { flex-direction: column; }
   .mk-claimform input, .mk-claimform .mk-btn--ink { flex: none; width: 100%; }
@@ -1160,15 +1199,11 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-claimfigures { display: block; }
   .mk-claimleft { margin-top: 4px; }
 }
-
-/* ⚠️ ONE RULE. `display` was stated twice — a flex row here for the single-row footer the
-   shared footer superseded, and `block` two hundred lines below, which won. `align-items`
-   and `gap` went with it: both are inert on a block box, so they described a layout that no
-   longer existed while reading as though they applied. The grid inside does the arranging. */
-.mk-foot { max-width: 1300px; margin: 0 auto; padding: 38px 56px 48px; display: block; }
-.mk-foot .mk-brand { margin-right: auto; }
-.mk-foot .mk-monogram { width: 26px; height: 26px; font-size: 13px; }
-.mk-foot .mk-wordmark { font-size: 16px; }
+/* Below 360 "founding writer" (228px at 27) no longer fits the card's 224px line, and the heading
+   broke into three with "writer" alone; at 26 the pair is 219px. */
+@media (max-width: 360px) {
+  .mk-claimband .mk-claimh2 { font-size: 26px; }
+}
 
 /* ── Responsive baseline (presentable, not pixel-designed) ── */
 @media (max-width: 1080px) {
@@ -1181,24 +1216,25 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      bare 0, for the same reason as the bleed above. */
   .mk-fcopy { --mk-copy-pull: 0px; }
   /* ⚠️ CAPPED SO THE HELD PAIR FITS THE NARROWEST PHONE. The heading's last two words are one
-     `nowrap` run, so they cannot break — at 34px the longest of them, "actually working", measures
-     302.9px against a 268px column at 320 and hung 8.9px past the viewport with a real horizontal
-     scrollbar. It was never far off: at the previous 30px it measured 267.3px in that same 268px
-     column, clearing by 0.7px, and at 375 today's 34px clears by 1.1px. A size that fits by a
-     rounding error is not fitting, it is getting away with it.
-     The divisor is the pair's own width in units of font-size (302.9 / 34 = 8.91, rounded up to 9
-     for margin), and 52px is the rows' two 26px gutters — so the size is whatever keeps the run
-     inside the column, and 34px wherever that is not binding: 29.8px at 320, the full 34 from ~360.
+     `nowrap` run, so they cannot break. The divisor is the widest pair's own width in units of
+     font-size, and 52px is the rows' two 26px gutters — so the size is whatever keeps the run inside
+     the column, and 34px wherever that is not binding.
+     ⚠️ 11, UP FROM 9 (17 Sep), BECAUSE THE HEADINGS CHANGED UNDER IT. 9 was sized for "actually
+     working" (8.91em). The current rows hold "Submission Packages" (10.54em, measured with Special
+     Elite loaded) and "Comparable Titles" (9.23em), so at 375 the first ran 358.5px in a 323px
+     column: on the deployed site its last words were clipped at the screen edge, and once the 13ch
+     cap came off it widened the whole row, clipping the paragraph too. At 11 it is 309.6px at 375
+     and 256.9px at 320; the full 34px returns from ~426. RE-MEASURE WHEN A HEADING CHANGES — the
+     widest pair sets this number, and no source check can see a font's widths.
      ⚠️ TWO DECLARATIONS, AND THE ORDER IS THE FALLBACK. A browser without container units drops the
      second as invalid and keeps the plain 34px; it is written this way rather than behind a second
      `@supports` because this sheet locks "one container-unit guard" and that is the right law. */
-  .mk-frow h3 { font-size: 34px; font-size: min(34px, calc((100cqw - 52px) / 9)); }
+  .mk-frow h3 { font-size: 34px; font-size: min(34px, calc((100cqw - 52px) / 11)); }
   .mk-fcopy p { font-size: 18px; }
   /* ⚠️ `.mk-beta`'s 18px padding is DELETED rather than retargeted. That band was a centred card
      needing side room inside a full-width section; `.mk-claimband` sets its own gutter at 1000 and
      its own card padding at 560, both in its own block. A rule here would be a third statement of
      the same inset, in a media query nobody editing the banner would think to look in. */
-  .mk-foot { padding: 30px 26px 40px; flex-wrap: wrap; }
 }
 
 /* ══════════════ Pricing (public marketing route) ══════════════
@@ -1214,14 +1250,18 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    their names and are restated below.
    Surfaces from --mk-parch/--mk-blush, hairlines from --mk-hair. No new colour. */
 
-.mk-pricehead { max-width: 1300px; margin: 0 auto; padding: 70px 56px 44px; text-align: center; }
+/* ⚠️ 76 ABOVE AND 48 BELOW, AND THE 56px SIDES STAY (17 Sep). The brief wrote `76px 0 48px`, but
+   this header is its own container — a zero there would take away the only thing keeping both
+   lines off the edge of a 1000px window. */
+.mk-pricehead { max-width: 1300px; margin: 0 auto; padding: 76px 56px 48px; text-align: center; }
 .mk-pricehead h1 {
   font-family: "Playfair Display", Georgia, serif; font-size: clamp(2rem, 3.2vw, 2.6rem);
-  font-weight: 500; line-height: 1.14; color: var(--mk-head); margin: 0;
+  font-weight: 500; line-height: 1.14; color: var(--mk-head); margin: 0; text-wrap: balance;
 }
+/* Balanced AND measured: without the 52ch the sub is a single 1,188px line at 1440. */
 .mk-pricehead p {
   font-size: 1.06rem; font-weight: 300; line-height: 1.6; color: var(--mk-muted);
-  margin: 18px auto 0; max-width: 52ch;
+  margin: 18px auto 0; max-width: 52ch; text-wrap: balance;
 }
 .mk-pricebody { max-width: 1300px; margin: 0 auto; padding: 0 56px 100px; }
 
@@ -1231,44 +1271,71 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   display: grid; grid-template-columns: 1fr 1.1fr 1fr; gap: 20px;
   align-items: stretch; padding: 22px 0 0;
 }
-/* ⚠️ A FIXED HEIGHT, AND IT IS WHAT LETS THE THREE CARDS BE READ ACROSS. Three birds at three
-   natural scales would put three plan names on three different lines. `flex-end` plus
-   `object-position: bottom left` stands each one on the same floor whatever its own proportions,
-   and the image is capped by HEIGHT with `width: auto` so none of them is stretched. */
-.mk-tierillo { height: 104px; display: flex; align-items: flex-end; margin: 0 0 14px; }
-.mk-tierillo img { max-height: 100%; width: auto; object-fit: contain; object-position: bottom left; display: block; }
-.mk-tier--founding .mk-tierillo { height: 124px; }
+/* ⚠️ `overflow: visible` IS STATED, NOT INHERITED, because the bird's whole point is to break the
+   card's top edge and a future `overflow: hidden` here — the usual way to tidy a radius — would
+   quietly cut its head off. `isolation` gives each card its own stacking context, so the bird's
+   and the flag's z-indexes are ordered against each other and not against the page. */
 .mk-tier {
-  position: relative; display: flex; flex-direction: column;
+  position: relative; display: flex; flex-direction: column; overflow: visible; isolation: isolate;
   background: var(--mk-parch); border: 1px solid var(--mk-hair); border-radius: 16px;
-  padding: 30px 28px 28px;
+  padding: 26px 28px 26px;
 }
+/* ⚠️ THE BIRD PERCHES ON THE CORNER; IT NO LONGER HAS A ROW OF ITS OWN (17 Sep). The fixed-height
+   slot above each plan name is deleted. Out of flow, the birds cannot push three names onto three
+   lines however differently they are drawn, which was the slot's only job.
+   ⚠️ EACH FILE CARRIES 12–19% EMPTY CANVAS ABOVE ITS DRAWING, so at `top: -18px` the ink breaks
+   the edge by 2–8px rather than by 18. The numbers are the brief's, applied as given; trimming the
+   canvas would widen each bird to 99–125px, past the 30% the text leaves free.
+   Above the card, below the flag: z 1 against the flag's 2. */
+.mk-tierbird {
+  position: absolute; top: -18px; right: 18px; z-index: 1;
+  height: 84px; width: auto; object-fit: contain; display: block; pointer-events: none;
+}
+.mk-tier--founding .mk-tierbird { height: 96px; }
 /* ⚠️ ONE ATTRIBUTE DRIVES BOTH THE SEMANTICS AND THE TREATMENT. `aria-disabled` is what a screen
    reader hears and what this rule dims, so the two cannot drift apart — and there is no separate
    `.mk-tier--off` class that someone could apply to a tier that is actually buyable. */
 .mk-tier[aria-disabled="true"] { opacity: .5; box-shadow: none; cursor: default; }
+/* ⚠️ THE LIFT IS A MARGIN NOW, NOT A TRANSFORM, AND THAT IS WHAT LINES THE LISTS UP (17 Sep). The
+   card takes 12px of extra top padding for its flag and gives the same 12px back as a negative
+   top margin, so it grows upward and its content starts on exactly the same line as its
+   neighbours'. `translateY(-6px)` moved the content too, which — with the old taller bird slot —
+   left this card's list 14px below the other two. */
 .mk-tier--founding {
   background: var(--mk-blush); border-color: var(--mk-cta-bd); cursor: default;
-  box-shadow: 0 18px 44px rgba(124, 58, 42, .14); transform: translateY(-6px);
+  box-shadow: 0 18px 44px rgba(124, 58, 42, .14);
+  padding-top: 38px; margin-top: -12px;
 }
 /* ⚠️ THE TAB BREAKS THE TOP EDGE, which is why it is absolutely positioned and the card is
-   `position: relative`. It says what is true of this tier and nothing persuasive. */
+   `position: relative`. It says what is true of this tier and nothing persuasive. Above the
+   perched bird: z 2 against the bird's 1.
+   ⚠️ TOP-LEFT, NOT CENTRED (17 Sep), because centred it collided with the perched bird at every
+   width measured — by 20px at 1440 and 62px on a phone. At the left it lines up with the card's
+   own content edge and clears the bird wherever three cards fit side by side. */
 .mk-tiertag {
-  position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+  position: absolute; top: -13px; left: 28px; z-index: 2;
   font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: .58rem;
   letter-spacing: .2em; text-transform: uppercase;
   background: var(--mk-nearblack); color: var(--mk-cta-ink);
   border-radius: 999px; padding: 6px 15px; white-space: nowrap;
 }
+/* ⚠️ 70% ON THE NAME AND THE LINE BENEATH IT, so neither runs under the bird in the corner. The
+   price and everything below sit clear of the bird's foot and keep the full width. */
 .mk-tiername {
-  font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 1.5rem;
-  color: var(--mk-nearblack); margin: 0;
+  font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 26px;
+  line-height: 1.3; color: var(--mk-nearblack); margin: 0; max-width: 70%;
 }
-/* ⚠️ `min-height` ON THE TWO PROSE LINES, so three cards of different wordiness still line their
-   prices and their feature lists up with each other. Without it the columns cannot be read
-   across, which is the only thing a three-card layout is for. */
-.mk-tierline { font-size: .95rem; color: var(--mk-muted); margin: 6px 0 0; min-height: 2.6em; line-height: 1.4; }
-.mk-tierprice { display: flex; align-items: baseline; gap: 8px; margin: 20px 0 0; flex-wrap: wrap; }
+/* ⚠️ A `min-height` ON EACH OF THE THREE ROWS ABOVE THE LIST — description, price and after-line
+   — so three cards of different wordiness start their feature lists on one line. Without them
+   the columns cannot be read across, which is the only thing a three-card layout is for. */
+.mk-tierline {
+  font-size: .95rem; color: var(--mk-muted); margin: 6px 0 0; line-height: 1.4;
+  max-width: 70%; min-height: 72px;
+}
+.mk-tierprice {
+  display: flex; align-items: baseline; gap: 8px; margin: 20px 0 0; flex-wrap: wrap;
+  min-height: 48px;
+}
 .mk-tieramount {
   font-family: "Playfair Display", Georgia, serif; font-size: 2.1rem; font-weight: 500;
   color: var(--mk-nearblack); line-height: 1.1;
@@ -1277,15 +1344,15 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   font-family: "JetBrains Mono", monospace; font-size: .62rem; letter-spacing: .14em;
   text-transform: uppercase; color: var(--mk-muted);
 }
-.mk-tierafter { font-size: .88rem; color: var(--mk-muted); margin: 8px 0 0; line-height: 1.45; min-height: 2.6em; }
+.mk-tierafter { font-size: .88rem; color: var(--mk-muted); margin: 8px 0 0; line-height: 1.45; min-height: 66px; }
 .mk-tierafter strong { color: var(--mk-nearblack); font-weight: 600; }
 
 .mk-tierfeats {
   list-style: none; margin: 22px 0 0; padding: 20px 0 0;
-  border-top: 1px solid var(--mk-hair); display: grid; gap: 10px;
+  border-top: 1px solid var(--mk-hair); display: grid; gap: 12px;
 }
 .mk-tier--founding .mk-tierfeats { border-top-color: rgba(124, 58, 42, .18); }
-.mk-tierfeats li { position: relative; padding-left: 22px; font-size: .95rem; line-height: 1.45; color: var(--mk-blush-body); }
+.mk-tierfeats li { position: relative; padding-left: 22px; font-size: 16px; line-height: 1.45; color: var(--mk-blush-body); }
 /* Drawn, not typed — a glyph would be announced once per item and the list already says how many. */
 .mk-tierfeats li::before {
   content: ""; position: absolute; left: 1px; top: .36em; width: 9px; height: 6px;
@@ -1300,7 +1367,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 
 .mk-tierplaces { margin: 16px 0 0; }
 /* `margin-top: auto` pins the call to action to the card's foot whatever the list above it does. */
-.mk-tiercta { margin-top: auto; padding-top: 24px; }
+.mk-tiercta { margin-top: auto; padding-top: 22px; }
 .mk-tiercta .mk-btn { display: block; width: 100%; text-align: center; padding: 13px 20px; border-radius: 11px; }
 .mk-tiernote {
   font-family: "JetBrains Mono", monospace; font-size: .58rem; letter-spacing: .14em;
@@ -1358,44 +1425,128 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-q { font-weight: 600; color: var(--mk-nearblack); }
 .mk-a { color: var(--mk-muted); margin-top: 5px; line-height: 1.6; max-width: 76ch; }
 
+/* ⚠️ THE CARDS STACK BELOW 1200, UP FROM 960 (17 Sep), AND THE NUMBER IS MEASURED. Three columns
+   need the founding card to be at least 368px wide: that is where its 96px bird's drawing clears a
+   flag 223px wide at the left, and where "Founding Writer" at 26px fits its 70% line. The card
+   reaches 368 at a 1189px window. Below that, side by side, the flag ran into the bird and the
+   name broke onto a second line, which put that card's list 34px below its neighbours' — the one
+   thing three cards side by side exist to avoid.
+   ⚠️ WIDENING-TO-NARROWING: this block, then 960, then 560 — equal specificity throughout. */
+@media (max-width: 1199.98px) {
+  /* One column, and the lift comes off — a card raised above nothing reads as misaligned. The
+     flag's extra padding stays; only the margin that paid for it goes. The 26px gap is also what
+     the perched birds and the flag overhang into, and both overhang by less. */
+  .mk-tiers { grid-template-columns: 1fr; gap: 26px; }
+  .mk-tier--founding { margin-top: 0; }
+  /* Stacked, the rows above the list have nothing to line up WITH, so the reserved height is dead. */
+  .mk-tierline, .mk-tierprice, .mk-tierafter { min-height: 0; }
+}
 @media (max-width: 960px) {
   .mk-pricehead { padding: 44px 26px 30px; }
   .mk-pricebody { padding: 0 26px 72px; }
-  /* One column, and the lift comes off — a card raised above nothing reads as misaligned. */
-  .mk-tiers { grid-template-columns: 1fr; gap: 26px; }
-  .mk-tier--founding { transform: none; }
   .mk-cmp .mk-c { width: auto; }
-  /* Stacked, the two prose lines have nothing to line up WITH, so the reserved height is dead. */
-  .mk-tierline, .mk-tierafter { min-height: 0; }
+}
+/* ⚠️ ON A PHONE THE FOUNDING CARD IS 323px WIDE, AND BOTH THE FLAG AND THE NAME HAVE TO GIVE.
+   Measured at 375: the flag at full size runs 40px into the bird's drawing, and "Founding Writer"
+   at 26px is 196px against a 186px line, so it broke before its last word. The tighter flag clears
+   the drawing by 22px at 375 and 7px at 360, and 22px keeps each plan name to one line. */
+@media (max-width: 560px) {
+  .mk-tiertag { left: 20px; font-size: .5rem; letter-spacing: .1em; padding: 5px 11px; }
+  .mk-tiername { font-size: 22px; }
+}
+/* Below 360 the plan name steps down again: at 22px "Founding Writer" (166px) outgrows its 70%
+   line from ~348 down. */
+@media (max-width: 360px) {
+  .mk-tiername { font-size: 19px; }
+}
+/* ⚠️ ON A 320 PHONE THE FOUNDING CARD IS 266px INSIDE ITS BORDER, AND A 96px BIRD AND A 168px FLAG
+   CANNOT SHARE ITS TOP EDGE — measured, the flag ran 32px into the drawing and the plan name 16px
+   under it. The bird steps down to 72 and the flag tightens, which clears both by 6–8px. The brief's
+   96 holds everywhere from 341 up. */
+@media (max-width: 340px) {
+  .mk-tier--founding .mk-tierbird { height: 72px; }
+  .mk-tiertag { left: 14px; font-size: .46rem; }
 }
 
 /* ══════════════ Shared footer (every public page) ══════════════
-   Supersedes the single-row `.mk-foot` layout that Landing, Pricing and the legal pages each drew
-   their own copy of. `.mk-foot` keeps its name and its outer padding; what changed is what sits
-   inside it — `.mk-foot`'s own rule is declared once, above. Every value below is a var() or a
-   neutral already used in this file. */
+   ⚠️ ONE AUTHORITATIVE BLOCK, REWRITTEN RATHER THAN PATCHED (17 Sep). The footer's rules had
+   spread to four places — a base rule beside the banner, a 1080px padding override, a 760px column
+   override and this block — and all four are deleted and restated here, breakpoints included.
+   ⚠️ THE BAND IS FULL WIDTH AND ITS CONTENT IS NOT. The ground and the hairline run edge to edge;
+   the columns sit in the site's standard 1180/56 container, so the footer lines up with the page
+   above it rather than with the nav's wider 1300.
+   ⚠️ AND THE BASE LINE NO LONGER STATES THE HOST. It printed `SITE_HOST` in mono capitals, which
+   put "SCRIPTALLY.INK" on every public page — the address that replaces it is the one support
+   address, read from `companyInfo`, so the footer cannot publish a second. */
+.mk-foot {
+  background-color: var(--mk-foot-ground); border-top: 1px solid var(--mk-hair);
+  padding: 64px 0 28px;
+}
+.mk-footinner { max-width: 1180px; margin: 0 auto; padding: 0 56px; }
 .mk-footgrid {
-  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 30px; align-items: start;
-  padding-bottom: 26px; border-bottom: 1px solid var(--mk-hair);
+  display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 48px; align-items: start;
 }
-.mk-footbrand .mk-brand { margin-right: 0; }
+/* The lockup: the hawk beside the name in type. `.mk-brand` supplies the row; the 11px is the
+   footer's own, and outranks the nav's 6 on specificity rather than on source order. */
+.mk-footbrand .mk-brand { gap: 11px; }
+.mk-footmark { height: 38px; width: auto; display: block; flex: none; }
+/* ⚠️ `line-height: 1.3`, NOT THE 1 THIS RULE USED TO CARRY. "QueryHawk" has two descenders, and
+   1.3 is the house floor for mixed-case Playfair. */
+.mk-wordmark {
+  font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 25px;
+  line-height: 1.3; letter-spacing: -.012em; color: var(--mk-nearblack);
+}
 .mk-foottag {
-  font-size: 12.5px; font-weight: 300; line-height: 1.65; color: var(--mk-muted);
-  margin-top: 10px; max-width: 300px;
+  font-size: 16.5px; line-height: 1.6; color: var(--mk-muted);
+  margin: 18px 0 0; max-width: 34ch;
 }
+/* The six states as the status band draws them — a signature rather than a control, so the row is
+   hidden from the accessibility tree and dimmed as a group. */
+.mk-footglyphs { display: flex; gap: 14px; margin: 22px 0 0; color: var(--mk-nearblack); opacity: .5; }
+.mk-footglyphs svg { width: 19px; height: 19px; display: block; flex: none; }
+/* No `!important` needed: brand.tsx forces h1, h2 and h3, and these are h4. */
 .mk-footcol h4 {
-  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--mk-label); font-weight: 500; margin-bottom: 11px;
+  font-family: "Special Elite", cursive; font-weight: 400; font-size: 15px;
+  color: var(--mk-claim-accent); margin: 0 0 18px;
 }
+.mk-footcol ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; justify-items: start; }
+/* ⚠️ THE RULE UNDER EACH LINK IS ALWAYS THERE AND ONLY ITS COLOUR CHANGES. A border that appeared
+   on hover would add a pixel of height and nudge every link below it. */
 .mk-footcol button {
-  display: block; background: none; border: none; padding: 0 0 8px; cursor: pointer;
-  font-family: inherit; font-size: 13px; color: var(--mk-ink); text-align: left;
+  background: none; border: 0; border-bottom: 1px solid transparent; padding: 0 0 2px;
+  cursor: pointer; font-family: inherit; font-size: 16.5px; line-height: 1.4;
+  color: var(--mk-ink); text-align: left;
 }
-.mk-footcol button:hover { color: var(--mk-burg); }
+.mk-footcol button:hover { border-bottom-color: var(--mk-claim-accent); }
+/* The hairline is the bar's own edge, not an element above it. `1fr auto 1fr` keeps the middle
+   cell on the page's midline whatever the two ends hold. */
 .mk-footbase {
-  display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 18px;
-  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--mk-label);
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
+  margin: 56px 0 0; padding: 22px 0 0; border-top: 1px solid var(--mk-hair);
+  font-size: 14.5px; color: var(--mk-muted);
+}
+.mk-footbase p { margin: 0; }
+.mk-footmade { display: inline-flex; align-items: center; gap: 8px; }
+.mk-footmade svg {
+  width: 16px; height: 16px; flex: none; fill: none; stroke: var(--mk-claim-accent);
+  stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+}
+.mk-footmail {
+  justify-self: end; color: var(--mk-ink); text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.mk-footmail:hover { border-bottom-color: var(--mk-claim-accent); }
+/* ⚠️ NARROWING ORDER, AND THE 560 BLOCK MUST STAY BELOW THE 900 ONE — equal specificity, so the
+   later query wins. */
+@media (max-width: 900px) {
+  .mk-footinner { padding: 0 26px; }
+  .mk-footgrid { grid-template-columns: 1fr 1fr; gap: 36px 24px; }
+  .mk-footbrand { grid-column: 1 / -1; }
+}
+@media (max-width: 560px) {
+  .mk-footgrid { grid-template-columns: 1fr; }
+  .mk-footbase { grid-template-columns: 1fr; justify-items: start; gap: 10px; }
+  .mk-footmail { justify-self: start; }
 }
 
 /* ══════════════ Document shell (privacy, terms) ══════════════ */
@@ -1485,7 +1636,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-callout p { margin-top: 0; font-size: 13.5px; }
 
 @media (max-width: 760px) {
-  .mk-footgrid { grid-template-columns: 1fr 1fr; gap: 24px; }
   .mk-docplane { padding: 30px 22px 6px; }
   .mk-docband { padding: 20px 22px; flex-wrap: wrap; }
   .mk-doctitle { font-size: 25px; }
@@ -1534,7 +1684,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-mission .mk-mission-main {
   display: block; font-family: "Special Elite", cursive !important; font-weight: 400;
   font-size: 50px; line-height: 1.2; letter-spacing: -.018em;
-  color: var(--mk-nearblack); margin: 0;
+  color: var(--mk-nearblack); margin: 0; text-wrap: balance;
 }
 
 /* The three registers. Measured paragraph → flat sentence → the turn. */
@@ -1582,7 +1732,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-sechead h2 {
   font-family: "Special Elite", cursive !important; font-weight: 400;
   font-size: 38px; line-height: 1.25; letter-spacing: -.005em;
-  color: var(--mk-nearblack); margin: 0;
+  color: var(--mk-nearblack); margin: 0; text-wrap: balance;
 }
 .mk-secrule { width: 64px; height: 2px; background: var(--mk-claim-accent); opacity: .75; margin: 20px auto 0; }
 
@@ -1608,7 +1758,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 .mk-bandcopy h2 {
   font-family: "Playfair Display", Georgia, serif; font-size: 28px; font-weight: 500;
-  line-height: 1.2; color: var(--mk-head); margin-top: 8px;
+  line-height: 1.2; color: var(--mk-head); margin-top: 8px; text-wrap: balance;
 }
 .mk-bandcopy p {
   font-size: 15px; font-weight: 300; line-height: 1.72; color: #5a4a40; margin-top: 16px;
@@ -1703,88 +1853,160 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-commitgrid { grid-template-columns: 1fr; }
   .mk-founder { padding: 38px 26px 16px; }
 }
+/* ⚠️ TWO PHONE SIZES SO NEITHER HEADING ENDS ON ONE WORD (17 Sep), measured with Special Elite
+   LOADED — an earlier reading taken against the fallback face was 20–30% narrow and would have
+   passed sizes that fail. At 375 the column is 323px. "Get good stories told." at 50 cannot keep
+   its last two words together ("stories told." alone is 324px), so it ended on "told."; at 38 it
+   balances as Get good / stories told. "Why QueryHawk exists" is 368px at 38 and left "exists"
+   alone; at 27 it is 301px and holds one line down to a ~353px phone. */
+@media (max-width: 560px) {
+  .mk-mission .mk-mission-main { font-size: 38px; }
+  .mk-sechead h2 { font-size: 27px; }
+}
+/* Below 360 the column is too narrow for 27px (268px at 320), and two lines of three words always
+   leave one alone — so the line gets smaller rather than breaking. 23px is 256px. */
+@media (max-width: 360px) {
+  .mk-sechead h2 { font-size: 23px; }
+}
 
-/* ══════════════ Contact — ways in, and a form card ══════════════ */
+/* ══════════════ Contact — the address, three reasons, and a form card ══════════════
+   ⚠️ ONE AUTHORITATIVE BLOCK, REWRITTEN RATHER THAN PATCHED (17 Sep). Every contact rule was
+   deleted and restated here. `.mk-wayplate`, `.mk-cleft h1` and the old `.mk-way strong`/`span`
+   pair went with the markup that rendered them.
+   ⚠️ THE PAGE IS ITS OWN CONTAINER, AND IT IS THE STANDARD ONE — 1180 wide with 56px gutters — so
+   the service line under the two columns shares their edges without restating them. */
+.mk-contact { max-width: 1180px; margin: 0 auto; padding: 80px 56px 88px; }
 .mk-contactsplit {
-  max-width: 1180px; margin: 0 auto; padding: 54px 56px 20px;
-  display: grid; grid-template-columns: 1fr 440px; gap: 54px; align-items: start;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; align-items: start;
 }
-.mk-cleft h1 {
-  font-family: "Playfair Display", Georgia, serif; font-size: 42px; font-weight: 500;
-  line-height: 1.12; color: var(--mk-head); margin-top: 10px;
+/* The kicker is About's, value for value — the two company pages open the same way. */
+.mk-ckicker {
+  font-family: "JetBrains Mono", monospace; font-weight: 400; font-size: .72rem;
+  letter-spacing: .24em; text-transform: uppercase; color: var(--mk-muted); margin: 0 0 18px;
 }
-.mk-clede { font-size: 15px; font-weight: 300; line-height: 1.72; color: #5a4a40; margin-top: 14px; max-width: 480px; }
-.mk-cmail {
-  display: inline-block; margin-top: 18px;
-  font-family: "JetBrains Mono", monospace; font-size: 13px; letter-spacing: .02em;
-  color: var(--mk-burg); text-decoration: none; border-bottom: 1px solid var(--mk-bd); padding-bottom: 2px;
+/* ⚠️ TWO CLASSES AND `!important`, HERE AND ON BOTH h2 RULES BELOW. brand.tsx forces every
+   `h1:not(.wsh-title)`, `h2` and `h3` into the brand face with `!important`; the h1 selector is
+   0-1-1, so a single class would lose between two important declarations and draw in Playfair. */
+.mk-contact .mk-ch1 {
+  font-family: "Special Elite", cursive !important; font-weight: 400;
+  font-size: 52px; line-height: 1.15; color: var(--mk-nearblack); margin: 0; text-wrap: balance;
 }
-.mk-cmail:hover { color: var(--mk-head); border-bottom-color: var(--mk-burg); }
+/* `ch` on the element that sets its own size, so the measure tracks the type it measures. */
+.mk-clede { font-size: 19px; line-height: 1.65; color: var(--mk-muted); margin: 20px 0 0; max-width: 42ch; }
 
-.mk-ways { margin-top: 30px; }
-.mk-way { display: flex; gap: 14px; padding: 18px 0; border-top: 1px solid var(--mk-hair); }
-.mk-way strong {
-  display: block; font-family: "Playfair Display", Georgia, serif; font-size: 16px;
-  font-weight: 500; color: var(--mk-head);
+.mk-cmailcard {
+  display: flex; align-items: center; gap: 16px; margin: 32px 0 0;
+  background: #fff; border-radius: 14px; padding: 18px 22px;
 }
-.mk-way span { display: block; margin-top: 6px; font-size: 13.5px; font-weight: 300; line-height: 1.65; color: var(--mk-muted); }
-.mk-wayplate {
-  flex: none; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
-  background: var(--mk-centre); border: 1px solid var(--mk-bd);
+.mk-cmaillabel {
+  margin: 0 0 3px; font-size: 12.5px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--mk-muted);
 }
-.mk-wayplate svg { width: 17px; height: 17px; fill: none; stroke: var(--mk-burg); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.mk-cmail {
+  font-size: 19px; color: var(--mk-nearblack); overflow-wrap: anywhere;
+  text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px;
+}
+.mk-cmail:hover { color: var(--mk-claim-accent); }
+
+/* The three reasons: a hairline above them, then one row each — the tile, then the words. */
+.mk-ways { margin: 36px 0 0; padding: 32px 0 0; border-top: 1px solid var(--mk-hair); display: grid; gap: 24px; }
+.mk-way { display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 24px; align-items: start; }
+.mk-way .mk-wayh {
+  font-family: "Special Elite", cursive !important; font-weight: 400;
+  font-size: 20px; line-height: 1.3; color: var(--mk-nearblack); margin: 0; text-wrap: balance;
+}
+.mk-waybody { font-size: 16.5px; line-height: 1.6; color: var(--mk-muted); margin: 6px 0 0; }
+
+/* The icon tiles. The glyphs are stroke-only and take their colour from the tile, per
+   `marketingMarks` — no hex lives in the component. */
+.mk-ctile { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; flex: none; }
+.mk-ctile svg { width: 20px; height: 20px; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.mk-ctile--mail { width: 44px; height: 44px; border-radius: 12px; }
+.mk-ctile--mail svg { width: 22px; height: 22px; }
+.mk-ctile--rose { background: var(--mk-centre); }
+.mk-ctile--rose svg { stroke: var(--mk-claim-accent); }
+.mk-ctile--grey { background: var(--mk-tile-grey); }
+.mk-ctile--grey svg { stroke: var(--mk-nearblack); }
+.mk-ctile--slate { background: var(--mk-slate-pale); }
+.mk-ctile--slate svg { stroke: var(--mk-slate); }
+
+/* The Archivist — whole, at its own ratio, capped and left-aligned. */
+.mk-cart { display: block; width: 100%; max-width: 300px; height: auto; margin: 40px 0 0; }
 
 /* The form card — the one lifted surface on the page. */
 .mk-formcard {
-  background: var(--mk-card); border: 1px solid var(--mk-hair); border-radius: 16px; padding: 26px;
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 12px 34px rgba(58, 28, 20, 0.09);
+  background: #fff; border-radius: 18px; padding: 32px 34px 30px;
+  box-shadow: 0 4px 18px rgba(28, 19, 15, .09);
 }
-.mk-formcard h2 {
-  font-family: "Playfair Display", Georgia, serif; font-size: 24px; font-weight: 500;
-  color: var(--mk-head); margin-top: 6px;
+.mk-formcard .mk-formh2 {
+  font-family: "Special Elite", cursive !important; font-weight: 400;
+  font-size: 28px; line-height: 1.25; color: var(--mk-nearblack); margin: 0;
 }
-.mk-csub { font-size: 13px; font-weight: 300; color: var(--mk-muted); margin-top: 6px; }
-.mk-field { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+.mk-csub { font-size: 16px; line-height: 1.55; color: var(--mk-muted); margin: 8px 0 0; }
+.mk-field { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
 .mk-field label {
-  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--mk-label);
+  font-size: 12.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--mk-muted);
 }
 .mk-field input, .mk-field select, .mk-field textarea {
-  font-family: inherit; font-size: 14px; color: var(--mk-ink);
-  background: #ffffff; border: 1px solid var(--mk-bd); border-radius: 10px; padding: 10px 12px;
+  font-family: inherit; font-size: 17px; color: var(--mk-ink);
+  background: #fff; border: 1px solid var(--mk-bd); border-radius: 10px; padding: 13px 15px;
   width: 100%; box-sizing: border-box;
 }
-.mk-field textarea { min-height: 118px; resize: vertical; line-height: 1.6; }
+.mk-field textarea { min-height: 140px; resize: vertical; line-height: 1.55; }
+/* The rust ring: the accent itself on the border, and at low alpha around it. */
 .mk-field input:focus, .mk-field select:focus, .mk-field textarea:focus {
-  outline: none; border-color: var(--mk-burg); box-shadow: 0 0 0 3px var(--mk-centre);
+  outline: none; border-color: var(--mk-claim-accent); box-shadow: 0 0 0 3px var(--mk-claim-ring);
 }
 .mk-field input::placeholder, .mk-field textarea::placeholder { color: var(--mk-label); }
-.mk-fielderr { font-size: 12px; color: var(--mk-burg); }
+.mk-fielderr { font-size: 14px; color: var(--mk-burg); }
 
 /* Off-screen rather than display:none — see the honeypot note in ContactPage.tsx. */
 .mk-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
-/* Dark ink primary — the one filled button in the tier, and only on this page's own action. */
+/* The ink pill at full width. Its hover is the nav CTA's, through the shared token. */
 .mk-cbtn {
-  margin-top: 20px; width: 100%; font-family: inherit; font-size: 13.5px; font-weight: 500;
-  padding: 12px 22px; border-radius: 11px; cursor: pointer;
-  background: var(--mk-ink); border: 1px solid var(--mk-ink); color: #ffffff;
+  display: block; width: 100%; margin: 26px 0 0; cursor: pointer;
+  font-family: inherit; font-size: 17px; font-weight: 500; line-height: 1.2;
+  padding: 16px 22px; border: 0; border-radius: 30px;
+  background: var(--mk-nearblack); color: var(--mk-cta-ink);
+  transition: background .18s ease;
 }
-.mk-cbtn:hover { background: var(--mk-head); border-color: var(--mk-head); }
+.mk-cbtn:hover { background: var(--mk-ink-hov); }
 .mk-cbtn:disabled { opacity: .55; cursor: default; }
-.mk-cstate { margin-top: 12px; font-size: 13px; font-weight: 300; line-height: 1.6; color: var(--mk-muted); }
+.mk-cbtn:disabled:hover { background: var(--mk-nearblack); }
+.mk-cstate { margin: 14px 0 0; font-size: 15px; line-height: 1.55; color: var(--mk-muted); }
 .mk-cstate--bad { color: var(--mk-burg); }
-.mk-cfine { margin-top: 14px; font-size: 12px; font-weight: 300; line-height: 1.6; color: var(--mk-label); }
+.mk-cfine { margin: 16px 0 0; font-size: 14px; line-height: 1.55; color: var(--mk-muted); }
 .mk-cfine .mk-doclink { font-size: inherit; }
-
-.mk-svcline {
-  max-width: 1180px; margin: 0 auto; padding: 24px 56px 10px; border-top: 1px solid var(--mk-hair);
+/* ⚠️ 17px ON PHONES TOO. mobileShell.css holds every text control at 16px below md with
+   `!important` — a floor against iOS zooming on focus. 17 is above that floor, so the brief's size
+   keeps the floor's purpose; the selector repeats its `:not()` chain plus this page's class
+   because that is the specificity it takes to win between two important declarations. */
+@media (max-width: 767.98px) {
+  .mk-field input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  .mk-field textarea,
+  .mk-field select { font-size: 17px !important; }
 }
-.mk-svcline p { font-size: 12.5px; font-weight: 300; line-height: 1.65; color: var(--mk-muted); }
-.mk-svcline strong { color: var(--mk-ink); font-weight: 500; }
 
+/* Under both columns and above the footer; the hairline is the line's own edge. */
+.mk-svcline { margin: 64px 0 0; padding: 24px 0 0; border-top: 1px solid var(--mk-hair); }
+.mk-svcline p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--mk-muted); }
+.mk-svcline strong { color: var(--mk-ink); font-weight: 600; }
+
+/* ⚠️ WIDENING-TO-NARROWING, AND THE ORDER IS THE CASCADE: all four blocks are equal specificity,
+   and a media query confers none. The reduced-motion override sits after the rule it overrides
+   for the same reason. */
+@media (prefers-reduced-motion: reduce) { .mk-cbtn { transition: none; } }
+@media (max-width: 1000px) {
+  .mk-contactsplit { grid-template-columns: minmax(0, 1fr); gap: 48px; }
+}
 @media (max-width: 900px) {
-  .mk-contactsplit { grid-template-columns: 1fr; gap: 30px; padding: 40px 26px 16px; }
-  .mk-cleft h1 { font-size: 32px; }
-  .mk-svcline { padding: 20px 26px 8px; }
+  .mk-contact { padding: 56px 26px 64px; }
+}
+@media (max-width: 560px) {
+  .mk-contact .mk-ch1 { font-size: 33px; }
+  .mk-formcard { padding: 24px 20px 22px; }
+  .mk-cmailcard { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .mk-cart { max-width: 220px; margin-left: auto; margin-right: auto; }
 }
