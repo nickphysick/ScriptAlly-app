@@ -419,52 +419,13 @@
   padding: 5px 12px; color: #4a3a2e; white-space: nowrap;
 }
 
-/* ══ THE HEADER (v16 §1) ══ */
-/* ⚠️ align-items: CENTER — the counters card is centred against the greeting, not top-aligned;
-   a top-aligned card beside a 46px name reads as two unrelated blocks. */
-/* ⚠️ THE BOTTOM PADDING IS THE INTER-CARD GAP — see --os-cardgap. It was 26px, nearly
-   double the gap between every other pair of cards, for no reason the card could state. */
-/* ⚠️ THE REF'S HERO: a two-track grid (`auto 1fr`), 40px gap, `padding: 10px 4px 6px`. It was a
-   flex row with 32px and its own bottom padding — which put the stats' left edge 66px out and the
-   hero 27px short at every width. */
-/* ⚠️ THE PRIORITY BLOCK'S VALUES, NOT THE BASE RULE'S — ref `.hero{gap:28px;padding:6px 4px 4px}`
-   overriding its own `gap:40px;padding:10px 4px 6px`. Six pixels of padding, and every card on the
-   page sat six pixels low because of it: the hero measured 128 against 122 and the grid, the top
-   row, both cards, the to-do card and the activity column all inherited the offset. */
-/* ⚠️ `.os-greet`'S GEOMETRY IS THE v26 BLOCK'S — see 'v26 · THE HERO'. The v22 rule that stood
-   here (a one-row `auto 1fr` flex-none grid) was superseded declaration for declaration and is
-   deleted rather than left to be read as the live one. */
-/* ⚠️ `.os-greet .os-gl` IS DELETED (v33, Phase 4). The page's own hero note has said since v26 that
-   "the old `.os-gl` / `.os-grow2` nesting is gone" — and it was gone from the PAGE and still
-   rendered by the SKELETON, which is the only reason the rule had a subject at all. The ghost is
-   three flat grid children now, matching the hero, so the wrapper went with it. `grep -rn os-gl
-   src/` returns nothing.
-
-   ⚠️ `.os-greet .os-grow2` (below) and seven more classes in this sheet are ALSO named nowhere in
-   `src/` — a full sweep of the file's 237 selectors found `.os-chip`, `.os-datechip`, `.os-grow2`,
-   `.os-lbl`, `.os-pill-o`, `.os-pin`, `.os-spacer` and `.pintext`. They are reported and NOT
-   removed: none was orphaned by this pass, and a skeleton commit that sweeps eight unrelated rules
-   is how a removal scoped to one surface takes out a rule serving two. */
-/* ⚠️ `.os-dateline` IS DELETED, NOT HIDDEN (audit pack P2). Its rule said the date line "says the
-   one thing the chrome does not" — which was true of the kicker it replaced and never true of the
-   date itself. A subtitle sits BELOW the name instead; the header is shorter for it. */
-/* ref `.hero p{margin:6px 0 0;color:var(--ink2);font-size:17px}` — the one piece of address on the
-   page. It was 13.5 in a muted step, which read as a caption under the greeting rather than a line
-   spoken to the reader. */
-.os-sub2 { font-size: 17px; color: #6b5d54; margin-top: 6px; }
-.os-greet .os-grow2 { display: flex; align-items: center; gap: 14px; }
-/* ⚠️ 46px, NOT 52 — ref `.hero h1{font-size:52px}` with the v17 priority block overriding to 46,
-   which is what renders. The base is the earlier ref's value left in place, and reading the first
-   declaration would have kept the greeting a size too big at every width. The hero is 122px tall
-   because of it; at 52 it was 128, and every card on the page sat 6px low. */
-.os-greet h1 { font-family: var(--font-serif); font-weight: 700; font-size: 46px; letter-spacing: -0.02em; color: #2a1f18; line-height: 1.05; margin: 0; }
-.os-greet .os-spacer { flex: 1; }
-.os-datechip {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 12px; color: #6a5a50; background: #ffffff;
-  border: 1px solid #e3d9cc; border-radius: 10px; padding: 7px 12px; white-space: nowrap;
-}
-.os-datechip svg { width: 13px; height: 13px; stroke: #7c3a2a; fill: none; stroke-width: 1.7; flex: none; }
+/* ══ THE HEADER — see 'THE HEADER (stage 1)' near the end of this sheet ══
+   ⚠️ THE OLD HEADER'S RULES ARE DELETED HERE, NOT LEFT BESIDE THE NEW ONES (stage 1, 17 Sep). This
+   block held the v16–v26 greeting's notes, its `.os-greet h1` rule, and four rules with no subject:
+   `.os-sub2`, `.os-greet .os-grow2`, `.os-greet .os-spacer` and the date chip (`.os-datechip`). The
+   header was rebuilt, so the header's dead rules went with it. The other five classes an earlier sweep
+   found named nowhere in `src/` — `.os-chip`, `.os-lbl`, `.os-pill-o`, `.os-pin`, `.pintext` — are
+   not the header's and are still reported rather than removed. */
 /* ⚠️ `.os-pills` AND `.os-pill` ARE RETIRED WITH THE ROW THEY DRESSED (dashboard redesign, Phase 3).
    The greeting's tenure and achievement pills are gone; nothing in `src/` renders either class, and
    a rule the stylesheet selects on that no component emits is a rule with no subject — this repo has
@@ -480,8 +441,10 @@
 /* ══ §8 · SKELETONS ══
    Overlay per card; content goes opacity:0 so the layout cannot shift when data lands.
    Skeleton = "don't know yet"; the empty states are "know it's nothing" — never conflate. */
-.os-card.isload, .os-greet.isload { position: relative; }
-.os-card.isload > *:not(.os-skel), .os-greet.isload > *:not(.os-skel) { opacity: 0; pointer-events: none; }
+/* ⚠️ `.os-greet.isload` IS GONE FROM BOTH RULES (stage 1) — the header no longer takes a per-card
+   skeleton; it says its words without figures while the data is out. */
+.os-card.isload { position: relative; }
+.os-card.isload > *:not(.os-skel) { opacity: 0; pointer-events: none; }
 .os-skel { position: absolute; inset: 14px 16px; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
 .os-skel i {
   display: block; border-radius: 8px; min-height: 12px;
@@ -578,38 +541,11 @@
 }
 
 /* ══ THE HERO ══ */
-/* ⚠️ PLACED, NOT AUTO-PLACED. `.os-greet` is `grid-template-columns: auto minmax(0, 1fr)`, so three
-   auto-placed children land at (1,1), (1,2) and (2,1) — the stats block beside the heading and the
-   subtitle underneath it, which is the hero upside down. These three mirror `.os-greet > h1`,
-   `.os-subrow` and `.os-counters` exactly. */
-.os-skelpage .os-greet > .os-sk-h1 { grid-column: 1; grid-row: 1; }
-.os-skelpage .os-greet > .os-sk-sub { grid-column: 1; grid-row: 2; }
-.os-skelpage .os-greet > .os-sk-stats {
-  grid-column: 2; grid-row: 1 / span 2; align-self: center; position: relative; top: -4px;
-}
-/* ⚠️ 48.3 IS THE h1's LINE BOX (46px × 1.05) AND THE 4px IS ITS OWN MARGIN — the two together are
-   what make the hero's first grid row 52.3 rather than 48.3. Taking the size and leaving the
-   margin behind is half a port, and it put the whole second row 4px high. */
-.os-sk-h1 { width: 300px; height: 48.3px; margin-bottom: 4px; border-radius: 10px; }
-/* ⚠️ 39.8 IS THE SUBROW's BOX, NOT THE SUBTITLE's LINE. `.os-subrow` is a flex row holding the
-   17px line (whose own 16px bottom margin counts toward the row) and, on a young account, the
-   tour chip. Measured 39.8 at all four widths with the chip up and 35.6 without — a 4.2px spread,
-   inside the 8px the Phase 4 gate allows, so one value serves both. */
-.os-sk-sub { width: 206px; height: 39.8px; }
-/* ⚠️ THE FIVE CLAMPS ARE THE COUNTERS' OWN. `.os-cic` is `clamp(64px, 4.6vw, 104px)` and IT is what
-   the counters card's height is — 70.6 / 78.7 / 88.3 / 104 across the four widths, and at 2520 it
-   is what the whole hero's height is. A fixed 88px ghost was right at 1920 and nowhere else. */
-.os-sk-stats {
-  display: flex; justify-content: space-between; align-items: center;
-  width: 100%; gap: clamp(12px, 1.1vw, 30px);
-}
-.os-sk-stat { display: flex; align-items: center; gap: clamp(8px, 0.85vw, 18px); min-width: 0; }
-.os-sk-ill {
-  width: clamp(64px, 4.6vw, 104px); height: clamp(64px, 4.6vw, 104px);
-  border-radius: 14px; flex: none;
-}
-.os-sk-statlab { width: 110px; height: 15px; margin-bottom: 9px; }
-.os-sk-statfig { width: 150px; height: 26px; }
+/* ⚠️ NO GHOST RULES, BECAUSE THERE IS NO GHOST (stage 1). The cover renders the page's own
+   `OneScreenHeader`, so its first row is sized by the header's rules and nothing here restates it.
+   `.os-sk-h1`, `.os-sk-sub`, `.os-sk-stats`, `.os-sk-stat`, `.os-sk-ill`, `.os-sk-statlab` and
+   `.os-sk-statfig` were measured stand-ins for the old greeting and its three stat rows, and went
+   with them. */
 
 /* ══ THE TOP ROW ══ */
 /* ⚠️ NO HEIGHTS ON THE GHOST CARDS THEMSELVES — they wear `.os-card`, `.os-aut`, `.os-lead`,
@@ -703,12 +639,10 @@
 }
 
 /* ══ §11 · RESPONSIVE FRAME ══ */
+/* ⚠️ THE GREETING'S 40px AND 34px STEPS ARE GONE (stage 1) — the header's type holds at 44px down
+   to 560px and steps once there. Its steps live with its rules, in 'THE HEADER (stage 1)'. */
 @media (max-width: 1360px) {
   .os-content { grid-template-columns: 276px minmax(0, 1fr) 262px; column-gap: 14px; padding: 16px 22px 22px; }
-  .os-greet h1 { font-size: 40px; }
-}
-@media (max-width: 1240px) {
-  .os-greet h1 { font-size: 34px; }
 }
 @media (max-width: 1200px) {
   .os-content { grid-template-columns: 256px minmax(0, 1fr) 240px; }
@@ -744,9 +678,6 @@
 }
 @media (max-width: 640px) {
   .os-content { padding: 14px 14px 24px; }
-  .os-greet .os-grow2 { flex-wrap: wrap; }
-  .os-greet h1 { font-size: 23px; }
-  .os-datechip { order: -1; }
   .os-toprow .os-lead { height: 220px; }
 }
 
@@ -755,101 +686,13 @@
   .os-skel i { animation: none; background: #efe7db; }
 }
 
-/* ══ THE HEADER COUNTERS ══ */
-/* takes ALL the remaining width; min-width:0 so a long greeting cannot push it out of the row */
-/* ⚠️ THE CONTAINER IS GONE (dashboard redesign, Phase 3) — the three stats sit directly on the
-   page ground beside the greeting. What went is the CARD: `.os-card`'s paper, its radius, its
-   shadow and its `::after` rim, none of which this element carries any more.
+/* ══ THE HEADER COUNTERS — RETIRED (stage 1, 17 Sep) ══
+   The three stat cards are deleted, and their rules with them: `.os-counters` and its 2100/1699
+   regimes, the no-lift guards, `.os-counter`, the stat slot `.os-cic` and its painted-plane
+   exemption, `.os-cw`/`.os-cl`/`.os-cv`/`.os-cn`/`.os-cd`, and the 1360/1240/1024 steps that moved
+   them in time with the greeting. What stays below is SHARED: `.os-mark-il` is the illustrated-mark
+   treatment the goals card still wears. */
 
-   ⚠️ AND THEY ARE CENTRED IN THE REMAINING WIDTH, NOT PUSHED RIGHT. The greeting is `flex: 0 0 auto`
-   and sizes to its widest child; the stats take everything after the gap and `justify-content:
-   center` centres them INSIDE that. Pushing right (`margin-left: auto` on a shrink-wrapped row)
-   would tie their position to the greeting's length, so the row would shift every time the writer's
-   name or the date changed underneath it. */
-/* ⚠️ THE REF'S STATS: flex, 36px gap, LEFT-aligned in the track the hero's second column gives it.
-   The app centred them in the remaining width; the ref's own `justify-content:flex-start!important`
-   is the shipping value. */
-/* ⚠️ THREE REGIMES, NOT TWO, AND THE BASE IS CENTRED (v22). The note this replaces was a correct
-   reading of v16 — 56px base, 36px below 1700 — and v22 states the row differently: it CENTRES the
-   stats in their track at 44px, tightens to 34px below 2100, and only below 1700 does it go
-   flex-start at 32px. The middle regime is the one with no v16 equivalent, and it covers 1920,
-   which is the width most of this pass has been measured at.
-   ⚠️ AND THE ALIGNMENT IS INVISIBLE TO THE DIFF, which is why it survived two passes. `stats`
-   probes the CONTAINER; the container's box is identical whether its children are centred or packed
-   left, so nothing in the table could report that the three stats sat hard against the greeting
-   with 300px of empty track to their right. It was found by dumping the subtree, not by measuring.
-   ⚠️ THE 6px THE TABLE *DOES* REPORT ON THIS PROBE IS NOT A FAULT. The hero is `auto 1fr`, so the
-   stats begin where the greeting ends — and the ref's greeting reads "Hello, Bethany" where the
-   harness account's is shorter. That is the fixture, not the design, and it cannot be closed
-   without renaming the account. */
-.os-counters {
-  flex: 1; min-width: 0;
-  display: flex; align-items: center; justify-content: center; gap: 44px;
-  padding: 0;
-}
-/* the middle regime — ref `@media (max-width:2100px){.stats{gap:34px!important}}`. After the base
-   rule, because a media query confers no specificity. */
-@media (max-width: 2100px) {
-  .os-counters { gap: 34px; }
-}
-
-/**
- * ⚠️ THE HERO STACKS BELOW THE REF'S OWN BREAKPOINT — and this block sits HERE, after the two
- * rules it overrides, because a media query confers no specificity.
- *
- * It was written into the grid's `@media (max-width: 1699px)` two hundred lines above `.os-greet`,
- * where both rules are 0-1-0 and the later one simply won. Measured: the hero stayed two columns at
- * 1536, 82px shorter than the ref's stacked one, which moved the TOP OF ALL THREE COLUMNS up by
- * that much — every card on the page reported as misplaced at 1536 and correct at 1920, which is
- * the tell for a missing responsive step rather than a wrong value. This repo records the same trap
- * against a `prefers-reduced-motion` override; it is the same law and it cost the same hour.
- *
- * Ref: `@media (max-width:1700px){ .hero{grid-template-columns:1fr!important;gap:14px!important}
- * .stats{gap:36px!important} }`.
- */
-/**
- * ⚠️ THE STACKING LEFTOVER IS DELETED, AND THE SWEEP COULD NOT SEE IT. `.os-greet` was being told
- * `grid-template-columns: 1fr` here and `auto minmax(0,1fr)` by a LATER base rule — and a media
- * query confers no specificity, so the base rule won and this one had been inert since the v26
- * hero landed. My duplicate-declaration sweep groups by (selector, MEDIA, property), so a media
- * rule defeated by a later BASE rule is two different keys to it and never pairs up. A dead rule
- * that a dead-rule sweep is structurally blind to is worth more than the rule itself: found by
- * reading the block after the measurement said the hero was already two columns at 1536.
- */
-@media (max-width: 1699px) {
-  /* ⚠️ 32 AND flex-start — ref `.stats{justify-content:flex-start!important;gap:32px!important}`,
-     which is the LAST of three `.stats` rules inside that block: it also carries `gap:30px` and a
-     bare `justify-content:flex-start` earlier, both superseded by this one. A value read off the
-     first match in a stylesheet is not the value. Stacked, there is no leftover track to centre in
-     anyway, which is why the alignment changes with the layout rather than with the gap. */
-  .os-counters { justify-content: flex-start; gap: 32px; }
-}
-/* ⚠️ READOUTS, NOT CONTROLS — no lift, ever. Kept after the card came off (Phase 3): the element
-   no longer carries `.os-card`, so these two rules select nothing TODAY, and they are the guard
-   against someone putting it back. A rule with no subject is normally the fault this repo records;
-   here the absence of the subject IS the state being guarded, which is the one case where keeping
-   it is right rather than sentimental. */
-.os-card.os-counters:hover, .os-card.os-counters.os-lift:hover {
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06);
-  transform: none;
-}
-/* ⚠️ THE READOUT CARD HOLDS ITS RIM STILL TOO — the ring, not a border-color, since the ring is
-   now the only thing that draws it. Without this the rim would warm on hover and promise the
-   click the rest of this rule exists to deny. */
-.os-card.os-counters:hover::after, .os-card.os-counters.os-lift:hover::after {
-  box-shadow: inset 0 0 0 1px #e3d9cc;
-}
-/* equal thirds, each CENTRED within its own third — not spread to the edges.
-   ⚠️ NOT `.os-ct`: that name belonged to the retired book-spine title, and a class that has meant
-   two different things is a class nobody can grep. */
-/* ⚠️ `flex: 0 1 auto`, NOT `flex: 1` (Phase 3). Inside the card each stat took an equal third of
-   a fixed box and the row filled it exactly, so `justify-content` had nothing to do. On the open
-   ground the three shrink-wrap and the GROUP is what centres — which is what makes "centred in
-   the remaining width" a statement rather than a no-op. Padding widens to carry the space the
-   card's own used to. */
-/* ⚠️ NO DIVIDER, NO PADDING — the ref's `.stat` is `display:flex; align-items:center; gap:18px` and
-   nothing else. The rule between stats was the container's furniture and the container is gone. */
-.os-counter { display: flex; align-items: center; gap: 18px; flex: 0 0 auto; min-width: 0; }
 /**
  * ⚠️ ILLUSTRATED MARKS, BARE ON THE CARD — and two traps, each of which cost a round to find.
  *
@@ -878,85 +721,6 @@
   /* the opacity leg is the entrance's; both live here now rather than in a second rule */
   transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1), opacity 0.2s ease 0.1s;
 }
-/**
- * ⚠️ 44px, AND THE CEILING IS THE ARTWORK'S — MEASURED, NOT CHOSEN (dashboard redesign, Phase 3).
- *
- * The pack asked for 96px, "up from 74". Neither figure was the page's: they were 44 (54 for the
- * plane) and had been. More usefully, these are RASTERS, so the honest ceiling is the source's own
- * resolution at the device pixel ratio the app targets — and the app ships one resolution with no
- * `srcset` and no DPR handling anywhere, so at DPR 2 the ceiling is half the intrinsic size:
- *
- *     agents-on-file-icon.png    100 × 100  →  50px
- *     response-rate-icon.png     100 × 100  →  50px
- *     active-query-image.png     800 × 800  → 400px   (the plane; huge headroom, and unused)
- *
- * Two of the three bind at 50px, which is below the ~64px the brief set as the floor worth moving
- * for. So they stay at 44 and the plane stays at its own 54 — every mark is inside its ceiling
- * today, and growing them would be upsampling a 100px PNG to fill a box it cannot fill.
- *
- * ⚠️ THE FIX IS BIGGER SOURCE ARTWORK, NEVER A BIGGER BOX. If the marks are wanted larger, the two
- * 100px files are re-exported at 2× the intended display size and this number moves with them.
- */
-.os-cic {
-  /* ⚠️ THE SLOT IS THE REF'S 112px (96 BELOW 1700); THE ARTWORK IS 50px INSIDE IT.
-     These are RASTERS at one resolution with no `srcset`, so the largest sharp size is the source's
-     own pixels at the DPR the app targets: agents-on-file 100×100 → 50, response-rate 100×100 → 50,
-     active-query 800×800 → 400. Two of three bind at 50, so the row caps there. The SLOT still
-     reserves what the design asks for and the picture centres in it — the shape that needs no change
-     the day the artwork is re-exported. Upscaling a 100px PNG into a 112px box would be softer than
-     what ships today, and the harness could not tell. */
-  width: 112px; height: 112px;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0;
-  /* ⚠️ THE 2px OPTICAL NUDGE IS GONE (v27, Phase 3). It was written when the mark sat directly
-     beside a Playfair heading, whose optical centre is above its line-box centre. In v27's hero the
-     stats are their own block, centred against the greeting PAIR and already carrying the row's own
-     4px lift — so the nudge was a second correction for a relationship that no longer exists, and
-     it put the illustration 2px above its own row. Measured against the ref: 92.2 where the ref
-     draws 96.1. Two optical corrections stacked is how a mark ends up outside the box it belongs
-     to. */
-  position: relative;
-}
-.os-counter:hover .os-cic img { transform: rotate(-3deg) scale(1.05); }
-
-/**
- * ⚠️ THE QUERIES-SENT MARK IS A PAINTING, AND IT BREAKS THE HOUSE RULE ON PURPOSE (audit pack P3).
- *
- * `mix-blend-mode: multiply` exists on `.os-mark-il img` because the other marks are drawn on an
- * OPAQUE WHITE FIELD, and without it each renders as a white square on the parchment. This one is
- * genuinely transparent — its corners are 3% white, not 100% — so multiply has nothing to remove
- * and instead DARKENS the watercolour wash against the card beneath it. The exception is stated
- * here, at the rule, rather than left as an unexplained `normal` someone later "restores".
- *
- * ⚠️ AND THE TEST FOR THE OTHER THREE STILL HOLDS. Multiply is not weakened on `.os-mark-il img`;
- * it is overridden for this one selector only, so a fourth line-drawn mark still gets it by
- * default and still fails loudly if it does not.
- *
- * 54px against its siblings' 44px because a wash needs room the line drawings do not — and the
- * negative margin grows with it, so the card's height is untouched: 54 − 24 = 30px effective,
- * still well under the ~50px the label and figure occupy. Verified: the card measures 82px with
- * the plane in, as it did with the icon it replaced.
- */
-/* the plane's source is 800px, so it is not the binding constraint — it takes the slot */
-.os-cic.plane { width: 112px; height: 112px; margin: 0; }
-.os-cic.plane img { mix-blend-mode: normal; }
-
-/* ⚠️ THE REF'S ≤1700 STEP, DECLARED AFTER THE BASE RULE — a media query confers no specificity, so
-   this block sat two hundred lines ABOVE `.os-cic` and lost to it at every width. Measured: the
-   slot stayed 112px at 1536 where the ref steps to 96, and the stats row was 16px taller than the
-   ref's. Second instance of the same trap in this file in one pass; the first was the hero's own
-   stack, and both were written into the grid's media block because that is where the responsive
-   rules "live". They live after the rule they override, or they do not live at all.
-
-   ⚠️ AND IT HAD TO MOVE TWICE. Placed after `.os-cic`'s base rule it still lost, because
-   `.os-cic.plane` is declared BELOW that and is 0-2-0 — the same weight as this block's second
-   selector, and later. Specificity gets you level with the rule you are overriding; only order
-   settles it, so the step goes after the LAST of them. */
-/* ⚠️ THE 96px ILLUSTRATION OVERRIDE IS GONE. v26's ref pinned `width:96px!important` below 1700,
-   beating its own clamp, and this mirrored it. v27 does not: measured, the ref computes 70.6px at
-   1536, which IS `clamp(64px, 4.6vw, 104px)`. */
-
-
 /* the goals mark — same rules, smaller box; `Query Target Icon.png` despite the card's name */
 /* ⚠️ `align-self: center` IS LOAD-BEARING — `.os-goal-r1` is `align-items: baseline`, and AN IMAGE
    HAS NO BASELINE: it aligns on its bottom margin edge and drags the row taller than its text.
@@ -978,53 +742,6 @@
  * which creates no stacking context on the CARD.
  */
 .os-card.enter .os-mark-il img { opacity: 0; }
-.os-cw { min-width: 0; }
-/* the ref's `.lab`: 16px in `--ink2`, 3px above the figure */
-.os-cl { font-size: 16px; color: #6b5d54; margin-bottom: 3px; white-space: nowrap; }
-.os-cv { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; }
-/* ⚠️ TABULAR NUMERALS — a counting figure whose glyph widths change re-lays-out the row on
-   every frame. */
-/* the ref's `.fig b`: serif 600 / 34px, in `--ink`. Tabular numerals stay — a counting figure whose
-   glyph widths change re-lays-out its row on every frame. */
-.os-cn {
-  font-variant-numeric: tabular-nums;
-  font-family: var(--font-serif); font-size: 34px; font-weight: 600; color: #2a1f18;
-  line-height: 1;
-}
-/* ref `.stat .mini` — 13px on a 3/10 pad. It was 10px on 2/8, which put the one piece of context
-   the stat row carries a full quarter below the ref's size. */
-.os-cd {
-  font-size: 13px; border-radius: 99px; padding: 3px 10px; white-space: nowrap;
-  background: #e6ece3; border: 1px solid #d3dccf; color: #4f6a4c;
-}
-
-/* ⚠️ THESE MUST SIT AFTER THE BASE RULES ABOVE, not up in the page's responsive frame. The
-   selectors are the same specificity, so source order decides — parked in the earlier block they
-   LOST to the base rules and every step was silently dead (measured: icons still shown at 1200
-   while the h1 had already stepped to 34px).
-
-   ⚠️ The breakpoints are the PAGE'S OWN ladder — 1360 (where the grid first tightens and the h1
-   drops to 40) and 1240 (where the h1 drops again to 34). The ref's first step is 1440, but this
-   page set its ladder in the one-screen build: tightening the card at 1440 while the greeting
-   beside it stayed at 46px would put the card visibly out of time with its own row. The icon step
-   lands on 1240 exactly as the pack asks, because the page already breaks there. One rhythm. */
-@media (max-width: 1360px) {
-  .os-greet { gap: 24px; }
-  .os-counter { padding: 2px 10px; gap: 10px; }
-  .os-cn { font-size: 21px; }
-}
-@media (max-width: 1240px) {
-  .os-greet { gap: 18px; }
-  /* the round marks are the only thing here that can go without losing information */
-  .os-cic { display: none; }
-  .os-counter { padding: 2px 8px; }
-}
-@media (max-width: 1024px) {
-  /* the header stacks: greeting first, the card full width beneath it */
-  .os-greet { flex-direction: column; align-items: flex-start; padding-bottom: 0; }
-  /* stacked, the stats have no leftover width to centre in — they start where the greeting does */
-  .os-counters { width: 100%; margin-top: 4px; justify-content: flex-start; }
-}
 
 /* ══ §3 · THE CHART CARD ══ */
 /**
@@ -2622,113 +2339,112 @@
    ref puts it and where it shares a line with Feedback and New. The rules go with the element:
    leaving a stylesheet block for markup nothing renders is the fault this sheet already records. */
 
-/* ══ v26 · THE HERO ══ */
-/**
- * ⚠️ TWO ROWS, AND THE STATS SPAN BOTH — ref `.page2 .hero .stats{grid-row:1 / span 2}`.
+/* ══ THE HEADER (stage 1, 17 Sep) ═══════════════════════════════════════════════════════════════
+ * One row, the left column's first: the greeting and its counts line on the left, the hawk at the
+ * right-hand end, just before the activity column. It REPLACES v26's two-row grid, whose stats
+ * spanned both rows — `.os-subrow`, `.os-sub2line`, the stat clamps and the 1980 chip-wording
+ * switch (`.os-cd-long`/`.os-cd-short`) are deleted with the cards they served.
  *
- * THE PACK GIVES TWO OPPOSITE INSTRUCTIONS FOR THIS, back to back: first that the stats are
- * "row 1 / column 2 … pinned to the heading's row", then that they "span both hero rows … They are
- * not pinned to the heading's row — that squashes them into the heading's height." The ref settles
- * it and the second is right: `grid-row: 1 / span 2`, `align-self: center`, `top: -4px`. So does
- * the pack's own gate, which requires the stats block to be TALLER than the greeting block — which
- * a row-1 placement cannot produce.
+ * ⚠️ `align-items: flex-end` IS THE WHOLE ALIGNMENT. The picture is the tallest thing in the row,
+ * so the row is its height and the text block stands on the same floor — nothing is nudged.
  *
- * The 4px lift is optical: the greeting block's mass sits high (a 46px heading over a 17px line),
- * so a true centre reads low against it.
+ * ⚠️ 34px BELOW THE ROW IS THE COLUMN'S GAP PLUS THIS ROW'S OWN MARGIN: 22 + 12 while the page is
+ * locked, 14 + 20 once the lock releases at 1024 and the column's gap tightens. The column's gap is
+ * not this block's to change; the margin is, so the margin is what steps.
+ *
+ * ⚠️ `box-sizing` IS STATED rather than inherited, because the arithmetic above depends on it.
+ *
+ * ⚠️ THE TWO TYPE SIZES ARE TOKENS ON THE ROW, so the 560 step is one line. The counts size has two
+ * readers — the line AND its separator dot, which sits inside a zero-size span (see `.os-hdsep`) and
+ * so cannot inherit it; stating 19px twice is how the dot and the line come to disagree.
  */
 .os-greet {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  grid-template-rows: auto auto;
-  column-gap: clamp(18px, 2vw, 36px);
-  row-gap: 6px;
-  align-items: center;
-  padding: 0 2px;
+  --os-hd-title: 44px;
+  --os-hd-counts: 19px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
   flex: none;
+  min-width: 0;
+  margin: 0 0 12px;
+  padding: 0;
 }
-.os-greet > h1 { grid-column: 1; grid-row: 1; }
-.os-greet .os-subrow { grid-column: 1; grid-row: 2; display: flex; align-items: center; gap: 12px; min-width: 0; }
-.os-greet .os-counters {
-  grid-column: 2; grid-row: 1 / span 2;
-  align-self: center; align-items: center;
-  position: relative; top: -4px;
-}
+/* the text block may shrink, so a long name wraps inside the row rather than pushing the hawk out */
+.os-hdtx { flex: 0 1 auto; min-width: 0; }
+.os-hdrow { display: flex; align-items: center; gap: 14px; min-width: 0; }
 /**
- * ⚠️ 46px FLAT, AND THE v27 CLAMP IS *STILL* DEFEATED IN THE REF — THIRD PASS RUNNING.
+ * ⚠️ TWO CLASSES AND `!important` ON THE FAMILY, AND NEITHER IS STYLE. `lib/brand.tsx` injects
+ * `h1:not(.wsh-title) { font-family: … !important }` (0-1-1) at runtime on every route. Between two
+ * important declarations the more specific wins, so a single-class rule silently draws in Playfair
+ * while reading as Special Elite in every file. `dashHeader.measure.ts` asks the browser which font
+ * actually PAINTED.
  *
- * v27 declares `.page2 .hero h1{font-size:clamp(34px,2.3vw,46px)}` and then, later in the same
- * sheet with no media query, `.page2 .hero h1{font-size:46px;margin-bottom:4px}`. The second wins.
- * MEASURED on the shipped ref at 1536, 1710, 1920 and 2520: 46px at every one. The clamp would give
- * 35.5 / 39.5 / 44.2 / 46.
+ * ⚠️ THE FALLBACK IS A TYPEWRITER FACE, NOT `cursive`. The generic cursive on a Mac is Apple
+ * Chancery, which is what a reader would see for the moment before the webfont lands.
  *
- * The pack says to build the clamp, on the ground that "the ref and the app will compute the same
- * value at the same width". They will not — that premise is what the measurement disproves. Build
- * the clamp and `text:greeting` misses by 10.5px at 1536, 6.5 at 1710 and 1.8 at 1920, on every run,
- * against a Phase 7 gate that asks for zero. A standing red is how a gate stops being read.
- *
- * ⚠️ THE FIX IS TWO LINES IN THE REF, AND THEN ONE HERE. Delete
- * `.page2 .hero h1{font-size:46px;margin-bottom:4px}` and
- * `.page2 .hero .sub2line{font-size:17px;...;margin:0 0 16px}` from
- * `dashboard-cappuccino-v27.html`, re-ship it, and this rule becomes
- * `font-size: clamp(34px, 2.3vw, 46px)` with the gate still green. The clamp is NOT written here as
- * a defeated declaration beside the flat one: that would be the exact dead-rule shape Phase 0's
- * sweep exists to remove, and writing one deliberately while deleting others is not a position.
- *
- * The same applies to the subtitle, 17px flat, for the same reason.
+ * ⚠️ 1.05 IS THE BRIEF'S LEADING, AND IT IS SAFE ONLY BECAUSE NOTHING CLIPS THE ROW. Descenders
+ * spill below the line box into the 12px above the counts line. The nearest clipping ancestors
+ * (`.os-root`, the shell's window) are far from the heading's edges, and `dashHeader.measure.ts`
+ * checks the ink against every one of them rather than trusting that.
  */
-.os-greet > h1 {
-  font-family: var(--font-serif); font-weight: 700; font-size: 46px;
-  letter-spacing: -0.02em; color: #2a1f18; line-height: 1.05; white-space: nowrap;
-  /* ⚠️ THE MARGINS COME FROM THE SAME LATE BLOCK AS THE SIZES, and they are what make the hero's
-     two rows 52.3 and 39.8 rather than 48.3 and 23.8 — measured on the ref at every width. Taking
-     the sizes from that block and leaving its margins behind would have been half a port. */
-  margin: 0 0 4px;
+.os-greet .os-hello {
+  font-family: "Special Elite", "Courier New", Courier, monospace !important;
+  font-weight: 400;
+  font-size: var(--os-hd-title);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: #2a1f18;
+  margin: 0;
+  min-width: 0;
 }
-.os-sub2line { margin: 0 0 16px; font-size: 17px; color: #6b5d54; white-space: nowrap; }
-
-/* ⚠️ THE FIVE LIVE CLAMPS, from the ref. They scale continuously so the row never steps — which is
-   what the pack asks for and what the ref actually does for these five. */
-.os-greet .os-counters { justify-content: space-between; gap: clamp(12px, 1.1vw, 30px); width: 100%; }
-.os-greet .os-counter { gap: clamp(8px, 0.85vw, 18px); flex: 0 1 auto; min-width: 0; }
-.os-greet .os-cic { width: clamp(64px, 4.6vw, 104px); height: clamp(64px, 4.6vw, 104px); }
-.os-greet .os-cl { font-size: clamp(13px, 0.8vw, 16.5px); margin-bottom: 3px; white-space: nowrap; }
-.os-greet .os-cn { font-size: clamp(23px, 1.5vw, 33px); }
-.os-greet .os-cd { font-size: clamp(10px, 0.66vw, 13px); padding: 3px clamp(6px, 0.5vw, 10px); }
-/* ⚠️ ONE WORDING AT A TIME — ref `.stat .mini .long` / `.short`, switched at 1980. Both are in the
-   DOM at every width; this decides which is displayed. */
-.os-cd-long { display: inline; }
-.os-cd-short { display: none; }
-@media (max-width: 1980px) {
-  .os-cd-long { display: none; }
-  .os-cd-short { display: inline; }
+/* ink, as the heading is; the figures carry the weight, the words do not */
+.os-hdcounts {
+  margin: 12px 0 0;
+  font-size: var(--os-hd-counts);
+  line-height: 1.5;
+  color: #2a1f18;
 }
-
+.os-hdcounts b { font-weight: 600; }
+/* a clause never breaks inside itself — if the line must wrap, it wraps at the dot */
+.os-hdc { white-space: nowrap; }
+/* ⚠️ THE SEPARATOR'S SPACES ARE REAL TEXT AT ZERO SIZE, so a screen reader and a copied line read
+   "out · 3" while the eye sees exactly 8px either side of the dot, in the page's muted ink. */
+.os-hdsep { font-size: 0; }
+.os-hddot { font-size: var(--os-hd-counts); margin: 0 8px; color: #8a7a6c; }
 /**
- * ⚠️ THE STACKING MEDIA QUERY IS DELETED (v27, Phase 3). There is no width in the supported range
- * where the stats leave the greeting's row — measured on the ref at 1536, 1710, 1920 and 2520, the
- * hero is two tracks and the stats are `grid-row: 1 / span 2` at every one of them, with their top
- * within 9.7px of the greeting's at the worst.
- *
- * ⚠️ AND THE 96px ILLUSTRATION OVERRIDE GOES WITH IT. v26's ref pinned `width:96px!important` below
- * 1700, which beat its own clamp, and the app mirrored it. v27 does not: at 1536 the ref computes
- * 70.6px, which IS `clamp(64px, 4.6vw, 104px)`. Measured rather than read — a duplicate-declaration
- * sweep cannot flag this, because a media override is the cascade working, not a dead rule. What
- * separates them is rendering the ref.
+ * ⚠️ WHOLE, AND NOTHING ELSE ON IT: no crop, border, radius, fill, shadow or blend. The artwork is
+ * genuinely transparent (its corners are clear), so it composites on the page as supplied —
+ * `mix-blend-mode` is the white-paper marks' treatment, not this one's. `max-width: none` because
+ * the global image reset would otherwise let a narrow row squeeze the picture's width under its
+ * stated height.
  */
-
-/**
- * ⚠️ THE GAP IS STILL STEPPED, AND THAT IS THE REF'S DOING, NOT A LEFTOVER. The pack lists
- * `clamp(12px, 1.1vw, 30px)` for the row gap and v27 still carries `gap:32px!important` below 1700
- * and `gap:34px!important` below 2100 — measured: 32 at 1536, 34 at 1710 and 1920, and only at 2520
- * (27.72) does the clamp itself apply. The clamp is declared and defeated for three of the four
- * widths, which is the same shape as the greeting below. Mirrored, because the gate compares
- * computed values.
- */
-@media (max-width: 2100px) {
-  .os-greet .os-counters { gap: 34px; }
+.os-greet .os-hdart {
+  display: block;
+  flex: none;
+  height: 150px;
+  width: auto;
+  max-width: none;
+  object-fit: contain;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
 }
-@media (max-width: 1700px) {
-  .os-greet .os-counters { gap: 32px; justify-content: flex-start; }
+/* the steps come AFTER the base rules — a media query confers no specificity */
+@media (max-width: 1200px) {
+  .os-greet .os-hdart { height: 110px; }
+}
+@media (max-width: 1024px) {
+  .os-greet { margin-bottom: 20px; }
+}
+@media (max-width: 900px) {
+  .os-greet { flex-direction: column; align-items: flex-start; gap: 0; }
+  .os-greet .os-hdart { display: none; }
+}
+@media (max-width: 560px) {
+  .os-greet { --os-hd-title: 32px; --os-hd-counts: 17px; }
 }
 
 /* ══ §P4 · REDUCED MOTION ═══════════════════════════════════════════════════════════════════
@@ -2754,15 +2470,10 @@
    it — which is the pack's own scope boundary expressed in the stylesheet rather than trusted.
    ══════════════════════════════════════════════════════════════════════════════════════════════ */
 
-/* ── the stat tiles' handwritten caveat ────────────────────────────────────────────────────── */
-/* ref `.stat .hand{font-size:17px;margin-top:2px;color:var(--ink-3)}`. The FACE is the app's
-   Caveat convention, not the ref's literal stack — `.qcaveat` is the same decision on the Query
-   Centre, and Editorial re-faces it to a quiet serif there. */
-.os-ccav {
-  display: block; margin-top: 2px;
-  font-family: "Caveat", cursive; font-size: 17px; line-height: 1.15;
-  color: #8a7a6c;
-}
+/* ── the stat tiles' handwritten caveat — RETIRED with the stat tiles (stage 1, 17 Sep) ──────── */
+/* `.os-ccav` is deleted: the header that replaced the tiles states "0 queries out" as a plain
+   figure, and carries no caveat. (Its ink, #8a7a6c — the ref's `--ink-3` — now colours the header's
+   separator dot.) */
 
 /* ── the Active-queries panel's faded example ──────────────────────────────────────────────── */
 .os-cempty { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }

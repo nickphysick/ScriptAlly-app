@@ -24,7 +24,7 @@ import { cssRule } from "../../test/cssRule";
 import { ComponentType, QueryStatus, UserPlan } from "../../types";
 import { OneScreenDashboard } from "./OneScreenDashboard";
 import {
-  COUNTER_CAVEAT, COMPS_TARGET, GETTING_STARTED, GETTING_STARTED_FOOT, counterCaveat,
+  COMPS_TARGET, GETTING_STARTED, GETTING_STARTED_FOOT,
   gettingStartedOpen, gettingStartedRows,
 } from "../../lib/dashEmpty";
 import { PACKAGE_MATERIALS } from "../../lib/manuscriptPackages";
@@ -205,21 +205,26 @@ describe("Phase 1 · the getting-started list is derived", () => {
   });
 });
 
-/* ══════════════════════ the stat tiles' caveats ══════════════════════ */
+/* ══════════════════════ the stat tiles' caveats — retired with the tiles ══════════════════════ */
 
-describe("Phase 1 · the stat caveats are true where they appear", () => {
-  it("states each line only where that counter's own figure is zero", () => {
-    expect(counterCaveat("agents", 0, true)).toBe(COUNTER_CAVEAT.agents);
-    /* ⚠️ THE CASE THE FIRST CUT GOT WRONG: agents are unscoped and ungated by the query count, so
-       a writer with nine on file reaches the empty branch with a 9 on screen. */
-    expect(counterCaveat("agents", 9, true)).toBeNull();
-    expect(counterCaveat("agents", 0, false)).toBeNull();
-  });
-
-  it("renders no caveat beside a non-zero counter on the empty page", () => {
+/* ⚠️ RETARGETED (dashboard header, stage 1). The three stat tiles and their handwritten caveats are
+   deleted. The caveats' own condition — a line only where its figure is zero — has no subject left,
+   so this asserts the retirement and what the header says in their place: on the empty page, the
+   Getting Started line (Nick, 17 Sep), whose count is this pack's own list. The three old lines are
+   named in the negative, so a tile reinstated with its wording fails here. */
+describe("Phase 1 · the empty page's header points at the list, with no caveat", () => {
+  it("says 'No queries out yet · N steps to get started', and renders none of the tiles' caveat lines", () => {
     const html = renderEmpty({ agents: [{ id: "a1", name: "Amara Osei", agency: "Osei Literary" }] as any[] });
-    expect(html).toContain(COUNTER_CAVEAT.sent);          // 0 sent
-    expect(html).not.toContain(COUNTER_CAVEAT.agents);    // 1 on file
+    const open = gettingStartedOpen(gettingStartedRows({
+      manuscripts: [MS], agentCount: 1, queryCount: 0, versions: [], activeManuscript: MS,
+    }));
+    expect(open).toBe(3);
+    expect(html).toContain(`No queries out yet</span><span class="os-hdsep"> <span class="os-hddot">·</span> </span><span class="os-hdc"><b>${open}</b> steps to get started`);
+    expect(html).not.toContain("tasks waiting on you");
+    for (const line of ["starts with your first send", "build it in Contact list", "arrive once queries are out"]) {
+      expect(html).not.toContain(line);
+    }
+    expect(html).not.toMatch(/["\s`]os-ccav["\s`]/);
   });
 });
 
@@ -244,7 +249,8 @@ describe("Phase 1 · the feed keeps its real events", () => {
 describe("Phase 1 · layout is unchanged", () => {
   it("keeps every panel in place on the empty page", () => {
     const html = renderEmpty();
-    for (const probe of ["stats", "toprow", "grid", "chart-card", "todo-card"]) {
+    /* `stats` left this list with the stat cards (stage 1); the header's own probe replaces it */
+    for (const probe of ["hero", "toprow", "grid", "chart-card", "todo-card"]) {
       expect(html).toContain(`data-probe="${probe}"`);
     }
   });

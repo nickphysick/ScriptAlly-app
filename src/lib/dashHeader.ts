@@ -1,0 +1,126 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * dashHeader — the dashboard header's greeting and its one line of live figures (stage 1, 17 Sep).
+ *
+ *   Hello, Nick.
+ *   12 queries out · 3 tasks waiting on you
+ *
+ * ⚠️ NEITHER FIGURE IS A NEW DERIVATION, AND THAT IS THE POINT OF THIS FILE. The header sits directly
+ * above two cards that already state both numbers — the chart's "Active queries" headline and the
+ * to-do card's badge — so a count of its own would be a third opinion placed where a reader compares
+ * them at a glance. Each figure is the SAME call its card makes, over the same scoped arrays, and
+ * `dashHeader.test.ts` asserts the two against each other rather than against literals.
+ *
+ *   · QUERIES OUT is the daily ledger's closing position today: sent, and not yet closed by an
+ *     offer, a rejection, a withdrawal or a stated no-response. "Out" means still out there — a
+ *     rejected letter came back. (`accountHeaderFacts.queryingLabel` uses "out" for every query
+ *     with a send date; that helper has no caller and describes an account's lifetime, not today.)
+ *   · TASKS WAITING is `boardFigures(...).cards` — the To-do and Today columns, snoozed excluded —
+ *     which is what the sidebar badge, every Tasks page and the dashboard's to-do card count.
+ *
+ * ⚠️ NULL IS "NOT LOADED YET", NEVER ZERO. The header renders the line without figures until the
+ * collections land; a zero appears only where zero is true. Nick's rule: never show a number that
+ * might change.
+ *
+ * ⚠️ A NEW ACCOUNT GETS A DIFFERENT LINE, ON THE SAME SWITCH AS THE CARD BENEATH IT. While the page
+ * is in its empty moment (no queries for the current manuscript — the flag that turns the to-do card
+ * into the Getting Started list), "0 tasks waiting on you" sat above a list of five things to do.
+ * True, and awkward. The line reads "No queries out yet · N steps to get started" instead, and N is
+ * the list's own open count by the list's own derivation — so the two can never disagree.
+ */
+import type { Query } from "../types";
+import { dailyLedger } from "./oneScreen";
+import { assembleBoardColumns, boardFigures, type AssembleColumnsInput } from "./todoColumns";
+import { gettingStartedOpen, gettingStartedRows, type GettingStartedInput } from "./dashEmpty";
+
+/**
+ * What the header's second line states. A STRING discriminant, because this repo compiles without
+ * `strictNullChecks` and a boolean one would not narrow.
+ */
+export type DashHeaderLine =
+  | { kind: "counts"; queriesOut: number; tasksWaiting: number }
+  | { kind: "starting"; steps: number };
+
+/** The chart's "Active queries" figure, by the chart's own derivation — the ledger's last row. */
+export const queriesOutCount = (queries: Query[], now: Date): number => {
+  const daily = dailyLedger(queries, now);
+  return daily.length ? daily[daily.length - 1].active : 0;
+};
+
+/** The to-do card's total, by the call every Tasks surface makes. */
+export const tasksWaitingCount = (input: AssembleColumnsInput): number =>
+  boardFigures(assembleBoardColumns(input).cols).cards;
+
+/** The Getting Started list's open steps — the empty-state card's badge, by the card's own call. */
+export const startingStepsCount = (input: GettingStartedInput): number =>
+  gettingStartedOpen(gettingStartedRows(input));
+
+export interface DashHeaderInput {
+  /** the collections have not landed — the line states no figure at all */
+  loading: boolean;
+  /** the page's empty moment (no queries for the current manuscript) — the card shows Getting Started */
+  empty: boolean;
+  /** the manuscript-scoped queries the chart reads */
+  scopedQueries: Query[];
+  now: Date;
+  /** exactly what the to-do card hands `assembleBoardColumns` */
+  board: AssembleColumnsInput;
+  /** exactly what the to-do card hands `gettingStartedRows` */
+  starting: GettingStartedInput;
+}
+
+/**
+ * The line, or null while loading. Only the branch that is shown is derived — the board is not
+ * assembled for a page that is showing the Getting Started count.
+ */
+export const dashHeaderLine = (i: DashHeaderInput): DashHeaderLine | null => {
+  if (i.loading) return null;
+  if (i.empty) return { kind: "starting", steps: startingStepsCount(i.starting) };
+  return {
+    kind: "counts",
+    queriesOut: queriesOutCount(i.scopedQueries, i.now),
+    tasksWaiting: tasksWaitingCount(i.board),
+  };
+};
+
+/**
+ * "Hello, Nick." — the full stop is part of the greeting, and a name that already ends in one
+ * ("J.") does not get a second.
+ */
+export const greetingText = (firstName: string): string =>
+  `Hello, ${firstName}${/[.!?]$/.test(firstName) ? "" : "."}`;
+
+export interface CountClause {
+  /** null while loading — the clause renders its words and no figure */
+  n: number | null;
+  noun: string;
+}
+
+/**
+ * The line's two clauses. Singulars agree ("1 query out", "1 task waiting on you", "1 step to get
+ * started"); without a figure the plural stands, because there is no number for it to agree with.
+ * "No queries out yet" carries no figure by design — the sentence is the figure.
+ */
+export const lineClauses = (line: DashHeaderLine | null): [CountClause, CountClause] => {
+  if (line?.kind === "starting") {
+    return [
+      { n: null, noun: "No queries out yet" },
+      { n: line.steps, noun: line.steps === 1 ? "step to get started" : "steps to get started" },
+    ];
+  }
+  const c = line?.kind === "counts" ? line : null;
+  return [
+    { n: c ? c.queriesOut : null, noun: c?.queriesOut === 1 ? "query out" : "queries out" },
+    { n: c ? c.tasksWaiting : null, noun: c?.tasksWaiting === 1 ? "task waiting on you" : "tasks waiting on you" },
+  ];
+};
+
+/**
+ * The illustration, served from `public/images/` — unhashed, so its URL carries its own content
+ * hash (`?v=`), the marketing pages' convention. `dashHeader.test.ts` reads the file and fails the
+ * day the bytes and the version disagree. 375px square: 2.5× the largest size it is drawn at, cut
+ * from the 1000px, 827KB original to 147KB with its transparency intact.
+ */
+export const HEADER_ART = { src: "/images/top-of-dashboard.png", version: "74893ae9", width: 375, height: 375 } as const;

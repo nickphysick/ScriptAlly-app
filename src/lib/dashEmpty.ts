@@ -14,7 +14,7 @@
  *
  * ⚠️ AND IT IS THE MANUSCRIPT-SCOPED SET, because every figure the empty state sits beside is
  * scoped. `OneScreenDashboard` derives `scopedQueries` once and hands it down; this reads the same
- * array, so the caveats cannot appear beside a count they do not describe.
+ * array, so the empty state cannot appear beside a count it does not describe.
  *
  * ⚠️ NOTHING HERE IS STORED, AND THE GETTING-STARTED ROWS ARE NOT TASKS. They are a projection of
  * "does this record exist" over data the page already holds — no rows are written to the to-do
@@ -26,32 +26,10 @@ import { ComponentType, Manuscript, ManuscriptVersion, Query } from "../types";
 import { PACKAGE_MATERIALS } from "./manuscriptPackages";
 import { manuscriptComps } from "./comps";
 
-/* ══════════════════════════ the stat tiles' caveat lines ══════════════════════════ */
-
-/**
- * The ref's `.stat .hand` lines, verbatim. One per counter, keyed by the counter's own key so a
- * line cannot end up under the wrong figure.
- */
-export const COUNTER_CAVEAT: Record<"sent" | "agents" | "responses", string> = {
-  sent: "starts with your first send",
-  agents: "build it in Contact list",
-  responses: "arrive once queries are out",
-};
-
-/**
- * The caveat for one counter, or null.
- *
- * ⚠️ TWO CONDITIONS, AND THE SECOND IS NOT REDUNDANT. The page being empty is what puts the
- * pack on screen; the counter's OWN figure being zero is what makes its line true. Agents are
- * deliberately NOT manuscript-scoped and are not gated by the query count either, so a writer
- * with nine agents on file and no queries yet reaches this branch with `n = 9` — and "build it in
- * Contact list" under a 9 is a caveat about an empty list that is not empty.
- */
-export const counterCaveat = (
-  key: "sent" | "agents" | "responses",
-  n: number,
-  empty: boolean,
-): string | null => (empty && n === 0 ? COUNTER_CAVEAT[key] : null);
+/* ══════════════════════════ the stat tiles' caveat lines — RETIRED ══════════════════════════
+   `COUNTER_CAVEAT` and `counterCaveat` went with the three stat cards they captioned (dashboard
+   header, stage 1, 17 Sep). The header that replaced the cards states "0 queries out" as a plain
+   figure, because zero is true there; it carries no caveat. */
 
 /* ══════════════════════════ the getting-started list ══════════════════════════ */
 

@@ -51,7 +51,7 @@ describe("/dashboard renders", () => {
 
   /**
    * ⚠️ The populated path is a DIFFERENT branch — the first-run panel gives way to the greeting,
-   * the stat row and the attention chip, all of which derive from the record set. Smoking only the
+   * the header's counts line and the chart, all of which derive from the record set. Smoking only the
    * empty account would leave every derivation on this page unexecuted.
    */
   it("renders without throwing once there is a manuscript, an agent and a query", () => {
@@ -61,7 +61,11 @@ describe("/dashboard renders", () => {
   it("…and that render is the real dashboard — the chart card, not the day-one panel", () => {
     const html = renderPageSeeded(page());
     expect(html).toContain("Active queries");   // the chart card, the page's spine
-    expect(html).toContain("Agents on file");   // the stats, on the ground since Phase 3
+    /* ⚠️ RETARGETED (dashboard header, stage 1): the stat cards are deleted, so "Agents on file" is
+       no landmark any more. The header's counts line replaced them, and it only renders its words
+       with a figure in front once the record set has been read — which is the populated branch. */
+    expect(html).not.toContain("Agents on file");
+    expect(html).toMatch(/<b>\d+<\/b> quer(y|ies) out/); // the header, on the populated path
     /* ⚠️ "Querying goals" IS NOT A LANDMARK ON THIS PAGE ANY MORE (ref v22) — the card leaves the
        dashboard with the two-column layout. `Activity` is the right column's own name and is the
        landmark that replaces it, so this census still spans all three regions of the page. */

@@ -153,6 +153,12 @@ export const responsesReceivedCount = (queries: Query[]): number =>
     q.hasAgentResponded !== undefined ? q.hasAgentResponded : agentEverActed(q),
   ).length;
 
+/**
+ * ⚠️ KNOWN UNDERSTATEMENT, AND STILL OWED: this divides by EVERY query on file, so an unsent draft
+ * pulls the rate down. The retired dashboard counter divided by queries SENT, and the two
+ * disagreed; that counter is gone (dashboard header, stage 1), so the note moved here, to the
+ * selector that still carries the fault. Fix at source and check each caller.
+ */
 export const responseRatePercent = (queries: Query[]): number =>
   queries.length > 0 ? Math.round((responsesReceivedCount(queries) / queries.length) * 100) : 0;
 

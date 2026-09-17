@@ -345,11 +345,18 @@ describe("§2 · the greeting", () => {
      asserted: no kicker, no `.os-sub2` lede, no italic-burgundy name. The slot has now held a
      kicker, a date, a lede and a question; this is the fourth swing and the first with a probe on
      it, which is what makes it checkable rather than remembered. */
-  it("the greeting leads, the question sits under it, and the name is plain ink", () => {
+  /* ⚠️ RETARGETED AGAIN (dashboard header, stage 1): THE QUESTION IS GONE, AND A LINE OF FIGURES
+     TAKES ITS ROW. "What's on your desk today?" is the fifth thing this slot has held and the first
+     to be replaced by a statement rather than an address — "N queries out · N tasks waiting on
+     you". What the case has always guarded still holds and is still asserted: no kicker, no lede,
+     no italic-burgundy name. The new line's own claims live in `dashHeader.test.tsx`. */
+  it("the greeting leads, the counts line sits under it, and the name is plain ink", () => {
     const html = render();
-    expect(html).toContain("Hello, Nick");
-    expect(html).toContain("os-sub2line");
-    expect(html).toContain('data-probe-text="subtitle"');
+    expect(html).toContain('<h1 class="os-hello" data-probe-text="greeting">Hello, Nick.</h1>');
+    expect(html).toContain('data-probe-text="header-counts"');
+    expect(html).not.toContain("os-sub2line");
+    expect(html).not.toContain('data-probe-text="subtitle"');
+    expect(html).not.toContain("on your desk today");
     expect(html).not.toContain('class="os-sub2"');
     expect(html).not.toContain("os-kicker");
     // no italic-burgundy name: the h1 carries no <em>
@@ -361,13 +368,13 @@ describe("§2 · the greeting", () => {
     expect(cssRules).not.toContain(".os-dateline {");
   });
 
-  /* ref `.hero p{margin:6px 0 0;color:var(--ink2);font-size:17px}` — it was 13.5 in a muted step,
-     which read as a caption under the greeting rather than a line spoken to the reader */
-  it("the lede is 17px in --ink2, 6px under the name", () => {
-    const r = rule(".os-sub2");
-    expect(r).toContain("font-size: 17px");
-    expect(r).toContain("#6b5d54");
-    expect(r).toContain("margin-top: 6px");
+  /* ⚠️ RETARGETED (stage 1): the `.os-sub2` lede rule had no element for several passes and went
+     with the header rewrite, as did the question's own `.os-sub2line`. A rule with no subject is the
+     fault this sheet records; its absence is the claim now. */
+  it("the lede and question rules are gone with their elements", () => {
+    expect(cssRuleCount(cssRules, ".os-sub2")).toBe(0);
+    expect(cssRuleCount(cssRules, ".os-sub2line")).toBe(0);
+    expect(cssRules).not.toContain(".os-subrow");
   });
 
   /* ⚠️ RETARGETED (dashboard redesign, Phase 3) — THE PILLS ARE RETIRED, and this asserts that
@@ -391,9 +398,22 @@ describe("§2 · the greeting", () => {
     expect(html).toContain("Hello, ");
   });
 
-  it('the counter says "Agents on file" — "on file", never "met"', () => {
-    expect(render()).toContain("Agents on file");
-    expect(render()).not.toContain("agents met");
+  /* ⚠️ RETARGETED (stage 1): THE THREE STAT CARDS ARE DELETED, so "Agents on file" no longer renders
+     here at all. The vocabulary half of the old case ("on file", never "met") still has a subject —
+     no surface on this page may say "agents met" — and the cards' absence is asserted by their
+     labels AND their classes, so a card reinstated under either fails. */
+  it("the three stat cards are gone — no label, no row, no slot — and nothing says 'agents met'", () => {
+    const html = render();
+    for (const label of ["Queries sent", "Agents on file", ">Responses<"]) {
+      expect(html, label).not.toContain(label);
+    }
+    expect(html).not.toContain('data-probe="stats"');
+    expect(html).not.toContain('data-probe="stat-card"');
+    expect(html).not.toContain('data-probe="stat-illustration"');
+    for (const cls of ["os-counters", "os-counter", "os-cic", "os-cn", "os-cd"]) {
+      expect(html, cls).not.toMatch(new RegExp(`["\\s\`]${cls}["\\s\`]`));
+    }
+    expect(html).not.toContain("agents met");
   });
 
   /* ⚠️ RETARGETED: the ≤1200 rule dropped the achievement pill because the header was crowded.
@@ -416,8 +436,23 @@ describe("§8 · skeletons", () => {
     expect(html).toContain("os-skel");
     expect(html).toContain("isload");
     // content is still IN the tree (opacity:0 via CSS) so layout cannot shift when data lands
-    expect(html).toContain("Hello, Nick");
-    expect(rule(".os-card.isload > *:not(.os-skel), .os-greet.isload > *:not(.os-skel)")).toContain("opacity: 0");
+    expect(html).toContain("Hello, Nick.");
+    /* ⚠️ `.os-greet.isload` LEFT THE RULE (stage 1) — the header takes no per-card skeleton */
+    expect(rule(".os-card.isload > *:not(.os-skel)")).toContain("opacity: 0");
+    expect(cssRules).not.toContain(".os-greet.isload");
+  });
+
+  /* ⚠️ THE HEADER IS THE ONE PANEL THAT DOES NOT SHIMMER (stage 1): while the data is out it says its
+     words and no figures — never a zero, never a bar. Asserted on the PAGE's header, which is the
+     one carrying the probe; the cover's copy is asserted in `oneScreenSkeleton.test.tsx`. */
+  it("⚠️ loading: the header carries no shimmer and no figure", () => {
+    const html = render({ loading: true });
+    const hdr = sliceBetween(html, '<div class="os-greet" data-probe="hero">', 'class="os-toprow"', "the page's header");
+    expect(hdr).not.toContain("isload");
+    expect(hdr).not.toContain("os-skel");
+    expect(hdr).not.toContain("<b>");
+    expect(hdr).toContain("queries out");
+    expect(hdr).toContain("tasks waiting on you");
   });
 
   it("reduced motion stills the shimmer to a static tint", () => {

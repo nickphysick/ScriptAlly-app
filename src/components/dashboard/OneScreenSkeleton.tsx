@@ -114,10 +114,20 @@ const SkeletonTicketGrid: React.FC = () => {
 export const OneScreenSkeleton: React.FC<{
   /** Dissolving — mounted, on its way out, with the finished page live beneath it. */
   leaving?: boolean;
-}> = ({ leaving = false }) => (
+  /**
+   * ⚠️ THE PAGE'S OWN HEADER, NOT A DRAWING OF IT (stage 1). The dashboard passes the same
+   * `OneScreenHeader` it renders, with its probes off, so the cover's first row is the page's first
+   * row to the pixel and the header never shimmers: the brief is that a header waiting on data says
+   * its words without figures. It is a slot rather than an import because the words need the
+   * writer's name, which only the page has.
+   */
+  header: React.ReactNode;
+}> = ({ leaving = false, header }) => (
   /* aria-hidden: a screen reader is told nothing by a shape. The wait itself is announced by the
-     page's live regions when the content lands. */
-  <div className={`os-skelpage${leaving ? " out" : ""}`} aria-hidden="true">
+     page's live regions when the content lands.
+     ⚠️ AND `inert`, because the cover is no longer only shapes: the header it carries can hold a
+     real button, and `aria-hidden` alone leaves a hidden control in the tab order. */
+  <div className={`os-skelpage${leaving ? " out" : ""}`} aria-hidden="true" inert>
     <div className="os-content">
       {/* ⚠️ `.os-grid` WAS MISSING, AND IT IS WHY THE GHOST WAS NEVER WHERE THE PAGE IS (v33,
           Phase 4). This file's own header said it reuses the real layout classes so the ghost
@@ -131,24 +141,9 @@ export const OneScreenSkeleton: React.FC<{
           {/* ⚠️ THE HERO IS INSIDE THE LEFT COLUMN, as it is on the page (v26 moved it there and
               the ghost stayed behind). While it was a sibling of `.os-grid` the whole grid started
               94px low and both columns with it — measured Δy +98 on the activity ghost. */}
-          <div className="os-greet">
-            <div className="os-sk os-sk-h1" />
-            <div className="os-sk os-sk-sub" />
-            {/* ⚠️ THREE STAT ROWS, NOT ONE BLOCK (v33, Phase 4) — ref `.sk-stats`. The counters were
-                a single 82px ghost, which is the shape of the box and says nothing about what is
-                coming; an illustration square beside a label and a figure is what actually lands. */}
-            <div className="os-sk-stats">
-              {[0, 1, 2].map((i) => (
-                <div className="os-sk-stat" key={i}>
-                  <div className="os-sk os-sk-ill" />
-                  <div>
-                    <div className="os-sk os-sk-statlab" />
-                    <div className="os-sk os-sk-statfig" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* ⚠️ THE HERO GHOST IS RETIRED (stage 1) — `.os-sk-h1`, `.os-sk-sub` and the three stat
+              rows went with the stat cards they stood for. The slot holds the page's real header. */}
+          {header}
 
           <div className="os-toprow" data-sk="toprow">
             {/* the manuscript tile — ref `#skeleton .sk-top > .sk-card:first-child` */}

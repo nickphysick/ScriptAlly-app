@@ -11,9 +11,8 @@
  * ⚠️ THE GOAL IS NO LONGER ONE OF THEM. §6 moved out whole to `lib/queryingGoals.ts`; the two
  * stored fields this file used to name (`goalTarget`/`goalPeriod`) are read by nothing now.
  */
-import { Agent, Query, QueryStatus } from "../types";
-import { idleAgentCount } from "./dashboardStats";
-import { isoWeekStart, responsesReceivedCount } from "./dashboardStats";
+import { Query, QueryStatus } from "../types";
+import { isoWeekStart } from "./dashboardStats";
 
 const WEEK_MS = 7 * 86400000;
 const DAY_MS = 86400000;
@@ -60,13 +59,12 @@ export interface LedgerPoint {
 
 /**
  * ⚠️ THE ONE DEFINITION OF "SENT", and every count of sends goes through it. A query is sent when
- * it carries a usable `dateSent` — a draft with no send date is not on the board. The header
- * counter and the chart's daily ledger both read THIS, so the number above the chart and the
- * number the line is drawn from cannot drift apart; they are the same predicate applied twice.
+ * it carries a usable `dateSent` — a draft with no send date is not on the board. The daily ledger
+ * and the chart's bands both read THIS, so the line and the stack beneath it cannot disagree about
+ * which queries are on the board. (The "Queries sent" header counter that also read it is retired
+ * with the stat cards, stage 1; the dashboard header's "queries out" reads the ledger itself.)
  */
 export const sentAt = (q: Query): number | null => parseWhen(q.dateSent);
-export const queriesSentCount = (queries: Query[]): number =>
-  queries.reduce((n, q) => (sentAt(q) !== null ? n + 1 : n), 0);
 
 const dayStart = (d: Date): Date => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const dayEnd = (d: Date): Date => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
@@ -231,118 +229,10 @@ export const rangeChip = (view: LedgerPoint[]): string => {
   return "Level over this range";
 };
 
-/* ══════════════════════════ §H · THE HEADER COUNTERS ══════════════════════════ */
-
-export interface HeaderCounter {
-  key: "sent" | "agents" | "responses";
-  label: string;
-  n: number;
-  /** ⚠️ ABSENT when there is nothing to report. Never "↑ 0", never "0%" — a chip that reports
-   *  nothing is worse than no chip, because it reads as a measurement rather than a silence. */
-  chip?: string;
-  /** the below-1980 wording — see headerCounters */
-  chipShort?: string;
-  /** the ref's `.mini.plain` — a white capsule for a chip that states a SPLIT rather than a change */
-  plain?: boolean;
-}
-
-/** The chips look back a ROLLING month, not a calendar one — on the 1st, a calendar reading would
- *  blank a chip that had twenty sends behind it the day before. */
-export const COUNTER_WINDOW_DAYS = 30;
-
-/**
- * The three header figures, all derived at read time (no stored counters, ever).
- *
- * ⚠️ THE RESPONSE RATE DIVIDES BY QUERIES **SENT**, not by every query on file. Dividing by all
- * queries lets an unsent draft quietly pull the rate down — a writer with drafts in the system is
- * shown a rate lower than reality. Beside a "Queries sent" counter reading the sent figure, the
- * two would visibly disagree.
- *
- * ⚠️ `dashboardStats.responseRatePercent` STILL DIVIDES BY ALL QUERIES and is therefore
- * understated wherever it is used. That is a bug in the shared selector, not a local deviation
- * here; fixing it at source and checking each caller is a tracked follow-up. Until it lands, two
- * things named "response rate" disagree — deliberately, and not indefinitely.
- */
-export const headerCounters = (queries: Query[], agents: Agent[], now: Date): HeaderCounter[] => {
-  const since = now.getTime() - COUNTER_WINDOW_DAYS * 86400000;
-
-  const sent = queriesSentCount(queries);
-  const sentRecently = queries.reduce((n, q) => {
-    const t = sentAt(q);
-    return t !== null && t >= since ? n + 1 : n;
-  }, 0);
-
-  const addedRecently = agents.reduce((n, a) => {
-    const t = parseWhen(a.dateAdded);
-    return t !== null && t >= since ? n + 1 : n;
-  }, 0);
-
-  /* ⚠️ THE SPLIT COMES FROM THE AGENT LIST'S OWN DERIVATION, never a second count of "has this
-     agent been queried". `agentIdleCount` is what the Agents hub's pulse line states. */
-  const queried = agents.length - idleAgentCount(agents, queries);
-  const responses = responsesReceivedCount(queries);
-  /**
-   * ⚠️ THE CHIP STATES THE DENOMINATOR, NOT A PERCENTAGE (dashboard redesign, Phase 3).
-   * "12 · of 21" rather than "12 · 57%". A rate is a figure the reader has to unpack against a
-   * total they cannot see; the total IS the interesting half, and stating it makes the numeral
-   * beside it mean something without arithmetic.
-   *
-   * ⚠️ AND IT QUIETLY SETTLES A DISAGREEMENT THIS FILE RECORDED. `dashboardStats.responseRatePercent`
-   * divides by EVERY query while this divided by queries SENT, so two things called "response rate"
-   * gave different answers — noted here as a bug in the shared selector and a tracked follow-up.
-   * This surface no longer states a rate at all, so it can no longer disagree with one. The selector
-   * is still understated wherever else it is used; that is unchanged and still owed.
-   *
-   * ⚠️ THE OMISSION CONDITION IS UNTOUCHED, DELIBERATELY. It is arguably now too strict — "0 · of 21"
-   * is a true and useful thing to say, where "0%" read as a measurement of nothing — but loosening
-   * when a chip appears is a product decision rather than a copy change, and it is flagged in the
-   * run report rather than taken here.
-   */
-  const denominator = sent > 0 && responses > 0 ? sent : null;
-
-  /**
-   * ⚠️ THE PILL CARRIES CONTEXT, NOT A BARE FIGURE (refdiff pass, Phase 4). "↑ 5" said a number and
-   * left the reader to work out of what, over what period; "↑ 5 this week" is the same derivation
-   * saying what it is. The agents pill states the SPLIT rather than a movement, which is why it
-   * takes the ref's `.plain` variant — a white capsule for a fact that is not a change.
-   *
-   * ⚠️ "IDLE", NEVER "UNQUERIED". The agent list has called an unqueried agent idle since its own
-   * rebuild, and `agentIdleCount` is the derivation both surfaces read. Two words for one state on
-   * one account is the fault the whole vocabulary discipline exists to prevent.
-   *
-   * ⚠️ AND THE OMISSION RULE IS UNCHANGED: a chip that reports nothing is worse than no chip. What
-   * changed is what a chip SAYS when it has something to report.
-   */
-  const idle = agents.length - queried;
-  /**
-   * ⚠️ EACH CHIP CARRIES TWO STRINGS, AND CSS CHOOSES (v27, Phase 3). Below 1980 the stats row has
-   * to give something up so it can stay on the greeting's line, and what gives way is the pill's
-   * WORDING — never the figure, the label or the illustration. Both strings are in the DOM at every
-   * width and a media query swaps which one displays.
-   *
-   * ⚠️ THE SHORT FORM IS A TRUE SUBSET OF THE LONG ONE, NEVER A DIFFERENT CLAIM. "5" is what "5
-   * this week" says with the period implied by the row it sits in; "5 idle" is the half of
-   * "11 queried · 5 idle" that the reader cannot get from the figure beside it (the figure is the
-   * agent total, so the queried count is a subtraction and the idle count is not). Shortening to
-   * "11 queried" would have dropped the only part that is not derivable.
-   *
-   * ⚠️ AND NEITHER FORM IS BUILT BY TRUNCATION. A CSS ellipsis would cut mid-word at whatever width
-   * the box happened to be, which is a different sentence at every viewport; these are two written
-   * strings and the switch is at one stated width.
-   */
-  const pair = (long: string, short: string) => ({ chip: long, chipShort: short });
-  return [
-    { key: "sent", label: "Queries sent", n: sent,
-      ...(sentRecently > 0 ? pair(`↑ ${sentRecently} this week`, `↑ ${sentRecently}`) : {}) },
-    { key: "agents", label: "Agents on file", n: agents.length,
-      ...(agents.length > 0 ? { ...pair(`${queried} queried · ${idle} idle`, `${idle} idle`), plain: true } : {}) },
-    { key: "responses", label: "Responses", n: responses,
-      ...(denominator !== null
-        ? pair(`${Math.round((responses / denominator) * 100)}% response rate`,
-               `${Math.round((responses / denominator) * 100)}%`)
-        : {}) },
-  ];
-};
+/* ══════════════════════════ §H · THE HEADER COUNTERS — RETIRED ══════════════════════════
+   `headerCounters`, `HeaderCounter`, `COUNTER_WINDOW_DAYS` and `queriesSentCount` went with the three
+   stat cards (dashboard header, stage 1, 17 Sep). The header's figures are `lib/dashHeader`'s now,
+   and both are the cards' own derivations. */
 
 /* ══════════════════════════ §3 · THE AXIS ══════════════════════════ */
 

@@ -29,7 +29,9 @@ import { OneScreenTour, TOUR_BREAKPOINT } from "./OneScreenTour";
 import { OneScreenAuthor } from "./OneScreenAuthor";
 import { OneScreenChart } from "./OneScreenChart";
 import { OneScreenTasks } from "./OneScreenTasks";
-import { OneScreenCounters } from "./OneScreenCounters";
+import { OneScreenHeader } from "./OneScreenHeader";
+import { dashHeaderLine, type DashHeaderLine } from "../../lib/dashHeader";
+import { localYMD } from "../../lib/shellSidebar";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../lib/manuscriptScope";
 import { deriveGoalProgress } from "../../lib/queryingGoals";
 import { OneScreenRail } from "./OneScreenRail";
@@ -123,6 +125,26 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
   );
 
   const firstName = (currentUser?.name ?? "").trim().split(/\s+/)[0] || "there";
+
+  /**
+   * ⚠️ THE HEADER'S FIGURES ARE THE CARDS' OWN (stage 1). Queries out is the chart's "Active queries"
+   * headline, from the same scoped set; tasks waiting is the to-do card's total, from the SAME inputs
+   * `OneScreenTasks` hands `assembleBoardColumns` — scoped tasks and activities, raw lookup sets; and
+   * in the empty moment the Getting Started count is the card's badge, from the same inputs it hands
+   * `gettingStartedRows`. `dashHeader.test.tsx` renders the page and holds each against its card.
+   *
+   * ⚠️ NULL WHILE LOADING, NEVER ZERO. The line renders its words without figures until the
+   * collections land.
+   */
+  const headerLine = React.useMemo<DashHeaderLine | null>(() => dashHeaderLine({
+    loading, empty, scopedQueries, now,
+    board: {
+      tasks: scopedTasks, userTasks, queries, agents, manuscripts, taskFlags, activities: scopedActivities,
+      now: now.getTime(), today: localYMD(now.getTime()), mutedTaskRules: currentUser?.mutedTaskRules,
+    },
+    starting: { manuscripts, agentCount: agents.length, queryCount: queries.length, versions, activeManuscript },
+  }), [loading, empty, scopedQueries, scopedTasks, userTasks, queries, agents, manuscripts, taskFlags,
+    scopedActivities, now, currentUser?.mutedTaskRules, versions, activeManuscript]);
 
   /* ⚠️ THE FEED'S ACTION AND THE PANEL'S DRAWER, JOINED HERE BECAUSE THEY ARE IN DIFFERENT COLUMNS
      (Phase 6). The rail's "Mark sent" hands up a query id; the to-do panel resolves it against the
@@ -250,13 +272,9 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
       className={`os-root${skeleton.phase === "on" ? " os-loading" : ""}`}
     >
       <div className="os-content" data-probe="main">
-        {/* ⚠️ THE HEADER IS ITS OWN GRID ROW, spanning both columns — not the first thing in the
-            main column. That is what lets the two columns below it start level.
-
-            ⚠️ AND IT IS A FLEX ROW: the greeting sizes to its content, the counters card takes the
-            rest, vertically centred against it. The greeting's own stack lives inside `.os-gl` —
-            without that wrapper the dateline, name and pills would each become flex items on the
-            same line. */}
+        {/* ⚠️ THE HEADER IS THE LEFT COLUMN'S FIRST ROW, not a row of its own above the grid — see
+            the v26 note inside `.os-colL` below. (This note used to describe a full-width header
+            with a counters card beside the greeting; both are gone.) */}
         {/* ⚠️ THE PAGE'S OWN TOP BAR IS DELETED (v28, Phase 2). It held the search in a row of
             its own, which cost ~90px of height before the greeting and left the NAV's row with a
             hole in the middle where the search belongs. The field is in the nav row now, beside
@@ -273,27 +291,15 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
               to be a row of `main` spanning both columns, which put the activity panel BELOW it;
               the ref starts the activity column level with the greeting, and the only way to do
               that is for the greeting to be the left column's first row. */}
-          <div className={`os-greet${loading ? " isload" : ""}`} data-probe="hero">
-            {loading && <Skel bars={["h", ""]} />}
-            {/* ⚠️ THREE GRID CHILDREN, FLAT — greeting, subtitle, stats. The old `.os-gl` /
-                `.os-grow2` nesting existed to stop the dateline, name and pills becoming flex items
-                on one line; all three of those are gone, and with the hero a two-row grid the
-                wrapper would be the grid item instead of the heading it wraps. */}
-            <h1 data-probe-text="greeting">Hello, {firstName}</h1>
-            <div className="os-subrow">
-              {/* ⚠️ A QUESTION, NOT A DERIVED FACT — the one piece of address on the page, which is
-                  why it is a constant. The slot has held a kicker, a date and a lede; v26 states it
-                  as its own hero row with its own text probe. */}
-              <p className="os-sub2line" data-probe-text="subtitle">What&apos;s on your desk today?</p>
-              {chipShows && (
-                <button type="button" ref={tourChipRef} className="os-tourchip" onClick={() => { if (wideEnough()) setTouring(true); }}>
-                  Take the tour
-                </button>
-              )}
-            </div>
-            {/* ⚠️ queries SCOPED, agents NOT — "agents on file" is a person-count, not a per-book fact. */}
-            <OneScreenCounters loading={loading} queries={scopedQueries} agents={agents} now={now} empty={empty} />
-          </div>
+          {/* ⚠️ THE HEADER CARRIES NO SKELETON OF ITS OWN (stage 1). It used to take `isload` and a
+              per-card shimmer; the brief is that a header still waiting on data says its words
+              without figures, so `headerCounts` is null until the collections land and the row is
+              otherwise whole from the first paint. */}
+          <OneScreenHeader
+            firstName={firstName}
+            line={headerLine}
+            tour={chipShows ? { onStart: () => { if (wideEnough()) setTouring(true); }, buttonRef: tourChipRef } : null}
+          />
           <div className="os-toprow" data-probe="toprow">
             <OneScreenAuthor
               loading={loading} manuscripts={manuscripts} compact
@@ -360,7 +366,21 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           makes "no layout shift" structural rather than a matter of matching numbers — and it is
           why the dissolve works: the page is already finished under there, so this fades off a
           settled picture rather than crossfading between two moving ones. */}
-      {skeleton.phase !== "off" && <OneScreenSkeleton leaving={skeleton.phase === "out"} />}
+      {/* ⚠️ THE COVER'S HEADER IS THIS PAGE'S HEADER — the same component with its probes off, so
+          the row it holds is the row the page will have. The tour chip rides along only so the
+          two rows are the same shape; the cover is `inert`, so it cannot be reached.
+
+          ⚠️ AND IT NEVER STATES A FIGURE. `loading` drops before the board has finished deriving:
+          measured on a warm load, the cover read "2 tasks waiting on you" for ~44ms before the
+          true 23. The page underneath is stood down for exactly that window, so its own header
+          never shows it; a cover that did would put a plausible wrong number on screen. The
+          figures arrive with the page, as the dissolve reveals it. */}
+      {skeleton.phase !== "off" && (
+        <OneScreenSkeleton
+          leaving={skeleton.phase === "out"}
+          header={<OneScreenHeader ghost firstName={firstName} line={null} tour={chipShows ? { onStart: () => {} } : null} />}
+        />
+      )}
       {touring && <OneScreenTour rootRef={rootRef} onEnd={endTour} />}
     </div>
   );

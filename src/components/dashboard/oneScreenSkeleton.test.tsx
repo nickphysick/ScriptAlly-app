@@ -23,7 +23,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
 import { describe, expect, it } from "vitest";
 import { OneScreenSkeleton } from "./OneScreenSkeleton";
+import { OneScreenHeader } from "./OneScreenHeader";
 import { SKELETON_FADE_MS } from "../../lib/skeletonTiming";
+import { sliceBetween } from "../../test/sliceBetween";
 
 const css = readFileSync(join(__dirname, "oneScreen.css"), "utf8");
 const dash = readFileSync(join(__dirname, "OneScreenDashboard.tsx"), "utf8");
@@ -31,7 +33,10 @@ const dash = readFileSync(join(__dirname, "OneScreenDashboard.tsx"), "utf8");
 const shell = readFileSync(join(__dirname, "..", "shell", "WorkspaceShell.tsx"), "utf8");
 const shellCss = readFileSync(join(__dirname, "..", "shell", "workspaceShell.css"), "utf8");
 const rootCss = readFileSync(join(__dirname, "..", "..", "index.css"), "utf8");
-const html = renderToStaticMarkup(<OneScreenSkeleton />);
+/* the header slot is filled as the dashboard fills it — the page's own header, probes off, no figures yet */
+const html = renderToStaticMarkup(
+  <OneScreenSkeleton header={<OneScreenHeader ghost firstName="Nick" line={null} />} />,
+);
 
 describe("the page skeleton mirrors the page", () => {
   it("renders the REAL layout containers, not a private copy of the grid", () => {
@@ -91,9 +96,8 @@ describe("the page skeleton mirrors the page", () => {
   });
 
   it("stands in for every card on the page — nothing loads unannounced", () => {
-    /* the hero, the manuscript tile, the chart's plot, the to-do rule, the feed, the tile's mark */
-    for (const cls of ["os-sk-h1", "os-sk-stats", "os-sk-aut", "os-sk-chplot", "os-sk-tkrule",
-                       "os-sk-acbub", "os-sk-comill"]) {
+    /* the manuscript tile, the chart's plot, the to-do rule, the feed, the tile's mark */
+    for (const cls of ["os-sk-aut", "os-sk-chplot", "os-sk-tkrule", "os-sk-acbub", "os-sk-comill"]) {
       expect(html).toContain(cls);
     }
     /* ⚠️ A CARD THAT LEAVES THE PAGE LEAVES THE SKELETON IN THE SAME COMMIT, or the loading state
@@ -156,8 +160,37 @@ describe("the page skeleton mirrors the page", () => {
     expect(src).toContain("gridTemplateColumns");
   });
 
+  /**
+   * ⚠️ THE COVER'S HEADER IS THE PAGE'S HEADER, NOT A DRAWING OF IT (dashboard header, stage 1).
+   * The brief is that the header never shows a skeleton: while data is out it says its words without
+   * figures. Rendering the page's own component is also what keeps the cover's first row the page's
+   * height to the pixel, which a hand-sized ghost was measured and tuned to do — and drifted from.
+   * Its probes are off, because the page beneath the cover is mounted and carries its own.
+   */
+  it("⚠️ holds the page's own header — words, no figures, no shimmer, no probes", () => {
+    const hdr = sliceBetween(html, '<div class="os-greet">', 'class="os-toprow"', "the cover's header");
+    expect(hdr, "the header must be in the cover, before the top row").toContain("os-hello");
+    expect(hdr).toContain("Hello, Nick.");
+    expect(hdr).toContain('class="os-hdcounts"');
+    expect(hdr).toContain("queries out");
+    expect(hdr).toContain("tasks waiting on you");
+    expect(hdr, "no figure while the data is out — never a zero").not.toContain("<b>");
+    expect(hdr, "no shimmer inside the header").not.toContain("os-sk");
+    expect(hdr, "no probe on the cover's copy").not.toContain("data-probe");
+    /* the retired ghosts went with the greeting and stat rows they stood for */
+    for (const gone of ["os-sk-h1", "os-sk-sub", "os-sk-stats", "os-sk-stat", "os-sk-ill"]) {
+      expect(html).not.toMatch(new RegExp(`["\\s\`]${gone}["\\s\`]`));
+    }
+  });
+
   it("is hidden from assistive tech — a shape tells a screen reader nothing", () => {
     expect(html).toContain('aria-hidden="true"');
+  });
+
+  /* ⚠️ AND INERT, because the cover is no longer only shapes: the header it carries can hold the
+     tour button, and `aria-hidden` alone leaves a hidden control in the tab order. */
+  it("⚠️ is inert — nothing inside the cover can take focus", () => {
+    expect(html).toMatch(/<div class="os-skelpage" aria-hidden="true" inert="">/);
   });
 
   /**
@@ -247,7 +280,14 @@ describe("the reveal — one arrival, not two", () => {
   });
 
   it("⚠️ the cover dissolves rather than vanishing — mounted through its fade", () => {
-    expect(dash).toContain('skeleton.phase !== "off" && <OneScreenSkeleton leaving={skeleton.phase === "out"} />');
+    /* the claim is the phase test and the leaving flag, not the spelling — the call now also
+       hands the cover the page's header (stage 1), so it is matched across lines */
+    expect(dash).toMatch(/skeleton\.phase !== "off" && \(\s*<OneScreenSkeleton\s+leaving=\{skeleton\.phase === "out"\}/);
+    expect(dash).toMatch(/<OneScreenSkeleton[\s\S]{0,200}header=\{<OneScreenHeader ghost /);
+    /* ⚠️ …and the cover's copy is handed NO figures, ever. `loading` drops before the board has
+       finished deriving (measured: "2 tasks" for ~44ms before the true 23), and the page is stood
+       down for exactly that window — only the cover could have shown the wrong number. */
+    expect(dash).toMatch(/<OneScreenHeader ghost [^>]*line=\{null\}/);
     const at = css.indexOf(".os-skelpage {");
     expect(at).toBeGreaterThan(-1);
     expect(css.slice(at, css.indexOf("}", at))).toContain("transition: opacity 250ms ease");

@@ -121,18 +121,18 @@ describe("dashboard — the entrances are cancelled, not merely shortened", () =
   });
 });
 
-describe("counters — the figure never moves", () => {
+/* ⚠️ RETARGETED (dashboard header, stage 1): THE COUNTERS ARE GONE, and the header's figures that
+   replaced them have no hover at all — they are words in a sentence, not readouts. The law the old
+   case stated, that a figure never moves under the cursor, is asserted over the new figures. */
+describe("the header's figures never move on their own", () => {
   const bare = readFileSync(join(__dirname, "oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-  it("only the icon transforms on hover; no rule transforms the number", () => {
-    /* ⚠️ RETARGETED: the transform moved to the IMG. A transform on the wrapper creates a
-       stacking context, which isolates the blend group and brings the artwork's white field back —
-       so this assertion moving is the fix, not a weakening of it. */
-    expect(bare).toMatch(/\.os-counter:hover \.os-cic img\s*\{[^}]*transform/);
-    /* and the wrapper must NOT carry one */
-    const cic = bare.slice(bare.indexOf(".os-cic {"), bare.indexOf("}", bare.indexOf(".os-cic {")));
-    expect(cic).not.toMatch(/transform:/);
-    // .os-cn is the figure — a transform on it would make the headline jitter under the cursor
-    expect(bare).not.toMatch(/\.os-counter:hover \.os-cn\s*\{[^}]*transform/);
+  /* (the row as a whole still takes the page's one-time entrance — `.os-greet.enter` — which is the
+     reveal, not a hover; it is asserted with the other entrances above) */
+  it("no rule of their own animates or transforms the header's line, its figures or its artwork", () => {
+    expect(bare).not.toContain(".os-counter:hover");
+    for (const sel of [".os-hdcounts", ".os-hdc", ".os-hddot", ".os-hdart"]) {
+      expect(bare, sel).not.toMatch(new RegExp(`\\${sel}[^{]*\\{[^}]*(transform|animation|transition)`));
+    }
   });
 });
 

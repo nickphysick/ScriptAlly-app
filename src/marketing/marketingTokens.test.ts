@@ -940,7 +940,17 @@ describe("the feature rows set their own type, and nothing else uses its familie
     const elsewhere = files
       .filter((f) => !f.replace(/\\/g, "/").endsWith("/marketing/marketing.css"))
       .filter((f) => /Special Elite|Source Serif 4/.test(decls(readFileSync(f, "utf8"))));
-    expect(elsewhere.map((f) => f.slice(src.length + 1))).toEqual([]);
+    /* ⚠️ ONE SIGNED-IN OWNER, AND IT IS NAMED RATHER THAN WAVED THROUGH (dashboard header, stage 1,
+       17 Sep). The dashboard's greeting is set in Special Elite by Nick's brief — the deliberate
+       decision this lock exists to surface. It is the only file outside the marketing sheet allowed
+       to name either family; it names only the typewriter face, and only in the greeting's own rule.
+       A second signed-in surface adopting the face is still a decision this fails on. */
+    expect(elsewhere.map((f) => f.slice(src.length + 1).replace(/\\/g, "/"))).toEqual(["components/dashboard/oneScreen.css"]);
+    const dash = decls(readFileSync(resolve(src, "components/dashboard/oneScreen.css"), "utf8"));
+    const dashOwners = [...dash.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
+      .filter((m) => /Special Elite|Source Serif 4/.test(m[2])).map((m) => m[1].trim());
+    expect(dashOwners).toEqual([".os-greet .os-hello"]);
+    expect(dash).not.toContain("Source Serif 4");
   });
 });
 
