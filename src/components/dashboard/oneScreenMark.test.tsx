@@ -16,7 +16,8 @@ import { resolve } from "node:path";
 import React from "react";
 import { OneScreenMark, markHasArt, MarkName } from "./OneScreenMark";
 
-const NAMES: MarkName[] = ["active-queries", "goals", "activity", "tasks"];
+/* "active-queries" is retired with the chart that wore it — the stage-3 chart carries the hawk (17 Sep) */
+const NAMES: MarkName[] = ["goals", "activity", "tasks"];
 const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 const blk = (sel: string) => {
   const i = css.indexOf(`${sel} {`);
@@ -91,21 +92,22 @@ describe("the mark slot", () => {
 });
 
 describe("every dashboard container header carries one mark", () => {
+  /* the chart is not in this list any more: its header carries the hawk illustration, not a mark
+     (dashboard stage 3, 17 Sep) — `oneScreenStages.test.tsx` holds that it renders no mark at all */
   const files = {
     "Tasks": "OneScreenTasks.tsx",
-    "Chart": "OneScreenChart.tsx",
     "Rail (goals + activity)": "OneScreenRail.tsx",
   };
-  it("all four headers are wired, and none twice", () => {
+  it("the marked headers are wired, and none twice", () => {
     let total = 0;
     for (const f of Object.values(files)) {
       const src = readFileSync(resolve(__dirname, `./${f}`), "utf8");
       total += (src.match(/<OneScreenMark name=/g) ?? []).length;
     }
-    /* ⚠️ THREE, NOT FOUR — Goals carries no mark. Its header is a LABEL, not an instrument, and
-       both the band and the mark box were tried there and rejected. A fourth appearing means the
-       goals card has been re-banded by someone who read this as an oversight. */
-    expect(total).toBe(3);
+    /* ⚠️ TWO — Goals carries no mark (its header is a LABEL, not an instrument, and both the band and
+       the mark box were tried there and rejected), and the chart's went with the stage-3 rebuild. A
+       third appearing means a header has been re-banded by someone who read this as an oversight. */
+    expect(total).toBe(2);
   });
 });
 

@@ -7,11 +7,12 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
 import {
-  achievementPill, awaitingChip, chartEvents,
+  achievementPill, chartEvents, closedAt,
   aggregateLedger, bindEvents, dailyLedger, defaultFreq, monotonePath,
-  nearestStop, RANGE_STOPS, rangeChip, rangeWindow, runStage, stopForDays, tenureLine,
+  rangeWindow, runStage, tenureLine,
   tourAutoRuns, tourChipShows, axisTop, axisTicks, niceStep,
 } from "./oneScreen";
+import { liveCount } from "./dashBreakdown";
 
 // Thursday 6 August 2026 — the ref's own day (ISO week starts Mon 3 Aug).
 const NOW = new Date(2026, 7, 6, 15, 0, 0);
@@ -130,18 +131,40 @@ describe("the range window", () => {
     expect(rangeWindow(all, 1).length).toBe(2); // a line needs two points
   });
 
-  it("the stops are the only positions the thumb can rest at", () => {
-    expect(RANGE_STOPS.map((s) => s.days)).toEqual([14, 30, 56, 91, 182, 365, 0]);
-    expect(nearestStop(30).label).toBe("Last 8 weeks");  // snaps to p:34, not p:14
-    expect(nearestStop(99).days).toBe(0);
-    expect(stopForDays(56).p).toBe(34);
-    expect(stopForDays(999)).toBe(RANGE_STOPS[2]);       // unknown falls back, never throws
+  /* ⚠️ THE RANGE STOPS AND THE RANGE CHIP ARE RETIRED WITH THE BRUSH (dashboard stage 3, 17 Sep). The
+     window is fixed per grain now — `dashChart.CHART_WINDOW` — and the caption that replaced the chip
+     is locked in `dashChart.test.ts`. `rangeWindow` itself stays, and so do the two cases above. */
+});
+
+/* ══ the ledger's closed set — an offer is live ══ */
+
+describe("⚠️ an offer is ON THE LINE (dashboard stages 2–3, 17 Sep)", () => {
+  /* Nick: "Offer is active, everywhere." The ledger counted an offer as closed while the agent list and
+     the manuscripts page called it live; the header, the breakdown and this line now agree. */
+  it("an offer is not closed, so it stays in the active stock", () => {
+    const offer = q({ status: QueryStatus.OFFER, dateSent: daysAgo(10), lastStatusChange: daysAgo(2) });
+    expect(closedAt(offer)).toBeNull();
+    const led = dailyLedger([offer, q({ dateSent: daysAgo(8) })], NOW);
+    expect(led[led.length - 1].active).toBe(2);
   });
 
-  it("the chip names the movement over the range, in words at zero", () => {
-    expect(rangeChip([{ active: 3 } as any, { active: 7 } as any])).toBe("↑ +4 over this range");
-    expect(rangeChip([{ active: 7 } as any, { active: 3 } as any])).toBe("↓ -4 over this range");
-    expect(rangeChip([{ active: 5 } as any, { active: 5 } as any])).toBe("Level over this range");
+  it("the three closed statuses still close — a pass, a withdrawal, silence", () => {
+    for (const status of [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]) {
+      expect(closedAt(q({ status, dateSent: daysAgo(10), lastStatusChange: daysAgo(3) })), status).not.toBeNull();
+    }
+  });
+
+  /* two derivations against each other, never against a literal: the line's closing figure IS the
+     header's live count, for a mix that decides every status */
+  it("the line's closing figure is the header's live count, whatever the mix", () => {
+    const mix = [
+      QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_REQUESTED,
+      QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.REJECTED,
+      QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE,
+    ].map((status, i) => q({ status, dateSent: daysAgo(30 - i), lastStatusChange: daysAgo(5) }));
+    const led = dailyLedger(mix, NOW);
+    expect(led[led.length - 1].active).toBe(liveCount(mix));
+    expect(liveCount(mix)).toBe(7);
   });
 });
 
@@ -421,8 +444,6 @@ describe("runStage — day one, early days, settled", () => {
     expect(runStage([q({ dateSent: daysAgo(15) })], [{}], NOW)).toBe("settled");
   });
 
-  it("the early-days chip states what is out, singular-safe by construction", () => {
-    expect(awaitingChip([q({ dateSent: daysAgo(1) })])).toBe("1 awaiting a reply");
-    expect(awaitingChip([])).toBe("0 awaiting a reply");
-  });
+  /* ⚠️ THE EARLY-DAYS CHIP ("N awaiting a reply") IS RETIRED WITH THE CHART THAT WORE IT (stage 3). The
+     scoped stage above still decides the first-run panels; the chart's caption states the movement. */
 });

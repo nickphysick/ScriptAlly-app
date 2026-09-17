@@ -289,8 +289,8 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
     <div className={`msv-plateband${hero ? " msv-plateband--hero" : ""}`} ref={bandRef}>
       {/*
         ⚠️ THE PLATE MARK IS THE DASHBOARD'S PNG, IMPORTED — not a traced SVG sibling of the four in
-        manuscriptMarks.tsx. `OneScreenAuthor` already renders this exact asset the same way
-        (contained, no blend mode). One asset, one home.
+        manuscriptMarks.tsx. The book profile's hero and the shell's manuscript scope import the
+        same PNG. One asset, one home.
       */}
       {/* The hero draws its own cover, overlapping the banner — one book image per card. */}
       {!hero && (

@@ -135,28 +135,25 @@ const APP = process.env.SA_REFDIFF_APP_URL || "http://127.0.0.1:4173";
    elements, and is recorded here so nobody reads their absence as a deletion); `community-strip`,
    which really is gone, replaced by `community-tile` in the right column. New: `topbar` and
    `search`, because v26 puts a 620x50 search field where the breadcrumb row was. */
+/* ⚠️ STAGES 2–3 (17 Sep): `toprow`, `manuscript-card` and `brush` are retired with the top row, the
+   manuscript tile and the range brush; the breakdown, the second row and its three cards, and the
+   chart's own illustration are new. A retired probe is removed with its element, and said so here. */
 const PROBES = [
   /* ⚠️ `topbar` IS `navrow` NOW, AND `chart-header` IS NEW. Both of the last two shipped faults
      were invisible to the probe set that existed: the search sat in a row of its own and no probe
      measured a row, and the chart header wrapped and no probe measured the header. A probe set is
      the shape of what the gate can notice. */
-  "main", "navrow", "search", "grid", "hero", "toprow", "chart-header",
+  "main", "navrow", "search", "hero",
   /* ⚠️ THE STAT ROW'S THREE PROBES ARE RETIRED WITH THE ROW (dashboard header, stage 1, 17 Sep) —
      `stats`, `stat-card` and `stat-illustration`. The header's illustration takes a probe of its own,
      because its box is the claim the stat illustration's was: a squashed picture is a smaller box. */
   "header-illustration",
-  "manuscript-card", "chart-card", "plot", "brush",
-  /* ⚠️ v31 ADDS THE CONTROL CLUSTER AS A BOX. The frequency control and the brush were compared
-     one at a time, so a divergence in what the cluster CONTAINS could hide inside two probes that
-     each measured correctly — which is how a select stood where the ref draws three chips for
-     three passes. The cluster's own box is the claim. */
-  "chart-controls",
-  "todo-card", "todo-rule",
-  /* ⚠️ v30 ADDS THE BADGE AND THE DRAWER. The badge became a CONTROL this pass — it clears the
-     filter — and a control that changes shape when it gains a job is exactly the thing a box probe
-     should be watching. The drawer is measured only while OPEN, and its anchor is the viewport
-     rather than the content datum, because a `position: fixed` panel pinned to the window's right
-     edge is not positioned relative to anything the datum describes. */
+  "breakdown", "row2", "quick-actions",
+  "chart-card", "chart-header", "chart-illustration", "chart-controls", "plot",
+  "closed-tile",
+  "grid", "todo-card", "todo-rule",
+  /* ⚠️ v30 ADDS THE BADGE. The badge became a CONTROL that pass — it clears the filter — and a control
+     that changes shape when it gains a job is exactly the thing a box probe should be watching. */
   "todo-badge",
   "activity-card", "feed",
   "community-tile",
@@ -212,16 +209,11 @@ const ALLOW = [
 ];
 
 /** true when this miss is one of the recorded allowances AND is no worse than the allowance says */
-/* the `vw` coefficients of the two probes whose width is viewport-relative — the brush's track is
-   `clamp(70px, 6.4vw, 200px)` and the cluster is the brush plus fixed-width chips, so both move by
-   the same 6.4% of any window difference. */
-const VW_ALLOW = [
-  { key: "brush", field: "w", vw: 0.064, slack: 1.5,
-    why: "the track is 6.4vw and the app is measured in a window sized to match the CONTENT boxes; " +
-         "where those windows differ, a viewport-relative width differs by exactly vw x dw" },
-  { key: "chart-controls", field: "w", vw: 0.064, slack: 1.5,
-    why: "the cluster is the brush plus fixed chips, so it carries the brush's own vw difference" },
-];
+/* ⚠️ THE TWO `vw` ALLOWANCES ARE RETIRED WITH THE BRUSH (stage 3, 17 Sep). They forgave the brush's
+   `6.4vw` track, and the chart-controls cluster that carried it, by exactly the window difference. The
+   grain toggle that replaced both is a fixed width, so there is nothing left to forgive; the mechanism
+   stays for the next viewport-relative box. */
+const VW_ALLOW = [];
 
 const allowedBy = (m, refData, appData) =>
   [...ALLOW, ...VW_ALLOW].find((a) => {
@@ -255,35 +247,29 @@ const allowedBy = (m, refData, appData) =>
 
 const ANCHOR = {
   main: "datum",
-  /* the bar spans the content, and the field is CENTRED in it — so both of the field's insets are
-     the fact, which `span` is exactly the anchor for */
   /**
    * ⚠️ THE NAV ROW AND ITS SEARCH ARE DATUMS, REPORTED AND NOT COMPARED — and the ref says why in
    * its own markup: "NAV ROW — the search sits in the nav's own row; the nav itself is locked and
-   * not drawn here". The ref's `.topbar` is a STAND-IN for a row it does not draw, positioned
-   * inside its `.main` because it has nowhere else to put it. Ours is real shell chrome above the
-   * content, so comparing the two would be comparing against a placeholder.
-   * What governs them instead is the standing gate below: one search control, a row no taller than
-   * 72px, and the greeting starting immediately under it. Those are claims about the app, checkable
-   * without the ref having an opinion.
+   * not drawn here". What governs them instead is the standing gate below: one search control, a row
+   * no taller than 72px, and the greeting starting immediately under it.
    */
   navrow: "datum", search: "datum",
-  "chart-header": "span",
-  grid: "span", hero: "span", toprow: "span",
+  /* the page's rows span the centred block (stages 2–3): both insets are the facts */
+  hero: "span", breakdown: "span", row2: "span", grid: "span",
   /* the header's illustration is pinned to the RIGHT end of its row, so its right inset and size are
      the facts — the greeting's length decides nothing about where it sits */
   "header-illustration": "right",
-  /* the tile is the only fixed track in the top row; everything beside it is elastic */
-  "manuscript-card": "left",
-  "chart-card": "span", plot: "span", brush: "right",
-  /* the cluster is pinned to the header's right edge, so its right inset and size are the facts */
-  "chart-controls": "right",
+  /* the second row is 300 · 1fr · 300: the quick actions pinned left, the closed tile pinned right,
+     the chart the elastic middle — and the chart's header and plot fill the chart */
+  "quick-actions": "left", "closed-tile": "right",
+  "chart-card": "span", "chart-header": "span", plot: "span",
+  /* the hawk leads the header; the toggle is pinned to its right edge */
+  "chart-illustration": "left", "chart-controls": "right",
   "todo-card": "span", "todo-rule": "span",
   /* the badge sits after the title in a left-to-right header, so its left inset and size are the
      facts; its right inset is wherever the title's length leaves it */
   "todo-badge": "left",
-  /* the right column is 360px pinned to the right edge, and everything in it goes with it —
-     including the community tile, which is now IN that column rather than a strip beneath both */
+  /* the right column is 360px pinned to the right edge of the block, and everything in it goes with it */
   "activity-card": "right", feed: "right", "community-tile": "right",
 };
 /**
@@ -299,7 +285,10 @@ const ANCHOR = {
  */
 /* ⚠️ `subtitle` IS RETIRED WITH "What's on your desk today?" (stage 1), and the header's counts line
    takes its place — it is the row the header's second size belongs to. */
-const TEXT_PROBES = ["greeting", "header-counts", "panel-title", "chart-title"];
+/* ⚠️ STAGES 2–3 ADD FIVE: the breakdown's count line, the chart's figure and caption, the closed tile's
+   figure and the querying day — each a treatment the brief names, compared for type, never for words. */
+const TEXT_PROBES = ["greeting", "header-counts", "panel-title", "chart-title", "breakdown-meta",
+  "chart-figure", "chart-caption", "closed-total", "querying-day"];
 
 /**
  * The type scale, as SELECTOR PAIRS — one row per treatment the design names, ref side and app side.
@@ -320,7 +309,8 @@ const TYPE_SCALE = [
      accepts either read the stat block and reported the card-title row at 19 against the ref's 23.
      The two treatments have their own probes in v22 for exactly this reason. */
   ["card title",      ".os-th2 h2",          ".os-th2 h2"],
-  ["chart figure",    ".os-ahead .os-n",     ".os-ahead .os-n"],
+  /* the chart's figure left the shared band with the stage-3 chart (17 Sep) */
+  ["chart figure",    ".os-acn",             ".os-acn"],
   ["hero greeting",   ".os-greet h1",        ".os-greet h1"],
   /* ⚠️ THE LEGEND ROW IS RETIRED WITH THE LEGEND (v26, Phase 5). The ref still SHIPS the markup and
      hides it with `.legend{display:none}`, so its type is still readable there and a type probe
@@ -339,6 +329,25 @@ const TYPE_SCALE = [
   ["bubble meta",     ".os-bubmeta",         ".os-bubmeta"],
   ["bubble label",    ".os-bublab",          ".os-bublab"],
   ["todo badge",      ".os-tbadge b",        ".os-tbadge b"],
+  /* ── stages 2–3 (17 Sep): every treatment the brief names on the three new sections ── */
+  ["breakdown title", ".os-bdtitle",         ".os-bdtitle"],
+  ["breakdown meta",  ".os-bdmeta",          ".os-bdmeta"],
+  ["breakdown count", ".os-bdn",             ".os-bdn"],
+  ["state pill",      ".os-spill-l",         ".os-spill-l"],
+  ["breakdown fact",  ".os-bdfact",          ".os-bdfact"],
+  ["breakdown foot",  ".os-bdfoot",          ".os-bdfoot"],
+  ["hero action",     ".os-qaherot",         ".os-qaherot"],
+  ["quick action",    ".os-qaitem",          ".os-qaitem"],
+  ["querying title",  ".os-qatitle",         ".os-qatitle"],
+  ["querying day",    ".os-qaday",           ".os-qaday"],
+  ["chart title",     ".os-acttl",           ".os-acttl"],
+  ["chart caption",   ".os-acdc",            ".os-acdc"],
+  ["grain toggle",    ".os-actog button",    ".os-actog button"],
+  ["axis label",      ".os-acx span",        ".os-acx span"],
+  ["closed title",    ".os-cltitle",         ".os-cltitle"],
+  ["closed figure",   ".os-clnum",           ".os-clnum"],
+  ["closed count",    ".os-clct",            ".os-clct"],
+  ["closed foot",     ".os-clfoot",          ".os-clfoot"],
 ];
 
 /**
@@ -480,214 +489,95 @@ const READ = `(() => {
         return tops.length ? Math.round((Math.max(...tops) - Math.min(...tops)) * 10) / 10 : 0;
       })()
     : null;
-  /* the brush is inside the header's content box, not clipped */
-  const brushEl = document.querySelector('[data-probe="brush"]');
-  out.checks.brushOverflow = hdrEl && brushEl
-    ? Math.round((brushEl.getBoundingClientRect().right - hdrEl.getBoundingClientRect().right) * 10) / 10
+  /* the grain toggle stays inside the header's box — the brush it replaced was held the same way */
+  const togEl = document.querySelector('[data-probe="chart-controls"]');
+  out.checks.toggleOverflow = hdrEl && togEl
+    ? Math.round((togEl.getBoundingClientRect().right - hdrEl.getBoundingClientRect().right) * 10) / 10
     : null;
   /**
-   * ⚠️ THE CHART'S THREE STRUCTURAL CLAIMS (v29). Each is about a BOX or a document position, never
-   * about how the picture looks, because every one of them was reported as a look and turned out to
-   * be something else. The pack said sage was visible above the line and named two causes; both were
-   * false — the line is one series, the paint order was already right, and the sage is the resting
-   * node's own ring. What WAS wrong was 34px of band fill below the zero baseline, which nobody had
-   * reported. These are the properties, so the next report does not have to be right about the cause.
+   * ⚠️ THE STAGE-3 CHART'S STRUCTURE (17 Sep). One navy line over one gradient-filled area that closes on
+   * the baseline, three gridlines, a hollow mark where the line starts and a solid one where it ends,
+   * and every event dot ON the line — measured against the DRAWN path, never against the maths that
+   * placed the dots. The stacked bands, their mask, the band-edge check and the crossing check are
+   * retired with the chart that had them.
+   * NO BACKTICKS AND NO BACKSLASHES IN HERE: this block is a template literal.
    */
   const plotEl = document.querySelector('[data-probe="plot"]');
   const plotSvg = plotEl ? (plotEl.tagName.toLowerCase() === "svg" ? plotEl : plotEl.querySelector("svg")) : null;
-  out.checks.lineVsTopBand = null;
-  out.checks.lineAfterBands = null;
   out.checks.paintBelowZero = null;
+  out.checks.plotStruct = null;
   if (plotSvg) {
     const inDefs = (el) => !!el.closest("defs");
     const paths = [...plotSvg.querySelectorAll("path")].filter((el) => !inDefs(el));
-    const lineEl = paths.find((el) =>
-      (el.getAttribute("stroke") || "").toLowerCase() === "#1c130f" &&
-      (el.getAttribute("fill") || "none") === "none" &&
-      Number(el.getAttribute("stroke-width")) >= 1.6);
-    const bandEls = paths.filter((el) => {
-      const f = (el.getAttribute("fill") || "none").toLowerCase();
-      return f !== "none" && f.indexOf("fadeout") < 0 && f.indexOf("bandfade") < 0;
-    });
-    /* the line is painted AFTER every band — a document-order claim, not an appearance one */
-    if (lineEl && bandEls.length) {
-      const order = [...plotSvg.querySelectorAll("path")];
-      const li = order.indexOf(lineEl);
-      out.checks.lineAfterBands = bandEls.every((b) => order.indexOf(b) < li);
+    const lines = paths.filter((el) => (el.getAttribute("fill") || "none") === "none");
+    const line = lines.find((el) => (el.getAttribute("stroke") || "").toLowerCase() === "#2a3a52");
+    const areas = paths.filter((el) => (el.getAttribute("fill") || "").indexOf("url(") === 0);
+    const gradId = areas[0] ? (areas[0].getAttribute("fill") || "").replace("url(#", "").replace(")", "") : "";
+    const grad = gradId ? plotSvg.querySelector("linearGradient#" + gradId) : null;
+    const stops = grad ? [...grad.querySelectorAll("stop")].map((st) => ({
+      colour: (st.getAttribute("stop-color") || "").toLowerCase(),
+      opacity: Number(st.getAttribute("stop-opacity")),
+    })) : [];
+    const grid = [...plotSvg.querySelectorAll("line")]
+      .filter((el) => !inDefs(el) && (el.getAttribute("class") || "").indexOf("os-acgrid") >= 0);
+    const gridYs = grid.map((el) => Number(el.getAttribute("y1")));
+    const baseY = gridYs.length ? Math.max(...gridYs) : null;
+    const first = plotSvg.querySelector(".os-acfirst");
+    const last = plotSvg.querySelector(".os-aclast");
+    const dots = [...plotSvg.querySelectorAll('[data-probe="chart-event"]')];
+    /* the drawn line, sampled once — every distance below is to this */
+    const pts = [];
+    if (line) {
+      const L = line.getTotalLength();
+      for (let k = 0; k <= 1200; k++) { const q = line.getPointAtLength((L * k) / 1200); pts.push([q.x, q.y]); }
     }
-    /**
-     * ⚠️ THE TOP BAND'S UPPER EDGE IS COMPARED AS A STRING, NOT AS TEN SAMPLED POINTS. Sampling
-     * with getPointAtLength has to guess which half of a closed area path is the top edge, and at
-     * the extreme right it guesses wrong — my own first probe reported a 47px divergence that was
-     * entirely the probe. The band's d BEGINS with the line's d when the two are one source; that
-     * is exact, cheap, and cannot be satisfied by a coincidence.
-     */
-    if (lineEl && bandEls.length) {
-      const ld = (lineEl.getAttribute("d") || "").trim();
-      const widest = bandEls.reduce((a, b) => (a && a.getBBox().y <= b.getBBox().y ? a : b), null);
-      const bd = widest ? (widest.getAttribute("d") || "").trim() : "";
-      out.checks.lineVsTopBand = ld.length > 0 && bd.indexOf(ld) === 0 ? 0 : null;
-      if (out.checks.lineVsTopBand === null && ld && bd) {
-        /* not one string — fall back to a sampled worst-case so the miss carries a number */
-        let worst = 0;
-        const L = lineEl.getTotalLength();
-        for (let k = 0; k < 10; k++) {
-          const pt = lineEl.getPointAtLength((L * k) / 9);
-          let lo = 0, hi = widest.getTotalLength() / 2, best = null;
-          for (let it = 0; it < 26; it++) {
-            const mid = (lo + hi) / 2;
-            const q = widest.getPointAtLength(mid);
-            best = q;
-            if (Math.abs(q.x - pt.x) < 0.2) break;
-            if (q.x < pt.x) lo = mid; else hi = mid;
-          }
-          if (best) worst = Math.max(worst, Math.abs(best.y - pt.y));
-        }
-        out.checks.lineVsTopBand = Math.round(worst * 100) / 100;
+    const near = (x, y) => {
+      let best = Infinity;
+      for (let k = 1; k < pts.length; k++) {
+        const ax = pts[k - 1][0], ay = pts[k - 1][1], bx = pts[k][0], by = pts[k][1];
+        const dx = bx - ax, dy = by - ay, len = dx * dx + dy * dy;
+        const t = len ? Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / len)) : 0;
+        const d = Math.hypot(ax + t * dx - x, ay + t * dy - y);
+        if (d < best) best = d;
       }
-    }
-    /**
-     * ⚠️ NOTHING PAINTS BELOW THE ZERO BASELINE, ASSERTED AS A BOX. The pixel proof is the separate
-     * dash-pixels script; this is the form that can run on every probe at every width without a
-     * screenshot, and it fails on the same fault. The baseline is the axis rule at zero; the claim
-     * is that no painted node's own box reaches past it.
-     */
-    const axis = [...plotSvg.querySelectorAll("line")].filter((el) => !inDefs(el))
-      .find((el) => (el.getAttribute("class") || "").indexOf("axis0") >= 0)
-      || [...plotSvg.querySelectorAll("line")].filter((el) => !inDefs(el))
-        .filter((el) => (el.getAttribute("stroke") || "") === "#d8cec2")[0];
-    if (axis) {
-      const zeroY = Number(axis.getAttribute("y1"));
+      return Math.round(best * 1000) / 1000;
+    };
+    const centre = (c) => [Number(c.getAttribute("cx")), Number(c.getAttribute("cy"))];
+    const gap = (c, p) => (c && p ? Math.round(Math.hypot(centre(c)[0] - p[0], centre(c)[1] - p[1]) * 100) / 100 : null);
+    const dotDists = dots.map((g) => {
+      const c = g.querySelector("circle");
+      return c ? near(centre(c)[0], centre(c)[1]) : Infinity;
+    });
+    out.checks.plotStruct = {
+      lines: lines.length,
+      lineStroke: line ? Number(line.getAttribute("stroke-width")) : null,
+      lineCap: line ? line.getAttribute("stroke-linecap") : null,
+      areas: areas.length,
+      areaFromLine: !!(line && areas[0]) && (areas[0].getAttribute("d") || "").indexOf(line.getAttribute("d") || "!") === 0,
+      stops,
+      gridlines: grid.length,
+      masks: plotSvg.querySelectorAll("mask, [mask]").length,
+      firstHollow: !!first && (first.getAttribute("fill") || "").toLowerCase() === "#ffffff"
+        && (first.getAttribute("stroke") || "").toLowerCase() === "#2a3a52",
+      lastSolid: !!last && (last.getAttribute("fill") || "").toLowerCase() === "#2a3a52",
+      firstAtStart: gap(first, pts[0]),
+      lastAtEnd: gap(last, pts[pts.length - 1]),
+      dots: dots.length,
+      dotKinds: [...new Set(dots.map((g) => g.getAttribute("data-kind")))].sort(),
+      dotWorst: dotDists.length ? Math.max(...dotDists) : null,
+    };
+    /* ⚠️ NOTHING PAINTS BELOW THE BASELINE, ASSERTED AS A BOX — the fill closes on it and the line never
+       dips under it. The event dots are marks ON the line and are not counted, as the old check's
+       markers were not. */
+    if (baseY !== null) {
       let over = 0;
-      for (const el of plotSvg.querySelectorAll("path, rect")) {
-        if (inDefs(el)) continue;
-        if (el.getAttribute("id") === "hit") continue;               /* the transparent hit target */
-        if ((el.getAttribute("fill") || "") === "transparent") continue;
+      for (const el of paths) {
         const bb = el.getBBox();
-        over = Math.max(over, bb.y + bb.height - zeroY);
+        over = Math.max(over, bb.y + bb.height - baseY);
       }
       out.checks.paintBelowZero = Math.round(over * 10) / 10;
     }
   }
-  /**
-   * ⚠️ THE PLOT'S STRUCTURE, ASSERTED (v31, Phase 2). The chart's interior is generated at runtime,
-   * so for three passes the diff compared its BOX and nothing inside it: every chart change was
-   * built from prose about the ref rather than from the ref. These hold whatever the data is, which
-   * is what makes them a gate rather than a snapshot.
-   */
-  /**
-   * ⚠️ NO BAND MAY EVER RISE ABOVE THE LINE, COMPARED AS ARRAYS RATHER THAN SAMPLED (v32).
-   *
-   * The bands and the line are polylines through one clamped sample set now, so their d strings are
-   * lists of the same x positions in the same order — which means this does not have to sample a
-   * curve or guess which half of a closed area path is its top edge. It reads the numbers.
-   *
-   * The band's own top edge is the first (steps + 1) points of its d; the line's d is exactly that
-   * many. A positive worst value is a band standing above the line in SVG y, which is the fault this
-   * pass exists to close and which no pixel sweep of the harness account's data could ever show.
-   */
-  out.checks.bandCrossing = (() => {
-    const host = document.querySelector('[data-probe="plot"]');
-    const svg = host && (host.tagName.toLowerCase() === "svg" ? host : host.querySelector("svg"));
-    if (!svg) return null;
-    const inDefs = (el) => !!el.closest("defs");
-    const nums = (d) => {
-      const out2 = [];
-      let i = 0;
-      while (i < d.length) {
-        const c = d.charCodeAt(i);
-        if ((c >= 48 && c <= 57) || c === 45 || c === 46) {
-          let j = i + 1;
-          while (j < d.length) {
-            const c2 = d.charCodeAt(j);
-            if ((c2 >= 48 && c2 <= 57) || c2 === 46) j++;
-            else break;
-          }
-          out2.push(parseFloat(d.slice(i, j)));
-          i = j;
-        } else i++;
-      }
-      return out2;
-    };
-    const paths = [...svg.querySelectorAll("path")].filter((el) => !inDefs(el));
-    const lineEl = paths.find((el) => (el.getAttribute("stroke") || "").toLowerCase() === "#1c130f"
-      && (el.getAttribute("fill") || "none") === "none" && Number(el.getAttribute("stroke-width")) >= 1.6);
-    const bandEls = paths.filter((el) => {
-      const f = (el.getAttribute("fill") || "none").toLowerCase();
-      return f !== "none" && f.indexOf("fade") < 0;
-    });
-    if (!lineEl || !bandEls.length) return null;
-    const ln = nums(lineEl.getAttribute("d") || "");
-    const pts2 = ln.length / 2;
-    if (pts2 < 8) return { skipped: "the line is not a polyline at this data size" };
-    let worst = -1e9;
-    let samples = 0;
-    for (const b of bandEls) {
-      const bd = nums(b.getAttribute("d") || "");
-      for (let k = 0; k < pts2; k++) {
-        const by = bd[k * 2 + 1], ly = ln[k * 2 + 1];
-        if (by === undefined || ly === undefined) continue;
-        /* SVG y grows downward: a band ABOVE the line has the SMALLER y */
-        const over = ly - by;
-        if (over > worst) worst = over;
-        samples++;
-      }
-    }
-    return { worst: Math.round(worst * 1000) / 1000, samples, points: pts2, bands: bandEls.length };
-  })();
-  out.checks.plotStruct = (() => {
-    const host = document.querySelector('[data-probe="plot"]');
-    const svg = host && (host.tagName.toLowerCase() === "svg" ? host : host.querySelector("svg"));
-    if (!svg) return null;
-    const inDefs = (el) => !!el.closest("defs");
-    const paths = [...svg.querySelectorAll("path")].filter((el) => !inDefs(el));
-    const bands = paths.filter((el) => {
-      const f = (el.getAttribute("fill") || "none").toLowerCase();
-      return f !== "none" && f.indexOf("fade") < 0;
-    });
-    const line = paths.find((el) => (el.getAttribute("stroke") || "").toLowerCase() === "#1c130f"
-      && (el.getAttribute("fill") || "none") === "none" && Number(el.getAttribute("stroke-width")) >= 1.6);
-    const masked = svg.querySelector("g[mask]");
-    const maskId = masked ? (masked.getAttribute("mask") || "").replace("url(#", "").replace(")", "") : "";
-    const mask = maskId ? svg.querySelector("mask#" + maskId) : null;
-    const gradId = mask ? (() => {
-      const r = mask.querySelector("rect");
-      return r ? (r.getAttribute("fill") || "").replace("url(#", "").replace(")", "") : "";
-    })() : "";
-    const grad = gradId ? svg.querySelector("linearGradient#" + gradId) : null;
-    const axis = [...svg.querySelectorAll("line")].filter((el) => !inDefs(el))
-      .find((el) => (el.getAttribute("class") || "").indexOf("axis0") >= 0);
-    const zeroY = axis ? Number(axis.getAttribute("y1")) : null;
-    const circles = [...svg.querySelectorAll("circle")].filter((el) => !inDefs(el) && !el.closest("#cross"));
-    const kids = [...svg.children];
-    /* the extreme x of a path, walked from its own geometry rather than a bbox */
-    const endX = (el) => {
-      if (!el) return null;
-      const L = el.getTotalLength();
-      let hi = -Infinity;
-      for (let k = 0; k <= 200; k++) { const q = el.getPointAtLength((L * k) / 200); if (q.x > hi) hi = q.x; }
-      return Math.round(hi * 100) / 100;
-    };
-    const cxs = circles.map((c) => Math.round(Number(c.getAttribute("cx")) * 100) / 100);
-    return {
-      bands: bands.length,
-      allMasked: !!masked && bands.every((b) => masked.contains(b)),
-      gradUnits: grad ? grad.getAttribute("gradientUnits") : null,
-      gradY1: grad ? Number(grad.getAttribute("y1")) : null,
-      gradY2: grad ? Number(grad.getAttribute("y2")) : null,
-      zeroY,
-      lines: paths.filter((el) => (el.getAttribute("fill") || "none") === "none"
-        && (el.getAttribute("stroke") || "").toLowerCase() === "#1c130f").length,
-      lineAfterMask: (!!line && !!masked) ? kids.indexOf(masked) < kids.indexOf(line) : null,
-      topStroke: bands.length ? (bands[0].getAttribute("stroke") || "none") : null,
-      markers: circles.length,
-      markerXs: cxs,
-      fadeRects: [...svg.querySelectorAll("rect")].filter((r) => !inDefs(r)
-        && (r.getAttribute("fill") || "").indexOf("url(") === 0).length,
-      lineEndX: endX(line),
-      bandEndX: bands.length ? endX(bands[0]) : null,
-    };
-  })();
   /**
    * ⚠️ NO RED RING, ANYWHERE, IN ANY STATE (v30, Phase 2). The house palette has burgundy for ink
    * and no red at all; a ring in either reads as an error on a control that is merely selected or
@@ -956,7 +846,7 @@ async function readPage(page, url, { app } = {}) {
     const authForm = await page.locator("#au-email, #au-pw").count();
     if (authForm > 0 || n < 12) {
       throw new Error(
-        `dash-refdiff: the app page is not the signed-in dashboard — ${n}/16 probes found` +
+        `dash-refdiff: the app page is not the signed-in dashboard — ${n}/${PROBES.length} probes found` +
         `${authForm ? ", and the sign-in form is on screen" : ""}. Refusing to diff it.`,
       );
     }
@@ -1258,50 +1148,39 @@ function diffScale(key, ref, app) {
  */
 const STANDING = [
   { k: "navrowH", why: "the nav row is one row", test: (v) => v !== null && v <= 72, want: "<= 72px" },
-  { k: "chartHeaderH", why: "the chart header is one row — a wrapped one is ~150px", test: (v) => v !== null && v <= 72, want: "<= 72px" },
+  /* ⚠️ RETARGETED (stage 3): the header is the hawk's height now (96), and at a narrow card the toggle
+     wraps beneath the headline by design — so the claim is "one row, or that one wrap, never a third" */
+  { k: "chartHeaderH", why: "the chart header is the hawk's row, or that row with the toggle beneath — never a third", test: (v) => v !== null && v >= 90 && v <= 140, want: "90–140px" },
   { k: "searchCount", why: "exactly one search control on the page", test: (v) => v === 1, want: "1" },
   /* ⚠️ `illH` AND `statsVsGreet` ARE RETIRED WITH THE STAT ROW (dashboard header, stage 1, 17 Sep).
      Both measured an element that no longer exists; kept, they would read null and fail forever. The
      header's illustration is held by its own probe above, and by tests/e2e/dashHeader.measure.ts. */
   /* ── v29's four ─────────────────────────────────────────────────────────────────────────────── */
-  {
-    k: "lineVsTopBand",
-    why: "the total line IS the top band's edge, and is drawn after every band — one series, one path",
-    test: (v, c) => v !== null && v <= 0.5 && c.lineAfterBands === true,
-    want: "<= 0.5px, line last",
-  },
+  /* ⚠️ `lineVsTopBand` IS RETIRED WITH THE BANDS (stage 3) — its subject was the top band's edge */
   { k: "paintBelowZero", why: "nothing paints below the chart's zero baseline", test: (v) => v !== null && v <= 0.5, want: "<= 0.5px" },
   { k: "ruleClear", why: "every band of the to-do rule paints — a token that does not resolve here makes it transparent", test: (v) => v === 0, want: "0 transparent" },
   { k: "ruleFill", why: "the rule's bands fill their track", test: (v) => v !== null && Math.abs(v) <= 3, want: "within 3px" },
   /**
-   * ⚠️ THE SIX CHART STRUCTURAL CLAIMS AS ONE GATE (v31, Phase 2). One entry rather than six because
-   * they describe one construction and a failure in any of them means the same thing — the chart is
-   * no longer built the way the ref builds it. The reading prints every field, so the message names
-   * which part moved.
+   * ⚠️ THE CHART'S CONSTRUCTION AS ONE GATE (v31's shape, stage 3's chart, 17 Sep). One entry because the
+   * parts describe one drawing and a failure in any of them means the same thing — the chart is no
+   * longer the one the brief describes. The reading prints every field, so the message names the part.
+   * `bandCrossing` is retired with the bands; the dots-on-the-line claim takes its place here.
    */
   {
     k: "plotStruct",
-    why: "the plot is three masked bands, one gradient, one line after them, no fade rect, two marks",
+    why: "one navy line over its own fade, three gridlines, hollow first and solid last marks on the line, and every event dot on it",
     test: (v) => !!v
-      && v.bands === 3
-      && v.allMasked === true
-      && v.gradUnits === "userSpaceOnUse"
-      && v.gradY1 === 0 && v.zeroY !== null && Math.abs(v.gradY2 - v.zeroY) <= 0.5
-      && v.lines === 1
-      && v.lineAfterMask === true
-      && v.topStroke === "none"
-      && v.markers >= 2
-      && v.fadeRects === 0
-      /* Phase 4's claim: the line and the bands end together, and the end mark sits on both */
-      && v.lineEndX !== null && v.bandEndX !== null && Math.abs(v.lineEndX - v.bandEndX) <= 0.5
-      && v.markerXs.some((x) => Math.abs(x - v.lineEndX) <= 0.5),
-    want: "3 masked bands · userSpaceOnUse 0→y(0) · 1 line after · no fade rect · ≥2 marks · line ends with the bands",
-  },
-  {
-    k: "bandCrossing",
-    why: "no band rises above the total line — the fault that survived three passes of pixel sweeps",
-    test: (v) => !!v && !v.skipped && v.samples > 200 && v.worst <= 0.05,
-    want: "no band above the line, > 200 compared points",
+      && v.lines === 1 && v.lineStroke === 2.2 && v.lineCap === "round"
+      && v.areas === 1 && v.areaFromLine === true
+      && v.stops.length === 2 && v.stops[0].colour === "#2a3a52" && v.stops[0].opacity === 0.22
+      && v.stops[1].colour === "#2a3a52" && v.stops[1].opacity === 0
+      && v.gridlines === 3 && v.masks === 0
+      && v.firstHollow === true && v.lastSolid === true
+      && v.firstAtStart !== null && v.firstAtStart <= 0.5 && v.lastAtEnd !== null && v.lastAtEnd <= 0.5
+      /* ⚠️ A CLAIM ABOUT DOTS NEEDS DOTS — the harness account's window holds both kinds today, and a
+         window that holds none is reported red rather than passed vacuously */
+      && v.dots >= 1 && v.dotWorst !== null && v.dotWorst <= 0.5,
+    want: "1 navy line 2.2 round · 1 area from it · 22%→0 navy · 3 gridlines · no mask · hollow first, solid last, on the line · ≥1 event dot, all within 0.5px",
   },
   { k: "redRings", why: "no control computes a red outline or box-shadow, in any state", test: (v) => v === 0, want: "0" },
   {
@@ -1320,28 +1199,17 @@ const STANDING = [
   },
   {
     k: "fade",
-    why: "the band fill fades toward the baseline — 85% of the painted span under half of 15%",
+    why: "the fill fades toward the baseline — 85% of the painted span under half of 15%",
     test: (v) => !!v && v.ratio < 0.5,
     want: "ratio < 0.5",
   },
-  {
-    k: "brush",
-    why: "the brush handle follows the cursor — monotonic, 1:1, and settling on the week its value implies",
-    test: (v) => !!v && (
-      /* where the ref hides the thumbnail, the keyboard route is the claim */
-      v.noTrack === true
-        ? v.keyboard === true
-        : (v.backwards === 0 && v.worstLag <= 2 && v.repeats <= 2
-          && v.weeks.p05 === 11 && v.weeks.p50 === 6 && v.weeks.p95 === 4
-          && v.settleErr !== null && v.settleErr <= 1.5)),
-    want: "0 backwards · lag <= 2px · 11/6/4 at 5/50/95% · settles on its own value",
-  },
+  /* ⚠️ `brush` IS RETIRED WITH THE BRUSH (stage 3) — the windows are fixed per grain now */
   {
     k: "plotDraws",
-    why: "the plot draws at every reachable range and frequency — sized, no NaN, a line of non-zero length",
-    test: (v) => !!v && v.readings >= 12 && v.drawn > 0
+    why: "the plot draws at every grain — sized, no NaN, a line of non-zero length",
+    test: (v) => !!v && v.readings === 3 && v.drawn > 0
       && v.unsized === 0 && v.nan === 0 && v.noLine === 0,
-    want: "every range × frequency: SVG sized · 0 NaN · line length > 0 (>= 12 readings)",
+    want: "Daily · Weekly · Monthly: SVG sized · 0 NaN · line length > 0 (3 readings)",
   },
 ];
 
@@ -1370,111 +1238,9 @@ function diffChecks(app) {
   return m;
 }
 
-/**
- * ⚠️ THE BRUSH HANDLE FOLLOWS THE CURSOR — the one standing gate that cannot be read from a static
- * page, because the fault is a RELATIONSHIP BETWEEN FRAMES rather than a property of one.
- *
- * The handle's position used to be derived from N and N from the handle, with a Math.round between
- * them, so the handle snapped to whole-week stops: a reader drags a pixel and the handle either does
- * not move or jumps a twelfth of the track. A snapshot of that page is indistinguishable from a
- * correct one — every value in it is right. Only driving the pointer shows it.
- *
- * Monotonic AND cursor-tracking, because each catches what the other cannot: a quantised handle is
- * still monotonic, and a handle that tracked in reverse would still be smooth.
- */
-async function brushDrag(page) {
-  const box = await page.evaluate(() => {
-    const t = document.querySelector('[data-probe="brush"] .os-bw');
-    if (!t) return null;
-    const r = t.getBoundingClientRect();
-    return { x: r.left, y: r.top + r.height / 2, w: r.width };
-  });
-  /**
-   * ⚠️ NO TRACK IS A STATE, NOT A FAILURE (v31). Below 1650 the ref hides the brush's thumbnail to
-   * make room for the third frequency chip, and the app follows it — so there is no handle to drag
-   * and the claim "the handle follows the cursor" is vacuous rather than false. What must still hold
-   * at those widths is the OTHER half of the same control: the range is reachable from the keyboard.
-   * Reporting `noTrack` with that check is the honest reading; returning null made the gate fail on
-   * a page that is behaving exactly as the ref does.
-   */
-  if (!box || box.w < 20) {
-    const keyboard = await page.evaluate(() => {
-      const el = document.querySelector('[data-probe="brush"] input[type="range"]');
-      if (!el) return false;
-      el.focus();
-      return document.activeElement === el;
-    });
-    return { noTrack: true, keyboard };
-  }
-  const STEPS = 40;
-  const at = (f) => box.x + box.w * f;
-  /**
-   * ⚠️ TWO ANIMATION FRAMES BEFORE EVERY READ, AND THIS IS THE DIFFERENCE BETWEEN MEASURING THE
-   * CONTROL AND MEASURING THE HARNESS. The handle's position is React state; a read taken in the
-   * same task as the pointer move returns the PREVIOUS frame. Without the wait this reported 8 to 10
-   * backward steps and a 7px lag on a handle that is following the cursor exactly — a stale read is
-   * indistinguishable from a control that jitters, which is the fault under test wearing the
-   * probe's clothes. Two rAFs, because one only guarantees the callback ran, not that it painted.
-   *
-   * ⚠️ AND THE LABEL IS SCOPED. `document.querySelector` with a selector LIST returns the first
-   * match in DOCUMENT order, not selector order — this file has been bitten by exactly that once
-   * already, with the app-stage scroller beating the content column for the datum.
-   */
-  const readHandle = () => page.evaluate(() => new Promise((resolve) => {
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      const h = document.querySelector('[data-probe="brush"] .os-bwin');
-      const t = document.querySelector('[data-probe="brush"] .os-bw');
-      const lbl = document.querySelector('.os-ctrls .os-rangelbl');
-      if (!h || !t) { resolve(null); return; }
-      const weeks = lbl ? Number((/(\d+)/.exec(lbl.textContent || "") || [])[1]) : null;
-      resolve({ left: Math.round((h.getBoundingClientRect().left - t.getBoundingClientRect().left) * 100) / 100, weeks });
-    }));
-  }));
-
-  const lefts = [];
-  const cursors = [];
-  const weeksAt = {};
-  await page.mouse.move(at(0.05), box.y);
-  await page.mouse.down();
-  for (let k = 0; k < STEPS; k++) {
-    const f = 0.05 + (0.9 * k) / (STEPS - 1);
-    await page.mouse.move(at(f), box.y);
-    const r = await readHandle();
-    if (!r) { await page.mouse.up(); return null; }
-    lefts.push(r.left);
-    cursors.push(Math.round(box.w * f * 100) / 100);
-    if (k === 0) weeksAt.p05 = r.weeks;
-    if (Math.abs(f - 0.5) < 0.012) weeksAt.p50 = r.weeks;
-    if (k === STEPS - 1) weeksAt.p95 = r.weeks;
-  }
-  await page.mouse.up();
-  const settled = await readHandle();
-
-  let backwards = 0;
-  let worstLag = 0;
-  let repeats = 0;
-  for (let k = 1; k < lefts.length; k++) {
-    const dh = lefts[k] - lefts[k - 1];
-    const dc = cursors[k] - cursors[k - 1];
-    if (dh < -0.5) backwards++;
-    if (Math.abs(dh) < 0.05) repeats++;
-    worstLag = Math.max(worstLag, Math.abs(dh - dc));
-  }
-  /* where the handle SHOULD settle: the boundary the final N implies, as a fraction of the track */
-  const implied = settled && settled.weeks
-    ? Math.round((1 - settled.weeks / 12) * box.w * 100) / 100
-    : null;
-  return {
-    steps: STEPS,
-    backwards,
-    repeats,
-    worstLag: Math.round(worstLag * 100) / 100,
-    weeks: weeksAt,
-    settledLeft: settled ? settled.left : null,
-    settledWeeks: settled ? settled.weeks : null,
-    settleErr: implied === null || !settled ? null : Math.round(Math.abs(settled.left - implied) * 100) / 100,
-  };
-}
+/* ⚠️ `brushDrag` IS DELETED WITH THE BRUSH (stage 3, 17 Sep). It drove the range handle across its track
+   and held that the handle followed the cursor; the chart's windows are fixed per grain now, so there
+   is no handle to drive. Recover it from e33db37a if a draggable range ever returns. */
 
 /**
  * ⚠️ THE THREE v30 GATES THAT CANNOT BE READ FROM A STATIC PAGE. Each is a claim about what happens
@@ -1482,40 +1248,25 @@ async function brushDrag(page) {
  * snapshot of the broken version is indistinguishable from a correct one in all three cases.
  */
 /**
- * ⚠️ THE PLOT DRAWS AT EVERY REACHABLE RANGE, AT EVERY FREQUENCY (v35) — the gate that was missing.
+ * ⚠️ THE PLOT DRAWS AT EVERY GRAIN (v35's gate, stage 3's control surface).
  *
- * Every chart check before this read the chart once, at its default range. The blank chart on dev
- * drew nothing at ANY range, so even a default read would have caught it — `plotStruct` would have gone
- * red — but the stream that changed the chart never ran this harness. So this gate asks the question
- * over the whole control surface, and asserts the three things a painted plot cannot fake:
+ * Every chart check before v35 read the chart once, at its default setting. The blank chart on dev
+ * drew nothing at ANY setting, and the stream that changed the chart never ran this harness. So this
+ * asks the question over the whole control surface — since stage 3 that is the three grains, the
+ * range brush being retired — and asserts the three things a painted plot cannot fake:
  *
- *   · the SVG carries a size — the direct signature of the unmeasured chart, which renders an SVG with
- *     no width, height or viewBox inside a wrapper that has a perfectly good box;
- *   · its markup holds no NaN — the signature the v35 pack predicted, which a range outrunning its
- *     series would still produce;
+ *   · the SVG carries a size — the direct signature of the unmeasured chart;
+ *   · its markup holds no NaN;
  *   · a line path exists and getTotalLength() is above zero — present, and actually drawn.
  *
  * A reading where the chart renders its sparse message instead of an SVG is counted and skipped, not
- * failed: that is the chart telling the truth about too few points. The population is asserted, so a
- * sweep that drove nothing cannot pass.
+ * failed: that is the chart telling the truth about too few points. The population is asserted.
  */
 async function plotSweep(page) {
-  const controls = await page.evaluate(() => {
-    const sl = document.querySelector('[data-probe="brush"] input[type="range"]');
-    if (!sl) return null;
-    const chips = Array.from(document.querySelectorAll('[data-probe="chart-controls"] button'))
-      .map((b) => ({ t: b.textContent.trim(), disabled: b.disabled, on: b.getAttribute("aria-pressed") === "true" }))
-      .filter((c) => c.t === "Daily" || c.t === "Weekly" || c.t === "Monthly");
-    return { min: Number(sl.min), max: Number(sl.max), value: Number(sl.value), chips };
-  });
-  if (!controls) return null;
-
-  const setRange = (v) => page.evaluate(async (v) => {
-    const sl = document.querySelector('[data-probe="brush"] input[type="range"]');
-    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(sl, String(v));
-    sl.dispatchEvent(new Event("input", { bubbles: true }));
-    await new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
-  }, v);
+  const chips = await page.evaluate(() => Array.from(document.querySelectorAll('[data-probe="chart-controls"] button'))
+    .map((b) => ({ t: b.textContent.trim(), on: b.getAttribute("aria-pressed") === "true" }))
+    .filter((c) => c.t === "Daily" || c.t === "Weekly" || c.t === "Monthly"));
+  if (!chips.length) return null;
   const clickChip = (t) => page.evaluate(async (t) => {
     const b = Array.from(document.querySelectorAll('[data-probe="chart-controls"] button')).find((x) => x.textContent.trim() === t);
     if (b) b.click();
@@ -1537,18 +1288,13 @@ async function plotSweep(page) {
   });
 
   const readings = [];
-  for (const chip of controls.chips) {
-    if (chip.disabled) continue;
+  for (const chip of chips) {
     await clickChip(chip.t);
-    for (let v = controls.min; v <= controls.max; v++) {
-      await setRange(v);
-      readings.push({ freq: chip.t, weeks: v, ...(await readPlot()) });
-    }
+    readings.push({ freq: chip.t, ...(await readPlot()) });
   }
   /* put the chart back the way the page opened it */
-  const opened = controls.chips.find((c) => c.on);
+  const opened = chips.find((c) => c.on);
   if (opened) await clickChip(opened.t);
-  await setRange(controls.value);
 
   const drawn = readings.filter((r) => !r.sparse);
   const failing = drawn.filter((r) => !r.sized || r.nan || !(r.lineLen > 0));
@@ -1557,7 +1303,6 @@ async function plotSweep(page) {
     drawn: drawn.length,
     sparse: readings.length - drawn.length,
     freqs: Array.from(new Set(readings.map((r) => r.freq))),
-    range: [controls.min, controls.max],
     unsized: drawn.filter((r) => !r.sized).length,
     nan: drawn.filter((r) => r.nan).length,
     noLine: drawn.filter((r) => !(r.lineLen > 0)).length,
@@ -1630,8 +1375,8 @@ async function driven(page) {
   }
 
   /**
-   * ⚠️ THE FILL ACTUALLY FADES (v30, Phase 5) — read from the rendered pixels, because a mask's
-   * effect exists nowhere else. A column at mid-plot from the top down to the baseline; the PAINTED
+   * ⚠️ THE FILL ACTUALLY FADES (v30, Phase 5) — read from the rendered pixels, because a gradient's
+   * effect exists nowhere else (it was a mask over bands until stage 3; the claim did not change). A column at mid-plot from the top down to the baseline; the PAINTED
    * span is whatever in that column is more than 2 units from the card colour, so the sample cannot
    * land in the empty sky above the stack. The pack's gate says "15% and 85% of the plot's height";
    * at this data 15% of the PLOT is above the stack entirely and reads as card, so the honest form
@@ -1645,10 +1390,11 @@ async function driven(page) {
     const hb = host.getBoundingClientRect(), sb = svg.getBoundingClientRect();
     const vb = (svg.getAttribute("viewBox") || "0 0 1 1").split(/\s+/).map(Number);
     const toY = (uy) => (sb.top - hb.top) + (uy - vb[1]) * (sb.height / vb[3]);
-    const lines = [...svg.querySelectorAll("line")].filter((l) => !l.closest("defs"));
-    const axis = lines.find((l) => (l.getAttribute("class") || "").indexOf("axis0") >= 0);
-    if (!axis) return null;
-    const zero = toY(Number(axis.getAttribute("y1"))), top = toY(vb[1]);
+    /* the baseline is the lowest of the three gridlines (stage 3) — it was the `axis0` rule */
+    const grid = [...svg.querySelectorAll("line")]
+      .filter((l) => !l.closest("defs") && (l.getAttribute("class") || "").indexOf("os-acgrid") >= 0);
+    if (!grid.length) return null;
+    const zero = toY(Math.max(...grid.map((l) => Number(l.getAttribute("y1"))))), top = toY(vb[1]);
     const pts = [];
     for (let k = 0; k < 40; k++) pts.push([Math.round(hb.width * 0.5), top + ((zero - top) * k) / 39]);
     return pts;
@@ -1986,7 +1732,6 @@ try {
     /* ⚠️ DRIVEN ON THE PAGE THAT IS STILL OPEN, AND ITS RESULT SURVIVES THE FIT RE-READ BELOW. The
        ±16px window exists to make two content boxes the same size; a drag's behaviour does not
        depend on it, and re-driving it on a second page would double the slowest part of the run. */
-    const brush = await brushDrag(appPage);
     const drivenChecks = await driven(appPage);
     const plotDraws = await plotSweep(appPage);
 
@@ -2003,7 +1748,6 @@ try {
       await fit.close();
     }
 
-    appData.checks.brush = brush;
     appData.checks.focusMouse = drivenChecks.focusMouse ?? null;
     appData.checks.focusTab = drivenChecks.focusTab ?? null;
     appData.checks.drawer = drivenChecks.drawer ?? null;

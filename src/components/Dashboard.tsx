@@ -1501,9 +1501,9 @@ export const Dashboard: React.FC<{
          `.os-root`'s `height: 100%` had nothing to resolve against and fell back to content
          height — 6,499px of wrapper in an 840px scroller, measured.
 
-         The height now comes from `.sa-dashroot` in oneScreen.css, which keeps it `height:100%`
-         where the page is locked and hands back `auto` + the dvh min-height + the bottom padding
-         in the releases, where the page is SUPPOSED to scroll. */
+         ⚠️ THE LOCK ITSELF IS RETIRED (dashboard stages 2–3, 17 Sep): the page flows and the shell's
+         window scrolls it, so this wrapper states no height at all — `.sa-dashroot` has no rule in
+         oneScreen.css beyond the focus rings that select on it. */
       style={{ color: bodyInk }}
     >
 

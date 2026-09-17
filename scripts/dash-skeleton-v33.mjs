@@ -26,7 +26,9 @@ function envLocal(k){const f=join(ROOT,".env.local");if(!existsSync(f))return nu
   for(const l of readFileSync(f,"utf8").split("\n")){const m=new RegExp("^\\s*"+k+"\\s*=\\s*(.*)$").exec(l);if(m)return m[1].trim().replace(/^["']|["']$/g,"")||null;}return null;}
 
 /**
- * ⚠️ SEVEN REGIONS, AND TWO OF THEM ARE READ FROM THE SAME ELEMENT IN BOTH STATES (v33.2).
+ * ⚠️ ELEVEN REGIONS, AND TWO OF THEM ARE READ FROM THE SAME ELEMENT IN BOTH STATES (v33.2).
+ * The top row (`toprow`) is retired with the manuscript tile; the breakdown and the three-card row
+ * that replaced it are five regions of their own (dashboard stages 2–3, 17 Sep).
  * `navrow` and `search` are the SHELL's controls, and the loading state keeps their boxes and
  * hides their ink — which is the only way the row's geometry can be the live one rather than six
  * numbers copied out of a measurement. So for those two the comparison is the element against
@@ -34,7 +36,8 @@ function envLocal(k){const f=join(ROOT,".env.local");if(!existsSync(f))return nu
  * the ghosts come off. That is exactly the claim: a nav row that changed height between states
  * would shift everything under it, which is the jump this whole phase exists to remove.
  */
-const REGIONS = ["navrow", "search", "grid", "toprow", "todo-card", "activity-card", "community-tile"];
+const REGIONS = ["navrow", "search", "breakdown", "row2", "quick-actions", "chart-card", "closed-tile",
+  "grid", "todo-card", "activity-card", "community-tile"];
 const LIVE_IN_BOTH = new Set(["navrow", "search"]);
 const TOL = Number(process.env.SA_SKEL_TOL || 4);
 /* how far the nav row's shimmer may sit from the cover's own opacity on any dissolving frame —
@@ -149,9 +152,15 @@ function readRegions(names) {
   /**
    * ⚠️ THE CLIPPING CLAIM IS MEASURED AS A CUT, NOT AS A PROPERTY. "No ancestor computes
    * `overflow: hidden` or `clip`" cannot hold in this shell and never could: `.ws-window` is the
-   * content capsule and clips at its own radius, `.ws-main` clips the column, `.os-root` clips the
-   * page — on every route, loading or not, by design. What the claim is FOR is that nothing of the
-   * ghost is cut off, so the ancestry is walked and the actual overhang reported at each clipper.
+   * content capsule and clips at its own radius, `.ws-main` clips the column — on every route,
+   * loading or not, by design. What the claim is FOR is that nothing of the ghost is cut off, so the
+   * ancestry is walked and the actual overhang reported at each clipper.
+   *
+   * ⚠️ AND THE WALK STOPS AT THE FIRST SCROLLER (dashboard stages 2–3, 17 Sep). The page flows now and
+   * the window scrolls it, so the ghost runs below the fold by design — and what is below a
+   * scroller's fold is reached by scrolling, not cut. The scroller's own TOP still counts (at load it
+   * sits at the top of its content), and anything that clips between the ghost and the scroller still
+   * counts; the ancestors above the scroller clip the scroller's box, which is sized to fit them.
    */
   const skEl = document.querySelector(".os-skelpage");
   out.clip = null;
@@ -160,14 +169,17 @@ function readRegions(names) {
     const clippers = [];
     for (let e = skEl.parentElement; e && e !== document.documentElement; e = e.parentElement) {
       const cs = getComputedStyle(e);
-      if (!/hidden|clip|auto|scroll/.test(cs.overflowY + cs.overflowX)) continue;
+      const scroller = /auto|scroll/.test(cs.overflowY + cs.overflowX);
+      if (!scroller && !/hidden|clip/.test(cs.overflowY + cs.overflowX)) continue;
       const r = e.getBoundingClientRect();
       clippers.push({
         cls: String(e.className).trim().split(/\s+/)[0] || e.tagName.toLowerCase(),
         overflow: cs.overflowX + "/" + cs.overflowY,
+        scroller,
         cutTop: Math.round(Math.max(0, r.top - s.top) * 10) / 10,
-        cutBottom: Math.round(Math.max(0, s.bottom - r.bottom) * 10) / 10,
+        cutBottom: scroller ? 0 : Math.round(Math.max(0, s.bottom - r.bottom) * 10) / 10,
       });
+      if (scroller) break;
     }
     out.clip = { clippers, worstCut: clippers.reduce((a, c) => Math.max(a, c.cutTop, c.cutBottom), 0) };
   }
@@ -392,7 +404,7 @@ for (const W of WIDTHS) {
    * The reveal staggers the cards in with `os-rise`, which TRANSLATES them — and
    * `getBoundingClientRect` returns the transformed box. Caught mid-flight, every region below the
    * nav row reads a few pixels off its resting place, uniformly, with all four heights correct.
-   * Measured: an intermittent +4 on grid, toprow, todo-card, activity-card AND community-tile at
+   * Measured: an intermittent +4 on grid, the (since retired) top row, todo-card, activity-card AND community-tile at
    * one width, on roughly one run in three — exactly the shape of one animation still running
    * rather than a layout fault. It sat the gate ON its 4px threshold.
    *

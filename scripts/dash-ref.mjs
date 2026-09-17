@@ -19,4 +19,9 @@
  * right. v34 stays on the design-ref watchlist as the authority for what is not yet rebuilt, and
  * stages 2 and 3 bring their own refs.
  */
-export const REF_REL = "design-refs/dashboard-build-2026-09-17.html";
+/*
+ * ⚠️ AND SINCE STAGES 2–3 (17 Sep, later the same day) IT POINTS AT THE SECOND SNAPSHOT, `…-17b`, taken
+ * after the breakdown, the three-card row and the new chart replaced the top row. The first snapshot
+ * stays in design-refs/ as the record of the stage-1 page; nothing reads it.
+ */
+export const REF_REL = "design-refs/dashboard-build-2026-09-17b.html";

@@ -24,11 +24,15 @@ export interface TourStep {
   body: string;
 }
 
-/** The six steps, copy verbatim from the ref. */
+/**
+ * The six steps. The copy was the ref's; two steps changed with stages 2–3 (17 Sep), because the
+ * manuscript tile they pointed at is retired and the chart no longer has hover readouts or pins — a
+ * tour describing a control that is not there teaches the wrong page.
+ */
 export const TOUR_STEPS: TourStep[] = [
-  { sel: ".os-lead", title: "Your queries, charted", body: "Hover any week for what was sent, what closed, and where every query stands. The small pins mark the moments that mattered." },
+  { sel: ".os-bd", title: "Where your queries stand", body: "Every live query, by how far it has got. The two marked columns are the ones waiting on you." },
+  { sel: ".os-lead", title: "Your queries, charted", body: "Your active queries over time. The dots mark each request that came in and each query that was passed on." },
   { sel: ".os-tasks", title: "What needs you", body: "Anything waiting on you, urgent first. Hover a row to act on it there and then." },
-  { sel: ".os-aut", title: "You and your book", body: "Your manuscript, at a glance. Add a cover or a profile photo whenever you like." },
   { sel: ".os-goal", title: "A target for the quarter", body: "Set a querying goal and the meter fills as you send." },
   { sel: ".os-actv", title: "The record", body: "Everything that happens, as it happens. The arrows expand the feed when you want the longer view." },
   { sel: null, title: "That's your desk", body: "You can take this tour again from the button beside the date, any time in your first week." },

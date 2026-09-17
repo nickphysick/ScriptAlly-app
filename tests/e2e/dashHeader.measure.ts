@@ -44,7 +44,9 @@ const PICK = (process.env.SA_DASH_HEADER_WIDTHS ?? "").split(",").map((s) => Num
 const WIDTHS = PICK.length ? ALL.filter((v) => PICK.includes(v.w)) : ALL;
 
 /** Everything below the header whose horizontal geometry must not move. */
-const BELOW = [".os-colL", ".os-colR", ".os-toprow", ".os-aut", ".os-lead", ".os-tasks", ".os-actv", ".os-comtile"];
+/* ⚠️ RETARGETED (stages 2–3, 17 Sep): the top row and its tile are retired; the breakdown, the second row
+   and its three cards are what sit below the header now. */
+const BELOW = [".os-bd", ".os-row2", ".os-grid", ".os-colL", ".os-colR", ".os-qa", ".os-lead", ".os-cl", ".os-tasks", ".os-actv", ".os-comtile"];
 
 type Box = { x: number; y: number; w: number; h: number; r: number; b: number };
 
@@ -196,7 +198,7 @@ function readPage(page: Page, below: string[]) {
         headerShimmer: hdr ? hdr.querySelectorAll(".os-sk, .os-skel").length : -1,
       },
       todoBadge: (() => { const b = q("[data-probe='todo-badge'] b"); return b ? b.textContent : null; })(),
-      chartActive: (() => { const n = q(".os-lead .os-n"); return n ? n.textContent : null; })(),
+      chartActive: (() => { const n = q(".os-lead .os-acn"); return n ? n.textContent : null; })(),
       emptyPage: !!q("[data-probe='chart-empty']"),
       seen: (window as unknown as { __saHdr?: unknown[] }).__saHdr ?? [],
     };
@@ -349,22 +351,27 @@ test.describe("the dashboard header", () => {
          It kept two tracks until then — the release was written for `.os-content` before `.os-grid`
          existed — so on a phone the left column resolved to ~0px and the activity column lay over it.
          Stacked: the header first, then the main content, then the activity column, which has a
-         height of its own (it declared 0 for the side-by-side layout and was invisible when stacked). */
+         height of its own (it declared 0 for the side-by-side layout and was invisible when stacked).
+         ⚠️ RETARGETED (stages 2–3): the header is the page's first row now, above the breakdown and the
+         three-card row, rather than the left column's first child. */
       if (w < 1025) {
         expect(r.gridTracks, "one track below 1025").toBe(1);
         const L = r.below[".os-colL"]!, R = r.below[".os-colR"]!, act = r.below[".os-actv"]!, tile = r.below[".os-comtile"]!;
-        expect(r.header!.y, "the header is the first thing in the stack").toBeCloseTo(L.y, 0);
+        const bd = r.below[".os-bd"]!, row2 = r.below[".os-row2"]!;
+        expect(r.header!.b, "the header is the first thing in the stack").toBeLessThanOrEqual(bd.y + 0.5);
+        expect(bd.b, "then the breakdown").toBeLessThanOrEqual(row2.y + 0.5);
+        expect(row2.b, "then the three cards").toBeLessThanOrEqual(L.y + 0.5);
         expect(R.y, "the activity column comes after the main content").toBeGreaterThanOrEqual(L.b - 0.5);
         expect(R.x, "and shares its left edge").toBeCloseTo(L.x, 0);
         expect(R.w, "and its width").toBeCloseTo(L.w, 0);
         expect(act.h, "the activity panel is not collapsed").toBeGreaterThan(200);
         expect(tile.y, "the community tile sits below the panel, not over it").toBeGreaterThanOrEqual(act.b - 0.5);
       }
-      /* ⚠️ KNOWN, PRE-EXISTING, AND THE SHELL'S: at tablet widths the desktop shell will not shrink
-         below the dashboard's natural width (the top row's tile beside the chart's unwrapping header,
-         ~871px), so the stage runs past the window and its right side is cut off. Measured 17 Sep: the
-         stage 911px wide in a 768px window, before the phone fix and after it. Recorded, not asserted
-         — it is not this page's to fix — and the annotation disappears the day the shell shrinks. */
+      /* ⚠️ KNOWN, AND THE SHELL'S: the desktop shell will not shrink below its widest rigid row (its
+         columns are `min-width: auto`), and that row is the TOP BAR, not the page — measured 17 Sep by
+         hiding each in turn: hiding the dashboard changes nothing, hiding `.ws-pagebar` fits the
+         window. The bar was 913px at 768 before stages 2–3 and is 632px since, so from 900px up
+         nothing overflows. Recorded, not asserted, and the annotation disappears when nothing does. */
       if ((r.stageOverflow ?? 0) > 0) {
         test.info().annotations.push({ type: "known-issue", description: `the stage runs ${r.stageOverflow}px past a ${w}px window (the shell does not shrink)` });
         // eslint-disable-next-line no-console
@@ -378,12 +385,14 @@ test.describe("the dashboard header", () => {
       expect(r.counts.box!.h, "one line").toBeCloseTo(cSize * 1.5, 0);
       expect(r.counts.clip).toEqual([]);
       expect(r.h1.clip, "no ancestor clips the greeting's ink").toEqual([]);
-      expect(r.header!.x, "the header starts at the main column's left edge").toBeCloseTo(r.colL!.x, 0);
-      expect(r.header!.r, "and ends at its right edge").toBeCloseTo(r.colL!.r, 0);
-      const next = r.below[".os-toprow"]!;
+      /* ⚠️ RETARGETED (stages 2–3): the header spans the page's centred block — the breakdown's edges —
+         rather than the left column, and the next section is the breakdown */
+      const next = r.below[".os-bd"]!;
+      expect(r.header!.x, "the header starts at the block's left edge").toBeCloseTo(next.x, 0);
+      expect(r.header!.r, "and ends at its right edge").toBeCloseTo(next.r, 0);
       expect(next.y - r.header!.b, "~34px before the next section").toBeCloseTo(34, 0);
       if (w > 900) {
-        expect(r.img!.box!.r, "it ends where the activity column's gap begins").toBeCloseTo(r.colL!.r, 0);
+        expect(r.img!.box!.r, "it ends at the block's right edge").toBeCloseTo(next.r, 0);
         expect(r.img!.box!.b, "bottom-aligned with the text block").toBeCloseTo(r.counts.box!.b, 0);
         expect(r.img!.box!.x, "it sits clear of the counts line").toBeGreaterThanOrEqual(r.counts.box!.r + 40 - 0.5);
       }

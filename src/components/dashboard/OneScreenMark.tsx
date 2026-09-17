@@ -25,9 +25,9 @@ import rolodexMark from "../../assets/shell/agents-on-file-icon.png";
 import manuscriptMark from "../../assets/shell/manuscript-icon.png";
 import allQueriesMark from "../../assets/shell/all-queries-icon.png";
 
-/** The four marks, and the brief each one is waiting for. */
+/** The dashboard's marks (three since the chart took the hawk, 17 Sep), and the brief each is waiting for. */
 export type MarkName =
-  | "active-queries" | "goals" | "activity" | "tasks" | "community"
+  | "goals" | "activity" | "tasks" | "community"
   /* the page-band keys — one per page that mounts variant="band" */
   | "queries" | "todo" | "calendar" | "contacts" | "packages" | "analytics"
   | "noteboard" | "discover" | "settings" | "manuscripts" | "comps";
@@ -36,20 +36,14 @@ export type MarkName =
  * ⚠️ THE BRIEFS. Kept beside the icons they will replace so the two never drift apart, and kept
  * OUT of the rendered output (see above).
  *
- *   active-queries — a line rising across a ruled page, ink-drawn
  *   goals          — a wax-sealed target, or a pin in a chart
  *   activity       — a clock face over a stack of filed cards
  *   tasks          — a pencil resting on a ticked list
  *
- * ⚠️ `src` IS ABSENT FOR ALL FOUR, and that absence is the whole state machine: present → the
+ * ⚠️ `src` IS ABSENT FOR ALL THREE, and that absence is the whole state machine: present → the
  * artwork, absent → the mono placeholder. Adding an asset is a one-line change here.
  */
 const MARK: Record<MarkName, { label: string; icon: React.ReactNode; src?: string }> = {
-  /* a line rising across a ruled page, ink-drawn */
-  "active-queries": {
-    label: "chart",
-    icon: <><path d="M3 3v18h18" /><path d="M7 15l4-5 3 3 5-7" /></>,
-  },
   /* a wax-sealed target, or a pin in a chart */
   goals: {
     label: "goal",
@@ -133,9 +127,9 @@ const MARK: Record<MarkName, { label: string; icon: React.ReactNode; src?: strin
    * a stack of bound pages — the shelf, not a single book. THE BRIEF IS THIS COMMENT AND NEVER
    * RENDERS.
    *
-   * ⚠️ THE SAME ASSET ALREADY SERVES `OneScreenAuthor` AND THE SHELL's manuscript scope. One
-   * drawing, three mounts, sizes at the call sites — see the rolodex note above. The monoline
-   * shelf stays as the degrade path.
+   * ⚠️ THE SAME ASSET ALSO SERVES THE SHELL's manuscript scope and the Manuscripts pages (the
+   * dashboard's manuscript tile was its other mount until stages 2–3, 17 Sep). One drawing, sizes at
+   * the call sites — see the rolodex note above. The monoline shelf stays as the degrade path.
    */
   manuscripts: {
     label: "shelf",

@@ -111,9 +111,12 @@ for (const W of WIDTHS) {
   /* ⚠️ A REFERENCE TAKEN FROM THE BUILD HAS NO FIXTURE TO SUBSTITUTE (stage 1, 17 Sep) — its plot is the
      app's own, frozen at capture, while the app's chart is a rolling window. Comparing the two would
      report the calendar as a regression. Skipped by name, with the reason, and the chart is held by
-     the standing structural gates (plotStruct, bandCrossing, plotDraws) until stage 3's chart ref. */
+     the standing structural gates (`plotStruct`, `plotDraws`, `fade`).
+     ⚠️ AND THE SUBSTITUTION BELOW IS WRITTEN FOR THE RETIRED BAND SERIES (stage 3 replaced the chart). It
+     is unreachable while the reference is a build snapshot; a drawn chart ref brings its own fixture
+     shape, and this block is rewritten for it then rather than guessed at now. */
   if (html.includes('<meta name="dash-ref-source" content="build">')) {
-    line.skipped = "the reference is a build snapshot — no data fixture to substitute; the chart is held structurally until stage 3's chart ref";
+    line.skipped = "the reference is a build snapshot — no data fixture to substitute; the chart is held by the structural gates";
     results.push(line); await ctx.close(); continue;
   }
   const subs = [];

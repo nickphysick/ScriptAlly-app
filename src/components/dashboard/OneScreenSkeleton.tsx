@@ -5,22 +5,22 @@
  * OneScreenSkeleton — the ghost shell shown while the dashboard's data resolves
  * (ref design-refs/dashboard-cappuccino-v34.html, `#skeleton`).
  *
- * ⚠️ IT REUSES THE REAL LAYOUT CLASSES — `os-content`, `os-grid`, `os-greet`, `os-colL`,
- * `os-toprow`, `os-colR` — RATHER THAN RESTATING THE GRID. That is the whole design of this file:
+ * ⚠️ IT REUSES THE REAL LAYOUT CLASSES — `os-content`, `os-greet`, `os-bd`, `os-row2`, `os-grid`,
+ * `os-colL`, `os-colR` (the rows of stages 2–3, 17 Sep) — RATHER THAN RESTATING THE GRID. That is the whole design of this file:
  * "a generic grid of grey rectangles is not acceptable — the point is that the layout does not jump
  * when data lands." A second copy of the grid would agree with the first on the day it was written
  * and drift the first time a column width moved, and it would drift SILENTLY, because nothing
  * renders both at once to compare.
  *
- * ⚠️ AND FROM v33 IT REUSES THE REAL CARD CLASSES TOO — `os-card`, `os-aut`, `os-lead`, `os-ahead`,
- * `os-lbody`, `os-chartwrap`, `os-tasks`, `os-th2`, `os-actv`, `os-comtile`. The class NAMES were
+ * ⚠️ AND FROM v33 IT REUSES THE REAL CARD CLASSES TOO — today `os-card`, `os-qa`, `os-qalist`,
+ * `os-lead`, `os-achead`, `os-acplot`, `os-cl`, `os-clrows`, `os-tasks`, `os-th2`, `os-actv`, `os-comtile`. The class NAMES were
  * always reused; the BOXES were not. Every ghost card was a plain grey rectangle carrying a
  * hand-written height, so the paper, the hairline, the radius, the padding and — the expensive one
  * — the flex and aspect-ratio budgets that decide how tall the top row is were all restated or
  * missing. Wearing the real classes, the ghost's boxes ARE the page's boxes, and the only numbers
  * left in this file's CSS are the sizes of the grey blocks INSIDE them.
  *
- * ⚠️ THE GHOST'S FIVE MEASUREMENT HANDLES ARE `data-sk` ATTRIBUTES, NOT CLASSES — the same
+ * ⚠️ THE GHOST'S MEASUREMENT HANDLES ARE `data-sk` ATTRIBUTES, NOT CLASSES — the same
  * reasoning `OneScreenPanel` states for `data-probe`: a class would have to be styled by something
  * to justify its existence, and an attribute is inert, so it can never be the reason a check
  * passes. They are `data-sk` rather than `data-probe` because the page underneath is MOUNTED and
@@ -33,6 +33,8 @@
  */
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
+import { QUICK_ACTIONS } from "../../lib/dashActions";
+import { CLOSED_BUCKETS } from "../../lib/dashClosed";
 
 /** ⚠️ THE REF'S OWN FEED RHYTHM — `#skeleton .sk-r` alternates a centred day caption with event
  *  blocks at 96 / 86 / 110 / 96 / 86. A single repeated height reads as a list of identical rows,
@@ -128,58 +130,62 @@ export const OneScreenSkeleton: React.FC<{
    * writer's name, which only the page has.
    */
   header: React.ReactNode;
-}> = ({ leaving = false, header }) => (
+  /**
+   * ⚠️ AND THE PAGE'S OWN BREAKDOWN, IN ITS GHOST MODE (stage 2) — the section heading keeps its words
+   * and the manuscript's title; the figures, pills and fact lines are shimmer blocks in the columns'
+   * own boxes. A slot for the same reason as the header: the title is the page's.
+   */
+  breakdown: React.ReactNode;
+}> = ({ leaving = false, header, breakdown }) => (
   /* aria-hidden: a screen reader is told nothing by a shape. The wait itself is announced by the
      page's live regions when the content lands.
      ⚠️ AND `inert`, because the cover is no longer only shapes: the header it carries can hold a
      real button, and `aria-hidden` alone leaves a hidden control in the tab order. */
   <div className={`os-skelpage${leaving ? " out" : ""}`} aria-hidden="true" inert>
+    {/* ⚠️ THE SAME FOUR ROWS AS THE PAGE (stages 2–3, 17 Sep), wearing the page's own row and card
+        classes, so every width, gap and padding is declared once — in the page's rules — and the
+        ghost cannot be laid out differently from the thing it stands for. */}
     <div className="os-content">
-      {/* ⚠️ `.os-grid` WAS MISSING, AND IT IS WHY THE GHOST WAS NEVER WHERE THE PAGE IS (v33,
-          Phase 4). This file's own header said it reuses the real layout classes so the ghost
-          "cannot be misaligned" — true of the class NAMES and false of the STRUCTURE. The page
-          gained `.os-grid` between the hero and the columns; the skeleton never did, so `.os-colL`
-          and `.os-colR` fell into `.os-content`'s flex COLUMN and stacked. Measured at 2520 before
-          the fix: the activity ghost at x≈0 against a loaded column at x≈1860.
-          Nothing compared the two until this pass built the gate that does. */}
+      {header}
+      {breakdown}
+
+      <div className="os-row2" data-sk="row2">
+        {/* the quick actions — the hero button's box, then four action rows and the foot */}
+        <div className="os-card os-qa" data-sk="quick-actions">
+          <div className="os-sk os-sk-qahero" />
+          <div className="os-qalist">
+            {/* one ghost per action the card draws — the card's own list, counted, never a number */}
+            {QUICK_ACTIONS.map((a) => <div className="os-sk os-sk-qaitem" key={a.key} />)}
+          </div>
+          <div className="os-qafoot"><div className="os-sk os-sk-qafoot" /></div>
+        </div>
+        {/* the chart — its header row (the hawk's box sets its height), then the plot and its labels */}
+        <div className="os-card os-lead" data-sk="chart-card">
+          <div className="os-achead">
+            <div className="os-acid">
+              <div className="os-sk os-sk-acart" />
+              <div className="os-sk os-sk-acstat" />
+            </div>
+            <div className="os-sk os-sk-actog" />
+          </div>
+          <div className="os-acbody">
+            <div className="os-acplot os-sk os-sk-acplot" />
+            <div className="os-acx" />
+          </div>
+        </div>
+        {/* the closed tile — heading, headline, four rows, foot */}
+        <div className="os-card os-cl" data-sk="closed-tile">
+          <div className="os-clhd"><div className="os-sk os-sk-clttl" /></div>
+          <div className="os-clhead"><div className="os-sk os-sk-clhead" /></div>
+          <div className="os-clrows">
+            {CLOSED_BUCKETS.map((b) => <div className="os-sk os-sk-clrow" key={b.key} />)}
+          </div>
+          <p className="os-clfoot"><i className="os-sk os-sk-clfoot" /></p>
+        </div>
+      </div>
+
       <div className="os-grid" data-sk="grid">
         <div className="os-colL">
-          {/* ⚠️ THE HERO IS INSIDE THE LEFT COLUMN, as it is on the page (v26 moved it there and
-              the ghost stayed behind). While it was a sibling of `.os-grid` the whole grid started
-              94px low and both columns with it — measured Δy +98 on the activity ghost. */}
-          {/* ⚠️ THE HERO GHOST IS RETIRED (stage 1) — `.os-sk-h1`, `.os-sk-sub` and the three stat
-              rows went with the stat cards they stood for. The slot holds the page's real header. */}
-          {header}
-
-          <div className="os-toprow" data-sk="toprow">
-            {/* the manuscript tile — ref `#skeleton .sk-top > .sk-card:first-child` */}
-            <div className="os-card os-aut os-aut-compact os-sk-aut">
-              <div className="os-sk os-sk-autpic" />
-              <div className="os-sk os-sk-autttl" />
-              <div className="os-sk-row">
-                <div className="os-sk os-sk-autchip" />
-                <div className="os-sk os-sk-autchip narrow" />
-              </div>
-              <div className="os-sk os-sk-autcap" />
-            </div>
-            {/* ⚠️ THE CHART GHOST IS THE CHART CARD'S OWN THREE BOXES — band, body, plot — because
-                that is where the top row's height comes from. `.os-chartwrap` carries
-                `aspect-ratio: 1000 / 330`, so the ghost's plot is as tall a fraction of its width
-                as the real one at every width, with no number to keep in step. Stating a height
-                here instead is what made the ghost row 60.7px short at 1536 and 3.3 at 1710. */}
-            <div className="os-card os-lead">
-              <div className="os-ahead">
-                <div className="os-sk os-sk-chmark" />
-                <div className="os-sk os-sk-chttl" />
-                <div className="os-sk os-sk-chchips" />
-                <div className="os-sk os-sk-chbrush" />
-              </div>
-              <div className="os-lbody">
-                <div className="os-chartwrap os-sk os-sk-chplot" />
-              </div>
-            </div>
-          </div>
-
           <div className="os-card os-tasks" data-sk="todo-card">
             <div className="os-th2">
               <div className="os-sk os-sk-tkmark" />
@@ -192,19 +198,13 @@ export const OneScreenSkeleton: React.FC<{
               <div className="os-sk os-sk-tkrule" />
             </div>
             {/* ⚠️ THE CARD'S OWN GRID, IN THE CARD'S OWN SCROLLER, AT A COUNT DERIVED FROM BOTH —
-                ref `.sk-tickets`, and see `SkeletonTicketGrid` above for what each of those three
-                words had to be fixed to make the next one mean anything. `.os-tkgrid` ITSELF, not a
-                copy of it: the ghost restated `repeat(auto-fill, minmax(288px, 1fr))` for one pass
-                and had ALREADY drifted, because the real grid steps to `minmax(240px, 1fr)` below
-                1700 and the copy did not. */}
+                see `SkeletonTicketGrid` above for what each of those three words had to be fixed to
+                make the next one mean anything. `.os-tkgrid` ITSELF, never a copy of it. */}
             <SkeletonTicketGrid />
           </div>
         </div>
 
         <div className="os-colR">
-          {/* ⚠️ NOT A CARD, AND THE GHOST MUST NOT BE ONE EITHER — `.os-actv` is a hairline column
-              (`border-left`, 26px of padding, no paper). A grey rounded rectangle here drew a card
-              where the page has none, so the loading state promised a container that never came. */}
           <div className="os-card os-actv" data-sk="activity-card">
             <div className="os-ahead">
               <div className="os-sk os-sk-acmark" />

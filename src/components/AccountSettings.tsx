@@ -788,8 +788,8 @@ export const AccountSettings: React.FC<{
           no `firebase/storage` import anywhere in src. A "Change photo" button that cannot store a
           photo is the Pen name field wearing a different label, and this build removed that one for
           exactly this reason.
-          STANDING FLAG: `OneScreenAuthor.tsx:62`'s "Add a photo +" navigates here and finds nothing
-          — a one-line follow-up, deliberately not smuggled into this phase. */}
+          The dashboard's "Add a photo +", which navigated here and found nothing, was retired with
+          its tile in dashboard stages 2–3 (17 Sep), so nothing arrives here looking for one. */}
       <SettingsCard heading="You" headingId="acct-h-profile">
         <IdentityRow name={currentUser.name} email={currentUser.email} />
       </SettingsCard>

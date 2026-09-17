@@ -46,6 +46,9 @@ export const SKELETON_MIN_MS = 500;
  * happen UNDER the opaque cover, where jank is invisible, and the dissolve begins on a quiet
  * thread. Dissolving onto a page that is still laying itself out is "revealed mid-arrival" — the
  * exact fault this module exists to remove — arrived at by a third route.
+ * (The chart's draw-in and the count-ups have since been retired with the chart that had them, 17 Sep;
+ * the beat stays for the rest of that work — the populated page's first layout — and was not
+ * re-measured when they went.)
  */
 export const SKELETON_SETTLE_MS = 200;
 /** How long the dissolve takes. ⚠️ Must match `.os-skelpage`'s transition — locked together. */

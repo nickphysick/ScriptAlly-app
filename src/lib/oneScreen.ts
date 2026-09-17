@@ -25,15 +25,19 @@ const parseWhen = (v: unknown): number | null => {
   return Number.isFinite(t) ? t : null;
 };
 
+/* ⚠️ AN OFFER IS ACTIVE (Nick, 17 Sep) — as it already was on the agent list and the manuscripts
+   page. This set used to include it, so the chart and the header counted an offer as closed while
+   the rest of the app called it live. `dashboardStats`' own terminal set changed in the same pass,
+   because its comment promises the two lines can never disagree. */
 const TERMINAL: ReadonlySet<QueryStatus> = new Set([
-  QueryStatus.OFFER, QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE,
+  QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE,
 ]);
 
 /** When a terminal query stopped being active — derived-field precedence, matching
  *  `activeWeeklySeries`' closedAtOf so the two lines can never disagree. */
-/** ⚠️ EXPORTED (dashboard redesign, Phase 4) so `chartBands` asks the SAME question this ledger
- *  asks about whether a query is still on the board. A second reading of "closed" is how the bands
- *  and the total line come to disagree about which queries are in flight. */
+/** ⚠️ EXPORTED so anything asking "is this query still on the board?" asks this ledger's question
+ *  rather than a second reading of "closed" — which is how two figures come to disagree about which
+ *  queries are in flight. (Its first other reader, `chartBands`, is retired with the bands.) */
 export const closedAt = (q: Query): number | null => {
   if (!TERMINAL.has(q.status)) return null;
   return parseWhen(q.lastStatusChange) ?? parseWhen(q.responseReceivedAt) ?? parseWhen(q.dateSent);
@@ -65,6 +69,9 @@ export interface LedgerPoint {
  * with the stat cards, stage 1; the dashboard header's "queries out" reads the ledger itself.)
  */
 export const sentAt = (q: Query): number | null => parseWhen(q.dateSent);
+/* ⚠️ AND SINCE STAGES 2–3 (17 Sep) `dashBreakdown.isLive` reads it too, so the dashboard's live count —
+   the header, the chart's headline, the breakdown — puts on the board exactly the queries this ledger
+   does. */
 
 const dayStart = (d: Date): Date => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const dayEnd = (d: Date): Date => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
@@ -148,63 +155,10 @@ export const aggregateLedger = (daily: LedgerPoint[], freq: Freq): LedgerPoint[]
 export const periodLabel = (freq: Freq, label: string): string =>
   freq === "weekly" ? `Week of ${label}` : label;
 
-/**
- * ⚠️ THE RANGE IS A WINDOW OF DAYS, NOT A COUNT OF POINTS (§3) — which is precisely why range and
- * frequency are two independent controls. "Last 8 weeks" is the same 56 days of history whether
- * it is drawn as 56 daily points or 8 weekly ones; slicing N points instead would make the range
- * mean something different at each frequency.
- */
-export interface RangeStop { p: number; days: number; label: string }
-export const RANGE_STOPS: RangeStop[] = [
-  { p: 0, days: 14, label: "Last 2 weeks" },
-  { p: 14, days: 30, label: "Last month" },
-  { p: 34, days: 56, label: "Last 8 weeks" },
-  { p: 52, days: 91, label: "Last 3 months" },
-  { p: 70, days: 182, label: "Last 6 months" },
-  { p: 86, days: 365, label: "Last year" },
-  { p: 100, days: 0, label: "Everything" }, // 0 = no cutoff
-];
-export const DEFAULT_RANGE_DAYS = 56;
-
-/**
- * ⚠️ THE BRUSH IS WEEKS NOW, 4 TO 12, AND THE MAPPING IS THE REF'S OWN (v26, Phase 5):
- *   `weeks = clamp(round((1 - p) * 12), 4, 12)` where p is the pointer's fraction ALONG THE TRACK.
- *
- * The handle sits under the cursor and the window runs from the handle to the RIGHT edge, so
- * dragging left lengthens the range and dragging right shortens it. There is no inverted fraction
- * anywhere: the one `1 - p` is the window's own geometry — the distance from the handle to the end
- * — rather than a mirror applied to a value. That distinction is the whole bug it replaces, where
- * the drawn handle sat at `100 - p` while the input's thumb sat at `p`, so the two were at opposite
- * ends of the track and the control moved the wrong way under the cursor.
- *
- * The ref's own clamp order matters and is preserved: it ROUNDS first and clamps second, so the
- * bottom of the track saturates at 4 rather than mapping linearly into it. At 5% / 50% / 95% of the
- * track that gives 11 / 6 / 4 weeks, which is the pack's gate.
- *
- * ⚠️ THIS NARROWS THE CHART'S REACH AND THAT IS A REAL LOSS, RECORDED RATHER THAN HIDDEN. The
- * landmark stops below ran 2 weeks to Everything; 4-12 weeks cannot show a year, and the monthly
- * grain now has at most three points to draw. `RANGE_STOPS` survives for the keyboard path and its
- * tests. Widening it is one constant — `BRUSH_WEEKS_MAX` — at the cost of the gate's exact numbers.
- */
-export const BRUSH_WEEKS_MIN = 4;
-export const BRUSH_WEEKS_MAX = 12;
-export const weeksFromFraction = (p: number): number => {
-  const f = Math.max(0, Math.min(1, p));
-  return Math.max(BRUSH_WEEKS_MIN, Math.min(BRUSH_WEEKS_MAX, Math.round((1 - f) * BRUSH_WEEKS_MAX)));
-};
-/** the inverse, for drawing the handle where the current value says it is */
-export const fractionFromWeeks = (weeks: number): number => {
-  const w = Math.max(BRUSH_WEEKS_MIN, Math.min(BRUSH_WEEKS_MAX, weeks));
-  return 1 - w / BRUSH_WEEKS_MAX;
-};
-export const weeksLabel = (weeks: number): string => `Last ${weeks} weeks`;
-
-/** The slider is continuous but SNAPS, so every position it can rest at means something. */
-export const nearestStop = (v: number): RangeStop =>
-  RANGE_STOPS.reduce((a, b) => (Math.abs(b.p - v) < Math.abs(a.p - v) ? b : a));
-export const stopForDays = (days: number): RangeStop =>
-  RANGE_STOPS.find((s) => s.days === days) ?? RANGE_STOPS[2];
-
+/* ⚠️ THE RANGE STOPS, THE BRUSH'S WEEKS MAPPING AND THE SNAPPING HELPERS ARE RETIRED WITH THE BRUSH
+   (dashboard stage 3, 17 Sep) — `RANGE_STOPS`, `DEFAULT_RANGE_DAYS`, `BRUSH_WEEKS_MIN`/`_MAX`,
+   `weeksFromFraction`, `fractionFromWeeks`, `weeksLabel`, `nearestStop`, `stopForDays`. The chart's
+   windows are fixed per grain now (`dashChart.CHART_WINDOW`); `rangeWindow` below is what cuts them. */
 export const rangeWindow = (rows: LedgerPoint[], days: number): LedgerPoint[] => {
   if (days <= 0 || rows.length === 0) return rows;
   const cutoff = rows[rows.length - 1].end.getTime() - days * DAY_MS;
@@ -220,14 +174,7 @@ export const DAILY_UNTIL_DAYS = 28;
 export const defaultFreq = (daily: LedgerPoint[]): Freq =>
   daily.length < DAILY_UNTIL_DAYS ? "daily" : "weekly";
 
-/** The headline chip: the range's first-to-last movement, in words at zero. */
-export const rangeChip = (view: LedgerPoint[]): string => {
-  if (view.length < 2) return "";
-  const diff = view[view.length - 1].active - view[0].active;
-  if (diff > 0) return `↑ +${diff} over this range`;
-  if (diff < 0) return `↓ ${diff} over this range`;
-  return "Level over this range";
-};
+/* `rangeChip` is retired with the brush — the caption is `dashChart.chartCaption` (stage 3, 17 Sep). */
 
 /* ══════════════════════════ §H · THE HEADER COUNTERS — RETIRED ══════════════════════════
    `headerCounters`, `HeaderCounter`, `COUNTER_WINDOW_DAYS` and `queriesSentCount` went with the three
@@ -304,35 +251,11 @@ export const monotonePath = (p: [number, number][]): string => {
   return d;
 };
 
-/**
- * ══════════════════════════ §3 · THE SAMPLED, CLAMPED STACK ══════════════════════════
- *
- * ⚠️ INTERPOLATING EACH CUMULATIVE BOUNDARY INDEPENDENTLY LETS ADJACENT BOUNDARIES CROSS BETWEEN
- * KNOTS, AND THAT IS THE WHOLE FAULT. A monotone fit is GLOBAL: each series' tangents come from its
- * own neighbouring values, so two series that are equal at every knot still take different paths
- * between them. The sage boundary (sand + sage) could therefore rise above the total line
- * (sand + sage + pink) in the gaps while agreeing exactly at every data point.
- *
- * ⚠️ REPRODUCED NUMERICALLY AGAINST THIS FILE'S OWN TANGENT MATHS BEFORE ANYTHING WAS CHANGED:
- *
- *     sand+sage    9   9   9  10  12  15  15  15  15
- *     total        9   9   9  10  12  15  16  16  15     (pink is 0 for the first six)
- *
- * Equal at knots 0–5. Between knots 4 and 5 the sage curve exceeds the total by 0.2963 units — about
- * 3px on a 16-unit axis at this chart's height. It needs a band that is zero for a stretch and
- * non-zero later, which is an ordinary shape for a writer: several quiet weeks, then a request.
- *
- * ⚠️ AND IT IS WHY EVERY PIXEL SWEEP ABOVE THE LINE CAME BACK CLEAN. With the harness account's own
- * data the crossing does not occur, so three passes of "nothing paints above the line" were true
- * readings of a page that happened not to be showing the fault. Four different causes were proposed
- * and measured away — paint order, two data sources, a stroke on the top band, the marker's ring —
- * and all four were genuinely innocent.
- *
- * THE FIX IS NOT TO FIT AT ALL AFTER CLAMPING: sample every boundary from the same interpolation,
- * clamp each to the one above it, then draw polylines through the clamped samples. Nothing is
- * re-fitted, so nothing can cross; and the line IS the topmost sampled array, so it cannot disagree
- * with the stack by construction rather than by agreement.
- */
+/* ⚠️ THE SAMPLED, CLAMPED STACK IS RETIRED WITH THE BANDS IT DREW (dashboard stage 3, 17 Sep) —
+   `sampleCurve` and `sampleStack` existed so adjacent cumulative boundaries could not cross between
+   knots, and there is one line now. The lesson stands for any future stack: fitting each boundary on
+   its own lets them cross; sample once, clamp, then draw. `hermiteCoeffs` stays — `dashChart` reads
+   the same tangents to put its event dots on the drawn curve. */
 
 /** Fritsch–Carlson tangents for one series of evenly spaced values. */
 export const hermiteCoeffs = (vals: readonly number[]): number[] => {
@@ -350,46 +273,6 @@ export const hermiteCoeffs = (vals: readonly number[]): number[] => {
     if (q > 9) { const t = 3 / Math.sqrt(q); m[i] = t * a * d[i]; m[i + 1] = t * b * d[i]; }
   }
   return m;
-};
-
-/** Evaluate that Hermite spline at `steps + 1` evenly spaced positions across the series. */
-export const sampleCurve = (vals: readonly number[], steps: number): number[] => {
-  const n = vals.length;
-  if (n === 0) return [];
-  if (n === 1) return new Array(steps + 1).fill(vals[0]);
-  const m = hermiteCoeffs(vals);
-  const out: number[] = [];
-  for (let k = 0; k <= steps; k++) {
-    const u = (k / steps) * (n - 1);
-    const i = Math.min(n - 2, Math.floor(u));
-    const t = u - i;
-    const h00 = 2 * t * t * t - 3 * t * t + 1;
-    const h10 = t * t * t - 2 * t * t + t;
-    const h01 = -2 * t * t * t + 3 * t * t;
-    const h11 = t * t * t - t * t;
-    out.push(h00 * vals[i] + h10 * m[i] + h01 * vals[i + 1] + h11 * m[i + 1]);
-  }
-  return out;
-};
-
-/**
- * Sample every cumulative boundary from one interpolation, then walk each sample index from the TOP
- * DOWN applying `boundary[b] = min(boundary[b], boundary[b + 1])`, and clamp to ≥ 0.
- *
- * ⚠️ TOP DOWN, NOT BOTTOM UP. Clamping upward would raise a lower boundary to meet an overshooting
- * one above it, which fixes the crossing by inflating a band's value; clamping downward pulls the
- * overshoot back to the ceiling it must not exceed. The order is the difference between correcting
- * the fault and hiding it under a bigger number.
- */
-export const sampleStack = (series: readonly (readonly number[])[], steps: number): number[][] => {
-  const curves = series.map((v) => sampleCurve(v, steps));
-  if (!curves.length) return [];
-  const len = curves[0].length;
-  for (let k = 0; k < len; k++) {
-    for (let b = curves.length - 2; b >= 0; b--) curves[b][k] = Math.min(curves[b][k], curves[b + 1][k]);
-    for (let b = 0; b < curves.length; b++) curves[b][k] = Math.max(0, curves[b][k]);
-  }
-  return curves;
 };
 
 /* ══════════════════════════ §3 · EVENT PINS ══════════════════════════ */
@@ -609,12 +492,6 @@ export const runStage = (queries: Query[], manuscripts: unknown[], now: Date): R
   if (sends.length === 0) return "early-days"; // a manuscript but no sends: still before the line
   const first = Math.min(...sends);
   return now.getTime() - first <= 14 * DAY_MS ? "early-days" : "settled";
-};
-
-/** The §9 chart chip for early days — "{n} awaiting a reply" instead of range movement. */
-export const awaitingChip = (queries: Query[]): string => {
-  const n = queries.filter((q) => !TERMINAL.has(q.status) && q.dateSent).length;
-  return `${n} awaiting a reply`;
 };
 
 /* ══════════════════════════ §12 · TOUR VISIBILITY ══════════════════════════ */

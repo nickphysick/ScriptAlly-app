@@ -145,7 +145,7 @@
   background: var(--msv-platefill); border: var(--msv-platefillbd);
   display: grid; place-items: center; padding: 22px;
 }
-/* Matches how OneScreenAuthor renders this same asset: contained, block, no blend mode. */
+/* The shared manuscript PNG: contained, block, no blend mode. */
 .msv-plateimg img { width: 100%; height: 100%; object-fit: contain; display: block; }
 
 .msv-plateid { min-width: 0; }

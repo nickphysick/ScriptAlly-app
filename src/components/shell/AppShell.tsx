@@ -356,7 +356,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         /* ⚠️ FIXED-VIEWPORT ROUTES. `.ws-work` is `flex: 1 0 auto` by default — shrink 0 — so it
            can never be smaller than its content and the card scrolls. `--fit` swaps in a definite
            basis (`flex: 1 1 0`); its own rule records that min-height:0 alone does NOT work here,
-           measured. Query Centre and the dashboard both fill the viewport exactly. */
+           measured. Query Centre fills the viewport exactly.
+           ⚠️ THE DASHBOARD LEFT THIS LIST (stages 2–3, 17 Sep) — it is a scrolling page now, and a
+           fixed-height work wrapper would clip it rather than let the stage scroll it. */
         /* ⚠️ AND THE TASKS ROUTES (7 Aug). Their pages carried a full `flex:1; min-height:0`
            chain from the slot down and STILL scrolled — twice — because the break was HERE,
            above everything that chain covers: `.ws-work` refuses to shrink, so no number of
@@ -387,7 +389,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             clientH 810 against `.ws-work` 876, with `.acct-plane` reporting no overflow of its
             own. Every link below was correct; the break is here. `plans` and `help` are their own
             route keys and keep the growing wrapper. */
-        fit={routeKey === "queries" || routeKey === "dashboard" || routeKey === "todo"
+        fit={routeKey === "queries" || routeKey === "todo"
           || routeKey === "agents" || routeKey === "manuscripts" || routeKey === "account"}
         sections={sections}
         icons={WORKSPACE_ICONS}

@@ -5,29 +5,29 @@
  * OneScreenDashboard — the one-screen dashboard (refs design-refs/dashboard-one-screen.html +
  * dashboard-one-screen-spec.md; §-references below are the spec's).
  *
- * ⚠️ THE ONE-SCREEN PROMISE (§1): the page fits its slot exactly and never scrolls; only tasks
- * and activity scroll, internally.
+ * ⚠️ THE ONE-SCREEN LOCK IS DROPPED (stages 2–3, 17 Sep — Nick). The page is a flowing page now: the
+ * header, the breakdown and the three-card row span the content width, and the to-do card and the
+ * activity column sit side by side beneath them at a FIXED height, each keeping its own scroll. The
+ * route is a `flow` slot again and `dashboard` is off the shell's `fit` list; the stage scrolls.
  *
- * ⚠️ THE HEIGHT IS PURE CSS NOW — `height:100%` of a slot the shell gives a definite height. The
- * JS lock that used to measure #app-stage-scroll is DELETED, not disabled: it stamped the whole
- * scroller's height, which INCLUDES the 66px sticky bar's band, so the card scrolled by exactly
- * `--head`. The fix is two route declarations — `layout="fill"` on the slot (App.tsx) and `fit`
- * on the work wrapper (AppShell) — which together hand this page the space REMAINING under the
- * bar. Both are required: `.ws-work` is `flex: 1 0 auto` without `fit` and can never shrink below
- * its content, and its own rule records that `min-height: 0` alone does NOT fix that, measured.
+ * ⚠️ THE CONTENT IS A CENTRED BLOCK WITH A MAXIMUM WIDTH (`--dash-page-max`, declared on the dashboard
+ * route's `.ws-main` so the shell's top bar can pad itself to the same measure). The activity column is INSIDE the
+ * block, never pinned to the window's edge — pinned, a gap opened between it and the content on a
+ * wide monitor.
  *
- * ⚠️ NEVER 100vh AND NEVER A BAR OFFSET (the house stage law) — `height:100%` inherits whatever
- * the shell decided, so a chrome change cannot silently strand this page.
- *
- * ⚠️ `min-height` IS FORBIDDEN on the lock elements (§1) — it grows past the fold with no
- * scrollbar. Locked in the smoke test against the stylesheet.
+ * ⚠️ NEVER 100vh AND NEVER A BAR OFFSET (the house stage law) still holds: nothing here measures the
+ * viewport; the fixed row height is a length, not a fraction of the window.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { Activity, Agent, Manuscript, ManuscriptVersion, Query, Task, TaskFlag, User, UserTask } from "../../types";
+import { Activity, Agent, Manuscript, ManuscriptVersion, Query, Task, TaskFlag, User, UserPlan, UserTask } from "../../types";
 import { runStage, tourAutoRuns, tourChipShows } from "../../lib/oneScreen";
 import { OneScreenTour, TOUR_BREAKPOINT } from "./OneScreenTour";
-import { OneScreenAuthor } from "./OneScreenAuthor";
 import { OneScreenChart } from "./OneScreenChart";
+import { OneScreenBreakdown } from "./OneScreenBreakdown";
+import { OneScreenActions } from "./OneScreenActions";
+import { OneScreenClosed } from "./OneScreenClosed";
+import { liveCount, queryBreakdown, queryingDay } from "../../lib/dashBreakdown";
+import { closedTile } from "../../lib/dashClosed";
 import { OneScreenTasks } from "./OneScreenTasks";
 import { OneScreenHeader } from "./OneScreenHeader";
 import { dashHeaderLine, type DashHeaderLine } from "../../lib/dashHeader";
@@ -146,6 +146,25 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
   }), [loading, empty, scopedQueries, scopedTasks, userTasks, queries, agents, manuscripts, taskFlags,
     scopedActivities, now, currentUser?.mutedTaskRules, versions, activeManuscript]);
 
+  /**
+   * ⚠️ STAGES 2–3's FIGURES, DERIVED ONCE HERE FROM THE SAME SCOPED SETS (17 Sep). The breakdown's
+   * total, the chart's headline and the header's "queries out" are one partition (`dashBreakdown`), so
+   * they reconcile by construction; the closed tile's buckets are `dashClosed`'s. All are null while
+   * loading — Nick's rule, never a number that might change.
+   */
+  const breakdown = React.useMemo(
+    () => (loading ? null : queryBreakdown({ queries: scopedQueries, activities: scopedActivities, agents, now })),
+    [loading, scopedQueries, scopedActivities, agents, now],
+  );
+  const closed = React.useMemo(
+    () => (loading ? null : closedTile(scopedQueries, scopedActivities)),
+    [loading, scopedQueries, scopedActivities],
+  );
+  const activeCount = loading ? null : liveCount(scopedQueries);
+  const queryingDayN = queryingDay(scopedQueries, now);
+  const manuscriptTitle = activeManuscript?.title?.trim() || null;
+  const isPro = currentUser?.plan === UserPlan.PRO;
+
   /* ⚠️ THE FEED'S ACTION AND THE PANEL'S DRAWER, JOINED HERE BECAUSE THEY ARE IN DIFFERENT COLUMNS
      (Phase 6). The rail's "Mark sent" hands up a query id; the to-do panel resolves it against the
      live board and opens its own drawer on the card. One drawer on the page, one session, one write
@@ -200,7 +219,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
      timeout, and the re-run then returned early at the guard without ever re-arming it. The class
      was added and never removed — a self-cancelling effect that read as correct and was verified
      `stillAnimating: true` long after settling. A ref survives the re-render without re-running
-     anything, the same reason the chart's `drewIn` is a ref. */
+     anything. */
   /**
    * ⚠️ THE COVER IS ON FROM THE FIRST PAINT AND OUTLIVES `loading` — never rendered off the flag
    * directly. The hook initialises its phase from `loading`, holds ~500ms once seen, then
@@ -233,7 +252,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
     if (skeleton.wasShown) return;
     const root = rootRef.current;
     if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const items = root.querySelectorAll(".os-card, .os-greet");
+    const items = root.querySelectorAll(".os-card, .os-greet, .os-bd");
     items.forEach((el) => el.classList.add("enter"));
     const id = window.setTimeout(() => items.forEach((el) => el.classList.remove("enter")), 900);
     return () => window.clearTimeout(id);
@@ -272,95 +291,83 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
       className={`os-root${skeleton.phase === "on" ? " os-loading" : ""}`}
     >
       <div className="os-content" data-probe="main">
-        {/* ⚠️ THE HEADER IS THE LEFT COLUMN'S FIRST ROW, not a row of its own above the grid — see
-            the v26 note inside `.os-colL` below. (This note used to describe a full-width header
-            with a counters card beside the greeting; both are gone.) */}
-        {/* ⚠️ THE PAGE'S OWN TOP BAR IS DELETED (v28, Phase 2). It held the search in a row of
-            its own, which cost ~90px of height before the greeting and left the NAV's row with a
-            hole in the middle where the search belongs. The field is in the nav row now, beside
-            Feedback and New — see `.ws-bigsearch` in the shell. What went with it: `.os-topbar`,
-            `.os-tbsp`, `.os-search`, `.os-kbd`, and the `searchQuery` props that fed it. */}
-        <div className="os-grid" data-probe="grid">
-        {/* ⚠️ TWO COLUMNS, AND THE LEFT ONE HAS A ROW OF ITS OWN (ref v22, Phase 3). The
-            manuscript tile and the chart card share a `330px | minmax(0,1fr)` top row at equal
-            height, and the to-do card takes everything beneath it. Querying goals and the Pro
-            banner have no place in this layout and are unmounted; Community leaves the column
-            entirely and becomes a strip under both of them. */}
-        <div className="os-colL">
-          {/* ⚠️ THE HERO IS INSIDE THE LEFT COLUMN NOW (v26) — ref `.page2 > .lcol > .hero`. It used
-              to be a row of `main` spanning both columns, which put the activity panel BELOW it;
-              the ref starts the activity column level with the greeting, and the only way to do
-              that is for the greeting to be the left column's first row. */}
-          {/* ⚠️ THE HEADER CARRIES NO SKELETON OF ITS OWN (stage 1). It used to take `isload` and a
-              per-card shimmer; the brief is that a header still waiting on data says its words
-              without figures, so `headerCounts` is null until the collections land and the row is
-              otherwise whole from the first paint. */}
-          <OneScreenHeader
-            firstName={firstName}
-            line={headerLine}
-            tour={chipShows ? { onStart: () => { if (wideEnough()) setTouring(true); }, buttonRef: tourChipRef } : null}
+        {/* ⚠️ FOUR ROWS IN ONE CENTRED BLOCK (stages 2–3, 17 Sep): the header, the breakdown and the
+            three-card row span the block's width, and the to-do card and the activity column sit
+            side by side beneath them. The header used to be the left column's first row with the
+            activity column beside it; it spans the block now, and its own layout is unchanged. */}
+        <OneScreenHeader
+          firstName={firstName}
+          line={headerLine}
+          tour={chipShows ? { onStart: () => { if (wideEnough()) setTouring(true); }, buttonRef: tourChipRef } : null}
+        />
+        <OneScreenBreakdown breakdown={breakdown} manuscriptTitle={manuscriptTitle} />
+        {/* ⚠️ THE MANUSCRIPT TILE IS RETIRED WITH THE TOP ROW IT SAT IN — its title is the quick actions'
+            foot now ("Querying …"), and the sidebar's manuscript switcher carries the rest. */}
+        <div className="os-row2" data-probe="row2">
+          <OneScreenActions
+            loading={loading}
+            manuscriptTitle={manuscriptTitle}
+            manuscriptId={activeManuscript?.id}
+            day={queryingDayN}
+            isPro={isPro}
+            onNavigate={onNavigate}
           />
-          <div className="os-toprow" data-probe="toprow">
-            <OneScreenAuthor
-              loading={loading} manuscripts={manuscripts} compact
-              currentUser={currentUser} activeManuscript={activeManuscript}
-              onNavigate={onNavigate}
-            />
-            <OneScreenChart
-            loading={loading} queries={scopedQueries} agents={agents} now={now}
-            dayOne={scopedStage === "day-one"} earlyDays={scopedStage === "early-days"}
+          <OneScreenChart
+            loading={loading}
+            queries={scopedQueries}
+            activities={scopedActivities}
+            activeCount={activeCount}
+            now={now}
             empty={empty}
-              onSendFirst={() => onNavigate("queries", "Send a query")}
-            />
-          </div>
+            onSendFirst={() => onNavigate("queries", "Send a query")}
+          />
+          <OneScreenClosed loading={loading} tile={closed} onSeeAll={() => onNavigate("queries")} />
+        </div>
+        <div className="os-grid" data-probe="grid">
           {/* ⚠️ SCOPED WHERE SCOPE MEANS SOMETHING, RAW WHERE IT DOES NOT (Phase 5). Tasks and
               activities are the manuscript's; queries, agents and manuscripts are the LOOKUP sets
               the board resolves cards against, and scoping those would hide the agent a scoped
               task is about. `taskFlags` is a stance the writer took on a task, not a per-book fact.
               This is the same split `assembleBoardColumns` is given everywhere else it is called. */}
-          <OneScreenTasks
+          <div className="os-colL">
+            <OneScreenTasks
+              loading={loading}
+              tasks={scopedTasks}
+              queries={queries}
+              agents={agents}
+              manuscripts={manuscripts}
+              userTasks={userTasks}
+              activities={scopedActivities}
+              taskFlags={taskFlags}
+              currentUser={currentUser}
+              now={now}
+              dayOne={scopedStage === "day-one"}
+              empty={empty}
+              versions={versions}
+              activeManuscript={activeManuscript}
+              onSeeAll={() => onNavigate("todo")}
+              onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
+              onAddAgent={() => onNavigate("agents", "Add an agent")}
+              onNavigate={onNavigate}
+              openForQueryId={feedOpenQueryId}
+              onOpenHandled={() => setFeedOpenQueryId(null)}
+            />
+          </div>
+
+          <OneScreenRail
             loading={loading}
-            tasks={scopedTasks}
-            queries={queries}
+            empty={empty}
+            queries={scopedQueries}
             agents={agents}
             manuscripts={manuscripts}
             userTasks={userTasks}
             activities={scopedActivities}
-            taskFlags={taskFlags}
-            currentUser={currentUser}
-            now={now}
-            dayOne={scopedStage === "day-one"}
-            empty={empty}
-            versions={versions}
             activeManuscript={activeManuscript}
-            onSeeAll={() => onNavigate("todo")}
-            onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
-            onAddAgent={() => onNavigate("agents", "Add an agent")}
             onNavigate={onNavigate}
-            openForQueryId={feedOpenQueryId}
-            onOpenHandled={() => setFeedOpenQueryId(null)}
+            onOpenTask={(queryId) => setFeedOpenQueryId(queryId)}
+            now={now}
           />
         </div>
-
-        <OneScreenRail
-          loading={loading}
-          empty={empty}
-          queries={scopedQueries}
-          agents={agents}
-          manuscripts={manuscripts}
-          userTasks={userTasks}
-          activities={scopedActivities}
-          activeManuscript={activeManuscript}
-          onNavigate={onNavigate}
-          onOpenTask={(queryId) => setFeedOpenQueryId(queryId)}
-          now={now}
-        />
-        </div>
-        {/* ⚠️ A STRIP UNDER BOTH COLUMNS, NOT A CARD IN ONE (ref v22). It is the same component
-            with a `strip` layout: an icon, a title, one line and the Beta pill on a single row.
-            As a column card it competed for height with the work; as a footer it states what it
-            is and gets out of the way. */}
-
       </div>
       {/* ⚠️ LAST CHILD, OVER THE MOUNTED PAGE. The cards stay in the tree beneath it, which is what
           makes "no layout shift" structural rather than a matter of matching numbers — and it is
@@ -379,6 +386,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
         <OneScreenSkeleton
           leaving={skeleton.phase === "out"}
           header={<OneScreenHeader ghost firstName={firstName} line={null} tour={chipShows ? { onStart: () => {} } : null} />}
+          breakdown={<OneScreenBreakdown ghost breakdown={null} manuscriptTitle={manuscriptTitle} />}
         />
       )}
       {touring && <OneScreenTour rootRef={rootRef} onEnd={endTour} />}

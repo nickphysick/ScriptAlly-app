@@ -1116,11 +1116,15 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     const shell = readFileSync(resolve(__dirname, "AppShell.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     const fit = /fit=\{([\s\S]*?)\}\s*\n/.exec(shell);
     expect(fit, "the `fit` prop is gone from AppShell — every grid page would scroll as a document").toBeTruthy();
-    /* ⚠️ `routeKey` IS THE FIRST PATH SEGMENT, so these five keys cover eleven pages. Naming a
-       sub-route here (`queries/analytics`) would never match and would read as covered. */
-    for (const key of ["queries", "dashboard", "todo", "agents", "manuscripts"]) {
+    /* ⚠️ `routeKey` IS THE FIRST PATH SEGMENT, so these four keys cover ten pages. Naming a
+       sub-route here (`queries/analytics`) would never match and would read as covered.
+       ⚠️ THE DASHBOARD LEFT THE LIST (stages 2–3, 17 Sep). It was never a grid page; it was on the
+       fixed-viewport chain for its own one-screen lock, which Nick dropped. It scrolls as a document
+       now, so its absence is the claim. */
+    for (const key of ["queries", "todo", "agents", "manuscripts"]) {
       expect(fit![1], `the \`${key}\` route lost its fixed-viewport opt-in`).toContain(`"${key}"`);
     }
+    expect(fit![1], "the dashboard scrolls as a document — a fit wrapper would clip it").not.toContain('"dashboard"');
 
     /* the page roots of every converted page: a definite height, and NOT a second scrollport */
     const ROOTS: [string, string, string][] = [

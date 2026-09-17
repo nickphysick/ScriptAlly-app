@@ -62,7 +62,7 @@ const MIX: Query[] = [
   q("q2", QueryStatus.PARTIAL_REQUESTED, { agentId: "a2" }),           // out — the writer's move, still out
   q("q3", QueryStatus.FULL_REQUESTED, { agentId: "a3" }),              // out
   q("q4", QueryStatus.REJECTED, { lastStatusChange: iso(5) }),         // came back
-  q("q5", QueryStatus.OFFER, { lastStatusChange: iso(2) }),            // closed by the ledger's law
+  q("q5", QueryStatus.OFFER, { lastStatusChange: iso(2) }),            // out — an offer is live (stages 2–3)
   q("q6", QueryStatus.WITHDRAWN, { lastStatusChange: iso(3) }),        // closed
   q("q7", QueryStatus.NO_RESPONSE, { lastStatusChange: iso(1) }),      // closed
   q("q8", QueryStatus.QUERIED, { dateSent: undefined }),               // a draft — never sent
@@ -81,8 +81,9 @@ const base = {
 };
 const page = (over: Record<string, unknown> = {}) =>
   renderToStaticMarkup(<OneScreenDashboard loading={false} {...base} {...over} />);
+/* ⚠️ THE HEADER ENDS WHERE THE BREAKDOWN BEGINS (stages 2–3, 17 Sep) — it was the retired top row */
 const headerOf = (html: string) =>
-  sliceBetween(html, '<div class="os-greet" data-probe="hero">', 'class="os-toprow"', "the page's header");
+  sliceBetween(html, '<div class="os-greet" data-probe="hero">', '<section class="os-bd"', "the page's header");
 const figures = (hdr: string) => [...hdr.matchAll(/<b>([\d,]+)<\/b>/g)].map((m) => Number(m[1].replace(/,/g, "")));
 
 /* ══ the two figures ═══════════════════════════════════════════════════════════════════════ */
@@ -91,20 +92,24 @@ describe("queries out — the chart's own figure", () => {
   it("is the daily ledger's closing position today, by the ledger itself", () => {
     const daily = dailyLedger(MIX, NOW);
     expect(daily.length, "the fixture must reach the ledger").toBeGreaterThan(1);
-    expect(queriesOutCount(MIX, NOW)).toBe(daily[daily.length - 1].active);
+    expect(queriesOutCount(MIX)).toBe(daily[daily.length - 1].active);
   });
 
-  it("counts what is still out there: not a rejection, an offer, a withdrawal, a stated no, or a draft", () => {
-    expect(queriesOutCount(MIX, NOW)).toBe(3);
+  /* ⚠️ RETARGETED (stages 2–3, 17 Sep): AN OFFER IS OUT. Nick: "Fix the header's count to include every
+     live query" and "Offer is active, everywhere" — so the offer that this case used to exclude is
+     now the fourth figure, and the ledger's line (above) moved with it. */
+  it("counts what is still out there — an offer included — and not a rejection, a withdrawal, a stated no, or a draft", () => {
+    expect(queriesOutCount(MIX)).toBe(4);
     /* the branch tally — every kind in the fixture was actually decided, not skipped */
     expect(MIX.filter((x) => sentAt(x) === null)).toHaveLength(1);
-    expect(queriesOutCount([], NOW)).toBe(0);
+    expect(MIX.some((x) => x.status === QueryStatus.OFFER)).toBe(true);
+    expect(queriesOutCount([])).toBe(0);
   });
 
   it("⚠️ the header states the SAME number the chart's headline does, on the rendered page", () => {
     const html = page();
     const [out] = figures(headerOf(html));
-    const chart = /<span class="os-n">([\d,]+)<\/span>/.exec(html);
+    const chart = /<span class="os-acn" data-probe-text="chart-figure">([\d,]+)<\/span>/.exec(html);
     expect(chart, "the chart's headline must render for this comparison to mean anything").not.toBeNull();
     expect(out).toBe(Number(chart![1].replace(/,/g, "")));
   });
@@ -281,11 +286,13 @@ describe("the rules", () => {
     }
   });
 
-  it("⚠️ ~34px below it: 12 + the column's 22, and 20 + 14 once the lock releases", () => {
+  /* ⚠️ RETARGETED (stages 2–3, 17 Sep): the row beneath the header is the breakdown now, not a column, so
+     the other half of the 34px is the breakdown's top margin — 22 on a wide page, 14 once it stacks. */
+  it("⚠️ ~34px below it: 12 + the breakdown's 22, and 20 + 14 at 1024 and below", () => {
     expect(rule(".os-greet")).toContain("margin: 0 0 12px");
-    expect(rule(".os-colL")).toContain("gap: 22px");
+    expect(rule(".os-bd")).toContain("margin-top: 22px");
     expect(inMedia("(max-width: 1024px)", ".os-greet")).toContain("margin-bottom: 20px");
-    expect(inMedia("(max-width: 1024px)", ".os-colL, .os-colR")).toContain("gap: 14px");
+    expect(inMedia("(max-width: 1024px)", ".os-bd")).toContain("margin-top: 14px");
   });
 
   it("⚠️ the greeting: Special Elite, important, two classes — the runtime brand rule is 0-1-1", () => {

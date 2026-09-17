@@ -21,6 +21,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { cssRule } from "../../test/cssRule";
+import { sliceBetween } from "../../test/sliceBetween";
 import { ComponentType, QueryStatus, UserPlan } from "../../types";
 import { OneScreenDashboard } from "./OneScreenDashboard";
 import {
@@ -103,22 +104,32 @@ describe("Phase 1 · the faded example is inert", () => {
     expect(fade).not.toContain("tabindex");
   });
 
+  /* ⚠️ THE PANEL ENDS AT THE CLOSED TILE NOW (stage 3) — the next card in its row, with a control of its
+     own ("All →"), so the slice is bounded by that card rather than by the to-do card further down. */
   it("puts exactly one control in the panel, and it is the CTA", () => {
     const html = renderEmpty();
-    const panel = html.slice(html.indexOf('data-probe="chart-empty"'));
-    const upToPanelEnd = panel.slice(0, panel.indexOf('data-probe="todo-card"') + 1 || undefined);
-    expect((upToPanelEnd.match(/<button/g) ?? []).length).toBe(1);
-    expect(upToPanelEnd).toContain("Log your first query");
+    const panel = sliceBetween(html, 'data-probe="chart-empty"', 'data-probe="closed-tile"', "the empty chart panel");
+    expect((panel.match(/<button/g) ?? []).length).toBe(1);
+    expect(panel).toContain("Log your first query");
   });
 
-  it("holds the real chart's aspect ratio, so the panel does not resize when the first query lands", () => {
-    expect(rule(".os-ce-plot")).toContain("aspect-ratio: 1000 / 330");
-    expect(rule(".os-chartwrap")).toContain("aspect-ratio: 1000 / 330");
+  /* ⚠️ RETARGETED (stage 3): the chart has no aspect ratio to match any more — its plot takes what the row
+     leaves above a floor. So the example sits in the REAL plot's box, by class, and the two cannot size
+     differently. */
+  it("draws the example in the real chart's own boxes, so the panel does not resize when the first query lands", () => {
+    const html = renderEmpty();
+    const panel = sliceBetween(html, 'data-probe="chart-empty"', 'data-probe="closed-tile"', "the empty chart panel");
+    for (const cls of ["os-achead os-ce-head", "os-acbody", "os-acplot os-ce-plot", "os-acx os-ce-x"]) {
+      expect(panel, cls).toContain(`class="${cls}"`);
+    }
+    expect(rule(".os-acplot")).toContain("min-height: 150px");
+    expect(rule(".os-ce-plot")).toContain("opacity: 0.28");
+    expect(cssRules).not.toMatch(/\.os-chartwrap\s*\{/);
   });
 
-  it("fades the band's CHILDREN and never the band", () => {
+  it("fades the header's CHILDREN and never the header", () => {
     expect(rule(".os-ce-head > *")).toContain("opacity: 0.28");
-    /* the band itself is `.os-ahead`, which the example reuses — it must carry no fade */
+    /* the header itself is `.os-achead`, which the example reuses — it must carry no fade */
     expect(() => rule(".os-ce-head")).toThrow();
   });
 });
@@ -249,8 +260,9 @@ describe("Phase 1 · the feed keeps its real events", () => {
 describe("Phase 1 · layout is unchanged", () => {
   it("keeps every panel in place on the empty page", () => {
     const html = renderEmpty();
-    /* `stats` left this list with the stat cards (stage 1); the header's own probe replaces it */
-    for (const probe of ["hero", "toprow", "grid", "chart-card", "todo-card"]) {
+    /* `stats` left this list with the stat cards (stage 1); the header's own probe replaces it. The top
+       row left with the manuscript tile (stage 3); the breakdown and the three-card row replace it. */
+    for (const probe of ["hero", "breakdown", "row2", "quick-actions", "chart-card", "closed-tile", "grid", "todo-card"]) {
       expect(html).toContain(`data-probe="${probe}"`);
     }
   });

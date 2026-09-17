@@ -24,6 +24,7 @@ import React from "react";
 import { describe, expect, it } from "vitest";
 import { OneScreenSkeleton } from "./OneScreenSkeleton";
 import { OneScreenHeader } from "./OneScreenHeader";
+import { OneScreenBreakdown } from "./OneScreenBreakdown";
 import { SKELETON_FADE_MS } from "../../lib/skeletonTiming";
 import { sliceBetween } from "../../test/sliceBetween";
 
@@ -33,16 +34,22 @@ const dash = readFileSync(join(__dirname, "OneScreenDashboard.tsx"), "utf8");
 const shell = readFileSync(join(__dirname, "..", "shell", "WorkspaceShell.tsx"), "utf8");
 const shellCss = readFileSync(join(__dirname, "..", "shell", "workspaceShell.css"), "utf8");
 const rootCss = readFileSync(join(__dirname, "..", "..", "index.css"), "utf8");
-/* the header slot is filled as the dashboard fills it — the page's own header, probes off, no figures yet */
+/* the two slots are filled as the dashboard fills them — the page's own header and breakdown, in their
+   ghost modes: probes off, no figures yet */
 const html = renderToStaticMarkup(
-  <OneScreenSkeleton header={<OneScreenHeader ghost firstName="Nick" line={null} />} />,
+  <OneScreenSkeleton
+    header={<OneScreenHeader ghost firstName="Nick" line={null} />}
+    breakdown={<OneScreenBreakdown ghost breakdown={null} manuscriptTitle="Tidewrack" />}
+  />,
 );
 
 describe("the page skeleton mirrors the page", () => {
   it("renders the REAL layout containers, not a private copy of the grid", () => {
-    for (const cls of ["os-content", "os-grid", "os-greet", "os-colL", "os-toprow", "os-colR"]) {
-      expect(html).toContain(cls);
+    for (const cls of ["os-content", "os-greet", "os-bd", "os-row2", "os-grid", "os-colL", "os-colR"]) {
+      expect(html).toMatch(new RegExp(`class="${cls}[" ]`));
     }
+    /* the top row went with the manuscript tile (stage 3), and its ghost went with it */
+    expect(html).not.toContain("os-toprow");
   });
 
   /* ⚠️ NESTING, NOT PRESENCE — the v33 fault passed the presence check above for three passes.
@@ -50,12 +57,26 @@ describe("the page skeleton mirrors the page", () => {
      (it was a sibling of the grid, which started the whole grid 94px low and both columns with
      it). This is a claim about the file's own markup, so it belongs in a source lock; where the
      boxes actually LAND is a measurement and is made by the Phase 4 gate. */
-  it("⚠️ the grid wraps the columns, and the hero is inside the LEFT one", () => {
-    expect(html).toContain('<div class="os-grid" data-sk="grid"><div class="os-colL"><div class="os-greet">');
-    const grid = html.indexOf('class="os-grid"');
-    const colR = html.indexOf('class="os-colR"');
-    expect(grid).toBeGreaterThan(-1);
-    expect(colR).toBeGreaterThan(grid);
+  /* ⚠️ RETARGETED (stages 2–3, 17 Sep): the header left the left column. The page is four rows in one
+     centred block — the header, the breakdown, the three-card row, and the grid that wraps the to-do
+     card and the activity column — and the cover is the same four, in the same order. */
+  it("⚠️ four rows in the page's order, and the grid wraps the two columns", () => {
+    const at = (needle: string) => {
+      const i = html.indexOf(needle);
+      expect(i, needle).toBeGreaterThan(-1);
+      return i;
+    };
+    const order = [
+      at('<div class="os-greet">'),
+      at('<section class="os-bd" data-sk="breakdown">'),
+      at('<div class="os-row2" data-sk="row2">'),
+      at('<div class="os-grid" data-sk="grid">'),
+    ];
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+    expect(html).toContain('<div class="os-grid" data-sk="grid"><div class="os-colL">');
+    expect(html.indexOf('class="os-colR"')).toBeGreaterThan(order[3]);
+    /* the header is not inside the grid any more */
+    expect(html.indexOf('<div class="os-greet">')).toBeLessThan(order[3]);
   });
 
   /* ⚠️ THE ANCHOR IS THE RULE, NOT THE NAME. Anchoring on `.os-skelpage` alone matched its FIRST
@@ -71,13 +92,16 @@ describe("the page skeleton mirrors the page", () => {
      documents every retirement by quoting what it retired. */
   it("⚠️ and declares no grid of its own — the columns are the page's, or they will drift", () => {
     const from = css.indexOf(".os-skelpage {");
-    const to = css.indexOf("§11 · RESPONSIVE FRAME");
+    /* the ghost rules end where the retired stat cards' tombstone begins (the old end anchor, the
+       lock's responsive frame, moved to the foot of the sheet in stages 2–3) */
+    const to = css.indexOf("THE HEADER COUNTERS — RETIRED");
     expect(from).toBeGreaterThan(-1);
     expect(to).toBeGreaterThan(from);
     const sk = css.slice(from, to).replace(/\/\*[\s\S]*?\*\//g, "");
     /* the slice must still hold the block it claims to be reading */
     expect(sk).toContain(".os-skelpage {");
-    expect(sk).toContain(".os-sk-aut");
+    expect(sk).toContain(".os-sk-bdn");
+    expect(sk).toContain(".os-sk-clrow");
     expect(sk).not.toContain("grid-template-columns");
     expect(sk).not.toContain("column-gap");
   });
@@ -88,17 +112,32 @@ describe("the page skeleton mirrors the page", () => {
      `aspect-ratio: 1000 / 330` that IS the top row's height above 1710; `.os-actv` the hairline
      column that is deliberately not a card; `.os-comtile` the 132px tile. A ghost that restates
      any of them is a second source of truth for one box, and the drift is invisible. */
+  /* ⚠️ RETARGETED (stages 2–3): the breakdown's column and card classes, the three second-row cards'
+     own inner boxes, and the bottom row's cards — every box the page's rules already size. */
   it("⚠️ wears the page's own card classes — a restated box is a box free to drift", () => {
-    for (const cls of ["os-card", "os-aut", "os-lead", "os-ahead", "os-lbody", "os-chartwrap",
-                       "os-tasks", "os-th2", "os-actv", "os-comtile"]) {
-      expect(html).toContain(cls);
+    for (const cls of ["os-card", "os-bdhead", "os-mount", "os-mount-in", "os-bdgrid", "os-bdcol", "os-bdn",
+                       "os-bdfact", "os-bdfoot", "os-qa", "os-qalist", "os-qafoot", "os-lead", "os-achead",
+                       "os-acid", "os-acbody", "os-acplot", "os-acx", "os-cl", "os-clhd", "os-clhead",
+                       "os-clrows", "os-clfoot", "os-tasks", "os-th2", "os-ahead", "os-actv", "os-comtile"]) {
+      expect(html, cls).toMatch(new RegExp(`class="([^"]* )?${cls}[" ]`));
+    }
+    /* the retired top row's boxes did not survive it */
+    for (const gone of ["os-aut", "os-lbody", "os-chartwrap"]) {
+      expect(html, gone).not.toMatch(new RegExp(`["\\s]${gone}["\\s]`));
     }
   });
 
   it("stands in for every card on the page — nothing loads unannounced", () => {
-    /* the manuscript tile, the chart's plot, the to-do rule, the feed, the tile's mark */
-    for (const cls of ["os-sk-aut", "os-sk-chplot", "os-sk-tkrule", "os-sk-acbub", "os-sk-comill"]) {
-      expect(html).toContain(cls);
+    /* the breakdown's figures and pills, the hero and the actions, the hawk and the plot, the closed
+       rows, the to-do rule, the feed, the tile's mark */
+    for (const cls of ["os-sk-bdn", "os-sk-bdpill", "os-sk-bdfact", "os-sk-qahero", "os-sk-qaitem", "os-sk-acart",
+                       "os-sk-actog", "os-sk-acplot", "os-sk-clrow", "os-sk-tkrule", "os-sk-acbub", "os-sk-comill"]) {
+      expect(html, cls).toContain(cls);
+    }
+    /* the manuscript tile's and the old chart's ghosts went with them (stage 3) */
+    for (const gone of ["os-sk-aut", "os-sk-chplot", "os-sk-chbrush", "os-sk-chchips", "os-sk-row"]) {
+      expect(html, gone).not.toMatch(new RegExp(`["\\s]${gone}["\\s]`));
+      expect(css, gone).not.toMatch(new RegExp(`\\.${gone}[\\s{]`));
     }
     /* ⚠️ A CARD THAT LEAVES THE PAGE LEAVES THE SKELETON IN THE SAME COMMIT, or the loading state
        advertises something that never arrives. Goals and the community CARD are both retired. */
@@ -112,10 +151,18 @@ describe("the page skeleton mirrors the page", () => {
      page's own `[data-probe]` UNDERNEATH the cover, which reported Δ 0 for a region nobody had
      looked at. The fallback is gone and this is the other half of that repair: the handles are
      asserted here, where a rename fails in the unit suite rather than in a browser. */
-  it("⚠️ carries the gate's five handles — and they are attributes, not classes", () => {
-    for (const h of ["grid", "toprow", "todo-card", "activity-card", "community-tile"]) {
-      expect(html).toContain(`data-sk="${h}"`);
+  /* ⚠️ RETARGETED (stages 2–3): nine handles, and read OFF THE GATE rather than typed here twice — the
+     list below is the gate's own `REGIONS`, minus the two shell regions it reads live in both states. */
+  it("⚠️ carries every handle the gate reads — and they are attributes, not classes", () => {
+    const gate = readFileSync(join(__dirname, "..", "..", "..", "scripts", "dash-skeleton-v33.mjs"), "utf8");
+    const listed = sliceBetween(gate, "const REGIONS = [", "];", "the gate's region list");
+    const regions = [...listed.matchAll(/"([a-z0-9-]+)"/g)].map((m) => m[1]);
+    const ghosts = regions.filter((r) => r !== "navrow" && r !== "search");
+    expect(ghosts, "the gate must read the ghost's regions").toHaveLength(9);
+    for (const h of ghosts) {
+      expect(html, h).toContain(`data-sk="${h}"`);
     }
+    expect(html).not.toContain('data-sk="toprow"');
     /* an unstyled class exists to be styled; a handle exists to be measured. Do not mix them. */
     expect(html).not.toContain("os-sk-tasks");
     expect(html).not.toContain("os-sk-actv");
@@ -168,8 +215,8 @@ describe("the page skeleton mirrors the page", () => {
    * Its probes are off, because the page beneath the cover is mounted and carries its own.
    */
   it("⚠️ holds the page's own header — words, no figures, no shimmer, no probes", () => {
-    const hdr = sliceBetween(html, '<div class="os-greet">', 'class="os-toprow"', "the cover's header");
-    expect(hdr, "the header must be in the cover, before the top row").toContain("os-hello");
+    const hdr = sliceBetween(html, '<div class="os-greet">', '<section class="os-bd"', "the cover's header");
+    expect(hdr, "the header must be in the cover, before the breakdown").toContain("os-hello");
     expect(hdr).toContain("Hello, Nick.");
     expect(hdr).toContain('class="os-hdcounts"');
     expect(hdr).toContain("queries out");
@@ -181,6 +228,21 @@ describe("the page skeleton mirrors the page", () => {
     for (const gone of ["os-sk-h1", "os-sk-sub", "os-sk-stats", "os-sk-stat", "os-sk-ill"]) {
       expect(html).not.toMatch(new RegExp(`["\\s\`]${gone}["\\s\`]`));
     }
+  });
+
+  /* ⚠️ THE COVER'S BREAKDOWN IS THE PAGE'S BREAKDOWN, IN GHOST MODE (stage 2): the heading keeps its
+     words and the manuscript's title, the five columns keep their boxes, and every figure, pill and fact
+     is a shimmer block — no number, no probe. */
+  it("⚠️ holds the page's own breakdown — the heading's words, five ghost columns, no figure, no probe", () => {
+    const bd = sliceBetween(html, '<section class="os-bd" data-sk="breakdown">', '<div class="os-row2"', "the cover's breakdown");
+    expect(bd).toContain('<h2 class="os-bdtitle">Where your queries stand</h2>');
+    expect(bd).toContain('<span class="os-bdmeta">queries · Tidewrack</span>');
+    expect(bd.match(/class="os-bdcol/g) ?? []).toHaveLength(5);
+    expect(bd.match(/os-sk-bdn/g) ?? []).toHaveLength(5);
+    expect(bd).not.toContain("data-probe");
+    expect(bd).not.toMatch(/>\d/);
+    /* the foot is drawn: the harness account carries an R&R and an offer (see the component's note) */
+    expect(bd).toContain("os-sk-bdfoot");
   });
 
   it("is hidden from assistive tech — a shape tells a screen reader nothing", () => {
@@ -314,19 +376,32 @@ describe("the timing is the lib's, not the component's", () => {
     expect(dash).not.toContain("loading && <OneScreenSkeleton");
   });
 
-  /* ⚠️ ONE STATED HEIGHT LEFT, AND THE RETIREMENT OF THE OTHER THREE IS THE CLAIM.
+  /* ⚠️ RETARGETED (stage 3): NO STATED HEIGHT LEFT. The manuscript tile's measured 312px went with the tile
+     and its top row; every ghost box now comes from the page's own rules, and the ghosts' inner
+     blocks are sized from the rules they stand for (see the note above `.os-sk-bdn`).
+     ⚠️ THE ORIGINAL NOTE, FOR THE HISTORY: ONE STATED HEIGHT LEFT, AND THE RETIREMENT OF THE OTHER THREE IS THE CLAIM.
      `--os-sk-counters-h`, `--os-sk-goal-h` and `--os-sk-tasks-h` each described a bare grey
      rectangle standing in for a card. The ghosts wear the real card classes now, so their boxes
      come from the same flex budgets and the same `aspect-ratio` that size the loaded ones, and a
      stated height would be a second source of truth free to drift. What cannot be derived is the
      manuscript tile's own content height — measured 312.3 at all four widths, and the taller card
      in the top row at 1536 and 1710, so it is what the row's height IS there. */
-  it("the one content-driven height is declared once, as a token — and the other three are gone", () => {
-    expect(css).toContain("--os-sk-aut-h:");
-    expect(css).toContain("var(--os-sk-aut-h)");
-    for (const t of ["--os-sk-counters-h", "--os-sk-goal-h", "--os-sk-tasks-h"]) {
-      expect(css).not.toContain(t);
+  it("no content-driven height is stated for the cover any more — all four are gone", () => {
+    const decls = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const t of ["--os-sk-aut-h", "--os-sk-counters-h", "--os-sk-goal-h", "--os-sk-tasks-h"]) {
+      expect(decls, t).not.toContain(t);
     }
+  });
+
+  /* ⚠️ THE COUNTED ROWS COUNT THE PAGE'S OWN LISTS (stages 2–3). Four action rows and four closed rows are
+     fixed today; the cover reads the same two lists the cards draw, so neither can grow on the page and
+     not in the cover. */
+  it("⚠️ the action and closed-row ghosts are the cards' own lists, counted", () => {
+    const src = readFileSync(join(__dirname, "OneScreenSkeleton.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(src).toContain("QUICK_ACTIONS.map(");
+    expect(src).toContain("CLOSED_BUCKETS.map(");
+    expect(html.match(/os-sk-qaitem/g) ?? []).toHaveLength(4);
+    expect(html.match(/os-sk-clrow/g) ?? []).toHaveLength(4);
   });
 });
 

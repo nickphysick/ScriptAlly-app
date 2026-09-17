@@ -29,15 +29,17 @@ describe("the fit modifier is opt-in and every other page is untouched", () => {
     expect(shell).toContain('className={`ws-work${fit ? " ws-work--fit" : ""}`}');
   });
 
-  /* ⚠️ TWO ROUTES NOW — Query Centre and the dashboard. Both are FIXED-VIEWPORT pages that fill
-     their slot exactly and scroll internally; the dashboard joined when its own JS height-lock
-     was deleted in favour of the flex chain. It stays an OPT-IN list, not a default: every other
-     page needs the growing wrapper the sticky frosted bar depends on. */
-  it("fixed-viewport routes opt in by name — Query Centre and the dashboard among them", () => {
+  /* ⚠️ Query Centre is a FIXED-VIEWPORT page that fills its slot exactly and scrolls internally. It
+     stays an OPT-IN list, not a default: every other page needs the growing wrapper the sticky
+     frosted bar depends on.
+     ⚠️ RETARGETED (dashboard stages 2–3, 17 Sep): THE DASHBOARD LEFT THE LIST. It was a one-screen
+     page; Nick dropped that lock, the page now scrolls as a document, and a fixed-height wrapper
+     would clip it. Its absence is asserted, so the route cannot drift back in unannounced. */
+  it("fixed-viewport routes opt in by name — Query Centre among them, and the dashboard no longer", () => {
     const fit = /fit=\{([^}]*)\}/.exec(appShell)?.[1] ?? "";
     expect(fit, "the fit expression must exist").not.toBe("");
     expect(fit).toContain('routeKey === "queries"');
-    expect(fit).toContain('routeKey === "dashboard"');
+    expect(fit).not.toContain('"dashboard"');
     /* ⚠️ still a NAMED LIST, never a default — every other page needs the growing wrapper the
        sticky frosted bar depends on. Routes may join; `true` may not. */
     expect(fit).toContain("routeKey ===");

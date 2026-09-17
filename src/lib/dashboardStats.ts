@@ -230,8 +230,9 @@ export const activeStageBreakdown = (queries: Query[]): StageRow[] =>
     count: queries.filter((q) => q.status === status).length,
   }));
 
+/* ⚠️ OFFER IS NOT HERE (17 Sep): an offer is an active query everywhere, and `oneScreen`'s ledger —
+   which this set is kept in step with — changed in the same pass. */
 const TERMINAL_STATUSES: ReadonlySet<QueryStatus> = new Set([
-  QueryStatus.OFFER,
   QueryStatus.REJECTED,
   QueryStatus.WITHDRAWN,
   QueryStatus.NO_RESPONSE,

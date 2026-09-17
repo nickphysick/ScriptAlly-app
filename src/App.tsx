@@ -340,6 +340,8 @@ export function pathFor(tab: string, subPageName?: string): string {
     case "agents": return subPageName === "Discover new agents" ? "/agents/discover" : "/agents";
     case "manuscripts": {
       if (subPageName === "Submission packages") return "/manuscripts/packages";
+      /* the dashboard's quick action — the packages page's Builder tab, where a package is made */
+      if (subPageName === "New package") return "/manuscripts/packages?tab=builder";
       if (subPageName === "Comparable titles") return "/manuscripts/comps";
       return "/manuscripts";
     }
@@ -681,12 +683,11 @@ function AppContent() {
       >
         {/* The four main pages stay MOUNTED across navigation (display toggling) so page-local
             state — Queries filters/sort/selection above all — survives leaving and returning. */}
-        {/* ⚠️ `fill`, NOT `flow`. A flow slot is a plain block that sizes to its content, so the
-            page had to measure the scroller in JS and stamp a pixel height — which included the
-            66px sticky bar's band and scrolled the card by exactly that. `fill` gives the slot
-            `flex:1; min-height:0`, i.e. the space REMAINING under the bar. Pairs with `fit` on the
-            work wrapper (AppShell) — both are needed; see .ws-work--fit. */}
-        <StagePage active={routeKey === "dashboard"} layout="fill">
+        {/* ⚠️ `flow` AGAIN (stages 2–3, 17 Sep). The dashboard was a one-screen page — a `fill` slot
+            paired with `fit` on the work wrapper, so it took exactly the space under the bar and
+            never scrolled. Nick dropped that lock: the page now grows with its rows and the stage
+            scrolls it, so the slot is a plain block and the route is off `fit` in AppShell. */}
+        <StagePage active={routeKey === "dashboard"}>
           <Dashboard
             onNavigate={handleNavigate}
             searchQuery={searchQuery}

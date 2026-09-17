@@ -13,10 +13,12 @@
  * them at a glance. Each figure is the SAME call its card makes, over the same scoped arrays, and
  * `dashHeader.test.ts` asserts the two against each other rather than against literals.
  *
- *   · QUERIES OUT is the daily ledger's closing position today: sent, and not yet closed by an
- *     offer, a rejection, a withdrawal or a stated no-response. "Out" means still out there — a
- *     rejected letter came back. (`accountHeaderFacts.queryingLabel` uses "out" for every query
- *     with a send date; that helper has no caller and describes an account's lifetime, not today.)
+ *   · QUERIES OUT is every LIVE query — sent, and not closed by a pass, a withdrawal or a stated
+ *     no-response. An offer is live (stages 2–3, 17 Sep: it used to count as closed here). It is
+ *     `dashBreakdown.liveCount`, the same set the breakdown's five columns and its R&R/offer line
+ *     partition, so header = columns + footer by construction; the chart's headline reads it too.
+ *     (`accountHeaderFacts.queryingLabel` uses "out" for every query with a send date; that helper has
+ *     no caller and describes an account's lifetime, not today.)
  *   · TASKS WAITING is `boardFigures(...).cards` — the To-do and Today columns, snoozed excluded —
  *     which is what the sidebar badge, every Tasks page and the dashboard's to-do card count.
  *
@@ -31,7 +33,7 @@
  * the list's own open count by the list's own derivation — so the two can never disagree.
  */
 import type { Query } from "../types";
-import { dailyLedger } from "./oneScreen";
+import { liveCount } from "./dashBreakdown";
 import { assembleBoardColumns, boardFigures, type AssembleColumnsInput } from "./todoColumns";
 import { gettingStartedOpen, gettingStartedRows, type GettingStartedInput } from "./dashEmpty";
 
@@ -43,11 +45,8 @@ export type DashHeaderLine =
   | { kind: "counts"; queriesOut: number; tasksWaiting: number }
   | { kind: "starting"; steps: number };
 
-/** The chart's "Active queries" figure, by the chart's own derivation — the ledger's last row. */
-export const queriesOutCount = (queries: Query[], now: Date): number => {
-  const daily = dailyLedger(queries, now);
-  return daily.length ? daily[daily.length - 1].active : 0;
-};
+/** Every live query — the figure the chart's headline and the breakdown's total also state. */
+export const queriesOutCount = (queries: Query[]): number => liveCount(queries);
 
 /** The to-do card's total, by the call every Tasks surface makes. */
 export const tasksWaitingCount = (input: AssembleColumnsInput): number =>
@@ -80,7 +79,7 @@ export const dashHeaderLine = (i: DashHeaderInput): DashHeaderLine | null => {
   if (i.empty) return { kind: "starting", steps: startingStepsCount(i.starting) };
   return {
     kind: "counts",
-    queriesOut: queriesOutCount(i.scopedQueries, i.now),
+    queriesOut: queriesOutCount(i.scopedQueries),
     tasksWaiting: tasksWaitingCount(i.board),
   };
 };

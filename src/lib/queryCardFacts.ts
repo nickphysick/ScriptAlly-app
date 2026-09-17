@@ -302,21 +302,7 @@ export const STATE_ACCENT_TOKEN: Record<State, string> = {
   closed: "var(--state-closed-deep)",
 };
 
-/**
- * …and one step deeper again, for a 1.2px line drawn OVER its own fill (dashboard v27, Phase 6).
- * Same key as the other two, so all three move together.
- *
- * ⚠️ NOT A DARKER `-deep`: that step is shared with the Contact list's board, the desk strip, the
- * active tab and the estimate bars, none of which asked to be retoned. A band border on a faded
- * stack is a different job from a ring on a card.
- */
-export const STATE_LINE_TOKEN: Record<State, string> = {
-  queried: "var(--state-queried-line)",
-  agent: "var(--state-agent-line)",
-  you: "var(--state-you-line)",
-  offer: "var(--state-offer-line)",
-  closed: "var(--state-closed-line)",
-};
+/* `STATE_LINE_TOKEN` (the `-line` rung, for band borders) is retired with the chart's bands (stage 3, 17 Sep). */
 
 export function turnWordFor(status: QueryStatus): string {
   const turn = turnFor(status);

@@ -256,20 +256,27 @@ try {
   const snap = await page.evaluate(serialise);
   const sha = execSync("git rev-parse --short HEAD", { cwd: ROOT }).toString().trim();
   const subject = execSync("git log -1 --format=%s", { cwd: ROOT }).toString().trim();
+  /* ⚠️ A CAPTURE FROM A DIRTY TREE SAYS SO. The served build is this tree's (checked above), which is
+     HEAD plus whatever is uncommitted — so a header naming HEAD alone would misstate what was
+     measured. The commit that adds the reference is the one that carries those changes. */
+  const dirtyPaths = execSync("git status --porcelain -- src public", { cwd: ROOT }).toString().trim();
+  const source = dirtyPaths
+    ? `${sha} plus uncommitted changes to ${dirtyPaths.split("\n").length} paths under src/ and public/ — the commit that adds this file carries them`
+    : `${sha} (${subject.replace(/--/g, "-")})`;
   const when = new Date().toISOString();
   /* root-relative urls left in the kept css (flag icons, if any survived) resolve against the server */
   const html = snap.html.split("url(/").join(`url(${APP}/`).split('url("/').join(`url("${APP}/`);
   const header =
     "<!doctype html>\n" +
     "<!-- ══ DASHBOARD REFERENCE — TAKEN FROM THE BUILD, NOT DRAWN ══\n" +
-    `     Source: ${sha} (${subject.replace(/--/g, "-")}), served bundle ${entry[1]}, ${when},\n` +
+    `     Source: ${source}, served bundle ${entry[1]}, ${when},\n` +
     `     at ${WIDTH}x${HEIGHT}, signed in as the harness account.\n` +
     "     Made by scripts/dash-ref-snapshot.mjs. A regression baseline between design stages, not a\n" +
     "     design: it agrees with its own build by construction. Regenerate under a NEW name, point\n" +
     "     scripts/dash-ref.mjs at it, and enrol it with scripts/check-design-refs.mjs --update. -->\n";
   writeFileSync(OUT, header + html + "\n");
   console.log(`✓ ${OUT_ARG} — ${Math.round((header.length + html.length) / 1024)}KB`);
-  console.log(`  from ${sha} · ${entry[1]} · ${WIDTH}x${HEIGHT} · ${probes} probes`);
+  console.log(`  from ${source} · ${entry[1]} · ${WIDTH}x${HEIGHT} · ${probes} probes`);
   console.log(`  css: ${snap.tally.kept} rules kept, ${snap.tally.dropped} dropped · ${JSON.stringify(snap.sheets)}`);
   console.log(`  images: ${snap.inlined} of ${snap.images} inlined`);
   console.log(`  hidden page slots dropped: ${snap.droppedSlots.length} (${snap.droppedSlots.join(", ")})`);

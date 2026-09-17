@@ -9,10 +9,9 @@
  * the wrapper meant that effect's only run found nothing, bailed, and never ran again.
  *
  * ⚠️ THIS IS A CONSTRUCTION CLAIM, AND IT IS HERE BECAUSE IT RUNS ON EVERY PUSH. The rendered claim —
- * the plot draws at every width, frequency and range — is `plotDraws` in scripts/dash-refdiff.mjs, and
- * that harness only runs when somebody runs it. That is exactly how the fault shipped: `plotStruct`
- * requires three bands and a line and would have failed on the first run, and the stream that changed
- * the chart never ran it. Two instruments for one fault, on purpose: this one is cheap and always on;
+ * the plot draws at every width and frequency — is `plotDraws` in scripts/dash-refdiff.mjs, and that
+ * harness only runs when somebody runs it. That is exactly how the fault shipped: the structural gate
+ * would have failed on the first run, and the stream that changed the chart never ran it. Two instruments for one fault, on purpose: this one is cheap and always on;
  * the rendered one is the proof that the plot actually paints.
  *
  * ⚠️ IT READS THE REF THE WRAPPER ACTUALLY CARRIES, NOT A NAME TYPED HERE, so renaming the ref does not
@@ -27,10 +26,12 @@ const raw = readFileSync(join(__dirname, "OneScreenChart.tsx"), "utf8");
 const src = raw.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
 
 describe("⚠️ the chart's size is measured when its wrapper arrives, not once at mount", () => {
-  const attach = /className="os-chartwrap"\s+ref=\{(\w+)\}/.exec(src);
+  /* the stage-3 chart (17 Sep) measures its plot box, `.os-acplot`, where the old chart measured
+     `.os-chartwrap` — the same construction on the element that now holds the svg */
+  const attach = /className="os-acplot"\s+ref=\{(\w+)\}/.exec(src);
 
   it("the wrapper carries a ref (the anchor every claim below reads)", () => {
-    expect(attach, "no ref on .os-chartwrap — nothing measures the plot").not.toBeNull();
+    expect(attach, "no ref on .os-acplot — nothing measures the plot").not.toBeNull();
   });
 
   it("that ref is a callback ref, not an object ref read by an effect", () => {

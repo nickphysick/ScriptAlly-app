@@ -120,9 +120,9 @@ describe("the rendered rail", () => {
     />,
   );
 
-  /* ⚠️ THE AUTHOR TILE LEFT THE RAIL (v16 §1) — it sits beside the chart in the main column's
-     fixed 302px row now, and OneScreenAuthor owns it. This case pins the DEPARTURE so the tile
-     cannot quietly return here and be rendered twice. */
+  /* ⚠️ THE AUTHOR TILE LEFT THE RAIL (v16 §1) — it moved beside the chart, and was retired outright
+     with that row in dashboard stages 2–3 (17 Sep). This case pins the DEPARTURE so the tile cannot
+     quietly return here. */
   it("the author tile is NOT in the rail any more", () => {
     expect(html).not.toContain("os-aut-band");
     expect(html).not.toContain('aria-label="Add a photo"');

@@ -31,9 +31,9 @@ import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { BrandDropdown } from "../forms/BrandDropdown";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
 import { genreDisplay } from "../../lib/genres";
-/* ⚠️ THE SHARED ASSET, NOT A TRACED COPY. `ManuscriptPlate`, `ManuscriptLibraryCard` and
-   `OneScreenAuthor` all render this exact PNG on a white plate; tracing it here would fork
-   one illustration into two that drift. One asset, one home. */
+/* ⚠️ THE SHARED ASSET, NOT A TRACED COPY. `ManuscriptPlate` and `ManuscriptHero` import this
+   exact PNG too; tracing it here would fork one illustration into two that drift. One asset,
+   one home. */
 import manuscriptIcon from "../../assets/shell/manuscript-icon.png";
 import {
   CompDraft,

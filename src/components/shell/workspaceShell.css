@@ -701,7 +701,13 @@
   overflow: hidden; padding: 0 22px 20px; background: var(--ws-ground);
 }
 /* ⚠️ CHROME, NOT CONTENT — it sits ON the ground above the window and never scrolls. */
-.ws-pagebar { flex: none; display: flex; align-items: center; gap: 14px; padding: 16px 6px 14px; }
+/* ⚠️ THE ROW'S INSET, ITS GAP AND THE TOGGLE'S SIZE ARE TOKENS (stages 2–3, 17 Sep) because the
+   dashboard's row computes where its search may start from all three — "the toggle's box plus the
+   gap" — and restating 6, 14 and 34 there would be three literals another rule owns. */
+.ws-pagebar {
+  --ws-pagebar-inset: 6px; --ws-pagebar-gap: 14px; --sb-toggle-size: 34px;
+  flex: none; display: flex; align-items: center; gap: var(--ws-pagebar-gap); padding: 16px var(--ws-pagebar-inset) 14px;
+}
 /**
  * ⚠️ THE DASHBOARD'S SEARCH SITS IN THIS ROW (v28, Phase 2) — ref `.topbar` at a fixed 64px with
  * `.searchwrap{flex:1 1 auto;max-width:640px}` and the actions to its right.
@@ -714,7 +720,29 @@
 /* ⚠️ 12/12 GIVES THE REF'S 64px ROW EXACTLY — a 40px field between them. It was 10/10, which made
    the row 60 and put every probe below it 3.1px high at all four widths: a uniform offset is always
    the frame, never the layout. */
-.dash-mode .ws-pagebar { padding: 12px 6px 12px; }
+/**
+ * ⚠️ THE DASHBOARD'S ROW SITS ON THE PAGE'S MEASURE (stages 2–3, 17 Sep). The dashboard's content is a
+ * centred block no wider than `--dash-page-max`, inset by `--dash-page-pad`, and the bar pads itself
+ * to the same two edges so the search and the actions sit above the columns they belong to. The bar
+ * and the window span the same box (`.ws-main`'s content box), so `100%` here IS the width the page
+ * centres in — which is why it is the bar's PADDING that carries the measure: a percentage in a
+ * padding resolves against that box, where one in a child's margin would not.
+ *
+ * ⚠️ THE COLLAPSE TOGGLE STAYS AT THE SEAM — out of the flow, at the row's own inset — because it
+ * belongs to the sidebar, not to the page (its note in WorkspaceShell: it does not move). The left
+ * padding therefore never drops below the toggle's box plus the row's gap, or a narrow window would
+ * put the search under it.
+ */
+.dash-mode .ws-pagebar {
+  position: relative;
+  padding-top: 12px; padding-bottom: 12px;
+  padding-left: max(
+    calc(var(--dash-page-pad) + max(0px, (100% - var(--dash-page-max) - 2 * var(--dash-page-pad)) / 2)),
+    calc(var(--ws-pagebar-inset) + var(--sb-toggle-size) + var(--ws-pagebar-gap))
+  );
+  padding-right: calc(var(--dash-page-pad) + max(0px, (100% - var(--dash-page-max) - 2 * var(--dash-page-pad)) / 2));
+}
+.dash-mode .ws-pagebar .sb-toggle { position: absolute; left: var(--ws-pagebar-inset); top: 50%; transform: translateY(-50%); }
 .ws-bigsearch {
   flex: 1 1 auto; max-width: 640px; min-width: 0;
   display: flex; align-items: center; gap: 10px;
@@ -737,7 +765,7 @@
    takes the parchment card treatment; the ring is the house focus ring. The glyph's left-column
    fill is keyed off `aria-expanded`, so the icon cannot disagree with the state it reports. */
 .sb-toggle {
-  flex: none; width: 34px; height: 34px; padding: 0;
+  flex: none; width: var(--sb-toggle-size); height: var(--sb-toggle-size); padding: 0;
   display: flex; align-items: center; justify-content: center;
   background: transparent; border: 1px solid transparent; border-radius: 9px;
   color: #9a8c80; cursor: pointer;
@@ -1260,10 +1288,29 @@
  * the cards sit directly on it. A card on a white panel on a ground is two surfaces where the
  * design has one, which is what the review saw as "the ground was white".
  */
+/**
+ * ⚠️ THE PAGE MEASURE, DECLARED ONCE (stages 2–3, 17 Sep) — Nick: the dashboard must not stretch
+ * indefinitely on a large monitor. `oneScreen.css` caps and centres `.os-content` with these, and the
+ * row above pads itself with the same two, so the two cannot disagree about where the columns are.
+ * 1440 is the default; 1520 was the other candidate on the table.
+ *
+ * ⚠️ ON `.ws-main`, THE COLUMN THAT HOLDS BOTH READERS — not on `.dash-mode` itself. Declared on the
+ * shell's root they were inherited by the rail too, and the rail gate (which diffs the rail's whole
+ * computed style across routes) rightly reported two properties the rail had gained on this route.
+ */
+.dash-mode .ws-main { --dash-page-max: 1440px; --dash-page-pad: 22px; }
+/* ⚠️ ON A PHONE THE PAD TIGHTENS, AND IT DOES SO HERE — on the token — so the row above and the page
+   step together. The page's own ≤640 padding was 14px before the measure existed. */
+@media (max-width: 640px) {
+  .dash-mode .ws-main { --dash-page-pad: 14px; }
+}
 .dash-mode .ws-main { background: #f4f0ea; }
 .dash-mode .ws-window {
   background-color: transparent;
   border-color: transparent;
+  /* ⚠️ NO BORDER AT ALL, NOT A TRANSPARENT ONE: the bar computes the page's edges from `.ws-main`'s
+     width, and a 1px border would put the page's box a pixel inside the bar's on each side. */
+  border-width: 0;
   box-shadow: none;
   border-radius: 0;
   transition-delay: 0s;
@@ -1325,7 +1372,14 @@
    right-aligned in the very row the crumb used. Moving them into the page would mean a second mount
    of three components that exist once. `visibility` rather than `display` so the row keeps its
    height and the hero starts where the ref puts it. */
-.dash-mode .ws-crumb, .dash-mode .ws-sync { visibility: hidden; }
+/* ⚠️ `display: none` SINCE STAGES 2–3 (17 Sep), and the divider with them. They were hidden with
+   `visibility` so the row kept its height — but the row's height is the 40px field and its padding, and
+   the invisible crumb's WIDTH was what pushed the search ~200px right of the page's left edge. The row
+   aligns to the page's measure now, so nothing may occupy space before the search. */
+.dash-mode .ws-crumb, .dash-mode .ws-sync, .dash-mode .ws-pagebar > .ws-vdiv { display: none; }
+/* ⚠️ A CLASSIC SCROLLBAR WOULD NARROW THE PAGE BUT NOT THE BAR — reserving the gutter on BOTH edges
+   keeps the page centred on the same axis as the row above it. Overlay scrollbars reserve nothing. */
+.dash-mode .ws-wbody { scrollbar-gutter: stable both-edges; }
 
 /**
  * ══ THE NAV ROW LOADS WITH THE PAGE — ON THE COVER'S CLOCK, NOT THE DATA'S (v34) ══
@@ -1382,6 +1436,9 @@
 .dash-mode .ws-main:has(.os-skelpage:not(.out)) .ws-pagebar :is(.ws-vdiv, .ws-bdiv) { opacity: 0; }
 /* the layer — present for the cover's whole life, so the dissolve has somewhere to start */
 .dash-mode .ws-main:has(.os-skelpage) .ws-pagebar :is(.sb-toggle, .ws-bigsearch, .ws-fbpill, .ws-nbtn, .sp-help) { position: relative; }
+/* …except the toggle, which is already positioned (at the seam, out of the row) and must stay there
+   while the cover is up — one class more specific than the rule above, so it wins whatever the order. */
+.dash-mode .ws-main:has(.os-skelpage) .ws-pagebar .sb-toggle.sb-toggle { position: absolute; }
 .dash-mode .ws-main:has(.os-skelpage) .ws-pagebar :is(.sb-toggle, .ws-bigsearch, .ws-fbpill, .ws-nbtn, .sp-help)::after {
   content: "";
   position: absolute;
