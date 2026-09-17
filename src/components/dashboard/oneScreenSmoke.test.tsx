@@ -113,6 +113,26 @@ describe("§1 · the lock", () => {
     expect(fit).toContain('routeKey === "dashboard"');
   });
 
+  /* ⚠️ THE PHONE RELEASE STACKS THE GRID, NOT ONLY THE PAGE (phone fix, 17 Sep). The ≤1024 release was
+     written when `.os-content` was the grid; the columns moved into `.os-grid` and kept their two
+     tracks on a phone — the left column 0–4px wide, the activity column over it. Both halves are
+     needed and both are asserted: one track, and the right column giving up the zero height that
+     only makes sense side by side (measured: with the track rule alone the activity panel was 0px).
+     Each must come AFTER its base rule — a media query confers no specificity. The layout itself is
+     measured by `tests/e2e/dashHeader.measure.ts` at 768 and 375. */
+  it("⚠️ below 1025 the grid is one track and the right column has a height of its own", () => {
+    /* comments are stripped from `cssRules`, so the block is found by its first rule, which only the
+       release carries */
+    const release = sliceBetween(cssRules, ".sa-dashroot { height: auto; min-height: 100vh;", "\n}\n", "the ≤1024 release");
+    expect(release).toContain(".os-grid { grid-template-columns: minmax(0, 1fr); }");
+    expect(release).toContain(".os-colR { height: auto; }");
+    expect(release).toContain(".os-greet, .os-colL, .os-colR { grid-column: auto; grid-row: auto; }");
+    expect(cssRules.indexOf(".os-grid { grid-template-columns: minmax(0, 1fr); }"))
+      .toBeGreaterThan(cssRules.indexOf(".os-grid {\n"));
+    expect(cssRules.indexOf(".os-colR { height: auto; }"))
+      .toBeGreaterThan(cssRules.indexOf(".os-colR { height: 0; }"));
+  });
+
   it("both releases exist, and they outrank the inline height with !important", () => {
     expect(cssRules).toContain("@media (max-width: 1024px)");
     expect(cssRules).toContain("@media (max-height: 680px) and (min-width: 1025px)");

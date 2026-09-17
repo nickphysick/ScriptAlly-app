@@ -659,6 +659,18 @@
   .sa-dashroot { height: auto; min-height: 100vh; min-height: 100dvh; padding-bottom: 4rem; }
   .os-root { height: auto !important; overflow: visible; }
   .os-content { display: flex; flex-direction: column; gap: 14px; padding: 16px 20px 28px; }
+  /* ⚠️ ONE TRACK BELOW 1025 (phone fix, 17 Sep). This release was written when `.os-content` WAS
+     the grid; the refdiff pass moved the columns into `.os-grid` and nothing released that, so a
+     phone kept `minmax(0, 1fr) 360px` — the left column resolved to 0–4px and the activity column
+     lay over it. One track, and the two columns auto-place in source order: the left one (header,
+     then the main content) above the right one (activity). */
+  .os-grid { grid-template-columns: minmax(0, 1fr); }
+  /* ⚠️ AND THE RIGHT COLUMN STOPS CLAIMING ZERO HEIGHT. `height: 0` is the side-by-side law (the
+     left column sets the row, the right one is stretched to it); stacked, it makes the right column's
+     own row 0px tall — measured with the grid rule alone: the activity panel 0px at 375 and 768, and
+     only the community tile spilling out below. `auto` hands it its content's height, which the
+     panel's own ≤1024 step (420px, §11 below) then bounds. */
+  .os-colR { height: auto; }
   /* the grid placements go with the grid, or the flex order is wrong */
   .os-greet, .os-colL, .os-colR { grid-column: auto; grid-row: auto; }
   .os-colL, .os-colR { gap: 14px; }

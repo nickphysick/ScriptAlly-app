@@ -183,6 +183,11 @@ function readPage(page: Page, below: string[]) {
         return g ? getComputedStyle(g).gridTemplateColumns.split(" ").filter(Boolean).length : null;
       })(),
       below: Object.fromEntries(below.map((s) => [s, box(q(s))])),
+      /* how far the stage runs past the window — the shell's own width, not the page's */
+      stageOverflow: (() => {
+        const st = document.getElementById("app-stage-scroll");
+        return st ? Math.round(st.getBoundingClientRect().right - window.innerWidth) : null;
+      })(),
       tourChip: box(q(".os-tourchip")),
       old: {
         counters: root ? root.querySelectorAll(".os-counters, .os-counter, [data-probe='stats'], [data-probe='stat-card'], .os-cic").length : -1,
@@ -340,20 +345,33 @@ test.describe("the dashboard header", () => {
         expect(moved, "nothing below the header may move sideways").toEqual([]);
       }
 
-      /* ══ WHAT NEEDS THE PAGE'S OWN LAYOUT TO BE RIGHT ══
-         ⚠️ KNOWN, PRE-EXISTING, AND NOT THE HEADER'S: below the lock release (1024) the page's
-         `.os-grid` keeps its two tracks — the release was written for `.os-content` before `.os-grid`
-         existed — so on a phone the left column resolves to ~0px and the activity column lies over it
-         (measured on the commit before this header: 4px wide at 375). Nothing below can be met in that
-         layout, so it is skipped THERE, loudly, keyed on the grid itself rather than on a width; the
-         day the grid stacks below 1025, this branch is not taken and every claim below applies. */
-      const twoTracksOnPhone = w < 1025 && (r.gridTracks ?? 0) > 1;
-      if (twoTracksOnPhone) {
-        test.info().annotations.push({ type: "known-issue", description: `.os-grid keeps ${r.gridTracks} tracks at ${w}px; the left column is ${r.colL?.w}px wide` });
-        // eslint-disable-next-line no-console
-        console.log(`[after ${w}] KNOWN ISSUE — the grid keeps ${r.gridTracks} tracks below 1025 (left column ${r.colL?.w}px); row, line and clip claims NOT measured at this width`);
-        return;
+      /* ══ BELOW 1025 THE PAGE IS ONE STACK (phone fix, 17 Sep) ══
+         It kept two tracks until then — the release was written for `.os-content` before `.os-grid`
+         existed — so on a phone the left column resolved to ~0px and the activity column lay over it.
+         Stacked: the header first, then the main content, then the activity column, which has a
+         height of its own (it declared 0 for the side-by-side layout and was invisible when stacked). */
+      if (w < 1025) {
+        expect(r.gridTracks, "one track below 1025").toBe(1);
+        const L = r.below[".os-colL"]!, R = r.below[".os-colR"]!, act = r.below[".os-actv"]!, tile = r.below[".os-comtile"]!;
+        expect(r.header!.y, "the header is the first thing in the stack").toBeCloseTo(L.y, 0);
+        expect(R.y, "the activity column comes after the main content").toBeGreaterThanOrEqual(L.b - 0.5);
+        expect(R.x, "and shares its left edge").toBeCloseTo(L.x, 0);
+        expect(R.w, "and its width").toBeCloseTo(L.w, 0);
+        expect(act.h, "the activity panel is not collapsed").toBeGreaterThan(200);
+        expect(tile.y, "the community tile sits below the panel, not over it").toBeGreaterThanOrEqual(act.b - 0.5);
       }
+      /* ⚠️ KNOWN, PRE-EXISTING, AND THE SHELL'S: at tablet widths the desktop shell will not shrink
+         below the dashboard's natural width (the top row's tile beside the chart's unwrapping header,
+         ~871px), so the stage runs past the window and its right side is cut off. Measured 17 Sep: the
+         stage 911px wide in a 768px window, before the phone fix and after it. Recorded, not asserted
+         — it is not this page's to fix — and the annotation disappears the day the shell shrinks. */
+      if ((r.stageOverflow ?? 0) > 0) {
+        test.info().annotations.push({ type: "known-issue", description: `the stage runs ${r.stageOverflow}px past a ${w}px window (the shell does not shrink)` });
+        // eslint-disable-next-line no-console
+        console.log(`[after ${w}] KNOWN ISSUE — the stage runs ${r.stageOverflow}px past the window; the shell does not shrink below the page's natural width`);
+      }
+
+      /* ══ WHAT NEEDS THE PAGE'S OWN LAYOUT TO BE RIGHT ══ */
 
       /* one line is one line box tall. (Distinct text-rect tops cannot answer this: the zero-size
          spaces around the dot sit at a top of their own on a line that has not wrapped.) */
