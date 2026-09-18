@@ -14,6 +14,7 @@ import { describe, it, expect } from "vitest";
 import {
   HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK, FOUNDING_PERKS,
   DOCUMENT_TITLE, FEATURE_ROWS, BAND_EYEBROW, BAND_HEADING,
+  VISION_HEADING, VISION_POINTS, VISION_LINK,
   FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_GET_LEAD, FOUNDING_GETS, FOUNDING_IN_RETURN, FOUNDING_CTA,
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
   FOUNDING_NOTE, FOUNDING_INVALID, foundingCounterLabel, foundingCounterRest, foundingRemainingLabel,
@@ -39,20 +40,86 @@ describe("landing copy — verbatim locks", () => {
    */
   it("the band's eyebrow and heading", () => {
     expect(BAND_EYEBROW).toBe("No more winging it.");
-    expect(BAND_HEADING).toBe("QueryHawk gives a bird's-eye view of your entire querying campaign.");
+    /* ⚠️ A QUESTION SINCE 18 SEP, AND THE MARK IS PART OF THE COPY. "QueryHawk gives a bird's-eye
+       view…" stated the benefit at the reader; this asks, and the feature rows below answer. */
+    expect(BAND_HEADING).toBe("Ready for a bird's-eye view of your entire querying campaign?");
     expect(HERO_H1).not.toBe(BAND_HEADING);
-    /* ⚠️ THE EYEBROW REPEATS THE HERO SUB'S OPENING SENTENCE, ON PURPOSE AND ON THE SAME PAGE. The
-       brief specifies both verbatim and changes neither, so this asserts the repetition is
-       INTENTIONAL by naming its two owners — which is what stops it quietly becoming three. Which
-       of the two gives the phrase up is an editorial call, not a copy fix. */
-    expect(HERO_SUB.startsWith(BAND_EYEBROW), "the hero sub opens with the same sentence").toBe(true);
+  });
+
+  /**
+   * ⚠️ INVERTED, AND THAT IS THE POINT OF THE EDIT (18 Sep). This used to assert the eyebrow's
+   * sentence ALSO opened the hero sub — the duplication was in the brief, so the lock named both
+   * owners to stop it becoming three. The 18 Sep ref resolves it in the band's favour, so the claim
+   * is now that the phrase has exactly ONE home. Counted across every string the page renders
+   * rather than checked on the hero alone: asserting `!startsWith` would pass on a sub that had
+   * moved the sentence into its second clause.
+   */
+  it("says `No more winging it.` exactly once on the page", () => {
+    const said = [
+      BAND_EYEBROW, BAND_HEADING,
+      HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK,
+      VISION_HEADING, VISION_LINK,
+      ...VISION_POINTS.flatMap((p) => [p.heading, p.body]),
+      ...FEATURE_ROWS.flatMap((r) => [r.heading, r.body, r.alt]),
+    ].filter((t) => t.includes(BAND_EYEBROW));
+    expect(said, `owners of the phrase: ${said.join(" | ")}`).toEqual([BAND_EYEBROW]);
   });
 
   it("the sub, word for word", () => {
     expect(HERO_SUB).toBe(
-      "No more winging it. QueryHawk is your expert querying companion, ready to take you on a " +
-        "data-driven journey to land your manuscript in the right agent's hands.",
+      "QueryHawk is your expert querying companion, ready to take you on a data-driven journey " +
+        "to land your manuscript in the right agent's hands.",
     );
+  });
+
+  /**
+   * ⚠️ THE WHITE BAND'S COPY, WORD FOR WORD (18 Sep, ref design-refs/landing-v6.html). Punctuation is
+   * part of it — the apostrophe in "There's", the full stop that ends each heading, and the fact
+   * that every heading IS a sentence rather than a label.
+   *
+   * ⚠️ AND THE HEADINGS ARE LENGTH-CONSTRAINED BY A LAYOUT RULE. Each is held on one line at desktop
+   * in a 318.7px column, so a longer one does not merely read differently — it wraps, and the width
+   * at which the whole row releases moves with it. A copy edit here is a layout change; the rendered
+   * width is measured in `visionBand.measure.ts`.
+   */
+  it("the vision band, word for word", () => {
+    expect(VISION_HEADING).toBe("Our vision is simple.");
+    expect(VISION_LINK).toBe("Read our story");
+    expect(VISION_POINTS.map((p) => p.heading)).toEqual([
+      "Get good stories told.",
+      "Make querying simple.",
+      "Let writers write.",
+    ]);
+    expect(VISION_POINTS[0].body).toBe(
+      "A captivating story should never be lost to a sub-par querying campaign. There's a " +
+        "dangerous skills gap between writing and querying. QueryHawk bridges that gap.",
+    );
+    expect(VISION_POINTS[1].body).toBe(
+      "Stop shooting from the hip. We'll crunch the data and give you everything you need to " +
+        "make targeted decisions at the right time.",
+    );
+    expect(VISION_POINTS[2].body).toBe(
+      "Less time trawling through spreadsheets, more time doing what you love.",
+    );
+  });
+
+  /**
+   * ⚠️ THE THIRD PLATE IS A PLACEHOLDER AND ITS FILENAME NAMES THE FINAL ART, NOT THE STAND-IN. The
+   * drawing on file is a quill and inkpot supplied as "quick actions"; the commissioned piece
+   * replaces that one file and nothing else changes. A filename describing the stand-in is how a
+   * path comes to name something the page has not shown for a year — the same fault as a comment
+   * outliving what it described. This asserts the path is the heading's, so the two cannot drift.
+   */
+  it("each plate's path is named for the point it illustrates", () => {
+    expect(VISION_POINTS.map((p) => p.image)).toEqual([
+      "/images/get-good-stories-told.png",
+      "/images/make-querying-simple.png",
+      "/images/let-writers-write.png",
+    ]);
+    /* ⚠️ AND NOT `about-story.png`, WHICH IS THE SAME SUBJECT DRAWN DIFFERENTLY. The About page
+       renders a version of the fireside scene with a brush wash behind it; this band renders the
+       one without. Two files, two pages, and neither may be pointed at the other's. */
+    expect(VISION_POINTS.map((p) => p.image)).not.toContain("/images/about-story.png");
   });
 
   /** Two actions, and they ask for different things: one claims a place, one explains the product. */
@@ -144,6 +211,8 @@ describe("landing copy — verbatim locks", () => {
       /* Retarget, same law: a row's body is one string now, and its alt text is rendered too. */
       ...FEATURE_ROWS.flatMap((r) => [r.body, r.alt]),
       HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK,
+      /* Retarget, same law: the white band is three more headings and three more paragraphs. */
+      VISION_HEADING, VISION_LINK, ...VISION_POINTS.flatMap((p) => [p.heading, p.body]),
       /* Retarget, same law: the band's blurb is four list items and an ask now. */
       FOUNDING_HEADING, ...FOUNDING_GETS, FOUNDING_IN_RETURN,
       FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL,
@@ -159,7 +228,7 @@ describe("landing copy — verbatim locks", () => {
    * invite the halo back, and a subtitle under a band header competes with the first row.
    */
   it("the band header is one plain string, and the ECG band's copy is retired", async () => {
-    expect(BAND_HEADING).toBe("QueryHawk gives a bird's-eye view of your entire querying campaign.");
+    expect(BAND_HEADING).toBe("Ready for a bird's-eye view of your entire querying campaign?");
     const copy = await import("./landingCopy");
     /* The trace's heading and its mono eyebrow went with the section that carried them. */
     expect("PULSE_HEADING" in copy, "PULSE_HEADING is retired").toBe(false);

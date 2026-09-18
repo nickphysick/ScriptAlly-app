@@ -1,0 +1,1284 @@
+{
+  "width": 1440,
+  "misses": [],
+  "expected": [
+    {
+      "key": "hero.h1.x",
+      "field": "x",
+      "app": 186,
+      "ref": 120,
+      "delta": 66,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.h1.cx",
+      "field": "cx",
+      "app": 433,
+      "ref": 400.9,
+      "delta": 32.1,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.h1.y",
+      "field": "y",
+      "app": 193.4,
+      "ref": 259.7,
+      "delta": -66.3,
+      "why": "the headline stays at 74px; the ref draws 68",
+      "miss": false
+    },
+    {
+      "key": "hero.h1.bottom",
+      "field": "bottom",
+      "app": 277.7,
+      "ref": 334.5,
+      "delta": -56.7,
+      "why": "the headline stays at 74px; the ref draws 68",
+      "miss": false
+    },
+    {
+      "key": "hero.h1.w",
+      "field": "w",
+      "app": 494,
+      "ref": 561.8,
+      "delta": -67.7,
+      "why": "the headline stays at 74px; the ref draws 68",
+      "miss": false
+    },
+    {
+      "key": "hero.h1.h",
+      "field": "h",
+      "app": 84.4,
+      "ref": 74.8,
+      "delta": 9.6,
+      "why": "the headline stays at 74px; the ref draws 68",
+      "miss": false
+    },
+    {
+      "key": "hero.h1.fontSize",
+      "field": "fontSize",
+      "app": 74,
+      "ref": 68,
+      "delta": 6,
+      "why": "the headline stays at 74px; the ref draws 68",
+      "miss": false
+    },
+    {
+      "key": "hero.h1.lineHeight",
+      "field": "lineHeight",
+      "app": 84.4,
+      "ref": 74.8,
+      "delta": 9.6,
+      "why": "the headline stays at 74px; the ref draws 68",
+      "miss": false
+    },
+    {
+      "key": "hero.sub.x",
+      "field": "x",
+      "app": 186,
+      "ref": 120,
+      "delta": 66,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.sub.right",
+      "field": "right",
+      "app": 680,
+      "ref": 640,
+      "delta": 40,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.sub.cx",
+      "field": "cx",
+      "app": 433,
+      "ref": 380,
+      "delta": 53,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.sub.y",
+      "field": "y",
+      "app": 303.7,
+      "ref": 360.5,
+      "delta": -56.7,
+      "why": "the sub stays 21px/1.65; the ref draws 19/1.7",
+      "miss": false
+    },
+    {
+      "key": "hero.sub.bottom",
+      "field": "bottom",
+      "app": 407.6,
+      "ref": 457.3,
+      "delta": -49.7,
+      "why": "the sub stays 21px/1.65; the ref draws 19/1.7",
+      "miss": false
+    },
+    {
+      "key": "hero.sub.w",
+      "field": "w",
+      "app": 494,
+      "ref": 520,
+      "delta": -26,
+      "why": "the sub stays 21px/1.65; the ref draws 19/1.7",
+      "miss": false
+    },
+    {
+      "key": "hero.sub.h",
+      "field": "h",
+      "app": 103.9,
+      "ref": 96.9,
+      "delta": 7,
+      "why": "the sub stays 21px/1.65; the ref draws 19/1.7",
+      "miss": false
+    },
+    {
+      "key": "hero.sub.lineHeight",
+      "field": "lineHeight",
+      "app": 34.7,
+      "ref": 32.3,
+      "delta": 2.4,
+      "why": "the sub stays 21px/1.65; the ref draws 19/1.7",
+      "miss": false
+    },
+    {
+      "key": "hero.sub.maxWidth",
+      "field": "maxWidth",
+      "app": null,
+      "ref": 520,
+      "delta": null,
+      "why": "the sub stays 21px/1.65; the ref draws 19/1.7",
+      "miss": false
+    },
+    {
+      "key": "hero.cta.x",
+      "field": "x",
+      "app": 186,
+      "ref": 120,
+      "delta": 66,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.cta.right",
+      "field": "right",
+      "app": 468.6,
+      "ref": 402.6,
+      "delta": 66,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.cta.cx",
+      "field": "cx",
+      "app": 327.3,
+      "ref": 261.3,
+      "delta": 66,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.cta.y",
+      "field": "y",
+      "app": 441.6,
+      "ref": 491.3,
+      "delta": -49.7,
+      "why": "follows the headline and sub above it, and the narrower art column",
+      "miss": false
+    },
+    {
+      "key": "hero.cta.bottom",
+      "field": "bottom",
+      "app": 502.6,
+      "ref": 550.3,
+      "delta": -47.7,
+      "why": "follows the headline and sub above it, and the narrower art column",
+      "miss": false
+    },
+    {
+      "key": "hero.cta.lineHeight",
+      "field": "lineHeight",
+      "app": 27,
+      "ref": null,
+      "delta": null,
+      "why": "the ref leaves these at `normal`; the app states a value, and the rendered heights agree",
+      "miss": false
+    },
+    {
+      "key": "hero.link.x",
+      "field": "x",
+      "app": 490.6,
+      "ref": 424.6,
+      "delta": 66,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.link.right",
+      "field": "right",
+      "app": 621.4,
+      "ref": 555.4,
+      "delta": 66,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.link.cx",
+      "field": "cx",
+      "app": 556,
+      "ref": 490,
+      "delta": 66,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.link.y",
+      "field": "y",
+      "app": 459.4,
+      "ref": 508.8,
+      "delta": -49.5,
+      "why": "follows the headline and sub above it, and the narrower art column",
+      "miss": false
+    },
+    {
+      "key": "hero.link.bottom",
+      "field": "bottom",
+      "app": 484.9,
+      "ref": 532.8,
+      "delta": -48,
+      "why": "follows the headline and sub above it, and the narrower art column",
+      "miss": false
+    },
+    {
+      "key": "hero.link.lineHeight",
+      "field": "lineHeight",
+      "app": 25.5,
+      "ref": null,
+      "delta": null,
+      "why": "the ref leaves these at `normal`; the app states a value, and the rendered heights agree",
+      "miss": false
+    },
+    {
+      "key": "hero.shadow.x",
+      "field": "x",
+      "app": 828,
+      "ref": 709.8,
+      "delta": 118.2,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.shadow.right",
+      "field": "right",
+      "app": 1383.4,
+      "ref": 1332,
+      "delta": 51.4,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.shadow.cx",
+      "field": "cx",
+      "app": 1105.7,
+      "ref": 1020.9,
+      "delta": 84.8,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.shadow.y",
+      "field": "y",
+      "app": 110.6,
+      "ref": 134.4,
+      "delta": -23.8,
+      "why": "follows the headline and sub above it, and the narrower art column",
+      "miss": false
+    },
+    {
+      "key": "hero.shadow.bottom",
+      "field": "bottom",
+      "app": 585.4,
+      "ref": 675.6,
+      "delta": -90.2,
+      "why": "follows the headline and sub above it, and the narrower art column",
+      "miss": false
+    },
+    {
+      "key": "hero.shadow.w",
+      "field": "w",
+      "app": 555.4,
+      "ref": 622.2,
+      "delta": -66.8,
+      "why": "follows the headline and sub above it, and the narrower art column",
+      "miss": false
+    },
+    {
+      "key": "hero.shadow.h",
+      "field": "h",
+      "app": 474.8,
+      "ref": 541.2,
+      "delta": -66.4,
+      "why": "follows the headline and sub above it, and the narrower art column",
+      "miss": false
+    },
+    {
+      "key": "hero.navcta.x",
+      "field": "x",
+      "app": 1088,
+      "ref": 1131.6,
+      "delta": -43.6,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.navcta.right",
+      "field": "right",
+      "app": 1314,
+      "ref": 1306,
+      "delta": 8,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.navcta.cx",
+      "field": "cx",
+      "app": 1201,
+      "ref": 1218.8,
+      "delta": -17.8,
+      "why": "the hero keeps the page's 1180/56 container; the ref was drawn at 1440/120",
+      "miss": false
+    },
+    {
+      "key": "hero.navcta.bottom",
+      "field": "bottom",
+      "app": 68,
+      "ref": 72,
+      "delta": -4,
+      "why": "follows the headline and sub above it, and the narrower art column",
+      "miss": false
+    },
+    {
+      "key": "hero.navcta.w",
+      "field": "w",
+      "app": 226,
+      "ref": 174.4,
+      "delta": 51.6,
+      "why": "follows the headline and sub above it, and the narrower art column",
+      "miss": false
+    },
+    {
+      "key": "hero.navcta.lineHeight",
+      "field": "lineHeight",
+      "app": 24,
+      "ref": null,
+      "delta": null,
+      "why": "the ref leaves these at `normal`; the app states a value, and the rendered heights agree",
+      "miss": false
+    },
+    {
+      "key": "hero.navcta.fontFamily",
+      "field": "fontFamily",
+      "app": "Source Sans 3",
+      "ref": "Source Serif 4",
+      "delta": null,
+      "why": "the nav button's family and weight are the tier's and were left unchanged",
+      "miss": false
+    },
+    {
+      "key": "hero.navcta.fontWeight",
+      "field": "fontWeight",
+      "app": "500",
+      "ref": "400",
+      "delta": null,
+      "why": "the nav button's family and weight are the tier's and were left unchanged",
+      "miss": false
+    },
+    {
+      "key": "band.eyebrow.x",
+      "field": "x",
+      "app": 186,
+      "ref": 120,
+      "delta": 66,
+      "why": "same container — the band's column is 1068 against the ref's 1200",
+      "miss": false
+    },
+    {
+      "key": "band.eyebrow.right",
+      "field": "right",
+      "app": 1254,
+      "ref": 1320,
+      "delta": -66,
+      "why": "same container — the band's column is 1068 against the ref's 1200",
+      "miss": false
+    },
+    {
+      "key": "band.eyebrow.y",
+      "field": "y",
+      "app": 696,
+      "ref": 804,
+      "delta": -108,
+      "why": "the eyebrow is left as it is: 21px/.13em against the ref's 17/.2em",
+      "miss": false
+    },
+    {
+      "key": "band.eyebrow.bottom",
+      "field": "bottom",
+      "app": 727.5,
+      "ref": 821,
+      "delta": -93.5,
+      "why": "the eyebrow is left as it is: 21px/.13em against the ref's 17/.2em",
+      "miss": false
+    },
+    {
+      "key": "band.eyebrow.w",
+      "field": "w",
+      "app": 1068,
+      "ref": 1200,
+      "delta": -132,
+      "why": "same container — the band's column is 1068 against the ref's 1200",
+      "miss": false
+    },
+    {
+      "key": "band.eyebrow.h",
+      "field": "h",
+      "app": 31.5,
+      "ref": 17,
+      "delta": 14.5,
+      "why": "the eyebrow is left as it is: 21px/.13em against the ref's 17/.2em",
+      "miss": false
+    },
+    {
+      "key": "band.eyebrow.fontSize",
+      "field": "fontSize",
+      "app": 21,
+      "ref": 17,
+      "delta": 4,
+      "why": "the eyebrow is left as it is: 21px/.13em against the ref's 17/.2em",
+      "miss": false
+    },
+    {
+      "key": "band.eyebrow.lineHeight",
+      "field": "lineHeight",
+      "app": 31.5,
+      "ref": null,
+      "delta": null,
+      "why": "the eyebrow is left as it is: 21px/.13em against the ref's 17/.2em",
+      "miss": false
+    },
+    {
+      "key": "band.heading.x",
+      "field": "x",
+      "app": 186,
+      "ref": 120,
+      "delta": 66,
+      "why": "same container — the band's column is 1068 against the ref's 1200",
+      "miss": false
+    },
+    {
+      "key": "band.heading.right",
+      "field": "right",
+      "app": 1254,
+      "ref": 1320,
+      "delta": -66,
+      "why": "same container — the band's column is 1068 against the ref's 1200",
+      "miss": false
+    },
+    {
+      "key": "band.heading.y",
+      "field": "y",
+      "app": 745.5,
+      "ref": 843,
+      "delta": -97.5,
+      "why": "33px, not the ref's 34 — 34 overflows a 1068px column by 3.4px",
+      "miss": false
+    },
+    {
+      "key": "band.heading.bottom",
+      "field": "bottom",
+      "app": 785.8,
+      "ref": 883.8,
+      "delta": -98,
+      "why": "33px, not the ref's 34 — 34 overflows a 1068px column by 3.4px",
+      "miss": false
+    },
+    {
+      "key": "band.heading.w",
+      "field": "w",
+      "app": 1068,
+      "ref": 1200,
+      "delta": -132,
+      "why": "same container — the band's column is 1068 against the ref's 1200",
+      "miss": false
+    },
+    {
+      "key": "vision.band.y",
+      "field": "y",
+      "app": 5422.9,
+      "ref": 1563.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.band.bottom",
+      "field": "bottom",
+      "app": 6291.8,
+      "ref": 2403.8,
+      "delta": 3888,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.band.h",
+      "field": "h",
+      "app": 868.8,
+      "ref": 840,
+      "delta": 28.9,
+      "why": "paragraphs 1 and 3 take one more line each in a 318.7px measure where the ref's 330 just holds them",
+      "miss": false
+    },
+    {
+      "key": "vision.h2.x",
+      "field": "x",
+      "app": 186,
+      "ref": 120,
+      "delta": 66,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h2.right",
+      "field": "right",
+      "app": 1254,
+      "ref": 1320,
+      "delta": -66,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h2.y",
+      "field": "y",
+      "app": 5531.9,
+      "ref": 1672.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h2.bottom",
+      "field": "bottom",
+      "app": 5597.9,
+      "ref": 1738.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h2.w",
+      "field": "w",
+      "app": 1068,
+      "ref": 1200,
+      "delta": -132,
+      "why": "the band's column is 1068 against the ref's 1200 — the page's own container",
+      "miss": false
+    },
+    {
+      "key": "vision.points.x",
+      "field": "x",
+      "app": 186,
+      "ref": 120,
+      "delta": 66,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.points.right",
+      "field": "right",
+      "app": 1254,
+      "ref": 1320,
+      "delta": -66,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.points.y",
+      "field": "y",
+      "app": 5661.9,
+      "ref": 1802.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.points.bottom",
+      "field": "bottom",
+      "app": 6102.8,
+      "ref": 2214.8,
+      "delta": 3888,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.points.w",
+      "field": "w",
+      "app": 1068,
+      "ref": 1200,
+      "delta": -132,
+      "why": "the column is 318.7px against the ref's 362.7 — the page's own container",
+      "miss": false
+    },
+    {
+      "key": "vision.points.h",
+      "field": "h",
+      "app": 440.8,
+      "ref": 412,
+      "delta": 28.9,
+      "why": "paragraphs 1 and 3 take one more line each in a 318.7px measure where the ref's 330 just holds them",
+      "miss": false
+    },
+    {
+      "key": "vision.fig1.x",
+      "field": "x",
+      "app": 186,
+      "ref": 120,
+      "delta": 66,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.fig1.right",
+      "field": "right",
+      "app": 504.7,
+      "ref": 482.7,
+      "delta": 22,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.fig1.cx",
+      "field": "cx",
+      "app": 345.3,
+      "ref": 301.3,
+      "delta": 44,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.fig1.y",
+      "field": "y",
+      "app": 5661.9,
+      "ref": 1802.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.fig1.bottom",
+      "field": "bottom",
+      "app": 5881.9,
+      "ref": 2022.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.fig1.w",
+      "field": "w",
+      "app": 318.7,
+      "ref": 362.7,
+      "delta": -44,
+      "why": "the column is 318.7px against the ref's 362.7 — the page's own container",
+      "miss": false
+    },
+    {
+      "key": "vision.img1.x",
+      "field": "x",
+      "app": 224.8,
+      "ref": 180.8,
+      "delta": 44,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.img1.right",
+      "field": "right",
+      "app": 465.8,
+      "ref": 421.9,
+      "delta": 44,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.img1.cx",
+      "field": "cx",
+      "app": 345.3,
+      "ref": 301.3,
+      "delta": 44,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.img1.y",
+      "field": "y",
+      "app": 5661.9,
+      "ref": 1802.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.img1.bottom",
+      "field": "bottom",
+      "app": 5881.9,
+      "ref": 2022.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3a.x",
+      "field": "x",
+      "app": 186,
+      "ref": 120,
+      "delta": 66,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3a.right",
+      "field": "right",
+      "app": 504.7,
+      "ref": 482.7,
+      "delta": 22,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3a.cx",
+      "field": "cx",
+      "app": 345.3,
+      "ref": 301.3,
+      "delta": 44,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3a.y",
+      "field": "y",
+      "app": 5911.9,
+      "ref": 2052.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3a.bottom",
+      "field": "bottom",
+      "app": 5944.3,
+      "ref": 2085.2,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3a.w",
+      "field": "w",
+      "app": 318.7,
+      "ref": 362.7,
+      "delta": -44,
+      "why": "the column is 318.7px against the ref's 362.7 — the page's own container",
+      "miss": false
+    },
+    {
+      "key": "vision.p1.x",
+      "field": "x",
+      "app": 186,
+      "ref": 136.3,
+      "delta": 49.7,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.p1.right",
+      "field": "right",
+      "app": 504.7,
+      "ref": 466.3,
+      "delta": 38.3,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.p1.cx",
+      "field": "cx",
+      "app": 345.3,
+      "ref": 301.3,
+      "delta": 44,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.p1.y",
+      "field": "y",
+      "app": 5958.3,
+      "ref": 2099.2,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.p1.bottom",
+      "field": "bottom",
+      "app": 6102.8,
+      "ref": 2214.8,
+      "delta": 3888,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.p1.w",
+      "field": "w",
+      "app": 318.7,
+      "ref": 330,
+      "delta": -11.3,
+      "why": "the column is 318.7px against the ref's 362.7 — the page's own container",
+      "miss": false
+    },
+    {
+      "key": "vision.p1.h",
+      "field": "h",
+      "app": 144.5,
+      "ref": 115.6,
+      "delta": 28.9,
+      "why": "paragraphs 1 and 3 take one more line each in a 318.7px measure where the ref's 330 just holds them",
+      "miss": false
+    },
+    {
+      "key": "vision.p2.x",
+      "field": "x",
+      "app": 560.7,
+      "ref": 555,
+      "delta": 5.7,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.p2.right",
+      "field": "right",
+      "app": 879.3,
+      "ref": 885,
+      "delta": -5.7,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.p2.y",
+      "field": "y",
+      "app": 5958.3,
+      "ref": 2099.2,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.p2.bottom",
+      "field": "bottom",
+      "app": 6073.9,
+      "ref": 2214.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.p2.w",
+      "field": "w",
+      "app": 318.7,
+      "ref": 330,
+      "delta": -11.3,
+      "why": "the column is 318.7px against the ref's 362.7 — the page's own container",
+      "miss": false
+    },
+    {
+      "key": "vision.p3.x",
+      "field": "x",
+      "app": 935.3,
+      "ref": 973.7,
+      "delta": -38.3,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.p3.right",
+      "field": "right",
+      "app": 1254,
+      "ref": 1303.7,
+      "delta": -49.7,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.p3.cx",
+      "field": "cx",
+      "app": 1094.7,
+      "ref": 1138.7,
+      "delta": -44,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.p3.y",
+      "field": "y",
+      "app": 5958.3,
+      "ref": 2099.2,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.p3.bottom",
+      "field": "bottom",
+      "app": 6045,
+      "ref": 2157,
+      "delta": 3888,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.p3.w",
+      "field": "w",
+      "app": 318.7,
+      "ref": 330,
+      "delta": -11.3,
+      "why": "the column is 318.7px against the ref's 362.7 — the page's own container",
+      "miss": false
+    },
+    {
+      "key": "vision.p3.h",
+      "field": "h",
+      "app": 86.7,
+      "ref": 57.8,
+      "delta": 28.9,
+      "why": "paragraphs 1 and 3 take one more line each in a 318.7px measure where the ref's 330 just holds them",
+      "miss": false
+    },
+    {
+      "key": "vision.fig2.x",
+      "field": "x",
+      "app": 560.7,
+      "ref": 538.7,
+      "delta": 22,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.fig2.right",
+      "field": "right",
+      "app": 879.3,
+      "ref": 901.3,
+      "delta": -22,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.fig2.y",
+      "field": "y",
+      "app": 5661.9,
+      "ref": 1802.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.fig2.bottom",
+      "field": "bottom",
+      "app": 5881.9,
+      "ref": 2022.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.fig2.w",
+      "field": "w",
+      "app": 318.7,
+      "ref": 362.7,
+      "delta": -44,
+      "why": "the column is 318.7px against the ref's 362.7 — the page's own container",
+      "miss": false
+    },
+    {
+      "key": "vision.img2.x",
+      "field": "x",
+      "app": 606,
+      "ref": 612,
+      "delta": -6.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.img2.right",
+      "field": "right",
+      "app": 834,
+      "ref": 827.9,
+      "delta": 6.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.img2.y",
+      "field": "y",
+      "app": 5661.9,
+      "ref": 1802.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.img2.bottom",
+      "field": "bottom",
+      "app": 5881.9,
+      "ref": 2022.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.img2.w",
+      "field": "w",
+      "app": 228,
+      "ref": 215.9,
+      "delta": 12.1,
+      "why": "the current artwork carries a paper aeroplane the ref's older export cropped off",
+      "miss": false
+    },
+    {
+      "key": "vision.h3b.x",
+      "field": "x",
+      "app": 560.7,
+      "ref": 538.7,
+      "delta": 22,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3b.right",
+      "field": "right",
+      "app": 879.3,
+      "ref": 901.3,
+      "delta": -22,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3b.y",
+      "field": "y",
+      "app": 5911.9,
+      "ref": 2052.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3b.bottom",
+      "field": "bottom",
+      "app": 5944.3,
+      "ref": 2085.2,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3b.w",
+      "field": "w",
+      "app": 318.7,
+      "ref": 362.7,
+      "delta": -44,
+      "why": "the column is 318.7px against the ref's 362.7 — the page's own container",
+      "miss": false
+    },
+    {
+      "key": "vision.fig3.x",
+      "field": "x",
+      "app": 935.3,
+      "ref": 957.3,
+      "delta": -22,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.fig3.right",
+      "field": "right",
+      "app": 1254,
+      "ref": 1320,
+      "delta": -66,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.fig3.cx",
+      "field": "cx",
+      "app": 1094.7,
+      "ref": 1138.7,
+      "delta": -44,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.fig3.y",
+      "field": "y",
+      "app": 5661.9,
+      "ref": 1802.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.fig3.bottom",
+      "field": "bottom",
+      "app": 5881.9,
+      "ref": 2022.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.fig3.w",
+      "field": "w",
+      "app": 318.7,
+      "ref": 362.7,
+      "delta": -44,
+      "why": "the column is 318.7px against the ref's 362.7 — the page's own container",
+      "miss": false
+    },
+    {
+      "key": "vision.img3.x",
+      "field": "x",
+      "app": 1007.9,
+      "ref": 1051.8,
+      "delta": -43.9,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.img3.right",
+      "field": "right",
+      "app": 1181.4,
+      "ref": 1225.5,
+      "delta": -44.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.img3.cx",
+      "field": "cx",
+      "app": 1094.7,
+      "ref": 1138.6,
+      "delta": -44,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.img3.y",
+      "field": "y",
+      "app": 5661.9,
+      "ref": 1802.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.img3.bottom",
+      "field": "bottom",
+      "app": 5881.9,
+      "ref": 2022.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3c.x",
+      "field": "x",
+      "app": 935.3,
+      "ref": 957.3,
+      "delta": -22,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3c.right",
+      "field": "right",
+      "app": 1254,
+      "ref": 1320,
+      "delta": -66,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3c.cx",
+      "field": "cx",
+      "app": 1094.7,
+      "ref": 1138.7,
+      "delta": -44,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3c.y",
+      "field": "y",
+      "app": 5911.9,
+      "ref": 2052.8,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3c.bottom",
+      "field": "bottom",
+      "app": 5944.3,
+      "ref": 2085.2,
+      "delta": 3859.1,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.h3c.w",
+      "field": "w",
+      "app": 318.7,
+      "ref": 362.7,
+      "delta": -44,
+      "why": "the column is 318.7px against the ref's 362.7 — the page's own container",
+      "miss": false
+    },
+    {
+      "key": "vision.more.y",
+      "field": "y",
+      "app": 6162.8,
+      "ref": 2274.8,
+      "delta": 3888,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.more.bottom",
+      "field": "bottom",
+      "app": 6186.6,
+      "ref": 2298.8,
+      "delta": 3887.8,
+      "why": "the band sits lower on a page whose hero and band differ above it, and 66px further in",
+      "miss": false
+    },
+    {
+      "key": "vision.more.lineHeight",
+      "field": "lineHeight",
+      "app": 23.8,
+      "ref": null,
+      "delta": null,
+      "why": "the ref leaves these at `normal`; the app states a value, and the rendered heights agree",
+      "miss": false
+    }
+  ]
+}

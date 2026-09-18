@@ -143,7 +143,7 @@ export const FoundingSignup: React.FC<{
               onChange={(ev) => setTrap(ev.target.value)}
             />
           </div>
-          <button type="submit" className="mk-btn mk-btn--ink" disabled={state === "sending"}>
+          <button type="submit" className="mk-btn mk-btn--navy" disabled={state === "sending"}>
             {ctaLabel}
           </button>
         </form>

@@ -27,9 +27,13 @@ import { supportMailto } from "../lib/companyInfo";
    short headline that wraps where it likes. `Hero.tsx` renders the string plainly — see its note. */
 export const HERO_H1 = "The hunt begins.";
 
+/* ⚠️ IT NO LONGER OPENS WITH "No more winging it." (18 Sep). That sentence was stated twice on one
+   page — here and as the band's eyebrow six hundred pixels below — and the ref of 18 Sep resolves
+   the repetition in the band's favour. A lock below asserts the hero does NOT open with it, which
+   is what stops the duplicate returning from a diff. */
 export const HERO_SUB =
-  "No more winging it. QueryHawk is your expert querying companion, ready to take you on a " +
-  "data-driven journey to land your manuscript in the right agent's hands.";
+  "QueryHawk is your expert querying companion, ready to take you on a data-driven journey to " +
+  "land your manuscript in the right agent's hands.";
 
 /** The solid pill. It goes to `/founders`, which is where the sign-up it asks for lives. */
 export const HERO_CTA = "Become a founding writer";
@@ -63,67 +67,32 @@ export const HERO_LINK = "See how it works";
  * no eyebrow, no sub-copy and no CTA: one heading and the marks.
  */
 /**
- * ⚠️ "No more winging it." ALSO OPENS `HERO_SUB`, SO THE LANDING PAGE SAYS IT TWICE. The brief
- * specifies it here verbatim and does not change the hero, so it is built as asked and flagged
- * rather than silently deduplicated — which of the two gives the phrase up is an editorial call,
- * not a copy fix. A lock below asserts the repetition is INTENTIONAL by naming both owners, so it
- * cannot drift to three.
+ * ⚠️ THE DUPLICATION IS RESOLVED, AND THIS IS THE OWNER THAT KEPT THE PHRASE (18 Sep). "No more
+ * winging it." opened `HERO_SUB` as well, so the page stated it twice six hundred pixels apart;
+ * the editorial call went to the band, and the hero's copy now begins at "QueryHawk is your expert
+ * querying companion". A lock asserts it appears EXACTLY ONCE across every string the page
+ * renders — which fails whichever surface reintroduces it.
  */
 export const BAND_EYEBROW = "No more winging it.";
-export const BAND_HEADING =
-  "QueryHawk gives a bird's-eye view of your entire querying campaign.";
-
 /**
- * The six pipeline states, as the carousel tells them.
- *
- * ⚠️ THE ORDER IS THE PIPELINE'S AND IS NOT A PRESENTATION CHOICE. It is the same progression
- * `StatusDot` draws in the app and the same one the glyph row drew before it — queried, partial
- * requested, partial sent, full requested, full sent, offer. A reordering here would teach a
- * sequence the product does not have.
- *
- * ⚠️ AND EVERY DESCRIPTION STATES WHAT QUERYHAWK RECORDS, never how the writer should feel about
- * it. "The best email in querying" is the one line that comes close, and it is about the EMAIL
- * rather than about the reader's chances — the house rule is that the app reports and never
- * appraises, and these are the only six sentences on the landing page describing the pipeline.
+ * ⚠️ A QUESTION NOW, NOT A CLAIM (ref design-refs/landing-v6.html). "QueryHawk gives a bird's-eye
+ * view…" stated the benefit at the reader; this asks whether they want it, and the feature rows
+ * below are the answer. The question mark and the apostrophe are both part of the copy.
  */
-export interface StatusStep {
-  key: string;
-  title: string;
-  body: string;
-}
+export const BAND_HEADING =
+  "Ready for a bird's-eye view of your entire querying campaign?";
 
-export const STATUS_STEPS: StatusStep[] = [
-  {
-    key: "queried",
-    title: "Queried",
-    body: "Your letter is out. The clock starts, and the reply window is worked out from that agent's usual turnaround.",
-  },
-  {
-    key: "partial-requested",
-    title: "Partial requested",
-    body: "They've asked to read part of it. Whatever they asked for is logged, and the ball is back in your court.",
-  },
-  {
-    key: "partial-sent",
-    title: "Partial sent",
-    body: "Chapters are away. The version you sent is recorded, so you know exactly what they're reading.",
-  },
-  {
-    key: "full-requested",
-    title: "Full requested",
-    body: "They want the whole manuscript. The best email in querying, and one you'll want dated.",
-  },
-  {
-    key: "full-sent",
-    title: "Full sent",
-    body: "The manuscript is with them. Now it's waiting — and QueryHawk counts the days so you don't have to.",
-  },
-  {
-    key: "offer",
-    title: "Offer",
-    body: "An offer of representation. Everything that led here is already written down, in order, with dates.",
-  },
-];
+/* ⚠️ `STATUS_STEPS` AND `StatusStep` ARE RETIRED WITH THE CAROUSEL THEY WERE WRITTEN FOR (18 Sep).
+   Six titles and six descriptions of the pipeline states, rotated one at a time under the band's
+   heading; the ref of 18 Sep takes the heading straight into the feature rows, so nothing rendered
+   them any more. Dead copy is worse than no copy — it reads as live product wording to whoever
+   opens the file next, and the house rule is to trace a symbol to a rendered root before keeping it.
+   ⚠️ THE GLYPHS ARE NOT RETIRED AND MUST NOT BE. `StatusGlyph` and `STATUS_GLYPH_COUNT`
+   (`marketingMarks.tsx`) still draw the footer's signature row — six marks, `aria-hidden`. The
+   footer's own lock used to reconcile that count against `STATUS_STEPS.length`; with the copy gone
+   it reconciles against the glyph table itself, which is the derivation that actually owns the six.
+   Recoverable from the commit that removed them if the states ever want describing again. */
+
 
 /* ⚠️ THE FEATURES HEADER IS DELETED AND SHOULD NOT COME BACK. `FEATURES_H2` ("The querying
    trenches, organised") and `FEATURES_SUB` ("Ditch the spreadsheet. It's time to get serious.")
@@ -358,6 +327,56 @@ export const FEATURE_ROWS: FeatureRow[] = [
     alt: "A library of comparable titles beside new ones the Scout suggests for a reading list.",
   },
 ];
+
+/* ══════════════ "Our vision is simple." — the white band under the feature rows ══════════════
+   (ref design-refs/landing-v6.html)
+
+   ⚠️ THREE POINTS, AND EACH IS AN ILLUSTRATION, A HEADING AND ONE PARAGRAPH. No eyebrow, no intro
+   paragraph under the h2, no per-point action. The band's whole job is to say why the product
+   exists; "Read our story" below the three is the only way out of it, and it goes to /about.
+
+   ⚠️ THE HEADINGS ARE HELD ON ONE LINE AT DESKTOP, so each is short enough to be. A longer one is
+   not a copy edit — it is a wrap, and the measured width at which `nowrap` releases moves with it.
+   `visionCopy` in marketingTokens.test.ts asserts the rendered ink against the column.
+
+   ⚠️ `let-writers-write.png` IS A PLACEHOLDER AND IS NAMED FOR THE FINAL ART, NOT FOR THE STAND-IN.
+   The drawing on file is a quill and inkpot supplied as "quick actions"; the commissioned piece
+   replaces that one file and nothing else changes. Naming it after the stand-in is how a filename
+   comes to describe something the page has not shown for a year. */
+export interface VisionPoint {
+  key: string;
+  image: string;
+  heading: string;
+  body: string;
+}
+
+export const VISION_HEADING = "Our vision is simple.";
+
+export const VISION_POINTS: VisionPoint[] = [
+  {
+    key: "stories",
+    image: "/images/get-good-stories-told.png",
+    heading: "Get good stories told.",
+    body: "A captivating story should never be lost to a sub-par querying campaign. There's a " +
+      "dangerous skills gap between writing and querying. QueryHawk bridges that gap.",
+  },
+  {
+    key: "simple",
+    image: "/images/make-querying-simple.png",
+    heading: "Make querying simple.",
+    body: "Stop shooting from the hip. We'll crunch the data and give you everything you need to " +
+      "make targeted decisions at the right time.",
+  },
+  {
+    key: "write",
+    image: "/images/let-writers-write.png",
+    heading: "Let writers write.",
+    body: "Less time trawling through spreadsheets, more time doing what you love.",
+  },
+];
+
+/** The band's one way out, to /about. A button, because marketing routes go through `onNavigate`. */
+export const VISION_LINK = "Read our story";
 
 /* ══════════════ Pricing (public, marketing tier) ══════════════
    ⚠️ THREE FIGURES ARE UNSET AND NOTHING HERE MAY INVENT THEM. The design this page was rebuilt

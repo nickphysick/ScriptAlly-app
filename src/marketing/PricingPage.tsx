@@ -106,7 +106,7 @@ const Tier: React.FC<{ tier: PricingTier; onNavigate: (tab: string, sub?: string
       <div className="mk-tiercta">
         {live ? (
           <>
-            <button type="button" className="mk-btn mk-btn--ink" onClick={() => onNavigate("founders")}>
+            <button type="button" className="mk-btn mk-btn--navy" onClick={() => onNavigate("founders")}>
               {tier.action}
             </button>
             <p className="mk-tiernote">Closes at 100 · no card needed</p>

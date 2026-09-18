@@ -32,7 +32,8 @@ import { AboutPage } from "./AboutPage";
 import { ContactPage } from "./ContactPage";
 import { FoundersPage } from "./FoundersPage";
 import { LEGAL_COPY_REVIEWED } from "./legalCopy";
-import { HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK, FEATURE_ROWS } from "./landingCopy";
+import { HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK, FEATURE_ROWS,
+  VISION_HEADING, VISION_POINTS, VISION_LINK, BAND_EYEBROW, BAND_HEADING } from "./landingCopy";
 import { SUPPORT_EMAIL } from "../lib/companyInfo";
 import { sliceBetween } from "../test/sliceBetween";
 
@@ -497,6 +498,43 @@ describe("the hero", () => {
 });
 
 /**
+ * ⚠️ THE BAND IS AN EYEBROW AND A QUESTION, AND THE CAROUSEL'S ABSENCE IS THE CLAIM (18 Sep).
+ * Asserting what a section renders cannot see something extra rotating underneath it; asserting the
+ * absence is what stops six glyph buttons, a live region and a 4.5-second timer coming back from a
+ * diff. The glyph MARKS are not forbidden — the footer draws all six — so this is scoped to the
+ * band rather than to the page.
+ */
+describe("the status band: a question, and nothing that moves", () => {
+  const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
+  const band = () => sliceBetween(html(), 'class="mk-statband"', 'id="mk-features"', "the status band");
+
+  it("renders the eyebrow and the heading, word for word", () => {
+    const b = band();
+    const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/'/g, "&#x27;");
+    expect(b).toContain(esc(BAND_EYEBROW));
+    expect(b).toContain(esc(BAND_HEADING));
+    expect(b, "the anchor the hero's link jumps to").toBeTruthy();
+    expect(html(), "…and the id itself, which the hero depends on").toContain('id="pulse"');
+  });
+
+  it("carries no carousel: no controls, no live region, no dashes", () => {
+    const b = band();
+    expect(b.match(/<button\b/g) ?? [], "nothing in the band is operable").toHaveLength(0);
+    expect(b, "no rotating description").not.toContain("aria-live");
+    expect(b, "and no tablist").not.toContain('role="tab');
+    for (const gone of ["mk-carousel", "mk-carglyphs", "mk-carglyph", "mk-carcopy", "mk-carcopyin",
+                        "mk-cartitle", "mk-carbody", "mk-cardashes", "mk-cardash"]) {
+      expect(b, `${gone} is retired`).not.toMatch(new RegExp('["\\s`]' + gone + '["\\s`]'));
+    }
+  });
+
+  /** ⚠️ THE MARKS SURVIVE ELSEWHERE, and asserting that is what stops the deletion over-reaching. */
+  it("and the glyphs themselves still draw, in the footer", () => {
+    expect(html(), "the footer's signature row").toContain('class="mk-footglyphs"');
+  });
+});
+
+/**
  * ⚠️ THE SIGN-UP LEFT THE HERO WITH THE PANEL THAT HELD IT, AND THE PAGE STILL HAS ONE. The form is
  * unchanged and mounted twice across the site — the sealed band at the foot of this page, and
  * `/founders` — so the landing carries exactly one, and the hero's solid button is the way to the
@@ -905,6 +943,76 @@ describe("the italic run is additive — the pages that do not use it are unchan
 });
 
 /**
+ * ⚠️ THE WHITE BAND: THREE POINTS, EACH AN ILLUSTRATION, A HEADING AND ONE PARAGRAPH (18 Sep).
+ * Asserted on the rendered page rather than on the copy module, because the failure this guards is
+ * a point picking up markup the copy never asked for — a second image, a link, a badge — and
+ * because a copy constant nothing renders passes a copy test perfectly.
+ */
+describe("the vision band: three points and one way out", () => {
+  const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
+  const band = () => sliceBetween(html(), 'class="mk-vision"', 'class="mk-claimband"', "the vision band");
+  const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
+
+  it("renders its heading and its three points, word for word", () => {
+    const b = band();
+    expect(b).toContain(esc(VISION_HEADING));
+    const points = b.split('<div class="mk-vpoint">').slice(1);
+    expect(points, "three points").toHaveLength(3);
+    points.forEach((markup, i) => {
+      const point = VISION_POINTS[i];
+      const img = markup.indexOf('src="' + point.image + "?v=");
+      const h3 = markup.indexOf('<h3 class="mk-vh3">');
+      expect(img, point.key + ": its illustration").toBeGreaterThan(-1);
+      expect(h3, point.key + ": its heading, after the illustration").toBeGreaterThan(img);
+      expect(markup, point.key + ": its heading, word for word").toContain(esc(point.heading));
+      const p = markup.indexOf('<p class="mk-vbody">' + esc(point.body) + "</p>");
+      expect(p, point.key + ": its paragraph, after the heading").toBeGreaterThan(h3);
+      expect(markup.match(/<img\b/g) ?? [], point.key + ": one illustration").toHaveLength(1);
+      expect(markup.match(/<p\b/g) ?? [], point.key + ": one paragraph").toHaveLength(1);
+      /* ⚠️ DECORATIVE, AND AN ALT HERE WOULD SAY THE HEADING TWICE to a screen reader. */
+      expect(markup, point.key + ": an empty alt").toMatch(/<img[^>]*alt=""/);
+    });
+  });
+
+  it("carries one action and it is the way to /about", () => {
+    const b = band();
+    expect(b.match(/<button\b/g) ?? [], "exactly one control in the band").toHaveLength(1);
+    expect(b).toContain(VISION_LINK);
+    /* ⚠️ A BUTTON, NOT AN ANCHOR. Marketing routes go through `onNavigate`; an `<a href>` would
+       reload the app to reach a page it can already render. The ref draws an anchor because it is a
+       standalone document with nowhere to navigate to. */
+    expect(b, "no anchor — the tier navigates through onNavigate").not.toContain("<a ");
+    expect(b, "and no per-point action").not.toContain("mk-btn");
+  });
+
+  /**
+   * ⚠️ A HAND-TYPED RATIO THAT DISAGREED WITH A FILE WOULD RESERVE THE WRONG BOX UNTIL IT LOADED —
+   * and here it would also break the shared baseline, because the three plates line up only while
+   * they are the same height. Read from each PNG's own header, and the URL's version from its hash.
+   */
+  it("states each plate's pixel size and versions its URL by the file's own content", () => {
+    const here2 = dirname(fileURLToPath(import.meta.url));
+    const points = band().split('<div class="mk-vpoint">').slice(1);
+    const heights = new Set<number>();
+    VISION_POINTS.forEach((point, i) => {
+      const png = readFileSync(resolve(here2, "../../public", "." + point.image));
+      expect(png.toString("latin1", 12, 16), point.image + ": the header was read").toBe("IHDR");
+      const w = png.readUInt32BE(16), h = png.readUInt32BE(20);
+      heights.add(h);
+      expect(points[i], point.image).toContain('width="' + w + '" height="' + h + '"');
+      const version = createHash("md5").update(png).digest("hex").slice(0, 8);
+      expect(points[i], point.image + ": versioned by its own content")
+        .toContain('src="' + point.image + "?v=" + version + '"');
+    });
+    /* ⚠️ ONE HEIGHT ACROSS ALL THREE, WHICH IS WHAT PUTS THEM ON A BASELINE. The CSS ends the figure
+       at `flex-end` and caps the picture at the box; that only produces a row if every file is the
+       same height to begin with. A differently-proportioned export floats, with every rule in the
+       stylesheet still reading correctly — so the claim belongs on the FILES. */
+    expect([...heights], "the three plates share one export height").toHaveLength(1);
+  });
+});
+
+/**
  * ⚠️ SIX ROWS, AND EACH IS AN IMAGE, A HEADING AND ONE PARAGRAPH — NOTHING ELSE. Asserted on the
  * rendered band rather than on the copy module, because the failure this guards is a row picking up
  * markup the copy never asked for: a button, a link, a bold run, a badge, or the aria-hidden wrapper
@@ -912,10 +1020,16 @@ describe("the italic run is additive — the pages that do not use it are unchan
  */
 describe("the feature rows: six images, six headings, six paragraphs", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
-  /* Retarget, same law: the band the rows end at is the founding-writers banner now, and its
-     class changed with the rebuild. The slice's END anchor is what stops it running to the foot of
-     the document — which is exactly what `sliceBetween` refused to let happen silently here. */
-  const band = () => sliceBetween(html(), 'id="mk-features"', 'class="mk-claimband"', "the features band");
+  /* Retarget, same law: the band the rows end at is the WHITE VISION BAND now (18 Sep), which
+     landed between the rows and the founding-writers banner. The slice's END anchor is what stops
+     it running to the foot of the document — which is exactly what `sliceBetween` refused to let
+     happen silently here.
+     ⚠️ AND THIS ONE WOULD NOT HAVE FAILED LOUDLY. Both anchors still exist, so `sliceBetween` had
+     nothing to refuse; the slice simply grew to swallow the new section, and the SIXTH row's
+     markup would then have carried three more images and a button. The assertions below say "one
+     image, one paragraph, no button" per row — so it fails, but it fails as though the rows were
+     wrong. Whenever a section is inserted on this page, check what slices across it. */
+  const band = () => sliceBetween(html(), 'id="mk-features"', 'class="mk-vision"', "the features band");
   const rowsOf = (markup: string) => markup.split('<div class="mk-frow">').slice(1);
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
   const unesc = (s: string) => s.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&amp;/g, "&");

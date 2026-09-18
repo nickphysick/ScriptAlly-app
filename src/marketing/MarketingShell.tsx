@@ -202,12 +202,12 @@ export const MarketingShell: React.FC<{
               </button>
             )}
             {nav.mode === "anon" ? (
-              <button type="button" className="mk-btn mk-btn--ink" onClick={() => onNavigate("founders")}>
+              <button type="button" className="mk-btn mk-btn--navy" onClick={() => onNavigate("founders")}>
                 {nav.primaryLabel}
               </button>
             ) : (
               <>
-                <button type="button" className="mk-btn mk-btn--ink" onClick={() => onNavigate("dashboard")}>
+                <button type="button" className="mk-btn mk-btn--navy" onClick={() => onNavigate("dashboard")}>
                   {nav.primaryLabel}
                 </button>
                 <span className="mk-avatar" aria-hidden="true">{nav.avatarInitial}</span>

@@ -133,20 +133,42 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   --mk-blush-ph: #b08e80;
   --mk-msg-ok-bg: rgba(233, 237, 230, .8);
   --mk-msg-ok-bd: rgba(138, 158, 136, .5);
+  /* ── The two primaries (18 Sep) ──
+     ⚠️ NAVY IS THE MARKETING TIER'S PRIMARY ACTION COLOUR AND RUST IS ITS SECONDARY VOICE. Both
+     arrived named in a brief rather than derived from anything here, so both get a token of their
+     own — a hex typed at four call sites is the `#1c130e`/`#1c130f` fault this file already
+     records, and it lands hardest on the controls whose whole justification is that they match.
+     ⚠️ `--mk-navy` IS A DOCUMENTED COPY OF THE DASHBOARD'S `--dash-navy`, NEVER A `var()` TO IT.
+     The same discipline `--mk-hero-ground` carries: this tier renders outside the theme classes
+     and keeps its own palette, so one cross-tier read is what an app refactor deletes without
+     knowing marketing depended on it. `marketingTokens.test.ts` asserts the two values agree.
+     ⚠️ AND RUST WAS ALREADY HERE UNDER A SURFACE'S NAME. `--mk-claim-accent` was the founding
+     banner's accent and is now an alias, so the banner's value is untouched and the new readers
+     name the colour rather than borrowing a band's private token. It is still NOT `--mk-burg`
+     (#7c3a2a) — fourteen points apart, two reds on one page, and that remains a flag rather than
+     a decision made here. */
+  /* ── The vision band's own surface (18 Sep) ──
+     ⚠️ IT IS TRUE WHITE, AND THAT IS NOT `--mk-card` (#fffefb). The card colour is a warm near-white
+     meant to sit ON the page's paper; this band's whole job is to read as a different sheet, and
+     three points of warmth is the difference between a page turn and a smudge.
+     The edge is the band's hairlines; the rule is the "Read our story" underline, a step stronger
+     on purpose. Both pre-computed alphas, per the no-`color-mix()` rule. */
+  --mk-vision-ground: #ffffff;
+  --mk-vision-edge: rgba(28, 19, 15, .08);
+  --mk-vision-rule: rgba(28, 19, 15, .14);
+  --mk-vision-body: rgba(28, 19, 15, .72);
+  --mk-navy: #2a3a52;
+  /* Navy's hover, pre-computed per the no-`color-mix()` rule — the same darkening step
+     `--mk-ink-hov` is to `--mk-nearblack`. */
+  --mk-navy-hov: #1f2c3f;
+  --mk-rust: #8a4a3c;
   /* ── The founding-writers banner ──
-     ⚠️ `--mk-claim-accent` (#8a4a3c) IS NOT `--mk-burg` (#7c3a2a), AND THE FOURTEEN POINTS
-     BETWEEN THEM ARE A FLAG RATHER THAN A DECISION I MADE. The brief specifies this value; the
-     page already carries a burgundy for exactly this job. Two near-identical reds on one page is
-     the shape of the `#1c130e`/`#1c130f` fault recorded in CLAUDE.md — invisible, unfindable,
-     and on the two marks whose whole justification is that they match. Reported to Nick, not
-     quietly snapped to the neighbour: a colour decision made by convenience is still a colour
-     decision made by the wrong person.
-     ⚠️ AND THE BUTTON'S TEXT DELIBERATELY DOES *NOT* GET A TOKEN. The brief asks for #f5f1eb on
-     the ink pill; `--mk-cta-ink` is #f7f0e9 and already means "the cream the ink pill prints in".
+     ⚠️ THE BUTTON'S TEXT DELIBERATELY DOES *NOT* GET A TOKEN. The brief asks for #f5f1eb on the
+     ink pill; `--mk-cta-ink` is #f7f0e9 and already means "the cream the ink pill prints in".
      Two points apart, one job — so this reads the existing token and the brief's value is not
-     introduced. That IS the fault above, avoided in the one place it could be. */
+     introduced. */
   --mk-claim-ground: #f5f1eb;
-  --mk-claim-accent: #8a4a3c;
+  --mk-claim-accent: var(--mk-rust);
   --mk-claim-track: #f7e8e2;
   --mk-claim-sh: rgba(28, 19, 15, .11);
   /* The rust at low alpha — the contact form's focus ring. Pre-computed from `--mk-claim-accent`'s
@@ -199,25 +221,38 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05);
 }
 .mk-btn:hover { background: #f4f2ef; }
-/* ⚠️ DECLARED AFTER `.mk-btn` AND `.mk-btn--cta`, AND THAT ORDERING IS THE WHOLE RULE. All three
-   are single-class selectors at equal specificity, so the last one in the file wins — move this
-   above the base and the nav's CTA silently reverts to white while the source still reads as ink.
-   The ref shipped with exactly that bug.
-   ⚠️ AND THE TWO FILLS ARE A GRAMMAR: ink in the NAV, pink for page primaries. They are
-   deliberately different so the bar's CTA and the page's CTAs are distinguishable; converging
-   them removes the distinction rather than tidying it. */
-.mk-btn--ink {
-  background: var(--mk-nearblack); border-color: var(--mk-nearblack); color: var(--mk-cta-ink);
+/* ⚠️ DECLARED AFTER `.mk-btn`, AND THAT ORDERING IS THE WHOLE RULE. A modifier and the base are
+   single-class selectors at equal specificity, so the last one in the file wins — move this above
+   the base and the nav's CTA silently reverts to white while the source still reads as navy. The
+   ref shipped with exactly that bug.
+   ⚠️ IT SAID "AFTER `.mk-btn` AND `.mk-btn--cta`" UNTIL 18 SEP, AND THAT HALF WAS NEVER TRUE: this
+   rule has always sat ABOVE the pink modifier. Nothing was broken — no element carries both, so
+   they never compete — but the sentence described a contest that does not exist, and the next
+   person to act on it would have moved a correct rule to satisfy a wrong reason. Corrected rather
+   than reordered.
+   ⚠️ IT REPLACES `.mk-btn--ink` OUTRIGHT AND THAT CLASS IS DELETED (18 Sep). Navy is the tier's
+   primary action colour now, so all four of its wearers moved together — both nav buttons, the
+   /pricing CTA and the founding sign-up's submit, which renders on three surfaces. Renamed rather
+   than retinted in place: a class called `--ink` painting navy is a comment outliving the thing it
+   described, at the API, and the rename is what makes a stray `.mk-btn--ink` in a future diff fail
+   to match anything instead of quietly drawing the old fill.
+   ⚠️ AND THE TWO FILLS ARE STILL A GRAMMAR: navy for the primary action, pink for page primaries.
+   They are deliberately different so the bar's CTA and the page's CTAs are distinguishable;
+   converging them removes the distinction rather than tidying it.
+   ⚠️ SIZE AND WEIGHT ARE UNCHANGED HERE. Only the hero's own pill takes the heavier 18px/600
+   treatment, so the page has exactly one dominant action and the chrome's is quieter than it. */
+.mk-btn--navy {
+  background: var(--mk-navy); border-color: var(--mk-navy); color: #ffffff;
   border-radius: 999px; padding: 11px 24px; font-size: 1rem; box-shadow: none;
   transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
   white-space: nowrap;
 }
-.mk-btn--ink:hover {
-  background: var(--mk-ink-hov); transform: translateY(-1px); box-shadow: 0 6px 14px rgba(28, 19, 15, .18);
+.mk-btn--navy:hover {
+  background: var(--mk-navy-hov); transform: translateY(-1px); box-shadow: 0 6px 14px rgba(42, 58, 82, .22);
 }
 @media (prefers-reduced-motion: reduce) {
-  .mk-btn--ink { transition: none; }
-  .mk-btn--ink:hover { transform: none; }
+  .mk-btn--navy { transition: none; }
+  .mk-btn--navy:hover { transform: none; }
   /* The condense is a state change, not an animation — it should land instantly. */
   .mk-navwrap, .mk-nav, .mk-logo { transition: none !important; }
 }
@@ -492,12 +527,45 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    right edge of the PAGE, not merely out of its column, and any overflow value here makes the hero
    the box that clips it. The scrollbar it would otherwise cause is prevented one level up, where
    clipping costs nothing. */
+/* ⚠️ THE CAP AND THE GUTTER ARE TOKENS BECAUSE THE SHADOW'S RULE READS THEM (18 Sep). They are the
+   same two numbers `.mk-rows` uses and they have not moved; what changed is that a second rule now
+   depends on them, and a number restated in two rules for two elements is the fault this repo keeps
+   paying for. Change them here and the shadow follows.
+   ⚠️ `--mk-hero-ink` IS THE MEASURED WIDTH OF THE RENDERED HEADLINE, and it is the one input CSS
+   cannot compute for itself. "The hunt begins." at 74px Special Elite measures 617.2px of ink;
+   618 is that rounded UP, so the clearance below can never come out under its stated minimum.
+   ⚠️ IT IS A FACT ABOUT THE TYPE, SO IT DIES WITH THE TYPE. A different headline, a different size,
+   a different face — or Special Elite failing to load — and this number is wrong. It is not left to
+   a comment: `heroShadow.measure.ts` measures the ink on the rendered page and asserts the
+   clearance the rule claims, so the token going stale is a red that names it. */
 .mk-hero {
-  max-width: 1180px; margin: 0 auto; padding: 0 56px;
+  --mk-hero-cap: 1180px;
+  --mk-hero-pad: 56px;
+  --mk-hero-ink: 618px;
+  /* How close the shadow may come to the headline's ink, and to the viewport's edge. Two rules
+     that happen to share a value, named separately so one can move without the other. */
+  --mk-hero-clear: 24px;
+  --mk-hero-edge: 24px;
+  /* The shadow's left edge in VIEWPORT coordinates: the page's gutter, the hero's own padding, the
+     headline's ink, then the clearance. `100cqw` is the width outside the cap — see `.mk-herowrap`.
+     Declared here because the hero owns every term; read once, by the image. */
+  --mk-hero-shadow-x: calc(
+    max(0px, (100cqw - var(--mk-hero-cap)) / 2)
+    + var(--mk-hero-pad) + var(--mk-hero-ink) + var(--mk-hero-clear)
+  );
+  max-width: var(--mk-hero-cap); margin: 0 auto; padding: 0 var(--mk-hero-pad);
   position: relative;
   display: grid; grid-template-columns: 1fr 1fr; align-items: center;
   min-height: 520px;
 }
+/* ⚠️ A QUERY CONTAINER, AND IT EXISTS FOR ONE MEASUREMENT: how much room there is OUTSIDE the cap.
+   The hero caps at 1180, so its own width stops carrying that information the moment the viewport
+   passes it — and the shadow's right-hand limit is stated against the viewport, not the container.
+   ⚠️ `cqw`, NOT `vw`, AND THAT IS THE WHOLE REASON FOR THE ELEMENT. `100vw` includes a classic
+   scrollbar, so on a machine that draws one the shadow's "24px from the edge" would be 24px minus
+   the scrollbar — i.e. under it. `.mk-featband` already solved this the same way for the Track
+   illustration's bleed. Do not "simplify" this to `vw`. */
+.mk-herowrap { container-type: inline-size; }
 /* ⚠️ THE STACKING CONTEXT IS LOAD-BEARING AT EVERY WIDTH NOW, not just stacked. The shadow is
    169% of its column and grows LEFTWARD from a fixed right edge, so it reaches back across the
    copy; the art is the later grid item, so without this it would paint a 20% wash over the
@@ -535,44 +603,65 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-heroctas { display: flex; align-items: center; gap: 22px; margin-top: 34px; }
 /* ⚠️ BOTH DECLARE THEIR OWN FAMILY. The button is caught by the injection's plain `button` rule and
    the link inherits from a `div` it also sets, so neither would be Source Serif by inheritance. */
+/* ⚠️ THE ONE DOMINANT ACTION ON THE SITE, AND THE ONLY NAVY BUTTON THAT IS HEAVIER THAN THE REST
+   (18 Sep). `.mk-btn--navy` — the nav, /pricing, the sign-up — keeps its 1rem regular weight on
+   purpose, so this pill reads as the page's ask and the chrome's reads as a way in. Making the
+   others match would remove the ranking rather than tidy it. */
+/* ⚠️ NO `line-height`, AND DROPPING IT IS WHAT MAKES THE BUTTON THE RIGHT HEIGHT. At `1` the pill
+   measured 52px against the ref's 59 — the padding was correct and the line box inside it was 18px
+   where `normal` gives ~25. Seven pixels, on the page's one dominant action, from a declaration
+   inherited off the old 17px pill and never re-measured. The widths matched exactly (282.6 on both)
+   the whole time, which is why it read as correct. */
 .mk-heropill {
-  font-family: "Source Serif 4", Georgia, serif; font-size: 17px; line-height: 1;
-  background: var(--mk-nearblack); color: #f5f1eb; border: 0; border-radius: 30px;
-  padding: 16px 30px; cursor: pointer;
+  font-family: "Source Serif 4", Georgia, serif; font-size: 18px; font-weight: 600;
+  letter-spacing: .005em;
+  background: var(--mk-navy); color: #ffffff; border: 0; border-radius: 30px;
+  padding: 17px 32px; cursor: pointer;
+  transition: background .18s ease;
 }
+.mk-heropill:hover { background: var(--mk-navy-hov); }
+@media (prefers-reduced-motion: reduce) { .mk-heropill { transition: none; } }
+/* ⚠️ RUST, NOT INK, AND IT IS THE SECOND HALF OF THE SAME DECISION. Beside a navy pill an ink link
+   reads as a second, quieter button; rust reads as a different KIND of thing — a way to keep
+   reading rather than a way to act. The underline stays the hairline weight so it never competes. */
 .mk-herolink {
-  font-family: "Source Serif 4", Georgia, serif; font-size: 17px; color: var(--mk-nearblack);
+  font-family: "Source Serif 4", Georgia, serif; font-size: 17px; color: var(--mk-rust);
   text-decoration: underline; text-underline-offset: 5px;
+  text-decoration-color: rgba(138, 74, 60, .35);
 }
 /* ⚠️ THE IMAGE OVERFLOWS ITS COLUMN BY DESIGN, AND `max-width: none` IS LOAD-BEARING. The global
-   image reset caps every img at 100% of its box, which would cancel the 118% silently. */
+   image reset caps every img at 100% of its box, which would cancel the width below silently. */
 .mk-heroart { position: relative; height: 100%; }
-/* ⚠️ THE OVERFLOW IS INTO THE GUTTER NOW, NOT OFF THE PAGE. At -14%/118% the shadow cleared the
-   viewport's right edge, which is what made the hero read as uncentred; inside a 1180px container
-   it leaves its own column by ~32px at 1440 and stops well short of the page edge. */
-/* ⚠️ IT GROWS SYMMETRICALLY, BECAUSE IT IS CENTRED — `top: 50%` plus `translateY(-50%)`, which
-   is the thing that reads well and was not to be moved. So an overhang past the hero's BOTTOM is
-   an equal overhang past its TOP, and the arithmetic is
-     shadow height = min-height + 2 x overhang        width = height x 2880/2100
-   For 520 and ~70px: 660 tall, 905 wide, which is 169% of the 534px art column. The top overhang
-   slides under the sticky nav (z-index 60, opaque ground) and is never seen; the bottom crosses
-   into the band, which is the whole point of the change.
-   ⚠️ AND GROWING IT VERTICALLY GROWS IT SIDEWAYS — the aspect ratio is fixed, so there is no
-   version of this that gets taller alone. `right` is anchored, so the extra 300px all arrives on
-   the LEFT, over the copy column. That is why `.mk-herocopy` now takes a stacking context at
-   every width. Reported rather than absorbed: it is a real consequence of "grow it", not a
-   detail. */
-/* ⚠️ ANCHORED FROM THE LEFT NOW, NOT THE RIGHT. At `right: -6%` the shadow grew leftward across
-   the copy as it got bigger; from `left: 54%` it grows RIGHTWARD, off the page, which is what the
-   clip on `html` is there to absorb. The `-46%` lift is deliberately not `-50%`: it sits the bird
-   fractionally high against the copy's optical centre.
-   ⚠️ 72%, UP FROM 58% (17 Sep). Against the 534px art column that is 384px, and the box's right
-   edge lands at 1393 on a 1440 page and 1313 on a 1280 one — past that viewport's edge. The
-   drawing stops 10% short of its own right edge, so at 1280 the ink still clears the page; below
-   ~1275 the clip takes the tip of the wing. Measured, and reported rather than capped. */
+/* ⚠️ POSITIONED BY A RULE, NOT BY THE REF'S NUMBERS (18 Sep). `design-refs/landing-v6.html` draws
+   the hero in a 1440px frame with 120px gutters; this one shares the feature rows' container — 1180
+   capped, 56px gutters — so the copy column starts 66px further right and every offset drawn there
+   puts the wing through the headline. The ref's SIZE is kept (104% of the art column) and its
+   POSITION is derived:
+
+     left   the headline's ink, plus a stated clearance — so the wing tip can never reach the words
+     width  that size, capped by the room left before the viewport's own margin
+     shrink when those two cannot both hold, the picture gives way, never the clearance
+
+   Measured at 1440: the ink ends at 803.2 and the wing starts at 828 — 24.8px clear — and the box
+   stops 32.6px short of the viewport's 24px margin, at the full 104%. The cap starts binding below
+   ~1375, where the picture shrinks instead of moving left: 458px at 1180, 278px at 1000, 179px at
+   901. Small, and never over the words.
+   ⚠️ THE FILE IS TRIMMED TO ITS OWN INK, WHICH IS WHAT LETS THIS RULE MEAN WHAT IT SAYS. With 30%
+   transparent padding in the PNG — as it had until 18 Sep — "the shadow's left edge" is a margin
+   rather than a wing, the clearance is a lie by whatever that padding measures, and the drawing
+   renders at 70% of the size the percentage claims.
+   ⚠️ IT GROWS SYMMETRICALLY, BECAUSE IT IS CENTRED. `top: 50%` plus `translateY(-50%)`, so an
+   overhang past the hero's bottom is an equal overhang past its top. The top slides under the
+   sticky nav (z-index 60, opaque ground) and is never seen; the bottom crosses into the band, which
+   is intended — `.mk-hero` sets no `overflow`, and `html`/`body` clip the x axis one level up.
+   ⚠️ `pointer-events: none` BECAUSE IT REACHES ACROSS THE COPY COLUMN AT NARROW WIDTHS. A 0.18
+   wash that eats a click on the headline is a bug nobody can see. */
 .mk-heroart img {
-  position: absolute; top: 50%; left: 54%; width: 72%; max-width: none;
-  transform: translateY(-46%); opacity: 0.16; display: block;
+  position: absolute; top: 50%;
+  left: calc(var(--mk-hero-ink) + var(--mk-hero-clear) - 100%);
+  width: max(0px, min(104%, calc(100cqw - var(--mk-hero-edge) - var(--mk-hero-shadow-x))));
+  max-width: none;
+  transform: translateY(-50%); opacity: 0.18; display: block; pointer-events: none;
 }
 
 /* ⚠️ THE RULE BELOW IS NOT THE HERO'S. `.mk-eyebrow` is the mono kicker About, Contact and Pricing
@@ -690,8 +779,12 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    a fade behind a rule is a fade nobody can see. It also cut the hero's shadow in half at the one
    place the shadow is meant to cross. Deleted rather than made transparent — a border set to
    `none` is a declaration describing a decision twice. */
+/* ⚠️ 88/56 NOW, AND THE FOOT IS THE POINT (18 Sep, ref design-refs/landing-v6.html). The carousel
+   used to close this band, so 80px of bottom padding separated it from the first feature row. With
+   the carousel gone the heading IS the last thing here, and it is a question the rows answer — so
+   it sits with them rather than being held off at arm's length. */
 .mk-statband {
-  max-width: 1180px; margin: 0 auto; padding: 96px 56px 80px;
+  max-width: 1180px; margin: 0 auto; padding: 88px 56px 56px;
   text-align: center;
   scroll-margin-top: var(--mk-nav-h);
 }
@@ -706,60 +799,28 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   letter-spacing: .13em; text-transform: uppercase; color: var(--mk-claim-accent);
   margin: 0 0 18px;
 }
+/* ⚠️ 33px, NOT THE REF'S 34, AND THE MISSING PIXEL IS ARITHMETIC RATHER THAN TASTE. The ref sets
+   34px inside a 1200px column; this band's column is 1068 (1180 capped, 56px gutters), and the
+   heading measures 1071.4px of ink at 34 — 3.4px over, which a `nowrap` answers by spilling into
+   the gutter rather than by wrapping, silently, with no scrollbar to report it. At 33 it measures
+   ~1040 and clears by 28. The same arithmetic said the OLD heading was already overflowing this
+   column by 31px at 31px of type, so this is a repair as well as a retune.
+   ⚠️ AND THE RELEASE BELOW MOVED WITH IT. A larger heading runs out of room sooner; the boundary is
+   measured on the rendered page, not carried over. */
 .mk-stattitle {
   font-family: "Special Elite", cursive !important; font-weight: 400;
-  font-size: 31px; line-height: 1.25; letter-spacing: -0.005em;
+  font-size: 33px; line-height: 1.22; letter-spacing: -0.012em;
   color: var(--mk-nearblack); margin: 0; white-space: nowrap;
 }
-/* ── The status carousel ──
-   ⚠️ THE GLYPHS ARE CONTROLS, NOT DECORATION. Each one jumps to its state, so each is a real
-   button: focusable, named, and carrying `aria-selected`. The row is a tablist; the copy beneath
-   is a polite live region, because this is ambient content that must not interrupt a reader. */
-.mk-carousel { margin: 38px 0 0; }
-.mk-carglyphs { display: flex; justify-content: center; align-items: center; gap: 34px; }
-/* ⚠️ THE TRANSITION IS ON THE BUTTON, NOT ON A CLASS THAT ONLY THE ACTIVE ONE CARRIES — otherwise
-   the mark being LEFT would snap while the one arriving eases. Both directions, one rule. */
-.mk-carglyph {
-  background: none; border: 0; padding: 4px; cursor: pointer; line-height: 0;
-  color: var(--mk-nearblack); opacity: .34; transform: scale(.9);
-  transition: opacity .35s ease, transform .35s ease;
-}
-.mk-carglyph svg { width: 26px; height: 26px; display: block; }
-.mk-carglyph--on { opacity: 1; transform: scale(1.16); color: var(--mk-claim-accent); }
-.mk-carglyph:hover { opacity: .7; }
-.mk-carglyph--on:hover { opacity: 1; }
-.mk-carglyph:focus-visible { outline: 2px solid var(--mk-burg); outline-offset: 4px; border-radius: 50%; }
-
-/* ⚠️ A MIN-HEIGHT, OR THE PAGE JUMPS ON EVERY TURN. Six descriptions of different lengths in a box
-   that sizes to its content move everything beneath them four times a minute. Measured against the
-   longest of the six at the narrowest width the row still holds. */
-.mk-carcopy { margin: 26px auto 0; max-width: 46rem; min-height: 8.5rem; }
-@keyframes mkCarIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.mk-carcopyin { animation: mkCarIn .45s ease forwards; }
-.mk-cartitle {
-  font-family: "Special Elite", cursive; font-weight: 400; font-size: 23px;
-  color: var(--mk-nearblack); margin: 0 0 10px;
-}
-.mk-carbody { font-size: 17px; line-height: 1.65; color: var(--mk-muted); margin: 0; }
-
-.mk-cardashes { display: flex; justify-content: center; gap: 8px; margin: 26px 0 0; }
-.mk-cardash {
-  width: 26px; height: 3px; border-radius: 999px; background: var(--mk-hair);
-  transition: background .35s ease;
-}
-.mk-cardash--on { background: var(--mk-claim-accent); }
-
-/* ⚠️ AFTER THE RULES IT OVERRIDES — a media query confers no specificity, so an override placed
-   earlier in the file loses on source order. The auto-advance is stopped in the COMPONENT rather
-   than here, because CSS can silence a fade and cannot stop a timer; this only removes the motion
-   that remains. Everything stays clickable. */
-@media (prefers-reduced-motion: reduce) {
-  .mk-carglyph, .mk-cardash { transition: none; }
-  .mk-carcopyin { animation: none; }
-}
+/* ⚠️ THE STATUS CAROUSEL IS DELETED ENTIRELY (18 Sep): `.mk-carousel`, `.mk-carglyphs`,
+   `.mk-carglyph` and its `--on`/hover/focus states, `.mk-carcopy`, `@keyframes mkCarIn`,
+   `.mk-carcopyin`, `.mk-cartitle`, `.mk-carbody`, `.mk-cardashes`, `.mk-cardash`, `.mk-cardash--on`,
+   their reduced-motion block and their 900px overrides. The band is an eyebrow and a question now,
+   and the feature rows below are the answer.
+   ⚠️ THE GLYPH ITSELF IS NOT DELETED. `StatusGlyph`/`STATUS_GLYPH_COUNT` still draw the footer's
+   signature row; `.mk-footglyphs` is its rule and it was never part of this block. Checked by grep
+   before the deletion rather than inferred from the diff — the two share a prefix and nothing
+   else. */
 
 /* ⚠️ THE BOUNDARY IS 1099.98, NOT 1100, BECAUSE `max-width` IS INCLUSIVE. The brief says the heading
    releases BELOW 1100, so at exactly 1100 it must still be held — and `@media (max-width: 1100px)`
@@ -769,10 +830,16 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    width than the container has below this point; past it the text does not break, it spills into
    the gutter — silently, because the spill lands inside the page's own padding rather than past the
    viewport, so no scrollbar ever appears to report it. */
-/* ⚠️ 999.98, NOT 1000, BECAUSE `max-width` IS INCLUSIVE. The heading must still be held AT 1000
-   and release below it; `max-width: 1000px` matches at 1000 and wraps it a pixel early. Measured
-   the same way the 1099.98 boundary it replaces was. */
-@media (max-width: 999.98px) {
+/* ⚠️ THE BOUNDARY IS MEASURED, AND IT MOVED UP WITH THE HEADING (18 Sep). Held on one line the
+   question needs ~1040px of ink at 33px; the column is the viewport less 112px of gutters, so it
+   stops fitting below ~1152 and the release sits at 1159.98. The old 999.98 was measured for a
+   31px heading and carrying it forward would have left this band spilling into its own gutter for
+   160px of viewport — silently, because the spill lands inside the page's padding and no scrollbar
+   ever appears to report it.
+   ⚠️ AND IT IS .98, NOT A ROUND NUMBER, BECAUSE `max-width` IS INCLUSIVE. The heading must still be
+   held AT the boundary and release below it; `max-width: 1160px` matches at 1160 and wraps it a
+   pixel early. */
+@media (max-width: 1159.98px) {
   /* ⚠️ `text-wrap` ONLY HERE, AND AFTER `white-space`. Both are shorthands that set the wrap mode,
      so in the base rule it would quietly undo the desktop `nowrap`. Released, it stops the sentence
      ending on "campaign." alone, as it did at 375. */
@@ -783,13 +850,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-stattitle { font-size: 24px; }
 }
 @media (max-width: 900px) {
-  .mk-statband { padding: 64px 26px 56px; }
+  .mk-statband { padding: 64px 26px 48px; }
   .mk-stateyebrow { font-size: 18px; }
-  .mk-carglyphs { gap: 18px; }
-  .mk-carcopy { min-height: 11rem; }
-  /* ⚠️ THE GAP TIGHTENS OR THE ROW OVERFLOWS A NARROW PHONE. Six 26px marks at 34px gaps need
-     6×26 + 5×34 = 326px against the 323px a 375 screen leaves inside its gutters — three pixels
-     over, which a flex row answers by overflowing rather than by wrapping. */
 }
 /* ⚠️ UNCHANGED WHEN `.mk-feathead` WAS DELETED, AND THAT IS A MEASURED DECISION RATHER THAN AN
    OVERSIGHT. The brief said to add back whatever the removed header was contributing IF the first
@@ -879,6 +941,119 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    alternation there; it wins only by coming later, so it must stay below this. */
 .mk-frow:nth-child(even) { direction: rtl; }
 .mk-frow:nth-child(even) > * { direction: ltr; }
+
+/* ── "Our vision is simple." — the white band between the rows and the offer ──
+   (ref design-refs/landing-v6.html)
+
+   ⚠️ IT IS THE THIRD BAND INSIDE `.mk-lower` THAT PAINTS ITS OWN GROUND, AND THE THIRD HAD TO BE
+   ARGUED FOR. The two-surface rule exists because a retired parchment band repainted by accident
+   over its whole height and flattened the cards sitting on it; the distinction that survived is
+   bounded-with-declared-edges versus unbounded. This band states BOTH edges with hairlines, so a
+   reader can see exactly where it starts and stops, and white is the one value on the page that
+   reads as a page turn rather than as another tint of the same paper. `marketingTokens.test.ts`
+   asserts the SET of three, so a fourth is a decision rather than a diff.
+
+   ⚠️ COLOUR ONLY, NEVER THE `background` SHORTHAND — the same reason `.mk-lower` and `.mk-claimband`
+   carry that warning. The shorthand resets every longhand, so the day someone adds an image here it
+   would take the ground with it and the band would go transparent through a green build. */
+.mk-vision {
+  background-color: var(--mk-vision-ground);
+  border-top: 1px solid var(--mk-vision-edge);
+  border-bottom: 1px solid var(--mk-vision-edge);
+  margin-top: 104px;
+}
+/* The page's own container, not the ref's. The ref is drawn in a 1440px frame at 120px gutters;
+   every other band here is 1180 capped at 56, and one gutter down the page beats two that merely
+   look alike. The columns come out 318.7px against the ref's 362.7 — see the h3 boundary below. */
+.mk-visionin {
+  max-width: 1180px; margin: 0 auto; padding: 108px 56px 104px;
+  text-align: center;
+}
+/* One class plus `!important`, which is enough HERE and is not everywhere: brand.tsx injects a
+   runtime rule at `h2` (0-0-1), so a single class outranks it — where its `h1:not(.wsh-title)` is
+   0-1-1 and the hero's title needs two classes to win. */
+.mk-visionh2 {
+  font-family: "Special Elite", cursive !important; font-weight: 400;
+  font-size: 60px; line-height: 1.1; letter-spacing: -0.015em;
+  color: var(--mk-nearblack); margin: 0;
+}
+.mk-visionpoints {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 56px; margin-top: 64px;
+}
+/* ⚠️ A FIXED HEIGHT ENDING AT `flex-end`, AND THAT IS WHAT PUTS THE THREE ON ONE BASELINE. Each
+   plate is trimmed to its own ink and exported at a common 440px height, so all three fill this box
+   vertically and stand on its floor whatever their widths. A padded export would float above the
+   line with every rule here still reading correctly — which is why the trim is stated at the
+   component and not only here. */
+.mk-vfig {
+  margin: 0 0 30px; height: 220px;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+/* ⚠️ `height: 100%`, NOT `max-height` — AND THE DIFFERENCE IS A PLATE THAT NEVER LOADS. With
+   `width: auto; height: auto` a replaced element that has not loaded yet has no used size at all,
+   so each picture measured 0x0 inside its 220px figure; `loading="lazy"` then never fired, because
+   Chrome starts a lazy image when its own box comes into view and a zero box never does. Measured:
+   three plates PENDING with `naturalWidth: 0` after scrolling the whole page twice. A definite
+   height plus the ratio the `width`/`height` attributes carry gives the right box BEFORE the file
+   arrives, which fixes the load and removes the pop-in with it.
+   ⚠️ `object-fit: contain` IS THE GUARD ON THE RATIO. The box is now stated rather than derived, so
+   a future export at a different proportion would stretch instead of fitting. It cannot.
+   ⚠️ AND `max-width` STILL MATTERS, which is why the figure keeps `flex-end`. A plate wider than its
+   column is capped by width and comes out SHORTER than the box — and then bottom-alignment is what
+   puts it back on the line with the other two. None of today's three hit that cap (241, 228 and 174
+   against 318.7), so it is a guard rather than a behaviour. */
+.mk-vfig img {
+  height: 100%; width: auto; max-width: 100%; object-fit: contain; display: block;
+}
+/* ⚠️ HELD ON ONE LINE, AND THE RELEASE IS MEASURED — see the boundary below. The headings are short
+   enough to hold in a 318.7px column; a longer one is a wrap, not a copy edit. */
+.mk-vh3 {
+  font-family: "Special Elite", cursive !important; font-weight: 400;
+  font-size: 27px; line-height: 1.2; letter-spacing: -0.01em;
+  color: var(--mk-nearblack); margin: 0; white-space: nowrap;
+}
+.mk-vbody {
+  font-family: "Source Serif 4", Georgia, serif; font-weight: 400;
+  font-size: 17px; line-height: 1.7; color: var(--mk-vision-body);
+  max-width: 330px; margin: 14px auto 0; text-wrap: balance;
+}
+/* ⚠️ A BUTTON WEARING A LINK, so it declares everything a button would otherwise bring: no fill, no
+   border, no padding, and its own family — brand.tsx names bare `button` too, so it would not be
+   Source Serif by inheritance. The underline is the band's rule colour, which is deliberately a
+   step stronger than the band's own edges: an edge should be felt and a link should be seen. */
+.mk-visionmore {
+  display: inline-block; margin-top: 60px;
+  font-family: "Source Serif 4", Georgia, serif; font-size: 17px; line-height: 1.4;
+  color: var(--mk-nearblack); background: none; border: 0; padding: 0; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 5px;
+  text-decoration-color: var(--mk-vision-rule);
+}
+.mk-visionmore:hover { text-decoration-color: var(--mk-nearblack); }
+
+/* ⚠️ THE HEADINGS RELEASE ABOVE THE STACK, NOT AT IT, AND THE GAP IS REAL. The columns stack at
+   1080 with the feature rows; the longest heading needs 304.6px of ink and the column is a third of
+   the viewport less 112px of gutters, so it stops fitting at ~1138 — leaving ~58px of viewport
+   where three columns still stand and a held heading would spill into the gap between them.
+   Measured on the rendered page; `.98` because `max-width` is inclusive. */
+@media (max-width: 1159.98px) {
+  .mk-vh3 { white-space: normal; text-wrap: balance; }
+}
+/* One column, on the same breakpoint the feature rows stack at — the two bands are read as one
+   region and a page that reflowed them at different widths would look like a mistake. */
+@media (max-width: 1080px) {
+  .mk-visionin { padding: 76px 26px 72px; }
+  .mk-visionh2 { font-size: 46px; }
+  .mk-visionpoints { grid-template-columns: 1fr; gap: 56px; margin-top: 48px; }
+  .mk-vfig { height: 180px; }
+  .mk-vision { margin-top: 72px; }
+}
+@media (max-width: 560px) {
+  .mk-visionh2 { font-size: 36px; }
+  .mk-visionmore { margin-top: 44px; }
+}
+@media (max-width: 360px) {
+  .mk-visionh2 { font-size: 31px; }
+}
 
 /* ── /founders: the Founding Writers page ──────────────────────────────────── */
 /* ⚠️ THIS WHOLE REGION WAS REWRITTEN RATHER THAN PATCHED, per the house rule: where a section

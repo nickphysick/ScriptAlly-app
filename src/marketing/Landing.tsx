@@ -20,6 +20,7 @@ import React, { useEffect } from "react";
 import { Hero } from "./Hero";
 import { StatusBand } from "./StatusBand";
 import { FeatureRows } from "./FeatureRows";
+import { Vision } from "./Vision";
 import { FoundingBand } from "./FoundingBand";
 import { MarketingFooter } from "./MarketingFooter";
 import { DOCUMENT_TITLE } from "./landingCopy";
@@ -40,6 +41,11 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
       <div className="mk-lower">
         <StatusBand />
         <FeatureRows />
+        {/* ⚠️ THE WHITE BAND SITS BETWEEN THE ROWS AND THE OFFER, AND THE ORDER IS THE ARGUMENT.
+            The rows say what the product does; this says why it exists; the founding band asks for
+            something. Moved above the rows it would ask a reader to care before they know what
+            they are looking at, and below the offer nobody would reach it. */}
+        <Vision onNavigate={onNavigate} />
         <FoundingBand onNavigate={onNavigate} />
       {/* ⚠️ LINKS, NOT SPANS. These were inert text for as long as the pages did not exist — which
           is a worse answer than an unfinished page, because a reader cannot tell the difference

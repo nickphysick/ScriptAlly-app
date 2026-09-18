@@ -19,7 +19,6 @@ vi.mock("../components/toast/ToastProvider", async () => (await import("../test/
 
 import { MarketingFooter } from "./MarketingFooter";
 import { STATUS_GLYPH_COUNT } from "./marketingMarks";
-import { STATUS_STEPS } from "./landingCopy";
 import { FOOTER_TAGLINE, SUPPORT_EMAIL } from "../lib/companyInfo";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -52,11 +51,22 @@ describe("the footer's brand column", () => {
 
   /**
    * ⚠️ A SIGNATURE, NOT A CONTROL: the row is hidden from the accessibility tree as a whole, and it
-   * draws exactly as many marks as the status band has states — asserted as two derivations
-   * against each other, never against a literal six on both sides.
+   * draws exactly as many marks as there are marks to draw — asserted as two derivations against
+   * each other, never against a literal six on both sides.
+   *
+   * ⚠️ RETARGET, SAME LAW (18 Sep). It used to reconcile against `STATUS_STEPS.length`, the status
+   * band's six descriptions — a real second derivation while the carousel rendered them. The
+   * carousel is deleted and that copy went with it, so the count now reconciles against the glyph
+   * TABLE, which is the thing that actually owns how many marks exist. The claim is unchanged: the
+   * footer draws every mark there is, and a seventh added to `marketingMarks` appears here without
+   * anyone remembering to come back.
    */
-  it("draws the six states as one row the accessibility tree never sees", () => {
-    expect(STATUS_GLYPH_COUNT, "one mark per state").toBe(STATUS_STEPS.length);
+  it("draws every state as one row the accessibility tree never sees", async () => {
+    const marks = await import("./marketingMarks");
+    expect("STATUS_GLYPHS" in marks, "the table it counts is exported").toBe(true);
+    expect(STATUS_GLYPH_COUNT, "one mark per glyph in the table")
+      .toBe((marks as unknown as { STATUS_GLYPHS: unknown[] }).STATUS_GLYPHS.length);
+    expect(STATUS_GLYPH_COUNT, "and the pipeline still has six states").toBe(6);
     const row = /<div class="mk-footglyphs" aria-hidden="true">([\s\S]*?)<\/div>/.exec(foot());
     expect(row, "the row renders, hidden").toBeTruthy();
     expect(row![1].match(/<svg/g) ?? []).toHaveLength(STATUS_GLYPH_COUNT);

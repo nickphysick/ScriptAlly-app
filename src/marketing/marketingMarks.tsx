@@ -182,7 +182,12 @@ export const ContactTile: React.FC<{ kind: ContactTileKind }> = ({ kind }) => (
  * ⚠️ NOT `StatusDot`'s VOCABULARY. The app's dot is a tinted disc with a plane, chevron or star
  * inside; nothing was reused because there was nothing to reuse, and `StatusDot` is untouched.
  */
-const STATUS_GLYPHS: React.ReactNode[] = [
+/* ⚠️ EXPORTED SO A LOCK CAN RECONCILE `STATUS_GLYPH_COUNT` AGAINST IT (18 Sep). The footer's row
+   used to be reconciled against `STATUS_STEPS` — the status band's six descriptions — which was a
+   genuine second derivation while the carousel rendered them. The carousel is deleted and that copy
+   went with it, so the count is checked against the table that owns it. Nothing renders this array
+   directly; `StatusGlyph` is the only way to draw one. */
+export const STATUS_GLYPHS: React.ReactNode[] = [
   <circle cx={12} cy={12} r={10} key="g" />,
   <>
     <circle cx={12} cy={12} r={10} strokeDasharray="6 4" />
