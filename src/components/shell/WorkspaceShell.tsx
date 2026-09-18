@@ -935,6 +935,12 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   <span className="ws-esc" aria-hidden="true">esc</span>
                 </button>
 
+                {/* ⚠️ NOT RENDERED ON THE DASHBOARD (v16, 18 Sep — Nick). That page's own quick actions
+                    are its answer to "make something", and two invitations a hand's width apart is
+                    one too many. It is ABSENT rather than hidden: a control the reader cannot see but
+                    the shell still mounts is a dead claim, and this one owns a popover and a focus
+                    trap that would go on listening behind it. Every other route keeps it. */}
+                {!dashMode && (
                 <span className="ws-appctl ws-newctl">
                 <div className="ws-newwrap" ref={newRef}>
                   <button
@@ -997,6 +1003,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   )}
                 </div>
                 </span>
+                )}
               </div>
           </header>
 

@@ -23,6 +23,14 @@ import { getActivityTime, normalizeResultingStatus } from "./queryDerivation";
 
 const DAY_MS = 86400000;
 
+/**
+ * ⚠️ THE CARD DRAWS ONE GRAIN — WEEKLY (v16, 18 Sep, Nick: "weekly only for now"). The Daily and
+ * Monthly windows stay in this table because the functions below are written over the grain rather
+ * than around it, and narrowing the type would be a change to every one of them for a toggle that is
+ * coming back. `CHART_GRAIN` is what the card reads; nothing else picks a grain any more.
+ */
+export const CHART_GRAIN: Freq = "weekly";
+
 /** How much history each grain shows — 8 weeks for Daily and Weekly, a year for Monthly. */
 export const CHART_WINDOW: Record<Freq, { days: number; label: string }> = {
   daily: { days: 56, label: "8 weeks" },
@@ -64,10 +72,25 @@ export const repliesInWindow = (
 };
 
 /** "↑ 4 over 8 weeks · 5 replies" */
-export const chartCaption = (delta: number, replies: number, freq: Freq): string => {
+export const chartMove = (delta: number, freq: Freq = CHART_GRAIN): string => {
   const span = CHART_WINDOW[freq].label;
-  const move = delta > 0 ? `↑ ${delta} over ${span}` : delta < 0 ? `↓ ${-delta} over ${span}` : `Level over ${span}`;
-  return `${move} · ${replies} ${replies === 1 ? "reply" : "replies"}`;
+  return delta > 0 ? `↑ ${delta} over ${span}` : delta < 0 ? `↓ ${-delta} over ${span}` : `Level over ${span}`;
+};
+
+/**
+ * The header's mono eyebrow — "18 out with agents · ↑ 6 over 8 weeks" (the ref's).
+ *
+ * ⚠️ THE COUNT IS THE ONE HANDED DOWN, AND WITHOUT IT THE CLAUSE IS ABSENT RATHER THAN ZERO. While
+ * the collections are landing the eyebrow states how the line moved and nothing about a stock nobody
+ * has counted yet.
+ *
+ * ⚠️ THE REPLIES CLAUSE IS RETIRED WITH THE STAGE-3 CAPTION. The ref states the stock and the move;
+ * "5 replies" was a third figure in a line the reader scans in one pass, and the feed beside it is
+ * where replies are read one at a time.
+ */
+export const chartEyebrow = (active: number | null, delta: number, freq: Freq = CHART_GRAIN): string => {
+  const move = chartMove(delta, freq);
+  return active === null ? move : `${active.toLocaleString("en-GB")} out with agents · ${move}`;
 };
 
 export type ChartEventKind = "request" | "pass";
@@ -230,3 +253,13 @@ export const xLabelIndexes = (len: number, every: number): number[] => {
   }
   return out;
 };
+
+/**
+ * Which points had a request come in — the weeks the axis marks in rose (the ref's `.axis span.hot`).
+ *
+ * ⚠️ IT READS THE DOTS THE PLOT ALREADY DREW, never the activity log a second time. The tick under a
+ * week and the dot on the line above it are then the same fact, and cannot come to disagree about
+ * which week a request landed in.
+ */
+export const requestWeeks = (dots: readonly ChartEventDot[]): Set<number> =>
+  new Set(dots.filter((d) => d.kind === "request").map((d) => d.idx));

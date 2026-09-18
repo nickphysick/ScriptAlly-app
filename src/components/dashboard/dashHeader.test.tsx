@@ -2,7 +2,12 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The dashboard header (stage 1, 17 Sep) — the greeting, the counts line, and the hawk.
+ * The dashboard header (stage 1, 17 Sep; v16, 18 Sep) — the greeting and the counts line.
+ *
+ * ⚠️ THE ILLUSTRATION IS RETIRED AND ITS FILE IS DELETED (v16). The cases that measured the hawk —
+ * its bytes, its version, its 300KB ceiling, its box and its four steps — went with it; what
+ * replaces them is one case asserting the header renders no image at all, so the picture cannot
+ * come back without a decision.
  *
  * ⚠️ THE TWO FIGURES ARE ASSERTED AGAINST THEIR CARDS, NOT ONLY AGAINST LITERALS. The header sits
  * directly above the chart ("Active queries") and the to-do card (its badge), so the claim that
@@ -23,7 +28,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { QueryStatus, UserPlan, type Agent, type Query, type Task } from "../../types";
 import { OneScreenDashboard } from "./OneScreenDashboard";
 import { OneScreenHeader } from "./OneScreenHeader";
-import { greetingText, HEADER_ART, lineClauses, queriesOutCount, startingStepsCount, tasksWaitingCount } from "../../lib/dashHeader";
+import { greetingText, lineClauses, queriesOutCount, startingStepsCount, tasksWaitingCount } from "../../lib/dashHeader";
 import { dailyLedger, sentAt } from "../../lib/oneScreen";
 import { cssRule } from "../../test/cssRule";
 import { sliceBetween } from "../../test/sliceBetween";
@@ -83,7 +88,11 @@ const page = (over: Record<string, unknown> = {}) =>
   renderToStaticMarkup(<OneScreenDashboard loading={false} {...base} {...over} />);
 /* ⚠️ THE HEADER ENDS WHERE THE BREAKDOWN BEGINS (stages 2–3, 17 Sep) — it was the retired top row */
 const headerOf = (html: string) =>
-  sliceBetween(html, '<div class="os-greet" data-probe="hero">', '<section class="os-bd"', "the page's header");
+  /* ⚠️ THE END ANCHOR IS THE FIRST CARD ROW (v16) — the breakdown it used to be is retired. A slice
+     whose end anchor is missing silently runs to the end of the file, which `sliceBetween` refuses. */
+  sliceBetween(html, '<div class="os-greet" data-probe="hero">', '<div class="os-row1"', "the page's header");
+/** the day the line ends on, for the rendered-line case — the clause is the page's own */
+const dayOf = (hdr: string) => (/Day ([\d,]+)/.exec(hdr) ?? [])[1];
 const figures = (hdr: string) => [...hdr.matchAll(/<b>([\d,]+)<\/b>/g)].map((m) => Number(m[1].replace(/,/g, "")));
 
 /* ══ the two figures ═══════════════════════════════════════════════════════════════════════ */
@@ -109,7 +118,9 @@ describe("queries out — the chart's own figure", () => {
   it("⚠️ the header states the SAME number the chart's headline does, on the rendered page", () => {
     const html = page();
     const [out] = figures(headerOf(html));
-    const chart = /<span class="os-acn" data-probe-text="chart-figure">([\d,]+)<\/span>/.exec(html);
+    /* ⚠️ THE CHART STATES ITS FIGURE IN ITS EYEBROW NOW (v16) — "27 out with agents · ↑ 3 over 8 weeks".
+       Same number, same derivation, handed down from this page; the probe follows it. */
+    const chart = /data-probe-text="chart-eyebrow">(?:<span[^>]*>)?([\d,]+) out with agents/.exec(html);
     expect(chart, "the chart's headline must render for this comparison to mean anything").not.toBeNull();
     expect(out).toBe(Number(chart![1].replace(/,/g, "")));
   });
@@ -127,7 +138,7 @@ describe("tasks waiting — the to-do card's own figure", () => {
   it("⚠️ the header states the SAME number as the to-do card's badge, on the rendered page", () => {
     const html = page();
     const [, waiting] = figures(headerOf(html));
-    const badge = /<span class="os-tbadge" data-probe="todo-badge"><b>([\d,]+)<\/b><\/span>/.exec(html);
+    const badge = /data-probe="todo-badge"[^>]*>All ([\d,]+)</.exec(html);
     expect(badge, "the badge must render at rest for this comparison to mean anything").not.toBeNull();
     expect(waiting).toBeGreaterThan(0);
     expect(waiting).toBe(Number(badge![1].replace(/,/g, "")));
@@ -153,16 +164,25 @@ describe("the words", () => {
   });
 
   it("singulars agree, and without figures the plural stands", () => {
-    expect(lineClauses({ kind: "counts", queriesOut: 1, tasksWaiting: 1 }).map((c) => c.noun))
-      .toEqual(["query out", "task waiting on you"]);
-    expect(lineClauses({ kind: "counts", queriesOut: 0, tasksWaiting: 2 }).map((c) => c.noun))
-      .toEqual(["queries out", "tasks waiting on you"]);
+    expect(lineClauses({ kind: "counts", queriesOut: 1, tasksWaiting: 1, day: 1 }).map((c) => c.noun))
+      .toEqual(["query out", "waiting on you", "Day 1"]);
+    expect(lineClauses({ kind: "counts", queriesOut: 0, tasksWaiting: 2, day: null }).map((c) => c.noun))
+      .toEqual(["queries out", "waiting on you"]);
     expect(lineClauses({ kind: "starting", steps: 1 }).map((c) => c.noun))
       .toEqual(["No queries out yet", "step to get started"]);
     expect(lineClauses(null)).toEqual([
       { n: null, noun: "queries out" },
-      { n: null, noun: "tasks waiting on you" },
+      { n: null, noun: "waiting on you" },
     ]);
+  });
+
+  /* ⚠️ THE DAY IS A CLAUSE, NOT A FIGURE SLOT (v16, 18 Sep). The ref sets "Day 1,018" in plain weight —
+     the number inside the words rather than before them — so the clause carries no `n` for the renderer
+     to embolden, and it is ABSENT before the first query rather than "Day 0". */
+  it("⚠️ the day clause: formatted, unemboldened, and absent before the first query", () => {
+    const [, , day] = lineClauses({ kind: "counts", queriesOut: 2, tasksWaiting: 0, day: 1018 });
+    expect(day).toEqual({ n: null, noun: "Day 1,018" });
+    expect(lineClauses({ kind: "counts", queriesOut: 2, tasksWaiting: 0, day: null })).toHaveLength(2);
   });
 
   it("renders the line as the brief writes it — two figures, a dot, nothing else", () => {
@@ -170,7 +190,7 @@ describe("the words", () => {
     expect(hdr).toContain('<h1 class="os-hello" data-probe-text="greeting">Hello, Nick.</h1>');
     const line = sliceBetween(hdr, '<p class="os-hdcounts"', "</p>", "the counts line");
     const text = line.replace(/<[^>]+>/g, "");
-    expect(text).toBe(`${figures(hdr)[0]} queries out · ${figures(hdr)[1]} tasks waiting on you`);
+    expect(text).toBe(`${figures(hdr)[0]} queries out · ${figures(hdr)[1]} waiting on you · Day ${dayOf(hdr)}`);
     expect(line).toContain('<span class="os-hdsep"> <span class="os-hddot">·</span> </span>');
     /* nothing else on the line — the tour chip lives beside the greeting */
     expect(line).not.toContain("os-tourchip");
@@ -181,7 +201,7 @@ describe("the words", () => {
   it("⚠️ a zero is stated, because zero is true", () => {
     const hdr = headerOf(page({ tasks: [] }));
     expect(figures(hdr)[0]).toBeGreaterThan(0);
-    expect(hdr).toContain("<b>0</b> tasks waiting on you");
+    expect(hdr).toContain("<b>0</b> waiting on you");
   });
 
   it("⚠️ while loading: the words, no figures — never a zero, never a skeleton", () => {
@@ -190,7 +210,7 @@ describe("the words", () => {
     expect(hdr).not.toContain("os-skel");
     expect(hdr).not.toContain("isload");
     expect(hdr).toContain(">queries out</span>");
-    expect(hdr).toContain(">tasks waiting on you</span>");
+    expect(hdr).toContain("waiting on you</span>");
   });
 
   it("the tour launcher sits beside the greeting, and the ghost copy carries no probe", () => {
@@ -214,7 +234,7 @@ describe("the words", () => {
  */
 describe("a new account — the Getting Started line", () => {
   const badgeOf = (html: string) => {
-    const m = /<span class="os-tbadge" data-probe="todo-badge"><b>([\d,]+)<\/b><\/span>/.exec(html);
+    const m = /data-probe="todo-badge"[^>]*>All ([\d,]+)</.exec(html);
     expect(m, "the card's badge must render for this comparison to mean anything").not.toBeNull();
     return Number(m![1]);
   };
@@ -228,7 +248,7 @@ describe("a new account — the Getting Started line", () => {
     expect(html, "the card must be showing the Getting Started list").toContain("Getting started");
     expect(lineOf(hdr)).toBe(`No queries out yet · ${n} steps to get started`);
     expect(figures(hdr)).toEqual([n]);
-    expect(hdr).not.toContain("tasks waiting on you");
+    expect(hdr).not.toContain("waiting on you");
   });
 
   it("the count moves with the records — a bare account has all five, a book and an agent take two off", () => {
@@ -242,7 +262,7 @@ describe("a new account — the Getting Started line", () => {
 
   it("⚠️ the first query switches it to the normal line", () => {
     const hdr = headerOf(page({ queries: [q("q1", QueryStatus.QUERIED)], tasks: [] }));
-    expect(lineOf(hdr)).toBe("1 query out · 0 tasks waiting on you");
+    expect(lineOf(hdr)).toMatch(/^1 query out · 0 waiting on you(?: · Day [\d,]+)?$/);
     expect(hdr).not.toContain("No queries out yet");
   });
 
@@ -250,100 +270,78 @@ describe("a new account — the Getting Started line", () => {
     const hdr = headerOf(page({ queries: [], tasks: [], loading: true }));
     expect(hdr).not.toContain("No queries out yet");
     expect(hdr).not.toContain("<b>");
-    expect(lineOf(hdr)).toBe("queries out · tasks waiting on you");
+    expect(lineOf(hdr)).toBe("queries out · waiting on you");
   });
 });
 
-/* ══ the illustration ══════════════════════════════════════════════════════════════════════ */
+/* ══ the illustration, retired ═══════════════════════════════════════════════════════════════ */
 
-describe("the illustration", () => {
-  const file = resolve(__dirname, "../../..", "public" + HEADER_ART.src);
-  const png = readFileSync(file);
-
-  it("is decorative, versioned by its own bytes, and sized by its own header", () => {
+describe("the illustration is gone", () => {
+  /* ⚠️ THE ASSET IS DELETED, SO THIS IS A RENDERED-OUTPUT CLAIM RATHER THAN A FILE ONE. The hawk's own
+     cases read `HEADER_ART`, its bytes and its md5; there is no constant and no file to read, and a
+     case that opened one would fail for the wrong reason. What is worth locking is that the header
+     draws no picture — the decision — and that nothing in the app still points at the file. */
+  it("⚠️ the header renders no image, and nothing names the file", () => {
     const hdr = headerOf(page());
-    expect(hdr).toContain(`src="${HEADER_ART.src}?v=${HEADER_ART.version}"`);
-    expect(hdr).toMatch(/<img class="os-hdart"[^>]*alt=""/);
-    expect(HEADER_ART.version, "the version IS the file").toBe(createHash("md5").update(png).digest("hex").slice(0, 8));
-    expect(png.toString("latin1", 12, 16), "the header was read").toBe("IHDR");
-    expect(png.readUInt32BE(16)).toBe(HEADER_ART.width);
-    expect(png.readUInt32BE(20)).toBe(HEADER_ART.height);
-    expect(png[25], "RGBA — the artwork is transparent").toBe(6);
-  });
-
-  it("⚠️ is under the brief's 300KB", () => {
-    expect(statSync(file).size).toBeLessThanOrEqual(300 * 1024);
+    expect(hdr).not.toContain("<img");
+    expect(hdr).not.toContain("top-of-dashboard");
+    expect(css).not.toContain("os-hdart");
   });
 });
-
-/* ══ the rules ═════════════════════════════════════════════════════════════════════════════ */
 
 describe("the rules", () => {
-  it("one flex row, bottom edges level, the two ends apart by 40", () => {
+  /* ⚠️ A COLUMN SINCE v16 — the row existed to put the hawk at the far end of it. */
+  it("a column: the greeting, then the line", () => {
     const r = rule(".os-greet");
-    for (const d of ["display: flex", "align-items: flex-end", "justify-content: space-between", "gap: 40px", "box-sizing: border-box"]) {
-      expect(r, d).toContain(d);
-    }
+    for (const d of ["display: flex", "flex-direction: column"]) expect(r, d).toContain(d);
+    expect(r, "nothing sits beside the greeting now").not.toContain("justify-content: space-between");
   });
 
-  /* ⚠️ RETARGETED (stages 2–3, 17 Sep): the row beneath the header is the breakdown now, not a column, so
-     the other half of the 34px is the breakdown's top margin — 22 on a wide page, 14 once it stacks. */
-  it("⚠️ ~34px below it: 12 + the breakdown's 22, and 20 + 14 at 1024 and below", () => {
-    expect(rule(".os-greet")).toContain("margin: 0 0 12px");
-    expect(rule(".os-bd")).toContain("margin-top: 22px");
-    expect(inMedia("(max-width: 1024px)", ".os-greet")).toContain("margin-bottom: 20px");
-    expect(inMedia("(max-width: 1024px)", ".os-bd")).toContain("margin-top: 14px");
+  /* ⚠️ RETARGETED (v16, 18 Sep): the gap under the header is the header's own bottom padding, because
+     the row beneath it is the first card row and a card carries no top margin. The ref sets 24. */
+  it("⚠️ the space under it belongs to the header, not to the row beneath", () => {
+    expect(rule(".os-greet")).toContain("padding: 26px 0 24px");
+    expect(rule(".os-row1"), "the row adds none of its own").not.toContain("margin-top");
   });
 
   it("⚠️ the greeting: Special Elite, important, two classes — the runtime brand rule is 0-1-1", () => {
     const h = rule(".os-greet .os-hello");
-    expect(h).toMatch(/font-family:\s*"Special Elite",[^;]*!important/);
-    expect(h).not.toContain("cursive");
+    /* ⚠️ THE FACE IS READ FROM THE PAGE'S TOKEN (v16) — one rule names the family, and `marketingTokens`
+       asserts it is the only signed-in rule that does. What must stay here is the `!important`, because
+       brand.tsx's `h1:not(.wsh-title)` is 0-1-1 and a single-class rule loses to it silently. */
+    expect(h).toMatch(/font-family:\s*var\(--os-type\)\s*!important/);
+    expect(rule(".os-root")).toContain('--os-type: "Special Elite"');
     expect(h).toContain("font-weight: 400");
-    expect(h).toContain("font-size: var(--os-hd-title)");
-    expect(h).toContain("line-height: 1.05");
-    expect(h).toContain("letter-spacing: -0.01em");
-    expect(rule(".os-greet")).toContain("--os-hd-title: 44px");
+    expect(h).toContain("font-size: 56px");
+    expect(h).toContain("line-height: 1.02");
   });
 
-  it("the line: 19px, 1.5, 12px under the name, figures at 600, the dot muted with 8px either side", () => {
+  it("the line: serif 17px/1.45, 10px under the name, figures at 600, the dot muted with 8px either side", () => {
     const c = rule(".os-hdcounts");
-    expect(c).toContain("font-size: var(--os-hd-counts)");
-    expect(c).toContain("line-height: 1.5");
-    expect(c).toContain("margin: 12px 0 0");
-    expect(rule(".os-greet")).toContain("--os-hd-counts: 19px");
+    expect(c).toContain("font-size: 17px");
+    expect(c).toContain("line-height: 1.45");
+    expect(c).toContain("margin: 10px 0 0");
+    expect(c, "the serif, not the page's sans").toContain("var(--font-serif)");
     expect(rule(".os-hdcounts b")).toContain("font-weight: 600");
     expect(rule(".os-hdsep")).toContain("font-size: 0");
     const dot = rule(".os-hddot");
-    expect(dot).toContain("font-size: var(--os-hd-counts)");
+    expect(dot).toContain("font-size: 17px");
     expect(dot).toContain("margin: 0 8px");
-    expect(dot, "muted, not the line's ink").not.toContain("#2a1f18");
-    expect(c).toContain("color: #2a1f18");
+    /* ⚠️ THE DOT IS MUTED AND THE LINE IS NOT — asserted against the TOKENS, because both were
+       literals one unit apart once and the difference was invisible and unfindable. */
+    expect(dot, "muted, not the line's ink").toContain("var(--dash-ink-45)");
+    expect(c).toContain("color: var(--dash-ink)");
   });
 
-  it("the hawk: 150 tall, whole, and nothing on it", () => {
-    const a = rule(".os-greet .os-hdart");
-    for (const d of ["height: 150px", "width: auto", "max-width: none", "object-fit: contain", "border: 0",
-                     "border-radius: 0", "background: none", "box-shadow: none", "flex: none"]) {
-      expect(a, d).toContain(d);
-    }
-    expect(a).not.toMatch(/object-fit:\s*cover|clip-path|overflow/);
-  });
-
-  it("⚠️ the steps: 110 at 1200, stacked and hidden at 900, 32/17 at 560 — and each can WIN", () => {
-    expect(inMedia("(max-width: 1200px)", ".os-greet .os-hdart")).toContain("height: 110px");
-    const stack = inMedia("(max-width: 900px)", ".os-greet");
-    expect(stack).toContain("flex-direction: column");
-    expect(stack).toContain("align-items: flex-start");
-    expect(inMedia("(max-width: 900px)", ".os-greet .os-hdart")).toContain("display: none");
-    const small = inMedia("(max-width: 560px)", ".os-greet");
-    expect(small).toContain("--os-hd-title: 32px");
-    expect(small).toContain("--os-hd-counts: 17px");
-    /* a media query confers no specificity — every step must come after the rule it overrides */
-    const baseAt = css.indexOf(".os-greet .os-hdart {");
-    expect(baseAt).toBeGreaterThan(-1);
-    for (const step of ["@media (max-width: 1200px) {\n  .os-greet .os-hdart", "@media (max-width: 900px) {\n  .os-greet {",
-                        "@media (max-width: 560px) {\n  .os-greet {", "@media (max-width: 1024px) {\n  .os-greet {"]) {
+  /* ⚠️ THE STEPS ARE THE GREETING'S OWN NOW — there is no picture to shrink or hide, so the two
+     breakpoints state the type and nothing else. Each is asserted to come AFTER the base rule, because
+     a media query confers no specificity and an earlier step is silently overruled. */
+  it("⚠️ the steps: 40px at 999, 32px at 560 — and each can WIN", () => {
+    expect(inMedia("(max-width: 999px)", ".os-greet .os-hello")).toContain("font-size: 40px");
+    expect(inMedia("(max-width: 640px)", ".os-greet .os-hello")).toContain("font-size: 32px");
+    const baseAt = css.indexOf(".os-greet .os-hello {");
+    expect(baseAt).toBeGreaterThan(0);
+    for (const step of ["@media (max-width: 999px)", "@media (max-width: 640px)"]) {
       expect(css.indexOf(step), step).toBeGreaterThan(baseAt);
     }
   });

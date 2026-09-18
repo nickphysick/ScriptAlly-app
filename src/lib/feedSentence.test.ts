@@ -1,6 +1,9 @@
 /**
  * ⚠️ THE SENTENCE MAY NOT SAY ANYTHING THE RECORD DOES NOT (v22, Phase 7).
  *
+ * (Moved with its subject to `lib/dashFeed` when the conversation feed was retired — v16, 18 Sep.
+ * The claims are unchanged.)
+ *
  * `describeEvent` is the one place the feed composes prose rather than quoting the log, so it is
  * the one place a clause could be invented. The ref's own fixture writes several that this app
  * cannot support — "the first 50 pages", "after reading the partial", "the full 50,000-word
@@ -13,8 +16,8 @@
  * be trusted.
  */
 import { describe, it, expect } from "vitest";
-import { describeEvent, elapsedClause, trustedElapsed, queriedTimes } from "./OneScreenRail";
-import { QueryStatus, ActivityType, type Activity } from "../../types";
+import { describeEvent, elapsedClause, trustedElapsed, queriedTimes } from "./dashFeed";
+import { QueryStatus, ActivityType, type Activity } from "../types";
 
 const text = (segs: ReturnType<typeof describeEvent>) => (segs ?? []).map((s) => s.t).join("");
 

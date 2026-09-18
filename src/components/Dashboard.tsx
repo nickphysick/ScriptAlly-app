@@ -1525,9 +1525,6 @@ export const Dashboard: React.FC<{
         activeManuscript={activeManuscriptForKicker}
         versions={versions}
         onNavigate={onNavigate}
-        onTaskAction={(task) => task.taskType === "data_quality_poor"
-          ? openEditAgent(task.relatedRecordId, { fromTask: true })
-          : onNavigate(task.actionPath, task.title)}
         updateUserProfile={updateUserProfile}
       />
 

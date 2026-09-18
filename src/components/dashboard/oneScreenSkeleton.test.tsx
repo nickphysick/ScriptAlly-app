@@ -24,9 +24,9 @@ import React from "react";
 import { describe, expect, it } from "vitest";
 import { OneScreenSkeleton } from "./OneScreenSkeleton";
 import { OneScreenHeader } from "./OneScreenHeader";
-import { OneScreenBreakdown } from "./OneScreenBreakdown";
 import { SKELETON_FADE_MS } from "../../lib/skeletonTiming";
 import { sliceBetween } from "../../test/sliceBetween";
+import { cssRules } from "../../test/cssRule";
 
 const css = readFileSync(join(__dirname, "oneScreen.css"), "utf8");
 const dash = readFileSync(join(__dirname, "OneScreenDashboard.tsx"), "utf8");
@@ -34,22 +34,21 @@ const dash = readFileSync(join(__dirname, "OneScreenDashboard.tsx"), "utf8");
 const shell = readFileSync(join(__dirname, "..", "shell", "WorkspaceShell.tsx"), "utf8");
 const shellCss = readFileSync(join(__dirname, "..", "shell", "workspaceShell.css"), "utf8");
 const rootCss = readFileSync(join(__dirname, "..", "..", "index.css"), "utf8");
-/* the two slots are filled as the dashboard fills them — the page's own header and breakdown, in their
-   ghost modes: probes off, no figures yet */
+/* ⚠️ ONE SLOT SINCE v16 — the breakdown is retired, so the cover's only borrowed component is the
+   page's own header, in ghost mode: probes off, no figures yet. */
 const html = renderToStaticMarkup(
-  <OneScreenSkeleton
-    header={<OneScreenHeader ghost firstName="Nick" line={null} />}
-    breakdown={<OneScreenBreakdown ghost breakdown={null} manuscriptTitle="Tidewrack" />}
-  />,
+  <OneScreenSkeleton header={<OneScreenHeader ghost firstName="Nick" line={null} />} />,
 );
 
 describe("the page skeleton mirrors the page", () => {
   it("renders the REAL layout containers, not a private copy of the grid", () => {
-    for (const cls of ["os-content", "os-greet", "os-bd", "os-row2", "os-grid", "os-colL", "os-colR"]) {
+    for (const cls of ["os-content", "os-greet", "os-row1", "os-row2"]) {
       expect(html).toMatch(new RegExp(`class="${cls}[" ]`));
     }
-    /* the top row went with the manuscript tile (stage 3), and its ghost went with it */
-    expect(html).not.toContain("os-toprow");
+    /* every grid the page has retired took its ghost with it, in the same commit */
+    for (const gone of ["os-toprow", "os-bd", "os-grid", "os-colL", "os-colR", "os-midrow"]) {
+      expect(html, gone).not.toMatch(new RegExp(`["\\s]${gone}["\\s]`));
+    }
   });
 
   /* ⚠️ NESTING, NOT PRESENCE — the v33 fault passed the presence check above for three passes.
@@ -57,10 +56,12 @@ describe("the page skeleton mirrors the page", () => {
      (it was a sibling of the grid, which started the whole grid 94px low and both columns with
      it). This is a claim about the file's own markup, so it belongs in a source lock; where the
      boxes actually LAND is a measurement and is made by the Phase 4 gate. */
-  /* ⚠️ RETARGETED (stages 2–3, 17 Sep): the header left the left column. The page is four rows in one
-     centred block — the header, the breakdown, the three-card row, and the grid that wraps the to-do
-     card and the activity column — and the cover is the same four, in the same order. */
-  it("⚠️ four rows in the page's order, and the grid wraps the two columns", () => {
+  /* ⚠️ RETARGETED (v16, 18 Sep): three rows in one centred block — the header, the three-card row,
+     and the two-card row — and the cover is the same three, in the same order. The NESTING half of
+     this claim is what the v33 fault slipped past for three passes (the ghost wore the right class
+     names inside the wrong parent), so each card is asserted INSIDE its row rather than merely
+     present somewhere in the document. */
+  it("⚠️ three rows in the page's order, each card inside its own row", () => {
     const at = (needle: string) => {
       const i = html.indexOf(needle);
       expect(i, needle).toBeGreaterThan(-1);
@@ -68,15 +69,18 @@ describe("the page skeleton mirrors the page", () => {
     };
     const order = [
       at('<div class="os-greet">'),
-      at('<section class="os-bd" data-sk="breakdown">'),
+      at('<div class="os-row1" data-sk="row1">'),
       at('<div class="os-row2" data-sk="row2">'),
-      at('<div class="os-grid" data-sk="grid">'),
     ];
     expect([...order].sort((a, b) => a - b)).toEqual(order);
-    expect(html).toContain('<div class="os-grid" data-sk="grid"><div class="os-colL">');
-    expect(html.indexOf('class="os-colR"')).toBeGreaterThan(order[3]);
-    /* the header is not inside the grid any more */
-    expect(html.indexOf('<div class="os-greet">')).toBeLessThan(order[3]);
+    const row1 = sliceBetween(html, '<div class="os-row1" data-sk="row1">', '<div class="os-row2"', "the cover's row 1");
+    for (const sk of ["quick-actions", "chart-card", "closed-tile"]) {
+      expect(row1, `${sk} must be inside row 1`).toContain(`data-sk="${sk}"`);
+    }
+    const row2 = html.slice(order[2]);
+    for (const sk of ["activity-card", "todo-card"]) {
+      expect(row2, `${sk} must be inside row 2`).toContain(`data-sk="${sk}"`);
+    }
   });
 
   /* ⚠️ THE ANCHOR IS THE RULE, NOT THE NAME. Anchoring on `.os-skelpage` alone matched its FIRST
@@ -91,19 +95,26 @@ describe("the page skeleton mirrors the page", () => {
      "A SOURCE-STRING LOCK STRIPS COMMENTS BEFORE IT ASSERTS") exists because this codebase
      documents every retirement by quoting what it retired. */
   it("⚠️ and declares no grid of its own — the columns are the page's, or they will drift", () => {
-    const from = css.indexOf(".os-skelpage {");
-    /* the ghost rules end where the retired stat cards' tombstone begins (the old end anchor, the
-       lock's responsive frame, moved to the foot of the sheet in stages 2–3) */
-    const to = css.indexOf("THE HEADER COUNTERS — RETIRED");
-    expect(from).toBeGreaterThan(-1);
-    expect(to).toBeGreaterThan(from);
-    const sk = css.slice(from, to).replace(/\/\*[\s\S]*?\*\//g, "");
-    /* the slice must still hold the block it claims to be reading */
-    expect(sk).toContain(".os-skelpage {");
-    expect(sk).toContain(".os-sk-bdn");
-    expect(sk).toContain(".os-sk-clrow");
-    expect(sk).not.toContain("grid-template-columns");
-    expect(sk).not.toContain("column-gap");
+    /**
+     * ⚠️ THE SUBJECT, NOT A SLICE OF THE FILE. This read a region bounded by two comments, and v16
+     * deleted the end anchor with the section it named: `indexOf` returned -1, and `slice(from, -1)`
+     * reads to one character from the end of the file, so every assertion below it would have
+     * covered the whole sheet in silence. It failed loudly only because both anchors were asserted.
+     * The honest form is to collect the ghost's OWN rules — every selector naming `os-sk` — which
+     * cannot be widened by a comment moving, and cannot be narrowed by the section being split in
+     * two (the shapes live in §10 and the cover in §12, which is precisely what broke the slice).
+     */
+    const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    const ghost = cssRules(bare).filter((r) => /\.os-sk/.test(r.sel));
+    /* the population first: an empty set satisfies every claim below it */
+    expect(ghost.length, "no ghost rules were read at all").toBeGreaterThan(8);
+    expect(ghost.some((r) => r.sel.includes(".os-skelpage"))).toBe(true);
+    expect(ghost.some((r) => r.sel.includes(".os-sk-qatile"))).toBe(true);
+    expect(ghost.some((r) => r.sel.includes(".os-sk-clrow"))).toBe(true);
+    for (const r of ghost) {
+      expect(r.body, `${r.sel} declares a grid of its own`).not.toContain("grid-template-columns");
+      expect(r.body, `${r.sel} declares a column gap of its own`).not.toContain("column-gap");
+    }
   });
 
   /* ⚠️ THE GHOST CARDS ARE THE REAL CARDS. Each of these carries a box the page already declares —
@@ -112,38 +123,41 @@ describe("the page skeleton mirrors the page", () => {
      `aspect-ratio: 1000 / 330` that IS the top row's height above 1710; `.os-actv` the hairline
      column that is deliberately not a card; `.os-comtile` the 132px tile. A ghost that restates
      any of them is a second source of truth for one box, and the drift is invisible. */
-  /* ⚠️ RETARGETED (stages 2–3): the breakdown's column and card classes, the three second-row cards'
-     own inner boxes, and the bottom row's cards — every box the page's rules already size. */
+  /* ⚠️ RETARGETED (v16): the five cards' own boxes — the card paper itself, the quick-action stack,
+     the chart's mount frame and its three bands, the closed tile's ring and key, and the two
+     scrolling cards. Every one of those is sized by a rule the page already declares. */
   it("⚠️ wears the page's own card classes — a restated box is a box free to drift", () => {
-    for (const cls of ["os-card", "os-bdhead", "os-mount", "os-mount-in", "os-bdgrid", "os-bdcol", "os-bdn",
-                       "os-bdfact", "os-bdfoot", "os-qa", "os-qalist", "os-qafoot", "os-lead", "os-achead",
-                       "os-acid", "os-acbody", "os-acplot", "os-acx", "os-cl", "os-clhd", "os-clhead",
-                       "os-clrows", "os-clfoot", "os-tasks", "os-th2", "os-ahead", "os-actv", "os-comtile"]) {
+    for (const cls of ["os-card", "os-hd", "os-qa", "os-qastack", "os-lead", "os-acframe", "os-achead",
+                       "os-acid", "os-aclegend", "os-acbody", "os-acplot", "os-acx", "os-cl", "os-clpie",
+                       "os-clkey", "os-feed", "os-todo", "os-scroll", "os-tdfoot"]) {
       expect(html, cls).toMatch(new RegExp(`class="([^"]* )?${cls}[" ]`));
     }
-    /* the retired top row's boxes did not survive it */
-    for (const gone of ["os-aut", "os-lbody", "os-chartwrap"]) {
+    /* every retired row's boxes went with it — bands, mounts, columns and the old chart wrapper */
+    for (const gone of ["os-aut", "os-lbody", "os-chartwrap", "os-ahead", "os-th2", "os-bdgrid", "os-mount",
+                        "os-tasks", "os-actv", "os-comtile"]) {
       expect(html, gone).not.toMatch(new RegExp(`["\\s]${gone}["\\s]`));
     }
   });
 
   it("stands in for every card on the page — nothing loads unannounced", () => {
-    /* the breakdown's figures and pills, the hero and the actions, the hawk and the plot, the closed
-       rows, the to-do rule, the feed, the tile's mark */
-    for (const cls of ["os-sk-bdn", "os-sk-bdpill", "os-sk-bdfact", "os-sk-qahero", "os-sk-qaitem", "os-sk-acart",
-                       "os-sk-actog", "os-sk-acplot", "os-sk-clrow", "os-sk-tkrule", "os-sk-acbub", "os-sk-comill"]) {
+    /* each card's title and chip, the three action tiles, the chart's headline / legend / plot, the
+       closed ring and its key rows, the feed's days and entries, the to-do rows and their footer */
+    for (const cls of ["os-sk-ttl", "os-sk-mini", "os-sk-qatile", "os-sk-acstat", "os-sk-legend",
+                       "os-sk-acplot", "os-sk-donut", "os-sk-clrow", "os-sk-fday", "os-sk-fent",
+                       "os-sk-tdrow", "os-sk-tdfoot"]) {
       expect(html, cls).toContain(cls);
     }
-    /* the manuscript tile's and the old chart's ghosts went with them (stage 3) */
-    for (const gone of ["os-sk-aut", "os-sk-chplot", "os-sk-chbrush", "os-sk-chchips", "os-sk-row"]) {
+    /* ⚠️ A CARD THAT LEAVES THE PAGE LEAVES THE SKELETON IN THE SAME COMMIT, or the loading state
+       advertises something that never arrives. The breakdown, the goals card, the manuscript tile,
+       the stat row, the community tile and the old chart are all retired — and the ghost's rules go
+       with the ghost, so a dead `.os-sk-*` rule cannot sit in the sheet waiting to be reattached. */
+    for (const gone of ["os-sk-bdn", "os-sk-bdpill", "os-sk-bdfact", "os-sk-bdfoot", "os-sk-qahero",
+                        "os-sk-qaitem", "os-sk-acart", "os-sk-actog", "os-sk-tkrule", "os-sk-acbub",
+                        "os-sk-comill", "os-sk-aut", "os-sk-chplot", "os-sk-chbrush", "os-sk-chchips",
+                        "os-sk-row", "os-sk-goal", "os-sk-counters", "os-sk-comstrip", "os-sk-ticket"]) {
       expect(html, gone).not.toMatch(new RegExp(`["\\s]${gone}["\\s]`));
       expect(css, gone).not.toMatch(new RegExp(`\\.${gone}[\\s{]`));
     }
-    /* ⚠️ A CARD THAT LEAVES THE PAGE LEAVES THE SKELETON IN THE SAME COMMIT, or the loading state
-       advertises something that never arrives. Goals and the community CARD are both retired. */
-    expect(html).not.toContain("os-sk-goal");
-    expect(html).not.toContain("os-sk-counters");
-    expect(html).not.toContain("os-sk-comstrip");
   });
 
   /* ⚠️ THE GATE'S FIVE HANDLES ARE INERT ATTRIBUTES, AND THEY EXIST OR THE GATE IS VACUOUS.
@@ -158,11 +172,13 @@ describe("the page skeleton mirrors the page", () => {
     const listed = sliceBetween(gate, "const REGIONS = [", "];", "the gate's region list");
     const regions = [...listed.matchAll(/"([a-z0-9-]+)"/g)].map((m) => m[1]);
     const ghosts = regions.filter((r) => r !== "navrow" && r !== "search");
-    expect(ghosts, "the gate must read the ghost's regions").toHaveLength(9);
+    expect(ghosts, "the gate must read the ghost's regions").toHaveLength(7);
     for (const h of ghosts) {
       expect(html, h).toContain(`data-sk="${h}"`);
     }
-    expect(html).not.toContain('data-sk="toprow"');
+    for (const gone of ["toprow", "breakdown", "grid", "community-tile"]) {
+      expect(html, gone).not.toContain(`data-sk="${gone}"`);
+    }
     /* an unstyled class exists to be styled; a handle exists to be measured. Do not mix them. */
     expect(html).not.toContain("os-sk-tasks");
     expect(html).not.toContain("os-sk-actv");
@@ -175,11 +191,17 @@ describe("the page skeleton mirrors the page", () => {
      width, so wearing the right grid class is not enough on its own: the real grid sits inside
      `.os-tbody` (`padding: 6px 18px 10px`), and without those two insets the ghost's grid was 36px
      wider and resolved FOUR columns at 1920 and SIX at 2520 against the card's THREE and FIVE. */
-  it("the ticket grid is the loaded card's own class, in the loaded card's own scroller", () => {
-    expect(html).toContain('class="os-tkgrid"');
-    expect(html).not.toContain("os-sk-tkgrid");
-    expect(html).toContain('class="os-tbodywrap"');
-    expect(html).toContain('class="os-tbody"');
+  /* ⚠️ RETARGETED (v16): the ticket GRID is retired with the card that drew it — the to-do card is a
+     list of rows in a plain scroller now. What survives is the claim underneath it, which is why this
+     case is inverted rather than deleted: the ghost's rows sit in the loaded card's own scroller
+     (`.os-scroll`), so their width, insets and count come from the box the page declares. The v34
+     fault this guards against was `auto-fill` resolving against a ghost container 36px wider than the
+     real one — four columns at 1920 against the card's three. */
+  it("the ghost rows sit in the loaded card's own scroller, not a copy of it", () => {
+    expect(html).toContain('<div class="os-scroll" data-sk="todo-rows">');
+    for (const gone of ["os-tkgrid", "os-sk-tkgrid", "os-tbodywrap", "os-tbody"]) {
+      expect(html, gone).not.toMatch(new RegExp(`["\\s]${gone}["\\s]`));
+    }
   });
 
   /**
@@ -199,12 +221,13 @@ describe("the page skeleton mirrors the page", () => {
    * the old tile height.
    */
   it("⚠️ no count lives in this file — the first pass renders exactly one block to measure", () => {
-    expect(html.match(/os-sk-ticket/g) ?? []).toHaveLength(1);
+    expect(html.match(/os-sk-tdrow/g) ?? []).toHaveLength(1);
     const src = readFileSync(join(__dirname, "OneScreenSkeleton.tsx"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "");
     expect(src).not.toMatch(/\[\s*0\s*,\s*1\s*,\s*2\s*,/);
     expect(src).toContain("getBoundingClientRect().height");
-    expect(src).toContain("gridTemplateColumns");
+    /* the port's own box, which cannot loop: the scroller's height is the card's, not its contents' */
+    expect(src).toContain("port.clientHeight");
   });
 
   /**
@@ -215,12 +238,12 @@ describe("the page skeleton mirrors the page", () => {
    * Its probes are off, because the page beneath the cover is mounted and carries its own.
    */
   it("⚠️ holds the page's own header — words, no figures, no shimmer, no probes", () => {
-    const hdr = sliceBetween(html, '<div class="os-greet">', '<section class="os-bd"', "the cover's header");
-    expect(hdr, "the header must be in the cover, before the breakdown").toContain("os-hello");
+    const hdr = sliceBetween(html, '<div class="os-greet">', '<div class="os-row1"', "the cover's header");
+    expect(hdr, "the header must be in the cover, before the first row").toContain("os-hello");
     expect(hdr).toContain("Hello, Nick.");
     expect(hdr).toContain('class="os-hdcounts"');
     expect(hdr).toContain("queries out");
-    expect(hdr).toContain("tasks waiting on you");
+    expect(hdr).toContain("waiting on you");
     expect(hdr, "no figure while the data is out — never a zero").not.toContain("<b>");
     expect(hdr, "no shimmer inside the header").not.toContain("os-sk");
     expect(hdr, "no probe on the cover's copy").not.toContain("data-probe");
@@ -230,20 +253,10 @@ describe("the page skeleton mirrors the page", () => {
     }
   });
 
-  /* ⚠️ THE COVER'S BREAKDOWN IS THE PAGE'S BREAKDOWN, IN GHOST MODE (stage 2): the heading keeps its
-     words and the manuscript's title, the five columns keep their boxes, and every figure, pill and fact
-     is a shimmer block — no number, no probe. */
-  it("⚠️ holds the page's own breakdown — the heading's words, five ghost columns, no figure, no probe", () => {
-    const bd = sliceBetween(html, '<section class="os-bd" data-sk="breakdown">', '<div class="os-row2"', "the cover's breakdown");
-    expect(bd).toContain('<h2 class="os-bdtitle">Where your queries stand</h2>');
-    expect(bd).toContain('<span class="os-bdmeta">queries · Tidewrack</span>');
-    expect(bd.match(/class="os-bdcol/g) ?? []).toHaveLength(5);
-    expect(bd.match(/os-sk-bdn/g) ?? []).toHaveLength(5);
-    expect(bd).not.toContain("data-probe");
-    expect(bd).not.toMatch(/>\d/);
-    /* the foot is drawn: the harness account carries an R&R and an offer (see the component's note) */
-    expect(bd).toContain("os-sk-bdfoot");
-  });
+  /* ⚠️ THE COVER'S BREAKDOWN CASE IS RETIRED WITH THE SECTION (v16) — "Where your queries stand" is
+     gone from the page, so the cover has one borrowed component rather than two. The claim it made
+     (a ghost section states its heading's words and shimmers every figure) is carried by the header
+     case above, which is the only borrowed component left. */
 
   it("is hidden from assistive tech — a shape tells a screen reader nothing", () => {
     expect(html).toContain('aria-hidden="true"');
@@ -400,7 +413,7 @@ describe("the timing is the lib's, not the component's", () => {
     const src = readFileSync(join(__dirname, "OneScreenSkeleton.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(src).toContain("QUICK_ACTIONS.map(");
     expect(src).toContain("CLOSED_BUCKETS.map(");
-    expect(html.match(/os-sk-qaitem/g) ?? []).toHaveLength(4);
+    expect(html.match(/os-sk-qatile/g) ?? []).toHaveLength(3);
     expect(html.match(/os-sk-clrow/g) ?? []).toHaveLength(4);
   });
 });

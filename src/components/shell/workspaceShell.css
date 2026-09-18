@@ -721,17 +721,30 @@
    the row 60 and put every probe below it 3.1px high at all four widths: a uniform offset is always
    the frame, never the layout. */
 /**
- * ⚠️ THE DASHBOARD'S ROW SITS ON THE PAGE'S MEASURE (stages 2–3, 17 Sep). The dashboard's content is a
- * centred block no wider than `--dash-page-max`, inset by `--dash-page-pad`, and the bar pads itself
- * to the same two edges so the search and the actions sit above the columns they belong to. The bar
- * and the window span the same box (`.ws-main`'s content box), so `100%` here IS the width the page
- * centres in — which is why it is the bar's PADDING that carries the measure: a percentage in a
+ * ⚠️ THE ROW SITS ON THE PAGE'S MEASURE, AND THE SEARCH IS AUTO-CENTRED INSIDE IT (v16, 18 Sep).
+ *
+ * ⚠️ AND THIS CORRECTS A SUPERSESSION THAT SHOULD NEVER HAVE BEEN WRITTEN. The v16 rewrite dropped
+ * the measure on the reading that "the ref draws one field on the row's MIDLINE", so the row was no
+ * longer a frame around the page's columns. Measured in the ref at 1440: its bar spans 264 → 1400
+ * and its first card row spans 264 → 1400 — the SAME box, to the pixel — and the help control's right
+ * edge is the closed tile's right edge. The field is not on the midline either: at 487 → 1127 its
+ * margins are 223 and 273, which is `margin-inline: auto` sharing the space left over once the help
+ * control and the row's gap are taken out. Reasoning from a screenshot said midline; measuring the
+ * artefact said measure, and the artefact is the authority.
+ *
+ * The measure is carried by the row's own PADDING because the bar and the window span the same box
+ * (`.ws-main`'s content box), so `100%` here IS the width the page centres in — a percentage in a
  * padding resolves against that box, where one in a child's margin would not.
  *
- * ⚠️ THE COLLAPSE TOGGLE STAYS AT THE SEAM — out of the flow, at the row's own inset — because it
- * belongs to the sidebar, not to the page (its note in WorkspaceShell: it does not move). The left
- * padding therefore never drops below the toggle's box plus the row's gap, or a narrow window would
- * put the search under it.
+ * ⚠️ THE COLLAPSE TOGGLE STAYS AT THE SEAM, out of the flow at the row's own inset, because it
+ * belongs to the sidebar rather than to the page (its note in WorkspaceShell: it does not move). The
+ * left padding therefore never drops below the toggle's box plus the row's gap, or a narrow window
+ * would put the search under it. The ref draws no toggle at all, which is a fact about a mockup with
+ * no sidebar to collapse.
+ *
+ * ⚠️ AND `+ New` IS GONE FROM THIS ROUTE ONLY (Nick, 18 Sep). It is the shell's control and every
+ * other page keeps it; on the dashboard the three quick-action tiles are the page's own answer to
+ * "make something", and two invitations a hand's width apart is one too many.
  */
 .dash-mode .ws-pagebar {
   position: relative;
@@ -743,6 +756,18 @@
   padding-right: calc(var(--dash-page-pad) + max(0px, (100% - var(--dash-page-max) - 2 * var(--dash-page-pad)) / 2));
 }
 .dash-mode .ws-pagebar .sb-toggle { position: absolute; left: var(--ws-pagebar-inset); top: 50%; transform: translateY(-50%); }
+.dash-mode .ws-bigsearch {
+  margin-inline: auto;
+  height: auto;
+  padding: 12px 20px;
+  border-radius: 34px;
+  /* ⚠️ THE LITERAL, NOT A TOKEN. The page's `--dash-parchment` is declared on `.os-root`, which is
+     not an ancestor of this row — a `var()` here would resolve to nothing and paint transparent. */
+  background: #fdf9f5;
+  border-color: rgba(28, 19, 15, 0.11);
+}
+.dash-mode .ws-bigsearch-t { font-size: 15px; color: rgba(28, 19, 15, 0.45); }
+
 .ws-bigsearch {
   flex: 1 1 auto; max-width: 640px; min-width: 0;
   display: flex; align-items: center; gap: 10px;

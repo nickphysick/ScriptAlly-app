@@ -10,17 +10,28 @@
  *
  * ⚠️ THE STAT CARDS' MARKS ARE RETIRED WITH THE CARDS (dashboard header, stage 1, 17 Sep). The stat
  * slot `.os-cic`, its painted-plane exemption and the counter mapping went with `OneScreenCounters`;
- * the cases that asserted them now assert their absence. `.os-mark-il` itself is SHARED — the goals
- * card still wears it — so every claim about the treatment stands, pointed at the mark that remains.
+ * the cases that asserted them now assert their absence.
+ *
+ * ⚠️ AND THE SHEET MOVED WITH THE LAST CONSUMER (v16, 18 Sep). `.os-mark-il` was `oneScreen.css`'s,
+ * shared by the stat row and the goals card. v16 retires the dashboard's own painted artwork
+ * entirely, which left one renderer — `OneScreenGoals`, a card mounted NOWHERE — so the rules live
+ * in `queryingGoals.css` beside it. The move is the point rather than tidiness: a shared rule whose
+ * only consumer is parked is a rule the next sweep of the shared sheet deletes as dead, and the
+ * white square would not appear until somebody remounted the card. This file reads BOTH sheets, so
+ * it also states where the treatment is NOT: nothing on the live dashboard blends.
  */
 import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const bare = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "");
+/** the dashboard's shared sheet — where the treatment must NOT be */
+const bare = strip(readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8"));
+/** the goals card's own sheet — where it lives now */
+const goalCss = strip(readFileSync(resolve(__dirname, "./queryingGoals.css"), "utf8"));
 const blk = (sel: string) => {
   const re = new RegExp(`(^|[}\\n])\\s*\\${sel}\\s*\\{([^}]*)\\}`, "m");
-  const m = re.exec(bare);
+  const m = re.exec(goalCss);
   expect(m, `${sel} must exist as a rule of its own`).not.toBeNull();
   return m![2];
 };
@@ -36,11 +47,14 @@ describe("trap 1 — the white field", () => {
    * is still asserted here unweakened. The dashboard's other painted artwork, the header's hawk, is
    * not an `.os-mark-il` at all: it is genuinely transparent and carries no blend of either kind.
    */
-  it("⚠️ the default is unweakened, the plane's exemption is gone, and the hawk takes no blend", () => {
+  it("⚠️ the default is unweakened, the plane's exemption is gone, and the live page takes no blend", () => {
     expect(blk(".os-mark-il img")).toContain("mix-blend-mode: multiply");
-    expect(bare).not.toMatch(/\.os-mark-il img\s*\{[^}]*mix-blend-mode:\s*normal/);
+    expect(goalCss).not.toMatch(/\.os-mark-il img\s*\{[^}]*mix-blend-mode:\s*normal/);
     expect(bare).not.toContain(".os-cic.plane");
-    expect(blk(".os-greet .os-hdart")).not.toContain("mix-blend-mode");
+    /* ⚠️ AND NOTHING ON THE LIVE PAGE BLENDS AT ALL — v16 has no painted artwork on it. A
+       `mix-blend-mode` appearing in the shared sheet is a mark that has come back without its traps
+       being thought about, which is how the white square returns. */
+    expect(bare, "the dashboard's shared sheet blends something").not.toContain("mix-blend-mode");
   });
 
   it("⚠️ and it is BARE — no plate, no border, no fill behind it", () => {
@@ -65,7 +79,7 @@ describe("trap 2 — a transform on an ancestor isolates the blend", () => {
   });
 
   it("hover transforms live on the IMG", () => {
-    expect(bare).toMatch(/\.os-goal:hover \.os-goalmark img\s*\{[^}]*transform/);
+    expect(goalCss).toMatch(/\.os-goal:hover \.os-goalmark img\s*\{[^}]*transform/);
     /* the stat slot's hover went with the slot */
     expect(bare).not.toContain(".os-counter:hover");
   });
@@ -73,7 +87,7 @@ describe("trap 2 — a transform on an ancestor isolates the blend", () => {
   it("⚠️ THE ENTRANCE ANIMATION IS A TRANSFORM TOO — the marks wait for the card to land", () => {
     // `.enter` transforms the CARD, so for its duration every mark inside blends against
     // transparency. Hiding by OPACITY on the img creates no stacking context on the card.
-    expect(bare).toMatch(/\.os-card\.enter \.os-mark-il img\s*\{[^}]*opacity:\s*0/);
+    expect(goalCss).toMatch(/\.os-card\.enter \.os-mark-il img\s*\{[^}]*opacity:\s*0/);
   });
 });
 
@@ -93,6 +107,15 @@ describe("the artwork is bounded at its own sharp size", () => {
 
   it("⚠️ the stat slot's rules are gone with the slot", () => {
     expect(bare).not.toMatch(/(^|[}\n])\s*[^{}]*\.os-cic\b[^{]*\{/);
+  });
+
+  /* ⚠️ AND THE TREATMENT LEFT THE SHARED SHEET WITH ITS LAST CONSUMER — both halves, because a rule
+     left behind in `oneScreen.css` would be styling nothing while this file reported it correct. */
+  it("⚠️ neither mark rule is left behind in the dashboard's shared sheet", () => {
+    for (const sel of [".os-mark-il", ".os-goalmark"]) {
+      expect(bare, `${sel} is still declared in oneScreen.css`)
+        .not.toMatch(new RegExp(`(^|[}\\n])\\s*[^{}]*\\${sel}\\b[^{]*\\{`));
+    }
   });
 });
 

@@ -1,63 +1,97 @@
-/* ── THE DASHBOARD (refs design-refs/dashboard-one-screen.html + -spec.md; stages 1–3, 17 Sep) ──
-   Prefix os-. Values are the ref's, literal — this page draws its own chrome once. */
+/* ── THE DASHBOARD (ref design-refs/dashboard-v16-2026-09-18.html; "v16", 18 Sep) ────────────────
+   ⚠️ THE DATE IS PART OF THE REF'S NAME. `design-refs/dashboard-v16.html` is a DIFFERENT design from
+   an earlier series and is still cited by `OneScreenPro.tsx`; this one arrived under the same name
+   and is kept apart from it by date.
+   ⚠️ THE REF DRAWS ONE WIDTH AND CARRIES NO MEDIA QUERIES. Everything at 1440 is the mockup's; the
+   two steps at the end are Nick's prose and are the authority below it.
 
-/* ══ §1 · THE PAGE ═══════════════════════════════════════════════════════════════════════════════
- *
- * ⚠️ THE ONE-SCREEN LOCK IS RETIRED (stages 2–3, 17 Sep — Nick: "The page scrolls. Drop the one-screen
- * lock."). The page used to be a column exactly the height of its slot, with every card flexing to fit.
- * Four rows of content do not fit one screen, so the page flows now and the shell's window scrolls it.
- * The bottom row keeps a fixed height — the to-do card and the activity column, each with its own
- * inner scroller (`--os-bottom-h`).
- *
- * ⚠️ THE LOCK'S OTHER PARTS WENT WITH IT: `layout="fill"` on the slot (App.tsx), the route's place in
- * `AppShell`'s `fit` list, and `height: 100%` on `.sa-dashroot`. A percentage height in a flowing
- * slot resolves to nothing, and a `fit` work wrapper would clip the page it now scrolls. The wrapper
- * has no rule of its own any more; its focus rings (below) still select on it.
- */
+   ⚠️ THE VALUES AT THE TOP ARE TOKENS BECAUSE A STYLING PASS FOLLOWS. Card paper, radius, padding,
+   shadow, the two type sizes and the four state papers are declared once on `.os-root`, so the
+   retune is that block rather than a sweep of this file. */
+
+/* ══ §0 · THE TOKENS ══════════════════════════════════════════════════════════════════════════ */
 .os-root {
-  /* ⚠️ 1.4 IS THE REF'S OWN `body` LEADING, AND IT IS STATED ONCE HERE BECAUSE IT WAS BEING
-     REDISCOVERED ONE ELEMENT AT A TIME. This app inherits 1.5. On any element whose HEIGHT is a
-     line box that is 1.1px per row at 11px and 2.3px at 23px — individually invisible, and each one
-     lands on the position of everything below it. */
-  line-height: 1.4;
-  /* ⚠️ THE FOOT'S HEIGHT, AS A TOKEN (fixes-2 A4). The scroller's bottom padding must clear the
-     LAST 30 DAYS foot so the final entry can scroll past it; the padding is derived from the foot. */
-  --os-afoot-h: 26px;
-  /* the cover's paper matches `.ws-window`'s white, so the overlay covers rather than tints */
-  --os-skel-paper: #ffffff;
-  /* ⚠️ THE PAGE'S TYPEWRITER FACE, AS A TOKEN (stages 2–3). Everything stages 2–3 set in it reads this
-     one declaration — the breakdown's and the closed tile's headings, the hero button's words, the
-     quick actions' manuscript title and the chart's title — so their face and fallbacks cannot
-     drift apart. The greeting (stage 1) still states the same stack itself and is left as it was;
-     `marketingTokens.test.ts` names both declarations. The fallback is a typewriter face, not
-     `cursive`: a Mac's generic cursive is Apple Chancery. */
+  /* paper and ink — the ref's `:root` */
+  --dash-card: #ffffff;
+  --dash-parchment: #fdf9f5;
+  --dash-page: #f5f1eb;
+  --dash-ink: #1c130f;
+  --dash-ink-70: rgba(28, 19, 15, 0.7);
+  --dash-ink-45: rgba(28, 19, 15, 0.45);
+  --dash-hair: rgba(28, 19, 15, 0.11);
+  --dash-frame: #7c3a2a;
+  --dash-rust: #8a4a3c;
+  --dash-navy: #2a3a52;
+  /* the four state papers, and the closed ring's four steps */
+  --dash-stone: #e4e1db;
+  --dash-rose: #f5e6df;
+  --dash-sand: #f7efe3;
+  --dash-sage: #e0e5dd;
+  --dash-quiet: #cfc9bf;
+  --dash-letter: #e6d5b6;
+  --dash-partial: #e9c6b7;
+  --dash-full: #bfcbba;
+  /* the card */
+  --dash-radius: 14px;
+  --dash-pad: 20px 22px;
+  --dash-shadow: 0 1px 3px rgba(28, 19, 15, 0.04);
+  --dash-gap: 20px;
+  /* type */
+  /**
+   * ⚠️ THE PAGE'S TYPEWRITER FACE, DECLARED HERE AND READ BY FOUR RULES — the card headings, the
+   * greeting, the tile labels and the manuscript runs in the feed. A `var()` whose custom property is
+   * declared NOWHERE is invalid at computed-value time and the declaration is simply dropped, with no
+   * error and nothing to point at: this token was lost for one build of the v16 rewrite and the
+   * headings quietly fell back to the body serif.
+   */
   --os-type: "Special Elite", "Courier New", Courier, monospace;
-  /* ⚠️ THE BOTTOM ROW'S HEIGHT — the one height this page states rather than hands down (Nick: "To-do
-     card and activity column get a fixed height and keep their inner scroll"). */
-  --os-bottom-h: 600px;
-  /* ⚠️ `--os-cardgap`, `--os-bleed` AND `--os-sk-aut-h` ARE GONE — the first two had no reader left
-     (the stat cards and the column bleed went in earlier passes), the third went with the tile. */
-  /* the page skeleton's containing block — see .os-skelpage. Every other absolutely-positioned
-     descendant on this page sits inside a `.os-card`, which is already `position: relative`. */
+  --dash-ttl: 22px;
+  --dash-eyebrow: 10px;
+  /* the two rows */
+  --dash-row1-closed: 320px;
+  --dash-row2-min: 380px;
+  --dash-row2-max: 560px;
+  /**
+   * ⚠️ THE SECOND ROW IS MEASURED FROM THE PAGE'S OWN SCROLL AREA, NEVER FROM THE VIEWPORT.
+   *
+   * The ref writes `clamp(380px, calc(100vh - 560px), 560px)`, which is right on a page that starts
+   * at the top of the window. This page does not: it sits under the beta strip, the top bar and the
+   * window's own inset, so `100vh` over-claims by all of it and the row would run past the fold on a
+   * short window — the house stage law, and the 21px the Tasks chassis lost to the same arithmetic.
+   *
+   * `--os-port-h` is the scroller's own height and `--os-row2-top` the distance from its top to this
+   * row, both published by `OneScreenDashboard` from a `ResizeObserver`. Neither depends on this
+   * row's height, so the measurement cannot feed itself: the port is sized by the shell, and what is
+   * above the row is the header and the first row.
+   */
+  /* ⚠️ BOTH ARE `0px` UNTIL MEASURED, AND THAT IS A SENTINEL RATHER THAN A GUESS. An unmeasured port
+     makes the `calc()` negative, so the clamp yields its FLOOR — the row starts at its minimum and
+     grows once the observer has answered. `100vh` sat here for one build, which is precisely the
+     over-claim the paragraph above forbids: it would have run the first painted frame past the fold
+     on a short window, and only the smoke lock's blanket "no 100vh in this sheet" caught it. */
+  --os-port-h: 0px;
+  --os-row2-top: 0px;
+  --dash-row2-h: clamp(
+    var(--dash-row2-min),
+    calc(var(--os-port-h) - var(--os-row2-top) - 44px),
+    var(--dash-row2-max)
+  );
+}
+
+/* ══ §1 · THE PAGE ════════════════════════════════════════════════════════════════════════════ */
+.os-root {
   position: relative;
   display: flex;
   flex-direction: column;
-  font-size: 14px;
-  color: #3a1c14;
+  min-width: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  color: var(--dash-ink);
 }
+
 /**
- * ⚠️ THE CONTENT IS A CENTRED BLOCK NO WIDER THAN THE PAGE MEASURE (Nick: the dashboard must not
- * stretch indefinitely on a large monitor). `--dash-page-max` and `--dash-page-pad` are declared once,
- * on `.dash-mode .ws-main` in `shell/workspaceShell.css` — the column holding both this block and the
- * top bar, which pads itself to the same two edges and must agree with this block to the pixel. They
- * resolve wherever this page is on screen: `.dash-mode` is exactly the dashboard route.
- *
- * ⚠️ `box-sizing` IS STATED, because the arithmetic depends on it: the block's border box is the
- * measure plus both pads, so its CONTENT box is the measure — the width the bar's search and actions
- * sit above.
- *
- * ⚠️ THE ACTIVITY COLUMN IS INSIDE THIS BLOCK, not pinned to the window's right edge — pinned, a gap
- * would open between it and the rest of the page on a wide screen (Nick).
+ * ⚠️ THE CONTENT IS A CENTRED BLOCK WITH A MAXIMUM MEASURE (stages 2–3, kept for v16). The tokens
+ * live on the dashboard route's `.ws-main` — never on `.dash-mode`, which is the rail's ancestor too
+ * — so the shell's top bar can pad itself to the same measure. See workspaceShell.css.
  */
 .os-content {
   box-sizing: border-box;
@@ -69,192 +103,544 @@
   padding: 0 var(--dash-page-pad) 44px;
   min-width: 0;
 }
-/**
- * ⚠️ THE BOTTOM ROW: THE TO-DO CARD AND THE ACTIVITY COLUMN, SIDE BY SIDE, AT A FIXED HEIGHT.
- *
- * The right column is 360 at every width, the ref's (v22 measures 360 at 1536, 1920 and 2520 alike).
- * The row is `minmax(0, 1fr)` inside a stated height, so neither column's content can grow it: a long
- * activity feed or a full to-do list scrolls inside its own box, and the two bottoms agree because
- * both are handed the same row, not because two heights happen to match.
- */
-.os-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
-  grid-template-rows: minmax(0, 1fr);
-  gap: 22px;
-  align-items: stretch;
-  height: var(--os-bottom-h);
-  margin-top: 18px;
-  min-width: 0;
-}
-.os-colL { grid-column: 1; }
-.os-colR { grid-column: 2; }
-/**
- * ⚠️ THE COLUMNS DO NOT CLIP (v26, Phase 8) — ref `.page2 .lcol, .page2 .rcol{overflow:visible}`. A
- * clip slices every card's shadow at the column edge, and it does not fix an overflowing card, it
- * hides one. The `height: 0` / `height: 100%` pair that kept the right column from feeding the row's
- * height is retired with the lock: the row's height is stated now, so no column can feed it.
- */
-.os-colL, .os-colR {
-  display: flex; flex-direction: column; min-height: 0; min-width: 0;
-  overflow: visible;
-}
-/* ⚠️ THE RIGHT COLUMN SPACES WITH ITS GAP ALONE — see 'the right column is a flex column' below for
-   the 26px. Margins beside a gap are how 44px once opened between two cards. */
 
 /**
- * ⚠️ THE SECOND ROW (stage 3) — quick actions, the chart and the closed tile, full width under the
- * breakdown. Nick's tracks and gap: `300px 1fr 300px`, 18px, stretched, 18px below the breakdown.
- *
- * ⚠️ `align-items: stretch` IS THE EQUAL-HEIGHT LAW, IN ONE WORD. The row is as tall as its tallest
- * card's content (the quick actions, at every width measured) and all three are handed that box;
- * the chart's plot and the two foot lines take the difference. Nothing states a height to agree on.
- *
- * ⚠️ `minmax(0, 1fr)`, NOT `1fr` — a bare `1fr` is `minmax(auto, 1fr)`, and the middle track would
- * refuse to shrink below its content's minimum width.
+ * ⚠️ ROW ONE IS THE REF'S THREE TRACKS, AND THE MIDDLE ONE IS THE ELASTIC ONE.
+ * `minmax(270px, .85fr)` holds the quick actions at their natural width, `minmax(0, 2.6fr)` gives the
+ * chart everything left over — the `0` is what stops a wide plot refusing to shrink — and the closed
+ * card is a fixed column, because a ring is drawn at a size rather than fitted to one.
+ */
+.os-row1 {
+  display: grid;
+  grid-template-columns: minmax(270px, 0.85fr) minmax(0, 2.6fr) var(--dash-row1-closed);
+  gap: var(--dash-gap);
+  align-items: stretch;
+  min-width: 0;
+}
+
+/**
+ * ⚠️ ROW TWO IS ONE HEIGHT AND TWO SCROLLERS. `align-items: stretch` with a height on the row is what
+ * makes both cards end on the same line however much either holds; each card is a flex column whose
+ * body is the only thing that scrolls.
  */
 .os-row2 {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr) 300px;
-  gap: 18px;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--dash-gap);
   align-items: stretch;
-  margin-top: 18px;
+  margin-top: var(--dash-gap);
+  height: var(--dash-row2-h);
   min-width: 0;
 }
-.os-row2 > * { min-width: 0; }
+/**
+ * ⚠️ NEITHER ROW MAY BE SHRUNK BY ITS COLUMN, AND THE LOADING COVER IS WHY.
+ *
+ * `.os-content` is a flex column, and on the page it sits in an unbounded root — so nothing squeezes
+ * a row and `flex-shrink`'s default never bites. Inside the COVER the same `.os-content` sits in
+ * `.os-skelpage`, which is `flex: 1 1 auto; min-height: 0; overflow: hidden` — a bounded box — so the
+ * rows were shrunk to fit it and the ghost's second row rendered 5px short of the real one. A jump at
+ * the moment the cover lifts is the one thing the cover exists to prevent.
+ *
+ * On the loaded page this is a no-op, which is exactly what makes it safe: it states the behaviour
+ * the page already has, in the one place where the same markup is laid out under a different bound.
+ */
+.os-row1, .os-row2 { flex: none; }
 
-/* ⚠️ COMMUNITY AS A STRIP UNDER BOTH COLUMNS — ref `.comstrip`. Icon, title, one line, Beta pill, on a
-   single row outside the grid, so it neither competes for column height nor has to be told not to be
-   the taller card.
-   ⚠️ NOTHING MOUNTS THE STRIP TODAY — the activity column renders `OneScreenCommunity`'s TILE — but the
-   component still carries the strip variant and its lock still reads these rules, so they stay
-   (restated from before stages 2–3, unchanged). Whether the variant goes is a separate decision. */
-.os-comstrip {
-  display: flex; align-items: center; gap: 16px;
-  margin-top: 22px; padding: 14px 20px; flex: none;
-  background: #fdfbf7; border: 1px solid #e6dfd6; border-radius: 14px;
-}
-.os-comstriptx { min-width: 0; }
-.os-comstrip h2 { font-family: var(--font-serif); font-weight: 500; font-size: 17px; margin: 0; }
-.os-comstrip p { margin: 2px 0 0; font-size: 14px; color: #a29587; }
-.os-comstrip .os-commbeta { margin-left: auto; flex: none; }
-
-/* ══ CARD CHROME ══ */
+/* ══ §2 · CARD CHROME ═════════════════════════════════════════════════════════════════════════ */
+/**
+ * ⚠️ ONE CARD, AND THE CHART IS THE ONE EXCEPTION. Every card is white with a hairline, a 14px radius
+ * and one soft shadow; the chart card carries the mount construction instead (parchment rim, real
+ * frame) because the plot is the page's one drawn object and the ref frames it.
+ */
 .os-card {
-  /* ⚠️ THE POSITIONING CONTEXT FOR THE RIM OVERLAY — declared HERE, not in a second `.os-card`
-     rule. A separate block is how this sheet has been bitten twice: the smoke test's slice takes
-     the FIRST match, so the second rule's declarations are invisible to it. One element, one rule. */
   position: relative;
-  /* ⚠️ AND A STACKING ORDER, so a card casts OVER its neighbours rather than under them (v26,
-     Phase 8). With every card at `auto`, painting order is document order: the card above always
-     drew under the card below, so the top edge of every shadow was covered by the next card's
-     opaque paper and the cast looked cut off on one side only. One shared `z-index: 1` puts them
-     all in the same layer, where a shadow paints over an earlier sibling's background. */
+  /**
+   * ⚠️ ONE STACKING LAYER FOR EVERY CARD, AND THE SIDEBAR'S SCRIM IS WHY. `.dash-mode .ws-main::before`
+   * is an 18px gradient at the rail's seam, `z-index: 0` and inert; without a layer of their own the
+   * cards paint at auto and the scrim washes over their left edge. It also puts each card's own
+   * shadow above the sibling before it, which is what makes the row read as five objects rather than
+   * one strip. Dropped in the v16 sheet rewrite and restored the same day — `dash-rail-v33.mjs`
+   * caught it as `belowCards: false`, which is the only gate that could have.
+   */
   z-index: 1;
-  /* ⚠️ THE REF'S CARD, VALUE FOR VALUE: `--card #fdfbf7`, a REAL 1px `--line #e6dfd6` border, an
-     18px radius and its two-stop shadow. The app had #fffdf9, no border at all (an `::after` inset
-     ring) and a 15px radius — three differences the refdiff reported on every card at every width. */
-  background: #fdfbf7;
-  border: 1px solid #e6dfd6;
-  /* ⚠️ NO `border` — THE RIM IS THE ::after RING BELOW, and it is the only thing that declares it.
-     A border here would be a second source of truth for one hairline, and the next person to
-     retune the rim token would move one and miss the other. Measured cost of removing it: card
-     size unchanged, contents sit 1px further out. */
-  border-radius: 18px;
-  box-shadow: 0 1px 2px rgba(42, 31, 24, 0.03), 0 8px 24px rgba(42, 31, 24, 0.04);
-  overflow: hidden;
+  box-sizing: border-box;
+  background: var(--dash-card);
+  border: 1px solid var(--dash-hair);
+  border-radius: var(--dash-radius);
+  padding: var(--dash-pad);
+  box-shadow: var(--dash-shadow);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
   min-height: 0;
-  /* border-color is no longer set on this element — the ring owns the rim */
-  transition: box-shadow 0.18s ease;
+}
+
+/* the head: title and eyebrow at the left, one chip at the right */
+.os-hd {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
 }
 /**
- * ⚠️ THE RIM IS AN OVERLAY, BECAUSE A CHILD WAS EATING THE BORDER (§2, browser-proven).
- *
- * THE BUG: `.os-card` is `border-radius` + `overflow: hidden`, and a child with an OPAQUE
- * background — `.os-ahead`, `.os-th2` — is clipped to the BORDER box, not the padding box. So the
- * band painted straight over the card's 1px border along every straight edge it touched. Red-rim
- * test: without the band the rim drew complete; with it, red survived ONLY in the corner arcs,
- * where the rectangular band curves away from the border.
- *
- * ⚠️ IT WAS NEVER A HOVER BUG. The top rim is absent at REST too. Hover darkens `border-color`,
- * the edges you can still see change, the covered one cannot — and that reads as "the rim
- * disappeared on hover".
- *
- * ⚠️ AN INSET box-shadow DOES NOT FIX IT, and is the obvious thing to try. Tested: an inset shadow
- * paints with the element's background, BELOW descendants, so the band covers it exactly as it
- * covered the border. Only an overlay that paints ABOVE descendants survives.
- *
- * ⚠️ THE BORDER STAYS FOR GEOMETRY. Removing it would give every card 2px more inner width under
- * border-box and shift its contents; the overlay is the visible rim, the border is the spacing.
- * Measured across banded and band-less cards: child offsets identical, so this is a no-op on the
- * cards that have no band — which is the case the primitive will meet most often elsewhere.
+ * ⚠️ `!important`, LIKE THE GREETING, AND FOR THE SAME REASON. `lib/brand.tsx` injects
+ * `h2, h3 { font-family: <brand heading> !important }` at runtime on every route, so a card title
+ * without it renders Playfair however carefully this rule is written — measured on the first v16
+ * build, where every heading on the page came back serif. One class beats the bare element between
+ * two `!important` declarations. The brand script is the actual problem; it goes in the type pass.
  */
-/* ⚠️ THE `::after` RIM IS RETIRED — the card draws a REAL border now, which is what the ref does.
-   Two sources for one hairline is how the next retune moves one and misses the other. */
-/* §10: hover deepens the DROP shadow only — no movement, no transform on a container. The RIM's
-   hover lives on the ::after (below), because the ring is the rim's single source of truth. */
-.os-card.os-lift:hover {
-  box-shadow: 0 2px 4px rgba(58, 28, 20, 0.05), 0 10px 26px rgba(58, 28, 20, 0.1);
+.os-cardttl {
+  margin: 0;
+  font-family: var(--os-type) !important;
+  font-weight: 400;
+  font-size: var(--dash-ttl);
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  color: var(--dash-ink);
 }
-.os-card.os-lift:hover::after { box-shadow: inset 0 0 0 1px #dbd0c1; }
+.os-sub {
+  margin: 5px 0 12px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--dash-eyebrow);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dash-ink-45);
+  line-height: 1.4;
+}
+/* ⚠️ `font-family: inherit` — `lib/brand.tsx` names bare spans as the body sans at runtime, so a
+   clause inside a mono line renders sans without it. Measured, twice. */
+.os-subc { font-family: inherit; white-space: nowrap; }
 
-/* one-time entrance, scoped to .enter and REMOVED after it runs.
-   ⚠️ THE §6 TRAP: never a persistent fill-mode on these — an animation's final keyframe outranks
-   class declarations, which is exactly the pinned-opacity "squashed header" bug. */
-.os-card.enter, .os-greet.enter, .os-bd.enter { animation: os-rise 0.42s cubic-bezier(0.22, 0.68, 0.36, 1) both; }
+.os-mini {
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--dash-eyebrow);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  border: 1px solid var(--dash-hair);
+  border-radius: 20px;
+  padding: 6px 12px;
+  color: var(--dash-ink-70);
+  white-space: nowrap;
+  background: var(--dash-page);
+  flex: none;
+}
+button.os-mini { cursor: pointer; }
+button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
+
+/* the one scrolling region a card may have */
+.os-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  /* the ref's -6/+6: the scrollbar sits outside the content's own measure */
+  margin: 0 -6px;
+  padding: 0 6px;
+}
+.os-scroll { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+.os-scroll:hover { scrollbar-color: #ddd0c0 transparent; }
+.os-scroll::-webkit-scrollbar { width: 7px; }
+.os-scroll::-webkit-scrollbar-thumb {
+  background: transparent; border-radius: 99px; border: 2px solid transparent;
+  background-clip: content-box; transition: background 0.2s;
+}
+.os-scroll:hover::-webkit-scrollbar-thumb { background: #ddd0c0; background-clip: content-box; }
+
+/* the entrance, and the guard that keeps it from arming the FLIP trap — see OneScreenDashboard */
 @keyframes os-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-/* ⚠️ `.os-greet` IS NOT IN A COLUMN — it spans the grid (`grid-column: 1 / -1`), so the
-   `.os-colM .os-greet` this used to say selected nothing and the greeting never staggered.
-   Pre-existing; corrected here because Phase 2 rewrote the block it sits in. */
+.os-card.enter, .os-greet.enter { animation: os-rise 0.42s cubic-bezier(0.22, 0.68, 0.36, 1) both; }
 .os-greet.enter { animation-delay: 0s; }
-/* the page's own order, top to bottom and left to right (stages 2–3) */
-.os-bd.enter { animation-delay: 0.04s; }
-.os-row2 .os-qa.enter { animation-delay: 0.07s; }
-.os-row2 .os-lead.enter { animation-delay: 0.09s; }
-.os-row2 .os-cl.enter { animation-delay: 0.11s; }
-.os-colL .os-tasks.enter { animation-delay: 0.14s; }
-.os-colR .os-actv.enter { animation-delay: 0.17s; }
+.os-row1 .os-card.enter:nth-child(1) { animation-delay: 0.06s; }
+.os-row1 .os-card.enter:nth-child(2) { animation-delay: 0.1s; }
+.os-row1 .os-card.enter:nth-child(3) { animation-delay: 0.14s; }
+.os-row2 .os-card.enter:nth-child(1) { animation-delay: 0.18s; }
+.os-row2 .os-card.enter:nth-child(2) { animation-delay: 0.22s; }
 
-/* §10: keyboard parity with hover */
-.os-root a:focus-visible, .os-root button:focus-visible, .os-root [tabindex]:focus-visible {
-  outline: 2px solid #8a9e88;
-  outline-offset: 2px;
+/* ⚠️ THE PAGE STANDS DOWN WHILE THE GHOST HOLDS THE FLOW — see `OneScreenSkeleton`. */
+.os-loading > .os-content { display: none; }
+
+/* ══ §3 · THE HEADER ══════════════════════════════════════════════════════════════════════════ */
+/**
+ * ⚠️ NO ILLUSTRATION (v16) — the greeting and one line of figures, and nothing at the right-hand end.
+ * `.os-hdart` and its four steps went with the hawk.
+ */
+.os-greet {
+  display: flex;
+  flex-direction: column;
+  padding: 26px 0 24px;
+  min-width: 0;
+}
+.os-hdrow { display: flex; align-items: center; gap: 14px; min-width: 0; }
+/**
+ * ⚠️ TWO CLASSES AND `!important`, AGAINST `lib/brand.tsx`. That script injects
+ * `h1:not(.wsh-title){font-family:…!important}` at runtime on every route; between two `!important`
+ * declarations the more specific selector wins, and its is 0-1-1 against this 0-2-0. Accepted for
+ * now (Nick); the brand script is the actual problem and goes in the app-wide type pass.
+ */
+.os-greet .os-hello {
+  margin: 0;
+  font-family: var(--os-type) !important;
+  font-weight: 400;
+  font-size: 56px;
+  line-height: 1.02;
+  letter-spacing: 0.005em;
+  color: var(--dash-ink);
+}
+.os-hdcounts {
+  margin: 10px 0 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--dash-ink);
+}
+.os-hdcounts b { font-weight: 600; }
+.os-hdc { white-space: nowrap; }
+/* ⚠️ THE SEPARATOR'S SPACES ARE REAL TEXT AT ZERO WIDTH, so a screen reader and a copy-paste both get
+   "out · 3" rather than "out·3", and the dot still carries its two margins. */
+.os-hdsep { font-size: 0; }
+.os-hddot { font-size: 17px; margin: 0 8px; color: var(--dash-ink-45); }
+
+/* ══ §4 · QUICK ACTIONS ═══════════════════════════════════════════════════════════════════════ */
+.os-qa .os-hd { margin-bottom: 10px; }
+/* ⚠️ EQUAL THIRDS, NOT THREE NATURAL HEIGHTS — the stack fills whatever the row's height turns out
+   to be, so the card never ends short of the two beside it. */
+.os-qastack {
+  flex: 1;
+  display: grid;
+  grid-template-rows: 1fr 1fr 1fr;
+  gap: 10px;
+  min-height: 0;
+}
+.os-qatile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px 10px 10px;
+  background: var(--dash-parchment);
+  border: 1px solid var(--dash-hair);
+  border-radius: 12px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--dash-ink);
+  min-width: 0;
+  transition: border-color 0.14s ease;
+}
+.os-qatile:hover { border-color: rgba(28, 19, 15, 0.3); }
+.os-qaart, .os-qaph { width: 46px; height: 46px; flex: none; object-fit: contain; display: block; }
+/* ⚠️ THE PLACEHOLDER IS THE SAME 46px BOX, so the day the artwork lands nothing in this card moves. */
+.os-qaph {
+  border: 1px dashed rgba(28, 19, 15, 0.3);
   border-radius: 8px;
-}
-
-/* shared type */
-.os-lbl {
+  display: flex; align-items: center; justify-content: center;
   font-family: "JetBrains Mono", monospace;
-  font-size: 9px; letter-spacing: 0.17em; text-transform: uppercase;
-  font-weight: 500; color: #9c8878;
+  font-size: 7px; line-height: 1.2; text-align: center;
+  color: rgba(28, 19, 15, 0.5);
+  padding: 2px;
 }
-.os-pill-o {
+.os-qalab {
+  font-family: var(--os-type);
+  font-size: 17px;
+  line-height: 1.15;
+  color: var(--dash-ink);
+  min-width: 0;
+}
+
+/* ══ §5 · THE CHART ═══════════════════════════════════════════════════════════════════════════ */
+/**
+ * ⚠️ THE MOUNT: A PARCHMENT RIM WITH A REAL FRAME INSIDE IT. The rim is the card (6px of parchment,
+ * 16px radius, its own shadow) and the frame is a 1px rust line at 11px — the ref's `.chart`/`.frame`.
+ * The card's own padding is replaced here rather than overridden per child.
+ */
+.os-lead {
+  padding: 6px;
+  background: var(--dash-parchment);
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(28, 19, 15, 0.06);
+}
+.os-acframe {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid var(--dash-frame);
+  border-radius: 11px;
+  background: var(--dash-card);
+  padding: 18px 22px 16px;
+}
+.os-achead { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-width: 0; }
+/* ⚠️ THE ROW STAYS A FLEX ROW WITH NOTHING IN THE PICTURE SLOT (Nick, 18 Sep) — a 96px image can come
+   back beside the count without a relayout. */
+.os-acid { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.os-acstat { display: flex; flex-direction: column; min-width: 0; }
+
+.os-aclegend { display: flex; gap: 16px; margin-bottom: 4px; font-size: 13px; color: var(--dash-ink-70); }
+.os-aclg { display: flex; align-items: center; gap: 7px; }
+.os-aclgd { width: 9px; height: 9px; border-radius: 50%; display: block; flex: none; }
+.os-aclgd--active { background: var(--dash-navy); }
+.os-aclgd--request { background: var(--dash-rose); border: 1px solid var(--dash-hair); }
+.os-aclgd--pass { background: var(--dash-stone); border: 1px solid var(--dash-hair); }
+
+.os-acbody { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+/* ⚠️ THE PLOT IS ABSOLUTE INSIDE ITS BOX, so an svg can never hold the card's height open. */
+.os-acplot { position: relative; flex: 1 1 auto; min-height: 150px; }
+.os-acplot > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.os-acgrid { stroke: #ece6de; stroke-width: 1; shape-rendering: crispEdges; }
+/* the event dots: the state paper, a white ring, and a heart in the state's own ink */
+.os-acev > circle:first-child { stroke: #ffffff; }
+.os-acev--request > circle:first-child { fill: var(--dash-rose); }
+.os-acev--request > .os-acevc { fill: var(--dash-rust); }
+.os-acev--pass > circle:first-child { fill: var(--dash-stone); }
+.os-acev--pass > .os-acevc { fill: rgba(28, 19, 15, 0.5); }
+
+/**
+ * ⚠️ ONE SLOT PER WEEK, AND THE TICK IS THE SLOT'S OWN `::before`. The ref draws a 4px rounded tick
+ * under every week and turns it rose on a week a request came in; hanging it off the slot means it
+ * cannot drift from the label it belongs to, and a thinned label leaves its tick behind.
+ */
+.os-acx {
+  display: flex;
+  justify-content: space-between;
   font-family: "JetBrains Mono", monospace;
-  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500;
-  background: #fffdf9; border: 1px solid #b9aa97; border-radius: 99px;
-  padding: 5px 12px; color: #4a3a2e; white-space: nowrap;
+  font-size: 10.5px;
+  color: var(--dash-ink-45);
+  margin-top: 8px;
+  flex: none;
+}
+.os-acx span { flex: 1; text-align: center; position: relative; padding-top: 10px; min-width: 0; }
+.os-acx span::before {
+  content: "";
+  position: absolute; left: 4px; right: 4px; top: 0;
+  height: 4px; border-radius: 2px;
+  background: var(--dash-stone);
+}
+.os-acx span.hot::before { background: var(--dash-rose); }
+
+.os-sparse { position: absolute; inset: 0; display: none; place-items: center; text-align: center; padding: 16px; }
+.os-sparse.on { display: grid; }
+.os-sparse span { font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 13.5px; color: var(--dash-ink-45); }
+
+/* ══ §6 · CLOSED ══════════════════════════════════════════════════════════════════════════════ */
+.os-cl { padding: 20px 22px 18px; }
+.os-clpie { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+.os-clpie svg { height: 100%; max-height: 150px; width: auto; display: block; }
+.os-dntrack { stroke: #f1ece5; }
+.os-dnarc--quiet { stroke: var(--dash-quiet); }
+.os-dnarc--letter { stroke: var(--dash-letter); }
+.os-dnarc--partial { stroke: var(--dash-partial); }
+.os-dnarc--full { stroke: var(--dash-full); }
+.os-dnn {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 34px; font-weight: 600; fill: var(--dash-ink);
+}
+.os-dnlab {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 1.2px; fill: var(--dash-ink); fill-opacity: 0.5;
+}
+.os-clkey { display: grid; gap: 4px; margin-top: 8px; flex: none; }
+.os-clrow { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--dash-ink-70); }
+.os-clrow b { margin-left: auto; font-weight: 600; color: var(--dash-ink); font-variant-numeric: tabular-nums; }
+/* ⚠️ A BUCKET WITH NOTHING IN IT KEEPS ITS ROW AND LOSES ITS COLOUR — absent, and greyed, not gone. */
+.os-clrow.z, .os-clrow.z b { color: var(--dash-ink-45); }
+.os-dnsw { width: 10px; height: 10px; border-radius: 3px; display: block; flex-shrink: 0; border: 1px solid rgba(28, 19, 15, 0.12); }
+.os-dnsw--quiet { background: var(--dash-quiet); }
+.os-dnsw--letter { background: var(--dash-letter); }
+.os-dnsw--partial { background: var(--dash-partial); }
+.os-dnsw--full { background: var(--dash-full); }
+
+/* ══ §7 · THE STATE PILL ══════════════════════════════════════════════════════════════════════ */
+.os-spill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase;
+  padding: 3px 9px 3px 6px; border-radius: 20px; white-space: nowrap;
+  color: var(--dash-ink);
+  background: var(--dash-stone);
+}
+/* the four state papers — `queryCardFacts`' own states */
+.os-spill--queried { background: var(--dash-sand); }
+.os-spill--agent { background: var(--dash-sage); }
+.os-spill--you { background: var(--dash-rose); }
+.os-spill--offer { background: #e7eef2; }
+.os-spill--closed { background: var(--dash-stone); }
+.os-spill--none { background: var(--dash-stone); }
+/* ⚠️ `inherit` — brand.tsx names bare spans as the body sans, so the label renders sans without it. */
+.os-spill-l { font-family: inherit; }
+.os-spill-d { width: 8px; height: 8px; border-radius: 50%; background: rgba(28, 19, 15, 0.35); display: block; flex: none; }
+
+/* ══ §8 · THE ACTIVITY FEED ═══════════════════════════════════════════════════════════════════ */
+.os-feed .os-hd { margin-bottom: 4px; }
+.os-fday {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--dash-ink-45);
+  display: flex; align-items: center; gap: 10px;
+  margin: 12px 0 8px;
+}
+.os-fday::before, .os-fday::after { content: ""; flex: 1; height: 1px; background: var(--dash-hair); }
+
+.os-fent {
+  display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center;
+  padding: 10px 0; border-top: 1px solid var(--dash-hair);
+  position: relative;
+}
+.os-fmain { min-width: 0; }
+.os-fband { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.os-ftime { font-family: "JetBrains Mono", monospace; font-size: 9px; color: var(--dash-ink-45); }
+.os-fsay { margin: 0; font-size: 14px; line-height: 1.45; color: var(--dash-ink); }
+.os-fwho { font-weight: 600; }
+.os-fbook { font-family: var(--os-type); font-style: normal; font-size: 13.5px; }
+.os-fprov {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--dash-ink-45); margin-top: 3px;
+}
+.os-flink {
+  font-size: 13px; color: var(--dash-ink); text-decoration: underline; text-underline-offset: 3px;
+  background: none; border: 0; padding: 0; cursor: pointer; white-space: nowrap;
+}
+/**
+ * ⚠️ THE NEW RULE SITS IN THE CARD'S OWN PADDING, which is why it is `-24px` — the card pads 22 and
+ * its border is 1. It marks the margin beside the entry rather than the entry itself, so nothing in
+ * the row moves when it appears or goes.
+ */
+.os-fent--new::before {
+  content: "";
+  position: absolute; left: -24px; top: 12px; bottom: 12px;
+  width: 3px; border-radius: 0 2px 2px 0;
+  background: var(--dash-rust);
+}
+.os-fent--app .os-fsay { color: var(--dash-ink-70); }
+.os-fempty {
+  margin: 18px 0 0; text-align: center;
+  font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 13.5px;
+  color: var(--dash-ink-45);
 }
 
-/* ══ THE HEADER — see 'THE HEADER (stage 1)' near the end of this sheet ══
-   ⚠️ THE OLD HEADER'S RULES ARE DELETED HERE, NOT LEFT BESIDE THE NEW ONES (stage 1, 17 Sep). This
-   block held the v16–v26 greeting's notes, its `.os-greet h1` rule, and four rules with no subject:
-   `.os-sub2`, `.os-greet .os-grow2`, `.os-greet .os-spacer` and the date chip (`.os-datechip`). The
-   header was rebuilt, so the header's dead rules went with it. The other five classes an earlier sweep
-   found named nowhere in `src/` — `.os-chip`, `.os-lbl`, `.os-pill-o`, `.os-pin`, `.pintext` — are
-   not the header's and are still reported rather than removed. */
-/* ⚠️ `.os-pills` AND `.os-pill` ARE RETIRED WITH THE ROW THEY DRESSED (dashboard redesign, Phase 3).
-   The greeting's tenure and achievement pills are gone; nothing in `src/` renders either class, and
-   a rule the stylesheet selects on that no component emits is a rule with no subject — this repo has
-   shipped a whole entrance animation into that state once already.
+/* ══ §9 · THE TO-DO CARD ══════════════════════════════════════════════════════════════════════ */
+.os-todo .os-hd { margin-bottom: 4px; }
+.os-tdrow {
+  display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center;
+  padding: 11px 0; border-top: 1px solid var(--dash-hair);
+  width: 100%; text-align: left; background: none; border-left: 0; border-right: 0; border-bottom: 0;
+  cursor: pointer; color: var(--dash-ink);
+}
+.os-tdrow:first-of-type { border-top: 0; }
+.os-tdrow:hover .os-tdt { color: var(--dash-rust); }
+/**
+ * ⚠️ THE TILE SCOPES THE DOT'S OWN TOKENS RATHER THAN DRAWING A SECOND GLYPH. `StatusDot` reads
+ * `--sd-hue` and `--sd-centre`; on this ink tile they become the page's cream, so the canonical glyph
+ * renders on a dark ground and the house law — a status is only ever drawn by that component — holds.
+ */
+.os-tdico {
+  width: 44px; height: 44px; border-radius: 12px; background: var(--dash-ink);
+  display: flex; align-items: center; justify-content: center; flex: none;
+  --sd-hue: #f5f1eb;
+  --sd-centre: transparent;
+}
+.os-tdico--none { background: var(--dash-stone); }
+.os-tddash { width: 12px; height: 2px; border-radius: 2px; background: var(--dash-ink); display: block; }
+.os-tdt { font-size: 14px; line-height: 1.35; min-width: 0; display: block; }
+.os-tdt i { font-style: italic; color: var(--dash-ink-70); }
+.os-tdt small {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--dash-ink-45); margin-top: 3px;
+}
+.os-tdbar { display: block; height: 6px; border-radius: 4px; background: #f1ece5; margin-top: 7px; overflow: hidden; }
+.os-tdbar i { display: block; height: 100%; background: var(--dash-navy); }
+/* ⚠️ A WINDOW NOBODY STATED IS DRAWN FAINTER (Nick) — a guessed window must not read as a known one. */
+.os-tdbar--guess { opacity: 0.55; }
+.os-tdn { font-size: 24px; font-weight: 600; color: var(--dash-ink); font-variant-numeric: tabular-nums; }
+.os-tdn em { font-style: normal; font-size: 12px; font-weight: 400; color: var(--dash-ink-45); }
+.os-tdgo { font-style: normal; font-size: 16px; color: var(--dash-ink-45); }
+.os-tdrow--urgent .os-tdn { color: var(--dash-rust); }
+/* the foot is pinned to the card's bottom, whatever the rows do */
+.os-tdfoot {
+  margin: auto 0 0; padding-top: 12px; border-top: 1px solid var(--dash-hair);
+  font-size: 13px; color: var(--dash-ink-70); flex: none;
+}
+.os-see {
+  font-size: 13px; color: var(--dash-ink); font-weight: 400;
+  background: none; border: none; padding: 0; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.os-tempty { min-height: 80px; display: grid; place-items: center; gap: 10px; padding: 16px; text-align: center; }
+.os-tempty span { font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 13.5px; color: var(--dash-ink-45); }
+.os-dayone-ctas { display: flex; gap: 8px; justify-content: center; }
+.os-btn-mini {
+  font-size: 10.5px; font-weight: 500; border-radius: 99px; padding: 0 12px; height: 24px;
+  display: flex; align-items: center; white-space: nowrap; cursor: pointer;
+  background: #2b2118; border: 1px solid #2b2118; color: #ffffff;
+}
+.os-btn-mini:hover { background: #3a2d22; }
+.os-btn-mini.ghost { background: #ffffff; border-color: #d5c8b8; color: #5c4d42; }
+.os-btn-mini.ghost:hover { border-color: #b9a893; color: #3a1c14; }
 
-   ⚠️ AND THE `--os-pastille-*` TOKENS GO WITH THEM — CHECKED, NOT ASSUMED. The first draft of this
-   note said `.os-p` (the tasks trio) reads them and they must stay. It does not: `.os-p` is WHITE and
-   its own lock says so in as many words — "the trio is white, so it must NOT read the pastille". The
-   pills were the only consumer, so removing them left four tokens declared and read by nothing, which
-   is the orphan the inverse sweep exists to catch. A grep for `var(--os-pastille` is what settled it;
-   the claim in the comment was worth exactly what it was checked against. */
+/* ══ §10 · THE GHOST'S OWN SHAPES ═════════════════════════════════════════════════════════════
+   ⚠️ NO HEIGHTS ON THE GHOST CARDS — they wear `.os-qa`, `.os-lead`, `.os-cl`, `.os-feed` and
+   `.os-todo`, so every padding, gap and flex budget is the page's own. The only numbers here are the
+   sizes of the grey blocks INSIDE those boxes, and each is the height of the thing it stands for. */
+/**
+ * ⚠️ EVERY HEIGHT HERE IS THE LINE BOX OF THE THING IT STANDS FOR, COMPUTED FROM THE REAL RULE — not
+ * a number that looked about right. They were, and the ghost's first row measured 302.4 against a
+ * loaded 344.6: a 42px jump at the moment the cover lifts, which is the one thing the cover exists to
+ * prevent. Each is stated with its arithmetic so the next retune can be done rather than guessed.
+ */
+/* `.os-cardttl` alone — 22px (`--dash-ttl`) × 1.3 */
+.os-sk-ttl { width: 46%; height: 28.6px; }
+/* ⚠️ A TITLE *AND* ITS EYEBROW, which is what three of the five cards draw: 28.6 + the eyebrow's 5px
+   top margin + 14 (10 × 1.4) + its 12px bottom margin. The ghost drew the title alone on all five,
+   so the closed tile came up 31px short — and the closed tile is what sets the first row's height. */
+.os-sk-ttl2 { width: 46%; height: 59.6px; }
+/* `.os-mini` — 10px (`--dash-eyebrow`) × normal + 12px of padding + 2px of border */
+.os-sk-mini { width: 74px; height: 26px; border-radius: 20px; }
+.os-sk-qatile { width: 100%; height: 100%; border-radius: 12px; }
+/* the chart's title AND its eyebrow: 28.6 + 5 (the eyebrow's top margin) + 14 (10 × 1.4) + 12 */
+.os-sk-acstat { width: 240px; height: 59.6px; }
+/* `.os-aclegend` — 13px × 1.5 */
+.os-sk-legend { width: 210px; height: 19.5px; }
+.os-sk-acplot { border-radius: 10px; }
+/* the axis: the slot's own 10px of padding-top plus 10.5px × 1.5 of label */
+.os-sk-acx { width: 100%; height: 25.8px; }
+.os-sk-donut { border-radius: 50%; }
+/* `.os-clrow` — 12.5px × 1.5 */
+.os-sk-clrow { height: 18.8px; }
+.os-sk-fday { height: 9px; width: 100%; margin: 12px 0 8px; }
+.os-sk-fent { width: 100%; margin-bottom: 10px; border-radius: 10px; }
+/* the row ghost is the row's own height: 44px tile + 11px of padding either side */
+.os-sk-tdrow { height: 66px; width: 100%; margin-bottom: 0; border-radius: 10px; }
+.os-sk-tdfoot { display: block; width: 180px; height: 13px; }
 
-/* ══ §8 · SKELETONS ══
+/* ══ §11 · RESPONSIVE ═════════════════════════════════════════════════════════════════════════
+   ⚠️ THE REF CARRIES NO MEDIA QUERIES — it draws 1440 and nothing else. The two steps below are
+   Nick's prose, and they are the authority at those widths. */
+@media (max-width: 1279px) {
+  /* the closed card drops beneath the chart, at the middle column's full width */
+  .os-row1 { grid-template-columns: minmax(270px, 0.85fr) minmax(0, 2.6fr); }
+  .os-row1 > .os-cl { grid-column: 2; }
+}
+@media (max-width: 999px) {
+  .os-row1, .os-row2 { grid-template-columns: minmax(0, 1fr); height: auto; }
+  .os-row1 > .os-cl { grid-column: auto; }
+  .os-row2 > .os-card { height: 520px; }
+  .os-greet { padding: 20px 0 18px; }
+  .os-greet .os-hello { font-size: 40px; }
+}
+@media (max-width: 640px) {
+  .os-content { padding-bottom: 24px; }
+  .os-greet .os-hello { font-size: 32px; }
+  .os-hdcounts { font-size: 15px; }
+  .os-hddot { font-size: 15px; margin: 0 6px; }
+  .os-row2 > .os-card { height: 460px; }
+}
+
+
+/* ══ §12 · THE LOADING COVER ══════════════════════════════════════════════════════════════════ */
+
+/* ══ the per-card bars (carried over) ══
    Overlay per card; content goes opacity:0 so the layout cannot shift when data lands.
    Skeleton = "don't know yet"; the empty states are "know it's nothing" — never conflate. */
 /* ⚠️ `.os-greet.isload` IS GONE FROM BOTH RULES (stage 1) — the header no longer takes a per-card
@@ -278,9 +664,9 @@
    is the PAGE-level answer, laid over the top: the two are different scales of the same idea.
 
    ⚠️ ITS GEOMETRY IS THE PAGE'S OWN. `OneScreenSkeleton` renders `.os-content` / `.os-greet` /
-   `.os-colM` / `.os-midrow` / `.os-colR` verbatim, so every column width, gap and padding below is
-   already declared once, further up this sheet. Nothing here restates the grid — only the blocks'
-   own heights, and each of those is the measured height of the card it covers. */
+   `.os-row1` / `.os-row2` and the cards' own classes verbatim, so every column width, gap and
+   padding below is already declared once, further up this sheet. Nothing here restates the grid —
+   only the blocks' own heights, and each of those is the measured height of the card it covers. */
 .os-skelpage {
   /**
    * ⚠️ IN THE FLOW, NOT OVER THE PAGE (v33.2, Phase 4) — and this reverses v33.1's overlay.
@@ -356,1297 +742,10 @@
   100% { background-position: 600px 0; }
 }
 
-/* ══ THE HERO ══ */
-/* ⚠️ NO GHOST RULES, BECAUSE THERE IS NO GHOST (stage 1). The cover renders the page's own
-   `OneScreenHeader`, so its first row is sized by the header's rules and nothing here restates it.
-   `.os-sk-h1`, `.os-sk-sub`, `.os-sk-stats`, `.os-sk-stat`, `.os-sk-ill`, `.os-sk-statlab` and
-   `.os-sk-statfig` were measured stand-ins for the old greeting and its three stat rows, and went
-   with them. */
 
-/* ══ THE BREAKDOWN AND THE SECOND ROW (stages 2–3, 17 Sep) ══ */
-/* ⚠️ NO HEIGHTS ON THE GHOST CARDS OR COLUMNS — they wear `.os-bdcol`, `.os-qa`, `.os-lead` and
-   `.os-cl`, so every padding, gap and flex budget is the page's own. Each number below is the height
-   of the thing the block stands in for, derived from that thing's own rule:
+/* ══ §13 · MICRO-INTERACTIONS ═════════════════════════════════════════════════════════════════ */
 
-     · breakdown count 32 — `.os-bdn`'s line box; the pill 20 — `.os-spill`'s 12px line and 4+4
-       padding; the fact 12 in a slot whose floor (`.os-bdfact`, 28) is the page's; the foot 10 with
-       2px either side — `.os-bdfoot`'s 14px line.
-     · the hero 84 — `.os-mount--hero`: 1 + 5 + (1 + 9 + 52 + 9 + 1) + 5 + 1; an action row 40 —
-       `.os-qaitem`'s 20px line and 10+10; the foot's 12 sits in `.os-qafoot`'s own 35px floor.
-     · the hawk 96, the headline 54 (`.os-acrow`'s 36 + 4 + `.os-acdelta`'s 16 — it centres against
-       the hawk, so it never sets the height), the toggle 30 — `.os-actog`: 1 + 2 + (5 + 14 + 5) + 2 + 1.
-     · the closed heading 16 with 5px either side (`.os-clhd`, 26), the headline 37 (`.os-clhead`'s
-       floor), a row 20 (`.os-clrow`'s floor), the foot 12 with 3px either side (`.os-clfoot`'s 18).
-
-   ⚠️ A CHANGE TO ANY OF THOSE RULES MOVES ITS GHOST OUT OF STEP, AND THE SKELETON GATE
-   (`scripts/dash-skeleton-v33.mjs`) READS BOTH — the regions are compared, not these numbers. */
-.os-sk-bdn { display: block; width: 34px; height: 32px; }
-.os-sk-bdpill { width: 88px; height: 20px; border-radius: 20px; flex: none; }
-.os-sk-bdfact { display: block; width: 70%; height: 12px; margin: 0 auto; }
-.os-sk-bdfoot { display: block; width: 150px; height: 10px; margin: 2px auto; }
-.os-sk-qahero { height: 84px; border-radius: 13px; flex: none; }
-.os-sk-qaitem { height: 40px; border-radius: 10px; flex: none; }
-.os-sk-qafoot { width: 62%; height: 12px; }
-.os-sk-acart { width: 96px; height: 96px; border-radius: 18px; flex: none; }
-.os-sk-acstat { width: 176px; height: 54px; flex: none; }
-.os-sk-actog { width: 180px; height: 30px; border-radius: 99px; flex: none; }
-.os-sk-acplot { border-radius: 10px; }
-.os-sk-clttl { width: 100%; height: 16px; margin: 5px 0; }
-.os-sk-clhead { width: 70%; height: 37px; }
-.os-sk-clrow { height: 20px; border-radius: 99px; flex: none; }
-.os-sk-clfoot { display: block; width: 60%; height: 12px; margin: 3px 0; }
-
-/* ══ THE TO-DO CARD ══ */
-.os-sk-tkmark { width: 30px; height: 30px; border-radius: 9px; flex: none; }
-.os-sk-tkttl { width: 150px; height: 28px; flex: none; }
-.os-sk-tkbadge { width: 52px; height: 24px; border-radius: 99px; flex: none; }
-.os-sk-tkall { width: 80px; height: 16px; margin-left: auto; flex: none; }
-/* ⚠️ NO TICKET GRID HERE, DELIBERATELY — the ghost wears `.os-tkgrid`, the card's own. A copy of
-   `repeat(auto-fill, minmax(288px, 1fr))` lived here for one pass and had already drifted: the real
-   grid steps to `minmax(240px, 1fr)` below 1700 and the copy did not. The `no grid of its own` lock
-   in `oneScreenSkeleton.test.ts` is what refuses the copy, and it was right. */
-.os-sk-tkrule { height: 12px; border-radius: 99px; flex: none; }
-/* ⚠️ 77.5px BECAUSE THE REAL TICKET IS 77.5 (17 Sep). It was 82 against a real 75.8 (v34, Phase 3),
-   then 76 — until the real ticket grew 1.7px and the skeleton gate went red on the tile alone, the
-   follow-up the 14 Sep run left open. `.tkt` states no height — it is a two-track grid sized by its
-   own content — so this number cannot be shared with it as a token without pinning a box that is
-   meant to be content-driven. It is instead GUARDED: the skeleton gate reads both tiles and fails
-   when they disagree, so a drift in either goes red rather than quietly changing how many blocks
-   the cover draws. A few pixels here is one row at some widths, which is why the count could not
-   be derived until the height was right. */
-.os-sk-ticket { height: 77.5px; border-radius: 12px; }
-
-/* ══ THE ACTIVITY COLUMN ══ */
-.os-sk-acmark { width: 26px; height: 26px; border-radius: 8px; flex: none; }
-.os-sk-acttl { width: 110px; height: 26px; flex: none; }
-.os-sk-account { width: 70px; height: 13px; flex: none; }
-/* ref `body.ac-hair #actCard .feed{padding-left:0;padding-right:8px}`, as the real feed is */
-.os-sk-acfeed {
-  display: flex; flex-direction: column; gap: 14px;
-  padding: 0 8px 0 0; min-height: 0; overflow: hidden;
-}
-.os-sk-acday { width: 120px; height: 13px; margin: 6px auto; flex: none; }
-.os-sk-acbub { border-radius: 12px; flex: none; }
-
-/* ══ THE COMMUNITY TILE ══ */
-.os-sk-comill { width: 84px; height: 84px; border-radius: 14px; flex: none; }
-.os-sk-comtx { flex: 1; min-width: 0; }
-.os-sk-comttl { width: 130px; height: 22px; margin-bottom: 10px; }
-.os-sk-comln { height: 14px; margin-bottom: 7px; }
-.os-sk-comln.short { width: 70%; margin-bottom: 0; }
-
-
-/* ⚠️ THE SWEEP IS SUPPRESSED BY NAME, NOT BY DURATION. This sheet's blanket reduced-motion rule
-   sets `animation-duration: .01ms !important` on everything inside `.os-root`, which would leave
-   an infinite sweep running at 100 frames a second — a strobe, not a stillness. Killing the
-   animation-NAME is what actually stops it, and the blocks then carry the wait at rest.
-
-   ⚠️ AND THE GRADIENT GOES WITH IT, or a stopped sweep leaves every block frozen mid-highlight at
-   whatever `background-position` it was declared with — a pale stripe across each ghost that reads
-   as a rendering fault rather than as stillness. `#ece6de` flat is the ref's own base stop.
-   ⚠️ THE 0.62 OPACITY IS RETIRED. It was the app's, not the ref's, and it made the reduced-motion
-   ghost a fainter object than the moving one — quieter motion, not quieter ink. */
-@media (prefers-reduced-motion: reduce) {
-  .os-sk { animation-name: none !important; background-image: none; background-color: var(--sa-sk-base); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .os-root *, .os-card.enter, .os-greet.enter, .os-bd.enter { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-  .os-skel i { animation: none; background: #efe7db; }
-}
-
-/* ══ THE HEADER COUNTERS — RETIRED (stage 1, 17 Sep) ══
-   The three stat cards are deleted, and their rules with them: `.os-counters` and its 2100/1699
-   regimes, the no-lift guards, `.os-counter`, the stat slot `.os-cic` and its painted-plane
-   exemption, `.os-cw`/`.os-cl`/`.os-cv`/`.os-cn`/`.os-cd`, and the 1360/1240/1024 steps that moved
-   them in time with the greeting. What stays below is SHARED: `.os-mark-il` is the illustrated-mark
-   treatment the goals card still wears. */
-
-/**
- * ⚠️ ILLUSTRATED MARKS, BARE ON THE CARD — and two traps, each of which cost a round to find.
- *
- * TRAP 1 — THE ARTWORK HAS AN OPAQUE WHITE FIELD. These are drawn on white paper, not on
- * transparency (44% of the target image is solid white). On parchment they render as a WHITE
- * SQUARE. `mix-blend-mode: multiply` drops the white into the card behind it. The fix is NOT to
- * put the illustration back on a white plate — bare on the card is the chosen treatment.
- *
- * ⚠️ TRAP 2 — A TRANSFORM ON ANY ANCESTOR KILLS THE BLEND. `transform`, `filter` and `opacity < 1`
- * each create a stacking context, which ISOLATES the blend group: the image then blends against
- * transparency instead of against the card, and the white square comes back. So the WRAPPER
- * carries no transform — the optical nudge is `position: relative; top`, never `translateY` — and
- * the hover transform goes on the IMG. This also means an entrance animation on a card holding an
- * illustration will flash the white field for as long as its transform is applied.
- *
- * ⚠️ TRAP 3 — THE IMAGE MUST NOT SET THE ROW'S HEIGHT. An image taller than the text beside it
- * grows the flex row and pushes the text down. The box is fixed, it cannot shrink, and the
- * negative vertical margin absorbs the overhang so the TEXT owns the row height.
- */
-.os-mark-il { display: block; flex-shrink: 0; }
-/* ⚠️ `max-width`, NOT `width` — the artwork sits at its own sharp size inside the slot rather
-   than being stretched to fill it. */
-.os-mark-il img {
-  max-width: 50px; max-height: 50px; width: auto; height: auto; object-fit: contain; display: block;
-  mix-blend-mode: multiply;
-  /* the opacity leg is the entrance's; both live here now rather than in a second rule */
-  transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1), opacity 0.2s ease 0.1s;
-}
-/* the goals mark — same rules, smaller box; `Query Target Icon.png` despite the card's name */
-/* ⚠️ `align-self: center` IS LOAD-BEARING — `.os-goal-r1` is `align-items: baseline`, and AN IMAGE
-   HAS NO BASELINE: it aligns on its bottom margin edge and drags the row taller than its text.
-   Measured before: row 33.3px against 21.8px of text. This opts the mark out of the baseline
-   group so the TEXT owns the row, which is the whole point of trap 3. */
-/* ⚠️ 52px, THE REF'S OWN — `<div class="ill" id="ill4" style="width:52px;height:52px">`. It was 34
-   with a negative margin absorbing the overhang, which is the retired trap-3 shape: the mark hid
-   under the text so the TEXT owned the row. Here the mark is the largest thing in the row by
-   design, so the negative margin goes with it — left in place it would pull the artwork out of the
-   space the card reserves. */
-.os-goalmark { width: 52px; height: 52px; margin: 0; align-self: center; }
-.os-goal:hover .os-goalmark img { transform: rotate(-4deg) scale(1.05); }
-
-/**
- * ⚠️ THE ENTRANCE ANIMATION WOULD FLASH THE WHITE FIELD (trap 2, the case that is easy to miss).
- * `.enter` is a TRANSFORM on the card, so for its ~420ms every illustration inside it blends
- * against transparency and shows as a white square. Isolating the mark from its own ancestor's
- * transform is not possible, so the marks stay hidden until the card has landed — opacity only,
- * which creates no stacking context on the CARD.
- */
-.os-card.enter .os-mark-il img { opacity: 0; }
-
-/* ══ §2 · THE BREAKDOWN — "Where your queries stand" (stage 2, 17 Sep) ═══════════════════════════
- *
- * A header on the page ground, then one card: five equal columns, one per live stage, and a slim foot
- * line for the two live states that are not columns (a revise-and-resubmit, an offer). The section
- * spans the page's measure directly under the greeting.
- *
- * ⚠️ 22px ABOVE IT IS THE COLUMN GAP THE GREETING USED TO SIT ON. The greeting's own 12px margin is
- * its half of the space and this is the other half, so the pair still reads 34px, as it did in
- * stage 1, and the greeting's rule is unchanged.
- */
-.os-bd { margin-top: 22px; min-width: 0; }
-/* ⚠️ NO CARD AROUND THE HEADER — it sits on the page ground. The title and the count share a
-   baseline, so the mono line reads as the heading's aside rather than as a second heading. */
-.os-bdhead {
-  display: flex; align-items: baseline; justify-content: space-between; gap: 18px;
-  margin: 0 0 12px; min-width: 0;
-}
-/**
- * ⚠️ TWO CLASSES AND `!important` ON THE FAMILY — the greeting's workaround, for the same reason.
- * `lib/brand.tsx` forces the family of every `h2` (and `h3`) with `!important` at runtime, so a heading
- * set in anything else must out-rank it or it silently paints in Playfair. The brand script is the
- * real problem, logged for the app-wide type pass; this goes with it.
- */
-.os-bd .os-bdtitle {
-  font-family: var(--os-type) !important;
-  font-weight: 400; font-size: 23px; line-height: 1.3; letter-spacing: 0;
-  color: #2a1f18; margin: 0; white-space: nowrap;
-}
-/**
- * ⚠️ THE META TAKES THE REST OF THE ROW AND CLAIMS NONE OF IT — `width: 0` and `flex: 1 1 0`, text to
- * the right. A manuscript title can be any length, and a nowrap line's full text counts toward the
- * row's min-content however well it ellipses: measured at 375, this row alone held the page 533.7px
- * wide, and the shell (whose columns will not shrink below their content) carried the whole page
- * off the side of the phone. With no width of its own it contributes nothing, and cuts short with an
- * ellipsis when the title will not fit.
- *
- * ⚠️ `overflow: clip`, NOT `hidden` — `hidden` makes the box a scroll container, whose baseline is not
- * its text's in every engine; `clip` cuts the same way and keeps the baseline this row is aligned on.
- */
-.os-bdmeta {
-  flex: 1 1 0; width: 0; min-width: 0;
-  font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 0.13em;
-  text-transform: uppercase; color: #9c8f82; text-align: right; white-space: nowrap;
-  overflow: clip; text-overflow: ellipsis;
-}
-
-/**
- * ⚠️ THE MOUNT — THE `MountPanel` CONSTRUCTION, AS THIS PAGE'S OWN CLASS (Nick: don't modify
- * MountPanel). That component is used across the app with its own values; this page's differ — a 16px
- * rim, the burgundy frame at full strength, a white inside — so the construction is restated here
- * rather than a prop grown on a shared component. A parchment rim of even padding, and inside it a
- * REAL clipping frame: a border, a smaller radius and `overflow: hidden`, never an overlay border
- * (an overlay cannot contain a fill; a column's tint would reach past the frame's corners).
- *
- * The rim's hairline and the card's shadow are the shared component's own (`mountShadow` and a 10%
- * burgundy line in `lib/designTokens.ts`); its paper grain is not carried over. The hero button (the
- * quick actions) takes the rim and the frame but no cast: it already sits on a card.
- */
-.os-mount {
-  box-sizing: border-box;
-  background-color: #fdfaf5;
-  border: 1px solid rgba(124, 58, 42, 0.1);
-}
-.os-mount-in {
-  box-sizing: border-box;
-  display: block;
-  background-color: #ffffff;
-  border: 1px solid #7c3a2a;
-  overflow: hidden;
-}
-.os-mount--card {
-  border-radius: 16px; padding: 6px;
-  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.08), 0 8px 26px rgba(58, 28, 20, 0.13);
-}
-.os-mount--card > .os-mount-in { border-radius: 11px; }
-.os-mount--hero { border-radius: 13px; padding: 5px; }
-.os-mount--hero > .os-mount-in { border-radius: 9px; }
-
-/* ⚠️ FIVE EQUAL COLUMNS, AND THE HAIRLINES ARE THE GAPS. A 1px gap over the frame's hairline colour
-   draws the rules between the columns, so every column's box is the same width by construction —
-   a border on four of them would make the first one a pixel wider than the rest. */
-.os-bdgrid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 1px;
-  background-color: #eee8e0;
-}
-.os-bdcol {
-  box-sizing: border-box;
-  display: flex; flex-direction: column; align-items: center;
-  min-width: 0; padding: 19px 10px 17px;
-  text-align: center;
-  background-color: #ffffff;
-}
-/* ⚠️ A FLOOR ON THE FIGURE: while the data is out the count is empty, and an empty block has no line
-   box at all — the column would sit 32px short and grow when the number landed. */
-.os-bdn {
-  display: block; min-height: 32px;
-  font-size: 29px; line-height: 32px; font-weight: 600; color: #2a1f18;
-  font-variant-numeric: tabular-nums;
-}
-.os-bdcol > .os-spill, .os-bdcol > .os-sk-bdpill { margin-top: 10px; }
-/* ⚠️ TWO LINES OF ROOM WHETHER OR NOT A COLUMN HAS A FACT — the floor is what keeps the five pills on
-   one line across the card when only some columns have something to say. 1.2 makes two lines 27.6. */
-.os-bdfact {
-  display: block; align-self: stretch; min-height: 28px; margin-top: 8px;
-  font-size: 11.5px; line-height: 1.2; color: #8a7a6c;
-}
-/* ⚠️ THE TWO REQUESTED COLUMNS — THE BALL IS WITH THE WRITER. A warmer ground, a 3px rust bar on the
-   bottom edge and the fact line in the same rust. The bar is an inset shadow so it takes no layout:
-   the column's box, and so its neighbours', stay exactly as tall as the other three. */
-.os-bdcol.court { background-color: #fcf8f6; box-shadow: inset 0 -3px 0 #8a4a3c; }
-.os-bdcol.court .os-bdfact { color: #8a4a3c; }
-/* nothing at a stage: the figure goes quiet and the pill steps back, but both stay — a zero is a fact */
-.os-bdcol.zero .os-bdn { color: #b3a596; }
-.os-bdcol.zero .os-spill { opacity: 0.55; }
-.os-bdfoot {
-  margin: 0; padding: 9px 14px 10px;
-  border-top: 1px solid #eee8e0;
-  font-family: "JetBrains Mono", monospace; font-size: 10.5px; line-height: 14px; letter-spacing: 0.04em;
-  color: #9c8f82; text-align: center;
-}
-
-/**
- * ⚠️ THE STATE PILL — a stage's glyph and its words on the stage's own tint. The breakdown and the
- * closed tile both wear it.
- *
- * ⚠️ THE FILLS ARE THE APP'S STATE TOKENS, NEVER A RAW HEX (Nick). They sit at `:root` in
- * `shell/f12.css`, so this page, the Query Centre's cards and the calendar cannot disagree about
- * what colour a stage is. The ink is the page's, on every tint.
- */
-.os-spill {
-  box-sizing: border-box;
-  display: inline-flex; align-items: center; gap: 5px; flex: none;
-  max-width: 100%;
-  padding: 4px 9px 4px 6px; border-radius: 20px;
-  font-family: "JetBrains Mono", monospace; font-size: 9px; line-height: 12px;
-  letter-spacing: 0.08em; text-transform: uppercase; color: #2a1f18;
-  white-space: nowrap;
-}
-.os-spill > :first-child { flex: none; }
-/* the label inherits the pill's mono — stated, for the reason at `.os-acdc` */
-.os-spill-l { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-family: inherit; }
-.os-spill--queried { background-color: var(--state-queried); }
-.os-spill--you { background-color: var(--state-you); }
-.os-spill--agent { background-color: var(--state-agent); }
-.os-spill--closed { background-color: var(--state-closed); }
-
-/* ══ §3 · THE SECOND ROW (stage 3, 17 Sep) — quick actions, the chart, the closed tile ════════════
- *
- * ⚠️ ALL THREE WEAR THE PAGE'S CARD (`.os-card`), and each declares only its own inside. Their equal
- * height is the row's (`.os-row2`); a foot line pinned with `margin-top: auto` is how each card
- * spends the difference, and the minimum gap above each foot is the margin of the block before it.
- */
-
-/* ── the quick actions ── */
-.os-qa { display: flex; flex-direction: column; padding: 16px; }
-.os-qahero {
-  display: block; width: 100%; margin: 0;
-  font: inherit; color: inherit; text-align: left; cursor: pointer;
-  transition: box-shadow 0.16s ease, transform 0.14s ease;
-}
-.os-qahero:hover { box-shadow: 0 2px 8px rgba(58, 28, 20, 0.1); }
-.os-qahero:active { transform: scale(0.99); }
-.os-qahero-in { display: flex; align-items: center; gap: 11px; padding: 9px 13px 9px 9px; }
-/* `max-width: none` because the global image reset would let a narrow card squeeze the quill */
-.os-qaart { display: block; flex: none; width: 52px; height: 52px; max-width: none; object-fit: contain; }
-.os-qaherot { min-width: 0; font-family: var(--os-type); font-size: 18px; line-height: 1.3; color: #2a1f18; }
-.os-qalist { display: flex; flex-direction: column; gap: 7px; margin: 12px 0 14px; }
-.os-qaitem {
-  box-sizing: border-box;
-  display: flex; align-items: center; gap: 10px; width: 100%;
-  padding: 10px 12px; border: 0; border-radius: 10px; background-color: #f5f1eb;
-  font: inherit; font-size: 14px; line-height: 20px; color: #2a1f18; text-align: left;
-  cursor: pointer; transition: background-color 0.14s ease;
-}
-.os-qaitem:hover { background-color: #efe8df; }
-.os-qaitem > span:not(.os-protag) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.os-qaic { width: 16px; height: 16px; flex: none; stroke-width: 1.7; }
-.os-qaic--ink { color: #2a1f18; }
-/* the app's slate — the Pro colour, and the agent colour on the shell's New menu */
-.os-qaic--slate { color: #6a89a7; }
-.os-qaic--ochre { color: #b3832f; }
-/* ⚠️ THE BUILDER'S PRO BADGE, VALUE FOR VALUE — slate on its pale step with a hairline — so a free
-   writer sees one Pro mark across the app, not a second design of it here. */
-.os-protag {
-  margin-left: auto; flex: none;
-  padding: 1px 7px; border: 1px solid #cfdde6; border-radius: 99px; background-color: #e7eef3;
-  font-family: "JetBrains Mono", monospace; font-size: 8.5px; line-height: 12px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: #6a89a7;
-}
-/* ⚠️ PINNED TO THE FOOT, AND A FLOOR RATHER THAN A HEIGHT: 12 of air, the hairline, and a 22px line.
-   `box-sizing` is stated because the floor counts the padding and the rule. */
-.os-qafoot {
-  box-sizing: border-box;
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  min-height: 35px; margin-top: auto; padding-top: 12px;
-  border-top: 1px solid #eee8e0;
-}
-.os-qaq {
-  display: block; min-width: 0;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  font-size: 13px; line-height: 22px; color: #8a7a6c;
-}
-/* ⚠️ `line-height: 1` KEEPS A SECOND FACE FROM GROWING THE LINE — the title's inline box sits inside
-   the 22px line rather than adding its own typewriter metrics to it. */
-.os-qatitle { font-family: var(--os-type); font-size: 15px; line-height: 1; color: #2a1f18; }
-.os-qaday {
-  flex: none;
-  font-family: "JetBrains Mono", monospace; font-size: 9.5px; line-height: 22px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: #9c8f82;
-}
-
-/**
- * ── the chart ──
- *
- * ⚠️ THE HEADER WRAPS, AND ONLY AT ITS ONE SEAM. The hawk and the headline are one group and the
- * toggle is the other; below ~530px of card the toggle takes a line of its own beneath them, which is
- * the one place the row can give without an item breaking inside itself.
- */
-.os-lead { display: flex; flex-direction: column; padding: 16px 20px 12px; }
-.os-achead {
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 10px 16px; flex: none; min-width: 0;
-}
-.os-acid { display: flex; align-items: center; gap: 14px; min-width: 0; }
-.os-acart { display: block; flex: none; width: 96px; height: 96px; max-width: none; object-fit: contain; }
-.os-acstat { display: flex; flex-direction: column; min-width: 0; }
-/* ⚠️ THE HEADLINE WRAPS RATHER THAN CLIPS. At 1280 the card is 302px and the hawk takes a third of it,
-   so the figure and its words stack, and the caption breaks between its two clauses (`.os-acdc`). */
-.os-acrow { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 9px; min-width: 0; }
-.os-acn {
-  min-height: 36px;
-  font-size: 33px; line-height: 36px; font-weight: 600; color: #2a1f18;
-  font-variant-numeric: tabular-nums;
-}
-.os-acttl { font-family: var(--os-type); font-size: 18px; line-height: 1.3; color: #2a1f18; white-space: nowrap; }
-.os-acdelta {
-  min-height: 16px; margin-top: 4px;
-  font-family: "JetBrains Mono", monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.04em;
-  color: #8a7a6c;
-}
-/* ⚠️ `font-family: inherit` IS NOT A NO-OP HERE. The brand script's type rule (`lib/brand.tsx`) names
-   `span`, `div`, `p` and `button` as ELEMENTS, and an element selector outranks inheritance — so a
-   bare span inside a mono line paints in the page's sans. Measured: the caption's clauses did. */
-.os-acdc { font-family: inherit; white-space: nowrap; }
-.os-actog {
-  display: inline-flex; flex: none; gap: 2px; padding: 2px;
-  border: 1px solid #e6dfd6; border-radius: 99px; background-color: #ffffff;
-}
-.os-actog button {
-  border: 0; border-radius: 99px; background-color: transparent; cursor: pointer;
-  padding: 5px 11px;
-  font-family: "JetBrains Mono", monospace; font-size: 10px; line-height: 14px; letter-spacing: 0.04em;
-  color: #8a7a6c; transition: background-color 0.14s ease, color 0.14s ease;
-}
-.os-actog button:hover { color: #2a1f18; }
-.os-actog button.on { background-color: #f5f1eb; color: #2a1f18; }
-.os-acbody { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; margin-top: 10px; }
-/* ⚠️ THE PLOT TAKES WHAT THE ROW LEAVES, ABOVE A FLOOR. The row's height is the quick actions'; the
-   plot is the one part of this card with no content height of its own. */
-.os-acplot { position: relative; flex: 1 1 auto; min-height: 150px; }
-/* ⚠️ THE SVG IS ABSOLUTE, SO IT CAN NEVER SIZE ITS BOX. The component measures the box and hands the
-   svg that exact viewBox and pixel size; an svg in the flow with pixel width attributes would hold
-   the track open when the window narrows, and the plot could only ever grow. */
-.os-acplot > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
-.os-acgrid { stroke: #ece6de; stroke-width: 1; shape-rendering: crispEdges; }
-/* ⚠️ THE EVENT DOTS WEAR THE STATE TOKENS — a request in the writer's-turn rose with a rust heart, a
-   pass in the closed stone with a muted one — and a 2px white ring lifts each off the line. */
-.os-acev > circle:first-child { stroke: #ffffff; }
-.os-acev--request > circle:first-child { fill: var(--state-you); }
-.os-acev--request > .os-acevc { fill: #8a4a3c; }
-.os-acev--pass > circle:first-child { fill: var(--state-closed); }
-.os-acev--pass > .os-acevc { fill: #9c8f82; }
-/* the x labels sit at their points' own x — the first reads from its point, the last back to it */
-.os-acx { position: relative; flex: none; height: 16px; margin-top: 6px; }
-.os-acx span {
-  position: absolute; top: 0; transform: translateX(-50%);
-  font-family: "JetBrains Mono", monospace; font-size: 10px; line-height: 16px; letter-spacing: 0.04em;
-  color: #9c8f82; white-space: nowrap;
-}
-.os-acx span.first { transform: none; }
-.os-acx span.last { transform: translateX(-100%); }
-.os-sparse { position: absolute; inset: 0; display: none; place-items: center; text-align: center; padding: 16px; }
-.os-sparse.on { display: grid; }
-.os-sparse span { font-family: var(--font-serif); font-style: italic; font-size: 13px; color: #b3a596; max-width: 230px; line-height: 1.5; }
-
-/**
- * ── the closed tile ──
- *
- * ⚠️ THE BAR FILLS ARE NICK'S FOUR, IN ORDER OF HOW FAR A QUERY GOT — deepest for the letter, palest
- * for silence. They are this tile's alone, so they are stated here rather than read from the state
- * tokens the pills use.
- */
-.os-cl { display: flex; flex-direction: column; padding: 16px 18px 14px; }
-.os-clhd { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; min-height: 26px; }
-/* two classes and `!important` — `h3` is in the brand script's forced list too (see `.os-bdtitle`) */
-.os-cl .os-cltitle {
-  font-family: var(--os-type) !important;
-  font-weight: 400; font-size: 20px; line-height: 26px; letter-spacing: 0;
-  color: #2a1f18; margin: 0;
-}
-.os-clall {
-  flex: none; padding: 0; border: 0; background-color: transparent; cursor: pointer;
-  font: inherit; font-size: 13px; line-height: 18px; color: #8a7a6c; white-space: nowrap;
-  text-decoration: underline; text-underline-offset: 3px;
-}
-.os-clall:hover { color: #2a1f18; }
-.os-clhead { display: flex; align-items: center; gap: 12px; min-height: 37px; margin-top: 12px; }
-.os-clnum {
-  flex: none;
-  font-size: 33px; line-height: 36px; font-weight: 600; color: #2a1f18;
-  font-variant-numeric: tabular-nums;
-}
-.os-clsub { display: flex; flex-direction: column; min-width: 0; }
-.os-clsub1 { font-size: 14px; line-height: 19px; color: #2a1f18; }
-.os-clsub2 { font-size: 12.5px; line-height: 18px; color: #8a7a6c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.os-clrows { display: flex; flex-direction: column; gap: 7px; margin: 16px 0 14px; }
-.os-clrow {
-  display: grid; grid-template-columns: 106px minmax(0, 1fr) 20px;
-  align-items: center; column-gap: 10px; min-height: 20px;
-}
-.os-clrow > .os-spill { justify-self: start; }
-.os-cltrack { display: block; height: 10px; border-radius: 99px; background-color: #f4f1ec; overflow: hidden; }
-.os-clfill { display: block; height: 100%; border-radius: 99px; }
-.os-clfill--letter { background-color: #8a4a3c; }
-.os-clfill--partial { background-color: #b07a6e; }
-.os-clfill--full { background-color: #d6b3aa; }
-.os-clfill--quiet { background-color: #cdc7bd; }
-.os-clct { text-align: right; font-size: 13px; line-height: 20px; color: #2a1f18; font-variant-numeric: tabular-nums; }
-.os-clfoot {
-  margin: auto 0 0; padding-top: 10px;
-  border-top: 1px solid #eee8e0;
-  font-size: 12.5px; line-height: 18px; color: #8a7a6c;
-}
-
-/* ══ §6 · THE ACTIVITY FEED, AS A CONVERSATION (dashboard redesign, Phase 6) ═════════════════
- *
- * ⚠️ THE TIMELINE MARKUP IS RETIRED, RULE AND ELEMENT TOGETHER — `.os-tlev` and its thread, dot,
- * connector and cardlet, plus `.os-r1`/`.os-st`/`.os-who`/`.os-cap`/`.os-tm`. Twelve classes, swept
- * for renderers with comments stripped before any of them went; all twelve had none.
- */
-
-/* ⚠️ TABS ON A HAIRLINE, NOT PILLS — a view selector, not a row of equal-weight buttons. The
-   active one underlines in BURGUNDY, which is one of the four places this repo permits it. */
-/* ref `.ftabs` — 16px gaps, 20px gutter, a `--line2` base and 2px of air beneath it */
-.os-ftabs {
-  display: flex; gap: 16px; padding: 0 20px; margin-bottom: 2px;
-  border-bottom: 1px solid #eee8e0; flex: none;
-}
-.os-ftab {
-  display: inline-flex; align-items: center; gap: 6px;
-  border: 0; background: none; padding: 9px 0 8px; margin-bottom: -1px; cursor: pointer;
-  font: inherit; font-size: 13.5px; color: #a29587; white-space: nowrap;
-  border-bottom: 2px solid transparent;
-}
-.os-ftab.on { color: #2a1f18; border-bottom-color: #7c3a2a; }
-.os-ftab i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
-.os-ftabn { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: #9c8f82; }
-.os-ftab.on .os-ftabn { color: #8a7a6c; }
-
-/* ⚠️ THE DAY CAPTION IS CENTRED AND STICKY — it is the one thing in the column that is not a
-   message, so it sits on the axis nothing else does. */
-.os-aday {
-  position: sticky; top: 0; z-index: 2;
-  text-align: center; padding: 7px 0 5px;
-  font-family: "JetBrains Mono", monospace; font-size: 8.5px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: #bfb2a3;
-  /* ⚠️ THE PAGE GROUND, NOT THE CARD'S — ref `body.ac-hair .day{background:linear-gradient(
-     var(--ground) 70%,rgba(244,240,234,0))}`. This caption is sticky: it sits over the events
-     scrolling beneath it and has to hide them, so it paints. With the card gone there is nothing
-     behind it but the desk, and `#fffdf9` would have drawn a pale card-coloured tablet sliding
-     down a panel that no longer has a card. The gradient rather than a flat fill is what stops
-     its lower edge reading as a rule. `--ground` is #f4f0ea, which is also the value the ref-diff
-     harness checks the page against. */
-  background: linear-gradient(#f4f0ea 70%, rgba(244, 240, 234, 0));
-}
-
-/* ⚠️ ALIGNMENT CARRIES DIRECTION, AND THERE IS NO LEGEND FOR IT. `in` is the agent's and hugs the
-   left; `out` is the writer's and hugs the right. A legend for a thing the layout already says is
-   the page explaining its own picture. */
-/* ⚠️ THE SIDES ARE UNMISTAKABLE, AND THAT IS ASYMMETRIC PADDING RATHER THAN ALIGNMENT.
-   Ref `.cv .msg.in{padding-left:26px;padding-right:76px}` and its mirror: the 76px is what stops a
-   bubble reaching the far edge, so a glance at the column's ragged side says who spoke without
-   reading a word. Equal padding with `justify-content` alone leaves a long sentence filling the
-   width on both sides, and then the two are told apart only by colour. */
-.os-bub { display: flex; align-items: flex-start; gap: 7px; margin-bottom: 7px; position: relative; }
-.os-bub.in { padding-left: 26px; padding-right: 76px; }
-.os-bub.out { flex-direction: row-reverse; padding-right: 26px; padding-left: 76px; }
-/* ref's ≤1700 step — 22/44, and desk 26 */
-@media (max-width: 1699px) {
-  .os-bub.in { padding-left: 22px; padding-right: 44px; }
-  .os-bub.out { padding-right: 22px; padding-left: 44px; }
-  .os-bub.desk { padding-left: 26px; padding-right: 26px; }
-}
-/* ⚠️ HOUSEKEEPING IS CENTRED AND HAS NO SIDE — it is not a message between two parties, so it
-   takes neither the knot nor a ragged edge. Ref `.cv .msg.desk{padding-left:38px;padding-right:38px}`
-   with a white bubble. */
-/* ⚠️ HOUSEKEEPING IS CENTRED, WHITE AND STRIPLESS — ref `.cv .msg.desk`. It is not a message
-   between two parties, so it takes neither a side, a knot, nor a state strip; its meta says
-   "Not tied to a query" in place of a name. */
-.os-bub.desk { padding-left: 38px; padding-right: 38px; justify-content: center; }
-.os-bub.desk .os-knot { display: none; }
-.os-bub.desk .os-bubin { background: #ffffff; }
-/* ⚠️ THE WRITER'S SIDE MIRRORS EVERY LINE, NOT JUST THE BOX — ref `.cv .msg.out .b .slab, .s`
-   and its `row-reverse` meta. A right-hand bubble whose text still ran left read as an agent's
-   bubble that had drifted across the column. */
-/* the ellipsis has to bite on the agency's OTHER end once the run is reversed */
-/* a tight run: same side, same day — the furniture goes, the spacing closes up */
-.os-bub.run { margin-top: -4px; }
-/* ref `.cv .msg .knot{top:16px}` — the knot sits against the bubble's first line, not its top edge */
-.os-knot { flex: none; position: absolute; top: 16px; }
-.os-bub.in .os-knot { left: 0; }
-.os-bub.out .os-knot { right: 0; }
-/**
- * ⚠️ THE BODY IS PARCHMENT AND CARRIES NO STATE COLOUR — ref `.cv .msg .b`, which is `#fffdf9`
- * with a `--line` hairline for every bubble on the feed.
- *
- * The state fill used to be the whole bubble, so a feed of eight events was eight coloured
- * rectangles and the reader picked sentences out of four different papers. It is a STRIP across
- * the top now: the colour labels the event, and the words sit on the same ground as every other
- * word on the page. `padding: 0` because the strip and the body carry their own.
- */
-.os-bubin {
-  /* ⚠️ 100% AND 12px ARE v22's FULL-WIDTH VALUES, FOLDED IN. They were appended as a second
-     `.os-bubin` rule at the end of the block, where they always won — so the 84% and the 14px
-     here had been dead since the day full-width messages landed. An override that can never lose
-     is not an override, it is the value; leaving both is how the next reader learns the wrong one. */
-  min-width: 0; max-width: 100%; width: 100%;
-  border-radius: 12px; padding: 0; overflow: hidden;
-  background: #fffdf9; border: 1px solid #e6dfd6;
-}
-.os-bub.in .os-bubin { border-bottom-left-radius: 3px; }
-.os-bub.out .os-bubin { border-bottom-right-radius: 3px; }
-/* ⚠️ THE ONE PLACE STATE COLOUR APPEARS ON A BUBBLE — ref `.b.v-strip .striph`. The fill and the
-   1px bottom border are set inline from `STATE_TOKEN`/`STATE_ACCENT`; this rule owns the geometry
-   and the neutral default a housekeeping bubble takes. */
-.os-bubstrip {
-  display: flex; align-items: center; gap: 8px;
-  /* ⚠️ A FLOOR, SO A BUBBLE WITH AN ACTION IS EXACTLY AS TALL AS ONE WITHOUT — ref's 26px. The
-     strip's height must not be a function of what it happens to contain, or the feed's rhythm
-     changes with the writer's outstanding requests. */
-  min-height: 26px;
-  padding: 7px 12px 6px;
-  border-bottom: 1px solid #e6dfd6;
-}
-.os-bubbody { padding: 10px 12px 11px; }
-/* housekeeping's label sits IN the body — it has no strip — so it needs the gap a strip's border
-   would otherwise have given it, and it centres with the rest of a desk bubble */
-.os-bublab-desk { margin-bottom: 4px; justify-content: center; color: #a29587; }
-.os-bub.desk .os-bubsay, .os-bub.desk .os-bubmeta { justify-content: center; text-align: center; }
-/* ref `.cv .msg .b .slab` — mono 9.5 at .09em, `--ink2` at .75. Inside the strip it takes no
-   bottom margin and no opacity: the strip's own colour is the separation. */
-.os-bublab {
-  display: flex; align-items: center; gap: 6px;
-  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.09em;
-  text-transform: uppercase; color: #6b5d54; margin: 0;
-}
-/* ref `.cv .msg .b .s{font-size:15px;color:var(--ink);line-height:1.35}` — the sentence is the
-   bubble's content and was set two and a half points below the ref's, at a muted ink. */
-.os-bubsay { font-size: 15px; color: #2a1f18; line-height: 1.4; }
-/* ⚠️ MONO — ref `.cv .msg .b .m{font-family:var(--mono);font-size:10px;letter-spacing:.08em;
-   text-transform:uppercase}`. The app's meta line was the body face at 10.5, so the one line on a
-   bubble that is a REFERENCE rather than prose read as more prose. */
-.os-bubmeta {
-  display: flex; align-items: baseline; gap: 8px;
-  font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.08em;
-  text-transform: uppercase; color: #9c8f82; margin-top: 5px;
-}
-/* ⚠️ THE AGENCY IS THE ONLY PART THAT MAY ELLIPSE — ref `.m .who2`. The surname and the time are
-   what place the event; the agency is context, and it is the one of the three that can be
-   arbitrarily long. `min-width: 0` on the group is what lets the `<i>` shrink at all. */
-.os-bubwho { flex: 1; min-width: 0; display: flex; white-space: nowrap; overflow: hidden; }
-.os-bubwho b { font-weight: 400; flex: none; }
-.os-bubwho i { font-style: normal; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.os-bubt { flex: none; }
-/**
- * ⚠️ THE ACTION AND THE TIMESTAMP SHARE ONE GRID CELL — the action REPLACES the time rather than
- * joining it. Both are `grid-area: 1/1`, so the slot is the taller and wider of the two and
- * nothing moves when one swaps for the other: no reflow on hover, and no row reserved on the
- * bubbles that have no action at all (which is almost all of them).
- *
- * ⚠️ ON HOVER, AND ON FOCUS-WITHIN — a control that only appears under a pointer is unreachable
- * from a keyboard, which is the fault the tasks card's own end-cell already records.
- */
-.os-bubend { margin-left: auto; flex: none; display: grid; align-items: center; justify-items: end; }
-.os-bubend > * { grid-area: 1 / 1; }
-.os-bubact {
-  opacity: 0; pointer-events: none;
-  border: 1px solid #d8cdbd; border-radius: 99px; background: #fffdf9;
-  padding: 3px 10px; font: inherit; font-size: 11px; color: #4a3a2e; cursor: pointer;
-  white-space: nowrap; transition: opacity 0.14s ease;
-}
-.os-bub:hover .os-bubact, .os-bub:focus-within .os-bubact { opacity: 1; pointer-events: auto; }
-/* the time gives way to it — one slot, one occupant at a time */
-.os-bub:hover .os-bubtm, .os-bub:focus-within .os-bubtm { opacity: 0; }
-.os-bubtm { transition: opacity 0.14s ease; }
-/* ⚠️ ONLY WHERE THERE IS SOMETHING TO SWAP TO. `:has()` keeps a bubble with no action showing its
-   time under the pointer; without it every bubble's timestamp vanished on hover and the feed
-   flickered blank as the cursor crossed it. */
-.os-bub:hover .os-bubend:not(:has(.os-bubact)) .os-bubtm,
-.os-bub:focus-within .os-bubend:not(:has(.os-bubact)) .os-bubtm { opacity: 1; }
-
-/**
- * ⚠️ FULL-WIDTH MESSAGES — ref `body.bw-full`, v22's shipping `bw:'full'`. Declared here, at the
- * END of the bubble block, because every rule it overrides is above it and a media query is not
- * the only thing that confers no specificity: two rules at 0-2-0 are settled by order.
- *
- * ⚠️ WHAT IS GIVEN UP, AND WHAT REPLACES IT. The old grammar carried direction in the LAYOUT — an
- * agent's event hugged the left with 76px of air on its right, yours mirrored it, and the ragged
- * side of the column told you who spoke without your reading a word. That is a real thing to lose
- * and the ref loses it deliberately: in a 333px column, 76px of enforced margin is a quarter of the
- * measure spent on a signal, and the sentences are long enough now to need every pixel of it.
- * Direction moves INTO the strip instead, as the ORDER of its three parts — dot, label, time for an
- * agent; time, label, dot for you. The mirror is the whole mechanism, so `row-reverse` on `.out`
- * and the time's flipped margin belong together and neither works alone.
- */
-.os-bub.in, .os-bub.out, .os-bub.desk { padding-left: 0; padding-right: 0; }
-/* the tail's clipped corner went with the indent — a 3px corner on a full-width block reads as a
-   mistake rather than as a tail pointing at a speaker */
-.os-bub.in .os-bubin, .os-bub.out .os-bubin { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
-.os-knot { display: none; }
-
-/* the strip carries the direction now: dot, label, time — mirrored for the writer's own events */
-.os-bubsd { width: 14px; height: 14px; flex: none; line-height: 0; }
-.os-bubstrip .os-bublab { margin: 0; white-space: nowrap; font-size: 9px; letter-spacing: 0.1em; }
-/* ⚠️ THE AUTO MARGIN MOVED TO THE WRAPPER — the time is a grid child now and pushing it with a
-   margin of its own would fight the cell it shares with the action. */
-.os-bubtm {
-  font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.05em; color: #9c8f82;
-}
-.os-bub.out .os-bubstrip { flex-direction: row-reverse; }
-.os-bub.out .os-bubend { margin-left: 0; margin-right: auto; justify-items: start; }
-
-/**
- * ⚠️ THE BODY TEXT IS ALWAYS LEFT-ALIGNED, ON BOTH SIDES AND IN BOTH KINDS, AND THIS IS THE RULE
- * THAT MATTERS MOST HERE. `.os-bub.out` used to set `text-align: right` on the sentence and a desk
- * bubble centred it — three alignments in one column, so a reader's eye had to find the start of
- * every line afresh. Right-aligned prose is hard to read at any length and these sentences are now
- * long; centred prose is worse. Direction is the strip's job, and the strip does it without
- * touching the words.
- */
-.os-bub.out .os-bubsay, .os-bub.desk .os-bubsay { text-align: left; }
-.os-bub.out .os-bublab, .os-bub.desk .os-bublab-desk { text-align: left; justify-content: flex-start; }
-/* the manuscript's title, italic inside the sentence — ref `<em>` */
-.os-bubsay em { font-style: italic; }
-
-/* meta: one row, reading left to right, whichever side the event came from */
-.os-bub.out .os-bubmeta, .os-bub.desk .os-bubmeta { flex-direction: row; justify-content: flex-start; text-align: left; }
-.os-bub.out .os-bubwho { flex-direction: row; }
-.os-bub.out .os-bubwho i { direction: ltr; }
-
-@media (hover: none) { .os-bubact { opacity: 1; } }
-
-/* ══ §5 · THE TO-DO PANEL (dashboard redesign, Phase 5) ══════════════════════════════════════
- *
- * ⚠️ THE ROW MARKUP IS RETIRED, RULE AND ELEMENT TOGETHER — `.os-trow` and its twelve companions
- * (`.os-knd`, `.os-tt`, `.os-tn`, `.os-tm2`, `.os-endcell`, `.os-stp`, `.os-act`, `.os-dots`,
- * `.os-trio`, `.os-p`, `.os-pdot`, `.os-none`). The panel renders `TaskTicket` now, so every one of
- * them selected nothing; a sweep with comments stripped found no renderer for any of the thirteen
- * before they went. A retired rule left in a sheet is how a deleted layout comes back.
- */
-
-/* the badge: the count, and — under a filter only — what it is counting, in that category's paper.
-   Ref `.badge`: 3/11 padding, a 99px pill on `#f1e7da` with an `#e6d8c6` hairline, the figure in
-   the serif at 16/600/1 and the label in mono at 9.5/.09em. */
-.os-tbadge {
-  display: inline-flex; align-items: baseline; gap: 5px; flex: none;
-  /* ref `.badge{margin-left:10px}` — a tenth of an inch of its own, ON TOP of the band's gap, so
-     the count reads as attached to the title rather than as the next item in the row. Without it
-     the badge sat 10px left of the ref's and its right edge was the only thing the diff could see. */
-  margin-left: 10px;
-  border-radius: 99px; padding: 3px 11px;
-  color: #2a1f18; white-space: nowrap;
-  background: #f1e7da; border: 1px solid #e6d8c6;
-  transition: background 0.16s ease;
-}
-.os-tbadge b {
-  font-family: var(--font-serif); font-weight: 600; font-size: 16px; line-height: 1;
-  color: #2a1f18; font-variant-numeric: tabular-nums;
-}
-.os-tbadge span {
-  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.09em;
-  text-transform: uppercase; color: #6b5d54;
-}
-
-/* ⚠️ THE ZONE IS TALLER THAN THE RULE, DELIBERATELY. The rule is 9px; the zone reserves the hover
-   target and the 18px of air between it and the first ticket, so thickening on hover happens
-   INSIDE space that is already there and no ticket moves. */
-/* ref `.rulezone{padding:8px 20px 18px}` — 8 above the rule and 18 below, which is what makes the
-   zone 38px at rest with a 12px rule in it. */
-.os-rulezone { position: relative; padding: 8px 20px 18px; flex: none; }
-/**
- * ⚠️ 12px, PILL RADIUS, ONE HAIRLINE, FULL CARD WIDTH — ref `.rulezone .sbar.thin`. The rule is a
- * single object now rather than a row of five: the border and the radius are ITS, and the bands
- * fill it edge to edge and are clipped by it.
- *
- * ⚠️ AND IT GROWS TO 15px ON HOVER WITHOUT REFLOWING ANYTHING, which is the part the ref does not
- * solve. The ref simply raises `.sbar.thin` to 15px, so its zone grows by 3 and every ticket below
- * moves down by 3 — the exact fault P5.3 measured here once already, when the rule was 9 and became
- * 12. The negative block margin is what keeps both: the ink is 15px, the FLOW height stays 12, and
- * nothing beneath it moves. The old fix (a 12px row with 9px bands growing inside it) is retired
- * because it cannot give the ref's 12px resting rule and its 15px hover at the same time.
- */
-.os-rule {
-  display: flex; align-items: stretch; height: 12px; gap: 0;
-  border-radius: 99px; border: 1px solid rgba(0, 0, 0, 0.05); overflow: hidden;
-  /* ⚠️ NO TRANSITION ON THE HEIGHT, and the sheet's own lock is right to forbid one: `height` and
-     `margin` are layout properties and animating them puts the whole card through layout on every
-     frame of a hover. The ref does not transition them either — its `.sbar.thin` transitions
-     `filter`, `flex-basis` and `transform`, and the height simply snaps. */
-}
-.os-rulezone:hover .os-rule, .os-rulezone.on .os-rule, .os-rulezone:focus-within .os-rule {
-  height: 15px; margin-block: -1.5px;
-}
-/* ⚠️ THE SEPARATOR IS A BORDER ON EACH BAND, IN THE CARD'S OWN PAPER — ref
-   `.sbar.thin button{border-right:2px solid var(--card)}` with none on the last. It was a 2px flex
-   GAP, which is the same picture until the rule gains a border and a radius: a gap shows the ZONE
-   through, and the zone is now behind a clipped pill, so the last band's gap became a 2px notch in
-   the rim. A border belongs to the band and is clipped with it. */
-.os-rb { border: 0; border-right: 2px solid #fffdf9; padding: 0; min-width: 3px; cursor: pointer; transition: filter 0.14s ease; }
-.os-rb:last-child { border-right: 0; }
-.os-rb:hover { filter: brightness(0.96); }
-.os-rb:focus-visible { outline: 2px solid #8a9e88; outline-offset: 1px; }
-
-/**
- * ⚠️ ONE FOCUS RING FOR THIS PAGE, SAGE, AND ONLY FOR THE KEYBOARD (v30, Phase 2).
- *
- * ⚠️ THE STATED CAUSE WAS FALSE AND THE MEASUREMENT SAYS SO. The pack reported a ring left behind
- * by a mouse click, fired on `:focus` rather than `:focus-visible`. Measured before touching
- * anything, clicking a rule band and a ticket: `outline-style: none`, `:focus-visible` not matched.
- * The outlines were already keyboard-only. What persists after a click is a SELECTION marker drawn
- * as a box-shadow — `.os-rb.on`'s burgundy inset and `.tkt.sel`'s pink ring — which is the app
- * saying what is selected, and reads as a stuck focus ring because until this pass the filter had
- * no way back. Phase 3 is the real fix for that half.
- *
- * ⚠️ SO THIS BLOCK CLEARS THE OUTLINE AND DELIBERATELY DOES NOT CLEAR `box-shadow`. The ref's own
- * rule is `:focus:not(:focus-visible){outline:none!important;box-shadow:none!important}` and the
- * second half is safe THERE because nothing in the ref draws state with a shadow. Here it would
- * erase the selected ticket's marker the moment it was focused — a mockup's rule that cannot be
- * ported without reading what the app does with the property.
- *
- * ⚠️ AND IT IS SCOPED, NOT GLOBAL. `.tkt`'s own ring is burgundy and that component is shared with
- * the To-do page and the Agents drawer; retinting it everywhere is a bigger call than this pack
- * makes, so the dashboard states its ring at 0-2-0 and the shared default is untouched. `.slo` is
- * named because the drawer is portalled to `body` (Phase 4) and is no longer inside `.sa-dashroot`.
- */
-.sa-dashroot :focus:not(:focus-visible),
-.slo :focus:not(:focus-visible) { outline: none; }
-.sa-dashroot :focus-visible,
-.slo :focus-visible { outline: 2px solid #8a9e88; outline-offset: 2px; border-radius: 6px; }
-/* the shared ticket's own ring is burgundy; on this page and in this drawer it is the page's sage */
-.sa-dashroot .tkt:focus-visible,
-.slo .tkt:focus-visible { outline: 2px solid #8a9e88; outline-offset: 2px; }
-
-/**
- * ⚠️ THE SELECTED BAND IS MARKED BY DIMMING THE OTHERS — the ref's own mechanism (v30, Phase 2).
- * It was an inset `#7c3a2a` ring on the selected band, which is burgundy rather than red but reads
- * as an error at 1.5px inside a pale tint, and is the ring the pack was seeing. The ref
- * (`.sbar button.dim{opacity:.4}`) never rings the selection: it fades everything that is NOT
- * selected, which says the same thing without adding a colour the palette reserves for ink.
- */
-.os-rb.dim { opacity: 0.4; }
-
-/* ⚠️ THE CAPTION SITS IN THE ZONE'S OWN PADDING AND ADDS NO HEIGHT TO IT — the rulezone reserves
-   18px below the rule for the legend overlay's shadow, and this line lives in it. A caption that
-   pushed the tickets down would make the grid jump every time a band was clicked, which is the
-   fault the legend was made an overlay to avoid. */
-.os-rulecap {
-  position: absolute; left: 20px; right: 20px; top: calc(100% - 17px);
-  margin: 0; font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.08em;
-  text-transform: uppercase; color: #9c8f82; white-space: nowrap; overflow: hidden;
-  text-overflow: ellipsis; pointer-events: none;
-}
-/* the legend overlay covers the caption when it opens — one line in that slot at a time */
-.os-rulezone.on .os-rulecap, .os-rulezone:hover .os-rulecap { opacity: 0; }
-
-/**
- * ⚠️ THE BADGE AS A CONTROL (v30, Phase 3) — ref `.badge{cursor:default}` plus `.badge .clr`.
- * It is a `button` only while a filter is on, so the resting badge keeps `.os-tbadge` exactly as it
- * was: same paddings, same radius, same type. What the button adds is a pointer, the `×` and a
- * hover that brings the glyph to full strength — the ref's own treatment, where the mark sits at
- * .6 until the badge is hovered so it reads as an affordance rather than as part of the label.
- */
-.os-tbadge-clr {
-  cursor: pointer; font: inherit; border: 1px solid #e6d8c6;
-  transition: filter 0.14s ease;
-}
-.os-tbadge-clr:hover { filter: brightness(0.97); }
-.os-tbadge-x { font-size: 14px; line-height: 1; letter-spacing: 0; color: #6b5d54; opacity: 0.6; margin-left: 2px; }
-.os-tbadge-clr:hover .os-tbadge-x { opacity: 1; }
-
-/* ⚠️ AN OVERLAY, NOT A ROW. Revealing the legend must not move a single ticket — a legend that
-   reflows the grid makes the thing you were about to click jump out from under the pointer. */
-.os-legend {
-  position: absolute; left: 18px; right: 18px; top: 100%; z-index: 4;
-  display: flex; flex-wrap: wrap; gap: 3px 14px;
-  padding: 9px 12px; margin-top: -12px;
-  background: #fffdf9; border-radius: 11px;
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 8px 22px rgba(58, 28, 20, 0.1);
-}
-.os-lg {
-  display: inline-flex; align-items: center; gap: 7px;
-  border: 0; background: none; padding: 2px 3px; cursor: pointer;
-  font: inherit; font-size: 11.5px; color: #5c5148; white-space: nowrap;
-}
-.os-lg b { font-weight: 600; color: #241811; font-variant-numeric: tabular-nums; }
-.os-lg i { width: 10px; height: 10px; border-radius: 3px; flex: none; box-shadow: inset 0 0 0 1px rgba(58, 28, 20, 0.08); }
-.os-lg.on { color: #241811; text-decoration: underline; text-underline-offset: 3px; }
-.os-lg:focus-visible { outline: 2px solid #8a9e88; outline-offset: 2px; border-radius: 6px; }
-
-/* ⚠️ THREE ACROSS, TOP-ALIGNED. `align-content: start` is what stops three tickets in a tall card
-   spreading down it — the grid would otherwise distribute its rows into the height the card gives.
-   `minmax(0, 1fr)` because a ticket's headline is a sentence and `1fr` alone would let the longest
-   one set every column's width. */
-/* ⚠️ THE FAMILY PAPERS ARE NOT DECLARED HERE ANY MORE — they are at `:root` in `taskTicket.css`,
-   beside the rules that read them. This grid carried a private copy because the tokens lived only
-   on `.tpn`; that copy fixed the dashboard and left `/todo`'s own tickets painting transparent
-   tags, which is why a page-scoped workaround was the worse of the two options: it made the fault
-   invisible on the page someone was looking at. See the hoist's note in `taskTicket.css`. */
-/* ⚠️ THE TICKET'S TITLE IS THE CARD'S OWN FACE HERE, AND THIS IS A DELIBERATE PER-SURFACE
-   DIVERGENCE — the two refs disagree. `todo-qc-style.html`'s brief specifies Inter 600 for the
-   To-do page's ticket, and `TaskTicket` renders on both surfaces; this page's ref sets
-   `.tk .ttl{font-weight:600;font-size:15px;line-height:1.3}` with no family, so it inherits the
-   card's, and `--ink` rather than the muted step. Scoped to the dashboard's grid so the To-do
-   page's contract is untouched. Raised in the run report: one component reading two ways on two
-   pages is a question for Nick, not a thing to settle by editing whichever file is open. */
-.os-tkgrid .tkt .ttl { font-family: inherit; font-size: 15px; color: #2a1f18; }
-
-/* ⚠️ NO FIXED COLUMN COUNT — ref `.tgrid{grid-template-columns:repeat(auto-fill,minmax(288px,1fr));
-   gap:12px;padding:0 20px 18px}`, stepping to `minmax(240px,1fr)` at its own 1700 breakpoint. It
-   was `repeat(3, …)` and then `repeat(2, …)`, which states a COUNT where the design states a
-   minimum: at any width where three 288s do not fit, a fixed three makes them narrower than the
-   design allows rather than dropping to two. */
-.os-tkgrid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
-  gap: 12px; align-content: start; padding: 0 20px 18px;
-}
-@media (max-width: 1699px) {
-  .os-tkgrid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
-}
-@media (max-width: 720px) { .os-tkgrid { grid-template-columns: minmax(0, 1fr); } }
-
-/* the drawer's pane takes the whole sheet — `SlideOver` supplies the chrome around it */
-.dash-tpn { display: flex; flex-direction: column; height: 100%; min-height: 0; }
-
-/**
- * ══════════════════ v33 · THE SIDEBAR BOUNDARY IS NOT DECLARED HERE ══════════════════
- *
- * ⚠️ IT USED TO BE, AND THAT WAS THE FAULT (v33.2, Phase 3). The scrim was
- * `.dash-mode .ws-window::before` — the content WINDOW, whose left edge measures 246 against the
- * rail's right edge at 224. It therefore began 22px inside the page and read as a band down the
- * content's own edge: the page as the raised object resting on the rail, which is the reading
- * upside down. A shadow belongs to its caster, and falls away from it.
- *
- * The column that IS flush with the rail is `.ws-main` — x = 224 at every width, measured — so the
- * rule now lives beside the other `.dash-mode` rules in `shell/workspaceShell.css`, where the
- * element it styles is declared. A page sheet reaching into one shell element to position
- * something against a THIRD shell element is how the wrong one gets picked; it is what happened.
- */
-
-/* ⚠️ `.os-tkfoot` IS DELETED WITH ITS ELEMENT (v33, Phase 2). A rule left behind for markup
-   nothing renders is the fault this sheet already records twice. */
-
-
-/* ══ §5 · THE TASKS CARD ══ */
-.os-tasks { display: flex; flex-direction: column; overflow: hidden; }
-/* ⚠️ CENTRED, not baseline-aligned, and CLOSED BY A HAIRLINE — the pills are objects on the row
-   now, not a run of text beside the title, so a shared baseline no longer describes the row. */
-/* ⚠️ THE CARD CLIPS so the edge-to-edge band meets the radius instead of overhanging it. */
-
-/* ⚠️ PINK, BECAUSE THIS IS THE TO-DO SURFACE. The house rule is sage for a dashboard container's
-   header and PINK where something is asking for you — this card is the one that does. The band
-   runs edge to edge, so the card needs `overflow:hidden` for it to meet the radius cleanly. */
-/* ⚠️ THE SAME PADDING AS `.os-ahead` (§2) — it was 11px/18px against the sage band's 10px/16px,
-   so the pink band stood 2px taller than the other three. Nobody had noticed because until now no
-   two bands sat side by side at the same height; measured 51 vs 49 across the four. The colours
-   differ by purpose, the GEOMETRY does not. */
-/* ⚠️ NO FILL, NO HAIRLINE (dashboard redesign, Phase 2). The header sits ON the card: title, mark
-   and controls against the card's own paper. What is gone is a `linear-gradient` band and a
-   `border-bottom` — deliberately NOT the 51px height, which stays because it is what makes the
-   four headers agree structurally rather than by four values that happen to match (they did not:
-   measured 51 against 49 before it was stated).
-
-   ⚠️ AND `background` IS ABSENT RATHER THAN SET TO `transparent`. The shorthand resets every
-   background longhand, so a future edit adding an image here would silently take a colour with it;
-   with nothing declared there is no shorthand to mistake. The card behind it is opaque. */
-/* ⚠️ NO `gap` HERE — the shared band rule below states it (v29, dead-rule sweep). This block said
-   `gap: 12px` and rendered 10: `.os-ahead, .os-th2 { gap: 10px }` is later in the file and both are
-   0-1-0, so the cascade took the grouped one while a reader scanning top-down took this. A value
-   the file states and the browser discards is worse than no value, because it reads as the answer. */
-.os-th2 {
-  display: flex; align-items: center; margin: 0;
-}
-.os-th2 h2 {
-  font-family: var(--font-serif); font-size: 23px; font-weight: 500; color: #2a1f18;
-  margin: 0; white-space: nowrap;
-}
-
-/* ⚠️ ONE TYPEFACE THROUGHOUT THE PILL (inherited Inter, never the serif). Playfair digits beside
-   Inter labels drop below the baseline — and the numeral is the thing being read. */
-
-
-
-/* ⚠️ FAINT PASTILLE BLUE (polish P7) — ONE fill for all three pills, with the DOT carrying the
-   kind.
-
-   ⚠️ WHITE, NOT TINTED (P5). The pills went pastille blue in an earlier pass, and the tint was
-   doing the same job as the dot beside it — two devices for one distinction, so the dot stopped
-   reading as the thing that carried the category. COLOUR LIVES IN THE DOT; the pill is a white
-   chip with a hairline. That also frees the tint for surfaces where nothing else is doing the
-   sorting.
-   ⚠️ THE FIGURE IS DARKER THAN THE LABEL. It is the thing being read. */
-
-
-.os-p.u .os-pdot { background: #7c3a2a; }
-.os-p.h .os-pdot { background: #8a9e88; }
-.os-p.m .os-pdot { background: #b9a893; }
-
-.os-see {
-  margin-left: auto; font-size: 11.5px; color: #7c3a2a; font-weight: 500;
-  background: none; border: none; padding: 0; cursor: pointer;
-}
-.os-see:hover { text-decoration: underline; }
-/* §10: every → slides on hover */
-.os-arr { display: inline-block; transition: transform 0.16s ease; }
-.os-see:hover .os-arr { transform: translateX(3px); }
-/* ⚠️ THE WRAPPER TAKES THE FLEX, THE SCROLLER TAKES THE PADDING (polish P2). EdgeFadeScroll
-   inserts a relative frame between the card and the scroll element and positions its two fades
-   against it — so the frame is what must grow, or the fades have nothing to hang on. */
-.os-tbodywrap { flex: 1; min-height: 0; }
-.os-tbody { padding: 6px 18px 10px; }
-.os-tempty { min-height: 80px; display: grid; place-items: center; padding: 16px; }
-.os-tempty span { font-family: var(--font-serif); font-style: italic; font-size: 13.5px; color: #b3a596; }
-
-/* ⚠️ THE FIXED GRID (§5): 56px | text | 104px | 18px — every pill lines up, and the end cell's
-   two occupants are ABSOLUTE in the same cell so hover can never reflow the row. */
-
-
-
-
-.os-knd.sg { background: #e9ede6; border-color: #d6ddd2; color: #5a6e58; }
-
-
-
-
-
-
-
-.os-stp.u { background: #f3e0d6; color: #6b3023; }
-.os-stp.t { background: #e9ede6; color: #5a6e58; }
-
-
-
-.os-btn-mini {
-  font-size: 10.5px; font-weight: 500; border-radius: 99px; padding: 0 12px; height: 24px;
-  display: flex; align-items: center; white-space: nowrap; cursor: pointer;
-  background: #2b2118; border: 1px solid #2b2118; color: #ffffff;
-}
-.os-btn-mini:hover { background: #3a2d22; }
-.os-btn-mini.ghost { background: #ffffff; border-color: #d5c8b8; color: #5c4d42; }
-.os-btn-mini.ghost:hover { border-color: #b9a893; color: #3a1c14; }
-
-
-
-
-/* §11: the task grid tightens, then stacks */
-@media (max-width: 1200px) {
-
-}
-@media (max-width: 640px) {
-
-
-
-
-
-
-
-}
-
-/* §10: slim warm scrollbars, appearing on container hover */
-.os-tbody, .os-abody { scrollbar-width: thin; scrollbar-color: transparent transparent; }
-.os-tbody:hover, .os-abody:hover { scrollbar-color: #ddd0c0 transparent; }
-.os-tbody::-webkit-scrollbar, .os-abody::-webkit-scrollbar { width: 7px; }
-.os-tbody::-webkit-scrollbar-thumb, .os-abody::-webkit-scrollbar-thumb {
-  background: transparent; border-radius: 99px; border: 2px solid transparent;
-  background-clip: content-box; transition: background 0.2s;
-}
-.os-tbody:hover::-webkit-scrollbar-thumb, .os-abody:hover::-webkit-scrollbar-thumb {
-  background: #ddd0c0; background-clip: content-box;
-}
-
-
-/* ══ §6 · QUERYING GOALS ══ */
-/* ⚠️ THE REF'S OWN PADDINGS, AND THIS CARD HAS NO BAND TO TAKE THEM FROM. The ref splits them
-   between a head (`14px 20px`, its bottom border and padding removed) and a `.goal` body
-   (`18px 22px 20px`); this card is BARE by a measured decision recorded at its markup, so the two
-   fold into one. The card's height is the right column's whole arrangement — the activity card
-   takes what is left — so its padding is six probes' worth of cascade. */
-.os-goal { padding: 14px 20px 20px; flex: none; }
-/* ⚠️ `align-items: center`, NOT `baseline` — an image has no baseline and aligns on its bottom
-   margin edge, so a 52px mark on a baselined row drags the row taller than its own text. This
-   file's own trap-3 note is about exactly that; the row was safe at 28px and is not at 52. */
-.os-goal-r1 { display: flex; align-items: center; gap: 10px; }
-.os-goal-r1 h2 { font-family: var(--font-serif); font-size: 23px; font-weight: 500; color: #2a1f18; flex: 1; margin: 0; }
-/* ⚠️ `.os-goal-num`, `.os-blocks` AND `.os-goal-edit` ARE RETIRED (goals pack).
-   `.os-goal-num` was the count rendered as a BUTTON that opened an inline editor — an editing
-   surface inside a reporting one, which made the number look like a control. `.os-blocks` was the
-   one-block-per-query meter, replaced by a single proportional bar whose fill is one constant
-   colour at every width. `.os-goal-edit`/`.os-goal-btns` were that inline editor's number input
-   and period select; the Form 11 sheet replaces them whole.
-   The card's own rules now live in `queryingGoals.css`, beside the component that renders them.
-   `.os-goal-t` went with the sentence it carried — the card states a count, not an instruction. */
-
-/* ══ §6 · ACTIVITY ══ */
-/* ⚠️ THE MIN-HEIGHT IS SMALL ON PURPOSE. Its job is to stop the card collapsing, NOT to reserve
-   space — a large value makes the card refuse to shrink and pushes the row taller again. */
-.os-actv { display: flex; flex-direction: column; overflow: hidden; flex: 1 1 auto; min-height: 120px; }
-/* ⚠️ SAGE, per the house rule: sage for a dashboard container's header, pink reserved for the
-   surface that is asking something of you (the tasks card). The band runs edge to edge, so the
-   card clips. */
-/**
- * ⚠️ THE BAND'S HEIGHT IS STATED, NOT DERIVED (headers P3). All three bands used to be sized by
- * their contents and agreed only by COINCIDENCE — Tasks at 11/18 padding, the sage band at 10/16,
- * measured 51 against 49. Any control, any longer title, any font fallback moved one and not the
- * others. A fixed height with `box-sizing: border-box` makes the agreement structural: the band is
- * 51px because it says so, and its contents centre inside whatever room that leaves.
- */
-/* ⚠️ AMENDED: THE HEIGHT IS A FLOOR NOW, NOT THE HEIGHT — ref `.hd{padding:14px 20px;gap:10px}`
-   plus `.card.ch-bare .hd{padding-bottom:4px}`. The note above is still right that the three bands
-   must agree, and 51px stated did make them agree — with each other, and not with the ref. The
-   ref's band is 14px of air, then its contents, then 4px: ASYMMETRIC, so its contents sit high in
-   the band. Centring them inside a stated 51 put the to-do badge 4.6px low at every width, and the
-   band's own height was within tolerance the whole time, which is why the diff blamed the badge.
-   `min-height` keeps the floor the note argues for: an empty band is still 51px. */
-.os-ahead, .os-th2 {
-  /* ⚠️ THE FLOOR IS 44px, NOT 51, AND A FLOOR THAT BINDS IS NOT A FLOOR. 51 was the v22 band's
-     stated HEIGHT, kept as a minimum when the band went content-driven — but the ref's band is
-     50.2 (14px of air, a 32.2px heading, 4px), so 51 bound on every card and every band ran 0.8px
-     tall. Small, and it pushed the to-do rule over the edge tolerance at 1536 while the card
-     itself stayed just inside it — so the diff reported the rule and not the band.
-     44 is the honest minimum: the padding plus the 26px tile, i.e. a band with nothing in it but
-     its mark. It never binds on a band that has a heading, which is the point. */
-  height: auto; min-height: 44px; padding: 14px 20px 4px; gap: 10px;
-  box-sizing: border-box; flex: none;
-}
-
-/* the same, for the sage band — see `.os-th2` above for why the height survives the paint */
-/* ⚠️ 10px, NOT 12 — ref `.hd{gap:10px}`, and it is declared here as well as on the shared rule
-   above because this block is LATER and would otherwise win at equal specificity. Two pixels per
-   gap, three gaps in the to-do band, and the count chip lands somewhere else. */
-.os-ahead {
-  display: flex; align-items: center; gap: 10px;
-}
-/* ⚠️ NOWRAP, AND THE CONTROLS SHRINK FIRST. A title wrapping to two lines was what broke the band
-   height at narrower widths — with a stated height it would now clip instead, which is worse. */
-.os-ahead h2, .os-th2 h2 { white-space: nowrap; flex: none; }
-/* the ref's `.hd h3`: serif 500 / 23px, in `--ink` — one heading treatment for every card */
-.os-ahead h2 {
-  font-family: var(--font-serif); font-size: 23px; font-weight: 500; color: #2a1f18;
-  margin: 0;
-}
-/**
- * ⚠️ THE ACTIVITY PANEL IS NOT A CARD — ref `body.ac-hair #actCard`, which is v22's shipping
- * chrome (`ac:'hair'`). It is a column of events beside two cards, and a card around it made the
- * page read as three objects of equal weight when two of them are surfaces you act on and this one
- * is a record you read. What separates it is a single hairline down its left edge and 26px of air.
- *
- * ⚠️ AND THE CONSEQUENCE IS THAT THE DAY CAPTIONS AND THE FADE TAKE THE PAGE GROUND, NOT THE
- * CARD'S. Both are gradients that hide what scrolls under them, and both were mixed against
- * `#fffdf9`; with no card behind them they would have painted a pale panel-shaped block on the
- * desk. The ref moves them to `--ground` in the same rule set, which is why these three belong
- * together and must not be separated: take the card away without them and the fix looks worse
- * than the fault.
- */
-.os-actv {
-  background: transparent; border: 0; box-shadow: none; border-radius: 0;
-  padding: 0 0 0 26px; border-left: 1px solid #e6dfd6;
-}
-/* ref `body.ac-hair #actCard .hd{padding-left:0;padding-right:44px}` — but the right side clears
-   the FUNNEL alone here, because the expander it also cleared is not built (see OneScreenRail). */
-.os-actv > .os-ahead { padding-left: 0; padding-right: 0; }
-/* ref `body.ac-hair #actCard .feed{padding-left:0;padding-right:8px}` */
-.os-actv .os-abody { padding-left: 0; padding-right: 8px; }
-/* ref `body.ac-hair #actCard .foot{padding-left:0;padding-right:0}` */
-.os-actv .os-afoot { padding-left: 0; padding-right: 0; }
-
-/* ⚠️ THE COUNT, THE SPACER AND THE FUNNEL — the quiet header's three additions (ref `.sub2`,
-   `.hd .sp`, `.funnel`). The funnel is the only control in this band and it is the reason the
-   filter row may be collapsed at all. */
-.os-asub {
-  font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: #9c8f82; margin-left: 10px; flex: none; white-space: nowrap;
-}
-.os-asp { flex: 1; }
-.os-funnel {
-  width: 26px; height: 26px; display: grid; place-items: center; flex: none;
-  border: 0; background: transparent; color: #b3a596; cursor: pointer; padding: 0;
-}
-.os-funnel svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
-.os-funnel:hover, .os-funnel.on { color: #2a1f18; }
-
-/* ⚠️ COLLAPSED TO NOTHING, NOT `display:none` — ref `#afilter{max-height:0;overflow:hidden;
-   transition:max-height .2s ease}` with `.fopen` taking it to 60px. The row keeps its width and
-   its place in the column while it is shut, which is what lets it open without the feed jumping;
-   `display:none` would remove it from layout and hand the reader a shift instead of a reveal.
-   It is also why this element is a PROBE with a height of zero — see OneScreenRail. */
-.os-afilter { max-height: 0; overflow: hidden; transition: max-height 0.2s ease; padding: 0; }
-.os-afilter.open { max-height: 60px; padding-bottom: 8px; }
-/* ref `body.ah-quiet #afilter .ftabs{border-bottom:0;padding:0 2px}` + the hairline's 0/0 */
-.os-afilter .os-ftabs { border-bottom: 0; padding-left: 0; padding-right: 0; }
-
-.os-actv { position: relative; }
-.os-abodywrap { flex: 1; min-height: 0; }
-/* ⚠️ THE BOTTOM PADDING CLEARS THE FOOT (polish P7). `.os-afoot` (LAST 30 DAYS) sits over the end
-   of the scroll region, so the final entry could never be read in full — it scrolled to its limit
-   still under the foot. The padding is the foot's own height (7px + 7px + ~9px line + 1px rule),
-   so the last row now scrolls clear of it rather than up to it. */
-/* ⚠️ NOTHING BLEEDS SIDEWAYS — ref `.feed{overflow-x:visible}` is wrong for a bubble whose
-   asymmetric padding puts its far edge near the column's; a horizontal scrollbar on a feed is a
-   layout fault wearing a control's clothes. The gate measures the bubbles' right edges against
-   this box's inner width. */
-.os-abody { padding: 0 14px calc(var(--os-afoot-h) + 10px); overflow-x: hidden; }
-.os-aempty { min-height: 120px; display: grid; place-items: center; padding: 16px; position: relative; }
-.os-aempty span { font-family: var(--font-serif); font-style: italic; font-size: 13px; color: #b3a596; text-align: center; }
-
-/* ⚠️ THE CASCADE IS CAPPED AT THE FIRST EIGHT — beyond that a stagger is a queue you wait
-   through, and the feed scrolls. Later cardlets simply appear. Scoped to `.enter`, which the page
-   removes once, so no fill-mode survives the entrance. */
-
-.os-actv.enter .os-tlev { animation: os-rise 0.34s cubic-bezier(0.22, 0.68, 0.36, 1) backwards; }
-.os-actv.enter .os-tlev:nth-child(1) { animation-delay: 0.20s; }
-.os-actv.enter .os-tlev:nth-child(2) { animation-delay: 0.25s; }
-.os-actv.enter .os-tlev:nth-child(3) { animation-delay: 0.30s; }
-.os-actv.enter .os-tlev:nth-child(4) { animation-delay: 0.35s; }
-.os-actv.enter .os-tlev:nth-child(5) { animation-delay: 0.40s; }
-.os-actv.enter .os-tlev:nth-child(6) { animation-delay: 0.45s; }
-.os-actv.enter .os-tlev:nth-child(7) { animation-delay: 0.50s; }
-.os-actv.enter .os-tlev:nth-child(8) { animation-delay: 0.55s; }
-.os-actv.enter .os-tlev:nth-child(n+9) { animation: none; }
-
-
-
-
-
-
-
-.os-st.sg { background: #e9ede6; color: #5a6e58; }
-/* the pill and its run count travel together — see the two-children note in OneScreenRail */
-
-/* ⚠️ QUIETER THAN THE PILL. The count is a footnote ON the event, not a second label competing
-   with it — a filled chip here would read as a status of its own. */
-.os-runx { font-family: "JetBrains Mono", monospace; font-size: 6.5px; letter-spacing: 0.06em; color: #a89a8a; white-space: nowrap; }
-
-
-
-
-/* the foot caption is CENTRED on the card's own edge — it names the window, it is not a label */
-/* ⚠️ THE REF'S `.foot`, WHICH IS THE SAME ELEMENT AS THE TO-DO CARD'S — one rule's worth of
-   metrics, shared: `space-between`, 12px of air, an 11px mono line at .1em. It was 7px, centred,
-   in a paler ink, which made it read as a watermark rather than as the foot of a panel; at 7px it
-   also stood 24.8px tall against the ref's 40.4, and the 15px went to the feed above it. */
-.os-afoot {
-  flex: none; border-top: 1px solid #eee8e0; padding: 12px 22px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.os-afoot .os-ac {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9c8f82;
-}
-
-/* ══ §6 · THE EXPAND — flex does the easing; the panel's own height is never animated ══ */
-/* ⚠️ THE EXPANDED STATE IS RETIRED WITH ITS CONTROL (ref v16, Phase 3) — `.os-rail-expanded` and
-   the `.stowable` collapse it drove. The goals card moved to the left column, so there was nothing
-   left in this one for the feed to expand INTO, and the state's only remaining effects were the
-   card's own shadow and an Escape hint for a thing that had not opened. `.os-esc` goes with it. */
-
-
-/* ══ §5 · THE PRO BANNER (v16 — supersedes the rail's mini) ══ */
-/* ⚠️ display:none BY DEFAULT and switched on only where the extra row genuinely fits. The gate is
-   viewport HEIGHT and WIDTH together: a short window has no room for it beneath tasks, and a
-   narrow one puts its three text lines into a column. Below either it is absent, never squeezed —
-   the page's one-screen promise outranks the upsell. */
-.os-probanner {
-  display: none; align-items: center; gap: 20px; padding: 22px; flex: none;
-  min-height: 132px;
-  border-top: 2px solid #c2cfda;
-  cursor: pointer; text-align: left; font: inherit;
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-@media (min-height: 940px) and (min-width: 1025px) {
-  .os-probanner { display: flex; }
-}
-.os-probanner:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 3px 6px rgba(58, 28, 20, 0.05), 0 9px 22px rgba(58, 28, 20, 0.09);
-}
-.os-pimg2 {
-  width: 96px; height: 96px; border-radius: 14px;
-  background: #e3eaf1; border: 1px solid #c9d6e2;
-  display: grid; place-items: center; flex: none;
-  transition: border-color 0.16s ease, background 0.16s ease;
-}
-.os-probanner:hover .os-pimg2 { background: #dae4ee; border-color: #b6c7d8; }
-.os-pimg2 svg { width: 38px; height: 38px; stroke: #7590b4; fill: none; stroke-width: 1.3; }
-.os-ptxt { flex: 1; min-width: 0; }
-.os-plab2 {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #46608a;
-  display: flex; align-items: center; gap: 6px;
-}
-.os-plab2::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #c2cfda; }
-.os-phead {
-  display: block; font-family: var(--font-serif); font-size: 22px; font-weight: 600;
-  color: #241811; margin-top: 8px; line-height: 1.15;
-}
-.os-pline { display: block; font-size: 13.5px; color: #5c5148; margin-top: 7px; line-height: 1.5; }
-.os-plink2 {
-  font-size: 13px; color: #46608a; font-weight: 500; white-space: nowrap; flex: none;
-  border: 1px solid #c9d6e2; border-radius: 99px; padding: 9px 18px; background: #ffffff;
-  transition: background 0.15s, border-color 0.15s;
-}
-.os-probanner:hover .os-plink2 { background: #f2f6fa; border-color: #a9bccd; text-decoration: underline; }
-.os-probanner:hover .os-arr { transform: translateX(3px); }
-
-/* ══ §9 · DAY ONE ══ */
-.os-dayone-tasks { display: grid; gap: 10px; place-items: center; }
-.os-dayone-ctas { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-/* the activity thread fades out above the first-query line */
-.os-aempty-thread {
-  position: absolute; left: 20px; top: 8px; bottom: 8px; width: 1.5px;
-  background: linear-gradient(#e8dcd0, rgba(232, 220, 208, 0));
-}
-
-/* ══ §P3 · MICRO-INTERACTIONS ═══════════════════════════════════════════════════════════════
+/* ══ micro-interactions, carried over ═══════════════════════════════════════════════════════════════
    ⚠️ TRANSFORM AND OPACITY ONLY (pack rule 7). Width, height, top and left force a layout
    recalculation on every frame; on a page holding a live chart and two scrollers that is felt,
    not theoretical. Everything below moves by transform or changes a colour — nothing resizes.
@@ -1655,36 +754,19 @@
    control that is already visible and already reachable by keyboard, which is what makes the
    reduced-motion block at the end safe: turning all of it off removes polish, never function. */
 
-/* cards — the shadow was already here; the lift is the addition */
 /**
- * ⚠️ NO LIFT ON A CARD FLUSH TO A CLIPPED EDGE — this rule USED to raise the card 2px.
+ * ⚠️ HOVER IS A SHADOW AND NOTHING ELSE — this rule USED to raise the card 2px, and the reason it
+ * stopped is worth keeping even though both halves of it are now history. The columns clipped
+ * (`overflow: hidden`) and the hairline was an `::after` overlay, so a 2px lift pushed the card's
+ * top — rim included — past the clip, and the rim vanished along the top edge on hover and nowhere
+ * else. The diagnosis took as long as it did because a SECOND `.os-card.os-lift:hover` rule lived
+ * 870 lines below the first: the duplicate-rule trap catching the diagnosis rather than the code.
  *
- * `.os-colM` and `.os-colR` are `overflow: hidden`, and the cards sit flush against the top of
- * their column. A 2px lift therefore pushed the card's top 2px — INCLUDING its ::after rim — past
- * the clip, so the rim vanished along the top edge on hover and nowhere else.
- *
- * ⚠️ AND THIS WAS THE SECOND CAUSE OF THE MISSING-RIM BUG. The first (an opaque band painting over
- * anything drawn on the element's own layer) is fixed by the ring overlay. This one is why the
- * fault looked HOVER-specific, and it was missed because a SECOND `.os-card.os-lift:hover` rule
- * lived 870 lines below the first — the duplicate-rule trap, this time catching the diagnosis
- * rather than the code.
- *
- * Hover is shadow-and-rim only. The lift survives where nothing clips it: buttons and pills.
+ * v16 clips nothing and the hairline is a real border, so neither cause survives. The rule stays
+ * shadow-only anyway: a card that moves under the pointer is movement without information, and the
+ * lift belongs where it says something — buttons and pills.
  */
 .os-card.os-lift { transition: box-shadow 0.16s ease; }
-
-/* activity — the cardlet steps aside, its dot swells on a slight overshoot */
-
-
-
-
-
-
-/* counters — ⚠️ THE ICON MOVES, THE FIGURE NEVER DOES. A number that shifts under the cursor
-   reads as unreliable, and these are the page's headline figures. */
-/* ⚠️ THE HOVER MOVED TO THE IMG (trap 2) — a transform on this wrapper isolates the blend. */
-
-/* header pills — a 1px lift and a warmer edge */
 
 
 
@@ -1698,8 +780,9 @@
    tried on these rows and rejected; the status pill stays put and the ⋯ is always there. */
 
 
+/* ══ §14 · THE MARK SLOT (read by pages beyond this one — see OneScreenMark) ══════════════════ */
 
-/* ══ §1 · THE MARK SLOT ══════════════════════════════════════════════════════════════════════
+/* ══ the mark slot, carried over ══════════════════════════════════════════════════════════════════════
    ⚠️ THE BOX IS FIXED AT 28px AND ITS CONTENTS ARE NOT. `flex: 0 0 28px` in both directions, so
    the header's height never depends on what is in the slot — which is the whole point: today a
    17px monoline icon, later a commissioned illustration at full bleed, and the swap moves nothing.
@@ -1743,265 +826,7 @@
 }
 
 
-
-
-
-/* ══ COMMUNITY TILE (community-tile pack, P1) ═══════════════════════════════════════════════════
-   Sage-band card at the author tile's width. Phase 1 renders the empty state and nothing else —
-   there is no cohort yet, and pre-launch that is the honest state rather than a placeholder. */
-.os-comm { display: flex; flex-direction: column; overflow: hidden; }
-/* ⚠️ THE BAND'S GEOMETRY IS `.os-ahead`'S, NOT ITS OWN. The first draft of this rule restated
-   `height: 44px; padding: 0 14px` — appended below the sheet's `.os-ahead, .os-th2 { height: 51px }`,
-   so it WON, and the Community band rendered 7px shorter than every other band on the page. Only
-   the mark and the chip are this tile's; the band is the shared one. */
-/* ⚠️ `.os-commic` IS DELETED WITH THE BESPOKE SPAN IT STYLED — the band reads `OneScreenMark`
-   now, so the plate, its fill, its hairline and its icon size all come from `.os-mark`. A
-   leftover rule for a fourth copy is how the copy comes back. */
-/* ⚠️ A STATEMENT ABOUT THE DATA, NOT THE CODE — it goes when the cohorts are populated enough
-   that most readers see real figures, not when the feature is "finished". */
-/* ⚠️ THE PILL SITS ON THE CARD NOW, NOT ON A BAND (dashboard redesign, Phase 7). Its fill was
-   translucent white — a wash designed to read AGAINST the sage gradient behind it — and on the
-   card's own paper a 62% white is very nearly nothing. It takes a solid parchment step and keeps
-   its sage edge and ink, so it still reads as a tag rather than as a word that happens to be
-   boxed. Same meaning, same colours, one surface further out. */
-.os-commbeta {
-  margin-left: auto; flex: none;
-  font-family: "JetBrains Mono", monospace; font-size: 8.5px; letter-spacing: 0.16em;
-  background: #f4efe8; border: 1px solid rgba(138, 158, 136, 0.42); color: #5a6e58;
-  border-radius: 11px; padding: 4px 8px;
-}
-/* ⚠️ THE REF'S BAND AND PLATE VALUES ARE NOT FOLLOWED, AND THE REF SAYS SO ITSELF. Both are SHARED
-   surfaces, and design-refs/community-empty-state-v1.html closes with the instruction that governs
-   them: "Reuse, don't rebuild. Active queries, Activity and Tasks already render this plate — the
-   build should extend that existing component or class rather than introducing a fourth copy…
-   My values here are read off the screenshot; the live ones win where they differ." They differ:
-
-     · the BAND — ref 56px; `.os-ahead` is 51px and is the same element on Active queries,
-       Activity and the chart. Matching the ref would silently retune three cards to fix one.
-     · the PLATE — ref 34px, radius 10, opaque fill, SAGE hairline, dark-sage icon. Live `.os-mark`
-       is 28px, radius 7, a TRANSLUCENT parchment fill and a burgundy icon. The ref draws the
-       existing headers the same way in its comparison strip, so the strip is checking the ref
-       against itself, not against the app.
-
-   ⚠️ AND THE REF'S SECOND FOOTNOTE DESCRIBES A BEHAVIOUR THE LIVE PLATE DOES NOT HAVE: "the plate
-   borrows its band's tint… on the pink Tasks band it takes a pink hairline and ink icon." It does
-   not — the hairline is burgundy on every band, Tasks included. What IS true is that the fill is
-   translucent, so the plate takes its band's colour that way. A real per-band tint is a four-header
-   change and remains reported rather than smuggled in under a one-tile task. */
-
-/* ⚠️ CENTRED ON BOTH AXES — the hero layout, baked. `justify-content: center` is what makes the
-   tile FILL its row without a spacer: the column centres in whatever height the tasks card sets,
-   so the old `margin-top: auto` footer would now push the hero upward rather than hold it down. */
-.os-commbody {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  padding: 18px 22px;
-  text-align: center;
-}
-/* ⚠️ 84px AGAINST A 100px SOURCE — never above 100, and never upscaled to fill space. The asset is
-   a 1x raster carrying a whole empty state; a 2x or SVG re-export is wanted (reported).
-   The ref (design-refs/community-empty-state-v1.html) sizes it the same, `width="84"` on the tag. */
-.os-commseed { width: 84px; height: 84px; object-fit: contain; display: block; flex: none; }
-.os-commempty {
-  margin: 0; font-size: 12.5px; line-height: 1.6; font-weight: 300; color: #5c4d44; max-width: 34ch;
-}
-/* ⚠️ `.os-commshare` IS DELETED — the "Spread the word" pill is removed from the tile, and its five
-   rules went with the element rather than being left behind for a Phase 2 that may never want that
-   control. This file has now made the same call three times (`.os-commic`, `.os-commfoot`, this):
-   a stylesheet that still describes a deleted node is how the node comes back, because the next
-   person to add markup finds it already styled and reads that as intent.
-
-   ⚠️ NOTHING WAS ADDED TO RE-CENTRE THE REMAINDER, AND NOTHING SHOULD BE. `.os-commbody` already
-   centres on both axes, so it centres whatever it contains — dropping a child re-centres the
-   other two by construction. The failure mode being avoided is the reflex fix: a `margin` or a
-   `padding-bottom` here to "balance" the pair would re-introduce the exact off-centre the spacer
-   below caused, this time with nothing to point at. */
-/* ⚠️ `.os-commfoot` IS DELETED. It existed to push a TOP-ALIGNED paragraph's slack to the bottom;
-   the body centres on both axes now, so a spacer would fight the centring it was there to
-   prevent. Rule and element removed together — a `margin-top: auto` left in this file would
-   silently un-centre the hero the next time someone re-added the div. */
-
-/* ══ THE TO-DO CARD'S HEIGHT (stages 2–3, 17 Sep) ══
-   ⚠️ THE CARD TAKES ITS COLUMN, AND THE COLUMN IS THE BOTTOM ROW'S STATED HEIGHT. v26's height law
-   (the top row's stretch, the plot's aspect ratio) and the note on the ref's 100vh page went with the
-   top row and the lock they served. */
-.os-colL .os-tasks { flex: 1 1 auto; min-height: 0; }
-
-/* ⚠️ THE RIGHT COLUMN IS A FLEX COLUMN WITH TWO CHILDREN NOW — ref `.page2 > .rcol`. Activity is
-   `flex: 1` and the community tile is `flex: 0 0 auto`, so the tile keeps its own height and the
-   panel absorbs every pixel of the difference. That is the whole reason the tile can sit under a
-   panel whose length is the writer's own record. */
-/* ⚠️ 26px, NOT 22 (v29, Phase 6) — ref `.page2 > .rcol{gap:26px}`. Every other gap on the page is
-   22; this one is deliberately larger, and the reason is what the extra four pixels buy: at 22 the
-   community tile read as the activity feed's last row rather than as an object of its own. It is
-   the separation that makes it a second card, so it is not a number to tidy back into line with
-   the others. */
-.os-colR { gap: 26px; }
-.os-colR .os-actv { flex: 1 1 auto; min-height: 0; }
-
-/* ══ v26 · THE COMMUNITY TILE ══ */
-/* ref `.comtile` — 360px (the column's width), ~95px tall, a 56px mark, a serif title, one line,
-   and the Beta pill in the corner rather than in the flow. */
-/**
- * ⚠️ THE TILE IS AN OBJECT, NOT THE FEED'S LAST ROW (v29, Phase 6) — ref `.comtile`, which in v29
- * gained a `min-height`, its own frame and half as much air again. It had been a 94.6px strip with
- * a 40px placeholder mark, sitting 22px under a 1,189px activity card: at that size and that
- * distance the eye reads it as more feed. Everything here is one decision expressed four ways —
- * height, padding, gap and separation — and the separation lives on `.os-colR` because it is a
- * relationship between two cards rather than a property of either.
- *
- * ⚠️ THE FRAME AND THE SHADOW COME FROM `.os-card` AND ARE NOT RESTATED. The ref declares its own
- * because its tile is not a card; ours is. Only the RADIUS is overridden — the ref draws 16 where
- * every other card here is 18 — so this block states the one thing that genuinely differs.
- */
-.os-comtile {
-  position: relative; flex: 0 0 auto;
-  display: flex; align-items: center; gap: 18px;
-  padding: 20px 18px; min-height: 132px; border-radius: 16px;
-}
-.os-comtile h4 { font-family: var(--font-serif); font-weight: 500; font-size: 19px; margin: 0; color: #2a1f18; }
-.os-comtile p { margin: 5px 0 0; font-size: 14px; color: #b3a596; line-height: 1.45; }
-.os-comtiletx { min-width: 0; }
-/* ⚠️ POSITIONED, NOT IN THE FLOW — ref `.beta3` is absolute at top right. In the flow it would be a
-   third flex item and the one line beside it would lose its measure to a two-word pill. */
-.os-comtile .os-commbeta {
-  position: absolute; top: 12px; right: 14px;
-  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.12em;
-  padding: 3px 9px; border-radius: 99px; background: #ffffff; border: 1px solid #e6dfd6; color: #9c8f82;
-}
-
-/* ⚠️ THE PAGE'S TOP BAR IS DELETED WITH ITS ROW (v28, Phase 2) — `.os-topbar`, `.os-tbsp`,
-   `.os-search`, `.os-kbd`. The search is in the NAV's row now (`.ws-bigsearch`), which is where the
-   ref puts it and where it shares a line with Feedback and New. The rules go with the element:
-   leaving a stylesheet block for markup nothing renders is the fault this sheet already records. */
-
-/* ══ THE HEADER (stage 1, 17 Sep) ═══════════════════════════════════════════════════════════════
- * One row, the page's first: the greeting and its counts line on the left, the hawk at the right-hand
- * end of the page's measure (stages 2–3 moved the row out of the left column; its rules are unchanged). It REPLACES v26's two-row grid, whose stats
- * spanned both rows — `.os-subrow`, `.os-sub2line`, the stat clamps and the 1980 chip-wording
- * switch (`.os-cd-long`/`.os-cd-short`) are deleted with the cards they served.
- *
- * ⚠️ `align-items: flex-end` IS THE WHOLE ALIGNMENT. The picture is the tallest thing in the row,
- * so the row is its height and the text block stands on the same floor — nothing is nudged.
- *
- * ⚠️ 34px BELOW THE ROW IS THE BREAKDOWN'S TOP MARGIN PLUS THIS ROW'S OWN: 22 + 12 on a wide page,
- * 14 + 20 at 1024 and below. The breakdown's margin is not this block's to change; this one is, so
- * each steps in its own rule.
- *
- * ⚠️ `box-sizing` IS STATED rather than inherited, because the arithmetic above depends on it.
- *
- * ⚠️ THE TWO TYPE SIZES ARE TOKENS ON THE ROW, so the 560 step is one line. The counts size has two
- * readers — the line AND its separator dot, which sits inside a zero-size span (see `.os-hdsep`) and
- * so cannot inherit it; stating 19px twice is how the dot and the line come to disagree.
- */
-.os-greet {
-  --os-hd-title: 44px;
-  --os-hd-counts: 19px;
-  box-sizing: border-box;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 40px;
-  flex: none;
-  min-width: 0;
-  margin: 0 0 12px;
-  padding: 0;
-}
-/* the text block may shrink, so a long name wraps inside the row rather than pushing the hawk out */
-.os-hdtx { flex: 0 1 auto; min-width: 0; }
-.os-hdrow { display: flex; align-items: center; gap: 14px; min-width: 0; }
-/**
- * ⚠️ TWO CLASSES AND `!important` ON THE FAMILY, AND NEITHER IS STYLE. `lib/brand.tsx` injects
- * `h1:not(.wsh-title) { font-family: … !important }` (0-1-1) at runtime on every route. Between two
- * important declarations the more specific wins, so a single-class rule silently draws in Playfair
- * while reading as Special Elite in every file. `dashHeader.measure.ts` asks the browser which font
- * actually PAINTED.
- *
- * ⚠️ THE FALLBACK IS A TYPEWRITER FACE, NOT `cursive`. The generic cursive on a Mac is Apple
- * Chancery, which is what a reader would see for the moment before the webfont lands.
- *
- * ⚠️ 1.05 IS THE BRIEF'S LEADING, AND IT IS SAFE ONLY BECAUSE NOTHING CLIPS THE ROW. Descenders
- * spill below the line box into the 12px above the counts line. The nearest clipping ancestor (the
- * shell's window; `.os-root` stopped clipping with the lock) is far from the heading's edges, and
- * `dashHeader.measure.ts` checks the ink against every one of them rather than trusting that.
- */
-.os-greet .os-hello {
-  font-family: "Special Elite", "Courier New", Courier, monospace !important;
-  font-weight: 400;
-  font-size: var(--os-hd-title);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-  color: #2a1f18;
-  margin: 0;
-  min-width: 0;
-}
-/* ink, as the heading is; the figures carry the weight, the words do not */
-.os-hdcounts {
-  margin: 12px 0 0;
-  font-size: var(--os-hd-counts);
-  line-height: 1.5;
-  color: #2a1f18;
-}
-.os-hdcounts b { font-weight: 600; }
-/* a clause never breaks inside itself — if the line must wrap, it wraps at the dot */
-.os-hdc { white-space: nowrap; }
-/* ⚠️ THE SEPARATOR'S SPACES ARE REAL TEXT AT ZERO SIZE, so a screen reader and a copied line read
-   "out · 3" while the eye sees exactly 8px either side of the dot, in the page's muted ink. */
-.os-hdsep { font-size: 0; }
-.os-hddot { font-size: var(--os-hd-counts); margin: 0 8px; color: #8a7a6c; }
-/**
- * ⚠️ WHOLE, AND NOTHING ELSE ON IT: no crop, border, radius, fill, shadow or blend. The artwork is
- * genuinely transparent (its corners are clear), so it composites on the page as supplied —
- * `mix-blend-mode` is the white-paper marks' treatment, not this one's. `max-width: none` because
- * the global image reset would otherwise let a narrow row squeeze the picture's width under its
- * stated height.
- */
-.os-greet .os-hdart {
-  display: block;
-  flex: none;
-  height: 150px;
-  width: auto;
-  max-width: none;
-  object-fit: contain;
-  border: 0;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-}
-/* the steps come AFTER the base rules — a media query confers no specificity */
-@media (max-width: 1200px) {
-  .os-greet .os-hdart { height: 110px; }
-}
-@media (max-width: 1024px) {
-  .os-greet { margin-bottom: 20px; }
-}
-@media (max-width: 900px) {
-  .os-greet { flex-direction: column; align-items: flex-start; gap: 0; }
-  .os-greet .os-hdart { display: none; }
-}
-@media (max-width: 560px) {
-  .os-greet { --os-hd-title: 32px; --os-hd-counts: 17px; }
-}
-
-/* ══ §P4 · REDUCED MOTION ═══════════════════════════════════════════════════════════════════
-   ⚠️ THIS BLOCK MUST STAY LAST — it wins on source order at equal specificity, and every rule
-   above is equal specificity. Anything added below it is silently exempt.
-
-   ⚠️ NOTHING IS HOVER-REVEALED ON THIS PAGE, so collapsing the motion hides nothing. If a future
-   affordance is ever revealed by a hover or an animation, it must be made permanently visible
-   here — an affordance you can only reach by moving is unusable when motion is switched off. */
-/* ⚠️ THIS BLOCK SITS ABOVE THE `prefers-reduced-motion` BLOCK BELOW, AND THAT IS NOT TIDINESS.
-   A media query confers no specificity, so the reduce block only reaches rules DECLARED BEFORE IT.
-   Appending the empty state to the end of this file exempted every one of its rules from reduced
-   motion — silently, with the reduce block reading perfectly correctly — and `motionPolish`'s
-   "the reduced-motion block is LAST" caught it on the first full run. Anything added to this sheet
-   goes here, above that block, not at the bottom. */
-
+/* ══ §15 · FIRST-RUN STATES ═══════════════════════════════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════════════════════════════════════════════════════════
    THE EMPTY DASHBOARD (empty-states pack, Phase 1; ref scriptally-empty-states-v2.html)
@@ -2035,7 +860,7 @@
 .os-ce-plot { opacity: 0.28; filter: saturate(0.85); }
 .os-ce-x { opacity: 0.28; filter: saturate(0.85); }
 
-/* the drawn grain toggle — `.os-actog button`'s values, for spans it cannot match */
+/* the drawn grain toggle — the live chip's (`.os-mini`) values, restated for spans it cannot match */
 .os-ce-seg > span {
   padding: 5px 11px; border-radius: 99px;
   font-family: "JetBrains Mono", monospace; font-size: 10px; line-height: 14px; letter-spacing: 0.04em;
@@ -2113,75 +938,273 @@
   font-family: "Caveat", cursive; font-size: 17px; line-height: 1.2; color: #8a7a6c;
 }
 
-/* ── the activity feed's ghost tail ────────────────────────────────────────────────────────── */
-/* ref `.act .rest` */
-.os-aghost { padding: 28px 22px 8px; display: flex; flex-direction: column; gap: 10px; align-items: center; text-align: center; }
-.os-aghost-lanes { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-bottom: 4px; }
-/* ⚠️ `.ghost` IS THE REF'S DASHED PLATE, AND DASHED MEANS PROVISIONAL — which is what these are.
-   Ref `.ghost{border:1.5px dashed rgba(28,19,15,.22);border-radius:10px}` with `height:58px`. */
-.os-aghost-lane { height: 52px; border: 1.5px dashed rgba(28, 19, 15, 0.22); border-radius: 10px; flex: none; }
-.os-aghost-cav { margin: 0; font-family: "Caveat", cursive; font-size: 17px; line-height: 1.2; color: #8a7a6c; max-width: 30ch; }
 
-/* ══ §11 · RESPONSIVE (stages 2–3, 17 Sep) ══════════════════════════════════════════════════════
+/* ══ §16 · PARKED: components kept but not mounted on this page ═══════════════════════════════
+   ⚠️ THE COMMUNITY TILE AND THE GOALS CARD ARE NOT ON THE v16 DASHBOARD (Nick: drop the tile from
+   the page, keep the component). Their rules stay with them: a kept component that renders
+   unstyled the day it is remounted is a component nobody can keep. The Pro banner is the same
+   case, parked since the rail's rebuild. */
+
+/* ══ querying goals — PARKED, mounted nowhere ══ */
+/* ⚠️ THE REF'S OWN PADDINGS, AND THIS CARD HAS NO BAND TO TAKE THEM FROM. The ref splits them
+   between a head (`14px 20px`, its bottom border and padding removed) and a `.goal` body
+   (`18px 22px 20px`); this card is BARE by a measured decision recorded at its markup, so the two
+   fold into one. The card's height is the right column's whole arrangement — the activity card
+   takes what is left — so its padding is six probes' worth of cascade. */
+.os-goal { padding: 14px 20px 20px; flex: none; }
+/* ⚠️ `align-items: center`, NOT `baseline` — an image has no baseline and aligns on its bottom
+   margin edge, so a 52px mark on a baselined row drags the row taller than its own text. This
+   file's own trap-3 note is about exactly that; the row was safe at 28px and is not at 52. */
+.os-goal-r1 { display: flex; align-items: center; gap: 10px; }
+.os-goal-r1 h2 { font-family: var(--font-serif); font-size: 23px; font-weight: 500; color: #2a1f18; flex: 1; margin: 0; }
+/* ⚠️ `.os-goal-num`, `.os-blocks` AND `.os-goal-edit` ARE RETIRED (goals pack).
+   `.os-goal-num` was the count rendered as a BUTTON that opened an inline editor — an editing
+   surface inside a reporting one, which made the number look like a control. `.os-blocks` was the
+   one-block-per-query meter, replaced by a single proportional bar whose fill is one constant
+   colour at every width. `.os-goal-edit`/`.os-goal-btns` were that inline editor's number input
+   and period select; the Form 11 sheet replaces them whole.
+   The card's own rules now live in `queryingGoals.css`, beside the component that renders them.
+   `.os-goal-t` went with the sentence it carried — the card states a count, not an instruction. */
+
+
+/* ══ COMMUNITY TILE (community-tile pack, P1) ═══════════════════════════════════════════════════
+   Sage-band card at the author tile's width. Phase 1 renders the empty state and nothing else —
+   there is no cohort yet, and pre-launch that is the honest state rather than a placeholder. */
+.os-comm { display: flex; flex-direction: column; overflow: hidden; }
+/* ⚠️ THE BAND'S GEOMETRY IS THIS CARD'S OWN NOW (v16) — the shared `.os-ahead` / `.os-th2` pair is
+   retired with the dashboard that wore it, and this is the last consumer. The values are that band's,
+   carried over rather than re-tuned: the fault they were tuned against (a restated `height: 44px;
+   padding: 0 14px` appended BELOW the shared rule, which won at equal specificity and rendered this
+   band 7px shorter than every other) cannot recur once there is nothing left to disagree with. */
+.os-commhead {
+  display: flex; align-items: center; gap: 10px;
+  min-height: 44px; padding: 14px 20px 4px;
+  box-sizing: border-box; flex: none;
+}
+/* nowrap, and the chip shrinks first — a title wrapping to two lines is what broke the band height */
+.os-commhead h2 {
+  margin: 0; white-space: nowrap; flex: none;
+  font-family: var(--font-serif); font-size: 23px; font-weight: 500; color: #2a1f18;
+}
+/* ⚠️ `.os-commic` IS DELETED WITH THE BESPOKE SPAN IT STYLED — the band reads `OneScreenMark`
+   now, so the plate, its fill, its hairline and its icon size all come from `.os-mark`. A
+   leftover rule for a fourth copy is how the copy comes back. */
+/* ⚠️ A STATEMENT ABOUT THE DATA, NOT THE CODE — it goes when the cohorts are populated enough
+   that most readers see real figures, not when the feature is "finished". */
+/* ⚠️ THE PILL SITS ON THE CARD NOW, NOT ON A BAND (dashboard redesign, Phase 7). Its fill was
+   translucent white — a wash designed to read AGAINST the sage gradient behind it — and on the
+   card's own paper a 62% white is very nearly nothing. It takes a solid parchment step and keeps
+   its sage edge and ink, so it still reads as a tag rather than as a word that happens to be
+   boxed. Same meaning, same colours, one surface further out. */
+.os-commbeta {
+  margin-left: auto; flex: none;
+  font-family: "JetBrains Mono", monospace; font-size: 8.5px; letter-spacing: 0.16em;
+  background: #f4efe8; border: 1px solid rgba(138, 158, 136, 0.42); color: #5a6e58;
+  border-radius: 11px; padding: 4px 8px;
+}
+/* ⚠️ THE REF'S BAND AND PLATE VALUES ARE NOT FOLLOWED, AND THE REF SAYS SO ITSELF. Both are SHARED
+   surfaces, and design-refs/community-empty-state-v1.html closes with the instruction that governs
+   them: "Reuse, don't rebuild. Active queries, Activity and Tasks already render this plate — the
+   build should extend that existing component or class rather than introducing a fourth copy…
+   My values here are read off the screenshot; the live ones win where they differ." They differ:
+
+     · the BAND — ref 56px; `.os-ahead` is 51px and is the same element on Active queries,
+       Activity and the chart. Matching the ref would silently retune three cards to fix one.
+     · the PLATE — ref 34px, radius 10, opaque fill, SAGE hairline, dark-sage icon. Live `.os-mark`
+       is 28px, radius 7, a TRANSLUCENT parchment fill and a burgundy icon. The ref draws the
+       existing headers the same way in its comparison strip, so the strip is checking the ref
+       against itself, not against the app.
+
+   ⚠️ AND THE REF'S SECOND FOOTNOTE DESCRIBES A BEHAVIOUR THE LIVE PLATE DOES NOT HAVE: "the plate
+   borrows its band's tint… on the pink Tasks band it takes a pink hairline and ink icon." It does
+   not — the hairline is burgundy on every band, Tasks included. What IS true is that the fill is
+   translucent, so the plate takes its band's colour that way. A real per-band tint is a four-header
+   change and remains reported rather than smuggled in under a one-tile task. */
+
+/* ⚠️ CENTRED ON BOTH AXES — the hero layout, baked. `justify-content: center` is what makes the
+   tile FILL its row without a spacer: the column centres in whatever height the tasks card sets,
+   so the old `margin-top: auto` footer would now push the hero upward rather than hold it down. */
+.os-commbody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 18px 22px;
+  text-align: center;
+}
+/* ⚠️ 84px AGAINST A 100px SOURCE — never above 100, and never upscaled to fill space. The asset is
+   a 1x raster carrying a whole empty state; a 2x or SVG re-export is wanted (reported).
+   The ref (design-refs/community-empty-state-v1.html) sizes it the same, `width="84"` on the tag. */
+.os-commseed { width: 84px; height: 84px; object-fit: contain; display: block; flex: none; }
+.os-commempty {
+  margin: 0; font-size: 12.5px; line-height: 1.6; font-weight: 300; color: #5c4d44; max-width: 34ch;
+}
+/* ⚠️ `.os-commshare` IS DELETED — the "Spread the word" pill is removed from the tile, and its five
+   rules went with the element rather than being left behind for a Phase 2 that may never want that
+   control. This file has now made the same call three times (`.os-commic`, `.os-commfoot`, this):
+   a stylesheet that still describes a deleted node is how the node comes back, because the next
+   person to add markup finds it already styled and reads that as intent.
+
+   ⚠️ NOTHING WAS ADDED TO RE-CENTRE THE REMAINDER, AND NOTHING SHOULD BE. `.os-commbody` already
+   centres on both axes, so it centres whatever it contains — dropping a child re-centres the
+   other two by construction. The failure mode being avoided is the reflex fix: a `margin` or a
+   `padding-bottom` here to "balance" the pair would re-introduce the exact off-centre the spacer
+   below caused, this time with nothing to point at. */
+/* ⚠️ `.os-commfoot` IS DELETED. It existed to push a TOP-ALIGNED paragraph's slack to the bottom;
+   the body centres on both axes now, so a spacer would fight the centring it was there to
+   prevent. Rule and element removed together — a `margin-top: auto` left in this file would
+   silently un-centre the hero the next time someone re-added the div. */
+
+
+/* ══ v26 · THE COMMUNITY TILE ══ */
+/* ref `.comtile` — 360px (the column's width), ~95px tall, a 56px mark, a serif title, one line,
+   and the Beta pill in the corner rather than in the flow. */
+/**
+ * ⚠️ THE TILE IS AN OBJECT, NOT THE FEED'S LAST ROW (v29, Phase 6) — ref `.comtile`, which in v29
+ * gained a `min-height`, its own frame and half as much air again. It had been a 94.6px strip with
+ * a 40px placeholder mark, sitting 22px under a 1,189px activity card: at that size and that
+ * distance the eye reads it as more feed. Everything here is one decision expressed four ways —
+ * height, padding, gap and separation. The separation used to live on `.os-colR`, because it is a
+ * relationship between two cards rather than a property of either; that column is retired with the
+ * dashboard's old grid, and this tile is mounted nowhere today.
  *
- * ⚠️ DECLARED HERE, ABOVE ONLY THE REDUCED-MOTION BLOCK — a media query confers no specificity, so it
- * must follow every rule it overrides. The lock's old frame sat four hundred lines up the sheet, and a
- * base rule below it (`.os-colR .os-actv`) was quietly taking its `flex` back.
- *
- * THREE STEPS, ALL NICK'S:
- *   · below 1280 the second row is two columns, and the closed tile takes a row of its own;
- *   · at 1024 and below the to-do card and the activity column stack, each keeping a height and its
- *     inner scroller (the phone fix of 17 Sep, carried over);
- *   · at 900 and below the three cards stack and the breakdown's five columns become two — the same
- *     boundary the greeting stacks at, so there is one line at 900 rather than two.
+ * ⚠️ THE FRAME AND THE SHADOW COME FROM `.os-card` AND ARE NOT RESTATED. The ref declares its own
+ * because its tile is not a card; ours is. Only the RADIUS is overridden, and the override is now
+ * the ONE thing this block has to re-justify: v16's card radius is `--dash-radius` (14), so a
+ * hard-coded 16 here is a deliberate difference rather than a value that used to agree.
  */
-@media (max-width: 1279px) {
-  .os-row2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .os-row2 > .os-cl { grid-column: 1 / -1; }
+.os-comtile {
+  position: relative; flex: 0 0 auto;
+  display: flex; align-items: center; gap: 18px;
+  padding: 20px 18px; min-height: 132px; border-radius: 16px;
 }
-@media (max-width: 1024px) {
-  .os-content { padding-top: 16px; padding-bottom: 28px; }
-  /* the greeting's margin steps to 20 here (its own rule); this is the other half of its 34px */
-  .os-bd { margin-top: 14px; }
-  /* ⚠️ ONE TRACK, AND NO STATED ROW (phone fix, 17 Sep, restated for the flowing page). The columns
-     name their tracks, so both are put back to `auto` or the right one would open an implicit second
-     column beside the first. */
-  .os-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; height: auto; gap: 14px; }
-  .os-colL, .os-colR { grid-column: auto; }
-  /* ⚠️ A HEIGHT EACH, NOT A FLEX SHARE — stacked, there is no row to divide, and each keeps its own
-     scroller rather than growing to its content. The activity column's 420 and its 26px gap are what
-     it rendered before this pass (the old frame's `gap: 14px` sat above the column's own rule and
-     never applied), so it is carried as it was rather than changed in passing. */
-  .os-colL .os-tasks { flex: none; height: 520px; }
-  .os-colR .os-actv { flex: none; height: 420px; }
-}
-@media (max-width: 900px) {
-  /* the breakdown's heading may wrap, and its meta takes a line of its own beneath it, left-aligned —
-     a basis of 100% puts it there, and its zero width still claims nothing (see `.os-bdmeta`) */
-  .os-bdhead { flex-wrap: wrap; row-gap: 2px; }
-  .os-bd .os-bdtitle { white-space: normal; }
-  .os-bdmeta { flex-basis: 100%; text-align: left; }
-  .os-row2 { grid-template-columns: minmax(0, 1fr); }
-  .os-row2 > .os-cl { grid-column: auto; }
-  .os-bdgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  /* ⚠️ THE FIFTH COLUMN TAKES THE LAST ROW WHOLE — two tracks and five columns leave one empty cell,
-     and the grid's hairline colour would fill it as a grey block. */
-  .os-bdcol:last-child { grid-column: 1 / -1; }
-}
-@media (max-width: 640px) {
-  .os-content { padding-bottom: 24px; }
+.os-comtile h4 { font-family: var(--font-serif); font-weight: 500; font-size: 19px; margin: 0; color: #2a1f18; }
+.os-comtile p { margin: 5px 0 0; font-size: 14px; color: #b3a596; line-height: 1.45; }
+.os-comtiletx { min-width: 0; }
+/* ⚠️ POSITIONED, NOT IN THE FLOW — ref `.beta3` is absolute at top right. In the flow it would be a
+   third flex item and the one line beside it would lose its measure to a two-word pill. */
+.os-comtile .os-commbeta {
+  position: absolute; top: 12px; right: 14px;
+  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.12em;
+  padding: 3px 9px; border-radius: 99px; background: #ffffff; border: 1px solid #e6dfd6; color: #9c8f82;
 }
 
+/* ⚠️ THE PAGE'S TOP BAR IS DELETED WITH ITS ROW (v28, Phase 2) — `.os-topbar`, `.os-tbsp`,
+   `.os-search`, `.os-kbd`. The search is in the NAV's row now (`.ws-bigsearch`), which is where the
+   ref puts it and where it shares a line with Feedback and New. The rules go with the element:
+   leaving a stylesheet block for markup nothing renders is the fault this sheet already records. */
+
+
+/* ══ the Pro banner (v16 — supersedes the rail's mini) ══ */
+/* ⚠️ display:none BY DEFAULT and switched on only where the extra row genuinely fits. The gate is
+   viewport HEIGHT and WIDTH together: a short window has no room for it beneath tasks, and a
+   narrow one puts its three text lines into a column. Below either it is absent, never squeezed —
+   the page's one-screen promise outranks the upsell. */
+.os-probanner {
+  display: none; align-items: center; gap: 20px; padding: 22px; flex: none;
+  min-height: 132px;
+  border-top: 2px solid #c2cfda;
+  cursor: pointer; text-align: left; font: inherit;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+@media (min-height: 940px) and (min-width: 1025px) {
+  .os-probanner { display: flex; }
+}
+.os-probanner:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(58, 28, 20, 0.05), 0 9px 22px rgba(58, 28, 20, 0.09);
+}
+.os-pimg2 {
+  width: 96px; height: 96px; border-radius: 14px;
+  background: #e3eaf1; border: 1px solid #c9d6e2;
+  display: grid; place-items: center; flex: none;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.os-probanner:hover .os-pimg2 { background: #dae4ee; border-color: #b6c7d8; }
+.os-pimg2 svg { width: 38px; height: 38px; stroke: #7590b4; fill: none; stroke-width: 1.3; }
+.os-ptxt { flex: 1; min-width: 0; }
+.os-plab2 {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #46608a;
+  display: flex; align-items: center; gap: 6px;
+}
+.os-plab2::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #c2cfda; }
+.os-phead {
+  display: block; font-family: var(--font-serif); font-size: 22px; font-weight: 600;
+  color: #241811; margin-top: 8px; line-height: 1.15;
+}
+.os-pline { display: block; font-size: 13.5px; color: #5c5148; margin-top: 7px; line-height: 1.5; }
+.os-plink2 {
+  font-size: 13px; color: #46608a; font-weight: 500; white-space: nowrap; flex: none;
+  border: 1px solid #c9d6e2; border-radius: 99px; padding: 9px 18px; background: #ffffff;
+  transition: background 0.15s, border-color 0.15s;
+}
+.os-probanner:hover .os-plink2 { background: #f2f6fa; border-color: #a9bccd; text-decoration: underline; }
+.os-probanner:hover .os-arr { transform: translateX(3px); }
+
+/* ══ day one ══ */
+.os-dayone-tasks { display: grid; gap: 10px; place-items: center; }
+.os-dayone-ctas { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+/* the activity thread fades out above the first-query line */
+.os-aempty-thread {
+  position: absolute; left: 20px; top: 8px; bottom: 8px; width: 1.5px;
+  background: linear-gradient(#e8dcd0, rgba(232, 220, 208, 0));
+}
+
+
+/* ⚠️ THE COMMUNITY STRIP'S OWN RULES, KEPT WITH THE COMPONENT (v16, 18 Sep). The tile left the
+   dashboard and the component did not (Nick); its strip variant has been unreachable since the rail's
+   rebuild and keeps its rules for the same reason — a kept component that renders unstyled the day it
+   is remounted is a component nobody can keep. */
+/* ⚠️ COMMUNITY AS A STRIP UNDER BOTH COLUMNS — ref `.comstrip`. Icon, title, one line, Beta pill, on a
+   single row outside the grid, so it neither competes for column height nor has to be told not to be
+   the taller card.
+   ⚠️ NOTHING MOUNTS THE STRIP TODAY — the activity column renders `OneScreenCommunity`'s TILE — but the
+   component still carries the strip variant and its lock still reads these rules, so they stay
+   (restated from before stages 2–3, unchanged). Whether the variant goes is a separate decision. */
+.os-comstrip {
+  display: flex; align-items: center; gap: 16px;
+  margin-top: 22px; padding: 14px 20px; flex: none;
+  background: #fdfbf7; border: 1px solid #e6dfd6; border-radius: 14px;
+}
+.os-comstriptx { min-width: 0; }
+.os-comstrip h2 { font-family: var(--font-serif); font-weight: 500; font-size: 17px; margin: 0; }
+.os-comstrip p { margin: 2px 0 0; font-size: 14px; color: #a29587; }
+.os-comstrip .os-commbeta { margin-left: auto; flex: none; }
+
+/* ══ THE TASK DRAWER'S PANE ═══════════════════════════════════════════════════════════════════
+   ⚠️ THE DRAWER'S OWN COLUMN, AND IT IS NOT DECORATION. `DashTaskDrawer` renders `tpn dash-tpn`:
+   `.tpn` is the task pane's own sheet, and this is the one declaration that makes the pane fill the
+   drawer and scroll inside it rather than growing past its foot. It was dropped in the v16 sheet
+   rewrite and restored the same day — a class a component emits and no sheet declares renders a
+   silently broken layout, which is the fault this sheet's own sweeps exist to catch. */
+.dash-tpn { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+
+/* ══ §17 · REDUCED MOTION ═════════════════════════════════════════════════════════════════════
+   ⚠️ THIS BLOCK MUST STAY LAST — it wins on source order at equal specificity, and every rule above
+   is equal specificity. Anything added below it is silently exempt, which is how the empty state's
+   rules once exempted themselves from reduced motion with the block reading perfectly correctly.
+
+   ⚠️ NOTHING IS HOVER-REVEALED ON THIS PAGE, so collapsing the motion hides nothing. If a future
+   affordance is ever revealed by a hover or an animation, it must be made permanently visible here —
+   an affordance you can only reach by moving is unusable when motion is switched off.
+
+   ⚠️ AND A 0.01ms ANIMATION STILL PAINTS ITS `from`. The entrances are switched OFF by name, and
+   their delays zeroed: a delay left standing holds the element at its starting offset for the
+   delay's length, which is the stutter this is meant to remove. */
 @media (prefers-reduced-motion: reduce) {
-  .os-root *,
-  .os-root *::before,
-  .os-root *::after {
+  .os-root *, .os-card.enter, .os-greet.enter {
     animation-duration: 0.01ms !important;
     animation-delay: 0ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     transition-delay: 0ms !important;
   }
-  /* the entrance offsets must not be left applied — a 0.01ms animation still paints its `from` */
-  .os-card.enter, .os-greet.enter, .os-bd.enter, .os-actv.enter .os-tlev { animation: none !important; }
+  .os-card.enter, .os-greet.enter { animation: none !important; }
+  .os-skel i { animation: none; background: #efe7db; }
+  /* ⚠️ THE NAME, NOT THE DURATION — a 0.01ms infinite sweep is a strobe, not a stillness. And the
+     gradient goes with it, or every block freezes mid-highlight. */
+  .os-sk { animation-name: none !important; background-image: none; background-color: var(--sa-sk-base); }
 }

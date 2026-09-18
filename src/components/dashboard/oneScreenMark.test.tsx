@@ -94,20 +94,31 @@ describe("the mark slot", () => {
 describe("every dashboard container header carries one mark", () => {
   /* the chart is not in this list any more: its header carries the hawk illustration, not a mark
      (dashboard stage 3, 17 Sep) — `oneScreenStages.test.tsx` holds that it renders no mark at all */
+  /* ⚠️ NO DASHBOARD HEADER CARRIES A MARK SINCE v16 (18 Sep). The rail is retired and the to-do card's
+     header is a title, an eyebrow and a chip — the ref draws no mark on any of the five cards. The
+     component is NOT retired: `OneScreenCommunity` and three other pages render it, which is why this
+     census now asserts the page's own files carry none rather than counting two. */
   const files = {
     "Tasks": "OneScreenTasks.tsx",
-    "Rail (goals + activity)": "OneScreenRail.tsx",
+    "Feed": "OneScreenFeed.tsx",
+    "Chart": "OneScreenChart.tsx",
+    "Closed": "OneScreenClosed.tsx",
+    "Quick actions": "OneScreenActions.tsx",
   };
-  it("the marked headers are wired, and none twice", () => {
+  it("no card on the page carries one, and the component is still live elsewhere", () => {
     let total = 0;
     for (const f of Object.values(files)) {
       const src = readFileSync(resolve(__dirname, `./${f}`), "utf8");
       total += (src.match(/<OneScreenMark name=/g) ?? []).length;
     }
-    /* ⚠️ TWO — Goals carries no mark (its header is a LABEL, not an instrument, and both the band and
-       the mark box were tried there and rejected), and the chart's went with the stage-3 rebuild. A
-       third appearing means a header has been re-banded by someone who read this as an oversight. */
-    expect(total).toBe(2);
+    /* ⚠️ ZERO, AND IT IS A DECISION RATHER THAN AN OMISSION (v16). The ref's five cards carry a title,
+       an eyebrow and a chip; the page's pictures are the three quick-action tiles. A mark appearing in
+       one of these headers is someone reading this as an oversight. */
+    expect(total).toBe(0);
+    /* ⚠️ AND THE COMPONENT IS NOT DEAD — three pages beyond this one render it, which is why the
+       component and its rules stay. A census of zero here must not read as "delete the mark". */
+    const community = readFileSync(resolve(__dirname, "./OneScreenCommunity.tsx"), "utf8");
+    expect(community).toContain("<OneScreenMark");
   });
 });
 

@@ -9,7 +9,9 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { QueryStatus, type Activity, type Query } from "../types";
-import { CLOSED_BUCKETS, CLOSED_STATUSES, closedTile, type ClosedBucketKey } from "./dashClosed";
+import {
+  CLOSED_BUCKETS, CLOSED_STATUSES, DONUT, DONUT_C, closedDonut, closedTile, type ClosedBucketKey,
+} from "./dashClosed";
 import { buildRows } from "./analytics";
 
 const NOW = new Date(2026, 8, 17, 12, 0, 0);
@@ -109,16 +111,85 @@ describe("⚠️ the four buckets", () => {
 
 describe("the words", () => {
   it("say how far a query got, never what was decided about it", () => {
-    expect(CLOSED_BUCKETS.map((b) => b.label)).toEqual(["Queried", "Partial", "Full", "No reply"]);
-    for (const b of CLOSED_BUCKETS) expect(b.label.toLowerCase()).not.toMatch(/reject|ghost|pass|declin/);
+    expect(CLOSED_BUCKETS.map((b) => b.label)).toEqual(["No reply", "Passed on query", "Passed on partial", "Passed on full"]);
+    /* ⚠️ "PASSED ON" IS THE APP'S OWN VERB AND IS NOT FORBIDDEN (v16, 18 Sep) — the feed has always
+       written "<agent> passed on <book>", and the ref names the three rungs that way. What stays
+       forbidden is the VERDICT vocabulary: a rejection is never called one, and silence is "No reply"
+       rather than ghosted. The earlier form of this case forbade "pass" too, which was the stage-3
+       labels' rule ("Queried · Partial · Full") rather than a law about the words. */
+    for (const b of CLOSED_BUCKETS) expect(b.label.toLowerCase()).not.toMatch(/reject|ghost|declin|dead|fail/);
   });
 
-  it("each bucket wears the state tint of the stage it names, and the glyph of that stage", () => {
-    expect(CLOSED_BUCKETS.map((b) => [b.key, b.tone, b.glyph])).toEqual([
-      ["letter", "queried", QueryStatus.QUERIED],
-      ["partial", "you", QueryStatus.PARTIAL_REQUESTED],
-      ["full", "agent", QueryStatus.FULL_REQUESTED],
-      ["quiet", "closed", QueryStatus.NO_RESPONSE],
-    ]);
+  /* ⚠️ THE ORDER IS THE RING'S, FROM 12 O'CLOCK, AND THE KEY READS THE SAME ARRAY (v16, 18 Sep) — so
+     the slice and the row beneath it cannot come to disagree about which bucket is which. The tint and
+     the glyph left this table with the pills: the ring and its swatches are coloured in the stylesheet,
+     one home for a colour. */
+  it("runs quiet, letter, partial, full — the ring's own order", () => {
+    expect(CLOSED_BUCKETS.map((b) => b.key)).toEqual(["quiet", "letter", "partial", "full"]);
+  });
+});
+
+/**
+ * ⚠️ THE RING IS A MEASUREMENT, SO IT IS ASSERTED AS ONE. The arcs are laid end to end from 12
+ * o'clock as SVG dash lengths, and the claim the tile rests on is that they close on the
+ * circumference exactly and in the key's own order. A slice that is a rounding error short leaves a
+ * hairline of track showing between two buckets, which reads as a fifth bucket with nothing in it.
+ */
+describe("the donut's arcs", () => {
+  const tile = (counts: Record<string, number>) => {
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    return {
+      total,
+      buckets: CLOSED_BUCKETS.map((b) => ({
+        key: b.key, label: b.label, count: counts[b.key] ?? 0,
+        share: total ? (counts[b.key] ?? 0) / total : 0,
+      })),
+    };
+  };
+
+  it("⚠️ the arcs sum to the circumference, exactly", () => {
+    const arcs = closedDonut(tile({ quiet: 7, letter: 3, partial: 2, full: 1 }));
+    expect(arcs).toHaveLength(4);
+    expect(arcs.reduce((a, x) => a + x.len, 0)).toBeCloseTo(DONUT_C, 9);
+  });
+
+  /* ⚠️ COMPUTED FROM THE COUNTS, NOT FROM `share`. Three thirds rounded and multiplied give three
+     arcs that do not quite meet; a running total of `count / total` cannot drift. */
+  it("⚠️ closes exactly on a total that does not divide", () => {
+    const arcs = closedDonut(tile({ quiet: 1, letter: 1, partial: 1, full: 0 }));
+    expect(arcs.reduce((a, x) => a + x.len, 0)).toBeCloseTo(DONUT_C, 9);
+  });
+
+  it("each arc starts where the one before it ended, in the key's order", () => {
+    const arcs = closedDonut(tile({ quiet: 5, letter: 3, partial: 2, full: 2 }));
+    expect(arcs.map((a) => a.key)).toEqual(["quiet", "letter", "partial", "full"]);
+    let run = 0;
+    for (const a of arcs) {
+      expect(a.offset, a.key).toBeCloseTo(-run, 9);
+      run += a.len;
+    }
+  });
+
+  /**
+   * ⚠️ A ZERO BUCKET DRAWS NOTHING AND STILL TAKES ITS TURN. It is dropped rather than drawn at
+   * length 0 — a zero-length dash with a round cap paints a DOT, which puts a slice on the ring for a
+   * bucket that has nothing in it — but the running offset passes through it, so the arcs that follow
+   * start exactly where they would have.
+   */
+  it("⚠️ a zero bucket is absent from the ring and does not move the ones after it", () => {
+    const full = closedDonut(tile({ quiet: 4, letter: 0, partial: 3, full: 1 }));
+    expect(full.map((a) => a.key)).toEqual(["quiet", "partial", "full"]);
+    const partial = full.find((a) => a.key === "partial")!;
+    expect(partial.offset).toBeCloseTo(-(4 / 8) * DONUT_C, 9);
+  });
+
+  it("nothing closed draws no ring at all", () => {
+    expect(closedDonut(tile({}))).toEqual([]);
+  });
+
+  /* the geometry the component draws with — the box, the radius and the stroke are one statement */
+  it("the circumference is the radius the arcs are stroked on", () => {
+    expect(DONUT_C).toBeCloseTo(2 * Math.PI * DONUT.r, 10);
+    expect(DONUT.r * 2 + DONUT.stroke).toBeLessThanOrEqual(DONUT.box);
   });
 });

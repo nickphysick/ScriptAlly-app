@@ -2,7 +2,13 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE ACTIVITY FEED AS A CONVERSATION (dashboard redesign, Phase 6).
+ * feedConversation — HOW THE FEED CLASSIFIES AN EVENT (dashboard redesign, Phase 6).
+ *
+ * ⚠️ THE CONVERSATION IS RETIRED AND THE CLASSIFIER IS NOT (v16, 18 Sep). The bubbles, their sides
+ * and their tight runs went with the rail; what the v16 feed still needs is exactly what this module
+ * always answered — is this event about a query, which rung did it produce, and does the row earn a
+ * "Send it" link. `Side`, `sideFromType` and `tightRunHeads` are deleted with the layout that read
+ * them, and `bubbleShape` is `eventShape`: a name that outlives its subject is worse than no name.
  *
  * ⚠️ HOUSEKEEPING IS DECIDED POSITIVELY, BY THE ABSENCE OF A `queryId`, AND BY NOTHING ELSE.
  * The obvious test — "no `resultingStatus`" — is wrong in a way that fails silently: that field is
@@ -27,63 +33,38 @@ import { ActivityType, QueryStatus, type Activity, type Query } from "../types";
 import { normalizeResultingStatus } from "./queryDerivation";
 import { stateFor, type State } from "./queryCardFacts";
 
-/** Whose message a bubble is. Alignment carries this; there is no legend for it. */
-export type Side = "in" | "out";
+/* ⚠️ `AGENT_STATUSES` IS RETIRED WITH THE SIDES (v16). It answered "whose message is this" for the
+   conversation's alignment; the v16 row states the person in its sentence instead. It was pointedly
+   NOT `statusDirection` — that export puts an OFFER on the writer's side, which is a defensible
+   colour choice on a list and was a false statement in a thread. */
 
-/**
- * ⚠️ THIS IS NOT `statusDirection`, AND REUSING IT WOULD HAVE BEEN WRONG. That export classifies a
- * status for the Query DB list's SPINE COLOUR and places `OFFER` in "out" — grouped with the
- * writer's outgoing acts, which is a defensible colour choice on a list and a false statement in a
- * conversation: an offer is the agent's message and belongs on the agent's side. Two derivations
- * exist here because there are two questions, and answering the second with the first would put
- * the best news a writer ever gets on the wrong side of the thread.
- */
-const AGENT_STATUSES: ReadonlySet<QueryStatus> = new Set([
-  QueryStatus.PARTIAL_REQUESTED,
-  QueryStatus.FULL_REQUESTED,
-  QueryStatus.REVISE_RESUBMIT,
-  QueryStatus.OFFER,
-  QueryStatus.REJECTED,
-]);
 
-/**
- * The activity types that carry no status and are still plainly the writer's act.
- * ⚠️ AN OFFER DECISION IS THE WRITER'S, not the agent's — the offer arriving was the agent's
- * message and is a separate event with its own status.
- */
-const WRITER_TYPES: ReadonlySet<string> = new Set<string>([
-  ActivityType.NUDGE_SENT, ActivityType.OFFER_ACCEPTED, ActivityType.OFFER_DECLINED,
-  ActivityType.QUERY_SENT, ActivityType.MATERIALS_SENT,
-]);
+/* ⚠️ `WRITER_TYPES` IS RETIRED WITH `sideFromType` (v16) — it named the acts that sat on the writer's
+   side of the thread, and nothing is aligned any more. */
 
-export interface BubbleShape {
+
+export interface EventShape {
   /** ⚠️ `queryId` DECIDES THIS, and nothing else. */
   kind: "query" | "housekeeping";
-  /** the v2 state whose fill the bubble takes — `null` on housekeeping and on a neutral query */
+  /** the v2 state whose token fills the row's pill — `null` on housekeeping and on a neutral query */
   state: State | null;
-  side: Side;
-  /** the exact status the rung produced, for `StatusDot`. Never a string that is not a member. */
+  /** the exact status the rung produced. Never a string that is not a member. */
   status: QueryStatus | null;
 }
 
 /**
  * The one classification. Takes the ACTIVITY, so a caller cannot hand it a half-resolved row.
  */
-export function bubbleShape(a: Pick<Activity, "activityType" | "resultingStatus" | "queryId">): BubbleShape {
+export function eventShape(a: Pick<Activity, "activityType" | "resultingStatus" | "queryId">): EventShape {
   /* ⚠️ THE TEST, AND IT IS THE FIRST LINE ON PURPOSE. */
-  if (!a.queryId) return { kind: "housekeeping", state: null, side: "out", status: null };
+  if (!a.queryId) return { kind: "housekeeping", state: null, status: null };
 
   const status = normalizeResultingStatus(a.resultingStatus) ?? statusFromType(a.activityType);
   if (status === null) {
     /* a query event the record cannot place — neutral, never housekeeping, never a guess */
-    return { kind: "query", state: null, side: sideFromType(a.activityType), status: null };
+    return { kind: "query", state: null, status: null };
   }
-  return {
-    kind: "query",
-    state: stateFor(status),
-    side: AGENT_STATUSES.has(status) ? "in" : "out",
-    status,
-  };
+  return { kind: "query", state: stateFor(status), status };
 }
 
 /** The `activityType` fallback — only the types that unambiguously name a rung. */
@@ -97,11 +78,6 @@ function statusFromType(t: unknown): QueryStatus | null {
     case ActivityType.STATUS_CHANGED:
     default: return null;
   }
-}
-
-/** Where an unplaceable query event sits. A type we know the writer performs goes on their side. */
-function sideFromType(t: unknown): Side {
-  return WRITER_TYPES.has(t as string) ? "out" : "in";
 }
 
 /**
@@ -118,21 +94,12 @@ export function markSentOffered(
   a: Pick<Activity, "activityType" | "resultingStatus" | "queryId">,
   queries: Pick<Query, "id" | "status">[],
 ): boolean {
-  const shape = bubbleShape(a);
+  const shape = eventShape(a);
   if (shape.kind !== "query" || shape.status === null) return false;
   if (!REQUESTED.has(shape.status)) return false;
   const q = queries.find((x) => x.id === a.queryId);
   return !!q && q.status === shape.status;
 }
 
-/**
- * ⚠️ A TIGHT RUN DROPS THE FURNITURE, NEVER THE BUBBLE. Consecutive bubbles from the same side, in
- * the same day group, lose their state label and their meta line so a burst reads as one burst.
- * The FIRST of a run keeps both — a run with no head is a run nobody can date or attribute.
- */
-export function tightRunHeads<T extends { side: Side; dayLabel: string }>(rows: T[]): boolean[] {
-  return rows.map((r, i) => {
-    const prev = rows[i - 1];
-    return !prev || prev.side !== r.side || prev.dayLabel !== r.dayLabel;
-  });
-}
+/* ⚠️ `tightRunHeads` IS RETIRED WITH THE BUBBLES (v16). It dropped a run's repeated furniture; the
+   v16 feed states every row's pill, time and provenance, because a row is read on its own. */

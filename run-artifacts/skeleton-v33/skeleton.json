@@ -1,0 +1,171 @@
+{
+  "rows": [
+    {
+      "width": 1440,
+      "caught": true,
+      "worst": 5,
+      "settle": {
+        "suppressed": true,
+        "slotClass": "",
+        "stillRunning": 0
+      },
+      "settleDuring": {
+        "suppressed": true,
+        "slotClass": "stage-page-on",
+        "stillRunning": 0
+      },
+      "edges": {
+        "during": {
+          "colFirst": {
+            "cls": "ws-pagebar",
+            "top": 41.8,
+            "bottom": 115.5
+          },
+          "colLast": {
+            "cls": "ws-winwrap",
+            "top": 115.5,
+            "bottom": 1130
+          },
+          "bodyTop": 115.5,
+          "bodyBottom": 1126.4,
+          "bodyFirst": {
+            "cls": "os-content",
+            "top": 115.5,
+            "bottom": 1126.4
+          },
+          "bodyLast": {
+            "cls": "os-content",
+            "top": 115.5,
+            "bottom": 1126.4
+          },
+          "shown": 2
+        },
+        "after": {
+          "colFirst": {
+            "cls": "ws-pagebar",
+            "top": 41.8,
+            "bottom": 115.5
+          },
+          "colLast": {
+            "cls": "ws-winwrap",
+            "top": 115.5,
+            "bottom": 1130
+          },
+          "bodyTop": 115.5,
+          "bodyBottom": 1130.8,
+          "bodyFirst": {
+            "cls": "os-greet",
+            "top": 115.5,
+            "bottom": 259.3
+          },
+          "bodyLast": {
+            "cls": "os-row2",
+            "top": 623.8,
+            "bottom": 1086.8
+          },
+          "shown": 2
+        }
+      },
+      "clip": {
+        "clippers": [
+          {
+            "cls": "ws-wbody",
+            "overflow": "auto/auto",
+            "scroller": true,
+            "cutTop": 0,
+            "cutBottom": 0
+          }
+        ],
+        "worstCut": 0
+      },
+      "live": {
+        "controls": 0,
+        "controlNames": [],
+        "inked": 0,
+        "inkedText": [],
+        "scanned": 1015
+      },
+      "removed": true,
+      "tickets": 0,
+      "tk": {
+        "during": {
+          "present": true,
+          "ghost": true,
+          "scroller": "os-scroll",
+          "count": 4,
+          "cols": 1,
+          "tileH": 66,
+          "gridW": 427.7,
+          "rowGap": 0,
+          "portFoot": 1035.4,
+          "lastBottom": 973,
+          "overflow": -62.4,
+          "wholeVisible": 4
+        },
+        "after": {
+          "present": true,
+          "ghost": false,
+          "scroller": "os-scroll",
+          "count": 23,
+          "cols": 1,
+          "tileH": 66,
+          "gridW": 427.7,
+          "rowGap": 0,
+          "portFoot": 1033.3,
+          "lastBottom": 2296.9,
+          "overflow": 1263.6,
+          "wholeVisible": 4
+        }
+      },
+      "nav": {
+        "frames": 69,
+        "on": 28,
+        "out": 16,
+        "off": 25,
+        "badOn": 0,
+        "badOut": 0,
+        "badOff": 0,
+        "maxOutDelta": 0,
+        "firstBadOn": null,
+        "firstBadOut": null
+      },
+      "animated": 35,
+      "blocks": 35,
+      "missing": []
+    }
+  ],
+  "widths": 1,
+  "worst": 5,
+  "allCaught": true,
+  "allRemoved": true,
+  "noneMissing": true,
+  "animated": true,
+  "tolerance": 4,
+  "reducedMotion": {
+    "skeletonBlocks": 66,
+    "skeletonRunning": 14,
+    "skeletonNamed": 0,
+    "barBlocks": 31,
+    "barLayers": 4,
+    "barRunning": 0,
+    "barNamed": 0,
+    "skFill": "none | rgb(236, 230, 222)"
+  },
+  "rmStill": false,
+  "headMatches": true,
+  "footMatches": false,
+  "nothingClipped": true,
+  "tkWidths": 1,
+  "tkCountMatches": true,
+  "tkColsMatch": true,
+  "tkTileMatches": true,
+  "tkContained": true,
+  "navHeld": true,
+  "navDissolves": true,
+  "navLiveAfter": true,
+  "navInStep": true,
+  "settled": true,
+  "noLive": true,
+  "regionsPass": false,
+  "pass": false
+}

@@ -2,27 +2,36 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * dashActions — the quick actions card's four quieter actions (dashboard stage 3, 17 Sep).
+ * dashActions — the dashboard's quick actions (stage 3, 17 Sep; rebuilt for v16, 18 Sep).
  *
- * ⚠️ DECLARED ONCE, SO THE CARD AND ITS LOADING GHOST DRAW THE SAME ROWS. The cover counts this list;
- * a number typed beside it is the drift the skeleton's own lock forbids.
+ * ⚠️ THREE TILES, AND THE TWO THAT LEFT ARE NOT GONE FROM THE APP. Smart email drop and New package
+ * were quieter rows on this card and are now reached from their own pages — the Record screen carries
+ * the paste flow, the packages page carries its builder. A doorway on the dashboard for every flow in
+ * the app is how this card grew a list nobody read.
  *
- * ⚠️ THE ICONS AND THE HANDLERS ARE THE CARD'S. This is words, order and ink only, so the ghost can
- * read it without importing an icon set or a flow.
+ * ⚠️ EVERY ACTION IS AN EXISTING FLOW, REACHED THE WAY THE SHELL REACHES IT — `invokeCapture`, the
+ * same capture contracts the sidebar's New menu uses. The card is a second doorway, never a second
+ * door.
+ *
+ * ⚠️ THE ART IS PART OF THE TILE, AND TWO OF THE THREE ARE NOT DRAWN YET. `art` names the file each
+ * tile is waiting for; where the file does not exist the tile draws the dashed placeholder square the
+ * ref draws, captioned with the name. Adding the artwork is one entry in `lib/dashArt`, and the
+ * placeholder comes off on its own — the tile's box does not change, so nothing relays out.
  */
-
-export type QuickActionKey = "record" | "agent" | "email" | "package";
+export type QuickActionKey = "query" | "record" | "agent";
 
 export interface QuickAction {
   key: QuickActionKey;
   label: string;
-  /** the icon's ink — the page's ink, the app's slate, or ochre */
-  tone: "ink" | "slate" | "ochre";
+  /** the capture contract this tile invokes — `shell/railNav`'s, never a flow of its own */
+  capture: "query" | "record" | "agent";
+  /** the art key in `lib/dashArt`, or the placeholder's caption while the file is missing */
+  art: "quill" | "letter" | "card";
 }
 
+/** The three tiles, in the ref's order — the thing you do most at the top. */
 export const QUICK_ACTIONS: readonly QuickAction[] = [
-  { key: "record", label: "Record a reply", tone: "ink" },
-  { key: "agent", label: "Add an agent", tone: "slate" },
-  { key: "email", label: "Smart email drop", tone: "ink" },
-  { key: "package", label: "New package", tone: "ochre" },
+  { key: "query", label: "Log a query", capture: "query", art: "quill" },
+  { key: "record", label: "Record a response", capture: "record", art: "letter" },
+  { key: "agent", label: "Add an agent", capture: "agent", art: "card" },
 ];

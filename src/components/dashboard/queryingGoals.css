@@ -250,3 +250,35 @@
   font-size: 12.5px; color: #6b5b4d; line-height: 1.45;
 }
 .gts-preview strong { color: #3a1c14; font-weight: 500; }
+
+/* ── the illustrated mark ─────────────────────────────────────────────────────────────────────
+ * ⚠️ MOVED HERE FROM `oneScreen.css` (v16, 18 Sep), BECAUSE THIS CARD IS ITS ONLY CONSUMER. The
+ * dashboard's own painted marks are retired, so `.os-mark-il` had one renderer left — a parked one —
+ * and a shared rule with a single parked consumer is a rule the next sweep of that sheet deletes as
+ * dead. This card is mounted NOWHERE today, so nobody would see the white square until it came back.
+ *
+ * ⚠️ TRAP 1 — THE WHITE FIELD. The artwork is drawn on white paper, not transparency, so without
+ * `mix-blend-mode: multiply` it renders as a white square on parchment. It measures perfectly.
+ *
+ * ⚠️ TRAP 2 — A TRANSFORM ON AN ANCESTOR ISOLATES THE BLEND GROUP, and the entrance animation is a
+ * transform: for its ~420ms every illustration inside the card blends against transparency and
+ * flashes the field. A mark cannot be isolated from its own ancestor's transform, so it waits —
+ * opacity only, which creates no stacking context on the card. Any hover transform therefore lives
+ * on the IMG, never on a wrapper.
+ *
+ * ⚠️ `max-width`, NOT `width` — the artwork sits at its own sharp size inside the slot rather than
+ * being stretched to fill it.
+ */
+.os-mark-il { display: block; flex-shrink: 0; }
+.os-mark-il img {
+  max-width: 50px; max-height: 50px; width: auto; height: auto; object-fit: contain; display: block;
+  mix-blend-mode: multiply;
+  /* the opacity leg is the entrance's; both live here rather than in a second rule */
+  transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1), opacity 0.2s ease 0.1s;
+}
+/* ⚠️ `align-self: center` IS LOAD-BEARING — an IMAGE HAS NO BASELINE: in a baseline-aligned row it
+   aligns on its bottom margin edge and drags the row taller than its text. Measured before the fix:
+   row 33.3px against 21.8px of text. */
+.os-goalmark { width: 52px; height: 52px; margin: 0; align-self: center; }
+.os-goal:hover .os-goalmark img { transform: rotate(-4deg) scale(1.05); }
+.os-card.enter .os-mark-il img { opacity: 0; }

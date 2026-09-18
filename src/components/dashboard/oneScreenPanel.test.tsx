@@ -79,287 +79,153 @@ describe("OneScreenPanel — the shell the four containers had", () => {
  * A surviving `::after` ring beside it would be the two-owners fault the old law was written
  * against, arriving from the other side.
  */
-describe("the container rim is the card's own border, and there is only one of it", () => {
+/**
+ * ⚠️ THE CARD'S LOOK IS FIVE TOKENS, AND THE TOKENS ARE THE CLAIM (v16, 18 Sep).
+ *
+ * The ref draws white paper, a hairline, a 14px radius, 20/22 of padding and a shadow so faint it
+ * reads as a lifted edge rather than a drop. Those are declared ONCE on `.os-root` because a styling
+ * pass follows: the retune is that block, not a sweep of the sheet. So what is pinned here is that
+ * `.os-card` READS them — a literal creeping back into this rule is how two cards come to differ by
+ * one unit, invisibly, which this repo has already paid for once on two buttons.
+ *
+ * ⚠️ AND THERE IS STILL EXACTLY ONE OWNER OF THE HAIRLINE. The `::after` ring was retired when the
+ * border became real; a ring alongside the border is the two-owners fault arriving from the far side.
+ */
+describe("the card is the ref's paper, and it reads its values from tokens", () => {
   const bare = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-  it("⚠️ the card draws a real border — the ref's 1px line, not an overlay ring", () => {
+
+  it("⚠️ every value on the card comes from `--dash-*`, never a literal", () => {
     const c = cssRule(bare, ".os-card", "oneScreen.css");
-    expect(c).toContain("border: 1px solid #e6dfd6");
-    expect(c).toContain("border-radius: 18px");
-    expect(c).toContain("background: #fdfbf7");
+    expect(c).toContain("background: var(--dash-card)");
+    expect(c).toContain("border: 1px solid var(--dash-hair)");
+    expect(c).toContain("border-radius: var(--dash-radius)");
+    expect(c).toContain("padding: var(--dash-pad)");
+    expect(c).toContain("box-shadow: var(--dash-shadow)");
+    /* a colour literal on this rule is the thing the token block exists to prevent */
+    expect(c, "a hex on the card's own rule").not.toMatch(/#[0-9a-f]{3,8}/i);
+    /* ⚠️ AND ITS STACKING LAYER, which is not decoration: the sidebar's seam scrim is `z-index: 0`
+       and inert, so a card at auto is washed over at its left edge. It was dropped in the v16 sheet
+       rewrite and only `dash-rail-v33.mjs` noticed. */
+    expect(c).toContain("z-index: 1");
+    expect(c).toContain("position: relative");
   });
 
-  it("⚠️ and the retired ring did not survive it — one hairline, one owner", () => {
+  it("the tokens are declared, and declared once, on the page root", () => {
+    const root = cssRule(bare, ".os-root", "oneScreen.css");
+    for (const t of ["--dash-card", "--dash-hair", "--dash-radius", "--dash-pad", "--dash-shadow"]) {
+      expect(root, `${t} must be declared on .os-root`).toContain(`${t}:`);
+      expect((bare.match(new RegExp(`${t}\\s*:`, "g")) ?? []).length, `${t} is declared twice`).toBe(1);
+    }
+    expect(root).toContain("--dash-radius: 14px");
+    expect(root).toContain("--dash-pad: 20px 22px");
+  });
+
+  it("⚠️ and the retired ring did not survive the border — one hairline, one owner", () => {
     expect(bare, "the ::after ring is back alongside the border").not.toMatch(/\.os-card::after\s*\{/);
   });
 });
 
-
 /**
- * ⚠️ EVERY CONTAINER'S BAND IS THE SAME OBJECT (§2).
+ * ⚠️ THE BANDS ARE RETIRED, RULE AND ELEMENT TOGETHER (v16).
  *
- * Active queries was the last container on plain parchment. It now wears `.os-ahead`, the same
- * band as Activity and Goals, and `.os-th2` — the pink tasks band — was 2px taller than the other
- * three on padding alone (11/18 against 10/16). Nobody had noticed, because until the marks landed
- * no two bands sat side by side at a shared height. Browser-measured after the fix: all four at
- * 49px, spread 0, at 1440 AND 1024.
+ * Every card on the old dashboard wore a coloured band — sage `.os-ahead`, pink `.os-th2` — and a
+ * long run of this file existed to hold the two to one geometry, because they had drifted twice.
+ * The ref draws no band at all: a title, a mono eyebrow and a chip on the card's own paper. So the
+ * claim inverts, and what it is worth is stated at the top of this file: a replacement that is ADDED
+ * leaves the original reachable, and a dormant band rule is a second header treatment waiting for
+ * the next reader to reattach it.
+ *
+ * ⚠️ THE COMMUNITY CARD IS THE ONE SURVIVOR AND IS NOT AN EXCEPTION — it declares `.os-commhead`
+ * itself now (see `oneScreenCommunity.test.tsx`), precisely so that nothing on the page depends on
+ * a shared rule the page no longer has.
  */
-describe("the bands are one geometry, coloured by purpose", () => {
-  const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
-  const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
-  it("⚠️ the sage and pink bands share their PADDING — colour differs by purpose, geometry does not", () => {
-    /* ⚠️ THEY SHARE IT BY BEING ONE RULE, which is a stronger claim than two rules that agree: the
-       two cannot drift, because there is only one declaration to edit. */
-    const grouped = /(?:^|\n)\.os-ahead,\s*\.os-th2\s*\{([^}]*)\}/m.exec(bare);
-    expect(grouped, "the two bands must share ONE geometry rule").not.toBeNull();
-    /* ⚠️ RETARGETED OFF THE VALUES (v22). It read `padding: 0 20px` and `height: 51px`, which was
-       the geometry when the band was a stated height with its contents centred; the ref's band is
-       `14px 20px` with `padding-bottom:4px` from `ch-bare` and no height at all, so its contents sit
-       HIGH in the band. Centring them cost the to-do badge 4.6px at every width while the band's own
-       height stayed in tolerance — the diff blamed the badge, which was innocent.
-       THE CLAIM WAS NEVER THE NUMBERS: it is that there is ONE rule, so the two bands cannot drift.
-       The numbers are decided against the ref by `scripts/dash-refdiff.mjs` and pinning them here
-       would go red on every retune of something this lock has no opinion about. */
-    expect(grouped![1]).toMatch(/padding:\s*\d+px/);
-    /* ⚠️ A FLOOR, AND ITS VALUE IS DELIBERATELY BELOW THE BAND'S NATURAL HEIGHT (v26). It was 51 —
-       the v22 band's stated height, kept as a minimum when the band went content-driven — and the
-       ref's band is 50.2, so it BOUND on every card and every band ran 0.8px tall. A floor that
-       binds is not a floor. 44 is the honest one: the padding plus the 26px mark, i.e. a band with
-       nothing in it but its tile. The claim is that a floor exists and does not bind, so the
-       assertion is on the relationship rather than on the number. */
-    const floor = Number(/min-height:\s*(\d+)px/.exec(grouped![1])?.[1]);
-    expect(floor, "the shared band must state a floor").toBeGreaterThan(0);
-    expect(floor, "a floor above the band's natural 50.2px height binds on every card").toBeLessThan(50);
-    expect(grouped![1]).toContain("box-sizing: border-box");
-    /* and neither may state a competing padding elsewhere — see the base-rule case below */
+describe("the band era is over, and nothing of it is left reachable", () => {
+  const bare = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const files = ["OneScreenTasks", "OneScreenFeed", "OneScreenChart", "OneScreenClosed", "OneScreenActions",
+                 "OneScreenDashboard", "OneScreenSkeleton", "OneScreenHeader"];
+
+  it("⚠️ no band rule survives in the sheet", () => {
+    for (const sel of [".os-ahead", ".os-th2", ".os-lh", ".os-ll", ".os-bandkey", ".os-lbody"]) {
+      expect(cssRuleCount(bare, sel), `${sel} is still declared`).toBe(0);
+    }
   });
 
-  /* ⚠️ THE CHART'S BAND EXCEPTION IS RETIRED WITH THE BAND (dashboard stage 3, 17 Sep). The chart used to
-     wear `.os-ahead` with a scoped `.os-lead > .os-ahead` override that let it hold two rows; the new
-     chart has a header of its own (`.os-achead` — the hawk, the headline and the grain toggle), so the
-     shared band is back to its two members and there is no exception left to scope. */
-  it("⚠️ the shared band has no exception left — no chart override, and nothing wraps by default", () => {
-    const shared = /(?:^|\n)\.os-ahead,\s*\.os-th2\s*\{([^}]*)\}/m.exec(bare)![1];
-    expect(shared).toMatch(/min-height:\s*\d+px/);
-    expect(shared).not.toMatch(/flex-wrap:\s*wrap/);
-    expect(bare).not.toMatch(/\.os-lead > \.os-ahead\s*\{/);
-    expect(bare).not.toMatch(/(?:^|\n)\.os-th2\s*\{[^}]*flex-wrap:\s*wrap/);
+  it("⚠️ and no card on the page emits one", () => {
+    for (const f of files) {
+      const src = readFileSync(resolve(__dirname, `./${f}.tsx`), "utf8")
+        .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+      for (const cls of ["os-ahead", "os-th2", "os-lh", "os-lbody"]) {
+        expect(src, `${f} still renders ${cls}`).not.toMatch(new RegExp(`["\\s\`]${cls}["\\s\`]`));
+      }
+    }
   });
 
-  it("Active queries has a header of its own now, and it is not the shared band", () => {
-    const chart = readFileSync(resolve(__dirname, "./OneScreenChart.tsx"), "utf8");
-    expect(chart).toMatch(/<div className="os-achead" data-probe="chart-header">/);
-    expect(chart).not.toContain('className="os-ahead"');
-    expect(chart).not.toContain('className="os-lh"');
-  });
-
-  it("⚠️ the retired chart header is GONE, not merely unused", () => {
-    // a dormant `.os-lh` is a second treatment waiting to be reattached by the next reader
-    expect(bare).not.toMatch(/\.os-lh\s*\{/);
-    expect(bare).not.toMatch(/\.os-ll\s*\{/);
-  });
-
-  /* ⚠️ THE BRUSH, THE CHIPS AND THE CONTROL CLUSTER ARE RETIRED (stage 3), rule and element together — a
-     control that is replaced leaves nothing reachable behind it. The grain toggle that replaced the
-     chips sits in the chart's own header. */
-  it("⚠️ the retired controls are gone from the sheet, and the toggle is in the chart's header", () => {
+  /* ⚠️ THE BRUSH, THE CHIPS, THE SLIDER AND THE CONTROL CLUSTER went with the chart they operated
+     (stage 3), and the Daily/Monthly toggle went with v16's single grain. A control that is replaced
+     leaves nothing reachable behind it — the chart states its grain in a chip rather than offering a
+     menu with one item in it. */
+  it("⚠️ the retired chart controls are gone from the sheet and from the chart", () => {
     for (const sel of [".os-brush", ".os-bw", ".os-bshade", ".os-bwin", ".os-freqchips", ".os-ctrls",
-                       ".os-rangelbl", ".os-rangeslider", ".os-rangecap", ".os-ctrlrow", ".os-freqsel"]) {
+                       ".os-rangelbl", ".os-rangeslider", ".os-rangecap", ".os-ctrlrow", ".os-freqsel",
+                       ".os-actog"]) {
       expect(cssRuleCount(bare, sel), sel).toBe(0);
     }
     expect(bare).not.toContain("::-moz-range-track");
     const chart = readFileSync(resolve(__dirname, "./OneScreenChart.tsx"), "utf8");
-    const head = sliceBetween(chart, '<div className="os-achead" data-probe="chart-header">', '<div className="os-acbody">', "the chart's header");
-    expect(head).toContain('className="os-actog"');
     expect(chart).not.toContain('type="range"');
+    /* the grain is STATED, not offered: one chip, and no second grain named anywhere in the card */
+    const head = sliceBetween(chart, '<div className="os-achead" data-probe="chart-header">',
+                              '<div className="os-acbody">', "the chart's header");
+    expect(head).toContain('data-probe="chart-controls"');
+    expect(head).toContain("Weekly");
+    expect(head).not.toMatch(/Daily|Monthly/);
   });
 });
 
 /**
- * ⚠️ THE GOALS CARD IS DELIBERATELY UNBANDED (headers P2). Tried, rejected: its header names the
- * card rather than operating it, and the sage band gave it a weight the card does not carry.
+ * ⚠️ NOTHING ON THIS PAGE CLIPS ITS CARDS, AND THAT IS A DECISION.
+ *
+ * The old grid's columns were `overflow: hidden`, so a card's shadow ended in a hard line down the
+ * column edge — the one thing a soft shadow must never have — and a 10px bleed allowance existed to
+ * buy room before the cut. Both are retired. The old rule's reason, "without the clip a tall card
+ * pushes past its column silently", is answered rather than dropped: it does, and now you see it. A
+ * clip never fixed an overflowing card; it hid one.
  */
-describe("Querying goals keeps its bare header", () => {
-  const rail = readFileSync(resolve(__dirname, "./OneScreenRail.tsx"), "utf8");
-  const goalHead = rail.slice(rail.indexOf('className="os-goal-r1"'), rail.indexOf("</h2>", rail.indexOf('className="os-goal-r1"')));
+describe("the rows do not clip, so no shadow is cut", () => {
+  const bare = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
-  it("no band and no mark box in the goals header", () => {
-    expect(goalHead).not.toContain("os-ahead");
-    expect(goalHead).not.toContain("OneScreenMark");
+  it("neither row clips, and the retired columns are gone entirely", () => {
+    for (const sel of [".os-row1", ".os-row2"]) {
+      expect(cssRule(bare, sel, "oneScreen.css"), `${sel} clips`).not.toMatch(/overflow:\s*(hidden|clip)/);
+    }
+    for (const sel of [".os-colL", ".os-colM", ".os-colR", ".os-toprow", ".os-midrow"]) {
+      expect(cssRuleCount(bare, sel), `${sel} outlived its grid`).toBe(0);
+    }
+    expect(bare, "the bleed allowance outlived the clip it bought room against").not.toContain("--os-bleed");
   });
 
-  /* ⚠️ REVERSED BY THE GOALS PACK, AND THE REVERSAL IS THE POINT. This case used to require
-     `"Goal met"` in oneScreen.ts, on the reasoning that the at-or-beyond-target STATE was not what
-     the header pass rejected. That still holds — the state survives, and is now the card's fullest
-     moment — but the WORDS do not: "Goal met" is a verdict, and the rebuilt card may not deliver
-     one. It states the day instead ("Target reached 19 August"), which is a fact that stays true
-     rather than a cheer that ages. The assertion is inverted rather than deleted, so the phrase
-     cannot drift back in.
+  /* ⚠️ THE CARDS THAT SCROLL CLIP THEMSELVES, AND THAT IS NOT THE SAME THING. Row two's two cards
+     hold internal scrollers; the scroller clips, the card does not, so a card's own shadow is whole
+     while its content is bounded. */
+  it("the scrolling cards bound their contents without clipping their own box", () => {
+    const scroll = cssRule(bare, ".os-scroll", "oneScreen.css");
+    expect(scroll).toMatch(/overflow-y:\s*auto/);
+    expect(scroll).toContain("min-height: 0");
+  });
+});
 
-     ⚠️ THE CASE ABOVE IS UNTOUCHED. The bare header is a separate decision, re-confirmed in the
-     browser on 23 Aug against a local build and deployed dev before this pack was written. */
-  it("⚠️ `Goal met` is retired — the reached state states a DAY, never a verdict", () => {
+/**
+ * ⚠️ `Goal met` IS RETIRED AND THE CARD THAT SAID IT IS GONE WITH THE RAIL (v16) — the lock stays,
+ * because the words are the point rather than the card. A verdict ages; a date does not. The module
+ * is still live (`dailyLedger` and the ledger's own types are the chart's), so the phrase could come
+ * back into it without anything rendering a goals card at all.
+ */
+describe("the page delivers no verdicts", () => {
+  it("⚠️ `Goal met` and `goalFigure` are both gone from the ledger module", () => {
     const lib = readFileSync(resolve(__dirname, "../../lib/oneScreen.ts"), "utf8");
-    /* comments stripped: this file's own prose quotes the retired phrase, twice */
+    /* comments stripped: prose about a retired phrase is not the phrase */
     const decls = lib.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
     expect(decls).not.toContain("Goal met");
     expect(decls).not.toContain("goalFigure");
-  });
-});
-
-/**
- * ⚠️ THE BAND'S HEIGHT IS STATED, NOT DERIVED (headers P3). All three bands used to be sized by
- * their contents and agreed only by coincidence — measured 51 against 49 before the padding was
- * unified, and any control, longer title or font fallback would have parted them again.
- * Browser-measured after the fix: 51.00 on all three, spread 0, at 1280 / 1440 / 1920.
- */
-describe("one band geometry, declared", () => {
-  const bare = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-
-  /* ⚠️ INVERTED BY THE REF (v22), AND THE OLD CLAIM IS THE ONE THAT WAS WRONG. This required the
-     band's height to be DECLARED, "not left to the contents" — on the reasoning that three bands
-     agreeing structurally beats three bands that happen to measure the same. The reasoning holds
-     and the mechanism was the wrong one: the ref's band has no height, its air is 14px above and
-     4px below, and a stated height with centred contents is a different thing that merely measures
-     close. The agreement now comes from ONE shared rule plus a FLOOR, which is the same structural
-     guarantee — an empty band is still 51px — without contradicting the ref. */
-  it("⚠️ the band's air is the ref's, and the 51px survives as a FLOOR", () => {
-    const m = /\.os-ahead,\s*\.os-th2\s*\{([^}]*)\}/.exec(bare);
-    expect(m, "the two bands must share ONE geometry rule").not.toBeNull();
-    expect(m![1]).toMatch(/min-height:\s*\d+px/);
-    expect(m![1]).toContain("box-sizing: border-box");
-    /* asymmetric: more air above the contents than below, which is what puts them high in the band */
-    const pad = /padding:\s*(\d+)px\s+\d+px\s+(\d+)px/.exec(m![1]);
-    expect(pad, "the band states a three-value padding").not.toBeNull();
-    expect(Number(pad![1])).toBeGreaterThan(Number(pad![2]));
-    expect(m![1]).not.toMatch(/(?:^|;)\s*height:\s*51px/);
-  });
-
-  /* ⚠️ THE BASE RULES, ANCHORED — see `geom`. The chart's scoped override DOES declare a padding
-     (the ref's own `#chartCard .hd`), which is the point of it; what must not happen is either
-     BASE band growing a padding of its own, because that is how the two drifted apart before. */
-  it("⚠️ neither band re-declares its own padding — that is how they drifted apart before", () => {
-    for (const sel of [".os-ahead", ".os-th2"]) {
-      const m = new RegExp(`(?:^|\\n)\\${sel}\\s*\\{([^}]*)\\}`, "m").exec(bare);
-      if (m) expect(m[1], sel).not.toMatch(/padding:/);
-    }
-  });
-
-  it("titles never wrap; the controls give instead", () => {
-    expect(bare).toMatch(/\.os-ahead h2,\s*\.os-th2 h2\s*\{[^}]*white-space:\s*nowrap/);
-  });
-
-  /* ⚠️ RETARGETED (stage 3): the figure is in the chart's own header, beside its words. */
-  it("⚠️ the figure is IN the chart's header, and the loose wrapper beneath is gone", () => {
-    const chart = readFileSync(resolve(__dirname, "./OneScreenChart.tsx"), "utf8");
-    const head = sliceBetween(chart, '<div className="os-achead" data-probe="chart-header">', '<div className="os-acbody">', "the chart's header");
-    expect(head).toContain('className="os-acn"');
-    expect(chart).not.toContain('className="os-fig"'); // nothing floats beneath the header
-    expect(bare).not.toMatch(/\.os-fig\s*\{/);
-  });
-
-  /* ⚠️ RETARGETED (stage 3): the shared card states no padding, as before; the chart has no band to run
-     edge to edge any more, so it pads itself like the other two cards in its row, and the body rule
-     that carried its gutter (`.os-lbody`) is retired. */
-  it("⚠️ the card states no padding of its own — each card pads itself", () => {
-    const i = bare.indexOf(".os-card {");
-    expect(bare.slice(i, bare.indexOf("}", i))).not.toMatch(/padding:/);
-    for (const sel of [".os-lead", ".os-qa", ".os-cl"]) {
-      expect(cssRule(bare, sel), sel).toMatch(/padding:\s*\d+px/);
-    }
-    expect(cssRuleCount(bare, ".os-lbody")).toBe(0);
-  });
-});
-
-/**
- * ⚠️ A CLIPPING COLUMN SLICES ITS CHILDREN'S SHADOWS (P4). The bleed allowance grows the clip
- * outward and pulls the box back, so the shadows survive and nothing moves. Browser-measured with
- * and without: card positions identical, gap 15px both ways, page still does not scroll.
- */
-describe("the columns bleed, and nothing moves", () => {
-  const bare = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-  const col = (() => {
-    const i = bare.indexOf(".os-colL, .os-colR {");
-    expect(i, "the columns must share one rule").toBeGreaterThan(-1);
-    return bare.slice(i, bare.indexOf("}", i));
-  })();
-
-  /* ⚠️ THE BLEED IS RETIRED, AND THE CLAIM INVERTS (v26, Phase 8). The columns clipped, so their
-     children's shadows ended at the column edge, and a 10px padding/negative-margin pair bought
-     10px of room before the cut. The technique was sound and the problem was the wrong one: these
-     shadows reach ~18px, so 10px of bleed sliced every one of them — a hard termination down the
-     column's edge, which is the single thing a soft shadow must never have. The ref does not clip
-     at all (`.page2 .lcol, .page2 .rcol, .toprow{overflow:visible}`), so neither do we, and there
-     is nothing left to bleed past.
-     ⚠️ THE OLD RULE'S REASON — "without the overflow, a tall card pushes past its column silently"
-     — is answered rather than dropped: it does, and now you SEE it. A clip never fixed an
-     overflowing card; it hid one. */
-  it("the columns do not clip, so nothing needs a bleed allowance", () => {
-    expect(col).toContain("overflow: visible");
-    expect(col).not.toContain("overflow: hidden");
-    expect(col).not.toContain("var(--os-bleed)");
-    /* the row that replaced the top row (stage 3) does not clip either — a card's shadow crosses it */
-    expect(cssRule(bare, ".os-row2")).not.toMatch(/overflow:\s*(hidden|clip)/);
-    expect(cssRuleCount(bare, ".os-toprow")).toBe(0);
-    /* and every card is in one stacking layer, so a shadow paints over an earlier sibling */
-    expect(bare).toMatch(/\.os-card \{[^}]*z-index:\s*1/);
-  });
-
-  /* ⚠️ RETIRED WITH THE BLEED IT EXISTED FOR (v26, Phase 8). `content-box` was required BECAUSE of
-     the padding/negative-margin pair: under `border-box` the padding ate into `height: 100%` and
-     the negative margin then pulled the content 10px out of place instead of restoring it. With no
-     padding there is nothing for the box model to eat, and the column inherits the sheet's own
-     `border-box` like everything else. The case is deleted rather than inverted: "the column is not
-     content-box" is not a law, it is the absence of one.
-     ⚠️ AND THE PADDING WAS INFLATING THE COLUMN, which is how it showed up: 20px of vertical
-     padding OUTSIDE `min-height: 100%` left the activity panel measuring short of the ref. */
-
-  /* the clip is gone entirely — see "the columns do not clip" above, which asserts its absence */
-});
-
-/**
- * ⚠️ A BAND MUST MEET ITS CARD'S EDGES — and the height tests could not see that it didn't.
- *
- * THE FAULT: `.os-lead` kept the `padding: 13px 18px 9px` it wore as a plain card when the band
- * arrived, so `.os-ahead` sat 18px in from each side and 13px down, inside a card that was also
- * `overflow: visible` — a square band floating within a rounded card. Every band still measured
- * 51px, so every test passed.
- *
- * A band's geometry is its POSITION as much as its size. Browser-measured after the fix: left, top
- * and width identical to the card on all three (deltas 0.00).
- */
-describe("the bands meet their cards' edges", () => {
-  const bare = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-  /* ⚠️ ANCHOR AT A RULE BOUNDARY. `indexOf(".os-lead {")` also matches INSIDE
-     `.os-midrow .os-lead {`, so the naive helper read the midrow's height rule and reported the
-     card as unclipped. The slice-anchoring trap, caught by its own assertion. */
-  const blk2 = (sel: string) => {
-    const re = new RegExp(`(^|[}\\n])\\s*\\${sel}\\s*\\{([^}]*)\\}`, "m");
-    const m = re.exec(bare);
-    expect(m, `${sel} must exist as a rule of its own`).not.toBeNull();
-    return m![2];
-  };
-
-  /* ⚠️ TWO BANDED CARDS SINCE STAGE 3 — the chart's header is its own and the card pads itself */
-  it("⚠️ every banded card carries NO padding — the padding belongs to its body", () => {
-    for (const sel of [".os-tasks", ".os-actv"]) {
-      const b = blk2(sel);
-      const p = /padding:\s*([^;]+)/.exec(b)?.[1]?.trim();
-      expect(p === undefined || p === "0", `${sel} padding is "${p}" — it would inset the band`).toBe(true);
-    }
-  });
-
-  it("⚠️ every banded card CLIPS, or the band's corners escape the card radius", () => {
-    for (const sel of [".os-tasks", ".os-actv"]) {
-      expect(blk2(sel), `${sel} must clip`).toContain("overflow: hidden");
-    }
-  });
-
-  /* ⚠️ RETARGETED (stage 3): this held the chart body's padding (`.os-lbody`, v22's `10px 22px 4px`) and
-     the legend's place beside it. Both are retired with the band; what survives is their absence. */
-  it("the chart has no band, no body wrapper and no legend", () => {
-    const chart = readFileSync(resolve(__dirname, "./OneScreenChart.tsx"), "utf8");
-    expect(chart).not.toContain('className="os-lbody"');
-    expect(chart).not.toContain('className="os-bandkey"');
-    expect(bare).not.toMatch(/\.os-bandkey\s*\{/);
   });
 });

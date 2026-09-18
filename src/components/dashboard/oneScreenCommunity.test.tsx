@@ -207,8 +207,15 @@ describe("the tile fills a row it does not size", () => {
     const strip = rule(".os-comstrip");
     expect(strip).toContain("display: flex");
     expect(strip).toContain("margin-top: 22px");
-    /* it is not a grid child — the grid is two columns and neither is Community's */
-    expect(cssRules).toContain("grid-template-columns: minmax(0, 1fr) 360px");
+    /* ⚠️ RETARGETED (v16, 18 Sep). The claim was "it is not a child of the page's grid", asserted by
+       naming that grid's own two tracks — and the grid is retired with the rail. What the strip must
+       still be is a ROW OF ITS OWN: a flex row with its own top margin and `flex: none`, so it can
+       neither be sized by a column nor compete for one. The page's own two rows are named here so the
+       claim still reads as "not one of these": if the strip is ever mounted again it goes beneath them.
+       ⚠️ AND NOTHING MOUNTS IT TODAY — see the parked note in oneScreen.css. */
+    expect(strip).toContain("flex: none");
+    expect(cssRules).toContain(".os-row1 {");
+    expect(cssRules).toContain(".os-row2 {");
     const src = readFileSync(resolve(__dirname, "./OneScreenCommunity.tsx"), "utf8");
     expect(src).toContain('data-probe="community-strip"');
     expect(src).toContain("strip = false");
@@ -216,10 +223,25 @@ describe("the tile fills a row it does not size", () => {
     expect((src.match(/COMMUNITY_EMPTY/g) ?? []).length).toBeGreaterThanOrEqual(2);
   });
 
-  /* ⚠️ THE BAND IS THE SHARED ONE. The first draft restated height/padding here and, being later
-     in the sheet, WON — rendering the Community band 7px shorter than every other band. */
-  it("⚠️ the band declares no geometry of its own", () => {
-    expect(cssRules).not.toMatch(/\.os-commhead \{[^}]*height:/);
-    expect(cssRules).not.toMatch(/\.os-commhead \{[^}]*padding:/);
+  /**
+   * ⚠️ INVERTED BY v16, AND THE INVERSION IS THE POINT. This used to require that the band declare
+   * NO geometry — the shared `.os-ahead` / `.os-th2` rule owned it, and the first draft of this card
+   * restated height and padding below that rule, won at equal specificity and rendered 7px shorter
+   * than every other band on the page. The shared rule is retired with the dashboard that wore it,
+   * so "inherit it from the shared band" now means "inherit it from nothing": the header would
+   * render unstyled, and this component is mounted NOWHERE, so nobody would see it until it
+   * returned. The claim is therefore the mirror — it states its own geometry — plus the half that
+   * was always the real one: there is exactly ONE declaration of it.
+   */
+  it("⚠️ the band owns its geometry now, and owns it exactly once", () => {
+    expect(cssRuleCount(cssRules, ".os-commhead"), "one owner, or the drift is back").toBe(1);
+    const head = cssRule(cssRules, ".os-commhead", "oneScreen.css");
+    expect(head).toMatch(/min-height:\s*\d+px/);
+    expect(head).toMatch(/padding:\s*\d+px/);
+    /* and it may not name the retired shared band — in the sheet or in the class list */
+    expect(cssRuleCount(cssRules, ".os-ahead"), "the retired shared band is back").toBe(0);
+    const src = readFileSync(resolve(__dirname, "./OneScreenCommunity.tsx"), "utf8");
+    expect(src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\{\/\*[\s\S]*?\*\/\}/g, ""))
+      .not.toMatch(/["\s`]os-ahead["\s`]/);
   });
 });

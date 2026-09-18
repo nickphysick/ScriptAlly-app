@@ -44,9 +44,9 @@ const PICK = (process.env.SA_DASH_HEADER_WIDTHS ?? "").split(",").map((s) => Num
 const WIDTHS = PICK.length ? ALL.filter((v) => PICK.includes(v.w)) : ALL;
 
 /** Everything below the header whose horizontal geometry must not move. */
-/* ⚠️ RETARGETED (stages 2–3, 17 Sep): the top row and its tile are retired; the breakdown, the second row
-   and its three cards are what sit below the header now. */
-const BELOW = [".os-bd", ".os-row2", ".os-grid", ".os-colL", ".os-colR", ".os-qa", ".os-lead", ".os-cl", ".os-tasks", ".os-actv", ".os-comtile"];
+/* ⚠️ RETARGETED (v16, 18 Sep): the breakdown, the goals grid and its two columns are retired with the
+   sections they named. The page is two rows and five cards, and those are what sit below the header. */
+const BELOW = [".os-row1", ".os-row2", ".os-qa", ".os-lead", ".os-cl", ".os-feed", ".os-todo"];
 
 type Box = { x: number; y: number; w: number; h: number; r: number; b: number };
 
@@ -110,7 +110,11 @@ function readPage(page: Page, below: string[]) {
     const hdr = q(".os-content .os-greet");
     const h1 = hdr ? hdr.querySelector("h1") : null;
     const counts = hdr ? hdr.querySelector(".os-hdcounts") : null;
-    const img = hdr ? (hdr.querySelector(".os-hdart") as HTMLImageElement | null) : null;
+    /* ⚠️ THE HEADER'S ILLUSTRATION IS RETIRED (v16) — this reads null now, and the ABSENCE is the
+       claim: the hawk came off with the stat cards' marks, and the page carries no picture outside
+       the quick-action tiles. A probe kept pointing at it would report `null` for ever and prove
+       nothing, so what it feeds is an assertion that nothing is there. */
+    const img = hdr ? (hdr.querySelector(".os-hdart, .os-greet img") as HTMLImageElement | null) : null;
     /* the dot carries the margins and the ink; its wrapper is a zero-size span holding the spaces */
     const sep = counts ? counts.querySelector(".os-hddot") : null;
     const nums = counts ? [...counts.querySelectorAll("b")] : [];
@@ -153,7 +157,7 @@ function readPage(page: Page, below: string[]) {
     };
 
     const imgStyle = img ? getComputedStyle(img) : null;
-    const colL = q(".os-colL");
+    const colL = q(".os-row1");
     const rootText = root ? (root.textContent || "") : "";
     return {
       viewport: { w: window.innerWidth, h: window.innerHeight },
@@ -179,9 +183,9 @@ function readPage(page: Page, below: string[]) {
         clip: clipped(img, [img.getBoundingClientRect()]),
       } : null,
       colL: box(colL),
-      /* how many tracks the page grid resolves to — two beside each other, or one stack */
+      /* how many tracks the page's bottom row resolves to — two beside each other, or one stack */
       gridTracks: (() => {
-        const g = q(".os-content > .os-grid");
+        const g = q(".os-content > .os-row2");
         return g ? getComputedStyle(g).gridTemplateColumns.split(" ").filter(Boolean).length : null;
       })(),
       below: Object.fromEntries(below.map((s) => [s, box(q(s))])),
@@ -197,8 +201,17 @@ function readPage(page: Page, below: string[]) {
         oldMarks: document.querySelectorAll("img[src*='active-query-image'], img[src*='response-rate-icon']").length,
         headerShimmer: hdr ? hdr.querySelectorAll(".os-sk, .os-skel").length : -1,
       },
-      todoBadge: (() => { const b = q("[data-probe='todo-badge'] b"); return b ? b.textContent : null; })(),
-      chartActive: (() => { const n = q(".os-lead .os-acn"); return n ? n.textContent : null; })(),
+      /* ⚠️ THE CHIP STATES "All N" NOW, AND THE FIGURE IS PULLED OUT RATHER THAN READ WHOLE — a probe
+         comparing "All 23" against "23" fails on a page that is perfectly correct. */
+      todoBadge: (() => {
+        const b = q("[data-probe='todo-badge']");
+        return b ? ((b.textContent ?? "").match(/[\d,]+/)?.[0] ?? null) : null;
+      })(),
+      /* the chart states its figure in its eyebrow: "N out with agents · …" */
+      chartActive: (() => {
+        const n = q("[data-probe-text='chart-eyebrow']");
+        return n ? ((n.textContent ?? "").match(/[\d,]+/)?.[0] ?? null) : null;
+      })(),
       emptyPage: !!q("[data-probe='chart-empty']"),
       seen: (window as unknown as { __saHdr?: unknown[] }).__saHdr ?? [],
     };
@@ -258,7 +271,11 @@ test.describe("the dashboard header", () => {
       const coverStates = (r.seen as Array<{ t: string | null; cover: boolean; shimmer: number }>).filter((s) => s.cover);
       expect(coverStates.length, "the cover was never caught — this case would be vacuous").toBeGreaterThan(0);
       for (const s of coverStates) {
-        expect(s.t, "the cover's header states no figure").toBe("queries out · tasks waiting on you");
+        /* ⚠️ TWO CLAUSES, NOT THREE, AND THE MISSING ONE IS THE POINT. The day clause is "Day 1,018" —
+           its figure is INSIDE the words rather than before them, so there is no version of it with
+           the number taken out. It is omitted entirely while the data is out rather than rendered as
+           a bare "Day", which would be a sentence with a hole in it. */
+        expect(s.t, "the cover's header states no figure").toBe("queries out · waiting on you");
         expect(s.shimmer, "the cover's header carries no shimmer").toBe(0);
       }
 
@@ -276,26 +293,32 @@ test.describe("the dashboard header", () => {
       expect(r.h1.style!.family.startsWith('"Special Elite"'), `family: ${r.h1.style!.family}`).toBe(true);
       expect(fonts?.join(" ") ?? "", "Special Elite is what actually painted").toContain("Special Elite");
       expect(r.h1.style!.weight).toBe("400");
-      const h1Size = w <= 560 ? 32 : 44;
+      /* ⚠️ THE v16 SCALE AND ITS TWO STEPS — 56 at full width, 40 below 1000, 32 below 640. The ref
+         draws one width; the two steps are Nick's prose and are the authority there. */
+      const h1Size = w <= 640 ? 32 : w <= 999 ? 40 : 56;
       expect(r.h1.style!.size).toBe(`${h1Size}px`);
-      expect(parseFloat(r.h1.style!.lineHeight)).toBeCloseTo(h1Size * 1.05, 1);
-      expect(parseFloat(r.h1.style!.letterSpacing)).toBeCloseTo(-0.01 * h1Size, 2);
+      expect(parseFloat(r.h1.style!.lineHeight)).toBeCloseTo(h1Size * 1.02, 1);
+      expect(parseFloat(r.h1.style!.letterSpacing)).toBeCloseTo(0.005 * h1Size, 2);
 
-      /* ── the counts line ── */
-      const cSize = w <= 560 ? 17 : 19;
+      /* ── the counts line: the serif, not the page's sans, and 17px stepping to 15 on a phone ── */
+      const cSize = w <= 640 ? 15 : 17;
       expect(r.counts.style!.size).toBe(`${cSize}px`);
-      expect(parseFloat(r.counts.style!.lineHeight)).toBeCloseTo(cSize * 1.5, 1);
-      expect(r.counts.style!.marginTop).toBe("12px");
+      expect(parseFloat(r.counts.style!.lineHeight)).toBeCloseTo(cSize * 1.45, 1);
+      expect(r.counts.style!.marginTop).toBe("10px");
       expect(r.counts.style!.color, "the line is ink").toBe(r.h1.style!.color);
       /* the normal line, or a new account's (no queries on this manuscript) — never both, never neither */
       const starting = r.counts.text?.startsWith("No queries out yet") ?? false;
       expect(r.counts.text).toMatch(starting
         ? /^No queries out yet · \d[\d,]* steps? to get started$/
-        : /^\d[\d,]* quer(y|ies) out · \d[\d,]* tasks? waiting on you$/);
+        /* ⚠️ THREE CLAUSES SINCE v16, AND THE THIRD IS OPTIONAL — "Day N" is absent until this
+           manuscript has a first send to count from, which is a real state on a fresh book. */
+        : /^\d[\d,]* quer(y|ies) out · \d[\d,]* waiting on you( · Day \d[\d,]*)?$/);
       expect(r.counts.nums.map((n) => n.weight)).toEqual(starting ? ["600"] : ["600", "600"]);
       expect((r.counts.sepText ?? "").trim()).toBe("·");
-      expect(r.counts.sep!.marginLeft).toBe("8px");
-      expect(r.counts.sep!.marginRight).toBe("8px");
+      /* 8px either side, tightening to 6 on a phone with the type — the dot's air is the line's */
+      const sepGap = w <= 640 ? "6px" : "8px";
+      expect(r.counts.sep!.marginLeft).toBe(sepGap);
+      expect(r.counts.sep!.marginRight).toBe(sepGap);
       expect(r.counts.sep!.color, "the dot is muted, not ink").not.toBe(r.counts.style!.color);
 
       /* the two figures are the page's own: the chart's headline and the to-do card's badge */
@@ -306,27 +329,20 @@ test.describe("the dashboard header", () => {
       } else {
         expect(r.emptyPage, "the counts line never sits over the Getting Started list").toBe(false);
         expect(String(queriesOut), "queries out === the chart's Active queries").toBe((r.chartActive ?? "").replace(/,/g, ""));
-        expect(String(tasksWaiting), "tasks waiting === the to-do card's badge").toBe((r.todoBadge ?? "").replace(/,/g, ""));
+        expect(String(tasksWaiting), "waiting on you === the to-do card's chip").toBe((r.todoBadge ?? "").replace(/,/g, ""));
       }
 
-      /* ── the illustration ── */
-      if (w <= 900) {
-        expect(r.headerStyle!.flexDirection, "the header stacks").toBe("column");
-        expect(r.img?.style?.display ?? "none", "hidden once the header stacks").toBe("none");
-      } else {
-        const want = w <= 1200 ? 110 : 150;
-        expect(r.img, "the illustration must render").not.toBeNull();
-        expect(r.img!.complete && r.img!.natural.w > 0, "decoded").toBe(true);
-        expect(r.img!.alt).toBe("");
-        expect(r.img!.box!.h).toBeCloseTo(want, 0);
-        expect(r.img!.box!.w, "width follows the artwork's own ratio").toBeCloseTo(want * (r.img!.natural.w / r.img!.natural.h), 0);
-        expect(r.img!.style!.objectFit).toBe("contain");
-        expect(r.img!.style!.border).toMatch(/^0px /);
-        expect(r.img!.style!.radius).toBe("0px");
-        expect(r.img!.style!.shadow).toBe("none");
-        expect(r.img!.style!.background).toBe("rgba(0, 0, 0, 0) none");
-        expect(r.img!.clip, "no ancestor crops the artwork").toEqual([]);
-      }
+      /**
+       * ── the illustration is RETIRED (v16), and the claim is inverted rather than dropped ──
+       *
+       * ⚠️ THE HEADER IS A GREETING AND ONE LINE OF FIGURES, at every width. The hawk went with the
+       * stat cards' marks; the page's only pictures are the three quick-action tiles. Asserting the
+       * absence is what stops it coming back without the decision being taken again — and the
+       * header's own column claim goes with it, since a stacked header was only ever about making
+       * room for a picture.
+       */
+      expect(r.img, "the header's illustration is back").toBeNull();
+      expect(r.headerStyle!.flexDirection, "the header is a column at every width now").toBe("column");
 
       /* ── nothing below moved sideways — valid at every width, because it compares two builds ── */
       const beforeFile = BASELINE ? resolve(BASELINE, `before-${w}.json`) : null;
@@ -354,18 +370,20 @@ test.describe("the dashboard header", () => {
          height of its own (it declared 0 for the side-by-side layout and was invisible when stacked).
          ⚠️ RETARGETED (stages 2–3): the header is the page's first row now, above the breakdown and the
          three-card row, rather than the left column's first child. */
-      if (w < 1025) {
-        expect(r.gridTracks, "one track below 1025").toBe(1);
-        const L = r.below[".os-colL"]!, R = r.below[".os-colR"]!, act = r.below[".os-actv"]!, tile = r.below[".os-comtile"]!;
-        const bd = r.below[".os-bd"]!, row2 = r.below[".os-row2"]!;
-        expect(r.header!.b, "the header is the first thing in the stack").toBeLessThanOrEqual(bd.y + 0.5);
-        expect(bd.b, "then the breakdown").toBeLessThanOrEqual(row2.y + 0.5);
-        expect(row2.b, "then the three cards").toBeLessThanOrEqual(L.y + 0.5);
-        expect(R.y, "the activity column comes after the main content").toBeGreaterThanOrEqual(L.b - 0.5);
-        expect(R.x, "and shares its left edge").toBeCloseTo(L.x, 0);
-        expect(R.w, "and its width").toBeCloseTo(L.w, 0);
-        expect(act.h, "the activity panel is not collapsed").toBeGreaterThan(200);
-        expect(tile.y, "the community tile sits below the panel, not over it").toBeGreaterThanOrEqual(act.b - 0.5);
+      /* ⚠️ RETARGETED (v16): the page is a header and two rows, and below 1000 both rows are one
+         track. The fault this guards is the one the phone fix found — a release written for the old
+         wrapper left a stacked column resolving to ~0px with the next card lying over it. */
+      if (w < 1000) {
+        expect(r.gridTracks, "one track below 1000").toBe(1);
+        const row1 = r.below[".os-row1"]!, row2 = r.below[".os-row2"]!;
+        const feed = r.below[".os-feed"]!, todo = r.below[".os-todo"]!;
+        expect(r.header!.b, "the header is the first thing in the stack").toBeLessThanOrEqual(row1.y + 0.5);
+        expect(row1.b, "then the three cards").toBeLessThanOrEqual(row2.y + 0.5);
+        expect(todo.y, "the to-do card comes after the feed").toBeGreaterThanOrEqual(feed.b - 0.5);
+        expect(todo.x, "and shares its left edge").toBeCloseTo(feed.x, 0);
+        expect(todo.w, "and its width").toBeCloseTo(feed.w, 0);
+        expect(feed.h, "a stacked card is not collapsed").toBeGreaterThan(200);
+        expect(todo.h, "nor is the one beneath it").toBeGreaterThan(200);
       }
       /* ⚠️ KNOWN, AND THE SHELL'S: the desktop shell will not shrink below its widest rigid row (its
          columns are `min-width: auto`), and that row is the TOP BAR, not the page — measured 17 Sep by
@@ -380,22 +398,27 @@ test.describe("the dashboard header", () => {
 
       /* ══ WHAT NEEDS THE PAGE'S OWN LAYOUT TO BE RIGHT ══ */
 
-      /* one line is one line box tall. (Distinct text-rect tops cannot answer this: the zero-size
-         spaces around the dot sit at a top of their own on a line that has not wrapped.) */
-      expect(r.counts.box!.h, "one line").toBeCloseTo(cSize * 1.5, 0);
+      /**
+       * ⚠️ ONE LINE, ASSERTED AS "FEWER THAN TWO" RATHER THAN AS A FIGURE. Pinning it to
+       * `size × line-height` fails on a correct page: the separator is `font-size: 0` and the dot
+       * inside it is full size, so the dot's inline box is aligned to a zero-size parent's baseline
+       * and extends the line box past the strut — measured 26.6 against a 24.65 strut at 1440. The
+       * claim was never the number; it is that the line has not wrapped.
+       *
+       * (Distinct text-rect tops cannot answer this either: the zero-size spaces around the dot sit
+       * at a top of their own on a line that has NOT wrapped.)
+       */
+      expect(r.counts.box!.h, "the counts line wrapped").toBeLessThan(cSize * 1.45 * 1.9);
+      expect(r.counts.box!.h, "…or collapsed").toBeGreaterThanOrEqual(cSize * 1.45 - 0.5);
       expect(r.counts.clip).toEqual([]);
       expect(r.h1.clip, "no ancestor clips the greeting's ink").toEqual([]);
-      /* ⚠️ RETARGETED (stages 2–3): the header spans the page's centred block — the breakdown's edges —
-         rather than the left column, and the next section is the breakdown */
-      const next = r.below[".os-bd"]!;
+      /* ⚠️ RETARGETED (v16): the header spans the page's centred block — the first row's edges — and
+         the next section is that row. The air between them is the header's own bottom padding; the
+         old ~34px was the picture's, and the picture is gone. */
+      const next = r.below[".os-row1"]!;
       expect(r.header!.x, "the header starts at the block's left edge").toBeCloseTo(next.x, 0);
       expect(r.header!.r, "and ends at its right edge").toBeCloseTo(next.r, 0);
-      expect(next.y - r.header!.b, "~34px before the next section").toBeCloseTo(34, 0);
-      if (w > 900) {
-        expect(r.img!.box!.r, "it ends at the block's right edge").toBeCloseTo(next.r, 0);
-        expect(r.img!.box!.b, "bottom-aligned with the text block").toBeCloseTo(r.counts.box!.b, 0);
-        expect(r.img!.box!.x, "it sits clear of the counts line").toBeGreaterThanOrEqual(r.counts.box!.r + 40 - 0.5);
-      }
+      expect(next.y - r.header!.b, "the row begins where the header ends").toBeCloseTo(0, 0);
       expect(r.docOverflowX, "nothing overflows the page sideways").toBeLessThanOrEqual(0);
     });
   }

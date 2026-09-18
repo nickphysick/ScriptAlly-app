@@ -949,11 +949,11 @@ describe("the feature rows set their own type, and nothing else uses its familie
     const dash = decls(readFileSync(resolve(src, "components/dashboard/oneScreen.css"), "utf8"));
     const dashOwners = [...dash.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
       .filter((m) => /Special Elite|Source Serif 4/.test(m[2])).map((m) => m[1].trim());
-    /* ⚠️ TWO DECLARATIONS IN THAT SHEET SINCE STAGES 2–3 (17 Sep): the greeting's own, and `.os-root`'s
-       `--os-type` token, which the breakdown and closed headings, the hero button, the manuscript title
-       and the chart's title all read (asserted in `oneScreenStages.test.tsx`). Still the one file, and
-       still only the typewriter face. */
-    expect(dashOwners).toEqual([".os-root", ".os-greet .os-hello"]);
+    /* ⚠️ ONE DECLARATION IN THAT SHEET SINCE v16 (18 Sep), AND IT IS THE TOKEN. `.os-root` declares
+       `--os-type`; the greeting, the card headings, the quick-action labels and the manuscript runs in
+       the feed all READ it, so the family is named once on the signed-in side of the app. A second
+       rule naming the face here is still a decision this fails on. */
+    expect(dashOwners).toEqual([".os-root"]);
     expect(dash).not.toContain("Source Serif 4");
   });
 });

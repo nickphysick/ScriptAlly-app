@@ -2,13 +2,17 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * OneScreenDashboard — the one-screen dashboard (refs design-refs/dashboard-one-screen.html +
- * dashboard-one-screen-spec.md; §-references below are the spec's).
+ * OneScreenDashboard — the dashboard (v16, 18 Sep; ref design-refs/dashboard-v16-2026-09-18.html).
  *
- * ⚠️ THE ONE-SCREEN LOCK IS DROPPED (stages 2–3, 17 Sep — Nick). The page is a flowing page now: the
- * header, the breakdown and the three-card row span the content width, and the to-do card and the
- * activity column sit side by side beneath them at a FIXED height, each keeping its own scroll. The
- * route is a `flow` slot again and `dashboard` is off the shell's `fit` list; the stage scrolls.
+ * The header, then two rows: quick actions · the chart · closed, and beneath them the activity feed
+ * beside the to-do list. Both cards in the second row end on the same line and scroll inside it.
+ *
+ * ⚠️ THE ONE-SCREEN LOCK IS DROPPED (stages 2–3, 17 Sep — Nick). The page flows and the stage scrolls
+ * it; the route is a `flow` slot and `dashboard` is off the shell's `fit` list.
+ *
+ * ⚠️ RETIRED WITH v16: the breakdown ("Where your queries stand"), the header's illustration, the
+ * activity RAIL and its community tile, the manuscript tile and the quick-action list. The feed is
+ * `OneScreenFeed` over `lib/dashFeed` — the rail's own derivation, in a lib, under a new layout.
  *
  * ⚠️ THE CONTENT IS A CENTRED BLOCK WITH A MAXIMUM WIDTH (`--dash-page-max`, declared on the dashboard
  * route's `.ws-main` so the shell's top bar can pad itself to the same measure). The activity column is INSIDE the
@@ -18,23 +22,22 @@
  * ⚠️ NEVER 100vh AND NEVER A BAR OFFSET (the house stage law) still holds: nothing here measures the
  * viewport; the fixed row height is a length, not a fraction of the window.
  */
-import React, { useEffect, useRef, useState } from "react";
-import { Activity, Agent, Manuscript, ManuscriptVersion, Query, Task, TaskFlag, User, UserPlan, UserTask } from "../../types";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Activity, Agent, Manuscript, ManuscriptVersion, Query, Task, TaskFlag, User, UserTask } from "../../types";
 import { runStage, tourAutoRuns, tourChipShows } from "../../lib/oneScreen";
 import { OneScreenTour, TOUR_BREAKPOINT } from "./OneScreenTour";
 import { OneScreenChart } from "./OneScreenChart";
-import { OneScreenBreakdown } from "./OneScreenBreakdown";
 import { OneScreenActions } from "./OneScreenActions";
 import { OneScreenClosed } from "./OneScreenClosed";
-import { liveCount, queryBreakdown, queryingDay } from "../../lib/dashBreakdown";
+import { liveCount } from "../../lib/dashBreakdown";
 import { closedTile } from "../../lib/dashClosed";
 import { OneScreenTasks } from "./OneScreenTasks";
 import { OneScreenHeader } from "./OneScreenHeader";
 import { dashHeaderLine, type DashHeaderLine } from "../../lib/dashHeader";
 import { localYMD } from "../../lib/shellSidebar";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../lib/manuscriptScope";
-import { deriveGoalProgress } from "../../lib/queryingGoals";
-import { OneScreenRail } from "./OneScreenRail";
+import { OneScreenFeed } from "./OneScreenFeed";
+import { readSeenAt, writeSeenAt } from "../../lib/dashSeen";
 import { OneScreenSkeleton } from "./OneScreenSkeleton";
 import { useSkeleton } from "../../lib/skeletonTiming";
 import "./oneScreen.css";
@@ -62,7 +65,9 @@ export interface OneScreenDashboardProps {
   /** The manuscript the shell scope names — the kicker repeats it (§2). */
   activeManuscript: Manuscript | null;
   onNavigate: (tab: string, sub?: string) => void;
-  onTaskAction: (task: Task) => void;
+  /* ⚠️ `onTaskAction` IS RETIRED (v16). It was destructured and never called — `tsc` does not flag an
+     unused prop, so it sat here as a handler the page could not reach. The To-do drawer is how a task
+     is acted on from this page. */
   updateUserProfile: (fields: Partial<User>) => Promise<void>;
   /** Injectable for tests; defaults to the real clock. */
   now?: Date;
@@ -77,7 +82,7 @@ export const Skel: React.FC<{ bars: ("h" | "grow" | "")[] }> = ({ bars }) => (
 
 export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
   loading, queries, agents, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
-  activeManuscript, onNavigate, onTaskAction, updateUserProfile, versions = [], now = new Date(),
+  activeManuscript, onNavigate, updateUserProfile, versions = [], now = new Date(),
 }) => {
   /**
    * ⚠️ THE SCOPED SETS ARE DERIVED ONCE, HERE, AND HANDED DOWN (B2). Every card reading the same
@@ -119,10 +124,9 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
    */
   const empty = scopedQueries.length === 0;
 
-  const goalProgress = React.useMemo(
-    () => deriveGoalProgress(queries, currentUser?.queryingGoals, now),
-    [queries, currentUser?.queryingGoals, now],
-  );
+  /* ⚠️ THE GOAL DERIVATION IS RETIRED (v16). `deriveGoalProgress` was computed here and read by
+     nothing — the goals card left the page with the rail's rebuild and the `const` stayed, which is
+     the assigned-but-unread shape this file's own notes warn about two screens down. */
 
   const firstName = (currentUser?.name ?? "").trim().split(/\s+/)[0] || "there";
 
@@ -152,18 +156,27 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
    * they reconcile by construction; the closed tile's buckets are `dashClosed`'s. All are null while
    * loading — Nick's rule, never a number that might change.
    */
-  const breakdown = React.useMemo(
-    () => (loading ? null : queryBreakdown({ queries: scopedQueries, activities: scopedActivities, agents, now })),
-    [loading, scopedQueries, scopedActivities, agents, now],
-  );
   const closed = React.useMemo(
     () => (loading ? null : closedTile(scopedQueries, scopedActivities)),
     [loading, scopedQueries, scopedActivities],
   );
   const activeCount = loading ? null : liveCount(scopedQueries);
-  const queryingDayN = queryingDay(scopedQueries, now);
-  const manuscriptTitle = activeManuscript?.title?.trim() || null;
-  const isPro = currentUser?.plan === UserPlan.PRO;
+
+  /**
+   * ⚠️ READ ONCE, ON ARRIVAL; WRITTEN WHEN THE PAGE GOES (Nick, 18 Sep). The feed marks what is new
+   * since this device last left the dashboard, so the moment must be the PREVIOUS visit's — stamping
+   * on mount would clear the rules in the same frame that drew them.
+   *
+   * ⚠️ AND `pagehide` CARRIES THE COMMON CASE. The workspace keeps its pages mounted and toggles
+   * `display`, so React's unmount fires on a tier crossing and on a reload it does not fire at all;
+   * `pagehide` is the event a refresh and a closing tab both raise. Both paths write the same stamp.
+   */
+  const [seenAt] = useState<number | null>(() => readSeenAt());
+  useEffect(() => {
+    const stamp = () => writeSeenAt();
+    window.addEventListener("pagehide", stamp);
+    return () => { window.removeEventListener("pagehide", stamp); stamp(); };
+  }, []);
 
   /* ⚠️ THE FEED'S ACTION AND THE PANEL'S DRAWER, JOINED HERE BECAUSE THEY ARE IN DIFFERENT COLUMNS
      (Phase 6). The rail's "Mark sent" hands up a query id; the to-do panel resolves it against the
@@ -234,6 +247,78 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
   const skeleton = useSkeleton(loading);
 
   const rootRef = useRef<HTMLDivElement>(null);
+  const row1Ref = useRef<HTMLDivElement>(null);
+  const row2Ref = useRef<HTMLDivElement>(null);
+
+  /**
+   * ⚠️ THE SECOND ROW'S HEIGHT IS MEASURED FROM THE PAGE'S OWN SCROLL AREA, NEVER FROM THE VIEWPORT
+   * (Nick, 18 Sep). The ref's `calc(100vh - 560px)` is right on a page that starts at the top of the
+   * window; this one sits under the beta strip, the top bar and the window's inset, so `100vh`
+   * over-claims by all of it — the house stage law, and the 21px the Tasks chassis lost to exactly
+   * this arithmetic. The two figures published here are the scroller's own height and the distance
+   * from its top to this row; the clamp in oneScreen.css does the rest.
+   *
+   * ⚠️ AND IT CANNOT FEED ITSELF. What is measured is the PORT (sized by the shell) and the row's TOP
+   * (set by the header and the first row) — neither moves when this row's height changes. The write is
+   * guarded on the value anyway, so even a surprising reflow settles in one pass rather than looping.
+   *
+   * ⚠️ A LAYOUT EFFECT, SO THE FIRST PAINTED FRAME CARRIES THE MEASURED VALUE. As a passive effect the
+   * first frame rendered at the token's sentinel — the row at its FLOOR — and corrected a frame later,
+   * which is a visible jump on the loading cover and put the skeleton gate's first-frame read 5px out
+   * while a settled read was within 1. The skeleton's own `GhostRows` measures in a layout effect for
+   * the same reason, and says so.
+   */
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    const row = row2Ref.current;
+    if (!root || !row) return undefined;
+    const port = root.closest(".ws-wbody") as HTMLElement | null;
+    let frame = 0;
+    const set = (name: string, px: number) => {
+      const next = `${Math.round(px)}px`;
+      if (root.style.getPropertyValue(name) !== next) root.style.setProperty(name, next);
+    };
+    /* ⚠️ NO VIEWPORT FALLBACK. With no scroller found there is nothing honest to say, so the two
+       sentinels stand and the row sits at its floor — `window.innerHeight` here would be the exact
+       over-claim the token's own note forbids, arriving through the back door. */
+    if (!port) return undefined;
+    /**
+     * ⚠️ THE ROW IS READ WHEREVER IT IS ON SCREEN — THE PAGE'S, OR THE COVER'S.
+     *
+     * While the loading cover holds, `.os-root.os-loading > .os-content` is `display: none`, so the
+     * real row's rect is all zeros and `top - portTop` came out NEGATIVE (measured −115). The clamp
+     * then took its ceiling and the ghost's second row rendered 560 against a loaded 383 — a 177px
+     * jump at the exact moment the cover lifts, which is the one thing the cover exists to prevent.
+     *
+     * The cover renders the page's own containers, so its `[data-sk="row2"]` sits where the real row
+     * will: measuring THAT while the page is down gives the honest figure before there is anything to
+     * jump. A `display: none` element has a null `offsetParent`, which is how the two are told apart.
+     */
+    const liveRow = (): HTMLElement =>
+      (row.offsetParent ? row : (document.querySelector('[data-sk="row2"]') as HTMLElement | null) ?? row);
+    const measure = () => {
+      frame = 0;
+      const portBox = port.getBoundingClientRect();
+      const r = liveRow().getBoundingClientRect();
+      set("--os-port-h", port.clientHeight);
+      /* ⚠️ AND A ZERO RECT IS REFUSED RATHER THAN WRITTEN. If neither row is laid out there is
+         nothing honest to say, and the token's sentinel leaves the row at its floor. */
+      if (r.height <= 0 && r.top === 0) return;
+      set("--os-row2-top", r.top - portBox.top);
+    };
+    const schedule = () => { if (!frame) frame = window.requestAnimationFrame(measure); };
+    measure();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(schedule);
+    ro.observe(port);
+    if (row1Ref.current) ro.observe(row1Ref.current);
+    window.addEventListener("resize", schedule);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", schedule);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [loading]);
   const entered = useRef(false);
   useEffect(() => {
     if (loading || entered.current) return;
@@ -252,7 +337,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
     if (skeleton.wasShown) return;
     const root = rootRef.current;
     if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const items = root.querySelectorAll(".os-card, .os-greet, .os-bd");
+    const items = root.querySelectorAll(".os-card, .os-greet");
     items.forEach((el) => el.classList.add("enter"));
     const id = window.setTimeout(() => items.forEach((el) => el.classList.remove("enter")), 900);
     return () => window.clearTimeout(id);
@@ -300,18 +385,12 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           line={headerLine}
           tour={chipShows ? { onStart: () => { if (wideEnough()) setTouring(true); }, buttonRef: tourChipRef } : null}
         />
-        <OneScreenBreakdown breakdown={breakdown} manuscriptTitle={manuscriptTitle} />
-        {/* ⚠️ THE MANUSCRIPT TILE IS RETIRED WITH THE TOP ROW IT SAT IN — its title is the quick actions'
-            foot now ("Querying …"), and the sidebar's manuscript switcher carries the rest. */}
-        <div className="os-row2" data-probe="row2">
-          <OneScreenActions
-            loading={loading}
-            manuscriptTitle={manuscriptTitle}
-            manuscriptId={activeManuscript?.id}
-            day={queryingDayN}
-            isPro={isPro}
-            onNavigate={onNavigate}
-          />
+
+        {/* ⚠️ ROW ONE IS THREE CARDS OF ONE HEIGHT — `align-items: stretch` and nothing measured. The
+            quick actions fill their card in equal thirds, the chart fills what the header leaves, and
+            the closed card fills its 320px column. */}
+        <div className="os-row1" data-probe="row1" ref={row1Ref}>
+          <OneScreenActions loading={loading} onNavigate={onNavigate} />
           <OneScreenChart
             loading={loading}
             queries={scopedQueries}
@@ -323,49 +402,48 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           />
           <OneScreenClosed loading={loading} tile={closed} onSeeAll={() => onNavigate("queries")} />
         </div>
-        <div className="os-grid" data-probe="grid">
-          {/* ⚠️ SCOPED WHERE SCOPE MEANS SOMETHING, RAW WHERE IT DOES NOT (Phase 5). Tasks and
-              activities are the manuscript's; queries, agents and manuscripts are the LOOKUP sets
-              the board resolves cards against, and scoping those would hide the agent a scoped
-              task is about. `taskFlags` is a stance the writer took on a task, not a per-book fact.
-              This is the same split `assembleBoardColumns` is given everywhere else it is called. */}
-          <div className="os-colL">
-            <OneScreenTasks
-              loading={loading}
-              tasks={scopedTasks}
-              queries={queries}
-              agents={agents}
-              manuscripts={manuscripts}
-              userTasks={userTasks}
-              activities={scopedActivities}
-              taskFlags={taskFlags}
-              currentUser={currentUser}
-              now={now}
-              dayOne={scopedStage === "day-one"}
-              empty={empty}
-              versions={versions}
-              activeManuscript={activeManuscript}
-              onSeeAll={() => onNavigate("todo")}
-              onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
-              onAddAgent={() => onNavigate("agents", "Add an agent")}
-              onNavigate={onNavigate}
-              openForQueryId={feedOpenQueryId}
-              onOpenHandled={() => setFeedOpenQueryId(null)}
-            />
-          </div>
 
-          <OneScreenRail
+        {/* ⚠️ ROW TWO IS ONE HEIGHT AND TWO SCROLLERS. The row's height is a clamp on the page's own
+            scroll area (see oneScreen.css) rather than on the viewport — the house stage law — and
+            each card is a flex column whose body scrolls inside it, so both end on the same line
+            however much either holds. */}
+        <div className="os-row2" data-probe="row2" ref={row2Ref}>
+          <OneScreenFeed
             loading={loading}
+            activities={scopedActivities}
+            queries={queries}
+            agents={agents}
+            manuscripts={manuscripts}
+            now={now}
+            seenAt={seenAt}
             empty={empty}
-            queries={scopedQueries}
+            onOpenTask={(queryId) => setFeedOpenQueryId(queryId)}
+          />
+          {/* ⚠️ SCOPED WHERE SCOPE MEANS SOMETHING, RAW WHERE IT DOES NOT (Phase 5). Tasks and
+              activities are the manuscript's; queries, agents and manuscripts are the LOOKUP sets the
+              board resolves cards against, and scoping those would hide the agent a scoped task is
+              about. `taskFlags` is a stance the writer took on a task, not a per-book fact. */}
+          <OneScreenTasks
+            loading={loading}
+            tasks={scopedTasks}
+            queries={queries}
             agents={agents}
             manuscripts={manuscripts}
             userTasks={userTasks}
             activities={scopedActivities}
-            activeManuscript={activeManuscript}
-            onNavigate={onNavigate}
-            onOpenTask={(queryId) => setFeedOpenQueryId(queryId)}
+            taskFlags={taskFlags}
+            currentUser={currentUser}
             now={now}
+            dayOne={scopedStage === "day-one"}
+            empty={empty}
+            versions={versions}
+            activeManuscript={activeManuscript}
+            onSeeAll={() => onNavigate("todo")}
+            onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
+            onAddAgent={() => onNavigate("agents", "Add an agent")}
+            onNavigate={onNavigate}
+            openForQueryId={feedOpenQueryId}
+            onOpenHandled={() => setFeedOpenQueryId(null)}
           />
         </div>
       </div>
@@ -386,7 +464,6 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
         <OneScreenSkeleton
           leaving={skeleton.phase === "out"}
           header={<OneScreenHeader ghost firstName={firstName} line={null} tour={chipShows ? { onStart: () => {} } : null} />}
-          breakdown={<OneScreenBreakdown ghost breakdown={null} manuscriptTitle={manuscriptTitle} />}
         />
       )}
       {touring && <OneScreenTour rootRef={rootRef} onEnd={endTour} />}

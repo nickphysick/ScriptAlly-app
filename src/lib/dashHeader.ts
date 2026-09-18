@@ -5,7 +5,7 @@
  * dashHeader — the dashboard header's greeting and its one line of live figures (stage 1, 17 Sep).
  *
  *   Hello, Nick.
- *   12 queries out · 3 tasks waiting on you
+ *   12 queries out · 3 waiting on you · Day 118
  *
  * ⚠️ NEITHER FIGURE IS A NEW DERIVATION, AND THAT IS THE POINT OF THIS FILE. The header sits directly
  * above two cards that already state both numbers — the chart's "Active queries" headline and the
@@ -19,8 +19,11 @@
  *     partition, so header = columns + footer by construction; the chart's headline reads it too.
  *     (`accountHeaderFacts.queryingLabel` uses "out" for every query with a send date; that helper has
  *     no caller and describes an account's lifetime, not today.)
- *   · TASKS WAITING is `boardFigures(...).cards` — the To-do and Today columns, snoozed excluded —
+ *   · WAITING ON YOU is `boardFigures(...).cards` — the To-do and Today columns, snoozed excluded —
  *     which is what the sidebar badge, every Tasks page and the dashboard's to-do card count.
+ *   · DAY N is `dashBreakdown.queryingDay` — days since this manuscript's first query, that day being
+ *     day 1 (v16, 18 Sep). It was the quick-actions foot until that card became three tiles and no
+ *     text; the clause simply moves, and it is the same call it always was.
  *
  * ⚠️ NULL IS "NOT LOADED YET", NEVER ZERO. The header renders the line without figures until the
  * collections land; a zero appears only where zero is true. Nick's rule: never show a number that
@@ -33,7 +36,7 @@
  * the list's own open count by the list's own derivation — so the two can never disagree.
  */
 import type { Query } from "../types";
-import { liveCount } from "./dashBreakdown";
+import { liveCount, queryingDay } from "./dashBreakdown";
 import { assembleBoardColumns, boardFigures, type AssembleColumnsInput } from "./todoColumns";
 import { gettingStartedOpen, gettingStartedRows, type GettingStartedInput } from "./dashEmpty";
 
@@ -42,7 +45,8 @@ import { gettingStartedOpen, gettingStartedRows, type GettingStartedInput } from
  * `strictNullChecks` and a boolean one would not narrow.
  */
 export type DashHeaderLine =
-  | { kind: "counts"; queriesOut: number; tasksWaiting: number }
+  /** `day` is null before the first query — the clause is dropped, never "Day 0" */
+  | { kind: "counts"; queriesOut: number; tasksWaiting: number; day: number | null }
   | { kind: "starting"; steps: number };
 
 /** Every live query — the figure the chart's headline and the breakdown's total also state. */
@@ -81,6 +85,7 @@ export const dashHeaderLine = (i: DashHeaderInput): DashHeaderLine | null => {
     kind: "counts",
     queriesOut: queriesOutCount(i.scopedQueries),
     tasksWaiting: tasksWaitingCount(i.board),
+    day: queryingDay(i.scopedQueries, i.now),
   };
 };
 
@@ -98,11 +103,20 @@ export interface CountClause {
 }
 
 /**
- * The line's two clauses. Singulars agree ("1 query out", "1 task waiting on you", "1 step to get
- * started"); without a figure the plural stands, because there is no number for it to agree with.
- * "No queries out yet" carries no figure by design — the sentence is the figure.
+ * The line's clauses. Singulars agree ("1 query out", "1 step to get started"); without a figure the
+ * plural stands, because there is no number for it to agree with. "No queries out yet" carries no
+ * figure by design — the sentence is the figure.
+ *
+ * ⚠️ IT RETURNS A LIST, NOT A PAIR (v16, 18 Sep). The counts line gained "Day n" and the
+ * getting-started line did not, so a fixed pair could only have carried the day as a third clause
+ * that is sometimes empty — which the renderer would then have to test for anyway. The renderer
+ * joins whatever it is given with the dot.
+ *
+ * ⚠️ AND THE DAY CLAUSE CARRIES NO `n`, THOUGH IT STATES A NUMBER. `n` is the figure the renderer
+ * emboldens; the ref sets "Day 1,018" in plain weight, the number inside the words rather than
+ * before them. The clause is therefore one phrase, formatted here.
  */
-export const lineClauses = (line: DashHeaderLine | null): [CountClause, CountClause] => {
+export const lineClauses = (line: DashHeaderLine | null): CountClause[] => {
   if (line?.kind === "starting") {
     return [
       { n: null, noun: "No queries out yet" },
@@ -110,16 +124,14 @@ export const lineClauses = (line: DashHeaderLine | null): [CountClause, CountCla
     ];
   }
   const c = line?.kind === "counts" ? line : null;
-  return [
+  const out: CountClause[] = [
     { n: c ? c.queriesOut : null, noun: c?.queriesOut === 1 ? "query out" : "queries out" },
-    { n: c ? c.tasksWaiting : null, noun: c?.tasksWaiting === 1 ? "task waiting on you" : "tasks waiting on you" },
+    { n: c ? c.tasksWaiting : null, noun: "waiting on you" },
   ];
+  if (c && c.day !== null) out.push({ n: null, noun: `Day ${c.day.toLocaleString("en-GB")}` });
+  return out;
 };
 
-/**
- * The illustration, served from `public/images/` — unhashed, so its URL carries its own content
- * hash (`?v=`), the marketing pages' convention. `dashHeader.test.ts` reads the file and fails the
- * day the bytes and the version disagree. 375px square: 2.5× the largest size it is drawn at, cut
- * from the 1000px, 827KB original to 147KB with its transparency intact.
- */
-export const HEADER_ART = { src: "/images/top-of-dashboard.png", version: "74893ae9", width: 375, height: 375 } as const;
+/* ⚠️ `HEADER_ART` IS RETIRED WITH THE HEADER'S ILLUSTRATION (v16, 18 Sep). The hawk stood at the
+   right-hand end of this row; the v16 header is the greeting and the line alone, and
+   `public/images/top-of-dashboard.png` is deleted with it — it had no other reader. */

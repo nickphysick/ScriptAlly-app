@@ -15,7 +15,7 @@ import { describe, expect, it } from "vitest";
 import { QueryStatus, type Activity, type Query } from "../types";
 import { dailyLedger, type LedgerPoint } from "./oneScreen";
 import {
-  CHART_WINDOW, chartCaption, chartDelta, chartEventDots, chartGeometry, chartView, eventDotPositions,
+  CHART_GRAIN, CHART_WINDOW, chartEyebrow, chartMove, chartDelta, chartEventDots, chartGeometry, chartView, eventDotPositions,
   PASS_EVENT_STATUSES, PLOT_PAD, plotX, REQUEST_EVENT_STATUSES, repliesInWindow, X_LABEL_SLOT, xLabelEvery,
   xLabelIndexes,
 } from "./dashChart";
@@ -91,11 +91,23 @@ describe("the windows", () => {
   });
 });
 
-describe("the caption", () => {
-  it("says which way the count moved, how far, over what, and how many replies came in", () => {
-    expect(chartCaption(4, 5, "weekly")).toBe("↑ 4 over 8 weeks · 5 replies");
-    expect(chartCaption(-2, 1, "daily")).toBe("↓ 2 over 8 weeks · 1 reply");
-    expect(chartCaption(0, 0, "monthly")).toBe("Level over 12 months · 0 replies");
+describe("the eyebrow", () => {
+  /* ⚠️ THE REPLIES CLAUSE IS RETIRED WITH THE STAGE-3 CAPTION (v16, 18 Sep). The ref states the stock
+     and the move; the feed beside it is where replies are read one at a time. */
+  it("states the stock and which way the line moved", () => {
+    expect(chartEyebrow(18, 6)).toBe("18 out with agents · ↑ 6 over 8 weeks");
+    expect(chartEyebrow(4, -2)).toBe("4 out with agents · ↓ 2 over 8 weeks");
+    expect(chartEyebrow(0, 0)).toBe("0 out with agents · Level over 8 weeks");
+  });
+
+  /* ⚠️ NO FIGURE UNTIL THE DATA LANDS — the clause is ABSENT rather than zero (Nick's rule). */
+  it("drops the stock clause while the count is unknown", () => {
+    expect(chartEyebrow(null, 3)).toBe("↑ 3 over 8 weeks");
+  });
+
+  it("the grain is one thing, and the card reads it rather than choosing", () => {
+    expect(CHART_GRAIN).toBe("weekly");
+    expect(chartMove(1)).toBe("↑ 1 over 8 weeks");
   });
 
   /* ⚠️ Daily and Weekly both say "over 8 weeks", so they must state one number for it */

@@ -198,16 +198,22 @@ export const GETTING_STARTED_FOOT =
   "these tick themselves off as you go — no need to come back and mark them";
 export const GETTING_STARTED_EYEBROW = "Getting started";
 
-/* ══════════════════════════ the activity feed's tail ══════════════════════════ */
+/* ══════════════════════════ the activity feed's first-run line ══════════════════════════ */
 
 /**
- * The ref's three ghost lanes, at its own opacities, and the caveat under them.
+ * What the feed says on an account with nothing in it yet.
  *
- * ⚠️ THE REAL EVENTS STAY. A new account already has the "added a manuscript" housekeeping event,
- * and the ref draws it — this is a TAIL under whatever the feed holds, never a replacement for it.
+ * ⚠️ THE THREE GHOST LANES ARE RETIRED WITH THE ACTIVITY COLUMN THEY SAT IN (v16, 18 Sep), and
+ * `FEED_GHOST_OPACITY` went with them. They drew a fading example UNDER whatever the feed held; the
+ * v16 feed is a dated list in a scroller, and a drawn example beneath live entries reads as more
+ * entries — the fault the community tile's own note records about sitting a strip under a long card.
+ *
+ * ⚠️ AND THE CONSTANT IS RENAMED RATHER THAN KEPT, because `FEED_GHOST_CAVEAT` was a caveat ABOUT
+ * the lanes: a name that outlives its subject is read as fact by whoever meets it next, and the
+ * sentence is no longer a caveat at all — it is the feed's own first-run line, and it is what the
+ * empty feed says in place of counting days nothing happened in.
  */
-export const FEED_GHOST_OPACITY: readonly number[] = [0.7, 0.4, 0.2];
-export const FEED_GHOST_CAVEAT =
+export const FEED_FIRST_RUN_LINE =
   "every send, reply and note you record lands here — the feed becomes your querying history";
 
 /* ══════════════════════════ the chart's faded example ══════════════════════════ */

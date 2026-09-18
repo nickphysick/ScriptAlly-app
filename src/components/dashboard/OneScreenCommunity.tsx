@@ -94,7 +94,12 @@ export const OneScreenCommunity: React.FC<{ loading: boolean; strip?: boolean; t
         ⚠️ AND THE BETA PILL SITS ON THE CARD NOW, which is a change of ground rather than of
         meaning: it is still a statement about the DATA's maturity, not the code's, and it stays
         until the cohorts are populated enough that most readers see real figures. */}
-    <div className="os-ahead os-commhead">
+    {/* ⚠️ `os-ahead` IS GONE FROM THIS CLASS LIST (v16, 18 Sep). The shared sage/pink band is retired
+        with the dashboard that wore it, and this card is now the only consumer of that geometry — so
+        `.os-commhead` states it rather than inheriting from a rule no page declares. A class list
+        naming a selector the sheet no longer has renders an unstyled header, silently, and this
+        component is deliberately mounted NOWHERE today: nobody would see it until it came back. */}
+    <div className="os-commhead">
       {/* ⚠️ THE SHARED SLOT, NOT A FOURTH COPY. This was a bespoke `.os-commic` span holding a
           lucide `<Users />` at its own size with no plate; the other three bands already shared
           `OneScreenMark`. Reading the map buys the 28px plate, its translucent parchment fill and

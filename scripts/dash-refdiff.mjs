@@ -109,11 +109,23 @@ const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
 const SELF_TEST = argv.includes("--self-test");
 const OUT = resolve(ROOT, flag("--out", "run-artifacts/dash-refdiff.json"));
-/* ⚠️ 1710 IS IN THE DEFAULT SET BECAUSE IT IS WHERE NICK WORKS, and nothing had ever measured it.
-   Two of v27's three reported faults appear only there: the chart header stacked at ≤1700 while
-   the stats stacked at ≤1750, so 1701–1750 was a band neither rule covered. A width nobody
-   measures is a width nobody's rules are written for. */
-const WIDTHS = flag("--widths", "1536,1710,1920,2520").split(",").map(Number);
+/**
+ * ⚠️ ONE WIDTH BY DEFAULT SINCE v16, AND IT IS THE ONE THE REF DRAWS. The mockup carries no media
+ * queries at all — it is a design hand-drawn at 1440 — so a comparison at 1536, 1710, 1920 or 2520
+ * asks it a question it cannot answer, and every difference it reports at those widths is the REF
+ * failing to respond rather than the app failing to match. Run against the previous build SNAPSHOT
+ * the four-width set was right, because a snapshot responds exactly as the app does.
+ *
+ * ⚠️ THE OTHER WIDTHS ARE NOT LOST — they are Nick's prose (1280: the closed tile drops beneath the
+ * chart; 1000: everything stacks), and they are measured against the PAGE rather than against the
+ * mockup, by `tests/e2e/dashStages.measure.ts` at 1920 / 1440 / 1280 / 1100 / 375. Pass `--widths`
+ * to compare more than one here; expect the extra columns to be noise.
+ *
+ * (1710 was in the old default set because it is where Nick works, and nothing had measured it: two
+ * of v27's three reported faults appeared only there. That reasoning belongs to the page's own
+ * measurement now, which is where the responsive rules live.)
+ */
+const WIDTHS = flag("--widths", "1440").split(",").map(Number);
 const HEIGHT = 1456;
 const APP = process.env.SA_REFDIFF_APP_URL || "http://127.0.0.1:4173";
 
@@ -138,26 +150,38 @@ const APP = process.env.SA_REFDIFF_APP_URL || "http://127.0.0.1:4173";
 /* ⚠️ STAGES 2–3 (17 Sep): `toprow`, `manuscript-card` and `brush` are retired with the top row, the
    manuscript tile and the range brush; the breakdown, the second row and its three cards, and the
    chart's own illustration are new. A retired probe is removed with its element, and said so here. */
+/* ⚠️ v16 (18 Sep): `breakdown`, `grid`, `community-tile`, `todo-rule`, `header-illustration` and
+   `chart-illustration` are retired with the sections and pictures they named. The page is a header
+   and two rows, and both rows are probes of their own — a row that lines up is the claim the three
+   cards inside it rest on. A retired probe is removed with its element, and said so here. */
 const PROBES = [
-  /* ⚠️ `topbar` IS `navrow` NOW, AND `chart-header` IS NEW. Both of the last two shipped faults
-     were invisible to the probe set that existed: the search sat in a row of its own and no probe
-     measured a row, and the chart header wrapped and no probe measured the header. A probe set is
-     the shape of what the gate can notice. */
   "main", "navrow", "search", "hero",
-  /* ⚠️ THE STAT ROW'S THREE PROBES ARE RETIRED WITH THE ROW (dashboard header, stage 1, 17 Sep) —
-     `stats`, `stat-card` and `stat-illustration`. The header's illustration takes a probe of its own,
-     because its box is the claim the stat illustration's was: a squashed picture is a smaller box. */
-  "header-illustration",
-  "breakdown", "row2", "quick-actions",
-  "chart-card", "chart-header", "chart-illustration", "chart-controls", "plot",
-  "closed-tile",
-  "grid", "todo-card", "todo-rule",
-  /* ⚠️ v30 ADDS THE BADGE. The badge became a CONTROL that pass — it clears the filter — and a control
-     that changes shape when it gains a job is exactly the thing a box probe should be watching. */
-  "todo-badge",
-  "activity-card", "feed",
-  "community-tile",
+  "row1", "quick-actions", "chart-card", "chart-header", "chart-controls", "plot", "closed-tile",
+  "row2", "activity-card", "feed", "todo-card", "todo-badge",
 ];
+
+/**
+ * ⚠️ THE REF SIDE IS RESOLVED BY SELECTOR, BECAUSE `dashboard-v16.html` IS A DRAWN MOCKUP AND CARRIES
+ * NO INSTRUMENTATION. Earlier refs were authored with `data-probe` attributes; this one is a design
+ * hand-drawn at 1440, and adding attributes to it would move its md5 — a ref whose hash has moved can
+ * no longer be checked against the one the pack named, which is the whole point of the watchlist.
+ *
+ * ⚠️ SO THE MAP IS THE TRANSLATION, AND IT IS ONE-WAY: the APP is always read by `data-probe`, so an
+ * app-side probe cannot be silently renamed to match a selector here. A probe missing from this table
+ * is reported as "the ref has no such probe" rather than skipped — a probe quietly dropped is
+ * coverage quietly dropped, which this file has been caught by before.
+ */
+const REF_SELECTORS = {
+  main: ".main",
+  navrow: ".top", search: ".top .search",
+  hero: ".hello",
+  row1: ".row1", "quick-actions": ".row1 .card.qa",
+  "chart-card": ".row1 .card.chart", "chart-header": ".chart .hd", "chart-controls": ".chart .hd .mini",
+  plot: ".chart svg",
+  "closed-tile": ".row1 .card.closed",
+  row2: ".row2", "activity-card": ".row2 .card.feed", feed: ".feed .scroll",
+  "todo-card": ".row2 .card.todo", "todo-badge": ".todo .hd .mini",
+};
 
 /**
  * ⚠️ EACH PROBE IS ANCHORED TO THE EDGE ITS DESIGN PINS IT TO, AND THIS IS THE SECOND HALF OF THE
@@ -249,28 +273,25 @@ const ANCHOR = {
   main: "datum",
   /**
    * ⚠️ THE NAV ROW AND ITS SEARCH ARE DATUMS, REPORTED AND NOT COMPARED — and the ref says why in
-   * its own markup: "NAV ROW — the search sits in the nav's own row; the nav itself is locked and
-   * not drawn here". What governs them instead is the standing gate below: one search control, a row
-   * no taller than 72px, and the greeting starting immediately under it.
+   * its own markup: the nav is locked and not drawn there. What governs them instead is the standing
+   * gate below: one search control, a row no taller than 72px, and the greeting starting immediately
+   * under it.
    */
   navrow: "datum", search: "datum",
-  /* the page's rows span the centred block (stages 2–3): both insets are the facts */
-  hero: "span", breakdown: "span", row2: "span", grid: "span",
-  /* the header's illustration is pinned to the RIGHT end of its row, so its right inset and size are
-     the facts — the greeting's length decides nothing about where it sits */
-  "header-illustration": "right",
-  /* the second row is 300 · 1fr · 300: the quick actions pinned left, the closed tile pinned right,
-     the chart the elastic middle — and the chart's header and plot fill the chart */
+  /* the page's rows span the centred block: both insets are the facts */
+  hero: "span", row1: "span", row2: "span",
+  /* row one is a floor, a share and a fixed tile: the actions pinned left, the closed tile pinned
+     right, the chart the elastic middle — and the chart's header and plot fill the chart */
   "quick-actions": "left", "closed-tile": "right",
   "chart-card": "span", "chart-header": "span", plot: "span",
-  /* the hawk leads the header; the toggle is pinned to its right edge */
-  "chart-illustration": "left", "chart-controls": "right",
-  "todo-card": "span", "todo-rule": "span",
-  /* the badge sits after the title in a left-to-right header, so its left inset and size are the
-     facts; its right inset is wherever the title's length leaves it */
-  "todo-badge": "left",
-  /* the right column is 360px pinned to the right edge of the block, and everything in it goes with it */
-  "activity-card": "right", feed: "right", "community-tile": "right",
+  /* the grain chip is pinned to the header's right edge */
+  "chart-controls": "right",
+  /* row two is 1.4fr 1fr: the feed pinned left, the to-do card pinned right */
+  "activity-card": "left", feed: "left",
+  "todo-card": "right",
+  /* the chip sits after the title in a left-to-right header, so its RIGHT inset and size are the
+     facts; its left inset is wherever the title's length leaves it */
+  "todo-badge": "right",
 };
 /**
  * ⚠️ THE REF'S OWN THREE, NOT SIX OF MINE — v16 instruments itself and the app carries its names.
@@ -287,8 +308,17 @@ const ANCHOR = {
    takes its place — it is the row the header's second size belongs to. */
 /* ⚠️ STAGES 2–3 ADD FIVE: the breakdown's count line, the chart's figure and caption, the closed tile's
    figure and the querying day — each a treatment the brief names, compared for type, never for words. */
-const TEXT_PROBES = ["greeting", "header-counts", "panel-title", "chart-title", "breakdown-meta",
-  "chart-figure", "chart-caption", "closed-total", "querying-day"];
+/**
+ * ⚠️ REPORTED, NOT COMPARED, SINCE v16 — and the reason is the same one that gave the ref side a
+ * selector map. These resolve by `data-probe-text`, which a drawn mockup does not carry, so a
+ * comparison would report "the ref has no such probe" for every row. They are still READ on the app
+ * side, because a treatment that vanishes from the page is worth seeing in the table.
+ *
+ * ⚠️ THE TYPE GATE IS `TYPE_SCALE`, WHICH IS SELECTOR PAIRS AND WORKS ON BOTH SIDES. That was always
+ * true — the note below it says so — and v16 makes it the only one, so the type comparison neither
+ * narrows nor depends on a ref being instrumented.
+ */
+const TEXT_PROBES = ["greeting", "header-counts", "chart-title", "chart-eyebrow", "closed-total"];
 
 /**
  * The type scale, as SELECTOR PAIRS — one row per treatment the design names, ref side and app side.
@@ -303,51 +333,28 @@ const TEXT_PROBES = ["greeting", "header-counts", "panel-title", "chart-title", 
    build carries the app's classes, so each row names the same element on both sides. When a stage
    brings a drawn ref again, the left column goes back to that ref's names — the three-column shape is
    kept for exactly that. The three STAT rows are retired with the stat row. */
+/* ⚠️ THE LEFT COLUMN NAMES THE DRAWN REF'S CLASSES AGAIN (v16, 18 Sep). It had gone to the app's own
+   names while the reference was a snapshot of the build — where both sides ARE the app — and the
+   three-column shape was kept for exactly this moment. Every row is one treatment the design names,
+   compared for size, family and weight; a row whose element the ref does not draw is a row that can
+   never pass, so it is removed rather than left as a permanent miss. */
 const TYPE_SCALE = [
-  /* ⚠️ THE TO-DO CARD'S TITLE, NOT THE FIRST `h2` IN A BAND. The chart's band holds a STAT BLOCK
-     whose title is deliberately 19px, and it comes first in the document — so a selector that
-     accepts either read the stat block and reported the card-title row at 19 against the ref's 23.
-     The two treatments have their own probes in v22 for exactly this reason. */
-  ["card title",      ".os-th2 h2",          ".os-th2 h2"],
-  /* the chart's figure left the shared band with the stage-3 chart (17 Sep) */
-  ["chart figure",    ".os-acn",             ".os-acn"],
-  ["hero greeting",   ".os-greet h1",        ".os-greet h1"],
-  /* ⚠️ THE LEGEND ROW IS RETIRED WITH THE LEGEND (v26, Phase 5). The ref still SHIPS the markup and
-     hides it with `.legend{display:none}`, so its type is still readable there and a type probe
-     would go on comparing a treatment neither page draws. Removing the row is a narrowing of
-     coverage and is recorded as one; what replaced the legend is nothing, deliberately. */
-  ["tab",             ".os-ftab",            ".os-ftab"],
-  ["tab count",       ".os-ftabn",           ".os-ftabn"],
-  ["ticket title",    ".tkt .ttl",           ".tkt .ttl"],
-  ["ticket tag",      ".tkt .tag",           ".tkt .tag"],
-  /* ⚠️ NO ROW FOR THE TICKET'S SUB-LINE — the ref's shipping ticket does not have one. `snip:'a'`
-     makes `sub(t)` return an empty string, so its ticket is a tag and a deed and nothing else. A
-     row for a treatment the design does not have can never pass, and leaving it in as a permanent
-     "no element in the REF" is a miss that teaches the reader to skip the table. The app's own
-     sub-line is a CONTENT question and belongs to Phase 6, not to the type scale. */
-  ["bubble sentence", ".os-bubsay",          ".os-bubsay"],
-  ["bubble meta",     ".os-bubmeta",         ".os-bubmeta"],
-  ["bubble label",    ".os-bublab",          ".os-bublab"],
-  ["todo badge",      ".os-tbadge b",        ".os-tbadge b"],
-  /* ── stages 2–3 (17 Sep): every treatment the brief names on the three new sections ── */
-  ["breakdown title", ".os-bdtitle",         ".os-bdtitle"],
-  ["breakdown meta",  ".os-bdmeta",          ".os-bdmeta"],
-  ["breakdown count", ".os-bdn",             ".os-bdn"],
-  ["state pill",      ".os-spill-l",         ".os-spill-l"],
-  ["breakdown fact",  ".os-bdfact",          ".os-bdfact"],
-  ["breakdown foot",  ".os-bdfoot",          ".os-bdfoot"],
-  ["hero action",     ".os-qaherot",         ".os-qaherot"],
-  ["quick action",    ".os-qaitem",          ".os-qaitem"],
-  ["querying title",  ".os-qatitle",         ".os-qatitle"],
-  ["querying day",    ".os-qaday",           ".os-qaday"],
-  ["chart title",     ".os-acttl",           ".os-acttl"],
-  ["chart caption",   ".os-acdc",            ".os-acdc"],
-  ["grain toggle",    ".os-actog button",    ".os-actog button"],
-  ["axis label",      ".os-acx span",        ".os-acx span"],
-  ["closed title",    ".os-cltitle",         ".os-cltitle"],
-  ["closed figure",   ".os-clnum",           ".os-clnum"],
-  ["closed count",    ".os-clct",            ".os-clct"],
-  ["closed foot",     ".os-clfoot",          ".os-clfoot"],
+  ["hero greeting",   ".hello",              ".os-greet h1"],
+  ["hero counts",     ".hello small",        ".os-hdcounts"],
+  ["card title",      ".hd h3",              ".os-cardttl"],
+  ["card eyebrow",    ".hd .sub",            ".os-sub"],
+  ["card chip",       ".hd .mini",           ".os-mini"],
+  ["action label",    ".act b",              ".os-qalab"],
+  ["axis label",      ".axis span",          ".os-acx span"],
+  ["legend",          ".legend span",        ".os-aclg"],
+  ["closed figure",   ".pie .n",             ".os-dnn"],
+  ["closed row",      ".key > div",          ".os-clrow"],
+  ["feed day rule",   ".feed .day",          ".os-fday"],
+  ["feed sentence",   ".ent p",              ".os-fsay"],
+  ["feed pill",       ".ent .pill",          ".os-fpill"],
+  ["todo task",       ".todo .row .t",       ".os-tdt"],
+  ["todo count",      ".todo .row .n",       ".os-tdn"],
+  ["todo foot",       ".todo .more",         ".os-tdfoot"],
 ];
 
 /**
@@ -410,6 +417,20 @@ const READ = `(() => {
     const k = el.getAttribute("data-probe");
     if (out.probes[k] || !visibleIn(el)) continue;   // first VISIBLE match wins
     out.probes[k] = box(el);
+  }
+  /* ⚠️ THE REF'S OWN SELECTOR MAP, APPLIED ONLY WHERE IT IS HANDED ONE. A drawn mockup carries no
+     instrumentation and its bytes must not be edited (its md5 is what the watchlist guards), so the
+     ref side is told which selector answers to which probe name. The APP is never given one — it is
+     always read by attribute — so a probe here cannot be quietly re-pointed at a different element
+     to make a miss go away. A name in the map that matches nothing stays ABSENT and is reported as
+     "the ref has no such probe", which is the honest reading of a probe with no subject. */
+  const mapRaw = document.documentElement.getAttribute("data-refdiff-probes");
+  if (mapRaw) {
+    for (const [k, sel] of Object.entries(JSON.parse(mapRaw))) {
+      if (out.probes[k]) continue;
+      const el = [...document.querySelectorAll(sel)].find(visibleIn);
+      if (el) out.probes[k] = box(el);
+    }
   }
   /**
    * ⚠️ THE DATUM IS THE CONTENT COLUMN HORIZONTALLY AND THE NAV ROW'S TOP VERTICALLY, and it is
@@ -710,17 +731,24 @@ const READ = `(() => {
      version named community/todo/activity — and Community stopped being the left column's last
      card the moment Pro rendered beneath it, so the check reported a 490px spread about three
      columns that were closing correctly. A column's bottom is the column's, whatever is in it. */
-  /* ⚠️ TWO COLUMNS SINCE v22, NOT THREE — and the floor moved with the layout rather than being
-     loosened. It required three and reported "fewer than three columns were visible" about a page
-     whose design has two, which is a check failing on a correct page: the worst kind, because the
-     honest response looks like weakening it. The CLAIM is unchanged — every column closes on the
-     same line — and it is asserted over however many the page has, with a floor of two so an empty
-     sweep still cannot pass. */
-  const cols = [...document.querySelectorAll(".col, .os-colL, .os-colR")]
+  /* ⚠️ THE CLAIM SURVIVED ITS SUBJECT TWICE, AND IS POINTED AT THE ROWS NOW (v16). It began as three
+     named cards, which broke the moment one stopped being its column's last; then as the columns,
+     which v16 retires. What it has always asserted is that the things sitting side by side CLOSE ON
+     THE SAME LINE — so it reads the cards of each row, and a spread is a row whose cards disagree
+     about where the row ends. The floor of two stands: an empty sweep still cannot pass.
+     ⚠️ AND IT IS PER ROW, NOT OVER THE PAGE. Row one and row two are different heights by design;
+     measuring all five cards together would report ~120px of "spread" on a correct page. */
+  const rowCards = (sel) => [...document.querySelectorAll(sel)]
+    .filter((e) => e.getBoundingClientRect().height > 0);
+  const cols = rowCards(".row1 > *, .os-row1 > *")
     .filter((e) => e.getBoundingClientRect().height > 0);
   const bottoms = cols.map((e) => { const r = e.getBoundingClientRect(); return num(r.y + r.height); });
   out.checks.columnBottoms = bottoms;
   out.checks.columnSpread = bottoms.length >= 2 ? num(Math.max(...bottoms) - Math.min(...bottoms)) : null;
+  const row2Cards = rowCards(".row2 > *, .os-row2 > *");
+  const b2 = row2Cards.map((e) => { const r = e.getBoundingClientRect(); return num(r.y + r.height); });
+  out.checks.row2Bottoms = b2;
+  out.checks.row2Spread = b2.length >= 2 ? num(Math.max(...b2) - Math.min(...b2)) : null;
   /* ⚠️ THE BLEND-TRAP READING IS RETIRED WITH THE STAT ROW (stage 1). Its subject was the stat
      illustrations, multiplied onto the page; the only blended mark left in the dashboard's code is on
      the goals card, which the page does not mount, and the header's art is transparent and unblended.
@@ -799,6 +827,13 @@ async function readPage(page, url, { app } = {}) {
     (rows) => document.documentElement.setAttribute("data-refdiff-scale", JSON.stringify(rows)),
     TYPE_SCALE.map((r) => [r[0], r[which]]),
   );
+  /* the ref's probe map — handed to the ref side only; see READ for why the app never gets one */
+  if (!app) {
+    await page.evaluate(
+      (m) => document.documentElement.setAttribute("data-refdiff-probes", JSON.stringify(m)),
+      REF_SELECTORS,
+    );
+  }
   const data = await page.evaluate(READ);
   /**
    * ⚠️ A SIGNED-OUT PAGE MUST STOP THE RUN, NOT BE MEASURED. This caught nothing on the round it was
@@ -807,8 +842,10 @@ async function readPage(page, url, { app } = {}) {
    * layout regression and is nothing of the kind. That is the fault this whole pass exists to close,
    * committed inside the harness written to close it.
    *
-   * The tell is cheap and total: the dashboard has sixteen probes, and the auth page has none of the
-   * ones that matter. Fewer than twelve is not a page worth diffing.
+   * The tell is cheap and total: the dashboard's probes are listed above, and the auth page has none
+   * of the ones that matter. Fewer than three quarters of them is not a page worth diffing — stated
+   * as a fraction of `PROBES` rather than a number, so retiring a section cannot quietly lower the
+   * bar to the point where a half-rendered page passes it.
    */
   /**
    * ⚠️ AND A SIGNED-IN PAGE WHOSE DATA HAS NOT ARRIVED MUST STOP THE RUN TOO — the same fault as
@@ -844,7 +881,7 @@ async function readPage(page, url, { app } = {}) {
   if (app) {
     const n = Object.keys(data.probes).length;
     const authForm = await page.locator("#au-email, #au-pw").count();
-    if (authForm > 0 || n < 12) {
+    if (authForm > 0 || n < Math.ceil(PROBES.length * 0.75)) {
       throw new Error(
         `dash-refdiff: the app page is not the signed-in dashboard — ${n}/${PROBES.length} probes found` +
         `${authForm ? ", and the sign-in form is on screen" : ""}. Refusing to diff it.`,
@@ -1230,10 +1267,11 @@ function diffChecks(app) {
   if (app.checks.hScroll > 1) {
     m.push({ key: "page", field: "hScroll", ref: 0, app: app.checks.hScroll });
   }
-  if (app.checks.columnSpread === null) {
-    m.push({ key: "page", field: "columnBottoms", why: "fewer than two columns were visible" });
-  } else if (app.checks.columnSpread > 1) {
-    m.push({ key: "page", field: "columnBottoms", ref: "≤1", app: app.checks.columnSpread });
+  /* ⚠️ EACH ROW CLOSES ON ITS OWN LINE, AND THE TWO ROWS ARE SEPARATE CLAIMS. They are different
+     heights by design; one spread over all five cards would report ~120px on a correct page. */
+  for (const [field, spread] of [["row1Bottoms", app.checks.columnSpread], ["row2Bottoms", app.checks.row2Spread]]) {
+    if (spread === null) m.push({ key: "page", field, why: "fewer than two cards were visible in the row" });
+    else if (spread > 1) m.push({ key: "page", field, ref: "≤1", app: spread });
   }
   return m;
 }

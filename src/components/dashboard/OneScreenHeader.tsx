@@ -2,19 +2,20 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * OneScreenHeader — the dashboard's header row (stage 1, 17 Sep): the greeting and one line of live
- * figures on the left, the hawk at the right-hand end, bottom edges level.
+ * OneScreenHeader — the dashboard's header (stage 1, 17 Sep; v16, 18 Sep).
  *
- * ⚠️ IT REPLACED THE THREE STAT CARDS AND THE "What's on your desk today?" LINE, which were deleted
- * rather than hidden — `OneScreenCounters`, `headerCounters` and the counters' caveats went with
- * them. The figures the cards stated live on the chart and the to-do card beneath this row.
+ *   Hello, Bethany.
+ *   18 queries out · 3 waiting on you · Day 1,018
+ *
+ * ⚠️ NO ILLUSTRATION (v16). The hawk stood at the right-hand end of this row and is deleted with its
+ * file; the ref's header is the greeting and one line of figures, and the page's pictures are the
+ * quick-action tiles. The clauses are `dashHeader.lineClauses`' — as many as the state has, joined by
+ * the dot, so the getting-started line keeps its two and the counts line gains the day.
  *
  * ⚠️ IT RENDERS TWICE WHILE THE PAGE LOADS, AND IT IS THE SAME COMPONENT BOTH TIMES. The loading
- * cover (`OneScreenSkeleton`) draws this row in place of grey bars — the brief's "no skeleton, no zero
- * placeholder" — and because it is this component rather than a drawing of it, the cover's row is
- * the page's row to the pixel: nothing below it can jump when the cover lifts. `ghost` strips the
- * one thing a second copy must not carry, the measurement probes (the page beneath the cover is
- * mounted and carries its own, and two of each is how a gate once read the wrong page).
+ * cover draws this row rather than a grey bar, so the cover's row is the page's row to the pixel and
+ * nothing below it jumps when the cover lifts. `ghost` strips the measurement probes, because two of
+ * each is how a gate once read the wrong page.
  *
  * ⚠️ THE GREETING IS AN `h1` WITH TWO CLASSES OF SPECIFICITY ON PURPOSE. `lib/brand.tsx` injects
  * `h1:not(.wsh-title) { font-family: … !important }` at runtime on every route; between two
@@ -22,7 +23,7 @@
  * Special Elite is `.os-greet .os-hello` (0-2-0) — see oneScreen.css.
  */
 import React from "react";
-import { greetingText, HEADER_ART, lineClauses, type DashHeaderLine } from "../../lib/dashHeader";
+import { greetingText, lineClauses, type DashHeaderLine } from "../../lib/dashHeader";
 
 export interface OneScreenHeaderProps {
   firstName: string;
@@ -33,7 +34,7 @@ export interface OneScreenHeaderProps {
   line: DashHeaderLine | null;
   /**
    * The tour launcher, when the account is young enough to be offered it. It sits beside the
-   * greeting because the counts line holds the two clauses and nothing else.
+   * greeting because the line beneath is figures and nothing else.
    */
   tour?: { onStart: () => void; buttonRef?: React.Ref<HTMLButtonElement> } | null;
   /** the loading cover's copy — no probes */
@@ -43,46 +44,35 @@ export interface OneScreenHeaderProps {
 const figure = (n: number) => n.toLocaleString("en-GB");
 
 export const OneScreenHeader: React.FC<OneScreenHeaderProps> = ({ firstName, line, tour = null, ghost = false }) => {
-  const [first, second] = lineClauses(line);
+  const clauses = lineClauses(line);
   const probe = (name: string) => (ghost ? undefined : name);
-  const clause = (c: typeof first) => (
-    /* ⚠️ A CLAUSE NEVER BREAKS INSIDE ITSELF — "3 tasks" on one line and "waiting on you" on the
-       next reads as two statements. If the line must wrap it wraps at the dot. */
-    <span className="os-hdc">
-      {c.n !== null && <><b>{figure(c.n)}</b>{" "}</>}
-      {c.noun}
-    </span>
-  );
   return (
     <div className="os-greet" data-probe={probe("hero")}>
-      <div className="os-hdtx">
-        <div className="os-hdrow">
-          <h1 className="os-hello" data-probe-text={probe("greeting")}>{greetingText(firstName)}</h1>
-          {tour && (
-            <button type="button" ref={tour.buttonRef} className="os-tourchip" onClick={tour.onStart}>
-              Take the tour
-            </button>
-          )}
-        </div>
-        <p className="os-hdcounts" data-probe-text={probe("header-counts")}>
-          {clause(first)}
-          {/* ⚠️ THE SPACES ARE REAL TEXT AND DRAW AT ZERO WIDTH. The brief sets the dot 8px either
-              side, which is a margin — but a bare margin leaves "out·3" in the text a screen reader
-              reads and a reader copies. `.os-hdsep` is `font-size: 0`, so its spaces take no room,
-              and the dot inside it carries the line's own size and the two 8px margins. */}
-          <span className="os-hdsep"> <span className="os-hddot">·</span> </span>
-          {clause(second)}
-        </p>
+      <div className="os-hdrow">
+        <h1 className="os-hello" data-probe-text={probe("greeting")}>{greetingText(firstName)}</h1>
+        {tour && (
+          <button type="button" ref={tour.buttonRef} className="os-tourchip" onClick={tour.onStart}>
+            Take the tour
+          </button>
+        )}
       </div>
-      <img
-        className="os-hdart"
-        src={`${HEADER_ART.src}?v=${HEADER_ART.version}`}
-        width={HEADER_ART.width}
-        height={HEADER_ART.height}
-        alt=""
-        decoding="async"
-        data-probe={probe("header-illustration")}
-      />
+      <p className="os-hdcounts" data-probe-text={probe("header-counts")}>
+        {clauses.map((c, i) => (
+          <React.Fragment key={c.noun}>
+            {/* ⚠️ THE SPACES ARE REAL TEXT AND DRAW AT ZERO WIDTH. The dot is set 8px either side,
+                which is a margin — but a bare margin leaves "out·3" in the text a screen reader reads
+                and a reader copies. `.os-hdsep` is `font-size: 0`, so its spaces take no room, and
+                the dot inside it carries the line's own size and the two margins. */}
+            {i > 0 && <span className="os-hdsep"> <span className="os-hddot">·</span> </span>}
+            {/* ⚠️ A CLAUSE NEVER BREAKS INSIDE ITSELF — "3 tasks" on one line and "waiting on you" on
+                the next reads as two statements. If the line must wrap it wraps at a dot. */}
+            <span className="os-hdc">
+              {c.n !== null && <><b>{figure(c.n)}</b>{" "}</>}
+              {c.noun}
+            </span>
+          </React.Fragment>
+        ))}
+      </p>
     </div>
   );
 };

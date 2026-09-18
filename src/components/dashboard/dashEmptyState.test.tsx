@@ -26,7 +26,7 @@ import { ComponentType, QueryStatus, UserPlan } from "../../types";
 import { OneScreenDashboard } from "./OneScreenDashboard";
 import {
   COMPS_TARGET, GETTING_STARTED, GETTING_STARTED_FOOT,
-  gettingStartedOpen, gettingStartedRows,
+  gettingStartedOpen, gettingStartedRows, FEED_FIRST_RUN_LINE,
 } from "../../lib/dashEmpty";
 import { PACKAGE_MATERIALS } from "../../lib/manuscriptPackages";
 
@@ -67,12 +67,11 @@ describe("Phase 1 · the zero-query branch", () => {
     const html = renderEmpty();
     expect(html).toContain('data-probe="chart-empty"');
     expect(html).toContain("os-tgs-list");
-    expect(html).toContain("os-aghost");
   });
 
   it("renders none of the pack once a single query exists", () => {
     const html = renderFull();
-    for (const cls of ["os-cempty", "os-cefade", "os-ceover", "os-tgs", "os-aghost", "os-ccav"]) {
+    for (const cls of ["os-cempty", "os-cefade", "os-ceover", "os-tgs", "os-ccav"]) {
       expect(html).not.toMatch(new RegExp(`["\\s\`]${cls}["\\s\`]`));
     }
     expect(html).not.toContain('data-probe="chart-empty"');
@@ -241,17 +240,31 @@ describe("Phase 1 · the empty page's header points at the list, with no caveat"
 
 /* ══════════════════════ the feed's tail ══════════════════════ */
 
-describe("Phase 1 · the feed keeps its real events", () => {
-  it("adds the ghost tail below whatever the feed holds, and hides the lanes from assistive tech", () => {
+/**
+ * ⚠️ THE GHOST TAIL IS RETIRED WITH THE ACTIVITY COLUMN IT SAT IN (v16, 18 Sep), and the claim
+ * inverts rather than lapsing. It drew three fading lanes under whatever the feed held, as a picture
+ * of what the column becomes. The v16 feed is a dated list in a scroller with a real empty line, and
+ * a drawn example beneath live entries reads as more entries — the exact fault the community tile's
+ * own note records about sitting a strip under a long card.
+ *
+ * ⚠️ WHAT SURVIVES IS THE HALF THAT MATTERED: the feed states its emptiness in words, and says
+ * nothing that could be mistaken for an event.
+ */
+describe("Phase 1 · the feed states its own emptiness", () => {
+  it("the empty feed is one honest line, and the retired ghost lanes are gone", () => {
     const html = renderEmpty();
-    expect(html).toContain("os-aghost-lanes");
-    expect(html).toMatch(/class="os-aghost-lanes" aria-hidden="true"/);
-    expect(html).toContain("every send, reply and note you record lands here");
-  });
-
-  it("draws three lanes at the ref's descending opacities", () => {
-    const html = renderEmpty();
-    for (const o of ["0.7", "0.4", "0.2"]) expect(html).toContain(`opacity:${o}`);
+    expect(html).toContain("os-fempty");
+    /* ⚠️ THE FIRST-RUN LINE, NOT A COUNT OF EMPTY DAYS. "Nothing logged in the last 30 days" is true
+       and useless on an account that has never logged anything; this says what the feed is for. */
+    expect(html).toContain(FEED_FIRST_RUN_LINE);
+    expect(html).not.toContain("Nothing logged in the last");
+    for (const gone of ["os-aghost", "os-aghost-lanes", "FEED_GHOST"]) {
+      expect(html, gone).not.toContain(gone);
+    }
+    /* a drawn lane would be an entry with no date and no source — the two things every real one has */
+    expect(html).not.toMatch(/opacity:0\.[247]\b/);
+    /* and the populated feed still counts its window */
+    expect(renderFull()).not.toContain(FEED_FIRST_RUN_LINE);
   });
 });
 
@@ -260,16 +273,33 @@ describe("Phase 1 · the feed keeps its real events", () => {
 describe("Phase 1 · layout is unchanged", () => {
   it("keeps every panel in place on the empty page", () => {
     const html = renderEmpty();
-    /* `stats` left this list with the stat cards (stage 1); the header's own probe replaces it. The top
-       row left with the manuscript tile (stage 3); the breakdown and the three-card row replace it. */
-    for (const probe of ["hero", "breakdown", "row2", "quick-actions", "chart-card", "closed-tile", "grid", "todo-card"]) {
+    /* `stats` left this list with the stat cards (stage 1); the header's own probe replaces it. The
+       top row left with the manuscript tile (stage 3), and `breakdown` and `grid` left with v16 —
+       the page is a header and two rows. */
+    for (const probe of ["hero", "row1", "row2", "quick-actions", "chart-card", "closed-tile",
+                         "activity-card", "todo-card"]) {
       expect(html).toContain(`data-probe="${probe}"`);
     }
   });
 
-  it("leaves the Community panel alone", () => {
-    /* it is the one panel the pack names as unchanged — same markup either side of the branch */
-    const grab = (h: string) => h.slice(h.indexOf("os-comtile"));
-    expect(grab(renderEmpty()).slice(0, 400)).toBe(grab(renderFull()).slice(0, 400));
+  /* ⚠️ THE COMMUNITY PANEL IS OFF THE DASHBOARD (Nick, 18 Sep) — the component is kept and mounted
+     nowhere, so "unchanged either side of the branch" has no subject. The claim that replaces it is
+     the one that matters to this pack: the branch changes the three surfaces it names and NOTHING
+     else, so the two renders differ only where the pack says they do. */
+  it("⚠️ the branch touches three surfaces and leaves the rest of the page alone", () => {
+    const empty = renderEmpty();
+    const full = renderFull();
+    for (const gone of ["os-comtile", "os-comstrip", "os-comm "]) {
+      expect(empty, gone).not.toContain(gone);
+      expect(full, gone).not.toContain(gone);
+    }
+    /* the quick actions and the closed tile are the same markup on both sides */
+    const grab = (h: string, probe: string) => {
+      const i = h.indexOf(`data-probe="${probe}"`);
+      expect(i, probe).toBeGreaterThan(-1);
+      return h.slice(i, i + 400);
+    };
+    expect(grab(empty, "quick-actions")).toBe(grab(full, "quick-actions"));
+    expect(grab(empty, "closed-tile")).toBe(grab(full, "closed-tile"));
   });
 });

@@ -1,570 +1,281 @@
 {
- "when": "2026-09-17T16:47:11.498Z",
- "ref": "design-refs/dashboard-build-2026-09-17b.html",
+ "when": "2026-09-18T09:36:15.396Z",
+ "ref": "design-refs/dashboard-v16-2026-09-18.html",
  "app": "http://127.0.0.1:4390",
  "widths": [
-  1536,
-  1710,
-  1920,
-  2520
+  1440
  ],
  "byWidth": {
-  "1536": {
+  "1440": {
    "ref": {
     "probes": {
-     "navrow": {
-      "x": 246,
-      "y": 41.8,
-      "w": 1268,
-      "h": 64,
+     "main": {
+      "x": 224,
+      "y": 0,
+      "w": 1216,
+      "h": 1456,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
+      "borderTop": "rgb(28, 19, 15)",
+      "radius": "0px"
+     },
+     "navrow": {
+      "x": 264,
+      "y": 16,
+      "w": 1136,
+      "h": 47,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(28, 19, 15)",
       "radius": "0px"
      },
      "search": {
-      "x": 300,
-      "y": 53.8,
+      "x": 487,
+      "y": 16,
       "w": 640,
-      "h": 40,
-      "bg": "rgb(255, 255, 255)",
+      "h": 47,
+      "bg": "rgb(253, 249, 245)",
       "borderTopW": 1,
-      "borderTop": "rgb(233, 226, 215)",
-      "radius": "12px"
-     },
-     "main": {
-      "x": 261,
-      "y": 41.8,
-      "w": 1238,
-      "h": 1514,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
+      "borderTop": "rgba(28, 19, 15, 0.11)",
+      "radius": "34px"
      },
      "hero": {
-      "x": 283,
-      "y": 105.8,
-      "w": 1194,
-      "h": 150,
+      "x": 264,
+      "y": 89,
+      "w": 1136,
+      "h": 84.4,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
+      "borderTop": "rgb(28, 19, 15)",
       "radius": "0px"
      },
-     "header-illustration": {
-      "x": 1327,
-      "y": 105.8,
-      "w": 150,
-      "h": 150,
+     "row1": {
+      "x": 264,
+      "y": 197.4,
+      "w": 1136,
+      "h": 330,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "breakdown": {
-      "x": 283,
-      "y": 289.8,
-      "w": 1194,
-      "h": 225.9,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "breakdown-col": {
-      "x": 291,
-      "y": 339.6,
-      "w": 234.8,
-      "h": 134,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "row2": {
-      "x": 283,
-      "y": 533.6,
-      "w": 1194,
-      "h": 360,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
+      "borderTop": "rgb(28, 19, 15)",
       "radius": "0px"
      },
      "quick-actions": {
-      "x": 283,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
+      "x": 264,
+      "y": 197.4,
+      "w": 270,
+      "h": 330,
+      "bg": "rgb(255, 255, 255)",
       "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "quick-actions-foot": {
-      "x": 300,
-      "y": 841.6,
-      "w": 266,
-      "h": 35,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 1,
-      "borderTop": "rgb(238, 232, 224)",
-      "radius": "0px"
+      "borderTop": "rgba(28, 19, 15, 0.11)",
+      "radius": "14px"
      },
      "chart-card": {
-      "x": 601,
-      "y": 533.6,
-      "w": 558,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
+      "x": 554,
+      "y": 197.4,
+      "w": 506,
+      "h": 330,
+      "bg": "rgb(253, 249, 245)",
+      "borderTopW": 0,
+      "borderTop": "rgb(28, 19, 15)",
+      "radius": "16px"
      },
      "chart-header": {
-      "x": 622,
-      "y": 550.6,
-      "w": 516,
-      "h": 96,
+      "x": 583,
+      "y": 222.4,
+      "w": 448,
+      "h": 52,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-illustration": {
-      "x": 622,
-      "y": 550.6,
-      "w": 96,
-      "h": 96,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
+      "borderTop": "rgb(28, 19, 15)",
       "radius": "0px"
      },
      "chart-controls": {
-      "x": 946.8,
-      "y": 583.6,
-      "w": 191.2,
-      "h": 30,
-      "bg": "rgb(255, 255, 255)",
+      "x": 949.8,
+      "y": 222.4,
+      "w": 81.2,
+      "h": 27,
+      "bg": "rgb(245, 241, 235)",
       "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "99px"
+      "borderTop": "rgba(28, 19, 15, 0.11)",
+      "radius": "20px"
      },
      "plot": {
-      "x": 622,
-      "y": 656.6,
-      "w": 516,
-      "h": 202,
+      "x": 583,
+      "y": 295.4,
+      "w": 448,
+      "h": 177,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-event": {
-      "x": 626.5,
-      "y": 739.7,
-      "w": 9,
-      "h": 9,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
+      "borderTop": "rgb(28, 19, 15)",
       "radius": "0px"
      },
      "closed-tile": {
-      "x": 1177,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
+      "x": 1080,
+      "y": 197.4,
+      "w": 320,
+      "h": 330,
+      "bg": "rgb(255, 255, 255)",
       "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
+      "borderTop": "rgba(28, 19, 15, 0.11)",
+      "radius": "14px"
      },
-     "closed-row": {
-      "x": 1196,
-      "y": 641.6,
-      "w": 262,
-      "h": 20,
+     "row2": {
+      "x": 264,
+      "y": 547.4,
+      "w": 1136,
+      "h": 560,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "grid": {
-      "x": 283,
-      "y": 911.6,
-      "w": 1194,
-      "h": 600,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "todo-card": {
-      "x": 283,
-      "y": 911.6,
-      "w": 812,
-      "h": 600,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "todo-badge": {
-      "x": 461.2,
-      "y": 930.7,
-      "w": 39.8,
-      "h": 24,
-      "bg": "rgb(241, 231, 218)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 216, 198)",
-      "radius": "99px"
-     },
-     "todo-rule": {
-      "x": 284,
-      "y": 962.8,
-      "w": 810,
-      "h": 38,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
+      "borderTop": "rgb(28, 19, 15)",
       "radius": "0px"
      },
      "activity-card": {
-      "x": 1117,
-      "y": 911.6,
-      "w": 360,
-      "h": 442,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "activity-filters": {
-      "x": 1144,
-      "y": 961.8,
-      "w": 333,
-      "h": 0,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
+      "x": 264,
+      "y": 547.4,
+      "w": 651,
+      "h": 560,
+      "bg": "rgb(255, 255, 255)",
+      "borderTopW": 1,
+      "borderTop": "rgba(28, 19, 15, 0.11)",
+      "radius": "14px"
      },
      "feed": {
-      "x": 1144,
-      "y": 961.8,
-      "w": 333,
-      "h": 351.4,
+      "x": 281,
+      "y": 620.4,
+      "w": 617,
+      "h": 466,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
+      "borderTop": "rgb(28, 19, 15)",
       "radius": "0px"
      },
-     "community-tile": {
-      "x": 1117,
-      "y": 1379.6,
-      "w": 360,
-      "h": 132,
-      "bg": "rgb(253, 251, 247)",
+     "todo-card": {
+      "x": 935,
+      "y": 547.4,
+      "w": 465,
+      "h": 560,
+      "bg": "rgb(255, 255, 255)",
       "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "16px"
+      "borderTop": "rgba(28, 19, 15, 0.11)",
+      "radius": "14px"
      },
-     "drawer": {
-      "x": 1548.8,
-      "y": 0,
-      "w": 640,
-      "h": 1456,
-      "bg": "rgb(253, 250, 245)",
-      "borderTopW": 0,
-      "borderTop": "rgb(0, 0, 0)",
-      "radius": "0px"
+     "todo-badge": {
+      "x": 1309.6,
+      "y": 568.4,
+      "w": 67.4,
+      "h": 27,
+      "bg": "rgb(245, 241, 235)",
+      "borderTopW": 1,
+      "borderTop": "rgba(28, 19, 15, 0.11)",
+      "radius": "20px"
      }
     },
-    "text": {
-     "greeting": {
-      "family": "Special Elite",
-      "size": 44,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "header-counts": {
-      "family": "Source Sans 3",
-      "size": 19,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "breakdown-count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-extras": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "querying-day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "chart-figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "chart-title": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "chart-caption": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400",
-      "color": "rgb(138, 122, 108)",
-      "hidden": false
-     },
-     "closed-total": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "closed-count": {
-      "family": "Source Sans 3",
-      "size": 13,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "panel-title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     }
-    },
+    "text": {},
     "scale": {
-     "card title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500"
-     },
-     "chart figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
-     },
      "hero greeting": {
       "family": "Special Elite",
-      "size": 44,
+      "size": 56,
       "weight": "400"
      },
-     "tab": {
-      "family": "Source Sans 3",
-      "size": 13.5,
+     "hero counts": {
+      "family": "Source Serif 4",
+      "size": 17,
       "weight": "400"
      },
-     "tab count": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
+     "card title": {
+      "family": "Special Elite",
+      "size": 22,
       "weight": "400"
      },
-     "ticket title": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "600"
-     },
-     "ticket tag": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "bubble sentence": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "400"
-     },
-     "bubble meta": {
-      "family": "JetBrains Mono",
+     "card eyebrow": {
+      "family": "IBM Plex Mono",
       "size": 10,
       "weight": "400"
      },
-     "bubble label": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "todo badge": {
-      "family": "Playfair Display",
-      "size": 16,
-      "weight": "600"
-     },
-     "breakdown title": {
-      "family": "Special Elite",
-      "size": 23,
-      "weight": "400"
-     },
-     "breakdown meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "breakdown count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600"
-     },
-     "state pill": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "breakdown fact": {
-      "family": "Source Sans 3",
-      "size": 11.5,
-      "weight": "400"
-     },
-     "breakdown foot": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400"
-     },
-     "hero action": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "quick action": {
-      "family": "Source Sans 3",
-      "size": 14,
-      "weight": "400"
-     },
-     "querying title": {
-      "family": "Special Elite",
-      "size": 15,
-      "weight": "400"
-     },
-     "querying day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "chart title": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "chart caption": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "grain toggle": {
-      "family": "JetBrains Mono",
+     "card chip": {
+      "family": "IBM Plex Mono",
       "size": 10,
+      "weight": "400"
+     },
+     "action label": {
+      "family": "Special Elite",
+      "size": 17,
       "weight": "400"
      },
      "axis label": {
-      "family": "JetBrains Mono",
-      "size": 10,
+      "family": "IBM Plex Mono",
+      "size": 10.5,
       "weight": "400"
      },
-     "closed title": {
-      "family": "Special Elite",
-      "size": 20,
-      "weight": "400"
-     },
-     "closed figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
-     },
-     "closed count": {
-      "family": "Source Sans 3",
+     "legend": {
+      "family": "Source Serif 4",
       "size": 13,
       "weight": "400"
      },
-     "closed foot": {
-      "family": "Source Sans 3",
+     "closed figure": null,
+     "closed row": {
+      "family": "Source Serif 4",
       "size": 12.5,
+      "weight": "400"
+     },
+     "feed day rule": {
+      "family": "IBM Plex Mono",
+      "size": 9,
+      "weight": "400"
+     },
+     "feed sentence": {
+      "family": "Source Serif 4",
+      "size": 14,
+      "weight": "400"
+     },
+     "feed pill": {
+      "family": "IBM Plex Mono",
+      "size": 9,
+      "weight": "400"
+     },
+     "todo task": {
+      "family": "Source Serif 4",
+      "size": 14,
+      "weight": "400"
+     },
+     "todo count": {
+      "family": "Source Serif 4",
+      "size": 24,
+      "weight": "600"
+     },
+     "todo foot": {
+      "family": "Source Serif 4",
+      "size": 13,
       "weight": "400"
      }
     },
     "checks": {
-     "navrowH": 64,
-     "chartHeaderH": 96,
-     "greetBelowNav": 63.3,
-     "searchCount": 1,
-     "searchVsFeedback": 0,
-     "headerRowSpread": 33,
-     "toggleOverflow": 0,
-     "paintBelowZero": 0,
-     "plotStruct": {
-      "lines": 1,
-      "lineStroke": 2.2,
-      "lineCap": "round",
-      "areas": 1,
-      "areaFromLine": true,
-      "stops": [
-       {
-        "colour": "#2a3a52",
-        "opacity": 0.22
-       },
-       {
-        "colour": "#2a3a52",
-        "opacity": 0
-       }
-      ],
-      "gridlines": 3,
-      "masks": 0,
-      "firstHollow": true,
-      "lastSolid": true,
-      "firstAtStart": 0,
-      "lastAtEnd": 0,
-      "dots": 6,
-      "dotKinds": [
-       "pass",
-       "request"
-      ],
-      "dotWorst": 0.039
-     },
+     "navrowH": null,
+     "chartHeaderH": null,
+     "greetBelowNav": null,
+     "searchCount": 0,
+     "searchVsFeedback": null,
+     "headerRowSpread": null,
+     "toggleOverflow": null,
+     "paintBelowZero": null,
+     "plotStruct": null,
      "redRings": 0,
-     "ruleClear": 0,
-     "ruleFill": 0,
-     "ruleBands": 5,
-     "ground": "rgb(244, 240, 234)",
+     "ruleClear": null,
+     "ruleFill": null,
+     "ruleBands": null,
+     "ground": "rgb(245, 241, 235)",
      "hScroll": 0,
      "columnBottoms": [
-      1511.6,
-      1511.6
+      527.4,
+      527.4,
+      527.4
      ],
-     "columnSpread": 0
+     "columnSpread": 0,
+     "row2Bottoms": [
+      1107.4,
+      1107.4
+     ],
+     "row2Spread": 0
     }
    },
    "app": {
@@ -572,268 +283,228 @@
      "navrow": {
       "x": 246,
       "y": 41.8,
-      "w": 1268,
-      "h": 64,
+      "w": 1216,
+      "h": 73.8,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
       "borderTop": "rgb(58, 28, 20)",
       "radius": "0px"
      },
      "search": {
-      "x": 300,
+      "x": 402.9,
       "y": 53.8,
       "w": 640,
-      "h": 40,
-      "bg": "rgb(255, 255, 255)",
+      "h": 49.8,
+      "bg": "rgb(253, 249, 245)",
       "borderTopW": 1,
-      "borderTop": "rgb(233, 226, 215)",
-      "radius": "12px"
+      "borderTop": "rgba(28, 19, 15, 0.11)",
+      "radius": "34px"
      },
      "main": {
-      "x": 261,
+      "x": 246,
       "y": 41.8,
-      "w": 1238,
-      "h": 1514,
+      "w": 1216,
+      "h": 1186.1,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
+      "borderTop": "rgb(28, 19, 15)",
       "radius": "0px"
      },
      "hero": {
-      "x": 283,
-      "y": 105.8,
-      "w": 1194,
-      "h": 150,
+      "x": 268,
+      "y": 115.5,
+      "w": 1172,
+      "h": 143.8,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
+      "borderTop": "rgb(28, 19, 15)",
       "radius": "0px"
      },
-     "header-illustration": {
-      "x": 1327,
-      "y": 105.8,
-      "w": 150,
-      "h": 150,
+     "row1": {
+      "x": 268,
+      "y": 259.3,
+      "w": 1172,
+      "h": 344.6,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
+      "borderTop": "rgb(28, 19, 15)",
       "radius": "0px"
      },
-     "breakdown": {
-      "x": 283,
-      "y": 289.8,
-      "w": 1194,
-      "h": 225.9,
+     "quick-actions": {
+      "x": 268,
+      "y": 259.3,
+      "w": 270,
+      "h": 344.6,
+      "bg": "rgb(255, 255, 255)",
+      "borderTopW": 1,
+      "borderTop": "rgba(28, 19, 15, 0.11)",
+      "radius": "14px"
+     },
+     "chart-card": {
+      "x": 558,
+      "y": 259.3,
+      "w": 542,
+      "h": 344.6,
+      "bg": "rgb(253, 249, 245)",
+      "borderTopW": 0,
+      "borderTop": "rgb(28, 19, 15)",
+      "radius": "16px"
+     },
+     "chart-header": {
+      "x": 587,
+      "y": 284.3,
+      "w": 484,
+      "h": 59.6,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
+      "borderTop": "rgb(28, 19, 15)",
       "radius": "0px"
      },
-     "breakdown-col": {
+     "chart-controls": {
+      "x": 1003.6,
+      "y": 284.3,
+      "w": 67.4,
+      "h": 29,
+      "bg": "rgb(245, 241, 235)",
+      "borderTopW": 1,
+      "borderTop": "rgba(28, 19, 15, 0.11)",
+      "radius": "20px"
+     },
+     "plot": {
+      "x": 587,
+      "y": 367.3,
+      "w": 484,
+      "h": 179.8,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(28, 19, 15)",
+      "radius": "0px"
+     },
+     "chart-event": {
+      "x": 592,
+      "y": 435,
+      "w": 14,
+      "h": 14,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(28, 19, 15)",
+      "radius": "0px"
+     },
+     "closed-tile": {
+      "x": 1120,
+      "y": 259.3,
+      "w": 320,
+      "h": 344.6,
+      "bg": "rgb(255, 255, 255)",
+      "borderTopW": 1,
+      "borderTop": "rgba(28, 19, 15, 0.11)",
+      "radius": "14px"
+     },
+     "closed-arc": {
+      "x": 1223.8,
+      "y": 358.6,
+      "w": 112.5,
+      "h": 112.5,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(28, 19, 15)",
+      "radius": "0px"
+     },
+     "closed-row": {
+      "x": 1143,
+      "y": 497.8,
+      "w": 274,
+      "h": 18.8,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgba(28, 19, 15, 0.7)",
+      "radius": "0px"
+     },
+     "row2": {
+      "x": 268,
+      "y": 623.8,
+      "w": 1172,
+      "h": 560,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(28, 19, 15)",
+      "radius": "0px"
+     },
+     "activity-card": {
+      "x": 268,
+      "y": 623.8,
+      "w": 672,
+      "h": 560,
+      "bg": "rgb(255, 255, 255)",
+      "borderTopW": 1,
+      "borderTop": "rgba(28, 19, 15, 0.11)",
+      "radius": "14px"
+     },
+     "feed": {
+      "x": 285,
+      "y": 708.4,
+      "w": 638,
+      "h": 454.4,
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderTopW": 0,
+      "borderTop": "rgb(28, 19, 15)",
+      "radius": "0px"
+     },
+     "feed-entry": {
       "x": 291,
-      "y": 339.6,
-      "w": 234.8,
-      "h": 134,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "row2": {
-      "x": 283,
-      "y": 533.6,
-      "w": 1194,
-      "h": 360,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "quick-actions": {
-      "x": 283,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "quick-actions-foot": {
-      "x": 300,
-      "y": 841.6,
-      "w": 266,
-      "h": 35,
+      "y": 741.9,
+      "w": 626,
+      "h": 83.1,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 1,
-      "borderTop": "rgb(238, 232, 224)",
-      "radius": "0px"
-     },
-     "chart-card": {
-      "x": 601,
-      "y": 533.6,
-      "w": 558,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "chart-header": {
-      "x": 622,
-      "y": 550.6,
-      "w": 516,
-      "h": 96,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-illustration": {
-      "x": 622,
-      "y": 550.6,
-      "w": 96,
-      "h": 96,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-controls": {
-      "x": 946.8,
-      "y": 583.6,
-      "w": 191.2,
-      "h": 30,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "99px"
-     },
-     "plot": {
-      "x": 622,
-      "y": 656.6,
-      "w": 516,
-      "h": 202,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-event": {
-      "x": 628,
-      "y": 733.6,
-      "w": 12,
-      "h": 12,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "closed-tile": {
-      "x": 1177,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "closed-row": {
-      "x": 1196,
-      "y": 641.6,
-      "w": 262,
-      "h": 20,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "grid": {
-      "x": 283,
-      "y": 911.6,
-      "w": 1194,
-      "h": 600,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
+      "borderTop": "rgba(28, 19, 15, 0.11)",
       "radius": "0px"
      },
      "todo-card": {
-      "x": 283,
-      "y": 911.6,
-      "w": 812,
-      "h": 600,
-      "bg": "rgb(253, 251, 247)",
+      "x": 960,
+      "y": 623.8,
+      "w": 480,
+      "h": 560,
+      "bg": "rgb(255, 255, 255)",
       "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
+      "borderTop": "rgba(28, 19, 15, 0.11)",
+      "radius": "14px"
      },
      "todo-badge": {
-      "x": 461.2,
-      "y": 930.7,
-      "w": 39.8,
-      "h": 24,
-      "bg": "rgb(241, 231, 218)",
+      "x": 1349.6,
+      "y": 644.8,
+      "w": 67.4,
+      "h": 29,
+      "bg": "rgb(245, 241, 235)",
       "borderTopW": 1,
-      "borderTop": "rgb(230, 216, 198)",
-      "radius": "99px"
+      "borderTop": "rgba(28, 19, 15, 0.11)",
+      "radius": "20px"
      },
-     "todo-rule": {
-      "x": 284,
-      "y": 962.8,
-      "w": 810,
-      "h": 38,
+     "todo-rows": {
+      "x": 977,
+      "y": 708.4,
+      "w": 446,
+      "h": 421.9,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
+      "borderTop": "rgb(28, 19, 15)",
       "radius": "0px"
      },
-     "activity-card": {
-      "x": 1117,
-      "y": 911.6,
-      "w": 360,
-      "h": 442,
+     "todo-row": {
+      "x": 983,
+      "y": 708.4,
+      "w": 434,
+      "h": 66,
       "bg": "rgba(0, 0, 0, 0)",
       "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
+      "borderTop": "rgb(28, 19, 15)",
       "radius": "0px"
-     },
-     "activity-filters": {
-      "x": 1144,
-      "y": 961.8,
-      "w": 333,
-      "h": 0,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "feed": {
-      "x": 1144,
-      "y": 961.8,
-      "w": 333,
-      "h": 351.4,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "community-tile": {
-      "x": 1117,
-      "y": 1379.6,
-      "w": 360,
-      "h": 132,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "16px"
      },
      "drawer": {
-      "x": 1548.8,
+      "x": 1496.8,
       "y": 0,
       "w": 640,
-      "h": 1456,
+      "h": 1726,
       "bg": "rgb(253, 250, 245)",
       "borderTopW": 0,
       "borderTop": "rgb(0, 0, 0)",
@@ -843,261 +514,148 @@
     "text": {
      "greeting": {
       "family": "Special Elite",
-      "size": 44,
+      "size": 56,
       "weight": "400",
-      "color": "rgb(42, 31, 24)",
+      "color": "rgb(28, 19, 15)",
       "hidden": false
      },
      "header-counts": {
-      "family": "Source Sans 3",
-      "size": 19,
+      "family": "Playfair Display",
+      "size": 17,
       "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "breakdown-count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-extras": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "querying-day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "chart-figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
+      "color": "rgb(28, 19, 15)",
       "hidden": false
      },
      "chart-title": {
       "family": "Special Elite",
-      "size": 18,
+      "size": 22,
       "weight": "400",
-      "color": "rgb(42, 31, 24)",
+      "color": "rgb(28, 19, 15)",
       "hidden": false
      },
-     "chart-caption": {
+     "chart-eyebrow": {
       "family": "JetBrains Mono",
-      "size": 11,
+      "size": 10,
       "weight": "400",
-      "color": "rgb(138, 122, 108)",
+      "color": "rgba(28, 19, 15, 0.45)",
       "hidden": false
      },
      "closed-total": {
-      "family": "Source Sans 3",
-      "size": 33,
+      "family": "Playfair Display",
+      "size": 34,
       "weight": "600",
-      "color": "rgb(42, 31, 24)",
+      "color": "rgb(28, 19, 15)",
       "hidden": false
      },
      "closed-count": {
       "family": "Source Sans 3",
-      "size": 13,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
+      "size": 12.5,
+      "weight": "600",
+      "color": "rgb(28, 19, 15)",
       "hidden": false
      },
-     "panel-title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500",
-      "color": "rgb(42, 31, 24)",
+     "feed-eyebrow": {
+      "family": "JetBrains Mono",
+      "size": 10,
+      "weight": "400",
+      "color": "rgba(28, 19, 15, 0.45)",
       "hidden": false
      }
     },
     "scale": {
-     "card title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500"
-     },
-     "chart figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
-     },
      "hero greeting": {
       "family": "Special Elite",
-      "size": 44,
+      "size": 56,
       "weight": "400"
      },
-     "tab": {
-      "family": "Source Sans 3",
-      "size": 13.5,
-      "weight": "400"
-     },
-     "tab count": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400"
-     },
-     "ticket title": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "600"
-     },
-     "ticket tag": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "bubble sentence": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "400"
-     },
-     "bubble meta": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "bubble label": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "todo badge": {
+     "hero counts": {
       "family": "Playfair Display",
-      "size": 16,
-      "weight": "600"
+      "size": 17,
+      "weight": "400"
      },
-     "breakdown title": {
+     "card title": {
       "family": "Special Elite",
-      "size": 23,
+      "size": 22,
       "weight": "400"
      },
-     "breakdown meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "breakdown count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600"
-     },
-     "state pill": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "breakdown fact": {
-      "family": "Source Sans 3",
-      "size": 11.5,
-      "weight": "400"
-     },
-     "breakdown foot": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400"
-     },
-     "hero action": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "quick action": {
-      "family": "Source Sans 3",
-      "size": 14,
-      "weight": "400"
-     },
-     "querying title": {
-      "family": "Special Elite",
-      "size": 15,
-      "weight": "400"
-     },
-     "querying day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "chart title": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "chart caption": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "grain toggle": {
+     "card eyebrow": {
       "family": "JetBrains Mono",
       "size": 10,
+      "weight": "400"
+     },
+     "card chip": {
+      "family": "JetBrains Mono",
+      "size": 10,
+      "weight": "400"
+     },
+     "action label": {
+      "family": "Special Elite",
+      "size": 17,
       "weight": "400"
      },
      "axis label": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "closed title": {
-      "family": "Special Elite",
-      "size": 20,
-      "weight": "400"
-     },
-     "closed figure": {
       "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
+      "size": 10.5,
+      "weight": "400"
      },
-     "closed count": {
+     "legend": {
       "family": "Source Sans 3",
       "size": 13,
       "weight": "400"
      },
-     "closed foot": {
+     "closed figure": {
+      "family": "Playfair Display",
+      "size": 34,
+      "weight": "600"
+     },
+     "closed row": {
       "family": "Source Sans 3",
       "size": 12.5,
+      "weight": "400"
+     },
+     "feed day rule": {
+      "family": "JetBrains Mono",
+      "size": 9,
+      "weight": "400"
+     },
+     "feed sentence": {
+      "family": "Source Sans 3",
+      "size": 14,
+      "weight": "400"
+     },
+     "feed pill": null,
+     "todo task": {
+      "family": "Source Sans 3",
+      "size": 14,
+      "weight": "400"
+     },
+     "todo count": {
+      "family": "Source Sans 3",
+      "size": 24,
+      "weight": "600"
+     },
+     "todo foot": {
+      "family": "Source Sans 3",
+      "size": 13,
       "weight": "400"
      }
     },
     "checks": {
-     "navrowH": 64,
-     "chartHeaderH": 96,
-     "greetBelowNav": 63.3,
+     "navrowH": 73.8,
+     "chartHeaderH": 59.6,
+     "greetBelowNav": 26,
      "searchCount": 1,
      "searchVsFeedback": 0,
-     "headerRowSpread": 33,
+     "headerRowSpread": 0,
      "toggleOverflow": 0,
      "paintBelowZero": 0,
      "plotStruct": {
       "lines": 1,
-      "lineStroke": 2.2,
+      "lineStroke": 2.6,
       "lineCap": "round",
-      "areas": 1,
+      "areas": 2,
       "areaFromLine": true,
-      "stops": [
-       {
-        "colour": "#2a3a52",
-        "opacity": 0.22
-       },
-       {
-        "colour": "#2a3a52",
-        "opacity": 0
-       }
-      ],
+      "stops": [],
       "gridlines": 3,
       "masks": 0,
       "firstHollow": true,
@@ -1109,3549 +667,577 @@
        "pass",
        "request"
       ],
-      "dotWorst": 0.043
+      "dotWorst": 0.088
      },
      "redRings": 0,
-     "ruleClear": 0,
-     "ruleFill": 0,
-     "ruleBands": 5,
+     "ruleClear": null,
+     "ruleFill": null,
+     "ruleBands": null,
      "ground": "rgb(244, 240, 234)",
      "hScroll": 0,
      "columnBottoms": [
-      1511.6,
-      1511.6
+      603.8,
+      603.8,
+      603.8
      ],
      "columnSpread": 0,
-     "focusMouse": {
-      "outline": "none",
-      "colour": "rgb(58, 28, 20)",
-      "fv": false
-     },
-     "focusTab": {
-      "outline": "solid",
-      "colour": "rgb(138, 158, 136)",
-      "fv": true
-     },
-     "drawer": {
-      "open": true,
-      "portalled": true,
-      "contexts": 0,
-      "inside": true,
-      "z": 9001,
-      "scrimZ": 9000
-     },
+     "row2Bottoms": [
+      1183.8,
+      1183.8
+     ],
+     "row2Spread": 0,
+     "focusMouse": null,
+     "focusTab": null,
+     "drawer": null,
      "fade": {
-      "hi": 59.7,
-      "lo": 15.7,
-      "ratio": 0.26
+      "hi": 9.2,
+      "lo": 30.5,
+      "ratio": 3.33
      },
-     "plotDraws": {
-      "readings": 3,
-      "drawn": 3,
-      "sparse": 0,
-      "freqs": [
-       "Daily",
-       "Weekly",
-       "Monthly"
-      ],
-      "unsized": 0,
-      "nan": 0,
-      "noLine": 0,
-      "firstFailing": null
-     }
+     "plotDraws": null
+    },
+    "viewportFitted": {
+     "dw": 44,
+     "dh": 270,
+     "width": 1484,
+     "height": 1726
     }
    },
-   "misses": [],
-   "allowed": []
-  },
-  "1710": {
-   "ref": {
-    "probes": {
-     "navrow": {
-      "x": 246,
-      "y": 41.8,
-      "w": 1442,
-      "h": 64,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "search": {
-      "x": 300,
-      "y": 53.8,
-      "w": 640,
-      "h": 40,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 1,
-      "borderTop": "rgb(233, 226, 215)",
-      "radius": "12px"
-     },
-     "main": {
-      "x": 261,
-      "y": 41.8,
-      "w": 1412,
-      "h": 1514,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "hero": {
-      "x": 283,
-      "y": 105.8,
-      "w": 1368,
-      "h": 150,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "header-illustration": {
-      "x": 1501,
-      "y": 105.8,
-      "w": 150,
-      "h": 150,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "breakdown": {
-      "x": 283,
-      "y": 289.8,
-      "w": 1368,
-      "h": 225.9,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "breakdown-col": {
-      "x": 291,
-      "y": 339.6,
-      "w": 269.6,
-      "h": 134,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "row2": {
-      "x": 283,
-      "y": 533.6,
-      "w": 1368,
-      "h": 360,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "quick-actions": {
-      "x": 283,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "quick-actions-foot": {
-      "x": 300,
-      "y": 841.6,
-      "w": 266,
-      "h": 35,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 1,
-      "borderTop": "rgb(238, 232, 224)",
-      "radius": "0px"
-     },
-     "chart-card": {
-      "x": 601,
-      "y": 533.6,
-      "w": 732,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "chart-header": {
-      "x": 622,
-      "y": 550.6,
-      "w": 690,
-      "h": 96,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-illustration": {
-      "x": 622,
-      "y": 550.6,
-      "w": 96,
-      "h": 96,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-controls": {
-      "x": 1120.8,
-      "y": 583.6,
-      "w": 191.2,
-      "h": 30,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "99px"
-     },
-     "plot": {
-      "x": 622,
-      "y": 656.6,
-      "w": 690,
-      "h": 202,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-event": {
-      "x": 628,
-      "y": 733.6,
-      "w": 12,
-      "h": 12,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "closed-tile": {
-      "x": 1351,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "closed-row": {
-      "x": 1370,
-      "y": 641.6,
-      "w": 262,
-      "h": 20,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "grid": {
-      "x": 283,
-      "y": 911.6,
-      "w": 1368,
-      "h": 600,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "todo-card": {
-      "x": 283,
-      "y": 911.6,
-      "w": 986,
-      "h": 600,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "todo-badge": {
-      "x": 461.2,
-      "y": 930.7,
-      "w": 39.8,
-      "h": 24,
-      "bg": "rgb(241, 231, 218)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 216, 198)",
-      "radius": "99px"
-     },
-     "todo-rule": {
-      "x": 284,
-      "y": 962.8,
-      "w": 984,
-      "h": 38,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "activity-card": {
-      "x": 1291,
-      "y": 911.6,
-      "w": 360,
-      "h": 442,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "activity-filters": {
-      "x": 1318,
-      "y": 961.8,
-      "w": 333,
-      "h": 0,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "feed": {
-      "x": 1318,
-      "y": 961.8,
-      "w": 333,
-      "h": 351.4,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "community-tile": {
-      "x": 1291,
-      "y": 1379.6,
-      "w": 360,
-      "h": 132,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "16px"
-     },
-     "drawer": {
-      "x": 1722.8,
-      "y": 0,
-      "w": 640,
-      "h": 1456,
-      "bg": "rgb(253, 250, 245)",
-      "borderTopW": 0,
-      "borderTop": "rgb(0, 0, 0)",
-      "radius": "0px"
-     }
+   "misses": [
+    {
+     "key": "hero",
+     "field": "y",
+     "ref": 89,
+     "app": 73.7,
+     "delta": -15.3,
+     "tol": 3
     },
-    "text": {
-     "greeting": {
-      "family": "Special Elite",
-      "size": 44,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "header-counts": {
-      "family": "Source Sans 3",
-      "size": 19,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "breakdown-count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-extras": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "querying-day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "chart-figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "chart-title": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "chart-caption": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400",
-      "color": "rgb(138, 122, 108)",
-      "hidden": false
-     },
-     "closed-total": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "closed-count": {
-      "family": "Source Sans 3",
-      "size": 13,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "panel-title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     }
+    {
+     "key": "hero",
+     "field": "x",
+     "ref": 40,
+     "app": 22,
+     "delta": -18,
+     "tol": 3
     },
-    "scale": {
-     "card title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500"
-     },
-     "chart figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
-     },
-     "hero greeting": {
-      "family": "Special Elite",
-      "size": 44,
-      "weight": "400"
-     },
-     "tab": {
-      "family": "Source Sans 3",
-      "size": 13.5,
-      "weight": "400"
-     },
-     "tab count": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400"
-     },
-     "ticket title": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "600"
-     },
-     "ticket tag": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "bubble sentence": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "400"
-     },
-     "bubble meta": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "bubble label": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "todo badge": {
-      "family": "Playfair Display",
-      "size": 16,
-      "weight": "600"
-     },
-     "breakdown title": {
-      "family": "Special Elite",
-      "size": 23,
-      "weight": "400"
-     },
-     "breakdown meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "breakdown count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600"
-     },
-     "state pill": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "breakdown fact": {
-      "family": "Source Sans 3",
-      "size": 11.5,
-      "weight": "400"
-     },
-     "breakdown foot": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400"
-     },
-     "hero action": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "quick action": {
-      "family": "Source Sans 3",
-      "size": 14,
-      "weight": "400"
-     },
-     "querying title": {
-      "family": "Special Elite",
-      "size": 15,
-      "weight": "400"
-     },
-     "querying day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "chart title": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "chart caption": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "grain toggle": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "axis label": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "closed title": {
-      "family": "Special Elite",
-      "size": 20,
-      "weight": "400"
-     },
-     "closed figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
-     },
-     "closed count": {
-      "family": "Source Sans 3",
-      "size": 13,
-      "weight": "400"
-     },
-     "closed foot": {
-      "family": "Source Sans 3",
-      "size": 12.5,
-      "weight": "400"
-     }
+    {
+     "key": "hero",
+     "field": "xr",
+     "ref": 40,
+     "app": 22,
+     "delta": -18,
+     "tol": 3
     },
-    "checks": {
-     "navrowH": 64,
-     "chartHeaderH": 96,
-     "greetBelowNav": 63.3,
-     "searchCount": 1,
-     "searchVsFeedback": 0,
-     "headerRowSpread": 33,
-     "toggleOverflow": 0,
-     "paintBelowZero": 0,
-     "plotStruct": {
-      "lines": 1,
-      "lineStroke": 2.2,
-      "lineCap": "round",
-      "areas": 1,
-      "areaFromLine": true,
-      "stops": [
-       {
-        "colour": "#2a3a52",
-        "opacity": 0.22
-       },
-       {
-        "colour": "#2a3a52",
-        "opacity": 0
-       }
-      ],
-      "gridlines": 3,
-      "masks": 0,
-      "firstHollow": true,
-      "lastSolid": true,
-      "firstAtStart": 0,
-      "lastAtEnd": 0,
-      "dots": 6,
-      "dotKinds": [
-       "pass",
-       "request"
-      ],
-      "dotWorst": 0.039
-     },
-     "redRings": 0,
-     "ruleClear": 0,
-     "ruleFill": 0,
-     "ruleBands": 5,
-     "ground": "rgb(244, 240, 234)",
-     "hScroll": 0,
-     "columnBottoms": [
-      1511.6,
-      1511.6
-     ],
-     "columnSpread": 0
+    {
+     "key": "hero",
+     "field": "h",
+     "ref": 84.4,
+     "app": 143.8,
+     "delta": 59.4,
+     "tol": 4
+    },
+    {
+     "key": "row1",
+     "field": "y",
+     "ref": 197.4,
+     "app": 217.5,
+     "delta": 20.1,
+     "tol": 3
+    },
+    {
+     "key": "row1",
+     "field": "x",
+     "ref": 40,
+     "app": 22,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "row1",
+     "field": "xr",
+     "ref": 40,
+     "app": 22,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "row1",
+     "field": "h",
+     "ref": 330,
+     "app": 344.6,
+     "delta": 14.6,
+     "tol": 4
+    },
+    {
+     "key": "quick-actions",
+     "field": "y",
+     "ref": 197.4,
+     "app": 217.5,
+     "delta": 20.1,
+     "tol": 3
+    },
+    {
+     "key": "quick-actions",
+     "field": "x",
+     "ref": 40,
+     "app": 22,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "quick-actions",
+     "field": "h",
+     "ref": 330,
+     "app": 344.6,
+     "delta": 14.6,
+     "tol": 4
+    },
+    {
+     "key": "chart-card",
+     "field": "y",
+     "ref": 197.4,
+     "app": 217.5,
+     "delta": 20.1,
+     "tol": 3
+    },
+    {
+     "key": "chart-card",
+     "field": "x",
+     "ref": 330,
+     "app": 312,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "chart-card",
+     "field": "xr",
+     "ref": 380,
+     "app": 362,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "chart-card",
+     "field": "h",
+     "ref": 330,
+     "app": 344.6,
+     "delta": 14.6,
+     "tol": 4
+    },
+    {
+     "key": "chart-header",
+     "field": "y",
+     "ref": 222.4,
+     "app": 242.5,
+     "delta": 20.1,
+     "tol": 3
+    },
+    {
+     "key": "chart-header",
+     "field": "x",
+     "ref": 359,
+     "app": 341,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "chart-header",
+     "field": "xr",
+     "ref": 409,
+     "app": 391,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "chart-header",
+     "field": "h",
+     "ref": 52,
+     "app": 59.6,
+     "delta": 7.6,
+     "tol": 4
+    },
+    {
+     "key": "chart-controls",
+     "field": "y",
+     "ref": 222.4,
+     "app": 242.5,
+     "delta": 20.1,
+     "tol": 3
+    },
+    {
+     "key": "chart-controls",
+     "field": "xr",
+     "ref": 409,
+     "app": 391,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "chart-controls",
+     "field": "w",
+     "ref": 81.2,
+     "app": 67.4,
+     "delta": -13.8,
+     "tol": 4
+    },
+    {
+     "key": "plot",
+     "field": "y",
+     "ref": 295.4,
+     "app": 325.5,
+     "delta": 30.1,
+     "tol": 3
+    },
+    {
+     "key": "plot",
+     "field": "x",
+     "ref": 359,
+     "app": 341,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "plot",
+     "field": "xr",
+     "ref": 409,
+     "app": 391,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "closed-tile",
+     "field": "y",
+     "ref": 197.4,
+     "app": 217.5,
+     "delta": 20.1,
+     "tol": 3
+    },
+    {
+     "key": "closed-tile",
+     "field": "xr",
+     "ref": 40,
+     "app": 22,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "closed-tile",
+     "field": "h",
+     "ref": 330,
+     "app": 344.6,
+     "delta": 14.6,
+     "tol": 4
+    },
+    {
+     "key": "row2",
+     "field": "y",
+     "ref": 547.4,
+     "app": 582,
+     "delta": 34.6,
+     "tol": 3
+    },
+    {
+     "key": "row2",
+     "field": "x",
+     "ref": 40,
+     "app": 22,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "row2",
+     "field": "xr",
+     "ref": 40,
+     "app": 22,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "activity-card",
+     "field": "y",
+     "ref": 547.4,
+     "app": 582,
+     "delta": 34.6,
+     "tol": 3
+    },
+    {
+     "key": "activity-card",
+     "field": "x",
+     "ref": 40,
+     "app": 22,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "activity-card",
+     "field": "w",
+     "ref": 651,
+     "app": 672,
+     "delta": 21,
+     "tol": 4
+    },
+    {
+     "key": "feed",
+     "field": "y",
+     "ref": 620.4,
+     "app": 666.6,
+     "delta": 46.2,
+     "tol": 3
+    },
+    {
+     "key": "feed",
+     "field": "x",
+     "ref": 57,
+     "app": 39,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "feed",
+     "field": "w",
+     "ref": 617,
+     "app": 638,
+     "delta": 21,
+     "tol": 4
+    },
+    {
+     "key": "feed",
+     "field": "h",
+     "ref": 466,
+     "app": 454.4,
+     "delta": -11.6,
+     "tol": 4
+    },
+    {
+     "key": "todo-card",
+     "field": "y",
+     "ref": 547.4,
+     "app": 582,
+     "delta": 34.6,
+     "tol": 3
+    },
+    {
+     "key": "todo-card",
+     "field": "xr",
+     "ref": 40,
+     "app": 22,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "todo-card",
+     "field": "w",
+     "ref": 465,
+     "app": 480,
+     "delta": 15,
+     "tol": 4
+    },
+    {
+     "key": "todo-badge",
+     "field": "y",
+     "ref": 568.4,
+     "app": 603,
+     "delta": 34.6,
+     "tol": 3
+    },
+    {
+     "key": "todo-badge",
+     "field": "xr",
+     "ref": 63,
+     "app": 45,
+     "delta": -18,
+     "tol": 3
+    },
+    {
+     "key": "greeting",
+     "field": "ref",
+     "why": "the ref has no such text probe"
+    },
+    {
+     "key": "header-counts",
+     "field": "ref",
+     "why": "the ref has no such text probe"
+    },
+    {
+     "key": "chart-title",
+     "field": "ref",
+     "why": "the ref has no such text probe"
+    },
+    {
+     "key": "chart-eyebrow",
+     "field": "ref",
+     "why": "the ref has no such text probe"
+    },
+    {
+     "key": "closed-total",
+     "field": "ref",
+     "why": "the ref has no such text probe"
+    },
+    {
+     "key": "type:hero counts",
+     "field": "family",
+     "ref": "Source Serif 4",
+     "app": "Playfair Display"
+    },
+    {
+     "key": "type:card eyebrow",
+     "field": "family",
+     "ref": "IBM Plex Mono",
+     "app": "JetBrains Mono"
+    },
+    {
+     "key": "type:card chip",
+     "field": "family",
+     "ref": "IBM Plex Mono",
+     "app": "JetBrains Mono"
+    },
+    {
+     "key": "type:axis label",
+     "field": "family",
+     "ref": "IBM Plex Mono",
+     "app": "Source Sans 3"
+    },
+    {
+     "key": "type:legend",
+     "field": "family",
+     "ref": "Source Serif 4",
+     "app": "Source Sans 3"
+    },
+    {
+     "key": "type:closed figure",
+     "field": "scale",
+     "why": "no element in the REF for this row"
+    },
+    {
+     "key": "type:closed row",
+     "field": "family",
+     "ref": "Source Serif 4",
+     "app": "Source Sans 3"
+    },
+    {
+     "key": "type:feed day rule",
+     "field": "family",
+     "ref": "IBM Plex Mono",
+     "app": "JetBrains Mono"
+    },
+    {
+     "key": "type:feed sentence",
+     "field": "family",
+     "ref": "Source Serif 4",
+     "app": "Source Sans 3"
+    },
+    {
+     "key": "type:feed pill",
+     "field": "scale",
+     "why": "no element in the APP for this row"
+    },
+    {
+     "key": "type:todo task",
+     "field": "family",
+     "ref": "Source Serif 4",
+     "app": "Source Sans 3"
+    },
+    {
+     "key": "type:todo count",
+     "field": "family",
+     "ref": "Source Serif 4",
+     "app": "Source Sans 3"
+    },
+    {
+     "key": "type:todo foot",
+     "field": "family",
+     "ref": "Source Serif 4",
+     "app": "Source Sans 3"
+    },
+    {
+     "key": "standing",
+     "field": "navrowH",
+     "ref": "<= 72px",
+     "app": 73.8,
+     "why": "the nav row is one row"
+    },
+    {
+     "key": "standing",
+     "field": "chartHeaderH",
+     "ref": "90–140px",
+     "app": 59.6,
+     "why": "the chart header is the hawk's row, or that row with the toggle beneath — never a third"
+    },
+    {
+     "key": "standing",
+     "field": "ruleClear",
+     "ref": "0 transparent",
+     "app": null,
+     "why": "every band of the to-do rule paints — a token that does not resolve here makes it transparent"
+    },
+    {
+     "key": "standing",
+     "field": "ruleFill",
+     "ref": "within 3px",
+     "app": null,
+     "why": "the rule's bands fill their track"
+    },
+    {
+     "key": "standing",
+     "field": "plotStruct",
+     "ref": "1 navy line 2.2 round · 1 area from it · 22%→0 navy · 3 gridlines · no mask · hollow first, solid last, on the line · ≥1 event dot, all within 0.5px",
+     "app": "{\"lines\":1,\"lineStroke\":2.6,\"lineCap\":\"round\",\"areas\":2,\"areaFromLine\":true,\"stops\":[],\"gridlines\":3,\"masks\":0,\"firstHollow\":true,\"lastSolid\":true,\"firstAtStart\":0,\"lastAtEnd\":0,\"dots\":6,\"dotKinds\":[\"pass\",\"request\"],\"dotWorst\":0.088}",
+     "why": "one navy line over its own fade, three gridlines, hollow first and solid last marks on the line, and every event dot on it"
+    },
+    {
+     "key": "standing",
+     "field": "focusMouse",
+     "ref": "none on click, solid sage on Tab",
+     "app": null,
+     "why": "a mouse click leaves no ring; Tab leaves a sage one"
+    },
+    {
+     "key": "standing",
+     "field": "drawer",
+     "ref": "portalled · 0 contexts · hit inside · above the scrim",
+     "app": null,
+     "why": "an open drawer is above everything — portalled out of every card's stacking context"
+    },
+    {
+     "key": "standing",
+     "field": "fade",
+     "ref": "ratio < 0.5",
+     "app": "{\"hi\":9.2,\"lo\":30.5,\"ratio\":3.33}",
+     "why": "the fill fades toward the baseline — 85% of the painted span under half of 15%"
+    },
+    {
+     "key": "standing",
+     "field": "plotDraws",
+     "ref": "Daily · Weekly · Monthly: SVG sized · 0 NaN · line length > 0 (3 readings)",
+     "app": null,
+     "why": "the plot draws at every grain — sized, no NaN, a line of non-zero length"
+    },
+    {
+     "key": "standing",
+     "field": "skeletonRegions",
+     "ref": "pass",
+     "app": "{\"rows\":[{\"width\":1440,\"caught\":true,\"worst\":5,\"settle\":{\"suppressed\":true,\"slotClass\":\"\",\"stillRunning\":0},\"settleDuring\":{\"suppressed\":true,\"slotClass\":\"stage-page-on\",\"stillRunning\":0},\"edges\":{\"during\":{\"colFirst\":{\"",
+     "why": "the loading shell's regions disagree with the loaded page's — the jump it exists to prevent"
+    },
+    {
+     "key": "standing",
+     "field": "skeletonEdges",
+     "ref": "pass",
+     "app": "{\"rows\":[{\"width\":1440,\"caught\":true,\"worst\":5,\"settle\":{\"suppressed\":true,\"slotClass\":\"\",\"stillRunning\":0},\"settleDuring\":{\"suppressed\":true,\"slotClass\":\"stage-page-on\",\"stillRunning\":0},\"edges\":{\"during\":{\"colFirst\":{\"",
+     "why": "the loading state's first or last pixel is not where the loaded page's is, or something is clipped off"
     }
-   },
-   "app": {
-    "probes": {
-     "navrow": {
-      "x": 246,
-      "y": 41.8,
-      "w": 1442,
-      "h": 64,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "search": {
-      "x": 300,
-      "y": 53.8,
-      "w": 640,
-      "h": 40,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 1,
-      "borderTop": "rgb(233, 226, 215)",
-      "radius": "12px"
-     },
-     "main": {
-      "x": 261,
-      "y": 41.8,
-      "w": 1412,
-      "h": 1514,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "hero": {
-      "x": 283,
-      "y": 105.8,
-      "w": 1368,
-      "h": 150,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "header-illustration": {
-      "x": 1501,
-      "y": 105.8,
-      "w": 150,
-      "h": 150,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "breakdown": {
-      "x": 283,
-      "y": 289.8,
-      "w": 1368,
-      "h": 225.9,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "breakdown-col": {
-      "x": 291,
-      "y": 339.6,
-      "w": 269.6,
-      "h": 134,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "row2": {
-      "x": 283,
-      "y": 533.6,
-      "w": 1368,
-      "h": 360,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "quick-actions": {
-      "x": 283,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "quick-actions-foot": {
-      "x": 300,
-      "y": 841.6,
-      "w": 266,
-      "h": 35,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 1,
-      "borderTop": "rgb(238, 232, 224)",
-      "radius": "0px"
-     },
-     "chart-card": {
-      "x": 601,
-      "y": 533.6,
-      "w": 732,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "chart-header": {
-      "x": 622,
-      "y": 550.6,
-      "w": 690,
-      "h": 96,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-illustration": {
-      "x": 622,
-      "y": 550.6,
-      "w": 96,
-      "h": 96,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-controls": {
-      "x": 1120.8,
-      "y": 583.6,
-      "w": 191.2,
-      "h": 30,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "99px"
-     },
-     "plot": {
-      "x": 622,
-      "y": 656.6,
-      "w": 690,
-      "h": 202,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-event": {
-      "x": 628,
-      "y": 733.6,
-      "w": 12,
-      "h": 12,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "closed-tile": {
-      "x": 1351,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "closed-row": {
-      "x": 1370,
-      "y": 641.6,
-      "w": 262,
-      "h": 20,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "grid": {
-      "x": 283,
-      "y": 911.6,
-      "w": 1368,
-      "h": 600,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "todo-card": {
-      "x": 283,
-      "y": 911.6,
-      "w": 986,
-      "h": 600,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "todo-badge": {
-      "x": 461.2,
-      "y": 930.7,
-      "w": 39.8,
-      "h": 24,
-      "bg": "rgb(241, 231, 218)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 216, 198)",
-      "radius": "99px"
-     },
-     "todo-rule": {
-      "x": 284,
-      "y": 962.8,
-      "w": 984,
-      "h": 38,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "activity-card": {
-      "x": 1291,
-      "y": 911.6,
-      "w": 360,
-      "h": 442,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "activity-filters": {
-      "x": 1318,
-      "y": 961.8,
-      "w": 333,
-      "h": 0,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "feed": {
-      "x": 1318,
-      "y": 961.8,
-      "w": 333,
-      "h": 351.4,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "community-tile": {
-      "x": 1291,
-      "y": 1379.6,
-      "w": 360,
-      "h": 132,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "16px"
-     },
-     "drawer": {
-      "x": 1722.8,
-      "y": 0,
-      "w": 640,
-      "h": 1456,
-      "bg": "rgb(253, 250, 245)",
-      "borderTopW": 0,
-      "borderTop": "rgb(0, 0, 0)",
-      "radius": "0px"
-     }
-    },
-    "text": {
-     "greeting": {
-      "family": "Special Elite",
-      "size": 44,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "header-counts": {
-      "family": "Source Sans 3",
-      "size": 19,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "breakdown-count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-extras": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "querying-day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "chart-figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "chart-title": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "chart-caption": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400",
-      "color": "rgb(138, 122, 108)",
-      "hidden": false
-     },
-     "closed-total": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "closed-count": {
-      "family": "Source Sans 3",
-      "size": 13,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "panel-title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     }
-    },
-    "scale": {
-     "card title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500"
-     },
-     "chart figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
-     },
-     "hero greeting": {
-      "family": "Special Elite",
-      "size": 44,
-      "weight": "400"
-     },
-     "tab": {
-      "family": "Source Sans 3",
-      "size": 13.5,
-      "weight": "400"
-     },
-     "tab count": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400"
-     },
-     "ticket title": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "600"
-     },
-     "ticket tag": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "bubble sentence": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "400"
-     },
-     "bubble meta": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "bubble label": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "todo badge": {
-      "family": "Playfair Display",
-      "size": 16,
-      "weight": "600"
-     },
-     "breakdown title": {
-      "family": "Special Elite",
-      "size": 23,
-      "weight": "400"
-     },
-     "breakdown meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "breakdown count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600"
-     },
-     "state pill": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "breakdown fact": {
-      "family": "Source Sans 3",
-      "size": 11.5,
-      "weight": "400"
-     },
-     "breakdown foot": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400"
-     },
-     "hero action": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "quick action": {
-      "family": "Source Sans 3",
-      "size": 14,
-      "weight": "400"
-     },
-     "querying title": {
-      "family": "Special Elite",
-      "size": 15,
-      "weight": "400"
-     },
-     "querying day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "chart title": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "chart caption": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "grain toggle": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "axis label": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "closed title": {
-      "family": "Special Elite",
-      "size": 20,
-      "weight": "400"
-     },
-     "closed figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
-     },
-     "closed count": {
-      "family": "Source Sans 3",
-      "size": 13,
-      "weight": "400"
-     },
-     "closed foot": {
-      "family": "Source Sans 3",
-      "size": 12.5,
-      "weight": "400"
-     }
-    },
-    "checks": {
-     "navrowH": 64,
-     "chartHeaderH": 96,
-     "greetBelowNav": 63.3,
-     "searchCount": 1,
-     "searchVsFeedback": 0,
-     "headerRowSpread": 33,
-     "toggleOverflow": 0,
-     "paintBelowZero": 0,
-     "plotStruct": {
-      "lines": 1,
-      "lineStroke": 2.2,
-      "lineCap": "round",
-      "areas": 1,
-      "areaFromLine": true,
-      "stops": [
-       {
-        "colour": "#2a3a52",
-        "opacity": 0.22
-       },
-       {
-        "colour": "#2a3a52",
-        "opacity": 0
-       }
-      ],
-      "gridlines": 3,
-      "masks": 0,
-      "firstHollow": true,
-      "lastSolid": true,
-      "firstAtStart": 0,
-      "lastAtEnd": 0,
-      "dots": 6,
-      "dotKinds": [
-       "pass",
-       "request"
-      ],
-      "dotWorst": 0.039
-     },
-     "redRings": 0,
-     "ruleClear": 0,
-     "ruleFill": 0,
-     "ruleBands": 5,
-     "ground": "rgb(244, 240, 234)",
-     "hScroll": 0,
-     "columnBottoms": [
-      1511.6,
-      1511.6
-     ],
-     "columnSpread": 0,
-     "focusMouse": {
-      "outline": "none",
-      "colour": "rgb(58, 28, 20)",
-      "fv": false
-     },
-     "focusTab": {
-      "outline": "solid",
-      "colour": "rgb(138, 158, 136)",
-      "fv": true
-     },
-     "drawer": {
-      "open": true,
-      "portalled": true,
-      "contexts": 0,
-      "inside": true,
-      "z": 9001,
-      "scrimZ": 9000
-     },
-     "fade": {
-      "hi": 60.4,
-      "lo": 13.9,
-      "ratio": 0.23
-     },
-     "plotDraws": {
-      "readings": 3,
-      "drawn": 3,
-      "sparse": 0,
-      "freqs": [
-       "Daily",
-       "Weekly",
-       "Monthly"
-      ],
-      "unsized": 0,
-      "nan": 0,
-      "noLine": 0,
-      "firstFailing": null
-     }
-    }
-   },
-   "misses": [],
-   "allowed": []
-  },
-  "1920": {
-   "ref": {
-    "probes": {
-     "navrow": {
-      "x": 246,
-      "y": 41.8,
-      "w": 1652,
-      "h": 64,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "search": {
-      "x": 352,
-      "y": 53.8,
-      "w": 640,
-      "h": 40,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 1,
-      "borderTop": "rgb(233, 226, 215)",
-      "radius": "12px"
-     },
-     "main": {
-      "x": 330,
-      "y": 41.8,
-      "w": 1484,
-      "h": 1514,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "hero": {
-      "x": 352,
-      "y": 105.8,
-      "w": 1440,
-      "h": 150,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "header-illustration": {
-      "x": 1642,
-      "y": 105.8,
-      "w": 150,
-      "h": 150,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "breakdown": {
-      "x": 352,
-      "y": 289.8,
-      "w": 1440,
-      "h": 225.9,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "breakdown-col": {
-      "x": 360,
-      "y": 339.6,
-      "w": 284,
-      "h": 134,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "row2": {
-      "x": 352,
-      "y": 533.6,
-      "w": 1440,
-      "h": 360,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "quick-actions": {
-      "x": 352,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "quick-actions-foot": {
-      "x": 369,
-      "y": 841.6,
-      "w": 266,
-      "h": 35,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 1,
-      "borderTop": "rgb(238, 232, 224)",
-      "radius": "0px"
-     },
-     "chart-card": {
-      "x": 670,
-      "y": 533.6,
-      "w": 804,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "chart-header": {
-      "x": 691,
-      "y": 550.6,
-      "w": 762,
-      "h": 96,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-illustration": {
-      "x": 691,
-      "y": 550.6,
-      "w": 96,
-      "h": 96,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-controls": {
-      "x": 1261.8,
-      "y": 583.6,
-      "w": 191.2,
-      "h": 30,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "99px"
-     },
-     "plot": {
-      "x": 691,
-      "y": 656.6,
-      "w": 762,
-      "h": 202,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-event": {
-      "x": 733,
-      "y": 733.6,
-      "w": 12,
-      "h": 12,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "closed-tile": {
-      "x": 1492,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "closed-row": {
-      "x": 1511,
-      "y": 641.6,
-      "w": 262,
-      "h": 20,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "grid": {
-      "x": 352,
-      "y": 911.6,
-      "w": 1440,
-      "h": 600,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "todo-card": {
-      "x": 352,
-      "y": 911.6,
-      "w": 1058,
-      "h": 600,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "todo-badge": {
-      "x": 530.2,
-      "y": 930.7,
-      "w": 39.8,
-      "h": 24,
-      "bg": "rgb(241, 231, 218)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 216, 198)",
-      "radius": "99px"
-     },
-     "todo-rule": {
-      "x": 353,
-      "y": 962.8,
-      "w": 1056,
-      "h": 38,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "activity-card": {
-      "x": 1432,
-      "y": 911.6,
-      "w": 360,
-      "h": 442,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "activity-filters": {
-      "x": 1459,
-      "y": 961.8,
-      "w": 333,
-      "h": 0,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "feed": {
-      "x": 1459,
-      "y": 961.8,
-      "w": 333,
-      "h": 351.4,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "community-tile": {
-      "x": 1432,
-      "y": 1379.6,
-      "w": 360,
-      "h": 132,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "16px"
-     },
-     "drawer": {
-      "x": 1932.8,
-      "y": 0,
-      "w": 640,
-      "h": 1456,
-      "bg": "rgb(253, 250, 245)",
-      "borderTopW": 0,
-      "borderTop": "rgb(0, 0, 0)",
-      "radius": "0px"
-     }
-    },
-    "text": {
-     "greeting": {
-      "family": "Special Elite",
-      "size": 44,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "header-counts": {
-      "family": "Source Sans 3",
-      "size": 19,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "breakdown-count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-extras": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "querying-day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "chart-figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "chart-title": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "chart-caption": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400",
-      "color": "rgb(138, 122, 108)",
-      "hidden": false
-     },
-     "closed-total": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "closed-count": {
-      "family": "Source Sans 3",
-      "size": 13,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "panel-title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     }
-    },
-    "scale": {
-     "card title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500"
-     },
-     "chart figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
-     },
-     "hero greeting": {
-      "family": "Special Elite",
-      "size": 44,
-      "weight": "400"
-     },
-     "tab": {
-      "family": "Source Sans 3",
-      "size": 13.5,
-      "weight": "400"
-     },
-     "tab count": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400"
-     },
-     "ticket title": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "600"
-     },
-     "ticket tag": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "bubble sentence": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "400"
-     },
-     "bubble meta": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "bubble label": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "todo badge": {
-      "family": "Playfair Display",
-      "size": 16,
-      "weight": "600"
-     },
-     "breakdown title": {
-      "family": "Special Elite",
-      "size": 23,
-      "weight": "400"
-     },
-     "breakdown meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "breakdown count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600"
-     },
-     "state pill": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "breakdown fact": {
-      "family": "Source Sans 3",
-      "size": 11.5,
-      "weight": "400"
-     },
-     "breakdown foot": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400"
-     },
-     "hero action": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "quick action": {
-      "family": "Source Sans 3",
-      "size": 14,
-      "weight": "400"
-     },
-     "querying title": {
-      "family": "Special Elite",
-      "size": 15,
-      "weight": "400"
-     },
-     "querying day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "chart title": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "chart caption": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "grain toggle": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "axis label": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "closed title": {
-      "family": "Special Elite",
-      "size": 20,
-      "weight": "400"
-     },
-     "closed figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
-     },
-     "closed count": {
-      "family": "Source Sans 3",
-      "size": 13,
-      "weight": "400"
-     },
-     "closed foot": {
-      "family": "Source Sans 3",
-      "size": 12.5,
-      "weight": "400"
-     }
-    },
-    "checks": {
-     "navrowH": 64,
-     "chartHeaderH": 96,
-     "greetBelowNav": 63.3,
-     "searchCount": 1,
-     "searchVsFeedback": 0,
-     "headerRowSpread": 33,
-     "toggleOverflow": 0,
-     "paintBelowZero": 0,
-     "plotStruct": {
-      "lines": 1,
-      "lineStroke": 2.2,
-      "lineCap": "round",
-      "areas": 1,
-      "areaFromLine": true,
-      "stops": [
-       {
-        "colour": "#2a3a52",
-        "opacity": 0.22
-       },
-       {
-        "colour": "#2a3a52",
-        "opacity": 0
-       }
-      ],
-      "gridlines": 3,
-      "masks": 0,
-      "firstHollow": true,
-      "lastSolid": true,
-      "firstAtStart": 0,
-      "lastAtEnd": 0,
-      "dots": 6,
-      "dotKinds": [
-       "pass",
-       "request"
-      ],
-      "dotWorst": 0.039
-     },
-     "redRings": 0,
-     "ruleClear": 0,
-     "ruleFill": 0,
-     "ruleBands": 5,
-     "ground": "rgb(244, 240, 234)",
-     "hScroll": 0,
-     "columnBottoms": [
-      1511.6,
-      1511.6
-     ],
-     "columnSpread": 0
-    }
-   },
-   "app": {
-    "probes": {
-     "navrow": {
-      "x": 246,
-      "y": 41.8,
-      "w": 1652,
-      "h": 64,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "search": {
-      "x": 352,
-      "y": 53.8,
-      "w": 640,
-      "h": 40,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 1,
-      "borderTop": "rgb(233, 226, 215)",
-      "radius": "12px"
-     },
-     "main": {
-      "x": 330,
-      "y": 41.8,
-      "w": 1484,
-      "h": 1514,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "hero": {
-      "x": 352,
-      "y": 105.8,
-      "w": 1440,
-      "h": 150,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "header-illustration": {
-      "x": 1642,
-      "y": 105.8,
-      "w": 150,
-      "h": 150,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "breakdown": {
-      "x": 352,
-      "y": 289.8,
-      "w": 1440,
-      "h": 225.9,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "breakdown-col": {
-      "x": 360,
-      "y": 339.6,
-      "w": 284,
-      "h": 134,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "row2": {
-      "x": 352,
-      "y": 533.6,
-      "w": 1440,
-      "h": 360,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "quick-actions": {
-      "x": 352,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "quick-actions-foot": {
-      "x": 369,
-      "y": 841.6,
-      "w": 266,
-      "h": 35,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 1,
-      "borderTop": "rgb(238, 232, 224)",
-      "radius": "0px"
-     },
-     "chart-card": {
-      "x": 670,
-      "y": 533.6,
-      "w": 804,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "chart-header": {
-      "x": 691,
-      "y": 550.6,
-      "w": 762,
-      "h": 96,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-illustration": {
-      "x": 691,
-      "y": 550.6,
-      "w": 96,
-      "h": 96,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-controls": {
-      "x": 1261.8,
-      "y": 583.6,
-      "w": 191.2,
-      "h": 30,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "99px"
-     },
-     "plot": {
-      "x": 691,
-      "y": 656.6,
-      "w": 762,
-      "h": 202,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-event": {
-      "x": 697,
-      "y": 733.6,
-      "w": 12,
-      "h": 12,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "closed-tile": {
-      "x": 1492,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "closed-row": {
-      "x": 1511,
-      "y": 641.6,
-      "w": 262,
-      "h": 20,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "grid": {
-      "x": 352,
-      "y": 911.6,
-      "w": 1440,
-      "h": 600,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "todo-card": {
-      "x": 352,
-      "y": 911.6,
-      "w": 1058,
-      "h": 600,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "todo-badge": {
-      "x": 530.2,
-      "y": 930.7,
-      "w": 39.8,
-      "h": 24,
-      "bg": "rgb(241, 231, 218)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 216, 198)",
-      "radius": "99px"
-     },
-     "todo-rule": {
-      "x": 353,
-      "y": 962.8,
-      "w": 1056,
-      "h": 38,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "activity-card": {
-      "x": 1432,
-      "y": 911.6,
-      "w": 360,
-      "h": 442,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "activity-filters": {
-      "x": 1459,
-      "y": 961.8,
-      "w": 333,
-      "h": 0,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "feed": {
-      "x": 1459,
-      "y": 961.8,
-      "w": 333,
-      "h": 351.4,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "community-tile": {
-      "x": 1432,
-      "y": 1379.6,
-      "w": 360,
-      "h": 132,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "16px"
-     },
-     "drawer": {
-      "x": 1932.8,
-      "y": 0,
-      "w": 640,
-      "h": 1456,
-      "bg": "rgb(253, 250, 245)",
-      "borderTopW": 0,
-      "borderTop": "rgb(0, 0, 0)",
-      "radius": "0px"
-     }
-    },
-    "text": {
-     "greeting": {
-      "family": "Special Elite",
-      "size": 44,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "header-counts": {
-      "family": "Source Sans 3",
-      "size": 19,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "breakdown-count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-extras": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "querying-day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "chart-figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "chart-title": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "chart-caption": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400",
-      "color": "rgb(138, 122, 108)",
-      "hidden": false
-     },
-     "closed-total": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "closed-count": {
-      "family": "Source Sans 3",
-      "size": 13,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "panel-title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     }
-    },
-    "scale": {
-     "card title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500"
-     },
-     "chart figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
-     },
-     "hero greeting": {
-      "family": "Special Elite",
-      "size": 44,
-      "weight": "400"
-     },
-     "tab": {
-      "family": "Source Sans 3",
-      "size": 13.5,
-      "weight": "400"
-     },
-     "tab count": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400"
-     },
-     "ticket title": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "600"
-     },
-     "ticket tag": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "bubble sentence": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "400"
-     },
-     "bubble meta": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "bubble label": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "todo badge": {
-      "family": "Playfair Display",
-      "size": 16,
-      "weight": "600"
-     },
-     "breakdown title": {
-      "family": "Special Elite",
-      "size": 23,
-      "weight": "400"
-     },
-     "breakdown meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "breakdown count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600"
-     },
-     "state pill": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "breakdown fact": {
-      "family": "Source Sans 3",
-      "size": 11.5,
-      "weight": "400"
-     },
-     "breakdown foot": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400"
-     },
-     "hero action": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "quick action": {
-      "family": "Source Sans 3",
-      "size": 14,
-      "weight": "400"
-     },
-     "querying title": {
-      "family": "Special Elite",
-      "size": 15,
-      "weight": "400"
-     },
-     "querying day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "chart title": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "chart caption": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "grain toggle": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "axis label": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "closed title": {
-      "family": "Special Elite",
-      "size": 20,
-      "weight": "400"
-     },
-     "closed figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
-     },
-     "closed count": {
-      "family": "Source Sans 3",
-      "size": 13,
-      "weight": "400"
-     },
-     "closed foot": {
-      "family": "Source Sans 3",
-      "size": 12.5,
-      "weight": "400"
-     }
-    },
-    "checks": {
-     "navrowH": 64,
-     "chartHeaderH": 96,
-     "greetBelowNav": 63.3,
-     "searchCount": 1,
-     "searchVsFeedback": 0,
-     "headerRowSpread": 33,
-     "toggleOverflow": 0,
-     "paintBelowZero": 0,
-     "plotStruct": {
-      "lines": 1,
-      "lineStroke": 2.2,
-      "lineCap": "round",
-      "areas": 1,
-      "areaFromLine": true,
-      "stops": [
-       {
-        "colour": "#2a3a52",
-        "opacity": 0.22
-       },
-       {
-        "colour": "#2a3a52",
-        "opacity": 0
-       }
-      ],
-      "gridlines": 3,
-      "masks": 0,
-      "firstHollow": true,
-      "lastSolid": true,
-      "firstAtStart": 0,
-      "lastAtEnd": 0,
-      "dots": 6,
-      "dotKinds": [
-       "pass",
-       "request"
-      ],
-      "dotWorst": 0.032
-     },
-     "redRings": 0,
-     "ruleClear": 0,
-     "ruleFill": 0,
-     "ruleBands": 5,
-     "ground": "rgb(244, 240, 234)",
-     "hScroll": 0,
-     "columnBottoms": [
-      1511.6,
-      1511.6
-     ],
-     "columnSpread": 0,
-     "focusMouse": {
-      "outline": "none",
-      "colour": "rgb(58, 28, 20)",
-      "fv": false
-     },
-     "focusTab": {
-      "outline": "solid",
-      "colour": "rgb(138, 158, 136)",
-      "fv": true
-     },
-     "drawer": {
-      "open": true,
-      "portalled": true,
-      "contexts": 0,
-      "inside": true,
-      "z": 9001,
-      "scrimZ": 9000
-     },
-     "fade": {
-      "hi": 60.4,
-      "lo": 13.9,
-      "ratio": 0.23
-     },
-     "plotDraws": {
-      "readings": 3,
-      "drawn": 3,
-      "sparse": 0,
-      "freqs": [
-       "Daily",
-       "Weekly",
-       "Monthly"
-      ],
-      "unsized": 0,
-      "nan": 0,
-      "noLine": 0,
-      "firstFailing": null
-     }
-    }
-   },
-   "misses": [],
-   "allowed": []
-  },
-  "2520": {
-   "ref": {
-    "probes": {
-     "navrow": {
-      "x": 246,
-      "y": 41.8,
-      "w": 2252,
-      "h": 64,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "search": {
-      "x": 652,
-      "y": 53.8,
-      "w": 640,
-      "h": 40,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 1,
-      "borderTop": "rgb(233, 226, 215)",
-      "radius": "12px"
-     },
-     "main": {
-      "x": 630,
-      "y": 41.8,
-      "w": 1484,
-      "h": 1514,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "hero": {
-      "x": 652,
-      "y": 105.8,
-      "w": 1440,
-      "h": 150,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "header-illustration": {
-      "x": 1942,
-      "y": 105.8,
-      "w": 150,
-      "h": 150,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "breakdown": {
-      "x": 652,
-      "y": 289.8,
-      "w": 1440,
-      "h": 225.9,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "breakdown-col": {
-      "x": 660,
-      "y": 339.6,
-      "w": 284,
-      "h": 134,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "row2": {
-      "x": 652,
-      "y": 533.6,
-      "w": 1440,
-      "h": 360,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "quick-actions": {
-      "x": 652,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "quick-actions-foot": {
-      "x": 669,
-      "y": 841.6,
-      "w": 266,
-      "h": 35,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 1,
-      "borderTop": "rgb(238, 232, 224)",
-      "radius": "0px"
-     },
-     "chart-card": {
-      "x": 970,
-      "y": 533.6,
-      "w": 804,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "chart-header": {
-      "x": 991,
-      "y": 550.6,
-      "w": 762,
-      "h": 96,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-illustration": {
-      "x": 991,
-      "y": 550.6,
-      "w": 96,
-      "h": 96,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-controls": {
-      "x": 1561.8,
-      "y": 583.6,
-      "w": 191.2,
-      "h": 30,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "99px"
-     },
-     "plot": {
-      "x": 991,
-      "y": 656.6,
-      "w": 762,
-      "h": 202,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-event": {
-      "x": 1033,
-      "y": 733.6,
-      "w": 12,
-      "h": 12,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "closed-tile": {
-      "x": 1792,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "closed-row": {
-      "x": 1811,
-      "y": 641.6,
-      "w": 262,
-      "h": 20,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "grid": {
-      "x": 652,
-      "y": 911.6,
-      "w": 1440,
-      "h": 600,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "todo-card": {
-      "x": 652,
-      "y": 911.6,
-      "w": 1058,
-      "h": 600,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "todo-badge": {
-      "x": 830.2,
-      "y": 930.7,
-      "w": 39.8,
-      "h": 24,
-      "bg": "rgb(241, 231, 218)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 216, 198)",
-      "radius": "99px"
-     },
-     "todo-rule": {
-      "x": 653,
-      "y": 962.8,
-      "w": 1056,
-      "h": 38,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "activity-card": {
-      "x": 1732,
-      "y": 911.6,
-      "w": 360,
-      "h": 442,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "activity-filters": {
-      "x": 1759,
-      "y": 961.8,
-      "w": 333,
-      "h": 0,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "feed": {
-      "x": 1759,
-      "y": 961.8,
-      "w": 333,
-      "h": 351.4,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "community-tile": {
-      "x": 1732,
-      "y": 1379.6,
-      "w": 360,
-      "h": 132,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "16px"
-     },
-     "drawer": {
-      "x": 2532.8,
-      "y": 0,
-      "w": 640,
-      "h": 1456,
-      "bg": "rgb(253, 250, 245)",
-      "borderTopW": 0,
-      "borderTop": "rgb(0, 0, 0)",
-      "radius": "0px"
-     }
-    },
-    "text": {
-     "greeting": {
-      "family": "Special Elite",
-      "size": 44,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "header-counts": {
-      "family": "Source Sans 3",
-      "size": 19,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "breakdown-count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-extras": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "querying-day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "chart-figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "chart-title": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "chart-caption": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400",
-      "color": "rgb(138, 122, 108)",
-      "hidden": false
-     },
-     "closed-total": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "closed-count": {
-      "family": "Source Sans 3",
-      "size": 13,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "panel-title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     }
-    },
-    "scale": {
-     "card title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500"
-     },
-     "chart figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
-     },
-     "hero greeting": {
-      "family": "Special Elite",
-      "size": 44,
-      "weight": "400"
-     },
-     "tab": {
-      "family": "Source Sans 3",
-      "size": 13.5,
-      "weight": "400"
-     },
-     "tab count": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400"
-     },
-     "ticket title": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "600"
-     },
-     "ticket tag": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "bubble sentence": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "400"
-     },
-     "bubble meta": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "bubble label": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "todo badge": {
-      "family": "Playfair Display",
-      "size": 16,
-      "weight": "600"
-     },
-     "breakdown title": {
-      "family": "Special Elite",
-      "size": 23,
-      "weight": "400"
-     },
-     "breakdown meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "breakdown count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600"
-     },
-     "state pill": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "breakdown fact": {
-      "family": "Source Sans 3",
-      "size": 11.5,
-      "weight": "400"
-     },
-     "breakdown foot": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400"
-     },
-     "hero action": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "quick action": {
-      "family": "Source Sans 3",
-      "size": 14,
-      "weight": "400"
-     },
-     "querying title": {
-      "family": "Special Elite",
-      "size": 15,
-      "weight": "400"
-     },
-     "querying day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "chart title": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "chart caption": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "grain toggle": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "axis label": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "closed title": {
-      "family": "Special Elite",
-      "size": 20,
-      "weight": "400"
-     },
-     "closed figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
-     },
-     "closed count": {
-      "family": "Source Sans 3",
-      "size": 13,
-      "weight": "400"
-     },
-     "closed foot": {
-      "family": "Source Sans 3",
-      "size": 12.5,
-      "weight": "400"
-     }
-    },
-    "checks": {
-     "navrowH": 64,
-     "chartHeaderH": 96,
-     "greetBelowNav": 63.3,
-     "searchCount": 1,
-     "searchVsFeedback": 0,
-     "headerRowSpread": 33,
-     "toggleOverflow": 0,
-     "paintBelowZero": 0,
-     "plotStruct": {
-      "lines": 1,
-      "lineStroke": 2.2,
-      "lineCap": "round",
-      "areas": 1,
-      "areaFromLine": true,
-      "stops": [
-       {
-        "colour": "#2a3a52",
-        "opacity": 0.22
-       },
-       {
-        "colour": "#2a3a52",
-        "opacity": 0
-       }
-      ],
-      "gridlines": 3,
-      "masks": 0,
-      "firstHollow": true,
-      "lastSolid": true,
-      "firstAtStart": 0,
-      "lastAtEnd": 0,
-      "dots": 6,
-      "dotKinds": [
-       "pass",
-       "request"
-      ],
-      "dotWorst": 0.039
-     },
-     "redRings": 0,
-     "ruleClear": 0,
-     "ruleFill": 0,
-     "ruleBands": 5,
-     "ground": "rgb(244, 240, 234)",
-     "hScroll": 0,
-     "columnBottoms": [
-      1511.6,
-      1511.6
-     ],
-     "columnSpread": 0
-    }
-   },
-   "app": {
-    "probes": {
-     "navrow": {
-      "x": 246,
-      "y": 41.8,
-      "w": 2252,
-      "h": 64,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "search": {
-      "x": 652,
-      "y": 53.8,
-      "w": 640,
-      "h": 40,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 1,
-      "borderTop": "rgb(233, 226, 215)",
-      "radius": "12px"
-     },
-     "main": {
-      "x": 630,
-      "y": 41.8,
-      "w": 1484,
-      "h": 1514,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "hero": {
-      "x": 652,
-      "y": 105.8,
-      "w": 1440,
-      "h": 150,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "header-illustration": {
-      "x": 1942,
-      "y": 105.8,
-      "w": 150,
-      "h": 150,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "breakdown": {
-      "x": 652,
-      "y": 289.8,
-      "w": 1440,
-      "h": 225.9,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "breakdown-col": {
-      "x": 660,
-      "y": 339.6,
-      "w": 284,
-      "h": 134,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "row2": {
-      "x": 652,
-      "y": 533.6,
-      "w": 1440,
-      "h": 360,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "quick-actions": {
-      "x": 652,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "quick-actions-foot": {
-      "x": 669,
-      "y": 841.6,
-      "w": 266,
-      "h": 35,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 1,
-      "borderTop": "rgb(238, 232, 224)",
-      "radius": "0px"
-     },
-     "chart-card": {
-      "x": 970,
-      "y": 533.6,
-      "w": 804,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "chart-header": {
-      "x": 991,
-      "y": 550.6,
-      "w": 762,
-      "h": 96,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-illustration": {
-      "x": 991,
-      "y": 550.6,
-      "w": 96,
-      "h": 96,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-controls": {
-      "x": 1561.8,
-      "y": 583.6,
-      "w": 191.2,
-      "h": 30,
-      "bg": "rgb(255, 255, 255)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "99px"
-     },
-     "plot": {
-      "x": 991,
-      "y": 656.6,
-      "w": 762,
-      "h": 202,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "chart-event": {
-      "x": 997,
-      "y": 733.6,
-      "w": 12,
-      "h": 12,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "closed-tile": {
-      "x": 1792,
-      "y": 533.6,
-      "w": 300,
-      "h": 360,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "closed-row": {
-      "x": 1811,
-      "y": 641.6,
-      "w": 262,
-      "h": 20,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "grid": {
-      "x": 652,
-      "y": 911.6,
-      "w": 1440,
-      "h": 600,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "todo-card": {
-      "x": 652,
-      "y": 911.6,
-      "w": 1058,
-      "h": 600,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "18px"
-     },
-     "todo-badge": {
-      "x": 830.2,
-      "y": 930.7,
-      "w": 39.8,
-      "h": 24,
-      "bg": "rgb(241, 231, 218)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 216, 198)",
-      "radius": "99px"
-     },
-     "todo-rule": {
-      "x": 653,
-      "y": 962.8,
-      "w": 1056,
-      "h": 38,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "activity-card": {
-      "x": 1732,
-      "y": 911.6,
-      "w": 360,
-      "h": 442,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "activity-filters": {
-      "x": 1759,
-      "y": 961.8,
-      "w": 333,
-      "h": 0,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "feed": {
-      "x": 1759,
-      "y": 961.8,
-      "w": 333,
-      "h": 351.4,
-      "bg": "rgba(0, 0, 0, 0)",
-      "borderTopW": 0,
-      "borderTop": "rgb(58, 28, 20)",
-      "radius": "0px"
-     },
-     "community-tile": {
-      "x": 1732,
-      "y": 1379.6,
-      "w": 360,
-      "h": 132,
-      "bg": "rgb(253, 251, 247)",
-      "borderTopW": 1,
-      "borderTop": "rgb(230, 223, 214)",
-      "radius": "16px"
-     },
-     "drawer": {
-      "x": 2532.8,
-      "y": 0,
-      "w": 640,
-      "h": 1456,
-      "bg": "rgb(253, 250, 245)",
-      "borderTopW": 0,
-      "borderTop": "rgb(0, 0, 0)",
-      "radius": "0px"
-     }
-    },
-    "text": {
-     "greeting": {
-      "family": "Special Elite",
-      "size": 44,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "header-counts": {
-      "family": "Source Sans 3",
-      "size": 19,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "breakdown-count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "breakdown-extras": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "querying-day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400",
-      "color": "rgb(156, 143, 130)",
-      "hidden": false
-     },
-     "chart-figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "chart-title": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "chart-caption": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400",
-      "color": "rgb(138, 122, 108)",
-      "hidden": false
-     },
-     "closed-total": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "closed-count": {
-      "family": "Source Sans 3",
-      "size": 13,
-      "weight": "400",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     },
-     "panel-title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500",
-      "color": "rgb(42, 31, 24)",
-      "hidden": false
-     }
-    },
-    "scale": {
-     "card title": {
-      "family": "Playfair Display",
-      "size": 23,
-      "weight": "500"
-     },
-     "chart figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
-     },
-     "hero greeting": {
-      "family": "Special Elite",
-      "size": 44,
-      "weight": "400"
-     },
-     "tab": {
-      "family": "Source Sans 3",
-      "size": 13.5,
-      "weight": "400"
-     },
-     "tab count": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400"
-     },
-     "ticket title": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "600"
-     },
-     "ticket tag": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "bubble sentence": {
-      "family": "Source Sans 3",
-      "size": 15,
-      "weight": "400"
-     },
-     "bubble meta": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "bubble label": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "todo badge": {
-      "family": "Playfair Display",
-      "size": 16,
-      "weight": "600"
-     },
-     "breakdown title": {
-      "family": "Special Elite",
-      "size": 23,
-      "weight": "400"
-     },
-     "breakdown meta": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "breakdown count": {
-      "family": "Source Sans 3",
-      "size": 29,
-      "weight": "600"
-     },
-     "state pill": {
-      "family": "JetBrains Mono",
-      "size": 9,
-      "weight": "400"
-     },
-     "breakdown fact": {
-      "family": "Source Sans 3",
-      "size": 11.5,
-      "weight": "400"
-     },
-     "breakdown foot": {
-      "family": "JetBrains Mono",
-      "size": 10.5,
-      "weight": "400"
-     },
-     "hero action": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "quick action": {
-      "family": "Source Sans 3",
-      "size": 14,
-      "weight": "400"
-     },
-     "querying title": {
-      "family": "Special Elite",
-      "size": 15,
-      "weight": "400"
-     },
-     "querying day": {
-      "family": "JetBrains Mono",
-      "size": 9.5,
-      "weight": "400"
-     },
-     "chart title": {
-      "family": "Special Elite",
-      "size": 18,
-      "weight": "400"
-     },
-     "chart caption": {
-      "family": "JetBrains Mono",
-      "size": 11,
-      "weight": "400"
-     },
-     "grain toggle": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "axis label": {
-      "family": "JetBrains Mono",
-      "size": 10,
-      "weight": "400"
-     },
-     "closed title": {
-      "family": "Special Elite",
-      "size": 20,
-      "weight": "400"
-     },
-     "closed figure": {
-      "family": "Source Sans 3",
-      "size": 33,
-      "weight": "600"
-     },
-     "closed count": {
-      "family": "Source Sans 3",
-      "size": 13,
-      "weight": "400"
-     },
-     "closed foot": {
-      "family": "Source Sans 3",
-      "size": 12.5,
-      "weight": "400"
-     }
-    },
-    "checks": {
-     "navrowH": 64,
-     "chartHeaderH": 96,
-     "greetBelowNav": 63.3,
-     "searchCount": 1,
-     "searchVsFeedback": 0,
-     "headerRowSpread": 33,
-     "toggleOverflow": 0,
-     "paintBelowZero": 0,
-     "plotStruct": {
-      "lines": 1,
-      "lineStroke": 2.2,
-      "lineCap": "round",
-      "areas": 1,
-      "areaFromLine": true,
-      "stops": [
-       {
-        "colour": "#2a3a52",
-        "opacity": 0.22
-       },
-       {
-        "colour": "#2a3a52",
-        "opacity": 0
-       }
-      ],
-      "gridlines": 3,
-      "masks": 0,
-      "firstHollow": true,
-      "lastSolid": true,
-      "firstAtStart": 0,
-      "lastAtEnd": 0,
-      "dots": 6,
-      "dotKinds": [
-       "pass",
-       "request"
-      ],
-      "dotWorst": 0.032
-     },
-     "redRings": 0,
-     "ruleClear": 0,
-     "ruleFill": 0,
-     "ruleBands": 5,
-     "ground": "rgb(244, 240, 234)",
-     "hScroll": 0,
-     "columnBottoms": [
-      1511.6,
-      1511.6
-     ],
-     "columnSpread": 0,
-     "focusMouse": {
-      "outline": "none",
-      "colour": "rgb(58, 28, 20)",
-      "fv": false
-     },
-     "focusTab": {
-      "outline": "solid",
-      "colour": "rgb(138, 158, 136)",
-      "fv": true
-     },
-     "drawer": {
-      "open": true,
-      "portalled": true,
-      "contexts": 0,
-      "inside": true,
-      "z": 9001,
-      "scrimZ": 9000
-     },
-     "fade": {
-      "hi": 60.4,
-      "lo": 13.9,
-      "ratio": 0.23
-     },
-     "plotDraws": {
-      "readings": 3,
-      "drawn": 3,
-      "sparse": 0,
-      "freqs": [
-       "Daily",
-       "Weekly",
-       "Monthly"
-      ],
-      "unsized": 0,
-      "nan": 0,
-      "noLine": 0,
-      "firstFailing": null
-     }
-    }
-   },
-   "misses": [],
+   ],
    "allowed": []
   }
  },
- "total": 0,
+ "total": 72,
  "plotDiff": {
   "rows": [
    {
-    "width": 1536,
+    "width": 1440,
     "points": 9,
-    "skipped": "the reference is a build snapshot — no data fixture to substitute; the chart is held by the structural gates"
-   },
-   {
-    "width": 1710,
-    "points": 9,
-    "skipped": "the reference is a build snapshot — no data fixture to substitute; the chart is held by the structural gates"
-   },
-   {
-    "width": 1920,
-    "points": 9,
-    "skipped": "the reference is a build snapshot — no data fixture to substitute; the chart is held by the structural gates"
-   },
-   {
-    "width": 2520,
-    "points": 9,
-    "skipped": "the reference is a build snapshot — no data fixture to substitute; the chart is held by the structural gates"
+    "substitutions": [],
+    "skipped": "the ref's fixture could not be substituted () — structure only, no pixel claim"
    }
   ]
  },
@@ -4659,9 +1245,9 @@
   "verdict": {
    "rows": [
     {
-     "width": 1536,
+     "width": 1440,
      "caught": true,
-     "worst": 0,
+     "worst": 5,
      "settle": {
       "suppressed": true,
       "slotClass": "",
@@ -4677,24 +1263,24 @@
        "colFirst": {
         "cls": "ws-pagebar",
         "top": 41.8,
-        "bottom": 105.8
+        "bottom": 115.5
        },
        "colLast": {
         "cls": "ws-winwrap",
-        "top": 105.8,
+        "top": 115.5,
         "bottom": 1130
        },
-       "bodyTop": 105.8,
-       "bodyBottom": 1555.6,
+       "bodyTop": 115.5,
+       "bodyBottom": 1126.4,
        "bodyFirst": {
         "cls": "os-content",
-        "top": 105.8,
-        "bottom": 1555.6
+        "top": 115.5,
+        "bottom": 1126.4
        },
        "bodyLast": {
         "cls": "os-content",
-        "top": 105.8,
-        "bottom": 1555.6
+        "top": 115.5,
+        "bottom": 1126.4
        },
        "shown": 2
       },
@@ -4702,24 +1288,24 @@
        "colFirst": {
         "cls": "ws-pagebar",
         "top": 41.8,
-        "bottom": 105.8
+        "bottom": 115.5
        },
        "colLast": {
         "cls": "ws-winwrap",
-        "top": 105.8,
+        "top": 115.5,
         "bottom": 1130
        },
-       "bodyTop": 105.8,
-       "bodyBottom": 1555.6,
+       "bodyTop": 115.5,
+       "bodyBottom": 1130.8,
        "bodyFirst": {
         "cls": "os-greet",
-        "top": 105.8,
-        "bottom": 255.8
+        "top": 115.5,
+        "bottom": 259.3
        },
        "bodyLast": {
-        "cls": "os-grid",
-        "top": 911.6,
-        "bottom": 1511.6
+        "cls": "os-row2",
+        "top": 623.8,
+        "bottom": 1086.8
        },
        "shown": 2
       }
@@ -4741,444 +1327,45 @@
       "controlNames": [],
       "inked": 0,
       "inkedText": [],
-      "scanned": 1227
+      "scanned": 1015
      },
      "removed": true,
-     "tickets": 10,
+     "tickets": 0,
      "tk": {
       "during": {
        "present": true,
        "ghost": true,
-       "scroller": "os-tbody",
-       "count": 10,
-       "cols": 2,
-       "tileH": 77.5,
-       "gridW": 774,
-       "rowGap": 12,
-       "portFoot": 1500.6,
-       "lastBottom": 1440.1,
-       "overflow": -60.5,
-       "wholeVisible": 10
+       "scroller": "os-scroll",
+       "count": 4,
+       "cols": 1,
+       "tileH": 66,
+       "gridW": 427.7,
+       "rowGap": 0,
+       "portFoot": 1035.4,
+       "lastBottom": 973,
+       "overflow": -62.4,
+       "wholeVisible": 4
       },
       "after": {
        "present": true,
        "ghost": false,
-       "scroller": "os-tbody",
+       "scroller": "os-scroll",
        "count": 23,
-       "cols": 2,
-       "tileH": 77.5,
-       "gridW": 774,
-       "rowGap": 12,
-       "portFoot": 1500.6,
-       "lastBottom": 2068.8,
-       "overflow": 568.2,
-       "wholeVisible": 10
+       "cols": 1,
+       "tileH": 66,
+       "gridW": 427.7,
+       "rowGap": 0,
+       "portFoot": 1033.3,
+       "lastBottom": 2296.9,
+       "overflow": 1263.6,
+       "wholeVisible": 4
       }
      },
      "nav": {
       "frames": 69,
       "on": 28,
-      "out": 15,
-      "off": 26,
-      "badOn": 0,
-      "badOut": 0,
-      "badOff": 0,
-      "maxOutDelta": 0,
-      "firstBadOn": null,
-      "firstBadOut": null
-     },
-     "animated": 65,
-     "blocks": 65,
-     "missing": []
-    },
-    {
-     "width": 1710,
-     "caught": true,
-     "worst": 0,
-     "settle": {
-      "suppressed": true,
-      "slotClass": "",
-      "stillRunning": 0
-     },
-     "settleDuring": {
-      "suppressed": true,
-      "slotClass": "stage-page-on",
-      "stillRunning": 0
-     },
-     "edges": {
-      "during": {
-       "colFirst": {
-        "cls": "ws-pagebar",
-        "top": 41.8,
-        "bottom": 105.8
-       },
-       "colLast": {
-        "cls": "ws-winwrap",
-        "top": 105.8,
-        "bottom": 1130
-       },
-       "bodyTop": 105.8,
-       "bodyBottom": 1555.6,
-       "bodyFirst": {
-        "cls": "os-content",
-        "top": 105.8,
-        "bottom": 1555.6
-       },
-       "bodyLast": {
-        "cls": "os-content",
-        "top": 105.8,
-        "bottom": 1555.6
-       },
-       "shown": 2
-      },
-      "after": {
-       "colFirst": {
-        "cls": "ws-pagebar",
-        "top": 41.8,
-        "bottom": 105.8
-       },
-       "colLast": {
-        "cls": "ws-winwrap",
-        "top": 105.8,
-        "bottom": 1130
-       },
-       "bodyTop": 105.8,
-       "bodyBottom": 1555.6,
-       "bodyFirst": {
-        "cls": "os-greet",
-        "top": 105.8,
-        "bottom": 255.8
-       },
-       "bodyLast": {
-        "cls": "os-grid",
-        "top": 911.6,
-        "bottom": 1511.6
-       },
-       "shown": 2
-      }
-     },
-     "clip": {
-      "clippers": [
-       {
-        "cls": "ws-wbody",
-        "overflow": "auto/auto",
-        "scroller": true,
-        "cutTop": 0,
-        "cutBottom": 0
-       }
-      ],
-      "worstCut": 0
-     },
-     "live": {
-      "controls": 0,
-      "controlNames": [],
-      "inked": 0,
-      "inkedText": [],
-      "scanned": 1232
-     },
-     "removed": true,
-     "tickets": 15,
-     "tk": {
-      "during": {
-       "present": true,
-       "ghost": true,
-       "scroller": "os-tbody",
-       "count": 15,
-       "cols": 3,
-       "tileH": 77.5,
-       "gridW": 948,
-       "rowGap": 12,
-       "portFoot": 1500.6,
-       "lastBottom": 1440.1,
-       "overflow": -60.5,
-       "wholeVisible": 15
-      },
-      "after": {
-       "present": true,
-       "ghost": false,
-       "scroller": "os-tbody",
-       "count": 23,
-       "cols": 3,
-       "tileH": 77.5,
-       "gridW": 948,
-       "rowGap": 12,
-       "portFoot": 1500.6,
-       "lastBottom": 1769.3,
-       "overflow": 268.7,
-       "wholeVisible": 15
-      }
-     },
-     "nav": {
-      "frames": 69,
-      "on": 28,
-      "out": 15,
-      "off": 26,
-      "badOn": 0,
-      "badOut": 0,
-      "badOff": 0,
-      "maxOutDelta": 0,
-      "firstBadOn": null,
-      "firstBadOut": null
-     },
-     "animated": 70,
-     "blocks": 70,
-     "missing": []
-    },
-    {
-     "width": 1920,
-     "caught": true,
-     "worst": 0,
-     "settle": {
-      "suppressed": true,
-      "slotClass": "",
-      "stillRunning": 0
-     },
-     "settleDuring": {
-      "suppressed": true,
-      "slotClass": "stage-page-on",
-      "stillRunning": 0
-     },
-     "edges": {
-      "during": {
-       "colFirst": {
-        "cls": "ws-pagebar",
-        "top": 41.8,
-        "bottom": 105.8
-       },
-       "colLast": {
-        "cls": "ws-winwrap",
-        "top": 105.8,
-        "bottom": 1130
-       },
-       "bodyTop": 105.8,
-       "bodyBottom": 1555.6,
-       "bodyFirst": {
-        "cls": "os-content",
-        "top": 105.8,
-        "bottom": 1555.6
-       },
-       "bodyLast": {
-        "cls": "os-content",
-        "top": 105.8,
-        "bottom": 1555.6
-       },
-       "shown": 2
-      },
-      "after": {
-       "colFirst": {
-        "cls": "ws-pagebar",
-        "top": 41.8,
-        "bottom": 105.8
-       },
-       "colLast": {
-        "cls": "ws-winwrap",
-        "top": 105.8,
-        "bottom": 1130
-       },
-       "bodyTop": 105.8,
-       "bodyBottom": 1555.6,
-       "bodyFirst": {
-        "cls": "os-greet",
-        "top": 105.8,
-        "bottom": 255.8
-       },
-       "bodyLast": {
-        "cls": "os-grid",
-        "top": 911.6,
-        "bottom": 1511.6
-       },
-       "shown": 2
-      }
-     },
-     "clip": {
-      "clippers": [
-       {
-        "cls": "ws-wbody",
-        "overflow": "auto/auto",
-        "scroller": true,
-        "cutTop": 0,
-        "cutBottom": 0
-       }
-      ],
-      "worstCut": 0
-     },
-     "live": {
-      "controls": 0,
-      "controlNames": [],
-      "inked": 0,
-      "inkedText": [],
-      "scanned": 1232
-     },
-     "removed": true,
-     "tickets": 15,
-     "tk": {
-      "during": {
-       "present": true,
-       "ghost": true,
-       "scroller": "os-tbody",
-       "count": 15,
-       "cols": 3,
-       "tileH": 77.5,
-       "gridW": 1020,
-       "rowGap": 12,
-       "portFoot": 1500.6,
-       "lastBottom": 1440.1,
-       "overflow": -60.5,
-       "wholeVisible": 15
-      },
-      "after": {
-       "present": true,
-       "ghost": false,
-       "scroller": "os-tbody",
-       "count": 23,
-       "cols": 3,
-       "tileH": 77.5,
-       "gridW": 1020,
-       "rowGap": 12,
-       "portFoot": 1500.6,
-       "lastBottom": 1749.8,
-       "overflow": 249.2,
-       "wholeVisible": 15
-      }
-     },
-     "nav": {
-      "frames": 70,
-      "on": 27,
-      "out": 17,
-      "off": 26,
-      "badOn": 0,
-      "badOut": 0,
-      "badOff": 0,
-      "maxOutDelta": 0,
-      "firstBadOn": null,
-      "firstBadOut": null
-     },
-     "animated": 70,
-     "blocks": 70,
-     "missing": []
-    },
-    {
-     "width": 2520,
-     "caught": true,
-     "worst": 0,
-     "settle": {
-      "suppressed": true,
-      "slotClass": "",
-      "stillRunning": 0
-     },
-     "settleDuring": {
-      "suppressed": true,
-      "slotClass": "stage-page-on",
-      "stillRunning": 0
-     },
-     "edges": {
-      "during": {
-       "colFirst": {
-        "cls": "ws-pagebar",
-        "top": 41.8,
-        "bottom": 105.8
-       },
-       "colLast": {
-        "cls": "ws-winwrap",
-        "top": 105.8,
-        "bottom": 1130
-       },
-       "bodyTop": 105.8,
-       "bodyBottom": 1555.6,
-       "bodyFirst": {
-        "cls": "os-content",
-        "top": 105.8,
-        "bottom": 1555.6
-       },
-       "bodyLast": {
-        "cls": "os-content",
-        "top": 105.8,
-        "bottom": 1555.6
-       },
-       "shown": 2
-      },
-      "after": {
-       "colFirst": {
-        "cls": "ws-pagebar",
-        "top": 41.8,
-        "bottom": 105.8
-       },
-       "colLast": {
-        "cls": "ws-winwrap",
-        "top": 105.8,
-        "bottom": 1130
-       },
-       "bodyTop": 105.8,
-       "bodyBottom": 1555.6,
-       "bodyFirst": {
-        "cls": "os-greet",
-        "top": 105.8,
-        "bottom": 255.8
-       },
-       "bodyLast": {
-        "cls": "os-grid",
-        "top": 911.6,
-        "bottom": 1511.6
-       },
-       "shown": 2
-      }
-     },
-     "clip": {
-      "clippers": [
-       {
-        "cls": "ws-wbody",
-        "overflow": "auto/auto",
-        "scroller": true,
-        "cutTop": 0,
-        "cutBottom": 0
-       }
-      ],
-      "worstCut": 0
-     },
-     "live": {
-      "controls": 0,
-      "controlNames": [],
-      "inked": 0,
-      "inkedText": [],
-      "scanned": 1232
-     },
-     "removed": true,
-     "tickets": 15,
-     "tk": {
-      "during": {
-       "present": true,
-       "ghost": true,
-       "scroller": "os-tbody",
-       "count": 15,
-       "cols": 3,
-       "tileH": 77.5,
-       "gridW": 1020,
-       "rowGap": 12,
-       "portFoot": 1500.6,
-       "lastBottom": 1440.1,
-       "overflow": -60.5,
-       "wholeVisible": 15
-      },
-      "after": {
-       "present": true,
-       "ghost": false,
-       "scroller": "os-tbody",
-       "count": 23,
-       "cols": 3,
-       "tileH": 77.5,
-       "gridW": 1020,
-       "rowGap": 12,
-       "portFoot": 1500.6,
-       "lastBottom": 1749.8,
-       "overflow": 249.2,
-       "wholeVisible": 15
-      }
-     },
-     "nav": {
-      "frames": 68,
-      "on": 26,
       "out": 16,
-      "off": 26,
+      "off": 25,
       "badOn": 0,
       "badOut": 0,
       "badOff": 0,
@@ -5186,33 +1373,33 @@
       "firstBadOn": null,
       "firstBadOut": null
      },
-     "animated": 70,
-     "blocks": 70,
+     "animated": 35,
+     "blocks": 35,
      "missing": []
     }
    ],
-   "widths": 4,
-   "worst": 0,
+   "widths": 1,
+   "worst": 5,
    "allCaught": true,
    "allRemoved": true,
    "noneMissing": true,
    "animated": true,
    "tolerance": 4,
    "reducedMotion": {
-    "skeletonBlocks": 134,
-    "skeletonRunning": 0,
+    "skeletonBlocks": 66,
+    "skeletonRunning": 14,
     "skeletonNamed": 0,
-    "barBlocks": 37,
-    "barLayers": 5,
+    "barBlocks": 31,
+    "barLayers": 4,
     "barRunning": 0,
     "barNamed": 0,
     "skFill": "none | rgb(236, 230, 222)"
    },
-   "rmStill": true,
+   "rmStill": false,
    "headMatches": true,
-   "footMatches": true,
+   "footMatches": false,
    "nothingClipped": true,
-   "tkWidths": 4,
+   "tkWidths": 1,
    "tkCountMatches": true,
    "tkColsMatch": true,
    "tkTileMatches": true,
@@ -5223,8 +1410,8 @@
    "navInStep": true,
    "settled": true,
    "noLive": true,
-   "regionsPass": true,
-   "pass": true
+   "regionsPass": false,
+   "pass": false
   }
  },
  "railGate": {

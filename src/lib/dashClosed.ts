@@ -24,24 +24,27 @@ import { Activity, Query, QueryStatus } from "../types";
 import { buildRows } from "./analytics";
 import { sentAt } from "./oneScreen";
 
-export type ClosedBucketKey = "letter" | "partial" | "full" | "quiet";
+export type ClosedBucketKey = "quiet" | "letter" | "partial" | "full";
 
 export interface ClosedBucketSpec {
   key: ClosedBucketKey;
+  /** how far it got, never what was decided — see the file's header */
   label: string;
-  /** which state token fills the pill */
-  tone: "queried" | "you" | "agent" | "closed";
-  /** whose glyph the pill wears */
-  glyph: QueryStatus;
 }
 
-/* ⚠️ THE BARS' FILLS ARE IN THE STYLESHEET (`.os-clfill--<key>`), NOT HERE — one home for a colour. */
-
+/**
+ * ⚠️ THE ORDER IS THE DONUT'S, FROM 12 O'CLOCK, AND THE KEY READS IT TOO (v16, 18 Sep). One array,
+ * so the ring and the key beneath it cannot disagree about which slice is which.
+ *
+ * ⚠️ THE FILLS ARE IN THE STYLESHEET (`.os-dnarc--<key>` and `.os-dnsw--<key>`), NOT HERE. One home
+ * for a colour: the arc and its swatch must be the same value, and a hex in this file would be a
+ * second place to change it.
+ */
 export const CLOSED_BUCKETS: readonly ClosedBucketSpec[] = [
-  { key: "letter", label: "Queried", tone: "queried", glyph: QueryStatus.QUERIED },
-  { key: "partial", label: "Partial", tone: "you", glyph: QueryStatus.PARTIAL_REQUESTED },
-  { key: "full", label: "Full", tone: "agent", glyph: QueryStatus.FULL_REQUESTED },
-  { key: "quiet", label: "No reply", tone: "closed", glyph: QueryStatus.NO_RESPONSE },
+  { key: "quiet", label: "No reply" },
+  { key: "letter", label: "Passed on query" },
+  { key: "partial", label: "Passed on partial" },
+  { key: "full", label: "Passed on full" },
 ];
 
 export const CLOSED_STATUSES: readonly QueryStatus[] = [QueryStatus.REJECTED, QueryStatus.NO_RESPONSE];
@@ -93,4 +96,47 @@ export const closedTile = (queries: readonly Query[], activities: readonly Activ
     replied: counts.letter + counts.partial + counts.full,
     quiet: counts.quiet,
   };
+};
+
+/* ── the donut ─────────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * The ring's geometry, stated once and shared by the renderer and its test (the ref's values).
+ * `R` is the radius the arcs are stroked on, `STROKE` their width; `C` is the circumference every
+ * dash length is a fraction of.
+ */
+export const DONUT = { r: 60, stroke: 22, box: 160 } as const;
+export const DONUT_C = 2 * Math.PI * DONUT.r;
+
+export interface DonutArc {
+  key: ClosedBucketKey;
+  /** the dash length — the share of the ring this bucket owns */
+  len: number;
+  /** where the arc starts, as SVG's negative dash offset */
+  offset: number;
+}
+
+/**
+ * The four arcs, in the buckets' own order, laid end to end from 12 o'clock.
+ *
+ * ⚠️ A ZERO BUCKET DRAWS NOTHING AND STILL TAKES ITS TURN. It is dropped from the list rather than
+ * drawn at length 0 — a zero-length dash with a round cap paints a dot, which would put a slice on
+ * the ring for a bucket that has nothing in it — but the running offset still passes through it, so
+ * the arcs that follow start where they would have.
+ *
+ * ⚠️ AND THE LENGTHS ARE COMPUTED FROM THE COUNTS, NOT FROM `share`. Rounding four shares and
+ * multiplying gives four arcs that do not quite meet; a running total of `count / total` closes on
+ * the circumference exactly, which is what `closedDonut(...).reduce` asserts in the test.
+ */
+export const closedDonut = (tile: Pick<ClosedTile, "total" | "buckets">): DonutArc[] => {
+  const out: DonutArc[] = [];
+  if (tile.total <= 0) return out;
+  let done = 0;
+  for (const b of CLOSED_BUCKETS) {
+    const count = tile.buckets.find((x) => x.key === b.key)?.count ?? 0;
+    const len = (count / tile.total) * DONUT_C;
+    if (len > 0) out.push({ key: b.key, len, offset: -(done / tile.total) * DONUT_C });
+    done += count;
+  }
+  return out;
 };

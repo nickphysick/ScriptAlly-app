@@ -26,9 +26,10 @@ function envLocal(k){const f=join(ROOT,".env.local");if(!existsSync(f))return nu
   for(const l of readFileSync(f,"utf8").split("\n")){const m=new RegExp("^\\s*"+k+"\\s*=\\s*(.*)$").exec(l);if(m)return m[1].trim().replace(/^["']|["']$/g,"")||null;}return null;}
 
 /**
- * ⚠️ ELEVEN REGIONS, AND TWO OF THEM ARE READ FROM THE SAME ELEMENT IN BOTH STATES (v33.2).
- * The top row (`toprow`) is retired with the manuscript tile; the breakdown and the three-card row
- * that replaced it are five regions of their own (dashboard stages 2–3, 17 Sep).
+ * ⚠️ NINE REGIONS, AND TWO OF THEM ARE READ FROM THE SAME ELEMENT IN BOTH STATES (v33.2).
+ * The page is two rows now (v16, 18 Sep): the three cards of row one and the two of row two, plus
+ * each row's own box. The top row, the breakdown, the goals grid and the community tile are all
+ * retired with the sections that carried them.
  * `navrow` and `search` are the SHELL's controls, and the loading state keeps their boxes and
  * hides their ink — which is the only way the row's geometry can be the live one rather than six
  * numbers copied out of a measurement. So for those two the comparison is the element against
@@ -36,8 +37,10 @@ function envLocal(k){const f=join(ROOT,".env.local");if(!existsSync(f))return nu
  * the ghosts come off. That is exactly the claim: a nav row that changed height between states
  * would shift everything under it, which is the jump this whole phase exists to remove.
  */
-const REGIONS = ["navrow", "search", "breakdown", "row2", "quick-actions", "chart-card", "closed-tile",
-  "grid", "todo-card", "activity-card", "community-tile"];
+/* ⚠️ THE v16 REGIONS. `breakdown`, `grid` and `community-tile` went with the sections they named —
+   a region naming a card the page no longer draws is measured against nothing and reports Δ 0. */
+const REGIONS = ["navrow", "search", "row1", "quick-actions", "chart-card", "closed-tile",
+  "row2", "activity-card", "todo-card"];
 const LIVE_IN_BOTH = new Set(["navrow", "search"]);
 const TOL = Number(process.env.SA_SKEL_TOL || 4);
 /* how far the nav row's shimmer may sit from the cover's own opacity on any dissolving frame —
@@ -52,7 +55,7 @@ const NAV_STEP_TOL = 0.1;
  * during the wait the ghost is read by its own five `data-sk` handles.
  *
  * ⚠️ AND THERE IS NO FALLBACK TO `[data-probe]`, DELIBERATELY. There was one, and it made the
- * `community-tile` row VACUOUS for a whole pass: the ghost's class was renamed, the selector stopped
+ * `community-tile` row (since retired) VACUOUS for a whole pass: the ghost's class was renamed, the selector stopped
  * matching, the fallback quietly measured the REAL tile beneath the cover, and the row reported
  * Δ 0 — a perfect score for a region nobody had looked at. A missing handle is a FAILURE (`missing`,
  * which the verdict requires to be empty), never a substitution.
@@ -239,14 +242,19 @@ function readRegions(names) {
  * against a real 75.8. Neither had a gate; both are cheap to state and each is one row's worth of
  * error at some width.
  */
+/* ⚠️ RETARGETED FROM THE TICKET GRID TO THE ROW LIST (v16, 18 Sep). The card holds rows in a plain
+   scroller now, so `cols` is always 1 and the claim that survives is the one that mattered: the ghost
+   fills the port it is standing in with blocks the height a real row renders at, and neither shows a
+   part-row below the fold. `.os-tkgrid` is gone, so a probe still naming it would find no grid and
+   report `present: false` for ever — a gate that cannot fail. */
 function readTickets() {
   const ghost = document.querySelector(".os-skelpage");
   const card = ghost
     ? ghost.querySelector('[data-sk="todo-card"]')
     : document.querySelector('[data-probe="todo-card"]');
-  const grid = card && card.querySelector(".os-tkgrid");
+  const grid = card && card.querySelector(ghost ? '[data-sk="todo-rows"]' : '[data-probe="todo-rows"]');
   if (!card || !grid) return { present: false, ghost: !!ghost };
-  const port = grid.parentElement;
+  const port = grid;
   const gs = getComputedStyle(grid), ps = getComputedStyle(port);
   const r1 = (n) => Math.round(n * 10) / 10;
   const kids = [...grid.children];
@@ -259,6 +267,9 @@ function readTickets() {
     present: true, ghost: !!ghost,
     scroller: port.className || "(none)",
     count: kids.length,
+    /* ⚠️ ALWAYS 1 SINCE v16 — the card is a list, not a grid. The reading stays because it is what
+       fails loudly if a grid ever comes back on one side and not the other; `gridTemplateColumns`
+       computes to "none" on a block, which splits to one entry. */
     cols: gs.gridTemplateColumns.split(" ").filter(Boolean).length,
     tileH: kids[0] ? r1(kids[0].getBoundingClientRect().height) : null,
     gridW: r1(grid.getBoundingClientRect().width),
@@ -309,8 +320,13 @@ function recordFrames() {
       shell: !!document.querySelector(".ws-app.dash-mode"),
       cover: sk ? (sk.classList.contains("out") ? "out" : "on") : "off",
       coverOpacity: sk ? parseFloat(getComputedStyle(sk).opacity) : 0,
-      search: read(document.querySelector(".ws-pagebar .ws-bigsearch")),
-      nbtn: read(document.querySelector(".ws-pagebar .ws-nbtn")),
+      /* ⚠️ EVERY CONTROL THE ROW ACTUALLY HAS, NOT TWO NAMED ONES (v16). This read `.ws-bigsearch`
+         and `.ws-nbtn`; v16 takes `+ New` off the dashboard, so `nbtn` was null on every frame and
+         the gate reported 29 of 29 frames "out of step" about a row that was behaving perfectly. A
+         probe naming a control the route does not have cannot pass, and its failure looks exactly
+         like the fault it was written to catch. The selector is the SHEET's own list. */
+      controls: [...document.querySelectorAll(".ws-pagebar :is(.sb-toggle, .ws-bigsearch, .ws-fbpill, .ws-nbtn, .sp-help)")]
+        .map(read).filter(Boolean),
       rowInert: !!row && getComputedStyle(row).pointerEvents === "none",
     };
     frames.push(f);
@@ -328,12 +344,15 @@ function judgeNav(frames) {
   const out = live.filter((f) => f.cover === "out");
   const seen = live.findIndex((f) => f.cover !== "off");
   const off = seen < 0 ? [] : live.slice(seen).filter((f) => f.cover === "off");
-  const okOn = (f) => !!(f.search && f.nbtn) && f.search.inkHidden && f.nbtn.inkHidden
-    && f.search.painted >= 0.99 && f.nbtn.painted >= 0.99 && f.rowInert;
-  const delta = (f) => Math.max(Math.abs((f.search ? f.search.painted : 0) - f.coverOpacity),
-    Math.abs((f.nbtn ? f.nbtn.painted : 0) - f.coverOpacity));
-  const okOff = (f) => !!(f.search && f.nbtn) && f.search.painted === 0 && f.nbtn.painted === 0
-    && !f.search.inkHidden && !f.nbtn.inkHidden && !f.rowInert;
+  /* ⚠️ A FLOOR ON THE POPULATION, or a frame that found no controls at all passes every claim below
+     it — the vacuous-empty-set fault, which is exactly how the retired `+ New` probe failed silently
+     in the other direction. Two is the fewest the row ever has (the toggle and the search). */
+  const enough = (f) => Array.isArray(f.controls) && f.controls.length >= 2;
+  const okOn = (f) => enough(f) && f.controls.every((c) => c.inkHidden && c.painted >= 0.99) && f.rowInert;
+  const delta = (f) => (enough(f)
+    ? Math.max(...f.controls.map((c) => Math.abs(c.painted - f.coverOpacity)))
+    : 1);
+  const okOff = (f) => enough(f) && f.controls.every((c) => c.painted === 0 && !c.inkHidden) && !f.rowInert;
   const badOn = on.filter((f) => !okOn(f));
   const badOut = out.filter((f) => delta(f) > NAV_STEP_TOL);
   const badOff = off.filter((f) => !okOff(f));
@@ -404,7 +423,8 @@ for (const W of WIDTHS) {
    * The reveal staggers the cards in with `os-rise`, which TRANSLATES them — and
    * `getBoundingClientRect` returns the transformed box. Caught mid-flight, every region below the
    * nav row reads a few pixels off its resting place, uniformly, with all four heights correct.
-   * Measured: an intermittent +4 on grid, the (since retired) top row, todo-card, activity-card AND community-tile at
+   * Measured: an intermittent +4 on the goals grid, the top row, todo-card, activity-card AND the
+   * community tile (all four since retired) at
    * one width, on roughly one run in three — exactly the shape of one animation still running
    * rather than a layout fault. It sat the gate ON its 4px threshold.
    *

@@ -52,3 +52,43 @@ export function cssRule(css: string, sel: string, what = "the stylesheet"): stri
 export function cssRuleCount(css: string, sel: string): number {
   return bodies(css, sel).length;
 }
+
+/**
+ * EVERY rule in a sheet, as `{ sel, body }` — for the sweeps that ask a question of a whole file
+ * rather than of a named selector ("does any ghost rule declare a grid", "does any rule state this
+ * property twice").
+ *
+ * ⚠️ IT IS A BRACE WALK, NOT A REGEX, AND THAT IS THE POINT. The obvious
+ * `/(^|\})\s*([^{}]*?)\{([^}]*)\}/g` finds ten rules in a sheet that has ninety: a blank line
+ * left by a stripped comment, or two rules on one line, breaks the chain and everything after the
+ * break is silently skipped. A sweep that reads a TENTH of its subject and reports no offence is
+ * the vacuous-pass family this repo keeps paying for, so the population is always worth asserting
+ * at the call site as well.
+ *
+ * ⚠️ AT-BLOCKS ARE DESCENDED INTO, NOT SKIPPED. A `@media` block holds ordinary rules, and a rule
+ * inside a breakpoint is exactly where a property comes back after being swept from the base.
+ * Comments must be stripped by the caller — this walker does not know one from a declaration.
+ */
+export function cssRules(css: string): Array<{ sel: string; body: string }> {
+  const out: Array<{ sel: string; body: string }> = [];
+  const walk = (src: string) => {
+    let i = 0;
+    while (i < src.length) {
+      const open = src.indexOf("{", i);
+      if (open === -1) return;
+      const sel = src.slice(i, open).replace(/^[\s;]+|[\s;]+$/g, "");
+      let depth = 1;
+      let j = open + 1;
+      for (; j < src.length && depth > 0; j += 1) {
+        if (src[j] === "{") depth += 1;
+        else if (src[j] === "}") depth -= 1;
+      }
+      const body = src.slice(open + 1, j - 1);
+      if (sel.startsWith("@")) walk(body);
+      else if (sel) out.push({ sel, body });
+      i = j;
+    }
+  };
+  walk(css);
+  return out;
+}

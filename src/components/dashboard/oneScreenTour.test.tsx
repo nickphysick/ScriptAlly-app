@@ -18,9 +18,11 @@ const tsx = readFileSync(resolve(__dirname, "./OneScreenTour.tsx"), "utf8");
 const dash = readFileSync(resolve(__dirname, "./OneScreenDashboard.tsx"), "utf8");
 
 describe("§12 · the six steps, copy verbatim from the ref", () => {
-  it("chart → tasks → author tile → goals → activity → closing card", () => {
-    /* stages 2–3 (17 Sep): the retired manuscript tile's step is gone and the breakdown leads */
-    expect(TOUR_STEPS.map((s) => s.sel)).toEqual([".os-bd", ".os-lead", ".os-tasks", ".os-goal", ".os-actv", null]);
+  it("quick actions → chart → closed → feed → to-do → closing card", () => {
+    /* ⚠️ v16 (18 Sep): every step names a card the page renders. The breakdown, the manuscript tile,
+       the goals card and the activity rail are all retired — and `.os-goal` had been targetless since
+       the rail's rebuild, which is the failure the next case now forbids. */
+    expect(TOUR_STEPS.map((s) => s.sel)).toEqual([".os-qa", ".os-lead", ".os-cl", ".os-feed", ".os-todo", null]);
     expect(TOUR_STEPS[1].title).toBe("Your queries, charted");
     expect(TOUR_STEPS[5].title).toBe("That's your desk");
     expect(TOUR_STEPS[5].body).toContain("any time in your first week");

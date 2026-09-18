@@ -9,7 +9,7 @@ import { describe, it, expect } from "vitest";
 import { sliceBetween } from "../../test/sliceBetween";
 import React from "react";
 import { readFileSync } from "node:fs";
-import { cssRule, cssRuleCount } from "../../test/cssRule";
+import { cssRule, cssRuleCount, cssRules as cssRules_ } from "../../test/cssRule";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueryStatus, UserPlan } from "../../types";
@@ -73,14 +73,30 @@ describe("§1 · the page", () => {
     expect(baseRules).not.toContain("100dvh");
   });
 
-  /* the JS lock was deleted long before the CSS one; it stays deleted */
-  it("⚠️ no measuring hook is left behind", () => {
+  /**
+   * ⚠️ THE STAGE LOCK STAYS DELETED; THE PORT MEASUREMENT IS NOT ONE (v16, 18 Sep).
+   *
+   * The lock sized the PAGE to the viewport and is what made it unscrollable. What v16 measures is
+   * the scroller's own height, to give the second row the ref's `clamp(380px, calc(100vh - 560px),
+   * 560px)` honestly — the viewport arithmetic is exactly what this page may not do, because it sits
+   * under the beta strip, the top bar and the window's inset. So the observer is REQUIRED, and what
+   * is asserted is the property that makes it safe: neither input depends on the row's own height,
+   * so the measurement cannot feed itself.
+   */
+  it("⚠️ the stage lock stays deleted, and the port measurement cannot feed itself", () => {
     const src = readFileSync(resolve(__dirname, "./OneScreenDashboard.tsx"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
-    for (const gone of ["useStageLock", "STAGE_SCROLL_ID", "lockH", "ResizeObserver"]) {
+    for (const gone of ["useStageLock", "STAGE_SCROLL_ID", "lockH"]) {
       expect(src, gone).not.toContain(gone);
     }
-    expect(src).not.toMatch(/className="os-root"[^>]*style=/);
+    /* the two published values, and what they are read from */
+    expect(src).toContain("--os-port-h");
+    expect(src).toContain("--os-row2-top");
+    expect(src).toContain("ResizeObserver");
+    expect(src, "the port is the SCROLLER's box, never the window's").not.toContain("innerHeight");
+    /* ⚠️ AND NEITHER IS READ OFF THE ROW — a row sized from its own box is a measurement loop */
+    expect(src).not.toMatch(/row2Ref[^;]*getBoundingClientRect\(\)\.height/);
+    expect(src).not.toMatch(/className="os-root"[^>]*style=\{\{[^}]*height/);
   });
 
   /* ⚠️ THE DASHBOARD'S OWN WRAPPER IS PART OF THE CHAIN — it carried `min-h-screen` (100vh) and `pb-16`
@@ -130,9 +146,9 @@ describe("§1 · the page", () => {
     }
   });
 
-  /* ⚠️ FOUR ROWS, IN ONE BLOCK, IN THIS ORDER — and the activity column is INSIDE the block (Nick: pinned to
-     the window's edge, it opens a gap beside the content on a wide screen). */
-  it("⚠️ the header, the breakdown, the second row, then the to-do card beside the activity column", () => {
+  /* ⚠️ THREE ROWS, IN ONE BLOCK, IN THIS ORDER (v16) — and both bottom cards are INSIDE the block
+     (Nick: pinned to the window's edge, the activity column opens a gap beside the content). */
+  it("⚠️ the header, the three-card row, then the feed beside the to-do card", () => {
     const html = render();
     /* the content block is the root's last child when nothing is loading or touring, so it runs to the end */
     const start = html.indexOf('<div class="os-content" data-probe="main">');
@@ -143,111 +159,140 @@ describe("§1 · the page", () => {
       expect(i, needle).toBeGreaterThan(-1);
       return i;
     };
-    const order = [at('data-probe="hero"'), at('data-probe="breakdown"'), at('data-probe="row2"'), at('data-probe="grid"')];
+    const order = [at('data-probe="hero"'), at('data-probe="row1"'), at('data-probe="row2"')];
     expect([...order].sort((a, b) => a - b)).toEqual(order);
-    const row2 = [at('data-probe="quick-actions"'), at('data-probe="chart-card"'), at('data-probe="closed-tile"')];
-    expect([...row2].sort((a, b) => a - b)).toEqual(row2);
+    const row1 = [at('data-probe="quick-actions"'), at('data-probe="chart-card"'), at('data-probe="closed-tile"')];
+    expect([...row1].sort((a, b) => a - b)).toEqual(row1);
+    expect(row1[0], "row one's cards must be inside row one").toBeGreaterThan(order[1]);
+    expect(row1[2], "…and above the second row").toBeLessThan(order[2]);
+    /* ⚠️ THE FEED LEADS THE SECOND ROW — the ref puts the wider card on the left, and the to-do
+       card's foot is what aligns with it. */
+    const row2 = [at('data-probe="activity-card"'), at('data-probe="todo-card")'.replace(")", ""))];
     expect(row2[0]).toBeGreaterThan(order[2]);
-    expect(row2[2]).toBeLessThan(order[3]);
-    expect(at('class="os-colR"')).toBeGreaterThan(order[3]);
-  });
-
-  it("⚠️ the second row: 300 · 1fr · 300, 18px apart, stretched, 18px below the breakdown", () => {
-    const r = rule(".os-row2");
-    expect(r).toContain("grid-template-columns: 300px minmax(0, 1fr) 300px");
-    expect(r).toContain("gap: 18px");
-    expect(r).toContain("align-items: stretch");
-    expect(r).toContain("margin-top: 18px");
-    /* equal heights are the row's, never a stated height on a card */
-    for (const sel of [".os-qa", ".os-lead", ".os-cl"]) {
-      expect(rule(sel), sel).not.toMatch(/(^|[\s;])height:/);
+    expect(row2[1]).toBeGreaterThan(row2[0]);
+    /* the retired grid and its two columns are gone from the markup entirely */
+    for (const gone of ["os-colL", "os-colR", "os-grid", "os-bd"]) {
+      expect(content, gone).not.toMatch(new RegExp(`class="([^"]* )?${gone}[" ]`));
     }
   });
 
-  /* ⚠️ THE ONE STATED HEIGHT ON THE PAGE (Nick: the to-do card and the activity column get a fixed height and
-     keep their inner scroll). The row is `minmax(0, 1fr)` inside it, so neither column's content can grow
-     it, and the two cards flex to fill. */
-  it("⚠️ the bottom row: one stated height, the ref's 360 on the right, and both cards fill it", () => {
-    const g = rule(".os-grid");
-    expect(g).toContain("grid-template-columns: minmax(0, 1fr) 360px");
-    expect(g).toContain("grid-template-rows: minmax(0, 1fr)");
-    expect(g).toContain("height: var(--os-bottom-h)");
-    expect(g).toContain("margin-top: 18px");
-    expect(rule(".os-root")).toMatch(/--os-bottom-h:\s*\d+px/);
-    expect(cssRules).toContain(".os-colL { grid-column: 1; }");
-    expect(cssRules).toContain(".os-colR { grid-column: 2; }");
-    expect(cssRules).not.toContain(".os-colM");
-    expect(rule(".os-colL .os-tasks")).toContain("flex: 1 1 auto");
-    expect(rule(".os-colL .os-tasks")).toContain("min-height: 0");
-    expect(rule(".os-colR .os-actv")).toContain("flex: 1 1 auto");
-    /* the retired height law: the right column no longer claims zero height beside the left */
-    expect(cssRules).not.toContain(".os-colR { height: 0; }");
+  /**
+   * ⚠️ ROW ONE'S TRACKS ARE THE REF'S, AND THE TWO FLEXIBLE ONES ARE `fr` WHILE THE THIRD IS NOT.
+   * The closed tile is a fixed 320 because a donut does not get better at being wider; the quick
+   * actions take a floor and a share, and the chart takes the rest. Equal card heights are the ROW's
+   * — `align-items: stretch` — and never a stated height on a card, which is what lets the chart's
+   * plot give when the quick actions' tiles do not.
+   */
+  it("⚠️ the first row: a floor, a share, and the closed tile's own width", () => {
+    const r = rule(".os-row1");
+    expect(r).toContain("grid-template-columns: minmax(270px, 0.85fr) minmax(0, 2.6fr) var(--dash-row1-closed)");
+    expect(r).toContain("gap: var(--dash-gap)");
+    expect(r).toContain("align-items: stretch");
+    expect(rule(".os-root")).toContain("--dash-row1-closed: 320px");
+    /* ⚠️ THE SWEEP, NOT THREE NAMED RULES. Two of the three cards have no base rule at all — their
+       look is `.os-card`'s and their own rules are descendants — so `cssRule` would fail on a sheet
+       that is perfectly correct. The claim is that NOTHING in the sheet states a height on any of
+       them, which is what "equal heights are the row's" means. */
+    const rows = cssRules_(cssRules);
+    for (const card of ["os-qa", "os-lead", "os-cl"]) {
+      for (const r of rows.filter((x) => new RegExp(`\\.${card}(?![\\w-])`).test(x.sel))) {
+        expect(r.body, `${r.sel} states a height — the row must own it`).not.toMatch(/(^|[\s;])height:/);
+      }
+    }
   });
 
-  it("the columns share one rule and do not clip", () => {
-    const c = rule(".os-colL, .os-colR");
-    expect(c).toContain("overflow: visible");
-    expect(c).toContain("min-height: 0");
+  /**
+   * ⚠️ THE ONE STATED HEIGHT ON THE PAGE, AND IT IS MEASURED FROM THE PAGE'S OWN SCROLL AREA. The
+   * ref writes `clamp(380px, calc(100vh - 560px), 560px)`; this page does not start at the top of the
+   * window, so `100vh` over-claims by the beta strip, the top bar and the window's inset — the house
+   * stage law, and the 21px the Tasks chassis lost to exactly this arithmetic. Both cards keep their
+   * own inner scroll inside it, so neither column's content can grow the row.
+   */
+  it("⚠️ the second row: the ref's clamp, measured from the scrollport", () => {
+    const r = rule(".os-row2");
+    expect(r).toContain("grid-template-columns: 1.4fr 1fr");
+    expect(r).toContain("gap: var(--dash-gap)");
+    expect(r).toContain("align-items: stretch");
+    expect(r).toContain("margin-top: var(--dash-gap)");
+    expect(r).toContain("height: var(--dash-row2-h)");
+    const root = rule(".os-root");
+    expect(root).toContain("--dash-row2-min: 380px");
+    expect(root).toContain("--dash-row2-max: 560px");
+    expect(root).toMatch(/--dash-row2-h:\s*clamp\(/);
+    /* the clamp's middle term is the PORT's height less what is above the row — never the viewport */
+    expect(root).toMatch(/calc\(var\(--os-port-h\) - var\(--os-row2-top\) - \d+px\)/);
+    /* ⚠️ AND BOTH INPUTS OPEN AT A SENTINEL, so an unmeasured first frame yields the FLOOR rather
+       than a row that runs past the fold. `100vh` sat here for one build. */
+    expect(root).toContain("--os-port-h: 0px");
+    expect(root).toContain("--os-row2-top: 0px");
   });
 
-  /* ⚠️ SMALL ON PURPOSE — its job is to stop the card collapsing, not to reserve space. A large
-     min-height makes the card refuse to shrink and pushes the row taller again. */
-  it("⚠️ the activity card can SHRINK: flex 1 1 auto behind a small min-height", () => {
-    const a = rule(".os-actv");
-    expect(a).toContain("flex: 1 1 auto");
-    expect(a).toContain("min-height: 120px");
-    expect(a).not.toContain("min-height: 200px");
+  /* ⚠️ BOTH BOTTOM CARDS SCROLL INSIDE THE ROW, and the row's height is what bounds them. A card
+     without `min-height: 0` in a grid track refuses to shrink below its content, so the scroller
+     never engages and the row grows instead — the fault that hid behind content in two rebuilds. */
+  it("⚠️ the bottom cards bound their contents rather than growing the row", () => {
+    /* the cards inherit `min-height: 0` from `.os-card`, which is where a grid child needs it — a
+       card that refuses to shrink below its content never engages its scroller and grows the row */
+    expect(rule(".os-card")).toContain("min-height: 0");
+    const scroll = rule(".os-scroll");
+    expect(scroll).toContain("flex: 1");
+    expect(scroll).toContain("min-height: 0");
+    expect(scroll).toMatch(/overflow-y:\s*auto/);
   });
 
-  it("the two-row spine and the top row are RETIRED, rule and element together", () => {
-    expect(cssRuleCount(cssRules, ".os-midrow")).toBe(0);
-    expect(cssRuleCount(cssRules, ".os-lowrow")).toBe(0);
-    expect(cssRuleCount(cssRules, ".os-midrow, .os-lowrow")).toBe(0);
-    expect(cssRules).not.toContain(".os-toprow");
+  it("the retired grid, its columns and the two-row spine are gone, rule and element together", () => {
+    for (const sel of [".os-grid", ".os-colL", ".os-colR", ".os-colL, .os-colR", ".os-colM",
+                       ".os-midrow", ".os-lowrow", ".os-toprow", ".os-actv", ".os-tasks", ".os-bd"]) {
+      expect(cssRuleCount(cssRules, sel), `${sel} is still declared`).toBe(0);
+    }
+    expect(cssRules).not.toContain("--os-bottom-h");
     for (const src of ["./OneScreenDashboard.tsx", "./OneScreenSkeleton.tsx"]) {
       const t = readFileSync(resolve(__dirname, src), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
       expect(t, `${src} still renders a retired row`).not.toMatch(/["\s`]os-(mid|low|top)row["\s`]/);
+      expect(t, `${src} still renders a retired column`).not.toMatch(/["\s`]os-col[LMR]["\s`]/);
     }
-    /* one regime for the bottom row's tracks, and none left for the top row's */
-    expect(cssRules.match(/grid-template-columns: minmax\(0, 1fr\) \d+px/g) ?? []).toHaveLength(1);
-    expect(cssRules).not.toMatch(/grid-template-columns: (330|280)px minmax\(0, 1fr\)/);
   });
 
-  /* ⚠️ THE STEPS COME AFTER EVERY RULE THEY OVERRIDE — a media query confers no specificity. The lock's old
-     frame sat four hundred lines above the rules it overrode, and one of them was quietly winning. */
+  /**
+   * ⚠️ THE STEPS COME AFTER EVERY RULE THEY OVERRIDE — a media query confers no specificity, and the
+   * lock's old frame sat four hundred lines above the rules it overrode with one of them quietly
+   * winning. The ref carries NO media queries at all (it draws 1440 and nothing else), so all three
+   * are Nick's prose and are the authority at those widths.
+   */
   it("⚠️ the three steps are Nick's, and each comes after the base rules it overrides", () => {
+    /* ⚠️ THE OPENING IS FOUND BY A TOLERANT MATCH, because comments are stripped and leave blank
+       lines: `indexOf("@media (…) {\n  .os-")` failed on a correct sheet the moment a block opened
+       with a note. */
     const block = (cond: string) => {
-      const i = cssRules.indexOf(`@media (${cond}) {\n  .os-`);
-      expect(i, cond).toBeGreaterThan(-1);
-      return { at: i, body: sliceBetween(cssRules.slice(i), "{", "\n}\n", cond) };
+      const m = new RegExp(`@media \\(${cond}\\) \\{`).exec(cssRules);
+      expect(m, cond).not.toBeNull();
+      return { at: m!.index, body: sliceBetween(cssRules.slice(m!.index), "{", "\n}", cond) };
     };
-    const narrow2 = block("max-width: 1279px");
-    expect(narrow2.body).toContain(".os-row2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }");
-    expect(narrow2.body).toContain(".os-row2 > .os-cl { grid-column: 1 / -1; }");
-    /* found by the first rule inside each block — comments are stripped, so blank lines may sit between */
-    const opening = (cond: string, first: string) => {
-      const m = new RegExp(`@media \\(${cond}\\) \\{\\s*\\.${first} `).exec(cssRules);
-      expect(m, `${cond} opening with .${first}`).not.toBeNull();
-      return m!.index;
-    };
-    const stack = opening("max-width: 1024px", "os-content");
-    const stackBody = sliceBetween(cssRules.slice(stack), "{", "\n}\n", "the 1024 step");
-    expect(stackBody).toContain(".os-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; height: auto; gap: 14px; }");
-    expect(stackBody, "the columns name their tracks, so both go back to auto").toContain(".os-colL, .os-colR { grid-column: auto; }");
-    expect(stackBody).toMatch(/\.os-colL \.os-tasks \{ flex: none; height: \d+px; \}/);
-    expect(stackBody).toMatch(/\.os-colR \.os-actv \{ flex: none; height: \d+px; \}/);
-    const phone = opening("max-width: 900px", "os-bdhead");
-    const phoneBody = sliceBetween(cssRules.slice(phone), "{", "\n}\n", "the 900 step");
-    expect(phoneBody).toContain(".os-row2 { grid-template-columns: minmax(0, 1fr); }");
-    expect(phoneBody).toContain(".os-bdgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }");
-    expect(phoneBody).toContain(".os-bdcol:last-child { grid-column: 1 / -1; }");
-    for (const base of [".os-row2 {", ".os-grid {", ".os-colL .os-tasks {", ".os-colR .os-actv {", ".os-bdgrid {", ".os-bdmeta {"]) {
+    /* 1280: the closed tile drops beneath the chart, at the middle column's full width */
+    const narrow = block("max-width: 1279px");
+    expect(narrow.body).toContain(".os-row1 { grid-template-columns: minmax(270px, 0.85fr) minmax(0, 2.6fr); }");
+    expect(narrow.body).toContain(".os-row1 > .os-cl { grid-column: 2; }");
+    /* 1000: everything stacks, and the stated row height is released or the cards are squeezed */
+    const stack = block("max-width: 999px");
+    expect(stack.body).toContain(".os-row1, .os-row2 { grid-template-columns: minmax(0, 1fr); height: auto; }");
+    expect(stack.body, "a stacked card needs a height of its own, or it collapses")
+      .toMatch(/\.os-row2 > \.os-card \{ height: \d+px; \}/);
+    /* 640: the type steps down and the page's own gutter tightens */
+    const phone = block("max-width: 640px");
+    expect(phone.body).toMatch(/\.os-greet \.os-hello \{ font-size: \d+px; \}/);
+    for (const base of [".os-row1 {", ".os-row2 {", ".os-greet .os-hello {", ".os-content {"]) {
       const b = cssRules.indexOf(base);
       expect(b, base).toBeGreaterThan(-1);
-      for (const step of [narrow2.at, stack, phone]) expect(step, `${base} must come before its step`).toBeGreaterThan(b);
+      for (const step of [narrow.at, stack.at, phone.at]) {
+        expect(step, `${base} must come before its step`).toBeGreaterThan(b);
+      }
     }
+    /* ⚠️ AND THE NARROW BLOCKS COME AFTER THE WIDE ONE — equal specificity, so the later wins, and a
+       ≤1279 block below a ≤999 one would override the narrower regime at phone width. */
+    expect(stack.at).toBeGreaterThan(narrow.at);
+    expect(phone.at).toBeGreaterThan(stack.at);
     /* and all three sit above the reduced-motion block, which stays last */
-    expect(cssRules.lastIndexOf("@media (prefers-reduced-motion: reduce)")).toBeGreaterThan(Math.max(narrow2.at, stack, phone));
+    expect(cssRules.lastIndexOf("@media (prefers-reduced-motion: reduce)")).toBeGreaterThan(phone.at);
   });
 
   /* ⚠️ THE SWEEP, NOT THE FOUR NAMES (dashboard redesign, Phase 2). Each header's own suite asserts
@@ -265,13 +310,20 @@ describe("§1 · the page", () => {
     expect(rule(".os-mark")).not.toContain("box-shadow");
   });
 
-  /* ⚠️ THE CLAIM IS ONE MECHANISM, NOT ONE NUMBER (v29, Phase 6) — the column states a gap and no margin
-     beside it. Two spacing mechanisms on one axis once opened 44px between two cards. */
-  it("⚠️ the right column spaces with ONE mechanism — the gap, and no margins beside it", () => {
-    expect(rule(".os-colR"), "the column must state a gap").toMatch(/gap:\s*\d/);
-    expect(cssRules).not.toContain(".os-colR { gap: 0; }");
+  /**
+   * ⚠️ ONE SPACING MECHANISM PER AXIS, AND THE CLAIM SURVIVED ITS SUBJECT (v29 Phase 6 → v16). The
+   * retired right column stated a gap AND its children carried margins, which once opened 44px
+   * between two cards. The columns are gone; the same fault is available to the two rows, so the
+   * claim is pointed at them: each row spaces with its `gap` and nothing inside it adds a margin.
+   */
+  it("⚠️ the rows space with ONE mechanism — the gap, and no margins beside it", () => {
+    for (const sel of [".os-row1", ".os-row2"]) {
+      expect(rule(sel), `${sel} must state a gap`).toContain("gap: var(--dash-gap)");
+    }
     expect(cssRules, "a margin beside the gap doubles the spacing")
-      .not.toMatch(/\.os-colR > \*\s*\{[^}]*margin-bottom:\s*[1-9]/);
+      .not.toMatch(/\.os-row[12] > \*\s*\{[^}]*margin/);
+    /* the gap is one token, declared once, so the two rows cannot part */
+    expect((cssRules.match(/--dash-gap:/g) ?? [])).toHaveLength(1);
   });
 });
 
@@ -338,7 +390,11 @@ describe("§2 · the greeting", () => {
     expect(html).not.toContain("os-pills");
     expect(html).not.toContain("os-pill");
     expect(html).not.toContain("Querying since");
-    expect(html).not.toContain("out with agents");
+    /* ⚠️ RETARGETED, NOT DROPPED (v16). "N out with agents" was the tenure pill's wording and is now
+       the CHART's eyebrow — a page-wide `not.toContain` would forbid a live sentence. The claim is
+       that it is not in the GREETING, which is what the pill row was. */
+    const greet = sliceBetween(html, '<div class="os-greet"', '<div class="os-row1"', "the greeting");
+    expect(greet).not.toContain("out with agents");
     /* ⚠️ THE GREETING KEEPS ITS NAME AND NOTHING ELSE (ref v22) — the pills went, then the date
        line, then the address. What this case guards is that the ROW of pills has not returned, and
        that claim does not depend on what else is or is not under the name. */
@@ -394,12 +450,12 @@ describe("§8 · skeletons", () => {
      one carrying the probe; the cover's copy is asserted in `oneScreenSkeleton.test.tsx`. */
   it("⚠️ loading: the header carries no shimmer and no figure", () => {
     const html = render({ loading: true });
-    const hdr = sliceBetween(html, '<div class="os-greet" data-probe="hero">', '<section class="os-bd"', "the page's header");
+    const hdr = sliceBetween(html, '<div class="os-greet" data-probe="hero">', '<div class="os-row1"', "the page's header");
     expect(hdr).not.toContain("isload");
     expect(hdr).not.toContain("os-skel");
     expect(hdr).not.toContain("<b>");
     expect(hdr).toContain("queries out");
-    expect(hdr).toContain("tasks waiting on you");
+    expect(hdr).toContain("waiting on you");
   });
 
   it("reduced motion stills the shimmer to a static tint", () => {
@@ -410,14 +466,14 @@ describe("§8 · skeletons", () => {
 describe("§6 trap · the entrance animation is scoped to .enter", () => {
   it("⚠️ no animation on the bare card classes — only on .enter, which JS removes", () => {
     expect(rule(".os-card")).not.toContain("animation");
-    expect(cssRules).toContain(".os-card.enter, .os-greet.enter, .os-bd.enter { animation: os-rise");
+    expect(cssRules).toContain(".os-card.enter, .os-greet.enter { animation: os-rise");
   });
 });
 
 describe("the sparse chart state and the tasks empty state (shells)", () => {
   it("a single point on the record: the chart says how the line begins", () => {
     const html = render({ queries: [q({ dateSent: daysAgo(0) })] });
-    expect(html).toContain("The line begins once there are two days on the record.");
+    expect(html).toContain("The line begins once there are two weeks on the record.");
   });
 
   it("no tasks → the italic empty line, and the header says Nothing needs you", () => {
@@ -464,7 +520,7 @@ describe("§9 · first-run states", () => {
      moved, and there is no pill. */
   it("early days: the chart states its movement, and nothing congratulates", () => {
     const html = render({ queries: [q({ dateSent: daysAgo(3) }), q({ dateSent: daysAgo(9) })] });
-    expect(html).toContain('data-probe-text="chart-caption"');
+    expect(html).toContain('data-probe-text="chart-eyebrow"');
     expect(html).toContain("over 8 weeks");
     expect(html).not.toContain("awaiting a reply");
     expect(html).not.toContain("os-pill");
@@ -498,30 +554,43 @@ describe("⚠️ the entrance class is REMOVED, and the guard is a ref", () => {
   });
 
   it("the animation still carries `both`, so removal is what keeps it safe", () => {
-    expect(cssRules).toContain(".os-card.enter, .os-greet.enter, .os-bd.enter { animation: os-rise");
+    expect(cssRules).toContain(".os-card.enter, .os-greet.enter { animation: os-rise");
     expect(cssRules).toMatch(/\.os-card\.enter[^}]*both;/);
   });
 
   /* ⚠️ RETARGETED (stages 2–3): every delay names the row its card actually lives in, and the page's own
      order sets the sequence. The retired cards' delays went with them. */
   it("every stagger delay names the row its card actually lives in", () => {
-    const order = [".os-bd.enter", ".os-row2 .os-qa.enter", ".os-row2 .os-lead.enter", ".os-row2 .os-cl.enter",
-                   ".os-colL .os-tasks.enter", ".os-colR .os-actv.enter"];
+    /* ⚠️ RETARGETED (v16), AND THE SELECTORS ARE POSITIONAL NOW. Each row's cards are staggered by
+       `:nth-child` inside the row they live in, rather than by name — five cards, two rows, and a
+       card moving between rows takes its place in the sequence with it rather than keeping a delay
+       written against its old parent. */
+    const order = [".os-greet.enter",
+                   ".os-row1 .os-card.enter:nth-child(1)", ".os-row1 .os-card.enter:nth-child(2)",
+                   ".os-row1 .os-card.enter:nth-child(3)",
+                   ".os-row2 .os-card.enter:nth-child(1)", ".os-row2 .os-card.enter:nth-child(2)"];
     const delay = (sel: string) => {
-      const m = new RegExp(`(?:^|\n)${sel.replace(/[.]/g, "\\.")} \\{ animation-delay: ([\\d.]+)s; \\}`).exec(cssRules);
+      const m = new RegExp(`(?:^|\n)${sel.replace(/[.()]/g, "\\$&")} \\{ animation-delay: ([\\d.]+)s; \\}`).exec(cssRules);
       expect(m, sel).not.toBeNull();
       return Number(m![1]);
     };
     const delays = order.map(delay);
     expect([...delays].sort((a, b) => a - b)).toEqual(delays);
-    for (const gone of [".os-colL .os-aut.enter", ".os-toprow .os-lead.enter", ".os-colL .os-probanner.enter",
-                        ".os-colR .os-goal.enter", ".os-colL .os-comm.enter"]) {
+    /* the retired cards' delays went with them — a delay naming a card nothing renders is a rule
+       with no subject, and the sequence it belonged to has one fewer step than it looks */
+    for (const gone of [".os-colL", ".os-colR", ".os-bd.enter", ".os-toprow", ".os-aut.enter",
+                        ".os-probanner.enter", ".os-goal.enter", ".os-comm.enter"]) {
       expect(cssRules, gone).not.toContain(gone);
     }
-    /* and each parent really holds its card on the rendered page */
+    /* ⚠️ AND THE POSITIONS ARE REAL: `:nth-child` is a claim about the DOM, so the rendered rows must
+       hold exactly the cards the delays assume, in that order. */
     const html = render();
-    const row2 = sliceBetween(html, 'data-probe="row2"', 'data-probe="grid"', "the second row");
-    for (const cls of ["os-qa", "os-lead", "os-cl"]) expect(row2, cls).toMatch(new RegExp(`class="os-card ${cls}[" ]`));
+    const row1 = sliceBetween(html, 'data-probe="row1"', 'class="os-row2"', "the first row");
+    expect([...row1.matchAll(/class="os-card(?: os-lift)? (os-[a-z]+)[" ]/g)].map((m) => m[1]))
+      .toEqual(["os-qa", "os-lead", "os-cl"]);
+    const row2 = html.slice(html.indexOf('class="os-row2"'));
+    expect([...row2.matchAll(/class="os-card(?: os-lift)? (os-[a-z]+)[" ]/g)].map((m) => m[1]))
+      .toEqual(["os-feed", "os-todo"]);
   });
 });
 
