@@ -288,7 +288,15 @@ async function run() {
   const appUrl = `http://127.0.0.1:${port}/`;
   /* ⚠️ THE SELF-TEST MOVES THE REF, NOT THE APP. Mutating the app would prove the app can be broken;
      mutating the oracle proves the COMPARISON reports a difference it should. */
-  const refData = await read(refUrl, selfTest ? () => { document.querySelector(".points").style.gap = "96px"; } : null, ".vision .points");
+  /* ⚠️ THE MUTATION MUST LAND ON A FIELD NO `EXPECTED` RULE EXCUSES, AND THE FIRST ONE DID NOT.
+     It widened the ref's column gap — and `vision.*.w` had since been agreed as a known difference,
+     so the harness excused its own mutation and reported "proves nothing". That is the check
+     working: a self-test is only worth the last time somebody watched it fail. The type on those
+     headings is not excused anywhere, and if it ever is, this goes quiet again and says so. */
+  const MUTATE = () => {
+    for (const h of document.querySelectorAll(".points h3")) h.style.fontSize = "33px";
+  };
+  const refData = await read(refUrl, selfTest ? MUTATE : null, ".vision .points");
   const appData = await read(appUrl, null, ".mk-visionpoints");
 
   const rows = [];
@@ -388,7 +396,7 @@ async function run() {
     JSON.stringify({ width: WIDTH, misses, expected }, null, 2));
 
   if (selfTest) {
-    const caught = misses.some((x) => x.key.startsWith("vision.") && x.field === "w");
+    const caught = misses.some((x) => x.key === "vision.h3a.fontSize");
     console.log(caught
       ? "\n✓ self-test: the harness reported the miss it was given"
       : "\n✗ self-test: the harness did NOT report a moved probe — it proves nothing");
