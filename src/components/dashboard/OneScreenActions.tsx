@@ -2,64 +2,62 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * OneScreenActions — the quick actions card (stage 3, 17 Sep; rebuilt for v16, 18 Sep).
+ * OneScreenActions — the quick-actions card (v33, 18 Sep; ref design-refs/dashboard-v33.html).
  *
- * Three tiles, each an illustration and a name, filling the card's height in equal thirds.
- *
- * ⚠️ NO SUB-TEXT AND NO BUTTON CHROME (the ref, and Nick). A tile is a picture and what it does. The
- * ref's own markup carries a sub-line and hides it; the words were "Request, pass, or R&R" — the kind
- * of explanation that is only read once and then read past for ever.
- *
- * ⚠️ EVERY TILE IS AN EXISTING FLOW, REACHED THE WAY THE SHELL REACHES IT — `invokeCapture`, the same
- * capture contracts the sidebar's New menu uses. The card is a second doorway, never a second door.
- *
- * ⚠️ TWO OF THE THREE PICTURES DO NOT EXIST YET, AND THE TILE SAYS SO RATHER THAN SHRINKING. A dashed
- * square of the same 46px, captioned with the file's subject, holds the space the artwork will take —
- * so the day it lands nothing in this card moves.
+ * No large title: a mono eyebrow in the sand band. One tile — "Log a query", with the quill — fills
+ * what the two lines beneath it leave; "Record a response" and "Add an agent" are plain rows with a
+ * hairline between them. Every control is an existing capture (`lib/dashActions`).
  */
 import React from "react";
 import { invokeCapture } from "../shell/railNav";
-import { QUICK_ART, ART_PLACEHOLDER, artUrl } from "../../lib/dashArt";
+import { DASH_ART, artUrl } from "../../lib/dashArt";
 import { QUICK_ACTIONS } from "../../lib/dashActions";
 import { OneScreenPanel } from "./OneScreenPanel";
+
+/** The ref's 16px arrow — `currentColor`, so it is ink on the tile and ink on the rows. */
+const Arrow: React.FC = () => (
+  <svg className="os-qaar" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </svg>
+);
 
 export const OneScreenActions: React.FC<{
   loading: boolean;
   onNavigate: (tab: string, sub?: string) => void;
-}> = ({ loading, onNavigate }) => (
-  <OneScreenPanel variant="os-qa" probe="quick-actions" loading={loading} skel={["h", "", "", ""]}>
-    <div className="os-hd">
-      <h3 className="os-cardttl">Quick actions</h3>
-    </div>
-    <div className="os-qastack">
-      {QUICK_ACTIONS.map((a) => {
-        const art = QUICK_ART[a.art];
-        return (
+}> = ({ loading, onNavigate }) => {
+  const main = QUICK_ACTIONS.filter((a) => a.rank === "main");
+  const minor = QUICK_ACTIONS.filter((a) => a.rank === "minor");
+  return (
+    <OneScreenPanel
+      variant="os-qa" tone="sand" probe="quick-actions" loading={loading} skel={["h", "grow", "", ""]}
+      band={<p className="os-qaeyebrow">Quick actions</p>}
+    >
+      {main.map((a) => (
+        <button
+          key={a.key} type="button" className="os-qahero" data-action={a.key} data-probe="qa-hero"
+          onClick={() => invokeCapture(a.capture, onNavigate)}
+        >
+          {/* ⚠️ CENTRED, 16px DOWN, AND `calc(100% - 78px)` TALL — sized off the TILE, so the quill
+              grows and shrinks with the row and never reaches the label beneath it. */}
+          <img
+            className="os-qaquill" src={artUrl(DASH_ART.quill)} width={DASH_ART.quill.width} height={DASH_ART.quill.height}
+            alt="" decoding="async" data-probe="qa-quill"
+          />
+          <b className="os-qaherolab">{a.label}</b>
+          <Arrow />
+        </button>
+      ))}
+      <div className="os-qaminor">
+        {minor.map((a) => (
           <button
-            key={a.key}
-            type="button"
-            className="os-qatile"
-            data-action={a.key}
+            key={a.key} type="button" className="os-qarow" data-action={a.key}
             onClick={() => invokeCapture(a.capture, onNavigate)}
           >
-            {art
-              ? (
-                <img
-                  className="os-qaart"
-                  src={artUrl(art)}
-                  width={art.width}
-                  height={art.height}
-                  alt=""
-                  decoding="async"
-                />
-              )
-              : (
-                <span className="os-qaph" aria-hidden="true">{ART_PLACEHOLDER[a.art]}</span>
-              )}
-            <span className="os-qalab">{a.label}</span>
+            <span className="os-qarowlab">{a.label}</span>
+            <Arrow />
           </button>
-        );
-      })}
-    </div>
-  </OneScreenPanel>
-);
+        ))}
+      </div>
+    </OneScreenPanel>
+  );
+};

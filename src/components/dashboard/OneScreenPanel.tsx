@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * OneScreenPanel — THE dashboard container. One card shell, four consumers.
+ * OneScreenPanel — THE dashboard container. One card shell, five consumers.
  *
  * ⚠️ WHY THIS EXISTS. Before it there were four containers with four header treatments, three of
  * them structurally different: Tasks and Activity carried gradient bands that agreed on neither
@@ -12,35 +12,34 @@
  * maintained by hand. That is the fault this codebase keeps meeting: duplicate rules surviving
  * edits, two counters with one name, `.os-p` beside `.os-pill`.
  *
- * ⚠️ THIS COMMIT IS A VISUAL NO-OP, DELIBERATELY. Every container keeps the exact class list and
- * the exact head markup it had; the panel owns only the shell (classes, loading skeleton, and the
- * ref/handlers a consumer needs). No band is invented for Goals or Active queries here, no mark
- * slot is added, and the rim is untouched — those land on top, each as its own change, so that any
- * pixel that moves in THIS commit is a bug rather than a judgement call.
- *
- * ⚠️ THE HEAD IS A NODE, NOT A SHAPE. The four heads genuinely differ — a trio of count pills, an
- * expand control, an editable goal figure, a control cluster — and forcing them into one prop
- * signature now would either flatten real differences or grow a prop per consumer. The primitive
- * owns WHERE the head goes and what surrounds it; the consumer owns what is in it. When §3 gives
- * Goals and Active queries real bands, the band becomes the panel's job and the heads collapse
- * towards each other on their own.
+ * ⚠️ SINCE v33 THE BAND IS THE PANEL'S JOB. The heads used to be the consumer's own markup rendered
+ * first inside the card (`head`), because they differed structurally; they are one construction now —
+ * a band across the top of the frame — so the panel draws it and the consumer supplies only what is
+ * IN it. The `head` prop is retired with the last consumer that passed one.
  */
 import React from "react";
 import { Skel } from "./OneScreenDashboard";
 
+/** The band's colour, by what the card is ABOUT — never by where it sits (v33). */
+export type PanelTone = "sand" | "navy" | "stone" | "slate" | "rose";
+
 export interface OneScreenPanelProps {
-  /** The container's own class — `os-tasks`, `os-actv`, `os-goal`, `os-lead`. */
+  /** The container's own class — `os-qa`, `os-lead`, `os-cl`, `os-feed`, `os-todo`. */
   variant: string;
   /** Firestore still resolving → the skeleton overlay, and the content goes `opacity: 0`. */
   loading?: boolean;
   /** Skeleton bar shape, per the existing `Skel` convention. */
   skel?: ("h" | "grow" | "")[];
-  /** The header row — the consumer's own markup, rendered first inside the card. */
-  head?: React.ReactNode;
+  /**
+   * ⚠️ THE HEADER BAND (v33) — the card's title row, drawn INSIDE the burgundy line, edge to edge,
+   * taking the frame's top corners (the frame's `overflow: hidden` does the clipping). The consumer
+   * passes the row's contents; the panel owns the band itself, so all five are one construction.
+   */
+  band?: React.ReactNode;
+  tone?: PanelTone;
   /** ⚠️ `os-lift` is the DEFAULT: every container has it today. Stated so a future opt-out is
    *  explicit rather than a class quietly dropped from one call site. */
   lift?: boolean;
-  /** The activity card measures itself for the expand/click-away behaviour. */
   innerRef?: React.Ref<HTMLDivElement>;
   /**
    * ⚠️ THE REF-DIFF HARNESS'S HANDLE, AND IT IS A PROP RATHER THAN A CLASS ON PURPOSE.
@@ -53,16 +52,27 @@ export interface OneScreenPanelProps {
   children?: React.ReactNode;
 }
 
+/**
+ * ⚠️ THE CARD IS A WHITE RIM WITH A FRAME INSIDE IT (v33 — "MountCard v2"). `.os-card` is the 6px
+ * rim, its radius and its shadow; `.os-frame` is the 1px burgundy line, 11px radius, and it CLIPS —
+ * which is what lets the band run edge to edge and take the top corners without a radius of its own.
+ *
+ * ⚠️ THIS IS THE DASHBOARD'S OWN CARD AND NOT THE SHARED `MountCard`/`MountPanel`. Those have some
+ * twenty-five importers across settings, plans, import and the Query Centre; a rim change there
+ * repaints all of them.
+ */
 export const OneScreenPanel: React.FC<OneScreenPanelProps> = ({
-  variant, loading = false, skel, head, lift = true, innerRef, probe, children,
+  variant, loading = false, skel, band, tone, lift = true, innerRef, probe, children,
 }) => (
   <div
     ref={innerRef}
     data-probe={probe}
-    className={`os-card${lift ? " os-lift" : ""} ${variant}${loading ? " isload" : ""}`}
+    className={`os-card${lift ? " os-lift" : ""} ${variant}${tone ? ` os-tone--${tone}` : ""}${loading ? " isload" : ""}`}
   >
     {loading && skel && <Skel bars={skel} />}
-    {head}
-    {children}
+    <div className="os-frame" data-probe={probe ? `${probe}-frame` : undefined}>
+      {band !== undefined && <div className="os-band" data-probe={probe ? `${probe}-band` : undefined}>{band}</div>}
+      {children}
+    </div>
   </div>
 );

@@ -85,51 +85,55 @@ describe("Phase 1 · the zero-query branch", () => {
 
 /* ══════════════════════ the faded example ══════════════════════ */
 
-describe("Phase 1 · the faded example is inert", () => {
-  it("hides the drawn layer from assistive tech and takes it out of hit testing", () => {
-    const html = renderEmpty();
-    /* the fade wrapper carries aria-hidden in the markup … */
-    expect(html).toMatch(/class="os-cefade"[^>]*aria-hidden="true"|aria-hidden="true"[^>]*class="os-cefade"/);
-    /* … and pointer-events in the sheet. Both halves, because either alone leaves it reachable. */
-    expect(rule(".os-cefade")).toContain("pointer-events: none");
-    expect(rule(".os-ceg")).toContain("pointer-events: none");
-  });
-
-  it("draws no button inside the faded layer — structurally, not by tabindex", () => {
-    const html = renderEmpty();
-    const fade = html.slice(html.indexOf('class="os-cefade"'), html.indexOf('class="os-ceover"'));
-    expect(fade.length).toBeGreaterThan(200);         // the slice found the layer
-    expect(fade).not.toContain("<button");
-    expect(fade).not.toContain("tabindex");
-  });
-
-  /* ⚠️ THE PANEL ENDS AT THE CLOSED TILE NOW (stage 3) — the next card in its row, with a control of its
-     own ("All →"), so the slice is bounded by that card rather than by the to-do card further down. */
+/**
+ * ⚠️ THE FADED EXAMPLE IS RETIRED (v33, 18 Sep), AND WHAT IT PROTECTED AGAINST IS GONE WITH IT. It drew
+ * a chart, a legend and a grain chip under a button, so five cases here held that drawing inert —
+ * aria-hidden, no button inside it, fading the header's children and never the header. The panel now
+ * draws no example at all: the Courier, a title, one line and one ink pill. The claims that survive
+ * are the ones that were never about the drawing: exactly one control, and nothing on the panel the
+ * populated card does not do.
+ */
+describe("Phase 1 · the empty chart panel", () => {
   it("puts exactly one control in the panel, and it is the CTA", () => {
     const html = renderEmpty();
     const panel = sliceBetween(html, 'data-probe="chart-empty"', 'data-probe="closed-tile"', "the empty chart panel");
     expect((panel.match(/<button/g) ?? []).length).toBe(1);
-    expect(panel).toContain("Log your first query");
+    expect(panel).toContain(">Log a query</button>");
+    expect(panel).not.toContain("tabindex");
   });
 
-  /* ⚠️ RETARGETED (stage 3): the chart has no aspect ratio to match any more — its plot takes what the row
-     leaves above a floor. So the example sits in the REAL plot's box, by class, and the two cannot size
-     differently. */
-  it("draws the example in the real chart's own boxes, so the panel does not resize when the first query lands", () => {
+  it("says what the card will become, and draws the Courier — never the Mentor, never a chart", () => {
     const html = renderEmpty();
     const panel = sliceBetween(html, 'data-probe="chart-empty"', 'data-probe="closed-tile"', "the empty chart panel");
-    for (const cls of ["os-achead os-ce-head", "os-acbody", "os-acplot os-ce-plot", "os-acx os-ce-x"]) {
-      expect(panel, cls).toContain(`class="${cls}"`);
+    expect(panel).toContain("No active queries right now");
+    expect(panel).toContain("this becomes your campaign chart");
+    expect(panel).toContain("/images/dash/courier.png");
+    expect(panel).not.toContain("mentor");
+    expect(panel).not.toContain("<svg");
+    /* the band stays above it, and names the state */
+    expect(html).toContain('data-probe-text="chart-title">No active queries</h3>');
+  });
+
+  it("⚠️ the faded example is gone, rule and element together", () => {
+    const html = renderEmpty();
+    for (const cls of ["os-cefade", "os-ceover", "os-ceg", "os-ce-head", "os-ce-plot", "os-ce-x", "os-ce-seg", "os-ce-svg"]) {
+      expect(html, cls).not.toMatch(new RegExp(`["\\s]${cls}["\\s]`));
+      expect(cssRules, cls).not.toMatch(new RegExp(`\\.${cls}[\\s,{:.>]`));
     }
-    expect(rule(".os-acplot")).toContain("min-height: 150px");
-    expect(rule(".os-ce-plot")).toContain("opacity: 0.28");
     expect(cssRules).not.toMatch(/\.os-chartwrap\s*\{/);
   });
 
-  it("fades the header's CHILDREN and never the header", () => {
-    expect(rule(".os-ce-head > *")).toContain("opacity: 0.28");
-    /* the header itself is `.os-achead`, which the example reuses — it must carry no fade */
-    expect(() => rule(".os-ce-head")).toThrow();
+  it("⚠️ the closed card's own empty state is NOT a zero-query state — it shares the layout, not the marker", () => {
+    /* one live query, nothing closed: an ordinary populated dashboard */
+    const html = renderFull();
+    expect(html).toContain('data-probe="closed-empty"');
+    expect(html).toContain("Nothing closed yet");
+    expect(html).toContain('data-probe-text="closed-title">No closed queries</h3>');
+    const panel = sliceBetween(html, 'data-probe="closed-empty"', 'data-probe="row2"', "the closed card with nothing in it");
+    expect(panel, "there is nothing to do here, so there is no button").not.toContain("<button");
+    /* he still looks up: both drawings are in the box */
+    expect(panel).toContain("/images/dash/archivist.png");
+    expect(panel).toContain("/images/dash/archivist-looking.png");
   });
 });
 

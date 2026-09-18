@@ -3,7 +3,7 @@
     {
       "width": 1440,
       "caught": true,
-      "worst": 5,
+      "worst": 4,
       "settle": {
         "suppressed": true,
         "slotClass": "",
@@ -27,16 +27,16 @@
             "bottom": 1130
           },
           "bodyTop": 115.5,
-          "bodyBottom": 1126.4,
+          "bodyBottom": 1126.3,
           "bodyFirst": {
             "cls": "os-content",
             "top": 115.5,
-            "bottom": 1126.4
+            "bottom": 1126.3
           },
           "bodyLast": {
             "cls": "os-content",
             "top": 115.5,
-            "bottom": 1126.4
+            "bottom": 1126.3
           },
           "shown": 2
         },
@@ -52,16 +52,16 @@
             "bottom": 1130
           },
           "bodyTop": 115.5,
-          "bodyBottom": 1130.8,
+          "bodyBottom": 1130.3,
           "bodyFirst": {
-            "cls": "os-greet",
+            "cls": "os-greetshadow",
             "top": 115.5,
-            "bottom": 259.3
+            "bottom": 487.5
           },
           "bodyLast": {
             "cls": "os-row2",
-            "top": 623.8,
-            "bottom": 1086.8
+            "top": 692.3,
+            "bottom": 1086.3
           },
           "shown": 2
         }
@@ -83,7 +83,7 @@
         "controlNames": [],
         "inked": 0,
         "inkedText": [],
-        "scanned": 1015
+        "scanned": 1017
       },
       "removed": true,
       "tickets": 0,
@@ -92,15 +92,15 @@
           "present": true,
           "ghost": true,
           "scroller": "os-scroll",
-          "count": 4,
+          "count": 3,
           "cols": 1,
           "tileH": 66,
-          "gridW": 427.7,
+          "gridW": 415.7,
           "rowGap": 0,
-          "portFoot": 1035.4,
-          "lastBottom": 973,
-          "overflow": -62.4,
-          "wholeVisible": 4
+          "portFoot": 1035.3,
+          "lastBottom": 975.3,
+          "overflow": -60,
+          "wholeVisible": 3
         },
         "after": {
           "present": true,
@@ -109,19 +109,19 @@
           "count": 23,
           "cols": 1,
           "tileH": 66,
-          "gridW": 427.7,
+          "gridW": 415.7,
           "rowGap": 0,
-          "portFoot": 1033.3,
-          "lastBottom": 2296.9,
-          "overflow": 1263.6,
-          "wholeVisible": 4
+          "portFoot": 1032.8,
+          "lastBottom": 2365.8,
+          "overflow": 1333,
+          "wholeVisible": 3
         }
       },
       "nav": {
-        "frames": 69,
-        "on": 28,
+        "frames": 66,
+        "on": 24,
         "out": 16,
-        "off": 25,
+        "off": 26,
         "badOn": 0,
         "badOut": 0,
         "badOff": 0,
@@ -135,14 +135,14 @@
     }
   ],
   "widths": 1,
-  "worst": 5,
+  "worst": 4,
   "allCaught": true,
   "allRemoved": true,
   "noneMissing": true,
   "animated": true,
   "tolerance": 4,
   "reducedMotion": {
-    "skeletonBlocks": 66,
+    "skeletonBlocks": 83,
     "skeletonRunning": 14,
     "skeletonNamed": 0,
     "barBlocks": 31,
@@ -153,7 +153,7 @@
   },
   "rmStill": false,
   "headMatches": true,
-  "footMatches": false,
+  "footMatches": true,
   "nothingClipped": true,
   "tkWidths": 1,
   "tkCountMatches": true,

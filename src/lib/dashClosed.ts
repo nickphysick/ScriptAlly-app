@@ -22,7 +22,7 @@
  */
 import { Activity, Query, QueryStatus } from "../types";
 import { buildRows } from "./analytics";
-import { sentAt } from "./oneScreen";
+import { closedAt, sentAt } from "./oneScreen";
 
 export type ClosedBucketKey = "quiet" | "letter" | "partial" | "full";
 
@@ -64,18 +64,30 @@ export interface ClosedTile {
   replied: number;
   /** went quiet — No reply */
   quiet: number;
+  /**
+   * Which queries are in each bucket, most recently closed first (v33) — the popup's "three most
+   * recent" and its "See all" read THIS, so the list under a slice is the slice, not a second
+   * bucketing that could disagree with the ring about where a query stopped.
+   */
+  members: Record<ClosedBucketKey, string[]>;
 }
 
 export const closedTile = (queries: readonly Query[], activities: readonly Activity[]): ClosedTile => {
   const closed = queries.filter((q) => CLOSED_STATUSES.includes(q.status) && sentAt(q) !== null);
   const rows = buildRows([...closed], [...activities], [], 0);
   const counts: Record<ClosedBucketKey, number> = { letter: 0, partial: 0, full: 0, quiet: 0 };
+  const members: Record<ClosedBucketKey, string[]> = { letter: [], partial: [], full: [], quiet: [] };
+  const closedMs = new Map(closed.map((q) => [q.id, closedAt(q) ?? 0]));
   for (const r of rows) {
     const key: ClosedBucketKey = r.status === QueryStatus.NO_RESPONSE ? "quiet"
       : r.reachedFull ? "full"
       : r.reachedRequest ? "partial"
       : "letter";
     counts[key] += 1;
+    members[key].push(r.id);
+  }
+  for (const k of Object.keys(members) as ClosedBucketKey[]) {
+    members[k].sort((a, b) => (closedMs.get(b) ?? 0) - (closedMs.get(a) ?? 0) || a.localeCompare(b));
   }
   const total = closed.length;
   const sum = counts.letter + counts.partial + counts.full + counts.quiet;
@@ -95,6 +107,7 @@ export const closedTile = (queries: readonly Query[], activities: readonly Activ
     pastLetter: counts.partial + counts.full,
     replied: counts.letter + counts.partial + counts.full,
     quiet: counts.quiet,
+    members,
   };
 };
 
@@ -105,7 +118,7 @@ export const closedTile = (queries: readonly Query[], activities: readonly Activ
  * `R` is the radius the arcs are stroked on, `STROKE` their width; `C` is the circumference every
  * dash length is a fraction of.
  */
-export const DONUT = { r: 60, stroke: 22, box: 160 } as const;
+export const DONUT = { r: 60, stroke: 20, hover: 25, gap: 3, box: 160 } as const;
 export const DONUT_C = 2 * Math.PI * DONUT.r;
 
 export interface DonutArc {
@@ -138,5 +151,49 @@ export const closedDonut = (tile: Pick<ClosedTile, "total" | "buckets">): DonutA
     if (len > 0) out.push({ key: b.key, len, offset: -(done / tile.total) * DONUT_C });
     done += count;
   }
+  return out;
+};
+
+/** The dash actually stroked: the arc, less the hairline gap that separates it from the next. */
+export const arcDash = (a: DonutArc): number => Math.max(0.01, a.len - DONUT.gap);
+
+/**
+ * ⚠️ THE RING IS TURNED SO ITS LARGEST SLICE IS CENTRED AT 12 O'CLOCK (v33). The Archivist's head
+ * covers about 65° at the top of the ring; centring the largest slice beneath it guarantees he never
+ * hides a small one — and the small ones, the partial and full requests, are what a writer most
+ * wants to see. A tie goes to the earlier bucket, so the ring does not flip between two equals.
+ *
+ * Returned in degrees, to be added to the arcs' own `rotate(-90)` start.
+ */
+export const donutRotation = (tile: Pick<ClosedTile, "total" | "buckets">): number => {
+  if (tile.total <= 0) return 0;
+  let done = 0, best = -1, centre = 0;
+  for (const b of CLOSED_BUCKETS) {
+    const count = tile.buckets.find((x) => x.key === b.key)?.count ?? 0;
+    if (count > best) { best = count; centre = ((done + count / 2) / tile.total) * 360; }
+    done += count;
+  }
+  return -centre;
+};
+
+/**
+ * What each slice's popup says under its name — what happened, and nothing the code does not do.
+ * ⚠️ "No reply" IS THE WRITER'S OWN CLOSE. The app closes nothing by itself and counts no days, so
+ * the line states the outcome and no threshold.
+ */
+export const CLOSED_NOTE: Record<ClosedBucketKey, string> = {
+  quiet: "Closed with no reply from the agent",
+  /* ⚠️ NOT "read … and passed" (the mockup's). The buckets are `reachedRequest` / `reachedFull` —
+     the log records that a request was MADE, never that anything was read, and a pass can land
+     between a request and the send. These say what the log says. */
+  letter: "The agent passed on the query",
+  partial: "The agent asked for a partial, then passed",
+  full: "The agent asked for the full manuscript, then passed",
+};
+
+/** Tallies: gates of five. `[5, 5, 4]` for 14 — full gates, then the part gate if any. */
+export const tallyGates = (n: number): number[] => {
+  const out: number[] = [];
+  for (let left = Math.max(0, Math.floor(n)); left > 0; left -= 5) out.push(Math.min(5, left));
   return out;
 };

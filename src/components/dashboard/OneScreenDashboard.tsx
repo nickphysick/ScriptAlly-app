@@ -2,7 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * OneScreenDashboard — the dashboard (v16, 18 Sep; ref design-refs/dashboard-v16-2026-09-18.html).
+ * OneScreenDashboard — the dashboard (v16, 18 Sep; top row and card chrome v33, 18 Sep — refs
+ * design-refs/dashboard-v16-2026-09-18.html and design-refs/dashboard-v33.html).
  *
  * The header, then two rows: quick actions · the chart · closed, and beneath them the activity feed
  * beside the to-do list. Both cards in the second row end on the same line and scroll inside it.
@@ -40,6 +41,8 @@ import { OneScreenFeed } from "./OneScreenFeed";
 import { readSeenAt, writeSeenAt } from "../../lib/dashSeen";
 import { OneScreenSkeleton } from "./OneScreenSkeleton";
 import { useSkeleton } from "../../lib/skeletonTiming";
+import { DashPopupProvider } from "./DashPopup";
+import { DASH_ART, artUrl } from "../../lib/dashArt";
 import "./oneScreen.css";
 
 export interface OneScreenDashboardProps {
@@ -375,7 +378,17 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
        */
       className={`os-root${skeleton.phase === "on" ? " os-loading" : ""}`}
     >
+      {/* ⚠️ THE HAWK'S SHADOW BELONGS TO THE GREETING (v33). One image, behind the cards (`z-index: 0`;
+          every row is above it), inert, and ABSOLUTE INSIDE THE CONTENT — so it scrolls with the page
+          rather than hanging on the window. A wing crosses the greeting and runs up behind the search
+          bar; the body disappears under the first two cards; a sliver shows in the gutter between
+          them. Nothing shows through a card: the cards are opaque and above it.
+          ⚠️ IT IS THE SOLID FILE, NOT THE LANDING PAGE'S — see `lib/dashArt`. */}
+      <DashPopupProvider rootRef={rootRef}>
       <div className="os-content" data-probe="main">
+        <div className="os-greetshadow" aria-hidden="true" data-probe="greet-shadow">
+          <img src={artUrl(DASH_ART.shadow)} width={DASH_ART.shadow.width} height={DASH_ART.shadow.height} alt="" decoding="async" />
+        </div>
         {/* ⚠️ FOUR ROWS IN ONE CENTRED BLOCK (stages 2–3, 17 Sep): the header, the breakdown and the
             three-card row span the block's width, and the to-do card and the activity column sit
             side by side beneath them. The header used to be the left column's first row with the
@@ -395,12 +408,18 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             loading={loading}
             queries={scopedQueries}
             activities={scopedActivities}
+            agents={agents}
+            manuscripts={manuscripts}
+            onOpenQuery={(id) => onNavigate("queries", id)}
             activeCount={activeCount}
             now={now}
             empty={empty}
             onSendFirst={() => onNavigate("queries", "Send a query")}
           />
-          <OneScreenClosed loading={loading} tile={closed} onSeeAll={() => onNavigate("queries")} />
+          <OneScreenClosed
+            loading={loading} tile={closed} queries={queries} agents={agents}
+            onSeeAll={() => onNavigate("queries")} onOpenQuery={(id) => onNavigate("queries", id)}
+          />
         </div>
 
         {/* ⚠️ ROW TWO IS ONE HEIGHT AND TWO SCROLLERS. The row's height is a clamp on the page's own
@@ -447,6 +466,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           />
         </div>
       </div>
+      </DashPopupProvider>
       {/* ⚠️ LAST CHILD, OVER THE MOUNTED PAGE. The cards stay in the tree beneath it, which is what
           makes "no layout shift" structural rather than a matter of matching numbers — and it is
           why the dissolve works: the page is already finished under there, so this fades off a

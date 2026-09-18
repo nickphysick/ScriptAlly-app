@@ -51,10 +51,17 @@ describe("trap 1 — the white field", () => {
     expect(blk(".os-mark-il img")).toContain("mix-blend-mode: multiply");
     expect(goalCss).not.toMatch(/\.os-mark-il img\s*\{[^}]*mix-blend-mode:\s*normal/);
     expect(bare).not.toContain(".os-cic.plane");
-    /* ⚠️ AND NOTHING ON THE LIVE PAGE BLENDS AT ALL — v16 has no painted artwork on it. A
-       `mix-blend-mode` appearing in the shared sheet is a mark that has come back without its traps
-       being thought about, which is how the white square returns. */
-    expect(bare, "the dashboard's shared sheet blends something").not.toContain("mix-blend-mode");
+    /* ⚠️ THE LIVE PAGE BLENDS IN EXACTLY ONE PLACE, AND IT IS NOT A WHITE-FIELD FIX (v33). The Mentor's
+       second drawing is `plus-lighter` inside an `isolation: isolate` wrapper — an additive
+       cross-dissolve between two transparent drawings, which blends them with EACH OTHER and with
+       nothing behind them. A `multiply` anywhere in the shared sheet is still a mark that has come
+       back without its traps being thought about, which is how the white square returns; and a second
+       blend of any kind is a decision nobody has taken. */
+    expect(bare, "a multiply on the live page is the white-field fix coming back").not.toMatch(/mix-blend-mode:\s*multiply/);
+    expect(bare.match(/mix-blend-mode/g)?.length, "exactly one blend on the live page: the Mentor's").toBe(1);
+    expect(bare).toMatch(/\.os-mentor-b\s*\{[^}]*mix-blend-mode:\s*plus-lighter/);
+    /* …and it needs its isolation, or it adds onto the chart behind him too — the pair is one mechanism */
+    expect(bare).toMatch(/\.os-mentor\s*\{[^}]*isolation:\s*isolate/);
   });
 
   it("⚠️ and it is BARE — no plate, no border, no fill behind it", () => {

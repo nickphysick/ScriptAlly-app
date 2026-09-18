@@ -136,16 +136,19 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
   const more = moreWaiting(live.length, rows.length);
 
   return (
-    <OneScreenPanel variant="os-todo" probe="todo-card" loading={loading} skel={["h", "grow", "grow"]}>
-      <div className="os-hd">
-        <div>
-          <h3 className="os-cardttl">To-do list</h3>
-          <p className="os-sub">{empty ? GETTING_STARTED_EYEBROW : "Where the ball is with you"}</p>
+    <OneScreenPanel
+      variant="os-todo" tone="rose" probe="todo-card" loading={loading} skel={["h", "grow", "grow"]}
+      /* ⚠️ NO SUB-HEADING UNDER ANY TITLE (v33) — so in the first-run moment the words that named
+         the list ("Getting started") have one place left to live, and it is the title. */
+      band={(
+        <div className="os-bandrow">
+          <h3 className="os-cardttl" data-probe-text="todo-title">{empty ? GETTING_STARTED_EYEBROW : "To-do list"}</h3>
+          <button type="button" className="os-mini" data-probe="todo-badge" onClick={onSeeAll}>
+            All {loading ? "" : total}
+          </button>
         </div>
-        <button type="button" className="os-mini" data-probe="todo-badge" onClick={onSeeAll}>
-          All {loading ? "" : total}
-        </button>
-      </div>
+      )}
+    >
 
       <div className="os-scroll" data-probe="todo-rows">
         {empty ? (

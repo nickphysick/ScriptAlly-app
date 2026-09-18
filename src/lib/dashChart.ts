@@ -2,181 +2,96 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * dashChart — the dashboard's active-queries chart (stage 3, 17 Sep): one navy line over a fade, its
- * window, its headline caption and the event dots that sit on it.
+ * dashChart — the geometry of the dashboard's active-queries chart (v33, 18 Sep; ref
+ * design-refs/dashboard-v33.html).
  *
- * ⚠️ THE LINE IS THE LEDGER'S `active` STOCK, AND NOTHING ELSE. The stacked state bands, the brush,
- * the hover readouts and the draw-in are retired with the chart that had them; what is left is the
- * one series the header already reads.
+ * ⚠️ THE LINE IS THE LEDGER'S `active` STOCK, AND NOTHING ELSE. What is windowed and at what grain is
+ * `dashWindow`'s; what is pinned to the line is `dashPins`'; what a week held is `dashWeekMix`'s. This
+ * file turns a series of values into pixels, and says where on the drawn line a moment falls.
  *
- * ⚠️ THE DOTS ARE ON THE CURVE BY CONSTRUCTION. A dot at a knot sits where the line passes through
- * that point exactly (a monotone cubic interpolates its knots); where a request and a pass share a
- * point, the two are nudged apart ALONG the same curve — evaluated with the same Fritsch–Carlson
- * tangents `monotonePath` draws with — so neither leaves the line.
- */
-import { Activity, Query, QueryStatus } from "../types";
-import {
-  aggregateLedger, axisTicks, axisTop, Freq, hermiteCoeffs, LedgerPoint, monotonePath, rangeWindow,
-} from "./oneScreen";
-import { buildRows } from "./analytics";
-import { getActivityTime, normalizeResultingStatus } from "./queryDerivation";
-
-const DAY_MS = 86400000;
-
-/**
- * ⚠️ THE CARD DRAWS ONE GRAIN — WEEKLY (v16, 18 Sep, Nick: "weekly only for now"). The Daily and
- * Monthly windows stay in this table because the functions below are written over the grain rather
- * than around it, and narrowing the type would be a change to every one of them for a toggle that is
- * coming back. `CHART_GRAIN` is what the card reads; nothing else picks a grain any more.
- */
-export const CHART_GRAIN: Freq = "weekly";
-
-/** How much history each grain shows — 8 weeks for Daily and Weekly, a year for Monthly. */
-export const CHART_WINDOW: Record<Freq, { days: number; label: string }> = {
-  daily: { days: 56, label: "8 weeks" },
-  weekly: { days: 56, label: "8 weeks" },
-  monthly: { days: 365, label: "12 months" },
-};
-
-export const chartView = (daily: LedgerPoint[], freq: Freq): LedgerPoint[] =>
-  rangeWindow(aggregateLedger(daily, freq), CHART_WINDOW[freq].days);
-
-/**
- * How far the active count moved across the window.
+ * ⚠️ THE PLOT HAS A FLOOR AND A HEADROOM, BOTH AS FRACTIONS OF ITS HEIGHT (the ref's). The baseline
+ * sits 92.5% of the way down — the Mentor stands on it, so the same fraction places his feet — and
+ * the largest value in range is drawn 18% from the top, which is the room the pins rise into.
  *
- * ⚠️ READ OFF THE DAILY ROWS AT EVERY GRAIN, so Daily and Weekly — both "over 8 weeks" — cannot state
- * two different numbers for the same eight weeks. A weekly view's first point closes up to six days
- * after the window opens; the daily row 56 days back is the window's actual edge.
- */
-export const chartDelta = (daily: LedgerPoint[], freq: Freq): number => {
-  if (daily.length === 0) return 0;
-  const last = daily.length - 1;
-  const from = Math.max(0, last - CHART_WINDOW[freq].days);
-  return daily[last].active - daily[from].active;
-};
-
-/**
- * Queries whose FIRST reply landed inside the window — each query counted once, whatever it went on
- * to say, which is the house response rule (`buildRows` carries the canonical response set).
- */
-export const repliesInWindow = (
-  queries: readonly Query[],
-  activities: readonly Activity[],
-  freq: Freq,
-  now: Date,
-): number => {
-  const from = now.getTime() - CHART_WINDOW[freq].days * DAY_MS;
-  return buildRows([...queries], [...activities], [], 0)
-    .filter((r) => r.respondedMs !== null && r.respondedMs >= from && r.respondedMs <= now.getTime())
-    .length;
-};
-
-/** "↑ 4 over 8 weeks · 5 replies" */
-export const chartMove = (delta: number, freq: Freq = CHART_GRAIN): string => {
-  const span = CHART_WINDOW[freq].label;
-  return delta > 0 ? `↑ ${delta} over ${span}` : delta < 0 ? `↓ ${-delta} over ${span}` : `Level over ${span}`;
-};
-
-/**
- * The header's mono eyebrow — "18 out with agents · ↑ 6 over 8 weeks" (the ref's).
+ * ⚠️ TWO LINES, ONE SET OF POINTS. A long campaign is a monotone cubic through weekly points (it
+ * passes through every knot and never overshoots — see `monotonePath`); a short one is STEPPED through
+ * daily points, because under twelve weeks every rise is one query going out and a curve would draw
+ * fractions of a query. `pointOnLine` answers for whichever was drawn, with the same tangents the
+ * curve used, so a pin or a focus marker is on the ink by construction.
  *
- * ⚠️ THE COUNT IS THE ONE HANDED DOWN, AND WITHOUT IT THE CLAUSE IS ABSENT RATHER THAN ZERO. While
- * the collections are landing the eyebrow states how the line moved and nothing about a stock nobody
- * has counted yet.
- *
- * ⚠️ THE REPLIES CLAUSE IS RETIRED WITH THE STAGE-3 CAPTION. The ref states the stock and the move;
- * "5 replies" was a third figure in a line the reader scans in one pass, and the feed beside it is
- * where replies are read one at a time.
+ * ⚠️ RETIRED WITH v33: the eyebrow caption ("N out with agents · ↑ N over 8 weeks"), the legend, the
+ * three gridlines, the hatch, the first-point marker, the request/pass dots and their nudge, and the
+ * by-width label thinning (the axis thins itself with a container query now).
  */
-export const chartEyebrow = (active: number | null, delta: number, freq: Freq = CHART_GRAIN): string => {
-  const move = chartMove(delta, freq);
-  return active === null ? move : `${active.toLocaleString("en-GB")} out with agents · ${move}`;
-};
+import { hermiteCoeffs, LedgerPoint, monotonePath } from "./oneScreen";
 
-export type ChartEventKind = "request" | "pass";
+export type LineMode = "smooth" | "stepped";
 
-/** A request came in — partial, full, or a revise-and-resubmit. */
-export const REQUEST_EVENT_STATUSES: readonly QueryStatus[] = [
-  QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT,
-];
-/** A pass — and only a pass. Silence is not an event on this line. */
-export const PASS_EVENT_STATUSES: readonly QueryStatus[] = [QueryStatus.REJECTED];
-
-export interface ChartEventDot {
-  /** the point the event falls inside */
-  idx: number;
-  kind: ChartEventKind;
-}
-
-/**
- * One dot of each kind per point: every logged request or pass is bound to the period that contains
- * it, then de-duplicated. Events outside the window are simply not drawn — never clamped to an edge,
- * which would put a dot on a date it did not happen.
- */
-export const chartEventDots = (view: LedgerPoint[], activities: readonly Activity[]): ChartEventDot[] => {
-  if (!view.length) return [];
-  const seen = new Set<string>();
-  const out: ChartEventDot[] = [];
-  for (const a of activities) {
-    const s = normalizeResultingStatus(a.resultingStatus);
-    if (!s) continue;
-    const kind: ChartEventKind | null = REQUEST_EVENT_STATUSES.includes(s) ? "request"
-      : PASS_EVENT_STATUSES.includes(s) ? "pass" : null;
-    if (!kind) continue;
-    const t = getActivityTime(a.date);
-    if (!(t > 0)) continue;
-    const idx = view.findIndex((p) => t >= p.start.getTime() && t <= p.end.getTime());
-    if (idx < 0 || seen.has(`${idx}:${kind}`)) continue;
-    seen.add(`${idx}:${kind}`);
-    out.push({ idx, kind });
-  }
-  return out.sort((x, y) => x.idx - y.idx || (x.kind === "request" ? -1 : 1));
-};
-
-/* ── geometry ── */
-
-/** The plot's own insets. The x labels are HTML beneath the svg, so nothing here reserves room for them. */
-export const PLOT_PAD = { x: 12, top: 14, bottom: 4 } as const;
+/** The plot's own proportions and insets — the ref's `draw()`. */
+export const PLOT = { baseline: 0.925, peak: 0.18, x0: 2, xEnd: 4 } as const;
 
 export const plotX = (u: number, W: number, len: number): number =>
-  PLOT_PAD.x + (u * (W - 2 * PLOT_PAD.x)) / Math.max(1, len - 1);
+  PLOT.x0 + (u * (W - PLOT.x0 - PLOT.xEnd)) / Math.max(1, len - 1);
 
-export const plotY = (v: number, H: number, top: number): number =>
-  H - PLOT_PAD.bottom - (v / Math.max(1, top)) * (H - PLOT_PAD.bottom - PLOT_PAD.top);
+/** `top` is the largest value in range (never below 1, so a flat-zero series sits on the floor). */
+export const plotY = (v: number, H: number, top: number): number => {
+  const base = H * PLOT.baseline;
+  return base - (v / Math.max(1, top)) * (base - H * PLOT.peak);
+};
 
 export interface ChartGeometry {
   points: [number, number][];
-  /** the line, a monotone cubic through every point */
   line: string;
-  /** the same curve, closed down to the baseline, for the fade */
-  area: string;
-  /** the three gridlines' y, baseline first */
-  gridY: number[];
   baseY: number;
+  /** the highest point the line reaches, in px — where the fill's gradient starts */
+  peakY: number;
   top: number;
+  mode: LineMode;
 }
 
-export const chartGeometry = (values: readonly number[], W: number, H: number): ChartGeometry => {
-  const top = axisTop(Math.max(0, ...values));
+/** Step-after: level to the next point's x, then up or down to its value. */
+export const steppedPath = (p: readonly [number, number][]): string => {
+  if (!p.length) return "";
+  let d = `M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)}`;
+  for (let i = 1; i < p.length; i += 1) d += ` H${p[i][0].toFixed(1)} V${p[i][1].toFixed(1)}`;
+  return d;
+};
+
+export const chartGeometry = (values: readonly number[], W: number, H: number, mode: LineMode): ChartGeometry => {
+  const top = Math.max(1, ...values);
   const points = values.map((v, i): [number, number] => [plotX(i, W, values.length), plotY(v, H, top)]);
-  const line = monotonePath(points);
-  const baseY = plotY(0, H, top);
-  const area = points.length
-    ? `${line} L${points[points.length - 1][0].toFixed(1)} ${baseY.toFixed(1)} L${points[0][0].toFixed(1)} ${baseY.toFixed(1)} Z`
-    : "";
-  const gridY = axisTicks(Math.max(0, ...values)).map((t) => plotY(t, H, top));
-  return { points, line, area, gridY, baseY, top };
+  const line = mode === "stepped" ? steppedPath(points) : monotonePath(points);
+  const peakY = points.length ? Math.min(...points.map((q) => q[1])) : H * PLOT.baseline;
+  return { points, line, baseY: H * PLOT.baseline, peakY, top, mode };
 };
 
 /**
- * The curve's position at a fractional index `u` — the Hermite form of the same monotone cubic the
- * line is drawn with, so a point computed here lies on the drawn path.
+ * The fill's outline: the line, closed down to the baseline.
+ *
+ * ⚠️ WITH `carryTo`, THE AREA RUNS ON LEVEL PAST THE LAST POINT — at the last point's height, out to
+ * the inside of the card's frame — and that is only ever passed when the window reaches today. The
+ * journey "goes on" from the present; a window dragged back to last spring ends where it ends.
  */
-export const curvePointAt = (values: readonly number[], u: number, W: number, H: number, top: number): [number, number] => {
+export const fillPath = (g: ChartGeometry, carryTo: number | null): string => {
+  if (!g.points.length) return "";
+  const first = g.points[0], last = g.points[g.points.length - 1];
+  const right = carryTo !== null && carryTo > last[0] ? carryTo : last[0];
+  const carry = right > last[0] ? ` L${right.toFixed(1)} ${last[1].toFixed(1)}` : "";
+  return `${g.line}${carry} L${right.toFixed(1)} ${g.baseY.toFixed(1)} L${first[0].toFixed(1)} ${g.baseY.toFixed(1)} Z`;
+};
+
+/**
+ * Where the drawn line is at a fractional index `u`.
+ *
+ * Smooth: the Hermite form of the same monotone cubic `monotonePath` draws, with the same
+ * Fritsch–Carlson tangents. Stepped: the value holds until the next point's x, then changes.
+ */
+export const pointOnLine = (values: readonly number[], u: number, W: number, H: number, top: number, mode: LineMode): [number, number] => {
   const n = values.length;
   if (n === 0) return [0, 0];
   if (n === 1) return [plotX(0, W, 1), plotY(values[0], H, top)];
   const uu = Math.max(0, Math.min(n - 1, u));
+  if (mode === "stepped") return [plotX(uu, W, n), plotY(values[Math.floor(uu)], H, top)];
   const i = Math.min(n - 2, Math.floor(uu));
   const t = uu - i;
   const m = hermiteCoeffs(values);
@@ -189,77 +104,77 @@ export const curvePointAt = (values: readonly number[], u: number, W: number, H:
 };
 
 /**
- * Where each dot is drawn. Alone at its point, a dot sits on the knot; sharing the point with the
- * other kind, the request moves a little before it and the pass a little after, both along the curve.
+ * A moment → a fractional index along the view, or null when the moment is outside it.
  *
- * ⚠️ AT EITHER END THE PAIR MOVES INWARD TOGETHER. The curve stops at its first and last knots, so a
- * nudge past the end would be clamped back onto the knot — the pair would sit half as far apart and
- * the two 6px dots would stack. Measured by the unit lock, not seen on the harness account, whose
- * shared points happened to be interior.
- */
-export const eventDotPositions = (
-  dots: readonly ChartEventDot[],
-  values: readonly number[],
-  W: number,
-  H: number,
-  top: number,
-): (ChartEventDot & { x: number; y: number })[] => {
-  const n = values.length;
-  const shared = new Set(dots.filter((d) => d.kind === "pass" && dots.some((o) => o.idx === d.idx && o.kind === "request")).map((d) => d.idx));
-  /* a nudge of ~6px, expressed in index units so it is the same distance at every grain */
-  const step = (W - 2 * PLOT_PAD.x) / Math.max(1, n - 1);
-  const du = step > 0 ? Math.min(0.45, 6 / step) : 0;
-  return dots.map((d) => {
-    let u = d.idx;
-    if (shared.has(d.idx)) {
-      /* the pair spans 2·du, centred on its knot unless an end would clip it */
-      const lo = Math.min(Math.max(d.idx - du, 0), Math.max(0, n - 1 - 2 * du));
-      u = d.kind === "request" ? lo : lo + 2 * du;
-    }
-    const [x, y] = curvePointAt(values, u, W, H, top);
-    return { ...d, x, y };
-  });
-};
-
-/** The horizontal room one x label is given: a "20 Jul" at 10px mono and the air either side of it. */
-export const X_LABEL_SLOT = 64;
-
-/**
- * Thin the x labels as the points multiply — and always keep the last.
+ * ⚠️ NEVER CLAMPED TO AN EDGE. An event before the view's first period or after its last is not
+ * drawn, because a pin at the edge would put it on a date it did not happen.
  *
- * ⚠️ TWO CAPS, AND THE TIGHTER ONE WINS: at most 6 / 9 / 12 labels by grain, and never more than the
- * plot's own width has room for. A cap by grain alone put nine weekly labels on a 340px plot at 1280,
- * each one touching the next. `width` is the measured plot; before the first measurement there is no
- * plot to crowd, so it defaults to no limit.
+ * Smooth (weekly points): a point stands at its period's CLOSE, so a moment between two closes is
+ * interpolated between them; a moment inside the first period has nothing before it and sits on the
+ * first point. Stepped (daily points): the day that contains it.
  */
-export const xLabelEvery = (len: number, freq: Freq, width = Number.POSITIVE_INFINITY): number => {
-  const byGrain = freq === "daily" ? 6 : freq === "weekly" ? 9 : 12;
-  const byWidth = Math.max(2, Math.floor((width - 2 * PLOT_PAD.x) / X_LABEL_SLOT) + 1);
-  return Math.max(1, Math.ceil(len / Math.min(byGrain, byWidth)));
-};
-
-/**
- * Which points carry a label: every `every`-th, and the last — but not one within a step of the last.
- *
- * ⚠️ THE LAST LABEL READS BACK FROM ITS POINT (it is right-aligned so it cannot run off the card), so it
- * occupies the whole of the step to its left that a centred label would share with its neighbour.
- * Keeping a label inside that step is how "31 Aug" and "14 Sep" came to touch at 1280.
- */
-export const xLabelIndexes = (len: number, every: number): number[] => {
-  const last = len - 1;
-  const out: number[] = [];
-  for (let i = 0; i < len; i += 1) {
-    if (i === last || (i % every === 0 && last - i >= every)) out.push(i);
+export const indexAt = (view: readonly LedgerPoint[], ms: number, mode: LineMode): number | null => {
+  if (!view.length) return null;
+  if (ms < view[0].start.getTime() || ms > view[view.length - 1].end.getTime()) return null;
+  if (mode === "stepped") {
+    const i = view.findIndex((p) => ms >= p.start.getTime() && ms <= p.end.getTime());
+    return i < 0 ? null : i;
   }
-  return out;
+  for (let i = 0; i < view.length; i += 1) {
+    const end = view[i].end.getTime();
+    if (ms > end) continue;
+    if (i === 0) return 0;
+    const prev = view[i - 1].end.getTime();
+    return i - 1 + (ms - prev) / Math.max(1, end - prev);
+  }
+  return view.length - 1;
+};
+
+/* ── the week layer ── */
+
+export interface WeekSlot {
+  /** "17 Aug" — the Monday the week opens on */
+  label: string;
+  /** how many of the view's points fall in it — the axis slot's flex weight */
+  weight: number;
+  /** the point the hover snaps to: the week's LAST point in the view (its close, or today) */
+  idx: number;
+  /** the moment the week's figures are read at */
+  atMs: number;
+}
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const mondayOf = (d: Date): Date => {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+  return x;
 };
 
 /**
- * Which points had a request come in — the weeks the axis marks in rose (the ref's `.axis span.hot`).
- *
- * ⚠️ IT READS THE DOTS THE PLOT ALREADY DREW, never the activity log a second time. The tick under a
- * week and the dot on the line above it are then the same fact, and cannot come to disagree about
- * which week a request landed in.
+ * One slot per week in view, whatever the grain. Weekly points are a week each (weight 1); daily
+ * points are grouped by their ISO week, so a campaign that began on a Thursday opens with a
+ * four-day slot and the axis stays under the days it names.
  */
-export const requestWeeks = (dots: readonly ChartEventDot[]): Set<number> =>
-  new Set(dots.filter((d) => d.kind === "request").map((d) => d.idx));
+export const weekSlots = (view: readonly LedgerPoint[], mode: LineMode): WeekSlot[] => {
+  if (mode === "smooth") {
+    return view.map((p, i) => ({ label: p.label, weight: 1, idx: i, atMs: p.end.getTime() }));
+  }
+  const out: (WeekSlot & { key: number })[] = [];
+  view.forEach((p, i) => {
+    const mon = mondayOf(p.start);
+    const open = out[out.length - 1];
+    if (open && open.key === mon.getTime()) { open.weight += 1; open.idx = i; open.atMs = p.end.getTime(); return; }
+    out.push({ key: mon.getTime(), label: `${mon.getDate()} ${MONTHS[mon.getMonth()]}`, weight: 1, idx: i, atMs: p.end.getTime() });
+  });
+  return out.map(({ key: _key, ...slot }) => slot);
+};
+
+/** A slot narrower than four days has no room for its date; it keeps its bar. */
+export const SLOT_LABEL_MIN_DAYS = 4;
+
+/** The slot whose snap point is nearest an x — the week layer's whole hit test. */
+export const nearestSlot = (slots: readonly WeekSlot[], x: number, W: number, len: number): number => {
+  let best = 0, bd = Infinity;
+  slots.forEach((s, i) => { const d = Math.abs(plotX(s.idx, W, len) - x); if (d < bd) { bd = d; best = i; } });
+  return best;
+};

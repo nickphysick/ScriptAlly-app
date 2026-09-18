@@ -63,8 +63,8 @@ async function openDash(page: Page, w: number, h: number) {
   /* ⚠️ THE DATA HAS LANDED WHEN THE CHART STATES ITS FIGURE. Every figure on this page waits for the
      same board, and the eyebrow is the one that is empty rather than zero while it is out — so
      polling it cannot be satisfied by a page that has resolved to nothing. */
-  await expect.poll(() => page.evaluate(() => document.querySelector("[data-probe-text='chart-eyebrow']")?.textContent ?? ""),
-    { timeout: 30_000 }).not.toBe("");
+  await expect.poll(() => page.evaluate(() => document.querySelector(".os-root [data-probe-text='chart-title']")?.textContent ?? ""),
+    { timeout: 30_000 }).toMatch(/^(\d|No )/);
   await page.waitForTimeout(600);
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
@@ -148,12 +148,15 @@ function read() {
     /* the guessed-window bar, if the account happens to hold one — reported, never required */
     guessedBars: qa(".os-tdbar--guess").length,
     headerCounts: txt("header-counts"),
-    chartEyebrow: txt("chart-eyebrow"),
-    closedTotal: txt("closed-total"),
-    closedCounts: qa("[data-probe-text='closed-count']").map((e) => e.textContent ?? ""),
-    dots: qa("[data-probe='chart-event']").map((g) => {
+    /* ⚠️ RETARGETED (v33): the chart states its figure in its TITLE ("27 active queries"), the closed
+       card in ITS title, the key in tallies (`data-count`), and the events are PINS whose point on
+       the line is the pin group's small ink circle. Same four laws, new hooks. */
+    chartEyebrow: txt("chart-title"),
+    closedTotal: txt("closed-title"),
+    closedCounts: qa("[data-probe='tally']").map((e) => e.getAttribute("data-count") ?? ""),
+    dots: qa("[data-probe='chart-pin']").map((g) => {
       const c = g.querySelector("circle")!;
-      return { kind: g.getAttribute("data-kind"), dist: near(Number(c.getAttribute("cx")), Number(c.getAttribute("cy"))) };
+      return { kind: g.getAttribute("data-n"), dist: near(Number(c.getAttribute("cx")), Number(c.getAttribute("cy"))) };
     }),
     firstGap: first && pts.length ? Math.hypot(first[0] - pts[0][0], first[1] - pts[0][1]) : null,
     lastGap: last && pts.length ? Math.hypot(last[0] - pts[pts.length - 1][0], last[1] - pts[pts.length - 1][1]) : null,
@@ -260,8 +263,10 @@ test.describe("the dashboard, stages 2–3", () => {
       if (w >= 1280) {
         expect(spread(r.cards1.map((c) => c.box.h)), "the three cards are one height").toBeLessThanOrEqual(0.5);
         expect(spread(r.cards1.map((c) => c.box.y)), "on one row").toBeLessThanOrEqual(0.5);
-        expect(cards1["closed-tile"].w, "the closed tile's own width").toBeCloseTo(320, 0);
-        expect(cards1["quick-actions"].w, "the quick actions keep their floor").toBeGreaterThanOrEqual(269.5);
+        /* v33: three elastic tracks — the fixed 320px closed column is retired, the floors are the ref's */
+        expect(cards1["closed-tile"].w, "the closed card keeps its floor").toBeGreaterThanOrEqual(295.5);
+        expect(cards1["quick-actions"].w, "the quick actions keep their floor").toBeGreaterThanOrEqual(227.5);
+        expect(cards1["chart-card"].w, "…and the chart is wider than the closed card too").toBeGreaterThan(cards1["closed-tile"].w);
         expect(cards1["chart-card"].w, "the chart takes the widest share").toBeGreaterThan(cards1["quick-actions"].w);
       } else if (w > 999) {
         /* ⚠️ THE CLOSED TILE DROPS BENEATH THE CHART AT THE MIDDLE COLUMN'S FULL WIDTH (Nick's prose —
@@ -278,12 +283,13 @@ test.describe("the dashboard, stages 2–3", () => {
 
       /* ── the closed tile's counts sum ── */
       expect(r.closedCounts).toHaveLength(4);
-      expect(r.closedCounts.reduce((a, c) => a + num(c), 0), "the four buckets are the total").toBe(num(r.closedTotal));
+      expect(r.closedCounts.reduce((a, c) => a + num(c), 0), "the four buckets are the total").toBe(num((r.closedTotal ?? "").split(" ")[0]));
 
       /* ── the chart's dots sit on the line it drew ── */
       expect(r.dots.length, "a claim about dots needs dots — the harness account's window holds both kinds").toBeGreaterThan(0);
       for (const d of r.dots) expect(d.dist, `a ${d.kind} dot is off the line`).toBeLessThanOrEqual(0.5);
-      expect(r.firstGap ?? 99, "the hollow mark is where the line starts").toBeLessThanOrEqual(0.5);
+      /* v33: the hollow first-point mark is retired — only the solid end marker remains */
+      expect(r.firstGap, "the hollow first-point mark is retired with v33").toBeNull();
       expect(r.lastGap ?? 99, "the solid mark is where the line ends").toBeLessThanOrEqual(0.5);
       /* ⚠️ THE LABELS ARE THINNED BY DERIVATION AND THE TICKS ARE NOT, so what is left must still
          clear its neighbour. Measured on the rendered ink — 4px is the eye's minimum gap. */

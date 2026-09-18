@@ -25,7 +25,7 @@ import { QueryStatus, UserPlan, type Activity, type Agent, type Query } from "..
 import { OneScreenDashboard } from "./OneScreenDashboard";
 import { OneScreenActions } from "./OneScreenActions";
 import { OneScreenClosed } from "./OneScreenClosed";
-import { QUICK_ART, ART_PLACEHOLDER } from "../../lib/dashArt";
+import { ART_PAIRS, DASH_ART } from "../../lib/dashArt";
 import { QUICK_ACTIONS } from "../../lib/dashActions";
 import { closedTile } from "../../lib/dashClosed";
 import { cssRule, cssRuleCount } from "../../test/cssRule";
@@ -96,11 +96,13 @@ const texts = (html: string, probe: string) =>
  * against the other, so a derivation that drifts fails rather than disagreeing quietly.
  */
 describe("the header's figure is the chart's figure", () => {
-  it("⚠️ 'N queries out' and 'N out with agents' are the same number, read off the page", () => {
+  /* v33: the chart states its figure in its TITLE — "27 active queries" — where v16 stated it in an
+     eyebrow ("27 out with agents"). Same number, same derivation; the probe follows it. */
+  it("⚠️ 'N queries out' and 'N active queries' are the same number, read off the page", () => {
     const html = page();
     const header = /<b>([\d,]+)<\/b> quer(?:y|ies) out/.exec(html);
     expect(header, "the header must state a live count").not.toBeNull();
-    const chart = /data-probe-text="chart-eyebrow">(?:<span[^>]*>)?([\d,]+) out with agents/.exec(html);
+    const chart = /data-probe-text="chart-title">([\d,]+) active quer(?:y|ies)</.exec(html);
     expect(chart, "the chart must state the same one").not.toBeNull();
     expect(num(chart![1])).toBe(num(header![1]));
     /* the fixture must actually exercise it — a reconciliation over zero is satisfied by anything */
@@ -110,7 +112,7 @@ describe("the header's figure is the chart's figure", () => {
   it("⚠️ while loading neither states a figure — never a zero", () => {
     const html = page({ loading: true });
     expect(html).not.toMatch(/<b>\d/);
-    expect(html).not.toMatch(/\d+ out with agents/);
+    expect(html).not.toMatch(/\d+ (active|closed) quer/);
   });
 });
 
@@ -121,42 +123,39 @@ describe("the quick actions", () => {
   const qa = sliceBetween(html, 'data-probe="quick-actions"', 'data-probe="chart-card"', "the quick actions");
 
   /**
-   * ⚠️ THREE TILES, EACH A PICTURE AND A NAME (the ref, and Nick). The hero, the four-item list, the
-   * sub-lines, the tones and the Pro mark are all retired: a tile is what it does, and the card's own
-   * words are the card's title. The ref's markup carries a sub-line and hides it — the words were
-   * "Request, pass, or R&R", the kind of explanation that is read once and then read past for ever.
+   * ⚠️ ONE TILE AND TWO LINES (v33 — the ref, and Nick). "Log a query" is what this card is for, so it
+   * is the tile and it carries the quill; the other two are plain rows beneath it. The v16 card drew
+   * three equal tiles, which said the three were equally likely. Its "no hero" claim is INVERTED here
+   * on purpose; everything else it retired stays retired.
    */
-  it("three tiles, in the ref's order, each a picture and a name", () => {
+  it("one tile and two rows, in the ref's order — and no large title", () => {
     const items = [...qa.matchAll(/data-action="(\w+)"/g)].map((m) => m[1]);
     expect(items).toEqual(["query", "record", "agent"]);
-    expect(QUICK_ACTIONS.map((a) => a.label)).toEqual(["Log a query", "Record a response", "Add an agent"]);
-    /* no sub-text, no tone chips, no hero, no Pro mark — the retired furniture, absent */
-    for (const gone of ["os-qahero", "os-qaic", "os-qasub", "os-protag", "os-qalist", "os-qafoot", "os-mount"]) {
+    expect(QUICK_ACTIONS.map((a) => [a.label, a.rank])).toEqual([["Log a query", "main"], ["Record a response", "minor"], ["Add an agent", "minor"]]);
+    expect(qa.match(/class="os-qahero"/g) ?? []).toHaveLength(1);
+    expect(qa.match(/class="os-qarow"/g) ?? []).toHaveLength(2);
+    expect(qa).toMatch(/class="os-qahero" data-action="query"/);
+    /* the eyebrow in the sand band is the card's only heading */
+    expect(html).toMatch(/class="os-card os-lift os-qa os-tone--sand"/);
+    expect(qa).toContain('<p class="os-qaeyebrow">Quick actions</p>');
+    expect(qa).not.toContain("<h3");
+    for (const gone of ["os-qatile", "os-qastack", "os-qaart", "os-qaph", "os-qaic", "os-qasub", "os-protag", "os-qalist", "os-qafoot", "os-mount"]) {
       expect(qa, gone).not.toMatch(new RegExp(`["\\s]${gone}["\\s]`));
     }
     expect(qa).not.toContain("Querying ");
     expect(qa).not.toContain("querying-day");
   });
 
-  /**
-   * ⚠️ TWO OF THE THREE PICTURES DO NOT EXIST YET, AND THE TILE SAYS SO RATHER THAN SHRINKING. A
-   * dashed square of the same 46px, captioned with the file's subject, holds the space the artwork
-   * will take — so the day it lands nothing in this card moves. The placeholder is `aria-hidden`,
-   * because "open letter" is a note to whoever draws it, not a label for a reader.
-   */
-  it("⚠️ a missing picture is a captioned placeholder of the same size, never an absence", () => {
-    const drawn = Object.keys(QUICK_ART);
-    expect(drawn, "the fixture must exercise both branches").toHaveLength(1);
-    expect(qa.match(/class="os-qaart"/g) ?? []).toHaveLength(drawn.length);
-    expect(qa.match(/class="os-qaph"/g) ?? []).toHaveLength(QUICK_ACTIONS.length - drawn.length);
-    for (const a of QUICK_ACTIONS) {
-      if (QUICK_ART[a.art]) continue;
-      expect(qa).toContain(`<span class="os-qaph" aria-hidden="true">${ART_PLACEHOLDER[a.art]}</span>`);
-    }
-    /* the two shapes are ONE box, or the card relays out the day the artwork lands */
-    const box = rule(".os-qaart, .os-qaph");
-    expect(box).toContain("width: 46px");
-    expect(box).toContain("height: 46px");
+  /* ⚠️ ONE PICTURE, AND IT EXISTS. The per-tile art keys and their dashed placeholders are retired —
+     only the main tile carries a drawing, so there is nothing left to wait for and nothing to caption. */
+  it("the tile carries the quill — inert, unannounced — and each control ends in the ref's arrow", () => {
+    expect(qa).toMatch(/<img class="os-qaquill" src="\/images\/dash\/quill\.png\?v=[0-9a-f]{8}"[^>]*alt=""/);
+    expect(qa.match(/<img/g) ?? []).toHaveLength(1);
+    expect(qa.match(/class="os-qaar"/g) ?? []).toHaveLength(3);
+    const quill = rule(".os-qaquill");
+    expect(quill).toContain("height: calc(100% - 78px)");
+    expect(quill).toContain("top: 16px");
+    expect(quill).toContain("pointer-events: none");
   });
 
   /* ⚠️ EVERY TILE IS AN EXISTING FLOW, reached the way the shell reaches it — the card is a second
@@ -173,6 +172,7 @@ describe("the quick actions", () => {
     const loading = renderToStaticMarkup(<OneScreenActions loading onNavigate={() => {}} />);
     expect(loading).toContain("isload");
     expect(loading).toContain("Quick actions");
+    expect(loading).toContain("Log a query");
   });
 });
 
@@ -182,19 +182,24 @@ describe("the closed tile", () => {
   const html = page();
   const cl = sliceBetween(html, 'data-probe="closed-tile"', 'class="os-row2"', "the closed tile");
 
-  it("the title, its eyebrow and the way to all of them", () => {
-    expect(cl).toContain('<h3 class="os-cardttl">Closed</h3>');
-    expect(cl).toContain('<p class="os-sub">Where each one stopped</p>');
-    expect(cl).toContain('class="os-mini os-clall"');
-    expect(cl).toMatch(/>All \d+<\/button>/);
+  /* v33: the title is a sentence with the count, on the stone band; the eyebrow and the "All N" chip
+     are retired — the way to all of them is each slice's own popup ("See all 9"). */
+  it("the title is a sentence with the count, on the stone band, and nothing sits under it", () => {
+    expect(html).toMatch(/class="os-card os-lift os-cl os-tone--stone"/);
+    expect(cl).toMatch(/<h3 class="os-cardttl" data-probe-text="closed-title">\d+ closed quer(?:y|ies)<\/h3>/);
+    expect(cl).not.toContain("Where each one stopped");
+    expect(cl).not.toMatch(/["\s]os-sub["\s]/);
+    expect(cl).not.toContain("os-clall");
   });
 
   /* ⚠️ THE BUCKETS ARE MUTUALLY EXCLUSIVE AND SUM TO THE TOTAL — the arithmetic the tile's whole
      claim rests on. A withdrawal is the writer's decision rather than an outcome and is left out; a
      silence is "No reply" whatever stage it fell quiet at. */
   it("⚠️ the four counts sum to the headline, a withdrawal is left out, and silence is No reply", () => {
-    const total = num(texts(cl, "closed-total")[0]);
-    const counts = texts(cl, "closed-count").map(num);
+    /* ⚠️ RETARGETED (v33): the key states its counts as TALLIES and shows no numeral, so the figure is
+       read off each tally's own `data-count` (it is also its aria-label); the total is the title's. */
+    const total = num(/data-probe-text="closed-title">([\d,]+) closed/.exec(cl)![1]);
+    const counts = [...cl.matchAll(/data-probe="tally" data-count="(\d+)"/g)].map((m) => Number(m[1]));
     expect(counts).toHaveLength(4);
     expect(counts.reduce((a, b) => a + b, 0)).toBe(total);
     expect(total).toBe(2);
@@ -210,15 +215,18 @@ describe("the closed tile", () => {
   it("a zero bucket keeps its row and goes quiet", () => {
     expect(cl.match(/class="os-clrow z"/g) ?? []).not.toHaveLength(0);
     expect(cl.match(/data-probe="closed-row"/g) ?? []).toHaveLength(4);
-    expect(rule(".os-clrow.z, .os-clrow.z b")).toContain("color: var(--dash-ink-45)");
+    expect(rule(".os-clrow.z")).toContain("opacity: 0.45");
+    /* …and a quiet row is not a control: nothing to hover, nothing to pin */
+    const quietRow = /<div class="os-clrow[^"]* z"[^>]*>/.exec(cl)![0];
+    expect(quietRow).not.toContain("tabindex");
+    expect(quietRow).not.toContain('role="button"');
   });
 
   it("⚠️ while loading: the words and no figure", () => {
     const loading = renderToStaticMarkup(<OneScreenClosed loading tile={null} onSeeAll={() => {}} />);
-    expect(texts(loading, "closed-total")).toEqual([""]);
-    expect(texts(loading, "closed-count")).toEqual(["", "", "", ""]);
-    expect(loading).toContain(">All</button>");
-    expect(loading).toContain("Where each one stopped");
+    expect(loading).toContain('data-probe-text="closed-title">Closed queries</h3>');
+    expect(loading).not.toMatch(/data-probe="tally"/);
+    expect(loading).not.toMatch(/\d+ closed/);
   });
 });
 
@@ -232,9 +240,10 @@ describe("⚠️ the words say how far a query got, never a verdict", () => {
     }
   });
 
-  /* ⚠️ NO MARK ON ANY CARD (v16) — the page's pictures are the three quick-action tiles, and the
-     chart's hawk came off with them. A mark in a header is someone reading that as an oversight. */
-  it("⚠️ no card on the page carries a mark, and the chart carries no illustration", () => {
+  /* ⚠️ NO MARK IN ANY HEADER (v16, and still true in v33). The page HAS illustrations now — the quill,
+     the Mentor, the Archivist — and every one of them lives in its card's CONTENT, never in a band.
+     A mark in a header is still someone reading that as an oversight, and the old hawk is still off. */
+  it("⚠️ no card carries a header mark, and the old hawk is not back", () => {
     for (const f of ["OneScreenChart", "OneScreenClosed", "OneScreenFeed", "OneScreenTasks"]) {
       const src = readFileSync(resolve(__dirname, `./${f}.tsx`), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
       expect(src, `${f} carries a mark`).not.toContain("OneScreenMark");
@@ -262,25 +271,23 @@ describe("the rules", () => {
     for (const sel of [".os-greet .os-hello", ".os-cardttl"]) {
       expect(rule(sel), sel).toMatch(/font-family: var\(--os-type\)\s*!important/);
     }
-    expect(rule(".os-qalab")).toContain("font-family: var(--os-type)");
+    for (const sel of [".os-qaherolab", ".os-qarowlab"]) expect(rule(sel), sel).toContain("font-family: var(--os-type)");
   });
 
-  /* ⚠️ EQUAL THIRDS, NOT THREE NATURAL HEIGHTS — the stack fills whatever height the row turns out
-     to be, so the three tiles stay one object rather than three stacked buttons with a gap under them. */
+  /* ⚠️ THE TILE FILLS WHAT THE TWO LINES LEAVE, so the card never ends short of the two beside it; and
+     every label is ONE line that scales with its own card (`cqw`), never with the window. */
   it("the quick actions' shapes are the ref's", () => {
-    const stack = rule(".os-qastack");
-    expect(stack).toContain("display: grid");
-    /* equal thirds — the three tiles fill whatever height the row turns out to be */
-    expect(stack).toMatch(/grid-template-rows: (?:1fr 1fr 1fr|repeat\(3, (?:minmax\(0, )?1fr\)?\))/);
-    expect(stack).toContain("min-height: 0");
-    expect(stack).toContain("gap: 10px");
-    expect(stack).toContain("flex: 1");
-    const tile = rule(".os-qatile");
-    for (const d of ["display: flex", "align-items: center", "padding: 10px 14px 10px 10px", "border-radius: 12px"]) {
-      expect(tile, d).toContain(d);
+    const hero = rule(".os-qahero");
+    for (const d of ["flex: 1 1 0", "min-height: 0", "position: relative", "align-items: flex-end", "padding: 16px", "border-radius: 12px"]) {
+      expect(hero, d).toContain(d);
     }
-    expect(tile).toContain("background: var(--dash-parchment)");
-    expect(rule(".os-qalab")).toContain("font-size: 17px");
+    expect(hero).toContain("background: var(--dash-parchment)");
+    expect(rule(".os-qaherolab")).toContain("font-size: clamp(18px, 9.6cqw, 24px)");
+    expect(rule(".os-qaherolab")).toContain("white-space: nowrap");
+    expect(rule(".os-qarowlab")).toContain("font-size: clamp(14.5px, 6.8cqw, 17px)");
+    expect(rule(".os-qarow")).toContain("padding: 13px 4px");
+    expect(rule(".os-qarow:last-child")).toContain("border-bottom: 0");
+    expect(rule(".os-qaeyebrow")).toContain("letter-spacing: 0.16em");
   });
 
   /* ⚠️ THE DONUT'S FOUR FILLS ARE TOKENS, and the key's four swatches read the SAME four — the ring
@@ -304,13 +311,37 @@ describe("the rules", () => {
 /* ══ the artwork ═══════════════════════════════════════════════════════════════════════════ */
 
 /**
- * ⚠️ ONE PICTURE ON THE PAGE NOW, AND THE CHECK IS THE SAME. The hawk came off with v16 and its file
- * is deliberately KEPT (`lib/dashArt` still carries it, for the 96px slot the chart's header holds
- * open) — so the sweep reads what `QUICK_ART` actually draws rather than a list typed here, and an
- * asset added to that table is checked the day it lands.
+ * ⚠️ SEVEN FILES, ONE CHECK EACH, AND THE SWEEP READS THE TABLE (v33). Whatever `DASH_ART` draws is
+ * checked the day it lands: versioned by its own bytes, the size it declares, transparent, and small.
+ * The old hawk's file is deliberately KEPT (`ACTIVE_QUERY_ART`) and is not drawn.
  */
 describe("the artwork", () => {
-  for (const [key, art] of Object.entries(QUICK_ART)) {
+  it("the table is the v33 set — the sweep below cannot pass by reading nothing", () => {
+    expect(Object.keys(DASH_ART).sort()).toEqual(["archivist", "archivistLooking", "courier", "mentor", "mentorLooking", "quill", "shadow"]);
+  });
+
+  /* ⚠️ THE TWO PAIRS REGISTER TO THE PIXEL ONLY WHILE THEY SHARE A CANVAS. Trimming either file to its
+     own alpha bounds gives the two different boxes and the hover swap jumps — so the two files of a
+     pair must declare, and BE, one size. */
+  for (const [a, b] of ART_PAIRS) {
+    it(`⚠️ ${a} / ${b}: one canvas`, () => {
+      expect([DASH_ART[a].width, DASH_ART[a].height]).toEqual([DASH_ART[b].width, DASH_ART[b].height]);
+      const size = (k: keyof typeof DASH_ART) => { const png = readFileSync(resolve(__dirname, "../../..", "public" + DASH_ART[k].src)); return [png.readUInt32BE(16), png.readUInt32BE(20)]; };
+      expect(size(a)).toEqual(size(b));
+    });
+  }
+
+  it("⚠️ the greeting's shadow is the SOLID file — its soft edge kept exactly, 256 alpha levels", () => {
+    const png = readFileSync(resolve(__dirname, "../../..", "public" + DASH_ART.shadow.src));
+    expect(png[25], "a palette").toBe(3);
+    const at = png.indexOf(Buffer.from("tRNS"));
+    expect(at).toBeGreaterThan(0);
+    expect(png.readUInt32BE(at - 4), "one palette entry per alpha level — the edge is not quantised").toBe(256);
+    /* …and it is not the landing page's pre-toned file, which would be invisible at 8% */
+    expect(DASH_ART.shadow.src).not.toBe("/images/hawk-shadow.png");
+  });
+
+  for (const [key, art] of Object.entries(DASH_ART)) {
     it(`${key}: versioned by its own bytes, its stated size, transparent, and under 300KB`, () => {
       const file = resolve(__dirname, "../../..", "public" + art!.src);
       const png = readFileSync(file);

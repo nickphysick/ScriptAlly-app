@@ -25,7 +25,7 @@
  */
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { QUICK_ACTIONS } from "../../lib/dashActions";
-import { CLOSED_BUCKETS, DONUT } from "../../lib/dashClosed";
+import { CLOSED_BUCKETS } from "../../lib/dashClosed";
 
 /**
  * ⚠️ THE REF'S OWN FEED RHYTHM — a day caption, then entries of unequal height. A single repeated
@@ -82,59 +82,66 @@ export const OneScreenSkeleton: React.FC<{
     <div className="os-content">
       {header}
 
+      {/* ⚠️ BANDS AND PLAIN BLOCKS ONLY (v33, Nick). Each ghost card is the page's own rim, frame and
+          band — the same classes, so every padding and flex budget is the page's — holding grey
+          blocks where words and drawings will be. No illustration is drawn in the cover: a Mentor
+          arriving before his chart would be the one finished thing on an unfinished page. */}
       <div className="os-row1" data-sk="row1">
-        {/* the quick actions — one ghost tile per action the card draws, never a number */}
-        <div className="os-card os-qa" data-sk="quick-actions">
-          <div className="os-hd"><div className="os-sk os-sk-ttl" /></div>
-          <div className="os-qastack">
-            {QUICK_ACTIONS.map((a) => <div className="os-sk os-sk-qatile" key={a.key} />)}
-          </div>
-        </div>
-
-        {/* the chart — the mount's frame, its header row, the plot and the axis */}
-        <div className="os-card os-lead" data-sk="chart-card">
-          <div className="os-acframe">
-            <div className="os-achead">
-              <div className="os-acid"><div className="os-sk os-sk-acstat" /></div>
-              <div className="os-sk os-sk-mini" />
-            </div>
-            <div className="os-aclegend"><div className="os-sk os-sk-legend" /></div>
-            <div className="os-acbody">
-              <div className="os-acplot os-sk os-sk-acplot" />
-              {/* ⚠️ THE AXIS IS DRAWN, NOT LEFT EMPTY. An empty `.os-acx` is 0 tall where the real one
-                  is 25.8, and the chart is the card that sets the row's height — so the ghost's whole
-                  first row came up short and the page jumped when the cover lifted. */}
-              <div className="os-acx"><div className="os-sk os-sk-acx" /></div>
+        <div className="os-card os-qa os-tone--sand" data-sk="quick-actions">
+          <div className="os-frame">
+            <div className="os-band"><div className="os-sk os-sk-eyebrow" /></div>
+            <div className="os-sk os-sk-hero" />
+            <div className="os-qaminor">
+              {QUICK_ACTIONS.filter((a) => a.rank === "minor").map((a) => (
+                <div className="os-qarow" key={a.key}><i className="os-sk os-sk-qarowlab" /></div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* closed — the head, the ring's own box, and one ghost per bucket */}
-        <div className="os-card os-cl" data-sk="closed-tile">
-          <div className="os-hd"><div className="os-sk os-sk-ttl2" /><div className="os-sk os-sk-mini" /></div>
-          <div className="os-clpie">
-            <div className="os-sk os-sk-donut" style={{ width: DONUT.box * 0.94, height: DONUT.box * 0.94 }} />
+        <div className="os-card os-lead os-tone--navy" data-sk="chart-card">
+          <div className="os-frame">
+            <div className="os-band"><div className="os-bandrow"><div className="os-sk os-sk-ttl os-sk--onnavy" /></div></div>
+            <div className="os-acplot"><div className="os-acdraw os-sk os-sk-acplot" /></div>
+            {/* ⚠️ THE AXIS IS DRAWN, NOT LEFT EMPTY — an empty `.os-acx` is 0 tall where the real one
+                is 25.8, and the ghost's first row came up short by exactly that once already. */}
+            <div className="os-acx"><div className="os-sk os-sk-acx" /></div>
           </div>
-          <div className="os-clkey">
-            {CLOSED_BUCKETS.map((b) => <div className="os-sk os-sk-clrow" key={b.key} />)}
+        </div>
+
+        <div className="os-card os-cl os-tone--stone" data-sk="closed-tile">
+          <div className="os-frame">
+            <div className="os-band"><div className="os-bandrow"><div className="os-sk os-sk-ttl" /></div></div>
+            <div className="os-clpie"><div className="os-ringbox os-sk os-sk-donut" /></div>
+            <div className="os-clkey">
+              {CLOSED_BUCKETS.map((b, n) => (
+                <div className={`os-clrow${n === 0 ? " os-clrow--first" : ""}`} key={b.key}>
+                  <i className="os-sk os-sk-chip" /><i className="os-sk os-sk-clrowlab" /><span />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       <div className="os-row2" data-sk="row2">
-        <div className="os-card os-feed" data-sk="activity-card">
-          <div className="os-hd"><div className="os-sk os-sk-ttl2" /><div className="os-sk os-sk-mini" /></div>
-          <div className="os-scroll" data-sk="feed">
-            {FEED.map((h, i) => (h === "cap"
-              ? <div className="os-sk os-sk-fday" key={i} />
-              : <div className="os-sk os-sk-fent" style={{ height: h }} key={i} />))}
+        <div className="os-card os-feed os-tone--slate" data-sk="activity-card">
+          <div className="os-frame">
+            <div className="os-band"><div className="os-bandrow"><div className="os-sk os-sk-ttl" /><div className="os-sk os-sk-mini" /></div></div>
+            <div className="os-scroll" data-sk="feed">
+              {FEED.map((h, i) => (h === "cap"
+                ? <div className="os-sk os-sk-fday" key={i} />
+                : <div className="os-sk os-sk-fent" style={{ height: h }} key={i} />))}
+            </div>
           </div>
         </div>
 
-        <div className="os-card os-todo" data-sk="todo-card">
-          <div className="os-hd"><div className="os-sk os-sk-ttl2" /><div className="os-sk os-sk-mini" /></div>
-          <GhostRows className="os-sk-tdrow" sk="todo-rows" />
-          <p className="os-tdfoot"><i className="os-sk os-sk-tdfoot" /></p>
+        <div className="os-card os-todo os-tone--rose" data-sk="todo-card">
+          <div className="os-frame">
+            <div className="os-band"><div className="os-bandrow"><div className="os-sk os-sk-ttl" /><div className="os-sk os-sk-mini" /></div></div>
+            <GhostRows className="os-sk-tdrow" sk="todo-rows" />
+            <p className="os-tdfoot"><i className="os-sk os-sk-tdfoot" /></p>
+          </div>
         </div>
       </div>
     </div>

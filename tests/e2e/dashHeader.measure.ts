@@ -207,9 +207,9 @@ function readPage(page: Page, below: string[]) {
         const b = q("[data-probe='todo-badge']");
         return b ? ((b.textContent ?? "").match(/[\d,]+/)?.[0] ?? null) : null;
       })(),
-      /* the chart states its figure in its eyebrow: "N out with agents · …" */
+      /* v33: the chart states its figure in its TITLE — "N active queries" (was the v16 eyebrow) */
       chartActive: (() => {
-        const n = q("[data-probe-text='chart-eyebrow']");
+        const n = q("[data-probe-text='chart-title']");
         return n ? ((n.textContent ?? "").match(/[\d,]+/)?.[0] ?? null) : null;
       })(),
       emptyPage: !!q("[data-probe='chart-empty']"),

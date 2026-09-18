@@ -183,12 +183,22 @@ describe("§1 · the page", () => {
    * — `align-items: stretch` — and never a stated height on a card, which is what lets the chart's
    * plot give when the quick actions' tiles do not.
    */
-  it("⚠️ the first row: a floor, a share, and the closed tile's own width", () => {
+  /* ⚠️ v33 — THREE ELASTIC TRACKS, AND THE CHART IS ALWAYS THE WIDEST. The closed card's fixed 320px
+     column is retired with its token: a fixed side column makes the chart absorb all of the squeeze,
+     which is the fault the ref's own note records. What is asserted is the RELATION as well as the
+     rule — the middle track has the largest floor and the largest share. */
+  it("⚠️ the first row: three floors and three shares, the chart's the largest of each", () => {
     const r = rule(".os-row1");
-    expect(r).toContain("grid-template-columns: minmax(270px, 0.85fr) minmax(0, 2.6fr) var(--dash-row1-closed)");
+    expect(r).toContain("grid-template-columns: minmax(228px, 0.78fr) minmax(340px, 2fr) minmax(296px, 1.12fr)");
     expect(r).toContain("gap: var(--dash-gap)");
     expect(r).toContain("align-items: stretch");
-    expect(rule(".os-root")).toContain("--dash-row1-closed: 320px");
+    /* the base declaration only — `rule()` joins every block for the selector, the ≤1279 step included */
+    const decl = /grid-template-columns: ([^;]+);/.exec(r)![1];
+    const tracks = [...decl.matchAll(/minmax\((\d+)px, ([\d.]+)fr\)/g)].map((m) => [Number(m[1]), Number(m[2])]);
+    expect(tracks.length).toBe(3);
+    expect(tracks[1][0]).toBeGreaterThan(Math.max(tracks[0][0], tracks[2][0]));
+    expect(tracks[1][1]).toBeGreaterThan(Math.max(tracks[0][1], tracks[2][1]));
+    expect(cssRules, "the fixed closed column is back").not.toContain("--dash-row1-closed");
     /* ⚠️ THE SWEEP, NOT THREE NAMED RULES. Two of the three cards have no base rule at all — their
        look is `.os-card`'s and their own rules are descendants — so `cssRule` would fail on a sheet
        that is perfectly correct. The claim is that NOTHING in the sheet states a height on any of
@@ -270,7 +280,7 @@ describe("§1 · the page", () => {
     };
     /* 1280: the closed tile drops beneath the chart, at the middle column's full width */
     const narrow = block("max-width: 1279px");
-    expect(narrow.body).toContain(".os-row1 { grid-template-columns: minmax(270px, 0.85fr) minmax(0, 2.6fr); }");
+    expect(narrow.body).toContain(".os-row1 { grid-template-columns: minmax(228px, 0.78fr) minmax(340px, 2fr); }");
     expect(narrow.body).toContain(".os-row1 > .os-cl { grid-column: 2; }");
     /* 1000: everything stacks, and the stated row height is released or the cards are squeezed */
     const stack = block("max-width: 999px");
@@ -473,7 +483,8 @@ describe("§6 trap · the entrance animation is scoped to .enter", () => {
 describe("the sparse chart state and the tasks empty state (shells)", () => {
   it("a single point on the record: the chart says how the line begins", () => {
     const html = render({ queries: [q({ dateSent: daysAgo(0) })] });
-    expect(html).toContain("The line begins once there are two weeks on the record.");
+    /* v33: a short campaign is drawn DAILY and stepped, so the line needs two days, not two weeks */
+    expect(html).toContain("The line begins once there are two days on the record.");
   });
 
   it("no tasks → the italic empty line, and the header says Nothing needs you", () => {
@@ -518,10 +529,12 @@ describe("§9 · first-run states", () => {
   /* ⚠️ RETARGETED (stage 3): the chart's "N awaiting a reply" chip is retired with the chart that wore it.
      Early days still states a fact and still congratulates nothing: the caption says how far the count
      moved, and there is no pill. */
-  it("early days: the chart states its movement, and nothing congratulates", () => {
+  /* v33: the movement caption is retired with the eyebrow; what early days states instead is SINCE
+     WHEN — the short campaign's quiet suffix — and still nothing congratulates. */
+  it("early days: the chart says since when, and nothing congratulates", () => {
     const html = render({ queries: [q({ dateSent: daysAgo(3) }), q({ dateSent: daysAgo(9) })] });
-    expect(html).toContain('data-probe-text="chart-eyebrow"');
-    expect(html).toContain("over 8 weeks");
+    expect(html).toMatch(/data-probe-text="chart-since">since \d{1,2} [A-Z][a-z]{2}<\/span>/);
+    expect(html).not.toContain("over 8 weeks");
     expect(html).not.toContain("awaiting a reply");
     expect(html).not.toContain("os-pill");
   });

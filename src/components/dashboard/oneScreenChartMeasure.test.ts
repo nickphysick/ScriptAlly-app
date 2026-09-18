@@ -26,12 +26,14 @@ const raw = readFileSync(join(__dirname, "OneScreenChart.tsx"), "utf8");
 const src = raw.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
 
 describe("⚠️ the chart's size is measured when its wrapper arrives, not once at mount", () => {
-  /* the stage-3 chart (17 Sep) measures its plot box, `.os-acplot`, where the old chart measured
-     `.os-chartwrap` — the same construction on the element that now holds the svg */
-  const attach = /className="os-acplot"\s+ref=\{(\w+)\}/.exec(src);
+  /* ⚠️ RETARGETED, SAME LAW (v33, 18 Sep): the measured element is `.os-acdraw` — the absolute box
+     that holds the svg, short of the Mentor — where stage 3 measured `.os-acplot` and the chart before
+     it `.os-chartwrap`. The claim is unchanged: the box is measured by a callback ref on the element
+     that holds the drawing, so an early return above it cannot leave the chart unmeasured. */
+  const attach = /className="os-acdraw"\s+ref=\{(\w+)\}/.exec(src);
 
   it("the wrapper carries a ref (the anchor every claim below reads)", () => {
-    expect(attach, "no ref on .os-acplot — nothing measures the plot").not.toBeNull();
+    expect(attach, "no ref on .os-acdraw — nothing measures the drawing").not.toBeNull();
   });
 
   it("that ref is a callback ref, not an object ref read by an effect", () => {

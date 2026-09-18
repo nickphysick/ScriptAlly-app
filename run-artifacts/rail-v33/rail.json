@@ -1,24 +1,7 @@
 {
   "rows": [
     {
-      "width": 1536,
-      "flushDelta": 0,
-      "scrimWidth": "18px",
-      "scrimZ": "0",
-      "cardZ": "1",
-      "scrimHeight": "1108.25px",
-      "colHeight": 1108.3,
-      "viewportH": 1150,
-      "scrimHit": "div.ws-main",
-      "colBoxShadow": "none",
-      "colBorderLeft": "0px",
-      "colRadiusTL": "0px",
-      "railBoxShadow": "none",
-      "railBorderRight": "0px",
-      "scrimImage": "linear-gradient(90deg, rgba(42, 31, 24, 0.07), rgba(42, 31, 24, 0.027) 45%, rgba(42, 31, 24, 0))"
-    },
-    {
-      "width": 1710,
+      "width": 1440,
       "flushDelta": 0,
       "scrimWidth": "18px",
       "scrimZ": "0",
@@ -36,23 +19,6 @@
     },
     {
       "width": 1920,
-      "flushDelta": 0,
-      "scrimWidth": "18px",
-      "scrimZ": "0",
-      "cardZ": "1",
-      "scrimHeight": "1108.25px",
-      "colHeight": 1108.3,
-      "viewportH": 1150,
-      "scrimHit": "div.ws-main",
-      "colBoxShadow": "none",
-      "colBorderLeft": "0px",
-      "colRadiusTL": "0px",
-      "railBoxShadow": "none",
-      "railBorderRight": "0px",
-      "scrimImage": "linear-gradient(90deg, rgba(42, 31, 24, 0.07), rgba(42, 31, 24, 0.027) 45%, rgba(42, 31, 24, 0))"
-    },
-    {
-      "width": 2520,
       "flushDelta": 0,
       "scrimWidth": "18px",
       "scrimZ": "0",

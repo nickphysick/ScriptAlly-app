@@ -11,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { QueryStatus, type Activity, type Query } from "../types";
 import {
   CLOSED_BUCKETS, CLOSED_STATUSES, DONUT, DONUT_C, closedDonut, closedTile, type ClosedBucketKey,
+  arcDash, CLOSED_NOTE, donutRotation, tallyGates,
 } from "./dashClosed";
 import { buildRows } from "./analytics";
 
@@ -191,5 +192,77 @@ describe("the donut's arcs", () => {
   it("the circumference is the radius the arcs are stroked on", () => {
     expect(DONUT_C).toBeCloseTo(2 * Math.PI * DONUT.r, 10);
     expect(DONUT.r * 2 + DONUT.stroke).toBeLessThanOrEqual(DONUT.box);
+  });
+});
+
+/* ══ v33 ══════════════════════════════════════════════════════════════════════════════════════ */
+
+describe("⚠️ the ring is turned so its LARGEST slice is centred at 12 o'clock", () => {
+  const tileOf = (quiet: number, letter: number, partial: number, full: number) => {
+    const counts: Record<ClosedBucketKey, number> = { quiet, letter, partial, full };
+    const total = quiet + letter + partial + full;
+    return { total, buckets: CLOSED_BUCKETS.map((b) => ({ ...b, count: counts[b.key], share: total ? counts[b.key] / total : 0 })) };
+  };
+  it("as a PROPERTY — whichever slice is largest, its centre lands on the top — never as an angle", () => {
+    const mixes: [number, number, number, number][] = [[14, 9, 3, 1], [4, 8, 0, 2], [0, 0, 5, 1], [1, 1, 1, 9], [3, 0, 0, 0], [2, 7, 7, 1]];
+    for (const mix of mixes) {
+      const t = tileOf(...mix);
+      const rot = donutRotation(t);
+      const arcs = closedDonut(t);
+      const largest = [...arcs].sort((a, b) => b.len - a.len)[0];
+      const centre = ((-largest.offset + largest.len / 2) / DONUT_C) * 360 + rot;
+      expect(((centre % 360) + 360) % 360, `${mix}: the ${largest.key} slice is centred on the top`).toBeCloseTo(0, 6);
+    }
+  });
+  it("the ref's own case: 14 of 27 quiet turns the ring −93.3°", () => {
+    expect(donutRotation(tileOf(14, 9, 3, 1))).toBeCloseTo(-93.33, 1);
+  });
+  it("a tie goes to the earlier bucket, and an empty ring is not turned", () => {
+    const t = tileOf(2, 7, 7, 1);
+    const arcs = closedDonut(t);
+    const letter = arcs.find((a) => a.key === "letter")!;
+    expect(donutRotation(t)).toBeCloseTo(-(((-letter.offset + letter.len / 2) / DONUT_C) * 360), 6);
+    expect(donutRotation(tileOf(0, 0, 0, 0))).toBe(0);
+  });
+  it("each arc is stroked 3 units short of its share — a hairline gap — and the shares still close the ring", () => {
+    const arcs = closedDonut(tileOf(14, 9, 3, 1));
+    expect(arcs.reduce((n, a) => n + a.len, 0)).toBeCloseTo(DONUT_C, 6);
+    for (const a of arcs) expect(arcDash(a)).toBeCloseTo(a.len - DONUT.gap, 6);
+    expect(DONUT).toMatchObject({ r: 60, stroke: 20, hover: 25, gap: 3, box: 160 });
+  });
+});
+
+describe("the members of each slice", () => {
+  it("⚠️ are the slice: their counts are the buckets' counts, most recently closed first", () => {
+    const qs = [
+      q(QueryStatus.NO_RESPONSE, { id: "n1", lastStatusChange: ago(40) }),
+      q(QueryStatus.NO_RESPONSE, { id: "n2", lastStatusChange: ago(5) }),
+      q(QueryStatus.REJECTED, { id: "r1", lastStatusChange: ago(9) }),
+      q(QueryStatus.WITHDRAWN, { id: "w1" }),
+    ];
+    const t = closedTile(qs, []);
+    for (const b of t.buckets) expect(t.members[b.key].length, `${b.key}: the list under the slice is the slice`).toBe(b.count);
+    expect(t.members.quiet).toEqual(["n2", "n1"]);
+    expect(Object.values(t.members).flat()).not.toContain("w1");
+  });
+});
+
+describe("the words under a slice", () => {
+  it("⚠️ say what the log records — a request was MADE — and never a threshold the app does not apply", () => {
+    const all = Object.values(CLOSED_NOTE).join(" | ");
+    expect(CLOSED_NOTE.quiet).toBe("Closed with no reply from the agent");
+    expect(all).not.toMatch(/\d+\s*days|after \d|automatic/i);
+    expect(all, "the buckets are reachedRequest / reachedFull — nothing records that anything was READ").not.toMatch(/\bread\b/i);
+    expect(all).not.toMatch(/reject|overdue|sadly|only/i);
+  });
+});
+
+describe("tallies are gates of five", () => {
+  it("full gates, then the part gate — and they sum to the number", () => {
+    expect(tallyGates(14)).toEqual([5, 5, 4]);
+    expect(tallyGates(51)).toEqual([5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1]);
+    expect(tallyGates(5)).toEqual([5]);
+    expect(tallyGates(0)).toEqual([]);
+    for (let n = 0; n < 60; n += 1) expect(tallyGates(n).reduce((a, b) => a + b, 0)).toBe(n);
   });
 });

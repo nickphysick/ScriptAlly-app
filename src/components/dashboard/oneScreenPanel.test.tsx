@@ -48,13 +48,22 @@ describe("OneScreenPanel — the shell the four containers had", () => {
     expect(html(<OneScreenPanel variant="os-tasks" loading />)).not.toMatch(/["\s`]os-skel["\s`]/);
   });
 
-  it("⚠️ the head precedes the body — it is the card's first child after the skeleton", () => {
+  /* ⚠️ v33 — THE BAND IS THE PANEL'S, INSIDE THE FRAME, AHEAD OF THE BODY. The `head` prop is retired
+     with its last consumer; what a consumer passes now is only what is IN the band. */
+  it("⚠️ the band is the frame's first child, and the body follows it inside the same frame", () => {
     const out = html(
-      <OneScreenPanel variant="os-actv" head={<div className="os-ahead">H</div>}>
+      <OneScreenPanel variant="os-x" tone="rose" probe="p" band={<h3>H</h3>}>
         <div className="body">B</div>
       </OneScreenPanel>
     );
-    expect(out.indexOf("os-ahead")).toBeLessThan(out.indexOf('class="body"'));
+    expect(out).toContain('class="os-card os-lift os-x os-tone--rose"');
+    expect(out).toMatch(/<div class="os-frame" data-probe="p-frame"><div class="os-band" data-probe="p-band"><h3>H<\/h3><\/div><div class="body">B<\/div><\/div>/);
+  });
+
+  it("a panel with no band draws no band — the frame still wraps the body", () => {
+    const out = html(<OneScreenPanel variant="os-x"><i>B</i></OneScreenPanel>);
+    expect(out).not.toContain("os-band");
+    expect(out).toContain('<div class="os-frame"><i>B</i></div>');
   });
 
   it("`os-lift` is the default and can be turned off explicitly", () => {
@@ -95,12 +104,25 @@ describe("the card is the ref's paper, and it reads its values from tokens", () 
   const bare = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
   it("⚠️ every value on the card comes from `--dash-*`, never a literal", () => {
+    /* ⚠️ v33 — THE CARD IS A RIM AND A FRAME. The rim is the card's own white (never parchment), 6px,
+       with no border of its own; the frame is the burgundy line and it CLIPS, which is what lets the
+       band take its top corners. Both read tokens; neither carries a literal. */
     const c = cssRule(bare, ".os-card", "oneScreen.css");
     expect(c).toContain("background: var(--dash-card)");
-    expect(c).toContain("border: 1px solid var(--dash-hair)");
+    expect(c).toContain("border: 0");
     expect(c).toContain("border-radius: var(--dash-radius)");
-    expect(c).toContain("padding: var(--dash-pad)");
+    expect(c).toContain("padding: var(--dash-rim)");
     expect(c).toContain("box-shadow: var(--dash-shadow)");
+    expect(c).toContain("container-type: inline-size");
+    const f = cssRule(bare, ".os-frame", "oneScreen.css");
+    expect(f).toContain("border: 1px solid var(--dash-frame)");
+    expect(f).toContain("border-radius: var(--dash-frame-radius)");
+    expect(f).toContain("padding: var(--dash-pad)");
+    expect(f).toContain("background: var(--dash-card)");
+    expect(f).toContain("overflow: hidden");
+    expect(f, "a hex on the frame's own rule").not.toMatch(/#[0-9a-f]{3,8}/i);
+    /* no card puts parchment back on its rim */
+    expect(bare).not.toMatch(/\.os-(lead|qa|cl|feed|todo)\s*\{[^}]*background:\s*var\(--dash-parchment\)/);
     /* a colour literal on this rule is the thing the token block exists to prevent */
     expect(c, "a hex on the card's own rule").not.toMatch(/#[0-9a-f]{3,8}/i);
     /* ⚠️ AND ITS STACKING LAYER, which is not decoration: the sidebar's seam scrim is `z-index: 0`
@@ -112,12 +134,16 @@ describe("the card is the ref's paper, and it reads its values from tokens", () 
 
   it("the tokens are declared, and declared once, on the page root", () => {
     const root = cssRule(bare, ".os-root", "oneScreen.css");
-    for (const t of ["--dash-card", "--dash-hair", "--dash-radius", "--dash-pad", "--dash-shadow"]) {
+    for (const t of ["--dash-card", "--dash-hair", "--dash-radius", "--dash-rim", "--dash-frame-radius", "--dash-pad", "--dash-shadow", "--dash-frame"]) {
       expect(root, `${t} must be declared on .os-root`).toContain(`${t}:`);
       expect((bare.match(new RegExp(`${t}\\s*:`, "g")) ?? []).length, `${t} is declared twice`).toBe(1);
     }
-    expect(root).toContain("--dash-radius: 14px");
-    expect(root).toContain("--dash-pad: 20px 22px");
+    expect(root).toContain("--dash-radius: 16px");
+    expect(root).toContain("--dash-rim: 6px");
+    expect(root).toContain("--dash-frame-radius: 11px");
+    expect(root).toContain("--dash-pad: 18px 22px 16px");
+    expect(root).toContain("--dash-shadow: 0 2px 8px rgba(28, 19, 15, 0.06)");
+    expect(root, "burgundy is the frame's line").toContain("--dash-frame: #7c3a2a");
   });
 
   it("⚠️ and the retired ring did not survive the border — one hairline, one owner", () => {
@@ -173,12 +199,12 @@ describe("the band era is over, and nothing of it is left reachable", () => {
     expect(bare).not.toContain("::-moz-range-track");
     const chart = readFileSync(resolve(__dirname, "./OneScreenChart.tsx"), "utf8");
     expect(chart).not.toContain('type="range"');
-    /* the grain is STATED, not offered: one chip, and no second grain named anywhere in the card */
-    const head = sliceBetween(chart, '<div className="os-achead" data-probe="chart-header">',
-                              '<div className="os-acbody">', "the chart's header");
-    expect(head).toContain('data-probe="chart-controls"');
-    expect(head).toContain("Weekly");
-    expect(head).not.toMatch(/Daily|Monthly/);
+    /* ⚠️ v33 — AND THE GRAIN CHIP WENT TOO. The grain follows the campaign's length now (daily and
+       stepped under twelve weeks, weekly and smoothed after), so there is nothing to state: no grain
+       is named anywhere in the card, and the one control it has is the minimap's window. */
+    const code = chart.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
+    expect(code).not.toMatch(/Daily|Weekly|Monthly/);
+    expect(code).not.toContain('data-probe="chart-controls"');
   });
 });
 

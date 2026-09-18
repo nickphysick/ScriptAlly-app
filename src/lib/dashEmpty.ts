@@ -218,5 +218,10 @@ export const FEED_FIRST_RUN_LINE =
 
 /* ══════════════════════════ the chart's faded example ══════════════════════════ */
 
-/** The ref's centred CTA over the faded example. */
-export const CHART_EMPTY_CTA = "Log your first query";
+/** The active-queries card with nothing in it (v33; `closed-empty.html`, option A). */
+export const CHART_EMPTY_TITLE = "No active queries right now";
+export const CHART_EMPTY_LINE = "As soon as one\u2019s live, this becomes your campaign chart.";
+export const CHART_EMPTY_CTA = "Log a query";
+/** …and the closed card's. No button: there is nothing to do here. */
+export const CLOSED_EMPTY_TITLE = "Nothing closed yet";
+export const CLOSED_EMPTY_LINE = "Queries will show here when their journey comes to an end, either due to lack of response or because the agent passed.";

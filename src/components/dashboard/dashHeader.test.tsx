@@ -118,9 +118,10 @@ describe("queries out — the chart's own figure", () => {
   it("⚠️ the header states the SAME number the chart's headline does, on the rendered page", () => {
     const html = page();
     const [out] = figures(headerOf(html));
-    /* ⚠️ THE CHART STATES ITS FIGURE IN ITS EYEBROW NOW (v16) — "27 out with agents · ↑ 3 over 8 weeks".
-       Same number, same derivation, handed down from this page; the probe follows it. */
-    const chart = /data-probe-text="chart-eyebrow">(?:<span[^>]*>)?([\d,]+) out with agents/.exec(html);
+    /* ⚠️ THE CHART STATES ITS FIGURE IN ITS TITLE NOW (v33) — "27 active queries", a sentence on the
+       navy band. Same number, same derivation, handed down from this page; the probe follows it from
+       the v16 eyebrow ("27 out with agents · …"), which is retired. */
+    const chart = /data-probe-text="chart-title">([\d,]+) active quer(?:y|ies)</.exec(html);
     expect(chart, "the chart's headline must render for this comparison to mean anything").not.toBeNull();
     expect(out).toBe(Number(chart![1].replace(/,/g, "")));
   });

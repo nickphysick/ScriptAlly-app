@@ -25,7 +25,7 @@
  */
 import React from "react";
 import type { Activity, Agent, Manuscript, Query } from "../../types";
-import { FEED_DAYS, feedDays, feedEntries, newCount, type FeedSeg } from "../../lib/dashFeed";
+import { FEED_DAYS, feedDays, feedEntries, type FeedSeg } from "../../lib/dashFeed";
 import { FEED_FIRST_RUN_LINE } from "../../lib/dashEmpty";
 import { OneScreenPanel } from "./OneScreenPanel";
 import { StatePill } from "./StatePill";
@@ -59,20 +59,20 @@ export const OneScreenFeed: React.FC<{
     [loading, activities, queries, agents, manuscripts, now, seenAt],
   );
   const days = React.useMemo(() => feedDays(entries), [entries]);
-  const fresh = newCount(entries);
 
   return (
-    <OneScreenPanel variant="os-feed" probe="activity-card" loading={loading} skel={["h", "grow", "grow"]}>
-      <div className="os-hd">
-        <div>
+    <OneScreenPanel
+      variant="os-feed" tone="slate" probe="activity-card" loading={loading} skel={["h", "grow", "grow"]}
+      /* ⚠️ NO SUB-HEADING UNDER ANY TITLE (v33). The eyebrow that stood here also carried "· N new";
+         the rust rule in each new entry's margin is what marks them now, and it marks the entries
+         themselves rather than counting them somewhere else. */
+      band={(
+        <div className="os-bandrow">
           <h3 className="os-cardttl">Activity feed</h3>
-          <p className="os-sub" data-probe-text="feed-eyebrow">
-            Everything that&rsquo;s happened, in order{fresh > 0 ? ` · ${fresh} new` : ""}
-          </p>
+          <span className="os-mini">{FEED_DAYS} days</span>
         </div>
-        <span className="os-mini">{FEED_DAYS} days</span>
-      </div>
-
+      )}
+    >
       <div className="os-scroll" data-probe="feed">
         {days.map((d) => (
           <React.Fragment key={d.label}>

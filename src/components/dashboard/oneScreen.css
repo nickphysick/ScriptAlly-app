@@ -29,12 +29,18 @@
   --dash-sage: #e0e5dd;
   --dash-quiet: #cfc9bf;
   --dash-letter: #e6d5b6;
-  --dash-partial: #e9c6b7;
-  --dash-full: #bfcbba;
+  --dash-partial: #e8c3b5;
+  --dash-full: #b7c4b1;
+  --dash-slate: #dfe5ea;
+  --dash-track: #f1ece5;
   /* the card */
-  --dash-radius: 14px;
-  --dash-pad: 20px 22px;
-  --dash-shadow: 0 1px 3px rgba(28, 19, 15, 0.04);
+  /* ⚠️ v33 — THE CARD IS A RIM AND A FRAME. `--dash-radius`/`--dash-shadow` are the RIM's; the frame's
+     own radius and padding are `--dash-frame-*`. The rim is the card's own white, never parchment. */
+  --dash-radius: 16px;
+  --dash-rim: 6px;
+  --dash-frame-radius: 11px;
+  --dash-pad: 18px 22px 16px;
+  --dash-shadow: 0 2px 8px rgba(28, 19, 15, 0.06);
   --dash-gap: 20px;
   /* type */
   /**
@@ -45,10 +51,9 @@
    * headings quietly fell back to the body serif.
    */
   --os-type: "Special Elite", "Courier New", Courier, monospace;
-  --dash-ttl: 22px;
+  --dash-ttl: clamp(21px, 8.3cqw, 30px);
   --dash-eyebrow: 10px;
   /* the two rows */
-  --dash-row1-closed: 320px;
   --dash-row2-min: 380px;
   --dash-row2-max: 560px;
   /**
@@ -105,14 +110,21 @@
 }
 
 /**
- * ⚠️ ROW ONE IS THE REF'S THREE TRACKS, AND THE MIDDLE ONE IS THE ELASTIC ONE.
- * `minmax(270px, .85fr)` holds the quick actions at their natural width, `minmax(0, 2.6fr)` gives the
- * chart everything left over — the `0` is what stops a wide plot refusing to shrink — and the closed
- * card is a fixed column, because a ring is drawn at a size rather than fitted to one.
+ * ⚠️ ROW ONE IS THE REF'S THREE TRACKS, ALL THREE ELASTIC, AND THE CHART IS ALWAYS THE WIDEST (v33).
+ * An earlier version gave the side cards fixed minimums and let the chart absorb all of the squeeze;
+ * with `fr` on every track the three give way together, and the floors are where each card's
+ * contents stop fitting. `align-items: stretch` is what makes the three one height.
+ *
+ * ⚠️ THE CHART'S FLOOR IS 340, NOT THE REF'S 380, AND THE REASON IS MEASURED. The ref's column is
+ * `window − 224 − 80`; this page's is ~38px narrower at the same window (the shell's window inset and
+ * the 22px page pad). At 1280 — the narrowest width the three sit across, since the ≤1279 step stacks
+ * them — the ref's floors sum to 944 against 938 of column, and the PAGE HELD THE SHELL OPEN by the
+ * 6px: `dashStages.measure` caught it as `appW 1286`. At 340 the chart takes what the two side floors
+ * leave (374 at 1280) and is still the widest of the three at every width.
  */
 .os-row1 {
   display: grid;
-  grid-template-columns: minmax(270px, 0.85fr) minmax(0, 2.6fr) var(--dash-row1-closed);
+  grid-template-columns: minmax(228px, 0.78fr) minmax(340px, 2fr) minmax(296px, 1.12fr);
   gap: var(--dash-gap);
   align-items: stretch;
   min-width: 0;
@@ -164,15 +176,68 @@
    */
   z-index: 1;
   box-sizing: border-box;
+  /* ⚠️ THE RIM (v33): 6px of the card's own white, no border, and the rim's shadow. */
   background: var(--dash-card);
-  border: 1px solid var(--dash-hair);
+  border: 0;
   border-radius: var(--dash-radius);
-  padding: var(--dash-pad);
+  padding: var(--dash-rim);
   box-shadow: var(--dash-shadow);
   min-width: 0;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  /* ⚠️ EACH CARD IS A SIZE CONTAINER, so a title scales with ITS card and not with the window — the
+     narrow closed card steps its title down while the wide feed beside it does not. A container
+     query cannot restyle the container itself, which is why `--stand` is on `.os-frame`. */
+  container-type: inline-size;
+}
+/**
+ * ⚠️ THE FRAME: the 1px burgundy line, 11px radius, and IT CLIPS. `overflow: hidden` is what lets the
+ * band run edge to edge and take the frame's top corners without a radius of its own. Burgundy is
+ * for this line and nothing else on the page.
+ */
+.os-frame {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--dash-frame);
+  border-radius: var(--dash-frame-radius);
+  background: var(--dash-card);
+  padding: var(--dash-pad);
+  overflow: hidden;
+}
+/* row two's frames close 2px tighter (the ref's `.mount > .frame`) */
+.os-row2 .os-frame { padding-bottom: 14px; }
+/**
+ * ⚠️ THE BAND: the card's title row, INSIDE the burgundy line, pulled to the frame's edges by
+ * negative margins equal to the frame's padding. At a 30px title it is 62px tall: 15 + 33 + 13 + 1.
+ * The colour is by what the card is ABOUT — `--band` comes from the tone class on the card.
+ */
+.os-band {
+  flex: none;
+  margin: -18px -22px 16px;
+  padding: 15px 22px 13px;
+  background: var(--band, var(--dash-page));
+  color: var(--band-ink, var(--dash-ink));
+  border-bottom: 1px solid rgba(28, 19, 15, 0.1);
+  min-width: 0;
+}
+.os-bandrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.os-tone--sand { --band: var(--dash-sand); }
+.os-tone--navy { --band: var(--dash-navy); --band-ink: #f5f1eb; }
+.os-tone--stone { --band: var(--dash-stone); }
+.os-tone--slate { --band: var(--dash-slate); }
+.os-tone--rose { --band: var(--dash-rose); }
+/* chips inside a band */
+.os-band .os-mini { background: rgba(255, 255, 255, 0.55); border-color: rgba(28, 19, 15, 0.14); }
+.os-tone--navy .os-band .os-mini { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.3); color: #f5f1eb; }
+/* the short campaign's quiet suffix — "SINCE 2 SEP" */
+.os-since {
+  font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(245, 241, 235, 0.6); white-space: nowrap; margin-right: auto; padding-top: 6px;
 }
 
 /* the head: title and eyebrow at the left, one chip at the right */
@@ -196,8 +261,12 @@
   font-weight: 400;
   font-size: var(--dash-ttl);
   letter-spacing: 0.01em;
-  line-height: 1.3;
-  color: var(--dash-ink);
+  /* ⚠️ 1.1 IS THE REF'S AND IT IS SAFE HERE: the face is Special Elite, not Playfair, the band has no
+     height of its own, and 13px of padding sits under the line — nothing clips a descender. */
+  line-height: 1.1;
+  white-space: nowrap;
+  color: inherit;
+  min-width: 0;
 }
 .os-sub {
   margin: 5px 0 12px;
@@ -300,114 +369,143 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-hdsep { font-size: 0; }
 .os-hddot { font-size: 17px; margin: 0 8px; color: var(--dash-ink-45); }
 
-/* ══ §4 · QUICK ACTIONS ═══════════════════════════════════════════════════════════════════════ */
-.os-qa .os-hd { margin-bottom: 10px; }
-/* ⚠️ EQUAL THIRDS, NOT THREE NATURAL HEIGHTS — the stack fills whatever the row's height turns out
-   to be, so the card never ends short of the two beside it. */
-.os-qastack {
-  flex: 1;
-  display: grid;
-  grid-template-rows: 1fr 1fr 1fr;
-  gap: 10px;
-  min-height: 0;
+/* ══ §4 · QUICK ACTIONS ═══════════════════════════════════════════════════════════════════════
+   One tile and two lines (v33). No large title: a mono eyebrow in the sand band. */
+.os-qa > .os-frame { padding: 16px 18px 12px; }
+.os-qa .os-band { margin: -16px -18px 14px; padding: 13px 20px 11px; }
+.os-qaeyebrow {
+  margin: 0;
+  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase;
+  line-height: 1.4; color: var(--dash-ink-45);
 }
-.os-qatile {
+/* ⚠️ THE TILE FILLS WHAT THE TWO LINES LEAVE — `flex: 1` in the frame's column — so the card never
+   ends short of the two beside it, and the quill (sized off the tile) grows with the row. */
+.os-qahero {
+  flex: 1 1 0;
+  min-height: 0;
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px 10px 10px;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 12px;
   background: var(--dash-parchment);
   border: 1px solid var(--dash-hair);
-  border-radius: 12px;
+  color: var(--dash-ink);
   text-align: left;
   cursor: pointer;
-  color: var(--dash-ink);
   min-width: 0;
   transition: border-color 0.14s ease;
 }
-.os-qatile:hover { border-color: rgba(28, 19, 15, 0.3); }
-.os-qaart, .os-qaph { width: 46px; height: 46px; flex: none; object-fit: contain; display: block; }
-/* ⚠️ THE PLACEHOLDER IS THE SAME 46px BOX, so the day the artwork lands nothing in this card moves. */
-.os-qaph {
-  border: 1px dashed rgba(28, 19, 15, 0.3);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 7px; line-height: 1.2; text-align: center;
-  color: rgba(28, 19, 15, 0.5);
-  padding: 2px;
+.os-qahero:hover { border-color: rgba(28, 19, 15, 0.3); }
+/* ⚠️ CENTRED, 16px DOWN, `calc(100% - 78px)` TALL — 78 is the label's line, the tile's padding and
+   the air between, so the quill never touches the words. Width follows from the drawing's own ratio. */
+.os-qaquill {
+  position: absolute; left: 50%; top: 16px;
+  height: calc(100% - 78px); width: auto; aspect-ratio: 697 / 883;
+  transform: translateX(-50%);
+  object-fit: contain; display: block; pointer-events: none;
 }
-.os-qalab {
-  font-family: var(--os-type);
-  font-size: 17px;
-  line-height: 1.15;
-  color: var(--dash-ink);
-  min-width: 0;
+.os-qaherolab {
+  font-family: var(--os-type); font-weight: 400;
+  font-size: clamp(18px, 9.6cqw, 24px); line-height: 1.1; white-space: nowrap;
 }
+.os-qaar { flex: none; margin-left: auto; opacity: 0.55; display: block; }
+.os-qaminor { display: grid; margin-top: 6px; flex: none; }
+.os-qarow {
+  display: flex; align-items: center;
+  padding: 13px 4px;
+  background: none; border: 0; border-bottom: 1px solid var(--dash-hair);
+  color: var(--dash-ink); text-align: left; cursor: pointer; min-width: 0;
+}
+.os-qarow:last-child { border-bottom: 0; padding-bottom: 6px; }
+.os-qarowlab { font-family: var(--os-type); font-size: clamp(14.5px, 6.8cqw, 17px); line-height: 1.2; white-space: nowrap; }
+.os-qarow:hover .os-qarowlab { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(28, 19, 15, 0.3); }
 
 /* ══ §5 · THE CHART ═══════════════════════════════════════════════════════════════════════════ */
 /**
- * ⚠️ THE MOUNT: A PARCHMENT RIM WITH A REAL FRAME INSIDE IT. The rim is the card (6px of parchment,
- * 16px radius, its own shadow) and the frame is a 1px rust line at 11px — the ref's `.chart`/`.frame`.
- * The card's own padding is replaced here rather than overridden per child.
+ * ⚠️ `--stand` IS THE WIDTH KEPT CLEAR FOR THE MENTOR, AND IT IS ON THE FRAME, NOT THE CARD. The card
+ * is the size container, and a container query cannot restyle the container element itself — so the
+ * `@container` rule below that zeroes it could never reach a value set on `.os-lead`.
  */
-.os-lead {
-  padding: 6px;
-  background: var(--dash-parchment);
-  border: 0;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(28, 19, 15, 0.06);
+.os-lead > .os-frame { --stand: 70px; }
+/**
+ * ⚠️ THE PLOT TAKES ITS HEIGHT FROM THE CARD, AND THE DRAWING NEVER TAKES PART IN LAYOUT. `flex: 1 1 0`
+ * with a floor; `.os-acdraw` is absolute inside it. An svg with a viewBox has a ratio of its own, and
+ * in the flow that ratio set the card's height — every widening of the window made the whole row
+ * taller and it never came back down.
+ */
+.os-acplot { position: relative; flex: 1 1 0; min-height: 170px; }
+.os-acdraw {
+  position: absolute; left: 0; top: 0;
+  width: calc(100% - var(--stand)); height: 100%;
+  z-index: 1;
 }
-.os-acframe {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  border: 1px solid var(--dash-frame);
-  border-radius: 11px;
-  background: var(--dash-card);
-  padding: 18px 22px 16px;
+.os-acdraw > svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+.os-acweeks { cursor: crosshair; }
+.os-achit { cursor: pointer; }
+/* the white disc scales about its own centre, with the glyph above it, on one clock */
+.os-acdisc { transition: transform 0.15s ease; }
+/* the baseline rule: from the plot's left edge to the frame's inner right edge, under his feet */
+.os-acground {
+  position: absolute; left: 0; right: -22px; top: 92.5%;
+  border-top: 1.5px solid rgba(28, 19, 15, 0.16);
+  z-index: 0;
 }
-.os-achead { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-width: 0; }
-/* ⚠️ THE ROW STAYS A FLEX ROW WITH NOTHING IN THE PICTURE SLOT (Nick, 18 Sep) — a 96px image can come
-   back beside the count without a relayout. */
-.os-acid { display: flex; align-items: center; gap: 14px; min-width: 0; }
-.os-acstat { display: flex; flex-direction: column; min-width: 0; }
-
-.os-aclegend { display: flex; gap: 16px; margin-bottom: 4px; font-size: 13px; color: var(--dash-ink-70); }
-.os-aclg { display: flex; align-items: center; gap: 7px; }
-.os-aclgd { width: 9px; height: 9px; border-radius: 50%; display: block; flex: none; }
-.os-aclgd--active { background: var(--dash-navy); }
-.os-aclgd--request { background: var(--dash-rose); border: 1px solid var(--dash-hair); }
-.os-aclgd--pass { background: var(--dash-stone); border: 1px solid var(--dash-hair); }
-
-.os-acbody { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
-/* ⚠️ THE PLOT IS ABSOLUTE INSIDE ITS BOX, so an svg can never hold the card's height open. */
-.os-acplot { position: relative; flex: 1 1 auto; min-height: 150px; }
-.os-acplot > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
-.os-acgrid { stroke: #ece6de; stroke-width: 1; shape-rendering: crispEdges; }
-/* the event dots: the state paper, a white ring, and a heart in the state's own ink */
-.os-acev > circle:first-child { stroke: #ffffff; }
-.os-acev--request > circle:first-child { fill: var(--dash-rose); }
-.os-acev--request > .os-acevc { fill: var(--dash-rust); }
-.os-acev--pass > circle:first-child { fill: var(--dash-stone); }
-.os-acev--pass > .os-acevc { fill: rgba(28, 19, 15, 0.5); }
+/**
+ * ⚠️ THE GLYPH LAYER — HTML over the drawing, the same box, inert. A glyph is centred on its disc
+ * by the svg's own coordinates (`left`/`top` inline) and scales by the disc's factor.
+ */
+.os-acglyphs { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.os-acglyph {
+  position: absolute; width: 19px; height: 19px; border-radius: 50%;
+  display: grid; place-items: center;
+  transform: translate(-50%, -50%) scale(1);
+  transition: transform 0.15s ease;
+  outline-offset: 2px;
+}
+.os-acglyph.at { transform: translate(-50%, -50%) scale(1.25); }
+.os-acglyph:focus-visible { outline: 2px solid var(--dash-navy); }
+.os-acglyphn { font-family: "JetBrains Mono", monospace; font-size: 9.5px; font-weight: 500; line-height: 1; color: var(--dash-ink); }
+/* two digits inside a 14px ring */
+.os-acglyphn--wide { font-size: 7.5px; letter-spacing: -0.02em; }
 
 /**
- * ⚠️ ONE SLOT PER WEEK, AND THE TICK IS THE SLOT'S OWN `::before`. The ref draws a 4px rounded tick
- * under every week and turns it rose on a week a request came in; hanging it off the slot means it
- * cannot drift from the label it belongs to, and a thinned label leaves its tick behind.
+ * ⚠️ THE MENTOR LEANS ON THE FRAME'S INNER RIGHT EDGE, AND HIS CLAWS ARE ON THE BASELINE.
+ * `right: -22px` is the frame's padding, so his back is flush with the line. The floor in the artwork
+ * is 97.05% of the way down the image, and that point sits on the plot's 92.5% — the same fraction
+ * `dashChart.PLOT.baseline` draws the line's floor at. Change one and the other is wrong.
+ */
+.os-mentor {
+  position: absolute; z-index: 3; right: -22px;
+  height: 150px; top: calc(92.5% - 150px * 0.9705);
+  pointer-events: none;
+  /* the two drawings blend with EACH OTHER and with nothing behind them */
+  isolation: isolate;
+}
+.os-mentor img { display: block; height: 100%; width: auto; transition: opacity 0.16s linear; }
+/* ⚠️ `plus-lighter` — ADDITIVE. With the first going 1→0 as the second goes 0→1 on one linear clock,
+   the pair always sums to 100% and the white card never shows through his chest mid-fade. */
+.os-mentor-b { position: absolute; inset: 0; opacity: 0; mix-blend-mode: plus-lighter; }
+.os-lead:hover .os-mentor-a, .os-lead:focus-within .os-mentor-a { opacity: 0; }
+.os-lead:hover .os-mentor-b, .os-lead:focus-within .os-mentor-b { opacity: 1; }
+
+/**
+ * ⚠️ ONE SLOT PER WEEK, UNDER THE DRAWING AND NOT UNDER THE MENTOR. The bar is the slot's own
+ * `::before`, so it cannot drift from the label it belongs to; `flex: 1 1 0` with `min-width: 0`
+ * keeps the bars even however long a label is, and `nowrap` keeps a date on one line.
  */
 .os-acx {
   display: flex;
-  justify-content: space-between;
   font-family: "JetBrains Mono", monospace;
   font-size: 10.5px;
+  line-height: 1.5;
   color: var(--dash-ink-45);
   margin-top: 8px;
+  margin-right: var(--stand);
   flex: none;
 }
-.os-acx span { flex: 1; text-align: center; position: relative; padding-top: 10px; min-width: 0; }
+.os-acx span { flex: 1 1 0; min-width: 0; white-space: nowrap; text-align: center; position: relative; padding-top: 10px; min-height: 25.8px; box-sizing: border-box; }
 .os-acx span::before {
   content: "";
   position: absolute; left: 4px; right: 4px; top: 0;
@@ -415,38 +513,211 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   background: var(--dash-stone);
 }
 .os-acx span.hot::before { background: var(--dash-rose); }
+.os-acx span.at { color: var(--dash-ink); }
+.os-acx span.at::before { background: var(--dash-navy); }
+/* under 560px of CARD, every other week keeps its bar and loses its words */
+@container (max-width: 560px) { .os-acx span:nth-child(even) { font-size: 0; } }
+/* a safety net: with row one's tracks this cannot happen above the ≤1279 step */
+@container (max-width: 350px) {
+  .os-mentor { display: none; }
+  .os-lead > .os-frame { --stand: 0px; }
+  .os-acground { right: 0; }
+}
 
 .os-sparse { position: absolute; inset: 0; display: none; place-items: center; text-align: center; padding: 16px; }
 .os-sparse.on { display: grid; }
 .os-sparse span { font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 13.5px; color: var(--dash-ink-45); }
 
+/* ── the minimap: the whole campaign, and the eight weeks in view ── */
+.os-mm { display: flex; align-items: center; gap: 10px; margin-top: 14px; flex: none; }
+.os-mm--arrive { animation: os-mm-in 1.1s ease both; }
+@keyframes os-mm-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.os-mmlab {
+  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dash-ink-45); white-space: nowrap;
+}
+.os-mmtrack { position: relative; flex: 1; height: 26px; border-radius: 5px; background: var(--dash-track); overflow: hidden; touch-action: pan-y; }
+.os-mmtrack > svg { display: block; width: 100%; height: 26px; }
+.os-mmwin {
+  position: absolute; top: 0; bottom: 0; min-width: 26px; box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.72); border: 1.5px solid var(--dash-navy); border-radius: 5px;
+  cursor: grab;
+}
+.os-mmwin:active { cursor: grabbing; }
+.os-mmwin:focus-visible { outline: 2px solid var(--dash-navy); outline-offset: 1px; }
+.os-mmwin i { position: absolute; top: 7px; bottom: 7px; left: 4px; width: 2px; border-radius: 2px; background: var(--dash-navy); }
+.os-mmwin i + i { left: auto; right: 4px; }
+
 /* ══ §6 · CLOSED ══════════════════════════════════════════════════════════════════════════════ */
-.os-cl { padding: 20px 22px 18px; }
-.os-clpie { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
-.os-clpie svg { height: 100%; max-height: 150px; width: auto; display: block; }
-.os-dntrack { stroke: #f1ece5; }
+.os-clpie { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; padding: 6px 0 2px; }
+/* ⚠️ A SQUARE OF 176px THAT GIVES WAY ONLY TO ITS CARD'S WIDTH — and everything inside it is a
+   percentage of THIS box, so the ring and the Archivist scale together.
+   ⚠️ NOT THE REF'S `height: 100%; max-height: 176px`. A percentage height in an auto-height flex slot
+   is indefinite, so the box was really being sized BY ITS CONTENT — the svg — and the loading cover,
+   which draws no svg, fell to the floor: its first row came up 80px short and the page jumped when
+   the cover lifted (`dash-skeleton-v33.mjs`, Δh −80). The closed card is what sets the row's height,
+   so its slot is never shorter than the ring; a stated size says the same thing without depending on
+   what is inside. */
+.os-ringbox { position: relative; flex: none; width: 176px; max-width: 100%; aspect-ratio: 1; }
+.os-ringbox > svg { position: relative; z-index: 1; display: block; width: 100%; height: 100%; overflow: visible; }
+.os-dntrack { stroke: var(--dash-track); }
+.os-dnarc { stroke-width: 20; transition: opacity 0.15s, stroke-width 0.15s; pointer-events: stroke; cursor: pointer; outline: none; }
+.os-dnarc.at { stroke-width: 25; }
+.os-dnarc.off { opacity: 0.38; }
+.os-dnarc:focus-visible { stroke-width: 25; }
 .os-dnarc--quiet { stroke: var(--dash-quiet); }
 .os-dnarc--letter { stroke: var(--dash-letter); }
 .os-dnarc--partial { stroke: var(--dash-partial); }
 .os-dnarc--full { stroke: var(--dash-full); }
-.os-dnn {
-  font-family: var(--font-serif), Georgia, serif;
-  font-size: 34px; font-weight: 600; fill: var(--dash-ink);
+/**
+ * ⚠️ THE ARCHIVIST, TWICE, IN ONE PLACE. 71.59% of the ring box (126px at 176), lifted 9.8% of the box
+ * above centre. The FRONT copy is clipped to a wedge from the ring's centre — 40° left of vertical to
+ * 52° right — whose edges fall in the gaps where his outline does not touch the ring.
+ * ⚠️ THE WEDGE BELONGS TO THIS SIZE AND THIS OFFSET. Change either and it must be recomputed.
+ */
+.os-arch {
+  position: absolute; left: 50%; top: 50%;
+  width: 71.59%; height: auto;
+  transform: translate(-50%, calc(-50% - 9.8%));
+  pointer-events: none; display: block;
 }
-.os-dnlab {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 9px; letter-spacing: 1.2px; fill: var(--dash-ink); fill-opacity: 0.5;
+/* ⚠️ `calc(-50% - 9.8%)` inside `translate` resolves against the IMAGE's height, not the box's. The
+   ref writes it this way and the 11px lift at full size is measured from it; kept verbatim. */
+.os-arch--back { z-index: 0; }
+.os-arch--front { z-index: 2; clip-path: polygon(50% 59.8%, -62.2% -90.4%, -120% -150%, 220% -150%, 187.6% -60.9%); }
+/* he looks up: the second drawing fades IN over the first, which stays opaque beneath it */
+.os-arch--alt { opacity: 0; transition: opacity 0.16s ease-out; }
+.os-cl:hover .os-arch--alt, .os-cl:focus-within .os-arch--alt { opacity: 1; }
+
+.os-clkey { display: grid; flex: none; }
+.os-clrow {
+  display: grid; grid-template-columns: 18px auto 1fr; align-items: center; gap: 10px;
+  padding: 6px 8px; margin: 0 -8px; border-radius: 6px;
+  /* the row is as tall as its 18px chip — the ref's — not as tall as the page's 1.5 line-height */
+  font-size: 13.5px; line-height: 18px; color: var(--dash-ink-70);
+  transition: background 0.15s; cursor: pointer; outline-offset: -2px;
 }
-.os-clkey { display: grid; gap: 4px; margin-top: 8px; flex: none; }
-.os-clrow { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--dash-ink-70); }
-.os-clrow b { margin-left: auto; font-weight: 600; color: var(--dash-ink); font-variant-numeric: tabular-nums; }
-/* ⚠️ A BUCKET WITH NOTHING IN IT KEEPS ITS ROW AND LOSES ITS COLOUR — absent, and greyed, not gone. */
-.os-clrow.z, .os-clrow.z b { color: var(--dash-ink-45); }
-.os-dnsw { width: 10px; height: 10px; border-radius: 3px; display: block; flex-shrink: 0; border: 1px solid rgba(28, 19, 15, 0.12); }
+.os-clrow.at { background: #f6f1ea; }
+.os-clrow:focus-visible { outline: 2px solid var(--dash-navy); }
+/* a hairline under No reply sets it apart: it is not a verdict */
+.os-clrow--first { border-bottom: 1px solid var(--dash-hair); border-radius: 6px 6px 0 0; padding-bottom: 9px; margin-bottom: 3px; }
+/* ⚠️ A BUCKET WITH NOTHING IN IT KEEPS ITS ROW — absent, and greyed, not gone — and is not a control. */
+.os-clrow.z { opacity: 0.45; cursor: default; }
+.os-clrowlab { white-space: nowrap; }
+.os-dnsw {
+  width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; border: 1px solid rgba(28, 19, 15, 0.12); box-sizing: border-box;
+}
+.os-dnsw svg { display: block; width: 18px; height: 18px; fill: none; stroke: rgba(28, 19, 15, 0.78); stroke-width: 1.35; stroke-linecap: round; stroke-linejoin: round; }
 .os-dnsw--quiet { background: var(--dash-quiet); }
 .os-dnsw--letter { background: var(--dash-letter); }
 .os-dnsw--partial { background: var(--dash-partial); }
 .os-dnsw--full { background: var(--dash-full); }
+.os-tally { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px 6px; min-height: 12px; min-width: 0; }
+.os-tg { display: block; flex: none; }
+
+/* ══ §6b · THE POPUP (portalled to `body` — see DashPopup) ═════════════════════════════════════
+   ⚠️ EVERY VALUE HERE IS A LITERAL, ON PURPOSE. The popup is outside `.os-root`, where none of the
+   page's tokens resolve, and a token that resolves to nothing paints nothing, silently. */
+.os-tip {
+  position: fixed; z-index: 60; left: 0; top: 0;
+  width: max-content; max-width: 270px; box-sizing: border-box;
+  padding: 13px 15px 12px;
+  background: rgba(255, 253, 250, 0.84);
+  border: 1px solid rgba(28, 19, 15, 0.16);
+  border-radius: 12px;
+  -webkit-backdrop-filter: blur(7px) saturate(1.15);
+  backdrop-filter: blur(7px) saturate(1.15);
+  box-shadow: 0 14px 34px -14px rgba(28, 19, 15, 0.38), 0 2px 6px rgba(28, 19, 15, 0.06);
+  font-family: var(--font-serif), Georgia, serif;
+  color: #1c130f;
+  pointer-events: none;
+  opacity: 0; transform: translateY(4px);
+  /* going: 120ms, at once */
+  transition: opacity 0.12s, transform 0.12s;
+}
+/* ⚠️ THE DELAY IS ON THE WAY IN ONLY, AND ONLY FROM HIDDEN. Once `on`, moving between weeks, pins,
+   slices or rows swaps the contents with no transition at all, so it updates at once. */
+.os-tip.on { opacity: 1; transform: none; transition: opacity 0.16s 0.28s, transform 0.16s 0.28s; }
+.os-tip.pinned { pointer-events: auto; transition-delay: 0s !important; background: rgba(255, 253, 250, 0.93); border-color: rgba(28, 19, 15, 0.3); }
+.os-tip p { margin: 0; }
+.os-tip-ey { font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }
+.os-tip-big { font-family: var(--os-type, "Courier New", Courier, monospace); font-size: 20px; line-height: 1.15; margin-top: 5px !important; }
+.os-tip-name { font-size: 19px; }
+.os-tip-sub { font-size: 13px; line-height: 1.45; color: rgba(28, 19, 15, 0.7); margin-top: 3px !important; }
+.os-tip-sub i { font-style: italic; }
+.os-tip-list { list-style: none; margin: 10px 0 0; padding: 10px 0 0; border-top: 1px solid rgba(28, 19, 15, 0.11); display: grid; gap: 8px; }
+.os-tip-list li { display: grid; grid-template-columns: 16px 1fr; gap: 9px; align-items: start; font-size: 13.5px; line-height: 1.4; }
+.os-tip-list li > span, .os-tip-list li b, .os-tip-list li em { font-family: inherit; }
+.os-tip-list li b { font-weight: 600; }
+.os-tip-list li em { display: block; font-style: normal; font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); margin-top: 3px; }
+.os-tip-list li em:only-child { margin-top: 0; }
+.os-tip-list li.os-tip-st { grid-template-columns: 16px 1fr auto; align-items: center; }
+.os-tip-list li.os-tip-st b { font-variant-numeric: tabular-nums; }
+.os-tip-st--undated { color: rgba(28, 19, 15, 0.7); }
+.os-tip-st--undated i { width: 16px; height: 16px; box-sizing: border-box; border: 1px dashed rgba(28, 19, 15, 0.3); border-radius: 50%; display: block; }
+.os-tip-list--plain { gap: 5px; }
+.os-tip-list--plain li { display: block; font-size: 13px; color: rgba(28, 19, 15, 0.7); }
+.os-tip-link, .os-tip-rowlink {
+  font: inherit; color: #1c130f; background: none; border: 0; padding: 0; cursor: pointer; text-align: left;
+  text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(28, 19, 15, 0.3);
+}
+.os-tip-link { display: inline-block; margin-top: 10px; font-size: 13px; }
+.os-tip-rowlink { text-decoration: none; }
+.os-tip-rowlink:hover { text-decoration: underline; }
+
+/* ══ §6c · THE GREETING'S SHADOW ═══════════════════════════════════════════════════════════════
+   Behind the cards, inert, and absolute inside the content — it scrolls with the page.
+
+   ⚠️ PLACED FROM THE GREETING, IN THE REF'S OWN NUMBERS. The ref hangs a 760×430 box on its main
+   column's top-left and puts the image at 96/−34 inside it; its greeting starts 89px down that column
+   and 40px in (MEASURED in the ref: the image is 56px right of and 123px above "Hello"). Here the
+   greeting starts `26px` down `.os-content` and `--dash-page-pad` in, so the image sits at
+   (pad + 56, 26 − 123) — the same place relative to "Hello".
+
+   ⚠️ AND IT CANNOT RUN UP BEHIND THE SEARCH BAR, AS THE REF'S DOES. There the whole column scrolls,
+   bar included; here the bar is the shell's and sits ABOVE this scroller, so anything that scrolls
+   with the page is cut at the scroller's top edge. The top of the box fades over 28px so that cut is
+   never a line. */
+.os-content { position: relative; }
+.os-content > * { position: relative; z-index: 1; }
+.os-content > .os-greetshadow {
+  position: absolute; z-index: 0; left: 0; top: 0;
+  width: 760px; max-width: 100%; height: 372px;
+  overflow: hidden; pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 28px);
+  mask-image: linear-gradient(180deg, transparent 0, #000 28px);
+}
+.os-greetshadow img { position: absolute; left: calc(var(--dash-page-pad, 22px) + 56px); top: -97px; width: 430px; height: auto; display: block; opacity: 0.08; }
+
+/* ══ §6d · A TOP-ROW CARD WITH NOTHING IN IT (v33; `closed-empty.html`, option A) ══════════════
+   ⚠️ REACHED FROM TWO DIFFERENT STATES: the active card when there are NO QUERIES, and the closed
+   card when there are queries and none has closed — an ordinary populated dashboard. */
+/* ⚠️ A MATCHING PAIR. The drawing, a title, one line; the active card adds the one thing to do about
+   it and the closed card adds nothing, because there is nothing to do there. The band stays above
+   both. The faded example chart that stood here is retired — it drew a card the app no longer has. */
+.os-hollow {
+  flex: 1 1 auto; min-height: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 4px 0 8px;
+}
+.os-hollow-art { display: block; height: auto; margin-bottom: 20px; filter: drop-shadow(0 6px 8px rgba(28, 19, 15, 0.18)); }
+.os-hollow-art--courier { width: 210px; max-width: 70%; }
+/* the Archivist keeps his hover swap here: two stacked drawings in one 168px box */
+.os-hollow-art--archivist { position: relative; width: 168px; max-width: 70%; aspect-ratio: 922 / 821; }
+.os-hollow-art--archivist .os-arch { position: absolute; inset: 0; left: 0; top: 0; width: 100%; height: 100%; transform: none; }
+.os-hollow-ttl { margin: 0; font-family: var(--os-type); font-size: clamp(21px, 6cqw, 30px); line-height: 1.15; color: var(--dash-ink); }
+.os-hollow-line { margin: 10px 0 0; font-size: 16px; line-height: 1.55; color: var(--dash-ink-70); max-width: 300px; }
+/* the page's one ink pill — buttons stay ink */
+.os-inkpill {
+  margin-top: 22px; border: 0; cursor: pointer;
+  background: var(--dash-ink); color: var(--dash-page);
+  font-family: var(--font-serif), Georgia, serif; font-size: 15px; line-height: 1.2;
+  padding: 12px 24px; border-radius: 30px;
+  transition: transform 0.14s ease, background-color 0.14s ease;
+}
+.os-inkpill:hover { background: #2e221b; }
+.os-inkpill:active { transform: translateY(1px); }
 
 /* ══ §7 · THE STATE PILL ══════════════════════════════════════════════════════════════════════ */
 .os-spill {
@@ -589,25 +860,27 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
  * loaded 344.6: a 42px jump at the moment the cover lifts, which is the one thing the cover exists to
  * prevent. Each is stated with its arithmetic so the next retune can be done rather than guessed.
  */
-/* `.os-cardttl` alone — 22px (`--dash-ttl`) × 1.3 */
-.os-sk-ttl { width: 46%; height: 28.6px; }
-/* ⚠️ A TITLE *AND* ITS EYEBROW, which is what three of the five cards draw: 28.6 + the eyebrow's 5px
-   top margin + 14 (10 × 1.4) + its 12px bottom margin. The ghost drew the title alone on all five,
-   so the closed tile came up 31px short — and the closed tile is what sets the first row's height. */
-.os-sk-ttl2 { width: 46%; height: 59.6px; }
+/* `.os-cardttl` — the title's own clamp × its 1.1 line-height, so the band is the band's height at
+   every card width (62px at a 30px title) */
+.os-sk-ttl { width: 58%; height: calc(var(--dash-ttl) * 1.1); }
+.os-sk--onnavy { opacity: 0.35; }
+/* `.os-qaeyebrow` — 9.5px × 1.4 */
+.os-sk-eyebrow { width: 96px; height: 13.3px; }
 /* `.os-mini` — 10px (`--dash-eyebrow`) × normal + 12px of padding + 2px of border */
-.os-sk-mini { width: 74px; height: 26px; border-radius: 20px; }
-.os-sk-qatile { width: 100%; height: 100%; border-radius: 12px; }
-/* the chart's title AND its eyebrow: 28.6 + 5 (the eyebrow's top margin) + 14 (10 × 1.4) + 12 */
-.os-sk-acstat { width: 240px; height: 59.6px; }
-/* `.os-aclegend` — 13px × 1.5 */
-.os-sk-legend { width: 210px; height: 19.5px; }
+.os-sk-mini { width: 74px; height: 26px; border-radius: 20px; flex: none; }
+/* the tile fills what the rows leave, exactly as `.os-qahero` does */
+.os-sk-hero { flex: 1 1 0; min-height: 0; width: 100%; border-radius: 12px; }
+/* `.os-qarowlab` — its own clamp × 1.2; the row's padding and hairline are the real `.os-qarow`'s */
+.os-sk-qarowlab { display: block; width: 62%; height: calc(clamp(14.5px, 6.8cqw, 17px) * 1.2); }
+.os-skelpage .os-qarow { cursor: default; }
 .os-sk-acplot { border-radius: 10px; }
 /* the axis: the slot's own 10px of padding-top plus 10.5px × 1.5 of label */
 .os-sk-acx { width: 100%; height: 25.8px; }
 .os-sk-donut { border-radius: 50%; }
-/* `.os-clrow` — 12.5px × 1.5 */
-.os-sk-clrow { height: 18.8px; }
+/* `.os-clrow` — an 18px chip beside an 18px line of label; the row's padding is the real row's */
+.os-sk-chip { display: block; width: 18px; height: 18px; border-radius: 4px; }
+.os-sk-clrowlab { display: block; width: 110px; height: 18px; }
+.os-skelpage .os-clrow { cursor: default; }
 .os-sk-fday { height: 9px; width: 100%; margin: 12px 0 8px; }
 .os-sk-fent { width: 100%; margin-bottom: 10px; border-radius: 10px; }
 /* the row ghost is the row's own height: 44px tile + 11px of padding either side */
@@ -619,7 +892,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
    Nick's prose, and they are the authority at those widths. */
 @media (max-width: 1279px) {
   /* the closed card drops beneath the chart, at the middle column's full width */
-  .os-row1 { grid-template-columns: minmax(270px, 0.85fr) minmax(0, 2.6fr); }
+  .os-row1 { grid-template-columns: minmax(228px, 0.78fr) minmax(340px, 2fr); }
   .os-row1 > .os-cl { grid-column: 2; }
 }
 @media (max-width: 999px) {
@@ -841,52 +1114,10 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
    figure, and carries no caveat. (Its ink, #8a7a6c — the ref's `--ink-3` — now colours the header's
    separator dot.) */
 
-/* ── the Active-queries panel's faded example ──────────────────────────────────────────────── */
-.os-cempty { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
-
-/* ⚠️ THE WHOLE DRAWN LAYER IS INERT, AND BOTH HALVES ARE LOAD-BEARING. `pointer-events: none`
-   stops the press; `user-select: none` stops a drag selecting the example's text, which is what
-   makes a picture feel like a picture. `aria-hidden` is on the element in the TSX — a stylesheet
-   cannot state that. */
-.os-cefade {
-  flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
-  pointer-events: none; user-select: none;
-}
-
-/* ⚠️ THE FADE IS ON THE PICTURE'S PARTS; THE CARD STAYS THE CARD. The header's contents, the plot and
-   its labels fade, and the card's own paper and hairline do not, so the panel reads as a real panel
-   holding an example rather than as a disabled one. Ref `.stage .faded{opacity:.28;filter:saturate(.85)}`. */
-.os-ce-head > * { opacity: 0.28; filter: saturate(0.85); }
-.os-ce-plot { opacity: 0.28; filter: saturate(0.85); }
-.os-ce-x { opacity: 0.28; filter: saturate(0.85); }
-
-/* the drawn grain toggle — the live chip's (`.os-mini`) values, restated for spans it cannot match */
-.os-ce-seg > span {
-  padding: 5px 11px; border-radius: 99px;
-  font-family: "JetBrains Mono", monospace; font-size: 10px; line-height: 14px; letter-spacing: 0.04em;
-  color: #8a7a6c; white-space: nowrap;
-}
-.os-ce-seg > span.on { background-color: #f5f1eb; color: #2a1f18; }
-
-/* ⚠️ THE PICTURE LIVES IN THE REAL PLOT'S BOX (`.os-acplot`), so the card is the same height before
-   and after the first query lands. The drawing is a fixed 800×200 stretched into that box, and
-   `non-scaling-stroke` keeps the line and the gridlines at their stated weights. */
-.os-ce-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-
-/* ── the one live control, over the picture ────────────────────────────────────────────────── */
-/* ref `.stage .over{position:absolute;inset:0;…;z-index:3}` */
-.os-ceover { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 3; }
-/* ⚠️ ref `.over-glow` verbatim, and `pointer-events: none` is not optional — the glow covers the
-   button it exists to lift, so without it the press lands on the gradient. */
-.os-ceg {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  width: 64%; height: 80%; pointer-events: none;
-  background: radial-gradient(ellipse at center,
-    rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.75) 45%, rgba(255, 255, 255, 0) 72%);
-}
-/* the CTA is the panel's one primary, so it is taller than `.os-btn-mini`'s 24px row height and
-   carries the ref's plane glyph beside the words */
-.os-ce-cta { position: relative; gap: 8px; height: 34px; padding: 0 16px; font-size: 12.5px; }
+/* ── the Active-queries panel with no queries ─────────────────────────────────────────────── */
+/* ⚠️ `.os-cempty` IS ONLY A MARKER NOW. The panel's layout is `.os-hollow` (§6d), shared with the
+   closed card's own empty state — which is NOT a zero-query state, so its rules cannot live in this
+   block without breaking the block's one promise. */
 
 /* ── the getting-started list, in the to-do card ────────────────────────────────────────────── */
 /* ref `.todo .hd .mono` — the eyebrow that names WHICH list this is, so the badge's outstanding

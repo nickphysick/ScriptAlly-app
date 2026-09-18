@@ -21,6 +21,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
+import { QUICK_ACTIONS } from "../../lib/dashActions";
 import { describe, expect, it } from "vitest";
 import { OneScreenSkeleton } from "./OneScreenSkeleton";
 import { OneScreenHeader } from "./OneScreenHeader";
@@ -109,8 +110,8 @@ describe("the page skeleton mirrors the page", () => {
     /* the population first: an empty set satisfies every claim below it */
     expect(ghost.length, "no ghost rules were read at all").toBeGreaterThan(8);
     expect(ghost.some((r) => r.sel.includes(".os-skelpage"))).toBe(true);
-    expect(ghost.some((r) => r.sel.includes(".os-sk-qatile"))).toBe(true);
-    expect(ghost.some((r) => r.sel.includes(".os-sk-clrow"))).toBe(true);
+    expect(ghost.some((r) => r.sel.includes(".os-sk-hero"))).toBe(true);
+    expect(ghost.some((r) => r.sel.includes(".os-sk-clrowlab"))).toBe(true);
     for (const r of ghost) {
       expect(r.body, `${r.sel} declares a grid of its own`).not.toContain("grid-template-columns");
       expect(r.body, `${r.sel} declares a column gap of its own`).not.toContain("column-gap");
@@ -127,14 +128,19 @@ describe("the page skeleton mirrors the page", () => {
      the chart's mount frame and its three bands, the closed tile's ring and key, and the two
      scrolling cards. Every one of those is sized by a rule the page already declares. */
   it("⚠️ wears the page's own card classes — a restated box is a box free to drift", () => {
-    for (const cls of ["os-card", "os-hd", "os-qa", "os-qastack", "os-lead", "os-acframe", "os-achead",
-                       "os-acid", "os-aclegend", "os-acbody", "os-acplot", "os-acx", "os-cl", "os-clpie",
-                       "os-clkey", "os-feed", "os-todo", "os-scroll", "os-tdfoot"]) {
+    /* ⚠️ RETARGETED (v33): the rim, the frame and the band are the page's own three boxes now, and the
+       ghost wears all three on every card — with the band's TONE, so the cover is bands and plain
+       blocks (Nick) and the band a card arrives with is the band it was waiting under. */
+    for (const cls of ["os-card", "os-frame", "os-band", "os-bandrow", "os-qa", "os-qaminor", "os-qarow", "os-lead",
+                       "os-acplot", "os-acdraw", "os-acx", "os-cl", "os-clpie", "os-ringbox", "os-clkey", "os-clrow",
+                       "os-feed", "os-todo", "os-scroll", "os-tdfoot",
+                       "os-tone--sand", "os-tone--navy", "os-tone--stone", "os-tone--slate", "os-tone--rose"]) {
       expect(html, cls).toMatch(new RegExp(`class="([^"]* )?${cls}[" ]`));
     }
     /* every retired row's boxes went with it — bands, mounts, columns and the old chart wrapper */
     for (const gone of ["os-aut", "os-lbody", "os-chartwrap", "os-ahead", "os-th2", "os-bdgrid", "os-mount",
-                        "os-tasks", "os-actv", "os-comtile"]) {
+                        "os-tasks", "os-actv", "os-comtile", "os-hd", "os-qastack", "os-acframe", "os-achead",
+                        "os-acid", "os-aclegend", "os-acbody"]) {
       expect(html, gone).not.toMatch(new RegExp(`["\\s]${gone}["\\s]`));
     }
   });
@@ -142,16 +148,21 @@ describe("the page skeleton mirrors the page", () => {
   it("stands in for every card on the page — nothing loads unannounced", () => {
     /* each card's title and chip, the three action tiles, the chart's headline / legend / plot, the
        closed ring and its key rows, the feed's days and entries, the to-do rows and their footer */
-    for (const cls of ["os-sk-ttl", "os-sk-mini", "os-sk-qatile", "os-sk-acstat", "os-sk-legend",
-                       "os-sk-acplot", "os-sk-donut", "os-sk-clrow", "os-sk-fday", "os-sk-fent",
+    for (const cls of ["os-sk-ttl", "os-sk-mini", "os-sk-eyebrow", "os-sk-hero", "os-sk-qarowlab", "os-sk-acplot",
+                       "os-sk-acx", "os-sk-donut", "os-sk-chip", "os-sk-clrowlab", "os-sk-fday", "os-sk-fent",
                        "os-sk-tdrow", "os-sk-tdfoot"]) {
       expect(html, cls).toContain(cls);
     }
+    /* ⚠️ NO ILLUSTRATION IN THE COVER (v33, Nick). A Mentor arriving before his chart would be the one
+       finished thing on an unfinished page — so the cover names no picture at all. */
+    expect(html).not.toContain("<img");
+    expect(html).not.toContain("/images/dash/");
     /* ⚠️ A CARD THAT LEAVES THE PAGE LEAVES THE SKELETON IN THE SAME COMMIT, or the loading state
        advertises something that never arrives. The breakdown, the goals card, the manuscript tile,
        the stat row, the community tile and the old chart are all retired — and the ghost's rules go
        with the ghost, so a dead `.os-sk-*` rule cannot sit in the sheet waiting to be reattached. */
-    for (const gone of ["os-sk-bdn", "os-sk-bdpill", "os-sk-bdfact", "os-sk-bdfoot", "os-sk-qahero",
+    for (const gone of ["os-sk-bdn", "os-sk-bdpill", "os-sk-bdfact", "os-sk-bdfoot", "os-sk-qahero", "os-sk-qatile",
+                        "os-sk-acstat", "os-sk-legend", "os-sk-ttl2", "os-sk-clrow",
                         "os-sk-qaitem", "os-sk-acart", "os-sk-actog", "os-sk-tkrule", "os-sk-acbub",
                         "os-sk-comill", "os-sk-aut", "os-sk-chplot", "os-sk-chbrush", "os-sk-chchips",
                         "os-sk-row", "os-sk-goal", "os-sk-counters", "os-sk-comstrip", "os-sk-ticket"]) {
@@ -411,10 +422,13 @@ describe("the timing is the lib's, not the component's", () => {
      not in the cover. */
   it("⚠️ the action and closed-row ghosts are the cards' own lists, counted", () => {
     const src = readFileSync(join(__dirname, "OneScreenSkeleton.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(src).toContain("QUICK_ACTIONS.map(");
+    /* ⚠️ RETARGETED (v33): one tile and two rows — the rows are the registry's `minor` actions, counted,
+       and the tile is the one `main`. Still the cards' own lists, never a number typed here. */
+    expect(src).toContain('QUICK_ACTIONS.filter((a) => a.rank === "minor").map(');
     expect(src).toContain("CLOSED_BUCKETS.map(");
-    expect(html.match(/os-sk-qatile/g) ?? []).toHaveLength(3);
-    expect(html.match(/os-sk-clrow/g) ?? []).toHaveLength(4);
+    expect(html.match(/os-sk-hero/g) ?? []).toHaveLength(QUICK_ACTIONS.filter((a) => a.rank === "main").length);
+    expect(html.match(/os-sk-qarowlab/g) ?? []).toHaveLength(QUICK_ACTIONS.filter((a) => a.rank === "minor").length);
+    expect(html.match(/os-sk-clrowlab/g) ?? []).toHaveLength(4);
   });
 });
 

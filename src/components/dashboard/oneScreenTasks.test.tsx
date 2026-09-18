@@ -112,10 +112,14 @@ describe("the rendered card", () => {
   const html = (over: Record<string, unknown> = {}) =>
     renderToStaticMarkup(<OneScreenTasks {...base} {...over} />);
 
-  it("states its name, its eyebrow, a chip and one route to the page", () => {
+  /* ⚠️ v33 — NO SUB-HEADING UNDER ANY TITLE. The eyebrow ("Where the ball is with you") is retired;
+     the title and its chip sit in the rose band, inside the frame. */
+  it("states its name in the rose band, with a chip and one route to the page — and no eyebrow", () => {
     const h = html();
-    expect(h).toContain("To-do list");
-    expect(h).toContain("Where the ball is with you");
+    expect(h).toMatch(/class="os-card os-lift os-todo os-tone--rose"/);
+    expect(h).toContain('<h3 class="os-cardttl" data-probe-text="todo-title">To-do list</h3>');
+    expect(h).not.toContain("Where the ball is with you");
+    expect(h).not.toMatch(/["\s]os-sub["\s]/);
     expect(h).toContain('data-probe="todo-badge"');
     expect(h).toContain("See all");
     /* the retired badge markup is gone with the band it sat in */
