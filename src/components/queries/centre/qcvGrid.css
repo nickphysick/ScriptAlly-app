@@ -1,0 +1,20 @@
+/** Query Centre v11 — the Grid. Two across, gap 14, 18px of padding inside the view's frame. */
+.qcv-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 18px; }
+.qcv-tile { position: relative; box-sizing: border-box; min-width: 0; height: 116px; border: 1px solid var(--qcv-hair); border-radius: 10px; overflow: hidden; background: #ffffff; cursor: pointer; outline: none; }
+.qcv-tile:hover { border-color: rgba(28, 19, 15, 0.3); }
+.qcv-tile--sk { cursor: default; }
+.qcv-tile--sk:hover { border-color: var(--qcv-hair); }
+.qcv-tile-bd { box-sizing: border-box; height: 35px; display: flex; align-items: center; gap: 8px; padding: 9px 12px 7px; background: var(--qcv-state, var(--state-closed)); border-bottom: 1px solid rgba(28, 19, 15, 0.1); }
+.qcv-tile-bd b { padding-top: 3px; font-family: var(--qcv-type); font-weight: 400; font-size: 15px; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcv-tile-bd em { margin-left: auto; flex: none; font-style: normal; font-family: var(--qcv-mono); font-size: 9px; letter-spacing: 0.08em; color: var(--qcv-ink-70); white-space: nowrap; }
+/* ⚠️ 11px, not the ref's 12, top and bottom: the name is mixed-case Playfair on a CLIPPED line, so it
+   takes 1.3 where the ref draws 1.2 — two pixels taller — and the tile stays the ref's 116. */
+.qcv-tile-in { padding: 11px 12px 11px 14px; }
+.qcv-tile-nm { display: block; font-family: var(--qcv-serif); font-weight: 600; font-size: 17px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcv-tile-ag { display: block; font-family: var(--qcv-serif); font-style: italic; font-size: 13.5px; line-height: 19px; color: var(--qcv-ink-70); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcv-tile-fact { display: block; margin-top: 4px; font-family: var(--qcv-mono); font-size: 8.5px; line-height: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* the rust left rule and the ink selection ring, as in the List — `isWithYou`, never an offer */
+.qcv-tile--you::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; background: var(--qcv-rust); border-radius: 0 2px 2px 0; z-index: 1; }
+.qcv-tile[aria-selected="true"]::after { content: ""; position: absolute; inset: 3px; border: 1.6px solid var(--qcv-ink); border-radius: 7px; pointer-events: none; }
+.qcv-tile:focus-visible { box-shadow: 0 0 0 2px var(--qcv-navy); }
+@container (max-width: 440px) { .qcv-tiles { grid-template-columns: minmax(0, 1fr); } }

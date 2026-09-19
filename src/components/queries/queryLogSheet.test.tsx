@@ -172,10 +172,8 @@ describe("§3 · one activity per save, the override on the payload, the ghost n
     expect(again).toContain("setCreateHint(null)");
   });
 
-  it("the saved card pulses once and the pulse honours reduced motion", () => {
-    expect(page).toContain("freshId={landedId}");
-    const css = readFileSync(join(process.cwd(), "src/components/queries/queryCard.css"), "utf8");
-    expect(css).toMatch(/\.qcc--fresh \{ animation: qccFresh/);
-    expect(css).toMatch(/prefers-reduced-motion[\s\S]{0,80}\.qcc--fresh \{ animation: none/);
-  });
+  /* ⚠️ RETIRED (Query Centre v11, 19 Sep): the old grid's cards (`QueryCentreGrid`) are no longer mounted, so
+     there is no card to pulse. A saved query still announces itself: the save selects it, and it is the
+     query in the DOCKED card, opened on Tracking (the case above). v11's tiles carry no entrance of
+     their own beyond the page's one-off arrival. */
 });

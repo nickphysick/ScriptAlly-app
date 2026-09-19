@@ -78,6 +78,7 @@ import { QcSummary } from "./queries/centre/QcSummary";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
 import { QcOpenCard, QcOpenCardSkeleton } from "./queries/centre/QcOpenCard";
 import { QcCalendar, QcCalendarSkeleton } from "./queries/centre/QcCalendar";
+import { QcGrid, QcGridSkeleton } from "./queries/centre/QcGrid";
 import {
   DEFAULT_SORT, buildQcRows, closedGrid, filterForStatusParam, filterOptions, inScope, matchesFilter, sortRows, stageColumns,
   type QcFilter, type QcSort,
@@ -6343,7 +6344,7 @@ export const Queries: React.FC<{
             ) : null}
             body={
               showGridSkeleton ? (
-                gridView === "list" ? <QcListSkeleton /> : gridView === "calendar" ? <QcCalendarSkeleton /> : <QueryGridSkeleton view={gridView} out={gridSkeletonOut} />
+                gridView === "list" ? <QcListSkeleton /> : gridView === "calendar" ? <QcCalendarSkeleton /> : <QcGridSkeleton />
               ) : emptyKind === "filtered" ? (
                 /* FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER — the card, and only where its
                    headline is true. Its line is counted over the SCOPED set, the one the sentence's
@@ -6369,16 +6370,7 @@ export const Queries: React.FC<{
                    narrows; the LANES are what the sentence shows. */
                 <QcCalendar rows={qcVisible} trackRows={qcScoped} selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} nowMs={Date.now()} />
               ) : (
-                <QueryCentreGrid
-                  ghost={ghostRow}
-                  freshId={landedId}
-                  rows={gridRows}
-                  group="none"
-                  onOpen={(id) => onOpenQuery?.(id)}
-                  selectedId={selectedQueryId}
-                  onVerb={handleRowVerb}
-                  onMore={handleRowMore}
-                />
+                <QcGrid rows={qcVisible} selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} nowMs={Date.now()} />
               )
             }
           />

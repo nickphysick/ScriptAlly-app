@@ -156,3 +156,39 @@ describe("the open query, docked", () => {
     expect(html).not.toContain("<button");
   });
 });
+
+/* ── the Grid view (v11, phase 9): the same rows, as tiles ── */
+import { QcGrid, QcGridSkeleton } from "./QcGrid";
+describe("the grid's tiles", () => {
+  const gridCss = sheet("qcvGrid.css");
+  it("two across, gap 14, 18px of padding; a tile is 116 tall with a 35px band — and takes 1.3 on its clipped Playfair name", () => {
+    const t = rule(gridCss, ".qcv-tiles");
+    expect(t).toMatch(/grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/); expect(t).toMatch(/gap:\s*14px/); expect(t).toMatch(/padding:\s*18px/);
+    expect(rule(gridCss, ".qcv-tile")).toMatch(/height:\s*116px/);
+    expect(rule(gridCss, ".qcv-tile-bd")).toMatch(/height:\s*35px/);
+    expect(rule(gridCss, ".qcv-tile-nm")).toMatch(/line-height:\s*1\.3/);
+  });
+  it("⚠️ NO TILE ACTIONS; rust follows `isWithYou` for every status; Day N is omitted when undated", () => {
+    const rows = rowsOf(ALL.map((s) => q({ status: s })));
+    const html = renderToStaticMarkup(<QcGrid rows={rows} selectedId={rows[0].id} onOpen={() => {}} nowMs={NOW} />);
+    expect(html).not.toContain("<button");
+    for (const s of ALL) expect(html.match(new RegExp(`data-status="${s.replace(/&/g, "&amp;")}" data-you="(true|false)"`))![1], s).toBe(String(isWithYou(s)));
+    expect(html.split('aria-selected="true"').length - 1).toBe(1);
+    expect(html).toContain("<em>Day 20</em>");
+    /* a close with no close date: no Day N at all, never "Day 0" */
+    expect(renderToStaticMarkup(<QcGrid rows={rowsOf([q({ status: QueryStatus.NO_RESPONSE })])} selectedId={null} onOpen={() => {}} nowMs={NOW} />)).not.toContain("Day ");
+  });
+  it("the tile states the list's OWN fact line — one derivation, two views", () => {
+    const rows = rowsOf([q({ dateSent: ago(36) })]);
+    const tile = renderToStaticMarkup(<QcGrid rows={rows} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
+    const list = renderToStaticMarkup(<QcList rows={rows} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
+    const said = tile.match(/class="qcv-tile-fact" title="([^"]+)"/)![1];
+    expect(said.length).toBeGreaterThan(8);
+    expect(list).toContain(`title="${said}"`);
+  });
+  it("eight placeholder tiles, none of them interactive", () => {
+    const html = renderToStaticMarkup(<QcGridSkeleton />);
+    expect(html.split('data-qcv="sk-tile"').length - 1).toBe(8);
+    expect(html).not.toContain('role="option"');
+  });
+});
