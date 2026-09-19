@@ -934,16 +934,17 @@ describe("§4 (quick actions) · no drawer, no desk, no selection — and one co
     /* ⚠️ RETARGETED 11 Sep (Grid pass §5): the list's inline closure became `handleRowVerb`, the ONE
        handler both views mount. The claim is unchanged — the quick pair returns before anything
        opens — and is asserted on that function; that both views mount it is asserted below. */
-    const body = sliceBetween(page, "const handleRowVerb = (", "const handleRowMore = (");
-    expect((page.match(/onVerb=\{handleRowVerb\}/g) ?? []).length, "a view stopped mounting the shared handler").toBe(2);
-    const guard = body.indexOf('if (verb === "snooze" || verb === "closed")');
-    const ret = body.indexOf("return;", guard);
-    expect(guard, "the quick pair is no longer intercepted").toBeGreaterThan(-1);
-    expect(ret, "the interception does not return").toBeGreaterThan(guard);
-    for (const opener of ["setSelectedQueryId(id)", "onOpenQuery?.(id)", "openDeskVerb("]) {
-      const at = body.indexOf(opener);
-      expect(at, `${opener} vanished — this lock is now asserting nothing`).toBeGreaterThan(-1);
-      expect(at, `${opener} runs before the quick pair returns`).toBeGreaterThan(ret);
+    /* ⚠️ RETARGETED AGAIN (Query Centre v11, 19 Sep): rows carry no verbs, so the quick pair is reached
+       from the open card's ⋯. The claim is unchanged — Snooze and Mark closed open a one-answer
+       popover and NOTHING else: no desk, no selection change, no navigation — and it is asserted on
+       the card's `onAction`, where only Nudge goes to the desk. */
+    const at = page.indexOf("onAction={(action, anchor) => {");
+    expect(at, "the card's action handler is missing").toBeGreaterThan(-1);
+    const body = page.slice(at, page.indexOf("}}", at));
+    expect(body).toContain('if (action === "nudge") openDeskVerb("nudge", anchor);');
+    expect(body).toContain('else openQuick(action === "snooze" ? "snooze" : "close", activeQuery.id, anchor);');
+    for (const opener of ["setSelectedQueryId(", "onOpenQuery?.(", "openRecord("]) {
+      expect(body, `the quick pair now reaches ${opener}`).not.toContain(opener);
     }
   });
 
@@ -953,9 +954,11 @@ describe("§4 (quick actions) · no drawer, no desk, no selection — and one co
     expect((page.match(/<QuickActionPopover/g) ?? []).length).toBe(1);
     expect(list, "the list grew its own popover").not.toContain("QuickActionPopover");
     expect(panel, "the drawer grew its own popover").not.toContain("QuickActionPopover");
-    /* the list's slot two is snooze, and it hands the page an anchor rather than opening anything */
-    expect(list).toContain('onVerb?.(r.id, "snooze", e.currentTarget)');
+    /* the drawer hands the page its BUTTON rather than opening anything; so does the docked card's ⋯ */
     expect(panel).toContain("onSnooze(e.currentTarget)");
+    const card = readFileSync(join(process.cwd(), "src/components/queries/centre/QcOpenCard.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(card, "the docked card grew its own popover").not.toContain("QuickActionPopover");
+    expect(card).toContain("onAction(k as OpenAction, moreRef.current)");
   });
 
   /**

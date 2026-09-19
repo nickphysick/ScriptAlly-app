@@ -1,0 +1,48 @@
+/**
+ * Query Centre v11 — the open query, docked. The only full framed card among the queries.
+ * Values are the ref's computed ones.
+ */
+.qcv-open { position: sticky; top: 16px; align-self: start; min-width: 0; }
+/* ⚠️ CAPPED TO THE SCROLLPORT, NOT `100vh`: the scroller starts below the shell's bar, so the viewport
+   over-claims by that offset. `--wpg-port-h` is the grid's published scrollport height; 32 = the 16px
+   the card keeps above it and the same beneath, and 12 = the card's own rim, top and bottom. */
+.qcv-open-fr { display: flex; flex-direction: column; max-height: calc(var(--wpg-port-h, 100vh) - 32px - 12px); }
+.qcv-open-bd { flex: none; display: flex; align-items: center; gap: 10px; padding: 12px 16px 10px; }
+.qcv-open-crt { display: flex; align-items: center; font-family: var(--qcv-mono); font-weight: 400; font-size: 9.5px; line-height: 13px; letter-spacing: 0.14em; text-transform: uppercase; }
+/* the rust dot: the move is the WRITER's. One definition (`isWithYou`) — never an offer. */
+.qcv-open-crt--you::before { content: ""; flex: none; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: var(--qcv-rust); }
+.qcv-open-day { margin-left: auto; font-family: var(--qcv-mono); font-weight: 400; font-size: 10.5px; line-height: 14px; letter-spacing: 0.06em; color: var(--qcv-ink-70); }
+
+.qcv-open-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px 18px 0; }
+.qcv-open-who { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.qcv-open-ini { box-sizing: border-box; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(95, 123, 147, 0.35); background: #e7eef2; color: #3f566a; display: flex; align-items: center; justify-content: center; font-family: var(--qcv-mono); font-size: 11px; letter-spacing: 0.04em; }
+.qcv-open-whotx { min-width: 0; }
+/* the name may wrap to two lines; it is Playfair, so 1.3 — and nothing clips it */
+.qcv-page .qcv-open-nm, .qcv-open .qcv-open-nm { margin: 0; font-family: var(--qcv-serif) !important; font-weight: 600; font-size: 19px; line-height: 1.3; letter-spacing: 0; color: var(--qcv-ink); }
+.qcv-open-ag { display: block; margin-top: 3px; font-family: var(--qcv-mono); font-size: 9px; line-height: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcv-open-pill { display: flex; align-items: center; gap: 6px; padding: 5px 10px 4px 7px; border-radius: 20px; background: var(--fc-band); font-family: var(--qcv-serif); font-size: 12.5px; line-height: 17px; white-space: nowrap; }
+
+.qcv-open-ms { margin-top: 14px; padding: 12px 14px; border-radius: 9px; background: var(--qcv-quiet); }
+.qcv-open-ms em { display: block; font-style: normal; font-family: var(--qcv-mono); font-size: 8.5px; line-height: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--qcv-ink-45); }
+.qcv-open-ms b { display: block; margin-top: 6px; font-family: var(--qcv-type); font-weight: 400; font-size: 21px; line-height: 1.15; }
+.qcv-open-ms p { display: flex; flex-wrap: wrap; gap: 6px; margin: 9px 0 0; }
+.qcv-open-ms p span { padding: 4px 7px; border-radius: 4px; background: #ffffff; font-family: var(--qcv-mono); font-size: 8.5px; line-height: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+.qcv-open-tabs { display: flex; gap: 18px; margin-top: 14px; border-bottom: 1px solid var(--qcv-hair); }
+.qcv-open-tabs button { margin: 0 0 -1px; padding: 0 0 8px; border: 0; border-bottom: 1.6px solid transparent; background: none; cursor: pointer; font-family: var(--qcv-serif); font-size: 14px; line-height: 20px; color: var(--qcv-ink-45); }
+.qcv-open-tabs button:hover { color: var(--qcv-ink); }
+/* the current tab: ink, with a 1.6px ink underline sitting ON the hairline */
+.qcv-open-tabs button[aria-selected="true"] { color: var(--qcv-ink); border-bottom-color: var(--qcv-ink); }
+.qcv-open-tabs button:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; border-radius: 3px; }
+.qcv-open-tabn { margin-left: 6px; font-style: normal; font-family: var(--qcv-mono); font-size: 9px; color: var(--qcv-ink-45); }
+.qcv-open-tab { padding: 14px 0 12px; }
+
+.qcv-open-ft { flex: none; display: flex; align-items: center; gap: 10px; padding: 12px 18px 13px; min-height: 80px; box-sizing: border-box; border-top: 1px solid var(--qcv-hair); background: #ffffff; }
+.qcv-open-stand { flex: 1 1 auto; min-width: 0; margin: 0; font-family: var(--qcv-mono); font-size: 9px; line-height: 13.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-70); }
+.qcv-open-act { flex: none; height: 38px; padding: 3px 18px 0; border: 0; border-radius: 22px; background: var(--qcv-navy); color: #ffffff; cursor: pointer; white-space: nowrap; font-family: var(--qcv-type); font-size: 14.5px; line-height: 1; }
+.qcv-open-act:hover { background: var(--qcv-navy-hov); }
+.qcv-open-act:focus-visible, .qcv-open-more:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
+.qcv-open-act--live, .qcv-open-more--live { box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.6px var(--qcv-ink); }
+.qcv-open-more { flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(28, 19, 15, 0.14); background: #ffffff; cursor: pointer; color: var(--qcv-ink); display: flex; align-items: center; justify-content: center; }
+.qcv-open-more:hover { background: var(--qcv-parchment); }
+.qcv-open-more i { font-style: normal; font-family: var(--qcv-mono); font-size: 13px; letter-spacing: 0.1em; line-height: 1; margin-top: -3px; }

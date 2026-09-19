@@ -117,7 +117,10 @@ describe("Queries.tsx artefacts — one home for actions + regressions", () => {
   it("the ?q= deep-link scroll-into-view is untouched (regression)", () => {
     /* the local now names the resolved id rather than the raw prop — same row, same behaviour */
     expect(src).toContain("query-row-${wanted}");
-    expect(src).toContain('scrollIntoView({ block: "center" })');
+    /* ⚠️ RETARGETED (v11): `nearest`, not `center`. The effect also runs when the reader CLICKS a row
+       (that click writes `?q=`), and centring a row they had just pressed moved the page under the
+       pointer — measured at a 1280 window. `nearest` still fetches an off-screen row on a deep link. */
+    expect(src).toContain('scrollIntoView({ block: "nearest" })');
   });
 });
 

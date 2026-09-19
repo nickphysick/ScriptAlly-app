@@ -319,7 +319,8 @@ export function factLine(row: QcRow, nowMs: number): string {
   }
   if (row.court === "offer") return since != null ? `${spanWords(since)} since the offer` : "offer not dated";
   if (row.expectedMs == null) return since != null ? `no date promised · ${spanWords(since)} waiting` : "no date promised";
-  if (row.expectedMs < nowMs) return `${spanWords(since ?? 0)} waiting · ${spanWords(wholeDays(row.expectedMs, nowMs))} past the expected date`;
+  /* "past expected", the sentence filter's own words — the full phrase ran past a 240px column */
+  if (row.expectedMs < nowMs) return `${spanWords(since ?? 0)} waiting · ${spanWords(wholeDays(row.expectedMs, nowMs))} past expected`;
   return `reply by ${shortDay(row.expectedMs)} · ${spanWords(wholeDays(nowMs, row.expectedMs))} away`;
 }
 /** The card footer's two lines: where it stands, in words. */

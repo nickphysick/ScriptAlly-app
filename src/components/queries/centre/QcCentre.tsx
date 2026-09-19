@@ -52,10 +52,12 @@ export const QcCentre: React.FC<{
   openCard: React.ReactNode;
   docked: boolean | null;
   onDocked: (docked: boolean) => void;
+  /** ← / → (and ↑ / ↓ in a list of rows) step the open query — bound to the STAGE, so only inside the view or the card. */
+  onStep?: (delta: 1 | -1) => void;
   onExport: () => void;
   canExport: boolean;
   entering: boolean;
-}> = ({ loading, headLine, onLog, logDisabled = false, logRef, summary, sentence, view, onView, body, openCard, docked, onDocked, onExport, canExport, entering }) => {
+}> = ({ loading, headLine, onLog, logDisabled = false, logRef, summary, sentence, view, onView, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const el = rootRef.current;
@@ -94,7 +96,20 @@ export const QcCentre: React.FC<{
 
       {/* the docked column exists only while there is a card to put in it — an empty 396px track
           beside the view (no rows; nothing selected yet) would be a column stating nothing */}
-      <div className={`qcv-stage${docked && openCard ? " qcv-stage--docked" : ""}`} data-qcv="stagegrid">
+      <div className={`qcv-stage${docked && openCard ? " qcv-stage--docked" : ""}`} data-qcv="stagegrid"
+        /* ⚠️ BOUND HERE, NOT ON THE DOCUMENT. The drawer bound the arrows only while open; a docked card
+           is always open, so a global binding would take the arrows from the whole page. Skipped in
+           anything editable, in a menu, and on the calendar's scroller (where ← → scroll time). */
+        onKeyDown={(e) => {
+          if (!onStep || e.defaultPrevented || e.altKey || e.metaKey || e.ctrlKey) return;
+          const t = e.target as HTMLElement;
+          if (t.closest("input, textarea, select, [contenteditable='true'], [role='menu'], [role='dialog'], .qcv-cal-box")) return;
+          const inRows = !!t.closest("[role='listbox'], [role='option']");
+          const delta = e.key === "ArrowRight" || (inRows && e.key === "ArrowDown") ? 1 : e.key === "ArrowLeft" || (inRows && e.key === "ArrowUp") ? -1 : 0;
+          if (!delta) return;
+          e.preventDefault();
+          onStep(delta as 1 | -1);
+        }}>
         <FramedCard as="section" className="qcv-ledger" probe="ledger" label="Queries">{body}</FramedCard>
         {docked ? openCard : null}
       </div>

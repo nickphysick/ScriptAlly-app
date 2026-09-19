@@ -90,6 +90,24 @@ describe("one derived list, one control that narrows it", () => {
   });
 });
 
+describe("⚠️ two houses, one set of doors — the docked card opens what the drawer opens", () => {
+  it("both take the SAME three tab bodies, built once", () => {
+    for (const p of ["tracking={qpTracking}", "notesTab={qpNotesTab}"]) expect(page.split(p).length - 1, p).toBe(2);
+    expect(page.split("agentTab={qpAgentTab").length - 1).toBe(2);
+    for (const c of ["const qpTracking = ", "const qpAgentTab = ", "const qpNotesTab = "]) expect(page.split(c).length - 1, c).toBe(1);
+  });
+  it("both primaries go through the desk for Mark sent / Record response, and the offer keeps its own journey", () => {
+    expect(page.split('openDeskVerb(panelRow.facts.turn === "you" ? "marksent" : "respond", anchor)').length - 1).toBe(2);
+    expect(page.split('if (panelRow.facts.turn === "offer") { openRecord(activeQuery); return; }').length - 1).toBe(2);
+  });
+  it("the drawer is for the narrow column and a CHOSEN query only — never beside the docked card, never for the implicit row", () => {
+    expect(page).toContain("{panelRow && activeQuery && urlSelectedId && qcDocked === false && (");
+  });
+  it("the tab memory is one key for both houses", () => {
+    expect(read("src/components/queries/centre/QcOpenCard.tsx")).toContain('import { TAB_KEY, readTab, type PanelTab } from "../QueryPanel";');
+  });
+});
+
 describe("loading answers first", () => {
   it("⚠️ the loading branch comes BEFORE every empty branch in the view's body, and there is no spinner", () => {
     const at = page.indexOf("body={");

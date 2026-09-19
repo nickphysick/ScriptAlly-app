@@ -58,9 +58,49 @@ describe("stageHistory — one span per stage, from the log", () => {
     expect(h.dated).toBe(false);
     expect(h.currentStartMs).toBeNull();
     expect(h.spans.filter((s) => s.current)).toHaveLength(0);
-    /* Queried is known start AND end; Partial requested is known to have ended, nobody recorded when — dropped */
-    expect(h.spans.map((s) => s.status)).toEqual([QueryStatus.QUERIED]);
-    expect(h.spans[0].endMs).toBe(ms(D(4, 20)));
+    /* no lane at all: a past drawn up to a present nobody can place would end at a guess */
+    expect(h.spans).toEqual([]);
+  });
+
+  describe("⚠️ THE DOCUMENT IS THE AUTHORITY — cases taken from the harness account's real data", () => {
+    it("a feed that runs PAST the document's status is residue: Partial sent rungs on a Partial requested query are not drawn", () => {
+      /* seed-pkgq-4: two sends recorded and undone; the projection kept them */
+      const h = stageHistory(q({ dateSent: D(6, 30), status: QueryStatus.PARTIAL_REQUESTED, partialRequestedDate: D(8, 2) }), [
+        rung(QueryStatus.QUERIED, D(6, 30)), rung(QueryStatus.PARTIAL_REQUESTED, D(7, 14)), rung(QueryStatus.PARTIAL_SENT, D(8, 21)), rung(QueryStatus.PARTIAL_SENT, D(8, 23), { id: "again" }),
+      ]);
+      expect(h.spans.map((s) => [s.status, s.startMs, s.endMs, s.current])).toEqual([
+        [QueryStatus.QUERIED, ms(D(6, 30)), ms(D(8, 2)), false],
+        [QueryStatus.PARTIAL_REQUESTED, ms(D(8, 2)), null, true],   /* the DOCUMENT's date, not the feed's 14 Jul */
+      ]);
+    });
+    it("where the document dates nothing, the feed's latest rung OF THAT STATUS answers — not its last rung", () => {
+      /* cor-move-a: no partialRequestedDate on the doc; the feed ends on residue */
+      const h = stageHistory(q({ dateSent: D(7, 4), status: QueryStatus.PARTIAL_REQUESTED }), [
+        rung(QueryStatus.QUERIED, D(7, 4)), rung(QueryStatus.PARTIAL_REQUESTED, D(8, 13)), rung(QueryStatus.PARTIAL_SENT, D(8, 21)),
+      ]);
+      expect(h.currentStartMs).toBe(ms(D(8, 13)));
+      expect(h.spans.map((s) => s.status)).toEqual([QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED]);
+    });
+    it("a Queried query waits from the day it was SENT, whatever a later Queried rung says", () => {
+      /* the row that read "0 days waiting · 22 weeks past expected" */
+      const h = stageHistory(q({ dateSent: D(3, 19) }), [rung(QueryStatus.PARTIAL_REQUESTED, D(5, 1)), rung(QueryStatus.QUERIED, D(9, 19))]);
+      expect(h.currentStartMs).toBe(ms(D(3, 19)));
+      expect(h.spans).toHaveLength(1);
+    });
+    it("closes left in the feed by undone closes are never drawn as a past stage", () => {
+      /* seed-query-20: a rejection and ten no-responses, all undone; the query is live */
+      const h = stageHistory(q({ dateSent: D(8, 4), status: QueryStatus.PARTIAL_REQUESTED, partialRequestedDate: D(8, 20) }), [
+        rung(QueryStatus.REJECTED, D(8, 12)), rung(QueryStatus.NO_RESPONSE, D(8, 13)),
+      ]);
+      expect(h.spans.map((s) => s.status)).toEqual([QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED]);
+    });
+    it("a resubmission RE-ENTERS Full sent: the pipeline date is the first time, `lastStatusChange` the latest", () => {
+      const h = stageHistory(q({ dateSent: D(2, 1), status: QueryStatus.FULL_SENT, fullRequestedDate: D(3, 1), fullSentDate: D(3, 10), lastStatusChange: D(7, 1) }), [rung(QueryStatus.REVISE_RESUBMIT, D(6, 1))]);
+      expect(h.spans.map((s) => [s.status, s.current])).toEqual([
+        [QueryStatus.QUERIED, false], [QueryStatus.FULL_REQUESTED, false], [QueryStatus.FULL_SENT, false], [QueryStatus.REVISE_RESUBMIT, false], [QueryStatus.FULL_SENT, true],
+      ]);
+      expect(h.currentStartMs).toBe(ms(D(7, 1)));
+    });
   });
 
   it("a provisional rung dates nothing", () => {

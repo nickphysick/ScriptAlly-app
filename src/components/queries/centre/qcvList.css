@@ -1,0 +1,69 @@
+/**
+ * Query Centre v11 — the List. The template is stated ONCE and read by the head and every row.
+ *
+ * ⚠️ FLOORS, CEILINGS, AND THE SPARE IN THE GAPS. `minmax(floor, ceiling)` tracks share the width
+ * between their limits; past the ceilings `justify-content: space-between` puts what is left into
+ * the three gaps, equally. A flexible Agent column ballooned on a wide window; fixed side columns
+ * ended up crushed against the right edge. Tracks are sized by these rules alone, never by content
+ * — every row is its own grid, and a content-sized track is a column that moves row to row.
+ */
+/* ⚠️ NOT A CONTAINER ITSELF. The 540px rule below is about the LEDGER, and the ledger's FramedCard is
+   already the size container; making this one too would answer the query 14px early. */
+.qcv-list { --qcv-tpl: minmax(186px, 256px) minmax(168px, 240px) minmax(78px, 96px) 46px; --qcv-tpl-gap: 18px; }
+.qcv-cols, .qcv-row {
+  display: grid; grid-template-columns: var(--qcv-tpl); column-gap: var(--qcv-tpl-gap); justify-content: space-between; align-items: center;
+  box-sizing: border-box; padding-left: 16px; padding-right: 18px;
+}
+.qcv-cols { padding-top: 9px; padding-bottom: 7px; background: var(--qcv-quiet); border-bottom: 1px solid var(--qcv-hair); }
+.qcv-cols b { font-family: var(--qcv-mono); font-weight: 400; font-size: 8.5px; line-height: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap; }
+/* the head's first label sits over the NAME, not over the chip: 32 + 14 */
+.qcv-cols-agent { margin-left: 46px; }
+
+.qcv-row { position: relative; height: 67px; padding-top: 11px; padding-bottom: 11px; cursor: pointer; border-top: 1px solid var(--qcv-hair); outline: none; }
+.qcv-rows > .qcv-row:first-child { border-top: 0; }
+.qcv-row:hover { background: var(--qcv-parchment); }
+.qcv-row--sk { cursor: default; }
+.qcv-row--sk:hover { background: none; }
+/* the chip and the name are ONE column, so a widening gap never separates them */
+.qcv-row-agent { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.qcv-chip { flex: none; box-sizing: border-box; width: 32px; height: 32px; border-radius: 9px; border: 1px solid rgba(28, 19, 15, 0.08); background: var(--qcv-state, var(--state-closed)); display: flex; align-items: center; justify-content: center; }
+.qcv-row-who { min-width: 0; flex: 1 1 auto; }
+/* ⚠️ 1.3, NOT THE REF'S 1.2: the name is mixed-case Playfair on ONE clipped line (`overflow: hidden`
+   for the ellipsis), and under 1.3 that crops descenders. The pair is 21 + 19 = 40 in a 45px row body. */
+.qcv-row-nm { display: block; font-family: var(--qcv-serif); font-weight: 600; font-size: 16.5px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcv-row-ag { display: block; font-family: var(--qcv-serif); font-style: italic; font-size: 13.5px; line-height: 1.35; color: var(--qcv-ink-70); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcv-row-st { min-width: 0; }
+.qcv-row-stn { display: block; font-family: var(--qcv-type); font-weight: 400; font-size: 14.5px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcv-row-fact { display: block; margin-top: 4px; font-family: var(--qcv-mono); font-size: 8.5px; line-height: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.qcv-mat { display: flex; align-items: center; gap: 6px; }
+.qcv-mat-i { display: block; width: 15px; height: 15px; color: var(--qcv-ink); opacity: 0.16; font-style: normal; }
+.qcv-mat-i--on { opacity: 0.8; }
+.qcv-mat-i svg { display: block; width: 15px; height: 15px; }
+
+.qcv-date { box-sizing: border-box; width: 46px; height: 45px; border: 1px solid var(--qcv-hair); border-radius: 7px; background: #ffffff; overflow: hidden; text-align: center; }
+.qcv-date u { display: block; text-decoration: none; padding: 3px 0 2px; background: var(--qcv-state, var(--state-closed)); border-bottom: 1px solid var(--qcv-hair); font-family: var(--qcv-mono); font-size: 8px; line-height: 10px; letter-spacing: 0.14em; text-transform: uppercase; }
+.qcv-date b { display: block; padding: 5px 0; font-family: var(--qcv-serif); font-weight: 600; font-size: 17px; line-height: 1; font-variant-numeric: tabular-nums lining-nums; }
+
+/* a row where the move is the writer's: a 3px rust rule down its left edge, inset 12 top and bottom.
+   `isWithYou` decides it — partial requested, full requested, R&R; never an offer. */
+.qcv-row--you::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; background: var(--qcv-rust); border-radius: 0 2px 2px 0; }
+/* selected: an inset ink ring, 3px in — never a fill */
+.qcv-row[aria-selected="true"]::after { content: ""; position: absolute; inset: 3px; border: 1.6px solid var(--qcv-ink); border-radius: 8px; pointer-events: none; }
+.qcv-row:focus-visible::after { content: ""; position: absolute; inset: 3px; border: 1.6px solid var(--qcv-navy); border-radius: 8px; pointer-events: none; }
+.qcv-row[aria-selected="true"]:focus-visible::after { border-color: var(--qcv-ink); box-shadow: 0 0 0 2px var(--qcv-navy); }
+
+/**
+ * ⚠️ THE DATE TILE GOES WHERE THE FOUR FLOORS STOP FITTING — 568px OF LEDGER, NOT THE BRIEF'S 540.
+ * The floors are 186 + 168 + 78 + 46 = 478, plus three 18px gaps = 532, plus the row's 34px of padding
+ * and the frame's 2px of line = 568. Between 541 and 567 the four-column row is wider than its ledger
+ * and the date tile runs out past the row's padding (the ref does the same there; it draws neither
+ * width). The icons stay; the skeleton rows follow the same rule.
+ *
+ * ⚠️ AND AT A 1280 WINDOW THE APP IS ON THE NARROW SIDE OF THIS: its page is 44px narrower than the
+ * mockup's (the shell's insets), so the ledger's content box is 540 where the mockup's is 584.
+ */
+@container (max-width: 567px) {
+  .qcv-cols, .qcv-row { grid-template-columns: minmax(166px, 1fr) 160px 78px; column-gap: 14px; }
+  .qcv-cols-date, .qcv-date, .qcv-date-sk { display: none; }
+}

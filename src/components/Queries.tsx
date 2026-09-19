@@ -75,6 +75,8 @@ import { QueryViewSwitch, type QueryView } from "./queries/QueryViewSwitch";
 import { QcCentre, QC_VIEW_KEY, readQcView, type QcView } from "./queries/centre/QcCentre";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcSummary } from "./queries/centre/QcSummary";
+import { QcList, QcListSkeleton } from "./queries/centre/QcList";
+import { QcOpenCard, QcOpenCardSkeleton } from "./queries/centre/QcOpenCard";
 import {
   DEFAULT_SORT, buildQcRows, closedGrid, filterForStatusParam, filterOptions, inScope, matchesFilter, sortRows, stageColumns,
   type QcFilter, type QcSort,
@@ -2465,9 +2467,11 @@ export const Queries: React.FC<{
     if (wanted && queries.some((q) => q.id === wanted)) {
       if (urlSelectedId !== wanted) {
         setSelectedQueryId(wanted);
-        /* Deep-linked arrival: bring the row into the middle of the list viewport so it lands clear
-           of both edge fades. Only on the selection CHANGE — not on every data tick. */
-        document.getElementById(`query-row-${wanted}`)?.scrollIntoView({ block: "center" });
+        /* Deep-linked arrival: bring the row into view. ⚠️ `nearest`, NOT `center` (v11): this effect
+           also runs when the reader CLICKS a row — that click is what writes `?q=` — and centring a
+           row the reader has just pressed moved the whole page under their pointer. `nearest` does
+           nothing for a row already on screen and still fetches one that is not. */
+        document.getElementById(`query-row-${wanted}`)?.scrollIntoView({ block: "nearest" });
       }
       return;
     }
@@ -5039,6 +5043,135 @@ export const Queries: React.FC<{
     return () => window.clearTimeout(id);
   }, [entering]);
 
+  /**
+   * ══ v11 · THE OPEN QUERY'S THREE TAB BODIES, BUILT ONCE ══
+   * They were inline props of the drawer's mount. The open query now has TWO houses — the docked
+   * card (`QcOpenCard`) at desktop widths and today's drawer (`QueryPanel`) under 900px of column —
+   * and both must show the same timeline, the same agent tab and the same notes thread, wired to
+   * the same handlers. Built here, handed to whichever is mounted; nothing about them changed.
+   */
+  const qpTracking = panelRow && activeQuery ? ((() => {
+                /* §2 (respond-nudge) — while a response is being drafted the timeline shows the
+                   PROPOSED world: the ghost activity appended to the real events (same builder,
+                   same renderer — decision 2), and the open-state block derived from the proposed
+                   status, which is what makes the waiting rung disappear when the ghost moots it. */
+                const proposedAny = deskProposed ?? deskMarkProposed ?? deskClosedProposed;
+                const eventsForRail = proposedAny ? [...trackingEvents, proposedAny] : trackingEvents;
+                const railStatus = (proposedAny?.resultingStatus ?? activeQuery.status) as QueryStatus;
+                const ta = getPrimaryAction(railStatus);
+                /**
+                 * §2 — THE SEND'S MATERIALS, READ-ONLY UNDER THE SEND RUNG. The same three states
+                 * the retired record view drew, from the same derivations: a PACKAGED send is the
+                 * blue `PackageGroup` strip (parcel slot · PACKAGE seal · chips), a LOOSE send is
+                 * the floating `LooseMaterials` chips, and a send with NOTHING recorded is the
+                 * dashed prompt. Editing is NOT here — decision 2 moves it into the ⋯'s mistake
+                 * branch, so the pills carry no popovers, no ×, and no ＋ Attach.
+                 *
+                 * ⚠️ THE AGENT'S EXPECTED SET IS SUPPRESSED BESIDE ANY ATTACHMENT (D6/D7) and
+                 * beside a DANGLING packageId (F-AD): what the agency usually asks for is not
+                 * evidence of what went. The fallback survives only where the query carries
+                 * nothing at all — where it answers "what does this agency ask for".
+                 */
+                const sentExtra = (
+                  <SentMaterials
+                    query={activeQuery}
+                    base={activeQuery.packageId ? ((activeQuery.materialsWanted ?? []) as (string | QueryMaterial)[]) : baseMaterialsFor(activeQuery, activeAgent)}
+                    packages={packages}
+                    portion={queryPortion(activeQuery, activeAgent)}
+                    onViewPackages={() => onNavigate?.("manuscripts", "Submission packages")}
+                  />
+                );
+                /**
+                 * ⚠️ THE DOTTED METHOD OPENS THE FORK, NEVER A DIRECT WRITE (decision 1). The
+                 * affordance survives; the shortcut is withdrawn. It is passed ONLY when the send
+                 * rung is a real activity — a synthesised root (dateSent with no Queried doc) has
+                 * no record to correct, and TimelineRows' own convention renders plain text when
+                 * the handler is absent rather than a dead control.
+                 */
+                const sentActivity = trackingEvents.find((e: any) => (e.type as QueryStatus) === QueryStatus.QUERIED);
+                return (
+                  /* the drawer's own rhythm for the shared renderer — the ref's 19px titles; a
+                     token override at the use site, never an edit to TimelineRows */
+                  <QueryTimeline
+                    query={activeQuery}
+                    agent={activeAgent}
+                    events={eventsForRail}
+                    primaryAction={{ ballHolder: ta.ballHolder, markKind: ta.kind === "mark-sent" ? ta.markKind : undefined }}
+                    ghostId={proposedAny ? "__ghost" : null}
+                    freshId={deskFreshId}
+                    /* §3 — the ⋯ opens the DESK at the fork, directly: the fork subsumes the old
+                       Edit/Delete menu (append is its second branch, remove lives on the edit
+                       form), so the two-item hop is gone. The trigger rides a ref for the notch
+                       and the focus return. */
+                    onEntryFork={(entry, trigger) => {
+                      setDeskVerb(null); /* one desk at a time */
+                      correctingTriggerRef.current = trigger;
+                      setCorrecting({ step: "fork", entry });
+                    }}
+                    highlightId={correcting?.entry.activityId ?? null}
+                    /* §5 — the closure offer's "Nudge now" opens the DESK, notched to the button
+                       that asked (the same anchor contract as the fork's ⋯). The modal it used to
+                       open survives only as the mobile surface below. */
+                    onNudge={(anchor) => openDeskVerb("nudge", anchor)}
+                    onSetExpectedDate={(iso) => commitExpectedDate(iso)}
+                    /* ⚠️ §4 — the offer tray's close joins the quick pair. It was the desk, beside
+                       its "Nudge now" neighbour; Nudge STAYS on the desk (it composes a draft) and
+                       close does not. One verb, one behaviour, wherever it is pressed — two close
+                       controls that opened different surfaces would be the fork this section is
+                       correcting, wearing a second face. */
+                    onMarkClosed={(anchor) => { if (activeQuery) openQuick("close", activeQuery.id, anchor); }}
+                    onEditSendMethod={sentActivity ? (anchor) => {
+                      const entry = rungEntry(sentActivity.id);
+                      if (entry) { correctingTriggerRef.current = anchor; setCorrecting({ step: "fork", entry }); }
+                    } : undefined}
+                    sentExtra={sentExtra}
+                  />
+                );
+              })()) : null;
+  const qpAgentTab = panelRow && activeQuery ? (activeAgent ? (
+                <QueryAgentTab
+                  agent={activeAgent}
+                  history={queriesForAgent(activeAgent.id, queries).map((q): AgentHistoryRow => {
+                    const ms = manuscripts.find((m) => m.id === q.manuscriptId);
+                    const when = (() => {
+                      if (q.id === activeQuery.id) return "this query";
+                      const iso = q.lastStatusChange || q.dateSent;
+                      if (!iso) return "";
+                      return new Date(iso).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+                    })();
+                    return {
+                      queryId: q.id,
+                      manuscriptTitle: ms?.title ?? "—",
+                      statusLine: q.status,
+                      when,
+                      isThisQuery: q.id === activeQuery.id,
+                      status: q.status,
+                    };
+                  })}
+                  onOpenContactList={() => onNavigate?.("agents")}
+                  onEditAgent={() => openEditAgent?.(activeAgent.id)}
+                />
+              ) : undefined) : null;
+  const qpNotesTab = panelRow && activeQuery ? ((
+                <NotesThread
+                  resetKey={activeQuery.id}
+                  notes={journalEntries
+                    .filter((entry) => entry.queryId === activeQuery.id)
+                    .map((e) => ({ id: e.id, entryText: e.entryText, createdAt: e.createdAt, pinned: (e as { pinned?: boolean }).pinned === true }))}
+                  onAdd={(text) => addJournalEntry(activeQuery.id, text)}
+                  onEdit={(id, text) => updateJournalEntry(id, text)}
+                  onPin={(id, pinned) => pinJournalEntry(id, pinned)}
+                  onDelete={(n) => showConfirm({
+                    title: "Delete this note?",
+                    danger: true,
+                    confirmLabel: "Delete",
+                    cancelLabel: "Keep it",
+                    body: <p style={{ margin: 0 }}>This note will be removed from the query&rsquo;s record.</p>,
+                    onConfirm: () => deleteJournalEntry(n.id),
+                  })}
+                />
+              )) : null;
+
   return (
     /* ── F12 root, headerless (shell rollout Phase 6): the v2 shell's top bar draws the crumb
        and the sidebar carries the account block, so F12Page's CrumbStrip + F12Account chrome
@@ -6290,12 +6423,45 @@ export const Queries: React.FC<{
             onView={setGridView}
             docked={qcDocked}
             onDocked={setQcDocked}
+            onStep={(delta) => {
+              if (!gridRows.length) return;
+              const at = panelIndex >= 0 ? panelIndex : -1;
+              const next = gridRows[(at + delta + gridRows.length) % gridRows.length];
+              onOpenQuery?.(next.id);
+            }}
             onExport={handleExportFilteredCSV}
             canExport={gridRows.length > 0}
-            openCard={null}
+            /**
+             * ⚠️ THE OPEN QUERY, DOCKED — the same query, tabs and handlers the drawer has; only its
+             * house changed. `QcCentre` renders it only while the column is 900px or more; under that
+             * the drawer below takes over, and never for the implicit first row.
+             */
+            openCard={showGridSkeleton ? <QcOpenCardSkeleton /> : (panelRow && activeQuery && qcById.get(activeQuery.id)) ? (
+              <QcOpenCard
+                row={qcById.get(activeQuery.id)!}
+                nowMs={Date.now()}
+                manuscriptTitle={activeMs?.title ?? null}
+                manuscriptTags={activeMs ? [activeMs.ageCategory, activeMs.genre, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString("en-GB")} words` : null].filter((t): t is string => !!t) : []}
+                /* the CTA engine's own answer, through the SAME doors the drawer uses: the desk hosts
+                   Record response and Mark sent; an open offer keeps its own journey */
+                onPrimary={(anchor) => {
+                  if (panelRow.facts.turn === "offer") { openRecord(activeQuery); return; }
+                  openDeskVerb(panelRow.facts.turn === "you" ? "marksent" : "respond", anchor);
+                }}
+                onAction={(action, anchor) => {
+                  if (action === "nudge") openDeskVerb("nudge", anchor);
+                  else openQuick(action === "snooze" ? "snooze" : "close", activeQuery.id, anchor);
+                }}
+                liveAction={deskVerb === "nudge" ? "nudge" : deskVerb === "closed" ? "closed" : deskVerb ? "primary" : null}
+                tracking={qpTracking}
+                agentTab={qpAgentTab}
+                notesTab={qpNotesTab}
+                noteCount={journalEntries.filter((j) => j.queryId === activeQuery.id).length}
+              />
+            ) : null}
             body={
               showGridSkeleton ? (
-                <QueryGridSkeleton view={gridView === "calendar" ? "calendar" : gridView} out={gridSkeletonOut} />
+                gridView === "list" ? <QcListSkeleton /> : <QueryGridSkeleton view={gridView} out={gridSkeletonOut} />
               ) : emptyKind === "filtered" ? (
                 /* FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER — the card, and only where its
                    headline is true. Its line is counted over the SCOPED set, the one the sentence's
@@ -6314,19 +6480,7 @@ export const Queries: React.FC<{
                   <button type="button" onClick={clearQcFilter}>Show all queries</button>
                 </p>
               ) : gridView === "list" ? (
-                <QueryListView
-                  rows={gridRows}
-                  group="none"
-                  since={listSince}
-                  sentLeaf={listSentLeaf}
-                  onVerb={handleRowVerb}
-                  sortKey={sortKey}
-                  sortDesc={sortDesc}
-                  selectedId={selectedQueryId}
-                  onSort={() => { /* the sentence sorts now */ }}
-                  onOpen={(id) => onOpenQuery?.(id)}
-                  onMore={handleRowMore}
-                />
+                <QcList rows={qcVisible} selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} nowMs={Date.now()} />
               ) : gridView === "calendar" ? (
                   <div className="tl-board qcc-calboard" data-dens={calDensity}>
                     <div className="tl-zone qcc-calzone">
@@ -6483,8 +6637,9 @@ export const Queries: React.FC<{
             />
           )}
 
-          {/* the DRAWER opens for a query the reader chose (`?q`), never for the implicit first row */}
-          {panelRow && activeQuery && urlSelectedId && (
+          {/* UNDER 900px OF COLUMN the open query is today's DRAWER — for a query the reader chose (`?q`),
+              never for the implicit first row, and never while the docked card is on screen */}
+          {panelRow && activeQuery && urlSelectedId && qcDocked === false && (
             <QueryPanel
               open
               facts={panelRow.facts}
@@ -6571,137 +6726,19 @@ export const Queries: React.FC<{
                * here (onEditEntry/onDeleteEntry) and off in FocusFlow, which renders the bare rows.
                * §2 wires the send-rung extras; this mount is the chassis.
                */
-              tracking={(() => {
-                /* §2 (respond-nudge) — while a response is being drafted the timeline shows the
-                   PROPOSED world: the ghost activity appended to the real events (same builder,
-                   same renderer — decision 2), and the open-state block derived from the proposed
-                   status, which is what makes the waiting rung disappear when the ghost moots it. */
-                const proposedAny = deskProposed ?? deskMarkProposed ?? deskClosedProposed;
-                const eventsForRail = proposedAny ? [...trackingEvents, proposedAny] : trackingEvents;
-                const railStatus = (proposedAny?.resultingStatus ?? activeQuery.status) as QueryStatus;
-                const ta = getPrimaryAction(railStatus);
-                /**
-                 * §2 — THE SEND'S MATERIALS, READ-ONLY UNDER THE SEND RUNG. The same three states
-                 * the retired record view drew, from the same derivations: a PACKAGED send is the
-                 * blue `PackageGroup` strip (parcel slot · PACKAGE seal · chips), a LOOSE send is
-                 * the floating `LooseMaterials` chips, and a send with NOTHING recorded is the
-                 * dashed prompt. Editing is NOT here — decision 2 moves it into the ⋯'s mistake
-                 * branch, so the pills carry no popovers, no ×, and no ＋ Attach.
-                 *
-                 * ⚠️ THE AGENT'S EXPECTED SET IS SUPPRESSED BESIDE ANY ATTACHMENT (D6/D7) and
-                 * beside a DANGLING packageId (F-AD): what the agency usually asks for is not
-                 * evidence of what went. The fallback survives only where the query carries
-                 * nothing at all — where it answers "what does this agency ask for".
-                 */
-                const sentExtra = (
-                  <SentMaterials
-                    query={activeQuery}
-                    base={activeQuery.packageId ? ((activeQuery.materialsWanted ?? []) as (string | QueryMaterial)[]) : baseMaterialsFor(activeQuery, activeAgent)}
-                    packages={packages}
-                    portion={queryPortion(activeQuery, activeAgent)}
-                    onViewPackages={() => onNavigate?.("manuscripts", "Submission packages")}
-                  />
-                );
-                /**
-                 * ⚠️ THE DOTTED METHOD OPENS THE FORK, NEVER A DIRECT WRITE (decision 1). The
-                 * affordance survives; the shortcut is withdrawn. It is passed ONLY when the send
-                 * rung is a real activity — a synthesised root (dateSent with no Queried doc) has
-                 * no record to correct, and TimelineRows' own convention renders plain text when
-                 * the handler is absent rather than a dead control.
-                 */
-                const sentActivity = trackingEvents.find((e: any) => (e.type as QueryStatus) === QueryStatus.QUERIED);
-                return (
-                  /* the drawer's own rhythm for the shared renderer — the ref's 19px titles; a
-                     token override at the use site, never an edit to TimelineRows */
-                  <QueryTimeline
-                    query={activeQuery}
-                    agent={activeAgent}
-                    events={eventsForRail}
-                    primaryAction={{ ballHolder: ta.ballHolder, markKind: ta.kind === "mark-sent" ? ta.markKind : undefined }}
-                    ghostId={proposedAny ? "__ghost" : null}
-                    freshId={deskFreshId}
-                    /* §3 — the ⋯ opens the DESK at the fork, directly: the fork subsumes the old
-                       Edit/Delete menu (append is its second branch, remove lives on the edit
-                       form), so the two-item hop is gone. The trigger rides a ref for the notch
-                       and the focus return. */
-                    onEntryFork={(entry, trigger) => {
-                      setDeskVerb(null); /* one desk at a time */
-                      correctingTriggerRef.current = trigger;
-                      setCorrecting({ step: "fork", entry });
-                    }}
-                    highlightId={correcting?.entry.activityId ?? null}
-                    /* §5 — the closure offer's "Nudge now" opens the DESK, notched to the button
-                       that asked (the same anchor contract as the fork's ⋯). The modal it used to
-                       open survives only as the mobile surface below. */
-                    onNudge={(anchor) => openDeskVerb("nudge", anchor)}
-                    onSetExpectedDate={(iso) => commitExpectedDate(iso)}
-                    /* ⚠️ §4 — the offer tray's close joins the quick pair. It was the desk, beside
-                       its "Nudge now" neighbour; Nudge STAYS on the desk (it composes a draft) and
-                       close does not. One verb, one behaviour, wherever it is pressed — two close
-                       controls that opened different surfaces would be the fork this section is
-                       correcting, wearing a second face. */
-                    onMarkClosed={(anchor) => { if (activeQuery) openQuick("close", activeQuery.id, anchor); }}
-                    onEditSendMethod={sentActivity ? (anchor) => {
-                      const entry = rungEntry(sentActivity.id);
-                      if (entry) { correctingTriggerRef.current = anchor; setCorrecting({ step: "fork", entry }); }
-                    } : undefined}
-                    sentExtra={sentExtra}
-                  />
-                );
-              })()}
+              tracking={qpTracking}
               /**
                * §4 — THE AGENT TAB, a view of the agent document (decision 4). History rows are
                * derived HERE because they need queries+manuscripts: every query with this agent,
                * newest activity first, the open one marked `this query`. `queriesForAgent` is the
                * same reader the Contact list counts with — one derivation, two surfaces.
                */
-              agentTab={activeAgent ? (
-                <QueryAgentTab
-                  agent={activeAgent}
-                  history={queriesForAgent(activeAgent.id, queries).map((q): AgentHistoryRow => {
-                    const ms = manuscripts.find((m) => m.id === q.manuscriptId);
-                    const when = (() => {
-                      if (q.id === activeQuery.id) return "this query";
-                      const iso = q.lastStatusChange || q.dateSent;
-                      if (!iso) return "";
-                      return new Date(iso).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
-                    })();
-                    return {
-                      queryId: q.id,
-                      manuscriptTitle: ms?.title ?? "—",
-                      statusLine: q.status,
-                      when,
-                      isThisQuery: q.id === activeQuery.id,
-                      status: q.status,
-                    };
-                  })}
-                  onOpenContactList={() => onNavigate?.("agents")}
-                  onEditAgent={() => openEditAgent?.(activeAgent.id)}
-                />
-              ) : undefined}
+              agentTab={qpAgentTab ?? undefined}
               /**
                * §1 — THE NOTES TAB IS THE EXISTING THREAD, UNBOXED. `NotesThread` owns ordering,
                * pinning, the composer and the settle; the tab is just where it lives now.
                */
-              notesTab={(
-                <NotesThread
-                  resetKey={activeQuery.id}
-                  notes={journalEntries
-                    .filter((entry) => entry.queryId === activeQuery.id)
-                    .map((e) => ({ id: e.id, entryText: e.entryText, createdAt: e.createdAt, pinned: (e as { pinned?: boolean }).pinned === true }))}
-                  onAdd={(text) => addJournalEntry(activeQuery.id, text)}
-                  onEdit={(id, text) => updateJournalEntry(id, text)}
-                  onPin={(id, pinned) => pinJournalEntry(id, pinned)}
-                  onDelete={(n) => showConfirm({
-                    title: "Delete this note?",
-                    danger: true,
-                    confirmLabel: "Delete",
-                    cancelLabel: "Keep it",
-                    body: <p style={{ margin: 0 }}>This note will be removed from the query&rsquo;s record.</p>,
-                    onConfirm: () => deleteJournalEntry(n.id),
-                  })}
-                />
-              )}
+              notesTab={qpNotesTab}
               noteCount={journalEntries.filter((j) => j.queryId === activeQuery.id).length}
             />
           )}

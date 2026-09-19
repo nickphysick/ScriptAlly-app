@@ -16,22 +16,31 @@ import { createPortal } from "react-dom";
 import "./qcvPage.css";
 
 export interface QcMenuItem { key: string; label: string; count?: number; swatch?: string | null }
-export interface QcMenuGroup { heading?: string; current: string; items: readonly QcMenuItem[]; onPick: (key: string) => void }
+/** `radio` (the default) marks `current`; `action` rows are plain menu items — the card's ⋯. */
+export interface QcMenuGroup { kind?: "radio" | "action"; heading?: string; current: string; items: readonly QcMenuItem[]; onPick: (key: string) => void }
 
-export const QcMenu: React.FC<{ anchor: HTMLElement | null; label: string; groups: readonly QcMenuGroup[]; onClose: () => void }> = ({ anchor, label, groups, onClose }) => {
+export const QcMenu: React.FC<{
+  anchor: HTMLElement | null; label: string; groups: readonly QcMenuGroup[]; onClose: () => void;
+  /** `up` hangs the panel ABOVE its anchor, right-aligned to it — the card's footer sits at the foot of the viewport. */
+  placement?: "down" | "up";
+}> = ({ anchor, label, groups, onClose, placement = "down" }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{ top: number; left: number; maxH: number } | null>(null);
+  const [pos, setPos] = useState<{ top?: number; bottom?: number; left: number; maxH: number } | null>(null);
 
   useLayoutEffect(() => {
     if (!anchor || !ref.current) return;
     const r = anchor.getBoundingClientRect();
     const w = ref.current.offsetWidth;
+    if (placement === "up") {
+      setPos({ bottom: window.innerHeight - r.top + 6, left: Math.max(12, Math.min(r.right - w, window.innerWidth - w - 12)), maxH: Math.max(120, r.top - 22) });
+      return;
+    }
     const top = r.bottom + 6;
     setPos({ top, left: Math.max(12, Math.min(r.left, window.innerWidth - w - 12)), maxH: Math.max(160, window.innerHeight - top - 16) });
-  }, [anchor]);
+  }, [anchor, placement]);
 
   useEffect(() => {
-    const items = () => Array.from(ref.current?.querySelectorAll<HTMLElement>('[role="menuitemradio"]') ?? []);
+    const items = () => Array.from(ref.current?.querySelectorAll<HTMLElement>('[role="menuitemradio"], [role="menuitem"]') ?? []);
     (items().find((b) => b.getAttribute("aria-checked") === "true") ?? items()[0])?.focus();
     const close = () => onClose();
     const onDown = (e: PointerEvent) => {
@@ -65,14 +74,14 @@ export const QcMenu: React.FC<{ anchor: HTMLElement | null; label: string; group
 
   return createPortal(
     <div ref={ref} className="qcv-menu" role="menu" aria-label={label} data-qcv="menu"
-      style={pos ? { top: pos.top, left: pos.left, maxHeight: pos.maxH } : { top: 0, left: 0, visibility: "hidden" }}>
+      style={pos ? { top: pos.top, bottom: pos.bottom, left: pos.left, maxHeight: pos.maxH } : { top: 0, left: 0, visibility: "hidden" }}>
       {groups.map((g, gi) => (
         <React.Fragment key={g.heading ?? gi}>
           {gi > 0 && <div className="qcv-menu-sep" role="separator" />}
           {g.heading && <p className="qcv-menu-h" id={`qcv-menu-h-${gi}`}>{g.heading}</p>}
           <div role="group" aria-labelledby={g.heading ? `qcv-menu-h-${gi}` : undefined}>
             {g.items.map((it) => (
-              <button key={it.key} type="button" role="menuitemradio" aria-checked={it.key === g.current}
+              <button key={it.key} type="button" role={g.kind === "action" ? "menuitem" : "menuitemradio"} aria-checked={g.kind === "action" ? undefined : it.key === g.current}
                 onClick={() => { g.onPick(it.key); onClose(); anchor?.focus(); }}>
                 {it.swatch ? <span className="qcv-menu-sw" style={{ background: it.swatch }} aria-hidden="true" /> : null}
                 <span className="qcv-menu-l">{it.label}</span>

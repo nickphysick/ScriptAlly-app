@@ -134,15 +134,10 @@ describe("⚠️ availability is queryVerbs' — for every status, and nowhere e
   });
 });
 
-describe("⚠️ both views mount the page's ONE handler — the card opens what the row opens", () => {
-  it("the list and the grid each pass handleRowVerb and handleRowMore", () => {
-    for (const mount of ["<QueryListView", "<QueryCentreGrid"]) {
-      const props = sliceBetween(page, mount, "/>");
-      expect(props, `${mount} lost the shared verb handler`).toContain("onVerb={handleRowVerb}");
-      expect(props, `${mount} lost the shared ⋯ handler`).toContain("onMore={handleRowMore}");
-    }
-  });
-});
+/* ⚠️ RETIRED (Query Centre v11, 19 Sep): rows and tiles carry NO verbs now — a row selects, and the
+   query's actions live in the open card's footer. The law this held ("one handler — the card opens
+   what the row opens") is restated where it still bites, in `centre/qcCentre.test.tsx`: the docked
+   card and the narrow drawer go through the SAME doors (`openDeskVerb`, `openQuick`, `openRecord`). */
 
 describe("the brief's values, as the stylesheet asks for them (the page measures what it gets)", () => {
   it("the row is placed against the band, hidden at rest, revealed by hover and by focus", () => {

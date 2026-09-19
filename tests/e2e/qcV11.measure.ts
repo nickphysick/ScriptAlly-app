@@ -133,6 +133,19 @@ async function readApp(page: Page): Promise<Reading> {
   if ("error" in r) throw new Error("app: " + r.error);
   return r as Reading;
 }
+/**
+ * ⚠️ THE APP'S PAGE IS NARROWER THAN THE MOCKUP'S AT THE SAME WINDOW — by 44px at 1440 (the shell's
+ * own insets; the brief keeps the app's sidebar and its 22px inset). Anything that depends on the
+ * LEDGER's width — the list's column edges, a grid tile's width — must therefore be compared at the
+ * same CONTENT width, not the same window. The mockup's column is `window − 268` (its 224px sidebar
+ * and 22px insets) up to its 1440 cap, so this opens the ref at the window that gives it the app's
+ * measured column.
+ */
+async function appColumn(page: Page): Promise<number> {
+  return page.evaluate(() => Math.round([...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect().width));
+}
+const refWindowFor = (column: number) => column + 268;
+
 const need = (r: Reading, who: string, name: string) => {
   const b = r.boxes[name];
   if (!b) throw new Error(`${who}: probe "${name}" found nothing — a subject that cannot be found has FAILED, not skipped`);
@@ -346,21 +359,37 @@ test("the summary's gauges — geometry, and which branches this account entered
 
 test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
   for (const [w, h] of [[1440, 860], [1280, 800], [1720, 900]] as const) {
-    const ref = await readRef(page, w, h);
     await openApp(page, w, h);
     const app = await readApp(page);
+    const column = await appColumn(page);
+    const refPage = await page.context().newPage();
+    const ref = await readRef(refPage, refWindowFor(column), h);
+    await refPage.close();
     const area = `list@${w}`;
+    const dated = !!app.boxes["row-date"];
+    near(area, "the ref was opened at the app's content width", need(ref, "ref", "stagegrid").w, need(app, "app", "stagegrid").w, 1);
+    sameSize(area, app, ref, "ledger", ["w"]);
+    record({ area, what: "column edges from the ledger's left [chip, stands, sent, date] and the ledger's width", got: { app: ["row-chip", "row-stand", "row-sent", "row-date"].map((c) => (app.boxes[c] && app.boxes["ledger"] ? Math.round((app.boxes[c]!.x - app.boxes["ledger"]!.x) * 10) / 10 : "not drawn")), widths: ["row-stand", "row-sent", "row-date"].map((c) => app.boxes[c]?.w ?? "not drawn"), ledger: app.boxes["ledger"]?.w ?? null, column }, want: "reported" });
+    /* ⚠️ THE DATE TILE IS A BRANCH, AND WHICH SIDE RAN IS STATED. Under 568px of ledger it is not drawn —
+       in the app AND in the ref at that width — so its size and edge are compared only where both draw it. */
+    seen("list-date-tile", `${w}: ${dated ? "drawn" : "dropped (ledger under 568)"}`);
+    is(area, "the date tile is drawn in the app exactly where the four floors fit", dated, need(app, "app", "ledger").w - 12 >= 568);
     sameSize(area, app, ref, "open", ["w"]);
     sameSize(area, app, ref, "list-head", ["h"]);
-    sameSize(area, app, ref, "row", ["h"]);
+    /* ⚠️ THE ROW IS 67 IN BOTH LAYOUTS HERE. The ref's row is auto-height and the 45px date tile is what
+       makes it 67; with the tile gone its row falls to 60.8, incidentally. The app states the height,
+       so the list does not change rhythm when the window crosses the threshold. */
+    if (dated) sameSize(area, app, ref, "row", ["h"]); else near(area, "row.h (stated, tile or no tile)", app.boxes["row"]?.h, 67, 0.5);
     sameSize(area, app, ref, "row-chip", ["w", "h"]);
-    sameSize(area, app, ref, "row-date", ["w"]);
-    for (const c of ["row-chip", "row-stand", "row-sent", "row-date"]) sameOffset(area, app, ref, c, "ledger", ["x"]);
+    if (dated && ref.boxes["row-date"]) sameSize(area, app, ref, "row-date", ["w"]);
+    for (const c of ["row-chip", "row-stand", "row-sent", ...(dated && ref.boxes["row-date"] ? ["row-date"] : [])]) sameOffset(area, app, ref, c, "ledger", ["x"]);
+    /* no row is wider than the ledger's frame: the floors fit, or the tile has gone */
+    const spill = await page.evaluate(() => { const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!; const f = p.querySelector("[data-qcv='ledger-frame']")!.getBoundingClientRect(); return [...p.querySelectorAll("[data-qcv='row'] > *")].filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && b.right > f.right - 1 + 0.5; }).length; });
+    is(area, "cells running out past the frame's right edge", spill, 0);
     sameSize(area, app, ref, "row-stand", ["w"]);
     sameSize(area, app, ref, "row-sent", ["w"]);
     if (w === 1440) {
       sameSize(area, app, ref, "open-band", ["h"]);
-      sameSize(area, app, ref, "open-action", ["h"]);
       /* the ledger and the card share the stage with a 20px gap */
       const st = need(app, "app", "stagegrid"), le = need(app, "app", "ledger"), op = need(app, "app", "open");
       near(area, "ledger + 20 + card fills the stage", le.w + 20 + op.w, st.w, 1);
@@ -384,8 +413,53 @@ test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
     is(area, "the card is sticky, not an overlay", facts.openPos, "sticky");
     is(area, "no scrim at desktop widths", facts.overlay, 0);
     for (const s of facts.you) { seen("rust-row", String(s)); yes(area, "rust follows 'with you' exactly — never an offer", ["Partial Requested", "Full Requested", "Revise & Resubmit"].includes(String(s)), String(s)); }
+    /* ── select a LIVE query: the first row on load may be closed, and a closed query has no action ── */
+    await page.locator(".qcv-page [data-qcv='row'][data-status='Queried']").first().click();
+    await page.waitForTimeout(700);
+    const sel = await readApp(page);
+    const card = await page.evaluate(() => {
+      const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+      const o = p.querySelector("[data-qcv='open']") as HTMLElement, rows = [...p.querySelectorAll("[data-qcv='row']")] as HTMLElement[];
+      const on = rows.filter((r) => r.getAttribute("aria-selected") === "true");
+      const act = o.querySelector("[data-qcv='open-action']") as HTMLElement | null;
+      return { same: on.length === 1 && on[0].dataset.id === o.dataset.id, status: o.dataset.status, action: act?.textContent ?? null, actBg: act ? getComputedStyle(act).backgroundColor : null,
+        tabs: [...o.querySelectorAll("[role='tab']")].map((t) => t.textContent?.replace(/\d+$/, "").trim()), url: location.search, court: o.querySelector("[data-qcv='open-court']")?.textContent, rust: o.querySelector("[data-qcv='open-court']")?.getAttribute("data-you") };
+    });
+    yes(area, "the card shows the row that is selected", card.same, JSON.stringify(card));
+    is(area, "a Queried query's one action", card.action, "Record a response");
+    is(area, "…is anthracite", card.actBg, "rgb(42, 58, 82)");
+    is(area, "the drawer's own three tabs, kept", card.tabs, ["Tracking", "Agent", "Notes"]);
+    is(area, "a Queried query is with the agent, and wears no rust", [card.court, card.rust], ["With the agent", "false"]);
+    yes(area, "choosing a row writes ?q= (a user's act)", /[?&]q=/.test(card.url), card.url);
+    if (w === 1440) { sameSize(area, sel, ref, "open-action", ["h"]); sameSize(area, sel, ref, "open-foot", ["h"]); }
     await page.screenshot({ path: resolve(OUT, `list-${w}.png`) });
   }
+});
+
+test("under 900px of column — nothing selects implicitly, and a chosen row opens today's drawer", async ({ page }) => {
+  await openApp(page, 1100, 800);
+  const at = async () => page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const drawer = [...document.querySelectorAll(".qpn")].find((e) => e.getAttribute("data-on") === "true" && e.getBoundingClientRect().width > 0);
+    const sum = p.querySelector("[data-qcv='sum']")!.getBoundingClientRect(), live = p.querySelector("[data-qcv='sum-live']")!.getBoundingClientRect(), cl = p.querySelector("[data-qcv='sum-closed']")!.getBoundingClientRect();
+    return { column: Math.round(p.getBoundingClientRect().width), narrow: p.classList.contains("qcv-page--narrow"), docked: p.querySelectorAll("[data-qcv='open']").length,
+      selected: p.querySelectorAll("[data-qcv='row'][aria-selected='true']").length, drawer: !!drawer, url: location.search, closedUnderLive: cl.top >= live.bottom - 1 && Math.abs(cl.left - live.left) < 1, sumW: Math.round(sum.width) };
+  });
+  const load = await at();
+  yes("narrow", "the column really is under 900 (the precondition)", load.column < 900, String(load.column));
+  is("narrow", "the page knows it", load.narrow, true);
+  is("narrow", "docked cards", load.docked, 0);
+  is("narrow", "⚠️ rows selected on load — an implicit selection here would open a drawer over the page", load.selected, 0);
+  is("narrow", "a drawer open on load", load.drawer, false);
+  is("narrow", "the URL on load", load.url.includes("q="), false);
+  is("narrow", "the closed card sits under the live one", load.closedUnderLive, true);
+  await page.locator(".qcv-page [data-qcv='row']").nth(2).click();
+  await page.waitForTimeout(900);
+  const chosen = await at();
+  is("narrow", "a chosen row opens today's drawer", chosen.drawer, true);
+  is("narrow", "…and is the one selected row", chosen.selected, 1);
+  yes("narrow", "…by writing ?q=", chosen.url.includes("q="), chosen.url);
+  await page.screenshot({ path: resolve(OUT, "narrow-1100-drawer.png") });
 });
 
 test("calendar — expanded and compact, the inset, one bar per stage", async ({ page }) => {
@@ -464,9 +538,11 @@ test("calendar — the sticky heading tracks the box's width through 1280 → 20
 test("grid — two tiles across beside the docked card", async ({ page }) => {
   const toGrid = async (p: Page) => { await p.click(".views button[data-v='grid']"); };
   for (const [w, h] of [[1440, 860], [1280, 800]] as const) {
-    const ref = await readRef(page, w, h, toGrid);
     await openApp(page, w, h, "grid");
     const app = await readApp(page);
+    const refPage = await page.context().newPage();
+    const ref = await readRef(refPage, refWindowFor(await appColumn(page)), h, toGrid);
+    await refPage.close();
     sameSize(`grid@${w}`, app, ref, "tile", ["w", "h"]);
     sameSize(`grid@${w}`, app, ref, "tile-band", ["h"]);
     sameSize(`grid@${w}`, app, ref, "open", ["w"]);

@@ -9,12 +9,10 @@
  * the same primitive `dashWeekMix` and `recomputeQuery`'s pure half read — so this page and those
  * cannot disagree about the order of events.
  *
- * ⚠️ AN UNDATED STAGE IS REPORTED AS UNDATED, NEVER GIVEN A DATE. An imported query's provisional
- * rungs are absent from the global feed (the import writes them to the query's own log only), so
- * the feed can end at a stage the query has since left. Where that happens the recompute-written
- * pipeline date for the CURRENT status is the fallback; where that is absent too, `currentStartMs`
- * is null and `dated` is false. The gauge then draws a dashed track and the calendar draws no bar —
- * a bar placed by guesswork is a statement about when something happened, made by nobody.
+ * ⚠️ AN UNDATED STAGE IS REPORTED AS UNDATED, NEVER GIVEN A DATE. Where neither the query document nor
+ * the feed dates the stage a query stands at, `currentStartMs` is null and `dated` is false. The
+ * gauge then draws a dashed track and the calendar draws no bar — a bar placed by guesswork is a
+ * statement about when something happened, made by nobody.
  */
 import { Query, QueryStatus } from "../types";
 import { orderedStatusBearing, type DerivableActivity } from "./queryDerivation";
@@ -51,55 +49,88 @@ export interface StageHistory {
   dated: boolean;
 }
 
-/** The recompute-written date for a status, where the query doc carries one. */
-function pipelineDate(q: Query, status: QueryStatus): number | null {
+/**
+ * The date the QUERY DOCUMENT gives for a stage — written by `recomputeQuery` from the query's own
+ * (authoritative) log, and null for a provisional rung. Queried is the send itself.
+ */
+function docDate(q: Query, status: QueryStatus): number | null {
   switch (status) {
     case QueryStatus.QUERIED: return anyToMs(q.dateSent);
     case QueryStatus.PARTIAL_REQUESTED: return anyToMs(q.partialRequestedDate);
     case QueryStatus.PARTIAL_SENT: return anyToMs(q.partialSentDate);
     case QueryStatus.FULL_REQUESTED: return anyToMs(q.fullRequestedDate);
     case QueryStatus.FULL_SENT: return anyToMs(q.fullSentDate);
-    case QueryStatus.OFFER: return anyToMs(q.offerDate) ?? anyToMs(q.lastStatusChange);
-    case QueryStatus.REJECTED: return anyToMs(q.rejectedDate) ?? anyToMs(q.lastStatusChange);
-    default: return anyToMs(q.lastStatusChange);
+    case QueryStatus.OFFER: return anyToMs(q.offerDate);
+    case QueryStatus.REJECTED: return anyToMs(q.rejectedDate);
+    default: return null;
   }
 }
+const DOC_DATED: readonly QueryStatus[] = [
+  QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT,
+];
 
+/**
+ * ⚠️ THE QUERY DOCUMENT IS THE AUTHORITY; THE FEED IS A WITNESS THAT CAN BE WRONG.
+ *
+ * The first cut walked the global feed's rungs and trusted where they ended. Measured on the harness
+ * account: the feed held `Partial Sent` rungs for a query whose document says `Partial Requested` —
+ * residue of sends that were recorded and then undone (historical writers minted different ids for
+ * the two stores, so an undo could miss the projection) — and a Queried row sent in March read
+ * "0 days waiting". The document is what `recomputeQuery` derives from the query's OWN log; the feed
+ * is a projection of it. So:
+ *
+ *   - where the query STANDS is `q.status`, always;
+ *   - WHEN IT GOT THERE is the document's own date for that stage, or `lastStatusChange` where that
+ *     is later (a resubmission re-enters Full sent; the pipeline date is the FIRST time). Queried is
+ *     the send. Only where the document dates nothing does the feed answer — with its latest rung
+ *     OF THAT STATUS — and if that is absent too the stage is UNDATED;
+ *   - the PAST is the document's dated stages, plus feed rungs for stages the document does not date
+ *     (R&R, an offer, a close), and ONLY those that fall before the current stage began. A rung dated
+ *     after it that names another stage is residue or a disagreement, and the document wins.
+ */
 export function stageHistory(q: Query, log: readonly DerivableActivity[] | undefined): StageHistory {
   const status = q.status as QueryStatus;
-  const sentMs = anyToMs(q.dateSent);
   const rungs = orderedStatusBearing([...(log ?? [])]).filter((r) => !r.provisional && Number.isFinite(r.time) && r.time > 0);
 
-  /* the walk: a rung that names a different stage closes the span before it and opens the next */
-  const spans: StageSpan[] = [];
-  if (sentMs != null) spans.push({ status: QueryStatus.QUERIED, startMs: sentMs, endMs: null, current: false });
-  for (const r of rungs) {
-    const last = spans[spans.length - 1];
-    if (!last) { spans.push({ status: r.status, startMs: r.time, endMs: null, current: false }); continue; }
-    if (r.status === last.status) continue;
-    /* a rung dated before the span it closes (a correction, an import) cannot end it earlier than it began */
-    const at = Math.max(r.time, last.startMs);
-    last.endMs = at;
-    spans.push({ status: r.status, startMs: at, endMs: null, current: false });
+  /* when it entered the stage it stands at */
+  let start: number | null;
+  if (status === QueryStatus.QUERIED) start = anyToMs(q.dateSent);
+  else {
+    const own = docDate(q, status), last = anyToMs(q.lastStatusChange);
+    start = own != null && last != null ? Math.max(own, last) : own ?? last;
+    if (start == null) { const mine = rungs.filter((r) => r.status === status); start = mine.length ? mine[mine.length - 1].time : null; }
   }
+  if (start == null) return { spans: [], currentStartMs: null, dated: false };
+  /* a stage cannot begin before the query was sent; a rung that says so is a clock or an import fault */
+  const sentMs = anyToMs(q.dateSent);
+  if (sentMs != null && start < sentMs) start = sentMs;
 
-  let last = spans[spans.length - 1];
-  if (!last || last.status !== status) {
-    /* the feed stops short of where the query stands — the pipeline date is the only other witness */
-    const at = pipelineDate(q, status);
-    if (at == null || (last && at < last.startMs)) {
-      /* ⚠️ what is dated stays; the last known span is NOT run forward to today, because the query
-         is known to have left it and nobody recorded when */
-      if (last) spans.pop();
-      return { spans: spans.map((s) => ({ ...s })), currentStartMs: null, dated: false };
-    }
-    if (last) last.endMs = at;
-    spans.push({ status, startMs: at, endMs: null, current: false });
-    last = spans[spans.length - 1];
+  /* what came before it */
+  const events: { status: QueryStatus; time: number }[] = [];
+  for (const s of DOC_DATED) { const t = docDate(q, s); if (t != null) events.push({ status: s, time: t }); }
+  for (const r of rungs) if (docDate(q, r.status) == null) events.push({ status: r.status, time: r.time });
+  /* nothing precedes the send: an earlier rung is clamped to it, and Queried sorts first on a tie */
+  if (sentMs != null) for (const e of events) if (e.time < sentMs) e.time = sentMs;
+  const rank = (st: QueryStatus) => (st === QueryStatus.QUERIED ? 0 : 1);
+  const before = events.filter((e) => (e.time < start! || (e.time === start && e.status !== status)) && !isClosedStatus(e.status)).sort((a, b) => a.time - b.time || rank(a.status) - rank(b.status));
+
+  const spans: StageSpan[] = [];
+  for (const e of before) {
+    const last = spans[spans.length - 1];
+    if (last && last.status === e.status) continue;
+    if (last) last.endMs = e.time;
+    spans.push({ status: e.status, startMs: e.time, endMs: null, current: false });
   }
-  last.current = true;
-  if (isClosedStatus(status)) last.endMs = last.startMs; /* a close is a moment; the view gives it a width */
-  return { spans, currentStartMs: last.startMs, dated: true };
+  const last = spans[spans.length - 1];
+  if (last && last.status === status) {
+    /* the feed and the document date the same entry differently — one stage, the earlier start */
+    last.current = true;
+    if (isClosedStatus(status)) last.endMs = last.startMs;
+    return { spans, currentStartMs: last.startMs, dated: true };
+  }
+  if (last) last.endMs = start;
+  spans.push({ status, startMs: start, endMs: isClosedStatus(status) ? start : null, current: true });
+  return { spans, currentStartMs: start, dated: true };
 }
 
 /** Whole days from a to b, never negative. */

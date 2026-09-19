@@ -256,7 +256,7 @@ describe("the row's words", () => {
   it("agent's turn: the reply date, or that none was promised, or how far past it is", () => {
     expect(factLine(one({ dateSent: ago(36) }, agent({ responseTimeWeeks: 6 })), NOW)).toBe("reply by 25 Sep · 6 days away");
     expect(factLine(one({ dateSent: ago(36) }), NOW)).toBe("no date promised · 5 weeks waiting");
-    expect(factLine(one({ dateSent: ago(51) }, agent({ responseTimeWeeks: 6 })), NOW)).toBe("7 weeks waiting · 9 days past the expected date");
+    expect(factLine(one({ dateSent: ago(51) }, agent({ responseTimeWeeks: 6 })), NOW)).toBe("7 weeks waiting · 9 days past expected");
   });
   it("the footer's line, and the footer's one action — none when closed", () => {
     expect(standLine(one({ status: QueryStatus.PARTIAL_REQUESTED }))).toBe("Jonathan is waiting on your partial");

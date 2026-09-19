@@ -33,8 +33,9 @@ import type { QueryStatus } from "../../types";
  * fact about this sitting, and next week's visit starts at Tracking like the brief says.
  */
 export type PanelTab = "tracking" | "agent" | "notes";
-const TAB_KEY = "sa.qpnTab";
-const readTab = (): PanelTab => {
+/* exported so the DOCKED card (v11) remembers the same tab the drawer does — one memory, two houses */
+export const TAB_KEY = "sa.qpnTab";
+export const readTab = (): PanelTab => {
   try {
     const v = sessionStorage.getItem(TAB_KEY);
     return v === "agent" || v === "notes" ? v : "tracking";

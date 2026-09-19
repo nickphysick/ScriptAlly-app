@@ -38,7 +38,6 @@ import { FEEDBACK_FAB } from "../../lib/beta";
 import { useSaveState, saveWhisper } from "../../lib/useSaveState";
 import { useSidebarCollapsed } from "./useSidebarCollapsed";
 import { formatSidebarName, getInitials } from "../../lib/displayName";
-import { agentPrimary } from "../../lib/agentDisplay";
 import { DeskTooltip } from "../dashboard/DeskTooltip";
 import { Rect as TipRect } from "../../lib/deskTooltip";
 import { manuscriptViewPath } from "./manuscriptScope";
@@ -385,25 +384,14 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const save = useSaveState();
   const crumb = shellCrumb(sections, hit);
   /**
-   * ⚠️ THE CRUMB FOLLOWS THE RECORD, AND IT IS RESOLVED HERE BECAUSE THE SHELL ALREADY HAS THE DATA.
-   * On `/queries?q=<id>` the page is showing one query, so the trail is `QueryHawk / Queries / Greg
-   * Panetta` rather than `… / Query Centre` — the page name is what the grid is called, and over a
-   * record it states the one thing the reader can already see while omitting the one they cannot.
-   *
-   * ⚠️ IT RESOLVES OR IT IS ABSENT — never a placeholder. A `?q=` naming a query that has been
-   * deleted, or that belongs to another account, leaves the crumb saying the page's own name, which
-   * is true. An id in a breadcrumb, or the word "Query", would both be worse than the page name.
+   * ⚠️ THE CRUMB NO LONGER FOLLOWS THE OPEN QUERY (Query Centre v11, 19 Sep). It used to read
+   * `QueryHawk / Queries / Greg Panetta` on `/queries?q=<id>`, on the reasoning that the page was
+   * then showing ONE query. It is not: the open query is a card docked beside the list (a drawer
+   * under 900px of column), the list is still on screen, and you have not gone anywhere — so the
+   * trail says where you are, `Query Centre`. Measured at a 1280 window it also wrapped the crumb
+   * to two lines and moved the bar every time a row was selected.
    */
-  const recordCrumb = useMemo(() => {
-    if (!pathname.startsWith("/queries")) return null;
-    const id = new URLSearchParams(search).get("q");
-    if (!id) return null;
-    const q = queries.find((x) => x.id === id);
-    if (!q) return null;
-    const a = agents.find((x) => x.id === q.agentId);
-    const name = agentPrimary(a);
-    return name || null;
-  }, [pathname, search, queries, agents]);
+  const recordCrumb: string | null = null;
   /**
    * ⚠️ THE MASTHEAD'S KICKER IS THE CRUMB'S OWN SECTION, TAKEN FROM THE SAME CALL. Reading a second
    * derivation put the two three inches apart and disagreeing: `shellV2Nav`'s `SHELL_SECTIONS` calls

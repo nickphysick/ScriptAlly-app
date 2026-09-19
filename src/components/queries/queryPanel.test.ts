@@ -119,11 +119,17 @@ describe("⚠️ the legacy edit sheet is unreachable from the live page", () =>
    */
   it("the drawer's tracking tab is the shared timeline, ⋯ on", () => {
     const mount = (() => {
-      const at = liveBranch.indexOf("tracking={(() => {");
-      expect(at, "the drawer's tracking mount is missing").toBeGreaterThan(-1);
-      const end = liveBranch.indexOf("notesTab=", at);
-      expect(end, "the notes tab no longer bounds the tracking slice").toBeGreaterThan(at);
-      return liveBranch.slice(at, end);
+      /* ⚠️ RETARGETED (v11, 19 Sep): the tab bodies are built ONCE, above the return, because the open
+         query has two houses now — the docked card and the narrow drawer — and both must show the
+         same timeline. The law is unchanged (the Tracking tab is the SHARED timeline with the ⋯ on);
+         the slice follows the expression to where it lives, and both houses are asserted to take it. */
+      const whole = decls(readFileSync(join(HERE, "../Queries.tsx"), "utf8"));
+      const at = whole.indexOf("const qpTracking = ");
+      expect(at, "the tracking body is missing").toBeGreaterThan(-1);
+      const end = whole.indexOf("const qpAgentTab = ", at);
+      expect(end, "the agent tab no longer bounds the tracking slice").toBeGreaterThan(at);
+      expect(whole.split("tracking={qpTracking}").length - 1, "the card and the drawer must BOTH take the one tracking body").toBe(2);
+      return whole.slice(at, end);
     })();
     expect(mount).toContain("<QueryTimeline");
     /* §3 — the ⋯ opens the desk at the fork directly; onEntryFork is what makes it render at all */
