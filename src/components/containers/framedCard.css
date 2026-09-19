@@ -1,0 +1,56 @@
+/**
+ * FramedCard — the dashboard's framed card, shared (Query Centre v11, 19 Sep).
+ *
+ * ⚠️ THESE ARE A DOCUMENTED COPY OF `oneScreen.css`'s `--dash-*` CARD TOKENS, NEVER A `var()` READ OF
+ * THEM. Those tokens are declared on `.os-root` and nowhere else — outside the dashboard they
+ * resolve to nothing and the card paints as a flat square, in silence. `framedCard.test.ts` asserts
+ * each value here against the dashboard's sheet (never a literal on both sides), so the two cannot
+ * drift. The dashboard is untouched; pointing `OneScreenPanel` at these is a later decision.
+ *
+ * At `:root`, so the scope is an ancestor of every consumer (the token-scope rule).
+ */
+:root {
+  --fc-card: #ffffff;
+  --fc-radius: 16px;
+  --fc-rim: 6px;
+  --fc-frame: #7c3a2a;
+  --fc-frame-radius: 11px;
+  --fc-shadow: 0 2px 8px rgba(28, 19, 15, 0.06);
+  --fc-ink: #1c130f;
+  --fc-page: #f5f1eb;
+  --fc-navy: #2a3a52;
+  --fc-stone: #e4e1db;
+}
+/* the rim: 6px of the card's own white, no border, the rim's shadow */
+.fc-card {
+  box-sizing: border-box;
+  background: var(--fc-card);
+  border: 0;
+  border-radius: var(--fc-radius);
+  padding: var(--fc-rim);
+  box-shadow: var(--fc-shadow);
+  min-width: 0;
+}
+/* a size container, so a title scales with ITS card. A container query cannot restyle the container
+   itself — anything that must respond goes on a child. */
+.fc-card--cq { container-type: inline-size; }
+/* the frame: the 1px burgundy line, and IT CLIPS — which is what lets a band run edge to edge and
+   take the frame's top corners without a radius of its own */
+.fc-frame {
+  box-sizing: border-box;
+  border: 1px solid var(--fc-frame);
+  border-radius: var(--fc-frame-radius);
+  background: var(--fc-card);
+  overflow: hidden;
+  min-width: 0;
+}
+/* the band, inside the line. The fill is by what the card is ABOUT: a tone class, or `--fc-band`. */
+.fc-band {
+  box-sizing: border-box;
+  background: var(--fc-band, var(--fc-page));
+  color: var(--fc-band-ink, var(--fc-ink));
+  border-bottom: 1px solid rgba(28, 19, 15, 0.1);
+  min-width: 0;
+}
+.fc-tone--navy { --fc-band: var(--fc-navy); --fc-band-ink: var(--fc-page); }
+.fc-tone--stone { --fc-band: var(--fc-stone); }
