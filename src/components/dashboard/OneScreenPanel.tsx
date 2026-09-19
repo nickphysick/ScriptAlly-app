@@ -44,9 +44,11 @@ export interface OneScreenPanelProps {
   lift?: boolean;
   innerRef?: React.Ref<HTMLDivElement>;
   /**
-   * ⚠️ THE REF-DIFF HARNESS'S HANDLE, AND IT IS A PROP RATHER THAN A CLASS ON PURPOSE.
-   * `scripts/dash-refdiff.mjs` reads `[data-probe]` on both the design ref and this page and
-   * compares the two boxes. A class would have to be styled by something to justify its existence;
+   * ⚠️ THE MEASUREMENTS' HANDLE, AND IT IS A PROP RATHER THAN A CLASS ON PURPOSE.
+   * `tests/e2e/dashTopRow.measure.ts` and `dashStages.measure.ts` read `[data-probe]` on this page
+   * (and the former measures the design ref by the same ruler) and compare boxes. (The original
+   * reader, `scripts/dash-refdiff.mjs`, was retired on 19 Sep with the v16 mockup it targeted.)
+   * A class would have to be styled by something to justify its existence;
    * an attribute is inert, which is exactly what a measurement handle should be — it can never
    * change what the page looks like, so it cannot be the reason a diff passes.
    */

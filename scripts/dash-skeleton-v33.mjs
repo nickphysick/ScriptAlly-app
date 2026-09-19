@@ -559,8 +559,11 @@ for (const W of WIDTHS) {
 await browser.close();
 
 /**
- * ⚠️ THE VERDICT IS WRITTEN AS JSON so `dash-refdiff.mjs` carries it as a standing gate rather than
- * as a thing somebody remembers to run. Four claims, and each one has been false at least once in
+ * ⚠️ THE VERDICT IS WRITTEN AS JSON, AND NOTHING CARRIES IT ANY MORE. `dash-refdiff.mjs` used to spawn
+ * this script and fold the verdict into its own table, "rather than as a thing somebody remembers to
+ * run"; that script was retired on 19 Sep with the v16 mockup it compared against, so this gate — and
+ * `dash-rail-v33.mjs`, which it spawned too — IS now a thing somebody remembers to run:
+ *   SA_REFDIFF_APP_URL=http://127.0.0.1:<port> node scripts/dash-skeleton-v33.mjs Four claims, and each one has been false at least once in
  * this phase: the ghost's regions land within 8px of the loaded page's at every width; every region
  * was actually FOUND on both sides (a missing one is a silent pass); the cover is caught on screen
  * at all (a load too fast to show it proves nothing); and it leaves the DOM once the page arrives.

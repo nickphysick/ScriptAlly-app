@@ -9,8 +9,10 @@
  * the wrapper meant that effect's only run found nothing, bailed, and never ran again.
  *
  * ⚠️ THIS IS A CONSTRUCTION CLAIM, AND IT IS HERE BECAUSE IT RUNS ON EVERY PUSH. The rendered claim —
- * the plot draws at every width and frequency — is `plotDraws` in scripts/dash-refdiff.mjs, and that
- * harness only runs when somebody runs it. That is exactly how the fault shipped: the structural gate
+ * the plot draws at every width — is `tests/e2e/dashStages.measure.ts` (the line is sampled off the
+ * rendered path and every pin and the end marker must sit on it, at five widths), and that
+ * harness only runs when somebody runs it. (It was `plotDraws` in `scripts/dash-refdiff.mjs` until that
+ * script was retired on 19 Sep with the v16 mockup it compared against.) That is exactly how the fault shipped: the structural gate
  * would have failed on the first run, and the stream that changed the chart never ran it. Two instruments for one fault, on purpose: this one is cheap and always on;
  * the rendered one is the proof that the plot actually paints.
  *
