@@ -515,6 +515,45 @@ test("calendar — expanded and compact, the inset, one bar per stage", async ({
   await page.locator(".qcv-page [data-qcv='cal-dens'] button", { hasText: "Expanded" }).first().click();
 });
 
+test("calendar — scrolled back to a lane with three or more stages: a past bar comes to full strength on hover, and its name stays readable", async ({ page }) => {
+  await openApp(page, 1440, 860, "calendar");
+  const found = await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const box = p.querySelector("[data-qcv='cal-box']") as HTMLElement;
+    const lanes = [...p.querySelectorAll("[data-qcv='cal-lane']")] as HTMLElement[];
+    const lane = lanes.find((l) => l.querySelectorAll("[data-qcv='cal-hist']").length >= 2);
+    if (!lane) return { stages: Math.max(0, ...lanes.map((l) => l.children.length)), ok: false };
+    const first = lane.querySelector("[data-qcv='cal-hist']") as HTMLElement;
+    box.scrollLeft = Math.max(0, first.offsetLeft - 40);
+    box.scrollTop = Math.max(0, lane.offsetTop - 120);
+    lane.setAttribute("data-e2e", "lane");
+    return { stages: lane.children.length, ok: true };
+  });
+  yes("history", "some lane on this account has three or more stages (or the history was never exercised)", found.ok, JSON.stringify(found));
+  await page.waitForTimeout(400);
+  const hist = page.locator(".qcv-page [data-e2e='lane'] [data-qcv='cal-hist']").first();
+  const rest = await hist.evaluate((e) => ({ op: getComputedStyle(e).opacity, title: e.getAttribute("title") }));
+  is("history", "at rest a past bar is .42", rest.op, "0.42");
+  yes("history", "its title states the stage and its dates", /^[A-Z][^,]+, \d{1,2} [A-Z][a-z]{2} to \d{1,2} [A-Z][a-z]{2}$/.test(rest.title ?? ""), String(rest.title));
+  await hist.hover();
+  await page.waitForTimeout(300);
+  is("history", "hovered, it is at full strength", await hist.evaluate((e) => getComputedStyle(e).opacity), "1");
+  /* the agent's name stays readable when the CURRENT bar starts off-screen: scroll so its left edge is cut */
+  const sticky = await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const box = p.querySelector("[data-qcv='cal-box']") as HTMLElement;
+    const cur = p.querySelector("[data-e2e='lane'] [data-qcv='cal-seg']") as HTMLElement;
+    if (cur.offsetWidth < 220) return null;
+    box.scrollLeft = cur.offsetLeft + 60;
+    const b = box.getBoundingClientRect(), nm = (cur.querySelector(".qcv-bar-nm") as HTMLElement).getBoundingClientRect();
+    return { barLeftOfBox: Math.round(cur.getBoundingClientRect().left - b.left), nameLeftOfBox: Math.round(nm.left - b.left) };
+  });
+  if (sticky) { seen("history", "sticky name exercised"); yes("history", "the bar starts off-screen (the precondition)", sticky.barLeftOfBox < 0, JSON.stringify(sticky)); yes("history", "…and the agent's name is still inside the box", sticky.nameLeftOfBox >= 0, JSON.stringify(sticky)); }
+  else seen("history", "sticky name NOT exercised — the current bar is under 220px");
+  await hist.hover().catch(() => {});
+  await page.screenshot({ path: resolve(OUT, "calendar-history-hover-1440.png") });
+});
+
 test("calendar — the sticky heading tracks the box's width through 1280 → 2000 → 1280, and the summary row does not move", async ({ page }) => {
   await openApp(page, 1280, 800, "calendar");
   const stop = async () => page.evaluate(() => {

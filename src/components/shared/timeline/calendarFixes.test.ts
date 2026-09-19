@@ -101,7 +101,12 @@ describe("§3 · the range is two leaves, and the row can no longer be squeezed"
 
 describe("§4 · one hover implementation, and both hosts mount it", () => {
   it("neither page carries its own copy of the delegated pair", () => {
-    for (const [name, src] of [["Queries", QC], ["TodoCalendarPage", TODO]] as const) {
+    /* ⚠️ RETARGETED (v11, 19 Sep): the board has ONE host now. The Query Centre's calendar is its own
+       component (`QcCalendar`), so "both hosts share one hover" became "the one host uses the shared
+       hover, and the other page mounts no board at all" — asserted, so a second host cannot return
+       quietly with a hover of its own. */
+    expect(QC, "the Query Centre mounts the To-do board again").not.toContain("<TimelineBoard");
+    for (const [name, src] of [["TodoCalendarPage", TODO]] as const) {
       expect(src, `${name} does not use the shared hover`).toContain("useSegHover");
       /* the mechanism this replaced: a local `segOf` walking to `.tl-p, .tl-jc`, and a setter for a
          hover state of the page's own. Either one back in a page is the fork returning. */
@@ -110,15 +115,12 @@ describe("§4 · one hover implementation, and both hosts mount it", () => {
     }
   });
 
-  it("⚠️ the Query Centre's click selects and opens — it does not set the hover", () => {
-    const pick = sliceBetween(QC, "pickSeg={(_rowKey, sg) => {", "}}", "the Calendar's pickSeg");
-    expect(pick).toContain("setCalSel(sg.key)");
-    expect(pick).toContain("onOpenQuery?.(sg.queryId)");
-    expect(pick, "a click still writes the hover state").not.toContain("Hover");
-  });
+  /* ⚠️ RETIRED (Query Centre v11, 19 Sep): the Query Centre no longer mounts this board. Its calendar is
+     `queries/centre/QcCalendar` — one bar per STAGE, from the activity log — and a bar there is a plain
+     button that selects. There is no hover state on that page for a click to write. */
 
-  it("both hosts hand the board real handlers, not the empty pair", () => {
-    for (const [name, src] of [["Queries", QC], ["TodoCalendarPage", TODO]] as const) {
+  it("the board's host hands it real handlers, not the empty pair", () => {
+    for (const [name, src] of [["TodoCalendarPage", TODO]] as const) {
       const board = sliceBetween(src, "<TimelineBoard", "/>", `${name}'s board mount`);
       expect(board, `${name} still passes an empty onRowsOver`).not.toMatch(/onRowsOver=\{\(\)\s*=>\s*\{\}\}/);
       expect(board, `${name} still passes an empty onRowsOut`).not.toMatch(/onRowsOut=\{\(\)\s*=>\s*\{\}\}/);

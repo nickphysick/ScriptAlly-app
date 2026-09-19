@@ -77,6 +77,7 @@ import { QcSentence } from "./queries/centre/QcSentence";
 import { QcSummary } from "./queries/centre/QcSummary";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
 import { QcOpenCard, QcOpenCardSkeleton } from "./queries/centre/QcOpenCard";
+import { QcCalendar, QcCalendarSkeleton } from "./queries/centre/QcCalendar";
 import {
   DEFAULT_SORT, buildQcRows, closedGrid, filterForStatusParam, filterOptions, inScope, matchesFilter, sortRows, stageColumns,
   type QcFilter, type QcSort,
@@ -3502,130 +3503,11 @@ export const Queries: React.FC<{
     };
   });
 
-  /* ══ THE CALENDAR (Run C) ═══════════════════════════════════════════════════════════════════
-     ⚠️ THE SAME BOARD TO-DO DRAWS, NOT A SECOND ONE. Every derivation below either comes from
-     `shared/timeline` or from `queryTimelineRows`, which is itself only an assembler for
-     `laneBars`. Nothing here computes a date, a position or a lane — if it did, the two pages
-     could draw the same wait differently, which is the fault this whole sequence exists to
-     prevent.
-
-     ⚠️ AND THE WINDOW IS DERIVED EXACTLY AS TO-DO DERIVES IT: `winStart` defaults to today,
-     `pastDaysOf` centres it, and the pager steps by `WEEK_STEP`. The raw fractional `pastDays` is
-     passed through UNROUNDED because To-do passes it unrounded — rounding here would shift the
-     whole board by half a day against the other page. */
-  const calRange = TIMELINE_RANGES[DEFAULT_RANGE_INDEX];
-  const calToday = useMemo(() => localYMD(Date.now()), []);
-  const [calWinStart, setCalWinStart] = useState<string>(calToday);
-  const [calDensity, setCalDensity] = useState<BoardDensity>("comfortable");
-  const [calSel, setCalSel] = useState<string | null>(null);
-  /* ⚠️ THE BOARD'S OWN HOVER PAIRING, NOT A LOCAL STATE SET FROM A CLICK (four-fixes §4). This was
-     a `useState` written only by `pickSeg`, so on this page a bar's action mark — the Caveat label
-     and its button — opened on a CLICK, and the same click opened the query: one gesture, two
-     answers. `useSegHover` is the mechanism To-do already had; both hosts now share it, delay and
-     all, so the board cannot behave differently depending on which page mounted it. */
-  const { seg: calHover, onRowsOver: calRowsOver, onRowsOut: calRowsOut } = useSegHover();
-  const [calCollapsed, setCalCollapsed] = useState<ReadonlySet<string>>(new Set());
-  const [calCross, setCalCross] = useState<{ x: number; label: string } | null>(null);
-  const calWrapRef = useRef<HTMLDivElement | null>(null);
-
-  const calPastDays = useMemo(() => pastDaysOf(calRange), [calRange]);
-  const calWinFrom = useMemo(
-    () => (calPastDays > 0 ? shiftWindow(calWinStart, calPastDays, -1) : calWinStart),
-    [calWinStart, calPastDays],
-  );
-  const calVisible = useMemo(() => windowDays(calWinFrom, calRange.days), [calWinFrom, calRange.days]);
-  const calTodayAt = useMemo(() => todayAtOf(calVisible, calToday), [calVisible, calToday]);
-  const calMonths = useMemo(() => monthsOf(calVisible, calToday), [calVisible, calToday]);
-  const calDateLabels = useMemo(
-    () => dateLabelsOf(calVisible, calToday, calRange.days, calTodayAt),
-    [calVisible, calToday, calRange.days, calTodayAt],
-  );
-  const calDayDate = useMemo(
-    () => (d: number) => shortCalDate(shiftWindow(calWinFrom, Math.round(d), 1)),
-    [calWinFrom],
-  );
-
-  /* ⚠️ IT READS `sortedList` — THE PAGE'S OWN FILTERED, SORTED SET, the same one Grid, List and
-     Board render. Filter and search therefore narrow the calendar for free, and Sort orders it,
-     because there is one collection and four ways of drawing it. */
-  const calData = useMemo(() => queryTimelineRows({
-    queries: sortedList as Query[],
-    agents, activities,
-    winFrom: calWinFrom, days: calRange.days, today: calToday,
-    manuscriptTitle: (id) => manuscripts.find((m) => m.id === id)?.title ?? "",
-  }), [sortedList, agents, activities, calWinFrom, calRange.days, calToday, manuscripts]);
-
-  /* ⚠️ ONE GROUP WITH NO LABEL DRAWS NO DIVIDER — the board's own `No grouping` shape. A heading
-     reading "everything" over every row states nothing, which is the same silence-wins rule an
-     empty section follows. */
-  /* ⚠️ THE GROUP CONTROL SAYS WHAT IT GROUPS BY, AND THE BOARD MUST OBEY THE SAME KEY. The first
-     cut grouped by agency whatever the control said — so the pill read `Status` over sections
-     divided by agency, which is a control stating something untrue about what is on screen. The
-     board's sections are built from the SAME `gridGroup` the other three views read.
-
-     ⚠️ AND `none` DRAWS NO DIVIDER AT ALL — one group with an empty label, the board's own
-     `No grouping` shape. A heading reading "everything" over every row states nothing. */
-  const calGroups = useMemo(() => {
-    if (gridGroup === "none") {
-      return [{ key: "all", tone: null, label: "", purpose: null, rows: calData.rows }];
-    }
-    /* the row's own queries decide its section; a row is filed by its FIRST query's fact, which is
-       the same query the row's identity comes from */
-    const keyOf = (rowKey: string): string => {
-      const q = (sortedList as Query[]).find((x) => rowKeyFor(x) === rowKey);
-      if (!q) return "—";
-      const agent = agents.find((a) => a.id === q.agentId);
-      switch (gridGroup) {
-        case "status": return String(q.status);
-        case "turn": return turnWordFor(q.status as QueryStatus);
-        case "agency": return agentSecondary(agent) || agentPrimary(agent) || "—";
-        case "month": return q.dateSent ? new Date(q.dateSent as string).toLocaleString("en-GB", { month: "long", year: "numeric" }) : "Not sent";
-        default: return "—";
-      }
-    };
-    const by = new Map<string, typeof calData.rows>();
-    for (const r of calData.rows) {
-      const k = keyOf(r.key);
-      const list = by.get(k) ?? [];
-      list.push(r);
-      by.set(k, list);
-    }
-    return [...by.entries()].map(([k, rows]) => ({ key: k, tone: null, label: k, purpose: null, rows }));
-  }, [calData.rows, gridGroup, sortedList, agents]);
-
-  const calRowNumber = useMemo(() => {
-    const n = new Map<string, number>();
-    let i = 0;
-    for (const g of calGroups) for (const r of g.rows) n.set(r.key, ++i);
-    return n;
-  }, [calGroups]);
-
-  /* ⚠️ ONE SEARCH, TWO HOSTS, AND `browseSearchRef` IS WHY IT IS A FUNCTION RATHER THAN A COPY.
-     The Calendar puts the field in its own header row and the other three views keep it in the
-     toolbar; typing the markup twice would fork a field that ⌘K and `/` both target through a
-     SINGLE ref. Only one host renders at a time, so the ref has exactly one subject — which is
-     also why this may never become two mounted fields. */
-  const searchField = (cls: string) => (
-    <div className={cls}>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a08a78" strokeWidth="2" aria-hidden="true">
-        <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" />
-      </svg>
-      <input
-        type="text"
-        placeholder="Search agents or agencies"
-        autoComplete="off"
-        value={listSearch}
-        onChange={(e) => setListSearch(e.target.value)}
-        aria-label="Search agents or agencies"
-        ref={browseSearchRef}
-      />
-      {/* the `/` hint the ref draws, inside the field */}
-      <span className="qcc-tb-kbd" aria-hidden="true">/</span>
-    </div>
-  );
-  const calWindowLabel = useMemo(() => windowRangeLabelOf(calVisible), [calVisible]);
-  const calLeaves = useMemo(() => windowLeavesOf(calVisible), [calVisible]);
-  const calMovedOff = movedOffTodayOf(calTodayAt, calRange.days);
+  /* ⚠️ THE OLD CALENDAR'S STATE IS GONE FROM HERE (v11, 19 Sep): the window, the pager, the hover
+     pairing, the group derivation and the `queryTimelineRows` call that fed To-do's `TimelineBoard`.
+     This page's calendar is `QcCalendar` now — one bar per STAGE from the activity log, on one
+     continuous track — and it takes the same rows the list does. The page's own search field went
+     with the toolbar; To-do keeps its board untouched. */
 
 
   /**
@@ -6461,7 +6343,7 @@ export const Queries: React.FC<{
             ) : null}
             body={
               showGridSkeleton ? (
-                gridView === "list" ? <QcListSkeleton /> : <QueryGridSkeleton view={gridView} out={gridSkeletonOut} />
+                gridView === "list" ? <QcListSkeleton /> : gridView === "calendar" ? <QcCalendarSkeleton /> : <QueryGridSkeleton view={gridView} out={gridSkeletonOut} />
               ) : emptyKind === "filtered" ? (
                 /* FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER — the card, and only where its
                    headline is true. Its line is counted over the SCOPED set, the one the sentence's
@@ -6482,67 +6364,10 @@ export const Queries: React.FC<{
               ) : gridView === "list" ? (
                 <QcList rows={qcVisible} selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} nowMs={Date.now()} />
               ) : gridView === "calendar" ? (
-                  <div className="tl-board qcc-calboard" data-dens={calDensity}>
-                    <div className="tl-zone qcc-calzone">
-                      <TimelineBoard
-                        range={calRange}
-                        today={calToday}
-                        todayAt={calTodayAt}
-                        months={calMonths}
-                        dateLabels={calDateLabels}
-                        dayDate={calDayDate}
-                        board={calData.rows}
-                        drawnGroups={calGroups}
-                        rows={calData.rows}
-                        rowNumber={calRowNumber}
-                        barsByRow={calData.barsByRow}
-                        sparse={<p className="qcc-calph">No queries in this window</p>}
-                        collapsedGroups={calCollapsed}
-                        toggleGroup={(k) => setCalCollapsed((c) => {
-                          const n = new Set(c);
-                          if (n.has(k)) n.delete(k); else n.add(k);
-                          return n;
-                        })}
-                        sel={calSel}
-                        setSel={setCalSel}
-                        hoverSeg={calHover}
-                        /* ⚠️ A CLICK SELECTS AND OPENS; IT NO LONGER SETS THE HOVER (four-fixes
-                           §4). `setCalHover(sg.key)` here was the whole reason the action mark
-                           needed a click: the reveal followed a state only this handler wrote, so
-                           the label appeared at the same moment the query opened over it. */
-                        pickSeg={(_rowKey, sg) => {
-                          setCalSel(sg.key);
-                          if (sg.queryId) onOpenQuery?.(sg.queryId);
-                        }}
-                        openCardOver={() => {}}
-                        cardAt={null}
-                        closeCard={() => {}}
-                        nudgeCountFor={() => 0}
-                        wrapRef={calWrapRef}
-                        onLaneMove={(e) => setCalCross(
-                          crossAt(calWrapRef.current, e.target, e.clientX, calVisible, calRange.days, shortCalDate),
-                        )}
-                        clearCross={() => setCalCross(null)}
-                        dragWindow={{}}
-                        onRowsOver={calRowsOver}
-                        onRowsOut={calRowsOut}
-                        cross={calCross}
-                        actToast={null}
-                        onNavigatePath={(path) => onNavigate("queries", path)}
-                      />
-                    </div>
-                    {/* ⚠️ DENSITY IS A HOVER PILL ON THE CARD, NOT A CONTROL IN A BAR (§3). It rests
-                        at .35 and comes to 1 when the board is hovered or the pill itself is
-                        focused — so it is reachable by keyboard at all times, which a hover-only
-                        control would not be. `prefers-reduced-motion` holds it at 1. */}
-                    <div className="qcc-denspill" role="group" aria-label="Density">
-                      {(["comfortable", "compact"] as const).map((d) => (
-                        <button key={d} type="button" data-on={d === calDensity}
-                          aria-pressed={d === calDensity}
-                          onClick={() => setCalDensity(d)}>{DENSITY_LABEL[d]}</button>
-                      ))}
-                    </div>
-                  </div>
+                /* ⚠️ THE SAME FRAME, THE SAME DOCKED CARD: selecting a bar does exactly what selecting
+                   a row does. The TRACK is set by the scoped set so it does not jump as the filter
+                   narrows; the LANES are what the sentence shows. */
+                <QcCalendar rows={qcVisible} trackRows={qcScoped} selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} nowMs={Date.now()} />
               ) : (
                 <QueryCentreGrid
                   ghost={ghostRow}
