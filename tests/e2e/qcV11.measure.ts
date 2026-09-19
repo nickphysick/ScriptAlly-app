@@ -328,7 +328,10 @@ test("summary row with 56 live queries — the row is the height it is with 39, 
       title: (p.querySelector("[data-qcv='sum-live-band']")?.textContent || "").replace(/\s+/g, " ").trim(),
       cols: stages.map((st) => ({
         gauges: st.querySelectorAll("[data-qcv='gauge']").length,
-        more: (st.querySelector("[data-qcv='gauge-more']")?.textContent || "").trim(),
+        more: (st.querySelector("[data-qcv='gauge-more']")?.getAttribute("title") || "").trim(),
+        /* the INK of the line, not its box: the line is `nowrap` and is allowed to run on past its
+           own column where the neighbour is empty, so only a Range says where the words end */
+        moreInk: (() => { const m = st.querySelector("[data-qcv='gauge-more']"); if (!m) return null; const r = document.createRange(); r.selectNodeContents(m); const b = [...r.getClientRects()].filter((c) => c.width > 0); return b.length ? { x0: Math.min(...b.map((c) => c.left)), x1: Math.max(...b.map((c) => c.right)) } : null; })(),
         h: Math.round(st.getBoundingClientRect().height * 10) / 10,
       })),
     };
@@ -346,6 +349,15 @@ test("summary row with 56 live queries — the row is the height it is with 39, 
   near("summary-56", "the row's height with 56 live is its height without", padded.h, plain.h, 0.6);
   yes("summary-56", "no column draws more than four gauges", padded.cols.every((c) => c.gauges <= 4));
   yes("summary-56", "a column holding more than four says how many it is not drawing", padded.cols.some((c) => /^\+\d+ earlier in the window$/.test(c.more)));
+  /* ⚠️ THE FAULT THIS CASE FOUND THE FIRST TIME IT RAN: with several columns over four, the
+     "+N earlier in the window" lines ran into one another (124px of ink in a 98px column). Asserted
+     over the INK of consecutive lines, and the population first — a run with fewer than two such
+     lines proves nothing about collisions. */
+  const inks = padded.cols.map((c) => c.moreInk).filter((m): m is { x0: number; x1: number } => !!m);
+  yes("summary-56", `at least two columns carry the line (${inks.length}) — otherwise nothing could collide`, inks.length >= 2);
+  for (let i = 1; i < inks.length; i++) yes("summary-56", `line ${i} ends before line ${i + 1} begins`, inks[i - 1].x1 <= inks[i].x0 - 2, `${inks[i - 1].x1.toFixed(1)} → ${inks[i].x0.toFixed(1)}`);
+  const cardRight = await page.evaluate(() => { const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!; return (p.querySelector("[data-qcv='sum-live']") as HTMLElement).getBoundingClientRect().right; });
+  yes("summary-56", "no line runs out of the card", inks.every((m) => m.x1 <= cardRight - 6));
   await page.locator(".qcv-page [data-qcv='sum']").first().screenshot({ path: resolve(OUT, "summary-56-live-1440.png") });
 });
 
@@ -368,7 +380,7 @@ test("the summary's gauges — geometry, and which branches this account entered
             fillPc: fb ? (fb.width / gw) * 100 : null, overFromPc: ob ? ((ob.x - gx) / gw) * 100 : null, overPc: ob ? (ob.width / gw) * 100 : null,
             fillBg: fill ? getComputedStyle(fill).backgroundColor : null, overBg: over ? getComputedStyle(over).backgroundColor : null };
         }),
-        more: s.querySelector("[data-qcv='gauge-more']")?.textContent ?? null,
+        more: s.querySelector("[data-qcv='gauge-more']")?.getAttribute("title") ?? null,
       };
     });
   });
@@ -742,6 +754,18 @@ test("reduced motion — no entrance and no pulse", async ({ browser }) => {
   });
   yes("reduced", "the v11 page rendered", !!r);
   is("reduced", "running animations while the skeleton is held", r?.running, 0);
+  await page.screenshot({ path: resolve(OUT, "reduced-motion-skeleton-1440.png") });
+  /* ⚠️ AND THE LOADED PAGE, WHICH IS WHAT "THE PAGE WITH REDUCED MOTION ON" MEANS. The first version
+     of this case photographed the held skeleton and called it the page. The precondition is that
+     the hold has ENDED; then nothing may be running and the entrance class must never have been on. */
+  await expect.poll(() => page.evaluate(() => [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)?.getAttribute("aria-busy")), { timeout: 30_000 }).toBe("false");
+  const landed = await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+    return { running: p.getAnimations({ subtree: true }).filter((a) => a.playState === "running").length, rows: p.querySelectorAll("[data-qcv='row']").length, cls: p.className };
+  });
+  yes("reduced", `the loaded page drew its rows (${landed.rows})`, landed.rows > 3);
+  is("reduced", "running animations the moment the data lands", landed.running, 0);
+  await page.waitForTimeout(400);
   await page.screenshot({ path: resolve(OUT, "reduced-motion-1440.png") });
   await ctx.close();
 });

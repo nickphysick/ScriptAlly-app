@@ -59,7 +59,7 @@ export const QcSummary: React.FC<{
             </div>
           ) : (
             <div className="qcv-stages">
-              {columns.map((c) => (
+              {columns.map((c, ci) => (
                 <div key={c.status} className={`qcv-stg${c.count ? "" : " qcv-stg--zero"}`} data-qcv="stage" data-stage={c.status} data-count={c.count}
                   data-pressed={filter === stageFilter(c.status) ? "true" : undefined}>
                   <button type="button" className="qcv-stg-top" aria-pressed={filter === stageFilter(c.status)} onClick={() => toggle(stageFilter(c.status))}
@@ -77,7 +77,19 @@ export const QcSummary: React.FC<{
                       </button>
                     ))}
                     {c.gauges.length > 0 && <s className="qcv-notch" data-qcv="notch" aria-hidden="true" />}
-                    {c.more > 0 && <em className="qcv-ga-more" data-qcv="gauge-more">+{c.more} earlier in the window</em>}
+                    {/* ⚠️ THE LONG FORM IS WIDER THAN ITS COLUMN AT EVERY WINDOW UP TO ~1640 (124px of ink
+                        against a 98px column at 1440). The mockup gets away with it because ONE column
+                        carries the line and it runs on into an empty neighbour; on an account where
+                        several columns are over four, the lines ran into each other (measured with 56
+                        live). So the words " in the window" are drawn only where the column to the
+                        right has no line of its own to collide with — never on the last column, which
+                        has nowhere to run on into. The `title` always carries the whole sentence. */}
+                    {c.more > 0 && (
+                      <em className={`qcv-ga-more${ci < columns.length - 1 && columns[ci + 1].more === 0 ? " qcv-ga-more--long" : ""}`}
+                        data-qcv="gauge-more" title={`+${c.more} earlier in the window`}>
+                        +{c.more} earlier<i className="qcv-ga-more-w"> in the window</i>
+                      </em>
+                    )}
                   </div>
                 </div>
               ))}
