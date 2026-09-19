@@ -96,7 +96,13 @@ describe("nothing selects a query implicitly", () => {
   it("⚠️ THE PARAM IS READ IN BOTH DIRECTIONS — present selects, absent clears", () => {
     /* ⚠️ THE CLEARING HALF IS THE ONE THAT WAS MISSING, and its absence is why the back link looked
        inert: the effect only ever SET a selection, so removing `?q=` left the old one standing. */
-    expect(queries, "the selection effect no longer clears when the param goes").toContain("if (!wanted && selectedQueryId !== null) setSelectedQueryId(null)");
+    /* ⚠️ RETARGETED (v11, 19 Sep): the state `?q` writes is `urlSelectedId` now, because the DOCKED card
+       also shows the first visible row when `?q` names nothing (`implicitId`). The law is unchanged
+       and is why the two are separate states: the param is still read in both directions, and what
+       it clears is ITS half — never the implicit one, which is not the URL's to clear. */
+    expect(queries, "the selection effect no longer clears when the param goes").toContain("if (!wanted && urlSelectedId !== null) setSelectedQueryId(null)");
+    expect(queries, "the effective selection is no longer `?q`, else the implicit first row").toContain("const selectedQueryId = urlSelectedId ?? implicitId;");
+    expect(queries, "an implicit selection in DRAWER mode would open a drawer on load").toContain("const qcImplicitWant = qcDocked === true && !urlSelectedId && !creating");
     expect(queries, "an unresolvable id clears the selection — that races the data on a slow load")
       .toContain("never merely unresolvable");
   });

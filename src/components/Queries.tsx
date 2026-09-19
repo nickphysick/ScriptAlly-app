@@ -72,6 +72,12 @@ import { heroBookTitle } from "./queries/queryEmptyCopy";
 import { gridEmptyKind, waitingSummary, waitingLine } from "../lib/queryGridEmpty";
 import { QueryBoardView } from "./queries/QueryBoardView";
 import { QueryViewSwitch, type QueryView } from "./queries/QueryViewSwitch";
+import { QcCentre, QC_VIEW_KEY, readQcView, type QcView } from "./queries/centre/QcCentre";
+import { QcSentence } from "./queries/centre/QcSentence";
+import {
+  DEFAULT_SORT, buildQcRows, filterForStatusParam, filterOptions, inScope, matchesFilter, sortRows,
+  type QcFilter, type QcSort,
+} from "../lib/qcSummary";
 /* ══ THE CALENDAR VIEW (Run C) — the SAME board To-do draws ═══════════════════════════════════
    Every piece below is shared: the board, its winbar, the window's arithmetic and the bar engine's
    own assembler. Nothing about the calendar is implemented on this page — a second implementation
@@ -439,7 +445,20 @@ export const Queries: React.FC<{
    */
   const { ask: askConfirm, node: confirmNode } = useConfirmAsk();
 
-  const [selectedQueryId, setSelectedQueryId] = useState<string | null>(null);
+  /**
+   * ⚠️ v11 · THE SELECTION IS `?q`, ELSE THE FIRST ROW — AND THE URL IS NEVER WRITTEN ON LOAD.
+   * `urlSelectedId` is what `?q=` names (the `?q` effect below is still its one writer). Where it
+   * names nothing, the DOCKED card shows the first visible row: `implicitId`, set by an effect
+   * further down from the rows actually on screen. It is state rather than a derivation because
+   * `activeQuery` is read ~900 lines above where the rows are built, and a `const` read before its
+   * declaration is the TDZ fault this page has already shipped once.
+   *
+   * ⚠️ IN DRAWER MODE NOTHING SELECTS IMPLICITLY (under 900px of column): an implicit selection
+   * there would open a drawer over the page on load. That condition lives in the effect.
+   */
+  const [urlSelectedId, setSelectedQueryId] = useState<string | null>(null);
+  const [implicitId, setImplicitId] = useState<string | null>(null);
+  const selectedQueryId = urlSelectedId ?? implicitId;
   const [selectedQuery, setSelectedQuery] = useState<any | null>(null);
 
   /* ── Mobile Pass 1 · LIST → DETAIL (ref design-refs/mobile-concept-v1.html frames 02/03) ──
@@ -2085,26 +2104,44 @@ export const Queries: React.FC<{
    * not navigate, so it cannot fight the router), and the effect re-asserts it whenever a `?q=`
    * navigation drops it. Read once on mount, defaulting to Grid.
    */
-  const [gridView, setGridView] = useState<QueryView>(() => {
+  /* ⚠️ v11 (19 Sep): THREE VIEWS — List (the default), Calendar, Grid. BOARD IS REMOVED, and the
+     memory is per DEVICE now (`localStorage`), where it was per session. `readQcView` owns the read
+     order (`?view=` → this device → the old session key → List) and maps a remembered `board`, or
+     anything else it does not know, to List. `?view=` is still only a REFLECTION, written with
+     `replaceState`; List is the default, so List is the view the URL does not state. */
+  const [gridView, setGridView] = useState<QcView>(() => {
     try {
-      const fromUrl = new URLSearchParams(window.location.search).get("view");
-      if (fromUrl === "list" || fromUrl === "board" || fromUrl === "calendar" || fromUrl === "grid") return fromUrl;
-      const saved = sessionStorage.getItem("sa.qcView");
-      if (saved === "list" || saved === "board" || saved === "calendar") return saved;
-    } catch { /* a private window has no storage — Grid is the honest default */ }
-    return "grid";
+      return readQcView(window.location.search, localStorage.getItem(QC_VIEW_KEY), sessionStorage.getItem(QC_VIEW_KEY));
+    } catch { return "list"; }
   });
   useEffect(() => {
-    try { sessionStorage.setItem("sa.qcView", gridView); } catch { /* fine */ }
+    try { localStorage.setItem(QC_VIEW_KEY, gridView); } catch { /* a private window: List next time */ }
     try {
       const url = new URL(window.location.href);
-      const want = gridView === "grid" ? null : gridView;
+      const want = gridView === "list" ? null : gridView;
       if ((url.searchParams.get("view") ?? null) !== want) {
         if (want) url.searchParams.set("view", want); else url.searchParams.delete("view");
         window.history.replaceState(window.history.state, "", url.toString());
       }
     } catch { /* fine */ }
   }, [gridView, selectedQueryId]);
+
+  /* ── v11 · THE SENTENCE'S STATE: one filter, one manuscript scope, one sort ──
+     These REPLACE the toolbar's model (turn / status ticks / facets / needs-overdue / sort key) on
+     the live page. The old state is still declared below because the unreachable three-column pane
+     reads it; nothing the reader can reach does. */
+  const QC_UNASSIGNED = "__unassigned__";
+  const [qcFilter, setQcFilter] = useState<QcFilter>("all");
+  const [qcScope, setQcScope] = useState<string | null>(null);
+  const [qcSort, setQcSort] = useState<QcSort>(DEFAULT_SORT);
+  /* null until the page has measured its own column — see QcCentre */
+  const [qcDocked, setQcDocked] = useState<boolean | null>(null);
+  /* ⚠️ A HOOK, SO IT SITS UP HERE — above `if (!currentUser) return null`. The filtered and sorted
+     views of it are plain consts further down, beside the list they replace. */
+  const qcRows = useMemo(
+    () => buildQcRows(queries as Query[], agents, activities, Date.now()),
+    [queries, agents, activities],
+  );
 
   /* ── THE ?status= FILTER (shell-rebuild pack, Phase 3) ──
      The shell's four Queries children are this same hub under different filters. The param is
@@ -2122,10 +2159,9 @@ export const Queries: React.FC<{
      nothing new to say. */
   useEffect(() => {
     if (!statusFilter) return;
-    const next = filterStateFor(statusFilter);
-    setTurnFilter(next.turn);
-    setStatusSel(next.statusSel);
-    setNeedsOverdue(next.needsOverdue);
+    /* v11: the param lands on the SENTENCE's filter. `attention` has always meant "overdue for a
+       reply" (needsOverdue), so it maps to Past expected — see `filterForStatusParam`. */
+    setQcFilter(filterForStatusParam(statusFilter));
   }, [statusFilter]);
   const [filterPopOpen, setFilterPopOpen] = useState(false);
   const [sortPopOpen, setSortPopOpen] = useState(false);
@@ -2426,7 +2462,7 @@ export const Queries: React.FC<{
       && activeSubPage !== "Queries database" && activeSubPage !== "Query database"
       ? activeSubPage : null;
     if (wanted && queries.some((q) => q.id === wanted)) {
-      if (selectedQueryId !== wanted) {
+      if (urlSelectedId !== wanted) {
         setSelectedQueryId(wanted);
         /* Deep-linked arrival: bring the row into the middle of the list viewport so it lands clear
            of both edge fades. Only on the selection CHANGE — not on every data tick. */
@@ -2437,8 +2473,8 @@ export const Queries: React.FC<{
     /* ⚠️ CLEARED ONLY WHEN THE PARAM IS GENUINELY ABSENT, never merely unresolvable. A `?q=` naming a
        query that has not loaded yet must not clear the selection on the way past — that would race
        the data and drop the reader back to the grid on a slow connection. */
-    if (!wanted && selectedQueryId !== null) setSelectedQueryId(null);
-  }, [queries, selectedQueryId, activeSubPage]);
+    if (!wanted && urlSelectedId !== null) setSelectedQueryId(null);
+  }, [queries, urlSelectedId, activeSubPage]);
 
   // The active query + its agent/manuscript, resolved live. The reading pane is view-only EXCEPT the
   // 5d click-to-pick shortcuts (send method + manuscript); everything else edits via the Edit Query
@@ -3313,7 +3349,77 @@ export const Queries: React.FC<{
       default: return lastActivityMs(b) - lastActivityMs(a);
     }
   };
-  const sortedList = [...filteredList].sort(compareQueries);
+  /**
+   * ⚠️ v11 · `sortedList` FOLLOWS THE SENTENCE. It is still the page's ONE derived list — the rows,
+   * the export, the stepping and the card all read it — but what narrows and orders it is the
+   * sentence's filter, scope and sort (`lib/qcSummary`), not the retired toolbar's. `filteredList`
+   * and `compareQueries` above are read only by the unreachable three-column pane now.
+   *
+   * The shell's global search still narrows it (agent, agency, manuscript title). The page's own
+   * search field is gone.
+   */
+  const qcTerm = (searchQuery || "").trim().toLowerCase();
+  const qcMsTitle = new Map(manuscripts.map((m) => [m.id, m.title ?? ""]));
+  const qcSearched = !qcTerm ? qcRows : qcRows.filter((r) =>
+    r.agentName.toLowerCase().includes(qcTerm) || r.agencyKey.toLowerCase().includes(qcTerm)
+    || (qcMsTitle.get(r.manuscriptId) ?? "").toLowerCase().includes(qcTerm));
+  /* the scope: a manuscript, or the queries that name none that exists (so they stay findable) */
+  const qcScoped = qcSearched.filter((r) => (qcScope === QC_UNASSIGNED ? !qcMsTitle.has(r.manuscriptId) : inScope(r, qcScope)));
+  const qcVisible = sortRows(qcScoped.filter((r) => matchesFilter(r, qcFilter)), qcSort);
+  const qcById = new Map(qcRows.map((r) => [r.id, r]));
+  const sortedList = qcVisible.map((r) => r.query);
+  /* ── the head's line, and the sentence's manuscript scope ──
+     ⚠️ THE PAGE IS NOT SCOPED TO A MANUSCRIPT BY DEFAULT — the scope is the sentence's, default All —
+     so the line names a title only where ONE is true: the chosen manuscript, or the only book on the
+     shelf. With several and no choice it says how many, never picks one. */
+  const qcBooks = manuscripts.filter((m) => qcRows.some((r) => r.manuscriptId === m.id));
+  const qcUnassignedCount = qcSearched.filter((r) => !qcMsTitle.has(r.manuscriptId)).length;
+  const qcScopeTitle = qcScope && qcScope !== QC_UNASSIGNED ? (qcMsTitle.get(qcScope) || null) : null;
+  const qcLineTitle = qcScopeTitle ?? (manuscripts.length === 1 ? (manuscripts[0].title || null) : null);
+  const qcHeadLine = qcLineTitle
+    ? <>Every query for <span className="qcv-line-ms">{qcLineTitle}</span>, from the first letter to the last reply.</>
+    : manuscripts.length > 1
+      ? <>Every query for all <span className="qcv-line-ms">{manuscripts.length}</span> manuscripts, from the first letter to the last reply.</>
+      : <>Every query, from the first letter to the last reply.</>;
+  const qcScopeMenu = manuscripts.length > 1 ? {
+    current: qcScope,
+    total: qcSearched.length,
+    options: [
+      ...qcBooks.map((m) => ({ id: m.id, title: m.title || "Untitled manuscript", count: qcSearched.filter((r) => r.manuscriptId === m.id).length })),
+      ...(qcUnassignedCount > 0 ? [{ id: QC_UNASSIGNED, title: "Not assigned to a manuscript", count: qcUnassignedCount }] : []),
+    ],
+    onScope: (id: string | null) => pickQcScope(id),
+  } : null;
+  /**
+   * ⚠️ A FILTER THAT HIDES THE OPEN QUERY LETS GO OF IT. The selection is `?q`, and a `?q` naming a
+   * row the sentence has just filtered out would leave the docked card showing a query the list
+   * beside it does not contain. Clearing it hands the card back to the first visible row (the
+   * implicit selection) — a user's act, so the URL may change; nothing here runs on load.
+   */
+  const releaseIfHidden = (nextVisible: (id: string) => boolean) => {
+    if (urlSelectedId && !nextVisible(urlSelectedId)) onSelectView?.("cards");
+  };
+  const pickQcFilter = (f: QcFilter) => {
+    setQcFilter(f);
+    releaseIfHidden((id) => { const r = qcById.get(id); return !!r && qcScoped.includes(r) && matchesFilter(r, f); });
+  };
+  const pickQcScope = (id: string | null) => {
+    setQcScope(id);
+    releaseIfHidden((qid) => {
+      const r = qcById.get(qid);
+      return !!r && (id === QC_UNASSIGNED ? !qcMsTitle.has(r.manuscriptId) : inScope(r, id)) && matchesFilter(r, qcFilter);
+    });
+  };
+  /* ── the implicit selection: the first visible row, while DOCKED and nothing is in `?q` ──
+     Sticky: once it names a row it keeps it for as long as that row is visible, so a re-sort does
+     not change the open query under the reader. Never in drawer mode, never while a query is being
+     written, and never before the column has been measured (`qcDocked === null`). */
+  const qcImplicitWant = qcDocked === true && !urlSelectedId && !creating
+    ? (implicitId && qcVisible.some((r) => r.id === implicitId) ? implicitId : (qcVisible[0]?.id ?? null))
+    : null;
+  useEffect(() => {
+    if (implicitId !== qcImplicitWant) setImplicitId(qcImplicitWant);
+  }, [qcImplicitWant, implicitId]);
 
   /**
    * ⚠️ THE GRID READS `sortedList`, THE SAME DERIVED SET THE DETAIL LIST READS. One filter
@@ -3566,7 +3672,7 @@ export const Queries: React.FC<{
    */
   const ghostShowing = !!ghostRow && gridView === "grid";
   const emptyWaiting = gridRows.length === 0 && queries.length > 0
-    ? waitingSummary(mastheadScopedQueries.map((q) => {
+    ? waitingSummary(qcScoped.map((r) => r.query).map((q) => {
         const ag = agents.find((a) => a.id === q.agentId);
         return cardFacts(q as Query, new Date(), { agencyWeeks: ag?.responseTimeWeeks, agentName: agentPrimary(ag) });
       }))
@@ -3579,17 +3685,12 @@ export const Queries: React.FC<{
     ghost: ghostShowing,
   });
   /**
-   * "See what's waiting" — the With-the-agent tile, exactly as pressing the tile sets it, with the
-   * other narrowing lifted so the view shows the queries the line just counted. The manuscript
-   * scope stays: it is the set the count was taken over.
+   * "See what's waiting" — the sentence's With the agent, exactly as choosing it in the menu sets it.
+   * The manuscript scope stays: it is the set the count was taken over.
    */
-  const seeWaiting = () => {
-    setStatusSel([]);
-    setGridFilters(emptyGridFilters());
-    setNeedsOverdue(false);
-    setListSearch("");
-    setQuickKey("agent");
-  };
+  const seeWaiting = () => { setQcFilter("agent"); };
+  /* one tap back: the FILTER clears; the manuscript scope stays — it is the set the count was taken over */
+  const clearQcFilter = () => { setQcFilter("all"); };
 
   /**
    * §1 (log-sheet) — THE READ-BACK SENTENCE, built where the draft lives. Playfair prose stating
@@ -4689,12 +4790,6 @@ export const Queries: React.FC<{
    * apply exactly once, ever.
    */
   const touchedControls = useRef({ sort: false, group: false });
-  const applyView = (next: QueryView) => {
-    setGridView(next);
-    const d = defaultsOnViewChange(next as QueryViewName, touchedControls.current);
-    if (d.sort !== undefined) { setSortKey(d.sort); setSortDesc(false); }
-    if (d.group !== undefined) setGridGroup(d.group);
-  };
 
   /**
    * §3b — THE MINIMUM-DISPLAY FLOOR, and §3c's resolution.
@@ -5455,7 +5550,7 @@ export const Queries: React.FC<{
              grid's own chrome, ABOVE the scroll row, so `.qcc-col` — which is inside it — cannot
              reach it. This is the page's own class on the shared element, so scoping here moves
              this page's masthead and no other's. */
-          className={`qc-wpg${pageEntering ? " qc-wpg--enter" : ""}`}
+          className="qc-wpg qc-wpg--v11"
           /* ⚠️ A FILL PAGE — the panes scroll, the page does not, and this is the declaration that
              makes that true. `.f12-body` says `flex: 1; min-height: 0`, written when its parent was
              `.f12-root`; against a block scroll row both apply to nothing, so browsing grew past the
@@ -5518,97 +5613,15 @@ export const Queries: React.FC<{
              recording`, which was right while a journey REPLACED the page. A journey is an overlay
              now: the desk stays whole underneath it, band and all, and stripping the chrome behind
              a scrim would animate a page the writer is not looking at. */
-          masthead={
-          <PageHeader
-            variant="workspace"
-            /* The workspace masthead: this page is a fixed-height master–detail surface, so
-               header height is working area taken from the panes. The description is KEPT as a
-               prop though compact doesn't render it — the copy stays where it lives, so bringing
-               it back is a flag flip rather than a hunt. */
-            /* ⚠️ RENAMED (Amendment 1, H2): "Queries Hub" → "Query Centre". The nav, the crumb
-               and the page's own heading must say the same thing — a page whose sidebar entry
-               and title disagree makes you check you are where you think you are. */
-            /**
-             * ⚠️ THE PAGE'S PICTURE MOVED FROM BEHIND THE WORDS TO BESIDE THEM (Contact parity §1).
-             * It was a full-width wash — the illustrated-masthead trial — and the comment that used
-             * to sit here refused a mark on the grounds that "the illustration bleeding across this
-             * band IS the page's picture, and a glyph beside the title is a second picture competing
-             * with the first". That reasoning was right about the BAND and dies with it: there is no
-             * wash to compete with now, and the 72px icon is the page's only picture.
-             *
-             * ⚠️ IT IS `icon`, NOT `mark` OR `illo`. `mark` no longer renders in the masthead at all
-             * (it survives for the collapsed bar), and `illo` is the additive slot between the text
-             * and the primary — the LEFT-hand picture beside a title is `icon`, which is precisely
-             * what Contact list passes. Same prop, same `.wsh-icon`, same box.
-             */
-            icon={qcMastheadIcon}
-            title="Query Centre"
-            /* ⚠️ MOVED FROM `.qc-phead`, NOT COPIED. That row is this page's control row in all but
-               the grid's prop name — its own comment calls it "their seat" — so a header primary
-               beside it would be the page stating its one creative verb twice, which is the fault
-               this format exists to end. The button is deleted there in the same commit. */
-            primary={{ label: "Log new query", disabled: creating, onClick: () => onNavigate?.("queries", "Log a query") }}
-            /**
-             * ⚠️ THE DESCRIPTION IS REINSTATED (Nick's copy, supplied directly), AND §1b's
-             * REASONING IS AMENDED RATHER THAN DELETED — because the objection it recorded was to a
-             * DIFFERENT SENTENCE, not to the idea of a subtitle.
-             *
-             * What §1b threw out was "Every query you've sent, and exactly where each one stands",
-             * on the grounds that it told the reader what page they were on while they stood on it.
-             * That objection stands and this copy does not meet it: the first clause says what the
-             * page holds, and the second says what you can DO here — log, review, update — which is
-             * the thing a writer arriving for the first time cannot get by looking.
-             *
-             * ⚠️ AND IT MATCHES MANUSCRIPTS BY MECHANISM, NOT BY IMITATION. `PageHeader` renders any
-             * `description` as the same `.wsh-sub` paragraph and steps the title from 40px to 38px
-             * by dropping `wsh--solo`; there is no second treatment to keep in step, which is why
-             * "same format as the manuscripts page" needed no styling at all.
-             *
-             * The counts §1b put here in its place are separately retired (see the note below) —
-             * so this is not displacing them, it is filling a slot that has been empty since.
-             */
-            description="Every query, every response — track every step of your journey so far"
-            /* ⚠️ WHY THE COUNTS WENT (§1b, then §1). They were two facts the reader could not get by
-               looking, both from `queryBucket` — the same function the filter pills and
-               `getPrimaryAction` read — and manuscript-scoped rather than view-scoped, so the
-               status filter and the search narrowed the LIST and never the page's own totals. */
-            /* ⚠️ THE MASTHEAD'S COUNT IS RETIRED (§1), AND THE EARLIER PACK PREDICTED THIS. It
-               flagged the duplication rather than resolving it — "the plate's description is not
-               drawn once the header condenses, which is the state the page spends its life in" —
-               and accepted it because the count then had no permanent home. It has one now: the
-               sage cap on the column it counts, in every state. Measured with both present: "20
-               queries" twice on one screen.
-               ⚠️ AND THE CAP IS THE ONE THAT SURVIVES, not the masthead. The figure describes the
-               LIST, and the cap sits on the list; the masthead describes the page.
-               ⚠️ `queriesMastheadCounts` IS THEREFORE ORPHANED — I first wrote that it "keeps its
-               other readers" and then checked, which it does not: nothing in `src/` renders it now,
-               only its own tests. Reported rather than deleted, and deliberately: it is a pure
-               function with a live suite covering a real rule (the zero clause is omitted, never
-               printed), and removing one in a visual pass is a separate decision. The cap derives
-               the same two figures from the same `queryBucket`, so they cannot disagree. */
-            /**
-             * ⚠️ NO ACTIONS AT ALL (in-flow masthead, step 1). Two lived here and each left by a
-             * different route, which is worth stating because they look like one change:
-             *
-             *   `Export`      → DROPPED. The list column's FOOT has carried an `EXPORT CSV` button
-             *                   calling the same `handleExportFilteredCSV` for as long as the foot
-             *                   has existed, so the masthead's copy was a third seat for one act.
-             *                   The foot is also the honest home: both read `sortedList`, the
-             *                   FILTERED column, and the foot states `SHOWING n OF m` right beside
-             *                   it — so what you are about to export is named next to the button
-             *                   that exports it. The masthead's note claimed Export "acts on the
-             *                   page, not on the column"; the call disagreed with the note.
-             *
-             *   `Log query`   → DROPPED. It rendered only in the empty branch, where
-             *                   the first-query card draws `+ Log your first query`, calling the same
-             *                   `openCreate()`. One control, two seats, one screen.
-             *
-             * ⚠️ AND THE JOURNEY CASE DISSOLVES WITH THEM. The band emptied its actions on
-             * `creating || recording` so a second journey could not be started on top of an open
-             * one; with no actions in any state there is nothing left to gate.
-             */
-          />
-          }
+          /**
+           * ⚠️ NO MASTHEAD — THIS PAGE DECLINES THE SHARED ONE (v11, 19 Sep; Nick). Its head is its
+           * own: "Query Centre" in the typewriter face on the page's cream, one line beneath, and
+           * "+ Log a query" at the right — drawn by `QcCentre`, inside the scroll row. With nothing
+           * passed here the grid renders no chrome and no collapsed bar, so nothing pins above the
+           * docked card. It is the ONE page in the opted-out set (`mastheadMatrix`, CLAUDE.md); the
+           * dashboard is exempt by not using this grid at all.
+           */
+          masthead={null}
         >
 
         {/* `creating` still decides it, now inside `gridEmptyKind`: create mode lives in the
@@ -6219,411 +6232,82 @@ export const Queries: React.FC<{
            * inevitable and invisible.
            */
           <>
-          <div className="qcc-col" data-qc-enter={pageEntering ? "1" : undefined}>
-            {/* ⚠️ THE COUNTS ARE THE WHOLE SET'S, AND THE PILLS NARROW IT. A pill that stated the
-                filtered figure would read `0` for every court you were not currently in, which
-                turns a set of counts into a set of tautologies. */}
-            {/**
-              * ⚠️ ONE STICKY WRAPPER, NOT THREE STICKY ROWS. The ref makes `.controls` a single
-              * `position: sticky` box around the quick filters, the toolbar and the active chips —
-              * so they travel as one object and cannot separate mid-scroll, which three
-              * independently-stuck rows at three `top` offsets eventually do.
-              *
-              * ⚠️ THE CHIPS ROW MOVED IN HERE from above the view split. It is the same element and
-              * the same handlers; what changed is that a filter you set no longer scrolls away
-              * from the control that set it.
-              */}
-            {/**
-              * ══ §1 · THE RECESSED WELL ═══════════════════════════════════════════════════════
-              * The toolbar and whichever view is showing sit in one recessed box, so the cards
-              * read as objects resting IN something rather than floating on the page. The ground
-              * is the page's own parchment taken one step down — #eee8e0 against #f2ede7 — so it
-              * reads as depth rather than as a second colour.
-              *
-              * ⚠️ IT WRAPS EVERY VIEW, WHICH IS THE POINT. Grid, List, Board and the Calendar
-              * placeholder are all inside it, so switching view changes what is IN the well and
-              * never whether there is one.
-              *
-              * ⚠️ AND IT MUST NOT TAKE `overflow: hidden` TO CLIP ITS RADIUS. `.qcc-controls` is
-              * `position: sticky`, and a clipping ancestor turns a sticky into a clamp — a fault
-              * this repo has already paid for on the packages builder.
-              *
-              * ⚠️ THE FOOT STAYS OUTSIDE: `Export CSV` acts on the filtered set as a whole.
-              */}
-            {/* ⚠️ THE TILES SIT ABOVE THE WELL, NOT IN IT (§1/§2). They count the whole set and
-                belong to the page; the well holds the toolbar and whichever view is showing. The
-                first cut opened the well before `.qcc-controls`, which holds the tiles AND the
-                toolbar — so the recess swallowed the tiles, and only the SCREENSHOT showed it:
-                every rect assertion passed, because each measured element was exactly where it
-                should be relative to a well that was simply too big. */}
-            {/**
-              * ⚠️ THE STAT TILES REPLACE THE QUICK CHIPS (colours v2, Phase 2). Same two axes —
-              * one court, plus the overdue flag as an independent second — and the same
-              * derivations: `quickCounts` over the manuscript-scoped set, and THE overdue
-              * predicate the filter itself calls. What changed is that the row now states the
-              * figures rather than hiding them behind a pill, and that `Closed` leaves it: the
-              * row's job is what is LIVE, and closed stays reachable through Filter's Status and
-              * Whose-turn facets (checked, not assumed).
-              */}
-            {/* ⚠️ NOT IN THE CALENDAR — the five tiles ARE that view's quick filters, drawn down
-                the rail instead. Same table, same counts, same handlers; a second row of them
-                above the board would be the same five questions asked twice. */}
-            {gridView !== "calendar" && (
-            <QueryStatTiles
-              loading={showGridSkeleton}
-              counts={quickTally}
-              overdueCount={overdueTally}
-              quickKey={quickKey}
-              overdue={needsOverdue}
-              onQuick={(k) => setQuickKey(k)}
-              onOverdue={(next) => setNeedsOverdue(next)}
-            />
-            )}
-            {/* ⚠️ THE WELL IS GONE FROM ALL FOUR VIEWS (§1) — from the DOM, not hidden.
-                `.qcc-plain` was already the board's and the calendar's, carrying the well's box
-                metrics to the pixel so the toolbar lands on the same coordinates whichever view is
-                open; making it unconditional is therefore a DELETION rather than a new layout, and
-                the toolbar does not move. A see-through well would have been the wrong answer: a
-                transparent recess still has its box to anything measuring the page. */}
-            <div
-              className="qcc-plain"
-              aria-busy={showGridSkeleton ? true : undefined}
-            >
-            {/* ⚠️ AND THE TOOLBAR ROW DOES NOT RENDER IN THE CALENDAR EITHER (§2). That view puts
-                the pager and the range where the toolbar's left cluster would be, the search on the
-                board's own midline, and the view switch at the right — one header row, above the
-                board and not above the rail. Two rows of controls, one of them empty of its own
-                purpose, is chrome stating nothing. */}
-            {gridView !== "calendar" && (
-            <div className="qcc-controls">
-
-            {/**
-              * ⚠️ THE REF'S TOOLBAR — LABELLED, WITH THE CURRENT VALUE ON THE BUTTON'S FACE. It
-              * replaces `{listHead}`'s icon triggers on THIS view only; the record view keeps them
-              * until Phase 6 deletes that surface. The two cannot disagree about what is selected,
-              * because the popovers, their refs and their state are the same objects — only the
-              * trigger's presentation differs.
-              *
-              * ⚠️ AND `Group None` / `Sort Last activity` IS THE POINT, not decoration. An icon
-              * cannot state how the grid is currently arranged, so a reader had to open a popover
-              * to find out. That is what earns the label its width.
-              */}
-            <div className="qcc-tb" role="group" aria-label="Query tools">
-              {/**
-                * ⚠️ THE COUNT MOVED UP FROM THE FOOTER (Contact parity §2), and it is the SHARED
-                * `PageTally` that Contact list and Analytics already mount — not a Playfair span
-                * typed here. The row is the thing that survives once the masthead scrolls away, so
-                * the count belongs on it; the footer said the same figure three hundred pixels
-                * lower, where nothing else about the page was stated.
-                *
-                * ⚠️ AND THE STRINGS ARE THIS PAGE'S OWN DERIVATION, per the component's own rule:
-                * there is no shared count function and there must not be one. `gridRows` is the
-                * filtered view and `mastheadScopedQueries` the manuscript-scoped whole — the exact
-                * two figures the footer stated, moved rather than recomputed.
-                */}
-              <div className="qcc-tb-left">
-              {/**
-                * ⚠️ `Showing N of M`, AND IT IS THIS PAGE'S OWN ELEMENT RATHER THAN THE SHARED
-                * `PageTally` IT REPLACES (§2). The shared tally is 18px Playfair in shell ink; this
-                * is 15px, muted, with only the FIGURES in ink — a different TREATMENT, not a
-                * different string, so it could not go through that component without changing it
-                * for Contact list and Analytics too. Flagged: the Contact-parity round asserted
-                * these two pages state their count identically, and this brief moves one of them.
-                *
-                * ⚠️ THE FIGURES ARE THIS PAGE'S OWN DERIVATION, unchanged — `gridRows` is the
-                * filtered view, `mastheadScopedQueries` the manuscript-scoped whole.
-                */}
-              <span className="qcc-tally">
-                {showGridSkeleton
-                  ? <>Showing <span className="qcs-l qcs-num" aria-hidden="true" /> of <span className="qcs-l qcs-num" aria-hidden="true" /></>
-                  : <>Showing <b>{gridRows.length}</b> of <b>{mastheadScopedQueries.length}</b></>}
-              </span>
-
-              {/* ⚠️ THESE THREE WERE INLINE MARKUP AND ARE NOW `shared/ToolbarButton` MOUNTS
-                  (QC-chassis round, Phase 1). The To-do page needs the same three controls, and
-                  the only way to have them without a component was to type the markup again —
-                  which is a fork that looks identical until one of them is restyled. The classes,
-                  the icons, the chevron and the anchoring refs are unchanged; what moved is the
-                  40 lines each of them used to spell out. */}
-              <div className="f12-popwrap">
-                <ToolbarButton
-                  ref={filterTrigRef} label="Filter"                   count={activeFilterCount} open={filterPopOpen}
-                  onClick={() => { setSortPopOpen(false); setGroupPopOpen(false); setFilterPopOpen((o) => !o); }}
-                />
-                {filterPopOpen && renderFilterPopover()}
-              </div>
-
-              <div className="f12-popwrap">
-                <ToolbarButton
-                  ref={groupTrigRef} label="Group"
-                                    value={gridView === "board" ? "Status" : (GRID_GROUPS.find((g) => g.key === gridGroup)?.label ?? "None")}
-                  open={groupPopOpen}
-                  /* ⚠️ THE BOARD IS ALREADY GROUPED BY STATUS — its seven columns ARE the grouping.
-                     Offering a second key would ask the board to reshape its columns, which is out
-                     of this run's scope; a control that opened and did nothing would be worse. */
-                  disabled={gridView === "board"}
-                  title={gridView === "board" ? "The board is already grouped by status." : undefined}
-                  onClick={() => { setFilterPopOpen(false); setSortPopOpen(false); setGroupPopOpen((o) => !o); }}
-                />
-                {groupPopOpen && renderGroupPopover()}
-              </div>
-
-              <div className="f12-popwrap">
-                <ToolbarButton
-                  ref={sortTrigRef} label="Sort"                   value={SORT_LABELS[sortKey] ?? "Last activity"}
-                  open={sortPopOpen}
-                  onClick={() => { setFilterPopOpen(false); setGroupPopOpen(false); setSortPopOpen((o) => !o); }}
-                />
-                {sortPopOpen && renderSortPopover()}
-              </div>
-
-              </div>{/* left track: the count and the three controls */}
-
-              {/* centre track — the search sits on the ROW's midline, not on what the flanks leave */}
-              {searchField("qcc-tb-search")}
-
-              <div className="qcc-tb-right">
-              {/* ⚠️ RIGHT OF SORT, AND IT CHANGES ONLY THE RENDERER. The tiles, Filter, Group,
-                  Sort, the search and the drawer are all shared — a view that owned any of them
-                  would be a second page wearing a segment's clothes. */}
-              <QueryViewSwitch view={gridView} onView={applyView} />
-
-              {/**
-                * ⚠️ NO PRIMARY IN THIS ROW — `Log new query` lives in the HERO and nowhere else.
-                * The v5 ref renders exactly one, as `.hero-cta`, and the masthead already carries
-                * it. Two buttons with one label on one screen is the single-home fault this repo
-                * keeps retiring; Phase 5's `#/queries/new` wiring targets the hero's.
-                *
-                * ⚠️ THE SPACER STAYS. It is what holds Filter · Group · Sort to the left while the
-                * row runs full width, and removing it with the button would re-centre the trio.
-                */}
-              </div>{/* right track */}
-            </div>
-
-            {activeFilterChips.length > 0 && (
-              <div className="f12-chips">
-                {activeFilterChips.map((c) => (
-                  <Chip key={c.key} onRemove={c.remove}>{c.label}</Chip>
-                ))}
-                <button type="button" className="f12-clear" onClick={resetAllFilters}>CLEAR ALL</button>
-              </div>
-            )}
-            </div>
-            )}
-
-            {/**
-              * ⚠️ THE SKELETON BRANCH COMES FIRST, AND THAT ORDER IS THE FIX (§4). While the
-              * collections are loading `gridRows` is empty, so the branch below it answered a
-              * loading page with "Nothing matches." — the wrong answer, stated confidently, for
-              * the whole of every cold load. It is the same fault this page's own retired 180ms
-              * grace produced on the browsing list, in a different branch: a gap at the start of
-              * the load that something else filled.
-              */}
-            {showGridSkeleton ? (
-              <QueryGridSkeleton view={gridView} out={gridSkeletonOut} />
-            ) : emptyKind === "filtered" ? (
-              /**
-               * §6 (Grid pass) — FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER. The ref's
-               * card, and only where its headline is true: `gridEmptyKind` returns this only when no
-               * query in the set the tiles count sits in a register that needs the writer. Its line
-               * is built from the facts the cards themselves state, over that same set, so its
-               * number IS the With-the-agent tile's.
-               */
-              <QueryEmptyCard
-                kind="filtered"
-                line={emptyWaiting ? waitingLine(emptyWaiting) : null}
-                onSeeWaiting={emptyWaiting && emptyWaiting.withAgents > 0 ? seeWaiting : null}
-                onClear={resetAllFilters}
+          {/**
+            * ══ v11 · THE BROWSING PAGE (19 Sep; ref design-refs/query-centre-v11.html) ══
+            * Head, summary row, the sentence and the view switch, then the stage: the view's frame
+            * with the open query DOCKED to its right. `QcCentre` lays it out and owns nothing about
+            * queries — every row, count and handler below is derived on this page, once.
+            *
+            * ⚠️ WHAT WENT WITH IT, and is not coming back in a second form: the masthead (this page
+            * declines the shared one — see CLAUDE.md), the five "whose court" tiles, the Filter /
+            * Group / Sort pills, the page's own search field, and the Board view. The sentence does
+            * the tiles' and the pills' job; the shell's search still narrows the list.
+            */}
+          <QcCentre
+            loading={showGridSkeleton}
+            entering={false}
+            headLine={qcHeadLine}
+            onLog={() => onNavigate?.("queries", "Log a query")}
+            /* a re-entry point that is already drafting says so rather than looking live and doing nothing */
+            logDisabled={creating}
+            logRef={logTriggerRef}
+            summary={null}
+            sentence={
+              <QcSentence
+                loading={showGridSkeleton}
+                calendar={gridView === "calendar"}
+                filter={qcFilter}
+                count={qcVisible.length}
+                options={filterOptions(qcScoped)}
+                onFilter={pickQcFilter}
+                sort={qcSort}
+                onSort={setQcSort}
+                scope={qcScopeMenu}
+                scopeTitle={qcScopeTitle}
               />
-            ) : emptyKind === "nomatch" ? (
-              /* ⚠️ THIS IS THE NO-MATCH STATE, NOT THE NO-QUERIES STATE — and since §6 of the Grid
-                 pass it is also what shows wherever "Nothing needs you right now" would be false: a
-                 view filtered to zero while a query waits on the writer. The page's own empty branch
-                 owns the no-queries case; saying "nothing matches" to someone who has never logged a
-                 query would be the worst lie this page could tell. */
-              <p className="qcc-none">
-                Nothing matches.
-                <button type="button" className="qcc-none-btn" onClick={resetAllFilters}>
-                  Clear filters
-                </button>
-              </p>
-            ) : gridView === "list" ? (
-              /* ⚠️ THE SAME ROWS, ALREADY NARROWED AND ORDERED. The list re-derives nothing — it
-                 hands a header's sort key back to the page and the page does the ordering, so the
-                 two views cannot disagree about what order things are in. */
-              <QueryListView
-                rows={gridRows}
-                group={gridGroup}
-                since={listSince}
-                sentLeaf={listSentLeaf}
-                onVerb={handleRowVerb}
-                sortKey={sortKey}
-                sortDesc={sortDesc}
-                selectedId={selectedQueryId}
-                onSort={(k) => { touchedControls.current.sort = true; if (k === sortKey) setSortDesc((d) => !d); else { setSortKey(k); setSortDesc(false); } }}
-                onOpen={(id) => onOpenQuery?.(id)}
-                onMore={handleRowMore}
-              />
-            ) : gridView === "board" ? (
-              <div className="qcc-boardwrap">
-                <QueryBoardView rows={gridRows} selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} />
-              </div>
-            ) : gridView === "calendar" ? (
-              /* ══ THE CALENDAR — RAIL, HEADER ROW, BOARD ═══════════════════════════════════════
-                 Ref `query-calendar-rail-v3-locked.html`. ⚠️ THE BOARD INSIDE THAT REF'S WHITE CARD
-                 IS A SKETCH AND IS NOT NORMATIVE — the board renders from v65, exactly as it does on
-                 To-do, and nothing here reaches inside it.
-
-                 ⚠️ AND THE REF CONTRADICTS ITSELF ABOUT THE RAIL. Its CSS carries
-                 `.rail{background:#fff;border-radius:14px;box-shadow:…}` — a white card — while its
-                 own prose says "No card behind them; only the fields are white". The prose is right
-                 and the CSS is the stale half, left over from a card-rail variant that was locked
-                 away. Bare rail; only the fields carry white. */
-              <div className="qcc-cal">
-                {/* ⚠️ THE CENSUS IS THE FIRST THING IN THE RAIL, IN THE RAIL'S OWN COLUMN, ON THE
-                    RANGE'S BASELINE. It is not in the header row and not beside the range: the two
-                    sit in different columns of one grid and share a baseline, which is what lets
-                    the rail's body start at the board's top edge below it.
-
-                    ⚠️ AND THE COPY IS CONDITIONAL, because "Showing 26 of 26" is a sentence that
-                    states a filter nobody applied. Unfiltered it counts; narrowed it says what it
-                    is showing of what. */}
-                <div className="qcc-cal-railtop">
-                  <div className="qcc-cal-showing">
-                    {gridRows.length === mastheadScopedQueries.length
-                      ? <><b>{mastheadScopedQueries.length}</b> {mastheadScopedQueries.length === 1 ? "query" : "queries"}</>
-                      : <>Showing <b>{gridRows.length}</b> of <b>{mastheadScopedQueries.length}</b></>}
-                  </div>
-                </div>
-
-                <div className="qcc-cal-railcol">
-                  {/* ⚠️ THE RAIL IS BARE — no card, no fill, no shadow. Only the three fields are
-                      white, which is what makes them read as the touchable things on it. */}
-                  <div className="qcc-cal-rail">
-                    <div className="qcc-cal-grp">Whose court</div>
-                    {/* ⚠️ THE SAME FIVE TILES, DOWN INSTEAD OF ACROSS — `STAT_TILES` is the one
-                        table, `quickTally`/`overdueTally` the one pair of counts, and the handlers
-                        are the tiles' own. Two axes survive the change of shape: one active court
-                        PLUS the independent overdue flag, so `Past expected` rings alongside a
-                        court rather than replacing it. */}
-                    {STAT_TILES.map((t) => {
-                      const on = t.key === "past" ? needsOverdue : quickKey === t.key;
-                      const n = t.key === "past" ? overdueTally : quickTally[t.key as QuickKey];
-                      return (
-                        <button
-                          key={t.key}
-                          type="button"
-                          className={`qcc-qf${on ? " on" : ""}`}
-                          aria-pressed={on}
-                          onClick={() => (t.key === "past" ? setNeedsOverdue(!needsOverdue) : setQuickKey(t.key as QuickKey))}
-                        >
-                          <span className="sw" style={t.swatch ? { background: STATE_TOKEN[t.swatch] } : undefined} />
-                          {t.label}
-                          <span className="n">{n}</span>
-                        </button>
-                      );
-                    })}
-                    <div className="qcc-cal-sep" />
-                    {/* ⚠️ THE SAME POPOVERS, THROUGH THE SAME TRIGGER REFS. The toolbar does not
-                        render in this view, so each ref has exactly one anchor — which is the only
-                        reason this is a relocation rather than a second set of controls. */}
-                    <div className="f12-popwrap qcc-cal-field">
-                      <span className="qcc-cal-lab">Filter</span>
-                      <button
-                        type="button" ref={filterTrigRef} className={`qcc-cal-ctrl${filterPopOpen ? " open" : ""}`}
-                        aria-expanded={filterPopOpen}
-                        onClick={() => { setSortPopOpen(false); setGroupPopOpen(false); setFilterPopOpen((o) => !o); }}
-                      >
-                        <span className="qcc-cal-val">{activeFilterCount > 0 ? `${activeFilterCount} applied` : "All"}</span>
-                        <span className="qcc-cal-chev" aria-hidden="true">▾</span>
-                      </button>
-                      {filterPopOpen && renderFilterPopover()}
-                    </div>
-                    <div className="f12-popwrap qcc-cal-field">
-                      <span className="qcc-cal-lab">Group</span>
-                      <button
-                        type="button" ref={groupTrigRef} className={`qcc-cal-ctrl${groupPopOpen ? " open" : ""}`}
-                        aria-expanded={groupPopOpen}
-                        onClick={() => { setFilterPopOpen(false); setSortPopOpen(false); setGroupPopOpen((o) => !o); }}
-                      >
-                        <span className="qcc-cal-val">{GRID_GROUPS.find((g) => g.key === gridGroup)?.label ?? "None"}</span>
-                        <span className="qcc-cal-chev" aria-hidden="true">▾</span>
-                      </button>
-                      {groupPopOpen && renderGroupPopover()}
-                    </div>
-                    <div className="f12-popwrap qcc-cal-field">
-                      <span className="qcc-cal-lab">Sort</span>
-                      <button
-                        type="button" ref={sortTrigRef} className={`qcc-cal-ctrl${sortPopOpen ? " open" : ""}`}
-                        aria-expanded={sortPopOpen}
-                        onClick={() => { setFilterPopOpen(false); setGroupPopOpen(false); setSortPopOpen((o) => !o); }}
-                      >
-                        <span className="qcc-cal-val">{GRID_SORTS.find((o) => o.key === sortKey)?.label ?? "Date sent"}</span>
-                        <span className="qcc-cal-chev" aria-hidden="true">▾</span>
-                      </button>
-                      {sortPopOpen && renderSortPopover()}
-                    </div>
-                  </div>
-                </div>
-
-                {/* ⚠️ THE HEADER ROW STARTS AT THE BOARD'S LEFT EDGE, NOT ABOVE THE RAIL — the
-                    rail's column is padded down by this row's height so the two tops align. */}
-                <div className="qcc-calhead">
-                  <div className="qcc-calhead-l">
-                    <button type="button" className="tl-wchv" aria-label="Back one week"
-                      onClick={() => setCalWinStart((w) => shiftWindow(w, WEEK_STEP, -1))}>‹</button>
-                    <button type="button" className="tl-wchv" aria-label="Forward one week"
-                      onClick={() => setCalWinStart((w) => shiftWindow(w, WEEK_STEP, 1))}>›</button>
-                    {/* ⚠️ TWO LEAVES, NOT A SENTENCE (four-fixes §3; ref query-calendar-header-v1,
-                        treatment A). `30 July – 27 October 2026` in Playfair 26 is 292.7px and it
-                        is the most variable content in the row, so the left column never gave way
-                        and the view switch overflowed its own cell leftwards ACROSS the search —
-                        measured at 1100, 1280 and 1440. The leaves are a fixed ~106px whatever the
-                        dates say, which is what makes the row's arithmetic hold at every width.
-                        ⚠️ THE SENTENCE SURVIVES AS THE ACCESSIBLE NAME. Two date leaves and an
-                        arrow are a picture of a span; a reader on a screen reader gets the words,
-                        and `windowRangeLabelOf` is still the one place they are composed. */}
-                    <h3 className="qcc-calhead-rng" aria-label={calWindowLabel}>
-                      {calLeaves && (
-                        <>
-                          <span className="qcc-calleaf" aria-hidden="true">
-                            <span className="qcc-calleaf-mo">{calLeaves.from.mon}</span>
-                            <span className="qcc-calleaf-dy">{calLeaves.from.day}</span>
-                          </span>
-                          <span className="qcc-calleaf-arr" aria-hidden="true">→</span>
-                          <span className="qcc-calleaf" aria-hidden="true">
-                            <span className="qcc-calleaf-mo">{calLeaves.to.mon}</span>
-                            <span className="qcc-calleaf-dy">{calLeaves.to.day}</span>
-                          </span>
-                        </>
-                      )}
-                    </h3>
-                    {calMovedOff && (
-                      <button type="button" className="tl-todaylink" onClick={() => setCalWinStart(calToday)}>
-                        Today
-                      </button>
-                    )}
-                  </div>
-                  {searchField("qcc-calsearch")}
-                  <div className="qcc-calhead-r">
-                    <QueryViewSwitch view={gridView} onView={applyView} />
-                  </div>
-                </div>
-
-                {/* ⚠️ THE HEADER ROW IS A DIRECT CHILD OF THE GRID, NOT OF THE BOARD COLUMN.
-                    It was nested one level deeper and its `grid-row: 1` therefore addressed
-                    nothing — a grid property on a grandchild is inert, silently — so the census
-                    sat alone in row 1 and the range stayed in row 2 with the board. Measured:
-                    58.6px apart at every width, where the two are meant to share a baseline. */}
-                <div className="qcc-cal-boardcol">
-                  {/* ⚠️ `.tl-board` IS THE BOARD'S TOKEN SCOPE — about a hundred and fifty custom
-                      properties. Mount the board without it and every `var()` resolves to nothing:
-                      it renders, the build is clean, and it is unstyled. `data-dens` rides the same
-                      element because the density rules are attribute selectors on it.
-
-                      ⚠️ AND `TimelineWinbar` DOES NOT RENDER HERE (§4). Its pager is in the header
-                      row and its density pair is the pill below; a winbar carrying neither would be
-                      an empty bar across the top of the card. */}
+            }
+            view={gridView}
+            onView={setGridView}
+            docked={qcDocked}
+            onDocked={setQcDocked}
+            onExport={handleExportFilteredCSV}
+            canExport={gridRows.length > 0}
+            openCard={null}
+            body={
+              showGridSkeleton ? (
+                <QueryGridSkeleton view={gridView === "calendar" ? "calendar" : gridView} out={gridSkeletonOut} />
+              ) : emptyKind === "filtered" ? (
+                /* FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER — the card, and only where its
+                   headline is true. Its line is counted over the SCOPED set, the one the sentence's
+                   menu counts, so its number IS the menu's "With the agent". */
+                <QueryEmptyCard
+                  kind="filtered"
+                  line={emptyWaiting ? waitingLine(emptyWaiting) : null}
+                  onSeeWaiting={emptyWaiting && emptyWaiting.withAgents > 0 ? seeWaiting : null}
+                  onClear={clearQcFilter}
+                />
+              ) : emptyKind === "nomatch" ? (
+                /* ⚠️ THE NO-MATCH STATE, NOT THE NO-QUERIES STATE — the page's own empty branch owns
+                   that one. Also what shows wherever "Nothing needs you right now" would be false. */
+                <p className="qcv-none">
+                  Nothing matches.
+                  <button type="button" onClick={clearQcFilter}>Show all queries</button>
+                </p>
+              ) : gridView === "list" ? (
+                <QueryListView
+                  rows={gridRows}
+                  group="none"
+                  since={listSince}
+                  sentLeaf={listSentLeaf}
+                  onVerb={handleRowVerb}
+                  sortKey={sortKey}
+                  sortDesc={sortDesc}
+                  selectedId={selectedQueryId}
+                  onSort={() => { /* the sentence sorts now */ }}
+                  onOpen={(id) => onOpenQuery?.(id)}
+                  onMore={handleRowMore}
+                />
+              ) : gridView === "calendar" ? (
                   <div className="tl-board qcc-calboard" data-dens={calDensity}>
                     <div className="tl-zone qcc-calzone">
                       <TimelineBoard
@@ -6685,38 +6369,20 @@ export const Queries: React.FC<{
                       ))}
                     </div>
                   </div>
-                </div>
-              </div>
-            ) : (
-              <QueryCentreGrid
-                ghost={ghostRow}
-                freshId={landedId}
-                rows={gridRows}
-                group={gridGroup}
-                onOpen={(id) => onOpenQuery?.(id)}
-                selectedId={selectedQueryId}
-                onVerb={handleRowVerb}
-                onMore={handleRowMore}
-              />
-            )}
-
-            </div>{/* ── the well closes: toolbar + whichever view is showing ── */}
-
-            {/* ⚠️ THE FOOT IS EXPORT ONLY NOW. Its count went to the toolbar row (§2) rather than
-                being duplicated there — the same figure in two places is one edit from disagreeing,
-                and this page has already paid for that. `Export CSV` stays exactly where it was:
-                it is an act on the filtered set, and the foot is where that set ends. */}
-            <div className="qcc-foot qcc-foot--export">
-              <button
-                type="button"
-                className="qcc-foot-lnk"
-                disabled={gridRows.length === 0}
-                onClick={handleExportFilteredCSV}
-              >
-                Export CSV
-              </button>
-            </div>
-          </div>
+              ) : (
+                <QueryCentreGrid
+                  ghost={ghostRow}
+                  freshId={landedId}
+                  rows={gridRows}
+                  group="none"
+                  onOpen={(id) => onOpenQuery?.(id)}
+                  selectedId={selectedQueryId}
+                  onVerb={handleRowVerb}
+                  onMore={handleRowMore}
+                />
+              )
+            }
+          />
 
 
 
@@ -6797,7 +6463,8 @@ export const Queries: React.FC<{
             />
           )}
 
-          {panelRow && activeQuery && (
+          {/* the DRAWER opens for a query the reader chose (`?q`), never for the implicit first row */}
+          {panelRow && activeQuery && urlSelectedId && (
             <QueryPanel
               open
               facts={panelRow.facts}

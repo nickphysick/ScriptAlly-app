@@ -295,13 +295,13 @@ describe("the journey's strip offers no exit of its own", () => {
        prop is not passed at all.
        ⚠️ AND THE TWO THAT LEFT BOTH LEFT AS DUPLICATES, not relocations — `Export` to the list
        foot's existing `EXPORT CSV`, `Log query` to the welcome pane's `Log your first query`. */
-    const mast = sliceBetween(code, 'variant="workspace"', "/>");
-    for (const gone of ["actions=", "actionsSlot=", "overflow="]) {
-      expect(mast, `the masthead was handed \`${gone}\` — PageHeader throws on it in development`)
-        .not.toContain(gone);
-    }
+    /* ⚠️ RETARGETED (v11, 19 Sep): there is no masthead on this page at all now — it declines the
+       shared one and passes `masthead={null}` — so "no actions in any state" holds by there being
+       nothing to hand them to. The stronger claim is asserted: no `PageHeader` is mounted here. */
+    expect(code, "a PageHeader is mounted on the Query Centre again").not.toContain("<PageHeader");
+    expect(code).toContain("masthead={null}");
     /* the duplicate exit this case was originally written for must still not come back */
-    expect(mast).not.toContain('label: "Close"');
+    expect(code).not.toContain('label: "Close"');
   });
 
   /* ⚠️ REPO LAW, RESTATED WHERE IT CAN BE BROKEN: nothing in this page's height chain may be sized

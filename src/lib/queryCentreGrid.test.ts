@@ -202,26 +202,10 @@ describe("⚠️ every declared control is mounted and wired", () => {
   const page = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
   const decls = page.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 
-  it("the stat tiles render from the declared set and drive the page's own filter state", () => {
-    /* ⚠️ RETARGETED (colours v2, Phase 2): the quick PILLS became stat TILES. The law is
-       unchanged and is the reason this case exists — the row is rendered from the declared table
-       rather than hand-written, and it drives the page's ONE narrowing rather than a state of its
-       own. What moved is where the map runs: `STAT_TILES.map` is inside QueryStatTiles now, and
-       the page hands it the two axes. Both halves are asserted, so a tile row that stopped being
-       generated, or one that grew its own state, still fails here. */
-    const tiles = readFileSync(resolve(__dirname, "../components/queries/QueryStatTiles.tsx"), "utf8")
-      .replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(tiles).toContain("STAT_TILES.map");
-    expect(decls).toContain("<QueryStatTiles");
-    expect(decls).toContain("onQuick={(k) => setQuickKey(k)}");
-    /* ⚠️ ONE STATE. `setQuickKey` maps onto `turnFilter`; a `useState` of its own here would be a
-       second control over one narrowing. */
-    expect(decls).toContain("setTurnFilter(");
-    expect(decls).not.toMatch(/useState<QuickKey>/);
-    expect(tiles, "the tile row grew state of its own").not.toMatch(/useState/);
-    /* the overdue tile is the SECOND axis, not a fifth court — it drives the page's own flag */
-    expect(decls).toContain("onOverdue={(next) => setNeedsOverdue(next)}");
-  });
+  /* ⚠️ RETIRED (Query Centre v11, 19 Sep): the stat tiles are gone from the page. The law — the row is
+     generated from a declared table and drives the page's ONE narrowing, never a state of its own — now
+     belongs to the sentence's menu: `filterOptions` is the table (`lib/qcSummary.test.ts`), and
+     `qcCentre.test.tsx` asserts the page holds one filter state and mounts no tiles. */
 
   it("Group has a control that can actually set it — not dead state", () => {
     expect(decls).toContain("setGridGroup(");

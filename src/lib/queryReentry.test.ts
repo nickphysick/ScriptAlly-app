@@ -68,8 +68,13 @@ describe("re-entry is a no-op, from every entry point", () => {
      * regression inside a commit about layout. That is what this lock is for, and it is why the
      * assertion follows the button rather than naming a place.
      */
-    expect(queries, "the page's Log button stays live while a draft is open")
-      .toMatch(/primary=\{\{[^}]*disabled: creating/);
+    /* ⚠️ THE BUTTON MOVED AGAIN (v11, 19 Sep) — to the page's own head, "+ Log a query" — and the
+       assertion follows the button, as the note above says it must: the page hands `creating` down
+       and `QcCentre` puts it on the control. Both halves, or a button that merely accepts the prop
+       and ignores it would pass. */
+    expect(queries, "the page's Log button stays live while a draft is open").toContain("logDisabled={creating}");
+    expect(read("../components/queries/centre/QcCentre.tsx"), "QcCentre accepts logDisabled and never applies it")
+      .toMatch(/data-qcv="head-cta"[^>]*disabled=\{logDisabled\}/);
     expect(queries, "the retired `.qc-phead` copy came back — the page would state its verb twice")
       .not.toContain('className="qc-btn qc-logq"');
   });

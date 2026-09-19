@@ -98,20 +98,26 @@ describe("the page puts each card only in the slot the selector names", () => {
   it("the view slot is the selector's `filtered`, then `nomatch` — the card, then the plain line", () => {
     const card = sliceBetween(page, 'emptyKind === "filtered" ? (', 'emptyKind === "nomatch" ? (');
     expect(card).toContain('kind="filtered"');
-    expect(card).toContain("onClear={resetAllFilters}");
+    /* ⚠️ RETARGETED (v11): "clear" is the SENTENCE's filter now; the scope stays, as it always did */
+    expect(card).toContain("onClear={clearQcFilter}");
     const none = sliceBetween(page, 'emptyKind === "nomatch" ? (', 'gridView === "list" ? (');
-    expect(none).toContain('className="qcc-none"');
+    expect(none).toContain('className="qcv-none"');
     expect(none).not.toContain("QueryEmptyCard");
   });
 
   it("⚠️ the card's count is taken over the set the tiles count, never the filtered view", () => {
-    expect(page, "the tiles stopped counting the scoped set").toMatch(/quickCounts\(\s*mastheadScopedQueries\.map/);
-    expect(page, "the card's summary is not over the tiles' set").toContain("waitingSummary(mastheadScopedQueries.map(");
+    /* ⚠️ RETARGETED (v11): the tiles are gone; the set they counted is the one the sentence's MENU
+       counts now — `qcScoped`, the manuscript-scoped rows. The law is unchanged: the card's line and
+       the menu's "With the agent" are taken over the same set, never the filtered view. */
+    expect(page, "the menu stopped counting the scoped set").toContain("options={filterOptions(qcScoped)}");
+    expect(page, "the card's summary is not over the menu's set").toContain("waitingSummary(qcScoped.map(");
   });
 
   it("'See what's waiting' sets the With-the-agent tile, and keeps the scope its count was taken over", () => {
     const body = sliceBetween(page, "const seeWaiting = () => {", "};");
-    expect(body).toContain('setQuickKey("agent")');
+    /* ⚠️ RETARGETED (v11): it sets the sentence's With the agent, exactly as the menu does */
+    expect(body).toContain('setQcFilter("agent")');
+    expect(body, "the CTA widened the scope its number was counted in").not.toContain("setQcScope");
     expect(body, "the CTA widened the scope its number was counted in").not.toContain("setSelectedManuscriptFilter");
   });
 

@@ -1324,6 +1324,20 @@
 .dash-mode .ws-work { background: transparent; }
 
 /**
+ * ══ `ground-mode` — A PAGE WHOSE CARDS SIT ON THE OPEN GROUND (Query Centre v11, 19 Sep) ══
+ * The same five declarations the dashboard makes about the window, and nothing else of `dash-mode`:
+ * the bar stays in the flow, the search stays the small pill, every control stays. The ground is the
+ * dashboard's own value — one cream for both pages, stated as the same literal one rule up.
+ *
+ * ⚠️ ON `.ws-main`, NOT ON THE SHELL'S ROOT, for the reason the dashboard's tokens are: the rail
+ * gate diffs the rail's whole computed style across routes and would rightly report a gain.
+ */
+.ground-mode .ws-main { background: #f4f0ea; }
+.ground-mode .ws-window { background-color: transparent; border-color: transparent; border-width: 0; box-shadow: none; border-radius: 0; transition-delay: 0s; }
+.ground-mode .ws-window::after { opacity: 0; transition-delay: 0s; }
+.ground-mode .ws-work { background: transparent; }
+
+/**
  * ══ THE SIDEBAR BOUNDARY — A SHADOW CAST *BY* THE RAIL (v33.2, Phase 3) ══
  *
  * ⚠️ THE DIRECTION IS THE WHOLE POINT, AND v33.1 HAD IT BACKWARDS. The scrim was on

@@ -68,7 +68,7 @@ const APP_SEL: Sel = Object.fromEntries([
   "ctl", "sentence", "views",
   "stagegrid", "ledger", "open", "open-band", "open-foot", "open-action",
   "list-head", "row", "row-chip", "row-stand", "row-sent", "row-date",
-  "cal-bar", "cal-box", "cal-axis", "cal-group", "cal-lane", "cal-seg", "cal-frame",
+  "cal-bar", "cal-box", "cal-axis", "cal-group", "cal-lane", "cal-seg", "ledger-frame",
   "tile", "tile-band",
 ].map((n) => [n, APP(n)]));
 const REF_SEL: Sel = {
@@ -78,7 +78,7 @@ const REF_SEL: Sel = {
   "ctl": ".ctl", "sentence": ".sentence", "views": ".views",
   "stagegrid": ".stage", "ledger": ".ledger", "open": ".open", "open-band": ".open .bd", "open-foot": ".open .ft", "open-action": ".open .ft button",
   "list-head": ".cols", "row": "#list .row", "row-chip": "#list .row .chip", "row-stand": "#list .row .st", "row-sent": "#list .row .mat", "row-date": "#list .row .date",
-  "cal-bar": ".calbar", "cal-box": ".cal", "cal-axis": ".axis", "cal-group": ".grp2", "cal-lane": ".lane", "cal-seg": ".bar:not(.hist)", "cal-frame": ".ledger > .frame",
+  "cal-bar": ".calbar", "cal-box": ".cal", "cal-axis": ".axis", "cal-group": ".grp2", "cal-lane": ".lane", "cal-seg": ".bar:not(.hist)", "ledger-frame": ".ledger > .frame",
   "tile": ".tile", "tile-band": ".tile .bd",
 };
 
@@ -184,12 +184,71 @@ test("top bar — + New is gone app-wide and Give feedback is anthracite", async
   is("topbar", "the keycap stays ink", r.keyBg, "rgb(28, 19, 15)");
 });
 
-test("head, summary row and control row — 1440×860", async ({ page }) => {
+test("head and control row — 1440×860", async ({ page }) => {
   const ref = await readRef(page, 1440, 860);
   await openApp(page, 1440, 860);
   const app = await readApp(page);
   sameSize("head", app, ref, "head-cta", ["w", "h"]);
   sameSize("head", app, ref, "head-title", ["h"]);
+  sameSize("head", app, ref, "head", ["h"]);
+  sameOffset("head", app, ref, "head-line", "head", ["y"]);
+  sameOffset("head", app, ref, "head-cta", "head", ["y"]);
+  sameSize("control", app, ref, "ctl", ["h"]);
+  sameSize("control", app, ref, "views", ["w", "h"]);
+  /* the page shares the dashboard's left edge and measure: same shell, same 22px inset */
+  const pg = await page.evaluate(() => { const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!; const b = p.getBoundingClientRect(); const bar = [...document.querySelectorAll(".ws-pagebar .sp-help")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect(); const t = p.querySelector("[data-qcv='head-title']")!.getBoundingClientRect(); return { x: b.x, w: b.width, gap: Math.round((t.y - bar.bottom) * 10) / 10 }; });
+  near("head", "the page's left edge (the dashboard's is 268 at 1440)", pg.x, 268, 1);
+  near("head", "the page's measure (the dashboard's is 1128 at 1440)", pg.w, 1128, 1);
+  near("head", "title sits 25px under the bar's controls, as the dashboard's greeting does", pg.gap, 25, 1.5);
+  /* no masthead, no tiles, no toolbar, no page search, no Board */
+  const gone = await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const vis = (s: string) => [...p.querySelectorAll(s)].filter((e) => e.getBoundingClientRect().height > 0).length;
+    const wpg = p.closest(".wpg")!;
+    return { masthead: [...wpg.querySelectorAll(".wsh, .wpg-chrome, .wpg-bar")].filter((e) => e.getBoundingClientRect().height > 0).length, tiles: vis(".qct-tile, .sts-tile"), toolbar: vis(".qcc-tb"), search: vis(".qcc-tb-search"), views: [...p.querySelectorAll("[data-qcv='views'] button")].map((b) => b.textContent?.trim()),
+      windowBg: getComputedStyle(document.querySelector(".ws-window")!).backgroundColor, title: getComputedStyle(p.querySelector("[data-qcv='head-title']")!).fontFamily, sentence: getComputedStyle(p.querySelector("[data-qcv='pk-filter']")!).fontFamily, cta: getComputedStyle(p.querySelector("[data-qcv='head-cta'] span")!).fontFamily };
+  });
+  is("control", "the old masthead, its chrome slab and its collapsed bar", gone.masthead, 0);
+  is("control", "the five tiles", gone.tiles, 0);
+  is("control", "the Filter / Group / Sort toolbar", gone.toolbar, 0);
+  is("control", "the view switch's segments", gone.views, ["List", "Calendar", "Grid"]);
+  is("control", "the window sheet behind the page", gone.windowBg, "rgba(0, 0, 0, 0)");
+  for (const [k, f] of [["title", gone.title], ["sentence", gone.sentence], ["log button", gone.cta]] as const) yes("head", `${k} is drawn in the typewriter face, not brand.tsx's`, /Special Elite/.test(f), f);
+  await page.screenshot({ path: resolve(OUT, "list-1440.png") });
+});
+
+test("the sentence — the two phrases are the page's only filter and sort", async ({ page }) => {
+  await openApp(page, 1440, 860);
+  const vis = ".qcv-page";
+  const phrase = () => page.evaluate(() => [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!.querySelector("[data-qcv='pk-filter']")!.textContent);
+  const rows = () => page.evaluate(() => [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!.querySelectorAll("[data-qcv='row'], .qlv-row, [data-qcc-id]").length);
+  yes("sentence", "it opens on All", /^All \d+ quer/.test((await phrase()) ?? ""), String(await phrase()));
+  await page.locator(`${vis} [data-qcv='pk-filter']`).first().click();
+  const menu = await page.evaluate(() => { const m = document.querySelector("[data-qcv='menu']"); return m ? { role: m.getAttribute("role"), items: [...m.querySelectorAll("[role='menuitemradio']")].map((b) => ({ label: b.querySelector(".qcv-menu-l")?.textContent, n: Number(b.querySelector(".qcv-menu-n")?.textContent), on: b.getAttribute("aria-checked") })) } : null; });
+  yes("sentence", "the filter menu opened", !!menu);
+  is("sentence", "role", menu?.role, "menu");
+  const labels = (menu?.items ?? []).map((i) => i.label);
+  is("sentence", "the menu leads with the five fixed rows", labels.slice(0, 5), ["All queries", "With you", "With the agent", "Offers", "Past expected"]);
+  yes("sentence", "…ends with Closed (before any manuscript group)", labels.includes("Closed"));
+  const get = (l: string) => (menu?.items ?? []).find((i) => i.label === l)?.n ?? -1;
+  is("sentence", "the three courts and Closed partition All", get("With you") + get("With the agent") + get("Offers") + get("Closed"), get("All queries"));
+  record({ area: "sentence", what: "menu counts (Past expected is the NEW clock's)", got: Object.fromEntries((menu?.items ?? []).map((i) => [i.label, i.n])), want: "reported" });
+  await page.locator("[data-qcv='menu'] [role='menuitemradio']", { hasText: "With the agent" }).first().click();
+  await page.waitForTimeout(300);
+  is("sentence", "the phrase rewrites itself", await phrase(), `${get("With the agent")} with the agent`);
+  is("sentence", "the menu closes on a choice", await page.locator("[data-qcv='menu']").count(), 0);
+  yes("sentence", "the view narrowed", (await rows()) > 0 && (await rows()) <= get("With the agent") * 2, String(await rows()));
+  await page.locator(`${vis} [data-qcv='pk-sort']`).first().click();
+  const sorts = await page.evaluate(() => [...document.querySelectorAll("[data-qcv='menu'] .qcv-menu-l")].map((e) => e.textContent));
+  is("sentence", "six sorts, in order", sorts, ["Latest activity first", "Newest query first", "Next reply date first", "With you first", "Agents A to Z", "Agencies A to Z"]);
+  await page.keyboard.press("Escape");
+  is("sentence", "Escape closes the menu", await page.locator("[data-qcv='menu']").count(), 0);
+});
+
+test("summary row — 1440×860", async ({ page }) => {
+  const ref = await readRef(page, 1440, 860);
+  await openApp(page, 1440, 860);
+  const app = await readApp(page);
   sameSize("summary", app, ref, "sum", ["h"]);
   sameSize("summary", app, ref, "sum-closed", ["w", "h"]);
   sameSize("summary", app, ref, "sum-live-band", ["h"]);
@@ -197,25 +256,12 @@ test("head, summary row and control row — 1440×860", async ({ page }) => {
   sameSize("summary", app, ref, "stage", ["h"]);
   sameSize("summary", app, ref, "gauge", ["h"]);
   sameSize("summary", app, ref, "closed-grid", ["h"]);
-  sameSize("control", app, ref, "ctl", ["h"]);
-  sameSize("control", app, ref, "views", ["w", "h"]);
   /* the live card and the closed card share the row's width with a 20px gap, in both */
   const s = need(app, "app", "sum"), l = need(app, "app", "sum-live"), c = need(app, "app", "sum-closed");
   near("summary", "live + 20 + closed fills the row", l.w + 20 + c.w, s.w, 1);
   /* the notch is at 70% of the graphic's width */
   const g = app.boxes["stage-graphic"], n = app.boxes["notch"];
   near("summary", "notch at 70% of the column's graphic", g && n ? ((n.x - g.x) / g.w) * 100 : null, 70, 1.5);
-  /* no masthead, no tiles, no toolbar, no page search, no Board */
-  const gone = await page.evaluate(() => {
-    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    const vis = (s: string) => [...p.querySelectorAll(s)].filter((e) => e.getBoundingClientRect().height > 0).length;
-    return { masthead: vis(".wsh"), tiles: vis(".qct-tile, .sts-tile"), toolbar: vis(".qcc-tb"), search: vis(".qcc-tb-search"), views: [...p.querySelectorAll("[data-qcv='views'] button")].map((b) => b.textContent?.trim()) };
-  });
-  is("control", "the old masthead", gone.masthead, 0);
-  is("control", "the five tiles", gone.tiles, 0);
-  is("control", "the Filter / Group / Sort toolbar", gone.toolbar, 0);
-  is("control", "the view switch's segments", gone.views, ["List", "Calendar", "Grid"]);
-  await page.screenshot({ path: resolve(OUT, "list-1440.png") });
 });
 
 test("the summary's gauges — geometry, and which branches this account entered", async ({ page }) => {
@@ -318,7 +364,7 @@ test("calendar — expanded and compact, the inset, one bar per stage", async ({
   sameSize("calendar", app, ref, "cal-lane", ["h"]);
   sameSize("calendar", app, ref, "cal-seg", ["h"]);
   sameSize("calendar", app, ref, "open", ["w"]);
-  const box = need(app, "app", "cal-box"), fr = need(app, "app", "cal-frame");
+  const box = need(app, "app", "cal-box"), fr = need(app, "app", "ledger-frame");
   near("calendar", "the scrolling box is inset 14px from the frame's left (inside its 1px line)", box.x - fr.x - 1, 14, 1);
   near("calendar", "…and from its right", fr.r - 1 - box.r, 14, 1);
   near("calendar", "…and from its bottom", fr.b - 1 - box.b, 14, 1);

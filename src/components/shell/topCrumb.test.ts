@@ -98,10 +98,12 @@ describe("Queries Hub chrome — artefact locks (F12 shell, overnight run)", () 
     // SCOPE itself (both classes, in order), which is what this lock is actually about.
     expect(queries).toMatch(/className=\{`t-f12 qc-neutral f12-root\$\{/);
     // Amendment 1 (H2): renamed Queries Hub → Query Centre, so nav, crumb and page agree.
-    expect(queries).toContain('title="Query Centre"'); // the PageHeader carries the name
-    /* ⚠️  NOW — Query Centre is on the grid, the last of the ten pages to
-       convert. `full` was the flyouts-P3 shape, and `compact` before it; both are retired. */
-    expect(queries).toContain('variant="workspace"');
+    /* ⚠️ RETARGETED (v11, 19 Sep): the page DECLINES the shared masthead, so neither `title=` nor
+       `variant="workspace"` is here to find. The name is stated by the page's own head (`QcCentre`'s
+       h1) and by the crumb; the page is still on the grid. */
+    expect(queries).toContain("<WorkspacePageGrid");
+    expect(queries).toContain("masthead={null}");
+    expect(readFileSync(resolve(__dirname, "../queries/centre/QcCentre.tsx"), "utf8")).toContain(">Query Centre</h1>");
     /* ⚠️ COMMENT-STRIPPED, because "compact" appears in this page's PROSE — I wrote this
        assertion against the raw text and it failed on the notes describing the retired variant,
        one edit after fixing the identical fault in the anchor scanner. */

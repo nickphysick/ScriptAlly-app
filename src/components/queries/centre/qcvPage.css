@@ -1,0 +1,159 @@
+/**
+ * Query Centre v11 — the page: ground, head, the sentence, the view switch, the stage, the menu.
+ * Ref design-refs/query-centre-v11.html. Every class here is `qcv-`-scoped (the ref's own `.top`
+ * leaked a bar's margin into every stage column — names are scoped for that reason).
+ *
+ * ⚠️ VALUES ARE STATED HERE, NOT PORTED. The ref's sheet is layered by version (v3 → v11) with later
+ * blocks overriding earlier ones; these are the computed values of its rendered page plus the
+ * brief's, written as one clean rule per selector.
+ *
+ * ⚠️ EVERY TEXT ELEMENT NAMES ITS FAMILY. `lib/brand.tsx` injects, at runtime, a body family on bare
+ * `span`/`p`/`div`/`button` and a heading family on `h1`–`h3` with `!important`. `.qcv-own` resets
+ * the first by class (0-1-1 beats 0-0-1); a heading in the typewriter face needs `!important` and
+ * two classes, as the dashboard's greeting does.
+ */
+.qcv-page {
+  --qcv-ink: #1c130f;
+  --qcv-ink-70: rgba(28, 19, 15, 0.7);
+  --qcv-ink-45: rgba(28, 19, 15, 0.45);
+  --qcv-hair: rgba(28, 19, 15, 0.11);
+  --qcv-parchment: #fdf9f5;
+  --qcv-quiet: #f6f1ea;
+  --qcv-track: #f1ece5;
+  --qcv-rust: #8a4a3c;
+  --qcv-navy: #2a3a52;
+  --qcv-navy-hov: #34465f;
+  /* ⚠️ READ, NEVER NAMED. The typewriter face is declared ONCE for the signed-in app, as `--sp-type`
+     at `:root` in shell/primitives.css (which this page imports); `marketingTokens.test` fails on a
+     third file spelling the family out. */
+  --qcv-type: var(--sp-type);
+  --qcv-serif: var(--font-serif);
+  --qcv-mono: var(--font-mono);
+  --qcv-shadow: 0 2px 8px rgba(28, 19, 15, 0.06);
+  --qcv-open-w: 396px;
+  box-sizing: border-box;
+  color: var(--qcv-ink);
+  font-family: var(--qcv-serif);
+  /* the title sits 25px under the bar's controls, as the dashboard's greeting does (measured: the
+     controls end 14px above the scroll row, so the page pays the other 11) */
+  padding-top: 11px;
+  padding-bottom: 90px;
+  min-width: 0;
+}
+.qcv-own { font-family: var(--qcv-serif); }
+/* ⚠️ THE RESET REACHES `span`/`p`/`div`/`label` ONLY — the elements brand.tsx names — and NOT `button`
+   (every button here names its own face, and the shared `.sp-inkpill` must keep its). It stops at
+   `.qcv-legacy`: the open card hosts the app's existing tab bodies (the timeline, the notes thread,
+   the agent tab), which were written against the brand's default and must not start inheriting. */
+.qcv-own :is(span, p, div, label):not(.qcv-legacy, .qcv-legacy *) { font-family: inherit; }
+.qcv-log .sp-inkpill-l { font-family: var(--qcv-type); }
+
+/* ── head: on the cream, no panel behind it ── */
+.qcv-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 24px;
+  margin: 0 0 22px;
+}
+.qcv-head-copy { min-width: 0; }
+.qcv-page .qcv-title {
+  margin: 0;
+  font-family: var(--qcv-type) !important;
+  font-weight: 400;
+  font-size: 48px;
+  /* 1.02 is the ref's, and it is safe HERE: the face is Special Elite, not Playfair, the box has no
+     height and no clipping ancestor, and the title is one fixed string. */
+  line-height: 1.02;
+  letter-spacing: 0;
+  color: var(--qcv-ink);
+}
+.qcv-line { margin: 8px 0 0; font-family: var(--qcv-serif); font-size: 16px; line-height: 22px; color: var(--qcv-ink-70); }
+.qcv-line .qcv-line-ms { font-family: var(--qcv-type); font-style: normal; font-size: 15px; color: var(--qcv-ink); }
+/* "+ Log a query" is the shared anthracite pill at the head's own padding: the brief's prose says
+   22/18, the ref's rendered button is 26/22 and measures the stated 154 × 50 — the rendered page wins. */
+.qcv-log.sp-inkpill { padding: 0 26px 0 22px; }
+
+/* ── the control row: a sentence, and the view switch ── */
+.qcv-ctl { display: flex; align-items: center; gap: 20px; margin: 24px 0 14px; min-height: 42px; }
+.qcv-page .qcv-sentence {
+  margin: 0; min-width: 0; flex: 1 1 auto;
+  font-family: var(--qcv-type) !important; font-weight: 400; font-size: 23px; line-height: 1.15; color: var(--qcv-ink);
+}
+.qcv-pk {
+  font: inherit; font-family: var(--qcv-type); color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer;
+  border-bottom: 1.5px dashed rgba(28, 19, 15, 0.4); text-align: left;
+}
+.qcv-pk:hover, .qcv-pk[aria-expanded="true"] { border-bottom: 1.5px solid var(--qcv-ink); }
+.qcv-pk:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 3px; border-radius: 2px; }
+.qcv-pk::after {
+  content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 0 4px 9px;
+  border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(45deg);
+}
+.qcv-pk:disabled { cursor: default; border-bottom-color: transparent; }
+.qcv-pk:disabled::after { display: none; }
+
+.qcv-views { flex: none; margin-left: auto; display: flex; gap: 2px; padding: 3px; border-radius: 24px; background: #ffffff; box-shadow: var(--qcv-shadow); }
+.qcv-views button {
+  height: 34px; padding: 2px 15px 0; border: 0; border-radius: 20px; background: none; cursor: pointer;
+  font-family: var(--qcv-type); font-size: 14.5px; line-height: 1; color: var(--qcv-ink);
+}
+.qcv-views button:hover { background: var(--qcv-parchment); }
+.qcv-views button[aria-pressed="true"] { background: var(--qcv-navy); color: #ffffff; }
+.qcv-views button:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
+
+/* ── the stage: the view's frame, and the open query docked to its right ── */
+.qcv-stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+.qcv-stage--docked { grid-template-columns: minmax(0, 1fr) var(--qcv-open-w); }
+.qcv-ledger { min-width: 0; }
+.qcv-ledger > .fc-frame { display: block; }
+.qcv-none { margin: 0; padding: 34px 18px; text-align: center; font-family: var(--qcv-serif); font-size: 15px; color: var(--qcv-ink-70); }
+.qcv-none button { font: inherit; background: none; border: 0; border-bottom: 1.5px dashed rgba(28, 19, 15, 0.4); padding: 0; margin-left: 10px; cursor: pointer; color: var(--qcv-ink); }
+
+/* Export: a mono link under the stage, right-aligned */
+.qcv-foot { display: flex; justify-content: flex-end; margin: 12px 2px 0; }
+.qcv-export {
+  font-family: var(--qcv-mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-70);
+  background: none; border: 0; border-bottom: 1px solid rgba(28, 19, 15, 0.25); padding: 0 0 2px; cursor: pointer;
+}
+.qcv-export:hover { color: var(--qcv-ink); border-bottom-color: var(--qcv-ink); }
+.qcv-export:disabled { opacity: 0.4; cursor: default; }
+
+/* ── the menu. PORTALLED TO `body`, outside `.qcv-page`, so its values are literals: a token read
+   here would resolve to nothing and the panel would paint transparent, in silence. ── */
+.qcv-menu {
+  position: fixed; z-index: 120; box-sizing: border-box; min-width: 230px; max-width: 360px; padding: 6px;
+  background: #ffffff; border: 1px solid rgba(28, 19, 15, 0.11); border-radius: 12px;
+  box-shadow: 0 14px 34px -14px rgba(28, 19, 15, 0.38), 0 2px 6px rgba(28, 19, 15, 0.06);
+  overflow-y: auto; color: #1c130f; font-family: var(--font-serif);
+}
+.qcv-menu-h { margin: 8px 10px 4px; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }
+.qcv-menu-sep { height: 1px; margin: 6px 4px; background: rgba(28, 19, 15, 0.11); }
+.qcv-menu button {
+  display: flex; align-items: center; gap: 9px; width: 100%; box-sizing: border-box; padding: 9px 10px; border: 0; border-radius: 7px;
+  background: none; cursor: pointer; text-align: left; font-family: var(--font-serif); font-size: 14.5px; line-height: 1.3; color: #1c130f;
+}
+.qcv-menu button:hover, .qcv-menu button:focus-visible { background: #fdf9f5; outline: none; }
+.qcv-menu button[aria-checked="true"] { background: #f5f1eb; font-weight: 600; }
+.qcv-menu .qcv-menu-sw { flex: none; width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(28, 19, 15, 0.12); }
+.qcv-menu .qcv-menu-l { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: inherit; }
+.qcv-menu .qcv-menu-n { flex: none; margin-left: 12px; font-family: var(--font-mono); font-size: 10px; font-weight: 400; color: rgba(28, 19, 15, 0.45); }
+
+/* ── below 900px of main column the docked column goes (the page sets the class by MEASURING the
+   column, never the window): the closed card sits under the live one ── */
+.qcv-page--narrow .qcv-head { grid-template-columns: minmax(0, 1fr); row-gap: 14px; }
+.qcv-page--narrow .qcv-head .qcv-log { justify-self: start; }
+.qcv-page--narrow .qcv-ctl { flex-wrap: wrap; }
+.qcv-page--narrow .qcv-page .qcv-title, .qcv-page--narrow.qcv-page .qcv-title { font-size: 36px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qcv-page *, .qcv-menu * { transition: none !important; }
+}
+
+/* ── the shared page grid, on THIS page ──
+   0-2-0, so it beats the older `.qc-wpg { --wpg-gutter … }` rules in f12.css rather than depending on
+   which sheet lands later in the bundle. The 22px inset and the 1440 cap are the dashboard's. The
+   window tokens are restated because this page sits on the open ground (`ground-mode`): the grid's
+   bottom hem fades INTO `--ws-window`, and fading into the window's white over cream is a pale stripe. */
+.qc-wpg.qc-wpg--v11 { --wpg-gutter: 22px; --wpg-measure: 1440px; --ws-window: #f4f0ea; --ws-window-rgb: 244, 240, 234; }
+.qcv-log.sp-inkpill:disabled { opacity: 0.5; cursor: default; }

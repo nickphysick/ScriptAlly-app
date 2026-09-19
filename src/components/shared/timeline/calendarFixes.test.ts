@@ -76,19 +76,9 @@ describe("§1 · a past stage is drawn in its own state colour, faded", () => {
 });
 
 describe("§3 · the range is two leaves, and the row can no longer be squeezed", () => {
-  it("the header draws two leaves with an arrow between, in window order", () => {
-    const head = sliceBetween(QC, '<h3 className="qcc-calhead-rng"', "</h3>", "the range");
-    const from = head.indexOf("calLeaves.from.mon");
-    const arrow = head.indexOf("qcc-calleaf-arr");
-    const to = head.indexOf("calLeaves.to.mon");
-    expect(from, "the window's start is not drawn").toBeGreaterThan(-1);
-    expect(arrow, "there is no arrow between the two leaves").toBeGreaterThan(from);
-    expect(to, "the window's end is not drawn after the arrow").toBeGreaterThan(arrow);
-    /* ⚠️ AND THE SENTENCE SURVIVES AS THE ACCESSIBLE NAME. Two leaves and an arrow are a picture;
-       a reader who cannot see it still gets the words, from the one place they are composed. */
-    expect(head).toContain("aria-label={calWindowLabel}");
-    expect(QC).toContain("const calWindowLabel = useMemo(() => windowRangeLabelOf(calVisible)");
-  });
+  /* ⚠️ RETIRED (Query Centre v11, 19 Sep): the Query Centre's calendar header — pager, two date leaves,
+     search, view switch — is removed with the rail. v11's calendar states its range as TEXT ("10 Aug to
+     30 Sep") in its own control row; that is measured in tests/e2e/qcV11.measure.ts. */
 
   it("⚠️ the centre is the only track told it may reach zero", () => {
     const row = bodyOf(HEAD_CSS, ".qcc-calhead");

@@ -169,6 +169,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
    * surfaces where the design has one.
    */
   const dashMode = pathname === "/dashboard";
+  /* ⚠️ THE QUERY CENTRE SITS ON THE OPEN GROUND TOO (v11, 19 Sep) — cards on the page's cream, no
+     window sheet behind them — but it is NOT `dash-mode`: that class also moves the bar out of the
+     flow, swaps the search for the big field and hides controls. `ground-mode` is the one thing
+     the two pages share, stated once. Analytics is a sub-route and keeps the window. */
+  const groundMode = pathname === "/queries";
   /**
    * ⚠️ THE DASHBOARD'S BAR IS TRANSPARENT AT REST AND TAKES THE PAGE'S GROUND ONCE THE PAGE HAS
    * SCROLLED (the v34 mockup, 19 Sep). On that route the scroller runs UP under the bar so the
@@ -431,7 +436,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
        `.ws-panel`, which is a SIBLING of the workspace — so no page can see it from a descendant
        selector, and a page that wants to redistribute the width the panel gave back has nothing to
        key on. Same boolean, second mount, on the common ancestor. */
-    <div className={`ws-app${sidebar.collapsed ? " sb-shut" : ""}${settingsMode ? " set-mode" : ""}${dashMode ? " dash-mode" : ""}`}>
+    <div className={`ws-app${sidebar.collapsed ? " sb-shut" : ""}${settingsMode ? " set-mode" : ""}${dashMode ? " dash-mode" : ""}${groundMode ? " ground-mode" : ""}`}>
 
       {/* ⚠️ `sb-ready` GATES THE WIDTH TRANSITION (sidebar-collapse pack, Phase 1). The collapsed
           state is read synchronously, so the first render is already narrow — but a transition

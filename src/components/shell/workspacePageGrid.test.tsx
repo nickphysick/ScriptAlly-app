@@ -1057,7 +1057,6 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        identical" report all over again. Ten routes, eight call sites — the Tasks family is three
        pages through one layout. */
     const CONVERTED = [
-      ["Query Centre", "../Queries.tsx"],
       ["Contact list", "../agents/AgentList.tsx"],
       ["Manuscripts", "../AllManuscripts.tsx"],
       ["Discover", "../DiscoverNewAgents.tsx"],
@@ -1071,6 +1070,22 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       expect(src, `${page} is listed as rendering the grid and no longer does`).toContain("WorkspacePageGrid");
       expect(src, `${page} stopped rendering a masthead`).toContain('variant="workspace"');
     }
+
+    /* ⚠️ THE OPTED-OUT SET IS EXACTLY ONE PAGE: THE QUERY CENTRE (v11, 19 Sep; Nick's decision). It
+       renders the grid and NO masthead — its head is its own, on the page's cream, and with nothing
+       passed the grid draws no chrome and no collapsed bar. It gets an exception row rather than a
+       quiet deletion, per the note below: this fails if the page takes the shared header back, and
+       the list is asserted by LENGTH so a second page cannot join it unannounced. */
+    const OPTED_OUT = [["Query Centre", "../Queries.tsx"]] as const;
+    expect(OPTED_OUT.length, "a page joined the opted-out set — that is a decision, not a diff").toBe(1);
+    for (const [page, file] of OPTED_OUT) {
+      const src = readFileSync(resolve(__dirname, file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+      expect(src, `${page} no longer renders the grid`).toContain("<WorkspacePageGrid");
+      expect(src, `${page} took the shared masthead back — move it to CONVERTED`).toContain("masthead={null}");
+      expect(src, `${page} mounts a PageHeader while listed as opted out`).not.toContain("<PageHeader");
+    }
+    const grid = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8");
+    expect(grid, "a grid with no masthead still renders an empty chrome slab").toContain("{!barOnly && !record && hasMast && (");
 
     /* ⚠️ COMPARABLE TITLES IS BACK IN `CONVERTED` ABOVE, and the exception row that stood here is
        deleted with the opt-out it described. It asserted the inverse — that the page renders the

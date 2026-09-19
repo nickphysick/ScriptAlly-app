@@ -267,6 +267,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
   masthead, toolbar, children, className, scrollLabel, dock, fill = false, scroller, barOnly, record,
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  const hasMast = React.isValidElement(masthead);
   /**
    * ⚠️ THE COLLAPSED BAR IS A SEPARATE ELEMENT, NEVER A TRANSFORMATION OF THE MASTHEAD, and the
    * reason is mechanical rather than aesthetic: `font-family` cannot be interpolated — the masthead
@@ -691,7 +692,11 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             * belongs to the WINDOW, not to the masthead's measure — an edge that stops short mid-air
             * is the same fault as the fill-page border complaint in another costume.
             */}
-          {!barOnly && !record && (
+          {/* ⚠️ NO MASTHEAD, NO CHROME — and no gap beneath it either (Query Centre v11). A page that
+              passes `masthead={null}` draws its own head inside the scroll row; an empty slab and
+              its 44px spacer would sit above it stating nothing. `barIdentity` already returns null
+              for a non-element, so such a page has no collapsed bar either. */}
+          {!barOnly && !record && hasMast && (
           <div className="wpg-chrome" ref={chromeRef}>
           <div className="wpg-mast">
             {/**
@@ -749,7 +754,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             * the flow to move. This does both: the slab's loss and the spacer's gain are the same
             * number, so the column's height never changes and neither does anything's position.
             */}
-          <div className="wpg-reclaim" aria-hidden="true" />
+          {(hasMast || !!record || !!barOnly) && <div className="wpg-reclaim" aria-hidden="true" />}
           {children}
         </div>
         {/* ⚠️ THE HEMS ARE GRID CHILDREN OF ROW 3, NOT CHILDREN OF THE SCROLLER. Inside the
