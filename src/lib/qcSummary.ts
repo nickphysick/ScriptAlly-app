@@ -20,6 +20,7 @@
 import { Activity, Agent, Query, QueryStatus } from "../types";
 import { agentAgencyLine, agentInitials, agentPrimary } from "./agentDisplay";
 import { buildRows as analyticsRows } from "./analytics";
+import { compareAttention, type AttentionRow } from "./queryAttentionSort";
 import { resolveExpectedDate } from "./expectedDate";
 import { cardMaterials, stateFor, turnFor, type CardMaterials, type State } from "./queryCardFacts";
 import type { DerivableActivity } from "./queryDerivation";
@@ -283,7 +284,10 @@ export const SORT_OPTIONS: readonly { key: QcSort; label: string }[] = [
   { key: "agency", label: "agencies A to Z" },
 ];
 const FAR = Number.MAX_SAFE_INTEGER;
-const COURT_RANK: Record<Court, number> = { you: 0, offer: 1, agent: 2, closed: 3 };
+const attentionRow = (r: QcRow): AttentionRow => ({
+  register: r.court === "you" ? "you" : r.court === "offer" ? "offer" : r.court === "closed" ? "closed" : r.pastExpected ? "late" : "calm",
+  expectedMs: r.expectedMs, closedMs: r.court === "closed" ? r.stageStartMs : null, lastActivityMs: r.lastMs,
+});
 export function sortRows(rows: readonly QcRow[], sort: QcSort): QcRow[] {
   const byActivity = (a: QcRow, b: QcRow) => b.lastMs - a.lastMs || a.id.localeCompare(b.id);
   const cmp: Record<QcSort, (a: QcRow, b: QcRow) => number> = {
@@ -291,7 +295,11 @@ export function sortRows(rows: readonly QcRow[], sort: QcSort): QcRow[] {
     newest: (a, b) => (b.sentMs ?? 0) - (a.sentMs ?? 0) || byActivity(a, b),
     /* absence sorts LAST: a query with no date cannot be the next to land */
     reply: (a, b) => (a.expectedMs ?? FAR) - (b.expectedMs ?? FAR) || byActivity(a, b),
-    you: (a, b) => COURT_RANK[a.court] - COURT_RANK[b.court] || byActivity(a, b),
+    /* ⚠️ "with you first" IS THE PAGE'S EXISTING ATTENTION ORDER, KEPT AND RELABELLED — `compareAttention`,
+       not a second ranking: with you, then past the expected date, then offers, then the rest by the
+       soonest date, then closed by the most recent close. The label says where the rows go and
+       nothing about what they are. */
+    you: (a, b) => compareAttention(attentionRow(a), attentionRow(b)) || byActivity(a, b),
     agent: (a, b) => a.agentName.localeCompare(b.agentName, "en-GB") || byActivity(a, b),
     /* ⚠️ NO AGENCY SORTS LAST, BY A BOOLEAN — not by a sentinel string. U+FFFF is a noncharacter and
        ICU collation ignores it, so an agency-less agent sorted FIRST. */

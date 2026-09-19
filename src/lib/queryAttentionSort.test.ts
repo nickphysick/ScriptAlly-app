@@ -8,7 +8,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { ATTENTION_RANK, compareAttention, type AttentionRow } from "./queryAttentionSort";
-import { VIEW_DEFAULTS } from "./queryViewDefaults";
+import { DEFAULT_SORT, SORT_OPTIONS } from "./qcSummary";
 import type { Register } from "./queryCardFacts";
 
 const row = (register: Register, o: Partial<AttentionRow> = {}): AttentionRow =>
@@ -49,10 +49,12 @@ describe("the attention order", () => {
     }
   });
 
-  it("⚠️ it is the GRID's default and nobody else's", () => {
-    expect(VIEW_DEFAULTS.grid.sort).toBe("attention");
-    expect(VIEW_DEFAULTS.list.sort).not.toBe("attention");
-    expect(VIEW_DEFAULTS.calendar.sort).not.toBe("attention");
-    expect(VIEW_DEFAULTS.board.sort).toBeUndefined();
+  /* ⚠️ RETARGETED (Query Centre v11, 19 Sep): per-view defaults are gone with the Board and the Sort
+     pill. This order survives as ONE of the sentence's six sorts, relabelled "with you first" — a label
+     that says where the rows go and nothing about what they are — and it is NOT the default. */
+  it("⚠️ it survives as 'with you first', and it is not the default", () => {
+    expect(SORT_OPTIONS.find((o) => o.key === "you")?.label).toBe("with you first");
+    expect(DEFAULT_SORT).toBe("activity");
+    expect(SORT_OPTIONS.map((o) => o.label).join(" ")).not.toMatch(/attention|overdue|late\b|urgent/i);
   });
 });

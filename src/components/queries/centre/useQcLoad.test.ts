@@ -52,6 +52,14 @@ describe("the hook", () => {
   it("the review hold is never read in a production build", () => {
     expect(hook).toMatch(/if \(import\.meta\.env\.MODE === "production"[^)]*\) return 0;/);
   });
+  it("⚠️ the row-padding review aid is never read in a production build either, and writes nothing", () => {
+    const aid = strip(readFileSync(join(process.cwd(), "src/components/queries/centre/qcReviewAid.ts"), "utf8"));
+    /* the production return comes BEFORE the window is read — a gate below the read is not a gate */
+    const gate = aid.indexOf('if (import.meta.env.MODE === "production"');
+    expect(gate, "no production gate").toBeGreaterThan(-1);
+    expect(gate).toBeLessThan(aid.indexOf("__SA_QC_PAD_LIVE"));
+    for (const w of ["updateQuery", "addQuery", "setDoc", "localStorage", "firebase"]) expect(aid, `${w} — the aid must only copy rows in memory`).not.toContain(w);
+  });
   it("the page's readiness includes the ACTIVITY FEED — the gauges and the calendar are dated from it", () => {
     const page = strip(readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8"));
     expect(page).toContain("const qcLoad = useQcLoad(collectionsReady && activitiesReady);");

@@ -2,19 +2,25 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE ILLUSTRATED MASTHEAD — A TRIAL ON TWO PAGES, LOCKED AS TWO PAGES.
+ * THE ILLUSTRATED MASTHEAD — A TRIAL ON ONE PAGE, LOCKED AS ONE PAGE.
  *
  * ⚠️ THE POINT OF EVERY CASE HERE IS THE POPULATION. A trial that quietly becomes two pages is no
  * longer a trial, and a treatment that quietly stops applying is a revert nobody decided. Both
- * directions are asserted: the two named pages have artwork, the other eight do not, and the SET
+ * directions are asserted: the named page has artwork, the other masthead pages do not, and the SET
  * is exact — not the count, so moving the trial to a different page fails as loudly as spreading it.
  */
 import { test, expect, Page } from "@playwright/test";
 import { openRoute, liftMotionSuppression } from "./measure";
 import { readPng } from "./pngPixels";
 
+/**
+ * ⚠️ THE QUERY CENTRE IS NOT IN THIS CENSUS, BECAUSE IT HAS NO MASTHEAD TO ILLUSTRATE (v11, 19 Sep).
+ * It declined the shared masthead by decision and draws its own head on the page ground with no
+ * artwork at all. That it is the ONE page to decline is asserted where the population is counted —
+ * `mastheadMatrix.measure.ts` (`OPTED_OUT`) — so its absence here is a consequence of that lock and
+ * not a second, quieter exemption.
+ */
 const PAGES: { name: string; route: string; cls: string }[] = [
-  { name: "Query Centre",        route: "/queries",              cls: "qc-wpg"   },
   { name: "Analytics",           route: "/queries/analytics",    cls: "qa-wpg"   },
   { name: "Contact list",        route: "/agents",               cls: "agl-wpg"  },
   { name: "Discover",            route: "/agents/discover",      cls: "dv-wpg"   },
@@ -26,16 +32,13 @@ const PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Noteboard",           route: "/todo/noteboard",       cls: "tpl-wpg"  },
 ];
 /**
- * ⚠️ TWO PAGES NOW, AND THE NUMBER IS THE GATE. The trial began on Submission packages and Query
- * Centre joined it deliberately. The SET is asserted rather than a count, so neither moving the
- * artwork to a different page nor a third page joining can pass — someone has to edit this list and
- * read this paragraph.
- *
- * ⚠️ AND THE TWO ARE DIFFERENT HEADER TYPES, which is why the behaviour case below compares each
- * against its OWN peers rather than against one another: Packages is Type A and its band is sticky,
- * Query Centre is Type B and its band is static.
+ * ⚠️ ONE PAGE AGAIN, AND THE SET IS THE GATE. The trial began on Submission packages; the Query
+ * Centre joined it deliberately and LEFT it deliberately when v11 took its masthead away (no
+ * illustrations on that page at all). The SET is asserted rather than a count, so neither moving
+ * the artwork to a different page nor a second page joining can pass — someone has to edit this
+ * list and read this paragraph.
  */
-const TRIAL = ["Submission packages", "Query Centre"];
+const TRIAL = ["Submission packages"];
 
 const readBand = (page: Page, cls: string) => page.evaluate((c) => {
   const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
@@ -90,7 +93,6 @@ test("⚠️ EXACTLY ONE PAGE CARRIES MASTHEAD ARTWORK — asserted in both dire
 
 const TRIAL_ROUTES: { name: string; route: string; cls: string }[] = [
   { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg" },
-  { name: "Query Centre",        route: "/queries",              cls: "qc-wpg"   },
 ];
 
 for (const width of [1280, 1440, 1920, 2560]) {
@@ -292,7 +294,7 @@ test("⚠️ THE TRIAL CHANGES NO BEHAVIOUR — the treated pages answer like ev
 }
 
 
-test("⚠️ NEITHER TRIAL PAGE PAINTS A GROUND — the masthead's ground is the window's, on all ten", async ({ page }) => {
+test("⚠️ NO TRIAL PAGE PAINTS A GROUND — the masthead's ground is the window's", async ({ page }) => {
   /**
    * ⚠️ THIS REPLACES THE TINT-FADE CASES, whose subject is deleted. They asserted the SHAPE of a
    * horizontal tint — the biggest step between adjacent samples against the total change, with
@@ -300,8 +302,9 @@ test("⚠️ NEITHER TRIAL PAGE PAINTS A GROUND — the masthead's ground is the
    * window's own plain ground, so there is no gradient left to check the shape of, and the honest
    * successor is the absence.
    *
-   * ⚠️ ASSERTED ON BOTH TRIAL PAGES, not one. The tint outlived the accent bar by a phase because a
-   * list said one page still had it; a claim about "neither" cannot go stale the same way.
+   * ⚠️ ASSERTED OVER `TRIAL_ROUTES`, never a page typed here. The tint outlived the accent bar by a
+   * phase because a list said one page still had it; a claim over the whole set cannot go stale
+   * the same way. (Two pages until the Query Centre left the trial with v11; one now.)
    */
   for (const t of TRIAL_ROUTES) {
     await openRoute(page, t.route, { width: 1440, height: 900 });

@@ -63,15 +63,24 @@ import { recordQueryResponse } from "../lib/recordResponse";
 import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitle";
 import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentSecondary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
-import { QueryCentreGrid, type GridCard } from "./queries/QueryCentreGrid";
-import { QueryStatTiles } from "./queries/QueryStatTiles";
-import { QueryListView } from "./queries/QueryListView";
+/**
+ * ⚠️ FOUR STYLESHEETS (three here, `queryViewSwitch.css` five lines down) IMPORTED FOR THEIR *POSITION*, NOT THEIR RULES (v11 clean-up, 19 Sep). This
+ * page used to mount `QueryCentreGrid`, `QueryStatTiles` and `QueryViewSwitch`, and those imports are
+ * what first pulled these sheets into the app's ONE stylesheet — whose order is the order of first
+ * import. The sheets are still live elsewhere (the Contact list's toolbar and view switch, To-do's
+ * stat tiles, the drawer's card ladder). Dropping the component imports would have moved each sheet to
+ * wherever it is next imported: a cascade reorder on three OTHER pages, from a clean-up on this one.
+ * Same sheets, same place, same order.
+ */
+import "./queries/queryCard.css";
+import "./queries/queryCentreGrid.css";
+import "./queries/queryStatTiles.css";
+import type { GridCard } from "./queries/QueryCentreGrid";
 import { QueryEmptyCard, TEMPLATE_HREF } from "./queries/QueryEmptyCard";
 import { QueryEmptyFeatures } from "./queries/QueryEmptyFeatures";
 import { heroBookTitle } from "./queries/queryEmptyCopy";
 import { gridEmptyKind, waitingSummary, waitingLine } from "../lib/queryGridEmpty";
-import { QueryBoardView } from "./queries/QueryBoardView";
-import { QueryViewSwitch, type QueryView } from "./queries/QueryViewSwitch";
+import "./queries/queryViewSwitch.css"; /* position-pinned, as above: the Contact list and To-do still mount the switch */
 import { QcCentre, QC_VIEW_KEY, readQcView, type QcView } from "./queries/centre/QcCentre";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcSummary } from "./queries/centre/QcSummary";
@@ -80,6 +89,7 @@ import { QcOpenCard, QcOpenCardSkeleton } from "./queries/centre/QcOpenCard";
 import { QcCalendar, QcCalendarSkeleton } from "./queries/centre/QcCalendar";
 import { QcGrid, QcGridSkeleton } from "./queries/centre/QcGrid";
 import { useQcLoad } from "./queries/centre/useQcLoad";
+import { padLiveRows } from "./queries/centre/qcReviewAid";
 import {
   DEFAULT_SORT, buildQcRows, closedGrid, filterForStatusParam, filterOptions, inScope, matchesFilter, sortRows, stageColumns,
   type QcFilter, type QcSort,
@@ -89,23 +99,17 @@ import {
    own assembler. Nothing about the calendar is implemented on this page — a second implementation
    would not disagree in detail, it would disagree in STRUCTURE, and the two pages would draw the
    same wait in two different places. */
-import { TimelineBoard } from "./shared/timeline/TimelineBoard";
-import { WEEK_STEP, DENSITY_LABEL, type BoardDensity } from "./shared/timeline/TimelineWinbar";
-import { useSegHover } from "./shared/timeline/useSegHover";
-import {
-  todayAtOf, monthsOf, dateLabelsOf, windowRangeLabelOf, windowLeavesOf, movedOffTodayOf,
-} from "./shared/timeline/boardWindow";
 import { crossAt } from "./shared/timeline/boardParts";
 /* ⚠️ THE BOARD'S STYLESHEET, IMPORTED EXPLICITLY. It is already in the bundle at runtime —
    every workspace page stays mounted, so `TodoCalendarPage` has loaded it — and relying on
    that is an invisible dependency on another page continuing to exist. Named here so the
    calendar keeps its styling if that page is ever unmounted or split out. */
+/* ⚠️ KEPT ON PURPOSE though this page no longer mounts the board (v11): the app ships ONE stylesheet
+   whose order is the order of first import, and removing this line would move To-do's calendar sheet
+   relative to everything imported between here and To-do. A reorder is a cascade change nobody asked for. */
 import "./todo/todoCalendar.css";
-import "./queries/queryCalendarLayout.css";
-import { queryTimelineRows, rowKeyFor } from "../lib/queryTimelineRows";
 /* the section a row is filed under reads the CARD's own vocabulary — never a second table */
 import { turnWordFor, STATE_TOKEN} from "../lib/queryCardFacts";
-import { TIMELINE_RANGES, DEFAULT_RANGE_INDEX, pastDaysOf } from "../lib/timelineRanges";
 import { windowDays, shiftWindow } from "../lib/todoTimeline";
 import { shortCalDate } from "../lib/todoCalendar";
 import { localYMD } from "../lib/shellSidebar";
@@ -186,11 +190,6 @@ import { NUDGE_NESTED_TYPE } from "../lib/logNudge";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { QuickActionPopover, type QuickActionKind } from "./queries/QuickActionPopover";
 import { PackagePicker } from "./reading-pane/PackagePicker";
-import { QueryCentreSkeleton, SKELETON_FLOOR_MS } from "./reading-pane/QueryCentreSkeleton";
-import { useSkeleton } from "../lib/skeletonTiming";
-import { defaultsOnViewChange, type QueryViewName } from "../lib/queryViewDefaults";
-import { QueryGridSkeleton } from "./queries/QueryGridSkeleton";
-import { QCC_ENTRANCE_TOTAL_MS } from "./queries/queryEntrance";
 /* §2b — the shared art registry, already consumed by two other Query Centre panels. */
 import { ArtSlot } from "./todo/ArtSlot";
 /* ⚠️ THE MASTHEAD'S OWN PICTURE, AS A URL — the same mechanism Contact list uses for its
@@ -2150,7 +2149,7 @@ export const Queries: React.FC<{
      calendar bar is dated from it, so drawn before it lands they would re-lay themselves out. */
   const qcLoad = useQcLoad(collectionsReady && activitiesReady);
   const qcRows = useMemo(
-    () => buildQcRows(queries as Query[], agents, activities, Date.now()),
+    () => padLiveRows(buildQcRows(queries as Query[], agents, activities, Date.now())),
     [queries, agents, activities],
   );
 

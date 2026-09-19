@@ -311,6 +311,44 @@ test("summary row at a 1280 window — the stage name never collides with its co
   await page.locator(".qcv-page [data-qcv='sum']").first().screenshot({ path: resolve(OUT, `summary-1280-${cols.length}col.png`) });
 });
 
+test("summary row with 56 live queries — the row is the height it is with 39, and no column draws a fifth gauge", async ({ page }) => {
+  /**
+   * ⚠️ THE HARNESS ACCOUNT HOLDS FEWER THAN FIFTY LIVE QUERIES, so the brief's question — what does
+   * the row do on a busy account — is asked with `qcReviewAid`: the account's OWN live rows repeated
+   * in memory until 56 are live. Nothing is written. The claim is a comparison of the page with
+   * itself: the same window, unpadded then padded, and the row's height must not move.
+   */
+  await openApp(page, 1440, 860);
+  const read = () => page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const sum = p.querySelector("[data-qcv='sum']") as HTMLElement;
+    const stages = [...p.querySelectorAll("[data-qcv='stage']")] as HTMLElement[];
+    return {
+      h: Math.round(sum.getBoundingClientRect().height * 10) / 10,
+      title: (p.querySelector("[data-qcv='sum-live-band']")?.textContent || "").replace(/\s+/g, " ").trim(),
+      cols: stages.map((st) => ({
+        gauges: st.querySelectorAll("[data-qcv='gauge']").length,
+        more: (st.querySelector("[data-qcv='gauge-more']")?.textContent || "").trim(),
+        h: Math.round(st.getBoundingClientRect().height * 10) / 10,
+      })),
+    };
+  });
+  const plain = await read();
+  await page.addInitScript(() => { (window as unknown as { __SA_QC_PAD_LIVE?: number }).__SA_QC_PAD_LIVE = 56; });
+  await openApp(page, 1440, 860);
+  const padded = await read();
+  record({ area: "summary-56", what: "unpadded", got: plain, want: "reported" });
+  record({ area: "summary-56", what: "padded to 56 live", got: padded, want: "reported" });
+  /* precondition FIRST: the padding took, or the comparison is the page against itself */
+  const liveN = (t: string) => { const m = /(\d+)/.exec(t); return m ? Number(m[1]) : -1; };
+  yes("summary-56", `the padded page says 56 live (it says "${padded.title}")`, liveN(padded.title) === 56);
+  yes("summary-56", "the unpadded page holds fewer than fifty — otherwise the aid measured nothing", liveN(plain.title) > 0 && liveN(plain.title) < 50);
+  near("summary-56", "the row's height with 56 live is its height without", padded.h, plain.h, 0.6);
+  yes("summary-56", "no column draws more than four gauges", padded.cols.every((c) => c.gauges <= 4));
+  yes("summary-56", "a column holding more than four says how many it is not drawing", padded.cols.some((c) => /^\+\d+ earlier in the window$/.test(c.more)));
+  await page.locator(".qcv-page [data-qcv='sum']").first().screenshot({ path: resolve(OUT, "summary-56-live-1440.png") });
+});
+
 test("the summary's gauges — geometry, and which branches this account entered", async ({ page }) => {
   await openApp(page, 1440, 860);
   const r = await page.evaluate(() => {
@@ -355,6 +393,20 @@ test("the summary's gauges — geometry, and which branches this account entered
   }
   const hs = [...new Set(r.map((s) => Math.round(s.h)))];
   is("gauges", "every column is one height whatever it holds", hs.length, 1);
+  /**
+   * ⚠️ WHICH BRANCHES THIS PAGE ENTERED IS ASSERTED PER BRANCH, NOT IMPLIED BY A GREEN. The phase 6
+   * commit message said this account entered `within`, `past` and `nodate`. It enters TWO: a column
+   * draws its four FURTHEST-THROUGH gauges, every agent's-turn query on this account that has an
+   * expected date is already past it, and the rest have none — under All manuscripts and under each
+   * manuscript scope alike (probed 19 Sep). So `within` is proved where it CAN be: `gaugeFor` in
+   * `qcSummary.test.ts` (35% and 70%, with its own every-branch tally) and the rendered fill in
+   * `qcSummary.test.tsx`. The day a within-window gauge reaches this page the third line below
+   * starts asserting its geometry, and the record says so instead of a green saying nothing.
+   */
+  const kinds = r.flatMap((s) => s.gauges.map((g) => g.kind));
+  yes("gauges", "the `past` branch was entered on the rendered page", kinds.includes("past"));
+  yes("gauges", "the `nodate` branch was entered on the rendered page", kinds.includes("nodate"));
+  record({ area: "gauges", what: "the `within` branch on the rendered page (unit-locked where this account cannot enter it)", got: kinds.filter((k) => k === "within").length, want: "reported" });
 });
 
 test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {

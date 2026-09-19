@@ -64,6 +64,16 @@ const CARVES = {
    */
 } as const;
 
+/**
+ * ⚠️ THE OPTED-OUT SET IS NAMED, AND IT IS EXACTLY ONE PAGE (Query Centre v11, 19 Sep — Nick's call).
+ * The Query Centre declines the shared masthead: its head is the page's own ("Query Centre" in the
+ * app's type, the head line, "+ Log a query"), drawn on the page ground with no slab. That is the
+ * decision this lock used to say had not been taken. It is asserted as the EXACT set, both ways —
+ * a second page declining fails by name, and the Query Centre quietly regaining a masthead fails
+ * too. The same set is held in `workspacePageGrid.test.tsx` (`OPTED_OUT`) and named in CLAUDE.md.
+ */
+const OPTED_OUT: readonly string[] = ["Query Centre"];
+
 const PAGES: { name: string; route: string; cls: string; fill: boolean }[] = [
   /* ⚠️ `fill: false` SINCE QUERY CENTRE BECAME A LIST AND A RECORD. `Queries.tsx` passes
      `fill={!!activeQuery}` — the RECORD view fills and its panes scroll, the browsing grid does not
@@ -96,7 +106,7 @@ const readMasthead = (page: Page, cls: string) => page.evaluate((c) => {
    * a census can do: the fault it should have REPORTED was a page silently leaving the system.
    *
    * ⚠️ AND THE POPULATION IS ASSERTED SEPARATELY, both ways — that enough pages were measured, and
-   * that the opted-out count is currently ZERO. An absence tolerated in silence is how three locks
+   * that the opted-out SET is exactly `OPTED_OUT` (it was zero until the Query Centre declined, v11). An absence tolerated in silence is how three locks
    * came to crash at once instead of one lock going red with a sentence.
    */
   const mast = g.querySelector(".wsh") as HTMLElement | null;
@@ -251,11 +261,15 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
   const rows: { name: string; r: NonNullable<Awaited<ReturnType<typeof readMasthead>>> }[] = [];
 
   const drifted: string[] = [];
+  const declined: string[] = [];
   for (const p of PAGES) {
     await openRoute(page, p.route, { width: 1440, height: 900 });
     await liftMotionSuppression(page);
     const r = await readMasthead(page, p.cls);
     expect(r, `${p.name}: no visible grid with class .${p.cls}`).not.toBeNull();
+    /* an opted-out page is a READING, recorded and asserted below — it carries no masthead fields,
+       so it takes no part in the drift check or in any comparison */
+    if ((r as { optedOut?: boolean }).optedOut) { declined.push(p.name); continue; }
     /**
      * ⚠️ A CENSUS GOES STALE, AND A PAGE THAT CHANGED VARIANT IS A READING RATHER THAN A FAULT.
      * Manuscripts was `fill` when this list was written and is not now, by another stream's change,
@@ -308,16 +322,14 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
      than as one absence, because "the hairline is 0 everywhere" is also true of a build that lost it
      altogether (pinned chrome, §1). */
   /**
-   * ⚠️ NO PAGE HAS OPTED OUT, AND THAT IS ASSERTED RATHER THAN ASSUMED (Nick's call, after
-   * Comparable titles did). A page declining the shared masthead is a product decision — one
-   * masthead, one settle, one Hide rule — so it surfaces here as a named failure instead of being
-   * absorbed by a skip. The reading above keeps the state measurable for a page that genuinely
-   * needs it one day; this says today is not that day.
+   * ⚠️ WHICH PAGES DECLINE THE MASTHEAD IS ASSERTED AS AN EXACT SET, NEVER ABSORBED BY A SKIP. It
+   * was "no page has opted out" until the Query Centre did, by decision (v11). A page declining the
+   * shared masthead is a product decision, so a second one surfaces here as a named failure — and
+   * so does the named one coming back.
    */
-  const optedOut = rows.filter((x) => (x.r as { optedOut?: boolean }).optedOut).map((x) => x.name);
-  expect(optedOut, `${optedOut.join(", ")} render the grid with no masthead. Page headers behave identically across the app; if a page genuinely needs to decline, that is a decision to take rather than a lock to relax.`)
-    .toEqual([]);
-  expect(rows.length, "no page was measured at all").toBe(PAGES.length);
+  expect(declined, `the pages rendering the grid with no masthead are [${declined.join(", ")}], and the decided set is [${OPTED_OUT.join(", ")}]. A page declining the shared masthead is a decision to take, not a lock to relax.`)
+    .toEqual([...OPTED_OUT]);
+  expect(rows.length, "a page was neither measured nor named as opted out").toBe(PAGES.length - OPTED_OUT.length);
 
   for (const { name, r } of rows) {
     expect(r.borderBottom, `${name}: the masthead drew its own hairline again — the slab's base is the one line`).toBe("0px");

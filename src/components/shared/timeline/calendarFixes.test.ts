@@ -27,7 +27,6 @@ const BOARD_CSS = decls(R("src/components/todo/todoCalendar.css"));
 const BOARD_TSX = decls(R("src/components/shared/timeline/TimelineBoard.tsx"));
 const QC = decls(R("src/components/Queries.tsx"));
 const TODO = decls(R("src/components/todo/TodoCalendarPage.tsx"));
-const HEAD_CSS = decls(R("src/components/queries/queryCalendarLayout.css"));
 
 /** every declaration block in a stylesheet, selector list and body */
 const blocks = (css: string) =>
@@ -75,29 +74,10 @@ describe("§1 · a past stage is drawn in its own state colour, faded", () => {
   });
 });
 
-describe("§3 · the range is two leaves, and the row can no longer be squeezed", () => {
-  /* ⚠️ RETIRED (Query Centre v11, 19 Sep): the Query Centre's calendar header — pager, two date leaves,
-     search, view switch — is removed with the rail. v11's calendar states its range as TEXT ("10 Aug to
-     30 Sep") in its own control row; that is measured in tests/e2e/qcV11.measure.ts. */
-
-  it("⚠️ the centre is the only track told it may reach zero", () => {
-    const row = bodyOf(HEAD_CSS, ".qcc-calhead");
-    expect(row).toMatch(/grid-template-columns\s*:\s*auto\s+minmax\(0,\s*1fr\)\s+auto/);
-    /* the right cell's `min-width: 0` collapsed its track and let the switch overflow across the
-       search — measured at 1100, 1280 and 1440. Neither flank may carry it again. */
-    for (const flank of [".qcc-calhead-l", ".qcc-calhead-r"]) {
-      expect(bodyOf(HEAD_CSS, flank), `${flank} carries min-width: 0 again`).not.toMatch(/min-width\s*:\s*0/);
-    }
-    expect(bodyOf(HEAD_CSS, ".qcc-calsearch")).toMatch(/width\s*:\s*min\(340px,\s*100%\)/);
-  });
-
-  it("the leaf is 44px and nothing in the row wraps its way out of trouble", () => {
-    expect(bodyOf(HEAD_CSS, ".qcc-calleaf")).toMatch(/width\s*:\s*44px/);
-    /* ⚠️ THE RANGE NO LONGER DECLARES A `white-space: nowrap`, and it must not need one: a nowrap
-       on a fixed-width pair of boxes is a rule about text that is not there any more. */
-    expect(bodyOf(HEAD_CSS, ".qcc-calhead-rng")).not.toMatch(/white-space/);
-  });
-});
+/* ⚠️ DESCRIBE RETIRED (Query Centre v11, 19 Sep) — "§3 · the range is two leaves, and the row can no longer be
+   squeezed". It locked the Query Centre calendar's HEADER row (pager, two date leaves, search, view switch) and
+   its sheet `queryCalendarLayout.css`; both are deleted with the rail. v11's calendar states its range as text in
+   its own control row — measured in tests/e2e/qcV11.measure.ts. */
 
 describe("§4 · one hover implementation, and both hosts mount it", () => {
   it("neither page carries its own copy of the delegated pair", () => {

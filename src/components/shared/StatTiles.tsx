@@ -8,11 +8,15 @@
  * Query Centre's own data (`STAT_TILES`, `QuickKey`, the overdue axis); the To-do page needs the
  * same tiles over a different set. A copy with the same class names would be a fork wearing
  * shared clothes — two components that look identical until one of them is restyled — so the
- * MARKUP moved here and `QueryStatTiles` became its wrapper. Both pages mount this.
+ * MARKUP moved here and `QueryStatTiles` became its wrapper.
+ *
+ * ⚠️ ONE CALLER SINCE QUERY CENTRE v11 (19 Sep). That page replaced its tiles with a sentence and
+ * `QueryStatTiles` was deleted with them, so the To-do page is the only mount. The component stays
+ * shared-shaped on purpose — it is still the one place to restyle a tile.
  *
  * ⚠️ THE STYLESHEET DID NOT MOVE. `queryStatTiles.css` is imported here and the classes are
- * unchanged (`.qct`, `.qct-tile`, `.qct-ic`, `.qct-tx`, `.qct-k`, `.qct-n`), so the Query Centre
- * renders byte-identically and there is one place to restyle a tile. Moving the file would have
+ * unchanged (`.qct`, `.qct-tile`, `.qct-ic`, `.qct-tx`, `.qct-k`, `.qct-n`), so the tiles rendered
+ * byte-identically through the move and there is one place to restyle a tile. Moving the file would have
  * been a rename touching a hot stylesheet for no gain.
  *
  * ⚠️ THE COUNTS ARE THE WHOLE SET'S, NEVER THE FILTERED VIEW'S — the law this row has carried

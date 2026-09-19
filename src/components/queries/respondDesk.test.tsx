@@ -440,31 +440,14 @@ describe("§2 (drawer-3) · the desk mounts on the BODY; the card scrolls inside
 describe("Phase 2 · the tiles state the whole set, and the switch changes only the renderer", () => {
   const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-  const tiles = readFileSync(join(process.cwd(), "src/components/queries/QueryStatTiles.tsx"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  /* `tiles` read a file retired with v11 */
 
   /* ⚠️ RETIRED (Query Centre v11, 19 Sep): the five "whose court" tiles are gone — the sentence's menu states
      the same counts. The law this case held (the four courts PARTITION the set; the counts read the
      scoped set, never the filtered view) is asserted as a property in `lib/qcSummary.test.ts`. */
 
-  it("⚠️ Past expected is a SECOND AXIS, not a fifth court — it combines with whichever court is on", () => {
-    /* the chips' semantics exactly: one court + a flag. A tile row of five exclusive buttons would
-       have made "with you AND past expected" unaskable, which is the commonest question here.
-       ⚠️ RETARGETED FROM THREE SPELLINGS TO THE CLAIM (QC-chassis round, Phase 1), AND ONLY AFTER
-       THOSE SPELLINGS CAUGHT A REAL REGRESSION. The tile MARKUP moved to `shared/StatTiles` so the
-       To-do page could mount the same component; the first version of that component took ONE
-       selected key and silently collapsed these two axes into one. This lock went red, correctly,
-       on a page that then pressed a single tile where it had pressed two. So the claim is asserted
-       where it now lives — the wrapper rings a SET, and the pick still branches on `past` — and
-       the component is asserted to honour a set at all, which is the half that broke. */
-    expect(tiles, "the overdue flag stopped combining with the court")
-      .toContain("selected={overdue ? [quickKey, \"past\"] : [quickKey]}");
-    expect(tiles, "past stopped toggling its own axis")
-      .toContain("k === \"past\" ? onOverdue(!overdue) : onQuick(k as QuickKey)");
-    const shared = readFileSync(join(process.cwd(), "src/components/shared/StatTiles.tsx"), "utf8");
-    expect(shared, "the shared row cannot ring two tiles, so the two axes cannot both show")
-      .toContain("Array.isArray(selected) ? selected.includes(k) : selected === k");
-  });
+  /* ⚠️ RETIRED (Query Centre v11): the tiles' two-axis selection went with the tiles. "Past expected" is one of the
+     sentence's filters now, and it stays agent's-turn only — `lib/qcSummary.test.ts`. */
 
   it("active is an ink border, never a fill — colour on this page states the court", () => {
     const css = readFileSync(join(process.cwd(), "src/components/queries/queryStatTiles.css"), "utf8")
@@ -490,137 +473,33 @@ describe("Phase 2 · the tiles state the whole set, and the switch changes only 
 });
 
 /* ══ colours v2 · Phases 3–5 — List, Board, and the Calendar placeholder ══════════════════════ */
-describe("Phase 3–5 · three renderers over one set of rows", () => {
-  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-  const list = readFileSync(join(process.cwd(), "src/components/queries/QueryListView.tsx"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-  const board = readFileSync(join(process.cwd(), "src/components/queries/QueryBoardView.tsx"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-
-  /* ⚠️ RETIRED → `qcCentre.test.tsx`, where the same law is restated against the v11 page: every view
-     takes `gridRows`, which is built from the ONE derived list, and no view re-derives. */
-
-  /* ⚠️ RETIRED → `qcCentre.test.tsx`: every view hands a selection to the page's one `onOpenQuery`. */
-
-  /* ⚠️ RETIRED: the list's column heads no longer sort. The sentence's second phrase is the page's ONE
-     sort control, so there is no second vocabulary for the heads to agree with. */
-
-  it("⚠️ the board has NO drag — status is derived, and the board is a read", () => {
-    for (const h of ["onDrop", "onDragStart", "onDragOver", "onDragEnd", "draggable"])
-      expect(board, `the board grew a ${h} handler`).not.toContain(h);
-  });
-
-  it("seven columns in the enum's own order, every status reaching exactly one", async () => {
-    const { BOARD_COLUMNS, boardColumnsCover, boardColumnFor } = await import("../../lib/queryCentreGrid");
-    expect(BOARD_COLUMNS).toHaveLength(7);
-    expect(BOARD_COLUMNS.map((c) => c.key)).toEqual(["queried", "preq", "psent", "freq", "fsent", "offer", "closed"]);
-    expect(boardColumnsCover(), "a status reaches no column, or two").toBe(true);
-    /* the two collectors the ref names, stated rather than implied */
-    expect(boardColumnFor(QueryStatus.REVISE_RESUBMIT)).toBe("freq");
-    expect(boardColumnFor(QueryStatus.NO_RESPONSE)).toBe("closed");
-  });
-
-  it("the band survives ONLY where the card's status is not its column's own", () => {
-    expect(board).toContain("const alt = r.status !== col.statuses[0];");
-    expect(board).toContain("{alt && (");
-    /* and the strip is always there — the column made the band redundant, not the colour */
-    expect(board).toContain('<span className="qbv-strip" aria-hidden="true" />');
-  });
-
-  it("⚠️ v14 §1 — the card is identity only, and the shingle went with the line it hid", () => {
-    /* RETARGETED. The overlap's whole justification was covering the fact line at rest; with no
-       line to cover it would have eaten the leaf instead. An 8px stack of short cards is also
-       shorter than tall cards overlapped — the density is bought again, more plainly. */
-    const css = readFileSync(join(process.cwd(), "src/components/queries/queryBoardView.css"), "utf8")
-      .replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(css).toMatch(/\.qbv-card \{[^}]*margin-bottom: 8px/);
-    expect(css, "the shingle survives").not.toMatch(/margin-bottom: calc\(-1/);
-    expect(css, "the hover lift survives — there is nothing underneath to lift clear of").not.toMatch(/\.qbv-card:hover[^{]*\{[^}]*translateY/);
-    expect(css, "the hover shadow went too — a clickable card should say so").toMatch(/\.qbv-card:hover[^{]*\{[^}]*box-shadow/);
-    /* the fact line's rules went WITH its markup */
-    for (const c of [".qbv-fact", ".qbv-fs", ".qbv-m ", ".qbv-mk"])
-      expect(css, `${c} outlived its markup`).not.toContain(c);
-    expect(board, "the board still renders a fact line").not.toContain("qbv-fact");
-    expect(board, "the board still renders materials").not.toMatch(/MATERIAL_SLOTS|qbv-mats/);
-    /* the header's rule is the state's deep step, and the header takes no fill */
-    expect(css).toMatch(/\.qbv-h \{[^}]*border-bottom: 1\.5px solid var\(--state-accent/);
-    expect(css.match(/\.qbv-h \{[^}]*\}/)?.[0] ?? "", "the column header grew a filled bar").not.toMatch(/background/);
-  });
-
-  /* ⚠️ THE PLACEHOLDER CASE IS DELETED, NOT INVERTED. It asserted that the Calendar rendered one
-     sentence and nothing else — true while the board could not be mounted, and a statement about a
-     decision that no longer stands now that it can. This repo's rule is that an assertion
-     describing a retired decision is deleted; inverting it into "the placeholder is gone" would
-     leave a lock whose subject is an absence nobody is tempted to restore. What replaced it is
-     `tests/e2e/qcCalendar.measure.ts`, which asserts the board actually mounts and draws. */
-});
+/* ⚠️ DESCRIBE RETIRED (Query Centre v11, 19 Sep) — "Phase 3–5 · three renderers over one set of rows".
+   Its subjects are deleted: `QueryBoardView` (the Board view is removed) and `QueryListView` (replaced by
+   `centre/QcList`). The law that mattered — every view takes the ONE derived list and re-derives nothing —
+   is restated against the v11 page in `centre/qcCentre.test.tsx`; the board's own cases (no drag, seven
+   columns, the band) have nothing left to describe. */
 
 /* ══ views pass 4 (v14) — the row, the verbs, the scrim and the motion ════════════════════════ */
 describe("v14 §2–§4 · one predicate, one history, one ground", () => {
   const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-  const list = readFileSync(join(process.cwd(), "src/components/queries/QueryListView.tsx"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  /* `list` read a file retired with v11 */
   const panel = readFileSync(join(process.cwd(), "src/components/queries/QueryPanel.tsx"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
   const pcss = readFileSync(join(process.cwd(), "src/components/queries/queryPanel.css"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "");
-  const lcss = readFileSync(join(process.cwd(), "src/components/queries/queryListView.css"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "");
+  /* `lcss` read a file retired with v11 */
 
-  it("§2 · the list's verbs ARE the drawer's — one predicate, imported by both", () => {
-    expect(list).toContain('import { queryVerbs, type SinceEvent } from "../../lib/queryRowFacts";');
-    expect(panel).toContain("const verbs = queryVerbs(facts.turn);");
-    expect(list).toContain("const v = queryVerbs(f.turn);");
-    /* neither surface restates a gate of its own */
-    for (const [what, src] of [["list", list], ["panel", panel]] as const)
-      expect(src, `${what} restates the agent-side gate`).not.toMatch(/turn === "sand" \|\| .*turn === "agent"/);
-  });
+  /* ⚠️ RETIRED (v11): rows carry no verbs. `queryVerbs` is still the ONE predicate — read by the drawer and by the
+     docked card (`centre/qcList.test.tsx`: "only what `queryVerbs` offers"). */
 
-  it("§2 · Court is retired, and the status is plain text with its dot", () => {
-    expect(list).not.toContain("qlv-turn");
-    expect(list).not.toContain("Court");
-    expect(lcss, "the status pill kept a fill").not.toMatch(/\.qlv-st \{[^}]*background/);
-    /* the row's colour is the bar, in the deep tone */
-    expect(lcss).toMatch(/\.qlv-bar \{[^}]*background: var\(--state-accent/);
-    expect(lcss).toMatch(/\.qlv-bar \{[^}]*width: 4px/);
-  });
+  /* ⚠️ RETIRED (v11) with `QueryListView` and its sheet. */
 
-  it("§2 · the Sent leaf is the original send, in sand, whatever the row's state", () => {
-    /* built from `dateSent` alone — the card's leaf legitimately drifts to the last event, and the
-       Sent column must not, because it marks where the journey started */
-    expect(page).toContain("const ms = q.dateSent ? new Date(q.dateSent).getTime() : NaN;");
-    expect(page).toContain('out[q.id] = { month: MONTHS_SHORT[d.getMonth()].toUpperCase(), day: d.getDate(), caption: "sent" };');
-    /* …and it wears the Queried class, so its month strip is sand on every row */
-    expect(list).toContain('className="qlv-leaf qcc--st-queried"');
-    /* one month table, shared with the card's own leaf */
-    expect(page).toContain("MON as MONTHS_SHORT");
-  });
+  /* ⚠️ RETIRED (v11) with `QueryListView`: the v11 row's date tile is the send date, on the row's state colour. */
 
-  it("§2 · Since then reads the timeline's own rows, and says so when there are none", () => {
-    expect(page).toContain("out[q.id] = sinceThen(activities as never, q.id,");
-    expect(list).toContain("nothing yet");
-    const facts = readFileSync(join(process.cwd(), "src/lib/queryRowFacts.ts"), "utf8")
-      .replace(/\/\*[\s\S]*?\*\//g, "");
-    /* the send is the leaf's, so it is excluded — what is left is precisely "since then" */
-    expect(facts).toContain("if (a.activityType === ActivityType.QUERY_SENT) continue;");
-    expect(facts).toContain("out.sort((x, y) => x.atMs - y.atMs)");
-  });
+  /* ⚠️ RETIRED (v11) with `QueryListView`: the v11 row has no "since then" column; the card's Tracking tab is the timeline. */
 
-  it("§2 · the action grid is fixed, and an absent verb is hidden rather than removed", () => {
-    expect(lcss).toMatch(/\.qlv-acts \{[^}]*grid-template-columns: 132px 30px 30px 30px/);
-    expect(list).toContain('style={v.nudge ? undefined : { visibility: "hidden" }}');
-    expect(list).toContain('style={v.markClosed ? undefined : { visibility: "hidden" }}');
-    /* a row action opens the DRAWER first — the desk needs its host and the ghost needs a rail.
-       ⚠️ RETARGETED 11 Sep (Grid pass §5): the row's handler is the page's shared `handleRowVerb`
-       now, so the claim is asserted as ORDER inside it rather than as two lines at one indentation. */
-    const verb = sliceBetween(page, "const handleRowVerb = (", "const handleRowMore = (");
-    const drawer = verb.indexOf("setSelectedQueryId(id);");
-    expect(drawer, "the handler no longer selects the row").toBeGreaterThan(-1);
-    expect(verb.indexOf("onOpenQuery?.(id);"), "the handler no longer opens the drawer").toBeGreaterThan(drawer);
-    expect(verb.indexOf("openDeskVerb("), "the desk opens before its host").toBeGreaterThan(verb.indexOf("onOpenQuery?.(id);"));
-  });
+  /* ⚠️ RETIRED (v11): there is no row action grid. */
 
   it("⚠️ §3 · the top bar carries NO verbs — navigation only", () => {
     /* ⚠️ THE FAR ANCHOR IS SEARCHED FROM THE NEAR ONE. There are two `qpn-inner` in this file (the
@@ -659,138 +538,10 @@ describe("v14 §2–§4 · one predicate, one history, one ground", () => {
 });
 
 /* ══ toolbar v2 · §3 — the list header ════════════════════════════════════════════════════════ */
-describe("§3 (sand band, superseding the mono) · the header is separated by its GROUND, and it drives THE sort", () => {
-  const list = readFileSync(join(process.cwd(), "src/components/queries/QueryListView.tsx"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-  const css = readFileSync(join(process.cwd(), "src/components/queries/queryListView.css"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "");
-  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-
-  /* ⚠️ REWRITTEN, NOT RETARGETED. The previous four assertions asserted PLAYFAIR — the choice
-     this section withdraws — so they described a retired decision and are deleted rather than
-     inverted. What survives is the LAW they were standing for: the header must not be set in the
-     face the agent names beneath it use, whatever that face is. */
-  /**
-   * ⚠️ THIS CASE HAS NOW BEEN WRITTEN THREE TIMES, AND THE REASON IS WORTH MORE THAN THE VALUES.
-   * v2 asserted Playfair; query-toolbar §3 replaced it with mono and asserted "NOT the serif the
-   * agent names use"; this replaces it with Playfair again. Neither reversal was a mistake — what
-   * changed underneath both is WHAT SEPARATES THE HEADER FROM THE ROWS. On a white header sharing
-   * the rows' ground, the typeface was the only separator available, and a serif label an inch
-   * above serif data cannot be read as a label. A sand band separates them by GROUND, which frees
-   * the type to be the page's own voice.
-   *
-   * So the durable claim is the SEPARATION, and it is asserted as the band — not as a typeface,
-   * which is the term that has flipped twice.
-   */
-  it("a sand band with its own rule — the header does not share the rows' ground", () => {
-    expect(css).toMatch(/\.qlv-head \{[^}]*background: var\(--state-queried, #f7efe3\)/);
-    expect(css).toMatch(/\.qlv-head \{[^}]*border-bottom: 1px solid #e4d9c9/);
-    /* the rows keep the card's own white — if they ever took the band's ground the separation
-       would be gone and this case would still pass on the header alone */
-    expect(css, "the rows took the header's ground").not.toMatch(/(?:^|\n)\s*\.qlv-row \{[^}]*background:/);
-  });
-
-  /**
-   * ⚠️ THE BUTTON MAY NOT DECLARE A FONT AT ALL, and this is the only part of the fault a source
-   * lock can see. `.qlv-h--btn { font: inherit }` sat after `.qlv-h` at equal specificity and
-   * reset the family and size to whatever the row inherits — so the header rendered in the page's
-   * sans while the sheet said Playfair, and before that while it said JetBrains Mono. The mono
-   * only LOOKED right because `text-transform` and `letter-spacing` are not part of the `font`
-   * shorthand and came through on their own.
-   *
-   * ⚠️ AND `font-family: inherit` IS NOT THE FIX — it is the same damage spelled longhand, for the
-   * same reason. The modifier needs no font reset: `.qlv-h` is an author rule on the same element
-   * and beats the UA sheet unaided. So the assertion is an ABSENCE of any font declaration here.
-   *
-   * The rendered face is asserted where it belongs — `parity` in `queryViews.measure.ts` reads
-   * the computed `font-family`, which is the only thing that can see a cascade.
-   */
-  it("the sortable header button declares no font — the shorthand was silently winning", () => {
-    const btn = (css.match(/(?:^|\n)\.qlv-h--btn \{[^}]*\}/) ?? [""])[0];
-    expect(btn, "the .qlv-h--btn rule vanished — this lock now asserts nothing").toContain("cursor: pointer");
-    expect(btn, "a font declaration came back on the modifier").not.toMatch(/font(-family|-size|-weight)?\s*:/);
-  });
-
-  it("names in Playfair ink, orderless names muted — the ref's own four values", () => {
-    expect(css).toMatch(/\.qlv-h \{[^}]*font-family: var\(--font-serif\)/);
-    expect(css).toMatch(/\.qlv-h \{[^}]*font-size: 14px/);
-    expect(css).toMatch(/\.qlv-h \{[^}]*color: var\(--ink/);
-    expect(css).toMatch(/\.qlv-h--dead \{[^}]*color: #9c8878/);
-  });
-
-  /* ⚠️ THE ALIGNMENT LAW, AS SOURCE — the rendered proof is in the measurement, which is where a
-     geometric claim belongs. What a source lock CAN say is that there is only one template and
-     one horizontal padding to disagree about, which is the structural guarantee behind it. */
-  it("one grid template and one horizontal padding, shared by the header and the rows", () => {
-    const shared = css.match(/\.qlv-head, \.qlv-row \{[^}]*\}/g) ?? [];
-    expect(shared.length, "the shared rule was split or renamed").toBeGreaterThanOrEqual(1);
-    expect(shared[0]).toMatch(/grid-template-columns:/);
-    expect(shared[0]).toMatch(/padding-left: 26px/);
-    expect(shared[0]).toMatch(/padding-right: 18px/);
-    /* neither may state a horizontal padding of its own — that is exactly how they drifted */
-    const headOnly = (css.match(/(?:^|\n)\.qlv-head \{[^}]*\}/) ?? [""])[0];
-    const rowOnly = (css.match(/(?:^|\n)\.qlv-row \{[^}]*\}/) ?? [""])[0];
-    for (const [name, block] of [["head", headOnly], ["row", rowOnly]] as const) {
-      expect(block, `${name} restated a horizontal padding`).not.toMatch(/padding-left|padding-right/);
-      expect(block, `${name} used the padding shorthand, which sets all four`).not.toMatch(/padding:/);
-    }
-    /* ⚠️ AND THE MEDIA QUERY IS WHERE IT ACTUALLY BROKE: it narrowed the ROW's left padding and
-       not the header's, so the two were 4px apart at 1280 and identical at 1440. */
-    const mq = (css.match(/@media \(max-width: 1380px\) \{[\s\S]*?\n\}/) ?? [""])[0];
-    /* ⚠️ ANCHORED. A bare `\.qlv-row \{` also matches the TAIL of `.qlv-head, .qlv-row {`, so the
-       first form of this assertion went red on the shared rule that fixes the bug — the exact
-       first-match trap this repo records against class-name locks, wearing a grouped selector. */
-    expect(mq, "the narrow regime moved one of them without the other")
-      .not.toMatch(/(?:^|\n)\s*\.qlv-row \{[^}]*padding-left/);
-  });
-
-  /* ⚠️ THE CONDITIONAL-MOUNT ASSERTION IS DELETED, NOT INVERTED. It required the caret to exist
-     only on the sorted column, which is precisely what §3 changes: a caret that is mounted on
-     hover grows an element under the pointer and reflows the label. Three opacities, one
-     element, nothing moving. */
-  it("the caret is always mounted and opacity-stepped — 0, .4 on hover, 1 when sorted", () => {
-    expect(css).toMatch(/\.qlv-caret \{[^}]*color: #7c3a2a/);
-    expect(css).toMatch(/\.qlv-caret \{[^}]*opacity: 0/);
-    expect(css).toMatch(/\.qlv-h--btn:hover \.qlv-caret \{[^}]*opacity: 0\.4/);
-    expect(css).toMatch(/\.qlv-h--on \.qlv-caret \{[^}]*opacity: 1/);
-    expect(list, "the caret went back to being conditionally mounted").not.toContain("{sortKey === c.sort && (");
-    /* ⚠️ AND NO COLOUR SHIFT ON HOVER — asserted as an ABSENCE, because the inherited rule would
-       now lighten an ink label. The caret is the whole affordance, which is all the ref draws. */
-    expect(css, "a hover colour came back, and from ink it can only lighten")
-      .not.toMatch(/(?:^|\n)\s*\.qlv-h--btn:hover \{/);
-  });
-
-  /* ⚠️ RIGHT-ALIGNMENT IS RETIRED BY §4.1, so that half is deleted rather than kept. The law that
-     survives is that the three orderless columns are not controls: muted, default cursor, and
-     rendered as spans so they are out of the tab order entirely. */
-  it("What went, Since then and Actions name no order — inert, muted, unfocusable", () => {
-    expect(list).toContain('<span key={i} className="qlv-h qlv-h--dead">{c.label}</span>');
-    expect(css).toMatch(/\.qlv-h--dead \{[^}]*cursor: default/);
-    expect(css).toMatch(/\.qlv-h--dead \{[^}]*color: #9c8878/);
-    /* §4.1 — the Actions column joins the other six rather than hanging off the right edge */
-    expect(css).toMatch(/\.qlv-acts \{[^}]*justify-content: start/);
-    expect(css, "Actions is right-aligned again").not.toMatch(/\.qlv-acts \{[^}]*justify-content: end/);
-  });
-
-  /* ⚠️ THE AGENT COLUMN SORTS BY SURNAME, which it claimed and did not do. Asserted through the
-     PURE function rather than the comparator's spelling, so a refactor of the switch cannot
-     redden it and a change of meaning must. */
-  it("Agent sorts by surname, not by the whole name", () => {
-    expect(surnameKey("Hester Blaine")).toBe("blaine");
-    expect(surnameKey("Ottoline de Vere")).toBe("vere");
-    expect(surnameKey("Madonna")).toBe("madonna");          // a mononym sorts under itself
-    expect(surnameKey("  Iris  Kwan  ")).toBe("kwan");      // a trailing space is not a surname
-    expect(surnameKey("Ana Ruiz-Marsh")).toBe("ruiz-marsh"); // a hyphenated surname is one token
-    expect(surnameKey("")).toBe("");
-    expect(surnameKey(null)).toBe("");
-    /* and the comparator reaches it, with the full name as the tiebreak */
-    expect(page).toMatch(/case "agent_az": return surnameKey\(agA\)[\s\S]{0,80}agA\.localeCompare\(agB\)/);
-  });
-
-  /* ⚠️ RETIRED with the sortable heads and the Sort pill: there is one sort control now (the sentence),
-     so "one sort state" holds by construction. Its six options are locked in `lib/qcSummary.test.ts`. */
-});
+/* ⚠️ DESCRIBE RETIRED (v11) — "§3 (sand band…) · the header is separated by its GROUND, and it drives THE sort".
+   It locked `QueryListView`'s sortable header and its sheet, both deleted. The v11 list's head names four
+   columns and sorts nothing (the sentence sorts); its template, floors and ceilings are locked in
+   `centre/qcList.test.tsx` and measured in tests/e2e/qcV11.measure.ts. */
 
 /* ══ toolbar v2 · §1 — the popovers' chassis ══════════════════════════════════════════════════ */
 describe("§1 (toolbar v2) · an OPT-IN chassis, and a fourth caller that must not feel it", () => {
@@ -870,47 +621,9 @@ describe("§1 (toolbar v2) · an OPT-IN chassis, and a fourth caller that must n
 });
 
 /* ══ toolbar v2 · §2 — Group actually groups ══════════════════════════════════════════════════ */
-describe("§2 (toolbar v2) · one partition, three views, and a board that says why not", () => {
-  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-  const list = readFileSync(join(process.cwd(), "src/components/queries/QueryListView.tsx"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-  const grid = readFileSync(join(process.cwd(), "src/components/queries/QueryCentreGrid.tsx"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-
-  /* ⚠️ RETIRED: Group is gone from the page (v11), so neither view partitions. */
-
-  it("an empty group is omitted — the buckets ARE the headings", () => {
-    /* headings come from the bucket keys, so a group with nothing in it cannot have a heading */
-    for (const src of [grid, list])
-      expect(src).toContain("[...buckets.keys()].sort((a, b) => compareGroupLabels(a, b, group))");
-    expect(list).toContain('group === "none"');
-  });
-
-  it("the heading's rule is the group's own deep step, and blank where the group names no state", () => {
-    const gridLib = readFileSync(join(process.cwd(), "src/lib/queryCentreGrid.ts"), "utf8")
-      .replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(gridLib).toContain("export function groupAccentClass");
-    /* ⚠️ agency and month name no state, so they get "" and the CSS falls back to neutral —
-       borrowing a state's colour for a group that is not a state would mean nothing */
-    expect(gridLib).toMatch(/if \(key === "status"\)[\s\S]{0,400}return "";\n\}/);
-    const gcss = readFileSync(join(process.cwd(), "src/components/queries/queryCentreGrid.css"), "utf8");
-    expect(gcss).toMatch(/\.qcc-sech-rule \{[^}]*background: var\(--state-accent, #e4d9cb\)/);
-    const lcss = readFileSync(join(process.cwd(), "src/components/queries/queryListView.css"), "utf8");
-    expect(lcss).toMatch(/\.qlv-gline \{[^}]*background: var\(--state-accent, #e4d9cb\)/);
-  });
-
-  /* ⚠️ RETIRED: the Board view and the Group control are both removed (v11). */
-
-  it("the headings are not sticky", () => {
-    const lcss = readFileSync(join(process.cwd(), "src/components/queries/queryListView.css"), "utf8")
-      .replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(lcss.match(/\.qlv-ghead \{[^}]*\}/)?.[0] ?? "", "the list's heading sticks").not.toContain("sticky");
-    const gcss = readFileSync(join(process.cwd(), "src/components/queries/queryCentreGrid.css"), "utf8")
-      .replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(gcss.match(/\.qcc-sech \{[^}]*\}/)?.[0] ?? "", "the grid's heading sticks").not.toContain("sticky");
-  });
-});
+/* ⚠️ DESCRIBE RETIRED (v11) — "§2 (toolbar v2) · one partition, three views, and a board that says why not".
+   Group is gone from the page, so neither view partitions and there is no heading to rule or to keep
+   un-sticky. `lib/queryCentreGrid`'s grouping functions keep their own unit tests. */
 
 /* ══ quick actions · §4 — snooze and close are one decision each ══════════════════════════════ */
 describe("§4 (quick actions) · no drawer, no desk, no selection — and one component for all of it", () => {
@@ -918,8 +631,7 @@ describe("§4 (quick actions) · no drawer, no desk, no selection — and one co
     .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
   const pop = readFileSync(join(process.cwd(), "src/components/queries/QuickActionPopover.tsx"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-  const list = readFileSync(join(process.cwd(), "src/components/queries/QueryListView.tsx"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  /* `list` read a file retired with v11 */
   const panel = readFileSync(join(process.cwd(), "src/components/queries/QueryPanel.tsx"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
@@ -952,7 +664,8 @@ describe("§4 (quick actions) · no drawer, no desk, no selection — and one co
      anchor; here we prove there is only one thing to render. */
   it("every anchor mounts the SAME component — the page has exactly one QuickActionPopover", () => {
     expect((page.match(/<QuickActionPopover/g) ?? []).length).toBe(1);
-    expect(list, "the list grew its own popover").not.toContain("QuickActionPopover");
+    /* the v11 list and grid carry no controls at all, so neither can grow one */
+    for (const f of ["QcList.tsx", "QcGrid.tsx"]) expect(readFileSync(join(process.cwd(), "src/components/queries/centre", f), "utf8"), `${f} grew its own popover`).not.toContain("QuickActionPopover");
     expect(panel, "the drawer grew its own popover").not.toContain("QuickActionPopover");
     /* the drawer hands the page its BUTTON rather than opening anything; so does the docked card's ⋯ */
     expect(panel).toContain("onSnooze(e.currentTarget)");
@@ -968,32 +681,13 @@ describe("§4 (quick actions) · no drawer, no desk, no selection — and one co
    * already records the same lesson from the other direction — the drawer's tray used to REGEX
    * the caption for a figure and went on labelling a true number with a false label.
    */
-  it("the reminder clause is a control in BOTH places, and neither matches on the wording", () => {
-    const facts = readFileSync(join(process.cwd(), "src/lib/queryCardFacts.ts"), "utf8")
-      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    expect(facts, "the facts stopped publishing which clause is the reminder").toContain("nudgePartIndex");
-    /* the list's clause */
-    expect(list).toContain("i === f.nudgePartIndex && v.nudge");
-    expect(list).toContain('onVerb?.(r.id, "snooze", e.currentTarget)');
-    /* the drawer's clause — the SAME string, passed in rather than rebuilt */
-    expect(panel).toContain("reminderLabel && onSnooze && verbs.nudge");
-    expect(page).toContain("panelRow.facts.captionParts[panelRow.facts.nudgePartIndex]");
-    /* neither surface may recognise the clause by reading it */
-    for (const view of [list, panel]) {
-      expect(view, "a view matched the reminder clause on its wording")
-        .not.toMatch(/Nudge agent in|no nudge set/);
-    }
-  });
+  /* ⚠️ RETIRED (v11): the list's reminder clause is gone with the row's controls; Snooze is reached from the card's ⋯
+     and from the drawer's own clause (narrow column), both through the page's one `openQuick`. */
 
   /* ⚠️ THE DASHED UNDERLINE IS THE PANE'S "edit in place", NOT THE TIMELINE'S "provisional".
      Two grammars live three inches apart on this page and the repo already paid for diluting
      one; both anchors wear the same one, and it is asserted so a restyle cannot split them. */
-  it("both reminder clauses wear one dashed treatment", () => {
-    const lcss = readFileSync(join(process.cwd(), "src/components/queries/queryListView.css"), "utf8");
-    const pcss = readFileSync(join(process.cwd(), "src/components/queries/queryPanel.css"), "utf8");
-    expect(lcss).toMatch(/\.qlv-snz \{[^}]*border-bottom: 1px dashed #cdbfae/);
-    expect(pcss).toMatch(/\.qpn-snz \{[^}]*border-bottom: 1px dashed #cdbfae/);
-  });
+  /* ⚠️ RETIRED (v11): one of the two clauses (the list's) no longer exists. */
 
   /**
    * ⚠️ SNOOZE WRITES NO ACTIVITY — the claim its own sub-line makes to the reader. Asserted over
@@ -1180,19 +874,8 @@ describe("the well round · a recess, a toolbar in its head, bones, and one entr
   /* ⚠️ RETIRED → `qcCentre.test.tsx`: the law (the loading branch answers before ANY empty branch can,
      and there is no spinner) is restated against the v11 page's body. */
 
-  it("the bones borrow the card's own classes, so the geometry cannot drift", () => {
-    const skel = readFileSync(join(process.cwd(), "src/components/queries/QueryGridSkeleton.tsx"), "utf8");
-    for (const c of ["qcc-band", "qcc-body", "qcc-who", "qcc-chip", "qcc-whotx", "qcc-leaf", "qcc-fact", "qcc-grid"])
-      expect(skel, `the skeleton stopped using the card's ${c}`).toContain(c);
-    expect(skel).toContain('aria-hidden="true"');
-    const skCss = readFileSync(join(process.cwd(), "src/components/queries/queryGridSkeleton.css"), "utf8")
-      .replace(/\/\*[\s\S]*?\*\//g, "");
-    /* the sheen's keyframes take literal values — a var() there fails silently */
-    const kf = (skCss.match(/@keyframes qcs-sheen \{[\s\S]*?\n\}/) ?? [""])[0];
-    expect(kf).not.toContain("var(");
-    expect(skCss).toContain("linear-gradient(90deg, #efe9e1, #f6f1ea, #efe9e1)");
-    expect(skCss).toMatch(/animation: qcs-sheen 1\.5s linear infinite/);
-  });
+  /* ⚠️ RETIRED (v11) with `QueryGridSkeleton`. The v11 placeholders borrow the REAL components' classes (`qcv-row`,
+     `qcv-tile`, `qcv-cal-lane`) — `centre/qcList.test.tsx` — and the held-versus-loaded frames are measured. */
 
   /* §5 — one entrance, and it is taken off */
   /* ⚠️ RETIRED: the old entrance (`qc-wpg--enter`, tiles stepped 40ms) is off with the tiles it moved. The

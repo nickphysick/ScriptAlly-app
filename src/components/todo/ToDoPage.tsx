@@ -1868,9 +1868,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         >
           <div className="tdb-centre">
           {/* ⚠️ SEVEN TILES AND ONE TOOLBAR, BOTH THE QUERY CENTRE'S (QC-chassis round, Phase 1).
-              The tiles are `shared/StatTiles` — the markup extracted from `QueryStatTiles`, which
-              now mounts it too, so this is a shared component rather than a copy wearing its
-              classes. The toolbar's search and its three controls are `shared/ToolbarButton`,
+              The tiles are `shared/StatTiles` — the markup extracted from `QueryStatTiles`, so
+              this is a shared component rather than a copy wearing its classes. (That wrapper was
+              deleted with Query Centre v11, which has no tiles; this page is the one mount now.) The toolbar's search and its three controls are `shared/ToolbarButton`,
               extracted from the Query Centre's own inline markup for the same reason.
 
               ⚠️ THE COUNTS COME FROM THE ONE ARRAY THE VIEWS RENDER FROM, and the five categories

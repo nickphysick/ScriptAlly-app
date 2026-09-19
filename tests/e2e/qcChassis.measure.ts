@@ -14,7 +14,7 @@
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn, liftMotionSuppression, visiblePage, openFocusedRow } from "./measure";
 import { writeFileSync, rmSync } from "node:fs";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 type R = { id: string; ok: boolean; note: string };
@@ -182,18 +182,38 @@ test("Phase 1 — the header, the seven tiles and the toolbar", async ({ page })
       r.segs.length === 3 && r.segs[0] === "Grid" && r.segs[1] === "List" && r.segs[2] === "Board",
       JSON.stringify(r.segs));
 
-  /* ⚠️ THE TILES ARE THE QUERY CENTRE'S COMPONENT, ASSERTED AT THE SOURCE AS WELL AS THE MARKUP.
-     Matching element structure alone is satisfiable by a copy carrying the same class names,
-     which is the fork this round forbids; that both pages IMPORT the same module is the claim
-     that cannot be. */
+  /* ⚠️ THE TILES AND THE TOOLBAR ARE SHARED MODULES, NEVER A COPY — ASSERTED AT THE SOURCE AS WELL
+     AS THE MARKUP. Matching element structure alone is satisfiable by a copy carrying the same
+     class names, which is the fork this round forbids.
+
+     ⚠️ RETARGETED 19 SEP, AND THE LAW SURVIVES THE MOVE. This used to read `QueryStatTiles.tsx` and
+     require BOTH pages to import the one module. Query Centre v11 replaced its tiles with a
+     sentence and that wrapper is deleted, so "both import it" is no longer sayable. What the claim
+     was always FOR is that nobody re-draws the markup — so it is now stated directly: this page
+     imports the shared modules, and exactly ONE component file in `src/components` emits each
+     class. That is the stronger form; it fails on a copy anywhere, not only on the second page. */
   const here = join(process.cwd(), "src/components");
-  const qTiles = readFileSync(join(here, "queries/QueryStatTiles.tsx"), "utf8");
   const todo = readFileSync(join(here, "todo/ToDoPage.tsx"), "utf8");
-  const qPage = readFileSync(join(here, "Queries.tsx"), "utf8");
-  add("P1.9 · the tiles and the toolbar are SHARED — both pages import the one module",
-      qTiles.includes('from "../shared/StatTiles"') && todo.includes('from "../shared/StatTiles"')
-        && qPage.includes('from "./shared/ToolbarButton"') && todo.includes('from "../shared/ToolbarButton"'),
-      "QueryStatTiles→StatTiles · ToDoPage→StatTiles · Queries→ToolbarButton · ToDoPage→ToolbarButton");
+  const emitters = (cls: string): string[] => {
+    const out: string[] = [];
+    const walk = (dir: string) => {
+      for (const e of readdirSync(dir, { withFileTypes: true })) {
+        const f = join(dir, e.name);
+        if (e.isDirectory()) { walk(f); continue; }
+        if (!/\.tsx$/.test(e.name) || /\.test\.tsx$/.test(e.name)) continue;
+        const src = readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+        if (src.includes(cls)) out.push(f.slice(here.length + 1));
+      }
+    };
+    walk(here);
+    return out;
+  };
+  const tileFiles = emitters("qct-tile");
+  const barFiles = emitters("qcc-tb-btn");
+  add("P1.9 · the tiles and the toolbar are SHARED — this page imports them, and one file emits each",
+      todo.includes('from "../shared/StatTiles"') && todo.includes('from "../shared/ToolbarButton"')
+        && tileFiles.join() === "shared/StatTiles.tsx" && barFiles.join() === "shared/ToolbarButton.tsx",
+      `ToDoPage→StatTiles · ToDoPage→ToolbarButton · qct-tile in [${tileFiles.join(", ")}] · qcc-tb-btn in [${barFiles.join(", ")}]`);
 
   /* ── selecting a tile narrows the list ── */
   const before = r.rows;
