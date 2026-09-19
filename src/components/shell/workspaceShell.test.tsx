@@ -315,20 +315,33 @@ describe("the breadcrumb is chrome", () => {
   });
 
   /**
-   * ⚠️ RETARGETED — + New stays ink, and the pink treatment stays rejected. What moved is that the
-   * ink is a TOKEN: this button and the masthead's primary are the same object by design, and they
-   * were two literals one unit apart (`#1c130e` here, `#1c130f` there). The claim is unchanged and
-   * is now stronger, because it asserts the shared source rather than a value that could drift.
+   * ⚠️ RETARGETED (Query Centre v11, 19 Sep) — `+ New` IS GONE FROM THE BAR, app-wide, and this case
+   * used to assert its fill. The law that survives: the bar carries no create control and none of
+   * its furniture, and the one pill left (Give feedback) is ANTHRACITE with white text while the
+   * keycap beside it stays ink. `newMenu.test.ts` retired with the menu it locked.
    */
-  it("+ New is INK from the shared token, never pink", () => {
-    const n = rule(".ws-nbtn");
-    expect(n).toContain("background: var(--btn-ink)");
-    expect(n, "the near-black is a literal again — the masthead's primary would drift from it")
-      .not.toMatch(/#1c130[ef]/i);
-    expect(n).not.toContain("#f5e2da");
-    /* the token itself, where it is declared, so the value is still pinned somewhere */
-    const idx = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
-    expect(idx, "--btn-ink moved off the app's near-black").toContain("--btn-ink: #1c130f");
+  const decls = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  it("the bar has no `+ New` — not the button, its popover, its anchor or its keyframe", () => {
+    const src = decls(readFileSync(resolve(__dirname, "WorkspaceShell.tsx"), "utf8"));
+    for (const gone of ["ws-nbtn", "ws-newmenu", "ws-newwrap", "setNewOpen", "invokeCapture", "TODO_OPEN_COMPOSER"]) {
+      expect(src, `${gone} is still in the shell`).not.toContain(gone);
+    }
+    /* the sheet: no rule of its own. (`.ws-nbtn` survives INSIDE the dashboard cover's `:is()` lists,
+       where it matches nothing — left because those lists are the dashboard's and locked there.) */
+    expect(cssRules, "`.ws-nbtn` has a rule again").not.toMatch(/(?:^|\n)\s*\.ws-nbtn[^,{]*\{/);
+    for (const gone of [".ws-newmenu", ".ws-newwrap", "ws-menuin"]) expect(cssRules, gone).not.toContain(gone);
+  });
+  it("Give feedback's pill is anthracite with white text; the keycap stays ink", () => {
+    const prim = decls(readFileSync(resolve(__dirname, "primitives.css"), "utf8"));
+    const pill = /(?:^|\n)\.sp-inkpill\s*\{([^}]*)\}/.exec(prim);
+    expect(pill, ".sp-inkpill has no rule").toBeTruthy();
+    expect(pill![1]).toContain("background: var(--sp-anthracite)");
+    expect(pill![1]).toContain("color: #ffffff");
+    expect(prim).toContain("--sp-anthracite: #2a3a52");
+    const key = /(?:^|\n)\.sp-search-k\s*\{([^}]*)\}/.exec(prim);
+    expect(key, ".sp-search-k has no rule").toBeTruthy();
+    expect(key![1], "the keycap followed the pill to anthracite").toContain("var(--sp-ink)");
+    expect(prim).toContain("--sp-ink: #1c130f");
   });
 });
 

@@ -271,18 +271,19 @@ describe("the kicker's and the CTA's treatment", () => {
   });
 
   /**
-   * ⚠️ THE CTA'S OWN CASE IS DELETED WITH THE BUTTON, AND WHAT SURVIVES IS THE TOKEN IT LEFT BEHIND.
-   * `--btn-ink` was created because the top bar's `+ New` and the masthead's primary were two
-   * literals one unit apart; the primary is gone and the token still has a consumer, which is the
-   * only reason it is not deleted too. `--btn-ink-on` had exactly one reader and follows the button
-   * out — swept for READS rather than definitions.
+   * ⚠️ RETARGETED TWICE, AND THE LAW IS THE SAME BOTH TIMES: `--btn-ink` EXISTS ONLY WHILE SOMETHING
+   * READS IT. It was created because the top bar's `+ New` and the masthead's primary were two
+   * literals one unit apart. The masthead primary went first; `+ New` went on 19 Sep (Query Centre
+   * v11). The token still has readers — the masthead CTA rule, the collapsed bar's CTA — so it stays,
+   * and this asserts that set is non-empty rather than naming one member that can leave again.
+   * `--btn-ink-on` had exactly one reader and followed it out; swept for READS, not definitions.
    */
-  it("⚠️ `--btn-ink` SURVIVES BECAUSE `+ New` READS IT; `--btn-ink-on` DOES NOT", () => {
-    const shell = strip(readFileSync(resolve(__dirname, "workspaceShell.css"), "utf8"));
-    const nbtn = /(?:^|\n)\.ws-nbtn\s*\{([^}]*)\}/.exec(shell);
-    expect(nbtn, "the top bar's `+ New` has no rule").toBeTruthy();
-    expect(nbtn![1], "the token's last consumer went back to a literal — delete the token or keep the reader")
-      .toContain("background: var(--btn-ink)");
+  it("⚠️ `--btn-ink` SURVIVES BECAUSE SOMETHING STILL READS IT; `--btn-ink-on` DOES NOT", () => {
+    const readers = ["pageHeader.css", "workspacePageGrid.css", "workspaceShell.css"]
+      .filter((f) => strip(readFileSync(resolve(__dirname, f), "utf8")).includes("var(--btn-ink)"));
+    expect(readers.length, "nothing in the shell reads --btn-ink any more — delete the token rather than keep an orphan").toBeGreaterThan(0);
+    expect(strip(readFileSync(resolve(__dirname, "workspaceShell.css"), "utf8")), "`+ New` has a rule again")
+      .not.toMatch(/(?:^|\n)\.ws-nbtn\s*\{/);
     expect(strip(root), "--btn-ink was deleted while something still reads it").toContain("--btn-ink: #1c130f");
     expect(strip(root), "--btn-ink-on is still declared and nothing reads it").not.toContain("--btn-ink-on");
     for (const f of ["pageHeader.css", "workspacePageGrid.css", "workspaceShell.css"]) {

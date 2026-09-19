@@ -99,7 +99,12 @@
 /* ══ THE BAR'S CONTROLS, IN THE CARDS' LANGUAGE (the v34 mockup, 19 Sep; ref design-refs/dashboard-v34.html)
    ⚠️ ONE SIZE ON EVERY PAGE — 50px. A Help button that changes size between routes is worse than
    every page starting 16px lower (Nick). The card's grammar at a button's scale: a WHITE RIM with its
-   soft shadow, and inside it a BURGUNDY LINE. Burgundy is only ever a line; buttons stay ink.
+   soft shadow, and inside it a BURGUNDY LINE. Burgundy is only ever a line.
+
+   ⚠️ BUTTONS ARE ANTHRACITE `#2a3a52` WITH WHITE TEXT (Query Centre v11, 19 Sep — Nick), which
+   SUPERSEDES "buttons stay ink". Scope so far: this pill (Give feedback; the Query Centre's "+ Log a
+   query") and the Query Centre's own buttons. KEYCAP HINTS STAY INK — `.sp-search-k` reads `--sp-ink`
+   and must not follow the pill. The app's other ink buttons are listed in CLAUDE.md for a ruling.
 
    ⚠️ THE TYPEWRITER FACE IS DECLARED HERE, AT `:root`, because these primitives render under two
    shells and the dashboard's own `--os-type` lives on `.os-root`, which is an ancestor of neither bar.
@@ -109,6 +114,8 @@
   --sp-type: "Special Elite", "Courier New", Courier, monospace;
   --sp-ctl: 50px;
   --sp-ink: #1c130f;
+  --sp-anthracite: #2a3a52;
+  --sp-anthracite-hov: #34465f;
   --sp-cream: #f5f1eb;
   --sp-frame: #7c3a2a;
   --sp-lift: 0 2px 8px rgba(28, 19, 15, 0.06);
@@ -188,7 +195,8 @@
 /* the "?" is a character in the page's face, optically centred — Special Elite sits high in its em */
 .sp-help-q { font-family: var(--sp-type); font-size: 23px; line-height: 1; padding-top: 3px; display: block; }
 
-/* ══ THE INK PILL — Give feedback, and + New ══ */
+/* ══ THE PILL — Give feedback, and the Query Centre's "+ Log a query". The class keeps its name; the
+   fill is anthracite now (see the token block). ══ */
 .sp-inkpill {
   box-sizing: border-box;
   flex: none;
@@ -196,12 +204,12 @@
   display: flex; align-items: center; gap: 9px;
   padding: 0 22px 0 18px;
   border: 0; border-radius: 30px;
-  background: var(--sp-ink); color: var(--sp-cream);
+  background: var(--sp-anthracite); color: #ffffff;
   font-family: var(--sp-type); font-size: 16px; line-height: 1; white-space: nowrap;
   cursor: pointer;
   transition: background-color 0.14s ease, transform 0.14s ease;
 }
-.sp-inkpill:hover { background: #2e221b; }
+.sp-inkpill:hover { background: var(--sp-anthracite-hov); }
 .sp-inkpill:active { transform: translateY(1px); }
 .sp-inkpill:focus-visible { outline: 2px solid var(--sp-frame); outline-offset: 2px; }
 .sp-inkpill svg { width: 17px; height: 17px; flex: none; margin-top: -2px; stroke-width: 1.9; }

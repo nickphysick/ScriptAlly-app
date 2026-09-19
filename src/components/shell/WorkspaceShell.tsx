@@ -26,14 +26,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useLocation } from "react-router-dom";
 import { MastheadSectionContext } from "./mastheadSection";
 import {
-  Book, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, PenLine, Plus,
+  Book, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, PenLine,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { planLine, resolveScopedManuscript, stepManuscript } from "../../lib/shellSidebar";
 import {
   ShellSection, openForHit, sectionClick, sectionRowState, shellCrumb, shellHitFor,
 } from "../../lib/workspaceShell";
-import { AvatarChip, CountChip, HelpButton, MenuCard, MenuCardDivider, MenuCardItem, SearchPill } from "./primitives";
+import { AvatarChip, CountChip, HelpButton, MenuCard, MenuCardItem, SearchPill } from "./primitives";
 import { FEEDBACK_FAB } from "../../lib/beta";
 import { useSaveState, saveWhisper } from "../../lib/useSaveState";
 import { useSidebarCollapsed } from "./useSidebarCollapsed";
@@ -41,9 +41,7 @@ import { formatSidebarName, getInitials } from "../../lib/displayName";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { DeskTooltip } from "../dashboard/DeskTooltip";
 import { Rect as TipRect } from "../../lib/deskTooltip";
-import { invokeCapture } from "./railNav";
 import { manuscriptViewPath } from "./manuscriptScope";
-import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
 import {
   ACCOUNT_ROUTES, accountSectionForPath, isAccountPath, AccountSectionId,
 } from "../../lib/accountRoutes";
@@ -300,9 +298,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
   const [openId, setOpenId] = useState<string | null>(() => openForHit(hit));
   const [msOpen, setMsOpen] = useState(false);
-  const [newOpen, setNewOpen] = useState(false);
 
-  const newRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setOpenId(openForHit(hit)); }, [hit?.section, hit?.child]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -320,53 +316,6 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
       document.removeEventListener("keydown", onKey);
     };
   }, [msOpen]);
-
-  /**
-   * ⚠️ THE MENU OWNS ITS KEYBOARD (polish P1). Outside-click and Escape were already here; arrow
-   * cycling, Tab-to-close and focus handling were not, so the menu could be opened by keyboard and
-   * then not operated by one.
-   *
-   * ⚠️ FOCUS RETURNS TO THE BUTTON ON CLOSE — but only when focus is still INSIDE the menu. A
-   * selection that navigates away has already put focus where it belongs, and yanking it back to a
-   * button on the previous page is worse than leaving it.
-   */
-  useEffect(() => {
-    if (!newOpen) return;
-    const items = (): HTMLElement[] =>
-      Array.from(newRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
-
-    items()[0]?.focus();
-
-    const onDown = (e: PointerEvent) => {
-      if (newRef.current?.contains(e.target as Node)) return;
-      setNewOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { setNewOpen(false); return; }
-      // Tab closes rather than trapping — this is a menu, not a dialogue.
-      if (e.key === "Tab") { setNewOpen(false); return; }
-      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
-      const list = items();
-      if (!list.length) return;
-      e.preventDefault(); // else the page scrolls under an open menu
-      const at = list.indexOf(document.activeElement as HTMLElement);
-      const next = e.key === "ArrowDown"
-        ? (at + 1) % list.length
-        : (at <= 0 ? list.length - 1 : at - 1);
-      list[next]?.focus();
-    };
-    document.addEventListener("pointerdown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("pointerdown", onDown);
-      document.removeEventListener("keydown", onKey);
-      if (newRef.current?.contains(document.activeElement)) {
-        newRef.current.querySelector<HTMLElement>(".ws-nbtn")?.focus();
-      }
-    };
-  }, [newOpen]);
-
-  useEffect(() => { setNewOpen(false); }, [pathname]);
 
   const go = useCallback((path: string) => {
     setMsOpen(false);
@@ -956,75 +905,14 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   <span className="ws-esc" aria-hidden="true">esc</span>
                 </button>
 
-                {/* ⚠️ NOT RENDERED ON THE DASHBOARD (v16, 18 Sep — Nick). That page's own quick actions
-                    are its answer to "make something", and two invitations a hand's width apart is
-                    one too many. It is ABSENT rather than hidden: a control the reader cannot see but
-                    the shell still mounts is a dead claim, and this one owns a popover and a focus
-                    trap that would go on listening behind it. Every other route keeps it. */}
-                {!dashMode && (
-                <span className="ws-appctl ws-newctl">
-                <div className="ws-newwrap" ref={newRef}>
-                  <button
-                    type="button"
-                    className="ws-nbtn sp-inkpill"
-                    aria-haspopup="menu"
-                    aria-expanded={newOpen}
-                    onClick={() => setNewOpen((o) => !o)}
-                  >
-                    <Plus aria-hidden="true" />
-                    New
-                  </button>
-                  {newOpen && (
-                    <MenuCard className="ws-newmenu" role="menu">
-                      {/* ⚠️ CONTEXT-AWARE, and only here. On a To-do page the global create offers
-                          the thing that page makes — a task — above the app-wide three. It opens
-                          the SAME composer the page's own pink action does, in task mode (audit
-                          item 7: one verb per control), by announcing an event the page listens
-                          for. The shell must not learn what a composer is. */}
-                      {pathname.startsWith("/todo") && (
-                        <MenuCardItem
-                          role="menuitem"
-                          label="Add a task"
-                          onSelect={() => {
-                            setNewOpen(false);
-                            window.dispatchEvent(new CustomEvent(TODO_OPEN_COMPOSER));
-                          }}
-                        />
-                      )}
-                      {/* The SAME capture contracts the dashboard hero actions use — the bar adds
-                          a doorway, never a second door. */}
-                      <MenuCardItem
-                        role="menuitem"
-                        label="Log a query"
-                        onSelect={() => { setNewOpen(false); if (onNavigate) invokeCapture("query", onNavigate); }}
-                      />
-                      <MenuCardItem
-                        role="menuitem"
-                        label="Record a response"
-                        onSelect={() => { setNewOpen(false); if (onNavigate) invokeCapture("record", onNavigate); }}
-                      />
-                      <MenuCardItem
-                        role="menuitem"
-                        label="Add agent"
-                        onSelect={() => { setNewOpen(false); if (onNavigate) invokeCapture("agent", onNavigate); }}
-                      />
-                      <MenuCardDivider />
-                      {/* ⚠️ THE REF ASKS FOR SIX ITEMS AND FOUR EXIST. "Add a manuscript" is real —
-                          App.tsx intercepts that exact sub-page name — so it is here. "New note"
-                          is NOT: the composer is opened by an event the To-do PAGE listens for, so
-                          from anywhere else it would reach no listener and the row would do
-                          nothing. A dead row teaches the wrong shape of the app (the shell renders
-                          what exists), so it waits for a real contract. */}
-                      <MenuCardItem
-                        role="menuitem"
-                        label="Add a manuscript"
-                        onSelect={() => { setNewOpen(false); onNavigate?.("manuscripts", "Add a manuscript"); }}
-                      />
-                    </MenuCard>
-                  )}
-                </div>
-                </span>
-                )}
+                {/* ⚠️ THERE IS NO `+ New` IN THE BAR (Query Centre v11, 19 Sep — Nick). Each page's own
+                    primary is where that page makes something: "+ Log a query" on the Query Centre,
+                    "Add manuscript" on Manuscripts, "Add a task" on To-do, the dashboard's quick
+                    actions. The button, its popover, its focus handling and its keyboard effect went
+                    together — a control nobody can see that the shell still listens for is a dead
+                    claim. What it leaves thinner is recorded in CLAUDE.md, deliberately unfixed here:
+                    the query-less "Record a response" (dashboard tile and ⌘K only) and, on desktop,
+                    "Add a manuscript" (Manuscripts and the dashboard only). */}
               </div>
           </header>
 

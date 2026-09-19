@@ -869,47 +869,9 @@
   .ws-fbpill-l { display: none; }
   .ws-fbpill { padding: 0; width: var(--sp-ctl, 50px); justify-content: center; gap: 0; }
 }
-/* ⚠️ THE MENU ANCHOR CAME BACK WITH THE BUTTON. `.ws-newwrap` was swept out with the bar's rules
-   and its absence was invisible in every measurement — the + New menu had nothing to anchor to. */
-.ws-newwrap { position: relative; flex: none; }
-/**
- * ⚠️ THE MENU MUST NOT BE IN FLOW (polish P1). It had NO rule of its own, and `.sp-card` is
- * statically positioned — so the panel laid out as an ordinary child of the pagebar, grew the bar
- * by its own height, and pushed the entire content window down the page. Opening a menu moved the
- * thing you were reading.
- *
- * The wrapper above is the anchor (`position: relative`); this takes the panel out of flow and
- * hangs it off the button's bottom-right. `z-index` clears the window, which paints a background.
- *
- * ⚠️ TRANSFORM AND OPACITY ONLY (pack rule 7). The entrance scales from the top-right corner it
- * belongs to — animating height or top here would relayout the pagebar every frame, which is the
- * displacement bug again in slow motion.
- */
-.ws-newmenu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: 60;
-  transform-origin: top right;
-  animation: ws-menuin 0.14s cubic-bezier(0.22, 0.68, 0.36, 1);
-}
-@keyframes ws-menuin { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
-/* the chevron/plus turns to say the menu is open — transform only */
-.ws-nbtn svg { transition: transform 0.14s cubic-bezier(0.22, 0.68, 0.36, 1); }
-.ws-nbtn[aria-expanded="true"] svg { transform: rotate(45deg); }
-/* ⚠️ AND `display:flex` IS LOAD-BEARING: the button holds an icon AND a label, and without it
-   they stack — the pill rendered as a tall black circle. Caught by the screenshot, not the tests. */
-.ws-nbtn {
-  display: flex; align-items: center; gap: 7px;
-  /* ⚠️ THE FILL IS THE SHARED TOKEN NOW. It was `#1c130e`, one unit off the masthead primary's
-     `#1c130f` — two literals for one button family, which is the shape a token exists to end. The
-     text is still `#ffffff` against the masthead's `#fdfaf5`; that difference is visible and is
-     flagged rather than changed here. */
-  /* ⚠️ THE BOX, THE TYPE AND THE CREAM TEXT ARE `.sp-inkpill`'s NOW (the v34 mockup) — it matches Give
-     feedback. The fill stays the shared token, so this and the masthead primary are still one ink. */
-  background: var(--btn-ink);
-}
-.ws-nbtn svg { stroke: currentColor; fill: none; }
+/* ⚠️ `+ New` IS GONE FROM THE BAR (Query Centre v11, 19 Sep), and its rules went with it: the menu's
+   anchor, the absolutely-placed panel, its entrance keyframe and the button's own fill. Each page's
+   primary is where that page makes something. */
 
 /* ⚠️ THE WINDOW IS THE SHEET OF PAPER, AND ITS FRAME MUST NOT MOVE. It is `overflow:hidden` and
    its BODY scrolls — put the scroll on the window itself and the radius, border and inset slide
@@ -994,9 +956,9 @@
 .ws-mspill:hover img, .ws-mspill:hover svg { transform: rotate(-3deg); }
 
 /* buttons — the pressed state, again the one usually missed */
-.ws-nbtn, .ws-upgrow { transition: transform 0.14s ease, background-color 0.14s ease, border-color 0.14s ease; }
-.ws-nbtn:hover, .ws-upgrow:hover { transform: translateY(-1px); }
-.ws-nbtn:active, .ws-upgrow:active { transform: scale(0.97); }
+.ws-upgrow { transition: transform 0.14s ease, background-color 0.14s ease, border-color 0.14s ease; }
+.ws-upgrow:hover { transform: translateY(-1px); }
+.ws-upgrow:active { transform: scale(0.97); }
 
 /* ⚠️ THE SEARCH FIELD MUST NOT CHANGE WIDTH ON FOCUS — a field that grows shoves the bar's
    flanks and, on the dashboard, walks the centred pill off the midline. The ring is a shadow,
@@ -1510,5 +1472,4 @@
     transition-duration: 0.01ms !important;
     transition-delay: 0ms !important;
   }
-  .ws-newmenu { animation: none !important; }
 }

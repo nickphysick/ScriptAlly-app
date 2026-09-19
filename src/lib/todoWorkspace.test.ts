@@ -227,14 +227,20 @@ describe("the window contracts are named once", () => {
     }
   });
 
-  it("the composer contract exists and the bar announces it", () => {
+  /* ⚠️ RETARGETED (Query Centre v11, 19 Sep): the top bar's `+ New` was removed app-wide, and it was
+     this contract's ONLY announcer — checked, not assumed: `TodoCalendarPage` imports the constant
+     and never dispatches it. So the To-do page's listener currently has nobody to hear from. That
+     is recorded as a follow-up for Nick rather than fixed in a Query Centre pass; the page's own
+     "Add a task" opens the composer directly and is unaffected. What this still guards: the name is
+     stated once, the page still listens under that name, and the shell — which no longer draws the
+     control — does not go on carrying a stale announcer for it. */
+  it("the composer contract exists, the page listens, and the shell no longer announces it", () => {
     expect(TODO_OPEN_COMPOSER).toBe("sa:open-todo-composer");
     const shell = readFileSync(resolve(__dirname, "../components/shell/WorkspaceShell.tsx"), "utf8");
-    expect(shell).toContain("TODO_OPEN_COMPOSER");
-    expect(shell).toContain('pathname.startsWith("/todo")');
+    expect(shell).not.toContain("TODO_OPEN_COMPOSER");
     const page = readFileSync(resolve(__dirname, "../components/todo/ToDoPage.tsx"), "utf8");
     expect(page).toContain("window.addEventListener(TODO_OPEN_COMPOSER");
-    // audit item 7 — one verb per control: the bar's global create makes a TASK.
+    // audit item 7 — one verb per control: the announced create makes a TASK.
     expect(page).toMatch(/setComposerMode\("task"\)/);
   });
 });
