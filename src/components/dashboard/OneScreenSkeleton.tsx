@@ -26,6 +26,7 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { QUICK_ACTIONS } from "../../lib/dashActions";
 import { CLOSED_BUCKETS } from "../../lib/dashClosed";
+import { MINIMAP_SEEN_KEY } from "../../lib/dashWindow";
 
 /**
  * ⚠️ THE REF'S OWN FEED RHYTHM — a day caption, then entries of unequal height. A single repeated
@@ -46,7 +47,11 @@ const GhostRows: React.FC<{ className: string; sk: string }> = ({ className, sk 
       if (!row) return;
       const h = row.getBoundingClientRect().height;
       if (h <= 0) return;
-      setCount(Math.max(1, Math.floor(port.clientHeight / h)));
+      /* ⚠️ EVERY ROW AFTER THE FIRST CARRIES A 1px HAIRLINE ABOVE IT — the real `.os-tdrow` has a
+         `border-top` that the first one drops — so n rows need `h + (n − 1)(h + 1)`, not `n × h`.
+         Counted as `n × h`, a port a pixel or two over a multiple of `h` fitted one ghost row more
+         than the page could show whole: `dash-skeleton-v33` read "ghost 4 vs whole 3, gap 1". */
+      setCount(Math.max(1, Math.floor((port.clientHeight - h) / (h + 1)) + 1));
     };
     fit();
     if (typeof ResizeObserver === "undefined") return undefined;
@@ -74,7 +79,11 @@ export const OneScreenSkeleton: React.FC<{
    * figures. It is a slot rather than an import because the words need the writer's name.
    */
   header: React.ReactNode;
-}> = ({ leaving = false, header }) => (
+}> = ({ leaving = false, header }) => {
+  const [hasRange] = useState(() => {
+    try { return typeof window !== "undefined" && window.localStorage.getItem(MINIMAP_SEEN_KEY) === "1"; } catch { return false; }
+  });
+  return (
   /* aria-hidden: a screen reader is told nothing by a shape. `inert` as well, because the cover is no
      longer only shapes — the header it carries can hold a real button, and `aria-hidden` alone leaves
      a hidden control in the tab order. */
@@ -87,9 +96,8 @@ export const OneScreenSkeleton: React.FC<{
           blocks where words and drawings will be. No illustration is drawn in the cover: a Mentor
           arriving before his chart would be the one finished thing on an unfinished page. */}
       <div className="os-row1" data-sk="row1">
-        <div className="os-card os-qa os-tone--sand" data-sk="quick-actions">
+        <div className="os-card os-qa" data-sk="quick-actions">
           <div className="os-frame">
-            <div className="os-band"><div className="os-sk os-sk-eyebrow" /></div>
             <div className="os-sk os-sk-hero" />
             <div className="os-qaminor">
               {QUICK_ACTIONS.filter((a) => a.rank === "minor").map((a) => (
@@ -101,7 +109,17 @@ export const OneScreenSkeleton: React.FC<{
 
         <div className="os-card os-lead os-tone--navy" data-sk="chart-card">
           <div className="os-frame">
-            <div className="os-band"><div className="os-bandrow"><div className="os-sk os-sk-ttl os-sk--onnavy" /></div></div>
+            {/* ⚠️ THE RANGE CONTROL'S BLOCK IS DRAWN ONLY FOR A DEVICE THAT HAS SEEN THE CONTROL. Whether
+                the card has one depends on the campaign's length, which the cover cannot know — but in
+                a narrow card the control WRAPS and the band is 97px, not 62, so guessing wrong is a
+                35px jump when the cover lifts. `sa.dashMinimapSeen` is set the first time the control
+                appears, so a returning long campaign gets the band it is about to see. */}
+            <div className="os-band">
+              <div className="os-bandrow">
+                <div className="os-sk os-sk-ttl os-sk--onnavy" />
+                {hasRange && <div className="os-mm"><div className="os-sk os-sk-mm os-sk--onnavy" /></div>}
+              </div>
+            </div>
             <div className="os-acplot"><div className="os-acdraw os-sk os-sk-acplot" /></div>
             {/* ⚠️ THE AXIS IS DRAWN, NOT LEFT EMPTY — an empty `.os-acx` is 0 tall where the real one
                 is 25.8, and the ghost's first row came up short by exactly that once already. */}
@@ -147,3 +165,4 @@ export const OneScreenSkeleton: React.FC<{
     </div>
   </div>
 );
+};

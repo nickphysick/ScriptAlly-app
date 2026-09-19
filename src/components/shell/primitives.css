@@ -96,95 +96,133 @@
   background: var(--shell-hair);
 }
 
-/* ══ SEARCH PILL ══ */
-.sp-search {
-  height: 34px;
-  border-radius: 9px;
-  background: #ffffff;
-  /* ⚠️ FIRMED FOR THE OAT BAR (polish §7). Against white the --shell-edge hairline was enough;
-     against the tint it dissolved, and the pill stopped reading as a control. The white FILL is
-     what keeps it legible — it is the one bright thing on a warm bar — but the edge has to hold
-     its own line. */
-  border: 1px solid #d9cec0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 11px;
-  color: var(--shell-muted);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-  transition: border-color 0.15s;
-}
-.sp-search:hover,
-.sp-search:focus-visible {
-  border-color: #d6cdbf;
-}
-.sp-search svg {
-  width: 14px;
-  height: 14px;
-  stroke-width: 1.7;
-  flex: none;
-}
-.sp-search-l {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.sp-search-k {
-  margin-left: auto;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px;
-  /* the ⌘K chip lifts with the bar's family, so it does not read as a hole in the pill */
-  background: #f2ede7;
-  border-radius: 4px;
-  padding: 1px 5px;
-  flex: none;
+/* ══ THE BAR'S CONTROLS, IN THE CARDS' LANGUAGE (the v34 mockup, 19 Sep; ref design-refs/dashboard-v34.html)
+   ⚠️ ONE SIZE ON EVERY PAGE — 50px. A Help button that changes size between routes is worse than
+   every page starting 16px lower (Nick). The card's grammar at a button's scale: a WHITE RIM with its
+   soft shadow, and inside it a BURGUNDY LINE. Burgundy is only ever a line; buttons stay ink.
+
+   ⚠️ THE TYPEWRITER FACE IS DECLARED HERE, AT `:root`, because these primitives render under two
+   shells and the dashboard's own `--os-type` lives on `.os-root`, which is an ancestor of neither bar.
+   A token that resolves to nothing falls back in silence. And each text element NAMES its family:
+   `lib/brand.tsx` injects a family on bare `span`/`button`/`kbd` at runtime, which a class outranks. */
+:root {
+  --sp-type: "Special Elite", "Courier New", Courier, monospace;
+  --sp-ctl: 50px;
+  --sp-ink: #1c130f;
+  --sp-cream: #f5f1eb;
+  --sp-frame: #7c3a2a;
+  --sp-lift: 0 2px 8px rgba(28, 19, 15, 0.06);
 }
 
-/* ══ HELP BUTTON ══ */
-.sp-help {
-  width: 32px;
-  height: 32px;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--shell-muted);
-  cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+/* ══ SEARCH — one component, two widths ══ */
+.sp-search {
+  box-sizing: border-box;
   flex: none;
+  height: var(--sp-ctl);
+  padding: 5px;                      /* the white rim */
+  border: 0;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: var(--sp-lift);
+  display: block;
+  color: var(--sp-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
-/* ⚠️ WHITE-UP, because the bar is GREIGE again. This flipped twice and the rule behind it never
-   changed: the hover lifts AWAY from the ground it sits on. On the interim off-white bar a white
-   hover was invisible, so it went parchment; on greige, white is the visible direction and
-   parchment is the one that disappears. Contrast follows the surface — so if the tint moves
-   again, this moves with it. */
-.sp-help:hover,
-.sp-help:focus-visible {
-  color: var(--shell-ink);
-  background: rgba(255, 255, 255, 0.55);
+/* the frame: the 1px burgundy line, filling the box inside the rim */
+.sp-search-f {
+  box-sizing: border-box;
+  height: 100%;
+  display: flex; align-items: center; gap: 11px;
+  padding: 0 9px 0 14px;
+  border: 1px solid var(--sp-frame);
+  border-radius: 11px;
+  min-width: 0;
 }
-.sp-help svg {
-  width: 17px;
-  height: 17px;
-  stroke-width: 1.6;
+/* ⚠️ FOCUS IS THE LINE GOING TO 2px — no glow. The second pixel is an inset shadow rather than a wider
+   border, so nothing inside the frame moves by a pixel when it takes focus. */
+.sp-search:focus-visible { outline: none; }
+.sp-search:focus-visible .sp-search-f { box-shadow: inset 0 0 0 1px var(--sp-frame); }
+.sp-search:hover .sp-search-f { background: #fffdfa; }
+.sp-search-i { width: 18px; height: 18px; flex: none; display: block; }
+.sp-search-l {
+  flex: 1 1 auto; min-width: 0;
+  font-family: var(--sp-type); font-size: 16px; line-height: 1.2; padding-top: 2px;
+  color: rgba(28, 19, 15, 0.45);
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
+/* the shortcut, as an ink keycap */
+.sp-search-k {
+  flex: none; margin-left: auto;
+  font-family: "JetBrains Mono", monospace; font-size: 11px; line-height: 13px; letter-spacing: 0.04em;
+  background: var(--sp-ink); color: var(--sp-cream);
+  border-radius: 7px; padding: 6px 9px;
+}
+/* the dashboard's: 60px tall, up to 700px, centred in its bar */
+.sp-search--big {
+  flex: 1 1 auto; min-width: 0; max-width: 700px; height: 60px;
+  margin-inline: auto; border-radius: 18px;
+}
+.sp-search--big .sp-search-f { gap: 13px; padding: 0 12px 0 18px; border-radius: 13px; }
+.sp-search--big .sp-search-i { width: 20px; height: 20px; }
+.sp-search--big .sp-search-l { font-size: 17px; }
+
+/* ══ THE DISC — Help, and the sidebar toggle ══
+   A white disc 50px across with the burgundy ring 5px in from the edge: two inset shadows, so the
+   ring is part of the disc and cannot drift from it. */
+.sp-disc {
+  box-sizing: border-box;
+  flex: none;
+  width: var(--sp-ctl); height: var(--sp-ctl);
+  padding: 0; border: 0; border-radius: 50%;
+  background: #ffffff; color: var(--sp-ink);
+  box-shadow: var(--sp-lift), inset 0 0 0 5px #ffffff, inset 0 0 0 6px var(--sp-frame);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: transform 0.14s ease;
+}
+.sp-disc:hover { transform: translateY(-1px); }
+.sp-disc:active { transform: translateY(0); }
+.sp-disc:focus-visible { outline: none; box-shadow: var(--sp-lift), inset 0 0 0 5px #ffffff, inset 0 0 0 7px var(--sp-frame); }
+/* the "?" is a character in the page's face, optically centred — Special Elite sits high in its em */
+.sp-help-q { font-family: var(--sp-type); font-size: 23px; line-height: 1; padding-top: 3px; display: block; }
+
+/* ══ THE INK PILL — Give feedback, and + New ══ */
+.sp-inkpill {
+  box-sizing: border-box;
+  flex: none;
+  height: var(--sp-ctl);
+  display: flex; align-items: center; gap: 9px;
+  padding: 0 22px 0 18px;
+  border: 0; border-radius: 30px;
+  background: var(--sp-ink); color: var(--sp-cream);
+  font-family: var(--sp-type); font-size: 16px; line-height: 1; white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.14s ease, transform 0.14s ease;
+}
+.sp-inkpill:hover { background: #2e221b; }
+.sp-inkpill:active { transform: translateY(1px); }
+.sp-inkpill:focus-visible { outline: 2px solid var(--sp-frame); outline-offset: 2px; }
+.sp-inkpill svg { width: 17px; height: 17px; flex: none; margin-top: -2px; stroke-width: 1.9; }
+.sp-inkpill-l { font-family: var(--sp-type); padding-top: 2px; }
 
 /* ══ FOCUS + REDUCED MOTION (Baked 21) ══
    One ring treatment across every primitive, inset so it never enlarges the control's box. */
-.sp-card-i:focus-visible,
-.sp-search:focus-visible,
-.sp-help:focus-visible {
+/* ⚠️ THE SEARCH AND THE DISC ARE NOT IN THIS RULE ANY MORE (the v34 mockup). Both carry their look IN
+   `box-shadow` — the rim's lift, the disc's burgundy ring — so a focus rule that SETS box-shadow
+   erases the control it is focusing. Their focus is stated beside their own rules: the burgundy line
+   going to 2px. Equal specificity and later in the file, this rule would have won in silence. */
+.sp-card-i:focus-visible {
   outline: none;
   box-shadow: inset 0 0 0 2px var(--shell-focus);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .sp-search,
-  .sp-help {
+  .sp-disc,
+  .sp-inkpill {
     transition: none;
   }
+  .sp-disc:hover, .sp-inkpill:active { transform: none; }
 }

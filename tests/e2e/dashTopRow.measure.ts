@@ -2,8 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * dashTopRow — the dashboard's top row, measured on a rendered page (v33, 18 Sep; ref
- * design-refs/dashboard-v33.html).
+ * dashTopRow — the dashboard's top row and its bar, measured on a rendered page (v33, 18 Sep; the v34
+ * mockup, 19 Sep — ref design-refs/dashboard-v34.html, which the comparison now reads).
  *
  * What is here is what no source lock can see: that the three cards are one height, that the row
  * does not creep when the window is dragged wider and back, that the Mentor's claws are on the chart's
@@ -64,7 +64,7 @@ function read() {
   const ground = q(".os-acground");
   const ringbox = q("[data-probe='ringbox']");
   const arch = [...root.querySelectorAll(".os-ringbox .os-arch")] as HTMLElement[];
-  const titles = [...root.querySelectorAll(".os-band .os-cardttl, .os-band .os-qaeyebrow")] as HTMLElement[];
+  const titles = [...root.querySelectorAll(".os-band .os-cardttl")] as HTMLElement[];
   const axis = [...root.querySelectorAll("[data-probe='chart-axis'] span")] as HTMLElement[];
   const mentorImgs = mentor ? [...mentor.querySelectorAll("img")] as HTMLElement[] : [];
   /* the ring: each arc's share and where its centre ends up after the svg's own rotation */
@@ -108,6 +108,26 @@ function read() {
     glyphs: [...root.querySelectorAll(".os-acglyph")].map((g) => box(g)),
     discs: [...root.querySelectorAll(".os-acdisc")].map((g) => box(g)),
     shadow: box(q("[data-probe='greet-shadow'] img")), shadowOpacity: st(q("[data-probe='greet-shadow'] img"))?.opacity ?? null,
+    hello: box(q(".os-hello")),
+    /* ── the v34 mockup ── */
+    qaHero: box(q("[data-probe='qa-hero']")), qaName: cards.qa?.getAttribute("aria-label") ?? null, qaRole: cards.qa?.getAttribute("role") ?? null,
+    qaBand: box(q("[data-probe='quick-actions-band']")),
+    range: box(q("[data-probe='minimap-track']")), rangeWin: box(q("[data-probe='minimap-window']")),
+    rangeName: q("[data-probe='minimap-window']")?.getAttribute("aria-label") ?? null,
+    rangeTitle: q("[data-probe='minimap']")?.getAttribute("title") ?? null,
+    rangeLabels: root.querySelectorAll(".os-mmlab").length,
+    chartFrame: box(chartFrame), chartTitle: box(q("[data-probe-text='chart-title']")),
+    bar: box(document.querySelector(".ws-pagebar")),
+    barSolid: !!document.querySelector(".ws-pagebar.is-solid"),
+    barGround: (() => { const b = document.querySelector(".ws-pagebar"); return b ? getComputedStyle(b, "::before").opacity : null; })(),
+    barPosition: st(document.querySelector(".ws-pagebar"))?.position ?? null,
+    search: box(document.querySelector("[data-probe='search']")), searchFrame: box(document.querySelector("[data-probe='search'] .sp-search-f")),
+    searchFace: st(document.querySelector("[data-probe='search'] .sp-search-l"))?.fontFamily ?? null,
+    searchKey: document.querySelector("[data-probe='search'] .sp-search-k")?.textContent ?? null,
+    feedback: box(document.querySelector("[data-probe='feedback']")), feedbackText: document.querySelector("[data-probe='feedback']")?.textContent?.trim() ?? null,
+    help: box(document.querySelector(".ws-pagebar .sp-help")), toggle: box(document.querySelector(".ws-pagebar .sb-toggle")),
+    scrollPad: st(document.querySelector(".ws-wbody"))?.scrollPaddingTop ?? null,
+    brand: { mark: box(document.querySelector(".ws-bmark")), word: st(document.querySelector(".ws-bwm"))?.fontSize ?? null, src: document.querySelector(".ws-bmark")?.getAttribute("src") ?? null },
     pageScrollW: document.documentElement.scrollWidth,
   };
 }
@@ -133,7 +153,7 @@ function structural(r: Reading, label: string) {
   /* one height, from `align-items: stretch` — asserted against EACH OTHER, never a literal */
   expect(near(qa!.h, chart!.h, 0.6) && near(chart!.h, closed!.h, 0.6), `${label}: the three top cards are one height (${qa!.h} / ${chart!.h} / ${closed!.h})`).toBe(true);
   expect(chart!.w, `${label}: the chart is the widest of the three`).toBeGreaterThan(Math.max(qa!.w, closed!.w));
-  expect(r.titles.length, `${label}: five bands were found`).toBe(5);
+  expect(r.titles.length, `${label}: four titled bands were found (quick actions has none since the v34 mockup)`).toBe(4);
   for (const t of r.titles) {
     expect(t.fits, `${label}: "${t.text}" fits its band`).toBe(true);
     expect(t.lines, `${label}: "${t.text}" is one line`).toBe(1);
@@ -154,27 +174,36 @@ function readRef() {
   const ground = document.querySelector(".activeq .ground");
   return {
     row1: box(".row1"), cards: { qa: box(".qa2"), chart: box(".activeq"), closed: box(".closedq") },
-    bands: { qa: box(".qa2 .eyebrow"), chart: box(".activeq .hd"), closed: box(".closedq .hd"), feed: box(".feed .hd"), todo: box(".todo .hd") },
+    bands: { qa: null, chart: box(".activeq .hd"), closed: box(".closedq .hd"), feed: box(".feed .hd"), todo: box(".todo .hd") },
     plot: box(".activeq .plot"), plotInChart: rel(".activeq .plot", ".activeq"), svg: box("#aq"),
     mentor: box(".surveyor"), mentorInChart: rel(".surveyor", ".activeq"),
     groundY: ground ? rd(ground.getBoundingClientRect().top) : null,
     ringbox: box(".ringbox"), ringInClosed: rel(".ringbox", ".closedq"),
     arch: box(".arch.back"), archInClosed: rel(".arch.back", ".closedq"),
     shadow: box(".greetshadow img"), hello: box(".hello"),
+    range: box(".mini-map.compact .track"), chartFrame: box(".activeq .frame"), chartTitle: box(".activeq .hd h3"),
+    qaHero: box(".qa2 .hero"), search: box(".search"), searchFrame: box(".sfr"), feedback: box(".fb"), help: box(".help"), top: box(".top"),
   };
 }
 
 test.describe("dashboard top row — v33", () => {
   test("the ref, by the same ruler — reported beside the page, card-relative first", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 860 });
-    await page.goto("file://" + resolve("design-refs/dashboard-v33.html"));
+    await page.goto("file://" + resolve("design-refs/dashboard-v34.html"));
     await page.waitForTimeout(1200);
     await page.evaluate(() => (document as unknown as { fonts: { ready: Promise<unknown> } }).fonts.ready);
     const ref = await page.evaluate(readRef);
     report.ref = ref;
     /* the numbers the brief quotes are the ref's own, or this comparison is against something else */
-    expect(ref.row1!.y, "the ref's top row").toBeCloseTo(197, 0);
     expect([ref.cards.qa!.w, ref.cards.chart!.w, ref.cards.closed!.w].map(Math.round)).toEqual([228, 556, 312]);
+    /* the v34 mockup's own quoted figures — if these are not the ref's, the comparison is against another file */
+    expect([Math.round(ref.range!.w), Math.round(ref.range!.h)], "the range control in the band").toEqual([178, 24]);
+    /* 276 in the brief, measured in a desktop browser; headless Chromium lays the ref's web fonts out ~2px shorter */
+    expect(Math.abs(ref.plot!.h - 276), `the plot takes the freed height (${ref.plot!.h})`).toBeLessThanOrEqual(3);
+    expect(Math.abs(ref.qaHero!.h - 286), `the quick-actions tile (${ref.qaHero!.h})`).toBeLessThanOrEqual(3);
+    expect([ref.search!.w, ref.search!.h, ref.searchFrame!.w, ref.searchFrame!.h].map(Math.round)).toEqual([700, 60, 690, 50]);
+    expect([Math.round(ref.feedback!.h), Math.round(ref.help!.w), Math.round(ref.help!.h)]).toEqual([50, 50, 50]);
+    expect(Math.round(ref.shadow!.w)).toBe(500);
     expect(Math.round(ref.ringbox!.w)).toBe(176);
   });
 
@@ -190,7 +219,12 @@ test.describe("dashboard top row — v33", () => {
     expect(r.rim.radius).toBe("16px");
     expect(r.rim.frameRadius).toBe("11px");
     /* the bands are coloured by what the card is about — five different fills */
-    expect(new Set(Object.values(r.bandFills)).size, "five bands, five meanings").toBe(5);
+    /* the v34 mockup: quick actions has no band — four bands, four meanings, and one card with a NAME only */
+    const fills = Object.entries(r.bandFills).filter(([k]) => k !== "quick-actions").map(([, v]) => v);
+    expect(new Set(fills).size, "four bands, four meanings").toBe(4);
+    expect(r.qaBand, "the quick-actions header is gone, band and all").toBeNull();
+    expect([r.qaRole, r.qaName], "…so the card is named for assistive tech").toEqual(["group", "Quick actions"]);
+    expect(near(r.qaHero!.y, r.cards.qa!.y + 6 + 1 + 18, 1), "the tile starts at the top of the frame: rim 6 + line 1 + 18 of padding").toBe(true);
     expect(r.bandFills["chart-card"]).toBe("rgb(42, 58, 82)");
 
     /* ⚠️ THE DRAWING IS OUT OF THE FLOW — the fault that made the row creep */
@@ -274,6 +308,191 @@ test.describe("dashboard top row — v33", () => {
     expect(near(floor, r.groundY!, 1.5), "1180: the Mentor's claws are on the baseline").toBe(true);
     structuralGlyphs(r, "1180");
     await page.screenshot({ path: resolve(OUT, "1180.png") });
+  });
+
+  test("the v34 mockup: the bar's controls, the control in the band, the tile, the brand", async ({ page }) => {
+    await openDash(page, 1440, 860);
+    const r = await page.evaluate(read);
+    report["v34@1440"] = r;
+    /* ── the range control: in the navy band, right of the title, never labelled ── */
+    expect(r.minimap, "the harness account's campaign is long enough to have the control").toBe(true);
+    const band = r.bands.chart!;
+    expect(r.range!.y >= band.y && r.range!.b <= band.b, "the control is INSIDE the band").toBe(true);
+    expect(near(r.range!.y + r.range!.h / 2, r.chartTitle!.y + r.chartTitle!.h / 2, 3), "…vertically centred on the title").toBe(true);
+    expect(r.range!.x, "…to the title's right").toBeGreaterThan(r.chartTitle!.r);
+    expect(near(r.range!.h, 24, 0.5)).toBe(true);
+    expect(near(band.h, 62, 0.6), `side by side the band is still 62 (${band.h})`).toBe(true);
+    expect(r.rangeLabels, "no DEC 2023, no TODAY").toBe(0);
+    expect(r.rangeName, "its name states the visible range and that it drags").toMatch(/^Showing \d{1,2} [A-Z][a-z]{2} to \d{1,2} [A-Z][a-z]{2}\. Drag to change the dates\.$/);
+    expect(r.rangeTitle).toBe(r.rangeName);
+    /* ── the bar ── */
+    expect([Math.round(r.search!.h), Math.round(r.feedback!.h), Math.round(r.help!.w), Math.round(r.help!.h), Math.round(r.toggle!.w), Math.round(r.toggle!.h)],
+      "search 60 · feedback 50 · help 50×50 · the toggle the same disc").toEqual([60, 50, 50, 50, 50, 50]);
+    expect(r.search!.w, "the search is capped at 700").toBeLessThanOrEqual(700.5);
+    expect([Math.round(r.search!.w - r.searchFrame!.w), Math.round(r.search!.h - r.searchFrame!.h)], "5px of white rim all round").toEqual([10, 10]);
+    expect(r.searchFace, "the placeholder is in the typewriter face — a token that resolved to nothing falls back in silence").toContain("Special Elite");
+    expect(r.searchKey).toMatch(/^(⌘K|Ctrl K)$/);
+    expect(r.feedbackText).toBe("Give feedback");
+    expect(near(r.help!.x - r.feedback!.r, 12, 1), `12px between Give feedback and Help (${(r.help!.x - r.feedback!.r).toFixed(1)})`).toBe(true);
+    expect(near(r.hello!.y - r.bar!.b, 8, 1.5) && near(r.hello!.y - r.search!.b, 20, 1.5), `20px from the bar's controls to the greeting (${(r.hello!.y - r.search!.b).toFixed(1)})`).toBe(true);
+    /* ── the brand ── */
+    expect([Math.round(r.brand.mark!.w), Math.round(r.brand.mark!.h), r.brand.word]).toEqual([40, 40, "21px"]);
+    expect([Math.round(r.brand.mark!.x), Math.round(r.brand.mark!.y - (await page.evaluate(() => document.querySelector(".ws-panel")!.getBoundingClientRect().top)))], "the slot is x 16 · y 20 of the sidebar").toEqual([16, 20]);
+    expect(r.brand.src).toContain("/images/app/queryhawk-mark.png?v=");
+    await page.screenshot({ path: resolve(OUT, "v34-1440.png") });
+  });
+
+  test("the v34 mockup: at 1280 the control wraps INSIDE the band, and the three cards stay one height", async ({ page }) => {
+    await openDash(page, 1280, 820);
+    const r = await page.evaluate(read);
+    report["v34@1280"] = { row1: r.row1, cards: r.cards, band: r.bands.chart, range: r.range, title: r.chartTitle };
+    expect(r.cards.chart!.w, "the precondition: the card is 470px or narrower, or this is the side-by-side case again").toBeLessThanOrEqual(470);
+    const band = r.bands.chart!;
+    expect(r.range!.y, "the control is on its own line beneath the title").toBeGreaterThan(r.chartTitle!.b - 0.5);
+    expect(r.range!.y >= band.y && r.range!.b <= band.b, "…still inside the navy band").toBe(true);
+    expect(near(band.h, 97, 1), `the band is 97 when wrapped (${band.h})`).toBe(true);
+    expect(near(r.range!.w, band.w - 44, 1.5), "…and takes the band's full line").toBe(true);
+    structural(r, "1280 wrapped");
+    await page.screenshot({ path: resolve(OUT, "v34-1280-wrapped.png") });
+  });
+
+  test("the v34 mockup: the window never passes the track, and a window in the past still dissolves", async ({ page }) => {
+    await openDash(page, 1440, 860);
+    const fill = () => page.evaluate(() => {
+      const svg = document.querySelector(".os-root [data-probe='plot']")!;
+      const g = svg.querySelector("[data-probe='chart-fill']")!;
+      const last = svg.querySelector(".os-aclast")!;
+      const d = g.querySelector("path")!.getAttribute("d")!;
+      /* the fill's furthest x against the line's last point: a carry runs PAST it */
+      const xs = [...d.matchAll(/[ML]\s*([\d.]+)\s+[\d.]+/g)].map((m) => Number(m[1]));
+      return { masked: !!g.getAttribute("mask"), grain: !!svg.querySelector("filter feTurbulence"), fillRight: Math.max(...xs), lastX: Number(last.getAttribute("cx")),
+        labels: [...document.querySelectorAll(".os-root [data-probe='chart-axis'] span")].map((e) => e.textContent).filter(Boolean) };
+    });
+    const geom = () => page.evaluate(() => {
+      const t = document.querySelector(".os-root [data-probe='minimap-track']")!.getBoundingClientRect();
+      const w = document.querySelector(".os-root [data-probe='minimap-window']")!.getBoundingClientRect();
+      return { t: { x: t.x, r: t.right }, w: { x: w.x, r: w.right, w: w.width } };
+    });
+    const before = await fill();
+    expect(before.masked && before.grain && before.fillRight > before.lastX + 20, "at today the end dissolves past the last point").toBe(true);
+    let g = await geom();
+    expect(g.w.r, `at today the window's right edge (${g.w.r}) does not pass the track's (${g.t.r})`).toBeLessThanOrEqual(g.t.r + 0.5);
+    expect(g.w.w, "the window keeps its 22px minimum").toBeGreaterThanOrEqual(21.5);
+
+    /* drag it into the past */
+    await page.mouse.move(g.w.x + g.w.w / 2, (await page.locator(".os-root [data-probe='minimap-window']").boundingBox())!.y + 12);
+    await page.mouse.down();
+    await page.mouse.move(g.t.x + (g.t.r - g.t.x) * 0.45, (await page.locator(".os-root [data-probe='minimap-window']").boundingBox())!.y + 12, { steps: 12 });
+    await page.mouse.up();
+    await settle(page);
+    const past = await fill();
+    report.past = { before, past };
+    expect(past.labels.join(","), "the precondition: the dates showing really changed").not.toBe(before.labels.join(","));
+    expect(past.masked && past.grain && past.fillRight > past.lastX + 20, "⚠️ in the past the end STILL dissolves — carried on past the last visible point").toBe(true);
+    await page.screenshot({ path: resolve(OUT, "v34-past-window.png") });
+
+    /* and hard against both ends it stays inside */
+    for (const to of [-400, 2000]) {
+      const b = (await page.locator(".os-root [data-probe='minimap-window']").boundingBox())!;
+      await page.mouse.move(b.x + b.width / 2, b.y + 12); await page.mouse.down();
+      await page.mouse.move(b.x + to, b.y + 12, { steps: 8 }); await page.mouse.up();
+      await settle(page);
+      g = await geom();
+      expect(g.w.x >= g.t.x - 0.5 && g.w.r <= g.t.r + 0.5, `dragged ${to > 0 ? "right" : "left"} to the stop, the window is inside the track (${JSON.stringify(g)})`).toBe(true);
+    }
+    /* put the device's remembered window back where it was */
+    await page.evaluate(() => window.localStorage.removeItem("sa.dashChartWindowEnd"));
+  });
+
+  test("the v34 mockup: the shadow passes behind the bar at rest, and the bar takes the ground once scrolled", async ({ page }) => {
+    await openDash(page, 1440, 860);
+    const r = await page.evaluate(read);
+    expect(r.barPosition, "the bar lies over the scroller on this route").toBe("absolute");
+    expect(r.scrollPad, "focus and anchors do not land under the bar").toBe(`${Math.round(r.bar!.h)}px`);
+    expect(near(r.shadow!.w, 500, 0.6)).toBe(true);
+    expect([near(r.shadow!.x - r.hello!.x, 18, 1.5), near(r.shadow!.y - r.hello!.y, -162, 2)], `the shadow is where the ref puts it against "Hello" (${(r.shadow!.x - r.hello!.x).toFixed(1)}, ${(r.shadow!.y - r.hello!.y).toFixed(1)})`).toEqual([true, true]);
+    expect(r.shadow!.y, "the precondition: the image reaches up into the bar's band").toBeLessThan(r.bar!.b - 20);
+    expect([r.barSolid, r.barGround], "at rest the bar has no ground").toEqual([false, "0"]);
+    /* ⚠️ THE PIXELS, NOT THE RECTS. An image whose box overlaps the bar proves nothing about what was
+       painted: clipped by a scroller that stops at the bar, the box still overlaps. So the bar's band
+       is photographed beside the search and must hold ink darker than the ground. */
+    /* the gap between the toggle's disc and the search's rim — bar, and nothing but bar. (A first cut
+       ran 70px left of the search and took in the toggle's own ring, which is dark in both states.) */
+    const gapX = Math.ceil(r.toggle!.r + 4), gapW = Math.floor(r.search!.x - 4) - gapX;
+    expect(gapW, "there is bare bar between the toggle and the search to photograph").toBeGreaterThan(20);
+    const clip = { x: gapX, y: Math.round(r.bar!.y + 2), width: gapW, height: Math.round(r.bar!.h - 4) };
+    const darkIn = async () => {
+      const png = readPng(await page.screenshot({ clip }));
+      let ground = 0, dark = 0;
+      const g = png.at(1, 1);
+      for (let y = 0; y < png.height; y += 1) for (let x = 0; x < png.width; x += 1) {
+        const [a, b, c] = png.at(x, y);
+        if (Math.abs(a - g[0]) + Math.abs(b - g[1]) + Math.abs(c - g[2]) > 12) dark += 1; else ground += 1;
+      }
+      return { ground, dark };
+    };
+    const rest = await darkIn();
+    report.shadowBehindBar = { clip, rest };
+    expect(rest.dark, `the wing is painted in the bar's band, left of the search (${JSON.stringify(rest)})`).toBeGreaterThan(150);
+    await page.screenshot({ path: resolve(OUT, "v34-shadow-behind-bar.png"), clip: { x: 224, y: 40, width: 1000, height: 330 } });
+
+    /* scrolled: the ground arrives, and nothing reads through it */
+    await page.evaluate(() => { const s = document.querySelector(".ws-wbody")!; s.scrollTop = 160; });
+    await settle(page);
+    const s2 = await page.evaluate(read);
+    expect([s2.barSolid, s2.barGround], "once the page has scrolled the bar takes the page's ground").toEqual([true, "1"]);
+    await page.screenshot({ path: resolve(OUT, "v34-scrolled.png"), clip: { x: 224, y: 40, width: 1000, height: 330 } });
+    const scrolled = await darkIn();
+    (report.shadowBehindBar as Record<string, unknown>).scrolled = scrolled;
+    expect(scrolled.dark, "…and the bar's band is ground from edge to edge").toBeLessThan(20);
+    await page.evaluate(() => { document.querySelector(".ws-wbody")!.scrollTop = 0; });
+    await settle(page);
+    expect((await page.evaluate(read)).barSolid, "back at the top it is transparent again").toBe(false);
+  });
+
+  /* ⚠️ THE SHARED CONTROLS ARE ONE SIZE ON EVERY PAGE (the v34 mockup — Nick: "a Help button that changes
+     size between routes is worse than every page starting 16px lower"). Asserted against the DASHBOARD'S
+     own readings, never a literal on both sides, over routes that draw the bar three different ways. */
+  test("the v34 mockup: the bar's shared controls are one size on every page", async ({ page }) => {
+    const readBar = () => page.evaluate(() => {
+      const rd = (n: number) => Math.round(n * 10) / 10;
+      const bar = [...document.querySelectorAll(".ws-pagebar")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+      const b = (sel: string) => { const el = bar.querySelector(sel); if (!el) return null; const r = el.getBoundingClientRect(); return r.width ? { x: rd(r.x), y: rd(r.y), w: rd(r.width), h: rd(r.height), cy: rd(r.y + r.height / 2) } : null; };
+      return { bar: { h: rd(bar.getBoundingClientRect().height), position: getComputedStyle(bar).position }, toggle: b(".sb-toggle"), help: b(".sp-help"), feedback: b(".ws-fbpill"),
+        pill: b(".sp-search:not(.sp-search--big)"), pillFrame: b(".sp-search:not(.sp-search--big) .sp-search-f"), neu: b(".ws-nbtn"), crumb: b(".ws-crumb"),
+        newFace: bar.querySelector(".ws-nbtn") ? getComputedStyle(bar.querySelector(".ws-nbtn")!).fontFamily : null };
+    });
+    await openDash(page, 1440, 860);
+    const dash = await readBar();
+    const pages: Record<string, Awaited<ReturnType<typeof readBar>>> = { "/dashboard": dash };
+    for (const route of ["/queries", "/todo", "/manuscripts", "/account"]) {
+      await openRoute(page, route, { width: 1440, height: 860 });
+      await settle(page);
+      const r = await readBar();
+      pages[route] = r;
+      for (const k of ["toggle", "help", "feedback"] as const) {
+        expect([r[k]!.w, r[k]!.h], `${route}: ${k} is the size it is on the dashboard`).toEqual([dash[k]!.w, dash[k]!.h]);
+      }
+      if (r.pill) {
+        expect(r.pill.h, `${route}: the search pill is 50`).toBe(50);
+        expect([r.pill.w - r.pillFrame!.w, r.pill.h - r.pillFrame!.h], `${route}: the pill has the card's 5px rim`).toEqual([10, 10]);
+      }
+      if (r.neu) { expect(r.neu.h, `${route}: + New is 50`).toBe(50); expect(r.newFace).toContain("Special Elite"); }
+      if (r.crumb) expect(Math.abs(r.crumb.cy - r.help!.cy), `${route}: the breadcrumb is vertically centred in the taller bar`).toBeLessThanOrEqual(3);
+      expect(r.bar.position, `${route}: only the dashboard's bar lies over the scroller`).not.toBe("absolute");
+    }
+    report.barEverywhere = pages;
+    /* the population: the loop really met a pill, a + New and a crumb somewhere */
+    expect(Object.values(pages).filter((r) => r.pill && r.neu && r.crumb).length).toBeGreaterThanOrEqual(3);
+    await openRoute(page, "/queries", { width: 1440, height: 860 });
+    await settle(page);
+    await page.screenshot({ path: resolve(OUT, "v34-bar-queries.png"), clip: { x: 0, y: 0, width: 1440, height: 260 } });
+    await page.setViewportSize({ width: 1060, height: 860 });
+    await settle(page);
+    const narrow = await readBar();
+    report.barNarrow = narrow;
+    expect([narrow.feedback!.w, narrow.feedback!.h], "under 1100 Give feedback is a 50px ink disc with the pencil").toEqual([50, 50]);
+    await page.screenshot({ path: resolve(OUT, "v34-bar-queries-1060.png"), clip: { x: 0, y: 0, width: 1060, height: 200 } });
   });
 
   test("hover states, the pin lock, and the Mentor's cross-dissolve", async ({ page }) => {

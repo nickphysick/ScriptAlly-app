@@ -617,14 +617,18 @@
    so that collapsing the wordmark (max-width 0, margin 0) leaves NOTHING between the mark and
    the row's centre — a flex gap beside a zero-width child still holds its 9px open and parks the
    mark 4.5px off-centre. Expanded, the two mechanisms are pixel-identical. */
+/* ⚠️ THE MARK SITS AT x 16 · y 20 AND DOES NOT MOVE WHEN THE SIDEBAR COLLAPSES (the v34 mockup, 19 Sep).
+   16 + 40 + 16 is the collapsed rail's 72px, so left-aligned at 16 it is already centred there — the
+   alignment contract's own rule, that icons do not move between states, for free. (`.ws-pin` pads
+   10px, hence 6.) */
 .ws-brand {
-  display: flex; align-items: center; justify-content: center; gap: 0;
-  padding: 16px 6px 14px; width: 100%;
+  display: flex; align-items: center; justify-content: flex-start; gap: 0;
+  padding: 20px 6px 14px; width: 100%;
   background: none; border: 0; cursor: pointer; font: inherit; text-align: left;
 }
 /* ⚠️ BARE ARTWORK — no plate, no border, no fill. The mark is transparent, so a plate would be a
    box drawn round a shape that does not want one. */
-.ws-bmark { height: 38px; width: auto; flex-shrink: 0; display: block; }
+.ws-bmark { height: 40px; width: 40px; flex-shrink: 0; display: block; }
 /* ⚠️ TYPE, NOT AN ASSET — 22px is the cap it looks like, with no ink ratio to keep in step.
    ⚠️ `max-width` + `overflow: hidden` are the COLLAPSE mechanism, not styling: the wordmark
    narrows and clips rather than wrapping or reflowing, and it never leaves the accessibility
@@ -639,9 +643,9 @@
    declaration was applied to mixed-case Playfair. THE RULE: `line-height: 1` is only ever safe on
    uppercase-only text. */
 .ws-bwm {
-  font-family: var(--font-serif); font-weight: 600; font-size: 22px;
+  font-family: var(--font-serif); font-weight: 600; font-size: 21px;
   color: #1c130e; letter-spacing: -0.01em; line-height: 1.3; white-space: nowrap;
-  margin-left: 9px; max-width: 160px; overflow: hidden;
+  margin-left: 10px; max-width: 160px; overflow: hidden;
 }
 .sb-collapsed .ws-bwm { opacity: 0; max-width: 0; margin-left: 0; }
 /* the transition arrives with sb-ready — a collapsed sidebar restored on load must not animate
@@ -698,14 +702,24 @@
    harness gets a fresh session every run and therefore always saw it. */
 .ws-main {
   flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column;
-  overflow: hidden; padding: 0 22px 20px; background: var(--ws-ground);
+  /* ⚠️ THE SIDE PADDING IS A TOKEN BECAUSE A SECOND ELEMENT READS IT: on the dashboard the bar is
+     absolutely placed and has to restate the inset it had in the flow. Two literals would agree
+     until one moved. */
+  --ws-main-pad: 22px;
+  overflow: hidden; padding: 0 var(--ws-main-pad) 20px; background: var(--ws-ground);
 }
 /* ⚠️ CHROME, NOT CONTENT — it sits ON the ground above the window and never scrolls. */
 /* ⚠️ THE ROW'S INSET, ITS GAP AND THE TOGGLE'S SIZE ARE TOKENS (stages 2–3, 17 Sep) because the
    dashboard's row computes where its search may start from all three — "the toggle's box plus the
    gap" — and restating 6, 14 and 34 there would be three literals another rule owns. */
 .ws-pagebar {
-  --ws-pagebar-inset: 6px; --ws-pagebar-gap: 14px; --sb-toggle-size: 34px;
+  /* ⚠️ 50px, THE SHARED CONTROLS' ONE SIZE (the v34 mockup, 19 Sep) — `--sp-ctl` in primitives.css.
+     The bar is therefore ~80px on every page where it was ~64, and every page starts ~16px lower:
+     accepted, because a Help button that changes size between routes is worse (Nick). */
+  --ws-pagebar-inset: 6px; --ws-pagebar-gap: 16px; --sb-toggle-size: var(--sp-ctl, 50px);
+  /* the space between the right-hand cluster's controls — a token because TWO rules state it: the
+     cluster's per-child margin, and the margin "Back to app" takes when settings mode brings it in */
+  --ws-bright-gap: 12px;
   flex: none; display: flex; align-items: center; gap: var(--ws-pagebar-gap); padding: 16px var(--ws-pagebar-inset) 14px;
 }
 /**
@@ -746,58 +760,69 @@
  * other page keeps it; on the dashboard the three quick-action tiles are the page's own answer to
  * "make something", and two invitations a hand's width apart is one too many.
  */
+/**
+ * ══ THE DASHBOARD'S BAR SITS OVER THE SCROLLER (the v34 mockup, 19 Sep) ══
+ *
+ * The greeting's hawk shadow scrolls with the page and must pass BEHIND this bar — the wing behind
+ * the left half of the search, and up off the top. The bar is the shell's and used to sit above the
+ * scroller, which clipped the shadow dead at the bar's bottom edge. So on this route only, the bar is
+ * taken out of the column's flow and laid OVER its top: the scroller (`.ws-winwrap`) then starts at
+ * the top of the column, the page pads itself down by `--dash-bar-h`, and the shadow — an ordinary
+ * element inside the page — is simply behind a transparent bar. Native scrolling, no script-driven
+ * layer (which would lag a frame behind the cards it sits under).
+ *
+ * ⚠️ `--dash-bar-h` IS THE BAR'S HEIGHT, STATED ONCE, AND THREE THINGS READ IT: the bar (`height`), the
+ * page (`.os-content`'s top padding, oneScreen.css) and the scroller's `scroll-padding-top` — so a
+ * control focused by keyboard, or an anchor, never lands under the bar. 12 + 60 + 12.
+ *
+ * ⚠️ TRANSPARENT AT REST, THE PAGE'S GROUND ONCE `scrollTop > 2` (`.is-solid`, derived in the shell),
+ * faded over 150ms — never a snap. The ground is a `::before` so the fade does not touch the controls.
+ * It starts at the bar's own left edge, which is already 22px in from the column's: the sidebar's
+ * 18px seam shadow is never covered.
+ *
+ * ⚠️ A CLASSIC SCROLLBAR NOW RUNS UP BESIDE THE BAR. Accepted (Nick).
+ */
+.dash-mode .ws-main { --dash-bar-h: 84px; }
+@media (max-width: 767px) { .dash-mode .ws-main { --dash-bar-h: 0px; } }   /* the bar is not drawn there */
+.dash-mode .ws-wbody { scroll-padding-top: var(--dash-bar-h); }
 .dash-mode .ws-pagebar {
-  position: relative;
+  position: absolute; z-index: 5;
+  top: 0; left: var(--ws-main-pad); right: var(--ws-main-pad);   /* the box it had in the flow */
+  box-sizing: border-box; height: var(--dash-bar-h);
   padding-top: 12px; padding-bottom: 12px;
+  /* ⚠️ `100%` IN A PADDING IS THE CONTAINING BLOCK'S WIDTH, NOT THIS BOX'S. In the flow that was the
+     column's CONTENT box; absolutely placed it is the column's PADDING box, 2 × `--ws-main-pad` wider —
+     so the centring term came out 22px long and the bar's ink sat 22px right of the page's at every
+     window wide enough to centre (`dashStages.measure`, 1920: 374 against 352). `--bar-w` restates the
+     width the bar actually has. */
+  --bar-w: calc(100% - 2 * var(--ws-main-pad));
   padding-left: max(
-    calc(var(--dash-page-pad) + max(0px, (100% - var(--dash-page-max) - 2 * var(--dash-page-pad)) / 2)),
+    calc(var(--dash-page-pad) + max(0px, (var(--bar-w) - var(--dash-page-max) - 2 * var(--dash-page-pad)) / 2)),
     calc(var(--ws-pagebar-inset) + var(--sb-toggle-size) + var(--ws-pagebar-gap))
   );
-  padding-right: calc(var(--dash-page-pad) + max(0px, (100% - var(--dash-page-max) - 2 * var(--dash-page-pad)) / 2));
+  padding-right: calc(var(--dash-page-pad) + max(0px, (var(--bar-w) - var(--dash-page-max) - 2 * var(--dash-page-pad)) / 2));
 }
-.dash-mode .ws-pagebar .sb-toggle { position: absolute; left: var(--ws-pagebar-inset); top: 50%; transform: translateY(-50%); }
-.dash-mode .ws-bigsearch {
-  margin-inline: auto;
-  height: auto;
-  padding: 12px 20px;
-  border-radius: 34px;
-  /* ⚠️ THE LITERAL, NOT A TOKEN. The page's `--dash-parchment` is declared on `.os-root`, which is
-     not an ancestor of this row — a `var()` here would resolve to nothing and paint transparent. */
-  background: #fdf9f5;
-  border-color: rgba(28, 19, 15, 0.11);
+/* ⚠️ CENTRED BY ARITHMETIC, NOT `translateY(-50%)` — the disc's own hover is a transform, and two rules
+   setting `transform` means the hover wins and the toggle jumps 25px. */
+.dash-mode .ws-pagebar .sb-toggle { position: absolute; left: var(--ws-pagebar-inset); top: calc(50% - var(--sb-toggle-size) / 2); }
+.dash-mode .ws-pagebar::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: #f4f0ea;                   /* `.dash-mode .ws-main`'s ground, as a literal: same value, one line up */
+  opacity: 0; transition: opacity 150ms ease;
+  pointer-events: none;
 }
-.dash-mode .ws-bigsearch-t { font-size: 15px; color: rgba(28, 19, 15, 0.45); }
-
-.ws-bigsearch {
-  flex: 1 1 auto; max-width: 640px; min-width: 0;
-  display: flex; align-items: center; gap: 10px;
-  height: 40px; padding: 0 14px;
-  background: #ffffff; border: 1px solid var(--ws-edge); border-radius: 12px;
-  font: inherit; cursor: pointer; text-align: left;
-}
-.ws-bigsearch:hover { border-color: #cdbfae; }
-.ws-bigsearch:focus-visible { outline: 2px solid #b98a76; outline-offset: 1px; }
-.ws-bigsearch svg { width: 17px; height: 17px; flex: none; stroke: #b3a596; fill: none; stroke-width: 1.7; }
-/* ⚠️ THE PROMPT ELLIPSES, THE SHORTCUT DOES NOT — the placeholder is the only part of this control
-   that can be arbitrarily long, and the ⌘K badge is the part a reader looks for. */
-.ws-bigsearch-t { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; color: #b3a596; }
-.ws-bigsearch-k {
-  flex: none; font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: #b3a596;
-  border: 1px solid var(--ws-edge); border-radius: 6px; padding: 3px 7px;
-}
+.dash-mode .ws-pagebar.is-solid::before { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .dash-mode .ws-pagebar::before { transition: none; } }
+/* ⚠️ `.ws-bigsearch` CARRIES NO RULES OF ITS OWN ANY MORE (the v34 mockup, 19 Sep). The dashboard's field
+   is `SearchPill big` — `.sp-search--big` in primitives.css — and the class survives only as the
+   handle the loading cover's `:has()` rules key on. */
 /* ── the collapse toggle — at the sidebar/content seam, first in the bar (sidebar-collapse pack).
    It does not move between states: same slot, same size, both directions. Rest is muted; hover
    takes the parchment card treatment; the ring is the house focus ring. The glyph's left-column
    fill is keyed off `aria-expanded`, so the icon cannot disagree with the state it reports. */
-.sb-toggle {
-  flex: none; width: var(--sb-toggle-size); height: var(--sb-toggle-size); padding: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: transparent; border: 1px solid transparent; border-radius: 9px;
-  color: #9a8c80; cursor: pointer;
-  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
-}
-.sb-toggle:hover { background: #fdfaf5; border-color: #e7ddd2; color: var(--shell-ink); }
-.sb-toggle:focus-visible { outline: 2px solid #7c3a2a; outline-offset: 2px; }
+/* ⚠️ THE SAME DISC AS HELP, AT THE SAME SIZE (the v34 mockup) — its box, ring and focus are `.sp-disc`'s
+   in primitives.css. What is left here is only what is the toggle's own. */
+.sb-toggle { color: var(--sp-ink, #1c130f); }
 .sb-toggle svg { display: block; }
 .sb-fillcol { transition: opacity 160ms ease; }
 .sb-toggle[aria-expanded="false"] .sb-fillcol { opacity: 0; }
@@ -809,7 +834,9 @@
 .ws-seg:hover { color: #241811; }
 .ws-vdiv { width: 1px; height: 18px; background: #e2dacd; margin: 0 2px; flex: none; align-self: center; }
 .ws-sync { font-family: "JetBrains Mono", monospace; font-size: 8.5px; letter-spacing: 0.2em; text-transform: uppercase; color: #b3a598; }
-.ws-bright { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+/* the spacing between its children is NOT here — it is per-child `margin-left`, further down, so a
+   control that collapses takes its space with it. A `gap` on this rule is overridden and reads as live. */
+.ws-bright { margin-left: auto; display: flex; align-items: center; }
 
 /* ── THE FEEDBACK PILL (feedback pack; ref design-refs/scriptally-account-menu-b.html) ─────────
    ⚠️ LABELLED, AND THAT IS A DISCOVERABILITY DECISION RATHER THAN A DENSITY ONE. It replaces a
@@ -821,25 +848,13 @@
 
    ⚠️ AND IT DECLARES ITS OWN BOX MODEL — `height: 34px` beside a 1px border and 13px of padding
    is two different pills under the two models, and this bar's flanks are measured. */
-.ws-fbpill {
-  box-sizing: border-box;
-  flex: none;
-  display: flex; align-items: center; gap: 7px;
-  height: 34px; padding: 0 13px 0 11px;
-  border: 1px solid var(--shell-edge); border-radius: 17px;
-  background: #ffffff; color: var(--shell-ink-soft); cursor: pointer;
-  font: inherit; font-size: 13px; font-weight: 500; white-space: nowrap;
-}
-.ws-fbpill svg { width: 15px; height: 15px; stroke-width: 1.8; flex: none; }
-/* the app's soft-pink CTA pair — the same one the account menu's Free block wears */
-.ws-fbpill:hover {
-  background: var(--pink); border-color: var(--pink-b); color: var(--shell-burgundy);
-}
-
-/* ⚠️ 22px, NOT `.ws-vdiv`'s 18. That divider sits between the page name and the save whisper, a
-   pair of TEXT items it is measured against; this one separates two controls a third taller. One
-   class each, because making either follow the other silently retunes a gap nobody was looking at. */
-.ws-bdiv { width: 1px; height: 22px; background: var(--shell-hair); flex: none; align-self: center; }
+/* ⚠️ AN INK PILL SINCE THE v34 MOCKUP (19 Sep) — 50px, cream on ink, Special Elite, labelled "Give
+   feedback". Its box and type are `.sp-inkpill`'s (primitives.css), shared with `+ New`; buttons stay
+   ink, and the soft-pink hover it used to wear is retired with the white pill it belonged to. */
+.ws-fbpill { }
+/* ⚠️ `.ws-bdiv` — THE HAIRLINE BETWEEN FEEDBACK AND HELP — IS RETIRED, RULE AND ELEMENT (the v34 mockup, 19 Sep).
+   It separated a labelled pill from a cluster of bare glyphs. Both are 50px objects in one language now,
+   12px apart, and a rule between them made that gap 21. */
 
 /* ⚠️ THE LABEL FOLDS BEFORE THE BAR DOES, and 1100px is the codebase's OWN narrow-desktop point
    (f12.css: "the measured point at which the panel stops helping"), not a number invented here.
@@ -849,9 +864,10 @@
    ⚠️ THERE IS NO ICON-ONLY STATE BELOW 768px, and that is the bar, not this rule: `.ws-pagebar`
    is `display: none` there and the mobile bar takes over. See the run report — the phone's only
    remaining route to the panel is the beta strip's own link, which is per-session dismissible. */
+/* under 1100 it is a 50px ink DISC with the pencil — same height, same ink, no label */
 @media (max-width: 1100px) {
   .ws-fbpill-l { display: none; }
-  .ws-fbpill { padding: 0 10px; }
+  .ws-fbpill { padding: 0; width: var(--sp-ctl, 50px); justify-content: center; gap: 0; }
 }
 /* ⚠️ THE MENU ANCHOR CAME BACK WITH THE BUTTON. `.ws-newwrap` was swept out with the bar's rules
    and its absence was invisible in every measurement — the + New menu had nothing to anchor to. */
@@ -889,10 +905,11 @@
      `#1c130f` — two literals for one button family, which is the shape a token exists to end. The
      text is still `#ffffff` against the masthead's `#fdfaf5`; that difference is visible and is
      flagged rather than changed here. */
-  background: var(--btn-ink); color: #ffffff; border: none; border-radius: 99px;
-  padding: 9px 18px; font-size: 13.5px; font-weight: 500; cursor: pointer; white-space: nowrap;
+  /* ⚠️ THE BOX, THE TYPE AND THE CREAM TEXT ARE `.sp-inkpill`'s NOW (the v34 mockup) — it matches Give
+     feedback. The fill stays the shared token, so this and the masthead primary are still one ink. */
+  background: var(--btn-ink);
 }
-.ws-nbtn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+.ws-nbtn svg { stroke: currentColor; fill: none; }
 
 /* ⚠️ THE WINDOW IS THE SHEET OF PAPER, AND ITS FRAME MUST NOT MOVE. It is `overflow:hidden` and
    its BODY scrolls — put the scroll on the window itself and the radius, border and inset slide
@@ -984,8 +1001,8 @@
 /* ⚠️ THE SEARCH FIELD MUST NOT CHANGE WIDTH ON FOCUS — a field that grows shoves the bar's
    flanks and, on the dashboard, walks the centred pill off the midline. The ring is a shadow,
    which costs no layout. */
-.sp-search { transition: box-shadow 0.15s ease, border-color 0.15s ease; }
-.sp-search:focus-visible { box-shadow: 0 0 0 3px rgba(185, 138, 118, 0.32); }
+/* ⚠️ THE SEARCH'S GLOW IS RETIRED (the v34 mockup, 19 Sep — "do not add a glow"). Its focus is the
+   burgundy line going to 2px, stated beside the control in primitives.css. */
 
 /* keyboard parity — every interactive element in the shell answers focus-visible */
 .ws-panel a:focus-visible, .ws-panel button:focus-visible,
@@ -1213,12 +1230,13 @@
 .set-mode .ws-window::after { opacity: 0; transition-delay: 0s; }
 
 /* ── the bar: Search and New leave, Back to app arrives ──────────────────────────────────────
-   ⚠️ THE ROW'S SPACING MOVED FROM `gap` TO PER-CHILD `margin-left`, AT THE SAME 10px. A gap is
+   ⚠️ THE ROW'S SPACING MOVED FROM `gap` TO PER-CHILD `margin-left` (then 10px, 12 now). A gap is
    charged for a child that has collapsed to zero width, so the two departing controls would each
    have left 10px of hole — the swap reading as a bar with something missing. A margin goes when
    its element does. Nothing that stays on screen moves. */
+/* 12px since the v34 mockup (19 Sep) — the ref's spacing between Give feedback and Help. */
 .ws-bright { gap: 0; }
-.ws-bright > * { margin-left: 10px; }
+.ws-bright > * { margin-left: var(--ws-bright-gap); }
 .ws-bright > *:first-child { margin-left: 0; }
 
 .ws-appctl,
@@ -1253,7 +1271,7 @@
 .set-mode .ws-setctl {
   max-width: 200px;
   opacity: 1;
-  margin-left: 10px;
+  margin-left: var(--ws-bright-gap);
   pointer-events: auto;
   visibility: visible;
   transition:
@@ -1457,8 +1475,8 @@
 }
 .dash-mode .ws-main:has(.os-skelpage:not(.out)) .ws-pagebar :is(.sb-toggle, .ws-bigsearch, .ws-fbpill, .ws-nbtn, .sp-help) > *,
 .dash-mode .ws-main:has(.os-skelpage:not(.out)) .ws-pagebar .ws-sync { visibility: hidden; }
-.dash-mode .ws-main:has(.os-skelpage) .ws-pagebar :is(.ws-vdiv, .ws-bdiv) { transition: opacity 250ms ease; }
-.dash-mode .ws-main:has(.os-skelpage:not(.out)) .ws-pagebar :is(.ws-vdiv, .ws-bdiv) { opacity: 0; }
+.dash-mode .ws-main:has(.os-skelpage) .ws-pagebar .ws-vdiv { transition: opacity 250ms ease; }
+.dash-mode .ws-main:has(.os-skelpage:not(.out)) .ws-pagebar .ws-vdiv { opacity: 0; }
 /* the layer — present for the cover's whole life, so the dissolve has somewhere to start */
 .dash-mode .ws-main:has(.os-skelpage) .ws-pagebar :is(.sb-toggle, .ws-bigsearch, .ws-fbpill, .ws-nbtn, .sp-help) { position: relative; }
 /* …except the toggle, which is already positioned (at the seam, out of the row) and must stay there

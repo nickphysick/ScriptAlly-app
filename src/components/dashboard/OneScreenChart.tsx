@@ -7,7 +7,7 @@
  * A sentence for a title ("18 active queries") on the navy band; one navy line over a fill that runs
  * on past today and breaks up into grain behind the Mentor, who leans on the card's right-hand edge
  * and looks at you while you are on the card; a pin for each dated response; a week axis; and, once
- * there are twelve weeks of record, a minimap.
+ * there are twelve weeks of record, a range control in the band beside the title.
  *
  * ⚠️ THE DRAWING IS OUT OF THE LAYOUT FLOW, AND THAT IS LOAD-BEARING. An `<svg>` with a viewBox has
  * an aspect ratio of its own; in the flow that ratio set the card's height, so every widening of the
@@ -41,7 +41,7 @@ import {
   type LineMode,
 } from "../../lib/dashChart";
 import {
-  campaignStage, clampWindowEnd, longView, MINIMAP_SEEN_KEY, readWindowBack, sinceLabel, windowAtToday,
+  campaignStage, clampWindowEnd, longView, MINIMAP_SEEN_KEY, rangeSentence, readWindowBack, sinceLabel,
   writeWindowBack,
 } from "../../lib/dashWindow";
 import { indexActivities, stageLabel, UNDATED_LABEL, weekMix } from "../../lib/dashWeekMix";
@@ -92,7 +92,6 @@ export const OneScreenChart: React.FC<{
   const [endIdx, setEndIdx] = useState<number | null>(null);
   /* the remembered window is days BACK from today, read once the record's length is known */
   const end = clampWindowEnd(endIdx ?? daily.length - 1 - readWindowBack(), daily.length);
-  const atToday = stage !== "long" || windowAtToday(end, daily.length);
   const view = useMemo(() => (stage === "long" ? longView(daily, end) : daily), [stage, daily, end]);
   const values = useMemo(() => view.map((p) => p.active), [view]);
   const slots = useMemo(() => weekSlots(view, mode), [view, mode]);
@@ -288,6 +287,12 @@ export const OneScreenChart: React.FC<{
     <div className="os-bandrow">
       <h3 className="os-cardttl" data-probe-text="chart-title">{loading ? "Active queries" : activeTitle(empty ? 0 : activeCount)}</h3>
       {!loading && !empty && stage === "short" && <span className="os-since" data-probe-text="chart-since">{sinceLabel(daily)}</span>}
+      {/* ⚠️ THE RANGE CONTROL IS IN THE BAND (the v34 mockup, 19 Sep), after the title, and the row WRAPS:
+          in a card of 470px or less it takes the full line beneath the title, still on the navy. In
+          the short-campaign stage there is no control — the quiet suffix above is what that stage says. */}
+      {!loading && !empty && stage === "long" && (
+        <OneScreenMinimap daily={daily} endIdx={end} onChange={moveWindow} label={rangeSentence(view)} arriving={arriving} />
+      )}
     </div>
   );
 
@@ -309,7 +314,9 @@ export const OneScreenChart: React.FC<{
   const focusPt: [number, number] | null = geo
     ? hoverSlot ? geo.points[hoverSlot.idx] ?? null : hoverPin ? [hoverPin.x, hoverPin.y] : null
     : null;
-  const carryTo = atToday && size ? Math.max(size.carry, last ? last[0] : 0) : null;
+  /* ⚠️ THE END OF THE CHART ALWAYS DISINTEGRATES (the v34 mockup) — whatever dates are showing. Only the
+     line and its end marker stop at the last visible point. */
+  const carryTo = size ? Math.max(size.carry, last ? last[0] : 0) : null;
 
   return (
     <OneScreenPanel variant="os-lead" tone="navy" probe="chart-card" loading={loading} skel={["h", "grow", ""]} lift={false} band={title} innerRef={cardRef}>
@@ -454,9 +461,6 @@ export const OneScreenChart: React.FC<{
           </span>
         ))}
       </div>
-      {stage === "long" && (
-        <OneScreenMinimap daily={daily} endIdx={end} onChange={moveWindow} arriving={arriving} />
-      )}
     </OneScreenPanel>
   );
 };

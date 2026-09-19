@@ -134,7 +134,7 @@ describe("the page skeleton mirrors the page", () => {
     for (const cls of ["os-card", "os-frame", "os-band", "os-bandrow", "os-qa", "os-qaminor", "os-qarow", "os-lead",
                        "os-acplot", "os-acdraw", "os-acx", "os-cl", "os-clpie", "os-ringbox", "os-clkey", "os-clrow",
                        "os-feed", "os-todo", "os-scroll", "os-tdfoot",
-                       "os-tone--sand", "os-tone--navy", "os-tone--stone", "os-tone--slate", "os-tone--rose"]) {
+                       "os-tone--navy", "os-tone--stone", "os-tone--slate", "os-tone--rose"]) {
       expect(html, cls).toMatch(new RegExp(`class="([^"]* )?${cls}[" ]`));
     }
     /* every retired row's boxes went with it — bands, mounts, columns and the old chart wrapper */
@@ -148,7 +148,7 @@ describe("the page skeleton mirrors the page", () => {
   it("stands in for every card on the page — nothing loads unannounced", () => {
     /* each card's title and chip, the three action tiles, the chart's headline / legend / plot, the
        closed ring and its key rows, the feed's days and entries, the to-do rows and their footer */
-    for (const cls of ["os-sk-ttl", "os-sk-mini", "os-sk-eyebrow", "os-sk-hero", "os-sk-qarowlab", "os-sk-acplot",
+    for (const cls of ["os-sk-ttl", "os-sk-mini", "os-sk-hero", "os-sk-qarowlab", "os-sk-acplot",
                        "os-sk-acx", "os-sk-donut", "os-sk-chip", "os-sk-clrowlab", "os-sk-fday", "os-sk-fent",
                        "os-sk-tdrow", "os-sk-tdfoot"]) {
       expect(html, cls).toContain(cls);
@@ -161,7 +161,7 @@ describe("the page skeleton mirrors the page", () => {
        advertises something that never arrives. The breakdown, the goals card, the manuscript tile,
        the stat row, the community tile and the old chart are all retired — and the ghost's rules go
        with the ghost, so a dead `.os-sk-*` rule cannot sit in the sheet waiting to be reattached. */
-    for (const gone of ["os-sk-bdn", "os-sk-bdpill", "os-sk-bdfact", "os-sk-bdfoot", "os-sk-qahero", "os-sk-qatile",
+    for (const gone of ["os-sk-bdn", "os-sk-bdpill", "os-sk-bdfact", "os-sk-bdfoot", "os-sk-qahero", "os-sk-qatile", "os-sk-eyebrow",
                         "os-sk-acstat", "os-sk-legend", "os-sk-ttl2", "os-sk-clrow",
                         "os-sk-qaitem", "os-sk-acart", "os-sk-actog", "os-sk-tkrule", "os-sk-acbub",
                         "os-sk-comill", "os-sk-aut", "os-sk-chplot", "os-sk-chbrush", "os-sk-chchips",

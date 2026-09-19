@@ -42,6 +42,8 @@
   --dash-pad: 18px 22px 16px;
   --dash-shadow: 0 2px 8px rgba(28, 19, 15, 0.06);
   --dash-gap: 20px;
+  /* the greeting's own top padding — with the bar's 12px beneath its controls, 20px bar-to-greeting */
+  --dash-greet-top: 8px;
   /* type */
   /**
    * ⚠️ THE PAGE'S TYPEWRITER FACE, DECLARED HERE AND READ BY FOUR RULES — the card headings, the
@@ -105,7 +107,9 @@
   width: 100%;
   max-width: calc(var(--dash-page-max) + 2 * var(--dash-page-pad));
   margin-inline: auto;
-  padding: 0 var(--dash-page-pad) 44px;
+  /* ⚠️ THE TOP PADDING IS THE SHELL'S BAR (the v34 mockup): on this route the scroller runs up under the
+     bar, so the page starts itself below it. `0px` wherever the token is not declared. */
+  padding: var(--dash-bar-h, 0px) var(--dash-page-pad) 44px;
   min-width: 0;
 }
 
@@ -226,6 +230,10 @@
   min-width: 0;
 }
 .os-bandrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+/* ⚠️ THE ACTIVE CARD'S BAND ROW WRAPS (the v34 mockup, 19 Sep) — it holds the title AND the range
+   control, 16px apart. Side by side the band is still 62px; when the card is too narrow for both, the
+   control drops to its own line INSIDE the band (see the container rule in §5) and the band is 97. */
+.os-lead .os-bandrow { gap: 16px; row-gap: 11px; flex-wrap: wrap; justify-content: flex-start; }
 .os-tone--sand { --band: var(--dash-sand); }
 .os-tone--navy { --band: var(--dash-navy); --band-ink: #f5f1eb; }
 .os-tone--stone { --band: var(--dash-stone); }
@@ -336,7 +344,8 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-greet {
   display: flex;
   flex-direction: column;
-  padding: 26px 0 24px;
+  /* 20px from the bar to the greeting (the v34 mockup): the bar keeps 12px beneath its controls, so 8 here */
+  padding: var(--dash-greet-top, 8px) 0 24px;
   min-width: 0;
 }
 .os-hdrow { display: flex; align-items: center; gap: 14px; min-width: 0; }
@@ -370,14 +379,10 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-hddot { font-size: 17px; margin: 0 8px; color: var(--dash-ink-45); }
 
 /* ══ §4 · QUICK ACTIONS ═══════════════════════════════════════════════════════════════════════
-   One tile and two lines (v33). No large title: a mono eyebrow in the sand band. */
-.os-qa > .os-frame { padding: 16px 18px 12px; }
-.os-qa .os-band { margin: -16px -18px 14px; padding: 13px 20px 11px; }
-.os-qaeyebrow {
-  margin: 0;
-  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase;
-  line-height: 1.4; color: var(--dash-ink-45);
-}
+   One tile and two lines (v33), and no header at all (the v34 mockup). */
+/* ⚠️ NO HEADER (the v34 mockup, 19 Sep): the eyebrow and its sand band are retired, rule and element
+   together, and the tile starts at the top of the frame. The card keeps its rim and its frame. */
+.os-qa > .os-frame { padding: 18px 18px 12px; }
 /* ⚠️ THE TILE FILLS WHAT THE TWO LINES LEAVE — `flex: 1` in the frame's column — so the card never
    ends short of the two beside it, and the quill (sized off the tile) grows with the row. */
 .os-qahero {
@@ -528,25 +533,29 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-sparse.on { display: grid; }
 .os-sparse span { font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 13.5px; color: var(--dash-ink-45); }
 
-/* ── the minimap: the whole campaign, and the eight weeks in view ── */
-.os-mm { display: flex; align-items: center; gap: 10px; margin-top: 14px; flex: none; }
+/* ── the range control: the whole campaign, and the eight weeks in view — IN THE NAVY BAND ──────
+   (the v34 mockup, 19 Sep; it sat under the date axis in v33, with two labels, both retired) */
+.os-mm { margin: 0 0 0 auto; flex: 0 1 178px; min-width: 120px; max-width: 200px; display: block; }
 .os-mm--arrive { animation: os-mm-in 1.1s ease both; }
 @keyframes os-mm-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-.os-mmlab {
-  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--dash-ink-45); white-space: nowrap;
+.os-mmtrack {
+  position: relative; height: 24px; border-radius: 7px; overflow: hidden; touch-action: pan-y;
+  background: rgba(245, 241, 235, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(245, 241, 235, 0.2);
 }
-.os-mmtrack { position: relative; flex: 1; height: 26px; border-radius: 5px; background: var(--dash-track); overflow: hidden; touch-action: pan-y; }
-.os-mmtrack > svg { display: block; width: 100%; height: 26px; }
+.os-mmtrack > svg { display: block; width: 100%; height: 24px; }
 .os-mmwin {
-  position: absolute; top: 0; bottom: 0; min-width: 26px; box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.72); border: 1.5px solid var(--dash-navy); border-radius: 5px;
+  position: absolute; top: 0; bottom: 0; box-sizing: border-box;
+  background: rgba(245, 241, 235, 0.24); border: 1.5px solid #f5f1eb; border-radius: 7px;
   cursor: grab;
 }
 .os-mmwin:active { cursor: grabbing; }
-.os-mmwin:focus-visible { outline: 2px solid var(--dash-navy); outline-offset: 1px; }
-.os-mmwin i { position: absolute; top: 7px; bottom: 7px; left: 4px; width: 2px; border-radius: 2px; background: var(--dash-navy); }
+.os-mmwin:focus-visible { outline: 2px solid #f5f1eb; outline-offset: 1px; }
+.os-mmwin i { position: absolute; top: 6px; bottom: 6px; left: 4px; width: 2px; border-radius: 2px; background: #f5f1eb; }
 .os-mmwin i + i { left: auto; right: 4px; }
+/* ⚠️ NEVER HIDDEN. 470px of CARD or less — a 1280px window — and the control takes the full line
+   beneath the title, still inside the band. */
+@container (max-width: 470px) { .os-mm { flex-basis: 100%; max-width: none; margin-left: 0; } }
 
 /* ══ §6 · CLOSED ══════════════════════════════════════════════════════════════════════════════ */
 .os-clpie { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; padding: 6px 0 2px; }
@@ -667,28 +676,30 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-tip-rowlink:hover { text-decoration: underline; }
 
 /* ══ §6c · THE GREETING'S SHADOW ═══════════════════════════════════════════════════════════════
-   Behind the cards, inert, and absolute inside the content — it scrolls with the page.
+   Behind the cards, inert, absolute inside the content — it scrolls with the page — and FREE TO RUN UP
+   BEHIND THE TOP BAR (the v34 mockup, 19 Sep).
 
-   ⚠️ PLACED FROM THE GREETING, IN THE REF'S OWN NUMBERS. The ref hangs a 760×430 box on its main
-   column's top-left and puts the image at 96/−34 inside it; its greeting starts 89px down that column
-   and 40px in (MEASURED in the ref: the image is 56px right of and 123px above "Hello"). Here the
-   greeting starts `26px` down `.os-content` and `--dash-page-pad` in, so the image sits at
-   (pad + 56, 26 − 123) — the same place relative to "Hello".
+   ⚠️ HOW IT GETS BEHIND THE BAR. The bar is the shell's and sits above the page; on this route the
+   shell extends the page's scroller UP under it and pads the page down by the bar's height
+   (`--dash-bar-h`, workspaceShell.css). So this box starts at the top of the scroller — which is the
+   top of the column, behind the bar — and nothing here needs to know the bar exists. v33's 28px fade
+   at the scroller's edge is gone with the edge.
 
-   ⚠️ AND IT CANNOT RUN UP BEHIND THE SEARCH BAR, AS THE REF'S DOES. There the whole column scrolls,
-   bar included; here the bar is the shell's and sits ABOVE this scroller, so anything that scrolls
-   with the page is cut at the scroller's top edge. The top of the box fades over 28px so that cut is
-   never a line. */
+   ⚠️ PLACED FROM THE GREETING, IN THE REF'S OWN NUMBERS, MEASURED: the ref's image is 500px wide,
+   18px right of and 162px above "Hello" (58/−66 from a column whose greeting starts at 40/96). Here
+   the greeting starts `--dash-bar-h + --dash-greet-top` down the content and `--dash-page-pad` in. */
 .os-content { position: relative; }
 .os-content > * { position: relative; z-index: 1; }
 .os-content > .os-greetshadow {
   position: absolute; z-index: 0; left: 0; top: 0;
-  width: 760px; max-width: 100%; height: 372px;
+  width: 860px; max-width: 100%; height: 520px;
   overflow: hidden; pointer-events: none;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 28px);
-  mask-image: linear-gradient(180deg, transparent 0, #000 28px);
 }
-.os-greetshadow img { position: absolute; left: calc(var(--dash-page-pad, 22px) + 56px); top: -97px; width: 430px; height: auto; display: block; opacity: 0.08; }
+.os-greetshadow img {
+  position: absolute; display: block; width: 500px; height: auto; opacity: 0.08;
+  left: calc(var(--dash-page-pad, 22px) + 18px);
+  top: calc(var(--dash-bar-h, 0px) + var(--dash-greet-top, 8px) - 162px);
+}
 
 /* ══ §6d · A TOP-ROW CARD WITH NOTHING IN IT (v33; `closed-empty.html`, option A) ══════════════
    ⚠️ REACHED FROM TWO DIFFERENT STATES: the active card when there are NO QUERIES, and the closed
@@ -864,8 +875,8 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
    every card width (62px at a 30px title) */
 .os-sk-ttl { width: 58%; height: calc(var(--dash-ttl) * 1.1); }
 .os-sk--onnavy { opacity: 0.35; }
-/* `.os-qaeyebrow` — 9.5px × 1.4 */
-.os-sk-eyebrow { width: 96px; height: 13.3px; }
+/* the range control's own 24px, in the navy band */
+.os-sk-mm { height: 24px; border-radius: 7px; }
 /* `.os-mini` — 10px (`--dash-eyebrow`) × normal + 12px of padding + 2px of border */
 .os-sk-mini { width: 74px; height: 26px; border-radius: 20px; flex: none; }
 /* the tile fills what the rows leave, exactly as `.os-qahero` does */
@@ -885,6 +896,8 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-sk-fent { width: 100%; margin-bottom: 10px; border-radius: 10px; }
 /* the row ghost is the row's own height: 44px tile + 11px of padding either side */
 .os-sk-tdrow { height: 66px; width: 100%; margin-bottom: 0; border-radius: 10px; }
+/* …and every row after the first sits under the real row's 1px hairline */
+.os-sk-tdrow + .os-sk-tdrow { margin-top: 1px; }
 .os-sk-tdfoot { display: block; width: 180px; height: 13px; }
 
 /* ══ §11 · RESPONSIVE ═════════════════════════════════════════════════════════════════════════

@@ -19,24 +19,24 @@
           "colFirst": {
             "cls": "ws-pagebar",
             "top": 41.8,
-            "bottom": 115.5
+            "bottom": 125.8
           },
           "colLast": {
             "cls": "ws-winwrap",
-            "top": 115.5,
+            "top": 41.8,
             "bottom": 1130
           },
-          "bodyTop": 115.5,
-          "bodyBottom": 1126.3,
+          "bodyTop": 41.8,
+          "bodyBottom": 1125.6,
           "bodyFirst": {
             "cls": "os-content",
-            "top": 115.5,
-            "bottom": 1126.3
+            "top": 41.8,
+            "bottom": 1125.6
           },
           "bodyLast": {
             "cls": "os-content",
-            "top": 115.5,
-            "bottom": 1126.3
+            "top": 41.8,
+            "bottom": 1125.6
           },
           "shown": 2
         },
@@ -44,24 +44,24 @@
           "colFirst": {
             "cls": "ws-pagebar",
             "top": 41.8,
-            "bottom": 115.5
+            "bottom": 125.8
           },
           "colLast": {
             "cls": "ws-winwrap",
-            "top": 115.5,
+            "top": 41.8,
             "bottom": 1130
           },
-          "bodyTop": 115.5,
-          "bodyBottom": 1130.3,
+          "bodyTop": 41.8,
+          "bodyBottom": 1129.6,
           "bodyFirst": {
             "cls": "os-greetshadow",
-            "top": 115.5,
-            "bottom": 487.5
+            "top": 41.8,
+            "bottom": 561.8
           },
           "bodyLast": {
             "cls": "os-row2",
-            "top": 692.3,
-            "bottom": 1086.3
+            "top": 684.6,
+            "bottom": 1085.6
           },
           "shown": 2
         }
@@ -83,7 +83,7 @@
         "controlNames": [],
         "inked": 0,
         "inkedText": [],
-        "scanned": 1017
+        "scanned": 1010
       },
       "removed": true,
       "tickets": 0,
@@ -97,9 +97,9 @@
           "tileH": 66,
           "gridW": 415.7,
           "rowGap": 0,
-          "portFoot": 1035.3,
-          "lastBottom": 975.3,
-          "overflow": -60,
+          "portFoot": 1034.6,
+          "lastBottom": 969.6,
+          "overflow": -65,
           "wholeVisible": 3
         },
         "after": {
@@ -111,17 +111,150 @@
           "tileH": 66,
           "gridW": 415.7,
           "rowGap": 0,
-          "portFoot": 1032.8,
-          "lastBottom": 2365.8,
-          "overflow": 1333,
+          "portFoot": 1032.1,
+          "lastBottom": 2358.1,
+          "overflow": 1326,
+          "wholeVisible": 3
+        }
+      },
+      "nav": {
+        "frames": 69,
+        "on": 28,
+        "out": 15,
+        "off": 26,
+        "badOn": 0,
+        "badOut": 0,
+        "badOff": 0,
+        "maxOutDelta": 0,
+        "firstBadOn": null,
+        "firstBadOut": null
+      },
+      "animated": 34,
+      "blocks": 34,
+      "missing": []
+    },
+    {
+      "width": 1536,
+      "caught": true,
+      "worst": 4,
+      "settle": {
+        "suppressed": true,
+        "slotClass": "",
+        "stillRunning": 0
+      },
+      "settleDuring": {
+        "suppressed": true,
+        "slotClass": "stage-page-on",
+        "stillRunning": 0
+      },
+      "edges": {
+        "during": {
+          "colFirst": {
+            "cls": "ws-pagebar",
+            "top": 41.8,
+            "bottom": 125.8
+          },
+          "colLast": {
+            "cls": "ws-winwrap",
+            "top": 41.8,
+            "bottom": 1130
+          },
+          "bodyTop": 41.8,
+          "bodyBottom": 1125.4,
+          "bodyFirst": {
+            "cls": "os-content",
+            "top": 41.8,
+            "bottom": 1125.4
+          },
+          "bodyLast": {
+            "cls": "os-content",
+            "top": 41.8,
+            "bottom": 1125.4
+          },
+          "shown": 2
+        },
+        "after": {
+          "colFirst": {
+            "cls": "ws-pagebar",
+            "top": 41.8,
+            "bottom": 125.8
+          },
+          "colLast": {
+            "cls": "ws-winwrap",
+            "top": 41.8,
+            "bottom": 1130
+          },
+          "bodyTop": 41.8,
+          "bodyBottom": 1129.4,
+          "bodyFirst": {
+            "cls": "os-greetshadow",
+            "top": 41.8,
+            "bottom": 561.8
+          },
+          "bodyLast": {
+            "cls": "os-row2",
+            "top": 687.4,
+            "bottom": 1085.4
+          },
+          "shown": 2
+        }
+      },
+      "clip": {
+        "clippers": [
+          {
+            "cls": "ws-wbody",
+            "overflow": "auto/auto",
+            "scroller": true,
+            "cutTop": 0,
+            "cutBottom": 0
+          }
+        ],
+        "worstCut": 0
+      },
+      "live": {
+        "controls": 0,
+        "controlNames": [],
+        "inked": 0,
+        "inkedText": [],
+        "scanned": 1012
+      },
+      "removed": true,
+      "tickets": 0,
+      "tk": {
+        "during": {
+          "present": true,
+          "ghost": true,
+          "scroller": "os-scroll",
+          "count": 3,
+          "cols": 1,
+          "tileH": 66,
+          "gridW": 455.7,
+          "rowGap": 0,
+          "portFoot": 1034.4,
+          "lastBottom": 972.4,
+          "overflow": -62,
+          "wholeVisible": 3
+        },
+        "after": {
+          "present": true,
+          "ghost": false,
+          "scroller": "os-scroll",
+          "count": 23,
+          "cols": 1,
+          "tileH": 66,
+          "gridW": 455.7,
+          "rowGap": 0,
+          "portFoot": 1031.9,
+          "lastBottom": 2360.9,
+          "overflow": 1329,
           "wholeVisible": 3
         }
       },
       "nav": {
         "frames": 66,
-        "on": 24,
+        "on": 25,
         "out": 16,
-        "off": 26,
+        "off": 25,
         "badOn": 0,
         "badOut": 0,
         "badOff": 0,
@@ -132,9 +265,142 @@
       "animated": 35,
       "blocks": 35,
       "missing": []
+    },
+    {
+      "width": 1920,
+      "caught": true,
+      "worst": 4,
+      "settle": {
+        "suppressed": true,
+        "slotClass": "",
+        "stillRunning": 0
+      },
+      "settleDuring": {
+        "suppressed": true,
+        "slotClass": "stage-page-on",
+        "stillRunning": 0
+      },
+      "edges": {
+        "during": {
+          "colFirst": {
+            "cls": "ws-pagebar",
+            "top": 41.8,
+            "bottom": 125.8
+          },
+          "colLast": {
+            "cls": "ws-winwrap",
+            "top": 41.8,
+            "bottom": 1130
+          },
+          "bodyTop": 41.8,
+          "bodyBottom": 1125.5,
+          "bodyFirst": {
+            "cls": "os-content",
+            "top": 41.8,
+            "bottom": 1125.5
+          },
+          "bodyLast": {
+            "cls": "os-content",
+            "top": 41.8,
+            "bottom": 1125.5
+          },
+          "shown": 2
+        },
+        "after": {
+          "colFirst": {
+            "cls": "ws-pagebar",
+            "top": 41.8,
+            "bottom": 125.8
+          },
+          "colLast": {
+            "cls": "ws-winwrap",
+            "top": 41.8,
+            "bottom": 1130
+          },
+          "bodyTop": 41.8,
+          "bodyBottom": 1129.5,
+          "bodyFirst": {
+            "cls": "os-greetshadow",
+            "top": 41.8,
+            "bottom": 561.8
+          },
+          "bodyLast": {
+            "cls": "os-row2",
+            "top": 690.5,
+            "bottom": 1085.5
+          },
+          "shown": 2
+        }
+      },
+      "clip": {
+        "clippers": [
+          {
+            "cls": "ws-wbody",
+            "overflow": "auto/auto",
+            "scroller": true,
+            "cutTop": 0,
+            "cutBottom": 0
+          }
+        ],
+        "worstCut": 0
+      },
+      "live": {
+        "controls": 0,
+        "controlNames": [],
+        "inked": 0,
+        "inkedText": [],
+        "scanned": 1010
+      },
+      "removed": true,
+      "tickets": 0,
+      "tk": {
+        "during": {
+          "present": true,
+          "ghost": true,
+          "scroller": "os-scroll",
+          "count": 3,
+          "cols": 1,
+          "tileH": 66,
+          "gridW": 545.7,
+          "rowGap": 0,
+          "portFoot": 1034.5,
+          "lastBottom": 975.5,
+          "overflow": -59,
+          "wholeVisible": 3
+        },
+        "after": {
+          "present": true,
+          "ghost": false,
+          "scroller": "os-scroll",
+          "count": 23,
+          "cols": 1,
+          "tileH": 66,
+          "gridW": 545.7,
+          "rowGap": 0,
+          "portFoot": 1032,
+          "lastBottom": 2364,
+          "overflow": 1332,
+          "wholeVisible": 3
+        }
+      },
+      "nav": {
+        "frames": 70,
+        "on": 29,
+        "out": 16,
+        "off": 25,
+        "badOn": 0,
+        "badOut": 0,
+        "badOff": 0,
+        "maxOutDelta": 0,
+        "firstBadOn": null,
+        "firstBadOut": null
+      },
+      "animated": 34,
+      "blocks": 34,
+      "missing": []
     }
   ],
-  "widths": 1,
+  "widths": 3,
   "worst": 4,
   "allCaught": true,
   "allRemoved": true,
@@ -142,10 +408,10 @@
   "animated": true,
   "tolerance": 4,
   "reducedMotion": {
-    "skeletonBlocks": 83,
+    "skeletonBlocks": 81,
     "skeletonRunning": 14,
     "skeletonNamed": 0,
-    "barBlocks": 31,
+    "barBlocks": 29,
     "barLayers": 4,
     "barRunning": 0,
     "barNamed": 0,
@@ -155,7 +421,7 @@
   "headMatches": true,
   "footMatches": true,
   "nothingClipped": true,
-  "tkWidths": 1,
+  "tkWidths": 3,
   "tkCountMatches": true,
   "tkColsMatch": true,
   "tkTileMatches": true,

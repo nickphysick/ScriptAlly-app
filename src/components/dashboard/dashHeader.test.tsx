@@ -301,7 +301,10 @@ describe("the rules", () => {
   /* ⚠️ RETARGETED (v16, 18 Sep): the gap under the header is the header's own bottom padding, because
      the row beneath it is the first card row and a card carries no top margin. The ref sets 24. */
   it("⚠️ the space under it belongs to the header, not to the row beneath", () => {
-    expect(rule(".os-greet")).toContain("padding: 26px 0 24px");
+    /* the v34 mockup (19 Sep): 20px from the bar's controls to the greeting — the bar keeps 12 beneath
+       its controls, so the greeting's own top padding is 8, through a token the shadow also reads */
+    expect(rule(".os-greet")).toContain("padding: var(--dash-greet-top, 8px) 0 24px");
+    expect(rule(".os-root")).toContain("--dash-greet-top: 8px");
     expect(rule(".os-row1"), "the row adds none of its own").not.toContain("margin-top");
   });
 

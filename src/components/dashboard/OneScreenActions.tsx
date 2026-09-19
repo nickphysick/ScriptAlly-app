@@ -4,7 +4,7 @@
  *
  * OneScreenActions — the quick-actions card (v33, 18 Sep; ref design-refs/dashboard-v33.html).
  *
- * No large title: a mono eyebrow in the sand band. One tile — "Log a query", with the quill — fills
+ * No header at all since the v34 mockup (19 Sep) — the card is named for assistive tech only. One tile — "Log a query", with the quill — fills
  * what the two lines beneath it leave; "Record a response" and "Add an agent" are plain rows with a
  * hairline between them. Every control is an existing capture (`lib/dashActions`).
  */
@@ -28,9 +28,11 @@ export const OneScreenActions: React.FC<{
   const main = QUICK_ACTIONS.filter((a) => a.rank === "main");
   const minor = QUICK_ACTIONS.filter((a) => a.rank === "minor");
   return (
+    /* ⚠️ NO HEADER (the v34 mockup, 19 Sep). The eyebrow and its sand band are gone; the tile starts at
+       the top of the frame. The card has no visible name now, so it carries an accessible one. */
     <OneScreenPanel
-      variant="os-qa" tone="sand" probe="quick-actions" loading={loading} skel={["h", "grow", "", ""]}
-      band={<p className="os-qaeyebrow">Quick actions</p>}
+      variant="os-qa" probe="quick-actions" loading={loading} skel={["grow", "", ""]}
+      label="Quick actions"
     >
       {main.map((a) => (
         <button

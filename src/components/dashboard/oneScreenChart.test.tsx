@@ -72,13 +72,40 @@ describe("the card over a campaign's life", () => {
     expect(html).toContain('data-probe-text="chart-since">since 2 Sep</span>');
     expect(html).not.toContain('data-probe="minimap"');
   });
-  it("long: the minimap arrives, spanning the first month to Today, with a window you can reach by keyboard", () => {
+  /* ⚠️ THE v34 MOCKUP (19 Sep): the control is IN THE NAVY BAND, after the title — not under the axis —
+     and it carries no labels. What it shows is said in its `title` and its accessible name. */
+  it("long: the range control arrives IN THE BAND, unlabelled, named for what it shows, reachable by keyboard", () => {
     const html = chart();
-    expect(html).toContain('data-probe="minimap"');
-    expect(html).toMatch(/<span class="os-mmlab">[A-Z][a-z]{2} \d{4}<\/span>/);
-    expect(html).toContain('<span class="os-mmlab">Today</span>');
+    const band = html.slice(html.indexOf('class="os-band"'), html.indexOf('data-probe="plot-box"'));
+    expect(band.indexOf("chart-title")).toBeGreaterThan(-1);
+    expect(band.indexOf('data-probe="minimap"'), "the control is inside the band, after the title").toBeGreaterThan(band.indexOf("chart-title"));
+    expect(html.slice(html.indexOf('data-probe="plot-box"')), "…and nowhere under the plot").not.toContain('data-probe="minimap"');
+    expect(html, "DEC 2023 and TODAY are dropped").not.toContain("os-mmlab");
+    const name = /data-probe="minimap-window"[^>]*aria-label="([^"]+)"/.exec(html)![1];
+    expect(name).toMatch(/^Showing \d{1,2} [A-Z][a-z]{2} to \d{1,2} [A-Z][a-z]{2}\. Drag to change the dates\.$/);
+    expect(html).toContain(`data-probe="minimap" title="${name}"`);
     expect(html).toMatch(/data-probe="minimap-window"[^>]*role="slider"[^>]*tabindex="0"/);
     expect(html).not.toContain("chart-since");
+  });
+
+  it("⚠️ it is never hidden: in a card of 470px or less it takes the band's full line, and the band's row wraps", () => {
+    expect(rule(".os-lead .os-bandrow")).toMatch(/flex-wrap:\s*wrap/);
+    expect(rule(".os-lead .os-bandrow")).toMatch(/row-gap:\s*11px/);
+    expect(rule(".os-lead .os-bandrow")).toMatch(/gap:\s*16px/);
+    expect(rule(".os-mm")).toMatch(/flex:\s*0 1 178px/);
+    expect(rule(".os-mm")).toMatch(/min-width:\s*120px/);
+    expect(rule(".os-mm")).toMatch(/max-width:\s*200px/);
+    expect(css).toMatch(/@container \(max-width: 470px\)\s*\{\s*\.os-mm \{ flex-basis: 100%; max-width: none; margin-left: 0; \}/);
+    /* no rule anywhere takes it off the page */
+    expect(css).not.toMatch(/\.os-mm[^{]*\{[^}]*display:\s*none/);
+  });
+
+  it("⚠️ the end of the chart ALWAYS disintegrates — the carry no longer asks whether the window reaches today", () => {
+    expect(code).not.toContain("windowAtToday");
+    expect(code).not.toContain("atToday");
+    expect(code).toMatch(/const carryTo = size \? Math\.max\(size\.carry, last \? last\[0\] : 0\) : null;/);
+    /* what still depends on the dates: the line and its end marker stop at the last visible point */
+    expect(code).toMatch(/\{last && <circle className="os-aclast" cx=\{last\[0\]\} cy=\{last\[1\]\}/);
   });
   it("⚠️ none: no chart and NO MENTOR — the Courier, what the card will become, and the one thing to do", () => {
     const html = chart({ queries: [], activeCount: 0, empty: true });
@@ -194,7 +221,8 @@ describe("the layers", () => {
 describe("the axis", () => {
   it("one slot per week, under the drawing; under 560px of CARD every other label goes and its bar stays", () => {
     const html = chart();
-    const axis = html.slice(html.indexOf('data-probe="chart-axis"'), html.indexOf('data-probe="minimap"'));
+    /* bounded on the axis's own element — the control that used to follow it is in the band now */
+    const axis = /data-probe="chart-axis">(.*?)<\/div>/.exec(html)![1];
     expect(axis.match(/<span/g)?.length).toBe(9);
     expect(rule(".os-acx span")).toMatch(/flex:\s*1 1 0/);
     expect(rule(".os-acx span")).toMatch(/white-space:\s*nowrap/);

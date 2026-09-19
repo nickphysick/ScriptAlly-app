@@ -43,8 +43,13 @@ export const firstMonthLabel = (daily: readonly LedgerPoint[]): string | null =>
 export const clampWindowEnd = (endIdx: number, dailyLen: number): number =>
   Math.max(Math.min(WINDOW_DAYS, dailyLen - 1), Math.min(dailyLen - 1, Math.round(endIdx)));
 
-/** Does the window reach today? Only then does the journey "go on" past the last point. */
-export const windowAtToday = (endIdx: number, dailyLen: number): boolean => endIdx >= dailyLen - 1;
+/* ⚠️ `windowAtToday` IS RETIRED (the v34 mockup, 19 Sep). It gated the fill's carried-on end to a
+   window that reaches today; the end of the chart now ALWAYS disintegrates, whatever dates are showing,
+   and the gate had no other reader. */
+
+/** "Showing 20 Jul to 14 Sep. Drag to change the dates." — the range control's title and its name. */
+export const rangeSentence = (view: readonly LedgerPoint[]): string =>
+  view.length ? `Showing ${view[0].label} to ${view[view.length - 1].label}. Drag to change the dates.` : "Drag to change the dates.";
 
 /**
  * The points the long chart draws: the weekly roll-up of the record UP TO the window's end, cut to
@@ -68,11 +73,19 @@ export const windowFraction = (endIdx: number, dailyLen: number): { left: number
   return { left: Math.max(0, right - width), width };
 };
 
-/** A drag position (the window's LEFT edge as a fraction of the track it can travel) → an end index. */
-export const endIdxFromLeft = (leftFrac: number, dailyLen: number): number => {
-  const span = Math.max(1, dailyLen - 1);
-  const width = Math.min(1, WINDOW_DAYS / span);
-  return clampWindowEnd((Math.max(0, Math.min(1 - width, leftFrac)) + width) * span, dailyLen);
+/**
+ * ⚠️ THE WINDOW'S DRAWN BOX, IN PIXELS, CLAMPED INSIDE ITS TRACK (the v34 mockup). The window has a
+ * minimum drawn width so its handles stay grabbable on a long campaign; on a two-year record that
+ * floor is wider than the eight weeks it stands for. Placed by its left edge it would run past the
+ * track at the right-hand end (the mockup does, and clips it — a shortcut, not the intent). So the box
+ * is placed by where the window ENDS, and then held inside the track at both ends.
+ */
+export const windowBox = (endIdx: number, dailyLen: number, trackW: number, minW: number): { left: number; width: number } => {
+  const f = windowFraction(endIdx, dailyLen);
+  const width = Math.min(trackW, Math.max(minW, f.width * trackW));
+  const right = Math.min(trackW, (f.left + f.width) * trackW);
+  const left = Math.max(0, Math.min(trackW - width, right - width));
+  return { left, width };
 };
 
 /**

@@ -141,11 +141,16 @@ describe("search — focus must not resize the field", () => {
     .replace(/\/\*[\s\S]*?\*\//g, "")
     + readFileSync(join(__dirname, "../shell/workspaceShell.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   it("⚠️ the ring is a box-shadow — a growing field shoves the bar's flanks", () => {
-    const m = /\.sp-search:focus-visible\s*\{([^}]*)\}/.exec(bare);
-    expect(m).not.toBeNull();
-    const decls = bare.match(/\.sp-search:focus-visible\s*\{[^}]*\}/g)!.join("");
-    expect(decls).toContain("box-shadow");
-    expect(decls).not.toMatch(/(^|[\s;{])width:/);
+    /* ⚠️ RETARGETED, SAME LAW (the v34 mockup, 19 Sep). The ring is the burgundy line going to 2px, drawn
+       as an inset shadow on the FRAME inside the pill — so the rule is `.sp-search:focus-visible
+       .sp-search-f`, and the match takes in the descendant. The claim has not moved: focus costs no
+       layout. And it is no longer a glow. */
+    const rules = bare.match(/\.sp-search:focus-visible[^{]*\{[^}]*\}/g);
+    expect(rules).not.toBeNull();
+    const decls = rules!.join("");
+    expect(decls).toContain("box-shadow: inset");
+    expect(decls).not.toMatch(/(^|[\s;{])(width|border-width|border|padding):/);
+    expect(decls, "no glow").not.toMatch(/box-shadow:\s*0 0 0 \d+px rgba/);
   });
 });
 

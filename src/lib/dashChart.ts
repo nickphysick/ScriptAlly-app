@@ -69,8 +69,11 @@ export const chartGeometry = (values: readonly number[], W: number, H: number, m
  * The fill's outline: the line, closed down to the baseline.
  *
  * ⚠️ WITH `carryTo`, THE AREA RUNS ON LEVEL PAST THE LAST POINT — at the last point's height, out to
- * the inside of the card's frame — and that is only ever passed when the window reaches today. The
- * journey "goes on" from the present; a window dragged back to last spring ends where it ends.
+ * the inside of the card's frame, where it breaks up behind the Mentor.
+ * ⚠️ AND THE CARD ALWAYS PASSES IT (the v34 mockup, 19 Sep) — the end of the chart disintegrates
+ * whatever dates are showing. The first pass drew it only for a window that reaches today; that is
+ * reversed. What still depends on the dates is the LINE and its end marker, which stop at the last
+ * visible point. `null` remains for a caller with no frame to carry to.
  */
 export const fillPath = (g: ChartGeometry, carryTo: number | null): string => {
   if (!g.points.length) return "";

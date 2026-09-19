@@ -37,6 +37,8 @@ export interface OneScreenPanelProps {
    */
   band?: React.ReactNode;
   tone?: PanelTone;
+  /** A card with no visible title still has a name: `role="group"` + this as its `aria-label`. */
+  label?: string;
   /** ⚠️ `os-lift` is the DEFAULT: every container has it today. Stated so a future opt-out is
    *  explicit rather than a class quietly dropped from one call site. */
   lift?: boolean;
@@ -62,11 +64,13 @@ export interface OneScreenPanelProps {
  * repaints all of them.
  */
 export const OneScreenPanel: React.FC<OneScreenPanelProps> = ({
-  variant, loading = false, skel, band, tone, lift = true, innerRef, probe, children,
+  variant, loading = false, skel, band, tone, label, lift = true, innerRef, probe, children,
 }) => (
   <div
     ref={innerRef}
     data-probe={probe}
+    role={label ? "group" : undefined}
+    aria-label={label}
     className={`os-card${lift ? " os-lift" : ""} ${variant}${tone ? ` os-tone--${tone}` : ""}${loading ? " isload" : ""}`}
   >
     {loading && skel && <Skel bars={skel} />}

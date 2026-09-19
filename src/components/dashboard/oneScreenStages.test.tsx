@@ -135,10 +135,14 @@ describe("the quick actions", () => {
     expect(qa.match(/class="os-qahero"/g) ?? []).toHaveLength(1);
     expect(qa.match(/class="os-qarow"/g) ?? []).toHaveLength(2);
     expect(qa).toMatch(/class="os-qahero" data-action="query"/);
-    /* the eyebrow in the sand band is the card's only heading */
-    expect(html).toMatch(/class="os-card os-lift os-qa os-tone--sand"/);
-    expect(qa).toContain('<p class="os-qaeyebrow">Quick actions</p>');
+    /* ⚠️ THE v34 MOCKUP (19 Sep): no header at all — the eyebrow and its sand band are gone, rule and
+       element together — so the card is NAMED for assistive tech, and the tile is the frame's first child */
+    expect(html).toMatch(/data-probe="quick-actions" role="group" aria-label="Quick actions" class="os-card os-lift os-qa"/);
+    expect(qa).not.toContain("os-band");
+    expect(qa).not.toContain("os-qaeyebrow");
+    expect(qa).not.toContain("os-tone--sand");
     expect(qa).not.toContain("<h3");
+    expect(qa).toMatch(/<div class="os-frame" data-probe="quick-actions-frame"><button type="button" class="os-qahero"/);
     for (const gone of ["os-qatile", "os-qastack", "os-qaart", "os-qaph", "os-qaic", "os-qasub", "os-protag", "os-qalist", "os-qafoot", "os-mount"]) {
       expect(qa, gone).not.toMatch(new RegExp(`["\\s]${gone}["\\s]`));
     }
@@ -171,7 +175,7 @@ describe("the quick actions", () => {
   it("while loading, the card keeps its words under the shimmer", () => {
     const loading = renderToStaticMarkup(<OneScreenActions loading onNavigate={() => {}} />);
     expect(loading).toContain("isload");
-    expect(loading).toContain("Quick actions");
+    expect(loading).toContain('aria-label="Quick actions"');
     expect(loading).toContain("Log a query");
   });
 });
@@ -287,7 +291,8 @@ describe("the rules", () => {
     expect(rule(".os-qarowlab")).toContain("font-size: clamp(14.5px, 6.8cqw, 17px)");
     expect(rule(".os-qarow")).toContain("padding: 13px 4px");
     expect(rule(".os-qarow:last-child")).toContain("border-bottom: 0");
-    expect(rule(".os-qaeyebrow")).toContain("letter-spacing: 0.16em");
+    expect(rule(".os-qa > .os-frame")).toContain("padding: 18px 18px 12px");
+    expect(css.replace(/\/\*[\s\S]*?\*\//g, ""), "the eyebrow's rule went with the eyebrow").not.toMatch(/\.os-qaeyebrow[\s{,]/);
   });
 
   /* ⚠️ THE DONUT'S FOUR FILLS ARE TOKENS, and the key's four swatches read the SAME four — the ring

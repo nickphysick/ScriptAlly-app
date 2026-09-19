@@ -132,7 +132,8 @@ describe("§1 · the page", () => {
     expect(c).toContain("box-sizing: border-box");
     expect(c).toContain("max-width: calc(var(--dash-page-max) + 2 * var(--dash-page-pad))");
     expect(c).toContain("margin-inline: auto");
-    expect(c).toMatch(/padding:\s*0 var\(--dash-page-pad\) \d+px/);
+    /* the v34 mockup: the top padding is the shell's bar — the scroller runs up under it on this route */
+    expect(c).toMatch(/padding:\s*var\(--dash-bar-h, 0px\) var\(--dash-page-pad\) \d+px/);
     expect(c).not.toContain("--work-max");
     const shellCss = readFileSync(resolve(__dirname, "../shell/workspaceShell.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(shellCss.match(/--dash-page-max:\s*\d+px/g) ?? []).toHaveLength(1);
@@ -614,11 +615,16 @@ describe("one search control, not two (v27, Phase 2)", () => {
      on one screen. Two controls for one job is worse than either alone: the reader has to work out
      whether they do the same thing, and they do. */
   it("the bar's search pill does not render on /dashboard", () => {
-    const at = shell.indexOf("<SearchPill");
-    expect(at, "the pill must still exist for every other route").toBeGreaterThan(-1);
-    /* it is gated, and on the dashboard flag specifically */
-    const before = shell.slice(Math.max(0, at - 400), at);
-    expect(before, "the pill must be conditional on NOT being in dash mode").toMatch(/\{!dashMode && \(/);
+    /* ⚠️ RETARGETED, SAME LAW (the v34 mockup, 19 Sep): the dashboard's field is `SearchPill big` now, so
+       the component is mounted TWICE in the source — and exactly one of them per route. The big one is
+       gated ON the dashboard flag, the small one on its negation. */
+    const mounts = [...shell.matchAll(/<SearchPill\b/g)].map((m) => m.index!);
+    expect(mounts, "one big, one small").toHaveLength(2);
+    const gate = (at: number) => shell.slice(Math.max(0, at - 160), at);
+    const big = mounts.find((at) => /\bbig\b/.test(shell.slice(at, at + 160)))!;
+    const small = mounts.find((at) => at !== big)!;
+    expect(gate(big), "the big field is the dashboard's alone").toMatch(/\{dashMode && \(\s*$/);
+    expect(gate(small), "the pill must be conditional on NOT being in dash mode").toMatch(/\{!dashMode && \(/);
   });
 
   /* ⚠️ REMOVED FROM THE DOM, NOT HIDDEN. "There is exactly one search control" is a claim about the

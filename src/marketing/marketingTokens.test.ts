@@ -1132,7 +1132,20 @@ describe("the feature rows set their own type, and nothing else uses its familie
        decision this lock exists to surface. It is the only file outside the marketing sheet allowed
        to name either family; it names only the typewriter face, and only in the greeting's own rule.
        A second signed-in surface adopting the face is still a decision this fails on. */
-    expect(elsewhere.map((f) => f.slice(src.length + 1).replace(/\\/g, "/"))).toEqual(["components/dashboard/oneScreen.css"]);
+    /* ⚠️ A SECOND SIGNED-IN OWNER SINCE THE v34 MOCKUP (19 Sep), AND IT IS NAMED, NOT WAVED THROUGH. Nick's
+       brief sets the top bar's shared controls — the search placeholder, Give feedback, Help's "?", and
+       + New — in Special Elite, on every workspace page. The bar renders under two shells and neither
+       is a descendant of `.os-root`, so the dashboard's `--os-type` cannot reach it (a token that
+       resolves to nothing falls back in silence): `shell/primitives.css` declares `--sp-type` at
+       `:root`. That is the whole of it — ONE declaration, the token — and a third file naming the
+       face is still a decision this fails on. */
+    expect(elsewhere.map((f) => f.slice(src.length + 1).replace(/\\/g, "/")).sort())
+      .toEqual(["components/dashboard/oneScreen.css", "components/shell/primitives.css"]);
+    const prim = decls(readFileSync(resolve(src, "components/shell/primitives.css"), "utf8"));
+    const primOwners = [...prim.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
+      .filter((m) => /Special Elite|Source Serif 4/.test(m[2])).map((m) => m[1].trim());
+    expect(primOwners, "the shell names the face once, as a token, and every control reads it").toEqual([":root"]);
+    expect(prim).not.toContain("Source Serif 4");
     const dash = decls(readFileSync(resolve(src, "components/dashboard/oneScreen.css"), "utf8"));
     const dashOwners = [...dash.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
       .filter((m) => /Special Elite|Source Serif 4/.test(m[2])).map((m) => m[1].trim());

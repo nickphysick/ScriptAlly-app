@@ -412,7 +412,8 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
        ONE mark and ONE wordmark per surface. Here it now pins the two properties that make the
        swap safe — a sized box and no plate — because a mark that grew a background would be the
        actual regression. The wordmark keeps the serif, and that is asserted where it lives. */
-    expect(wsCss).toMatch(/\.ws-bmark \{[^}]*height: 38px/s);
+    /* the v34 mockup (19 Sep): the mark is the hawk-head roundel, 40px square — still bare artwork */
+    expect(wsCss).toMatch(/\.ws-bmark \{[^}]*height: 40px; width: 40px/s);
     expect(wsCss, "the bare mark grew a plate").not.toMatch(/\.ws-bmark \{[^}]*background:/s);
     expect(wsCss).toMatch(/\.ws-bwm \{[^}]*var\(--font-serif\)/s);
   });

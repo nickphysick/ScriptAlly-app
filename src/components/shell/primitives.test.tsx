@@ -150,10 +150,28 @@ describe("SearchPill — an opener, never a field", () => {
       .toMatch(/width:\s*264px/);
   });
 
-  it("is 34px on a 9px radius, per both mockups", () => {
+  /* ⚠️ THE v34 MOCKUP (19 Sep): a small version of the card — a 5px white rim, and inside it a frame with
+     the 1px burgundy line. One control size for the whole bar (`--sp-ctl`, 50px). */
+  it("is a small card: 50px, a white rim, and a burgundy frame inside it", () => {
     const r = rule(".sp-search");
-    expect(r).toContain("height: 34px");
-    expect(r).toContain("border-radius: 9px");
+    expect(r).toContain("height: var(--sp-ctl)");
+    expect(r).toContain("padding: 5px");
+    expect(r).toContain("background: #ffffff");
+    expect(r).toContain("border: 0");
+    expect(rule(".sp-search-f")).toContain("border: 1px solid var(--sp-frame)");
+    expect(css).toMatch(/:root\s*\{[^}]*--sp-ctl:\s*50px/);
+    expect(css).toMatch(/:root\s*\{[^}]*--sp-frame:\s*#7c3a2a/);
+    const html = renderToStaticMarkup(<SearchPill onOpen={() => {}} />);
+    expect(html).toMatch(/<button[^>]*class="sp-search"[^>]*><span class="sp-search-f">/);
+    expect(html).toMatch(/<kbd class="sp-search-k" aria-hidden="true">(⌘K|Ctrl K)<\/kbd>/);
+  });
+
+  it("the dashboard's large field is the SAME component, wider", () => {
+    const html = renderToStaticMarkup(<SearchPill big onOpen={() => {}} label="Search agents, queries, manuscripts…" />);
+    expect(html).toMatch(/class="sp-search sp-search--big ws-bigsearch"/);
+    expect(html, "a big field states no fixed width").not.toContain("style=");
+    expect(rule(".sp-search--big")).toContain("max-width: 700px");
+    expect(rule(".sp-search--big")).toContain("height: 60px");
   });
 });
 
@@ -164,18 +182,29 @@ describe("HelpButton", () => {
     expect(html).toContain('aria-label="Help centre"');
   });
 
-  it("is a 32px ghost square that lifts to WHITE on hover (the bar is greige)", () => {
-    expect(rule(".sp-help")).toContain("width: 32px");
-    expect(rule(".sp-help")).toContain("background: transparent");
-    expect(css).toMatch(/\.sp-help:hover[^{]*\{[^}]*background: rgba\(255, 255, 255, 0\.55\)/s);
+  /* ⚠️ THE v34 MOCKUP: a white disc with the burgundy ring 5px in — two inset shadows, so the ring is
+     part of the disc — and a typewriter "?". The sidebar toggle wears the same class at the same size. */
+  it("is a 50px white disc with a burgundy ring 5px in, and a typewriter ?", () => {
+    const html = renderToStaticMarkup(<HelpButton onOpen={() => {}} />);
+    expect(html).toContain('class="sp-help sp-disc"');
+    expect(html).toContain('<span class="sp-help-q" aria-hidden="true">?</span>');
+    const d = rule(".sp-disc");
+    expect(d).toContain("width: var(--sp-ctl); height: var(--sp-ctl)");
+    expect(d).toContain("border-radius: 50%");
+    expect(d).toContain("inset 0 0 0 5px #ffffff, inset 0 0 0 6px var(--sp-frame)");
+    expect(rule(".sp-help-q")).toContain("font-family: var(--sp-type)");
   });
 });
 
 describe("Both shells keep their focus ring and honour reduced motion (Baked 21)", () => {
   it("every interactive primitive takes the one inset ring", () => {
     expect(css).toMatch(/\.sp-card-i:focus-visible[\s\S]*?box-shadow: inset 0 0 0 2px var\(--shell-focus\)/);
-    expect(css).toContain(".sp-search:focus-visible");
-    expect(css).toContain(".sp-help:focus-visible");
+    /* ⚠️ THE SEARCH AND THE DISC STATE THEIR OWN FOCUS (the v34 mockup). Both carry their LOOK in
+       box-shadow — the rim's lift, the disc's ring — so the shared rule, which SETS box-shadow, would
+       erase the control it was focusing. Every one of them still answers focus-visible. */
+    for (const sel of [".sp-search:focus-visible", ".sp-disc:focus-visible", ".sp-inkpill:focus-visible"]) expect(css).toContain(sel);
+    const shared = /\.sp-card-i:focus-visible[^{]*\{/.exec(css)![0];
+    expect(shared, "the shared ring may not name a control whose look lives in box-shadow").not.toMatch(/sp-search|sp-help|sp-disc/);
   });
 
   it("reduced motion kills the transitions", () => {

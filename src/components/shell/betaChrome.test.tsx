@@ -157,8 +157,9 @@ describe("the feedback dock", () => {
        presses; and left of the divider, so it reads as the reader's action rather than as one
        more piece of system furniture in the icon cluster. */
     const html = bar(true);
-    expect(html).toContain('class="ws-fbpill"');
-    expect(html).toContain("Feedback");
+    /* the v34 mockup (19 Sep): an ink pill, and the VISIBLE label is now the accessible name's own words */
+    expect(html).toMatch(/class="ws-fbpill sp-inkpill"/);
+    expect(html).toContain(">Give feedback</span>");
     /* The accessible name is on the BUTTON, not the label span, so it survives the narrow state
        where the CSS folds the label away and only the pencil is left. */
     expect(html).toContain(`aria-label="${FEEDBACK_FAB}"`);
@@ -171,9 +172,11 @@ describe("the feedback dock", () => {
       expect(i, `the rendered bar must contain ${needle}`).toBeGreaterThan(-1);
       return i;
     };
-    expect(order('class="sp-search"')).toBeLessThan(order('class="ws-fbpill"'));
-    expect(order('class="ws-fbpill"')).toBeLessThan(order('class="ws-bdiv"'));
-    expect(order('class="ws-bdiv"')).toBeLessThan(order('class="sp-help"'));
+    expect(order('class="sp-search"')).toBeLessThan(order('class="ws-fbpill sp-inkpill"'));
+    /* the v34 mockup (19 Sep): the hairline that stood between them is retired — two 50px objects in one
+       language, 12px apart. The ORDER is what this asserts and it has not changed: search · feedback · help. */
+    expect(order('class="ws-fbpill sp-inkpill"')).toBeLessThan(order('class="sp-help sp-disc"'));
+    expect(html).not.toMatch(/["\s]ws-bdiv["\s]/);
   });
 
   /**

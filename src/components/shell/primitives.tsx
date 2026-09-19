@@ -15,7 +15,6 @@
  * answer is a stylesheet reading `--shell-*`, with Tailwind kept to layout and spacing.
  */
 import React from "react";
-import { Search, HelpCircle } from "lucide-react";
 import { initialsOf } from "../../lib/searchSuggestionsCore";
 import "./primitives.css";
 
@@ -132,22 +131,42 @@ export interface SearchPillProps {
   /** The workspace bar and the top-nav bar both draw it 210px; kept a prop for narrow bars. */
   width?: number;
   label?: string;
+  /**
+   * ⚠️ THE DASHBOARD'S LARGE FIELD IS THIS COMPONENT, WIDER (the v34 mockup, 19 Sep) — 60px tall, up
+   * to 700px, its placeholder a sentence. One component in two widths, so the rim, the burgundy
+   * frame, the icon and the keycap cannot drift apart between the page that draws the big one and
+   * the fourteen that draw the small one.
+   */
+  big?: boolean;
+  probe?: string;
 }
 
+/** The platform's real modifier — "⌘K" on Apple hardware, "Ctrl K" everywhere else. */
+export const searchShortcut = (): string =>
+  (typeof navigator !== "undefined" && /Mac|iP/.test(navigator.platform ?? "") ? "⌘K" : "Ctrl K");
+
 export const SearchPill: React.FC<SearchPillProps> = ({
-  onOpen, width = 210, label = "Search", anchorRef,
+  onOpen, width = 210, label = "Search", anchorRef, big = false, probe,
 }) => (
+  /* ⚠️ A SMALL VERSION OF THE CARD: a white rim (the button), and inside it a frame with the 1px
+     burgundy line (`.sp-search-f`). It stays a BUTTON dressed as a field — the app's search IS the
+     palette, and a text box that opened an overlay on its first keystroke would be a worse lie. */
   <button
     ref={anchorRef}
     type="button"
-    className="sp-search"
-    style={{ width }}
+    className={`sp-search${big ? " sp-search--big ws-bigsearch" : ""}`}
+    style={big ? undefined : { width }}
+    data-probe={probe}
     onClick={onOpen}
     aria-keyshortcuts="Meta+K Control+K"
   >
-    <Search aria-hidden="true" />
-    <span className="sp-search-l">{label}</span>
-    <span className="sp-search-k" aria-hidden="true">⌘K</span>
+    <span className="sp-search-f">
+      <svg className="sp-search-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" />
+      </svg>
+      <span className="sp-search-l">{label}</span>
+      <kbd className="sp-search-k" aria-hidden="true">{searchShortcut()}</kbd>
+    </span>
   </button>
 );
 
@@ -158,7 +177,10 @@ export interface HelpButtonProps {
 }
 
 export const HelpButton: React.FC<HelpButtonProps> = ({ onOpen }) => (
-  <button type="button" className="sp-help" onClick={onOpen} aria-label="Help centre" title="Help">
-    <HelpCircle aria-hidden="true" />
+  /* ⚠️ A WHITE DISC WITH A BURGUNDY RING 5px IN, AND A TYPEWRITER "?" (the v34 mockup, 19 Sep) — the
+     card's rim and frame at the size of a button. The glyph is a character, not an icon, so it is in
+     the page's own face. */
+  <button type="button" className="sp-help sp-disc" onClick={onOpen} aria-label="Help centre" title="Help">
+    <span className="sp-help-q" aria-hidden="true">?</span>
   </button>
 );

@@ -49,6 +49,7 @@ import {
 } from "../../lib/accountRoutes";
 import { SettingsRail, SETTINGS_RAIL_HEADING_ID } from "../settings/SettingsRail";
 import { UserPlan } from "../../types";
+import { APP_MARK, artUrl } from "../../lib/appArt";
 import "./primitives.css";
 import manuscriptMark from "../../assets/shell/manuscript-icon.png";
 import "./workspaceShell.css";
@@ -170,6 +171,27 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
    * surfaces where the design has one.
    */
   const dashMode = pathname === "/dashboard";
+  /**
+   * ⚠️ THE DASHBOARD'S BAR IS TRANSPARENT AT REST AND TAKES THE PAGE'S GROUND ONCE THE PAGE HAS
+   * SCROLLED (the v34 mockup, 19 Sep). On that route the scroller runs UP under the bar so the
+   * greeting's shadow can pass behind it; at rest nothing else is up there. Once anything scrolls, the
+   * cards would pass visibly under a see-through bar — so it goes opaque, and the shadow has scrolled
+   * away with the page by then.
+   *
+   * ⚠️ DERIVED FROM THE VALUE, NEVER FROM AN OBSERVER. `scrollTop > 2`, read on scroll and again when
+   * the route arrives (the shell remembers each route's scroll position, so a return to the dashboard
+   * can land already scrolled). A missed intersection event is permanent; a reading cannot go stale.
+   */
+  const [barSolid, setBarSolid] = useState(false);
+  const readBar = React.useCallback((el: HTMLElement | null) => {
+    const next = !!el && el.scrollTop > 2;
+    setBarSolid((was) => (was === next ? was : next));
+  }, []);
+  useEffect(() => {
+    if (!dashMode) { setBarSolid(false); return undefined; }
+    const id = window.requestAnimationFrame(() => readBar(scrollRef?.current ?? null));
+    return () => window.cancelAnimationFrame(id);
+  }, [dashMode, readBar, scrollRef]);
   /**
    * ⚠️ THE SHELL COMPUTES NO LOADING STATE, AND THAT IS THE FIX (v34). The nav row's loading
    * treatment is keyed in `workspaceShell.css` to the dashboard's COVER — its `.os-skelpage`
@@ -480,9 +502,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               of that pendulum — type, then the asset, now type again — so it is worth stating what
               actually decided it rather than leaving the next pass to swing it back.
 
-              The MARK is `/scriptally-logo-new.png`, the plane-and-S, sitting bare on the ground:
-              no plate, no border, no fill. It is transparent artwork, so a plate would be a box
-              drawn around a shape that does not need one.
+              The MARK is the hawk-head roundel — `lib/appArt`'s 120px copy of the landing nav's own
+              mark — 40px across, sitting bare on the ground: no plate, no border, no fill. (It was
+              `/scriptally-logo-new.png`, the plane-and-S, until the v34 mockup of 19 Sep.) It is
+              transparent artwork, so a plate would be a box drawn around a shape that does not
+              need one. Collapsed, the roundel alone is the brand.
 
               The WORDMARK is set in Playfair at 22px. The previous pass used
               `/scriptally-title-v2.png` on the grounds that re-setting it is "a lookalike rather
@@ -495,7 +519,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               the title PNG is used (SmartImportReview, SidebarNav, ScriptAllyLogo) — this mount
               simply no longer has an ink ratio to keep in step. */}
           <button type="button" className="ws-brand" onClick={() => go("/dashboard")} aria-label="QueryHawk — go to dashboard">
-            <img className="ws-bmark" src="/scriptally-logo-new.png" alt="" aria-hidden="true" />
+            <img className="ws-bmark" src={artUrl(APP_MARK)} width={APP_MARK.width} height={APP_MARK.height} alt="" aria-hidden="true" />
             <span className="ws-bwm">QueryHawk</span>
           </button>
 
@@ -764,7 +788,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               ink is `visibility: hidden`, which also takes the controls out of the accessibility tree and
               the tab order — so there is no `aria-hidden` here, and none set from a flag, because a flag is
               what ran on the wrong clock. */}
-          <header className="ws-pagebar" data-probe="navrow">
+          <header className={`ws-pagebar${dashMode && barSolid ? " is-solid" : ""}`} data-probe="navrow">
               {/* ⚠️ THE COLLAPSE TOGGLE SITS AT THE SIDEBAR/CONTENT SEAM — first in the bar, before
                   the crumb — and it does not move between states (sidebar-collapse pack, baked:
                   not in the sidebar footer, not on the panel edge, not hover-revealed; a footer
@@ -775,7 +799,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   ⌘\ was freed by the tuck sweep one commit back. */}
               <button
                 type="button"
-                className="sb-toggle"
+                className="sb-toggle sp-disc"
                 onClick={sidebar.toggle}
                 aria-expanded={!sidebar.collapsed}
                 aria-controls="ws-sidebar"
@@ -871,18 +895,15 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   input rather than a real input, because the app's search IS the palette — a text
                   box that looked typeable but opened an overlay on first keystroke would be a
                   worse lie than the pill it replaces. */}
+              {/* ⚠️ AND IT IS THE SAME COMPONENT AS THE PILL, WIDER (the v34 mockup, 19 Sep). The field used
+                  to be its own markup with its own rules; one component in two widths is what stops the
+                  rim, the frame, the icon and the keycap drifting between this page and the other
+                  fourteen. `ws-bigsearch` rides along as a class because the loading cover keys on it. */}
               {dashMode && (
-                <button
-                  type="button"
-                  className="ws-bigsearch"
-                  data-probe="search"
-                  ref={searchAnchorRef}
-                  onClick={onOpenSearch}
-                >
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
-                  <span className="ws-bigsearch-t">Search agents, queries, manuscripts…</span>
-                  <span className="ws-bigsearch-k" aria-hidden="true">⌘K</span>
-                </button>
+                <SearchPill
+                  big probe="search" anchorRef={searchAnchorRef} onOpen={onOpenSearch}
+                  label="Search agents, queries, manuscripts…"
+                />
               )}
               <div className="ws-bright">
                 {!dashMode && (
@@ -903,7 +924,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   <>
                     <button
                       type="button"
-                      className="ws-fbpill"
+                      className="ws-fbpill sp-inkpill"
+                      data-probe="feedback"
                       onClick={onOpenFeedback}
                       aria-expanded={feedbackOpen}
                       /* The accessible name survives the narrow state, where the label is hidden
@@ -911,9 +933,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                       aria-label={FEEDBACK_FAB}
                     >
                       <PenLine aria-hidden="true" />
-                      <span className="ws-fbpill-l">Feedback</span>
+                      <span className="ws-fbpill-l sp-inkpill-l">Give feedback</span>
                     </button>
-                    <span className="ws-bdiv" aria-hidden="true" />
                   </>
                 )}
                 <HelpButton onOpen={onOpenHelp} />
@@ -945,7 +966,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 <div className="ws-newwrap" ref={newRef}>
                   <button
                     type="button"
-                    className="ws-nbtn"
+                    className="ws-nbtn sp-inkpill"
                     aria-haspopup="menu"
                     aria-expanded={newOpen}
                     onClick={() => setNewOpen((o) => !o)}
@@ -1030,7 +1051,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               className="ws-wbody sv2-stagepad"
               id={scrollId}
               ref={scrollRef}
-              onScroll={onScroll}
+              onScroll={(ev) => { onScroll?.(ev); if (dashMode) readBar(ev.currentTarget); }}
             >
               <div className={`ws-work${fit ? " ws-work--fit" : ""}`}>
                 {/* ⚠️ THE MASTHEAD'S KICKER, SUPPLIED ONCE. Every page's masthead names its section;

@@ -189,7 +189,7 @@ describe("the sidebar's type scale, and the width that moved with it", () => {
     // sibling beneath it, which is what bought the name its width. The SIZE is unchanged at 12px,
     // which is what this table guards; only the selector moved.
     expect(rule(".ws-upgrow")).toContain("font-size: 12px");       // upgrade pill
-    expect(rule(".ws-bwm")).toContain("font-size: 22px");         // wordmark
+    expect(rule(".ws-bwm")).toContain("font-size: 21px");          // the v34 mockup: 21 beside a 40px roundel         // wordmark
     expect(rule(".ws-ic svg")).toContain("width: 17px");          // nav icons
   });
 
@@ -277,8 +277,11 @@ describe("the breadcrumb is chrome", () => {
   /* ⚠️ NEW, and the inverse of the retired "the bar renders INSIDE the card": the breadcrumb now
      sits on the ground ABOVE the window, so it does not scroll with the content. */
   it("⚠️ it renders OUTSIDE the window, above it", () => {
-    expect(srcCode.indexOf('className="ws-pagebar"')).toBeGreaterThan(-1);
-    expect(srcCode.indexOf('className="ws-pagebar"')).toBeLessThan(srcCode.indexOf('className="ws-window"'));
+    /* the class list is a template now (it gains `is-solid` on a scrolled dashboard) — the anchor is
+       the class's opening, against a quote OR a backtick, and the claim is unchanged */
+    const bar = srcCode.search(/className=(?:"|\{`)ws-pagebar[" `$]/);
+    expect(bar).toBeGreaterThan(-1);
+    expect(bar).toBeLessThan(srcCode.indexOf('className="ws-window"'));
     expect(rule(".ws-pagebar")).toContain("flex: none");
   });
 
