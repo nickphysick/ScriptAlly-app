@@ -44,8 +44,15 @@
 /* ⚠️ THE RESET REACHES `span`/`p`/`div`/`label` ONLY — the elements brand.tsx names — and NOT `button`
    (every button here names its own face, and the shared `.sp-inkpill` must keep its). It stops at
    `.qcv-legacy`: the open card hosts the app's existing tab bodies (the timeline, the notes thread,
-   the agent tab), which were written against the brand's default and must not start inheriting. */
-.qcv-own :is(span, p, div, label):not(.qcv-legacy, .qcv-legacy *) { font-family: inherit; }
+   the agent tab), which were written against the brand's default and must not start inheriting.
+
+   ⚠️ ITS SPECIFICITY IS EXACTLY 0-1-0, AND THAT IS THE WHOLE DESIGN. It has to beat brand.tsx's bare
+   `span` (0-0-1, injected LAST at runtime, so a tie is lost) and must LOSE to every single-class rule
+   in these sheets that names a face (`.qcv-keyline` is mono, 0-1-0). `:where()` takes the element
+   list and the exclusion out of the count; the tie with a single class is then settled by ORDER, so
+   this rule is FIRST in this sheet and every v11 component imports this sheet before its own. The
+   first cut was 0-2-1 and silently turned every mono caption on the page into Playfair capitals. */
+.qcv-own :where(span, p, div, label):where(:not(.qcv-legacy, .qcv-legacy *)) { font-family: inherit; }
 .qcv-log .sp-inkpill-l { font-family: var(--qcv-type); }
 
 /* ── head: on the cream, no panel behind it ── */
@@ -69,7 +76,9 @@
   color: var(--qcv-ink);
 }
 .qcv-line { margin: 8px 0 0; font-family: var(--qcv-serif); font-size: 16px; line-height: 22px; color: var(--qcv-ink-70); }
-.qcv-line .qcv-line-ms { font-family: var(--qcv-type); font-style: normal; font-size: 15px; color: var(--qcv-ink); }
+/* ⚠️ `line-height: 0` ON THE INLINE TITLE: a second face inside the line has its own ascent, and at
+   the line's 22px it pushed the line box to 25 — the head measured 82 against the ref's 79. */
+.qcv-line .qcv-line-ms { font-family: var(--qcv-type); font-style: normal; font-size: 15px; line-height: 0; color: var(--qcv-ink); }
 /* "+ Log a query" is the shared anthracite pill at the head's own padding: the brief's prose says
    22/18, the ref's rendered button is 26/22 and measures the stated 154 × 50 — the rendered page wins. */
 .qcv-log.sp-inkpill { padding: 0 26px 0 22px; }

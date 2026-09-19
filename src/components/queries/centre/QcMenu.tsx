@@ -13,6 +13,7 @@
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import "./qcvPage.css";
 
 export interface QcMenuItem { key: string; label: string; count?: number; swatch?: string | null }
 export interface QcMenuGroup { heading?: string; current: string; items: readonly QcMenuItem[]; onPick: (key: string) => void }

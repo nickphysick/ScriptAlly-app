@@ -9,6 +9,7 @@
 import React, { useCallback, useRef, useState } from "react";
 import { SORT_OPTIONS, filterPhrase, type FilterOption, type QcFilter, type QcSort } from "../../../lib/qcSummary";
 import { QcMenu, type QcMenuGroup } from "./QcMenu";
+import "./qcvPage.css";
 
 export interface ScopeOption { id: string; title: string; count: number }
 

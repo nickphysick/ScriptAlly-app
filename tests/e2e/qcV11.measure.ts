@@ -254,14 +254,48 @@ test("summary row — 1440×860", async ({ page }) => {
   sameSize("summary", app, ref, "sum-live-band", ["h"]);
   sameSize("summary", app, ref, "sum-closed-band", ["h"]);
   sameSize("summary", app, ref, "stage", ["h"]);
+  sameSize("summary", app, ref, "stage-graphic", ["h"]);
+  sameSize("summary", app, ref, "sum-live", ["h"]);
   sameSize("summary", app, ref, "gauge", ["h"]);
-  sameSize("summary", app, ref, "closed-grid", ["h"]);
+  /* ⚠️ THE ONE PLACE THE PAGE DELIBERATELY DIFFERS FROM THE REF: the ref has no "+N withdrawn" line.
+     Where this account has one, the grid gives back exactly 6px (three row gaps, 6 → 4) so the ROW
+     stays the ref's height — which is asserted above, and is the claim that matters. */
+  const wd = await page.evaluate(() => !![...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!.querySelector("[data-qcv='withdrawn-line']"));
+  seen("closed-grid", wd ? "with the withdrawn line" : "without it");
+  near("summary", `closed-grid.h (${wd ? "ref − 6, the withdrawn line is present" : "the ref's"})`, app.boxes["closed-grid"]?.h, need(ref, "ref", "closed-grid").h - (wd ? 6 : 0));
   /* the live card and the closed card share the row's width with a 20px gap, in both */
   const s = need(app, "app", "sum"), l = need(app, "app", "sum-live"), c = need(app, "app", "sum-closed");
   near("summary", "live + 20 + closed fills the row", l.w + 20 + c.w, s.w, 1);
   /* the notch is at 70% of the graphic's width */
   const g = app.boxes["stage-graphic"], n = app.boxes["notch"];
   near("summary", "notch at 70% of the column's graphic", g && n ? ((n.x - g.x) / g.w) * 100 : null, 70, 1.5);
+});
+
+test("summary row at a 1280 window — the stage name never collides with its count, six columns or seven", async ({ page }) => {
+  const ref = await readRef(page, 1280, 800);
+  await openApp(page, 1280, 800);
+  const app = await readApp(page);
+  sameSize("summary@1280", app, ref, "sum", ["h"]);
+  const cols = await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    return [...p.querySelectorAll("[data-qcv='stage']")].map((s) => {
+      const l = s.querySelector(".qcv-stg-l")!, n = s.querySelector(".qcv-stg-n")!.getBoundingClientRect(), box = s.getBoundingClientRect();
+      const r = document.createRange(); r.selectNodeContents(l);
+      const ink = [...r.getClientRects()];
+      /* a 2D test: the header may STACK, so "to the right of" is not the question — "on top of" is */
+      const hit = ink.some((k) => k.left < n.right - 0.5 && k.right > n.left + 0.5 && k.top < n.bottom - 0.5 && k.bottom > n.top + 0.5);
+      const out = ink.some((k) => k.right > box.right + 0.5 || k.left < box.left - 0.5);
+      return { stage: (s as HTMLElement).dataset.stage, w: Math.round(box.width), h: Math.round(box.height), lines: ink.length, hit, out };
+    });
+  });
+  seen("summary@1280", `${cols.length} columns`);
+  yes("summary@1280", "there are stage columns (the population)", cols.length >= 6, String(cols.length));
+  for (const c of cols) {
+    yes("summary@1280", `${c.stage}: the name's ink does not sit on the count`, !c.hit, JSON.stringify(c));
+    yes("summary@1280", `${c.stage}: the name's ink stays inside its column`, !c.out, JSON.stringify(c));
+    is("summary@1280", `${c.stage}: the column is still 84 tall`, c.h, 84);
+  }
+  await page.locator(".qcv-page [data-qcv='sum']").first().screenshot({ path: resolve(OUT, `summary-1280-${cols.length}col.png`) });
 });
 
 test("the summary's gauges — geometry, and which branches this account entered", async ({ page }) => {
@@ -274,7 +308,8 @@ test("the summary's gauges — geometry, and which branches this account entered
       const gw = gr ? gr.getBoundingClientRect().width : 0, gx = gr ? gr.getBoundingClientRect().x : 0;
       return {
         stage: s.getAttribute("data-stage"), count: Number(s.getAttribute("data-count")), h: s.getBoundingClientRect().height,
-        graphicH: gr ? gr.getBoundingClientRect().height : null,
+        /* the FIXED area is the content box (27); the rect adds the 6px pad and the hairline */
+        graphicH: gr ? parseFloat(getComputedStyle(gr).height) : null,
         gauges: [...s.querySelectorAll("[data-qcv='gauge']")].map((g) => {
           const fill = g.querySelector("[data-qcv='gauge-fill']") as HTMLElement | null, over = g.querySelector("[data-qcv='gauge-over']") as HTMLElement | null;
           const fb = fill?.getBoundingClientRect(), ob = over?.getBoundingClientRect();

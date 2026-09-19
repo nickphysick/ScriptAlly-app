@@ -74,8 +74,9 @@ import { QueryBoardView } from "./queries/QueryBoardView";
 import { QueryViewSwitch, type QueryView } from "./queries/QueryViewSwitch";
 import { QcCentre, QC_VIEW_KEY, readQcView, type QcView } from "./queries/centre/QcCentre";
 import { QcSentence } from "./queries/centre/QcSentence";
+import { QcSummary } from "./queries/centre/QcSummary";
 import {
-  DEFAULT_SORT, buildQcRows, filterForStatusParam, filterOptions, inScope, matchesFilter, sortRows,
+  DEFAULT_SORT, buildQcRows, closedGrid, filterForStatusParam, filterOptions, inScope, matchesFilter, sortRows, stageColumns,
   type QcFilter, type QcSort,
 } from "../lib/qcSummary";
 /* ══ THE CALENDAR VIEW (Run C) — the SAME board To-do draws ═══════════════════════════════════
@@ -6251,7 +6252,26 @@ export const Queries: React.FC<{
             /* a re-entry point that is already drafting says so rather than looking live and doing nothing */
             logDisabled={creating}
             logRef={logTriggerRef}
-            summary={null}
+            summary={
+              /* ⚠️ COUNTED OVER THE SCOPED SET, like the sentence's menu — never the filtered view, or
+                 pressing a stage would zero every other column. */
+              <QcSummary
+                loading={showGridSkeleton}
+                liveCount={qcScoped.filter((r) => r.court !== "closed").length}
+                withYouCount={qcScoped.filter((r) => r.withYou).length}
+                columns={stageColumns(qcScoped, Date.now())}
+                closed={closedGrid(qcScoped)}
+                filter={qcFilter}
+                onFilter={pickQcFilter}
+                selectedId={selectedQueryId}
+                /* a gauge selects its query WITHOUT changing the filter — unless the filter hides it */
+                onOpen={(id) => {
+                  const r = qcById.get(id);
+                  if (r && !matchesFilter(r, qcFilter)) setQcFilter("all");
+                  onOpenQuery?.(id);
+                }}
+              />
+            }
             sentence={
               <QcSentence
                 loading={showGridSkeleton}
