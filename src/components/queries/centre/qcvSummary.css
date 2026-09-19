@@ -7,8 +7,11 @@
 .qcv-sum > .fc-card { display: flex; flex-direction: column; min-height: 0; }
 .qcv-sum > .fc-card > .fc-frame { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
 
-.qcv-sum-band { display: flex; align-items: center; gap: 14px; padding: 11px 18px 9px; flex: none; }
-.qcv-sum-band--closed { padding-right: 12px; gap: 8px; }
+/* ⚠️ THE BANDS STATE THEIR HEIGHT. It was set by their CONTENT — the 27px chip — and the loading state
+   draws no chip, so both bands came up short and the whole row measured 178 held against 185 loaded:
+   a 7px jump at the moment the data lands. 48 and 45 are the ref's bands. */
+.qcv-sum-band { box-sizing: border-box; min-height: 48px; display: flex; align-items: center; gap: 14px; padding: 11px 18px 9px; flex: none; }
+.qcv-sum-band--closed { min-height: 45px; padding-right: 12px; gap: 8px; }
 /* the title scales with ITS card — the card is the size container, so the rule is on a child */
 .qcv-sum .qcv-sum-ttl { margin: 0; min-width: 0; font-family: var(--qcv-type) !important; font-weight: 400; font-size: clamp(19px, 3.2cqw, 24px); line-height: 1.1; white-space: nowrap; color: inherit; }
 .qcv-sum .qcv-sum-ttl--closed { font-size: 19px; }

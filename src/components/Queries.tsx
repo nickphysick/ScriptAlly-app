@@ -79,6 +79,7 @@ import { QcList, QcListSkeleton } from "./queries/centre/QcList";
 import { QcOpenCard, QcOpenCardSkeleton } from "./queries/centre/QcOpenCard";
 import { QcCalendar, QcCalendarSkeleton } from "./queries/centre/QcCalendar";
 import { QcGrid, QcGridSkeleton } from "./queries/centre/QcGrid";
+import { useQcLoad } from "./queries/centre/useQcLoad";
 import {
   DEFAULT_SORT, buildQcRows, closedGrid, filterForStatusParam, filterOptions, inScope, matchesFilter, sortRows, stageColumns,
   type QcFilter, type QcSort,
@@ -408,6 +409,7 @@ export const Queries: React.FC<{
     agents,
     queries,
     collectionsReady,
+    activitiesReady,
     packages,
     /* §2 — the package's slots are version ids; the picker resolves them to names. Both stores
        are the DbProvider's own, which Queries already consumes, so this adds no import edge. */
@@ -2143,6 +2145,10 @@ export const Queries: React.FC<{
   const [qcDocked, setQcDocked] = useState<boolean | null>(null);
   /* ⚠️ A HOOK, SO IT SITS UP HERE — above `if (!currentUser) return null`. The filtered and sorted
      views of it are plain consts further down, beside the list they replace. */
+  /* ⚠️ ONE LOADING MODEL FOR THE BROWSING PAGE (v11): no flash under 150ms, a 400ms floor once shown,
+     and one entrance when the data lands. "Ready" includes the ACTIVITY FEED — every gauge and every
+     calendar bar is dated from it, so drawn before it lands they would re-lay themselves out. */
+  const qcLoad = useQcLoad(collectionsReady && activitiesReady);
   const qcRows = useMemo(
     () => buildQcRows(queries as Query[], agents, activities, Date.now()),
     [queries, agents, activities],
@@ -4637,33 +4643,11 @@ export const Queries: React.FC<{
    * cover and a stagger are two answers to "the page is arriving". Where a cover was seen the
    * dissolve IS the arrival, so §5's entrance is gated on this exactly as the dashboard's is.
    */
-  const gridSkeleton = useSkeleton(!collectionsReady);
-  const showGridSkeleton = gridSkeleton.phase !== "off";
-  const gridSkeletonOut = gridSkeleton.phase === "out";
-  const runEntrance = !gridSkeleton.wasShown;
-
-  /**
-   * ══ §5 · THE ENTRANCE, AND WHY IT IS TAKEN OFF AGAIN ═════════════════════════════════════════
-   *
-   * ⚠️ THE ATTRIBUTE IS REMOVED WHEN THE ENTRANCE ENDS, and that is the whole mechanism for "it
-   * must not re-run". A CSS animation does not restart on a re-render, so leaving the attribute on
-   * would LOOK correct — the drawer would open, a filter would change, and nothing would move. But
-   * every block would still carry a live `animation-name`, so any later edit that remounts a card
-   * — a key change, a re-sort, a group heading arriving — would replay the entrance for that card
-   * in the middle of a settled page. Taking it off means there is no animation left to replay, and
-   * that is what the measurement asserts.
-   *
-   * ⚠️ AND IT NEVER STARTS WHERE A SKELETON WAS SEEN. `wasShown` is the timing lib's own answer:
-   * a cover and a stagger are two answers to "the page is arriving", and running both means it
-   * arrives twice. The dissolve IS the arrival on a cold load; the entrance is for the warm one.
-   */
-  const [entranceDone, setEntranceDone] = useState(false);
-  useEffect(() => {
-    if (!runEntrance) { setEntranceDone(true); return; }
-    const t = window.setTimeout(() => setEntranceDone(true), QCC_ENTRANCE_TOTAL_MS);
-    return () => window.clearTimeout(t);
-  }, [runEntrance]);
-  const pageEntering = runEntrance && !entranceDone;
+  /* ⚠️ THE TWO OLD SKELETON MODELS AND THE OLD ENTRANCE ARE RETIRED (v11): `useSkeleton` with its
+     cross-fade, the 400ms whole-page floor below, and `runEntrance` — which ran the entrance only
+     when NO skeleton had been shown, the inverse of what the page does now. `useQcLoad` is the one
+     model; these names survive as plain consts because the unreachable three-column pane reads them. */
+  const showGridSkeleton = qcLoad.loading;
 
   /**
    * ══ §3 · PER-VIEW DEFAULTS, AND THE WRITER'S CHOICE BEATING THEM ═════════════════════════════
@@ -4691,40 +4675,7 @@ export const Queries: React.FC<{
    * mounted — and the skeleton is skipped entirely. A floor that fired regardless would be a timer
    * showing a skeleton after the data had arrived, which is the one thing it must not become.
    */
-  const startedUnready = useRef<boolean | null>(null);
-  if (startedUnready.current === null) startedUnready.current = !dataReady;
-  const [floorDone, setFloorDone] = useState(false);
-  useEffect(() => {
-    if (!startedUnready.current) { setFloorDone(true); return; }
-    const t = setTimeout(() => setFloorDone(true), SKELETON_FLOOR_MS);
-    return () => clearTimeout(t);
-  }, []);
-
-  /**
-   * §3c — ⚠️ A REMEMBERED SELECTION RESOLVES BEHIND THE SKELETON, NEVER IN FRONT OF IT. The restore
-   * runs in an effect once the queries arrive, so the content would render UNSELECTED for one frame
-   * and the remembered query would appear after it — a flash of "Select a query to get started" on
-   * every return visit. Reading the id at mount lets the skeleton stay up until the selection it is
-   * going to resolve into has actually been applied.
-   *
-   * ⚠️ IT WAITS ONLY FOR AN ID THE DATA ACTUALLY CONTAINS. A remembered query that has since been
-   * deleted would otherwise hold the skeleton forever, waiting for a row that is never coming.
-   */
-  /**
-   * ⚠️ `awaitingRemembered` IS DELETED WITH THE AUTO-SELECT IT SERVED. It held the skeleton until the
-   * LAST-VIEWED query had loaded, so the page would not flash a list before restoring the record —
-   * which was the right compensation while something restored one. Nothing does: `?q=` is the only
-   * thing that selects, and a deep link's id is in the URL from the first frame. Keeping it would
-   * have held the grid behind a skeleton waiting for a row it was never going to open.
-   */
-  const showSkeleton = !!startedUnready.current && (!dataReady || !floorDone);
-
-  /**
-   * ⚠️ THE FADE IS ARMED ONLY WHEN A SKELETON ACTUALLY PRECEDED THE CONTENT. A page that was ready
-   * at mount has nothing to cross-fade FROM, and fading it in anyway would put a 200ms veil over
-   * every ordinary return to this page.
-   */
-  const fadeIn = !!startedUnready.current && !showSkeleton;
+  const fadeIn = false;
 
   const listGroups = (() => {
     const nowMs = Date.now();
@@ -5657,7 +5608,11 @@ export const Queries: React.FC<{
           * grace so a fast load never flashes the skeleton — a second mechanism here would be a
           * second answer to one question.
           */}
-        {showSkeleton ? <QueryCentreSkeleton head={listHead} /> : emptyKind === "first" ? (
+        {/* ⚠️ THE FRAMES NEVER MOVE (v11): there is no whole-page skeleton any more. While loading, the
+            REAL page is drawn — `QcCentre` with placeholders inside its cards — so the first-run branch
+            must not answer until the data has: `queries` is `[]` during the load, and "No queries yet"
+            would be the page stating a fact about an account it has not read. */}
+        {!qcLoad.loading && emptyKind === "first" ? (
           /**
            * §6 (Grid pass) — THE FIRST-QUERY CARD, AND NOTHING ELSE ON THE PAGE. The ref's
            * section-4 card replaces the split this branch used to draw (a placeholder list beside a
@@ -6261,8 +6216,9 @@ export const Queries: React.FC<{
             * the tiles' and the pills' job; the shell's search still narrows the list.
             */}
           <QcCentre
-            loading={showGridSkeleton}
-            entering={false}
+            loading={qcLoad.loading}
+            blank={qcLoad.blank}
+            entering={qcLoad.entering}
             headLine={qcHeadLine}
             onLog={() => onNavigate?.("queries", "Log a query")}
             /* a re-entry point that is already drafting says so rather than looking live and doing nothing */

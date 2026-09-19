@@ -1,0 +1,51 @@
+/**
+ * Query Centre v11 — loading, and the one entrance.
+ *
+ * ⚠️ LITERAL VALUES INSIDE EVERY KEYFRAME. A `var()` in a keyframe fails silently in this setup — no
+ * error, no animation. And `backwards`, never `both`: a fill that outlives the animation holds a
+ * transform on rows and lanes that have sticky children, and outranks any transform set later.
+ *
+ * ⚠️ NEVER A CROSS-FADE. The placeholders are removed AT ONCE and the content animates in; two
+ * simultaneous opacity fades dip to about 75% in the middle and read as a flicker.
+ */
+
+/* loading: nothing is interactive, and hover states do not answer */
+.qcv-page--loading .qcv-row, .qcv-page--loading .qcv-tile, .qcv-page--loading .qcv-stg { cursor: default; }
+.qcv-page--loading .qcv-stg:hover { background: none; }
+/* the first 150ms: the REAL frames with nothing in them — not the placeholders, not the content */
+.qcv-page--blank .qcv-sk, .qcv-page--blank .qcv-cal-barsk { visibility: hidden; }
+.qcv-page--blank .qcv-skw { animation: none; }
+
+@keyframes qcv-draw { 0% { transform: scaleX(0); } 100% { transform: scaleX(1); } }
+@keyframes qcv-arrive { 0% { opacity: 0; transform: translateY(5px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes qcv-show { 0% { opacity: 0; } 100% { opacity: 1; } }
+
+/* ── led by the gauges: they draw out from the left, column by column ── */
+.qcv-page--enter .qcv-ga-fill, .qcv-page--enter .qcv-ga-over { transform-origin: left center; animation: qcv-draw 0.52s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+.qcv-page--enter .qcv-stg:nth-child(2) .qcv-ga-fill { animation-delay: 0.04s; }
+.qcv-page--enter .qcv-stg:nth-child(3) .qcv-ga-fill { animation-delay: 0.08s; }
+.qcv-page--enter .qcv-stg:nth-child(4) .qcv-ga-fill { animation-delay: 0.12s; }
+.qcv-page--enter .qcv-stg:nth-child(5) .qcv-ga-fill { animation-delay: 0.16s; }
+.qcv-page--enter .qcv-stg:nth-child(6) .qcv-ga-fill { animation-delay: 0.2s; }
+.qcv-page--enter .qcv-stg:nth-child(7) .qcv-ga-fill { animation-delay: 0.24s; }
+/* the ink overrun follows at 420ms over 220ms; the notch fades in at 300ms over 200ms */
+.qcv-page--enter .qcv-ga-over { animation-delay: 0.42s; animation-duration: 0.22s; }
+.qcv-page--enter .qcv-notch { animation: qcv-show 0.2s 0.3s backwards; }
+
+/* names and counts, band titles, the closed grid, the sentence, the open card's contents */
+.qcv-page--enter .qcv-stg-top, .qcv-page--enter .qcv-sum-ttl, .qcv-page--enter .qcv-mini, .qcv-page--enter .qcv-mx, .qcv-page--enter .qcv-mx-wd,
+.qcv-page--enter .qcv-keyline, .qcv-page--enter .qcv-sentence, .qcv-page--enter .qcv-open-fr > * { animation: qcv-show 0.22s backwards; }
+
+/* rows, tiles, lanes: a 5px rise, staggered 30ms for the first seven; the rest share the seventh's delay */
+.qcv-page--enter .qcv-row, .qcv-page--enter .qcv-tile, .qcv-page--enter .qcv-cal-lane { animation: qcv-arrive 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+.qcv-page--enter :is(.qcv-row, .qcv-tile, .qcv-cal-lane):nth-child(2) { animation-delay: 0.03s; }
+.qcv-page--enter :is(.qcv-row, .qcv-tile, .qcv-cal-lane):nth-child(3) { animation-delay: 0.06s; }
+.qcv-page--enter :is(.qcv-row, .qcv-tile, .qcv-cal-lane):nth-child(4) { animation-delay: 0.09s; }
+.qcv-page--enter :is(.qcv-row, .qcv-tile, .qcv-cal-lane):nth-child(5) { animation-delay: 0.12s; }
+.qcv-page--enter :is(.qcv-row, .qcv-tile, .qcv-cal-lane):nth-child(6) { animation-delay: 0.15s; }
+.qcv-page--enter :is(.qcv-row, .qcv-tile, .qcv-cal-lane):nth-child(n + 7) { animation-delay: 0.18s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qcv-page--enter *, .qcv-page--enter *::before, .qcv-page--enter *::after { animation: none !important; }
+  .qcv-skw { animation: none !important; }
+}

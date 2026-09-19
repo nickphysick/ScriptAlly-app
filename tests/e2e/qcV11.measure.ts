@@ -26,7 +26,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { openRoute } from "./measure";
+import { ensureSignedIn, openRoute } from "./measure";
 
 const OUT = resolve("test-results/qc-v11");
 const REPORT = resolve(OUT, "report.json");
@@ -614,14 +614,67 @@ test("loading — the frames never move, and nothing is interactive", async ({ p
   });
   is("loading", "real rows while loading", inert.rows, 0);
   is("loading", "placeholder rows", inert.skRows, 8);
+  near("loading", "a placeholder row is the real row's height", await page.evaluate(() => [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!.querySelector("[data-qcv='sk-row']")!.getBoundingClientRect().height), 67, 0.5);
   is("loading", "enabled summary / sentence controls while loading", inert.enabled, 0);
   await expect.poll(() => page.evaluate(() => [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)?.getAttribute("aria-busy")), { timeout: 20_000 }).toBe("false");
   await page.waitForTimeout(1300);
   const done = await readApp(page);
-  for (const n of ["head-cta", "sum", "sum-live", "sum-closed", "sum-live-band", "ctl", "views", "ledger", "open", "list-head"]) {
+  /* ⚠️ THE LEDGER AND THE CARD KEEP THEIR PLACE AND WIDTH, NOT THEIR HEIGHT: eight placeholder rows are
+     not fifty-four real ones, and a card's height is its query's. Everything ABOVE them keeps all four. */
+  for (const n of ["head-cta", "sum", "sum-live", "sum-closed", "sum-live-band", "sum-closed-band", "ctl", "views", "list-head", "open-band"]) {
     const a = held.boxes[n], b = done.boxes[n];
     for (const d of ["x", "y", "w", "h"] as const) near("loading", `${n}.${d} held → loaded`, a ? a[d] : null, b ? b[d] : null, 1);
   }
+  for (const n of ["ledger", "open"]) {
+    const a = held.boxes[n], b = done.boxes[n];
+    for (const d of ["x", "y", "w"] as const) near("loading", `${n}.${d} held → loaded`, a ? a[d] : null, b ? b[d] : null, 1);
+  }
+
+});
+
+test("loading — the calendar's skeleton, held at the current density", async ({ page }) => {
+  await page.addInitScript(() => { (window as unknown as { __SA_QC_HOLD_MS?: number }).__SA_QC_HOLD_MS = 6000; try { localStorage.setItem("sa.qcView", "calendar"); } catch { /* fine */ } });
+  await openRoute(page, "/queries?view=calendar", { width: 1440, height: 860 });
+  const r = await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const bars = [...p.querySelectorAll(".qcv-cal-barsk")].map((b) => Math.round(b.getBoundingClientRect().height));
+    return { busy: p.getAttribute("aria-busy"), bars, lanes: p.querySelectorAll("[data-qcv='cal-lane']").length, controls: p.querySelectorAll("[data-qcv='cal-bar'] button").length };
+  });
+  is("loading-cal", "busy while held (the precondition)", r.busy, "true");
+  is("loading-cal", "six lanes of placeholder bars at the expanded bar's height", r.bars, [76, 76, 76, 76, 76, 76]);
+  is("loading-cal", "real lanes", r.lanes, 0);
+  is("loading-cal", "the control row is blank", r.controls, 0);
+  await page.screenshot({ path: resolve(OUT, "skeleton-calendar-1440.png") });
+});
+
+test("the entrance — it runs once when the data lands, is over inside 800ms, and is recorded", async ({ browser }) => {
+  /* ⚠️ NO MOTION SUPPRESSION HERE. `openRoute` kills animation for every static measurement; an
+     entrance measured under it is measured not happening. This context is its own. */
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 860 }, storageState: "tests/e2e/.auth/state.json", recordVideo: { dir: resolve(OUT, "video"), size: { width: 1440, height: 860 } } });
+  const page = await ctx.newPage();
+  await page.addInitScript(() => { (window as unknown as { __SA_QC_HOLD_MS?: number }).__SA_QC_HOLD_MS = 1500; try { localStorage.setItem("sa.qcView", "list"); } catch { /* fine */ } });
+  await page.goto("/queries");
+  await ensureSignedIn(page);
+  await page.goto("/queries");
+  const visible = () => page.evaluate(() => { const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0); return p ? { busy: p.getAttribute("aria-busy"), entering: p.classList.contains("qcv-page--enter"), running: p.getAnimations({ subtree: true }).filter((a) => a.playState === "running" && (a as CSSAnimation).animationName?.startsWith("qcv-") && (a as CSSAnimation).animationName !== "qcv-pulse").length, sk: p.querySelectorAll(".qcv-sk").length } : null; });
+  await expect.poll(async () => (await visible())?.busy, { timeout: 30_000 }).toBe("true");
+  await expect.poll(async () => (await visible())?.busy, { timeout: 30_000, intervals: [25] }).toBe("false");
+  const landed = await visible();
+  is("entrance", "placeholders are removed AT ONCE — none beside the content (never a cross-fade)", landed?.sk, 0);
+  is("entrance", "the page is entering", landed?.entering, true);
+  yes("entrance", "entrance animations are running (the precondition — or 'over by 800ms' is trivially true)", (landed?.running ?? 0) > 5, String(landed?.running));
+  await page.waitForTimeout(900);
+  const after = await visible();
+  is("entrance", "running entrance animations 900ms later", after?.running, 0);
+  is("entrance", "the entering class came off by timer", after?.entering, false);
+  /* a filter, a view change and a selection do not replay it */
+  await page.locator(".qcv-page [data-qcv='views'] button", { hasText: "Grid" }).first().click();
+  await page.waitForTimeout(120);
+  is("entrance", "replayed on a view change", (await visible())?.entering, false);
+  await page.locator(".qcv-page [data-qcv='views'] button", { hasText: "List" }).first().click();
+  await page.waitForTimeout(400);
+  await ctx.close();
+  record({ area: "entrance", what: "video", got: "test-results/qc-v11/video/*.webm", want: "reported" });
 });
 
 test("reduced motion — no entrance and no pulse", async ({ browser }) => {

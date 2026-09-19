@@ -18,6 +18,7 @@ import React, { useLayoutEffect, useRef } from "react";
 import { FramedCard } from "../../containers/FramedCard";
 import "../../shell/primitives.css";
 import "./qcvPage.css";
+import "./qcvEnter.css";
 
 export type QcView = "list" | "calendar" | "grid";
 export const QC_VIEWS: readonly { key: QcView; label: string }[] = [
@@ -37,6 +38,8 @@ export function readQcView(search: string, local: string | null, legacySession: 
 
 export const QcCentre: React.FC<{
   loading: boolean;
+  /** The first 150ms of a load: the real frames with nothing in them. */
+  blank?: boolean;
   headLine: React.ReactNode;
   onLog: () => void;
   /** True while a query is already being written. */
@@ -57,7 +60,7 @@ export const QcCentre: React.FC<{
   onExport: () => void;
   canExport: boolean;
   entering: boolean;
-}> = ({ loading, headLine, onLog, logDisabled = false, logRef, summary, sentence, view, onView, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
+}> = ({ loading, blank = false, headLine, onLog, logDisabled = false, logRef, summary, sentence, view, onView, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const el = rootRef.current;
@@ -71,14 +74,14 @@ export const QcCentre: React.FC<{
   }, [onDocked]);
 
   return (
-    <div ref={rootRef} className={`qcv-page qcv-own${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${entering ? " qcv-page--enter" : ""}`}
+    <div ref={rootRef} className={`qcv-page qcv-own${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
       role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page" data-view={view}>
       <header className="qcv-head" data-qcv="head">
         <div className="qcv-head-copy">
           <h1 className="qcv-title" data-qcv="head-title">Query Centre</h1>
           <p className="qcv-line" data-qcv="head-line">{headLine}</p>
         </div>
-        <button ref={logRef} type="button" className="sp-inkpill qcv-log" data-qcv="head-cta" onClick={onLog} disabled={logDisabled}>
+        <button ref={logRef} type="button" className="sp-inkpill qcv-log" data-qcv="head-cta" onClick={onLog} disabled={logDisabled || loading}>
           <span className="sp-inkpill-l">+ Log a query</span>
         </button>
       </header>
@@ -89,7 +92,7 @@ export const QcCentre: React.FC<{
         {sentence}
         <div className="qcv-views" role="group" aria-label="View" data-qcv="views">
           {QC_VIEWS.map((v) => (
-            <button key={v.key} type="button" aria-pressed={v.key === view} onClick={() => onView(v.key)}>{v.label}</button>
+            <button key={v.key} type="button" aria-pressed={v.key === view} disabled={loading} onClick={() => onView(v.key)}>{v.label}</button>
           ))}
         </div>
       </div>
@@ -115,7 +118,7 @@ export const QcCentre: React.FC<{
       </div>
 
       <div className="qcv-foot">
-        <button type="button" className="qcv-export" disabled={!canExport} onClick={onExport}>Export CSV</button>
+        <button type="button" className="qcv-export" disabled={!canExport || loading} onClick={onExport}>Export CSV</button>
       </div>
       <div className="qcv-sr" role="status" aria-live="polite" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
         {loading ? "" : "Queries loaded"}

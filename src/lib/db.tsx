@@ -200,6 +200,8 @@ interface DbContextType {
   smartImportUsage: SmartImportUsage | null;
   authReady: boolean;
   collectionsReady: boolean;
+  /** ADDITIVE (Query Centre v11): the global activity feed has delivered — or failed, or the net fired. */
+  activitiesReady: boolean;
   manuscripts: Manuscript[];
   versions: ManuscriptVersion[];
   packages: SubmissionPackage[];
@@ -507,6 +509,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   //                  delivered their first snapshot. Lets the dashboard tell "loading" from "empty".
   const [authReady, setAuthReady] = useState<boolean>(false);
   const [collectionsReady, setCollectionsReady] = useState<boolean>(false);
+  /**
+   * ⚠️ ADDITIVE, AND SEPARATE FROM `collectionsReady` ON PURPOSE (Query Centre v11, 19 Sep). That flag
+   * is the dashboard's "loading or empty?" answer and must not start waiting on a fourth collection.
+   * The Query Centre's gauges and calendar date every stage from the activity feed, so drawn before
+   * the feed lands they would re-lay themselves out a moment later. This says the feed has delivered
+   * a first snapshot — or errored, or the same 6s safety net fired: it can never hold a page for ever.
+   */
+  const [activitiesReady, setActivitiesReady] = useState<boolean>(false);
   /** Cleared with the listeners — see `readinessNet` below. */
   const readinessNetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -544,6 +554,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setSmartImportUsage(null);
         setAuthReady(true);          // auth resolved: definitively logged out
         setCollectionsReady(false);  // next sign-in starts in the loading state
+        setActivitiesReady(false);
         if (readinessNetRef.current) { clearTimeout(readinessNetRef.current); readinessNetRef.current = null; }
         try { localStorage.removeItem("scriptally_was_authed"); } catch {}
 
@@ -570,6 +581,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       // Track first-load of the collections the dashboard's empty-state depends on, so the UI can
       // tell "still loading" from "genuinely empty" (kills the empty-state flicker on boot).
       setCollectionsReady(false);
+      setActivitiesReady(false);
       let mLoaded = false, aLoaded = false, qLoaded = false;
       const markCollectionsLoaded = () => {
         if (mLoaded && aLoaded && qLoaded) setCollectionsReady(true);
@@ -596,6 +608,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const readinessNet = setTimeout(() => {
         mLoaded = aLoaded = qLoaded = true;
         markCollectionsLoaded();
+        setActivitiesReady(true);
       }, 6000);
       readinessNetRef.current = readinessNet;
 
@@ -748,7 +761,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             return actDoc;
           });
           setActivities(migratedArr);
+          if (snapshotIsLoaded(snap)) setActivitiesReady(true);
         }, (error) => {
+          setActivitiesReady(true); /* a feed that failed must not hold the page; the stages read as undated */
           handleFirestoreError(error, OperationType.GET, `users/${uid}/activities`);
         });
 
@@ -803,6 +818,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         console.error("Bootstrapping/authentication loading failures:", err);
         setAuthReady(true);          // never strand the app on the boot splash
         setCollectionsReady(true);   // …or on the loading skeleton
+        setActivitiesReady(true);
       }
     });
 
@@ -3771,6 +3787,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         smartImportUsage,
         authReady,
         collectionsReady,
+        activitiesReady,
         manuscripts,
         versions,
         packages,

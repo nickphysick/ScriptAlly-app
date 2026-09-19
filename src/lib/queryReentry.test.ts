@@ -74,7 +74,7 @@ describe("re-entry is a no-op, from every entry point", () => {
        and ignores it would pass. */
     expect(queries, "the page's Log button stays live while a draft is open").toContain("logDisabled={creating}");
     expect(read("../components/queries/centre/QcCentre.tsx"), "QcCentre accepts logDisabled and never applies it")
-      .toMatch(/data-qcv="head-cta"[^>]*disabled=\{logDisabled\}/);
+      .toMatch(/data-qcv="head-cta"[^>]*disabled=\{logDisabled(?: \|\| loading)?\}/); /* …or while the page is still loading */
     expect(queries, "the retired `.qc-phead` copy came back — the page would state its verb twice")
       .not.toContain('className="qc-btn qc-logq"');
   });
