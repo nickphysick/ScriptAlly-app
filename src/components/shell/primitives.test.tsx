@@ -15,7 +15,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
-  AvatarChip, CountChip, HelpButton, MenuCard, MenuCardDivider, MenuCardItem, SearchPill,
+  AvatarChip, CountChip, HelpButton, MenuCard, MenuCardDivider, MenuCardItem, SearchPill, searchShortcut,
 } from "./primitives";
 
 const css = readFileSync(resolve(__dirname, "./primitives.css"), "utf8");
@@ -132,8 +132,22 @@ describe("MenuCard — one card, both shells", () => {
 });
 
 describe("SearchPill — an opener, never a field", () => {
-  it("advertises the shortcut that does the same thing", () => {
-    expect(renderToStaticMarkup(<SearchPill onOpen={() => {}} />)).toContain("⌘K");
+  /* ⚠️ THIS LOCK WAS MACHINE-DEPENDENT FOR ONE COMMIT, AND CI CAUGHT IT. It asserted "⌘K" on the
+     rendered pill; the keycap follows the platform since the v34 mockup, Node exposes
+     `navigator.platform`, and the Linux runner rendered "Ctrl K". Both branches are entered here BY
+     ARGUMENT, and the rendered keycap is held to whatever the function returns on this machine —
+     never to a literal that is only true on the author's. */
+  it("advertises the shortcut that does the same thing — the platform's real modifier", () => {
+    expect(searchShortcut("MacIntel")).toBe("⌘K");
+    expect(searchShortcut("iPad")).toBe("⌘K");
+    expect(searchShortcut("Linux x86_64")).toBe("Ctrl K");
+    expect(searchShortcut("Win32")).toBe("Ctrl K");
+    /* an unknown platform is the EMPTY STRING here, never `undefined` — `undefined` takes the default
+       parameter, which is this machine's own platform, and the repair that first wrote it that way was
+       green under a forced Linux platform and red on the Mac: the same fault, one line further in */
+    expect(searchShortcut("")).toBe("Ctrl K");
+    const html = renderToStaticMarkup(<SearchPill onOpen={() => {}} />);
+    expect(html).toContain(`<kbd class="sp-search-k" aria-hidden="true">${searchShortcut()}</kbd>`);
   });
 
   /* ⚠️ A REAL INPUT HERE WOULD BE A SECOND SEARCH. The palette owns the query; a field in the bar

@@ -141,9 +141,17 @@ export interface SearchPillProps {
   probe?: string;
 }
 
-/** The platform's real modifier — "⌘K" on Apple hardware, "Ctrl K" everywhere else. */
-export const searchShortcut = (): string =>
-  (typeof navigator !== "undefined" && /Mac|iP/.test(navigator.platform ?? "") ? "⌘K" : "Ctrl K");
+/**
+ * The platform's real modifier — "⌘K" on Apple hardware, "Ctrl K" everywhere else.
+ *
+ * ⚠️ THE PLATFORM IS AN ARGUMENT, DEFAULTING TO THE MACHINE'S. Node exposes `navigator.platform` too
+ * ("MacIntel" on a Mac, "Linux x86_64" on CI), so anything that renders this is machine-dependent: the
+ * first lock on it asserted "⌘K", passed on the Mac it was written on and went red on the Linux
+ * runner. Both branches are asserted by passing the platform in; a rendered keycap is only ever
+ * compared with what this returns on the machine doing the rendering.
+ */
+export const searchShortcut = (platform: string | undefined = typeof navigator !== "undefined" ? navigator.platform : undefined): string =>
+  (/Mac|iP/.test(platform ?? "") ? "⌘K" : "Ctrl K");
 
 export const SearchPill: React.FC<SearchPillProps> = ({
   onOpen, width = 210, label = "Search", anchorRef, big = false, probe,
