@@ -1,0 +1,356 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * qcSummary — everything the Query Centre (v11) states about a set of queries, derived once: the
+ * rows, whose court each is in, the ONE expected-date clock, the gauges, the closed grid, the
+ * sentence filter and the sorts. Pure; no Firebase; nothing stored.
+ *
+ * ⚠️ ONE DEFINITION OF "WITH YOU" — `isWithYou`. It drives the rust rule on rows, tiles and bars,
+ * the rust dot in the card's band, the "N WITH YOU" chip and the With you filter. It is the app's
+ * own classification (`turnFor(status) === "you"`: partial requested, full requested, revise &
+ * resubmit) and NOT the mockup's, which also reddened offers. An offer has its own court.
+ *
+ * ⚠️ ONE CLOCK FOR THE WHOLE PAGE — `expectedFor`. Agent's turn: `resolveExpectedDate` (the most
+ * recent of the writer's own date or a reply-stated window, else the agency's window from the last
+ * send, else NULL — never the house 8/12/12 weeks). Writer's turn: `expectedSendDate` and nothing
+ * else. Offer: `offerResponseDeadline`. `namedEndFor` is deliberately not used: it prefers a nudge
+ * reminder, and a reminder is not an expected date.
+ */
+import { Activity, Agent, Query, QueryStatus } from "../types";
+import { agentAgencyLine, agentInitials, agentPrimary } from "./agentDisplay";
+import { buildRows as analyticsRows } from "./analytics";
+import { resolveExpectedDate } from "./expectedDate";
+import { cardMaterials, stateFor, turnFor, type CardMaterials, type State } from "./queryCardFacts";
+import type { DerivableActivity } from "./queryDerivation";
+import { anyToMs, dayN, isClosedStatus, stageHistory, type StageHistory } from "./qcStages";
+
+const DAY = 86_400_000;
+
+/* ── courts ── */
+export type Court = "you" | "agent" | "offer" | "closed";
+export function courtOf(status: QueryStatus): Court {
+  const t = turnFor(status);
+  return t === "you" ? "you" : t === "offer" ? "offer" : t === "closed" ? "closed" : "agent";
+}
+/** THE one definition. See the header. */
+export const isWithYou = (status: QueryStatus): boolean => courtOf(status) === "you";
+export const COURT_LABEL: Record<Court, string> = { you: "With you", agent: "With the agent", offer: "Offer", closed: "Closed" };
+
+/* ── stages, in the summary's order. R&R is a live status and gets a column only when one exists. ── */
+export const BASE_STAGES: readonly QueryStatus[] = [
+  QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT,
+  QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.OFFER,
+];
+export const STAGE_NAME: Record<QueryStatus, string> = {
+  [QueryStatus.QUERIED]: "Queried",
+  [QueryStatus.PARTIAL_REQUESTED]: "Partial requested",
+  [QueryStatus.PARTIAL_SENT]: "Partial sent",
+  [QueryStatus.FULL_REQUESTED]: "Full requested",
+  [QueryStatus.FULL_SENT]: "Full sent",
+  [QueryStatus.REVISE_RESUBMIT]: "Revise & resubmit",
+  [QueryStatus.OFFER]: "Offer",
+  [QueryStatus.REJECTED]: "Passed",
+  [QueryStatus.WITHDRAWN]: "Withdrawn",
+  [QueryStatus.NO_RESPONSE]: "Closed with no reply",
+};
+/** Six columns; seven — R&R between Full sent and Offer — only while a live R&R exists. */
+export function stageOrder(rows: readonly QcRow[]): QueryStatus[] {
+  const rr = rows.some((r) => r.status === QueryStatus.REVISE_RESUBMIT);
+  if (!rr) return [...BASE_STAGES];
+  const out = [...BASE_STAGES];
+  out.splice(out.indexOf(QueryStatus.OFFER), 0, QueryStatus.REVISE_RESUBMIT);
+  return out;
+}
+/** The calendar's groups: by who must act first, R&R after Full requested, Closed last. */
+export const CALENDAR_GROUPS: readonly (QueryStatus | "closed")[] = [
+  QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER,
+  QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, "closed",
+];
+
+/* ── the row ── */
+export type ExpectedKind = "reply" | "sendBy" | "offer";
+export type ClosedHow = "passed" | "noReply" | "withdrawn";
+export type Furthest = "query" | "partial" | "full";
+
+export interface QcRow {
+  id: string;
+  query: Query;
+  status: QueryStatus;
+  state: State;
+  court: Court;
+  withYou: boolean;
+  agentName: string;
+  agency: string;
+  /** The agency as recorded, for sorting — `agency` is the DISPLAY line and reads "No agency" when there is none, which would sort among the Ns. */
+  agencyKey: string;
+  initials: string;
+  manuscriptId: string;
+  sentMs: number | null;
+  lastMs: number;
+  history: StageHistory;
+  /** The day it reached the stage it stands at; null when nothing dates it. */
+  stageStartMs: number | null;
+  expectedMs: number | null;
+  expectedKind: ExpectedKind | null;
+  /** Agent's turn, a date promised, and that date gone. The ONLY thing "Past expected" counts. */
+  pastExpected: boolean;
+  materials: CardMaterials;
+  materialsRecorded: boolean;
+  dayN: number | null;
+  closedHow: ClosedHow | null;
+  furthest: Furthest;
+}
+
+export function expectedFor(q: Query, agent: Agent | undefined | null): { ms: number | null; kind: ExpectedKind | null } {
+  const status = q.status as QueryStatus;
+  const court = courtOf(status);
+  if (court === "closed") return { ms: null, kind: null };
+  if (court === "you") return { ms: anyToMs(q.expectedSendDate), kind: "sendBy" };
+  if (court === "offer") return { ms: anyToMs(q.offerResponseDeadline), kind: "offer" };
+  const sends = [q.dateSent, q.partialSentDate, q.fullSentDate].map(anyToMs).filter((t): t is number => t != null);
+  const r = resolveExpectedDate(q, sends.length ? Math.max(...sends) : null, agent?.responseTimeWeeks ?? null, null);
+  return { ms: r.ms, kind: "reply" };
+}
+
+export function buildQcRows(queries: readonly Query[], agents: readonly Agent[], activities: readonly Activity[], nowMs: number): QcRow[] {
+  const agentById = new Map(agents.map((a) => [a.id, a]));
+  const log = new Map<string, DerivableActivity[]>();
+  const lastAct = new Map<string, number>();
+  for (const a of activities) {
+    if (!a.queryId) continue;
+    const list = log.get(a.queryId);
+    if (list) list.push(a as DerivableActivity); else log.set(a.queryId, [a as DerivableActivity]);
+    const t = anyToMs(a.date);
+    if (t != null && t > (lastAct.get(a.queryId) ?? 0)) lastAct.set(a.queryId, t);
+  }
+  const reach = new Map(analyticsRows([...queries], [...activities], [...agents], nowMs).map((r) => [r.id, r]));
+  return queries.map((q) => {
+    const status = q.status as QueryStatus;
+    const agent = agentById.get(q.agentId);
+    const history = stageHistory(q, log.get(q.id));
+    const exp = expectedFor(q, agent);
+    const court = courtOf(status);
+    const { materials, materialsRecorded } = cardMaterials(q.materialsWanted);
+    const sentMs = anyToMs(q.dateSent);
+    const r = reach.get(q.id);
+    return {
+      id: q.id, query: q, status, state: stateFor(status), court, withYou: court === "you",
+      agentName: agentPrimary(agent), agency: agentAgencyLine(agent), agencyKey: (agent?.agency ?? "").trim(), initials: agentInitials(agent),
+      manuscriptId: q.manuscriptId,
+      sentMs,
+      lastMs: Math.max(lastAct.get(q.id) ?? 0, anyToMs(q.lastStatusChange) ?? 0, sentMs ?? 0),
+      history, stageStartMs: history.currentStartMs,
+      expectedMs: exp.ms, expectedKind: exp.kind,
+      pastExpected: court === "agent" && exp.ms != null && exp.ms < nowMs,
+      materials, materialsRecorded,
+      dayN: dayN(q, history, nowMs),
+      closedHow: status === QueryStatus.REJECTED ? "passed" : status === QueryStatus.NO_RESPONSE ? "noReply" : status === QueryStatus.WITHDRAWN ? "withdrawn" : null,
+      furthest: r?.reachedFull ? "full" : r?.reachedRequest ? "partial" : "query",
+    };
+  });
+}
+
+/* ── durations, in the mockup's words ── */
+export const spanWords = (days: number): string => (days >= 35 ? `${Math.round(days / 7)} weeks` : `${days} ${days === 1 ? "day" : "days"}`);
+const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+export const shortDay = (ms: number): string => { const d = new Date(ms); return `${d.getDate()} ${MON[d.getMonth()]}`; };
+const wholeDays = (a: number, b: number): number => Math.max(0, Math.round((b - a) / DAY));
+
+/* ── gauges ── */
+export const NOTCH_PC = 70;
+export const GAUGE_CAP = 4;
+export type GaugeKind = "within" | "past" | "nodate";
+export interface Gauge {
+  id: string;
+  kind: GaugeKind;
+  /** How much of the window has gone: 1 is the expected date. Null with no date. */
+  f: number | null;
+  /** Navy, from the left, as a % of the column's width. At most the notch. */
+  fillPc: number;
+  /** Ink, from the notch. 0 within the window; at most 100 − notch. */
+  overPc: number;
+  title: string;
+}
+export function gaugeFor(row: QcRow, nowMs: number): Gauge {
+  const who = row.agentName;
+  const none = row.expectedKind === "sendBy" ? "no send-by date" : row.expectedKind === "offer" ? "no decision date" : "no date promised";
+  if (row.stageStartMs == null) return { id: row.id, kind: "nodate", f: null, fillPc: 0, overPc: 0, title: `${who}, stage not dated` };
+  if (row.expectedMs == null) return { id: row.id, kind: "nodate", f: null, fillPc: 0, overPc: 0, title: `${who}, ${none}` };
+  const window = Math.max(row.expectedMs - row.stageStartMs, DAY);
+  const f = Math.max((nowMs - row.stageStartMs) / window, 0.03);
+  const what = row.expectedKind === "sendBy" ? "your send-by date" : row.expectedKind === "offer" ? "the decision date" : "the expected date";
+  const past = nowMs > row.expectedMs;
+  const title = past
+    ? `${who}, ${spanWords(wholeDays(row.expectedMs, nowMs))} past ${what}`
+    : `${who}, ${spanWords(wholeDays(nowMs, row.expectedMs))} until ${what}`;
+  return {
+    id: row.id, kind: f > 1 ? "past" : "within", f,
+    fillPc: Math.min(f, 1) * NOTCH_PC,
+    overPc: f > 1 ? Math.min((f - 1) * NOTCH_PC, 100 - NOTCH_PC) : 0,
+    title,
+  };
+}
+export interface StageColumn { status: QueryStatus; name: string; count: number; gauges: Gauge[]; more: number }
+export function stageColumns(rows: readonly QcRow[], nowMs: number): StageColumn[] {
+  const live = rows.filter((r) => r.court !== "closed");
+  return stageOrder(live).map((status) => {
+    const mine = live.filter((r) => r.status === status);
+    const gauges = mine.map((r) => gaugeFor(r, nowMs)).sort((a, b) => (b.f ?? 0) - (a.f ?? 0));
+    return { status, name: STAGE_NAME[status], count: mine.length, gauges: gauges.slice(0, GAUGE_CAP), more: Math.max(0, mine.length - GAUGE_CAP) };
+  });
+}
+
+/* ── the closed grid ── */
+export interface ClosedGrid {
+  /** Rejected + No Response. The grid sums to it, and the title states it. */
+  total: number;
+  rows: { key: Furthest; label: string; title: string; status: QueryStatus; passed: number; noReply: number }[];
+  /** A withdrawal is the writer's decision, not an outcome (17 Sep). Stated beneath, never counted in. */
+  withdrawn: number;
+}
+export function closedGrid(rows: readonly QcRow[]): ClosedGrid {
+  const counted = rows.filter((r) => r.closedHow === "passed" || r.closedHow === "noReply");
+  const line = (key: Furthest, label: string, title: string, status: QueryStatus) => ({
+    key, label, title, status,
+    passed: counted.filter((r) => r.furthest === key && r.closedHow === "passed").length,
+    noReply: counted.filter((r) => r.furthest === key && r.closedHow === "noReply").length,
+  });
+  return {
+    total: counted.length,
+    rows: [
+      line("query", "At the query", "Closed without a request for pages", QueryStatus.QUERIED),
+      line("partial", "After a partial", "Closed after a partial was requested", QueryStatus.PARTIAL_SENT),
+      line("full", "After a full", "Closed after a full was requested, or beyond: a revise and resubmit, or an offer", QueryStatus.FULL_SENT),
+    ],
+    withdrawn: rows.filter((r) => r.closedHow === "withdrawn").length,
+  };
+}
+
+/* ── the sentence: one filter, one manuscript scope, one sort ── */
+export type QcFilter = "all" | "you" | "agent" | "offers" | "past" | "closed" | `stage:${QueryStatus}`;
+export const stageFilter = (s: QueryStatus): QcFilter => `stage:${s}`;
+export function matchesFilter(row: QcRow, f: QcFilter): boolean {
+  switch (f) {
+    case "all": return true;
+    case "you": return row.withYou;
+    case "agent": return row.court === "agent";
+    case "offers": return row.court === "offer";
+    case "past": return row.pastExpected;
+    case "closed": return row.court === "closed"; /* Withdrawn included, so those queries stay findable */
+    default: return row.status === (f.slice("stage:".length) as QueryStatus);
+  }
+}
+export const inScope = (row: QcRow, manuscriptId: string | null): boolean => manuscriptId == null || row.manuscriptId === manuscriptId;
+
+export interface FilterOption { key: QcFilter; label: string; count: number; swatch: string | null }
+/** Counts read the manuscript-scoped set, never the filtered view — a menu that counted what it had already narrowed would show zeros. */
+export function filterOptions(scoped: readonly QcRow[]): FilterOption[] {
+  const n = (f: QcFilter) => scoped.filter((r) => matchesFilter(r, f)).length;
+  const sw = (s: State) => `var(--state-${s})`;
+  return [
+    { key: "all", label: "All queries", count: n("all"), swatch: null },
+    { key: "you", label: "With you", count: n("you"), swatch: sw("you") },
+    { key: "agent", label: "With the agent", count: n("agent"), swatch: sw("agent") },
+    { key: "offers", label: "Offers", count: n("offers"), swatch: sw("offer") },
+    { key: "past", label: "Past expected", count: n("past"), swatch: null },
+    ...stageOrder(scoped.filter((r) => r.court !== "closed")).map((s) => ({ key: stageFilter(s), label: STAGE_NAME[s], count: n(stageFilter(s)), swatch: sw(stateFor(s)) })),
+    { key: "closed", label: "Closed", count: n("closed"), swatch: sw("closed") },
+  ];
+}
+/** The first phrase. It rewrites itself; with a manuscript chosen it carries the title. */
+export function filterPhrase(f: QcFilter, count: number, opts: { manuscriptTitle?: string | null; calendar?: boolean } = {}): string {
+  const base =
+    f === "all" ? `All ${count} ${count === 1 ? "query" : "queries"}`
+      : f === "you" ? `${count} with you`
+        : f === "agent" ? `${count} with the agent`
+          : f === "offers" ? `${count} ${count === 1 ? "offer" : "offers"}`
+            : f === "past" ? `${count} past expected`
+              : f === "closed" ? `${count} closed`
+                : `${count} ${STAGE_NAME[f.slice("stage:".length) as QueryStatus].toLowerCase()}`;
+  return `${base}${opts.manuscriptTitle ? ` for ${opts.manuscriptTitle}` : ""}${opts.calendar ? " on the calendar" : ""}`;
+}
+
+export type QcSort = "activity" | "newest" | "reply" | "you" | "agent" | "agency";
+export const DEFAULT_SORT: QcSort = "activity";
+/** No appraisal wording: "with you first" says where the rows go, not what they are. */
+export const SORT_OPTIONS: readonly { key: QcSort; label: string }[] = [
+  { key: "activity", label: "latest activity first" },
+  { key: "newest", label: "newest query first" },
+  { key: "reply", label: "next reply date first" },
+  { key: "you", label: "with you first" },
+  { key: "agent", label: "agents A to Z" },
+  { key: "agency", label: "agencies A to Z" },
+];
+const FAR = Number.MAX_SAFE_INTEGER;
+const COURT_RANK: Record<Court, number> = { you: 0, offer: 1, agent: 2, closed: 3 };
+export function sortRows(rows: readonly QcRow[], sort: QcSort): QcRow[] {
+  const byActivity = (a: QcRow, b: QcRow) => b.lastMs - a.lastMs || a.id.localeCompare(b.id);
+  const cmp: Record<QcSort, (a: QcRow, b: QcRow) => number> = {
+    activity: byActivity,
+    newest: (a, b) => (b.sentMs ?? 0) - (a.sentMs ?? 0) || byActivity(a, b),
+    /* absence sorts LAST: a query with no date cannot be the next to land */
+    reply: (a, b) => (a.expectedMs ?? FAR) - (b.expectedMs ?? FAR) || byActivity(a, b),
+    you: (a, b) => COURT_RANK[a.court] - COURT_RANK[b.court] || byActivity(a, b),
+    agent: (a, b) => a.agentName.localeCompare(b.agentName, "en-GB") || byActivity(a, b),
+    /* ⚠️ NO AGENCY SORTS LAST, BY A BOOLEAN — not by a sentinel string. U+FFFF is a noncharacter and
+       ICU collation ignores it, so an agency-less agent sorted FIRST. */
+    agency: (a, b) => Number(!a.agencyKey) - Number(!b.agencyKey) || a.agencyKey.localeCompare(b.agencyKey, "en-GB") || a.agentName.localeCompare(b.agentName, "en-GB"),
+  };
+  return [...rows].sort(cmp[sort]);
+}
+
+/* ── the list's fact line ── */
+/**
+ * What stands under the status name. Writer's turn keeps the app's "N days since request", and
+ * gains "due 3 Oct · 14 days left" IN FRONT of it only when `expectedSendDate` exists — a due date
+ * is never derived from anything else.
+ */
+export function factLine(row: QcRow, nowMs: number): string {
+  const since = row.stageStartMs != null ? wholeDays(row.stageStartMs, nowMs) : null;
+  if (row.court === "closed") return row.stageStartMs != null ? `closed ${shortDay(row.stageStartMs)}` : "close not dated";
+  if (row.court === "you") {
+    const tail = since != null ? `${since} ${since === 1 ? "day" : "days"} since request` : "request not dated";
+    if (row.expectedMs == null) return tail;
+    const due = row.expectedMs >= nowMs
+      ? `due ${shortDay(row.expectedMs)} · ${spanWords(wholeDays(nowMs, row.expectedMs))} left`
+      : `due ${shortDay(row.expectedMs)} · ${spanWords(wholeDays(row.expectedMs, nowMs))} past`;
+    return `${due} · ${tail}`;
+  }
+  if (row.court === "offer") return since != null ? `${spanWords(since)} since the offer` : "offer not dated";
+  if (row.expectedMs == null) return since != null ? `no date promised · ${spanWords(since)} waiting` : "no date promised";
+  if (row.expectedMs < nowMs) return `${spanWords(since ?? 0)} waiting · ${spanWords(wholeDays(row.expectedMs, nowMs))} past the expected date`;
+  return `reply by ${shortDay(row.expectedMs)} · ${spanWords(wholeDays(nowMs, row.expectedMs))} away`;
+}
+/** The card footer's two lines: where it stands, in words. */
+export function standLine(row: QcRow): string {
+  const first = row.agentName.split(" ")[0] || row.agentName;
+  if (row.court === "closed") return STAGE_NAME[row.status];
+  if (row.court === "offer") return `${first} has offered representation`;
+  if (row.court === "you") {
+    const what = row.status === QueryStatus.PARTIAL_REQUESTED ? "partial" : row.status === QueryStatus.FULL_REQUESTED ? "full" : "revisions";
+    return `${first} is waiting on your ${what}`;
+  }
+  return row.status === QueryStatus.PARTIAL_SENT ? `${first} has your partial` : row.status === QueryStatus.FULL_SENT ? `${first} has your full` : `Waiting on ${first}`;
+}
+
+/* ── ?status= — the deep link's four values, onto the sentence ── */
+/**
+ * ⚠️ "attention" MEANT "overdue for a reply" (`needsOverdue`), NOT "with you". It maps to Past
+ * expected, which is what it has always selected; nothing in the app generates the link today.
+ */
+export function filterForStatusParam(p: "all" | "attention" | "awaiting" | "closed"): QcFilter {
+  return p === "attention" ? "past" : p === "awaiting" ? "agent" : p === "closed" ? "closed" : "all";
+}
+
+/* ── the action in the card's footer ── */
+export function primaryActionLabel(status: QueryStatus): string | null {
+  if (isClosedStatus(status)) return null;
+  switch (status) {
+    case QueryStatus.PARTIAL_REQUESTED: return "Mark partial sent";
+    case QueryStatus.FULL_REQUESTED: return "Mark full sent";
+    case QueryStatus.REVISE_RESUBMIT: return "Record your resubmission";
+    case QueryStatus.OFFER: return "Record your decision";
+    default: return "Record a response";
+  }
+}
