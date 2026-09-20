@@ -142,14 +142,30 @@ describe("the row's words", () => {
     expect(r.meta, "the row must not restate the agency where there is a date").not.toBe(c.record);
   });
 
-  /* ⚠️ AND WHERE THERE IS NO DATE, THE ROW STATES THE CARD'S OWN META RATHER THAN INVENTING ONE. A
-     housekeeping gap is raised from a flag that records every date except when it was raised — so
-     there is genuinely nothing to measure from, and the honest answer is the agency line. */
-  it("falls back to the card's own record line where there is no anchor", () => {
-    const c = card("k1", { taskType: "agent_missing_wishlist", record: "Marsh Lit" });
+  /**
+   * ⚠️ AND WHERE THERE IS NO DATE THE ROW STATES NO DATE — it does not reach for the nearest
+   * string. This case pinned the opposite for one build, and the opposite was wrong twice over.
+   *
+   * `c.record` is `[agentPrimary(ag), ag.agency].join(" · ")` — the agent AND the agency — while
+   * the fact line already opens with `inputs.agency`. So the rendered row read
+   * **"BRIGHT LITERARY · NOAH BRIGHT · BRIGHT LITERARY"** on three of the harness board's eight
+   * rows, with this assertion green; and the row's own sentence had just named the agent as well.
+   *
+   * `facts.spanKey` is not the replacement either: it is the LABEL half of a pair ("Waiting" ·
+   * "7 weeks"), which is why `heroWait` exists to phrase the two together. Alone it renders the
+   * bare word "Age" in the middle of the line.
+   *
+   * ⚠️ SO THE ASSERTION IS THE ABSENCE **AND** THAT THE FACT DOES NOT REPEAT ITSELF. Pinning
+   * `meta === ""` by itself would go green again the day something else put the agency further
+   * along the line, which is the shape that just cost a build.
+   */
+  it("states no date where there is no anchor, and never says the agency twice", () => {
+    const c = card("k1", { taskType: "agent_missing_wishlist", record: "Ottoline Frayn · Marsh Lit" });
     const r = todoRows({ cards: [c], data: data([], []) })[0];
     expect(r.days).toBeNull();
-    expect(r.meta).toBe("Marsh Lit");
+    expect(r.meta).toBe("");
+    const runs = r.fact.split(" · ").filter(Boolean);
+    expect(new Set(runs).size, `the fact repeats itself: ${r.fact}`).toBe(runs.length);
   });
 
   /* ⚠️ URGENT IS THE BOARD'S, NOT THE ROW'S — the row reports it and never decides it, or a task

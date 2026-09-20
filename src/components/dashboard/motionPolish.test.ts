@@ -44,8 +44,19 @@ describe.each(SHEETS)("%s sheet — motion is transform/opacity only", (_name, p
    * narrow as it was — new layout motion must either be this pack's, on its curve, or argue its
    * own case in this comment.
    */
+  /**
+   * ⚠️ AND `height` JOINS `width` FOR ONE MECHANISM, WHICH IS THE ROW'S CONTROLS (to-do row round,
+   * 20 Sep). They reveal by taking room rather than by fading, because a control that is invisible
+   * but present is a control a reader clicks by accident. Above 560px of card they slide sideways
+   * into spare row (`width` 0 → 90px); below it there is no spare row, so they appear BENEATH the
+   * day figure and the right column grows downward instead (`height` 0 → 26px). One behaviour, two
+   * axes, decided by the container.
+   *
+   * ⚠️ IT IS NOT A THIRD DOOR. Both are the same declaration in two container states, and a third
+   * layout transition — on a different element, for a different reason — still fails here.
+   */
   const COLLAPSE_SIG = /240ms cubic-bezier\(0\.32, 0\.72, 0\.28, 1\)/;
-  const ALLOWED = [/transition:\s*width\s/, /transition:\s*max-height\s/, COLLAPSE_SIG];
+  const ALLOWED = [/transition:\s*width\s/, /transition:\s*height\s/, /transition:\s*max-height\s/, COLLAPSE_SIG];
 
   it("no `transition:` names a layout property, apart from the named exceptions", () => {
     const decls = bare.match(/transition:\s*[^;}]+/g) ?? [];

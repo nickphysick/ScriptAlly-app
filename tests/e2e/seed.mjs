@@ -15,6 +15,29 @@
  * scriptally-dev; it refuses to run against anything else. `.firebaserc`'s default is PROD, and a
  * bare config resolving there is the documented way this goes wrong.
  *
+ * ⚠️ A JOURNEY HARNESS THAT COMMITS CANNOT BE TOLD APART FROM THIS FIXTURE, AND THAT COST A RUN
+ * (20 Sep). Probes drove the to-do row's completion journeys against this account, committed nudges
+ * and died before their undo; the board went from three "worth a nudge" rows to none, because a
+ * nudged nudge is a silence. Re-seeding did not restore it — this file rewrites queries, agents and
+ * manuscripts, and writes NO activities, so the rungs a probe logged simply stay. Trying to clean up
+ * afterwards, a cutoff of "activities written since 16:00" matched **55 documents**, most of them
+ * the app's own, and deleting them on that guess was refused.
+ *
+ * ⚠️ A `probe: true` FIELD WAS CONSIDERED AND IS THE WRONG FIX. A journey harness writes through the
+ * app's own path on purpose — `logNudge`, `recordMaterialsSent`, `updateQueryStatus` — which is the
+ * whole point of measuring it; marking the write means forking that path for a test, and the field
+ * would be denied in SILENCE by `isValidActivity`'s allowlist until a rules deploy carried it. A
+ * flag the production write path has to carry so the test can find its own rubbish is a worse thing
+ * to own than the rubbish.
+ *
+ * ⚠️ SO: A DEDICATED PROBE ACCOUNT. It needs no change to any write path, no rules line and no
+ * heuristic — the separation is the uid. What it takes: a second dev user, its password in
+ * `.env.local` beside `SA_E2E_PASSWORD`, `SA_E2E_EMAIL` pointed at it for journey runs, and this
+ * seeder run against it. Measurements that only READ keep using the harness account.
+ *
+ * Until that exists, any harness that commits RESTORES IN A `finally` — a run that dies mid-journey
+ * must not leave the account changed.
+ *
  *   node tests/e2e/seed.mjs
  */
 import { readFileSync, existsSync } from "node:fs";

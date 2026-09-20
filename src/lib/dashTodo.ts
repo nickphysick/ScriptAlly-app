@@ -212,7 +212,25 @@ export const todoRows = (i: TodoRowsInput): TodoRow[] =>
     const status = (q?.status as QueryStatus) ?? null;
     const days = inputs.days;
     const category = taskCategory(c);
-    const meta = inputs.anchorDate ? `${facts.dateKey} ${facts.dateValue}` : (c.record || facts.spanKey);
+    /**
+     * ⚠️ `c.record` IS NOT A FALLBACK HERE, AND USING IT SAID THE AGENCY TWICE. It is built as
+     * `[agentPrimary(ag), ag.agency].join(" · ")` — the agent AND the agency — so joining it after
+     * `inputs.agency` produced **"BRIGHT LITERARY · NOAH BRIGHT · BRIGHT LITERARY"**, on three of
+     * the harness board's eight rows. It reads as a rendering fault rather than a duplication,
+     * which is why it survived a screenshot: the eye takes the third run as a different fact.
+     *
+     * ⚠️ AND IT WAS NEVER ADDING ANYTHING. The row's own sentence names the agent ("Noah Bright has
+     * made an offer") and this line already opens with the agency, so every word of `c.record` is
+     * one the row has just said.
+     *
+     * ⚠️ NOR IS `facts.spanKey` THE REPLACEMENT — it is a LABEL, not a fact. It pairs with
+     * `spanValue` ("Waiting" · "7 weeks"), which is why `heroWait` exists to phrase the two
+     * together; alone it renders the word **"Age"** in the middle of the line. So where the card
+     * carries no anchor date there is no date to state, and the row states the agency and stops.
+     * An undated row saying less is the point — it is the same rule the ticket follows with its em
+     * dash, rather than reaching for whichever string is nearest.
+     */
+    const meta = inputs.anchorDate ? `${facts.dateKey} ${facts.dateValue}` : "";
     /* ⚠️ THE QUERY'S AGENT, NOT THE CARD'S, WHERE THEY DIFFER — the card carries `agentId` for the
        housekeeping rules, and a query's agent is the one whose initials belong beside it. */
     const agent = i.data.agents.find((a) => a.id === (q?.agentId ?? c.agentId));

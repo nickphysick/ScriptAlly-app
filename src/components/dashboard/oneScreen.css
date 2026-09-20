@@ -981,6 +981,60 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 /* the quick reference stays lit while its card is open */
 .os-tdact--on { background: var(--dash-parchment); border-color: var(--dash-frame); color: var(--dash-ink); }
 
+/* ══ THE NARROW ROW — under 560px of card (to-do row round, 20 Sep; ref `todo-row-narrow.html`) ══
+ *
+ * ⚠️ THE ROW WAS DRAWN FOR A THOUSAND PIXELS AND THIS CARD IS ABOUT 460 (Nick's own correction). At
+ * the real width the five-column row put the sentence on three lines, truncated the fact line to
+ * `FRA…` and let the controls crowd the figure — measured at 1440 and 1280, where the to-do card is
+ * a right-hand column rather than a page.
+ *
+ * ⚠️ THE CARD GIVES UP THE AVATAR, NOT THE WIDTH. The feed needs its width for sentences more than
+ * the to-do needs it for names — and the avatar's initials were the one thing the sentence already
+ * says, so it is the only element here whose removal costs a reader nothing.
+ *
+ * ⚠️ AND THE CONTROLS GROW THE COLUMN *DOWNWARD*, which is the change that stops anything crowding.
+ * At full width they slide sideways into 90px of spare row; there is no spare row here, so they
+ * appear beneath the figure and the right column gets taller instead. It is a `height` transition
+ * rather than a `width` one for exactly that reason.
+ *
+ * ⚠️ IT IS A CONTAINER QUERY, NOT A VIEWPORT ONE. The card is a right-hand column at 1920 and a
+ * full-width block when the page stacks, so the row's width is a fact about its CARD; a media query
+ * would give the stacked page a narrow row at its widest.
+ */
+@container (max-width: 560px) {
+  .os-tdrow {
+    grid-template-columns: var(--td-band) 22px 1fr auto;
+    gap: 12px;
+    align-items: start;
+    padding: 11px 12px 11px 0;
+  }
+  /* the avatar goes — the sentence already names the agent */
+  .os-tdav { display: none; }
+
+  .os-tdbox { margin-top: 1px; }
+
+  .os-tdl1 { display: block; font-size: 15px; line-height: 1.35; }
+  /* the manuscript drops to its own typewriter line, so the task never wraps past two */
+  .os-tdl1 .os-tdms { display: block; font-size: 13.5px; margin-top: 2px; color: var(--dash-ink-70); }
+
+  .os-tdl2 { gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+  /* ⚠️ THE FACT GIVES, NEVER THE PILL — the pill is the state, and a state truncated to "Full requ…"
+     is a worse loss than an agency name cut short. */
+  .os-tdfact { font-size: 8.5px; letter-spacing: 0.08em; max-width: 100%; }
+
+  .os-tdright { flex-direction: column; align-items: flex-end; gap: 6px; min-height: 44px; }
+  .os-tdn { font-size: 9px; line-height: 1; }
+  .os-tdn b { font-size: 20px; margin-bottom: 3px; }
+
+  .os-tdacts { width: auto; height: 0; gap: 3px; transition: height 0.15s ease; }
+  .os-tdrow:hover .os-tdacts,
+  .os-tdrow:focus-within .os-tdacts,
+  .os-tdrow--open .os-tdacts { width: auto; height: 26px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  @container (max-width: 560px) { .os-tdacts { transition: none; } }
+}
+
 /* ── the three panels a row can open beneath itself ───────────────────────────────────────── */
 /**
  * ⚠️ ONE ROW OF THE GRID, SPANNING IT — `grid-column: 1 / -1` puts the panel on a second grid row

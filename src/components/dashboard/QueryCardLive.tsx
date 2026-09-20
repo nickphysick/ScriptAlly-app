@@ -59,24 +59,28 @@ export const QueryCardLive: React.FC<{
     const events = act.ballHolder === "writer" ? withTerminus(rungs) : rungs;
 
     /**
-     * ⚠️ THE COURT IS THE CTA ENGINE'S, NOT A FOURTH OPINION — the same `ballHolder` the to-do row's
-     * category and the Queries filter bar read, so the three cannot disagree about whose move it is.
+     * ⚠️ THE BAND IS DERIVED FROM THE STATUS, NOT FROM `ballHolder` (Nick, 20 Sep — and he is right
+     * that letting `null` mean "closed" was the fault rather than the offer being an exception).
      *
-     * ⚠️ WITH ONE CARVE-OUT, AND IT IS A CORRECTNESS FIX RATHER THAN A PREFERENCE: `ballHolder` is
-     * `null` for OFFER as well as for the three terminal states, because the engine is answering
-     * "whose move decides the next rung" and an offer's answer is neither party's alone. Reading
-     * `null` as "Closed" put a stone **CLOSED** band over a LIVE OFFER — measured on the harness
-     * account, `Day 110`, with the status pill beside it reading "Offer". An offer counts as ACTIVE
-     * everywhere else in this app (`agentStanding` says so in as many words), so the band says so
-     * too. The status is tested directly, because that is the fact that distinguishes them.
+     * `getPrimaryAction` answers "whose move decides the next rung", and it returns `null` for an
+     * OFFER exactly as it does for the three terminal states — because an offer's next move is
+     * neither party's alone. That is a correct answer to its own question and the wrong input for
+     * this one: read as "closed" it put a stone **CLOSED** band over a live offer at Day 110, with
+     * the status pill beside it reading "Offer". An offer is the most alive a query gets.
+     *
+     * So the status decides, and `ballHolder` only splits the two live directions beneath it. The
+     * three terminal states are named, so a tenth status arriving in the enum lands on the live side
+     * and is visible rather than being quietly filed as closed.
      */
-    const court = act.ballHolder === "writer"
-      ? { label: "With you", band: "rose" as const }
-      : act.ballHolder === "agent"
-        ? { label: "With the agency", band: "sand" as const }
-        : status === QueryStatus.OFFER
-          ? { label: "An offer", band: "rose" as const }
-          : { label: "Closed", band: "stone" as const };
+    const CLOSED = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE];
+    const court = status === QueryStatus.OFFER
+      /* with the writer: an offer is theirs to answer */
+      ? { label: "An offer", band: "rose" as const }
+      : CLOSED.includes(status)
+        ? { label: "Closed", band: "stone" as const }
+        : act.ballHolder === "writer"
+          ? { label: "With you", band: "rose" as const }
+          : { label: "With the agency", band: "sand" as const };
 
     const sentMs = query.dateSent ? new Date(query.dateSent).getTime() : NaN;
     const day = Number.isFinite(sentMs) ? `Day ${Math.max(0, daysBetween(sentMs, Date.now()))}` : null;

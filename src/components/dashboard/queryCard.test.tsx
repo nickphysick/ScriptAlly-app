@@ -79,10 +79,14 @@ describe("the story's last line", () => {
    * offer on the harness account. Both directions, because asserting only the offer would pass on a
    * build where nothing was ever closed.
    */
-  it("an offer is live, and the three terminal states are not", () => {
+  it("an offer is live, and only the three terminal states are closed", () => {
+    /* the STATUS decides, and `ballHolder` only splits the two live directions beneath it */
     expect(live).toContain("status === QueryStatus.OFFER");
     expect(live).toContain('{ label: "An offer", band: "rose" as const }');
-    expect(live).toContain('{ label: "Closed", band: "stone" as const }');
+    /* ⚠️ THE CLOSED SET IS NAMED, NOT INFERRED FROM A NULL — so a tenth status lands on the live
+       side and is visible, rather than being quietly filed as closed. */
+    expect(live).toContain("const CLOSED = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]");
+    expect(live).toContain("CLOSED.includes(status)");
   });
 
   it("states the court and offers no action of its own", () => {

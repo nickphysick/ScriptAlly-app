@@ -441,16 +441,38 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
         </Suspense>
       )}
 
-      {/* ⚠️ THE APP'S OWN DIAL, MOUNTED A THIRD TIME — never a second implementation. It carries a
-          CEILING (you cannot snooze past the thing you are waiting for) that no prose here asks for
-          and that a fresh six-stop track would silently drop. */}
+      {/* ⚠️ THE APP'S OWN DIAL, MOUNTED A THIRD TIME — never a second implementation. It carries an
+          offer CEILING (an offer stops at tomorrow) that a fresh six-stop track would silently drop. */}
       {snooze && (
         <Suspense fallback={null}>
           <DashSnooze
             card={live.find((c) => c.key === snooze.key) ?? null}
             anchor={snooze.anchor}
             onClose={() => setSnooze(null)}
-            onSnoozed={() => setSnooze(null)}
+            /**
+             * ⚠️ A SNOOZE RAISES A STRIP, EXACTLY AS A DISMISS DOES — it did not, for one build, and
+             * the two controls sit three pixels apart. Dismiss went through the commit path and came
+             * back with a strip and an Undo; snooze wrote its flag, closed the dial, and the row
+             * simply disappeared with no trace and no way back short of the To-do page. §4 says Undo
+             * on every strip, and the honest reading is that an action which removes a row from the
+             * board must LEAVE a strip to carry one.
+             *
+             * ⚠️ IT DOES NOT GO THROUGH `ask`. The write has already happened inside the dial — the
+             * dial owns its own commit, which is what makes it mountable anywhere — so routing a
+             * second request through `DashTaskCommit` would write the flag twice. This reuses the
+             * state the commit path sets (`panels` · `undos` · `held`) without reusing its writer.
+             */
+            onSnoozed={(days, undoFlag) => {
+              const key = snooze.key;
+              setSnooze(null);
+              const r = rows.find((x) => x.key === key);
+              const logged = days === 1
+                ? "Put off until tomorrow."
+                : `Put off for ${days} days.`;
+              setPanels((ps) => ({ ...ps, [key]: { kind: "strip", text: stripFor(r, logged, "dismiss"), canChange: false } }));
+              setUndos((u) => ({ ...u, [key]: undoFlag }));
+              holdCompletion(key, { logged, undo: undoFlag });
+            }}
           />
         </Suspense>
       )}
