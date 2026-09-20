@@ -108,21 +108,21 @@ export const QueryCard: React.FC<{
      popover rendered inside one would be clipped by its own column, which is what a popover is for
      escaping. */
   return createPortal(
-    <div className="qcd" style={menuStyle} ref={ref} role="dialog"
+    <div className="qcard" style={menuStyle} ref={ref} role="dialog"
       aria-label={`${model.statusWord} — ${model.agent.name}`}>
 
-      <div className={`qcd-band qcd-band--${model.court.band}`}>
+      <div className={`qcard-band qcard-band--${model.court.band}`}>
         <span>{model.court.label}</span>
         {model.day && <span>{model.day}</span>}
       </div>
 
-      <div className="qcd-who">
-        <span className="qcd-av" aria-hidden="true">{model.agent.initials}</span>
-        <span className="qcd-name">
+      <div className="qcard-who">
+        <span className="qcard-av" aria-hidden="true">{model.agent.initials}</span>
+        <span className="qcard-name">
           <b>{model.agent.name}</b>
           {model.agent.agency && <small>{model.agent.agency}</small>}
         </span>
-        <span className="qcd-st">
+        <span className="qcard-st">
           {/* the app's ONE drawing of a query status; the words beside it say the same thing */}
           {model.status && <StatusDot status={model.status} overrideSize={12} decorative />}
           {model.statusWord}
@@ -130,52 +130,52 @@ export const QueryCard: React.FC<{
       </div>
 
       {model.ms && (
-        <div className="qcd-ms">
-          <p className="qcd-k">Querying</p>
+        <div className="qcard-ms">
+          <p className="qcard-k">Querying</p>
           <b>{model.ms.title}</b>
           {model.ms.tags.length > 0 && (
-            <div className="qcd-tags">{model.ms.tags.map((t) => <span key={t}>{t}</span>)}</div>
+            <div className="qcard-tags">{model.ms.tags.map((t) => <span key={t}>{t}</span>)}</div>
           )}
         </div>
       )}
 
       {/* ⚠️ LIVE, NOT DECORATION. A tab row that does not switch teaches a reader the card holds
           more than it will show them, which is worse than one tab and no row at all. */}
-      <div className="qcd-tabs" role="tablist">
+      <div className="qcard-tabs" role="tablist">
         {CARD_TABS.map((t) => (
           <button type="button" key={t.key} role="tab" aria-selected={tab === t.key}
             className={tab === t.key ? "on" : undefined}
-            data-probe={`qcd-tab-${t.key}`} onClick={() => setTab(t.key)}>{t.label}</button>
+            data-probe={`qcard-tab-${t.key}`} onClick={() => setTab(t.key)}>{t.label}</button>
         ))}
       </div>
 
       {rows ? (
-        <div className="qcd-facts" role="tabpanel">
+        <div className="qcard-facts" role="tabpanel">
           {rows.length === 0
-            ? <p className="qcd-none">Nothing recorded.</p>
+            ? <p className="qcard-none">Nothing recorded.</p>
             : rows.map((f) => (
-              <div className="qcd-fact" key={f.k}><span className="qcd-k">{f.k}</span><span>{f.v}</span></div>
+              <div className="qcard-fact" key={f.k}><span className="qcard-k">{f.k}</span><span>{f.v}</span></div>
             ))}
         </div>
       ) : (
-        <div className="qcd-tl" role="tabpanel">
+        <div className="qcard-tl" role="tabpanel">
           {model.events.map((e) => (
-            <div className={`qcd-ev${e.kind === "now" ? " qcd-ev--now" : ""}`} key={e.key}>
-              <span className="qcd-g">
+            <div className={`qcard-ev${e.kind === "now" ? " qcard-ev--now" : ""}`} key={e.key}>
+              <span className="qcard-g">
                 {e.kind === "status"
                   ? <StatusDot status={e.status} overrideSize={16} decorative />
                   : <i aria-hidden="true" />}
               </span>
               <span><b>{e.t}</b></span>
-              <span className="qcd-d">{e.d}</span>
+              <span className="qcard-d">{e.d}</span>
             </div>
           ))}
-          {model.events.length === 0 && <p className="qcd-none">Nothing logged yet.</p>}
+          {model.events.length === 0 && <p className="qcard-none">Nothing logged yet.</p>}
         </div>
       )}
 
-      <div className="qcd-foot">
-        <span className="qcd-exp">{model.window}</span>
+      <div className="qcard-foot">
+        <span className="qcard-exp">{model.window}</span>
         <button type="button" onClick={model.onOpenQuery}>Open the full query</button>
       </div>
     </div>,

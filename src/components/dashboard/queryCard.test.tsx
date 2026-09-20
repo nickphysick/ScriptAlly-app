@@ -72,6 +72,19 @@ describe("the story's last line", () => {
    *
    * `ballHolder` still decides the BAND's court, which is the part a glance needs.
    */
+  /**
+   * ⚠️ AN OFFER IS NOT CLOSED, AND THE CTA ENGINE CANNOT SAY SO. `ballHolder` is `null` for OFFER as
+   * well as for the three terminal states — it answers "whose move decides the next rung", and an
+   * offer's answer is neither party's alone. Read as "Closed" it put a stone CLOSED band over a live
+   * offer on the harness account. Both directions, because asserting only the offer would pass on a
+   * build where nothing was ever closed.
+   */
+  it("an offer is live, and the three terminal states are not", () => {
+    expect(live).toContain("status === QueryStatus.OFFER");
+    expect(live).toContain('{ label: "An offer", band: "rose" as const }');
+    expect(live).toContain('{ label: "Closed", band: "stone" as const }');
+  });
+
   it("states the court and offers no action of its own", () => {
     expect(live).toContain('act.ballHolder === "writer"');
     const card = read("QueryCard.tsx");
@@ -113,8 +126,8 @@ describe("the story's last line", () => {
     const card = read("QueryCard.tsx");
     expect(card).toContain("useState<QueryCardTab>");
     /* ⚠️ THE TABLE, NOT THE RENDERED ATTRIBUTE — the probe is built by interpolation, so a literal
-       `qcd-tab-tracking` appears nowhere in the source and a `toContain` on one asserts nothing. */
-    expect(card).toContain("data-probe={`qcd-tab-${t.key}`}");
+       `qcard-tab-tracking` appears nowhere in the source and a `toContain` on one asserts nothing. */
+    expect(card).toContain("data-probe={`qcard-tab-${t.key}`}");
     for (const t of ["tracking", "agent", "materials"]) expect(card).toContain(`"${t}"`);
   });
 

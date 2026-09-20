@@ -27,7 +27,7 @@ import { getStatusLabel } from "../StatusPill";
 import { formatQueryMaterials } from "../../lib/materials";
 import { agentInitials, agentPrimary, agentSecondary } from "../../lib/agentDisplay";
 import { daysBetween } from "../../lib/elapsed";
-import type { Agent, Manuscript, Query, QueryStatus } from "../../types";
+import { QueryStatus, type Agent, type Manuscript, type Query } from "../../types";
 
 export const QueryCardLive: React.FC<{
   uid: string | undefined;
@@ -58,13 +58,25 @@ export const QueryCardLive: React.FC<{
      */
     const events = act.ballHolder === "writer" ? withTerminus(rungs) : rungs;
 
-    /* ⚠️ THE COURT IS THE CTA ENGINE'S, NOT A FOURTH OPINION — the same `ballHolder` the to-do row's
-       category and the Queries filter bar read, so the three cannot disagree about whose move it is. */
+    /**
+     * ⚠️ THE COURT IS THE CTA ENGINE'S, NOT A FOURTH OPINION — the same `ballHolder` the to-do row's
+     * category and the Queries filter bar read, so the three cannot disagree about whose move it is.
+     *
+     * ⚠️ WITH ONE CARVE-OUT, AND IT IS A CORRECTNESS FIX RATHER THAN A PREFERENCE: `ballHolder` is
+     * `null` for OFFER as well as for the three terminal states, because the engine is answering
+     * "whose move decides the next rung" and an offer's answer is neither party's alone. Reading
+     * `null` as "Closed" put a stone **CLOSED** band over a LIVE OFFER — measured on the harness
+     * account, `Day 110`, with the status pill beside it reading "Offer". An offer counts as ACTIVE
+     * everywhere else in this app (`agentStanding` says so in as many words), so the band says so
+     * too. The status is tested directly, because that is the fact that distinguishes them.
+     */
     const court = act.ballHolder === "writer"
       ? { label: "With you", band: "rose" as const }
       : act.ballHolder === "agent"
         ? { label: "With the agency", band: "sand" as const }
-        : { label: "Closed", band: "stone" as const };
+        : status === QueryStatus.OFFER
+          ? { label: "An offer", band: "rose" as const }
+          : { label: "Closed", band: "stone" as const };
 
     const sentMs = query.dateSent ? new Date(query.dateSent).getTime() : NaN;
     const day = Number.isFinite(sentMs) ? `Day ${Math.max(0, daysBetween(sentMs, Date.now()))}` : null;

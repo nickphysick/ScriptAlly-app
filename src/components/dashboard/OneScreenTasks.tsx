@@ -212,7 +212,7 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
     if (panels[r.key]) return;
     const c = cardFor(r.key);
     if (!c) return;
-    const j = journeyFor(r.category);
+    const j = journeyFor(c);
     if (j === "choose") { setPanels((ps) => ({ ...ps, [r.key]: { kind: "menu" } })); return; }
     if (j === "page") { openGap(c); return; }
     seq.current += 1;
@@ -230,18 +230,23 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
       return;
     }
     seq.current += 1;
-    /* ⚠️ BOTH GO THROUGH `commit`, WHICH IS THE ONE WRITE PATH. "Close it" is the `no_reply`
-       reason — the same `CLOSE_REASONS[0]` the pane's close journey uses — and "Nudge once more"
-       is a nudge like any other, so neither is a second way of doing a thing the app already does. */
-    ask({
-      id: seq.current, kind: "values", card: c,
-      values: draftToValues(blankDraft(r), choice === "close" ? "close" : "nudge"),
-    });
+    /* ⚠️ TWO WRITES, TWO DOORS, AND BOTH ARE THE APP'S OWN. "Close it" is `CLOSE_REASONS[0]` through
+       `commit` — the same reason the pane's close journey uses, so it lands under No reply in Closed
+       on both surfaces. "Nudge once more" cannot go through `commit`, because that routes on the
+       CARD's journey and a quiet card's is the close; it takes the nudge's own write instead, which
+       is the same `logNudge` by the same builders. */
+    if (choice === "close") {
+      ask({ id: seq.current, kind: "values", card: c, values: draftToValues(blankDraft(r), "close") });
+    } else {
+      ask({ id: seq.current, kind: "nudge", card: c });
+    }
   };
 
   const openEditor = (r: TodoRow) => {
+    const c = cardFor(r.key);
+    if (!c) return;
     setDrafts((ds) => ({ ...ds, [r.key]: ds[r.key] ?? blankDraft(r) }));
-    setPanels((ps) => ({ ...ps, [r.key]: { kind: "edit", mode: journeyFor(r.category) === "nudge" ? "nudge" : "sent" } }));
+    setPanels((ps) => ({ ...ps, [r.key]: { kind: "edit", mode: journeyFor(c) === "nudge" ? "nudge" : "sent" } }));
   };
 
   const save = (r: TodoRow, mode: "sent" | "nudge") => {
@@ -408,7 +413,14 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
             request={request}
             onLogged={(key, logged, undoFn) => {
               const r = rows.find((x) => x.key === key);
-              setPanels((ps) => ({ ...ps, [key]: { kind: "strip", text: stripFor(r, logged), canChange: journeyFor(r?.category ?? "house") !== "page" } }));
+              const c = cardFor(key);
+              /* the strip states the OUTCOME, which is what the request asked for — never the row's
+                 category, which is what it was before the write */
+              const outcome = request.kind === "dismiss" ? "dismiss" as const
+                : request.kind === "nudge" ? "nudge" as const
+                  : request.kind === "values" && request.values.reason ? "close" as const
+                    : c && journeyFor(c) === "nudge" ? "nudge" as const : "sent" as const;
+              setPanels((ps) => ({ ...ps, [key]: { kind: "strip", text: stripFor(r, logged, outcome), canChange: outcome === "sent" || outcome === "nudge" } }));
               setUndos((u) => ({ ...u, [key]: undoFn }));
               holdCompletion(key, { logged, undo: undoFn });
               setRequest(null);

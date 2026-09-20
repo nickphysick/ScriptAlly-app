@@ -13,30 +13,40 @@
  * PORTALLED to `document.body` so it can escape its column's clip — which puts it outside
  * `.os-root`, where every `--dash-*` lives. A `var(--dash-hair)` here resolves to NOTHING and the
  * declaration is dropped in silence: hairlines simply absent, through a green build and a green
- * suite. The values are stated on `.qcd` itself so the card carries its palette wherever it mounts.
+ * suite. The values are stated on `.qcard` itself so the card carries its palette wherever it mounts.
  */
-.qcd {
+/**
+ * ⚠️ THE PREFIX IS `qcard`, AND `qcd` IS TAKEN — found by a card that rendered perfectly and could
+ * not be clicked. `correctionDesk.css` has owned `.qcd` since the Correction UI, and its own rule
+ * carries `pointer-events: none`; being the later sheet in the bundle, it won, and the query card
+ * became a picture. Every rule read correctly, the element was visible at full opacity with the
+ * right rect, and `elementsFromPoint` simply did not return it.
+ *
+ * ⚠️ THE TELL IS THAT THE FAULT IS INVISIBLE TO EVERY CHECK THAT READS THE CARD'S OWN SHEET, and a
+ * class-name grep for the prefix you are ABOUT to take is two seconds. Check before you rename.
+ */
+.qcard {
   /* the palette, stated because `document.body` is not inside `.os-root` — see the note above */
-  --qcd-page: #f5f1eb;
-  --qcd-parchment: #fdf9f5;
-  --qcd-ink: #1c130f;
-  --qcd-ink-70: rgba(28, 19, 15, 0.7);
-  --qcd-ink-45: rgba(28, 19, 15, 0.45);
-  --qcd-hair: rgba(28, 19, 15, 0.11);
-  --qcd-rust: #8a4a3c;
-  --qcd-rose: #f5e6df;
-  --qcd-sand: #f7efe3;
-  --qcd-stone: #e4e1db;
+  --qcard-page: #f5f1eb;
+  --qcard-parchment: #fdf9f5;
+  --qcard-ink: #1c130f;
+  --qcard-ink-70: rgba(28, 19, 15, 0.7);
+  --qcard-ink-45: rgba(28, 19, 15, 0.45);
+  --qcard-hair: rgba(28, 19, 15, 0.11);
+  --qcard-rust: #8a4a3c;
+  --qcard-rose: #f5e6df;
+  --qcard-sand: #f7efe3;
+  --qcard-stone: #e4e1db;
 
   /* ⚠️ ABOVE THE SHELL'S CHROME AND BELOW A MODAL. The workspace rail sits at 40 and the app's
      dialogs at 50; a glance must clear the page's furniture without outranking a decision. */
   z-index: 45;
   background: #ffffff;
-  border: 1px solid var(--qcd-hair);
+  border: 1px solid var(--qcard-hair);
   border-radius: 12px;
   box-shadow: 0 18px 48px rgba(28, 19, 15, 0.18);
   overflow: hidden;
-  color: var(--qcd-ink);
+  color: var(--qcard-ink);
   font-family: var(--font-sans), "Source Sans Pro", sans-serif;
   /* a column, so the body gives and the foot stays put when the history is long */
   display: flex;
@@ -44,131 +54,131 @@
 }
 
 /* ── whose court, and how long ────────────────────────────────────────────────────────────── */
-.qcd-band {
+.qcard-band {
   flex: none;
   display: flex; align-items: center; justify-content: space-between;
   padding: 8px 16px;
   font-family: "JetBrains Mono", monospace;
-  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcd-ink-70);
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcard-ink-70);
 }
 /* ⚠️ THE SAME THREE FILLS THE TO-DO ROW'S BAND USES — one grammar, two sizes. */
-.qcd-band--rose { background: var(--qcd-rose); }
-.qcd-band--sand { background: var(--qcd-sand); }
-.qcd-band--stone { background: var(--qcd-stone); }
+.qcard-band--rose { background: var(--qcard-rose); }
+.qcard-band--sand { background: var(--qcard-sand); }
+.qcard-band--stone { background: var(--qcard-stone); }
 
 /* ── who it is with ──────────────────────────────────────────────────────────────────────── */
-.qcd-who {
+.qcard-who {
   flex: none;
   display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center;
   padding: 14px 16px 12px;
 }
-.qcd-av {
+.qcard-av {
   width: 36px; height: 36px; border-radius: 50%;
-  background: var(--qcd-page); border: 1px solid var(--qcd-hair);
+  background: var(--qcard-page); border: 1px solid var(--qcard-hair);
   display: flex; align-items: center; justify-content: center;
-  font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--qcd-ink-70);
+  font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--qcard-ink-70);
 }
-.qcd-name { min-width: 0; }
-.qcd-name b { display: block; font-size: 17px; font-weight: 600; line-height: 1.15; }
-.qcd-name small {
+.qcard-name { min-width: 0; }
+.qcard-name b { display: block; font-size: 17px; font-weight: 600; line-height: 1.15; }
+.qcard-name small {
   display: block; margin-top: 4px;
   font-family: "JetBrains Mono", monospace;
-  font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcd-ink-45);
+  font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcard-ink-45);
 }
-.qcd-st {
+.qcard-st {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 12.5px; padding: 5px 11px 5px 8px; border-radius: 20px;
-  border: 1px solid var(--qcd-hair); background: var(--qcd-page); white-space: nowrap;
+  border: 1px solid var(--qcard-hair); background: var(--qcard-page); white-space: nowrap;
 }
 
 /* ── the manuscript ──────────────────────────────────────────────────────────────────────── */
-.qcd-ms {
+.qcard-ms {
   flex: none;
   margin: 0 16px 12px; padding: 10px 13px;
-  background: var(--qcd-parchment); border: 1px solid var(--qcd-hair); border-radius: 9px;
+  background: var(--qcard-parchment); border: 1px solid var(--qcard-hair); border-radius: 9px;
 }
-.qcd-k {
+.qcard-k {
   font-family: "JetBrains Mono", monospace;
-  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcd-ink-45);
+  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcard-ink-45);
   margin: 0 0 4px;
 }
-.qcd-ms b { display: block; font-family: var(--os-type, "Special Elite", cursive); font-weight: 400; font-size: 18px; }
-.qcd-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-.qcd-tags span {
+.qcard-ms b { display: block; font-family: var(--os-type, "Special Elite", cursive); font-weight: 400; font-size: 18px; }
+.qcard-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.qcard-tags span {
   font-family: "JetBrains Mono", monospace;
   font-size: 8px; letter-spacing: 0.09em; text-transform: uppercase;
-  background: #ffffff; border: 1px solid var(--qcd-hair); border-radius: 4px;
-  padding: 3px 6px; color: var(--qcd-ink-70);
+  background: #ffffff; border: 1px solid var(--qcard-hair); border-radius: 4px;
+  padding: 3px 6px; color: var(--qcard-ink-70);
 }
 
 /* ── the tabs ────────────────────────────────────────────────────────────────────────────── */
-.qcd-tabs { flex: none; display: flex; gap: 18px; padding: 0 16px; border-bottom: 1px solid var(--qcd-hair); }
-.qcd-tabs button {
-  font: inherit; font-size: 13px; color: var(--qcd-ink-45); background: none; border: 0;
+.qcard-tabs { flex: none; display: flex; gap: 18px; padding: 0 16px; border-bottom: 1px solid var(--qcard-hair); }
+.qcard-tabs button {
+  font: inherit; font-size: 13px; color: var(--qcard-ink-45); background: none; border: 0;
   padding: 6px 0 8px; cursor: pointer;
 }
-.qcd-tabs button.on {
-  color: var(--qcd-ink); font-weight: 600;
-  border-bottom: 2px solid var(--qcd-ink); margin-bottom: -1px;
+.qcard-tabs button.on {
+  color: var(--qcard-ink); font-weight: 600;
+  border-bottom: 2px solid var(--qcard-ink); margin-bottom: -1px;
 }
-.qcd-tabs button:focus-visible { outline: 2px solid var(--qcd-rust); outline-offset: -2px; }
+.qcard-tabs button:focus-visible { outline: 2px solid var(--qcard-rust); outline-offset: -2px; }
 
 /* ── the body: the story, or a tab's facts ───────────────────────────────────────────────── */
-.qcd-tl, .qcd-facts { padding: 12px 16px 6px; min-height: 0; overflow-y: auto; }
-.qcd-none { margin: 4px 0 8px; font-size: 13.5px; color: var(--qcd-ink-45); font-style: italic; }
+.qcard-tl, .qcard-facts { padding: 12px 16px 6px; min-height: 0; overflow-y: auto; }
+.qcard-none { margin: 4px 0 8px; font-size: 13.5px; color: var(--qcard-ink-45); font-style: italic; }
 
-.qcd-ev {
+.qcard-ev {
   display: grid; grid-template-columns: 16px 1fr auto; gap: 10px; align-items: start;
   padding: 5px 0 9px; position: relative;
 }
 /* the spine runs from under one mark to the next, and stops at the last */
-.qcd-ev::before {
+.qcard-ev::before {
   content: ""; position: absolute; left: 7.5px; top: 20px; bottom: -4px;
-  width: 1px; background: var(--qcd-hair);
+  width: 1px; background: var(--qcard-hair);
 }
-.qcd-ev:last-child::before { display: none; }
-.qcd-g { margin-top: 2px; display: flex; align-items: center; justify-content: center; width: 16px; }
+.qcard-ev:last-child::before { display: none; }
+.qcard-g { margin-top: 2px; display: flex; align-items: center; justify-content: center; width: 16px; }
 /* ⚠️ THE MARK INSIDE A STATUS ROW IS `StatusDot` AND IS NOT RESTYLED HERE. This `i` is the OTHER
    branch — a rung with no status (a nudge), which takes a plain mark rather than a status glyph. */
-.qcd-g i { width: 7px; height: 7px; border-radius: 50%; display: block; background: var(--qcd-ink-45); }
-.qcd-ev b { font-size: 14px; font-weight: 600; }
-.qcd-d {
+.qcard-g i { width: 7px; height: 7px; border-radius: 50%; display: block; background: var(--qcard-ink-45); }
+.qcard-ev b { font-size: 14px; font-weight: 600; }
+.qcard-d {
   font-family: "JetBrains Mono", monospace;
   font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--qcd-ink-45); padding-top: 4px; white-space: nowrap;
+  color: var(--qcard-ink-45); padding-top: 4px; white-space: nowrap;
 }
 /* the terminus — the one row about the reader rather than about the record */
-.qcd-ev--now b { color: var(--qcd-rust); }
-.qcd-ev--now .qcd-g i { background: var(--qcd-rust); }
+.qcard-ev--now b { color: var(--qcard-rust); }
+.qcard-ev--now .qcard-g i { background: var(--qcard-rust); }
 
-.qcd-fact {
+.qcard-fact {
   display: grid; grid-template-columns: 104px 1fr; gap: 10px; align-items: baseline;
   padding: 6px 0 8px; font-size: 14px;
 }
-.qcd-fact .qcd-k { margin: 0; }
+.qcard-fact .qcard-k { margin: 0; }
 
 /* ── the way out ─────────────────────────────────────────────────────────────────────────── */
-.qcd-foot {
+.qcard-foot {
   flex: none;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 10px 16px 12px; border-top: 1px solid var(--qcd-hair); margin-top: 6px;
+  padding: 10px 16px 12px; border-top: 1px solid var(--qcard-hair); margin-top: 6px;
 }
-.qcd-exp {
+.qcard-exp {
   font-family: "JetBrains Mono", monospace;
-  font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcd-ink-45);
+  font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcard-ink-45);
 }
-.qcd-foot button {
-  font: inherit; font-size: 13px; color: var(--qcd-ink); background: none; border: 0; padding: 0;
+.qcard-foot button {
+  font: inherit; font-size: 13px; color: var(--qcard-ink); background: none; border: 0; padding: 0;
   cursor: pointer; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;
 }
-.qcd-foot button:hover { color: var(--qcd-rust); }
+.qcard-foot button:hover { color: var(--qcard-rust); }
 
 /* ⚠️ THE ARRIVAL IS SHORT AND IT DOES NOT MOVE THE PAGE. It fades and rises 4px from where it will
    sit, so nothing beneath it shifts — a glance that announced itself would defeat the point of not
    being a modal. */
-@keyframes qcdIn {
+@keyframes qcardIn {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: none; }
 }
-.qcd { animation: qcdIn 0.14s ease-out both; }
-@media (prefers-reduced-motion: reduce) { .qcd { animation: none; } }
+.qcard { animation: qcardIn 0.14s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .qcard { animation: none; } }

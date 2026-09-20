@@ -22,23 +22,36 @@ import React, { useEffect, useRef } from "react";
 import { StatePill } from "./StatePill";
 import { getStatusLabel } from "../StatusPill";
 import { elapsedParts } from "../../lib/elapsed";
+import { completionVia } from "../../lib/todoActions";
+import type { BoardCard } from "../../lib/todoBoard";
 import type { TodoRow } from "../../lib/dashTodo";
-import type { Category } from "../../lib/todoCategory";
 
 /** what a tick means on a row of this category */
 export type TodoJourney = "sent" | "nudge" | "choose" | "page";
 
 /**
- * ⚠️ ONE MEANING COMMITS, SEVERAL ASK. `req` is a send the writer owes and `nudge` is a chase —
- * each has exactly one honest completion, so the tick writes. `quiet` has three (close it, chase it
- * again, leave it) and there is no right answer, so the tick asks. Housekeeping is a gap in a
- * record: it finishes by the writer going and filling it in, so there is nothing here to record.
+ * ⚠️ ONE MEANING COMMITS, SEVERAL ASK — AND WHICH IS WHICH IS `completionVia`'S, NOT THE CATEGORY'S.
+ *
+ * This read `taskCategory` first, and it was wrong in a way no reading would have caught: the
+ * `req` group ("Agents are waiting") holds OFFER cards as well as sends, and an offer's completion
+ * is a DECISION rather than a send. `quickDone` correctly refused it and returned false, so the
+ * tick did nothing at all and the row said "That didn't save" over an offer — measured on the
+ * first row of the harness board.
+ *
+ * `completionVia` is the app's own answer to "what does finishing this write", which is the
+ * question the tick is actually asking. So: a send and a nudge each have one honest completion and
+ * commit; a silence has three (close it, chase it again, leave it) and there is no right answer, so
+ * the tick asks; everything else — an offer's decision, a housekeeping gap, a writer's own note —
+ * belongs to a surface this row does not have, and goes to the page that does.
  */
-export const journeyFor = (category: Category): TodoJourney =>
-  category === "req" ? "sent"
-    : category === "nudge" ? "nudge"
-      : category === "quiet" ? "choose"
-        : "page";
+export const journeyFor = (card: BoardCard): TodoJourney => {
+  switch (completionVia(card)) {
+    case "mark-sent": return "sent";
+    case "log-nudge": return "nudge";
+    case "close-query": return "choose";
+    default: return "page";
+  }
+};
 
 /** the panel a row is showing beneath itself — at most one, by construction */
 export type RowPanel =
@@ -112,7 +125,11 @@ export const TodoRowCard: React.FC<TodoRowCardProps> = ({
   const refRef = useRef<HTMLButtonElement>(null);
   const snoozeRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  /* ⚠️ THE BOX IS ON FOR ANY OPEN PANEL, INCLUDING THE MENU — the ref's own behaviour. While a quiet
+     row is being asked about, the tick shows WHICH row the question is about; nothing is written,
+     and Escape or a click away turns it back off. Only `strip` also strikes the sentence. */
   const done = !!row.done || panel?.kind === "strip";
+  const ticked = done || !!panel;
   const open = !!panel || peeking;
 
   /**
@@ -145,7 +162,7 @@ export const TodoRowCard: React.FC<TodoRowCardProps> = ({
       <span className={`os-tdband os-tdband--${row.band}`} aria-hidden="true" />
 
       <button
-        type="button" className={`os-tdbox${done ? " os-tdbox--on" : ""}`} data-probe="todo-tick"
+        type="button" className={`os-tdbox${ticked ? " os-tdbox--on" : ""}`} data-probe="todo-tick"
         aria-label={row.done ? `${row.done.logged} — ${plain(row)}` : `Complete: ${plain(row)}`}
         aria-expanded={panel?.kind === "menu" ? true : undefined}
         onClick={onTick}

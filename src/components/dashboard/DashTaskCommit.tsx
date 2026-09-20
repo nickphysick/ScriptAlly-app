@@ -23,6 +23,8 @@ import React, { useEffect, useRef } from "react";
 import { useTaskCommit } from "../todo/useTaskCommit";
 import { useScriptAllyDb } from "../../lib/db";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
+import { nudgeWriteArgs, quickNudgePayload } from "../../lib/todoWalk";
+import { ActivityType } from "../../types";
 import { useTodoToast } from "../todo/useTodoToast";
 import type { BoardCard } from "../../lib/todoBoard";
 import type { JourneySendValues } from "../../lib/paneJourney";
@@ -56,7 +58,19 @@ export type CommitRequest =
    * ⚠️ The To-do page still calls `dismissTask` and therefore still has the defect. Flagged, not
    * fixed here — repairing a shared writer belongs in its own change, with its own reds.
    */
-  | { id: number; kind: "dismiss"; card: BoardCard };
+  | { id: number; kind: "dismiss"; card: BoardCard }
+  /**
+   * ⚠️ A NUDGE ON A CARD WHOSE OWN COMPLETION IS SOMETHING ELSE — "Nudge once more" on a quiet row.
+   *
+   * It cannot go through `commit`, and that is not a shortcut being taken: `commitFromPane` routes
+   * on the CARD's journey, so a quiet card's values land in the CLOSE arm however they are filled
+   * in. Passing nudge values there produced a close with no reason and returned false — measured,
+   * the row showed nothing at all.
+   *
+   * So it calls the nudge's own write directly — and it is the SAME write: `quickNudgePayload` →
+   * `nudgeWriteArgs` → `logNudge`, the three things `useTaskCommit`'s own `log-nudge` arm uses.
+   */
+  | { id: number; kind: "nudge"; card: BoardCard };
 
 export interface DashTaskCommitProps {
   request: CommitRequest | null;
@@ -81,7 +95,7 @@ export const DashTaskCommit: React.FC<DashTaskCommitProps> = ({
   request, onLogged, onDuplicate, onFailed, onNeedsPage,
 }) => {
   const { flash, remember: rememberUndo } = useTodoToast();
-  const { upsertTaskFlag } = useScriptAllyDb();
+  const { upsertTaskFlag, logNudge, deleteActivity, queries, activities } = useScriptAllyDb();
 
   /* ⚠️ A REF, BECAUSE `flash` IS A setState AND THE COMMIT READS ITS RESULT IN THE SAME TICK.
      Reading the toast from render scope hands the receipt the PREVIOUS write's words — worse than
@@ -101,14 +115,30 @@ export const DashTaskCommit: React.FC<DashTaskCommitProps> = ({
     /* the guard's new home — see `onDuplicate` */
     confirmAsk: async (msg: string) => {
       duplicated.current = true;
-      if (pendingKey.current) onDuplicate(pendingKey.current, msg);
+      if (pendingKey.current) ctx.current.onDuplicate(pendingKey.current, msg);
       return false;
     },
     openFlow: () => onNeedsPage(),
   });
 
+  /**
+   * ⚠️ THE EFFECT KEYS ON `request.id` AND NOTHING ELSE, AND EVERYTHING ELSE IT NEEDS IS HELD IN A
+   * REF. This was written with the callbacks and `quickDone` in the dependency list, which is what
+   * the linter asks for and is exactly wrong here: every one of them is a fresh identity on every
+   * render, so the effect re-ran continuously — **re-running the COMMIT** each time, while the
+   * previous run's cleanup set `live = false` and threw its result away. Measured: the nudge chunk
+   * loaded, the write path ran, and the row showed nothing at all.
+   *
+   * A commit is an EVENT, not a synchronisation. `id` is the event; the rest is context.
+   */
+  const ctx = useRef({ quickDone, commit, upsertTaskFlag, onLogged, onDuplicate, onFailed, logNudge, deleteActivity, queries, activities });
+  ctx.current = { quickDone, commit, upsertTaskFlag, onLogged, onDuplicate, onFailed, logNudge, deleteActivity, queries, activities };
+
+  const reqId = request?.id ?? null;
   useEffect(() => {
-    if (!request) return;
+    if (!request || reqId === null) return;
+    const { quickDone: qd, commit: cm, upsertTaskFlag: flag, onLogged: logged, onFailed: failed,
+      logNudge, queries } = ctx.current;
     let live = true;
     void (async () => {
       lastFlash.current = null;
@@ -116,7 +146,7 @@ export const DashTaskCommit: React.FC<DashTaskCommitProps> = ({
       pendingKey.current = request.card.key;
       if (request.kind === "dismiss") {
         const c = request.card;
-        if (!c.taskType || !c.relatedRecordId) { onFailed(c.key, "There is nothing to dismiss here."); return; }
+        if (!c.taskType || !c.relatedRecordId) { failed(c.key, "There is nothing to dismiss here."); return; }
         const key = flagKeyForTask(c.taskType, c.relatedRecordId);
         await upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL, bumpSnooze: true });
         if (!live) return;
@@ -124,16 +154,42 @@ export const DashTaskCommit: React.FC<DashTaskCommitProps> = ({
           () => { void upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); });
         return;
       }
+      if (request.kind === "nudge") {
+        const c = request.card;
+        const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+        if (!q) { failed(c.key, "There is no query to nudge here."); return; }
+        const pay = quickNudgePayload({ cardKey: c.key, label: c.title, queryId: q.id, method: q.sendMethod, nowIso: new Date().toISOString() });
+        const r = await logNudge(...nudgeWriteArgs(pay, new Date().toISOString()));
+        if (!live) return;
+        if (!r.success) { failed(c.key, r.error || "Couldn't log the nudge."); return; }
+        /**
+         * ⚠️ THE INVERSE IS `deleteActivity` ON THE NUDGE ITSELF, which unwinds both twins and the
+         * two fields — the same undo `useTaskCommit`'s own nudge arm remembers.
+         *
+         * ⚠️ AND IT READS `ctx.current` INSIDE THE CLOSURE, NOT THE ARRAY DESTRUCTURED ABOVE. That
+         * array is the snapshot from BEFORE the write, so the nudge just logged is not in it: the
+         * undo deleted the previous newest nudge, or nothing at all. Measured — the feed still read
+         * "You nudged Rachel Lin" after pressing Undo. An undo that restores nothing is worse than
+         * no undo, because it looks like it worked.
+         */
+        logged(c.key, "Nudge sent", () => {
+          const mine = ctx.current.activities
+            .filter((a) => a.queryId === q.id && a.activityType === ActivityType.NUDGE_SENT)
+            .sort((x, y) => new Date(y.date).getTime() - new Date(x.date).getTime());
+          if (mine[0]?.id) void ctx.current.deleteActivity(mine[0].id);
+        });
+        return;
+      }
       const ok = request.kind === "quick"
-        ? await quickDone(request.card)
-        : await commit(request.card, request.values, []);
+        ? await qd(request.card)
+        : await cm(request.card, request.values, []);
       if (!live) return;
       /* the guard already spoke — the row is showing its editor, and saying "couldn't" over it
          would report a refusal the writer did not make */
       if (duplicated.current) return;
       const f = lastFlash.current;
       if (ok && f) {
-        onLogged(request.card.key, f.msg, f.action ? () => { void f.action!.fn(); } : undefined);
+        logged(request.card.key, f.msg, f.action ? () => { void f.action!.fn(); } : undefined);
       } else if (!ok) {
         /* ⚠️ A COMMIT THAT WROTE NOTHING SAYS SO. Leaving the tick on over an unwritten record is
            the one outcome a writer cannot tell from success. */
@@ -141,7 +197,8 @@ export const DashTaskCommit: React.FC<DashTaskCommitProps> = ({
       }
     })();
     return () => { live = false; };
-  }, [request, quickDone, commit, upsertTaskFlag, onLogged, onFailed, onDuplicate]);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps -- see the note above: `id` is the event */
+  }, [reqId]);
 
   return null;
 };

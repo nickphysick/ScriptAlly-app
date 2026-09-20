@@ -97,14 +97,33 @@ export const draftToValues = (d: RowDraft, mode: "sent" | "nudge" | "close"): Jo
 /**
  * The strip's sentence — what was logged, and the one date that follows from it.
  *
- * ⚠️ IT LEADS WITH THE COMMIT'S OWN WORDS. `useTaskCommit` raises a toast naming the write; putting
- * a second description here would be a second vocabulary for one event, and the two would disagree
- * the first time a task type changed what it records.
+ * ⚠️ THE FOLLOW-ON DATE IS PER OUTCOME, NOT PER ROW, AND THE FIRST VERSION GOT THIS WRONG IN THE
+ * ONE CASE THAT MATTERS. It computed the tail from the row's own window whatever had been
+ * committed, so closing a query rendered **"Closed … Reply due 15 Nov"** — a date for a reply
+ * nobody is waiting for any more, on the one outcome whose whole meaning is that the waiting has
+ * stopped. Measured on the harness board.
+ *
+ * ⚠️ AND A CLOSE LEADS WITH ITS OWN WORDS RATHER THAN THE TOAST'S. `useTaskCommit`'s close toast
+ * says `Done — "No response from Peter Vance for 6 months"`, which is the CARD's title quoted back;
+ * the strip states what was recorded. Everywhere else the toast IS the app's own name for the write
+ * and is used verbatim, because a second description is a second vocabulary for one event.
  */
-export const stripFor = (row: TodoRow | undefined, logged: string): React.ReactNode => {
+export const stripFor = (
+  row: TodoRow | undefined,
+  logged: string,
+  outcome: "sent" | "nudge" | "close" | "dismiss" = "sent",
+): React.ReactNode => {
   if (!row) return <>{logged}</>;
-  const follow = row.category === "nudge" ? shortDate(shift(28)) : row.windowDays ? shortDate(shift(row.windowDays)) : "";
-  const tail = row.category === "nudge"
+  if (outcome === "dismiss") return <>{logged}</>;
+  if (outcome === "close") {
+    /* the elapsed figure is the row's own — the same one it was showing a moment ago */
+    const span = row.days === null ? null : `${row.days} days`;
+    return <>Closed: <b>no reply</b>{span ? ` after ${span}` : ""}. Counts as “No reply” in Closed.</>;
+  }
+  const follow = outcome === "nudge"
+    ? shortDate(shift(28))
+    : row.windowDays ? shortDate(shift(row.windowDays)) : "";
+  const tail = outcome === "nudge"
     ? (follow ? ` Next nudge suggested ${follow}.` : "")
     : (follow ? ` Reply due ${follow}.` : "");
   return <>Logged: <b>{logged}</b>.{tail}</>;
