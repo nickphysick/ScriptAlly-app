@@ -471,12 +471,21 @@ test("the summary's gauges — the OPEN-WINDOW branch, on queries re-dated insid
     yes("within", `an open window's navy stops at or before the notch — ${w.title}`, w.fillPc != null && w.notchPc != null && w.fillPc <= w.notchPc + 0.6, `${w.fillPc?.toFixed(1)} vs notch ${w.notchPc?.toFixed(1)}`);
     yes("within", `an open window draws NO overrun — ${w.title}`, !w.overPc, String(w.overPc));
     is("within", "an open window's fill is navy", w.fillBg, "rgb(42, 58, 82)");
-    yes("within", `an open window's title counts DOWN to the date — ${w.title}`, /until the expected date$/.test(w.title));
+    /* ⚠️ THREE WORDINGS, NOT ONE — and the re-seeded fixture is what proved it. `gaugeFor` names
+       what is being counted down to: "the expected date" on the agent's turn, "your send-by date"
+       where the writer set one, "the decision date" on an offer. The old fixture held no
+       writer's-turn query with an `expectedSendDate`, so this branch had only ever been seen in
+       its agent's-turn form and the assertion had quietly narrowed to it. */
+    yes("within", `an open window's title counts DOWN to a named date — ${w.title}`,
+      /until (the expected date|your send-by date|the decision date)$/.test(w.title));
   }
   /* the spread is the point of the aid: early in the window through to the notch */
   const spread = Math.max(...within.map((w) => w.fillPc ?? 0)) - Math.min(...within.map((w) => w.fillPc ?? 0));
   yes("within", `the open windows span the track rather than sitting at one fraction (${spread.toFixed(1)}pp)`, spread > 15);
   record({ area: "within", what: "open-window fills, % of track", got: within.map((w) => +(w.fillPc ?? 0).toFixed(1)), want: "reported" });
+  /* which of the three countdowns the fixture actually exercised — a monoculture here is the
+     fault this case just had, so it is printed rather than inferred */
+  for (const w of within) seen("within-countdown", (/until (.+)$/.exec(w.title)?.[1]) ?? "none");
   await page.locator(".qcv-page [data-qcv='sum']").first().screenshot({ path: resolve(OUT, "summary-open-window-1440.png") });
 });
 
