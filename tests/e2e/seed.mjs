@@ -20,7 +20,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, setDoc, collection, getDocs, getDoc, writeBatch } from "firebase/firestore";
+import { getFirestore, doc, setDoc, collection, getDocs, getDoc, writeBatch, deleteDoc } from "firebase/firestore";
 
 const env = (file) => Object.fromEntries(
   readFileSync(file, "utf8").split("\n")
@@ -64,6 +64,13 @@ console.log(`signed in as ${EMAIL} on ${PROJECT}`);
 const iso = (daysAgo) => {
   const d = new Date();
   d.setDate(d.getDate() - daysAgo);
+  const p2 = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
+};
+/** A date N days AFTER today, as the app names it — the writer's own send-by date. */
+const ymdIn = (days) => {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
   const p2 = (n) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
 };
@@ -158,31 +165,159 @@ const AGENT_IDS = [];
   console.log(`wrote ${AGENT_IDS.length} agents`);
 }
 
-/* ── twenty queries across the pipeline ─────────────────────────────────────────────────── */
-const STATUSES = [
-  "Queried", "Queried", "Queried", "Queried", "Queried", "Queried",
-  "Partial Requested", "Partial Sent", "Full Requested", "Full Sent",
-  "Revise & Resubmit", "Offer",
-  "Rejected", "Rejected", "Rejected", "Rejected",
-  "Withdrawn", "No Response", "Queried", "Partial Requested",
-];
+/* ── two agencies that state NO reply window ─────────────────────────────────────────────
+ *
+ * ⚠️ SEPARATE IDS, AND DELIBERATELY NOT IN `AGENT_IDS`. Appending them to `NAMES` would change
+ * `AGENT_IDS.length`, and the queries below pick their agent by index — every existing seeded query
+ * would silently move to a different agency. These two exist so the fixture always holds the
+ * "no stated window" gauge, which is a first-class state and not an error.
+ *
+ * ⚠️ `responseTimeWeeks` IS OMITTED, NEVER 0 OR null. Absence is the app's own "not stated"
+ * (CLAUDE.md, the agent-list spec); `agentWindowMs` returns null without it, so these two produce a
+ * query with no expected date rather than one with a guessed date.
+ */
+const NO_WINDOW_IDS = ["seed-agent-nowin-1", "seed-agent-nowin-2"];
 {
   const batch = writeBatch(db);
-  STATUSES.forEach((status, i) => {
-    const id = `seed-query-${i + 1}`;
-    batch.set(doc(db, "users", uid, "queries", id), {
-      id, userId: uid,
-      agentId: AGENT_IDS[i % AGENT_IDS.length],
-      manuscriptId: MS_ID,
-      dateSent: iso(100 - i * 4),
-      status,
-      sendMethod: "Email",
-      personalisationNotes: "",
-      packageId: "",
+  [["Bea Halloran", "Halloran & Fitch"], ["Rufus Oyelaran", "Oyelaran Books"]].forEach(([name, agency], i) => {
+    batch.set(doc(db, "users", uid, "agents", NO_WINDOW_IDS[i]), {
+      id: NO_WINDOW_IDS[i], userId: uid, name, agency,
+      email: `${name.split(" ")[0].toLowerCase()}@example.com`,
+      website: "", genres: ["Literary Fiction"], notes: "", agentNotes: "",
+      mswlNotes: "", twitter: "", bluesky: "", instagram: "", socials: [],
+      city: "London", country: "GB",
+      submissionStatus: "Open", submissionMethod: "Email",
+      starRating: 3, noResponseMeansNo: false,
+      setAside: false, importedNeedsReview: false,
+      materialsWanted: ["Query letter"],
+      dateAdded: iso(60), lastCheckedDate: iso(10),
     });
   });
   await batch.commit();
-  console.log(`wrote ${STATUSES.length} queries`);
+  console.log(`wrote ${NO_WINDOW_IDS.length} agents with no stated window`);
+}
+
+/* ── twenty-two queries across the pipeline, each placed AT A STATE ──────────────────────────
+ *
+ * ⚠️ EVERY DATE IS COMPUTED FROM THE AGENCY'S OWN WINDOW AT RUN TIME, NOT FROM A FIXED OFFSET.
+ * The old table wrote `dateSent: iso(100 - i * 4)` against a flat 8-week window, which put ELEVEN
+ * OF TWENTY queries past their reply window on the day the seeder ran and pushed every one of them
+ * a further day past it for every day nobody re-ran it. A fixture that drifts is a fixture whose
+ * meaning changes without anyone editing it: the summary row's gauge branches, and any assertion
+ * over them, would flip on their own.
+ *
+ * ⚠️ SO THE TABLE STATES THE STATE, AND THE DATE IS DERIVED. `at` is where the query should sit:
+ *   { within: f }   f of the way through the window — 0.9+ is the near-the-notch case
+ *   { pastDays: n } past the expected date by n days
+ *   { pastMonths }  past it by months, the long-overdue case
+ *   null            closed, or writer's-turn: the send date is not what dates these
+ * Read back by `qcSummary.gaugeFor`, the three branches are `within`, `past` and `nodate`, and this
+ * table is what guarantees the page shows all three on any day it is re-seeded.
+ *
+ * ⚠️ THE STATUS MIX AND THE AGENT OF EVERY EXISTING QUERY ARE UNCHANGED. Only the dates move, plus
+ * two appended queries on the no-window agencies — so the closed grid's numbers, the court split and
+ * every id another suite opens stay exactly as they were.
+ */
+const WEEKS = 8; /* every seed-agent-N states eight weeks; see the agents block above */
+const QUERIES = [
+  { status: "Queried",           agent: 0,  at: { within: 0.22 } },
+  { status: "Queried",           agent: 1,  at: { within: 0.48 } },
+  { status: "Queried",           agent: 2,  at: { within: 0.9 } },   /* near the notch */
+  { status: "Queried",           agent: 3,  at: { within: 0.95 } },  /* nearer still */
+  { status: "Queried",           agent: 4,  at: { pastDays: 5 } },
+  { status: "Queried",           agent: 5,  at: { pastDays: 16 } },
+  { status: "Partial Requested", agent: 6,  at: null, expectedSendDate: ymdIn(6) },
+  { status: "Partial Sent",      agent: 7,  at: { within: 0.66 } },
+  { status: "Full Requested",    agent: 8,  at: null },
+  { status: "Full Sent",         agent: 9,  at: { pastMonths: 4 } },
+  { status: "Revise & Resubmit", agent: 10, at: null, expectedSendDate: ymdIn(21) },
+  { status: "Offer",             agent: 11, at: null },
+  { status: "Rejected",          agent: 0,  at: null },
+  { status: "Rejected",          agent: 1,  at: null },
+  { status: "Rejected",          agent: 2,  at: null },
+  { status: "Rejected",          agent: 3,  at: null },
+  { status: "Withdrawn",         agent: 4,  at: null },
+  { status: "No Response",       agent: 5,  at: null },
+  { status: "Queried",           agent: 6,  at: { pastMonths: 7 } },
+  { status: "Partial Requested", agent: 7,  at: null },
+  /* a third inside three weeks, on Full Sent rather than Queried: a fourth overrun in the Queried
+     column would push its open window out of the four the row draws, and the point of the spread is
+     that the summary shows all three branches without anyone arranging it. */
+  { status: "Full Sent",         agent: 8,  at: { pastDays: 12 } },
+  /* the two no-window agencies: an expected date cannot be derived, and none is invented */
+  { status: "Queried",           noWindow: 0, at: null },
+  { status: "Partial Sent",      noWindow: 1, at: null },
+];
+{
+  /** Days before today for the query's CURRENT stage, given where it should sit and the window. */
+  const anchorDaysAgo = (at, weeks) => {
+    const w = weeks * 7;
+    if (!at) return 40;                                   /* closed / writer's turn: not window-dated */
+    if (at.within != null) return Math.round(w * at.within);
+    if (at.pastDays != null) return w + at.pastDays;
+    return w + at.pastMonths * 30;
+  };
+  /**
+   * ⚠️ EVERY STAGE THE QUERY HAS PASSED THROUGH IS DATED, AND THAT IS NOT DECORATION.
+   * `qcStages.stageHistory` reads the query document first and the activity feed only for statuses
+   * the document does not date — so a query whose status is `Partial Sent` with no
+   * `partialSentDate` is genuinely UNDATED, and the summary row is right to draw it as a dashed
+   * gauge with no bar. The old fixture set `dateSent` alone, so ten of its gauges were the `nodate`
+   * branch and the within branch could not be seen at all. Proved by dry-running this table through
+   * the real derivation before it was written: one `within` drawn, eight `nodate`.
+   *
+   * The chain runs BACKWARDS from the current stage, a fortnight a rung, so the anchor above lands
+   * on the stage the window actually runs from — the last SEND for an agent's-turn query.
+   */
+  const CHAIN = {
+    "Queried":           ["dateSent"],
+    "Partial Requested": ["dateSent", "partialRequestedDate"],
+    "Partial Sent":      ["dateSent", "partialRequestedDate", "partialSentDate"],
+    "Full Requested":    ["dateSent", "partialRequestedDate", "partialSentDate", "fullRequestedDate"],
+    "Full Sent":         ["dateSent", "partialRequestedDate", "partialSentDate", "fullRequestedDate", "fullSentDate"],
+    "Revise & Resubmit": ["dateSent", "partialRequestedDate", "partialSentDate", "lastStatusChange"],
+    "Offer":             ["dateSent", "partialRequestedDate", "partialSentDate", "fullRequestedDate", "fullSentDate", "offerDate"],
+    "Rejected":          ["dateSent", "rejectedDate"],
+    "Withdrawn":         ["dateSent", "lastStatusChange"],
+    "No Response":       ["dateSent", "lastStatusChange"],
+  };
+  const batch = writeBatch(db);
+  QUERIES.forEach((q, i) => {
+    const id = `seed-query-${i + 1}`;
+    const agentId = q.noWindow != null ? NO_WINDOW_IDS[q.noWindow] : AGENT_IDS[q.agent];
+    const chain = CHAIN[q.status];
+    const anchor = anchorDaysAgo(q.at, WEEKS);
+    const dates = {};
+    chain.forEach((key, j) => { dates[key] = iso(anchor + (chain.length - 1 - j) * 14); });
+    batch.set(doc(db, "users", uid, "queries", id), {
+      id, userId: uid,
+      agentId,
+      manuscriptId: MS_ID,
+      ...dates,
+      status: q.status,
+      sendMethod: "Email",
+      personalisationNotes: "",
+      packageId: "",
+      ...(q.expectedSendDate ? { expectedSendDate: q.expectedSendDate } : {}),
+    });
+  });
+  await batch.commit();
+  console.log(`wrote ${QUERIES.length} queries`);
+
+  /**
+   * ⚠️ AND ANY `seed-query-N` PAST THE END OF THE TABLE IS DELETED, so the list can shrink.
+   * `batch.set` overwrites the ids it writes and knows nothing about the ones it used to write:
+   * shortening this table would strand the tail on the account for ever, still rendering, still
+   * counted, and attributable to nothing. No such orphan was found when this was added — it is the
+   * guard, not the repair.
+   */
+  const live = await getDocs(path("queries"));
+  const stale = live.docs.filter((d) => {
+    const m = /^seed-query-(\d+)$/.exec(d.id);
+    return m && +m[1] > QUERIES.length;
+  });
+  for (const d of stale) await deleteDoc(d.ref);
+  console.log(stale.length ? `removed ${stale.length} stale seed-query-* past the table` : "no stale seed-query-* to remove");
 }
 
 /* ══ THREE CALENDAR FIXTURES THE ACCOUNT COULD NOT PRODUCE (Porcelain fix pack, Phase 2) ══════

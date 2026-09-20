@@ -66,9 +66,6 @@
 .qcv-ga[aria-pressed="true"] { outline: 1.4px solid var(--qcv-ink); outline-offset: 1px; }
 .qcv-notch { position: absolute; left: 70%; top: 5px; bottom: 9px; width: 0; border-left: 1.4px solid var(--qcv-ink); text-decoration: none; pointer-events: none; z-index: 2; }
 .qcv-ga-more { display: block; margin-top: 3px; font-style: normal; font-family: var(--qcv-mono); font-size: 7.5px; line-height: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap; }
-/* the long form only where it has an empty neighbour to run on into — see QcSummary.tsx */
-.qcv-ga-more-w { display: none; font-style: normal; }
-.qcv-ga-more--long .qcv-ga-more-w { display: inline; }
 .qcv-keyline { margin: 7px 8px 0; font-family: var(--qcv-mono); font-size: 8px; line-height: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ── the closed grid: numbers, never a chart ── */
@@ -131,7 +128,5 @@
 @container (max-width: 620px) {
   .qcv-stages, .qcv-sum--seven .qcv-stages { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 6px; }
   .qcv-keyline { white-space: normal; }
-  /* three across: a column's right-hand neighbour may be on the next row, so nothing runs on */
-  .qcv-ga-more--long .qcv-ga-more-w { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .qcv-skw { animation: none; } }

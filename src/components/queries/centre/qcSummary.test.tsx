@@ -53,28 +53,29 @@ describe("the live card", () => {
   it("⚠️ FIFTY queries in one stage render FOUR gauges and one line — the row cannot grow with the account", () => {
     const html = render(Array.from({ length: 50 }, (_, i) => q({ dateSent: ago(i + 1) })));
     expect(html.split('data-qcv="gauge"').length - 1).toBe(4);
-    /* the sentence is whole in the `title`; the words after "earlier" are a separate element the
-       sheet shows only where the next column has no line of its own to collide with */
+    /* the whole sentence is in the `title`; the drawn line is the short form and only the short form */
     expect(html).toContain('title="+46 earlier in the window"');
-    expect(html).toMatch(/>\+46 earlier<i class="qcv-ga-more-w"> in the window<\/i><\/em>/);
+    expect(html).toMatch(/data-qcv="gauge-more"[^>]*>\s*\+46 earlier\s*<\/em>/);
     expect(rule(css, ".qcv-stg-u")).toMatch(/height:\s*27px/);
     expect(rule(css, ".qcv-stg")).toMatch(/height:\s*84px/);
   });
-  it("⚠️ the long form is drawn only beside a neighbour with no line of its own — two busy columns never run into each other", () => {
-    /* Six Queried alone: the column to its right (Partial requested) has no line, so the sentence
-       may run on into it, as the mockup draws. Six Queried AND six Partial requested: Queried now
-       has a busy neighbour and must fall back to the short form, while Partial requested — beside
-       an empty Partial sent — keeps the long one. */
+  it("⚠️ ONE PHRASING IN EVERY COLUMN — a busy column reads the same beside an empty neighbour and beside a busy one", () => {
+    /* The fault this forbids is TWO phrasings on one card. An earlier pass drew the mockup's longer
+       sentence wherever it had an empty neighbour to run on into and the short form elsewhere, which
+       fits but reads as a bug. Asserted as an EQUALITY between the two arrangements rather than
+       against a literal, so it survives a rewording and fails the moment the line becomes
+       conditional again. */
     const busy = (status: QueryStatus, n: number, extra: Partial<Query> = {}) => Array.from({ length: n }, (_, i) => q({ id: `${status}-${i}`, status, dateSent: ago(i + 3), ...extra }));
-    const lone = render(busy(QueryStatus.QUERIED, 6));
-    expect(lone.split("qcv-ga-more--long").length - 1, "one busy column beside an empty one keeps the mockup's sentence").toBe(1);
-    const pair = render([...busy(QueryStatus.QUERIED, 6), ...busy(QueryStatus.PARTIAL_REQUESTED, 6, { partialRequestedDate: ago(2) as never })]);
-    const classes = [...pair.matchAll(/class="(qcv-ga-more[^"]*)"[^>]*data-qcv="gauge-more"/g)].map((m) => m[1]);
-    expect(classes.length, "both columns say how many they are not drawing").toBe(2);
-    expect(classes[0], "Queried sits beside a column with a line of its own").toBe("qcv-ga-more");
-    expect(classes[1], "Partial requested sits beside an empty one").toBe("qcv-ga-more qcv-ga-more--long");
-    /* and the sheet hides the run-on words unless the modifier is there */
-    expect(rule(css, ".qcv-ga-more-w")).toMatch(/display:\s*none/);
+    const lines = (html: string) => [...html.matchAll(/data-qcv="gauge-more"[^>]*>([\s\S]*?)<\/em>/g)].map((m) => m[1].replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim());
+    const lone = lines(render(busy(QueryStatus.QUERIED, 6)));
+    const pair = lines(render([...busy(QueryStatus.QUERIED, 6), ...busy(QueryStatus.PARTIAL_REQUESTED, 6, { partialRequestedDate: ago(2) as never })]));
+    expect(lone.length, "the lone busy column says how many it is not drawing").toBe(1);
+    expect(pair.length, "both busy columns say how many they are not drawing").toBe(2);
+    expect(pair[0], "a busy column beside a busy one reads as it does beside an empty one").toBe(lone[0]);
+    expect(new Set(pair).size, "the two columns differ only in their number").toBe(1);
+    expect(lone[0]).toBe("+2 earlier");
+    /* nothing in the sheet can bring a second phrasing back */
+    expect(css, "the run-on span and its modifier are retired").not.toMatch(/qcv-ga-more-w|qcv-ga-more--long/);
   });
   it("a gauge carries a title AND the same accessible name, and is a button that is NOT inside a button", () => {
     const html = render([q({ dateSent: ago(22) })]);

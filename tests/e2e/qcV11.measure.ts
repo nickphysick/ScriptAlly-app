@@ -117,6 +117,23 @@ async function readRef(page: Page, w: number, h: number, prep?: (p: Page) => Pro
   if ("error" in r) throw new Error("ref: " + r.error);
   return r as Reading;
 }
+/**
+ * ⚠️ THE LIST'S TRACK RULE IS READ OUT OF THE SHEET, because the app deliberately DIVERGES from the
+ * mockup here. The ref's floors drop the date tile at a 1280 window on the app's narrower column;
+ * Nick's call (20 Sep) was to bring the floors down so it survives, which necessarily moves the
+ * three right-hand columns away from the ref's x at every width. So those edges are asserted
+ * against the app's OWN declared floors and ceilings, and the ref's are recorded beside them.
+ */
+function listTemplate() {
+  const css = readFileSync(resolve("src/components/queries/centre/qcvList.css"), "utf8");
+  const tpl = /--qcv-tpl:\s*([^;]+);/.exec(css)?.[1] ?? "";
+  const flex = [...tpl.matchAll(/minmax\((\d+(?:\.\d+)?)px,\s*(\d+(?:\.\d+)?)px\)/g)].map((m) => ({ floor: +m[1], ceiling: +m[2] }));
+  const fixed = [...tpl.replace(/minmax\([^)]*\)/g, "").matchAll(/(\d+(?:\.\d+)?)px/g)].map((m) => +m[1]);
+  const gap = +(/--qcv-tpl-gap:\s*(\d+(?:\.\d+)?)px/.exec(css)?.[1] ?? 0);
+  const drop = +(/@container \(max-width: (\d+)px\)/.exec(css)?.[1] ?? 0);
+  return { flex, fixed, gap, drop, boundary: drop + 1 };
+}
+
 async function openApp(page: Page, w: number, h: number, view: "list" | "calendar" | "grid" = "list") {
   await page.addInitScript((v) => { try { localStorage.setItem("sa.qcView", v); } catch { /* fine */ } }, view);
   await openRoute(page, view === "list" ? "/queries" : `/queries?view=${view}`, { width: w, height: h });
@@ -407,18 +424,60 @@ test("the summary's gauges — geometry, and which branches this account entered
   is("gauges", "every column is one height whatever it holds", hs.length, 1);
   /**
    * ⚠️ WHICH BRANCHES THIS PAGE ENTERED IS ASSERTED PER BRANCH, NOT IMPLIED BY A GREEN. The phase 6
-   * commit message said this account entered `within`, `past` and `nodate`. It enters TWO: a column
-   * draws its four FURTHEST-THROUGH gauges, every agent's-turn query on this account that has an
-   * expected date is already past it, and the rest have none — under All manuscripts and under each
-   * manuscript scope alike (probed 19 Sep). So `within` is proved where it CAN be: `gaugeFor` in
-   * `qcSummary.test.ts` (35% and 70%, with its own every-branch tally) and the rendered fill in
-   * `qcSummary.test.tsx`. The day a within-window gauge reaches this page the third line below
-   * starts asserting its geometry, and the record says so instead of a green saying nothing.
+   * commit message said this account entered `within`, `past` and `nodate`. As it stands it enters
+   * TWO: a column draws its four FURTHEST-THROUGH gauges, an open window is behind every overrun,
+   * and every agent's-turn query here with an expected date is already past it. The third branch is
+   * asserted in the case below, on a page given different INPUT rather than a different reading.
    */
   const kinds = r.flatMap((s) => s.gauges.map((g) => g.kind));
   yes("gauges", "the `past` branch was entered on the rendered page", kinds.includes("past"));
   yes("gauges", "the `nodate` branch was entered on the rendered page", kinds.includes("nodate"));
-  record({ area: "gauges", what: "the `within` branch on the rendered page (unit-locked where this account cannot enter it)", got: kinds.filter((k) => k === "within").length, want: "reported" });
+  record({ area: "gauges", what: "`within` gauges on the account as it stands", got: kinds.filter((k) => k === "within").length, want: "reported" });
+});
+
+test("the summary's gauges — the OPEN-WINDOW branch, on queries re-dated inside their agency's window", async ({ page }) => {
+  /**
+   * ⚠️ THE THIRD BRANCH IS THE ONE A REAL ACCOUNT WILL SHOW MOST, AND THIS ACCOUNT CANNOT SHOW IT.
+   * `qcReviewAid` moves a handful of agent's-turn queries' SEND dates inside their agency's stated
+   * window — an input, at the top of the same pipe — and `expectedFor` → `gaugeFor` then derive the
+   * open window for real. Nothing is written and no expected date is set by hand; if the aid ever
+   * reaches past the send dates, the lock in `useQcLoad.test.ts` fails first.
+   */
+  await page.addInitScript(() => { (window as unknown as { __SA_QC_AHEAD?: number }).__SA_QC_AHEAD = 6; });
+  await openApp(page, 1440, 860);
+  const g = await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    return [...p.querySelectorAll("[data-qcv='gauge']")].map((el) => {
+      const fill = el.querySelector("[data-qcv='gauge-fill']") as HTMLElement | null;
+      const over = el.querySelector("[data-qcv='gauge-over']") as HTMLElement | null;
+      const notch = (el.parentElement as HTMLElement).querySelector("[data-qcv='notch']") as HTMLElement | null;
+      const box = el.getBoundingClientRect();
+      return {
+        kind: el.getAttribute("data-kind"), title: el.getAttribute("title") ?? "",
+        fillPc: fill ? (fill.getBoundingClientRect().width / box.width) * 100 : null,
+        fillBg: fill ? getComputedStyle(fill).backgroundColor : null,
+        overPc: over ? (over.getBoundingClientRect().width / box.width) * 100 : null,
+        notchPc: notch ? ((notch.getBoundingClientRect().x - box.x) / box.width) * 100 : null,
+      };
+    });
+  });
+  const within = g.filter((x) => x.kind === "within");
+  const kinds = new Set(g.map((x) => x.kind));
+  /* the precondition FIRST: the aid took, and the other two branches are still on the page beside it */
+  yes("within", `the aid put open windows on the page (${within.length})`, within.length >= 3);
+  for (const k of ["past", "nodate"]) yes("within", `the \`${k}\` branch is still on the page beside them`, kinds.has(k));
+  /* and the geometry of the branch itself, measured as RENDERED WIDTH rather than read off a style */
+  for (const w of within) {
+    yes("within", `an open window's navy stops at or before the notch — ${w.title}`, w.fillPc != null && w.notchPc != null && w.fillPc <= w.notchPc + 0.6, `${w.fillPc?.toFixed(1)} vs notch ${w.notchPc?.toFixed(1)}`);
+    yes("within", `an open window draws NO overrun — ${w.title}`, !w.overPc, String(w.overPc));
+    is("within", "an open window's fill is navy", w.fillBg, "rgb(42, 58, 82)");
+    yes("within", `an open window's title counts DOWN to the date — ${w.title}`, /until the expected date$/.test(w.title));
+  }
+  /* the spread is the point of the aid: early in the window through to the notch */
+  const spread = Math.max(...within.map((w) => w.fillPc ?? 0)) - Math.min(...within.map((w) => w.fillPc ?? 0));
+  yes("within", `the open windows span the track rather than sitting at one fraction (${spread.toFixed(1)}pp)`, spread > 15);
+  record({ area: "within", what: "open-window fills, % of track", got: within.map((w) => +(w.fillPc ?? 0).toFixed(1)), want: "reported" });
+  await page.locator(".qcv-page [data-qcv='sum']").first().screenshot({ path: resolve(OUT, "summary-open-window-1440.png") });
 });
 
 test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
@@ -436,22 +495,61 @@ test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
     record({ area, what: "column edges from the ledger's left [chip, stands, sent, date] and the ledger's width", got: { app: ["row-chip", "row-stand", "row-sent", "row-date"].map((c) => (app.boxes[c] && app.boxes["ledger"] ? Math.round((app.boxes[c]!.x - app.boxes["ledger"]!.x) * 10) / 10 : "not drawn")), widths: ["row-stand", "row-sent", "row-date"].map((c) => app.boxes[c]?.w ?? "not drawn"), ledger: app.boxes["ledger"]?.w ?? null, column }, want: "reported" });
     /* ⚠️ THE DATE TILE IS A BRANCH, AND WHICH SIDE RAN IS STATED. Under 568px of ledger it is not drawn —
        in the app AND in the ref at that width — so its size and edge are compared only where both draw it. */
-    seen("list-date-tile", `${w}: ${dated ? "drawn" : "dropped (ledger under 568)"}`);
-    is(area, "the date tile is drawn in the app exactly where the four floors fit", dated, need(app, "app", "ledger").w - 12 >= 568);
+    const T = listTemplate();
+    seen("list-date-tile", `${w}: ${dated ? "drawn" : `dropped (container under ${T.boundary})`}`);
+    /* the container is the ledger's CARD content box — the ledger's border box less its 6px rim each side */
+    is(area, "the date tile is drawn exactly where the four floors fit the container", dated, need(app, "app", "ledger").w - 12 >= T.boundary);
+    /**
+     * ⚠️ AND AT 1280 IT IS DRAWN, FULL STOP — the line above cannot say this. Its expected value is
+     * derived from the same stylesheet the page is rendered from, so floors that rise take the
+     * threshold and the tile with them and BOTH sides move together: the check passes while the
+     * Queried column quietly disappears at the everyday window. That is the whole reason this pass
+     * happened (Nick, 20 Sep), so it is asserted flatly, against the window rather than the CSS.
+     */
+    if (w === 1280) yes(area, "the date tile is drawn at a 1280 window — the column this pass exists to keep", dated);
     sameSize(area, app, ref, "open", ["w"]);
     sameSize(area, app, ref, "list-head", ["h"]);
     /* ⚠️ THE ROW IS 67 IN BOTH LAYOUTS HERE. The ref's row is auto-height and the 45px date tile is what
        makes it 67; with the tile gone its row falls to 60.8, incidentally. The app states the height,
        so the list does not change rhythm when the window crosses the threshold. */
-    if (dated) sameSize(area, app, ref, "row", ["h"]); else near(area, "row.h (stated, tile or no tile)", app.boxes["row"]?.h, 67, 0.5);
+    /* ⚠️ AND THE HEIGHT IS COMPARED TO THE REF ONLY WHERE BOTH DRAW THE TILE. At 1280 the app now
+       does and the ref still does not, so the two are in different layouts: the ref's row falls to
+       60.8 without the tile while the app STATES 67 in both, which is the point — the list keeps its
+       rhythm across the threshold. Comparing them there measures the divergence, not the height. */
+    if (dated && ref.boxes["row-date"]) sameSize(area, app, ref, "row", ["h"]);
+    else near(area, "row.h (stated, tile or no tile)", app.boxes["row"]?.h, 67, 0.5);
     sameSize(area, app, ref, "row-chip", ["w", "h"]);
-    if (dated && ref.boxes["row-date"]) sameSize(area, app, ref, "row-date", ["w"]);
-    for (const c of ["row-chip", "row-stand", "row-sent", ...(dated && ref.boxes["row-date"] ? ["row-date"] : [])]) sameOffset(area, app, ref, c, "ledger", ["x"]);
+    /* the chip sits at the row's own padding and still matches the ref exactly */
+    sameOffset(area, app, ref, "row-chip", "ledger", ["x"]);
+    /**
+     * ⚠️ THE THREE RIGHT-HAND COLUMNS ARE ASSERTED AGAINST THE APP'S OWN TEMPLATE, NOT THE REF'S —
+     * see `listTemplate`. Every track between its declared floor and ceiling, equal gaps at or above
+     * the declared minimum, and the four adding up to the width they were given: that is the whole
+     * of the rule, and it cannot be satisfied by a row whose columns drifted.
+     */
+    const cells = await page.evaluate(() => {
+      const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+      const row = p.querySelector("[data-qcv='row']") as HTMLElement;
+      const cs = getComputedStyle(row);
+      const tracks = cs.gridTemplateColumns.split(" ").map(parseFloat);
+      const r = row.getBoundingClientRect();
+      return { tracks, inner: r.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) };
+    });
+    const want = dated ? [...T.flex, { floor: T.fixed[0], ceiling: T.fixed[0] }] : null;
+    if (want) {
+      is(area, "four tracks are drawn", cells.tracks.length, 4);
+      cells.tracks.forEach((t, i) => yes(area, `track ${i} sits between its floor and ceiling (${want[i].floor}–${want[i].ceiling})`, t >= want[i].floor - 0.6 && t <= want[i].ceiling + 0.6, t.toFixed(1)));
+      const gaps = (cells.inner - cells.tracks.reduce((x, y) => x + y, 0)) / 3;
+      yes(area, `the three gaps are at or above the declared ${T.gap}px minimum`, gaps >= T.gap - 0.6, gaps.toFixed(1));
+    }
+    record({ area, what: "app vs REF column edges [chip, stands, sent, date] — the floors diverge deliberately (20 Sep)", got: {
+      app: ["row-chip", "row-stand", "row-sent", "row-date"].map((c) => (app.boxes[c] && app.boxes["ledger"] ? Math.round((app.boxes[c]!.x - app.boxes["ledger"]!.x) * 10) / 10 : "not drawn")),
+      ref: ["row-chip", "row-stand", "row-sent", "row-date"].map((c) => (ref.boxes[c] && ref.boxes["ledger"] ? Math.round((ref.boxes[c]!.x - ref.boxes["ledger"]!.x) * 10) / 10 : "not drawn")),
+    }, want: "reported" });
     /* no row is wider than the ledger's frame: the floors fit, or the tile has gone */
     const spill = await page.evaluate(() => { const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!; const f = p.querySelector("[data-qcv='ledger-frame']")!.getBoundingClientRect(); return [...p.querySelectorAll("[data-qcv='row'] > *")].filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && b.right > f.right - 1 + 0.5; }).length; });
     is(area, "cells running out past the frame's right edge", spill, 0);
-    sameSize(area, app, ref, "row-stand", ["w"]);
-    sameSize(area, app, ref, "row-sent", ["w"]);
+    record({ area, what: "app vs REF column widths [stands, sent]", got: { app: ["row-stand", "row-sent"].map((c) => app.boxes[c]?.w ?? null), ref: ["row-stand", "row-sent"].map((c) => ref.boxes[c]?.w ?? null) }, want: "reported" });
     if (w === 1440) {
       sameSize(area, app, ref, "open-band", ["h"]);
       /* the ledger and the card share the stage with a 20px gap */

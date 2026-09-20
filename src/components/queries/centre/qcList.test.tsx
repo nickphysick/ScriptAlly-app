@@ -33,7 +33,10 @@ const listCss = sheet("qcvList.css"), openCss = sheet("qcvOpen.css");
 
 describe("the list's columns — one template, floors and ceilings, the spare in the gaps", () => {
   it("⚠️ the template is stated ONCE and read by the head AND every row; tracks are minmax(floor, ceiling), never content-sized", () => {
-    expect(rule(listCss, ".qcv-list")).toMatch(/--qcv-tpl:\s*minmax\(186px, 256px\) minmax\(168px, 240px\) minmax\(78px, 96px\) 46px/);
+    /* ⚠️ THE SHAPE, NOT THE FIVE NUMBERS. Pinning the values made this go red on a retune that
+       changed nothing about the law — three minmax tracks and one fixed tile — and the values
+       themselves are asserted where they MEAN something, in the threshold arithmetic below. */
+    expect(rule(listCss, ".qcv-list")).toMatch(/--qcv-tpl:\s*minmax\(\d+px, \d+px\) minmax\(\d+px, \d+px\) minmax\(\d+px, \d+px\) \d+px\s*;/);
     const shared = rule(listCss, ".qcv-cols, .qcv-row");
     expect(shared).toMatch(/grid-template-columns:\s*var\(--qcv-tpl\)/);
     expect(shared).toMatch(/column-gap:\s*var\(--qcv-tpl-gap\)/);
@@ -42,10 +45,26 @@ describe("the list's columns — one template, floors and ceilings, the spare in
     expect(listCss).not.toMatch(/grid-template-columns:[^;]*(auto|max-content|min-content|fit-content)/);
     expect(listCss, "display: contents fractures a row's hover and selection").not.toMatch(/display:\s*contents/);
   });
-  it("⚠️ the date tile goes where the four FLOORS stop fitting — 568, by arithmetic, and the rule is the ledger's container query", () => {
-    const floors = 186 + 168 + 78 + 46, gaps = 3 * 18, rowPadding = 16 + 18, frameLines = 2;
-    expect(floors + gaps + rowPadding + frameLines).toBe(568);
-    expect(listCss).toMatch(/@container \(max-width: 567px\) \{\s*\.qcv-cols, \.qcv-row \{ grid-template-columns: minmax\(166px, 1fr\) 160px 78px; column-gap: 14px; \}/);
+  it("⚠️ the date tile goes where the four FLOORS stop fitting, and the threshold is DERIVED from them rather than restated", () => {
+    /* ⚠️ THE FLOORS ARE READ OUT OF THE SHEET, NOT TYPED HERE. Restating them made this a pair of
+       literals that agree with each other and with nothing else — it passed while the tile was
+       dropping at the window it was written to protect. Both sides now come from `--qcv-tpl`, so a
+       floor that moves without its threshold fails here, which is the only thing this can usefully
+       say. The 36 is the frame's two borders plus the row's 16 + 18 of padding; the container is
+       the ledger's card and an inline-size query reads its CONTENT box (measured, not assumed). */
+    const tpl = /--qcv-tpl:\s*([^;]+);/.exec(listCss)?.[1] ?? "";
+    const floors = [...tpl.matchAll(/minmax\((\d+(?:\.\d+)?)px/g)].map((m) => +m[1]);
+    const fixed = [...tpl.replace(/minmax\([^)]*\)/g, "").matchAll(/(\d+(?:\.\d+)?)px/g)].map((m) => +m[1]);
+    const gap = +(/--qcv-tpl-gap:\s*(\d+(?:\.\d+)?)px/.exec(listCss)?.[1] ?? 0);
+    expect(floors.length, "three flexible tracks").toBe(3);
+    expect(fixed.length, "one fixed track — the date tile").toBe(1);
+    expect(gap).toBeGreaterThan(0);
+    const boundary = [...floors, ...fixed].reduce((a, b) => a + b, 0) + 3 * gap + 36;
+    const declared = +(/@container \(max-width: (\d+)px\)/.exec(listCss)?.[1] ?? -1);
+    expect(declared, `the four columns need ${boundary}px of container, so the tile drops below it`).toBe(boundary - 1);
+    /* and it must still clear a 1280 window, which is what this pass was for: 540 of container */
+    expect(boundary, "the four-column row no longer fits a 1280 window's 540px container").toBeLessThanOrEqual(540);
+    expect(listCss).toMatch(/@container \(max-width: \d+px\) \{\s*\.qcv-cols, \.qcv-row \{ grid-template-columns: minmax\(166px, 1fr\) 160px 78px; column-gap: 14px; \}/);
     expect(listCss).toMatch(/\.qcv-cols-date, \.qcv-date, \.qcv-date-sk \{ display: none; \}/);
     expect(rule(listCss, ".qcv-list"), "the list must not be a container itself — the rule is about the LEDGER").not.toMatch(/container-type/);
   });

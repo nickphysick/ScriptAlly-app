@@ -7,9 +7,9 @@
  * ended up crushed against the right edge. Tracks are sized by these rules alone, never by content
  * — every row is its own grid, and a content-sized track is a column that moves row to row.
  */
-/* ⚠️ NOT A CONTAINER ITSELF. The 540px rule below is about the LEDGER, and the ledger's FramedCard is
+/* ⚠️ NOT A CONTAINER ITSELF. The rule below is about the LEDGER, and the ledger's FramedCard is
    already the size container; making this one too would answer the query 14px early. */
-.qcv-list { --qcv-tpl: minmax(186px, 256px) minmax(168px, 240px) minmax(78px, 96px) 46px; --qcv-tpl-gap: 18px; }
+.qcv-list { --qcv-tpl: minmax(172px, 256px) minmax(162px, 240px) minmax(74px, 96px) 46px; --qcv-tpl-gap: 14px; }
 .qcv-cols, .qcv-row {
   display: grid; grid-template-columns: var(--qcv-tpl); column-gap: var(--qcv-tpl-gap); justify-content: space-between; align-items: center;
   box-sizing: border-box; padding-left: 16px; padding-right: 18px;
@@ -54,16 +54,23 @@
 .qcv-row[aria-selected="true"]:focus-visible::after { border-color: var(--qcv-ink); box-shadow: 0 0 0 2px var(--qcv-navy); }
 
 /**
- * ⚠️ THE DATE TILE GOES WHERE THE FOUR FLOORS STOP FITTING — 568px OF LEDGER, NOT THE BRIEF'S 540.
- * The floors are 186 + 168 + 78 + 46 = 478, plus three 18px gaps = 532, plus the row's 34px of padding
- * and the frame's 2px of line = 568. Between 541 and 567 the four-column row is wider than its ledger
- * and the date tile runs out past the row's padding (the ref does the same there; it draws neither
- * width). The icons stay; the skeleton rows follow the same rule.
+ * ⚠️ THE DATE TILE GOES WHERE THE FOUR FLOORS STOP FITTING — 532px OF CONTAINER, AND EVERY TERM OF
+ * THAT IS MEASURED RATHER THAN REASONED. The container is the ledger's `.fc-card--cq`, and an
+ * inline-size query reads its CONTENT box; the row then loses the frame's two 1px borders and its
+ * own 16 + 18 of padding, so the width the tracks actually share is `container - 36`.
  *
- * ⚠️ AND AT A 1280 WINDOW THE APP IS ON THE NARROW SIDE OF THIS: its page is 44px narrower than the
- * mockup's (the shell's insets), so the ledger's content box is 540 where the mockup's is 584.
+ *   floors 172 + 162 + 74 + 46 = 454, plus three 14px gaps = 496, plus that 36 = 532.
+ *
+ * ⚠️ THE FLOORS CAME DOWN SO THE TILE SURVIVES A 1280 WINDOW (Nick, 20 Sep) — at 1280 the card's
+ * content box is 540, which leaves 504 for tracks and gaps. The brief's 540 threshold, and a first
+ * pass that took only the gap to 14 and the Sent floor to 74, were both arithmetic against the
+ * LEDGER's 552 rather than against that 504: they came out 12px short and the tile still dropped.
+ * The two text columns gave up the difference. 496 against 504 leaves 8px of slack at 1280 — small,
+ * so re-measure rather than re-derive if any of these five numbers moves.
+ *
+ * Under 532 the row is three columns: the icons stay, the date goes, and the skeleton follows.
  */
-@container (max-width: 567px) {
+@container (max-width: 531px) {
   .qcv-cols, .qcv-row { grid-template-columns: minmax(166px, 1fr) 160px 78px; column-gap: 14px; }
   .qcv-cols-date, .qcv-date, .qcv-date-sk { display: none; }
 }

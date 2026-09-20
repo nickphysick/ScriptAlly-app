@@ -5,6 +5,8 @@
  * useQcLoad — the 150ms / 400ms rule as a pure function, and the entrance sheet's own rules.
  */
 import { describe, it, expect } from "vitest";
+import { padLiveQueries } from "./qcReviewAid";
+import { QueryStatus, type Query } from "../../../types";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { ENTRANCE_MS, SKELETON_DELAY_MS, SKELETON_MIN_MS, qcLoadPhase } from "./useQcLoad";
@@ -52,13 +54,44 @@ describe("the hook", () => {
   it("the review hold is never read in a production build", () => {
     expect(hook).toMatch(/if \(import\.meta\.env\.MODE === "production"[^)]*\) return 0;/);
   });
-  it("⚠️ the row-padding review aid is never read in a production build either, and writes nothing", () => {
+  it("⚠️ the review aid is never read in a production build either, writes nothing, and fabricates INPUT rather than output", () => {
     const aid = strip(readFileSync(join(process.cwd(), "src/components/queries/centre/qcReviewAid.ts"), "utf8"));
-    /* the production return comes BEFORE the window is read — a gate below the read is not a gate */
+    /* the production return comes BEFORE either knob is read — a gate below the read is not a gate */
     const gate = aid.indexOf('if (import.meta.env.MODE === "production"');
     expect(gate, "no production gate").toBeGreaterThan(-1);
-    expect(gate).toBeLessThan(aid.indexOf("__SA_QC_PAD_LIVE"));
-    for (const w of ["updateQuery", "addQuery", "setDoc", "localStorage", "firebase"]) expect(aid, `${w} — the aid must only copy rows in memory`).not.toContain(w);
+    for (const knob of ["__SA_QC_PAD_LIVE", "__SA_QC_AHEAD"]) expect(gate).toBeLessThan(aid.indexOf(knob));
+    for (const w of ["updateQuery", "addQuery", "setDoc", "localStorage", "firebase"]) expect(aid, `${w} — the aid must only copy queries in memory`).not.toContain(w);
+    /**
+     * ⚠️ IT MAY NOT TOUCH A DERIVED FIELD. The aid exists so the page can be SEEN in a state this
+     * account does not hold; the moment it writes an expected date, a gauge fraction or a row, the
+     * screenshot stops being evidence about the app's arithmetic and becomes evidence about this
+     * file. It moves send dates — an INPUT — and the real pipe derives the rest.
+     */
+    for (const d of ["expectedMs", "expectedKind", "pastExpected", "fillPc", "overPc", "gauges", "QcRow", "gaugeFor", "stageHistory"])
+      expect(aid, `${d} — the aid must not reach into the derivation`).not.toContain(d);
+    const page = strip(readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8"));
+    /**
+     * ⚠️ TWO CLAIMS, AND THE SECOND IS THE ONE A GUARD ALONE DOES NOT BUY. The aid must feed
+     * `buildQcRows` (so the derivation downstream is the real one), and the CALL SITE must carry its
+     * own `import.meta.env.MODE` gate. With the gate only inside the aid the gate folded correctly —
+     * provably inert — and the module still shipped to production, body and `@license` docblock, the
+     * latter verbatim because esbuild keeps legal comments whole. A statically-replaced MODE at the
+     * call site makes the branch dead and the module unreachable, so the bundler drops it. Confirmed
+     * by grepping the built output; this only stops the gate being quietly removed.
+     */
+    expect(page, "the aid feeds buildQcRows; it must not sit on the far side of it")
+      .toMatch(/buildQcRows\(\s*import\.meta\.env\.MODE === "production" \? \(queries as Query\[\]\) : padLiveQueries\(/);
+  });
+  it("⚠️ the aid survives the FIRST render, when there is nothing to copy — it runs before the data lands", () => {
+    /* This is not hypothetical: without the empty guard `i % 0` is NaN, `live[NaN]` is undefined,
+       and the Query Centre fell into its error boundary on load with the knob set. tsc, the unit
+       suite and the production build were all green; the rendered page caught it. */
+    (globalThis as Record<string, unknown>).window = { __SA_QC_PAD_LIVE: 56, __SA_QC_AHEAD: 6 };
+    try {
+      expect(padLiveQueries([], [], Date.now())).toEqual([]);
+      const closedOnly = [{ id: "c1", status: QueryStatus.REJECTED } as Query];
+      expect(padLiveQueries(closedOnly, [], Date.now()), "nothing live is nothing to repeat").toEqual(closedOnly);
+    } finally { delete (globalThis as Record<string, unknown>).window; }
   });
   it("the page's readiness includes the ACTIVITY FEED — the gauges and the calendar are dated from it", () => {
     const page = strip(readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8"));

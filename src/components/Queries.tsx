@@ -89,7 +89,7 @@ import { QcOpenCard, QcOpenCardSkeleton } from "./queries/centre/QcOpenCard";
 import { QcCalendar, QcCalendarSkeleton } from "./queries/centre/QcCalendar";
 import { QcGrid, QcGridSkeleton } from "./queries/centre/QcGrid";
 import { useQcLoad } from "./queries/centre/useQcLoad";
-import { padLiveRows } from "./queries/centre/qcReviewAid";
+import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
   DEFAULT_SORT, buildQcRows, closedGrid, filterForStatusParam, filterOptions, inScope, matchesFilter, sortRows, stageColumns,
   type QcFilter, type QcSort,
@@ -2149,7 +2149,15 @@ export const Queries: React.FC<{
      calendar bar is dated from it, so drawn before it lands they would re-lay themselves out. */
   const qcLoad = useQcLoad(collectionsReady && activitiesReady);
   const qcRows = useMemo(
-    () => padLiveRows(buildQcRows(queries as Query[], agents, activities, Date.now())),
+    /* ⚠️ THE MODE CHECK IS HERE, NOT ONLY INSIDE THE AID, SO THE BUNDLER CAN DROP IT. With the gate
+       only in `qcReviewAid` the guard folded correctly (`num = () => 0`, provably inert) and the
+       module still SHIPPED — body, and its `@license` docblock verbatim, which esbuild keeps whole.
+       A statically-replaced `import.meta.env.MODE` makes this branch dead code in a production
+       build, the import unreachable, and the module absent from the bundle. Verified by grepping
+       `dist/`, not by reading this line. */
+    () => buildQcRows(
+      import.meta.env.MODE === "production" ? (queries as Query[]) : padLiveQueries(queries as Query[], agents, Date.now()),
+      agents, activities, Date.now()),
     [queries, agents, activities],
   );
 
