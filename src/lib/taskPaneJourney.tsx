@@ -169,14 +169,29 @@ const QUERY_STATUSES = new Set<string>(Object.values(QueryStatus));
 const asQueryStatus = (s: string | undefined): QueryStatus | null =>
   s && QUERY_STATUSES.has(s) ? (s as QueryStatus) : null;
 
-/** one log rung → one typed entry; the status test decides which kind it is */
-function toEntry(e: JourneyInputs["events"][number]): TaskPaneEvent {
+/**
+ * One log rung → one typed entry; the status test decides which kind it is.
+ *
+ * ⚠️ EXPORTED, BECAUSE THE DASHBOARD'S QUERY PEEK DRAWS THE SAME RAIL BESIDE A FEED ENTRY. It builds
+ * `TaskPaneEvent[]` from `lib/dockTimeline` exactly as the pane does and renders it with its own
+ * markup — one model, two renderers. A second copy of this test is how one surface comes to draw a
+ * status dot where the other draws a mark, for the same rung.
+ */
+export function toEntry(e: JourneyInputs["events"][number]): TaskPaneEvent {
   const status = asQueryStatus(e.status);
   const base = { key: e.key, t: e.label, d: e.via ? `${e.when} · ${e.via}` : e.when };
   return status
     ? { ...base, kind: "status", status }
     : { ...base, kind: "mark", ...(e.incoming ? { incoming: true } : {}) };
 }
+
+/**
+ * ⚠️ THE TERMINUS IS PART OF THE DATA, not something a renderer appends. Exported with `toEntry` so
+ * the peek's rail ends the same way the pane's does — a list that stopped at the last thing that
+ * happened would be a shorter array, not a different renderer.
+ */
+export const withTerminus = (events: TaskPaneEvent[]): TaskPaneEvent[] =>
+  [...events, { key: "__now", kind: "now" as const, t: "Your turn", d: "Today" }];
 
 export interface TaskPaneForkOption {
   id: string;
@@ -254,12 +269,7 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
    * ends `['now','Your turn','Today']`, so a rail that stopped at the last thing that happened
    * would be a shorter array, not a different renderer.
    */
-  const tl: TaskPaneEvent[] | null = presence.timeline
-    ? [
-        ...input.events.map(toEntry),
-        { key: "__now", kind: "now" as const, t: "Your turn", d: "Today" },
-      ]
-    : null;
+  const tl: TaskPaneEvent[] | null = presence.timeline ? withTerminus(input.events.map(toEntry)) : null;
 
   return {
     /* ⚠️ THE BAND IS THE JOURNEY'S WHERE THE JOURNEY DECLARES ONE (Phase 2) — a crossover changes

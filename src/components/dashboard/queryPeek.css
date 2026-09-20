@@ -1,0 +1,256 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The query peek — the mount construction, beside the row that raised it.
+ *
+ * ⚠️ IT DECLARES ITS OWN TOKENS, AND THAT IS NOT DUPLICATION FOR ITS OWN SAKE. The peek is PORTALLED
+ * to `document.body` so it can escape the feed card's own clip — which puts it outside `.os-root`,
+ * where every `--dash-*` is declared. A `var(--dash-hair)` here resolves to NOTHING and the rule is
+ * dropped in silence: hairlines simply absent, the frame transparent, and every declaration reading
+ * perfectly correctly. The values are stated on `.qpk` itself so the popover carries its palette
+ * wherever it is mounted.
+ *
+ * ⚠️ THE MOUNT IS THE APP'S QUERY CONTAINER — parchment rim, burgundy frame, white paper. The ref's
+ * own argument: it is the same container a query card wears on the landing page, so a query looks
+ * like a query wherever it appears.
+ */
+.qpk {
+  /* the palette, stated because `document.body` is not inside `.os-root` — see the note above */
+  --qpk-parchment: #fdf9f5;
+  --qpk-page: #f5f1eb;
+  --qpk-ink: #1c130f;
+  --qpk-ink-70: rgba(28, 19, 15, 0.7);
+  --qpk-ink-45: rgba(28, 19, 15, 0.45);
+  --qpk-hair: rgba(28, 19, 15, 0.11);
+  --qpk-frame: #7c3a2a;
+  --qpk-rust: #8a4a3c;
+
+  /* ⚠️ ABOVE THE SHELL'S CHROME AND BELOW A MODAL. The workspace rail sits at 40 and the app's
+     dialogs at 50; a glance must clear the page's furniture without outranking a decision. */
+  z-index: 45;
+  color: var(--qpk-ink);
+  font-family: var(--font-sans, "Source Sans Pro", sans-serif);
+  /* the frame clips its own corners, so the panel scrolls as one object rather than by section */
+  display: flex;
+}
+
+.qpk-mount {
+  background: var(--qpk-parchment);
+  border-radius: 16px;
+  padding: 6px;
+  box-shadow: 0 16px 44px rgba(28, 19, 15, 0.18);
+  width: 100%;
+  min-height: 0;
+  display: flex;
+}
+.qpk-frame {
+  border: 1px solid var(--qpk-frame);
+  border-radius: 11px;
+  background: #fff;
+  overflow: hidden;
+  width: 100%;
+  min-height: 0;
+  /* ⚠️ A COLUMN, SO THE STORY SCROLLS AND THE FOOT STAYS. `overflow: auto` on the FRAME would take
+     the foot's two routes out of view with the history — the same fault `useFixedMenu`'s own
+     `constrain` note records about capping a panel rather than its body. */
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── the state, and the way out ── */
+.qpk-top {
+  flex: none;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--qpk-hair);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.qpk-top .st { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.qpk-top .st b {
+  font-family: "Special Elite", cursive;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.3;
+}
+.qpk-top .x {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--qpk-hair);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--qpk-ink-45);
+  background: var(--qpk-page);
+  cursor: pointer;
+  padding: 0;
+}
+.qpk-top .x:hover { color: var(--qpk-ink); }
+
+/* ── who it is with ── */
+.qpk-agent {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--qpk-hair);
+  width: 100%;
+  background: none;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+.qpk-agent:not(:disabled) { cursor: pointer; }
+.qpk-agent:not(:disabled):hover { background: var(--qpk-parchment); }
+.qpk-agent .av {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #e7eef2;
+  border: 1px solid var(--qpk-hair);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: #5f7b93;
+}
+.qpk-who { min-width: 0; }
+.qpk-who b { display: block; font-size: 15px; font-weight: 600; }
+.qpk-who span { display: block; font-size: 12.5px; color: var(--qpk-ink-70); }
+.qpk-agent .arw { margin-left: auto; color: var(--qpk-ink-45); }
+
+/* ── the two facts ── */
+.qpk-facts {
+  flex: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--qpk-hair);
+}
+.qpk-facts > div { padding: 11px 16px; border-right: 1px solid var(--qpk-hair); min-width: 0; }
+.qpk-facts > div:last-child { border-right: 0; }
+.qpk-facts dt {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--qpk-ink-45);
+  margin-bottom: 4px;
+}
+.qpk-facts dd { margin: 0; font-size: 14px; }
+
+/* ── the story so far ── */
+.qpk-tl {
+  padding: 13px 16px;
+  min-height: 0;
+  overflow-y: auto;
+}
+.qpk-tl .t {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--qpk-ink-45);
+  margin: 0 0 10px;
+}
+.qpk-tl .ev { position: relative; padding: 0 0 13px 24px; }
+.qpk-tl .ev:last-child { padding-bottom: 0; }
+/* the spine runs from under one mark to the next, and stops at the last */
+.qpk-tl .ev::before {
+  content: "";
+  position: absolute;
+  left: 6.5px;
+  top: 15px;
+  bottom: -2px;
+  width: 1px;
+  background: var(--qpk-hair);
+}
+.qpk-tl .ev:last-child::before { display: none; }
+.qpk-tl .ev .dot {
+  position: absolute;
+  left: 0;
+  top: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid var(--qpk-hair);
+}
+/* ⚠️ THE MARK INSIDE A STATUS ROW IS `StatusDot` AND IS NOT RESTYLED HERE. This `i` is the OTHER
+   branch — a rung with no status (a nudge), which takes a plain mark rather than a status glyph. */
+.qpk-tl .ev .dot i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: block;
+  background: var(--qpk-ink-45);
+}
+.qpk-tl .ev b { display: block; font-size: 14px; font-weight: 600; }
+.qpk-tl .ev > span {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--qpk-ink-45);
+}
+/* the terminus — the one row that is about the reader rather than about the record */
+.qpk-tl .ev.now b { color: var(--qpk-rust); }
+.qpk-tl .ev.now .dot i { background: var(--qpk-rust); }
+
+/* ── the two ways out ── */
+.qpk-foot {
+  flex: none;
+  padding: 11px 16px;
+  border-top: 1px solid var(--qpk-hair);
+  background: var(--qpk-page);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.qpk-foot button {
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--qpk-ink);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.qpk-foot .b {
+  font-size: 13px;
+  background: var(--qpk-ink);
+  color: var(--qpk-page);
+  border-radius: 20px;
+  padding: 7px 14px;
+  text-decoration: none;
+}
+.qpk-foot .b:hover { opacity: 0.9; }
+
+/* ⚠️ THE ARRIVAL IS SHORT AND IT DOES NOT MOVE THE PAGE. It fades and rises 4px from where it will
+   sit, so nothing beneath it shifts — a glance that announced itself would defeat the point of not
+   being a modal. */
+@keyframes qpkIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.qpk { animation: qpkIn 0.14s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qpk { animation: none; }
+}

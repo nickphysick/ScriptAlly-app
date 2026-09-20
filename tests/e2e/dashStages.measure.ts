@@ -145,8 +145,12 @@ function read() {
     })),
     feedEntries: qa("[data-probe='feed-entry']").length,
     todoRows: qa("[data-probe='todo-row']").length,
-    /* the guessed-window bar, if the account happens to hold one — reported, never required */
-    guessedBars: qa(".os-tdbar--guess").length,
+    /* ⚠️ THE PROGRESS BAR IS RETIRED (20 Sep) — asserted absent BELOW, with its survivors asserted
+       present, because a removal checked in one direction only cannot tell "gone" from "gone along
+       with the row that held it". */
+    bars: qa(".os-tdbar").length,
+    ticks: qa("[data-probe='todo-tick']").length,
+    figures: qa(".os-tdn").length,
     headerCounts: txt("header-counts"),
     /* ⚠️ RETARGETED (v33): the chart states its figure in its TITLE ("27 active queries"), the closed
        card in ITS title, the key in tallies (`data-count`), and the events are PINS whose point on
@@ -341,6 +345,14 @@ test.describe("the dashboard, stages 2–3", () => {
       }
       /* the fixture must hold enough to be worth bounding — an empty card scrolls trivially */
       expect(r.feedEntries + r.todoRows, "the account must hold rows for this to mean anything").toBeGreaterThan(0);
+
+      /* ⚠️ THE PROGRESS BAR IS GONE AND THE ROW IS NOT — both halves, because "no bars" is also what
+         a card with no rows reports. The tick and the day figure are the survivors. */
+      if (r.todoRows > 0) {
+        expect(r.bars, "the retired progress bar is back on the row").toBe(0);
+        expect(r.ticks, "every row carries its tick").toBe(r.todoRows);
+        expect(r.figures, "every row states its figure").toBe(r.todoRows);
+      }
 
       /* ── the typewriter headings actually painted in the typewriter face ── */
       expect(r.headings.length, "the page must carry headings to check").toBeGreaterThanOrEqual(5);

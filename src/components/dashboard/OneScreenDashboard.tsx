@@ -23,7 +23,7 @@
  * ⚠️ NEVER 100vh AND NEVER A BAR OFFSET (the house stage law) still holds: nothing here measures the
  * viewport; the fixed row height is a length, not a fraction of the window.
  */
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Activity, Agent, Manuscript, ManuscriptVersion, Query, Task, TaskFlag, User, UserTask } from "../../types";
 import { runStage, tourAutoRuns, tourChipShows } from "../../lib/oneScreen";
 import { OneScreenTour, TOUR_BREAKPOINT } from "./OneScreenTour";
@@ -38,6 +38,13 @@ import { dashHeaderLine, type DashHeaderLine } from "../../lib/dashHeader";
 import { localYMD } from "../../lib/shellSidebar";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../lib/manuscriptScope";
 import { OneScreenFeed } from "./OneScreenFeed";
+/**
+ * ⚠️ LAZY, AND FOR THE REASON `DashTaskDrawer` IS. It reaches `useDockActivity` → `lib/firebase`,
+ * which initialises the SDK at module load; a static import here would put `auth/invalid-api-key`
+ * into every dashboard suite's import graph and they would stop COLLECTING.
+ */
+const QueryPeekLive = React.lazy(() =>
+  import("./QueryPeekLive").then((m) => ({ default: m.QueryPeekLive })));
 import { readSeenAt, writeSeenAt } from "../../lib/dashSeen";
 import { OneScreenSkeleton } from "./OneScreenSkeleton";
 import { useSkeleton } from "../../lib/skeletonTiming";
@@ -186,6 +193,13 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
      live board and opens its own drawer on the card. One drawer on the page, one session, one write
      path — a second one in the rail would be a second answer to what finishing a send involves. */
   const [feedOpenQueryId, setFeedOpenQueryId] = useState<string | null>(null);
+  /**
+   * ⚠️ ONE PEEK AT A TIME, AND IT HOLDS THE ROW IT CAME FROM. The anchor is the element the writer
+   * clicked: the popover is placed against it and the row stays highlighted behind it, so what was
+   * clicked is still visible while it is being read. A second open peek would be two answers to
+   * "which query am I looking at".
+   */
+  const [peek, setPeek] = useState<{ entryId: string; queryId: string; anchor: HTMLElement } | null>(null);
 
   /* ── §12 · the tour ── */
   const [touring, setTouring] = useState(false);
@@ -437,6 +451,9 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             seenAt={seenAt}
             empty={empty}
             onOpenTask={(queryId) => setFeedOpenQueryId(queryId)}
+            onPeek={(entry, anchor) => setPeek(
+              entry.queryId ? { entryId: entry.id, queryId: entry.queryId, anchor } : null)}
+            openPeekId={peek?.entryId ?? null}
           />
           {/* ⚠️ SCOPED WHERE SCOPE MEANS SOMETHING, RAW WHERE IT DOES NOT (Phase 5). Tasks and
               activities are the manuscript's; queries, agents and manuscripts are the LOOKUP sets the
@@ -466,6 +483,33 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           />
         </div>
       </div>
+      {/* ⚠️ MOUNTED ONLY WHILE ONE IS OPEN, WITH NO FALLBACK. The popover's own arrival announces it;
+          a spinner in its place would be a second thing appearing beside the row. */}
+      {peek && (() => {
+        const q = queries.find((x) => x.id === peek.queryId);
+        if (!q) return null;
+        return (
+          <Suspense fallback={null}>
+            <QueryPeekLive
+              uid={currentUser?.id}
+              query={q}
+              agent={agents.find((a) => a.id === q.agentId)}
+              anchor={peek.anchor}
+              onClose={() => setPeek(null)}
+              onOpenQuery={(id) => { setPeek(null); onNavigate("queries", id); }}
+              onOpenAgent={(id) => {
+                setPeek(null);
+                try { sessionStorage.setItem("sa.agentReveal", id); } catch { /* private mode */ }
+                onNavigate("agents");
+              }}
+              /* ⚠️ THE PEEK STATES THE NEXT ACTION; THE TO-DO CARD PERFORMS IT. There is one drawer
+                 on this page and one write path through it — a second host here would be a second
+                 answer to what finishing a send involves. */
+              onAct={(id) => { setPeek(null); setFeedOpenQueryId(id); }}
+            />
+          </Suspense>
+        );
+      })()}
       </DashPopupProvider>
       {/* ⚠️ LAST CHILD, OVER THE MOUNTED PAGE. The cards stay in the tree beneath it, which is what
           makes "no layout shift" structural rather than a matter of matching numbers — and it is

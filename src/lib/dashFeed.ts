@@ -62,6 +62,19 @@ export interface FeedEntry {
   provenance: string;
   /** the underlined link at the right, where the record supports one */
   action: { label: string; queryId: string } | null;
+  /**
+   * The query this entry is about, where it is about one.
+   *
+   * ⚠️ SEPARATE FROM `action`, BECAUSE THE ROWS THAT MOST NEED THE PEEK ARE THE ONES WITH NO ACTION.
+   * `action` is present only where a send is offered — a handful of rows. Every other entry about a
+   * query is still about a query, and "what is this, where is it up to" is exactly the question a
+   * row with nothing to press raises. Gating the peek on `action` meant the glance was available on
+   * the rows that already had a button and nowhere else.
+   *
+   * ⚠️ AND IT IS THE ACTIVITY'S OWN `queryId`, NOT A LOOKUP. `app` rows — the housekeeping the app
+   * did for itself — carry none, which is what keeps them out of the peek without a second test.
+   */
+  queryId: string | null;
   /** logged since the writer last had this page open */
   isNew: boolean;
 }
@@ -337,6 +350,7 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
       say,
       provenance,
       action: markSentOffered(a, i.queries) ? { label: "Send it →", queryId: a.queryId } : null,
+      queryId: a.queryId ?? null,
       /* ⚠️ A DEVICE THAT HAS NEVER SHOWN THE PAGE MARKS NOTHING. Everything would be new, which puts a
          rust rule beside all thirty days of it and says nothing at all. */
       isNew: i.seenAt !== null && t > i.seenAt,

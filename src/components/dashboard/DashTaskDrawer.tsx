@@ -20,7 +20,7 @@
  * will-record strip and its filling primary arrive together because they are one component and one
  * session. A cut-down copy here would be a second answer to "what does finishing this involve".
  */
-import React, { useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { SlideOver } from "../shared/SlideOver";
 import { TaskPane } from "../todo/TaskPane";
 import { useTaskPaneSession, type TaskPaneHost } from "../todo/useTaskPaneSession";
@@ -36,7 +36,15 @@ export const DashTaskDrawer: React.FC<{
   /** the flow hand-off and "See all" are one destination: the page that owns the takeover */
   onSeeAll: () => void;
   onNavigate: (tab: string, sub?: string) => void;
-}> = ({ card, onClose, onSeeAll, onNavigate }) => {
+  /**
+   * ⚠️ THE RECEIPT IS THE TOAST, NOT A SECOND SENTENCE. When a task finishes, the card that raised it
+   * holds the row for a moment saying what was logged and offering the way back — and both of those
+   * already exist: `useTaskCommit` raises a toast whose message IS the app's own words for the write
+   * and whose action IS its inverse. Composing a second description here would be a second vocabulary
+   * for one event, free to drift from the toast the writer just read.
+   */
+  onCompleted?: (done: { logged: string; undo?: () => void }) => void;
+}> = ({ card, onClose, onSeeAll, onNavigate, onCompleted }) => {
   const paneRef = useRef<HTMLDivElement>(null);
   /* ⚠️ THE To-do PAGE'S OWN TOAST, AND ITS PILL RENDERED THE SAME WAY. `useTaskCommit` needs
      `flash` and `remember`, and its own docstring says there is no parallel undo store in the app
@@ -45,6 +53,15 @@ export const DashTaskDrawer: React.FC<{
   const { toast, flash, dismiss: dismissToast, pause: pauseToast, resume: resumeToast, remember: rememberUndo } = useTodoToast();
   const { ask: confirmAsk, node: askNode } = useConfirmAsk();
 
+  /* ⚠️ A REF, BECAUSE `flash` IS A setState AND `completed` FIRES IN THE SAME TICK. Reading `toast`
+     from render scope would hand the completion the PREVIOUS write's words — which is worse than no
+     receipt, because it is a plausible one. */
+  const lastFlash = useRef<{ msg: string; action?: { label: string; fn: () => void | Promise<void> } } | null>(null);
+  const flashAndKeep = useCallback<typeof flash>((msg, action, ms) => {
+    lastFlash.current = { msg, action };
+    flash(msg, action, ms);
+  }, [flash]);
+
   /**
    * ⚠️ THE FLOW HAND-OFF NAVIGATES; IT DOES NOT MOUNT A SECOND TAKEOVER. `FocusFlow` is a
    * full-screen overlay the To-do page hosts, and a card whose journey is a takeover rather than a
@@ -52,7 +69,7 @@ export const DashTaskDrawer: React.FC<{
    * completion surface on screen at once.
    */
   const goToFlow = useMemo(() => (_c: BoardCard) => { onClose(); onSeeAll(); }, [onClose, onSeeAll]);
-  const { commit } = useTaskCommit({ flash, rememberUndo, confirmAsk, openFlow: goToFlow });
+  const { commit } = useTaskCommit({ flash: flashAndKeep, rememberUndo, confirmAsk, openFlow: goToFlow });
 
   const host: TaskPaneHost = {
     /* ⚠️ SCOPED TO THIS DRAWER. Every workspace page stays mounted under the display-toggling
@@ -67,7 +84,14 @@ export const DashTaskDrawer: React.FC<{
        to the next card because it HAS a cursor; a panel of tickets has none, and inventing one
        would be a second board cursor free to disagree with the page's. */
     advance: onClose,
-    completed: onClose,
+    completed: () => {
+      const f = lastFlash.current;
+      /* ⚠️ NO RECEIPT WITHOUT WORDS. A completion that raised no toast has nothing true to say it
+         logged, and "Done" invented here would be the app describing a write it did not name. */
+      if (f) onCompleted?.({ logged: f.msg, undo: f.action ? () => { void f.action!.fn(); } : undefined });
+      lastFlash.current = null;
+      onClose();
+    },
     openQuery: (c) => { if (c.relatedRecordId) onNavigate("queries", c.relatedRecordId); },
     openAgent: (agentId) => {
       try { sessionStorage.setItem("sa.agentReveal", agentId); } catch { /* private mode */ }

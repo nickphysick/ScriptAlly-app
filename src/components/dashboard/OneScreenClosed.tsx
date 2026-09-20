@@ -89,7 +89,7 @@ export const OneScreenClosed: React.FC<{
 
   if (t && t.total === 0) {
     return (
-      <OneScreenPanel variant="os-cl" tone="stone" probe="closed-tile" loading={loading} skel={["h", "grow", ""]} band={band} innerRef={cardRef}>
+      <OneScreenPanel variant="os-cl" probe="closed-tile" loading={loading} skel={["h", "grow", ""]} band={band} innerRef={cardRef}>
         <div className="os-hollow" data-probe="closed-empty">
           <span className="os-hollow-art os-hollow-art--archivist" aria-hidden="true"><Archivist layer="back" /></span>
           <p className="os-hollow-ttl">{CLOSED_EMPTY_TITLE}</p>
@@ -148,7 +148,7 @@ export const OneScreenClosed: React.FC<{
   } : {});
 
   return (
-    <OneScreenPanel variant="os-cl" tone="stone" probe="closed-tile" loading={loading} skel={["h", "grow", ""]} band={band} innerRef={cardRef}>
+    <OneScreenPanel variant="os-cl" probe="closed-tile" loading={loading} skel={["h", "grow", ""]} band={band} innerRef={cardRef}>
       <div className="os-clpie">
         <div className="os-ringbox" data-probe="ringbox">
           <Archivist layer="back" />

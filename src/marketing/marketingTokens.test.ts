@@ -1139,8 +1139,26 @@ describe("the feature rows set their own type, and nothing else uses its familie
        resolves to nothing falls back in silence): `shell/primitives.css` declares `--sp-type` at
        `:root`. That is the whole of it — ONE declaration, the token — and a third file naming the
        face is still a decision this fails on. */
+    /* ⚠️ A THIRD SIGNED-IN OWNER SINCE THE FEED/TO-DO PASS (20 Sep), AND THE REASON IS THE SAME ONE
+       `primitives.css` gives: SCOPE. The query peek's state heading is the typewriter face like every
+       other dashboard card title — but the popover is PORTALLED to `document.body` so it can escape
+       the feed card's clip, which puts it outside `.os-root` where `--os-type` is declared. A token
+       that resolves to nothing falls back in silence, so the family is stated on `.qpk` itself. One
+       declaration, in the peek's own sheet; a fourth file naming the face is still a decision this
+       fails on. */
+    /* ⚠️ A FOURTH, THE SAME DAY, AND IT IS THE DELIBERATE ONE THIS LOCK EXISTS FOR. Nick's brief sets
+       the task panel's deed — the sentence the whole completion surface is about — in the typewriter
+       face at 26px, so the panel reads in the same voice as the cards that send a writer to it. ONE
+       declaration, on `.slo .tpn .dhero .title`. Its cost is recorded at the value: Special Elite has
+       one weight, so the deed's variables are distinguished by their underline rather than by 600.
+       A fifth file naming the face is still a decision this fails on. */
     expect(elsewhere.map((f) => f.slice(src.length + 1).replace(/\\/g, "/")).sort())
-      .toEqual(["components/dashboard/oneScreen.css", "components/shell/primitives.css"]);
+      .toEqual([
+        "components/dashboard/oneScreen.css",
+        "components/dashboard/queryPeek.css",
+        "components/shell/primitives.css",
+        "components/todo/taskPane.css",
+      ]);
     const prim = decls(readFileSync(resolve(src, "components/shell/primitives.css"), "utf8"));
     const primOwners = [...prim.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
       .filter((m) => /Special Elite|Source Serif 4/.test(m[2])).map((m) => m[1].trim());

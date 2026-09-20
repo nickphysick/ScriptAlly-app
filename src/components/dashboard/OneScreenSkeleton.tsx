@@ -107,7 +107,7 @@ export const OneScreenSkeleton: React.FC<{
           </div>
         </div>
 
-        <div className="os-card os-lead os-tone--navy" data-sk="chart-card">
+        <div className="os-card os-lead" data-sk="chart-card">
           <div className="os-frame">
             {/* ⚠️ THE RANGE CONTROL'S BLOCK IS DRAWN ONLY FOR A DEVICE THAT HAS SEEN THE CONTROL. Whether
                 the card has one depends on the campaign's length, which the cover cannot know — but in
@@ -127,7 +127,7 @@ export const OneScreenSkeleton: React.FC<{
           </div>
         </div>
 
-        <div className="os-card os-cl os-tone--stone" data-sk="closed-tile">
+        <div className="os-card os-cl" data-sk="closed-tile">
           <div className="os-frame">
             <div className="os-band"><div className="os-bandrow"><div className="os-sk os-sk-ttl" /></div></div>
             <div className="os-clpie"><div className="os-ringbox os-sk os-sk-donut" /></div>
@@ -143,7 +143,7 @@ export const OneScreenSkeleton: React.FC<{
       </div>
 
       <div className="os-row2" data-sk="row2">
-        <div className="os-card os-feed os-tone--slate" data-sk="activity-card">
+        <div className="os-card os-feed" data-sk="activity-card">
           <div className="os-frame">
             <div className="os-band"><div className="os-bandrow"><div className="os-sk os-sk-ttl" /><div className="os-sk os-sk-mini" /></div></div>
             <div className="os-scroll" data-sk="feed">
@@ -154,7 +154,7 @@ export const OneScreenSkeleton: React.FC<{
           </div>
         </div>
 
-        <div className="os-card os-todo os-tone--rose" data-sk="todo-card">
+        <div className="os-card os-todo" data-sk="todo-card">
           <div className="os-frame">
             <div className="os-band"><div className="os-bandrow"><div className="os-sk os-sk-ttl" /><div className="os-sk os-sk-mini" /></div></div>
             <GhostRows className="os-sk-tdrow" sk="todo-rows" />

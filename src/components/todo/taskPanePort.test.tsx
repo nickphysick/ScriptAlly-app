@@ -132,6 +132,46 @@ const rendered = new Set(
   [...HTML.matchAll(/class="([^"]+)"/g)].flatMap((m) => m[1].split(/\s+/)).filter(Boolean),
 );
 
+/**
+ * ⚠️ A HOST WITH NO CURSOR GETS NO CURSOR CONTROLS (feed/to-do pass, 20 Sep).
+ *
+ * `DashTaskDrawer` shows ONE card and says so in its own docstring — "there is no queue here… a
+ * panel of tickets has none, and inventing one would be a second board cursor free to disagree with
+ * the page's". It passes `total: 0` with no-op handlers, and the pane rendered **"Task 1 of 0"**
+ * beside two circles that did nothing. Both halves are asserted, because "the arrows are gone" is
+ * also what a pane that had lost its whole header would report.
+ *
+ * ⚠️ AND THE KEY STAYS IN BOTH. Closing is not a movement through a queue, and a panel with no way
+ * out is a worse fault than a dead arrow.
+ */
+describe("the position and the arrows belong to a queue", () => {
+  const solo = renderToStaticMarkup(
+    <TaskPane journey={SEND} onPrimary={() => {}}
+      nav={{ index: 0, total: 0, label: "Needs you now", onPrev: () => {}, onNext: () => {}, onClose: () => {} }} />,
+  );
+
+  it("a single-card host states no position and offers no arrows", () => {
+    expect(solo, "a false position is worse than none").not.toContain("Task 1 of 0");
+    expect(solo).not.toMatch(/["\s]pos["\s]/);
+    expect(solo).not.toContain('aria-label="Previous task"');
+    expect(solo).not.toContain('aria-label="Next task"');
+    /* the way out survives, and so does the family pill beside it */
+    expect(solo).toContain(">Esc</button>");
+    expect(solo).toMatch(/["\s]fam["\s]/);
+  });
+
+  it("…and a queued host states all three", () => {
+    const queued = renderToStaticMarkup(
+      <TaskPane journey={SEND} onPrimary={() => {}}
+        nav={{ ...NAV, onClose: () => {} }} />,
+    );
+    expect(queued).toContain("Task 3 of 9");
+    expect(queued).toContain('aria-label="Previous task"');
+    expect(queued).toContain('aria-label="Next task"');
+    expect(queued).toContain(">Esc</button>");
+  });
+});
+
 describe("1 · the pane's class names are the mockup's", () => {
   /**
    * ⚠️ READ OUT OF THE MOCKUP, NOT LISTED HERE. Its `<style>` block is the authority for which
@@ -314,9 +354,14 @@ describe("1 · the pane's class names are the mockup's", () => {
        as the pane — and every one of those fourteen rules failed a lock about where rules reach
        while reaching nowhere new. A lock that goes red on an edit which made its own claim truer is
        the shape this repo forbids: it trains the next reader to rebaseline without looking.
-       The test is now that every selector CONTAINS a `.tpn` hook, which is what confinement means. */
+       The test is now that every selector CONTAINS a `.tpn` hook, which is what confinement means.
+       ⚠️ AND `:has(.tpn)` IS A HOOK TOO (feed/to-do pass, 20 Sep) — the same correction a second
+       time, from the other side of the selector. The panel's own lift is stated on `.slo:has(.tpn)`:
+       it applies ONLY to a drawer that contains this pane, which is stricter than a descendant
+       rule, not looser, because the pane must be present for it to match at all. It failed on the
+       character before `.tpn` being `(` rather than a space. */
     const unscoped = rules.filter((l) => l.trim() && !/^\s*}/.test(l)
-      && !l.split("{")[0].split(",").every((sel) => /(^|[\s>])\.tpn[-\s.{:>[]/.test(sel + " ")));
+      && !l.split("{")[0].split(",").every((sel) => /(^|[\s>(])\.tpn[-\s.{:>[)]/.test(sel + " ")));
     expect(unscoped, `unscoped rules would reach the whole app:\n${unscoped.slice(0, 5).join("\n")}`)
       .toHaveLength(0);
   });

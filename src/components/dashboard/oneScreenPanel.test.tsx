@@ -52,11 +52,15 @@ describe("OneScreenPanel — the shell the four containers had", () => {
      with its last consumer; what a consumer passes now is only what is IN the band. */
   it("⚠️ the band is the frame's first child, and the body follows it inside the same frame", () => {
     const out = html(
-      <OneScreenPanel variant="os-x" tone="rose" probe="p" band={<h3>H</h3>}>
+      <OneScreenPanel variant="os-x" probe="p" band={<h3>H</h3>}>
         <div className="body">B</div>
       </OneScreenPanel>
     );
-    expect(out).toContain('class="os-card os-lift os-x os-tone--rose"');
+    /* ⚠️ THE FOUR TONES ARE RETIRED (the feed/to-do pass): every band is the one navy, so a per-card
+       tone class is a knob with nothing behind it. Asserted ABSENT as well as the class being right,
+       because a panel that silently kept emitting one would look identical and mean something. */
+    expect(out).toContain('class="os-card os-lift os-x"');
+    expect(out).not.toContain("os-tone--");
     expect(out).toMatch(/<div class="os-frame" data-probe="p-frame"><div class="os-band" data-probe="p-band"><h3>H<\/h3><\/div><div class="body">B<\/div><\/div>/);
   });
 

@@ -25,7 +25,7 @@
  */
 import React from "react";
 import type { Activity, Agent, Manuscript, Query } from "../../types";
-import { FEED_DAYS, feedDays, feedEntries, type FeedSeg } from "../../lib/dashFeed";
+import { FEED_DAYS, feedDays, feedEntries, type FeedEntry, type FeedSeg } from "../../lib/dashFeed";
 import { FEED_FIRST_RUN_LINE } from "../../lib/dashEmpty";
 import { OneScreenPanel } from "./OneScreenPanel";
 import { StatePill } from "./StatePill";
@@ -53,7 +53,15 @@ export const OneScreenFeed: React.FC<{
   empty?: boolean;
   /** an entry offering "Send it" hands its query up; the to-do card opens the drawer on it */
   onOpenTask?: (queryId: string) => void;
-}> = ({ loading, activities, queries, agents, manuscripts, now, seenAt, empty = false, onOpenTask }) => {
+  /**
+   * ⚠️ THE ROW HANDS UP ITS OWN ELEMENT, because the peek is ANCHORED to it — a popover that has to
+   * flip and shift around the viewport needs the box it is opening beside, and only the row knows
+   * which one it is.
+   */
+  onPeek?: (entry: FeedEntry, anchor: HTMLElement) => void;
+  /** the entry whose peek is open — the row it belongs to stays lit behind it */
+  openPeekId?: string | null;
+}> = ({ loading, activities, queries, agents, manuscripts, now, seenAt, empty = false, onOpenTask, onPeek, openPeekId = null }) => {
   const entries = React.useMemo(
     () => (loading ? [] : feedEntries({ activities, queries, agents, manuscripts, now, seenAt })),
     [loading, activities, queries, agents, manuscripts, now, seenAt],
@@ -62,7 +70,7 @@ export const OneScreenFeed: React.FC<{
 
   return (
     <OneScreenPanel
-      variant="os-feed" tone="slate" probe="activity-card" loading={loading} skel={["h", "grow", "grow"]}
+      variant="os-feed" probe="activity-card" loading={loading} skel={["h", "grow", "grow"]}
       /* ⚠️ NO SUB-HEADING UNDER ANY TITLE (v33). The eyebrow that stood here also carried "· N new";
          the rust rule in each new entry's margin is what marks them now, and it marks the entries
          themselves rather than counting them somewhere else. */
@@ -77,11 +85,29 @@ export const OneScreenFeed: React.FC<{
         {days.map((d) => (
           <React.Fragment key={d.label}>
             <div className="os-fday">{d.label}</div>
-            {d.entries.map((e) => (
+            {d.entries.map((e) => {
+              /* ⚠️ `app` DECIDES THIS, AND IT ALREADY EXISTED. A housekeeping or Scout row is the
+                 app's own record-keeping — `dashFeed` marks it — and has no single query behind it,
+                 so it opens the LIST it refers to (its own action) rather than a peek about a query
+                 that does not exist. A second derivation asking "is this about a query" would have
+                 been a second answer to a question `FeedEntry` already carries. */
+              const peekable = !e.app && !!e.queryId && !!onPeek;
+              const open = peekable && openPeekId === e.id;
+              return (
               <div
-                className={`os-fent${e.isNew ? " os-fent--new" : ""}${e.app ? " os-fent--app" : ""}`}
+                className={`os-fent${e.isNew ? " os-fent--new" : ""}${e.app ? " os-fent--app" : ""}${peekable ? " os-fent--go" : ""}${open ? " os-fent--open" : ""}`}
                 key={e.id}
                 data-probe="feed-entry"
+                {...(peekable ? {
+                  role: "button" as const,
+                  tabIndex: 0,
+                  "aria-haspopup": "dialog" as const,
+                  "aria-expanded": open,
+                  onClick: (ev: React.MouseEvent<HTMLDivElement>) => onPeek!(e, ev.currentTarget),
+                  onKeyDown: (ev: React.KeyboardEvent<HTMLDivElement>) => {
+                    if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); onPeek!(e, ev.currentTarget); }
+                  },
+                } : {})}
               >
                 <div className="os-fmain">
                   <div className="os-fband">
@@ -93,15 +119,24 @@ export const OneScreenFeed: React.FC<{
                     {e.provenance ? <small className="os-fprov">{e.provenance}</small> : null}
                   </p>
                 </div>
+                {/* ⚠️ THE EXPLICIT LINK IS THE SHORTCUT PAST THE PEEK, so it must not also open it —
+                    `stopPropagation` is what keeps one press from doing two things. A row with no
+                    action says what it does on hover instead. */}
                 {e.action && onOpenTask
                   ? (
-                    <button type="button" className="os-flink" onClick={() => onOpenTask(e.action!.queryId)}>
+                    <button
+                      type="button" className="os-flink"
+                      onClick={(ev) => { ev.stopPropagation(); onOpenTask(e.action!.queryId); }}
+                    >
                       {e.action.label}
                     </button>
                   )
-                  : <span />}
+                  : peekable
+                    ? <span className="os-fpeek" aria-hidden="true">Open query →</span>
+                    : <span />}
               </div>
-            ))}
+              );
+            })}
           </React.Fragment>
         ))}
         {!loading && entries.length === 0 && (

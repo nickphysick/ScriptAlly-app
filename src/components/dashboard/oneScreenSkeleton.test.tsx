@@ -129,18 +129,19 @@ describe("the page skeleton mirrors the page", () => {
      scrolling cards. Every one of those is sized by a rule the page already declares. */
   it("⚠️ wears the page's own card classes — a restated box is a box free to drift", () => {
     /* ⚠️ RETARGETED (v33): the rim, the frame and the band are the page's own three boxes now, and the
-       ghost wears all three on every card — with the band's TONE, so the cover is bands and plain
-       blocks (Nick) and the band a card arrives with is the band it was waiting under. */
+       ghost wears all three on every card. The band's TONE is gone with the tones themselves: every
+       band is the one navy, so the cover's band is the band the card arrives with by construction. */
     for (const cls of ["os-card", "os-frame", "os-band", "os-bandrow", "os-qa", "os-qaminor", "os-qarow", "os-lead",
                        "os-acplot", "os-acdraw", "os-acx", "os-cl", "os-clpie", "os-ringbox", "os-clkey", "os-clrow",
-                       "os-feed", "os-todo", "os-scroll", "os-tdfoot",
-                       "os-tone--navy", "os-tone--stone", "os-tone--slate", "os-tone--rose"]) {
+                       "os-feed", "os-todo", "os-scroll", "os-tdfoot"]) {
       expect(html, cls).toMatch(new RegExp(`class="([^"]* )?${cls}[" ]`));
     }
     /* every retired row's boxes went with it — bands, mounts, columns and the old chart wrapper */
     for (const gone of ["os-aut", "os-lbody", "os-chartwrap", "os-ahead", "os-th2", "os-bdgrid", "os-mount",
                         "os-tasks", "os-actv", "os-comtile", "os-hd", "os-qastack", "os-acframe", "os-achead",
-                        "os-acid", "os-aclegend", "os-acbody"]) {
+                        "os-acid", "os-aclegend", "os-acbody",
+                        /* the four band tones went when every band became the one navy */
+                        "os-tone--navy", "os-tone--stone", "os-tone--slate", "os-tone--rose"]) {
       expect(html, gone).not.toMatch(new RegExp(`["\\s]${gone}["\\s]`));
     }
   });

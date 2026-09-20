@@ -55,7 +55,7 @@ describe("the title is a sentence with the live count", () => {
   });
   it("it sits in the navy band, inside the frame, and nothing sits under it", () => {
     const html = chart();
-    expect(html).toMatch(/class="os-card os-lead os-tone--navy"/);
+    expect(html).toMatch(/class="os-card os-lead"/);
     expect(html.indexOf('class="os-frame"')).toBeLessThan(html.indexOf('class="os-band"'));
     expect(html.indexOf('class="os-band"')).toBeLessThan(html.indexOf("chart-title"));
     /* no sub-heading, no chip, no key — all three retired with v33 */

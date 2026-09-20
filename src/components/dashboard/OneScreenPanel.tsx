@@ -12,6 +12,9 @@
  * maintained by hand. That is the fault this codebase keeps meeting: duplicate rules surviving
  * edits, two counters with one name, `.os-p` beside `.os-pill`.
  *
+ * ⚠️ AND SINCE 20 SEP IT CARRIES ONE TREATMENT, NOT FIVE — solid navy, cream title, no tint per card.
+ * The `tone` prop went with the tints; `.os-band` in oneScreen.css says why.
+ *
  * ⚠️ SINCE v33 THE BAND IS THE PANEL'S JOB. The heads used to be the consumer's own markup rendered
  * first inside the card (`head`), because they differed structurally; they are one construction now —
  * a band across the top of the frame — so the panel draws it and the consumer supplies only what is
@@ -19,9 +22,6 @@
  */
 import React from "react";
 import { Skel } from "./OneScreenDashboard";
-
-/** The band's colour, by what the card is ABOUT — never by where it sits (v33). */
-export type PanelTone = "sand" | "navy" | "stone" | "slate" | "rose";
 
 export interface OneScreenPanelProps {
   /** The container's own class — `os-qa`, `os-lead`, `os-cl`, `os-feed`, `os-todo`. */
@@ -36,7 +36,6 @@ export interface OneScreenPanelProps {
    * passes the row's contents; the panel owns the band itself, so all five are one construction.
    */
   band?: React.ReactNode;
-  tone?: PanelTone;
   /** A card with no visible title still has a name: `role="group"` + this as its `aria-label`. */
   label?: string;
   /** ⚠️ `os-lift` is the DEFAULT: every container has it today. Stated so a future opt-out is
@@ -66,14 +65,14 @@ export interface OneScreenPanelProps {
  * repaints all of them.
  */
 export const OneScreenPanel: React.FC<OneScreenPanelProps> = ({
-  variant, loading = false, skel, band, tone, label, lift = true, innerRef, probe, children,
+  variant, loading = false, skel, band, label, lift = true, innerRef, probe, children,
 }) => (
   <div
     ref={innerRef}
     data-probe={probe}
     role={label ? "group" : undefined}
     aria-label={label}
-    className={`os-card${lift ? " os-lift" : ""} ${variant}${tone ? ` os-tone--${tone}` : ""}${loading ? " isload" : ""}`}
+    className={`os-card${lift ? " os-lift" : ""} ${variant}${loading ? " isload" : ""}`}
   >
     {loading && skel && <Skel bars={skel} />}
     <div className="os-frame" data-probe={probe ? `${probe}-frame` : undefined}>

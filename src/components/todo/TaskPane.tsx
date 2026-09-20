@@ -306,6 +306,8 @@ const BookMark: React.FC = () => (
 );
 
 export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, committed, heroFixed = false }) => {
+  /* a host that moves between tasks, as against one showing a single card — see `.dhead` below */
+  const queued = !!nav && nav.total > 0;
   /**
    * ⚠️ THE DERIVED LINE IS THE DRAWER'S, AND THE NOTE'S OWN PROVENANCE IS BOTH HOSTS'.
    *
@@ -470,13 +472,20 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, 
               move you between tasks or out. THE PILL IS THE ONLY TINT IN THE HEADER, which is
               what makes it read as a label rather than as a surface; the deed moves INTO the
               document, below, as its title. */}
+          {/* a host that moves between tasks, as against one showing a single card */}
           <div className="dhead">
             <span className={`fam ${d.cls}`}>{FAM_LABEL[d.cls]}</span>
-            {nav && <span className="pos">Task {nav.index + 1} of {nav.total}</span>}
+            {/* ⚠️ NO QUEUE, NO POSITION AND NO ARROWS (feed/to-do pass, 20 Sep). A host with no cursor
+                passes `total: 0` and no-op handlers — the dashboard's drawer says so in its own
+                docstring — and the pane rendered "Task 1 of 0" beside two circles that did nothing.
+                It was invisible while the position was 8.5px grey; the ref's 9.5px made a false
+                statement legible, which is the useful half of a restyle. The KEY survives, because
+                closing is not a movement through a queue. */}
+            {queued && <span className="pos">Task {nav!.index + 1} of {nav!.total}</span>}
             {nav && (
               <div className="dnav">
-                <button type="button" onClick={nav.onPrev} aria-label="Previous task">‹</button>
-                <button type="button" onClick={nav.onNext} aria-label="Next task">›</button>
+                {queued && <button type="button" onClick={nav.onPrev} aria-label="Previous task">‹</button>}
+                {queued && <button type="button" onClick={nav.onNext} aria-label="Next task">›</button>}
                 {/* ⚠️ THE WORD, NOT AN ✕ — this is not a dialogue being dismissed: the list is
                     still there and still live, and the contract prints the KEY, which is the one
                     that closes it. */}

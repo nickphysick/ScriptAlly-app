@@ -32,7 +32,9 @@ import React, { Suspense, useMemo, useState } from "react";
 const DashTaskDrawer = React.lazy(() =>
   import("./DashTaskDrawer").then((m) => ({ default: m.DashTaskDrawer })));
 import { Activity, Agent, Manuscript, ManuscriptVersion, Query, Task, TaskFlag, User, UserTask } from "../../types";
-import { StatusDot } from "../StatusDot";
+import { StatePill } from "./StatePill";
+import { getStatusLabel } from "../StatusPill";
+import type { TodoTitle } from "../../lib/dashTodo";
 import { OneScreenPanel } from "./OneScreenPanel";
 import { assembleBoardColumns } from "../../lib/todoColumns";
 import {
@@ -41,7 +43,7 @@ import {
 import { BoardCard } from "../../lib/todoBoard";
 import { isUrgentCard } from "../../lib/todoCategory";
 import { listRowInputs } from "../../lib/taskCardFacts";
-import { moreWaiting, todoRows } from "../../lib/dashTodo";
+import { moreWaiting, todoRows, type TodoDone, type TodoRow } from "../../lib/dashTodo";
 import { localYMD } from "../../lib/shellSidebar";
 
 export interface OneScreenTasksProps {
@@ -79,6 +81,9 @@ export interface OneScreenTasksProps {
   onOpenHandled?: () => void;
 }
 
+/** The row's sentence as plain words — the tick's accessible name cannot carry the italic run. */
+const plain = (t: TodoTitle): string => `${t.pre}${t.who}${t.post}`.replace(/\s+/g, " ").trim();
+
 export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
   loading, tasks, queries, agents, manuscripts, userTasks, activities, taskFlags, currentUser,
   now, dayOne = false, empty = false, versions = [], activeManuscript = null,
@@ -86,6 +91,15 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
   openForQueryId, onOpenHandled,
 }) => {
   const [openKey, setOpenKey] = useState<string | null>(null);
+  /**
+   * ⚠️ HELD, BECAUSE THE BOARD STOPS RAISING THE CARD THE MOMENT THE WRITE LANDS. A row that vanishes
+   * as it is ticked leaves the writer nothing to check and nowhere to undo from — so the completion
+   * is kept here, with the row it happened to, and drawn until this card next mounts.
+   *
+   * ⚠️ SESSION STATE, NOT A FACT ABOUT THE BOARD. Nothing is stored and nothing is derived: the board
+   * is still the only authority on what needs doing, and this is a receipt sitting on top of it.
+   */
+  const [held, setHeld] = useState<Record<string, { row: TodoRow; at: number }>>({});
 
   /* ⚠️ THE SAME CALL THE RAIL BADGE AND EVERY TASKS PAGE MAKE, on the dashboard's SCOPED arrays —
      so switching the manuscript chip moves this card and nothing else about the derivation. */
@@ -100,7 +114,7 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
   const live = useMemo<BoardCard[]>(() => [...cols.todo, ...cols.today], [cols]);
   const taskData = useMemo(() => ({ queries, agents, manuscripts, userTasks, activities }),
     [queries, agents, manuscripts, userTasks, activities]);
-  const rows = useMemo(
+  const board = useMemo(
     () => todoRows({
       cards: live,
       data: taskData,
@@ -108,6 +122,57 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
     }),
     [live, taskData],
   );
+
+  /* The board's rows with any completion stamped on, plus the rows the board has since dropped put
+     back where they were. `at` is the index the row held when it was ticked, so a receipt does not
+     jump to the foot of the list at the moment the reader looks away from it. */
+  const rows = useMemo(() => {
+    const keys = new Set(board.map((r) => r.key));
+    const out: TodoRow[] = board.map((r) => (held[r.key] ? { ...r, done: held[r.key].row.done } : r));
+    for (const [key, h] of Object.entries(held)) {
+      if (!keys.has(key)) out.splice(Math.min(h.at, out.length), 0, h.row);
+    }
+    return out;
+  }, [board, held]);
+
+  /**
+   * ⚠️ HOUSEKEEPING IS THE EXCEPTION, AND IT IS AN EXCEPTION ABOUT WHAT FINISHING MEANS. Every other
+   * row finishes by RECORDING something — a send, a reply, a nudge — which is what the panel is for.
+   * A housekeeping card is a gap in a record, so there is nothing to record: it finishes by the
+   * writer going and filling the gap in. Opening a completion panel over it would ask them to state
+   * that they had done a thing they had not been given the chance to do.
+   *
+   * ⚠️ THE DESTINATION COMES OFF THE CARD, NEVER OFF THE TASK TYPE. The card already names the agent
+   * or the manuscript whose record the gap is in; a table from task type to route here would be a
+   * second place that has to learn every new housekeeping rule, and would silently send the next one
+   * to the wrong page.
+   */
+  const openGap = (c: BoardCard) => {
+    if (c.agentId) {
+      try { sessionStorage.setItem("sa.agentReveal", c.agentId); } catch { /* private mode */ }
+      onNavigate("agents");
+    } else if (c.msTitle) {
+      onNavigate("manuscripts");
+    } else {
+      /* a gap the dashboard cannot place: the page that owns every card is the honest fallback */
+      onSeeAll();
+    }
+  };
+
+  const tick = (r: TodoRow) => {
+    if (r.done) return;
+    const c = live.find((x) => x.key === r.key);
+    if (c?.hk) openGap(c);
+    else setOpenKey(r.key);
+  };
+
+  /* ⚠️ THE ROW IS SNAPSHOT BEFORE THE BOARD ANSWERS, not looked up afterwards — by the time the
+     write has landed there is nothing left to look up. */
+  const holdCompletion = (key: string, done: TodoDone) => {
+    const at = board.findIndex((r) => r.key === key);
+    const row = board[at] ?? rows.find((r) => r.key === key);
+    if (row) setHeld((h) => ({ ...h, [key]: { row: { ...row, done }, at: Math.max(at, 0) } }));
+  };
 
   /* ⚠️ THE OPEN CARD IS RESOLVED AGAINST THE LIVE BOARD, so a card that leaves the board while its
      drawer is open closes it rather than stranding a pane over a task that no longer exists. Two
@@ -137,7 +202,7 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
 
   return (
     <OneScreenPanel
-      variant="os-todo" tone="rose" probe="todo-card" loading={loading} skel={["h", "grow", "grow"]}
+      variant="os-todo" probe="todo-card" loading={loading} skel={["h", "grow", "grow"]}
       /* ⚠️ NO SUB-HEADING UNDER ANY TITLE (v33) — so in the first-run moment the words that named
          the list ("Getting started") have one place left to live, and it is the title. */
       band={(
@@ -194,34 +259,49 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
           <div className="os-tempty"><span>Nothing needs you today.</span></div>
         ) : (
           rows.map((r) => (
-            <button
-              type="button"
-              className={`os-tdrow${r.urgent ? " os-tdrow--urgent" : ""}`}
+            <div
+              className={`os-tdrow${r.urgent ? " os-tdrow--urgent" : ""}${r.done ? " os-tdrow--done" : ""}`}
               key={r.key}
               data-probe="todo-row"
-              onClick={() => setOpenKey(r.key)}
             >
-              {/* ⚠️ THE GLYPH IS `StatusDot`, TINTED BY THE TILE. The house law is that a query status
-                  is only ever drawn by that component; the tile scopes `--sd-hue` to the cream ink so
-                  the same glyph reads on an ink ground. A row with no query has no status to draw. */}
-              <span className={`os-tdico${r.status ? "" : " os-tdico--none"}`} aria-hidden="true">
-                {r.status
-                  ? <StatusDot status={r.status} overrideSize={18} decorative />
-                  : <span className="os-tddash" />}
-              </span>
+              {/* ⚠️ TICKING IS NOT COMPLETING — IT OPENS THE PANEL AT THIS TASK (§6). A bare tick would
+                  mark the task done without recording what was sent or when, and two days later the
+                  query says "requested" while the list says "done". The tick opens a record; the panel
+                  writes it. A row already ticked is inert: its undo is the way back. */}
+              <button
+                type="button"
+                className={`os-tdbox${r.done ? " os-tdbox--done" : ""}`}
+                data-probe="todo-tick"
+                aria-label={r.done ? `${r.done.logged} — ${plain(r.title)}` : `Record: ${plain(r.title)}`}
+                aria-disabled={r.done ? true : undefined}
+                onClick={() => tick(r)}
+              >
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#f5f1eb" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
+              </button>
               <span className="os-tdt">
                 {r.title.pre}{r.title.who ? <i>{r.title.who}</i> : null}{r.title.post}
-                <small>{r.meta}</small>
-                {r.bar && (
-                  <span className={`os-tdbar${r.bar.stated ? "" : " os-tdbar--guess"}`} aria-hidden="true">
-                    <i style={{ width: `${r.bar.pct.toFixed(1)}%` }} />
-                  </span>
-                )}
+                <span className="os-tdmeta">
+                  {/* ⚠️ THE STATE IN WORDS, DRAWN BY `StatusDot` INSIDE THE PILL — the house law is that
+                      a query status has one drawing, and `StatePill` is the feed's own mount of it. */}
+                  {r.status && <StatePill status={r.status} state={null} label={getStatusLabel(r.status)} />}
+                  {r.done
+                    ? (
+                      <>
+                        <span className="os-tdwhen">{r.done.logged}</span>
+                        {r.done.undo && (
+                          <button type="button" className="os-tdundo" data-probe="todo-undo" onClick={r.done.undo}>undo</button>
+                        )}
+                      </>
+                    )
+                    : <span className="os-tdwhen">{r.meta}</span>}
+                </span>
               </span>
               <span className="os-tdn">
                 {r.days === null ? <em className="os-tdgo">→</em> : <>{r.days}<em>d</em></>}
               </span>
-            </button>
+            </div>
           ))
         )}
       </div>
@@ -240,6 +320,7 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
           <DashTaskDrawer
             card={openCard}
             onClose={closeDrawer}
+            onCompleted={(done) => holdCompletion(openCard.key, done)}
             onSeeAll={onSeeAll}
             onNavigate={onNavigate}
           />

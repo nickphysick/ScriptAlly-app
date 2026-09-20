@@ -33,9 +33,9 @@ import { buildJourney } from "../../lib/taskPaneJourney";
 import type { TaskPaneJourney } from "./TaskPane";
 import { Agent, QueryStatus } from "../../types";
 import { DockTimelineEvent } from "./timelineEvent";
+import { dockTimeline } from "../../lib/dockTimeline";
 import { useDockActivity } from "./useDockActivity";
-import { dropSupersededProvisional, normalizeResultingStatus } from "../../lib/queryDerivation";
-import { activityEventLabel } from "../../lib/activityEvent";
+import { normalizeResultingStatus } from "../../lib/queryDerivation";
 import { AgentDataNeed, agentDataQualityNeeds } from "../../lib/agentDataQuality";
 import { JourneyKind } from "../../lib/paneJourney";
 import { willRecordText } from "../../lib/agentMaterials";
@@ -58,7 +58,7 @@ import {
   type JourneyId, type JourneyFlow,
 } from "../../lib/journeys";
 import { paneCommits, paneCommitValues } from "../../lib/paneCommit";
-import { sendSpecFor, collapseTimelineDuplicates } from "../../lib/todoDock";
+import { sendSpecFor } from "../../lib/todoDock";
 import { cardBucket, waitAnchorMs } from "../../lib/todoBuckets";
 import { ticketFacts } from "../../lib/ticketFacts";
 import { elapsedPhrase } from "../../lib/elapsed";
@@ -695,11 +695,6 @@ export function useTaskPaneSession(
     return Number.isFinite(ms) ? new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "";
   }
 
-  function dayKeyOf(raw: any): string {
-    const ms = raw?.toMillis ? raw.toMillis() : raw?.seconds ? raw.seconds * 1000 : Date.parse(String(raw ?? ""));
-    return Number.isFinite(ms) ? new Date(ms).toISOString().slice(0, 10) : "";
-  }
-
   /**
    * ⚠️ WHAT THE AGENT ASKED FOR, IN THEIR OWN WORDS — the journey's reference block. It is the
    * newest incoming rung's own note, displayed verbatim and never parsed, with the anchor line the
@@ -733,71 +728,17 @@ export function useTaskPaneSession(
     return `${p.figure} ${p.unit} ago`;
   }
 
-  function dockTimeline(card: BoardCard): DockTimelineEvent[] {
+  /**
+   * ⚠️ A WRAPPER NOW — the derivation moved to `lib/dockTimeline` when the dashboard's query peek
+   * began drawing the same history beside a feed entry. What is left here is the LOOKUP: which
+   * query this card is about, and what channel it went out by. The four decisions that must not be
+   * made twice — which rows are real, which are duplicates, what each is called, how it is dated —
+   * are in the shared function.
+   */
+  function dockTimelineFor(card: BoardCard): DockTimelineEvent[] {
     if (!card.relatedRecordId) return [];
     const q = queries.find((x) => x.id === card.relatedRecordId);
-    const ag = q ? agents.find((a) => a.id === q.agentId) : undefined;
-    /* ⚠️ §7b — THE SUPERSEDED PROVISIONAL RUNG IS DROPPED BEFORE ANYTHING ELSE. This surface is
-       where the duplicate was SEEN: it does not dedupe by status, so an import's `OFFER` rung and
-       the writer's later real one both drew, one above the other, the first reading
-       "(imported — date needed)". Same predicate as the derivation and the Query Centre —
-       `dropSupersededProvisional` — so the three cannot come to differ about which rung is real. */
-    const live = dropSupersededProvisional(dockRows, (r) => ({
-      status: r.resultingStatus ?? r.type,
-      provisional: r.dateProvisional === true,
-    }));
-    /* ⚠️ ITEM 6 — AND THEN THE SAME-DAY PAIR. `dropSupersededProvisional` above handles an import
-       rung superseded by a RECORDED one; it leaves a pair that is both provisional (or both real)
-       exactly as it found it, which is the `Partial requested · via email` twice on one date.
-       Keyed on (status, DAY), so a re-request on a different day survives — that is a real thing an
-       agency does. Display only: both documents are still in Firestore. */
-    const once = collapseTimelineDuplicates(live, (r) => ({
-      status: r.resultingStatus ?? r.type,
-      day: dayKeyOf(r.createdAt ?? r.date),
-      provisional: r.dateProvisional === true,
-    }));
-    const kept = once
-      /* ⚠️ `includeSend` — THIS SURFACE HAS NO HERO ROW. The Centre suppresses the send because it
-         draws one above its timeline; the card does not, so without this the query going out was
-         dropped and a full-requested card showed a single rung with no beginning. */
-      .map((r, i) => ({ r, i, label: activityEventLabel(r as { activityType?: unknown; resultingStatus?: unknown }, { includeSend: true }) }))
-      .filter((x) => x.label !== null);
-    return kept
-      .map((x) => {
-        /* ⚠️ `createdAt` IS A FIRESTORE TIMESTAMP ON THESE ROWS, not the ISO string the global feed
-           carries — reading it as a string yields "Invalid Date" rather than an error. */
-        const raw: any = x.r.createdAt ?? x.r.date;
-        const ms = raw?.toMillis ? raw.toMillis() : raw?.seconds ? raw.seconds * 1000 : Date.parse(String(raw ?? ""));
-        return {
-          key: x.r.id ?? `ev-${x.i}`,
-          label: x.label as string,
-          when: Number.isFinite(ms) ? new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "",
-          /* absent where the record is silent — never inferred */
-          ...(x.r.via ? { via: String(x.r.via) } : q?.sendMethod ? { via: `via ${String(q.sendMethod).toLowerCase()}` } : {}),
-          /* ⚠️ ITEM 5 — A PROVISIONAL RUNG SHOWS THE EVENT AND NOTHING ELSE. The import writes its
-             own bookkeeping into `note` — "Full Requested (imported — date needed)" — and the card
-             rendered it as the agent's words. It is a message from the importer to itself.
-             ⚠️ KEYED ON THE STORED FLAG, NEVER ON THE STRING. Matching "(imported" would be
-             deriving state by reading a display string, which is the fault the whole record is
-             built to avoid; `dateProvisional` is a real field and says exactly this.
-             ⚠️ AND IT SUPPRESSES THE WHOLE SUB-LINE ON A PROVISIONAL RUNG, not just the
-             parenthetical — a provisional rung's note is import-written by construction, and
-             trimming the brackets off would leave "Full Requested" restating the label above it. */
-          ...(x.r.note && x.r.dateProvisional !== true ? { note: String(x.r.note) } : {}),
-          /* ⚠️ THE STATUS ITSELF, HANDED TO THE REAL `StatusDot`. It used to be a three-state ring
-             derived here and painted by the card's own CSS; `StatusDot` is the app's one drawing of
-             a query status and is never recreated locally. `resultingStatus ?? type` is the same
-             pair `subcollectionDocToDerivable` reads, so the dot and the derivation agree about
-             which field carries the status.
-             ⚠️ A NUDGE HAS NO STATUS AND TAKES NO DOT — `NUDGE_SENT` is not a status change. */
-          ...((st) => (st ? { status: String(st) } : {}))(x.r.resultingStatus ?? x.r.type),
-        } as DockTimelineEvent;
-      })
-      /* ⚠️ EVERY ENTRY, OLDEST FIRST — the cap is gone. It was `.slice(-6)`, which silently dropped
-         the OLDEST rungs, so a long history lost its beginning: precisely the end a reader is
-         looking for when they open the record. The body scrolls and the footer is pinned below it,
-         so length costs nothing now. Ascending, as `useDockActivity` orders it and as v14 draws it. */
-      ;
+    return dockTimeline(dockRows, { sendMethod: q?.sendMethod ? String(q.sendMethod) : undefined });
   }
 
   /**
@@ -1149,7 +1090,7 @@ export function useTaskPaneSession(
                       const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
                       return formatQueryMaterials(q?.materialsWanted);
                     })(),
-                    events: dockTimeline(card).map((e) => ({
+                    events: dockTimelineFor(card).map((e) => ({
                       key: e.key, label: e.label, when: e.when, via: e.via,
                       /* ⚠️ THE LOG'S OWN STATUS, CARRIED WHOLE (Phase 8). `dockTimeline` already
                          sets it from `resultingStatus ?? type` — the same pair the derivation

@@ -75,9 +75,13 @@
 .tpn .chip { display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ink2);background:var(--field);border:0.5px solid var(--hair2);border-radius:8px;padding:5px 10px; }
 .tpn .chip .tick { color:var(--sage);font-size:11px; }
 .tpn .seg { display:flex;gap:8px;flex-wrap:wrap; }
-.tpn .seg button { cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:8px 14px;color:var(--ink2);transition:all .16s; }
+/* ⚠️ THE REF'S `.opts span` (20 Sep) — a 20px-radius pill on the page ground, filled INK when it is
+   the answer. It was a 9px rounded rectangle filled pink. The panel's two selected grammars are now
+   a FILL on a pill (one of a short row of choices) and a burgundy RING on a card (one of a few whole
+   options); they are different controls and the ref draws them differently on purpose. */
+.tpn .seg button { cursor:pointer;font-family:'Inter',sans-serif;font-size:13.5px;background:var(--ground);border:1px solid var(--hair);border-radius:20px;padding:8px 16px;color:var(--ink2);transition:all .16s; }
 .tpn .seg button:hover { border-color:#c9a89e; }
-.tpn .seg button.on { background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500; }
+.tpn .seg button.on { background:var(--ink);border-color:var(--ink);color:var(--ground);font-weight:500; }
 /* ⚠️ THE ONE MINIMUM HEIGHT IN THE PANE, AND IT IS THE CONTRACT'S OWN (48px). It is about a
    CONTROL being usable — a textarea with no minimum is a slot — not about a card being padded out
    to meet its neighbour, which is what Phase 2 removes. */
@@ -394,15 +398,21 @@
    size. The `.band` rules and the `.u-* .band` pair are DELETED rather than left: a rule for an
    element nothing renders is the trap this file has a standing note about. ── */
 .tpn .dhead { flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:10px 12px 10px 18px; border-bottom:1px solid var(--hair);background:var(--white); }
-.tpn .fam { height:22px;padding:0 9px;border-radius:999px;font-family:'JetBrains Mono',monospace; font-size:8px;letter-spacing:0.12em;text-transform:uppercase;display:inline-flex;align-items:center; font-weight:500;flex-shrink:0; }
-.tpn .fam.u-now { background:linear-gradient(135deg,var(--u-now-1),var(--u-now-2));color:var(--burg); }
-.tpn .fam.u-house { background:linear-gradient(135deg,var(--u-house-1),var(--u-house-2));color:#2e3a2c; }
-.tpn .fam.u-yours { background:linear-gradient(135deg,var(--u-yours-1),var(--u-yours-2));color:#8a7440; }
-.tpn .pos { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em; color:#b3a494;text-transform:uppercase;white-space:nowrap; }
-.tpn .dnav { margin-left:auto;display:flex;gap:4px;flex-shrink:0; }
-.tpn .dnav button { cursor:pointer;width:26px;height:26px;border-radius:7px;background:var(--white); border:1px solid var(--edge);color:var(--ink2);display:inline-flex;align-items:center;justify-content:center; font-size:11px; }
+/* ⚠️ THE PANEL MOCKUP'S CHIP (feed/to-do pass, 20 Sep; ref `containers-peek-and-panel.html`
+   `.p-top .tag`): 9px on .11em in a 14px-radius pill. It was 8px, which reads as a system tag
+   rather than as a label on the writer's own task. */
+.tpn .fam { padding:5px 11px;border-radius:14px;line-height:1;font-family:'JetBrains Mono',monospace; font-size:9px;letter-spacing:0.11em;text-transform:uppercase;display:inline-flex;align-items:center; font-weight:500;flex-shrink:0; }
+.tpn .fam.u-now { background:var(--u-now-1);color:var(--burg); }
+.tpn .fam.u-house { background:var(--u-house-1);color:#2e3a2c; }
+.tpn .fam.u-yours { background:var(--u-yours-1);color:#8a7440; }
+.tpn .pos { font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.11em; color:var(--muted);text-transform:uppercase;white-space:nowrap; }
+.tpn .dnav { margin-left:auto;display:flex;gap:6px;flex-shrink:0; }
+/* ⚠️ CIRCLES, PER THE REF — 28px, with the key beside them keeping its own shape. Rounded squares
+   put the two movements and the exit in ONE vocabulary; the ref separates the two you use
+   constantly from the one you use once. */
+.tpn .dnav button { cursor:pointer;width:28px;height:28px;border-radius:50%;background:var(--white); border:1px solid var(--hair);color:var(--ink2);display:inline-flex;align-items:center;justify-content:center; font-size:12px;padding:0; }
 .tpn .dnav button:hover { border-color:#c9a89e; }
-.tpn .dnav button.k { width:auto;padding:0 8px;font-family:'JetBrains Mono',monospace;font-size:8px; letter-spacing:0.1em;text-transform:uppercase; }
+.tpn .dnav button.k { width:auto;height:28px;padding:0 12px;border-radius:16px;font-family:'JetBrains Mono',monospace;font-size:9.5px; letter-spacing:0.1em;text-transform:uppercase; }
 /* ⚠️ A HEADING MAY NOT CARRY COLOUR-SHIFTED EMPHASIS (deed round, Phase 1 — repo law, also in
    CLAUDE.md). `.deed em` was burgundy for three rounds: a heading that changes colour mid-sentence
    reads as two things, and the reader has to work out which half is the point. Emphasis is
@@ -578,10 +588,10 @@
    which is a label rather than the content. */
 .tpn .willrec { font-size:12px;color:#6a584a;font-weight:300;line-height:1.5;min-width:0;max-width:56ch;flex:1 1 240px; }
 .tpn .willrec b { color:var(--ink2);font-weight:500; }
-.tpn .willrec .lead { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-right:7px; }
+.tpn .willrec .lead { font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.11em;text-transform:uppercase;color:var(--muted);margin-right:7px; }
 .tpn .willrec b { color:var(--ink2);font-weight:500; }
 .tpn .ab { cursor:pointer;height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;transition:all .15s; }
-.tpn .ab.quiet { background:var(--white);border:1px solid var(--edge);color:#57534e; }
+.tpn .ab.quiet { background:var(--white);border:1px solid var(--hair);color:var(--muted2); }
 .tpn .ab.quiet:hover { background:#f5f2ee; }
 .tpn .ab.go { background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-weight:600; }
 .tpn .ab.go:hover { background:#efd5ca; }
@@ -770,11 +780,14 @@
 .tpn .foot .cfail { font-size:11.5px;color:var(--burg);font-weight:500;min-width:0; }
 
 /* the collapsed fork — one line, and the way back */
-.tpn .receipt { display:flex;align-items:center;gap:8px;padding:9px 0 3px;flex-wrap:wrap; }
-.tpn .receipt .rk { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted); }
-.tpn .receipt .rv { font-size:12.5px;font-weight:500;color:var(--ink2); }
-.tpn .receipt .rlink { cursor:pointer;background:none;border:0;padding:0;font-family:'Inter',sans-serif;font-size:10.5px;color:#b3a494;border-bottom:1px solid transparent; }
-.tpn .receipt .rlink:hover { color:var(--burg);border-bottom-color:rgba(124,58,42,0.35); }
+.tpn .receipt { display:flex;align-items:baseline;gap:10px;padding:6px 0 12px;flex-wrap:wrap; }
+/* ⚠️ THE REF'S `.chose` (20 Sep): the mono label at 10px on .11em, the ANSWER in the document's own
+   serif at 15/600 beside it, and the way back as an underlined link. It was 8.5 / 12.5 / 10.5 — a
+   caption row rather than a statement of what the writer had decided. */
+.tpn .receipt .rk { font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.11em;text-transform:uppercase;color:var(--muted); }
+.tpn .receipt .rv { font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--ink2); }
+.tpn .receipt .rlink { cursor:pointer;background:none;border:0;padding:0;font-family:'Inter',sans-serif;font-size:13px;color:var(--muted2);text-decoration:underline;text-underline-offset:3px;border-bottom:0; }
+.tpn .receipt .rlink:hover { color:var(--burg); }
 .tpn .cleared { font-size:10.5px;color:var(--muted2);font-weight:300;padding:0 0 6px;line-height:1.5; }
 .tpn .flowinfo { font-size:11.5px;color:var(--muted2);font-weight:300;padding:6px 0 4px;line-height:1.55; }
 
@@ -962,7 +975,7 @@
 .tpn .ab.go.prime:hover { background: var(--field); }
 .tpn .ab.go.prime .fill {
   position: absolute; left: 0; top: 0; bottom: 0; width: 0;
-  background: linear-gradient(90deg, #f7e7e0, var(--pink));
+  background: linear-gradient(90deg, #6a584a, var(--ink));
   /* ⚠️ THE SAME DURATION IN BOTH DIRECTIONS — the fill RECEDES when an answer is removed, and a
      progress indicator that only ever advances is lying about a form you can revise. */
   transition: width .34s cubic-bezier(.4, 0, .2, 1);
@@ -971,9 +984,11 @@
 .tpn .ab.go.prime .t { position: relative; z-index: 1; }
 /* ⚠️ THE ONE MOMENT THE BUTTON CHANGES CHARACTER */
 .tpn .ab.go.prime.ready {
-  background: var(--pink); border-color: var(--pink-b); color: var(--burg);
+  /* ⚠️ INK, PER THE REF'S `.b.ink` (20 Sep). The FILL MECHANISM IS UNTOUCHED — it is the panel's
+     own answer to "how far through am I", and only the colour it runs into has changed. */
+  background: var(--ink); border-color: var(--ink); color: var(--ground);
 }
-.tpn .ab.go.prime.ready:hover { background: #efd5ca; }
+.tpn .ab.go.prime.ready:hover { background: #3a1c14; border-color: #3a1c14; }
 .tpn .ab.go.prime.nudge { animation: tpnNudgeIn .34s ease; }
 @keyframes tpnNudgeIn {
   0% { transform: scale(1); } 45% { transform: scale(1.035); } 100% { transform: scale(1); }
@@ -1061,7 +1076,8 @@
    title's own `margin-bottom` used to provide, which moved onto the hero with it. */
 .tpn .dhero { flex: 0 0 auto; padding: 0 0 16px; }
 .slo .tpn .dhero {
-  margin: 0 24px; padding: 18px 20px 16px;
+  /* ⚠️ THE PANEL MOCKUP'S `.p-head` (20 Sep): 18/22 outside, 20/22 inside, radius 14. */
+  margin: 18px 22px; padding: 20px 22px;
   border-radius: 14px; border: 1px solid rgba(58, 28, 20, 0.08);
 }
 .slo .tpn .dhero.u-now { background: linear-gradient(135deg, var(--u-now-1), var(--u-now-2)); }
@@ -1074,17 +1090,33 @@
    applies. It is measured rather than assumed (`anatomyDiff`, the ink-against-clip check). */
 /* the split keeps its 21px document title; 22/1.28 is the contract's, and the drawer's */
 .tpn .dhero .title { margin-bottom: 0; }
-.slo .tpn .dhero .title { font-size: 22px; font-weight: 500; line-height: 1.28; }
+/**
+ * ⚠️ THE TYPEWRITER FACE, AT THE REF'S 26/1.3 (20 Sep). It is the panel's own `h2`, and it makes the
+ * task sentence read in the same voice as every card title on the dashboard rather than as a second
+ * display face inside the app's one completion surface.
+ *
+ * ⚠️ AND 1.3 IS THE FLOOR, NOT A CHOICE. The deed is whole sentences of manuscript titles and agent
+ * names — full of descenders — and this repo has cropped a heading once already by taking a ref's
+ * tighter value at face value.
+ *
+ * ⚠️ WHAT IT COSTS, STATED RATHER THAN SHIPPED QUIETLY: Special Elite has ONE weight, so `.title b`'s
+ * 600 no longer distinguishes a variable from a frame word. The manuscript and the agent still read
+ * as variables because they carry the dotted underline (below); the AGENCY, which has no page and
+ * therefore no underline, no longer does. Flagged — it is a real loss and a small one, and the
+ * alternative was two display faces inside one panel.
+ */
+.slo .tpn .dhero .title { font-family: "Special Elite", cursive; font-size: 26px; font-weight: 400; line-height: 1.3; }
 .tpn .dhero .line {
-  font-size: 12.5px; color: rgba(58, 28, 20, 0.72); font-weight: 300;
-  margin-top: 8px; line-height: 1.5;
+  /* the ref's `.p-head p` — 15px, which is a sentence rather than a caption */
+  font-size: 15px; color: rgba(58, 28, 20, 0.72); font-weight: 300;
+  margin-top: 10px; line-height: 1.5;
 }
 .tpn .dhero .chips { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
 .tpn .dhero .chip {
-  display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px;
-  border-radius: 999px; background: rgba(255, 253, 250, 0.75);
+  display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px;
+  border-radius: 16px; background: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(58, 28, 20, 0.10);
-  font-size: 11px; color: var(--ink2); font-weight: 500; white-space: nowrap;
+  font-size: 12.5px; color: var(--ink2); font-weight: 500; white-space: nowrap;
 }
 .tpn .dhero .chip svg { width: 12px; height: 12px; flex-shrink: 0; }
 .tpn .dhero .chip .m {
@@ -1206,3 +1238,18 @@
    P2.4 measures the hug in the split and stays green. */
 .slo .tpn .wcol { height: 100%; }
 .slo .tpn .sheet { flex: 1 1 auto; height: 100%; max-height: 100%; }
+
+
+/* ══ THE PANEL, PER THE REF (feed/to-do pass, 20 Sep) ═════════════════════════════════════════
+   ⚠️ SCOPED WITH `:has()` SO NO OTHER DRAWER IN THE APP IS TOUCHED. `SlideOver` is shared chrome
+   with several adopters; the panel mockup describes THIS sheet, so the deeper lift is stated where
+   the task pane is the thing inside it rather than on the primitive.
+
+   ⚠️ THE SCRIM IS DELIBERATELY NOT CHANGED. The ref dims the page to `rgba(28,19,15,.22)` against
+   the app's `rgba(58,28,20,.14)`; the scrim is a SIBLING of the sheet, so `:has()` cannot reach it,
+   and darkening `.slo-scrim` itself would darken every drawer in the app. That is a decision about
+   shared chrome rather than a restyle of this panel — flagged, not taken. */
+.slo:has(.tpn) {
+  background: #fdf9f5;
+  box-shadow: -12px 0 40px rgba(28, 19, 15, 0.14);
+}

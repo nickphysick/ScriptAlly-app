@@ -5,23 +5,18 @@
  * dashTodo — the dashboard's to-do rows (v16, 18 Sep; ref design-refs/dashboard-v16-2026-09-18.html).
  *
  * A row per card on the board's live columns: the state glyph, what to do and with whom, the date the
- * clock runs from, how far through the window it is, and the day count.
+ * clock runs from, and the day count.
  *
  * ⚠️ NOT A SECOND BOARD. The cards are `assembleBoardColumns`' — the same call the sidebar badge and
  * every Tasks page make — and every fact on a row comes from the accessors the To-do page's own list
  * rows use (`listRowInputs`, `ticketFacts`). This module arranges them; it derives nothing new about a
  * task.
  *
- * ⚠️ THE BAR IS THE LIST'S CLOCK, NOT THE PANE'S, AND THAT DIFFERENCE IS DELIBERATE. It measures the
- * elapsed figure the row already states against the window the agent stated — the same anchor the day
- * count is counted from, so the number and the bar cannot disagree. The Query Centre's pane re-bases
- * its own bar on a holding reply and answers a different question ("what am I waiting on now"); this
- * one answers "how long has this been going", which is what a list is for.
- *
- * ⚠️ AND A WINDOW NOBODY STATED IS DRAWN FAINTER (Nick, 18 Sep). Where the agency states a reply time
- * the bar is the real thing; where it does not, the house assumption (`STAGE_RESPONSE_WINDOWS`,
- * 8/12/12 weeks) fills in and `stated: false` takes the bar to 55% — so a guessed window never looks
- * like a known one.
+ * ⚠️ THE PROGRESS BAR IS RETIRED (20 Sep) — the row states its age as a figure, and a bar beside a
+ * figure is the same fact drawn twice. It was the only reader of `TodoBar`, so the type went with it;
+ * what survives is `replyWindow`, which is the half that was never about drawing. The task panel's
+ * "reply expected" reads it, and a second derivation of a reply window is how two surfaces come to
+ * disagree about when a reply is due.
  */
 import { QueryStatus, type Query } from "../types";
 import type { BoardCard } from "./todoBoard";
@@ -29,10 +24,18 @@ import { listRowInputs, type TaskData } from "./taskCardFacts";
 import { ticketFacts } from "./ticketFacts";
 import { STAGE_RESPONSE_WINDOWS } from "./queryAmbient";
 
-export interface TodoBar {
-  /** 0–100, clamped: a window that has run out is full, never over */
-  pct: number;
-  /** the agency stated this window; false means the house assumption filled in */
+/**
+ * How long the agency has to reply to a query sitting where this one is.
+ *
+ * ⚠️ ONE DERIVATION, BECAUSE TWO SURFACES STATE IT. The to-do row counts a query's age against this
+ * window and the task panel's "reply expected" is this window added to the anchor; derived twice,
+ * they would eventually disagree about when a reply is due, and neither would look wrong.
+ *
+ * `stated: false` means the AGENCY said nothing and the house assumption filled in
+ * (`STAGE_RESPONSE_WINDOWS`, 8/12/12 weeks) — a guess must never be presented as a fact.
+ */
+export interface ReplyWindow {
+  days: number;
   stated: boolean;
 }
 
@@ -51,6 +54,25 @@ export const splitTitle = (title: string, who: string): TodoTitle => {
   return { pre: title.slice(0, i), who, post: title.slice(i + who.length) };
 };
 
+/**
+ * ⚠️ A ROW THE WRITER HAS JUST TICKED (feed/to-do round, 20 Sep).
+ *
+ * Ticking opens the task panel and the panel does the writing; when it commits, the board stops
+ * raising that card and the row would simply VANISH — which is the one thing a writer who has just
+ * acted must not see, because they cannot tell "recorded" from "lost". So the card holds the row
+ * where it was, struck through, saying what went down and offering the way back.
+ *
+ * ⚠️ `undo` IS A HANDLE, NOT A FLAG, and its absence is meaningful: a completion whose window has
+ * closed still shows what was logged and simply offers no way back. A boolean here would have made
+ * the row render a dead link — and this repo has already paid for an Undo that restored nothing.
+ */
+export interface TodoDone {
+  /** what the tick recorded, in the app's own words — "Nudge logged", "Full sent" */
+  logged: string;
+  /** reverses that write; absent once it can no longer be reversed */
+  undo?: () => void;
+}
+
 export interface TodoRow {
   /** the board card's own key — the drawer opens on it */
   key: string;
@@ -64,9 +86,14 @@ export interface TodoRow {
   meta: string;
   /** the day figure at the right; null where nothing is being counted */
   days: number | null;
-  /** null on a row with no window to draw */
-  bar: TodoBar | null;
   urgent: boolean;
+  /**
+   * ⚠️ HELD, NEVER DERIVED. `todoRows` always returns `null` here — a completion is something that
+   * happened in this session, not a fact about the board, and the board has by then stopped raising
+   * the card at all. The CARD holds it and stamps it on (see `OneScreenTasks`), which is why the
+   * shape lives on the row rather than beside it: one thing decides what a row looks like.
+   */
+  done: TodoDone | null;
 }
 
 /** Which of the house windows applies to a query sitting where this one is. */
@@ -74,6 +101,16 @@ const stageOf = (status: QueryStatus | null): keyof typeof STAGE_RESPONSE_WINDOW
   if (status === QueryStatus.QUERIED) return "query";
   if (status === QueryStatus.PARTIAL_REQUESTED || status === QueryStatus.PARTIAL_SENT) return "partial";
   return "full";
+};
+
+/** @see ReplyWindow — the agency's own figure where it gave one, the house window where it did not. */
+export const replyWindow = (
+  status: QueryStatus | null,
+  responseTimeWeeks: number | undefined,
+): ReplyWindow => {
+  const stated = typeof responseTimeWeeks === "number" && responseTimeWeeks > 0;
+  const weeks = stated ? (responseTimeWeeks as number) : STAGE_RESPONSE_WINDOWS[stageOf(status)];
+  return { days: weeks * 7, stated };
 };
 
 export interface TodoRowsInput {
@@ -90,11 +127,7 @@ export const todoRows = (i: TodoRowsInput): TodoRow[] =>
     const q: Query | undefined = c.relatedRecordId
       ? i.data.queries.find((x) => x.id === c.relatedRecordId)
       : undefined;
-    const agent = q ? i.data.agents.find((a) => a.id === q.agentId) : undefined;
-    const weeks = agent?.responseTimeWeeks;
-    const stated = typeof weeks === "number" && weeks > 0;
     const status = (q?.status as QueryStatus) ?? null;
-    const windowDays = (stated ? (weeks as number) : STAGE_RESPONSE_WINDOWS[stageOf(status)]) * 7;
     const days = inputs.days;
     return {
       key: c.key,
@@ -106,9 +139,7 @@ export const todoRows = (i: TodoRowsInput): TodoRow[] =>
          with its em dash, and the row states the card's own meta line instead. */
       meta: inputs.anchorDate ? `${facts.dateKey} ${facts.dateValue}` : (c.record || facts.spanKey),
       days,
-      bar: q && days !== null && windowDays > 0
-        ? { pct: Math.max(0, Math.min(1, days / windowDays)) * 100, stated }
-        : null,
+      done: null,
       urgent: i.isUrgent ? i.isUrgent(c) : false,
     };
   });

@@ -189,7 +189,7 @@ describe("the closed tile", () => {
   /* v33: the title is a sentence with the count, on the stone band; the eyebrow and the "All N" chip
      are retired — the way to all of them is each slice's own popup ("See all 9"). */
   it("the title is a sentence with the count, on the stone band, and nothing sits under it", () => {
-    expect(html).toMatch(/class="os-card os-lift os-cl os-tone--stone"/);
+    expect(html).toMatch(/class="os-card os-lift os-cl"/);
     expect(cl).toMatch(/<h3 class="os-cardttl" data-probe-text="closed-title">\d+ closed quer(?:y|ies)<\/h3>/);
     expect(cl).not.toContain("Where each one stopped");
     expect(cl).not.toMatch(/["\s]os-sub["\s]/);

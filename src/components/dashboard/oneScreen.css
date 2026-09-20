@@ -53,7 +53,9 @@
    * headings quietly fell back to the body serif.
    */
   --os-type: "Special Elite", "Courier New", Courier, monospace;
-  --dash-ttl: clamp(21px, 8.3cqw, 30px);
+  /* 24–26px (both refs; the newer draws 24, the older 26) — still container-scaled, so the narrow
+     closed card steps down inside the range rather than out of it */
+  --dash-ttl: clamp(24px, 8.3cqw, 26px);
   --dash-eyebrow: 10px;
   /* the two rows */
   --dash-row2-min: 380px;
@@ -220,13 +222,22 @@
  * negative margins equal to the frame's padding. At a 30px title it is 62px tall: 15 + 33 + 13 + 1.
  * The colour is by what the card is ABOUT — `--band` comes from the tone class on the card.
  */
+/**
+ * ⚠️ ONE HEADER TREATMENT ON EVERY CARD — SOLID NAVY (feed/to-do round, 20 Sep; refs
+ * feed-todo-interactions.html + containers-peek-and-panel.html).
+ *
+ * The five pale tinted bands — sand, navy, stone, slate, rose, one per card's "meaning" — are retired,
+ * and with them the `tone` prop that chose between them. The meaning a band carried is already in the
+ * card's TITLE, and five tints across one row read as five different kinds of object rather than as
+ * one page. The bands are full-bleed to the frame's edges; the frame's `overflow: hidden` clips them
+ * to its own top corners, so the band needs no radius of its own.
+ */
 .os-band {
   flex: none;
   margin: -18px -22px 16px;
-  padding: 15px 22px 13px;
-  background: var(--band, var(--dash-page));
-  color: var(--band-ink, var(--dash-ink));
-  border-bottom: 1px solid rgba(28, 19, 15, 0.1);
+  padding: 14px 22px;
+  background: var(--dash-navy);
+  color: var(--dash-page);
   min-width: 0;
 }
 .os-bandrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
@@ -234,14 +245,16 @@
    control, 16px apart. Side by side the band is still 62px; when the card is too narrow for both, the
    control drops to its own line INSIDE the band (see the container rule in §5) and the band is 97. */
 .os-lead .os-bandrow { gap: 16px; row-gap: 11px; flex-wrap: wrap; justify-content: flex-start; }
-.os-tone--sand { --band: var(--dash-sand); }
-.os-tone--navy { --band: var(--dash-navy); --band-ink: #f5f1eb; }
-.os-tone--stone { --band: var(--dash-stone); }
-.os-tone--slate { --band: var(--dash-slate); }
-.os-tone--rose { --band: var(--dash-rose); }
-/* chips inside a band */
-.os-band .os-mini { background: rgba(255, 255, 255, 0.55); border-color: rgba(28, 19, 15, 0.14); }
-.os-tone--navy .os-band .os-mini { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.3); color: #f5f1eb; }
+/* ⚠️ THE CHIP IS AN OUTLINE ON THE NAVY, NOT A FILL. A filled chip on a solid band reads as a second
+   surface inside the header; the outline reads as a label on it. Cream at .85 against cream text at
+   full, so the chip sits under the title rather than beside it in weight. */
+.os-band .os-mini {
+  background: transparent;
+  border-color: rgba(245, 241, 235, 0.3);
+  color: rgba(245, 241, 235, 0.85);
+  padding: 5px 11px;
+}
+.os-band button.os-mini:hover { border-color: rgba(245, 241, 235, 0.55); color: #f5f1eb; }
 /* the short campaign's quiet suffix — "SINCE 2 SEP" */
 .os-since {
   font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
@@ -761,11 +774,24 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 }
 .os-fday::before, .os-fday::after { content: ""; flex: 1; height: 1px; background: var(--dash-hair); }
 
+/**
+ * ⚠️ THE WHOLE ROW IS THE TARGET (feed/to-do round, 20 Sep) — clicking anywhere on it opens the
+ * query's peek. The padding and the matching negative margin are one mechanism: the row's HIT AREA
+ * and its tinted hover reach 12px past the text on both sides, while the text stays exactly where it
+ * was. A padded row with no negative margin would have indented the whole feed by 12px.
+ */
 .os-fent {
   display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center;
-  padding: 10px 0; border-top: 1px solid var(--dash-hair);
+  padding: 10px 12px; margin: 0 -12px;
+  border-top: 1px solid var(--dash-hair); border-radius: 8px;
   position: relative;
+  width: auto; text-align: left; background: none; font: inherit; color: inherit;
 }
+.os-fent--go { cursor: pointer; }
+.os-fent--go:hover, .os-fent--go:focus-visible { background: var(--dash-parchment); }
+.os-fent--go:focus-visible { outline: 2px solid var(--dash-frame); outline-offset: -2px; }
+/* ⚠️ THE ROW IT OPENED STAYS LIT WHILE THE PEEK IS UP, so the reader can see what they clicked. */
+.os-fent--open { background: var(--dash-parchment); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.08); }
 .os-fmain { min-width: 0; }
 .os-fband { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
 .os-ftime { font-family: "JetBrains Mono", monospace; font-size: 9px; color: var(--dash-ink-45); }
@@ -787,13 +813,26 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
  * its border is 1. It marks the margin beside the entry rather than the entry itself, so nothing in
  * the row moves when it appears or goes.
  */
+/* ⚠️ −12, NOT −24: the row's own left edge moved 12px out with its negative margin, so the rule's
+   offset moves the same 12px to stay in the card's left margin where it has always been. */
 .os-fent--new::before {
   content: "";
-  position: absolute; left: -24px; top: 12px; bottom: 12px;
+  position: absolute; left: -12px; top: 12px; bottom: 12px;
   width: 3px; border-radius: 0 2px 2px 0;
   background: var(--dash-rust);
 }
 .os-fent--app .os-fsay { color: var(--dash-ink-70); }
+/* ⚠️ THE ROW'S OWN AFFORDANCE, SHOWN ONLY ON HOVER. A row with an explicit action already says what
+   it does; a row without one still opens the query, and this is how it says so without adding a
+   permanent second link to every line in the feed. */
+.os-fpeek {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--dash-ink-45); white-space: nowrap;
+  opacity: 0; transition: opacity 0.12s ease;
+}
+.os-fent--go:hover .os-fpeek, .os-fent--go:focus-visible .os-fpeek, .os-fent--open .os-fpeek { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .os-fpeek { transition: none; } }
 .os-fempty {
   margin: 18px 0 0; text-align: center;
   font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 13.5px;
@@ -802,44 +841,62 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 
 /* ══ §9 · THE TO-DO CARD ══════════════════════════════════════════════════════════════════════ */
 .os-todo .os-hd { margin-bottom: 4px; }
+/**
+ * ⚠️ A CHECKBOX, A SENTENCE, A META ROW AND A FIGURE (feed/to-do round, 20 Sep; ref
+ * feed-todo-interactions.html). The ink icon tile and the progress bar are retired: the tile drew the
+ * query's state twice (the meta row's pill says it in words) and the bar drew the age twice (the
+ * figure on the right says it in days).
+ *
+ * ⚠️ `align-items: start`, because the row is two lines beside a one-line box and a one-line figure.
+ */
 .os-tdrow {
-  display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center;
-  padding: 11px 0; border-top: 1px solid var(--dash-hair);
+  display: grid; grid-template-columns: 22px 1fr auto; gap: 12px; align-items: start;
+  padding: 12px 0; border-top: 1px solid var(--dash-hair);
   width: 100%; text-align: left; background: none; border-left: 0; border-right: 0; border-bottom: 0;
-  cursor: pointer; color: var(--dash-ink);
+  font: inherit; color: inherit;
 }
 .os-tdrow:first-of-type { border-top: 0; }
-.os-tdrow:hover .os-tdt { color: var(--dash-rust); }
-/**
- * ⚠️ THE TILE SCOPES THE DOT'S OWN TOKENS RATHER THAN DRAWING A SECOND GLYPH. `StatusDot` reads
- * `--sd-hue` and `--sd-centre`; on this ink tile they become the page's cream, so the canonical glyph
- * renders on a dark ground and the house law — a status is only ever drawn by that component — holds.
- */
-.os-tdico {
-  width: 44px; height: 44px; border-radius: 12px; background: var(--dash-ink);
-  display: flex; align-items: center; justify-content: center; flex: none;
-  --sd-hue: #f5f1eb;
-  --sd-centre: transparent;
+
+/* ⚠️ THE BOX IS THE CONTROL AND THE ROW IS NOT. Ticking opens the task panel — see `OneScreenTasks` —
+   and the rest of the row opens nothing, so only the box takes the pointer. */
+.os-tdbox {
+  width: 22px; height: 22px; margin-top: 1px; padding: 0; flex: none;
+  border-radius: 7px; border: 1.5px solid rgba(28, 19, 15, 0.3); background: #ffffff;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
 }
-.os-tdico--none { background: var(--dash-stone); }
-.os-tddash { width: 12px; height: 2px; border-radius: 2px; background: var(--dash-ink); display: block; }
-.os-tdt { font-size: 14px; line-height: 1.35; min-width: 0; display: block; }
+.os-tdbox:hover { border-color: var(--dash-ink); background: var(--dash-parchment); }
+.os-tdbox:focus-visible { outline: 2px solid var(--dash-frame); outline-offset: 2px; }
+.os-tdbox svg { opacity: 0; display: block; }
+.os-tdbox--done { background: var(--dash-ink); border-color: var(--dash-ink); }
+.os-tdbox--done svg { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .os-tdbox { transition: none; } }
+
+.os-tdt { font-size: 14.5px; line-height: 1.4; min-width: 0; color: var(--dash-ink); }
 .os-tdt i { font-style: italic; color: var(--dash-ink-70); }
-.os-tdt small {
-  display: block;
+.os-tdrow--done .os-tdt { color: var(--dash-ink-45); text-decoration: line-through; text-decoration-color: rgba(28, 19, 15, 0.3); }
+/* ⚠️ THE STRIKE IS THE SENTENCE'S ALONE — a struck meta line would read as a fact retracted, when it
+   is the one line on a completed row that is newly TRUE. */
+.os-tdrow--done .os-tdmeta { text-decoration: none; }
+
+.os-tdmeta { display: flex; align-items: center; gap: 9px; margin-top: 6px; flex-wrap: wrap; }
+.os-tdmeta .os-tdwhen {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dash-ink-45);
+}
+.os-tdundo {
   font-family: "JetBrains Mono", monospace;
   font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--dash-ink-45); margin-top: 3px;
+  color: var(--dash-ink-70); background: none; border: 0; padding: 0; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px;
 }
-.os-tdbar { display: block; height: 6px; border-radius: 4px; background: #f1ece5; margin-top: 7px; overflow: hidden; }
-.os-tdbar i { display: block; height: 100%; background: var(--dash-navy); }
-/* ⚠️ A WINDOW NOBODY STATED IS DRAWN FAINTER (Nick) — a guessed window must not read as a known one. */
-.os-tdbar--guess { opacity: 0.55; }
-.os-tdn { font-size: 24px; font-weight: 600; color: var(--dash-ink); font-variant-numeric: tabular-nums; }
-.os-tdn em { font-style: normal; font-size: 12px; font-weight: 400; color: var(--dash-ink-45); }
-.os-tdgo { font-style: normal; font-size: 16px; color: var(--dash-ink-45); }
+.os-tdundo:hover { color: var(--dash-ink); }
+
+.os-tdn { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--dash-ink); }
+.os-tdn em { font-style: normal; font-size: 11px; font-weight: 400; color: var(--dash-ink-45); }
+.os-tdgo { font-size: 16px; color: var(--dash-ink-45); font-style: normal; }
 .os-tdrow--urgent .os-tdn { color: var(--dash-rust); }
-/* the foot is pinned to the card's bottom, whatever the rows do */
+
 .os-tdfoot {
   margin: auto 0 0; padding-top: 12px; border-top: 1px solid var(--dash-hair);
   font-size: 13px; color: var(--dash-ink-70); flex: none;

@@ -82,19 +82,20 @@ describe("the card derives nothing about a task", () => {
   });
 
   /**
-   * ⚠️ THE STATUS GLYPH IS `StatusDot` AND ONLY `StatusDot` — the house law, and the ink tile is what
-   * made it possible to keep: the tile scopes `--sd-hue`/`--sd-centre` to the page's cream, so the
-   * canonical glyph renders on a dark ground rather than being redrawn by hand for one card.
+   * ⚠️ THE STATUS GLYPH IS `StatusDot` AND ONLY `StatusDot` — the house law. The ink tile that used to
+   * carry it is retired with the row's redraw; the state now travels in the shared `StatePill`, which
+   * renders the canonical glyph itself and states the stone "no status" pill where a card is not
+   * about a query. So the law is kept by DELEGATION, and this asserts the delegation rather than a
+   * second copy of the glyph — the failure it forecloses is this card hand-drawing a status again.
    */
-  it("⚠️ a status is drawn by StatusDot, and the tile tints it rather than replacing it", () => {
-    expect(panel).toContain("<StatusDot");
-    expect(panel).toContain("overrideSize={18}");
-    const tile = rule(".os-tdico");
-    expect(tile).toContain("--sd-hue: #f5f1eb");
-    expect(tile).toContain("--sd-centre: transparent");
-    /* a row with no query has no status to draw, and states that rather than inventing one */
-    expect(panel).toContain("os-tdico--none");
-    expect(rule(".os-tdico--none")).toContain("background: var(--dash-stone)");
+  it("⚠️ a status is drawn by StatusDot — here, through the shared pill", () => {
+    expect(panel).toContain("<StatePill");
+    /* and NOT redrawn: no glyph of its own, no tile scoping the dot's tokens to a dark ground */
+    expect(panel).not.toContain("<StatusDot");
+    expect(panel).not.toMatch(/["\s`]os-tdico["\s`]/);
+    expect(cssRuleCount(cssRules, ".os-tdico")).toBe(0);
+    /* a row with no query passes `status: null`, which is the pill's own stone branch */
+    expect(panel).toContain("r.status");
   });
 });
 
@@ -113,10 +114,12 @@ describe("the rendered card", () => {
     renderToStaticMarkup(<OneScreenTasks {...base} {...over} />);
 
   /* ⚠️ v33 — NO SUB-HEADING UNDER ANY TITLE. The eyebrow ("Where the ball is with you") is retired;
-     the title and its chip sit in the rose band, inside the frame. */
-  it("states its name in the rose band, with a chip and one route to the page — and no eyebrow", () => {
+     the title and its chip sit in the navy band, inside the frame. */
+  it("states its name in the navy band, with a chip and one route to the page — and no eyebrow", () => {
     const h = html();
-    expect(h).toMatch(/class="os-card os-lift os-todo os-tone--rose"/);
+    /* the four band tones are retired: every card's band is the one navy */
+    expect(h).toMatch(/class="os-card os-lift os-todo"/);
+    expect(h).not.toContain("os-tone--");
     expect(h).toContain('<h3 class="os-cardttl" data-probe-text="todo-title">To-do list</h3>');
     expect(h).not.toContain("Where the ball is with you");
     expect(h).not.toMatch(/["\s]os-sub["\s]/);
@@ -199,14 +202,16 @@ describe("the rendered card", () => {
 /* ══ THE SHEET ═══════════════════════════════════════════════════════════════════════════════ */
 
 describe("the card's stylesheet", () => {
-  /* ⚠️ THREE COLUMNS, AND THE MIDDLE ONE IS THE ONLY ONE THAT GIVES. The tile and the day count are
-     fixed, so a long task line wraps rather than squeezing the figure it is explaining. */
-  it("the row is a three-column grid: the tile, the sentence, the count", () => {
+  /* ⚠️ THREE COLUMNS, AND THE MIDDLE ONE IS THE ONLY ONE THAT GIVES. The tick and the day count are
+     fixed, so a long task line wraps rather than squeezing the figure it is explaining.
+     ⚠️ AND THE ROW ALIGNS TO ITS TOP, NOT ITS CENTRE: the sentence now carries a meta line beneath
+     it, so a centred row would float the tick and the figure against a two-line middle column. */
+  it("the row is a three-column grid: the tick, the sentence, the count", () => {
     const r = rule(".os-tdrow");
-    expect(r).toContain("grid-template-columns: 44px 1fr auto");
-    expect(r).toContain("align-items: center");
-    expect(rule(".os-tdico")).toContain("width: 44px");
-    expect(rule(".os-tdico")).toContain("height: 44px");
+    expect(r).toContain("grid-template-columns: 22px 1fr auto");
+    expect(r).toContain("align-items: start");
+    expect(rule(".os-tdbox")).toContain("width: 22px");
+    expect(rule(".os-tdbox")).toContain("height: 22px");
     expect(rule(".os-tdt")).toContain("min-width: 0");
   });
 
@@ -218,19 +223,47 @@ describe("the card's stylesheet", () => {
   });
 
   /**
-   * ⚠️ A GUESSED WINDOW IS DRAWN FAINTER, AND THAT IS THE POINT OF THE BAR (Nick, 18 Sep). The
-   * fraction is days elapsed over the AGENT'S STATED reply window; where no window is stated the
-   * app's default for that stage stands in, and the bar drops to 55% so a guess cannot be mistaken
-   * for a fact. The distinction is the derivation's (`dashTodo.TodoBar.stated`) and this is the half
-   * that makes it visible.
+   * ⚠️ THE PROGRESS BAR IS RETIRED, RULE AND ELEMENT TOGETHER (20 Sep). The row states its age as a
+   * figure; a bar beside that figure is the same fact drawn twice, and the fainter "guessed window"
+   * treatment it carried has nowhere left to show. `replyWindow` survives in `dashTodo` because the
+   * task panel's "reply expected" reads it — that is arithmetic, not a drawing.
+   *
+   * Asserted as an absence in BOTH directions, because a rule with no element and an element with no
+   * rule are each silent, and this pass produced the opportunity for both.
    */
-  it("⚠️ the progress bar distinguishes a stated window from a guessed one", () => {
-    const bar = rule(".os-tdbar");
-    expect(bar).toContain("height: 6px");
-    expect(bar).toContain("overflow: hidden");
-    expect(rule(".os-tdbar i")).toContain("background: var(--dash-navy)");
-    expect(rule(".os-tdbar--guess")).toContain("opacity: 0.55");
-    expect(panel, "the component must render the guessed variant").toContain("os-tdbar--guess");
+  it("⚠️ the progress bar is gone — no rule, no variant, no element", () => {
+    for (const gone of [".os-tdbar", ".os-tdbar i", ".os-tdbar--guess"]) {
+      expect(cssRuleCount(cssRules, gone), gone).toBe(0);
+    }
+    expect(panel).not.toMatch(/["\s`]os-tdbar(--guess)?["\s`]/);
+  });
+
+  /**
+   * ⚠️ THE TICK IS THE ROW'S CONTROL AND IT IS A BUTTON, NOT A CHECKBOX INPUT. What it opens is the
+   * task panel at that task — a tick that silently completed a send would record a fact the writer
+   * never stated. The filled state is what a completion looks like AFTERWARDS.
+   */
+  it("the tick is a 22px control, and its filled state is ink with a cream mark", () => {
+    const box = rule(".os-tdbox");
+    expect(box).toContain("border-radius: 7px");
+    expect(box).toContain("border: 1.5px solid rgba(28, 19, 15, 0.3)");
+    expect(box).toContain("background: #fff");
+    expect(rule(".os-tdbox--done")).toContain("background: var(--dash-ink)");
+    expect(panel).toContain('data-probe="todo-tick"');
+  });
+
+  /**
+   * ⚠️ A COMPLETED ROW SAYS WHAT WAS LOGGED AND OFFERS THE WAY BACK. It stays on the card until the
+   * card next refreshes: a row that vanishes the instant it is ticked gives the writer nothing to
+   * check and nowhere to undo from.
+   */
+  it("a completed row strikes its sentence through and keeps its meta line legible", () => {
+    expect(rule(".os-tdrow--done .os-tdt")).toContain("text-decoration: line-through");
+    /* ⚠️ THE STRIKE MUST NOT REACH THE META LINE — it is the receipt, and a struck receipt reads as
+       though the undo were spent too. `text-decoration` inherits into descendants, so this is an
+       explicit reversal rather than an omission. */
+    expect(rule(".os-tdrow--done .os-tdmeta")).toContain("text-decoration: none");
+    expect(panel).toContain('data-probe="todo-undo"');
   });
 
   /* ⚠️ URGENT IS INK, NOT A SECOND PAPER — the row already carries a state on its tile, and a tinted

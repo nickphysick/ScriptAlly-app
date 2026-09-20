@@ -21,7 +21,7 @@ import { QueryStatus, type Agent, type Query } from "../types";
 import type { BoardCard } from "./todoBoard";
 import { listRowInputs, type TaskData } from "./taskCardFacts";
 import { STAGE_RESPONSE_WINDOWS } from "./queryAmbient";
-import { moreWaiting, splitTitle, todoRows } from "./dashTodo";
+import { moreWaiting, replyWindow, splitTitle, todoRows } from "./dashTodo";
 
 const DAY = 86400000;
 const ago = (n: number) => new Date(Date.now() - n * DAY).toISOString();
@@ -75,71 +75,56 @@ describe("moreWaiting", () => {
   });
 });
 
-describe("the progress bar", () => {
+/**
+ * ⚠️ THE BAR IS RETIRED AND ITS ARITHMETIC IS NOT. These cases used to assert a percentage; what they
+ * were really holding is *a reply window is the agency's figure where it gave one and the house
+ * figure where it did not, and the two are distinguishable* — which is a claim about the window, and
+ * survives the drawing going away. The task panel's "reply expected" is the surviving reader.
+ */
+describe("the reply window", () => {
   /* ⚠️ FOUR, NOT EIGHT, AND THE VALUE IS THE POINT. `STAGE_RESPONSE_WINDOWS.query` IS eight weeks,
-     so a stated eight makes the two branches produce the same percentage — a fixture in which the
+     so a stated eight makes the two branches produce the same figure — a fixture in which the
      assertion cannot tell a stated window from a guessed one, and it passed. */
   const STATED_WEEKS = 4;
-  const cards = [
-    card("k-stated", { relatedRecordId: "q-stated", agentId: "a-stated", status: QueryStatus.QUERIED }),
-    card("k-guess", { relatedRecordId: "q-guess", agentId: "a-guess", status: QueryStatus.QUERIED }),
-  ];
-  const db = data(
-    [query("q-stated", "a-stated", QueryStatus.QUERIED, 28), query("q-guess", "a-guess", QueryStatus.QUERIED, 28)],
-    [agent("a-stated", STATED_WEEKS), agent("a-guess")],
-  );
-  const rows = todoRows({ cards, data: db });
-  const byKey = (k: string) => rows.find((r) => r.key === k)!;
 
-  /* ⚠️ THE TALLY: both branches must be ENTERED, or a fixture that drifts into one state passes
+  /* ⚠️ THE TALLY: both branches must be ENTERED, or a sweep that only ever sees one state passes
      while proving half the behaviour. */
-  it("⚠️ the fixture exercises both windows", () => {
-    expect(rows.map((r) => r.bar?.stated)).toEqual([true, false]);
+  it("⚠️ both branches are exercised, and they disagree", () => {
+    const stated = replyWindow(QueryStatus.QUERIED, STATED_WEEKS);
+    const guess = replyWindow(QueryStatus.QUERIED, undefined);
+    expect(stated.stated).toBe(true);
+    expect(guess.stated).toBe(false);
+    /* a fallback equal to the stated window would prove nothing */
+    expect(stated.days).not.toBe(guess.days);
   });
 
-  it("a stated window is the agency's own, and the bar is the row's own day figure over it", () => {
-    const r = byKey("k-stated");
-    const days = listRowInputs(cards[0], db).days!;
-    expect(days, "the fixture must have a clock running").toBeGreaterThan(0);
-    expect(r.days).toBe(days);
-    expect(r.bar).toEqual({ pct: (days / (STATED_WEEKS * 7)) * 100, stated: true });
+  it("a stated window is the agency's own, in days", () => {
+    expect(replyWindow(QueryStatus.QUERIED, STATED_WEEKS)).toEqual({ days: STATED_WEEKS * 7, stated: true });
   });
 
   /**
-   * ⚠️ A WINDOW NOBODY STATED IS THE HOUSE ASSUMPTION, AND IT IS FLAGGED AS ONE. The figure is
-   * `STAGE_RESPONSE_WINDOWS` for the stage the query is at, and `stated: false` is what takes the
-   * bar to 55% on the page. Without the flag a guess would be drawn exactly like a fact.
+   * ⚠️ A WINDOW NOBODY STATED IS THE HOUSE ASSUMPTION, AND IT IS FLAGGED AS ONE. Without the flag a
+   * guess is indistinguishable from a fact at every surface that reads it.
    */
   it("an unstated window falls back to the stage's house figure, and says so", () => {
-    const r = byKey("k-guess");
-    const days = listRowInputs(cards[1], db).days!;
-    expect(r.bar).toEqual({ pct: (days / (STAGE_RESPONSE_WINDOWS.query * 7)) * 100, stated: false });
-    /* and the two disagree — a fallback equal to the stated window would prove nothing */
-    expect(r.bar!.pct).not.toBe(byKey("k-stated").bar!.pct);
+    expect(replyWindow(QueryStatus.QUERIED, undefined))
+      .toEqual({ days: STAGE_RESPONSE_WINDOWS.query * 7, stated: false });
+    /* zero and a negative are not a stated window either — they are a record with nothing in it */
+    expect(replyWindow(QueryStatus.QUERIED, 0).stated).toBe(false);
   });
 
   /* ⚠️ THE STAGE DECIDES WHICH HOUSE WINDOW APPLIES — a partial out is not on the query's clock */
   it("the house window follows the stage the query is at", () => {
-    const c = card("k-partial", { relatedRecordId: "q-p", agentId: "a-guess", status: QueryStatus.PARTIAL_SENT });
-    const pdb = data([query("q-p", "a-guess", QueryStatus.PARTIAL_SENT, 28)], [agent("a-guess")]);
-    const r = todoRows({ cards: [c], data: pdb })[0];
-    const days = listRowInputs(c, pdb).days!;
-    expect(r.bar).toEqual({ pct: (days / (STAGE_RESPONSE_WINDOWS.partial * 7)) * 100, stated: false });
+    expect(replyWindow(QueryStatus.PARTIAL_SENT, undefined).days).toBe(STAGE_RESPONSE_WINDOWS.partial * 7);
+    expect(replyWindow(QueryStatus.FULL_SENT, undefined).days).toBe(STAGE_RESPONSE_WINDOWS.full * 7);
+    /* a card with no query at all still answers, so no caller has to guard the call */
+    expect(replyWindow(null, undefined).days).toBe(STAGE_RESPONSE_WINDOWS.full * 7);
   });
 
-  /* ⚠️ A WINDOW THAT HAS RUN OUT IS FULL, NEVER OVER — a bar past 100% draws outside its track */
-  it("clamps at 100 rather than overflowing", () => {
-    const c = card("k-old", { relatedRecordId: "q-old", agentId: "a-stated", status: QueryStatus.QUERIED });
-    const odb = data([query("q-old", "a-stated", QueryStatus.QUERIED, 400)], [agent("a-stated", 2)]);
-    expect(todoRows({ cards: [c], data: odb })[0].bar).toEqual({ pct: 100, stated: true });
-  });
-
-  /* ⚠️ NO QUERY, NO BAR. A housekeeping card has no window to be through, and drawing an empty track
-     under it would state that it has one and is at nought. */
-  it("a card with no query draws no bar and states no status", () => {
+  /* ⚠️ NO QUERY, NO STATUS. A housekeeping card is not about a query and states nothing about one. */
+  it("a card with no query states no status", () => {
     const c = card("k-house", { hk: true, title: "Add your manuscript", who: "", taskType: "agent_missing_wishlist" });
     const r = todoRows({ cards: [c], data: data([], []) })[0];
-    expect(r.bar).toBeNull();
     expect(r.status).toBeNull();
     expect(r.queryId).toBeNull();
   });
