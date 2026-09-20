@@ -165,8 +165,43 @@ export const describeEvent = (
   msTitle: string,
   /** milliseconds between the query going out and THIS event; null when it cannot be trusted */
   elapsedMs: number | null,
+  /**
+   * The event's own type, for the rungs that carry no status.
+   *
+   * ⚠️ OPTIONAL, SO EVERY EXISTING CALLER IS BYTE-IDENTICAL. A nudge has no `resultingStatus` —
+   * it is not a state change — so without this the sentence was null and the row fell back to the
+   * activity's STORED `description`, which is import-and-writer prose rather than the feed's voice.
+   */
+  activityType?: string,
+  /**
+   * Could this close have been the app's rather than the writer's?
+   *
+   * ⚠️ IT IS A POSSIBILITY, NOT A FACT, AND THAT IS WHY IT IS PHRASED THIS WAY. `db.tsx` auto-closes
+   * a query whose `ifNoResponse` is "Mark as no response automatically" once its deadline passes —
+   * so on such a query a `NO_RESPONSE` rung may be the app's act or the writer's, and **nothing on
+   * the record distinguishes them**. The only marker is the activity's `description` string, and
+   * deriving state by reading a display string is the fault this whole module is built to avoid.
+   *
+   * So the writer's sentence is used only where an automatic close was IMPOSSIBLE, which is a sound
+   * inference; where it was possible the old sentence stands, and it is true either way. Giving the
+   * activity a real field at write time is the proper fix and it needs a rules line.
+   */
+  autoCloseArmed?: boolean,
 ): FeedSeg[] | null => {
+  /**
+   * ⚠️ THE NUDGE IS BUILT, NEVER READ OFF THE RECORD (Nick, 20 Sep). `logNudge` stores
+   * "Nudge sent to {agent} at {agency}"; printing that would put a second vocabulary in a feed
+   * written in one voice, and it is the writer's own act, so the subject is "You".
+   */
+  if (!status && activityType === ActivityType.NUDGE_SENT && who) {
+    const head: FeedSeg[] = [{ t: "You nudged " }, { t: who, who: true }];
+    const clause = elapsedClause(elapsedMs);
+    if (clause) head.push({ t: ` — ${clause} since your query` });
+    return head;
+  }
   if (!status || !who) return null;
+  /* see `autoCloseArmed` — "you closed it" only where the app could not have */
+  const byWriter = !autoCloseArmed;
   const book: FeedSeg[] = msTitle ? [{ t: " " }, { t: msTitle, em: true }] : [];
   const to: FeedSeg[] = [{ t: " to " }, { t: who, who: true }];
   const they: FeedSeg[] = [{ t: who, who: true }];
@@ -199,16 +234,33 @@ export const describeEvent = (
     case QueryStatus.WITHDRAWN:
       head = [{ t: "You withdrew your query for" }, ...book, { t: " from " }, ...they];
       break;
-    /* ⚠️ NOT "they ignored you". The status means the stated window passed with nothing recorded —
-       a fact about the RECORD, not about the agent, who may have replied somewhere this app never saw. */
+    /**
+     * ⚠️ THE SUBJECT IS THE WRITER, BECAUSE CLOSING IS THE WRITER'S ACT (Nick, 20 Sep) — and the
+     * feed is written in their voice throughout. The old sentence ("No reply recorded from …") was
+     * right about one thing and it is carried over: **it names what the writer did, never what the
+     * agent did not do.** "Without a reply" is a fact about the record; "they ignored you" would be
+     * a claim about a person who may have replied somewhere this app never saw.
+     *
+     * ⚠️ AND THE AUTOMATIC CLOSE KEEPS THE OLD SENTENCE, which is the whole reason the branch
+     * splits. Where housekeeping closed it, the APP closed it, and a sentence beginning "You" would
+     * hand the writer an act they never performed.
+     */
     case QueryStatus.NO_RESPONSE:
-      head = [{ t: "No reply recorded from " }, ...they, { t: " about" }, ...book];
+      head = byWriter
+        ? [{ t: "You closed your query" }, ...to, ...(msTitle ? [{ t: " for" }, ...book] : [])]
+        : [{ t: "No reply recorded from " }, ...they, { t: " about" }, ...book];
       break;
     default:
       return null;
   }
   const clause = elapsedClause(elapsedMs);
-  if (clause && status !== QueryStatus.QUERIED) head.push({ t: `, ${clause} after you queried` });
+  if (clause && status !== QueryStatus.QUERIED) {
+    /* a close the writer made reads "after N without a reply"; everything else keeps "after you
+       queried", which is the anchor those sentences are counted from */
+    head.push(status === QueryStatus.NO_RESPONSE && byWriter
+      ? { t: ` after ${clause} without a reply` }
+      : { t: `, ${clause} after you queried` });
+  }
   return head;
 };
 
@@ -329,7 +381,11 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
       who = (agent?.name || agent?.agency || "").trim();
       const msTitle = i.manuscripts.find((m) => m.id === a.manuscriptId)?.title;
       const anchorAt = querySentAt(a.queryId ?? "", queriedAt, q);
-      say = describeEvent(shape.status, who, (msTitle ?? "").trim(), trustedElapsed(anchorAt, t, nowMs))
+      say = describeEvent(
+        shape.status, who, (msTitle ?? "").trim(), trustedElapsed(anchorAt, t, nowMs),
+        String(a.activityType),
+        q?.ifNoResponse === "Mark as no response automatically",
+      )
         ?? [{ t: a.description?.trim() || who }];
       provenance = (agent?.agency ?? "").trim();
     }

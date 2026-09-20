@@ -88,13 +88,21 @@ export interface OneScreenTasksProps {
    */
   openForQueryId?: string | null;
   onOpenHandled?: () => void;
+  /**
+   * ⚠️ THE CARD IS MOUNTED ONCE, BY THE PAGE, AND THIS RAISES THE REQUEST. One mount is what makes
+   * "one open at a time" structural rather than a rule two components have to keep — and the feed
+   * and this card then open the same object rather than two that merely look alike.
+   */
+  onQuickRef?: (queryId: string, anchor: HTMLElement) => void;
+  /** which query the page currently has a card open for, so the row's control can stay lit */
+  refQueryId?: string | null;
 }
 
 export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
   loading, tasks, queries, agents, manuscripts, userTasks, activities, taskFlags, currentUser,
   now, dayOne = false, empty = false, versions = [], activeManuscript = null,
   onSeeAll, onAddManuscript, onAddAgent, onNavigate,
-  openForQueryId, onOpenHandled,
+  openForQueryId, onOpenHandled, onQuickRef, refQueryId,
 }) => {
   /**
    * ⚠️ HELD, BECAUSE THE BOARD STOPS RAISING THE CARD THE MOMENT THE WRITE LANDS. A row that vanishes
@@ -170,7 +178,6 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
   const [panels, setPanels] = useState<Record<string, RowPanel>>({});
   const [drafts, setDrafts] = useState<Record<string, RowDraft>>({});
   const [undos, setUndos] = useState<Record<string, (() => void) | undefined>>({});
-  const [peekKey, setPeekKey] = useState<string | null>(null);
   const [snooze, setSnooze] = useState<{ key: string; anchor: HTMLElement } | null>(null);
   const [request, setRequest] = useState<CommitRequest | null>(null);
   const [note, setNote] = useState<string | null>(null);
@@ -363,9 +370,9 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
                   key={r.key}
                   row={r}
                   panel={panels[r.key] ?? null}
-                  peeking={peekKey === r.key}
+                  peeking={!!r.queryId && refQueryId === r.queryId}
                   onTick={() => tick(r)}
-                  onQuickRef={() => setPeekKey((k) => (k === r.key ? null : r.key))}
+                  onQuickRef={(anchor) => { if (r.queryId) onQuickRef?.(r.queryId, anchor); }}
                   onSnooze={(anchor) => setSnooze({ key: r.key, anchor })}
                   onDismiss={() => dismiss(r)}
                   onChange={() => openEditor(r)}

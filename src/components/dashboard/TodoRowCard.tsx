@@ -52,7 +52,7 @@ export interface TodoRowCardProps {
   /** the quick-reference card is open against this row */
   peeking: boolean;
   onTick: () => void;
-  onQuickRef: () => void;
+  onQuickRef: (anchor: HTMLElement) => void;
   onSnooze: (anchor: HTMLElement) => void;
   onDismiss: () => void;
   onChange: () => void;
@@ -109,6 +109,7 @@ export const TodoRowCard: React.FC<TodoRowCardProps> = ({
   row, panel, peeking, onTick, onQuickRef, onSnooze, onDismiss,
   onChange, onUndo, onChoose, onSave, onCancelEdit, editor,
 }) => {
+  const refRef = useRef<HTMLButtonElement>(null);
   const snoozeRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const done = !!row.done || panel?.kind === "strip";
@@ -171,7 +172,8 @@ export const TodoRowCard: React.FC<TodoRowCardProps> = ({
             control that moved between rows would be pressed by accident. */}
         <span className="os-tdacts">
           <button type="button" className={`os-tdact${peeking ? " os-tdact--on" : ""}`} data-probe="todo-ref"
-            aria-label={`Quick reference: ${plain(row)}`} aria-pressed={peeking} onClick={onQuickRef}><IcoRef /></button>
+            ref={refRef} aria-label={`Quick reference: ${plain(row)}`} aria-pressed={peeking}
+            onClick={() => refRef.current && onQuickRef(refRef.current)}><IcoRef /></button>
           <button type="button" className="os-tdact" data-probe="todo-snooze" ref={snoozeRef}
             aria-label={`Snooze: ${plain(row)}`}
             onClick={() => snoozeRef.current && onSnooze(snoozeRef.current)}><IcoClock /></button>

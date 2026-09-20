@@ -43,8 +43,8 @@ import { OneScreenFeed } from "./OneScreenFeed";
  * which initialises the SDK at module load; a static import here would put `auth/invalid-api-key`
  * into every dashboard suite's import graph and they would stop COLLECTING.
  */
-const QueryPeekLive = React.lazy(() =>
-  import("./QueryPeekLive").then((m) => ({ default: m.QueryPeekLive })));
+const QueryCardLive = React.lazy(() =>
+  import("./QueryCardLive").then((m) => ({ default: m.QueryCardLive })));
 import { readSeenAt, writeSeenAt } from "../../lib/dashSeen";
 import { OneScreenSkeleton } from "./OneScreenSkeleton";
 import { useSkeleton } from "../../lib/skeletonTiming";
@@ -480,6 +480,10 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             onNavigate={onNavigate}
             openForQueryId={feedOpenQueryId}
             onOpenHandled={() => setFeedOpenQueryId(null)}
+            /* the page owns the one card; the row raises the request and stays lit while it is up */
+            onQuickRef={(queryId, anchor) => setPeek((p) => (
+              p?.queryId === queryId ? null : { entryId: `todo:${queryId}`, queryId, anchor }))}
+            refQueryId={peek?.queryId ?? null}
           />
         </div>
       </div>
@@ -490,22 +494,14 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
         if (!q) return null;
         return (
           <Suspense fallback={null}>
-            <QueryPeekLive
+            <QueryCardLive
               uid={currentUser?.id}
               query={q}
               agent={agents.find((a) => a.id === q.agentId)}
+              manuscript={manuscripts.find((m) => m.id === q.manuscriptId)}
               anchor={peek.anchor}
               onClose={() => setPeek(null)}
               onOpenQuery={(id) => { setPeek(null); onNavigate("queries", id); }}
-              onOpenAgent={(id) => {
-                setPeek(null);
-                try { sessionStorage.setItem("sa.agentReveal", id); } catch { /* private mode */ }
-                onNavigate("agents");
-              }}
-              /* ⚠️ THE PEEK STATES THE NEXT ACTION; THE TO-DO CARD PERFORMS IT. There is one drawer
-                 on this page and one write path through it — a second host here would be a second
-                 answer to what finishing a send involves. */
-              onAct={(id) => { setPeek(null); setFeedOpenQueryId(id); }}
             />
           </Suspense>
         );

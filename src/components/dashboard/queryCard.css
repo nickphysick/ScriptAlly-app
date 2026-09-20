@@ -1,0 +1,174 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The query card — the app's one card for one query, at reference size (ref `todo-row-v2.html`'s
+ * `.qc`).
+ *
+ * ⚠️ THE MOUNT CONSTRUCTION IS RETIRED WITH `QueryPeek`. That drew a parchment rim around a
+ * burgundy frame; this ref draws a plain white card with a coloured top band and a deeper lift, and
+ * the two cannot both be what a query looks like.
+ *
+ * ⚠️ IT DECLARES ITS OWN TOKENS, AND THAT IS NOT DUPLICATION FOR ITS OWN SAKE. The card is
+ * PORTALLED to `document.body` so it can escape its column's clip — which puts it outside
+ * `.os-root`, where every `--dash-*` lives. A `var(--dash-hair)` here resolves to NOTHING and the
+ * declaration is dropped in silence: hairlines simply absent, through a green build and a green
+ * suite. The values are stated on `.qcd` itself so the card carries its palette wherever it mounts.
+ */
+.qcd {
+  /* the palette, stated because `document.body` is not inside `.os-root` — see the note above */
+  --qcd-page: #f5f1eb;
+  --qcd-parchment: #fdf9f5;
+  --qcd-ink: #1c130f;
+  --qcd-ink-70: rgba(28, 19, 15, 0.7);
+  --qcd-ink-45: rgba(28, 19, 15, 0.45);
+  --qcd-hair: rgba(28, 19, 15, 0.11);
+  --qcd-rust: #8a4a3c;
+  --qcd-rose: #f5e6df;
+  --qcd-sand: #f7efe3;
+  --qcd-stone: #e4e1db;
+
+  /* ⚠️ ABOVE THE SHELL'S CHROME AND BELOW A MODAL. The workspace rail sits at 40 and the app's
+     dialogs at 50; a glance must clear the page's furniture without outranking a decision. */
+  z-index: 45;
+  background: #ffffff;
+  border: 1px solid var(--qcd-hair);
+  border-radius: 12px;
+  box-shadow: 0 18px 48px rgba(28, 19, 15, 0.18);
+  overflow: hidden;
+  color: var(--qcd-ink);
+  font-family: var(--font-sans), "Source Sans Pro", sans-serif;
+  /* a column, so the body gives and the foot stays put when the history is long */
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── whose court, and how long ────────────────────────────────────────────────────────────── */
+.qcd-band {
+  flex: none;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcd-ink-70);
+}
+/* ⚠️ THE SAME THREE FILLS THE TO-DO ROW'S BAND USES — one grammar, two sizes. */
+.qcd-band--rose { background: var(--qcd-rose); }
+.qcd-band--sand { background: var(--qcd-sand); }
+.qcd-band--stone { background: var(--qcd-stone); }
+
+/* ── who it is with ──────────────────────────────────────────────────────────────────────── */
+.qcd-who {
+  flex: none;
+  display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center;
+  padding: 14px 16px 12px;
+}
+.qcd-av {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--qcd-page); border: 1px solid var(--qcd-hair);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--qcd-ink-70);
+}
+.qcd-name { min-width: 0; }
+.qcd-name b { display: block; font-size: 17px; font-weight: 600; line-height: 1.15; }
+.qcd-name small {
+  display: block; margin-top: 4px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcd-ink-45);
+}
+.qcd-st {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; padding: 5px 11px 5px 8px; border-radius: 20px;
+  border: 1px solid var(--qcd-hair); background: var(--qcd-page); white-space: nowrap;
+}
+
+/* ── the manuscript ──────────────────────────────────────────────────────────────────────── */
+.qcd-ms {
+  flex: none;
+  margin: 0 16px 12px; padding: 10px 13px;
+  background: var(--qcd-parchment); border: 1px solid var(--qcd-hair); border-radius: 9px;
+}
+.qcd-k {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcd-ink-45);
+  margin: 0 0 4px;
+}
+.qcd-ms b { display: block; font-family: var(--os-type, "Special Elite", cursive); font-weight: 400; font-size: 18px; }
+.qcd-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.qcd-tags span {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8px; letter-spacing: 0.09em; text-transform: uppercase;
+  background: #ffffff; border: 1px solid var(--qcd-hair); border-radius: 4px;
+  padding: 3px 6px; color: var(--qcd-ink-70);
+}
+
+/* ── the tabs ────────────────────────────────────────────────────────────────────────────── */
+.qcd-tabs { flex: none; display: flex; gap: 18px; padding: 0 16px; border-bottom: 1px solid var(--qcd-hair); }
+.qcd-tabs button {
+  font: inherit; font-size: 13px; color: var(--qcd-ink-45); background: none; border: 0;
+  padding: 6px 0 8px; cursor: pointer;
+}
+.qcd-tabs button.on {
+  color: var(--qcd-ink); font-weight: 600;
+  border-bottom: 2px solid var(--qcd-ink); margin-bottom: -1px;
+}
+.qcd-tabs button:focus-visible { outline: 2px solid var(--qcd-rust); outline-offset: -2px; }
+
+/* ── the body: the story, or a tab's facts ───────────────────────────────────────────────── */
+.qcd-tl, .qcd-facts { padding: 12px 16px 6px; min-height: 0; overflow-y: auto; }
+.qcd-none { margin: 4px 0 8px; font-size: 13.5px; color: var(--qcd-ink-45); font-style: italic; }
+
+.qcd-ev {
+  display: grid; grid-template-columns: 16px 1fr auto; gap: 10px; align-items: start;
+  padding: 5px 0 9px; position: relative;
+}
+/* the spine runs from under one mark to the next, and stops at the last */
+.qcd-ev::before {
+  content: ""; position: absolute; left: 7.5px; top: 20px; bottom: -4px;
+  width: 1px; background: var(--qcd-hair);
+}
+.qcd-ev:last-child::before { display: none; }
+.qcd-g { margin-top: 2px; display: flex; align-items: center; justify-content: center; width: 16px; }
+/* ⚠️ THE MARK INSIDE A STATUS ROW IS `StatusDot` AND IS NOT RESTYLED HERE. This `i` is the OTHER
+   branch — a rung with no status (a nudge), which takes a plain mark rather than a status glyph. */
+.qcd-g i { width: 7px; height: 7px; border-radius: 50%; display: block; background: var(--qcd-ink-45); }
+.qcd-ev b { font-size: 14px; font-weight: 600; }
+.qcd-d {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--qcd-ink-45); padding-top: 4px; white-space: nowrap;
+}
+/* the terminus — the one row about the reader rather than about the record */
+.qcd-ev--now b { color: var(--qcd-rust); }
+.qcd-ev--now .qcd-g i { background: var(--qcd-rust); }
+
+.qcd-fact {
+  display: grid; grid-template-columns: 104px 1fr; gap: 10px; align-items: baseline;
+  padding: 6px 0 8px; font-size: 14px;
+}
+.qcd-fact .qcd-k { margin: 0; }
+
+/* ── the way out ─────────────────────────────────────────────────────────────────────────── */
+.qcd-foot {
+  flex: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 16px 12px; border-top: 1px solid var(--qcd-hair); margin-top: 6px;
+}
+.qcd-exp {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcd-ink-45);
+}
+.qcd-foot button {
+  font: inherit; font-size: 13px; color: var(--qcd-ink); background: none; border: 0; padding: 0;
+  cursor: pointer; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;
+}
+.qcd-foot button:hover { color: var(--qcd-rust); }
+
+/* ⚠️ THE ARRIVAL IS SHORT AND IT DOES NOT MOVE THE PAGE. It fades and rises 4px from where it will
+   sit, so nothing beneath it shifts — a glance that announced itself would defeat the point of not
+   being a modal. */
+@keyframes qcdIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.qcd { animation: qcdIn 0.14s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .qcd { animation: none; } }

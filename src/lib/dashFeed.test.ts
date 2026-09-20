@@ -12,7 +12,7 @@
 import { describe, it, expect } from "vitest";
 import { ActivityType, QueryStatus, type Activity, type Agent, type Manuscript, type Query } from "../types";
 import {
-  FEED_DAYS, dayLabelFor, feedDays, feedEntries, newCount, provenanceOf, queriedTimes, sayText,
+  FEED_DAYS, dayLabelFor, describeEvent, feedDays, feedEntries, newCount, provenanceOf, queriedTimes, sayText,
   trustedElapsed,
 } from "./dashFeed";
 
@@ -161,5 +161,59 @@ describe("the elapsed clause is only stated when the record supports it", () => 
       act({ id: "again", queryId: "q1", date: at(10), resultingStatus: QueryStatus.QUERIED }),
     ]);
     expect(map.get("q1")).toBe(new Date(at(40)).getTime());
+  });
+});
+
+/**
+ * ⚠️ TWO SENTENCES THE FEED COULD NOT BUILD BEFORE (to-do row round, 20 Sep).
+ *
+ * A nudge carries no `resultingStatus`, so `describeEvent` returned null and the row fell back to
+ * the activity's STORED `description` — import-and-writer prose in a feed written in one voice.
+ * And a close was phrased as a fact about the record ("No reply recorded from …") where the writer
+ * had just performed the act themselves.
+ */
+describe("the two sentences the record can now carry", () => {
+  const MIN = 60_000;
+
+  it("a nudge is built from the event, never read off the stored description", () => {
+    const say = describeEvent(null, "William Tan", "The Salt Road", 84 * 24 * 60 * MIN, ActivityType.NUDGE_SENT);
+    const words = (say ?? []).map((sg) => sg.t).join("");
+    expect(words).toBe("You nudged William Tan — 84 days since your query");
+    /* the agent is its own run, so a renderer can find them inside the sentence */
+    expect((say ?? []).some((sg) => sg.who && sg.t === "William Tan")).toBe(true);
+    /* and nothing here reads the record's own prose */
+    expect(words).not.toContain("Nudge sent to");
+  });
+
+  it("…and says nothing at all without an agent to name", () => {
+    expect(describeEvent(null, "", "The Salt Road", MIN, ActivityType.NUDGE_SENT)).toBeNull();
+  });
+
+  /**
+   * ⚠️ THE WRITER'S SENTENCE ONLY WHERE THE APP COULD NOT HAVE CLOSED IT. `db.tsx` auto-closes a
+   * query armed with "Mark as no response automatically"; on such a query a `NO_RESPONSE` rung may
+   * be either act and nothing on the record distinguishes them, so the old sentence stands — and it
+   * is true whoever closed it. Both directions are asserted, because asserting only the first would
+   * pass on a build that had lost the distinction entirely.
+   */
+  it("a close names what the writer did — unless the app might have done it", () => {
+    const mine = describeEvent(QueryStatus.NO_RESPONSE, "Marcus Reed", "The Salt Road", 820 * 24 * 60 * MIN, "x", false);
+    expect((mine ?? []).map((sg) => sg.t).join(""))
+      .toBe("You closed your query to Marcus Reed for The Salt Road after 820 days without a reply");
+
+    const armed = describeEvent(QueryStatus.NO_RESPONSE, "Marcus Reed", "The Salt Road", 820 * 24 * 60 * MIN, "x", true);
+    expect((armed ?? []).map((sg) => sg.t).join("")).toContain("No reply recorded from Marcus Reed");
+  });
+
+  /* ⚠️ AND IT NEVER SAYS WHAT THE AGENT DID NOT DO — the reasoning the old sentence guarded, carried
+     over rather than dropped with its wording. They may have replied somewhere this app never saw. */
+  it("neither sentence makes a claim about the agent", () => {
+    for (const armed of [true, false]) {
+      const words = (describeEvent(QueryStatus.NO_RESPONSE, "Marcus Reed", "", MIN, "x", armed) ?? [])
+        .map((sg) => sg.t).join("").toLowerCase();
+      for (const forbidden of ["ignored", "never replied", "didn't reply", "did not reply", "failed to"]) {
+        expect(words, forbidden).not.toContain(forbidden);
+      }
+    }
   });
 });

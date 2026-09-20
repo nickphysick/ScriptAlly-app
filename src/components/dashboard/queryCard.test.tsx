@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The query peek — what opens it, and what it says at the end of the story.
+ * The query card — what opens it, and what it says at the end of the story.
  *
  * ⚠️ THE MODEL IS THE SUBJECT, NOT THE MARKUP. `QueryPeekLive` reaches Firebase and cannot be
  * rendered here (`environment: 'node'`, no emulator), and `QueryPeek` itself portals to
@@ -14,12 +14,13 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { existsSync } from "node:fs";
 import { stripComments } from "../../test/pageSmoke";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (rel: string) => stripComments(readFileSync(resolve(here, rel), "utf8"));
 
-describe("what opens a peek", () => {
+describe("what opens a card", () => {
   const feed = read("OneScreenFeed.tsx");
 
   /**
@@ -43,14 +44,14 @@ describe("what opens a peek", () => {
   });
 
   /** the row stays visible behind the popover — what was clicked is still there to be seen */
-  it("the clicked row is held lit while its peek is open", () => {
+  it("the clicked row is held lit while its card is open", () => {
     expect(feed).toContain("os-fent--open");
     expect(read("oneScreen.css")).toContain(".os-fent--open");
   });
 });
 
 describe("the story's last line", () => {
-  const live = read("QueryPeekLive.tsx");
+  const live = read("QueryCardLive.tsx");
 
   /**
    * ⚠️ THE TERMINUS IS CONDITIONAL HERE AND UNCONDITIONAL IN THE PANE, AND BOTH ARE RIGHT. The task
@@ -63,10 +64,19 @@ describe("the story's last line", () => {
     expect(live).toContain('act.ballHolder === "writer" ? withTerminus(rungs) : rungs');
   });
 
-  /** ⚠️ AND NO ACTION PILL ON A FINISHED QUERY — `ballHolder: null` is the CTA engine's own word for
-   *  a terminal state, and "Record response" on a rejection invites recording what already happened. */
-  it("offers no next action where there is none", () => {
-    expect(live).toContain("...(act.ballHolder ? { primary:");
+  /**
+   * ⚠️ THE CARD OFFERS NO ACTION AT ALL, AND THE PEEK'S DID — this is a decision, not a loss. The
+   * card is a GLANCE; the act belongs to the row that opened it, which has a tick, a snooze and a
+   * dismiss three inches to the left. An ink pill here would be a second place to finish one task,
+   * and the two would eventually disagree about what finishing means.
+   *
+   * `ballHolder` still decides the BAND's court, which is the part a glance needs.
+   */
+  it("states the court and offers no action of its own", () => {
+    expect(live).toContain('act.ballHolder === "writer"');
+    const card = read("QueryCard.tsx");
+    expect(card, "the act belongs to the row, not to the glance").not.toContain("model.primary");
+    expect(card).toContain("Open the full query");
   });
 
   /**
@@ -78,6 +88,34 @@ describe("the story's last line", () => {
     expect(live).toContain('from "../../lib/dockTimeline"');
     expect(live).toContain('from "../../lib/taskPaneJourney"');
     expect(read("../todo/useTaskPaneSession.tsx")).toContain('from "../../lib/dockTimeline"');
+  });
+
+  /**
+   * ⚠️ ONE CARD, MOUNTED ONCE BY THE PAGE (Nick, 20 Sep). The feed's rows and the to-do rows open
+   * the SAME component from the SAME mount — two cards three inches apart, same data, different
+   * chrome, was the fault this replaces. A second mount would also make "one open at a time" a rule
+   * two components had to keep rather than something the structure guarantees.
+   */
+  it("is mounted once, and both surfaces raise to it", () => {
+    const dash = read("OneScreenDashboard.tsx");
+    expect((dash.match(/<QueryCardLive/g) ?? []).length, "one mount, not one per surface").toBe(1);
+    /* the feed raises through onPeek; the to-do row raises through onQuickRef */
+    expect(dash).toContain("onPeek={");
+    expect(dash).toContain("onQuickRef={");
+    /* and the retired peek is gone, file and reference */
+    expect(dash).not.toContain("QueryPeek");
+    expect(existsSync(resolve(here, "QueryPeek.tsx")),
+      "a replacement that is ADDED leaves the original reachable").toBe(false);
+  });
+
+  /** the tabs switch — a tab row that did not would teach the card holds more than it shows */
+  it("the three tabs are live", () => {
+    const card = read("QueryCard.tsx");
+    expect(card).toContain("useState<QueryCardTab>");
+    /* ⚠️ THE TABLE, NOT THE RENDERED ATTRIBUTE — the probe is built by interpolation, so a literal
+       `qcd-tab-tracking` appears nowhere in the source and a `toContain` on one asserts nothing. */
+    expect(card).toContain("data-probe={`qcd-tab-${t.key}`}");
+    for (const t of ["tracking", "agent", "materials"]) expect(card).toContain(`"${t}"`);
   });
 
   /** and the AUTHORITATIVE store, not the feed's own best-effort projection twin */

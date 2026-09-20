@@ -69,12 +69,24 @@ describe("describeEvent", () => {
       .toBe("Ruth Alderman passed on, 24 days after you queried");
   });
 
-  /* ⚠️ NO_RESPONSE IS A FACT ABOUT THE RECORD, NOT ABOUT THE AGENT. They may well have replied
-     somewhere this app never saw; the app reports and does not appraise. */
-  it("does not accuse anyone of ignoring the writer", () => {
-    const t = text(describeEvent(QueryStatus.NO_RESPONSE, "Ruth Alderman", "Murphy's Day Out", 90 * 86_400_000));
-    expect(t).toContain("No reply recorded from Ruth Alderman");
-    expect(t).not.toMatch(/ignored|never replied|failed to|did not bother/i);
+  /**
+   * ⚠️ NO_RESPONSE NEVER MAKES A CLAIM ABOUT THE AGENT. They may well have replied somewhere this
+   * app never saw; the app reports and does not appraise.
+   *
+   * ⚠️ RETARGETED, AND THE LAW IS THE HALF THAT SURVIVED (to-do row round, 20 Sep). The sentence's
+   * SUBJECT changed — closing is the writer's act and the feed is written in their voice, so it now
+   * reads "You closed your query to …" where the app could not have closed it itself. What did not
+   * change, and is what this case was really holding, is that neither wording says what the agent
+   * did not do. So the accusation sweep runs over BOTH branches and the subject is asserted
+   * separately.
+   */
+  it("does not accuse anyone of ignoring the writer, in either wording", () => {
+    const mine = text(describeEvent(QueryStatus.NO_RESPONSE, "Ruth Alderman", "Murphy's Day Out", 90 * 86_400_000, "x", false));
+    const app = text(describeEvent(QueryStatus.NO_RESPONSE, "Ruth Alderman", "Murphy's Day Out", 90 * 86_400_000, "x", true));
+    expect(mine).toContain("You closed your query to Ruth Alderman");
+    expect(app, "where the app may have closed it, it does not say the writer did")
+      .toContain("No reply recorded from Ruth Alderman");
+    for (const t of [mine, app]) expect(t).not.toMatch(/ignored|never replied|failed to|did not bother/i);
   });
 
   /* ⚠️ THE CLAUSES THE REF WRITES AND WE CANNOT DERIVE. Named individually, because the failure
