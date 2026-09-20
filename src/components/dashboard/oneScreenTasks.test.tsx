@@ -17,7 +17,7 @@
  */
 import { describe, it, expect } from "vitest";
 import React from "react";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { cssRule, cssRuleCount } from "../../test/cssRule";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -30,8 +30,12 @@ const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
 /* the shared ANCHORED reader — see src/test/cssRule.ts for the substring fault it closes */
 const rule = (sel: string) => cssRule(cssRules, sel, "oneScreen.css");
 
-const panel = readFileSync(resolve(__dirname, "./OneScreenTasks.tsx"), "utf8")
+const here = __dirname;
+/* ⚠️ COMMENTS STRIPPED BEFORE ANYTHING IS ASSERTED — this repo's prose names every class it has
+   ever retired, so a raw read reports an obituary as a live reference. */
+const read = (f: string) => readFileSync(resolve(here, f), "utf8")
   .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+const panel = read("OneScreenTasks.tsx");
 
 /* ══ THE DERIVATIONS ═════════════════════════════════════════════════════════════════════════ */
 
@@ -88,14 +92,18 @@ describe("the card derives nothing about a task", () => {
    * about a query. So the law is kept by DELEGATION, and this asserts the delegation rather than a
    * second copy of the glyph — the failure it forecloses is this card hand-drawing a status again.
    */
+  /* ⚠️ RETARGETED (to-do row round): the markup moved into `TodoRowCard`, so the claim is asserted
+     where the pill is now rendered. The LAW is unchanged — a query status has one drawing, and this
+     card delegates to it rather than keeping a second. */
   it("⚠️ a status is drawn by StatusDot — here, through the shared pill", () => {
-    expect(panel).toContain("<StatePill");
+    const row = read("TodoRowCard.tsx");
+    expect(row).toContain("<StatePill");
     /* and NOT redrawn: no glyph of its own, no tile scoping the dot's tokens to a dark ground */
-    expect(panel).not.toContain("<StatusDot");
+    expect(row, "the card must not redraw a status of its own").not.toContain("<StatusDot");
     expect(panel).not.toMatch(/["\s`]os-tdico["\s`]/);
     expect(cssRuleCount(cssRules, ".os-tdico")).toBe(0);
     /* a row with no query passes `status: null`, which is the pill's own stone branch */
-    expect(panel).toContain("r.status");
+    expect(row).toContain("row.status");
   });
 });
 
@@ -168,35 +176,28 @@ describe("the rendered card", () => {
      panel put `auth/invalid-api-key` into ELEVEN dashboard suites and they stopped COLLECTING — a
      failure that reads as "no tests found" rather than as a red. Asserted so nobody flattens it
      back to a static import and rediscovers that the hard way. */
-  it("⚠️ the drawer mounts TaskPane and its session, by import — and is loaded lazily", () => {
-    expect(panel).toContain("React.lazy(");
-    expect(panel).toContain('import("./DashTaskDrawer")');
-    expect(panel, "a static import would drag Firebase into every dashboard suite")
-      .not.toMatch(/^import .*DashTaskDrawer/m);
-    const drawer = readFileSync(resolve(__dirname, "./DashTaskDrawer.tsx"), "utf8");
-    expect(drawer).toContain('from "../todo/TaskPane"');
-    expect(drawer).toContain('from "../todo/useTaskPaneSession"');
-    expect(drawer).toContain('from "../shared/SlideOver"');
-    expect(drawer).toContain("useTaskPaneSession(");
-    expect(drawer).toContain("<TaskPane");
+  /**
+   * ⚠️ RETARGETED, AND THE SUBJECT IS GONE RATHER THAN MOVED (to-do row round). These two cases
+   * asserted that the dashboard's completion surface was the To-do page's own pane, mounted whole
+   * and lazily. The pane is no longer opened from the dashboard at all — the row completes in
+   * place — so what survives of the law is the half that still has a subject: **the dashboard and
+   * the To-do page write the same records through the same function**. That is stronger than the
+   * mount claim ever was, because it is about the write rather than about the component.
+   */
+  it("⚠️ the dashboard writes through `useTaskCommit`, exactly as the To-do page does", () => {
+    const writer = read("DashTaskCommit.tsx");
+    expect(writer).toContain('from "../todo/useTaskCommit"');
+    expect(writer).toContain("useTaskCommit({");
+    /* and it is the ONLY write path this card has — no second door */
+    expect(panel, "the card must not write directly").not.toContain('from "../../lib/db"');
   });
 
-  /**
-   * ⚠️ ONE DRAWER ON THE PAGE, AND THE FEED ASKS THIS CARD TO OPEN IT. The feed is a sibling in
-   * another column; its "Send it" link hands over a QUERY id, which is resolved HERE against the
-   * live board — the only place that knows which card a query is currently raising. A second drawer
-   * in the feed would be a second answer to what finishing a send involves.
-   *
-   * ⚠️ AND THE OPEN CARD IS RESOLVED FROM THE BOARD EVERY RENDER, never held as a copy: a card that
-   * leaves the board while its drawer is open closes it, rather than stranding a pane over a task
-   * that no longer exists.
-   */
-  it("⚠️ the drawer opens from two selectors and one board", () => {
-    expect(panel).toContain("openForQueryId");
-    expect(panel).toMatch(/live\.find\(\(c\) => c\.key === openKey\)/);
-    expect(panel).toMatch(/live\.find\(\(c\) => c\.relatedRecordId === openForQueryId\)/);
-    expect(panel).toContain("onOpenHandled");
+  it("⚠️ the retired drawer is gone, rule and element", () => {
+    expect(panel).not.toContain("DashTaskDrawer");
+    expect(existsSync(resolve(here, "DashTaskDrawer.tsx")),
+      "a replacement that is ADDED leaves the original reachable").toBe(false);
   });
+
 });
 
 /* ══ THE SHEET ═══════════════════════════════════════════════════════════════════════════════ */
@@ -206,20 +207,28 @@ describe("the card's stylesheet", () => {
      fixed, so a long task line wraps rather than squeezing the figure it is explaining.
      ⚠️ AND THE ROW ALIGNS TO ITS TOP, NOT ITS CENTRE: the sentence now carries a meta line beneath
      it, so a centred row would float the tick and the figure against a two-line middle column. */
-  it("the row is a three-column grid: the tick, the sentence, the count", () => {
+  /* ⚠️ FIVE COLUMNS SINCE THE ROW BECAME A SLIM QUERY CARD (`todo-journeys.html`): the band, the
+     tick, the avatar, the sentence and the figure. Only the sentence gives. */
+  it("the row is a five-column grid: band, tick, avatar, sentence, count", () => {
     const r = rule(".os-tdrow");
-    expect(r).toContain("grid-template-columns: 22px 1fr auto");
-    expect(r).toContain("align-items: start");
+    expect(r).toContain("grid-template-columns: var(--td-band) 22px 38px 1fr auto");
+    expect(r).toContain("align-items: center");
     expect(rule(".os-tdbox")).toContain("width: 22px");
     expect(rule(".os-tdbox")).toContain("height: 22px");
+    expect(rule(".os-tdav"), "the avatar is the card's own circle at row size").toContain("width: 38px");
     expect(rule(".os-tdt")).toContain("min-width: 0");
   });
 
-  /* ⚠️ THE SEPARATOR IS A TOP BORDER AND THE FIRST ROW HAS NONE — so the list opens against the
-     header's own air rather than under a second hairline. */
-  it("rows are separated by one hairline, and the first row carries none", () => {
-    expect(rule(".os-tdrow")).toContain("border-top: 1px solid var(--dash-hair)");
-    expect(rule(".os-tdrow:first-of-type")).toContain("border-top: 0");
+  /* ⚠️ THE HAIRLINE SEPARATOR IS RETIRED WITH THE LIST LINE. Rows are cards now: each carries its
+     own border on all four sides and they are separated by 8px of ground, so a shared top border
+     would draw a second line against the card above it. */
+  it("rows are separated by ground, not by a shared hairline", () => {
+    const r = rule(".os-tdrow");
+    expect(r).toContain("border: 1px solid var(--dash-hair)");
+    expect(r).toContain("margin-bottom: 8px");
+    expect(r).toContain("border-radius: var(--td-radius)");
+    expect(cssRuleCount(cssRules, ".os-tdrow:first-of-type"),
+      "the first-row carve-out went with the shared border").toBe(0);
   });
 
   /**
@@ -246,10 +255,12 @@ describe("the card's stylesheet", () => {
   it("the tick is a 22px control, and its filled state is ink with a cream mark", () => {
     const box = rule(".os-tdbox");
     expect(box).toContain("border-radius: 7px");
-    expect(box).toContain("border: 1.5px solid rgba(28, 19, 15, 0.3)");
-    expect(box).toContain("background: #fff");
-    expect(rule(".os-tdbox--done")).toContain("background: var(--dash-ink)");
-    expect(panel).toContain('data-probe="todo-tick"');
+    expect(box).toContain("border: 1.5px solid rgba(28, 19, 15, 0.28)");
+    expect(box).toContain("background: #ffffff");
+    /* ⚠️ `--on`, NOT `--done` — the box is ON while a quiet row's menu is open and nothing has been
+       written yet, so the class names the CONTROL's state rather than the task's. */
+    expect(rule(".os-tdbox--on")).toContain("background: var(--dash-ink)");
+    expect(read("TodoRowCard.tsx")).toContain('data-probe="todo-tick"');
   });
 
   /**
@@ -258,19 +269,20 @@ describe("the card's stylesheet", () => {
    * check and nowhere to undo from.
    */
   it("a completed row strikes its sentence through and keeps its meta line legible", () => {
-    expect(rule(".os-tdrow--done .os-tdt")).toContain("text-decoration: line-through");
+    expect(rule(".os-tdrow--done .os-tdtx")).toContain("text-decoration: line-through");
     /* ⚠️ THE STRIKE MUST NOT REACH THE META LINE — it is the receipt, and a struck receipt reads as
        though the undo were spent too. `text-decoration` inherits into descendants, so this is an
        explicit reversal rather than an omission. */
-    expect(rule(".os-tdrow--done .os-tdmeta")).toContain("text-decoration: none");
-    expect(panel).toContain('data-probe="todo-undo"');
+    expect(rule(".os-tdrow--done .os-tdl2")).toContain("text-decoration: none");
+    expect(read("TodoRowCard.tsx")).toContain('data-probe="todo-undo"');
   });
 
   /* ⚠️ URGENT IS INK, NOT A SECOND PAPER — the row already carries a state on its tile, and a tinted
      row beside a tinted tile gives one fact two treatments. */
   it("an urgent row rusts its day count and nothing else", () => {
-    expect(rule(".os-tdrow--urgent .os-tdn")).toContain("color: var(--dash-rust)");
+    expect(rule(".os-tdn--hot b")).toContain("color: var(--dash-rust)");
     expect(cssRuleCount(cssRules, ".os-tdrow--urgent")).toBe(0);
+    expect(cssRuleCount(cssRules, ".os-tdrow--hot")).toBe(0);
   });
 
   /* ⚠️ THE FOOT IS PINNED WITH `margin: auto 0 0`, NOT POSITIONED — the card is a flex column, so

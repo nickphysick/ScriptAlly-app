@@ -18,8 +18,10 @@
  * "reply expected" reads it, and a second derivation of a reply window is how two surfaces come to
  * disagree about when a reply is due.
  */
-import { QueryStatus, type Query } from "../types";
+import { ActivityType, QueryStatus, type Activity, type Query } from "../types";
 import type { BoardCard } from "./todoBoard";
+import { CATEGORIES, taskCategory, type Category } from "./todoCategory";
+import { agentInitials } from "./agentDisplay";
 import { listRowInputs, type TaskData } from "./taskCardFacts";
 import { ticketFacts } from "./ticketFacts";
 import { STAGE_RESPONSE_WINDOWS } from "./queryAmbient";
@@ -73,6 +75,58 @@ export interface TodoDone {
   undo?: () => void;
 }
 
+/**
+ * ⚠️ THE DASHBOARD'S WORDING FOR THE FIVE SETS `taskCategory` ALREADY DECIDES — a fourth surface's
+ * labels, not a fourth membership. The board column calls `req` "Agent requests" because a column
+ * names a KIND of thing; a dashboard group says what is HAPPENING, so the same set reads "Agents
+ * are waiting". `quiet` and `house` come out identical to `CATEGORY_LABEL`, which is the tell that
+ * only the two were renamed.
+ *
+ * ⚠️ `yours` IS NAMED EVEN THOUGH THE BRIEF LISTS FOUR GROUPS. A writer's own note filed under
+ * Housekeeping would be the app calling their work its own record-keeping — so it gets the label
+ * the rest of the app already gives it. A sixth category fails the lock below rather than landing
+ * silently in whichever group happens to be last.
+ */
+export const DASH_GROUP_LABEL: Record<Category, string> = {
+  req: "Agents are waiting",
+  nudge: "Worth a nudge",
+  quiet: "Gone quiet",
+  house: "Housekeeping",
+  yours: "Your tasks",
+};
+
+/** the order the card stacks them in — what needs you, then what is worth doing, then the rest */
+export const DASH_GROUP_ORDER: readonly Category[] = ["req", "nudge", "quiet", "house", "yours"];
+
+/** the band down the row's left edge, and the state pill's fill: one token per category */
+export type TodoBand = "rose" | "sand" | "stone";
+const BAND: Record<Category, TodoBand> = {
+  /* the ball is with the writer */
+  req: "rose",
+  /* out with the agency, and their window has closed */
+  nudge: "sand",
+  /* past prompting */
+  quiet: "stone",
+  /* neither is about a query's court at all */
+  house: "stone",
+  yours: "stone",
+};
+
+/**
+ * How many times this query has been nudged.
+ *
+ * ⚠️ DERIVED, BECAUSE NOTHING STORES IT. `logNudge` writes `nudgeDate` and `lastNudgeSentDate` and
+ * no counter; the count is the number of `NUDGE_SENT` activities against the query, which is the
+ * same filter the Calendar and `useTaskCommit`'s undo already use. A stored counter would be a
+ * fourth thing to keep in step with three existing readers of the same rows.
+ */
+export const nudgeCount = (queryId: string | null, activities: readonly Activity[]): number =>
+  queryId ? activities.filter((a) => a.queryId === queryId && a.activityType === ActivityType.NUDGE_SENT).length : 0;
+
+/** "nudged twice" — the count in words, absent at zero rather than "nudged 0 times" */
+export const nudgePhrase = (n: number): string | null =>
+  n <= 0 ? null : n === 1 ? "nudged once" : n === 2 ? "nudged twice" : `nudged ${n} times`;
+
 export interface TodoRow {
   /** the board card's own key — the drawer opens on it */
   key: string;
@@ -87,6 +141,34 @@ export interface TodoRow {
   /** the day figure at the right; null where nothing is being counted */
   days: number | null;
   urgent: boolean;
+  /** which group the row stacks under — `taskCategory`'s, never re-tested here */
+  category: Category;
+  /** the left band and the pill's fill */
+  band: TodoBand;
+  /** the agent's initials for the avatar — the app's own display rule, agency-less records included */
+  initials: string;
+  /**
+   * The mono fact line: the agency, the ticket's own date phrase, and the nudge count where there
+   * is one — `Bloomsbury Quill · quiet since 11 Jun · nudged twice`.
+   *
+   * ⚠️ IT REUSES `meta` VERBATIM rather than re-phrasing the date. The ticket says "Their window
+   * closed 29 Jul" where the ref draws "window closed 29 Jul"; one word, and restating it here
+   * would be a second vocabulary for one date — the fault this row's own `meta` comment names.
+   */
+  fact: string;
+  /** the manuscript, set in the typewriter face after the task — absent where the card names none */
+  ms: string | null;
+  /** the board's own task type — what the editor pre-fills its materials from */
+  taskType: string | undefined;
+  /**
+   * The reply window in DAYS, the agency's where they state one.
+   *
+   * ⚠️ IT CARRIES THE NUMBER, NOT THE `stated` FLAG, BECAUSE THE ROW NEVER PRINTS IT. The editor
+   * fills a date field from it and the strip counts forward from it; neither says "their window",
+   * so nothing here can present the house assumption as something the agency told us. Any surface
+   * that wants to SAY it reads `replyWindow` and gets `stated` with it.
+   */
+  windowDays: number;
   /**
    * ⚠️ HELD, NEVER DERIVED. `todoRows` always returns `null` here — a completion is something that
    * happened in this session, not a fact about the board, and the board has by then stopped raising
@@ -129,6 +211,12 @@ export const todoRows = (i: TodoRowsInput): TodoRow[] =>
       : undefined;
     const status = (q?.status as QueryStatus) ?? null;
     const days = inputs.days;
+    const category = taskCategory(c);
+    const meta = inputs.anchorDate ? `${facts.dateKey} ${facts.dateValue}` : (c.record || facts.spanKey);
+    /* ⚠️ THE QUERY'S AGENT, NOT THE CARD'S, WHERE THEY DIFFER — the card carries `agentId` for the
+       housekeeping rules, and a query's agent is the one whose initials belong beside it. */
+    const agent = i.data.agents.find((a) => a.id === (q?.agentId ?? c.agentId));
+    const nudged = nudgePhrase(nudgeCount(c.relatedRecordId ?? null, i.data.activities));
     return {
       key: c.key,
       queryId: c.relatedRecordId ?? null,
@@ -137,10 +225,18 @@ export const todoRows = (i: TodoRowsInput): TodoRow[] =>
       /* ⚠️ THE TICKET'S OWN WORDS — "Asked on 22 August". A second vocabulary for the same fact is
          how two surfaces come to call one date two things. Where there is no date the ticket says so
          with its em dash, and the row states the card's own meta line instead. */
-      meta: inputs.anchorDate ? `${facts.dateKey} ${facts.dateValue}` : (c.record || facts.spanKey),
+      meta,
       days,
       done: null,
       urgent: i.isUrgent ? i.isUrgent(c) : false,
+      category,
+      band: BAND[category],
+      initials: agentInitials(agent),
+      /* the agency is `listRowInputs`', so the row and the ticket name one agency one way */
+      fact: [inputs.agency, meta, nudged].filter(Boolean).join(" · "),
+      ms: c.msTitle ?? null,
+      taskType: c.taskType,
+      windowDays: replyWindow(status, agent?.responseTimeWeeks).days,
     };
   });
 
@@ -152,3 +248,24 @@ export const todoRows = (i: TodoRowsInput): TodoRow[] =>
  * everything (the foot then states the total and the link, never "0 more").
  */
 export const moreWaiting = (total: number, shown: number): number => Math.max(0, total - shown);
+
+export interface TodoGroup {
+  key: Category;
+  label: string;
+  rows: TodoRow[];
+}
+
+/**
+ * The rows, stacked under their group headings, EMPTY GROUPS DROPPED.
+ *
+ * ⚠️ IT PARTITIONS AN ALREADY-ORDERED LIST rather than sorting within each group — so whatever
+ * order the board handed over survives inside a heading, and a second ordering pass cannot come to
+ * disagree with the first. The same shape the agent list's grouping uses.
+ */
+export const todoGroups = (rows: readonly TodoRow[]): TodoGroup[] =>
+  DASH_GROUP_ORDER
+    .map((key) => ({ key, label: DASH_GROUP_LABEL[key], rows: rows.filter((r) => r.category === key) }))
+    .filter((g) => g.rows.length > 0);
+
+/** every category has a heading — asserted rather than assumed, so a sixth cannot arrive unnamed */
+export const DASH_GROUPS_COVER_CATEGORIES = CATEGORIES.every((c) => DASH_GROUP_ORDER.includes(c));

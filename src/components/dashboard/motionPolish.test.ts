@@ -157,7 +157,7 @@ describe("search — focus must not resize the field", () => {
 /**
  * ⚠️ THE LAZY DRAWER, GUARDED FROM A FILE THAT IMPORTS NOTHING (dashboard redesign, Phase 5).
  *
- * `OneScreenTasks` loads `DashTaskDrawer` through `React.lazy`, because the drawer reaches
+ * `OneScreenTasks` loads its WRITING half through `React.lazy`, because that half reaches
  * `useTaskCommit` → `lib/db` → `lib/firebase`, which initialises the Firebase SDK at MODULE LOAD.
  * A static import puts `auth/invalid-api-key` into the graph of every suite that renders the
  * dashboard, and those suites then fail to COLLECT.
@@ -172,11 +172,27 @@ describe("the dashboard's to-do drawer stays out of the load path", () => {
   const panel = readFileSync(join(__dirname, "OneScreenTasks.tsx"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
-  it("⚠️ DashTaskDrawer is React.lazy, never a static import", () => {
+  /**
+   * ⚠️ RETARGETED, SAME LAW (to-do row round, 20 Sep). The claim is *the panel does not pull the
+   * write layer into its own module graph* — it was written against `DashTaskDrawer`, which this
+   * round retires: the dashboard commits from the row now, so the two modules that reach the db
+   * context are `DashTaskCommit` (the writer) and `DashSnooze` (the dial's flag write). Both are
+   * asserted, because naming only one would leave the other free to be imported statically.
+   */
+  it("⚠️ every module that reaches the write layer is React.lazy, never a static import", () => {
     expect(panel).toContain("React.lazy(");
-    expect(panel).toContain('import("./DashTaskDrawer")');
-    expect(panel, "a static import drags the Firebase SDK into every dashboard suite")
-      .not.toMatch(/^import[^\n]*DashTaskDrawer/m);
+    for (const m of ["DashTaskCommit", "DashSnooze"]) {
+      expect(panel, `${m} must be lazy`).toContain(`import("./${m}")`);
+      /* ⚠️ `import type` IS NOT A STATIC IMPORT — it is erased before the bundle exists, so it
+         pulls no module in. What must not appear is a VALUE import; asserting against the word
+         alone would forbid the type the panel legitimately reads from the writer's own contract. */
+      for (const line of panel.split("\n").filter((l) => l.startsWith("import") && l.includes(m))) {
+        expect(line, `a value import of ${m} drags the Firebase SDK into every dashboard suite`)
+          .toMatch(/^import type /);
+      }
+    }
+    /* and the retired drawer is gone rather than merely unmounted */
+    expect(panel).not.toContain("DashTaskDrawer");
   });
 
   /* ⚠️ AND THE PANEL ITSELF MUST NOT REACH THE WRITE LAYER BY ANOTHER DOOR — the point is the

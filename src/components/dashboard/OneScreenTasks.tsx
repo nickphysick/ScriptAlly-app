@@ -20,7 +20,7 @@
  * drawer on whichever card that query is raising — one drawer on the page, one session, one write
  * path. A second one in the feed would be a second answer to what finishing a send involves.
  */
-import React, { Suspense, useMemo, useState } from "react";
+import React, { Suspense, useMemo, useRef, useState } from "react";
 
 /**
  * ⚠️ LAZY, AND IT IS NOT AN OPTIMISATION. The drawer reaches `useTaskCommit` → `lib/db` →
@@ -29,11 +29,17 @@ import React, { Suspense, useMemo, useState } from "react";
  * of ELEVEN dashboard suites and they stopped COLLECTING — the failure that reads as "no tests
  * found" rather than as a red.
  */
-const DashTaskDrawer = React.lazy(() =>
-  import("./DashTaskDrawer").then((m) => ({ default: m.DashTaskDrawer })));
+/**
+ * ⚠️ LAZY, AND NOT AS AN OPTIMISATION — see the module's own header. `useTaskCommit` reaches
+ * `lib/db` → `lib/firebase`, which initialises the SDK at module load and would stop eleven
+ * dashboard suites COLLECTING.
+ */
+const DashTaskCommit = React.lazy(() =>
+  import("./DashTaskCommit").then((m) => ({ default: m.DashTaskCommit })));
+/** ⚠️ LAZY FOR THE SAME REASON — the dial reads and writes the task flag through the db context. */
+const DashSnooze = React.lazy(() =>
+  import("./DashSnooze").then((m) => ({ default: m.DashSnooze })));
 import { Activity, Agent, Manuscript, ManuscriptVersion, Query, Task, TaskFlag, User, UserTask } from "../../types";
-import { StatePill } from "./StatePill";
-import { getStatusLabel } from "../StatusPill";
 import type { TodoTitle } from "../../lib/dashTodo";
 import { OneScreenPanel } from "./OneScreenPanel";
 import { assembleBoardColumns } from "../../lib/todoColumns";
@@ -43,7 +49,10 @@ import {
 import { BoardCard } from "../../lib/todoBoard";
 import { isUrgentCard } from "../../lib/todoCategory";
 import { listRowInputs } from "../../lib/taskCardFacts";
-import { moreWaiting, todoRows, type TodoDone, type TodoRow } from "../../lib/dashTodo";
+import { moreWaiting, todoGroups, todoRows, type TodoDone, type TodoRow } from "../../lib/dashTodo";
+import { TodoRowCard, journeyFor, type RowPanel } from "./TodoRowCard";
+import { TodoRowEditor, blankDraft, draftToValues, stripFor, type RowDraft } from "./TodoRowEditor";
+import type { CommitRequest } from "./DashTaskCommit";
 import { localYMD } from "../../lib/shellSidebar";
 
 export interface OneScreenTasksProps {
@@ -81,16 +90,12 @@ export interface OneScreenTasksProps {
   onOpenHandled?: () => void;
 }
 
-/** The row's sentence as plain words — the tick's accessible name cannot carry the italic run. */
-const plain = (t: TodoTitle): string => `${t.pre}${t.who}${t.post}`.replace(/\s+/g, " ").trim();
-
 export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
   loading, tasks, queries, agents, manuscripts, userTasks, activities, taskFlags, currentUser,
   now, dayOne = false, empty = false, versions = [], activeManuscript = null,
   onSeeAll, onAddManuscript, onAddAgent, onNavigate,
   openForQueryId, onOpenHandled,
 }) => {
-  const [openKey, setOpenKey] = useState<string | null>(null);
   /**
    * ⚠️ HELD, BECAUSE THE BOARD STOPS RAISING THE CARD THE MOMENT THE WRITE LANDS. A row that vanishes
    * as it is ticked leaves the writer nothing to check and nowhere to undo from — so the completion
@@ -159,11 +164,107 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
     }
   };
 
+  /* ── what each row is showing, and what it has drafted ─────────────────────────────────────
+     ⚠️ KEYED BY ROW, NOT A SINGLE "open" — two rows can hold a strip at once (tick one, tick the
+     next), and a single slot would silently drop the first receipt the moment the second landed. */
+  const [panels, setPanels] = useState<Record<string, RowPanel>>({});
+  const [drafts, setDrafts] = useState<Record<string, RowDraft>>({});
+  const [undos, setUndos] = useState<Record<string, (() => void) | undefined>>({});
+  const [peekKey, setPeekKey] = useState<string | null>(null);
+  const [snooze, setSnooze] = useState<{ key: string; anchor: HTMLElement } | null>(null);
+  const [request, setRequest] = useState<CommitRequest | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+  const seq = useRef(0);
+  const ask = (r: CommitRequest) => { setNote(null); setRequest(r); };
+
+  const closePanel = (key: string) => setPanels((ps) => { const n = { ...ps }; delete n[key]; return n; });
+
+  const cardFor = (key: string) => live.find((c) => c.key === key);
+
+  /**
+   * ⚠️ THE FEED'S "Send it" RUNS THIS CARD'S OWN JOURNEY — it does not open a second surface.
+   * It used to open the task drawer, which is retired with this round; the contract it was keeping
+   * is unchanged and is now stronger, because the feed and the row commit through one function
+   * rather than through one component. The request arrives as a QUERY id and is resolved here,
+   * against the live board — the only place that knows which card a query is currently raising.
+   */
+  React.useEffect(() => {
+    if (!openForQueryId) return;
+    const r = rows.find((x) => x.queryId === openForQueryId);
+    if (r) tick(r);
+    onOpenHandled?.();
+  }, [openForQueryId]);
+
+  /**
+   * ⚠️ THE TICK'S MEANING, AND NOTHING IS WRITTEN UNTIL IT IS UNAMBIGUOUS. `sent` and `nudge` have
+   * one honest completion each, so they commit with the defaults `useTaskCommit` owns; `choose`
+   * has three and opens the menu; housekeeping is a gap in a record and goes to the page where the
+   * gap is filled. A ticked row is inert — its Undo is the way back.
+   */
   const tick = (r: TodoRow) => {
-    if (r.done) return;
-    const c = live.find((x) => x.key === r.key);
-    if (c?.hk) openGap(c);
-    else setOpenKey(r.key);
+    if (panels[r.key]) return;
+    const c = cardFor(r.key);
+    if (!c) return;
+    const j = journeyFor(r.category);
+    if (j === "choose") { setPanels((ps) => ({ ...ps, [r.key]: { kind: "menu" } })); return; }
+    if (j === "page") { openGap(c); return; }
+    seq.current += 1;
+    ask({ id: seq.current, kind: "quick", card: c });
+  };
+
+  /** the quiet menu — nothing was written when it opened, and two of the three write now */
+  const choose = (r: TodoRow, choice: "close" | "nudge" | "snooze") => {
+    const c = cardFor(r.key);
+    if (!c) return;
+    if (choice === "snooze") {
+      closePanel(r.key);
+      const el = document.querySelector<HTMLElement>(`[data-probe="todo-row"][data-key="${CSS.escape(r.key)}"] [data-probe="todo-snooze"]`);
+      if (el) setSnooze({ key: r.key, anchor: el });
+      return;
+    }
+    seq.current += 1;
+    /* ⚠️ BOTH GO THROUGH `commit`, WHICH IS THE ONE WRITE PATH. "Close it" is the `no_reply`
+       reason — the same `CLOSE_REASONS[0]` the pane's close journey uses — and "Nudge once more"
+       is a nudge like any other, so neither is a second way of doing a thing the app already does. */
+    ask({
+      id: seq.current, kind: "values", card: c,
+      values: draftToValues(blankDraft(r), choice === "close" ? "close" : "nudge"),
+    });
+  };
+
+  const openEditor = (r: TodoRow) => {
+    setDrafts((ds) => ({ ...ds, [r.key]: ds[r.key] ?? blankDraft(r) }));
+    setPanels((ps) => ({ ...ps, [r.key]: { kind: "edit", mode: journeyFor(r.category) === "nudge" ? "nudge" : "sent" } }));
+  };
+
+  const save = (r: TodoRow, mode: "sent" | "nudge") => {
+    const c = cardFor(r.key);
+    if (!c) return;
+    seq.current += 1;
+    ask({ id: seq.current, kind: "values", card: c, values: draftToValues(drafts[r.key] ?? blankDraft(r), mode) });
+  };
+
+  /**
+   * ⚠️ UNDO REVERSES THE WRITE AND RESTORES THE ROW — in that order, and the row only comes back if
+   * the reversal is actually available. An Undo that put the row back without reversing anything
+   * would be the worst of the three outcomes: it looks like it worked.
+   */
+  const undo = (r: TodoRow) => {
+    const fn = undos[r.key];
+    if (fn) fn();
+    closePanel(r.key);
+    setUndos((u) => { const n = { ...u }; delete n[r.key]; return n; });
+    setHeld((h) => { const n = { ...h }; delete n[r.key]; return n; });
+  };
+
+  /* ⚠️ ONE CLICK, NO DIALOGUE, AND THE ROW KEEPS THE WAY BACK. Dismissing is the app's own
+     `dismissTask` — the same writer the To-do page uses — so "stop suggesting this nudge" means the
+     same thing on both pages. */
+  const dismiss = (r: TodoRow) => {
+    const c = cardFor(r.key);
+    if (!c?.taskType || !c.relatedRecordId) return;
+    seq.current += 1;
+    ask({ id: seq.current, kind: "dismiss", card: c });
   };
 
   /* ⚠️ THE ROW IS SNAPSHOT BEFORE THE BOARD ANSWERS, not looked up afterwards — by the time the
@@ -174,14 +275,6 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
     if (row) setHeld((h) => ({ ...h, [key]: { row: { ...row, done }, at: Math.max(at, 0) } }));
   };
 
-  /* ⚠️ THE OPEN CARD IS RESOLVED AGAINST THE LIVE BOARD, so a card that leaves the board while its
-     drawer is open closes it rather than stranding a pane over a task that no longer exists. Two
-     selectors, one card: the row the writer clicked, and the query the feed asked for. */
-  const openCard = useMemo(
-    () => live.find((c) => c.key === openKey)
-      ?? (openForQueryId ? live.find((c) => c.relatedRecordId === openForQueryId) ?? null : null),
-    [live, openKey, openForQueryId]);
-  const closeDrawer = () => { setOpenKey(null); onOpenHandled?.(); };
 
   /**
    * ⚠️ DERIVED, NEVER STORED, AND `assembleBoardColumns` NEVER SEES IT. These five rows are a
@@ -258,50 +351,37 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
         ) : rows.length === 0 ? (
           <div className="os-tempty"><span>Nothing needs you today.</span></div>
         ) : (
-          rows.map((r) => (
-            <div
-              className={`os-tdrow${r.urgent ? " os-tdrow--urgent" : ""}${r.done ? " os-tdrow--done" : ""}`}
-              key={r.key}
-              data-probe="todo-row"
-            >
-              {/* ⚠️ TICKING IS NOT COMPLETING — IT OPENS THE PANEL AT THIS TASK (§6). A bare tick would
-                  mark the task done without recording what was sent or when, and two days later the
-                  query says "requested" while the list says "done". The tick opens a record; the panel
-                  writes it. A row already ticked is inert: its undo is the way back. */}
-              <button
-                type="button"
-                className={`os-tdbox${r.done ? " os-tdbox--done" : ""}`}
-                data-probe="todo-tick"
-                aria-label={r.done ? `${r.done.logged} — ${plain(r.title)}` : `Record: ${plain(r.title)}`}
-                aria-disabled={r.done ? true : undefined}
-                onClick={() => tick(r)}
-              >
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#f5f1eb" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M5 13l4 4L19 7" />
-                </svg>
-              </button>
-              <span className="os-tdt">
-                {r.title.pre}{r.title.who ? <i>{r.title.who}</i> : null}{r.title.post}
-                <span className="os-tdmeta">
-                  {/* ⚠️ THE STATE IN WORDS, DRAWN BY `StatusDot` INSIDE THE PILL — the house law is that
-                      a query status has one drawing, and `StatePill` is the feed's own mount of it. */}
-                  {r.status && <StatePill status={r.status} state={null} label={getStatusLabel(r.status)} />}
-                  {r.done
-                    ? (
-                      <>
-                        <span className="os-tdwhen">{r.done.logged}</span>
-                        {r.done.undo && (
-                          <button type="button" className="os-tdundo" data-probe="todo-undo" onClick={r.done.undo}>undo</button>
-                        )}
-                      </>
-                    )
-                    : <span className="os-tdwhen">{r.meta}</span>}
-                </span>
-              </span>
-              <span className="os-tdn">
-                {r.days === null ? <em className="os-tdgo">→</em> : <>{r.days}<em>d</em></>}
-              </span>
-            </div>
+          todoGroups(rows).map((g, gi) => (
+            <React.Fragment key={g.key}>
+              {/* ⚠️ RUST ON THE FIRST HEADING ONLY — it is the one group where somebody is waiting
+                  on the writer, and a second rust heading would make the colour mean "a heading". */}
+              <p className={`os-tdgh${g.key === "req" ? " os-tdgh--hot" : ""}`} data-probe="todo-group">
+                {g.label}<span className="os-tdgc">{g.rows.length}</span>
+              </p>
+              {g.rows.map((r) => (
+                <TodoRowCard
+                  key={r.key}
+                  row={r}
+                  panel={panels[r.key] ?? null}
+                  peeking={peekKey === r.key}
+                  onTick={() => tick(r)}
+                  onQuickRef={() => setPeekKey((k) => (k === r.key ? null : r.key))}
+                  onSnooze={(anchor) => setSnooze({ key: r.key, anchor })}
+                  onDismiss={() => dismiss(r)}
+                  onChange={() => openEditor(r)}
+                  onUndo={() => undo(r)}
+                  onChoose={(choice) => choose(r, choice)}
+                  onSave={(mode) => save(r, mode)}
+                  onCancelEdit={() => closePanel(r.key)}
+                  editor={<TodoRowEditor
+                    mode={panels[r.key]?.kind === "edit" ? (panels[r.key] as { mode: "sent" | "nudge" }).mode : "sent"}
+                    draft={drafts[r.key] ?? blankDraft(r)}
+                    onChange={(d) => setDrafts((ds) => ({ ...ds, [r.key]: d }))}
+                  />}
+                />
+              ))}
+              {gi === 0 ? null : null}
+            </React.Fragment>
           ))
         )}
       </div>
@@ -313,19 +393,51 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
         </p>
       )}
 
-      {/* ⚠️ MOUNTED ONLY ONCE A ROW IS OPEN — with no fallback, deliberately. The drawer's own
-          entrance is what announces it; a spinner in the sheet's place would be a second arrival. */}
-      {openCard && (
+      {/* ⚠️ MOUNTED ONLY WHILE THERE IS SOMETHING TO WRITE, and with no fallback: the strip is what
+          announces the result, so a spinner here would be a second arrival for one act. */}
+      {request && (
         <Suspense fallback={null}>
-          <DashTaskDrawer
-            card={openCard}
-            onClose={closeDrawer}
-            onCompleted={(done) => holdCompletion(openCard.key, done)}
-            onSeeAll={onSeeAll}
-            onNavigate={onNavigate}
+          <DashTaskCommit
+            request={request}
+            onLogged={(key, logged, undoFn) => {
+              const r = rows.find((x) => x.key === key);
+              setPanels((ps) => ({ ...ps, [key]: { kind: "strip", text: stripFor(r, logged), canChange: journeyFor(r?.category ?? "house") !== "page" } }));
+              setUndos((u) => ({ ...u, [key]: undoFn }));
+              holdCompletion(key, { logged, undo: undoFn });
+              setRequest(null);
+            }}
+            onDuplicate={(key, prompt) => {
+              const r = rows.find((x) => x.key === key);
+              if (r) setDrafts((ds) => ({ ...ds, [key]: ds[key] ?? blankDraft(r) }));
+              setPanels((ps) => ({ ...ps, [key]: { kind: "edit", mode: "sent", warn: prompt } }));
+              setRequest(null);
+            }}
+            onFailed={(key, message) => {
+              setPanels((ps) => { const n = { ...ps }; delete n[key]; return n; });
+              setNote(message);
+              setRequest(null);
+            }}
+            onNeedsPage={() => { setRequest(null); onSeeAll(); }}
           />
         </Suspense>
       )}
+
+      {/* ⚠️ THE APP'S OWN DIAL, MOUNTED A THIRD TIME — never a second implementation. It carries a
+          CEILING (you cannot snooze past the thing you are waiting for) that no prose here asks for
+          and that a fresh six-stop track would silently drop. */}
+      {snooze && (
+        <Suspense fallback={null}>
+          <DashSnooze
+            card={live.find((c) => c.key === snooze.key) ?? null}
+            anchor={snooze.anchor}
+            onClose={() => setSnooze(null)}
+            onSnoozed={() => setSnooze(null)}
+          />
+        </Suspense>
+      )}
+
+      {/* a refusal the writer did not make needs saying out loud; everything else is the strip's */}
+      {note && <p className="os-tdnote-line" role="alert">{note}</p>}
     </OneScreenPanel>
   );
 };

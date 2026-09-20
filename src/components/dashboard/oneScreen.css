@@ -841,61 +841,257 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 
 /* ══ §9 · THE TO-DO CARD ══════════════════════════════════════════════════════════════════════ */
 .os-todo .os-hd { margin-bottom: 4px; }
-/**
- * ⚠️ A CHECKBOX, A SENTENCE, A META ROW AND A FIGURE (feed/to-do round, 20 Sep; ref
- * feed-todo-interactions.html). The ink icon tile and the progress bar are retired: the tile drew the
- * query's state twice (the meta row's pill says it in words) and the bar drew the age twice (the
- * figure on the right says it in days).
- *
- * ⚠️ `align-items: start`, because the row is two lines beside a one-line box and a one-line figure.
- */
-.os-tdrow {
-  display: grid; grid-template-columns: 22px 1fr auto; gap: 12px; align-items: start;
-  padding: 12px 0; border-top: 1px solid var(--dash-hair);
-  width: 100%; text-align: left; background: none; border-left: 0; border-right: 0; border-bottom: 0;
-  font: inherit; color: inherit;
-}
-.os-tdrow:first-of-type { border-top: 0; }
 
-/* ⚠️ THE BOX IS THE CONTROL AND THE ROW IS NOT. Ticking opens the task panel — see `OneScreenTasks` —
-   and the rest of the row opens nothing, so only the box takes the pointer. */
-.os-tdbox {
-  width: 22px; height: 22px; margin-top: 1px; padding: 0; flex: none;
-  border-radius: 7px; border: 1.5px solid rgba(28, 19, 15, 0.3); background: #ffffff;
-  display: flex; align-items: center; justify-content: center; cursor: pointer;
+/**
+ * ⚠️ THE ROW IS A SLIM QUERY CARD, NOT A LIST LINE (to-do row round, 20 Sep; ref
+ * `todo-journeys.html`, which is the later of the two drawings and the one the brief restates —
+ * `todo-row-v2.html` draws the same row ~10% smaller and is the authority for the CARD below, not
+ * for this).
+ *
+ * ⚠️ THE GEOMETRY IS ONE SET OF TOKENS BECAUSE FOUR SURFACES READ IT — the row, the band, the
+ * strip, the editor and the menu all inset to the same edges, and a strip that started 2px inside
+ * the sentence above it would read as a different object rather than as the row's own receipt.
+ */
+.os-todo {
+  --td-band: 6px;
+  --td-radius: 12px;
+  /* the strip / editor / menu all inset to this, so they line up under the sentence */
+  --td-inset: 16px;
+  --td-surface: var(--dash-parchment);
+}
+
+/* ── the group headings ───────────────────────────────────────────────────────────────────── */
+.os-tdgh {
+  display: flex; align-items: center; gap: 10px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px; letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--dash-ink-45); margin: 14px 4px 8px;
+}
+.os-tdgh::after { content: ""; flex: 1; height: 1px; background: var(--dash-hair); }
+/* ⚠️ RUST ON THE FIRST HEADING ONLY — it is the one group where somebody else is waiting on you. */
+.os-tdgh--hot { color: var(--dash-rust); }
+.os-tdgh .os-tdgc { background: var(--dash-page); border-radius: 10px; padding: 2px 7px; color: var(--dash-ink-70); }
+
+/* ── the row ──────────────────────────────────────────────────────────────────────────────── */
+.os-tdrow {
+  display: grid; grid-template-columns: var(--td-band) 22px 38px 1fr auto; gap: 14px;
+  align-items: center; padding: 13px var(--td-inset) 13px 0; margin-bottom: 8px;
+  background: var(--td-surface); border: 1px solid var(--dash-hair); border-radius: var(--td-radius);
+  position: relative;
   transition: background-color 0.12s ease, border-color 0.12s ease;
 }
-.os-tdbox:hover { border-color: var(--dash-ink); background: var(--dash-parchment); }
+.os-tdrow:hover, .os-tdrow--open { background: #ffffff; border-color: rgba(28, 19, 15, 0.22); }
+.os-tdrow:focus-within { border-color: rgba(28, 19, 15, 0.22); }
+@media (prefers-reduced-motion: reduce) { .os-tdrow { transition: none; } }
+
+/* ⚠️ THE BAND IS PULLED OVER THE BORDER by a negative margin, so the fill meets the row's own edge
+   rather than sitting a hairline inside it — which reads as a gap at this size. */
+.os-tdband {
+  align-self: stretch; margin: -1px 0 -1px -1px;
+  border-radius: calc(var(--td-radius) - 1px) 0 0 calc(var(--td-radius) - 1px);
+}
+.os-tdband--rose { background: var(--dash-rose); }
+.os-tdband--sand { background: var(--dash-sand); }
+.os-tdband--stone { background: var(--dash-stone); }
+
+/* ⚠️ THE BOX IS THE CONTROL AND THE ROW IS NOT. What a tick MEANS is the row's own business — see
+   `OneScreenTasks`: one meaning commits, several open a menu — but only the box takes the pointer. */
+.os-tdbox {
+  width: 22px; height: 22px; padding: 0; flex: none;
+  border-radius: 7px; border: 1.5px solid rgba(28, 19, 15, 0.28); background: #ffffff;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.os-tdbox:hover { border-color: var(--dash-ink); }
 .os-tdbox:focus-visible { outline: 2px solid var(--dash-frame); outline-offset: 2px; }
-.os-tdbox svg { opacity: 0; display: block; }
-.os-tdbox--done { background: var(--dash-ink); border-color: var(--dash-ink); }
-.os-tdbox--done svg { opacity: 1; }
-@media (prefers-reduced-motion: reduce) { .os-tdbox { transition: none; } }
-
-.os-tdt { font-size: 14.5px; line-height: 1.4; min-width: 0; color: var(--dash-ink); }
-.os-tdt i { font-style: italic; color: var(--dash-ink-70); }
-.os-tdrow--done .os-tdt { color: var(--dash-ink-45); text-decoration: line-through; text-decoration-color: rgba(28, 19, 15, 0.3); }
-/* ⚠️ THE STRIKE IS THE SENTENCE'S ALONE — a struck meta line would read as a fact retracted, when it
-   is the one line on a completed row that is newly TRUE. */
-.os-tdrow--done .os-tdmeta { text-decoration: none; }
-
-.os-tdmeta { display: flex; align-items: center; gap: 9px; margin-top: 6px; flex-wrap: wrap; }
-.os-tdmeta .os-tdwhen {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dash-ink-45);
+.os-tdbox svg { opacity: 0; transform: scale(0.6); display: block; transition: opacity 0.18s ease, transform 0.18s ease; }
+.os-tdbox--on { background: var(--dash-ink); border-color: var(--dash-ink); }
+.os-tdbox--on svg { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .os-tdbox, .os-tdbox svg { transition: none; }
 }
-.os-tdundo {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--dash-ink-70); background: none; border: 0; padding: 0; cursor: pointer;
-  text-decoration: underline; text-underline-offset: 3px;
-}
-.os-tdundo:hover { color: var(--dash-ink); }
 
-.os-tdn { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--dash-ink); }
-.os-tdn em { font-style: normal; font-size: 11px; font-weight: 400; color: var(--dash-ink-45); }
+.os-tdav {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--dash-page); border: 1px solid var(--dash-hair);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--dash-ink-70); flex: none;
+}
+
+/* ── the task ─────────────────────────────────────────────────────────────────────────────── */
+.os-tdt { min-width: 0; }
+/**
+ * ⚠️ THE APP'S OWN BODY FACE, NOT THE REF'S. Both mockups are set in Source Serif 4, which this app
+ * does not load; the standing ruling on that difference is to build in the app's stack and treat
+ * the type row as an expected difference rather than adding a fifth family for one row.
+ */
+.os-tdl1 {
+  font-size: 16px; line-height: 1.3;
+  display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  color: var(--dash-ink);
+}
+.os-tdl1 b { font-weight: 600; }
+/* ⚠️ THE TOKEN, NOT THE FAMILY — the sheet names the typewriter face exactly once. */
+.os-tdl1 .os-tdms { font-family: var(--os-type); font-weight: 400; font-size: 15px; }
+.os-tdl2 {
+  display: flex; align-items: center; gap: 9px; margin-top: 5px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--dash-ink-45);
+  min-width: 0;
+}
+/* the fact line gives before the pill does — the pill is three words, the line is a sentence */
+.os-tdfact { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ⚠️ A COMPLETED ROW STRIKES THE SENTENCE AND NOTHING ELSE. The meta line is the one line on a
+   finished row that is newly TRUE, and a struck receipt reads as a fact retracted. */
+.os-tdrow--done .os-tdl1 { color: var(--dash-ink-45); }
+.os-tdrow--done .os-tdtx { text-decoration: line-through; text-decoration-color: rgba(28, 19, 15, 0.28); }
+.os-tdrow--done .os-tdl2 { text-decoration: none; }
+
+/* ── the figure, and the controls that slide in beside it ─────────────────────────────────── */
+.os-tdright { display: flex; align-items: center; gap: 8px; }
+.os-tdn {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--dash-ink-45); white-space: nowrap; text-align: right;
+}
+.os-tdn b {
+  display: block; font-family: inherit; font-size: 22px; font-weight: 600;
+  letter-spacing: 0; color: var(--dash-ink); line-height: 1; font-variant-numeric: tabular-nums;
+}
+.os-tdn--hot b { color: var(--dash-rust); }
 .os-tdgo { font-size: 16px; color: var(--dash-ink-45); font-style: normal; }
-.os-tdrow--urgent .os-tdn { color: var(--dash-rust); }
+
+/**
+ * ⚠️ WIDTH, NOT OPACITY — the controls take no room until they are wanted, so the day figure sits
+ * at the row's edge at rest rather than 90px inside it. It is the one width animation on the page.
+ */
+.os-tdacts { display: flex; gap: 4px; width: 0; overflow: hidden; transition: width 0.15s ease; }
+.os-tdrow:hover .os-tdacts,
+.os-tdrow:focus-within .os-tdacts,
+.os-tdrow--open .os-tdacts { width: 90px; }
+@media (prefers-reduced-motion: reduce) { .os-tdacts { transition: none; } }
+.os-tdact {
+  width: 26px; height: 26px; padding: 0; flex: none; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--dash-ink-45); cursor: pointer; background: none; border: 1px solid transparent;
+}
+.os-tdact:hover { background: var(--dash-page); border-color: var(--dash-hair); color: var(--dash-ink); }
+.os-tdact:focus-visible { outline: 2px solid var(--dash-frame); outline-offset: 1px; }
+/* the quick reference stays lit while its card is open */
+.os-tdact--on { background: var(--dash-parchment); border-color: var(--dash-frame); color: var(--dash-ink); }
+
+/* ── the three panels a row can open beneath itself ───────────────────────────────────────── */
+/**
+ * ⚠️ ONE ROW OF THE GRID, SPANNING IT — `grid-column: 1 / -1` puts the panel on a second grid row
+ * rather than inside the sentence's column, so it starts at the row's own inset whatever the
+ * columns do. They are mutually exclusive by construction: the row holds one `panel` state.
+ */
+.os-tdstrip, .os-tdedit, .os-tdmenu {
+  grid-column: 1 / -1; margin: 10px var(--td-inset) 0 var(--td-inset);
+  animation: osTdIn 0.22s ease-out both;
+}
+@keyframes osTdIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .os-tdstrip, .os-tdedit, .os-tdmenu { animation: none; }
+}
+
+.os-tdstrip {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: var(--dash-parchment); border: 1px solid var(--dash-hair); border-radius: 10px;
+  padding: 11px 14px; font-size: 14px; color: var(--dash-ink-70);
+}
+.os-tdstrip b { color: var(--dash-ink); font-weight: 600; }
+.os-tdstrip .os-tdsp { flex: 1; }
+.os-tdstrip button {
+  font: inherit; font-size: 13px; color: var(--dash-ink); background: none; border: 0; padding: 0;
+  cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+}
+.os-tdstrip button:hover { color: var(--dash-frame); }
+
+.os-tdedit {
+  display: flex; flex-direction: column;
+  background: var(--dash-parchment); border: 1px solid var(--dash-frame); border-radius: 12px;
+  overflow: hidden;
+}
+/* ⚠️ THE DUPLICATE-SEND WARNING SITS ABOVE THE FIELDS, IN THE EDITOR — never a modal. The guard is
+   `useTaskCommit`'s and it is not suppressed; what changes is where it asks. */
+.os-tdwarn {
+  padding: 11px 15px; background: var(--dash-rose); font-size: 13.5px; color: var(--dash-ink);
+  border-bottom: 1px solid var(--dash-hair);
+}
+.os-tder {
+  display: grid; grid-template-columns: 110px 1fr; gap: 12px; align-items: center;
+  padding: 11px 15px; border-bottom: 1px solid var(--dash-hair); background: #ffffff;
+}
+.os-tdk {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--dash-ink-45);
+}
+.os-tdv { font-size: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.os-tdopt {
+  font: inherit; font-size: 13px; border: 1px solid var(--dash-hair); border-radius: 16px;
+  padding: 5px 12px; background: var(--dash-page); cursor: pointer; color: var(--dash-ink);
+}
+.os-tdopt:hover { border-color: rgba(28, 19, 15, 0.28); }
+.os-tdopt:focus-visible { outline: 2px solid var(--dash-frame); outline-offset: 1px; }
+.os-tdopt--on { background: var(--dash-ink); color: var(--dash-page); border-color: var(--dash-ink); }
+.os-tdnote {
+  font: inherit; font-size: 14px; width: 100%; min-height: 54px; resize: vertical;
+  border: 1px solid var(--dash-hair); border-radius: 8px; padding: 8px 10px;
+  background: var(--dash-page); color: var(--dash-ink);
+}
+.os-tdef { display: flex; align-items: center; gap: 10px; padding: 11px 15px; background: var(--dash-parchment); }
+.os-tdrec {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dash-ink-45); flex: 1;
+}
+.os-tdb {
+  font: inherit; font-size: 13px; border-radius: 20px; padding: 7px 14px;
+  border: 1px solid var(--dash-hair); background: #ffffff; cursor: pointer; color: var(--dash-ink);
+}
+.os-tdb--ink { background: var(--dash-ink); color: var(--dash-page); border-color: var(--dash-ink); }
+.os-tdb--quiet { border-color: transparent; color: var(--dash-ink-70); }
+.os-tdb:focus-visible { outline: 2px solid var(--dash-frame); outline-offset: 2px; }
+
+.os-tdmenu {
+  display: flex; flex-direction: column; gap: 2px;
+  background: #ffffff; border: 1px solid var(--dash-frame); border-radius: 12px; padding: 8px;
+}
+.os-tdmh {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dash-ink-45);
+  padding: 6px 10px 8px; margin: 0;
+}
+.os-tdmi {
+  display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center;
+  padding: 10px; border-radius: 9px; font: inherit; font-size: 14.5px; color: var(--dash-ink);
+  background: none; border: 0; cursor: pointer; text-align: left; width: 100%;
+}
+.os-tdmi:hover { background: var(--dash-page); }
+.os-tdmi:focus-visible { outline: 2px solid var(--dash-frame); outline-offset: -2px; }
+.os-tdmi .os-tdic {
+  width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--dash-hair);
+  display: flex; align-items: center; justify-content: center; background: var(--dash-page);
+}
+.os-tdmi small { display: block; font-size: 12.5px; color: var(--dash-ink-45); margin-top: 2px; }
+/* ⚠️ WHAT IT DOES TO THE QUERY, ON THE RIGHT — the option's title says what you are doing and this
+   says what the app will do with it. A menu that only stated the first would be asking a writer to
+   guess which of three options closes a query. */
+/* ⚠️ A REFUSAL THE WRITER DID NOT MAKE IS SAID OUT LOUD. Every other outcome is the strip's; this
+   is the one case where the row has nothing to show, because nothing was written. */
+.os-tdnote-line {
+  margin: 8px 0 0; font-size: 13px; color: var(--dash-frame);
+}
+
+.os-tdmi .os-tdwhat {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--dash-ink-45); white-space: nowrap;
+}
 
 .os-tdfoot {
   margin: auto 0 0; padding-top: 12px; border-top: 1px solid var(--dash-hair);
