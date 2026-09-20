@@ -8,13 +8,14 @@
  */
 import { test } from "@playwright/test";
 import { openRoute } from "./measure";
+import { openQueryById, openTab, pressAction } from "./openQuery";
 
 test("paint at the desk's top edge — Nudge, 1440", async ({ page }) => {
   await openRoute(page, "/queries", { width: 1440, height: 900 });
-  await page.locator('[data-qcc-id="cor-move-b"]').click();
-  await page.locator(".qpn-tab", { hasText: "Tracking" }).click();
-  await page.locator(".qpn .tl-more").first().waitFor();
-  await page.locator(".qpn-act", { hasText: "Nudge" }).first().click();
+  const host = await openQueryById(page, "cor-move-b");
+  await openTab(page, host, "Tracking");
+  await page.locator(`${host.root} .tl-more`).first().waitFor();
+  await pressAction(page, host, /Nudge/i);
   await page.locator(".qcd-card .qrd-mail").waitFor();
   /* the frame AFTER open — place() runs in a layout effect, and a measurement taken on the same
      frame reads a .ws-window that may not have laid out yet (the brief's own suspicion) */

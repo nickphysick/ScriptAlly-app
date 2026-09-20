@@ -22,6 +22,7 @@
  */
 import { test, expect, Page } from "@playwright/test";
 import { openRoute, liftMotionSuppression } from "./measure";
+import { isOptedOut, OPTED_OUT } from "./optedOut";
 
 /* ⚠️ SPLICED FROM THE GROUND LOCK, NEVER RETYPED — writing this census by hand produced two wrong
    classes out of three in one sitting. If it moves, it moves in one place. */
@@ -37,6 +38,27 @@ const PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Calendar",            route: "/todo/calendar",        cls: "tpl-wpg"  },
   { name: "Noteboard",           route: "/todo/noteboard",       cls: "tpl-wpg"  },
 ];
+
+/**
+ * ⚠️ THE PAGES THAT DECLINED THE SHARED MASTHEAD ARE TAKEN FROM THE ONE REGISTER, NOT FROM A LIST
+ * HERE (Nick's condition, 20 Sep). All three loops below dereference `.wpg-chrome`, and on a page
+ * that draws its own head that is `null` — `getComputedStyle(null)` throws, which is a crash rather
+ * than a finding, and CLAUDE.md already records that a crashing lock tells you nothing and hides in
+ * a noisy run. The Query Centre opted out a day before this file noticed, because `mastheadMatrix`
+ * held the set privately. One register; a page opts out of every suite at once.
+ *
+ * ⚠️ AND THE EXEMPTION IS ASSERTED, NOT ASSUMED — `declinedHere` must be exactly the register's
+ * pages, so a census that quietly stopped measuring a page fails instead of going green.
+ */
+/* ⚠️ AND THE THREE POPULATION COUNTS BELOW COUNT `IN_TREATMENT`, NOT `PAGES` — an opted-out page
+   is not an unwalked one, and `populationHolds()` is what proves the difference is the register's. */
+const IN_TREATMENT = PAGES.filter((p) => !isOptedOut(p.name) && !isOptedOut(p.route));
+const declinedHere = PAGES.filter((p) => isOptedOut(p.name) || isOptedOut(p.route)).map((p) => p.name);
+const populationHolds = () => {
+  expect(declinedHere.slice().sort(), "the pages skipped here are not the opted-out register's")
+    .toEqual(OPTED_OUT.filter((n) => PAGES.some((p) => p.name === n)).slice().sort());
+  expect(IN_TREATMENT.length, "too few pages left to compare a shared treatment").toBeGreaterThan(3);
+};
 
 const norm = (c: string) => (/rgba?\(([^)]*)\)/.exec(c)?.[1].split(",").slice(0, 3).map((x) => Math.round(parseFloat(x.trim()))) ?? []).join(", ");
 /* ⚠️ A TOKEN IS A HEX AND A COMPUTED STOP IS AN `rgb()` — comparing them raw is a lock that fails on
@@ -84,6 +106,7 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
 }, cls);
 
 test("⚠️ EVERY MASTHEAD SITS ON THE WINDOW'S OWN GROUND — a partition, with no carve-out", async ({ page }) => {
+  populationHolds();
   /**
    * ⚠️ THE CARVE-OUT IS GONE AND THE PARTITION IS STRONGER FOR IT. It named two pages by hand and
    * held them to a weaker claim, which is exactly the shape that erodes one exemption at a time.
@@ -95,7 +118,7 @@ test("⚠️ EVERY MASTHEAD SITS ON THE WINDOW'S OWN GROUND — a partition, wit
    */
   const lines: string[] = [];
   let measured = 0;
-  for (const { name, route, cls } of PAGES) {
+  for (const { name, route, cls } of IN_TREATMENT) {
     await openRoute(page, route, { width: 1440, height: 900 });
     await liftMotionSuppression(page);
     const r = await read(page, cls);
@@ -107,13 +130,14 @@ test("⚠️ EVERY MASTHEAD SITS ON THE WINDOW'S OWN GROUND — a partition, wit
     lines.push(`${name.padEnd(21)} ground ${r!.chromeBg}`);
   }
   console.log("\n══ THE MASTHEAD'S GROUND (1440)\n" + lines.join("\n"));
-  expect(measured, "the census was not fully walked").toBe(PAGES.length);
+  expect(measured, "the census was not fully walked").toBe(IN_TREATMENT.length);
 });
 
 test("⚠️ THE TOOLBAR TAKES THE PAGE'S GROUND, NOT THE MASTHEAD'S — asserted in both directions", async ({ page }) => {
+  populationHolds();
   let withBand = 0, withoutBand = 0;
   const lines: string[] = [];
-  for (const { name, route, cls } of PAGES) {
+  for (const { name, route, cls } of IN_TREATMENT) {
     await openRoute(page, route, { width: 1440, height: 900 });
     await liftMotionSuppression(page);
     const r = (await read(page, cls))!;
@@ -130,13 +154,14 @@ test("⚠️ THE TOOLBAR TAKES THE PAGE'S GROUND, NOT THE MASTHEAD'S — asserte
   /* ⚠️ BOTH DIRECTIONS. Without this the case passes on a build where no page renders a toolbar at
      all — which is exactly the state Discover was just moved into, so it is not hypothetical. */
   expect(withBand, "no toolbar was measured — the case proved nothing").toBeGreaterThan(2);
-  expect(withBand + withoutBand, "the census was not fully walked").toBe(PAGES.length);
+  expect(withBand + withoutBand, "the census was not fully walked").toBe(IN_TREATMENT.length);
 });
 
 test("⚠️ A PAGE WITH NO CONTROLS RENDERS NO CONTROL ROW — structural, not Discover-specific", async ({ page }) => {
+  populationHolds();
   const lines: string[] = [];
   let checked = 0;
-  for (const { name, route, cls } of PAGES) {
+  for (const { name, route, cls } of IN_TREATMENT) {
     await openRoute(page, route, { width: 1440, height: 900 });
     await liftMotionSuppression(page);
     const r = await page.evaluate((c) => {
@@ -160,7 +185,7 @@ test("⚠️ A PAGE WITH NO CONTROLS RENDERS NO CONTROL ROW — structural, not 
     }
   }
   console.log("\n══ CONTROL ROWS (1440)\n" + lines.join("\n"));
-  expect(checked, "the census was not walked").toBe(PAGES.length);
+  expect(checked, "the census was not walked").toBe(IN_TREATMENT.length);
 });
 
 /**
@@ -171,8 +196,9 @@ test("⚠️ A PAGE WITH NO CONTROLS RENDERS NO CONTROL ROW — structural, not 
  * the absence, asserted, so a half-landed retract cannot arrive unnoticed.
  */
 test("⚠️ NO PAGE RETRACTS ITS TOOLBAR — the mechanism is withdrawn, not half-present", async ({ page }) => {
+  populationHolds();
   const lines: string[] = [];
-  for (const { name, route, cls } of PAGES) {
+  for (const { name, route, cls } of IN_TREATMENT) {
     await openRoute(page, route, { width: 1440, height: 900 });
     await liftMotionSuppression(page);
     const r = await page.evaluate(async (c) => {

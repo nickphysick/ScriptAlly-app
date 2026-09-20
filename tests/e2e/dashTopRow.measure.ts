@@ -459,8 +459,13 @@ test.describe("dashboard top row — v33", () => {
       const bar = [...document.querySelectorAll(".ws-pagebar")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
       const b = (sel: string) => { const el = bar.querySelector(sel); if (!el) return null; const r = el.getBoundingClientRect(); return r.width ? { x: rd(r.x), y: rd(r.y), w: rd(r.width), h: rd(r.height), cy: rd(r.y + r.height / 2) } : null; };
       return { bar: { h: rd(bar.getBoundingClientRect().height), position: getComputedStyle(bar).position }, toggle: b(".sb-toggle"), help: b(".sp-help"), feedback: b(".ws-fbpill"),
-        pill: b(".sp-search:not(.sp-search--big)"), pillFrame: b(".sp-search:not(.sp-search--big) .sp-search-f"), neu: b(".ws-nbtn"), crumb: b(".ws-crumb"),
-        newFace: bar.querySelector(".ws-nbtn") ? getComputedStyle(bar.querySelector(".ws-nbtn")!).fontFamily : null };
+        pill: b(".sp-search:not(.sp-search--big)"), pillFrame: b(".sp-search:not(.sp-search--big) .sp-search-f"), crumb: b(".ws-crumb"),
+        /* ⚠️ `+ New` IS NOT A SHARED CONTROL ANY MORE — it was deleted from the bar on every route
+           (Query Centre v11, phase 3, Nick's call). Its size was measured here as one of the set
+           that must agree page to page, so with the button gone the set could never be met. It is
+           counted as an ABSENCE below rather than dropped, because a silently missing control is
+           how a lock stops meaning anything. */
+        neu: bar.querySelectorAll(".ws-nbtn").length };
     });
     await openDash(page, 1440, 860);
     const dash = await readBar();
@@ -477,13 +482,14 @@ test.describe("dashboard top row — v33", () => {
         expect(r.pill.h, `${route}: the search pill is 50`).toBe(50);
         expect([r.pill.w - r.pillFrame!.w, r.pill.h - r.pillFrame!.h], `${route}: the pill has the card's 5px rim`).toEqual([10, 10]);
       }
-      if (r.neu) { expect(r.neu.h, `${route}: + New is 50`).toBe(50); expect(r.newFace).toContain("Special Elite"); }
+      expect(r.neu, `${route}: + New is back in the bar — it was removed from every route`).toBe(0);
       if (r.crumb) expect(Math.abs(r.crumb.cy - r.help!.cy), `${route}: the breadcrumb is vertically centred in the taller bar`).toBeLessThanOrEqual(3);
       expect(r.bar.position, `${route}: only the dashboard's bar lies over the scroller`).not.toBe("absolute");
     }
     report.barEverywhere = pages;
-    /* the population: the loop really met a pill, a + New and a crumb somewhere */
-    expect(Object.values(pages).filter((r) => r.pill && r.neu && r.crumb).length).toBeGreaterThanOrEqual(3);
+    /* the population: the loop really met a pill and a crumb somewhere — `+ New` is no longer part
+       of the set, so requiring it here would be requiring the thing the line above forbids */
+    expect(Object.values(pages).filter((r) => r.pill && r.crumb).length).toBeGreaterThanOrEqual(3);
     await openRoute(page, "/queries", { width: 1440, height: 860 });
     await settle(page);
     await page.screenshot({ path: resolve(OUT, "v34-bar-queries.png"), clip: { x: 0, y: 0, width: 1440, height: 260 } });

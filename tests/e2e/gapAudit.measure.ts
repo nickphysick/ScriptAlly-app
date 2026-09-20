@@ -7,8 +7,15 @@
  * the reading that matters is the PIXEL distance from the header card's bottom edge to the first
  * thing drawn below it, with every contributor between them itemised.
  */
-import { test } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
+/**
+ * ⚠️ THE OPTED-OUT PAGES COME FROM THE ONE REGISTER (Nick's condition, 20 Sep). This census read
+ * `.wsh` on every page and called `getBoundingClientRect()` on the Query Centre's null, which is a
+ * crash rather than a finding — and the page had declined the shared masthead a day earlier, with
+ * `mastheadMatrix` the only suite that knew. A page opts out everywhere at once.
+ */
+import { isOptedOut } from "./optedOut";
 
 const PAGES: [string, string][] = [
   ["Query Centre", "/queries"],
@@ -25,7 +32,9 @@ const PAGES: [string, string][] = [
 
 test("the gap under the header, itemised", async ({ page }) => {
   const rows: Record<string, unknown>[] = [];
+  const declined: string[] = [];
   for (const [label, route] of PAGES) {
+    if (isOptedOut(label) || isOptedOut(route)) { declined.push(label); continue; }
     await openRoute(page, route, { width: 1440, height: 900 });
     const r = await page.evaluate(() => {
       const n = (v: string) => Math.round((parseFloat(v) || 0) * 10) / 10;
@@ -87,4 +96,15 @@ test("the gap under the header, itemised", async ({ page }) => {
   }
   console.log("\n══ THE GAP UNDER THE HEADER (card's bottom edge → first thing drawn) ══");
   console.table(rows);
+  if (declined.length) console.log(`opted out of the shared masthead, not measured here: ${declined.join(", ")}`);
+  /**
+   * ⚠️ THE POPULATION, BOTH WAYS — a census with no assertion cannot fail, and this one did not
+   * fail, it CRASHED on a null `.wsh`. Skipping a page silently would put the same hazard back
+   * where nobody looks, so the skip is counted: the declined set must be exactly the register's,
+   * and every other page must have been measured.
+   */
+  expect(declined.sort(), "the pages skipped here are not the ones in the opted-out register")
+    .toEqual(PAGES.map(([l]) => l).filter((l) => isOptedOut(l)).sort());
+  expect(rows.length, "pages were dropped from the census without being named").toBe(PAGES.length - declined.length);
+  expect(rows.filter((r) => r.total === -1).map((r) => r.page), "a page still in the treatment drew no header").toEqual([]);
 });

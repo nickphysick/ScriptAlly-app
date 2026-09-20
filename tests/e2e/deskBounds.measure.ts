@@ -1,12 +1,13 @@
 import { test } from "@playwright/test";
 import { openRoute } from "./measure";
+import { openQueryById, openTab, pressAction } from "./openQuery";
 test("desk vs window — rects, top rule, clipping ancestors", async ({ page }) => {
   for (const width of [1440, 2560]) {
     await openRoute(page, "/queries", { width, height: 900 });
-    await page.locator('[data-qcc-id="cor-move-b"]').click();
-    await page.locator(".qpn-tab", { hasText: "Tracking" }).click();
-    await page.locator(".qpn .tl-more").first().waitFor();
-    await page.locator(".qpn-act", { hasText: "Record response" }).first().click();
+    const host = await openQueryById(page, "cor-move-b");
+    await openTab(page, host, "Tracking");
+    await page.locator(`${host.root} .tl-more`).first().waitFor();
+    await pressAction(page, host, /Record .*response/i);
     await page.locator(".qcd-card").waitFor();
     const r = await page.evaluate(() => {
       const card = document.querySelector<HTMLElement>(".qcd-card")!;

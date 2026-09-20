@@ -18,6 +18,14 @@
  */
 import { test, expect, Page } from "@playwright/test";
 import { openRoute, liftMotionSuppression, scrollbarWidth } from "./measure";
+/**
+ * ⚠️ THE OPTED-OUT SET IS IMPORTED, NOT DECLARED HERE. It used to be this file's own const, which
+ * made this the only suite that knew — `gapAudit`, `headerFix` and `subWrap` went on reaching for a
+ * masthead and a subtitle the Query Centre does not draw. One register, every suite reads it
+ * (Nick's condition, 20 Sep). The CLAIM is still this file's: the exact set, both ways — a second
+ * page declining fails by name, and the Query Centre quietly regaining a masthead fails too.
+ */
+import { OPTED_OUT } from "./optedOut";
 
 /** the page-specific class on each grid root — `.tpl-wpg` is shared by the three Tasks pages */
 
@@ -63,16 +71,6 @@ const CARVES = {
    * `CARVED_HEIGHT` goes with them, so the height equality now covers the whole census.
    */
 } as const;
-
-/**
- * ⚠️ THE OPTED-OUT SET IS NAMED, AND IT IS EXACTLY ONE PAGE (Query Centre v11, 19 Sep — Nick's call).
- * The Query Centre declines the shared masthead: its head is the page's own ("Query Centre" in the
- * app's type, the head line, "+ Log a query"), drawn on the page ground with no slab. That is the
- * decision this lock used to say had not been taken. It is asserted as the EXACT set, both ways —
- * a second page declining fails by name, and the Query Centre quietly regaining a masthead fails
- * too. The same set is held in `workspacePageGrid.test.tsx` (`OPTED_OUT`) and named in CLAUDE.md.
- */
-const OPTED_OUT: readonly string[] = ["Query Centre"];
 
 const PAGES: { name: string; route: string; cls: string; fill: boolean }[] = [
   /* ⚠️ `fill: false` SINCE QUERY CENTRE BECAME A LIST AND A RECORD. `Queries.tsx` passes

@@ -6,6 +6,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
+import { isOptedOut } from "./optedOut";
 
 /**
  * ⚠️ THE VISIBLE PLATE, NOT THE FIRST ONE. The workspace keeps every page MOUNTED and toggles
@@ -40,29 +41,48 @@ test("a short description is untouched", async ({ page }) => {
 });
 
 /**
- * ⚠️ THE TWO SUBTITLES ARE COMPARED TO EACH OTHER, NOT TO LITERALS. "Same font as the manuscripts
- * page" is a claim about two rendered elements agreeing, so a hard-coded 14px would go green the
- * day someone retoned the shared rule and BOTH pages moved together — which is the state this
- * asserts, not a particular size.
+ * ⚠️ THE SUBTITLES OF THE PAGES STILL IN THE SHARED TREATMENT ARE COMPARED TO EACH OTHER, NOT TO
+ * LITERALS. "Same font as the manuscripts page" is a claim about two rendered elements agreeing, so
+ * a hard-coded 14px would go green the day someone retoned the shared rule and BOTH pages moved
+ * together — which is the state this asserts, not a particular size.
  *
- * ⚠️ AND IT IS MEASURED, NOT READ OUT OF THE STYLESHEET. The divergence was a page-scoped override
- * (`.qc-wpg .wsh-sub`, mono 11px, left behind by the retired counts) beating a shared rule that was
- * itself perfectly correct — so a lock reading either file would have found nothing wrong. Only the
- * cascade's answer shows it.
+ * ⚠️ AND IT IS MEASURED, NOT READ OUT OF THE STYLESHEET. The divergence this was written for was a
+ * page-scoped override beating a shared rule that was itself perfectly correct — so a lock reading
+ * either file would have found nothing wrong. Only the cascade's answer shows it.
+ *
+ * ⚠️ THE QUERY CENTRE IS NOT IN THIS COMPARISON, BY RULING (Nick, 20 Sep), AND THE REGISTER SAYS SO
+ * RATHER THAN THIS FILE. It opted out of the shared masthead with v11; its head line is a facts
+ * sentence between a Special Elite title and two action pills, a shape no other page has, so
+ * holding its subtitle to the shared wrap rule would enforce the remains of a treatment the page no
+ * longer uses. **Its exclusion comes from `optedOut.ts`** — the same set `mastheadMatrix` asserts —
+ * so a page cannot be exempt here and red there.
  */
-test("both pages' subtitles render identically", async ({ page }) => {
+test("every page still in the shared treatment renders its subtitle identically", async ({ page }) => {
   const typography = async (route: string) => {
     await openRoute(page, route, { width: 1440, height: 900 });
     await page.waitForTimeout(1800);
     const r = await plateOf(page);
     return { font: r.font, size: r.size, weight: r.weight, tracking: r.tracking, colour: r.colour };
   };
-  const manuscripts = await typography("/manuscripts");
-  const queries = await typography("/queries");
-  console.log(`  manuscripts: ${JSON.stringify(manuscripts)}`);
-  console.log(`  queries:     ${JSON.stringify(queries)}`);
-  expect(manuscripts.font, "the fixture measured nothing").toBeTruthy();
-  expect(queries, "Query Centre's subtitle is not in the shared treatment").toEqual(manuscripts);
+  /* ⚠️ THE POPULATION IS ASSERTED FIRST. With the Query Centre gone from the set, a comparison over
+     what is left is satisfied by ONE page — which proves nothing about a shared treatment. */
+  const shared = ["/manuscripts", "/agents", "/manuscripts/packages"].filter((r) => !isOptedOut(r));
+  expect(shared.length, "a shared treatment needs at least two pages to be shared BETWEEN").toBeGreaterThan(1);
+  const first = await typography(shared[0]);
+  console.log(`  ${shared[0]}: ${JSON.stringify(first)}`);
+  expect(first.font, "the fixture measured nothing").toBeTruthy();
+  for (const route of shared.slice(1)) {
+    const r = await typography(route);
+    console.log(`  ${route}: ${JSON.stringify(r)}`);
+    expect(r, `${route}'s subtitle is not in the shared treatment`).toEqual(first);
+  }
+  /* and the opted-out page is checked to be genuinely ABSENT from the treatment rather than
+     silently skipped — an exemption nobody can see is how this fault started */
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  await page.waitForTimeout(1800);
+  const qc = await plateOf(page);
+  console.log(`  /queries (opted out): ${JSON.stringify(qc)}`);
+  expect(qc.subText, "the Query Centre grew a shared `.wsh-sub` again — it draws its own head").toBe("");
 });
 
 test("the collapse still gives the space back", async ({ page }) => {
