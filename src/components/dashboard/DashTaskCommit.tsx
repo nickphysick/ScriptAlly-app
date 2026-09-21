@@ -43,20 +43,31 @@ export type CommitRequest =
   /**
    * Dismiss — stop suggesting this task.
    *
-   * ⚠️ IT DOES *NOT* GO THROUGH `dismissTask`, AND THE REASON IS A REAL DEFECT IN THAT FUNCTION.
-   * `db.dismissTask` special-cases `nudge_overdue` and writes a **`NUDGE_SENT` activity** —
-   * "Nudge sent to {agent} at {agency}", with a fabricated "They've had your query for N days" —
-   * before it touches the flag. So dismissing a nudge SUGGESTION records that the writer nudged the
-   * agent, which they did not. It lands in the global feed only, so it is also a rung the
-   * authoritative subcollection has never heard of.
+   * ⚠️ IT DOES NOT GO THROUGH `dismissTask`, AND THE DEFECT THAT WAS THE REASON IS NOW FIXED —
+   * `main` `5c19285a`, 21 Sep. `db.dismissTask` used to special-case `nudge_overdue` and write a
+   * **`NUDGE_SENT` activity** — "Nudge sent to {agent} at {agency}", with a fabricated "They've
+   * had your query for N days" — before it touched the flag, so dismissing a nudge SUGGESTION
+   * recorded that the writer had chased the agent, which they had not. It landed in the global
+   * feed alone, so it was also a rung the authoritative subcollection had never heard of. The
+   * branch is gone; `lib/dismissTask.test.ts` holds it gone.
    *
-   * What dismissing actually means is the LAST line of that function: mute the task's flag. So this
-   * writes exactly that — `upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL, bumpSnooze: true })`,
-   * the same primitive, minus a write that states something untrue. The inverse is the same call
-   * with `snoozedUntil: null`, which is what makes the row's Undo real.
+   * What dismissing means is the last line of that function: mute the task's flag. So this writes
+   * exactly that — `upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL, bumpSnooze: true })` — and
+   * its inverse is the same call with `snoozedUntil: null`, which is what makes the row's Undo
+   * real. That inverse is now a member of the type as well (`dismissTask(…, "lift")`): the undos
+   * that wanted it were passing `("fixed snooze", 0)`, and `0` is falsy, so the patch resolved to
+   * `undefined` — which `upsertTaskFlag` reads as KEEP. An undo that restored nothing.
    *
-   * ⚠️ The To-do page still calls `dismissTask` and therefore still has the defect. Flagged, not
-   * fixed here — repairing a shared writer belongs in its own change, with its own reds.
+   * ⚠️ SO THIS ARM AND `dismissTask("…", "permanent")` ARE NOW THE SAME TWO WRITES, AND ONE OF
+   * THEM SHOULD GO. Collapsing this into the shared writer is a follow-up for whoever merges this
+   * branch, not a change to make inside a review branch — but it is the one thing left here, and
+   * leaving two spellings of one intent is how they come to disagree.
+   *
+   * ⚠️ AND UNTIL THIS BRANCH IS MERGED OR REBASED, ITS OWN `src/lib/db.tsx` STILL CARRIES THE
+   * BRANCH. The fix is on `main`, which this branch does not yet contain; the paragraph above
+   * describes the world after that lands, deliberately, because a comment written to be true only
+   * before a merge is a comment that goes stale at the merge — which is exactly what happened to
+   * the one this replaces.
    */
   | { id: number; kind: "dismiss"; card: BoardCard }
   /**
