@@ -63,6 +63,8 @@ import { listRowInputs } from "../../lib/taskCardFacts";
 import { moreWaiting, nudgeCount, replyWindow, todoGroups, todoRows, type TodoDone, type TodoRow } from "../../lib/dashTodo";
 import { TodoRowCard, type RowPanel } from "./TodoRowCard";
 import { modalJourney, modalWhen } from "../../lib/taskModal";
+import { duplicateSendPrompt, priorSameTypeSend } from "../../lib/todoWalk";
+import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import type { TaskModalValues } from "../task/TaskModal";
 import type { SendMethod } from "../../lib/paneJourney";
 import { TodoRowEditor, blankDraft, draftToValues, stripFor, type RowDraft } from "./TodoRowEditor";
@@ -315,6 +317,25 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
    * answer to the guard's question — see `onDuplicate` in `DashTaskCommit`.
    */
   const commitFromModal = (r: TodoRow, c: BoardCard, v: TaskModalValues) => {
+    /**
+     * ⚠️ THE DUPLICATE GUARD IS ASKED HERE, AND IT HAD TO BE — making the tick always open the
+     * modal SILENTLY DISABLED IT. The guard lives in `quickDone` and nowhere else; the tick used to
+     * reach it, and now every send goes through `commit` instead, which has never had one. Measured
+     * on the page: a second full to an agent who already had one was written with no question
+     * asked. **The optimistic path was carrying a check nobody had noticed it carried.**
+     *
+     * ⚠️ IT IS THE SAME PREDICATE AND THE SAME SENTENCE — `priorSameTypeSend` and
+     * `duplicateSendPrompt`, both pure, both the ones `quickDone` calls. A second rule for "is this
+     * a repeat send" is how two surfaces come to disagree about what a duplicate is.
+     */
+    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+    if (!warn && q && v.answer.write === "commit" && modalJourney(c) === "sent") {
+      const act = getPrimaryAction(q.status as QueryStatus);
+      if (act.kind === "mark-sent") {
+        const prior = priorSameTypeSend(activities, q.id, act.target, act.markKind === "resubmit");
+        if (prior) { setWarn(duplicateSendPrompt(act.target, c.who, prior)); return; }
+      }
+    }
     seq.current += 1;
     const id = seq.current;
     const allow = !!warn;

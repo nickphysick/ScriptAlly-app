@@ -552,6 +552,44 @@
 - **⚠️ THE DRAWER'S HUG BELOW 1050px IS KNOWN AND DELIBERATELY UNFIXED.** The sheet's content wants 461px; the cap is 404 at a 900px viewport and clear of 461 from 1050 up, so on a 1440×900 laptop the drawer scrolls internally where it used to hug. `tightened` P3.10b tests the hug law at 1050 so it is not silently dropped — **which is not the same as the hug being fine**. It belongs to a mobile/laptop pass, not to a correction of the desktop layout.
 - **⚠️ AND `.card .ttl` IS DECLARED TWICE IN THE CONTRACT** — Inter 14.5/600, then Playfair 18/500 two hundred lines later, so the artefact RENDERS Playfair while the brief specifies Inter 600. The brief wins (a reasoned value in prose beats an unreasoned one in an artefact). A reader diffing the ref against `TaskTicket.tsx` will find the difference and it is not a mistake.
 
+## Finishing a task — THE PANE READS, THE MODAL FINISHES (task-modal round, 21 Sep; ref `task-modal.html`)
+
+**⚠️ THAT SENTENCE IS THE WHOLE RULE, AND IT IS NICK'S (21 Sep): *"I'd rather hold one sentence than
+a flag."*** `TaskPane` is where a writer READS a task — its quick-reference rail, its dated timeline,
+its record tiles and its stage ladder are a reading surface and the modal draws none of them.
+`TaskModal` is where a task is FINISHED. **Do not reopen the question of whether they duplicate each
+other**: they do not, because they answer different questions, and a flag over the top of them would
+be two surfaces free to offer different verbs for one card — the fault this page closed once already
+when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its own pass **once the
+`QueryCard` carries the rail, the timeline and the tiles**, which is what it should absorb.
+
+- **⚠️ THE TICK NEVER COMMITS. It opens the modal, and only the modal writes.** Until 21 Sep a tick
+  committed on a send and on a nudge with the defaults and asked only on a quiet card. Nick: *"a
+  commit the user can't see is a commit they don't trust. One click plus a visible confirmation is
+  the price, and it's the right price."* Undo on the row's strip stays as the safety net after.
+- **⚠️ EVERY JOURNEY OFFERS THREE ANSWERS, AND A `CommitRequest` KIND NAMES THE WRITE — NEVER THE
+  CARD.** `commitFromPane` routes on the CARD's journey, so a send card's values land in the send arm
+  however they are filled in; that is what produced a close with no reason when the `nudge` kind was
+  added. `close` and `mute` are their own kinds for the same reason. Nick: *"a third time through the
+  same seam suggests the seam wants a kind field that names the write, not the card."*
+- **⚠️ "Task n of N" MEANS THE LIST YOU CAME FROM, NEVER A GLOBAL.** The dashboard's board is
+  manuscript-scoped and capped and the To-do page's `dockable` is neither. **On the dashboard the
+  modal's counter may never exceed what the card itself shows** — if the card says "All 18" the modal
+  never says "of 19". Each door passes its own ordered list, which makes that true by construction.
+- **⚠️ THE FEED'S LINK OPENS THE MODAL FROM THE QUERY, NOT FROM A BOARD ROW, AND COMMITS NOTHING.**
+  `markSentOffered` reads the QUERY's status; the board reads task FLAGS. A snoozed or dismissed task
+  is suppressed from `live` while the feed still draws the link — so the old `if (r) tick(r)` with no
+  `else` **silently did nothing**, on a link that looked live.
+- **⚠️ `taskModal.css` DECLARES ITS OWN PALETTE BECAUSE THE MODAL PORTALS TO `document.body`** —
+  outside `.os-root`, where every `--dash-*` resolves to nothing and the declaration is dropped in
+  silence. `queryCard.css` carries the same block for the same reason.
+- **⚠️ A DATE IS TEXT WITH A `Change` LINK, NEVER A BARE `<input type="date">`.** Measured on the
+  page: the browser renders its own locale, `02/11/2026`, where every other date in the app reads
+  `2 Nov` — so the resting state was the one place the app spoke in a format it uses nowhere else.
+- **⚠️ AND THE REF'S `.head h2` IS DECLARED TWICE — the browser takes the second, 24px/1.3, where the
+  brief says 25px/1.32.** Measured in the rendered mockup. A reasoned value in prose beats an
+  unreasoned one in an artefact; `text-wrap: balance` survived there only by accident.
+
 ## The page masthead — ONE FORMAT, ONE BEHAVIOUR (⚠️ SUPERSEDES "Header types — canonical" in full, 30 Aug; refs `174-pinned-chrome-options.html`, `175-sticky-masthead-chevron.html`, `collapse-transition.html` option B)
 
 **Every masthead behaves identically: it is the first thing in the scroll row, it scrolls away as content, and a 46px collapsed bar takes over.** No sticky slab, no settle, no Hide, no chevron, no fold, no per-page arrangement — and no partition, because a partition needs two behaviours and there is one.
