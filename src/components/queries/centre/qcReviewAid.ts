@@ -13,7 +13,9 @@
  * finished `QcRow`s, so anything it demonstrated was demonstrated about numbers this file had
  * written — the gauge geometry would have been "proved" from hand-made inputs. Everything here goes
  * in at the top of the same pipe the real queries use, so `buildQcRows` → `expectedFor` →
- * `stageHistory` → `gaugeFor` all run for real and a screenshot shows the app's own arithmetic.
+ * `stageHistory` all run for real and a screenshot shows the app's own arithmetic. (`gaugeFor`
+ * was the third link until the compact strip was retired on 21 Sep; the calendar's bars are what
+ * `__SA_QC_AHEAD` demonstrates now.)
  *
  * ⚠️ `AHEAD` RE-DATES EXISTING QUERIES RATHER THAN ADDING NEW ONES, and the reason is the finding
  * it exists to illustrate. A column draws its four FURTHEST-through gauges; an open window is by

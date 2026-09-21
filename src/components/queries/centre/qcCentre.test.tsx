@@ -30,7 +30,7 @@ const rule = (sel: string) => {
 };
 
 const frame = (over: Partial<React.ComponentProps<typeof QcCentre>> = {}) => renderToStaticMarkup(
-  <QcCentre loading={false} entering={false} headLine="Every query, from the first letter to the last reply." onLog={() => {}} onRecord={() => {}} summary={<div id="sum" />}
+  <QcCentre loading={false} entering={false} headLine="Every query, from the first letter to the last reply." onLog={() => {}} onRecord={() => {}}
     sentence={<h2 id="sentence">s</h2>} overview={<div id="overview" />} view="list" onView={() => {}} onBack={() => {}} body={<div id="body" />} openCard={<aside id="card" />}
     docked onDocked={() => {}} onExport={() => {}} canExport {...over} />,
 );

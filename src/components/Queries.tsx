@@ -83,7 +83,6 @@ import { gridEmptyKind, waitingSummary, waitingLine } from "../lib/queryGridEmpt
 import "./queries/queryViewSwitch.css"; /* position-pinned, as above: the Contact list and To-do still mount the switch */
 import { QcCentre, clearQcViewMemory, DEFAULT_QC_VIEW, readQcView, type QcView } from "./queries/centre/QcCentre";
 import { QcSentence } from "./queries/centre/QcSentence";
-import { QcSummary } from "./queries/centre/QcSummary";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
 import { QcOpenCard, QcOpenCardSkeleton } from "./queries/centre/QcOpenCard";
 import { QcCalendar, QcCalendarSkeleton } from "./queries/centre/QcCalendar";
@@ -91,8 +90,8 @@ import { QcGrid, QcGridSkeleton } from "./queries/centre/QcGrid";
 import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
-  DEFAULT_SORT, buildQcRows, closedGrid, fanHand, filterForStatusParam, filterOptions, inScope, matchesFilter,
-  overviewCards, rowsWithdrawn, sortRows, stageColumns, stageFilter,
+  DEFAULT_SORT, buildQcRows, fanHand, filterForStatusParam, filterOptions, inScope, matchesFilter,
+  overviewCards, rowsWithdrawn, sortRows, stageFilter,
   type OverviewKey, type QcFilter, type QcSort,
 } from "../lib/qcSummary";
 import { QcOverview } from "./queries/centre/QcOverview";
@@ -6253,26 +6252,6 @@ export const Queries: React.FC<{
             /* a re-entry point that is already drafting says so rather than looking live and doing nothing */
             logDisabled={creating}
             logRef={logTriggerRef}
-            summary={
-              /* ⚠️ COUNTED OVER THE SCOPED SET, like the sentence's menu — never the filtered view, or
-                 pressing a stage would zero every other column. */
-              <QcSummary
-                loading={showGridSkeleton}
-                liveCount={qcScoped.filter((r) => r.court !== "closed").length}
-                withYouCount={qcScoped.filter((r) => r.withYou).length}
-                columns={stageColumns(qcScoped, Date.now())}
-                closed={closedGrid(qcScoped)}
-                filter={qcFilter}
-                onFilter={pickQcFilter}
-                selectedId={selectedQueryId}
-                /* a gauge selects its query WITHOUT changing the filter — unless the filter hides it */
-                onOpen={(id) => {
-                  const r = qcById.get(id);
-                  if (r && !matchesFilter(r, qcFilter)) setQcFilter("all");
-                  onOpenQuery?.(id);
-                }}
-              />
-            }
             sentence={
               <QcSentence
                 loading={showGridSkeleton}

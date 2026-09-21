@@ -94,7 +94,6 @@ export const QcCentre: React.FC<{
   /** True while a query is already being written. */
   logDisabled?: boolean;
   logRef?: React.Ref<HTMLButtonElement>;
-  summary: React.ReactNode;
   sentence: React.ReactNode;
   /** The Overview's own body, rendered instead of everything below the head. */
   overview: React.ReactNode;
@@ -115,7 +114,7 @@ export const QcCentre: React.FC<{
   onExport: () => void;
   canExport: boolean;
   entering: boolean;
-}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, summary, sentence, overview, fan, view, onView, onBack, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
+}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, sentence, overview, fan, view, onView, onBack, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
   const inView = view !== "overview";
   const rootRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
@@ -166,8 +165,6 @@ export const QcCentre: React.FC<{
       {/* ⚠️ THE OVERVIEW REPLACES EVERYTHING BELOW THE HEAD (§4) — no sentence, no view, no docked
           card, no strip. It is the stat row and the portal. */}
       {!inView ? overview : <>
-      {summary}
-
       {/* ⚠️ THERE IS NO VIEW SWITCH (§1.3). The portal's three tiles are how you enter a view, and
           the back link and the crumb are how you leave — so the segmented control that used to sit
           at the right of this row is GONE rather than hidden. Anyone re-adding it is adding a

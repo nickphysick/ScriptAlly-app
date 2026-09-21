@@ -103,29 +103,31 @@ describe("the hook", () => {
 
 describe("the entrance sheet", () => {
   const frames = css.match(/@keyframes[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g) ?? [];
-  it("three keyframes, LITERAL values in every one — a var() in a keyframe fails silently here", () => {
-    expect(frames.map((f) => f.match(/@keyframes (\S+)/)![1]).sort()).toEqual(["qcv-arrive", "qcv-draw", "qcv-show"]);
+  it("two keyframes, LITERAL values in every one — a var() in a keyframe fails silently here", () => {
+    /* `qcv-draw` was the gauge's, and went with the compact strip on 21 Sep */
+    expect(frames.map((f) => f.match(/@keyframes (\S+)/)![1]).sort()).toEqual(["qcv-arrive", "qcv-show"]);
     for (const f of frames) expect(f).not.toContain("var(");
     expect(css).not.toContain("color-mix(");
   });
   it("⚠️ `backwards`, never `both` or `forwards`: a fill that outlives the animation holds a transform on rows with sticky children", () => {
     const anims = [...css.matchAll(/animation:\s*([^;]+);/g)].map((m) => m[1]).filter((a) => a !== "none" && !a.startsWith("none"));
-    expect(anims.length).toBeGreaterThan(3);
+    expect(anims.length, "the entrance sheet has lost its animations").toBeGreaterThan(1);
     for (const a of anims) { expect(a, a).toContain("backwards"); expect(a, a).not.toMatch(/\b(both|forwards)\b/); }
   });
-  it("gauges draw from the LEFT over 520ms, columns 40ms apart; the ink follows at 420 over 220; the notch at 300 over 200", () => {
-    expect(css).toMatch(/\.qcv-ga-fill, \.qcv-page--enter \.qcv-ga-over \{ transform-origin: left center; animation: qcv-draw 0\.52s cubic-bezier\(0\.2, 0\.7, 0\.2, 1\) backwards; \}/);
-    expect([...css.matchAll(/\.qcv-stg:nth-child\((\d)\) \.qcv-ga-fill \{ animation-delay: ([\d.]+)s; \}/g)].map((m) => [Number(m[1]), Number(m[2])])).toEqual([[2, 0.04], [3, 0.08], [4, 0.12], [5, 0.16], [6, 0.2], [7, 0.24]]);
-    expect(css).toMatch(/\.qcv-ga-over \{ animation-delay: 0\.42s; animation-duration: 0\.22s; \}/);
-    expect(css).toMatch(/\.qcv-notch \{ animation: qcv-show 0\.2s 0\.3s backwards; \}/);
-  });
+  /**
+   * ⚠️ THE GAUGE ENTRANCE IS RETIRED WITH THE COMPACT STRIP (21 Sep) — removed by design, not
+   * broken. It asserted the draw-from-the-left, the 40ms column stagger, the ink's follow and the
+   * notch; there are no gauges, no stage columns and no notch on this page any more, and the
+   * rules went with them rather than being left selecting on classes nothing emits.
+   */
   it("rows, tiles and lanes rise 5px over 280ms, 30ms apart for the first seven; everything after shares the seventh's delay", () => {
     expect(css).toMatch(/@keyframes qcv-arrive \{ 0% \{ opacity: 0; transform: translateY\(5px\); \}/);
     expect([...css.matchAll(/:nth-child\((\d|n \+ 7)\) \{ animation-delay: ([\d.]+)s; \}/g)].filter((m) => !m[0].includes("qcv-stg")).map((m) => [m[1], Number(m[2])]))
       .toEqual([["2", 0.03], ["3", 0.06], ["4", 0.09], ["5", 0.12], ["6", 0.15], ["n + 7", 0.18]]);
   });
   it("⚠️ all of it is done inside 800ms — the latest any animation can finish, computed from the sheet", () => {
-    const ends = [0.24 + 0.52, 0.42 + 0.22, 0.3 + 0.2, 0.22, 0.18 + 0.28];
+    /* the gauge's three terms went with the strip; what is left is the rows and the fades */
+    const ends = [0.22, 0.18 + 0.28];
     expect(Math.max(...ends)).toBeLessThanOrEqual(ENTRANCE_MS / 1000);
   });
   it("none of it under prefers-reduced-motion, pulse included; the blank phase hides placeholders, never the frames", () => {

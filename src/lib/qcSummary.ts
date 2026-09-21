@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * qcSummary — everything the Query Centre (v11) states about a set of queries, derived once: the
- * rows, whose court each is in, the ONE expected-date clock, the gauges, the closed grid, the
- * sentence filter and the sorts. Pure; no Firebase; nothing stored.
+ * rows, whose court each is in, the ONE expected-date clock, the Overview's stat row and the
+ * fan's hand, the sentence filter and the sorts. Pure; no Firebase; nothing stored.
  *
  * ⚠️ ONE DEFINITION OF "WITH YOU" — `isWithYou`. It drives the rust rule on rows, tiles and bars,
  * the rust dot in the card's band, the "N WITH YOU" chip and the With you filter. It is the app's
@@ -159,40 +159,21 @@ const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct
 export const shortDay = (ms: number): string => { const d = new Date(ms); return `${d.getDate()} ${MON[d.getMonth()]}`; };
 const wholeDays = (a: number, b: number): number => Math.max(0, Math.round((b - a) / DAY));
 
-/* ── gauges ── */
-export const NOTCH_PC = 70;
-export const GAUGE_CAP = 4;
-export type GaugeKind = "within" | "past" | "nodate";
-export interface Gauge {
-  id: string;
-  kind: GaugeKind;
-  /** How much of the window has gone: 1 is the expected date. Null with no date. */
-  f: number | null;
-  /** Navy, from the left, as a % of the column's width. At most the notch. */
-  fillPc: number;
-  /** Ink, from the notch. 0 within the window; at most 100 − notch. */
-  overPc: number;
-  title: string;
-}
-export function gaugeFor(row: QcRow, nowMs: number): Gauge {
-  const who = row.agentName;
-  const none = row.expectedKind === "sendBy" ? "no send-by date" : row.expectedKind === "offer" ? "no decision date" : "no date promised";
-  if (row.stageStartMs == null) return { id: row.id, kind: "nodate", f: null, fillPc: 0, overPc: 0, title: `${who}, stage not dated` };
-  if (row.expectedMs == null) return { id: row.id, kind: "nodate", f: null, fillPc: 0, overPc: 0, title: `${who}, ${none}` };
-  const window = Math.max(row.expectedMs - row.stageStartMs, DAY);
-  const f = Math.max((nowMs - row.stageStartMs) / window, 0.03);
-  const what = row.expectedKind === "sendBy" ? "your send-by date" : row.expectedKind === "offer" ? "the decision date" : "the expected date";
-  const past = nowMs > row.expectedMs;
-  const title = past
-    ? `${who}, ${spanWords(wholeDays(row.expectedMs, nowMs))} past ${what}`
-    : `${who}, ${spanWords(wholeDays(nowMs, row.expectedMs))} until ${what}`;
-  return {
-    id: row.id, kind: f > 1 ? "past" : "within", f,
-    fillPc: Math.min(f, 1) * NOTCH_PC,
-    overPc: f > 1 ? Math.min((f - 1) * NOTCH_PC, 100 - NOTCH_PC) : 0,
-    title,
-  };
-}
+/**
+ * ⚠️ THE GAUGES, THE STAGE COLUMNS AND THE CLOSED GRID ARE DELETED (21 Sep) — REMOVED BY DESIGN,
+ * NOT BROKEN. They were the compact strip's, and the strip is gone from the views: the Overview is
+ * the only summary this page has, and Ledger, List and Calendar are content only. `gaugeFor`,
+ * `stageColumns`, `closedGrid`, `GAUGE_CAP` and `NOTCH_PC` went WITH the component rather than
+ * being left as a library nobody calls.
+ *
+ * ⚠️ CHECKED BEFORE REMOVING, AND BOTH APPARENT SURVIVORS WERE FALSE: `lib/cardC` has its own
+ * unrelated `gaugeFor` (a name collision, not an importer) and `qcReviewAid` names it only inside
+ * a COMMENT. A grep for the symbol reported two live consumers and there were none.
+ *
+ * What stays is what the Overview and the fan read: `rowsForStage`, `rowsForClosed`,
+ * `rowsWithdrawn`, `rowsForCard`, `fanHand` and `overviewCards`.
+ */
+
 /**
  * ⚠️ THE TWO SELECTORS EVERY COUNT AND EVERY DEAL READS (v21 §5, Nick's ruling 2). A stat card
  * states a number and its fan deals that number of cards; the strip's stage column states the same
@@ -212,42 +193,6 @@ export const rowsForClosed = (rows: readonly QcRow[]): QcRow[] =>
   rows.filter((r) => r.closedHow === "passed" || r.closedHow === "noReply");
 export const rowsWithdrawn = (rows: readonly QcRow[]): QcRow[] =>
   rows.filter((r) => r.closedHow === "withdrawn");
-
-export interface StageColumn { status: QueryStatus; name: string; count: number; gauges: Gauge[]; more: number }
-export function stageColumns(rows: readonly QcRow[], nowMs: number): StageColumn[] {
-  const live = rows.filter((r) => r.court !== "closed");
-  return stageOrder(live).map((status) => {
-    const mine = rowsForStage(rows, status);
-    const gauges = mine.map((r) => gaugeFor(r, nowMs)).sort((a, b) => (b.f ?? 0) - (a.f ?? 0));
-    return { status, name: STAGE_NAME[status], count: mine.length, gauges: gauges.slice(0, GAUGE_CAP), more: Math.max(0, mine.length - GAUGE_CAP) };
-  });
-}
-
-/* ── the closed grid ── */
-export interface ClosedGrid {
-  /** Rejected + No Response. The grid sums to it, and the title states it. */
-  total: number;
-  rows: { key: Furthest; label: string; title: string; status: QueryStatus; passed: number; noReply: number }[];
-  /** A withdrawal is the writer's decision, not an outcome (17 Sep). Stated beneath, never counted in. */
-  withdrawn: number;
-}
-export function closedGrid(rows: readonly QcRow[]): ClosedGrid {
-  const counted = rowsForClosed(rows);
-  const line = (key: Furthest, label: string, title: string, status: QueryStatus) => ({
-    key, label, title, status,
-    passed: counted.filter((r) => r.furthest === key && r.closedHow === "passed").length,
-    noReply: counted.filter((r) => r.furthest === key && r.closedHow === "noReply").length,
-  });
-  return {
-    total: counted.length,
-    rows: [
-      line("query", "At the query", "Closed without a request for pages", QueryStatus.QUERIED),
-      line("partial", "After a partial", "Closed after a partial was requested", QueryStatus.PARTIAL_SENT),
-      line("full", "After a full", "Closed after a full was requested, or beyond: a revise and resubmit, or an offer", QueryStatus.FULL_SENT),
-    ],
-    withdrawn: rowsWithdrawn(rows).length,
-  };
-}
 
 /* ── the Overview's stat row (v21 §3.1) ── */
 
