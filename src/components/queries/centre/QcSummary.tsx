@@ -100,29 +100,39 @@ export const QcSummary: React.FC<{
         </div>
       </FramedCard>
 
-      <FramedCard as="article" tone="stone" probe="sum-closed" className="qcv-sum-closed" bandClassName="qcv-sum-band qcv-sum-band--closed" label="Closed queries"
-        band={<>
-          <h3 className="qcv-sum-ttl qcv-sum-ttl--closed">{loading ? <span className="qcv-sk" style={{ width: 140, height: 18 }} /> : `${closed.total} closed ${closed.total === 1 ? "query" : "queries"}`}</h3>
-          {!loading && <button type="button" className="qcv-mini qcv-mini--stone" data-qcv="see-them" aria-pressed={filter === "closed"} onClick={() => toggle("closed")}>See them</button>}
-        </>}>
-        <div className="qcv-sbody qcv-sbody--closed">
-          <div className={`qcv-mx${loading ? " qcv-skw" : ""}${!loading && closed.withdrawn > 0 ? " qcv-mx--wd" : ""}`} data-qcv="closed-grid">
-            <span /><em>{loading ? " " : "Passed"}</em><em>{loading ? " " : "No reply"}</em>
-            {loading ? [96, 112, 92].map((w) => (
-              <React.Fragment key={w}>
-                <span className="qcv-mx-rl"><span className="qcv-sk qcv-sk--r" style={{ width: 14, height: 14 }} /><span className="qcv-sk" style={{ width: w, height: 12 }} /></span>
-                <span className="qcv-sk qcv-sk--c" style={{ width: 14, height: 14 }} /><span className="qcv-sk qcv-sk--c" style={{ width: 14, height: 14 }} />
-              </React.Fragment>
-            )) : closed.rows.map((r) => (
-              <React.Fragment key={r.key}>
-                <span className="qcv-mx-rl" title={r.title}><StatusDot status={r.status as QueryStatus} overrideSize={14} decorative />{r.label}</span>
-                <b className={`qcv-mx-n${r.passed ? "" : " qcv-mx-n--z"}`}>{r.passed}</b>
-                <b className={`qcv-mx-n${r.noReply ? "" : " qcv-mx-n--z"}`}>{r.noReply}</b>
-              </React.Fragment>
-            ))}
-          </div>
-          {!loading && closed.withdrawn > 0 && <p className="qcv-mx-wd" data-qcv="withdrawn-line">+{closed.withdrawn} withdrawn, not counted here</p>}
+      {/* ⚠️ A BAND, NOT A CARD (v21 §6). The closed half used to be a 286px column beside the live
+          one, which made the live card narrower than it needed at every width and gave the closed
+          figures a whole card's worth of chrome for three numbers. It is one full-width band now,
+          directly beneath, and the live card has the row to itself. */}
+      <FramedCard as="article" probe="sum-closed" className="qcv-cb" label="Closed queries">
+        <span className="qcv-cb-spine" aria-hidden="true" />
+        <b className="qcv-cb-ttl" data-qcv="closed-title">
+          {loading ? <span className="qcv-sk" style={{ width: 140, height: 18 }} /> : `${closed.total} closed ${closed.total === 1 ? "query" : "queries"}`}
+        </b>
+        <div className="qcv-cb-cols" data-qcv="closed-grid">
+          {(loading ? [0, 1, 2] : closed.rows).map((r, i) => (
+            <span className="qcv-cb-col" key={loading ? i : (r as typeof closed.rows[number]).key}
+              title={loading ? undefined : (r as typeof closed.rows[number]).title}>
+              {loading ? (
+                <><span className="qcv-sk qcv-sk--r" style={{ width: 14, height: 14 }} /><span className="qcv-sk" style={{ width: 92, height: 12 }} /></>
+              ) : (
+                <>
+                  <StatusDot status={(r as typeof closed.rows[number]).status as QueryStatus} overrideSize={14} decorative />
+                  <em className="qcv-cb-l">{(r as typeof closed.rows[number]).label}</em>
+                  <span className="qcv-cb-f"><b>{(r as typeof closed.rows[number]).passed}</b><small>passed</small></span>
+                  <span className="qcv-cb-f"><b>{(r as typeof closed.rows[number]).noReply}</b><small>no reply</small></span>
+                </>
+              )}
+            </span>
+          ))}
         </div>
+        {!loading && closed.withdrawn > 0 && (
+          <p className="qcv-cb-wd" data-qcv="withdrawn-line">+{closed.withdrawn} withdrawn, not counted here</p>
+        )}
+        {!loading && (
+          <button type="button" className="qcv-mini qcv-mini--stone qcv-cb-see" data-qcv="see-them"
+            aria-pressed={filter === "closed"} onClick={() => toggle("closed")}>See them</button>
+        )}
       </FramedCard>
     </section>
   );

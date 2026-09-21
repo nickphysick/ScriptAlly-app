@@ -3,7 +3,8 @@
  * the row is 185px whatever the account holds (6 rim + 1 frame + 48 band + 123 body + 1 + 6).
  * Values are the ref's COMPUTED ones (its sheet is layered v3 → v11; nothing is ported from it).
  */
-.qcv-sum { display: grid; grid-template-columns: minmax(0, 1fr) 286px; gap: 20px; align-items: stretch; }
+/* ⚠️ ONE COLUMN NOW (v21 §6): the live card full width, the closed BAND 18px beneath it. */
+.qcv-sum { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: stretch; }
 .qcv-sum > .fc-card { display: flex; flex-direction: column; min-height: 0; }
 .qcv-sum > .fc-card > .fc-frame { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
 
@@ -30,12 +31,19 @@
 .qcv-sbody--closed { padding: 12px 18px 10px; justify-content: center; }
 
 /* ── the stage columns: six equal tracks; seven only while a live R&R exists ── */
-.qcv-stages { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; align-items: start; }
+/* ⚠️ A 1px HAIRLINE BETWEEN COLUMNS AND NO GAP (§6). The gap read as six loose tiles; a rule reads
+   as one card divided into six. The separator is a `border-left` on every column but the first, so
+   a seventh column brings its own rule and nothing has to count them. */
+.qcv-stages { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0; align-items: start; }
+.qcv-stg + .qcv-stg { border-left: 1px solid var(--qcv-hair); }
 .qcv-sum--seven .qcv-stages { grid-template-columns: repeat(7, minmax(0, 1fr)); }
-.qcv-stg { position: relative; box-sizing: border-box; height: 84px; padding: 5px 5px 7px; border-radius: 9px; display: flex; flex-direction: column; min-width: 0; }
+.qcv-stg { position: relative; box-sizing: border-box; height: 85px; padding: 2px 9px 6px; display: flex; flex-direction: column; min-width: 0; }
 .qcv-stg:hover { background: var(--qcv-parchment); }
-/* pressed is an inset ink ring, never a fill */
-.qcv-stg[data-pressed="true"] { box-shadow: inset 0 0 0 1.6px var(--qcv-ink); }
+/* ⚠️ PRESSED IS A PARCHMENT FILL AND A RULE UNDER THE HEADER, NOT AN INSET RING (§6). A ring drawn
+   inside a column that now has a hairline on its left reads as a second, heavier divider — two
+   borders a pixel apart, and the pressed column looked like a seam rather than a selection. */
+.qcv-stg[data-pressed="true"] { background: var(--qcv-parchment); }
+.qcv-stg[data-pressed="true"] .qcv-stg-top { box-shadow: 0 1.6px 0 var(--qcv-ink); }
 .qcv-stg-top {
   display: flex; align-items: center; gap: 6px; min-height: 32px; width: 100%; padding: 0; margin: 0; border: 0; background: none; cursor: pointer; text-align: left; color: var(--qcv-ink);
   font-family: var(--qcv-serif);
@@ -45,15 +53,21 @@
 .qcv-stg-top:focus-visible { outline: none; }
 .qcv-stg-top:focus-visible::after { box-shadow: 0 0 0 2px var(--qcv-navy); }
 .qcv-stg-top > .sd, .qcv-stg-top > span:first-child { flex: none; }
-/* the name may wrap to two lines ("Partial / requested"); the count is pushed right and never shrinks */
-.qcv-stg-l { flex: 1 1 0%; min-width: 0; font-family: var(--qcv-type); font-weight: 400; font-size: 12.5px; line-height: 1.1; padding-top: 2px; }
-.qcv-stg-n { flex: none; margin-left: 2px; font-family: var(--qcv-serif); font-weight: 600; font-size: 19px; line-height: 1; font-variant-numeric: tabular-nums lining-nums; }
+/**
+ * ⚠️ `min-width: min-content`, NOT `0` — THE NAME MUST NEVER SHRINK BELOW ITS OWN CONTENT (§6).
+ * With `min-width: 0` a flex item shrinks to nothing and the text simply overflows its box, so
+ * "Queried" and "Partial sent" were being CLIPPED at narrow widths — silently, because an
+ * overflowing inline box does not scroll and nothing reports it. `min-content` is the longest word,
+ * so the name wraps instead of clipping, which is what the two-line treatment was always for.
+ */
+.qcv-stg-l { flex: 1 1 0%; min-width: min-content; font-family: var(--qcv-type); font-weight: 400; font-size: 12px; line-height: 1.1; padding-top: 2px; }
+.qcv-stg-n { flex: none; margin-left: 2px; font-family: var(--qcv-serif); font-weight: 600; font-size: 20px; line-height: 1; font-variant-numeric: tabular-nums lining-nums; }
 .qcv-stg--zero .qcv-stg-l, .qcv-stg--zero .qcv-stg-n { color: var(--qcv-ink-45); }
 
 /* the graphic: 6px under the header, a hairline, 6px, then a FIXED 27px — content-box, so the box is 34 */
 .qcv-stg-u { position: relative; box-sizing: content-box; height: 27px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--qcv-hair); }
 .qcv-ga {
-  position: relative; z-index: 1; display: block; box-sizing: border-box; width: 100%; height: 3px; margin: 2px 0 0; padding: 0; border: 0; border-radius: 2px;
+  position: relative; z-index: 1; display: block; box-sizing: border-box; width: 100%; height: 4px; margin: 4px 0 0; padding: 0; border: 0; border-radius: 2px;
   background: var(--qcv-track); cursor: pointer; overflow: visible;
 }
 /* a 3px target is too fine to press: the hit area is the gauge plus the daylight round it */
@@ -130,3 +144,78 @@
   .qcv-keyline { white-space: normal; }
 }
 @media (prefers-reduced-motion: reduce) { .qcv-skw { animation: none; } }
+
+/* ══ v21 §6 — the compact strip ══════════════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ THE WRAP IS ON THE COLUMN, WITH THE CARD AS CONTAINER — trap 1, and it is not optional. A
+ * container query cannot restyle its OWN container, so `@container (max-width: 800px)` can never
+ * target `.qcv-sum-live`; it targets the header INSIDE it. `.fc-card--cq` already declares
+ * `container-type: inline-size`, so the live card is the container without anything being added.
+ *
+ * Under 800px the header stops being one line: the glyph and the count share the first, and the
+ * name takes a full-width second. That is what lets `min-width: min-content` hold at 1100 without
+ * the count being pushed off the column.
+ */
+@container (max-width: 800px) {
+  .qcv-stg-top { flex-wrap: wrap; }
+  .qcv-stg-l { order: 3; flex: 1 0 100%; min-width: 0; padding-top: 1px; }
+  .qcv-stg-n { margin-left: auto; }
+}
+
+/* ── the closed band ─────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * ⚠️ IT MUST OUT-SPECIFY `.qcv-sum > .fc-card > .fc-frame`, WHICH IS 0-3-0 AND SETS
+ * `flex-direction: column`. Written as `.qcv-cb > .fc-frame` (0-2-0) this rule LOSES the direction
+ * while winning everything else — so the band stacked its title, its columns and its chip
+ * vertically and measured 172px against the 54 it states. Every declaration read correctly.
+ * Measured before the fix; this is the page-vs-component specificity trap, inside one stylesheet.
+ */
+.qcv-sum > .qcv-cb > .fc-frame {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 22px;
+  padding: 9px 12px 9px 22px;
+}
+/* the spine sits INSIDE the frame, as the Overview's stat cards do */
+.qcv-cb-spine {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 6px;
+  background: var(--state-closed, #e4e1db);
+  border-radius: 4px 0 0 4px;
+}
+.qcv-cb-ttl {
+  flex: none;
+  font-family: var(--qcv-type); font-weight: 400; font-size: 19px; line-height: 1.2;
+  color: var(--qcv-ink); white-space: nowrap;
+}
+.qcv-cb-cols { flex: 1 1 auto; min-width: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.qcv-cb-col { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.qcv-cb-l {
+  font-style: normal; font-family: var(--qcv-serif); font-size: 13px; line-height: 1.15;
+  color: var(--qcv-ink-70); min-width: 0;
+}
+.qcv-cb-f { display: flex; align-items: baseline; gap: 4px; flex: none; }
+.qcv-cb-f b { font-family: var(--qcv-serif); font-weight: 600; font-size: 16px; line-height: 1; font-variant-numeric: tabular-nums; }
+.qcv-cb-f small {
+  font-family: var(--qcv-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--qcv-ink-45);
+}
+.qcv-cb-wd {
+  flex: none; margin: 0;
+  font-family: var(--qcv-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--qcv-ink-45); white-space: nowrap;
+}
+.qcv-cb-see { flex: none; margin-left: auto; }
+
+/**
+ * ⚠️ AT 1280 THE BAND IS 70 RATHER THAN 54, AND THE EXTRA IS THE LABEL WRAPPING ABOVE ITS FIGURES
+ * (§6's own note). It is a column query on the band, not a viewport one: the band is as wide as the
+ * content column, which the sidebar's state changes independently of the window.
+ */
+@container (max-width: 1020px) {
+  .qcv-cb-col { flex-wrap: wrap; row-gap: 2px; }
+  .qcv-cb-l { flex: 1 0 100%; }
+}

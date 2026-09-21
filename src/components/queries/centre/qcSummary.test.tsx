@@ -57,7 +57,11 @@ describe("the live card", () => {
     expect(html).toContain('title="+46 earlier in the window"');
     expect(html).toMatch(/data-qcv="gauge-more"[^>]*>\s*\+46 earlier\s*<\/em>/);
     expect(rule(css, ".qcv-stg-u")).toMatch(/height:\s*27px/);
-    expect(rule(css, ".qcv-stg")).toMatch(/height:\s*84px/);
+    /* §6's stated column: 85 tall, 2/9/6 padding, and a hairline instead of a gap */
+    expect(rule(css, ".qcv-stg")).toMatch(/height:\s*85px/);
+    expect(rule(css, ".qcv-stg")).toMatch(/padding:\s*2px 9px 6px/);
+    expect(rule(css, ".qcv-stages")).toMatch(/gap:\s*0/);
+    expect(rule(css, ".qcv-stg + .qcv-stg")).toMatch(/border-left:\s*1px solid/);
   });
   it("⚠️ ONE PHRASING IN EVERY COLUMN — a busy column reads the same beside an empty neighbour and beside a busy one", () => {
     /* The fault this forbids is TWO phrasings on one card. An earlier pass drew the mockup's longer
@@ -99,8 +103,17 @@ describe("the live card", () => {
     const html = render([q({})], { filter: stageFilter(QueryStatus.QUERIED) });
     expect(html).toMatch(/class="qcv-stg" data-qcv="stage" data-stage="Queried" data-count="1" data-pressed="true"/);
     expect(html).toMatch(/class="qcv-stg qcv-stg--zero" data-qcv="stage" data-stage="Offer"/);
-    expect(rule(css, '.qcv-stg[data-pressed="true"]')).toMatch(/box-shadow:\s*inset 0 0 0 1\.6px var\(--qcv-ink\)/);
-    expect(rule(css, '.qcv-stg[data-pressed="true"]')).not.toMatch(/background/);
+    /**
+     * ⚠️ THE LAW REVERSED IN v21 §6, AND THE CASE'S OWN NAME USED TO STATE THE OLD ONE — pressed is
+     * a parchment FILL with a 1.6px ink rule under the header, and no longer an inset ring. The
+     * ring was right while the columns had a gap between them; with a hairline separator it read as
+     * a second, heavier divider a pixel from the first, so the pressed column looked like a seam.
+     */
+    expect(rule(css, '.qcv-stg[data-pressed="true"]')).toMatch(/background:\s*var\(--qcv-parchment\)/);
+    expect(rule(css, '.qcv-stg[data-pressed="true"] .qcv-stg-top')).toMatch(/box-shadow:\s*0 1\.6px 0 var\(--qcv-ink\)/);
+    expect(rule(css, '.qcv-stg[data-pressed="true"]'), "the retired inset ring is back").not.toMatch(/inset 0 0 0/);
+    /* the old clause here forbade a FILL, which §6 makes the treatment — what must not come back
+       is the ring, asserted above. A stage with none is still drawn quiet: */
   });
   it("a status is drawn by StatusDot only — no glyph is redrawn here", () => {
     const src = decls(readFileSync(join(process.cwd(), "src/components/queries/centre/QcSummary.tsx"), "utf8"));
@@ -112,9 +125,12 @@ describe("the live card", () => {
 describe("the closed card", () => {
   it("numbers, zeros drawn quiet, and the withdrawn line only when there is one", () => {
     const html = render([q({ status: QueryStatus.REJECTED }), q({ status: QueryStatus.NO_RESPONSE }), q({ status: QueryStatus.WITHDRAWN })]);
-    expect(html).toContain(">2 closed queries</h3>");
-    expect(html).toMatch(/At the query<\/span><b class="qcv-mx-n">1<\/b><b class="qcv-mx-n">1<\/b>/);
-    expect(html).toMatch(/After a partial<\/span><b class="qcv-mx-n qcv-mx-n--z">0<\/b>/);
+    /* the closed half is a BAND now, not a card, so its title is not a card heading */
+    expect(html).toContain(">2 closed queries</b>");
+    expect(html).toContain('data-qcv="closed-title"');
+    /* the band states each figure beside its own caption rather than in a three-column matrix */
+    expect(html).toMatch(/At the query<\/em><span class="qcv-cb-f"><b>1<\/b><small>passed<\/small>/);
+    expect(html).toMatch(/After a partial<\/em><span class="qcv-cb-f"><b>0<\/b>/);
     expect(html).toMatch(/data-qcv="withdrawn-line">\+1 withdrawn, not counted here</);
     expect(render([q({ status: QueryStatus.REJECTED })])).not.toContain("withdrawn-line");
     expect(html).toMatch(/title="Closed after a full was requested, or beyond[^"]*"/);
@@ -127,11 +143,16 @@ describe("loading: the REAL cards, with placeholders inside them", () => {
   it("both cards and both bands render; no counts, no chips, six columns of three gauge lines, ONE pulse per group", () => {
     const html = render([], { loading: true });
     expect(html).toContain('data-qcv="sum-live"');
-    expect(html).toContain('data-qcv="sum-closed-band"');
+    /* ⚠️ THE CLOSED CARD'S BAND IS GONE WITH THE CARD (§6) — a full-width band has nothing to put
+       a coloured header strip on. Asserted as an ABSENCE so the band cannot quietly come back. */
+    expect(html, "the closed card's band survives the band that replaced it").not.toContain('data-qcv="sum-closed-band"');
+    expect(html).toContain('class="qcv-cb-spine"');
     expect(html).not.toContain("with-you-chip");
     expect(html).not.toContain('data-qcv="gauge"');
     expect(html.split("qcv-sk--ga").length - 1).toBe(18);
-    expect(html.split("qcv-skw").length - 1).toBe(2);
+    /* ⚠️ ONE `qcv-skw` GROUP NOW, NOT TWO — the closed CARD had a skeleton wrapper of its own and
+       the band does not; its three columns carry their own placeholders inline. */
+    expect(html.split("qcv-skw").length - 1).toBe(1);
     expect(css).toMatch(/@keyframes qcv-pulse \{ 0% \{ opacity: 1; \} 50% \{ opacity: 0\.5; \} 100% \{ opacity: 1; \} \}/);
     expect(css.match(/@keyframes[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g)!.join("")).not.toContain("var(");
     expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\) \{ \.qcv-skw \{ animation: none; \} \}/);
