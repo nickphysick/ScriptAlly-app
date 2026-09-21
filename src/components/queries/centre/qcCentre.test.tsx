@@ -31,7 +31,7 @@ const rule = (sel: string) => {
 
 const frame = (over: Partial<React.ComponentProps<typeof QcCentre>> = {}) => renderToStaticMarkup(
   <QcCentre loading={false} entering={false} headLine="Every query, from the first letter to the last reply." onLog={() => {}} onRecord={() => {}} summary={<div id="sum" />}
-    sentence={<h2 id="sentence">s</h2>} view="list" onView={() => {}} body={<div id="body" />} openCard={<aside id="card" />}
+    sentence={<h2 id="sentence">s</h2>} overview={<div id="overview" />} view="list" onView={() => {}} onBack={() => {}} body={<div id="body" />} openCard={<aside id="card" />}
     docked onDocked={() => {}} onExport={() => {}} canExport {...over} />,
 );
 
@@ -162,10 +162,27 @@ describe("the frame, rendered", () => {
     expect(frame({ logDisabled: true })).toMatch(/data-qcv="head-cta"[^>]*disabled=""/);
     expect(frame()).not.toMatch(/data-qcv="head-cta"[^>]*disabled/);
   });
-  it("the switch presses exactly the current view, under the new names", () => {
-    const html = frame({ view: "calendar" });
-    expect([...html.matchAll(/<button type="button" aria-pressed="(true|false)">(Ledger|List|Calendar)<\/button>/g)].map((m) => [m[2], m[1]]))
-      .toEqual([["Ledger", "false"], ["List", "false"], ["Calendar", "true"]]);
+  /**
+   * ⚠️ THE VIEW SWITCH IS GONE (v21 §1.3), AND THIS ASSERTS THE ABSENCE RATHER THAN LAPSING. It
+   * used to check that the segmented control pressed exactly the current view. The portal's three
+   * tiles are the only way into a view now and the back link is the only way out, so a switch
+   * would be a second door beside a door — which is what the Overview exists to be.
+   */
+  it("⚠️ there is no view switch, in any view, and the way out is the back link", () => {
+    for (const v of ["list", "grid", "calendar"] as const) {
+      const html = frame({ view: v });
+      expect(html, `a view switch is mounted in ${v}`).not.toMatch(/["\s]qcv-views["\s]/);
+      expect(html).not.toMatch(/aria-pressed/);
+      expect(html, `${v} offers no way back to the Overview`).toContain('data-qcv="back-overview"');
+    }
+    /* …and the Overview itself has no back link, because it is where back goes */
+    const over = frame({ view: "overview" });
+    expect(over).not.toContain('data-qcv="back-overview"');
+    expect(over, "the Overview is not rendering its own body").toContain('id="overview"');
+    /* the Overview replaces the view's furniture entirely: no sentence, no stage, no export */
+    for (const gone of ['id="sentence"', 'data-qcv="stagegrid"', "qcv-export"]) {
+      expect(over, `${gone} is on the Overview`).not.toContain(gone);
+    }
   });
   it("⚠️ the open card renders only while DOCKED; unmeasured (null) renders neither a card nor a docked column", () => {
     expect(frame({ docked: true })).toContain('id="card"');
@@ -235,9 +252,12 @@ describe("the sheet", () => {
     expect(card, "framedCard.css no longer declares --fc-frame").toBeTruthy();
     expect(declared, "the head's frame colour has drifted from the card's").toBe(card);
   });
-  it("buttons are anthracite with white text; no ink fill on this sheet", () => {
-    expect(rule('.qcv-views button[aria-pressed="true"]')).toMatch(/background:\s*var\(--qcv-navy\);\s*color:\s*#ffffff/);
+  it("anthracite is the page's one button fill, and nothing on this sheet is ink-filled", () => {
+    /* ⚠️ IT USED TO READ THE PRESSED VIEW-SWITCH BUTTON, which is retired. The claim was never
+       about the switch: it is that this page fills buttons with anthracite and never with ink. */
     expect(rule(".qcv-page")).toMatch(/--qcv-navy:\s*#2a3a52/);
     expect(css).not.toMatch(/background:\s*(#1c130f|var\(--qcv-ink\))/);
+    /* the switch's own rules went with it rather than being left inert */
+    expect(css, "the retired view switch still has a stylesheet").not.toMatch(/(?:^|\n)\s*\.qcv-views\s*\{/);
   });
 });

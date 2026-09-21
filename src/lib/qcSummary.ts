@@ -192,11 +192,31 @@ export function gaugeFor(row: QcRow, nowMs: number): Gauge {
     title,
   };
 }
+/**
+ * ⚠️ THE TWO SELECTORS EVERY COUNT AND EVERY DEAL READS (v21 §5, Nick's ruling 2). A stat card
+ * states a number and its fan deals that number of cards; the strip's stage column states the same
+ * number; the closed band states the closed one. Those are FOUR surfaces asserting one fact, and
+ * the only way they cannot come to disagree is for all four to call the same function — so the
+ * membership test lives here once, and `qcSummary.test` asserts card count === fan length for
+ * every card rather than checking each surface's arithmetic separately.
+ *
+ * ⚠️ AND `rowsForClosed` EXCLUDES WITHDRAWN, deliberately and in step with `closedGrid`. A
+ * withdrawal is the writer's own decision, not an outcome the agent produced; the closed card
+ * counts Rejected + No Response, so its fan deals Rejected + No Response. The withdrawn ones are
+ * stated beside the fan ("+1 withdrawn, not shown") rather than silently dealt or silently dropped.
+ */
+export const rowsForStage = (rows: readonly QcRow[], status: QueryStatus): QcRow[] =>
+  rows.filter((r) => r.court !== "closed" && r.status === status);
+export const rowsForClosed = (rows: readonly QcRow[]): QcRow[] =>
+  rows.filter((r) => r.closedHow === "passed" || r.closedHow === "noReply");
+export const rowsWithdrawn = (rows: readonly QcRow[]): QcRow[] =>
+  rows.filter((r) => r.closedHow === "withdrawn");
+
 export interface StageColumn { status: QueryStatus; name: string; count: number; gauges: Gauge[]; more: number }
 export function stageColumns(rows: readonly QcRow[], nowMs: number): StageColumn[] {
   const live = rows.filter((r) => r.court !== "closed");
   return stageOrder(live).map((status) => {
-    const mine = live.filter((r) => r.status === status);
+    const mine = rowsForStage(rows, status);
     const gauges = mine.map((r) => gaugeFor(r, nowMs)).sort((a, b) => (b.f ?? 0) - (a.f ?? 0));
     return { status, name: STAGE_NAME[status], count: mine.length, gauges: gauges.slice(0, GAUGE_CAP), more: Math.max(0, mine.length - GAUGE_CAP) };
   });
@@ -211,7 +231,7 @@ export interface ClosedGrid {
   withdrawn: number;
 }
 export function closedGrid(rows: readonly QcRow[]): ClosedGrid {
-  const counted = rows.filter((r) => r.closedHow === "passed" || r.closedHow === "noReply");
+  const counted = rowsForClosed(rows);
   const line = (key: Furthest, label: string, title: string, status: QueryStatus) => ({
     key, label, title, status,
     passed: counted.filter((r) => r.furthest === key && r.closedHow === "passed").length,
@@ -224,8 +244,71 @@ export function closedGrid(rows: readonly QcRow[]): ClosedGrid {
       line("partial", "After a partial", "Closed after a partial was requested", QueryStatus.PARTIAL_SENT),
       line("full", "After a full", "Closed after a full was requested, or beyond: a revise and resubmit, or an offer", QueryStatus.FULL_SENT),
     ],
-    withdrawn: rows.filter((r) => r.closedHow === "withdrawn").length,
+    withdrawn: rowsWithdrawn(rows).length,
   };
+}
+
+/* ── the Overview's stat row (v21 §3.1) ── */
+
+export type OverviewKey = QueryStatus | "closed";
+export interface OverviewCard {
+  key: OverviewKey;
+  /** The status whose glyph the card draws. The closed card draws the closed mark. */
+  status: QueryStatus;
+  name: string;
+  count: number;
+  /** The one mono line under the name. */
+  note: string;
+  /** The note is a count of queries past their date: ink, weight 600, rather than 45%. */
+  urgent: boolean;
+  /** The rust dot after the glyph — the two states where the move is yours and material is owed. */
+  rust: boolean;
+}
+
+/**
+ * One card per status, in pipeline order, and Closed last.
+ *
+ * ⚠️ THE ROW IS SEVEN CARDS, OR EIGHT WHILE A LIVE R&R EXISTS — and the eighth is `stageOrder`'s
+ * own decision, not a second rule written here. The strip's stage columns and this row would
+ * otherwise disagree about whether R&R is a thing on this account, which is exactly the class of
+ * fault the shared selectors above exist to foreclose.
+ *
+ * ⚠️ AND THE MONO LINE STATES A FACT, NEVER A VERDICT. "N past the date" is the app's wording for a
+ * date that has gone by; "overdue" and "late" are forbidden here as everywhere (CLAUDE.md). A card
+ * at zero says "none" rather than stating a figure of nothing — including the closed card, whose
+ * "0 passed · 0 no reply" would be two facts about an empty set.
+ */
+export function overviewCards(rows: readonly QcRow[], nowMs: number): OverviewCard[] {
+  void nowMs; /* `pastExpected` is already derived against now when the rows are built */
+  const live = rows.filter((r) => r.court !== "closed");
+  const cards: OverviewCard[] = stageOrder(live).map((status) => {
+    const mine = rowsForStage(rows, status);
+    const past = mine.filter((r) => r.pastExpected).length;
+    const owed = status === QueryStatus.PARTIAL_REQUESTED || status === QueryStatus.FULL_REQUESTED;
+    const note = mine.length === 0 ? "none"
+      : past > 0 ? `${past} past the date`
+        : owed ? "your move"
+          : status === QueryStatus.OFFER ? "decision due"
+            : "in the window";
+    return {
+      key: status, status, name: STAGE_NAME[status], count: mine.length,
+      note, urgent: mine.length > 0 && past > 0, rust: owed && mine.length > 0,
+    };
+  });
+  const closed = rowsForClosed(rows);
+  const passed = closed.filter((r) => r.closedHow === "passed").length;
+  const noReply = closed.filter((r) => r.closedHow === "noReply").length;
+  cards.push({
+    key: "closed", status: QueryStatus.REJECTED, name: "Closed", count: closed.length,
+    note: closed.length === 0 ? "none" : `${passed} passed · ${noReply} no reply`,
+    urgent: false, rust: false,
+  });
+  return cards;
+}
+
+/** The rows a stat card deals when it is clicked — the same membership its count states. */
+export function rowsForCard(rows: readonly QcRow[], key: OverviewKey): QcRow[] {
+  return key === "closed" ? rowsForClosed(rows) : rowsForStage(rows, key);
 }
 
 /* ── the sentence: one filter, one manuscript scope, one sort ── */

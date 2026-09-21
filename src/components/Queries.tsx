@@ -91,9 +91,11 @@ import { QcGrid, QcGridSkeleton } from "./queries/centre/QcGrid";
 import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
-  DEFAULT_SORT, buildQcRows, closedGrid, filterForStatusParam, filterOptions, inScope, matchesFilter, sortRows, stageColumns,
+  DEFAULT_SORT, buildQcRows, closedGrid, filterForStatusParam, filterOptions, inScope, matchesFilter, overviewCards,
+  sortRows, stageColumns, stageFilter,
   type QcFilter, type QcSort,
 } from "../lib/qcSummary";
+import { QcOverview } from "./queries/centre/QcOverview";
 /* ══ THE CALENDAR VIEW (Run C) — the SAME board To-do draws ═══════════════════════════════════
    Every piece below is shared: the board, its winbar, the window's arithmetic and the bar engine's
    own assembler. Nothing about the calendar is implemented on this page — a second implementation
@@ -6275,8 +6277,27 @@ export const Queries: React.FC<{
                 scopeTitle={qcScopeTitle}
               />
             }
+            overview={
+              <QcOverview
+                cards={overviewCards(qcScoped, Date.now())}
+                loading={showGridSkeleton}
+                /* ⚠️ PHASE 4 FILTERS; PHASE 5 FANS. §4 says a stat card deals its queries as cards,
+                   and the fan is the next phase — so until it lands the card does the honest
+                   approximation of its own meaning (open the Ledger showing exactly that set)
+                   rather than sitting inert. A control that looks live and does nothing is the one
+                   thing this page must not ship. */
+                onCard={(key) => {
+                  setQcFilter(key === "closed" ? "closed" : stageFilter(key));
+                  setGridView("list");
+                }}
+                onView={setGridView}
+              />
+            }
             view={gridView}
             onView={setGridView}
+            /* ⚠️ LEAVING A VIEW CLEARS THE SELECTION. `?q=` is App.tsx's, so this goes through the
+               page's one route out rather than writing the URL here. */
+            onBack={() => { onSelectView?.("cards"); setGridView("overview"); }}
             docked={qcDocked}
             onDocked={setQcDocked}
             onStep={(delta) => {

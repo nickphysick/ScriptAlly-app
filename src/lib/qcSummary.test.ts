@@ -11,6 +11,7 @@ import { Activity, Agent, Query, QueryStatus } from "../types";
 import {
   BASE_STAGES, CALENDAR_GROUPS, DEFAULT_SORT, GAUGE_CAP, NOTCH_PC, SORT_OPTIONS, STAGE_NAME,
   buildQcRows, closedGrid, courtOf, expectedFor, factLine, filterForStatusParam, filterOptions, filterPhrase,
+  overviewCards, rowsForCard, rowsWithdrawn,
   gaugeFor, inScope, isWithYou, matchesFilter, primaryActionLabel, sortRows, stageColumns, stageFilter, stageOrder, standLine,
   type QcFilter, type QcRow,
 } from "./qcSummary";
@@ -160,6 +161,85 @@ describe("stage columns", () => {
   });
   it("the calendar groups: who must act first, R&R after Full requested, Closed last", () => {
     expect(CALENDAR_GROUPS).toEqual([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, "closed"]);
+  });
+});
+
+describe("the Overview's stat row — a card states a number, and its fan deals that number", () => {
+  /* one of every status, plus a second Queried, so every card has something to be wrong about */
+  const mixed = () => {
+    const qs = [
+      mkQ({ status: QueryStatus.QUERIED }), mkQ({ status: QueryStatus.QUERIED }),
+      mkQ({ status: QueryStatus.PARTIAL_REQUESTED }), mkQ({ status: QueryStatus.PARTIAL_SENT }),
+      mkQ({ status: QueryStatus.FULL_REQUESTED }), mkQ({ status: QueryStatus.FULL_SENT }),
+      mkQ({ status: QueryStatus.REVISE_RESUBMIT }), mkQ({ status: QueryStatus.OFFER }),
+      mkQ({ status: QueryStatus.REJECTED }), mkQ({ status: QueryStatus.NO_RESPONSE }),
+      mkQ({ status: QueryStatus.WITHDRAWN }),
+    ];
+    return rowsOf(qs);
+  };
+
+  it("seven cards, in pipeline order, Closed last — eight while a live R&R exists", () => {
+    const plain = overviewCards(rowsOf([mkQ()]), NOW);
+    expect(plain.map((c) => c.key)).toEqual([...BASE_STAGES, "closed"]);
+    const withRr = overviewCards(mixed(), NOW);
+    expect(withRr).toHaveLength(8);
+    expect(withRr.map((c) => c.key).indexOf(QueryStatus.REVISE_RESUBMIT))
+      .toBe(withRr.map((c) => c.key).indexOf(QueryStatus.FULL_SENT) + 1);
+    expect(withRr[withRr.length - 1].key).toBe("closed");
+  });
+
+  /**
+   * ⚠️ THE LOCK NICK ASKED FOR, AND IT IS AN EQUALITY BETWEEN TWO DERIVATIONS RATHER THAN TWO
+   * LITERALS. A card's count and the hand it deals are the same membership or the reader is told
+   * "12 queried" and handed eleven cards. Asserting `toBe(2)` on both sides would go green the day
+   * someone changed both in the same wrong direction.
+   */
+  it("⚠️ every card's count is exactly the length of the hand it deals", () => {
+    const rows = mixed();
+    const cards = overviewCards(rows, NOW);
+    expect(cards.length).toBeGreaterThan(3);
+    for (const c of cards) {
+      expect(rowsForCard(rows, c.key), `${String(c.key)} deals a different set from the number it states`)
+        .toHaveLength(c.count);
+    }
+    /* and the whole row accounts for every row exactly once, withdrawn excepted */
+    const dealt = cards.flatMap((c) => rowsForCard(rows, c.key).map((r) => r.id));
+    expect(new Set(dealt).size, "a query is dealt by two cards").toBe(dealt.length);
+    expect(dealt).toHaveLength(rows.length - rowsWithdrawn(rows).length);
+  });
+
+  it("⚠️ the closed card deals what it counts — Rejected and No Response, never Withdrawn", () => {
+    const rows = mixed();
+    const closedCard = overviewCards(rows, NOW).find((c) => c.key === "closed")!;
+    expect(closedCard.count).toBe(2);
+    expect(closedCard.note).toBe("1 passed · 1 no reply");
+    expect(rowsForCard(rows, "closed").map((r) => r.status).sort())
+      .toEqual([QueryStatus.NO_RESPONSE, QueryStatus.REJECTED].sort());
+    expect(rowsForCard(rows, "closed").some((r) => r.closedHow === "withdrawn")).toBe(false);
+    expect(rowsWithdrawn(rows)).toHaveLength(1);
+    /* the closed card and the closed grid state the same total, from the one selector */
+    expect(closedGrid(rows).total).toBe(closedCard.count);
+  });
+
+  it("the mono line states a fact and never a verdict, and an empty card says `none`", () => {
+    const empty = overviewCards(rowsOf([mkQ({ status: QueryStatus.REJECTED })]), NOW);
+    for (const c of empty.filter((x) => x.count === 0)) expect(c.note).toBe("none");
+    /* an agent's-turn query whose promised date has gone */
+    const late = rowsOf([mkQ({ dateSent: ago(200) })], [agent({ responseTimeWeeks: 8 })]);
+    const q = overviewCards(late, NOW).find((c) => c.key === QueryStatus.QUERIED)!;
+    expect(q.note).toBe("1 past the date");
+    expect(q.urgent).toBe(true);
+    for (const c of overviewCards(mixed(), NOW)) {
+      expect(c.note, `"${c.note}" appraises`).not.toMatch(/overdue|late|stale|slow|bad|good/i);
+    }
+  });
+
+  it("the rust dot is the two states where material is owed and the move is yours", () => {
+    const cards = overviewCards(mixed(), NOW);
+    expect(cards.filter((c) => c.rust).map((c) => c.key))
+      .toEqual([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED]);
+    /* …and never on a card at zero */
+    expect(overviewCards(rowsOf([mkQ()]), NOW).some((c) => c.rust)).toBe(false);
   });
 });
 

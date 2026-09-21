@@ -85,6 +85,35 @@
 
 /* the action row: both pills, 16px under the facts line, left-aligned */
 .qcv-hr { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+
+/**
+ * "← Back to overview" — the way out of a view, at the head's top right, its baseline level with
+ * the title.
+ *
+ * ⚠️ ABSOLUTE, SO IT TAKES NO ROW OF ITS OWN. The head is a block and the title is 48px; in the
+ * flow this would either push the facts line down or sit on a fourth line. Its containing block is
+ * `.qcv-head`'s `position: relative`.
+ */
+.qcv-backov {
+  position: absolute; top: 18px; right: 0;
+  display: inline-flex; align-items: center; gap: 8px; padding: 0 0 3px;
+  font-family: var(--qcv-type); font-size: 16px; line-height: 1; color: var(--qcv-ink);
+  text-decoration: none; border-bottom: 1.5px dashed rgba(28, 19, 15, 0.4); white-space: nowrap;
+}
+.qcv-backov span { transition: transform 0.18s ease; }
+.qcv-backov:hover { border-bottom-style: solid; }
+.qcv-backov:hover span { transform: translateX(-3px); }
+.qcv-backov:focus-visible { outline: 2px solid var(--qcv-ink); outline-offset: 4px; border-radius: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .qcv-backov span { transition: none; }
+  .qcv-backov:hover span { transform: none; }
+}
+/* ⚠️ IF THE TITLE'S LINE CANNOT HOLD IT, IT MOVES LEVEL WITH THE ACTION PILLS rather than wrapping
+   (§2). Wrapping would put it under the title and over the facts line, which is the one place on
+   this head with no room. */
+@media (max-width: 1100px) {
+  .qcv-backov { top: auto; bottom: 14px; }
+}
 /**
  * "Record a response" — the anthracite pill's twin in size and face, in the card's own clothes: a
  * white fill, a white rim and the burgundy frame, drawn as two inset shadows so the button's box is
@@ -126,14 +155,9 @@
 .qcv-pk:disabled { cursor: default; border-bottom-color: transparent; }
 .qcv-pk:disabled::after { display: none; }
 
-.qcv-views { flex: none; margin-left: auto; display: flex; gap: 2px; padding: 3px; border-radius: 24px; background: #ffffff; box-shadow: var(--qcv-shadow); }
-.qcv-views button {
-  height: 34px; padding: 2px 15px 0; border: 0; border-radius: 20px; background: none; cursor: pointer;
-  font-family: var(--qcv-type); font-size: 14.5px; line-height: 1; color: var(--qcv-ink);
-}
-.qcv-views button:hover { background: var(--qcv-parchment); }
-.qcv-views button[aria-pressed="true"] { background: var(--qcv-navy); color: #ffffff; }
-.qcv-views button:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
+/* ⚠️ THE VIEW SWITCH'S RULES ARE DELETED, not left inert (§1.3). The portal is how you enter a
+   view and the back link is how you leave; a stylesheet still describing a segmented control is
+   what the next reader restyles, and then mounts. */
 
 /* ── the stage: the view's frame, and the open query docked to its right ── */
 .qcv-stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }

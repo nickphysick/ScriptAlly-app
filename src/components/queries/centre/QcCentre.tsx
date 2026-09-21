@@ -20,7 +20,13 @@ import "../../shell/primitives.css";
 import "./qcvPage.css";
 import "./qcvEnter.css";
 
-export type QcView = "list" | "calendar" | "grid";
+/**
+ * ⚠️ `overview` IS A VIEW IN THE STATE AND NOT IN `QC_VIEWS` (v21 §1). The three entries below are
+ * the things the PORTAL offers and the crumb can name; the Overview is where you are when you are
+ * in none of them. Putting it in the table would have given the portal a tile that goes where you
+ * already are, and the crumb a fourth segment naming the page it already names.
+ */
+export type QcView = "overview" | "list" | "calendar" | "grid";
 
 /**
  * ⚠️ v21 (21 Sep): THE VIEWS ARE RENAMED, LABELS ONLY — the ruled table is **Ledger** (was List) and
@@ -32,10 +38,11 @@ export type QcView = "list" | "calendar" | "grid";
  * ⚠️ AND THE ORDER IS THE PORTAL'S — Ledger, List, Calendar. It is the order the Overview's three
  * tiles are drawn in, and this table is what draws them, so the two cannot come apart.
  */
-export const QC_VIEWS: readonly { key: QcView; label: string }[] = [
+export type QcPortalView = Exclude<QcView, "overview">;
+export const QC_VIEWS: readonly { key: QcPortalView; label: string }[] = [
   { key: "list", label: "Ledger" }, { key: "grid", label: "List" }, { key: "calendar", label: "Calendar" },
 ];
-/** The label a view is called by, for the crumb and the portal. */
+/** The label a view is called by, for the crumb and the portal. The Overview names nothing. */
 export const qcViewLabel = (v: QcView): string => QC_VIEWS.find((x) => x.key === v)?.label ?? "";
 export const DOCK_MIN_COLUMN = 900;
 
@@ -50,11 +57,23 @@ export const DOCK_MIN_COLUMN = 900;
  * the reasons recorded there. What has changed is that it is now the only input.
  */
 export const QC_VIEW_KEY = "sa.qcView";
-/** The view the param-less URL means. */
-export const DEFAULT_QC_VIEW: QcView = "list";
-/** The URL, and nothing else. `board` is the retired view; anything unknown reads as the default. */
+/**
+ * The view the param-less URL means.
+ *
+ * ⚠️ ARRIVING AT `/queries` LANDS ON THE OVERVIEW, ALWAYS, unless the URL carries a deep link
+ * (`?view=`, `?q=`, `?status=`) — §1.1. This constant is that rule, and `?view=` is written for
+ * anything that is not it, so the Overview is the state the URL does not state.
+ */
+export const DEFAULT_QC_VIEW: QcView = "overview";
+/**
+ * The URL, and nothing else.
+ *
+ * ⚠️ `?view=board` IS ACCEPTED AND MEANS THE OVERVIEW (§1.2). The Board was retired in v11 and its
+ * links were left pointing at a view that no longer exists; landing them on the Overview is the
+ * closest honest answer, and it is the same answer anything unknown gets.
+ */
 export function readQcView(search: string): QcView {
-  const ok = (v: string | null): v is QcView => v === "list" || v === "calendar" || v === "grid";
+  const ok = (v: string | null): v is QcPortalView => v === "list" || v === "calendar" || v === "grid";
   const fromUrl = new URLSearchParams(search).get("view");
   return ok(fromUrl) ? fromUrl : DEFAULT_QC_VIEW;
 }
@@ -77,8 +96,12 @@ export const QcCentre: React.FC<{
   logRef?: React.Ref<HTMLButtonElement>;
   summary: React.ReactNode;
   sentence: React.ReactNode;
+  /** The Overview's own body, rendered instead of everything below the head. */
+  overview: React.ReactNode;
   view: QcView;
   onView: (v: QcView) => void;
+  /** Leave the view: back to the Overview, clearing any selection. */
+  onBack: () => void;
   /** The view's body, inside the frame. */
   body: React.ReactNode;
   /** The open query, docked. Rendered only while `docked`. */
@@ -90,7 +113,8 @@ export const QcCentre: React.FC<{
   onExport: () => void;
   canExport: boolean;
   entering: boolean;
-}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, summary, sentence, view, onView, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
+}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, summary, sentence, overview, view, onView, onBack, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
+  const inView = view !== "overview";
   const rootRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const el = rootRef.current;
@@ -123,17 +147,31 @@ export const QcCentre: React.FC<{
             <span>Record a response</span>
           </button>
         </div>
+        {/* ⚠️ A LINK, NOT A BUTTON, AND ONLY INSIDE A VIEW. It is how you leave, and it clears the
+            selection on the way — the same act as the crumb's "Query Centre" segment. */}
+        {inView && (
+          <a
+            className="qcv-backov"
+            data-qcv="back-overview"
+            href="/queries"
+            onClick={(e) => { e.preventDefault(); onBack(); }}
+          >
+            <span aria-hidden="true">←</span> Back to overview
+          </a>
+        )}
       </header>
 
+      {/* ⚠️ THE OVERVIEW REPLACES EVERYTHING BELOW THE HEAD (§4) — no sentence, no view, no docked
+          card, no strip. It is the stat row and the portal. */}
+      {!inView ? overview : <>
       {summary}
 
+      {/* ⚠️ THERE IS NO VIEW SWITCH (§1.3). The portal's three tiles are how you enter a view, and
+          the back link and the crumb are how you leave — so the segmented control that used to sit
+          at the right of this row is GONE rather than hidden. Anyone re-adding it is adding a
+          second way in, beside a portal whose whole job is to be the first. */}
       <div className="qcv-ctl" data-qcv="ctl">
         {sentence}
-        <div className="qcv-views" role="group" aria-label="View" data-qcv="views">
-          {QC_VIEWS.map((v) => (
-            <button key={v.key} type="button" aria-pressed={v.key === view} disabled={loading} onClick={() => onView(v.key)}>{v.label}</button>
-          ))}
-        </div>
       </div>
 
       {/* the docked column exists only while there is a card to put in it — an empty 396px track
@@ -159,6 +197,7 @@ export const QcCentre: React.FC<{
       <div className="qcv-foot">
         <button type="button" className="qcv-export" disabled={!canExport || loading} onClick={onExport}>Export CSV</button>
       </div>
+      </>}
       <div className="qcv-sr" role="status" aria-live="polite" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
         {loading ? "" : "Queries loaded"}
       </div>
