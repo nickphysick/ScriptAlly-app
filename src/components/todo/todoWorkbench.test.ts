@@ -352,7 +352,14 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
       expect(f).not.toContain("window.confirm(");
     }
     const scope = page + writer;
-    expect((scope.match(/await confirmAsk\(/g) ?? []).length).toBe(3); // quick-✓ duplicate · composer discard · delete-note/task confirm
+    /* ⚠️ FOUR SINCE 21 SEP, AND THE FOURTH IS THE POINT OF THE TASK-MODAL ROUND'S ONE REAL BUG.
+       The duplicate-send guard was consulted on the quick-✓ path and NOWHERE ELSE, so it was
+       reached by route rather than by rule: the day the dashboard's tick began committing through
+       `commitSendFromPane` instead, a second full manuscript to an agent who already had one was
+       written with no question asked. Both senders ask now, which is what makes this a 4. A census
+       like this is exactly the thing that should have to be told — and it was, on the same commit
+       that added the guard, which is the whole reason it is counted rather than described. */
+    expect((scope.match(/await confirmAsk\(/g) ?? []).length).toBe(4); // quick-✓ duplicate · the pane committer's duplicate · composer discard · delete-note/task confirm
     expect((flow.match(/await confirmAsk\(/g) ?? []).length).toBe(3); // exit guard + staged + quick guards
     /* ⚠️ THE CLAIM IS "ABOVE EVERYTHING IT BLOCKS", NOT A NUMBER (v30, Phase 4). This pinned 90 and
        went red when the drawer moved to 9001 and the ask had to follow it — a lock failing on the

@@ -326,6 +326,29 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
     if (!q) return false;
     const action = getPrimaryAction(q.status as QueryStatus);
     if (action.kind !== "mark-sent") return false;
+    /**
+     * ⚠️ THE DUPLICATE-SEND GUARD LIVES ON BOTH WRITE PATHS NOW, AND IT DID NOT — WHICH IS HOW IT
+     * STOPPED BEING REACHED WITHOUT ANYTHING GOING RED (task-modal round, 21 Sep).
+     *
+     * It was consulted in `quickDone` and nowhere else. The dashboard's tick used to go through
+     * `quickDone`, so it was protected by the route rather than by the rule; the moment the tick
+     * began opening a modal and committing through HERE instead, a second full manuscript to an
+     * agent who already had one was written with no question asked — through a clean production
+     * build and 8,187 green unit tests. **The optimistic path was carrying a check nobody had
+     * noticed it carried**, and removing a mechanism removes whatever was riding on it.
+     *
+     * ⚠️ SO IT IS BESIDE THE WRITE, NOT BESIDE A SURFACE (Nick, 21 Sep). Every committer reaches
+     * this function; a guard in a caller protects that caller and the next one to arrive is
+     * unguarded again, silently, in exactly this way. `duplicateSendSpec.test.ts` asserts the rule
+     * on BOTH paths for the same reason — it is the test that would have failed.
+     *
+     * ⚠️ AND DECLINING WRITES NOTHING. `confirmAsk` is part of the write path rather than
+     * decoration: on the To-do page it is a dialog, on the dashboard it declines and hands the
+     * question to the modal as a banner with `Log it anyway`. Both answer the same question.
+     */
+    const prior = priorSameTypeSend(activitiesRef.current, q.id, action.target, action.markKind === "resubmit");
+    if (prior && !(await confirmAsk(duplicateSendPrompt(action.target, card.who, prior),
+      { confirmLabel: "Send again", cancelLabel: "Cancel" }))) return false;
     const nowIso = new Date().toISOString();
     const base = quickSendPayload({
       cardKey: card.key, label: card.title, taskType: card.taskType, queryId: q.id,

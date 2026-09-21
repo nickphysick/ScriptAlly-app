@@ -52,7 +52,7 @@ const iso = (d) => new Date(Date.now() - d * 86400000).toISOString();
 const q = (id) => doc(db, "users", uid, "queries", id);
 const a = (id) => doc(db, "users", uid, "agents", id);
 const IDS = ["rj-send", "rj-dupe"];
-const AGENTS = ["rj-agent-1", "rj-agent-2"];
+const AGENTS = ["rj-agent-1", "rj-agent-2", "rj-agent-3"];
 
 /**
  * Every `taskFlags` document this fixture's rows can have produced.
@@ -87,7 +87,9 @@ async function clearFlags() {
  */
 async function removeAll() {
   for (const id of IDS) await deleteDoc(q(id));
-  await deleteDoc(doc(db, "users", uid, "activities", "rj-dupe-sent"));
+  for (const a of ["rj-dupe-sent", "rj-send-asked", "rj-nudge-sent"]) {
+    await deleteDoc(doc(db, "users", uid, "activities", a));
+  }
   for (const id of AGENTS) await deleteDoc(a(id));
   return clearFlags();
 }
@@ -143,5 +145,33 @@ await setDoc(doc(db, "users", uid, "activities", "rj-dupe-sent"), {
   description: "Full manuscript sent to Tobias Hark",
 });
 
-console.log(`seeded rj-send (never sent) and rj-dupe (already has a full send); cleared ${cleared} task flags`);
+/**
+ * ⚠️ NO NUDGE FIXTURE HERE, AND THE ATTEMPT IS RECORDED BECAUSE THE NEXT PERSON WILL TRY IT TOO.
+ * `nudge_overdue` is a DERIVED `Task`, built in `db.tsx`'s generator, which chooses between a CLOSE
+ * suggestion and a NUDGE for the same query. Two seeds were tried and both came back as closes: a
+ * query 84 days out against a 6-week window (long past it), and one 70 days out against a 16-week
+ * window (still inside it), each carrying `lastNudgeSentDate` and a `nudgeDate` two days in the
+ * past — which the generator's own comment calls *"the writer's own reminder date — raises the SAME
+ * nudge when it arrives"*. Both landed in "Gone quiet".
+ *
+ * So the input that flips that decision is something else — `noResponseMeansNo` on the agent,
+ * `scheduledReminder` over `userTasks`, or `repliedSinceMs` — and finding it is a job for whoever
+ * next needs the nudge journey on a page, not a guess to leave seeded. **A fixture that raises the
+ * wrong card is worse than none: it adds a fourth quiet row and looks like it worked.**
+ */
+
+/**
+ * ⚠️ AND THE FEED'S "Send it →" IS OFFERED BY `markSentOffered`, WHICH NEEDS A REQUEST EVENT IN THE
+ * FEED — not merely a query sitting at a requested status. It reads an ACTIVITY whose resulting
+ * status is a request and checks the query still stands there, so `rj-send` raised a board card and
+ * no feed link: the board reads the query, the feed reads the log. Seeding the event is what makes
+ * the two agree, and it is the same divergence that let a link be drawn over a suppressed task.
+ */
+await setDoc(doc(db, "users", uid, "activities", "rj-send-asked"), {
+  id: "rj-send-asked", userId: uid, queryId: "rj-send", manuscriptId: MS,
+  activityType: "Status Changed", resultingStatus: "Full Requested", date: iso(9), details: "",
+  description: "Imogen Vale asked for the full manuscript",
+});
+
+console.log(`seeded rj-send (never sent, with a request in the feed), rj-dupe (already has a full send); cleared ${cleared} task flags`);
 process.exit(0);

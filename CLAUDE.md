@@ -56,6 +56,7 @@
   - **The rule:** every `var(--x)` a stylesheet READS must resolve to a definition — asserted in `shellV2Tokens.test.ts` ("no shell rule reads a token that does not exist"). Pointed this way it immediately found two more: `--sv2-flank`, left dangling when Phase 3 deleted `.sv2-tb-dash`, and `--shell-ease`, which named nothing behind an inline fallback.
   - Still also grep `dist/` after adding or renaming a token — a green build proves the CSS parsed, not that it contains what you wrote (see the swallowed-comment note below). The two guards catch opposite mistakes.
 - **⚠️ A PSEUDO-ELEMENT KEEPS ITS OWN TRANSITION.** Suppressing the transition on `.x` does NOT reach `.x::after` — target it directly (`.x::after { transition: none !important }`). The top-nav hairline measured opacity `0` in BOTH states and looked like a dead rule; it is 0 → 1.
+- **⚠️ AND AN ELEMENT MID-ENTRANCE REPORTS ITS ANIMATED BOX, SO MEASURE AFTER `animationend` OR WITH ANIMATIONS OFF — NEVER DURING.** *(21 Sep, the task modal.)* It measured **674px** on one run and **680** on the next with no change between them: `getBoundingClientRect` on an element still inside its `scale(.975)` entrance returns the SCALED box, and 680 × 0.99 is 674. The reading was the harness's, not the page's — and it is the more dangerous half of the family below, because a plausible number about a correct page gets believed. Wait for `animationend`, set `animation: none`, or poll until two consecutive reads agree.
 - **⚠️ SUPPRESS TRANSITIONS BEFORE MEASURING — a transitioned property reports where it STARTED, not where it is.** This has now cost time twice, and both times it looked like a real bug: a **collapsed column measured 246px** (its expanded width) and **the fade's opacity measured 0** while its class was on. Set `el.style.transition = "none"` before reading, or read after the transition has demonstrably finished. In the in-app browser pane specifically, transitions do not reliably advance at all, so `getComputedStyle` returns the start value indefinitely.
 - **⚠️ A CUSTOM PROPERTY COMPUTED AT `:root` CANNOT BE OVERRIDDEN BY A LOWER VARIANT; ONE READ INSIDE A `calc()` RESOLVES AT THE USE SITE.** *(Query Centre, 13 Aug — and the two look identical from a distance, which is the whole cost.)* `:root` sets `--content-top-gap: var(--content-top-gap-rest)`, so the value is **already resolved** by the time any page sees it: overriding `--content-top-gap-rest` further down changes **nothing**, and the page-scoped rhythm had to name `--content-top-gap` itself in both states at 0-2-0. `--header-inset` is read inside `calc(var(--content-gutter) + var(--header-inset))` on `.wpg-plate`, so a **use-site** resolution — overriding it on an ancestor works, and one page-scoped line took the masthead from a 120px-inset island to a full-width band without touching the shell's law or the other nine pages. **The test is not "is it a token" but "where is it evaluated": a variant read into a resolved property at `:root` is spent; a property read inside a `calc()` is live all the way down.**
 - **⚠️ A MALFORMED CSS COMMENT SWALLOWS TOKENS SILENTLY.** A declaration left outside its `/* */` produced **no token and no error** — the build succeeded, the tests passed, and the desk was simply the wrong colour. Every shell token now sits in `shellV2Tokens.test.ts`'s `BAKED` map for exactly this reason: a value asserted there fails the moment it stops being emitted.
@@ -563,6 +564,23 @@ be two surfaces free to offer different verbs for one card — the fault this pa
 when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its own pass **once the
 `QueryCard` carries the rail, the timeline and the tiles**, which is what it should absorb.
 
+- **⚠️ ON THE TO-DO PAGE THE PANE STILL DOES BOTH, AND THAT IS THE STATED INTERIM (Nick, 21 Sep).**
+  One asking surface per page holds; it is simply a different one there for now. That page's cards
+  open the pane, and the pane's primary routes on `activeFlow.writes` — *the flow declares the
+  write, not the card* — which is the modal's own insight already built into a 1,301-line session.
+  **Mounting the modal beside it would be two asking surfaces on one card**, the fault the role
+  split exists to prevent. Replacing that fork is its own phase, scheduled after the dashboard has
+  had a week on dev. **Until then: dashboard finishes in the modal, To-do page finishes in the
+  pane, and neither page has two.**
+- **⚠️ THE DUPLICATE-SEND GUARD IS BESIDE THE WRITE, NOT BESIDE A SURFACE — and it stopped being
+  reached once already without anything going red.** `priorSameTypeSend` was consulted in
+  `quickDone` and nowhere else; the dashboard's tick reached it by ROUTE rather than by rule, so the
+  moment the tick began committing through `commitSendFromPane` instead, a second full manuscript to
+  an agent who already had one was written with no question asked — through a clean production build
+  and 8,187 green tests. **The optimistic path was carrying a check nobody had noticed it carried.**
+  Both senders consult it now, and `duplicateSendGuard.test.ts` derives the sender list from *who
+  calls `recordMaterialsSent`* rather than naming them, so the next sender to arrive is covered by
+  construction. A guard in a caller protects that caller and leaves the next one unguarded.
 - **⚠️ THE TICK NEVER COMMITS. It opens the modal, and only the modal writes.** Until 21 Sep a tick
   committed on a send and on a nudge with the defaults and asked only on a quiet card. Nick: *"a
   commit the user can't see is a commit they don't trust. One click plus a visible confirmation is
