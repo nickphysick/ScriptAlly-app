@@ -91,11 +91,13 @@ import { QcGrid, QcGridSkeleton } from "./queries/centre/QcGrid";
 import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
-  DEFAULT_SORT, buildQcRows, closedGrid, filterForStatusParam, filterOptions, inScope, matchesFilter, overviewCards,
-  sortRows, stageColumns, stageFilter,
-  type QcFilter, type QcSort,
+  DEFAULT_SORT, buildQcRows, closedGrid, fanHand, filterForStatusParam, filterOptions, inScope, matchesFilter,
+  overviewCards, rowsWithdrawn, sortRows, stageColumns, stageFilter,
+  type OverviewKey, type QcFilter, type QcSort,
 } from "../lib/qcSummary";
 import { QcOverview } from "./queries/centre/QcOverview";
+import { QcFan } from "./queries/centre/QcFan";
+import { fanCardModel } from "../lib/qcFanModel";
 /* ══ THE CALENDAR VIEW (Run C) — the SAME board To-do draws ═══════════════════════════════════
    Every piece below is shared: the board, its winbar, the window's arithmetic and the bar engine's
    own assembler. Nothing about the calendar is implemented on this page — a second implementation
@@ -2152,6 +2154,14 @@ export const Queries: React.FC<{
   const [qcSort, setQcSort] = useState<QcSort>(DEFAULT_SORT);
   /* null until the page has measured its own column — see QcCentre */
   const [qcDocked, setQcDocked] = useState<boolean | null>(null);
+  /**
+   * The open fan: which stat card dealt it, and the element it was dealt from.
+   *
+   * ⚠️ THE ORIGIN IS AN ELEMENT RATHER THAN A POINT, because it is needed twice and for two
+   * different reasons: the cards fly out of its centre, and focus goes back into it when the fan
+   * closes. A captured `{x, y}` serves the first and silently drops the second.
+   */
+  const [qcFan, setQcFan] = useState<{ key: OverviewKey; origin: HTMLElement | null } | null>(null);
   /* ⚠️ A HOOK, SO IT SITS UP HERE — above `if (!currentUser) return null`. The filtered and sorted
      views of it are plain consts further down, beside the list they replace. */
   /* ⚠️ ONE LOADING MODEL FOR THE BROWSING PAGE (v11): no flash under 150ms, a 400ms floor once shown,
@@ -6281,18 +6291,38 @@ export const Queries: React.FC<{
               <QcOverview
                 cards={overviewCards(qcScoped, Date.now())}
                 loading={showGridSkeleton}
-                /* ⚠️ PHASE 4 FILTERS; PHASE 5 FANS. §4 says a stat card deals its queries as cards,
-                   and the fan is the next phase — so until it lands the card does the honest
-                   approximation of its own meaning (open the Ledger showing exactly that set)
-                   rather than sitting inert. A control that looks live and does nothing is the one
-                   thing this page must not ship. */
-                onCard={(key) => {
-                  setQcFilter(key === "closed" ? "closed" : stageFilter(key));
-                  setGridView("list");
-                }}
+                /* ⚠️ A STAT CARD DEALS; IT DOES NOT FILTER (§1.4). The element it was pressed from
+                   is captured so the hand deals FROM it and focus returns TO it. */
+                onCard={(key, el) => setQcFan({ key, origin: el })}
                 onView={setGridView}
               />
             }
+            fan={qcFan && (() => {
+              const hand = fanHand(qcScoped, qcFan.key);
+              const card = overviewCards(qcScoped, Date.now()).find((c) => c.key === qcFan.key);
+              /* ⚠️ THE HEADER STATES THE FULL COUNT, NEVER THE HAND — the cap changes the deal and
+                 not the number (Nick, 21 Sep). `hand.count` is the card's own figure. */
+              const wd = qcFan.key === "closed" ? rowsWithdrawn(qcScoped).length : 0;
+              return (
+                <QcFan
+                  title={`${hand.count} ${(card?.name ?? "").toLowerCase()}`}
+                  dealt={hand.dealt}
+                  more={hand.more}
+                  /* ⚠️ STATED, NEVER DEALT: the closed card counts Rejected and No Response, so a
+                     withdrawal is accounted for out loud rather than silently dropped. */
+                  withdrawnNote={wd > 0 ? `+${wd} withdrawn, not shown` : null}
+                  origin={qcFan.origin}
+                  model={(row) => fanCardModel(row, manuscripts.find((m) => m.id === row.manuscriptId)?.title ?? null, () => {})}
+                  onPick={(id) => { setQcFan(null); setQcFilter("all"); setGridView("list"); onOpenQuery?.(id); }}
+                  onSeeAll={() => {
+                    setQcFan(null);
+                    setQcFilter(qcFan.key === "closed" ? "closed" : stageFilter(qcFan.key));
+                    setGridView("list");
+                  }}
+                  onClose={() => setQcFan(null)}
+                />
+              );
+            })()}
             view={gridView}
             onView={setGridView}
             /* ⚠️ LEAVING A VIEW CLEARS THE SELECTION. `?q=` is App.tsx's, so this goes through the

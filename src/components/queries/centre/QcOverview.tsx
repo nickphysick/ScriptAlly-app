@@ -134,8 +134,14 @@ function useAvailable(ref: React.RefObject<HTMLDivElement | null>): void {
 
 export const QcOverview: React.FC<{
   cards: OverviewCard[];
-  /** Deal this card's queries. */
-  onCard: (key: OverviewKey) => void;
+  /**
+   * Deal this card's queries.
+   *
+   * ⚠️ IT HANDS BACK THE ELEMENT IT WAS PRESSED FROM. The fan deals out of that element's centre
+   * and returns focus into it on close, so the caller needs the node rather than a point — a
+   * captured `{x, y}` serves the animation and silently drops the focus return.
+   */
+  onCard: (key: OverviewKey, el: HTMLElement) => void;
   /** Open a view. */
   onView: (v: QcView) => void;
   loading: boolean;
@@ -158,11 +164,11 @@ export const QcOverview: React.FC<{
             tabIndex: loading ? -1 : 0,
             "aria-disabled": loading || undefined,
             "data-key": String(c.key),
-            onClick: () => { if (!loading) onCard(c.key); },
+            onClick: (e: React.MouseEvent) => { if (!loading) onCard(c.key, e.currentTarget as HTMLElement); },
             onKeyDown: (e: React.KeyboardEvent) => {
               if (loading || (e.key !== "Enter" && e.key !== " ")) return;
               e.preventDefault();
-              onCard(c.key);
+              onCard(c.key, e.currentTarget as HTMLElement);
             },
           }}
         >

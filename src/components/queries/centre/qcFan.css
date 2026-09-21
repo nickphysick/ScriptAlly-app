@@ -1,0 +1,185 @@
+/**
+ * The fan (v21 §5) — the overlay, the hand, and the stack card that closes it.
+ *
+ * ⚠️ THE CARD'S OWN TREATMENT FOLLOWS ITS HOST FROM HERE, which is why `QueryCard` needed no width
+ * prop, no compact prop and no variant prop. `.qcf .qcard` is the fanned card: 260px instead of
+ * 440, no tab row, a tighter foot. The To-do reference card settled this pattern — *"a prop would
+ * have forked the component"* — and the same argument applies exactly.
+ */
+
+/**
+ * ⚠️ THE FAN PORTALS TO `document.body`, SO IT CARRIES ITS OWN PALETTE. Every `--qcv-*` is declared
+ * on `.qcv-page` and resolves to NOTHING out here — the rules would read perfectly and paint their
+ * fallbacks, which is the fault `taskModal.css` and the dashboard's popup both record. The three
+ * families below are the app's own `:root` tokens, which DO resolve anywhere; the colours are
+ * stated, because a theme-scoped colour out here is the same trap wearing a hex.
+ *
+ * ⚠️ AND THE FACES ARE READ, NEVER NAMED. A third file spelling out "Special Elite" fails
+ * `marketingTokens.test` — which is exactly how this scope fault was caught rather than shipped.
+ */
+.qcf {
+  --qcf-ink: #1c130f;
+  --qcf-ink-70: rgba(28, 19, 15, 0.7);
+  --qcf-cream: #fdfaf5;
+  --qcf-type: var(--sp-type);
+  --qcf-mono: var(--font-mono);
+  --qcf-serif: var(--font-serif);
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  font-family: var(--qcf-serif);
+}
+
+/* ⚠️ THE BACKDROP IS ITS OWN ELEMENT so a click on it closes and a click on a card does not. A
+   click handler on the overlay itself would fire for every card in the hand. */
+.qcf-back {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 19, 15, 0.42);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+/* a blurred backdrop is motion of a kind, and it is also the most expensive thing on the page */
+.qcf--still .qcf-back { backdrop-filter: none; -webkit-backdrop-filter: none; }
+
+/* ── the header ──────────────────────────────────────────────────────────────────────────────── */
+
+.qcf-head {
+  position: absolute;
+  top: 9vh;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 14px;
+  padding: 0 64px;
+  text-align: center;
+}
+.qcf-count {
+  font-family: var(--qcf-type);
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 1.3;
+  color: var(--qcf-cream);
+}
+.qcf-hint,
+.qcf-wd {
+  font-family: var(--qcf-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(253, 250, 245, 0.75);
+}
+/* the withdrawn line sits under the pair rather than beside them — it is a footnote, not a peer */
+.qcf-wd {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 6px;
+}
+
+.qcf-x {
+  position: absolute;
+  right: 22px;
+  top: 0;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--qcf-cream);
+  color: var(--qcf-ink);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+.qcf-x:hover { background: #ffffff; }
+.qcf-x:focus-visible { outline: 2px solid var(--qcf-cream); outline-offset: 3px; }
+
+/* ── the hand ────────────────────────────────────────────────────────────────────────────────── */
+
+.qcf-deck { position: absolute; inset: 0; }
+
+/**
+ * ⚠️ THE ROTATION ORIGIN IS BELOW THE CARD, which is what makes a hand read as held rather than as
+ * a row of tilted tiles — and it is also why a fanned card must be measured by its unrotated box
+ * (the brief's own trap 3). `getBoundingClientRect` on one of these returns the swung bounds.
+ */
+.qcf-card {
+  position: absolute;
+  width: 260px;
+  transform-origin: 50% 120%;
+  cursor: pointer;
+  will-change: transform;
+}
+.qcf-card:focus { outline: none; }
+
+/* ⚠️ HOVER AND KEYBOARD FOCUS ARE THE SAME STATE. A lift that only the mouse can reach makes the
+   hand unreadable from the keyboard, where the cards are most overlapped. */
+.qcf-card:hover,
+.qcf-card:focus-visible {
+  z-index: 60 !important;
+  transform: translateY(calc(-50% - 26px)) rotate(0deg) scale(1.04) !important;
+}
+.qcf-card:focus-visible .qcard { box-shadow: 0 0 0 2px var(--qcf-cream), 0 18px 40px -18px rgba(0, 0, 0, 0.6); }
+.qcf--still .qcf-card { transition: none !important; }
+
+/* ── the fanned card: the shared card, dressed by its host ──────────────────────────────────── */
+
+.qcf .qcard {
+  position: static;
+  width: 260px;
+  box-shadow: 0 14px 34px -16px rgba(0, 0, 0, 0.55);
+}
+/* the tab row is the popover's affordance; a dealt card is a glance, not a place to browse */
+.qcf .qcard-tabs { display: none; }
+.qcf .qcard-tl { padding-top: 2px; }
+/* ⚠️ THE FOOT'S BUTTON IS DISPLAY-ONLY IN THIS PASS (§5). It shows what the card's next act WOULD
+   be; pressing it must never change a status in one click, and the centred task flow is where it
+   will go when that exists. `pointer-events: none` is the guarantee, not the styling. */
+.qcf .qcard-foot button { pointer-events: none; }
+
+/* ── the stack card ─────────────────────────────────────────────────────────────────────────── */
+
+.qcf-stack { height: 176px; }
+.qcf-stack-face,
+.qcf-stack-e {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: var(--qcf-cream);
+  border: 1px solid rgba(28, 19, 15, 0.18);
+}
+/* the two edges behind it: what makes it read as the side of a deck rather than a blank card */
+.qcf-stack-e1 { transform: translate(6px, 6px); }
+.qcf-stack-e2 { transform: translate(12px, 12px); }
+.qcf-stack-face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 14px 34px -16px rgba(0, 0, 0, 0.55);
+}
+.qcf-stack-face b {
+  font-family: var(--qcf-type);
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--qcf-ink);
+}
+.qcf-stack-face small {
+  font-family: var(--qcf-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--qcf-ink-70);
+  border-bottom: 1.5px dashed rgba(28, 19, 15, 0.4);
+  padding-bottom: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qcf-back { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .qcf-card { transition: none !important; }
+}

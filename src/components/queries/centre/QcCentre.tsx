@@ -98,6 +98,8 @@ export const QcCentre: React.FC<{
   sentence: React.ReactNode;
   /** The Overview's own body, rendered instead of everything below the head. */
   overview: React.ReactNode;
+  /** The open fan, if a stat card has dealt one. It portals itself; this is only its mount. */
+  fan?: React.ReactNode;
   view: QcView;
   onView: (v: QcView) => void;
   /** Leave the view: back to the Overview, clearing any selection. */
@@ -113,7 +115,7 @@ export const QcCentre: React.FC<{
   onExport: () => void;
   canExport: boolean;
   entering: boolean;
-}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, summary, sentence, overview, view, onView, onBack, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
+}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, summary, sentence, overview, fan, view, onView, onBack, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
   const inView = view !== "overview";
   const rootRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
@@ -198,6 +200,7 @@ export const QcCentre: React.FC<{
         <button type="button" className="qcv-export" disabled={!canExport || loading} onClick={onExport}>Export CSV</button>
       </div>
       </>}
+      {fan}
       <div className="qcv-sr" role="status" aria-live="polite" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
         {loading ? "" : "Queries loaded"}
       </div>
