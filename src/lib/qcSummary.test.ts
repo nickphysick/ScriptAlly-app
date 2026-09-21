@@ -11,7 +11,7 @@ import { Activity, Agent, Query, QueryStatus } from "../types";
 import {
   BASE_STAGES, CALENDAR_GROUPS, DEFAULT_SORT, GAUGE_CAP, NOTCH_PC, SORT_OPTIONS, STAGE_NAME,
   buildQcRows, closedGrid, courtOf, expectedFor, factLine, filterForStatusParam, filterOptions, filterPhrase,
-  overviewCards, rowsForCard, rowsWithdrawn,
+  fanHand, overviewCards, rowsForCard, rowsWithdrawn,
   gaugeFor, inScope, isWithYou, matchesFilter, primaryActionLabel, sortRows, stageColumns, stageFilter, stageOrder, standLine,
   type QcFilter, type QcRow,
 } from "./qcSummary";
@@ -219,6 +219,54 @@ describe("the Overview's stat row — a card states a number, and its fan deals 
     expect(rowsWithdrawn(rows)).toHaveLength(1);
     /* the closed card and the closed grid state the same total, from the one selector */
     expect(closedGrid(rows).total).toBe(closedCard.count);
+  });
+
+  /**
+   * ⚠️ RULING 2, RESTATED FOR THE CAPPED FAN RATHER THAN LOOSENED (Nick, 21 Sep). The original
+   * claim was "a card's count IS the length of the hand it deals". The fan now deals at most
+   * fifteen, so that sentence is no longer true as written — and the wrong response would be to
+   * relax it to something a wrong deal could satisfy. It becomes THREE claims instead, which
+   * together say everything the original said:
+   *
+   *   1. the dealt cards are exactly the first `min(count, 15)` in LATEST-ACTIVITY order;
+   *   2. the stack card exists if and only if `count > 15`, and its number is `count - 15`;
+   *   3. the stat card's figure is still `count` — the cap changes the DEAL, never the COUNT.
+   *
+   * Between them there is nowhere for a discrepancy to hide: 1 pins which fifteen, 2 pins that the
+   * rest are accounted for out loud, 3 pins that the headline never shrank to match the hand.
+   */
+  const many = (n: number, status = QueryStatus.QUERIED) =>
+    rowsOf(Array.from({ length: n }, (_, i) => mkQ({ status, dateSent: ago(n - i) })));
+
+  it("⚠️ 1 — the deal is the first min(count, 15) in latest-activity order, from the card's own set", () => {
+    const rows = many(50);
+    const hand = fanHand(rows, QueryStatus.QUERIED);
+    expect(hand.count).toBe(50);
+    expect(hand.dealt).toHaveLength(15);
+    /* the order is stated, so "the most recent fifteen" means something */
+    const byRecency = rowsForCard(rows, QueryStatus.QUERIED).slice().sort((a, b) => b.lastMs - a.lastMs);
+    expect(hand.dealt.map((r) => r.id)).toEqual(byRecency.slice(0, 15).map((r) => r.id));
+    /* …and it is the CARD's set, not the whole account */
+    const mixed = rowsOf([...Array.from({ length: 20 }, () => mkQ()), mkQ({ status: QueryStatus.OFFER })]);
+    expect(fanHand(mixed, QueryStatus.QUERIED).dealt.every((r) => r.status === QueryStatus.QUERIED)).toBe(true);
+  });
+
+  it("⚠️ 2 — the stack card is present iff count > 15, and its number is count − 15", () => {
+    for (const [n, more] of [[3, 0], [15, 0], [16, 1], [50, 35]] as const) {
+      const hand = fanHand(many(n), QueryStatus.QUERIED);
+      expect(hand.more, `${n} queries`).toBe(more);
+      expect(hand.dealt.length, `${n} queries`).toBe(Math.min(n, 15));
+      /* the stack is a consequence of the cap, never an independent count */
+      expect(hand.dealt.length + hand.more, `${n} queries are not all accounted for`).toBe(n);
+    }
+  });
+
+  it("⚠️ 3 — the cap changes the DEAL and never the COUNT: the stat card still says 50", () => {
+    const rows = many(50);
+    const card = overviewCards(rows, NOW).find((c) => c.key === QueryStatus.QUERIED)!;
+    expect(card.count, "the headline shrank to the hand").toBe(50);
+    expect(card.count).toBe(fanHand(rows, QueryStatus.QUERIED).count);
+    expect(card.count).toBe(rowsForCard(rows, QueryStatus.QUERIED).length);
   });
 
   it("the mono line states a fact and never a verdict, and an empty card says `none`", () => {

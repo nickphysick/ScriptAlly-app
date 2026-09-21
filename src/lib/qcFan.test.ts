@@ -6,7 +6,7 @@
  * not mention and the page will meet: a hand of none, and a hand too big to draw.
  */
 import { describe, it, expect } from "vitest";
-import { FAN_CARD_W, FAN_MAX_GAP, fanCentreY, fanLayout } from "./qcFan";
+import { FAN_CARD_W, FAN_MAX_GAP, FAN_MAX_HAND, FAN_MIN_STRIP, fanCentreY, fanLayout } from "./qcFan";
 
 describe("a hand of cards", () => {
   it("one card sits alone in the centre — no spacing, no rotation, no drop", () => {
@@ -95,21 +95,36 @@ describe("a hand of cards", () => {
   });
 
   /**
-   * ⚠️ THE ANSWER TO "WHAT DOES IT LOOK LIKE AT 30 AND 50", WHICH §5 ASKS FOR BEFORE ANY PAGING
-   * SCHEME IS INVENTED. It stays inside the deck and keeps its symmetry — the cards simply overlap
-   * harder, which is what a hand of fifty cards looks like. Nothing escapes the available width.
+   * ⚠️ THE CAP'S ARITHMETIC, WHICH IS THE WHOLE REASON FOR IT (Nick's ruling, 21 Sep). A card is
+   * identifiable only while its visible strip still shows the initials disc — about 50px — and at
+   * 1280 the strip is `720 / (n - 1)`. Fifteen cards give 51.4px; SIXTEEN give exactly 48; fifty
+   * would give 14.7. So the hand caps at sixteen (fifteen dealt plus the stack), and the number
+   * this module exports is the one the deal obeys rather than a second opinion about it.
+   *
+   * ⚠️ THE GEOMETRY AT THIRTY AND FIFTY WAS NEVER UNSOUND, WHICH IS WORTH KEEPING STRAIGHT — those
+   * hands stayed inside the deck and kept their symmetry. What they could not do was stay READABLE.
+   * The case below still computes them, so the record shows a design limit rather than a bug.
    */
-  it("thirty and fifty stay inside the deck — the overlap is heavy and the geometry holds", () => {
-    for (const n of [20, 30, 50]) {
+  it("⚠️ the cap is a readability figure: 51.4px of strip at fifteen, 48 at sixteen, 14.7 at fifty", () => {
+    const strip = (n: number) => fanLayout(n, 1280, 800).gap;
+    expect(strip(15)).toBeCloseTo(720 / 14, 6);
+    expect(strip(FAN_MAX_HAND)).toBeCloseTo(48, 6);
+    expect(strip(50)).toBeCloseTo(720 / 49, 6);
+    /* the hand the fan actually lays out never goes below the strip its own constant names */
+    expect(strip(FAN_MAX_HAND)).toBeGreaterThanOrEqual(FAN_MIN_STRIP);
+    expect(strip(FAN_MAX_HAND + 1), "a seventeenth card would break the strip").toBeLessThan(FAN_MIN_STRIP);
+  });
+
+  it("fifteen, sixteen and fifty: the first two are the real hands, and all three stay in the deck", () => {
+    for (const n of [15, FAN_MAX_HAND, 50]) {
       const f = fanLayout(n, 1280, 800);
       expect(f.span.left, `${n}: the hand escapes to the left`).toBeGreaterThanOrEqual(150 - 0.001);
       expect(f.span.right, `${n}: the hand escapes to the right`).toBeLessThanOrEqual(1130 + 0.001);
       expect(f.cards).toHaveLength(n);
       expect(f.overlapping).toBe(true);
-      /* every card still visible as a sliver: the gap never collapses to nothing */
       expect(f.gap, `${n}: cards are stacked exactly`).toBeGreaterThan(0);
+      /* symmetrical about the viewport's middle at every size */
+      expect(f.cards[0].centre + f.cards[n - 1].centre, `${n}`).toBeCloseTo(1280, 6);
     }
-    /* fifty cards share the same 720px of travel twelve did — that IS the crowding */
-    expect(fanLayout(50, 1280, 800).gap).toBeCloseTo(720 / 49, 6);
   });
 });

@@ -25,6 +25,7 @@ import { resolveExpectedDate } from "./expectedDate";
 import { cardMaterials, stateFor, turnFor, type CardMaterials, type State } from "./queryCardFacts";
 import type { DerivableActivity } from "./queryDerivation";
 import { anyToMs, dayN, isClosedStatus, stageHistory, type StageHistory } from "./qcStages";
+import { FAN_MAX_DEALT } from "./qcFan";
 
 const DAY = 86_400_000;
 
@@ -309,6 +310,26 @@ export function overviewCards(rows: readonly QcRow[], nowMs: number): OverviewCa
 /** The rows a stat card deals when it is clicked — the same membership its count states. */
 export function rowsForCard(rows: readonly QcRow[], key: OverviewKey): QcRow[] {
   return key === "closed" ? rowsForClosed(rows) : rowsForStage(rows, key);
+}
+
+/**
+ * The hand the fan lays out for a stat card: at most fifteen query cards, latest activity first,
+ * and the number left over (v21 §5, Nick's ruling of 21 Sep).
+ *
+ * ⚠️ IT READS `rowsForCard`, SO THE DEAL AND THE COUNT CANNOT DISAGREE — which is the whole point of
+ * the shared selectors above, and the cap is the one place that claim could quietly stop being true.
+ * The stat card's figure is still `count`; the header still says "50 queried"; what is capped is how
+ * many of them get a card. `more` is therefore `count - FAN_MAX_DEALT`, never a separate count of
+ * anything.
+ *
+ * ⚠️ LATEST ACTIVITY FIRST, AND THE SORT IS PART OF THE CLAIM. "The fifteen most recent" is only
+ * meaningful against a stated order; taking the first fifteen of whatever order the rows arrived in
+ * would deal an arbitrary fifteen and still pass a length check.
+ */
+export interface FanHand { dealt: QcRow[]; more: number; count: number }
+export function fanHand(rows: readonly QcRow[], key: OverviewKey): FanHand {
+  const all = rowsForCard(rows, key).slice().sort((a, b) => b.lastMs - a.lastMs);
+  return { dealt: all.slice(0, FAN_MAX_DEALT), more: Math.max(0, all.length - FAN_MAX_DEALT), count: all.length };
 }
 
 /* ── the sentence: one filter, one manuscript scope, one sort ── */

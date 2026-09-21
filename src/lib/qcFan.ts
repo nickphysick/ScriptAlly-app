@@ -19,6 +19,23 @@
  * about the wrong variable. Spacing below the card's own width IS overlap, by definition.
  */
 
+/**
+ * ⚠️ THE FAN DEALS AT MOST FIFTEEN QUERY CARDS, AND THE NUMBER IS ARITHMETIC RATHER THAN TASTE
+ * (Nick's ruling, 21 Sep). A card is identifiable only while its visible strip still shows the
+ * initials disc — about **50px**. At 1280 the hand's travel is `available - CARD` = **720px**, so
+ * the strip is `720 / (n - 1)`: 51.4px at fifteen cards, **48px at sixteen**, and 14.7px at fifty.
+ * The geometry at thirty and fifty is perfectly sound — nothing escapes, the symmetry holds — and a
+ * 15px sliver is simply not a card anyone can read.
+ *
+ * ⚠️ SIXTEEN IS THE HAND, NOT THE DEAL. The sixteenth place belongs to the STACK card ("+35 more"),
+ * so fifteen is what the cap has to be for the hand to come out at the width the strip survives.
+ */
+export const FAN_MAX_DEALT = 15;
+/** The widest hand the fan ever lays out: the dealt cards plus the stack. */
+export const FAN_MAX_HAND = FAN_MAX_DEALT + 1;
+/** The narrowest strip of a card that still shows its initials disc — the cap's reason. */
+export const FAN_MIN_STRIP = 48;
+
 /** The card's drawn width — §5's 260. */
 export const FAN_CARD_W = 260;
 /** The most two card centres are ever set apart: the card plus a gap. */
