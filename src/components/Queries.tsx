@@ -6317,7 +6317,14 @@ export const Queries: React.FC<{
              * house changed. `QcCentre` renders it only while the column is 900px or more; under that
              * the drawer below takes over, and never for the implicit first row.
              */
-            openCard={showGridSkeleton ? <QcOpenCardSkeleton /> : (panelRow && activeQuery && qcById.get(activeQuery.id)) ? (
+            /**
+             * ⚠️ THE COVER RESERVES A CARD ONLY WHERE ONE IS COMING (v21 §7). Since nothing selects
+             * itself, `/queries?view=list` loads with no card at all — and a cover that drew one
+             * anyway put the ledger at 698px behind a page that lands at 1114, which is a 416px jump
+             * at the instant the cover lifts: the exact fault the cover exists to prevent, built into
+             * the cover. The URL is what knows, and it knows before the data arrives.
+             */
+            openCard={showGridSkeleton ? (selectedQueryId ? <QcOpenCardSkeleton /> : null) : (panelRow && activeQuery && qcById.get(activeQuery.id)) ? (
               <QcOpenCard
                 row={qcById.get(activeQuery.id)!}
                 nowMs={Date.now()}

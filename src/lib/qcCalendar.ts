@@ -183,6 +183,18 @@ export function laneBars(row: QcRow, track: CalTrack, nowMs: number): CalBar[] {
       const shift = floor - bars[i].left;
       bars[i].left = floor;
       bars[i].width = Math.max(bars[i].width - shift, bars[i].current ? CURRENT_MIN_PX : PAST_MIN_PX);
+      /**
+       * ⚠️ THE OVERRUN IS IN THE BAR'S OWN COORDINATES, so moving the bar moves it too — and this
+       * pass moved the bar and left the overlay where it was. Measured: an overrun ending 13px PAST
+       * its bar's right edge, on a bar shifted 13px by the daylight rule. The overlay is a child, so
+       * it kept drawing; it simply hung off the end, with the geometry above computed correctly.
+       */
+      const o = bars[i].over;
+      if (o) {
+        const left = Math.max(0, Math.min(o.left - shift, bars[i].width));
+        const width = Math.min(o.width, bars[i].width - left);
+        bars[i].over = width > 0.5 ? { left, width } : null;
+      }
     }
   }
   return bars;

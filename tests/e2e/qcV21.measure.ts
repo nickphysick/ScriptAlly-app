@@ -70,9 +70,10 @@ function seen(area: string, key: string) { const r = load(); (r.tally[area] ??= 
 type Sel = Record<string, string>;
 const APP = (name: string) => `[data-qcv="${name}"]`;
 const APP_SEL: Sel = Object.fromEntries([
-  "head", "head-title", "head-line", "head-cta",
-  "sum", "sum-live", "sum-live-band", "sum-closed", "sum-closed-band", "stage", "stage-graphic", "gauge", "notch", "closed-grid",
-  "ctl", "sentence", "views",
+  "head", "head-title", "head-line", "head-cta", "back-overview",
+  "overview", "ov-stats", "ov-card", "ov-portal", "ov-tile",
+  "fan", "fan-deck", "fan-card", "fan-title",
+  "ctl", "sentence",
   "stagegrid", "ledger", "open", "open-band", "open-foot", "open-action",
   "list-head", "row", "row-chip", "row-stand", "row-sent", "row-date",
   "cal-bar", "cal-box", "cal-axis", "cal-group", "cal-lane", "cal-seg", "ledger-frame",
@@ -80,9 +81,10 @@ const APP_SEL: Sel = Object.fromEntries([
 ].map((n) => [n, APP(n)]));
 const REF_SEL: Sel = {
   "head": ".head", "head-title": ".head h1", "head-line": ".head .facts", "head-cta": ".head .inkpill",
-  "sum": ".sum", "sum-live": ".s-act", "sum-live-band": ".s-act .hd", "sum-closed": ".s-cl", "sum-closed-band": ".s-cl .hd",
-  "stage": ".stg", "stage-graphic": ".stg .ub", "gauge": ".ub .ga", "notch": ".ub > s", "closed-grid": ".mx",
-  "ctl": ".ctl", "sentence": ".sentence", "views": ".views",
+  "back-overview": ".backov",
+  "overview": "#ovpage", "ov-stats": ".ovstats", "ov-card": ".ovs", "ov-portal": ".vt3", "ov-tile": ".vt",
+  "fan": "#fan", "fan-deck": "#fan .deck", "fan-card": "#fan .deck > *", "fan-title": "#fan .fh b",
+  "ctl": ".ctl", "sentence": ".sentence",
   "stagegrid": ".stage", "ledger": ".ledger", "open": ".open", "open-band": ".open .bd", "open-foot": ".open .ft", "open-action": ".open .ft button",
   "list-head": ".cols", "row": "#list .row", "row-chip": "#list .row .chip", "row-stand": "#list .row .st", "row-sent": "#list .row .mat", "row-date": "#list .row .date",
   "cal-bar": ".calbar", "cal-box": ".cal", "cal-axis": ".axis", "cal-group": ".grp2", "cal-lane": ".lane", "cal-seg": ".bar:not(.hist)", "ledger-frame": ".ledger > .frame",
@@ -110,6 +112,21 @@ function readAll(arg: { sel: Record<string, string>; root: string | null }) {
 }
 type Reading = { boxes: Record<string, { n: number; x: number; y: number; w: number; h: number; r: number; b: number } | null>; vw: number; vh: number };
 
+/**
+ * ⚠️ THE REF LANDS ON ITS OVERVIEW, AS THE APP DOES (§1.1), so every case that compares a VIEW must
+ * enter one first. Before v21 the mockup opened straight into the ledger and no prep was needed;
+ * without this the ref's `.ledger`, `.cols` and `#list .row` are simply absent and `need()` would
+ * report the app's probes as the missing ones.
+ */
+const toView = (v: "list" | "cal" | "grid") => async (p: Page) => { await p.click(`.vt3 .vt[data-v='${v}']`); await p.waitForTimeout(500); };
+/** …and §7 again: the ref opens a view with nothing selected too, so its open card must be ASKED for. */
+/**
+ * ⚠️ SCOPED TO THE VISIBLE VIEW. The ref keeps all three views in the DOM and hides two, and EVERY
+ * row, tile and bar carries `data-i` — so a bare `[data-i]` resolves to a hidden list row and
+ * Playwright waits out the whole test timeout for it to become visible. Seven minutes, reported as
+ * a click that would not land.
+ */
+const toViewPicked = (v: "list" | "cal" | "grid") => async (p: Page) => { await toView(v)(p); await p.click(`.view.v-${v} [data-i]`); await p.waitForTimeout(500); };
 async function readRef(page: Page, w: number, h: number, prep?: (p: Page) => Promise<void>): Promise<Reading> {
   await page.setViewportSize({ width: w, height: h });
   await page.goto(REF);
@@ -141,16 +158,32 @@ function listTemplate() {
   return { flex, fixed, gap, drop, boundary: drop + 1 };
 }
 
+/**
+ * ⚠️ A VIEW IS ALWAYS ASKED FOR BY URL NOW (v21 §1.1). The per-device memory is gone and `/queries`
+ * lands on the OVERVIEW, so the old seeding of `sa.qcView` did not merely stop working — it would
+ * have left every view case measuring the Overview and reporting its probes as absent. `openOverview`
+ * is the other door, and the two are separate functions so a case cannot open the wrong one by
+ * forgetting an argument.
+ */
 async function openApp(page: Page, w: number, h: number, view: "list" | "calendar" | "grid" = "list") {
-  await page.addInitScript((v) => { try { localStorage.setItem("sa.qcView", v); } catch { /* fine */ } }, view);
-  await openRoute(page, view === "list" ? "/queries" : `/queries?view=${view}`, { width: w, height: h });
+  await openRoute(page, `/queries?view=${view}`, { width: w, height: h });
   /* the page has landed when it says it is no longer busy */
   await expect.poll(() => page.evaluate(() => {
     const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0);
     return p ? p.getAttribute("aria-busy") : "absent";
-  }), { timeout: 30_000, message: "the v11 page root (.qcv-page) never rendered, or never stopped being busy" }).toBe("false");
+  }), { timeout: 30_000, message: "the page root (.qcv-page) never rendered, or never stopped being busy" }).toBe("false");
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(1300); /* past the entrance, which is done inside 800ms */
+}
+/** The page with no view asked for: the Overview (§4). */
+async function openOverview(page: Page, w: number, h: number) {
+  await openRoute(page, "/queries", { width: w, height: h });
+  await expect.poll(() => page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0);
+    return p ? p.getAttribute("aria-busy") : "absent";
+  }), { timeout: 30_000, message: "the page root never rendered, or never stopped being busy" }).toBe("false");
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForTimeout(1300);
 }
 async function readApp(page: Page): Promise<Reading> {
   const r = await page.evaluate(readAll, { sel: APP_SEL, root: ".qcv-page" });
@@ -190,18 +223,22 @@ test("0 · the report is this run's", async () => {
 });
 
 test("the ref reads as the brief says it does (1440×860) — or every comparison below is against the wrong box", async ({ page }) => {
-  const ref = await readRef(page, 1440, 860);
+  const ref = await readRef(page, 1440, 860, toViewPicked("list"));
   const want: [string, "w" | "h", number][] = [
-    ["head-cta", "w", 154], ["head-cta", "h", 50], ["sum", "h", 185], ["sum-live", "w", 866], ["sum-closed", "w", 286],
-    ["sum-live-band", "h", 48], ["stage", "w", 134], ["stage", "h", 84], ["gauge", "h", 3], ["closed-grid", "w", 236], ["closed-grid", "h", 94],
-    ["ctl", "h", 42], ["views", "w", 240], ["views", "h", 42], ["ledger", "w", 756], ["open", "w", 396], ["open-band", "h", 37],
+    ["head-cta", "w", 154], ["head-cta", "h", 50],
+    ["ledger", "w", 756], ["open", "w", 396],
     ["open-foot", "h", 80], ["open-action", "h", 38], ["list-head", "h", 29], ["row", "h", 67], ["row-chip", "w", 32], ["row-date", "w", 46],
   ];
+  /* ⚠️ `ctl.h` (42) AND `open-band.h` (37) ARE DROPPED FROM THIS TABLE, not re-baselined: they were
+     the v11 brief's figures and the v21 ref reads 27.4 and 47. A number I would have had to take
+     from the ref in order to check the ref against is not a check. Both are still compared
+     app-against-ref in their own cases, which is the claim that matters; this table's job is to
+     catch a wrong SELECTOR, and ten probes do that. */
   /* ⚠️ TWO OF THESE ARE SET BY TEXT, and the brief's figures for them came from another browser: the
-     view switch reads 235.1 here against a stated 240 with Special Elite demonstrably loaded. This
-     check exists to catch a wrong SELECTOR, which is out by tens of pixels, so text-set widths get
+     head's button reads a few pixels off its stated width with Special Elite demonstrably loaded.
+     This check exists to catch a wrong SELECTOR, which is out by tens of pixels, so text-set widths get
      6px. The app is compared with the ref as read HERE, in one browser, at the usual 2. */
-  const TEXT_SET = new Set(["views.w", "head-cta.w"]);
+  const TEXT_SET = new Set(["head-cta.w"]);
   for (const [n, d, v] of want) near("ref", `${n}.${d}`, need(ref, "ref", n)[d], v, TEXT_SET.has(`${n}.${d}`) ? 6 : TOL);
 });
 
@@ -222,7 +259,7 @@ test("top bar — + New is gone app-wide and Give feedback is anthracite", async
 });
 
 test("head and control row — 1440×860", async ({ page }) => {
-  const ref = await readRef(page, 1440, 860);
+  const ref = await readRef(page, 1440, 860, toView("list"));
   await openApp(page, 1440, 860);
   const app = await readApp(page);
   sameSize("head", app, ref, "head-cta", ["w", "h"]);
@@ -231,7 +268,6 @@ test("head and control row — 1440×860", async ({ page }) => {
   sameOffset("head", app, ref, "head-line", "head", ["y"]);
   sameOffset("head", app, ref, "head-cta", "head", ["y"]);
   sameSize("control", app, ref, "ctl", ["h"]);
-  sameSize("control", app, ref, "views", ["w", "h"]);
   /* the page shares the dashboard's left edge and measure: same shell, same 22px inset */
   const pg = await page.evaluate(() => { const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!; const b = p.getBoundingClientRect(); const bar = [...document.querySelectorAll(".ws-pagebar .sp-help")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect(); const t = p.querySelector("[data-qcv='head-title']")!.getBoundingClientRect(); return { x: b.x, w: b.width, gap: Math.round((t.y - bar.bottom) * 10) / 10 }; });
   near("head", "the page's left edge (the dashboard's is 268 at 1440)", pg.x, 268, 1);
@@ -242,13 +278,19 @@ test("head and control row — 1440×860", async ({ page }) => {
     const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
     const vis = (s: string) => [...p.querySelectorAll(s)].filter((e) => e.getBoundingClientRect().height > 0).length;
     const wpg = p.closest(".wpg")!;
-    return { masthead: [...wpg.querySelectorAll(".wsh, .wpg-chrome, .wpg-bar")].filter((e) => e.getBoundingClientRect().height > 0).length, tiles: vis(".qct-tile, .sts-tile"), toolbar: vis(".qcc-tb"), search: vis(".qcc-tb-search"), views: [...p.querySelectorAll("[data-qcv='views'] button")].map((b) => b.textContent?.trim()),
+    return { masthead: [...wpg.querySelectorAll(".wsh, .wpg-chrome, .wpg-bar")].filter((e) => e.getBoundingClientRect().height > 0).length, tiles: vis(".qct-tile, .sts-tile"), toolbar: vis(".qcc-tb"), search: vis(".qcc-tb-search"),
+      views: vis("[data-qcv='views']"), strip: vis("[data-qcv='sum']"), back: vis("[data-qcv='back-overview']"),
       windowBg: getComputedStyle(document.querySelector(".ws-window")!).backgroundColor, title: getComputedStyle(p.querySelector("[data-qcv='head-title']")!).fontFamily, sentence: getComputedStyle(p.querySelector("[data-qcv='pk-filter']")!).fontFamily, cta: getComputedStyle(p.querySelector("[data-qcv='head-cta'] span")!).fontFamily };
   });
   is("control", "the old masthead, its chrome slab and its collapsed bar", gone.masthead, 0);
   is("control", "the five tiles", gone.tiles, 0);
   is("control", "the Filter / Group / Sort toolbar", gone.toolbar, 0);
-  is("control", "the view switch's segments", gone.views, ["List", "Calendar", "Grid"]);
+  /* ⚠️ ASSERTED ABSENT, NOT RESTYLED (§1.3 and §6). The portal's three tiles are the only way into
+     a view and the Overview is the only summary; a switch or a strip drawn here would be a second
+     of each, which is what both removals exist to prevent. */
+  is("control", "the retired view switch", gone.views, 0);
+  is("control", "the retired compact strip", gone.strip, 0);
+  is("control", "…and inside a view, the back link IS drawn", gone.back, 1);
   is("control", "the window sheet behind the page", gone.windowBg, "rgba(0, 0, 0, 0)");
   for (const [k, f] of [["title", gone.title], ["sentence", gone.sentence], ["log button", gone.cta]] as const) yes("head", `${k} is drawn in the typewriter face, not brand.tsx's`, /Special Elite/.test(f), f);
   await page.screenshot({ path: resolve(OUT, "list-1440.png") });
@@ -282,219 +324,20 @@ test("the sentence — the two phrases are the page's only filter and sort", asy
   is("sentence", "Escape closes the menu", await page.locator("[data-qcv='menu']").count(), 0);
 });
 
-test("summary row — 1440×860", async ({ page }) => {
-  const ref = await readRef(page, 1440, 860);
-  await openApp(page, 1440, 860);
-  const app = await readApp(page);
-  sameSize("summary", app, ref, "sum", ["h"]);
-  sameSize("summary", app, ref, "sum-closed", ["w", "h"]);
-  sameSize("summary", app, ref, "sum-live-band", ["h"]);
-  sameSize("summary", app, ref, "sum-closed-band", ["h"]);
-  sameSize("summary", app, ref, "stage", ["h"]);
-  sameSize("summary", app, ref, "stage-graphic", ["h"]);
-  sameSize("summary", app, ref, "sum-live", ["h"]);
-  sameSize("summary", app, ref, "gauge", ["h"]);
-  /* ⚠️ THE ONE PLACE THE PAGE DELIBERATELY DIFFERS FROM THE REF: the ref has no "+N withdrawn" line.
-     Where this account has one, the grid gives back exactly 6px (three row gaps, 6 → 4) so the ROW
-     stays the ref's height — which is asserted above, and is the claim that matters. */
-  const wd = await page.evaluate(() => !![...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!.querySelector("[data-qcv='withdrawn-line']"));
-  seen("closed-grid", wd ? "with the withdrawn line" : "without it");
-  near("summary", `closed-grid.h (${wd ? "ref − 6, the withdrawn line is present" : "the ref's"})`, app.boxes["closed-grid"]?.h, need(ref, "ref", "closed-grid").h - (wd ? 6 : 0));
-  /* the live card and the closed card share the row's width with a 20px gap, in both */
-  const s = need(app, "app", "sum"), l = need(app, "app", "sum-live"), c = need(app, "app", "sum-closed");
-  near("summary", "live + 20 + closed fills the row", l.w + 20 + c.w, s.w, 1);
-  /* the notch is at 70% of the graphic's width */
-  const g = app.boxes["stage-graphic"], n = app.boxes["notch"];
-  near("summary", "notch at 70% of the column's graphic", g && n ? ((n.x - g.x) / g.w) * 100 : null, 70, 1.5);
-});
-
-test("summary row at a 1280 window — the stage name never collides with its count, six columns or seven", async ({ page }) => {
-  const ref = await readRef(page, 1280, 800);
-  await openApp(page, 1280, 800);
-  const app = await readApp(page);
-  sameSize("summary@1280", app, ref, "sum", ["h"]);
-  const cols = await page.evaluate(() => {
-    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    return [...p.querySelectorAll("[data-qcv='stage']")].map((s) => {
-      const l = s.querySelector(".qcv-stg-l")!, n = s.querySelector(".qcv-stg-n")!.getBoundingClientRect(), box = s.getBoundingClientRect();
-      const r = document.createRange(); r.selectNodeContents(l);
-      const ink = [...r.getClientRects()];
-      /* a 2D test: the header may STACK, so "to the right of" is not the question — "on top of" is */
-      const hit = ink.some((k) => k.left < n.right - 0.5 && k.right > n.left + 0.5 && k.top < n.bottom - 0.5 && k.bottom > n.top + 0.5);
-      const out = ink.some((k) => k.right > box.right + 0.5 || k.left < box.left - 0.5);
-      return { stage: (s as HTMLElement).dataset.stage, w: Math.round(box.width), h: Math.round(box.height), lines: ink.length, hit, out };
-    });
-  });
-  seen("summary@1280", `${cols.length} columns`);
-  yes("summary@1280", "there are stage columns (the population)", cols.length >= 6, String(cols.length));
-  for (const c of cols) {
-    yes("summary@1280", `${c.stage}: the name's ink does not sit on the count`, !c.hit, JSON.stringify(c));
-    yes("summary@1280", `${c.stage}: the name's ink stays inside its column`, !c.out, JSON.stringify(c));
-    is("summary@1280", `${c.stage}: the column is still 84 tall`, c.h, 84);
-  }
-  await page.locator(".qcv-page [data-qcv='sum']").first().screenshot({ path: resolve(OUT, `summary-1280-${cols.length}col.png`) });
-});
-
-test("summary row with 56 live queries — the row is the height it is with 39, and no column draws a fifth gauge", async ({ page }) => {
-  /**
-   * ⚠️ THE HARNESS ACCOUNT HOLDS FEWER THAN FIFTY LIVE QUERIES, so the brief's question — what does
-   * the row do on a busy account — is asked with `qcReviewAid`: the account's OWN live rows repeated
-   * in memory until 56 are live. Nothing is written. The claim is a comparison of the page with
-   * itself: the same window, unpadded then padded, and the row's height must not move.
-   */
-  await openApp(page, 1440, 860);
-  const read = () => page.evaluate(() => {
-    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    const sum = p.querySelector("[data-qcv='sum']") as HTMLElement;
-    const stages = [...p.querySelectorAll("[data-qcv='stage']")] as HTMLElement[];
-    return {
-      h: Math.round(sum.getBoundingClientRect().height * 10) / 10,
-      title: (p.querySelector("[data-qcv='sum-live-band']")?.textContent || "").replace(/\s+/g, " ").trim(),
-      cols: stages.map((st) => ({
-        gauges: st.querySelectorAll("[data-qcv='gauge']").length,
-        more: (st.querySelector("[data-qcv='gauge-more']")?.getAttribute("title") || "").trim(),
-        /* the INK of the line, not its box: the line is `nowrap` and is allowed to run on past its
-           own column where the neighbour is empty, so only a Range says where the words end */
-        moreInk: (() => { const m = st.querySelector("[data-qcv='gauge-more']"); if (!m) return null; const r = document.createRange(); r.selectNodeContents(m); const b = [...r.getClientRects()].filter((c) => c.width > 0); return b.length ? { x0: Math.min(...b.map((c) => c.left)), x1: Math.max(...b.map((c) => c.right)) } : null; })(),
-        h: Math.round(st.getBoundingClientRect().height * 10) / 10,
-      })),
-    };
-  });
-  const plain = await read();
-  await page.addInitScript(() => { (window as unknown as { __SA_QC_PAD_LIVE?: number }).__SA_QC_PAD_LIVE = 56; });
-  await openApp(page, 1440, 860);
-  const padded = await read();
-  record({ area: "summary-56", what: "unpadded", got: plain, want: "reported" });
-  record({ area: "summary-56", what: "padded to 56 live", got: padded, want: "reported" });
-  /* precondition FIRST: the padding took, or the comparison is the page against itself */
-  const liveN = (t: string) => { const m = /(\d+)/.exec(t); return m ? Number(m[1]) : -1; };
-  yes("summary-56", `the padded page says 56 live (it says "${padded.title}")`, liveN(padded.title) === 56);
-  yes("summary-56", "the unpadded page holds fewer than fifty — otherwise the aid measured nothing", liveN(plain.title) > 0 && liveN(plain.title) < 50);
-  near("summary-56", "the row's height with 56 live is its height without", padded.h, plain.h, 0.6);
-  yes("summary-56", "no column draws more than four gauges", padded.cols.every((c) => c.gauges <= 4));
-  yes("summary-56", "a column holding more than four says how many it is not drawing", padded.cols.some((c) => /^\+\d+ earlier in the window$/.test(c.more)));
-  /* ⚠️ THE FAULT THIS CASE FOUND THE FIRST TIME IT RAN: with several columns over four, the
-     "+N earlier in the window" lines ran into one another (124px of ink in a 98px column). Asserted
-     over the INK of consecutive lines, and the population first — a run with fewer than two such
-     lines proves nothing about collisions. */
-  const inks = padded.cols.map((c) => c.moreInk).filter((m): m is { x0: number; x1: number } => !!m);
-  yes("summary-56", `at least two columns carry the line (${inks.length}) — otherwise nothing could collide`, inks.length >= 2);
-  for (let i = 1; i < inks.length; i++) yes("summary-56", `line ${i} ends before line ${i + 1} begins`, inks[i - 1].x1 <= inks[i].x0 - 2, `${inks[i - 1].x1.toFixed(1)} → ${inks[i].x0.toFixed(1)}`);
-  const cardRight = await page.evaluate(() => { const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!; return (p.querySelector("[data-qcv='sum-live']") as HTMLElement).getBoundingClientRect().right; });
-  yes("summary-56", "no line runs out of the card", inks.every((m) => m.x1 <= cardRight - 6));
-  await page.locator(".qcv-page [data-qcv='sum']").first().screenshot({ path: resolve(OUT, "summary-56-live-1440.png") });
-});
-
-test("the summary's gauges — geometry, and which branches this account entered", async ({ page }) => {
-  await openApp(page, 1440, 860);
-  const r = await page.evaluate(() => {
-    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    const stages = [...p.querySelectorAll("[data-qcv='stage']")] as HTMLElement[];
-    return stages.map((s) => {
-      const gr = s.querySelector("[data-qcv='stage-graphic']") as HTMLElement | null;
-      const gw = gr ? gr.getBoundingClientRect().width : 0, gx = gr ? gr.getBoundingClientRect().x : 0;
-      return {
-        stage: s.getAttribute("data-stage"), count: Number(s.getAttribute("data-count")), h: s.getBoundingClientRect().height,
-        /* the FIXED area is the content box (27); the rect adds the 6px pad and the hairline */
-        graphicH: gr ? parseFloat(getComputedStyle(gr).height) : null,
-        gauges: [...s.querySelectorAll("[data-qcv='gauge']")].map((g) => {
-          const fill = g.querySelector("[data-qcv='gauge-fill']") as HTMLElement | null, over = g.querySelector("[data-qcv='gauge-over']") as HTMLElement | null;
-          const fb = fill?.getBoundingClientRect(), ob = over?.getBoundingClientRect();
-          return { kind: g.getAttribute("data-kind"), title: g.getAttribute("title"), name: g.getAttribute("aria-label"),
-            fillPc: fb ? (fb.width / gw) * 100 : null, overFromPc: ob ? ((ob.x - gx) / gw) * 100 : null, overPc: ob ? (ob.width / gw) * 100 : null,
-            fillBg: fill ? getComputedStyle(fill).backgroundColor : null, overBg: over ? getComputedStyle(over).backgroundColor : null };
-        }),
-        more: s.querySelector("[data-qcv='gauge-more']")?.getAttribute("title") ?? null,
-      };
-    });
-  });
-  yes("gauges", "six or seven stage columns (the population)", r.length === 6 || r.length === 7, `found ${r.length}`);
-  for (const s of r) {
-    yes("gauges", `${s.stage}: at most four gauges`, s.gauges.length <= 4, `${s.gauges.length}`);
-    yes("gauges", `${s.stage}: the graphic is a fixed 27px`, s.graphicH != null && Math.abs(s.graphicH - 27) <= 1, `${s.graphicH}`);
-    yes("gauges", `${s.stage}: shows min(count, 4) gauges`, s.gauges.length === Math.min(s.count, 4), `${s.gauges.length} of ${s.count}`);
-    if (s.count > 4) yes("gauges", `${s.stage}: the overflow line says +${s.count - 4}`, (s.more ?? "").includes(`+${s.count - 4}`), s.more ?? "absent");
-    for (const g of s.gauges) {
-      seen("gauge-kind", g.kind ?? "null");
-      yes("gauges", `${s.stage}: a gauge carries a title and the same accessible name`, !!g.title && g.title === g.name, String(g.title));
-      if (g.kind === "within") { yes("gauges", "a within-window fill stops at or before the notch", g.fillPc != null && g.fillPc <= 70.5, String(g.fillPc)); is("gauges", "fill is navy", g.fillBg, "rgb(42, 58, 82)"); }
-      if (g.kind === "past") {
-        near("gauges", "a past gauge's navy runs to the notch", g.fillPc, 70, 1);
-        near("gauges", "its ink starts at the notch", g.overFromPc, 70, 1);
-        yes("gauges", "the ink overrun is capped at 30%", g.overPc != null && g.overPc <= 30.5, String(g.overPc));
-        is("gauges", "overrun is ink", g.overBg, "rgb(28, 19, 15)");
-      }
-      if (g.kind === "nodate") yes("gauges", "no date: no fill at all", g.fillPc == null && g.overPc == null);
-    }
-  }
-  const hs = [...new Set(r.map((s) => Math.round(s.h)))];
-  is("gauges", "every column is one height whatever it holds", hs.length, 1);
-  /**
-   * ⚠️ WHICH BRANCHES THIS PAGE ENTERED IS ASSERTED PER BRANCH, NOT IMPLIED BY A GREEN. The phase 6
-   * commit message said this account entered `within`, `past` and `nodate`. As it stands it enters
-   * TWO: a column draws its four FURTHEST-THROUGH gauges, an open window is behind every overrun,
-   * and every agent's-turn query here with an expected date is already past it. The third branch is
-   * asserted in the case below, on a page given different INPUT rather than a different reading.
-   */
-  const kinds = r.flatMap((s) => s.gauges.map((g) => g.kind));
-  yes("gauges", "the `past` branch was entered on the rendered page", kinds.includes("past"));
-  yes("gauges", "the `nodate` branch was entered on the rendered page", kinds.includes("nodate"));
-  record({ area: "gauges", what: "`within` gauges on the account as it stands", got: kinds.filter((k) => k === "within").length, want: "reported" });
-});
-
-test("the summary's gauges — the OPEN-WINDOW branch, on queries re-dated inside their agency's window", async ({ page }) => {
-  /**
-   * ⚠️ THE THIRD BRANCH IS THE ONE A REAL ACCOUNT WILL SHOW MOST, AND THIS ACCOUNT CANNOT SHOW IT.
-   * `qcReviewAid` moves a handful of agent's-turn queries' SEND dates inside their agency's stated
-   * window — an input, at the top of the same pipe — and `expectedFor` → `gaugeFor` then derive the
-   * open window for real. Nothing is written and no expected date is set by hand; if the aid ever
-   * reaches past the send dates, the lock in `useQcLoad.test.ts` fails first.
-   */
-  await page.addInitScript(() => { (window as unknown as { __SA_QC_AHEAD?: number }).__SA_QC_AHEAD = 6; });
-  await openApp(page, 1440, 860);
-  const g = await page.evaluate(() => {
-    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    return [...p.querySelectorAll("[data-qcv='gauge']")].map((el) => {
-      const fill = el.querySelector("[data-qcv='gauge-fill']") as HTMLElement | null;
-      const over = el.querySelector("[data-qcv='gauge-over']") as HTMLElement | null;
-      const notch = (el.parentElement as HTMLElement).querySelector("[data-qcv='notch']") as HTMLElement | null;
-      const box = el.getBoundingClientRect();
-      return {
-        kind: el.getAttribute("data-kind"), title: el.getAttribute("title") ?? "",
-        fillPc: fill ? (fill.getBoundingClientRect().width / box.width) * 100 : null,
-        fillBg: fill ? getComputedStyle(fill).backgroundColor : null,
-        overPc: over ? (over.getBoundingClientRect().width / box.width) * 100 : null,
-        notchPc: notch ? ((notch.getBoundingClientRect().x - box.x) / box.width) * 100 : null,
-      };
-    });
-  });
-  const within = g.filter((x) => x.kind === "within");
-  const kinds = new Set(g.map((x) => x.kind));
-  /* the precondition FIRST: the aid took, and the other two branches are still on the page beside it */
-  yes("within", `the aid put open windows on the page (${within.length})`, within.length >= 3);
-  for (const k of ["past", "nodate"]) yes("within", `the \`${k}\` branch is still on the page beside them`, kinds.has(k));
-  /* and the geometry of the branch itself, measured as RENDERED WIDTH rather than read off a style */
-  for (const w of within) {
-    yes("within", `an open window's navy stops at or before the notch — ${w.title}`, w.fillPc != null && w.notchPc != null && w.fillPc <= w.notchPc + 0.6, `${w.fillPc?.toFixed(1)} vs notch ${w.notchPc?.toFixed(1)}`);
-    yes("within", `an open window draws NO overrun — ${w.title}`, !w.overPc, String(w.overPc));
-    is("within", "an open window's fill is navy", w.fillBg, "rgb(42, 58, 82)");
-    /* ⚠️ THREE WORDINGS, NOT ONE — and the re-seeded fixture is what proved it. `gaugeFor` names
-       what is being counted down to: "the expected date" on the agent's turn, "your send-by date"
-       where the writer set one, "the decision date" on an offer. The old fixture held no
-       writer's-turn query with an `expectedSendDate`, so this branch had only ever been seen in
-       its agent's-turn form and the assertion had quietly narrowed to it. */
-    yes("within", `an open window's title counts DOWN to a named date — ${w.title}`,
-      /until (the expected date|your send-by date|the decision date)$/.test(w.title));
-  }
-  /* the spread is the point of the aid: early in the window through to the notch */
-  const spread = Math.max(...within.map((w) => w.fillPc ?? 0)) - Math.min(...within.map((w) => w.fillPc ?? 0));
-  yes("within", `the open windows span the track rather than sitting at one fraction (${spread.toFixed(1)}pp)`, spread > 15);
-  record({ area: "within", what: "open-window fills, % of track", got: within.map((w) => +(w.fillPc ?? 0).toFixed(1)), want: "reported" });
-  /* which of the three countdowns the fixture actually exercised — a monoculture here is the
-     fault this case just had, so it is printed rather than inferred */
-  for (const w of within) seen("within-countdown", (/until (.+)$/.exec(w.title)?.[1]) ?? "none");
-  await page.locator(".qcv-page [data-qcv='sum']").first().screenshot({ path: resolve(OUT, "summary-open-window-1440.png") });
-});
+/**
+ * ⚠️ FIVE CASES ARE RETIRED HERE, BY DESIGN AND NOT BECAUSE THEY BROKE (v21 §6, Nick's change of
+ * plan). They measured the compact strip — the live card with its stage columns and gauges, the
+ * closed band, the header's wrap at a 1280 window, the notch at 70%, the row's height with 56 live
+ * queries and the "+N earlier" lines not colliding. The strip is gone from the views entirely: the
+ * Overview is the only summary, and a view shows its content and nothing else.
+ *
+ * The claims did not lapse, they MOVED. `rowsForStage`, `rowsForClosed` and `fanHand` still feed
+ * the Overview's stat row and the fan, and their unit locks are untouched; the stat row and the fan
+ * are measured below. What is gone with the component is the geometry OF that component — a lock on
+ * the gauges' notch has no subject once nothing draws a gauge.
+ *
+ * Recoverable at 2e094dd6 (the commit that built the strip) if the decision is ever revisited.
+ */
 
 test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
   for (const [w, h] of [[1440, 860], [1280, 800], [1720, 900]] as const) {
@@ -502,11 +345,20 @@ test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
     const app = await readApp(page);
     const column = await appColumn(page);
     const refPage = await page.context().newPage();
-    const ref = await readRef(refPage, refWindowFor(column), h);
+    const ref = await readRef(refPage, refWindowFor(column), h, toView("list"));
+    /* and the same ref with a query chosen, for everything that only exists once one is */
+    const refPicked = await readRef(refPage, refWindowFor(column), h, toViewPicked("list"));
     await refPage.close();
     const area = `list@${w}`;
     const dated = !!app.boxes["row-date"];
     near(area, "the ref was opened at the app's content width", need(ref, "ref", "stagegrid").w, need(app, "app", "stagegrid").w, 1);
+    /**
+     * ⚠️ REVERSED BY §7, AND THE REF AGREES: the ledger is the WHOLE STAGE until a query is chosen.
+     * It used to be 756 beside a 396 card on load, because the page selected the first row for you.
+     * Both sides now open with nothing selected, so both open full width — and the case that the
+     * ledger and the card share the stage moved down to after the click, where it belongs.
+     */
+    near(area, "the ledger fills the stage while nothing is selected", need(app, "app", "ledger").w, need(app, "app", "stagegrid").w, 1);
     sameSize(area, app, ref, "ledger", ["w"]);
     record({ area, what: "column edges from the ledger's left [chip, stands, sent, date] and the ledger's width", got: { app: ["row-chip", "row-stand", "row-sent", "row-date"].map((c) => (app.boxes[c] && app.boxes["ledger"] ? Math.round((app.boxes[c]!.x - app.boxes["ledger"]!.x) * 10) / 10 : "not drawn")), widths: ["row-stand", "row-sent", "row-date"].map((c) => app.boxes[c]?.w ?? "not drawn"), ledger: app.boxes["ledger"]?.w ?? null, column }, want: "reported" });
     /* ⚠️ THE DATE TILE IS A BRANCH, AND WHICH SIDE RAN IS STATED. Under 568px of ledger it is not drawn —
@@ -523,7 +375,6 @@ test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
      * happened (Nick, 20 Sep), so it is asserted flatly, against the window rather than the CSS.
      */
     if (w === 1280) yes(area, "the date tile is drawn at a 1280 window — the column this pass exists to keep", dated);
-    sameSize(area, app, ref, "open", ["w"]);
     sameSize(area, app, ref, "list-head", ["h"]);
     /* ⚠️ THE ROW IS 67 IN BOTH LAYOUTS HERE. The ref's row is auto-height and the 45px date tile is what
        makes it 67; with the tile gone its row falls to 60.8, incidentally. The app states the height,
@@ -566,29 +417,27 @@ test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
     const spill = await page.evaluate(() => { const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!; const f = p.querySelector("[data-qcv='ledger-frame']")!.getBoundingClientRect(); return [...p.querySelectorAll("[data-qcv='row'] > *")].filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && b.right > f.right - 1 + 0.5; }).length; });
     is(area, "cells running out past the frame's right edge", spill, 0);
     record({ area, what: "app vs REF column widths [stands, sent]", got: { app: ["row-stand", "row-sent"].map((c) => app.boxes[c]?.w ?? null), ref: ["row-stand", "row-sent"].map((c) => ref.boxes[c]?.w ?? null) }, want: "reported" });
-    if (w === 1440) {
-      sameSize(area, app, ref, "open-band", ["h"]);
-      /* the ledger and the card share the stage with a 20px gap */
-      const st = need(app, "app", "stagegrid"), le = need(app, "app", "ledger"), op = need(app, "app", "open");
-      near(area, "ledger + 20 + card fills the stage", le.w + 20 + op.w, st.w, 1);
-    }
     const facts = await page.evaluate(() => {
       const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
       const rows = [...p.querySelectorAll("[data-qcv='row']")] as HTMLElement[];
       const lefts = (s: string) => [...new Set(rows.map((r) => { const e = r.querySelector(s); return e ? Math.round(e.getBoundingClientRect().x) : -1; }))];
       const open = p.querySelector("[data-qcv='open']") as HTMLElement | null;
-      return { rows: rows.length, selected: rows.filter((r) => r.getAttribute("aria-selected") === "true").length,
+      return { rows: rows.length, url: location.search, selected: rows.filter((r) => r.getAttribute("aria-selected") === "true").length,
         standLefts: lefts("[data-qcv='row-stand']"), sentLefts: lefts("[data-qcv='row-sent']"),
         rowButtons: rows.reduce((n, r) => n + r.querySelectorAll("button").length, 0),
-        openPos: open ? getComputedStyle(open).position : null, overlay: document.querySelectorAll(".qpn-scrim").length,
+        overlay: document.querySelectorAll(".qpn-scrim").length,
         you: rows.filter((r) => r.getAttribute("data-you") === "true").map((r) => r.getAttribute("data-status")) };
     });
     yes(area, "there are rows (the population)", facts.rows > 3, String(facts.rows));
-    is(area, "exactly one row is selected on load", facts.selected, 1);
+    /* ⚠️ §7: NOTHING SELECTS ITSELF, at any width. The page used to open on the first row and write
+       nothing to the URL, so a reader arrived at a query they had not asked for and the ledger was
+       already narrowed to make room for it. */
+    is(area, "rows selected on load", facts.selected, 0);
+    is(area, "a docked card on load", app.boxes["open"] ? 1 : 0, 0);
+    yes(area, "…and the URL carries no ?q= (nothing was chosen, so nothing is stated)", !/[?&]q=/.test(facts.url ?? ""), String(facts.url));
     is(area, "every row's second column starts at one x — tracks sized by rule, not content", facts.standLefts.length, 1);
     is(area, "every row's third column starts at one x", facts.sentLefts.length, 1);
     is(area, "row buttons", facts.rowButtons, 0);
-    is(area, "the card is sticky, not an overlay", facts.openPos, "sticky");
     is(area, "no scrim at desktop widths", facts.overlay, 0);
     for (const s of facts.you) { seen("rust-row", String(s)); yes(area, "rust follows 'with you' exactly — never an offer", ["Partial Requested", "Full Requested", "Revise & Resubmit"].includes(String(s)), String(s)); }
     /* ── select a LIVE query: the first row on load may be closed, and a closed query has no action ── */
@@ -600,16 +449,24 @@ test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
       const o = p.querySelector("[data-qcv='open']") as HTMLElement, rows = [...p.querySelectorAll("[data-qcv='row']")] as HTMLElement[];
       const on = rows.filter((r) => r.getAttribute("aria-selected") === "true");
       const act = o.querySelector("[data-qcv='open-action']") as HTMLElement | null;
-      return { same: on.length === 1 && on[0].dataset.id === o.dataset.id, status: o.dataset.status, action: act?.textContent ?? null, actBg: act ? getComputedStyle(act).backgroundColor : null,
+      return { same: on.length === 1 && on[0].dataset.id === o.dataset.id, status: o.dataset.status, pos: getComputedStyle(o).position, action: act?.textContent ?? null, actBg: act ? getComputedStyle(act).backgroundColor : null,
         tabs: [...o.querySelectorAll("[role='tab']")].map((t) => t.textContent?.replace(/\d+$/, "").trim()), url: location.search, court: o.querySelector("[data-qcv='open-court']")?.textContent, rust: o.querySelector("[data-qcv='open-court']")?.getAttribute("data-you") };
     });
     yes(area, "the card shows the row that is selected", card.same, JSON.stringify(card));
+    /* §7's other half: the moment a query IS chosen, the ledger gives the card its column */
+    const stq = need(sel, "app", "stagegrid"), leq = need(sel, "app", "ledger"), opq = need(sel, "app", "open");
+    near(area, "once chosen: ledger + 20 + card fills the stage", leq.w + 20 + opq.w, stq.w, 1);
+    yes(area, "…and the ledger really gave up room", leq.w < need(app, "app", "ledger").w - 200, `${need(app, "app", "ledger").w} → ${leq.w}`);
+    if (w === 1440) { sameSize(area, sel, refPicked, "open-band", ["h"]); sameSize(area, sel, refPicked, "open", ["w"]); }
     is(area, "a Queried query's one action", card.action, "Record a response");
     is(area, "…is anthracite", card.actBg, "rgb(42, 58, 82)");
     is(area, "the drawer's own three tabs, kept", card.tabs, ["Tracking", "Agent", "Notes"]);
     is(area, "a Queried query is with the agent, and wears no rust", [card.court, card.rust], ["With the agent", "false"]);
     yes(area, "choosing a row writes ?q= (a user's act)", /[?&]q=/.test(card.url), card.url);
-    if (w === 1440) { sameSize(area, sel, ref, "open-action", ["h"]); sameSize(area, sel, ref, "open-foot", ["h"]); }
+    /* ⚠️ READ AFTER THE CLICK, because there is no card before it (§7) — a `getComputedStyle` of
+       nothing is not evidence that the card is not an overlay. */
+    is(area, "the card is sticky, not an overlay", card.pos, "sticky");
+    if (w === 1440) { sameSize(area, sel, refPicked, "open-action", ["h"]); sameSize(area, sel, refPicked, "open-foot", ["h"]); }
     await page.screenshot({ path: resolve(OUT, `list-${w}.png`) });
   }
 });
@@ -619,18 +476,19 @@ test("under 900px of column — nothing selects implicitly, and a chosen row ope
   const at = async () => page.evaluate(() => {
     const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
     const drawer = [...document.querySelectorAll(".qpn")].find((e) => e.getAttribute("data-on") === "true" && e.getBoundingClientRect().width > 0);
-    const sum = p.querySelector("[data-qcv='sum']")!.getBoundingClientRect(), live = p.querySelector("[data-qcv='sum-live']")!.getBoundingClientRect(), cl = p.querySelector("[data-qcv='sum-closed']")!.getBoundingClientRect();
     return { column: Math.round(p.getBoundingClientRect().width), narrow: p.classList.contains("qcv-page--narrow"), docked: p.querySelectorAll("[data-qcv='open']").length,
-      selected: p.querySelectorAll("[data-qcv='row'][aria-selected='true']").length, drawer: !!drawer, url: location.search, closedUnderLive: cl.top >= live.bottom - 1 && Math.abs(cl.left - live.left) < 1, sumW: Math.round(sum.width) };
+      selected: p.querySelectorAll("[data-qcv='row'][aria-selected='true']").length, drawer: !!drawer, url: location.search };
   });
   const load = await at();
   yes("narrow", "the column really is under 900 (the precondition)", load.column < 900, String(load.column));
   is("narrow", "the page knows it", load.narrow, true);
   is("narrow", "docked cards", load.docked, 0);
-  is("narrow", "⚠️ rows selected on load — an implicit selection here would open a drawer over the page", load.selected, 0);
+  /* ⚠️ THIS IS NOW THE RULE AT EVERY WIDTH (§7), not the narrow exception it used to be. It stays
+     here because the CONSEQUENCE is still peculiar to a narrow column: an implicit selection here
+     would have opened a drawer over the page nobody asked for. */
+  is("narrow", "rows selected on load", load.selected, 0);
   is("narrow", "a drawer open on load", load.drawer, false);
   is("narrow", "the URL on load", load.url.includes("q="), false);
-  is("narrow", "the closed card sits under the live one", load.closedUnderLive, true);
   await page.locator(".qcv-page [data-qcv='row']").nth(2).click();
   await page.waitForTimeout(900);
   const chosen = await at();
@@ -641,7 +499,7 @@ test("under 900px of column — nothing selects implicitly, and a chosen row ope
 });
 
 test("calendar — expanded and compact, the inset, one bar per stage", async ({ page }) => {
-  const toCal = async (p: Page) => { await p.click(".views button[data-v='cal']"); };
+  const toCal = toView("cal");
   const ref = await readRef(page, 1440, 860, toCal);
   await openApp(page, 1440, 860, "calendar");
   let app = await readApp(page);
@@ -650,7 +508,9 @@ test("calendar — expanded and compact, the inset, one bar per stage", async ({
   sameSize("calendar", app, ref, "cal-group", ["h"]);
   sameSize("calendar", app, ref, "cal-lane", ["h"]);
   sameSize("calendar", app, ref, "cal-seg", ["h"]);
-  sameSize("calendar", app, ref, "open", ["w"]);
+  /* ⚠️ THE DOCKED CARD IS NOT MEASURED HERE: nothing is selected on arrival in any view (§7), so on
+     both sides there is no card to measure and "the card is 396 in the calendar too" would be a
+     comparison of two absences. It is the same component the list case measures, after a pick. */
   const box = need(app, "app", "cal-box"), fr = need(app, "app", "ledger-frame");
   near("calendar", "the scrolling box is inset 14px from the frame's left (inside its 1px line)", box.x - fr.x - 1, 14, 1);
   near("calendar", "…and from its right", fr.r - 1 - box.r, 14, 1);
@@ -681,7 +541,7 @@ test("calendar — expanded and compact, the inset, one bar per stage", async ({
   await page.screenshot({ path: resolve(OUT, "calendar-expanded-1440.png") });
 
   /* compact */
-  const refC = await readRef(page, 1440, 860, async (p) => { await toCal(p); await p.click(".dens button[data-d='c']"); });
+  const refC = await readRef(page, 1440, 860, async (p) => { await toCal(p); await p.click(".dens button[data-d='c']"); await p.waitForTimeout(300); });
   await openApp(page, 1440, 860, "calendar");
   await page.locator(".qcv-page [data-qcv='cal-dens'] button", { hasText: "Compact" }).first().click();
   await page.waitForTimeout(400);
@@ -732,11 +592,14 @@ test("calendar — scrolled back to a lane with three or more stages: a past bar
   await page.screenshot({ path: resolve(OUT, "calendar-history-hover-1440.png") });
 });
 
-test("calendar — the sticky heading tracks the box's width through 1280 → 2000 → 1280, and the summary row does not move", async ({ page }) => {
+test("calendar — the sticky heading tracks the box's width through 1280 → 2000 → 1280, and the head does not move", async ({ page }) => {
   await openApp(page, 1280, 800, "calendar");
   const stop = async () => page.evaluate(() => {
     const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    const b = p.querySelector("[data-qcv='cal-box']") as HTMLElement, g = p.querySelector("[data-qcv='cal-group']") as HTMLElement, s = p.querySelector("[data-qcv='sum']") as HTMLElement;
+    const b = p.querySelector("[data-qcv='cal-box']") as HTMLElement, g = p.querySelector("[data-qcv='cal-group']") as HTMLElement, s = p.querySelector("[data-qcv='head']") as HTMLElement;
+    /* ⚠️ THE PAGE HEAD IN PLACE OF THE RETIRED STRIP (§6). The claim was never about the strip: it
+       is that a resize moves the calendar's heading and NOTHING ELSE. The head is what is still
+       above the view, so it is what must hold still. */
     return { box: b.clientWidth, head: Math.round(g.getBoundingClientRect().width), sum: Math.round(s.getBoundingClientRect().height * 10) / 10 };
   });
   const a = await stop();
@@ -746,19 +609,23 @@ test("calendar — the sticky heading tracks the box's width through 1280 → 20
   const c = await stop();
   for (const [n, s] of [["1280", a], ["2000", b], ["1280 again", c]] as const) near("drag", `heading width is the box's visible width at ${n}`, s.head, s.box, 2);
   yes("drag", "the box really changed width (the precondition)", b.box > a.box + 200, `${a.box} → ${b.box}`);
-  is("drag", "the summary row's height at 2000", b.sum, a.sum);
-  is("drag", "the summary row's height back at 1280", c.sum, a.sum);
+  is("drag", "the page head's height at 2000", b.sum, a.sum);
+  is("drag", "the page head's height back at 1280", c.sum, a.sum);
   is("drag", "the heading's width returns", c.head, a.head);
   record({ area: "drag", what: "stops", got: { a, b, c }, want: "reported" });
 });
 
 test("grid — two tiles across beside the docked card", async ({ page }) => {
-  const toGrid = async (p: Page) => { await p.click(".views button[data-v='grid']"); };
   for (const [w, h] of [[1440, 860], [1280, 800]] as const) {
     await openApp(page, w, h, "grid");
+    /* ⚠️ A QUERY IS CHOSEN FIRST, ON BOTH SIDES (§7). Nothing selects itself now, so an unpicked
+       grid is two tiles across the WHOLE stage and an unpicked ref is the same — but the claim
+       being measured is the grid BESIDE the docked card, which neither side draws until asked. */
+    await page.locator(".qcv-page [data-qcv='tile']").first().click();
+    await page.waitForTimeout(600);
     const app = await readApp(page);
     const refPage = await page.context().newPage();
-    const ref = await readRef(refPage, refWindowFor(await appColumn(page)), h, toGrid);
+    const ref = await readRef(refPage, refWindowFor(await appColumn(page)), h, toViewPicked("grid"));
     await refPage.close();
     sameSize(`grid@${w}`, app, ref, "tile", ["w", "h"]);
     sameSize(`grid@${w}`, app, ref, "tile-band", ["h"]);
@@ -777,8 +644,7 @@ test("grid — two tiles across beside the docked card", async ({ page }) => {
 
 test("loading — the frames never move, and nothing is interactive", async ({ page }) => {
   await page.addInitScript(() => { (window as unknown as { __SA_QC_HOLD_MS?: number }).__SA_QC_HOLD_MS = 6000; });
-  await page.addInitScript(() => { try { localStorage.setItem("sa.qcView", "list"); } catch { /* fine */ } });
-  await openRoute(page, "/queries", { width: 1440, height: 860 });
+  await openRoute(page, "/queries?view=list", { width: 1440, height: 860 });
   const busy = await page.evaluate(() => {
     const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0);
     return p ? p.getAttribute("aria-busy") : "absent";
@@ -788,30 +654,38 @@ test("loading — the frames never move, and nothing is interactive", async ({ p
   await page.screenshot({ path: resolve(OUT, "skeleton-list-1440.png") });
   const inert = await page.evaluate(() => {
     const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    return { rows: p.querySelectorAll("[data-qcv='row']").length, skRows: p.querySelectorAll("[data-qcv='sk-row']").length, enabled: [...p.querySelectorAll("[data-qcv='sum'] button, [data-qcv='sentence'] button")].filter((b) => !(b as HTMLButtonElement).disabled).length };
+    return { rows: p.querySelectorAll("[data-qcv='row']").length, skRows: p.querySelectorAll("[data-qcv='sk-row']").length, enabled: [...p.querySelectorAll("[data-qcv='head'] button, [data-qcv='sentence'] button")].filter((b) => !(b as HTMLButtonElement).disabled).length };
   });
   is("loading", "real rows while loading", inert.rows, 0);
   is("loading", "placeholder rows", inert.skRows, 8);
   near("loading", "a placeholder row is the real row's height", await page.evaluate(() => [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!.querySelector("[data-qcv='sk-row']")!.getBoundingClientRect().height), 67, 0.5);
-  is("loading", "enabled summary / sentence controls while loading", inert.enabled, 0);
+  is("loading", "enabled head / sentence controls while loading", inert.enabled, 0);
   await expect.poll(() => page.evaluate(() => [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)?.getAttribute("aria-busy")), { timeout: 20_000 }).toBe("false");
   await page.waitForTimeout(1300);
   const done = await readApp(page);
   /* ⚠️ THE LEDGER AND THE CARD KEEP THEIR PLACE AND WIDTH, NOT THEIR HEIGHT: eight placeholder rows are
      not fifty-four real ones, and a card's height is its query's. Everything ABOVE them keeps all four. */
-  for (const n of ["head-cta", "sum", "sum-live", "sum-closed", "sum-live-band", "sum-closed-band", "ctl", "views", "list-head", "open-band"]) {
+  /* ⚠️ `open-band` IS OFF THIS LIST: with nothing selected on load there is no card, on either side
+     of the comparison, so "the frame did not move" would be a claim about two absences. */
+  for (const n of ["head-cta", "ctl", "list-head"]) {
     const a = held.boxes[n], b = done.boxes[n];
     for (const d of ["x", "y", "w", "h"] as const) near("loading", `${n}.${d} held → loaded`, a ? a[d] : null, b ? b[d] : null, 1);
   }
-  for (const n of ["ledger", "open"]) {
+  /* ⚠️ `open` GOES WITH `open-band`, FOR THE SAME REASON — the card is absent on BOTH sides now
+     (§7), and `near` on two absences is not a claim about a frame holding still, it is a claim
+     about nothing. The ledger is the frame this page has while it loads. */
+  for (const n of ["ledger"]) {
     const a = held.boxes[n], b = done.boxes[n];
     for (const d of ["x", "y", "w"] as const) near("loading", `${n}.${d} held → loaded`, a ? a[d] : null, b ? b[d] : null, 1);
   }
+  /* and the absence itself is the claim worth making */
+  is("loading", "a docked card, held", held.boxes["open"] ? 1 : 0, 0);
+  is("loading", "…and loaded", done.boxes["open"] ? 1 : 0, 0);
 
 });
 
 test("loading — the calendar's skeleton, held at the current density", async ({ page }) => {
-  await page.addInitScript(() => { (window as unknown as { __SA_QC_HOLD_MS?: number }).__SA_QC_HOLD_MS = 6000; try { localStorage.setItem("sa.qcView", "calendar"); } catch { /* fine */ } });
+  await page.addInitScript(() => { (window as unknown as { __SA_QC_HOLD_MS?: number }).__SA_QC_HOLD_MS = 6000; });
   await openRoute(page, "/queries?view=calendar", { width: 1440, height: 860 });
   const r = await page.evaluate(() => {
     const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
@@ -830,10 +704,10 @@ test("the entrance — it runs once when the data lands, is over inside 800ms, a
      entrance measured under it is measured not happening. This context is its own. */
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 860 }, storageState: "tests/e2e/.auth/state.json", recordVideo: { dir: resolve(OUT, "video"), size: { width: 1440, height: 860 } } });
   const page = await ctx.newPage();
-  await page.addInitScript(() => { (window as unknown as { __SA_QC_HOLD_MS?: number }).__SA_QC_HOLD_MS = 1500; try { localStorage.setItem("sa.qcView", "list"); } catch { /* fine */ } });
-  await page.goto("/queries");
+  await page.addInitScript(() => { (window as unknown as { __SA_QC_HOLD_MS?: number }).__SA_QC_HOLD_MS = 1500; });
+  await page.goto("/queries?view=list");
   await ensureSignedIn(page);
-  await page.goto("/queries");
+  await page.goto("/queries?view=list");
   const visible = () => page.evaluate(() => { const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0); return p ? { busy: p.getAttribute("aria-busy"), entering: p.classList.contains("qcv-page--enter"), running: p.getAnimations({ subtree: true }).filter((a) => a.playState === "running" && (a as CSSAnimation).animationName?.startsWith("qcv-") && (a as CSSAnimation).animationName !== "qcv-pulse").length, sk: p.querySelectorAll(".qcv-sk").length } : null; });
   await expect.poll(async () => (await visible())?.busy, { timeout: 30_000 }).toBe("true");
   await expect.poll(async () => (await visible())?.busy, { timeout: 30_000, intervals: [25] }).toBe("false");
@@ -845,12 +719,16 @@ test("the entrance — it runs once when the data lands, is over inside 800ms, a
   const after = await visible();
   is("entrance", "running entrance animations 900ms later", after?.running, 0);
   is("entrance", "the entering class came off by timer", after?.entering, false);
-  /* a filter, a view change and a selection do not replay it */
-  await page.locator(".qcv-page [data-qcv='views'] button", { hasText: "Grid" }).first().click();
-  await page.waitForTimeout(120);
-  is("entrance", "replayed on a view change", (await visible())?.entering, false);
-  await page.locator(".qcv-page [data-qcv='views'] button", { hasText: "List" }).first().click();
-  await page.waitForTimeout(400);
+  /* ⚠️ A VIEW CHANGE IS NOW A ROUND TRIP THROUGH THE OVERVIEW (§1.3 retired the switch), which is
+     the harder case for this claim rather than the easier one: leaving a view and entering another
+     is exactly where a re-run of the entrance would be easiest to miss. */
+  await page.locator(".qcv-page [data-qcv='back-overview']").first().click();
+  await page.waitForTimeout(150);
+  is("entrance", "replayed on the way out to the Overview", (await visible())?.entering, false);
+  await page.locator(".qcv-page [data-qcv='ov-tile'][data-view='grid']").first().click();
+  await page.waitForTimeout(150);
+  is("entrance", "replayed on entering another view", (await visible())?.entering, false);
+  await page.waitForTimeout(300);
   await ctx.close();
   record({ area: "entrance", what: "video", got: "test-results/qc-v21/video/*.webm", want: "reported" });
 });
@@ -859,14 +737,15 @@ test("reduced motion — no entrance and no pulse", async ({ browser }) => {
   const ctx = await browser.newContext({ reducedMotion: "reduce", viewport: { width: 1440, height: 860 }, storageState: "tests/e2e/.auth/state.json" });
   const page = await ctx.newPage();
   await page.addInitScript(() => { (window as unknown as { __SA_QC_HOLD_MS?: number }).__SA_QC_HOLD_MS = 3000; });
-  await openRoute(page, "/queries", { width: 1440, height: 860 });
+  /* the Ledger, not the landing: this case's second half counts ROWS, and the Overview has none */
+  await openRoute(page, "/queries?view=list", { width: 1440, height: 860 });
   const r = await page.evaluate(() => {
     const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0);
     if (!p) return null;
     const running = p.getAnimations({ subtree: true }).filter((a) => a.playState === "running").length;
     return { busy: p.getAttribute("aria-busy"), running };
   });
-  yes("reduced", "the v11 page rendered", !!r);
+  yes("reduced", "the page rendered", !!r);
   is("reduced", "running animations while the skeleton is held", r?.running, 0);
   await page.screenshot({ path: resolve(OUT, "reduced-motion-skeleton-1440.png") });
   /* ⚠️ AND THE LOADED PAGE, WHICH IS WHAT "THE PAGE WITH REDUCED MOTION ON" MEANS. The first version
@@ -882,6 +761,276 @@ test("reduced motion — no entrance and no pulse", async ({ browser }) => {
   await page.waitForTimeout(400);
   await page.screenshot({ path: resolve(OUT, "reduced-motion-1440.png") });
   await ctx.close();
+});
+
+/* ══ v21 ══════════════════════════════════════════════════════════════════════════════════════ */
+
+test("the Overview — the stat row, the portal, and everything below the head replaced", async ({ page }) => {
+  await openOverview(page, 1440, 860);
+  const app = await readApp(page);
+  /* ⚠️ THE REF IS OPENED AT THE APP'S OWN COLUMN WIDTH, as every other comparison here is. Read at
+     1440 flat its stat card is 157 against the app's 130 — a card 27px wider fits its name on one
+     line, so the ref's card measured 130.4 and the app's 141.2 and the difference was the MEASURE,
+     not the card. */
+  const refPage = await page.context().newPage();
+  const ref = await readRef(refPage, refWindowFor(await appColumn(page)), 860);
+  await refPage.close();
+  sameSize("overview", app, ref, "ov-card", ["h"]);
+  /* ⚠️ THE TILE'S HEIGHT IS REPORTED, NOT ASSERTED AGAINST THE REF. The ref states a flat 420; the
+     app derives it from the portal's own measured top so the tiles end above the fold, which is the
+     fix that stopped them running 19px past it. At 1440×860 that gives 387. Pinning the ref's 420
+     would be pinning the number the app exists not to use. */
+  record({ area: "overview", what: "ov-tile.h — app (derived from the fold) vs ref (a flat 420)", got: { app: app.boxes["ov-tile"]?.h, ref: need(ref, "ref", "ov-tile").h }, want: "reported" });
+  sameOffset("overview", app, ref, "ov-portal", "overview", ["y"]);
+  const r = await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const cards = [...p.querySelectorAll("[data-qcv='ov-card']")] as HTMLElement[];
+    const tiles = [...p.querySelectorAll("[data-qcv='ov-tile']")] as HTMLElement[];
+    const port = p.querySelector("[data-qcv='ov-portal']") as HTMLElement;
+    const fig = (c: HTMLElement) => Number(c.querySelector(".qco-fig")?.textContent ?? "-1");
+    return {
+      view: p.getAttribute("data-view"), url: location.search,
+      cards: cards.map((c) => ({ key: c.dataset.key, n: fig(c), name: c.querySelector(".qco-name")?.textContent, note: c.querySelector(".qco-note")?.textContent })),
+      tiles: tiles.map((t) => ({ view: t.dataset.view, label: t.querySelector(".qco-tname")?.textContent, art: !!t.querySelector("[data-qcv='ov-art']") })),
+      /* ⚠️ THE FOLD IS THE SCROLLER'S, NOT THE WINDOW'S — the whole point of `--qco-avail`. */
+      portalBottom: Math.round(port.getBoundingClientRect().bottom),
+      fold: Math.round((p.closest(".wpg-scroll") as HTMLElement).getBoundingClientRect().top + (p.closest(".wpg-scroll") as HTMLElement).clientHeight),
+      pageScroll: Math.round(p.closest(".wpg-scroll")?.scrollHeight ?? 0) - Math.round(p.closest(".wpg-scroll")?.clientHeight ?? 0),
+      /* what the Overview replaces */
+      sentence: p.querySelectorAll("[data-qcv='sentence'], [data-qcv='ctl']").length,
+      ledger: p.querySelectorAll("[data-qcv='ledger']").length, open: p.querySelectorAll("[data-qcv='open']").length,
+      back: p.querySelectorAll("[data-qcv='back-overview']").length,
+    };
+  });
+  is("overview", "the page says it is the Overview", r.view, "overview");
+  is("overview", "…and the URL says nothing (it is the state the URL does not state)", r.url.includes("view="), false);
+  yes("overview", "seven cards, or eight with a live R&R", r.cards.length === 7 || r.cards.length === 8, JSON.stringify(r.cards.map((c) => c.key)));
+  seen("overview", `${r.cards.length} stat cards`);
+  record({ area: "overview", what: "the stat row", got: r.cards, want: "reported" });
+  is("overview", "the portal's three tiles, in the portal's order", r.tiles.map((t) => t.view), ["list", "grid", "calendar"]);
+  is("overview", "…labelled Ledger, List, Calendar (v21's renames)", r.tiles.map((t) => t.label), ["Ledger", "List", "Calendar"]);
+  yes("overview", "every tile reserves its art slot", r.tiles.every((t) => t.art));
+  /**
+   * ⚠️ THE CLAIM IS REACHABILITY, NOT "IT NEVER SCROLLS" — and the stronger form was wrong.
+   * The tiles have a 330px floor, so below a certain viewport they cannot shrink to fit and the
+   * page scrolls to reach them: measured 1440×860 → 0 scroll with 44px of clearance, 1920×1080 →
+   * 0 with 200, and 1280×800 → the floor binds, the portal runs 2px past the fold and the page
+   * scrolls 24. What the original fault was is UNREACHABLE — 19px past the fold with
+   * `scrollHeight === clientHeight`, so nothing could bring it into view.
+   */
+  const past = Math.max(0, r.portalBottom - r.fold);
+  seen("overview", past === 0 ? "the portal fits above the fold" : "the tile floor binds; the page scrolls to reach it");
+  record({ area: "overview", what: "portal foot vs the scroller's fold, and the scroll available", got: { portalBottom: r.portalBottom, fold: r.fold, past, scroll: Math.max(0, r.pageScroll) }, want: "reported" });
+  yes("overview", `whatever runs past the fold can be scrolled to (${past} past, ${Math.max(0, r.pageScroll)} of scroll)`, past <= Math.max(0, r.pageScroll));
+  for (const [k, n] of [["the sentence and its row", r.sentence], ["the ledger", r.ledger], ["a docked card", r.open], ["the back link", r.back]] as const) {
+    is("overview", `${k}, on the Overview`, n, 0);
+  }
+  await page.screenshot({ path: resolve(OUT, "overview-1440.png") });
+});
+
+test("the Overview → a view → back — the back link and the crumb are the only ways out", async ({ page }) => {
+  await openOverview(page, 1440, 860);
+  const at = () => page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    return { view: p.getAttribute("data-view"), url: location.search, back: p.querySelectorAll("[data-qcv='back-overview']").length,
+      crumb: [...document.querySelectorAll(".ws-crumb a, .ws-crumb b, .ws-crumb span")].map((e) => e.textContent?.trim()).filter(Boolean) };
+  });
+  await page.locator(".qcv-page [data-qcv='ov-tile'][data-view='calendar']").first().click();
+  await page.waitForTimeout(700);
+  const inView = await at();
+  is("portal", "a tile enters its view", inView.view, "calendar");
+  yes("portal", "…and states it in the URL", /view=calendar/.test(inView.url), inView.url);
+  is("portal", "the back link is drawn inside a view", inView.back, 1);
+  record({ area: "portal", what: "the crumb inside a view", got: inView.crumb, want: "reported" });
+  /* choose a query, then leave: Back clears BOTH */
+  await page.locator(".qcv-page [data-qcv='cal-seg']").first().click();
+  await page.waitForTimeout(600);
+  yes("portal", "a query can be chosen in the view", /[?&]q=/.test((await at()).url));
+  await page.locator(".qcv-page [data-qcv='back-overview']").first().click();
+  await page.waitForTimeout(700);
+  const out = await at();
+  is("portal", "Back returns to the Overview", out.view, "overview");
+  is("portal", "…clearing the view", out.url.includes("view="), false);
+  is("portal", "…and the selection with it", out.url.includes("q="), false);
+});
+
+test("§7 — Escape closes the open query and leaves the view where it is", async ({ page }) => {
+  await openApp(page, 1440, 860);
+  await page.locator(".qcv-page [data-qcv='row']").nth(1).click();
+  await page.waitForTimeout(600);
+  const open = await page.evaluate(() => ({ url: location.search, open: document.querySelectorAll("[data-qcv='open']").length }));
+  yes("escape", "a query is open (the precondition)", open.open === 1 && /[?&]q=/.test(open.url), JSON.stringify(open));
+  await page.locator(".qcv-page [data-qcv='row']").nth(1).press("Escape");
+  await page.waitForTimeout(600);
+  const shut = await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    return { url: location.search, view: p.getAttribute("data-view"), open: p.querySelectorAll("[data-qcv='open']").length,
+      ledger: Math.round(p.querySelector("[data-qcv='ledger']")!.getBoundingClientRect().width), stage: Math.round(p.querySelector("[data-qcv='stagegrid']")!.getBoundingClientRect().width) };
+  });
+  is("escape", "the card closes", shut.open, 0);
+  is("escape", "…and ?q= goes with it", shut.url.includes("q="), false);
+  /* ⚠️ THE POINT OF THE SEPARATE HANDLER: Escape must NOT be Back. */
+  is("escape", "the view stays where it was", shut.view, "list");
+  near("escape", "…and the ledger takes the stage back", shut.ledger, shut.stage, 1);
+});
+
+test("the fan — a stat card deals its hand, capped at fifteen with a stack card behind", async ({ page }) => {
+  await openOverview(page, 1440, 860);
+  const cards = await page.evaluate(() => [...document.querySelectorAll(".qcv-page [data-qcv='ov-card']")].map((c) => ({ key: (c as HTMLElement).dataset.key, n: Number(c.querySelector(".qco-fig")?.textContent ?? "-1") })));
+  const busiest = cards.filter((c) => c.n > 0).sort((a, b) => b.n - a.n)[0];
+  yes("fan", "some stat card has a hand to deal (the population)", !!busiest && busiest.n > 0, JSON.stringify(cards));
+  await page.locator(`.qcv-page [data-qcv='ov-card'][data-key='${busiest.key}']`).first().click();
+  await page.waitForTimeout(900);
+  const fan = await page.evaluate(() => {
+    const f = document.querySelector("[data-qcv='fan']") as HTMLElement | null;
+    if (!f) return null;
+    /* ⚠️ THE STACK CARD CARRIES THE SAME PROBE AND IS NOT A DEALT CARD. Counting it made the hand
+       16 against a cap of 15 — which read exactly like the cap being off by one. */
+    const deck = ([...f.querySelectorAll("[data-qcv='fan-card']")] as HTMLElement[]).filter((d) => !d.classList.contains("qcf-stack"));
+    const stack = f.querySelector(".qcf-stack") as HTMLElement | null;
+    return { role: f.getAttribute("role"), modal: f.getAttribute("aria-modal"), title: f.querySelector("[data-qcv='fan-title']")?.textContent,
+      dealt: deck.length, stack: stack ? (stack.querySelector("b")?.textContent ?? "") : null,
+      back: f.querySelectorAll("[data-qcv='fan-back']").length,
+      /* ⚠️ THE FANNED CARD IS THE APP'S OWN QUERY CARD, dressed by its host and not forked */
+      isQueryCard: deck.every((d) => !!d.querySelector(".qcard")),
+      /* ⚠️ `offsetWidth`, NOT THE RECT. A fanned card is rotated, so `getBoundingClientRect` returns
+         the SWUNG box — 296 for a 260px card, which reads exactly like the wrong width. The brief's
+         own trap 3, walked into by the case written to check the brief. */
+      w: deck.length ? deck[0].offsetWidth : null,
+      /* ⚠️ VISIBLE tabs. `display: none` is how the row is turned off, and a hidden element still
+         answers `querySelectorAll` — so counting matches measured the markup, not the card. */
+      tabs: deck.reduce((n, d) => n + [...d.querySelectorAll("[role='tab']")].filter((t) => (t as HTMLElement).getBoundingClientRect().height > 0).length, 0),
+      /**
+       * ⚠️ THE FAN'S OWN CHROME, NOT THE CARD'S. The scope fault this checks for is `.qcf`'s rules
+       * painting their fallbacks out here; the CARD is the app's card and renders in the app's body
+       * faces exactly as it does on the dashboard, which is the point of not forking it. A first
+       * version read the card's title, found Source Sans 3 — correct — and reported it as the fault.
+       */
+      face: getComputedStyle(f.querySelector("[data-qcv='fan-title']") as Element).fontFamily,
+      stackFace: f.querySelector(".qcf-stack-face b") ? getComputedStyle(f.querySelector(".qcf-stack-face b") as Element).fontFamily : null,
+      cardFace: deck.length && deck[0].querySelector(".qcard-name") ? getComputedStyle(deck[0].querySelector(".qcard-name") as Element).fontFamily : null,
+    };
+  });
+  yes("fan", "the card dealt a fan", !!fan, JSON.stringify(cards));
+  is("fan", "it is a modal dialogue", [fan?.role, fan?.modal], ["dialog", "true"]);
+  is("fan", "it has its own backdrop element (so a click on a card is not a click on it)", fan?.back, 1);
+  yes("fan", `the header states the full count (${busiest.n})`, (fan?.title ?? "").includes(String(busiest.n)), String(fan?.title));
+  /* ⚠️ THE CAP, AND THE STACK CARD, ASSERTED AGAINST THE STAT CARD'S OWN FIGURE — never a literal */
+  is("fan", "it deals min(count, 15)", fan?.dealt, Math.min(busiest.n, 15));
+  seen("fan", busiest.n > 15 ? "over the cap (a stack card)" : "under the cap (no stack)");
+  if (busiest.n > 15) is("fan", "…and the stack card says how many it is not dealing", fan?.stack, `+${busiest.n - 15} more`);
+  else is("fan", "…and there is no stack card", fan?.stack, null);
+  is("fan", "a dealt card IS the app's query card", fan?.isQueryCard, true);
+  is("fan", "…at 260px, the host's width", fan?.w, 260);
+  is("fan", "…with the popover's tab row off (a dealt card is a glance)", fan?.tabs, 0);
+  yes("fan", "the fan's own chrome resolves the typewriter face out here (the portal carries its own palette)", /Special Elite/.test(fan?.face ?? ""), String(fan?.face));
+  if (fan?.stackFace) yes("fan", "…and so does the stack card", /Special Elite/.test(fan.stackFace), String(fan.stackFace));
+  record({ area: "fan", what: "the CARD keeps the app's own body face, as it does on the dashboard", got: fan?.cardFace, want: "reported" });
+  await page.screenshot({ path: resolve(OUT, `fan-${busiest.key}-1440.png`) });
+  /* Escape closes it and leaves the Overview where it was */
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(500);
+  const shut = await page.evaluate(() => ({ fan: document.querySelectorAll("[data-qcv='fan']").length, view: [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!.getAttribute("data-view") }));
+  is("fan", "Escape closes it", shut.fan, 0);
+  is("fan", "…and leaves you on the Overview", shut.view, "overview");
+});
+
+test("§8 — a live calendar bar always reaches today, and an overrun is drawn inside it", async ({ page }) => {
+  await openApp(page, 1440, 860, "calendar");
+  const r = await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const today = p.querySelector("[data-qcv='cal-today']")!.getBoundingClientRect();
+    const segs = [...p.querySelectorAll("[data-qcv='cal-seg']")] as HTMLElement[];
+    return {
+      today: today.left,
+      bars: segs.map((b) => {
+        const box = b.getBoundingClientRect();
+        const over = b.querySelector(".qcv-bar-over") as HTMLElement | null;
+        const cs = getComputedStyle(b);
+        return { status: b.dataset.status, right: box.right, left: box.left, title: b.getAttribute("title") ?? b.getAttribute("aria-label") ?? "",
+          over: over ? Math.round(over.getBoundingClientRect().right - over.getBoundingClientRect().left) : null,
+          overRight: over ? over.getBoundingClientRect().right : null,
+          openLeft: cs.borderLeftStyle === "dashed", openRight: cs.borderRightStyle === "dashed" };
+      }),
+    };
+  });
+  yes("§8", "there are live bars (the population)", r.bars.length > 3, String(r.bars.length));
+  const closed = (b: { status?: string }) => ["Rejected", "Withdrawn", "No Response"].includes(String(b.status));
+  const live = r.bars.filter((b) => !closed(b));
+  yes("§8", "…and some of them are live", live.length > 0, String(live.length));
+  for (const b of live) yes("§8", `a live ${b.status} bar reaches today`, b.right >= r.today - 1.5, `${b.right.toFixed(1)} vs ${r.today.toFixed(1)}`);
+  const past = live.filter((b) => b.over != null);
+  seen("§8", `${past.length} of ${live.length} live bars are past their expected date`);
+  yes("§8", "some bar is past its expected date — or the overrun branch was never entered", past.length > 0, String(past.length));
+  for (const b of past) yes("§8", "the overrun ends at the bar's own end, inside it", Math.abs((b.overRight as number) - b.right) <= 2, JSON.stringify(b));
+  /* the undated stage: a bar that says so, with a dashed LEFT edge */
+  const undated = r.bars.filter((b) => /stage not dated/i.test(b.title));
+  seen("§8", undated.length ? `${undated.length} undated stages` : "no undated stage on this account");
+  for (const b of undated) {
+    yes("§8", "an undated stage's bar says it is undated", /stage not dated/i.test(b.title), b.title);
+    yes("§8", "…and its left edge is dashed, because the start was drawn rather than recorded", b.openLeft, JSON.stringify(b));
+  }
+  record({ area: "§8", what: "bars", got: r.bars.slice(0, 12), want: "reported" });
+  await page.screenshot({ path: resolve(OUT, "calendar-today-1440.png") });
+});
+
+test("StatusDot — the ring set, one grammar, drawn by nothing else", async ({ page }) => {
+  await openApp(page, 1440, 860);
+  const r = await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const marks = [...p.querySelectorAll("svg[viewBox='0 0 24 24']")].filter((m) => m.querySelector("circle[r='10'], path"));
+    const kind = (m: Element) => {
+      const ring = m.querySelector("circle[r='10']") as SVGCircleElement | null;
+      return { ring: ring ? (ring.getAttribute("stroke-dasharray") ? "dashed" : "solid") : "none",
+        centre: m.querySelector("circle[r='6.5']") ? "full" : m.querySelector("path[d^='M12 12L12 5.5']") ? "half" : m.querySelector("path[d='M7.5 12h9']") ? "bar" : "none",
+        stroke: getComputedStyle(m).strokeWidth };
+    };
+    return { n: marks.length, kinds: marks.map(kind),
+      /* the retired machinery: no tinted disc, no pulse */
+      pulse: p.querySelectorAll(".sa-statusdot").length,
+      discs: [...p.querySelectorAll("[class*='statusdot']")].length };
+  });
+  yes("statusdot", "marks are drawn (the population)", r.n > 5, String(r.n));
+  const seenKinds = new Set(r.kinds.map((k) => `${k.ring}+${k.centre}`));
+  for (const k of seenKinds) seen("statusdot", k);
+  record({ area: "statusdot", what: "the glyphs this account draws", got: [...seenKinds].sort(), want: "reported" });
+  yes("statusdot", "every mark is a ring or a document — never a tinted disc", r.kinds.every((k) => k.ring !== "none" || k.centre === "none"), JSON.stringify(r.kinds.slice(0, 6)));
+  is("statusdot", "the retired pulse element", r.pulse, 0);
+  yes("statusdot", "more than one glyph is on the page — or the set was never exercised", seenKinds.size > 1, [...seenKinds].join(", "));
+});
+
+test("§14 · the offsets table — reported at 1440×860 and 1280×800", async ({ page }) => {
+  /**
+   * ⚠️ REPORTED, NOT ASSERTED, AND DELIBERATELY SO. This is the brief's table of where things land
+   * so a reader can see the page's rhythm at a glance; pinning each number would be a lock on a
+   * spelling rather than on a claim, failing on every legitimate retune. The claims that matter are
+   * asserted in the cases above, against the ref or against each other.
+   */
+  for (const [w, h] of [[1440, 860], [1280, 800]] as const) {
+    for (const where of ["overview", "list"] as const) {
+      if (where === "overview") await openOverview(page, w, h); else await openApp(page, w, h);
+      const t = await page.evaluate(() => {
+        const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+        const base = p.getBoundingClientRect();
+        const off = (s: string) => { const e = p.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round((b.x - base.x) * 10) / 10, y: Math.round((b.y - base.y) * 10) / 10, w: Math.round(b.width * 10) / 10, h: Math.round(b.height * 10) / 10 }; };
+        return {
+          page: { x: Math.round(base.x), w: Math.round(base.width) },
+          title: off("[data-qcv='head-title']"), facts: off("[data-qcv='head-line']"), actions: off("[data-qcv='head-actions']"),
+          back: off("[data-qcv='back-overview']"), stats: off("[data-qcv='ov-stats']"), card1: off("[data-qcv='ov-card']"),
+          portal: off("[data-qcv='ov-portal']"), tile1: off("[data-qcv='ov-tile']"),
+          sentence: off("[data-qcv='ctl']"), ledger: off("[data-qcv='ledger']"), row1: off("[data-qcv='row']"), open: off("[data-qcv='open']"),
+        };
+      });
+      record({ area: "§14 offsets", what: `${where} @ ${w}×${h}`, got: t, want: "reported" });
+    }
+  }
+  /* and the one number Nick asked for: where the first Ledger row sits now the strip has gone */
+  await openApp(page, 1280, 800);
+  const rowTop = await page.evaluate(() => Math.round(document.querySelector(".qcv-page [data-qcv='row']")!.getBoundingClientRect().top * 10) / 10);
+  /* 702.5 with the compact strip · 394.7 the moment it went · 372.1 once the head's stray 8px and
+     the control row's 15px of air for the retired view switch went with it */
+  record({ area: "§14 offsets", what: "the first Ledger row's top at 1280×800 (702.5 with the strip → 394.7 without → 372.1 now)", got: rowTop, want: "reported" });
+  yes("§14 offsets", `the first row is well above the fold at 1280×800 (${rowTop})`, rowTop < 500, String(rowTop));
 });
 
 test("Ω · the run measured enough to be believed", async () => {

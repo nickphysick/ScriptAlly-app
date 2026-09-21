@@ -206,3 +206,31 @@ describe("the groups", () => {
     for (const s of said) expect(s, s).not.toMatch(/overdue|\blate\b|rejected|urgent/i);
   });
 });
+
+describe("the daylight pass", () => {
+  /**
+   * ⚠️ IT MOVES THE BAR AND MUST MOVE THE OVERRUN WITH IT. The overrun's `left` and `width` are
+   * offsets INSIDE the bar, so a pass that shifts the bar right and shortens it leaves the overlay
+   * hanging off the end — measured on the real account as an overrun ending 13px past its own bar,
+   * with every number that produced it computed correctly.
+   */
+  it("an overrun never ends past its bar, whatever the layout pass did to the bar", () => {
+    const rs = rows([
+      /* three stages within days of one another: the minimum widths force the shift */
+      q({ dateSent: iso(9, 1), status: QueryStatus.PARTIAL_SENT, partialRequestedDate: iso(9, 1), partialSentDate: iso(9, 1) }),
+      q({ dateSent: iso(7, 2), status: QueryStatus.QUERIED }),
+      q({ dateSent: iso(8, 11), status: QueryStatus.FULL_SENT, fullRequestedDate: iso(8, 12), fullSentDate: iso(8, 13) }),
+    ], 4);
+    const t = calTrack(rs, NOW);
+    let withOver = 0;
+    for (const r of rs) {
+      for (const b of laneBars(r, t, NOW)) {
+        if (!b.over) continue;
+        withOver += 1;
+        expect(b.over.left, `${r.id}: the overrun starts inside its bar`).toBeGreaterThanOrEqual(0);
+        expect(b.over.left + b.over.width, `${r.id}: the overrun ends inside its bar`).toBeLessThanOrEqual(b.width + 0.01);
+      }
+    }
+    expect(withOver, "no bar was past its expected date — the branch was never entered").toBeGreaterThan(0);
+  });
+});

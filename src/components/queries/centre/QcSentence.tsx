@@ -32,7 +32,12 @@ export const QcSentence: React.FC<{
   const close = useCallback(() => setOpen(null), []);
 
   if (loading) {
-    return <h2 className="qcv-sentence" data-qcv="sentence"><span className="qcv-sk" style={{ width: 420, height: 24, display: "inline-block" }} /></h2>;
+    return <h2 className="qcv-sentence" data-qcv="sentence">{/* ⚠️ `0.7em` AND `vertical-align: middle`, NOT A PIXEL HEIGHT ON THE BASELINE. An inline-block
+            sits ON the baseline, so its height is added to the line box's descent and a 24px pill
+            made this h2 33.4 against a loaded 27.4 — a 6px jump at the instant the cover lifts. Sized
+            in the sentence's OWN em and centred on the line, the h2 keeps the height its type gives
+            it at every width, which is the whole job of a placeholder. */}
+      <span className="qcv-sk" style={{ width: 420, height: "0.7em", display: "inline-block", verticalAlign: "middle" }} /></h2>;
   }
   const phrase = filterPhrase(filter, count, { manuscriptTitle: scopeTitle, calendar });
   const filterGroups: QcMenuGroup[] = [

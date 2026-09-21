@@ -114,6 +114,8 @@ const MINI: Record<QcPortalView, React.FC> = { list: LedgerMini, grid: ListMini,
  * dismissible, the head's facts line can wrap, and the stat row is a card taller with a live R&R.
  * All three move the number, and none of them is 430.
  */
+/** The air the portal leaves under itself — the page's own bottom gutter. */
+const GUTTER_PX = 22;
 function useAvailable(ref: React.RefObject<HTMLDivElement | null>): void {
   React.useLayoutEffect(() => {
     const el = ref.current;
@@ -122,7 +124,24 @@ function useAvailable(ref: React.RefObject<HTMLDivElement | null>): void {
       const top = el.getBoundingClientRect().top;
       /* a zero rect is the page not laid out yet — refuse it rather than publishing a wrong floor */
       if (top <= 0) return;
-      el.style.setProperty("--qco-avail", `${Math.max(0, Math.round(window.innerHeight - top - 22))}px`);
+      /**
+       * ⚠️ THE BOTTOM IS THE SCROLLER'S, NOT THE WINDOW'S — the same over-claim as sizing to `100vh`
+       * from an element that does not start at y 0, arriving from the other end. `.wpg-scroll` begins
+       * below the shell's bar and ends above the window's foot, so `window.innerHeight` is generous
+       * by the whole of that inset: measured, the Overview fitted the window and overflowed its own
+       * scroller by 88px, with the portal's foot dutifully above the fold the whole time.
+       */
+      const port = el.closest(".wpg-scroll");
+      const bottom = port ? port.getBoundingClientRect().top + port.clientHeight : window.innerHeight;
+      /**
+       * ⚠️ AND THE PAGE'S OWN BOTTOM PADDING IS BELOW THE PORTAL, so it has to come off too. With
+       * only the scroller's bottom the tiles ended 22px above the fold and the page still scrolled
+       * by 68 — which is that padding, sitting under a portal already sized to fit. Measured rather
+       * than typed: it is a live value on the page's rule, not a constant this file can hold.
+       */
+      const page = el.closest(".qcv-page");
+      const padBottom = page ? parseFloat(getComputedStyle(page).paddingBottom) || 0 : 0;
+      el.style.setProperty("--qco-avail", `${Math.max(0, Math.round(bottom - top - padBottom - GUTTER_PX))}px`);
     };
     read();
     window.addEventListener("resize", read);

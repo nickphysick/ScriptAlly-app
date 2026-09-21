@@ -122,7 +122,9 @@ describe("the entrance sheet", () => {
    */
   it("rows, tiles and lanes rise 5px over 280ms, 30ms apart for the first seven; everything after shares the seventh's delay", () => {
     expect(css).toMatch(/@keyframes qcv-arrive \{ 0% \{ opacity: 0; transform: translateY\(5px\); \}/);
-    expect([...css.matchAll(/:nth-child\((\d|n \+ 7)\) \{ animation-delay: ([\d.]+)s; \}/g)].filter((m) => !m[0].includes("qcv-stg")).map((m) => [m[1], Number(m[2])]))
+    /* the `qcv-stg` exclusion that used to sit here went with the strip's rules — a filter whose
+       subject no longer exists reads as though it is still holding something back */
+    expect([...css.matchAll(/:nth-child\((\d|n \+ 7)\) \{ animation-delay: ([\d.]+)s; \}/g)].map((m) => [m[1], Number(m[2])]))
       .toEqual([["2", 0.03], ["3", 0.06], ["4", 0.09], ["5", 0.12], ["6", 0.15], ["n + 7", 0.18]]);
   });
   it("⚠️ all of it is done inside 800ms — the latest any animation can finish, computed from the sheet", () => {

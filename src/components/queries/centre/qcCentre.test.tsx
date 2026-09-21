@@ -13,8 +13,8 @@
  * comments stripped — a lock over raw source finds its tokens in the prose explaining the retirement.
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync, readdirSync } from "node:fs";
+import { join, resolve } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { DEFAULT_QC_VIEW, DOCK_MIN_COLUMN, QC_VIEWS, QcCentre, qcViewLabel, readQcView } from "./QcCentre";
@@ -259,5 +259,45 @@ describe("the sheet", () => {
     expect(css).not.toMatch(/background:\s*(#1c130f|var\(--qcv-ink\))/);
     /* the switch's own rules went with it rather than being left inert */
     expect(css, "the retired view switch still has a stylesheet").not.toMatch(/(?:^|\n)\s*\.qcv-views\s*\{/);
+  });
+});
+
+/**
+ * ⚠️ EVERY PLACEHOLDER CLASS THE CENTRE EMITS MUST BE DEFINED, AND EVERY ONE DEFINED MUST BE
+ * EMITTED — both directions, because this went wrong in both on one commit (v21 §6). The strip's
+ * sheet was deleted and took `.qcv-sk`'s base rule with it, so eight call sites across six
+ * components went on rendering unstyled inline spans: no fill, no radius, no height, through a
+ * clean build and a green suite. Restoring it wholesale would have brought back three modifiers
+ * nothing emits.
+ *
+ * THE CLAIM IS THE PAIRING, NOT THE LIST. A sweep states it once and covers whatever is added next;
+ * a case naming `.qcv-sk` would not have caught `--q` or `--t` going the same way.
+ */
+describe("the loading placeholders", () => {
+  const DIR = resolve(__dirname);
+  const sheets = readdirSync(DIR).filter((f) => f.endsWith(".css")).map((f) => readFileSync(resolve(DIR, f), "utf8")).join("\n");
+  const sources = readdirSync(DIR).filter((f) => f.endsWith(".tsx") && !f.includes(".test.")).map((f) => readFileSync(resolve(DIR, f), "utf8")).join("\n");
+  /* ⚠️ COMMENTS STRIPPED FIRST, both sides: the note explaining this very fault spells every one of
+     these class names, so a raw-text sweep reads the obituary as a live rule and as a live render. */
+  const strip = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  /* ⚠️ LOOKAROUNDS, NOT CONSUMED DELIMITERS. A class list is `"qcv-sk qcv-sk--q"`: consume the
+     space after the first and the scan resumes past the delimiter the second one needs, so the
+     sweep finds ONE class in a file full of them and then passes its own population floor. */
+  const emitted = new Set([...strip(sources).matchAll(/(?<=["'`\s])(qcv-sk(?:--[a-z]+)?)(?=["'`\s])/g)].map((m) => m[1]));
+  const defined = new Set([...strip(sheets).matchAll(/\.(qcv-sk(?:--[a-z]+)?)[\s,{:]/g)].map((m) => m[1]));
+
+  it("the population — the components really do render placeholders", () => {
+    expect(emitted.size, "no placeholder class was found at all; this sweep would then pass vacuously").toBeGreaterThan(3);
+  });
+  it("every class a component renders has a rule", () => {
+    expect([...emitted].filter((c) => !defined.has(c)).sort()).toEqual([]);
+  });
+  it("…and every rule has a component rendering it", () => {
+    expect([...defined].filter((c) => !emitted.has(c)).sort()).toEqual([]);
+  });
+  it("⚠️ `.qcv-sk` declares `display: block` — on a <span> an inline box ignores every height it is given", () => {
+    const rule = /(?:^|\n)\s*\.qcv-sk\s*\{([^}]*)\}/.exec(strip(sheets));
+    expect(rule, "`.qcv-sk` has no base rule").not.toBeNull();
+    expect(rule![1]).toMatch(/display:\s*block/);
   });
 });
