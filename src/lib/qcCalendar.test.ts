@@ -136,12 +136,45 @@ describe("the bars — one per stage, placed by date", () => {
     expect(b.over).toBeNull();
     expect(b.left + b.width).toBe(xOf(t, NOW));
   });
-  it("⚠️ a stage nothing dates gets NO lane — it is listed under its group, never given a bar", () => {
+  /**
+   * ⚠️ THIS REVERSES A LAW (v21 §8), rather than loosening one. The rule used to be *"a stage
+   * nothing dates gets NO lane — it is listed under its group, never given a bar"*, which was
+   * honest about the date and silent about the query: a reader scanning the calendar for what is
+   * with an agent found an empty row, and the name under the group said only that a date is
+   * missing. The bar is drawn now and the words still say the stage is not dated.
+   */
+  it("⚠️ REVERSED: an undated stage DOES get a lane — a bar that runs to today and says it is undated", () => {
     const undated = q({ dateSent: iso(6, 1), status: QueryStatus.FULL_SENT });
     const rs = rows([undated, q({ status: QueryStatus.FULL_SENT, fullSentDate: iso(9, 1), fullRequestedDate: iso(8, 25) })]);
-    const g = calGroups(rs, calTrack(rs, NOW), NOW).find((x) => x.key === QueryStatus.FULL_SENT)!;
-    expect([g.count, g.lanes.length, g.undated.map((r) => r.id)]).toEqual([2, 1, [undated.id]]);
-    expect(laneBars(rs[0], calTrack(rs, NOW), NOW)).toEqual([]);
+    const t = calTrack(rs, NOW);
+    const g = calGroups(rs, t, NOW).find((x) => x.key === QueryStatus.FULL_SENT)!;
+    expect([g.count, g.lanes.length]).toEqual([2, 2]);
+    const bars = laneBars(rs[0], t, NOW);
+    const cur = bars[bars.length - 1];
+    expect(cur.current).toBe(true);
+    expect(cur.left + cur.width, "it reaches today").toBe(xOf(t, NOW));
+    expect([cur.line, cur.tail, cur.title]).toEqual(["Stage not dated", "stage not dated", "Full sent, stage not dated"]);
+  });
+  /**
+   * ⚠️ THE BRIEF ASKED FOR TWO SHAPES AND ONLY ONE IS REACHABLE — asserted here so nobody adds the
+   * other back. §8 wanted the bar to run "from the end of the previous stage", ten days back only
+   * where there is none; but `stageHistory` hands back NO spans at all when the current stage is
+   * undated, so a query with earlier dated rungs is in exactly the same position as one with
+   * nothing. Both fixtures below are the ten-day form, and the second is the proof.
+   */
+  it("it always begins ten days back with a DASHED left edge — there is never a previous stage to start from", () => {
+    const alone = rows([q({ status: QueryStatus.FULL_SENT })])[0];
+    const t0 = calTrack([alone], NOW);
+    const [only] = laneBars(alone, t0, NOW);
+    expect(only.openLeft, "the start was drawn, not recorded, and the edge says so").toBe(true);
+    expect(xOf(t0, NOW) - only.left).toBe(10 * PX_PER_DAY);
+    /* the same query with three dated rungs behind it: still no spans, still the ten-day form */
+    const after = rows([q({ dateSent: iso(8, 1), status: QueryStatus.FULL_SENT, partialRequestedDate: iso(8, 11), partialSentDate: iso(8, 21) })])[0];
+    expect(after.history.spans, "an undated current stage yields no history at all").toEqual([]);
+    const t = calTrack([after], NOW);
+    const bars = laneBars(after, t, NOW);
+    expect(bars).toHaveLength(1);
+    expect([bars[0].openLeft, xOf(t, NOW) - bars[0].left]).toEqual([true, 10 * PX_PER_DAY]);
   });
   it("a past bar's title states the stage and its dates; its words are the dates and how long it lasted", () => {
     const { bars } = journey();

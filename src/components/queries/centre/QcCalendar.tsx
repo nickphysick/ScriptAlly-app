@@ -142,7 +142,7 @@ export const QcCalendar: React.FC<{
                         <div key={lane.id} className="qcv-cal-lane" data-qcv="cal-lane" data-selected={lane.id === selectedId ? "true" : undefined}>
                           {lane.bars.map((b) => (
                             <button key={b.key} type="button" data-qcv={b.current ? "cal-seg" : "cal-hist"} data-id={lane.id} data-status={b.status} data-you={b.you ? "true" : "false"}
-                              className={`qcv-bar${b.current ? "" : " qcv-bar--hist"}${b.openRight ? " qcv-bar--open" : ""}${b.you ? " qcv-bar--you" : ""}`}
+                              className={`qcv-bar${b.current ? "" : " qcv-bar--hist"}${b.openRight ? " qcv-bar--open" : ""}${b.openLeft ? " qcv-bar--openl" : ""}${b.you ? " qcv-bar--you" : ""}`}
                               style={{ left: b.left, width: b.width, ["--qcv-state" as string]: `var(--state-${stateOf(b.status)})` }}
                               tabIndex={b.current ? 0 : -1} aria-pressed={lane.id === selectedId} title={b.current ? undefined : b.title}
                               aria-label={`${lane.row.agentName}. ${b.title}`} onClick={() => onOpen(lane.id)}>
@@ -160,11 +160,6 @@ export const QcCalendar: React.FC<{
                           ))}
                         </div>
                       ))}
-                      {g.undated.length > 0 && (
-                        <p className="qcv-cal-undated" data-qcv="cal-undated"><b>Stage not dated</b>{g.undated.map((r) => (
-                          <button key={r.id} type="button" aria-pressed={r.id === selectedId} onClick={() => onOpen(r.id)}>{r.agentName}</button>
-                        ))}</p>
-                      )}
                     </div>
                   )}
                 </React.Fragment>

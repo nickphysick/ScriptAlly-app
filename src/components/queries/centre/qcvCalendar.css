@@ -55,6 +55,10 @@
 }
 /* no date promised: the bar ends at today with a dashed right edge and a SQUARE right end */
 .qcv-bar--open { border-right: 1px dashed rgba(28, 19, 15, 0.4); border-top-right-radius: 0; border-bottom-right-radius: 0; }
+/* ⚠️ THE MIRROR OF `--open`, AND IT MEANS THE SAME THING AT THE OTHER END (§8): this edge is not
+   where the stage began, it is where the drawing began. An undated stage has no start to place, so
+   the bar is given a length and its left edge says the length was drawn rather than recorded. */
+.qcv-bar--openl { border-left: 1px dashed rgba(28, 19, 15, 0.4); border-top-left-radius: 0; border-bottom-left-radius: 0; }
 /* a stage that is the WRITER's carries a 3px rust inset on its left edge (`isWithYou`, per BAR) */
 .qcv-bar--you { box-shadow: inset 3px 0 0 var(--qcv-rust); }
 /* ⚠️ `clip`, NOT `hidden`: `hidden` would make the bar a scroll container and kill the sticky label in it */
@@ -76,6 +80,7 @@
    and the text block are sticky so the name stays readable when the bar starts off-screen. */
 .qcv-bar-xb { display: flex; align-items: center; box-sizing: border-box; height: 27px; padding: 2px 9px 0 8px; background: var(--qcv-state, var(--qcv-quiet)); border-bottom: 1px solid rgba(28, 19, 15, 0.1); border-radius: calc(var(--qcv-barr) - 1px) calc(var(--qcv-barr) - 1px) 0 0; }
 .qcv-bar--open .qcv-bar-xb { border-top-right-radius: 0; }
+.qcv-bar--openl .qcv-bar-xb { border-top-left-radius: 0; }
 .qcv-bar--hist .qcv-bar-xb { overflow: clip; }
 .qcv-bar-stick { position: sticky; left: 10px; display: inline-flex; align-items: center; gap: 7px; }
 .qcv-bar-stick b { padding-top: 2px; font-family: var(--qcv-type); font-weight: 400; font-size: 14px; line-height: 1; }
@@ -90,10 +95,6 @@
 .qcv-bar-end { position: absolute; right: -6px; top: 50%; box-sizing: border-box; width: 11px; height: 11px; margin-top: -5px; border-radius: 50%; background: #ffffff; border: 1.6px solid var(--qcv-ink-70); }
 .qcv-bar-end--you { border-radius: 2px; transform: rotate(45deg); background: var(--qcv-rust); border-color: var(--qcv-rust); }
 
-.qcv-cal-undated { position: sticky; left: 0; box-sizing: border-box; width: var(--qcv-vw, 100%); margin: 0; padding: 10px 4px 12px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; font-family: var(--qcv-serif); font-size: 13px; }
-.qcv-cal-undated b { font-family: var(--qcv-mono); font-weight: 400; font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-45); }
-.qcv-cal-undated button { padding: 0; border: 0; border-bottom: 1px dashed rgba(28, 19, 15, 0.4); background: none; cursor: pointer; font-family: var(--qcv-serif); font-size: 13px; color: var(--qcv-ink); }
-.qcv-cal-undated button[aria-pressed="true"] { border-bottom: 1.6px solid var(--qcv-ink); }
 
 @media (prefers-reduced-motion: reduce) { .qcv-bar--hist { transition: none; } }
 

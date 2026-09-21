@@ -6,8 +6,9 @@
  * strings out. One continuous track at 11px a day; one lane per query; one bar per STAGE of its
  * journey, from `qcStages.stageHistory`.
  *
- * ⚠️ A BAR IS NEVER PLACED BY GUESSWORK. A query whose current stage nothing dates gets NO lane; it is
- * listed under its group as "stage not dated". A past stage is drawn only between two dated ends.
+ * ⚠️ A BAR IS NEVER PLACED BY GUESSWORK. A past stage is drawn only between two dated ends, and a
+ * stage nothing dates says so in its own words on a bar whose left edge is dashed because its start
+ * was drawn rather than recorded (v21 §8) — see `laneBars`.
  */
 import { QueryStatus } from "../types";
 import { isClosedStatus } from "./qcStages";
@@ -61,6 +62,12 @@ export interface CalBar {
   /** No date promised: the bar ends at today with a dashed, square right end. */
   openRight: boolean;
   /**
+   * The stage has no dated entry and nothing before it, so its START is invented (v21 §8) — ten
+   * days back, drawn with a dashed left edge that says so. A bar that began at a made-up date
+   * without saying it was made up would be the worst of the three options.
+   */
+  openLeft: boolean;
+  /**
    * The stretch from the expected date to today, on a bar that has run past it (v21 §8).
    *
    * ⚠️ IT IS A CHILD OF THE BAR, NEVER A SECOND BAR — `left` and `width` are offsets INSIDE the
@@ -82,7 +89,7 @@ export interface CalBar {
   title: string;
 }
 export interface CalLane { id: string; row: QcRow; bars: CalBar[] }
-export interface CalGroup { key: string; label: string; count: number; lanes: CalLane[]; undated: QcRow[] }
+export interface CalGroup { key: string; label: string; count: number; lanes: CalLane[] }
 
 function currentWords(row: QcRow, nowMs: number): { line: string; note: string; tail: string } {
   const since = row.stageStartMs != null ? Math.max(0, Math.round((nowMs - row.stageStartMs) / DAY)) : 0;
@@ -102,8 +109,26 @@ function currentWords(row: QcRow, nowMs: number): { line: string; note: string; 
     : { line: `Reply expected ${shortDay(row.expectedMs)}`, note: `${spanWords(since)} waiting`, tail: `reply by ${shortDay(row.expectedMs)}` };
 }
 
+/**
+ * ⚠️ A STAGE WITH NO DATED ENTRY NOW DRAWS A BAR (v21 §8), WHERE IT USED TO DRAW NOTHING. The row
+ * was excluded from the lanes and listed as a name under its group — honest about the date and
+ * silent about the query: a reader scanning the calendar for what is with an agent found an empty
+ * row, and the name said only that something was missing.
+ *
+ * ⚠️ IT ALWAYS BEGINS TEN DAYS BACK, AND THE BRIEF'S OTHER CASE CANNOT HAPPEN. §8 asked for a bar
+ * "from the end of the previous stage", falling back to ten days where there is none — but
+ * `stageHistory` returns NO SPANS AT ALL when the current stage is undated (`qcStages.ts:103`; its
+ * type says so at `:48`, and `qcStages.test.ts` locks it). There is never a previous stage to
+ * start from here, so that branch would be code nobody can reach. One shape, stated once.
+ *
+ * ⚠️ AND THE INVENTED START IS ADMITTED RATHER THAN HIDDEN. Ten days is a DRAWING LENGTH, not a
+ * claim: the left edge is dashed and the words still read "stage not dated". The tempting
+ * alternative — starting at `sentMs`, a date the document really holds — would draw a bar saying
+ * the query has stood at this stage since the day it was sent, which is precisely the date nobody
+ * has. A plausible wrong date is worse than an obviously drawn one.
+ */
+const UNDATED_LEAD_DAYS = 10;
 export function laneBars(row: QcRow, track: CalTrack, nowMs: number): CalBar[] {
-  if (!row.history.dated) return [];
   const bars: CalBar[] = row.history.spans.map((s, i) => {
     const left = xOf(track, s.startMs);
     const court = COURT_LABEL[courtOf(s.status)];
@@ -112,7 +137,7 @@ export function laneBars(row: QcRow, track: CalTrack, nowMs: number): CalBar[] {
       const dates = `${shortDay(s.startMs)} to ${shortDay(end)}`;
       const lasted = spanWords(Math.max(1, Math.round((end - s.startMs) / DAY)));
       /* 4px of daylight wherever the status changes — taken off the END of the earlier bar */
-      return { key: `${row.id}:${i}`, status: s.status, current: false, left, width: Math.max(xOf(track, end) - left - DAYLIGHT_PX, PAST_MIN_PX), you: isWithYou(s.status), openRight: false, over: null, end: null, court,
+      return { key: `${row.id}:${i}`, status: s.status, current: false, left, width: Math.max(xOf(track, end) - left - DAYLIGHT_PX, PAST_MIN_PX), you: isWithYou(s.status), openRight: false, openLeft: false, over: null, end: null, court,
         line: dates, note: lasted, tail: dates, title: `${STAGE_NAME[s.status]}, ${dates}` };
     }
     const closed = isClosedStatus(s.status);
@@ -130,10 +155,21 @@ export function laneBars(row: QcRow, track: CalTrack, nowMs: number): CalBar[] {
     /* the overrun: from the expected date to today, in the bar's own coordinates */
     const past = !closed && row.expectedMs != null && row.expectedMs < nowMs;
     const overLeft = past ? Math.max(0, Math.min(xOf(track, row.expectedMs as number) - left, width)) : 0;
-    return { key: `${row.id}:${i}`, status: s.status, current: true, left, width, you: isWithYou(s.status), openRight,
+    return { key: `${row.id}:${i}`, status: s.status, current: true, left, width, you: isWithYou(s.status), openRight, openLeft: false,
       over: past && width - overLeft > 0.5 ? { left: overLeft, width: width - overLeft } : null,
       end: closed || openRight ? null : row.withYou ? "you" : "agent", court, ...w, title: `${STAGE_NAME[s.status]}, ${w.line}${w.note ? `, ${w.note}` : ""}` };
   });
+  if (!row.history.dated) {
+    const left = xOf(track, nowMs - UNDATED_LEAD_DAYS * DAY);
+    bars.push({
+      key: `${row.id}:undated`, status: row.status, current: true, left,
+      width: Math.max(xOf(track, nowMs) - left, CURRENT_MIN_PX),
+      you: isWithYou(row.status), openRight: false, openLeft: true, over: null, end: null,
+      court: COURT_LABEL[courtOf(row.status)],
+      line: "Stage not dated", note: "", tail: "stage not dated",
+      title: `${STAGE_NAME[row.status]}, stage not dated`,
+    });
+  }
   /**
    * ⚠️ A STAGE THAT LASTED LESS THAN A DAY STILL GETS ITS SLIVER, AND THE NEXT BAR STARTS AFTER IT.
    * A request and its send on the same day are 0px apart; the 8px minimum then ran the sliver 8px INTO
@@ -159,8 +195,11 @@ export function calGroups(rows: readonly QcRow[], track: CalTrack, nowMs: number
       .sort((a, b) => (a.expectedMs ?? nowMs) - (b.expectedMs ?? nowMs) || (a.stageStartMs ?? 0) - (b.stageStartMs ?? 0) || a.id.localeCompare(b.id));
     return {
       key: g, label: g === "closed" ? "Closed" : STAGE_NAME[g], count: mine.length,
-      lanes: mine.filter((r) => r.history.dated).map((r) => ({ id: r.id, row: r, bars: laneBars(r, track, nowMs) })),
-      undated: mine.filter((r) => !r.history.dated),
+      /* ⚠️ EVERY ROW GETS A LANE NOW (§8). An undated stage used to be excluded here and listed as a
+         name under the group; it draws a bar that says "stage not dated" instead, so the separate
+         list — and `CalGroup.undated`, which nothing else read — went with it rather than staying
+         as a second place the same fact is stated. */
+      lanes: mine.map((r) => ({ id: r.id, row: r, bars: laneBars(r, track, nowMs) })),
     };
   }).filter((g) => g.count > 0);
 }
