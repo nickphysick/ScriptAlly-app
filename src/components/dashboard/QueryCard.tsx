@@ -63,14 +63,39 @@ export interface QueryCardModel {
   materials: { k: string; v: string }[];
   /** the foot's left line — the window, and whose figure it is */
   window: string;
+  /**
+   * The foot's button.
+   *
+   * ⚠️ THE LABEL IS THE MODEL'S BECAUSE THE FAN'S IS CONTEXTUAL (v21 §5) — "Record a response",
+   * "Mark full sent" — where the popover's is always "Open the full query". Defaulting keeps every
+   * existing caller's words exactly as they were.
+   */
+  actionLabel?: string;
   onOpenQuery: () => void;
 }
 
+/**
+ * ⚠️ THE ONE SEAM: IS THIS A POPOVER, OR IS IT PLACED BY ITS HOST? (v21 §5, 21 Sep.)
+ *
+ * With an `anchor` it is what it has always been — portalled to the body, positioned against the
+ * row that raised it, dismissing itself on Escape or a pointerdown outside. Without one it renders
+ * IN PLACE and installs nothing: the Query Centre's fan deals twelve of these inside a modal, and
+ * twelve popovers would be twelve competing Escape handlers, each closing a card when the reader
+ * meant to close the fan.
+ *
+ * ⚠️ IT IS ONE CONCEPT RATHER THAN FIVE FLAGS, WHICH IS WHY IT IS AN EXTENSION AND NOT A FORK. A
+ * card that is not a popover does not position itself and does not dismiss itself — those are the
+ * same fact. Everything else the fan wants of it (260px instead of 440, no tab row, a tighter
+ * foot) follows its HOST through a descendant selector, which is the treatment this repo already
+ * settled on for the To-do reference card: *"a prop would have forked the component"*.
+ *
+ * Every existing caller passes an anchor and is byte-identical.
+ */
 export const QueryCard: React.FC<{
   model: QueryCardModel;
   /** the row the card belongs to — it stays lit, and the card is placed against it */
-  anchor: HTMLElement;
-  onClose: () => void;
+  anchor?: HTMLElement;
+  onClose?: () => void;
 }> = ({ model, anchor, onClose }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [tab, setTab] = useState<QueryCardTab>("tracking");
@@ -78,7 +103,7 @@ export const QueryCard: React.FC<{
   /* ⚠️ `anchorEl`, NOT THE HOOK'S OWN `triggerRef`. The trigger is somebody else's element, and
      assigning a ref in an effect points it AFTER the hook's layout effect has already run and
      returned early — measured once as a 400px popover at x 0, y 900, full viewport width. */
-  const { menuStyle } = useFixedMenu<HTMLElement>(true, {
+  const { menuStyle } = useFixedMenu<HTMLElement>(!!anchor, {
     placement: "side", menuRef: ref, width: CARD_W, constrain: true, anchorEl: anchor,
   });
 
@@ -88,6 +113,8 @@ export const QueryCard: React.FC<{
    * and ends outside (a drag over the text) is not a dismissal.
    */
   useEffect(() => {
+    /* placed by a host rather than anchored: it is not a popover, so it dismisses nothing */
+    if (!anchor || !onClose) return undefined;
     const away = (e: PointerEvent) => {
       const t = e.target as Node;
       if (ref.current?.contains(t) || anchor.contains(t)) return;
@@ -107,8 +134,8 @@ export const QueryCard: React.FC<{
   /* ⚠️ PORTALLED TO THE BODY. Both surfaces that open this sit in a scroller with a radius; a
      popover rendered inside one would be clipped by its own column, which is what a popover is for
      escaping. */
-  return createPortal(
-    <div className="qcard" style={menuStyle} ref={ref} role="dialog"
+  const card = (
+    <div className="qcard" style={anchor ? menuStyle : undefined} ref={ref} role={anchor ? "dialog" : "group"}
       aria-label={`${model.statusWord} — ${model.agent.name}`}>
 
       <div className={`qcard-band qcard-band--${model.court.band}`}>
@@ -176,9 +203,9 @@ export const QueryCard: React.FC<{
 
       <div className="qcard-foot">
         <span className="qcard-exp">{model.window}</span>
-        <button type="button" onClick={model.onOpenQuery}>Open the full query</button>
+        <button type="button" onClick={model.onOpenQuery}>{model.actionLabel ?? "Open the full query"}</button>
       </div>
-    </div>,
-    document.body,
+    </div>
   );
+  return anchor ? createPortal(card, document.body) : card;
 };
