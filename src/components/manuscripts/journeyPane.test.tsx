@@ -10,6 +10,7 @@
  * is never re-ordered, and that nothing here appraises.
  */
 import { describe, it, expect } from "vitest";
+import { sdAt } from "../../test/statusDotSignature";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
@@ -59,12 +60,14 @@ describe("the track", () => {
    */
   it("draws its stations through StatusDot rather than a reproduction", () => {
     const html = pane();
-    // One decorative dot per station, and StatusDot's own markup — not a hand-rolled circle.
-    /* StatusDot's own inline box — `position:relative` first, then the size it was given. The
-       closed marker is a CSS class with no inline style, so it cannot be mistaken for one. */
-    expect(html.match(/width:26px;height:26px/g) ?? []).toHaveLength(STANDING_STATIONS.length);
+    /* One decorative mark per station, and StatusDot's own markup — not a hand-rolled circle.
+       The signature is shared (src/test/statusDotSignature.ts): the ring set removed the
+       positioned wrapper this used to match on, and the four suites that had each written their
+       own version of "this is the real dot" went red together over a change that touched none of
+       the surfaces they guard. */
+    expect(html.match(sdAt(26)) ?? []).toHaveLength(STANDING_STATIONS.length);
     // …and each is decorative, because the label directly beneath already names the status.
-    expect(html.match(/<span aria-hidden="true" style="position:relative;width:26px/g) ?? [])
+    expect(html.match(/<span aria-hidden="true" style="width:26px/g) ?? [])
       .toHaveLength(STANDING_STATIONS.length);
     const src = readFileSync(join(__dirname, "JourneyPane.tsx"), "utf8");
     expect(src).toContain('import { StatusDot }');

@@ -22,6 +22,7 @@ import { sliceBetween } from "../../test/sliceBetween";
 import { QueryEmptyFeatures } from "./QueryEmptyFeatures";
 import { QueryStatus } from "../../types";
 import { STATE_TOKEN } from "../../lib/queryCardFacts";
+import { SD_RETIRED, SD_RING, SD_VIEWBOX } from "../../test/statusDotSignature";
 import {
   QCF_BOARD, QCF_CARD, QCF_CLOSING, QCF_DEPTH, QCF_EXAMPLE_TAG, QCF_HERO, QCF_HERO_NOTES, QCF_LIST,
   QCF_MOVES, QCF_ROWS, QCF_SWATCHES, QCF_VIEWS, heroBookTitle,
@@ -189,7 +190,12 @@ describe("the app's own components and tints, never a recreation", () => {
     expect(src).toContain('import { StatusDot } from "../StatusDot"');
     /* the ref's own `.sdot` conic-gradient must not have been ported */
     expect(css).not.toContain("conic-gradient");
-    expect(html).toContain("sa-statusdot");
+    /* ⚠️ `sa-statusdot` WAS THE PULSE ELEMENT'S CLASS, not the component's, and the ring set (v21
+       §9) removed the pulse — so this matched a treatment rather than the mark. The shared
+       signature is the set's own geometry, which every status carries at every size. */
+    expect(html).toContain(SD_VIEWBOX);
+    expect(html).toContain(SD_RING);
+    for (const gone of SD_RETIRED) expect(html, `${gone} survives the ring set`).not.toContain(gone);
   });
 
   it("uses the real statuses, so the depth sequence is the app's ladder", () => {

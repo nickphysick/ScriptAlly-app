@@ -68,16 +68,22 @@ describe("the journey funnel", () => {
     const html = render(rowsFor(3));
     /* ⚠️ ASSERTED ON WHAT StatusDot ACTUALLY EMITS, which is not what it looks like it emits. It
        carries no `sd-dot` class and — because these dots are `decorative`, the stage naming itself
-       right underneath — no title or aria-label either. Its real signature is the per-theme token
-       pair it reads (`--sd-hue` / `--sd-centre`) and the pulse element on the writer's-turn states.
-       A hand-drawn circle here would have baked hexes and no pulse, which is the thing worth
-       catching; the first version of this test looked for a class that has never existed and would
-       have gone red on a perfectly correct page. */
-    expect(html, "the stage dots are not reading StatusDot's theme tokens — something local is drawing them")
-      .toContain("var(--sd-hue");
-    expect(html).toContain("var(--sd-centre");
-    expect(html, "the pulsing writer's-turn treatment is absent — this is not the locked component")
-      .toContain("sa-statusdot__pulse");
+       right underneath — no title or aria-label either.
+
+       ⚠️ ITS SIGNATURE CHANGED WITH THE RING SET (v21 §9), AND THE LAW DID NOT. This used to look
+       for the per-theme token pair and the pulse element, because those were the two things a
+       hand-drawn circle would not have. The set is one ink stroke now: no tokens, no pulse. The
+       new signature is the ring's own geometry — a 24 viewBox stroked 2 with an r=10 circle, in
+       the one ink — which is equally hard to produce by accident. The claim is unchanged: these
+       stage marks come from the locked component, not from a local recreation. */
+    expect(html, "the stage dots are not drawn on StatusDot's 24 viewBox — something local is drawing them")
+      .toContain('viewBox="0 0 24 24"');
+    expect(html, "the ring is missing — this is not the locked component").toContain('r="10"');
+    expect(html, "the set is one ink stroke at 2 on the viewBox").toContain('stroke-width="2"');
+    expect(html).toContain("color:#1c130f");
+    /* and the retired treatment is gone rather than merely unasserted */
+    expect(html).not.toContain("sa-statusdot__pulse");
+    expect(html).not.toContain("var(--sd-hue");
 
     /* four stage dots at the requested 56px, which also proves `overrideSize` reached the
        component rather than the app-wide default being drawn */

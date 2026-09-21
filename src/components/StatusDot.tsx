@@ -2,40 +2,60 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * StatusDot — QueryHawk's canonical, permanent query-status glyph. Every visual
- * representation of a QueryStatus anywhere in the app renders through this component
- * (query list rows, sidebar filter rows, the reading-pane masthead, the dashboard,
- * timelines, import reviews). No render site ever draws its own dot.
+ * StatusDot — QueryHawk's canonical, permanent query-status glyph. Every visual representation of a
+ * QueryStatus anywhere in the app renders through this component (query list rows, the Query
+ * Centre's views, the dashboard, timelines, the To-do board, import reviews). No render site ever
+ * draws its own dot. That law is unchanged and is the only thing about this file that is.
  *
- * SINGLE SOURCE OF TRUTH — `STATUS_DOT_MAP` below maps each status to { base, glyph, pulse }.
- * Everything is derived from `base`:
- *   · Fill  = base mixed ~20% over parchment (#fdf9f5) — a soft tint of the base.
- *   · Glyph = base mixed ~22% toward ink (#3a322c) — deepened so it stays legible on the fill.
- *   · Border = 1px in the base colour on every dot, so even the palest fills (Queried,
- *     No Response, Withdrawn) keep a clear edge on cream / parchment / a selected row.
- * Change a value in the map and it propagates to every dot everywhere.
+ * ══ THE RING SET (v21 §9, 21 Sep) — ONE LAW, REPLACING THE TINTED-DISC SET ══
  *
- * AMENDED LOCK (owner-approved, consolidated-v37): geometry, fills, glyphs and semantics stay
- * locked, but the PALETTE of the six pipeline statuses (Queried → R&R) is now a per-theme token
- * pair — ring/glyph read `--sd-hue`, the centre disc reads `--sd-centre` (values set on
- * .t-capp/.t-bold/.t-edn in index.css). One hue per theme: direction/stage is carried by shape,
- * not colour. The per-status spectrum hexes remain as FALLBACKS so un-themed surfaces
- * (onboarding, auth preview, dev labs) render exactly as before. Closed-state statuses
- * (Rejected/Withdrawn/No Response) and the Offer star keep their existing treatment in every
- * theme, as does the ghost drain.
+ * The mark is now a RING, drawn in ink, and the status is carried by what the ring is made of:
  *
- * Rendering is pure CSS + inline SVG (no raster artwork): a tinted disc, a base-colour ring,
- * and a stroked/filled 24×24 glyph. The four "your move" states (Partial Requested,
- * Full Requested, Revise & Resubmit, Offer) get a slow pulsing ring — see statusDot.css,
- * which also handles prefers-reduced-motion.
+ *   dashed ring  =  the agent has asked for something (a request, not yet answered)
+ *   solid ring   =  you have sent it
+ *   half centre  =  a partial          ·  full centre = a full manuscript
+ *   no centre    =  nothing material has been asked for or sent yet
+ *   a bar        =  closed
  *
- * The optional `ghost` "would-be"/skipped treatment renders the same dot drained to a neutral
- * grey (no pulse); opacity is left to external CSS (e.g. the hero's .hf-ghost peek/hover).
+ *   Queried            ring                    Full requested  dashed ring + full centre
+ *   Partial requested  dashed ring + half      Full sent       ring + full centre
+ *   Partial sent       ring + half             Offer           a document outline
+ *                                              Closed          ring + a horizontal bar
+ *
+ * ⚠️ THE SHAPE CARRIES EVERYTHING; COLOUR CARRIES NOTHING. There is no tinted disc, no per-status
+ * base colour, no derived fill and no ring hue — the whole mark is one ink stroke at 2px on a 24
+ * viewBox, and the only filled areas are the half and full centres. This is the point of the set:
+ * the old spectrum had ten colours doing a job the composition now does, and a reader had to learn
+ * the palette to read a row.
+ *
+ * ⚠️ `--sd-hue` / `--sd-centre` ARE NO LONGER READ HERE, AND ARE NOT DELETED. The pair is a live
+ * theme accent read by the manuscripts plate, the agents page and the dashboard's stat caps; this
+ * component simply stops being one of its consumers. Removing the tokens because *this* file
+ * stopped reading them would silently blank a dozen unrelated surfaces.
+ *
+ * ⚠️ THE PULSE IS GONE, AND SO IS `badge`. The four "your move" states had an animated ring around
+ * the disc; there is no disc and the ref draws no pulse. `badge` (a thick ring and a white centre,
+ * for the calendar's 58px mark) described the disc's proportions and had no callers left.
+ *
+ * ⚠️ TWO PLACES WHERE THE APP HAS MORE STATUSES THAN THE SET HAS GLYPHS. Both are flagged rather
+ * than quietly resolved, because mapping a status to its nearest-looking neighbour is how a reader
+ * comes to trust a mark that is lying to them:
+ *
+ *   · **The closed set collapses.** Rejected, Withdrawn and No Response were a cross, a dash and an
+ *     ellipsis; all three are now "Closed" — ring + bar. This app treats them as one concept
+ *     everywhere else (`statusDirection`, the closed grid, the filter), so the collapse is honest,
+ *     but the DRAWING no longer distinguishes them. The accessible name and the tooltip still do.
+ *   · **Revise & Resubmit has no row in the set at all.** It takes the one cell the composition
+ *     leaves empty — a dashed ring with NO centre — which reads as "the agent has asked for
+ *     something" without claiming a partial or a full. Nothing was invented: it is the set's own
+ *     two parts in the one combination the seven named statuses do not use. It wants a ruling.
+ *
+ * The optional `ghost` "would-be"/skipped treatment draws the same ring in neutral grey; opacity is
+ * left to external CSS (e.g. the hero's `.hf-ghost` peek/hover).
  */
 import React from "react";
 import { QueryStatus } from "../types";
 import { normalizeStatus, getStatusLabel } from "./StatusPill";
-import "./statusDot.css";
 
 /** Legend source: map over this and render the actual <StatusDot> — never redraw copies. */
 export const STATUS_DOT_LEGEND: { status: QueryStatus; label: string }[] = [
@@ -49,39 +69,36 @@ export const STATUS_DOT_LEGEND: { status: QueryStatus; label: string }[] = [
   { status: QueryStatus.REJECTED, label: "Rejected" },
 ];
 
-/** Glyph identifiers — paths defined in renderGlyph(). */
-type GlyphKey =
-  | "plane"
-  | "chevron-in-single"
-  | "chevron-out-single"
-  | "chevron-in-double"
-  | "chevron-out-double"
-  | "loop"
-  | "star"
-  | "cross"
-  | "dash"
-  | "ellipsis";
-
+/**
+ * The ring's two halves, as the set composes them.
+ *
+ * `ring` is the outline — solid when you have sent something, dashed while the agent is asking for
+ * it. `centre` is what the ask or the send is ABOUT — a half disc for a partial, a full disc for a
+ * manuscript, nothing when no material is in play, a bar when the query is closed.
+ */
+type RingKind = "solid" | "dashed";
+type CentreKind = "none" | "half" | "full" | "bar";
 interface DotSpec {
-  /** Base colour — fill, glyph and border are all derived from this. */
-  base: string;
-  glyph: GlyphKey;
-  /** Pulsing ring — true only for the four "your move" states. */
-  pulse: boolean;
+  ring: RingKind;
+  centre: CentreKind;
+  /** Offer is the one status that is not a ring at all — it is the document itself. */
+  document?: true;
 }
 
-/** SINGLE SOURCE OF TRUTH — QueryStatus → { base colour, glyph, pulse }. */
+/** SINGLE SOURCE OF TRUTH — QueryStatus → the ring it is made of. */
 const STATUS_DOT_MAP: Record<QueryStatus, DotSpec> = {
-  [QueryStatus.QUERIED]: { base: "#DCC5BF", glyph: "plane", pulse: false },
-  [QueryStatus.PARTIAL_REQUESTED]: { base: "#C98E8A", glyph: "chevron-in-single", pulse: true },
-  [QueryStatus.PARTIAL_SENT]: { base: "#AEBE96", glyph: "chevron-out-single", pulse: false },
-  [QueryStatus.FULL_REQUESTED]: { base: "#B5736F", glyph: "chevron-in-double", pulse: true },
-  [QueryStatus.FULL_SENT]: { base: "#8FA876", glyph: "chevron-out-double", pulse: false },
-  [QueryStatus.REVISE_RESUBMIT]: { base: "#C57344", glyph: "loop", pulse: true },
-  [QueryStatus.OFFER]: { base: "#5E8049", glyph: "star", pulse: true },
-  [QueryStatus.REJECTED]: { base: "#963C36", glyph: "cross", pulse: false },
-  [QueryStatus.WITHDRAWN]: { base: "#9B8C7A", glyph: "dash", pulse: false },
-  [QueryStatus.NO_RESPONSE]: { base: "#C2B6A4", glyph: "ellipsis", pulse: false },
+  [QueryStatus.QUERIED]: { ring: "solid", centre: "none" },
+  [QueryStatus.PARTIAL_REQUESTED]: { ring: "dashed", centre: "half" },
+  [QueryStatus.PARTIAL_SENT]: { ring: "solid", centre: "half" },
+  [QueryStatus.FULL_REQUESTED]: { ring: "dashed", centre: "full" },
+  [QueryStatus.FULL_SENT]: { ring: "solid", centre: "full" },
+  /* ⚠️ THE SET'S ONE FREE CELL — see the header. A request (dashed) with no material named. */
+  [QueryStatus.REVISE_RESUBMIT]: { ring: "dashed", centre: "none" },
+  [QueryStatus.OFFER]: { ring: "solid", centre: "none", document: true },
+  /* ⚠️ ALL THREE CLOSED STATUSES DRAW THE SAME MARK — the drawing collapses, the name does not. */
+  [QueryStatus.REJECTED]: { ring: "solid", centre: "bar" },
+  [QueryStatus.WITHDRAWN]: { ring: "solid", centre: "bar" },
+  [QueryStatus.NO_RESPONSE]: { ring: "solid", centre: "bar" },
 };
 
 /**
@@ -108,117 +125,47 @@ export const statusDirection = (status: QueryStatus | string): "out" | "in" | "c
   }
 };
 
-/** Surfaces the base colour is mixed against to derive fill (parchment) and glyph (ink). */
-const PARCHMENT = "#fdf9f5";
-const INK = "#3a322c";
-/** Neutral base for the ghost / skipped treatment. */
-const GHOST_BASE = "#a99e90";
-
-const clamp255 = (n: number) => Math.max(0, Math.min(255, Math.round(n)));
-const parseHex = (hex: string): [number, number, number] => {
-  const h = hex.replace("#", "");
-  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
-};
-const toHex = (rgb: [number, number, number]) =>
-  "#" + rgb.map((c) => clamp255(c).toString(16).padStart(2, "0")).join("");
-
-/** Linear sRGB mix: `t` is the fraction of `b` blended into `a`. */
-const mix = (a: string, b: string, t: number): string => {
-  const [ar, ag, ab] = parseHex(a);
-  const [br, bg, bb] = parseHex(b);
-  return toHex([ar + (br - ar) * t, ag + (bg - ag) * t, ab + (bb - ab) * t]);
-};
-
-const fillOf = (base: string) => mix(PARCHMENT, base, 0.2); // soft tint of the base
-const glyphColorOf = (base: string) => mix(base, INK, 0.22); // deepened for legibility
-
-/** The six pipeline statuses whose palette is theme-tokenised (amended lock). Offer and the
- *  closed set keep their own treatment; ghost is always the neutral drain. */
-const THEME_TOKENISED: ReadonlySet<QueryStatus> = new Set([
-  QueryStatus.QUERIED,
-  QueryStatus.PARTIAL_REQUESTED,
-  QueryStatus.PARTIAL_SENT,
-  QueryStatus.FULL_REQUESTED,
-  QueryStatus.FULL_SENT,
-  QueryStatus.REVISE_RESUBMIT,
-]);
+/** The one ink the set is drawn in — the app's `--ink`, stated because this is not a themed mark. */
+const INK_STROKE = "#1c130f";
+/** Neutral drain for the ghost / skipped treatment. */
+const GHOST_STROKE = "#a99e90";
 
 const warnedUnknownStatuses = new Set<string>();
 
-/** Every status dot renders at this fixed size, everywhere it appears (design requirement).
- *  The per-call `size` prop is accepted for backwards-compatibility but no longer changes the
- *  rendered size — change this one constant to resize all dots app-wide. */
+/** Every status dot renders at this size unless a caller overrides it. */
 const DOT_SIZE = 30;
 
-const STROKE_PROPS = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 2.2,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-};
+/**
+ * The ring set's parts, on a 24 viewBox.
+ *
+ * ⚠️ THE STROKE WIDTH IS A CONSTANT 2 ON THE VIEWBOX, NOT ON THE PIXEL. The svg scales, so a mark
+ * drawn at 13px carries a proportionally lighter line than one at 30 — which is what keeps the set
+ * looking like one family across the eighteen surfaces that draw it at eleven different sizes.
+ */
+const RING_R = 10;
+const CENTRE_R = 6.5;
 
-/** Glyph paths — 24×24 viewBox, `currentColor` so the wrapping <svg> sets the colour. */
-const renderGlyph = (key: GlyphKey): React.ReactNode => {
-  switch (key) {
-    case "plane":
-      return (
-        <>
-          <path d="M21 4 L3 11 L10 13 L12 20 Z" {...STROKE_PROPS} />
-          <path d="M21 4 L10 13" {...STROKE_PROPS} />
-        </>
-      );
-    case "chevron-in-single":
-      return <path d="M15 6 L9 12 L15 18" {...STROKE_PROPS} />;
-    case "chevron-out-single":
-      return <path d="M9 6 L15 12 L9 18" {...STROKE_PROPS} />;
-    case "chevron-in-double":
-      return (
-        <>
-          <path d="M18 6 L12 12 L18 18" {...STROKE_PROPS} />
-          <path d="M11 6 L5 12 L11 18" {...STROKE_PROPS} />
-        </>
-      );
-    case "chevron-out-double":
-      return (
-        <>
-          <path d="M6 6 L12 12 L6 18" {...STROKE_PROPS} />
-          <path d="M13 6 L19 12 L13 18" {...STROKE_PROPS} />
-        </>
-      );
-    case "loop":
-      return (
-        <>
-          <path d="M20 11 a8 8 0 1 0 -2.3 6" {...STROKE_PROPS} />
-          <path d="M20 5 L20 11 L14 11" {...STROKE_PROPS} />
-        </>
-      );
-    case "star":
-      return (
-        <path
-          d="M12 3 L14.6 9 L21 9.5 L16 13.7 L17.6 20 L12 16.4 L6.4 20 L8 13.7 L3 9.5 L9.4 9 Z"
-          fill="currentColor"
-          stroke="none"
-        />
-      );
-    case "cross":
-      return (
-        <>
-          <path d="M7 7 L17 17" {...STROKE_PROPS} />
-          <path d="M17 7 L7 17" {...STROKE_PROPS} />
-        </>
-      );
-    case "dash":
-      return <path d="M7 12 L17 12" {...STROKE_PROPS} />;
-    case "ellipsis":
-      return (
-        <>
-          <circle cx={6} cy={12} r={1.3} fill="currentColor" />
-          <circle cx={12} cy={12} r={1.3} fill="currentColor" />
-          <circle cx={18} cy={12} r={1.3} fill="currentColor" />
-        </>
-      );
+const renderRing = (spec: DotSpec): React.ReactNode => {
+  if (spec.document) {
+    /* Offer is the document itself — an outline with two lines of writing on it. */
+    return (
+      <>
+        <path d="M7 3.5h7l4 4V20.5H7z" strokeLinejoin="round" />
+        <path d="M10 12h5M10 15.5h5" strokeLinecap="round" />
+      </>
+    );
   }
+  return (
+    <>
+      <circle cx={12} cy={12} r={RING_R} strokeDasharray={spec.ring === "dashed" ? "6 4" : undefined} />
+      {spec.centre === "half" && (
+        /* the right half of the centre disc: up to the top, round the arc, back to the middle */
+        <path d={`M12 12L12 ${12 - CENTRE_R}A${CENTRE_R} ${CENTRE_R} 0 0 1 12 ${12 + CENTRE_R}Z`} fill="currentColor" stroke="none" />
+      )}
+      {spec.centre === "full" && <circle cx={12} cy={12} r={CENTRE_R} fill="currentColor" stroke="none" />}
+      {spec.centre === "bar" && <path d="M7.5 12h9" strokeLinecap="round" />}
+    </>
+  );
 };
 
 export interface StatusDotProps {
@@ -227,24 +174,9 @@ export interface StatusDotProps {
   /** Deprecated/ignored: all dots render at DOT_SIZE (30px) app-wide. Kept so existing call
    *  sites that still pass a size don't need touching. */
   size?: number;
-  /** Explicit pixel size that OVERRIDES the app-wide 30px — used only by the dense timelines,
-   *  where a full-size dot would be clipped by the compact layout. Min 12. */
+  /** Explicit pixel size that OVERRIDES the app-wide 30px — used by the dense timelines and by
+   *  every surface with a stated mark size. Min 12. */
   overrideSize?: number;
-  /**
-   * Draw the dot as a large standalone BADGE rather than as an inline mark.
-   *
-   * ⚠️ ADDITIVE, AND EVERY EXISTING CALLER IS BYTE-IDENTICAL WITHOUT IT. The dot's ring is a
-   * constant 1px, which is right at 12–22px and a hairline at the calendar's 58: measured on the
-   * v60 board, a 58px disc in a pale tint with a 1px edge, which reads as a wash rather than as a
-   * mark. The design of record draws the same circle with a ring at ~11% of its diameter and a
-   * WHITE centre, so the glyph sits in a clear field instead of on a tint.
-   *
-   * ⚠️ IT IS A PROP RATHER THAN A SIZE THRESHOLD INSIDE THE COMPONENT. A rule like "scale the ring
-   * above 24px" would change every existing caller that ever passes a larger size, silently, and
-   * this component is locked precisely so that cannot happen. A caller that wants the badge
-   * treatment asks for it; nobody else is touched.
-   */
-  badge?: boolean;
   className?: string;
   /** Muted "would-be"/skipped treatment — the same dot, drained to neutral grey. Default false. */
   ghost?: boolean;
@@ -257,7 +189,6 @@ export interface StatusDotProps {
 export const StatusDot: React.FC<StatusDotProps> = ({
   status,
   overrideSize,
-  badge = false,
   className,
   ghost = false,
   decorative = false,
@@ -298,31 +229,16 @@ export const StatusDot: React.FC<StatusDotProps> = ({
     );
   }
 
-  const base = ghost ? GHOST_BASE : spec.base;
-  // Pipeline statuses read the theme token pair, falling back to today's exact per-status
-  // colours where no theme class is present (onboarding, auth preview, dev labs). Ghost and
-  // the exempt statuses (Offer, closed set) never consult the theme vars.
-  const themed = !ghost && THEME_TOKENISED.has(norm);
-  const ringColor = themed ? `var(--sd-hue, ${base})` : base;
-  const fill = themed ? `var(--sd-centre, ${fillOf(base)})` : fillOf(base);
-  const glyphColor = themed ? `var(--sd-hue, ${glyphColorOf(base)})` : glyphColorOf(base);
-  const pulseColor = themed ? `var(--sd-hue, ${base})` : base;
-  const pulse = spec.pulse && !ghost;
-  const glyphSize = Math.round(S * 0.62);
-  /* ⚠️ THE RING SCALES WITH THE DISC IN BADGE MODE, AT THE REF'S OWN PROPORTION. Its circle is
-     `r=7.4` stroked `1.7` in a 20-unit viewBox — 11.5% of the drawn diameter — so a 58px badge
-     carries a ~6px ring rather than a 1px one. Below badge mode the constant 1px stands: it is
-     what guarantees an edge on the palest fills at inline sizes, which is a different problem. */
-  const ringPx = badge ? Math.max(1, Math.round(S * 0.115)) : 1;
-  /* and the centre goes white, so the glyph reads out of a clear field rather than off a tint */
-  const discFill = badge ? "#ffffff" : fill;
+  /* ⚠️ ONE COLOUR, AND `currentColor` CARRIES IT TO BOTH THE STROKE AND THE CENTRE. The half and
+     full discs are FILLS and the ring is a STROKE; setting `color` once on the svg is what keeps
+     them the same ink without the two being stated separately and drifting apart. */
+  const ink = ghost ? GHOST_STROKE : INK_STROKE;
 
   return (
     <span
       {...a11y}
       className={className}
       style={{
-        position: "relative",
         width: S,
         height: S,
         flexShrink: 0,
@@ -332,31 +248,17 @@ export const StatusDot: React.FC<StatusDotProps> = ({
         verticalAlign: "middle",
       }}
     >
-      {/* tinted disc + 1px ring (guarantees an edge on every surface) */}
-      <span
-        style={{
-          position: "absolute",
-          inset: 0,
-          borderRadius: "50%",
-          background: discFill,
-          border: `${ringPx}px solid ${ringColor}`,
-          boxSizing: "border-box",
-        }}
-      />
-      {pulse && (
-        <span
-          className="sa-statusdot__pulse"
-          style={{ ["--sa-dot-pulse-color" as string]: pulseColor } as React.CSSProperties}
-        />
-      )}
       <svg
-        width={glyphSize}
-        height={glyphSize}
+        width={S}
+        height={S}
         viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
         aria-hidden="true"
-        style={{ position: "relative", display: "block", color: glyphColor }}
+        style={{ display: "block", color: ink }}
       >
-        {renderGlyph(spec.glyph)}
+        {renderRing(spec)}
       </svg>
     </span>
   );

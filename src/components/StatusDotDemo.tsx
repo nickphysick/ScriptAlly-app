@@ -10,6 +10,12 @@
  *
  * Note: sizes here use `overrideSize` because the app-wide `size` prop is intentionally ignored
  * (every in-app dot renders at the fixed 30px) — overrideSize is the only way to show a range.
+ *
+ * ⚠️ THIS PAGE IS UNREACHABLE FROM ANY BUILD, INCLUDING `build:dev`. Its branch in `App.tsx` is
+ * `isStatusDotDemo && import.meta.env.DEV`, and Vite sets `DEV` to false for `vite build` whatever
+ * `--mode` says — so the whole branch is folded away and the hash falls through to the landing.
+ * Reach it with the dev SERVER (`npx vite`), not a preview of a build. Measured 21 Sep, after the
+ * built bundle was found to contain `useStatusDotDemoRoute();` with its result discarded.
  */
 import React from "react";
 import { QueryStatus } from "../types";
@@ -89,9 +95,11 @@ export const StatusDotDemo: React.FC = () => {
             One map, one dot everywhere
           </h2>
           <p style={{ fontSize: 11.5, color: "#8a7a6c", marginBottom: 15, lineHeight: 1.5 }}>
-            Soft tint fill + a 1px base-colour ring + a glyph that names the verb: ✈ queried, ‹ requested,
-            › sent, ↺ revise, ★ offer, × rejected, – withdrawn, … no response. The four "your move" states
-            (Partial&nbsp;Requested, Full&nbsp;Requested, Revise&nbsp;&amp;&nbsp;Resubmit, Offer) pulse.
+            One ink stroke, 2px on a 24 viewBox. A <b>dashed</b> ring means the agent has asked for
+            something; a <b>solid</b> ring means you have sent it. The centre says what it is about — a
+            half disc for a partial, a full disc for a manuscript, nothing when no material is in play,
+            a bar when the query is closed. Offer is the document itself. Shape carries all of it, so
+            there is no tint, no per-status colour and no pulse.
           </p>
 
           <table style={{ width: "100%", borderCollapse: "collapse", position: "relative" }}>
@@ -132,8 +140,10 @@ export const StatusDotDemo: React.FC = () => {
             Contrast on every surface
           </h2>
           <p style={{ fontSize: 11.5, color: "#8a7a6c", marginBottom: 15, lineHeight: 1.5 }}>
-            Each dot must keep a clear edge on cream, parchment and a selected/active row. The 1px
-            base-colour ring is what carries the palest fills (Queried, No&nbsp;Response, Withdrawn).
+            Each mark must read on cream, on parchment and on a selected/active row. It is one ink at
+            full strength on all three now, so contrast is no longer the question the palest fills
+            used to raise — what this check is for is whether the ring's 2px line holds up against a
+            tinted row.
           </p>
           <table style={{ width: "100%", borderCollapse: "collapse", position: "relative" }}>
             <thead>

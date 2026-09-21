@@ -5,6 +5,7 @@
  * Fulls under consideration, and Latest responses.
  */
 import { describe, it, expect } from "vitest";
+import { SD_RING, SD_STROKE, sdAt } from "../../test/statusDotSignature";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
@@ -140,13 +141,13 @@ describe("latest responses", () => {
        token and the assertion said the chips were locally drawn when they were not.
 
        What IS universal is the root span StatusDot always emits, at the size it was given — which
-       proves both that the locked component drew it and that `overrideSize` reached it. */
-    const dots = html.match(
-      /position:relative;width:13px;height:13px;flex-shrink:0;display:inline-flex/g,
-    ) ?? [];
-    expect(dots, "the chips are not drawing StatusDot at the requested size").toHaveLength(2);
-    /* and its inner disc, which a bare emoji or a CSS pill would not have */
-    expect(html).toContain("position:absolute;inset:0;border-radius:50%");
+       proves both that the locked component drew it and that `overrideSize` reached it. That
+       signature now lives in src/test/statusDotSignature.ts, because the ring set (v21 §9) changed
+       it and four suites had each written their own copy. */
+    expect(html.match(sdAt(13)) ?? [], "the chips are not drawing StatusDot at the requested size").toHaveLength(2);
+    /* and its ring, which a bare emoji or a CSS pill would not have */
+    expect(html).toContain(SD_RING);
+    expect(html).toContain(SD_STROKE);
   });
 
   it("is a real table with column headers", () => {

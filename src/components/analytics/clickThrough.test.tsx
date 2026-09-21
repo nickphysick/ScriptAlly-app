@@ -15,6 +15,7 @@ import { buildRows, MIN_SAMPLE } from "../../lib/analytics";
 import { QUERIES_STATUS_PARAM } from "../../lib/queriesFilterParam";
 import { AnalyticsTarget, FILTER_GAP, labelForTarget, pathForTarget } from "./openInQueryCentre";
 import { ShareCard } from "./ShareCard";
+import { SD_INK, SD_VIEWBOX, sdAt } from "../../test/statusDotSignature";
 
 const NOW = new Date(2026, 7, 19, 12, 0, 0).getTime();
 const daysAgo = (n: number) => new Date(NOW - n * 86400000).toISOString();
@@ -121,7 +122,9 @@ describe("the share card", () => {
 
   it("draws its funnel through StatusDot, not a recreation", () => {
     const html = render();
-    expect(html.match(/position:relative;width:30px;height:30px/g) ?? []).toHaveLength(4);
+    expect(html.match(sdAt(30)) ?? [], "the four funnel marks are not StatusDot at 30px").toHaveLength(4);
+    expect(html).toContain(SD_VIEWBOX);
+    expect(html).toContain(SD_INK);
   });
 
   it("is a real dialog, labelled by its own heading", () => {
