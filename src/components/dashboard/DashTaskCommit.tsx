@@ -24,7 +24,7 @@ import { useTaskCommit } from "../todo/useTaskCommit";
 import { useScriptAllyDb } from "../../lib/db";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import { nudgeWriteArgs, quickNudgePayload } from "../../lib/todoWalk";
-import { ActivityType } from "../../types";
+import { ActivityType, QueryStatus } from "../../types";
 import { useTodoToast } from "../todo/useTodoToast";
 import type { BoardCard } from "../../lib/todoBoard";
 import type { JourneySendValues } from "../../lib/paneJourney";
@@ -37,9 +37,9 @@ import type { JourneySendValues } from "../../lib/paneJourney";
  */
 export type CommitRequest =
   /** the tick's optimistic path — commit with the defaults `useTaskCommit` already owns */
-  | { id: number; kind: "quick"; card: BoardCard }
-  /** Save from the in-row editor, or a menu option that carries values */
-  | { id: number; kind: "values"; card: BoardCard; values: JourneySendValues }
+  | { id: number; kind: "quick"; card: BoardCard; allowDuplicate?: boolean }
+  /** the modal's answer and its values */
+  | { id: number; kind: "values"; card: BoardCard; values: JourneySendValues; allowDuplicate?: boolean }
   /**
    * Dismiss — stop suggesting this task.
    *
@@ -75,20 +75,47 @@ export type CommitRequest =
    * So it calls the nudge's own write directly — and it is the SAME write: `quickNudgePayload` →
    * `nudgeWriteArgs` → `logNudge`, the three things `useTaskCommit`'s own `log-nudge` arm uses.
    */
-  | { id: number; kind: "nudge"; card: BoardCard };
+  | { id: number; kind: "nudge"; card: BoardCard }
+  /**
+   * ⚠️ CLOSE A QUERY FROM A CARD WHOSE OWN JOURNEY IS SOMETHING ELSE — "I'm not going to send it" on
+   * a SEND card (task-modal round, §6).
+   *
+   * ⚠️ AND THIS IS THE THIRD TIME THE SAME SEAM HAS BEEN ASKED FOR, WHICH IS WHY IT IS A KIND
+   * RATHER THAN A ROUTE. `commitFromPane` routes on the CARD's journey, so a send card's values
+   * land in the SEND arm however they are filled in — the fault that produced a close with no
+   * reason when the nudge kind was added. Nick, 21 Sep: *"you've already had to do that once for
+   * nudge and a third time through the same seam suggests the seam wants a kind field that names
+   * the write, not the card."* So these two name their write and take it directly.
+   *
+   * It is the same write `quickDone`'s own `close-query` arm makes — `updateQueryStatus` to
+   * `NO_RESPONSE`, `undoQueryStatus` as the inverse — so a query closed from a send card and one
+   * closed from a quiet card are the same record, which is the whole point of not forking.
+   */
+  | { id: number; kind: "close"; card: BoardCard; note?: string }
+  /**
+   * ⚠️ STOP SUGGESTING THIS — "I'll leave it" on a nudge card (§6), and it is a MUTE rather than a
+   * snooze. A snooze says come back on a date; this says the app was wrong to raise it, so it takes
+   * `MUTED_UNTIL` and nothing on the query moves. Its `records` line says "Query unchanged" and
+   * that is a claim this arm has to keep: no status, no date, no activity.
+   */
+  | { id: number; kind: "mute"; card: BoardCard };
 
 export interface DashTaskCommitProps {
   request: CommitRequest | null;
   /** what was logged, in the app's own words, and the way back — both from the commit's own toast */
   onLogged: (cardKey: string, logged: string, undo?: () => void) => void;
   /**
-   * ⚠️ THE DUPLICATE-SEND GUARD, REHOMED RATHER THAN SUPPRESSED (Nick, 20 Sep). `useTaskCommit`
-   * asks `confirmAsk` before a second send of the same materials; on the To-do page that is a
-   * dialog, and a tick that commits optimistically has nowhere to put one. So the dashboard's
-   * `confirmAsk` DECLINES — nothing is written — and hands the question to the row, which opens its
-   * editor pre-filled with the warning above the fields and `Log it anyway` on Save.
+   * ⚠️ THE DUPLICATE-SEND GUARD ASKS IN THE MODAL NOW (task-modal round §8; Nick, 21 Sep: *"take the
+   * simplification"*). `useTaskCommit` calls `confirmAsk` before a second send of the same
+   * materials. There is nowhere to put a dialog over a dialog, so this arm DECLINES — writing
+   * nothing — and hands the question up as `warn`, which the modal renders as a rose banner above
+   * the form with `Log it anyway` on the primary.
    *
-   * The optimistic path therefore runs only when the guard passes, which is the whole of the rule.
+   * ⚠️ AND THE ANSWER COMES BACK AS A NEW REQUEST CARRYING `allowDuplicate`, NOT AS A RESOLVER THIS
+   * COMPONENT HOLDS. A promise parked here across renders is a second source of truth about whether
+   * a write is in flight, and it is exactly the imperative handle this module's own header refuses.
+   * The writer pressing `Log it anyway` raises a fresh request; the guard reads the flag and passes.
+   * Same outcome, and the write path still runs exactly once per press.
    */
   onDuplicate: (cardKey: string, prompt: string) => void;
   onFailed: (cardKey: string, message: string) => void;
@@ -100,7 +127,7 @@ export const DashTaskCommit: React.FC<DashTaskCommitProps> = ({
   request, onLogged, onDuplicate, onFailed, onNeedsPage,
 }) => {
   const { flash, remember: rememberUndo } = useTodoToast();
-  const { upsertTaskFlag, logNudge, deleteActivity, queries, activities } = useScriptAllyDb();
+  const { upsertTaskFlag, logNudge, deleteActivity, updateQueryStatus, undoQueryStatus, queries, activities } = useScriptAllyDb();
 
   /* ⚠️ A REF, BECAUSE `flash` IS A setState AND THE COMMIT READS ITS RESULT IN THE SAME TICK.
      Reading the toast from render scope hands the receipt the PREVIOUS write's words — worse than
@@ -108,6 +135,8 @@ export const DashTaskCommit: React.FC<DashTaskCommitProps> = ({
   const lastFlash = useRef<{ msg: string; action?: { label: string; fn: () => void | Promise<void> } } | null>(null);
   const pendingKey = useRef<string | null>(null);
   const duplicated = useRef(false);
+  /* the flag the banner's button sets, read by `confirmAsk` — see `onDuplicate` */
+  const allowDup = useRef(false);
 
   const flashAndKeep = React.useCallback<typeof flash>((msg, action, ms) => {
     lastFlash.current = { msg, action };
@@ -119,6 +148,8 @@ export const DashTaskCommit: React.FC<DashTaskCommitProps> = ({
     rememberUndo,
     /* the guard's new home — see `onDuplicate` */
     confirmAsk: async (msg: string) => {
+      /* the writer has already been asked and said yes — this request IS the answer */
+      if (allowDup.current) return true;
       duplicated.current = true;
       if (pendingKey.current) ctx.current.onDuplicate(pendingKey.current, msg);
       return false;
@@ -136,8 +167,8 @@ export const DashTaskCommit: React.FC<DashTaskCommitProps> = ({
    *
    * A commit is an EVENT, not a synchronisation. `id` is the event; the rest is context.
    */
-  const ctx = useRef({ quickDone, commit, upsertTaskFlag, onLogged, onDuplicate, onFailed, logNudge, deleteActivity, queries, activities });
-  ctx.current = { quickDone, commit, upsertTaskFlag, onLogged, onDuplicate, onFailed, logNudge, deleteActivity, queries, activities };
+  const ctx = useRef({ quickDone, commit, upsertTaskFlag, onLogged, onDuplicate, onFailed, logNudge, deleteActivity, updateQueryStatus, undoQueryStatus, queries, activities });
+  ctx.current = { quickDone, commit, upsertTaskFlag, onLogged, onDuplicate, onFailed, logNudge, deleteActivity, updateQueryStatus, undoQueryStatus, queries, activities };
 
   const reqId = request?.id ?? null;
   useEffect(() => {
@@ -148,6 +179,7 @@ export const DashTaskCommit: React.FC<DashTaskCommitProps> = ({
     void (async () => {
       lastFlash.current = null;
       duplicated.current = false;
+      allowDup.current = (request.kind === "quick" || request.kind === "values") && !!request.allowDuplicate;
       pendingKey.current = request.card.key;
       if (request.kind === "dismiss") {
         const c = request.card;
@@ -157,6 +189,30 @@ export const DashTaskCommit: React.FC<DashTaskCommitProps> = ({
         if (!live) return;
         onLogged(c.key, "Dismissed — this one won’t be suggested again.",
           () => { void upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); });
+        return;
+      }
+      if (request.kind === "mute") {
+        const c = request.card;
+        if (!c.taskType || !c.relatedRecordId) { failed(c.key, "There is nothing to stop here."); return; }
+        const key = flagKeyForTask(c.taskType, c.relatedRecordId);
+        await upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL, bumpSnooze: true });
+        if (!live) return;
+        onLogged(c.key, "Left it — no more nudges suggested for this one.",
+          () => { void upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); });
+        return;
+      }
+      if (request.kind === "close") {
+        const c = request.card;
+        const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+        if (!q) { failed(c.key, "There is no query to close here."); return; }
+        const prev = q.status as QueryStatus;
+        /* ⚠️ THE SAME CALL `quickDone`'s `close-query` ARM MAKES, and the same inverse. A second
+           spelling of "close a query" is a second answer to what closing means. */
+        await ctx.current.updateQueryStatus(q.id, QueryStatus.NO_RESPONSE,
+          request.note || "Closed with no reply from the agent");
+        if (!live) return;
+        onLogged(c.key, "Closed — no reply from the agent.",
+          () => { void ctx.current.undoQueryStatus(q.id, prev, QueryStatus.NO_RESPONSE); });
         return;
       }
       if (request.kind === "nudge") {

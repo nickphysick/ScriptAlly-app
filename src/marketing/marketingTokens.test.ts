@@ -1152,11 +1152,18 @@ describe("the feature rows set their own type, and nothing else uses its familie
        declaration, on `.slo .tpn .dhero .title`. Its cost is recorded at the value: Special Elite has
        one weight, so the deed's variables are distinguished by their underline rather than by 600.
        A fifth file naming the face is still a decision this fails on. */
+    /* ⚠️ A FIFTH, AND IT IS THE MODAL THAT REPLACED THAT PANEL'S COMPLETION HALF (task-modal round,
+       21 Sep). It sets the task sentence in the same typewriter face for the same reason — the
+       modal is now what a card sends a writer to, so it has to read in the voice the card promised.
+       It declares the face rather than reading `--os-type` because it PORTALS to `document.body`,
+       outside `.os-root`, where that token resolves to nothing; the fallback is the whole value
+       there. A sixth file naming the face is still a decision this fails on. */
     expect(elsewhere.map((f) => f.slice(src.length + 1).replace(/\\/g, "/")).sort())
       .toEqual([
         "components/dashboard/oneScreen.css",
         "components/dashboard/queryCard.css",
         "components/shell/primitives.css",
+        "components/task/taskModal.css",
         "components/todo/taskPane.css",
       ]);
     const prim = decls(readFileSync(resolve(src, "components/shell/primitives.css"), "utf8"));

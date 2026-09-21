@@ -39,7 +39,18 @@ const DashTaskCommit = React.lazy(() =>
 /** ⚠️ LAZY FOR THE SAME REASON — the dial reads and writes the task flag through the db context. */
 const DashSnooze = React.lazy(() =>
   import("./DashSnooze").then((m) => ({ default: m.DashSnooze })));
-import { Activity, Agent, Manuscript, ManuscriptVersion, Query, Task, TaskFlag, User, UserTask } from "../../types";
+/** the same dial, hosted inside the modal — see `DashSnoozeInline` */
+const DashSnoozeInline = React.lazy(() =>
+  import("./DashSnooze").then((m) => ({ default: m.DashSnoozeInline })));
+/**
+ * ⚠️ LAZY FOR A DIFFERENT REASON FROM THE TWO ABOVE, AND WORTH SAYING. The modal itself touches no
+ * db — it collects an answer and hands it up. It is split because it is 300 lines and a stylesheet
+ * that only a reader who opens a task ever needs, and because keeping the split uniform here means
+ * nobody has to work out which of three neighbours is safe to import statically.
+ */
+const TaskModal = React.lazy(() =>
+  import("../task/TaskModal").then((m) => ({ default: m.TaskModal })));
+import { Activity, Agent, Manuscript, ManuscriptVersion, Query, QueryStatus, Task, TaskFlag, User, UserTask } from "../../types";
 import type { TodoTitle } from "../../lib/dashTodo";
 import { OneScreenPanel } from "./OneScreenPanel";
 import { assembleBoardColumns } from "../../lib/todoColumns";
@@ -49,8 +60,11 @@ import {
 import { BoardCard } from "../../lib/todoBoard";
 import { isUrgentCard } from "../../lib/todoCategory";
 import { listRowInputs } from "../../lib/taskCardFacts";
-import { moreWaiting, todoGroups, todoRows, type TodoDone, type TodoRow } from "../../lib/dashTodo";
-import { TodoRowCard, journeyFor, type RowPanel } from "./TodoRowCard";
+import { moreWaiting, nudgeCount, replyWindow, todoGroups, todoRows, type TodoDone, type TodoRow } from "../../lib/dashTodo";
+import { TodoRowCard, type RowPanel } from "./TodoRowCard";
+import { modalJourney, modalWhen } from "../../lib/taskModal";
+import type { TaskModalValues } from "../task/TaskModal";
+import type { SendMethod } from "../../lib/paneJourney";
 import { TodoRowEditor, blankDraft, draftToValues, stripFor, type RowDraft } from "./TodoRowEditor";
 import type { CommitRequest } from "./DashTaskCommit";
 import { localYMD } from "../../lib/shellSidebar";
@@ -176,7 +190,10 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
      ⚠️ KEYED BY ROW, NOT A SINGLE "open" — two rows can hold a strip at once (tick one, tick the
      next), and a single slot would silently drop the first receipt the moment the second landed. */
   const [panels, setPanels] = useState<Record<string, RowPanel>>({});
-  const [drafts, setDrafts] = useState<Record<string, RowDraft>>({});
+  /** which row has the modal open, and whether the feed opened it (§4 — no counter, no chevrons) */
+  const [modal, setModal] = useState<{ key: string; fromFeed: boolean } | null>(null);
+  /** §8 · the guard's question, shown as the modal's banner rather than as a dialog over a dialog */
+  const [warn, setWarn] = useState<string | null>(null);
   const [undos, setUndos] = useState<Record<string, (() => void) | undefined>>({});
   const [snooze, setSnooze] = useState<{ key: string; anchor: HTMLElement } | null>(null);
   const [request, setRequest] = useState<CommitRequest | null>(null);
@@ -198,62 +215,122 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
   React.useEffect(() => {
     if (!openForQueryId) return;
     const r = rows.find((x) => x.queryId === openForQueryId);
-    if (r) tick(r);
+    /**
+     * ⚠️ IT OPENS THE MODAL AND COMMITS NOTHING (§10). It used to call `tick(r)`, which for a send
+     * journey WROTE immediately with the defaults — the direct commit this round supersedes.
+     *
+     * ⚠️ AND THE OLD LINE WAS `if (r) tick(r)` WITH NO ELSE, WHICH IS A BUG ON ITS OWN. The feed
+     * offers the link from `markSentOffered`, which reads the QUERY's status; the board reads task
+     * FLAGS. A snoozed or dismissed task is suppressed from `live` while the feed still draws the
+     * link, so the click found no row and silently did nothing. Opening from the query rather than
+     * from a board row is what removes it — the modal wants a card, but a `null` here now says so
+     * in the one place that can, rather than being absorbed by a guard.
+     */
+    if (r) openModal(r, { fromFeed: true });
     onOpenHandled?.();
   }, [openForQueryId]);
 
   /**
-   * ⚠️ THE TICK'S MEANING, AND NOTHING IS WRITTEN UNTIL IT IS UNAMBIGUOUS. `sent` and `nudge` have
-   * one honest completion each, so they commit with the defaults `useTaskCommit` owns; `choose`
-   * has three and opens the menu; housekeeping is a gap in a record and goes to the page where the
-   * gap is filled. A ticked row is inert — its Undo is the way back.
+   * ⚠️ THE TICK OPENS THE MODAL AND WRITES NOTHING (task-modal round §1). It used to commit
+   * optimistically on a send and on a nudge and ask only on a quiet card. Nick, 21 Sep: *"a commit
+   * the user can't see is a commit they don't trust. One click plus a visible confirmation is the
+   * price, and it's the right price."* Undo on the strip stays as the safety net after.
+   *
+   * A housekeeping card still goes to the page: it is a gap in a record, filled where the gap is,
+   * and the modal has no takeover to host it in — which is what `openFlow` exists to hand off.
    */
-  const tick = (r: TodoRow) => {
+  const openModal = (r: TodoRow, opts?: { fromFeed?: boolean }) => {
     if (panels[r.key]) return;
     const c = cardFor(r.key);
     if (!c) return;
-    const j = journeyFor(c);
-    if (j === "choose") { setPanels((ps) => ({ ...ps, [r.key]: { kind: "menu" } })); return; }
-    if (j === "page") { openGap(c); return; }
-    seq.current += 1;
-    ask({ id: seq.current, kind: "quick", card: c });
+    if (!modalJourney(c)) { openGap(c); return; }
+    setWarn(null);
+    setModal({ key: r.key, fromFeed: !!opts?.fromFeed });
   };
+  const tick = (r: TodoRow) => openModal(r);
 
-  /** the quiet menu — nothing was written when it opened, and two of the three write now */
-  const choose = (r: TodoRow, choice: "close" | "nudge" | "snooze") => {
-    const c = cardFor(r.key);
-    if (!c) return;
-    if (choice === "snooze") {
-      closePanel(r.key);
-      const el = document.querySelector<HTMLElement>(`[data-probe="todo-row"][data-key="${CSS.escape(r.key)}"] [data-probe="todo-snooze"]`);
-      if (el) setSnooze({ key: r.key, anchor: el });
-      return;
+  /**
+   * ⚠️ THE QUIET MENU AND THE IN-ROW EDITOR ARE BOTH RETIRED (§11), and their three jobs moved
+   * WHOLE rather than being dropped: the menu's three choices are the modal's three answer cards
+   * for the quiet journey — same titles, same glosses, same "what it records" footers — and the
+   * editor's fields are the modal's form rows. What is gone is the idea that a row hosts either.
+   *
+   * ⚠️ AND `Change` IS GONE FROM THE STRIP WITH THEM (§9). To change something you press Undo and
+   * tick again, or open the query. A `Change` that re-opened the editor was a third surface for one
+   * question, and the receipt is a record rather than a form.
+   */
+  /* ── the modal's inputs and its one way out ─────────────────────────────────────────────── */
+
+  const modalRow = modal ? rows.find((x) => x.key === modal.key) ?? null : null;
+  const modalCard = modalRow ? cardFor(modalRow.key) ?? null : null;
+
+  /**
+   * Everything the modal renders that it cannot derive.
+   *
+   * ⚠️ IT READS THE SAME ACCESSORS THE ROW DOES — `listRowInputs` for the agency, the anchor date
+   * and whether the ask was a partial; `replyWindow` for the agency's own figure. A second
+   * derivation here would let the modal and the row it opened from state different facts about one
+   * task, three inches apart.
+   */
+  const modalFacts = useMemo(() => {
+    const r = modalRow, c = modalCard;
+    const j = c ? modalJourney(c) : null;
+    if (!r || !c || !j) {
+      return { journey: "sent" as const, title: { pre: "", who: "", post: "" }, when: "",
+        agent: { name: "", initials: "", meta: "" }, partial: false, materials: "",
+        expected: null, remind: null, method: "Email" as const };
     }
-    seq.current += 1;
-    /* ⚠️ TWO WRITES, TWO DOORS, AND BOTH ARE THE APP'S OWN. "Close it" is `CLOSE_REASONS[0]` through
-       `commit` — the same reason the pane's close journey uses, so it lands under No reply in Closed
-       on both surfaces. "Nudge once more" cannot go through `commit`, because that routes on the
-       CARD's journey and a quiet card's is the close; it takes the nudge's own write instead, which
-       is the same `logNudge` by the same builders. */
-    if (choice === "close") {
-      ask({ id: seq.current, kind: "values", card: c, values: draftToValues(blankDraft(r), "close") });
-    } else {
-      ask({ id: seq.current, kind: "nudge", card: c });
-    }
-  };
+    const inputs = listRowInputs(c, taskData);
+    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+    const agent = agents.find((a) => a.id === (q?.agentId ?? c.agentId));
+    const win = replyWindow((q?.status as QueryStatus) ?? null, agent?.responseTimeWeeks);
+    const day = (n: number) => { const d = new Date(); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+    return {
+      journey: j,
+      title: r.title,
+      when: modalWhen(j, inputs.anchorDate, r.days, nudgeCount(r.queryId, activities)),
+      agent: {
+        name: c.who || "the agent",
+        initials: r.initials,
+        /* ⚠️ THE WINDOW IS STATED ONLY WHERE THE AGENCY STATED ONE — `replyWindow` carries that
+           flag, and a house figure presented as theirs is a guess wearing a fact's clothes. */
+        meta: [inputs.agency, win.stated ? `${Math.round(win.days / 7)}-week window` : null].filter(Boolean).join(" · "),
+      },
+      partial: inputs.partial,
+      materials: inputs.ask || (inputs.partial ? "Partial" : "Full manuscript"),
+      expected: win.days ? { date: day(win.days), hint: win.stated ? `Their ${Math.round(win.days / 7)}-week window` : "House estimate" } : null,
+      remind: win.days ? { date: day(win.days + 14), hint: "2 weeks after" } : null,
+      method: (q?.sendMethod as SendMethod) ?? "Email",
+    };
+  }, [modalRow, modalCard, taskData, queries, agents, activities]);
 
-  const openEditor = (r: TodoRow) => {
-    const c = cardFor(r.key);
-    if (!c) return;
-    setDrafts((ds) => ({ ...ds, [r.key]: ds[r.key] ?? blankDraft(r) }));
-    setPanels((ps) => ({ ...ps, [r.key]: { kind: "edit", mode: journeyFor(c) === "nudge" ? "nudge" : "sent" } }));
-  };
-
-  const save = (r: TodoRow, mode: "sent" | "nudge") => {
-    const c = cardFor(r.key);
-    if (!c) return;
+  /**
+   * The modal's answer, routed to the write that names it.
+   *
+   * ⚠️ FOUR ANSWERS, FOUR KINDS, AND NONE OF THEM ROUTES ON THE CARD (Nick, 21 Sep). `close` and
+   * `mute` are their own `CommitRequest` kinds for exactly that reason: `commitFromPane` routes on
+   * the CARD's journey, so a send card asking to close would land in the send arm.
+   *
+   * ⚠️ AND `allowDuplicate` RIDES THE REQUEST. If the banner is up, this press IS the writer's
+   * answer to the guard's question — see `onDuplicate` in `DashTaskCommit`.
+   */
+  const commitFromModal = (r: TodoRow, c: BoardCard, v: TaskModalValues) => {
     seq.current += 1;
-    ask({ id: seq.current, kind: "values", card: c, values: draftToValues(drafts[r.key] ?? blankDraft(r), mode) });
+    const id = seq.current;
+    const allow = !!warn;
+    setModal(null); setWarn(null);
+    if (v.answer.write === "close") { ask({ id, kind: "close", card: c, note: v.note || undefined }); return; }
+    if (v.answer.write === "mute") { ask({ id, kind: "mute", card: c }); return; }
+    /* "Nudge once more" on a quiet card — the nudge's own write, as before */
+    if (v.answer.write === "commit" && modalJourney(c) === "quiet") { ask({ id, kind: "nudge", card: c }); return; }
+    const mode = modalJourney(c) === "nudge" ? "nudge" as const : "sent" as const;
+    const draft: RowDraft = {
+      ...blankDraft(r),
+      materials: v.materials ? [v.materials] : blankDraft(r).materials,
+      also: v.also, sentDate: v.when, method: v.method,
+      expected: v.expected, remind: v.remind, note: v.note,
+    };
+    ask({ id, kind: "values", card: c, values: draftToValues(draft, mode), allowDuplicate: allow });
   };
 
   /**
@@ -380,16 +457,7 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
                   onQuickRef={(anchor) => { if (r.queryId) onQuickRef?.(r.queryId, anchor); }}
                   onSnooze={(anchor) => setSnooze({ key: r.key, anchor })}
                   onDismiss={() => dismiss(r)}
-                  onChange={() => openEditor(r)}
                   onUndo={() => undo(r)}
-                  onChoose={(choice) => choose(r, choice)}
-                  onSave={(mode) => save(r, mode)}
-                  onCancelEdit={() => closePanel(r.key)}
-                  editor={<TodoRowEditor
-                    mode={panels[r.key]?.kind === "edit" ? (panels[r.key] as { mode: "sent" | "nudge" }).mode : "sent"}
-                    draft={drafts[r.key] ?? blankDraft(r)}
-                    onChange={(d) => setDrafts((ds) => ({ ...ds, [r.key]: d }))}
-                  />}
                 />
               ))}
               {gi === 0 ? null : null}
@@ -416,21 +484,19 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
               const c = cardFor(key);
               /* the strip states the OUTCOME, which is what the request asked for — never the row's
                  category, which is what it was before the write */
-              const outcome = request.kind === "dismiss" ? "dismiss" as const
+              const outcome = request.kind === "dismiss" || request.kind === "mute" ? "dismiss" as const
                 : request.kind === "nudge" ? "nudge" as const
-                  : request.kind === "values" && request.values.reason ? "close" as const
-                    : c && journeyFor(c) === "nudge" ? "nudge" as const : "sent" as const;
-              setPanels((ps) => ({ ...ps, [key]: { kind: "strip", text: stripFor(r, logged, outcome), canChange: outcome === "sent" || outcome === "nudge" } }));
+                  : request.kind === "close" ? "close" as const
+                    : request.kind === "values" && request.values.reason ? "close" as const
+                      : c && modalJourney(c) === "nudge" ? "nudge" as const : "sent" as const;
+              /* ⚠️ THE STRIP CARRIES UNDO ALONE NOW (§9) — see the note where the editor was. */
+              setPanels((ps) => ({ ...ps, [key]: { kind: "strip", text: stripFor(r, logged, outcome), canChange: false } }));
               setUndos((u) => ({ ...u, [key]: undoFn }));
               holdCompletion(key, { logged, undo: undoFn });
               setRequest(null);
             }}
-            onDuplicate={(key, prompt) => {
-              const r = rows.find((x) => x.key === key);
-              if (r) setDrafts((ds) => ({ ...ds, [key]: ds[key] ?? blankDraft(r) }));
-              setPanels((ps) => ({ ...ps, [key]: { kind: "edit", mode: "sent", warn: prompt } }));
-              setRequest(null);
-            }}
+            /* §8 · the modal stays open and grows a banner; nothing was written */
+            onDuplicate={(key, prompt) => { setWarn(prompt); setModal((m) => m ?? { key, fromFeed: false }); setRequest(null); }}
             onFailed={(key, message) => {
               setPanels((ps) => { const n = { ...ps }; delete n[key]; return n; });
               setNote(message);
@@ -473,6 +539,53 @@ export const OneScreenTasks: React.FC<OneScreenTasksProps> = ({
               setUndos((u) => ({ ...u, [key]: undoFlag }));
               holdCompletion(key, { logged, undo: undoFlag });
             }}
+          />
+        </Suspense>
+      )}
+
+      {/**
+        * ⚠️ THE MODAL IS MOUNTED ONCE, BY THIS CARD, AND EVERY DOOR RAISES IT (§1). Three components
+        * each rendering their own would be three modals free to ask different questions about one
+        * task — the fault this page closed when two panes briefly coexisted.
+        */}
+      {modalRow && modalCard && (
+        <Suspense fallback={null}>
+          <TaskModal
+            facts={modalFacts}
+            /* §4 · the list you stepped in from, never a global — and absent from the feed door */
+            order={modal?.fromFeed ? null : {
+              index: rows.findIndex((x) => x.key === modalRow.key),
+              total: rows.length,
+              onPrev: () => { const i = rows.findIndex((x) => x.key === modalRow.key); if (i > 0) setModal({ key: rows[i - 1].key, fromFeed: false }); },
+              onNext: () => { const i = rows.findIndex((x) => x.key === modalRow.key); if (i < rows.length - 1) setModal({ key: rows[i + 1].key, fromFeed: false }); },
+            }}
+            fromFeed={!!modal?.fromFeed}
+            warn={warn}
+            busy={!!request}
+            onOpenQuery={() => { setModal(null); if (modalRow.queryId) onNavigate("queries", modalRow.queryId); }}
+            onClose={() => { setModal(null); setWarn(null); }}
+            onCommit={(v) => commitFromModal(modalRow, modalCard, v)}
+            /**
+             * ⚠️ THE SNOOZE ANSWER WRITES FROM THE DIAL, SO IT DOES NOT GO THROUGH `ask` — the dial
+             * owns its own commit, which is what makes it mountable anywhere, and a second request
+             * through `DashTaskCommit` would write the flag twice. It raises the same strip the
+             * anchored control does, so a task put off from the modal still leaves a way back.
+             */
+            renderSnooze={() => (
+              <Suspense fallback={null}>
+                <DashSnoozeInline
+                  card={modalCard}
+                  onPick={() => { setModal(null); setWarn(null); }}
+                  onSnoozed={(days, undoFlag) => {
+                    const key = modalRow.key;
+                    const logged = days === 1 ? "Put off until tomorrow." : `Put off for ${days} days.`;
+                    setPanels((ps) => ({ ...ps, [key]: { kind: "strip", text: stripFor(modalRow, logged, "dismiss"), canChange: false } }));
+                    setUndos((u) => ({ ...u, [key]: undoFlag }));
+                    holdCompletion(key, { logged, undo: undoFlag });
+                  }}
+                />
+              </Suspense>
+            )}
           />
         </Suspense>
       )}

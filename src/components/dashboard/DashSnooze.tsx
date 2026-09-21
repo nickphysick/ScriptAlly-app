@@ -31,7 +31,7 @@
  * footer says so; nothing here writes a status, a date or an activity.
  */
 import React from "react";
-import { SnoozeDial } from "../todo/SnoozeDial";
+import { SnoozeDial, SnoozeDialBody } from "../todo/SnoozeDial";
 import { useScriptAllyDb } from "../../lib/db";
 import { flagKeyForTask } from "../../lib/taskFlags";
 import type { BoardCard } from "../../lib/todoBoard";
@@ -73,6 +73,41 @@ export const DashSnooze: React.FC<{
            the date alone leaves the bump behind, so the task comes back already counted as having
            been put off once, and the next snooze starts from the wrong rung. */
         onSnoozed(days, () => { void db.upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); });
+      }}
+    />
+  );
+};
+
+/**
+ * The same dial, inside the task modal rather than anchored to a control (task-modal round §6).
+ *
+ * ⚠️ IT IS `SnoozeDialBody`, NOT A SECOND DIAL. `SnoozeDial` is the body plus a positioned shell —
+ * `useFixedMenu`, a scrim, an anchor — and inside a modal every one of those is wrong: there is
+ * nothing to anchor to, and a popover over a modal is a second overlay competing for Escape. The
+ * body was already exported for exactly this kind of host.
+ *
+ * ⚠️ AND IT MAKES THE SAME TWO WRITES AS THE ANCHORED ONE, through the same pair, so a task put off
+ * from the modal and one put off from the row's control are the same record with the same way back.
+ */
+export const DashSnoozeInline: React.FC<{
+  card: BoardCard | null;
+  onPick: (days: number) => void;
+  onSnoozed?: (days: number, undo: () => void) => void;
+}> = ({ card, onPick, onSnoozed }) => {
+  const db = useScriptAllyDb();
+  if (!card) return null;
+  return (
+    <SnoozeDialBody
+      card={card}
+      onSnooze={(days) => {
+        if (!card.taskType || !card.relatedRecordId) { onPick(days); return; }
+        const key = flagKeyForTask(card.taskType, card.relatedRecordId);
+        void db.upsertTaskFlag(key, {
+          snoozedUntil: new Date(Date.now() + days * 86400000).toISOString(),
+          bumpSnooze: true,
+        });
+        onSnoozed?.(days, () => { void db.upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); });
+        onPick(days);
       }}
     />
   );

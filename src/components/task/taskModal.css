@@ -1,0 +1,308 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The task modal — the app's one surface for finishing a task (task-modal round, 21 Sep;
+ * ref `task-modal.html`).
+ *
+ * ⚠️ IT DECLARES ITS OWN PALETTE, AND THAT IS NOT DUPLICATION FOR ITS OWN SAKE. The modal is
+ * PORTALLED to `document.body` so it can escape three different columns' clipping — which puts it
+ * outside `.os-root`, where every `--dash-*` lives. A `var(--dash-hair)` here resolves to NOTHING
+ * and the declaration is dropped in silence: hairlines simply absent, through a green build and a
+ * green suite. `queryCard.css` carries the same block for the same reason, and learned it the same
+ * way. Everything is stated on `.tm` itself so the modal carries its palette wherever it mounts.
+ *
+ * ⚠️ THE THREE TIMINGS ARE TOKENS BECAUSE THE COMPONENT READS THEM TOO. The exit has to outlive its
+ * own animation — React must keep the element mounted until the 160ms has run — so the duration is
+ * stated once here and once as a constant beside it, and a lock asserts they agree. Two numbers for
+ * one fact is how a modal comes to vanish mid-fade.
+ */
+.tm-scope {
+  /* the palette — see the header */
+  --tm-page: #f5f1eb;
+  --tm-parchment: #fdf9f5;
+  --tm-ink: #1c130f;
+  --tm-ink-70: rgba(28, 19, 15, 0.7);
+  --tm-ink-45: rgba(28, 19, 15, 0.45);
+  --tm-hair: rgba(28, 19, 15, 0.11);
+  --tm-frame: #7c3a2a;
+  --tm-rose: #f5e6df;
+  --tm-sand: #f7efe3;
+  --tm-stone: #e4e1db;
+  --tm-rust: #8a4a3c;
+
+  /* §1 · the one width, and the cap that keeps a long body inside the viewport */
+  --tm-w: 680px;
+  --tm-cap: calc(100vh - 60px);
+  /* §2 · the backdrop */
+  --tm-dim: rgba(28, 19, 15, 0.34);
+  /* §3 · the three timings */
+  --tm-t-dim: 220ms;
+  --tm-t-rise: 320ms;
+  --tm-t-exit: 160ms;
+  --tm-t-swap: 180ms;
+  --tm-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── the backdrop ─────────────────────────────────────────────────────────────────────────── */
+.tm-dim {
+  position: fixed; inset: 0; z-index: 60;
+  background: var(--tm-dim);
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+  animation: tmDimIn var(--tm-t-dim) ease-out both;
+}
+@keyframes tmDimIn { from { opacity: 0 } to { opacity: 1 } }
+
+/* ── the modal ────────────────────────────────────────────────────────────────────────────── */
+.tm {
+  position: fixed; left: 50%; top: 50%; z-index: 61;
+  transform: translate(-50%, -50%);
+  width: var(--tm-w); max-width: calc(100vw - 32px);
+  max-height: var(--tm-cap);
+  display: flex; flex-direction: column;
+  font-family: var(--font-sans), "Source Sans Pro", sans-serif;
+  color: var(--tm-ink);
+  /* ⚠️ THE DELAY IS THE POINT OF THE ENTRANCE (§3). The backdrop starts alone; 60ms later the
+     modal rises into a page that has already begun to recede. Both together reads as one flat
+     appearance, which is what the sequencing exists to avoid. */
+  animation: tmRise var(--tm-t-rise) var(--tm-ease) 60ms both;
+}
+@keyframes tmRise {
+  from { opacity: 0; transform: translate(-50%, -50%) translateY(22px) scale(0.975) }
+  to { opacity: 1; transform: translate(-50%, -50%) translateY(0) scale(1) }
+}
+
+/* ⚠️ THE EXIT REVERSES BOTH TOGETHER, WITH NO DELAY (§3) — leaving is one movement. A staggered
+   exit reads as the modal hesitating. */
+.tm-scope--leaving .tm-dim { animation: tmDimIn var(--tm-t-exit) ease-in both reverse }
+.tm-scope--leaving .tm { animation: tmRise var(--tm-t-exit) ease-in both reverse }
+
+/* ⚠️ PREV/NEXT DOES NOT RE-RUN THE ENTRANCE (§3). The modal is already open and has not moved; only
+   its contents change, so only its contents cross-fade. Re-playing the rise would say a new window
+   had opened, which is precisely the thing stepping through a list must not say. */
+.tm-body-swap { animation: tmSwap var(--tm-t-swap) ease-out both }
+@keyframes tmSwap { from { opacity: 0 } to { opacity: 1 } }
+
+@media (prefers-reduced-motion: reduce) {
+  .tm-dim, .tm, .tm-scope--leaving .tm-dim, .tm-scope--leaving .tm, .tm-body-swap { animation: none }
+}
+
+/* the mount: parchment rim, burgundy frame, white page — the app's card grammar at modal scale */
+.tm-mount {
+  background: var(--tm-parchment);
+  border-radius: 18px; padding: 7px;
+  box-shadow: 0 30px 80px rgba(28, 19, 15, 0.3);
+  display: flex; flex-direction: column; min-height: 0;
+}
+.tm-frame {
+  border: 1px solid var(--tm-frame); border-radius: 12px; background: #ffffff;
+  overflow: hidden; display: flex; flex-direction: column; min-height: 0;
+}
+
+/* ── §4 · the top bar ─────────────────────────────────────────────────────────────────────── */
+.tm-top {
+  flex: none;
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 18px; border-bottom: 1px solid var(--tm-hair); background: var(--tm-parchment);
+}
+.tm-tag {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase;
+  background: var(--tm-rose); border-radius: 14px; padding: 5px 11px;
+}
+.tm-tag--sand { background: var(--tm-sand) }
+.tm-tag--stone { background: var(--tm-stone) }
+.tm-of {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--tm-ink-45);
+}
+.tm-topr { margin-left: auto; display: flex; gap: 6px; align-items: center }
+.tm-topr button {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid var(--tm-hair); background: #ffffff;
+  display: flex; align-items: center; justify-content: center;
+  font: inherit; font-size: 12px; color: var(--tm-ink-70); cursor: pointer;
+}
+.tm-topr button:disabled { opacity: 0.4; cursor: default }
+.tm-topr button:hover:not(:disabled) { background: var(--tm-page) }
+.tm-esc {
+  width: auto !important; padding: 0 11px; border-radius: 16px !important;
+  font-family: "JetBrains Mono", monospace; font-size: 9px !important; letter-spacing: 0.1em;
+}
+.tm-topr button:focus-visible { outline: 2px solid var(--tm-frame); outline-offset: 2px }
+
+/* ── §5 · the head ────────────────────────────────────────────────────────────────────────── */
+.tm-head {
+  flex: none;
+  display: grid; grid-template-columns: minmax(0, 1fr) 132px; column-gap: 26px; align-items: center;
+  padding: 22px 24px 20px; border-bottom: 1px solid var(--tm-hair);
+  background: linear-gradient(to bottom, var(--tm-parchment), #ffffff);
+}
+.tm-ttl { min-width: 0 }
+/**
+ * ⚠️ 25px / 1.32, NOT THE 24 / 1.3 THE REF RENDERS. `.head h2` is declared TWICE in the mockup and
+ * the browser takes the second — measured in the rendered ref, `24px / 31.2px`. The brief states
+ * 25 / 1.32 and a reasoned value in prose beats an unreasoned one in an artefact (Nick, 21 Sep:
+ * *"mine, and I should have caught it"*). `text-wrap: balance` survived in the ref only because the
+ * second copy happens not to set it.
+ *
+ * ⚠️ AND 1.32 IS ABOVE THE HOUSE FLOOR FOR A REASON: mixed-case Playfair under 1.3 crops its
+ * descenders, and a task sentence is full of agent names and manuscript titles.
+ */
+.tm-head h2 {
+  margin: 0;
+  font-family: var(--os-type, "Special Elite", cursive); font-weight: 400;
+  font-size: 25px; line-height: 1.32; text-wrap: balance;
+}
+.tm-head h2 em {
+  font-style: normal; text-decoration: underline; text-underline-offset: 5px;
+  text-decoration-color: rgba(124, 58, 42, 0.35);
+}
+.tm-when { margin: 8px 0 0; font-size: 14px; color: var(--tm-ink-70) }
+.tm-agent {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--tm-hair);
+}
+.tm-av {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: #ffffff; border: 1px solid var(--tm-hair);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--tm-ink-70); flex-shrink: 0;
+}
+.tm-agent b { font-size: 14px; font-weight: 600 }
+.tm-ameta {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tm-ink-45);
+}
+.tm-open {
+  margin-left: auto; font: inherit; font-size: 12.5px; color: var(--tm-ink-70);
+  background: none; border: 0; padding: 0; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;
+}
+/* ⚠️ THE PLACEHOLDER IS THE SAME 132px BOX THE ARTWORK WILL BE, so the day it lands nothing moves —
+   the rule this repo already applies to the dashboard's quick-action tiles. */
+.tm-ill {
+  width: 132px; height: 132px;
+  border: 1px dashed rgba(28, 19, 15, 0.28); border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: "JetBrains Mono", monospace; font-size: 8px; color: rgba(28, 19, 15, 0.5);
+  text-align: center; line-height: 1.35; background: #ffffff;
+}
+
+/* ── §6 · the body ────────────────────────────────────────────────────────────────────────── */
+.tm-bd { padding: 18px 22px; overflow-y: auto; min-height: 0 }
+.tm-q {
+  display: flex; align-items: center; gap: 9px; margin: 0 0 12px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--tm-ink-70);
+}
+.tm-q i { width: 7px; height: 7px; border-radius: 50%; background: var(--tm-rust); display: block }
+
+.tm-opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px }
+.tm-opt {
+  display: flex; flex-direction: column; gap: 8px; text-align: left;
+  background: #ffffff; border: 1px solid var(--tm-hair); border-radius: 12px;
+  padding: 14px; cursor: pointer; font: inherit; color: inherit;
+}
+.tm-opt .tm-ic {
+  width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--tm-hair);
+  display: flex; align-items: center; justify-content: center; background: var(--tm-page);
+  color: var(--tm-ink);
+}
+.tm-opt b { font-size: 14.5px; font-weight: 600; line-height: 1.25 }
+.tm-opt .tm-why { font-size: 12.5px; color: var(--tm-ink-70); line-height: 1.4 }
+.tm-opt .tm-rec {
+  margin-top: auto;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tm-ink-45);
+}
+.tm-opt[aria-pressed="true"] {
+  border-color: var(--tm-frame);
+  box-shadow: 0 0 0 3px var(--tm-parchment), 0 0 0 4px rgba(124, 58, 42, 0.3);
+}
+.tm-opt:focus-visible { outline: 2px solid var(--tm-frame); outline-offset: 2px }
+
+/* §8 · the duplicate-send banner, above the form */
+.tm-warn {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--tm-rose); border-radius: 10px; padding: 11px 14px;
+  font-size: 13.5px; margin-bottom: 14px;
+}
+
+.tm-form {
+  background: var(--tm-parchment); border: 1px solid var(--tm-hair);
+  border-radius: 12px; overflow: hidden;
+}
+.tm-fr {
+  display: grid; grid-template-columns: 130px 1fr; gap: 14px; align-items: center;
+  padding: 12px 16px; border-bottom: 1px solid var(--tm-hair); background: #ffffff;
+}
+.tm-fr:last-child { border-bottom: 0 }
+.tm-k {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--tm-ink-45);
+}
+.tm-v { font-size: 14.5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.tm-hint {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tm-ink-45);
+}
+.tm-pc {
+  border: 1px solid var(--tm-hair); border-radius: 16px; padding: 6px 13px;
+  font: inherit; font-size: 13px; background: var(--tm-page); cursor: pointer; color: inherit;
+}
+.tm-pc--on { background: var(--tm-ink); color: var(--tm-page); border-color: var(--tm-ink) }
+.tm-pc--link {
+  border-color: transparent; background: transparent; color: var(--tm-ink-70);
+  text-decoration: underline; text-underline-offset: 3px; padding-left: 2px;
+}
+.tm-pc:focus-visible { outline: 2px solid var(--tm-frame); outline-offset: 2px }
+input.tm-pc { font-size: 13px }
+
+.tm-adds { display: flex; gap: 18px; margin-top: 12px; flex-wrap: wrap }
+.tm-adds button {
+  font: inherit; font-size: 13px; color: var(--tm-ink-70);
+  background: none; border: 0; padding: 0; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 4px;
+}
+.tm-note {
+  width: 100%; margin-top: 10px; font: inherit; font-size: 14px;
+  border: 1px solid var(--tm-hair); border-radius: 9px; padding: 9px 11px;
+  background: #ffffff; color: inherit; min-height: 62px; resize: vertical;
+}
+.tm-also { width: 100%; min-height: 0; resize: none }
+
+/* ── §7 · the footer ──────────────────────────────────────────────────────────────────────── */
+.tm-foot {
+  flex: none;
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 22px; border-top: 1px solid var(--tm-hair); background: var(--tm-parchment);
+}
+.tm-foot .tm-rec {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--tm-ink-45);
+}
+.tm-footr { margin-left: auto; display: flex; gap: 10px; align-items: center }
+.tm-b {
+  font: inherit; font-size: 14px; border-radius: 24px; padding: 10px 18px;
+  border: 1px solid var(--tm-hair); background: #ffffff; cursor: pointer; color: inherit;
+}
+.tm-b--ink { background: var(--tm-ink); color: var(--tm-page); border-color: var(--tm-ink) }
+.tm-b--quiet { border-color: transparent; color: var(--tm-ink-70) }
+.tm-b:disabled { opacity: 0.5; cursor: default }
+.tm-b:focus-visible { outline: 2px solid var(--tm-frame); outline-offset: 2px }
+
+/* the snooze dial, hosted inside the body rather than anchored to anything (§6) */
+.tm-snooze { border: 1px solid var(--tm-hair); border-radius: 12px; overflow: hidden }
+
+/* ⚠️ ONE STEP, AND IT IS THE ANSWER CARDS. At 1280 the modal is still 680px with room to spare;
+   what a narrow window costs is three 200px cards side by side, which is the only part of this
+   layout that cannot simply reflow. */
+@media (max-width: 760px) {
+  .tm-opts { grid-template-columns: 1fr }
+  .tm-opt { flex-direction: row; align-items: center; gap: 12px }
+  .tm-opt .tm-rec { margin-top: 0; margin-left: auto; text-align: right }
+  .tm-head { grid-template-columns: minmax(0, 1fr); row-gap: 16px }
+  .tm-ill { display: none }
+}

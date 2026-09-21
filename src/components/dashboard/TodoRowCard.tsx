@@ -55,9 +55,10 @@ export const journeyFor = (card: BoardCard): TodoJourney => {
 
 /** the panel a row is showing beneath itself — at most one, by construction */
 export type RowPanel =
-  | { kind: "menu" }
-  | { kind: "strip"; text: React.ReactNode; canChange: boolean }
-  | { kind: "edit"; mode: "sent" | "nudge"; warn?: string };
+  | { kind: "strip"; text: React.ReactNode; canChange: boolean };
+
+/* ⚠️ `menu` AND `edit` ARE GONE WITH THE MODAL (task-modal round §11). A row shows a receipt or it
+   shows nothing; every question is asked in the modal now. */
 
 export interface TodoRowCardProps {
   row: TodoRow;
@@ -68,13 +69,7 @@ export interface TodoRowCardProps {
   onQuickRef: (anchor: HTMLElement) => void;
   onSnooze: (anchor: HTMLElement) => void;
   onDismiss: () => void;
-  onChange: () => void;
   onUndo: () => void;
-  onChoose: (choice: "close" | "nudge" | "snooze") => void;
-  onSave: (mode: "sent" | "nudge") => void;
-  onCancelEdit: () => void;
-  /** the editor's own fields — supplied by the card so one row's draft cannot outlive it */
-  editor: React.ReactNode;
 }
 
 const Tick = () => (
@@ -119,8 +114,7 @@ const QUIET_CHOICES: { key: "close" | "nudge" | "snooze"; title: string; why: st
 const plain = (r: TodoRow): string => `${r.title.pre}${r.title.who}${r.title.post}`.replace(/\s+/g, " ").trim();
 
 export const TodoRowCard: React.FC<TodoRowCardProps> = ({
-  row, panel, peeking, onTick, onQuickRef, onSnooze, onDismiss,
-  onChange, onUndo, onChoose, onSave, onCancelEdit, editor,
+  row, panel, peeking, onTick, onQuickRef, onSnooze, onDismiss, onUndo,
 }) => {
   const refRef = useRef<HTMLButtonElement>(null);
   const snoozeRef = useRef<HTMLButtonElement>(null);
@@ -131,26 +125,6 @@ export const TodoRowCard: React.FC<TodoRowCardProps> = ({
   const done = !!row.done || panel?.kind === "strip";
   const ticked = done || !!panel;
   const open = !!panel || peeking;
-
-  /**
-   * ⚠️ ESCAPE AND A CLICK AWAY UNTICK THE MENU, because nothing has been written yet — the box is
-   * on to show which row is being asked about, and leaving it on over an unanswered question would
-   * be the app claiming a completion the writer never chose.
-   */
-  useEffect(() => {
-    if (panel?.kind !== "menu") return;
-    const key = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); onCancelEdit(); } };
-    const away = (e: PointerEvent) => {
-      if (!menuRef.current || menuRef.current.contains(e.target as Node)) return;
-      onCancelEdit();
-    };
-    document.addEventListener("keydown", key, true);
-    document.addEventListener("pointerdown", away, true);
-    return () => {
-      document.removeEventListener("keydown", key, true);
-      document.removeEventListener("pointerdown", away, true);
-    };
-  }, [panel?.kind, onCancelEdit]);
 
   const fig = row.days === null ? null : elapsedParts(row.days);
 
@@ -164,7 +138,6 @@ export const TodoRowCard: React.FC<TodoRowCardProps> = ({
       <button
         type="button" className={`os-tdbox${ticked ? " os-tdbox--on" : ""}`} data-probe="todo-tick"
         aria-label={row.done ? `${row.done.logged} — ${plain(row)}` : `Complete: ${plain(row)}`}
-        aria-expanded={panel?.kind === "menu" ? true : undefined}
         onClick={onTick}
       ><Tick /></button>
 
@@ -203,39 +176,14 @@ export const TodoRowCard: React.FC<TodoRowCardProps> = ({
         <div className="os-tdstrip" data-probe="todo-strip" role="status">
           <span className="os-tdstriptx">{panel.text}</span>
           <span className="os-tdsp" />
-          {panel.canChange && <button type="button" data-probe="todo-change" onClick={onChange}>Change</button>}
+          {/* ⚠️ UNDO ALONE (§9). `Change` re-opened the in-row editor, which is retired: a receipt
+              is a record rather than a form, and changing something means Undo then tick again, or
+              opening the query. `canChange` survives on the type for one release so a host that
+              still sets it does not fail to compile — nothing reads it. */}
           <button type="button" data-probe="todo-undo" onClick={onUndo}>Undo</button>
         </div>
       )}
 
-      {panel?.kind === "menu" && (
-        <div className="os-tdmenu" data-probe="todo-menu" role="group" aria-label="What would you like to do?" ref={menuRef}>
-          <p className="os-tdmh">What would you like to do?</p>
-          {QUIET_CHOICES.map((c) => (
-            <button type="button" className="os-tdmi" key={c.key} data-probe={`todo-choice-${c.key}`}
-              onClick={() => onChoose(c.key)}>
-              <span className="os-tdic"><c.ico /></span>
-              <span>{c.title}<small>{c.why}</small></span>
-              <span className="os-tdwhat">{c.what}</span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {panel?.kind === "edit" && (
-        <div className="os-tdedit" data-probe="todo-edit">
-          {panel.warn && <p className="os-tdwarn" data-probe="todo-warn">{panel.warn}</p>}
-          {editor}
-          <div className="os-tdef">
-            <span className="os-tdrec" data-probe="todo-records">
-              {panel.mode === "nudge" ? "This records a nudge" : "This records a send"}
-            </span>
-            <button type="button" className="os-tdb os-tdb--quiet" onClick={onCancelEdit}>Cancel</button>
-            <button type="button" className="os-tdb os-tdb--ink" data-probe="todo-save"
-              onClick={() => onSave(panel.mode)}>{panel.warn ? "Log it anyway" : "Save"}</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
