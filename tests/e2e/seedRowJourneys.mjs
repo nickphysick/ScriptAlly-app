@@ -51,7 +51,7 @@ const uid = user.uid;
 const iso = (d) => new Date(Date.now() - d * 86400000).toISOString();
 const q = (id) => doc(db, "users", uid, "queries", id);
 const a = (id) => doc(db, "users", uid, "agents", id);
-const IDS = ["rj-send", "rj-dupe"];
+const IDS = ["rj-send", "rj-dupe", "rj-nudge"];
 const AGENTS = ["rj-agent-1", "rj-agent-2", "rj-agent-3"];
 
 /**
@@ -146,19 +146,29 @@ await setDoc(doc(db, "users", uid, "activities", "rj-dupe-sent"), {
 });
 
 /**
- * ⚠️ NO NUDGE FIXTURE HERE, AND THE ATTEMPT IS RECORDED BECAUSE THE NEXT PERSON WILL TRY IT TOO.
- * `nudge_overdue` is a DERIVED `Task`, built in `db.tsx`'s generator, which chooses between a CLOSE
- * suggestion and a NUDGE for the same query. Two seeds were tried and both came back as closes: a
- * query 84 days out against a 6-week window (long past it), and one 70 days out against a 16-week
- * window (still inside it), each carrying `lastNudgeSentDate` and a `nudgeDate` two days in the
- * past — which the generator's own comment calls *"the writer's own reminder date — raises the SAME
- * nudge when it arrives"*. Both landed in "Gone quiet".
+ * ⚠️ THE NUDGE FIXTURE IS A QUERY THAT HAS NEVER BEEN CHASED, and the two that failed before it
+ * both carried `lastNudgeSentDate` — which is why the generator raised CLOSES. Nick, 21 Sep: *"a
+ * query that's already been chased and is past its next nudge date is gone quiet by the product's
+ * own logic."* That is the rule stated plainly, and both earlier seeds were arguing with it:
  *
- * So the input that flips that decision is something else — `noResponseMeansNo` on the agent,
- * `scheduledReminder` over `userTasks`, or `repliedSinceMs` — and finding it is a job for whoever
- * next needs the nudge journey on a page, not a guess to leave seeded. **A fixture that raises the
- * wrong card is worse than none: it adds a fourth quiet row and looks like it worked.**
+ *   · 84 days out, 6-week window, ALREADY NUDGED 30 days ago, check-back 3 days past → a close.
+ *   · 70 days out, 16-week window, ALREADY NUDGED 30 days ago, check-back 2 days past → a close.
+ *
+ * Worth a nudge is the state BEFORE any of that: past the reply window, never chased, no reply. So
+ * this carries no `lastNudgeSentDate` and no `nudgeDate` at all — their ABSENCE is the fixture.
+ *
+ * ⚠️ AND IT IS NAMED AS A PROBE ON PURPOSE. "Tamsin Probewell · Probe & Nightingale" cannot be
+ * mistaken for the harness's own seeded agents while it is on the board, and a screenshot of it
+ * says what it is. `--clean` removes it; nothing else on the account looks like it.
  */
+const NUDGE_WEEKS = 6;
+await setDoc(a("rj-agent-3"), agent("rj-agent-3", "Tamsin Probewell", "Probe & Nightingale", NUDGE_WEEKS));
+await setDoc(q("rj-nudge"), {
+  id: "rj-nudge", userId: uid, agentId: "rj-agent-3", manuscriptId: MS, packageId: "",
+  status: "Queried", sendMethod: "Email", personalisationNotes: "",
+  /* 84 days against a 42-day window: six weeks past it, and never chased */
+  dateSent: iso(84), lastStatusChange: iso(84),
+});
 
 /**
  * ⚠️ AND THE FEED'S "Send it →" IS OFFERED BY `markSentOffered`, WHICH NEEDS A REQUEST EVENT IN THE
@@ -173,5 +183,5 @@ await setDoc(doc(db, "users", uid, "activities", "rj-send-asked"), {
   description: "Imogen Vale asked for the full manuscript",
 });
 
-console.log(`seeded rj-send (never sent, with a request in the feed), rj-dupe (already has a full send); cleared ${cleared} task flags`);
+console.log(`seeded rj-send (never sent, with a request in the feed), rj-dupe (already has a full send), rj-nudge (never chased); cleared ${cleared} task flags`);
 process.exit(0);

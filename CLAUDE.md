@@ -564,6 +564,17 @@ be two surfaces free to offer different verbs for one card — the fault this pa
 when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its own pass **once the
 `QueryCard` carries the rail, the timeline and the tiles**, which is what it should absorb.
 
+- **⚠️ WORTH A NUDGE = PAST THE REPLY WINDOW, NEVER NUDGED. GONE QUIET = PAST THE WINDOW, ALREADY
+  NUDGED, AND PAST THE NEXT NUDGE DATE.** (Nick, 21 Sep.) **The generator agrees** — checked rather
+  than assumed: a query 84 days out against a stated 6-week window with **no `lastNudgeSentDate` and
+  no `nudgeDate`** raises `nudge_overdue` and lands in *Worth a nudge*; the same query carrying a
+  past `lastNudgeSentDate` and a past check-back raises `no_response_close` and lands in *Gone
+  quiet*. No disagreement to record.
+  - **⚠️ AND THAT IS WHY TWO EARLIER FIXTURES FAILED TO RAISE A NUDGE — they were arguing with the
+    rule.** Both carried `lastNudgeSentDate` plus a past `nudgeDate` (84 days / 6-week window, and
+    70 days / 16-week window) and both came back closes, which is the product being correct. **The
+    absence of those two fields IS the fixture**; adding them describes a different state. Neither
+    `noResponseMeansNo`, `scheduledReminder` nor `repliedSinceMs` was deciding it.
 - **⚠️ ON THE TO-DO PAGE THE PANE STILL DOES BOTH, AND THAT IS THE STATED INTERIM (Nick, 21 Sep).**
   One asking surface per page holds; it is simply a different one there for now. That page's cards
   open the pane, and the pane's primary routes on `activeFlow.writes` — *the flow declares the
