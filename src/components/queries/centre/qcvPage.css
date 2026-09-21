@@ -55,15 +55,15 @@
 .qcv-own :where(span, p, div, label):where(:not(.qcv-legacy, .qcv-legacy *)) { font-family: inherit; }
 .qcv-log .sp-inkpill-l { font-family: var(--qcv-type); }
 
-/* ── head: on the cream, no panel behind it ── */
+/* ── head: on the cream, no panel behind it ──
+   ⚠️ A BLOCK, NOT A TWO-COLUMN GRID (v21 §2). The title, the facts line and the action row stack;
+   `position: relative` is the back link's containing block, which the Overview phase hangs at the
+   head's top-right. */
 .qcv-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  column-gap: 24px;
+  display: block;
+  position: relative;
   margin: 0 0 22px;
 }
-.qcv-head-copy { min-width: 0; }
 .qcv-page .qcv-title {
   margin: 0;
   font-family: var(--qcv-type) !important;
@@ -82,6 +82,30 @@
 /* "+ Log a query" is the shared anthracite pill at the head's own padding: the brief's prose says
    22/18, the ref's rendered button is 26/22 and measures the stated 154 × 50 — the rendered page wins. */
 .qcv-log.sp-inkpill { padding: 0 26px 0 22px; }
+
+/* the action row: both pills, 16px under the facts line, left-aligned */
+.qcv-hr { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+/**
+ * "Record a response" — the anthracite pill's twin in size and face, in the card's own clothes: a
+ * white fill, a white rim and the burgundy frame, drawn as two inset shadows so the button's box is
+ * the 190 × 50 it states rather than 190 plus borders.
+ *
+ * ⚠️ THE FRAME COLOUR IS A DOCUMENTED COPY OF `--fc-frame`, NOT A `var()` READ OF IT. That token is
+ * declared on `.fc` (containers/framedCard.css) and the head is not a card, so a read here resolves
+ * to nothing and — inside a `box-shadow` — paints an invisible ring with the rule looking perfectly
+ * correct. `qcCentre.test.tsx` asserts the two agree, which is the same arrangement the marketing
+ * tier's `--mk-hero-ground` has with `--ws-ground` and for the same reason.
+ */
+.qcv-page { --qcv-frame: #7c3a2a; }
+.qcv-ghostpill {
+  display: flex; align-items: center; height: 50px; padding: 2px 22px 0;
+  border: 0; border-radius: 30px; background: #ffffff; color: var(--qcv-ink);
+  font-family: var(--qcv-type); font-size: 16px; line-height: 1; cursor: pointer; white-space: nowrap;
+  box-shadow: var(--qcv-shadow), inset 0 0 0 5px #ffffff, inset 0 0 0 6px var(--qcv-frame);
+}
+.qcv-ghostpill:hover { background: var(--qcv-parchment); }
+.qcv-ghostpill:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 3px; }
+.qcv-ghostpill:disabled { opacity: 0.5; cursor: default; }
 
 /* ── the control row: a sentence, and the view switch ── */
 .qcv-ctl { display: flex; align-items: center; gap: 20px; margin: 24px 0 14px; min-height: 42px; }
@@ -150,8 +174,10 @@
 
 /* ── below 900px of main column the docked column goes (the page sets the class by MEASURING the
    column, never the window): the closed card sits under the live one ── */
-.qcv-page--narrow .qcv-head { grid-template-columns: minmax(0, 1fr); row-gap: 14px; }
-.qcv-page--narrow .qcv-head .qcv-log { justify-self: start; }
+/* ⚠️ THE NARROW HEAD NEEDS NO RULE NOW. It carried `grid-template-columns` and a `justify-self` to
+   drop the lone pill under the title; the head is a block and the actions are their own left-aligned
+   row at every width, so both were describing a layout that no longer exists. Deleted rather than
+   left inert — a rule with no subject is what the next reader tunes. */
 .qcv-page--narrow .qcv-ctl { flex-wrap: wrap; }
 .qcv-page--narrow .qcv-page .qcv-title, .qcv-page--narrow.qcv-page .qcv-title { font-size: 36px; }
 

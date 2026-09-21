@@ -81,7 +81,7 @@ import { QueryEmptyFeatures } from "./queries/QueryEmptyFeatures";
 import { heroBookTitle } from "./queries/queryEmptyCopy";
 import { gridEmptyKind, waitingSummary, waitingLine } from "../lib/queryGridEmpty";
 import "./queries/queryViewSwitch.css"; /* position-pinned, as above: the Contact list and To-do still mount the switch */
-import { QcCentre, QC_VIEW_KEY, readQcView, type QcView } from "./queries/centre/QcCentre";
+import { QcCentre, clearQcViewMemory, DEFAULT_QC_VIEW, readQcView, type QcView } from "./queries/centre/QcCentre";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcSummary } from "./queries/centre/QcSummary";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
@@ -2120,21 +2120,19 @@ export const Queries: React.FC<{
    * not navigate, so it cannot fight the router), and the effect re-asserts it whenever a `?q=`
    * navigation drops it. Read once on mount, defaulting to Grid.
    */
-  /* ⚠️ v11 (19 Sep): THREE VIEWS — List (the default), Calendar, Grid. BOARD IS REMOVED, and the
-     memory is per DEVICE now (`localStorage`), where it was per session. `readQcView` owns the read
-     order (`?view=` → this device → the old session key → List) and maps a remembered `board`, or
-     anything else it does not know, to List. `?view=` is still only a REFLECTION, written with
-     `replaceState`; List is the default, so List is the view the URL does not state. */
+  /* ⚠️ v21 (21 Sep): THE VIEW MEMORY IS GONE AND THE URL IS THE ONLY SOURCE. `readQcView` reads
+     `?view=` and nothing else; `clearQcViewMemory` removes the retired per-device key so a later
+     reader cannot find it and honour it again. Three views, renamed as LABELS only — Ledger (`list`,
+     the default), List (`grid`), Calendar — so every bookmarked `?view=grid` still means the card
+     grid. `?view=` remains a REFLECTION written with `replaceState`, for the reason above. */
   const [gridView, setGridView] = useState<QcView>(() => {
-    try {
-      return readQcView(window.location.search, localStorage.getItem(QC_VIEW_KEY), sessionStorage.getItem(QC_VIEW_KEY));
-    } catch { return "list"; }
+    try { return readQcView(window.location.search); } catch { return DEFAULT_QC_VIEW; }
   });
+  useEffect(() => { clearQcViewMemory(); }, []);
   useEffect(() => {
-    try { localStorage.setItem(QC_VIEW_KEY, gridView); } catch { /* a private window: List next time */ }
     try {
       const url = new URL(window.location.href);
-      const want = gridView === "list" ? null : gridView;
+      const want = gridView === DEFAULT_QC_VIEW ? null : gridView;
       if ((url.searchParams.get("view") ?? null) !== want) {
         if (want) url.searchParams.set("view", want); else url.searchParams.delete("view");
         window.history.replaceState(window.history.state, "", url.toString());
@@ -6238,6 +6236,8 @@ export const Queries: React.FC<{
             entering={qcLoad.entering}
             headLine={qcHeadLine}
             onLog={() => onNavigate?.("queries", "Log a query")}
+            /* the app-level Record-a-response host in App.tsx — an interception, never a navigation */
+            onRecord={() => onNavigate?.("queries", "Record a response")}
             /* a re-entry point that is already drafting says so rather than looking live and doing nothing */
             logDisabled={creating}
             logRef={logTriggerRef}

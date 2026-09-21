@@ -17,7 +17,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { DOCK_MIN_COLUMN, QC_VIEWS, QcCentre, readQcView } from "./QcCentre";
+import { DEFAULT_QC_VIEW, DOCK_MIN_COLUMN, QC_VIEWS, QcCentre, qcViewLabel, readQcView } from "./QcCentre";
 
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const read = (rel: string) => readFileSync(join(process.cwd(), rel), "utf8");
@@ -30,31 +30,41 @@ const rule = (sel: string) => {
 };
 
 const frame = (over: Partial<React.ComponentProps<typeof QcCentre>> = {}) => renderToStaticMarkup(
-  <QcCentre loading={false} entering={false} headLine="Every query, from the first letter to the last reply." onLog={() => {}} summary={<div id="sum" />}
+  <QcCentre loading={false} entering={false} headLine="Every query, from the first letter to the last reply." onLog={() => {}} onRecord={() => {}} summary={<div id="sum" />}
     sentence={<h2 id="sentence">s</h2>} view="list" onView={() => {}} body={<div id="body" />} openCard={<aside id="card" />}
     docked onDocked={() => {}} onExport={() => {}} canExport {...over} />,
 );
 
-describe("the view — three of them, remembered per device, one writer on the URL", () => {
-  it("List, Calendar, Grid — and no Board", () => {
-    expect(QC_VIEWS.map((v) => v.label)).toEqual(["List", "Calendar", "Grid"]);
+describe("the view — three of them, renamed, with the URL as the only source", () => {
+  /**
+   * ⚠️ THE LABELS MOVED AND THE IDS DID NOT (v21 §1.2), WHICH IS THE WHOLE CLAIM HERE. The ruled
+   * table is called Ledger and is still `list`; the card grid is called List and is still `grid`.
+   * Asserting the PAIRS rather than the label list is what makes this a lock: a future tidy that
+   * "makes the ids match the labels" breaks every bookmarked `?view=grid` and 30-odd measurements,
+   * and a list of three words would go green through it.
+   */
+  it("Ledger is `list`, List is `grid`, Calendar is `calendar` — in the portal's order, and no Board", () => {
+    expect(QC_VIEWS.map((v) => [v.key, v.label])).toEqual([["list", "Ledger"], ["grid", "List"], ["calendar", "Calendar"]]);
+    expect(QC_VIEWS.map((v) => v.key)).not.toContain("board");
+    expect(qcViewLabel("grid")).toBe("List");
   });
-  it("read order is ?view= → this device → the old session key → List; a remembered `board` is List", () => {
-    expect(readQcView("?view=grid", "calendar", "list")).toBe("grid");
-    expect(readQcView("", "calendar", "grid")).toBe("calendar");
-    expect(readQcView("", null, "grid")).toBe("grid");
-    expect(readQcView("", null, null)).toBe("list");
+  it("the URL is the only input: `?view=` or the default, and a dead `board` reads as the default", () => {
+    expect(readQcView("?view=grid")).toBe("grid");
+    expect(readQcView("?view=calendar")).toBe("calendar");
+    expect(readQcView("")).toBe(DEFAULT_QC_VIEW);
     for (const stale of ["board", "", "kanban"]) {
-      expect(readQcView(`?view=${stale}`, stale, stale), `"${stale}" did not fall back to List`).toBe("list");
+      expect(readQcView(`?view=${stale}`), `"${stale}" did not fall back to the default`).toBe(DEFAULT_QC_VIEW);
     }
-    expect(readQcView("?view=board", "grid", null), "a dead ?view= must not mask what the device remembers").toBe("grid");
+    /* it takes ONE argument now — the device's memory is not an input, and cannot be passed as one */
+    expect(readQcView.length).toBe(1);
   });
-  it("the page remembers in localStorage, and reflects with replaceState — never a navigation, never sessionStorage.setItem", () => {
-    expect(page).toContain("localStorage.setItem(QC_VIEW_KEY, gridView)");
-    expect(page).not.toMatch(/sessionStorage\.setItem\(\s*["'`]sa\.qcView/);
+  it("⚠️ the page WRITES no view memory and CLEARS the retired key; the URL is reflected with replaceState", () => {
+    expect(page, "the per-device memory is being written again").not.toMatch(/localStorage\.setItem\(\s*QC_VIEW_KEY/);
+    expect(page).not.toMatch(/(?:local|session)Storage\.setItem\(\s*["'`]sa\.qcView/);
+    expect(page, "the retired key is left where a later reader can honour it").toContain("clearQcViewMemory()");
     expect(page).toContain("window.history.replaceState(window.history.state");
-    /* List is the default, so List is the view the URL does not state */
-    expect(page).toContain('const want = gridView === "list" ? null : gridView;');
+    /* the default is the view the URL does not state — named once, so the landing flip is one line */
+    expect(page).toContain("const want = gridView === DEFAULT_QC_VIEW ? null : gridView;");
   });
 });
 
@@ -122,21 +132,40 @@ describe("loading answers first", () => {
 });
 
 describe("the frame, rendered", () => {
-  it("head: the title, the line, and '+ Log a query' — no masthead component", () => {
+  it("head: the title, the line, and an action ROW carrying both pills — no masthead component", () => {
     const html = frame();
     expect(html).toMatch(/<h1 class="qcv-title" data-qcv="head-title">Query Centre<\/h1>/);
     expect(html).toContain('data-qcv="head-line"');
     expect(html).toMatch(/<button[^>]*class="sp-inkpill qcv-log"[^>]*data-qcv="head-cta"[^>]*><span class="sp-inkpill-l">\+ Log a query<\/span><\/button>/);
+    expect(html).toMatch(/<button[^>]*class="qcv-ghostpill"[^>]*data-qcv="head-record"[^>]*><span>Record a response<\/span><\/button>/);
     expect(html).not.toMatch(/["\s]wsh["\s]/);
+    /**
+     * ⚠️ BOTH PILLS INSIDE THE ONE ROW, AND THE CLAIM IS CONTAINMENT — asserting each pill on its
+     * own passes on a page that renders them three inches apart.
+     *
+     * ⚠️ AND IT IS NOT BOUNDED ON `</div>`. The first cut sliced the row as "from `head-actions` to
+     * the first `</div>` after `head-record`"; a closing tag is not a delimiter, because it matches
+     * the first NESTED close — so the slice ran straight past the row's own end and swallowed the
+     * next sibling. Proved vacuous: moving the Record pill OUT of the row left all 27 green.
+     * Bound instead on the two buttons themselves, which cannot nest: if no element closes between
+     * them, they are siblings of one parent.
+     */
+    const between = html.slice(html.indexOf('data-qcv="head-cta"'), html.indexOf('data-qcv="head-record"'));
+    expect(between, "the Record pill is not inside the action row — something closes between the two pills").not.toContain("</div>");
+    /* and the row comes after the facts line, not beside the title */
+    expect(html.indexOf('data-qcv="head-actions"')).toBeGreaterThan(html.indexOf('data-qcv="head-line"'));
+  });
+  it("⚠️ Record a response is the GLOBAL flow, with no query chosen — the entry `+ New` took away", () => {
+    expect(page).toContain('onRecord={() => onNavigate?.("queries", "Record a response")}');
   });
   it("the Log button says so while a query is already being written", () => {
     expect(frame({ logDisabled: true })).toMatch(/data-qcv="head-cta"[^>]*disabled=""/);
     expect(frame()).not.toMatch(/data-qcv="head-cta"[^>]*disabled/);
   });
-  it("the switch presses exactly the current view", () => {
+  it("the switch presses exactly the current view, under the new names", () => {
     const html = frame({ view: "calendar" });
-    expect([...html.matchAll(/<button type="button" aria-pressed="(true|false)">(List|Calendar|Grid)<\/button>/g)].map((m) => [m[2], m[1]]))
-      .toEqual([["List", "false"], ["Calendar", "true"], ["Grid", "false"]]);
+    expect([...html.matchAll(/<button type="button" aria-pressed="(true|false)">(Ledger|List|Calendar)<\/button>/g)].map((m) => [m[2], m[1]]))
+      .toEqual([["Ledger", "false"], ["List", "false"], ["Calendar", "true"]]);
   });
   it("⚠️ the open card renders only while DOCKED; unmeasured (null) renders neither a card nor a docked column", () => {
     expect(frame({ docked: true })).toContain('id="card"');
@@ -188,6 +217,23 @@ describe("the sheet", () => {
     const reads = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
     expect(reads.size).toBeGreaterThan(10);
     for (const r of reads) expect(APP.includes(r) || new RegExp(`${r}:`).test(css), `${r} is read and never declared`).toBe(true);
+  });
+  /**
+   * ⚠️ THE GHOST PILL'S FRAME IS A COPY OF `--fc-frame`, AND THE COPY IS WHAT IS ASSERTED. The token
+   * is declared on `.fc`; the head is not a card, so a `var(--fc-frame)` here resolves to nothing —
+   * and inside a `box-shadow` an unresolved colour paints an invisible ring while the rule reads
+   * perfectly correctly. Both sides are read from their own file: a literal on both sides of this
+   * assertion would agree with itself for ever.
+   */
+  it("the Record pill wears the card's own edge, and its burgundy is the card's", () => {
+    const shadow = rule(".qcv-ghostpill");
+    expect(shadow).toMatch(/inset 0 0 0 5px #ffffff/);
+    expect(shadow).toMatch(/inset 0 0 0 6px var\(--qcv-frame\)/);
+    expect(shadow).not.toMatch(/border:\s*1px/);
+    const declared = /--qcv-frame:\s*(#[0-9a-f]{6})/i.exec(css)?.[1]?.toLowerCase();
+    const card = /--fc-frame:\s*(#[0-9a-f]{6})/i.exec(decls(read("src/components/containers/framedCard.css")))?.[1]?.toLowerCase();
+    expect(card, "framedCard.css no longer declares --fc-frame").toBeTruthy();
+    expect(declared, "the head's frame colour has drifted from the card's").toBe(card);
   });
   it("buttons are anthracite with white text; no ink fill on this sheet", () => {
     expect(rule('.qcv-views button[aria-pressed="true"]')).toMatch(/background:\s*var\(--qcv-navy\);\s*color:\s*#ffffff/);

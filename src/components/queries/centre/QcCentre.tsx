@@ -21,19 +21,47 @@ import "./qcvPage.css";
 import "./qcvEnter.css";
 
 export type QcView = "list" | "calendar" | "grid";
+
+/**
+ * ⚠️ v21 (21 Sep): THE VIEWS ARE RENAMED, LABELS ONLY — the ruled table is **Ledger** (was List) and
+ * the card grid is **List** (was Grid). The internal ids and the `?view=` values are deliberately
+ * unchanged: a URL somebody bookmarked, and every `?view=grid` in the measurement suite, still mean
+ * what they meant. Renaming the ids to match the labels would have been the tidy-looking change and
+ * would have broken both, silently, for a word.
+ *
+ * ⚠️ AND THE ORDER IS THE PORTAL'S — Ledger, List, Calendar. It is the order the Overview's three
+ * tiles are drawn in, and this table is what draws them, so the two cannot come apart.
+ */
 export const QC_VIEWS: readonly { key: QcView; label: string }[] = [
-  { key: "list", label: "List" }, { key: "calendar", label: "Calendar" }, { key: "grid", label: "Grid" },
+  { key: "list", label: "Ledger" }, { key: "grid", label: "List" }, { key: "calendar", label: "Calendar" },
 ];
+/** The label a view is called by, for the crumb and the portal. */
+export const qcViewLabel = (v: QcView): string => QC_VIEWS.find((x) => x.key === v)?.label ?? "";
 export const DOCK_MIN_COLUMN = 900;
+
+/**
+ * ⚠️ VIEW MEMORY IS GONE (v21 §1.1), AND THE KEY IS CLEARED RATHER THAN LEFT (`clearQcViewMemory`).
+ * The page used to remember your last view per device, so `/queries` opened wherever you happened
+ * to leave it. v21 lands you in one known place; a key still sitting in `localStorage` would be a
+ * fact about the reader that nothing reads, waiting to be honoured again by whoever finds it and
+ * assumes it means something. So: the URL is the ONLY source, and the old key is removed on load.
+ *
+ * ⚠️ `?view=` IS STILL A REFLECTION, NOT A ROUTE — written with `replaceState` by `Queries.tsx`, for
+ * the reasons recorded there. What has changed is that it is now the only input.
+ */
 export const QC_VIEW_KEY = "sa.qcView";
-/** Per device. A remembered `board` — the view is gone — falls back to List, as does anything unknown. */
-export function readQcView(search: string, local: string | null, legacySession: string | null): QcView {
+/** The view the param-less URL means. */
+export const DEFAULT_QC_VIEW: QcView = "list";
+/** The URL, and nothing else. `board` is the retired view; anything unknown reads as the default. */
+export function readQcView(search: string): QcView {
   const ok = (v: string | null): v is QcView => v === "list" || v === "calendar" || v === "grid";
   const fromUrl = new URLSearchParams(search).get("view");
-  if (ok(fromUrl)) return fromUrl;
-  if (ok(local)) return local;
-  if (ok(legacySession)) return legacySession;
-  return "list";
+  return ok(fromUrl) ? fromUrl : DEFAULT_QC_VIEW;
+}
+/** Remove the retired per-device memory, in both stores, so it cannot be honoured again. */
+export function clearQcViewMemory(): void {
+  try { localStorage.removeItem(QC_VIEW_KEY); } catch { /* a private window: nothing to clear */ }
+  try { sessionStorage.removeItem(QC_VIEW_KEY); } catch { /* ditto */ }
 }
 
 export const QcCentre: React.FC<{
@@ -42,6 +70,8 @@ export const QcCentre: React.FC<{
   blank?: boolean;
   headLine: React.ReactNode;
   onLog: () => void;
+  /** The global Record-a-response flow, opened with no query chosen (the dashboard tile's). */
+  onRecord: () => void;
   /** True while a query is already being written. */
   logDisabled?: boolean;
   logRef?: React.Ref<HTMLButtonElement>;
@@ -60,7 +90,7 @@ export const QcCentre: React.FC<{
   onExport: () => void;
   canExport: boolean;
   entering: boolean;
-}> = ({ loading, blank = false, headLine, onLog, logDisabled = false, logRef, summary, sentence, view, onView, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
+}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, summary, sentence, view, onView, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const el = rootRef.current;
@@ -76,14 +106,23 @@ export const QcCentre: React.FC<{
   return (
     <div ref={rootRef} className={`qcv-page qcv-own${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
       role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page" data-view={view}>
+      {/* ⚠️ THE ACTIONS ARE A ROW OF THEIR OWN, UNDER THE FACTS LINE (v21 §2) — not one pill on the
+          title's line. Two of them now, and a pill beside a 48px title pins the head's height to the
+          taller of the two and leaves the second nowhere to go. */}
       <header className="qcv-head" data-qcv="head">
-        <div className="qcv-head-copy">
-          <h1 className="qcv-title" data-qcv="head-title">Query Centre</h1>
-          <p className="qcv-line" data-qcv="head-line">{headLine}</p>
+        <h1 className="qcv-title" data-qcv="head-title">Query Centre</h1>
+        <p className="qcv-line" data-qcv="head-line">{headLine}</p>
+        <div className="qcv-hr" data-qcv="head-actions">
+          <button ref={logRef} type="button" className="sp-inkpill qcv-log" data-qcv="head-cta" onClick={onLog} disabled={logDisabled || loading}>
+            <span className="sp-inkpill-l">+ Log a query</span>
+          </button>
+          {/* ⚠️ THE GLOBAL RECORD-A-RESPONSE IS BACK WITHIN REACH HERE. Deleting `+ New` from the top
+              bar took the only chrome that offered it with no query chosen — flagged in the v11
+              report as stranded, and this is the fix. It opens the same flow the dashboard tile does. */}
+          <button type="button" className="qcv-ghostpill" data-qcv="head-record" onClick={onRecord} disabled={loading}>
+            <span>Record a response</span>
+          </button>
         </div>
-        <button ref={logRef} type="button" className="sp-inkpill qcv-log" data-qcv="head-cta" onClick={onLog} disabled={logDisabled || loading}>
-          <span className="sp-inkpill-l">+ Log a query</span>
-        </button>
       </header>
 
       {summary}
