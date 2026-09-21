@@ -2,7 +2,14 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * qcV11 — the Query Centre against design-refs/query-centre-v11.html, measured on a rendered page.
+ * qcV21 — the Query Centre against design-refs/query-centre-v21.html, measured on a rendered page.
+ *
+ * ⚠️ REPOINTED FROM v11 TO v21 AT THE TOP OF THE REBUILD, AND EXPECTED RED UNTIL IT FINISHES.
+ * The app is mid-migration between two refs: the cases that compare it to the ref describe v21,
+ * which the page does not yet draw. That is a STATED, TEMPORARY red belonging to this build — not
+ * the known-red backlog — and each phase's commit says which cases it turns green. The unit gates
+ * (tsc, Vitest, the production build) stay green throughout; those are what "no worse than
+ * baseline" governs.
  *
  * THE REF IS MEASURED BY THE SAME RULER, IN THE SAME BROWSER. Every expected size is read off the
  * mockup at the same viewport rather than typed here, so a number cannot be mis-copied; the numbers
@@ -28,9 +35,9 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { resolve } from "node:path";
 import { ensureSignedIn, openRoute } from "./measure";
 
-const OUT = resolve("test-results/qc-v11");
+const OUT = resolve("test-results/qc-v21");
 const REPORT = resolve(OUT, "report.json");
-const REF = "file://" + resolve("design-refs/query-centre-v11.html");
+const REF = "file://" + resolve("design-refs/query-centre-v21.html");
 const TOL = 2;
 const MIN_ASSERTIONS = 60;
 
@@ -845,7 +852,7 @@ test("the entrance — it runs once when the data lands, is over inside 800ms, a
   await page.locator(".qcv-page [data-qcv='views'] button", { hasText: "List" }).first().click();
   await page.waitForTimeout(400);
   await ctx.close();
-  record({ area: "entrance", what: "video", got: "test-results/qc-v11/video/*.webm", want: "reported" });
+  record({ area: "entrance", what: "video", got: "test-results/qc-v21/video/*.webm", want: "reported" });
 });
 
 test("reduced motion — no entrance and no pulse", async ({ browser }) => {
