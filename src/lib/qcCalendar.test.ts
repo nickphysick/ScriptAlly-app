@@ -58,13 +58,20 @@ describe("the bars — one per stage, placed by date", () => {
     const t = calTrack([r], NOW);
     return { r, t, bars: laneBars(r, t, NOW) };
   };
-  it("a past stage runs from the day it was entered to the day it was left, less 4px of daylight; the current one runs to the expected date", () => {
+  it("a past stage runs from the day it was entered to the day it was left, less 4px of daylight; a live one runs to max(expected, today)", () => {
     const { t, bars } = journey();
-    expect(bars.map((b) => [b.status, b.current, b.left, b.width])).toEqual([
+    const live = bars[2];
+    expect(bars.slice(0, 2).map((b) => [b.status, b.current, b.left, b.width])).toEqual([
       [QueryStatus.QUERIED, false, 0, 10 * 11 - DAYLIGHT_PX],
       [QueryStatus.PARTIAL_REQUESTED, false, 10 * 11, 10 * 11 - DAYLIGHT_PX],
-      [QueryStatus.PARTIAL_SENT, true, 20 * 11, 28 * 11],     /* 21 Aug + the agency's 4 weeks */
     ]);
+    /* ⚠️ 21 Aug + the agency's 4 weeks lands ONE DAY BEFORE today in this fixture, which I had
+       assumed was the other way round until the arithmetic said otherwise. So the live bar reaches
+       today (29 days) rather than the date (28), and carries a one-day overrun — which makes this
+       the smallest case the rule has, and a good one to keep. */
+    expect([live.status, live.current, live.left, live.width]).toEqual([QueryStatus.PARTIAL_SENT, true, 20 * 11, 29 * 11]);
+    expect(live.over).not.toBeNull();
+    expect(live.over!.width, "a day past the date is a day of overrun").toBe(11);
     expect(xOf(t, at(2026, 8, 21))).toBe(220);
   });
   it("⚠️ 4px of daylight wherever the status changes — between EVERY pair, including a stage that lasted under a day", () => {
@@ -101,12 +108,33 @@ describe("the bars — one per stage, placed by date", () => {
     expect(cb[cb.length - 1].width).toBe(3 * 11);      /* a close is a moment; the view gives it three days */
     expect(cb[cb.length - 1].line).toBe("Passed 2 Sep");
   });
-  it("past the expected date it says how far past the WINDOW, and the bar still ends on the date", () => {
+  /**
+   * ⚠️ THE LAW REVERSED BY v21 §8, AND THIS CASE'S OWN NAME USED TO STATE THE OLD ONE. The bar
+   * stopped at the expected date, so an overdue query left a GAP across today — the one column a
+   * reader scans — and the further past the date it ran, the further its bar sat from the line
+   * that says "now". A live bar reaches `max(expected, today)` now, and the stretch it has run
+   * past becomes an overlay INSIDE it whose left edge is the date.
+   */
+  it("⚠️ past the expected date the bar carries on TO TODAY, and the overrun is drawn inside it", () => {
     const r = rows([q({ dateSent: iso(7, 1) })], 4)[0];
     const t = calTrack([r], NOW);
     const [b] = laneBars(r, t, NOW);
-    expect(b.left + b.width).toBe(xOf(t, at(2026, 7, 29)));
+    /* it reaches today, not the date */
+    expect(b.left + b.width).toBe(xOf(t, NOW));
+    expect(b.left + b.width, "the bar still stops at the expected date").toBeGreaterThan(xOf(t, at(2026, 7, 29)));
+    /* and the overrun starts exactly ON the expected date, in the bar's own coordinates */
+    expect(b.over).not.toBeNull();
+    expect(b.left + b.over!.left).toBe(xOf(t, at(2026, 7, 29)));
+    expect(b.over!.left + b.over!.width, "the overrun does not reach the bar's end").toBe(b.width);
     expect([b.line, b.note]).toEqual(["Reply expected 29 Jul", "7 weeks past the window"]);
+  });
+  it("a bar with no promised date ends at today and draws no overrun — there is no date to mark", () => {
+    const r = rows([q({ dateSent: iso(7, 1) })], null as unknown as number)[0];
+    const t = calTrack([r], NOW);
+    const [b] = laneBars(r, t, NOW);
+    expect(b.openRight).toBe(true);
+    expect(b.over).toBeNull();
+    expect(b.left + b.width).toBe(xOf(t, NOW));
   });
   it("⚠️ a stage nothing dates gets NO lane — it is listed under its group, never given a bar", () => {
     const undated = q({ dateSent: iso(6, 1), status: QueryStatus.FULL_SENT });

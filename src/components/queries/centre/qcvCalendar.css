@@ -96,3 +96,29 @@
 .qcv-cal-undated button[aria-pressed="true"] { border-bottom: 1.6px solid var(--qcv-ink); }
 
 @media (prefers-reduced-motion: reduce) { .qcv-bar--hist { transition: none; } }
+
+/**
+ * ══ v21 §8 — a live bar always reaches today ═══════════════════════════════════════════════════
+ *
+ * ⚠️ THE OVERRUN IS DRAWN INSIDE THE BAR, AND ITS LEFT EDGE IS THE EXPECTED DATE. Before this the
+ * bar STOPPED at that date, so an overdue query left a gap across today — the one column a reader
+ * scans — and the further past the date it went, the further its bar sat from the line saying
+ * "now". The bar carries on now, and the stretch it has run past is a wash with a 1.6px ink line
+ * at its start. That line is not decoration: it is the only thing left marking the date.
+ *
+ * ⚠️ `pointer-events: none` IS LOAD-BEARING. The overlay covers the half of the bar a reader is
+ * most likely to aim at; without it the bar's own hover and click stop working exactly where the
+ * query is most overdue.
+ */
+.qcv-bar-over {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(28, 19, 15, 0.13);
+  border-left: 1.6px solid var(--qcv-ink);
+  /* the right end follows the bar's own radius; the left is square, because it is a date */
+  border-radius: 0 999px 999px 0;
+  pointer-events: none;
+}
+/* an open-ended bar has no promised date, so it has no overrun to draw */
+.qcv-bar--open .qcv-bar-over { display: none; }

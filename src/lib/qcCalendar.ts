@@ -60,6 +60,18 @@ export interface CalBar {
   you: boolean;
   /** No date promised: the bar ends at today with a dashed, square right end. */
   openRight: boolean;
+  /**
+   * The stretch from the expected date to today, on a bar that has run past it (v21 §8).
+   *
+   * ⚠️ IT IS A CHILD OF THE BAR, NEVER A SECOND BAR — `left` and `width` are offsets INSIDE the
+   * bar rather than track coordinates. Two sibling bars would fight over hover and selection, and
+   * the reader would be able to put the pointer "between" one query's two pieces.
+   *
+   * ⚠️ AND ITS LEFT EDGE *IS* THE EXPECTED DATE. The 1.6px ink line there is not decoration: it is
+   * the only thing left marking the date once the bar has grown past it. Same language as the
+   * gauges the strip used to draw — colour up to the notch, ink past it.
+   */
+  over: { left: number; width: number } | null;
   /** Expanded only, current only, and only where a date was promised: whose date it is. */
   end: "agent" | "you" | null;
   court: string;
@@ -100,14 +112,26 @@ export function laneBars(row: QcRow, track: CalTrack, nowMs: number): CalBar[] {
       const dates = `${shortDay(s.startMs)} to ${shortDay(end)}`;
       const lasted = spanWords(Math.max(1, Math.round((end - s.startMs) / DAY)));
       /* 4px of daylight wherever the status changes — taken off the END of the earlier bar */
-      return { key: `${row.id}:${i}`, status: s.status, current: false, left, width: Math.max(xOf(track, end) - left - DAYLIGHT_PX, PAST_MIN_PX), you: isWithYou(s.status), openRight: false, end: null, court,
+      return { key: `${row.id}:${i}`, status: s.status, current: false, left, width: Math.max(xOf(track, end) - left - DAYLIGHT_PX, PAST_MIN_PX), you: isWithYou(s.status), openRight: false, over: null, end: null, court,
         line: dates, note: lasted, tail: dates, title: `${STAGE_NAME[s.status]}, ${dates}` };
     }
     const closed = isClosedStatus(s.status);
     const openRight = !closed && row.expectedMs == null;
-    const endMs = closed ? s.startMs + CLOSED_DAYS * DAY : row.expectedMs ?? nowMs;
+    /**
+     * ⚠️ A LIVE BAR ALWAYS REACHES TODAY (v21 §8). It used to stop at the expected date, so an
+     * overdue query left a gap across today — the one column a reader scans for — and the longer
+     * a query was overdue the further its bar sat from the line that says "now". `max` is the
+     * whole change: ahead of the date the bar still ends there and today's line crosses it;
+     * past it, the bar carries on and the overrun becomes an overlay inside it.
+     */
+    const endMs = closed ? s.startMs + CLOSED_DAYS * DAY : Math.max(row.expectedMs ?? nowMs, nowMs);
     const w = currentWords(row, nowMs);
-    return { key: `${row.id}:${i}`, status: s.status, current: true, left, width: Math.max(xOf(track, endMs) - left, CURRENT_MIN_PX), you: isWithYou(s.status), openRight,
+    const width = Math.max(xOf(track, endMs) - left, CURRENT_MIN_PX);
+    /* the overrun: from the expected date to today, in the bar's own coordinates */
+    const past = !closed && row.expectedMs != null && row.expectedMs < nowMs;
+    const overLeft = past ? Math.max(0, Math.min(xOf(track, row.expectedMs as number) - left, width)) : 0;
+    return { key: `${row.id}:${i}`, status: s.status, current: true, left, width, you: isWithYou(s.status), openRight,
+      over: past && width - overLeft > 0.5 ? { left: overLeft, width: width - overLeft } : null,
       end: closed || openRight ? null : row.withYou ? "you" : "agent", court, ...w, title: `${STAGE_NAME[s.status]}, ${w.line}${w.note ? `, ${w.note}` : ""}` };
   });
   /**

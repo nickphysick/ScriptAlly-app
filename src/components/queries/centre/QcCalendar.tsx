@@ -151,6 +151,10 @@ export const QcCalendar: React.FC<{
                               {/* expanded: a small card */}
                               <span className="qcv-bar-xb"><span className="qcv-bar-stick"><StatusDot status={b.status} overrideSize={14} decorative /><b>{STAGE_NAME[b.status]}</b><em>{b.court}</em></span></span>
                               <span className="qcv-bar-xi"><b className="qcv-bar-nm">{lane.row.agentName}</b><i className="qcv-bar-ag">{lane.row.agency}</i><span className="qcv-bar-fact">{b.line}{b.note && <small>{b.note}</small>}</span></span>
+                              {/* ⚠️ THE OVERRUN IS A CHILD OF THE BAR (§8), never a second bar beside
+                                  it — two siblings would fight over hover and selection, and a
+                                  reader could put the pointer "between" one query's two pieces. */}
+                              {b.over && <i className="qcv-bar-over" style={{ left: `${b.over.left}px`, width: `${b.over.width}px` }} aria-hidden="true" />}
                               {b.end && <i className={`qcv-bar-end qcv-bar-end--${b.end}`} aria-hidden="true" />}
                             </button>
                           ))}
