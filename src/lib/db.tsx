@@ -195,6 +195,16 @@ function formatHumanDate(dateInput: string | Date | undefined): string {
   return `${day} ${month} ${year}`;
 }
 
+/**
+ * What a caller is asking `dismissTask` to do.
+ *
+ * ⚠️ `"lift"` IS THE INVERSE, AND IT IS A MEMBER RATHER THAN A CONVENTION. Every dismiss and
+ * snooze on the To-do surfaces flashes an Undo, and before this existed those undos passed
+ * `("fixed snooze", 0)` — a nearest neighbour that resolved to "keep the existing snooze". A type
+ * that cannot express a choice the UI offers is the wrong type; see `dismissTask` for the measure.
+ */
+export type DismissType = "permanent" | "fixed snooze" | "custom date" | "lift";
+
 interface DbContextType {
   currentUser: User | null;
   smartImportUsage: SmartImportUsage | null;
@@ -460,7 +470,7 @@ interface DbContextType {
   updateUserProfile: (fields: Partial<User>) => Promise<void>;
   
   // Task Actions
-  dismissTask: (taskType: string, relatedRecordId: string, dismissType: "permanent" | "fixed snooze" | "custom date", snoozeDays?: number) => Promise<void>;
+  dismissTask: (taskType: string, relatedRecordId: string, dismissType: DismissType, snoozeDays?: number) => Promise<void>;
   /**
    * Log a nudge: writes a non-status NUDGE_SENT activity, sets nudgeDate (+ lastNudgeSentDate),
    * and hides-and-resurfaces the nudge_overdue task on the chosen check-back date. Never touches
@@ -3597,50 +3607,52 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     return n;
   };
 
-  // Task dismissal and snoozing — now writes a taskFlag (dismissedTasks absorbed).
-  const dismissTask = async (taskType: string, relatedRecordId: string, dismissType: "permanent" | "fixed snooze" | "custom date", snoozeDays?: number) => {
+  /**
+   * Stop suggesting a derived task — the writer's stance, persisted as a taskFlag and nothing else.
+   *
+   * ⚠️ IT WRITES NO ACTIVITY, AND UNTIL 21 SEP IT DID. This function special-cased `nudge_overdue`
+   * and wrote a **`NUDGE_SENT` activity** first — "Nudge sent to {agent} at {agency}", with a
+   * fabricated "They've had your query for N days" — so dismissing or snoozing a nudge SUGGESTION
+   * recorded that the writer had chased the agent, which they had not. A control whose entire
+   * meaning is "stop asking me" was making a claim about a real person's correspondence.
+   *
+   * ⚠️ AND IT WAS A RUNG THE QUERY HAD NEVER HEARD OF. It went into `users/{uid}/activities` alone
+   * — no twin in the authoritative `queries/{id}/activity`, no `lastNudgeSentDate` — so it showed
+   * up in the feed, the board's recent strip, the calendar and the row facts while everything that
+   * reads the query still said the agent had never been nudged. `logNudge` is the write that does
+   * this properly, both stores and both fields; dismissing is the flag and only the flag.
+   *
+   * ⚠️ `upsertTaskFlag` IS THE ONE WRITER. This is the named intent on top of it — the place the
+   * dismiss vocabulary is turned into a patch — so a caller never re-derives `MUTED_UNTIL` or the
+   * days arithmetic for itself.
+   */
+  const dismissTask = async (taskType: string, relatedRecordId: string, dismissType: DismissType, snoozeDays?: number) => {
     if (!currentUser) return;
+    const key = flagKeyForTask(taskType, relatedRecordId);
 
-    if (taskType === "nudge_overdue") {
-      const targetQuery = queries.find(qi => qi.id === relatedRecordId);
-      if (targetQuery) {
-        const agentObj = agents.find(ag => ag.id === targetQuery.agentId);
-        
-        let daysDiff = 45; // default fallback
-        if (targetQuery.dateSent) {
-          try {
-            const sentTime = new Date(targetQuery.dateSent).getTime();
-            const diff = Date.now() - sentTime;
-            daysDiff = Math.max(1, Math.floor(diff / (1000 * 60 * 60 * 24)));
-          } catch (e) {
-            daysDiff = 45;
-          }
-        }
-
-        const actId = "act-" + Math.random().toString(36).substr(2, 9);
-        const nudgeActivity: Activity = {
-          id: actId,
-          userId: currentUser.id,
-          queryId: relatedRecordId,
-          manuscriptId: targetQuery.manuscriptId,
-          activityType: ActivityType.NUDGE_SENT,
-          description: `Nudge sent to ${agentObj?.name || "agent"} at ${agentObj?.agency || "agency"}`,
-          date: new Date().toISOString(),
-          details: `They've had your query for ${daysDiff} days`
-        };
-
-        setDoc(doc(db, "users", currentUser.id, "activities", actId), nudgeActivity).catch(err => {
-          console.error("Failed to write nudge activity into firestore", err);
-        });
-      }
+    /**
+     * ⚠️ `"lift"` EXISTS BECAUSE THE INVERSE HAD NOWHERE TO GO, AND THE NEAREST NEIGHBOUR IT WAS
+     * GIVEN WAS A NO-OP. Both of Queries' undos said `dismissTask(…, "fixed snooze", 0)` meaning
+     * "put it back" — and `0` is falsy, so `snoozedUntil` came out `undefined`, which
+     * `upsertTaskFlag` reads as KEEP. The undo therefore left the snooze exactly where it was and
+     * incremented the snooze count on the way past: an undo that restores nothing, which is worse
+     * than no undo because it looks like it worked. The union could not express the choice the UI
+     * was offering, so the union was wrong.
+     *
+     * A snooze of zero days or fewer is not a snooze either, so it funnels here rather than
+     * silently keeping the old date — nothing reachable does that today, which makes this a trap
+     * closed rather than a behaviour changed.
+     */
+    if (dismissType === "lift" || (dismissType === "fixed snooze" && !(snoozeDays && snoozeDays > 0))) {
+      await upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true });
+      return;
     }
 
-    // Persist the stance as a taskFlag: fixed snooze → snoozedUntil in N days; permanent → an
-    // indefinite mute (MUTED_UNTIL). ("custom date" flows through logNudge, not here.)
-    const key = flagKeyForTask(taskType, relatedRecordId);
+    // fixed snooze → snoozedUntil in N days; permanent → the indefinite mute. ("custom date" flows
+    // through logNudge, not here, and keeps whatever the flag already carried.)
     const snoozedUntil =
-      dismissType === "fixed snooze" && snoozeDays ? new Date(Date.now() + snoozeDays * DAY_MS).toISOString()
-      : dismissType === "permanent" ? "3000-01-01T00:00:00.000Z"
+      dismissType === "fixed snooze" ? new Date(Date.now() + snoozeDays! * DAY_MS).toISOString()
+      : dismissType === "permanent" ? MUTED_UNTIL
       : undefined;
     await upsertTaskFlag(key, { snoozedUntil, bumpSnooze: true });
   };

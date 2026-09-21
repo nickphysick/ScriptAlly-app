@@ -975,7 +975,12 @@ export const Queries: React.FC<{
            second dismissal behind. */
         undo: async () => {
           await updateQuery(q.id, { nudgeDate: prior } as Partial<Query>);
-          await dismissTask("nudge_overdue", q.id, "fixed snooze", 0);
+          /* ⚠️ `"lift"`, NOT `("fixed snooze", 0)`. Zero is falsy, so the old call resolved to
+             `snoozedUntil: undefined`, which `upsertTaskFlag` reads as KEEP — the suppression
+             stayed exactly where it was and the snooze count went up on the way past. Both halves
+             of the reminder have to come back or the board goes on hiding the card this page has
+             just un-snoozed. */
+          await dismissTask("nudge_overdue", q.id, "lift");
           showToast({ message: "Restored" });
         },
       });
@@ -985,7 +990,12 @@ export const Queries: React.FC<{
   };
 
   /* ⚠️ PERMANENT, AND STILL NOT AN ACTIVITY. The nudge stops being asked for; nothing is recorded
-     about the query, because nothing about the query has changed. */
+     about the query, because nothing about the query has changed.
+
+     ⚠️ THAT SENTENCE WAS FALSE FOR AS LONG AS IT STOOD (fixed 21 Sep). It describes this function
+     and was read as describing the write — and `dismissTask` special-cased `nudge_overdue` and
+     logged a `NUDGE_SENT` activity before it touched the flag, so "stop nudging" recorded a nudge.
+     The claim is true now because the callee was repaired, not because the caller was careful. */
   const commitStopNudging = async (q: Query) => {
     const prior = q.nudgeDate;
     setQuick(null);
@@ -994,7 +1004,7 @@ export const Queries: React.FC<{
       showToast({
         message: "Nudges stopped for this query",
         undo: async () => {
-          await dismissTask("nudge_overdue", q.id, "fixed snooze", 0);
+          await dismissTask("nudge_overdue", q.id, "lift");
           if (prior) await updateQuery(q.id, { nudgeDate: prior } as Partial<Query>);
           showToast({ message: "Restored" });
         },

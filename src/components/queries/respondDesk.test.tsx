@@ -693,6 +693,17 @@ describe("§4 (quick actions) · no drawer, no desk, no selection — and one co
    * ⚠️ SNOOZE WRITES NO ACTIVITY — the claim its own sub-line makes to the reader. Asserted over
    * the write's body, and it names the activity primitives rather than counting calls, because
    * "one call fewer" is not the claim: the claim is that NONE of them is reachable from here.
+   *
+   * ⚠️ AND IT WAS GREEN THROUGHOUT A BUG THAT MADE THE CLAIM FALSE (repaired 21 Sep). Sweeping
+   * THIS body for activity primitives asks whether the CALL SITE writes an activity; the claim is
+   * about the snooze. `db.dismissTask` special-cased `nudge_overdue` and wrote a `NUDGE_SENT`
+   * activity — "Nudge sent to {agent} at {agency}" — before it touched the flag, so every snooze
+   * recorded a nudge the writer never sent, and nothing here could see it. A property of the part
+   * standing in for the whole, which is the failure this repo keeps rebuilding.
+   *
+   * The delegate's own half now has its own file (`lib/dismissTask.test.ts`). What is added here
+   * is the JOIN: this body writes no activity AND the one writer it hands off to is named, so the
+   * two cases cannot both be satisfied while the composed path writes one.
    */
   it("snooze writes no activity — the reminder moves, and nothing is recorded", () => {
     const body = sliceBetween(page, "const commitQuickSnooze", "const commitStopNudging");
@@ -704,6 +715,17 @@ describe("§4 (quick actions) · no drawer, no desk, no selection — and one co
     /* and it is reversible, restoring the PRIOR date rather than compensating with a negative */
     expect(body).toContain("undo:");
     expect(body).toContain("nudgeDate: prior");
+    /* ⚠️ THE UNDO LIFTS THE SUPPRESSION, IT DOES NOT RE-SNOOZE BY ZERO. `("fixed snooze", 0)` read
+       as KEEP, so the board went on hiding a card this page had just restored — and the two lines
+       above, asserting the date comes back, were satisfied the whole time. */
+    expect(body).toContain('dismissTask("nudge_overdue", q.id, "lift")');
+    /* the other half of the claim: what the delegate itself may do (lib/dismissTask.test.ts) */
+    const dismiss = sliceBetween(
+      readFileSync(join(process.cwd(), "src/lib/db.tsx"), "utf8"),
+      "const dismissTask = async", "  // Log a nudge —", "dismissTask",
+    ).replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const w of ["ActivityType", "activityType", "setDoc"])
+      expect(dismiss, `the snooze's delegate writes an activity again (${w})`).not.toContain(w);
   });
 
   it("close writes exactly one activity, through the one primitive both surfaces share", () => {
