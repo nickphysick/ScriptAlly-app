@@ -103,6 +103,14 @@ export const QcCentre: React.FC<{
   onView: (v: QcView) => void;
   /** Leave the view: back to the Overview, clearing any selection. */
   onBack: () => void;
+  /**
+   * Clear the selection and leave the view where it is (v21 §7).
+   *
+   * ⚠️ SEPARATE FROM `onBack`, THOUGH BOTH CLEAR `?q`. Escape and the card's ✕ mean "close this
+   * query"; Back means "leave this view". Folding them would send a reader to the Overview for
+   * pressing Escape, which is a bigger move than they asked for.
+   */
+  onClearSelection?: () => void;
   /** The view's body, inside the frame. */
   body: React.ReactNode;
   /** The open query, docked. Rendered only while `docked`. */
@@ -114,7 +122,7 @@ export const QcCentre: React.FC<{
   onExport: () => void;
   canExport: boolean;
   entering: boolean;
-}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, sentence, overview, fan, view, onView, onBack, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
+}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, sentence, overview, fan, view, onView, onBack, onClearSelection, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
   const inView = view !== "overview";
   const rootRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
@@ -180,9 +188,18 @@ export const QcCentre: React.FC<{
            is always open, so a global binding would take the arrows from the whole page. Skipped in
            anything editable, in a menu, and on the calendar's scroller (where ← → scroll time). */
         onKeyDown={(e) => {
-          if (!onStep || e.defaultPrevented || e.altKey || e.metaKey || e.ctrlKey) return;
+          if (e.defaultPrevented || e.altKey || e.metaKey || e.ctrlKey) return;
           const t = e.target as HTMLElement;
           if (t.closest("input, textarea, select, [contenteditable='true'], [role='menu'], [role='dialog'], .qcv-cal-box")) return;
+          /* ⚠️ ESCAPE CLOSES THE OPEN QUERY, and only while one is open — otherwise the key would
+             be swallowed on a page that has nothing to close, reaching past whatever else wants it. */
+          if (e.key === "Escape") {
+            if (!openCard || !onClearSelection) return;
+            e.preventDefault();
+            onClearSelection();
+            return;
+          }
+          if (!onStep) return;
           const inRows = !!t.closest("[role='listbox'], [role='option']");
           const delta = e.key === "ArrowRight" || (inRows && e.key === "ArrowDown") ? 1 : e.key === "ArrowLeft" || (inRows && e.key === "ArrowUp") ? -1 : 0;
           if (!delta) return;

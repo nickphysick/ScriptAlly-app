@@ -34,6 +34,8 @@ export type OpenAction = "nudge" | "snooze" | "closed";
 export const QcOpenCard: React.FC<{
   row: QcRow;
   nowMs: number;
+  /** Clear the selection — the view goes back to full width. */
+  onClose?: () => void;
   manuscriptTitle: string | null;
   /** Audience, genre, word count — each omitted where the manuscript does not state it. */
   manuscriptTags: readonly string[];
@@ -45,7 +47,7 @@ export const QcOpenCard: React.FC<{
   agentTab: React.ReactNode;
   notesTab: React.ReactNode;
   noteCount: number;
-}> = ({ row, nowMs, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount }) => {
+}> = ({ row, nowMs, onClose, manuscriptTitle, manuscriptTags, onPrimary, onAction, liveAction = null, tracking, agentTab, notesTab, noteCount }) => {
   const [tab, setTab] = useState<PanelTab>(readTab);
   const pickTab = (t: PanelTab) => { setTab(t); try { sessionStorage.setItem(TAB_KEY, t); } catch { /* the default is fine */ } };
   const [moreOpen, setMoreOpen] = useState(false);
@@ -68,6 +70,13 @@ export const QcOpenCard: React.FC<{
         <b className={`qcv-open-crt${row.withYou ? " qcv-open-crt--you" : ""}`} data-qcv="open-court" data-you={row.withYou ? "true" : "false"}>{COURT_LABEL[row.court]}</b>
         {/* omitted, never "Day 0", where either end of it is undated */}
         {row.dayN != null && <b className="qcv-open-day">Day {row.dayN}</b>}
+        {/* ⚠️ THE ✕ IS BACK IN THE BAND (v21 §7). v11 hid it because the card was ALWAYS open —
+            there was an implicit selection, so closing it had nowhere to go and a control that
+            cannot be obeyed is worse than none. Nothing selects on load now, so "close" is a real
+            state again: it returns the view to full width. */}
+        {onClose && (
+          <button type="button" className="qcv-open-x" data-qcv="open-close" aria-label="Close this query" onClick={onClose}>✕</button>
+        )}
       </>}>
       <div className="qcv-open-body">
         <div className="qcv-open-who">

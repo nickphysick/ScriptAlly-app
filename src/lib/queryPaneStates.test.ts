@@ -96,13 +96,23 @@ describe("nothing selects a query implicitly", () => {
   it("⚠️ THE PARAM IS READ IN BOTH DIRECTIONS — present selects, absent clears", () => {
     /* ⚠️ THE CLEARING HALF IS THE ONE THAT WAS MISSING, and its absence is why the back link looked
        inert: the effect only ever SET a selection, so removing `?q=` left the old one standing. */
-    /* ⚠️ RETARGETED (v11, 19 Sep): the state `?q` writes is `urlSelectedId` now, because the DOCKED card
-       also shows the first visible row when `?q` names nothing (`implicitId`). The law is unchanged
-       and is why the two are separate states: the param is still read in both directions, and what
-       it clears is ITS half — never the implicit one, which is not the URL's to clear. */
+    /**
+     * ⚠️ RETARGETED AGAIN (v21 §7, 21 Sep), AND THIS TIME THE DESCRIBE'S NAME BECAME TRUE. v11 had
+     * the docked card show the first visible row when `?q` named nothing, so "nothing selects a
+     * query implicitly" was a heading over a file that did exactly that — the exception was
+     * carved out for drawer mode only ("an implicit selection there would open a drawer on
+     * load"), which was the honest rule all along.
+     *
+     * `implicitId` is gone. The selection IS `?q` and nothing else, at every width and in every
+     * view, so the param being read in both directions is now the whole mechanism rather than
+     * half of it.
+     */
     expect(queries, "the selection effect no longer clears when the param goes").toContain("if (!wanted && urlSelectedId !== null) setSelectedQueryId(null)");
-    expect(queries, "the effective selection is no longer `?q`, else the implicit first row").toContain("const selectedQueryId = urlSelectedId ?? implicitId;");
-    expect(queries, "an implicit selection in DRAWER mode would open a drawer on load").toContain("const qcImplicitWant = qcDocked === true && !urlSelectedId && !creating");
+    expect(queries, "the selection is something other than `?q`").toContain("const selectedQueryId = urlSelectedId;");
+    const decls2 = queries.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    for (const gone of ["implicitId", "qcImplicitWant", "setImplicitId"]) {
+      expect(decls2, `\`${gone}\` survives — the implicit selection is back`).not.toContain(gone);
+    }
     expect(queries, "an unresolvable id clears the selection — that races the data on a slow load")
       .toContain("never merely unresolvable");
   });

@@ -455,19 +455,20 @@ export const Queries: React.FC<{
   const { ask: askConfirm, node: confirmNode } = useConfirmAsk();
 
   /**
-   * ⚠️ v11 · THE SELECTION IS `?q`, ELSE THE FIRST ROW — AND THE URL IS NEVER WRITTEN ON LOAD.
-   * `urlSelectedId` is what `?q=` names (the `?q` effect below is still its one writer). Where it
-   * names nothing, the DOCKED card shows the first visible row: `implicitId`, set by an effect
-   * further down from the rows actually on screen. It is state rather than a derivation because
-   * `activeQuery` is read ~900 lines above where the rows are built, and a `const` read before its
-   * declaration is the TDZ fault this page has already shipped once.
+   * ⚠️ v21 §7 · NOTHING SELECTS ON LOAD, AT ANY WIDTH, IN ANY VIEW. The selection is `?q=` and
+   * nothing else; `urlSelectedId` is what it names, and the `?q` effect below is still its one
+   * writer.
    *
-   * ⚠️ IN DRAWER MODE NOTHING SELECTS IMPLICITLY (under 900px of column): an implicit selection
-   * there would open a drawer over the page on load. That condition lives in the effect.
+   * ⚠️ THIS RETIRES `implicitId` AND REVERSES v11's "the docked card shows the first row". That
+   * rule bought a card the reader never asked for and paid the whole content width for it: the
+   * 396px column existed on every load whether or not anything was selected, so the Ledger was
+   * 756px wide to show a query nobody had chosen. It also made the under-900px case an EXCEPTION
+   * ("never in drawer mode, or a drawer opens over the page on load") — and that exception was
+   * the honest rule all along, so it is now the universal one and there is no branch left to get
+   * wrong (Nick's ruling 6, 21 Sep).
    */
   const [urlSelectedId, setSelectedQueryId] = useState<string | null>(null);
-  const [implicitId, setImplicitId] = useState<string | null>(null);
-  const selectedQueryId = urlSelectedId ?? implicitId;
+  const selectedQueryId = urlSelectedId;
   const [selectedQuery, setSelectedQuery] = useState<any | null>(null);
 
   /* ── Mobile Pass 1 · LIST → DETAIL (ref design-refs/mobile-concept-v1.html frames 02/03) ──
@@ -3449,16 +3450,9 @@ export const Queries: React.FC<{
       return !!r && (id === QC_UNASSIGNED ? !qcMsTitle.has(r.manuscriptId) : inScope(r, id)) && matchesFilter(r, qcFilter);
     });
   };
-  /* ── the implicit selection: the first visible row, while DOCKED and nothing is in `?q` ──
-     Sticky: once it names a row it keeps it for as long as that row is visible, so a re-sort does
-     not change the open query under the reader. Never in drawer mode, never while a query is being
-     written, and never before the column has been measured (`qcDocked === null`). */
-  const qcImplicitWant = qcDocked === true && !urlSelectedId && !creating
-    ? (implicitId && qcVisible.some((r) => r.id === implicitId) ? implicitId : (qcVisible[0]?.id ?? null))
-    : null;
-  useEffect(() => {
-    if (implicitId !== qcImplicitWant) setImplicitId(qcImplicitWant);
-  }, [qcImplicitWant, implicitId]);
+  /* ⚠️ THE IMPLICIT SELECTION IS GONE (v21 §7) — see the note at `urlSelectedId`. Its effect and
+     its sticky "keep the row while it is visible" rule went with it; there is no state to keep in
+     step with the rows any more, which is one fewer thing that can disagree with what is on screen. */
 
   /**
    * ⚠️ THE GRID READS `sortedList`, THE SAME DERIVED SET THE DETAIL LIST READS. One filter
@@ -6307,6 +6301,7 @@ export const Queries: React.FC<{
             /* ⚠️ LEAVING A VIEW CLEARS THE SELECTION. `?q=` is App.tsx's, so this goes through the
                page's one route out rather than writing the URL here. */
             onBack={() => { onSelectView?.("cards"); setGridView("overview"); }}
+            onClearSelection={() => onSelectView?.("cards")}
             docked={qcDocked}
             onDocked={setQcDocked}
             onStep={(delta) => {
@@ -6326,6 +6321,8 @@ export const Queries: React.FC<{
               <QcOpenCard
                 row={qcById.get(activeQuery.id)!}
                 nowMs={Date.now()}
+                /* the ✕, Escape and Back to overview are one act: clear `?q` and the view is wide again */
+                onClose={() => onSelectView?.("cards")}
                 manuscriptTitle={activeMs?.title ?? null}
                 manuscriptTags={activeMs ? [activeMs.ageCategory, activeMs.genre, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString("en-GB")} words` : null].filter((t): t is string => !!t) : []}
                 /* the CTA engine's own answer, through the SAME doors the drawer uses: the desk hosts
