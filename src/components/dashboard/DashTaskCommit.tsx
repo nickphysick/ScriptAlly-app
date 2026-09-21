@@ -62,12 +62,6 @@ export type CommitRequest =
    * THEM SHOULD GO. Collapsing this into the shared writer is a follow-up for whoever merges this
    * branch, not a change to make inside a review branch — but it is the one thing left here, and
    * leaving two spellings of one intent is how they come to disagree.
-   *
-   * ⚠️ AND UNTIL THIS BRANCH IS MERGED OR REBASED, ITS OWN `src/lib/db.tsx` STILL CARRIES THE
-   * BRANCH. The fix is on `main`, which this branch does not yet contain; the paragraph above
-   * describes the world after that lands, deliberately, because a comment written to be true only
-   * before a merge is a comment that goes stale at the merge — which is exactly what happened to
-   * the one this replaces.
    */
   | { id: number; kind: "dismiss"; card: BoardCard }
   /**
