@@ -569,6 +569,109 @@ test("§2 · the rail — placed from the window's box, at two heights, before a
  * The unit lock proves the two derivations agree over a fixture; only the rendered page proves the
  * tile a reader presses deals the hand its own number states.
  */
+/**
+ * ⚠️ §6 · THE BIRDS-EYE VIEW — AND THE CLAIM THAT ONLY A RENDER CAN MAKE IS THE LINE. The library
+ * places every bar so its own expected date lands on 50% of the track; whether the LINE is drawn at
+ * that same 50%, in the same box, is a fact about two stylesheets' arithmetic agreeing — and this
+ * repo has measured a line drawn from padding arithmetic sitting a few pixels off the thing it was
+ * supposed to mark. So the line's x is compared with each bar's own end, in pixels.
+ */
+test("§6 · Birds-eye — the line is where the dates are, the rows scroll, and the card does not grow", async ({ page }) => {
+  await openApp(page, 1440, 860);
+  const be = await page.evaluate(() => {
+    const rail = [...document.querySelectorAll("[data-qcv='rail']")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
+    if (!rail) return null;
+    const rb = rail.getBoundingClientRect();
+    const px = (n: number) => Math.round(n * 10) / 10;
+    const groups = [...rail.querySelectorAll("[data-qcv='be-group']")].map((g) => ({
+      key: g.getAttribute("data-group"),
+      heading: (g.querySelector("[data-qcv='be-heading']")?.textContent ?? "").trim(),
+      rows: g.querySelectorAll("[data-qcv='be-row']").length,
+    }));
+    const lines = [...rail.querySelectorAll("[data-qcv='be-line']")].map((l) => {
+      const b = l.getBoundingClientRect();
+      const rows = l.parentElement!.getBoundingClientRect();
+      return { x: px(b.left), top: px(b.top - rows.top), h: px(b.height), rowsH: px(rows.height) };
+    });
+    /* every bar's own right edge, and the line it is measured against */
+    const bars = [...rail.querySelectorAll("[data-qcv='be-row']")].map((r) => {
+      const bar = r.querySelector("[data-qcv='be-bar']") as HTMLElement | null;
+      const track = r.querySelector("[data-qcv='be-track']") as HTMLElement | null;
+      const over = r.querySelector("[data-qcv='be-over']") as HTMLElement | null;
+      if (!bar || !track) return null;
+      const bb = bar.getBoundingClientRect(), tb = track.getBoundingClientRect();
+      return { mid: px(tb.left + tb.width / 2), end: px(bb.right), start: px(bb.left), over: over ? px(over.getBoundingClientRect().left) : null,
+        day: (r.querySelector("[data-qcv='be-day']")?.textContent ?? "").trim(), court: r.getAttribute("data-court") };
+    }).filter(Boolean) as { mid: number; end: number; start: number; over: number | null; day: string; court: string | null }[];
+    const scroller = rail.querySelector("[data-qcv='be-scroll']") as HTMLElement;
+    return {
+      railH: px(rb.height),
+      groups, lines, bars,
+      /* the rows are the only thing that scrolls */
+      scrolls: scroller.scrollHeight > scroller.clientHeight + 1,
+      railScrolls: rail.scrollHeight > rail.clientHeight + 1,
+      head: px((rail.querySelector("[data-qcv='be-head']") as HTMLElement).getBoundingClientRect().height),
+      focus: [...rail.querySelectorAll("[data-qcv='be-focus'] button")].map((b) => ({ l: b.textContent, on: b.getAttribute("aria-pressed") })),
+      /* §6.2's own requirement: no name or status line may ellipsis at 340 */
+      clipped: [...rail.querySelectorAll(".qcv-be-nm, .qcv-be-st")].filter((e) => e.scrollWidth > e.clientWidth + 0.5).map((e) => (e.textContent ?? "").trim()),
+    };
+  });
+  yes("birdseye", "the view is drawn", !!be, JSON.stringify(be?.groups));
+  yes("birdseye", `it drew rows (${be?.bars.length})`, (be?.bars.length ?? 0) > 3, String(be?.bars.length));
+  is("birdseye", "the focus toggle's three states, Everything pressed", be?.focus, [{ l: "Everything", on: "true" }, { l: "With you", on: "false" }, { l: "With the agent", on: "false" }]);
+  record({ area: "birdseye", what: "the groups, and the rail's height", got: { groups: be?.groups, railH: be?.railH, head: be?.head }, want: "reported" });
+
+  /* ⚠️ THE LINE IS PER GROUP AND AS TALL AS ITS OWN ROWS — never the scroll box's height. */
+  yes("birdseye", `a line per group (${be?.lines.length} for ${be?.groups.length})`, be?.lines.length === be?.groups.length, JSON.stringify(be?.lines));
+  for (const l of be?.lines ?? []) {
+    near("birdseye", "the line starts at its rows' top", l.top, 0, 0.5);
+    near("birdseye", "…and is exactly as tall as them", l.h, l.rowsH, 0.5);
+  }
+
+  /**
+   * ⚠️ THE CLAIM: a bar's end is LEFT of the track's middle when there is time left, ON it when the
+   * date is today, and the overrun starts AT it when the date has gone. Measured against the track's
+   * own middle rather than against a number, so the two cannot drift apart.
+   */
+  const withTime = (be?.bars ?? []).filter((b) => /^\d+d$/.test(b.day));
+  const past = (be?.bars ?? []).filter((b) => /ago$/.test(b.day));
+  const undated = (be?.bars ?? []).filter((b) => b.day === "—");
+  record({ area: "birdseye", what: "the bars, by what their day count says", got: { withTime: withTime.length, past: past.length, undated: undated.length }, want: "reported" });
+  yes("birdseye", `some bars have time left (${withTime.length}) — or the claim below is vacuous`, withTime.length > 0, String(withTime.length));
+  for (const b of withTime) yes("birdseye", `a bar with time left ends short of the line (${b.end} vs ${b.mid})`, b.end <= b.mid + 0.6, JSON.stringify(b));
+  yes("birdseye", `some bars are past their date (${past.length}) — or the overrun is vacuous`, past.length > 0, String(past.length));
+  for (const b of past) {
+    yes("birdseye", `a bar past its date crosses the line (${b.end} vs ${b.mid})`, b.end >= b.mid - 0.6, JSON.stringify(b));
+    /**
+     * ⚠️ AT THE LINE, OR AT THE BAR'S OWN LEFT WHERE THE BAR BEGINS PAST IT. A query that entered
+     * its current stage AFTER its date had gone has no stretch running from the line — the whole
+     * bar is past it, so the whole bar is ink. Asserting a flat 50% reported 37px of disagreement
+     * about a correct bar, which is a measurement being wrong about the page.
+     */
+    if (b.over != null) near("birdseye", "…and its overrun starts at the line, or at the bar where the bar begins past it", b.over, Math.max(b.mid, b.start), 1);
+  }
+  const wholly = past.filter((b) => b.start > b.mid + 0.6);
+  record({ area: "birdseye", what: "bars that begin past the line (the whole bar is ink)", got: wholly.length, want: "reported" });
+  for (const b of undated) near("birdseye", "an undated bar ends on the line — it is anchored on today", b.end, b.mid, 1);
+
+  is("birdseye", "⚠️ the ROWS scroll", be?.scrolls, true);
+  is("birdseye", "⚠️ …and the card itself does not", be?.railScrolls, false);
+  is("birdseye", "§6.2 · names and status lines that clip at 340px", be?.clipped, []);
+  await page.screenshot({ path: resolve(OUT, "birdseye-1440.png") });
+
+  /* the focus fades the other court and changes no count */
+  const before = await page.evaluate(() => document.querySelectorAll("[data-qcv='be-row']").length);
+  await page.locator("[data-qcv='be-focus'] button[data-f='you']").first().click();
+  await page.waitForTimeout(250);
+  const after = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll("[data-qcv='be-row']")] as HTMLElement[];
+    return { n: rows.length, faded: rows.filter((r) => Number(getComputedStyle(r).opacity) < 0.9).length, courts: [...new Set(rows.filter((r) => Number(getComputedStyle(r).opacity) < 0.9).map((r) => r.getAttribute("data-court")))] };
+  });
+  is("birdseye", "⚠️ choosing a court removes no rows", after.n, before);
+  yes("birdseye", `…it fades the other court (${after.faded} of ${after.n})`, after.faded > 0 && after.faded < after.n, JSON.stringify(after));
+  is("birdseye", "…and only the other court", after.courts, ["agent"]);
+});
+
 test("§4 · the courts — three tiles, framed, and a tile deals exactly what it counts", async ({ page }) => {
   await openApp(page, 1440, 860);
   const tiles = await page.evaluate(() => {

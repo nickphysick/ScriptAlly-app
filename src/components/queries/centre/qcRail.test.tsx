@@ -10,7 +10,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { LEDGER_MIN, QcBirdsEyePlaceholder, QcRail, RAIL_INSET_X, RAIL_INSET_Y, RAIL_RESERVE, RAIL_STACK_BELOW, RAIL_W, railBox } from "./QcRail";
+import { LEDGER_MIN, QcRail, RAIL_INSET_X, RAIL_INSET_Y, RAIL_RESERVE, RAIL_STACK_BELOW, RAIL_W, railBox } from "./QcRail";
+import { QcBirdsEye } from "./QcBirdsEye";
 
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const read = (rel: string) => decls(readFileSync(join(process.cwd(), rel), "utf8"));
@@ -73,7 +74,7 @@ describe("⚠️ the rail is placed from the WINDOW's measured box, never the vi
 
 describe("the card, rendered", () => {
   const rail = (over: Partial<React.ComponentProps<typeof QcRail>> = {}) =>
-    renderToStaticMarkup(<QcRail birdsEye={<QcBirdsEyePlaceholder />} {...over} />);
+    renderToStaticMarkup(<QcRail birdsEye={<QcBirdsEye rows={[]} nowMs={Date.now()} />} {...over} />);
 
   it("⚠️ it renders UNPLACED before the first measurement, and that state must look finished", () => {
     /* server-rendered, so no layout effect has run: this is the one frame a reader can see */
@@ -95,8 +96,11 @@ describe("the card, rendered", () => {
   });
   it("⚠️ no ⤢ until there is something for it to open (phase 4)", () => {
     /* a disabled control advertises a thing that does not exist; a dead one is worse — it looks
-       live and does nothing, the fault this repo records against an undo that restores nothing */
-    expect(rail()).not.toContain("<button");
+       live and does nothing, the fault this repo records against an undo that restores nothing.
+       The focus toggle's three buttons ARE live and are what is left. */
+    const html = rail();
+    expect(html, "the ⤢ arrives with the view it opens").not.toContain('data-qcv="be-expand"');
+    expect(html.split("<button").length - 1, "only the focus toggle's three").toBe(3);
   });
 });
 

@@ -134,24 +134,3 @@ export const QcRail: React.FC<{
     </aside>
   );
 };
-
-/**
- * The rail's head (§6.1), and — until phase 3 — all there is of the Birds-eye view.
- *
- * ⚠️ NO ⤢ YET, AND THAT IS DELIBERATE. §6.1 gives the head a round button that opens the expanded
- * view; the expanded view arrives in phase 4. A button drawn now would be either disabled (a
- * control advertising a thing that does not exist) or dead (worse: it looks live and does nothing,
- * which is the fault this repo records against an undo that restores nothing). It arrives with what
- * it opens.
- *
- * ⚠️ AND THERE IS NO "coming soon", NO DASHED BOX AND NO SKELETON HELD FOREVER. A card with its
- * real title and nothing under it is an honest unfinished state; placeholder chrome on a page that
- * is otherwise finished teaches a reader that the page is unfinished everywhere.
- */
-export const QcBirdsEyePlaceholder: React.FC = () => (
-  <div className="qcv-rc" data-qcv="railcal">
-    <div className="qcv-rc-head" data-qcv="railcal-head">
-      <b className="qcv-rc-ttl">Birds-eye view</b>
-    </div>
-  </div>
-);

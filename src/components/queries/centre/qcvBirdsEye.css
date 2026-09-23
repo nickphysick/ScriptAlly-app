@@ -1,0 +1,162 @@
+/**
+ * Query Centre v65 §6 — the rail's Birds-eye view.
+ *
+ * ⚠️ THE COLUMN IS head · focus · axis · ROWS (the only thing that scrolls) · legend, and the card
+ * never changes height. `min-height: 0` on the scroller is what makes that true: without it a flex
+ * child's floor is its CONTENT, so the rows push the card past the window instead of scrolling
+ * inside it — the fault this repo has measured on four different surfaces.
+ */
+@import "./qcvPage.css";
+
+/**
+ * ⚠️ ONE RULE FOR `.qcv-be`, TOKENS AND ALL. Written as two — a flex column here and the track's
+ * geometry two hundred lines down — the lock that reads this rule takes whichever comes FIRST and
+ * reported the tokens as absent. One rule per selector is this repo's own invariant, and the reason
+ * is exactly that: a reader takes the first block, the cascade takes the last.
+ *
+ * ⚠️ AND THE TRACK'S GEOMETRY IS STATED HERE AND NOWHERE ELSE. The line, the ticks and every row's
+ * bar sit in the same horizontal space; three rules each computing it is three chances for one to
+ * be a pixel out, on the one element whose whole job is to line up.
+ */
+.qcv-be {
+  display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto;
+  --qcv-be-pad: 22px;
+  --qcv-be-who: 160px;
+  --qcv-be-day: 46px;
+  --qcv-be-gap: 8px;
+  /* the track's own left edge and width, inside the row's grid */
+  --qcv-be-tl: calc(var(--qcv-be-pad) + var(--qcv-be-who) + var(--qcv-be-gap));
+  --qcv-be-tw: calc(100% - var(--qcv-be-pad) * 2 - var(--qcv-be-who) - var(--qcv-be-day) - var(--qcv-be-gap) * 2);
+}
+
+/* §6.1 — the head */
+.qcv-be-head { flex: none; display: flex; align-items: center; gap: 10px; padding: 22px 22px 8px; }
+.qcv-be-ttl { font-family: var(--qcv-type); font-weight: 400; font-size: 20px; line-height: 1.2; color: var(--qcv-ink); }
+
+/**
+ * §6.1 — the focus toggle. 32px on the page's own quiet fill, the pressed segment white with a
+ * hairline shadow. It FADES the other court's rows (see `.qcv-be-row--fade`); it never hides them
+ * and never changes a count.
+ */
+.qcv-be-focus {
+  flex: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px;
+  margin: 12px 22px 0; padding: 2px; height: 32px; box-sizing: border-box;
+  background: #f3eee7; border-radius: 8px;
+}
+.qcv-be-focus button {
+  font-family: var(--qcv-type); font-weight: 400; font-size: 11px; line-height: 1;
+  color: var(--qcv-ink-70); background: none; border: 0; border-radius: 6px; padding: 0; cursor: pointer;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.qcv-be-focus button[aria-pressed="true"] { background: #fff; color: var(--qcv-ink); box-shadow: 0 1px 2px rgba(28, 19, 15, 0.12); }
+.qcv-be-focus button:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 1px; }
+.qcv-be-focus button:disabled { cursor: default; }
+
+/**
+ * §6.2 — the axis. One label over the line and eight faint week ticks, and NOTHING else: a row's
+ * own date is on the line, so a dated axis would be naming days that mean something different on
+ * every row.
+ *
+ * ⚠️ THE TRACK'S GEOMETRY IS STATED ONCE, HERE, AND EVERY OTHER RULE READS IT. The line, the ticks
+ * and each row's bar all sit in the same horizontal space; three rules each computing it is three
+ * chances for one of them to be a pixel out, on the one element whose whole job is to line up.
+ */
+.qcv-be-axis { position: relative; flex: none; height: 16px; margin: 12px var(--qcv-be-pad) 0; }
+.qcv-be-axl {
+  position: absolute; left: 50%; top: 2px; transform: translateX(-50%);
+  font-family: var(--qcv-mono); font-weight: 600; font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--qcv-ink-45); white-space: nowrap;
+}
+.qcv-be-axis i { position: absolute; top: 6px; width: 1px; height: 4px; background: rgba(28, 19, 15, 0.16); }
+
+/* the rows: the only thing that scrolls */
+.qcv-be-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 0 6px; }
+.qcv-be-none { margin: 18px var(--qcv-be-pad); font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcv-ink-45); }
+
+/* §6.2 — the group headings. Overdue's is ink; the other two are 45%. */
+.qcv-be-gh {
+  display: flex; align-items: baseline; gap: 7px; margin: 12px var(--qcv-be-pad) 4px;
+  font-family: var(--qcv-mono); font-weight: 400; font-size: 8px; line-height: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--qcv-ink-45);
+}
+.qcv-be-grp--overdue .qcv-be-gh { color: var(--qcv-ink); }
+.qcv-be-gh span { font-family: var(--qcv-serif); font-size: 12px; letter-spacing: 0; text-transform: none; }
+
+/**
+ * ⚠️ THE LINE IS THE ROWS' OWN, drawn on the container the rows sit in — so it runs from the first
+ * row to the last and stops. On the scroller it would carry on into empty space and read as a date
+ * the nothing below it is measured against.
+ */
+.qcv-be-rows { position: relative; }
+.qcv-be-line {
+  position: absolute; top: 0; bottom: 0; left: calc(var(--qcv-be-tl) + var(--qcv-be-tw) * 0.5);
+  width: 1px; background: var(--qcv-ink-45); pointer-events: none; z-index: 1;
+}
+
+.qcv-be-row {
+  display: grid; grid-template-columns: var(--qcv-be-who) minmax(0, 1fr) var(--qcv-be-day);
+  column-gap: var(--qcv-be-gap); align-items: center;
+  box-sizing: border-box; height: 40px; padding: 0 var(--qcv-be-pad);
+  border-bottom: 1px solid var(--qcv-hair);
+}
+.qcv-be-rows > .qcv-be-row:last-child { border-bottom: 0; }
+/* §6.1 — the focus fades the other court; hover brings it most of the way back */
+.qcv-be-row--fade { opacity: 0.22; }
+.qcv-be-row--fade:hover { opacity: 0.6; }
+
+.qcv-be-who { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.qcv-be-ini {
+  flex: none; width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  /* §1.6 — anthracite with cream initials, everywhere initials appear; the shell's token */
+  background: var(--sp-anthracite); color: #f5f1eb;
+  font-family: var(--qcv-mono); font-weight: 600; font-size: 7.5px; line-height: 1; font-style: normal; letter-spacing: 0.02em;
+}
+.qcv-be-wtx { min-width: 0; }
+.qcv-be-nm { display: block; font-family: var(--qcv-serif); font-weight: 600; font-size: 12.5px; line-height: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcv-be-st {
+  display: flex; align-items: center; gap: 5px; min-width: 0;
+  font-family: var(--qcv-type); font-weight: 400; font-size: 10px; line-height: 13px; color: var(--qcv-ink-70);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.qcv-be-st svg { flex: none; }
+
+/* §6.3 — the bars */
+.qcv-be-t { position: relative; display: block; height: 100%; min-width: 0; }
+.qcv-be-bar {
+  position: absolute; top: calc(50% - 4px); height: 8px; border-radius: 4px;
+  background: var(--qcv-state, var(--state-closed)); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.07);
+  overflow: hidden;
+}
+/* a bar that began before the track is cut flat, so the cut reads as "and before this" */
+.qcv-be-bar--cut { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+/* nothing dates it: the bar says so rather than being placed against a date nobody promised */
+.qcv-be-bar--dash { background: repeating-linear-gradient(90deg, rgba(28, 19, 15, 0.18) 0 4px, transparent 4px 8px); }
+/* the move is the writer's — the same rust, meaning the same thing, as everywhere else */
+.qcv-be-bar--you { box-shadow: inset 3px 0 0 var(--qcv-rust), inset 0 0 0 1px rgba(28, 19, 15, 0.07); }
+/* the stretch past the date: ink, and no text — the day count at the row's right states the number */
+.qcv-be-over { position: absolute; top: 0; bottom: 0; background: rgba(28, 19, 15, 0.55); border-left: 1.5px solid var(--qcv-ink); }
+/* §6.2 — watch-and-wait bars sit back until the row is under the pointer */
+.qcv-be-row--watch .qcv-be-bar { opacity: 0.72; }
+.qcv-be-row--watch:hover .qcv-be-bar { opacity: 1; }
+
+.qcv-be-day { font-family: var(--qcv-type); font-weight: 400; font-size: 11px; line-height: 1; text-align: right; color: var(--qcv-ink-70); white-space: nowrap; }
+.qcv-be-day--urgent { color: var(--qcv-ink); font-weight: 600; }
+
+/* §6.3 — the legend */
+.qcv-be-key {
+  flex: none; display: flex; align-items: center; gap: 5px; height: 36px; box-sizing: border-box;
+  padding: 0 var(--qcv-be-pad); border-top: 1px solid var(--qcv-hair);
+  font-family: var(--qcv-mono); font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-45);
+}
+.qcv-be-key i { display: inline-block; width: 14px; height: 6px; border-radius: 3px; margin-left: 8px; }
+.qcv-be-key i:first-child { margin-left: 0; }
+.qcv-be-k1 { background: var(--state-queried); }
+.qcv-be-k2 { background: rgba(28, 19, 15, 0.55); }
+.qcv-be-k3 { background: repeating-linear-gradient(90deg, rgba(28, 19, 15, 0.18) 0 3px, transparent 3px 6px); }
+
+.qcv-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qcv-be-row--fade, .qcv-be-row--watch .qcv-be-bar { transition: none; }
+}

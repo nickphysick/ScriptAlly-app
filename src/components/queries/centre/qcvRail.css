@@ -36,8 +36,3 @@
  * against the card it sits in. One `data-showing`, two treatments.
  */
 .qcv-rail[data-showing="query"] { padding: 14px; }
-
-/* ── the Birds-eye view's own chrome (§6.1). Its body arrives in phase 3. ── */
-.qcv-rc { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
-.qcv-rc-head { display: flex; align-items: center; gap: 10px; padding: 22px 22px 8px; }
-.qcv-rc-ttl { font-family: var(--qcv-type); font-weight: 400; font-size: 20px; line-height: 1.2; color: var(--qcv-ink); }

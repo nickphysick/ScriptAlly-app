@@ -84,7 +84,8 @@ import "./queries/queryViewSwitch.css"; /* position-pinned, as above: the Contac
 import { QcCentre, clearQcViewMemory } from "./queries/centre/QcCentre";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
-import { QcBirdsEyePlaceholder, QcRail } from "./queries/centre/QcRail";
+import { QcRail } from "./queries/centre/QcRail";
+import { QcBirdsEye } from "./queries/centre/QcBirdsEye";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
 import { QcOpenCard, QcOpenCardSkeleton } from "./queries/centre/QcOpenCard";
 import { useQcLoad } from "./queries/centre/useQcLoad";
@@ -6311,7 +6312,7 @@ export const Queries: React.FC<{
              */
             rail={(
               <QcRail
-                birdsEye={<QcBirdsEyePlaceholder />}
+                birdsEye={<QcBirdsEye rows={qcScoped} nowMs={Date.now()} loading={showGridSkeleton} />}
                 openCard={!qcDocked ? undefined : showGridSkeleton ? (selectedQueryId ? <QcOpenCardSkeleton /> : undefined) : (panelRow && activeQuery && qcById.get(activeQuery.id)) ? (
                   <QcOpenCard
                   row={qcById.get(activeQuery.id)!}
