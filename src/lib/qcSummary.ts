@@ -170,8 +170,13 @@ const wholeDays = (a: number, b: number): number => Math.max(0, Math.round((b - 
  * unrelated `gaugeFor` (a name collision, not an importer) and `qcReviewAid` names it only inside
  * a COMMENT. A grep for the symbol reported two live consumers and there were none.
  *
- * What stays is what the Overview and the fan read: `rowsForStage`, `rowsForClosed`,
- * `rowsWithdrawn`, `rowsForCard`, `fanHand` and `overviewCards`.
+ * ⚠️ AND v65 §4 TOOK THE OVERVIEW'S OWN SELECTORS WITH IT — `OverviewKey`, `OverviewCard`,
+ * `overviewCards`, `rowsForCard` and `fanHand`. The three court tiles replace the seven-or-eight
+ * stat cards, so `courtTiles` and `tileHand` replace them; a replacement that is ADDED leaves the
+ * original reachable, and only one that is SWAPPED retires it.
+ *
+ * What stays is what the sentence, the courts and the fan read: `rowsForStage`, `rowsForClosed`
+ * and `rowsWithdrawn`.
  */
 
 /**
@@ -194,88 +199,88 @@ export const rowsForClosed = (rows: readonly QcRow[]): QcRow[] =>
 export const rowsWithdrawn = (rows: readonly QcRow[]): QcRow[] =>
   rows.filter((r) => r.closedHow === "withdrawn");
 
-/* ── the Overview's stat row (v21 §3.1) ── */
+export interface FanHand { dealt: QcRow[]; more: number; count: number }
+/** The cap and the order, over whatever set was chosen. Both doors into the fan read THIS. */
+export function handOf(set: readonly QcRow[]): FanHand {
+  const all = set.slice().sort((a, b) => b.lastMs - a.lastMs);
+  return { dealt: all.slice(0, FAN_MAX_DEALT), more: Math.max(0, all.length - FAN_MAX_DEALT), count: all.length };
+}
 
-export type OverviewKey = QueryStatus | "closed";
-export interface OverviewCard {
-  key: OverviewKey;
-  /** The status whose glyph the card draws. The closed card draws the closed mark. */
-  status: QueryStatus;
+/* ── the three courts, as the page's tiles state them (v65 §1.3) ── */
+
+/**
+ * ⚠️ THREE COURTS, AND `tileCourt` IS NOT `courtOf` — the difference is OFFER, and it is a decision
+ * rather than a slip. `courtOf` gives an offer its own court because the four-way split is what the
+ * rest of the app reasons with; the page's three tiles put it under **With you**, because an
+ * offer's decision is the writer's and there is no fourth tile for it to sit in. Nick's ruling of
+ * 23 Sep, and the tile's own fact line says so out loud ("N offers to decide").
+ *
+ * ⚠️ `isWithYou` IS UNTOUCHED AND KEEPS ITS MEANING. The rust marker on a row, a bar or a chip
+ * still means "material is owed by you", which an offer does not owe. Two names for two questions;
+ * folding them would put a rust mark on every offer in the app.
+ *
+ * ⚠️ AND WITHDRAWN IS `null`, NOT `"closed"`. A withdrawal is the writer's own act rather than an
+ * outcome an agent produced, so it is outside the three counts entirely — stated beside the closed
+ * fan ("+N withdrawn, not shown") and counted nowhere. `null` is what makes that structural: a
+ * withdrawn row has no tile to be counted in, so no tile can accidentally acquire it.
+ */
+export type TileCourt = "you" | "agent" | "closed";
+export function tileCourt(status: QueryStatus): TileCourt | null {
+  const c = courtOf(status);
+  if (c === "you" || c === "offer") return "you";
+  if (c === "agent") return "agent";
+  return status === QueryStatus.WITHDRAWN ? null : "closed";
+}
+export const rowsForTile = (rows: readonly QcRow[], tile: TileCourt): QcRow[] =>
+  rows.filter((r) => tileCourt(r.status) === tile);
+
+export interface CourtTile {
+  key: TileCourt;
   name: string;
   count: number;
-  /** The one mono line under the name. */
-  note: string;
-  /** The note is a count of queries past their date: ink, weight 600, rather than 45%. */
+  /** The one mono line under the count. */
+  fact: string;
+  /** The fact is a count of queries past their date: ink, weight 600, rather than 45%. */
   urgent: boolean;
-  /** The rust dot after the glyph — the two states where the move is yours and material is owed. */
+  /** The rust dot at the band's right — the court where the move is yours. */
   rust: boolean;
 }
 
 /**
- * One card per status, in pipeline order, and Closed last.
+ * The three tiles, in the page's order, from one pass over the rows.
  *
- * ⚠️ THE ROW IS SEVEN CARDS, OR EIGHT WHILE A LIVE R&R EXISTS — and the eighth is `stageOrder`'s
- * own decision, not a second rule written here. The strip's stage columns and this row would
- * otherwise disagree about whether R&R is a thing on this account, which is exactly the class of
- * fault the shared selectors above exist to foreclose.
- *
- * ⚠️ AND THE MONO LINE STATES A FACT, NEVER A VERDICT. "N past the date" is the app's wording for a
- * date that has gone by; "overdue" and "late" are forbidden here as everywhere (CLAUDE.md). A card
- * at zero says "none" rather than stating a figure of nothing — including the closed card, whose
- * "0 passed · 0 no reply" would be two facts about an empty set.
+ * ⚠️ A TILE AT ZERO SAYS "none yet" RATHER THAN STATING A FIGURE OF NOTHING. "0 passed · 0 no reply"
+ * is two facts about an empty set, and "your move on these" about nothing is an instruction with no
+ * object — the same rule the Overview's cards were written to.
  */
-export function overviewCards(rows: readonly QcRow[], nowMs: number): OverviewCard[] {
-  void nowMs; /* `pastExpected` is already derived against now when the rows are built */
-  const live = rows.filter((r) => r.court !== "closed");
-  const cards: OverviewCard[] = stageOrder(live).map((status) => {
-    const mine = rowsForStage(rows, status);
-    const past = mine.filter((r) => r.pastExpected).length;
-    const owed = status === QueryStatus.PARTIAL_REQUESTED || status === QueryStatus.FULL_REQUESTED;
-    const note = mine.length === 0 ? "none"
-      : past > 0 ? `${past} past the date`
-        : owed ? "your move"
-          : status === QueryStatus.OFFER ? "decision due"
-            : "in the window";
-    return {
-      key: status, status, name: STAGE_NAME[status], count: mine.length,
-      note, urgent: mine.length > 0 && past > 0, rust: owed && mine.length > 0,
-    };
-  });
-  const closed = rowsForClosed(rows);
+export function courtTiles(rows: readonly QcRow[]): CourtTile[] {
+  const you = rowsForTile(rows, "you");
+  const agent = rowsForTile(rows, "agent");
+  const closed = rowsForTile(rows, "closed");
+  const offers = you.filter((r) => r.status === QueryStatus.OFFER).length;
+  const past = agent.filter((r) => r.pastExpected).length;
   const passed = closed.filter((r) => r.closedHow === "passed").length;
   const noReply = closed.filter((r) => r.closedHow === "noReply").length;
-  cards.push({
-    key: "closed", status: QueryStatus.REJECTED, name: "Closed", count: closed.length,
-    note: closed.length === 0 ? "none" : `${passed} passed · ${noReply} no reply`,
-    urgent: false, rust: false,
-  });
-  return cards;
+  return [
+    {
+      key: "you", name: COURT_LABEL.you, count: you.length,
+      fact: you.length === 0 ? "none yet" : offers > 0 ? `${offers} offer${offers === 1 ? "" : "s"} to decide` : "your move on these",
+      urgent: false, rust: you.length > 0,
+    },
+    {
+      key: "agent", name: COURT_LABEL.agent, count: agent.length,
+      fact: agent.length === 0 ? "none yet" : past > 0 ? `${past} past the date` : "all in the window",
+      urgent: past > 0, rust: false,
+    },
+    {
+      key: "closed", name: COURT_LABEL.closed, count: closed.length,
+      fact: closed.length === 0 ? "none yet" : `${passed} passed · ${noReply} no reply`,
+      urgent: false, rust: false,
+    },
+  ];
 }
-
-/** The rows a stat card deals when it is clicked — the same membership its count states. */
-export function rowsForCard(rows: readonly QcRow[], key: OverviewKey): QcRow[] {
-  return key === "closed" ? rowsForClosed(rows) : rowsForStage(rows, key);
-}
-
-/**
- * The hand the fan lays out for a stat card: at most fifteen query cards, latest activity first,
- * and the number left over (v21 §5, Nick's ruling of 21 Sep).
- *
- * ⚠️ IT READS `rowsForCard`, SO THE DEAL AND THE COUNT CANNOT DISAGREE — which is the whole point of
- * the shared selectors above, and the cap is the one place that claim could quietly stop being true.
- * The stat card's figure is still `count`; the header still says "50 queried"; what is capped is how
- * many of them get a card. `more` is therefore `count - FAN_MAX_DEALT`, never a separate count of
- * anything.
- *
- * ⚠️ LATEST ACTIVITY FIRST, AND THE SORT IS PART OF THE CLAIM. "The fifteen most recent" is only
- * meaningful against a stated order; taking the first fifteen of whatever order the rows arrived in
- * would deal an arbitrary fifteen and still pass a length check.
- */
-export interface FanHand { dealt: QcRow[]; more: number; count: number }
-export function fanHand(rows: readonly QcRow[], key: OverviewKey): FanHand {
-  const all = rowsForCard(rows, key).slice().sort((a, b) => b.lastMs - a.lastMs);
-  return { dealt: all.slice(0, FAN_MAX_DEALT), more: Math.max(0, all.length - FAN_MAX_DEALT), count: all.length };
-}
+/** The hand a court tile deals — the same membership its count states. */
+export const tileHand = (rows: readonly QcRow[], tile: TileCourt): FanHand => handOf(rowsForTile(rows, tile));
 
 /* ── the sentence: one filter, one manuscript scope, one sort ── */
 export type QcFilter = "all" | "you" | "agent" | "offers" | "past" | "closed" | `stage:${QueryStatus}`;

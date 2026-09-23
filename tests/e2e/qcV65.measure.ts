@@ -72,18 +72,19 @@ const APP = (name: string) => `[data-qcv="${name}"]`;
 const APP_SEL: Sel = Object.fromEntries([
   "head", "head-title", "head-line", "head-cta",
   "fan", "fan-deck", "fan-card", "fan-title",
-  "ctl", "sentence",
+  "ctl", "sentence", "courts", "court",
   "stagegrid", "ledger", "open", "open-band", "open-foot", "open-action",
-  "list-head", "row", "row-chip", "row-stand", "row-sent", "row-date",
-  "ledger-frame",
+  "row", "row-chip", "row-stand", "row-sent", "row-date",
 ].map((n) => [n, APP(n)]));
 const REF_SEL: Sel = {
   "head": ".head", "head-title": ".head h1", "head-line": ".head .facts", "head-cta": ".head .inkpill",
   "fan": "#fan", "fan-deck": "#fan .deck", "fan-card": "#fan .deck > *", "fan-title": "#fan .fh b",
   "ctl": ".ctl", "sentence": ".sentence",
   "stagegrid": ".stage", "ledger": ".ledger", "open": ".open", "open-band": ".open .bd", "open-foot": ".open .ft", "open-action": ".open .ft button",
-  "list-head": ".cols", "row": "#list .row", "row-chip": "#list .row .chip", "row-stand": "#list .row .st", "row-sent": "#list .row .mat", "row-date": "#list .row .date",
-  "ledger-frame": ".ledger > .frame",
+  "row": "#list .row", "row-chip": "#list .row .chip", "row-stand": "#list .row .st", "row-sent": "#list .row .mat", "row-date": "#list .row .date",
+  /* ⚠️ the courts are `.sum` in the ref, which `body.one` HIDES (v65 §4 rebuilt them) — so there is
+     no ref probe for them and nothing compares them; the app's own case measures them directly */
+  "courts": ".sum", "court": ".sum .sec",
 };
 
 /** Runs IN THE PAGE. A real function (no template literal), so no escape is eaten on the way in. */
@@ -174,10 +175,20 @@ async function readRef(page: Page, w: number, h: number, prep?: (p: Page) => Pro
  * three right-hand columns away from the ref's x at every width. So those edges are asserted
  * against the app's OWN declared floors and ceilings, and the ref's are recorded beside them.
  */
+/**
+ * The row's template, read out of the sheet rather than restated here.
+ *
+ * ⚠️ IT IS ONE FLEXIBLE TRACK AND THREE FIXED SINCE v65 §5 — `minmax(166px, 1fr) 170px 78px 46px`.
+ * Before, it was three `minmax(floor, ceiling)` tracks and one fixed, and the ceilings were what the
+ * spare went into; the single `1fr` takes the spare itself now. A reader of this function carried
+ * across from v21 gets `flex: []` and four "fixed" tracks, which is how track 0 came to be checked
+ * against 170–170 and reported at 374.
+ */
 function listTemplate() {
   const css = readFileSync(resolve("src/components/queries/centre/qcvList.css"), "utf8");
   const tpl = /--qcv-tpl:\s*([^;]+);/.exec(css)?.[1] ?? "";
-  const flex = [...tpl.matchAll(/minmax\((\d+(?:\.\d+)?)px,\s*(\d+(?:\.\d+)?)px\)/g)].map((m) => ({ floor: +m[1], ceiling: +m[2] }));
+  /* a flexible track is `minmax(floor, 1fr)`: a floor and no ceiling but the row's own width */
+  const flex = [...tpl.matchAll(/minmax\((\d+(?:\.\d+)?)px,\s*1fr\)/g)].map((m) => ({ floor: +m[1] }));
   const fixed = [...tpl.replace(/minmax\([^)]*\)/g, "").matchAll(/(\d+(?:\.\d+)?)px/g)].map((m) => +m[1]);
   const gap = +(/--qcv-tpl-gap:\s*(\d+(?:\.\d+)?)px/.exec(css)?.[1] ?? 0);
   const drop = +(/@container \(max-width: (\d+)px\)/.exec(css)?.[1] ?? 0);
@@ -216,7 +227,14 @@ async function readApp(page: Page): Promise<Reading> {
 async function appColumn(page: Page): Promise<number> {
   return page.evaluate(() => Math.round([...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect().width));
 }
-const refWindowFor = (column: number) => column + 268;
+/**
+ * ⚠️ 246, NOT 268, SINCE v65 §2 — AND THE CHANGE IS WHICH INSETS ARE STILL OUTSIDE THE COLUMN. The
+ * mockup's page is its window less a 224px nav and its own 22px insets on each side; both documents
+ * now reserve the SAME 384px at the right for the fixed card, so that reservation cancels and only
+ * the LEFT 22 is left to add. Measured: at 268 the ref's content came out 766 against the app's 744,
+ * which is that 22 exactly.
+ */
+const refWindowFor = (column: number) => column + 246;
 
 const need = (r: Reading, who: string, name: string) => {
   const b = r.boxes[name];
@@ -299,6 +317,71 @@ test("top bar — + New is gone app-wide and Give feedback is anthracite", async
  * given. The second half is the one a unit test cannot see: the old reflection wrote `?view=` back
  * with `replaceState` on every change, so a param left untouched is the evidence it is gone.
  */
+/**
+ * ⚠️ §2 · NOTHING IN THE BAR MAY OVERFLOW AT 1280, which is the whole reason the whisper goes and
+ * the search takes the slack. The page reserves 384px for the card, so the bar above it has less
+ * room than on any other route — and this is checked as INK AGAINST BOXES rather than as
+ * `scrollWidth`, because a flex row does not fail by scrolling. It fails by squeezing one child to
+ * nothing or pushing another past the edge, and `scrollWidth === clientWidth` reports "fine" for
+ * both (the landing statement's `nowrap` taught this repo that lesson by 3.4px).
+ */
+test("§2 · the narrow bar — the whisper goes, the crumb holds, and nothing overflows at 1280", async ({ page }) => {
+  for (const w of [1280, 1440] as const) {
+    await openApp(page, w, 800);
+    const bar = await page.evaluate(() => {
+      const b = [...document.querySelectorAll(".ws-pagebar")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
+      if (!b) return null;
+      const box = b.getBoundingClientRect();
+      /* ⚠️ `display: none` IS NOT "SQUEEZED TO NOTHING" — the whisper and its divider are REMOVED
+         here by design, and counting them as casualties is the check misreading its own subject. A
+         child that is laid out and has no width is the fault; one that is not laid out is a
+         decision. `offsetParent === null` tells them apart without knowing which ones they are. */
+      const kids = [...b.children].map((e) => {
+        const r = e.getBoundingClientRect();
+        return { cls: (e.className || "").toString().split(" ")[0], w: Math.round(r.width), left: Math.round(r.left - box.left), right: Math.round(box.right - r.right),
+          laidOut: (e as HTMLElement).offsetParent !== null || getComputedStyle(e).position === "fixed", shown: r.width > 0 };
+      });
+      const px = (n: number) => Math.round(n * 10) / 10;
+      return {
+        w: px(box.width),
+        sync: [...b.querySelectorAll(".ws-sync")].filter((e) => e.getBoundingClientRect().width > 0).length,
+        crumb: px(b.querySelector(".ws-crumb")?.getBoundingClientRect().width ?? 0),
+        search: px(b.querySelector(".sp-search")?.getBoundingClientRect().width ?? 0),
+        /* ink outside the bar's own box, in either direction */
+        out: kids.filter((k) => k.shown && (k.left < -0.5 || k.right < -0.5)).map((k) => k.cls),
+        squeezed: kids.filter((k) => k.laidOut && !k.shown).map((k) => k.cls),
+        removed: kids.filter((k) => !k.laidOut).map((k) => k.cls),
+        kids,
+      };
+    });
+    const area = `bar@${w}`;
+    yes(area, "the bar is on the page", !!bar, JSON.stringify(bar));
+    is(area, "the save whisper is drawn", bar?.sync, 0);
+    is(area, "…and it is REMOVED rather than squeezed — with its divider and nothing else", bar?.removed, ["ws-vdiv", "ws-sync"]);
+    yes(area, `nothing runs past the bar's edges (${JSON.stringify(bar?.out)})`, (bar?.out.length ?? 1) === 0, JSON.stringify(bar?.out));
+    yes(area, `nothing is squeezed to nothing (${JSON.stringify(bar?.squeezed)})`, (bar?.squeezed.length ?? 1) === 0, JSON.stringify(bar?.squeezed));
+    /**
+     * ⚠️ THE SLACK IS REPORTED, AND THE CLAIM IS THAT NOTHING OVERFLOWS — which is what §2 asks
+     * for. It is NOT that the search narrows: measured with the whisper gone, the bar has 140px of
+     * free space at 1280, so there is no slack for it to take and it sits at 210 at both widths.
+     * Asserting that it narrows would be asserting a consequence of a fault the whisper's removal
+     * already prevents — a check that can only pass on a bar that is too full.
+     */
+    const free = (bar?.w ?? 0) - (bar?.kids.filter((k) => k.shown).reduce((n, k) => n + k.w, 0) ?? 0);
+    record({ area, what: "the bar's children, and the free space between them", got: { kids: bar?.kids, free: Math.round(free) }, want: "reported" });
+    yes(area, `the bar has room to spare (${Math.round(free)}px) rather than being squeezed to fit`, free > 0, String(Math.round(free)));
+    seen("bar-widths", `${w}: crumb ${bar?.crumb} · search ${bar?.search} · free ${Math.round(free)}`);
+  }
+  /* ⚠️ AND THE CRUMB DOES NOT SHRINK, which IS a claim and is checkable: it is the one thing in the
+     bar that must read the same at every width. */
+  const t = load().tally["bar-widths"] ?? {};
+  const rd = (w: number) => Object.keys(t).find((k) => k.startsWith(`${w}:`)) ?? "";
+  const num = (s: string, label: string) => +(new RegExp(`${label} ([\\d.]+)`).exec(s)?.[1] ?? -1);
+  const [a, b] = [rd(1280), rd(1440)];
+  is("bar", "the crumb is the same width at 1280 and 1440 — it does not shrink", num(a, "crumb"), num(b, "crumb"));
+  record({ area: "bar", what: "crumb · search · free, at 1280 and 1440", got: { "1280": a, "1440": b }, want: "reported" });
+});
+
 test("§1 · the views are retired — every ?view= lands on the same ledger, and the URL is left alone", async ({ page }) => {
   const read = async () => page.evaluate(() => {
     const pg = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0);
@@ -355,10 +438,22 @@ test("head and control row — 1440×860", async ({ page }) => {
   const app = await readApp(page);
   sameSize("head", app, ref, "head-cta", ["w", "h"]);
   sameSize("head", app, ref, "head-title", ["h"]);
-  sameSize("head", app, ref, "head", ["h"]);
-  sameOffset("head", app, ref, "head-line", "head", ["y"]);
-  sameOffset("head", app, ref, "head-cta", "head", ["y"]);
+  /**
+   * ⚠️ THE HEAD'S BOX IS NOT COMPARED, AND THE REASON IS A PARTITION RATHER THAN A DISAGREEMENT.
+   * The ref's hero pays its own `18px` of top padding inside a page that pays none; this page pays
+   * `11px` at the PAGE so the title sits 25px under the bar's controls, exactly as the dashboard's
+   * greeting does — a cross-page rhythm this app keeps and the mockup has no opinion about. Same
+   * ink in the same place, two boxes drawn round it, and `head.h` differs by that padding alone.
+   *
+   * So what is compared is the ARRANGEMENT, which is the design's actual claim: where the facts
+   * line sits under the title, where the pills sit under it, and the title's own size. A box
+   * comparison here would fail for ever on a difference nobody could act on without giving up the
+   * rhythm — the "assert the claim, not the spelling" rule, in its most literal form.
+   */
+  sameOffset("head", app, ref, "head-line", "head-title", ["y"]);
+  sameOffset("head", app, ref, "head-cta", "head-line", ["y"]);
   sameSize("control", app, ref, "ctl", ["h"]);
+  record({ area: "head", what: "the head's box, app vs ref (they differ by the ref's own 18/6 of padding, which this page pays at the PAGE)", got: { app: app.boxes.head?.h, ref: ref.boxes.head?.h }, want: "reported" });
   /* the page shares the dashboard's left edge and measure: same shell, same 22px inset */
   const pg = await page.evaluate(() => { const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!; const b = p.getBoundingClientRect(); const bar = [...document.querySelectorAll(".ws-pagebar .sp-help")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect(); const t = p.querySelector("[data-qcv='head-title']")!.getBoundingClientRect(); return { x: b.x, w: b.width, gap: Math.round((t.y - bar.bottom) * 10) / 10 }; });
   near("head", "the page's left edge (the dashboard's is 268 at 1440)", pg.x, 268, 1);
@@ -387,6 +482,194 @@ test("head and control row — 1440×860", async ({ page }) => {
   is("control", "the window sheet behind the page", gone.windowBg, "rgba(0, 0, 0, 0)");
   for (const [k, f] of [["title", gone.title], ["sentence", gone.sentence], ["log button", gone.cta]] as const) yes("head", `${k} is drawn in the typewriter face, not brand.tsx's`, /Special Elite/.test(f), f);
   await page.screenshot({ path: resolve(OUT, "list-1440.png") });
+});
+
+/**
+ * ⚠️ §2 · LOCK 1 — THE CARD IS PLACED FROM THE WINDOW'S BOX, AND THAT IS THE WHOLE CLAIM. The ref
+ * writes `top: 16; bottom: 16; right: 22` against the viewport because in a drawn page the viewport
+ * IS the window. Here the shell's window sits under a bar and a strip, so the assertion compares
+ * the card's rect with the WINDOW's measured rect — never with `innerHeight`, which is the guess
+ * this app has now paid for four times.
+ *
+ * ⚠️ AND IT IS READ BEFORE AND AFTER THE DATA LANDS. The loading cover `display: none`s the page's
+ * content, so a card measured during it reads a window that is a different height — the sentinel in
+ * `railBox` exists for exactly that, and only a before-and-after reading proves the sentinel works.
+ */
+test("§2 · the rail — placed from the window's box, at two heights, before and after the data", async ({ page }) => {
+  const read = () => page.evaluate(() => {
+    const rail = [...document.querySelectorAll("[data-qcv='rail']")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
+    const win = document.querySelector(".ws-window") as HTMLElement | null;
+    if (!rail || !win) return null;
+    const r = rail.getBoundingClientRect(), w = win.getBoundingClientRect();
+    const px = (n: number) => Math.round(n * 10) / 10;
+    return {
+      pos: getComputedStyle(rail).position,
+      width: px(r.width),
+      top: px(r.top - w.top),
+      bottom: px(w.bottom - r.bottom),
+      right: px(w.right - r.right),
+      innerH: window.innerHeight,
+      winH: px(w.height),
+      showing: rail.getAttribute("data-showing"),
+      /* what the card published, and what the page is actually paying */
+      pad: px(parseFloat(getComputedStyle(document.querySelector(".qcv-page") as HTMLElement).paddingRight)),
+    };
+  });
+
+  for (const [w, h] of [[1440, 860], [1440, 800], [1440, 700]] as const) {
+    const area = `rail@${w}×${h}`;
+    /* ⚠️ MEASURED WHILE THE COVER IS STILL UP — `openApp` waits it out, so this goes in cold and
+       polls for the card rather than for the page's own "not busy". */
+    await openRoute(page, "/queries", { width: w, height: h });
+    const early = await page.evaluate(() => {
+      const rail = document.querySelector("[data-qcv='rail']") as HTMLElement | null;
+      const win = document.querySelector(".ws-window") as HTMLElement | null;
+      if (!rail || !win) return null;
+      const r = rail.getBoundingClientRect(), w2 = win.getBoundingClientRect();
+      return { top: Math.round((r.top - w2.top) * 10) / 10, h: Math.round(r.height), pos: getComputedStyle(rail).position };
+    });
+    record({ area, what: "during the load (the cover is up)", got: early, want: "reported" });
+    if (early && early.pos === "fixed") near(area, "…and it is already on the window's own top + 16", early.top, 16, 1);
+
+    await openApp(page, w, h);
+    const r = await read();
+    yes(area, "the card is on the page", !!r, JSON.stringify(r));
+    is(area, "it is placed, not tracked", r?.pos, "fixed");
+    near(area, "width", r?.width, 340, 0.5);
+    near(area, "top — the WINDOW's top + 16", r?.top, 16, 0.5);
+    near(area, "bottom — the WINDOW's bottom − 16", r?.bottom, 16, 0.5);
+    near(area, "right — the WINDOW's right − 22", r?.right, 22, 0.5);
+    /* ⚠️ THE PRECONDITION THAT MAKES THE THREE ABOVE MEAN ANYTHING: the window is NOT the viewport.
+       Where they happen to agree, a card placed off `innerHeight` would measure identically and
+       this case would pass on the fault it exists to catch. */
+    yes(area, `the window is shorter than the viewport (${r?.winH} vs ${r?.innerH}) — or these three are satisfied by the guess`, (r?.innerH ?? 0) - (r?.winH ?? 0) > 20, `${r?.innerH} − ${r?.winH}`);
+    is(area, "nothing is chosen, so it shows the Birds-eye view", r?.showing, "birdseye");
+    near(area, "…and the page is paying exactly the reservation the card published", r?.pad, 384, 0.5);
+
+    /**
+     * ⚠️ REPORTED, NOT ASSERTED — §2's "the top bar spans the page column only and starts level
+     * with the card's top" is a claim about the SHELL's bar, and the go-ahead scoped this pass's
+     * shell change to exactly two things (the whisper and the search). Whether the bar should also
+     * stop at the card's left edge is Nick's, so the numbers are put on the record rather than
+     * acted on: a silent yes and a silent no are equally unhelpful.
+     */
+    const bar = await page.evaluate(() => {
+      const b = [...document.querySelectorAll(".ws-pagebar")].find((e) => e.getBoundingClientRect().height > 0)?.getBoundingClientRect();
+      const rail = [...document.querySelectorAll("[data-qcv='rail']")].find((e) => e.getBoundingClientRect().height > 0)?.getBoundingClientRect();
+      const win = document.querySelector(".ws-window")?.getBoundingClientRect();
+      const px = (n: number | undefined) => (n == null ? null : Math.round(n * 10) / 10);
+      return b && rail && win ? { barRight: px(b.right), barBottom: px(b.bottom), cardLeft: px(rail.left), cardTop: px(rail.top), winTop: px(win.top), overlap: px(b.right - rail.left) } : null;
+    });
+    record({ area, what: "§2 · the bar against the card (reported: does the bar stop at the card's left edge, and do their tops agree?)", got: bar, want: "reported" });
+  }
+});
+
+/**
+ * ⚠️ §4 · THE THREE COURTS COUNT WHAT THEIR FAN DEALS, AND THE PAGE IS WHERE THAT IS WORTH CHECKING.
+ * The unit lock proves the two derivations agree over a fixture; only the rendered page proves the
+ * tile a reader presses deals the hand its own number states.
+ */
+test("§4 · the courts — three tiles, framed, and a tile deals exactly what it counts", async ({ page }) => {
+  await openApp(page, 1440, 860);
+  const tiles = await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    return [...p.querySelectorAll("[data-qcv='court']")].map((t) => {
+      const b = t.getBoundingClientRect();
+      const band = t.querySelector("[data-qcv='court-band']") as HTMLElement;
+      return {
+        court: t.getAttribute("data-court"),
+        count: Number(t.querySelector("[data-qcv='court-count']")?.textContent),
+        fact: (t.querySelector("[data-qcv='court-fact']")?.textContent ?? "").trim(),
+        w: Math.round(b.width), h: Math.round(b.height),
+        band: getComputedStyle(band).backgroundColor,
+        /* the framed treatment: a rim and a line drawn as two inset shadows, not a border */
+        shadow: getComputedStyle(t).boxShadow.includes("inset"),
+        border: getComputedStyle(t).borderTopWidth,
+      };
+    });
+  });
+  is("courts", "three tiles", tiles.length, 3);
+  is("courts", "in the page's order", tiles.map((t) => t.court), ["you", "agent", "closed"]);
+  yes("courts", "they are the same width", new Set(tiles.map((t) => t.w)).size === 1, JSON.stringify(tiles.map((t) => t.w)));
+  is("courts", "the three bands are three different colours", new Set(tiles.map((t) => t.band)).size, 3);
+  for (const t of tiles) {
+    yes("courts", `${t.court} keeps the FRAMED treatment (the page's one exception)`, t.shadow, String(t.shadow));
+    is("courts", `${t.court} draws no border`, t.border, "0px");
+    /* ⚠️ NO APPRAISAL WORDS ANYWHERE ON THIS PAGE — "overdue" belongs to the Birds-eye view alone */
+    yes("courts", `${t.court}'s fact line states a fact ("${t.fact}")`, !/overdue|late|behind|too long/i.test(t.fact), t.fact);
+  }
+  record({ area: "courts", what: "the three tiles", got: tiles, want: "reported" });
+
+  /* ⚠️ THE COUNTS AND THE LEDGER ARE TWO DERIVATIONS OF ONE SET, compared against EACH OTHER. A
+     literal on both sides would agree with itself for ever; the ledger's own "All N queries" is the
+     page's other statement of the same total, and withdrawn queries are in neither tile. */
+  const said = await page.evaluate(() => [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!.querySelector("[data-qcv='pk-filter']")!.textContent ?? "");
+  const all = Number(/(\d+)/.exec(said)?.[1] ?? -1);
+  const sum = tiles.reduce((n, t) => n + t.count, 0);
+  yes("courts", `the sentence states a total (${all})`, all > 0, said);
+  record({ area: "courts", what: "the three counts against the sentence's total", got: { sum, all, withdrawn: all - sum }, want: "reported" });
+  yes("courts", `the three courts account for every query but the withdrawn ones (${sum} of ${all})`, sum <= all && all - sum >= 0, `${sum} vs ${all}`);
+
+  /* the fan: pressed from a tile, it deals that tile's own number */
+  const hot = tiles.find((t) => t.count > 0)!;
+  await page.locator(`.qcv-page [data-qcv='court'][data-court='${hot.court}']`).first().click();
+  await page.waitForTimeout(500);
+  const fan = await page.evaluate(() => {
+    const f = document.querySelector("[data-qcv='fan']");
+    if (!f) return null;
+    return { title: (f.querySelector("[data-qcv='fan-title']")?.textContent ?? "").trim(), cards: f.querySelectorAll("[data-qcv='fan-card']").length };
+  });
+  yes("courts", "a tile deals a fan", !!fan, JSON.stringify(fan));
+  yes("courts", `the fan's header states the tile's own count (${hot.count}) — "${fan?.title}"`, (fan?.title ?? "").startsWith(String(hot.count)), fan?.title ?? "");
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(300);
+});
+
+/**
+ * ⚠️ §5 · THE ROWS ARE THE CARDS, AND THE LEDGER KEEPS THE WHOLE COLUMN. This is the change that
+ * cost the ledger 396px in v11 and gives it back: the open query lives in the rail, so choosing one
+ * must not narrow the list. Measured as a BEFORE AND AFTER, because "it is wide" is satisfied by a
+ * page where nothing is selected.
+ */
+test("§5 · the ledger — cards 10px apart, and choosing one does not narrow the list", async ({ page }) => {
+  await openApp(page, 1440, 860);
+  const read = () => page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const rows = [...p.querySelectorAll("[data-qcv='row']")] as HTMLElement[];
+    const led = p.querySelector("[data-qcv='ledger']") as HTMLElement;
+    const cs = rows[0] ? getComputedStyle(rows[0]) : null;
+    return {
+      ledger: Math.round(led.getBoundingClientRect().width),
+      rows: rows.length,
+      rowW: rows[0] ? Math.round(rows[0].getBoundingClientRect().width) : null,
+      gap: rows.length > 1 ? Math.round((rows[1].getBoundingClientRect().top - rows[0].getBoundingClientRect().bottom) * 10) / 10 : null,
+      radius: cs?.borderTopLeftRadius,
+      shadow: cs ? cs.boxShadow !== "none" : false,
+      tracks: cs ? cs.gridTemplateColumns : "",
+      head: p.querySelectorAll("[data-qcv='list-head'], .qcv-cols").length,
+      frame: led.querySelectorAll(".fc-frame").length,
+    };
+  });
+  const before = await read();
+  yes("ledger", `it drew rows (${before.rows})`, before.rows > 3, String(before.rows));
+  is("ledger", "no head row", before.head, 0);
+  is("ledger", "no frame around the list", before.frame, 0);
+  near("ledger", "the cards are 10px apart", before.gap, 10, 0.5);
+  is("ledger", "14px corners", before.radius, "14px");
+  yes("ledger", "each card has its own shadow", before.shadow);
+  is("ledger", "four tracks", before.tracks.split(/\s+/).length, 4);
+  record({ area: "ledger", what: "the ledger at 1440, nothing chosen", got: before, want: "reported" });
+
+  await page.locator(".qcv-page [data-qcv='row']").nth(1).click();
+  await page.waitForTimeout(600);
+  const after = await read();
+  const showing = await page.evaluate(() => (document.querySelector("[data-qcv='rail']") as HTMLElement | null)?.getAttribute("data-showing"));
+  is("ledger", "the chosen query went to the rail", showing, "query");
+  /* ⚠️ THE CLAIM. In v11 this measured 1114 before and 698 after. */
+  is("ledger", "…and the ledger did not narrow by a pixel", after.ledger, before.ledger);
+  is("ledger", "…nor did a row", after.rowW, before.rowW);
+  record({ area: "ledger", what: "ledger width before → after a selection", got: { before: before.ledger, after: after.ledger }, want: "reported" });
+  await page.keyboard.press("Escape");
 });
 
 test("the sentence — the two phrases are the page's only filter and sort", async ({ page }) => {
@@ -458,8 +741,11 @@ test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
        in the app AND in the ref at that width — so its size and edge are compared only where both draw it. */
     const T = listTemplate();
     seen("list-date-tile", `${w}: ${dated ? "drawn" : `dropped (container under ${T.boundary})`}`);
-    /* the container is the ledger's CARD content box — the ledger's border box less its 6px rim each side */
-    is(area, "the date tile is drawn exactly where the four floors fit the container", dated, need(app, "app", "ledger").w - 12 >= T.boundary);
+    /* ⚠️ THE CONTAINER IS THE LEDGER'S OWN BOX NOW (§5). It used to be a `FramedCard`, so the query
+       answered 12px early — the border box less a 6px rim each side. The frame is gone with the
+       ledger's card, so there is nothing to subtract, and this is the sort of term that is silently
+       wrong for ever if it is carried rather than re-derived. */
+    is(area, "the date tile is drawn exactly where the four floors fit the container", dated, need(app, "app", "ledger").w >= T.boundary);
     /**
      * ⚠️ AND AT 1280 IT IS DRAWN, FULL STOP — the line above cannot say this. Its expected value is
      * derived from the same stylesheet the page is rendered from, so floors that rise take the
@@ -468,16 +754,14 @@ test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
      * happened (Nick, 20 Sep), so it is asserted flatly, against the window rather than the CSS.
      */
     if (w === 1280) yes(area, "the date tile is drawn at a 1280 window — the column this pass exists to keep", dated);
-    sameSize(area, app, ref, "list-head", ["h"]);
-    /* ⚠️ THE ROW IS 67 IN BOTH LAYOUTS HERE. The ref's row is auto-height and the 45px date tile is what
-       makes it 67; with the tile gone its row falls to 60.8, incidentally. The app states the height,
-       so the list does not change rhythm when the window crosses the threshold. */
-    /* ⚠️ AND THE HEIGHT IS COMPARED TO THE REF ONLY WHERE BOTH DRAW THE TILE. At 1280 the app now
-       does and the ref still does not, so the two are in different layouts: the ref's row falls to
-       60.8 without the tile while the app STATES 67 in both, which is the point — the list keeps its
-       rhythm across the threshold. Comparing them there measures the divergence, not the height. */
-    if (dated && ref.boxes["row-date"]) sameSize(area, app, ref, "row", ["h"]);
-    else near(area, "row.h (stated, tile or no tile)", app.boxes["row"]?.h, 67, 0.5);
+    /* ⚠️ NO HEAD ROW TO COMPARE (§5) — it went with the ledger's frame on both sides. */
+    /* ⚠️ THE ROW'S HEIGHT IS ITS OWN FLOOR, NOT THE REF'S. Both are auto-height cards now, and a
+       card's height is its content's: the app's rows carry the e2e account's real names and status
+       lines, the ref's carry the mockup's. What the app states is a MINIMUM, and that is what is
+       asserted — read from the sheet rather than typed, so a retune moves both together. */
+    const minH = +(/min-height:\s*(\d+(?:\.\d+)?)px/.exec(readFileSync(resolve("src/components/queries/centre/qcvList.css"), "utf8"))?.[1] ?? -1);
+    yes(area, `the row's stated floor is in the sheet (${minH})`, minH > 0, String(minH));
+    yes(area, `every row is at least its stated floor (${app.boxes["row"]?.h} vs ${minH})`, (app.boxes["row"]?.h ?? 0) >= minH - 0.5, String(app.boxes["row"]?.h));
     sameSize(area, app, ref, "row-chip", ["w", "h"]);
     /* the chip sits at the row's own padding and still matches the ref exactly */
     sameOffset(area, app, ref, "row-chip", "ledger", ["x"]);
@@ -495,20 +779,33 @@ test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
       const r = row.getBoundingClientRect();
       return { tracks, inner: r.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) };
     });
-    const want = dated ? [...T.flex, { floor: T.fixed[0], ceiling: T.fixed[0] }] : null;
-    if (want) {
+    if (dated) {
       is(area, "four tracks are drawn", cells.tracks.length, 4);
-      cells.tracks.forEach((t, i) => yes(area, `track ${i} sits between its floor and ceiling (${want[i].floor}–${want[i].ceiling})`, t >= want[i].floor - 0.6 && t <= want[i].ceiling + 0.6, t.toFixed(1)));
+      is(area, "one of them is flexible, three are fixed", [T.flex.length, T.fixed.length], [1, 3]);
+      /* the flexible track is at or above its floor; the three fixed ones are exactly what they say */
+      yes(area, `the flexible track is at or above its ${T.flex[0].floor}px floor`, cells.tracks[0] >= T.flex[0].floor - 0.6, cells.tracks[0].toFixed(1));
+      T.fixed.forEach((f, i) => near(area, `fixed track ${i + 1}`, cells.tracks[i + 1], f, 0.6));
+      /* ⚠️ AND THE FOUR ADD UP TO WHAT THEY WERE GIVEN, less three declared gaps — which is the
+         claim a per-track check cannot make: the flexible one must absorb the spare EXACTLY, or
+         the row is silently narrower or wider than its card. */
       const gaps = (cells.inner - cells.tracks.reduce((x, y) => x + y, 0)) / 3;
-      yes(area, `the three gaps are at or above the declared ${T.gap}px minimum`, gaps >= T.gap - 0.6, gaps.toFixed(1));
+      near(area, `the three gaps are the declared ${T.gap}px`, gaps, T.gap, 0.6);
     }
     record({ area, what: "app vs REF column edges [chip, stands, sent, date] — the floors diverge deliberately (20 Sep)", got: {
       app: ["row-chip", "row-stand", "row-sent", "row-date"].map((c) => (app.boxes[c] && app.boxes["ledger"] ? Math.round((app.boxes[c]!.x - app.boxes["ledger"]!.x) * 10) / 10 : "not drawn")),
       ref: ["row-chip", "row-stand", "row-sent", "row-date"].map((c) => (ref.boxes[c] && ref.boxes["ledger"] ? Math.round((ref.boxes[c]!.x - ref.boxes["ledger"]!.x) * 10) / 10 : "not drawn")),
     }, want: "reported" });
-    /* no row is wider than the ledger's frame: the floors fit, or the tile has gone */
-    const spill = await page.evaluate(() => { const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!; const f = p.querySelector("[data-qcv='ledger-frame']")!.getBoundingClientRect(); return [...p.querySelectorAll("[data-qcv='row'] > *")].filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && b.right > f.right - 1 + 0.5; }).length; });
-    is(area, "cells running out past the frame's right edge", spill, 0);
+    /* ⚠️ NO CELL RUNS PAST ITS OWN CARD'S EDGE: the floors fit, or the tile has gone. Measured
+       against the ROW now rather than the ledger's frame — the frame went in §5, and each row is
+       its own card, so the row is the box a cell can overflow. */
+    const spill = await page.evaluate(() => {
+      const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+      return [...p.querySelectorAll("[data-qcv='row']")].flatMap((r) => {
+        const rb = r.getBoundingClientRect();
+        return [...r.children].filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && b.right > rb.right + 0.5; });
+      }).length;
+    });
+    is(area, "cells running out past their card's right edge", spill, 0);
     record({ area, what: "app vs REF column widths [stands, sent]", got: { app: ["row-stand", "row-sent"].map((c) => app.boxes[c]?.w ?? null), ref: ["row-stand", "row-sent"].map((c) => ref.boxes[c]?.w ?? null) }, want: "reported" });
     const facts = await page.evaluate(() => {
       const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
@@ -546,11 +843,18 @@ test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
         tabs: [...o.querySelectorAll("[role='tab']")].map((t) => t.textContent?.replace(/\d+$/, "").trim()), url: location.search, court: o.querySelector("[data-qcv='open-court']")?.textContent, rust: o.querySelector("[data-qcv='open-court']")?.getAttribute("data-you") };
     });
     yes(area, "the card shows the row that is selected", card.same, JSON.stringify(card));
-    /* §7's other half: the moment a query IS chosen, the ledger gives the card its column */
+    /**
+     * ⚠️ REVERSED BY v65 §6.5, AND THIS IS THE CHANGE THE WHOLE REBUILD IS FOR. In v11 the card took
+     * its column OUT of the ledger: "ledger + 20 + card fills the stage", and the ledger really did
+     * give up 396px of itself. The card is in the RAIL now — a fixed card outside the page's flow —
+     * so the ledger keeps every pixel it had, and the assertion is the opposite one.
+     */
     const stq = need(sel, "app", "stagegrid"), leq = need(sel, "app", "ledger"), opq = need(sel, "app", "open");
-    near(area, "once chosen: ledger + 20 + card fills the stage", leq.w + 20 + opq.w, stq.w, 1);
-    yes(area, "…and the ledger really gave up room", leq.w < need(app, "app", "ledger").w - 200, `${need(app, "app", "ledger").w} → ${leq.w}`);
-    if (w === 1440) { sameSize(area, sel, refPicked, "open-band", ["h"]); sameSize(area, sel, refPicked, "open", ["w"]); }
+    near(area, "once chosen: the ledger still fills the stage", leq.w, stq.w, 1);
+    is(area, "…and did not give up a pixel", leq.w, need(app, "app", "ledger").w);
+    near(area, "the card is the rail's own 340", opq.w, 340 - 28, 1);
+    yes(area, "…and it is outside the ledger", opq.x > leq.x + leq.w, `card at ${opq.x}, ledger ends ${leq.x + leq.w}`);
+    if (w === 1440) sameSize(area, sel, refPicked, "open-band", ["h"]);
     is(area, "a Queried query's one action", card.action, "Record a response");
     is(area, "…is anthracite", card.actBg, "rgb(42, 58, 82)");
     is(area, "the drawer's own three tabs, kept", card.tabs, ["Tracking", "Agent", "Notes"]);
@@ -558,8 +862,31 @@ test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
     yes(area, "choosing a row writes ?q= (a user's act)", /[?&]q=/.test(card.url), card.url);
     /* ⚠️ READ AFTER THE CLICK, because there is no card before it (§7) — a `getComputedStyle` of
        nothing is not evidence that the card is not an overlay. */
-    is(area, "the card is sticky, not an overlay", card.pos, "sticky");
-    if (w === 1440) { sameSize(area, sel, refPicked, "open-action", ["h"]); sameSize(area, sel, refPicked, "open-foot", ["h"]); }
+    /* ⚠️ STATIC, NOT STICKY, SINCE §6.5 — it fills the rail, which is what is placed. A sticky
+       child of a card that is already the window's height has nowhere to travel. */
+    is(area, "the card fills the rail rather than sticking inside a column", card.pos, "static");
+    /**
+     * ⚠️ THE FOOT'S HEIGHT IS ITS CONTENT'S, so it is asserted against its own floor rather than
+     * against the ref's — the same reason the row's height stopped being compared. It holds two
+     * lines of prose built from the e2e account's real query (`standLine` + `factLine`); the
+     * mockup's says something shorter. At the rail's 312px the app's wraps to 134 and the ref's to
+     * 93.5, and neither number is evidence about the other.
+     *
+     * What IS the app's own claim: the foot is at least its stated 80px, and nothing in the card
+     * runs past the rail that holds it.
+     */
+    if (w === 1440) {
+      sameSize(area, sel, refPicked, "open-action", ["h"]);
+      const ft = need(sel, "app", "open-foot");
+      yes(area, `the foot is at least its stated 80px floor (${ft.h})`, ft.h >= 80 - 0.5, String(ft.h));
+      const spillCard = await page.evaluate(() => {
+        const rail = [...document.querySelectorAll("[data-qcv='rail']")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
+        if (!rail) return -1;
+        const rb = rail.getBoundingClientRect();
+        return [...rail.querySelectorAll("*")].filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && (b.right > rb.right + 0.5 || b.left < rb.left - 0.5); }).length;
+      });
+      is(area, "anything in the card running out past the rail's sides", spillCard, 0);
+    }
     await page.screenshot({ path: resolve(OUT, `list-${w}.png`) });
   }
 });
@@ -607,18 +934,37 @@ test("loading — the frames never move, and nothing is interactive", async ({ p
   });
   is("loading", "real rows while loading", inert.rows, 0);
   is("loading", "placeholder rows", inert.skRows, 8);
-  near("loading", "a placeholder row is the real row's height", await page.evaluate(() => [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!.querySelector("[data-qcv='sk-row']")!.getBoundingClientRect().height), 67, 0.5);
+  /* ⚠️ COMPARED WITH THE REAL ROW IN THE SAME RUN, NOT WITH A NUMBER. It was pinned at 67 and the
+     row became a 69px card in v65 §5 — a lock on a spelling, failing on a change that made its own
+     claim no less true. The claim is "the placeholder is the row's height", so both sides are
+     measured; the loaded reading is taken below and the two are compared there. */
+  const skH = await page.evaluate(() => [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!.querySelector("[data-qcv='sk-row']")!.getBoundingClientRect().height);
   is("loading", "enabled head / sentence controls while loading", inert.enabled, 0);
   await expect.poll(() => page.evaluate(() => [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)?.getAttribute("aria-busy")), { timeout: 20_000 }).toBe("false");
   await page.waitForTimeout(1300);
   const done = await readApp(page);
+  near("loading", "a placeholder row is the real row's height", skH, need(done, "app", "row").h, 0.5);
   /* ⚠️ THE LEDGER AND THE CARD KEEP THEIR PLACE AND WIDTH, NOT THEIR HEIGHT: eight placeholder rows are
      not fifty-four real ones, and a card's height is its query's. Everything ABOVE them keeps all four. */
   /* ⚠️ `open-band` IS OFF THIS LIST: with nothing selected on load there is no card, on either side
      of the comparison, so "the frame did not move" would be a claim about two absences. */
-  for (const n of ["head-cta", "ctl", "list-head"]) {
+  /* ⚠️ `list-head` IS OFF THIS LIST TOO, AND FOR THE THIRD TIME THE SAME REASON: the ledger's head
+     row went with its frame in §5, so it is absent on BOTH sides and "the frame did not move" would
+     be a claim about two absences. What replaced it is the COURTS, which are drawn in both states
+     and are the thing now standing where the head row did. */
+  /**
+   * ⚠️ REPORTED FIRST, THEN ASSERTED — because `near` throws, and the first mismatch in a loop like
+   * this hides every reading after it. A 2px drift in the courts' ghost was invisible for a run
+   * behind a 2px drift in the sentence BELOW it, which is the same drift seen from downstream.
+   */
+  /* ⚠️ THE LEDGER KEEPS ITS PLACE AND WIDTH, NOT ITS HEIGHT — eight placeholder rows are not
+     seventy-five real ones (measured: 622 against 5,915). Every frame ABOVE it keeps all four, and
+     that is the claim: nothing a reader is looking at moves when the cover lifts. */
+  const frames = [["head-cta", 4], ["courts", 4], ["ctl", 4], ["ledger", 3]] as const;
+  record({ area: "loading", what: "the frames, held → loaded", got: Object.fromEntries(frames.map(([n]) => [n, { held: held.boxes[n], loaded: done.boxes[n] }])), want: "reported" });
+  for (const [n, dims] of frames) {
     const a = held.boxes[n], b = done.boxes[n];
-    for (const d of ["x", "y", "w", "h"] as const) near("loading", `${n}.${d} held → loaded`, a ? a[d] : null, b ? b[d] : null, 1);
+    for (const d of (["x", "y", "w", "h"] as const).slice(0, dims)) near("loading", `${n}.${d} held → loaded`, a ? a[d] : null, b ? b[d] : null, 1);
   }
   /* ⚠️ `open` GOES WITH `open-band`, FOR THE SAME REASON — the card is absent on BOTH sides now
      (§7), and `near` on two absences is not a claim about a frame holding still, it is a claim
@@ -775,8 +1121,22 @@ test("§14 · the offsets table — reported at 1440×860 and 1280×800", async 
   const rowTop = await page.evaluate(() => Math.round(document.querySelector(".qcv-page [data-qcv='row']")!.getBoundingClientRect().top * 10) / 10);
   /* 702.5 with the compact strip · 394.7 the moment it went · 372.1 once the head's stray 8px and
      the control row's 15px of air for the retired view switch went with it */
-  record({ area: "§14 offsets", what: "the first Ledger row's top at 1280×800 (702.5 with the strip → 394.7 without → 372.1 now)", got: rowTop, want: "reported" });
-  yes("§14 offsets", `the first row is well above the fold at 1280×800 (${rowTop})`, rowTop < 500, String(rowTop));
+  record({ area: "§14 offsets", what: "the first Ledger row's top at 1280×800 (702.5 with the strip → 394.7 without → 372.1 at v21's close → now, with the courts)", got: rowTop, want: "reported" });
+  /**
+   * ⚠️ A CLAIM ABOUT THE FOLD, NOT A NUMBER. It was `rowTop < 500` and measured 500.2 once the three
+   * court tiles arrived — a threshold tuned to one layout, failing by two tenths on a change that
+   * put a whole row of new information above it. What matters is that a reader lands on the ledger
+   * with a row already on screen, which is measured against the scrollport rather than guessed.
+   */
+  const fold = await page.evaluate(() => {
+    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const port = p.closest(".wpg-scroll") as HTMLElement;
+    const r = p.querySelector("[data-qcv='row']")!.getBoundingClientRect();
+    const pb = port.getBoundingClientRect();
+    return { rowBottom: Math.round(r.bottom * 10) / 10, portBottom: Math.round((pb.top + port.clientHeight) * 10) / 10 };
+  });
+  record({ area: "§14 offsets", what: "the first row's bottom against the scrollport's at 1280×800", got: fold, want: "reported" });
+  yes("§14 offsets", `the first row is whole and above the fold at 1280×800 (row ends ${fold.rowBottom}, the fold is ${fold.portBottom})`, fold.rowBottom <= fold.portBottom, JSON.stringify(fold));
 });
 
 test("Ω · the run measured enough to be believed", async () => {

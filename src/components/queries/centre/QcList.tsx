@@ -57,9 +57,6 @@ export const QcList: React.FC<{
   }, [selectedId]);
   return (
   <div className="qcv-list" data-qcv="list">
-    <div className="qcv-cols" data-qcv="list-head" aria-hidden="true">
-      <b className="qcv-cols-agent">Agent</b><b>Where it stands</b><b>Sent so far</b><b className="qcv-cols-date">Queried</b>
-    </div>
     <div ref={boxRef} role="listbox" aria-label="Queries" className="qcv-rows">
       {rows.map((r) => {
         const sent = r.sentMs != null ? new Date(r.sentMs) : null;
@@ -97,7 +94,6 @@ export const QcList: React.FC<{
 /** Eight placeholder rows at the REAL row height, so nothing jumps when the data lands. */
 export const QcListSkeleton: React.FC = () => (
   <div className="qcv-list" aria-hidden="true">
-    <div className="qcv-cols" data-qcv="list-head"><b className="qcv-cols-agent">Agent</b><b>Where it stands</b><b>Sent so far</b><b className="qcv-cols-date">Queried</b></div>
     <div className="qcv-rows qcv-skw">
       {Array.from({ length: 8 }, (_, i) => (
         <div key={i} className="qcv-row qcv-row--sk" data-qcv="sk-row">

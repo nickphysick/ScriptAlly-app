@@ -15,7 +15,6 @@
  * on a guess.
  */
 import React, { useLayoutEffect, useRef } from "react";
-import { FramedCard } from "../../containers/FramedCard";
 import "../../shell/primitives.css";
 import "./qcvPage.css";
 import "./qcvEnter.css";
@@ -68,14 +67,25 @@ export const QcCentre: React.FC<{
   logDisabled?: boolean;
   logRef?: React.Ref<HTMLButtonElement>;
   sentence: React.ReactNode;
+  /** The three court tiles (§4), between the hero and the sentence. */
+  courts: React.ReactNode;
+  /**
+   * The fixed card at the right (§2, §6): the Birds-eye view, or the open query.
+   *
+   * ⚠️ IT IS HANDED IN WHOLE, ALREADY DECIDED. The page reserves its column with padding and places
+   * nothing: the card measures the window and places itself. Passing its CONTENTS instead would put
+   * the choice between Birds-eye and a query in the page's layout component, which knows about
+   * neither.
+   */
+  rail: React.ReactNode;
   /** The open fan, if a court tile has dealt one. It portals itself; this is only its mount. */
   fan?: React.ReactNode;
   /** Clear the selection: Escape, and the card's own ✕. */
   onClearSelection?: () => void;
-  /** The view's body, inside the frame. */
+  /** The ledger. */
   body: React.ReactNode;
-  /** The open query, docked. Rendered only while `docked`. */
-  openCard: React.ReactNode;
+  /** Whether a query is open — Escape has something to close, and the rail is showing it. */
+  hasOpen?: boolean;
   docked: boolean | null;
   onDocked: (docked: boolean) => void;
   /** ← / → (and ↑ / ↓ in a list of rows) step the open query — bound to the STAGE, so only inside the view or the card. */
@@ -83,7 +93,7 @@ export const QcCentre: React.FC<{
   onExport: () => void;
   canExport: boolean;
   entering: boolean;
-}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, sentence, fan, onClearSelection, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
+}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, sentence, courts, rail, fan, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const el = rootRef.current;
@@ -118,6 +128,9 @@ export const QcCentre: React.FC<{
         </div>
       </header>
 
+      {/* §4 — the three courts, 18px under the pills */}
+      {courts}
+
       {/* ⚠️ THERE IS NO VIEW SWITCH AND NOTHING TO SWITCH (v65 §1). The ledger IS the page; the
           calendar is the rail's Birds-eye view. A segmented control here would offer a state the
           page cannot be in. */}
@@ -125,9 +138,9 @@ export const QcCentre: React.FC<{
         {sentence}
       </div>
 
-      {/* the docked column exists only while there is a card to put in it — an empty 396px track
-          beside the view (no rows; nothing selected yet) would be a column stating nothing */}
-      <div className={`qcv-stage${docked && openCard ? " qcv-stage--docked" : ""}`} data-qcv="stagegrid"
+      {/* ⚠️ ONE COLUMN (§5). The open query lives in the rail now, so the ledger keeps the page's
+          whole width whatever is chosen — and selecting a row no longer narrows it by 396px. */}
+      <div className="qcv-stage" data-qcv="stagegrid"
         /* ⚠️ BOUND HERE, NOT ON THE DOCUMENT. The drawer bound the arrows only while open; a docked card
            is always open, so a global binding would take the arrows from the whole page. Skipped in
            anything editable, in a menu, and on the calendar's scroller (where ← → scroll time). */
@@ -138,7 +151,7 @@ export const QcCentre: React.FC<{
           /* ⚠️ ESCAPE CLOSES THE OPEN QUERY, and only while one is open — otherwise the key would
              be swallowed on a page that has nothing to close, reaching past whatever else wants it. */
           if (e.key === "Escape") {
-            if (!openCard || !onClearSelection) return;
+            if (!hasOpen || !onClearSelection) return;
             e.preventDefault();
             onClearSelection();
             return;
@@ -150,13 +163,16 @@ export const QcCentre: React.FC<{
           e.preventDefault();
           onStep(delta as 1 | -1);
         }}>
-        <FramedCard as="section" className="qcv-ledger" probe="ledger" label="Queries">{body}</FramedCard>
-        {docked ? openCard : null}
+        {/* ⚠️ NOT A `FramedCard` ANY MORE (§5): the ledger has no frame, because the ROWS are the
+            cards. What is left is a size container — the row's container query needs one, and the
+            frame used to be it. */}
+        <section className="qcv-ledger" data-qcv="ledger" aria-label="Queries">{body}</section>
       </div>
 
       <div className="qcv-foot">
         <button type="button" className="qcv-export" disabled={!canExport || loading} onClick={onExport}>Export CSV</button>
       </div>
+      {rail}
       {fan}
       <div className="qcv-sr" role="status" aria-live="polite" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
         {loading ? "" : "Queries loaded"}

@@ -1,0 +1,82 @@
+/**
+ * Query Centre v65 §4 — the three court tiles.
+ *
+ * ⚠️ THE FRAMED TREATMENT IS THIS PAGE'S ONE EXCEPTION (§1.5) and is spelled out here rather than
+ * shared: a white rim and a burgundy line, drawn as two inset shadows so the tile's box is exactly
+ * its stated size and the band inside can run edge to edge. A border would push the band in by its
+ * own width and the band would stop meeting the corners.
+ */
+@import "./qcvPage.css";
+
+.qcv-courts {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;
+  margin-top: 18px;
+}
+
+.qcv-court {
+  display: flex; flex-direction: column; align-items: stretch;
+  margin: 0; padding: 0; border: 0; text-align: left; cursor: pointer;
+  background: #fff; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 2px 8px rgba(28, 19, 15, 0.06), inset 0 0 0 6px #fff, inset 0 0 0 7px var(--qcv-frame);
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
+}
+.qcv-court:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -14px rgba(28, 19, 15, 0.3), 0 2px 8px rgba(28, 19, 15, 0.06), inset 0 0 0 6px #fff, inset 0 0 0 7px var(--qcv-frame); }
+.qcv-court:focus-visible { outline: 2px solid var(--qcv-ink); outline-offset: 3px; }
+.qcv-court:disabled { cursor: default; transform: none; }
+.qcv-court--sk { cursor: default; box-shadow: 0 2px 8px rgba(28, 19, 15, 0.06), inset 0 0 0 6px #fff, inset 0 0 0 7px var(--qcv-frame); }
+
+/* ⚠️ THE BAND SITS INSIDE THE FRAME, which is what the 7px margin is: the rim is 6 and the line is
+   the seventh pixel, so a band inset by 7 starts exactly where the line ends. */
+.qcv-court-band {
+  display: flex; align-items: center; gap: 6px;
+  margin: 7px 7px 0; padding: 0 11px; height: 26px; border-radius: 7px 7px 0 0;
+  font-family: var(--qcv-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--qcv-ink-70);
+}
+.qcv-court--you .qcv-court-band { background: #f5e6df; }
+.qcv-court--agent .qcv-court-band { background: #f7efe3; }
+.qcv-court--closed .qcv-court-band { background: #e4e1db; }
+.qcv-court-nm { white-space: nowrap; }
+.qcv-court-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--qcv-rust); margin-left: auto; flex: none; }
+/* ⚠️ `margin-left: auto` ON WHICHEVER OF THE TWO COMES FIRST, so the dot and the affordance cannot
+   both claim the spare and push each other about. The dot claims it when present; otherwise the
+   affordance does. */
+.qcv-court-see { margin-left: auto; font-style: normal; font-size: 8px; letter-spacing: 0.14em; color: var(--qcv-ink-45); white-space: nowrap; opacity: 0; transition: opacity 0.15s ease; }
+.qcv-court-dot + .qcv-court-see { margin-left: 6px; }
+.qcv-court:hover .qcv-court-see { opacity: 1; }
+
+.qcv-court-body { display: block; padding: 8px 18px 14px; }
+/**
+ * ⚠️ THE HEIGHT IS STATED, BECAUSE A BASELINE-ALIGNED ROW'S HEIGHT COMES FROM FONT METRICS. The row
+ * holds a 36px serif count and a 17px typewriter label aligned on their baselines, so its box is
+ * `max(baseline offset) + max(below it)` across two faces — and until both have LOADED those are
+ * the fallback's. Measured: the tile was 109.4 before the fonts landed and 111.4 after, so the page
+ * moved 2px under the reader at the moment the loading cover lifted, and no amount of matching the
+ * ghost to the real tile could fix it: the two were identical, and both were 2px short.
+ *
+ * ⚠️ 36 IS THE COUNT'S OWN LINE BOX — `--qcv-court-n` is 36px at `line-height: 1` — and the two are
+ * an artefact-locked pair (`qcRail.test.tsx` reads both out of this sheet). A height that stopped
+ * agreeing with the count would crop it.
+ */
+.qcv-court-head { display: flex; align-items: baseline; gap: 8px; min-width: 0; height: 36px; }
+.qcv-court-n { font-family: var(--qcv-serif); font-weight: 600; font-size: 36px; line-height: 1; color: var(--qcv-ink); }
+.qcv-court-lbl { font-family: var(--qcv-type); font-size: 17px; line-height: 1.2; color: var(--qcv-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/**
+ * ⚠️ THE LINE-HEIGHT IS STATED, AND THAT IS WHAT MAKES THE TILE'S HEIGHT A CONSTANT. Left at
+ * `normal` it comes from the FONT's own metrics — so the box is one height while the mono face is
+ * still loading and another once it lands, and the ghost measured 2px short of the real tile for
+ * exactly as long as the fonts took. Every other line in this tile already states one (36/1 and
+ * 17/1.2); this was the one that did not, and it was the one that moved.
+ */
+.qcv-court-fact { display: block; margin-top: 7px; font-family: var(--qcv-mono); font-size: 8px; line-height: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcv-court-fact--urgent { color: var(--qcv-ink); font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qcv-court, .qcv-court-see { transition: none; }
+  .qcv-court:hover { transform: none; }
+}
+
+/* ⚠️ THE GHOST IS THE REAL TYPE WITH ITS INK HIDDEN — see `QcCourtsSkeleton`. Painting a block the
+   right height is arithmetic ABOUT a line box; this IS the line box. */
+.qcv-court--sk .qcv-court-n,
+.qcv-court--sk .qcv-court-lbl,
+.qcv-court--sk .qcv-court-fact { color: transparent; background: #efe9e0; border-radius: 5px; }

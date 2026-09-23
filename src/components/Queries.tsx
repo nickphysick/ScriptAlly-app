@@ -83,14 +83,16 @@ import { gridEmptyKind, waitingSummary, waitingLine } from "../lib/queryGridEmpt
 import "./queries/queryViewSwitch.css"; /* position-pinned, as above: the Contact list and To-do still mount the switch */
 import { QcCentre, clearQcViewMemory } from "./queries/centre/QcCentre";
 import { QcSentence } from "./queries/centre/QcSentence";
+import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
+import { QcBirdsEyePlaceholder, QcRail } from "./queries/centre/QcRail";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
 import { QcOpenCard, QcOpenCardSkeleton } from "./queries/centre/QcOpenCard";
 import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
-  DEFAULT_SORT, buildQcRows, fanHand, filterForStatusParam, filterOptions, inScope, matchesFilter,
-  overviewCards, rowsWithdrawn, sortRows, stageFilter,
-  type OverviewKey, type QcFilter, type QcSort,
+  DEFAULT_SORT, buildQcRows, courtTiles, filterForStatusParam, filterOptions, inScope, matchesFilter,
+  rowsWithdrawn, sortRows, tileHand,
+  type QcFilter, type QcSort, type TileCourt,
 } from "../lib/qcSummary";
 import { QcFan } from "./queries/centre/QcFan";
 import { fanCardModel } from "../lib/qcFanModel";
@@ -2140,7 +2142,10 @@ export const Queries: React.FC<{
    * different reasons: the cards fly out of its centre, and focus goes back into it when the fan
    * closes. A captured `{x, y}` serves the first and silently drops the second.
    */
-  const [qcFan, setQcFan] = useState<{ key: OverviewKey; origin: HTMLElement | null } | null>(null);
+  /* ⚠️ THE FAN IS DEALT BY A COURT TILE NOW (v65 §1.4), not by a stage card. The fan itself is
+     unchanged — fifteen most recent, a stack card beyond, the closed hand noting withdrawals; only
+     its door moved, which is the whole of the change here. */
+  const [qcFan, setQcFan] = useState<{ key: TileCourt; origin: HTMLElement | null } | null>(null);
   /* ⚠️ A HOOK, SO IT SITS UP HERE — above `if (!currentUser) return null`. The filtered and sorted
      views of it are plain consts further down, beside the list they replace. */
   /* ⚠️ ONE LOADING MODEL FOR THE BROWSING PAGE (v11): no flash under 150ms, a 400ms floor once shown,
@@ -6240,9 +6245,17 @@ export const Queries: React.FC<{
                 scopeTitle={qcScopeTitle}
               />
             }
+            courts={showGridSkeleton ? <QcCourtsSkeleton /> : (
+              <QcCourts
+                tiles={courtTiles(qcScoped)}
+                /* ⚠️ A COURT TILE DEALS; IT DOES NOT FILTER. The element it was pressed from is
+                   captured so the hand deals FROM it and focus returns TO it. */
+                onCourt={(key, el) => setQcFan({ key, origin: el })}
+              />
+            )}
             fan={qcFan && (() => {
-              const hand = fanHand(qcScoped, qcFan.key);
-              const card = overviewCards(qcScoped, Date.now()).find((c) => c.key === qcFan.key);
+              const hand = tileHand(qcScoped, qcFan.key);
+              const card = courtTiles(qcScoped).find((c) => c.key === qcFan.key);
               /* ⚠️ THE HEADER STATES THE FULL COUNT, NEVER THE HAND — the cap changes the deal and
                  not the number (Nick, 21 Sep). `hand.count` is the card's own figure. */
               const wd = qcFan.key === "closed" ? rowsWithdrawn(qcScoped).length : 0;
@@ -6259,7 +6272,10 @@ export const Queries: React.FC<{
                   onPick={(id) => { setQcFan(null); setQcFilter("all"); onOpenQuery?.(id); }}
                   onSeeAll={() => {
                     setQcFan(null);
-                    setQcFilter(qcFan.key === "closed" ? "closed" : stageFilter(qcFan.key));
+                    /* ⚠️ THE SENTENCE HAS A FILTER FOR EACH COURT ALREADY — "With you", "With the
+                       agent", "Closed" — so "see all" narrows the ledger to exactly the set the
+                       tile counted, rather than to a stage the tile never named. */
+                    setQcFilter(qcFan.key === "you" ? "you" : qcFan.key === "agent" ? "agent" : "closed");
                   }}
                   onClose={() => setQcFan(null)}
                 />
@@ -6276,43 +6292,53 @@ export const Queries: React.FC<{
             }}
             onExport={handleExportFilteredCSV}
             canExport={gridRows.length > 0}
+            hasOpen={!!(panelRow && activeQuery)}
             /**
-             * ⚠️ THE OPEN QUERY, DOCKED — the same query, tabs and handlers the drawer has; only its
-             * house changed. `QcCentre` renders it only while the column is 900px or more; under that
-             * the drawer below takes over, and never for the implicit first row.
-             */
-            /**
+             * ⚠️ THE OPEN QUERY LIVES IN THE RAIL NOW (v65 §6.5) — the same query, tabs and handlers
+             * the drawer has; only its house changed again. `QcRail` shows the Birds-eye view while
+             * nothing is chosen and this card while something is, so the page's furniture never
+             * moves and the ledger keeps its whole width either way.
+             *
+             * ⚠️ AND IT IS STILL GATED ON `qcDocked`, which measures the PAGE's own column. Under
+             * 900px of it the drawer below takes over, as it has since v11. The rail's own stacking
+             * threshold is a different question about a different box — the WINDOW's width against
+             * what a card plus a usable ledger needs — and the two are deliberately not folded.
+             *
              * ⚠️ THE COVER RESERVES A CARD ONLY WHERE ONE IS COMING (v21 §7). Since nothing selects
-             * itself, `/queries?view=list` loads with no card at all — and a cover that drew one
-             * anyway put the ledger at 698px behind a page that lands at 1114, which is a 416px jump
-             * at the instant the cover lifts: the exact fault the cover exists to prevent, built into
-             * the cover. The URL is what knows, and it knows before the data arrives.
+             * itself, `/queries` loads with no card at all — and a cover that drew one anyway put the
+             * ledger at 698px behind a page that lands at 1114, which is a 416px jump at the instant
+             * the cover lifts: the exact fault the cover exists to prevent, built into the cover.
              */
-            openCard={showGridSkeleton ? (selectedQueryId ? <QcOpenCardSkeleton /> : null) : (panelRow && activeQuery && qcById.get(activeQuery.id)) ? (
-              <QcOpenCard
-                row={qcById.get(activeQuery.id)!}
-                nowMs={Date.now()}
-                /* the ✕, Escape and Back to overview are one act: clear `?q` and the view is wide again */
-                onClose={() => onSelectView?.("cards")}
-                manuscriptTitle={activeMs?.title ?? null}
-                manuscriptTags={activeMs ? [activeMs.ageCategory, activeMs.genre, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString("en-GB")} words` : null].filter((t): t is string => !!t) : []}
-                /* the CTA engine's own answer, through the SAME doors the drawer uses: the desk hosts
-                   Record response and Mark sent; an open offer keeps its own journey */
-                onPrimary={(anchor) => {
-                  if (panelRow.facts.turn === "offer") { openRecord(activeQuery); return; }
-                  openDeskVerb(panelRow.facts.turn === "you" ? "marksent" : "respond", anchor);
-                }}
-                onAction={(action, anchor) => {
-                  if (action === "nudge") openDeskVerb("nudge", anchor);
-                  else openQuick(action === "snooze" ? "snooze" : "close", activeQuery.id, anchor);
-                }}
-                liveAction={deskVerb === "nudge" ? "nudge" : deskVerb === "closed" ? "closed" : deskVerb ? "primary" : null}
-                tracking={qpTracking}
-                agentTab={qpAgentTab}
-                notesTab={qpNotesTab}
-                noteCount={journalEntries.filter((j) => j.queryId === activeQuery.id).length}
-              />
-            ) : null}
+            rail={(
+              <QcRail
+                birdsEye={<QcBirdsEyePlaceholder />}
+                openCard={!qcDocked ? undefined : showGridSkeleton ? (selectedQueryId ? <QcOpenCardSkeleton /> : undefined) : (panelRow && activeQuery && qcById.get(activeQuery.id)) ? (
+                  <QcOpenCard
+                  row={qcById.get(activeQuery.id)!}
+                  nowMs={Date.now()}
+                  /* the ✕ and Escape are one act: clear `?q`, and the rail goes back to Birds-eye */
+                  onClose={() => onSelectView?.("cards")}
+                  manuscriptTitle={activeMs?.title ?? null}
+                  manuscriptTags={activeMs ? [activeMs.ageCategory, activeMs.genre, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString("en-GB")} words` : null].filter((t): t is string => !!t) : []}
+                  /* the CTA engine's own answer, through the SAME doors the drawer uses: the desk hosts
+                     Record response and Mark sent; an open offer keeps its own journey */
+                  onPrimary={(anchor) => {
+                    if (panelRow.facts.turn === "offer") { openRecord(activeQuery); return; }
+                    openDeskVerb(panelRow.facts.turn === "you" ? "marksent" : "respond", anchor);
+                  }}
+                  onAction={(action, anchor) => {
+                    if (action === "nudge") openDeskVerb("nudge", anchor);
+                    else openQuick(action === "snooze" ? "snooze" : "close", activeQuery.id, anchor);
+                  }}
+                  liveAction={deskVerb === "nudge" ? "nudge" : deskVerb === "closed" ? "closed" : deskVerb ? "primary" : null}
+                  tracking={qpTracking}
+                  agentTab={qpAgentTab}
+                  notesTab={qpNotesTab}
+                  noteCount={journalEntries.filter((j) => j.queryId === activeQuery.id).length}
+                />
+                  ) : undefined}
+                />
+              )}
             body={
               showGridSkeleton ? (
                 <QcListSkeleton />

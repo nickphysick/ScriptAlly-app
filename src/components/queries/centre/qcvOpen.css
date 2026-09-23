@@ -1,12 +1,28 @@
 /**
- * Query Centre v11 — the open query, docked. The only full framed card among the queries.
- * Values are the ref's computed ones.
+ * Query Centre — the open query. It lives in the RAIL since v65 §6.5, and two things follow.
+ *
+ * ⚠️ IT WEARS THE LANDING PAGE'S CLOTHES NOW, NOT THE FRAMED ONES (§1.5): white, a soft shadow, the
+ * band flush at the top, no white rim and no burgundy line. The framed treatment is the three court
+ * tiles' alone on this page, and a framed card inside the rail's own unframed one would be two
+ * borders 14px apart. It is still built on `FramedCard` — the band, the clip and the scrolling body
+ * are exactly what it needs — so what changes is the dress, in one place, over one consumer.
+ *
+ * ⚠️ AND IT NEITHER STICKS NOR CAPS ITSELF ANY MORE. Both were right while it sat in a scrolling
+ * column: `position: sticky` held it as the ledger went past, and the scrollport cap stopped it
+ * running off the bottom. In a card that is already placed to the window's own height, a sticky
+ * child has nowhere to travel and a cap is a SECOND opinion about a height the rail has measured —
+ * the two would disagree at every viewport where the rail's arithmetic and this `calc()` differ.
+ * It fills its host, and the host is what knows how tall that is.
  */
-.qcv-open { position: sticky; top: 16px; align-self: start; min-width: 0; }
-/* ⚠️ CAPPED TO THE SCROLLPORT, NOT `100vh`: the scroller starts below the shell's bar, so the viewport
-   over-claims by that offset. `--wpg-port-h` is the grid's published scrollport height; 32 = the 16px
-   the card keeps above it and the same beneath, and 12 = the card's own rim, top and bottom. */
-.qcv-open-fr { display: flex; flex-direction: column; max-height: calc(var(--wpg-port-h, 100vh) - 32px - 12px); }
+.qcv-open {
+  position: static; align-self: stretch; min-width: 0;
+  display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto;
+  /* §1.5's treatment: white, a soft shadow, 12px corners — and no rim, so no padding of its own */
+  padding: 0; background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 24px -18px rgba(28, 19, 15, 0.22);
+}
+/* the frame still CLIPS — which is what lets the band run edge to edge and take the top corners —
+   and that is now the only thing it does: no border, and the card's own radius */
+.qcv-open-fr { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; border: 0; border-radius: 12px; background: none; }
 .qcv-open-bd { flex: none; box-sizing: border-box; min-height: 37px; display: flex; align-items: center; gap: 10px; padding: 12px 16px 10px; }
 .qcv-open-crt { display: flex; align-items: center; font-family: var(--qcv-mono); font-weight: 400; font-size: 9.5px; line-height: 13px; letter-spacing: 0.14em; text-transform: uppercase; }
 /* the rust dot: the move is the WRITER's. One definition (`isWithYou`) — never an offer. */

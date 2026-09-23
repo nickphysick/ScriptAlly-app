@@ -15,7 +15,8 @@ import { Activity, Agent, Query, QueryStatus } from "../types";
 import {
   BASE_STAGES, CALENDAR_GROUPS, DEFAULT_SORT, SORT_OPTIONS, STAGE_NAME,
   buildQcRows, courtOf, expectedFor, factLine, filterForStatusParam, filterOptions, filterPhrase,
-  fanHand, overviewCards, rowsForCard, rowsForClosed, rowsWithdrawn,
+  handOf, rowsForClosed, rowsWithdrawn,
+  courtTiles, rowsForTile, tileCourt, tileHand, type TileCourt,
   inScope, isWithYou, matchesFilter, primaryActionLabel, sortRows, stageFilter, stageOrder, standLine,
   type QcFilter, type QcRow,
 } from "./qcSummary";
@@ -79,133 +80,22 @@ describe("the ONE clock — expectedFor", () => {
   });
 });
 
-describe("the Overview's stat row — a card states a number, and its fan deals that number", () => {
-  /* one of every status, plus a second Queried, so every card has something to be wrong about */
-  const mixed = () => {
-    const qs = [
-      mkQ({ status: QueryStatus.QUERIED }), mkQ({ status: QueryStatus.QUERIED }),
-      mkQ({ status: QueryStatus.PARTIAL_REQUESTED }), mkQ({ status: QueryStatus.PARTIAL_SENT }),
-      mkQ({ status: QueryStatus.FULL_REQUESTED }), mkQ({ status: QueryStatus.FULL_SENT }),
-      mkQ({ status: QueryStatus.REVISE_RESUBMIT }), mkQ({ status: QueryStatus.OFFER }),
-      mkQ({ status: QueryStatus.REJECTED }), mkQ({ status: QueryStatus.NO_RESPONSE }),
-      mkQ({ status: QueryStatus.WITHDRAWN }),
-    ];
-    return rowsOf(qs);
-  };
-
-  it("seven cards, in pipeline order, Closed last — eight while a live R&R exists", () => {
-    const plain = overviewCards(rowsOf([mkQ()]), NOW);
-    expect(plain.map((c) => c.key)).toEqual([...BASE_STAGES, "closed"]);
-    const withRr = overviewCards(mixed(), NOW);
-    expect(withRr).toHaveLength(8);
-    expect(withRr.map((c) => c.key).indexOf(QueryStatus.REVISE_RESUBMIT))
-      .toBe(withRr.map((c) => c.key).indexOf(QueryStatus.FULL_SENT) + 1);
-    expect(withRr[withRr.length - 1].key).toBe("closed");
-  });
-
-  /**
-   * ⚠️ THE LOCK NICK ASKED FOR, AND IT IS AN EQUALITY BETWEEN TWO DERIVATIONS RATHER THAN TWO
-   * LITERALS. A card's count and the hand it deals are the same membership or the reader is told
-   * "12 queried" and handed eleven cards. Asserting `toBe(2)` on both sides would go green the day
-   * someone changed both in the same wrong direction.
-   */
-  it("⚠️ every card's count is exactly the length of the hand it deals", () => {
-    const rows = mixed();
-    const cards = overviewCards(rows, NOW);
-    expect(cards.length).toBeGreaterThan(3);
-    for (const c of cards) {
-      expect(rowsForCard(rows, c.key), `${String(c.key)} deals a different set from the number it states`)
-        .toHaveLength(c.count);
-    }
-    /* and the whole row accounts for every row exactly once, withdrawn excepted */
-    const dealt = cards.flatMap((c) => rowsForCard(rows, c.key).map((r) => r.id));
-    expect(new Set(dealt).size, "a query is dealt by two cards").toBe(dealt.length);
-    expect(dealt).toHaveLength(rows.length - rowsWithdrawn(rows).length);
-  });
-
-  it("⚠️ the closed card deals what it counts — Rejected and No Response, never Withdrawn", () => {
-    const rows = mixed();
-    const closedCard = overviewCards(rows, NOW).find((c) => c.key === "closed")!;
-    expect(closedCard.count).toBe(2);
-    expect(closedCard.note).toBe("1 passed · 1 no reply");
-    expect(rowsForCard(rows, "closed").map((r) => r.status).sort())
-      .toEqual([QueryStatus.NO_RESPONSE, QueryStatus.REJECTED].sort());
-    expect(rowsForCard(rows, "closed").some((r) => r.closedHow === "withdrawn")).toBe(false);
-    expect(rowsWithdrawn(rows)).toHaveLength(1);
-    /* the card's count IS the selector's length — the closed grid that used to state this third
-       figure went with the compact strip, and `rowsForClosed` is the one answer now */
-    expect(rowsForClosed(rows)).toHaveLength(closedCard.count);
-  });
-
-  /**
-   * ⚠️ RULING 2, RESTATED FOR THE CAPPED FAN RATHER THAN LOOSENED (Nick, 21 Sep). The original
-   * claim was "a card's count IS the length of the hand it deals". The fan now deals at most
-   * fifteen, so that sentence is no longer true as written — and the wrong response would be to
-   * relax it to something a wrong deal could satisfy. It becomes THREE claims instead, which
-   * together say everything the original said:
-   *
-   *   1. the dealt cards are exactly the first `min(count, 15)` in LATEST-ACTIVITY order;
-   *   2. the stack card exists if and only if `count > 15`, and its number is `count - 15`;
-   *   3. the stat card's figure is still `count` — the cap changes the DEAL, never the COUNT.
-   *
-   * Between them there is nowhere for a discrepancy to hide: 1 pins which fifteen, 2 pins that the
-   * rest are accounted for out loud, 3 pins that the headline never shrank to match the hand.
-   */
-  const many = (n: number, status = QueryStatus.QUERIED) =>
-    rowsOf(Array.from({ length: n }, (_, i) => mkQ({ status, dateSent: ago(n - i) })));
-
-  it("⚠️ 1 — the deal is the first min(count, 15) in latest-activity order, from the card's own set", () => {
-    const rows = many(50);
-    const hand = fanHand(rows, QueryStatus.QUERIED);
-    expect(hand.count).toBe(50);
-    expect(hand.dealt).toHaveLength(15);
-    /* the order is stated, so "the most recent fifteen" means something */
-    const byRecency = rowsForCard(rows, QueryStatus.QUERIED).slice().sort((a, b) => b.lastMs - a.lastMs);
-    expect(hand.dealt.map((r) => r.id)).toEqual(byRecency.slice(0, 15).map((r) => r.id));
-    /* …and it is the CARD's set, not the whole account */
-    const mixed = rowsOf([...Array.from({ length: 20 }, () => mkQ()), mkQ({ status: QueryStatus.OFFER })]);
-    expect(fanHand(mixed, QueryStatus.QUERIED).dealt.every((r) => r.status === QueryStatus.QUERIED)).toBe(true);
-  });
-
-  it("⚠️ 2 — the stack card is present iff count > 15, and its number is count − 15", () => {
-    for (const [n, more] of [[3, 0], [15, 0], [16, 1], [50, 35]] as const) {
-      const hand = fanHand(many(n), QueryStatus.QUERIED);
-      expect(hand.more, `${n} queries`).toBe(more);
-      expect(hand.dealt.length, `${n} queries`).toBe(Math.min(n, 15));
-      /* the stack is a consequence of the cap, never an independent count */
-      expect(hand.dealt.length + hand.more, `${n} queries are not all accounted for`).toBe(n);
-    }
-  });
-
-  it("⚠️ 3 — the cap changes the DEAL and never the COUNT: the stat card still says 50", () => {
-    const rows = many(50);
-    const card = overviewCards(rows, NOW).find((c) => c.key === QueryStatus.QUERIED)!;
-    expect(card.count, "the headline shrank to the hand").toBe(50);
-    expect(card.count).toBe(fanHand(rows, QueryStatus.QUERIED).count);
-    expect(card.count).toBe(rowsForCard(rows, QueryStatus.QUERIED).length);
-  });
-
-  it("the mono line states a fact and never a verdict, and an empty card says `none`", () => {
-    const empty = overviewCards(rowsOf([mkQ({ status: QueryStatus.REJECTED })]), NOW);
-    for (const c of empty.filter((x) => x.count === 0)) expect(c.note).toBe("none");
-    /* an agent's-turn query whose promised date has gone */
-    const late = rowsOf([mkQ({ dateSent: ago(200) })], [agent({ responseTimeWeeks: 8 })]);
-    const q = overviewCards(late, NOW).find((c) => c.key === QueryStatus.QUERIED)!;
-    expect(q.note).toBe("1 past the date");
-    expect(q.urgent).toBe(true);
-    for (const c of overviewCards(mixed(), NOW)) {
-      expect(c.note, `"${c.note}" appraises`).not.toMatch(/overdue|late|stale|slow|bad|good/i);
-    }
-  });
-
-  it("the rust dot is the two states where material is owed and the move is yours", () => {
-    const cards = overviewCards(mixed(), NOW);
-    expect(cards.filter((c) => c.rust).map((c) => c.key))
-      .toEqual([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED]);
-    /* …and never on a card at zero */
-    expect(overviewCards(rowsOf([mkQ()]), NOW).some((c) => c.rust)).toBe(false);
-  });
-});
+/**
+ * ⚠️ THE OVERVIEW'S STAT ROW IS DELETED (v65 §4), AND ITS CLAIMS DID NOT LAPSE — THEY MOVED. The
+ * seven-or-eight stat cards are three court tiles, so `overviewCards`, `rowsForCard`, `fanHand`,
+ * `OverviewKey` and `OverviewCard` went with them rather than being left exported for a page that
+ * no longer has a caller. Each thing this block proved has a home below, over the tiles:
+ *
+ *   · a card states what its fan deals  → "the count and the hand are the same membership, per tile"
+ *   · the cap, and latest-activity order → "the hand's cap and order are ONE function — `handOf`"
+ *   · withdrawn is in no closed count   → the same case, and `tileCourt`'s own `null`
+ *   · a card at zero states no figures  → "the fact lines, including the zero case"
+ *   · "N past the date" is ink          → "the rust dot is the With-you tile's and no other"
+ *
+ * The one claim with no successor is the ORDER of the stage cards (pipeline order, Closed last,
+ * eight while a live R&R exists) — there are no stage cards to order. `stageOrder` still decides
+ * the sentence's menu and is locked where the menu is.
+ */
 
 describe("the sentence — one filter, one scope, one sort", () => {
   it("the Closed FILTER includes Withdrawn (so those queries stay findable) while the closed CARD does not count it", () => {
@@ -289,5 +179,78 @@ describe("the row's words", () => {
     said.push(...filterOptions(rowsOf(ALL.map((s) => mkQ({ status: s })))).map((o) => o.label));
     expect(said.length).toBeGreaterThan(60);
     for (const s of said) expect(s, s).not.toMatch(/overdue|\blate\b|rejected|urgent|attention/i);
+  });
+});
+
+/* ── v65 §1.3 · the three courts ───────────────────────────────────────────────────────────── */
+
+describe("⚠️ tileCourt is NOT courtOf, and the difference is the whole ruling", () => {
+  it("an OFFER is With you here, and With its own court everywhere else", () => {
+    expect(courtOf(QueryStatus.OFFER)).toBe("offer");
+    expect(tileCourt(QueryStatus.OFFER)).toBe("you");
+    /* ⚠️ and `isWithYou` must NOT have moved with it — the rust marker still means material owed */
+    expect(isWithYou(QueryStatus.OFFER)).toBe(false);
+  });
+  it("a WITHDRAWN query belongs to no tile at all", () => {
+    expect(tileCourt(QueryStatus.WITHDRAWN)).toBeNull();
+    expect(courtOf(QueryStatus.WITHDRAWN)).toBe("closed");
+  });
+  it("the three sets, named — and every status lands in exactly one of them or in none", () => {
+    const by: Record<string, QueryStatus[]> = { you: [], agent: [], closed: [], none: [] };
+    for (const s of ALL) by[tileCourt(s) ?? "none"].push(s);
+    expect(by.you.sort()).toEqual([QueryStatus.FULL_REQUESTED, QueryStatus.OFFER, QueryStatus.PARTIAL_REQUESTED, QueryStatus.REVISE_RESUBMIT].sort());
+    expect(by.agent.sort()).toEqual([QueryStatus.FULL_SENT, QueryStatus.PARTIAL_SENT, QueryStatus.QUERIED].sort());
+    expect(by.closed.sort()).toEqual([QueryStatus.NO_RESPONSE, QueryStatus.REJECTED].sort());
+    expect(by.none).toEqual([QueryStatus.WITHDRAWN]);
+    /* the partition: nothing counted twice, nothing missed */
+    expect(by.you.length + by.agent.length + by.closed.length + by.none.length).toBe(ALL.length);
+  });
+});
+
+describe("the court tiles state what their fan deals", () => {
+  const tiles = (st: QueryStatus[]) => rowsOf(st.map((status) => mkQ({ status })));
+  it("⚠️ the count and the hand are the same membership, per tile — never two derivations", () => {
+    const rows = tiles([QueryStatus.QUERIED, QueryStatus.OFFER, QueryStatus.PARTIAL_REQUESTED, QueryStatus.REJECTED, QueryStatus.WITHDRAWN]);
+    for (const t of ["you", "agent", "closed"] as TileCourt[]) {
+      const tile = courtTiles(rows).find((c) => c.key === t)!;
+      expect(tile.count, t).toBe(rowsForTile(rows, t).length);
+      expect(tileHand(rows, t).count, t).toBe(tile.count);
+    }
+    /* the withdrawn one is in no tile's count and in no tile's hand */
+    const total = courtTiles(rows).reduce((n, c) => n + c.count, 0);
+    expect(total, "a withdrawn query was counted in a tile").toBe(rows.length - 1);
+  });
+  it("⚠️ and the hand's cap and order are ONE function — `handOf`, which both doors read", () => {
+    /* ⚠️ THE DATES MUST DIFFER OR THE ORDER CLAIM IS VACUOUS. Twenty rows built from one factory
+       share a `lastMs`, so ANY order is in descending order and dropping the sort passes. Measured:
+       it did — the mutation reddened a neighbouring case and left this one green. */
+    /* …and they are built OLDEST FIRST, so the input's own order is the wrong one. Built newest
+       first, the unsorted slice is already descending and dropping the sort is invisible. Measured
+       that too: the first fixture had distinct dates and STILL passed the mutation. */
+    const rows = rowsOf(Array.from({ length: 20 }, (_, i) => mkQ({ status: QueryStatus.QUERIED, dateSent: ago(20 - i) })));
+    const hand = tileHand(rows, "agent");
+    expect(new Set(rows.map((r) => r.lastMs)).size, "the fixture is a monoculture; the order claim below would be vacuous").toBe(20);
+    expect(hand.dealt.length).toBe(15);
+    expect(hand.more).toBe(5);
+    expect(hand.count).toBe(20);
+    expect(handOf(rowsForTile(rows, "agent"))).toEqual(hand);
+    /* latest activity first — a length check alone would pass on any fifteen */
+    expect(hand.dealt.map((r) => r.lastMs)).toEqual([...hand.dealt.map((r) => r.lastMs)].sort((a, b) => b - a));
+  });
+  it("the fact lines, including the zero case — a tile at zero states no figures", () => {
+    const empty = courtTiles([]);
+    expect(empty.map((t) => t.fact)).toEqual(["none yet", "none yet", "none yet"]);
+    const rows = tiles([QueryStatus.OFFER, QueryStatus.PARTIAL_REQUESTED, QueryStatus.QUERIED, QueryStatus.REJECTED, QueryStatus.NO_RESPONSE]);
+    const t = Object.fromEntries(courtTiles(rows).map((c) => [c.key, c]));
+    expect(t.you.fact).toBe("1 offer to decide");
+    expect(t.closed.fact).toBe("1 passed · 1 no reply");
+    /* ⚠️ "all in the window" is a FACT; the app never says overdue or late outside Birds-eye */
+    expect(t.agent.fact === "all in the window" || /past the date$/.test(t.agent.fact)).toBe(true);
+    for (const c of courtTiles(rows)) expect(c.fact, c.key).not.toMatch(/overdue|late|behind/i);
+  });
+  it("the rust dot is the With-you tile's and no other", () => {
+    const rows = tiles([QueryStatus.PARTIAL_REQUESTED, QueryStatus.QUERIED, QueryStatus.REJECTED]);
+    expect(courtTiles(rows).map((c) => c.rust)).toEqual([true, false, false]);
+    expect(courtTiles([]).map((c) => c.rust)).toEqual([false, false, false]);
   });
 });

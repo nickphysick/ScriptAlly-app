@@ -1,0 +1,43 @@
+/**
+ * Query Centre v65 §2 and §6 — the fixed card at the right.
+ *
+ * ⚠️ ITS PLACEMENT IS SET FROM JS, NOT FROM HERE, and that is the point rather than an oversight:
+ * `top`, `right` and `height` are measured off the shell's window capsule (see `QcRail.tsx`). What
+ * this sheet owns is everything that does not depend on where the window is.
+ *
+ * ⚠️ NO BORDER, AND THE SHADOW IS THE CARD (§1.5 / §6). This is the landing page's treatment, not
+ * the framed one: the three court tiles are the only framed thing on this page, so a rim here would
+ * make the rail read as a fourth one.
+ */
+@import "./qcvPage.css";
+
+.qcv-rail {
+  box-sizing: border-box;
+  display: flex; flex-direction: column; min-width: 0;
+  background: #fff; border-radius: 20px; border: 0;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 18px 40px -22px rgba(28, 19, 15, 0.28);
+  overflow: hidden;
+}
+/* placed: the measured box wins, and `position: fixed` is the only thing stated here */
+.qcv-rail--fixed { position: fixed; z-index: 6; }
+/**
+ * ⚠️ STACKED IS THE HONEST FALLBACK, NOT A NARROWER FIXED CARD. Under 1180px of window there is no
+ * room for a 340px column beside the ledger, so the card leaves the right edge entirely and takes
+ * its natural height under the page. It is also what renders for the one frame before the first
+ * measurement lands — which is why it must look like a finished state rather than a gap.
+ */
+.qcv-rail--stacked { position: static; width: auto; height: auto; margin-top: 22px; }
+
+/**
+ * ⚠️ THE QUERY CARD SITS 14px INSIDE THE RAIL'S EDGES (§6.5), AND THE BIRDS-EYE VIEW DOES NOT. The
+ * Birds-eye view IS the card — its head is the card's head and its rows run to the card's sides —
+ * while the query is an object PUT IN it. Padding the rail unconditionally would inset the
+ * Birds-eye view's own chrome by 14px on every edge; padding neither would put a card's shadow
+ * against the card it sits in. One `data-showing`, two treatments.
+ */
+.qcv-rail[data-showing="query"] { padding: 14px; }
+
+/* ── the Birds-eye view's own chrome (§6.1). Its body arrives in phase 3. ── */
+.qcv-rc { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+.qcv-rc-head { display: flex; align-items: center; gap: 10px; padding: 22px 22px 8px; }
+.qcv-rc-ttl { font-family: var(--qcv-type); font-weight: 400; font-size: 20px; line-height: 1.2; color: var(--qcv-ink); }

@@ -1338,6 +1338,32 @@
 .ground-mode .ws-work { background: transparent; }
 
 /**
+ * ⚠️ AND SINCE v65 §2, ONE MORE THING ABOUT THE BAR — THE NARROW VARIANT, PAGE-SCOPED. The Query
+ * Centre reserves 384px of its own width for a fixed card at the right, so the bar above it has
+ * less room than on any other route. Two changes, and only these two:
+ *
+ *   1. THE SAVE WHISPER GOES, with its divider. It is a statement about a page that writes as you
+ *      work; this page's writes go through modals that say so themselves, and at this width it is
+ *      the one thing in the bar that can be dropped without losing a control.
+ *   2. THE SEARCH GIVES WAY FIRST when the bar runs out — `flex-shrink: 1; min-width: 0`.
+ *
+ * ⚠️ AND THE SECOND ONE IS A SHRINK, NOT A GROW, BECAUSE THE SEARCH IS NOT A FLEX ITEM OF THE BAR.
+ * The bar's own children are the toggle, the crumb, the divider, the whisper and `.ws-bright`; the
+ * search sits INSIDE `.ws-bright`, which is content-sized. Written as `flex: 1 1 150px` the grow
+ * half had nothing to grow into and the measurement said so — 210px at 1280 and 210px at 1440, a
+ * rule that reads as doing something and does nothing. Measured with the whisper gone, the bar has
+ * **140px of slack at 1280** and nothing overflows, so there is no slack to take; what is left is
+ * the honest half, which is that the search is what yields if that ever stops being true.
+ *
+ * ⚠️ THE OTHER FOURTEEN ROUTES DO NOT CHANGE, and that is why this is scoped to `.ground-mode`
+ * rather than done in the bar's own rules. A shared control that changes size between routes is
+ * worse than a page starting lower — the standing ruling behind `--sp-ctl`. What changes here is
+ * what the bar CARRIES, not how big its controls are.
+ */
+.ground-mode .ws-sync, .ground-mode .ws-pagebar > .ws-vdiv { display: none; }
+.ground-mode .ws-pagebar .sp-search { flex-shrink: 1; min-width: 0; }
+
+/**
  * ══ THE SIDEBAR BOUNDARY — A SHADOW CAST *BY* THE RAIL (v33.2, Phase 3) ══
  *
  * ⚠️ THE DIRECTION IS THE WHOLE POINT, AND v33.1 HAD IT BACKWARDS. The scrim was on

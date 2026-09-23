@@ -30,7 +30,6 @@
   --qcv-serif: var(--font-serif);
   --qcv-mono: var(--font-mono);
   --qcv-shadow: 0 2px 8px rgba(28, 19, 15, 0.06);
-  --qcv-open-w: 396px;
   box-sizing: border-box;
   color: var(--qcv-ink);
   font-family: var(--qcv-serif);
@@ -39,6 +38,23 @@
   padding-top: 11px;
   padding-bottom: 90px;
   min-width: 0;
+  /**
+   * ⚠️ §2 · THE PAGE RESERVES THE RAIL'S COLUMN — 340 + a 22px gutter + a 22px edge. It is padding
+   * rather than a grid track because the card is `position: fixed` (placed from the window's own
+   * box, see `QcRail.tsx`) and takes part in no layout: a track would be a second statement of a
+   * width only one of them could be right about.
+   *
+   * ⚠️ AND THE VALUE IS PUBLISHED BY THE CARD ITSELF, not asked of a media query. The reservation
+   * and the thing being reserved for must come and go together, and they are decided by different
+   * boxes: a media query knows the VIEWPORT, while whether there is room for a card depends on the
+   * WINDOW — the same 1440 viewport gives 1128 of window with the sidebar open and 1312 with it
+   * shut. Two askers, two answers, and at every width between them either 384px of nothing down
+   * the right of a stacked page or a fixed card sitting over the ledger's last column.
+   *
+   * The fallback is the reservation rather than 0, so the first frame — before any measurement —
+   * is the common case rather than a layout that jumps once the card places itself.
+   */
+  padding-right: var(--qcv-rail-pad, 384px);
 }
 .qcv-own { font-family: var(--qcv-serif); }
 /* ⚠️ THE RESET REACHES `span`/`p`/`div`/`label` ONLY — the elements brand.tsx names — and NOT `button`
@@ -59,26 +75,38 @@
    ⚠️ A BLOCK, NOT A TWO-COLUMN GRID (v21 §2). The title, the facts line and the action row stack;
    `position: relative` is the back link's containing block, which the Overview phase hangs at the
    head's top-right. */
+/**
+ * ⚠️ §3 · UNBOXED. No card, no border, no tray — the title sits on the page, as the references'
+ * headlines do. The mockup wore a white card for three of its version blocks and took it off again
+ * in v46; what is here is the last word, measured, not the first.
+ *
+ * ⚠️ THE RIGHT PADDING RESERVES 150 × 150 FOR THE ARCHIVIST AND NOTHING RENDERS IN IT. A slot with
+ * no art is honest; a dashed placeholder box in a finished hero is chrome that says "unfinished"
+ * on a page that is not. The reservation is what stops the facts line running under him the day he
+ * arrives — so it is kept, and it is the one thing about him this build does.
+ */
 .qcv-head {
   display: block;
   position: relative;
-  margin: 0 0 22px;
+  margin: 0 0 18px;
+  padding-right: 190px;
 }
 .qcv-page .qcv-title {
   margin: 0;
   font-family: var(--qcv-type) !important;
   font-weight: 400;
-  font-size: 48px;
-  /* 1.02 is the ref's, and it is safe HERE: the face is Special Elite, not Playfair, the box has no
-     height and no clipping ancestor, and the title is one fixed string. */
-  line-height: 1.02;
+  font-size: 50px;
+  /* ⚠️ 1 IS SAFE HERE AND NOWHERE NEAR PLAYFAIR: the face is Special Elite, the box has no height
+     and no clipping ancestor, and the title is one fixed string with no descender below the line
+     it would crop. The house floor of 1.3 is for mixed-case Playfair in a box that clips. */
+  line-height: 1;
   letter-spacing: 0;
   color: var(--qcv-ink);
 }
 /* ⚠️ NO TOP MARGIN: the ref's `.facts` is `margin: 0` under a 48px title at `line-height: 1.02`, and
    the 8px this carried made the head 145 against the ref's 137 — eight pixels that pushed every
    page down and were nobody's decision. */
-.qcv-line { margin: 0; font-family: var(--qcv-serif); font-size: 16px; line-height: 22px; color: var(--qcv-ink-70); }
+.qcv-line { margin: 10px 0 0; font-family: var(--qcv-serif); font-size: 16px; line-height: 22px; color: var(--qcv-ink-70); }
 /* ⚠️ `line-height: 0` ON THE INLINE TITLE: a second face inside the line has its own ascent, and at
    the line's 22px it pushed the line box to 25 — the head measured 82 against the ref's 79. */
 .qcv-line .qcv-line-ms { font-family: var(--qcv-type); font-style: normal; font-size: 15px; line-height: 0; color: var(--qcv-ink); }
@@ -86,8 +114,8 @@
    22/18, the ref's rendered button is 26/22 and measures the stated 154 × 50 — the rendered page wins. */
 .qcv-log.sp-inkpill { padding: 0 26px 0 22px; }
 
-/* the action row: both pills, 16px under the facts line, left-aligned */
-.qcv-hr { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+/* the action row: both pills, 20px under the facts line, left-aligned (§3) */
+.qcv-hr { display: flex; align-items: center; gap: 10px; margin-top: 20px; }
 
 /**
  * "Record a response" — the anthracite pill's twin in size and face, in the card's own clothes: a
@@ -115,7 +143,7 @@
 /* ⚠️ NO `min-height`: the 42 was the RETIRED VIEW SWITCH's height (§1.3), and with the switch gone
    the row was holding 15px of air for a control that is not there. The sentence sizes the row now,
    as it does in the ref — 27.4 at 1440. */
-.qcv-ctl { display: flex; align-items: center; gap: 20px; margin: 24px 0 14px; }
+.qcv-ctl { display: flex; align-items: center; gap: 20px; margin: 22px 0 14px; }
 .qcv-page .qcv-sentence {
   margin: 0; min-width: 0; flex: 1 1 auto;
   font-family: var(--qcv-type) !important; font-weight: 400; font-size: 23px; line-height: 1.15; color: var(--qcv-ink);
@@ -138,10 +166,17 @@
    what the next reader restyles, and then mounts. */
 
 /* ── the stage: the view's frame, and the open query docked to its right ── */
-.qcv-stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
-.qcv-stage--docked { grid-template-columns: minmax(0, 1fr) var(--qcv-open-w); }
-.qcv-ledger { min-width: 0; }
-.qcv-ledger > .fc-frame { display: block; }
+/**
+ * ⚠️ ONE COLUMN, ALWAYS (§5). The open query used to dock beside the ledger and take 396px of it;
+ * it lives in the rail now, so the ledger has the page column to itself whatever is chosen. The
+ * `--docked` modifier is deleted rather than left selecting on nothing.
+ *
+ * ⚠️ AND THE LEDGER HAS NO FRAME. It is not a card holding rows; the ROWS are the cards. What is
+ * left of `.qcv-ledger` is a size container — the row's own container query needs one, and the
+ * `FramedCard` that used to be it has gone with the frame.
+ */
+.qcv-stage { display: block; }
+.qcv-ledger { min-width: 0; container-type: inline-size; }
 .qcv-none { margin: 0; padding: 34px 18px; text-align: center; font-family: var(--qcv-serif); font-size: 15px; color: var(--qcv-ink-70); }
 .qcv-none button { font: inherit; background: none; border: 0; border-bottom: 1.5px dashed rgba(28, 19, 15, 0.4); padding: 0; margin-left: 10px; cursor: pointer; color: var(--qcv-ink); }
 

@@ -7,23 +7,42 @@
  * ended up crushed against the right edge. Tracks are sized by these rules alone, never by content
  * — every row is its own grid, and a content-sized track is a column that moves row to row.
  */
-/* ⚠️ NOT A CONTAINER ITSELF. The rule below is about the LEDGER, and the ledger's FramedCard is
-   already the size container; making this one too would answer the query 14px early. */
-.qcv-list { --qcv-tpl: minmax(172px, 256px) minmax(162px, 240px) minmax(74px, 96px) 46px; --qcv-tpl-gap: 14px; }
-.qcv-cols, .qcv-row {
-  display: grid; grid-template-columns: var(--qcv-tpl); column-gap: var(--qcv-tpl-gap); justify-content: space-between; align-items: center;
-  box-sizing: border-box; padding-left: 16px; padding-right: 18px;
+/**
+ * ⚠️ v65 §5 · THE ROWS ARE THE CARDS, AND THE LEDGER IS NOT ONE. There is no header row and no
+ * ruled frame: a flex column of white cards 10px apart, each with its own shadow and corners. The
+ * column headings went with the frame — a heading strip floating above detached cards labels a
+ * table that is not there.
+ *
+ * ⚠️ AND THE TRACKS ARE THE REF'S LAST DECLARATION, `minmax(166px,1fr) 170px 78px 46px`. The ref
+ * states this template FOUR times across its stacked version blocks; this is the one at the end
+ * (its line 1282) and the only one that renders. The brief's prose says a fixed `280px` first
+ * track, which is that template's older sibling — a fixed first column cannot give the spare back
+ * to the name on a wide page.
+ */
+.qcv-list { --qcv-tpl: minmax(166px, 1fr) 170px 78px 46px; --qcv-tpl-gap: 14px; display: flex; flex-direction: column; }
+.qcv-rows { display: flex; flex-direction: column; gap: 10px; }
+/**
+ * ⚠️ ONE RULE FOR `.qcv-row`, AND THAT IS THIS SHEET'S OWN INVARIANT rather than tidiness. A lock
+ * three files over finds its rule by first match, so a second base rule silently repoints every
+ * assertion at whichever block comes first — which is exactly what happened when this was written
+ * as two (the grid, then the card), and the card's own properties reported as absent.
+ *
+ * ⚠️ THE SELECTED RING IS AN INSET SHADOW BESIDE THE BASE ONE, not a border and not a fill. A
+ * border would change the card's box by 1.6px on every edge and shuffle every track; a fill would
+ * make the chosen row the one card on the page wearing a colour, which is the band's job elsewhere.
+ * Both shadows are restated together because `box-shadow` has no way to add one.
+ */
+.qcv-row {
+  display: grid; grid-template-columns: var(--qcv-tpl); column-gap: var(--qcv-tpl-gap); align-items: center;
+  box-sizing: border-box; padding: 12px 18px 12px 16px;
+  position: relative; min-height: 69px; cursor: pointer; outline: none;
+  background: #fff; border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 24px -18px rgba(28, 19, 15, 0.22);
 }
-.qcv-cols { padding-top: 9px; padding-bottom: 7px; background: var(--qcv-quiet); border-bottom: 1px solid var(--qcv-hair); }
-.qcv-cols b { font-family: var(--qcv-mono); font-weight: 400; font-size: 8.5px; line-height: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap; }
-/* the head's first label sits over the NAME, not over the chip: 32 + 14 */
-.qcv-cols-agent { margin-left: 46px; }
-
-.qcv-row { position: relative; height: 67px; padding-top: 11px; padding-bottom: 11px; cursor: pointer; border-top: 1px solid var(--qcv-hair); outline: none; }
-.qcv-rows > .qcv-row:first-child { border-top: 0; }
 .qcv-row:hover { background: var(--qcv-parchment); }
+.qcv-row[aria-selected="true"] { box-shadow: 0 0 0 1.6px var(--qcv-ink) inset, 0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 24px -18px rgba(28, 19, 15, 0.22); }
 .qcv-row--sk { cursor: default; }
-.qcv-row--sk:hover { background: none; }
+.qcv-row--sk:hover { background: #fff; }
 /* the chip and the name are ONE column, so a widening gap never separates them */
 .qcv-row-agent { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .qcv-chip { flex: none; box-sizing: border-box; width: 32px; height: 32px; border-radius: 9px; border: 1px solid rgba(28, 19, 15, 0.08); background: var(--qcv-state, var(--state-closed)); display: flex; align-items: center; justify-content: center; }
@@ -47,30 +66,30 @@
 
 /* a row where the move is the writer's: a 3px rust rule down its left edge, inset 12 top and bottom.
    `isWithYou` decides it — partial requested, full requested, R&R; never an offer. */
+/* the rust rail rides the card's own left edge, inside its corners */
 .qcv-row--you::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; background: var(--qcv-rust); border-radius: 0 2px 2px 0; }
 /* selected: an inset ink ring, 3px in — never a fill */
-.qcv-row[aria-selected="true"]::after { content: ""; position: absolute; inset: 3px; border: 1.6px solid var(--qcv-ink); border-radius: 8px; pointer-events: none; }
-.qcv-row:focus-visible::after { content: ""; position: absolute; inset: 3px; border: 1.6px solid var(--qcv-navy); border-radius: 8px; pointer-events: none; }
-.qcv-row[aria-selected="true"]:focus-visible::after { border-color: var(--qcv-ink); box-shadow: 0 0 0 2px var(--qcv-navy); }
+/* ⚠️ THE SELECTED RING MOVED INTO `box-shadow` (above) AND THE `::after` IS FOCUS'S ALONE. Two
+   rings drawn by two mechanisms on one element is how a focused-and-selected row ends up wearing
+   a double outline 3px apart. */
+.qcv-row:focus-visible::after { content: ""; position: absolute; inset: 3px; border: 1.6px solid var(--qcv-navy); border-radius: 11px; pointer-events: none; }
 
 /**
- * ⚠️ THE DATE TILE GOES WHERE THE FOUR FLOORS STOP FITTING — 532px OF CONTAINER, AND EVERY TERM OF
- * THAT IS MEASURED RATHER THAN REASONED. The container is the ledger's `.fc-card--cq`, and an
- * inline-size query reads its CONTENT box; the row then loses the frame's two 1px borders and its
- * own 16 + 18 of padding, so the width the tracks actually share is `container - 36`.
+ * ⚠️ THE DATE TILE GOES WHERE THE FOUR FLOORS STOP FITTING, AND EVERY TERM IS MEASURED RATHER THAN
+ * REASONED. The container is `.qcv-ledger` now (the ledger's `FramedCard` went with the frame, so
+ * the ledger is the size container itself), and an inline-size query reads its CONTENT box. A row
+ * is a card in that box, so it loses only its OWN padding — 16 + 18 — and no longer two frame
+ * borders: the width the tracks actually share is `container - 34`.
  *
- *   floors 172 + 162 + 74 + 46 = 454, plus three 14px gaps = 496, plus that 36 = 532.
+ *   floors 166 + 170 + 78 + 46 = 460, plus three 14px gaps = 502, plus that 34 = 536.
  *
- * ⚠️ THE FLOORS CAME DOWN SO THE TILE SURVIVES A 1280 WINDOW (Nick, 20 Sep) — at 1280 the card's
- * content box is 540, which leaves 504 for tracks and gaps. The brief's 540 threshold, and a first
- * pass that took only the gap to 14 and the Sent floor to 74, were both arithmetic against the
- * LEDGER's 552 rather than against that 504: they came out 12px short and the tile still dropped.
- * The two text columns gave up the difference. 496 against 504 leaves 8px of slack at 1280 — small,
- * so re-measure rather than re-derive if any of these five numbers moves.
+ * ⚠️ THE THRESHOLD IS DERIVED FROM THE FLOORS IN THE LOCK, NEVER RESTATED THERE. Two numbers that
+ * agree with each other and with nothing else is what this pair was the last time somebody typed
+ * both; `qcList.test.tsx` reads `--qcv-tpl` and requires the value below to be their sum minus one.
  *
- * Under 532 the row is three columns: the icons stay, the date goes, and the skeleton follows.
+ * Under 536 the row is three columns: the icons stay, the date goes, and the skeleton follows.
  */
-@container (max-width: 531px) {
-  .qcv-cols, .qcv-row { grid-template-columns: minmax(166px, 1fr) 160px 78px; column-gap: 14px; }
-  .qcv-cols-date, .qcv-date, .qcv-date-sk { display: none; }
+@container (max-width: 535px) {
+  .qcv-row { grid-template-columns: minmax(166px, 1fr) 160px 78px; column-gap: 14px; }
+  .qcv-date, .qcv-date-sk { display: none; }
 }

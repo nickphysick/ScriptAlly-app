@@ -31,7 +31,7 @@ const rule = (sel: string) => {
 
 const frame = (over: Partial<React.ComponentProps<typeof QcCentre>> = {}) => renderToStaticMarkup(
   <QcCentre loading={false} entering={false} headLine="Every query, from the first letter to the last reply." onLog={() => {}} onRecord={() => {}}
-    sentence={<h2 id="sentence">s</h2>} body={<div id="body" />} openCard={<aside id="card" />}
+    sentence={<h2 id="sentence">s</h2>} body={<div id="body" />} courts={<div id="courts" />} rail={<aside id="rail" />}
     docked onDocked={() => {}} onExport={() => {}} canExport {...over} />,
 );
 
@@ -181,17 +181,23 @@ describe("the frame, rendered", () => {
       expect(html, `${kept} is missing from the page`).toContain(kept);
     }
   });
-  it("⚠️ the open card renders only while DOCKED; unmeasured (null) renders neither a card nor a docked column", () => {
-    expect(frame({ docked: true })).toContain('id="card"');
-    expect(frame({ docked: true })).toContain("qcv-stage--docked");
-    for (const d of [false, null]) {
-      expect(frame({ docked: d }), String(d)).not.toContain('id="card"');
+  /**
+   * ⚠️ THE LEDGER HAS ONE COLUMN, WHATEVER IS CHOSEN (v65 §5). The open query moved into the rail,
+   * so selecting a row no longer takes 396px off the list — and the `--docked` modifier is deleted
+   * rather than left selecting on nothing. `docked` still exists and still measures the COLUMN: it
+   * decides card-versus-drawer, which is a different question from how wide the ledger is.
+   */
+  it("⚠️ one column always — the stage never narrows for a card, and the rail is always mounted", () => {
+    for (const d of [true, false, null] as const) {
       expect(frame({ docked: d }), String(d)).not.toContain("qcv-stage--docked");
+      expect(frame({ docked: d }), `the rail is not mounted at docked=${d}`).toContain('id="rail"');
+      expect(frame({ docked: d }), String(d)).toContain('id="courts"');
     }
-    expect(frame({ docked: true, openCard: null }), "an empty docked column").not.toContain("qcv-stage--docked");
     expect(frame({ docked: false })).toContain("qcv-page--narrow");
     expect(frame({ docked: null })).not.toContain("qcv-page--narrow");
     expect(DOCK_MIN_COLUMN).toBe(900);
+    /* and the retired modifier is gone from the sheet too, not merely unrendered */
+    expect(css, "a rule for the docked column outlived the docked column").not.toContain("qcv-stage--docked");
   });
   it("busy while loading, and it says when it is done — once, politely", () => {
     expect(frame({ loading: true })).toMatch(/data-qcv="page"|aria-busy="true"/);
@@ -199,20 +205,34 @@ describe("the frame, rendered", () => {
     expect(frame()).toContain('aria-busy="false"');
     expect(frame()).toMatch(/role="status" aria-live="polite"[^>]*>Queries loaded</);
   });
-  it("the view's frame is the shared FramedCard with no band; Export is a link under the stage", () => {
+  /**
+   * ⚠️ THE LEDGER HAS NO FRAME (v65 §5) — it is not a card holding rows, the ROWS are the cards.
+   * What is left of `.qcv-ledger` is a size container the row's own container query needs; the
+   * `FramedCard` that used to be it has gone with the frame, and so has its band-less `.fc-frame`.
+   */
+  it("the ledger is a bare section — no FramedCard, no frame; Export is a link under the stage", () => {
     const html = frame();
-    expect(html).toMatch(/<section data-qcv="ledger"[^>]*class="fc-card fc-card--cq qcv-ledger"><div class="fc-frame" data-qcv="ledger-frame"><div id="body">/);
+    expect(html).toMatch(/<section class="qcv-ledger" data-qcv="ledger" aria-label="Queries"><div id="body">/);
+    expect(html, "the ledger grew a frame again").not.toContain("fc-frame");
+    expect(html).not.toContain("fc-card");
     expect(html).toMatch(/<div class="qcv-foot"><button type="button" class="qcv-export">Export CSV<\/button>/);
     expect(frame({ canExport: false })).toMatch(/class="qcv-export" disabled=""/);
   });
 });
 
 describe("the sheet", () => {
-  it("the stage is one column, and 1fr + 396 only while docked; they align to the top", () => {
-    expect(rule(".qcv-stage")).toMatch(/grid-template-columns:\s*minmax\(0,\s*1fr\);/);
-    expect(rule(".qcv-stage")).toMatch(/align-items:\s*start/);
-    expect(rule(".qcv-stage--docked")).toMatch(/grid-template-columns:\s*minmax\(0,\s*1fr\)\s+var\(--qcv-open-w\)/);
-    expect(rule(".qcv-page")).toMatch(/--qcv-open-w:\s*396px/);
+  it("§5 · the stage is one column and states no track at all; the ledger is the size container", () => {
+    expect(rule(".qcv-stage")).toMatch(/display:\s*block/);
+    expect(css, "the docked track outlived the docked card").not.toContain("--qcv-open-w");
+    expect(rule(".qcv-ledger")).toMatch(/container-type:\s*inline-size/);
+  });
+  it("§2 · the page reserves the rail's column, and the CARD is what decides how much", () => {
+    /* 340 + a 22px gutter + a 22px edge — padding rather than a track, because the card is fixed
+       and takes part in no layout; a track would be a second statement of one width. The value is
+       published by the card's own measurement, so the reservation and the card cannot disagree;
+       the fallback is the reservation rather than 0, so the first frame is the common case.
+       The whole claim, with its mutations, is in `qcRail.test.tsx` — this is the page's half. */
+    expect(rule(".qcv-page")).toMatch(/padding-right:\s*var\(--qcv-rail-pad,\s*384px\)/);
   });
   it("⚠️ the typewriter face is READ from the shell's one token, never named — and the title beats brand.tsx", () => {
     expect(css).not.toMatch(/Special Elite/);
@@ -226,11 +246,24 @@ describe("the sheet", () => {
     expect(menuRules.length).toBeGreaterThan(6);
     for (const [, sel, body] of menuRules) expect(body, `${sel.trim()} reads a page-scoped token`).not.toMatch(/var\(--qcv-/);
   });
-  it("every var() the sheet reads resolves — to a token it declares, or to one of the app's :root tokens", () => {
+  it("every var() the sheet reads resolves — to a token it declares, to an app :root token, or to a PUBLISHED measurement", () => {
     const APP = ["--font-serif", "--font-mono", "--sp-type", "--wpg-gutter", "--wpg-measure", "--ws-window", "--ws-window-rgb"];
+    /**
+     * ⚠️ A MEASUREMENT PUBLISHED FROM JS IS LEGITIMATELY ABSENT FROM THE SHEET, and its FALLBACK is
+     * what renders until it lands — the one case CLAUDE.md names for a fallback ("a token that might
+     * legitimately be absent"). But an exemption that only says "not declared here" would cover a
+     * token nothing publishes either, which is the fault this whole check exists to catch. So each
+     * one names its WRITER and the writer is read: the exemption is granted by the publishing code
+     * existing, not by the list.
+     */
+    const PUBLISHED: Record<string, string> = { "--qcv-rail-pad": "src/components/queries/centre/QcRail.tsx" };
+    for (const [tok, writer] of Object.entries(PUBLISHED)) {
+      expect(read(writer), `${tok} is exempt as published, and ${writer} does not publish it`).toContain(`setProperty("${tok}"`);
+      expect(css, `${tok} is read without a fallback, so an unpublished frame paints nothing`).toMatch(new RegExp(`var\\(${tok},\\s*[^)]+\\)`));
+    }
     const reads = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
     expect(reads.size).toBeGreaterThan(10);
-    for (const r of reads) expect(APP.includes(r) || new RegExp(`${r}:`).test(css), `${r} is read and never declared`).toBe(true);
+    for (const r of reads) expect(APP.includes(r) || r in PUBLISHED || new RegExp(`${r}:`).test(css), `${r} is read and never declared`).toBe(true);
   });
   /**
    * ⚠️ THE GHOST PILL'S FRAME IS A COPY OF `--fc-frame`, AND THE COPY IS WHAT IS ASSERTED. The token

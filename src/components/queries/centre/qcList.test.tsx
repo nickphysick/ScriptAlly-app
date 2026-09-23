@@ -36,12 +36,17 @@ describe("the list's columns — one template, floors and ceilings, the spare in
     /* ⚠️ THE SHAPE, NOT THE FIVE NUMBERS. Pinning the values made this go red on a retune that
        changed nothing about the law — three minmax tracks and one fixed tile — and the values
        themselves are asserted where they MEAN something, in the threshold arithmetic below. */
-    expect(rule(listCss, ".qcv-list")).toMatch(/--qcv-tpl:\s*minmax\(\d+px, \d+px\) minmax\(\d+px, \d+px\) minmax\(\d+px, \d+px\) \d+px\s*;/);
-    const shared = rule(listCss, ".qcv-cols, .qcv-row");
+    /* ⚠️ v65 §5: ONE FLEXIBLE TRACK AND THREE FIXED ONES, and the head row is GONE — a heading strip
+       floating above detached cards labels a table that is not there. So the template is read on the
+       ROW alone, and `justify-content: space-between` went with the head: a single `1fr` track takes
+       the spare itself, and putting it in the gaps instead would move the three right-hand columns
+       away from the date tile they are read against. */
+    expect(rule(listCss, ".qcv-list")).toMatch(/--qcv-tpl:\s*minmax\(\d+px, 1fr\) \d+px \d+px \d+px\s*;/);
+    const shared = rule(listCss, ".qcv-row");
     expect(shared).toMatch(/grid-template-columns:\s*var\(--qcv-tpl\)/);
     expect(shared).toMatch(/column-gap:\s*var\(--qcv-tpl-gap\)/);
-    expect(shared, "past the ceilings the spare goes into the GAPS").toMatch(/justify-content:\s*space-between/);
-    expect(listCss.split("grid-template-columns").length - 1, "a second template somewhere would let head and rows disagree").toBe(2);
+    expect(listCss, "the head row is retired; a rule for it is what the next reader mounts").not.toMatch(/\.qcv-cols/);
+    expect(listCss.split("grid-template-columns").length - 1, "a second template somewhere would let rows disagree").toBe(2);
     expect(listCss).not.toMatch(/grid-template-columns:[^;]*(auto|max-content|min-content|fit-content)/);
     expect(listCss, "display: contents fractures a row's hover and selection").not.toMatch(/display:\s*contents/);
   });
@@ -50,39 +55,54 @@ describe("the list's columns — one template, floors and ceilings, the spare in
        literals that agree with each other and with nothing else — it passed while the tile was
        dropping at the window it was written to protect. Both sides now come from `--qcv-tpl`, so a
        floor that moves without its threshold fails here, which is the only thing this can usefully
-       say. The 36 is the frame's two borders plus the row's 16 + 18 of padding; the container is
-       the ledger's card and an inline-size query reads its CONTENT box (measured, not assumed). */
+       say. The 34 is the row's own 16 + 18 of padding and NOTHING ELSE: the ledger's FramedCard went
+       with the frame in v65 §5, so there are no longer two borders to subtract. The container is
+       `.qcv-ledger` and an inline-size query reads its CONTENT box (measured, not assumed). */
     const tpl = /--qcv-tpl:\s*([^;]+);/.exec(listCss)?.[1] ?? "";
     const floors = [...tpl.matchAll(/minmax\((\d+(?:\.\d+)?)px/g)].map((m) => +m[1]);
     const fixed = [...tpl.replace(/minmax\([^)]*\)/g, "").matchAll(/(\d+(?:\.\d+)?)px/g)].map((m) => +m[1]);
     const gap = +(/--qcv-tpl-gap:\s*(\d+(?:\.\d+)?)px/.exec(listCss)?.[1] ?? 0);
-    expect(floors.length, "three flexible tracks").toBe(3);
-    expect(fixed.length, "one fixed track — the date tile").toBe(1);
+    expect(floors.length, "one flexible track").toBe(1);
+    expect(fixed.length, "three fixed tracks — where it stands, sent so far, the date tile").toBe(3);
     expect(gap).toBeGreaterThan(0);
-    const boundary = [...floors, ...fixed].reduce((a, b) => a + b, 0) + 3 * gap + 36;
+    const boundary = [...floors, ...fixed].reduce((a, b) => a + b, 0) + 3 * gap + 34;
     const declared = +(/@container \(max-width: (\d+)px\)/.exec(listCss)?.[1] ?? -1);
     expect(declared, `the four columns need ${boundary}px of container, so the tile drops below it`).toBe(boundary - 1);
     /* and it must still clear a 1280 window, which is what this pass was for: 540 of container */
     expect(boundary, "the four-column row no longer fits a 1280 window's 540px container").toBeLessThanOrEqual(540);
-    expect(listCss).toMatch(/@container \(max-width: \d+px\) \{\s*\.qcv-cols, \.qcv-row \{ grid-template-columns: minmax\(166px, 1fr\) 160px 78px; column-gap: 14px; \}/);
-    expect(listCss).toMatch(/\.qcv-cols-date, \.qcv-date, \.qcv-date-sk \{ display: none; \}/);
-    expect(rule(listCss, ".qcv-list"), "the list must not be a container itself — the rule is about the LEDGER").not.toMatch(/container-type/);
+    expect(listCss).toMatch(/@container \(max-width: \d+px\) \{\s*\.qcv-row \{ grid-template-columns: minmax\(166px, 1fr\) 160px 78px; column-gap: 14px; \}/);
+    expect(listCss).toMatch(/\.qcv-date, \.qcv-date-sk \{ display: none; \}/);
+    /* ⚠️ THE CONTAINER MOVED RATHER THAN MULTIPLYING. `.qcv-ledger` is the size container now (the
+       frame that used to be it is gone); the list must still not be a second one, or the query
+       answers at the wrong box. */
+    expect(rule(listCss, ".qcv-list"), "a second container answers the query at the wrong box").not.toMatch(/container-type/);
+    expect(sheet("qcvPage.css"), "the ledger stopped being the size container").toMatch(/\.qcv-ledger \{[^}]*container-type:\s*inline-size/);
   });
-  it("a row is 67 tall; selection is an inset ink ring and never a fill; the name is Playfair on a clipped line, so 1.3", () => {
-    expect(rule(listCss, ".qcv-row")).toMatch(/height:\s*67px/);
-    const sel = rule(listCss, '.qcv-row[aria-selected="true"]::after');
-    expect(sel).toMatch(/inset:\s*3px/); expect(sel).toMatch(/border:\s*1\.6px solid var\(--qcv-ink\)/); expect(sel).toMatch(/border-radius:\s*8px/);
+  it("§5 · a row is a CARD — 69 tall, 14px corners, its own shadow, 10px from the next", () => {
+    const row = rule(listCss, ".qcv-row");
+    expect(row).toMatch(/min-height:\s*69px/);
+    expect(row).toMatch(/border-radius:\s*14px/);
+    expect(row).toMatch(/background:\s*#fff/);
+    expect(row).toMatch(/box-shadow:\s*0 1px 2px rgba\(28, 19, 15, 0\.05\), 0 10px 24px -18px rgba\(28, 19, 15, 0\.22\)/);
+    expect(rule(listCss, ".qcv-rows")).toMatch(/gap:\s*10px/);
+    /* ⚠️ SELECTION IS A RING AND NEVER A FILL, and it is now ONE mechanism: an inset shadow beside
+       the base one. A border would change the card's box and shuffle every track; two rings drawn
+       two ways is how a focused-and-selected row wears a double outline. */
+    const sel = rule(listCss, '.qcv-row[aria-selected="true"]');
+    expect(sel).toMatch(/box-shadow:\s*0 0 0 1\.6px var\(--qcv-ink\) inset/);
+    expect(sel, "the ring must keep the card's own shadow, not replace it").toMatch(/0 10px 24px -18px/);
+    expect(listCss).not.toMatch(/\[aria-selected="true"\][^{]*\{[^}]*background/);
+    expect(listCss, "the ring must not also be drawn as a pseudo-element").not.toMatch(/\[aria-selected="true"\]::after/);
     expect(rule(listCss, ".qcv-row:hover")).toMatch(/background:\s*var\(--qcv-parchment\)/);
-    expect(listCss).not.toMatch(/\[aria-selected="true"\]\s*\{[^}]*background/);
     expect(rule(listCss, ".qcv-row-nm")).toMatch(/line-height:\s*1\.3/);
   });
 });
 
 describe("the rows, rendered", () => {
-  it("⚠️ NO ROW BUTTONS — a row selects and nothing else; the head names the four columns", () => {
+  it("⚠️ NO ROW BUTTONS — a row selects and nothing else, and there is no head row to name columns", () => {
     const html = renderToStaticMarkup(<QcList rows={rowsOf([q({}), q({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(3) })])} selectedId={null} onOpen={() => {}} nowMs={NOW} />);
     expect(html).not.toContain("<button");
-    expect(html).toMatch(/>Agent<\/b><b>Where it stands<\/b><b>Sent so far<\/b><b class="qcv-cols-date">Queried<\/b>/);
+    expect(html, "the retired head row is rendered again").not.toContain("qcv-cols");
     expect(html.split('role="option"').length - 1).toBe(2);
   });
   it("⚠️ RUST FOLLOWS `isWithYou` EXACTLY — for every status, and never an offer", () => {
@@ -138,11 +158,35 @@ describe("the open query, docked", () => {
     const html = card({});
     expect(html).toMatch(/^<aside[^>]*data-qcv="open"[^>]*class="fc-card qcv-open qcv-own"[^>]*style="--fc-band:var\(--state-queried\)"/);
     expect(html).not.toMatch(/scrim|qpn/);
-    expect(rule(openCss, ".qcv-open")).toMatch(/position:\s*sticky;\s*top:\s*16px/);
   });
-  it("⚠️ it caps itself to the SCROLLPORT — `--wpg-port-h` — and no rule on the sheet is sized to the viewport alone", () => {
-    expect(rule(openCss, ".qcv-open-fr")).toMatch(/max-height:\s*calc\(var\(--wpg-port-h, 100vh\) - 32px - 12px\)/);
-    expect(openCss.replace(/var\(--wpg-port-h, 100vh\)/g, "")).not.toMatch(/\d(vh|dvh)/);
+  /**
+   * ⚠️ IT NEITHER STICKS NOR CAPS ITSELF SINCE v65 §6.5, and both retirements are asserted rather
+   * than left to lapse. Both were right while the card sat in a scrolling column: `position: sticky`
+   * held it as the ledger went past, and `max-height: calc(var(--wpg-port-h) …)` stopped it running
+   * off the bottom. In the rail — a card already placed to the window's measured height — a sticky
+   * child has nowhere to travel, and a cap is a SECOND opinion about a height something else has
+   * measured. Two derivations of one number disagree at every viewport where they differ.
+   */
+  it("⚠️ in the rail it fills its host, and states neither a sticky nor a height of its own", () => {
+    const own = rule(openCss, ".qcv-open");
+    expect(own).toMatch(/position:\s*static/);
+    expect(own).toMatch(/flex:\s*1 1 auto/);
+    /* ⚠️ §1.5's CARD, NOT THE FRAMED ONE: white, a soft shadow, 12px corners — and crucially NO rim
+       and NO burgundy line, which is what the framed treatment is. The framed look is the three
+       court tiles' alone on this page, and a framed card inside the rail's unframed one would be
+       two borders 14px apart. The rim is what `FramedCard` draws as two inset shadows, so its
+       absence is the thing to assert. */
+    expect(own, "the card kept the framed rim").not.toMatch(/inset 0 0 0 \d+px/);
+    expect(own).toMatch(/border-radius:\s*12px/);
+    expect(own).toMatch(/box-shadow:\s*0 1px 2px rgba\(28, 19, 15, 0\.05\), 0 10px 24px -18px rgba\(28, 19, 15, 0\.22\)/);
+    expect(rule(openCss, ".qcv-open-fr"), "the frame still draws a line").toMatch(/border:\s*0/);
+    /* ⚠️ …and it is 14px inside the rail (§6.5), which is the RAIL's padding and only while it is
+       showing a query: the Birds-eye view IS the card, so insetting it would inset its own head. */
+    expect(sheet("qcvRail.css")).toMatch(/\.qcv-rail\[data-showing="query"\] \{ padding: 14px; \}/);
+    expect(rule(openCss, ".qcv-open-fr")).not.toMatch(/max-height/);
+    /* ⚠️ AND THE STANDING LAW IS UNCHANGED AND STILL CHECKED: nothing here is sized to the viewport.
+       The fallback went with the cap, so the sheet must now name no `vh` at all. */
+    expect(openCss).not.toMatch(/\d(vh|dvh)/);
     expect(rule(openCss, ".qcv-open-body")).toMatch(/overflow-y:\s*auto/);
     expect(rule(openCss, ".qcv-open-ft")).toMatch(/flex:\s*none/);
   });

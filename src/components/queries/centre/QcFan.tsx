@@ -10,8 +10,9 @@
  * makes you scroll to find out.
  *
  * ⚠️ AT MOST FIFTEEN GET A CARD, AND THE SIXTEENTH PLACE IS THE STACK (Nick, 21 Sep). The header
- * still states the full count — "50 queried" — because the cap changes the DEAL and never the
- * COUNT. `fanHand` decides which fifteen and how many are left; this file only draws them.
+ * still states the full count — "52 with the agent" — because the cap changes the DEAL and never
+ * the COUNT. `handOf` decides which fifteen and how many are left, over whatever set its door
+ * chose (`tileHand` for a court tile since v65 §4); this file only draws them.
  *
  * ⚠️ THE CARD IS THE APP'S ONE QUERY CARD, PLACED BY ITS HOST. Not a copy of it, and not a variant
  * of it: `QueryCard` without an anchor renders in place and installs no dismissal of its own, which
