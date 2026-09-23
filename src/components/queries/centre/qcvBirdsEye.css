@@ -32,6 +32,15 @@
 /* §6.1 — the head */
 .qcv-be-head { flex: none; display: flex; align-items: center; gap: 10px; padding: 22px 22px 8px; }
 .qcv-be-ttl { font-family: var(--qcv-type); font-weight: 400; font-size: 20px; line-height: 1.2; color: var(--qcv-ink); }
+/* §6.1 — the ⤢, a 28px disc at the head's right */
+.qcv-be-ex {
+  margin-left: auto; flex: none; width: 28px; height: 28px; border-radius: 50%;
+  background: #fff; border: 1px solid rgba(28, 19, 15, 0.14); color: var(--qcv-ink);
+  font-size: 13px; line-height: 1; cursor: pointer;
+}
+.qcv-be-ex:hover { background: var(--qcv-parchment); }
+.qcv-be-ex:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
+.qcv-be-ex:disabled { cursor: default; opacity: 0.5; }
 
 /**
  * §6.1 — the focus toggle. 32px on the page's own quiet fill, the pressed segment white with a
@@ -93,7 +102,12 @@
   width: 1px; background: var(--qcv-ink-45); pointer-events: none; z-index: 1;
 }
 
+/* ⚠️ THE ROW IS A BUTTON (§6.4), so it states everything a button brings with it: no border, no
+   background, the page's own text alignment. A row that inherited the UA's button chrome would be
+   a grey box with centred text, which is the sort of thing that gets "fixed" by making it a div. */
 .qcv-be-row {
+  appearance: none; -webkit-appearance: none; border: 0; background: none; text-align: left;
+  font: inherit; color: inherit; width: 100%; cursor: pointer;
   display: grid; grid-template-columns: var(--qcv-be-who) minmax(0, 1fr) var(--qcv-be-day);
   column-gap: var(--qcv-be-gap); align-items: center;
   box-sizing: border-box; height: 40px; padding: 0 var(--qcv-be-pad);
@@ -103,6 +117,8 @@
 /* §6.1 — the focus fades the other court; hover brings it most of the way back */
 .qcv-be-row--fade { opacity: 0.22; }
 .qcv-be-row--fade:hover { opacity: 0.6; }
+.qcv-be-row:hover { background: var(--qcv-parchment); }
+.qcv-be-row:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: -2px; }
 
 .qcv-be-who { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .qcv-be-ini {

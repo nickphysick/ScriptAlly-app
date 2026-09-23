@@ -50,14 +50,52 @@ export const LEDGER_MIN = 536;
 export const RAIL_STACK_BELOW = RAIL_RESERVE + LEDGER_MIN;
 
 export interface RailBox { top: number; right: number; height: number }
+/** What the window's own rect gives us. Read once, by whoever is placing something against it. */
+export interface WinRect { top: number; left: number; right: number; height: number; width: number }
 
 /** The placement, as a pure function of the window's rect — so it can be checked without a browser. */
-export function railBox(win: { top: number; right: number; height: number; width: number }, viewportW: number): RailBox | null {
+export function railBox(win: WinRect, viewportW: number): RailBox | null {
   if (!(win.height > 0) || !(win.width > 0)) return null;
   if (win.width < RAIL_STACK_BELOW) return null;
   const height = win.height - RAIL_INSET_Y * 2;
   if (!(height > 0)) return null;
   return { top: win.top + RAIL_INSET_Y, right: Math.max(0, viewportW - win.right + RAIL_INSET_X), height };
+}
+
+/**
+ * §7 · The expanded card's box: the rail's own, grown leftwards to the window's far edge.
+ *
+ * ⚠️ IT KEEPS THE RAIL'S TOP, BOTTOM AND RIGHT — that is what makes the growth read as the SAME
+ * card rather than a new one appearing in its place. Only `left` is new, and it is the window's own
+ * left plus the same 22px gutter the right pays, so the card is inset equally on both sides.
+ *
+ * ⚠️ AND THE REF'S `calc(100vw − 224px − 44px)` IS ITS OWN FRAME AGAIN. In a drawn page the viewport
+ * IS the window and the nav's 224px is a constant; here the sidebar collapses and the window's box
+ * already knows the answer. A width derived from `100vw` would be 224px too wide the moment the
+ * sidebar shut, and the card would run off the left of the screen.
+ */
+export function expandedBox(win: WinRect, viewportW: number): (RailBox & { left: number; width: number }) | null {
+  const rail = railBox(win, viewportW);
+  if (!rail) return null;
+  const left = win.left + RAIL_INSET_X;
+  const width = Math.max(0, viewportW - rail.right - left);
+  return width > 0 ? { ...rail, left, width } : null;
+}
+
+/**
+ * Read the shell's window capsule. `null` when it has not been laid out — never a zero rect.
+ *
+ * ⚠️ IT FALLS BACK TO THE DOCUMENT, AND THAT IS FOR THE PORTAL. The expanded card renders into
+ * `document.body`, so walking UP from it never reaches the shell at all: `closest` found nothing,
+ * the box came back null, and the card drew itself at the viewport's top-left corner — measured,
+ * top 0 against the rail's 137.8. The window is a singleton in this shell, so asking the document
+ * for it is not a guess; what would be a guess is assuming the caller is inside it.
+ */
+export function readWindow(el: Element | null): WinRect | null {
+  const win = (el?.closest(".ws-window") ?? document.querySelector(".ws-window")) as HTMLElement | null;
+  if (!win) return null;
+  const r = win.getBoundingClientRect();
+  return r.height > 0 && r.width > 0 ? { top: r.top, left: r.left, right: r.right, height: r.height, width: r.width } : null;
 }
 
 export const QcRail: React.FC<{
@@ -91,8 +129,8 @@ export const QcRail: React.FC<{
      */
     const page = el.closest(".qcv-page") as HTMLElement | null;
     const read = () => {
-      const r = win?.getBoundingClientRect();
-      const next = r ? railBox({ top: r.top, right: r.right, height: r.height, width: r.width }, window.innerWidth) : null;
+      const w = readWindow(win);
+      const next = w ? railBox(w, window.innerWidth) : null;
       setBox((prev) => (prev && next && prev.top === next.top && prev.right === next.right && prev.height === next.height ? prev : next));
       page?.style.setProperty("--qcv-rail-pad", next ? `${RAIL_RESERVE}px` : "0px");
       announce(!!next);
@@ -108,12 +146,10 @@ export const QcRail: React.FC<{
   /* the window's own top moves when chrome above it comes and goes; the box is cheap to re-read */
   useEffect(() => {
     const on = () => {
-      const el = ref.current;
-      const win = el?.closest(".ws-window") as HTMLElement | null;
-      const r = win?.getBoundingClientRect();
-      const next = r ? railBox({ top: r.top, right: r.right, height: r.height, width: r.width }, window.innerWidth) : null;
+      const w = readWindow(ref.current);
+      const next = w ? railBox(w, window.innerWidth) : null;
       setBox((prev) => (prev && next && prev.top === next.top && prev.right === next.right && prev.height === next.height ? prev : next));
-      (el?.closest(".qcv-page") as HTMLElement | null)?.style.setProperty("--qcv-rail-pad", next ? `${RAIL_RESERVE}px` : "0px");
+      (ref.current?.closest(".qcv-page") as HTMLElement | null)?.style.setProperty("--qcv-rail-pad", next ? `${RAIL_RESERVE}px` : "0px");
       announce(!!next);
     };
     window.addEventListener("resize", on);

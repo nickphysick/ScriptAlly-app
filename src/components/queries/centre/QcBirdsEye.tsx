@@ -45,17 +45,26 @@ export const QcBirdsEye: React.FC<{
   rows: readonly QcRow[];
   nowMs: number;
   loading?: boolean;
-}> = ({ rows, nowMs, loading = false }) => {
+  /**
+   * Open the expanded view (§6.4). The ⤢ opens it with nothing highlighted; a ROW opens it with
+   * that query highlighted — and never opens the card in the rail, which is the one thing a rail
+   * row does not do.
+   */
+  onExpand: (focusId: string | null) => void;
+}> = ({ rows, nowMs, loading = false, onExpand }) => {
   const [focus, setFocus] = useState<EyeFocus>("all");
   const groups: EyeGroup[] = loading ? [] : eyeGroups(rows, nowMs);
   const total = groups.reduce((n, g) => n + g.count, 0);
 
   return (
     <div className="qcv-be" data-qcv="railcal">
-      {/* ⚠️ NO ⤢ YET — it opens the expanded view, which arrives in phase 4. A control drawn before
-          its destination is either disabled (advertising a thing that does not exist) or dead. */}
       <div className="qcv-be-head" data-qcv="be-head">
         <b className="qcv-be-ttl">Birds-eye view</b>
+        {/* ⚠️ THE ⤢ OPENS IT WITH NOTHING HIGHLIGHTED; a ROW opens it with that query highlighted.
+            Two doors, one destination, and the difference is what arrives selected. */}
+        <button type="button" className="qcv-be-ex" data-qcv="be-expand" aria-label="Open the Birds-eye view" disabled={loading} onClick={() => onExpand(null)}>
+          <span aria-hidden="true">⤢</span>
+        </button>
       </div>
 
       {/* ⚠️ THE FOCUS FADES, IT DOES NOT FILTER (§6.1) — the other court's rows stay where they are
@@ -84,13 +93,18 @@ export const QcBirdsEye: React.FC<{
             <div className="qcv-be-rows" data-qcv="be-rows">
               <i className="qcv-be-line" data-qcv="be-line" aria-hidden="true" />
               {g.rows.map((r) => (
-                <div
+                /* ⚠️ A ROW OPENS THE EXPANDED VIEW, NOT THE CARD IN THE RAIL (§6.4) — the rail is
+                   where you LOOK at the shape of things; opening a query here would replace the very
+                   view you are reading with the thing you were reading it about. */
+                <button
                   key={r.id}
+                  type="button"
                   className={`qcv-be-row${eyeFaded(r, focus) ? " qcv-be-row--fade" : ""}${r.group === "watch" ? " qcv-be-row--watch" : ""}`}
                   data-qcv="be-row"
                   data-id={r.id}
                   data-court={r.court}
                   title={r.title}
+                  onClick={() => onExpand(r.id)}
                 >
                   <span className="qcv-be-who">
                     <i className="qcv-be-ini" aria-hidden="true">{r.row.initials}</i>
@@ -101,7 +115,7 @@ export const QcBirdsEye: React.FC<{
                   </span>
                   <Bar r={r} />
                   <span className={`qcv-be-day${r.day.urgent ? " qcv-be-day--urgent" : ""}`} data-qcv="be-day">{r.day.text}</span>
-                </div>
+                </button>
               ))}
             </div>
           </section>

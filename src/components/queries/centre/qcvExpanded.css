@@ -1,0 +1,96 @@
+/**
+ * Query Centre v65 §7 / §8.1 / §8.2 — the Birds-eye view grown.
+ *
+ * ⚠️ THE CARD'S BOX IS SET FROM JS (`expandedBox`), so this sheet states no top, left, width or
+ * height. What it owns is everything that does not depend on where the shell's window is.
+ */
+@import "./qcvPage.css";
+
+.qcv-xp { position: fixed; inset: 0; z-index: 80; }
+/* §7 — the page behind dims; it keeps its scroll position, which the stage lock guarantees */
+.qcv-xp-back { position: absolute; inset: 0; background: rgba(28, 19, 15, 0.22); }
+
+/**
+ * ⚠️ THE REVEAL IS A `clip-path`, NOT A SLIDE OR A FADE. It uncovers the card from the rail's own
+ * width, which is what says "this is the same card, grown" — a fade would be a NEW card appearing
+ * where the old one was. The 340 is the rail's width and is the one number this sheet restates,
+ * because a `clip-path` cannot read it from the element's own box.
+ */
+.qcv-xp-card {
+  position: absolute; box-sizing: border-box;
+  display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  background: #fff; border: 0; border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 24px 60px -24px rgba(28, 19, 15, 0.45);
+  clip-path: inset(0 0 0 calc(100% - 340px) round 20px);
+  transition: clip-path 380ms cubic-bezier(0.2, 0.75, 0.2, 1);
+}
+.qcv-xp-card--in { clip-path: inset(0 round 20px); }
+@media (prefers-reduced-motion: reduce) {
+  .qcv-xp-card { transition: none; clip-path: inset(0 round 20px); }
+}
+
+/**
+ * §8 — the header ground is ONE BLOCK. The tray's colour runs the full width and carries on down
+ * through the date row (phase 5), so the two read as a single coloured band with the rows starting
+ * on white beneath a single hairline. 18px top corners, square at the bottom, because the block
+ * continues rather than ending.
+ */
+.qcv-xp-tray {
+  flex: none; position: relative;
+  display: grid; grid-template-columns: var(--qcv-xp-lcol, 260px) max-content minmax(0, 1fr);
+  column-gap: 28px; align-items: center;
+  padding: 16px 18px 16px 0;
+  background: #f5f1eb; border-radius: 18px 18px 0 0;
+}
+
+/* §8.1 — the Courier's column: the names column's width, from the tray's top to the date row's foot */
+.qcv-xp-col { position: relative; align-self: stretch; min-height: 258px; }
+.qcv-xp-art {
+  display: block; width: 100%; height: 100%; object-fit: contain;
+  padding: 4px 12px 50px 22px; box-sizing: border-box;
+  filter: drop-shadow(0 12px 16px rgba(28, 19, 15, 0.2));
+}
+/**
+ * ⚠️ THE ✕ IS THE TOPMOST THING AT ITS OWN CENTRE. It sits inside the Courier's column and over the
+ * drawing; a `z-index` below the art would make the one way out unclickable while looking perfectly
+ * present. The measurement asserts it with `elementFromPoint`, not by reading this rule.
+ */
+.qcv-xp-x {
+  position: absolute; top: 12px; left: 12px; z-index: 3;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: #fff; border: 1px solid rgba(28, 19, 15, 0.14); color: var(--qcv-ink);
+  font-size: 13px; line-height: 1; cursor: pointer;
+  box-shadow: 0 2px 6px rgba(28, 19, 15, 0.14);
+}
+.qcv-xp-x:hover { background: var(--qcv-parchment); }
+.qcv-xp-x:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
+
+/**
+ * §8.2 — the title, vertically centred on the Courier's column. `align-items: center` on the tray
+ * is what does it, and the measurement compares the two midpoints rather than trusting the word.
+ */
+.qcv-xp-ttl {
+  margin: 0; font-family: var(--qcv-type) !important; font-weight: 400; font-size: 44px; line-height: 1.1;
+  color: var(--qcv-ink); white-space: nowrap;
+}
+
+/* §8.2 — three stat cards, right-aligned in what is left */
+.qcv-xp-stats { display: flex; justify-content: flex-end; gap: 10px; min-width: 0; }
+.qcv-xp-stat {
+  flex: 1 1 0; max-width: 180px; box-sizing: border-box;
+  padding: 12px 12px 11px; border-radius: 14px;
+  background: #fff; border: 1px solid rgba(28, 19, 15, 0.09);
+}
+/* ⚠️ OVERDUE IS THE INK CARD — the one group the reader is meant to look at first */
+.qcv-xp-stat--overdue { background: var(--qcv-ink); border-color: var(--qcv-ink); }
+.qcv-xp-stat--overdue .qcv-xp-n, .qcv-xp-stat--overdue .qcv-xp-nm { color: #f5f1eb; }
+.qcv-xp-stat--overdue .qcv-xp-hint { color: rgba(245, 241, 235, 0.7); }
+.qcv-xp-stat--none { opacity: 0.45; }
+.qcv-xp-n { display: block; font-family: var(--qcv-serif); font-weight: 600; font-size: 34px; line-height: 1; color: var(--qcv-ink); }
+/* ⚠️ THE NAME AND THE HINT MAY WRAP (§8.2) — at 1280 the cards are 87px wide and "Watch and wait"
+   does not fit on one line. A `nowrap` here would make the card a horizontal scrollbar. */
+.qcv-xp-nm { display: block; margin-top: 6px; font-family: var(--qcv-type); font-size: 12.5px; line-height: 1.25; color: var(--qcv-ink); }
+.qcv-xp-hint { display: block; margin-top: 4px; font-family: var(--qcv-mono); font-size: 7px; line-height: 1.5; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-45); }
+
+/* the rows' region — the date row and the rows themselves arrive in phase 5 */
+.qcv-xp-body { flex: 1 1 auto; min-height: 0; overflow: auto; border-top: 1px solid rgba(28, 19, 15, 0.1); }

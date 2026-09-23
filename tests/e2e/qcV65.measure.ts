@@ -672,6 +672,140 @@ test("§6 · Birds-eye — the line is where the dates are, the rows scroll, and
   is("birdseye", "…and only the other court", after.courts, ["agent"]);
 });
 
+/**
+ * ⚠️ §7 · THE EXPANDED CARD — AND THE CLAIM ONLY A RENDER CAN MAKE IS THAT IT IS THE SAME CARD. Its
+ * top, bottom and right must be the rail's OWN, to the pixel, or the growth reads as a new card
+ * appearing where the old one was. The unit lock proves the arithmetic; this proves the two boxes.
+ */
+test("§7 · the expanded view — the rail's own box grown leftwards, and the ✕ on top of everything", async ({ page }) => {
+  await openApp(page, 1440, 860);
+  const railBefore = await page.evaluate(() => {
+    const r = [...document.querySelectorAll("[data-qcv='rail']")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect();
+    const w = document.querySelector(".ws-window")!.getBoundingClientRect();
+    const px = (n: number) => Math.round(n * 10) / 10;
+    return { top: px(r.top), bottom: px(r.bottom), right: px(r.right), left: px(r.left), winLeft: px(w.left), winRight: px(w.right) };
+  });
+  await page.locator("[data-qcv='be-expand']").first().click();
+  /* ⚠️ PAST THE 380ms REVEAL BEFORE MEASURING — an element mid-animation reports its ANIMATED box,
+     which is this repo's own trap: 674 on one run and 680 on the next, from a scaled entrance. */
+  await page.waitForTimeout(700);
+  const xp = await page.evaluate(() => {
+    const c = document.querySelector("[data-qcv='xp-card']") as HTMLElement | null;
+    const w = document.querySelector(".ws-window")!.getBoundingClientRect();
+    if (!c) return null;
+    const b = c.getBoundingClientRect();
+    const px = (n: number) => Math.round(n * 10) / 10;
+    const col = c.querySelector("[data-qcv='xp-col']")!.getBoundingClientRect();
+    const ttl = c.querySelector("[data-qcv='xp-title']")!.getBoundingClientRect();
+    const x = c.querySelector("[data-qcv='xp-close']")!.getBoundingClientRect();
+    /* ⚠️ THE ✕ MUST BE THE TOPMOST THING AT ITS OWN CENTRE — a stacking claim `getComputedStyle`
+       cannot make. Its rect is on screen by construction (it is inside the card we just measured). */
+    const atX = document.elementFromPoint(x.left + x.width / 2, x.top + x.height / 2);
+    return {
+      top: px(b.top), bottom: px(b.bottom), right: px(b.right), left: px(b.left), width: px(b.width),
+      winLeft: px(w.left), winRight: px(w.right),
+      clip: getComputedStyle(c).clipPath,
+      col: px(col.width), colMid: px(col.top + col.height / 2), ttlMid: px(ttl.top + ttl.height / 2),
+      onTop: atX ? (atX.closest("[data-qcv='xp-close']") ? "close" : (atX.getAttribute("data-qcv") ?? atX.tagName)) : "nothing",
+      stats: [...c.querySelectorAll("[data-qcv='xp-stat']")].map((e) => ({ g: e.getAttribute("data-group"), n: (e.querySelector(".qcv-xp-n")?.textContent ?? "").trim(), w: Math.round(e.getBoundingClientRect().width) })),
+      backdrop: getComputedStyle(document.querySelector("[data-qcv='xp-back']")!).backgroundColor,
+    };
+  });
+  yes("expanded", "the card opened", !!xp, JSON.stringify(xp));
+  record({ area: "expanded", what: "the card, the rail it grew from, and the window", got: { xp, railBefore }, want: "reported" });
+
+  /* ⚠️ THE THREE IT KEEPS — this is what says "the same card" */
+  near("expanded", "top — the rail's own", xp?.top, railBefore.top, 0.6);
+  near("expanded", "bottom — the rail's own", xp?.bottom, railBefore.bottom, 0.6);
+  near("expanded", "right — the rail's own", xp?.right, railBefore.right, 0.6);
+  /* …and the one it takes: the window's left plus the same 22px gutter the right pays */
+  near("expanded", "left — the WINDOW's left + 22", xp ? xp.left - xp.winLeft : null, 22, 0.6);
+  near("expanded", "…and the right gutter is the same 22", xp ? xp.winRight - xp.right : null, 22, 0.6);
+  /* the precondition that makes those mean something: it really did grow */
+  yes("expanded", `it is wider than the rail (${xp?.width} vs 340)`, (xp?.width ?? 0) > 400, String(xp?.width));
+  is("expanded", "the reveal has finished — the card is fully uncovered", xp?.clip, "inset(0px round 20px)");
+
+  is("expanded", "⚠️ the ✕ is the topmost thing at its own centre", xp?.onTop, "close");
+  near("expanded", "§8.2 · the title's midpoint IS the Courier column's", xp?.ttlMid, xp?.colMid, 1);
+  near("expanded", "§8.1 · the column is the names column's width", xp?.col, 260, 0.6);
+  is("expanded", "§8.2 · three stat cards", xp?.stats.length, 3);
+  is("expanded", "…in the groups' order", xp?.stats.map((s) => s.g), ["overdue", "upcoming", "watch"]);
+  is("expanded", "the page behind dims", xp?.backdrop, "rgba(28, 19, 15, 0.22)");
+  await page.screenshot({ path: resolve(OUT, "expanded-1440.png") });
+
+  /**
+   * ⚠️ THE PAGE BEHIND DOES NOT SCROLL — AND THE INSTRUMENT MATTERS. Setting `scrollTop` by hand
+   * moves an `overflow: hidden` element perfectly happily: the CSS lock stops a READER, not a
+   * script, so a probe that assigns `scrollTop` is asking the wrong question and reports a correct
+   * lock as broken. The claims are that the lock is ON both scrollers, and that a WHEEL over the
+   * backdrop moves neither.
+   */
+  const locked = await page.evaluate(() => {
+    const port = document.querySelector(".qcv-page")?.closest(".wpg-scroll") as HTMLElement | null;
+    const stage = document.getElementById("app-stage-scroll");
+    return { port: port ? getComputedStyle(port).overflow : "absent", stage: stage ? getComputedStyle(stage).overflow : "absent", at: port?.scrollTop ?? -1 };
+  });
+  is("expanded", "the page's own scroller is locked", locked.port, "hidden");
+  is("expanded", "…and the shell's stage with it", locked.stage, "hidden");
+  await page.mouse.move(700, 500);
+  await page.mouse.wheel(0, 400);
+  await page.waitForTimeout(300);
+  const after200 = await page.evaluate(() => (document.querySelector(".qcv-page")?.closest(".wpg-scroll") as HTMLElement | null)?.scrollTop ?? -1);
+  is("expanded", "…so a wheel over the backdrop moves nothing", after200, locked.at);
+
+  /* Escape closes it, and the rail is as it was */
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(600);
+  const after = await page.evaluate(() => {
+    const c = document.querySelectorAll("[data-qcv='xp-card']").length;
+    const r = [...document.querySelectorAll("[data-qcv='rail']")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect();
+    const px = (n: number) => Math.round(n * 10) / 10;
+    return { cards: c, top: px(r.top), right: px(r.right), width: px(r.width), showing: document.querySelector("[data-qcv='rail']")?.getAttribute("data-showing") };
+  });
+  is("expanded", "Escape closes it", after.cards, 0);
+  is("expanded", "…and the rail is exactly as it was", [after.top, after.right, after.width], [railBefore.top, railBefore.right, 340]);
+  is("expanded", "…still showing the Birds-eye view", after.showing, "birdseye");
+  /* ⚠️ AND ESCAPE DID NOT ALSO CLOSE A QUERY — one key, one act. Nothing was open, so the test is
+     that the URL is untouched; the case that a query survives the calendar is §8.11's, in phase 5. */
+  is("expanded", "…and it wrote nothing to the URL", await page.evaluate(() => location.search.includes("q=")), false);
+
+  /* a rail ROW opens it too, and does NOT open the query in the rail */
+  await page.locator("[data-qcv='be-row']").first().click();
+  await page.waitForTimeout(700);
+  const fromRow = await page.evaluate(() => ({
+    card: document.querySelectorAll("[data-qcv='xp-card']").length,
+    showing: document.querySelector("[data-qcv='rail']")?.getAttribute("data-showing"),
+    url: location.search,
+  }));
+  is("expanded", "a rail row opens the expanded view", fromRow.card, 1);
+  is("expanded", "⚠️ …and does NOT open the query in the rail", fromRow.showing, "birdseye");
+  is("expanded", "…nor write ?q=", fromRow.url.includes("q="), false);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(500);
+});
+
+/**
+ * ⚠️ §1 · `?view=calendar` IS THE ONE MEANING THE PARAM KEPT, and phase 1 parked the reading for
+ * exactly this. Now that there is something to open, it opens it — which is the half of §1 that
+ * could not be measured until today.
+ */
+test("§1 · ?view=calendar opens the Birds-eye view expanded, and `cal` is its alias", async ({ page }) => {
+  for (const v of ["calendar", "cal"]) {
+    await openApp(page, 1440, 860, `?view=${v}`);
+    await page.waitForTimeout(700);
+    const open = await page.evaluate(() => ({ card: document.querySelectorAll("[data-qcv='xp-card']").length, url: location.search }));
+    is("§1 retirement", `?view=${v} opens it expanded`, open.card, 1);
+    is("§1 retirement", `?view=${v} — and the app still leaves the URL alone`, open.url, `?view=${v}`);
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(400);
+  }
+  /* …and every other value still lands on the ledger with nothing expanded */
+  for (const v of ["list", "grid", "board"]) {
+    await openApp(page, 1440, 860, `?view=${v}`);
+    is("§1 retirement", `?view=${v} opens nothing`, await page.evaluate(() => document.querySelectorAll("[data-qcv='xp-card']").length), 0);
+  }
+});
+
 test("§4 · the courts — three tiles, framed, and a tile deals exactly what it counts", async ({ page }) => {
   await openApp(page, 1440, 860);
   const tiles = await page.evaluate(() => {

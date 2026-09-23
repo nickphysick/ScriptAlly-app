@@ -10,7 +10,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { LEDGER_MIN, QcRail, RAIL_INSET_X, RAIL_INSET_Y, RAIL_RESERVE, RAIL_STACK_BELOW, RAIL_W, railBox } from "./QcRail";
+import { LEDGER_MIN, QcRail, RAIL_INSET_X, RAIL_INSET_Y, RAIL_RESERVE, RAIL_STACK_BELOW, RAIL_W, expandedBox, railBox } from "./QcRail";
 import { QcBirdsEye } from "./QcBirdsEye";
 
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
@@ -21,7 +21,7 @@ const shellCss = read("src/components/shell/workspaceShell.css");
 
 /** A window capsule 1128 wide, 16px down the viewport, in a 1440 × 860 window. */
 /** The app's real window at 1440 × 860 with the sidebar open: 1128 wide, measured. */
-const WIN = { top: 96, right: 1418, height: 700, width: 1128 };
+const WIN = { top: 96, left: 290, right: 1418, height: 700, width: 1128 };
 
 describe("⚠️ the rail is placed from the WINDOW's measured box, never the viewport", () => {
   /**
@@ -74,7 +74,7 @@ describe("⚠️ the rail is placed from the WINDOW's measured box, never the vi
 
 describe("the card, rendered", () => {
   const rail = (over: Partial<React.ComponentProps<typeof QcRail>> = {}) =>
-    renderToStaticMarkup(<QcRail birdsEye={<QcBirdsEye rows={[]} nowMs={Date.now()} />} {...over} />);
+    renderToStaticMarkup(<QcRail birdsEye={<QcBirdsEye rows={[]} nowMs={Date.now()} onExpand={() => {}} />} {...over} />);
 
   it("⚠️ it renders UNPLACED before the first measurement, and that state must look finished", () => {
     /* server-rendered, so no layout effect has run: this is the one frame a reader can see */
@@ -94,13 +94,11 @@ describe("the card, rendered", () => {
        mounted, is two scroll positions and two things claiming the same 340px. */
     expect(withCard, "the Birds-eye view is still mounted behind the query").not.toContain('data-qcv="railcal"');
   });
-  it("⚠️ no ⤢ until there is something for it to open (phase 4)", () => {
-    /* a disabled control advertises a thing that does not exist; a dead one is worse — it looks
-       live and does nothing, the fault this repo records against an undo that restores nothing.
-       The focus toggle's three buttons ARE live and are what is left. */
-    const html = rail();
-    expect(html, "the ⤢ arrives with the view it opens").not.toContain('data-qcv="be-expand"');
-    expect(html.split("<button").length - 1, "only the focus toggle's three").toBe(3);
+  it("⚠️ the ⤢ is drawn now that there is something for it to open (§6.4)", () => {
+    /* it was absent through phase 3 on the standing rule that a control arrives with its
+       destination: drawn before one exists it is either disabled — advertising a thing that is not
+       there — or dead, which is worse. */
+    expect(rail()).toContain('data-qcv="be-expand"');
   });
 });
 
@@ -214,5 +212,37 @@ describe("the court tiles", () => {
     expect(renderToStaticMarkup(<QcCourts tiles={courtTiles([])} onCourt={() => {}} loading />).split("disabled=").length - 1).toBe(3);
     /* ⚠️ THE GHOST IS NOT A BUTTON AT ALL — a placeholder that can be pressed deals an empty hand */
     expect(renderToStaticMarkup(<QcCourtsSkeleton />)).not.toContain("<button");
+  });
+});
+
+/* ── §7 · the expanded card's box ───────────────────────────────────────────────────────────── */
+
+describe("⚠️ the expanded card is the rail's own box, grown leftwards", () => {
+  it("it keeps the top, the bottom and the right, and takes the window's left plus the same gutter", () => {
+    const rail = railBox(WIN, 1440)!;
+    const wide = expandedBox(WIN, 1440)!;
+    /* ⚠️ THE THREE IT KEEPS ARE WHAT MAKE THE GROWTH READ AS THE SAME CARD rather than a new one
+       appearing where it was. Only `left` is new. */
+    expect([wide.top, wide.height, wide.right]).toEqual([rail.top, rail.height, rail.right]);
+    expect(wide.left).toBe(WIN.left + RAIL_INSET_X);
+    /* …and it is inset by the SAME gutter on both sides of the window: its left edge sits 22 inside
+       the window's left, and its right edge 22 inside the window's right */
+    expect(wide.left - WIN.left, "the left gutter").toBe(RAIL_INSET_X);
+    expect(WIN.right - (1440 - wide.right), "the right gutter").toBe(RAIL_INSET_X);
+    /* and the width is whatever is between them — never a third number */
+    expect(Math.round(wide.left + wide.width)).toBe(Math.round(1440 - wide.right));
+  });
+  it("⚠️ it is derived from the WINDOW, not from `100vw` — or a collapsed sidebar runs it off the screen", () => {
+    /* the same viewport with the sidebar shut gives a wider window and a wider card; a width of
+       `100vw − 224 − 44` would be the same number in both, and 184px too wide in the second */
+    const open = expandedBox(WIN, 1440)!;
+    const shut = expandedBox({ ...WIN, left: WIN.left - 184, width: WIN.width + 184 }, 1440)!;
+    expect(shut.width - open.width).toBe(184);
+    expect(shut.left).toBe(open.left - 184);
+  });
+  it("it refuses the same readings the rail refuses", () => {
+    expect(expandedBox({ ...WIN, height: 0 }, 1440)).toBeNull();
+    expect(expandedBox({ ...WIN, width: NaN }, 1440)).toBeNull();
+    expect(expandedBox({ ...WIN, width: RAIL_STACK_BELOW - 1 }, 1440)).toBeNull();
   });
 });

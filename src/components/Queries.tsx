@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useLayoutEffect, useState, useEffect, useRef, useMemo } from "react";
+import React, { useCallback, useLayoutEffect, useState, useEffect, useRef, useMemo } from "react";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
@@ -81,11 +81,12 @@ import { QueryEmptyFeatures } from "./queries/QueryEmptyFeatures";
 import { heroBookTitle } from "./queries/queryEmptyCopy";
 import { gridEmptyKind, waitingSummary, waitingLine } from "../lib/queryGridEmpty";
 import "./queries/queryViewSwitch.css"; /* position-pinned, as above: the Contact list and To-do still mount the switch */
-import { QcCentre, clearQcViewMemory } from "./queries/centre/QcCentre";
+import { QcCentre, clearQcViewMemory, readBirdsEyeOpen } from "./queries/centre/QcCentre";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcRail } from "./queries/centre/QcRail";
 import { QcBirdsEye } from "./queries/centre/QcBirdsEye";
+import { QcExpanded } from "./queries/centre/QcExpanded";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
 import { QcOpenCard, QcOpenCardSkeleton } from "./queries/centre/QcOpenCard";
 import { useQcLoad } from "./queries/centre/useQcLoad";
@@ -2125,6 +2126,20 @@ export const Queries: React.FC<{
    * removed, so no later reader can find it and assume it means something.
    */
   useEffect(() => { clearQcViewMemory(); }, []);
+  /**
+   * ⚠️ §7 · THE EXPANDED BIRDS-EYE VIEW, AND `?view=calendar` IS ITS ONE URL. `readBirdsEyeOpen` is
+   * the reading phase 1 left parked for exactly this; it is read ONCE, at mount, and never written
+   * back — the param is an instruction about how to open, not a place the app keeps its state.
+   *
+   * ⚠️ `beFocus` IS THE QUERY A RAIL ROW ARRIVED FROM, and it is separate from `?q`. Highlighting a
+   * row inside the calendar is not opening that query: `?q` opens the card in the rail, and these
+   * two must not be the same thing or leaving the calendar would leave a query open behind it.
+   */
+  const [beOpen, setBeOpen] = useState<boolean>(() => {
+    try { return readBirdsEyeOpen(window.location.search); } catch { return false; }
+  });
+  const [beFocus, setBeFocus] = useState<string | null>(null);
+  const openBirdsEye = useCallback((focusId: string | null) => { setBeFocus(focusId); setBeOpen(true); }, []);
 
   /* ── v11 · THE SENTENCE'S STATE: one filter, one manuscript scope, one sort ──
      These REPLACE the toolbar's model (turn / status ticks / facets / needs-overdue / sort key) on
@@ -6254,6 +6269,9 @@ export const Queries: React.FC<{
                 onCourt={(key, el) => setQcFan({ key, origin: el })}
               />
             )}
+            overlay={beOpen ? (
+              <QcExpanded rows={qcScoped} nowMs={Date.now()} focusId={beFocus} onClose={() => { setBeOpen(false); setBeFocus(null); }} />
+            ) : null}
             fan={qcFan && (() => {
               const hand = tileHand(qcScoped, qcFan.key);
               const card = courtTiles(qcScoped).find((c) => c.key === qcFan.key);
@@ -6312,7 +6330,7 @@ export const Queries: React.FC<{
              */
             rail={(
               <QcRail
-                birdsEye={<QcBirdsEye rows={qcScoped} nowMs={Date.now()} loading={showGridSkeleton} />}
+                birdsEye={<QcBirdsEye rows={qcScoped} nowMs={Date.now()} loading={showGridSkeleton} onExpand={openBirdsEye} />}
                 openCard={!qcDocked ? undefined : showGridSkeleton ? (selectedQueryId ? <QcOpenCardSkeleton /> : undefined) : (panelRow && activeQuery && qcById.get(activeQuery.id)) ? (
                   <QcOpenCard
                   row={qcById.get(activeQuery.id)!}

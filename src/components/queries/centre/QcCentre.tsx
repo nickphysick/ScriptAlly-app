@@ -80,6 +80,11 @@ export const QcCentre: React.FC<{
   rail: React.ReactNode;
   /** The open fan, if a court tile has dealt one. It portals itself; this is only its mount. */
   fan?: React.ReactNode;
+  /**
+   * The Birds-eye view, expanded (§7). Like the fan it portals itself, so this is only its mount —
+   * but it needs one: rendered inside the rail it would unmount the moment the rail showed a query.
+   */
+  overlay?: React.ReactNode;
   /** Clear the selection: Escape, and the card's own ✕. */
   onClearSelection?: () => void;
   /** The ledger. */
@@ -93,7 +98,7 @@ export const QcCentre: React.FC<{
   onExport: () => void;
   canExport: boolean;
   entering: boolean;
-}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, sentence, courts, rail, fan, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering }) => {
+}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, sentence, courts, rail, fan, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const el = rootRef.current;
@@ -174,6 +179,7 @@ export const QcCentre: React.FC<{
       </div>
       {rail}
       {fan}
+      {overlay}
       <div className="qcv-sr" role="status" aria-live="polite" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
         {loading ? "" : "Queries loaded"}
       </div>

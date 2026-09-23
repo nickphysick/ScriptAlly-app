@@ -34,7 +34,7 @@ const mkQ = (over: Partial<Query> = {}): Query => ({
 });
 const agent = (over: Partial<Agent> = {}): Agent => ({ id: "a1", userId: "u", name: "Jonathan Marsh", agency: "The Marsh Agency", responseTimeWeeks: 8, ...over } as Agent);
 const rowsOf = (qs: Query[]) => buildQcRows(qs, [agent()], [], NOW);
-const view = (qs: Query[] = [mkQ()]) => renderToStaticMarkup(<QcBirdsEye rows={rowsOf(qs)} nowMs={NOW} />);
+const view = (qs: Query[] = [mkQ()]) => renderToStaticMarkup(<QcBirdsEye rows={rowsOf(qs)} nowMs={NOW} onExpand={() => {}} />);
 
 describe("the view, rendered", () => {
   it("head, focus, axis, rows, legend — in that order and nothing else", () => {
@@ -87,7 +87,7 @@ describe("the view, rendered", () => {
   it("⚠️ nothing out with an agent says so, rather than drawing an empty track", () => {
     expect(view([])).toContain("Nothing is out with an agent.");
     /* …and while it is loading it says nothing at all, rather than claiming the account is empty */
-    expect(renderToStaticMarkup(<QcBirdsEye rows={[]} nowMs={NOW} loading />)).not.toContain("Nothing is out");
+    expect(renderToStaticMarkup(<QcBirdsEye rows={[]} nowMs={NOW} loading onExpand={() => {}} />)).not.toContain("Nothing is out");
   });
 });
 
