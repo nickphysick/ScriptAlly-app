@@ -40,17 +40,6 @@
   padding-bottom: 90px;
   min-width: 0;
 }
-/**
- * ⚠️ THE OVERVIEW PAYS THE GUTTER AND NOT THE VIEWS' 90px. That 90 is air at the end of a SCROLLING
- * list; the Overview is sized to the fold, so it is 90px of nothing beneath a portal that already
- * fits — and it forced the page to scroll by 31px to reach it while the tiles sat 59px clear of the
- * fold. Both numbers are the same mistake: room reserved below a thing measured to end above.
- *
- * ⚠️ AND `useAvailable` READS THIS VALUE rather than knowing it, so the two cannot come apart: the
- * portal's height is `scroller bottom − its own top − THIS padding − the gutter`, and changing the
- * number here moves the tiles by exactly as much as it moves the page's foot.
- */
-.qcv-page[data-view="overview"] { padding-bottom: 22px; }
 .qcv-own { font-family: var(--qcv-serif); }
 /* ⚠️ THE RESET REACHES `span`/`p`/`div`/`label` ONLY — the elements brand.tsx names — and NOT `button`
    (every button here names its own face, and the shared `.sp-inkpill` must keep its). It stops at
@@ -100,34 +89,6 @@
 /* the action row: both pills, 16px under the facts line, left-aligned */
 .qcv-hr { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
 
-/**
- * "← Back to overview" — the way out of a view, at the head's top right, its baseline level with
- * the title.
- *
- * ⚠️ ABSOLUTE, SO IT TAKES NO ROW OF ITS OWN. The head is a block and the title is 48px; in the
- * flow this would either push the facts line down or sit on a fourth line. Its containing block is
- * `.qcv-head`'s `position: relative`.
- */
-.qcv-backov {
-  position: absolute; top: 18px; right: 0;
-  display: inline-flex; align-items: center; gap: 8px; padding: 0 0 3px;
-  font-family: var(--qcv-type); font-size: 16px; line-height: 1; color: var(--qcv-ink);
-  text-decoration: none; border-bottom: 1.5px dashed rgba(28, 19, 15, 0.4); white-space: nowrap;
-}
-.qcv-backov span { transition: transform 0.18s ease; }
-.qcv-backov:hover { border-bottom-style: solid; }
-.qcv-backov:hover span { transform: translateX(-3px); }
-.qcv-backov:focus-visible { outline: 2px solid var(--qcv-ink); outline-offset: 4px; border-radius: 3px; }
-@media (prefers-reduced-motion: reduce) {
-  .qcv-backov span { transition: none; }
-  .qcv-backov:hover span { transform: none; }
-}
-/* ⚠️ IF THE TITLE'S LINE CANNOT HOLD IT, IT MOVES LEVEL WITH THE ACTION PILLS rather than wrapping
-   (§2). Wrapping would put it under the title and over the facts line, which is the one place on
-   this head with no room. */
-@media (max-width: 1100px) {
-  .qcv-backov { top: auto; bottom: 14px; }
-}
 /**
  * "Record a response" — the anthracite pill's twin in size and face, in the card's own clothes: a
  * white fill, a white rim and the burgundy frame, drawn as two inset shadows so the button's box is

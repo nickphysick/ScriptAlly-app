@@ -2,8 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * QcCentre — the Query Centre's browsing page (v11): head, summary row, the sentence and the view
- * switch, then the stage — the view's frame with the open query docked to its right.
+ * QcCentre — the Query Centre's page (v65): head, the sentence, then the stage — the ledger's frame
+ * with the open query docked to its right.
  *
  * It lays the page out and owns nothing about queries: the rows, the filter, the sort, the selection
  * and every handler arrive from `Queries.tsx`, which is still the one place they are derived.
@@ -20,67 +20,40 @@ import "../../shell/primitives.css";
 import "./qcvPage.css";
 import "./qcvEnter.css";
 
-/**
- * ⚠️ `overview` IS A VIEW IN THE STATE AND NOT IN `QC_VIEWS` (v21 §1). The three entries below are
- * the things the PORTAL offers and the crumb can name; the Overview is where you are when you are
- * in none of them. Putting it in the table would have given the portal a tile that goes where you
- * already are, and the crumb a fourth segment naming the page it already names.
- */
-export type QcView = "overview" | "list" | "calendar" | "grid";
-
-/**
- * ⚠️ v21 (21 Sep): THE VIEWS ARE RENAMED, LABELS ONLY — the ruled table is **Ledger** (was List) and
- * the card grid is **List** (was Grid). The internal ids and the `?view=` values are deliberately
- * unchanged: a URL somebody bookmarked, and every `?view=grid` in the measurement suite, still mean
- * what they meant. Renaming the ids to match the labels would have been the tidy-looking change and
- * would have broken both, silently, for a word.
- *
- * ⚠️ AND THE ORDER IS THE PORTAL'S — Ledger, List, Calendar. It is the order the Overview's three
- * tiles are drawn in, and this table is what draws them, so the two cannot come apart.
- */
-export type QcPortalView = Exclude<QcView, "overview">;
-export const QC_VIEWS: readonly { key: QcPortalView; label: string }[] = [
-  { key: "list", label: "Ledger" }, { key: "grid", label: "List" }, { key: "calendar", label: "Calendar" },
-];
-/** The label a view is called by, for the crumb and the portal. The Overview names nothing. */
-export const qcViewLabel = (v: QcView): string => QC_VIEWS.find((x) => x.key === v)?.label ?? "";
 export const DOCK_MIN_COLUMN = 900;
 
 /**
- * ⚠️ VIEW MEMORY IS GONE (v21 §1.1), AND THE KEY IS CLEARED RATHER THAN LEFT (`clearQcViewMemory`).
- * The page used to remember your last view per device, so `/queries` opened wherever you happened
- * to leave it. v21 lands you in one known place; a key still sitting in `localStorage` would be a
- * fact about the reader that nothing reads, waiting to be honoured again by whoever finds it and
- * assumes it means something. So: the URL is the ONLY source, and the old key is removed on load.
+ * ⚠️ THE VIEWS ARE GONE (v65 §1). There is no Overview, no portal, no view switch and no card grid:
+ * the LEDGER is the page, and the calendar is the rail's Birds-eye view rather than a state the
+ * whole page can be in. `QcView`, `QC_VIEWS`, `qcViewLabel`, `DEFAULT_QC_VIEW` and `readQcView` are
+ * deleted rather than left exported — a table naming three views, on a page with one, is the kind
+ * of thing the next reader builds a switch from.
  *
- * ⚠️ `?view=` IS STILL A REFLECTION, NOT A ROUTE — written with `replaceState` by `Queries.tsx`, for
- * the reasons recorded there. What has changed is that it is now the only input.
+ * ⚠️ VIEW MEMORY STAYS DEAD, AND THE KEY IS STILL CLEARED (`clearQcViewMemory`). The page used to
+ * remember your last view per device. A key still sitting in `localStorage` would be a fact about
+ * the reader that nothing reads, waiting to be honoured again by whoever finds it and assumes it
+ * means something — so it is removed on load, and goes on being removed now that there is not even
+ * a view for it to name.
  */
 export const QC_VIEW_KEY = "sa.qcView";
-/**
- * The view the param-less URL means.
- *
- * ⚠️ ARRIVING AT `/queries` LANDS ON THE OVERVIEW, ALWAYS, unless the URL carries a deep link
- * (`?view=`, `?q=`, `?status=`) — §1.1. This constant is that rule, and `?view=` is written for
- * anything that is not it, so the Overview is the state the URL does not state.
- */
-export const DEFAULT_QC_VIEW: QcView = "overview";
-/**
- * The URL, and nothing else.
- *
- * ⚠️ `?view=board` IS ACCEPTED AND MEANS THE OVERVIEW (§1.2). The Board was retired in v11 and its
- * links were left pointing at a view that no longer exists; landing them on the Overview is the
- * closest honest answer, and it is the same answer anything unknown gets.
- */
-export function readQcView(search: string): QcView {
-  const ok = (v: string | null): v is QcPortalView => v === "list" || v === "calendar" || v === "grid";
-  const fromUrl = new URLSearchParams(search).get("view");
-  return ok(fromUrl) ? fromUrl : DEFAULT_QC_VIEW;
-}
 /** Remove the retired per-device memory, in both stores, so it cannot be honoured again. */
 export function clearQcViewMemory(): void {
   try { localStorage.removeItem(QC_VIEW_KEY); } catch { /* a private window: nothing to clear */ }
   try { sessionStorage.removeItem(QC_VIEW_KEY); } catch { /* ditto */ }
+}
+
+/**
+ * `?view=` IS ACCEPTED AND IGNORED, WITH ONE MEANING LEFT: `calendar` (and the `cal` alias) opens
+ * the page with the Birds-eye view expanded. Every other value — `list`, `grid`, `board`, anything
+ * — is accepted and lands on the ledger, which is where the page lands anyway.
+ *
+ * ⚠️ IT IS READ, NEVER WRITTEN. The old reflection wrote the view back with `replaceState` on every
+ * change; with one page there is nothing to reflect, and a param the app keeps re-asserting is a
+ * second writer on a URL `?q=` already owns. A bookmark still works; the app stops editing it.
+ */
+export function readBirdsEyeOpen(search: string): boolean {
+  const v = new URLSearchParams(search).get("view");
+  return v === "calendar" || v === "cal";
 }
 
 export const QcCentre: React.FC<{
@@ -95,21 +68,9 @@ export const QcCentre: React.FC<{
   logDisabled?: boolean;
   logRef?: React.Ref<HTMLButtonElement>;
   sentence: React.ReactNode;
-  /** The Overview's own body, rendered instead of everything below the head. */
-  overview: React.ReactNode;
-  /** The open fan, if a stat card has dealt one. It portals itself; this is only its mount. */
+  /** The open fan, if a court tile has dealt one. It portals itself; this is only its mount. */
   fan?: React.ReactNode;
-  view: QcView;
-  onView: (v: QcView) => void;
-  /** Leave the view: back to the Overview, clearing any selection. */
-  onBack: () => void;
-  /**
-   * Clear the selection and leave the view where it is (v21 §7).
-   *
-   * ⚠️ SEPARATE FROM `onBack`, THOUGH BOTH CLEAR `?q`. Escape and the card's ✕ mean "close this
-   * query"; Back means "leave this view". Folding them would send a reader to the Overview for
-   * pressing Escape, which is a bigger move than they asked for.
-   */
+  /** Clear the selection: Escape, and the card's own ✕. */
   onClearSelection?: () => void;
   /** The view's body, inside the frame. */
   body: React.ReactNode;
@@ -122,8 +83,7 @@ export const QcCentre: React.FC<{
   onExport: () => void;
   canExport: boolean;
   entering: boolean;
-}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, sentence, overview, fan, view, onView, onBack, onClearSelection, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
-  const inView = view !== "overview";
+}> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, sentence, fan, onClearSelection, body, openCard, docked, onDocked, onStep, onExport, canExport, entering }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const el = rootRef.current;
@@ -138,7 +98,7 @@ export const QcCentre: React.FC<{
 
   return (
     <div ref={rootRef} className={`qcv-page qcv-own${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
-      role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page" data-view={view}>
+      role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page">
       {/* ⚠️ THE ACTIONS ARE A ROW OF THEIR OWN, UNDER THE FACTS LINE (v21 §2) — not one pill on the
           title's line. Two of them now, and a pill beside a 48px title pins the head's height to the
           taller of the two and leaves the second nowhere to go. */}
@@ -156,27 +116,11 @@ export const QcCentre: React.FC<{
             <span>Record a response</span>
           </button>
         </div>
-        {/* ⚠️ A LINK, NOT A BUTTON, AND ONLY INSIDE A VIEW. It is how you leave, and it clears the
-            selection on the way — the same act as the crumb's "Query Centre" segment. */}
-        {inView && (
-          <a
-            className="qcv-backov"
-            data-qcv="back-overview"
-            href="/queries"
-            onClick={(e) => { e.preventDefault(); onBack(); }}
-          >
-            <span aria-hidden="true">←</span> Back to overview
-          </a>
-        )}
       </header>
 
-      {/* ⚠️ THE OVERVIEW REPLACES EVERYTHING BELOW THE HEAD (§4) — no sentence, no view, no docked
-          card, no strip. It is the stat row and the portal. */}
-      {!inView ? overview : <>
-      {/* ⚠️ THERE IS NO VIEW SWITCH (§1.3). The portal's three tiles are how you enter a view, and
-          the back link and the crumb are how you leave — so the segmented control that used to sit
-          at the right of this row is GONE rather than hidden. Anyone re-adding it is adding a
-          second way in, beside a portal whose whole job is to be the first. */}
+      {/* ⚠️ THERE IS NO VIEW SWITCH AND NOTHING TO SWITCH (v65 §1). The ledger IS the page; the
+          calendar is the rail's Birds-eye view. A segmented control here would offer a state the
+          page cannot be in. */}
       <div className="qcv-ctl" data-qcv="ctl">
         {sentence}
       </div>
@@ -213,7 +157,6 @@ export const QcCentre: React.FC<{
       <div className="qcv-foot">
         <button type="button" className="qcv-export" disabled={!canExport || loading} onClick={onExport}>Export CSV</button>
       </div>
-      </>}
       {fan}
       <div className="qcv-sr" role="status" aria-live="polite" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
         {loading ? "" : "Queries loaded"}

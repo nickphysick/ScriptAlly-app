@@ -665,7 +665,8 @@ describe("§4 (quick actions) · no drawer, no desk, no selection — and one co
   it("every anchor mounts the SAME component — the page has exactly one QuickActionPopover", () => {
     expect((page.match(/<QuickActionPopover/g) ?? []).length).toBe(1);
     /* the v11 list and grid carry no controls at all, so neither can grow one */
-    for (const f of ["QcList.tsx", "QcGrid.tsx"]) expect(readFileSync(join(process.cwd(), "src/components/queries/centre", f), "utf8"), `${f} grew its own popover`).not.toContain("QuickActionPopover");
+    /* `QcGrid.tsx` was the second file here and is deleted (v65 §1); the ledger is the one list */
+    for (const f of ["QcList.tsx"]) expect(readFileSync(join(process.cwd(), "src/components/queries/centre", f), "utf8"), `${f} grew its own popover`).not.toContain("QuickActionPopover");
     expect(panel, "the drawer grew its own popover").not.toContain("QuickActionPopover");
     /* the drawer hands the page its BUTTON rather than opening anything; so does the docked card's ⋯ */
     expect(panel).toContain("onSnooze(e.currentTarget)");

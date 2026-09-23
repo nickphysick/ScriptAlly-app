@@ -81,12 +81,10 @@ import { QueryEmptyFeatures } from "./queries/QueryEmptyFeatures";
 import { heroBookTitle } from "./queries/queryEmptyCopy";
 import { gridEmptyKind, waitingSummary, waitingLine } from "../lib/queryGridEmpty";
 import "./queries/queryViewSwitch.css"; /* position-pinned, as above: the Contact list and To-do still mount the switch */
-import { QcCentre, clearQcViewMemory, DEFAULT_QC_VIEW, readQcView, type QcView } from "./queries/centre/QcCentre";
+import { QcCentre, clearQcViewMemory } from "./queries/centre/QcCentre";
 import { QcSentence } from "./queries/centre/QcSentence";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
 import { QcOpenCard, QcOpenCardSkeleton } from "./queries/centre/QcOpenCard";
-import { QcCalendar, QcCalendarSkeleton } from "./queries/centre/QcCalendar";
-import { QcGrid, QcGridSkeleton } from "./queries/centre/QcGrid";
 import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
@@ -94,7 +92,6 @@ import {
   overviewCards, rowsWithdrawn, sortRows, stageFilter,
   type OverviewKey, type QcFilter, type QcSort,
 } from "../lib/qcSummary";
-import { QcOverview } from "./queries/centre/QcOverview";
 import { QcFan } from "./queries/centre/QcFan";
 import { fanCardModel } from "../lib/qcFanModel";
 /* ══ THE CALENDAR VIEW (Run C) — the SAME board To-do draws ═══════════════════════════════════
@@ -2117,32 +2114,14 @@ export const Queries: React.FC<{
   const [needsOverdue, setNeedsOverdue] = useState(false);
 
   /**
-   * ⚠️ THE VIEW IS A RENDERER, NOT A ROUTE — and that is why it is session state with a URL
-   * REFLECTION rather than a router param (colours v2, Phase 2). `?q=` is owned by App.tsx and a
-   * selection navigates; making the view a second owned param would put two writers on one URL.
-   * So: session storage is the source, `?view=` is written back with `replaceState` (which does
-   * not navigate, so it cannot fight the router), and the effect re-asserts it whenever a `?q=`
-   * navigation drops it. Read once on mount, defaulting to Grid.
+   * ⚠️ v65 (23 Sep): THERE IS NO VIEW, SO THERE IS NOTHING TO REFLECT. The ledger is the page and
+   * Birds-eye is the rail's; `?view=` is read for its one surviving meaning (`calendar`/`cal` opens
+   * Birds-eye expanded) and never written. The `replaceState` reflection is GONE — with one page
+   * there is nothing to say, and a param the app keeps re-asserting is a second writer on a URL
+   * `?q=` already owns. `clearQcViewMemory` stays: the retired per-device key must go on being
+   * removed, so no later reader can find it and assume it means something.
    */
-  /* ⚠️ v21 (21 Sep): THE VIEW MEMORY IS GONE AND THE URL IS THE ONLY SOURCE. `readQcView` reads
-     `?view=` and nothing else; `clearQcViewMemory` removes the retired per-device key so a later
-     reader cannot find it and honour it again. Three views, renamed as LABELS only — Ledger (`list`,
-     the default), List (`grid`), Calendar — so every bookmarked `?view=grid` still means the card
-     grid. `?view=` remains a REFLECTION written with `replaceState`, for the reason above. */
-  const [gridView, setGridView] = useState<QcView>(() => {
-    try { return readQcView(window.location.search); } catch { return DEFAULT_QC_VIEW; }
-  });
   useEffect(() => { clearQcViewMemory(); }, []);
-  useEffect(() => {
-    try {
-      const url = new URL(window.location.href);
-      const want = gridView === DEFAULT_QC_VIEW ? null : gridView;
-      if ((url.searchParams.get("view") ?? null) !== want) {
-        if (want) url.searchParams.set("view", want); else url.searchParams.delete("view");
-        window.history.replaceState(window.history.state, "", url.toString());
-      }
-    } catch { /* fine */ }
-  }, [gridView, selectedQueryId]);
 
   /* ── v11 · THE SENTENCE'S STATE: one filter, one manuscript scope, one sort ──
      These REPLACE the toolbar's model (turn / status ticks / facets / needs-overdue / sort key) on
@@ -3491,18 +3470,16 @@ export const Queries: React.FC<{
    */
   const listSince = useMemo(() => {
     const out: Record<string, SinceEvent[]> = {};
-    if (gridView !== "list") return out;
     for (const q of sortedList) {
       const sent = q.dateSent ? new Date(q.dateSent).getTime() : null;
       out[q.id] = sinceThen(activities as never, q.id, Number.isNaN(sent as number) ? null : sent);
     }
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gridView, sortedList, activities]);
+  }, [sortedList, activities]);
 
   const listSentLeaf = useMemo(() => {
     const out: Record<string, CardLeaf | null> = {};
-    if (gridView !== "list") return out;
     for (const q of sortedList) {
       const ms = q.dateSent ? new Date(q.dateSent).getTime() : NaN;
       if (Number.isNaN(ms)) { out[q.id] = null; continue; }
@@ -3511,7 +3488,7 @@ export const Queries: React.FC<{
     }
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gridView, sortedList]);
+  }, [sortedList]);
 
   const gridRows: GridCard[] = sortedList.map((q) => {
     const agent = agents.find((a) => a.id === q.agentId);
@@ -3584,7 +3561,9 @@ export const Queries: React.FC<{
    * branch and the view slot. The summary is taken over `mastheadScopedQueries` — the set the tiles
    * count — and never over the filtered view, which is the thing that has just come to zero.
    */
-  const ghostShowing = !!ghostRow && gridView === "grid";
+  /* ⚠️ THE GHOST CARD WAS THE CARD GRID'S, and the grid is retired (v65 §1) — the ledger draws no
+     placeholder row while a query is being written, so there is never a ghost on screen. */
+  const ghostShowing = false;
   const emptyWaiting = gridRows.length === 0 && queries.length > 0
     ? waitingSummary(qcScoped.map((r) => r.query).map((q) => {
         const ag = agents.find((a) => a.id === q.agentId);
@@ -6249,7 +6228,8 @@ export const Queries: React.FC<{
             sentence={
               <QcSentence
                 loading={showGridSkeleton}
-                calendar={gridView === "calendar"}
+                /* Birds-eye is the rail's view, not a state this sentence can be in (v65 §1) */
+                calendar={false}
                 filter={qcFilter}
                 count={qcVisible.length}
                 options={filterOptions(qcScoped)}
@@ -6258,16 +6238,6 @@ export const Queries: React.FC<{
                 onSort={setQcSort}
                 scope={qcScopeMenu}
                 scopeTitle={qcScopeTitle}
-              />
-            }
-            overview={
-              <QcOverview
-                cards={overviewCards(qcScoped, Date.now())}
-                loading={showGridSkeleton}
-                /* ⚠️ A STAT CARD DEALS; IT DOES NOT FILTER (§1.4). The element it was pressed from
-                   is captured so the hand deals FROM it and focus returns TO it. */
-                onCard={(key, el) => setQcFan({ key, origin: el })}
-                onView={setGridView}
               />
             }
             fan={qcFan && (() => {
@@ -6286,21 +6256,15 @@ export const Queries: React.FC<{
                   withdrawnNote={wd > 0 ? `+${wd} withdrawn, not shown` : null}
                   origin={qcFan.origin}
                   model={(row) => fanCardModel(row, manuscripts.find((m) => m.id === row.manuscriptId)?.title ?? null, () => {})}
-                  onPick={(id) => { setQcFan(null); setQcFilter("all"); setGridView("list"); onOpenQuery?.(id); }}
+                  onPick={(id) => { setQcFan(null); setQcFilter("all"); onOpenQuery?.(id); }}
                   onSeeAll={() => {
                     setQcFan(null);
                     setQcFilter(qcFan.key === "closed" ? "closed" : stageFilter(qcFan.key));
-                    setGridView("list");
                   }}
                   onClose={() => setQcFan(null)}
                 />
               );
             })()}
-            view={gridView}
-            onView={setGridView}
-            /* ⚠️ LEAVING A VIEW CLEARS THE SELECTION. `?q=` is App.tsx's, so this goes through the
-               page's one route out rather than writing the URL here. */
-            onBack={() => { onSelectView?.("cards"); setGridView("overview"); }}
             onClearSelection={() => onSelectView?.("cards")}
             docked={qcDocked}
             onDocked={setQcDocked}
@@ -6351,7 +6315,7 @@ export const Queries: React.FC<{
             ) : null}
             body={
               showGridSkeleton ? (
-                gridView === "list" ? <QcListSkeleton /> : gridView === "calendar" ? <QcCalendarSkeleton /> : <QcGridSkeleton />
+                <QcListSkeleton />
               ) : emptyKind === "filtered" ? (
                 /* FILTERED TO ZERO, WITH NOTHING WAITING ON THE WRITER — the card, and only where its
                    headline is true. Its line is counted over the SCOPED set, the one the sentence's
@@ -6369,15 +6333,8 @@ export const Queries: React.FC<{
                   Nothing matches.
                   <button type="button" onClick={clearQcFilter}>Show all queries</button>
                 </p>
-              ) : gridView === "list" ? (
-                <QcList rows={qcVisible} selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} nowMs={Date.now()} />
-              ) : gridView === "calendar" ? (
-                /* ⚠️ THE SAME FRAME, THE SAME DOCKED CARD: selecting a bar does exactly what selecting
-                   a row does. The TRACK is set by the scoped set so it does not jump as the filter
-                   narrows; the LANES are what the sentence shows. */
-                <QcCalendar rows={qcVisible} trackRows={qcScoped} selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} nowMs={Date.now()} />
               ) : (
-                <QcGrid rows={qcVisible} selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} nowMs={Date.now()} />
+                <QcList rows={qcVisible} selectedId={selectedQueryId} onOpen={(id) => onOpenQuery?.(id)} nowMs={Date.now()} />
               )
             }
           />

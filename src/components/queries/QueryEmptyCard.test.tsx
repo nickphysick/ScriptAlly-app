@@ -100,7 +100,9 @@ describe("the page puts each card only in the slot the selector names", () => {
     expect(card).toContain('kind="filtered"');
     /* ⚠️ RETARGETED (v11): "clear" is the SENTENCE's filter now; the scope stays, as it always did */
     expect(card).toContain("onClear={clearQcFilter}");
-    const none = sliceBetween(page, 'emptyKind === "nomatch" ? (', 'gridView === "list" ? (');
+    /* ⚠️ RETARGETED (v65 §1): the end anchor was the view fork, and there is one view. The ledger
+       is what follows the no-match line now, so the slice ends where it begins. */
+    const none = sliceBetween(page, 'emptyKind === "nomatch" ? (', "<QcList rows={qcVisible}");
     expect(none).toContain('className="qcv-none"');
     expect(none).not.toContain("QueryEmptyCard");
   });

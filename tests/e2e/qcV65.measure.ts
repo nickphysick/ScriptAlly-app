@@ -35,9 +35,9 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { resolve } from "node:path";
 import { ensureSignedIn, openRoute } from "./measure";
 
-const OUT = resolve("test-results/qc-v21");
+const OUT = resolve("test-results/qc-v65");
 const REPORT = resolve(OUT, "report.json");
-const REF = "file://" + resolve("design-refs/query-centre-v21.html");
+const REF = "file://" + resolve("design-refs/query-centre-v65.html");
 const TOL = 2;
 const MIN_ASSERTIONS = 60;
 
@@ -70,25 +70,20 @@ function seen(area: string, key: string) { const r = load(); (r.tally[area] ??= 
 type Sel = Record<string, string>;
 const APP = (name: string) => `[data-qcv="${name}"]`;
 const APP_SEL: Sel = Object.fromEntries([
-  "head", "head-title", "head-line", "head-cta", "back-overview",
-  "overview", "ov-stats", "ov-card", "ov-portal", "ov-tile",
+  "head", "head-title", "head-line", "head-cta",
   "fan", "fan-deck", "fan-card", "fan-title",
   "ctl", "sentence",
   "stagegrid", "ledger", "open", "open-band", "open-foot", "open-action",
   "list-head", "row", "row-chip", "row-stand", "row-sent", "row-date",
-  "cal-bar", "cal-box", "cal-axis", "cal-group", "cal-lane", "cal-seg", "ledger-frame",
-  "tile", "tile-band",
+  "ledger-frame",
 ].map((n) => [n, APP(n)]));
 const REF_SEL: Sel = {
   "head": ".head", "head-title": ".head h1", "head-line": ".head .facts", "head-cta": ".head .inkpill",
-  "back-overview": ".backov",
-  "overview": "#ovpage", "ov-stats": ".ovstats", "ov-card": ".ovs", "ov-portal": ".vt3", "ov-tile": ".vt",
   "fan": "#fan", "fan-deck": "#fan .deck", "fan-card": "#fan .deck > *", "fan-title": "#fan .fh b",
   "ctl": ".ctl", "sentence": ".sentence",
   "stagegrid": ".stage", "ledger": ".ledger", "open": ".open", "open-band": ".open .bd", "open-foot": ".open .ft", "open-action": ".open .ft button",
   "list-head": ".cols", "row": "#list .row", "row-chip": "#list .row .chip", "row-stand": "#list .row .st", "row-sent": "#list .row .mat", "row-date": "#list .row .date",
-  "cal-bar": ".calbar", "cal-box": ".cal", "cal-axis": ".axis", "cal-group": ".grp2", "cal-lane": ".lane", "cal-seg": ".bar:not(.hist)", "ledger-frame": ".ledger > .frame",
-  "tile": ".tile", "tile-band": ".tile .bd",
+  "ledger-frame": ".ledger > .frame",
 };
 
 /** Runs IN THE PAGE. A real function (no template literal), so no escape is eaten on the way in. */
@@ -113,20 +108,51 @@ function readAll(arg: { sel: Record<string, string>; root: string | null }) {
 type Reading = { boxes: Record<string, { n: number; x: number; y: number; w: number; h: number; r: number; b: number } | null>; vw: number; vh: number };
 
 /**
- * ⚠️ THE REF LANDS ON ITS OVERVIEW, AS THE APP DOES (§1.1), so every case that compares a VIEW must
- * enter one first. Before v21 the mockup opened straight into the ledger and no prep was needed;
- * without this the ref's `.ledger`, `.cols` and `#list .row` are simply absent and `need()` would
- * report the app's probes as the missing ones.
+ * ⚠️ THE REF IS ONE PAGE, AND `body.one` IS WHAT MAKES IT ONE. The mockup still carries v21's views,
+ * portal, compact strip and back link in its DOM and hides them with `body.one … { display: none
+ * !important }` (its line 1134), applied unconditionally on load. So there is no view to pick and
+ * no tab to click — and a prep function that clicked one would resolve to a HIDDEN element and wait
+ * out the whole test timeout, which is how seven minutes were lost to this ref's sibling.
+ *
+ * ⚠️ AND EVERY ROW, TILE AND BAR IN IT CARRIES `data-i`. A bare `[data-i]` still matches something
+ * hidden; anything that needs a row scopes to the visible section first.
  */
-const toView = (v: "list" | "cal" | "grid") => async (p: Page) => { await p.click(`.vt3 .vt[data-v='${v}']`); await p.waitForTimeout(500); };
-/** …and §7 again: the ref opens a view with nothing selected too, so its open card must be ASKED for. */
+const refPick = async (p: Page) => { await p.click(".one-l [data-i]"); await p.waitForTimeout(500); };
 /**
- * ⚠️ SCOPED TO THE VISIBLE VIEW. The ref keeps all three views in the DOM and hides two, and EVERY
- * row, tile and bar carries `data-i` — so a bare `[data-i]` resolves to a hidden list row and
- * Playwright waits out the whole test timeout for it to become visible. Seven minutes, reported as
- * a click that would not land.
+ * The ref's own frame, read rather than assumed: the mode, the hidden furniture, and the two tracks
+ * of `body.one .onegrid`. Separate from `readRef` because it answers about the REF's construction,
+ * not about a box the app is compared against.
  */
-const toViewPicked = (v: "list" | "cal" | "grid") => async (p: Page) => { await toView(v)(p); await p.click(`.view.v-${v} [data-i]`); await p.waitForTimeout(500); };
+async function readRefRaw(page: Page, w: number, h: number) {
+  await page.setViewportSize({ width: w, height: h });
+  await page.goto(REF);
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForTimeout(1600);
+  return page.evaluate(() => {
+    const drawn = (sel: string) => [...document.querySelectorAll(sel)].filter((e) => (e as HTMLElement).getBoundingClientRect().height > 0).length;
+    const grid = document.querySelector(".onegrid") as HTMLElement | null;
+    /* ⚠️ THE RAIL IS MEASURED, NOT PARSED OUT OF THE TEMPLATE. `gridTemplateColumns` computes to
+       used values with `minmax()` left in place in some states, so splitting it on whitespace gives
+       three tokens for a two-track grid and `Number("316px")` is NaN either way. The rail's box is
+       the claim; the declaration is only how it is spelled. */
+    const rail = document.querySelector(".rail") as HTMLElement | null;
+    const left = document.querySelector(".one-l") as HTMLElement | null;
+    const d = document.body.dataset;
+    return {
+      one: document.body.classList.contains("one"),
+      data: { stat: d.stat, rc: d.rc, rl: d.rl, xe: d.xe, xa: d.xa, xl: d.xl, ms: d.ms, dc: d.dc, ct: d.ct, ln: d.ln, pb: d.pb, sel: d.sel },
+      hidden: { views: drawn(".views"), portal: drawn("#ovpage .vt3"), sum: drawn(".sum"), backov: drawn(".backov") },
+      railTrack: rail ? Math.round(rail.getBoundingClientRect().width * 10) / 10 : null,
+      leftCol: left ? Math.round(left.getBoundingClientRect().width * 10) / 10 : null,
+      railTop: rail ? Math.round(rail.getBoundingClientRect().top * 10) / 10 : null,
+      railBottom: rail ? Math.round((innerHeight - rail.getBoundingClientRect().bottom) * 10) / 10 : null,
+      railRight: rail ? Math.round((innerWidth - rail.getBoundingClientRect().right) * 10) / 10 : null,
+      railSticky: rail ? getComputedStyle(rail).position : null,
+      gutter: grid ? parseFloat(getComputedStyle(grid).columnGap) : null,
+      h1: parseFloat(getComputedStyle(document.querySelector(".head h1")!).fontSize),
+    };
+  });
+}
 async function readRef(page: Page, w: number, h: number, prep?: (p: Page) => Promise<void>): Promise<Reading> {
   await page.setViewportSize({ width: w, height: h });
   await page.goto(REF);
@@ -159,14 +185,13 @@ function listTemplate() {
 }
 
 /**
- * ⚠️ A VIEW IS ALWAYS ASKED FOR BY URL NOW (v21 §1.1). The per-device memory is gone and `/queries`
- * lands on the OVERVIEW, so the old seeding of `sa.qcView` did not merely stop working — it would
- * have left every view case measuring the Overview and reporting its probes as absent. `openOverview`
- * is the other door, and the two are separate functions so a case cannot open the wrong one by
- * forgetting an argument.
+ * ⚠️ THERE IS ONE DOOR NOW (v65 §1) — `/queries`, and nothing else. The Overview is retired, so is
+ * the card grid, and `?view=` is accepted and ignored; a case that opened a view by URL would be
+ * asking for a state the page cannot be in. Where a case needs to prove the param is ignored it
+ * passes `search` and asserts what it gets, rather than trusting the door to have honoured it.
  */
-async function openApp(page: Page, w: number, h: number, view: "list" | "calendar" | "grid" = "list") {
-  await openRoute(page, `/queries?view=${view}`, { width: w, height: h });
+async function openApp(page: Page, w: number, h: number, search = "") {
+  await openRoute(page, `/queries${search}`, { width: w, height: h });
   /* the page has landed when it says it is no longer busy */
   await expect.poll(() => page.evaluate(() => {
     const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0);
@@ -174,16 +199,6 @@ async function openApp(page: Page, w: number, h: number, view: "list" | "calenda
   }), { timeout: 30_000, message: "the page root (.qcv-page) never rendered, or never stopped being busy" }).toBe("false");
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(1300); /* past the entrance, which is done inside 800ms */
-}
-/** The page with no view asked for: the Overview (§4). */
-async function openOverview(page: Page, w: number, h: number) {
-  await openRoute(page, "/queries", { width: w, height: h });
-  await expect.poll(() => page.evaluate(() => {
-    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0);
-    return p ? p.getAttribute("aria-busy") : "absent";
-  }), { timeout: 30_000, message: "the page root never rendered, or never stopped being busy" }).toBe("false");
-  await page.evaluate(() => document.fonts.ready);
-  await page.waitForTimeout(1300);
 }
 async function readApp(page: Page): Promise<Reading> {
   const r = await page.evaluate(readAll, { sel: APP_SEL, root: ".qcv-page" });
@@ -222,24 +237,43 @@ test("0 · the report is this run's", async () => {
   expect(existsSync(REPORT)).toBe(false);
 });
 
-test("the ref reads as the brief says it does (1440×860) — or every comparison below is against the wrong box", async ({ page }) => {
-  const ref = await readRef(page, 1440, 860, toViewPicked("list"));
-  const want: [string, "w" | "h", number][] = [
-    ["head-cta", "w", 154], ["head-cta", "h", 50],
-    ["ledger", "w", 756], ["open", "w", 396],
-    ["open-foot", "h", 80], ["open-action", "h", 38], ["list-head", "h", 29], ["row", "h", 67], ["row-chip", "w", 32], ["row-date", "w", 46],
-  ];
-  /* ⚠️ `ctl.h` (42) AND `open-band.h` (37) ARE DROPPED FROM THIS TABLE, not re-baselined: they were
-     the v11 brief's figures and the v21 ref reads 27.4 and 47. A number I would have had to take
-     from the ref in order to check the ref against is not a check. Both are still compared
-     app-against-ref in their own cases, which is the claim that matters; this table's job is to
-     catch a wrong SELECTOR, and ten probes do that. */
-  /* ⚠️ TWO OF THESE ARE SET BY TEXT, and the brief's figures for them came from another browser: the
-     head's button reads a few pixels off its stated width with Special Elite demonstrably loaded.
-     This check exists to catch a wrong SELECTOR, which is out by tens of pixels, so text-set widths get
-     6px. The app is compared with the ref as read HERE, in one browser, at the usual 2. */
-  const TEXT_SET = new Set(["head-cta.w"]);
-  for (const [n, d, v] of want) near("ref", `${n}.${d}`, need(ref, "ref", n)[d], v, TEXT_SET.has(`${n}.${d}`) ? 6 : TOL);
+/**
+ * ⚠️ THE ORACLE IS CHECKED BEFORE ANYTHING IS CHECKED AGAINST IT, and for v65 that starts with the
+ * MODE. The mockup carries every earlier version's markup and selects v65 with one class and a
+ * dozen data-attributes, set unconditionally on load (its line 3086): `one` plus `stat=k · rc=b ·
+ * rl=4 · xe=next · xa=time · xl=6 · ms=b · dc=a · ct=b · ln=due · pb=side · sel=band`. Those are the
+ * mockup's OPTIONS and this combination is the design. A run that read the ref before the script
+ * had applied them would be reading a different page with the same name — which is the "plausible
+ * numbers about the wrong subject" failure this file's header exists to prevent.
+ */
+test("the ref is in v65's mode, and its frame reads as its own sheet states", async ({ page }) => {
+  const r = await readRefRaw(page, 1440, 860);
+  is("ref", "body.one — the class that hides v21's views, portal, strip and back link", r.one, true);
+  is("ref", "the mockup's chosen options", r.data, { stat: "k", rc: "b", rl: "4", xe: "next", xa: "time", xl: "6", ms: "b", dc: "a", ct: "b", ln: "due", pb: "side", sel: "band" });
+  /* ⚠️ THE RETIRED FURNITURE IS IN THE DOM AND HIDDEN, so every probe below must be filtered by
+     visibility. A selector that resolves is not a selector that is drawn. */
+  is("ref", "…and the retired furniture is present but not drawn", r.hidden, { views: 0, portal: 0, sum: 0, backov: 0 });
+  /**
+   * ⚠️ AND THE RAIL IS THE WORKED EXAMPLE OF WHY NOTHING HERE IS READ FROM SOURCE. This mockup is
+   * cumulative: twenty-eight version blocks (v4 → v64), each overriding the last, and the rail is
+   * declared FOUR times. Its first declaration is a 316px sticky grid track (line 1163); its last
+   * (line 1800, the v46 block) is `position: fixed; top: 16; bottom: 16; right: 22; width: 340`,
+   * with the grid collapsed to one column and its gap to zero. Taking the first cost one run —
+   * which is the cheap version of this mistake, and the reason every number below is MEASURED.
+   */
+  near("ref", "the rail's width", r.railTrack, 340, 1);
+  is("ref", "the rail is placed, not tracked", r.railSticky, "fixed");
+  /* ⚠️ THESE THREE ARE THE GO-AHEAD'S PLACEMENT, and in the ref they are against the VIEWPORT. In
+     the app they are against the WINDOW CAPSULE's measured box — the house law that a constant
+     offset from the viewport is a guess at everything above the element. Read here so phase 4
+     compares the app with a number taken from the oracle rather than from prose. */
+  near("ref", "the rail's top inset", r.railTop, 16, 0.5);
+  near("ref", "the rail's bottom inset", r.railBottom, 16, 0.5);
+  near("ref", "the rail's right inset", r.railRight, 22, 0.5);
+  is("ref", "the grid is one column (the rail left it)", r.gutter, 0);
+  /* the h1 is declared three times too; 50px is the last (v46, line 1806) */
+  near("ref", "the head's h1", r.h1, 50, 1);
+  record({ area: "ref", what: "the v65 frame at 1440×860", got: r, want: "reported" });
 });
 
 test("top bar — + New is gone app-wide and Give feedback is anthracite", async ({ page }) => {
@@ -258,8 +292,65 @@ test("top bar — + New is gone app-wide and Give feedback is anthracite", async
   is("topbar", "the keycap stays ink", r.keyBg, "rgb(28, 19, 15)");
 });
 
+/**
+ * ⚠️ PHASE 1'S OWN CLAIM: THE VIEWS ARE GONE, AND `?view=` IS ACCEPTED AND IGNORED. The unit lock
+ * proves `readBirdsEyeOpen` and the absent exports; only the rendered page proves that no URL the
+ * app has ever written lands anywhere but the ledger, and that the app does not EDIT the URL it was
+ * given. The second half is the one a unit test cannot see: the old reflection wrote `?view=` back
+ * with `replaceState` on every change, so a param left untouched is the evidence it is gone.
+ */
+test("§1 · the views are retired — every ?view= lands on the same ledger, and the URL is left alone", async ({ page }) => {
+  const read = async () => page.evaluate(() => {
+    const pg = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0);
+    if (!pg) return null;
+    const drawn = (sel: string) => [...pg.querySelectorAll(sel)].filter((e) => (e as HTMLElement).getBoundingClientRect().height > 0).length;
+    const first = pg.querySelector("[data-qcv='row']");
+    return {
+      search: location.search,
+      rows: drawn("[data-qcv='row']"),
+      first: first ? (first.textContent ?? "").trim().slice(0, 40) : null,
+      ledger: drawn("[data-qcv='ledger']"),
+      /* the four retired doors */
+      portal: drawn("[data-qcv='ov-portal'], [data-qcv='ov-tile']"),
+      stats: drawn("[data-qcv='ov-stats'], [data-qcv='ov-card']"),
+      back: drawn("[data-qcv='back-overview']"),
+      views: drawn("[data-qcv='views']"),
+      tiles: drawn(".qcv-tiles, .qcv-tile"),
+      cal: drawn(".qcv-cal-box"),
+    };
+  });
+
+  await openApp(page, 1440, 860);
+  const plain = await read();
+  yes("§1 retirement", "the page rendered", !!plain);
+  is("§1 retirement", "the ledger is drawn with no view asked for", plain?.ledger, 1);
+  yes("§1 retirement", `the ledger has rows (${plain?.rows}) — or every comparison below is vacuous`, (plain?.rows ?? 0) > 3, String(plain?.rows));
+  for (const [what, got] of [["the Overview's portal", plain?.portal], ["the Overview's stat row", plain?.stats], ["the back link", plain?.back], ["the view switch", plain?.views], ["the card grid's tiles", plain?.tiles]] as const) {
+    is("§1 retirement", `${what} is not drawn`, got, 0);
+  }
+
+  /**
+   * ⚠️ EVERY VALUE THE APP HAS EVER WRITTEN, plus the two it never did. `grid` and `list` are in
+   * bookmarks and in 11 measurement files; `board` was retired in v11 and its links were left
+   * pointing at it; `overview` was v21's landing. All four are accepted and all four land here.
+   */
+  for (const v of ["list", "grid", "board", "overview", "calendar"]) {
+    await openApp(page, 1440, 860, `?view=${v}`);
+    const got = await read();
+    is("§1 retirement", `?view=${v} — the search string the app left behind`, got?.search, `?view=${v}`);
+    is("§1 retirement", `?view=${v} — the same ledger`, got?.ledger, 1);
+    is("§1 retirement", `?view=${v} — the same rows`, got?.rows, plain?.rows);
+    is("§1 retirement", `?view=${v} — the same first row`, got?.first, plain?.first);
+    is("§1 retirement", `?view=${v} — no portal`, got?.portal, 0);
+    /* ⚠️ `calendar` IS THE ONE VALUE THAT STILL MEANS SOMETHING, and Birds-eye is not built yet
+       (phase 3). It lands on the ledger like the rest until it is — reported, not asserted, so the
+       day it opens expanded this case says so rather than going quietly green. */
+    if (v === "calendar") record({ area: "§1 retirement", what: "?view=calendar — Birds-eye boxes drawn (0 until phase 3)", got: got?.cal, want: "reported" });
+  }
+});
+
 test("head and control row — 1440×860", async ({ page }) => {
-  const ref = await readRef(page, 1440, 860, toView("list"));
+  const ref = await readRef(page, 1440, 860);
   await openApp(page, 1440, 860);
   const app = await readApp(page);
   sameSize("head", app, ref, "head-cta", ["w", "h"]);
@@ -279,18 +370,20 @@ test("head and control row — 1440×860", async ({ page }) => {
     const vis = (s: string) => [...p.querySelectorAll(s)].filter((e) => e.getBoundingClientRect().height > 0).length;
     const wpg = p.closest(".wpg")!;
     return { masthead: [...wpg.querySelectorAll(".wsh, .wpg-chrome, .wpg-bar")].filter((e) => e.getBoundingClientRect().height > 0).length, tiles: vis(".qct-tile, .sts-tile"), toolbar: vis(".qcc-tb"), search: vis(".qcc-tb-search"),
-      views: vis("[data-qcv='views']"), strip: vis("[data-qcv='sum']"), back: vis("[data-qcv='back-overview']"),
+      views: vis("[data-qcv='views']"), strip: vis("[data-qcv='sum']"), back: vis("[data-qcv='back-overview']"), tilesOv: vis("[data-qcv='ov-tile']"),
       windowBg: getComputedStyle(document.querySelector(".ws-window")!).backgroundColor, title: getComputedStyle(p.querySelector("[data-qcv='head-title']")!).fontFamily, sentence: getComputedStyle(p.querySelector("[data-qcv='pk-filter']")!).fontFamily, cta: getComputedStyle(p.querySelector("[data-qcv='head-cta'] span")!).fontFamily };
   });
   is("control", "the old masthead, its chrome slab and its collapsed bar", gone.masthead, 0);
   is("control", "the five tiles", gone.tiles, 0);
   is("control", "the Filter / Group / Sort toolbar", gone.toolbar, 0);
-  /* ⚠️ ASSERTED ABSENT, NOT RESTYLED (§1.3 and §6). The portal's three tiles are the only way into
-     a view and the Overview is the only summary; a switch or a strip drawn here would be a second
-     of each, which is what both removals exist to prevent. */
+  /* ⚠️ ASSERTED ABSENT, NOT RESTYLED. The switch and the compact strip went in v21; the Overview,
+     its portal and the back link go in v65 §1 — there is one page, so there is nowhere to switch
+     to, nothing to summarise above the ledger and nowhere for a back link to lead. Every one of
+     these is a second door or a second summary, which is what each removal exists to prevent. */
   is("control", "the retired view switch", gone.views, 0);
   is("control", "the retired compact strip", gone.strip, 0);
-  is("control", "…and inside a view, the back link IS drawn", gone.back, 1);
+  is("control", "the retired back link", gone.back, 0);
+  is("control", "the retired Overview portal's tiles", gone.tilesOv, 0);
   is("control", "the window sheet behind the page", gone.windowBg, "rgba(0, 0, 0, 0)");
   for (const [k, f] of [["title", gone.title], ["sentence", gone.sentence], ["log button", gone.cta]] as const) yes("head", `${k} is drawn in the typewriter face, not brand.tsx's`, /Special Elite/.test(f), f);
   await page.screenshot({ path: resolve(OUT, "list-1440.png") });
@@ -345,9 +438,9 @@ test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
     const app = await readApp(page);
     const column = await appColumn(page);
     const refPage = await page.context().newPage();
-    const ref = await readRef(refPage, refWindowFor(column), h, toView("list"));
+    const ref = await readRef(refPage, refWindowFor(column), h);
     /* and the same ref with a query chosen, for everything that only exists once one is */
-    const refPicked = await readRef(refPage, refWindowFor(column), h, toViewPicked("list"));
+    const refPicked = await readRef(refPage, refWindowFor(column), h, refPick);
     await refPage.close();
     const area = `list@${w}`;
     const dated = !!app.boxes["row-date"];
@@ -498,150 +591,6 @@ test("under 900px of column — nothing selects implicitly, and a chosen row ope
   await page.screenshot({ path: resolve(OUT, "narrow-1100-drawer.png") });
 });
 
-test("calendar — expanded and compact, the inset, one bar per stage", async ({ page }) => {
-  const toCal = toView("cal");
-  const ref = await readRef(page, 1440, 860, toCal);
-  await openApp(page, 1440, 860, "calendar");
-  let app = await readApp(page);
-  sameSize("calendar", app, ref, "cal-bar", ["h"]);
-  sameSize("calendar", app, ref, "cal-axis", ["h"]);
-  sameSize("calendar", app, ref, "cal-group", ["h"]);
-  sameSize("calendar", app, ref, "cal-lane", ["h"]);
-  sameSize("calendar", app, ref, "cal-seg", ["h"]);
-  /* ⚠️ THE DOCKED CARD IS NOT MEASURED HERE: nothing is selected on arrival in any view (§7), so on
-     both sides there is no card to measure and "the card is 396 in the calendar too" would be a
-     comparison of two absences. It is the same component the list case measures, after a pick. */
-  const box = need(app, "app", "cal-box"), fr = need(app, "app", "ledger-frame");
-  near("calendar", "the scrolling box is inset 14px from the frame's left (inside its 1px line)", box.x - fr.x - 1, 14, 1);
-  near("calendar", "…and from its right", fr.r - 1 - box.r, 14, 1);
-  near("calendar", "…and from its bottom", fr.b - 1 - box.b, 14, 1);
-  const facts = await page.evaluate(() => {
-    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    const b = p.querySelector("[data-qcv='cal-box']") as HTMLElement;
-    const lanes = [...p.querySelectorAll("[data-qcv='cal-lane']")] as HTMLElement[];
-    const segs = lanes.map((l) => [...l.querySelectorAll("[data-qcv='cal-seg'], [data-qcv='cal-hist']")] as HTMLElement[]);
-    const today = p.querySelector("[data-qcv='cal-today']") as HTMLElement | null;
-    const gaps: number[] = [];
-    for (const s of segs) for (let i = 1; i < s.length; i++) gaps.push(Math.round((s[i].getBoundingClientRect().x - s[i - 1].getBoundingClientRect().right) * 10) / 10);
-    const hist = p.querySelector("[data-qcv='cal-hist']") as HTMLElement | null;
-    return { lanes: lanes.length, maxSegs: Math.max(0, ...segs.map((s) => s.length)), gaps,
-      todayPc: today ? ((today.getBoundingClientRect().x - b.getBoundingClientRect().x) / b.clientWidth) * 100 : null,
-      histOpacity: hist ? getComputedStyle(hist).opacity : null, histOverflow: hist ? getComputedStyle(hist).overflowX : null,
-      groups: [...p.querySelectorAll("[data-qcv='cal-group']")].map((g) => g.getAttribute("data-group")),
-      rings: p.querySelectorAll(".tl-actbtn, .tl-act").length, range: p.querySelector("[data-qcv='cal-range']")?.textContent ?? null };
-  });
-  yes("calendar", "there are lanes (the population)", facts.lanes > 3, String(facts.lanes));
-  near("calendar", "it opens with today 46% of the way across", facts.todayPc, 46, 2);
-  yes("calendar", "some lane has more than one stage — or 'one bar per stage' was never exercised", facts.maxSegs > 1, String(facts.maxSegs));
-  yes("calendar", "4px of daylight wherever the status changes", facts.gaps.length > 0 && facts.gaps.every((g) => g >= 3 && g <= 5.5), JSON.stringify(facts.gaps.slice(0, 8)));
-  is("calendar", "a past stage rests at .42", facts.histOpacity, "0.42");
-  is("calendar", "…and clips with `clip`, never `hidden` (a scroll container kills the sticky label)", facts.histOverflow, "clip");
-  is("calendar", "the To-do board's action rings", facts.rings, 0);
-  yes("calendar", "the range is stated as text", /\d+ \w{3} to \d+ \w{3}/.test(facts.range ?? ""), String(facts.range));
-  await page.screenshot({ path: resolve(OUT, "calendar-expanded-1440.png") });
-
-  /* compact */
-  const refC = await readRef(page, 1440, 860, async (p) => { await toCal(p); await p.click(".dens button[data-d='c']"); await p.waitForTimeout(300); });
-  await openApp(page, 1440, 860, "calendar");
-  await page.locator(".qcv-page [data-qcv='cal-dens'] button", { hasText: "Compact" }).first().click();
-  await page.waitForTimeout(400);
-  app = await readApp(page);
-  sameSize("calendar-compact", app, refC, "cal-lane", ["h"]);
-  sameSize("calendar-compact", app, refC, "cal-seg", ["h"]);
-  await page.screenshot({ path: resolve(OUT, "calendar-compact-1440.png") });
-  /* put the density back — it is remembered per device, and the next case reads expanded */
-  await page.locator(".qcv-page [data-qcv='cal-dens'] button", { hasText: "Expanded" }).first().click();
-});
-
-test("calendar — scrolled back to a lane with three or more stages: a past bar comes to full strength on hover, and its name stays readable", async ({ page }) => {
-  await openApp(page, 1440, 860, "calendar");
-  const found = await page.evaluate(() => {
-    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    const box = p.querySelector("[data-qcv='cal-box']") as HTMLElement;
-    const lanes = [...p.querySelectorAll("[data-qcv='cal-lane']")] as HTMLElement[];
-    const lane = lanes.find((l) => l.querySelectorAll("[data-qcv='cal-hist']").length >= 2);
-    if (!lane) return { stages: Math.max(0, ...lanes.map((l) => l.children.length)), ok: false };
-    const first = lane.querySelector("[data-qcv='cal-hist']") as HTMLElement;
-    box.scrollLeft = Math.max(0, first.offsetLeft - 40);
-    box.scrollTop = Math.max(0, lane.offsetTop - 120);
-    lane.setAttribute("data-e2e", "lane");
-    return { stages: lane.children.length, ok: true };
-  });
-  yes("history", "some lane on this account has three or more stages (or the history was never exercised)", found.ok, JSON.stringify(found));
-  await page.waitForTimeout(400);
-  const hist = page.locator(".qcv-page [data-e2e='lane'] [data-qcv='cal-hist']").first();
-  const rest = await hist.evaluate((e) => ({ op: getComputedStyle(e).opacity, title: e.getAttribute("title") }));
-  is("history", "at rest a past bar is .42", rest.op, "0.42");
-  yes("history", "its title states the stage and its dates", /^[A-Z][^,]+, \d{1,2} [A-Z][a-z]{2} to \d{1,2} [A-Z][a-z]{2}$/.test(rest.title ?? ""), String(rest.title));
-  await hist.hover();
-  await page.waitForTimeout(300);
-  is("history", "hovered, it is at full strength", await hist.evaluate((e) => getComputedStyle(e).opacity), "1");
-  /* the agent's name stays readable when the CURRENT bar starts off-screen: scroll so its left edge is cut */
-  const sticky = await page.evaluate(() => {
-    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    const box = p.querySelector("[data-qcv='cal-box']") as HTMLElement;
-    const cur = p.querySelector("[data-e2e='lane'] [data-qcv='cal-seg']") as HTMLElement;
-    if (cur.offsetWidth < 220) return null;
-    box.scrollLeft = cur.offsetLeft + 60;
-    const b = box.getBoundingClientRect(), nm = (cur.querySelector(".qcv-bar-nm") as HTMLElement).getBoundingClientRect();
-    return { barLeftOfBox: Math.round(cur.getBoundingClientRect().left - b.left), nameLeftOfBox: Math.round(nm.left - b.left) };
-  });
-  if (sticky) { seen("history", "sticky name exercised"); yes("history", "the bar starts off-screen (the precondition)", sticky.barLeftOfBox < 0, JSON.stringify(sticky)); yes("history", "…and the agent's name is still inside the box", sticky.nameLeftOfBox >= 0, JSON.stringify(sticky)); }
-  else seen("history", "sticky name NOT exercised — the current bar is under 220px");
-  await hist.hover().catch(() => {});
-  await page.screenshot({ path: resolve(OUT, "calendar-history-hover-1440.png") });
-});
-
-test("calendar — the sticky heading tracks the box's width through 1280 → 2000 → 1280, and the head does not move", async ({ page }) => {
-  await openApp(page, 1280, 800, "calendar");
-  const stop = async () => page.evaluate(() => {
-    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    const b = p.querySelector("[data-qcv='cal-box']") as HTMLElement, g = p.querySelector("[data-qcv='cal-group']") as HTMLElement, s = p.querySelector("[data-qcv='head']") as HTMLElement;
-    /* ⚠️ THE PAGE HEAD IN PLACE OF THE RETIRED STRIP (§6). The claim was never about the strip: it
-       is that a resize moves the calendar's heading and NOTHING ELSE. The head is what is still
-       above the view, so it is what must hold still. */
-    return { box: b.clientWidth, head: Math.round(g.getBoundingClientRect().width), sum: Math.round(s.getBoundingClientRect().height * 10) / 10 };
-  });
-  const a = await stop();
-  await page.setViewportSize({ width: 2000, height: 800 }); await page.waitForTimeout(500);
-  const b = await stop();
-  await page.setViewportSize({ width: 1280, height: 800 }); await page.waitForTimeout(500);
-  const c = await stop();
-  for (const [n, s] of [["1280", a], ["2000", b], ["1280 again", c]] as const) near("drag", `heading width is the box's visible width at ${n}`, s.head, s.box, 2);
-  yes("drag", "the box really changed width (the precondition)", b.box > a.box + 200, `${a.box} → ${b.box}`);
-  is("drag", "the page head's height at 2000", b.sum, a.sum);
-  is("drag", "the page head's height back at 1280", c.sum, a.sum);
-  is("drag", "the heading's width returns", c.head, a.head);
-  record({ area: "drag", what: "stops", got: { a, b, c }, want: "reported" });
-});
-
-test("grid — two tiles across beside the docked card", async ({ page }) => {
-  for (const [w, h] of [[1440, 860], [1280, 800]] as const) {
-    await openApp(page, w, h, "grid");
-    /* ⚠️ A QUERY IS CHOSEN FIRST, ON BOTH SIDES (§7). Nothing selects itself now, so an unpicked
-       grid is two tiles across the WHOLE stage and an unpicked ref is the same — but the claim
-       being measured is the grid BESIDE the docked card, which neither side draws until asked. */
-    await page.locator(".qcv-page [data-qcv='tile']").first().click();
-    await page.waitForTimeout(600);
-    const app = await readApp(page);
-    const refPage = await page.context().newPage();
-    const ref = await readRef(refPage, refWindowFor(await appColumn(page)), h, toViewPicked("grid"));
-    await refPage.close();
-    sameSize(`grid@${w}`, app, ref, "tile", ["w", "h"]);
-    sameSize(`grid@${w}`, app, ref, "tile-band", ["h"]);
-    sameSize(`grid@${w}`, app, ref, "open", ["w"]);
-    const f = await page.evaluate(() => {
-      const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-      const t = [...p.querySelectorAll("[data-qcv='tile']")] as HTMLElement[];
-      return { n: t.length, across: new Set(t.slice(0, 6).map((e) => Math.round(e.getBoundingClientRect().x))).size, buttons: t.reduce((n, e) => n + e.querySelectorAll("button").length, 0) };
-    });
-    yes(`grid@${w}`, "there are tiles (the population)", f.n > 3, String(f.n));
-    is(`grid@${w}`, "tiles across", f.across, 2);
-    is(`grid@${w}`, "tile actions", f.buttons, 0);
-    await page.screenshot({ path: resolve(OUT, `grid-${w}.png`) });
-  }
-});
-
 test("loading — the frames never move, and nothing is interactive", async ({ page }) => {
   await page.addInitScript(() => { (window as unknown as { __SA_QC_HOLD_MS?: number }).__SA_QC_HOLD_MS = 6000; });
   await openRoute(page, "/queries?view=list", { width: 1440, height: 860 });
@@ -684,21 +633,6 @@ test("loading — the frames never move, and nothing is interactive", async ({ p
 
 });
 
-test("loading — the calendar's skeleton, held at the current density", async ({ page }) => {
-  await page.addInitScript(() => { (window as unknown as { __SA_QC_HOLD_MS?: number }).__SA_QC_HOLD_MS = 6000; });
-  await openRoute(page, "/queries?view=calendar", { width: 1440, height: 860 });
-  const r = await page.evaluate(() => {
-    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    const bars = [...p.querySelectorAll(".qcv-cal-barsk")].map((b) => Math.round(b.getBoundingClientRect().height));
-    return { busy: p.getAttribute("aria-busy"), bars, lanes: p.querySelectorAll("[data-qcv='cal-lane']").length, controls: p.querySelectorAll("[data-qcv='cal-bar'] button").length };
-  });
-  is("loading-cal", "busy while held (the precondition)", r.busy, "true");
-  is("loading-cal", "six lanes of placeholder bars at the expanded bar's height", r.bars, [76, 76, 76, 76, 76, 76]);
-  is("loading-cal", "real lanes", r.lanes, 0);
-  is("loading-cal", "the control row is blank", r.controls, 0);
-  await page.screenshot({ path: resolve(OUT, "skeleton-calendar-1440.png") });
-});
-
 test("the entrance — it runs once when the data lands, is over inside 800ms, and is recorded", async ({ browser }) => {
   /* ⚠️ NO MOTION SUPPRESSION HERE. `openRoute` kills animation for every static measurement; an
      entrance measured under it is measured not happening. This context is its own. */
@@ -719,18 +653,15 @@ test("the entrance — it runs once when the data lands, is over inside 800ms, a
   const after = await visible();
   is("entrance", "running entrance animations 900ms later", after?.running, 0);
   is("entrance", "the entering class came off by timer", after?.entering, false);
-  /* ⚠️ A VIEW CHANGE IS NOW A ROUND TRIP THROUGH THE OVERVIEW (§1.3 retired the switch), which is
-     the harder case for this claim rather than the easier one: leaving a view and entering another
-     is exactly where a re-run of the entrance would be easiest to miss. */
-  await page.locator(".qcv-page [data-qcv='back-overview']").first().click();
+  /* ⚠️ THE VIEW ROUND TRIP IS GONE WITH THE VIEWS (v65 §1). What is left of the claim — that the
+     entrance runs ONCE and does not re-run as the page's state changes — is exercised by selecting a
+     row, which re-renders the stage and is the state change this page actually has. */
+  await page.locator(".qcv-page [data-qcv='row']").first().click();
   await page.waitForTimeout(150);
-  is("entrance", "replayed on the way out to the Overview", (await visible())?.entering, false);
-  await page.locator(".qcv-page [data-qcv='ov-tile'][data-view='grid']").first().click();
-  await page.waitForTimeout(150);
-  is("entrance", "replayed on entering another view", (await visible())?.entering, false);
+  is("entrance", "replayed when a query is opened", (await visible())?.entering, false);
   await page.waitForTimeout(300);
   await ctx.close();
-  record({ area: "entrance", what: "video", got: "test-results/qc-v21/video/*.webm", want: "reported" });
+  record({ area: "entrance", what: "video", got: "test-results/qc-v65/video/*.webm", want: "reported" });
 });
 
 test("reduced motion — no entrance and no pulse", async ({ browser }) => {
@@ -765,95 +696,6 @@ test("reduced motion — no entrance and no pulse", async ({ browser }) => {
 
 /* ══ v21 ══════════════════════════════════════════════════════════════════════════════════════ */
 
-test("the Overview — the stat row, the portal, and everything below the head replaced", async ({ page }) => {
-  await openOverview(page, 1440, 860);
-  const app = await readApp(page);
-  /* ⚠️ THE REF IS OPENED AT THE APP'S OWN COLUMN WIDTH, as every other comparison here is. Read at
-     1440 flat its stat card is 157 against the app's 130 — a card 27px wider fits its name on one
-     line, so the ref's card measured 130.4 and the app's 141.2 and the difference was the MEASURE,
-     not the card. */
-  const refPage = await page.context().newPage();
-  const ref = await readRef(refPage, refWindowFor(await appColumn(page)), 860);
-  await refPage.close();
-  sameSize("overview", app, ref, "ov-card", ["h"]);
-  /* ⚠️ THE TILE'S HEIGHT IS REPORTED, NOT ASSERTED AGAINST THE REF. The ref states a flat 420; the
-     app derives it from the portal's own measured top so the tiles end above the fold, which is the
-     fix that stopped them running 19px past it. At 1440×860 that gives 387. Pinning the ref's 420
-     would be pinning the number the app exists not to use. */
-  record({ area: "overview", what: "ov-tile.h — app (derived from the fold) vs ref (a flat 420)", got: { app: app.boxes["ov-tile"]?.h, ref: need(ref, "ref", "ov-tile").h }, want: "reported" });
-  sameOffset("overview", app, ref, "ov-portal", "overview", ["y"]);
-  const r = await page.evaluate(() => {
-    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    const cards = [...p.querySelectorAll("[data-qcv='ov-card']")] as HTMLElement[];
-    const tiles = [...p.querySelectorAll("[data-qcv='ov-tile']")] as HTMLElement[];
-    const port = p.querySelector("[data-qcv='ov-portal']") as HTMLElement;
-    const fig = (c: HTMLElement) => Number(c.querySelector(".qco-fig")?.textContent ?? "-1");
-    return {
-      view: p.getAttribute("data-view"), url: location.search,
-      cards: cards.map((c) => ({ key: c.dataset.key, n: fig(c), name: c.querySelector(".qco-name")?.textContent, note: c.querySelector(".qco-note")?.textContent })),
-      tiles: tiles.map((t) => ({ view: t.dataset.view, label: t.querySelector(".qco-tname")?.textContent, art: !!t.querySelector("[data-qcv='ov-art']") })),
-      /* ⚠️ THE FOLD IS THE SCROLLER'S, NOT THE WINDOW'S — the whole point of `--qco-avail`. */
-      portalBottom: Math.round(port.getBoundingClientRect().bottom),
-      fold: Math.round((p.closest(".wpg-scroll") as HTMLElement).getBoundingClientRect().top + (p.closest(".wpg-scroll") as HTMLElement).clientHeight),
-      pageScroll: Math.round(p.closest(".wpg-scroll")?.scrollHeight ?? 0) - Math.round(p.closest(".wpg-scroll")?.clientHeight ?? 0),
-      /* what the Overview replaces */
-      sentence: p.querySelectorAll("[data-qcv='sentence'], [data-qcv='ctl']").length,
-      ledger: p.querySelectorAll("[data-qcv='ledger']").length, open: p.querySelectorAll("[data-qcv='open']").length,
-      back: p.querySelectorAll("[data-qcv='back-overview']").length,
-    };
-  });
-  is("overview", "the page says it is the Overview", r.view, "overview");
-  is("overview", "…and the URL says nothing (it is the state the URL does not state)", r.url.includes("view="), false);
-  yes("overview", "seven cards, or eight with a live R&R", r.cards.length === 7 || r.cards.length === 8, JSON.stringify(r.cards.map((c) => c.key)));
-  seen("overview", `${r.cards.length} stat cards`);
-  record({ area: "overview", what: "the stat row", got: r.cards, want: "reported" });
-  is("overview", "the portal's three tiles, in the portal's order", r.tiles.map((t) => t.view), ["list", "grid", "calendar"]);
-  is("overview", "…labelled Ledger, List, Calendar (v21's renames)", r.tiles.map((t) => t.label), ["Ledger", "List", "Calendar"]);
-  yes("overview", "every tile reserves its art slot", r.tiles.every((t) => t.art));
-  /**
-   * ⚠️ THE CLAIM IS REACHABILITY, NOT "IT NEVER SCROLLS" — and the stronger form was wrong.
-   * The tiles have a 330px floor, so below a certain viewport they cannot shrink to fit and the
-   * page scrolls to reach them: measured 1440×860 → 0 scroll with 44px of clearance, 1920×1080 →
-   * 0 with 200, and 1280×800 → the floor binds, the portal runs 2px past the fold and the page
-   * scrolls 24. What the original fault was is UNREACHABLE — 19px past the fold with
-   * `scrollHeight === clientHeight`, so nothing could bring it into view.
-   */
-  const past = Math.max(0, r.portalBottom - r.fold);
-  seen("overview", past === 0 ? "the portal fits above the fold" : "the tile floor binds; the page scrolls to reach it");
-  record({ area: "overview", what: "portal foot vs the scroller's fold, and the scroll available", got: { portalBottom: r.portalBottom, fold: r.fold, past, scroll: Math.max(0, r.pageScroll) }, want: "reported" });
-  yes("overview", `whatever runs past the fold can be scrolled to (${past} past, ${Math.max(0, r.pageScroll)} of scroll)`, past <= Math.max(0, r.pageScroll));
-  for (const [k, n] of [["the sentence and its row", r.sentence], ["the ledger", r.ledger], ["a docked card", r.open], ["the back link", r.back]] as const) {
-    is("overview", `${k}, on the Overview`, n, 0);
-  }
-  await page.screenshot({ path: resolve(OUT, "overview-1440.png") });
-});
-
-test("the Overview → a view → back — the back link and the crumb are the only ways out", async ({ page }) => {
-  await openOverview(page, 1440, 860);
-  const at = () => page.evaluate(() => {
-    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    return { view: p.getAttribute("data-view"), url: location.search, back: p.querySelectorAll("[data-qcv='back-overview']").length,
-      crumb: [...document.querySelectorAll(".ws-crumb a, .ws-crumb b, .ws-crumb span")].map((e) => e.textContent?.trim()).filter(Boolean) };
-  });
-  await page.locator(".qcv-page [data-qcv='ov-tile'][data-view='calendar']").first().click();
-  await page.waitForTimeout(700);
-  const inView = await at();
-  is("portal", "a tile enters its view", inView.view, "calendar");
-  yes("portal", "…and states it in the URL", /view=calendar/.test(inView.url), inView.url);
-  is("portal", "the back link is drawn inside a view", inView.back, 1);
-  record({ area: "portal", what: "the crumb inside a view", got: inView.crumb, want: "reported" });
-  /* choose a query, then leave: Back clears BOTH */
-  await page.locator(".qcv-page [data-qcv='cal-seg']").first().click();
-  await page.waitForTimeout(600);
-  yes("portal", "a query can be chosen in the view", /[?&]q=/.test((await at()).url));
-  await page.locator(".qcv-page [data-qcv='back-overview']").first().click();
-  await page.waitForTimeout(700);
-  const out = await at();
-  is("portal", "Back returns to the Overview", out.view, "overview");
-  is("portal", "…clearing the view", out.url.includes("view="), false);
-  is("portal", "…and the selection with it", out.url.includes("q="), false);
-});
-
 test("§7 — Escape closes the open query and leaves the view where it is", async ({ page }) => {
   await openApp(page, 1440, 860);
   await page.locator(".qcv-page [data-qcv='row']").nth(1).click();
@@ -864,114 +706,20 @@ test("§7 — Escape closes the open query and leaves the view where it is", asy
   await page.waitForTimeout(600);
   const shut = await page.evaluate(() => {
     const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    return { url: location.search, view: p.getAttribute("data-view"), open: p.querySelectorAll("[data-qcv='open']").length,
+    return { url: location.search, portal: p.querySelectorAll("[data-qcv='ov-portal'], [data-qcv='ov-tile']").length, open: p.querySelectorAll("[data-qcv='open']").length,
       ledger: Math.round(p.querySelector("[data-qcv='ledger']")!.getBoundingClientRect().width), stage: Math.round(p.querySelector("[data-qcv='stagegrid']")!.getBoundingClientRect().width) };
   });
   is("escape", "the card closes", shut.open, 0);
   is("escape", "…and ?q= goes with it", shut.url.includes("q="), false);
-  /* ⚠️ THE POINT OF THE SEPARATE HANDLER: Escape must NOT be Back. */
-  is("escape", "the view stays where it was", shut.view, "list");
+  /**
+   * ⚠️ THE POINT OF THE SEPARATE HANDLER SURVIVES THE VIEWS (v65 §1): Escape must not be Back.
+   * It used to be checkable as "the view did not change"; with one page the same claim is that
+   * Escape does not take the reader somewhere else — the ledger is still what is drawn, and no
+   * Overview appears behind it. Retargeted rather than dropped: the two handlers are still separate
+   * and `onClearSelection` is still the one Escape calls.
+   */
+  is("escape", "Escape did not navigate — no Overview behind the closed card", shut.portal, 0);
   near("escape", "…and the ledger takes the stage back", shut.ledger, shut.stage, 1);
-});
-
-test("the fan — a stat card deals its hand, capped at fifteen with a stack card behind", async ({ page }) => {
-  await openOverview(page, 1440, 860);
-  const cards = await page.evaluate(() => [...document.querySelectorAll(".qcv-page [data-qcv='ov-card']")].map((c) => ({ key: (c as HTMLElement).dataset.key, n: Number(c.querySelector(".qco-fig")?.textContent ?? "-1") })));
-  const busiest = cards.filter((c) => c.n > 0).sort((a, b) => b.n - a.n)[0];
-  yes("fan", "some stat card has a hand to deal (the population)", !!busiest && busiest.n > 0, JSON.stringify(cards));
-  await page.locator(`.qcv-page [data-qcv='ov-card'][data-key='${busiest.key}']`).first().click();
-  await page.waitForTimeout(900);
-  const fan = await page.evaluate(() => {
-    const f = document.querySelector("[data-qcv='fan']") as HTMLElement | null;
-    if (!f) return null;
-    /* ⚠️ THE STACK CARD CARRIES THE SAME PROBE AND IS NOT A DEALT CARD. Counting it made the hand
-       16 against a cap of 15 — which read exactly like the cap being off by one. */
-    const deck = ([...f.querySelectorAll("[data-qcv='fan-card']")] as HTMLElement[]).filter((d) => !d.classList.contains("qcf-stack"));
-    const stack = f.querySelector(".qcf-stack") as HTMLElement | null;
-    return { role: f.getAttribute("role"), modal: f.getAttribute("aria-modal"), title: f.querySelector("[data-qcv='fan-title']")?.textContent,
-      dealt: deck.length, stack: stack ? (stack.querySelector("b")?.textContent ?? "") : null,
-      back: f.querySelectorAll("[data-qcv='fan-back']").length,
-      /* ⚠️ THE FANNED CARD IS THE APP'S OWN QUERY CARD, dressed by its host and not forked */
-      isQueryCard: deck.every((d) => !!d.querySelector(".qcard")),
-      /* ⚠️ `offsetWidth`, NOT THE RECT. A fanned card is rotated, so `getBoundingClientRect` returns
-         the SWUNG box — 296 for a 260px card, which reads exactly like the wrong width. The brief's
-         own trap 3, walked into by the case written to check the brief. */
-      w: deck.length ? deck[0].offsetWidth : null,
-      /* ⚠️ VISIBLE tabs. `display: none` is how the row is turned off, and a hidden element still
-         answers `querySelectorAll` — so counting matches measured the markup, not the card. */
-      tabs: deck.reduce((n, d) => n + [...d.querySelectorAll("[role='tab']")].filter((t) => (t as HTMLElement).getBoundingClientRect().height > 0).length, 0),
-      /**
-       * ⚠️ THE FAN'S OWN CHROME, NOT THE CARD'S. The scope fault this checks for is `.qcf`'s rules
-       * painting their fallbacks out here; the CARD is the app's card and renders in the app's body
-       * faces exactly as it does on the dashboard, which is the point of not forking it. A first
-       * version read the card's title, found Source Sans 3 — correct — and reported it as the fault.
-       */
-      face: getComputedStyle(f.querySelector("[data-qcv='fan-title']") as Element).fontFamily,
-      stackFace: f.querySelector(".qcf-stack-face b") ? getComputedStyle(f.querySelector(".qcf-stack-face b") as Element).fontFamily : null,
-      cardFace: deck.length && deck[0].querySelector(".qcard-name") ? getComputedStyle(deck[0].querySelector(".qcard-name") as Element).fontFamily : null,
-    };
-  });
-  yes("fan", "the card dealt a fan", !!fan, JSON.stringify(cards));
-  is("fan", "it is a modal dialogue", [fan?.role, fan?.modal], ["dialog", "true"]);
-  is("fan", "it has its own backdrop element (so a click on a card is not a click on it)", fan?.back, 1);
-  yes("fan", `the header states the full count (${busiest.n})`, (fan?.title ?? "").includes(String(busiest.n)), String(fan?.title));
-  /* ⚠️ THE CAP, AND THE STACK CARD, ASSERTED AGAINST THE STAT CARD'S OWN FIGURE — never a literal */
-  is("fan", "it deals min(count, 15)", fan?.dealt, Math.min(busiest.n, 15));
-  seen("fan", busiest.n > 15 ? "over the cap (a stack card)" : "under the cap (no stack)");
-  if (busiest.n > 15) is("fan", "…and the stack card says how many it is not dealing", fan?.stack, `+${busiest.n - 15} more`);
-  else is("fan", "…and there is no stack card", fan?.stack, null);
-  is("fan", "a dealt card IS the app's query card", fan?.isQueryCard, true);
-  is("fan", "…at 260px, the host's width", fan?.w, 260);
-  is("fan", "…with the popover's tab row off (a dealt card is a glance)", fan?.tabs, 0);
-  yes("fan", "the fan's own chrome resolves the typewriter face out here (the portal carries its own palette)", /Special Elite/.test(fan?.face ?? ""), String(fan?.face));
-  if (fan?.stackFace) yes("fan", "…and so does the stack card", /Special Elite/.test(fan.stackFace), String(fan.stackFace));
-  record({ area: "fan", what: "the CARD keeps the app's own body face, as it does on the dashboard", got: fan?.cardFace, want: "reported" });
-  await page.screenshot({ path: resolve(OUT, `fan-${busiest.key}-1440.png`) });
-  /* Escape closes it and leaves the Overview where it was */
-  await page.keyboard.press("Escape");
-  await page.waitForTimeout(500);
-  const shut = await page.evaluate(() => ({ fan: document.querySelectorAll("[data-qcv='fan']").length, view: [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!.getAttribute("data-view") }));
-  is("fan", "Escape closes it", shut.fan, 0);
-  is("fan", "…and leaves you on the Overview", shut.view, "overview");
-});
-
-test("§8 — a live calendar bar always reaches today, and an overrun is drawn inside it", async ({ page }) => {
-  await openApp(page, 1440, 860, "calendar");
-  const r = await page.evaluate(() => {
-    const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-    const today = p.querySelector("[data-qcv='cal-today']")!.getBoundingClientRect();
-    const segs = [...p.querySelectorAll("[data-qcv='cal-seg']")] as HTMLElement[];
-    return {
-      today: today.left,
-      bars: segs.map((b) => {
-        const box = b.getBoundingClientRect();
-        const over = b.querySelector(".qcv-bar-over") as HTMLElement | null;
-        const cs = getComputedStyle(b);
-        return { status: b.dataset.status, right: box.right, left: box.left, title: b.getAttribute("title") ?? b.getAttribute("aria-label") ?? "",
-          over: over ? Math.round(over.getBoundingClientRect().right - over.getBoundingClientRect().left) : null,
-          overRight: over ? over.getBoundingClientRect().right : null,
-          openLeft: cs.borderLeftStyle === "dashed", openRight: cs.borderRightStyle === "dashed" };
-      }),
-    };
-  });
-  yes("§8", "there are live bars (the population)", r.bars.length > 3, String(r.bars.length));
-  const closed = (b: { status?: string }) => ["Rejected", "Withdrawn", "No Response"].includes(String(b.status));
-  const live = r.bars.filter((b) => !closed(b));
-  yes("§8", "…and some of them are live", live.length > 0, String(live.length));
-  for (const b of live) yes("§8", `a live ${b.status} bar reaches today`, b.right >= r.today - 1.5, `${b.right.toFixed(1)} vs ${r.today.toFixed(1)}`);
-  const past = live.filter((b) => b.over != null);
-  seen("§8", `${past.length} of ${live.length} live bars are past their expected date`);
-  yes("§8", "some bar is past its expected date — or the overrun branch was never entered", past.length > 0, String(past.length));
-  for (const b of past) yes("§8", "the overrun ends at the bar's own end, inside it", Math.abs((b.overRight as number) - b.right) <= 2, JSON.stringify(b));
-  /* the undated stage: a bar that says so, with a dashed LEFT edge */
-  const undated = r.bars.filter((b) => /stage not dated/i.test(b.title));
-  seen("§8", undated.length ? `${undated.length} undated stages` : "no undated stage on this account");
-  for (const b of undated) {
-    yes("§8", "an undated stage's bar says it is undated", /stage not dated/i.test(b.title), b.title);
-    yes("§8", "…and its left edge is dashed, because the start was drawn rather than recorded", b.openLeft, JSON.stringify(b));
-  }
-  record({ area: "§8", what: "bars", got: r.bars.slice(0, 12), want: "reported" });
-  await page.screenshot({ path: resolve(OUT, "calendar-today-1440.png") });
 });
 
 test("StatusDot — the ring set, one grammar, drawn by nothing else", async ({ page }) => {
@@ -1007,8 +755,8 @@ test("§14 · the offsets table — reported at 1440×860 and 1280×800", async 
    * asserted in the cases above, against the ref or against each other.
    */
   for (const [w, h] of [[1440, 860], [1280, 800]] as const) {
-    for (const where of ["overview", "list"] as const) {
-      if (where === "overview") await openOverview(page, w, h); else await openApp(page, w, h);
+    {
+      await openApp(page, w, h);
       const t = await page.evaluate(() => {
         const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
         const base = p.getBoundingClientRect();
@@ -1016,12 +764,10 @@ test("§14 · the offsets table — reported at 1440×860 and 1280×800", async 
         return {
           page: { x: Math.round(base.x), w: Math.round(base.width) },
           title: off("[data-qcv='head-title']"), facts: off("[data-qcv='head-line']"), actions: off("[data-qcv='head-actions']"),
-          back: off("[data-qcv='back-overview']"), stats: off("[data-qcv='ov-stats']"), card1: off("[data-qcv='ov-card']"),
-          portal: off("[data-qcv='ov-portal']"), tile1: off("[data-qcv='ov-tile']"),
           sentence: off("[data-qcv='ctl']"), ledger: off("[data-qcv='ledger']"), row1: off("[data-qcv='row']"), open: off("[data-qcv='open']"),
         };
       });
-      record({ area: "§14 offsets", what: `${where} @ ${w}×${h}`, got: t, want: "reported" });
+      record({ area: "§14 offsets", what: `the page @ ${w}×${h}`, got: t, want: "reported" });
     }
   }
   /* and the one number Nick asked for: where the first Ledger row sits now the strip has gone */

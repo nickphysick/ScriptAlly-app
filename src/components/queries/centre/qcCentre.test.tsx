@@ -17,7 +17,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { DEFAULT_QC_VIEW, DOCK_MIN_COLUMN, QC_VIEWS, QcCentre, qcViewLabel, readQcView } from "./QcCentre";
+import { DOCK_MIN_COLUMN, QcCentre, readBirdsEyeOpen } from "./QcCentre";
 
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const read = (rel: string) => readFileSync(join(process.cwd(), rel), "utf8");
@@ -31,40 +31,42 @@ const rule = (sel: string) => {
 
 const frame = (over: Partial<React.ComponentProps<typeof QcCentre>> = {}) => renderToStaticMarkup(
   <QcCentre loading={false} entering={false} headLine="Every query, from the first letter to the last reply." onLog={() => {}} onRecord={() => {}}
-    sentence={<h2 id="sentence">s</h2>} overview={<div id="overview" />} view="list" onView={() => {}} onBack={() => {}} body={<div id="body" />} openCard={<aside id="card" />}
+    sentence={<h2 id="sentence">s</h2>} body={<div id="body" />} openCard={<aside id="card" />}
     docked onDocked={() => {}} onExport={() => {}} canExport {...over} />,
 );
 
-describe("the view — three of them, renamed, with the URL as the only source", () => {
+describe("⚠️ the views are gone, and `?view=` keeps exactly one meaning (v65 §1)", () => {
   /**
-   * ⚠️ THE LABELS MOVED AND THE IDS DID NOT (v21 §1.2), WHICH IS THE WHOLE CLAIM HERE. The ruled
-   * table is called Ledger and is still `list`; the card grid is called List and is still `grid`.
-   * Asserting the PAIRS rather than the label list is what makes this a lock: a future tidy that
-   * "makes the ids match the labels" breaks every bookmarked `?view=grid` and 30-odd measurements,
-   * and a list of three words would go green through it.
+   * ⚠️ THE TABLE ITSELF IS THE THING THAT HAD TO GO. `QC_VIEWS` named three views with their ids and
+   * labels; on a page with one view that table is not merely unused, it is a specification for the
+   * switch somebody will build from it. The assertion is therefore that the exports are ABSENT —
+   * a lock over a deleted symbol, which is the only form that cannot be satisfied by not calling it.
    */
-  it("Ledger is `list`, List is `grid`, Calendar is `calendar` — in the portal's order, and no Board", () => {
-    expect(QC_VIEWS.map((v) => [v.key, v.label])).toEqual([["list", "Ledger"], ["grid", "List"], ["calendar", "Calendar"]]);
-    expect(QC_VIEWS.map((v) => v.key)).not.toContain("board");
-    expect(qcViewLabel("grid")).toBe("List");
-  });
-  it("the URL is the only input: `?view=` or the default, and a dead `board` reads as the default", () => {
-    expect(readQcView("?view=grid")).toBe("grid");
-    expect(readQcView("?view=calendar")).toBe("calendar");
-    expect(readQcView("")).toBe(DEFAULT_QC_VIEW);
-    for (const stale of ["board", "", "kanban"]) {
-      expect(readQcView(`?view=${stale}`), `"${stale}" did not fall back to the default`).toBe(DEFAULT_QC_VIEW);
+  it("`QC_VIEWS`, `qcViewLabel`, `readQcView` and `DEFAULT_QC_VIEW` are deleted, not merely unmounted", async () => {
+    const mod = await import("./QcCentre") as Record<string, unknown>;
+    for (const gone of ["QC_VIEWS", "qcViewLabel", "readQcView", "DEFAULT_QC_VIEW", "QcPortalView"]) {
+      expect(mod[gone], `${gone} is still exported — the view table outlived the views`).toBeUndefined();
     }
-    /* it takes ONE argument now — the device's memory is not an input, and cannot be passed as one */
-    expect(readQcView.length).toBe(1);
   });
-  it("⚠️ the page WRITES no view memory and CLEARS the retired key; the URL is reflected with replaceState", () => {
+  it("`calendar` (and the `cal` alias) opens Birds-eye; every other value is accepted and ignored", () => {
+    expect(readBirdsEyeOpen("?view=calendar")).toBe(true);
+    expect(readBirdsEyeOpen("?view=cal")).toBe(true);
+    /* ⚠️ ACCEPTED AND IGNORED, NEVER REFUSED — a bookmark from any earlier version of this page
+       lands on the ledger, which is where the page lands anyway. Nothing 404s and nothing warns. */
+    for (const stale of ["list", "grid", "board", "kanban", "overview", ""]) {
+      expect(readBirdsEyeOpen(`?view=${stale}`), `"${stale}" opened Birds-eye`).toBe(false);
+    }
+    expect(readBirdsEyeOpen("")).toBe(false);
+    expect(readBirdsEyeOpen("?q=abc")).toBe(false);
+  });
+  it("⚠️ the page WRITES no view memory, no `?view=` and CLEARS the retired key", () => {
     expect(page, "the per-device memory is being written again").not.toMatch(/localStorage\.setItem\(\s*QC_VIEW_KEY/);
     expect(page).not.toMatch(/(?:local|session)Storage\.setItem\(\s*["'`]sa\.qcView/);
     expect(page, "the retired key is left where a later reader can honour it").toContain("clearQcViewMemory()");
-    expect(page).toContain("window.history.replaceState(window.history.state");
-    /* the default is the view the URL does not state — named once, so the landing flip is one line */
-    expect(page).toContain("const want = gridView === DEFAULT_QC_VIEW ? null : gridView;");
+    /* ⚠️ THE REFLECTION IS GONE. With one page there is nothing to reflect, and an app that keeps
+       re-asserting `?view=` is a second writer on a URL `?q=` already owns. */
+    expect(page, "the Query Centre is writing the URL again").not.toContain("window.history.replaceState(window.history.state");
+    expect(page).not.toContain('searchParams.set("view"');
   });
 });
 
@@ -163,25 +165,20 @@ describe("the frame, rendered", () => {
     expect(frame()).not.toMatch(/data-qcv="head-cta"[^>]*disabled/);
   });
   /**
-   * ⚠️ THE VIEW SWITCH IS GONE (v21 §1.3), AND THIS ASSERTS THE ABSENCE RATHER THAN LAPSING. It
-   * used to check that the segmented control pressed exactly the current view. The portal's three
-   * tiles are the only way into a view now and the back link is the only way out, so a switch
-   * would be a second door beside a door — which is what the Overview exists to be.
+   * ⚠️ THE SWITCH AND THE BACK LINK ARE BOTH GONE (v65 §1), AND THIS ASSERTS BOTH ABSENCES. The
+   * switch chose between three views; the link led back to an Overview. With one page there is
+   * nowhere to switch to and nowhere to go back from — and a link out of a page that is the
+   * destination is the clearest way to teach a reader that somewhere else exists.
    */
-  it("⚠️ there is no view switch, in any view, and the way out is the back link", () => {
-    for (const v of ["list", "grid", "calendar"] as const) {
-      const html = frame({ view: v });
-      expect(html, `a view switch is mounted in ${v}`).not.toMatch(/["\s]qcv-views["\s]/);
-      expect(html).not.toMatch(/aria-pressed/);
-      expect(html, `${v} offers no way back to the Overview`).toContain('data-qcv="back-overview"');
-    }
-    /* …and the Overview itself has no back link, because it is where back goes */
-    const over = frame({ view: "overview" });
-    expect(over).not.toContain('data-qcv="back-overview"');
-    expect(over, "the Overview is not rendering its own body").toContain('id="overview"');
-    /* the Overview replaces the view's furniture entirely: no sentence, no stage, no export */
-    for (const gone of ['id="sentence"', 'data-qcv="stagegrid"', "qcv-export"]) {
-      expect(over, `${gone} is on the Overview`).not.toContain(gone);
+  it("⚠️ no view switch, no back link, and the page's own furniture is always on", () => {
+    const html = frame();
+    expect(html, "a view switch is mounted").not.toMatch(/["\s]qcv-views["\s]/);
+    expect(html).not.toMatch(/aria-pressed/);
+    expect(html, "the back link outlived the Overview").not.toContain('data-qcv="back-overview"');
+    expect(html).not.toContain("qcv-backov");
+    /* the sentence, the stage and the export are the page, not a view's furniture */
+    for (const kept of ['id="sentence"', 'data-qcv="stagegrid"', "qcv-export"]) {
+      expect(html, `${kept} is missing from the page`).toContain(kept);
     }
   });
   it("⚠️ the open card renders only while DOCKED; unmeasured (null) renders neither a card nor a docked column", () => {
