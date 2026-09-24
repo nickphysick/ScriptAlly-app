@@ -51,6 +51,28 @@ export const QcTimeline: React.FC<{
   const [pxd, setPxd] = useState(PXD_DEFAULT);
   const [cross, setCross] = useState<Crosshair | null>(null);
   const [scrollLeft, setScrollLeft] = useState(0);
+  /**
+   * §8.9 — the lane's controls, MEASURED rather than restated.
+   *
+   * ⚠️ THE TAG RIDES THE SAME LANE THE CONTROLS SIT IN, so its clamp has to know how wide they are.
+   * It clamped against the names column only, and a pointer anywhere under the nav or the zoom drew
+   * an ink date pill over them at `z-index: 5` against their `4` — a control half covered by
+   * something that reads like a control. Their width is `nav + gap + zoom`, three values this file
+   * does not own, so it is read off the element instead of arithmetic.
+   */
+  const ctlRef = useRef<HTMLDivElement>(null);
+  const [ctlW, setCtlW] = useState(0);
+
+  useLayoutEffect(() => {
+    const el = ctlRef.current;
+    if (!el) return undefined;
+    const read = () => setCtlW(el.getBoundingClientRect().width);
+    read();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(read);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const ext = useMemo(() => extentOf(rows, nowMs), [rows, nowMs]);
   /**
@@ -210,7 +232,7 @@ export const QcTimeline: React.FC<{
     <div className="qcv-tl" ref={boxRef} data-qcv="tl" style={{ ["--qcv-tl-names" as string]: `${NAMES_W}px` }}>
       {/* §8.4 — the lane. Its controls are OVERLAYS over the scroller, never inside it. */}
       <div className="qcv-tl-lane" data-qcv="tl-lane">
-        <div className="qcv-tl-controls" data-qcv="tl-controls">
+        <div className="qcv-tl-controls" data-qcv="tl-controls" ref={ctlRef}>
           <span className="qcv-tl-nav" data-qcv="tl-nav">
             <button type="button" onClick={() => pan(-NUDGE_WEEKS)} aria-label="Four weeks earlier">‹</button>
             <button type="button" className="qcv-tl-today" onClick={() => { const el = scrollRef.current; if (el && boxW > 0) { el.scrollTo({ left: scrollForToday(ext, pxd, boxW, nowMs), behavior: "smooth" }); } }}>Today</button>
@@ -229,10 +251,25 @@ export const QcTimeline: React.FC<{
         {edges.later > 0 && edges.nearestLater != null && (
           <button type="button" className="qcv-tl-marker qcv-tl-marker--r" data-qcv="tl-marker" onClick={() => glide(edges.nearestLater!)}>{edges.later} due later ›</button>
         )}
-        {/* §8.9 — the tag rides the lane, clamped clear of the controls */}
-        {cross && (
-          <span className={`qcv-tl-tag${cross.today ? " qcv-tl-tag--today" : ""}`} data-qcv="tl-tag" style={{ left: Math.max(NAMES_W + 8, NAMES_W + cross.x - scrollLeft) }}>{cross.label}</span>
-        )}
+        {/* §8.9 — the tag rides the lane, clamped clear of BOTH flanks */}
+        {cross && (() => {
+          /* the controls start 18px past the names column (their rule states it, and the width is
+             measured), and the tag keeps 8px off their right edge */
+          const guard = NAMES_W + 18 + ctlW + 8;
+          const at = NAMES_W + cross.x - scrollLeft;
+          const under = at < guard;
+          return (
+            <span
+              className={`qcv-tl-tag${cross.today ? " qcv-tl-tag--today" : ""}`}
+              data-qcv="tl-tag"
+              /* ⚠️ UNDER THE CONTROLS IT LEFT-ALIGNS AT THE GUARD RATHER THAN CENTRING ON IT. The
+                 rule centres the tag with `translateX(-50%)`, so clamping the CENTRE would still
+                 put half of it under the zoom pill; dropping the transform is what makes the guard
+                 mean the tag's own left edge. */
+              style={under ? { left: guard, transform: "none" } : { left: at }}
+            >{cross.label}</span>
+          );
+        })()}
       </div>
 
       <div className="qcv-tl-scroll" ref={scrollRef} data-qcv="tl-scroll" onWheel={onWheel} onMouseMove={onMove} onMouseLeave={() => setCross(null)}>

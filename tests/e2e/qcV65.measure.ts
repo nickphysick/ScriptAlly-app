@@ -709,12 +709,87 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
       onTop: atX ? (atX.closest("[data-qcv='xp-close']") ? "close" : (atX.getAttribute("data-qcv") ?? atX.tagName)) : "nothing",
       stats: [...c.querySelectorAll("[data-qcv='xp-stat']")].map((e) => ({ g: e.getAttribute("data-group"), n: (e.querySelector(".qcv-xp-n")?.textContent ?? "").trim(), w: Math.round(e.getBoundingClientRect().width) })),
       backdrop: getComputedStyle(document.querySelector("[data-qcv='xp-back']")!).backgroundColor,
+      cardBg: getComputedStyle(c).backgroundColor,
+      /* §10 lock 4 — where the Courier's column ends, and where the date row begins */
+      colTop: px(col.top), colBottom: px(col.bottom), cardTop: px(b.top),
+      trayBottom: (() => { const t = c.querySelector("[data-qcv='xp-tray']"); return t ? px(t.getBoundingClientRect().bottom) : null; })(),
+      tierBottom: (() => { const t = c.querySelector("[data-qcv='tl-tier']"); return t ? px(t.getBoundingClientRect().bottom) : null; })(),
+      /* the title on ONE line — a `getClientRects` count, which a wrap turns into two */
+      ttlLines: (c.querySelector("[data-qcv='xp-title']") as HTMLElement).getClientRects().length,
+      /**
+       * §10 lock 3 — white throughout, no second surface INSIDE.
+       *
+       * ⚠️ THE AREA IS THE FILL'S RECT CLIPPED TO THE CARD, NOT ITS OWN. The rows sit on a track
+       * some forty times the card's width, so an unclipped fraction reported `.qcv-tl-rows` at
+       * 4440% and every 12px bar at 5–12% — numbers about the TRACK, offered as numbers about the
+       * card. A 300px bar clipped to what is on screen is a mark; unclipped it looks like a surface.
+       *
+       * ⚠️ AND IT IS A CENSUS OF DISTINCT COLOURS, not a threshold to pass. The claim is that every
+       * fill on this card comes from a palette the design STATES — the card's white, the header
+       * band, the group band — so a new one has to be added here deliberately rather than slipping
+       * under a limit. The bars are excluded by name: they are the thing the view DRAWS, and their
+       * colours are `--state-*`, whose law is locked with StatusDot rather than here.
+       */
+      fills: (() => {
+        const out: { cls: string; bg: string; pc: number }[] = [];
+        const cardArea = b.width * b.height;
+        for (const e of c.querySelectorAll("*")) {
+          if (e.getAttribute("data-qcv") === "tl-bar" || e.closest("[data-qcv='tl-bar']")) continue;
+          const r = e.getBoundingClientRect();
+          const w = Math.max(0, Math.min(r.right, b.right) - Math.max(r.left, b.left));
+          const h = Math.max(0, Math.min(r.bottom, b.bottom) - Math.max(r.top, b.top));
+          const pc = Math.round(((w * h) / cardArea) * 1000) / 10;
+          if (pc < 3) continue;
+          const bg = getComputedStyle(e).backgroundColor;
+          const m = /rgba?\(([^)]+)\)/.exec(bg);
+          if (!m) continue;
+          const parts = m[1].split(",").map((v) => parseFloat(v));
+          if ((parts[3] ?? 1) < 0.9) continue;
+          out.push({ cls: (e.className || e.tagName).toString().split(" ")[0], bg, pc });
+        }
+        return out;
+      })(),
     };
   });
   yes("expanded", "the card opened", !!xp, JSON.stringify(xp));
   record({ area: "expanded", what: "the card, the rail it grew from, and the window", got: { xp, railBefore }, want: "reported" });
 
   /* ⚠️ THE THREE IT KEEPS — this is what says "the same card" */
+  /* ── §10 lock 3 · white throughout ── */
+  is("expanded", "the card itself is white", xp?.cardBg, "rgb(255, 255, 255)");
+  record({ area: "expanded", what: "every opaque fill covering 3% or more of the card, clipped to it (bars excluded)", got: xp?.fills, want: "reported" });
+  const palette = [...new Set((xp?.fills ?? []).map((f) => f.bg))].sort();
+  for (const c2 of palette) seen("expanded", `fill: ${c2}`);
+  yes("expanded", "the census found fills at all — an empty sweep proves nothing", palette.length > 0, JSON.stringify(xp?.fills));
+  is("expanded", "§10 lock 3 · no second surface inside — the card's white, the header band and the group band, and nothing else",
+    palette.join(" · "), "rgb(245, 241, 235) · rgb(248, 244, 238) · rgb(255, 255, 255)");
+
+  /* ── §10 lock 4 · the Courier's column, and the title on one line ── */
+  is("expanded", "the title is one line at 1440", xp?.ttlLines, 1);
+  /**
+   * ⚠️ A DIVERGENCE FROM §8.1, MEASURED PRECISELY AND NOT REBUILT — and the numbers say more than
+   * the first reading of it did. The column is **258.0px tall, exactly the brief's figure**; what
+   * is wrong is WHERE. The brief spans it from the tray's top through the date row's foot, so the
+   * tray is the ref's ~154 and the column overhangs the dates; here it sits INSIDE the tray's 16px
+   * padding and the tray has grown to hold it, so the tray is 290 and the date row starts beneath
+   * it. **The header is 394 against the ref's 258 — 136px taller** — and the Courier never reaches
+   * the date row's corner. Putting it right moves the title's centring reference and the buttons'
+   * lane with it: a header rebuild, not a tweak, so it is recorded rather than attempted here.
+   */
+  const hdr = xp && xp.colTop != null && xp.colBottom != null ? {
+    cardTop: xp.cardTop, colTop: xp.colTop, colBottom: xp.colBottom, trayBottom: xp.trayBottom, tierBottom: xp.tierBottom,
+    colHeight: Math.round((xp.colBottom - xp.colTop) * 10) / 10,
+    trayHeight: xp.trayBottom != null && xp.cardTop != null ? Math.round((xp.trayBottom - xp.cardTop) * 10) / 10 : null,
+    dateRow: xp.tierBottom != null && xp.trayBottom != null ? Math.round((xp.tierBottom - xp.trayBottom) * 10) / 10 : null,
+    header: xp.tierBottom != null && xp.cardTop != null ? Math.round((xp.tierBottom - xp.cardTop) * 10) / 10 : null,
+  } : null;
+  record({ area: "expanded", what: "§8.1 · the header's geometry against the brief (column 258 from the tray's top to the date row's foot; header 258)", got: hdr, want: "reported" });
+  near("expanded", "the column IS 258px tall, as the brief says", hdr?.colHeight, 258, 1);
+  is("expanded", "…and the date row is 104, as the brief says", hdr?.dateRow, 104);
+  /* what the app actually does, asserted so it cannot drift while the divergence stands */
+  near("expanded", "the column sits inside the tray's 16px top padding (the divergence)", xp?.colTop, (xp?.cardTop ?? 0) + 16, 0.6);
+  near("expanded", "…and its foot is the tray's foot, not the date row's (the divergence)", xp?.colBottom, (xp?.trayBottom ?? 0) - 16, 0.6);
+
   near("expanded", "top — the rail's own", xp?.top, railBefore.top, 0.6);
   near("expanded", "bottom — the rail's own", xp?.bottom, railBefore.bottom, 0.6);
   near("expanded", "right — the rail's own", xp?.right, railBefore.right, 0.6);
@@ -782,6 +857,27 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
   is("expanded", "…nor write ?q=", fromRow.url.includes("q="), false);
   await page.keyboard.press("Escape");
   await page.waitForTimeout(500);
+
+  /**
+   * §10 lock 4's second width. The title is `nowrap`, so the way it fails is OVERFLOW rather than a
+   * wrap — this repo's own `nowrap` rule — and the narrow window is where the tray's three columns
+   * squeeze it. Both are asked: one line, and its ink inside the card.
+   */
+  await openApp(page, 1280, 800, "?view=calendar");
+  await page.waitForTimeout(900);
+  const narrow = await page.evaluate(() => {
+    const c = document.querySelector("[data-qcv='xp-card']");
+    const t = c?.querySelector("[data-qcv='xp-title']") as HTMLElement | null;
+    if (!c || !t) return null;
+    const b = c.getBoundingClientRect();
+    const r = t.getBoundingClientRect();
+    const px = (n: number) => Math.round(n * 10) / 10;
+    return { lines: t.getClientRects().length, right: px(r.right), cardRight: px(b.right), stats: c.querySelectorAll("[data-qcv='xp-stat']").length };
+  });
+  record({ area: "expanded", what: "the title at 1280", got: narrow, want: "reported" });
+  is("expanded", "the title is one line at 1280 too", narrow?.lines, 1);
+  yes("expanded", `…and its ink stays inside the card (${narrow?.right} against ${narrow?.cardRight})`, (narrow?.right ?? 1e9) <= (narrow?.cardRight ?? 0), JSON.stringify(narrow));
+  is("expanded", "…with all three stat cards still drawn", narrow?.stats, 3);
 });
 
 /**
@@ -829,6 +925,13 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
       line: line ? px(line.left) : null,
       pill: pill ? px(pill.left + pill.width / 2) : null,
       overEnds: over.map((b) => px(b.right)),
+      /* §10 lock 6 names PXD 21, 10.5 and 5. The app's zoom is three PRESETS whose density falls
+         out of the track's own width, so the figure is REPORTED beside the preset rather than
+         pinned — a pinned density would be a lock on this viewport. One week of ticks gives it. */
+      pxd: (() => {
+        const w = [...card.querySelectorAll(".qcv-tl-wk")].map((e) => e.getBoundingClientRect().left);
+        return w.length > 1 ? Math.round(((w[1] - w[0]) / 7) * 100) / 100 : null;
+      })(),
       bars,
       rows: card.querySelectorAll("[data-qcv='tl-row']").length,
       groups: [...card.querySelectorAll("[data-qcv='tl-group']")].map((g) => g.getAttribute("data-group")),
@@ -916,6 +1019,52 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
   });
   yes("timeline", `§8.9 · the crosshair names a day ("${tag.text}")`, /^(Today · )?\d+ [A-Z][a-z]{2}( · (Mon|Tue|Wed|Thu|Fri|Sat|Sun))?$/.test(tag.text), tag.text);
   is("timeline", "…and draws its line", tag.line, true);
+
+  /**
+   * §10 lock 7 — the tag's own rect stays clear of BOTH flanks: right of the names column, and left
+   * of the lane's controls. Hovering a row UNDER the controls is the case that matters, because
+   * that is where the tag would otherwise be drawn beneath them and read as a control that is half
+   * a date. It is clamped rather than hidden, so the reading is its box against theirs.
+   */
+  const ctlBox = await page.evaluate(() => {
+    const c = document.querySelector("[data-qcv='tl-controls']")!.getBoundingClientRect();
+    const sc = document.querySelector("[data-qcv='tl-scroll']")!.getBoundingClientRect();
+    return { l: c.left, r: c.right, y: sc.top + sc.height * 0.6 };
+  });
+  /**
+   * ⚠️ SWEPT ACROSS THE CONTROLS' WHOLE WIDTH, NOT PROBED AT ONE POINT. One position passed on the
+   * first run and proved nothing: the tag sat clear of the controls because the pointer's own x put
+   * it there, not because the clamp fired. The branch is entered only where the tag WOULD be under
+   * them, so the reading that matters is the crosshair's LINE under the controls while the TAG is
+   * beside them — two boxes, one pointer, which no single position can be relied on to produce.
+   */
+  const sweep: { x: number; lineL: number; tagL: number; tagR: number; under: boolean }[] = [];
+  for (let i = 0; i <= 6; i += 1) {
+    const x = ctlBox.l + ((ctlBox.r - ctlBox.l) * i) / 6;
+    await page.mouse.move(x, ctlBox.y);
+    await page.waitForTimeout(90);
+    const got = await page.evaluate(() => {
+      const t = document.querySelector("[data-qcv='tl-tag']");
+      const ln = document.querySelector("[data-qcv='tl-cross']");
+      const c = document.querySelector("[data-qcv='tl-controls']");
+      if (!t || !c) return null;
+      const px = (n: number) => Math.round(n * 10) / 10;
+      const b = t.getBoundingClientRect(); const cb = c.getBoundingClientRect();
+      const lb = ln?.getBoundingClientRect();
+      return { tagL: px(b.left), tagR: px(b.right), lineL: lb ? px(lb.left) : NaN, ctlL: px(cb.left), ctlR: px(cb.right) };
+    });
+    if (got) sweep.push({ x: Math.round(x), lineL: got.lineL, tagL: got.tagL, tagR: got.tagR, under: got.lineL >= got.ctlL && got.lineL <= got.ctlR });
+  }
+  record({ area: "timeline", what: "§8.9 · the tag swept across the lane's controls", got: { ctl: { l: Math.round(ctlBox.l), r: Math.round(ctlBox.r) }, sweep }, want: "reported" });
+  yes("timeline", `the sweep read the tag at every position (${sweep.length} of 7)`, sweep.length === 7, JSON.stringify(sweep));
+  /* the precondition: the crosshair's own line really was under the controls somewhere in the sweep */
+  const underRuns = sweep.filter((r) => r.under);
+  yes("timeline", `§10 lock 7 · the crosshair passed under the controls (${underRuns.length} of ${sweep.length} positions)`, underRuns.length > 0, JSON.stringify(sweep));
+  /* …and the tag was beside them at every one of those positions rather than over them */
+  const overlapping = underRuns.filter((r) => r.tagR > ctlBox.l + 0.6 && r.tagL < ctlBox.r - 0.6);
+  yes("timeline", `§10 lock 7 · …and the tag stayed clear of them throughout (${overlapping.length} overlaps)`, overlapping.length === 0, JSON.stringify(overlapping));
+  const names = await page.evaluate(() => Math.round(document.querySelector("[data-qcv='tl-names']")!.getBoundingClientRect().right * 10) / 10);
+  yes("timeline", `§10 lock 7 · …and right of the names column at every position (${names})`, sweep.every((r) => r.tagL >= names - 0.6), JSON.stringify(sweep.map((r) => r.tagL)));
   /* ⚠️ AND IT HIDES OVER THE NAMES COLUMN — where a date would be a date about nothing */
   const overNames = await page.evaluate(() => { const n = document.querySelector("[data-qcv='tl-names']")!.getBoundingClientRect(); return { x: n.left + 40, y: n.top + n.height / 2 }; });
   await page.mouse.move(overNames.x, overNames.y);

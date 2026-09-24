@@ -396,3 +396,28 @@ describe("the sheet's own invariant", () => {
     expect(dupes, `declared twice: ${dupes.join(" · ")}`).toEqual([]);
   });
 });
+
+describe("§8.9 · the crosshair tag's guard", () => {
+  const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");
+  const tlCss = read("src/components/queries/centre/qcvTimeline.css");
+  /**
+   * ⚠️ THE GEOMETRY IS MEASURED ON THE PAGE (`qcV65.measure.ts`, §10 lock 7) — this is the half a
+   * source lock can honestly carry: that the controls' width is READ off the element rather than
+   * restated. Three values this file does not own (nav, gap, zoom) written here as a constant would
+   * be right until any one of them moved, and wrong in silence after.
+   */
+  it("the controls' width is measured, never restated", () => {
+    expect(tlSrc).toMatch(/const ctlRef = useRef<HTMLDivElement>\(null\)/);
+    expect(tlSrc).toMatch(/setCtlW\(el\.getBoundingClientRect\(\)\.width\)/);
+    expect(tlSrc).toMatch(/data-qcv="tl-controls" ref=\{ctlRef\}/);
+    expect(tlSrc).toMatch(/const guard = NAMES_W \+ 18 \+ ctlW \+ 8;/);
+    /* the 18 is the controls' own offset, and it is the ONE number shared with the sheet */
+    expect(tlCss).toMatch(/\.qcv-tl-controls \{[^}]*left: calc\(var\(--qcv-tl-names\) \+ 18px\)/);
+  });
+  it("⚠️ …and under the controls it LEFT-ALIGNS — a clamped centre still puts half of it under them", () => {
+    expect(tlCss).toMatch(/\.qcv-tl-tag \{[^}]*transform: translateX\(-50%\)/);
+    expect(tlSrc).toMatch(/style=\{under \? \{ left: guard, transform: "none" \} : \{ left: at \}\}/);
+    /* and the old one-sided clamp is gone rather than left beside the new one */
+    expect(tlSrc, "the names-column-only clamp is superseded").not.toMatch(/Math\.max\(NAMES_W \+ 8,/);
+  });
+});
