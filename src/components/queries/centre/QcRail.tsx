@@ -124,23 +124,29 @@ export function railBox(win: WinRect, viewportW: number): RailBox | null {
  * sidebar shut, and the card would run off the left of the screen.
  */
 export interface ExpandedBox { top: number; height: number; left: number; width: number }
-export function expandedBox(win: WinRect, group: { left: number; right: number }): ExpandedBox | null {
-  if (!(win.height > 0) || !(win.width > 0)) return null;
+export function expandedBox(win: WinRect, group: { left: number; right: number }, viewportH: number): ExpandedBox | null {
+  if (!(win.width > 0)) return null;
   if (win.width < RAIL_STACK_BELOW) return null;
-  const height = win.height - RAIL_INSET_Y * 2;
+  /**
+   * ⚠️ §4.1 · THE HEIGHT IS THE VIEWPORT'S, AND THIS IS THE ONE PLACE IT IS. Everywhere else in
+   * this app a height taken from the viewport is the fault the house law is written against — but
+   * the expanded card is an OVERLAY on a dimmed page and sits OVER the shell's bar, so the window
+   * capsule is not its frame. Nothing is above it to be guessed at, which is the whole reason the
+   * law exists; the exception is stated here rather than left to be rediscovered.
+   */
+  const height = viewportH - RAIL_INSET_Y * 2;
   const width = group.right - group.left;
   if (!(height > 0) || !(width > 0)) return null;
   /**
    * ⚠️ IT SPANS THE GROUP, NOT THE WINDOW (v65.2 §2). The card grows out of the rail, and the rail
    * is the group's second column — so growing to the window's edges would take it somewhere the
    * page it belongs to does not reach, and on a wide screen that is hundreds of pixels of desk on
-   * each side. Its top and bottom are still the window's, because the group has no vertical extent
-   * of its own.
+   * each side.
    */
   /* ⚠️ NO `right`: the card is placed by left + width, and a third number about the same edge is a
      third thing that can disagree — and computing it would need `window`, which a pure function
      that a unit test calls does not have. */
-  return { top: win.top + RAIL_INSET_Y, height, left: group.left, width };
+  return { top: RAIL_INSET_Y, height, left: group.left, width };
 }
 
 /**

@@ -30,113 +30,184 @@
 }
 
 /**
- * §6 — THE TRAY: a two-column grid inside the card, 22px left and right, 18px from the top.
+ * §4.2 — THE TRAY, LAYOUT A. It POSITIONS EVERYTHING ABSOLUTELY WITHIN ITS OWN BOX. A grid was the
+ * right answer while the tray held two things beside each other; layout A holds seven, at seven
+ * stated offsets from two edges, and a grid that has to produce those is a grid with a hole in it
+ * for every one of them.
  *
- * ⚠️ THE HEADER GROUND IS NO LONGER ONE BLOCK. v65's tray ran its colour the full width and carried
- * on down through the date row; §1.5 retires that — the date row is white — so the tray is a shape
- * with all four corners rather than a band with two.
+ * [268, 34, 968 × 166 at 1280 — the mock's own box, measured.]
  *
- * ⚠️ AND IT DOES NOT CLIP, WHICH `.qcv-xp-clip` DOES. The controls sit 8px BELOW it and the ✕'s
- * focus ring reaches outside it; a tray with `overflow: hidden` would cut both. One element clips
- * and it holds nothing but the picture — the same arrangement the rail's header needed, for the
- * same reason.
+ * ⚠️ AND IT DOES NOT CLIP, WHICH `.qcv-xp-clip` DOES. The ✕'s focus ring reaches outside it; a tray
+ * with `overflow: hidden` would cut it. One element clips and it holds nothing but the picture.
  */
 .qcv-xp-tray {
   flex: none; position: relative; box-sizing: border-box;
-  margin: 18px 22px 0; padding: 18px 70px 18px 26px; min-height: 150px;
-  display: grid; grid-template-columns: max-content minmax(0, 1fr);
-  column-gap: 28px; align-items: center;
+  margin: 18px 22px 0; height: 166px;
   background: var(--be-accent); border-radius: 18px;
-  /* ⚠️ STACKED ABOVE THE BODY so §8.3's popover can hang over the rows. The date row's lane is
-     positioned and later in the tree, so without this the panel paints BEHIND them — present,
+  /* ⚠️ STACKED ABOVE THE BODY so §6's popovers can hang over the rows. The date row's lane is
+     positioned and later in the tree, so without this a panel paints BEHIND them — present,
      correct and invisible. It is not decoration; it is half of the popover's mechanism. */
   z-index: 5;
 }
 .qcv-xp-clip { position: absolute; inset: 0; z-index: 1; overflow: hidden; border-radius: 18px; pointer-events: none; }
 /**
- * §6 — THE HEAD IS PLACED FROM THE TITLE'S MEASURED WIDTH, never a constant. `--qcv-xp-tw` is
- * published by the card once the face has landed; 26px is the tray's own left padding and 34 the
- * gap the design states, so the picture follows the words at any type size.
+ * §4.2 — THE HAWK: 150 wide at left 26, top 82, clipped by the tray and behind every word.
  *
- * ⚠️ AND ITS FALLBACK IS A REAL TITLE'S WIDTH RATHER THAN 0. An unpublished frame would otherwise
- * put the head under the title's first letter — which is the one place the design forbids it.
+ * ⚠️ IT IS A CONSTANT NOW, AND THE MEASURED WIDTH MOVED TO THE SENTENCE. In v65.2 the head sat
+ * beside the title and its left had to be the title's measured right; in layout A the head is
+ * bottom-left and the TITLE'S NEIGHBOUR is "today & next up" — so `--qcv-xp-tw` still places an
+ * element from measured text, and it is that one. The law did not go away; its subject moved.
  */
-.qcv-xp-hawk {
-  position: absolute; bottom: -52px; left: calc(26px + var(--qcv-xp-tw, 356px) + 34px);
-  width: 150px; height: auto; display: block;
-}
-/**
- * §6 — the title: Special Elite 46, one line, in column 1.
- *
- * ⚠️ ITS VERTICAL MIDPOINT IS THE TRAY'S, and `align-items: center` on the tray is what does it.
- * The measurement compares the two midpoints rather than trusting the word — the mock renders both
- * at 96.3 exactly, and the claim is the equality rather than either number.
- */
+.qcv-xp-hawk { position: absolute; left: 26px; top: 82px; width: 150px; height: auto; z-index: 0; }
+/* §4.2 — the title: Special Elite 46, one line, top-left */
 .qcv-xp-ttl {
-  position: relative; z-index: 2;
-  margin: 0; font-family: var(--qcv-type) !important; font-weight: 400; font-size: 46px; line-height: 1;
-  color: var(--be-ink); white-space: nowrap;
+  position: absolute; left: 30px; top: 26px; z-index: 2; margin: 0;
+  /* ⚠️ `!important` BECAUSE THE TITLE IS AN `<h2>`. `brand.tsx` names h1/h2/h3 as the app's serif
+     with `!important` at runtime, so a plain declaration here loses and the typewriter title
+     renders in Playfair — measured, and it is why this word is not decoration. */
+  font-family: var(--qcv-type) !important; font-weight: 400; font-size: 46px; line-height: 1;
+  letter-spacing: -0.5px; color: var(--qcv-ink); white-space: nowrap;
 }
-
 /**
- * §6 — THE ✕: 32px at the tray's top right, transparent, with a ring in the muted ink.
+ * §4.2 — TODAY & NEXT UP, beside the title and placed from the title's MEASURED right edge.
  *
- * ⚠️ IT IS THE TOPMOST THING AT ITS OWN CENTRE. It sits over the picture; a `z-index` below the
- * drawing would make the one way out unclickable while looking perfectly present. The measurement
- * asserts it with `elementFromPoint`, not by reading this rule.
+ * ⚠️ A CONSTANT HERE IS RIGHT FOR ONE STRING, AT ONE SIZE, IN THE ONE FONT THAT HAPPENED TO BE
+ * LOADED WHEN IT WAS MEASURED. `--qcv-xp-tw` is published by the card at layout and again on
+ * `document.fonts.ready`, so the sentence follows the words rather than a number about them.
+ */
+.qcv-xp-sub {
+  position: absolute; top: 32px; z-index: 2;
+  left: calc(30px + var(--qcv-xp-tw, 356px) + 24px);
+  right: 280px; min-width: 0;
+}
+.qcv-xp-sub u {
+  display: block; text-decoration: none;
+  font-family: var(--qcv-mono); font-weight: 400; font-size: 8px; line-height: 1.4;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--be-mute);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.qcv-xp-next {
+  display: flex; align-items: baseline; gap: 7px; margin-top: 4px; min-width: 0;
+}
+.qcv-xp-next b {
+  flex: none; padding: 2px 6px; border-radius: 6px; background: rgba(255, 255, 255, 0.6);
+  font-family: var(--qcv-mono); font-weight: 700; font-size: 8px; line-height: 1.2;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcv-ink-70);
+}
+/* ⚠️ ONE LINE WITH AN ELLIPSIS — a sentence that wrapped would push into the hawk beneath it */
+.qcv-xp-next span {
+  min-width: 0; font-family: var(--qcv-type); font-weight: 400; font-size: 13.5px; line-height: 1.2;
+  color: var(--qcv-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* §4.2 — Find an agent: 200 × 32 at the tray's top right, inside the ✕ */
+.qcv-xp-find {
+  position: absolute; top: 16px; right: 60px; z-index: 3;
+  box-sizing: border-box; width: 200px; height: 32px;
+  display: flex; align-items: center; gap: 6px; padding: 0 10px;
+  background: rgba(255, 255, 255, 0.7); border-radius: 16px;
+}
+.qcv-xp-find svg { flex: none; color: var(--be-mute); }
+.qcv-xp-find input {
+  flex: 1 1 auto; min-width: 0; border: 0; background: none; padding: 0; outline: none;
+  font-family: var(--qcv-type); font-weight: 400; font-size: 12.5px; line-height: 1; color: var(--qcv-ink);
+}
+.qcv-xp-find input::placeholder { color: var(--be-mute); }
+.qcv-xp-findn {
+  flex: none; font-family: var(--qcv-mono); font-size: 7.5px; line-height: 1;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--be-mute); white-space: nowrap;
+}
+/**
+ * §4.2 — THE ✕: 32px at the tray's top right, transparent, with a ring in the muted ink.
+ *
+ * ⚠️ IT IS THE TOPMOST THING AT ITS OWN CENTRE. It sits over the picture, and a drawing painted
+ * above it would make the one way out unclickable while looking perfectly present.
  */
 .qcv-xp-x {
-  position: absolute; top: 18px; right: 18px; z-index: 3;
+  position: absolute; top: 16px; right: 16px; z-index: 4;
   width: 32px; height: 32px; border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: none; border: 0; box-shadow: inset 0 0 0 1px var(--be-mute); color: var(--be-ink);
-  font-size: 13px; line-height: 1; cursor: pointer;
+  background: none; border: 0; box-shadow: inset 0 0 0 1px var(--be-mute); color: var(--qcv-ink);
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
 }
 .qcv-xp-x:hover { background: var(--be-soft); }
 .qcv-xp-x:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
 
-/* §8.2 — three stat cards, right-aligned in what is left */
 /**
- * §6 — three stat cards, right-aligned in column 2, beginning 20px after the head's right edge.
+ * §4.2 — THE THREE COUNT CARDS, in a row at the tray's bottom-left, 118 × 54 (156 at ≥ 1500).
  *
- * ⚠️ THE PADDING IS ARITHMETIC THAT CANCELS, NOT A VALUE. The head's left and this column's left
- * both start from the same measured title width, so their difference is constant:
- * `34 (the head's gap) + 150 (its width) + 20 (the cards' gap) − 28 (the tray's column gap)`. The
- * mock states the sum as `176px`; stating it as the sum is what keeps it right when any term moves.
+ * ⚠️ THEY ARE COMPACT NOW: a two-column grid with the count spanning both rows at the left and the
+ * name over its hint at the right. v65.2's cards were 180-wide stacks; layout A puts them beside
+ * the hawk with the time controls at the other end, and a stack of that height has nowhere to go.
  *
- * ⚠️ AND THE 180 CAP IS ON EACH CARD, NOT THE ROW. At 1920 each measures 180 and the cap is what
- * stops three cards spreading across a wide tray; at 1280 they are 93 and `flex: 1 1 0` shares
- * what there is. A cap on the row would let one card take the slack of another.
+ * ⚠️ AND 224 IS WHERE THE MOCK PUTS THEM, which clears the hawk (26 + 150) by 48. It is stated as
+ * that sum rather than as 224, so moving the picture moves the cards with it.
  */
-.qcv-xp-stats { display: flex; justify-content: flex-end; align-items: center; gap: 12px; min-width: 0; padding-left: 176px; }
+.qcv-xp-stats {
+  position: absolute; left: calc(26px + 150px + 48px); bottom: 18px; z-index: 2;
+  display: flex; align-items: stretch; gap: 10px;
+}
 .qcv-xp-stat {
-  flex: 1 1 0; max-width: 180px; box-sizing: border-box;
-  padding: 12px 12px 11px; border-radius: 14px;
-  background: #fff; border: 1px solid rgba(28, 19, 15, 0.09);
+  flex: none; box-sizing: border-box; width: 118px; height: 54px; padding: 0 12px;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto;
+  column-gap: 9px; align-content: center;
+  border-radius: 12px; background: #fff; border: 1px solid rgba(28, 19, 15, 0.09);
   /* §8.2 — the card is a BUTTON since it became the filter; these undo the agent's own defaults */
   font: inherit; text-align: left; cursor: pointer;
 }
+/* §4.2 — wider from 1500, where the tray has the room and the names stop wrapping */
+@media (min-width: 1500px) { .qcv-xp-stat { width: 156px; padding: 0 14px; } }
 /* ⚠️ OVERDUE IS THE INK CARD — the one group the reader is meant to look at first */
 .qcv-xp-stat--overdue { background: var(--qcv-ink); border-color: var(--qcv-ink); }
 .qcv-xp-stat--overdue .qcv-xp-n, .qcv-xp-stat--overdue .qcv-xp-nm { color: #f5f1eb; }
 .qcv-xp-stat--overdue .qcv-xp-hint { color: rgba(245, 241, 235, 0.7); }
 .qcv-xp-stat--none { opacity: 0.45; }
-.qcv-xp-n { display: block; font-family: var(--qcv-serif); font-weight: 600; font-size: 34px; line-height: 1; color: var(--qcv-ink); }
+/* the count spans both rows at the left — one figure beside two lines, never above them */
+.qcv-xp-n { grid-row: 1 / 3; align-self: center; font-family: var(--qcv-serif); font-weight: 600; font-size: 26px; line-height: 1; color: var(--qcv-ink); }
 /* ⚠️ THE NAME AND THE HINT MAY WRAP (§8.2) — at 1280 the cards are 87px wide and "Watch and wait"
    does not fit on one line. A `nowrap` here would make the card a horizontal scrollbar. */
 /* ⚠️ LOWERCASED BY THE SHEET, NOT BY THE STRING. The mock types these labels in lower case on the
    cards; `ATTENTION_LABEL` is also a GROUP HEADING and a Filter option, where "overdue" would read
    as a mistake. A sentence-case string can be quietened by a stylesheet — which is the same rule
    §5's due column states from the other end, where a shouting string cannot. */
-.qcv-xp-nm { display: block; margin-top: 6px; font-family: var(--qcv-type); font-size: 12.5px; line-height: 1.25; text-transform: lowercase; color: var(--qcv-ink); }
-.qcv-xp-hint { display: block; margin-top: 4px; font-family: var(--qcv-mono); font-size: 7px; line-height: 1.5; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-45); }
+.qcv-xp-nm { grid-column: 2; align-self: end; font-family: var(--qcv-type); font-size: 12px; line-height: 1.15; text-transform: lowercase; color: var(--qcv-ink); }
+.qcv-xp-hint { grid-column: 2; align-self: start; margin-top: 2px; font-family: var(--qcv-mono); font-size: 6.5px; line-height: 1.4; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcv-ink-45); }
 
 /**
  * The body holds the date row and the rows (§8.4–§8.6). It does NOT scroll itself: the timeline's
  * own scroller does, because the names column has to stay sticky against it — a scroller one level
  * up would carry the sticky cell out of the box it is sticky within.
  */
-.qcv-xp-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+/**
+ * §4.1 — THE CALENDAR BODY IS A PANEL BELOW THE TRAY: a 1px hairline, 14px corners, 14px of desk
+ * between it and the tray, and the card's own 22px inset on the other three sides. [268 → 1236,
+ * 214 → 762 at 1280.]
+ *
+ * ⚠️ IT CLIPS, AND THAT IS WHAT THE CORNERS ARE FOR. The rows scroll inside it, so without
+ * `overflow: hidden` the first and last of them square off the panel's own radius.
+ */
+.qcv-xp-body {
+  flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden;
+  margin: 14px 22px 22px; box-sizing: border-box;
+  border: 1px solid rgba(28, 19, 15, 0.09); border-radius: 14px; background: #fff;
+}
+/**
+ * §4.2 — the time controls' host in the tray: right-aligned, its right edge 20px in from the
+ * tray's right, bottom 25. The controls themselves are the timeline's and portal in here.
+ */
+.qcv-xp-time { position: absolute; right: 20px; bottom: 25px; z-index: 3; display: flex; align-items: center; }
+/**
+ * ⚠️ A PORTAL CARRIES ITS OWN RULES WITH IT, AND THIS ONE CARRIED A POSITION. `.qcv-tl-controls` is
+ * `position: absolute; left: calc(var(--qcv-tl-names) + 18px)` for the lane it used to live in, so
+ * inside the tray it placed itself 318px from the TRAY's left — measured, its right edge landed at
+ * 1631 against the card's 1396.
+ *
+ * ⚠️ AND THE CONSEQUENCE WAS NOT A MISPLACED CLUSTER, IT WAS A SCROLLING CARD. The card carries
+ * `overflow: hidden`, which hides overflow and still SCROLLS: its `scrollWidth` became 1363 against
+ * a 1128 client, and the first click on a zoom button focused it, so the browser scrolled the card
+ * 235px to bring it into view — moving every other thing in the card left with it. The tell was a
+ * body measured at 55 inside a card at 268, which is impossible for a static child and is exactly
+ * what a scrolled ancestor looks like.
+ */
+.qcv-xp-time .qcv-tl-controls { position: static; left: auto; top: auto; }
 
 /**
  * §8.2 — the cards ARE the attention filter.
@@ -230,3 +301,11 @@
   margin-top: 4px; font-family: var(--qcv-mono) !important; font-size: 8px !important;
   letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-45);
 }
+
+/**
+ * §4.2 — FIND MARKS AND FADES; IT NEVER FILTERS. A ring on the matching rows' names cell and 35%
+ * on everything else, so the shape of the whole pipeline stays on screen while one agent is found
+ * inside it. Filtering would answer a different question and lose the reader the answer to theirs.
+ */
+.qcv-tl-row--hit .qcv-tl-names { box-shadow: inset 0 0 0 2px var(--qcv-ink); }
+.qcv-tl-row--miss { opacity: 0.35; }

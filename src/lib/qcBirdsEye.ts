@@ -224,3 +224,45 @@ export const EYE_STATUSES: readonly QueryStatus[] = [
   QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT,
   QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER,
 ];
+
+/* ── §4.2 · today & next up ── */
+
+/** The soonest live query with an expected date on or after today, as one sentence. */
+export interface NextUp { date: string; sentence: string }
+
+/**
+ * §4.2 — THE SENTENCE NAMES WHAT IS DUE AND WHEN, in the reader's own words.
+ *
+ * ⚠️ IT READS THE SAME `expectedMs` EVERY OTHER SURFACE READS, so the rail's due column, the
+ * expanded rows' due cells and this sentence cannot name different days for one query. The three
+ * wordings are chosen by whose court it is — the page's own three-way `tileCourt`, so an offer is
+ * the writer's decision here exactly as it is on the tiles.
+ *
+ * ⚠️ AND "NOTHING DUE" IS A SENTENCE, NOT AN EMPTY SLOT. A header that simply lost its second line
+ * when an account had nothing coming would read as a header that failed to load.
+ */
+export function nextUp(rows: readonly QcRow[], nowMs: number): NextUp {
+  const today = new Date(nowMs); today.setHours(0, 0, 0, 0);
+  const from = today.getTime();
+  const live = rows
+    .filter((r) => r.expectedMs != null && r.expectedMs >= from && tileCourt(r.status) !== "closed")
+    .sort((a, b) => (a.expectedMs ?? 0) - (b.expectedMs ?? 0));
+  const date = new Date(nowMs).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+  const soonest = live[0];
+  if (!soonest) return { date, sentence: "Nothing due in the weeks ahead." };
+  const days = Math.round((soonest.expectedMs! - from) / DAY);
+  const when = days === 0 ? "today" : days === 1 ? "tomorrow" : `in ${days} days`;
+  const who = soonest.agentName;
+  switch (soonest.status) {
+    case QueryStatus.OFFER:
+      return { date, sentence: `Your decision on ${who}'s offer is due ${when}.` };
+    case QueryStatus.PARTIAL_REQUESTED:
+      return { date, sentence: `Send ${who} the partial ${when}.` };
+    case QueryStatus.FULL_REQUESTED:
+      return { date, sentence: `Send ${who} the full ${when}.` };
+    case QueryStatus.REVISE_RESUBMIT:
+      return { date, sentence: `Send ${who} the revision ${when}.` };
+    default:
+      return { date, sentence: `${who}'s reply is due ${when}.` };
+  }
+}

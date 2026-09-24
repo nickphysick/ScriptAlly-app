@@ -1011,20 +1011,21 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
       top: px(b.top), bottom: px(b.bottom), right: px(b.right), left: px(b.left), width: px(b.width),
       winLeft: px(w.left), winRight: px(w.right),
       clip: getComputedStyle(c).clipPath,
+      ttl: { x: px(ttl.left), y: px(ttl.top), r: px(ttl.right), b: px(ttl.bottom) },
       ttlMid: px(ttl.top + ttl.height / 2), ttlLeft: px(ttl.left), ttlRight: px(ttl.right), ttlSize: parseFloat(getComputedStyle(c.querySelector("[data-qcv='xp-title']")!).fontSize),
       onTop: atX ? (atX.closest("[data-qcv='xp-close']") ? "close" : (atX.getAttribute("data-qcv") ?? atX.tagName)) : "nothing",
       stats: [...c.querySelectorAll("[data-qcv='xp-stat']")].map((e) => ({ g: e.getAttribute("data-group"), n: (e.querySelector(".qcv-xp-n")?.textContent ?? "").trim(), w: Math.round(e.getBoundingClientRect().width) })),
       backdrop: getComputedStyle(document.querySelector("[data-qcv='xp-back']")!).backgroundColor,
       cardBg: getComputedStyle(c).backgroundColor,
       /* §10 locks 4 and 5 — the column, the tray, the date row and the controls at its foot */
-      cardTop: px(b.top),
+      cardTop: px(b.top), vh: window.innerHeight,
       tray: (() => { const t = c.querySelector("[data-qcv='xp-tray']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { x: px(r2.left), y: px(r2.top), w: px(r2.width), h: px(r2.height), r: px(r2.right), bot: px(r2.bottom) }; })(),
       hawk: (() => { const t = c.querySelector("[data-qcv='xp-hawk']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { x: px(r2.left), y: px(r2.top), w: px(r2.width), r: px(r2.right), bot: px(r2.bottom) }; })(),
       firstCard: (() => { const t = c.querySelector("[data-qcv='xp-stat']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { x: px(r2.left), w: px(r2.width), y: px(r2.top), bot: px(r2.bottom) }; })(),
       tw: getComputedStyle(c).getPropertyValue("--qcv-xp-tw").trim(),
       xTop: px(x.top), xRight: px(x.right),
       /* §6 — the lane the controls ride in, and its own white ground (§1.5) */
-      lane: (() => { const t = c.querySelector("[data-qcv='tl-lane']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { y: px(r2.top), h: px(r2.height), bg: getComputedStyle(t).backgroundColor }; })(),
+      lane: (() => { const t = c.querySelector("[data-qcv='tl-lane']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { x: px(r2.left), y: px(r2.top), h: px(r2.height), bg: getComputedStyle(t).backgroundColor }; })(),
       trayTop: (() => { const t = c.querySelector("[data-qcv='xp-tray']"); return t ? px(t.getBoundingClientRect().top) : null; })(),
       trayBottom: (() => { const t = c.querySelector("[data-qcv='xp-tray']"); return t ? px(t.getBoundingClientRect().bottom) : null; })(),
       trayMid: (() => { const t = c.querySelector("[data-qcv='xp-tray']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return px(r2.top + r2.height / 2); })(),
@@ -1116,18 +1117,21 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
   /* §6 — the tray: 22px inside the card left and right, 18px from its top, 18px corners */
   near("expanded", "§6 · the tray sits 22px inside the card's left", (xp?.tray?.x ?? 0) - (xp?.left ?? 0), 22, 0.6);
   near("expanded", "§6 · …and 22px inside its right", (xp?.right ?? 0) - (xp?.tray?.r ?? 0), 22, 0.6);
-  near("expanded", "§6 · …and 18px from its top", (xp?.tray?.y ?? 0) - (xp?.cardTop ?? 0), 18, 0.6);
+  near("expanded", "§4.1 · …and 18px from its top", (xp?.tray?.y ?? 0) - (xp?.cardTop ?? 0), 18, 0.6);
   yes("expanded", `§6 · the tray is at least its stated 150 floor (${xp?.tray?.h})`, (xp?.tray?.h ?? 0) >= 149.5, String(xp?.tray?.h));
 
   /**
-   * §6 — THE TITLE'S VERTICAL MIDPOINT EQUALS THE TRAY'S. This is v65.1 lock 4's one surviving
-   * claim, restated against §6's parts: there is no column to centre on now, and `align-items:
-   * center` on the tray is what makes it true. The mock renders both at 96.3 exactly.
+   * §4.2 — THE TITLE IS PLACED, NOT CENTRED, AND THE OLD CLAIM IS RETIRED RATHER THAN LOOSENED.
+   * v65.1 asserted that the title's vertical midpoint EQUALS the tray's, which was true because the
+   * tray was a grid with `align-items: center`. Layout A states the title's corner — left 30, top
+   * 26 — so the midpoints no longer agree and were never meant to: the mock renders the title's at
+   * 83 against the tray's 117. Asserting the corner is the claim layout A actually makes.
    */
-  near("expanded", "§6 · the title's midpoint is the tray's", xp?.ttlMid, xp?.trayMid, 1);
+  near("expanded", "§4.2 · the title sits 30px in from the tray's left", (xp?.ttl?.x ?? 0) - (xp?.tray?.x ?? 0), 30, 1);
+  near("expanded", "§4.2 · …and 26px down from its top", (xp?.ttl?.y ?? 0) - (xp?.tray?.y ?? 0), 26, 1);
   is("expanded", "§6 · …on one line", xp?.ttlLines, 1);
   near("expanded", "§6 · …at 46px", xp?.ttlSize, 46, 0.5);
-  near("expanded", "§6 · …26px inside the tray's left", (xp?.ttlLeft ?? 0) - (xp?.tray?.x ?? 0), 26, 1);
+  /* §4.2 — 30 now, not 26; asserted above against the tray's own left edge */
 
   /**
    * §6 — THE HEAD'S LEFT IS THE TITLE'S MEASURED RIGHT EDGE + 34, and the number the card published
@@ -1135,7 +1139,14 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
    * the face, the copy or the fallback moved — which is why this is asserted against the title's
    * own measured box rather than against 416.
    */
-  near("expanded", "§6 · the head starts 34px after the title's right edge", (xp?.hawk?.x ?? 0) - (xp?.ttlRight ?? 0), 34, 1);
+  /**
+   * §4.2 — THE HEAD IS BOTTOM-LEFT NOW AND THE "34px AFTER THE TITLE" CLAIM IS RETIRED. It was the
+   * measured-text law's subject in v65.2; layout A gives the head a stated corner and hands that
+   * law to "today & next up", which is asserted below. Keeping this would be a lock about a
+   * relationship the design no longer has.
+   */
+  near("expanded", "§4.2 · the head sits 26px in from the tray's left", (xp?.hawk?.x ?? 0) - (xp?.tray?.x ?? 0), 26, 1.5);
+  near("expanded", "§4.2 · …and 82px down from its top", (xp?.hawk?.y ?? 0) - (xp?.tray?.y ?? 0), 82, 1.5);
   near("expanded", "§6 · …at 150 wide", xp?.hawk?.w, 150, 0.6);
   yes("expanded", `§6 · the published width IS the title's rendered width (${xp?.tw} vs ${hdr?.titleWidth})`,
     Math.abs(parseFloat(xp?.tw ?? "0") - (hdr?.titleWidth ?? -1)) < 1, `${xp?.tw} vs ${hdr?.titleWidth}`);
@@ -1143,7 +1154,8 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
   yes("expanded", `§6 · the head hangs past the tray's foot (${xp?.hawk?.bot} vs ${xp?.tray?.bot})`, (xp?.hawk?.bot ?? 0) > (xp?.tray?.bot ?? 0) + 1, `${xp?.hawk?.bot} vs ${xp?.tray?.bot}`);
 
   /* §6 — the cards begin 20px after the head's right edge, and that offset is arithmetic that cancels */
-  near("expanded", "§6 · the first card begins 20px after the head's right edge", (xp?.firstCard?.x ?? 0) - (xp?.hawk?.r ?? 0), 20, 1.5);
+  /* §4.2 — the cards clear the head by 48 now, stated in the sheet as `26 + 150 + 48` */
+  near("expanded", "§4.2 · the first card begins 48px after the head's right edge", (xp?.firstCard?.x ?? 0) - (xp?.hawk?.r ?? 0), 48, 1.5);
 
   /**
    * §6 — FILTER, SORT AND ↺ ARE ON WHITE, 8px BENEATH THE TRAY. v65.1 lock 5 put them at the foot of
@@ -1158,17 +1170,32 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
    * has gone must fail as a MISSING SUBJECT rather than as a number.
    */
   yes("expanded", "§6 · the date row's lane is on the page (the box the controls ride in)", xp?.lane != null, JSON.stringify(xp?.lane));
-  near("expanded", "§6 · the lane begins at the tray's foot", (xp?.lane?.y ?? 0) - (xp?.tray?.bot ?? 0), 0, 1);
+  /* §4.1 — the calendar body is a PANEL now, 14px of desk below the tray */
+  near("expanded", "§4.1 · the body panel begins 14px below the tray", (xp?.lane?.y ?? 0) - (xp?.tray?.bot ?? 0), 14, 1.5);
   near("expanded", "§6 · the controls sit 8px into it", (xp?.ctl?.top ?? 0) - (xp?.lane?.y ?? 0), 8, 1);
-  near("expanded", "§6 · …at the card's own inner left", (xp?.ctl?.left ?? 0) - (xp?.left ?? 0), 44, 1.5);
+  /* §6 — 44 into the LANE, which is inside the body panel now; the corner move is §6's own phase */
+  near("expanded", "§6 · the controls sit 44px into the lane", (xp?.ctl?.left ?? 0) - (xp?.lane?.x ?? 0), 44, 1.5);
   is("expanded", "§1.5 · …and the date row is on white, not the tray's colour carried down", xp?.lane?.bg, "rgb(255, 255, 255)");
   /* the ✕ is still the topmost thing at its own centre — now at the tray's top right */
   is("expanded", "§6 · the ✕ is topmost at its own centre", xp?.onTop, "close");
-  near("expanded", "§6 · …18px from the tray's top", (xp?.xTop ?? 0) - (xp?.tray?.y ?? 0), 18, 0.6);
-  near("expanded", "§6 · …and 18px from its right", (xp?.tray?.r ?? 0) - (xp?.xRight ?? 0), 18, 0.6);
+  /* §4.2 — 16 now, not 18: layout A puts the ✕ and Find on one line at the tray's top right */
+  near("expanded", "§4.2 · …16px from the tray's top", (xp?.xTop ?? 0) - (xp?.tray?.y ?? 0), 16, 0.6);
+  near("expanded", "§4.2 · …and 16px from its right", (xp?.tray?.r ?? 0) - (xp?.xRight ?? 0), 16, 0.6);
 
-  near("expanded", "top — the rail's own", xp?.top, railBefore.top, 0.6);
-  near("expanded", "bottom — the rail's own", xp?.bottom, railBefore.bottom, 0.6);
+  /**
+   * §4.1 — ⚠️ THE TOP AND BOTTOM ARE THE VIEWPORT'S NOW, NOT THE RAIL'S, AND THE OLD EQUALITY IS
+   * RETIRED RATHER THAN LOOSENED. The card grew out of the rail and kept its top and bottom while
+   * both sat inside the window capsule; §4.1 puts the card OVER the shell's bar, so it reaches
+   * 16px from the viewport's own edges while the rail stays 16px inside the window's. Measured:
+   * the card's top is 16 against the rail's 137.8 — a 121.8px difference that IS the bar.
+   *
+   * ⚠️ AND THE PRECONDITION IS ASSERTED, because on a page whose window happened to start at the
+   * viewport's top the two would be indistinguishable and this case would prove nothing.
+   */
+  yes("expanded", `§4.1 · the window is BELOW the viewport's top (${railBefore.top}) — or this case is vacuous`, railBefore.top > 40, String(railBefore.top));
+  near("expanded", "§4.1 · the card's top is the viewport's + 16", xp?.top, 16, 1);
+  near("expanded", "§4.1 · …and its bottom the viewport's − 16", (xp?.vh ?? 0) - (xp?.bottom ?? 0), 16, 1);
+  yes("expanded", `§4.1 · …so it reaches ABOVE the rail, over the shell's bar (${xp?.top} vs ${railBefore.top})`, (xp?.top ?? 0) < railBefore.top - 40, `${xp?.top} vs ${railBefore.top}`);
   near("expanded", "right — the rail's own", xp?.right, railBefore.right, 0.6);
   /* …and the one it takes: the window's left plus the same 22px gutter the right pays */
   /**
@@ -1291,9 +1318,9 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
    * single height to assert. What survives is the tray's own floor, which is the claim that stopped
    * the 394-against-258 run away.
    */
-  yes("expanded", `§6 · the tray keeps its 150 floor at 1280 (${narrow?.trayHeight})`, (narrow?.trayHeight ?? 0) >= 149.5, String(narrow?.trayHeight));
+  near("expanded", `§4.2 · the tray states 166 at 1280 (${narrow?.trayHeight})`, narrow?.trayHeight, 166, 1);
   record({ area: "expanded", what: "§6 · the tray and the header at 1280, reported (the date row is white now, so the header is not one block)", got: { tray: narrow?.trayHeight, toTier: narrow?.header }, want: "reported" });
-  near("expanded", "the title's midpoint is the tray's at 1280 too", narrow?.ttlMid, narrow?.trayMid, 1);
+  /* §4.2 — placed rather than centred; the corner is asserted at 1440 and the ink is checked here */
   yes("expanded", `…and its ink stays inside the card (${narrow?.right} against ${narrow?.cardRight})`, (narrow?.right ?? 1e9) <= (narrow?.cardRight ?? 0), JSON.stringify(narrow));
   is("expanded", "…with all three stat cards still drawn", narrow?.stats, 3);
 });
@@ -1643,36 +1670,47 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
    * that is where the tag would otherwise be drawn beneath them and read as a control that is half
    * a date. It is clamped rather than hidden, so the reading is its box against theirs.
    */
-  const ctlBox = await page.evaluate(() => {
-    const c = document.querySelector("[data-qcv='tl-controls']")!.getBoundingClientRect();
-    const sc = document.querySelector("[data-qcv='tl-scroll']")!.getBoundingClientRect();
-    return { l: c.left, r: c.right, y: sc.top + sc.height * 0.6 };
-  });
   /**
-   * ⚠️ SWEPT ACROSS THE CONTROLS' WHOLE WIDTH, NOT PROBED AT ONE POINT. One position passed on the
-   * first run and proved nothing: the tag sat clear of the controls because the pointer's own x put
-   * it there, not because the clamp fired. The branch is entered only where the tag WOULD be under
-   * them, so the reading that matters is the crosshair's LINE under the controls while the TAG is
-   * beside them — two boxes, one pointer, which no single position can be relied on to produce.
+   * §5 · THE TAG'S LEFT BOUND IS THE NAMES COLUMN NOW, AND THE SWEEP'S SUBJECT MOVED WITH IT. It
+   * used to sweep the lane's time controls, which §4.2 moved into the tray — so a sweep across
+   * where they used to be is a sweep across empty lane, and the one position that still read a tag
+   * did so because the pointer happened to be over the track. The names column is what the tag must
+   * still clear: it is opaque, and a tag drawn under it is a date the reader cannot see.
    */
+  const ctlBox = await page.evaluate(() => {
+    /* ⚠️ SCOPED TO THE CARD. Every workspace page stays mounted, so an unscoped `tl-names` can
+       answer about a copy the reader cannot see — measured here as a names column whose right edge
+       was 356 against the card's own 568. */
+    const card = document.querySelector("[data-qcv='xp-card']")!;
+    const n = card.querySelector("[data-qcv='tl-names']")!.getBoundingClientRect();
+    const sc = card.querySelector("[data-qcv='tl-scroll']")!.getBoundingClientRect();
+    /* sweep from just inside the names column to 120px past it — the band where the clamp bites */
+    /* ⚠️ THE SWEEP STARTS AT THE COLUMN'S EDGE, NOT INSIDE IT. Over the names the crosshair HIDES
+       by design, so a position in there reads no tag at all — and a population check would call
+       that a miss when it is the page being correct. */
+    return { l: n.right + 2, r: n.right + 140, y: sc.top + sc.height * 0.6, names: n.right, card: Math.round(card.getBoundingClientRect().left), cardW: Math.round(card.getBoundingClientRect().width), sc: Math.round(sc.left), vw: innerWidth,
+      chain: (() => { const out: string[] = []; let e: Element | null = card.querySelector("[data-qcv='tl-scroll']"); while (e && out.length < 8) { const r = e.getBoundingClientRect(); out.push(`${e.tagName}.${(e.className || "").toString().slice(0, 18)}@${Math.round(r.left)}w${Math.round(r.width)}`); e = e.parentElement; } return out; })(),
+      cards: document.querySelectorAll("[data-qcv='xp-card']").length, scrolls: document.querySelectorAll("[data-qcv='tl-scroll']").length };
+  });
   const sweep: { x: number; lineL: number; tagL: number; tagR: number; under: boolean }[] = [];
   for (let i = 0; i <= 6; i += 1) {
     const x = ctlBox.l + ((ctlBox.r - ctlBox.l) * i) / 6;
     await page.mouse.move(x, ctlBox.y);
     await page.waitForTimeout(90);
     const got = await page.evaluate(() => {
-      const t = document.querySelector("[data-qcv='tl-tag']");
-      const ln = document.querySelector("[data-qcv='tl-cross']");
-      const c = document.querySelector("[data-qcv='tl-controls']");
-      if (!t || !c) return null;
-      const px = (n: number) => Math.round(n * 10) / 10;
-      const b = t.getBoundingClientRect(); const cb = c.getBoundingClientRect();
+      const card = document.querySelector("[data-qcv='xp-card']");
+      const t = card?.querySelector("[data-qcv='tl-tag']");
+      const ln = card?.querySelector("[data-qcv='tl-cross']");
+      const n = card?.querySelector("[data-qcv='tl-names']");
+      if (!t || !n) return null;
+      const px = (v: number) => Math.round(v * 10) / 10;
+      const b = t.getBoundingClientRect(); const nb = n.getBoundingClientRect();
       const lb = ln?.getBoundingClientRect();
-      return { tagL: px(b.left), tagR: px(b.right), lineL: lb ? px(lb.left) : NaN, ctlL: px(cb.left), ctlR: px(cb.right) };
+      return { tagL: px(b.left), tagR: px(b.right), lineL: lb ? px(lb.left) : NaN, ctlL: px(nb.left), ctlR: px(nb.right) };
     });
-    if (got) sweep.push({ x: Math.round(x), lineL: got.lineL, tagL: got.tagL, tagR: got.tagR, under: got.lineL >= got.ctlL && got.lineL <= got.ctlR });
+    if (got) sweep.push({ x: Math.round(x), lineL: got.lineL, tagL: got.tagL, tagR: got.tagR, under: got.lineL <= got.ctlR + 8 });
   }
-  record({ area: "timeline", what: "§8.9 · the tag swept across the lane's controls", got: { ctl: { l: Math.round(ctlBox.l), r: Math.round(ctlBox.r) }, sweep }, want: "reported" });
+  record({ area: "timeline", what: "§5 · the tag swept across the names column's right edge", got: { names: Math.round(ctlBox.names), sweep }, want: "reported" });
   /**
    * ⚠️ AND THE LINE IS AT THE POINTER, WHICH IS THE CLAIM THE SWEEP EXISTS ON TOP OF. The scroller's
    * box starts at the names column and `crosshairAt` reads the TRACK's coordinates, so a missing
@@ -1690,14 +1728,14 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
   yes("timeline", `the sweep read the tag at every position (${sweep.length} of 7)`, sweep.length === 7, JSON.stringify(sweep));
   /* the precondition: the crosshair's own line really was under the controls somewhere in the sweep */
   const underRuns = sweep.filter((r) => r.under);
-  yes("timeline", `§10 lock 7 · the crosshair passed under the controls (${underRuns.length} of ${sweep.length} positions)`, underRuns.length > 0, JSON.stringify(sweep));
+  yes("timeline", `§10 · the crosshair came within the tag's left bound (${underRuns.length} of ${sweep.length} positions)`, underRuns.length > 0, JSON.stringify(sweep));
   /* …and the tag was beside them at every one of those positions rather than over them */
-  const overlapping = underRuns.filter((r) => r.tagR > ctlBox.l + 0.6 && r.tagL < ctlBox.r - 0.6);
-  yes("timeline", `§10 lock 7 · …and the tag stayed clear of them throughout (${overlapping.length} overlaps)`, overlapping.length === 0, JSON.stringify(overlapping));
-  const names = await page.evaluate(() => Math.round(document.querySelector("[data-qcv='tl-names']")!.getBoundingClientRect().right * 10) / 10);
-  yes("timeline", `§10 lock 7 · …and right of the names column at every position (${names})`, sweep.every((r) => r.tagL >= names - 0.6), JSON.stringify(sweep.map((r) => r.tagL)));
+  const overlapping = underRuns.filter((r) => r.tagL < ctlBox.names - 0.6);
+  yes("timeline", `§10 · …and the tag never slid under the names column (${overlapping.length} overlaps)`, overlapping.length === 0, JSON.stringify(overlapping));
+  const names = await page.evaluate(() => { const c = document.querySelector("[data-qcv='xp-card']")!; return Math.round(c.querySelector("[data-qcv='tl-names']")!.getBoundingClientRect().right * 10) / 10; });
+  yes("timeline", `§10 · …and right of the names column at every position (names ${names}, ctl ${JSON.stringify(ctlBox)})`, sweep.every((r) => r.tagL >= names - 0.6), JSON.stringify(sweep.map((r) => r.tagL)));
   /* ⚠️ AND IT HIDES OVER THE NAMES COLUMN — where a date would be a date about nothing */
-  const overNames = await page.evaluate(() => { const n = document.querySelector("[data-qcv='tl-names']")!.getBoundingClientRect(); return { x: n.left + 40, y: n.top + n.height / 2 }; });
+  const overNames = await page.evaluate(() => { const c = document.querySelector("[data-qcv='xp-card']")!; const n = c.querySelector("[data-qcv='tl-names']")!.getBoundingClientRect(); return { x: n.left + 40, y: n.top + n.height / 2 }; });
   await page.mouse.move(overNames.x, overNames.y);
   await page.waitForTimeout(250);
   is("timeline", "§8.9 · the crosshair hides over the names column", await page.evaluate(() => document.querySelectorAll("[data-qcv='tl-tag']").length), 0);
@@ -1866,6 +1904,7 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
       tray: box("[data-qcv='xp-tray']"),
       nav: box("[data-qcv='tl-controls']"),
       ctl: box("[data-qcv='xp-ctl']"),
+      lane: box("[data-qcv='tl-lane']"),
       filter: box("[data-qcv='xp-filter']"),
       sort: box("[data-qcv='xp-sort']"),
       reset: box("[data-qcv='xp-reset']"),
@@ -1949,12 +1988,24 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
    * beneath the tray, at the card's own inner left. The claim is still a relationship, and it is
    * still measured as one.
    */
-  near("controls", "the cluster sits 8px into the date row's lane, which begins at the tray's foot", (rest?.ctl?.y ?? 0) - (rest?.tray?.bottom ?? 0), 8, 1);
-  yes("controls", `…and starts at the card's inner left, not centred on anything (${rest?.ctl?.x})`,
-    rest != null && rest.ctl != null && rest.tray != null && Math.abs(rest.ctl.x - (rest.tray.x + 22)) < 1.5,
-    JSON.stringify({ ctl: rest?.ctl?.x, tray: rest?.tray?.x }));
-  /* §6 — "sharing one row": the left cluster and the nav sit at the SAME offset in the lane */
-  near("controls", "…on the same line as the nav", rest?.ctl?.y, rest?.nav?.y, 0.6);
+  /**
+   * §4.1 — THE LANE BEGINS AT THE BODY PANEL'S TOP NOW, not at the tray's foot: the panel is 14px
+   * of desk and a 1px hairline below it. The claim is still a RELATIONSHIP between two boxes —
+   * the cluster sits 8px into the lane — and it is the lane that moved, not the cluster.
+   */
+  near("controls", "the cluster sits 8px into the date row's lane", (rest?.ctl?.y ?? 0) - (rest?.lane?.y ?? 0), 8, 1);
+  near("controls", "§4.1 · …and the lane begins 15px below the tray (14 of desk and a 1px rim)", (rest?.lane?.y ?? 0) - (rest?.tray?.bottom ?? 0), 15, 1.5);
+  yes("controls", `…and starts at the lane's own inner left, not centred on anything (${rest?.ctl?.x})`,
+    rest != null && rest.ctl != null && rest.lane != null && Math.abs(rest.ctl.x - (rest.lane.x + 44)) < 1.5,
+    JSON.stringify({ ctl: rest?.ctl?.x, lane: rest?.lane?.x }));
+  /**
+   * ⚠️ §4.2 — THE NAV IS IN THE TRAY NOW, so "on the same line as the nav" is retired rather than
+   * loosened: the two clusters are in different boxes by design and an equality between their tops
+   * would be a claim the layout no longer makes. What replaces it is that the nav IS in the tray.
+   */
+  yes("controls", `§4.2 · the time controls sit inside the tray (${rest?.nav?.y} vs tray ${rest?.tray?.y}–${rest?.tray?.bottom})`,
+    rest?.nav != null && rest?.tray != null && rest.nav.y >= rest.tray.y && rest.nav.y <= rest.tray.bottom,
+    JSON.stringify({ nav: rest?.nav, tray: rest?.tray }));
 
   /* ⚠️ THE WIDTHS ARE REPORTED, NOT ASSERTED. The ref draws Filter 107 × 40 and Sort 91 × 40; both
      are content-sized here, so pinning them would be a lock on a font's metrics rather than on the

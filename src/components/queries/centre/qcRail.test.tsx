@@ -243,40 +243,50 @@ describe("the court tiles", () => {
 /* ── §7 · the expanded card's box ───────────────────────────────────────────────────────────── */
 
 /**
- * ⚠️ RETARGETED IN v65.2 §2 — AND THE CLAIM CHANGED, NOT JUST THE SIGNATURE. These asserted that
- * the card grew to the WINDOW's edges, inset by the same 22px gutter on each side, which was right
- * while the page filled the window. Now the page and the card are one centred group capped at 1480,
- * and a card grown to the window would leave the page it belongs to behind — on a 2560 screen by
- * hundreds of pixels of desk on each side. Its horizontal extent is the GROUP's; its top and bottom
- * are still the window's, because the group has no vertical extent of its own.
+ * ⚠️ RETARGETED TWICE, AND EACH TIME THE CLAIM CHANGED RATHER THAN THE SIGNATURE. v65.2 §2 moved
+ * the card's horizontal extent from the WINDOW to the centred GROUP, because a card grown to the
+ * window leaves the page it belongs to behind — on a 2560 screen by hundreds of pixels of desk.
+ * v65.3 §4.1 moves its VERTICAL extent from the window to the VIEWPORT, because the card now sits
+ * OVER the shell's bar: it is an overlay on a dimmed page, so the window capsule is not its frame.
+ *
+ * ⚠️ THAT SECOND MOVE IS AN EXCEPTION TO THIS APP'S OWN VIEWPORT LAW, AND IT IS STATED AS ONE. The
+ * law exists because something is normally above an element and a constant offset guesses at it;
+ * here nothing is, which is exactly the condition under which the law does not apply.
  */
-describe("⚠️ the expanded card spans the GROUP, and keeps the window's top and bottom", () => {
+describe("⚠️ the expanded card spans the GROUP, and takes its height from the VIEWPORT (§4.1)", () => {
   const GROUP = { left: 300, right: 1380 };
+  const VH = 900;
   it("its left and right are the group's, to the pixel", () => {
-    const rail = railBox(WIN, 1440)!;
-    const wide = expandedBox(WIN, GROUP)!;
+    const wide = expandedBox(WIN, GROUP, VH)!;
     expect(wide.left).toBe(GROUP.left);
     expect(wide.left + wide.width).toBe(GROUP.right);
     /* ⚠️ AND IT STATES NO `right`. The card is placed by left + width; a third number about the same
        edge is a third thing that can disagree, and computing it would need `window` — which a pure
        function a unit test calls does not have. */
     expect("right" in wide).toBe(false);
-    /* the two it keeps are what make the growth read as the same card rather than a new one */
-    expect([wide.top, wide.height]).toEqual([rail.top, rail.height]);
+  });
+  it("§4.1 · ⚠️ its top and height are the VIEWPORT's, inset 16 — never the window's", () => {
+    const b = expandedBox(WIN, GROUP, VH)!;
+    expect(b.top, "viewport top + 16").toBe(16);
+    expect(b.height, "viewport bottom − 16").toBe(VH - 32);
+    /* the precondition that makes this a real claim: the window is NOT at the viewport's top */
+    expect(WIN.top, "a window flush with the viewport would make the two indistinguishable").toBeGreaterThan(0);
+    expect(b.top).not.toBe(WIN.top + 16);
   });
   it("⚠️ …and a group narrower than the window does NOT give it the window's edges", () => {
     /* the fault this closes: on a wide screen the group is capped and the window is not, so a card
        taking the window's edges is the one thing on the page not centred with everything else */
-    const narrow = expandedBox(WIN, { left: 500, right: 1000 })!;
+    const narrow = expandedBox(WIN, { left: 500, right: 1000 }, VH)!;
     expect(narrow.width).toBe(500);
     expect(narrow.left).toBe(500);
     expect(narrow.left).toBeGreaterThan(WIN.left);
   });
   it("it refuses the same readings the rail refuses", () => {
-    expect(expandedBox({ ...WIN, height: 0 }, GROUP)).toBeNull();
-    expect(expandedBox({ ...WIN, width: NaN }, GROUP)).toBeNull();
-    expect(expandedBox({ ...WIN, width: RAIL_STACK_BELOW - 1 }, GROUP), "stacked: there is no card to grow").toBeNull();
-    expect(expandedBox(WIN, { left: 400, right: 400 }), "a group with no width").toBeNull();
+    expect(expandedBox({ ...WIN, width: NaN }, GROUP, VH)).toBeNull();
+    expect(expandedBox({ ...WIN, width: RAIL_STACK_BELOW - 1 }, GROUP, VH), "stacked: there is no card to grow").toBeNull();
+    expect(expandedBox(WIN, { left: 400, right: 400 }, VH), "a group with no width").toBeNull();
+    expect(expandedBox(WIN, GROUP, 0), "a viewport with no height is a page before layout").toBeNull();
+    expect(expandedBox(WIN, GROUP, 20), "…and one shorter than its own insets").toBeNull();
   });
 });
 

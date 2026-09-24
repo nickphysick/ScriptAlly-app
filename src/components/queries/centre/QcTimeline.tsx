@@ -17,6 +17,7 @@
  * three numbers that agree today.
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { StatusDot } from "../../StatusDot";
 import { dueCell } from "../../../lib/qcBirdsEye";
 import { groupRows, type CalView } from "../../../lib/qcCalView";
@@ -48,8 +49,17 @@ export const QcTimeline: React.FC<{
   /** §8.7 — the dotted chip opens the app's nudge flow for that query. */
   /** §6 — Filter, Sort and ↺, rendered into the date row's top lane. */
   leftControls?: React.ReactNode;
+  /**
+   * §4.2 — where the time controls are DRAWN. They belong to the tray in layout A and to the
+   * scroll state here, so they are rendered by this component and portalled into that host: the
+   * handlers stay beside the value they drive, and the pixels land where the design puts them.
+   * `null` keeps them in the lane, which is what the To-do page's calendar still wants.
+   */
+  timeHost?: HTMLElement | null;
+  /** §4.2 — Find's term, lower-cased. It MARKS and FADES rows; it never filters them. */
+  find?: string;
   onNudge: (id: string) => void;
-}> = ({ rows, view, packageName, nowMs, focusId = null, onOpen, leftControls, onNudge }) => {
+}> = ({ rows, view, packageName, nowMs, focusId = null, onOpen, leftControls, onNudge, timeHost = null, find = "" }) => {
   const boxRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [boxW, setBoxW] = useState(0);
@@ -66,7 +76,6 @@ export const QcTimeline: React.FC<{
    * does not own, so it is read off the element instead of arithmetic.
    */
   const ctlRef = useRef<HTMLDivElement>(null);
-  const [ctlW, setCtlW] = useState(0);
   /**
    * ⚠️ `--qcv-xp-ext` IS RETIRED (v65.2 §6), NOT MERELY UNREAD. It published the distance from the
    * lane's top to the date tier's foot so the Courier's column could overflow DOWNWARD through the
@@ -76,17 +85,22 @@ export const QcTimeline: React.FC<{
    */
   const laneRef = useRef<HTMLDivElement>(null);
   const tierRef = useRef<HTMLDivElement>(null);
-
+  const tagRef = useRef<HTMLSpanElement>(null);
+  /**
+   * §10 — THE TAG'S OWN WIDTH, MEASURED. The clamp has to fire when the tag's LEFT EDGE would cross
+   * the bound, not when its centre would: the rule centres it with `translateX(-50%)`, so a trigger
+   * that compares the centre lets half the tag slide under the names column while reporting itself
+   * clear. Measured on the page: a tag left edge at 561.5 against a bound of 591, from a centre
+   * that was one pixel the right side of it.
+   */
+  const [tagW, setTagW] = useState(0);
   useLayoutEffect(() => {
-    const el = ctlRef.current;
-    if (!el) return undefined;
-    const read = () => setCtlW(el.getBoundingClientRect().width);
-    read();
-    if (typeof ResizeObserver === "undefined") return undefined;
-    const ro = new ResizeObserver(read);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+    const el = tagRef.current;
+    if (!el) return;
+    const w = el.getBoundingClientRect().width;
+    if (w > 0 && Math.abs(w - tagW) > 0.5) setTagW(w);
+  });
+
 
   const ext = useMemo(() => extentOf(rows, nowMs), [rows, nowMs]);
   /**
@@ -192,6 +206,23 @@ export const QcTimeline: React.FC<{
     const id = requestAnimationFrame(() => { if (!put()) requestAnimationFrame(put); });
     return () => cancelAnimationFrame(id);
   }, [boxW, rows.length, ext.fromMs]);
+
+  /**
+   * §4.2 — THE FIRST MATCH SCROLLS INTO VIEW, 110px below the body's top.
+   *
+   * ⚠️ IT SCROLLS THE ROWS VERTICALLY AND LEAVES THE DATES ALONE. Find is about WHO, not WHEN —
+   * moving the track sideways would answer a question nobody asked and lose the reader their place
+   * in the calendar. And it is the SCROLLER's own `scrollTop`, never `scrollIntoView`, which would
+   * scroll every ancestor including the page behind the overlay.
+   */
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || !find) return;
+    const hit = el.querySelector("[data-find='hit']") as HTMLElement | null;
+    if (!hit) return;
+    const top = hit.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - 110;
+    el.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }, [find]);
 
   /** Anything the reader does to the track is theirs: nothing re-places it afterwards. */
   const mine = useCallback(() => { touched.current = true; }, []);
@@ -332,6 +363,28 @@ export const QcTimeline: React.FC<{
     el.scrollTo({ left: Math.max(0, xAt(ext, pxd, ms) - boxW / 2), behavior: "smooth" });
   };
 
+  /**
+   * §4.2 — ‹ Today › and the zoom, rendered ONCE and placed in one of two homes: the tray's own
+   * host in the expanded view, or this component's lane where there is no host.
+   *
+   * ⚠️ ONE ELEMENT, TWO PLACES — never two copies. Two `Today` buttons would be two controls that
+   * have to agree about one scroller, and the second one to be written is the one that forgets.
+   */
+  const timeControls = (
+    <div className="qcv-tl-controls" data-qcv="tl-controls" ref={ctlRef}>
+      <span className="qcv-tl-nav" data-qcv="tl-nav">
+        <button type="button" onClick={() => pan(-NUDGE_WEEKS)} aria-label="Four weeks earlier">‹</button>
+        <button type="button" className="qcv-tl-today" onClick={() => { const el = scrollRef.current; if (el && boxW > 0) { mine(); el.scrollTo({ left: scrollForToday(ext, pxd, boxW, nowMs), behavior: "smooth" }); } }}>Today</button>
+        <button type="button" onClick={() => pan(NUDGE_WEEKS)} aria-label="Four weeks later">›</button>
+      </span>
+      <span className="qcv-tl-zoom" data-qcv="tl-zoom" role="group" aria-label="Zoom">
+        {ZOOM_PRESETS.map((p) => (
+          <button key={p.key} type="button" data-z={p.key} aria-pressed={activePreset(pxd) === p.key} onClick={() => toPreset(p.key)}>{p.label}</button>
+        ))}
+      </span>
+    </div>
+  );
+
   const bar = (r: TlRow, b: TlRow["bars"][number]) => {
     const left = xAt(ext, pxd, b.fromMs);
     const w = Math.max(2, xAt(ext, pxd, b.toMs) - left);
@@ -391,18 +444,7 @@ export const QcTimeline: React.FC<{
           * and after — which is §11 lock 6, and the reason they are not in the scrolling body.
           */}
         {leftControls}
-        <div className="qcv-tl-controls" data-qcv="tl-controls" ref={ctlRef}>
-          <span className="qcv-tl-nav" data-qcv="tl-nav">
-            <button type="button" onClick={() => pan(-NUDGE_WEEKS)} aria-label="Four weeks earlier">‹</button>
-            <button type="button" className="qcv-tl-today" onClick={() => { const el = scrollRef.current; if (el && boxW > 0) { mine(); el.scrollTo({ left: scrollForToday(ext, pxd, boxW, nowMs), behavior: "smooth" }); } }}>Today</button>
-            <button type="button" onClick={() => pan(NUDGE_WEEKS)} aria-label="Four weeks later">›</button>
-          </span>
-          <span className="qcv-tl-zoom" data-qcv="tl-zoom" role="group" aria-label="Zoom">
-            {ZOOM_PRESETS.map((p) => (
-              <button key={p.key} type="button" data-z={p.key} aria-pressed={activePreset(pxd) === p.key} onClick={() => toPreset(p.key)}>{p.label}</button>
-            ))}
-          </span>
-        </div>
+        {timeHost ? createPortal(timeControls, timeHost) : timeControls}
         {/* §8.8 — the edge markers, clear of the controls, and absent when there is nothing off-screen */}
         {edges.earlier > 0 && edges.nearestEarlier != null && (
           <button type="button" className="qcv-tl-marker qcv-tl-marker--l" data-qcv="tl-marker" onClick={() => glide(edges.nearestEarlier!)}>‹ {edges.earlier} due earlier</button>
@@ -410,15 +452,23 @@ export const QcTimeline: React.FC<{
         {edges.later > 0 && edges.nearestLater != null && (
           <button type="button" className="qcv-tl-marker qcv-tl-marker--r" data-qcv="tl-marker" onClick={() => glide(edges.nearestLater!)}>{edges.later} due later ›</button>
         )}
-        {/* §8.9 — the tag rides the lane, clamped clear of BOTH flanks */}
+        {/**
+          * §5 — THE TAG'S BOUNDS ARE THE NAMES COLUMN AND THE PANEL'S RIGHT EDGE.
+          *
+          * ⚠️ IT USED TO CLEAR THE TIME CONTROLS, AND THOSE HAVE LEFT THE LANE (§4.2). The guard was
+          * `NAMES_W + 18 + <the cluster's measured width> + 8` — a clearance around a cluster now in the
+          * tray, so keeping it would clamp the tag away from a strip of empty lane for no reason
+          * anybody reading the page could see. The controls moved, so the clearance goes with them:
+          * what remains is the names column, which is opaque and would hide the tag behind it.
+          */}
         {cross && (() => {
-          /* the controls start 18px past the names column (their rule states it, and the width is
-             measured), and the tag keeps 8px off their right edge */
-          const guard = NAMES_W + 18 + ctlW + 8;
+          const guard = NAMES_W + 8;
           const at = NAMES_W + cross.x - scrollLeft;
-          const under = at < guard;
+          /* the tag is centred, so it is its LEFT EDGE that must clear the bound */
+          const under = at - tagW / 2 < guard;
           return (
             <span
+              ref={tagRef}
               className={`qcv-tl-tag${cross.today ? " qcv-tl-tag--today" : ""}`}
               data-qcv="tl-tag"
               /* ⚠️ UNDER THE CONTROLS IT LEFT-ALIGNS AT THE GUARD RATHER THAN CENTRING ON IT. The
@@ -479,8 +529,9 @@ export const QcTimeline: React.FC<{
                   return (
                     <div
                       key={r.id}
-                      className={`qcv-tl-row${r.group === "watch" ? " qcv-tl-row--watch" : ""}${focusId === r.id ? " qcv-tl-row--focus" : ""}${dueCell(r.row, nowMs).kind === "past" ? " qcv-tl-row--late" : ""}`}
+                      className={`qcv-tl-row${r.group === "watch" ? " qcv-tl-row--watch" : ""}${focusId === r.id ? " qcv-tl-row--focus" : ""}${dueCell(r.row, nowMs).kind === "past" ? " qcv-tl-row--late" : ""}${find ? (r.row.agentName.toLowerCase().includes(find) ? " qcv-tl-row--hit" : " qcv-tl-row--miss") : ""}`}
                       data-qcv="tl-row"
+                      data-find={find ? (r.row.agentName.toLowerCase().includes(find) ? "hit" : "miss") : undefined}
                       data-id={r.id}
                       onClick={() => onOpen(r.id)}
                     >

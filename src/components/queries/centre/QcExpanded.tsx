@@ -9,7 +9,8 @@
  * fade or a slide. A card that faded in would be a NEW card appearing where the old one was, which
  * is a different thing to say about the same view.
  *
- * ⚠️ THE BOX IS MEASURED OFF THE WINDOW CAPSULE, never the viewport — `expandedBox` in `QcRail`.
+ * ⚠️ THE BOX TAKES ITS EDGES FROM THE GROUP AND ITS HEIGHT FROM THE VIEWPORT (§4.1) — the one
+ * place in this app the viewport is the frame, because the card is an overlay OVER the shell's bar.
  * The mockup writes `calc(100vw − 224px − 44px)` because in a drawn page the nav is a constant;
  * here the sidebar collapses, and a width taken from `100vw` runs the card off the screen the
  * moment it does.
@@ -28,25 +29,22 @@ import { QcTimeline } from "./QcTimeline";
 import type { QcRow } from "../../../lib/qcSummary";
 import { BE_HAWK_HEAD } from "./qcArt";
 import { expandedBox, readWindow, type ExpandedBox } from "./QcRail";
+import { nextUp } from "../../../lib/qcBirdsEye";
 import "./qcvExpanded.css";
 
 type Box = ExpandedBox;
 
 /**
- * §6 — the three numbers the header's geometry is built from, and they are stated once because the
- * mock's own `padding-left: 176px` on the cards is ARITHMETIC THAT CANCELS rather than a value.
+ * §4.2 — LAYOUT A'S OWN NUMBERS. The head is 150 wide at the tray's left, and the count cards clear
+ * it by 48 — stated in the sheet as `26 + 150 + 48` rather than as `224`, so moving the picture
+ * moves the cards with it.
  *
- * The head's left and the cards' column both start from the SAME measured title width, so their
- * difference is constant: `HEAD_GAP + HEAD_W + CARD_GAP - COL_GAP` = 34 + 150 + 20 − 28 = 176. One
- * published measurement therefore places the picture AND the cards, and a literal 176 in the sheet
- * would be that sum with its reasoning thrown away — right until any one of the four moved.
+ * ⚠️ `CARDS_PAD` AND ITS FOUR TERMS ARE RETIRED WITH THE LAYOUT THEY DESCRIBED. They expressed one
+ * thing — how far a row of cards had to clear a head placed from MEASURED TEXT — and in layout A
+ * neither the head nor the cards is placed that way. The element that IS placed from measured text
+ * is now "today & next up", and `--qcv-xp-tw` places it: the law survived, its subject moved.
  */
-export const HEAD_GAP = 34;
 export const HEAD_W = 150;
-export const CARD_GAP = 20;
-export const COL_GAP = 28;
-/** What the cards' column pays to clear the head, derived rather than stated. */
-export const CARDS_PAD = HEAD_GAP + HEAD_W + CARD_GAP - COL_GAP;
 
 export const QcExpanded: React.FC<{
   rows: readonly QcRow[];
@@ -86,7 +84,7 @@ export const QcExpanded: React.FC<{
       const win = readWindow(ref.current);
       const g = document.querySelector(".qcv-group") as HTMLElement | null;
       const gb = g ? g.getBoundingClientRect() : null;
-      setBox(win && gb && gb.width > 0 ? expandedBox(win, { left: gb.left, right: gb.right }) : null);
+      setBox(win && gb && gb.width > 0 ? expandedBox(win, { left: gb.left, right: gb.right }, window.innerHeight) : null);
     };
     read();
     if (typeof ResizeObserver === "undefined") return undefined;
@@ -195,6 +193,15 @@ export const QcExpanded: React.FC<{
   /* §8.2 — the whole live pipeline's counts, whatever the filter says */
   const counts = attentionCounts(rows, clock);
   const close = useCallback(() => closeRef.current(), []);
+  /* §4.2 — Find an agent. It MARKS and FADES; it never filters, so the counts, the grouping and the
+     sort are all untouched by typing in it. */
+  const [find, setFind] = useState("");
+  const timeHost = useRef<HTMLDivElement>(null);
+  const [timeReady, setTimeReady] = useState(false);
+  useLayoutEffect(() => { setTimeReady(!!timeHost.current); }, []);
+  const up = nextUp(rows, clock);
+  const term = find.trim().toLowerCase();
+  const found = term ? rows.filter((r) => r.agentName.toLowerCase().includes(term)).length : 0;
 
   return createPortal(
     <div className="qcv-xp" data-qcv="expanded" role="dialog" aria-modal="true" aria-label="Birds-eye view">
@@ -206,18 +213,44 @@ export const QcExpanded: React.FC<{
         style={box ? { top: box.top, left: box.left, width: box.width, height: box.height } : undefined}
       >
         {/**
-          * §6 — THE TRAY IS A TWO-COLUMN GRID INSIDE THE CARD, and the header ground is no longer
-          * one block: the date row beneath it is white (§1.5). The Courier's column, its drawing
-          * and the negative-margin mechanism that carried it down through the date row are all
-          * retired with it — v65.1 phase 1's whole subject, replaced rather than adjusted.
+          * §4.2 — LAYOUT A. The tray positions everything absolutely within its own box.
+          */}
+        {/**
+          * §4.2 — LAYOUT A. The tray positions everything absolutely within its own box: the title
+          * top-left with today & next up beside it, Find and the ✕ top-right, and along the foot
+          * the hawk, the three count cards and the time controls.
           */}
         <header className="qcv-xp-tray" data-qcv="xp-tray">
-          {/* §6 — the clip layer is the tray's own box and radius; it holds the picture and nothing
-              else, so the words above it can never be cut and the head can hang off the bottom. */}
+          {/* §4.2 — the clip layer is the tray's own box and radius; it holds the picture and
+              nothing else, so the words above it can never be cut and the head can hang off. */}
           <span className="qcv-xp-clip" aria-hidden="true">
             <img className="qcv-xp-hawk" data-qcv="xp-hawk" src={`${BE_HAWK_HEAD.src}?v=${BE_HAWK_HEAD.version}`} width={BE_HAWK_HEAD.width} height={BE_HAWK_HEAD.height} alt="" />
           </span>
           <h2 ref={ttlRef} className="qcv-xp-ttl" data-qcv="xp-title">Birds-eye view</h2>
+          {/* §4.2 — today, and the one thing due soonest. Both derived; neither stored. */}
+          <div className="qcv-xp-sub" data-qcv="xp-sub">
+            <u data-qcv="xp-today">{up.date}</u>
+            <span className="qcv-xp-next" data-qcv="xp-next">
+              <b>Next up</b>
+              <span data-qcv="xp-nextline">{up.sentence}</span>
+            </span>
+          </div>
+          {/* §4.2 — Find an agent: it marks and fades, and changes nothing else about the view */}
+          <div className="qcv-xp-find" data-qcv="xp-find">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <circle cx="5" cy="5" r="3.6" stroke="currentColor" strokeWidth="1.2" />
+              <path d="M7.8 7.8L11 11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+            </svg>
+            <input
+              type="search"
+              value={find}
+              onChange={(e) => setFind(e.target.value)}
+              placeholder="Find an agent"
+              aria-label="Find an agent"
+              data-qcv="xp-findinput"
+            />
+            {term !== "" && <span className="qcv-xp-findn" data-qcv="xp-findn">{found === 1 ? "1 found" : found === 0 ? "none" : `${found} found`}</span>}
+          </div>
           {/* ⚠️ THE ✕ IS THE TOPMOST THING AT ITS OWN CENTRE — it sits over the picture, and a
               drawing painted above it would make the one way out unclickable while looking present. */}
           <button type="button" className="qcv-xp-x" data-qcv="xp-close" aria-label="Close the Birds-eye view" onClick={close}>
@@ -225,7 +258,7 @@ export const QcExpanded: React.FC<{
               <path d="M2 2l9 9M11 2l-9 9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
             </svg>
           </button>
-          {/* §8.2 — the three stat cards ARE the attention filter: click to select, click again to
+          {/* §8.2 — the three count cards ARE the attention filter: click to select, click again to
               release, multi-select. A group with none is drawn and disabled, because its absence is
               the fact the card is stating. */}
           <div className={`qcv-xp-stats${view.attention.length ? " qcv-xp-stats--filtered" : ""}`} data-qcv="xp-stats">
@@ -251,6 +284,13 @@ export const QcExpanded: React.FC<{
               );
             })}
           </div>
+          {/**
+            * §4.2 — THE TIME CONTROLS LIVE IN THE TRAY AND ARE RENDERED BY THE TIMELINE. This is the
+            * host they portal into: the handlers stay beside the scroll state they drive, and the
+            * pixels land where layout A puts them. A second copy of `‹ Today ›` in this file would
+            * be two controls that have to agree about one scroller.
+            */}
+          <div className="qcv-xp-time" data-qcv="xp-time" ref={timeHost} />
         </header>
         <div className="qcv-xp-body" data-qcv="xp-body" data-focus={focusId ?? undefined}>
           {/* §6 — the controls ride in the date row's top lane, as overlays over a WHITE row (§1.5): the
@@ -258,6 +298,8 @@ export const QcExpanded: React.FC<{
           <QcTimeline
             rows={rows} view={view} packageName={packageName} nowMs={clock} focusId={focusId} onOpen={onOpen} onNudge={onNudge}
             leftControls={<QcCalControls view={view} onView={setView} menu={menu} onMenu={setMenu} counts={counts} />}
+            timeHost={timeReady ? timeHost.current : null}
+            find={term}
           />
         </div>
       </div>
