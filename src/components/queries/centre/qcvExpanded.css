@@ -124,7 +124,11 @@
 .qcv-xp-n { display: block; font-family: var(--qcv-serif); font-weight: 600; font-size: 34px; line-height: 1; color: var(--qcv-ink); }
 /* ⚠️ THE NAME AND THE HINT MAY WRAP (§8.2) — at 1280 the cards are 87px wide and "Watch and wait"
    does not fit on one line. A `nowrap` here would make the card a horizontal scrollbar. */
-.qcv-xp-nm { display: block; margin-top: 6px; font-family: var(--qcv-type); font-size: 12.5px; line-height: 1.25; color: var(--qcv-ink); }
+/* ⚠️ LOWERCASED BY THE SHEET, NOT BY THE STRING. The mock types these labels in lower case on the
+   cards; `ATTENTION_LABEL` is also a GROUP HEADING and a Filter option, where "overdue" would read
+   as a mistake. A sentence-case string can be quietened by a stylesheet — which is the same rule
+   §5's due column states from the other end, where a shouting string cannot. */
+.qcv-xp-nm { display: block; margin-top: 6px; font-family: var(--qcv-type); font-size: 12.5px; line-height: 1.25; text-transform: lowercase; color: var(--qcv-ink); }
 .qcv-xp-hint { display: block; margin-top: 4px; font-family: var(--qcv-mono); font-size: 7px; line-height: 1.5; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-45); }
 
 /**

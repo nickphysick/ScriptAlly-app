@@ -9,6 +9,7 @@ import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { CARDS_PAD, CARD_GAP, COL_GAP, HEAD_GAP, HEAD_W } from "./QcExpanded";
+import { ATTENTION_LABEL } from "../../../lib/qcBirdsEye";
 import { ATTENTION_HINT } from "../../../lib/qcBirdsEye";
 
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
@@ -223,6 +224,18 @@ describe("§6 · the expanded header", () => {
     expect(css).not.toContain("--qcv-xp-ext");
     expect(css, "the one-block ground outlived the date row it ran into").not.toContain("--qcv-xp-lcol");
   });
+
+  /**
+   * ⚠️ THE CARD LABELS ARE LOWERCASED BY THE SHEET, NOT BY THE STRING. The mock types them in lower
+   * case; `ATTENTION_LABEL` is also a group heading and a Filter option, where "overdue" reads as a
+   * mistake. A sentence-case string can be quietened by a stylesheet; a shouting one cannot, which
+   * is why the due column's strings go the other way.
+   */
+  it("§6 · the stat cards' labels are lowercased by the sheet, and the string stays sentence case", () => {
+    expect(rule(".qcv-xp-nm")).toMatch(/text-transform:\s*lowercase/);
+    expect(ATTENTION_LABEL.overdue, "the string is read by the group headings and the Filter too").toBe("Overdue");
+  });
+
 });
 
 describe("§8.2 · the title and the stat cards", () => {
