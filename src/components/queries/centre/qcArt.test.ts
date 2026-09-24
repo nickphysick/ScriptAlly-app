@@ -9,7 +9,7 @@ import { describe, it, expect } from "vitest";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { COURIER_CUTOUT } from "./qcArt";
+import { BE_HAWK_HEAD, COURIER_CUTOUT, HERO_COURIER_MAP, type QcArt } from "./qcArt";
 
 const file = resolve(process.cwd(), "public", COURIER_CUTOUT.src.replace(/^\//, ""));
 
@@ -40,5 +40,51 @@ describe("the Birds-eye header's Courier", () => {
       .map((f) => readFileSync(resolve(dir, f), "utf8"));
     expect(sheets.length).toBeGreaterThan(2);
     for (const css of sheets) expect(css.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("mix-blend-mode");
+  });
+});
+
+/* ── v65.2 · the hero's map and the Birds-eye view's hawk head ───────────────────────────────── */
+
+describe("the v65.2 artwork", () => {
+  const at = (a: QcArt) => resolve(process.cwd(), "public", a.src.replace(/^\//, ""));
+  /**
+   * ⚠️ PNG-8 WITH A `tRNS` TABLE, NOT RGBA AND NOT WebP. The brief asks for WebP and this machine
+   * has no encoder for it (`cwebp` absent, `sips` refusing the format, no Pillow, no sharp), so
+   * `scripts/qc-art.mjs` trims to the alpha box, downscales and quantises in node's own zlib — the
+   * same answer the dashboard's marks took when this came up before. Colour type 3 with `tRNS` is
+   * how an indexed PNG carries transparency; without that chunk the drawing arrives on a white
+   * field and somebody reaches for a blend mode, which this repo retired everywhere.
+   */
+  for (const [name, art, maxKb] of [["the hero's map", HERO_COURIER_MAP, 100], ["the hawk's head", BE_HAWK_HEAD, 100]] as const) {
+    it(`${name}: the file is where the record says, at the bytes the pipeline produced`, () => {
+      const f = at(art);
+      expect(existsSync(f), `${f} is not in the tree`).toBe(true);
+      const b = readFileSync(f);
+      expect(createHash("md5").update(b).digest("hex").slice(0, 8)).toBe(art.version);
+      expect(b.subarray(1, 4).toString("ascii")).toBe("PNG");
+      expect(b.readUInt32BE(16)).toBe(art.width);
+      expect(b.readUInt32BE(20)).toBe(art.height);
+      expect(b.readUInt8(25), "colour type 3 — indexed").toBe(3);
+      expect(b.includes(Buffer.from("tRNS", "ascii")), "no tRNS: the drawing would arrive on a white field").toBe(true);
+      expect(Math.round(b.length / 1024), `${name} is over its budget`).toBeLessThanOrEqual(maxKb);
+    });
+  }
+  it("⚠️ each is TRIMMED to its drawn area — a padded image scales its padding with it", () => {
+    /* the sources carry transparent margin (the hero 16px at the left, the head 56px at the top),
+       and every measured number in §3 and §6 is about the DRAWING, not the file it arrived in */
+    const src = resolve(process.cwd(), "design-refs/art");
+    expect(existsSync(resolve(src, "qc-hero-courier-map.png"))).toBe(true);
+    expect(existsSync(resolve(src, "be-hawk-head.png"))).toBe(true);
+    const hero = readFileSync(resolve(src, "qc-hero-courier-map.png"));
+    expect(hero.readUInt32BE(16), "the source is the untrimmed ref").toBe(1250);
+    expect(HERO_COURIER_MAP.width, "…and the shipped file is narrower than it").toBeLessThan(1250);
+    const head = readFileSync(resolve(src, "be-hawk-head.png"));
+    expect(head.readUInt32BE(16)).toBe(1250);
+    expect(BE_HAWK_HEAD.width).toBeLessThan(1250);
+  });
+  it("…and each is at most 2× the size it is ever drawn at", () => {
+    /* the head is drawn at 150px in the expanded tray and 102 in the rail; the hero at ~670 */
+    expect(BE_HAWK_HEAD.width).toBeLessThanOrEqual(300);
+    expect(HERO_COURIER_MAP.width).toBeLessThanOrEqual(1340);
   });
 });

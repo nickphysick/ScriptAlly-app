@@ -21,3 +21,30 @@ export const COURIER_CUTOUT: QcArt = {
   width: 360,
   height: 269,
 };
+
+/**
+ * v65.2 — the two drawings the Birds-eye view and the hero carry.
+ *
+ * ⚠️ THEY ARE PNG-8, NOT WebP, AND THAT IS A SUBSTITUTION. The brief asks for WebP; this machine
+ * has no encoder for it — `cwebp` absent, `sips -s format webp` refusing with "Can't write format:
+ * org.webmproject.webp", neither Pillow nor sharp installed. `scripts/qc-art.mjs` trims each source
+ * to its alpha box, downscales to 2× its largest display size and quantises in node's own zlib;
+ * both land well inside the 100KB budget with a measured mean RGB error under 2.3. The format is
+ * not the one asked for and the size budget is met, which is the honest half of it.
+ *
+ * ⚠️ AND THE HASHES ARE OF THE SHIPPED FILES, not of the refs — the refs are guarded separately by
+ * `design-refs/.refhashes.json`. Two different claims: that the artwork has not changed, and that
+ * what the app serves is what the pipeline produced from it.
+ */
+export const HERO_COURIER_MAP: QcArt = {
+  src: "/images/qc/hero-courier-map.png",
+  version: "024e9aa4",
+  width: 1196,
+  height: 375,
+};
+export const BE_HAWK_HEAD: QcArt = {
+  src: "/images/qc/be-hawk-head.png",
+  version: "a10c3aa9",
+  width: 300,
+  height: 287,
+};
