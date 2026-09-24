@@ -806,6 +806,165 @@ test("§1 · ?view=calendar opens the Birds-eye view expanded, and `cal` is its 
   }
 });
 
+/**
+ * ⚠️ §8.4 · THE CLAIM ONLY A RENDER CAN MAKE: the today line, the TODAY pill's centre and an
+ * overdue bar's end must meet on the SAME PIXEL at every zoom. They come from one derivation, which
+ * is what makes it true — and the point of measuring is that "one derivation" is a property of the
+ * code and "the same pixel" is a property of the page.
+ */
+test("§8 · the expanded body — the today line, the pill and an overdue bar meet at every zoom", async ({ page }) => {
+  await openApp(page, 1440, 860, "?view=calendar");
+  await page.waitForTimeout(900);
+  const read = async () => page.evaluate(() => {
+    const card = document.querySelector("[data-qcv='xp-card']");
+    if (!card) return null;
+    const px = (n: number) => Math.round(n * 10) / 10;
+    const line = card.querySelector("[data-qcv='tl-todayline']")?.getBoundingClientRect();
+    const pill = card.querySelector("[data-qcv='tl-todaypill']")?.getBoundingClientRect();
+    /* an overdue bar ends at today: its right edge is the third thing that must agree */
+    const over = [...card.querySelectorAll("[data-qcv='tl-over']")].map((e) => e.getBoundingClientRect()).filter((b) => b.width > 0);
+    const bars = card.querySelectorAll("[data-qcv='tl-bar']").length;
+    const scroll = card.querySelector("[data-qcv='tl-scroll']") as HTMLElement | null;
+    return {
+      line: line ? px(line.left) : null,
+      pill: pill ? px(pill.left + pill.width / 2) : null,
+      overEnds: over.map((b) => px(b.right)),
+      bars,
+      rows: card.querySelectorAll("[data-qcv='tl-row']").length,
+      groups: [...card.querySelectorAll("[data-qcv='tl-group']")].map((g) => g.getAttribute("data-group")),
+      heat: card.querySelectorAll("[data-qcv='tl-heat'] i").length,
+      months: card.querySelectorAll("[data-qcv='tl-month']").length,
+      zoom: [...card.querySelectorAll("[data-qcv='tl-zoom'] button")].map((b) => ({ z: b.getAttribute("data-z"), on: b.getAttribute("aria-pressed") })),
+      /* §8.6 — the names cell is sticky and OPAQUE */
+      namesBg: (() => { const n = card.querySelector("[data-qcv='tl-names']"); return n ? getComputedStyle(n).backgroundColor : null; })(),
+      namesPos: (() => { const n = card.querySelector("[data-qcv='tl-names']"); return n ? getComputedStyle(n).position : null; })(),
+      scrolls: scroll ? scroll.scrollWidth > scroll.clientWidth + 1 : false,
+    };
+  });
+
+  const at = await read();
+  yes("timeline", "the body drew", !!at, JSON.stringify(at));
+  /**
+   * ⚠️ THE PRECONDITION EVERY READING BELOW DEPENDS ON: TODAY IS ON SCREEN, at 58% of the track.
+   * Without it the line, the pill and twenty-four bar ends agree with each other 9,800px off the
+   * right of the window — which is exactly what happened, and the comparison passed. A set of
+   * numbers that agree is not evidence they are in the right place.
+   */
+  const onScreen = await page.evaluate(() => {
+    const sc = document.querySelector("[data-qcv='tl-scroll']") as HTMLElement | null;
+    const el = document.querySelector("[data-qcv='tl-todayline']");
+    const names = document.querySelector("[data-qcv='tl-names']");
+    if (!sc || !el || !names) return null;
+    const b = sc.getBoundingClientRect();
+    const l = el.getBoundingClientRect();
+    /**
+     * ⚠️ AGAINST THE TRACK, NOT THE SCROLLER. §8.4's 58% is of the VISIBLE TRACK — the dates — and
+     * the names column is 260px of the scroller that holds no dates at all. Measured against the
+     * whole scroller the same correct placement reads 68%, and the ten points are exactly the
+     * names column. A denominator is half of every percentage.
+     */
+    const nw = names.getBoundingClientRect().width;
+    const trackLeft = b.left + nw;
+    const trackW = b.width - nw;
+    return { at: Math.round(((l.left - trackLeft) / trackW) * 100), scrollLeft: Math.round(sc.scrollLeft), names: Math.round(nw), inside: l.left >= trackLeft && l.left <= b.right };
+  });
+  yes("timeline", `⚠️ today is ON SCREEN when the view opens (${onScreen?.at}% across, scrollLeft ${onScreen?.scrollLeft})`, !!onScreen?.inside, JSON.stringify(onScreen));
+  /* §8.4 — and at 58% of the track, which is where the view is placed to put it */
+  near("timeline", "…at 58% of the visible track", onScreen?.at, 58, 8);
+  yes("timeline", `it drew rows (${at?.rows}) and bars (${at?.bars})`, (at?.rows ?? 0) > 3 && (at?.bars ?? 0) > 3, JSON.stringify({ rows: at?.rows, bars: at?.bars }));
+  record({ area: "timeline", what: "the body at 1440, on open", got: at, want: "reported" });
+  is("timeline", "§8.6 · the names cell is sticky", at?.namesPos, "sticky");
+  yes("timeline", `…and opaque (${at?.namesBg}) — or the dates scroll visibly behind the names`, at?.namesBg === "rgb(255, 255, 255)", String(at?.namesBg));
+  is("timeline", "§8.4 · the date track scrolls sideways", at?.scrolls, true);
+  yes("timeline", `§8.5 · the heat drew weeks (${at?.heat})`, (at?.heat ?? 0) > 4, String(at?.heat));
+  yes("timeline", `§8.4 · the tier drew months (${at?.months})`, (at?.months ?? 0) > 2, String(at?.months));
+
+  /**
+   * ⚠️ AT THREE ZOOMS, AND THE PRECONDITION IS THAT THE SCALE REALLY MOVED. Three readings that
+   * happen to be identical because the zoom did nothing would satisfy the claim while proving
+   * nothing about it.
+   */
+  const seenLines: number[] = [];
+  for (const z of ["6w", "3m", "6m"]) {
+    await page.locator(`[data-qcv='tl-zoom'] button[data-z='${z}']`).click();
+    await page.waitForTimeout(500);
+    const r = await read();
+    yes("timeline", `zoom ${z} — the view is still drawn`, !!r, JSON.stringify(r));
+    seenLines.push(r?.line ?? -1);
+    near("timeline", `zoom ${z} — the TODAY pill's centre is ON the today line`, r?.pill, r?.line, 1.5);
+    for (const end of r?.overEnds ?? []) near("timeline", `zoom ${z} — an overdue bar ends on the today line`, end, r?.line, 1.5);
+    is("timeline", `zoom ${z} — the switch lights it`, (r?.zoom ?? []).find((b) => b.z === z)?.on, "true");
+    seen("tl-zoom", `${z}: line ${r?.line} · overdue bars ${r?.overEnds.length}`);
+  }
+  yes("timeline", `the three zooms really moved the view (${JSON.stringify(seenLines)}) — or the claim above is about one state`, new Set(seenLines).size > 1, JSON.stringify(seenLines));
+
+  /* §8.8 — the markers count dates off the edges, and go when there are none */
+  await page.locator("[data-qcv='tl-zoom'] button[data-z='6w']").click();
+  await page.waitForTimeout(400);
+  const markers = await page.evaluate(() => [...document.querySelectorAll("[data-qcv='tl-marker']")].map((m) => (m.textContent ?? "").trim()));
+  record({ area: "timeline", what: "§8.8 · the edge markers at the tightest zoom", got: markers, want: "reported" });
+  for (const m of markers) yes("timeline", `a marker states a count ("${m}")`, /\d+ due (earlier|later)/.test(m), m);
+
+  /* §8.9 — the crosshair follows the pointer and names a day */
+  const box = await page.evaluate(() => { const s = document.querySelector("[data-qcv='tl-scroll']")!.getBoundingClientRect(); return { x: s.left + s.width * 0.7, y: s.top + s.height * 0.6 }; });
+  await page.mouse.move(box.x, box.y);
+  await page.waitForTimeout(250);
+  const tag = await page.evaluate(() => {
+    const t = document.querySelector("[data-qcv='tl-tag']");
+    const c = document.querySelector("[data-qcv='tl-cross']");
+    return { text: (t?.textContent ?? "").trim(), line: !!c };
+  });
+  yes("timeline", `§8.9 · the crosshair names a day ("${tag.text}")`, /^(Today · )?\d+ [A-Z][a-z]{2}( · (Mon|Tue|Wed|Thu|Fri|Sat|Sun))?$/.test(tag.text), tag.text);
+  is("timeline", "…and draws its line", tag.line, true);
+  /* ⚠️ AND IT HIDES OVER THE NAMES COLUMN — where a date would be a date about nothing */
+  const overNames = await page.evaluate(() => { const n = document.querySelector("[data-qcv='tl-names']")!.getBoundingClientRect(); return { x: n.left + 40, y: n.top + n.height / 2 }; });
+  await page.mouse.move(overNames.x, overNames.y);
+  await page.waitForTimeout(250);
+  is("timeline", "§8.9 · the crosshair hides over the names column", await page.evaluate(() => document.querySelectorAll("[data-qcv='tl-tag']").length), 0);
+
+  await page.screenshot({ path: resolve(OUT, "expanded-body-1440.png") });
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(400);
+});
+
+/**
+ * ⚠️ §8.10 · THE CONTROLS AND THE TODAY LINE SURVIVE EVERY REBUILD. This is the one the mockup
+ * failed, and it fails silently: the rows rebuild, the overlays go with them, and the view looks
+ * finished until somebody reaches for a control that is no longer there.
+ */
+test("§8.10 · a zoom rebuilds the rows and the lane's controls survive it", async ({ page }) => {
+  await openApp(page, 1440, 860, "?view=calendar");
+  await page.waitForTimeout(900);
+  const parts = () => page.evaluate(() => {
+    const c = document.querySelector("[data-qcv='xp-card']");
+    return {
+      nav: c?.querySelectorAll("[data-qcv='tl-nav'] button").length ?? 0,
+      zoom: c?.querySelectorAll("[data-qcv='tl-zoom'] button").length ?? 0,
+      line: c?.querySelectorAll("[data-qcv='tl-todayline']").length ?? 0,
+      rows: c?.querySelectorAll("[data-qcv='tl-row']").length ?? 0,
+    };
+  });
+  const before = await parts();
+  is("rebuild", "three nav buttons and three zoom presets", [before.nav, before.zoom], [3, 3]);
+  is("rebuild", "one today line", before.line, 1);
+  for (const act of ["6m", "6w"]) {
+    await page.locator(`[data-qcv='tl-zoom'] button[data-z='${act}']`).click();
+    await page.waitForTimeout(400);
+    const after = await parts();
+    is("rebuild", `after ${act} — the nav survived`, after.nav, before.nav);
+    is("rebuild", `after ${act} — the zoom switch survived`, after.zoom, before.zoom);
+    is("rebuild", `after ${act} — the today line survived`, after.line, before.line);
+    is("rebuild", `after ${act} — and the rows are all still there`, after.rows, before.rows);
+  }
+  /* ‹ › move the view and leave everything standing */
+  await page.locator("[data-qcv='tl-nav'] button").first().click();
+  await page.waitForTimeout(400);
+  const panned = await parts();
+  is("rebuild", "after a pan — everything survived", [panned.nav, panned.zoom, panned.line], [3, 3, 1]);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(400);
+});
+
 test("§4 · the courts — three tiles, framed, and a tile deals exactly what it counts", async ({ page }) => {
   await openApp(page, 1440, 860);
   const tiles = await page.evaluate(() => {
@@ -1227,8 +1386,16 @@ test("the entrance — it runs once when the data lands, is over inside 800ms, a
   await page.goto("/queries?view=list");
   const visible = () => page.evaluate(() => { const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0); return p ? { busy: p.getAttribute("aria-busy"), entering: p.classList.contains("qcv-page--enter"), running: p.getAnimations({ subtree: true }).filter((a) => a.playState === "running" && (a as CSSAnimation).animationName?.startsWith("qcv-") && (a as CSSAnimation).animationName !== "qcv-pulse").length, sk: p.querySelectorAll(".qcv-sk").length } : null; });
   await expect.poll(async () => (await visible())?.busy, { timeout: 30_000 }).toBe("true");
+  /**
+   * ⚠️ POLLED FOR `entering`, NOT READ ONCE AFTER `busy` FLIPS. The entering class comes off by an
+   * 800ms timer, so a single reading taken the moment the data lands assumes the poll caught the
+   * window — and under a long run's load it does not. This case passed alone and failed inside a
+   * 25-case run, which is the signature. Polling for the state the claim is about still FAILS if
+   * the entrance never runs (the poll times out); it just stops failing when the machine is busy.
+   */
   await expect.poll(async () => (await visible())?.busy, { timeout: 30_000, intervals: [25] }).toBe("false");
-  const landed = await visible();
+  let landed = await visible();
+  await expect.poll(async () => { const v = await visible(); if (v?.entering) landed = v; return v?.entering; }, { timeout: 3_000, intervals: [15], message: "the page never entered — no entrance ran when the data landed" }).toBe(true);
   is("entrance", "placeholders are removed AT ONCE — none beside the content (never a cross-fade)", landed?.sk, 0);
   is("entrance", "the page is entering", landed?.entering, true);
   yes("entrance", "entrance animations are running (the precondition — or 'over by 800ms' is trivially true)", (landed?.running ?? 0) > 5, String(landed?.running));

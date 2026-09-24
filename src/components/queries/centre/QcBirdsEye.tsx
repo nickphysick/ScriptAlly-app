@@ -26,7 +26,7 @@ const Bar: React.FC<{ r: EyeRow }> = ({ r }) => (
       className={`qcv-be-bar${r.bar.cut ? " qcv-be-bar--cut" : ""}${r.bar.dashed ? " qcv-be-bar--dash" : ""}${r.court === "you" ? " qcv-be-bar--you" : ""}`}
       data-qcv="be-bar"
       data-status={r.row.status}
-      /* the stage's own colour, set the way `QcList` and `QcCalendar` set it — one vocabulary */
+      /* the stage's own colour, set the way `QcList` and `QcTimeline` set it — one vocabulary */
       style={{ left: `${r.bar.left}%`, width: `${r.bar.width}%`, ["--qcv-state" as string]: `var(--state-${r.row.state})` }}
     >
       {/* the overrun rides INSIDE the bar, so nothing can leave it behind when the bar moves */}

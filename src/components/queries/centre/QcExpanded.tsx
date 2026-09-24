@@ -22,6 +22,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { createPortal } from "react-dom";
 import { lockStageScroll } from "../../../lib/stageScroll";
 import { ATTENTION_HINT, eyeGroups, type Attention, type EyeGroup } from "../../../lib/qcBirdsEye";
+import { QcTimeline } from "./QcTimeline";
 import type { QcRow } from "../../../lib/qcSummary";
 import { COURIER_CUTOUT } from "./qcArt";
 import { expandedBox, readWindow, type RailBox } from "./QcRail";
@@ -36,9 +37,13 @@ export const QcExpanded: React.FC<{
   rows: readonly QcRow[];
   nowMs: number;
   onClose: () => void;
-  /** The query a rail row arrived from, highlighted once there are rows to highlight (phase 5). */
+  /** The query a rail row arrived from: ringed, and scrolled to the middle (§8.11). */
   focusId?: string | null;
-}> = ({ rows, nowMs, onClose, focusId = null }) => {
+  /** §8.11 — a row or a bar opens the query, centred and in focus. */
+  onOpen: (id: string) => void;
+  /** §8.7 — the dotted chip opens the app's nudge flow for that query. */
+  onNudge: (id: string) => void;
+}> = ({ rows, nowMs, onClose, focusId = null, onOpen, onNudge }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState<Box | null>(null);
   const [open, setOpen] = useState(false);
@@ -113,7 +118,20 @@ export const QcExpanded: React.FC<{
     };
   }, []);
 
-  const groups: EyeGroup[] = eyeGroups(rows, nowMs);
+  /**
+   * ⚠️ THE CLOCK IS FROZEN WHEN THE CARD OPENS, and that is not an optimisation. `nowMs` arrives as
+   * `Date.now()` written inline at the mount, so it is a NEW value on every render of the page —
+   * which made every memo in the body a new object every time, and the frame that places the scroll
+   * was cancelled by its own effect re-running before it could fire. The view opened two and a half
+   * years in the past with `scrollLeft` at 0, and every case passed.
+   *
+   * ⚠️ AND IT IS RIGHT ON ITS OWN TERMS. This view draws today as a LINE; a today that moved
+   * because a parent re-rendered would slide the line, the pill and every bar's end under the
+   * reader mid-session. A few minutes' staleness is the correct trade, and the card is re-opened
+   * often enough that it never shows.
+   */
+  const [clock] = useState(() => nowMs);
+  const groups: EyeGroup[] = eyeGroups(rows, clock);
   const byKey = (k: Attention) => groups.find((g) => g.key === k);
   const close = useCallback(() => closeRef.current(), []);
 
@@ -160,8 +178,9 @@ export const QcExpanded: React.FC<{
             })}
           </div>
         </header>
-        {/* the date row and the rows arrive in phase 5; the header is what this phase builds */}
-        <div className="qcv-xp-body" data-qcv="xp-body" data-focus={focusId ?? undefined} />
+        <div className="qcv-xp-body" data-qcv="xp-body" data-focus={focusId ?? undefined}>
+          <QcTimeline rows={rows} nowMs={clock} focusId={focusId} onOpen={onOpen} onNudge={onNudge} />
+        </div>
       </div>
     </div>,
     document.body,

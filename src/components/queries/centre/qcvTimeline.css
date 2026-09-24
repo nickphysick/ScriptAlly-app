@@ -1,0 +1,160 @@
+/**
+ * Query Centre v65 §8.4–§8.9 — the expanded Birds-eye view's body.
+ *
+ * ⚠️ THE LANE'S CONTROLS SIT OVER THE SCROLLER, NOT IN IT (§8.4, §8.10). They are siblings of the
+ * thing that scrolls, absolutely placed above it — so nothing scrolls under them and a rebuild of
+ * the rows cannot take them with it. In the mockup they lived inside the axis and a re-render lost
+ * them; the fix is structural, because a control that has to be put back is one that will one day
+ * not be.
+ *
+ * ⚠️ AND THE NAMES CELL IS `position: sticky; left: 0` WITH AN OPAQUE FILL. A transparent sticky
+ * cell has the dates scrolling visibly behind the names, which reads as a rendering fault rather
+ * than as a column.
+ */
+@import "./qcvPage.css";
+
+.qcv-tl { position: relative; display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+
+/* §8.4 — the lane: 52px of the tray's colour, with the controls over it */
+.qcv-tl-lane {
+  position: relative; flex: none; height: 52px; box-sizing: border-box;
+  background: #f5f1eb; border-bottom: 1px solid rgba(28, 19, 15, 0.1);
+}
+.qcv-tl-controls { position: absolute; top: 6px; left: calc(var(--qcv-tl-names) + 18px); display: flex; align-items: center; gap: 10px; z-index: 4; }
+.qcv-tl-nav, .qcv-tl-zoom { display: flex; align-items: center; height: 40px; box-sizing: border-box; background: #fff; border: 1px solid rgba(28, 19, 15, 0.12); border-radius: 20px; }
+.qcv-tl-nav button {
+  height: 100%; padding: 0 12px; border: 0; background: none; cursor: pointer;
+  font-family: var(--qcv-type); font-size: 15px; line-height: 1; color: var(--qcv-ink); border-radius: 20px;
+}
+.qcv-tl-nav .qcv-tl-today { padding: 0 18px; }
+.qcv-tl-nav button:hover, .qcv-tl-zoom button:hover { background: var(--qcv-parchment); }
+.qcv-tl-zoom { padding: 4px; gap: 2px; }
+.qcv-tl-zoom button {
+  height: 32px; padding: 0 12px; border: 0; background: none; cursor: pointer; border-radius: 16px;
+  font-family: var(--qcv-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcv-ink-70);
+}
+/* ⚠️ THE PRESSED PRESET IS ANTHRACITE, the app's one ink fill for a chosen control */
+.qcv-tl-zoom button[aria-pressed="true"] { background: var(--sp-anthracite); color: #fff; }
+.qcv-tl-nav button:focus-visible, .qcv-tl-zoom button:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: -2px; }
+
+/* §8.8 — the markers, in the lane and clear of the controls */
+.qcv-tl-marker {
+  position: absolute; top: 12px; z-index: 3; height: 28px; padding: 0 12px; border-radius: 14px;
+  background: #fff; border: 1px solid rgba(28, 19, 15, 0.14); cursor: pointer;
+  font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-70);
+}
+.qcv-tl-marker--l { left: calc(var(--qcv-tl-names) + 340px); }
+.qcv-tl-marker--r { right: 18px; }
+.qcv-tl-marker:hover { background: var(--qcv-parchment); }
+
+/* §8.9 — the crosshair's tag, riding the lane */
+.qcv-tl-tag {
+  position: absolute; top: 4px; z-index: 5; transform: translateX(-50%); pointer-events: none;
+  padding: 3px 8px 4px; border-radius: 9px; background: var(--qcv-ink); color: #f5f1eb;
+  font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap;
+}
+.qcv-tl-tag--today { background: var(--qcv-rust); }
+
+/* the scroller: both ways, inside the card */
+.qcv-tl-scroll { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+.qcv-tl-inner { position: relative; }
+
+/**
+ * §8.4 — the date tier. The tray's colour carries on down through it, so the header and the dates
+ * read as ONE block with the rows starting on white beneath a single hairline.
+ */
+.qcv-tl-tier { position: relative; height: 52px; background: #f5f1eb; border-bottom: 1px solid rgba(28, 19, 15, 0.1); }
+.qcv-tl-mon {
+  position: absolute; top: 6px; transform: translateX(-50%);
+  font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap;
+}
+.qcv-tl-wk { position: absolute; bottom: 0; width: 1px; height: 4px; background: rgba(28, 19, 15, 0.16); }
+/* §8.5 — the heat sits UNDER the labels and over nothing */
+.qcv-tl-heat { position: absolute; left: 0; right: 0; bottom: 5px; height: 24px; }
+.qcv-tl-heat i { position: absolute; bottom: 0; background: var(--sp-anthracite); border-radius: 2px; }
+.qcv-tl-todaypill {
+  position: absolute; top: 5px; transform: translateX(-50%); z-index: 2;
+  padding: 3px 9px 4px; border-radius: 9px; background: var(--qcv-ink); color: #f5f1eb;
+  font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
+}
+
+/* §8.6 — the rows */
+.qcv-tl-rows { position: relative; background: #fff; }
+/* ⚠️ THE TODAY LINE AND THE CROSSHAIR RUN THE ROWS' FULL HEIGHT, and both are placed from the same
+   `xAt` every bar is placed from — one derivation, so they cannot drift apart at a zoom. */
+.qcv-tl-todayline { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--qcv-ink); z-index: 3; pointer-events: none; }
+.qcv-tl-cross { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(28, 19, 15, 0.28); z-index: 3; pointer-events: none; }
+.qcv-tl-none { margin: 40px 0; text-align: center; font-family: var(--qcv-type); font-size: 15px; color: var(--qcv-ink-45); }
+
+.qcv-tl-band { position: relative; height: 30px; background: #f8f4ee; }
+.qcv-tl-band span {
+  position: sticky; left: 0; display: inline-flex; align-items: baseline; gap: 8px; height: 30px;
+  padding: 0 0 0 18px; box-sizing: border-box;
+  font-family: var(--qcv-type); font-size: 14px; line-height: 30px; color: var(--qcv-ink);
+}
+.qcv-tl-band i { font-style: normal; font-family: var(--qcv-mono); font-size: 9px; color: var(--qcv-ink-45); }
+
+.qcv-tl-row { position: relative; display: grid; grid-template-columns: var(--qcv-tl-names) auto; height: 44px; border-bottom: 1px solid var(--qcv-hair); cursor: pointer; }
+.qcv-tl-row:hover { background: var(--qcv-parchment); }
+/* §8.11 — a row arrived at from the rail wears an ink ring */
+.qcv-tl-row--focus { box-shadow: inset 0 0 0 1.6px var(--qcv-ink); }
+/* §8.6 — watch-and-wait bars sit back until the row is under the pointer */
+.qcv-tl-row--watch .qcv-tl-bar { opacity: 0.72; }
+.qcv-tl-row--watch:hover .qcv-tl-bar { opacity: 1; }
+
+/* ⚠️ STICKY AND OPAQUE — a transparent sticky cell has the dates scrolling visibly behind the names */
+.qcv-tl-names {
+  position: sticky; left: 0; z-index: 2; display: flex; align-items: center; gap: 10px;
+  box-sizing: border-box; padding: 0 12px 0 18px; background: #fff; border-right: 1px solid var(--qcv-hair);
+}
+.qcv-tl-row:hover .qcv-tl-names { background: var(--qcv-parchment); }
+.qcv-tl-ini {
+  flex: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: var(--sp-anthracite); color: #f5f1eb;
+  font-family: var(--qcv-mono); font-weight: 600; font-size: 9px; line-height: 1; font-style: normal;
+}
+.qcv-tl-who { min-width: 0; }
+.qcv-tl-nm { display: block; font-family: var(--qcv-serif); font-weight: 600; font-size: 13.5px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcv-tl-st { display: flex; align-items: center; gap: 5px; font-family: var(--qcv-type); font-size: 11.5px; line-height: 14px; color: var(--qcv-ink-70); white-space: nowrap; overflow: hidden; }
+.qcv-tl-st svg { flex: none; }
+
+.qcv-tl-track { position: relative; height: 44px; }
+
+/* §8.7 — the bars */
+.qcv-tl-bar {
+  position: absolute; top: 11px; height: 22px; border-radius: 11px; box-sizing: border-box;
+  appearance: none; -webkit-appearance: none; border: 0; padding: 0 10px; cursor: pointer; text-align: left;
+  background: var(--qcv-state, var(--state-closed)); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.07);
+  overflow: hidden; white-space: nowrap;
+}
+/* a past stage sits back, and comes forward with its row */
+.qcv-tl-bar--past { opacity: 0.42; height: 10px; top: 17px; border-radius: 5px; }
+.qcv-tl-row:hover .qcv-tl-bar--past { opacity: 0.7; }
+.qcv-tl-bar--you { box-shadow: inset 3px 0 0 var(--qcv-rust), inset 0 0 0 1px rgba(28, 19, 15, 0.07); }
+.qcv-tl-bar:hover { box-shadow: inset 0 0 0 1.6px var(--qcv-ink); }
+.qcv-tl-bar:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 1px; }
+/* the ink stretch from the expected date to today — no words, because the chip states the number */
+.qcv-tl-over { position: absolute; top: 0; bottom: 0; background: rgba(28, 19, 15, 0.55); border-left: 1.5px solid var(--qcv-ink); }
+/* ⚠️ THE STRETCH BEYOND TODAY IS HOLLOW — it has not happened, so it is drawn as time left */
+.qcv-tl-ahead { position: absolute; top: 0; bottom: 0; background: rgba(255, 255, 255, 0.68); border-left: 1.5px dashed rgba(28, 19, 15, 0.45); }
+.qcv-tl-words {
+  position: relative; z-index: 1; font-family: var(--qcv-type); font-size: 11.5px; line-height: 22px; color: var(--qcv-ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
+}
+.qcv-tl-bar--past .qcv-tl-words { font-size: 9px; line-height: 10px; color: var(--qcv-ink-70); }
+
+/* §8.7 — the dotted chip and the action ghost */
+.qcv-tl-nudge {
+  position: absolute; top: 12px; height: 20px; padding: 0 9px; border-radius: 10px; white-space: nowrap;
+  background: #fff; border: 1px dashed var(--qcv-rust); color: var(--qcv-ink); cursor: pointer;
+  font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.qcv-tl-nudge:hover { background: #fdf3ef; }
+.qcv-tl-ghost {
+  position: absolute; top: 10px; width: 24px; height: 24px; border-radius: 50%;
+  border: 1px dashed var(--qcv-rust); display: flex; align-items: center; justify-content: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qcv-tl-scroll { scroll-behavior: auto; }
+}

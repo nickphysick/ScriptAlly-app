@@ -269,10 +269,22 @@ describe("§5 · the popover is gone, the modal is mobile-only, the desk took th
     expect(page).not.toContain("isMarkSentOpen");
   });
 
-  it("NudgeModal mounts behind the mobile gate only — the desk has no mobile geometry, the modal is its stand-in below md", () => {
-    expect(page).toContain("{isMobile && isNudgeOpen && activeQuery && activeAgent && (");
-    /* exactly one mount, and no other <NudgeModal on the page */
+  /**
+   * ⚠️ RETARGETED (v65 §8.7): ONE MOUNT, TWO DOORS. The mobile gate was the modal's only door and
+   * the assertion named it directly; the Birds-eye view's dotted chip is a second — and it names
+   * its query BY ID rather than selecting it, because selecting would change `?q` and the effect
+   * that closes every ribbon popover on a selection change would shut the modal in the same tick.
+   *
+   * The claim that mattered is unchanged and is what is asserted: ONE mount. Two would be two
+   * surfaces free to disagree about the same act, and the chip's query is often not the selected
+   * one — so the target is resolved once, from whichever door asked.
+   */
+  it("NudgeModal has exactly one mount, and one resolved target behind two doors", () => {
     expect((page.match(/<NudgeModal/g) ?? []).length).toBe(1);
+    expect(page).toContain("{nudgeTarget && nudgeAgent && (");
+    /* the mobile door is still the selected query; the calendar's names one by id */
+    expect(page).toMatch(/const nudgeTarget = beNudge \? queries\.find\(\(q\) => q\.id === beNudge\) \?\? null : \(isMobile && isNudgeOpen \? activeQuery : null\);/);
+    expect(page, "the chip must not select the query it nudges").toContain("onNudge={(id) => { setBeOpen(false); setBeFocus(null); setBeNudge(id); }}");
   });
 
   it("the closure offer's Nudge now opens the DESK, notched to the button that asked", () => {
@@ -361,7 +373,7 @@ describe("§2 (pass 3) · the close menu is retired; closed is the desk's fourth
   });
 
   it("below md, the modal's 'close instead' hands over to the sheet that has the close rows", () => {
-    expect(page).toContain("onCloseInstead={() => { setIsNudgeOpen(false); setMobileMoreOpen(true); }}");
+    expect(page).toContain("onCloseInstead={() => { setIsNudgeOpen(false); setBeNudge(null); setMobileMoreOpen(true); }}");
   });
 });
 

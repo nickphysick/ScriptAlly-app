@@ -92,5 +92,9 @@
 .qcv-xp-nm { display: block; margin-top: 6px; font-family: var(--qcv-type); font-size: 12.5px; line-height: 1.25; color: var(--qcv-ink); }
 .qcv-xp-hint { display: block; margin-top: 4px; font-family: var(--qcv-mono); font-size: 7px; line-height: 1.5; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-45); }
 
-/* the rows' region — the date row and the rows themselves arrive in phase 5 */
-.qcv-xp-body { flex: 1 1 auto; min-height: 0; overflow: auto; border-top: 1px solid rgba(28, 19, 15, 0.1); }
+/**
+ * The body holds the date row and the rows (§8.4–§8.6). It does NOT scroll itself: the timeline's
+ * own scroller does, because the names column has to stay sticky against it — a scroller one level
+ * up would carry the sticky cell out of the box it is sticky within.
+ */
+.qcv-xp-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }

@@ -2139,6 +2139,13 @@ export const Queries: React.FC<{
     try { return readBirdsEyeOpen(window.location.search); } catch { return false; }
   });
   const [beFocus, setBeFocus] = useState<string | null>(null);
+  /**
+   * ⚠️ THE CALENDAR'S NUDGE CARRIES ITS QUERY'S ID RATHER THAN SELECTING IT (§8.7, §9). Selecting
+   * would change `?q`, and the effect that closes every ribbon popover on a selection change would
+   * shut the modal in the same tick it opened. It is also the honest shape: nudging a query from
+   * the calendar is not the same act as opening it.
+   */
+  const [beNudge, setBeNudge] = useState<string | null>(null);
   const openBirdsEye = useCallback((focusId: string | null) => { setBeFocus(focusId); setBeOpen(true); }, []);
 
   /* ── v11 · THE SENTENCE'S STATE: one filter, one manuscript scope, one sort ──
@@ -2522,6 +2529,13 @@ export const Queries: React.FC<{
   const activeQuery = selectedQueryId ? (selectedQuery || queries.find(q => q.id === selectedQueryId)) : null;
   const currentStatus = activeQuery?.status ?? selectedQuery?.status;
   const activeAgent = activeQuery ? agents.find(a => a.id === activeQuery.agentId) : null;
+  /**
+   * The query the nudge modal is about — the calendar's chip names one by id, the mobile more-sheet
+   * means the selected one. One target, one mount; the two doors cannot disagree about which query
+   * is being nudged.
+   */
+  const nudgeTarget = beNudge ? queries.find((q) => q.id === beNudge) ?? null : (isMobile && isNudgeOpen ? activeQuery : null);
+  const nudgeAgent = nudgeTarget ? agents.find((a) => a.id === nudgeTarget.agentId) ?? null : null;
   const activeMs = activeQuery ? manuscripts.find(m => m.id === activeQuery.manuscriptId) : null;
   /**
    * The active manuscript's BOOK versions — named orderings, NOT the `versions` subcollection, which
@@ -6270,7 +6284,22 @@ export const Queries: React.FC<{
               />
             )}
             overlay={beOpen ? (
-              <QcExpanded rows={qcScoped} nowMs={Date.now()} focusId={beFocus} onClose={() => { setBeOpen(false); setBeFocus(null); }} />
+              <QcExpanded
+                rows={qcScoped}
+                nowMs={Date.now()}
+                focusId={beFocus}
+                onClose={() => { setBeOpen(false); setBeFocus(null); }}
+                /**
+                 * ⚠️ §8.11 — OPENING A QUERY FROM THE CALENDAR OPENS IT IN THE RAIL, and closes the
+                 * calendar on the way. The brief draws a second, centred copy of the card over the
+                 * backdrop; this app already has exactly one house for an open query on this page,
+                 * and a second one would be two surfaces free to disagree about the same query —
+                 * the fault the docked card replaced the drawer to end. Recorded as a deviation.
+                 */
+                onOpen={(id) => { setBeOpen(false); setBeFocus(null); onOpenQuery?.(id); }}
+                /* ⚠️ THE CHIP OPENS THE APP'S OWN NUDGE FLOW (§9), never a second one */
+                onNudge={(id) => { setBeOpen(false); setBeFocus(null); setBeNudge(id); }}
+              />
             ) : null}
             fan={qcFan && (() => {
               const hand = tileHand(qcScoped, qcFan.key);
@@ -8672,19 +8701,25 @@ export const Queries: React.FC<{
         right-inset card), so the more-sheet's "Nudge the agent" keeps the modal below md while
         every desktop route opens the desk. Mirrors the dashboard mount otherwise: NudgeModal
         collects the check-back + note and logs via the isolated logNudge path. */}
-    {isMobile && isNudgeOpen && activeQuery && activeAgent && (
+    {/* ⚠️ ONE MOUNT, TWO DOORS. Below md the more-sheet's "Nudge the agent" opens it for the query
+        the reader is looking at; the Birds-eye view's dotted chip opens it for a query it names by
+        id, without selecting it. A second mount would be two surfaces free to disagree about the
+        same act — and the chip's query is often NOT the selected one, which is the whole reason it
+        carries an id rather than setting `?q`. */}
+    {nudgeTarget && nudgeAgent && (
       <NudgeModal
-        agentName={agentPrimary(activeAgent) || null}
-        agency={activeAgent.name?.trim() ? activeAgent.agency || "" : ""}
-        dateSent={activeQuery.dateSent}
-        responseDeadline={activeQuery.responseDeadline}
-        onClose={() => setIsNudgeOpen(false)}
+        agentName={agentPrimary(nudgeAgent) || null}
+        agency={nudgeAgent.name?.trim() ? nudgeAgent.agency || "" : ""}
+        dateSent={nudgeTarget.dateSent}
+        responseDeadline={nudgeTarget.responseDeadline}
+        onClose={() => { setIsNudgeOpen(false); setBeNudge(null); }}
         onConfirm={async ({ checkBackDate, note }) => {
-          await logNudge(activeQuery.id, { checkBackDate, note });
+          await logNudge(nudgeTarget.id, { checkBackDate, note });
           setIsNudgeOpen(false);
+          setBeNudge(null);
         }}
         /* §2 — the close menu is gone; below md the more-sheet already carries the close rows */
-        onCloseInstead={() => { setIsNudgeOpen(false); setMobileMoreOpen(true); }}
+        onCloseInstead={() => { setIsNudgeOpen(false); setBeNudge(null); setMobileMoreOpen(true); }}
       />
     )}
 

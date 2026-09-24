@@ -6,7 +6,7 @@
  * the three stat cards.
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { LCOL } from "./QcExpanded";
 import { ATTENTION_HINT } from "../../../lib/qcBirdsEye";
@@ -131,5 +131,115 @@ describe("§8.2 · the title and the stat cards", () => {
     expect(rule(".qcv-xp-hint")).not.toContain("nowrap");
     /* the hints are the lib's, so the header and the groups cannot disagree about what they mean */
     for (const h of Object.values(ATTENTION_HINT)) expect(src.includes("ATTENTION_HINT"), h).toBe(true);
+  });
+});
+
+/* ── §8.4–§8.9 · the body ───────────────────────────────────────────────────────────────────── */
+
+describe("the timeline", () => {
+  const tlCss = read("src/components/queries/centre/qcvTimeline.css");
+  const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");
+  const tlRule = (sel: string) => {
+    const m = tlCss.match(new RegExp(`(?:^|\\n)\\s*${sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`));
+    expect(m, `${sel} has no rule`).toBeTruthy();
+    return m![1];
+  };
+
+  /**
+   * ⚠️ THE CLOCK IS FROZEN AT OPEN, and the reason is the sharpest lesson of this phase. `nowMs`
+   * arrives as `Date.now()` written inline at the mount, so it is a NEW value on every render of
+   * the page; every memo in the body rebuilt each time, and the animation frame that places the
+   * initial scroll was cancelled by its own effect re-running before it could fire. The view opened
+   * two and a half years in the past with `scrollLeft` at 0 — and all twenty-five cases passed,
+   * because the line, the pill and twenty-four bar ends all agreed with each other out there.
+   */
+  it("⚠️ the expanded card freezes its clock, and the body reads THAT rather than the prop", () => {
+    expect(src).toMatch(/const \[clock\] = useState\(\(\) => nowMs\);/);
+    expect(src).toContain("eyeGroups(rows, clock)");
+    expect(src).toMatch(/<QcTimeline rows=\{rows\} nowMs=\{clock\}/);
+    expect(src, "a live clock here re-derives everything on every parent render").not.toMatch(/<QcTimeline[^>]*nowMs=\{nowMs\}/);
+  });
+  it("⚠️ …and the initial scroll is CONFIRMED, not assumed — a clamped write reports nothing", () => {
+    /* `scrollLeft` set before the track's thousands of pixels exist is clamped to zero and lost
+       silently. It is read back and retried on the next frame. */
+    expect(tlSrc).toMatch(/if \(Math\.abs\(node\.scrollLeft - want\) < 1\)/);
+    expect(tlSrc).toMatch(/requestAnimationFrame\(\(\) => \{ if \(!put\(\)\) requestAnimationFrame\(put\); \}\)/);
+  });
+  /**
+   * ⚠️ AND ITS DEPS ARE ONE NUMBER, because an effect that depends on a value rebuilt every render
+   * CANCELS ITS OWN ANIMATION FRAME FOR EVER. Written `[boxW, ext, pxd, nowMs, focusId, tl]` it
+   * looked exhaustive and correct; `rows` arrives as a fresh array from the page's render, so `ext`
+   * and `tl` were new objects every time, the cleanup cancelled the frame the effect had just
+   * armed, and the next render armed another. Twenty-five cases stayed green and the view opened
+   * two and a half years in the past.
+   */
+  it("⚠️ the placement's effect depends on a NUMBER, and reads the rest from a ref when it fires", () => {
+    const at = tlSrc.indexOf("const placed = useRef(false);");
+    expect(at, "the placement has moved").toBeGreaterThan(-1);
+    const block = tlSrc.slice(at, tlSrc.indexOf("const pan = ", at));
+    expect(block, "the deps are objects that change identity every render").toMatch(/\}, \[boxW, rows\.length\]\);/);
+    /**
+     * ⚠️ AND IT WAITS FOR ROWS. With no data the extent is three weeks wide, today's x is about 220
+     * and `scrollForToday` correctly answers ZERO; the write then succeeds — 0 is 0 — `placed`
+     * records a success, and the view never places itself again once fifty queries arrive and the
+     * track becomes twelve thousand pixels long. A guard that fires against an empty account locks
+     * in an answer that was right for nothing. Found by instrumenting the component after three
+     * wrong diagnoses; the trace read `put:want=0,got=0` followed by `placed=true`.
+     */
+    expect(block, "it places itself against an empty account and records that as done").toContain("rows.length === 0");
+    expect(block, "it must read the live values at the moment it fires").toContain("const L = latest.current;");
+    expect(tlSrc).toMatch(/const latest = useRef\(\{ ext, pxd, boxW, nowMs, focusId, tl \}\);/);
+  });
+  it("⚠️ §8.10 · the lane's controls are SIBLINGS of the scroller, never inside it", () => {
+    /* in the mockup they lived inside the axis and a re-render lost them. The fix is structural:
+       a control that has to be put back after a rebuild is one that will one day not be. */
+    const lane = tlSrc.indexOf('data-qcv="tl-lane"');
+    const controls = tlSrc.indexOf('data-qcv="tl-controls"');
+    const scroll = tlSrc.indexOf('data-qcv="tl-scroll"');
+    expect(lane).toBeGreaterThan(-1);
+    expect(controls).toBeGreaterThan(lane);
+    expect(controls, "the controls are inside the scroller").toBeLessThan(scroll);
+    expect(tlRule(".qcv-tl-controls")).toMatch(/position:\s*absolute/);
+  });
+  it("⚠️ §8.4 · the today line is placed from the ROWS' own track — one derivation, not three", () => {
+    /* the line, the TODAY pill and an overdue bar's end all come from `xAt` against the same extent
+       and the same scale, so they meet on the same pixel at every zoom because they are ONE
+       derivation. Padding arithmetic is how the mockup's line came to sit beside the pill. */
+    expect(tlSrc).toMatch(/const todayX = xAt\(ext, pxd, new Date\(nowMs\)\.setHours\(0, 0, 0, 0\)\);/);
+    expect(tlSrc).toMatch(/data-qcv="tl-todayline"[^>]*style=\{\{ left: NAMES_W \+ todayX \}\}/s);
+    expect(tlSrc).toMatch(/data-qcv="tl-todaypill"[^>]*style=\{\{ left: todayX \}\}/s);
+    /* and nothing here computes an x any other way */
+    expect(tlSrc, "a second way of turning a date into a pixel").not.toMatch(/PX_PER_DAY|\/ DAY\) \* \d/);
+  });
+  it("⚠️ §8.6 · the names cell is sticky AND opaque", () => {
+    const n = tlRule(".qcv-tl-names");
+    expect(n).toMatch(/position:\s*sticky/);
+    expect(n).toMatch(/left:\s*0/);
+    /* a transparent sticky cell has the dates scrolling visibly behind the names */
+    expect(n).toMatch(/background:\s*#fff/);
+    expect(n).toMatch(/border-right/);
+  });
+  it("§8.7 · a bar's overrun and its hollow stretch are CHILDREN of the bar", () => {
+    /* two sibling bars would fight over hover and let a reader point "between" one query's pieces */
+    const bar = tlSrc.slice(tlSrc.indexOf('data-qcv="tl-bar"'), tlSrc.indexOf("</button>", tlSrc.indexOf('data-qcv="tl-bar"')));
+    expect(bar).toContain('data-qcv="tl-over"');
+    expect(bar).toContain('data-qcv="tl-ahead"');
+    expect(tlRule(".qcv-tl-over")).toMatch(/position:\s*absolute/);
+    expect(tlRule(".qcv-tl-ahead"), "the stretch beyond today is hollow, not filled").toMatch(/background:\s*rgba\(255, 255, 255, 0\.68\)/);
+  });
+  it("§8.7 · the nudge chip and the action ghost are the lib's decision, not the view's", () => {
+    expect(tlSrc).toContain("{t.nudge && (");
+    expect(tlSrc).toContain("{t.ghost && (");
+    /* the view must not decide WHO gets a chip — that is `tlRow`'s, and it is locked there */
+    expect(tlSrc, "the view is deciding whose bar gets a chip").not.toMatch(/tileCourt|isWithYou/);
+  });
+  it("⚠️ §8.9 · the crosshair hides over the names, the controls and a marker", () => {
+    expect(tlSrc).toMatch(/closest\("\[data-qcv='tl-names'\], \[data-qcv='tl-controls'\], \[data-qcv='tl-marker'\]"\)/);
+    expect(tlRule(".qcv-tl-tag--today")).toMatch(/background:\s*var\(--qcv-rust\)/);
+  });
+  it("⚠️ THE v21 CALENDAR IS DELETED, not left unmounted — its replacement is here", () => {
+    for (const f of ["src/components/queries/centre/QcCalendar.tsx", "src/components/queries/centre/qcvCalendar.css", "src/lib/qcCalendar.ts"]) {
+      expect(existsSync(join(process.cwd(), f)), `${f} is still in the tree`).toBe(false);
+    }
   });
 });
