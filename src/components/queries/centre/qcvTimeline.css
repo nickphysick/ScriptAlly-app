@@ -147,7 +147,11 @@
 .qcv-tl-nudge {
   position: absolute; top: 12px; height: 20px; padding: 0 9px; border-radius: 10px; white-space: nowrap;
   background: #fff; border: 1px dashed var(--qcv-rust); color: var(--qcv-ink); cursor: pointer;
-  font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  /* ⚠️ THE CHIP IS TYPEWRITER AND LOWERCASE (§8.7, v65.1). It was mono 8px uppercase — the page's
+     own grammar for a SYSTEM TAG — and this is a sentence someone reads and acts on: "14 days
+     overdue · nudge". Set as a tag it read as a status the app had computed rather than as the one
+     thing on the row you can do something about. */
+  font-family: var(--qcv-type); font-size: 11px; letter-spacing: 0;
 }
 .qcv-tl-nudge:hover { background: #fdf3ef; }
 .qcv-tl-ghost {
@@ -158,3 +162,18 @@
 @media (prefers-reduced-motion: reduce) {
   .qcv-tl-scroll { scroll-behavior: auto; }
 }
+
+/**
+ * §8.7 — a stage nothing dates (v65.1).
+ *
+ * ⚠️ DASHED IS THE PAGE'S OWN WORD FOR "NOT ESTABLISHED FACT", and it is the reason this bar may be
+ * drawn at all: it runs from the last thing anything DID date to today, which is a guess, and the
+ * dash is what admits it. The words say so too — a bar that looked like any other would be the app
+ * stating a date it does not have.
+ */
+.qcv-tl-bar--undated {
+  background: #fff;
+  border: 1px dashed var(--qcv-rust);
+  box-shadow: none;
+}
+.qcv-tl-bar--undated .qcv-tl-words { color: var(--qcv-ink-70); font-style: italic; }

@@ -63,7 +63,13 @@ export const QcBirdsEye: React.FC<{
         {/* ⚠️ THE ⤢ OPENS IT WITH NOTHING HIGHLIGHTED; a ROW opens it with that query highlighted.
             Two doors, one destination, and the difference is what arrives selected. */}
         <button type="button" className="qcv-be-ex" data-qcv="be-expand" aria-label="Open the Birds-eye view" disabled={loading} onClick={() => onExpand(null)}>
-          <span aria-hidden="true">⤢</span>
+          {/* ⚠️ DRAWN, NOT TYPED (v65.1). It was the character `⤢` (U+2922), which neither Special
+              Elite nor the app's mono face carries, so the browser fell back and rendered a dot —
+              a control whose whole meaning is its arrow, showing none. A glyph a font may not have
+              is a picture that may not arrive; a path always does. */}
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+            <path d="M7.6 1.4h4v4M11.6 1.4 7.9 5.1M5.4 11.6h-4v-4M1.4 11.6l3.7-3.7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
       </div>
 

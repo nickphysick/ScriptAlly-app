@@ -53,12 +53,34 @@ describe("stageHistory — one span per stage, from the log", () => {
     expect(h.spans[1].endMs).toBe(ms(D(5, 1)));
   });
 
-  it("⚠️ …and with no witness at all it is UNDATED — no current span, and the last known span is not run forward", () => {
+  /**
+   * ⚠️ RETARGETED (v65.1, Nick's ruling) — AND THE OLD LAW IS WHY THE PAGE DREW NOTHING.
+   *
+   * This asserted `spans: []` and no current span: *"no lane at all: a past drawn up to a present
+   * nobody can place would end at a guess"*. Honest, and it cost the row its whole history — a
+   * query whose Full Sent has no date lost its Queried and its Partial Requested too, so every
+   * surface drawing from the history drew NOTHING. Measured on the page: two rows with no bars,
+   * one of them showing its action ghost exactly on the today line because the ghost is placed
+   * after the last bar and there was no last bar.
+   *
+   * What stays true, and is still asserted, is what `dated` and `currentStartMs` MEAN: nothing
+   * dates this stage. The guess is now confined to where the bar is DRAWN from — the last thing
+   * anything dates — and the view draws it dashed and says "stage not dated".
+   */
+  it("⚠️ …and with no witness at all it is UNDATED — nothing dates it, and the history survives", () => {
     const h = stageHistory(q({ dateSent: D(4, 8), status: QueryStatus.FULL_SENT }), [rung(QueryStatus.PARTIAL_REQUESTED, D(4, 20))]);
+    expect(h.dated, "nothing dates the stage it stands at").toBe(false);
+    expect(h.currentStartMs, "…so there is no date to report as its start").toBeNull();
+    /* the history is drawn, and the undated stage runs from the last thing anything DID date */
+    expect(h.spans.map((s) => s.status)).toEqual([QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_SENT]);
+    const cur = h.spans.filter((s) => s.current);
+    expect(cur).toHaveLength(1);
+    expect(cur[0].startMs, "from the previous stage's end — the only date available").toBe(ms(D(4, 20)));
+  });
+  it("⚠️ …and with NOTHING dated at all there is still no lane, because there is nothing to draw from", () => {
+    const h = stageHistory(q({ status: QueryStatus.FULL_SENT }), []);
     expect(h.dated).toBe(false);
     expect(h.currentStartMs).toBeNull();
-    expect(h.spans.filter((s) => s.current)).toHaveLength(0);
-    /* no lane at all: a past drawn up to a present nobody can place would end at a guess */
     expect(h.spans).toEqual([]);
   });
 
@@ -141,7 +163,16 @@ describe("stageHistory — one span per stage, from the log", () => {
       }
       const cur = h.spans.filter((s) => s.current);
       if (h.dated) { tally.dated++; expect(cur).toHaveLength(1); expect(cur[0].status).toBe(status); expect(h.currentStartMs).toBe(cur[0].startMs); }
-      else { tally.undated++; expect(cur).toHaveLength(0); expect(h.currentStartMs).toBeNull(); }
+      else {
+        tally.undated++;
+        /* ⚠️ `currentStartMs` IS STILL NULL WHEN UNDATED — that is what the field means, and every
+           reader guarding on it (the day count, the rail's dashed bar, `stageStartMs`) depends on
+           it. What changed in v65.1 is that the SPANS survive: where anything at all is dated there
+           is a current span placed at the last of them, and where nothing is there are no spans. */
+        expect(h.currentStartMs).toBeNull();
+        if (h.spans.length) { expect(cur).toHaveLength(1); expect(cur[0].status).toBe(status); }
+        else expect(cur).toHaveLength(0);
+      }
       if (h.spans.length > 2) tally.multi++;
     }
     /* every branch was entered, or the property was only ever asked of one shape */

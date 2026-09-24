@@ -80,8 +80,12 @@ export const QcList: React.FC<{
               <small className="qcv-row-fact" title={factLine(r, nowMs)}>{factLine(r, nowMs)}</small>
             </div>
             <SentSoFar row={r} />
-            <div className="qcv-date" data-qcv="row-date" title={sent ? sent.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "Send date not recorded"}>
-              <u>{sent ? MON[sent.getMonth()] : "—"}</u><b>{sent ? sent.getDate() : "·"}</b>
+            {/* ⚠️ AN UNDATED TILE IS BLANK WITH A DASH, NOT A DASH OVER A DOT (v65.1). It drew an em
+                dash where the month goes and an interpunct where the day goes — two marks, neither
+                of which is a date, read as a tile whose contents failed to load. One dash says the
+                one thing there is to say, and the tooltip says it in words. */}
+            <div className={`qcv-date${sent ? "" : " qcv-date--none"}`} data-qcv="row-date" data-dated={sent ? "true" : "false"} title={sent ? sent.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "Send date not recorded"}>
+              {sent ? <><u>{MON[sent.getMonth()]}</u><b>{sent.getDate()}</b></> : <i aria-hidden="true">–</i>}
             </div>
           </div>
         );

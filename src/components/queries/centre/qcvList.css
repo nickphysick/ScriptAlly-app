@@ -63,6 +63,11 @@
 .qcv-date { box-sizing: border-box; width: 46px; height: 45px; border: 1px solid var(--qcv-hair); border-radius: 7px; background: #ffffff; overflow: hidden; text-align: center; }
 .qcv-date u { display: block; text-decoration: none; padding: 3px 0 2px; background: var(--qcv-state, var(--state-closed)); border-bottom: 1px solid var(--qcv-hair); font-family: var(--qcv-mono); font-size: 8px; line-height: 10px; letter-spacing: 0.14em; text-transform: uppercase; }
 .qcv-date b { display: block; padding: 5px 0; font-family: var(--qcv-serif); font-weight: 600; font-size: 17px; line-height: 1; font-variant-numeric: tabular-nums lining-nums; }
+/* ⚠️ AN UNDATED TILE IS BLANK WITH A DASH — no month band, no numeral, and nothing pretending to be
+   either. The dash is centred in the whole tile rather than in the numeral's half, because there is
+   no band above it to sit under. */
+.qcv-date--none { display: flex; align-items: center; justify-content: center; }
+.qcv-date--none i { font-style: normal; font-family: var(--qcv-serif); font-size: 17px; line-height: 1; color: var(--qcv-ink-45); }
 
 /* a row where the move is the writer's: a 3px rust rule down its left edge, inset 12 top and bottom.
    `isWithYou` decides it — partial requested, full requested, R&R; never an offer. */

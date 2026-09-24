@@ -100,15 +100,40 @@ export function stageHistory(q: Query, log: readonly DerivableActivity[] | undef
     start = own != null && last != null ? Math.max(own, last) : own ?? last;
     if (start == null) { const mine = rungs.filter((r) => r.status === status); start = mine.length ? mine[mine.length - 1].time : null; }
   }
-  if (start == null) return { spans: [], currentStartMs: null, dated: false };
   /* a stage cannot begin before the query was sent; a rung that says so is a clock or an import fault */
   const sentMs = anyToMs(q.dateSent);
-  if (sentMs != null && start < sentMs) start = sentMs;
 
   /* what came before it */
   const events: { status: QueryStatus; time: number }[] = [];
   for (const s of DOC_DATED) { const t = docDate(q, s); if (t != null) events.push({ status: s, time: t }); }
   for (const r of rungs) if (docDate(q, r.status) == null) events.push({ status: r.status, time: r.time });
+
+  /**
+   * ⚠️ AN UNDATED CURRENT STAGE NO LONGER ERASES THE ROW'S HISTORY (v65.1, Nick's ruling).
+   *
+   * This used to return `{ spans: [] }` the moment nothing dated the stage the query stands at —
+   * so a query whose Full Sent has no date lost its Queried and its Full Requested too, and every
+   * surface drawing from the history drew NOTHING. Measured on the page: two rows with no bars at
+   * all, one of them showing its action ghost sitting exactly on the today line, because the ghost
+   * is placed after the last bar and there was no last bar to place it after.
+   *
+   * ⚠️ THE FALLBACK IS THE LAST THING ANYTHING DATES, WHICH IS "THE PREVIOUS STAGE'S END" — the
+   * only honest answer available, since what is missing is precisely the date this stage began.
+   * Where even that is absent it is the send, and where THAT is absent there is nothing to draw
+   * from and the history is genuinely empty.
+   *
+   * ⚠️ AND `dated` STAYS FALSE AND `currentStartMs` STAYS NULL. They mean "nothing dates this
+   * stage", which is still true, and every reader that guards on them — the day count, the rail's
+   * dashed bar, `stageStartMs` — is unchanged. What the fallback buys is the SPANS, nothing else.
+   */
+  let dated = true;
+  if (start == null) {
+    dated = false;
+    const known = events.filter((e) => !isClosedStatus(e.status)).sort((a, b) => a.time - b.time);
+    start = known.length ? known[known.length - 1].time : sentMs;
+  }
+  if (start == null) return { spans: [], currentStartMs: null, dated: false };
+  if (sentMs != null && start < sentMs) start = sentMs;
   /* nothing precedes the send: an earlier rung is clamped to it, and Queried sorts first on a tie */
   if (sentMs != null) for (const e of events) if (e.time < sentMs) e.time = sentMs;
   const rank = (st: QueryStatus) => (st === QueryStatus.QUERIED ? 0 : 1);
@@ -126,11 +151,11 @@ export function stageHistory(q: Query, log: readonly DerivableActivity[] | undef
     /* the feed and the document date the same entry differently — one stage, the earlier start */
     last.current = true;
     if (isClosedStatus(status)) last.endMs = last.startMs;
-    return { spans, currentStartMs: last.startMs, dated: true };
+    return { spans, currentStartMs: dated ? last.startMs : null, dated };
   }
   if (last) last.endMs = start;
   spans.push({ status, startMs: start, endMs: isClosedStatus(status) ? start : null, current: true });
-  return { spans, currentStartMs: start, dated: true };
+  return { spans, currentStartMs: dated ? start : null, dated };
 }
 
 /** Whole days from a to b, never negative. */

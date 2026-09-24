@@ -163,9 +163,25 @@ export const QcTimeline: React.FC<{
    */
   const latest = useRef({ ext, pxd, boxW, nowMs, focusId, tl });
   latest.current = { ext, pxd, boxW, nowMs, focusId, tl };
-  const placed = useRef(false);
+  /**
+   * ⚠️ AND IT RE-PLACES WHEN THE EXTENT MOVES, WHICH IS THE SAME FAULT ONE STEP ALONG (v65.1).
+   *
+   * The guard above waits for rows — but rows can arrive in more than one batch, and the extent's
+   * left edge is the EARLIEST send in whatever has arrived. Place against a first batch of recent
+   * queries and the answer is right for that extent; when the older ones land, `fromMs` moves years
+   * to the left and the scroll that was 58% of the way along is now the extent's START. A one-shot
+   * `placed` flag then refuses to correct it, which is a view opening in 2023 with every number in
+   * it agreeing — the shape this file has already been caught by twice.
+   *
+   * ⚠️ SO THE GUARD IS THE EXTENT IT WAS PLACED AGAINST, NOT A BOOLEAN — and `touched` is what
+   * stops it fighting the reader. Anything the reader does to the track (a wheel, a pan, a zoom, a
+   * Today, a glide) marks it, and from then on the view is theirs and nothing re-places it.
+   */
+  const placedFor = useRef<number | null>(null);
+  const touched = useRef(false);
   useLayoutEffect(() => {
-    if (placed.current || boxW <= 0 || rows.length === 0) return undefined;
+    if (touched.current || boxW <= 0 || rows.length === 0) return undefined;
+    if (placedFor.current === ext.fromMs) return undefined;
     const put = () => {
       const node = scrollRef.current;
       if (!node) return false;
@@ -174,29 +190,34 @@ export const QcTimeline: React.FC<{
       const at = focus?.row.expectedMs ?? focus?.row.stageStartMs ?? null;
       const want = at != null ? Math.max(0, xAt(L.ext, L.pxd, at) - L.boxW / 2) : scrollForToday(L.ext, L.pxd, L.boxW, L.nowMs);
       node.scrollLeft = want;
-      if (Math.abs(node.scrollLeft - want) < 1) { placed.current = true; setScrollLeft(node.scrollLeft); return true; }
+      if (Math.abs(node.scrollLeft - want) < 1) { placedFor.current = L.ext.fromMs; setScrollLeft(node.scrollLeft); return true; }
       return false;
     };
     if (put()) return undefined;
     const id = requestAnimationFrame(() => { if (!put()) requestAnimationFrame(put); });
     return () => cancelAnimationFrame(id);
-  }, [boxW, rows.length]);
+  }, [boxW, rows.length, ext.fromMs]);
+
+  /** Anything the reader does to the track is theirs: nothing re-places it afterwards. */
+  const mine = useCallback(() => { touched.current = true; }, []);
 
   const pan = useCallback((weeksBy: number) => {
     const el = scrollRef.current;
     if (!el) return;
+    mine();
     el.scrollLeft = Math.max(0, el.scrollLeft + weeksBy * 7 * pxd);
     setScrollLeft(el.scrollLeft);
-  }, [pxd]);
+  }, [pxd, mine]);
 
   const toPreset = useCallback((key: string) => {
     const p = ZOOM_PRESETS.find((z) => z.key === key);
     const el = scrollRef.current;
     if (!p || !el || boxW <= 0) return;
+    mine();
     const next = zoomAbout(ext, pxd, pxdForPreset(p, boxW), el.scrollLeft, boxW / 2);
     setPxd(next.pxd);
     requestAnimationFrame(() => { if (scrollRef.current) { scrollRef.current.scrollLeft = next.scrollLeft; setScrollLeft(next.scrollLeft); } });
-  }, [ext, pxd, boxW]);
+  }, [ext, pxd, boxW, mine]);
 
   /* ⚠️ ctrl/⌘-WHEEL ZOOMS ABOUT THE POINTER; a plain wheel scrolls, as it should */
   const onWheel = useCallback((e: React.WheelEvent) => {
@@ -204,11 +225,12 @@ export const QcTimeline: React.FC<{
     e.preventDefault();
     const el = scrollRef.current;
     if (!el) return;
+    mine();
     const at = e.clientX - el.getBoundingClientRect().left;
     const next = zoomAbout(ext, pxd, clampPxd(pxd * (e.deltaY < 0 ? 1.12 : 1 / 1.12)), el.scrollLeft, at);
     setPxd(next.pxd);
     requestAnimationFrame(() => { if (scrollRef.current) { scrollRef.current.scrollLeft = next.scrollLeft; setScrollLeft(next.scrollLeft); } });
-  }, [ext, pxd]);
+  }, [ext, pxd, mine]);
 
   /* §8.9 — the crosshair, snapped to the day, hidden over the names column and the controls */
   const onMove = useCallback((e: React.MouseEvent) => {
@@ -230,6 +252,7 @@ export const QcTimeline: React.FC<{
   const glide = (ms: number) => {
     const el = scrollRef.current;
     if (!el) return;
+    mine();
     el.scrollTo({ left: Math.max(0, xAt(ext, pxd, ms) - boxW / 2), behavior: "smooth" });
   };
 
@@ -241,7 +264,7 @@ export const QcTimeline: React.FC<{
       <button
         key={b.key}
         type="button"
-        className={`qcv-tl-bar${b.current ? " qcv-tl-bar--now" : " qcv-tl-bar--past"}${b.you ? " qcv-tl-bar--you" : ""}`}
+        className={`qcv-tl-bar${b.current ? " qcv-tl-bar--now" : " qcv-tl-bar--past"}${b.you ? " qcv-tl-bar--you" : ""}${b.undated ? " qcv-tl-bar--undated" : ""}`}
         data-qcv="tl-bar"
         data-status={b.status}
         data-current={b.current ? "true" : "false"}
@@ -264,7 +287,7 @@ export const QcTimeline: React.FC<{
         <div className="qcv-tl-controls" data-qcv="tl-controls" ref={ctlRef}>
           <span className="qcv-tl-nav" data-qcv="tl-nav">
             <button type="button" onClick={() => pan(-NUDGE_WEEKS)} aria-label="Four weeks earlier">‹</button>
-            <button type="button" className="qcv-tl-today" onClick={() => { const el = scrollRef.current; if (el && boxW > 0) { el.scrollTo({ left: scrollForToday(ext, pxd, boxW, nowMs), behavior: "smooth" }); } }}>Today</button>
+            <button type="button" className="qcv-tl-today" onClick={() => { const el = scrollRef.current; if (el && boxW > 0) { mine(); el.scrollTo({ left: scrollForToday(ext, pxd, boxW, nowMs), behavior: "smooth" }); } }}>Today</button>
             <button type="button" onClick={() => pan(NUDGE_WEEKS)} aria-label="Four weeks later">›</button>
           </span>
           <span className="qcv-tl-zoom" data-qcv="tl-zoom" role="group" aria-label="Zoom">

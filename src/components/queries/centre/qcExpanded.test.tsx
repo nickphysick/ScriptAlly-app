@@ -194,10 +194,17 @@ describe("the timeline", () => {
    * two and a half years in the past.
    */
   it("⚠️ the placement's effect depends on a NUMBER, and reads the rest from a ref when it fires", () => {
-    const at = tlSrc.indexOf("const placed = useRef(false);");
+    const at = tlSrc.indexOf("const placedFor = useRef<number | null>(null);");
     expect(at, "the placement has moved").toBeGreaterThan(-1);
     const block = tlSrc.slice(at, tlSrc.indexOf("const pan = ", at));
-    expect(block, "the deps are objects that change identity every render").toMatch(/\}, \[boxW, rows\.length\]\);/);
+    /**
+     * ⚠️ THE DEPS GAINED `ext.fromMs` IN v65.1, AND IT IS A NUMBER — which is the whole of the rule
+     * this case states. `ext` itself is a fresh object every render and putting IT here is what
+     * cancelled the animation frame for ever; its `fromMs` is a primitive and changes only when the
+     * extent really moves, which is exactly when the view needs placing again.
+     */
+    expect(block, "the deps are objects that change identity every render").toMatch(/\}, \[boxW, rows\.length, ext\.fromMs\]\);/);
+    expect(block, "`ext` itself would be a new object on every render").not.toMatch(/\}, \[[^\]]*[^.]\bext\b[^.][^\]]*\]\);/);
     /**
      * ⚠️ AND IT WAITS FOR ROWS. With no data the extent is three weeks wide, today's x is about 220
      * and `scrollForToday` correctly answers ZERO; the write then succeeds — 0 is 0 — `placed`
@@ -207,6 +214,13 @@ describe("the timeline", () => {
      * wrong diagnoses; the trace read `put:want=0,got=0` followed by `placed=true`.
      */
     expect(block, "it places itself against an empty account and records that as done").toContain("rows.length === 0");
+    /* ⚠️ AND IT RE-PLACES WHEN THE EXTENT MOVES, unless the reader has touched the track: rows can
+       arrive in more than one batch, and a scroll placed against a first batch of recent queries is
+       the extent's START once the older ones land. */
+    expect(block).toContain("if (placedFor.current === ext.fromMs) return undefined;");
+    expect(block).toContain("if (touched.current ||");
+    expect(tlSrc, "every deliberate move marks the view as the reader's").toMatch(/const mine = useCallback\(\(\) => \{ touched\.current = true; \}, \[\]\);/);
+    expect((tlSrc.match(/\bmine\(\);/g) ?? []).length, "the wheel, the pan, the zoom, the glide and Today").toBeGreaterThanOrEqual(5);
     expect(block, "it must read the live values at the moment it fires").toContain("const L = latest.current;");
     expect(tlSrc).toMatch(/const latest = useRef\(\{ ext, pxd, boxW, nowMs, focusId, tl \}\);/);
   });
@@ -453,5 +467,45 @@ describe("§8.1 · the Courier's column spans the tray AND the date row (v65.1)"
        the two midpoints level, and the Courier's drawn body sits in the upper part of his column,
        so they read as level. Measured as an equality in `qcV65.measure.ts`. */
     expect(rule(".qcv-xp-tray")).toMatch(/align-items:\s*center/);
+  });
+});
+
+describe("the dev review — d, e, f (v65.1)", () => {
+  const tlCss = read("src/components/queries/centre/qcvTimeline.css");
+  const tlRuleOf = (sel: string) => {
+    const m = tlCss.match(new RegExp(`(?:^|\\n)\\s*${sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`));
+    expect(m, `${sel} has no rule`).toBeTruthy();
+    return m![1];
+  };
+
+  it("d · the nudge chip is TYPEWRITER and lowercase — it is a sentence, not a system tag", () => {
+    const chip = tlRuleOf(".qcv-tl-nudge");
+    expect(chip).toMatch(/font-family:\s*var\(--qcv-type\)/);
+    expect(chip, "mono uppercase is this page's grammar for a tag the app computed").not.toMatch(/text-transform:\s*uppercase/);
+    expect(chip).not.toMatch(/font-family:\s*var\(--qcv-mono\)/);
+    /* and the words are the lib's, with the envelope before them */
+    const tlSrc2 = read("src/lib/qcTimeline.ts");
+    /* the string is built, so the literal in the source is the tail of the template */
+    expect(tlSrc2).toContain("overdue · nudge");
+    expect(tlSrc2, "singulars agree — one day, not 1 days").toMatch(/overdueDays === 1 \? "day" : "days"/);
+    expect(tlSrc2, "the app does not shout at the reader").not.toMatch(/OVERDUE · NUDGE/);
+    expect(read("src/components/queries/centre/QcTimeline.tsx")).toMatch(/<span aria-hidden="true">✉<\/span> \{t\.nudge\.text\}/);
+  });
+
+  it("e · the rail's expand mark is DRAWN, never a character a font may not carry", () => {
+    const be = read("src/components/queries/centre/QcBirdsEye.tsx");
+    expect(be, "⤢ (U+2922) is in neither Special Elite nor the mono face — it rendered as a dot").not.toContain("⤢");
+    const slice = be.slice(be.indexOf('data-qcv="be-expand"'), be.indexOf('data-qcv="be-expand"') + 700);
+    expect(slice).toMatch(/<svg width="13" height="13"/);
+    expect(slice).toMatch(/stroke="currentColor"/);
+  });
+
+  it("f · an undated ledger tile is blank with a dash — not a dash over a dot", () => {
+    const list = read("src/components/queries/centre/QcList.tsx");
+    expect(list, "an em dash where the month goes and an interpunct where the day goes is two marks, neither a date").not.toMatch(/\{sent \? MON\[sent\.getMonth\(\)\] : "—"\}/);
+    expect(list).toMatch(/sent \? <><u>\{MON\[sent\.getMonth\(\)\]\}<\/u><b>\{sent\.getDate\(\)\}<\/b><\/> : <i aria-hidden="true">–<\/i>/);
+    expect(list).toMatch(/data-dated=\{sent \? "true" : "false"\}/);
+    const listCss = read("src/components/queries/centre/qcvList.css");
+    expect(listCss).toMatch(/\.qcv-date--none \{[^}]*justify-content: center/);
   });
 });

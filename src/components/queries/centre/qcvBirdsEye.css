@@ -36,6 +36,8 @@
 .qcv-be-ex {
   margin-left: auto; flex: none; width: 28px; height: 28px; border-radius: 50%;
   background: #fff; border: 1px solid rgba(28, 19, 15, 0.14); color: var(--qcv-ink);
+  /* the mark is an SVG path, so the button only has to centre it */
+  display: inline-flex; align-items: center; justify-content: center;
   font-size: 13px; line-height: 1; cursor: pointer;
 }
 .qcv-be-ex:hover { background: var(--qcv-parchment); }

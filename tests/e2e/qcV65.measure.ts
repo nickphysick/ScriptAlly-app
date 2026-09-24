@@ -992,6 +992,24 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
       groups: [...card.querySelectorAll("[data-qcv='tl-group']")].map((g) => g.getAttribute("data-group")),
       heat: card.querySelectorAll("[data-qcv='tl-heat'] i").length,
       months: card.querySelectorAll("[data-qcv='tl-month']").length,
+      /**
+       * ⚠️ RENDERED IS NOT VISIBLE, AND THAT IS THE WHOLE OF v65.1's ITEM (b). Thirty-five month
+       * labels were drawn and NOT ONE was on screen: the clearance around the TODAY pill was 3.2%
+       * of the WHOLE TRACK, which on a three-year pipeline is 376px either side — a 752px hole in a
+       * 1,128px viewport. A count of elements cannot see that; a count of elements INSIDE THE BOX
+       * can. Same for the ticks and the heat.
+       */
+      visible: (() => {
+        const sc2 = card.querySelector("[data-qcv='tl-scroll']")!.getBoundingClientRect();
+        const nm = card.querySelector("[data-qcv='tl-names']")!.getBoundingClientRect();
+        const inBox = (e: Element) => { const r2 = e.getBoundingClientRect(); return r2.left >= nm.right - 1 && r2.right <= sc2.right + 1; };
+        return {
+          months: [...card.querySelectorAll("[data-qcv='tl-month']")].filter(inBox).length,
+          weeks: [...card.querySelectorAll(".qcv-tl-wk")].filter(inBox).length,
+          heat: [...card.querySelectorAll("[data-qcv='tl-heat'] i")].filter(inBox).length,
+          namesR: Math.round(nm.right * 10) / 10, boxR: Math.round(sc2.right * 10) / 10,
+        };
+      })(),
       zoom: [...card.querySelectorAll("[data-qcv='tl-zoom'] button")].map((b) => ({ z: b.getAttribute("data-z"), on: b.getAttribute("aria-pressed") })),
       /* §8.6 — the names cell is sticky and OPAQUE */
       namesBg: (() => { const n = card.querySelector("[data-qcv='tl-names']"); return n ? getComputedStyle(n).backgroundColor : null; })(),
@@ -1002,6 +1020,10 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
 
   const at = await read();
   yes("timeline", "the body drew", !!at, JSON.stringify(at));
+  record({ area: "timeline", what: "on open — what is visible in the tier", got: at?.visible, want: "reported" });
+  yes("timeline", `on open — month labels are VISIBLE, not merely rendered (${at?.visible.months} of ${at?.months})`, (at?.visible.months ?? 0) > 0, JSON.stringify(at?.visible));
+  yes("timeline", `on open — week ticks are visible (${at?.visible.weeks})`, (at?.visible.weeks ?? 0) > 0, JSON.stringify(at?.visible));
+  yes("timeline", `on open — the heat is visible (${at?.visible.heat} of ${at?.heat})`, (at?.visible.heat ?? 0) > 0, JSON.stringify(at?.visible));
   /**
    * ⚠️ THE PRECONDITION EVERY READING BELOW DEPENDS ON: TODAY IS ON SCREEN, at 58% of the track.
    * Without it the line, the pill and twenty-four bar ends agree with each other 9,800px off the
@@ -1052,7 +1074,26 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
     near("timeline", `zoom ${z} — the TODAY pill's centre is ON the today line`, r?.pill, r?.line, 1.5);
     for (const end of r?.overEnds ?? []) near("timeline", `zoom ${z} — an overdue bar ends on the today line`, end, r?.line, 1.5);
     is("timeline", `zoom ${z} — the switch lights it`, (r?.zoom ?? []).find((b) => b.z === z)?.on, "true");
-    seen("tl-zoom", `${z}: line ${r?.line} · overdue bars ${r?.overEnds.length}`);
+    /**
+     * ⚠️ THE PRECONDITION, AT EVERY ZOOM AND NOT ONLY ON OPEN (v65.1). It was asserted once, at the
+     * start of this case, and the loop below then checked only that the line, the pill and the bar
+     * ends AGREE — which they do perfectly well off the right of the window. That is the fault this
+     * case's own header records ("all agreed with each other 9,800px off the right"), returning at
+     * a later moment in the same file.
+     */
+    const seenOn = await page.evaluate(() => {
+      const card = document.querySelector("[data-qcv='xp-card']")!;
+      const sc2 = card.querySelector("[data-qcv='tl-scroll']")!.getBoundingClientRect();
+      const nm = card.querySelector("[data-qcv='tl-names']")!.getBoundingClientRect();
+      const l = card.querySelector("[data-qcv='tl-todayline']")?.getBoundingClientRect();
+      return l ? { on: l.left >= nm.right - 1 && l.right <= sc2.right + 1, x: Math.round(l.left) } : null;
+    });
+    yes("timeline", `zoom ${z} — today is still ON SCREEN (x ${seenOn?.x})`, seenOn?.on === true, JSON.stringify(seenOn));
+    /* ⚠️ AND THE TIER HAS CONTENTS THERE — rendered is not visible */
+    record({ area: "timeline", what: `zoom ${z} — what is visible in the tier`, got: r?.visible, want: "reported" });
+    yes("timeline", `zoom ${z} — month labels are visible, not merely rendered (${r?.visible.months} of ${r?.months})`, (r?.visible.months ?? 0) > 0, JSON.stringify(r?.visible));
+    yes("timeline", `zoom ${z} — week ticks are visible (${r?.visible.weeks})`, (r?.visible.weeks ?? 0) > 0, JSON.stringify(r?.visible));
+    seen("tl-zoom", `${z}: line ${r?.line} · overdue bars ${r?.overEnds.length} · months visible ${r?.visible.months}`);
   }
   yes("timeline", `the three zooms really moved the view (${JSON.stringify(seenLines)}) — or the claim above is about one state`, new Set(seenLines).size > 1, JSON.stringify(seenLines));
 
@@ -1062,6 +1103,35 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
   const markers = await page.evaluate(() => [...document.querySelectorAll("[data-qcv='tl-marker']")].map((m) => (m.textContent ?? "").trim()));
   record({ area: "timeline", what: "§8.8 · the edge markers at the tightest zoom", got: markers, want: "reported" });
   for (const m of markers) yes("timeline", `a marker states a count ("${m}")`, /\d+ due (earlier|later)/.test(m), m);
+
+  /**
+   * §8.7 / v65.1 (a) — EVERY LIVE ROW DRAWS A BAR, AT LEAST A DAY WIDE, AND NO GHOST SITS ON THE
+   * LINE. Two rows on this account drew nothing at all: their current stage is undated, and
+   * `stageHistory` used to answer an undated stage with no spans — so the row lost its whole
+   * history, and the action ghost, which is placed after the last bar, fell back to `now` and
+   * landed exactly on the today line. That is what gave it away on the page.
+   */
+  const rowsNow = await page.evaluate(() => {
+    const card = document.querySelector("[data-qcv='xp-card']")!;
+    const line = card.querySelector("[data-qcv='tl-todayline']")!.getBoundingClientRect().left;
+    const out = [...card.querySelectorAll("[data-qcv='tl-row']")].map((row) => {
+      const bars = [...row.querySelectorAll("[data-qcv='tl-bar']")].map((b) => Math.round(b.getBoundingClientRect().width * 10) / 10);
+      const g = row.querySelector("[data-qcv='tl-ghost']");
+      return {
+        id: row.getAttribute("data-id"), name: (row.querySelector(".qcv-tl-nm")?.textContent ?? "").trim(),
+        bars, ghostOnLine: g ? Math.abs(g.getBoundingClientRect().left - line) < 4 : false,
+        undated: !!row.querySelector(".qcv-tl-bar--undated"),
+      };
+    });
+    return { total: out.length, noBars: out.filter((x) => x.bars.length === 0), thin: out.filter((x) => x.bars.some((w) => w < 1)), onLine: out.filter((x) => x.ghostOnLine), undated: out.filter((x) => x.undated).length };
+  });
+  record({ area: "timeline", what: "§8.7 · every live row's bars", got: rowsNow, want: "no row without bars, none thinner than a day, no ghost on the line" });
+  yes("timeline", `the sweep saw rows at all (${rowsNow.total})`, rowsNow.total > 5, String(rowsNow.total));
+  is("timeline", "§8.7 · every live row draws a bar", rowsNow.noBars.map((x) => x.name).join(" · "), "");
+  is("timeline", "§8.7 · …and none of them is thinner than a day", rowsNow.thin.map((x) => x.name).join(" · "), "");
+  is("timeline", "§8.7 · …and no action ghost sits on the today line", rowsNow.onLine.map((x) => x.name).join(" · "), "");
+  /* ⚠️ THE BRANCH MUST BE ENTERED, or "every row draws a bar" is a claim about rows that all had one */
+  yes("timeline", `…and the undated branch was exercised (${rowsNow.undated} dashed rows)`, rowsNow.undated > 0, JSON.stringify(rowsNow.undated));
 
   /* §8.9 — the crosshair follows the pointer and names a day */
   const box = await page.evaluate(() => { const s = document.querySelector("[data-qcv='tl-scroll']")!.getBoundingClientRect(); return { x: s.left + s.width * 0.7, y: s.top + s.height * 0.6 }; });

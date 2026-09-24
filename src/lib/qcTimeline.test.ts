@@ -8,7 +8,7 @@ import { describe, it, expect } from "vitest";
 import { Activity, Agent, Query, QueryStatus } from "../types";
 import { buildQcRows, type QcRow } from "./qcSummary";
 import {
-  HEAT_CURRENT, HEAT_EXPECTED, HEAT_PAST, NUDGE_WEEKS, PXD_DEFAULT, PXD_MAX, PXD_MIN, TODAY_AT, ZOOM_PRESETS,
+  HEAT_CURRENT, HEAT_EXPECTED, HEAT_PAST, MONTH_CLEAR_PX, NUDGE_WEEKS, PXD_DEFAULT, PXD_MAX, PXD_MIN, TODAY_AT, ZOOM_PRESETS,
   activePreset, clampPxd, crosshairAt, currentWords, edgeCounts, extentOf, ghostFor, heatWeeks, monthTicks,
   msAt, pxdForPreset, scrollForToday, tlRow, trackWidth, weekTicks, xAt, zoomAbout,
 } from "./qcTimeline";
@@ -87,13 +87,21 @@ describe("§8.4 · the extent", () => {
 });
 
 describe("§8.4 · the tier's labels", () => {
-  it("⚠️ no month label within 3.2% of today — the TODAY pill is already there", () => {
+  /**
+   * ⚠️ RETARGETED (v65.1) — AND IT WENT RED ON THE FIX, WHICH IS THE POINT OF IT. It asserted the
+   * clearance as 3.2% of the TRACK, which is what the code did and what the fault was: on a
+   * three-year pipeline that is 376px either side of today, and 35 month labels rendered with NOT
+   * ONE of them visible. The claim that survives is the one it was standing in for — no label
+   * collides with the TODAY pill — and it is a PIXEL distance now, asserted in the v65.1 block at
+   * the foot of this file along with the property that makes it a fix rather than a smaller number.
+   */
+  it("⚠️ no month label collides with the TODAY pill — a fixed clearance, not a share of the track", () => {
     const pxd = PXD_DEFAULT;
-    const w = trackWidth(EXT, pxd);
     const todayX = xAt(EXT, pxd, new Date(NOW).setHours(0, 0, 0, 0));
     for (const t of monthTicks(EXT, pxd, NOW)) {
-      expect(Math.abs(t.x - todayX), t.label).toBeGreaterThan(w * 0.032);
+      expect(Math.abs(t.x - todayX), t.label).toBeGreaterThan(MONTH_CLEAR_PX);
     }
+    expect(trackWidth(EXT, pxd), "…and the track is long enough that a share of it would differ").toBeGreaterThan(2000);
   });
   it("the year rides January's label rather than taking a row of its own", () => {
     const jans = monthTicks(EXT, PXD_DEFAULT, NOW).filter((t) => t.label.startsWith("Jan"));
@@ -211,5 +219,105 @@ describe("§8.9 · the crosshair", () => {
     const other = crosshairAt(EXT, PXD_DEFAULT, xAt(EXT, PXD_DEFAULT, NOW - 3 * DAY), NOW);
     expect(other.today).toBe(false);
     expect(other.label).toMatch(/^\d+ [A-Z][a-z]{2} · (Mon|Tue|Wed|Thu|Fri|Sat|Sun)$/);
+  });
+});
+
+describe("§8.7 · every live row draws a bar, at least a day wide (v65.1)", () => {
+  const NOW2 = Date.UTC(2026, 8, 25, 12);
+  const day = 86_400_000;
+  const iso2 = (d: number) => new Date(NOW2 + d * day).toISOString();
+  const agent2 = { id: "a", userId: "u", name: "A", agency: "B", responseTimeWeeks: 8 } as never;
+  const build = (over: Record<string, unknown>) => {
+    const q2 = { id: "q", userId: "u", manuscriptId: "m", agentId: "a", packageId: "", personalisationNotes: "", sendMethod: "Email", status: QueryStatus.QUERIED, ...over } as never;
+    return buildQcRows([q2], [agent2], [], NOW2)[0];
+  };
+
+  /**
+   * ⚠️ THE FIXTURE MUST BE ONE WHERE THE BAR WOULD OTHERWISE BE ZERO, OR THE FLOOR IS NEVER ASKED.
+   * A query sent TODAY at an agency that states a window has an expected date eight weeks ahead, so
+   * its bar runs forward and is wide by construction — the first version of this case used exactly
+   * that and stayed green with the floor deleted. The case that needs the floor is a stage entered
+   * today with NOTHING ahead of it: no stated window, so no expected date, so `from` and `to` are
+   * both today.
+   */
+  const noWindow = { id: "a", userId: "u", name: "A", agency: "B" } as never;
+  const buildNoWindow = (over: Record<string, unknown>) => {
+    const q2 = { id: "q", userId: "u", manuscriptId: "m", agentId: "a", packageId: "", personalisationNotes: "", sendMethod: "Email", status: QueryStatus.QUERIED, ...over } as never;
+    return buildQcRows([q2], [noWindow], [], NOW2)[0];
+  };
+  it("⚠️ a stage entered TODAY with nothing ahead of it still draws — one day, never nothing", () => {
+    const r = buildNoWindow({ dateSent: iso2(0) });
+    expect(r.expectedMs, "the fixture really has nothing ahead of it").toBeNull();
+    const t = tlRow(r, NOW2);
+    expect(t.bars.length).toBeGreaterThan(0);
+    for (const b of t.bars) expect(b.toMs - b.fromMs, b.label).toBeGreaterThanOrEqual(day);
+  });
+  it("…and a dated stage with a date ahead runs forward to it, not to today", () => {
+    const r = build({ dateSent: iso2(0) });
+    const cur = tlRow(r, NOW2).bars.find((b) => b.current)!;
+    expect(r.expectedMs).not.toBeNull();
+    expect(cur.toMs).toBe(r.expectedMs);
+    expect(cur.aheadFromMs, "and the stretch beyond today is drawn hollow").not.toBeNull();
+  });
+  it("⚠️ an UNDATED current stage draws too, dashed, from the last thing anything dated", () => {
+    /* Full Sent with no `fullSentDate` and no `lastStatusChange`: nothing dates the stage it stands
+       at, and before v65.1 the whole row drew nothing at all */
+    const r = build({ dateSent: iso2(-60), status: QueryStatus.FULL_SENT, fullRequestedDate: iso2(-20) });
+    expect(r.stageStartMs, "nothing dates it").toBeNull();
+    const t = tlRow(r, NOW2);
+    const cur = t.bars.filter((b) => b.current);
+    expect(cur).toHaveLength(1);
+    expect(cur[0].undated).toBe(true);
+    expect(cur[0].words).toBe("stage not dated");
+    /* from the previous stage's end — the only date available — and never from the send */
+    expect(cur[0].fromMs).toBe(Date.parse(iso2(-20)));
+    expect(t.bars.length, "and the history survives with it").toBeGreaterThan(1);
+  });
+  it("⚠️ …and its ghost is after the bar, never on the today line", () => {
+    const r = build({ dateSent: iso2(-60), status: QueryStatus.FULL_REQUESTED, partialSentDate: iso2(-20) });
+    const t = tlRow(r, NOW2);
+    expect(t.ghost, "a with-you stage owes something").not.toBeNull();
+    const last = t.bars[t.bars.length - 1];
+    expect(last, "there is a bar to place the ghost after").toBeTruthy();
+    /* the ghost is drawn from the last bar's end; with no bars it fell back to `now` and sat on the line */
+    expect(last.toMs).toBeGreaterThan(0);
+  });
+  it("an undated stage with NOTHING dated draws nothing — there is nothing to draw from", () => {
+    const r = build({ status: QueryStatus.FULL_SENT });
+    expect(tlRow(r, NOW2).bars).toEqual([]);
+  });
+});
+
+describe("§8.4 · the month labels clear the TODAY pill by a fixed distance (v65.1)", () => {
+  const N3 = Date.UTC(2026, 8, 25, 12);
+  const extOf = (months: number) => ({ fromMs: Date.UTC(2026 - Math.floor(months / 12), 8 - (months % 12), 1), toMs: N3 + 26 * 7 * 86_400_000, days: months * 30 });
+  it("MONTH_CLEAR_PX is a PIXEL distance, and the hole it makes does not grow with the track", () => {
+    /**
+     * ⚠️ THE PROPERTY, NOT THE VALUE. It was 3.2% of the whole track, so a long pipeline opened a
+     * hole hundreds of pixels wide around today — measured on the page: 35 labels rendered, none
+     * visible. What must hold is that the gap between the last label before today and the first
+     * after it is the SAME on a short history and a long one.
+     */
+    const gapAround = (months: number) => {
+      const ext = extOf(months);
+      const ticks = monthTicks(ext, PXD_DEFAULT, N3);
+      const todayX = xAt(ext, PXD_DEFAULT, N3);
+      const before = ticks.filter((t) => t.x < todayX).map((t) => t.x);
+      const after = ticks.filter((t) => t.x > todayX).map((t) => t.x);
+      expect(before.length, `${months} months: labels before today`).toBeGreaterThan(0);
+      expect(after.length, `${months} months: labels after today`).toBeGreaterThan(0);
+      return Math.min(...after) - Math.max(...before);
+    };
+    const short = gapAround(6);
+    const long = gapAround(36);
+    expect(Math.abs(long - short), `a 6-month history leaves ${short}px around today and a 36-month one ${long}px`).toBeLessThan(2);
+  });
+  it("…and no label is drawn within MONTH_CLEAR_PX of today", () => {
+    const ext = extOf(36);
+    const todayX = xAt(ext, PXD_DEFAULT, N3);
+    for (const t of monthTicks(ext, PXD_DEFAULT, N3)) {
+      expect(Math.abs(t.x - todayX), t.label).toBeGreaterThan(MONTH_CLEAR_PX);
+    }
+    expect(MONTH_CLEAR_PX).toBeLessThan(60);
   });
 });

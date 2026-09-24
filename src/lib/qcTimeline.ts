@@ -95,16 +95,27 @@ export interface Tick { ms: number; x: number; label: string }
  * under it is two labels in one place — the one spot on this axis where a reader is certain to be
  * looking. The year rides the January label rather than taking a row of its own.
  */
+/**
+ * §8.4 — how close a month label may come to the TODAY pill, IN PIXELS.
+ *
+ * ⚠️ IT WAS 3.2% OF THE WHOLE TRACK, AND THAT IS A DIFFERENT DISTANCE ON EVERY ACCOUNT. The track
+ * is the extent times the zoom, so on a three-year pipeline at the default density it is ~11,750px
+ * — and 3.2% of that is 376px either side of today, a 752px hole in a 1,128px viewport. Measured on
+ * the page: **35 month labels rendered and NOT ONE of them visible**, which reads as a date tier
+ * that failed to draw. The thing being avoided is a pill about 47px wide, so the clearance is a
+ * fact about the pill and never about the length of the reader's querying history.
+ */
+export const MONTH_CLEAR_PX = 34;
+
 export function monthTicks(ext: Extent, pxd: number, nowMs: number): Tick[] {
   const out: Tick[] = [];
-  const w = trackWidth(ext, pxd);
   const todayX = xAt(ext, pxd, startOfDay(nowMs));
   const d = new Date(ext.fromMs);
   d.setDate(1); d.setHours(0, 0, 0, 0);
   while (d.getTime() <= ext.toMs) {
     const ms = d.getTime();
     const x = xAt(ext, pxd, ms);
-    if (Math.abs(x - todayX) > w * 0.032) {
+    if (Math.abs(x - todayX) > MONTH_CLEAR_PX) {
       out.push({ ms, x, label: d.getMonth() === 0 ? `${MON[0]} ${d.getFullYear()}` : MON[d.getMonth()] });
     }
     d.setMonth(d.getMonth() + 1);
@@ -176,6 +187,8 @@ export interface TlBar {
   /** The stretch beyond TODAY — drawn hollow, because it has not happened yet. */
   aheadFromMs: number | null;
   you: boolean;
+  /** Nothing dates this stage: it is drawn dashed, from the last thing anything DID date. */
+  undated: boolean;
   /** The sentence at the bar's end; past bars carry only their stage's name. */
   words: string;
   label: string;
@@ -229,27 +242,52 @@ export function ghostFor(status: QueryStatus): TlGhost | null {
  * time still to come is drawn rather than implied. The part beyond TODAY is hollow — it has not
  * happened — and the part beyond the EXPECTED DATE is ink. A bar can have both.
  */
+/**
+ * ⚠️ EVERY BAR IS AT LEAST ONE DAY WIDE, AND THE FLOOR IS ONE DAY RATHER THAN A PIXEL COUNT — the
+ * rail's rule, brought here (v65.1). A stage entered TODAY spans no time at all, so the honest
+ * width is zero, and a zero-width bar is an empty row beside a day count that says something: it
+ * reads as a fault rather than as a fact. One day is the smallest thing this track can say, and it
+ * is true — the bar covers today.
+ */
+const atLeastADay = (fromMs: number, toMs: number): number => Math.max(toMs, fromMs + DAY);
+
 export function tlRow(row: QcRow, nowMs: number): TlRow {
   const bars: TlBar[] = [];
   const today = startOfDay(nowMs);
   for (const s of row.history.spans) {
     if (s.current) continue;
+    const to = atLeastADay(s.startMs, s.endMs ?? today);
     bars.push({
       key: `${row.id}:${s.status}`, status: s.status, current: false,
-      fromMs: s.startMs, toMs: s.endMs ?? today, overFromMs: null, aheadFromMs: null,
-      you: isWithYou(s.status), words: "", label: STAGE_NAME[s.status],
+      fromMs: s.startMs, toMs: to, overFromMs: null, aheadFromMs: null,
+      you: isWithYou(s.status), undated: false, words: "", label: STAGE_NAME[s.status],
       title: `${STAGE_NAME[s.status]} · ${shortDate(s.startMs)} → ${shortDate(s.endMs ?? today)}`,
     });
   }
-  if (row.stageStartMs != null) {
-    const end = Math.max(row.expectedMs ?? today, today);
+  /**
+   * ⚠️ AN UNDATED STAGE STILL DRAWS A BAR (v65.1, Nick's ruling). It used to draw nothing, because
+   * `stageStartMs` is null when nothing dates the stage — so a row lost its current bar, and with
+   * the history erased upstream it lost every bar. The ghost then fell back to `nowMs` and sat
+   * exactly on the today line, which is what gave it away on the page.
+   *
+   * ⚠️ AND THE GUESS IS ADMITTED RATHER THAN HIDDEN: it runs from the last thing anything DID date
+   * — the previous stage's end, which `stageHistory` now supplies as the current span — to today,
+   * DASHED, and it says "stage not dated". Starting it at the send instead would draw a bar
+   * claiming the query has stood here since it went out, which is precisely the date nobody has.
+   */
+  const undatedSpan = row.stageStartMs == null ? row.history.spans.find((s) => s.current) : null;
+  const startMs = row.stageStartMs ?? undatedSpan?.startMs ?? null;
+  if (startMs != null) {
+    const undated = row.stageStartMs == null;
+    const end = atLeastADay(startMs, Math.max(row.expectedMs ?? today, today));
     bars.push({
       key: `${row.id}:current`, status: row.status, current: true,
-      fromMs: row.stageStartMs, toMs: end,
-      overFromMs: row.expectedMs != null && row.expectedMs < today ? row.expectedMs : null,
+      fromMs: startMs, toMs: end,
+      overFromMs: !undated && row.expectedMs != null && row.expectedMs < today ? row.expectedMs : null,
       aheadFromMs: end > today ? today : null,
-      you: isWithYou(row.status), words: currentWords(row, nowMs), label: STAGE_NAME[row.status],
-      title: currentWords(row, nowMs),
+      you: isWithYou(row.status), undated,
+      words: undated ? "stage not dated" : currentWords(row, nowMs), label: STAGE_NAME[row.status],
+      title: undated ? `${STAGE_NAME[row.status]} · stage not dated` : currentWords(row, nowMs),
     });
   }
   /* §8.7 — the chip is AGENT-SIDE ONLY: a nudge is a thing you send someone who owes you a reply */
