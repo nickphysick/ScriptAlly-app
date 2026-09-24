@@ -710,10 +710,16 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
       stats: [...c.querySelectorAll("[data-qcv='xp-stat']")].map((e) => ({ g: e.getAttribute("data-group"), n: (e.querySelector(".qcv-xp-n")?.textContent ?? "").trim(), w: Math.round(e.getBoundingClientRect().width) })),
       backdrop: getComputedStyle(document.querySelector("[data-qcv='xp-back']")!).backgroundColor,
       cardBg: getComputedStyle(c).backgroundColor,
-      /* §10 lock 4 — where the Courier's column ends, and where the date row begins */
+      /* §10 locks 4 and 5 — the column, the tray, the date row and the controls at its foot */
       colTop: px(col.top), colBottom: px(col.bottom), cardTop: px(b.top),
+      trayTop: (() => { const t = c.querySelector("[data-qcv='xp-tray']"); return t ? px(t.getBoundingClientRect().top) : null; })(),
       trayBottom: (() => { const t = c.querySelector("[data-qcv='xp-tray']"); return t ? px(t.getBoundingClientRect().bottom) : null; })(),
+      trayMid: (() => { const t = c.querySelector("[data-qcv='xp-tray']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return px(r2.top + r2.height / 2); })(),
       tierBottom: (() => { const t = c.querySelector("[data-qcv='tl-tier']"); return t ? px(t.getBoundingClientRect().bottom) : null; })(),
+      laneTop: (() => { const t = c.querySelector("[data-qcv='tl-lane']"); return t ? px(t.getBoundingClientRect().top) : null; })(),
+      ctl: (() => { const t = c.querySelector("[data-qcv='xp-ctl']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { mid: px(r2.left + r2.width / 2), bottom: px(r2.bottom), top: px(r2.top) }; })(),
+      colMidX: px(col.left + col.width / 2),
+      ext: getComputedStyle(c).getPropertyValue("--qcv-xp-ext").trim(),
       /* the title on ONE line — a `getClientRects` count, which a wrap turns into two */
       ttlLines: (c.querySelector("[data-qcv='xp-title']") as HTMLElement).getClientRects().length,
       /**
@@ -764,31 +770,54 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
   is("expanded", "§10 lock 3 · no second surface inside — the card's white, the header band and the group band, and nothing else",
     palette.join(" · "), "rgb(245, 241, 235) · rgb(248, 244, 238) · rgb(255, 255, 255)");
 
-  /* ── §10 lock 4 · the Courier's column, and the title on one line ── */
+  /* ── §10 lock 4 · the Courier's column, rebuilt to §8.1 (v65.1) ── */
   is("expanded", "the title is one line at 1440", xp?.ttlLines, 1);
-  /**
-   * ⚠️ A DIVERGENCE FROM §8.1, MEASURED PRECISELY AND NOT REBUILT — and the numbers say more than
-   * the first reading of it did. The column is **258.0px tall, exactly the brief's figure**; what
-   * is wrong is WHERE. The brief spans it from the tray's top through the date row's foot, so the
-   * tray is the ref's ~154 and the column overhangs the dates; here it sits INSIDE the tray's 16px
-   * padding and the tray has grown to hold it, so the tray is 290 and the date row starts beneath
-   * it. **The header is 394 against the ref's 258 — 136px taller** — and the Courier never reaches
-   * the date row's corner. Putting it right moves the title's centring reference and the buttons'
-   * lane with it: a header rebuild, not a tweak, so it is recorded rather than attempted here.
-   */
   const hdr = xp && xp.colTop != null && xp.colBottom != null ? {
-    cardTop: xp.cardTop, colTop: xp.colTop, colBottom: xp.colBottom, trayBottom: xp.trayBottom, tierBottom: xp.tierBottom,
+    cardTop: xp.cardTop, colTop: xp.colTop, colBottom: xp.colBottom,
+    trayTop: xp.trayTop, trayBottom: xp.trayBottom, laneTop: xp.laneTop, tierBottom: xp.tierBottom, ext: xp.ext,
     colHeight: Math.round((xp.colBottom - xp.colTop) * 10) / 10,
-    trayHeight: xp.trayBottom != null && xp.cardTop != null ? Math.round((xp.trayBottom - xp.cardTop) * 10) / 10 : null,
-    dateRow: xp.tierBottom != null && xp.trayBottom != null ? Math.round((xp.tierBottom - xp.trayBottom) * 10) / 10 : null,
+    trayHeight: xp.trayBottom != null && xp.trayTop != null ? Math.round((xp.trayBottom - xp.trayTop) * 10) / 10 : null,
+    dateRow: xp.tierBottom != null && xp.laneTop != null ? Math.round((xp.tierBottom - xp.laneTop) * 10) / 10 : null,
     header: xp.tierBottom != null && xp.cardTop != null ? Math.round((xp.tierBottom - xp.cardTop) * 10) / 10 : null,
   } : null;
-  record({ area: "expanded", what: "§8.1 · the header's geometry against the brief (column 258 from the tray's top to the date row's foot; header 258)", got: hdr, want: "reported" });
-  near("expanded", "the column IS 258px tall, as the brief says", hdr?.colHeight, 258, 1);
-  is("expanded", "…and the date row is 104, as the brief says", hdr?.dateRow, 104);
-  /* what the app actually does, asserted so it cannot drift while the divergence stands */
-  near("expanded", "the column sits inside the tray's 16px top padding (the divergence)", xp?.colTop, (xp?.cardTop ?? 0) + 16, 0.6);
-  near("expanded", "…and its foot is the tray's foot, not the date row's (the divergence)", xp?.colBottom, (xp?.trayBottom ?? 0) - 16, 0.6);
+  record({ area: "expanded", what: "§8.1 · the header, rebuilt", got: hdr, want: "tray ~154 · date row 104 · column 258 from the tray's top · header ~258" });
+  /**
+   * ⚠️ THE COLUMN STARTS AT THE TRAY'S TOP EDGE, NOT INSIDE ITS PADDING. That 16px was the whole
+   * fault: the column stated 258, sat inside the padding, and the tray grew to 290 to hold it — a
+   * header of 394 against the design's 258, with the column's HEIGHT right all along.
+   */
+  near("expanded", "the column starts at the tray's top edge", xp?.colTop, xp?.trayTop, 0.6);
+  near("expanded", "…and at the card's top, which is the same edge", xp?.colTop, xp?.cardTop, 0.6);
+  /* …and runs through the date row, by the height the timeline PUBLISHED rather than a constant */
+  near("expanded", "the column's foot IS the date row's foot", xp?.colBottom, xp?.tierBottom, 1);
+  yes("expanded", `the timeline published the date row's height (${xp?.ext})`, /^\d+(\.\d+)?px$/.test(xp?.ext ?? ""), String(xp?.ext));
+  is("expanded", "…and the date row is 104", hdr?.dateRow, 104);
+  /**
+   * ⚠️ THE HEADER'S HEIGHT IS THE TRAY'S PLUS THE DATE ROW'S AND NOTHING ELSE — asserted as a
+   * COMPOSITION rather than as a number, because the tray's own height is the stat cards', and the
+   * cards are taller at 1280 (where their names wrap) than at 1440. The brief's "~154 and ~258" are
+   * its 1280 figures — its own card measurements say "87 × 121 at 1280; 144 wide at 1440" — so they
+   * are asserted at 1280, at the foot of this case, and reported here.
+   */
+  is("expanded", "the header is the tray plus the date row, with nothing spare",
+    hdr && hdr.trayHeight != null && hdr.dateRow != null ? Math.round((hdr.trayHeight + hdr.dateRow) * 10) / 10 : null, hdr?.header);
+  is("expanded", "…and the column is the header, because it spans both", hdr?.colHeight, hdr?.header);
+  seen("expanded", `header at 1440: ${hdr?.header} (tray ${hdr?.trayHeight} + date row ${hdr?.dateRow})`);
+  /**
+   * ⚠️ THE TITLE CENTRES ON THE TRAY, NOT ON THE COLUMN (Nick, 25 Sep). The column now runs 258
+   * through the date row while the tray is ~154, so centring on the column would drop the title
+   * below the tray's own middle. The ref renders the two midpoints level and the Courier's drawn
+   * body sits in the upper part of his column, so they read as level.
+   */
+  near("expanded", "§10 lock 4 · the title's midpoint is the TRAY's", xp?.ttlMid, xp?.trayMid, 1);
+
+  /* ── §10 lock 5 · Filter, Sort and ↺ at the column's foot, centred on it ── */
+  near("expanded", "§10 lock 5 · the controls are centred on the column", xp?.ctl?.mid, xp?.colMidX, 0.6);
+  yes("expanded", `§10 lock 5 · …at the column's foot, over the date row (controls end ${xp?.ctl?.bottom}, column ${xp?.colBottom}, lane starts ${xp?.laneTop})`,
+    xp?.ctl != null && xp.colBottom != null && xp.laneTop != null && xp.ctl.bottom <= xp.colBottom + 0.6 && xp.ctl.bottom > xp.laneTop,
+    JSON.stringify({ ctl: xp?.ctl, colBottom: xp?.colBottom, laneTop: xp?.laneTop }));
+  /* the ✕ is still the topmost thing at its own centre, in the column's top-left corner */
+  is("expanded", "§10 lock 5 · the ✕ is topmost at its own centre", xp?.onTop, "close");
 
   near("expanded", "top — the rail's own", xp?.top, railBefore.top, 0.6);
   near("expanded", "bottom — the rail's own", xp?.bottom, railBefore.bottom, 0.6);
@@ -801,7 +830,15 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
   is("expanded", "the reveal has finished — the card is fully uncovered", xp?.clip, "inset(0px round 20px)");
 
   is("expanded", "⚠️ the ✕ is the topmost thing at its own centre", xp?.onTop, "close");
-  near("expanded", "§8.2 · the title's midpoint IS the Courier column's", xp?.ttlMid, xp?.colMid, 1);
+  /**
+   * ⚠️ RETIRED AND REPLACED, NOT DELETED (v65.1, Nick's correction). This asserted the title's
+   * midpoint against the COLUMN's, which was right while the column was the tray's height and is
+   * wrong now that it runs 258 through the date row — centring on it would drop the title below the
+   * tray's own middle. The ref renders the two level, and the Courier's drawn body sits in the
+   * upper part of his column, so they read as level. The claim now lives above, against the TRAY's
+   * midpoint, and is asserted at 1280 as well.
+   */
+  record({ area: "expanded", what: "§8.2 · the title's midpoint against the column's (superseded — the tray's is the claim)", got: { title: xp?.ttlMid, column: xp?.colMid, tray: xp?.trayMid }, want: "reported" });
   near("expanded", "§8.1 · the column is the names column's width", xp?.col, 260, 0.6);
   is("expanded", "§8.2 · three stat cards", xp?.stats.length, 3);
   is("expanded", "…in the groups' order", xp?.stats.map((s) => s.g), ["overdue", "upcoming", "watch"]);
@@ -872,10 +909,28 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
     const b = c.getBoundingClientRect();
     const r = t.getBoundingClientRect();
     const px = (n: number) => Math.round(n * 10) / 10;
-    return { lines: t.getClientRects().length, right: px(r.right), cardRight: px(b.right), stats: c.querySelectorAll("[data-qcv='xp-stat']").length };
+    const box = (sel: string) => { const e = c.querySelector(sel); return e ? e.getBoundingClientRect() : null; };
+    const tray = box("[data-qcv='xp-tray']"); const lane = box("[data-qcv='tl-lane']");
+    const tier = box("[data-qcv='tl-tier']"); const col = box("[data-qcv='xp-col']");
+    return {
+      lines: t.getClientRects().length, right: px(r.right), cardRight: px(b.right),
+      stats: c.querySelectorAll("[data-qcv='xp-stat']").length,
+      statH: px(box("[data-qcv='xp-stat']")?.height ?? 0),
+      trayHeight: tray ? px(tray.height) : null,
+      colHeight: col ? px(col.height) : null,
+      dateRow: tier && lane ? px(tier.bottom - lane.top) : null,
+      header: tier ? px(tier.bottom - b.top) : null,
+      ttlMid: px(r.top + r.height / 2),
+      trayMid: tray ? px(tray.top + tray.height / 2) : null,
+    };
   });
-  record({ area: "expanded", what: "the title at 1280", got: narrow, want: "reported" });
+  record({ area: "expanded", what: "the title and the header at 1280", got: narrow, want: "tray ~154 · header ~258" });
   is("expanded", "the title is one line at 1280 too", narrow?.lines, 1);
+  /* ── §8.1's own figures, at the width the brief states them for ── */
+  near("expanded", "§8.1 · the tray is back to ~154 at 1280", narrow?.trayHeight, 154, 4);
+  near("expanded", "§8.1 · …and the header with it — ~258, where it was 394", narrow?.header, 258, 4);
+  near("expanded", "§8.1 · …the column being the brief's 258", narrow?.colHeight, 258, 4);
+  near("expanded", "the title's midpoint is the tray's at 1280 too", narrow?.ttlMid, narrow?.trayMid, 1);
   yes("expanded", `…and its ink stays inside the card (${narrow?.right} against ${narrow?.cardRight})`, (narrow?.right ?? 1e9) <= (narrow?.cardRight ?? 0), JSON.stringify(narrow));
   is("expanded", "…with all three stat cards still drawn", narrow?.stats, 3);
 });

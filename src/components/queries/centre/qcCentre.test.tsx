@@ -264,6 +264,9 @@ describe("the sheet", () => {
       "--qcv-xp-lcol": "src/components/queries/centre/QcExpanded.tsx",
       "--qcv-tl-names": "src/components/queries/centre/QcTimeline.tsx",
       "--qcv-state": "src/components/queries/centre/QcTimeline.tsx",
+      /* §8.1 — the date row's measured height, published onto the card so the tray's column can
+         extend through it. The timeline owns the measurement; the tray is a sibling one level up. */
+      "--qcv-xp-ext": "src/components/queries/centre/QcTimeline.tsx",
     };
     for (const [tok, writer] of Object.entries(PUBLISHED)) {
       const w = read(writer);

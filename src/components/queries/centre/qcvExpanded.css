@@ -47,8 +47,28 @@
   z-index: 5;
 }
 
-/* §8.1 — the Courier's column: the names column's width, from the tray's top to the date row's foot */
-.qcv-xp-col { position: relative; align-self: stretch; min-height: 258px; }
+/**
+ * §8.1 — the Courier's column: the names column's width, from the TRAY'S TOP EDGE through the foot
+ * of the date row.
+ *
+ * ⚠️ THE NEGATIVE MARGINS ARE THE WHOLE MECHANISM, AND THEY ARE NOT A NUDGE. The cell's top and
+ * bottom cancel the tray's own 16px padding so the column starts at the tray's edge rather than
+ * inside it; the bottom one then carries on by `--qcv-xp-ext` so it overflows DOWNWARD through the
+ * date row without adding to the tray's height. That last part is the point: it used to state
+ * `min-height: 258px` while sitting inside the padding, so **the tray grew to 290 to hold it and
+ * the header to 394 against the design's 258** — the column's height was right and its placement
+ * was not.
+ *
+ * ⚠️ AND IT IS OPAQUE IN THE TRAY'S COLOUR BECAUSE IT IS NOW THE DATE ROW'S CORNER CELL. The tier
+ * is inset by the names column, so the region beneath the column was the card's white and the dates
+ * scrolled to its right; with the column over it, anything see-through would show them passing
+ * behind the drawing.
+ */
+.qcv-xp-col {
+  position: relative; align-self: stretch; z-index: 2;
+  margin: -16px 0 calc(-16px - var(--qcv-xp-ext, 104px));
+  background: #f5f1eb;
+}
 .qcv-xp-art {
   display: block; width: 100%; height: 100%; object-fit: contain;
   padding: 4px 12px 50px 22px; box-sizing: border-box;

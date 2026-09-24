@@ -421,3 +421,37 @@ describe("§8.9 · the crosshair tag's guard", () => {
     expect(tlSrc, "the names-column-only clamp is superseded").not.toMatch(/Math\.max\(NAMES_W \+ 8,/);
   });
 });
+
+describe("§8.1 · the Courier's column spans the tray AND the date row (v65.1)", () => {
+  const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");
+  /**
+   * ⚠️ THE GEOMETRY IS MEASURED (`qcV65.measure.ts`, §10 locks 4 and 5). What a source lock can
+   * honestly carry is the MECHANISM: that the extent is published by the thing that measures it,
+   * and that the column no longer states a height of its own.
+   */
+  it("the date row's height is published by the timeline, never restated in the tray", () => {
+    expect(tlSrc).toMatch(/card\.style\.setProperty\("--qcv-xp-ext"/);
+    expect(tlSrc).toMatch(/tier\.getBoundingClientRect\(\)\.bottom - lane\.getBoundingClientRect\(\)\.top/);
+    expect(tlSrc).toMatch(/ro\.observe\(lane\);\s*\n\s*ro\.observe\(tier\);/);
+    /* it crosses a component boundary, so the writer reaches the card rather than its own root */
+    expect(tlSrc).toMatch(/closest\("\[data-qcv='xp-card'\]"\)/);
+  });
+  it("⚠️ the column states NO height — the fault was a stated one inside the tray's padding", () => {
+    const col = rule(".qcv-xp-col");
+    expect(col, "a stated height is what grew the tray to 290 and the header to 394").not.toMatch(/(?:^|[;{\s])(min-)?height\s*:/);
+    /* the negative margins ARE the mechanism: cancel the tray's padding, then carry on by the extent */
+    expect(col).toMatch(/margin:\s*-16px 0 calc\(-16px - var\(--qcv-xp-ext, 104px\)\)/);
+  });
+  it("⚠️ …and it is OPAQUE, because it is now the date row's corner cell", () => {
+    expect(rule(".qcv-xp-col")).toMatch(/background:\s*#f5f1eb/);
+    /* above the date row it covers — the tier is inset by the names column, so the dates run behind it */
+    expect(rule(".qcv-xp-col")).toMatch(/z-index:\s*2/);
+  });
+  it("the tray keeps `align-items: center`, because the TITLE centres on the tray", () => {
+    /* ⚠️ NOT ON THE COLUMN. The column now runs 258 through the date row while the tray is ~154;
+       centring the title on the column would drop it below the tray's own middle. The ref renders
+       the two midpoints level, and the Courier's drawn body sits in the upper part of his column,
+       so they read as level. Measured as an equality in `qcV65.measure.ts`. */
+    expect(rule(".qcv-xp-tray")).toMatch(/align-items:\s*center/);
+  });
+});

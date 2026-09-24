@@ -62,6 +62,35 @@ export const QcTimeline: React.FC<{
    */
   const ctlRef = useRef<HTMLDivElement>(null);
   const [ctlW, setCtlW] = useState(0);
+  /**
+   * §8.1 — the date row's height, PUBLISHED so the Courier's column can extend through it.
+   *
+   * ⚠️ IT CROSSES A COMPONENT BOUNDARY, WHICH IS WHY IT IS A TOKEN AND NOT A CONSTANT. The date row
+   * is this component's; the column is the card's tray, one level up and a sibling away. A number
+   * restated in the tray would be right until the lane or the tier moved, and the column would then
+   * stop short of the dates or hang past them with nothing to point at. Same arrangement as
+   * `--qcv-rail-pad`: the thing that OWNS the measurement publishes it, and the reader takes the
+   * resting value as its fallback so the first frame is the common case.
+   */
+  const laneRef = useRef<HTMLDivElement>(null);
+  const tierRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const lane = laneRef.current;
+    const tier = tierRef.current;
+    const card = boxRef.current?.closest("[data-qcv='xp-card']") as HTMLElement | null;
+    if (!lane || !tier || !card) return undefined;
+    const read = () => {
+      const h = tier.getBoundingClientRect().bottom - lane.getBoundingClientRect().top;
+      if (h > 0) card.style.setProperty("--qcv-xp-ext", `${Math.round(h * 10) / 10}px`);
+    };
+    read();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(read);
+    ro.observe(lane);
+    ro.observe(tier);
+    return () => ro.disconnect();
+  }, []);
 
   useLayoutEffect(() => {
     const el = ctlRef.current;
@@ -231,7 +260,7 @@ export const QcTimeline: React.FC<{
   return (
     <div className="qcv-tl" ref={boxRef} data-qcv="tl" style={{ ["--qcv-tl-names" as string]: `${NAMES_W}px` }}>
       {/* §8.4 — the lane. Its controls are OVERLAYS over the scroller, never inside it. */}
-      <div className="qcv-tl-lane" data-qcv="tl-lane">
+      <div className="qcv-tl-lane" data-qcv="tl-lane" ref={laneRef}>
         <div className="qcv-tl-controls" data-qcv="tl-controls" ref={ctlRef}>
           <span className="qcv-tl-nav" data-qcv="tl-nav">
             <button type="button" onClick={() => pan(-NUDGE_WEEKS)} aria-label="Four weeks earlier">‹</button>
@@ -275,7 +304,7 @@ export const QcTimeline: React.FC<{
       <div className="qcv-tl-scroll" ref={scrollRef} data-qcv="tl-scroll" onWheel={onWheel} onMouseMove={onMove} onMouseLeave={() => setCross(null)}>
         <div className="qcv-tl-inner" style={{ width: NAMES_W + width }}>
           {/* §8.4 — the date tier: the heat, the months, the week ticks and the TODAY pill */}
-          <div className="qcv-tl-tier" data-qcv="tl-tier" style={{ marginLeft: NAMES_W, width }}>
+          <div className="qcv-tl-tier" data-qcv="tl-tier" ref={tierRef} style={{ marginLeft: NAMES_W, width }}>
             <div className="qcv-tl-heat" data-qcv="tl-heat" aria-hidden="true">
               {heat.map((h) => (
                 <i key={h.ms} style={{ left: xAt(ext, pxd, h.ms), width: Math.max(1, 7 * pxd - 1), height: `${h.heightPc}%`, opacity: h.opacity }} />
