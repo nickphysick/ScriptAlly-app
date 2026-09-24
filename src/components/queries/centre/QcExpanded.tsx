@@ -27,10 +27,10 @@ import { QcCalControls, type CalMenu } from "./QcCalControls";
 import { NAMES_W, QcTimeline } from "./QcTimeline";
 import type { QcRow } from "../../../lib/qcSummary";
 import { COURIER_CUTOUT } from "./qcArt";
-import { expandedBox, readWindow, type RailBox } from "./QcRail";
+import { expandedBox, readWindow, type ExpandedBox } from "./QcRail";
 import "./qcvExpanded.css";
 
-type Box = RailBox & { left: number; width: number };
+type Box = ExpandedBox;
 
 /**
  * §8.1 — the names column's width, which the Courier's column matches exactly.
@@ -65,18 +65,29 @@ export const QcExpanded: React.FC<{
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
 
-  /* the box, measured off the window and re-read whenever it changes shape */
+  /**
+   * The box: its top and bottom from the WINDOW, its left and right from the GROUP (v65.2 §2).
+   *
+   * ⚠️ TWO BOXES, BECAUSE THE CARD ANSWERS TO TWO THINGS. It grows out of the rail, which is the
+   * group's second column, so its horizontal extent is the group's — on a wide screen the window's
+   * edges are hundreds of pixels of desk further out, and the card would leave the page it belongs
+   * to behind. Vertically the group has no extent of its own, so those stay the window's.
+   */
   useLayoutEffect(() => {
     const read = () => {
-      /* the card is portalled to `body`, so `readWindow` reaches the shell through the document */
+      /* the card is portalled to `body`, so both reads reach the shell through the document */
       const win = readWindow(ref.current);
-      setBox(win ? expandedBox(win, window.innerWidth) : null);
+      const g = document.querySelector(".qcv-group") as HTMLElement | null;
+      const gb = g ? g.getBoundingClientRect() : null;
+      setBox(win && gb && gb.width > 0 ? expandedBox(win, { left: gb.left, right: gb.right }) : null);
     };
     read();
     if (typeof ResizeObserver === "undefined") return undefined;
     const ro = new ResizeObserver(read);
     const win = document.querySelector(".ws-window");
     if (win) ro.observe(win);
+    const grp = document.querySelector(".qcv-group");
+    if (grp) ro.observe(grp);
     ro.observe(document.documentElement);
     window.addEventListener("resize", read);
     return () => { ro.disconnect(); window.removeEventListener("resize", read); };

@@ -10,7 +10,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { LEDGER_MIN, QcRail, RAIL_INSET_X, RAIL_INSET_Y, RAIL_RESERVE, RAIL_STACK_BELOW, RAIL_W, expandedBox, railBox } from "./QcRail";
+import { GROUP_GAP, GROUP_MAX, LEDGER_MIN, QcRail, RAIL_INSET_X, RAIL_INSET_Y, RAIL_RESERVE, RAIL_STACK_BELOW, RAIL_W, expandedBox, railBox, railStick } from "./QcRail";
 import { QcBirdsEye } from "./QcBirdsEye";
 
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
@@ -81,7 +81,7 @@ describe("the card, rendered", () => {
     const html = rail();
     expect(html).toContain('data-qcv="rail"');
     expect(html).toContain("qcv-rail--stacked");
-    expect(html).not.toContain("qcv-rail--fixed");
+    expect(html).not.toContain("qcv-rail--beside");
     expect(html, "an unplaced card must not carry a half-written inline box").not.toMatch(/style="[^"]*top:/);
   });
   it("one card, two contents — and it says which it is showing", () => {
@@ -113,25 +113,50 @@ describe("the sheet, and the two shell rules", () => {
     expect(m![1], "the rail grew the framed treatment").not.toMatch(/inset 0 0 0 \d+px/);
   });
   it("⚠️ the sheet states the POSITION and nothing about WHERE — the placement is measured", () => {
-    expect(railCss).toMatch(/\.qcv-rail--fixed \{ position: fixed;/);
+    expect(railCss).toMatch(/\.qcv-rail--beside \{[^}]*position: sticky/);
     /* a `top`, `right` or `bottom` here would be a second opinion about a box JS has measured, and
        whichever won it would be wrong on the page where the other was right */
-    const fixed = railCss.match(/(?:^|\n)\s*\.qcv-rail--fixed\s*\{([^}]*)\}/)![1];
-    for (const p of ["top:", "right:", "bottom:", "left:", "height:", "width:"]) {
-      expect(fixed, `${p} is stated in CSS as well as measured`).not.toContain(p);
+    /**
+     * ⚠️ RETARGETED IN v65.2 §2, AND THE RULE IS UNCHANGED: the sheet may name the position and not
+     * the place. What changed is that a sticky card MUST state a `top` and a `height` — that is
+     * what sticky is — so the claim is that both READ A PUBLISHED MEASUREMENT rather than stating a
+     * number. `top: 16px` and `calc(100vh - 32px)` are the mock's, and both are facts about a page
+     * whose scrollport is its viewport.
+     */
+    const beside = railCss.match(/(?:^|\n)\s*\.qcv-rail--beside\s*\{([^}]*)\}/)![1];
+    expect(beside).toMatch(/top:\s*var\(--be-rail-top/);
+    expect(beside).toMatch(/height:\s*var\(--be-rail-h/);
+    for (const p of ["right:", "bottom:", "left:", "width:"]) {
+      expect(beside, `${p} is stated in CSS as well as measured`).not.toContain(p);
     }
+    expect(beside, "a constant offset is a guess at everything above the card").not.toMatch(/top:\s*\d/);
+    expect(beside, "100vh is the viewport, and the card does not start at y 0").not.toContain("100vh");
   });
-  it("§2 · one measurement owns both sides — the card publishes the reservation, the page reads it", () => {
-    /* ⚠️ NOT A MEDIA QUERY. A media query knows the VIEWPORT; whether there is room for a card
-       depends on the WINDOW. Two askers, two answers, and between them either 384px of nothing
-       down the right of a stacked page or a fixed card over the ledger's last column. */
-    expect(pageCss).toMatch(/padding-right:\s*var\(--qcv-rail-pad,\s*384px\)/);
-    expect(pageCss, "the page asks a media query about a window question").not.toMatch(/@media[^{]*\{\s*\.qcv-page \{ padding-right/);
+  it("§2 · one measurement owns both sides — the card publishes, the group reads", () => {
+    /**
+     * ⚠️ THE RESERVATION BECAME A TRACK (v65.2). The page used to pay `padding-right` for a card
+     * placed against the window's right edge; the two are one grid now, so the width is stated
+     * once and nothing can disagree with it. What did NOT change is the law underneath: whether
+     * there is room is a question about the WINDOW, and a media query knows the VIEWPORT — the same
+     * 1440 viewport gives 1128 of window with the sidebar open and 1312 with it shut. The card
+     * still answers it, and now publishes the answer as the group's own attribute.
+     */
+    expect(pageCss, "the reservation is a track now").not.toMatch(/padding-right:\s*var\(--qcv-rail-pad/);
+    expect(pageCss).toMatch(/\.qcv-group \{[^}]*grid-template-columns: minmax\(0, 1fr\) 340px/);
+    expect(pageCss).toMatch(/\.qcv-group \{[^}]*column-gap: 28px/);
+    /* ⚠️ THE CAP IS THE PAGE'S `--wpg-measure`, not a `max-width` here: the shared grid computes the
+       cap and the gutter reduction in ONE `min()`, and a second cap on this element beat the gutter
+       — the page started at the window's edge, 246 against the dashboard's 268. */
+    expect(pageCss).toMatch(/--wpg-measure: 1480px/);
+    expect(pageCss, "a second cap contests the grid's gutter reduction").not.toMatch(/\.qcv-group \{[^}]*max-width/);
+    expect(pageCss).toMatch(/\.qcv-group\[data-rail="stacked"\] \{ grid-template-columns: minmax\(0, 1fr\); \}/);
+    expect(pageCss, "the group asks a media query about a window question").not.toMatch(/@media[^{]*\{\s*\.qcv-group/);
     const rail = read("src/components/queries/centre/QcRail.tsx");
-    expect(rail).toMatch(/setProperty\("--qcv-rail-pad", next \? `\$\{RAIL_RESERVE\}px` : "0px"\)/);
-    /* the reservation is the card's own width plus two 22px gutters — derived, not a fourth number */
+    expect(rail).toMatch(/group\?\.setAttribute\("data-rail", next \? "beside" : "stacked"\)/);
+    /* the group's own numbers are the card's width and the gutter, stated once each */
+    expect(GROUP_MAX).toBe(1480);
+    expect(GROUP_GAP).toBe(28);
     expect(RAIL_RESERVE).toBe(RAIL_W + RAIL_INSET_X * 2);
-    expect(RAIL_RESERVE).toBe(384);
   });
   it("⚠️ the narrow bar is PAGE-SCOPED: the other fourteen routes keep the whisper", () => {
     expect(shellCss).toMatch(/\.ground-mode \.ws-sync, \.ground-mode \.ws-pagebar > \.ws-vdiv \{ display: none; \}/);
@@ -217,32 +242,82 @@ describe("the court tiles", () => {
 
 /* ── §7 · the expanded card's box ───────────────────────────────────────────────────────────── */
 
-describe("⚠️ the expanded card is the rail's own box, grown leftwards", () => {
-  it("it keeps the top, the bottom and the right, and takes the window's left plus the same gutter", () => {
+/**
+ * ⚠️ RETARGETED IN v65.2 §2 — AND THE CLAIM CHANGED, NOT JUST THE SIGNATURE. These asserted that
+ * the card grew to the WINDOW's edges, inset by the same 22px gutter on each side, which was right
+ * while the page filled the window. Now the page and the card are one centred group capped at 1480,
+ * and a card grown to the window would leave the page it belongs to behind — on a 2560 screen by
+ * hundreds of pixels of desk on each side. Its horizontal extent is the GROUP's; its top and bottom
+ * are still the window's, because the group has no vertical extent of its own.
+ */
+describe("⚠️ the expanded card spans the GROUP, and keeps the window's top and bottom", () => {
+  const GROUP = { left: 300, right: 1380 };
+  it("its left and right are the group's, to the pixel", () => {
     const rail = railBox(WIN, 1440)!;
-    const wide = expandedBox(WIN, 1440)!;
-    /* ⚠️ THE THREE IT KEEPS ARE WHAT MAKE THE GROWTH READ AS THE SAME CARD rather than a new one
-       appearing where it was. Only `left` is new. */
-    expect([wide.top, wide.height, wide.right]).toEqual([rail.top, rail.height, rail.right]);
-    expect(wide.left).toBe(WIN.left + RAIL_INSET_X);
-    /* …and it is inset by the SAME gutter on both sides of the window: its left edge sits 22 inside
-       the window's left, and its right edge 22 inside the window's right */
-    expect(wide.left - WIN.left, "the left gutter").toBe(RAIL_INSET_X);
-    expect(WIN.right - (1440 - wide.right), "the right gutter").toBe(RAIL_INSET_X);
-    /* and the width is whatever is between them — never a third number */
-    expect(Math.round(wide.left + wide.width)).toBe(Math.round(1440 - wide.right));
+    const wide = expandedBox(WIN, GROUP)!;
+    expect(wide.left).toBe(GROUP.left);
+    expect(wide.left + wide.width).toBe(GROUP.right);
+    /* ⚠️ AND IT STATES NO `right`. The card is placed by left + width; a third number about the same
+       edge is a third thing that can disagree, and computing it would need `window` — which a pure
+       function a unit test calls does not have. */
+    expect("right" in wide).toBe(false);
+    /* the two it keeps are what make the growth read as the same card rather than a new one */
+    expect([wide.top, wide.height]).toEqual([rail.top, rail.height]);
   });
-  it("⚠️ it is derived from the WINDOW, not from `100vw` — or a collapsed sidebar runs it off the screen", () => {
-    /* the same viewport with the sidebar shut gives a wider window and a wider card; a width of
-       `100vw − 224 − 44` would be the same number in both, and 184px too wide in the second */
-    const open = expandedBox(WIN, 1440)!;
-    const shut = expandedBox({ ...WIN, left: WIN.left - 184, width: WIN.width + 184 }, 1440)!;
-    expect(shut.width - open.width).toBe(184);
-    expect(shut.left).toBe(open.left - 184);
+  it("⚠️ …and a group narrower than the window does NOT give it the window's edges", () => {
+    /* the fault this closes: on a wide screen the group is capped and the window is not, so a card
+       taking the window's edges is the one thing on the page not centred with everything else */
+    const narrow = expandedBox(WIN, { left: 500, right: 1000 })!;
+    expect(narrow.width).toBe(500);
+    expect(narrow.left).toBe(500);
+    expect(narrow.left).toBeGreaterThan(WIN.left);
   });
   it("it refuses the same readings the rail refuses", () => {
-    expect(expandedBox({ ...WIN, height: 0 }, 1440)).toBeNull();
-    expect(expandedBox({ ...WIN, width: NaN }, 1440)).toBeNull();
-    expect(expandedBox({ ...WIN, width: RAIL_STACK_BELOW - 1 }, 1440)).toBeNull();
+    expect(expandedBox({ ...WIN, height: 0 }, GROUP)).toBeNull();
+    expect(expandedBox({ ...WIN, width: NaN }, GROUP)).toBeNull();
+    expect(expandedBox({ ...WIN, width: RAIL_STACK_BELOW - 1 }, GROUP), "stacked: there is no card to grow").toBeNull();
+    expect(expandedBox(WIN, { left: 400, right: 400 }), "a group with no width").toBeNull();
   });
 });
+
+/* ── §2 · the sticky placement ───────────────────────────────────────────────────────────────── */
+
+describe("§2 · the card is sticky in the group, at a measured offset and height", () => {
+  /* the window sits 100px down the viewport; the scrollport starts 60px below the viewport's top */
+  it("⚠️ the sticky offset is measured from the SCROLLPORT, never the 16 itself", () => {
+    const st = railStick(WIN, WIN.top - 40, WIN.top + 200)!;
+    /* the card must come to rest at window.top + 16; the scrollport starts 40px above that window,
+       so the offset is 56 — writing `top: 16px` would park it 40px too high */
+    expect(st.stickyTop).toBe(RAIL_INSET_Y + 40);
+  });
+  it("⚠️ the height runs from the card's OWN top, and `Math.max` serves both states with no state", () => {
+    /* before it sticks, its top is where it happens to sit */
+    const loose = railStick(WIN, 0, WIN.top + 200)!;
+    expect(loose.height).toBe(WIN.top + WIN.height - RAIL_INSET_Y - (WIN.top + 200));
+    /* once stuck, it is the rest position, and the height is the window less both insets */
+    const stuck = railStick(WIN, 0, WIN.top + RAIL_INSET_Y)!;
+    expect(stuck.height).toBe(WIN.height - RAIL_INSET_Y * 2);
+    /* and a card scrolled ABOVE its rest position does not grow past it */
+    const above = railStick(WIN, 0, WIN.top - 300)!;
+    expect(above.height).toBe(stuck.height);
+  });
+  /**
+   * ⚠️ THE LATCH, AND IT SHIPPED FOR ONE BUILD. The card renders stacked until it has measured, so
+   * on the first read its top is far below the window's bottom. A height derived from that top is
+   * negative; a placement refused for a negative height leaves the card stacked; and the stacked
+   * card measures the same top on the next read. The page stayed one column at 1440 with every
+   * rule correct, and the only symptom was a measurement reporting the ledger 390px too wide.
+   */
+  it("⚠️ a card that has not been placed yet is still placeable — the state must not decide the measurement", () => {
+    const wayBelow = WIN.top + WIN.height + 900;
+    const st = railStick(WIN, 0, wayBelow);
+    expect(st, "an unplaced card refuses its own placement for ever").not.toBeNull();
+    /* …and it is given the full resting height, not a negative one */
+    expect(st!.height).toBe(WIN.height - RAIL_INSET_Y * 2);
+  });
+  it("…and it refuses what the fixed card refused", () => {
+    expect(railStick({ ...WIN, height: 0 }, 0, 0)).toBeNull();
+    expect(railStick({ ...WIN, width: RAIL_STACK_BELOW - 1 }, 0, 0)).toBeNull();
+  });
+});
+

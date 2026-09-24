@@ -37,7 +37,13 @@ import { ensureSignedIn, openRoute } from "./measure";
 
 const OUT = resolve("test-results/qc-v65");
 const REPORT = resolve(OUT, "report.json");
-const REF = "file://" + resolve("design-refs/query-centre-v65.html");
+/**
+ * ⚠️ REPOINTED TO v74 IN v65.2 §0. v65 is superseded: it draws the card fixed against the window's
+ * right edge, the page full-bleed and no artwork, all three of which this round replaces. A run
+ * against the old mock would produce true readings about a design nobody is building — the
+ * "plausible numbers about the wrong subject" failure this file's header exists to prevent.
+ */
+const REF = "file://" + resolve("design-refs/query-centre-v74.html");
 const TOL = 2;
 const MIN_ASSERTIONS = 95;
 
@@ -138,19 +144,37 @@ async function readRefRaw(page: Page, w: number, h: number) {
        the claim; the declaration is only how it is spelled. */
     const rail = document.querySelector(".rail") as HTMLElement | null;
     const left = document.querySelector(".one-l") as HTMLElement | null;
+    const art = document.querySelector(".hero-art2") as HTMLElement | null;
+    const head = document.querySelector(".head") as HTMLElement | null;
+    const h1 = document.querySelector(".head h1") as HTMLElement | null;
     const d = document.body.dataset;
+    const r1 = (n: number) => Math.round(n * 10) / 10;
     return {
       one: document.body.classList.contains("one"),
-      data: { stat: d.stat, rc: d.rc, rl: d.rl, xe: d.xe, xa: d.xa, xl: d.xl, ms: d.ms, dc: d.dc, ct: d.ct, ln: d.ln, pb: d.pb, sel: d.sel },
+      /* the twelve v65 options, plus the three v74 adds this round is built to */
+      data: { stat: d.stat, rc: d.rc, rl: d.rl, xe: d.xe, xa: d.xa, xl: d.xl, ms: d.ms, dc: d.dc, ct: d.ct, ln: d.ln, pb: d.pb, sel: d.sel, hero: d.hero, hl: d.hl, rh: d.rh },
       hidden: { views: drawn(".views"), portal: drawn("#ovpage .vt3"), sum: drawn(".sum"), backov: drawn(".backov") },
-      railTrack: rail ? Math.round(rail.getBoundingClientRect().width * 10) / 10 : null,
-      leftCol: left ? Math.round(left.getBoundingClientRect().width * 10) / 10 : null,
-      railTop: rail ? Math.round(rail.getBoundingClientRect().top * 10) / 10 : null,
-      railBottom: rail ? Math.round((innerHeight - rail.getBoundingClientRect().bottom) * 10) / 10 : null,
-      railRight: rail ? Math.round((innerWidth - rail.getBoundingClientRect().right) * 10) / 10 : null,
+      railTrack: rail ? r1(rail.getBoundingClientRect().width) : null,
+      leftCol: left ? r1(left.getBoundingClientRect().width) : null,
+      railTop: rail ? r1(rail.getBoundingClientRect().top) : null,
+      railBottom: rail ? r1(innerHeight - rail.getBoundingClientRect().bottom) : null,
+      railRight: rail ? r1(innerWidth - rail.getBoundingClientRect().right) : null,
       railSticky: rail ? getComputedStyle(rail).position : null,
+      railStickTop: rail ? getComputedStyle(rail).top : null,
+      /* §2 — the card's right edge IS the group's, which is what "one grid" means */
+      railInGroup: rail && grid ? r1(grid.getBoundingClientRect().right - rail.getBoundingClientRect().right) : null,
+      gridW: grid ? r1(grid.getBoundingClientRect().width) : null,
+      gridMax: grid ? getComputedStyle(grid).maxWidth : null,
       gutter: grid ? parseFloat(getComputedStyle(grid).columnGap) : null,
-      h1: parseFloat(getComputedStyle(document.querySelector(".head h1")!).fontSize),
+      /* §3 — which hero state the ref is in at this width, and where the art sits relative to the title */
+      leftContainer: left ? getComputedStyle(left).containerType : null,
+      headDisplay: head ? getComputedStyle(head).display : null,
+      artTop: art ? r1(art.getBoundingClientRect().top) : null,
+      artLeft: art ? r1(art.getBoundingClientRect().left) : null,
+      artW: art ? r1(art.getBoundingClientRect().width) : null,
+      h1Top: h1 ? r1(h1.getBoundingClientRect().top) : null,
+      h1Left: h1 ? r1(h1.getBoundingClientRect().left) : null,
+      h1: parseFloat(getComputedStyle(h1!).fontSize),
     };
   });
 }
@@ -212,7 +236,15 @@ async function openApp(page: Page, w: number, h: number, search = "") {
   await page.waitForTimeout(1300); /* past the entrance, which is done inside 800ms */
 }
 async function readApp(page: Page): Promise<Reading> {
-  const r = await page.evaluate(readAll, { sel: APP_SEL, root: ".qcv-page" });
+  /**
+   * ⚠️ ROOTED ON THE GROUP SINCE v65.2 §2 — THE CARD LEFT THE PAGE COLUMN. `.qcv-page` was the whole
+   * of this page while the card was placed inside it; the card is the group's second track now, so a
+   * probe rooted on the page silently stops finding it. That is not a miss that reads as a miss:
+   * `app.boxes["open"]` simply becomes `undefined`, so "no docked card on load" passes for the wrong
+   * reason and every later claim about the card is a claim about nothing. The group contains the
+   * page, so every other reading is unchanged.
+   */
+  const r = await page.evaluate(readAll, { sel: APP_SEL, root: ".qcv-group" });
   if ("error" in r) throw new Error("app: " + r.error);
   return r as Reading;
 }
@@ -228,13 +260,18 @@ async function appColumn(page: Page): Promise<number> {
   return page.evaluate(() => Math.round([...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect().width));
 }
 /**
- * ⚠️ 246, NOT 268, SINCE v65 §2 — AND THE CHANGE IS WHICH INSETS ARE STILL OUTSIDE THE COLUMN. The
- * mockup's page is its window less a 224px nav and its own 22px insets on each side; both documents
- * now reserve the SAME 384px at the right for the fixed card, so that reservation cancels and only
- * the LEFT 22 is left to add. Measured: at 268 the ref's content came out 766 against the app's 744,
- * which is that 22 exactly.
+ * ⚠️ 636, NOT 246, SINCE v65.2 §2 — AND THE CHANGE IS THAT THE CARD'S COLUMN STOPPED CANCELLING.
+ * While both documents reserved the same 384px at the right for a FIXED card, that reservation was
+ * outside both columns and dropped out of the arithmetic; only the mockup's extra left inset was
+ * left to add. Now the card is a TRACK in each document's own grid, so the mockup's content column
+ * is its window less its 224px nav and 44px of insets (268), less the group's gutter and the card's
+ * width (28 + 340 = 368) — 636 in total.
+ *
+ * ⚠️ AND IT IS MEASURED, NOT REASONED. At the old 246 the ref's content came out 782 against the
+ * app's — a 390px disagreement, which is 368 plus the 22 the old formula was carrying. The
+ * assertion immediately below is what proves the formula each run; it is not decoration.
  */
-const refWindowFor = (column: number) => column + 246;
+const refWindowFor = (column: number) => column + 636;
 
 const need = (r: Reading, who: string, name: string) => {
   const b = r.boxes[name];
@@ -264,34 +301,49 @@ test("0 · the report is this run's", async () => {
  * had applied them would be reading a different page with the same name — which is the "plausible
  * numbers about the wrong subject" failure this file's header exists to prevent.
  */
-test("the ref is in v65's mode, and its frame reads as its own sheet states", async ({ page }) => {
+test("the ref is in v74's mode, and its frame reads as its own sheet states", async ({ page }) => {
   const r = await readRefRaw(page, 1440, 860);
   is("ref", "body.one — the class that hides v21's views, portal, strip and back link", r.one, true);
-  is("ref", "the mockup's chosen options", r.data, { stat: "k", rc: "b", rl: "4", xe: "next", xa: "time", xl: "6", ms: "b", dc: "a", ct: "b", ln: "due", pb: "side", sel: "band" });
+  is("ref", "the mockup's chosen options", r.data, { stat: "k", rc: "b", rl: "4", xe: "next", xa: "time", xl: "6", ms: "b", dc: "a", ct: "b", ln: "due", pb: "side", sel: "band", hero: "beside", hl: "k", rh: "5" });
   /* ⚠️ THE RETIRED FURNITURE IS IN THE DOM AND HIDDEN, so every probe below must be filtered by
      visibility. A selector that resolves is not a selector that is drawn. */
   is("ref", "…and the retired furniture is present but not drawn", r.hidden, { views: 0, portal: 0, sum: 0, backov: 0 });
   /**
    * ⚠️ AND THE RAIL IS THE WORKED EXAMPLE OF WHY NOTHING HERE IS READ FROM SOURCE. This mockup is
-   * cumulative: twenty-eight version blocks (v4 → v64), each overriding the last, and the rail is
-   * declared FOUR times. Its first declaration is a 316px sticky grid track (line 1163); its last
-   * (line 1800, the v46 block) is `position: fixed; top: 16; bottom: 16; right: 22; width: 340`,
-   * with the grid collapsed to one column and its gap to zero. Taking the first cost one run —
-   * which is the cheap version of this mistake, and the reason every number below is MEASURED.
+   * cumulative — thirty-odd version blocks, each overriding the last — and the rail is declared
+   * several times over. Its v46 declaration is `position: fixed; right: 22; width: 340`; its LAST
+   * (the v67 block) is `position: sticky; top: 16; height: var(--railh)` inside a 1480-capped grid.
+   * Taking the first cost one run, which is the cheap version of this mistake.
    */
   near("ref", "the rail's width", r.railTrack, 340, 1);
-  is("ref", "the rail is placed, not tracked", r.railSticky, "fixed");
-  /* ⚠️ THESE THREE ARE THE GO-AHEAD'S PLACEMENT, and in the ref they are against the VIEWPORT. In
-     the app they are against the WINDOW CAPSULE's measured box — the house law that a constant
-     offset from the viewport is a guess at everything above the element. Read here so phase 4
-     compares the app with a number taken from the oracle rather than from prose. */
-  near("ref", "the rail's top inset", r.railTop, 16, 0.5);
-  near("ref", "the rail's bottom inset", r.railBottom, 16, 0.5);
-  near("ref", "the rail's right inset", r.railRight, 22, 0.5);
-  is("ref", "the grid is one column (the rail left it)", r.gutter, 0);
-  /* the h1 is declared three times too; 50px is the last (v46, line 1806) */
+  /* §2 — it is STICKY IN A GRID now, not fixed against the window */
+  is("ref", "the card is a sticky grid track", r.railSticky, "sticky");
+  is("ref", "…at a 16px rest offset", r.railStickTop, "16px");
+  near("ref", "the group's gutter", r.gutter, 28, 0.5);
+  is("ref", "the group's cap", r.gridMax, "1480px");
+  near("ref", "the card's right edge IS the group's", r.railInGroup, 0, 0.5);
+  /**
+   * ⚠️ §3 — AT 1440 THE REF IS IN ITS **BANNER** STATE, AND THAT IS THE FINDING. Its left column is
+   * 804px, under the 920 its own container query breaks at, so the head is a flex column with the
+   * art above the title. The app reaches the same state at the same width for the same reason. A
+   * run that asserted "the art is beside the title at 1440" would be asserting against a mock that
+   * does not do it either.
+   */
+  is("ref", "the fallback is a CONTAINER query on the left column, not a media query", r.leftContainer, "inline-size");
+  is("ref", "at 1440 the head is the banner", r.headDisplay, "flex");
+  record({ area: "ref", what: "at 1440 the column is under 920, so the art banners", got: { leftCol: r.leftCol, artTop: r.artTop, h1Top: r.h1Top, artW: r.artW }, want: "reported" });
+  expect(r.artTop!, "the banner's art must sit ABOVE the title").toBeLessThan(r.h1Top!);
+  /* the h1 is declared several times too; 50px is the last */
   near("ref", "the head's h1", r.h1, 50, 1);
-  record({ area: "ref", what: "the v65 frame at 1440×860", got: r, want: "reported" });
+  record({ area: "ref", what: "the v74 frame at 1440×860", got: r, want: "reported" });
+
+  /* …and at 1920 the column clears 920, so the same markup puts the art beside the words */
+  const w = await readRefRaw(page, 1920, 860);
+  is("ref", "at 1920 the head is the grid", w.headDisplay, "grid");
+  expect(w.leftCol!, "the column must clear the 920 the query breaks at").toBeGreaterThan(920);
+  expect(Math.abs(w.artTop! - w.h1Top!), "beside means on the same line, not above it").toBeLessThan(40);
+  expect(w.artLeft!, "the art must sit to the RIGHT of the title").toBeGreaterThan(w.h1Left!);
+  record({ area: "ref", what: "the v74 frame at 1920×860", got: w, want: "reported" });
 });
 
 test("top bar — + New is gone app-wide and Give feedback is anthracite", async ({ page }) => {
@@ -455,10 +507,28 @@ test("head and control row — 1440×860", async ({ page }) => {
   sameSize("control", app, ref, "ctl", ["h"]);
   record({ area: "head", what: "the head's box, app vs ref (they differ by the ref's own 18/6 of padding, which this page pays at the PAGE)", got: { app: app.boxes.head?.h, ref: ref.boxes.head?.h }, want: "reported" });
   /* the page shares the dashboard's left edge and measure: same shell, same 22px inset */
-  const pg = await page.evaluate(() => { const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!; const b = p.getBoundingClientRect(); const bar = [...document.querySelectorAll(".ws-pagebar .sp-help")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect(); const t = p.querySelector("[data-qcv='head-title']")!.getBoundingClientRect(); return { x: b.x, w: b.width, gap: Math.round((t.y - bar.bottom) * 10) / 10 }; });
-  near("head", "the page's left edge (the dashboard's is 268 at 1440)", pg.x, 268, 1);
-  near("head", "the page's measure (the dashboard's is 1128 at 1440)", pg.w, 1128, 1);
-  near("head", "title sits 25px under the bar's controls, as the dashboard's greeting does", pg.gap, 25, 1.5);
+  /**
+   * ⚠️ RETARGETED TO THE GROUP IN v65.2 §2. The claim is that this page shares the dashboard's left
+   * edge and measure — 268 and 1128 at 1440, the shell's own inset. Until §2 the page WAS that box;
+   * now it is the first column of a group whose second column is the card, so the group is what
+   * carries the claim and the page is what carries the ledger. Asserting the page's own width
+   * against 1128 would be asserting that no card is beside it.
+   */
+  const pg = await page.evaluate(() => { const g = [...document.querySelectorAll(".qcv-group")].find((e) => e.getBoundingClientRect().height > 0)!; const p = g.querySelector(".qcv-page") as HTMLElement; const b = g.getBoundingClientRect(); const pb = p.getBoundingClientRect(); const bar = [...document.querySelectorAll(".ws-pagebar .sp-help")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect(); const t = p.querySelector("[data-qcv='head-title']")!.getBoundingClientRect(); const h = p.querySelector(".qcv-head")!.getBoundingClientRect(); return { x: b.x, w: b.width, colX: pb.x, colW: pb.width, gap: Math.round((t.y - bar.bottom) * 10) / 10, headGap: Math.round((h.y - bar.bottom) * 10) / 10, headDisplay: getComputedStyle(p.querySelector(".qcv-head")!).display }; });
+  near("head", "the group's left edge (the dashboard's is 268 at 1440)", pg.x, 268, 1);
+  near("head", "the group's measure (the dashboard's is 1128 at 1440)", pg.w, 1128, 1);
+  /* …and the page starts at the same edge: it is the group's FIRST column */
+  near("head", "the page's left edge is the group's", pg.colX, pg.x, 1);
+  record({ area: "head", what: "the group and the column it gives the page", got: { group: pg.w, column: pg.colW, card: Math.round((pg.w - pg.colW) * 10) / 10 }, want: "reported" });
+  /**
+   * ⚠️ MEASURED ON THE HEAD, NOT THE TITLE (v65.2 §3) — THE FIRST INK IS THE ART NOW. The rhythm is
+   * that this page's chrome starts 25px under the bar's controls, exactly as the dashboard's
+   * greeting does: 14px of the bar's own gap plus the page's 11px of padding. The TITLE was that
+   * first ink until the hero gained artwork; below 920px of column the art banners above the words,
+   * so the title sits 277px down and the claim measured the art's height rather than the rhythm.
+   */
+  near("head", "the head starts 25px under the bar's controls, as the dashboard's greeting does", pg.headGap, 25, 1.5);
+  record({ area: "head", what: "…and where the title falls inside it (the art banners above it under 920px of column)", got: { titleGap: pg.gap, headDisplay: pg.headDisplay }, want: "reported" });
   /* no masthead, no tiles, no toolbar, no page search, no Board */
   const gone = await page.evaluate(() => {
     const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
@@ -511,8 +581,12 @@ test("§2 · the rail — placed from the window's box, at two heights, before a
       innerH: window.innerHeight,
       winH: px(w.height),
       showing: rail.getAttribute("data-showing"),
-      /* what the card published, and what the page is actually paying */
-      pad: px(parseFloat(getComputedStyle(document.querySelector(".qcv-page") as HTMLElement).paddingRight)),
+      /* §2 — what the card published, and what the group is actually doing with it */
+      dataRail: (document.querySelector(".qcv-group") as HTMLElement | null)?.getAttribute("data-rail") ?? null,
+      groupRight: px((document.querySelector(".qcv-group") as HTMLElement).getBoundingClientRect().right - r.right),
+      /* the scrollport the sticky offset is measured FROM, which is not the window and not the viewport */
+      portTop: px((document.querySelector(".wpg-scroll") as HTMLElement).getBoundingClientRect().top),
+      stickTop: getComputedStyle(rail).top,
     };
   });
 
@@ -529,22 +603,56 @@ test("§2 · the rail — placed from the window's box, at two heights, before a
       return { top: Math.round((r.top - w2.top) * 10) / 10, h: Math.round(r.height), pos: getComputedStyle(rail).position };
     });
     record({ area, what: "during the load (the cover is up)", got: early, want: "reported" });
-    if (early && early.pos === "fixed") near(area, "…and it is already on the window's own top + 16", early.top, 16, 1);
 
     await openApp(page, w, h);
     const r = await read();
     yes(area, "the card is on the page", !!r, JSON.stringify(r));
-    is(area, "it is placed, not tracked", r?.pos, "fixed");
+    /**
+     * ⚠️ RETARGETED IN v65.2 §2 — IT WAS `fixed`, AND THE THREE INSETS WERE AGAINST THE WINDOW.
+     * Fixed was right while the page filled the window; with the content centred at 1480 it strands
+     * the card against the screen while the ledger sits hundreds of pixels to its left. What
+     * survives unchanged is the LAW the case was written for: the placement is measured, never a
+     * constant offset from the viewport. It has simply moved from "which insets" to "which
+     * scrollport" — see the sticky-rest claim below, which is the one a `top: 16px` gets wrong.
+     */
+    is(area, "it is a sticky grid track", r?.pos, "sticky");
+    is(area, "…and the group is drawing its second column", r?.dataRail, "beside");
     near(area, "width", r?.width, 340, 0.5);
-    near(area, "top — the WINDOW's top + 16", r?.top, 16, 0.5);
+    near(area, "its right edge IS the group's — one grid, one statement of the width", r?.groupRight, 0, 0.5);
     near(area, "bottom — the WINDOW's bottom − 16", r?.bottom, 16, 0.5);
-    near(area, "right — the WINDOW's right − 22", r?.right, 22, 0.5);
     /* ⚠️ THE PRECONDITION THAT MAKES THE THREE ABOVE MEAN ANYTHING: the window is NOT the viewport.
        Where they happen to agree, a card placed off `innerHeight` would measure identically and
        this case would pass on the fault it exists to catch. */
     yes(area, `the window is shorter than the viewport (${r?.winH} vs ${r?.innerH}) — or these three are satisfied by the guess`, (r?.innerH ?? 0) - (r?.winH ?? 0) > 20, `${r?.innerH} − ${r?.winH}`);
     is(area, "nothing is chosen, so it shows the Birds-eye view", r?.showing, "birdseye");
-    near(area, "…and the page is paying exactly the reservation the card published", r?.pad, 384, 0.5);
+
+    /**
+     * ⚠️ §2 · THE CLAIM A CONSTANT `top: 16px` WOULD FAIL, AND THE REASON THIS CASE STILL EARNS ITS
+     * KEEP. A sticky `top` is measured from the SCROLLPORT, and this app's scrollport starts below
+     * the shell's bar — so the mock's own `top: 16px`, carried across, would park the card 16px
+     * below the scroll row and 40-odd pixels above where it belongs. Scroll until it has stuck,
+     * then assert where it CAME TO REST: the window's own top + 16.
+     */
+    const port = await page.evaluate(() => Math.round((document.querySelector(".wpg-scroll") as HTMLElement).getBoundingClientRect().top * 10) / 10);
+    const winTop = await page.evaluate(() => Math.round((document.querySelector(".ws-window") as HTMLElement).getBoundingClientRect().top * 10) / 10);
+    /**
+     * ⚠️ REPORTED, NOT ASSERTED — AND THE FIRST CUT ASSERTED A DIFFERENCE THAT DOES NOT EXIST HERE.
+     * A sticky `top` is measured from the SCROLLPORT, so the mock's own `top: 16px` is a guess at
+     * everything above the card. On THIS page the guess happens to be right: the Query Centre
+     * declines the masthead and sits on the open ground, so `.wpg-scroll` starts at the window's own
+     * top — measured 121.8 against 121.8. **That is a fact about this page's chrome, not about the
+     * derivation**, and it is exactly why the offset must stay derived: the next page to mount this
+     * card, or a masthead returning here, moves one of the two and nothing else would notice.
+     * The relation itself is proved in `qcRail.test.ts`, on a window the scrollport does not match.
+     */
+    record({ area, what: "the scrollport against the window (they agree on THIS page, which is why the offset must not be a constant)", got: { portTop: port, winTop }, want: "reported" });
+    await page.evaluate(() => { (document.querySelector(".wpg-scroll") as HTMLElement).scrollTop = 600; });
+    await page.waitForTimeout(350);
+    const stuck = await read();
+    near(area, "⚠️ once stuck, it rests on the WINDOW's top + 16", stuck?.top, 16, 1);
+    record({ area, what: "the sticky offset the card published, against the scrollport it is measured from", got: { stickTop: stuck?.stickTop, portTop: stuck?.portTop, winTop }, want: "reported" });
+    await page.evaluate(() => { (document.querySelector(".wpg-scroll") as HTMLElement).scrollTop = 0; });
+    await page.waitForTimeout(250);
 
     /**
      * ⚠️ REPORTED, NOT ASSERTED — §2's "the top bar spans the page column only and starts level
@@ -686,6 +794,16 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
     return { top: px(r.top), bottom: px(r.bottom), right: px(r.right), left: px(r.left), winLeft: px(w.left), winRight: px(w.right) };
   });
   await page.locator("[data-qcv='be-expand']").first().click();
+  /**
+   * ⚠️ THE POINTER IS MOVED OFF THE CARD BEFORE THE FILL CENSUS, AND IT IS NOT TIDINESS.
+   * A click leaves the pointer where the control was; the expanded card draws the same rows the
+   * card did, and `.qcv-be-row:hover` is parchment — so whichever row happens to sit under that
+   * point paints a fourth colour and the census reports a second surface that the design does not
+   * have. Measured 24 Sep: `rgb(253, 249, 245)` appeared the moment §2 moved the card's left edge,
+   * because the pointer then landed on a row instead of on nothing. The census is a claim about the
+   * page's own fills, so the pointer must not be one of its inputs.
+   */
+  await page.mouse.move(2, 2);
   /* ⚠️ PAST THE 380ms REVEAL BEFORE MEASURING — an element mid-animation reports its ANIMATED box,
      which is this repo's own trap: 674 on one run and 680 on the next, from a scaled entrance. */
   await page.waitForTimeout(700);
@@ -823,8 +941,22 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
   near("expanded", "bottom — the rail's own", xp?.bottom, railBefore.bottom, 0.6);
   near("expanded", "right — the rail's own", xp?.right, railBefore.right, 0.6);
   /* …and the one it takes: the window's left plus the same 22px gutter the right pays */
-  near("expanded", "left — the WINDOW's left + 22", xp ? xp.left - xp.winLeft : null, 22, 0.6);
-  near("expanded", "…and the right gutter is the same 22", xp ? xp.winRight - xp.right : null, 22, 0.6);
+  /**
+   * ⚠️ RETARGETED IN v65.2 §2 — THE CARD SPANS THE GROUP, NOT THE WINDOW. It grew to the window's
+   * edges inset by 22 while the page filled the window; centred at 1480 that leaves the card against
+   * the screen with the ledger hundreds of pixels to its left. Its top and bottom are still the
+   * window's, because the group has no vertical extent of its own — so only the horizontal half of
+   * this claim moved, and it moved to the box the card now belongs to.
+   */
+  const grp = await page.evaluate(() => { const g = document.querySelector(".qcv-group") as HTMLElement | null; if (!g) return null; const b = g.getBoundingClientRect(); return { left: Math.round(b.left * 10) / 10, right: Math.round(b.right * 10) / 10 }; });
+  yes("expanded", "the group is on the page (the box the card is measured against)", !!grp, JSON.stringify(grp));
+  near("expanded", "left — the GROUP's left", xp?.left, grp!.left, 0.6);
+  near("expanded", "…and its right edge is the group's too", xp ? xp.left + xp.width : null, grp!.right, 0.6);
+  /* ⚠️ RETIRED WITH ITS SIBLING (v65.2 §2): both gutters were the WINDOW's, and the card is flush
+     with the GROUP now — which is itself inset by the page's own gutter, so the ink still lands
+     where the ledger's does. Asserting 22 from the window would require the card to be inset twice.
+     What replaces it is the line above: the card's right edge IS the group's. */
+  record({ area: "expanded", what: "the window's own gutters, reported (the card is flush with the group, which carries them)", got: { fromWinLeft: xp ? xp.left - xp.winLeft : null, fromWinRight: xp ? xp.winRight - xp.right : null }, want: "reported" });
   /* the precondition that makes those mean something: it really did grow */
   yes("expanded", `it is wider than the rail (${xp?.width} vs 340)`, (xp?.width ?? 0) > 400, String(xp?.width));
   is("expanded", "the reveal has finished — the card is fully uncovered", xp?.clip, "inset(0px round 20px)");
@@ -1761,7 +1893,8 @@ test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
       const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
       const rows = [...p.querySelectorAll("[data-qcv='row']")] as HTMLElement[];
       const lefts = (s: string) => [...new Set(rows.map((r) => { const e = r.querySelector(s); return e ? Math.round(e.getBoundingClientRect().x) : -1; }))];
-      const open = p.querySelector("[data-qcv='open']") as HTMLElement | null;
+      /* the card is the GROUP's second track now, a sibling of the page rather than a descendant */
+      const open = (p.closest(".qcv-group") ?? p).querySelector("[data-qcv='open']") as HTMLElement | null;
       return { rows: rows.length, url: location.search, selected: rows.filter((r) => r.getAttribute("aria-selected") === "true").length,
         standLefts: lefts("[data-qcv='row-stand']"), sentLefts: lefts("[data-qcv='row-sent']"),
         rowButtons: rows.reduce((n, r) => n + r.querySelectorAll("button").length, 0),
@@ -1785,8 +1918,10 @@ test("list and the docked card — 1440, 1280 and 1720", async ({ page }) => {
     await page.waitForTimeout(700);
     const sel = await readApp(page);
     const card = await page.evaluate(() => {
-      const p = [...document.querySelectorAll(".qcv-page")].find((e) => e.getBoundingClientRect().height > 0)!;
-      const o = p.querySelector("[data-qcv='open']") as HTMLElement, rows = [...p.querySelectorAll("[data-qcv='row']")] as HTMLElement[];
+      /* ⚠️ THE CARD IS THE GROUP'S, NOT THE PAGE'S (v65.2 §2) — scoped to the page this read `null`
+         and threw, which is at least loud; rooted on the group it finds what it is asking about. */
+      const g = [...document.querySelectorAll(".qcv-group")].find((e) => e.getBoundingClientRect().height > 0)!;
+      const o = g.querySelector("[data-qcv='open']") as HTMLElement, rows = [...g.querySelectorAll("[data-qcv='row']")] as HTMLElement[];
       const on = rows.filter((r) => r.getAttribute("aria-selected") === "true");
       const act = o.querySelector("[data-qcv='open-action']") as HTMLElement | null;
       return { same: on.length === 1 && on[0].dataset.id === o.dataset.id, status: o.dataset.status, pos: getComputedStyle(o).position, action: act?.textContent ?? null, actBg: act ? getComputedStyle(act).backgroundColor : null,

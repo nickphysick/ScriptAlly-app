@@ -18,6 +18,7 @@ import { join, resolve } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { DOCK_MIN_COLUMN, QcCentre, readBirdsEyeOpen } from "./QcCentre";
+import { HERO_COURIER_MAP } from "./qcArt";
 
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const read = (rel: string) => readFileSync(join(process.cwd(), rel), "utf8");
@@ -157,6 +158,93 @@ describe("the frame, rendered", () => {
     /* and the row comes after the facts line, not beside the title */
     expect(html.indexOf('data-qcv="head-actions"')).toBeGreaterThan(html.indexOf('data-qcv="head-line"'));
   });
+  it("§2 · the page and the card are ONE group — the card is a sibling of the page, not a child", () => {
+    const html = frame({ rail: React.createElement("aside", { "data-qcv": "rail" }) });
+    /* the group wraps both, so the grid can place them; a card inside `.qcv-page` would be inside
+       the very column whose width it is meant to sit beside */
+    /* ⚠️ NOT ANCHORED ON `^`. React 19's SSR prepends `<link rel="preload" as="image">` for the
+       hero art, so the markup does not start with the group — and that preload is the art's, which
+       is a thing this page now WANTS. */
+    expect(html).toContain('<div class="qcv-group qcv-own" data-qcv="group" data-rail="beside">');
+    const group = html.indexOf('data-qcv="group"');
+    const page = html.indexOf('data-qcv="page"');
+    expect(group, "the page is not inside the group").toBeLessThan(page);
+    const rail = html.indexOf('data-qcv="rail"');
+    expect(rail, "the card renders after the page opens").toBeGreaterThan(page);
+    /**
+     * ⚠️ THE PAGE MUST HAVE CLOSED BEFORE THE CARD OPENS, AND THAT IS A DEPTH QUESTION, NOT A
+     * `</div>` QUESTION. A first cut asserted "some `</div>` sits between the two", which is true
+     * of a card nested three levels inside the page — proved vacuous by moving `{rail}` back inside
+     * `.qcv-page` and watching all 147 stay green. Walk the tags instead: from the page's own
+     * opening tag, depth must return to zero before the card's.
+     */
+    const depthAt = (from: number, to: number) => {
+      let d = 0;
+      for (const m of html.slice(from, to).matchAll(/<(\/?)div\b|<div\b[^>]*\/>/g)) d += m[1] ? -1 : 1;
+      return d;
+    };
+    const pageOpen = html.lastIndexOf("<div", page);
+    expect(depthAt(pageOpen, html.lastIndexOf("<", rail)), "the card is nested inside the page").toBe(0);
+    /* …and the card is still inside the group: the group has NOT closed by then */
+    const groupOpen = html.lastIndexOf("<div", group);
+    expect(depthAt(groupOpen, html.lastIndexOf("<", rail)), "the card fell out of the group").toBe(1);
+  });
+  /**
+   * ⚠️ THE DOCK IS DECIDED ON THE GROUP, AND READING THE PAGE COLUMN COST FOUR MEASUREMENTS.
+   * `DOCK_MIN_COLUMN` asks whether there is room for a ledger AND a card beside it. That was a
+   * question about `.qcv-page` only while the page carried the card's 384px reservation as its own
+   * padding; as a grid track the reservation left the page's box, so at a 1440 window the page went
+   * from 1172 to 760 and the same 900 started meaning "too narrow". Nothing about the threshold was
+   * wrong — the box under it was.
+   */
+  it("§2 · the dock threshold is measured on the GROUP, never on the page column", () => {
+    const src = read("src/components/queries/centre/QcCentre.tsx");
+    expect(src).toMatch(/const groupRef = useRef<HTMLDivElement>\(null\)/);
+    expect(src).toMatch(/const el = groupRef\.current;[\s\S]{0,300}onDocked\(w >= DOCK_MIN_COLUMN\)/);
+    /* …and the ref is ON the group element, which is what makes the two the same box */
+    expect(src).toMatch(/<div ref=\{groupRef\} className="qcv-group/);
+    expect(src, "the page column is measured for the dock again").not.toMatch(/ref=\{groupRef\}[^>]*className=\{`qcv-page/);
+  });
+  /**
+   * §3 · THE ART IS AN ELEMENT IN THE HEAD, PLACED BY THE GRID — never a background image.
+   * A background could not be given a width the words also respect, could not reorder under the
+   * container query, and could not be trimmed: it would need a crop, and §1.1 forbids one.
+   */
+  it("§3 · the hero art is the enrolled asset, whole, and LAST in the reading order", () => {
+    const html = frame();
+    expect(html).toContain('<figure class="qcv-heroart" data-qcv="head-art" aria-hidden="true">');
+    /* the enrolled record is what renders — src and version both, so a swapped drawing cannot
+       reach the page wearing the old cache key */
+    expect(html).toContain(`src="${HERO_COURIER_MAP.src}?v=${HERO_COURIER_MAP.version}`);
+    expect(html).toContain(`width="${HERO_COURIER_MAP.width}" height="${HERO_COURIER_MAP.height}"`);
+    /* ⚠️ THE INTRINSIC SIZE IS STATED so the head does not reflow when the image lands — and it is
+       the enrolled size, not a literal, so the two cannot come apart. */
+    expect(HERO_COURIER_MAP.width / HERO_COURIER_MAP.height).toBeCloseTo(1196 / 375, 3);
+    /* last in the DOM: title → facts → actions → picture. The grid puts it at the right; a reader
+       on a screen reader, and a page with no CSS, both get the words first. */
+    expect(html.indexOf('data-qcv="head-art"')).toBeGreaterThan(html.indexOf('data-qcv="head-actions"'));
+    expect(html, "a decorative drawing must not be announced").toContain('alt=""');
+  });
+  it("§3 · the head is a grid with the art beside, and the fallback is a CONTAINER query", () => {
+    expect(rule(".qcv-head")).toMatch(/grid-template-columns: auto minmax\(0, 1fr\)/);
+    expect(rule(".qcv-head")).toMatch(/align-items: center/);
+    expect(rule(".qcv-heroart")).toMatch(/grid-column: 2; grid-row: 1 \/ 4/);
+    /* ⚠️ THE ARCHIVIST'S RESERVATION IS GONE. `padding-right: 190px` held 150 × 150 for a drawing
+       that never arrived, so every hero on this page paid for an absence. */
+    expect(rule(".qcv-head"), "the empty Archivist slot outlived the art that fills it").not.toMatch(/padding-right/);
+    /**
+     * ⚠️ A CONTAINER QUERY ON THE PAGE COLUMN, NEVER A MEDIA QUERY — the same law §2's collapse
+     * follows. The column is the window less the card's track less the gutters, so the viewport
+     * cannot answer whether the art fits beside the words: it would have to guess at the sidebar,
+     * the card and the centring at once.
+     */
+    expect(rule(".qcv-page")).toMatch(/container-type:\s*inline-size/);
+    expect(css).toMatch(/@container \(max-width: 920px\) \{\s*\.qcv-head \{ display: flex; flex-direction: column;/);
+    expect(css, "the art becomes a banner ABOVE the words, not a column beside them").toMatch(
+      /@container \(max-width: 920px\)[\s\S]{0,240}\.qcv-heroart \{ order: -1; width: 100%;/,
+    );
+    expect(css, "a media query is asking the viewport a question about a column").not.toMatch(/@media[^{]*\{\s*\.qcv-head/);
+  });
   it("⚠️ Record a response is the GLOBAL flow, with no query chosen — the entry `+ New` took away", () => {
     expect(page).toContain('onRecord={() => onNavigate?.("queries", "Record a response")}');
   });
@@ -226,13 +314,28 @@ describe("the sheet", () => {
     expect(css, "the docked track outlived the docked card").not.toContain("--qcv-open-w");
     expect(rule(".qcv-ledger")).toMatch(/container-type:\s*inline-size/);
   });
-  it("§2 · the page reserves the rail's column, and the CARD is what decides how much", () => {
-    /* 340 + a 22px gutter + a 22px edge — padding rather than a track, because the card is fixed
-       and takes part in no layout; a track would be a second statement of one width. The value is
-       published by the card's own measurement, so the reservation and the card cannot disagree;
-       the fallback is the reservation rather than 0, so the first frame is the common case.
-       The whole claim, with its mutations, is in `qcRail.test.tsx` — this is the page's half. */
-    expect(rule(".qcv-page")).toMatch(/padding-right:\s*var\(--qcv-rail-pad,\s*384px\)/);
+  /**
+   * ⚠️ RETARGETED IN v65.2 §2 — THE RESERVATION BECAME A TRACK. This asserted the page paid
+   * `padding-right: var(--qcv-rail-pad, 384px)` for a card placed against the window's right edge,
+   * which was right while the page filled the window. Centred at 1480 that card is stranded against
+   * the screen with the ledger hundreds of pixels to its left, so the page and the card are one
+   * grid now and the width is stated once. The law underneath is unchanged and still locked in
+   * `qcRail.test.tsx`: whether there is room is a question about the WINDOW, and the card answers
+   * it. This is the page's half.
+   */
+  it("§2 · the page is the group's first column, and the card's is a track", () => {
+    expect(css, "the reservation is a track now").not.toMatch(/padding-right:\s*var\(--qcv-rail-pad/);
+    expect(rule(".qcv-group")).toMatch(/grid-template-columns: minmax\(0, 1fr\) 340px/);
+    /**
+     * ⚠️ THE CAP IS THE PAGE'S `--wpg-measure`, NOT A `max-width` ON THE GROUP. The shared grid
+     * gives its scroll row's child `min(--wpg-measure, 100% - 2 × --wpg-gutter)` with
+     * `margin-inline: auto` — the rule that gives every page the dashboard's left edge. A second
+     * `max-width` here beat the gutter reduction and put the page at the window's own edge (246
+     * against 268, measured). Cap and gutter in one `min()`, or they agree only until one binds.
+     */
+    expect(rule(".qcv-group"), "a second cap contests the grid's gutter reduction").not.toMatch(/max-width/);
+    expect(rule(".qcv-group"), "…and a second centring with it").not.toMatch(/margin-inline/);
+    expect(css).toMatch(/--wpg-measure: 1480px/);
   });
   it("⚠️ the typewriter face is READ from the shell's one token, never named — and the title beats brand.tsx", () => {
     expect(css).not.toMatch(/Special Elite/);
@@ -255,12 +358,13 @@ describe("the sheet", () => {
     const dir = "src/components/queries/centre";
     const sheets = readdirSync(join(process.cwd(), dir)).filter((f) => f.endsWith(".css"));
     expect(sheets.length).toBeGreaterThan(6);
-    const bodies = new Map(sheets.map((f) => [f, read(`${dir}/${f}`)]));
+    /* ⚠️ COMMENT-STRIPPED, per the house rule — the prose explaining a RETIRED token names it, and a
+       raw-text sweep then demands the resurrection of the thing it found the obituary for. */
+    const bodies = new Map(sheets.map((f) => [f, decls(read(`${dir}/${f}`))]));
     const atRoot = new Set([...rule(":root").matchAll(/(--qcv-[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
     expect(atRoot.size, "the palette is at :root").toBeGreaterThan(8);
     /* published from JS onto an element inside the subtree that reads them, so they resolve there */
     const PUBLISHED: Record<string, string> = {
-      "--qcv-rail-pad": "src/components/queries/centre/QcRail.tsx",
       "--qcv-xp-lcol": "src/components/queries/centre/QcExpanded.tsx",
       "--qcv-tl-names": "src/components/queries/centre/QcTimeline.tsx",
       "--qcv-state": "src/components/queries/centre/QcTimeline.tsx",
@@ -295,7 +399,9 @@ describe("the sheet", () => {
      * one names its WRITER and the writer is read: the exemption is granted by the publishing code
      * existing, not by the list.
      */
-    const PUBLISHED: Record<string, string> = { "--qcv-rail-pad": "src/components/queries/centre/QcRail.tsx" };
+    /* ⚠️ `--qcv-rail-pad` LEFT THIS MAP WITH THE RESERVATION IT NAMED (v65.2 §2). An exemption for
+       a token nothing publishes any more is exactly what this check exists to catch. */
+    const PUBLISHED: Record<string, string> = {};
     for (const [tok, writer] of Object.entries(PUBLISHED)) {
       expect(read(writer), `${tok} is exempt as published, and ${writer} does not publish it`).toContain(`setProperty("${tok}"`);
       expect(css, `${tok} is read without a fallback, so an unpublished frame paints nothing`).toMatch(new RegExp(`var\\(${tok},\\s*[^)]+\\)`));
@@ -320,6 +426,25 @@ describe("the sheet", () => {
     const card = /--fc-frame:\s*(#[0-9a-f]{6})/i.exec(decls(read("src/components/containers/framedCard.css")))?.[1]?.toLowerCase();
     expect(card, "framedCard.css no longer declares --fc-frame").toBeTruthy();
     expect(declared, "the head's frame colour has drifted from the card's").toBe(card);
+  });
+  /**
+   * ⚠️ GENERALISED IN v65.2 §2 — IT WAS SCOPED TO `qcvExpanded.css` AND I TRIPPED OVER IT IN
+   * `qcvPage.css` THE SAME DAY. Appending `.qcv-page { container-type: inline-size; }` at the foot
+   * of a sheet that already had a `.qcv-page` block gave the file two base rules for one selector:
+   * the browser takes the last, every `rule()` helper in this repo takes the FIRST, and the half of
+   * the page's style in the second block is invisible to every lock reading it. The claim belongs
+   * to the directory, not to one file in it.
+   */
+  it("⚠️ no selector in this directory is declared twice outside a media or container query", () => {
+    const dir = "src/components/queries/centre";
+    const sheets = readdirSync(join(process.cwd(), dir)).filter((f) => f.endsWith(".css"));
+    const bad: string[] = [];
+    for (const f of sheets) {
+      const flat = decls(read(`${dir}/${f}`)).replace(/@(?:media|container|supports)[^{]*\{[\s\S]*?\n\}/g, "");
+      const sels = [...flat.matchAll(/(?:^|\n)([^@\n{][^{\n]*)\{/g)].map((m) => m[1].trim());
+      for (const sel of sels.filter((x, i) => sels.indexOf(x) !== i)) bad.push(`${f}: ${sel}`);
+    }
+    expect([...new Set(bad)], "a second base rule the browser takes and every lock here does not").toEqual([]);
   });
   it("anthracite is the page's one button fill, and nothing on this sheet is ink-filled", () => {
     /* ⚠️ IT USED TO READ THE PRESSED VIEW-SWITCH BUTTON, which is retired. The claim was never

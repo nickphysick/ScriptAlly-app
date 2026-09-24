@@ -16,6 +16,7 @@
  */
 import React, { useLayoutEffect, useRef } from "react";
 import "../../shell/primitives.css";
+import { HERO_COURIER_MAP } from "./qcArt";
 import "./qcvPage.css";
 import "./qcvEnter.css";
 
@@ -99,9 +100,19 @@ export const QcCentre: React.FC<{
   canExport: boolean;
   entering: boolean;
 }> = ({ loading, blank = false, headLine, onLog, onRecord, logDisabled = false, logRef, sentence, courts, rail, fan, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering }) => {
-  const rootRef = useRef<HTMLDivElement>(null);
+  const groupRef = useRef<HTMLDivElement>(null);
+  /**
+   * ⚠️ MEASURED ON THE GROUP, NOT THE PAGE COLUMN (v65.2 §2) — AND THE QUESTION DID NOT CHANGE.
+   * `DOCK_MIN_COLUMN` asks whether there is room for a ledger AND a card beside it, which was a
+   * question about `.qcv-page` only while the page carried the card's reservation as its own
+   * padding. As a grid TRACK that reservation left the page's box: at a 1440 window the page
+   * measured 1172 and now measures 760, so the same 900 suddenly meant "too narrow to dock" on the
+   * everyday width. Measured: the rail showed the Birds-eye view with a query chosen, `?q=` opened
+   * nothing, and the title dropped to its 36px narrow size — four failures, one number read off the
+   * wrong box.
+   */
   useLayoutEffect(() => {
-    const el = rootRef.current;
+    const el = groupRef.current;
     if (!el) return undefined;
     const read = () => { const w = el.getBoundingClientRect().width; if (w > 0) onDocked(w >= DOCK_MIN_COLUMN); };
     read();
@@ -112,7 +123,13 @@ export const QcCentre: React.FC<{
   }, [onDocked]);
 
   return (
-    <div ref={rootRef} className={`qcv-page qcv-own${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
+    /**
+     * §2 — THE PAGE AND THE BIRDS-EYE CARD ARE ONE CENTRED GROUP. The card used to be placed against
+     * the window's right edge, which is right while the page fills the window and strands it on a
+     * wide screen once the content is centred at 1480. A grid track states the width once.
+     */
+    <div ref={groupRef} className="qcv-group qcv-own" data-qcv="group" data-rail="beside">
+    <div className={`qcv-page qcv-own${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering ? " qcv-page--enter" : ""}`}
       role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page">
       {/* ⚠️ THE ACTIONS ARE A ROW OF THEIR OWN, UNDER THE FACTS LINE (v21 §2) — not one pill on the
           title's line. Two of them now, and a pill beside a 48px title pins the head's height to the
@@ -131,6 +148,18 @@ export const QcCentre: React.FC<{
             <span>Record a response</span>
           </button>
         </div>
+        {/**
+          * §3 — THE ART SITS BESIDE THE TITLE, WHOLE. It is last in the DOM and placed by the grid,
+          * so the reading order is title → facts → actions → picture, which is the order they
+          * matter in; and under 920px of page column the container query turns the same element
+          * into a banner above them without the markup changing at all.
+          *
+          * ⚠️ NO MASK, NO CROP, NO NEGATIVE OFFSET (§1.1). The drawing is trimmed to its own alpha
+          * box in the pipeline, so `width: 100%` shows all of it and nothing has to be hidden.
+          */}
+        <figure className="qcv-heroart" data-qcv="head-art" aria-hidden="true">
+          <img src={`${HERO_COURIER_MAP.src}?v=${HERO_COURIER_MAP.version}`} width={HERO_COURIER_MAP.width} height={HERO_COURIER_MAP.height} alt="" />
+        </figure>
       </header>
 
       {/* §4 — the three courts, 18px under the pills */}
@@ -177,12 +206,13 @@ export const QcCentre: React.FC<{
       <div className="qcv-foot">
         <button type="button" className="qcv-export" disabled={!canExport || loading} onClick={onExport}>Export CSV</button>
       </div>
-      {rail}
-      {fan}
-      {overlay}
       <div className="qcv-sr" role="status" aria-live="polite" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
         {loading ? "" : "Queries loaded"}
       </div>
+    </div>
+    {rail}
+    {fan}
+    {overlay}
     </div>
   );
 };

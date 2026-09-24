@@ -86,23 +86,47 @@
   padding-bottom: 90px;
   min-width: 0;
   /**
-   * ⚠️ §2 · THE PAGE RESERVES THE RAIL'S COLUMN — 340 + a 22px gutter + a 22px edge. It is padding
-   * rather than a grid track because the card is `position: fixed` (placed from the window's own
-   * box, see `QcRail.tsx`) and takes part in no layout: a track would be a second statement of a
-   * width only one of them could be right about.
-   *
-   * ⚠️ AND THE VALUE IS PUBLISHED BY THE CARD ITSELF, not asked of a media query. The reservation
-   * and the thing being reserved for must come and go together, and they are decided by different
-   * boxes: a media query knows the VIEWPORT, while whether there is room for a card depends on the
-   * WINDOW — the same 1440 viewport gives 1128 of window with the sidebar open and 1312 with it
-   * shut. Two askers, two answers, and at every width between them either 384px of nothing down
-   * the right of a stacked page or a fixed card sitting over the ledger's last column.
-   *
-   * The fallback is the reservation rather than 0, so the first frame — before any measurement —
-   * is the common case rather than a layout that jumps once the card places itself.
+   * ⚠️ §3 · THE SIZE CONTAINER FOR THE HERO'S FALLBACK, and it is declared HERE rather than in its
+   * own rule: a second `.qcv-page { }` block is a duplicate base rule, and this repo's `rule()`
+   * helpers take the FIRST match — so the half of the page's style that lived in the second block
+   * would be invisible to every lock reading it.
    */
-  padding-right: var(--qcv-rail-pad, 384px);
+  container-type: inline-size;
 }
+
+/**
+ * §2 — THE PAGE AND THE BIRDS-EYE CARD ARE ONE CENTRED GROUP.
+ *
+ * ⚠️ IT REPLACES A RESERVATION WITH A TRACK, and the reservation was right for a fixed card. The
+ * page used to pay `padding-right: var(--qcv-rail-pad)` for a card placed against the window's
+ * right edge; once the content is centred at 1480 that card is stranded against the screen with the
+ * ledger hundreds of pixels away. A grid track states the width once, and nothing can disagree
+ * with it.
+ *
+ * ⚠️ AND THE COLLAPSE IS PUBLISHED BY THE CARD, not asked of a media query — the same law the
+ * reservation followed. A media query knows the VIEWPORT; whether there is room depends on the
+ * WINDOW, and the same 1440 viewport gives 1128 of window with the sidebar open and 1312 with it
+ * shut. `data-rail` is the card's own answer.
+ */
+/**
+ * ⚠️ THE CAP IS THE GRID'S, NOT A SECOND `max-width` HERE — AND THE FIRST CUT STATED IT TWICE.
+ * `.wpg-scroll > *` already carries `min(--wpg-measure, 100% - 2 × --wpg-gutter)` with
+ * `margin-inline: auto`, which is what gives every page in the app the dashboard's left edge. The
+ * group is that child, so a `max-width: 1480px` of its own OVERRODE the gutter reduction and the
+ * page started at the window's own edge: measured 246 against the dashboard's 268, on a declaration
+ * that reads perfectly correctly. **Two ways to express one inset agree until one of them binds.**
+ * The group's cap is therefore stated as the page's `--wpg-measure` (see `.qc-wpg--v11`), where the
+ * gutter and the cap are computed together.
+ */
+.qcv-group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  column-gap: 28px;
+  align-items: start;
+  min-width: 0;
+}
+.qcv-group[data-rail="stacked"] { grid-template-columns: minmax(0, 1fr); }
+.qcv-group > .qcv-page { grid-column: 1; }
 .qcv-own { font-family: var(--qcv-serif); }
 /* ⚠️ THE RESET REACHES `span`/`p`/`div`/`label` ONLY — the elements brand.tsx names — and NOT `button`
    (every button here names its own face, and the shared `.sp-inkpill` must keep its). It stops at
@@ -132,11 +156,39 @@
  * on a page that is not. The reservation is what stops the facts line running under him the day he
  * arrives — so it is kept, and it is the one thing about him this build does.
  */
+/**
+ * §3 — THE HERO: the title, the facts and the pills at the left, the art beside them.
+ *
+ * ⚠️ THE 190px OF RIGHT PADDING IS GONE, AND IT WAS RESERVING A SLOT NOTHING RENDERED IN. It held
+ * 150 × 150 for an Archivist that never arrived, so every hero on this page has been paying for an
+ * absence. The art takes the space now, and takes it as a track rather than as padding.
+ */
 .qcv-head {
-  display: block;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  column-gap: 28px;
+  align-items: center;
   position: relative;
   margin: 0 0 18px;
-  padding-right: 190px;
+}
+.qcv-head > *:not(.qcv-heroart) { grid-column: 1; }
+.qcv-head .qcv-line { max-width: 420px; }
+/* ⚠️ WHOLE, NEVER CROPPED (§1.1) — the pipeline trims it to its own alpha box, so `width: 100%`
+   shows all of it and there is nothing to mask. `pointer-events: none`: it is a picture. */
+.qcv-heroart { grid-column: 2; grid-row: 1 / 4; align-self: center; margin: 0; pointer-events: none; }
+.qcv-heroart img { display: block; width: 100%; height: auto; }
+
+/**
+ * ⚠️ THE FALLBACK IS A CONTAINER QUERY ON THE PAGE COLUMN, NOT A MEDIA QUERY ON THE VIEWPORT (§3).
+ * The page column is the window less the rail's track less the group's gutters, so the viewport
+ * says nothing useful about whether the art fits beside the words — at a 1280 viewport the column
+ * is 644 and the banner is right; at 1920 it is wider and the art sits beside. A media query would
+ * have to guess at the rail, the sidebar and the centring all at once.
+ */
+@container (max-width: 920px) {
+  .qcv-head { display: flex; flex-direction: column; align-items: flex-start; }
+  .qcv-heroart { order: -1; width: 100%; margin: 0 0 14px; }
 }
 .qcv-page .qcv-title {
   margin: 0;
@@ -271,7 +323,14 @@
    which sheet lands later in the bundle. The 22px inset and the 1440 cap are the dashboard's. The
    window tokens are restated because this page sits on the open ground (`ground-mode`): the grid's
    bottom hem fades INTO `--ws-window`, and fading into the window's white over cream is a pale stripe. */
-.qc-wpg.qc-wpg--v11 { --wpg-gutter: 22px; --wpg-measure: 1440px; --ws-window: #f4f0ea; --ws-window-rgb: 244, 240, 234; }
+/**
+ * ⚠️ THE MEASURE IS 1480 SINCE v65.2 §2, AND IT IS A DESIGN CHANGE RATHER THAN A FIX — 40px wider
+ * than v11's 1440. The two numbers measure the SAME quantity: the ledger plus the card beside it.
+ * v11 capped it at 1440 while the card's column was the page's own padding; the mock caps the group
+ * at 1480. Stating it here rather than on `.qcv-group` is what keeps the cap and the gutter in one
+ * `min()` — see the note at that rule for what happened when they were two.
+ */
+.qc-wpg.qc-wpg--v11 { --wpg-gutter: 22px; --wpg-measure: 1480px; --ws-window: #f4f0ea; --ws-window-rgb: 244, 240, 234; }
 .qcv-log.sp-inkpill:disabled { opacity: 0.5; cursor: default; }
 
 /**

@@ -42,7 +42,17 @@ describe("§7 · the card", () => {
     }
     /* …and the two that ARE stated are the floors, which are not a position */
     expect(card).toMatch(/min-height:\s*0/);
-    expect(src, "the card must read the window's own box").toContain("expandedBox(win, window.innerWidth)");
+    /* ⚠️ RETARGETED IN v65.2 §2 — IT USED TO READ `expandedBox(win, window.innerWidth)`. The claim
+       was never about `innerWidth`: it is that every term of this box is MEASURED. Now that the page
+       is centred at 1480 the card's horizontal extent belongs to the GROUP, not the screen, so the
+       second term is the group's own rect and the first is still the window capsule's. Both are
+       read; neither is stated. Widening from the viewport would have put the card's right edge
+       against the screen with the ledger hundreds of pixels to its left. */
+    expect(src, "the card must read the window capsule's own box").toContain("const win = readWindow(");
+    expect(src, "the card's width must come from the group it belongs to").toMatch(
+      /expandedBox\(win,\s*\{\s*left: gb\.left,\s*right: gb\.right\s*\}\)/,
+    );
+    expect(src, "a viewport term would strand the card against the screen").not.toMatch(/window\.inner(Width|Height)/);
     expect(src, "a viewport width would run it off the screen when the sidebar collapses").not.toMatch(/100vw/);
     /**
      * ⚠️ AND IT FINDS THE WINDOW THROUGH THE DOCUMENT, BECAUSE IT IS A PORTAL. Walking UP from a

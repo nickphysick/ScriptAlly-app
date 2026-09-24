@@ -63,16 +63,27 @@
   line-height: 1.3;
   color: var(--qcf-cream);
 }
-.qcf-hint,
-.qcf-wd {
+.qcf-hint {
   font-family: var(--qcf-mono);
   font-size: 9px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(253, 250, 245, 0.75);
 }
-/* the withdrawn line sits under the pair rather than beside them — it is a footnote, not a peer */
+/**
+ * the withdrawn line sits under the pair rather than beside them — it is a footnote, not a peer.
+ *
+ * ⚠️ IT STATES THE SHARED TYPE ITSELF RATHER THAN JOINING `.qcf-hint`'s GROUP. A grouped selector
+ * plus an own rule gives the file two base rules for one class, and every `rule()` helper in this
+ * repo takes the FIRST — so a lock reading `.qcf-wd` would have read the typography and never seen
+ * the positioning that is the whole point of the second block.
+ */
 .qcf-wd {
+  font-family: var(--qcf-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(253, 250, 245, 0.75);
   position: absolute;
   top: 100%;
   left: 0;
