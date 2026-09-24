@@ -2,7 +2,14 @@
 import { expect, test } from "@playwright/test";
 import { ensureSignedIn, openRoute } from "./measure";
 
-const ROUTES = ["/queries", "/queries?view=grid", "/queries?view=calendar", "/dashboard", "/todo", "/queries/analytics", "/agents", "/manuscripts"];
+/**
+ * ⚠️ `?view=grid` AND `?view=calendar` ARE GONE FROM THIS CENSUS (v65.1). Since v65 retired the
+ * views, `?view=grid` is the same page as `/queries` — a duplicate — and `?view=calendar` OPENS THE
+ * EXPANDED BIRDS-EYE VIEW, so this sweep was measuring a MODAL and counting its marks as the page's.
+ * A census that visits the same surface twice inflates its own population, and one that visits a
+ * different surface than it names is not measuring what it says.
+ */
+const ROUTES = ["/queries", "/dashboard", "/todo", "/queries/analytics", "/agents", "/manuscripts"];
 
 test("every closed mark names its outcome", async ({ page }) => {
   await ensureSignedIn(page);

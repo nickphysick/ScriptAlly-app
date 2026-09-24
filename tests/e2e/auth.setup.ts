@@ -124,9 +124,17 @@ setup("authenticate", async ({ page, browser }) => {
        it could not enable. The prefix matches both, and skipping is what this walk wants anyway:
        it is getting a test account past the gate, not exercising onboarding. */
     const skip = page.getByRole("button", { name: /^Skip/ });
-    /* ⚠️ AND THE GOOGLE BUTTON IS EXCLUDED BY CLASS AS WELL, because the wait above is a race this
-       walk should not be able to lose twice. `.g-btn` is never an onboarding verb. */
-    const cont = page.getByRole("button", { name: /^Continue/ }).and(page.locator(":not(.g-btn)"));
+    /**
+     * ⚠️ ANCHORED TO THE ONBOARDING CARD, WHICH IS A POSITIVE CLAIM RATHER THAN AN EXCLUSION.
+     *
+     * `/^Continue/` on its own also matches the SIGN-IN page's "Continue with Google", and the walk
+     * ran while that page was still up: it clicked `.g-btn`, started an OAuth flow, and Playwright
+     * retried a click on a detaching node for the full 420-second timeout. The first repair
+     * excluded `.g-btn` by name — true today, and a list of things this is NOT, which the next
+     * button with a "Continue…" label is not on. `.sa-onb-card` is the onboarding's own card, so
+     * the only Continue this can find is the one the walk exists to press.
+     */
+    const cont = page.locator(".sa-onb-card").getByRole("button", { name: /^Continue/ });
     if (await skip.count()) { await skip.first().click(); }
     else if (await cont.count()) {
       /* ⚠️ NEVER CLICK A DISABLED CONTINUE — IT LOOKS EXACTLY LIKE A HUNG PAGE. A gated step keeps
@@ -142,6 +150,7 @@ setup("authenticate", async ({ page, browser }) => {
          matching structure survives copy edits that matching wording cannot. */
       if (await cont.first().isDisabled()) {
         const choice = page
+          .locator(".sa-onb-card")
           .getByRole("button")
           .filter({ hasNotText: /^(Continue|Back|Skip|Sign out|Log out)/ })
           .filter({ visible: true });
