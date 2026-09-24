@@ -12,7 +12,7 @@
  * labels out of this view is carrying the exception with them.
  */
 import { QueryStatus } from "../types";
-import { STAGE_NAME, tileCourt, type QcRow } from "./qcSummary";
+import { STAGE_NAME, shortDay, tileCourt, type QcRow } from "./qcSummary";
 
 const DAY = 86_400_000;
 
@@ -60,6 +60,36 @@ export function dayCount(row: QcRow, nowMs: number): DayCount {
   const days = Math.round((row.expectedMs - nowMs) / DAY);
   if (days === 0) return { text: "today", urgent: false };
   return days > 0 ? { text: `${days}d`, urgent: false } : { text: `${-days}d ago`, urgent: true };
+}
+
+/* ── v65.2 §5 · the row's right column: the due date, and how far away it is ── */
+
+/**
+ * ⚠️ THE DATE AND THE DISTANCE ARE TWO FACTS AND THE COLUMN STATES BOTH (§1.8). "10d over" alone
+ * makes a reader work out which day that was; "9 Sep" alone makes them work out whether it has
+ * gone. The pair is the whole point of the column, and it is why `dayCount`'s single string could
+ * not simply be restyled into it.
+ *
+ * ⚠️ THE STRINGS ARE SENTENCE CASE AND THE SHEET UPPERCASES THEM. A screen reader should not be
+ * shouted at because a design wanted small capitals, and `text-transform` is the one way to have
+ * the look without the string.
+ *
+ * ⚠️ AND `kind` IS WHAT ANYTHING ELSE CLASSIFIES ON, never the wording. A measurement that sorted
+ * rows with `/^\d+d$/` and `/ago$/` was reading the DISPLAY TEXT, so the first re-wording broke it
+ * — and it would have broken silently in the direction that matters, by matching nothing and
+ * reporting an empty population as a clean sweep.
+ */
+export type DueKind = "past" | "today" | "future" | "none";
+export interface DueCell { date: string; distance: string; kind: DueKind; urgent: boolean }
+export function dueCell(row: QcRow, nowMs: number): DueCell {
+  /* ⚠️ "—" IS A DATE NOBODY HAS PROMISED, the same rule `dayCount` states above: an em dash says
+     there is no fact here, where a formatted "1 Jan 1970" would state one that is not true. */
+  if (row.expectedMs == null) return { date: "—", distance: "No date", kind: "none", urgent: false };
+  const date = shortDay(row.expectedMs);
+  const days = Math.round((row.expectedMs - nowMs) / DAY);
+  if (days === 0) return { date, distance: "Today", kind: "today", urgent: false };
+  if (days > 0) return { date, distance: `In ${days}d`, kind: "future", urgent: false };
+  return { date, distance: `${-days}d over`, kind: "past", urgent: true };
 }
 
 /* ── §6.3 · the track: seventy days, with the expected date on the line ── */
@@ -133,6 +163,8 @@ export interface EyeRow {
   group: Attention;
   bar: EyeBar;
   day: DayCount;
+  /** §5 — the right column: the due date over how far away it is. */
+  due: DueCell;
   /** The status as this view names it, and the dot it draws. */
   stage: string;
   /** Which court, for the focus toggle's fade — never a filter. */
@@ -157,7 +189,7 @@ export function eyeRows(rows: readonly QcRow[], nowMs: number): EyeRow[] {
       const day = dayCount(r, nowMs);
       const stage = STAGE_NAME[r.status];
       return {
-        id: r.id, row: r, group: attentionGroup(r, nowMs), bar: eyeBar(r, nowMs), day, stage,
+        id: r.id, row: r, group: attentionGroup(r, nowMs), bar: eyeBar(r, nowMs), day, due: dueCell(r, nowMs), stage,
         court: tileCourt(r.status) === "you" ? "you" : "agent",
         title: `${r.agentName} — ${stage}, ${r.expectedMs == null ? "no date promised" : day.urgent ? `${day.text.replace(" ago", "")} past the expected date` : `${day.text} to go`}`,
       };

@@ -17,6 +17,8 @@
 import React, { useState } from "react";
 import { StatusDot } from "../../StatusDot";
 import { EYE_FOCUS, eyeFaded, eyeGroups, type EyeFocus, type EyeGroup, type EyeRow } from "../../../lib/qcBirdsEye";
+import { attentionCounts } from "../../../lib/qcCalView";
+import { BE_HAWK_HEAD } from "./qcArt";
 import type { QcRow } from "../../../lib/qcSummary";
 import "./qcvBirdsEye.css";
 
@@ -55,11 +57,35 @@ export const QcBirdsEye: React.FC<{
   const [focus, setFocus] = useState<EyeFocus>("all");
   const groups: EyeGroup[] = loading ? [] : eyeGroups(rows, nowMs);
   const total = groups.reduce((n, g) => n + g.count, 0);
+  const counts = attentionCounts(loading ? [] : rows, nowMs);
 
   return (
     <div className="qcv-be" data-qcv="railcal">
+      {/**
+        * §4 — THE HEAD IS A BLUSH TRAY, AND THE HAWK PEEKS OUT OF ITS BOTTOM EDGE.
+        *
+        * ⚠️ THE CLIPPING LAYER IS ITS OWN ELEMENT, not `overflow: hidden` on the tray. The toggle
+        * sits 10px BELOW the tray and the counts line's own descenders reach its padding, so a tray
+        * that clipped would clip them too. One element clips, and it holds nothing but the picture.
+        *
+        * ⚠️ AND THE PICTURE IS BEHIND THE WORDS BY STACKING ORDER, never by being drawn smaller.
+        * The clip layer is `z-index: 0` and every text child is above it; the head is `right: -14px;
+        * bottom: -36px` inside it, so the crown, brows, eyes and spectacles show and the rest is cut
+        * by the tray's own bottom edge — which is the whole drawing this design wants.
+        */}
       <div className="qcv-be-head" data-qcv="be-head">
-        <b className="qcv-be-ttl">Birds-eye view</b>
+        <span className="qcv-be-clip" aria-hidden="true">
+          <img className="qcv-be-hawk" src={`${BE_HAWK_HEAD.src}?v=${BE_HAWK_HEAD.version}`} width={BE_HAWK_HEAD.width} height={BE_HAWK_HEAD.height} alt="" data-qcv="be-hawk" />
+        </span>
+        <b className="qcv-be-ttl" data-qcv="be-title">Birds-eye view</b>
+        {/**
+          * §4 — THE COUNTS LINE IS THE RAIL'S ALONE; the expanded header has none, because its three
+          * stat cards ARE the counts and they filter (§1.4). Both read `attentionCounts`, so the two
+          * surfaces cannot state different numbers for the same three groups.
+          */}
+        <span className="qcv-be-counts" data-qcv="be-counts">
+          <b>{counts.overdue} overdue</b>{` · ${counts.upcoming} upcoming · ${counts.watch} waiting`}
+        </span>
         {/* ⚠️ THE ⤢ OPENS IT WITH NOTHING HIGHLIGHTED; a ROW opens it with that query highlighted.
             Two doors, one destination, and the difference is what arrives selected. */}
         <button type="button" className="qcv-be-ex" data-qcv="be-expand" aria-label="Open the Birds-eye view" disabled={loading} onClick={() => onExpand(null)}>
@@ -84,9 +110,23 @@ export const QcBirdsEye: React.FC<{
         ))}
       </div>
 
+      {/**
+        * §5 — THE AXIS SHARES THE ROW'S OWN GRID, so its track cell is the rows' track cell and the
+        * DUE pill cannot drift from the line beneath it. Three rules each computing the track is
+        * three chances for one of them to be a pixel out, on the one element whose job is to line up.
+        *
+        * ⚠️ WAITING AND OVERDUE ARE 30px FROM THE LINE, NOT FROM THE PILL. The pill's width is its
+        * text's, so measuring from its edges would move both labels the day the word changed.
+        */}
       <div className="qcv-be-axis" data-qcv="be-axis" aria-hidden="true">
-        <span className="qcv-be-axl">Due date</span>
-        {[10, 20, 30, 40, 60, 70, 80, 90].map((x) => <i key={x} style={{ left: `${x}%` }} />)}
+        <span />
+        <span className="qcv-be-axt">
+          <u className="qcv-be-axnow">Due</u>
+          <em className="qcv-be-axl">Waiting</em>
+          <em className="qcv-be-axr">Overdue</em>
+          {[10, 20, 30, 40, 60, 70, 80, 90].map((x) => <i key={x} style={{ left: `${x}%` }} />)}
+        </span>
+        <span />
       </div>
 
       <div className="qcv-be-scroll" data-qcv="be-scroll">
@@ -105,7 +145,7 @@ export const QcBirdsEye: React.FC<{
                 <button
                   key={r.id}
                   type="button"
-                  className={`qcv-be-row${eyeFaded(r, focus) ? " qcv-be-row--fade" : ""}${r.group === "watch" ? " qcv-be-row--watch" : ""}`}
+                  className={`qcv-be-row${eyeFaded(r, focus) ? " qcv-be-row--fade" : ""}${r.group === "watch" ? " qcv-be-row--watch" : ""}${r.due.kind === "past" ? " qcv-be-row--late" : ""}`}
                   data-qcv="be-row"
                   data-id={r.id}
                   data-court={r.court}
@@ -120,7 +160,16 @@ export const QcBirdsEye: React.FC<{
                     </span>
                   </span>
                   <Bar r={r} />
-                  <span className={`qcv-be-day${r.day.urgent ? " qcv-be-day--urgent" : ""}`} data-qcv="be-day">{r.day.text}</span>
+                  {/**
+                    * §5 — THE DATE OVER ITS DISTANCE. Two facts, because either alone leaves the
+                    * reader doing arithmetic: "10d over" does not say which day, and "9 Sep" does
+                    * not say whether it has gone. `data-due` is what anything else classifies on —
+                    * the wording is for a reader, never for a probe.
+                    */}
+                  <span className={`qcv-be-due${r.due.urgent ? " qcv-be-due--late" : ""}`} data-qcv="be-due" data-due={r.due.kind}>
+                    <b data-qcv="be-due-date">{r.due.date}</b>
+                    <u data-qcv="be-due-dist">{r.due.distance}</u>
+                  </span>
                 </button>
               ))}
             </div>

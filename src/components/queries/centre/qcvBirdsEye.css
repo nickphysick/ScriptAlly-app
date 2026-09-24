@@ -22,25 +22,56 @@
   display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto;
   --qcv-be-pad: 22px;
   --qcv-be-who: 160px;
-  --qcv-be-day: 46px;
-  --qcv-be-gap: 8px;
+  /* §5 — the right column is 52 and the columns do not gap: the axis shares this grid, so a gap
+     here would move the DUE pill off the line the rows are measured against. */
+  --qcv-be-day: 52px;
+  --qcv-be-gap: 0px;
   /* the track's own left edge and width, inside the row's grid */
   --qcv-be-tl: calc(var(--qcv-be-pad) + var(--qcv-be-who) + var(--qcv-be-gap));
   --qcv-be-tw: calc(100% - var(--qcv-be-pad) * 2 - var(--qcv-be-who) - var(--qcv-be-day) - var(--qcv-be-gap) * 2);
 }
 
-/* §6.1 — the head */
-.qcv-be-head { flex: none; display: flex; align-items: center; gap: 10px; padding: 22px 22px 8px; }
-.qcv-be-ttl { font-family: var(--qcv-type); font-weight: 400; font-size: 20px; line-height: 1.2; color: var(--qcv-ink); }
-/* §6.1 — the ⤢, a 28px disc at the head's right */
+/**
+ * §4 — THE HEAD IS A BLUSH TRAY: 8px inside the card, 122px tall, 14px corners.
+ *
+ * ⚠️ IT DOES NOT CLIP, and `.qcv-be-clip` does. The tray is `overflow: visible` so the counts
+ * line's descenders and any focus ring are whole; the picture is cut by a layer of its own.
+ *
+ * ⚠️ AND EVERY CHILD IS PLACED FROM THE TRAY'S OWN EDGES rather than flowed, because the drawing
+ * behind them has to sit in a known place: a flex row would move the title the day the counts line
+ * wrapped, and the head would then be behind a different word.
+ */
+.qcv-be-head {
+  flex: none; position: relative; box-sizing: border-box;
+  margin: 8px 8px 0; height: 122px;
+  background: var(--be-accent); border-radius: 14px;
+}
+/* the clipping layer: it holds the picture and nothing else, so nothing legible can be cut by it */
+.qcv-be-clip { position: absolute; inset: 0; z-index: 0; overflow: hidden; border-radius: 14px; pointer-events: none; }
+/* §4 — 102px, hanging off the tray's bottom-right so the crown, brows, eyes and spectacles show */
+.qcv-be-hawk { position: absolute; right: -14px; bottom: -36px; width: 102px; height: auto; display: block; }
+.qcv-be-ttl {
+  position: absolute; left: 19px; top: 32px; z-index: 1;
+  font-family: var(--qcv-type); font-weight: 400; font-size: 30px; line-height: 1;
+  letter-spacing: -0.3px; color: var(--be-ink); white-space: nowrap;
+}
+/* §4 — the counts line. The overdue figure and its word are bold ink; the rest is the muted ink. */
+.qcv-be-counts {
+  position: absolute; left: 20px; top: 74px; z-index: 1;
+  font-family: var(--qcv-mono); font-weight: 400; font-size: 8.5px; line-height: 1.4;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--be-mute); white-space: nowrap;
+}
+.qcv-be-counts b { font-weight: 700; color: var(--be-ink); }
+/* §4 — the ⤢: a 28px ring at the tray's top right, transparent, in the muted ink */
 .qcv-be-ex {
-  margin-left: auto; flex: none; width: 28px; height: 28px; border-radius: 50%;
-  background: #fff; border: 1px solid rgba(28, 19, 15, 0.14); color: var(--qcv-ink);
+  position: absolute; top: 14px; right: 14px; z-index: 1;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: none; border: 0; box-shadow: inset 0 0 0 1px var(--be-mute); color: var(--be-ink);
   /* the mark is an SVG path, so the button only has to centre it */
   display: inline-flex; align-items: center; justify-content: center;
   font-size: 13px; line-height: 1; cursor: pointer;
 }
-.qcv-be-ex:hover { background: var(--qcv-parchment); }
+.qcv-be-ex:hover { background: var(--be-soft); }
 .qcv-be-ex:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
 .qcv-be-ex:disabled { cursor: default; opacity: 0.5; }
 
@@ -51,7 +82,8 @@
  */
 .qcv-be-focus {
   flex: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px;
-  margin: 12px 22px 0; padding: 2px; height: 32px; box-sizing: border-box;
+  /* §4 — OUT of the tray, 10px beneath it, and 14px inside the tray's own edges (8 + 14 = 22) */
+  margin: 10px 22px 0; padding: 2px; height: 32px; box-sizing: border-box;
   background: #f3eee7; border-radius: 8px;
 }
 .qcv-be-focus button {
@@ -72,13 +104,32 @@
  * and each row's bar all sit in the same horizontal space; three rules each computing it is three
  * chances for one of them to be a pixel out, on the one element whose whole job is to line up.
  */
-.qcv-be-axis { position: relative; flex: none; height: 16px; margin: 12px var(--qcv-be-pad) 0; }
-.qcv-be-axl {
-  position: absolute; left: 50%; top: 2px; transform: translateX(-50%);
-  font-family: var(--qcv-mono); font-weight: 600; font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--qcv-ink-45); white-space: nowrap;
+/**
+ * §5 — THE AXIS IS THE ROW'S OWN GRID, so its middle cell IS the track and the DUE pill sits on the
+ * line by construction rather than by two rules agreeing.
+ */
+.qcv-be-axis {
+  flex: none; display: grid; grid-template-columns: var(--qcv-be-who) minmax(0, 1fr) var(--qcv-be-day);
+  column-gap: var(--qcv-be-gap); height: 22px; margin: 10px var(--qcv-be-pad) 0;
 }
-.qcv-be-axis i { position: absolute; top: 6px; width: 1px; height: 4px; background: rgba(28, 19, 15, 0.16); }
+.qcv-be-axt { position: relative; display: block; }
+/* the pill ON the line: ink, cream text, and centred on the midpoint the rows measure against */
+.qcv-be-axnow {
+  position: absolute; left: 50%; top: 2px; transform: translateX(-50%);
+  padding: 2px 7px; border-radius: 8px; background: var(--qcv-ink); color: #f5f1eb;
+  font-family: var(--qcv-mono); font-weight: 600; font-size: 7.5px; line-height: 1;
+  letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; white-space: nowrap;
+}
+/* ⚠️ 30px FROM THE LINE, not from the pill — the pill's width is its text's, so measuring from its
+   edges would move both labels the day the word changed. */
+.qcv-be-axl, .qcv-be-axr {
+  position: absolute; top: 5px; font-style: normal;
+  font-family: var(--qcv-mono); font-size: 7px; line-height: 1;
+  letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
+}
+.qcv-be-axl { right: calc(50% + 30px); font-weight: 400; color: var(--qcv-ink-45); }
+.qcv-be-axr { left: calc(50% + 30px); font-weight: 600; color: var(--qcv-ink); }
+.qcv-be-axt i { position: absolute; top: 18px; width: 1px; height: 4px; background: rgba(28, 19, 15, 0.16); }
 
 /* the rows: the only thing that scrolls */
 .qcv-be-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 0 6px; }
@@ -99,9 +150,11 @@
  * the nothing below it is measured against.
  */
 .qcv-be-rows { position: relative; }
+/* §5 — solid ink at 70%, 1.5px, the full height of the rows */
 .qcv-be-line {
   position: absolute; top: 0; bottom: 0; left: calc(var(--qcv-be-tl) + var(--qcv-be-tw) * 0.5);
-  width: 1px; background: var(--qcv-ink-45); pointer-events: none; z-index: 1;
+  width: 1.5px; margin-left: -0.75px; background: var(--qcv-ink); opacity: 0.7;
+  pointer-events: none; z-index: 1;
 }
 
 /* ⚠️ THE ROW IS A BUTTON (§6.4), so it states everything a button brings with it: no border, no
@@ -158,8 +211,42 @@
 .qcv-be-row--watch .qcv-be-bar { opacity: 0.72; }
 .qcv-be-row--watch:hover .qcv-be-bar { opacity: 1; }
 
-.qcv-be-day { font-family: var(--qcv-type); font-weight: 400; font-size: 11px; line-height: 1; text-align: right; color: var(--qcv-ink-70); white-space: nowrap; }
-.qcv-be-day--urgent { color: var(--qcv-ink); font-weight: 600; }
+/**
+ * §5 — the right column: the due date over how far away it is, right-aligned.
+ *
+ * ⚠️ THE DISTANCE IS UPPERCASED BY THE SHEET, NOT BY THE STRING. A screen reader should not be
+ * shouted at because a design wanted small capitals.
+ */
+.qcv-be-due { display: block; text-align: right; min-width: 0; }
+.qcv-be-due b {
+  display: block; font-family: var(--qcv-serif); font-weight: 600; font-size: 12px; line-height: 1.1;
+  color: var(--qcv-ink); white-space: nowrap;
+}
+.qcv-be-due u {
+  display: block; margin-top: 2px; text-decoration: none;
+  font-family: var(--qcv-mono); font-weight: 400; font-size: 7px; line-height: 1.1;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap;
+}
+.qcv-be-due--late u { font-weight: 700; color: var(--qcv-ink); }
+/* a date nobody promised: the em dash is muted too, so the column does not read as a stated day */
+.qcv-be-due[data-due="none"] b { color: var(--qcv-ink-45); }
+
+/**
+ * §5 — AN OVERDUE ROW IS WASHED ACROSS THE WHOLE CARD, not just its content box: a wash that
+ * stopped at the 22px gutter would read as a box drawn round the text rather than as a state the
+ * row is in.
+ *
+ * ⚠️ AND IT NEEDS NO BLEED HERE, WHICH THE MOCK DOES. Its rows sit in a container inset by the
+ * gutter, so its overdue row carries `margin: 0 -22px` to reach the card's edges; ours span the
+ * card already and hold the gutter as their own padding. Carrying the mock's negative margin
+ * across therefore overshot by exactly that gutter — measured, the row's left edge landed 22px
+ * OUTSIDE the card (1034 against 1056). A value taken from a ref is a value about the ref's own
+ * frame until the structure underneath it has been checked.
+ */
+.qcv-be-row--late {
+  background: #f8ebe3; box-shadow: inset 3px 0 0 var(--qcv-ink); border-bottom-color: #efdcd1;
+}
+.qcv-be-row--late:hover { background: #f5e3d9; }
 
 /* §6.3 — the legend */
 .qcv-be-key {

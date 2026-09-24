@@ -684,6 +684,138 @@ test("§2 · the rail — placed from the window's box, at two heights, before a
  * repo has measured a line drawn from padding arithmetic sitting a few pixels off the thing it was
  * supposed to mark. So the line's x is compared with each bar's own end, in pixels.
  */
+/**
+ * ⚠️ v65.2 §11 LOCKS 3 AND 4 — THE RAIL'S HEADER AND ITS ROWS, MEASURED. Every claim here is a
+ * geometric one, which is the half a source lock cannot carry: a sheet can state `height: 122px`
+ * about a tray a later rule grows, and `width: 102px` about a picture an ancestor scales.
+ */
+test("§4 · the rail's header — the tray, the words, and the hawk behind them", async ({ page }) => {
+  await openApp(page, 1440, 860);
+  const h = await page.evaluate(() => {
+    const rail = [...document.querySelectorAll("[data-qcv='rail']")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+    const px = (n: number) => Math.round(n * 10) / 10;
+    const q = (s: string) => rail.querySelector(s) as HTMLElement | null;
+    const rb = rail.getBoundingClientRect();
+    const bx = (e: Element | null) => { if (!e) return null; const b = e.getBoundingClientRect(); return { x: px(b.x - rb.x), y: px(b.y - rb.y), w: px(b.width), h: px(b.height), r: px(b.right - rb.x), bot: px(b.bottom - rb.y) }; };
+    const head = q("[data-qcv='be-head']"), hawk = q("[data-qcv='be-hawk']"), clip = rail.querySelector(".qcv-be-clip");
+    const ttl = q("[data-qcv='be-title']"), cnt = q("[data-qcv='be-counts']"), ex = q("[data-qcv='be-expand']"), focus = q("[data-qcv='be-focus']");
+    /* the picture's VISIBLE box: its own rect clipped to the layer that cuts it */
+    const hb = hawk!.getBoundingClientRect(), cb = clip!.getBoundingClientRect();
+    const vis = { x: px(Math.max(hb.x, cb.x) - rb.x), y: px(Math.max(hb.y, cb.y) - rb.y), r: px(Math.min(hb.right, cb.right) - rb.x), bot: px(Math.min(hb.bottom, cb.bottom) - rb.y) };
+    /* the title's INK, not its box — a `<b>` fills its line, and the drawing sits beside the words */
+    const ink = (e: Element) => { const rg = document.createRange(); rg.selectNodeContents(e); const rs = [...rg.getClientRects()]; const l = Math.min(...rs.map((r) => r.x)), t = Math.min(...rs.map((r) => r.y)); return { x: px(l - rb.x), y: px(t - rb.y), r: px(Math.max(...rs.map((r) => r.right)) - rb.x), bot: px(Math.max(...rs.map((r) => r.bottom)) - rb.y), lines: rs.length }; };
+    return {
+      card: { w: px(rb.width) }, head: bx(head), clip: bx(clip), hawk: bx(hawk), vis,
+      ttl: ink(ttl!), cnt: ink(cnt!), ex: bx(ex), focus: bx(focus),
+      headBg: getComputedStyle(head!).backgroundColor, radius: getComputedStyle(head!).borderRadius,
+      exBg: getComputedStyle(ex!).backgroundColor, ttlSize: parseFloat(getComputedStyle(ttl!).fontSize),
+      countsText: (cnt!.textContent ?? "").trim(), hawkSrc: (hawk as HTMLImageElement).getAttribute("src"),
+    };
+  });
+  record({ area: "be-head", what: "the tray, the words and the picture, all relative to the card", got: h, want: "reported" });
+  /* §4 — the tray: 8px inside a 340 card, 122 tall, 14px corners, in the accent */
+  near("be-head", "the tray's height", h.head!.h, 122, 1);
+  near("be-head", "…inset 8px from the card's left", h.head!.x, 8, 0.5);
+  near("be-head", "…and 8px from its right", h.card.w - h.head!.r, 8, 0.5);
+  is("be-head", "the tray is the Birds-eye accent", h.headBg, "rgb(233, 201, 184)");
+  is("be-head", "…with 14px corners", h.radius, "14px");
+  /* §4 — the title is ONE line, and the ⤢ is a ring rather than a disc */
+  is("be-head", "the title is one line", h.ttl.lines, 1);
+  near("be-head", "…at 30px", h.ttlSize, 30, 0.5);
+  is("be-head", "the ⤢ is transparent — the tray is the fill it sits on", h.exBg, "rgba(0, 0, 0, 0)");
+  near("be-head", "the ⤢ sits 14px from the tray's top", h.ex!.y - h.head!.y, 14, 0.5);
+  near("be-head", "…and 14px from its right", h.head!.r - h.ex!.r, 14, 0.5);
+  /* §4 — the toggle is OUT of the tray, 10px beneath it */
+  near("be-head", "the toggle's top is the tray's bottom + 10", h.focus!.y - h.head!.bot, 10, 0.5);
+  /**
+   * ⚠️ NO TEXT CROSSES THE HEAD (§4). The check is the mock's: the text boxes against the picture's
+   * VISIBLE box — its own rect clipped by the layer that cuts it — with the crown inset 14 / 10,
+   * because the drawing's ink does not reach its own image edges. Measuring the unclipped image
+   * would report an overlap with everything, which is the design working.
+   */
+  const crown = { x: h.vis.x + 14, y: h.vis.y + 10, r: h.vis.r - 14, bot: h.vis.bot };
+  record({ area: "be-head", what: "the crown's box, inset from the picture's clipped box", got: crown, want: "reported" });
+  yes("be-head", "the picture is actually clipped by the tray (or the check is about nothing)", h.hawk!.bot > h.clip!.bot - 0.5, `${h.hawk!.bot} vs ${h.clip!.bot}`);
+  for (const [name, b] of [["the title", h.ttl], ["the counts line", h.cnt]] as const) {
+    const hit = b.r > crown.x && b.x < crown.r && b.bot > crown.y && b.y < crown.bot;
+    yes("be-head", `${name} does not cross the hawk`, !hit, JSON.stringify({ text: b, crown }));
+  }
+  /* §4 — the counts line is the three groups, in the stated order */
+  yes("be-head", "the counts line names the three groups", /^\d+ OVERDUE · \d+ UPCOMING · \d+ WAITING$/i.test(h.countsText), h.countsText);
+  await page.locator("[data-qcv='rail']").first().screenshot({ path: resolve(OUT, "be-head-1440.png") });
+});
+
+test("§5 · the rail's axis and rows — the pill on the line, and the date over its distance", async ({ page }) => {
+  await openApp(page, 1440, 860);
+  const r = await page.evaluate(() => {
+    const rail = [...document.querySelectorAll("[data-qcv='rail']")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+    const px = (n: number) => Math.round(n * 10) / 10;
+    const bxa = (e: Element | null) => { if (!e) return null; const b = e.getBoundingClientRect(); return { x: px(b.x), w: px(b.width), r: px(b.right), y: px(b.y), h: px(b.height) }; };
+    const axt = rail.querySelector(".qcv-be-axt");
+    const rows = [...rail.querySelectorAll("[data-qcv='be-row']")] as HTMLElement[];
+    const cell = (row: HTMLElement, s: string) => row.querySelector(s) as HTMLElement | null;
+    const clips = (e: HTMLElement | null) => (e ? e.scrollWidth > e.clientWidth + 0.5 : false);
+    const first = rows[0], late = rows.find((x) => x.className.includes("qcv-be-row--late")) ?? null;
+    const ok = rows.find((x) => !x.className.includes("qcv-be-row--late")) ?? null;
+    const lateCs = late ? getComputedStyle(late) : null;
+    return {
+      axt: bxa(axt), pill: bxa(rail.querySelector(".qcv-be-axnow")), axl: bxa(rail.querySelector(".qcv-be-axl")), axr: bxa(rail.querySelector(".qcv-be-axr")),
+      line: bxa(rail.querySelector("[data-qcv='be-line']")), track: bxa(first?.querySelector("[data-qcv='be-track']") ?? null),
+      due: bxa(first?.querySelector("[data-qcv='be-due']") ?? null),
+      rowCols: first ? getComputedStyle(first).gridTemplateColumns : null,
+      axCols: axt?.parentElement ? getComputedStyle(axt.parentElement).gridTemplateColumns : null,
+      lineW: rail.querySelector("[data-qcv='be-line']") ? getComputedStyle(rail.querySelector("[data-qcv='be-line']")!).width : null,
+      lateBg: lateCs?.backgroundColor ?? null, lateEdge: lateCs?.boxShadow ?? null,
+      lateX: late ? px(late.getBoundingClientRect().x) : null, lateR: late ? px(late.getBoundingClientRect().right) : null,
+      lateTrackX: late ? bxa(late.querySelector("[data-qcv='be-track']"))?.x ?? null : null,
+      okX: ok ? px(ok.getBoundingClientRect().x) : null,
+      okTrackX: ok ? bxa(ok.querySelector("[data-qcv='be-track']"))?.x ?? null : null,
+      railX: px(rail.getBoundingClientRect().x), railR: px(rail.getBoundingClientRect().right),
+      /* every date and distance, and whether any of them clips */
+      cells: rows.map((row) => ({
+        kind: cell(row, "[data-qcv='be-due']")?.getAttribute("data-due") ?? null,
+        date: (cell(row, "[data-qcv='be-due-date']")?.textContent ?? "").trim(),
+        dist: (cell(row, "[data-qcv='be-due-dist']")?.textContent ?? "").trim(),
+        clipped: clips(cell(row, "[data-qcv='be-due-date']")) || clips(cell(row, "[data-qcv='be-due-dist']")) || clips(cell(row, ".qcv-be-nm")) || clips(cell(row, ".qcv-be-st")),
+      })),
+      lateCount: rows.filter((x) => x.className.includes("qcv-be-row--late")).length,
+    };
+  });
+  record({ area: "be-rows", what: "the axis, the line and the rows", got: { axt: r.axt, pill: r.pill, line: r.line, track: r.track, due: r.due, cols: r.rowCols }, want: "reported" });
+  /* §5 — the axis shares the row's grid, so the pill is ON the line by construction */
+  is("be-rows", "the axis's tracks are the row's", r.axCols, r.rowCols);
+  near("be-rows", "the right column is 52", parseFloat((r.rowCols ?? "").split(" ").pop() ?? "0"), 52, 0.5);
+  near("be-rows", "the DUE pill's centre is the track's midpoint", (r.pill!.x + r.pill!.r) / 2, (r.track!.x + r.track!.r) / 2, 1);
+  near("be-rows", "…and the line is there too", (r.line!.x + r.line!.r) / 2, (r.track!.x + r.track!.r) / 2, 1);
+  near("be-rows", "the line is 1.5px", parseFloat(r.lineW ?? "0"), 1.5, 0.1);
+  /* §5 — WAITING and OVERDUE are 30px from the LINE */
+  const mid = (r.track!.x + r.track!.r) / 2;
+  near("be-rows", "WAITING's right edge is 30px left of the line", mid - r.axl!.r, 30, 1);
+  near("be-rows", "OVERDUE's left edge is 30px right of it", r.axr!.x - mid, 30, 1);
+  /* §5 — every date and distance fits at 340, and the four kinds are the library's */
+  yes("be-rows", `there are rows (${r.cells.length})`, r.cells.length > 3, String(r.cells.length));
+  const kinds = [...new Set(r.cells.map((c) => c.kind))].sort();
+  record({ area: "be-rows", what: "the due kinds this fixture drew, and a sample of the column", got: { kinds, sample: r.cells.slice(0, 6) }, want: "reported" });
+  for (const c of r.cells) {
+    yes("be-rows", "a row states both its date and its distance", !!c.date && !!c.dist, JSON.stringify(c));
+    yes("be-rows", "…and neither clips at 340", !c.clipped, JSON.stringify(c));
+  }
+  /* §5 — an overdue row is washed across the WHOLE card, with a 3px ink edge */
+  yes("be-rows", `some rows are overdue (${r.lateCount}) — or the wash is unproved`, r.lateCount > 0, String(r.lateCount));
+  is("be-rows", "the wash", r.lateBg, "rgb(248, 235, 227)");
+  yes("be-rows", "the 3px ink inset edge", /inset/.test(r.lateEdge ?? "") && /3px/.test(r.lateEdge ?? ""), String(r.lateEdge));
+  /**
+   * ⚠️ THE WASH REACHES THE CARD'S EDGES AND THE GRID DOES NOT MOVE — two claims, and the second is
+   * the one a bleed gets wrong. The mock's rows sit in a container inset by the gutter and its
+   * overdue row carries a negative margin to escape it; ours span the card already, so the same
+   * margin overshot by exactly that gutter (measured: 1034 against the card's 1056).
+   */
+  near("be-rows", "the wash starts at the card's own left edge", r.lateX!, r.railX, 1);
+  near("be-rows", "…and ends at its right", r.lateR!, r.railR, 1);
+  is("be-rows", "an ordinary row spans the same box — the wash is a state, not a different width", r.okX, r.lateX);
+  near("be-rows", "⚠️ and the columns are unmoved: the late row's track is the ordinary row's", r.lateTrackX!, r.okTrackX!, 0.5);
+});
+
 test("§6 · Birds-eye — the line is where the dates are, the rows scroll, and the card does not grow", async ({ page }) => {
   await openApp(page, 1440, 860);
   const be = await page.evaluate(() => {
@@ -709,8 +841,15 @@ test("§6 · Birds-eye — the line is where the dates are, the rows scroll, and
       if (!bar || !track) return null;
       const bb = bar.getBoundingClientRect(), tb = track.getBoundingClientRect();
       return { mid: px(tb.left + tb.width / 2), end: px(bb.right), start: px(bb.left), over: over ? px(over.getBoundingClientRect().left) : null,
-        day: (r.querySelector("[data-qcv='be-day']")?.textContent ?? "").trim(), court: r.getAttribute("data-court") };
-    }).filter(Boolean) as { mid: number; end: number; start: number; over: number | null; day: string; court: string | null }[];
+        /* ⚠️ CLASSIFIED ON `data-due`, NOT ON THE WORDS (v65.2 §5). This read the day count's text
+           and sorted it with `/^\d+d$/` and `/ago$/`; §5 re-worded the column to "In 3d" / "10d
+           over" / "No date" and every one of those patterns matched nothing — which would have
+           reported an empty population as a clean sweep rather than as a miss. */
+        due: r.querySelector("[data-qcv='be-due']")?.getAttribute("data-due") ?? null,
+        date: (r.querySelector("[data-qcv='be-due-date']")?.textContent ?? "").trim(),
+        dist: (r.querySelector("[data-qcv='be-due-dist']")?.textContent ?? "").trim(),
+        court: r.getAttribute("data-court") };
+    }).filter(Boolean) as { mid: number; end: number; start: number; over: number | null; due: string | null; date: string; dist: string; court: string | null }[];
     const scroller = rail.querySelector("[data-qcv='be-scroll']") as HTMLElement;
     return {
       railH: px(rb.height),
@@ -741,9 +880,9 @@ test("§6 · Birds-eye — the line is where the dates are, the rows scroll, and
    * date is today, and the overrun starts AT it when the date has gone. Measured against the track's
    * own middle rather than against a number, so the two cannot drift apart.
    */
-  const withTime = (be?.bars ?? []).filter((b) => /^\d+d$/.test(b.day));
-  const past = (be?.bars ?? []).filter((b) => /ago$/.test(b.day));
-  const undated = (be?.bars ?? []).filter((b) => b.day === "—");
+  const withTime = (be?.bars ?? []).filter((b) => b.due === "future");
+  const past = (be?.bars ?? []).filter((b) => b.due === "past");
+  const undated = (be?.bars ?? []).filter((b) => b.due === "none");
   record({ area: "birdseye", what: "the bars, by what their day count says", got: { withTime: withTime.length, past: past.length, undated: undated.length }, want: "reported" });
   yes("birdseye", `some bars have time left (${withTime.length}) — or the claim below is vacuous`, withTime.length > 0, String(withTime.length));
   for (const b of withTime) yes("birdseye", `a bar with time left ends short of the line (${b.end} vs ${b.mid})`, b.end <= b.mid + 0.6, JSON.stringify(b));
