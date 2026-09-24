@@ -211,25 +211,28 @@ describe("§4.2 · the expanded header, layout A", () => {
    * The measurement caught it: the cluster read 42px ABOVE the tray's foot, from a `bottom: 10px`
    * left over from its life at the Courier's column.
    */
-  it("§6 · Filter, Sort and ↺ ride the date row's lane, at the card's own inner left", () => {
-    const ctl = rule(".qcv-xp-ctl");
-    expect(ctl).toMatch(/position: absolute; top: var\(--qcv-tl-lanetop\); left: 44px/);
-    expect(ctl, "centring is what it did at the column's foot").not.toMatch(/justify-content/);
-    /* …and it is handed to the lane as a slot rather than positioned against it from outside */
-    expect(src).toMatch(/leftControls=\{<QcCalControls/);
-    expect(read("src/components/queries/centre/QcTimeline.tsx")).toMatch(/\{leftControls\}/);
-    /* §1.5 — the date row is the card's white now, not the tray's colour carried down */
+  it("§5–§6 · Filter, Sort and ↺ ride the date row's CORNER CELL, over the names", () => {
+    /**
+     * ⚠️ THE LANE THEY USED TO RIDE HAS NO HEIGHT NOW (§5). It was a 52px row above the dates; the
+     * date row carries its own 60px with a corner cell inside it, so a second row would be 52px of
+     * white nobody asked for. The cluster therefore sits in the CORNER, which is what §6 asks for
+     * and what makes "over the names" a structural fact rather than an offset that happens to land.
+     */
     const tl = read("src/components/queries/centre/qcvTimeline.css");
+    const corner = /\.qcv-tl-corner \{([^}]*)\}/.exec(tl)?.[1] ?? "";
+    expect(corner, "the corner is sticky-left, or the dates run out from under it").toMatch(/position: sticky/);
+    expect(corner).toMatch(/left: 0/);
+    expect(corner).toMatch(/width: var\(--qcv-tl-names\)/);
+    expect(corner).toMatch(/height: 60px/);
+    /* ⚠️ OPAQUE. The dates pass UNDER it, so a transparent corner is a column of dates behind the
+       controls — the same claim the names cell carries one row down. */
+    expect(corner).toMatch(/background: #fff/);
+    /* …and it is handed the controls as a slot rather than positioned against them from outside */
+    expect(src).toMatch(/leftControls=\{<QcCalControls/);
+    expect(read("src/components/queries/centre/QcTimeline.tsx")).toMatch(/data-qcv="tl-corner">\{leftControls\}/);
+    /* §5 — the lane survives as a zero-height overlay for what must not scroll with the dates */
     const lane = /\.qcv-tl-lane \{([^}]*)\}/.exec(tl)?.[1] ?? "";
-    expect(lane).toMatch(/background: #fff/);
-    expect(tl).toMatch(/\.qcv-tl-tier \{[^}]*background: #fff/);
-    /* ⚠️ ONE OFFSET FOR BOTH CLUSTERS — §6's words are "sharing one row", and two numbers a couple
-       of pixels apart is exactly how that stops being true. */
-    expect(read("src/components/queries/centre/qcvPage.css"), "a shared offset on one component's element resolves for the other by luck of ancestry").toMatch(/--qcv-tl-lanetop: 8px/);
-    expect(tl).toMatch(/\.qcv-tl-controls \{[^}]*top: var\(--qcv-tl-lanetop\)/);
-    /* the flow row the first cut added is gone rather than left inert */
-    expect(css, "the flow row outlived the overlay that replaced it").not.toContain("qcv-xp-ctlrow");
-    expect(src).not.toContain("xp-ctlrow");
+    expect(lane).toMatch(/height: 0/);
   });
   it("⚠️ the Courier's column, its drawing and its extent are GONE, not merely unmounted", () => {
     for (const dead of [".qcv-xp-col", ".qcv-xp-art"]) expect(css, `${dead} outlived the column it styled`).not.toContain(dead);
@@ -817,9 +820,12 @@ describe("§9 · dragging the dates", () => {
     expect(tlSrc).toMatch(/if \(zoomFrame\.current\) return;/);
     expect(tlSrc).toMatch(/zoomPend\.current = \{ pxd: clampPxd\(from \* Math\.exp/);
   });
-  it("§9 · the heat rises from the tier's floor, in navy, with 1px gaps", () => {
+  it("§5 · the heat is a 6px strip along the row's foot, in navy, with 1px gaps", () => {
+    /* ⚠️ THE TALL BARS ARE RETIRED (§5). They took 24px of a 52px row to say a thing the strip says
+       in six, and the row has a month band and a line of dates to carry now. */
+    expect(/\.qcv-tl-heat \{([^}]*)\}/.exec(tl)?.[1] ?? "").toMatch(/height: 6px/);
     const h = /\.qcv-tl-heat i \{([^}]*)\}/.exec(tl)?.[1] ?? "";
-    expect(h).toMatch(/border-radius: 3px 3px 0 0/);
+    expect(h).toMatch(/border-radius: 2px 2px 0 0/);
     expect(h).toMatch(/background: var\(--sp-anthracite\)/);
     expect(h).toMatch(/bottom: 0/);
     /* the 1px gap is the width: a week is `7 × pxd` less one */
@@ -828,6 +834,83 @@ describe("§9 · dragging the dates", () => {
 });
 
 /* ── v65.2 §10 · the crosshair ─────────────────────────────────────────────────────────────────── */
+
+/**
+ * §5 · THE DATE ROW. One sticky row of two cells — the corner over the names and the tier over the
+ * dates — carrying month bands, every Monday's date, a 6px density strip and the TODAY pill.
+ *
+ * ⚠️ WHAT IT RETIRED, AND WHY IT IS RECORDED HERE: the month LABELS used to be points that had to
+ * dodge the TODAY pill, and the clearance was written as a share of the TRACK — which on a
+ * three-year pipeline is 376px of hole either side of today, thirty-five labels rendered and not
+ * one of them visible. A band has somewhere else to put its name, so there is nothing to dodge.
+ */
+describe("§5 · the date row", () => {
+  const tl = read("src/components/queries/centre/qcvTimeline.css");
+  const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");
+  const trule = (sel: string) => {
+    const m = tl.match(new RegExp(`(?:^|\\n)\\s*${sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`));
+    expect(m, `${sel} has no rule`).toBeTruthy();
+    return m![1];
+  };
+
+  it("§5 · it is ONE row of two cells, sticky at the body's top, 60px tall", () => {
+    /* ⚠️ THE CORNER AND THE TIER ARE SIBLINGS INSIDE THE SCROLLER — the only arrangement in which
+       the two cannot disagree about where the names column ends. A corner drawn outside the
+       scroller would be a second element that has to be TOLD how wide that column is. */
+    expect(tlSrc).toMatch(/<div className="qcv-tl-daterow"[^>]*>\s*<div className="qcv-tl-corner"/);
+    const row = trule(".qcv-tl-daterow");
+    expect(row, "the dates scroll away with the rows").toMatch(/position: sticky/);
+    expect(row).toMatch(/top: 0/);
+    expect(row, "the rows would show through it").toMatch(/background: #fff/);
+    const corner = trule(".qcv-tl-corner"), tier = trule(".qcv-tl-tier");
+    expect(corner).toMatch(/height: 60px/);
+    expect(tier).toMatch(/height: 60px/);
+    /* the corner outranks the dates running under it, and the row outranks the rows under IT */
+    expect(+(/z-index: (\d+)/.exec(corner)?.[1] ?? 0)).toBeGreaterThan(+(/z-index: (\d+)/.exec(row)?.[1] ?? 0));
+  });
+
+  it("⚠️ §5 · the TIER IS TRANSPARENT — the bands are what colour it", () => {
+    /* A fill here paints over the month bands, which is the whole of the row's colour. The white
+       belongs to the ROW beneath, so an empty extent still reads as part of the card. */
+    expect(trule(".qcv-tl-tier")).toMatch(/background: transparent/);
+  });
+
+  it("§5 · the bands are contiguous and their labels are STUCK at the names column's right", () => {
+    expect(tlSrc).toMatch(/monthBands\(ext, pxd\)/);
+    expect(tlSrc).toMatch(/style=\{\{ left: m\.x, width: m\.width \}\}/);
+    const b = trule(".qcv-tl-mb b");
+    expect(b, "a label that scrolls away names a month nobody is looking at").toMatch(/position: sticky/);
+    expect(b).toMatch(/left: calc\(var\(--qcv-tl-names\) \+ 8px\)/);
+    /* ⚠️ THE OFFSET IS THE NAMES COLUMN'S OWN WIDTH, never the 330 it happens to be: the column and
+       the corner both read that token, so the three cannot come apart at a retune. */
+    expect(b, "the label's stuck position restates a width it does not own").not.toMatch(/left: 3\d\dpx/);
+  });
+
+  it("§5 · every Monday states its date, and its tick is the label's own top", () => {
+    expect(tlSrc).toMatch(/className="qcv-tl-wk" data-qcv="tl-monday"/);
+    const wk = trule(".qcv-tl-wk");
+    expect(wk).toMatch(/top: 30px/);
+    expect(wk).toMatch(/padding-top: 6px/);
+    /* one element, so the tick and the date it belongs to cannot drift apart */
+    expect(trule(".qcv-tl-wk::before")).toMatch(/top: 0/);
+    expect(trule(".qcv-tl-wk::before")).toMatch(/height: 4px/);
+  });
+
+  it("§5 · TODAY is an ink pill on the dates' line", () => {
+    const t = trule(".qcv-tl-todaypill");
+    expect(t).toMatch(/top: 32px/);
+    expect(t).toMatch(/background: var\(--qcv-ink\)/);
+    expect(t).toMatch(/border-radius: 9px/);
+    /* above the bands it sits on, or it is a pill with a month band drawn through it */
+    expect(+(/z-index: (\d+)/.exec(t)?.[1] ?? 0)).toBeGreaterThan(0);
+  });
+
+  it("⚠️ §5 · the month POINTS and their track-share clearance are GONE, not merely unused", () => {
+    expect(tl, "the retired point label still has a rule").not.toMatch(/[".\s]qcv-tl-mon[\s{,]/);
+    expect(tlSrc).not.toMatch(/monthTicks/);
+    expect(read("src/lib/qcTimeline.ts")).not.toMatch(/monthTicks/);
+  });
+});
 
 describe("§10 · the crosshair", () => {
   const tl = read("src/components/queries/centre/qcvTimeline.css");

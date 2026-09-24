@@ -111,50 +111,69 @@ export interface Tick { ms: number; x: number; label: string }
  * that failed to draw. The thing being avoided is a pill about 47px wide, so the clearance is a
  * fact about the pill and never about the length of the reader's querying history.
  */
-export const MONTH_CLEAR_PX = 34;
+/** §5 — the band labels are full month names; `MON` stays for anything that needs the short form. */
+export const MONTH_FULL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] as const;
 
-export function monthTicks(ext: Extent, pxd: number, nowMs: number): Tick[] {
-  const out: Tick[] = [];
-  const todayX = xAt(ext, pxd, startOfDay(nowMs));
+/**
+ * §5 — ONE BAND PER MONTH, across the row's full height, alternating and named.
+ *
+ * ⚠️ A BAND IS A SPAN, NOT A TICK, AND THAT IS WHY THE CLEARANCE WENT. The old month LABEL had to
+ * dodge the TODAY pill, so it carried a clearance — and a clearance expressed as a share of the
+ * track put 376px of hole either side of today on a three-year pipeline, with thirty-five labels
+ * rendered and none of them visible. A band has somewhere else to put its label: the band's own
+ * left edge, stuck to the names column, so the current month is named wherever the reader has
+ * dragged to and nothing has to dodge anything.
+ */
+export interface MonthBand { ms: number; x: number; width: number; month: string; year: string; alt: boolean }
+export function monthBands(ext: Extent, pxd: number): MonthBand[] {
+  const out: MonthBand[] = [];
   const d = new Date(ext.fromMs);
   d.setDate(1); d.setHours(0, 0, 0, 0);
+  let alt = false;
   while (d.getTime() <= ext.toMs) {
     const ms = d.getTime();
     const x = xAt(ext, pxd, ms);
-    if (Math.abs(x - todayX) > MONTH_CLEAR_PX) {
-      out.push({ ms, x, label: d.getMonth() === 0 ? `${MON[0]} ${d.getFullYear()}` : MON[d.getMonth()] });
-    }
-    d.setMonth(d.getMonth() + 1);
+    const next = new Date(d); next.setMonth(next.getMonth() + 1);
+    out.push({ ms, x, width: xAt(ext, pxd, next.getTime()) - x, month: MONTH_FULL[d.getMonth()], year: String(d.getFullYear()), alt });
+    alt = !alt;
+    d.setTime(next.getTime());
   }
   return out;
 }
-/** Mondays, for the tier's foot. */
+
+/**
+ * §5 — EVERY MONDAY, WITH ITS DATE. The old ticks were unlabelled marks at the tier's foot; §5 asks
+ * for the date of each Monday, centred on its own x with a tick above it.
+ */
 export function weekTicks(ext: Extent, pxd: number): Tick[] {
   const out: Tick[] = [];
   const d = new Date(ext.fromMs);
   d.setHours(0, 0, 0, 0);
   while (d.getDay() !== 1) d.setDate(d.getDate() + 1);
-  for (let ms = d.getTime(); ms <= ext.toMs; ms += WEEK) out.push({ ms, x: xAt(ext, pxd, ms), label: "" });
+  for (let ms = d.getTime(); ms <= ext.toMs; ms += WEEK) {
+    out.push({ ms, x: xAt(ext, pxd, ms), label: String(new Date(ms).getDate()) });
+  }
   return out;
 }
 
 /* ── §8.5 · the heat ── */
 
-/** The weights, stated once: a past stage, the current stage, and an expected date. */
-export const HEAT_PAST = 0.12;
+/**
+ * §5 — THE WEIGHTS, STATED ONCE: the current stage and an expected date. The strip is 6px along the
+ * date row's foot now rather than a set of tall bars, so a PAST stage no longer earns a weight —
+ * §5 names two contributions and two is what this counts.
+ */
 export const HEAT_CURRENT = 0.28;
 export const HEAT_EXPECTED = 1;
-export interface HeatWeek { ms: number; weight: number; heightPc: number; opacity: number }
+export interface HeatWeek { ms: number; weight: number; opacity: number }
 
 /**
- * ⚠️ THE HEAT BEGINS WHERE THE FIRST QUERY'S JOURNEY BEGAN, which is what makes it a picture of the
- * account rather than of the window: every week a query has spent at any stage contributes, and an
- * expected date contributes much more than a week of waiting because it is the thing a reader is
- * looking for.
+ * ⚠️ THE OPACITY IS `.1 + .6 × √(w/max)`, AND THE ROOT IS THE POINT. A linear scale on a fixture
+ * where one week carries an offer and twenty carry a single query makes every ordinary week
+ * invisible; the root lifts the quiet ones without flattening the busy one.
  *
- * ⚠️ AND THE SCALE IS `√(w/max)`, NOT `w/max`. A linear scale on this data draws one spike at the
- * busiest week and a flat line everywhere else; the square root is what makes the quiet weeks
- * legible beside the loud one. The floor of 12% is so a week with anything in it is still a mark.
+ * ⚠️ AND AN EMPTY WEEK IS ZERO, not the floor. A strip whose every cell is faintly navy says the
+ * whole year was busy, which is the opposite of what it is for.
  */
 export function heatWeeks(rows: readonly QcRow[], ext: Extent, nowMs: number): HeatWeek[] {
   const weeks = new Map<number, number>();
@@ -166,17 +185,17 @@ export function heatWeeks(rows: readonly QcRow[], ext: Extent, nowMs: number): H
   };
   for (const r of rows) {
     for (const s of r.history.spans) {
+      if (!s.current) continue;
       const end = s.endMs ?? Math.min(nowMs, ext.toMs);
-      for (let ms = s.startMs; ms <= end; ms += WEEK) add(ms, s.current ? HEAT_CURRENT : HEAT_PAST);
+      for (let ms = s.startMs; ms <= end; ms += WEEK) add(ms, HEAT_CURRENT);
     }
     if (r.expectedMs != null) add(r.expectedMs, HEAT_EXPECTED);
   }
   const max = Math.max(...weeks.values(), 0);
   if (!(max > 0)) return [];
-  return [...weeks.entries()].sort((a, b) => a[0] - b[0]).map(([ms, weight]) => {
-    const f = Math.sqrt(weight / max);
-    return { ms, weight, heightPc: Math.max(12, 100 * f), opacity: Math.min(0.62, 0.1 + 0.52 * f) };
-  });
+  return [...weeks.entries()].sort((a, b) => a[0] - b[0]).map(([ms, weight]) => ({
+    ms, weight, opacity: weight > 0 ? Math.min(0.7, 0.1 + 0.6 * Math.sqrt(weight / max)) : 0,
+  }));
 }
 
 /* ── §8.7 · the bars ── */

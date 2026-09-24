@@ -242,11 +242,17 @@
  * apart is how that stops being true.
  */
 .qcv-xp-ctl {
-  /* ⚠️ 44, NOT 22: "card-inner left + 22" means the card's own 22px inset PLUS 22 again, which is
-     where the tray's left edge is plus 22. Measured at 22 the cluster sat exactly on the tray's
-     left edge — 290 against the tray's 290 — which reads as aligned and is one inset short. */
-  position: absolute; top: var(--qcv-tl-lanetop); left: 44px; z-index: 4;
-  display: flex; align-items: center; gap: 8px;
+  /**
+   * §6 — THE CLUSTER SITS IN THE DATE ROW'S CORNER CELL, statically. It used to be an overlay on
+   * the lane at `left: 44px`, measured against a row that no longer exists; the corner IS the names
+   * column's width, so "over the names" is now a fact about where it lives rather than an offset
+   * that has to keep agreeing with one.
+   *
+   * ⚠️ `relative` RATHER THAN `static`: the popover is absolutely positioned against this element,
+   * and a static parent would hand it to the corner — or, once the corner scrolls, to the card.
+   */
+  position: relative; z-index: 4;
+  display: flex; align-items: center; gap: 5px;
 }
 .qcv-xp-btn, .qcv-xp-reset {
   display: inline-flex; align-items: center; gap: 7px; height: 40px; box-sizing: border-box;

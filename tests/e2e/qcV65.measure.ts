@@ -1031,7 +1031,11 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
       trayMid: (() => { const t = c.querySelector("[data-qcv='xp-tray']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return px(r2.top + r2.height / 2); })(),
       tierBottom: (() => { const t = c.querySelector("[data-qcv='tl-tier']"); return t ? px(t.getBoundingClientRect().bottom) : null; })(),
       laneTop: (() => { const t = c.querySelector("[data-qcv='tl-lane']"); return t ? px(t.getBoundingClientRect().top) : null; })(),
-      ctl: (() => { const t = c.querySelector("[data-qcv='xp-ctl']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { mid: px(r2.left + r2.width / 2), bottom: px(r2.bottom), top: px(r2.top), left: px(r2.left) }; })(),
+      ctl: (() => { const t = c.querySelector("[data-qcv='xp-ctl']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { mid: px(r2.left + r2.width / 2), bottom: px(r2.bottom), top: px(r2.top), left: px(r2.left), vmid: px(r2.top + r2.height / 2) }; })(),
+      /* §5 — the date row and its corner cell, which is where §6's controls now live */
+      drow: (() => { const t = c.querySelector("[data-qcv='tl-daterow']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { x: px(r2.left), y: px(r2.top), h: px(r2.height), vmid: px(r2.top + r2.height / 2), bg: getComputedStyle(t).backgroundColor }; })(),
+      corner: (() => { const t = c.querySelector("[data-qcv='tl-corner']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { x: px(r2.left), y: px(r2.top), w: px(r2.width), h: px(r2.height) }; })(),
+      namesW: (() => { const t = c.querySelector("[data-qcv='tl-names']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { x: px(r2.left), w: px(r2.width) }; })(),
       /* the title on ONE line — a `getClientRects` count, which a wrap turns into two */
       ttlLines: (c.querySelector("[data-qcv='xp-title']") as HTMLElement).getClientRects().length,
       /**
@@ -1172,10 +1176,30 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
   yes("expanded", "§6 · the date row's lane is on the page (the box the controls ride in)", xp?.lane != null, JSON.stringify(xp?.lane));
   /* §4.1 — the calendar body is a PANEL now, 14px of desk below the tray */
   near("expanded", "§4.1 · the body panel begins 14px below the tray", (xp?.lane?.y ?? 0) - (xp?.tray?.bot ?? 0), 14, 1.5);
-  near("expanded", "§6 · the controls sit 8px into it", (xp?.ctl?.top ?? 0) - (xp?.lane?.y ?? 0), 8, 1);
-  /* §6 — 44 into the LANE, which is inside the body panel now; the corner move is §6's own phase */
-  near("expanded", "§6 · the controls sit 44px into the lane", (xp?.ctl?.left ?? 0) - (xp?.lane?.x ?? 0), 44, 1.5);
-  is("expanded", "§1.5 · …and the date row is on white, not the tray's colour carried down", xp?.lane?.bg, "rgb(255, 255, 255)");
+  /**
+   * §5–§6 — RETARGETED, AND THE LAW IS THE SAME ONE: *Filter, Group, Sort and ↺ sit over the names,
+   * on white, sharing one line with the dates.* v65.2 stated that as two offsets into a 52px lane
+   * (8 down, 44 in); §5 gives the date row its own 60px with a CORNER CELL over the names, so the
+   * lane has no height and both offsets describe a box that is no longer there.
+   *
+   * ⚠️ AND THE REPLACEMENT IS AN EQUALITY RATHER THAN A NEW PAIR OF OFFSETS. The cluster is CENTRED
+   * in the corner, so the claim survives §6 resizing the buttons — which an offset would not, and
+   * which is exactly the kind of legitimate edit a pinned number turns into a red.
+   */
+  yes("expanded", "§5 · the date row is on the page", xp?.drow != null && xp?.corner != null, JSON.stringify({ drow: xp?.drow, corner: xp?.corner }));
+  near("expanded", "§5 · the date row is 60px", xp?.drow?.h, 60, 0.6);
+  near("expanded", "§6 · the controls are CENTRED in it, not offset into it", (xp?.ctl?.vmid ?? 0) - (xp?.drow?.vmid ?? 0), 0, 0.6);
+  /**
+   * ⚠️ AND "OVER THE NAMES" IS A SHARED BOX, NOT A MEASURED GAP. The corner and the names cells
+   * both read `--qcv-tl-names`, so this is the two of them being the SAME column — which no offset
+   * from the lane's left could state, and which is the thing §6's words actually claim.
+   */
+  near("expanded", "§6 · the corner IS the names column — same left", (xp?.corner?.x ?? 0) - (xp?.namesW?.x ?? -1), 0, 0.6);
+  near("expanded", "§6 · …and the same width", (xp?.corner?.w ?? 0) - (xp?.namesW?.w ?? -1), 0, 0.6);
+  near("expanded", "§6 · the cluster sits 10px inside the corner's left, as the ref's does", (xp?.ctl?.left ?? 0) - (xp?.corner?.x ?? 0), 10, 1);
+  /* §5 — READ OFF THE DATE ROW ITSELF. The white used to be the lane's; the lane has no height and
+     no fill now, so the same claim is asserted where the paint actually is. */
+  is("expanded", "§1.5 · …and the date row is on white, not the tray's colour carried down", xp?.drow?.bg, "rgb(255, 255, 255)");
   /* the ✕ is still the topmost thing at its own centre — now at the tray's top right */
   is("expanded", "§6 · the ✕ is topmost at its own centre", xp?.onTop, "close");
   /* §4.2 — 16 now, not 18: layout A puts the ✕ and Find on one line at the tray's top right */
@@ -1295,14 +1319,14 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
     const r = t.getBoundingClientRect();
     const px = (n: number) => Math.round(n * 10) / 10;
     const box = (sel: string) => { const e = c.querySelector(sel); return e ? e.getBoundingClientRect() : null; };
-    const tray = box("[data-qcv='xp-tray']"); const lane = box("[data-qcv='tl-lane']");
+    const tray = box("[data-qcv='xp-tray']");
     const tier = box("[data-qcv='tl-tier']");
     return {
       lines: t.getClientRects().length, right: px(r.right), cardRight: px(b.right),
       stats: c.querySelectorAll("[data-qcv='xp-stat']").length,
       statH: px(box("[data-qcv='xp-stat']")?.height ?? 0),
       trayHeight: tray ? px(tray.height) : null,
-      dateRow: tier && lane ? px(tier.bottom - lane.top) : null,
+      dateRow: (() => { const d = box("[data-qcv='tl-daterow']"); return d ? px(d.height) : null; })(),
       header: tier ? px(tier.bottom - b.top) : null,
       ttlMid: px(r.top + r.height / 2),
       trayMid: tray ? px(tray.top + tray.height / 2) : null,
@@ -1905,6 +1929,9 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
       nav: box("[data-qcv='tl-controls']"),
       ctl: box("[data-qcv='xp-ctl']"),
       lane: box("[data-qcv='tl-lane']"),
+      drow: box("[data-qcv='tl-daterow']"),
+      corner: box("[data-qcv='tl-corner']"),
+      namesCell: box("[data-qcv='tl-names']"),
       filter: box("[data-qcv='xp-filter']"),
       sort: box("[data-qcv='xp-sort']"),
       reset: box("[data-qcv='xp-reset']"),
@@ -1989,15 +2016,17 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
    * still measured as one.
    */
   /**
-   * §4.1 — THE LANE BEGINS AT THE BODY PANEL'S TOP NOW, not at the tray's foot: the panel is 14px
-   * of desk and a 1px hairline below it. The claim is still a RELATIONSHIP between two boxes —
-   * the cluster sits 8px into the lane — and it is the lane that moved, not the cluster.
+   * §5 — THE CLUSTER IS IN THE DATE ROW'S CORNER, CENTRED. It rode a 52px lane at 8px down and 44
+   * in; §5 replaced that lane with a 60px date row whose first cell is the names column's own
+   * width, so both offsets described a box that has gone. The law they stood for — *over the names,
+   * on white, sharing the dates' line* — is stated here as two equalities instead, which is the
+   * stronger form: it survives §6 resizing the buttons, and an offset would not.
    */
-  near("controls", "the cluster sits 8px into the date row's lane", (rest?.ctl?.y ?? 0) - (rest?.lane?.y ?? 0), 8, 1);
-  near("controls", "§4.1 · …and the lane begins 15px below the tray (14 of desk and a 1px rim)", (rest?.lane?.y ?? 0) - (rest?.tray?.bottom ?? 0), 15, 1.5);
-  yes("controls", `…and starts at the lane's own inner left, not centred on anything (${rest?.ctl?.x})`,
-    rest != null && rest.ctl != null && rest.lane != null && Math.abs(rest.ctl.x - (rest.lane.x + 44)) < 1.5,
-    JSON.stringify({ ctl: rest?.ctl?.x, lane: rest?.lane?.x }));
+  near("controls", "§5 · the cluster is centred in the date row", (rest?.ctl?.mid == null || rest?.drow == null) ? NaN : ((rest.ctl.y + (rest.ctl.h ?? 0) / 2) - (rest.drow.y + (rest.drow.h ?? 0) / 2)), 0, 0.6);
+  near("controls", "§4.1 · …and the body panel begins 15px below the tray (14 of desk and a 1px rim)", (rest?.lane?.y ?? 0) - (rest?.tray?.bottom ?? 0), 15, 1.5);
+  yes("controls", `§6 · …over the names, because the corner IS that column (${JSON.stringify({ corner: rest?.corner, names: rest?.namesCell })})`,
+    rest?.corner != null && rest?.namesCell != null && Math.abs(rest.corner.x - rest.namesCell.x) < 0.6 && Math.abs(rest.corner.w - rest.namesCell.w) < 0.6,
+    JSON.stringify({ corner: rest?.corner?.x, names: rest?.namesCell?.x }));
   /**
    * ⚠️ §4.2 — THE NAV IS IN THE TRAY NOW, so "on the same line as the nav" is retired rather than
    * loosened: the two clusters are in different boxes by design and an equality between their tops

@@ -15,19 +15,25 @@
 
 .qcv-tl { position: relative; display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
 
-/* §8.4 — the lane: 52px of the tray's colour, with the controls over it */
 /**
  * §1.5 / §6 — THE DATE ROW IS ON WHITE. v65 ran the tray's colour down through the lane and the
  * tier so the two read as one coloured band; §6 retires that — the tray is a shape with four
  * corners and the date row beneath it is the card's own white, closed by a hairline.
  *
- * ⚠️ `--qcv-tl-lanetop` IS THE ONE OFFSET BOTH OF THE LANE'S CLUSTERS READ. §6's words are "sharing
- * one row", and two numbers a couple of pixels apart is exactly how that stops being true.
+ * ⚠️ `--qcv-tl-lanetop` HAS ONE READER LEFT AND IT IS A FALLBACK. The time controls are portalled
+ * into the tray and sit statically there; they draw in the lane only for the frame before the host
+ * ref lands. Filter, Group, Sort and ↺ left the lane entirely in §6 — they are in the date row's
+ * corner now — so the token is no longer "the offset both clusters read".
  */
-.qcv-tl-lane {
-  position: relative; flex: none; height: 52px; box-sizing: border-box;
-  background: #fff; border-bottom: 1px solid rgba(28, 19, 15, 0.1);
-}
+/**
+ * §5 — THE LANE HAS NO HEIGHT OF ITS OWN. It holds what must not scroll with the dates — the edge
+ * markers and the crosshair's tag — and lies OVER the date row rather than above it.
+ *
+ * ⚠️ `height: 0` WITH `overflow: visible`, NOT `display: contents`. Its children are positioned
+ * against it, so it has to remain a containing block; `display: contents` would hand them to the
+ * timeline's own box and every offset in this file would start from somewhere else.
+ */
+.qcv-tl-lane { position: relative; flex: none; height: 0; z-index: 6; }
 .qcv-tl-controls { position: absolute; top: var(--qcv-tl-lanetop); left: calc(var(--qcv-tl-names) + 18px); display: flex; align-items: center; gap: 10px; z-index: 4; }
 .qcv-tl-nav, .qcv-tl-zoom { display: flex; align-items: center; height: 40px; box-sizing: border-box; background: #fff; border: 1px solid rgba(28, 19, 15, 0.12); border-radius: 20px; }
 .qcv-tl-nav button {
@@ -47,17 +53,19 @@
 
 /* §8.8 — the markers, in the lane and clear of the controls */
 .qcv-tl-marker {
-  position: absolute; top: 12px; z-index: 3; height: 28px; padding: 0 12px; border-radius: 14px;
+  position: absolute; top: 18px; z-index: 3; height: 28px; padding: 0 12px; border-radius: 14px;
   background: #fff; border: 1px solid rgba(28, 19, 15, 0.14); cursor: pointer;
   font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-70);
 }
-.qcv-tl-marker--l { left: calc(var(--qcv-tl-names) + 340px); }
-.qcv-tl-marker--r { right: 18px; }
+/* §5 — just right of the names column, and 14px in from the panel's right */
+.qcv-tl-marker--l { left: calc(var(--qcv-tl-names) + 12px); }
+.qcv-tl-marker--r { right: 14px; }
 .qcv-tl-marker:hover { background: var(--qcv-parchment); }
 
 /* §8.9 — the crosshair's tag, riding the lane */
+/* §5 — the tag rides in the band-label line */
 .qcv-tl-tag {
-  position: absolute; top: 4px; z-index: 5; transform: translateX(-50%); pointer-events: none;
+  position: absolute; top: 5px; z-index: 5; transform: translateX(-50%); pointer-events: none;
   padding: 3px 8px 4px; border-radius: 9px; background: var(--qcv-ink); color: #f5f1eb;
   font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap;
 }
@@ -68,31 +76,70 @@
 .qcv-tl-inner { position: relative; }
 
 /**
- * §8.4 — the date tier. The tray's colour carries on down through it, so the header and the dates
- * read as ONE block with the rows starting on white beneath a single hairline.
- */
-/**
- * §9 — THE TIER IS THE DRAG HANDLE, so it says so in the cursor and in `touch-action`.
+ * §5 — THE TIER IS THE DATE ROW'S SECOND CELL, and it is TRANSPARENT: the row beneath it is white,
+ * and what colours the tier is the month bands inside it. A fill here would paint over them.
+ *
+ * §9 — AND THE TIER IS THE DRAG HANDLE, so it says so in the cursor and in `touch-action`.
  *
  * ⚠️ `pan-y` RATHER THAN `none`: a horizontal drag pans the dates and a vertical one still scrolls
  * the page, which is what a reader on a phone expects of a wide thing inside a tall one.
  */
-.qcv-tl-tier { position: relative; height: 52px; background: #fff; border-bottom: 1px solid rgba(28, 19, 15, 0.1); cursor: grab; touch-action: pan-y; }
+.qcv-tl-tier { position: relative; flex: none; height: 60px; background: transparent; cursor: grab; touch-action: pan-y; }
 /* §9 — grabbing applies to the WHOLE body while a drag is live, not just the tier the press began on */
 .qcv-tl-scroll--drag, .qcv-tl-scroll--drag * { cursor: grabbing !important; }
-.qcv-tl-mon {
-  position: absolute; top: 6px; transform: translateX(-50%);
-  font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap;
+/**
+ * §5 — THE DATE ROW IS STICKY AT THE BODY'S TOP, and the corner cell is sticky-left inside it. Two
+ * stickies, one row: the dates hold their place as the rows scroll under them, and the corner holds
+ * its place over the names as the dates run under IT.
+ */
+/* ⚠️ IT DECLARES ITS OWN `box-sizing`: the hairline is part of the 60, as it is in the ref, and a
+   rule whose height is stated beside a border must not inherit which of the two wins. */
+.qcv-tl-daterow {
+  position: sticky; top: 0; z-index: 12; display: flex; box-sizing: border-box; height: 60px;
+  background: #fff; border-bottom: 1px solid rgba(28, 19, 15, 0.1);
 }
-.qcv-tl-wk { position: absolute; bottom: 0; width: 1px; height: 4px; background: rgba(28, 19, 15, 0.16); }
-/* §8.5 — the heat sits UNDER the labels and over nothing */
-.qcv-tl-heat { position: absolute; left: 0; right: 0; bottom: 5px; height: 24px; }
-/* §9 — navy, 3px TOP corners (they rise from the tier's floor), 1px gaps between the weeks */
-.qcv-tl-heat i { position: absolute; bottom: 0; background: var(--sp-anthracite); border-radius: 3px 3px 0 0; }
+/* §5 · §6 — the corner: 330 × 60, white and OPAQUE, holding Filter, Group, Sort and ↺ */
+.qcv-tl-corner {
+  position: sticky; left: 0; z-index: 15; flex: none;
+  width: var(--qcv-tl-names); height: 60px; box-sizing: border-box; background: #fff;
+  /* the ref's own: a flex row, centred, 10px in from each end */
+  display: flex; align-items: center; padding: 0 10px;
+}
+/**
+ * §5 — ONE BAND PER MONTH, alternating, with a 1px rule at its left edge and its name STUCK at the
+ * names column's right + 8 — so the month a reader is looking at is the one named, at every drag
+ * position, without anything having to dodge the TODAY pill.
+ */
+.qcv-tl-mb { position: absolute; top: 0; bottom: 0; background: #faf7f3; border-left: 1px solid rgba(28, 19, 15, 0.1); }
+.qcv-tl-mb--alt { background: #f2ede5; }
+.qcv-tl-mb b {
+  position: sticky; left: calc(var(--qcv-tl-names) + 8px); display: inline-block;
+  margin: 7px 0 0 8px; white-space: nowrap;
+  font-family: var(--qcv-type); font-weight: 400; font-size: 13px; line-height: 1; color: var(--qcv-ink);
+}
+.qcv-tl-mb b u {
+  margin-left: 3px; text-decoration: none;
+  font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.1em; color: var(--qcv-ink-45);
+}
+/* §5 — every Monday's date, centred on its x, 30px down, with a 1 × 4px tick above it */
+.qcv-tl-wk {
+  position: absolute; top: 30px; padding-top: 6px; transform: translateX(-50%);
+  font-family: var(--qcv-mono); font-size: 9px; line-height: 1; color: var(--qcv-ink-70); white-space: nowrap;
+}
+/* the tick is the label's own top 4px — one element, so the two cannot drift apart */
+.qcv-tl-wk::before { content: ""; position: absolute; left: 50%; top: 0; width: 1px; height: 4px; background: rgba(28, 19, 15, 0.3); }
+/**
+ * §5 — THE HEAT IS A 6px STRIP ALONG THE ROW'S FOOT. The tall bars are retired: they took 24px of a
+ * 52px row to say a thing the strip says in six, and the row has a month band and a date line to
+ * carry now. Navy, 2px top corners, one cell per week, and an empty week draws NOTHING.
+ */
+.qcv-tl-heat { position: absolute; left: 0; right: 0; bottom: 0; height: 6px; }
+.qcv-tl-heat i { position: absolute; bottom: 0; top: 0; background: var(--sp-anthracite); border-radius: 2px 2px 0 0; }
+/* §5 — TODAY: the ink pill on the dates' line */
 .qcv-tl-todaypill {
-  position: absolute; top: 5px; transform: translateX(-50%); z-index: 2;
-  padding: 3px 9px 4px; border-radius: 9px; background: var(--qcv-ink); color: #f5f1eb;
-  font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
+  position: absolute; top: 32px; transform: translateX(-50%); z-index: 3;
+  padding: 2px 7px; border-radius: 9px; background: var(--qcv-ink); color: #f5f1eb;
+  font-family: var(--qcv-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
 }
 
 /* §8.6 — the rows */

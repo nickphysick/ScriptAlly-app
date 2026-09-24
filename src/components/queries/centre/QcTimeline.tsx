@@ -24,7 +24,7 @@ import { groupRows, type CalView } from "../../../lib/qcCalView";
 import type { QcRow } from "../../../lib/qcSummary";
 import {
   NUDGE_WEEKS, PXD_DEFAULT, ZOOM_PRESETS, activePreset, clampPxd, crosshairAt, edgeCounts, extentOf,
-  heatWeeks, monthTicks, msAt, pxdForPreset, scrollForToday, tlRow, trackWidth, weekTicks, xAt, zoomAbout,
+  heatWeeks, monthBands, msAt, pxdForPreset, scrollForToday, tlRow, trackWidth, weekTicks, xAt, zoomAbout,
   type Crosshair, type TlRow,
 } from "../../../lib/qcTimeline";
 import "./qcvTimeline.css";
@@ -118,7 +118,7 @@ export const QcTimeline: React.FC<{
   const width = trackWidth(ext, pxd);
   const todayX = xAt(ext, pxd, new Date(nowMs).setHours(0, 0, 0, 0));
   const heat = useMemo(() => heatWeeks(rows, ext, nowMs), [rows, ext, nowMs]);
-  const months = useMemo(() => monthTicks(ext, pxd, nowMs), [ext, pxd, nowMs]);
+  const months = useMemo(() => monthBands(ext, pxd), [ext, pxd]);
   const weeks = useMemo(() => weekTicks(ext, pxd), [ext, pxd]);
   const edges = useMemo(() => edgeCounts([...tl.values()], ext, pxd, scrollLeft, boxW), [tl, ext, pxd, scrollLeft, boxW]);
 
@@ -430,20 +430,17 @@ export const QcTimeline: React.FC<{
 
   return (
     <div className="qcv-tl" ref={boxRef} data-qcv="tl" style={{ ["--qcv-tl-names" as string]: `${NAMES_W}px` }}>
-      {/* §8.4 — the lane. Its controls are OVERLAYS over the scroller, never inside it. */}
+      {/**
+        * §5 — THE LANE IS AN OVERLAY WITH NO HEIGHT OF ITS OWN NOW. It was a 52px row above the
+        * dates; §5 gives the DATE ROW its own 60px with a corner cell inside it, so a second row
+        * would be 52px of white nobody asked for. What still lives here is what must NOT scroll
+        * with the dates: the edge markers and the crosshair's tag.
+        *
+        * ⚠️ AND IT IS STILL A SIBLING OF THE SCROLLER, WHICH IS THE WHOLE POINT. The rows rebuild on
+        * every zoom, filter and group change; the lane does not, so what sits in it is the same
+        * element before and after — §11 lock 6, and the reason none of it is in the scrolling body.
+        */}
       <div className="qcv-tl-lane" data-qcv="tl-lane" ref={laneRef}>
-        {/**
-          * §6 — FILTER, SORT AND ↺ SIT IN THIS LANE, AS OVERLAYS, at the card's own inner left.
-          * They are the expanded card's controls and the lane is the timeline's, so they arrive as
-          * a slot rather than as a second absolutely-positioned cluster measured against the lane
-          * from outside it: an overlay whose top is computed by one component and whose parent is
-          * another is a number two files have to agree about.
-          *
-          * ⚠️ AND THE LANE IS WHY THEY SURVIVE A RE-RENDER. The rows rebuild on every zoom, filter
-          * and group change; the lane does not, so the controls in it are the same elements before
-          * and after — which is §11 lock 6, and the reason they are not in the scrolling body.
-          */}
-        {leftControls}
         {timeHost ? createPortal(timeControls, timeHost) : timeControls}
         {/* §8.8 — the edge markers, clear of the controls, and absent when there is nothing off-screen */}
         {edges.earlier > 0 && edges.nearestEarlier != null && (
@@ -495,18 +492,48 @@ export const QcTimeline: React.FC<{
       >
         <div className="qcv-tl-inner" style={{ width: NAMES_W + width }}>
           {/* §8.4 — the date tier: the heat, the months, the week ticks and the TODAY pill */}
-          <div className="qcv-tl-tier" data-qcv="tl-tier" ref={tierRef} style={{ marginLeft: NAMES_W, width }}>
-            <div className="qcv-tl-heat" data-qcv="tl-heat" aria-hidden="true">
+          {/**
+            * §5–§6 — THE CORNER CELL, over the names, 330 × 60, WHITE AND OPAQUE. It is sticky-left
+            * inside the scroller, so it holds its place over the names column while the dates run
+            * under it — and it is what §6's Filter, Group, Sort and ↺ sit in.
+            *
+            * ⚠️ IT IS INSIDE THE SCROLLER AND THE DATES ARE TOO, which is the only arrangement in
+            * which the two cannot disagree: a corner drawn outside would be a second element that
+            * has to be told how wide the names column is.
+            */}
+          <div className="qcv-tl-daterow" data-qcv="tl-daterow">
+          <div className="qcv-tl-corner" data-qcv="tl-corner">{leftControls}</div>
+          <div className="qcv-tl-tier" data-qcv="tl-tier" ref={tierRef} style={{ width }}>
+            {/**
+              * §5 — MONTH BANDS. One band per month across the row's full height, alternating, each
+              * naming itself at its own left edge — and the LABEL is sticky at the names column's
+              * right + 8, so the month you are looking at is always the one named.
+              *
+              * ⚠️ THIS IS WHAT RETIRED THE MONTH LABELS' CLEARANCE. They were points that had to
+              * dodge the TODAY pill, and a clearance written as a share of the TRACK put 376px of
+              * hole either side of today on a three-year pipeline — thirty-five labels rendered and
+              * not one of them visible. A band has somewhere else to put its name.
+              */}
+            {months.map((m) => (
+              <span key={m.ms} className={`qcv-tl-mb${m.alt ? " qcv-tl-mb--alt" : ""}`} data-qcv="tl-month" style={{ left: m.x, width: m.width }}>
+                <b data-qcv="tl-monthlabel">{m.month}<u>{m.year}</u></b>
+              </span>
+            ))}
+            {/* §5 — every Monday's date, centred on its own x with a tick above it */}
+            {weeks.map((w) => (
+              <span key={w.ms} className="qcv-tl-wk" data-qcv="tl-monday" style={{ left: w.x }}>{w.label}</span>
+            ))}
+            {/* §5 — the heat strip: 6px along the row's foot, one cell per week */}
+            <span className="qcv-tl-heat" data-qcv="tl-heat" title="Darker weeks are busier" aria-hidden="true">
               {heat.map((h) => (
-                <i key={h.ms} style={{ left: xAt(ext, pxd, h.ms), width: Math.max(1, 7 * pxd - 1), height: `${h.heightPc}%`, opacity: h.opacity }} />
+                <i key={h.ms} style={{ left: xAt(ext, pxd, h.ms), width: Math.max(1, 7 * pxd - 1), opacity: h.opacity }} />
               ))}
-            </div>
-            {months.map((m) => <span key={m.ms} className="qcv-tl-mon" data-qcv="tl-month" style={{ left: m.x }}>{m.label}</span>)}
-            {weeks.map((w) => <i key={w.ms} className="qcv-tl-wk" style={{ left: w.x }} aria-hidden="true" />)}
+            </span>
             <span className="qcv-tl-todaypill" data-qcv="tl-todaypill" style={{ left: todayX }}>Today</span>
             {/* §10 — the crosshair runs through the DATE TIER as well as the rows: a line that
                 stopped at the tier's foot would leave the tag it belongs to floating over nothing. */}
             {cross && <i className="qcv-tl-cross qcv-tl-cross--tier" data-qcv="tl-cross-tier" style={{ left: cross.x }} aria-hidden="true" />}
+          </div>
           </div>
 
           {/* §8.6 — the rows, with the names cell sticky-left */}

@@ -8,8 +8,8 @@ import { describe, it, expect } from "vitest";
 import { Activity, Agent, Query, QueryStatus } from "../types";
 import { buildQcRows, type QcRow } from "./qcSummary";
 import {
-  HEAT_CURRENT, HEAT_EXPECTED, HEAT_PAST, MONTH_CLEAR_PX, NUDGE_WEEKS, PXD_DEFAULT, PXD_MAX, PXD_MIN, TODAY_AT, ZOOM_PRESETS,
-  activePreset, clampPxd, crosshairAt, currentWords, edgeCounts, extentOf, ghostFor, heatWeeks, monthTicks,
+  HEAT_CURRENT, HEAT_EXPECTED, MONTH_FULL, NUDGE_WEEKS, PXD_DEFAULT, PXD_MAX, PXD_MIN, TODAY_AT, ZOOM_PRESETS,
+  activePreset, clampPxd, crosshairAt, currentWords, edgeCounts, extentOf, ghostFor, heatWeeks, monthBands,
   msAt, pxdForPreset, scrollForToday, tlRow, trackWidth, weekTicks, xAt, zoomAbout,
 } from "./qcTimeline";
 
@@ -102,33 +102,44 @@ describe("§8.4 · the tier's labels", () => {
    * collides with the TODAY pill — and it is a PIXEL distance now, asserted in the v65.1 block at
    * the foot of this file along with the property that makes it a fix rather than a smaller number.
    */
-  it("⚠️ no month label collides with the TODAY pill — a fixed clearance, not a share of the track", () => {
-    const pxd = PXD_DEFAULT;
-    const todayX = xAt(EXT, pxd, new Date(NOW).setHours(0, 0, 0, 0));
-    for (const t of monthTicks(EXT, pxd, NOW)) {
-      expect(Math.abs(t.x - todayX), t.label).toBeGreaterThan(MONTH_CLEAR_PX);
+  /**
+   * §5 — ⚠️ THE CLEARANCE IS GONE BECAUSE THE LABEL HAS SOMEWHERE ELSE TO BE. A month was a POINT
+   * that had to dodge the TODAY pill; a BAND names itself at its own left edge, stuck to the names
+   * column, so nothing collides and nothing has to be hidden to avoid colliding. The fault that
+   * clearance caused is recorded in CLAUDE.md and is what a band forecloses rather than fixes:
+   * thirty-five labels rendered and not one of them visible.
+   */
+  it("§5 · one band per month, contiguous, alternating, each naming itself", () => {
+    const bands = monthBands(EXT, PXD_DEFAULT);
+    expect(bands.length).toBeGreaterThan(3);
+    for (const b of bands) {
+      expect(b.month, `${b.month}`).toBe(MONTH_FULL[new Date(b.ms).getMonth()]);
+      expect(b.year).toMatch(/^\d{4}$/);
+      expect(b.width, "a band with no width is a month nobody can see").toBeGreaterThan(0);
+      expect(new Date(b.ms).getDate(), "a band starts on the first of its month").toBe(1);
     }
-    expect(trackWidth(EXT, pxd), "…and the track is long enough that a share of it would differ").toBeGreaterThan(2000);
+    /* ⚠️ CONTIGUOUS AND ALTERNATING — a gap between two bands is a strip of nothing where a month
+       should be, and two neighbours the same tone are one band as far as a reader can tell. */
+    for (let i = 1; i < bands.length; i += 1) {
+      expect(Math.abs(bands[i].x - (bands[i - 1].x + bands[i - 1].width)), `gap before ${bands[i].month}`).toBeLessThan(0.001);
+      expect(bands[i].alt, `${bands[i].month} repeats its neighbour's tone`).toBe(!bands[i - 1].alt);
+    }
   });
-  it("the year rides January's label rather than taking a row of its own", () => {
-    const jans = monthTicks(EXT, PXD_DEFAULT, NOW).filter((t) => t.label.startsWith("Jan"));
-    expect(jans.length).toBeGreaterThan(0);
-    for (const j of jans) expect(j.label).toMatch(/^Jan \d{4}$/);
-    const others = monthTicks(EXT, PXD_DEFAULT, NOW).filter((t) => !t.label.startsWith("Jan"));
-    for (const o of others) expect(o.label, o.label).toMatch(/^[A-Z][a-z]{2}$/);
-  });
-  it("the week ticks are Mondays", () => {
-    for (const t of weekTicks(EXT, PXD_DEFAULT).slice(0, 12)) expect(new Date(t.ms).getDay()).toBe(1);
+  it("§5 · every Monday, carrying its own date", () => {
+    for (const t of weekTicks(EXT, PXD_DEFAULT).slice(0, 12)) {
+      expect(new Date(t.ms).getDay()).toBe(1);
+      /* the date itself, not a blank mark: the label IS the day of the month */
+      expect(t.label).toBe(String(new Date(t.ms).getDate()));
+    }
   });
 });
 
 describe("§8.5 · the heat", () => {
-  it("the three weights, stated", () => {
-    expect([HEAT_PAST, HEAT_CURRENT, HEAT_EXPECTED]).toEqual([0.12, 0.28, 1]);
+  it("§5 · the two weights, stated", () => {
+    expect([HEAT_CURRENT, HEAT_EXPECTED]).toEqual([0.28, 1]);
   });
   it("⚠️ an expected date outweighs a week of waiting — it is the thing a reader is looking for", () => {
     expect(HEAT_EXPECTED).toBeGreaterThan(HEAT_CURRENT * 3);
-    expect(HEAT_CURRENT).toBeGreaterThan(HEAT_PAST);
   });
   it("⚠️ the scale is √(w/max), so the quiet weeks stay legible beside the loud one", () => {
     /* ⚠️ THE FIXTURE MUST HAVE A LOUD WEEK AND A QUIET ONE, or the claim below is about nothing:
@@ -144,10 +155,11 @@ describe("§8.5 · the heat", () => {
     const max = Math.max(...weeks.map((w) => w.weight));
     const quiet = weeks.find((w) => w.weight < max / 4);
     expect(quiet, "the fixture has no quiet week — the claim below would be vacuous").toBeTruthy();
-    /* linear would put this one at under a quarter; the root lifts it above half */
-    expect(quiet!.heightPc / 100).toBeGreaterThan(Math.sqrt(quiet!.weight / max) - 0.001);
-    expect(quiet!.heightPc).toBeGreaterThanOrEqual(12);
-    for (const w of weeks) expect(w.opacity).toBeLessThanOrEqual(0.62);
+    /* §5 — the strip is 6px of opacity now, not a bar with a height: `.1 + .6 × √(w/max)` */
+    expect(quiet!.opacity).toBeCloseTo(Math.min(0.7, 0.1 + 0.6 * Math.sqrt(quiet!.weight / max)), 6);
+    /* linear would leave the quiet week at a tenth of the loud one; the root lifts it well above */
+    expect(quiet!.opacity).toBeGreaterThan(0.1 + 0.6 * (quiet!.weight / max));
+    for (const w of weeks) expect(w.opacity).toBeLessThanOrEqual(0.7);
   });
   it("nothing to weigh draws nothing — never a band of zeros", () => {
     expect(heatWeeks([], EXT, NOW)).toEqual([]);
@@ -295,39 +307,15 @@ describe("§8.7 · every live row draws a bar, at least a day wide (v65.1)", () 
   });
 });
 
-describe("§8.4 · the month labels clear the TODAY pill by a fixed distance (v65.1)", () => {
-  const N3 = Date.UTC(2026, 8, 25, 12);
-  const extOf = (months: number) => ({ fromMs: Date.UTC(2026 - Math.floor(months / 12), 8 - (months % 12), 1), toMs: N3 + 26 * 7 * 86_400_000, days: months * 30 });
-  it("MONTH_CLEAR_PX is a PIXEL distance, and the hole it makes does not grow with the track", () => {
-    /**
-     * ⚠️ THE PROPERTY, NOT THE VALUE. It was 3.2% of the whole track, so a long pipeline opened a
-     * hole hundreds of pixels wide around today — measured on the page: 35 labels rendered, none
-     * visible. What must hold is that the gap between the last label before today and the first
-     * after it is the SAME on a short history and a long one.
-     */
-    const gapAround = (months: number) => {
-      const ext = extOf(months);
-      const ticks = monthTicks(ext, PXD_DEFAULT, N3);
-      const todayX = xAt(ext, PXD_DEFAULT, N3);
-      const before = ticks.filter((t) => t.x < todayX).map((t) => t.x);
-      const after = ticks.filter((t) => t.x > todayX).map((t) => t.x);
-      expect(before.length, `${months} months: labels before today`).toBeGreaterThan(0);
-      expect(after.length, `${months} months: labels after today`).toBeGreaterThan(0);
-      return Math.min(...after) - Math.max(...before);
-    };
-    const short = gapAround(6);
-    const long = gapAround(36);
-    expect(Math.abs(long - short), `a 6-month history leaves ${short}px around today and a 36-month one ${long}px`).toBeLessThan(2);
-  });
-  it("…and no label is drawn within MONTH_CLEAR_PX of today", () => {
-    const ext = extOf(36);
-    const todayX = xAt(ext, PXD_DEFAULT, N3);
-    for (const t of monthTicks(ext, PXD_DEFAULT, N3)) {
-      expect(Math.abs(t.x - todayX), t.label).toBeGreaterThan(MONTH_CLEAR_PX);
-    }
-    expect(MONTH_CLEAR_PX).toBeLessThan(60);
-  });
-});
+/**
+ * ⚠️ §8.4's CLEARANCE BLOCK IS RETIRED, AND THE FAULT IT GUARDED IS FORECLOSED RATHER THAN FIXED.
+ * A month label was a POINT that had to dodge the TODAY pill, so it carried a clearance — first as
+ * 3.2% of the track (376px either side of today on a three-year pipeline, thirty-five labels
+ * rendered and none visible), then as a fixed 34px. §5 makes a month a BAND that names itself at
+ * its own left edge, stuck to the names column: there is nothing to dodge, so there is no clearance
+ * to get wrong. The lesson is CLAUDE.md's and stays there; these two cases are about a mechanism
+ * that no longer exists, and the band's own properties are asserted in §8.4's block above.
+ */
 
 /* ── v65.2 §9 · the heat ───────────────────────────────────────────────────────────────────────── */
 
@@ -338,21 +326,19 @@ describe("§9 · the heat", () => {
    * quiet weeks legible beside the loud one, and the 12% floor is so a week with anything in it is
    * still a mark rather than nothing.
    */
-  it("the weights, the curve and the floor are §9's own", () => {
-    expect([HEAT_PAST, HEAT_CURRENT, HEAT_EXPECTED]).toEqual([0.12, 0.28, 1]);
+  it("§5 · the two weights and the curve are §5's own", () => {
+    /* ⚠️ THE STRIP IS 6px OF OPACITY NOW, NOT A BAR WITH A HEIGHT (§5), and a PAST stage no longer
+       earns a weight: §5 names two contributions — the current stage and the expected date. */
+    expect([HEAT_CURRENT, HEAT_EXPECTED]).toEqual([0.28, 1]);
     const rows = buildQcRows([mkQ(), mkQ({ dateSent: ago(300) })], [agent()], [], NOW);
     const ext = extentOf(rows, NOW);
     const heat = heatWeeks(rows, ext, NOW);
     expect(heat.length, "the fixture drew no heat at all").toBeGreaterThan(3);
     const max = Math.max(...heat.map((h) => h.weight));
     for (const h of heat) {
-      const f = Math.sqrt(h.weight / max);
-      expect(h.heightPc, `height at w=${h.weight}`).toBeCloseTo(Math.max(12, 100 * f), 6);
-      expect(h.opacity, `opacity at w=${h.weight}`).toBeCloseTo(Math.min(0.62, 0.1 + 0.52 * f), 6);
+      expect(h.opacity, `opacity at w=${h.weight}`).toBeCloseTo(Math.min(0.7, 0.1 + 0.6 * Math.sqrt(h.weight / max)), 6);
+      expect(h, "a height belongs to the retired tall bars").not.toHaveProperty("heightPc");
     }
-    /* …and the floor really binds on the quietest week, or the claim above is about nothing */
-    const quietest = heat.reduce((a, b) => (a.weight <= b.weight ? a : b));
-    expect(quietest.heightPc).toBeGreaterThanOrEqual(12);
   });
   /* §9 — every week inside the extent and none outside it: a bar off the track is a week nobody sees */
   it("every bar is inside the extent", () => {
