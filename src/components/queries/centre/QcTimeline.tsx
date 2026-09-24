@@ -18,7 +18,7 @@
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
-import { ATTENTION_LABEL, eyeGroups, type Attention } from "../../../lib/qcBirdsEye";
+import { groupRows, type CalView } from "../../../lib/qcCalView";
 import type { QcRow } from "../../../lib/qcSummary";
 import {
   NUDGE_WEEKS, PXD_DEFAULT, ZOOM_PRESETS, activePreset, clampPxd, crosshairAt, edgeCounts, extentOf,
@@ -33,6 +33,10 @@ export const NAMES_W = 260;
 
 export const QcTimeline: React.FC<{
   rows: readonly QcRow[];
+  /** §8.3 — which rows, in which groups, in what order. */
+  view: CalView;
+  /** §8.3 — a package's name for the package grouping; absent means every row is "No package". */
+  packageName?: (id: string) => string | null;
   nowMs: number;
   /** The query a rail row arrived from: ringed, and scrolled to the middle. */
   focusId?: string | null;
@@ -40,7 +44,7 @@ export const QcTimeline: React.FC<{
   onOpen: (id: string) => void;
   /** §8.7 — the dotted chip opens the app's nudge flow for that query. */
   onNudge: (id: string) => void;
-}> = ({ rows, nowMs, focusId = null, onOpen, onNudge }) => {
+}> = ({ rows, view, packageName, nowMs, focusId = null, onOpen, onNudge }) => {
   const boxRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [boxW, setBoxW] = useState(0);
@@ -49,7 +53,13 @@ export const QcTimeline: React.FC<{
   const [scrollLeft, setScrollLeft] = useState(0);
 
   const ext = useMemo(() => extentOf(rows, nowMs), [rows, nowMs]);
-  const groups = useMemo(() => eyeGroups(rows, nowMs), [rows, nowMs]);
+  /**
+   * ⚠️ THE FILTER AND THE SORT ARE `groupRows`', NEVER THIS COMPONENT'S. It decided the groups
+   * itself until phase 6, and the controls that replaced that call are a second view of the same
+   * state — the popover's checkboxes and the stat cards read and write one value, so neither can
+   * be showing a set the rows disagree with.
+   */
+  const groups = useMemo(() => groupRows(rows, view, nowMs, packageName), [rows, view, nowMs, packageName]);
   const tl = useMemo(() => {
     const out = new Map<string, TlRow>();
     for (const g of groups) for (const r of g.rows) out.set(r.id, tlRow(r.row, nowMs));
@@ -248,7 +258,12 @@ export const QcTimeline: React.FC<{
               <p className="qcv-tl-none" data-qcv="tl-none">Nothing here with these settings.</p>
             ) : groups.map((g) => (
               <section key={g.key} data-qcv="tl-group" data-group={g.key}>
-                <div className="qcv-tl-band" data-qcv="tl-band"><span>{ATTENTION_LABEL[g.key as Attention]}<i>{g.count}</i></span></div>
+                {/* §8.3 — a heading shows whenever grouping is on, even where there is one group;
+                    only "Nothing" removes them. Its words are the GROUP's, so Status and package
+                    groups name themselves rather than falling back to an attention label. */}
+                {view.groupBy !== "none" && (
+                  <div className="qcv-tl-band" data-qcv="tl-band"><span>{g.label}<i>{g.count}</i></span></div>
+                )}
                 {g.rows.map((r) => {
                   const t = tl.get(r.id)!;
                   return (

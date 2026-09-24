@@ -21,8 +21,10 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { lockStageScroll } from "../../../lib/stageScroll";
-import { ATTENTION_HINT, eyeGroups, type Attention, type EyeGroup } from "../../../lib/qcBirdsEye";
-import { QcTimeline } from "./QcTimeline";
+import { ATTENTION_HINT, ATTENTION_LABEL, ATTENTION_ORDER, type Attention } from "../../../lib/qcBirdsEye";
+import { CAL_DEFAULT, attentionCounts, type CalView } from "../../../lib/qcCalView";
+import { QcCalControls, type CalMenu } from "./QcCalControls";
+import { NAMES_W, QcTimeline } from "./QcTimeline";
 import type { QcRow } from "../../../lib/qcSummary";
 import { COURIER_CUTOUT } from "./qcArt";
 import { expandedBox, readWindow, type RailBox } from "./QcRail";
@@ -30,8 +32,14 @@ import "./qcvExpanded.css";
 
 type Box = RailBox & { left: number; width: number };
 
-/** §8.1 — the names column's width, which the Courier's column matches exactly. */
-export const LCOL = 260;
+/**
+ * §8.1 — the names column's width, which the Courier's column matches exactly.
+ *
+ * ⚠️ IT IS THE TIMELINE'S OWN NUMBER, IMPORTED — never a second 260. §10 lock 4 states the column's
+ * width EQUALS the names column's right edge, so two constants that happen to agree would be the
+ * claim restated rather than kept, and the first retune of one of them is where they part.
+ */
+export const LCOL = NAMES_W;
 
 export const QcExpanded: React.FC<{
   rows: readonly QcRow[];
@@ -43,9 +51,16 @@ export const QcExpanded: React.FC<{
   onOpen: (id: string) => void;
   /** §8.7 — the dotted chip opens the app's nudge flow for that query. */
   onNudge: (id: string) => void;
-}> = ({ rows, nowMs, onClose, focusId = null, onOpen, onNudge }) => {
+  /** §8.3 — a package's name, for the package grouping. */
+  packageName?: (id: string) => string | null;
+}> = ({ rows, nowMs, onClose, focusId = null, onOpen, onNudge, packageName }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState<Box | null>(null);
+  /* §8.3 — one value for whose court, which groups, how grouped and how sorted. */
+  const [view, setView] = useState<CalView>(CAL_DEFAULT);
+  const [menu, setMenu] = useState<CalMenu>(null);
+  const menuRef = useRef<CalMenu>(null);
+  menuRef.current = menu;
   const [open, setOpen] = useState(false);
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
@@ -84,6 +99,11 @@ export const QcExpanded: React.FC<{
       if (e.key !== "Escape") return;
       e.preventDefault();
       e.stopImmediatePropagation();
+      /* ⚠️ THE CASCADE, AND IT IS ONE HANDLER ON PURPOSE (§8.3). An open popover consumes the key
+         and closes itself; only a closed one lets it reach the card. Giving the popover its own
+         `document` listener would make the cascade depend on which of the two registered last,
+         which is a property of mount order rather than of what is on screen. */
+      if (menuRef.current) { setMenu(null); return; }
       closeRef.current();
     };
     document.addEventListener("keydown", onKey, true);
@@ -131,8 +151,8 @@ export const QcExpanded: React.FC<{
    * often enough that it never shows.
    */
   const [clock] = useState(() => nowMs);
-  const groups: EyeGroup[] = eyeGroups(rows, clock);
-  const byKey = (k: Attention) => groups.find((g) => g.key === k);
+  /* §8.2 — the whole live pipeline's counts, whatever the filter says */
+  const counts = attentionCounts(rows, clock);
   const close = useCallback(() => closeRef.current(), []);
 
   return createPortal(
@@ -142,7 +162,10 @@ export const QcExpanded: React.FC<{
         ref={ref}
         className={`qcv-xp-card${open ? " qcv-xp-card--in" : ""}`}
         data-qcv="xp-card"
-        style={box ? { top: box.top, left: box.left, width: box.width, height: box.height } : undefined}
+        /* ⚠️ `--qcv-xp-lcol` IS PUBLISHED HERE. The tray read it with a 260px fallback and nothing
+           set it — a rule that looks parameterised and is not, which is how the next reader goes
+           looking for a knob that does not exist. The fallback WAS the value; now the value is. */
+        style={{ ...(box ? { top: box.top, left: box.left, width: box.width, height: box.height } : {}), ["--qcv-xp-lcol" as string]: `${LCOL}px` }}
       >
         {/* §8 — the header ground is ONE BLOCK: the tray's colour runs the full width and carries on
             down through the date row, so the two read as a single coloured band over white rows. */}
@@ -160,26 +183,39 @@ export const QcExpanded: React.FC<{
               alt=""
               aria-hidden="true"
             />
+            {/* §8.1 — Filter, Sort and ↺ over the Courier's feet, centred on the column */}
+            <QcCalControls view={view} onView={setView} menu={menu} onMenu={setMenu} counts={counts} />
           </div>
           <h2 className="qcv-xp-ttl" data-qcv="xp-title">Birds-eye view</h2>
-          {/* §8.2 — the three stat cards. They become the attention filter in phase 6; here they
-              state the counts, which is what they are FOR. A group with none is drawn and disabled. */}
-          <div className="qcv-xp-stats" data-qcv="xp-stats">
-            {(["overdue", "upcoming", "watch"] as const).map((k) => {
-              const g = byKey(k);
-              const count = g?.count ?? 0;
+          {/* §8.2 — the three stat cards ARE the attention filter: click to select, click again to
+              release, multi-select. A group with none is drawn and disabled, because its absence is
+              the fact the card is stating. */}
+          <div className={`qcv-xp-stats${view.attention.length ? " qcv-xp-stats--filtered" : ""}`} data-qcv="xp-stats">
+            {ATTENTION_ORDER.map((k: Attention) => {
+              const count = counts[k];
+              const on = view.attention.includes(k);
               return (
-                <div key={k} className={`qcv-xp-stat qcv-xp-stat--${k}${count === 0 ? " qcv-xp-stat--none" : ""}`} data-qcv="xp-stat" data-group={k} aria-disabled={count === 0 || undefined}>
+                <button
+                  key={k}
+                  type="button"
+                  className={`qcv-xp-stat qcv-xp-stat--${k}${count === 0 ? " qcv-xp-stat--none" : ""}${on ? " qcv-xp-stat--on" : ""}`}
+                  data-qcv="xp-stat"
+                  data-group={k}
+                  data-on={on ? "true" : "false"}
+                  aria-pressed={on}
+                  disabled={count === 0}
+                  onClick={() => setView((v) => ({ ...v, attention: v.attention.includes(k) ? v.attention.filter((a) => a !== k) : [...v.attention, k] }))}
+                >
                   <b className="qcv-xp-n">{count}</b>
-                  <span className="qcv-xp-nm">{g?.label ?? (k === "overdue" ? "Overdue" : k === "upcoming" ? "Upcoming" : "Watch and wait")}</span>
+                  <span className="qcv-xp-nm">{ATTENTION_LABEL[k]}</span>
                   <small className="qcv-xp-hint">{ATTENTION_HINT[k]}</small>
-                </div>
+                </button>
               );
             })}
           </div>
         </header>
         <div className="qcv-xp-body" data-qcv="xp-body" data-focus={focusId ?? undefined}>
-          <QcTimeline rows={rows} nowMs={clock} focusId={focusId} onOpen={onOpen} onNudge={onNudge} />
+          <QcTimeline rows={rows} view={view} packageName={packageName} nowMs={clock} focusId={focusId} onOpen={onOpen} onNudge={onNudge} />
         </div>
       </div>
     </div>,

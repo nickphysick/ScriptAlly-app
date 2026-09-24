@@ -124,7 +124,14 @@ describe("§8.2 · the title and the stat cards", () => {
     /* ⚠️ A GROUP WITH NOTHING IN IT IS DRAWN, NOT HIDDEN — a row of three that sometimes has two
        teaches a reader the set changes, when what changed is one number */
     expect(rule(".qcv-xp-stat--none")).toMatch(/opacity:\s*0\.45/);
-    expect(src).toContain('aria-disabled={count === 0 || undefined}');
+    /**
+     * ⚠️ RETARGETED IN PHASE 6, AND THE CLAIM IS THE SAME ONE: a group at zero is drawn and cannot
+     * be acted on. It was `aria-disabled` on a `div`, which was all a non-interactive card could
+     * say; the cards are buttons now that they are the filter, so the honest form is the real
+     * attribute — which also stops the click rather than only announcing that it should not happen.
+     */
+    expect(src).toContain("disabled={count === 0}");
+    expect(src, "the card is still DRAWN at zero — only inert").not.toMatch(/count === 0 \?\s*null/);
   });
   it("⚠️ the name and the hint MAY WRAP — at 1280 a card is 87px and 'Watch and wait' does not fit", () => {
     expect(rule(".qcv-xp-nm"), "a nowrap here makes the card a scrollbar").not.toContain("nowrap");
@@ -153,11 +160,24 @@ describe("the timeline", () => {
    * two and a half years in the past with `scrollLeft` at 0 — and all twenty-five cases passed,
    * because the line, the pill and twenty-four bar ends all agreed with each other out there.
    */
-  it("⚠️ the expanded card freezes its clock, and the body reads THAT rather than the prop", () => {
+  it("⚠️ the expanded card freezes its clock, and EVERY derivation reads that rather than the prop", () => {
     expect(src).toMatch(/const \[clock\] = useState\(\(\) => nowMs\);/);
-    expect(src).toContain("eyeGroups(rows, clock)");
-    expect(src).toMatch(/<QcTimeline rows=\{rows\} nowMs=\{clock\}/);
+    expect(src).toMatch(/<QcTimeline[^>]*nowMs=\{clock\}/);
     expect(src, "a live clock here re-derives everything on every parent render").not.toMatch(/<QcTimeline[^>]*nowMs=\{nowMs\}/);
+    /**
+     * ⚠️ STATED AS A SWEEP RATHER THAN AS ONE CALL SITE, because phase 6 moved the one it used to
+     * name. It required `eyeGroups(rows, clock)`; grouping is `groupRows`' job now and it runs
+     * inside the body, so a lock on that spelling would have gone red over a change that touched
+     * nothing about the clock. The LAW is that `nowMs` is read exactly once — to seed `clock` — and
+     * that is what a sweep can say and a call site cannot.
+     */
+    const body = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    /* the prop's own NAME is not a read of it: `nowMs:` declares the type and `nowMs={` passes
+       something to a child, which here is `clock`. Both are excluded by name rather than by a
+       looser pattern, so a real `nowMs === …` comparison would still be counted. */
+    const reads = [...body.matchAll(/\bnowMs\b(?![:=])/g)].length;
+    expect(reads, `nowMs is read ${reads} times; it may only be destructured and used to seed the clock`).toBeLessThanOrEqual(2);
+    expect(body).toContain("attentionCounts(rows, clock)");
   });
   it("⚠️ …and the initial scroll is CONFIRMED, not assumed — a clamped write reports nothing", () => {
     /* `scrollLeft` set before the track's thousands of pixels exist is clamped to zero and lost
@@ -241,5 +261,138 @@ describe("the timeline", () => {
     for (const f of ["src/components/queries/centre/QcCalendar.tsx", "src/components/queries/centre/qcvCalendar.css", "src/lib/qcCalendar.ts"]) {
       expect(existsSync(join(process.cwd(), f)), `${f} is still in the tree`).toBe(false);
     }
+  });
+});
+
+/* ── §8.1 / §8.3 · Filter, Sort and Reset ───────────────────────────────────────────────────── */
+
+describe("§8.1 · the controls at the column's foot", () => {
+  const ctl = read("src/components/queries/centre/QcCalControls.tsx");
+
+  it("both buttons are 40px, white, 1px edge, 20px corners, typewriter 14.5px — and no shadow", () => {
+    const b = rule(".qcv-xp-btn, .qcv-xp-reset");
+    expect(b).toMatch(/height:\s*40px/);
+    expect(b).toMatch(/border-radius:\s*20px/);
+    expect(b).toMatch(/border:\s*1px solid rgba\(28, 19, 15, 0\.12\)/);
+    expect(b).toMatch(/background:\s*#fff/);
+    expect(b).toMatch(/font-size:\s*14\.5px/);
+    expect(b).toMatch(/font-family:\s*var\(--qcv-type\)/);
+    expect(b, "§8.1 says no shadow").not.toContain("box-shadow");
+  });
+  it("⚠️ the cluster is CENTRED ON THE COLUMN, so the reset appearing re-centres all three", () => {
+    const c = rule(".qcv-xp-ctl");
+    /* it fills the column (left and right both 0) and centres its contents; a cluster pinned by one
+       edge would shunt the pair sideways the moment a third button arrived */
+    expect(c).toMatch(/left:\s*0/);
+    expect(c).toMatch(/right:\s*0/);
+    expect(c).toMatch(/justify-content:\s*center/);
+    expect(c).toMatch(/bottom:\s*10px/);
+  });
+  it("each button goes ink while open OR while its own settings differ — and ↺ for either", () => {
+    expect(ctl).toMatch(/filterOn \|\| menu === "filter"/);
+    expect(ctl).toMatch(/sortOn \|\| menu === "sort"/);
+    expect(ctl).toMatch(/\{anyDiffers\(view\) && \(/);
+    expect(rule(".qcv-xp-btn--on")).toMatch(/background:\s*var\(--qcv-ink\)/);
+    expect(rule(".qcv-xp-btn--on")).toMatch(/color:\s*#f5f1eb/);
+    /* the reset is rust on white, and rust-filled on hover */
+    expect(rule(".qcv-xp-reset")).toMatch(/color:\s*var\(--qcv-rust\)/);
+    expect(rule(".qcv-xp-reset:hover")).toMatch(/background:\s*var\(--qcv-rust\)/);
+  });
+  it("⚠️ ↺ resets the VIEW and nothing else — it never touches zoom or scroll", () => {
+    expect(ctl).toMatch(/onClick=\{\(\) => \{ onView\(CAL_DEFAULT\); onMenu\(null\); \}\}/);
+    for (const forbidden of ["scrollLeft", "pxd", "zoom", "scrollTo"]) {
+      expect(ctl, `the reset must not reach ${forbidden}`).not.toContain(forbidden);
+    }
+  });
+});
+
+describe("§8.3 · one popover", () => {
+  const ctl = read("src/components/queries/centre/QcCalControls.tsx");
+
+  it("300px, 12px corners, below the buttons and over the names", () => {
+    const p = rule(".qcv-xp-pop");
+    expect(p).toMatch(/width:\s*300px/);
+    expect(p).toMatch(/border-radius:\s*12px/);
+    expect(p).toMatch(/top:\s*calc\(100% \+ 10px\)/);
+    /**
+     * ⚠️ THE TRAY IS STACKED ABOVE THE BODY, and the two declarations are one mechanism. The date
+     * row's lane is positioned and later in the tree, so without this the panel paints BEHIND the
+     * rows — present, correct and invisible. Asserted together, because either alone is meaningless.
+     */
+    expect(rule(".qcv-xp-tray")).toMatch(/z-index:\s*5/);
+    expect(p).toMatch(/z-index:\s*6/);
+  });
+  it("⚠️ ONE panel with two contents — never two components agreeing to close each other", () => {
+    /* one element, whose contents are chosen by the open menu */
+    expect((ctl.match(/className="qcv-xp-pop"/g) ?? []).length).toBe(1);
+    expect(ctl).toMatch(/\{menu && \(/);
+    expect(ctl).toMatch(/menu === "filter" \? \(/);
+  });
+  it("Filter's three sections; Sort's three; and the words are the libs'", () => {
+    expect(ctl).toContain("Whose court");
+    expect(ctl).toContain("Attention");
+    expect(ctl).toContain("Clear filters");
+    expect(ctl).toContain("Group by");
+    expect(ctl).toContain("Sort by");
+    expect(ctl).toContain("Reset sort");
+    expect(ctl).toContain("· flip");
+    /* the options are read from the libs so the popover and the rows cannot name different sets */
+    expect(ctl).toMatch(/EYE_FOCUS\.map/);
+    expect(ctl).toMatch(/ATTENTION_ORDER\.map/);
+    expect(ctl).toMatch(/GROUP_BY_OPTIONS\.map/);
+    expect(ctl).toMatch(/SORT_BY_OPTIONS\.map/);
+    expect(ctl, "a hand-written option list is how two surfaces come to disagree").not.toMatch(/"Watch and wait"/);
+  });
+  it("⚠️ the checkbox and the card are ONE state, read and written through `toggleAttention`", () => {
+    expect(ctl).toMatch(/aria-checked=\{view\.attention\.includes\(k\)\}/);
+    expect(ctl).toMatch(/onView\(toggleAttention\(view, k\)\)/);
+    /* …and the counts it shows are the whole pipeline's, handed in rather than re-derived here */
+    expect(ctl).toMatch(/counts: Record<Attention, number>/);
+    expect(ctl, "a second count in the popover is a second answer to one question").not.toContain("attentionCounts(");
+  });
+  it("⚠️ ESCAPE CASCADES FROM ONE HANDLER — the popover has no `document` listener of its own", () => {
+    /**
+     * Two capture-phase listeners on `document` are decided by REGISTRATION ORDER, which is a fact
+     * about which element mounted last rather than about what is on screen. The card owns the key
+     * and asks whether a panel is open first.
+     */
+    expect(ctl, "the popover must not listen for Escape itself").not.toContain("Escape");
+    expect(src).toMatch(/if \(menuRef\.current\) \{ setMenu\(null\); return; \}/);
+    /* the dismissal idiom it DOES own: pointerdown outside, with the trigger counting as inside */
+    expect(ctl).toMatch(/addEventListener\("pointerdown", onDown\)/);
+    expect(ctl).toMatch(/!ref\.current\?\.contains\(e\.target as Node\)/);
+  });
+});
+
+describe("§8.2 · the cards are the filter", () => {
+  it("the ring is a shadow, never a border — a 2px border would move the card's content", () => {
+    expect(rule(".qcv-xp-stat--on")).toMatch(/box-shadow:\s*0 0 0 2px var\(--qcv-ink\)/);
+    /* ⚠️ and the ink card's ring is INSIDE it, because ink on ink is invisible */
+    expect(rule(".qcv-xp-stat--overdue.qcv-xp-stat--on")).toMatch(/box-shadow:\s*inset 0 0 0 2px #f5f1eb/);
+    expect(rule(".qcv-xp-stat--on"), "a border would nudge the row sideways").not.toContain("border");
+  });
+  it("⚠️ the fade is on the ROW, so one rule serves all three", () => {
+    /* a per-card rule is how a card gets left bright because its own handler forgot */
+    expect(rule(".qcv-xp-stats--filtered .qcv-xp-stat:not(.qcv-xp-stat--on)")).toMatch(/opacity:\s*0\.45/);
+    expect(src).toMatch(/view\.attention\.length \? " qcv-xp-stats--filtered" : ""/);
+  });
+  it("the card is a button, multi-select, and click-again releases", () => {
+    expect(src).toMatch(/aria-pressed=\{on\}/);
+    expect(src).toMatch(/v\.attention\.includes\(k\) \? v\.attention\.filter\(\(a\) => a !== k\) : \[\.\.\.v\.attention, k\]/);
+  });
+});
+
+describe("the sheet's own invariant", () => {
+  /**
+   * ⚠️ ONE BASE RULE PER SELECTOR, because `rule()` above takes the FIRST match. A selector declared
+   * twice silently repoints every assertion at whichever block comes first while the browser paints
+   * the last — the fault this repo has hit in three sheets, and hit again in this one during phase
+   * 6, when `.qcv-xp-tray` and `.qcv-xp-stat` each gained a second block at the file's foot.
+   */
+  it("no selector is declared twice outside a media query", () => {
+    const flat = css.replace(/@media[^{]*\{[\s\S]*?\n\}/g, "");
+    const sels = [...flat.matchAll(/(?:^|\n)([^@\n{][^{\n]*)\{/g)].map((m) => m[1].trim());
+    const dupes = sels.filter((s2, i) => sels.indexOf(s2) !== i);
+    expect(dupes, `declared twice: ${dupes.join(" · ")}`).toEqual([]);
   });
 });

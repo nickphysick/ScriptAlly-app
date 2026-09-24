@@ -12,7 +12,25 @@
  * the first by class (0-1-1 beats 0-0-1); a heading in the typewriter face needs `!important` and
  * two classes, as the dashboard's greeting does.
  */
-.qcv-page {
+/**
+ * ⚠️ THE PALETTE IS AT `:root`, NOT ON `.qcv-page`, AND THAT IS NOT TIDINESS — IT IS THE ONLY SCOPE
+ * THE EXPANDED CARD CAN READ. `QcExpanded` portals to `document.body`, so a token declared on
+ * `.qcv-page` is not an ancestor of it and every `var(--qcv-*)` out there yields NOTHING: the
+ * declaration is dropped, the surface paints transparent, and the rule reads perfectly in the
+ * sheet. Measured 24 Sep: `background: var(--qcv-ink)` on the expanded view's Filter button
+ * computed `rgba(0, 0, 0, 0)`, and **86 reads across `qcvExpanded.css` and `qcvTimeline.css` had
+ * been resolving to nothing since phase 4** — every ink, every parchment, and all three faces —
+ * through two phases of green measurements, because those measured geometry and literals.
+ *
+ * ⚠️ THE HOUSE PRECEDENT IS THE OTHER ONE, AND IT DOES NOT APPLY HERE. `qcFan.css` and
+ * `taskModal.css` both portal and both declare their OWN prefix with stated values — which is right
+ * when the portal's palette is its own, and wrong here, where the card must be the page's colours.
+ * A second `--qcv-*` block on `.qcv-xp` would be two copies of one palette free to drift.
+ *
+ * The names are uniquely prefixed, so nothing outside this page can collide with them, and nothing
+ * overrides them per theme — which is what makes `:root` safe as well as necessary.
+ */
+:root {
   --qcv-ink: #1c130f;
   --qcv-ink-70: rgba(28, 19, 15, 0.7);
   --qcv-ink-45: rgba(28, 19, 15, 0.45);
@@ -30,6 +48,21 @@
   --qcv-serif: var(--font-serif);
   --qcv-mono: var(--font-mono);
   --qcv-shadow: 0 2px 8px rgba(28, 19, 15, 0.06);
+  /**
+   * ⚠️ A DOCUMENTED COPY OF `--fc-frame`, NOT A `var()` READ OF IT. That token is declared on `.fc`
+   * (containers/framedCard.css) and neither the head nor a court is a card, so a read here resolves
+   * to nothing and — inside a `box-shadow` — paints an invisible ring with the rule looking
+   * perfectly correct. `qcCentre.test.tsx` asserts the two agree, which is the same arrangement the
+   * marketing tier's `--mk-hero-ground` has with `--ws-ground` and for the same reason.
+   *
+   * ⚠️ AND IT SITS AT `:root` WITH THE REST OF THE PALETTE (moved 24 Sep). `qcvCourts.css` read it
+   * across sheets from `.qcv-page`, which resolves only while nothing that reads it is portalled —
+   * the arrangement that had the expanded card painting transparent for two phases.
+   */
+  --qcv-frame: #7c3a2a;
+}
+
+.qcv-page {
   box-sizing: border-box;
   color: var(--qcv-ink);
   font-family: var(--qcv-serif);
@@ -122,13 +155,10 @@
  * white fill, a white rim and the burgundy frame, drawn as two inset shadows so the button's box is
  * the 190 × 50 it states rather than 190 plus borders.
  *
- * ⚠️ THE FRAME COLOUR IS A DOCUMENTED COPY OF `--fc-frame`, NOT A `var()` READ OF IT. That token is
- * declared on `.fc` (containers/framedCard.css) and the head is not a card, so a read here resolves
- * to nothing and — inside a `box-shadow` — paints an invisible ring with the rule looking perfectly
- * correct. `qcCentre.test.tsx` asserts the two agree, which is the same arrangement the marketing
- * tier's `--mk-hero-ground` has with `--ws-ground` and for the same reason.
+ * ⚠️ The frame colour's reasoning moved WITH IT, to `--qcv-frame` in the palette at the head of this
+ * file (24 Sep) — a note here describing a token declared elsewhere is a comment outliving what it
+ * describes, which this repo reads as fact for exactly as long as nobody checks.
  */
-.qcv-page { --qcv-frame: #7c3a2a; }
 .qcv-ghostpill {
   display: flex; align-items: center; height: 50px; padding: 2px 22px 0;
   border: 0; border-radius: 30px; background: #ffffff; color: var(--qcv-ink);

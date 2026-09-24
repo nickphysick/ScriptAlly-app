@@ -87,6 +87,21 @@ setup("authenticate", async ({ page, browser }) => {
   await page.getByRole("button", { name: /^Sign in$/ }).last().click();
 
   /**
+   * ⚠️ WAIT FOR THE AUTH SCREEN TO GO BEFORE WALKING THE ONBOARDING GATE. The walk below asks for
+   * a button whose name starts "Continue" — and the SIGN-IN page has one: "Continue with Google".
+   * Entering the loop while that page is still up therefore clicks the Google button, which starts
+   * an OAuth flow and detaches the node, and Playwright retries a click on a detaching element
+   * until the whole run times out.
+   *
+   * ⚠️ IT ONLY BITES WHEN THE SAVED SESSION HAS EXPIRED, which is why it sat here unnoticed: every
+   * ordinary run reuses `state.json` in about eighteen seconds and never reaches this line at all.
+   * Measured 24 Sep — a run died here after seven minutes with `locator resolved to
+   * <button type="button" class="g-btn">`, and the password path itself was fine: driven by hand
+   * it signs in and reaches the dashboard in six seconds.
+   */
+  await expect(page.locator("#au-pw")).toHaveCount(0, { timeout: 30_000 });
+
+  /**
    * ⚠️ A FRESH ACCOUNT LANDS ON THE ONBOARDING GATE, NOT THE SHELL. `App.tsx`'s branch order is
    * load-bearing — `!currentUser → <Auth/>` → the onboarding gate → the AppShell — so signing in
    * is not enough: the first run met "Where are you in your querying journey?" and timed out
@@ -109,7 +124,9 @@ setup("authenticate", async ({ page, browser }) => {
        it could not enable. The prefix matches both, and skipping is what this walk wants anyway:
        it is getting a test account past the gate, not exercising onboarding. */
     const skip = page.getByRole("button", { name: /^Skip/ });
-    const cont = page.getByRole("button", { name: /^Continue/ });
+    /* ⚠️ AND THE GOOGLE BUTTON IS EXCLUDED BY CLASS AS WELL, because the wait above is a race this
+       walk should not be able to lose twice. `.g-btn` is never an onboarding verb. */
+    const cont = page.getByRole("button", { name: /^Continue/ }).and(page.locator(":not(.g-btn)"));
     if (await skip.count()) { await skip.first().click(); }
     else if (await cont.count()) {
       /* ⚠️ NEVER CLICK A DISABLED CONTINUE — IT LOOKS EXACTLY LIKE A HUNG PAGE. A gated step keeps

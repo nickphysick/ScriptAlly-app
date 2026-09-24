@@ -41,6 +41,10 @@
   column-gap: 28px; align-items: center;
   padding: 16px 18px 16px 0;
   background: #f5f1eb; border-radius: 18px 18px 0 0;
+  /* ⚠️ STACKED ABOVE THE BODY so §8.3's popover can hang over the rows. The date row's lane is
+     positioned and later in the tree, so without this the panel paints BEHIND them — present,
+     correct and invisible. It is not decoration; it is half of the popover's mechanism. */
+  z-index: 5;
 }
 
 /* §8.1 — the Courier's column: the names column's width, from the tray's top to the date row's foot */
@@ -80,6 +84,8 @@
   flex: 1 1 0; max-width: 180px; box-sizing: border-box;
   padding: 12px 12px 11px; border-radius: 14px;
   background: #fff; border: 1px solid rgba(28, 19, 15, 0.09);
+  /* §8.2 — the card is a BUTTON since it became the filter; these undo the agent's own defaults */
+  font: inherit; text-align: left; cursor: pointer;
 }
 /* ⚠️ OVERDUE IS THE INK CARD — the one group the reader is meant to look at first */
 .qcv-xp-stat--overdue { background: var(--qcv-ink); border-color: var(--qcv-ink); }
@@ -98,3 +104,84 @@
  * up would carry the sticky cell out of the box it is sticky within.
  */
 .qcv-xp-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+
+/**
+ * §8.2 — the cards ARE the attention filter.
+ *
+ * ⚠️ THE RING IS A `box-shadow`, NEVER A BORDER. Every card already carries a 1px edge and the ink
+ * one carries none; growing a 2px border on selection would move the card's content by 2px in one
+ * case and 1px in the other, so picking a group would nudge the row of cards sideways.
+ */
+.qcv-xp-stat:disabled { cursor: default; }
+.qcv-xp-stat--on { box-shadow: 0 0 0 2px var(--qcv-ink); }
+/* ⚠️ the ink card's ring has to be INSIDE it — an ink ring on an ink fill is invisible */
+.qcv-xp-stat--overdue.qcv-xp-stat--on { box-shadow: inset 0 0 0 2px #f5f1eb; }
+/* ⚠️ while anything is picked the rest drop back — the state is on the ROW, so one rule serves all
+   three and a card cannot be left bright because its own handler forgot. */
+.qcv-xp-stats--filtered .qcv-xp-stat:not(.qcv-xp-stat--on) { opacity: 0.45; }
+.qcv-xp-stats--filtered .qcv-xp-stat:not(.qcv-xp-stat--on):hover:not(:disabled) { opacity: 0.8; }
+.qcv-xp-stat:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
+
+/**
+ * §8.1 — Filter, Sort and ↺ over the Courier's feet.
+ *
+ * ⚠️ THE TRAY CARRIES `z-index: 5` FOR THIS (stated in its own rule above, never restated here —
+ * a second `.qcv-xp-tray` block is the duplicate-base-rule trap this sheet's locks read through).
+ */
+.qcv-xp-ctl {
+  position: absolute; left: 0; right: 0; bottom: 10px; z-index: 4;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.qcv-xp-btn, .qcv-xp-reset {
+  display: inline-flex; align-items: center; gap: 7px; height: 40px; box-sizing: border-box;
+  padding: 0 17px; border-radius: 20px; border: 1px solid rgba(28, 19, 15, 0.12);
+  background: #fff; color: var(--qcv-ink);
+  font-family: var(--qcv-type); font-size: 14.5px; line-height: 1; cursor: pointer;
+}
+.qcv-xp-btn--on { background: var(--qcv-ink); border-color: var(--qcv-ink); color: #f5f1eb; }
+.qcv-xp-btn:hover:not(.qcv-xp-btn--on) { background: var(--qcv-parchment); }
+.qcv-xp-reset { width: 40px; padding: 0; justify-content: center; font-size: 17px; color: var(--qcv-rust); }
+.qcv-xp-reset:hover { background: var(--qcv-rust); border-color: var(--qcv-rust); color: #fff; }
+.qcv-xp-btn:focus-visible, .qcv-xp-reset:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
+
+/* §8.3 — one popover, below the buttons, over the names */
+.qcv-xp-pop {
+  position: absolute; top: calc(100% + 10px); left: 50%; transform: translateX(-50%); z-index: 6;
+  width: 300px; box-sizing: border-box; padding: 8px;
+  background: #fff; border: 1px solid rgba(28, 19, 15, 0.12); border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 18px 40px -18px rgba(28, 19, 15, 0.45);
+  text-align: left;
+}
+.qcv-xp-sec { padding: 6px 4px 8px; border-bottom: 1px solid var(--qcv-hair); }
+.qcv-xp-sec:last-of-type { border-bottom: 0; }
+.qcv-xp-pop h5 {
+  margin: 2px 6px 6px; font-family: var(--qcv-mono); font-size: 7.5px; font-weight: 400;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcv-ink-45);
+}
+.qcv-xp-pop button {
+  display: block; width: 100%; box-sizing: border-box; text-align: left;
+  padding: 7px 10px; border: 0; border-radius: 8px; background: none; color: var(--qcv-ink);
+  font-family: var(--qcv-serif); font-size: 14px; line-height: 1.2; cursor: pointer;
+}
+.qcv-xp-pop button:hover:not(:disabled) { background: var(--qcv-parchment); }
+.qcv-xp-pop button[aria-checked="true"] { background: var(--qcv-parchment); font-weight: 600; }
+.qcv-xp-pop button:disabled { opacity: 0.4; cursor: default; }
+.qcv-xp-seg { display: flex; gap: 4px; padding: 3px; border-radius: 16px; background: #f3eee7; }
+.qcv-xp-seg button {
+  flex: 1; width: auto; height: 28px; padding: 0 6px; border-radius: 14px;
+  font-family: var(--qcv-type); font-size: 11.5px; text-align: center; white-space: nowrap;
+}
+.qcv-xp-seg button[aria-checked="true"] { background: var(--qcv-navy); color: #fff; font-weight: 400; }
+/* the checkbox rows: tick, name, count */
+.qcv-xp-chk { display: flex !important; align-items: center; gap: 8px; }
+.qcv-xp-chk i {
+  flex: none; width: 15px; height: 15px; border: 1px solid rgba(28, 19, 15, 0.28); border-radius: 4px;
+  font-style: normal; font-size: 10px; line-height: 13px; text-align: center; color: var(--qcv-ink);
+}
+.qcv-xp-chk[aria-checked="true"] i { background: var(--qcv-ink); border-color: var(--qcv-ink); color: #f5f1eb; }
+.qcv-xp-chk u { margin-left: auto; font-family: var(--qcv-mono); font-size: 9px; text-decoration: none; color: var(--qcv-ink-45); }
+.qcv-xp-dir { margin-top: 4px; font-family: var(--qcv-type) !important; font-size: 12.5px !important; color: var(--qcv-ink-70); }
+.qcv-xp-clear {
+  margin-top: 4px; font-family: var(--qcv-mono) !important; font-size: 8px !important;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-45);
+}

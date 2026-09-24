@@ -13,7 +13,7 @@
  * comments stripped — a lock over raw source finds its tokens in the prose explaining the retirement.
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync, readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -236,15 +236,51 @@ describe("the sheet", () => {
   });
   it("⚠️ the typewriter face is READ from the shell's one token, never named — and the title beats brand.tsx", () => {
     expect(css).not.toMatch(/Special Elite/);
-    expect(rule(".qcv-page")).toMatch(/--qcv-type:\s*var\(--sp-type\)/);
+    expect(rule(":root"), "the palette is at :root so the portalled card can read it").toMatch(/--qcv-type:\s*var\(--sp-type\)/);
     /* brand.tsx forces h1:not(.wsh-title) with !important at 0-1-1: two classes AND !important, or Playfair */
     expect(rule(".qcv-page .qcv-title")).toMatch(/font-family:\s*var\(--qcv-type\)\s*!important/);
     expect(rule(".qcv-page .qcv-sentence")).toMatch(/font-family:\s*var\(--qcv-type\)\s*!important/);
   });
-  it("⚠️ the menu is portalled outside `.qcv-page`, so it reads NO page token — a token there resolves to nothing", () => {
-    const menuRules = [...css.matchAll(/(?:^|\n)\s*(\.qcv-menu[^{]*)\{([^}]*)\}/g)];
-    expect(menuRules.length).toBeGreaterThan(6);
-    for (const [, sel, body] of menuRules) expect(body, `${sel.trim()} reads a page-scoped token`).not.toMatch(/var\(--qcv-/);
+  /**
+   * ⚠️ THE PALETTE IS AT `:root` AND THE LOCK IS STATED OVER EVERY SHEET, which is the repair of a
+   * real fault rather than a tidying. It used to say "the MENU reads no `--qcv-*` token", because
+   * the menu portals and the palette was on `.qcv-page` — true, and a rule about one component.
+   * Two phases later the expanded card portalled too, and **86 reads across `qcvExpanded.css` and
+   * `qcvTimeline.css` were resolving to nothing** (measured 24 Sep: `background: var(--qcv-ink)`
+   * computed `rgba(0, 0, 0, 0)`), through two rounds of green measurement, because those measured
+   * geometry and literals. A law written about the component that happened to hit it cannot catch
+   * the next component; a law about the TOKEN can.
+   */
+  it("⚠️ a --qcv-* token read by more than one sheet is declared at `:root` — a portal has no other ancestor", () => {
+    const dir = "src/components/queries/centre";
+    const sheets = readdirSync(join(process.cwd(), dir)).filter((f) => f.endsWith(".css"));
+    expect(sheets.length).toBeGreaterThan(6);
+    const bodies = new Map(sheets.map((f) => [f, read(`${dir}/${f}`)]));
+    const atRoot = new Set([...rule(":root").matchAll(/(--qcv-[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
+    expect(atRoot.size, "the palette is at :root").toBeGreaterThan(8);
+    /* published from JS onto an element inside the subtree that reads them, so they resolve there */
+    const PUBLISHED: Record<string, string> = {
+      "--qcv-rail-pad": "src/components/queries/centre/QcRail.tsx",
+      "--qcv-xp-lcol": "src/components/queries/centre/QcExpanded.tsx",
+      "--qcv-tl-names": "src/components/queries/centre/QcTimeline.tsx",
+      "--qcv-state": "src/components/queries/centre/QcTimeline.tsx",
+    };
+    for (const [tok, writer] of Object.entries(PUBLISHED)) {
+      const w = read(writer);
+      expect(w.includes(`"${tok}"`) || w.includes(`--qcv-${tok.slice(6)}`), `${tok} is exempt as published and ${writer} does not set it`).toBe(true);
+    }
+    const bad: string[] = [];
+    for (const [f, body] of bodies) {
+      for (const m of body.matchAll(/var\((--qcv-[a-z0-9-]+)/g)) {
+        const tok = m[1];
+        if (atRoot.has(tok) || tok in PUBLISHED) continue;
+        /* a sheet may declare a token on its own element and read it in the same sheet — that
+           element is its own ancestor by construction, portal or not */
+        if (new RegExp(`(?:^|[;{\\s])${tok}\\s*:`).test(body)) continue;
+        bad.push(`${f}: ${tok}`);
+      }
+    }
+    expect([...new Set(bad)], "read across sheets from a scope a portal may not be inside").toEqual([]);
   });
   it("every var() the sheet reads resolves — to a token it declares, to an app :root token, or to a PUBLISHED measurement", () => {
     const APP = ["--font-serif", "--font-mono", "--sp-type", "--wpg-gutter", "--wpg-measure", "--ws-window", "--ws-window-rgb"];
@@ -285,7 +321,7 @@ describe("the sheet", () => {
   it("anthracite is the page's one button fill, and nothing on this sheet is ink-filled", () => {
     /* ⚠️ IT USED TO READ THE PRESSED VIEW-SWITCH BUTTON, which is retired. The claim was never
        about the switch: it is that this page fills buttons with anthracite and never with ink. */
-    expect(rule(".qcv-page")).toMatch(/--qcv-navy:\s*#2a3a52/);
+    expect(rule(":root")).toMatch(/--qcv-navy:\s*#2a3a52/);
     expect(css).not.toMatch(/background:\s*(#1c130f|var\(--qcv-ink\))/);
     /* the switch's own rules went with it rather than being left inert */
     expect(css, "the retired view switch still has a stylesheet").not.toMatch(/(?:^|\n)\s*\.qcv-views\s*\{/);

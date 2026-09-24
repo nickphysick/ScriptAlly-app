@@ -39,7 +39,7 @@ const OUT = resolve("test-results/qc-v65");
 const REPORT = resolve(OUT, "report.json");
 const REF = "file://" + resolve("design-refs/query-centre-v65.html");
 const TOL = 2;
-const MIN_ASSERTIONS = 60;
+const MIN_ASSERTIONS = 95;
 
 /* ── the run's own ledger ──
    ⚠️ FILE-BACKED, NOT MODULE STATE. Playwright restarts the worker after a failed case, which would
@@ -963,6 +963,286 @@ test("§8.10 · a zoom rebuilds the rows and the lane's controls survive it", as
   is("rebuild", "after a pan — everything survived", [panned.nav, panned.zoom, panned.line], [3, 3, 1]);
   await page.keyboard.press("Escape");
   await page.waitForTimeout(400);
+});
+
+/**
+ * ⚠️ EVERY POPOVER CONTROL IS SCOPED TO THE POPOVER. "With you" is also the rail's focus toggle and
+ * "Status" is also the page's own sort — both are still in the DOM behind the modal, so a bare
+ * `getByRole` is a strict-mode violation at best and a click on the page behind at worst.
+ */
+const pop = (page: Page) => page.locator("[data-qcv='xp-pop']");
+
+test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover is one, and ↺ puts it all back", async ({ page }) => {
+  await openApp(page, 1440, 860, "?view=calendar");
+  await page.waitForTimeout(900);
+
+  /** Everything this case asks of the page, in one read. */
+  const read = async () => page.evaluate(() => {
+    const card = document.querySelector("[data-qcv='xp-card']");
+    if (!card) return null;
+    const px = (n: number) => Math.round(n * 10) / 10;
+    const box = (s: string, root: Element = card) => { const e = root.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return { x: px(b.left), y: px(b.top), w: px(b.width), h: px(b.height), mid: px(b.left + b.width / 2), bottom: px(b.bottom) }; };
+    const col = card.querySelector("[data-qcv='xp-col']")!.getBoundingClientRect();
+    const sc = card.querySelector("[data-qcv='tl-scroll']") as HTMLElement | null;
+    const ctl = card.querySelector("[data-qcv='xp-ctl']");
+    return {
+      col: { x: px(col.left), w: px(col.width), mid: px(col.left + col.width / 2), bottom: px(col.bottom) },
+      ctl: box("[data-qcv='xp-ctl']"),
+      filter: box("[data-qcv='xp-filter']"),
+      sort: box("[data-qcv='xp-sort']"),
+      reset: box("[data-qcv='xp-reset']"),
+      pop: box("[data-qcv='xp-pop']"),
+      popMenu: card.querySelector("[data-qcv='xp-pop']")?.getAttribute("data-menu") ?? null,
+      pops: card.querySelectorAll("[data-qcv='xp-pop']").length,
+      /* §8.1 — each button is ink with cream text while open or while its own settings differ */
+      btnInk: ["xp-filter", "xp-sort"].map((k) => {
+        const e = card.querySelector(`[data-qcv='${k}']`) as HTMLElement | null;
+        if (!e) return null;
+        const cs = getComputedStyle(e);
+        return { k, bg: cs.backgroundColor, fg: cs.color, changed: e.getAttribute("data-changed"), open: e.getAttribute("aria-expanded") };
+      }),
+      /* the cards: their counts, their ring, and what they faded to */
+      stats: [...card.querySelectorAll("[data-qcv='xp-stat']")].map((e) => {
+        const cs = getComputedStyle(e);
+        return {
+          g: e.getAttribute("data-group"), n: (e.querySelector(".qcv-xp-n")?.textContent ?? "").trim(),
+          on: e.getAttribute("data-on"), disabled: (e as HTMLButtonElement).disabled,
+          opacity: Math.round(parseFloat(cs.opacity) * 100) / 100, shadow: cs.boxShadow,
+        };
+      }),
+      groups: [...card.querySelectorAll("[data-qcv='tl-group']")].map((g) => g.getAttribute("data-group")),
+      bands: [...card.querySelectorAll("[data-qcv='tl-band'] span")].map((b) => (b.textContent ?? "").trim()),
+      rowIds: [...card.querySelectorAll("[data-qcv='tl-row']")].map((r) => r.getAttribute("data-id")),
+      names: [...card.querySelectorAll("[data-qcv='tl-row'] .qcv-tl-nm")].map((n) => (n.textContent ?? "").trim()),
+      chks: [...card.querySelectorAll("[data-qcv='xp-chk']")].map((c) => ({ g: c.getAttribute("data-group"), on: c.getAttribute("aria-checked"), n: (c.querySelector("u")?.textContent ?? "").trim() })),
+      zoomOn: [...card.querySelectorAll("[data-qcv='tl-zoom'] button")].find((b) => b.getAttribute("aria-pressed") === "true")?.getAttribute("data-z") ?? null,
+      scrollLeft: sc ? Math.round(sc.scrollLeft) : null,
+      /* §8.3 — the popover is over the NAMES, which is a stacking claim rather than a position one */
+      overNames: (() => {
+        const pop = ctl?.querySelector("[data-qcv='xp-pop']") as HTMLElement | null;
+        if (!pop) return null;
+        const b = pop.getBoundingClientRect();
+        const at = document.elementFromPoint(b.left + b.width / 2, b.bottom - 6);
+        return at ? (at.closest("[data-qcv='xp-pop']") ? "pop" : (at.getAttribute("data-qcv") ?? at.tagName)) : "nothing";
+      })(),
+    };
+  });
+
+  const rest = await read();
+  yes("controls", "the expanded view drew, with its controls", !!rest?.filter && !!rest?.sort, JSON.stringify(rest?.ctl));
+
+  /**
+   * ⚠️ THE CARD'S PALETTE RESOLVES OUT HERE — measured on the RENDER, because a sheet reading
+   * `var(--qcv-ink)` reads perfectly whether or not the token is an ancestor of the element.
+   * `QcExpanded` portals to `document.body`, and while the palette sat on `.qcv-page` every one of
+   * the 86 `--qcv-*` reads in this card's two sheets resolved to nothing: the ink, the parchment
+   * and all three faces, for two phases, through green measurements that asked about geometry.
+   * A fallback would have hidden it again, so these are read as COMPUTED VALUES, not as rules.
+   */
+  const palette = await page.evaluate(() => {
+    const card = document.querySelector("[data-qcv='xp-card']")!;
+    const cs = (s2: string) => { const e = card.querySelector(s2); return e ? getComputedStyle(e) : null; };
+    const ttl = cs("[data-qcv='xp-title']");
+    const mon = cs(".qcv-xp-hint");
+    return {
+      title: ttl?.fontFamily ?? null,
+      titleInk: ttl?.color ?? null,
+      hint: mon?.fontFamily ?? null,
+      /* the raw token, asked of an element inside the portal */
+      ink: getComputedStyle(card).getPropertyValue("--qcv-ink").trim(),
+      type: getComputedStyle(card).getPropertyValue("--qcv-type").trim(),
+    };
+  });
+  record({ area: "controls", what: "the portalled card's palette, computed", got: palette, want: "reported" });
+  is("controls", "the ink token resolves inside the portal", palette.ink, "#1c130f");
+  yes("controls", `the typewriter face resolves inside the portal (${palette.type})`, /Special Elite/.test(palette.type), palette.type);
+  yes("controls", `…and the title really renders in it (${palette.title})`, /Special Elite/.test(palette.title ?? ""), palette.title ?? "");
+  yes("controls", `…and the hint in the mono face (${palette.hint})`, /Mono/i.test(palette.hint ?? ""), palette.hint ?? "");
+  is("controls", "…and the title's ink is the page's", palette.titleInk, "rgb(28, 19, 15)");
+  record({ area: "controls", what: "at rest", got: rest, want: "reported" });
+
+  /* ── §8.1 · where they sit ── */
+  is("controls", "Filter is 40px tall", rest?.filter?.h, 40);
+  is("controls", "Sort is 40px tall", rest?.sort?.h, 40);
+  /**
+   * ⚠️ CENTRED ON THE COLUMN, NOT ON THEMSELVES — the claim is a relationship between two boxes,
+   * so it is measured as one. A pinned x would pass on a column that had moved and taken the
+   * buttons with it, which is the thing the rule is there to prevent.
+   */
+  near("controls", "the cluster's midline is the column's", rest?.ctl?.mid, rest?.col.mid, 0.6);
+  yes("controls", `the cluster is at the column's foot (cluster ends ${rest?.ctl?.bottom}, the column ${rest?.col.bottom})`,
+    rest != null && rest.ctl != null && rest.col.bottom - rest.ctl.bottom < 24 && rest.ctl.bottom <= rest.col.bottom, JSON.stringify({ ctl: rest?.ctl?.bottom, col: rest?.col.bottom }));
+
+  /* ⚠️ THE WIDTHS ARE REPORTED, NOT ASSERTED. The ref draws Filter 107 × 40 and Sort 91 × 40; both
+     are content-sized here, so pinning them would be a lock on a font's metrics rather than on the
+     design — the §14 practice, applied to the one number the brief happens to state. */
+  record({ area: "controls", what: "the buttons' widths against the ref's (Filter 107, Sort 91)", got: { filter: rest?.filter?.w, sort: rest?.sort?.w }, want: "reported" });
+
+  /* ── the page-load default: nothing differs, so no ↺ and no ink ── */
+  is("controls", "at rest nothing differs — Filter", rest?.btnInk?.[0]?.changed, "false");
+  is("controls", "at rest nothing differs — Sort", rest?.btnInk?.[1]?.changed, "false");
+  is("controls", "…so the reset is absent", rest?.reset, null);
+  is("controls", "…and no popover is open", rest?.pops, 0);
+  /* ⚠️ ASSERTED AGAINST THE THREE NAMES, not against itself — `groups.join() === groups.join()` is
+     a tautology with intermediate steps, which is the fault this file's own §8 case records. */
+  yes("controls", "the page loads grouped by Attention", (rest?.groups ?? []).length > 0 && (rest?.groups ?? []).every((g) => ["overdue", "upcoming", "watch"].includes(g ?? "")), JSON.stringify(rest?.groups));
+  yes("controls", "…and the bands name those groups", (rest?.bands ?? []).length > 0 && (rest?.bands ?? []).every((b) => /^(Overdue|Upcoming|Watch and wait)\s*\d+$/.test(b)), JSON.stringify(rest?.bands));
+  const whiteFilter = rest?.btnInk?.[0]?.bg;
+  yes("controls", `at rest Filter is white (${whiteFilter})`, whiteFilter === "rgb(255, 255, 255)", String(whiteFilter));
+
+  /* ── §8.2 · the cards ARE the filter ── */
+  const countsAtRest = (rest?.stats ?? []).map((s) => s.n);
+  const firstLive = (rest?.stats ?? []).find((s) => !s.disabled)!;
+  yes("controls", "a card with a count is clickable and one with none is disabled",
+    (rest?.stats ?? []).every((s) => s.disabled === (s.n === "0")), JSON.stringify(rest?.stats));
+
+  await page.locator(`[data-qcv='xp-stat'][data-group='${firstLive.g}']`).click();
+  await page.waitForTimeout(150);
+  const picked = await read();
+  record({ area: "controls", what: `after picking ${firstLive.g}`, got: { stats: picked?.stats, groups: picked?.groups, reset: picked?.reset, btn: picked?.btnInk }, want: "reported" });
+  is("controls", "the picked card is on", picked?.stats.find((s) => s.g === firstLive.g)?.on, "true");
+  yes("controls", "…and carries a 2px ink ring", /rgba?\(28, 19, 15/.test(picked?.stats.find((s) => s.g === firstLive.g)?.shadow ?? "") || /245, 241, 235/.test(picked?.stats.find((s) => s.g === firstLive.g)?.shadow ?? ""), picked?.stats.find((s) => s.g === firstLive.g)?.shadow ?? "");
+  yes("controls", "the unpicked cards drop to 45%", (picked?.stats ?? []).filter((s) => s.g !== firstLive.g).every((s) => s.opacity <= 0.46), JSON.stringify(picked?.stats.map((s) => [s.g, s.opacity])));
+  /**
+   * ⚠️ THE COUNTS ARE THE WHOLE PIPELINE'S AND DO NOT MOVE. This is the half of §8.2 a reader would
+   * never think to check and the half that makes the cards worth looking at: a count that narrowed
+   * with the filter would be answering a question they have already answered.
+   */
+  is("controls", "the counts do not move when a group is picked", (picked?.stats ?? []).map((s) => s.n).join("/"), countsAtRest.join("/"));
+  is("controls", "…and the rows are only that group", [...new Set(picked?.groups ?? [])].join(","), firstLive.g);
+  is("controls", "Filter now differs", picked?.btnInk?.[0]?.changed, "true");
+  is("controls", "…so Filter goes ink with cream text", picked?.btnInk?.[0]?.bg, "rgb(28, 19, 15)");
+  is("controls", "…and the reset appears, 40px round", picked?.reset?.h, 40);
+  is("controls", "…but Sort has not changed", picked?.btnInk?.[1]?.changed, "false");
+
+  /* ⚠️ §10 LOCK 8 NAMES FOUR ACTS IN ONE SEQUENCE — a filter, a zoom, a group change and a reset.
+     They are done in one case on purpose: each is fine alone, and the fault the lock is written for
+     is one of them destroying another's work. The zoom goes here, between the filter and the
+     grouping, so the rows are rebuilt twice with different row sets on the track. */
+  await page.locator("[data-qcv='tl-zoom'] button[data-z='6w']").click();
+  await page.waitForTimeout(200);
+  const zoomed = await read();
+  is("controls", "a zoom while filtered keeps the filter", zoomed?.stats.find((st) => st.g === firstLive.g)?.on, "true");
+  is("controls", "…and the zoom took", zoomed?.zoomOn, "6w");
+  yes("controls", "…and the lane's controls survived it", (zoomed?.ctl?.h ?? 0) > 0 && !!zoomed?.filter && !!zoomed?.sort, JSON.stringify({ ctl: zoomed?.ctl?.h, f: !!zoomed?.filter }));
+
+  /* ── §8.3 · one popover, and the checkbox mirrors the card ── */
+  await page.locator("[data-qcv='xp-filter']").click();
+  await page.waitForTimeout(120);
+  const fpop = await read();
+  record({ area: "controls", what: "the Filter popover", got: { pop: fpop?.pop, chks: fpop?.chks, over: fpop?.overNames }, want: "reported" });
+  is("controls", "one popover, and it is Filter's", fpop?.pops, 1);
+  is("controls", "…300px wide", fpop?.pop?.w, 300);
+  yes("controls", `…below the buttons (pop ${fpop?.pop?.y}, buttons end ${fpop?.filter?.bottom})`, (fpop?.pop?.y ?? 0) > (fpop?.filter?.bottom ?? 1e9) - 0.5, JSON.stringify({ pop: fpop?.pop?.y, btn: fpop?.filter?.bottom }));
+  /* a stacking claim: the panel is over the names, not under them */
+  is("controls", "…and NOTHING paints over it — the rows do not swallow the panel", fpop?.overNames, "pop");
+  is("controls", "the checkbox mirrors the card that was clicked", fpop?.chks.find((c) => c.g === firstLive.g)?.on, "true");
+  is("controls", "…and states the same count", fpop?.chks.find((c) => c.g === firstLive.g)?.n, firstLive.n);
+
+  /* ⚠️ THE DISMISSAL IS TESTED FROM INSIDE THE CARD, not on the backdrop — the backdrop closes the
+     whole view, so a click there would prove the panel had gone for the wrong reason. */
+  await page.locator("[data-qcv='xp-title']").click();
+  await page.waitForTimeout(120);
+  const dismissed = await read();
+  yes("controls", "a click outside closes the panel and leaves the card open", dismissed != null && dismissed.pops === 0, JSON.stringify({ pops: dismissed?.pops, card: dismissed != null }));
+  await page.locator("[data-qcv='xp-filter']").click();
+  await page.waitForTimeout(120);
+
+  /* Sort's button replaces it rather than opening a second */
+  await page.locator("[data-qcv='xp-sort']").click();
+  await page.waitForTimeout(120);
+  const spop = await read();
+  is("controls", "opening Sort closes Filter — never two panels", spop?.pops, 1);
+  is("controls", "…and the one open is Sort's", spop?.popMenu, "sort");
+
+  /* ── §8.3 · Group by Status, then Nothing ── */
+  await pop(page).getByRole("radio", { name: "Status", exact: true }).click();
+  await page.waitForTimeout(150);
+  const byStatus = await read();
+  record({ area: "controls", what: "grouped by Status", got: { bands: byStatus?.bands, groups: byStatus?.groups }, want: "reported" });
+  yes("controls", "the bands are status names, not attention names",
+    (byStatus?.bands ?? []).length > 0 && !(byStatus?.bands ?? []).some((b) => /^(Overdue|Upcoming|Watch and wait)/.test(b)), JSON.stringify(byStatus?.bands));
+  yes("controls", "…in pipeline order", (byStatus?.bands ?? []).length > 0 && JSON.stringify(byStatus?.bands) !== JSON.stringify([...(byStatus?.bands ?? [])].sort()), JSON.stringify(byStatus?.bands));
+
+  await pop(page).getByRole("radio", { name: "Nothing", exact: true }).click();
+  await page.waitForTimeout(150);
+  const flat = await read();
+  is("controls", "Nothing removes the headings altogether", flat?.bands?.length, 0);
+  yes("controls", "…and keeps every row that was in the groups", (flat?.rowIds ?? []).length === (byStatus?.rowIds ?? []).length && (flat?.rowIds ?? []).length > 0, `${flat?.rowIds?.length} vs ${byStatus?.rowIds?.length}`);
+
+  /* ── §8.3 · the sort, and the flip ── */
+  const before = flat?.names ?? [];
+  await page.locator("[data-qcv='xp-dir']").click();
+  await page.waitForTimeout(150);
+  const flipped = await read();
+  record({ area: "controls", what: "ascending → descending", got: { before: before.slice(0, 5), after: (flipped?.names ?? []).slice(0, 5) }, want: "reported" });
+  yes("controls", "flipping the direction re-orders the rows", JSON.stringify(flipped?.names) !== JSON.stringify(before) && (flipped?.names ?? []).length === before.length, JSON.stringify({ before: before.slice(0, 4), after: (flipped?.names ?? []).slice(0, 4) }));
+  is("controls", "Sort now differs too", flipped?.btnInk?.[1]?.changed, "true");
+
+  /* ── §8.3 · whose court HIDES ── */
+  await page.locator("[data-qcv='xp-filter']").click();
+  await page.waitForTimeout(120);
+  await pop(page).getByRole("radio", { name: "With you", exact: true }).click();
+  await page.waitForTimeout(150);
+  const youOnly = await read();
+  record({ area: "controls", what: "with you", got: { rows: youOnly?.rowIds?.length, of: flipped?.rowIds?.length }, want: "reported" });
+  yes("controls", `whose court HIDES rather than fades (${youOnly?.rowIds?.length} of ${flipped?.rowIds?.length})`,
+    (youOnly?.rowIds ?? []).length < (flipped?.rowIds ?? []).length, `${youOnly?.rowIds?.length} / ${flipped?.rowIds?.length}`);
+
+  /* ── Escape cascades: the popover first, the card second ── */
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(150);
+  const afterEsc = await read();
+  yes("controls", "Escape closes the popover and leaves the card open", afterEsc != null && afterEsc.pops === 0, JSON.stringify({ pops: afterEsc?.pops, card: afterEsc != null }));
+
+  /* ── §8.1 · ↺ puts it all back, and touches neither zoom nor scroll ── */
+  const zoomBefore = afterEsc?.zoomOn;
+  const scrollBefore = afterEsc?.scrollLeft ?? 0;
+  await page.locator("[data-qcv='xp-reset']").click();
+  await page.waitForTimeout(200);
+  const reset = await read();
+  record({ area: "controls", what: "after the reset", got: { stats: reset?.stats, bands: reset?.bands, zoom: reset?.zoomOn, scroll: reset?.scrollLeft, was: { zoomBefore, scrollBefore } }, want: "reported" });
+  is("controls", "the reset takes the ink off Filter", reset?.btnInk?.[0]?.changed, "false");
+  is("controls", "…and off Sort", reset?.btnInk?.[1]?.changed, "false");
+  is("controls", "…and takes itself away", reset?.reset, null);
+  yes("controls", "…no card is picked", (reset?.stats ?? []).every((s) => s.on === "false"), JSON.stringify(reset?.stats.map((s) => s.on)));
+  yes("controls", "…grouped by Attention again", (reset?.bands ?? []).length > 0 && (reset?.bands ?? []).every((b) => /^(Overdue|Upcoming|Watch and wait)/.test(b)), JSON.stringify(reset?.bands));
+  is("controls", "…and the row count is the whole live set again", reset?.rowIds?.length, rest?.rowIds?.length);
+  /**
+   * ⚠️ THE RESET DOES NOT TOUCH ZOOM OR SCROLL (§8.3), and that is asserted rather than assumed.
+   * They belong to the TRACK — where the reader is looking — and the reset belongs to the ROWS.
+   * The cheapest way to break it is to rebuild the timeline on a view change, which would put the
+   * reader back at today with a different set of rows and no way to tell which had moved.
+   */
+  is("controls", "the reset leaves the zoom alone", reset?.zoomOn, zoomBefore);
+  near("controls", "…and leaves the scroll where it was", reset?.scrollLeft, scrollBefore, 2);
+
+  /**
+   * §10 lock 8's survival clause: after all four acts, every control and the today line are still
+   * there, and the grouping is back to its three headings.
+   *
+   * ⚠️ THREE HEADINGS RATHER THAN "22 ROWS" — the brief states the seed's own count, and a literal
+   * tuned to one account is a lock on a fixture rather than on the page. The reset's row count is
+   * asserted above against WHAT THE PAGE LOADED WITH, which cannot drift and cannot be satisfied by
+   * a coincidence.
+   */
+  const survived = await page.evaluate(() => {
+    const card = document.querySelector("[data-qcv='xp-card']");
+    const has = (s2: string) => !!card?.querySelector(s2);
+    return {
+      nav: has("[data-qcv='tl-nav']"), zoom: has("[data-qcv='tl-zoom']"),
+      filter: has("[data-qcv='xp-filter']"), sort: has("[data-qcv='xp-sort']"),
+      today: has("[data-qcv='tl-todayline']"),
+      bands: card?.querySelectorAll("[data-qcv='tl-band']").length ?? 0,
+    };
+  });
+  record({ area: "controls", what: "§10 lock 8 — what survived the filter, the zoom, the grouping and the reset", got: survived, want: "reported" });
+  yes("controls", "the nav, the zoom, Filter, Sort and the today line all survived", Object.entries(survived).filter(([k]) => k !== "bands").every(([, v]) => v === true), JSON.stringify(survived));
+  /* ⚠️ AGAINST THE PAGE-LOAD READING, NOT AGAINST "3" — a group with nothing in it is dropped, so
+     the number of headings is a fact about the account. What the reset must restore is the state
+     the page opened in, and that is a comparison of two measured things. */
+  is("controls", "…and the headings are the page-load set again", survived.bands, rest?.bands?.length);
+  seen("controls", `attention headings on this account: ${survived.bands}`);
 });
 
 test("§4 · the courts — three tiles, framed, and a tile deals exactly what it counts", async ({ page }) => {

@@ -6288,6 +6288,16 @@ export const Queries: React.FC<{
                 rows={qcScoped}
                 nowMs={Date.now()}
                 focusId={beFocus}
+                /**
+                 * §8.3 — the package grouping's names.
+                 *
+                 * ⚠️ THE RESOLVER IS PASSED IN RATHER THAN THE LIST, so `groupRows` stays a pure
+                 * function of rows and a view. A lib that reached for the packages collection would
+                 * be a second reader of the page's data with its own idea of which manuscript is in
+                 * scope, and an id it could not resolve is already a case the grouping answers:
+                 * "No package", which is the honest word for a package this page cannot name.
+                 */
+                packageName={(id) => packages.find((pk) => pk.id === id)?.packageName ?? null}
                 onClose={() => { setBeOpen(false); setBeFocus(null); }}
                 /**
                  * ⚠️ §8.11 — OPENING A QUERY FROM THE CALENDAR OPENS IT IN THE RAIL, and closes the

@@ -43,10 +43,20 @@ function cssFiles(dir: string, out: string[] = []): string[] {
 
 const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "");
 
-/** every `:root { … }` body in a file, brace-matched so a nested block cannot end the slice early */
+/**
+ * Every `:root { … }` body in a file, brace-matched so a nested block cannot end the slice early.
+ *
+ * ⚠️ TAILWIND v4's `@theme { … }` IS A `:root` BLOCK AND IS COUNTED AS ONE. It is where
+ * `--font-sans`, `--font-serif` and `--font-mono` are declared, and the sweep reported all three as
+ * "defined nowhere" — a false offence about the three faces the whole app reads. Verified in the
+ * BUILT sheet rather than assumed: `dist/assets/index-*.css` emits them as
+ * `@layer theme { :root, :host { --font-serif: … } }`, so they resolve at `:root` at runtime
+ * exactly as a literal block would. Reading only the source's literal `:root` is reading the
+ * authoring syntax instead of the cascade.
+ */
 function rootBlocks(css: string): string[] {
   const out: string[] = [];
-  const re = /(?:^|[\s,}])(:root)\s*\{/g;
+  const re = /(?:^|[\s,}])(:root|@theme)\s*\{/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(css))) {
     let depth = 1;
