@@ -841,6 +841,9 @@ test("§6 · Birds-eye — the line is where the dates are, the rows scroll, and
       if (!bar || !track) return null;
       const bb = bar.getBoundingClientRect(), tb = track.getBoundingClientRect();
       return { mid: px(tb.left + tb.width / 2), end: px(bb.right), start: px(bb.left), over: over ? px(over.getBoundingClientRect().left) : null,
+        /* §1.9 — the overrun is INK at full opacity here as it is in the expanded view; the two
+           draw the same fact and a tint in one of them makes them two facts. */
+        overBg: over ? getComputedStyle(over).backgroundColor : null,
         /* ⚠️ CLASSIFIED ON `data-due`, NOT ON THE WORDS (v65.2 §5). This read the day count's text
            and sorted it with `/^\d+d$/` and `/ago$/`; §5 re-worded the column to "In 3d" / "10d
            over" / "No date" and every one of those patterns matched nothing — which would have
@@ -849,7 +852,7 @@ test("§6 · Birds-eye — the line is where the dates are, the rows scroll, and
         date: (r.querySelector("[data-qcv='be-due-date']")?.textContent ?? "").trim(),
         dist: (r.querySelector("[data-qcv='be-due-dist']")?.textContent ?? "").trim(),
         court: r.getAttribute("data-court") };
-    }).filter(Boolean) as { mid: number; end: number; start: number; over: number | null; due: string | null; date: string; dist: string; court: string | null }[];
+    }).filter(Boolean) as { mid: number; end: number; start: number; over: number | null; overBg: string | null; due: string | null; date: string; dist: string; court: string | null }[];
     const scroller = rail.querySelector("[data-qcv='be-scroll']") as HTMLElement;
     return {
       railH: px(rb.height),
@@ -897,6 +900,15 @@ test("§6 · Birds-eye — the line is where the dates are, the rows scroll, and
      */
     if (b.over != null) near("birdseye", "…and its overrun starts at the line, or at the bar where the bar begins past it", b.over, Math.max(b.mid, b.start), 1);
   }
+  /**
+   * §1.9 · THE OVERRUN IS INK AT FULL OPACITY IN **BOTH** HOMES. The rail and the expanded view draw
+   * the same fact, and a tint in one of them makes it two facts — a reader who learns the mark in
+   * one place has to learn it again in the other. The expanded view's copy is asserted in §7; this
+   * is the rail's, and the population is asserted first so an empty set cannot pass for agreement.
+   */
+  const overBgs = [...new Set(past.map((b) => b.overBg).filter(Boolean))];
+  yes("birdseye", `some overruns were drawn to read a colour from (${past.filter((b) => b.overBg).length})`, overBgs.length > 0, JSON.stringify(overBgs));
+  is("birdseye", "§1.9 · the rail's overrun is ink at full opacity, as the expanded view's is", overBgs, ["rgb(28, 19, 15)"]);
   const wholly = past.filter((b) => b.start > b.mid + 0.6);
   record({ area: "birdseye", what: "bars that begin past the line (the whole bar is ink)", got: wholly.length, want: "reported" });
   for (const b of undated) near("birdseye", "an undated bar ends on the line — it is anchored on today", b.end, b.mid, 1);
@@ -952,7 +964,7 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
     if (!c) return null;
     const b = c.getBoundingClientRect();
     const px = (n: number) => Math.round(n * 10) / 10;
-    const col = c.querySelector("[data-qcv='xp-col']")!.getBoundingClientRect();
+
     const ttl = c.querySelector("[data-qcv='xp-title']")!.getBoundingClientRect();
     const x = c.querySelector("[data-qcv='xp-close']")!.getBoundingClientRect();
     /* ⚠️ THE ✕ MUST BE THE TOPMOST THING AT ITS OWN CENTRE — a stacking claim `getComputedStyle`
@@ -962,21 +974,26 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
       top: px(b.top), bottom: px(b.bottom), right: px(b.right), left: px(b.left), width: px(b.width),
       winLeft: px(w.left), winRight: px(w.right),
       clip: getComputedStyle(c).clipPath,
-      col: px(col.width), colMid: px(col.top + col.height / 2), ttlMid: px(ttl.top + ttl.height / 2),
+      ttlMid: px(ttl.top + ttl.height / 2), ttlLeft: px(ttl.left), ttlRight: px(ttl.right), ttlSize: parseFloat(getComputedStyle(c.querySelector("[data-qcv='xp-title']")!).fontSize),
       onTop: atX ? (atX.closest("[data-qcv='xp-close']") ? "close" : (atX.getAttribute("data-qcv") ?? atX.tagName)) : "nothing",
       stats: [...c.querySelectorAll("[data-qcv='xp-stat']")].map((e) => ({ g: e.getAttribute("data-group"), n: (e.querySelector(".qcv-xp-n")?.textContent ?? "").trim(), w: Math.round(e.getBoundingClientRect().width) })),
       backdrop: getComputedStyle(document.querySelector("[data-qcv='xp-back']")!).backgroundColor,
       cardBg: getComputedStyle(c).backgroundColor,
       /* §10 locks 4 and 5 — the column, the tray, the date row and the controls at its foot */
-      colTop: px(col.top), colBottom: px(col.bottom), cardTop: px(b.top),
+      cardTop: px(b.top),
+      tray: (() => { const t = c.querySelector("[data-qcv='xp-tray']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { x: px(r2.left), y: px(r2.top), w: px(r2.width), h: px(r2.height), r: px(r2.right), bot: px(r2.bottom) }; })(),
+      hawk: (() => { const t = c.querySelector("[data-qcv='xp-hawk']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { x: px(r2.left), y: px(r2.top), w: px(r2.width), r: px(r2.right), bot: px(r2.bottom) }; })(),
+      firstCard: (() => { const t = c.querySelector("[data-qcv='xp-stat']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { x: px(r2.left), w: px(r2.width), y: px(r2.top), bot: px(r2.bottom) }; })(),
+      tw: getComputedStyle(c).getPropertyValue("--qcv-xp-tw").trim(),
+      xTop: px(x.top), xRight: px(x.right),
+      /* §6 — the lane the controls ride in, and its own white ground (§1.5) */
+      lane: (() => { const t = c.querySelector("[data-qcv='tl-lane']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { y: px(r2.top), h: px(r2.height), bg: getComputedStyle(t).backgroundColor }; })(),
       trayTop: (() => { const t = c.querySelector("[data-qcv='xp-tray']"); return t ? px(t.getBoundingClientRect().top) : null; })(),
       trayBottom: (() => { const t = c.querySelector("[data-qcv='xp-tray']"); return t ? px(t.getBoundingClientRect().bottom) : null; })(),
       trayMid: (() => { const t = c.querySelector("[data-qcv='xp-tray']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return px(r2.top + r2.height / 2); })(),
       tierBottom: (() => { const t = c.querySelector("[data-qcv='tl-tier']"); return t ? px(t.getBoundingClientRect().bottom) : null; })(),
       laneTop: (() => { const t = c.querySelector("[data-qcv='tl-lane']"); return t ? px(t.getBoundingClientRect().top) : null; })(),
-      ctl: (() => { const t = c.querySelector("[data-qcv='xp-ctl']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { mid: px(r2.left + r2.width / 2), bottom: px(r2.bottom), top: px(r2.top) }; })(),
-      colMidX: px(col.left + col.width / 2),
-      ext: getComputedStyle(c).getPropertyValue("--qcv-xp-ext").trim(),
+      ctl: (() => { const t = c.querySelector("[data-qcv='xp-ctl']"); if (!t) return null; const r2 = t.getBoundingClientRect(); return { mid: px(r2.left + r2.width / 2), bottom: px(r2.bottom), top: px(r2.top), left: px(r2.left) }; })(),
       /* the title on ONE line — a `getClientRects` count, which a wrap turns into two */
       ttlLines: (c.querySelector("[data-qcv='xp-title']") as HTMLElement).getClientRects().length,
       /**
@@ -1024,57 +1041,94 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
   const palette = [...new Set((xp?.fills ?? []).map((f) => f.bg))].sort();
   for (const c2 of palette) seen("expanded", `fill: ${c2}`);
   yes("expanded", "the census found fills at all — an empty sweep proves nothing", palette.length > 0, JSON.stringify(xp?.fills));
-  is("expanded", "§10 lock 3 · no second surface inside — the card's white, the header band and the group band, and nothing else",
-    palette.join(" · "), "rgb(245, 241, 235) · rgb(248, 244, 238) · rgb(255, 255, 255)");
+  /**
+   * ⚠️ THE ACCENT JOINS THE PALETTE DELIBERATELY (v65.2 §6), which is the whole point of a census
+   * rather than a threshold: the tray is `--be-accent` now, so a new fill has to be ADDED here by
+   * somebody who meant it rather than slipping under a limit. What left at the same time is the
+   * date row — the lane and the tier were the tray's colour and are the card's white now (§1.5), so
+   * `rgb(245, 241, 235)` survives on nothing but the timeline's own band.
+   */
+  /* …and §7's overdue wash joins them, deliberately: a row past its date is washed across its whole
+     width, the sticky names cell included, which is a fourth stated fill rather than a fourth
+     accident. */
+  is("expanded", "§10 lock 3 · no second surface inside — the accent tray, the overdue wash, the group band and the card's white, and nothing else",
+    palette.join(" · "), "rgb(233, 201, 184) · rgb(248, 235, 227) · rgb(248, 244, 238) · rgb(255, 255, 255)");
 
   /* ── §10 lock 4 · the Courier's column, rebuilt to §8.1 (v65.1) ── */
   is("expanded", "the title is one line at 1440", xp?.ttlLines, 1);
-  const hdr = xp && xp.colTop != null && xp.colBottom != null ? {
-    cardTop: xp.cardTop, colTop: xp.colTop, colBottom: xp.colBottom,
-    trayTop: xp.trayTop, trayBottom: xp.trayBottom, laneTop: xp.laneTop, tierBottom: xp.tierBottom, ext: xp.ext,
-    colHeight: Math.round((xp.colBottom - xp.colTop) * 10) / 10,
-    trayHeight: xp.trayBottom != null && xp.trayTop != null ? Math.round((xp.trayBottom - xp.trayTop) * 10) / 10 : null,
-    dateRow: xp.tierBottom != null && xp.laneTop != null ? Math.round((xp.tierBottom - xp.laneTop) * 10) / 10 : null,
-    header: xp.tierBottom != null && xp.cardTop != null ? Math.round((xp.tierBottom - xp.cardTop) * 10) / 10 : null,
+  /**
+   * ⚠️ §11 LOCKS 4 AND 5 OF v65.1 ARE RETIRED HERE, WITH THEIR REASONS. They asserted the Courier's
+   * column: that it began at the tray's top edge rather than inside its padding, that its foot WAS
+   * the date row's foot by a height the timeline published, that the header was the tray plus the
+   * date row with the column spanning both, and that Filter/Sort/↺ sat at the column's foot centred
+   * on it. Every one was true and every one is about a thing §6 retires — the column, its drawing,
+   * its published extent and the one-block ground are gone, and the date row is white.
+   *
+   * What survives unchanged is the claim they were really for: THE TITLE CENTRES ON THE TRAY. It
+   * was the correction that ended the 394-against-258 header, and §6 states it again in its own
+   * words ("its vertical midpoint equals the tray's"). It is restated below against the new parts.
+   */
+  const hdr = xp?.tray ? {
+    tray: xp.tray.h,
+    cards: xp.firstCard ? Math.round((xp.firstCard.bot - xp.firstCard.y) * 10) / 10 : null,
+    titleWidth: Math.round((xp.ttlRight - xp.ttlLeft) * 10) / 10,
+    published: xp.tw,
   } : null;
-  record({ area: "expanded", what: "§8.1 · the header, rebuilt", got: hdr, want: "tray ~154 · date row 104 · column 258 from the tray's top · header ~258" });
-  /**
-   * ⚠️ THE COLUMN STARTS AT THE TRAY'S TOP EDGE, NOT INSIDE ITS PADDING. That 16px was the whole
-   * fault: the column stated 258, sat inside the padding, and the tray grew to 290 to hold it — a
-   * header of 394 against the design's 258, with the column's HEIGHT right all along.
-   */
-  near("expanded", "the column starts at the tray's top edge", xp?.colTop, xp?.trayTop, 0.6);
-  near("expanded", "…and at the card's top, which is the same edge", xp?.colTop, xp?.cardTop, 0.6);
-  /* …and runs through the date row, by the height the timeline PUBLISHED rather than a constant */
-  near("expanded", "the column's foot IS the date row's foot", xp?.colBottom, xp?.tierBottom, 1);
-  yes("expanded", `the timeline published the date row's height (${xp?.ext})`, /^\d+(\.\d+)?px$/.test(xp?.ext ?? ""), String(xp?.ext));
-  is("expanded", "…and the date row is 104", hdr?.dateRow, 104);
-  /**
-   * ⚠️ THE HEADER'S HEIGHT IS THE TRAY'S PLUS THE DATE ROW'S AND NOTHING ELSE — asserted as a
-   * COMPOSITION rather than as a number, because the tray's own height is the stat cards', and the
-   * cards are taller at 1280 (where their names wrap) than at 1440. The brief's "~154 and ~258" are
-   * its 1280 figures — its own card measurements say "87 × 121 at 1280; 144 wide at 1440" — so they
-   * are asserted at 1280, at the foot of this case, and reported here.
-   */
-  is("expanded", "the header is the tray plus the date row, with nothing spare",
-    hdr && hdr.trayHeight != null && hdr.dateRow != null ? Math.round((hdr.trayHeight + hdr.dateRow) * 10) / 10 : null, hdr?.header);
-  is("expanded", "…and the column is the header, because it spans both", hdr?.colHeight, hdr?.header);
-  seen("expanded", `header at 1440: ${hdr?.header} (tray ${hdr?.trayHeight} + date row ${hdr?.dateRow})`);
-  /**
-   * ⚠️ THE TITLE CENTRES ON THE TRAY, NOT ON THE COLUMN (Nick, 25 Sep). The column now runs 258
-   * through the date row while the tray is ~154, so centring on the column would drop the title
-   * below the tray's own middle. The ref renders the two midpoints level and the Courier's drawn
-   * body sits in the upper part of his column, so they read as level.
-   */
-  near("expanded", "§10 lock 4 · the title's midpoint is the TRAY's", xp?.ttlMid, xp?.trayMid, 1);
+  record({ area: "expanded", what: "§6 · the header's parts", got: hdr, want: "reported" });
 
-  /* ── §10 lock 5 · Filter, Sort and ↺ at the column's foot, centred on it ── */
-  near("expanded", "§10 lock 5 · the controls are centred on the column", xp?.ctl?.mid, xp?.colMidX, 0.6);
-  yes("expanded", `§10 lock 5 · …at the column's foot, over the date row (controls end ${xp?.ctl?.bottom}, column ${xp?.colBottom}, lane starts ${xp?.laneTop})`,
-    xp?.ctl != null && xp.colBottom != null && xp.laneTop != null && xp.ctl.bottom <= xp.colBottom + 0.6 && xp.ctl.bottom > xp.laneTop,
-    JSON.stringify({ ctl: xp?.ctl, colBottom: xp?.colBottom, laneTop: xp?.laneTop }));
-  /* the ✕ is still the topmost thing at its own centre, in the column's top-left corner */
-  is("expanded", "§10 lock 5 · the ✕ is topmost at its own centre", xp?.onTop, "close");
+  /* §6 — the tray: 22px inside the card left and right, 18px from its top, 18px corners */
+  near("expanded", "§6 · the tray sits 22px inside the card's left", (xp?.tray?.x ?? 0) - (xp?.left ?? 0), 22, 0.6);
+  near("expanded", "§6 · …and 22px inside its right", (xp?.right ?? 0) - (xp?.tray?.r ?? 0), 22, 0.6);
+  near("expanded", "§6 · …and 18px from its top", (xp?.tray?.y ?? 0) - (xp?.cardTop ?? 0), 18, 0.6);
+  yes("expanded", `§6 · the tray is at least its stated 150 floor (${xp?.tray?.h})`, (xp?.tray?.h ?? 0) >= 149.5, String(xp?.tray?.h));
+
+  /**
+   * §6 — THE TITLE'S VERTICAL MIDPOINT EQUALS THE TRAY'S. This is v65.1 lock 4's one surviving
+   * claim, restated against §6's parts: there is no column to centre on now, and `align-items:
+   * center` on the tray is what makes it true. The mock renders both at 96.3 exactly.
+   */
+  near("expanded", "§6 · the title's midpoint is the tray's", xp?.ttlMid, xp?.trayMid, 1);
+  is("expanded", "§6 · …on one line", xp?.ttlLines, 1);
+  near("expanded", "§6 · …at 46px", xp?.ttlSize, 46, 0.5);
+  near("expanded", "§6 · …26px inside the tray's left", (xp?.ttlLeft ?? 0) - (xp?.tray?.x ?? 0), 26, 1);
+
+  /**
+   * §6 — THE HEAD'S LEFT IS THE TITLE'S MEASURED RIGHT EDGE + 34, and the number the card published
+   * IS the title's rendered width. A constant left would put the picture inside the words the day
+   * the face, the copy or the fallback moved — which is why this is asserted against the title's
+   * own measured box rather than against 416.
+   */
+  near("expanded", "§6 · the head starts 34px after the title's right edge", (xp?.hawk?.x ?? 0) - (xp?.ttlRight ?? 0), 34, 1);
+  near("expanded", "§6 · …at 150 wide", xp?.hawk?.w, 150, 0.6);
+  yes("expanded", `§6 · the published width IS the title's rendered width (${xp?.tw} vs ${hdr?.titleWidth})`,
+    Math.abs(parseFloat(xp?.tw ?? "0") - (hdr?.titleWidth ?? -1)) < 1, `${xp?.tw} vs ${hdr?.titleWidth}`);
+  /* …and it is clipped by the tray's own bottom edge, which is what makes it a peek rather than a picture */
+  yes("expanded", `§6 · the head hangs past the tray's foot (${xp?.hawk?.bot} vs ${xp?.tray?.bot})`, (xp?.hawk?.bot ?? 0) > (xp?.tray?.bot ?? 0) + 1, `${xp?.hawk?.bot} vs ${xp?.tray?.bot}`);
+
+  /* §6 — the cards begin 20px after the head's right edge, and that offset is arithmetic that cancels */
+  near("expanded", "§6 · the first card begins 20px after the head's right edge", (xp?.firstCard?.x ?? 0) - (xp?.hawk?.r ?? 0), 20, 1.5);
+
+  /**
+   * §6 — FILTER, SORT AND ↺ ARE ON WHITE, 8px BENEATH THE TRAY. v65.1 lock 5 put them at the foot of
+   * the Courier's column, centred on it; there is no column, and the ground beneath the tray is
+   * white rather than a continuation of its colour (§1.5).
+   */
+  /**
+   * ⚠️ READ OFF THE CLUSTER AND THE LANE, NOT OFF A ROW — AND THE FIRST CUT READ A ROW THAT HAD
+   * BEEN DELETED. `.qcv-xp-ctlrow` was the flow row this phase replaced with an overlay in the
+   * lane; the probe went on asking for it, got null, and the assertion compared 0 against the
+   * tray's foot — reporting −305.8, which is a true statement about nothing. A probe whose subject
+   * has gone must fail as a MISSING SUBJECT rather than as a number.
+   */
+  yes("expanded", "§6 · the date row's lane is on the page (the box the controls ride in)", xp?.lane != null, JSON.stringify(xp?.lane));
+  near("expanded", "§6 · the lane begins at the tray's foot", (xp?.lane?.y ?? 0) - (xp?.tray?.bot ?? 0), 0, 1);
+  near("expanded", "§6 · the controls sit 8px into it", (xp?.ctl?.top ?? 0) - (xp?.lane?.y ?? 0), 8, 1);
+  near("expanded", "§6 · …at the card's own inner left", (xp?.ctl?.left ?? 0) - (xp?.left ?? 0), 44, 1.5);
+  is("expanded", "§1.5 · …and the date row is on white, not the tray's colour carried down", xp?.lane?.bg, "rgb(255, 255, 255)");
+  /* the ✕ is still the topmost thing at its own centre — now at the tray's top right */
+  is("expanded", "§6 · the ✕ is topmost at its own centre", xp?.onTop, "close");
+  near("expanded", "§6 · …18px from the tray's top", (xp?.xTop ?? 0) - (xp?.tray?.y ?? 0), 18, 0.6);
+  near("expanded", "§6 · …and 18px from its right", (xp?.tray?.r ?? 0) - (xp?.xRight ?? 0), 18, 0.6);
 
   near("expanded", "top — the rail's own", xp?.top, railBefore.top, 0.6);
   near("expanded", "bottom — the rail's own", xp?.bottom, railBefore.bottom, 0.6);
@@ -1102,15 +1156,11 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
 
   is("expanded", "⚠️ the ✕ is the topmost thing at its own centre", xp?.onTop, "close");
   /**
-   * ⚠️ RETIRED AND REPLACED, NOT DELETED (v65.1, Nick's correction). This asserted the title's
-   * midpoint against the COLUMN's, which was right while the column was the tray's height and is
-   * wrong now that it runs 258 through the date row — centring on it would drop the title below the
-   * tray's own middle. The ref renders the two level, and the Courier's drawn body sits in the
-   * upper part of his column, so they read as level. The claim now lives above, against the TRAY's
-   * midpoint, and is asserted at 1280 as well.
+   * ⚠️ RETIRED WITH THE COLUMN (v65.2 §6). These reported the title's midpoint against the COLUMN's
+   * and asserted the column was the names column's width. There is no column: §6's tray is a
+   * two-column grid whose first track is the title itself. The surviving claim — the title's
+   * midpoint IS the tray's — is asserted above, against §6's own parts.
    */
-  record({ area: "expanded", what: "§8.2 · the title's midpoint against the column's (superseded — the tray's is the claim)", got: { title: xp?.ttlMid, column: xp?.colMid, tray: xp?.trayMid }, want: "reported" });
-  near("expanded", "§8.1 · the column is the names column's width", xp?.col, 260, 0.6);
   is("expanded", "§8.2 · three stat cards", xp?.stats.length, 3);
   is("expanded", "…in the groups' order", xp?.stats.map((s) => s.g), ["overdue", "upcoming", "watch"]);
   is("expanded", "the page behind dims", xp?.backdrop, "rgba(28, 19, 15, 0.22)");
@@ -1182,13 +1232,12 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
     const px = (n: number) => Math.round(n * 10) / 10;
     const box = (sel: string) => { const e = c.querySelector(sel); return e ? e.getBoundingClientRect() : null; };
     const tray = box("[data-qcv='xp-tray']"); const lane = box("[data-qcv='tl-lane']");
-    const tier = box("[data-qcv='tl-tier']"); const col = box("[data-qcv='xp-col']");
+    const tier = box("[data-qcv='tl-tier']");
     return {
       lines: t.getClientRects().length, right: px(r.right), cardRight: px(b.right),
       stats: c.querySelectorAll("[data-qcv='xp-stat']").length,
       statH: px(box("[data-qcv='xp-stat']")?.height ?? 0),
       trayHeight: tray ? px(tray.height) : null,
-      colHeight: col ? px(col.height) : null,
       dateRow: tier && lane ? px(tier.bottom - lane.top) : null,
       header: tier ? px(tier.bottom - b.top) : null,
       ttlMid: px(r.top + r.height / 2),
@@ -1197,10 +1246,16 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
   });
   record({ area: "expanded", what: "the title and the header at 1280", got: narrow, want: "tray ~154 · header ~258" });
   is("expanded", "the title is one line at 1280 too", narrow?.lines, 1);
-  /* ── §8.1's own figures, at the width the brief states them for ── */
-  near("expanded", "§8.1 · the tray is back to ~154 at 1280", narrow?.trayHeight, 154, 4);
-  near("expanded", "§8.1 · …and the header with it — ~258, where it was 394", narrow?.header, 258, 4);
-  near("expanded", "§8.1 · …the column being the brief's 258", narrow?.colHeight, 258, 4);
+  /**
+   * ⚠️ §8.1's THREE FIGURES ARE RETIRED (v65.2 §6) AND ONE IS RESTATED. The tray at ~154, the header
+   * at ~258 and the column at 258 were one arrangement: a tray sized by the Courier's column, with
+   * the column running through the date row. §6 states its own floor — `min-height: 150` — and the
+   * date row is white rather than part of the header, so "the header" is no longer a thing with a
+   * single height to assert. What survives is the tray's own floor, which is the claim that stopped
+   * the 394-against-258 run away.
+   */
+  yes("expanded", `§6 · the tray keeps its 150 floor at 1280 (${narrow?.trayHeight})`, (narrow?.trayHeight ?? 0) >= 149.5, String(narrow?.trayHeight));
+  record({ area: "expanded", what: "§6 · the tray and the header at 1280, reported (the date row is white now, so the header is not one block)", got: { tray: narrow?.trayHeight, toTier: narrow?.header }, want: "reported" });
   near("expanded", "the title's midpoint is the tray's at 1280 too", narrow?.ttlMid, narrow?.trayMid, 1);
   yes("expanded", `…and its ink stays inside the card (${narrow?.right} against ${narrow?.cardRight})`, (narrow?.right ?? 1e9) <= (narrow?.cardRight ?? 0), JSON.stringify(narrow));
   is("expanded", "…with all three stat cards still drawn", narrow?.stats, 3);
@@ -1234,6 +1289,128 @@ test("§1 · ?view=calendar opens the Birds-eye view expanded, and `cal` is its 
  * is what makes it true — and the point of measuring is that "one derivation" is a property of the
  * code and "the same pixel" is a property of the page.
  */
+/**
+ * ⚠️ v65.2 §7 · THE ROWS, MEASURED. The names cell's two facts, the overdue wash reaching the sticky
+ * cell, the overrun's computed colour in BOTH views, and the one claim a source lock cannot make at
+ * all: that no sentence's ink is left of the track's visible edge.
+ */
+test("§7 · the expanded rows — the due cell, the wash, the ink overrun and the anchored sentences", async ({ page }) => {
+  await openApp(page, 1440, 860, "?view=calendar");
+  await page.waitForTimeout(1100);
+  await page.mouse.move(2, 2);
+  const r = await page.evaluate(() => {
+    const px = (n: number) => Math.round(n * 10) / 10;
+    const c = document.querySelector("[data-qcv='xp-card']") as HTMLElement;
+    const names = c.querySelector("[data-qcv='tl-names']") as HTMLElement;
+    const sc = c.querySelector("[data-qcv='tl-scroll']") as HTMLElement;
+    const rows = [...c.querySelectorAll("[data-qcv='tl-row']")] as HTMLElement[];
+    const late = rows.find((x) => x.className.includes("qcv-tl-row--late")) ?? null;
+    const ok = rows.find((x) => !x.className.includes("qcv-tl-row--late")) ?? null;
+    const clips = (e: HTMLElement | null) => (e ? e.scrollWidth > e.clientWidth + 0.5 : false);
+    /* the track's visible left edge: the scrollport's left, plus the sticky names cell over it */
+    const scb = sc.getBoundingClientRect();
+    const visLeft = px(scb.left + (names?.getBoundingClientRect().width ?? 0));
+    /**
+     * every sentence's INK, not its box — a `<span>` fills its line and the claim is about letters.
+     *
+     * ⚠️ AND ONLY THE VISIBLE ONES. `getClientRects` returns a layout box whatever an ancestor's
+     * `overflow` does with it, so a bar scrolled a thousand pixels off to the left reports its
+     * words at a thousand pixels off to the left — a true reading about something no reader can
+     * see, and the first cut of this check failed on exactly that. The claim is about sentences
+     * somebody is looking at, so the sweep takes the ones whose own box intersects the scrollport.
+     */
+    const words = [...c.querySelectorAll("[data-qcv='tl-words']")] as HTMLElement[];
+    /**
+     * ⚠️ AND IT IS READ PER BRANCH, BECAUSE THE PUSH IS CAPPED ON PURPOSE. The inset is
+     * `min(scrollLeft + 10 − left, w − 24)`: on a bar too narrow to hold the sentence the cap wins,
+     * the words stay inside their bar and the bar's own `overflow` clips them. That is the design —
+     * so a flat sweep over every sentence asserts the anchoring of sentences the anchoring was
+     * never offered to, and reports the page's own ellipsis as a fault.
+     */
+    const sent = words.map((w) => {
+      const bar = w.parentElement as HTMLElement;
+      const bb = bar.getBoundingClientRect();
+      const rg = document.createRange(); rg.selectNodeContents(w);
+      const rs = [...rg.getClientRects()];
+      if (!rs.length) return null;
+      const l = Math.min(...rs.map((q) => q.x));
+      const ml = parseFloat(getComputedStyle(w).marginLeft) || 0;
+      const cap = bb.width - 24;
+      const branch = ml <= 0.5 ? "unpushed" : (cap > 0 && ml >= cap - 0.5 ? "capped" : "anchored");
+      return { l: px(l), barL: px(bb.left), barW: px(bb.width), ml: px(ml), branch };
+    }).filter((v) => v != null) as { l: number; barL: number; barW: number; ml: number; branch: string }[];
+    const overs = [...c.querySelectorAll("[data-qcv='tl-over']")] as HTMLElement[];
+    return {
+      rows: rows.length, namesW: px(names?.getBoundingClientRect().width ?? 0),
+      due: rows.map((row) => ({
+        kind: row.querySelector("[data-qcv='tl-due']")?.getAttribute("data-due") ?? null,
+        date: (row.querySelector("[data-qcv='tl-due-date']")?.textContent ?? "").trim(),
+        dist: (row.querySelector("[data-qcv='tl-due-dist']")?.textContent ?? "").trim(),
+        clipped: clips(row.querySelector("[data-qcv='tl-due-date']")) || clips(row.querySelector("[data-qcv='tl-due-dist']")),
+      })),
+      lateBg: late ? getComputedStyle(late).backgroundColor : null,
+      lateCellBg: late ? getComputedStyle(late.querySelector("[data-qcv='tl-names']") as HTMLElement).backgroundColor : null,
+      lateCellEdge: late ? getComputedStyle(late.querySelector("[data-qcv='tl-names']") as HTMLElement).boxShadow : null,
+      okCellBg: ok ? getComputedStyle(ok.querySelector("[data-qcv='tl-names']") as HTMLElement).backgroundColor : null,
+      lateCount: rows.filter((x) => x.className.includes("qcv-tl-row--late")).length,
+      overBg: overs.length ? getComputedStyle(overs[0]).backgroundColor : null, overs: overs.length,
+      visLeft, sentences: sent.length,
+      tally: sent.reduce((a, x) => { a[x.branch] = (a[x.branch] ?? 0) + 1; return a; }, {} as Record<string, number>),
+      /* the anchored ones are the claim; the others are reported and asserted against their OWN bar */
+      anchoredWorst: (() => { const a = sent.filter((x) => x.branch === "anchored"); return a.length ? px(Math.min(...a.map((x) => x.l))) : null; })(),
+      escaped: sent.filter((x) => x.branch !== "anchored" && x.l < x.barL - 0.5).map((x) => ({ l: x.l, barL: x.barL, branch: x.branch })),
+      /* §7 — a heading whenever grouping is on */
+      bands: c.querySelectorAll("[data-qcv='tl-band']").length,
+      groups: c.querySelectorAll("[data-qcv='tl-group']").length,
+    };
+  });
+  record({ area: "xp-rows", what: "the rows, the wash, the overrun and the sentences", got: r, want: "reported" });
+  yes("xp-rows", `there are rows (${r.rows})`, r.rows > 3, String(r.rows));
+  near("xp-rows", "§6 · the names column is 300", r.namesW, 300, 1);
+  /* §7 — every row states its due date AND its distance, and neither clips */
+  for (const d of r.due) {
+    yes("xp-rows", "a row states both its date and its distance", !!d.date && !!d.dist, JSON.stringify(d));
+    yes("xp-rows", "…and neither clips in a 300px cell", !d.clipped, JSON.stringify(d));
+  }
+  const kinds = [...new Set(r.due.map((d) => d.kind))].sort();
+  record({ area: "xp-rows", what: "the due kinds this fixture drew", got: kinds, want: "reported" });
+  /* §7 — the wash reaches the sticky cell, which is the half a row-only wash gets wrong */
+  yes("xp-rows", `some rows are overdue (${r.lateCount}) — or the wash is unproved`, r.lateCount > 0, String(r.lateCount));
+  is("xp-rows", "the row's wash", r.lateBg, "rgb(248, 235, 227)");
+  is("xp-rows", "⚠️ …and the STICKY names cell's, which carries its own opaque fill", r.lateCellBg, "rgb(248, 235, 227)");
+  yes("xp-rows", "the 3px ink inset edge is on the names cell", /inset/.test(r.lateCellEdge ?? "") && /3px/.test(r.lateCellEdge ?? ""), String(r.lateCellEdge));
+  is("xp-rows", "…and an ordinary row's cell is still white", r.okCellBg, "rgb(255, 255, 255)");
+  /* §1.9 — the overrun is ink, measured rather than read out of a sheet */
+  yes("xp-rows", `there are overruns (${r.overs})`, r.overs > 0, String(r.overs));
+  is("xp-rows", "§1.9 · the overrun is ink at full opacity", r.overBg, "rgb(28, 19, 15)");
+  /**
+   * §7 — NO SENTENCE'S INK IS LEFT OF THE TRACK'S VISIBLE EDGE + 10. This is the claim only a render
+   * can make: a bar beginning off-screen took its words under the sticky cell, and on dev an offer
+   * read "ur decision was due 31 Jul". The population is asserted first — an empty sweep would
+   * report a clean result about nothing.
+   */
+  yes("xp-rows", `there are sentences (${r.sentences})`, r.sentences > 3, String(r.sentences));
+  record({ area: "xp-rows", what: "§7 · how each sentence was placed", got: r.tally, want: "reported" });
+  /* ⚠️ THE BRANCH MUST BE ENTERED, or the claim is about sentences that needed no anchoring */
+  yes("xp-rows", `the anchoring branch ran (${r.tally.anchored ?? 0} anchored of ${r.sentences})`, (r.tally.anchored ?? 0) > 0, JSON.stringify(r.tally));
+  yes("xp-rows", `no ANCHORED sentence begins left of the track's visible edge + 10 (worst ${r.anchoredWorst}, edge ${r.visLeft})`,
+    r.anchoredWorst != null && r.anchoredWorst >= r.visLeft + 9, JSON.stringify({ worst: r.anchoredWorst, edge: r.visLeft, tally: r.tally }));
+  /* …and the ones the cap kept inside their bar never escape it — the bar's own ellipsis, not a leak */
+  yes("xp-rows", `no capped sentence escapes its bar (${r.escaped.length})`, r.escaped.length === 0, JSON.stringify(r.escaped));
+  /* §7 — headings whenever grouping is on, INCLUDING while a stat card is selected */
+  is("xp-rows", "a heading per group with grouping on", r.bands, r.groups);
+  await page.locator("[data-qcv='xp-stat'][data-group='overdue']").first().click();
+  await page.waitForTimeout(500);
+  const filtered = await page.evaluate(() => {
+    const c = document.querySelector("[data-qcv='xp-card']")!;
+    return { bands: c.querySelectorAll("[data-qcv='tl-band']").length, groups: c.querySelectorAll("[data-qcv='tl-group']").length, rows: c.querySelectorAll("[data-qcv='tl-row']").length };
+  });
+  record({ area: "xp-rows", what: "§7 · with a stat card selected", got: filtered, want: "reported" });
+  yes("xp-rows", `the filter narrowed the rows (${filtered.rows} of ${r.rows})`, filtered.rows > 0 && filtered.rows < r.rows, JSON.stringify(filtered));
+  is("xp-rows", "⚠️ §7 · …and the headings are still there (the v59 ruling)", filtered.bands, filtered.groups);
+  yes("xp-rows", "…at least one of them", filtered.bands > 0, String(filtered.bands));
+});
+
 test("§8 · the expanded body — the today line, the pill and an overdue bar meet at every zoom", async ({ page }) => {
   await openApp(page, 1440, 860, "?view=calendar");
   await page.waitForTimeout(900);
@@ -1325,7 +1502,14 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
   yes("timeline", `it drew rows (${at?.rows}) and bars (${at?.bars})`, (at?.rows ?? 0) > 3 && (at?.bars ?? 0) > 3, JSON.stringify({ rows: at?.rows, bars: at?.bars }));
   record({ area: "timeline", what: "the body at 1440, on open", got: at, want: "reported" });
   is("timeline", "§8.6 · the names cell is sticky", at?.namesPos, "sticky");
-  yes("timeline", `…and opaque (${at?.namesBg}) — or the dates scroll visibly behind the names`, at?.namesBg === "rgb(255, 255, 255)", String(at?.namesBg));
+  /**
+   * ⚠️ THE CLAIM IS OPACITY, NOT WHITENESS, AND §7 IS WHY. An overdue row's names cell is the wash
+   * now (`#f8ebe3`) — it has to be, or a white rectangle slides over a blush row — so a check that
+   * demanded white would fail on a correct page. What must never happen is an ALPHA below 1, which
+   * is what lets the dates scroll visibly behind the names.
+   */
+  yes("timeline", `…and opaque (${at?.namesBg}) — or the dates scroll visibly behind the names`,
+    /^rgb\(/.test(at?.namesBg ?? "") && !/rgba\([^)]*,\s*0?\.\d+\s*\)/.test(at?.namesBg ?? ""), String(at?.namesBg));
   is("timeline", "§8.4 · the date track scrolls sideways", at?.scrolls, true);
   yes("timeline", `§8.5 · the heat drew weeks (${at?.heat})`, (at?.heat ?? 0) > 4, String(at?.heat));
   yes("timeline", `§8.4 · the tier drew months (${at?.months})`, (at?.months ?? 0) > 2, String(at?.months));
@@ -1452,6 +1636,20 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
     if (got) sweep.push({ x: Math.round(x), lineL: got.lineL, tagL: got.tagL, tagR: got.tagR, under: got.lineL >= got.ctlL && got.lineL <= got.ctlR });
   }
   record({ area: "timeline", what: "§8.9 · the tag swept across the lane's controls", got: { ctl: { l: Math.round(ctlBox.l), r: Math.round(ctlBox.r) }, sweep }, want: "reported" });
+  /**
+   * ⚠️ AND THE LINE IS AT THE POINTER, WHICH IS THE CLAIM THE SWEEP EXISTS ON TOP OF. The scroller's
+   * box starts at the names column and `crosshairAt` reads the TRACK's coordinates, so a missing
+   * `- NAMES_W` draws the line a names-width right of the pointer and names a day a fortnight late —
+   * measured at 298px, through every green gate, because no declaration is wrong. The tolerance is
+   * one DAY, derived from the tier's own week ticks rather than typed, because the crosshair snaps.
+   */
+  const pxd = await page.evaluate(() => {
+    const w = [...document.querySelectorAll("[data-qcv='tl-tier'] .qcv-tl-wk")].map((e) => e.getBoundingClientRect().left);
+    return w.length > 1 ? Math.round(((w[1] - w[0]) / 7) * 100) / 100 : NaN;
+  });
+  yes("timeline", `the week ticks gave a day's width (${pxd}px)`, pxd > 0, String(pxd));
+  const adrift = sweep.filter((r) => Math.abs(r.lineL - r.x) > pxd + 1.5);
+  yes("timeline", `§10 · the crosshair's line lands on the pointer at every position (${adrift.length} adrift by more than a day)`, adrift.length === 0, JSON.stringify(adrift));
   yes("timeline", `the sweep read the tag at every position (${sweep.length} of 7)`, sweep.length === 7, JSON.stringify(sweep));
   /* the precondition: the crosshair's own line really was under the controls somewhere in the sweep */
   const underRuns = sweep.filter((r) => r.under);
@@ -1467,7 +1665,105 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
   await page.waitForTimeout(250);
   is("timeline", "§8.9 · the crosshair hides over the names column", await page.evaluate(() => document.querySelectorAll("[data-qcv='tl-tag']").length), 0);
 
+  /**
+   * §9 · THE DRAG, MEASURED RATHER THAN READ. The source lock asserts the handler's exclusion list;
+   * only the page can say whether a press on a control still behaves as a click. Two presses, one
+   * gesture each: on the dates, where the track must move with the pointer, and on a zoom pill,
+   * where it must not move at all and the pill must still take the press.
+   */
+  /* ⚠️ A READING, NOT A DEREFERENCE: a crash names a line number where a failure names a property,
+     and in a long case the difference is an hour. */
+  const scrollNow = async (tag = "") => {
+    const v = await page.evaluate(() => { const e = document.querySelector("[data-qcv='tl-scroll']") as HTMLElement | null; return e ? e.scrollLeft : null; });
+    yes("timeline", `§9 · the expanded card is open (the precondition${tag ? ", " + tag : ""})`, v != null, String(v));
+    return v ?? 0;
+  };
+  const tierMid = await page.evaluate(() => { const t = document.querySelector("[data-qcv='tl-tier']")!.getBoundingClientRect(); const s = document.querySelector("[data-qcv='tl-scroll']")!.getBoundingClientRect(); return { x: s.left + s.width * 0.7, y: t.top + t.height / 2 }; });
+  const beforeDrag = await scrollNow("before the drag");
+  await page.mouse.move(tierMid.x, tierMid.y);
+  await page.mouse.down();
+  for (let i = 1; i <= 4; i += 1) await page.mouse.move(tierMid.x - i * 50, tierMid.y);
+  await page.mouse.up();
+  await page.waitForTimeout(150);
+  const afterDrag = await scrollNow("after the drag");
+  yes("timeline", `§9 · a drag on the dates pans the track (${beforeDrag} → ${afterDrag})`, afterDrag - beforeDrag > 150, `${beforeDrag} → ${afterDrag}`);
+
   await page.screenshot({ path: resolve(OUT, "expanded-body-1440.png") });
+  /**
+   * §8 · OPENING ON TODAY IS A CLAIM ABOUT EVERY OPEN, NOT THE FIRST. Closing and re-opening
+   * WITHOUT a page load is the only way to see it: a reload rebuilds the module, so a view that
+   * remembered where it was left would place itself correctly on a fresh load and open in 2023 the
+   * second time somebody reached for it. The drag and the zooms above have left the scroll a long
+   * way from today, which is what makes the re-open worth taking.
+   */
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(500);
+  await page.locator("[data-qcv='be-expand']").click();
+  await page.waitForTimeout(900);
+  const reopened = await page.evaluate(() => {
+    const card = document.querySelector("[data-qcv='xp-card']");
+    const sc = card?.querySelector("[data-qcv='tl-scroll']") as HTMLElement | null;
+    const line = card?.querySelector("[data-qcv='tl-todayline']")?.getBoundingClientRect();
+    const nm = card?.querySelector("[data-qcv='tl-names']")?.getBoundingClientRect();
+    if (!sc || !line || !nm) return null;
+    const b = sc.getBoundingClientRect();
+    const trackL = nm.right, trackW = b.right - trackL;
+    return { on: line.left > trackL && line.left < b.right, at: Math.round(((line.left - trackL) / trackW) * 1000) / 10 };
+  });
+  yes("timeline", `§8 · a re-opened view places itself on today again (${reopened?.at}% of the track)`, !!reopened?.on, JSON.stringify(reopened));
+  near("timeline", "§8 · …at 58% of the visible track", reopened?.at, 58, 8);
+  /**
+   * ⚠️ AND THE GESTURE THAT MUST DO NOTHING — ON A CONTROL INSIDE THE DRAG SURFACE. The first cut
+   * pressed the zoom pill and could never have failed: the controls live in the LANE, a sibling of
+   * the scroller, so a press on them never reaches the scroller's handler and the exclusion list it
+   * was written to prove had nothing to do with the reading. **A bar is a `<button>` inside the
+   * scroller**, which is what the list actually protects, and dropping `button` from it reddens
+   * this and nothing else.
+   */
+  /* …and the bar has to be one a pointer can actually reach: `.first()` is routinely scrolled off
+     the track, and a press at coordinates outside the scroller is a press on nothing. */
+  /* ⚠️ THIS LEG RUNS AFTER THE RE-OPEN, WHERE THE VIEW HAS JUST PLACED ITSELF ON TODAY. Run before
+     it, the drag and the three zooms above have left the track a long way off and there is no bar a
+     pointer can reach — a press on nothing, which is not the same as a press that must not pan. */
+  /**
+   * …and the lane's own controls still work, which is the other half of the same rule. It runs
+   * BEFORE the bar press because releasing that press opens the query and closes the calendar, so
+   * anything after it is a click on a page that has gone — measured as a 7-minute timeout.
+   */
+  const zoomPill = page.locator("[data-qcv='tl-zoom'] button[data-z='6m']");
+  await zoomPill.click();
+  await page.waitForTimeout(500);
+  is("timeline", "§9 · a click on the zoom still zooms", await zoomPill.getAttribute("aria-pressed"), "true");
+  const zb = await page.evaluate(() => {
+    const sc = document.querySelector("[data-qcv='tl-scroll']")!.getBoundingClientRect();
+    const names = document.querySelector("[data-qcv='tl-names']")!.getBoundingClientRect().right;
+    for (const e of [...document.querySelectorAll("[data-qcv='tl-bar']")]) {
+      const r = e.getBoundingClientRect();
+      /* the POINT has to be pressable: inside the scrollport, and right of the sticky names cell */
+      const x = Math.max(r.left, names + 30) + 8, y = r.top + r.height / 2;
+      const hit = document.elementFromPoint(x, y) as HTMLElement | null;
+      if (x < r.right - 8 && x < sc.right - 20 && y > sc.top + 4 && y < sc.bottom - 4 && hit?.closest("[data-qcv='tl-bar']") === e) return { x, y, w: r.width };
+    }
+    return null;
+  });
+  yes("timeline", "§9 · a bar was on screen to press", !!zb, JSON.stringify(zb));
+  const beforeCtl = await scrollNow("before the bar press");
+  await page.mouse.move(zb!.x, zb!.y);
+  await page.mouse.down();
+  for (let i = 1; i <= 4; i += 1) await page.mouse.move(zb!.x - i * 50, zb!.y);
+  /**
+   * ⚠️ READ WHILE THE BUTTON IS STILL DOWN. Releasing 200px from where the press began makes the
+   * browser fire its click on the nearest common ancestor of the two — the ROW — which opens the
+   * query and takes the calendar with it, so a reading taken afterwards is about a page that has
+   * gone. The claim is about the gesture, and the gesture is what is happening right now.
+   */
+  const afterCtl = await scrollNow("during the bar press");
+  await page.mouse.up();
+  await page.waitForTimeout(400);
+  /* ⚠️ THE CLAIM IS THAT NOTHING PANNED, NOT THAT A CLICK FIRED. A press that travels 200px and
+     releases elsewhere is not a click by the browser's own rule, so asserting one would be a claim
+     about Chromium. What the exclusion buys is that the gesture never became a drag. */
+  is("timeline", `§9 · a press on a bar pans nothing (${Math.round(beforeCtl)} → ${Math.round(afterCtl)})`, Math.abs(afterCtl - beforeCtl) < 1.5, true);
   await page.keyboard.press("Escape");
   await page.waitForTimeout(400);
 });
@@ -1527,11 +1823,11 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
     if (!card) return null;
     const px = (n: number) => Math.round(n * 10) / 10;
     const box = (s: string, root: Element = card) => { const e = root.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return { x: px(b.left), y: px(b.top), w: px(b.width), h: px(b.height), mid: px(b.left + b.width / 2), bottom: px(b.bottom) }; };
-    const col = card.querySelector("[data-qcv='xp-col']")!.getBoundingClientRect();
     const sc = card.querySelector("[data-qcv='tl-scroll']") as HTMLElement | null;
     const ctl = card.querySelector("[data-qcv='xp-ctl']");
     return {
-      col: { x: px(col.left), w: px(col.width), mid: px(col.left + col.width / 2), bottom: px(col.bottom) },
+      tray: box("[data-qcv='xp-tray']"),
+      nav: box("[data-qcv='tl-controls']"),
       ctl: box("[data-qcv='xp-ctl']"),
       filter: box("[data-qcv='xp-filter']"),
       sort: box("[data-qcv='xp-sort']"),
@@ -1610,13 +1906,18 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
   is("controls", "Filter is 40px tall", rest?.filter?.h, 40);
   is("controls", "Sort is 40px tall", rest?.sort?.h, 40);
   /**
-   * ⚠️ CENTRED ON THE COLUMN, NOT ON THEMSELVES — the claim is a relationship between two boxes,
-   * so it is measured as one. A pinned x would pass on a column that had moved and taken the
-   * buttons with it, which is the thing the rule is there to prevent.
+   * ⚠️ RETARGETED IN v65.2 §6 — THE CLUSTER LEFT THE COLUMN. It used to be centred on the Courier's
+   * column and sat at its foot, and both claims were relationships between two boxes rather than
+   * pinned coordinates, which was right. §6 retires the column: the cluster sits on WHITE, 8px
+   * beneath the tray, at the card's own inner left. The claim is still a relationship, and it is
+   * still measured as one.
    */
-  near("controls", "the cluster's midline is the column's", rest?.ctl?.mid, rest?.col.mid, 0.6);
-  yes("controls", `the cluster is at the column's foot (cluster ends ${rest?.ctl?.bottom}, the column ${rest?.col.bottom})`,
-    rest != null && rest.ctl != null && rest.col.bottom - rest.ctl.bottom < 24 && rest.ctl.bottom <= rest.col.bottom, JSON.stringify({ ctl: rest?.ctl?.bottom, col: rest?.col.bottom }));
+  near("controls", "the cluster sits 8px into the date row's lane, which begins at the tray's foot", (rest?.ctl?.y ?? 0) - (rest?.tray?.bottom ?? 0), 8, 1);
+  yes("controls", `…and starts at the card's inner left, not centred on anything (${rest?.ctl?.x})`,
+    rest != null && rest.ctl != null && rest.tray != null && Math.abs(rest.ctl.x - (rest.tray.x + 22)) < 1.5,
+    JSON.stringify({ ctl: rest?.ctl?.x, tray: rest?.tray?.x }));
+  /* §6 — "sharing one row": the left cluster and the nav sit at the SAME offset in the lane */
+  near("controls", "…on the same line as the nav", rest?.ctl?.y, rest?.nav?.y, 0.6);
 
   /* ⚠️ THE WIDTHS ARE REPORTED, NOT ASSERTED. The ref draws Filter 107 × 40 and Sort 91 × 40; both
      are content-sized here, so pinning them would be a lock on a font's metrics rather than on the
@@ -2355,6 +2656,38 @@ test("§14 · the offsets table — reported at 1440×860 and 1280×800", async 
      the control row's 15px of air for the retired view switch went with it */
   record({ area: "§14 offsets", what: "the first Ledger row's top at 1280×800 (702.5 with the strip → 394.7 without → 372.1 at v21's close → now, with the courts)", got: rowTop, want: "reported" });
   /**
+ * §13 · THE HEADER, BESIDE THE MOCK'S, AT BOTH WIDTHS. The brief asks for this each phase, and it is
+ * a screenshot rather than an assertion on purpose: the numbers around it are locked above, and what
+ * a picture adds is the thing no number states — whether the two read as the same object.
+ */
+test("§13 · the expanded header, ours and the mock's, at 1280 and 1920", async ({ page, browser }) => {
+  const refPage = await (await browser.newContext()).newPage();
+  const shot: Record<string, string> = {};
+  for (const w of [1280, 1920]) {
+    await openApp(page, w, 900, "?view=calendar");
+    await page.waitForTimeout(1100);
+    const tray = page.locator("[data-qcv='xp-tray']");
+    await tray.screenshot({ path: resolve(OUT, `xp-head-app-${w}.png`) });
+    shot[`app-${w}`] = `xp-head-app-${w}.png`;
+    /* the mock opens its own sheet through the function its UI calls — no guessing at a trigger */
+    await refPage.setViewportSize({ width: refWindowFor(w - 268 - 44), height: 900 });
+    await refPage.goto(REF);
+    await refPage.evaluate(() => document.fonts.ready);
+    await refPage.waitForTimeout(1200);
+    await refPage.evaluate(() => (window as unknown as { openSheet: (n: number) => void }).openSheet(-1));
+    await refPage.waitForTimeout(900);
+    const csh = refPage.locator(".csh").first();
+    if (await csh.count()) {
+      await csh.screenshot({ path: resolve(OUT, `xp-head-ref-${w}.png`) });
+      shot[`ref-${w}`] = `xp-head-ref-${w}.png`;
+    }
+  }
+  record({ area: "shots", what: "§13 · the expanded header, ours and the mock's", got: shot, want: "reported" });
+  yes("shots", `four header shots were taken (${Object.keys(shot).length})`, Object.keys(shot).length === 4, JSON.stringify(shot));
+  await refPage.close();
+});
+
+/**
    * ⚠️ A CLAIM ABOUT THE FOLD, NOT A NUMBER. It was `rowTop < 500` and measured 500.2 once the three
    * court tiles arrived — a threshold tuned to one layout, failing by two tenths on a change that
    * put a whole row of new information above it. What matters is that a reader lands on the ledger

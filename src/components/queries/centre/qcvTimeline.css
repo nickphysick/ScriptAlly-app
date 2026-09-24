@@ -16,11 +16,19 @@
 .qcv-tl { position: relative; display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
 
 /* §8.4 — the lane: 52px of the tray's colour, with the controls over it */
+/**
+ * §1.5 / §6 — THE DATE ROW IS ON WHITE. v65 ran the tray's colour down through the lane and the
+ * tier so the two read as one coloured band; §6 retires that — the tray is a shape with four
+ * corners and the date row beneath it is the card's own white, closed by a hairline.
+ *
+ * ⚠️ `--qcv-tl-lanetop` IS THE ONE OFFSET BOTH OF THE LANE'S CLUSTERS READ. §6's words are "sharing
+ * one row", and two numbers a couple of pixels apart is exactly how that stops being true.
+ */
 .qcv-tl-lane {
   position: relative; flex: none; height: 52px; box-sizing: border-box;
-  background: #f5f1eb; border-bottom: 1px solid rgba(28, 19, 15, 0.1);
+  background: #fff; border-bottom: 1px solid rgba(28, 19, 15, 0.1);
 }
-.qcv-tl-controls { position: absolute; top: 6px; left: calc(var(--qcv-tl-names) + 18px); display: flex; align-items: center; gap: 10px; z-index: 4; }
+.qcv-tl-controls { position: absolute; top: var(--qcv-tl-lanetop); left: calc(var(--qcv-tl-names) + 18px); display: flex; align-items: center; gap: 10px; z-index: 4; }
 .qcv-tl-nav, .qcv-tl-zoom { display: flex; align-items: center; height: 40px; box-sizing: border-box; background: #fff; border: 1px solid rgba(28, 19, 15, 0.12); border-radius: 20px; }
 .qcv-tl-nav button {
   height: 100%; padding: 0 12px; border: 0; background: none; cursor: pointer;
@@ -63,7 +71,15 @@
  * §8.4 — the date tier. The tray's colour carries on down through it, so the header and the dates
  * read as ONE block with the rows starting on white beneath a single hairline.
  */
-.qcv-tl-tier { position: relative; height: 52px; background: #f5f1eb; border-bottom: 1px solid rgba(28, 19, 15, 0.1); }
+/**
+ * §9 — THE TIER IS THE DRAG HANDLE, so it says so in the cursor and in `touch-action`.
+ *
+ * ⚠️ `pan-y` RATHER THAN `none`: a horizontal drag pans the dates and a vertical one still scrolls
+ * the page, which is what a reader on a phone expects of a wide thing inside a tall one.
+ */
+.qcv-tl-tier { position: relative; height: 52px; background: #fff; border-bottom: 1px solid rgba(28, 19, 15, 0.1); cursor: grab; touch-action: pan-y; }
+/* §9 — grabbing applies to the WHOLE body while a drag is live, not just the tier the press began on */
+.qcv-tl-scroll--drag, .qcv-tl-scroll--drag * { cursor: grabbing !important; }
 .qcv-tl-mon {
   position: absolute; top: 6px; transform: translateX(-50%);
   font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap;
@@ -71,7 +87,8 @@
 .qcv-tl-wk { position: absolute; bottom: 0; width: 1px; height: 4px; background: rgba(28, 19, 15, 0.16); }
 /* §8.5 — the heat sits UNDER the labels and over nothing */
 .qcv-tl-heat { position: absolute; left: 0; right: 0; bottom: 5px; height: 24px; }
-.qcv-tl-heat i { position: absolute; bottom: 0; background: var(--sp-anthracite); border-radius: 2px; }
+/* §9 — navy, 3px TOP corners (they rise from the tier's floor), 1px gaps between the weeks */
+.qcv-tl-heat i { position: absolute; bottom: 0; background: var(--sp-anthracite); border-radius: 3px 3px 0 0; }
 .qcv-tl-todaypill {
   position: absolute; top: 5px; transform: translateX(-50%); z-index: 2;
   padding: 3px 9px 4px; border-radius: 9px; background: var(--qcv-ink); color: #f5f1eb;
@@ -83,6 +100,7 @@
 /* ⚠️ THE TODAY LINE AND THE CROSSHAIR RUN THE ROWS' FULL HEIGHT, and both are placed from the same
    `xAt` every bar is placed from — one derivation, so they cannot drift apart at a zoom. */
 .qcv-tl-todayline { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--qcv-ink); z-index: 3; pointer-events: none; }
+/* §10 — 1px at 28% ink, snapped to the day, through the tier and the rows alike */
 .qcv-tl-cross { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(28, 19, 15, 0.28); z-index: 3; pointer-events: none; }
 .qcv-tl-none { margin: 40px 0; text-align: center; font-family: var(--qcv-type); font-size: 15px; color: var(--qcv-ink-45); }
 
@@ -105,8 +123,34 @@
 /* ⚠️ STICKY AND OPAQUE — a transparent sticky cell has the dates scrolling visibly behind the names */
 .qcv-tl-names {
   position: sticky; left: 0; z-index: 2; display: flex; align-items: center; gap: 10px;
-  box-sizing: border-box; padding: 0 12px 0 18px; background: #fff; border-right: 1px solid var(--qcv-hair);
+  box-sizing: border-box; padding: 0 14px 0 18px; background: #fff; border-right: 1px solid var(--qcv-hair);
 }
+/**
+ * §7 — the due date over its distance, at the cell's right. The same two facts the rail's right
+ * column states, in the same type, from the same `dueCell`: either alone leaves the reader doing
+ * arithmetic — "10d over" does not say which day, "9 Sep" does not say whether it has gone.
+ */
+.qcv-tl-due { margin-left: auto; padding-left: 8px; text-align: right; flex: none; }
+.qcv-tl-due b { display: block; font-family: var(--qcv-serif); font-weight: 600; font-size: 12px; line-height: 1.1; color: var(--qcv-ink); white-space: nowrap; }
+.qcv-tl-due u {
+  display: block; margin-top: 2px; text-decoration: none;
+  font-family: var(--qcv-mono); font-weight: 400; font-size: 7px; line-height: 1.1;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcv-ink-45); white-space: nowrap;
+}
+.qcv-tl-due--late u { font-weight: 700; color: var(--qcv-ink); }
+.qcv-tl-due[data-due="none"] b { color: var(--qcv-ink-45); }
+
+/**
+ * §7 — AN OVERDUE ROW IS WASHED ACROSS THE WHOLE ROW, THE STICKY NAMES CELL INCLUDED, and the 3px
+ * ink edge is on that cell.
+ *
+ * ⚠️ THE CELL NEEDS ITS OWN FILL, NOT THE ROW'S. It is `position: sticky` with an opaque white of
+ * its own — that opacity is what stops the dates scrolling visibly behind the names — so a wash on
+ * the row alone leaves a white rectangle sliding over a blush row, which is worse than no wash.
+ */
+.qcv-tl-row--late { background: #f8ebe3; border-bottom-color: #efdcd1; }
+.qcv-tl-row--late .qcv-tl-names { background: #f8ebe3; box-shadow: inset 3px 0 0 var(--qcv-ink); }
+.qcv-tl-row--late:hover, .qcv-tl-row--late:hover .qcv-tl-names { background: #f5e3d9; }
 .qcv-tl-row:hover .qcv-tl-names { background: var(--qcv-parchment); }
 .qcv-tl-ini {
   flex: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -134,9 +178,27 @@
 .qcv-tl-bar:hover { box-shadow: inset 0 0 0 1.6px var(--qcv-ink); }
 .qcv-tl-bar:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 1px; }
 /* the ink stretch from the expected date to today — no words, because the chip states the number */
-.qcv-tl-over { position: absolute; top: 0; bottom: 0; background: rgba(28, 19, 15, 0.55); border-left: 1.5px solid var(--qcv-ink); }
+/**
+ * §7 / §1.9 — THE OVERRUN IS INK AT FULL OPACITY. It was `rgba(28, 19, 15, 0.55)`, which renders
+ * taupe over a bar's own colour — reported as a token failing to resolve and diagnosed by Nick as
+ * the alpha itself. It is the same fact the rail's `.qcv-be-over` states, so the two carry the same
+ * value: a stretch past the date is ink, never a tint of one.
+ */
+.qcv-tl-over { position: absolute; top: 0; bottom: 0; background: var(--qcv-ink); border-left: 1.5px solid var(--qcv-ink); }
 /* ⚠️ THE STRETCH BEYOND TODAY IS HOLLOW — it has not happened, so it is drawn as time left */
 .qcv-tl-ahead { position: absolute; top: 0; bottom: 0; background: rgba(255, 255, 255, 0.68); border-left: 1.5px dashed rgba(28, 19, 15, 0.45); }
+/**
+ * §7 — THE SENTENCE IS ANCHORED TO THE VISIBLE PART OF ITS BAR, not to the bar's left edge.
+ *
+ * ⚠️ A BAR THAT BEGINS OFF-SCREEN LEFT TOOK ITS WORDS WITH IT AND SLID THEM UNDER THE STICKY NAMES
+ * CELL — on dev an offer read "ur decision was due 31 Jul", a sentence with its first half eaten.
+ *
+ * ⚠️ AND `position: sticky` CANNOT DO IT HERE, WHICH THE MEASUREMENT PROVED. The bar carries
+ * `overflow: hidden`, so the bar IS the sticky child's nearest scrollport and the words stuck to a
+ * box that never scrolls — ink at −8360 against a visible edge of 568. The offset is computed in
+ * `QcTimeline` instead, as a MARGIN, because a margin also takes the width away and that is what
+ * turns "does not fit" into the ellipsis below.
+ */
 .qcv-tl-words {
   position: relative; z-index: 1; font-family: var(--qcv-type); font-size: 11.5px; line-height: 22px; color: var(--qcv-ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;

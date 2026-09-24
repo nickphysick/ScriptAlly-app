@@ -365,12 +365,12 @@ describe("the sheet", () => {
     expect(atRoot.size, "the palette is at :root").toBeGreaterThan(8);
     /* published from JS onto an element inside the subtree that reads them, so they resolve there */
     const PUBLISHED: Record<string, string> = {
-      "--qcv-xp-lcol": "src/components/queries/centre/QcExpanded.tsx",
+      /* ⚠️ `--qcv-xp-lcol` AND `--qcv-xp-ext` LEFT THIS MAP WITH THE COURIER'S COLUMN (v65.2 §6).
+         Both sized it; §6 retires it, so neither has a publisher or a reader. An exemption for a
+         token nothing publishes is exactly what this check exists to catch. */
+      "--qcv-xp-tw": "src/components/queries/centre/QcExpanded.tsx",
       "--qcv-tl-names": "src/components/queries/centre/QcTimeline.tsx",
       "--qcv-state": "src/components/queries/centre/QcTimeline.tsx",
-      /* §8.1 — the date row's measured height, published onto the card so the tray's column can
-         extend through it. The timeline owns the measurement; the tray is a sibling one level up. */
-      "--qcv-xp-ext": "src/components/queries/centre/QcTimeline.tsx",
     };
     for (const [tok, writer] of Object.entries(PUBLISHED)) {
       const w = read(writer);

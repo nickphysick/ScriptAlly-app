@@ -205,8 +205,12 @@
 .qcv-be-bar--dash { background: repeating-linear-gradient(90deg, rgba(28, 19, 15, 0.18) 0 4px, transparent 4px 8px); }
 /* the move is the writer's — the same rust, meaning the same thing, as everywhere else */
 .qcv-be-bar--you { box-shadow: inset 3px 0 0 var(--qcv-rust), inset 0 0 0 1px rgba(28, 19, 15, 0.07); }
-/* the stretch past the date: ink, and no text — the day count at the row's right states the number */
-.qcv-be-over { position: absolute; top: 0; bottom: 0; background: rgba(28, 19, 15, 0.55); border-left: 1.5px solid var(--qcv-ink); }
+/**
+ * §1.9 — the stretch past the date: INK AT FULL OPACITY, and no text; the row's right column states
+ * the number. It was `rgba(28, 19, 15, 0.55)`, which renders taupe over the bar's own colour — the
+ * expanded view's `.qcv-tl-over` carried the same alpha and the same fault, and both are ink now.
+ */
+.qcv-be-over { position: absolute; top: 0; bottom: 0; background: var(--qcv-ink); border-left: 1.5px solid var(--qcv-ink); }
 /* §6.2 — watch-and-wait bars sit back until the row is under the pointer */
 .qcv-be-row--watch .qcv-be-bar { opacity: 0.72; }
 .qcv-be-row--watch:hover .qcv-be-bar { opacity: 1; }

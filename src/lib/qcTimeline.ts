@@ -30,21 +30,27 @@ export const NUDGE_WEEKS = 4;
 
 export const clampPxd = (pxd: number): number => Math.min(PXD_MAX, Math.max(PXD_MIN, pxd));
 
-export interface ZoomPreset { key: string; label: string; days: number }
+export interface ZoomPreset { key: string; label: string; pxd: number }
+/**
+ * ⚠️ A PRESET IS A SCALE, NOT A SPAN (v65.2 §8, Nick's ruling of 24 Sep). They were `days` and the
+ * scale was `trackW / days`, so "3m" meant a different px/day on every window — and `PXD_DEFAULT`,
+ * which is a scale, could only light a preset by coincidence of width. The mock states them as
+ * scales: 6w = 21, 3m = 10.5, 6m = 5, and 10.5 is the default, so the view opens on 3m lit.
+ */
 export const ZOOM_PRESETS: readonly ZoomPreset[] = [
-  { key: "6w", label: "6w", days: 42 },
-  { key: "3m", label: "3m", days: 91 },
-  { key: "6m", label: "6m", days: 182 },
+  { key: "6w", label: "6w", pxd: 21 },
+  { key: "3m", label: "3m", pxd: 10.5 },
+  { key: "6m", label: "6m", pxd: 5 },
 ];
-/** The scale a preset means in a track this wide. */
-export const pxdForPreset = (p: ZoomPreset, trackW: number): number => clampPxd(trackW / p.days);
+/** The scale a preset means — its own, clamped to what the view allows. */
+export const pxdForPreset = (p: ZoomPreset): number => clampPxd(p.pxd);
 /**
  * ⚠️ THE SWITCH LIGHTS WHICHEVER PRESET IS WITHIN 0.6 OF THE CURRENT SCALE, and none of them
  * otherwise. A switch that always showed one lit would claim the view is at a preset when a pinch
  * has taken it somewhere between two.
  */
-export const activePreset = (pxd: number, trackW: number): string | null =>
-  ZOOM_PRESETS.find((p) => Math.abs(pxdForPreset(p, trackW) - pxd) <= 0.6)?.key ?? null;
+export const activePreset = (pxd: number): string | null =>
+  ZOOM_PRESETS.find((p) => Math.abs(pxdForPreset(p) - pxd) <= 0.6)?.key ?? null;
 
 /* ── §8.4 · the extent ── */
 

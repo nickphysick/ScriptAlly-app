@@ -18,6 +18,7 @@
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
+import { dueCell } from "../../../lib/qcBirdsEye";
 import { groupRows, type CalView } from "../../../lib/qcCalView";
 import type { QcRow } from "../../../lib/qcSummary";
 import {
@@ -29,7 +30,9 @@ import "./qcvTimeline.css";
 
 const DAY = 86_400_000;
 /** §8.6 — the names column, and §8.1's Courier column above it are the same width. */
-export const NAMES_W = 260;
+/* §6 — 300 since v65.2 (it was 260): the names cell now carries the due date and its distance at
+   its right, which is 44px of type the old width had nowhere to put. */
+export const NAMES_W = 300;
 
 export const QcTimeline: React.FC<{
   rows: readonly QcRow[];
@@ -43,8 +46,10 @@ export const QcTimeline: React.FC<{
   /** §8.11 — a row or a bar opens the query, centred and in focus. */
   onOpen: (id: string) => void;
   /** §8.7 — the dotted chip opens the app's nudge flow for that query. */
+  /** §6 — Filter, Sort and ↺, rendered into the date row's top lane. */
+  leftControls?: React.ReactNode;
   onNudge: (id: string) => void;
-}> = ({ rows, view, packageName, nowMs, focusId = null, onOpen, onNudge }) => {
+}> = ({ rows, view, packageName, nowMs, focusId = null, onOpen, leftControls, onNudge }) => {
   const boxRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [boxW, setBoxW] = useState(0);
@@ -63,34 +68,14 @@ export const QcTimeline: React.FC<{
   const ctlRef = useRef<HTMLDivElement>(null);
   const [ctlW, setCtlW] = useState(0);
   /**
-   * §8.1 — the date row's height, PUBLISHED so the Courier's column can extend through it.
-   *
-   * ⚠️ IT CROSSES A COMPONENT BOUNDARY, WHICH IS WHY IT IS A TOKEN AND NOT A CONSTANT. The date row
-   * is this component's; the column is the card's tray, one level up and a sibling away. A number
-   * restated in the tray would be right until the lane or the tier moved, and the column would then
-   * stop short of the dates or hang past them with nothing to point at. Same arrangement as
-   * `--qcv-rail-pad`: the thing that OWNS the measurement publishes it, and the reader takes the
-   * resting value as its fallback so the first frame is the common case.
+   * ⚠️ `--qcv-xp-ext` IS RETIRED (v65.2 §6), NOT MERELY UNREAD. It published the distance from the
+   * lane's top to the date tier's foot so the Courier's column could overflow DOWNWARD through the
+   * date row without adding to the tray's height — the whole mechanism v65.1 phase 1 was built on.
+   * §6 retires that column, so the number has nobody to tell: a publication with no reader is a
+   * knob the next person goes looking for, and this repo has paid for one of those already.
    */
   const laneRef = useRef<HTMLDivElement>(null);
   const tierRef = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    const lane = laneRef.current;
-    const tier = tierRef.current;
-    const card = boxRef.current?.closest("[data-qcv='xp-card']") as HTMLElement | null;
-    if (!lane || !tier || !card) return undefined;
-    const read = () => {
-      const h = tier.getBoundingClientRect().bottom - lane.getBoundingClientRect().top;
-      if (h > 0) card.style.setProperty("--qcv-xp-ext", `${Math.round(h * 10) / 10}px`);
-    };
-    read();
-    if (typeof ResizeObserver === "undefined") return undefined;
-    const ro = new ResizeObserver(read);
-    ro.observe(lane);
-    ro.observe(tier);
-    return () => ro.disconnect();
-  }, []);
 
   useLayoutEffect(() => {
     const el = ctlRef.current;
@@ -177,11 +162,21 @@ export const QcTimeline: React.FC<{
    * stops it fighting the reader. Anything the reader does to the track (a wheel, a pan, a zoom, a
    * Today, a glide) marks it, and from then on the view is theirs and nothing re-places it.
    */
-  const placedFor = useRef<number | null>(null);
+  const placedFor = useRef<string | null>(null);
   const touched = useRef(false);
   useLayoutEffect(() => {
     if (touched.current || boxW <= 0 || rows.length === 0) return undefined;
-    if (placedFor.current === ext.fromMs) return undefined;
+    /**
+     * ⚠️ THE KEY IS THE EXTENT **AND THE MEASURED WIDTH**, because a width read before the card has
+     * laid out is not a narrow box — it is the CONTENT's width, and the placement it produces is a
+     * plausible number the success check cannot refuse. Measured on a re-open: `clientWidth` came
+     * back as 12050 (the whole track) rather than 1128, so `boxW` was 11750, `scrollForToday`
+     * answered 3023 against a correct 9358, the write succeeded, `placedFor` recorded it, and the
+     * view opened **two years in the past** — on every open after the first, through a green suite.
+     * Keying on the pair means a corrected width re-places; `touched` still keeps it off a reader.
+     */
+    const key = `${ext.fromMs}:${boxW}`;
+    if (placedFor.current === key) return undefined;
     const put = () => {
       const node = scrollRef.current;
       if (!node) return false;
@@ -190,7 +185,7 @@ export const QcTimeline: React.FC<{
       const at = focus?.row.expectedMs ?? focus?.row.stageStartMs ?? null;
       const want = at != null ? Math.max(0, xAt(L.ext, L.pxd, at) - L.boxW / 2) : scrollForToday(L.ext, L.pxd, L.boxW, L.nowMs);
       node.scrollLeft = want;
-      if (Math.abs(node.scrollLeft - want) < 1) { placedFor.current = L.ext.fromMs; setScrollLeft(node.scrollLeft); return true; }
+      if (Math.abs(node.scrollLeft - want) < 1) { placedFor.current = `${L.ext.fromMs}:${L.boxW}`; setScrollLeft(node.scrollLeft); return true; }
       return false;
     };
     if (put()) return undefined;
@@ -214,12 +209,24 @@ export const QcTimeline: React.FC<{
     const el = scrollRef.current;
     if (!p || !el || boxW <= 0) return;
     mine();
-    const next = zoomAbout(ext, pxd, pxdForPreset(p, boxW), el.scrollLeft, boxW / 2);
+    const next = zoomAbout(ext, pxd, pxdForPreset(p), el.scrollLeft, boxW / 2);
     setPxd(next.pxd);
     requestAnimationFrame(() => { if (scrollRef.current) { scrollRef.current.scrollLeft = next.scrollLeft; setScrollLeft(next.scrollLeft); } });
   }, [ext, pxd, boxW, mine]);
 
-  /* ⚠️ ctrl/⌘-WHEEL ZOOMS ABOUT THE POINTER; a plain wheel scrolls, as it should */
+  /**
+   * §9 — ctrl/⌘-WHEEL AND TRACKPAD PINCH ZOOM ABOUT THE POINTER; a plain wheel scrolls, as it should.
+   *
+   * ⚠️ THE CURVE IS `e^(−deltaY × 0.008)`, NOT A FIXED STEP PER NOTCH. A pinch arrives as a stream
+   * of ctrl-wheels whose `deltaY` carries how far the fingers moved, so a constant 1.12 per event
+   * makes the zoom a function of how many events the hardware sends rather than of the gesture.
+   *
+   * ⚠️ AND IT IS COALESCED TO ONE RE-RENDER PER FRAME. A pinch delivers events faster than the
+   * browser paints; re-rendering each one rebuilds every row and the gesture stutters against its
+   * own work. The pending scale accumulates and the frame applies whatever it has reached.
+   */
+  const zoomPend = useRef<{ pxd: number; at: number } | null>(null);
+  const zoomFrame = useRef(0);
   const onWheel = useCallback((e: React.WheelEvent) => {
     if (!e.ctrlKey && !e.metaKey) return;
     e.preventDefault();
@@ -227,18 +234,87 @@ export const QcTimeline: React.FC<{
     if (!el) return;
     mine();
     const at = e.clientX - el.getBoundingClientRect().left;
-    const next = zoomAbout(ext, pxd, clampPxd(pxd * (e.deltaY < 0 ? 1.12 : 1 / 1.12)), el.scrollLeft, at);
-    setPxd(next.pxd);
-    requestAnimationFrame(() => { if (scrollRef.current) { scrollRef.current.scrollLeft = next.scrollLeft; setScrollLeft(next.scrollLeft); } });
+    const from = zoomPend.current?.pxd ?? pxd;
+    zoomPend.current = { pxd: clampPxd(from * Math.exp(-e.deltaY * 0.008)), at };
+    if (zoomFrame.current) return;
+    zoomFrame.current = requestAnimationFrame(() => {
+      zoomFrame.current = 0;
+      const p = zoomPend.current;
+      zoomPend.current = null;
+      const sc = scrollRef.current;
+      if (!p || !sc) return;
+      const next = zoomAbout(ext, pxd, p.pxd, sc.scrollLeft, p.at);
+      setPxd(next.pxd);
+      requestAnimationFrame(() => { if (scrollRef.current) { scrollRef.current.scrollLeft = next.scrollLeft; setScrollLeft(next.scrollLeft); } });
+    });
   }, [ext, pxd, mine]);
+
+  /**
+   * §9 — DRAGGING THE DATES. A press on the date tier pans the calendar 1:1 with the pointer.
+   *
+   * ⚠️ THE HIT AREA EXCLUDES EVERYTHING INTERACTIVE IN THE LANE, and that is not tidiness: this was
+   * a real fault in the mock, where the drag captured the pointer and swallowed the lane's own
+   * clicks. A press on Today, ‹, ›, the zoom or an edge marker must behave as a click, so the drag
+   * refuses to start on any of them rather than starting and then trying to tell them apart.
+   *
+   * ⚠️ AND A PRESS THAT MOVES UNDER 3px IS NOT A DRAG. Without that floor every click on the tier
+   * is a one-pixel pan, and the crosshair blinks off under a reader who only meant to point.
+   *
+   * ⚠️ NO INERTIA, DELIBERATELY. The content follows the pointer exactly and stops when it stops:
+   * a flick that carries on is a second model of where the dates are, and this view already has
+   * one — the scroll position the today line, the pill and every bar are placed from.
+   */
+  const drag = useRef<{ id: number; x: number; scroll: number; moved: boolean } | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
+    const el = scrollRef.current;
+    if (!el || e.button !== 0) return;
+    const t = e.target as HTMLElement;
+    if (t.closest("button, a, input, [role='button'], [data-qcv='tl-marker'], [data-qcv='tl-names'], [data-qcv='xp-ctl']")) return;
+    drag.current = { id: e.pointerId, x: e.clientX, scroll: el.scrollLeft, moved: false };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    document.body.style.userSelect = "none";
+    e.preventDefault();
+  }, []);
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
+    const d = drag.current, el = scrollRef.current;
+    if (!d || !el || e.pointerId !== d.id) return;
+    const dx = e.clientX - d.x;
+    if (!d.moved) {
+      if (Math.abs(dx) < 3) return;
+      d.moved = true;
+      setDragging(true);
+      setCross(null);
+      mine();
+    }
+    /* 1:1, horizontal only — the browser clamps at the extent's ends and nothing rubber-bands */
+    el.scrollLeft = d.scroll - dx;
+    setScrollLeft(el.scrollLeft);
+  }, [mine]);
+  const endDrag = useCallback((e: React.PointerEvent) => {
+    const d = drag.current;
+    if (!d || e.pointerId !== d.id) return;
+    drag.current = null;
+    setDragging(false);
+    document.body.style.userSelect = "";
+    const el = e.currentTarget as HTMLElement;
+    if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
+  }, []);
 
   /* §8.9 — the crosshair, snapped to the day, hidden over the names column and the controls */
   const onMove = useCallback((e: React.MouseEvent) => {
     const el = scrollRef.current;
-    if (!el) return;
+    if (!el || drag.current?.moved) return;
     const t = e.target as HTMLElement;
-    if (t.closest("[data-qcv='tl-names'], [data-qcv='tl-controls'], [data-qcv='tl-marker']")) { setCross(null); return; }
-    setCross(crosshairAt(ext, pxd, el.scrollLeft + (e.clientX - el.getBoundingClientRect().left), nowMs));
+    /* §10 — it hides over the names column, the lane's controls, a popover and a marker. The
+       popover is the one that was missing: it hangs OVER the rows, so a crosshair drawn under it
+       is a line a reader can see through a panel they are reading. */
+    if (t.closest("[data-qcv='tl-names'], [data-qcv='tl-controls'], [data-qcv='tl-marker'], [data-qcv='xp-pop'], [data-qcv='xp-ctl']")) { setCross(null); return; }
+    /* ⚠️ THE POINTER IS IN THE SCROLLER'S BOX AND `crosshairAt` WANTS THE TRACK'S. The scroller
+       starts at the names column, so `scrollLeft + (clientX - left)` is a CONTENT x and the track
+       begins `NAMES_W` into it — measured, the line was drawn 298px right of the pointer and the
+       tag named a day a fortnight later, with every declaration reading correctly. */
+    setCross(crosshairAt(ext, pxd, el.scrollLeft + (e.clientX - el.getBoundingClientRect().left) - NAMES_W, nowMs));
   }, [ext, pxd, nowMs]);
 
   useEffect(() => {
@@ -275,7 +351,26 @@ export const QcTimeline: React.FC<{
         {/* the ink stretch from the expected date to today, and the hollow one beyond today */}
         {b.overFromMs != null && <u className="qcv-tl-over" data-qcv="tl-over" style={{ left: `${pc(b.overFromMs)}%`, right: 0 }} />}
         {b.aheadFromMs != null && <u className="qcv-tl-ahead" data-qcv="tl-ahead" style={{ left: `${pc(b.aheadFromMs)}%`, right: 0 }} />}
-        <span className="qcv-tl-words" data-qcv="tl-words">{b.current ? b.words : b.label}</span>
+        {/**
+          * §7 — THE SENTENCE IS ANCHORED TO THE VISIBLE PART OF ITS BAR, and the offset is computed
+          * rather than declared.
+          *
+          * ⚠️ `position: sticky` WAS THE FIRST ANSWER AND IT CANNOT WORK HERE. The bar carries
+          * `overflow: hidden`, which makes it the sticky child's nearest scrollport — so the words
+          * stuck to the BAR, which never scrolls, and a bar beginning off-screen still took them
+          * with it. Measured: a sentence's ink at −8360 against a visible edge of 568.
+          *
+          * The track's visible left edge, in the track's own coordinates, is exactly `scrollLeft`
+          * (the names cell covers the first `NAMES_W` of the viewport and the track begins there),
+          * so the inset is how far the bar's left is behind it, plus the 10px §7 asks for. It is a
+          * MARGIN rather than a transform because a margin also takes the width away, which is what
+          * turns "does not fit" into the bar's own ellipsis.
+          */}
+        <span
+          className="qcv-tl-words"
+          data-qcv="tl-words"
+          style={{ marginLeft: Math.max(0, Math.min(scrollLeft + 10 - left, w - 24)) }}
+        >{b.current ? b.words : b.label}</span>
       </button>
     );
   };
@@ -284,6 +379,18 @@ export const QcTimeline: React.FC<{
     <div className="qcv-tl" ref={boxRef} data-qcv="tl" style={{ ["--qcv-tl-names" as string]: `${NAMES_W}px` }}>
       {/* §8.4 — the lane. Its controls are OVERLAYS over the scroller, never inside it. */}
       <div className="qcv-tl-lane" data-qcv="tl-lane" ref={laneRef}>
+        {/**
+          * §6 — FILTER, SORT AND ↺ SIT IN THIS LANE, AS OVERLAYS, at the card's own inner left.
+          * They are the expanded card's controls and the lane is the timeline's, so they arrive as
+          * a slot rather than as a second absolutely-positioned cluster measured against the lane
+          * from outside it: an overlay whose top is computed by one component and whose parent is
+          * another is a number two files have to agree about.
+          *
+          * ⚠️ AND THE LANE IS WHY THEY SURVIVE A RE-RENDER. The rows rebuild on every zoom, filter
+          * and group change; the lane does not, so the controls in it are the same elements before
+          * and after — which is §11 lock 6, and the reason they are not in the scrolling body.
+          */}
+        {leftControls}
         <div className="qcv-tl-controls" data-qcv="tl-controls" ref={ctlRef}>
           <span className="qcv-tl-nav" data-qcv="tl-nav">
             <button type="button" onClick={() => pan(-NUDGE_WEEKS)} aria-label="Four weeks earlier">‹</button>
@@ -292,7 +399,7 @@ export const QcTimeline: React.FC<{
           </span>
           <span className="qcv-tl-zoom" data-qcv="tl-zoom" role="group" aria-label="Zoom">
             {ZOOM_PRESETS.map((p) => (
-              <button key={p.key} type="button" data-z={p.key} aria-pressed={activePreset(pxd, boxW) === p.key} onClick={() => toPreset(p.key)}>{p.label}</button>
+              <button key={p.key} type="button" data-z={p.key} aria-pressed={activePreset(pxd) === p.key} onClick={() => toPreset(p.key)}>{p.label}</button>
             ))}
           </span>
         </div>
@@ -324,7 +431,18 @@ export const QcTimeline: React.FC<{
         })()}
       </div>
 
-      <div className="qcv-tl-scroll" ref={scrollRef} data-qcv="tl-scroll" onWheel={onWheel} onMouseMove={onMove} onMouseLeave={() => setCross(null)}>
+      {/**
+        * §9 — THE PRESS IS BOUND ON THE SCROLLER, and the tier is what declares itself a handle.
+        * Capture belongs to one element or a pointer that leaves the tier mid-drag stops panning;
+        * binding it here means the gesture survives the pointer crossing a row, a bar or the lane,
+        * and `onPointerDown` is what refuses to start on anything interactive.
+        */}
+      <div
+        className={`qcv-tl-scroll${dragging ? " qcv-tl-scroll--drag" : ""}`}
+        ref={scrollRef} data-qcv="tl-scroll" data-dragging={dragging ? "true" : "false"}
+        onWheel={onWheel} onMouseMove={onMove} onMouseLeave={() => setCross(null)}
+        onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerCancel={endDrag}
+      >
         <div className="qcv-tl-inner" style={{ width: NAMES_W + width }}>
           {/* §8.4 — the date tier: the heat, the months, the week ticks and the TODAY pill */}
           <div className="qcv-tl-tier" data-qcv="tl-tier" ref={tierRef} style={{ marginLeft: NAMES_W, width }}>
@@ -336,6 +454,9 @@ export const QcTimeline: React.FC<{
             {months.map((m) => <span key={m.ms} className="qcv-tl-mon" data-qcv="tl-month" style={{ left: m.x }}>{m.label}</span>)}
             {weeks.map((w) => <i key={w.ms} className="qcv-tl-wk" style={{ left: w.x }} aria-hidden="true" />)}
             <span className="qcv-tl-todaypill" data-qcv="tl-todaypill" style={{ left: todayX }}>Today</span>
+            {/* §10 — the crosshair runs through the DATE TIER as well as the rows: a line that
+                stopped at the tier's foot would leave the tag it belongs to floating over nothing. */}
+            {cross && <i className="qcv-tl-cross qcv-tl-cross--tier" data-qcv="tl-cross-tier" style={{ left: cross.x }} aria-hidden="true" />}
           </div>
 
           {/* §8.6 — the rows, with the names cell sticky-left */}
@@ -358,7 +479,7 @@ export const QcTimeline: React.FC<{
                   return (
                     <div
                       key={r.id}
-                      className={`qcv-tl-row${r.group === "watch" ? " qcv-tl-row--watch" : ""}${focusId === r.id ? " qcv-tl-row--focus" : ""}`}
+                      className={`qcv-tl-row${r.group === "watch" ? " qcv-tl-row--watch" : ""}${focusId === r.id ? " qcv-tl-row--focus" : ""}${dueCell(r.row, nowMs).kind === "past" ? " qcv-tl-row--late" : ""}`}
                       data-qcv="tl-row"
                       data-id={r.id}
                       onClick={() => onOpen(r.id)}
@@ -369,6 +490,18 @@ export const QcTimeline: React.FC<{
                           <b className="qcv-tl-nm">{r.row.agentName}</b>
                           <span className="qcv-tl-st"><StatusDot status={r.row.status} overrideSize={11} decorative />{r.stage}</span>
                         </span>
+                        {/**
+                          * §7 / §1.8 — THE DUE DATE AND ITS DISTANCE, exactly as the rail's right
+                          * column states them, from the same `dueCell`. Two surfaces, one
+                          * derivation: a second formatter here is how "9 Sep · 10d over" comes to
+                          * read differently in two places that are showing the same query.
+                          */}
+                        {(() => { const d = dueCell(r.row, nowMs); return (
+                          <span className={`qcv-tl-due${d.urgent ? " qcv-tl-due--late" : ""}`} data-qcv="tl-due" data-due={d.kind}>
+                            <b data-qcv="tl-due-date">{d.date}</b>
+                            <u data-qcv="tl-due-dist">{d.distance}</u>
+                          </span>
+                        ); })()}
                       </div>
                       <div className="qcv-tl-track" data-qcv="tl-track" style={{ width }}>
                         {t.bars.map((b) => bar(t, b))}

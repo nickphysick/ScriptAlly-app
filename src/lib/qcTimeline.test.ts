@@ -37,13 +37,20 @@ describe("§8.4 · the scale", () => {
   });
   it("the three presets, and the switch lights one only when the scale really is at it", () => {
     expect(ZOOM_PRESETS.map((p) => p.key)).toEqual(["6w", "3m", "6m"]);
-    expect(ZOOM_PRESETS.map((p) => p.days)).toEqual([42, 91, 182]);
-    const W = 900;
-    for (const p of ZOOM_PRESETS) expect(activePreset(pxdForPreset(p, W), W), p.key).toBe(p.key);
+    /**
+     * ⚠️ A PRESET IS A SCALE, NOT A SPAN (v65.2 §8). They were `days` and the scale was
+     * `trackW / days`, so "3m" meant a different px/day on every window — and `PXD_DEFAULT`, which
+     * IS a scale, could only light a preset by coincidence of width. The mock states them as
+     * scales, and 10.5 is the default, so the view opens on 3m lit rather than on whatever the
+     * window happens to make of 91 days.
+     */
+    expect(ZOOM_PRESETS.map((p) => p.pxd)).toEqual([21, 10.5, 5]);
+    for (const p of ZOOM_PRESETS) expect(activePreset(pxdForPreset(p)), p.key).toBe(p.key);
+    expect(activePreset(PXD_DEFAULT), "the view opens on 3m").toBe("3m");
     /* ⚠️ AND NONE OF THEM BETWEEN TWO. A switch that always showed one lit would claim the view is
        at a preset when a pinch has taken it somewhere else. */
-    const between = (pxdForPreset(ZOOM_PRESETS[0], W) + pxdForPreset(ZOOM_PRESETS[1], W)) / 2;
-    expect(activePreset(between, W)).toBeNull();
+    const between = (pxdForPreset(ZOOM_PRESETS[0]) + pxdForPreset(ZOOM_PRESETS[1])) / 2;
+    expect(activePreset(between)).toBeNull();
   });
   it("⚠️ a zoom keeps the date under the pointer STILL", () => {
     const at = msAt(EXT, 10.5, 400 + 300);
@@ -319,5 +326,41 @@ describe("§8.4 · the month labels clear the TODAY pill by a fixed distance (v6
       expect(Math.abs(t.x - todayX), t.label).toBeGreaterThan(MONTH_CLEAR_PX);
     }
     expect(MONTH_CLEAR_PX).toBeLessThan(60);
+  });
+});
+
+/* ── v65.2 §9 · the heat ───────────────────────────────────────────────────────────────────────── */
+
+describe("§9 · the heat", () => {
+  /**
+   * ⚠️ THE SCALE IS `√(w/max)`, AND A LINEAR ONE IS WHY. On this data a linear scale draws one
+   * spike at the busiest week and a flat line everywhere else; the square root is what makes the
+   * quiet weeks legible beside the loud one, and the 12% floor is so a week with anything in it is
+   * still a mark rather than nothing.
+   */
+  it("the weights, the curve and the floor are §9's own", () => {
+    expect([HEAT_PAST, HEAT_CURRENT, HEAT_EXPECTED]).toEqual([0.12, 0.28, 1]);
+    const rows = buildQcRows([mkQ(), mkQ({ dateSent: ago(300) })], [agent()], [], NOW);
+    const ext = extentOf(rows, NOW);
+    const heat = heatWeeks(rows, ext, NOW);
+    expect(heat.length, "the fixture drew no heat at all").toBeGreaterThan(3);
+    const max = Math.max(...heat.map((h) => h.weight));
+    for (const h of heat) {
+      const f = Math.sqrt(h.weight / max);
+      expect(h.heightPc, `height at w=${h.weight}`).toBeCloseTo(Math.max(12, 100 * f), 6);
+      expect(h.opacity, `opacity at w=${h.weight}`).toBeCloseTo(Math.min(0.62, 0.1 + 0.52 * f), 6);
+    }
+    /* …and the floor really binds on the quietest week, or the claim above is about nothing */
+    const quietest = heat.reduce((a, b) => (a.weight <= b.weight ? a : b));
+    expect(quietest.heightPc).toBeGreaterThanOrEqual(12);
+  });
+  /* §9 — every week inside the extent and none outside it: a bar off the track is a week nobody sees */
+  it("every bar is inside the extent", () => {
+    const rows = buildQcRows([mkQ(), mkQ({ dateSent: ago(300) })], [agent()], [], NOW);
+    const ext = extentOf(rows, NOW);
+    for (const h of heatWeeks(rows, ext, NOW)) {
+      expect(h.ms).toBeGreaterThanOrEqual(ext.fromMs);
+      expect(h.ms).toBeLessThanOrEqual(ext.toMs);
+    }
   });
 });

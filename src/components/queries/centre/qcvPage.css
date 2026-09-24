@@ -74,6 +74,15 @@
   --be-ink: #1c130f;
   --be-mute: rgba(28, 19, 15, 0.62);
   --be-soft: rgba(28, 19, 15, 0.07);
+
+  /**
+   * §6 — THE DATE ROW'S LANE HOLDS TWO CLUSTERS AND THEY SHARE ONE OFFSET. Filter/Sort/↺ are the
+   * expanded card's and the nav/zoom are the timeline's, so the value is read by two sheets — and
+   * the house rule for that is `:root`, because a token declared on one component's element is a
+   * token the other resolves only by luck of ancestry. §6's own words are "sharing one row", and
+   * two numbers a couple of pixels apart is exactly how that stops being true.
+   */
+  --qcv-tl-lanetop: 8px;
 }
 
 .qcv-page {

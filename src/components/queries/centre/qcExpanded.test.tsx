@@ -8,7 +8,7 @@
 import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { LCOL } from "./QcExpanded";
+import { CARDS_PAD, CARD_GAP, COL_GAP, HEAD_GAP, HEAD_W } from "./QcExpanded";
 import { ATTENTION_HINT } from "../../../lib/qcBirdsEye";
 
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
@@ -93,35 +93,144 @@ describe("§7 · the card", () => {
   });
 });
 
-describe("§8.1 · the Courier's column", () => {
-  it("its width IS the names column's, stated once", () => {
-    expect(LCOL).toBe(260);
-    expect(src).toContain("style={{ width: LCOL }}");
-    expect(rule(".qcv-xp-tray")).toMatch(/grid-template-columns:\s*var\(--qcv-xp-lcol, 260px\) max-content minmax\(0, 1fr\)/);
-    expect(rule(".qcv-xp-tray")).toMatch(/column-gap:\s*28px/);
+/**
+ * ⚠️ RETIRED IN v65.2 §6 — "§8.1 · the Courier's column" AND EVERYTHING IT ASSERTED. The column was
+ * v65.1 phase 1's whole subject: the names column's width, from the tray's top edge down through
+ * the date row, holding the drawing, the ✕ and the controls, with negative margins cancelling the
+ * tray's padding and carrying on by `--qcv-xp-ext`. §6 replaces it wholesale — a two-column tray,
+ * the head placed from the title's measured width, the controls on white, and a date row that is
+ * white rather than a continuation of the tray's colour (§1.5).
+ *
+ * The cases are not weakened, they are about a thing that no longer exists; what replaces them is
+ * below, and the geometry is measured in `qcV65.measure.ts` because that is the artefact that can
+ * carry it.
+ */
+describe("§6 · the expanded header", () => {
+  it("the tray is a two-column grid inside the card, and the ground is no longer one block", () => {
+    const tray = rule(".qcv-xp-tray");
+    expect(tray).toMatch(/margin: 18px 22px 0/);
+    expect(tray).toMatch(/padding: 18px 70px 18px 26px/);
+    expect(tray).toMatch(/min-height: 150px/);
+    expect(tray).toMatch(/grid-template-columns: max-content minmax\(0, 1fr\)/);
+    expect(tray).toMatch(new RegExp(`column-gap: ${COL_GAP}px`));
+    expect(tray).toMatch(/border-radius: 18px/);
+    expect(tray).toMatch(/background: var\(--be-accent\)/);
+    /* ⚠️ THE TRAY DOES NOT CLIP; the clip layer does. The controls sit 8px BELOW it and the ✕'s
+       focus ring reaches outside it — a tray with `overflow: hidden` would cut both. */
+    expect(tray, "the tray clips, so it will cut the controls and the focus ring").not.toMatch(/overflow:\s*hidden/);
+    const clip = rule(".qcv-xp-clip");
+    expect(clip).toMatch(/overflow: hidden/);
+    expect(clip).toMatch(/border-radius: 18px/);
+    expect(clip).toMatch(/pointer-events: none/);
   });
-  it("⚠️ the ✕ is above the drawing — below it the one way out is unclickable while looking present", () => {
+  /**
+   * ⚠️ THE HEAD'S LEFT IS THE TITLE'S MEASURED WIDTH + 34, PUBLISHED. "Birds-eye view" is set in
+   * Special Elite at 46px, so its width is whatever that face gives it — a constant left would put
+   * the picture inside the words the day the type, the copy or the fallback font moved.
+   */
+  it("§6 · the head is placed from the title's measured width, never a constant", () => {
+    const hawk = rule(".qcv-xp-hawk");
+    expect(hawk).toMatch(new RegExp(`width: ${HEAD_W}px`));
+    expect(hawk).toMatch(/bottom: -52px/);
+    expect(hawk).toMatch(new RegExp(`left: calc\\(26px \\+ var\\(--qcv-xp-tw, \\d+px\\) \\+ ${HEAD_GAP}px\\)`));
+    /**
+     * …and the card is what publishes it, once the face has landed.
+     *
+     * ⚠️ THIS HALF IS THE MECHANISM, NOT THE BEHAVIOUR, AND A MUTATION PROVED THE DIFFERENCE.
+     * Guarding the write into deadness — `void 0 && card.style.setProperty(…)` — leaves every
+     * string here intact and this case green, because a source lock can only see that the code was
+     * WRITTEN. What catches it is the rendered assertion in `qcV65.measure.ts`: the published value
+     * must EQUAL the title's measured width, and an unpublished token reads as the empty string.
+     * Recorded rather than papered over: this case is the mechanism's half and says so.
+     */
+    expect(src).toMatch(/card\.style\.setProperty\("--qcv-xp-tw"/);
+    expect(src, "a zero reading would put the head under the title's first letter").toMatch(/if \(w > 0\)/);
+    expect(src, "the fallback font's width is a real number about the wrong font").toMatch(/document\.fonts\?\.ready\?\.then\(put\)/);
+  });
+  /**
+   * ⚠️ THE CARDS' PADDING IS ARITHMETIC THAT CANCELS, NOT A VALUE. The head's left and the cards'
+   * column both start from the SAME measured title width, so their difference is constant. The mock
+   * states the sum as `176px`; stating it as the sum is what keeps it right when any term moves.
+   */
+  it("§6 · the cards clear the head by a derived constant, and the 180 cap is on each card", () => {
+    /**
+     * ⚠️ THE CLAIM IS THAT IT IS DERIVED, AND COMPARING THE VALUE CANNOT MAKE IT. `expect(CARDS_PAD)
+     * .toBe(HEAD_GAP + HEAD_W + CARD_GAP - COL_GAP)` is satisfied by a literal `176` — the expected
+     * side is built from the same four constants, so the assertion agrees with itself. Proved by
+     * mutation: replacing the sum with `176` left this case green. The honest claim is about the
+     * SOURCE — that the value is written as the sum — plus the arithmetic it must come to.
+     */
+    expect(src, "CARDS_PAD is stated as a number rather than derived").toMatch(/export const CARDS_PAD = HEAD_GAP \+ HEAD_W \+ CARD_GAP - COL_GAP;/);
+    expect(CARDS_PAD).toBe(176);
+    expect([HEAD_GAP, HEAD_W, CARD_GAP, COL_GAP]).toEqual([34, 150, 20, 28]);
+    const stats = rule(".qcv-xp-stats");
+    expect(stats).toMatch(new RegExp(`padding-left: ${CARDS_PAD}px`));
+    expect(stats).toMatch(new RegExp(`gap: 12px`));
+    /* ⚠️ THE CAP IS PER CARD. At 1920 each measures 180; at 1280 they are 93 and `flex: 1 1 0`
+       shares what there is. A cap on the ROW would let one card take the slack of another. */
+    expect(rule(".qcv-xp-stat")).toMatch(/max-width: 180px/);
+    expect(rule(".qcv-xp-stat")).toMatch(/flex: 1 1 0/);
+    expect(stats, "a cap on the row lets one card take another's slack").not.toMatch(/max-width/);
+  });
+  it("§6 · the ✕ is a ring at the tray's top right, above the picture", () => {
     const x = rule(".qcv-xp-x");
-    expect(x).toMatch(/z-index:\s*3/);
-    expect(x).toMatch(/width:\s*32px/);
-    expect(x).toMatch(/top:\s*12px;\s*left:\s*12px/);
-    /* the art carries no z-index of its own, so nothing can climb over it by accident */
-    expect(rule(".qcv-xp-art"), "the drawing claims a stacking order").not.toContain("z-index");
+    expect(x).toMatch(/top: 18px; right: 18px/);
+    expect(x).toMatch(/width: 32px/);
+    expect(x).toMatch(/z-index: 3/);
+    expect(x).toMatch(/background: none/);
+    expect(x).toMatch(/box-shadow: inset 0 0 0 1px var\(--be-mute\)/);
+    /* the picture claims no stacking order of its own, so nothing can climb over it by accident */
+    expect(rule(".qcv-xp-hawk"), "the drawing claims a stacking order").not.toContain("z-index");
+    /* ⚠️ DRAWN, NOT TYPED — the same rule the rail's ⤢ needed: a glyph a font may not have is a
+       picture that may not arrive, and this one is the only way out of the view. */
+    expect(src).toMatch(/data-qcv="xp-close"[\s\S]{0,260}<svg/);
   });
-  it("the drawing is contained, shadowed, and takes NO blend — it is already transparent", () => {
-    const art = rule(".qcv-xp-art");
-    expect(art).toMatch(/object-fit:\s*contain/);
-    expect(art).toMatch(/padding:\s*4px 12px 50px 22px/);
-    expect(art).toMatch(/drop-shadow\(0 12px 16px rgba\(28, 19, 15, 0\.2\)\)/);
-    expect(css).not.toContain("mix-blend-mode");
-    expect(src).toContain('alt=""');
+  /**
+   * §6 — FILTER, SORT AND ↺ ARE AN OVERLAY IN THE DATE ROW'S TOP LANE, not a row in the flow.
+   *
+   * ⚠️ A FLOW ROW BENEATH THE TRAY WAS THE FIRST CUT AND IT WAS WRONG IN TWO WAYS. It pushed the
+   * date row down by its own height, and it put the controls outside the one element that survives
+   * a rebuild — the rows are rewritten on every zoom, filter and group change, and the lane is not.
+   * The measurement caught it: the cluster read 42px ABOVE the tray's foot, from a `bottom: 10px`
+   * left over from its life at the Courier's column.
+   */
+  it("§6 · Filter, Sort and ↺ ride the date row's lane, at the card's own inner left", () => {
+    const ctl = rule(".qcv-xp-ctl");
+    expect(ctl).toMatch(/position: absolute; top: var\(--qcv-tl-lanetop\); left: 44px/);
+    expect(ctl, "centring is what it did at the column's foot").not.toMatch(/justify-content/);
+    /* …and it is handed to the lane as a slot rather than positioned against it from outside */
+    expect(src).toMatch(/leftControls=\{<QcCalControls/);
+    expect(read("src/components/queries/centre/QcTimeline.tsx")).toMatch(/\{leftControls\}/);
+    /* §1.5 — the date row is the card's white now, not the tray's colour carried down */
+    const tl = read("src/components/queries/centre/qcvTimeline.css");
+    const lane = /\.qcv-tl-lane \{([^}]*)\}/.exec(tl)?.[1] ?? "";
+    expect(lane).toMatch(/background: #fff/);
+    expect(tl).toMatch(/\.qcv-tl-tier \{[^}]*background: #fff/);
+    /* ⚠️ ONE OFFSET FOR BOTH CLUSTERS — §6's words are "sharing one row", and two numbers a couple
+       of pixels apart is exactly how that stops being true. */
+    expect(read("src/components/queries/centre/qcvPage.css"), "a shared offset on one component's element resolves for the other by luck of ancestry").toMatch(/--qcv-tl-lanetop: 8px/);
+    expect(tl).toMatch(/\.qcv-tl-controls \{[^}]*top: var\(--qcv-tl-lanetop\)/);
+    /* the flow row the first cut added is gone rather than left inert */
+    expect(css, "the flow row outlived the overlay that replaced it").not.toContain("qcv-xp-ctlrow");
+    expect(src).not.toContain("xp-ctlrow");
+  });
+  it("⚠️ the Courier's column, its drawing and its extent are GONE, not merely unmounted", () => {
+    for (const dead of [".qcv-xp-col", ".qcv-xp-art"]) expect(css, `${dead} outlived the column it styled`).not.toContain(dead);
+    expect(src, "the Courier is still imported").not.toContain("COURIER_CUTOUT");
+    /* ⚠️ AND THE PUBLICATION GOES WITH ITS READER. A token nobody reads is a knob the next person
+       goes looking for — this repo has paid for one of those already. */
+    expect(read("src/components/queries/centre/QcTimeline.tsx"), "--qcv-xp-ext outlived the column it sized").not.toContain("--qcv-xp-ext");
+    expect(css).not.toContain("--qcv-xp-ext");
+    expect(css, "the one-block ground outlived the date row it ran into").not.toContain("--qcv-xp-lcol");
   });
 });
 
 describe("§8.2 · the title and the stat cards", () => {
-  it("the title is 44px typewriter on one line, centred on the column by the tray's own alignment", () => {
+  it("the title is 46px typewriter on one line, centred on the TRAY by its own alignment", () => {
+    /* ⚠️ 46 SINCE v65.2 §6 (it was 44), and it centres on the TRAY rather than on a column — there
+       is no column now. The equality of the two midpoints is measured; this is the mechanism. */
     const t = rule(".qcv-xp-ttl");
-    expect(t).toMatch(/font-size:\s*44px/);
+    expect(t).toMatch(/font-size:\s*46px/);
     expect(t).toMatch(/font-family:\s*var\(--qcv-type\)\s*!important/);
     expect(t).toMatch(/white-space:\s*nowrap/);
     expect(rule(".qcv-xp-tray")).toMatch(/align-items:\s*center/);
@@ -204,7 +313,7 @@ describe("the timeline", () => {
    * two and a half years in the past.
    */
   it("⚠️ the placement's effect depends on a NUMBER, and reads the rest from a ref when it fires", () => {
-    const at = tlSrc.indexOf("const placedFor = useRef<number | null>(null);");
+    const at = tlSrc.indexOf("const placedFor = useRef<string | null>(null);");
     expect(at, "the placement has moved").toBeGreaterThan(-1);
     const block = tlSrc.slice(at, tlSrc.indexOf("const pan = ", at));
     /**
@@ -227,7 +336,16 @@ describe("the timeline", () => {
     /* ⚠️ AND IT RE-PLACES WHEN THE EXTENT MOVES, unless the reader has touched the track: rows can
        arrive in more than one batch, and a scroll placed against a first batch of recent queries is
        the extent's START once the older ones land. */
-    expect(block).toContain("if (placedFor.current === ext.fromMs) return undefined;");
+    /**
+     * ⚠️ AND THE KEY IS THE EXTENT **AND THE MEASURED WIDTH**. A `clientWidth` read before the card
+     * has laid out is the CONTENT's width, not the box's — measured on a re-open, 12050 where the
+     * box is 1128 — so the placement is computed against a 11750px viewport, lands two years early,
+     * SUCCEEDS its own check, and is recorded as done. Keying on the pair lets a corrected width
+     * re-place; keying on the extent alone cannot, because the extent never changed.
+     */
+    expect(block).toContain("const key = `${ext.fromMs}:${boxW}`;");
+    expect(block).toContain("if (placedFor.current === key) return undefined;");
+    expect(block, "a success must record the width it was placed against").toMatch(/placedFor\.current = `\$\{L\.ext\.fromMs\}:\$\{L\.boxW\}`/);
     expect(block).toContain("if (touched.current ||");
     expect(tlSrc, "every deliberate move marks the view as the reader's").toMatch(/const mine = useCallback\(\(\) => \{ touched\.current = true; \}, \[\]\);/);
     expect((tlSrc.match(/\bmine\(\);/g) ?? []).length, "the wheel, the pan, the zoom, the glide and Today").toBeGreaterThanOrEqual(5);
@@ -277,8 +395,14 @@ describe("the timeline", () => {
     /* the view must not decide WHO gets a chip — that is `tlRow`'s, and it is locked there */
     expect(tlSrc, "the view is deciding whose bar gets a chip").not.toMatch(/tileCourt|isWithYou/);
   });
-  it("⚠️ §8.9 · the crosshair hides over the names, the controls and a marker", () => {
-    expect(tlSrc).toMatch(/closest\("\[data-qcv='tl-names'\], \[data-qcv='tl-controls'\], \[data-qcv='tl-marker'\]"\)/);
+  /**
+   * ⚠️ RETARGETED IN v65.2 §10 — IT PINNED THE SELECTOR STRING, AND THE LIST GREW. §10 adds a
+   * popover and the lane's left-hand cluster to what the crosshair hides over, so a lock matching
+   * the three-item literal went red over a change that made its own claim MORE true. The claim is
+   * the MEMBERSHIP, not the spelling, and it is asserted per element in "§10 · it hides over
+   * everything a reader could be looking at instead" below.
+   */
+  it("⚠️ §8.9 · the crosshair's today tag is rust", () => {
     expect(tlRule(".qcv-tl-tag--today")).toMatch(/background:\s*var\(--qcv-rust\)/);
   });
   it("⚠️ THE v21 CALENDAR IS DELETED, not left unmounted — its replacement is here", () => {
@@ -303,15 +427,15 @@ describe("§8.1 · the controls at the column's foot", () => {
     expect(b).toMatch(/font-family:\s*var\(--qcv-type\)/);
     expect(b, "§8.1 says no shadow").not.toContain("box-shadow");
   });
-  it("⚠️ the cluster is CENTRED ON THE COLUMN, so the reset appearing re-centres all three", () => {
-    const c = rule(".qcv-xp-ctl");
-    /* it fills the column (left and right both 0) and centres its contents; a cluster pinned by one
-       edge would shunt the pair sideways the moment a third button arrived */
-    expect(c).toMatch(/left:\s*0/);
-    expect(c).toMatch(/right:\s*0/);
-    expect(c).toMatch(/justify-content:\s*center/);
-    expect(c).toMatch(/bottom:\s*10px/);
-  });
+  /**
+   * ⚠️ RETIRED IN v65.2 §6 — "the cluster is CENTRED ON THE COLUMN, so the reset appearing
+   * re-centres all three". It filled the Courier's column and centred its contents, which was
+   * right: a cluster pinned by one edge would shunt the pair sideways the moment ↺ arrived. §6
+   * retires the column and pins the cluster to the card's own inner LEFT, in the date row's lane —
+   * so the reset now appears to the right of Sort and nothing moves when it does, which is the
+   * same concern answered by the opposite arrangement. The claim lives in "§6 · Filter, Sort and ↺
+   * ride the date row's lane" above.
+   */
   it("each button goes ink while open OR while its own settings differ — and ↺ for either", () => {
     expect(ctl).toMatch(/filterOn \|\| menu === "filter"/);
     expect(ctl).toMatch(/sortOn \|\| menu === "sort"/);
@@ -446,39 +570,19 @@ describe("§8.9 · the crosshair tag's guard", () => {
   });
 });
 
-describe("§8.1 · the Courier's column spans the tray AND the date row (v65.1)", () => {
-  const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");
-  /**
-   * ⚠️ THE GEOMETRY IS MEASURED (`qcV65.measure.ts`, §10 locks 4 and 5). What a source lock can
-   * honestly carry is the MECHANISM: that the extent is published by the thing that measures it,
-   * and that the column no longer states a height of its own.
-   */
-  it("the date row's height is published by the timeline, never restated in the tray", () => {
-    expect(tlSrc).toMatch(/card\.style\.setProperty\("--qcv-xp-ext"/);
-    expect(tlSrc).toMatch(/tier\.getBoundingClientRect\(\)\.bottom - lane\.getBoundingClientRect\(\)\.top/);
-    expect(tlSrc).toMatch(/ro\.observe\(lane\);\s*\n\s*ro\.observe\(tier\);/);
-    /* it crosses a component boundary, so the writer reaches the card rather than its own root */
-    expect(tlSrc).toMatch(/closest\("\[data-qcv='xp-card'\]"\)/);
-  });
-  it("⚠️ the column states NO height — the fault was a stated one inside the tray's padding", () => {
-    const col = rule(".qcv-xp-col");
-    expect(col, "a stated height is what grew the tray to 290 and the header to 394").not.toMatch(/(?:^|[;{\s])(min-)?height\s*:/);
-    /* the negative margins ARE the mechanism: cancel the tray's padding, then carry on by the extent */
-    expect(col).toMatch(/margin:\s*-16px 0 calc\(-16px - var\(--qcv-xp-ext, 104px\)\)/);
-  });
-  it("⚠️ …and it is OPAQUE, because it is now the date row's corner cell", () => {
-    expect(rule(".qcv-xp-col")).toMatch(/background:\s*#f5f1eb/);
-    /* above the date row it covers — the tier is inset by the names column, so the dates run behind it */
-    expect(rule(".qcv-xp-col")).toMatch(/z-index:\s*2/);
-  });
-  it("the tray keeps `align-items: center`, because the TITLE centres on the tray", () => {
-    /* ⚠️ NOT ON THE COLUMN. The column now runs 258 through the date row while the tray is ~154;
-       centring the title on the column would drop it below the tray's own middle. The ref renders
-       the two midpoints level, and the Courier's drawn body sits in the upper part of his column,
-       so they read as level. Measured as an equality in `qcV65.measure.ts`. */
-    expect(rule(".qcv-xp-tray")).toMatch(/align-items:\s*center/);
-  });
-});
+/**
+ * ⚠️ RETIRED IN v65.2 §6 — "§8.1 · the Courier's column spans the tray AND the date row (v65.1)".
+ * Four cases, and every one of them was about the column's EXTENT: that the timeline published the
+ * distance from the lane's top to the date tier's foot, that the column stated no height of its
+ * own, that its negative margins cancelled the tray's padding and carried on by that extent, and
+ * that it was opaque because it had become the date row's corner cell.
+ *
+ * §6 retires the column, so all four are about a thing that does not exist. The lesson they were
+ * written for is not lost and is stated where it now applies: the tray's height must not be set by
+ * something sitting inside its padding — which is why §6's tray states `min-height` and nothing in
+ * it states a height at all. What replaced them is `describe("§6 · the expanded header")` above,
+ * and the geometry is measured in `qcV65.measure.ts`.
+ */
 
 describe("the dev review — d, e, f (v65.1)", () => {
   const tlCss = read("src/components/queries/centre/qcvTimeline.css");
@@ -517,5 +621,200 @@ describe("the dev review — d, e, f (v65.1)", () => {
     expect(list).toMatch(/data-dated=\{sent \? "true" : "false"\}/);
     const listCss = read("src/components/queries/centre/qcvList.css");
     expect(listCss).toMatch(/\.qcv-date--none \{[^}]*justify-content: center/);
+  });
+});
+
+/* ── v65.2 §7 · the expanded rows ─────────────────────────────────────────────────────────────── */
+
+describe("§7 · the rows", () => {
+  const tl = read("src/components/queries/centre/qcvTimeline.css");
+  const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");
+  const tlRule = (sel: string) => {
+    const m = tl.match(new RegExp(`(?:^|\\n)\\s*${sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`));
+    expect(m, `${sel} has no rule`).toBeTruthy();
+    return m![1];
+  };
+  it("§6 · the names column is 300, because it now carries the due date and its distance", () => {
+    expect(tlSrc).toMatch(/export const NAMES_W = 300;/);
+  });
+  /**
+   * §7 / §1.8 — THE DUE DATE AND ITS DISTANCE COME FROM THE RAIL'S OWN `dueCell`. Two surfaces, one
+   * derivation: a second formatter here is how "9 Sep · 10d over" comes to read differently in two
+   * places that are showing the same query.
+   */
+  it("§7 · the names cell states the due date and its distance, from the shared derivation", () => {
+    expect(tlSrc).toMatch(/import \{ dueCell \} from "\.\.\/\.\.\/\.\.\/lib\/qcBirdsEye"/);
+    expect(tlSrc).toMatch(/data-qcv="tl-due" data-due=\{d\.kind\}/);
+    expect(tlRule(".qcv-tl-due")).toMatch(/margin-left: auto/);
+    expect(tlRule(".qcv-tl-due")).toMatch(/text-align: right/);
+    expect(tlRule(".qcv-tl-names"), "§7 states 14px of padding at the cell's right").toMatch(/padding: 0 14px 0 18px/);
+    /* the same type as the rail's column, so the two read as one thing stated twice */
+    expect(tlRule(".qcv-tl-due b")).toMatch(/font-size: 12px/);
+    expect(tlRule(".qcv-tl-due u")).toMatch(/font-size: 7px/);
+    expect(tlRule(".qcv-tl-due u")).toMatch(/text-transform: uppercase/);
+  });
+  /**
+   * ⚠️ THE STICKY CELL NEEDS ITS OWN FILL, NOT THE ROW'S. It carries an opaque white so the dates
+   * do not scroll visibly behind the names; a wash on the row alone leaves a white rectangle
+   * sliding over a blush row, which is worse than no wash at all.
+   */
+  it("§7 · an overdue row is washed across the whole row, the sticky names cell included", () => {
+    expect(tlRule(".qcv-tl-row--late")).toMatch(/background: #f8ebe3/);
+    expect(tl).toMatch(/\.qcv-tl-row--late \.qcv-tl-names \{[^}]*background: #f8ebe3/);
+    expect(tl).toMatch(/\.qcv-tl-row--late \.qcv-tl-names \{[^}]*box-shadow: inset 3px 0 0 var\(--qcv-ink\)/);
+    expect(tlSrc, "the class comes from the shared derivation, not a second test of the date").toMatch(/dueCell\(r\.row, nowMs\)\.kind === "past" \? " qcv-tl-row--late"/);
+  });
+  /**
+   * §1.9 — THE OVERRUN IS INK AT FULL OPACITY, IN BOTH VIEWS. It was `rgba(28, 19, 15, 0.55)` in
+   * each, which renders taupe over a bar's own colour — reported as a token failing to resolve and
+   * diagnosed as the alpha itself. Both are asserted here because they state the same fact, and a
+   * lock on one is how the other drifts.
+   */
+  it("§1.9 · the overrun is ink at full opacity — in the expanded view AND the rail", () => {
+    for (const [sheet, sel] of [[tl, ".qcv-tl-over"], [read("src/components/queries/centre/qcvBirdsEye.css"), ".qcv-be-over"]] as const) {
+      const m = sheet.match(new RegExp(`(?:^|\\n)\\s*\\${sel}\\s*\\{([^}]*)\\}`));
+      expect(m, `${sel} has no rule`).toBeTruthy();
+      expect(m![1], `${sel} is a tint of ink rather than ink`).toMatch(/background: var\(--qcv-ink\)/);
+      expect(m![1], `${sel} still carries an alpha`).not.toMatch(/rgba\(28, 19, 15, 0\.\d+\)\s*;?\s*(?:border|$)/);
+    }
+  });
+  /**
+   * §7 — THE SENTENCE IS ANCHORED TO THE VISIBLE PART OF ITS BAR. A bar beginning off-screen left
+   * took its words with it and slid them under the sticky names cell: on dev an offer read "ur
+   * decision was due 31 Jul", a sentence with its first half eaten. `position: sticky` clamps them
+   * to the scrollport — the track's visible left edge plus 10 — and the bar's own `overflow:
+   * hidden` ellipsises what will not fit.
+   */
+  it("§7 · a sentence never slides under the names column", () => {
+    /**
+     * ⚠️ THE OFFSET IS COMPUTED, NOT DECLARED, and `position: sticky` was the first answer. The bar
+     * carries `overflow: hidden`, so the bar IS the sticky child's nearest scrollport: the words
+     * stuck to a box that never scrolls and a bar beginning off-screen still took them with it.
+     * Measured at −8360 against a visible edge of 568. The rendered claim is in `qcV65.measure.ts`;
+     * what belongs here is the arithmetic and the reason it is a margin.
+     */
+    expect(tlSrc).toMatch(/marginLeft: Math\.max\(0, Math\.min\(scrollLeft \+ 10 - left, w - 24\)\)/);
+    expect(tlSrc, "a transform does not take the width away, so nothing ellipsises").not.toMatch(/translateX\(\$\{?inset/);
+    /* the bar clips, which is what turns "does not fit" into an ellipsis rather than an overflow */
+    expect(tlRule(".qcv-tl-bar")).toMatch(/overflow: hidden/);
+    expect(tlRule(".qcv-tl-words")).toMatch(/text-overflow: ellipsis/);
+  });
+});
+
+/* ── v65.2 §9 · the drag, the zoom and the heat's look ────────────────────────────────────────── */
+
+describe("§9 · dragging the dates", () => {
+  const tl = read("src/components/queries/centre/qcvTimeline.css");
+  const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");
+  /**
+   * ⚠️ THE HIT AREA EXCLUDES EVERYTHING INTERACTIVE, AND IT IS THE HALF THAT WAS A REAL FAULT IN THE
+   * MOCK: the drag captured the pointer and swallowed the lane's own clicks. A press on Today, ‹, ›,
+   * the zoom or an edge marker must behave as a CLICK — so the drag refuses to start on any of
+   * them rather than starting and then trying to tell them apart afterwards.
+   */
+  it("§9 · a press on anything interactive is a click, not a drag", () => {
+    expect(tlSrc).toMatch(/const onPointerDown = useCallback/);
+    const guard = /if \(t\.closest\("([^"]+)"\)\) return;/.exec(tlSrc.slice(tlSrc.indexOf("const onPointerDown")))?.[1] ?? "";
+    for (const sel of ["button", "[data-qcv='tl-marker']", "[data-qcv='tl-names']", "[data-qcv='xp-ctl']"]) {
+      expect(guard, `${sel} is a drag handle`).toContain(sel);
+    }
+    /* and only the primary button starts one */
+    expect(tlSrc).toMatch(/e\.button !== 0\) return/);
+  });
+  it("§9 · the pan is 1:1 and horizontal, with no inertia and a 3px floor", () => {
+    expect(tlSrc, "the pan is not 1:1 with the pointer").toMatch(/el\.scrollLeft = d\.scroll - dx;/);
+    expect(tlSrc, "a press under 3px is a click").toMatch(/if \(Math\.abs\(dx\) < 3\) return;/);
+    /* ⚠️ NO INERTIA: nothing keeps moving after the pointer stops, because a flick that carries on
+       is a second model of where the dates are and this view already has one. */
+    expect(tlSrc, "an inertia term entered the pan").not.toMatch(/velocit|momentum|inertia|decay/i);
+    /* the vertical position is untouched — `scrollTop` is not written anywhere in the drag */
+    const body = tlSrc.slice(tlSrc.indexOf("const onPointerMove"), tlSrc.indexOf("const endDrag"));
+    expect(body, "the drag writes a vertical position").not.toContain("scrollTop");
+  });
+  it("§9 · capture is taken and given back, and the selection is restored", () => {
+    expect(tlSrc).toMatch(/setPointerCapture\(e\.pointerId\)/);
+    expect(tlSrc).toMatch(/document\.body\.style\.userSelect = "none"/);
+    expect(tlSrc).toMatch(/document\.body\.style\.userSelect = ""/);
+    expect(tlSrc).toMatch(/releasePointerCapture\(e\.pointerId\)/);
+    /* ⚠️ BOTH ENDINGS. `pointercancel` is what fires when the browser takes the gesture away — a
+       drag that only listens for `pointerup` leaves the body unselectable and the cursor grabbing. */
+    expect(tlSrc).toMatch(/onPointerUp=\{endDrag\} onPointerCancel=\{endDrag\}/);
+  });
+  it("§9 · the crosshair hides during a drag, and the cursor says which state it is in", () => {
+    expect(tlSrc).toMatch(/if \(!el \|\| drag\.current\?\.moved\) return;/);
+    expect(tlSrc).toMatch(/setCross\(null\);\s*\n\s*mine\(\);/);
+    const tier = /\.qcv-tl-tier \{([^}]*)\}/.exec(tl)?.[1] ?? "";
+    expect(tier).toMatch(/cursor: grab/);
+    /* ⚠️ `pan-y`, NOT `none`: a horizontal drag pans the dates and a vertical one still scrolls the
+       page, which is what a reader on a phone expects of a wide thing inside a tall one. */
+    expect(tier).toMatch(/touch-action: pan-y/);
+    expect(tl, "grabbing must cover the whole body, not just the tier the press began on").toMatch(/\.qcv-tl-scroll--drag, \.qcv-tl-scroll--drag \* \{ cursor: grabbing/);
+  });
+  /**
+   * §9 — THE ZOOM'S CURVE IS `e^(−deltaY × 0.008)`, NOT A FIXED STEP PER NOTCH. A pinch arrives as a
+   * stream of ctrl-wheels whose `deltaY` carries how far the fingers moved, so a constant factor
+   * per event makes the zoom a function of how many events the hardware sends.
+   */
+  it("§9 · the zoom is exponential in deltaY, about the pointer, one re-render per frame", () => {
+    expect(tlSrc).toMatch(/Math\.exp\(-e\.deltaY \* 0\.008\)/);
+    expect(tlSrc, "a fixed step per notch is a function of the hardware").not.toMatch(/1\.12/);
+    expect(tlSrc).toMatch(/zoomAbout\(ext, pxd, p\.pxd, sc\.scrollLeft, p\.at\)/);
+    /* coalesced: a pinch delivers events faster than the browser paints */
+    expect(tlSrc).toMatch(/if \(zoomFrame\.current\) return;/);
+    expect(tlSrc).toMatch(/zoomPend\.current = \{ pxd: clampPxd\(from \* Math\.exp/);
+  });
+  it("§9 · the heat rises from the tier's floor, in navy, with 1px gaps", () => {
+    const h = /\.qcv-tl-heat i \{([^}]*)\}/.exec(tl)?.[1] ?? "";
+    expect(h).toMatch(/border-radius: 3px 3px 0 0/);
+    expect(h).toMatch(/background: var\(--sp-anthracite\)/);
+    expect(h).toMatch(/bottom: 0/);
+    /* the 1px gap is the width: a week is `7 × pxd` less one */
+    expect(tlSrc).toMatch(/width: Math\.max\(1, 7 \* pxd - 1\)/);
+  });
+});
+
+/* ── v65.2 §10 · the crosshair ─────────────────────────────────────────────────────────────────── */
+
+describe("§10 · the crosshair", () => {
+  const tl = read("src/components/queries/centre/qcvTimeline.css");
+  const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");
+  it("§10 · a 1px line at 28% ink, through the date tier AND the rows", () => {
+    expect(/\.qcv-tl-cross \{([^}]*)\}/.exec(tl)?.[1] ?? "").toMatch(/width: 1px; background: rgba\(28, 19, 15, 0\.28\)/);
+    /* ⚠️ BOTH, AND THE TIER WAS MISSING. A line that stopped at the tier's foot leaves the tag it
+       belongs to floating over nothing — the tag rides the LANE, above the tier. */
+    expect(tlSrc).toMatch(/data-qcv="tl-cross-tier"/);
+    expect(tlSrc).toMatch(/data-qcv="tl-cross"/);
+  });
+  it("§10 · the tag is an ink pill in the lane, rust on today", () => {
+    const tag = /\.qcv-tl-tag \{([^}]*)\}/.exec(tl)?.[1] ?? "";
+    expect(tag).toMatch(/font-size: 8px/);
+    expect(tag).toMatch(/background: var\(--qcv-ink\); color: #f5f1eb/);
+    expect(/\.qcv-tl-tag--today \{([^}]*)\}/.exec(tl)?.[1] ?? "").toMatch(/background: var\(--qcv-rust\)/);
+  });
+  /**
+   * §10 — IT HIDES OVER THE NAMES COLUMN, THE LANE'S CONTROLS, A POPOVER AND A MARKER.
+   *
+   * ⚠️ THE POPOVER WAS THE ONE MISSING. It hangs OVER the rows, so a crosshair drawn under it is a
+   * line a reader can see through the panel they are reading — and the left-hand cluster joined the
+   * lane this round, so it is named here too.
+   */
+  it("§10 · it hides over everything a reader could be looking at instead", () => {
+    const guard = /if \(t\.closest\("([^"]+)"\)\) \{ setCross\(null\); return; \}/.exec(tlSrc)?.[1] ?? "";
+    for (const sel of ["[data-qcv='tl-names']", "[data-qcv='tl-controls']", "[data-qcv='tl-marker']", "[data-qcv='xp-pop']", "[data-qcv='xp-ctl']"]) {
+      expect(guard, `it is drawn over ${sel}`).toContain(sel);
+    }
+    /* …and during a drag, which is §9's half of the same rule */
+    expect(tlSrc).toMatch(/if \(!el \|\| drag\.current\?\.moved\) return;/);
+  });
+  /**
+   * §10 — CLAMPED CLEAR OF THE CONTROLS, AND THE CLAMP DROPS THE CENTRING. The rule centres the tag
+   * with `translateX(-50%)`, so clamping the CENTRE would still put half of it under the zoom pill;
+   * dropping the transform is what makes the guard mean the tag's own left edge.
+   */
+  it("§10 · under the controls it left-aligns at the guard rather than centring on it", () => {
+    expect(tlSrc).toMatch(/const guard = NAMES_W \+ 18 \+ ctlW \+ 8;/);
+    expect(tlSrc).toMatch(/style=\{under \? \{ left: guard, transform: "none" \} : \{ left: at \}\}/);
+    /* the controls' width is MEASURED, never restated: three values this file does not own */
+    expect(tlSrc).toMatch(/const ctlRef = useRef<HTMLDivElement>\(null\)/);
   });
 });

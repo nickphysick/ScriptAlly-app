@@ -24,22 +24,29 @@ import { lockStageScroll } from "../../../lib/stageScroll";
 import { ATTENTION_HINT, ATTENTION_LABEL, ATTENTION_ORDER, type Attention } from "../../../lib/qcBirdsEye";
 import { CAL_DEFAULT, attentionCounts, type CalView } from "../../../lib/qcCalView";
 import { QcCalControls, type CalMenu } from "./QcCalControls";
-import { NAMES_W, QcTimeline } from "./QcTimeline";
+import { QcTimeline } from "./QcTimeline";
 import type { QcRow } from "../../../lib/qcSummary";
-import { COURIER_CUTOUT } from "./qcArt";
+import { BE_HAWK_HEAD } from "./qcArt";
 import { expandedBox, readWindow, type ExpandedBox } from "./QcRail";
 import "./qcvExpanded.css";
 
 type Box = ExpandedBox;
 
 /**
- * §8.1 — the names column's width, which the Courier's column matches exactly.
+ * §6 — the three numbers the header's geometry is built from, and they are stated once because the
+ * mock's own `padding-left: 176px` on the cards is ARITHMETIC THAT CANCELS rather than a value.
  *
- * ⚠️ IT IS THE TIMELINE'S OWN NUMBER, IMPORTED — never a second 260. §10 lock 4 states the column's
- * width EQUALS the names column's right edge, so two constants that happen to agree would be the
- * claim restated rather than kept, and the first retune of one of them is where they part.
+ * The head's left and the cards' column both start from the SAME measured title width, so their
+ * difference is constant: `HEAD_GAP + HEAD_W + CARD_GAP - COL_GAP` = 34 + 150 + 20 − 28 = 176. One
+ * published measurement therefore places the picture AND the cards, and a literal 176 in the sheet
+ * would be that sum with its reasoning thrown away — right until any one of the four moved.
  */
-export const LCOL = NAMES_W;
+export const HEAD_GAP = 34;
+export const HEAD_W = 150;
+export const CARD_GAP = 20;
+export const COL_GAP = 28;
+/** What the cards' column pays to clear the head, derived rather than stated. */
+export const CARDS_PAD = HEAD_GAP + HEAD_W + CARD_GAP - COL_GAP;
 
 export const QcExpanded: React.FC<{
   rows: readonly QcRow[];
@@ -162,6 +169,29 @@ export const QcExpanded: React.FC<{
    * often enough that it never shows.
    */
   const [clock] = useState(() => nowMs);
+  /**
+   * §6 — THE HEAD'S LEFT IS THE TITLE'S MEASURED RIGHT EDGE + 34, PUBLISHED, NEVER A CONSTANT.
+   * "Birds-eye view" is set in Special Elite at 46px; its width is whatever that face gives it at
+   * whatever size the tray ends up, so a fixed left would put the picture inside the words the day
+   * the type, the copy or the fallback font moved. The tray reads `--qcv-xp-tw`.
+   *
+   * ⚠️ AND A ZERO READING IS REFUSED RATHER THAN PUBLISHED. Before the face lands the title measures
+   * its fallback's width, which is a real number about the wrong font; before layout it measures 0,
+   * which would put the head under the title's first letter. `document.fonts.ready` is what makes
+   * the published number the one the reader sees.
+   */
+  const ttlRef = useRef<HTMLHeadingElement>(null);
+  useLayoutEffect(() => {
+    const el = ttlRef.current, card = ref.current;
+    if (!el || !card) return undefined;
+    const put = () => { const w = el.getBoundingClientRect().width; if (w > 0) card.style.setProperty("--qcv-xp-tw", `${Math.round(w * 10) / 10}px`); };
+    put();
+    void document.fonts?.ready?.then(put);
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(put);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [box]);
   /* §8.2 — the whole live pipeline's counts, whatever the filter says */
   const counts = attentionCounts(rows, clock);
   const close = useCallback(() => closeRef.current(), []);
@@ -173,31 +203,28 @@ export const QcExpanded: React.FC<{
         ref={ref}
         className={`qcv-xp-card${open ? " qcv-xp-card--in" : ""}`}
         data-qcv="xp-card"
-        /* ⚠️ `--qcv-xp-lcol` IS PUBLISHED HERE. The tray read it with a 260px fallback and nothing
-           set it — a rule that looks parameterised and is not, which is how the next reader goes
-           looking for a knob that does not exist. The fallback WAS the value; now the value is. */
-        style={{ ...(box ? { top: box.top, left: box.left, width: box.width, height: box.height } : {}), ["--qcv-xp-lcol" as string]: `${LCOL}px` }}
+        style={box ? { top: box.top, left: box.left, width: box.width, height: box.height } : undefined}
       >
-        {/* §8 — the header ground is ONE BLOCK: the tray's colour runs the full width and carries on
-            down through the date row, so the two read as a single coloured band over white rows. */}
+        {/**
+          * §6 — THE TRAY IS A TWO-COLUMN GRID INSIDE THE CARD, and the header ground is no longer
+          * one block: the date row beneath it is white (§1.5). The Courier's column, its drawing
+          * and the negative-margin mechanism that carried it down through the date row are all
+          * retired with it — v65.1 phase 1's whole subject, replaced rather than adjusted.
+          */}
         <header className="qcv-xp-tray" data-qcv="xp-tray">
-          <div className="qcv-xp-col" data-qcv="xp-col" style={{ width: LCOL }}>
-            {/* ⚠️ THE ✕ IS THE TOPMOST THING AT ITS OWN CENTRE — it sits over the Courier, and a
-                drawing painted above it would make the one way out unclickable. */}
-            <button type="button" className="qcv-xp-x" data-qcv="xp-close" aria-label="Close the Birds-eye view" onClick={close}>✕</button>
-            <img
-              className="qcv-xp-art"
-              data-qcv="xp-art"
-              src={`${COURIER_CUTOUT.src}?v=${COURIER_CUTOUT.version}`}
-              width={COURIER_CUTOUT.width}
-              height={COURIER_CUTOUT.height}
-              alt=""
-              aria-hidden="true"
-            />
-            {/* §8.1 — Filter, Sort and ↺ over the Courier's feet, centred on the column */}
-            <QcCalControls view={view} onView={setView} menu={menu} onMenu={setMenu} counts={counts} />
-          </div>
-          <h2 className="qcv-xp-ttl" data-qcv="xp-title">Birds-eye view</h2>
+          {/* §6 — the clip layer is the tray's own box and radius; it holds the picture and nothing
+              else, so the words above it can never be cut and the head can hang off the bottom. */}
+          <span className="qcv-xp-clip" aria-hidden="true">
+            <img className="qcv-xp-hawk" data-qcv="xp-hawk" src={`${BE_HAWK_HEAD.src}?v=${BE_HAWK_HEAD.version}`} width={BE_HAWK_HEAD.width} height={BE_HAWK_HEAD.height} alt="" />
+          </span>
+          <h2 ref={ttlRef} className="qcv-xp-ttl" data-qcv="xp-title">Birds-eye view</h2>
+          {/* ⚠️ THE ✕ IS THE TOPMOST THING AT ITS OWN CENTRE — it sits over the picture, and a
+              drawing painted above it would make the one way out unclickable while looking present. */}
+          <button type="button" className="qcv-xp-x" data-qcv="xp-close" aria-label="Close the Birds-eye view" onClick={close}>
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+              <path d="M2 2l9 9M11 2l-9 9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+            </svg>
+          </button>
           {/* §8.2 — the three stat cards ARE the attention filter: click to select, click again to
               release, multi-select. A group with none is drawn and disabled, because its absence is
               the fact the card is stating. */}
@@ -226,7 +253,12 @@ export const QcExpanded: React.FC<{
           </div>
         </header>
         <div className="qcv-xp-body" data-qcv="xp-body" data-focus={focusId ?? undefined}>
-          <QcTimeline rows={rows} view={view} packageName={packageName} nowMs={clock} focusId={focusId} onOpen={onOpen} onNudge={onNudge} />
+          {/* §6 — the controls ride in the date row's top lane, as overlays over a WHITE row (§1.5): the
+              dates never scroll under them, and the lane survives every rebuild of the rows. */}
+          <QcTimeline
+            rows={rows} view={view} packageName={packageName} nowMs={clock} focusId={focusId} onOpen={onOpen} onNudge={onNudge}
+            leftControls={<QcCalControls view={view} onView={setView} menu={menu} onMenu={setMenu} counts={counts} />}
+          />
         </div>
       </div>
     </div>,
