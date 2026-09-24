@@ -92,67 +92,67 @@ export function dueCell(row: QcRow, nowMs: number): DueCell {
   return { date, distance: `${-days}d over`, kind: "past", urgent: true };
 }
 
-/* ── §6.3 · the track: seventy days, with the expected date on the line ── */
-
-/** The track holds this many days, half either side of the line. */
-export const TRACK_DAYS = 70;
-/** A bar with no beginning is drawn this far back, dashed — the v21 calendar's own answer (§8). */
-export const UNDATED_LEAD_DAYS = 10;
-
-export interface EyeBar {
-  /** Percentages of the track's width. */
-  left: number;
-  width: number;
-  /** The stretch past the line, in the same units — `null` when the date has not gone by. */
-  over: { left: number; width: number } | null;
-  /** The bar began before the track did, so its left end is cut flat rather than rounded. */
-  cut: boolean;
-  /** Nothing dates this row's expected date: it is anchored on today and drawn dashed. */
-  dashed: boolean;
-}
+/* ── §3.2 · the progress bar ── */
 
 /**
- * ⚠️ EVERY ROW IS SHIFTED SO ITS OWN EXPECTED DATE SITS ON THE LINE (§6.3), which is what makes one
- * vertical line readable across rows whose dates are months apart: the gap between a bar's end and
- * the line IS the time left, in the same pixels, on every row. A shared calendar axis would put
- * each bar somewhere different and the line would mean nothing.
+ * §3.2 · THE BAR IS A PROGRESS BAR — how far through the agency's own window this query is.
  *
- * ⚠️ AND A ROW WITH NO EXPECTED DATE IS ANCHORED ON TODAY INSTEAD, so its bar ends at the line and
- * is drawn dashed. That is honest — the line means "the date" and this row has none — where
- * placing it against some default would state a date nobody promised.
+ * **f = (today − stage entry) / (expected − stage entry).** The track is the whole window; the
+ * ALLOWANCE is the white part it is allowed to take, and the FILL is how much of it has gone.
+ *
+ * ⚠️ PAST THE DATE THE BAR RESCALES RATHER THAN OVERFLOWING. The allowance shrinks to `1/f` of the
+ * track and the rest is ink, so a query 24% over reads as an allowance that is 81% of the track
+ * with ink beyond it — and the notch at the join is the due date itself. Drawing the overrun past
+ * the track's end instead would make a bar that is longer the later it is, which is a shape the
+ * row cannot hold and a reader cannot compare.
+ *
+ * ⚠️ AND IT REPLACES THE DUE LINE (Nick's decision 1, 24 Sep), with its axis and hollow segments.
+ * One vertical line shared across rows meant every bar had to be SHIFTED so its own date sat on it,
+ * which is a second coordinate system inside a 340px rail. A progress bar states the same fact —
+ * how much of the window is gone — without asking the reader to hold two.
  */
-export function eyeBar(row: QcRow, nowMs: number): EyeBar {
-  const anchor = row.expectedMs ?? nowMs;
-  const pc = (ms: number) => 50 + ((ms - anchor) / DAY) * (100 / TRACK_DAYS);
-  const startMs = row.stageStartMs ?? nowMs - UNDATED_LEAD_DAYS * DAY;
-  const rawLeft = pc(startMs);
-  const right = Math.max(0, Math.min(100, pc(nowMs)));
+export interface EyeProgress {
+  /** Nothing dates this row's window: the track is drawn dashed and empty. */
+  dated: boolean;
+  /** How far through the window, 1 being the expected date. `null` when undated. */
+  f: number | null;
+  /** The white allowance's share of the TRACK: 1 up to the date, `1/f` past it. */
+  allowance: number;
+  /** The coloured fill's share of the TRACK, floored so a fresh stage still shows. */
+  fill: number;
+  /** The ink stretch's share of the TRACK; 0 up to the date. */
+  over: number;
+}
+/** The fill never falls below this share of the track — a stage entered today still reads. */
+export const PROGRESS_FLOOR = 0.03;
+/** …and the allowance never falls below it either, or the notch has nowhere to stand. */
+export const ALLOWANCE_FLOOR = 0.03;
+
+export function eyeProgress(row: QcRow, nowMs: number): EyeProgress {
   /**
-   * ⚠️ A BAR IS AT LEAST ONE DAY WIDE, AND THE FLOOR IS ONE DAY RATHER THAN A PIXEL COUNT. A query
-   * that entered its current stage TODAY spans no time at all, so the honest width is zero — and a
-   * zero-width bar is an empty row beside a day count that says something, which reads as a fault
-   * rather than as a fact. One day is the smallest thing this track can say, and it is true: the
-   * bar covers today. Measured on the page before this existed: twenty-five rows past their date,
-   * several of them with nothing drawn.
-   */
-  const floor = 100 / TRACK_DAYS;
-  const left = Math.max(0, Math.min(100 - floor, Math.min(rawLeft, right - floor)));
-  const width = Math.max(floor, right - left);
-  /**
-   * ⚠️ THE INK STRETCH RUNS FROM THE LINE TO TODAY, AND IS `null` WHEN THERE IS NO DATE TO BE PAST.
-   * That one test is the whole of it: once a date has gone by, `right` is past 50 by construction
-   * and the FLOOR above guarantees a drawable width, so a width test here would be a branch nothing
-   * can enter — and an unreachable guard is a claim nobody can check. Proved by mutation: loosening
-   * it reddened nothing.
+   * ⚠️ THE WINDOW'S START FALLS BACK TO THE SEND DATE, AND THAT IS NOT A GUESS. An expected date on
+   * an agent's-turn query IS `last send + the agency's stated window`, so where the stage entry was
+   * never recorded the send is the very date the end was computed from — the fraction is then the
+   * agency's own window rather than an invention.
    *
-   * ⚠️ AND WHERE THE BAR BEGINS PAST THE LINE, THE WHOLE BAR IS INK. A query that entered its
-   * current stage after its date had gone has no stretch running from the line, because the line is
-   * behind it. `Math.max` is what says so, and it is why an assertion that the ink always starts at
-   * 50 reported 37px of disagreement about a correct bar.
+   * ⚠️ FOUND ON THE PAGE, NOT HERE. Without it a row read "60d over" in its date column beside an
+   * EMPTY dashed track, which is two statements about one query that contradict each other; the
+   * unit fixture had a stage date on every row and could not see it.
    */
-  const overLeft = Math.max(left, 50);
-  const over = row.expectedMs != null && nowMs > row.expectedMs ? { left: overLeft, width: right - overLeft } : null;
-  return { left, width, over, cut: rawLeft < 0, dashed: row.expectedMs == null || row.stageStartMs == null };
+  const start = row.stageStartMs ?? row.sentMs;
+  const exp = row.expectedMs;
+  /* ⚠️ UNDATED IS EITHER END MISSING, not just the expected date. A window needs both a beginning
+     and an end; with only one of them there is no fraction to state, and a bar drawn from a guessed
+     start would put a number on a thing nobody recorded. */
+  if (start == null || exp == null) return { dated: false, f: null, allowance: 1, fill: 0, over: 0 };
+  /* ⚠️ A WINDOW OF ZERO OR LESS IS FULLY OVERRUN, NOT A DIVISION BY ZERO. An expected date at or
+     before the stage entry means the window had gone before the stage began — true, and the honest
+     drawing is all ink with the allowance at its floor so the notch is still there to see. */
+  const span = exp - start;
+  const f = span > 0 ? Math.max(0, (nowMs - start) / span) : Infinity;
+  const allowance = f > 1 ? Math.max(ALLOWANCE_FLOOR, 1 / f) : 1;
+  const fill = Math.max(PROGRESS_FLOOR, Math.min(f, 1) * allowance);
+  return { dated: true, f, allowance, fill, over: f > 1 ? 1 - allowance : 0 };
 }
 
 /* ── the view's rows ── */
@@ -161,7 +161,8 @@ export interface EyeRow {
   id: string;
   row: QcRow;
   group: Attention;
-  bar: EyeBar;
+  /** §3.2 — the progress bar, replacing v65's due-line geometry. */
+  prog: EyeProgress;
   day: DayCount;
   /** §5 — the right column: the due date over how far away it is. */
   due: DueCell;
@@ -189,7 +190,7 @@ export function eyeRows(rows: readonly QcRow[], nowMs: number): EyeRow[] {
       const day = dayCount(r, nowMs);
       const stage = STAGE_NAME[r.status];
       return {
-        id: r.id, row: r, group: attentionGroup(r, nowMs), bar: eyeBar(r, nowMs), day, due: dueCell(r, nowMs), stage,
+        id: r.id, row: r, group: attentionGroup(r, nowMs), prog: eyeProgress(r, nowMs), day, due: dueCell(r, nowMs), stage,
         court: tileCourt(r.status) === "you" ? "you" : "agent",
         title: `${r.agentName} — ${stage}, ${r.expectedMs == null ? "no date promised" : day.urgent ? `${day.text.replace(" ago", "")} past the expected date` : `${day.text} to go`}`,
       };

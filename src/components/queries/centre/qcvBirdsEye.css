@@ -86,7 +86,10 @@
   margin: 10px 22px 0; padding: 2px; height: 32px; box-sizing: border-box;
   background: #f3eee7; border-radius: 8px;
 }
+/* §3.1 — the three labels are CENTRED in their segments. A button's default text alignment is its
+   UA's, and left-aligned words inside equal segments read as three columns rather than one control. */
 .qcv-be-focus button {
+  display: flex; align-items: center; justify-content: center;
   font-family: var(--qcv-type); font-weight: 400; font-size: 11px; line-height: 1;
   color: var(--qcv-ink-70); background: none; border: 0; border-radius: 6px; padding: 0; cursor: pointer;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -95,67 +98,42 @@
 .qcv-be-focus button:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 1px; }
 .qcv-be-focus button:disabled { cursor: default; }
 
-/**
- * §6.2 — the axis. One label over the line and eight faint week ticks, and NOTHING else: a row's
- * own date is on the line, so a dated axis would be naming days that mean something different on
- * every row.
- *
- * ⚠️ THE TRACK'S GEOMETRY IS STATED ONCE, HERE, AND EVERY OTHER RULE READS IT. The line, the ticks
- * and each row's bar all sit in the same horizontal space; three rules each computing it is three
- * chances for one of them to be a pixel out, on the one element whose whole job is to line up.
- */
-/**
- * §5 — THE AXIS IS THE ROW'S OWN GRID, so its middle cell IS the track and the DUE pill sits on the
- * line by construction rather than by two rules agreeing.
- */
-.qcv-be-axis {
-  flex: none; display: grid; grid-template-columns: var(--qcv-be-who) minmax(0, 1fr) var(--qcv-be-day);
-  column-gap: var(--qcv-be-gap); height: 22px; margin: 10px var(--qcv-be-pad) 0;
-}
-.qcv-be-axt { position: relative; display: block; }
-/* the pill ON the line: ink, cream text, and centred on the midpoint the rows measure against */
-.qcv-be-axnow {
-  position: absolute; left: 50%; top: 2px; transform: translateX(-50%);
-  padding: 2px 7px; border-radius: 8px; background: var(--qcv-ink); color: #f5f1eb;
-  font-family: var(--qcv-mono); font-weight: 600; font-size: 7.5px; line-height: 1;
-  letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; white-space: nowrap;
-}
-/* ⚠️ 30px FROM THE LINE, not from the pill — the pill's width is its text's, so measuring from its
-   edges would move both labels the day the word changed. */
-.qcv-be-axl, .qcv-be-axr {
-  position: absolute; top: 5px; font-style: normal;
-  font-family: var(--qcv-mono); font-size: 7px; line-height: 1;
-  letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
-}
-.qcv-be-axl { right: calc(50% + 30px); font-weight: 400; color: var(--qcv-ink-45); }
-.qcv-be-axr { left: calc(50% + 30px); font-weight: 600; color: var(--qcv-ink); }
-.qcv-be-axt i { position: absolute; top: 18px; width: 1px; height: 4px; background: rgba(28, 19, 15, 0.16); }
-
 /* the rows: the only thing that scrolls */
 .qcv-be-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 0 6px; }
 .qcv-be-none { margin: 18px var(--qcv-be-pad); font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcv-ink-45); }
 
-/* §6.2 — the group headings. Overdue's is ink; the other two are 45%. */
-.qcv-be-gh {
-  display: flex; align-items: baseline; gap: 7px; margin: 12px var(--qcv-be-pad) 4px;
-  font-family: var(--qcv-mono); font-weight: 400; font-size: 8px; line-height: 11px; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--qcv-ink-45);
-}
-.qcv-be-grp--overdue .qcv-be-gh { color: var(--qcv-ink); }
-.qcv-be-gh span { font-family: var(--qcv-serif); font-size: 12px; letter-spacing: 0; text-transform: none; }
-
 /**
- * ⚠️ THE LINE IS THE ROWS' OWN, drawn on the container the rows sit in — so it runs from the first
- * row to the last and stops. On the scroller it would carry on into empty space and read as a date
- * the nothing below it is measured against.
+ * §3.4 — THE GROUP HEADINGS, AND THEY ARE STICKY ACROSS THE CARD'S WHOLE INNER WIDTH.
+ *
+ * ⚠️ A STUCK HEADING THAT DOES NOT SPAN THE CARD LEAVES ROWS VISIBLE BESIDE IT. The rows are inset
+ * by the card's padding and the heading was inset by the same, so a row scrolling under a stuck
+ * heading showed through the gutters either side of it — a row sliced in half by nothing. The
+ * heading therefore pulls out to the card's inner edges (`margin: 0 -22px`) and pays it back in
+ * padding, so its ink lands where it did and its BACKGROUND covers the whole width.
  */
-.qcv-be-rows { position: relative; }
-/* §5 — solid ink at 70%, 1.5px, the full height of the rows */
-.qcv-be-line {
-  position: absolute; top: 0; bottom: 0; left: calc(var(--qcv-be-tl) + var(--qcv-be-tw) * 0.5);
-  width: 1.5px; margin-left: -0.75px; background: var(--qcv-ink); opacity: 0.7;
-  pointer-events: none; z-index: 1;
+.qcv-be-gh {
+  position: sticky; top: 0; z-index: 3;
+  display: flex; align-items: center; gap: 8px;
+  /* ⚠️ THE 18px OF AIR IS PADDING, NOT MARGIN, and that is the sticky half of this rule. A margin
+     sits OUTSIDE the background, so a stuck heading with `margin-top: 18px` shows 18px of rows
+     above it — the same fault as a heading that does not span the card, turned on its side.
+     Measured off the mock: `margin: 0 -22px 4px; padding: 18px 22px 8px`. */
+  margin: 0 -22px 4px; padding: 18px 22px 8px;
+  background: #fff; box-shadow: 0 1px 0 rgba(28, 19, 15, 0.08);
+  font-family: var(--qcv-type); font-weight: 400; font-size: 16px; line-height: 20px;
+  letter-spacing: 0; text-transform: none; color: var(--qcv-ink);
 }
+/* the first heading sits closer to the toggle above it — there is nothing to separate it from */
+.qcv-be-grp:first-child .qcv-be-gh { padding-top: 12px; }
+/* §3.4 — the count is a pill, and Overdue's is ink so the group that needs an eye gets one */
+.qcv-be-gh span {
+  flex: none; padding: 2px 7px; border-radius: 9px; background: #f3eee7;
+  font-family: var(--qcv-mono); font-weight: 400; font-size: 9px; line-height: 12px;
+  letter-spacing: 0.08em; color: var(--qcv-ink-70);
+}
+.qcv-be-grp--overdue .qcv-be-gh span { background: var(--qcv-ink); color: #f5f1eb; }
+
+.qcv-be-rows { position: relative; }
 
 /* ⚠️ THE ROW IS A BUTTON (§6.4), so it states everything a button brings with it: no border, no
    background, the page's own text alignment. A row that inherited the UA's button chrome would be
@@ -192,28 +170,58 @@
 }
 .qcv-be-st svg { flex: none; }
 
-/* §6.3 — the bars */
-.qcv-be-t { position: relative; display: block; height: 100%; min-width: 0; }
-.qcv-be-bar {
-  position: absolute; top: calc(50% - 4px); height: 8px; border-radius: 4px;
-  background: var(--qcv-state, var(--state-closed)); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.07);
-  overflow: hidden;
-}
-/* a bar that began before the track is cut flat, so the cut reads as "and before this" */
-.qcv-be-bar--cut { border-top-left-radius: 0; border-bottom-left-radius: 0; }
-/* nothing dates it: the bar says so rather than being placed against a date nobody promised */
-.qcv-be-bar--dash { background: repeating-linear-gradient(90deg, rgba(28, 19, 15, 0.18) 0 4px, transparent 4px 8px); }
-/* the move is the writer's — the same rust, meaning the same thing, as everywhere else */
-.qcv-be-bar--you { box-shadow: inset 3px 0 0 var(--qcv-rust), inset 0 0 0 1px rgba(28, 19, 15, 0.07); }
 /**
- * §1.9 — the stretch past the date: INK AT FULL OPACITY, and no text; the row's right column states
- * the number. It was `rgba(28, 19, 15, 0.55)`, which renders taupe over the bar's own colour — the
- * expanded view's `.qcv-tl-over` carried the same alpha and the same fault, and both are ink now.
+ * §3.2 — THE PROGRESS BAR. The middle cell holds one track: 8px tall, 4px corners, inset 4 from the
+ * cell's left and 10 from its right so the date column beside it never crowds it. [84 × 8 at 1280,
+ * with a 70px track — the mock's own geometry, measured rather than read.]
  */
-.qcv-be-over { position: absolute; top: 0; bottom: 0; background: var(--qcv-ink); border-left: 1.5px solid var(--qcv-ink); }
+.qcv-be-pg { position: relative; display: block; height: 8px; min-width: 0; }
+.qcv-be-track {
+  position: absolute; left: 4px; right: 10px; top: 0; height: 8px;
+  border-radius: 4px; overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12);
+}
+/* ⚠️ NOTHING DATES IT: an empty track that says so, rather than a bar placed against a date nobody
+   promised. The dashes are the pattern, and the ring is a touch heavier so an empty track still
+   reads as a track. */
+.qcv-be-track--none {
+  background: repeating-linear-gradient(90deg, rgba(28, 19, 15, 0.18) 0 4px, transparent 4px 8px);
+  box-shadow: inset 0 0 0 1.2px rgba(28, 19, 15, 0.12);
+}
+/* the allowance: the window the agency asked for, in white, with its own ring */
+.qcv-be-allow {
+  position: absolute; left: 0; top: 0; bottom: 0; background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12);
+}
+/**
+ * ⚠️ THE FILL IS THE STATUS'S OWN COLOUR AND NEVER A DEEPENED ONE (decision 2). `--state-queried`
+ * #f7efe3 · `--state-you` #f5e6df · `--state-agent` #e0e5dd · `--state-offer` #d7e0e8 ·
+ * `--state-closed` #e4e1db — the app's one status palette, which §3.2's table restates exactly.
+ */
+.qcv-be-fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  background: var(--qcv-state, var(--state-closed));
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14);
+}
+/* the move is the writer's — the same rust, meaning the same thing, as everywhere else */
+.qcv-be-track--you .qcv-be-fill { box-shadow: inset 3px 0 0 var(--qcv-rust), inset 0 0 0 1px rgba(138, 74, 60, 0.35); }
+/**
+ * §3.2 — PAST THE DATE, THE REST OF THE TRACK IS INK, with the track's own right-end corners. It is
+ * ink at full opacity, as the expanded view's is: the two draw the same fact and a tint in one of
+ * them would make it two facts.
+ */
+.qcv-be-over {
+  position: absolute; top: 0; bottom: 0; background: var(--qcv-ink);
+  border-top-right-radius: 4px; border-bottom-right-radius: 4px;
+}
+/* the due date itself, standing 3px proud above and below so it reads as a mark, not a seam */
+.qcv-be-notch {
+  position: absolute; top: -3px; height: 14px; width: 2px; margin-left: -1px;
+  background: #fff; text-decoration: none;
+}
 /* §6.2 — watch-and-wait bars sit back until the row is under the pointer */
-.qcv-be-row--watch .qcv-be-bar { opacity: 0.72; }
-.qcv-be-row--watch:hover .qcv-be-bar { opacity: 1; }
+.qcv-be-row--watch .qcv-be-track { opacity: 0.72; }
+.qcv-be-row--watch:hover .qcv-be-track { opacity: 1; }
 
 /**
  * §5 — the right column: the due date over how far away it is, right-aligned.
@@ -247,8 +255,27 @@
  * OUTSIDE the card (1034 against 1056). A value taken from a ref is a value about the ref's own
  * frame until the structure underneath it has been checked.
  */
+/**
+ * §3.3 — AND IT IS AN INSET CARD NOW, not a full-width wash: 12px clear of the card's edges, 10px
+ * corners, no bottom border. [Row 930 → 1246 in a 918 → 1258 card.]
+ *
+ * ⚠️ THE MOCK WRITES `margin: 0 -10px; padding: 0 10px` AND THAT IS ITS FRAME, NOT OURS. Its rows
+ * sit in a container inset by the gutter, so a negative margin is how its row reaches OUT toward
+ * the card. Ours span the card already and hold the gutter as padding, so the same inset is a
+ * POSITIVE 12px margin paid back as 10px of padding — 12 + 10 = the 22px gutter, so the ink lands
+ * exactly where every other row's does and only the background moved.
+ */
 .qcv-be-row--late {
-  background: #f8ebe3; box-shadow: inset 3px 0 0 var(--qcv-ink); border-bottom-color: #efdcd1;
+  /**
+   * ⚠️ THE WIDTH IS STATED, AND NEITHER `100%` NOR `auto` WILL DO. The row states `width: 100%`, so
+   * a margin does not inset it — it makes it 24px WIDER than the card and hangs it off both edges
+   * (measured: 12px clear on the left and 12px PAST the right, from a margin that reads as
+   * symmetrical). And `auto` is worse: the row is a `<button>`, so it SHRINK-TO-FITS — measured at
+   * 232 against the card's 340, with the bar's whole column computing to `0px`. The subtraction is
+   * the honest form, and it names the margin it is paying for.
+   */
+  width: calc(100% - 24px); margin: 0 12px 4px; padding: 0 10px; border-radius: 10px;
+  background: #f8ebe3; box-shadow: inset 3px 0 0 var(--qcv-ink); border-bottom: 0;
 }
 .qcv-be-row--late:hover { background: #f5e3d9; }
 
@@ -267,5 +294,5 @@
 .qcv-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 @media (prefers-reduced-motion: reduce) {
-  .qcv-be-row--fade, .qcv-be-row--watch .qcv-be-bar { transition: none; }
+  .qcv-be-row--fade, .qcv-be-row--watch .qcv-be-track { transition: none; }
 }

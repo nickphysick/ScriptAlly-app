@@ -43,7 +43,7 @@ const REPORT = resolve(OUT, "report.json");
  * against the old mock would produce true readings about a design nobody is building — the
  * "plausible numbers about the wrong subject" failure this file's header exists to prevent.
  */
-const REF = "file://" + resolve("design-refs/query-centre-v74.html");
+const REF = "file://" + resolve("design-refs/query-centre-v85.html");
 const TOL = 2;
 const MIN_ASSERTIONS = 95;
 
@@ -745,13 +745,12 @@ test("§4 · the rail's header — the tray, the words, and the hawk behind them
   await page.locator("[data-qcv='rail']").first().screenshot({ path: resolve(OUT, "be-head-1440.png") });
 });
 
-test("§5 · the rail's axis and rows — the pill on the line, and the date over its distance", async ({ page }) => {
+test("§3.2–§3.3 · the rail's progress bars and rows — the window, the overrun and the notch", async ({ page }) => {
   await openApp(page, 1440, 860);
   const r = await page.evaluate(() => {
     const rail = [...document.querySelectorAll("[data-qcv='rail']")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
     const px = (n: number) => Math.round(n * 10) / 10;
     const bxa = (e: Element | null) => { if (!e) return null; const b = e.getBoundingClientRect(); return { x: px(b.x), w: px(b.width), r: px(b.right), y: px(b.y), h: px(b.height) }; };
-    const axt = rail.querySelector(".qcv-be-axt");
     const rows = [...rail.querySelectorAll("[data-qcv='be-row']")] as HTMLElement[];
     const cell = (row: HTMLElement, s: string) => row.querySelector(s) as HTMLElement | null;
     const clips = (e: HTMLElement | null) => (e ? e.scrollWidth > e.clientWidth + 0.5 : false);
@@ -759,12 +758,38 @@ test("§5 · the rail's axis and rows — the pill on the line, and the date ove
     const ok = rows.find((x) => !x.className.includes("qcv-be-row--late")) ?? null;
     const lateCs = late ? getComputedStyle(late) : null;
     return {
-      axt: bxa(axt), pill: bxa(rail.querySelector(".qcv-be-axnow")), axl: bxa(rail.querySelector(".qcv-be-axl")), axr: bxa(rail.querySelector(".qcv-be-axr")),
-      line: bxa(rail.querySelector("[data-qcv='be-line']")), track: bxa(first?.querySelector("[data-qcv='be-track']") ?? null),
+      /* v65.3 §3.2 — the axis and the due line are retired; their absence is a reading */
+      axisGone: rail.querySelectorAll("[data-qcv='be-axis'], [data-qcv='be-line']").length,
+      pg: bxa(first?.querySelector("[data-qcv='be-prog']") ?? null), track: bxa(first?.querySelector("[data-qcv='be-track']") ?? null),
       due: bxa(first?.querySelector("[data-qcv='be-due']") ?? null),
       rowCols: first ? getComputedStyle(first).gridTemplateColumns : null,
-      axCols: axt?.parentElement ? getComputedStyle(axt.parentElement).gridTemplateColumns : null,
-      lineW: rail.querySelector("[data-qcv='be-line']") ? getComputedStyle(rail.querySelector("[data-qcv='be-line']")!).width : null,
+      /* every dated row's three parts, so the fill colours and the notch can be checked as a set */
+      bars: rows.map((row) => {
+        const tr = row.querySelector("[data-qcv='be-track']") as HTMLElement | null;
+        const al = row.querySelector("[data-qcv='be-allow']") as HTMLElement | null;
+        const fl = row.querySelector("[data-qcv='be-fill']") as HTMLElement | null;
+        const ov = row.querySelector("[data-qcv='be-over']") as HTMLElement | null;
+        const nt = row.querySelector("[data-qcv='be-notch']") as HTMLElement | null;
+        if (!tr) return null;
+        const tb = tr.getBoundingClientRect();
+        return {
+          dated: (row.querySelector("[data-qcv='be-prog']") as HTMLElement | null)?.dataset.dated ?? null,
+          due: (row.querySelector("[data-qcv='be-due']") as HTMLElement | null)?.getAttribute("data-due") ?? null,
+          status: tr.getAttribute("data-status"),
+          trackW: px(tb.width),
+          fill: fl ? getComputedStyle(fl).backgroundColor : null,
+          /* ⚠️ SHARES AT FULL PRECISION, AND PRESENCE SEPARATELY. A query two days into a ten-week
+             window has an allowance of 0.996 and an overrun a third of a pixel wide; rounded to one
+             decimal that reads as "no overrun at all", which is the probe reporting a correct page
+             as broken. Presence is the binary fact and magnitude is continuous — never one for the
+             other. */
+          hasOver: !!ov, hasAllow: !!al,
+          allowW: al ? al.getBoundingClientRect().width / tb.width : null,
+          overW: ov ? ov.getBoundingClientRect().width / tb.width : null,
+          notchAt: nt ? (nt.getBoundingClientRect().left + 1 - tb.left) / tb.width : null,
+          dashed: getComputedStyle(tr).backgroundImage.includes("gradient"),
+        };
+      }).filter(Boolean),
       lateBg: lateCs?.backgroundColor ?? null, lateEdge: lateCs?.boxShadow ?? null,
       lateX: late ? px(late.getBoundingClientRect().x) : null, lateR: late ? px(late.getBoundingClientRect().right) : null,
       lateTrackX: late ? bxa(late.querySelector("[data-qcv='be-track']"))?.x ?? null : null,
@@ -781,17 +806,45 @@ test("§5 · the rail's axis and rows — the pill on the line, and the date ove
       lateCount: rows.filter((x) => x.className.includes("qcv-be-row--late")).length,
     };
   });
-  record({ area: "be-rows", what: "the axis, the line and the rows", got: { axt: r.axt, pill: r.pill, line: r.line, track: r.track, due: r.due, cols: r.rowCols }, want: "reported" });
-  /* §5 — the axis shares the row's grid, so the pill is ON the line by construction */
-  is("be-rows", "the axis's tracks are the row's", r.axCols, r.rowCols);
+  record({ area: "be-rows", what: "the bars and the rows", got: { pg: r.pg, track: r.track, due: r.due, cols: r.rowCols, bars: r.bars.slice(0, 8) }, want: "reported" });
+  /* §3.2 — the due line and its axis are gone, and their absence is a reading rather than a belief */
+  is("be-rows", "§3.2 · the axis and the due line are retired", r.axisGone, 0);
   near("be-rows", "the right column is 52", parseFloat((r.rowCols ?? "").split(" ").pop() ?? "0"), 52, 0.5);
-  near("be-rows", "the DUE pill's centre is the track's midpoint", (r.pill!.x + r.pill!.r) / 2, (r.track!.x + r.track!.r) / 2, 1);
-  near("be-rows", "…and the line is there too", (r.line!.x + r.line!.r) / 2, (r.track!.x + r.track!.r) / 2, 1);
-  near("be-rows", "the line is 1.5px", parseFloat(r.lineW ?? "0"), 1.5, 0.1);
-  /* §5 — WAITING and OVERDUE are 30px from the LINE */
-  const mid = (r.track!.x + r.track!.r) / 2;
-  near("be-rows", "WAITING's right edge is 30px left of the line", mid - r.axl!.r, 30, 1);
-  near("be-rows", "OVERDUE's left edge is 30px right of it", r.axr!.x - mid, 30, 1);
+  /* §3.2 — the track is inset 4 from its cell's left and 10 from its right [84 → 70 at the mock] */
+  near("be-rows", "the track starts 4px into its cell", r.track!.x - r.pg!.x, 4, 0.6);
+  near("be-rows", "…and ends 10px short of it", r.pg!.r - r.track!.r, 10, 0.6);
+  near("be-rows", "the track is 8px tall", r.track!.h, 8, 0.6);
+  /**
+   * §3.2 · LOCK 2 — THE FILL COLOURS ARE THE STATUS PALETTE'S, THE OVERRUN IS PRESENT IFF f > 1,
+   * AND THE NOTCH SITS AT THE ALLOWANCE. The three are one claim: the notch only means the due date
+   * because the allowance is `1/f` of the track, and the overrun only means "past it" because it
+   * begins there. Each branch is tallied, so a fixture that drifts into one state fails loudly.
+   */
+  const TRUE_FILL: Record<string, string> = {
+    "Queried": "rgb(247, 239, 227)", "Partial Requested": "rgb(245, 230, 223)", "Full Requested": "rgb(245, 230, 223)",
+    "Revise & Resubmit": "rgb(245, 230, 223)",
+    "Partial Sent": "rgb(224, 229, 221)", "Full Sent": "rgb(224, 229, 221)", "Offer": "rgb(215, 224, 232)",
+  };
+  const dated = r.bars.filter((b) => b!.dated === "yes") as NonNullable<(typeof r.bars)[number]>[];
+  const undated = r.bars.filter((b) => b!.dated === "no") as NonNullable<(typeof r.bars)[number]>[];
+  record({ area: "be-rows", what: "§3.2 · how each bar was drawn", got: { dated: dated.length, undated: undated.length, over: dated.filter((b) => b.overW).length }, want: "reported" });
+  yes("be-rows", `some bars are dated (${dated.length})`, dated.length > 0, String(dated.length));
+  for (const b of dated) {
+    const want = TRUE_FILL[b.status ?? ""];
+    if (want) is("be-rows", `§3.2 · a ${b.status} bar fills in its own status colour, never a deepened one`, b.fill, want);
+    /* the overrun is present exactly where the date has gone, and nowhere else */
+    is("be-rows", `§3.2 · ${b.status} — an overrun iff the date has gone (${b.due})`, b.hasOver, b.due === "past");
+    if (b.hasOver) {
+      yes("be-rows", `§3.2 · …and the notch stands at the allowance (${b.notchAt} vs ${b.allowW})`, Math.abs((b.notchAt ?? 0) - (b.allowW ?? 0)) <= 0.02, JSON.stringify(b));
+      yes("be-rows", "§3.2 · …and the allowance and the overrun are the whole track", Math.abs((b.allowW ?? 0) + (b.overW ?? 0) - 1) <= 0.03, JSON.stringify(b));
+    } else {
+      is("be-rows", "§3.2 · up to the date the allowance is the whole track", Math.round((b.allowW ?? 0) * 100) / 100, 1);
+      is("be-rows", "§3.2 · …and no notch, because there is no date behind it", b.notchAt, null);
+    }
+  }
+  /* ⚠️ AND THE UNDATED BRANCH IS ENTERED, or "every row draws a window" is about rows that all had one */
+  yes("be-rows", `some rows are undated (${undated.length}) — the dashed track`, undated.length > 0, String(undated.length));
+  for (const b of undated) yes("be-rows", "§3.2 · an undated track is dashed and empty", b.dashed && !b.hasAllow, JSON.stringify(b));
   /* §5 — every date and distance fits at 340, and the four kinds are the library's */
   yes("be-rows", `there are rows (${r.cells.length})`, r.cells.length > 3, String(r.cells.length));
   const kinds = [...new Set(r.cells.map((c) => c.kind))].sort();
@@ -800,23 +853,23 @@ test("§5 · the rail's axis and rows — the pill on the line, and the date ove
     yes("be-rows", "a row states both its date and its distance", !!c.date && !!c.dist, JSON.stringify(c));
     yes("be-rows", "…and neither clips at 340", !c.clipped, JSON.stringify(c));
   }
-  /* §5 — an overdue row is washed across the WHOLE card, with a 3px ink edge */
-  yes("be-rows", `some rows are overdue (${r.lateCount}) — or the wash is unproved`, r.lateCount > 0, String(r.lateCount));
+  /**
+   * §3.3 — AN OVERDUE ROW IS AN INSET CARD: 12px clear of the rail card's edges, with the 3px ink
+   * edge inside it. [Row 930 → 1246 in a 918 → 1258 card, at the mock's 1280.]
+   *
+   * ⚠️ AND THE COLUMNS DO NOT MOVE, which is the half an inset gets wrong: the 12px margin is paid
+   * back as 10px of padding, so the late row's track is the ordinary row's to half a pixel.
+   */
+  yes("be-rows", `some rows are overdue (${r.lateCount}) — or the inset is unproved`, r.lateCount > 0, String(r.lateCount));
   is("be-rows", "the wash", r.lateBg, "rgb(248, 235, 227)");
   yes("be-rows", "the 3px ink inset edge", /inset/.test(r.lateEdge ?? "") && /3px/.test(r.lateEdge ?? ""), String(r.lateEdge));
-  /**
-   * ⚠️ THE WASH REACHES THE CARD'S EDGES AND THE GRID DOES NOT MOVE — two claims, and the second is
-   * the one a bleed gets wrong. The mock's rows sit in a container inset by the gutter and its
-   * overdue row carries a negative margin to escape it; ours span the card already, so the same
-   * margin overshot by exactly that gutter (measured: 1034 against the card's 1056).
-   */
-  near("be-rows", "the wash starts at the card's own left edge", r.lateX!, r.railX, 1);
-  near("be-rows", "…and ends at its right", r.lateR!, r.railR, 1);
-  is("be-rows", "an ordinary row spans the same box — the wash is a state, not a different width", r.okX, r.lateX);
+  near("be-rows", "§3.3 · the inset row is 12px clear of the card's left", r.lateX! - r.railX, 12, 1);
+  near("be-rows", "§3.3 · …and 12px clear of its right", r.railR - r.lateR!, 12, 1);
+  yes("be-rows", "§3.3 · an ordinary row still spans the card", Math.abs(r.okX! - r.railX) <= 1, `${r.okX} vs ${r.railX}`);
   near("be-rows", "⚠️ and the columns are unmoved: the late row's track is the ordinary row's", r.lateTrackX!, r.okTrackX!, 0.5);
 });
 
-test("§6 · Birds-eye — the line is where the dates are, the rows scroll, and the card does not grow", async ({ page }) => {
+test("§6 · Birds-eye — the progress reads across the rows, they scroll, and the card does not grow", async ({ page }) => {
   await openApp(page, 1440, 860);
   const be = await page.evaluate(() => {
     const rail = [...document.querySelectorAll("[data-qcv='rail']")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement | undefined;
@@ -828,35 +881,30 @@ test("§6 · Birds-eye — the line is where the dates are, the rows scroll, and
       heading: (g.querySelector("[data-qcv='be-heading']")?.textContent ?? "").trim(),
       rows: g.querySelectorAll("[data-qcv='be-row']").length,
     }));
-    const lines = [...rail.querySelectorAll("[data-qcv='be-line']")].map((l) => {
-      const b = l.getBoundingClientRect();
-      const rows = l.parentElement!.getBoundingClientRect();
-      return { x: px(b.left), top: px(b.top - rows.top), h: px(b.height), rowsH: px(rows.height) };
-    });
-    /* every bar's own right edge, and the line it is measured against */
+    /* §3.2 — each row's three parts as shares of its own track, so rows on different scales compare */
     const bars = [...rail.querySelectorAll("[data-qcv='be-row']")].map((r) => {
-      const bar = r.querySelector("[data-qcv='be-bar']") as HTMLElement | null;
       const track = r.querySelector("[data-qcv='be-track']") as HTMLElement | null;
+      const al = r.querySelector("[data-qcv='be-allow']") as HTMLElement | null;
+      const fl = r.querySelector("[data-qcv='be-fill']") as HTMLElement | null;
       const over = r.querySelector("[data-qcv='be-over']") as HTMLElement | null;
-      if (!bar || !track) return null;
-      const bb = bar.getBoundingClientRect(), tb = track.getBoundingClientRect();
-      return { mid: px(tb.left + tb.width / 2), end: px(bb.right), start: px(bb.left), over: over ? px(over.getBoundingClientRect().left) : null,
-        /* §1.9 — the overrun is INK at full opacity here as it is in the expanded view; the two
-           draw the same fact and a tint in one of them makes them two facts. */
+      if (!track) return null;
+      const tb = track.getBoundingClientRect();
+      /* full precision: a bar two days into a ten-week window overruns by a third of a pixel */
+      const share = (e: Element | null) => (e ? e.getBoundingClientRect().width / tb.width : null);
+      return { trackW: px(tb.width), hasOver: !!over, hasAllow: !!al, allow: share(al), fillW: share(fl), overW: share(over),
         overBg: over ? getComputedStyle(over).backgroundColor : null,
         /* ⚠️ CLASSIFIED ON `data-due`, NOT ON THE WORDS (v65.2 §5). This read the day count's text
-           and sorted it with `/^\d+d$/` and `/ago$/`; §5 re-worded the column to "In 3d" / "10d
-           over" / "No date" and every one of those patterns matched nothing — which would have
-           reported an empty population as a clean sweep rather than as a miss. */
+           and sorted it with patterns §5 then re-worded out of existence — an empty population
+           reported as a clean sweep rather than as a miss. */
         due: r.querySelector("[data-qcv='be-due']")?.getAttribute("data-due") ?? null,
         date: (r.querySelector("[data-qcv='be-due-date']")?.textContent ?? "").trim(),
         dist: (r.querySelector("[data-qcv='be-due-dist']")?.textContent ?? "").trim(),
         court: r.getAttribute("data-court") };
-    }).filter(Boolean) as { mid: number; end: number; start: number; over: number | null; overBg: string | null; due: string | null; date: string; dist: string; court: string | null }[];
+    }).filter(Boolean) as { trackW: number; hasOver: boolean; hasAllow: boolean; allow: number | null; fillW: number | null; overW: number | null; overBg: string | null; due: string | null; date: string; dist: string; court: string | null }[];
     const scroller = rail.querySelector("[data-qcv='be-scroll']") as HTMLElement;
     return {
       railH: px(rb.height),
-      groups, lines, bars,
+      groups, bars,
       /* the rows are the only thing that scrolls */
       scrolls: scroller.scrollHeight > scroller.clientHeight + 1,
       railScrolls: rail.scrollHeight > rail.clientHeight + 1,
@@ -871,34 +919,25 @@ test("§6 · Birds-eye — the line is where the dates are, the rows scroll, and
   is("birdseye", "the focus toggle's three states, Everything pressed", be?.focus, [{ l: "Everything", on: "true" }, { l: "With you", on: "false" }, { l: "With the agent", on: "false" }]);
   record({ area: "birdseye", what: "the groups, and the rail's height", got: { groups: be?.groups, railH: be?.railH, head: be?.head }, want: "reported" });
 
-  /* ⚠️ THE LINE IS PER GROUP AND AS TALL AS ITS OWN ROWS — never the scroll box's height. */
-  yes("birdseye", `a line per group (${be?.lines.length} for ${be?.groups.length})`, be?.lines.length === be?.groups.length, JSON.stringify(be?.lines));
-  for (const l of be?.lines ?? []) {
-    near("birdseye", "the line starts at its rows' top", l.top, 0, 0.5);
-    near("birdseye", "…and is exactly as tall as them", l.h, l.rowsH, 0.5);
-  }
-
   /**
-   * ⚠️ THE CLAIM: a bar's end is LEFT of the track's middle when there is time left, ON it when the
-   * date is today, and the overrun starts AT it when the date has gone. Measured against the track's
-   * own middle rather than against a number, so the two cannot drift apart.
+   * §3.2 · THE CLAIM: with time left the fill is SHORT of the track's end and there is no overrun;
+   * past the date the allowance and the overrun are the whole track; with no date the track is
+   * empty. Each is read as a SHARE of the row's own track, so rows on different windows compare.
    */
   const withTime = (be?.bars ?? []).filter((b) => b.due === "future");
   const past = (be?.bars ?? []).filter((b) => b.due === "past");
   const undated = (be?.bars ?? []).filter((b) => b.due === "none");
-  record({ area: "birdseye", what: "the bars, by what their day count says", got: { withTime: withTime.length, past: past.length, undated: undated.length }, want: "reported" });
+  record({ area: "birdseye", what: "the bars, by what their due cell says", got: { withTime: withTime.length, past: past.length, undated: undated.length, sample: (be?.bars ?? []).slice(0, 5) }, want: "reported" });
   yes("birdseye", `some bars have time left (${withTime.length}) — or the claim below is vacuous`, withTime.length > 0, String(withTime.length));
-  for (const b of withTime) yes("birdseye", `a bar with time left ends short of the line (${b.end} vs ${b.mid})`, b.end <= b.mid + 0.6, JSON.stringify(b));
+  for (const b of withTime) {
+    yes("birdseye", `time left: the allowance is the whole track (${b.allow})`, Math.abs((b.allow ?? 0) - 1) <= 0.02, JSON.stringify(b));
+    yes("birdseye", `…and the fill is short of its end (${b.fillW})`, (b.fillW ?? 1) < 1.001, JSON.stringify(b));
+    yes("birdseye", "…and nothing is drawn past a date that has not come", !b.hasOver, JSON.stringify(b));
+  }
   yes("birdseye", `some bars are past their date (${past.length}) — or the overrun is vacuous`, past.length > 0, String(past.length));
   for (const b of past) {
-    yes("birdseye", `a bar past its date crosses the line (${b.end} vs ${b.mid})`, b.end >= b.mid - 0.6, JSON.stringify(b));
-    /**
-     * ⚠️ AT THE LINE, OR AT THE BAR'S OWN LEFT WHERE THE BAR BEGINS PAST IT. A query that entered
-     * its current stage AFTER its date had gone has no stretch running from the line — the whole
-     * bar is past it, so the whole bar is ink. Asserting a flat 50% reported 37px of disagreement
-     * about a correct bar, which is a measurement being wrong about the page.
-     */
-    if (b.over != null) near("birdseye", "…and its overrun starts at the line, or at the bar where the bar begins past it", b.over, Math.max(b.mid, b.start), 1);
+    yes("birdseye", `past the date the bar rescales — an allowance and an overrun (${b.allow})`, b.hasOver && (b.allow ?? 1) <= 1.0001, JSON.stringify(b));
+    yes("birdseye", "…and the allowance and the overrun are the whole track", Math.abs((b.allow ?? 0) + (b.overW ?? 0) - 1) <= 0.03, JSON.stringify(b));
   }
   /**
    * §1.9 · THE OVERRUN IS INK AT FULL OPACITY IN **BOTH** HOMES. The rail and the expanded view draw
@@ -909,9 +948,7 @@ test("§6 · Birds-eye — the line is where the dates are, the rows scroll, and
   const overBgs = [...new Set(past.map((b) => b.overBg).filter(Boolean))];
   yes("birdseye", `some overruns were drawn to read a colour from (${past.filter((b) => b.overBg).length})`, overBgs.length > 0, JSON.stringify(overBgs));
   is("birdseye", "§1.9 · the rail's overrun is ink at full opacity, as the expanded view's is", overBgs, ["rgb(28, 19, 15)"]);
-  const wholly = past.filter((b) => b.start > b.mid + 0.6);
-  record({ area: "birdseye", what: "bars that begin past the line (the whole bar is ink)", got: wholly.length, want: "reported" });
-  for (const b of undated) near("birdseye", "an undated bar ends on the line — it is anchored on today", b.end, b.mid, 1);
+  for (const b of undated) yes("birdseye", "§3.2 · an undated row draws an EMPTY track", !b.hasAllow && b.fillW == null, JSON.stringify(b));
 
   is("birdseye", "⚠️ the ROWS scroll", be?.scrolls, true);
   is("birdseye", "⚠️ …and the card itself does not", be?.railScrolls, false);

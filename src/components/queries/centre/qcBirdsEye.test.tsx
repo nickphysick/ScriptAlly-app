@@ -39,9 +39,10 @@ const rowsOf = (qs: Query[]) => buildQcRows(qs, [agent()], [], NOW);
 const view = (qs: Query[] = [mkQ()]) => renderToStaticMarkup(<QcBirdsEye rows={rowsOf(qs)} nowMs={NOW} onExpand={() => {}} />);
 
 describe("the view, rendered", () => {
-  it("head, focus, axis, rows, legend — in that order and nothing else", () => {
+  it("head, focus, rows, legend — in that order, and the axis is GONE", () => {
     const html = view();
-    const order = ["be-head", "be-focus", "be-axis", "be-scroll", "be-key"].map((p) => html.indexOf(`data-qcv="${p}"`));
+    expect(html, "§3.2 retired the axis with the due line it labelled").not.toContain('data-qcv="be-axis"');
+    const order = ["be-head", "be-focus", "be-scroll", "be-key"].map((p) => html.indexOf(`data-qcv="${p}"`));
     expect(order.every((i) => i > -1), JSON.stringify(order)).toBe(true);
     expect([...order].sort((a, b) => a - b), "the column is out of order").toEqual(order);
   });
@@ -53,38 +54,69 @@ describe("the view, rendered", () => {
     }
     expect(src, "it must read the lib").toContain('from "../../../lib/qcBirdsEye"');
   });
-  it("a bar carries its own left and width as percentages, and its stage's colour", () => {
-    const html = view([mkQ({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(4) })]);
-    const bar = /<i class="qcv-be-bar[^"]*"[^>]*style="([^"]*)"/.exec(html)?.[1] ?? "";
-    expect(bar).toMatch(/left:\s*[\d.]+%/);
-    expect(bar).toMatch(/width:\s*[\d.]+%/);
-    expect(bar, "the bar is not in the app's status vocabulary").toContain("--qcv-state:var(--state-");
+  it("§3.2 · the bar is a TRACK with an allowance and a fill, in the status's own colour", () => {
+    /* ⚠️ AN AGENT'S-TURN QUERY, because only those have an expected date. A `Full Requested` is the
+       WRITER's turn, whose date comes from `expectedSendDate` and nothing else — so a fixture built
+       from one draws the undated track and an allowance assertion over it is about a branch that
+       cannot be entered. Found by this case going red on its first run. */
+    const html = view([mkQ({ dateSent: ago(20) })]);
+    expect(html, "the retired due-line bar").not.toContain("qcv-be-bar");
+    expect(html).toContain('data-qcv="be-track"');
+    expect(/<i class="qcv-be-allow"[^>]*style="width:[\d.]+%/.test(html), "no allowance").toBe(true);
+    expect(/<b class="qcv-be-fill"[^>]*style="width:[\d.]+%/.test(html), "no fill").toBe(true);
+    const track = /<i class="qcv-be-track[^"]*"[^>]*style="([^"]*)"/.exec(html)?.[1] ?? "";
+    expect(track, "the bar is not in the app's status vocabulary").toContain("--qcv-state:var(--state-");
+    /* ⚠️ THE TRUE STATUS COLOUR, NEVER THE DEEPENED ONE (decision 2) */
+    expect(track, "a deepened token is a second status palette").not.toContain("-deep");
   });
-  it("⚠️ the rust inset is the WITH-YOU court's, and an offer counts as yours here", () => {
-    const mine = view([mkQ({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(4) })]);
-    const offer = view([mkQ({ status: QueryStatus.OFFER, offerDate: ago(4) })]);
-    const theirs = view([mkQ()]);
-    expect(mine).toContain("qcv-be-bar--you");
-    expect(offer, "an offer's decision is yours — the page's three courts, not the four-way one").toContain("qcv-be-bar--you");
-    expect(theirs).not.toContain("qcv-be-bar--you");
+  it("⚠️ past the date the track carries an overrun AND a notch; before it, neither", () => {
+    const late = view([mkQ({ dateSent: ago(400) })]);
+    const fresh = view([mkQ({ dateSent: ago(2) })]);
+    expect(late).toContain('data-qcv="be-over"');
+    expect(late, "the notch is the due date itself").toContain('data-qcv="be-notch"');
+    expect(fresh, "nothing is past a date that has not come").not.toContain('data-qcv="be-over"');
+    expect(fresh).not.toContain('data-qcv="be-notch"');
+    /* …and the notch stands where the allowance ends, which is what makes it the date */
+    const al = /<i class="qcv-be-allow"[^>]*style="width:([\d.]+)%/.exec(late)?.[1];
+    const notch = /<s class="qcv-be-notch"[^>]*style="left:([\d.]+)%/.exec(late)?.[1];
+    expect(al, "no allowance to compare").toBeTruthy();
+    expect(notch).toBe(al);
   });
-  it("⚠️ the line is drawn on the ROWS, never on the scroller", () => {
+  it("⚠️ an undated row draws an EMPTY dashed track — never a bar against a date nobody gave", () => {
+    const html = view([mkQ({ responseDeadline: null } as never)]);
+    const undated = renderToStaticMarkup(
+      <QcBirdsEye rows={buildQcRows([mkQ()], [agent({ responseTimeWeeks: undefined as never })], [], NOW)} nowMs={NOW} onExpand={() => {}} />,
+    );
+    expect(undated).toContain("qcv-be-track--none");
+    expect(undated, "an undated track holds nothing").not.toContain('data-qcv="be-fill"');
+    expect(rule(".qcv-be-track--none")).toMatch(/repeating-linear-gradient/);
+    expect(html.length).toBeGreaterThan(0);
+  });
+  it("§3.4 · ⚠️ a stuck heading spans the card's INNER width, or rows show beside it", () => {
     const html = view([mkQ(), mkQ({ status: QueryStatus.PARTIAL_SENT, partialSentDate: ago(3) })]);
-    /* the line must be inside a `be-rows`, and `be-rows` inside `be-scroll` — so the line is
-       exactly as tall as the rows it measures rather than running on into empty space */
-    const rows = html.indexOf('data-qcv="be-rows"');
-    const line = html.indexOf('data-qcv="be-line"');
-    const scroll = html.indexOf('data-qcv="be-scroll"');
-    expect(scroll).toBeLessThan(rows);
-    expect(rows).toBeLessThan(line);
-    expect(rule(".qcv-be-rows")).toMatch(/position:\s*relative/);
-    expect(rule(".qcv-be-line")).toMatch(/top:\s*0;\s*bottom:\s*0/);
+    expect(html, "the due line went with the axis").not.toContain('data-qcv="be-line"');
+    const gh = rule(".qcv-be-gh");
+    expect(gh).toMatch(/position:\s*sticky/);
+    expect(gh).toMatch(/top:\s*0/);
+    /**
+     * ⚠️ THE PULL-OUT AND THE PAY-BACK ARE ONE MECHANISM AND ARE ASSERTED TOGETHER. The margin is
+     * what makes the background reach the card's edges; the padding is what keeps the ink where
+     * every other row's is. Either alone is a heading that is wrong in one of two ways, and
+     * removing the margin as tidy-looking dead space is exactly how this breaks.
+     */
+    expect(gh, "the heading does not reach the card's edges").toMatch(/margin:\s*0 -22px 4px/);
+    /* ⚠️ AND THE AIR ABOVE IT IS PADDING: a margin sits outside the background, so a stuck heading
+       with a top margin shows rows above it — the same fault turned on its side. */
+    expect(gh, "…and it does not pay the gutter back").toMatch(/padding:\s*18px 22px 8px/);
+    expect(gh, "a transparent stuck heading is a heading with rows behind it").toMatch(/background:\s*#fff/);
   });
   it("group headings carry their count, and Overdue's is ink", () => {
     const html = view([mkQ({ dateSent: ago(400) }), mkQ({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(2) })]);
     const gs = eyeGroups(rowsOf([mkQ({ dateSent: ago(400) }), mkQ({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(2) })]), NOW);
-    for (const g of gs) expect(html, g.label).toContain(`${g.label}<span>${g.count}</span>`);
-    expect(rule(".qcv-be-grp--overdue .qcv-be-gh")).toMatch(/color:\s*var\(--qcv-ink\)/);
+    for (const g of gs) expect(html, g.label).toContain(`${g.label}<span data-qcv="be-gcount">${g.count}</span>`);
+    /* §3.4 — the count is a PILL, and Overdue's is ink with cream text */
+    expect(rule(".qcv-be-gh span")).toMatch(/border-radius:\s*9px/);
+    expect(rule(".qcv-be-grp--overdue .qcv-be-gh span")).toMatch(/background:\s*var\(--qcv-ink\)/);
   });
   it("⚠️ nothing out with an agent says so, rather than drawing an empty track", () => {
     expect(view([])).toContain("Nothing is out with an agent.");
@@ -96,12 +128,11 @@ describe("the view, rendered", () => {
 describe("the sheet", () => {
   it("⚠️ the track's geometry is stated ONCE and every rule reads it", () => {
     const own = rule(".qcv-be");
-    for (const t of ["--qcv-be-pad", "--qcv-be-who", "--qcv-be-day", "--qcv-be-gap", "--qcv-be-tl", "--qcv-be-tw"]) {
+    for (const t of ["--qcv-be-pad", "--qcv-be-who", "--qcv-be-day", "--qcv-be-gap"]) {
       expect(own, `${t} is not declared on the view`).toContain(t);
     }
-    /* the line and the row read the same tokens — three rules each computing the track is three
-       chances for one of them to be a pixel out, on the element whose whole job is to line up */
-    expect(rule(".qcv-be-line")).toMatch(/left:\s*calc\(var\(--qcv-be-tl\) \+ var\(--qcv-be-tw\) \* 0\.5\)/);
+    /* §3.2 — the track is inset from its own cell, and the two numbers are the mock's */
+    expect(rule(".qcv-be-track")).toMatch(/left:\s*4px;\s*right:\s*10px/);
     expect(rule(".qcv-be-row")).toMatch(/grid-template-columns:\s*var\(--qcv-be-who\) minmax\(0, 1fr\) var\(--qcv-be-day\)/);
     expect(rule(".qcv-be-row")).toMatch(/column-gap:\s*var\(--qcv-be-gap\)/);
     expect(rule(".qcv-be-row")).toMatch(/padding:\s*0 var\(--qcv-be-pad\)/);
@@ -113,7 +144,7 @@ describe("the sheet", () => {
        the window instead of scrolling inside it — measured on four surfaces in this repo */
     expect(sc).toMatch(/min-height:\s*0/);
     expect(sc).toMatch(/flex:\s*1 1 auto/);
-    for (const fixed of [".qcv-be-head", ".qcv-be-focus", ".qcv-be-axis", ".qcv-be-key"]) {
+    for (const fixed of [".qcv-be-head", ".qcv-be-focus", ".qcv-be-key"]) {
       expect(rule(fixed), `${fixed} must not grow or shrink`).toMatch(/flex:\s*none/);
     }
     /* and nothing in this view is sized to the viewport — the card's height is the window's */
@@ -191,62 +222,68 @@ describe("§4 · the header is a blush tray with the hawk behind the words", () 
   });
   it("§4 · the toggle is OUT of the tray, 10px beneath it", () => {
     expect(rule(".qcv-be-focus")).toMatch(/margin: 10px 22px 0/);
-    /**
-     * …and it is a SIBLING of the tray, not a child — a child would be clipped by the layer above,
-     * or would grow the tray past the 122 the design states.
-     *
-     * ⚠️ A DEPTH WALK, NOT A `</div>` SEARCH. "Some close tag sits between the two" is true of a
-     * toggle nested three levels inside the tray, which is the fault this asserts against; phase 2
-     * proved that form vacuous by moving an element back inside its parent and watching it pass.
-     */
-    const html = view();
-    const headOpen = html.lastIndexOf("<div", html.indexOf('data-qcv="be-head"'));
-    const focusAt = html.indexOf('data-qcv="be-focus"');
-    expect(focusAt).toBeGreaterThan(headOpen);
-    let depth = 0;
-    for (const m of html.slice(headOpen, html.lastIndexOf("<", focusAt)).matchAll(/<(\/?)div\b/g)) depth += m[1] ? -1 : 1;
-    expect(depth, "the toggle is nested inside the tray").toBe(0);
+  });
+  it("§3.1 · ⚠️ the toggle's three labels are CENTRED in their segments", () => {
+    /* a button's default text alignment is its UA's — left-aligned words inside three equal
+       segments read as three columns rather than as one control */
+    const b = rule(".qcv-be-focus button");
+    expect(b).toMatch(/display:\s*flex/);
+    expect(b).toMatch(/justify-content:\s*center/);
+    expect(b).toMatch(/align-items:\s*center/);
   });
   it("the hawk is the enrolled asset, at its recorded version", () => {
     expect(view()).toContain(`src="${BE_HAWK_HEAD.src}?v=${BE_HAWK_HEAD.version}"`);
   });
 });
 
-/* ── v65.2 §5 · the axis and the rows (lock 4) ────────────────────────────────────────────────── */
+/* ── v65.3 §3.2–§3.3 · the progress bars and the rows (locks 2 and 3) ─────────────────────────── */
 
-describe("§5 · the axis and the rows", () => {
-  it("the axis shares the ROW's grid, so the pill cannot drift from the line", () => {
-    const ax = rule(".qcv-be-axis");
-    const row = rule(".qcv-be-row");
-    const tracks = /grid-template-columns: ([^;]+);/.exec(ax)?.[1];
-    expect(tracks, "the axis states no tracks").toBeTruthy();
-    expect(row, "the row's tracks differ from the axis's").toContain(`grid-template-columns: ${tracks}`);
-    expect(tracks).toBe("var(--qcv-be-who) minmax(0, 1fr) var(--qcv-be-day)");
-    expect(ax).toMatch(/height: 22px/);
+describe("§3.2–§3.3 · the bars and the rows", () => {
+  it("⚠️ the axis, its labels and the due line are RETIRED, sheet and markup alike", () => {
+    /* the decision is decision 1's, and a rule left behind for a retired element is a rule the next
+       reader has to work out is dead — so their absence is asserted rather than assumed */
+    for (const gone of [".qcv-be-axis", ".qcv-be-axt", ".qcv-be-axnow", ".qcv-be-axl", ".qcv-be-axr", ".qcv-be-line", ".qcv-be-bar"]) {
+      expect(css, `${gone} outlived the due line`).not.toContain(`${gone} {`);
+      expect(css, `${gone} outlived the due line`).not.toContain(`${gone},`);
+    }
+    expect(src).not.toContain("be-axis");
+    expect(src).not.toContain("be-line");
   });
   it("§5 · the right column is 52 and the columns do not gap", () => {
     const be = rule(".qcv-be");
     expect(be).toMatch(/--qcv-be-day: 52px/);
-    expect(be, "a column gap moves the pill off the line the rows are measured against").toMatch(/--qcv-be-gap: 0px/);
+    expect(be, "a column gap moves the bar off the space the date column measures").toMatch(/--qcv-be-gap: 0px/);
   });
-  it("⚠️ WAITING and OVERDUE are 30px from the LINE, never from the pill", () => {
-    /* the pill's width is its text's, so measuring from its edges moves both labels the day the
-       word changes — and the labels' whole job is to say which side of the line is which */
-    expect(rule(".qcv-be-axl")).toMatch(/right: calc\(50% \+ 30px\)/);
-    expect(rule(".qcv-be-axr")).toMatch(/left: calc\(50% \+ 30px\)/);
-    expect(rule(".qcv-be-axl"), "the waiting side is the quiet one").toMatch(/color: var\(--qcv-ink-45\)/);
-    expect(rule(".qcv-be-axr"), "the overdue side is bold ink").toMatch(/font-weight: 600; color: var\(--qcv-ink\)/);
-    expect(rule(".qcv-be-axnow")).toMatch(/background: var\(--qcv-ink\)/);
-    expect(rule(".qcv-be-axnow")).toMatch(/left: 50%/);
+  it("§3.2 · the three parts of the track, and the notch stands proud of it", () => {
+    expect(rule(".qcv-be-pg")).toMatch(/height:\s*8px/);
+    expect(rule(".qcv-be-track")).toMatch(/border-radius:\s*4px/);
+    expect(rule(".qcv-be-track")).toMatch(/left:\s*4px;\s*right:\s*10px/);
+    expect(rule(".qcv-be-allow"), "the allowance is the white window").toMatch(/background:\s*#fff/);
+    expect(rule(".qcv-be-fill")).toMatch(/background:\s*var\(--qcv-state, var\(--state-closed\)\)/);
+    /* §1.9 — the overrun is INK at full opacity, as the expanded view's is */
+    expect(rule(".qcv-be-over")).toMatch(/background:\s*var\(--qcv-ink\)/);
+    /* 8 tall plus 3 proud above and below is 14 — the mock's own notch, measured */
+    const n = rule(".qcv-be-notch");
+    expect(n).toMatch(/top:\s*-3px/);
+    expect(n).toMatch(/height:\s*14px/);
+    expect(n).toMatch(/width:\s*2px/);
+    expect(n).toMatch(/background:\s*#fff/);
   });
-  it("§5 · the due line is 1.5px ink at 70%", () => {
-    const line = rule(".qcv-be-line");
-    expect(line).toMatch(/width: 1.5px/);
-    expect(line).toMatch(/background: var\(--qcv-ink\)/);
-    expect(line).toMatch(/opacity: 0.7/);
-    /* …and it is centred on the track's midpoint rather than offset to one side of it */
-    expect(line).toMatch(/margin-left: -0.75px/);
+  it("§3.3 · ⚠️ an overdue row is an INSET card, and the inset pays the gutter back", () => {
+    const late = rule(".qcv-be-row--late");
+    /* 12 + 10 = the 22px gutter, so the ink lands where every other row's does and only the
+       background moved. Either number alone is a row that is wrong in one of two ways. */
+    /* ⚠️ `100%` widens the row by the margins and `auto` shrink-to-fits it (a button), so the
+       width is STATED and names the margin it pays for. Both were measured on the page. */
+    expect(late).toMatch(/width:\s*calc\(100% - 24px\)/);
+    expect(late).toMatch(/margin:\s*0 12px 4px/);
+    expect(late).toMatch(/padding:\s*0 10px/);
+    expect(late).toMatch(/border-radius:\s*10px/);
+    expect(late).toMatch(/background:\s*#f8ebe3/);
+    expect(late, "the 3px ink edge is the marker").toMatch(/inset 3px 0 0 var\(--qcv-ink\)/);
+    expect(late, "an inset card with a bottom border reads as a row that lost its corner").toMatch(/border-bottom:\s*0/);
   });
+
   /**
    * §1.8 — THE DATE AND THE DISTANCE ARE TWO FACTS AND THE ROW STATES BOTH. Either alone leaves the
    * reader doing arithmetic: "10d over" does not say which day, and "9 Sep" does not say whether it
@@ -269,23 +306,7 @@ describe("§5 · the axis and the rows", () => {
     expect(rule(".qcv-be-due u")).toMatch(/text-transform: uppercase/);
     for (const c of cells) expect(c[3], `"${c[3]}" is already uppercase in the source`).not.toBe(c[3].toUpperCase());
   });
-  it("§5 · an overdue row is washed across the WHOLE card, with a 3px ink edge", () => {
-    const late = rule(".qcv-be-row--late");
-    expect(late).toMatch(/background: #f8ebe3/);
-    expect(late).toMatch(/box-shadow: inset 3px 0 0 var\(--qcv-ink\)/);
-    expect(late).toMatch(/border-bottom-color: #efdcd1/);
-    /**
-     * ⚠️ AND IT ADDS NO BLEED, WHICH THE MOCK DOES AND WE MUST NOT COPY. Its rows sit in a container
-     * inset by the gutter, so its overdue row needs `margin: 0 -22px` to reach the card's edges;
-     * ours span the card already and hold the gutter as padding. Carrying the negative margin
-     * across overshot by exactly that gutter — measured, 22px outside the card. The wash's reach is
-     * a RENDERED claim and lives in `qcV65.measure.ts`; what belongs here is that nothing moves the
-     * row's box, because that is what keeps its columns on every other row's.
-     */
-    expect(late, "a margin here moves the row off the card").not.toMatch(/margin/);
-    expect(late, "a width here moves the row off the card").not.toMatch(/width/);
-    expect(late, "padding here moves the columns out of step with every other row").not.toMatch(/padding/);
-    /* and the class is on the rows whose date has gone, from the library's own answer */
+  it("§3.3 · the overdue class comes from the library's own answer, on the rows whose date has gone", () => {
     const html = view([mkQ({ dateSent: ago(400) })]);
     expect(html).toContain("qcv-be-row--late");
     expect(html).toContain('data-due="past"');

@@ -2,17 +2,13 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * QcBirdsEye — the rail's view (v65 §6): head, focus toggle, axis, rows, legend.
+ * QcBirdsEye — the rail's view (v65.3 §3): head, focus toggle, rows, legend.
  *
- * ⚠️ ONE VERTICAL LINE, AND EVERY ROW IS SHIFTED SO ITS OWN EXPECTED DATE SITS ON IT (§6.3). That
- * is what makes a single line readable across rows whose dates are months apart: the gap between a
- * bar's end and the line IS the time left, in the same pixels, on every row. The arithmetic is in
- * `lib/qcBirdsEye`, so this file places what it is given and derives nothing.
- *
- * ⚠️ AND THE LINE RUNS THE HEIGHT OF THE ROWS, NOT OF THE SCROLL BOX (§6.3). A line drawn on the
- * scroller would carry on past the last row into empty space and read as a date the rows below it
- * are measured against — so it is drawn INSIDE the rows' own container, which is exactly as tall as
- * they are.
+ * ⚠️ THE DUE LINE IS GONE, AND WITH IT THE SHIFTED BARS (v65.3 decision 1). Every row used to be
+ * offset so its own expected date sat on one shared vertical line — which made the gap between a
+ * bar's end and the line mean the same thing on every row, and cost a second coordinate system
+ * inside a 340px rail. A progress bar states the same fact without one: `eyeProgress` answers how
+ * far through the window a query is, and this file places what it is given and derives nothing.
  */
 import React, { useState } from "react";
 import { StatusDot } from "../../StatusDot";
@@ -22,26 +18,48 @@ import { BE_HAWK_HEAD } from "./qcArt";
 import type { QcRow } from "../../../lib/qcSummary";
 import "./qcvBirdsEye.css";
 
-const Bar: React.FC<{ r: EyeRow }> = ({ r }) => (
-  <span className="qcv-be-t" data-qcv="be-track">
-    <i
-      className={`qcv-be-bar${r.bar.cut ? " qcv-be-bar--cut" : ""}${r.bar.dashed ? " qcv-be-bar--dash" : ""}${r.court === "you" ? " qcv-be-bar--you" : ""}`}
-      data-qcv="be-bar"
-      data-status={r.row.status}
-      /* the stage's own colour, set the way `QcList` and `QcTimeline` set it — one vocabulary */
-      style={{ left: `${r.bar.left}%`, width: `${r.bar.width}%`, ["--qcv-state" as string]: `var(--state-${r.row.state})` }}
-    >
-      {/* the overrun rides INSIDE the bar, so nothing can leave it behind when the bar moves */}
-      {r.bar.over && (
-        <u
-          className="qcv-be-over"
-          data-qcv="be-over"
-          style={{ left: `${((r.bar.over.left - r.bar.left) / Math.max(r.bar.width, 0.0001)) * 100}%`, width: `${(r.bar.over.width / Math.max(r.bar.width, 0.0001)) * 100}%` }}
-        />
-      )}
-    </i>
-  </span>
-);
+/**
+ * §3.2 — THE PROGRESS BAR. Three parts in one track: the white ALLOWANCE (the window the agency
+ * asked for), the coloured FILL (how much of it has gone) and, past the date, the ink OVERRUN with
+ * a white NOTCH at the join marking the date itself.
+ *
+ * ⚠️ IT PLACES WHAT IT IS GIVEN AND DERIVES NOTHING. Every share comes from `eyeProgress`, so the
+ * expanded view and this rail cannot disagree about how far through a window a query is — and the
+ * arithmetic is checkable without a browser.
+ *
+ * ⚠️ AND THE FILL IS THE STATUS'S OWN COLOUR, NEVER A DEEPENED ONE (decision 2). `--state-queried`
+ * and its four siblings are the app's one status palette; `--state-*-deep` is a different family
+ * for a different job, and a rail that quietly used it would be the only surface in the app where
+ * "the colour of a Partial Sent" meant something else.
+ */
+const Bar: React.FC<{ r: EyeRow }> = ({ r }) => {
+  const p = r.prog;
+  const pc = (n: number) => `${Math.max(0, Math.min(100, n * 100))}%`;
+  return (
+    <span className="qcv-be-pg" data-qcv="be-prog" data-dated={p.dated ? "yes" : "no"}>
+      <i
+        className={`qcv-be-track${p.dated ? "" : " qcv-be-track--none"}${r.court === "you" ? " qcv-be-track--you" : ""}`}
+        data-qcv="be-track"
+        data-status={r.row.status}
+        style={{ ["--qcv-state" as string]: `var(--state-${r.row.state})` }}
+      >
+        {p.dated && (
+          <>
+            <i className="qcv-be-allow" data-qcv="be-allow" style={{ width: pc(p.allowance) }} />
+            <b className="qcv-be-fill" data-qcv="be-fill" style={{ width: pc(p.fill) }} />
+            {p.over > 0 && (
+              <>
+                <u className="qcv-be-over" data-qcv="be-over" style={{ left: pc(p.allowance), width: pc(p.over) }} />
+                {/* the date itself, standing proud of the track so it reads as a mark rather than a seam */}
+                <s className="qcv-be-notch" data-qcv="be-notch" style={{ left: pc(p.allowance) }} />
+              </>
+            )}
+          </>
+        )}
+      </i>
+    </span>
+  );
+};
 
 export const QcBirdsEye: React.FC<{
   rows: readonly QcRow[];
@@ -110,34 +128,13 @@ export const QcBirdsEye: React.FC<{
         ))}
       </div>
 
-      {/**
-        * §5 — THE AXIS SHARES THE ROW'S OWN GRID, so its track cell is the rows' track cell and the
-        * DUE pill cannot drift from the line beneath it. Three rules each computing the track is
-        * three chances for one of them to be a pixel out, on the one element whose job is to line up.
-        *
-        * ⚠️ WAITING AND OVERDUE ARE 30px FROM THE LINE, NOT FROM THE PILL. The pill's width is its
-        * text's, so measuring from its edges would move both labels the day the word changed.
-        */}
-      <div className="qcv-be-axis" data-qcv="be-axis" aria-hidden="true">
-        <span />
-        <span className="qcv-be-axt">
-          <u className="qcv-be-axnow">Due</u>
-          <em className="qcv-be-axl">Waiting</em>
-          <em className="qcv-be-axr">Overdue</em>
-          {[10, 20, 30, 40, 60, 70, 80, 90].map((x) => <i key={x} style={{ left: `${x}%` }} />)}
-        </span>
-        <span />
-      </div>
-
       <div className="qcv-be-scroll" data-qcv="be-scroll">
         {groups.length === 0 ? (
           <p className="qcv-be-none">{loading ? "" : "Nothing is out with an agent."}</p>
         ) : groups.map((g) => (
           <section key={g.key} className={`qcv-be-grp qcv-be-grp--${g.key}`} data-qcv="be-group" data-group={g.key}>
-            <h3 className="qcv-be-gh" data-qcv="be-heading">{g.label}<span>{g.count}</span></h3>
-            {/* ⚠️ THE LINE IS THIS ELEMENT'S, so it is exactly as tall as the rows it measures */}
+            <h3 className="qcv-be-gh" data-qcv="be-heading">{g.label}<span data-qcv="be-gcount">{g.count}</span></h3>
             <div className="qcv-be-rows" data-qcv="be-rows">
-              <i className="qcv-be-line" data-qcv="be-line" aria-hidden="true" />
               {g.rows.map((r) => (
                 /* ⚠️ A ROW OPENS THE EXPANDED VIEW, NOT THE CARD IN THE RAIL (§6.4) — the rail is
                    where you LOOK at the shape of things; opening a query here would replace the very

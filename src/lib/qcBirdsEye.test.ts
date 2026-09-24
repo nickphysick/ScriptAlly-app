@@ -8,8 +8,8 @@ import { describe, it, expect } from "vitest";
 import { Agent, Query, QueryStatus } from "../types";
 import { buildQcRows, type QcRow } from "./qcSummary";
 import {
-  ATTENTION_HINT, ATTENTION_LABEL, ATTENTION_ORDER, EYE_FOCUS, TRACK_DAYS, UNDATED_LEAD_DAYS, UPCOMING_DAYS,
-  attentionGroup, dayCount, eyeBar, eyeFaded, eyeGroups, eyeRows,
+  ALLOWANCE_FLOOR, ATTENTION_HINT, ATTENTION_LABEL, ATTENTION_ORDER, EYE_FOCUS, PROGRESS_FLOOR, UPCOMING_DAYS,
+  attentionGroup, dayCount, eyeProgress, eyeFaded, eyeGroups, eyeRows,
 } from "./qcBirdsEye";
 
 const DAY = 86_400_000;
@@ -68,112 +68,78 @@ describe("§6.2 · the day count", () => {
   });
 });
 
-describe("§6.3 · the track — seventy days, the expected date on the line", () => {
-  const pcPerDay = 100 / TRACK_DAYS;
+describe("§3.2 · the progress bar — how far through the agency's own window", () => {
   /**
-   * ⚠️ THE CONSTANT IS PINNED SEPARATELY FROM THE RELATIONSHIPS, and that is not belt-and-braces.
-   * Every assertion below derives its expected value from `TRACK_DAYS`, so changing 70 to 60 moves
-   * BOTH sides and the whole block stays green — measured: it did. The scale is a design decision
-   * (§6.3: seventy days, thirty-five each side of the line) and a decision is pinned; the geometry
-   * built on it is derived, so a retune of the scale fails HERE and nowhere else.
+   * ⚠️ THE FRACTION IS THE WHOLE MODEL, AND EVERY ASSERTION DERIVES ITS EXPECTED VALUE FROM IT.
+   * `f = (today − stage entry) / (expected − stage entry)`. A test that typed 0.5 beside a fixture
+   * built to be half way through would pass on a function that returned 0.5 for everything.
    */
-  it("⚠️ the track is seventy days — the design's own number, pinned", () => {
-    expect(TRACK_DAYS).toBe(70);
+  it("up to the date the allowance is the whole track and the fill is f", () => {
+    /* entered 10 days ago, due in 10 — exactly half way */
+    const p = eyeProgress(at(NOW + 10 * DAY, NOW - 10 * DAY), NOW);
+    expect(p.dated).toBe(true);
+    expect(p.f).toBeCloseTo(0.5, 6);
+    expect(p.allowance, "the allowance is the whole track up to the date").toBe(1);
+    expect(p.fill).toBeCloseTo(0.5, 6);
+    expect(p.over, "nothing is past a date that has not come").toBe(0);
   });
-  it("the expected date is at 50%, whatever the date is", () => {
-    for (const d of [-40, -1, 0, 1, 40]) {
-      /* a bar that ENDS on its expected date: stage start well before, today AT the date */
-      const b = eyeBar(at(NOW, NOW - 20 * DAY), NOW);
-      expect(Math.round((b.left + b.width) * 100) / 100, `${d}`).toBe(50);
-    }
+  it("⚠️ a stage entered TODAY still draws — the 3% floor, and it is of the TRACK", () => {
+    const p = eyeProgress(at(NOW + 20 * DAY, NOW), NOW);
+    expect(p.f).toBe(0);
+    expect(p.fill).toBe(PROGRESS_FLOOR);
+    expect(PROGRESS_FLOOR, "the floor is a design decision and is pinned on its own").toBe(0.03);
   });
-  it("⚠️ time left is the GAP between the bar's end and the line, at 70 days across", () => {
-    const b = eyeBar(at(NOW + 14 * DAY, NOW - 7 * DAY), NOW);
-    /* today is 14 days before the date, so the bar ends 14 × (100/70) % left of the line */
-    expect(Math.round((50 - (b.left + b.width)) * 100) / 100).toBe(Math.round(14 * pcPerDay * 100) / 100);
-    /* …and it began 7 days before today, which is 21 days before the DATE the line carries */
-    expect(Math.round((50 - b.left) * 100) / 100).toBe(Math.round(21 * pcPerDay * 100) / 100);
-    expect(b.over, "nothing is past a date that has not come").toBeNull();
+  it("⚠️ past the date the bar RESCALES: the allowance is 1/f and the rest is ink", () => {
+    /* entered 31 days ago against a 25-day window: f = 31/25 = 1.24 */
+    const p = eyeProgress(at(NOW - 6 * DAY, NOW - 31 * DAY), NOW);
+    expect(p.f).toBeCloseTo(31 / 25, 6);
+    expect(p.allowance).toBeCloseTo(25 / 31, 6);
+    expect(p.over).toBeCloseTo(1 - 25 / 31, 6);
+    /* the fill fills the allowance once the date has gone — there is no unspent window left */
+    expect(p.fill).toBeCloseTo(p.allowance, 6);
+    /* …and the three parts are the whole track, which is what makes the notch the due date */
+    expect(p.allowance + p.over).toBeCloseTo(1, 6);
   });
-  it("⚠️ a bar past its date crosses the line, and the part beyond it is the overrun", () => {
-    const b = eyeBar(at(NOW - 7 * DAY, NOW - 21 * DAY), NOW);
-    expect(b.over, "the date has gone and nothing is drawn past the line").toBeTruthy();
-    expect(Math.round(b.over!.left)).toBe(50);
-    expect(Math.round(b.over!.width * 100) / 100).toBe(Math.round(7 * pcPerDay * 100) / 100);
-    expect(Math.round((b.left + b.width) * 100) / 100).toBe(Math.round((50 + 7 * pcPerDay) * 100) / 100);
-  });
-  it("⚠️ a bar that began before the track is CUT FLAT rather than shortened out of existence", () => {
-    /* 60 days before the date is 25 days off the left end of a 70-day track */
-    const b = eyeBar(at(NOW + 5 * DAY, NOW - 60 * DAY), NOW);
-    expect(b.cut).toBe(true);
-    expect(b.left).toBe(0);
-    expect(b.width).toBeGreaterThan(0);
-    /* and one that fits is not cut */
-    expect(eyeBar(at(NOW + 5 * DAY, NOW - 10 * DAY), NOW).cut).toBe(false);
-  });
-  it("⚠️ no expected date: the row anchors on TODAY, ends at the line, and is drawn dashed", () => {
-    const b = eyeBar(at(null, NOW - 14 * DAY), NOW);
-    expect(b.dashed).toBe(true);
-    expect(Math.round((b.left + b.width) * 100) / 100).toBe(50);
-    expect(b.over, "there is no date to be past").toBeNull();
-  });
-  it("⚠️ no stage start either: a stated lead rather than a bar with no beginning", () => {
-    const b = eyeBar(at(null, null), NOW);
-    expect(b.dashed).toBe(true);
-    expect(UNDATED_LEAD_DAYS).toBe(10);
-    expect(Math.round(b.width * 100) / 100).toBe(Math.round(UNDATED_LEAD_DAYS * pcPerDay * 100) / 100);
-  });
-  /**
-   * ⚠️ FOUND BY THE RENDERED PAGE, NOT BY THIS FILE — twenty-five rows were past their date and
-   * several had nothing drawn at all, because a query that entered its current stage TODAY spans no
-   * time. The zero-width bar then carried a zero-width overrun, which has a POSITION, and a probe
-   * that finds one believes the overrun is there: it reported 37px right of the line it is meant to
-   * start on. Two faults, one shape — a thing that draws nothing but can still be measured.
-   */
-  it("⚠️ a bar is at least ONE DAY wide, and it still ends on today", () => {
-    const b = eyeBar(at(NOW - 12 * DAY, NOW), NOW);
-    expect(Math.round(b.width * 100) / 100).toBe(Math.round(pcPerDay * 100) / 100);
-    /* and it still ends where today is — the floor takes its width from the LEFT */
-    const today = 50 + (12 * pcPerDay);
-    expect(Math.round((b.left + b.width) * 100) / 100).toBe(Math.round(Math.min(100, today) * 100) / 100);
-  });
-  it("⚠️ an overrun starts at the LINE, or at the bar's own left when the bar begins past it", () => {
-    /* the ordinary case: the bar crosses the line, so the ink starts there */
-    const crossing = eyeBar(at(NOW - 7 * DAY, NOW - 21 * DAY), NOW);
-    expect(Math.round(crossing.over!.left)).toBe(50);
-    /* ⚠️ AND THE CASE THE PAGE FOUND: a query that entered its current stage AFTER the date had
-       gone. The whole bar is past the line, so the whole bar is ink and the overrun begins where
-       the BAR does — not at the line, which is behind it. An assertion that the ink always starts
-       at 50 is wrong here, and it was: it reported 37px of disagreement about a correct bar. */
-    const beyond = eyeBar(at(NOW - 12 * DAY, NOW), NOW);
-    expect(beyond.left, "the precondition: this bar begins past the line").toBeGreaterThan(50);
-    expect(beyond.over!.left).toBe(beyond.left);
-    expect(Math.round(beyond.over!.width * 100) / 100).toBe(Math.round(beyond.width * 100) / 100);
+  it("the notch sits at the allowance, which is where the mock draws it", () => {
+    /* the ref renders an allowance of 56.5 in a 70px track: f = 70/56.5 */
+    const f = 70 / 56.5;
+    const windowDays = 25;
+    const p = eyeProgress(at(NOW - (f - 1) * windowDays * DAY, NOW - f * windowDays * DAY), NOW);
+    expect(p.allowance).toBeCloseTo(56.5 / 70, 3);
   });
   it("⚠️ an overrun exists only where a date has GONE — not where it falls today", () => {
-    /* a date landing exactly on today is not past: nothing is drawn beyond the line */
-    expect(eyeBar(at(NOW, NOW - 10 * DAY), NOW).over).toBeNull();
-    expect(eyeBar(at(NOW + DAY, NOW - 10 * DAY), NOW).over).toBeNull();
-    expect(eyeBar(at(NOW - 1, NOW - 10 * DAY), NOW).over, "a second past the date is past it").toBeTruthy();
-    /* ⚠️ AND NO WIDTH TEST GUARDS IT, deliberately: past a date, `right` is beyond 50 by
-       construction and the one-day floor guarantees a drawable width, so a width test would be a
-       branch nothing can enter. Every overrun this can produce has width. */
-    for (const [e, st] of [[NOW - DAY, NOW - 40 * DAY], [NOW - 40 * DAY, NOW], [NOW - 200 * DAY, NOW - 400 * DAY]] as const) {
-      const o = eyeBar(at(e, st), NOW).over;
-      expect(o, `${e}`).toBeTruthy();
-      expect(o!.width, `${e} drew an overrun with no width`).toBeGreaterThan(0);
+    expect(eyeProgress(at(NOW, NOW - 10 * DAY), NOW).over, "a date landing today is not past").toBe(0);
+    expect(eyeProgress(at(NOW + DAY, NOW - 10 * DAY), NOW).over).toBe(0);
+    expect(eyeProgress(at(NOW - 1, NOW - 10 * DAY), NOW).over, "a second past the date is past it").toBeGreaterThan(0);
+  });
+  it("⚠️ a missing stage entry falls back to the SEND DATE — the date the end was computed from", () => {
+    /* the expected date IS `last send + the agency's window`, so the send is the window's own start;
+       found on the page, where a row read "60d over" beside an empty track */
+    const r = { expectedMs: NOW + 10 * DAY, stageStartMs: null, sentMs: NOW - 10 * DAY } as never as QcRow;
+    const p = eyeProgress(r, NOW);
+    expect(p.dated, "a send and an expected date are a window").toBe(true);
+    expect(p.f).toBeCloseTo(0.5, 6);
+  });
+  it("⚠️ either end missing is UNDATED — a window needs a beginning and an end", () => {
+    /* ⚠️ AND THE SEND IS CLEARED TOO, or the fallback above quietly supplies the missing end and
+       this case measures a window rather than the absence of one. */
+    for (const [e, st] of [[null, NOW - 14 * DAY], [NOW + 5 * DAY, null], [null, null]] as const) {
+      const p = eyeProgress(at(e, st, { sentMs: null }), NOW);
+      expect(p.dated, `${e} / ${st}`).toBe(false);
+      expect(p.f).toBeNull();
+      expect(p.fill, "an undated track is empty, not floored").toBe(0);
+      expect(p.over).toBe(0);
     }
   });
-  it("nothing is ever drawn outside the track", () => {
-    for (const [e, s] of [[NOW + 200 * DAY, NOW - 400 * DAY], [NOW - 200 * DAY, NOW - 400 * DAY], [NOW, NOW]] as const) {
-      const b = eyeBar(at(e, s), NOW);
-      expect(b.left).toBeGreaterThanOrEqual(0);
-      expect(b.left + b.width).toBeLessThanOrEqual(100.001);
-      if (b.over) expect(b.over.left + b.over.width).toBeLessThanOrEqual(100.001);
-    }
+  it("⚠️ a window of zero or less is fully overrun, never a division by zero", () => {
+    const p = eyeProgress(at(NOW - 10 * DAY, NOW - 10 * DAY), NOW);
+    expect(p.dated).toBe(true);
+    expect(p.f).toBe(Infinity);
+    expect(p.allowance, "clamped so the notch still has somewhere to stand").toBe(ALLOWANCE_FLOOR);
+    expect(p.over).toBeCloseTo(1 - ALLOWANCE_FLOOR, 6);
+    expect(Number.isFinite(p.fill) && p.fill > 0, "and it still draws something").toBe(true);
   });
 });
-
 describe("the view's rows", () => {
   it("⚠️ closed queries are not drawn — a closed query has no time left to show", () => {
     const rows = rowsOf([QueryStatus.QUERIED, QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN, QueryStatus.OFFER].map((status) => mkQ({ status })));
