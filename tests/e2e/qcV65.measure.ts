@@ -2655,37 +2655,7 @@ test("§14 · the offsets table — reported at 1440×860 and 1280×800", async 
   /* 702.5 with the compact strip · 394.7 the moment it went · 372.1 once the head's stray 8px and
      the control row's 15px of air for the retired view switch went with it */
   record({ area: "§14 offsets", what: "the first Ledger row's top at 1280×800 (702.5 with the strip → 394.7 without → 372.1 at v21's close → now, with the courts)", got: rowTop, want: "reported" });
-  /**
- * §13 · THE HEADER, BESIDE THE MOCK'S, AT BOTH WIDTHS. The brief asks for this each phase, and it is
- * a screenshot rather than an assertion on purpose: the numbers around it are locked above, and what
- * a picture adds is the thing no number states — whether the two read as the same object.
- */
-test("§13 · the expanded header, ours and the mock's, at 1280 and 1920", async ({ page, browser }) => {
-  const refPage = await (await browser.newContext()).newPage();
-  const shot: Record<string, string> = {};
-  for (const w of [1280, 1920]) {
-    await openApp(page, w, 900, "?view=calendar");
-    await page.waitForTimeout(1100);
-    const tray = page.locator("[data-qcv='xp-tray']");
-    await tray.screenshot({ path: resolve(OUT, `xp-head-app-${w}.png`) });
-    shot[`app-${w}`] = `xp-head-app-${w}.png`;
-    /* the mock opens its own sheet through the function its UI calls — no guessing at a trigger */
-    await refPage.setViewportSize({ width: refWindowFor(w - 268 - 44), height: 900 });
-    await refPage.goto(REF);
-    await refPage.evaluate(() => document.fonts.ready);
-    await refPage.waitForTimeout(1200);
-    await refPage.evaluate(() => (window as unknown as { openSheet: (n: number) => void }).openSheet(-1));
-    await refPage.waitForTimeout(900);
-    const csh = refPage.locator(".csh").first();
-    if (await csh.count()) {
-      await csh.screenshot({ path: resolve(OUT, `xp-head-ref-${w}.png`) });
-      shot[`ref-${w}`] = `xp-head-ref-${w}.png`;
-    }
-  }
-  record({ area: "shots", what: "§13 · the expanded header, ours and the mock's", got: shot, want: "reported" });
-  yes("shots", `four header shots were taken (${Object.keys(shot).length})`, Object.keys(shot).length === 4, JSON.stringify(shot));
-  await refPage.close();
-});
+
 
 /**
    * ⚠️ A CLAIM ABOUT THE FOLD, NOT A NUMBER. It was `rowTop < 500` and measured 500.2 once the three
@@ -2702,6 +2672,41 @@ test("§13 · the expanded header, ours and the mock's, at 1280 and 1920", async
   });
   record({ area: "§14 offsets", what: "the first row's bottom against the scrollport's at 1280×800", got: fold, want: "reported" });
   yes("§14 offsets", `the first row is whole and above the fold at 1280×800 (row ends ${fold.rowBottom}, the fold is ${fold.portBottom})`, fold.rowBottom <= fold.portBottom, JSON.stringify(fold));
+});
+
+/**
+ * §13 · THE HEADER, BESIDE THE MOCK'S, AT BOTH WIDTHS. The brief asks for this each phase, and it is
+ * a screenshot rather than an assertion on purpose: the numbers around it are locked above, and what
+ * a picture adds is the thing no number states — whether the two read as the same object.
+ */
+test("§13 · the expanded header, ours and the mock's, at 1280 and 1920", async ({ page, browser }) => {
+  const refPage = await (await browser.newContext()).newPage();
+  const shot: Record<string, string> = {};
+  for (const w of [1280, 1920]) {
+    await openApp(page, w, 900, "?view=calendar");
+    await page.waitForTimeout(1100);
+    const tray = page.locator("[data-qcv='xp-tray']");
+    await tray.screenshot({ path: resolve(OUT, `xp-head-app-${w}.png`) });
+    shot[`app-${w}`] = `xp-head-app-${w}.png`;
+    /* ⚠️ THROUGH THE MOCK'S OWN CONTROL, NOT ITS FUNCTION. `openSheet` is declared inside the ref's
+       single <script> and is not on `window`, so calling it threw; the control that calls it is
+       `.ropen` / `.rcx`, and clicking that is what a reader does anyway. */
+    await refPage.setViewportSize({ width: refWindowFor(w - 268 - 44), height: 900 });
+    await refPage.goto(REF);
+    await refPage.evaluate(() => document.fonts.ready);
+    await refPage.waitForTimeout(1200);
+    const trigger = refPage.locator(".ropen, .rcx").first();
+    if (await trigger.count()) await trigger.click();
+    await refPage.waitForTimeout(900);
+    const csh = refPage.locator(".csh").first();
+    if (await csh.count()) {
+      await csh.screenshot({ path: resolve(OUT, `xp-head-ref-${w}.png`) });
+      shot[`ref-${w}`] = `xp-head-ref-${w}.png`;
+    }
+  }
+  record({ area: "shots", what: "§13 · the expanded header, ours and the mock's", got: shot, want: "reported" });
+  yes("shots", `four header shots were taken (${Object.keys(shot).length})`, Object.keys(shot).length === 4, JSON.stringify(shot));
+  await refPage.close();
 });
 
 test("Ω · the run measured enough to be believed", async () => {
