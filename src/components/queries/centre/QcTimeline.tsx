@@ -544,7 +544,7 @@ export const QcTimeline: React.FC<{
             {groups.length === 0 ? (
               <p className="qcv-tl-none" data-qcv="tl-none">Nothing here with these settings.</p>
             ) : groups.map((g) => (
-              <section key={g.key} data-qcv="tl-group" data-group={g.key}>
+              <section key={g.key} className="qcv-tl-group" data-qcv="tl-group" data-group={g.key}>
                 {/* §8.3 — a heading shows whenever grouping is on, even where there is one group;
                     only "Nothing" removes them. Its words are the GROUP's, so Status and package
                     groups name themselves rather than falling back to an attention label. */}

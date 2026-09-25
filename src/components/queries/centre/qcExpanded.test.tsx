@@ -220,10 +220,13 @@ describe("§4.2 · the expanded header, layout A", () => {
      */
     const tl = read("src/components/queries/centre/qcvTimeline.css");
     const corner = /\.qcv-tl-corner \{([^}]*)\}/.exec(tl)?.[1] ?? "";
+    /* §7 — ONE NUMBER: the row's height IS the group bands' sticky offset, so a band cannot slide
+       under the dates or float below them. Four rules read it. */
+    expect(/(?:^|\n)\s*\.qcv-tl \{([^}]*)\}/.exec(tl)?.[1] ?? "").toMatch(/--qcv-tl-daterow-h: 60px/);
     expect(corner, "the corner is sticky-left, or the dates run out from under it").toMatch(/position: sticky/);
     expect(corner).toMatch(/left: 0/);
     expect(corner).toMatch(/width: var\(--qcv-tl-names\)/);
-    expect(corner).toMatch(/height: 60px/);
+    expect(corner).toMatch(/height: var\(--qcv-tl-daterow-h\)/);
     /* ⚠️ OPAQUE. The dates pass UNDER it, so a transparent corner is a column of dates behind the
        controls — the same claim the names cell carries one row down. */
     expect(corner).toMatch(/background: #fff/);
@@ -771,11 +774,26 @@ describe("§7 · the rows", () => {
    * do not scroll visibly behind the names; a wash on the row alone leaves a white rectangle
    * sliding over a blush row, which is worse than no wash at all.
    */
-  it("§7 · an overdue row is washed across the whole row, the sticky names cell included", () => {
-    expect(tlRule(".qcv-tl-row--late")).toMatch(/background: #f8ebe3/);
-    expect(tl).toMatch(/\.qcv-tl-row--late \.qcv-tl-names \{[^}]*background: #f8ebe3/);
-    expect(tl).toMatch(/\.qcv-tl-row--late \.qcv-tl-names \{[^}]*box-shadow: inset 3px 0 0 var\(--qcv-ink\)/);
-    expect(tlSrc, "the class comes from the shared derivation, not a second test of the date").toMatch(/dueCell\(r\.row, nowMs\)\.kind === "past" \? " qcv-tl-row--late"/);
+  it("§7 · an overdue row's highlight is INSET IN THE NAMES CELL, not washed across the row", () => {
+    /**
+     * ⚠️ THE FULL-ROW WASH IS RETIRED, AND THE REASON IS THE TRACK. A row runs the whole extent —
+     * five thousand pixels on a three-year pipeline — so a wash on it is a blush band across the
+     * entire timeline for one query, and with twenty-five overdue rows the track is blush rather
+     * than white. The fact being marked is about the QUERY, so it is marked where the query is
+     * named: a rounded pill inside the names cell, with an ink tab at its left edge.
+     */
+    expect(tl, "the retired full-row wash is back").not.toMatch(/\.qcv-tl-row--late \{[^}]*background/);
+    const pill = /\.qcv-tl-row--late \.qcv-tl-names::before \{([^}]*)\}/.exec(tl)?.[1] ?? "";
+    expect(pill, "the highlight has no rule").toBeTruthy();
+    expect(pill).toMatch(/background: #f8ebe3/);
+    expect(pill).toMatch(/border-radius: 10px/);
+    expect(pill).toMatch(/position: absolute/);
+    const tab = /\.qcv-tl-row--late \.qcv-tl-names::after \{([^}]*)\}/.exec(tl)?.[1] ?? "";
+    expect(tab).toMatch(/background: var\(--qcv-ink\)/);
+    expect(tab).toMatch(/width: 3px/);
+    /* ⚠️ AND THE CELL'S CONTENTS RIDE ABOVE BOTH. The pill is drawn behind them; without this the
+       avatar, the name and the due date are under a blush rectangle. */
+    expect(tl).toMatch(/\.qcv-tl-row--late \.qcv-tl-names > \* \{[^}]*z-index: 1/);
   });
   /**
    * §1.9 — THE OVERRUN IS INK AT FULL OPACITY, IN BOTH VIEWS. It was `rgba(28, 19, 15, 0.55)` in
@@ -918,9 +936,10 @@ describe("§5 · the date row", () => {
     expect(row, "the dates scroll away with the rows").toMatch(/position: sticky/);
     expect(row).toMatch(/top: 0/);
     expect(row, "the rows would show through it").toMatch(/background: #fff/);
+    expect(row).toMatch(/height: var\(--qcv-tl-daterow-h\)/);
     const corner = trule(".qcv-tl-corner"), tier = trule(".qcv-tl-tier");
-    expect(corner).toMatch(/height: 60px/);
-    expect(tier).toMatch(/height: 60px/);
+    expect(corner).toMatch(/height: var\(--qcv-tl-daterow-h\)/);
+    expect(tier).toMatch(/height: var\(--qcv-tl-daterow-h\)/);
     /* the corner outranks the dates running under it, and the row outranks the rows under IT */
     expect(+(/z-index: (\d+)/.exec(corner)?.[1] ?? 0)).toBeGreaterThan(+(/z-index: (\d+)/.exec(row)?.[1] ?? 0));
   });
@@ -965,6 +984,96 @@ describe("§5 · the date row", () => {
     expect(tl, "the retired point label still has a rule").not.toMatch(/[".\s]qcv-tl-mon[\s{,]/);
     expect(tlSrc).not.toMatch(/monthTicks/);
     expect(read("src/lib/qcTimeline.ts")).not.toMatch(/monthTicks/);
+  });
+});
+
+/**
+ * §7 · THE GROUP BANDS, and what closing does.
+ */
+describe("§7 · the group bands", () => {
+  const tl = read("src/components/queries/centre/qcvTimeline.css");
+  const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");
+  const r = (sel: string) => {
+    const m = tl.match(new RegExp(`(?:^|\\n)\\s*${sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`));
+    expect(m, `${sel} has no rule`).toBeTruthy();
+    return m![1];
+  };
+
+  it("§7 · anthracite, sticky BELOW the date row, running the track's full width", () => {
+    const b = r(".qcv-tl-band");
+    expect(b).toMatch(/background: var\(--sp-anthracite\)/);
+    expect(b).toMatch(/position: sticky/);
+    /**
+     * ⚠️ IT STICKS AT THE DATE ROW'S OWN HEIGHT, NOT AT 0 — and it reads the token rather than the
+     * number, because a band stuck at anything else either slides under the dates (and the reader
+     * loses the heading exactly when the rows they are reading belong to it) or floats below them.
+     */
+    expect(b).toMatch(/top: var\(--qcv-tl-daterow-h\)/);
+    /* ⚠️ AND NO WIDTH: it is a block in the rows' own box, which IS the track. A band that stopped
+       at the names column would let rows show beside it, which reads as a row, not a heading. */
+    expect(b, "a band that states a width is a band that can stop short of the track").not.toMatch(/width:/);
+    /* it must outrank the rows it holds back, and sit under the date row it hangs from */
+    const z = +(/z-index: (\d+)/.exec(b)?.[1] ?? 0);
+    expect(z).toBeGreaterThan(0);
+    expect(z).toBeLessThan(+(/z-index: (\d+)/.exec(r(".qcv-tl-daterow"))?.[1] ?? 0));
+  });
+
+  it("§7 · white bold name, the count at 62%, and the 14px gap belongs to the BAND", () => {
+    expect(r(".qcv-tl-band span")).toMatch(/color: #fff/);
+    expect(r(".qcv-tl-band span")).toMatch(/font-weight: 700/);
+    expect(r(".qcv-tl-band i")).toMatch(/color: rgba\(255, 255, 255, 0\.62\)/);
+    /* ⚠️ A `margin-top` ON THE BAND, cleared on the first — the air between groups belongs to the
+       band that starts the next one. As a padding on the section it would appear above the FIRST
+       band too, against the date row. */
+    expect(r(".qcv-tl-band")).toMatch(/margin-top: 14px/);
+    /* ⚠️ `:first-of-type`: the today line and the crosshair are `<i>` siblings ahead of the first
+       section, so `:first-child` matches nothing and the gap appears against the date row. */
+    expect(tl).toMatch(/\.qcv-tl-group:first-of-type \.qcv-tl-band \{[^}]*margin-top: 0/);
+    expect(tl, "a :first-child rule cannot reach the first group here").not.toMatch(/\.qcv-tl-group:first-child/);
+    expect(tlSrc).toMatch(/className="qcv-tl-group"/);
+  });
+});
+
+describe("§7 · closing", () => {
+  it("⚠️ §7 · closing LIFTS THE OVERLAYS OUT before it clears the card", () => {
+    /**
+     * The time controls live in a portal into the tray; the popover and Find are the card's own.
+     * The lift is set first and the page's close deferred to the next frame, so the overlays leave
+     * the tree BEFORE the card does — one synchronous call would batch both into a single commit
+     * and the order would mean nothing.
+     */
+    const body = src.slice(src.indexOf("const close = useCallback"), src.indexOf("exitRef.current = close;"));
+    for (const step of ["setMenu(null)", 'setFind("")', "setTimeReady(false)"]) expect(body, step).toContain(step);
+    expect(body).toMatch(/requestAnimationFrame\(\(\) => closeRef\.current\(\)\)/);
+    /* …and the three lifts come BEFORE the frame that closes */
+    expect(body.indexOf("setTimeReady(false)")).toBeLessThan(body.indexOf("requestAnimationFrame"));
+  });
+
+  it("⚠️ §7 · every way out uses that ONE exit — a second path is a second behaviour", () => {
+    /* the ✕ and the backdrop take `close` directly; Escape reaches it through a ref, because its
+       handler is registered once with no dependencies */
+    expect(src).toMatch(/onClick=\{close\}/);
+    expect(src).toMatch(/exitRef\.current\(\);/);
+    expect(src, "Escape still closes by its own route").not.toMatch(/if \(menuRef\.current\) \{ setMenu\(null\); return; \}\s*\n\s*closeRef\.current\(\);/);
+  });
+
+  it("⚠️ §7 · every OPEN starts from nothing, because the card is unmounted rather than hidden", () => {
+    /**
+     * "Every open resets the zoom to 3m with today at 56–58%" is true by CONSTRUCTION here: the
+     * page renders the card only while it is open, so `pxd`, the scroll, the view, Find and the
+     * menu are all fresh state. This asserts the construction — a card kept mounted and hidden
+     * would keep all five, and nothing else in the file would notice.
+     */
+    const q = read("src/components/Queries.tsx");
+    expect(q).toMatch(/overlay=\{beOpen \? \(/);
+    expect(q, "the card is kept mounted, so a re-open restores the last zoom").not.toMatch(/<QcExpanded[^>]*hidden/);
+    /* …and the default IS 3m: the zoom's own state starts at the scale the preset names */
+    const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");
+    expect(tlSrc).toMatch(/useState\(PXD_DEFAULT\)/);
+    const lib = read("src/lib/qcTimeline.ts");
+    expect(lib).toMatch(/export const PXD_DEFAULT = 10\.5;/);
+    expect(lib).toMatch(/\{ key: "3m", label: "3m", pxd: 10\.5 \}/);
+    expect(lib).toMatch(/export const TODAY_AT = 0\.58;/);
   });
 });
 

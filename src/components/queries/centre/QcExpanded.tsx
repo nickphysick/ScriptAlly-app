@@ -69,6 +69,8 @@ export const QcExpanded: React.FC<{
   const [open, setOpen] = useState(false);
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
+  /* the one exit, held in a ref so the `[]` key handler above reaches the current one */
+  const exitRef = useRef<() => void>(() => closeRef.current());
 
   /**
    * The box: its top and bottom from the WINDOW, its left and right from the GROUP (v65.2 §2).
@@ -120,7 +122,9 @@ export const QcExpanded: React.FC<{
          `document` listener would make the cascade depend on which of the two registered last,
          which is a property of mount order rather than of what is on screen. */
       if (menuRef.current) { setMenu(null); return; }
-      closeRef.current();
+      /* §7 — through the SAME close the ✕ and the backdrop use, so the overlays are lifted out
+         whichever way the card is dismissed. A second path here is a second behaviour. */
+      exitRef.current();
     };
     document.addEventListener("keydown", onKey, true);
     return () => document.removeEventListener("keydown", onKey, true);
@@ -192,13 +196,34 @@ export const QcExpanded: React.FC<{
   }, [box]);
   /* §8.2 — the whole live pipeline's counts, whatever the filter says */
   const counts = attentionCounts(rows, clock);
-  const close = useCallback(() => closeRef.current(), []);
   /* §4.2 — Find an agent. It MARKS and FADES; it never filters, so the counts, the grouping and the
      sort are all untouched by typing in it. */
   const [find, setFind] = useState("");
   const timeHost = useRef<HTMLDivElement>(null);
   const [timeReady, setTimeReady] = useState(false);
   useLayoutEffect(() => { setTimeReady(!!timeHost.current); }, []);
+
+  /**
+   * §7 — CLOSING LIFTS EVERY OVERLAY OUT BEFORE IT CLEARS THE CARD.
+   *
+   * ⚠️ THE TIME CONTROLS LIVE IN A PORTAL INTO THE TRAY, and the popover and the Find field are the
+   * card's own. Dropping `beOpen` unmounts all of it in one commit, which React copes with — what a
+   * reader sees is the point: a panel or a typed search that was open when the card went is a panel
+   * or a search that is still described in the DOM at the moment the clip-path is read.
+   *
+   * ⚠️ AND IT IS TWO COMMITS, DELIBERATELY. The lift is set first and the page's own close is
+   * deferred to the next frame, so the overlays are gone from the tree BEFORE the card is; one
+   * synchronous call would batch them into a single commit and the order would mean nothing. This
+   * is the mock's own close, which moves its two portalled clusters back to their holder before it
+   * hides the sheet.
+   */
+  const close = useCallback(() => {
+    setMenu(null);
+    setFind("");
+    setTimeReady(false);
+    requestAnimationFrame(() => closeRef.current());
+  }, []);
+  exitRef.current = close;
   const up = nextUp(rows, clock);
   const term = find.trim().toLowerCase();
   const found = term ? rows.filter((r) => r.agentName.toLowerCase().includes(term)).length : 0;

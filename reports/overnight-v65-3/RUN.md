@@ -242,3 +242,54 @@ the names column back to 300; the band dropping its hint.
 - Gates: tsc 0 · build clean · **8,385 passed / 3 skipped**.
 - Measurement: **30 passed**, 1,256 assertions. Filter/Group/Sort 34px at x 301 · 385.5 · 464, on one
   line, inside a 330px corner whose box IS the names cell's.
+
+
+## Phase 7 — landed, pushed
+
+**§7 · the group bands, the overdue mark, and what closing does.**
+
+**The bands are anthracite and stick BELOW the date row.** Full track width (measured 12,090 against
+a track of 12,090), white bold typewriter name, the count in mono at 62% white, sticky at
+`--qcv-tl-daterow-h` — the date row's own height, one number for both, because a band stuck at 0
+slides under the dates and the reader loses the heading exactly when the rows they are reading belong
+to it. The 14px gap between groups is a `margin-top` on the BAND, cleared on the first.
+
+**An overdue row's highlight is inset in the names cell.** The full-row wash is retired: a row runs
+the whole extent — twelve thousand pixels on this fixture — so a wash on it is a blush band across
+the entire timeline for one query, and with twenty-five overdue rows the track is blush rather than
+white. The mark is about the QUERY, so it is drawn where the query is named: a `::before` pill
+(`#f8ebe3`, 10px corners) with an ink `::after` tab 3px wide, both BEHIND the cell's contents, so the
+sticky cell keeps the opaque white that stops the dates scrolling visibly behind the names.
+
+**Closing lifts the overlays out before it clears the card.** The time controls live in a portal into
+the tray; the popover and Find are the card's own. `close` sets all three away and defers the page's
+own close to the next frame, so the overlays leave the tree BEFORE the card does — one synchronous
+call would batch them into a single commit and the order would mean nothing. It is the mock's own
+close, which moves its two portalled clusters back to their holder before it hides the sheet. Escape
+goes through the same exit via a ref, because its handler is registered once with no dependencies.
+
+**Every open starts from nothing, and that is asserted as a CONSTRUCTION rather than built.** The
+page renders the card only while it is open, so `pxd`, the scroll, the view, Find and the menu are
+all fresh state; `PXD_DEFAULT` is 10.5, which is the 3m preset, and `TODAY_AT` is 0.58. A card kept
+mounted and hidden would keep all five and nothing else in the file would notice.
+
+### Faults found
+
+1. **`:first-child` matched no band.** The today line and the crosshair are `<i>` siblings ahead of
+   the first section, so the "no gap above the first" rule reached nothing and every band carried
+   14px — including the one against the date row. `:first-of-type`, with the reason at the value.
+2. **The fills census still expected the retired wash.** It read `tray · wash · parchment band ·
+   white` and now reads `tray · white · anthracite`. The blush pill has left the census because it is
+   a `::before`, which an element-fill sweep cannot see — so the pill is asserted directly instead.
+
+### Locks, each proved red
+
+Eleven mutations: the band sticking at 0 · the band stopping at the names column · the band losing
+its gap · its label going back to ink · the full-row wash returning · the cell's contents sinking
+under the pill · the ink tab going · the date row's height ceasing to be the band's offset · closing
+clearing the card first · Escape getting its own exit again · the zoom ceasing to default to 3m.
+
+- Gates: tsc 0 · build clean · **8,390 passed / 3 skipped**.
+- Measurement: **30 passed**, 1,267 assertions. Band 12,090 wide against a 12,090 track, sticky at
+  60px, anthracite with a white label; gaps `0 · 14 · 14`; the row unwashed, its cell white, the pill
+  `#f8ebe3` at 10px corners with a 3px ink tab, and an ordinary row with no pill at all.

@@ -1092,9 +1092,12 @@ test("§7 · the expanded view — the rail's own box grown leftwards, and the �
    */
   /* …and §7's overdue wash joins them, deliberately: a row past its date is washed across its whole
      width, the sticky names cell included, which is a fourth stated fill rather than a fourth
-     accident. */
-  is("expanded", "§10 lock 3 · no second surface inside — the accent tray, the overdue wash, the group band and the card's white, and nothing else",
-    palette.join(" · "), "rgb(233, 201, 184) · rgb(248, 235, 227) · rgb(248, 244, 238) · rgb(255, 255, 255)");
+     accident. (§7 retired that wash — see the note below.) */
+  /* §7 — the census: the accent tray, the card's white and the ANTHRACITE group band. The overdue
+     wash has left it because the highlight is a `::before` inside the names cell now, which an
+     element-fill sweep cannot see — and the old band's parchment went with the anthracite. */
+  is("expanded", "§10 lock 3 · no second surface inside — the accent tray, the group band and the card's white, and nothing else",
+    palette.join(" · "), "rgb(233, 201, 184) · rgb(255, 255, 255) · rgb(42, 58, 82)");
 
   /* ── §10 lock 4 · the Courier's column, rebuilt to §8.1 (v65.1) ── */
   is("expanded", "the title is one line at 1440", xp?.ttlLines, 1);
@@ -1438,8 +1441,21 @@ test("§7 · the expanded rows — the due cell, the wash, the ink overrun and t
       })),
       lateBg: late ? getComputedStyle(late).backgroundColor : null,
       lateCellBg: late ? getComputedStyle(late.querySelector("[data-qcv='tl-names']") as HTMLElement).backgroundColor : null,
-      lateCellEdge: late ? getComputedStyle(late.querySelector("[data-qcv='tl-names']") as HTMLElement).boxShadow : null,
+      /* §7 — the highlight and its tab are PSEUDO-ELEMENTS behind the cell's contents */
+      latePill: late ? (() => { const c2 = getComputedStyle(late.querySelector("[data-qcv='tl-names']") as HTMLElement, "::before"); return { bg: c2.backgroundColor, r: c2.borderRadius, w: c2.width, h: c2.height, left: c2.left }; })() : null,
+      lateTab: late ? (() => { const c2 = getComputedStyle(late.querySelector("[data-qcv='tl-names']") as HTMLElement, "::after"); return { bg: c2.backgroundColor, w: c2.width, h: c2.height }; })() : null,
+      okPill: ok ? getComputedStyle(ok.querySelector("[data-qcv='tl-names']") as HTMLElement, "::before").content : null,
       okCellBg: ok ? getComputedStyle(ok.querySelector("[data-qcv='tl-names']") as HTMLElement).backgroundColor : null,
+      /* §7 — the bands: anthracite, full track width, and stuck below the date row */
+      band: (() => { const b2 = c.querySelector("[data-qcv='tl-band']") as HTMLElement | null; if (!b2) return null; const bb = b2.getBoundingClientRect(); const cs2 = getComputedStyle(b2);
+        const sp2 = b2.querySelector("span") as HTMLElement | null; const inn = b2.querySelector("[data-qcv='tl-rows']");
+        return { x: px(bb.x), w: px(bb.width), h: px(bb.height), bg: cs2.backgroundColor, pos: cs2.position, top: cs2.top, z: cs2.zIndex,
+          label: sp2 ? getComputedStyle(sp2).color : null, has: !!inn }; })(),
+      rowsW: (() => { const rw = c.querySelector("[data-qcv='tl-rows']"); return rw ? px(rw.getBoundingClientRect().width) : null; })(),
+      bandGaps: (() => {
+        const gs = [...c.querySelectorAll("[data-qcv='tl-group']")] as HTMLElement[];
+        return gs.map((g, i2) => { const bd = g.querySelector("[data-qcv='tl-band']") as HTMLElement | null; return bd ? { i: i2, mt: getComputedStyle(bd).marginTop } : null; });
+      })(),
       lateCount: rows.filter((x) => x.className.includes("qcv-tl-row--late")).length,
       overBg: overs.length ? getComputedStyle(overs[0]).backgroundColor : null, overs: overs.length,
       visLeft, sentences: sent.length,
@@ -1463,12 +1479,35 @@ test("§7 · the expanded rows — the due cell, the wash, the ink overrun and t
   }
   const kinds = [...new Set(r.due.map((d) => d.kind))].sort();
   record({ area: "xp-rows", what: "the due kinds this fixture drew", got: kinds, want: "reported" });
-  /* §7 — the wash reaches the sticky cell, which is the half a row-only wash gets wrong */
-  yes("xp-rows", `some rows are overdue (${r.lateCount}) — or the wash is unproved`, r.lateCount > 0, String(r.lateCount));
-  is("xp-rows", "the row's wash", r.lateBg, "rgb(248, 235, 227)");
-  is("xp-rows", "⚠️ …and the STICKY names cell's, which carries its own opaque fill", r.lateCellBg, "rgb(248, 235, 227)");
-  yes("xp-rows", "the 3px ink inset edge is on the names cell", /inset/.test(r.lateCellEdge ?? "") && /3px/.test(r.lateCellEdge ?? ""), String(r.lateCellEdge));
-  is("xp-rows", "…and an ordinary row's cell is still white", r.okCellBg, "rgb(255, 255, 255)");
+  /**
+   * §7 — THE HIGHLIGHT IS INSET IN THE NAMES CELL, AND THE FULL-ROW WASH IS RETIRED. A row runs the
+   * whole extent, so a wash on it is a blush band across the entire timeline for ONE query — with
+   * twenty-five overdue rows the track is blush rather than white. The fact is about the query, so
+   * it is marked where the query is named.
+   */
+  yes("xp-rows", `some rows are overdue (${r.lateCount}) — or the highlight is unproved`, r.lateCount > 0, String(r.lateCount));
+  record({ area: "xp-rows", what: "§7 · the overdue row's parts", got: { row: r.lateBg, cell: r.lateCellBg, pill: r.latePill, tab: r.lateTab }, want: "reported" });
+  is("xp-rows", "§7 · the ROW itself is not washed", r.lateBg, "rgba(0, 0, 0, 0)");
+  is("xp-rows", "§7 · …and the sticky cell keeps its opaque white, which is what hides the dates behind it", r.lateCellBg, "rgb(255, 255, 255)");
+  is("xp-rows", "§7 · the highlight is a rounded pill drawn inside the cell", r.latePill?.bg, "rgb(248, 235, 227)");
+  is("xp-rows", "§7 · …with 10px corners", r.latePill?.r, "10px");
+  is("xp-rows", "§7 · …and an ink tab 3px wide at its left", r.lateTab?.bg, "rgb(28, 19, 15)");
+  is("xp-rows", "§7 · …3px", r.lateTab?.w, "3px");
+  /* ⚠️ AND AN ORDINARY ROW DRAWS NEITHER — a pill on every row is a highlight that marks nothing */
+  is("xp-rows", "§7 · an ordinary row has no pill at all", r.okPill, "none");
+  is("xp-rows", "…and its cell is still white", r.okCellBg, "rgb(255, 255, 255)");
+  /* §7 — the bands */
+  record({ area: "xp-rows", what: "§7 · the group band", got: { band: r.band, rowsW: r.rowsW, gaps: r.bandGaps }, want: "reported" });
+  is("xp-rows", "§7 · the band is anthracite", r.band?.bg, "rgb(42, 58, 82)");
+  is("xp-rows", "§7 · …its label white", r.band?.label, "rgb(255, 255, 255)");
+  is("xp-rows", "§7 · …it is sticky", r.band?.pos, "sticky");
+  is("xp-rows", "§7 · …at the date row's own height, so it never slides under the dates", r.band?.top, "60px");
+  near("xp-rows", "§7 · …and it runs the FULL width of the track, so no row shows beside it", r.band?.w, r.rowsW ?? 0, 0.6);
+  /* ⚠️ THE GAP BELONGS TO THE BAND, AND THE FIRST ONE HAS NONE — asserted as a pair, because a
+     rule that gave every band a margin would put 14px above the first, against the date row. */
+  is("xp-rows", "§7 · the first band has no gap above it", (r.bandGaps ?? [])[0]?.mt, "0px");
+  yes("xp-rows", `§7 · …and every later one has 14px (${JSON.stringify(r.bandGaps)})`,
+    (r.bandGaps ?? []).length > 1 && (r.bandGaps ?? []).slice(1).every((g) => g?.mt === "14px"), JSON.stringify(r.bandGaps));
   /* §1.9 — the overrun is ink, measured rather than read out of a sheet */
   yes("xp-rows", `there are overruns (${r.overs})`, r.overs > 0, String(r.overs));
   is("xp-rows", "§1.9 · the overrun is ink at full opacity", r.overBg, "rgb(28, 19, 15)");

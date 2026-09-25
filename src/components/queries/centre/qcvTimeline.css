@@ -13,7 +13,12 @@
  */
 @import "./qcvPage.css";
 
-.qcv-tl { position: relative; display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+/**
+ * ⚠️ `--qcv-tl-daterow-h` IS THE DATE ROW'S HEIGHT AND THE GROUP BANDS' STICKY OFFSET, and it is ONE
+ * number because they are one fact: a band stuck at anything other than the row's own height either
+ * slides under it or floats below it. Four rules read it — the row, its two cells and the band.
+ */
+.qcv-tl { position: relative; display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; --qcv-tl-daterow-h: 60px; }
 
 /**
  * §1.5 / §6 — THE DATE ROW IS ON WHITE. v65 ran the tray's colour down through the lane and the
@@ -84,7 +89,7 @@
  * ⚠️ `pan-y` RATHER THAN `none`: a horizontal drag pans the dates and a vertical one still scrolls
  * the page, which is what a reader on a phone expects of a wide thing inside a tall one.
  */
-.qcv-tl-tier { position: relative; flex: none; height: 60px; background: transparent; cursor: grab; touch-action: pan-y; }
+.qcv-tl-tier { position: relative; flex: none; height: var(--qcv-tl-daterow-h); background: transparent; cursor: grab; touch-action: pan-y; }
 /* §9 — grabbing applies to the WHOLE body while a drag is live, not just the tier the press began on */
 .qcv-tl-scroll--drag, .qcv-tl-scroll--drag * { cursor: grabbing !important; }
 /**
@@ -95,13 +100,13 @@
 /* ⚠️ IT DECLARES ITS OWN `box-sizing`: the hairline is part of the 60, as it is in the ref, and a
    rule whose height is stated beside a border must not inherit which of the two wins. */
 .qcv-tl-daterow {
-  position: sticky; top: 0; z-index: 12; display: flex; box-sizing: border-box; height: 60px;
+  position: sticky; top: 0; z-index: 12; display: flex; box-sizing: border-box; height: var(--qcv-tl-daterow-h);
   background: #fff; border-bottom: 1px solid rgba(28, 19, 15, 0.1);
 }
 /* §5 · §6 — the corner: 330 × 60, white and OPAQUE, holding Filter, Group, Sort and ↺ */
 .qcv-tl-corner {
   position: sticky; left: 0; z-index: 15; flex: none;
-  width: var(--qcv-tl-names); height: 60px; box-sizing: border-box; background: #fff;
+  width: var(--qcv-tl-names); height: var(--qcv-tl-daterow-h); box-sizing: border-box; background: #fff;
   /* the ref's own: a flex row, centred, 10px in from each end */
   display: flex; align-items: center; padding: 0 10px;
 }
@@ -151,15 +156,38 @@
 .qcv-tl-cross { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(28, 19, 15, 0.28); z-index: 3; pointer-events: none; }
 .qcv-tl-none { margin: 40px 0; text-align: center; font-family: var(--qcv-type); font-size: 15px; color: var(--qcv-ink-45); }
 
-.qcv-tl-band { position: relative; height: 30px; background: #f8f4ee; }
+/**
+ * §7 — THE GROUP BAND IS ANTHRACITE AND STICKS BELOW THE DATE ROW. Three things make it work and
+ * all three are load-bearing:
+ *
+ * ⚠️ IT RUNS THE FULL WIDTH OF THE TRACK, which is what v85's own headline is about: a band that
+ * stopped at the names column would let rows show beside it, and a heading with a row alongside it
+ * reads as a row rather than as a heading.
+ *
+ * ⚠️ IT STICKS AT `--qcv-tl-daterow-h`, NOT AT 0. The date row is sticky at the body's top, so a
+ * band stuck at 0 slides UNDER it and the reader loses the heading exactly when the rows they are
+ * reading belong to it. The two offsets are one number and it is declared once.
+ *
+ * ⚠️ AND THE 14px GAP IS A `margin-top` ON EVERY BAND BUT THE FIRST. It is the air between groups,
+ * so it belongs to the band that starts the next one — a padding on the section would put the same
+ * gap above the first band too, against the date row.
+ */
+.qcv-tl-band {
+  position: sticky; top: var(--qcv-tl-daterow-h); z-index: 9;
+  height: 30px; margin-top: 14px; background: var(--sp-anthracite);
+}
+/* ⚠️ `:first-of-type`, NOT `:first-child` — the today line and the crosshair are `<i>` siblings
+   ahead of the first section, so `:first-child` matched nothing and every band carried the gap,
+   including the one against the date row. */
+.qcv-tl-group:first-of-type .qcv-tl-band { margin-top: 0; }
 .qcv-tl-band span {
   position: sticky; left: 0; display: inline-flex; align-items: baseline; gap: 8px; height: 30px;
-  padding: 0 0 0 18px; box-sizing: border-box;
-  font-family: var(--qcv-type); font-size: 14px; line-height: 30px; color: var(--qcv-ink);
+  padding: 0 8px 0 18px; box-sizing: border-box;
+  font-family: var(--qcv-type); font-weight: 700; font-size: 14px; line-height: 30px; color: #fff;
 }
-.qcv-tl-band i { font-style: normal; font-family: var(--qcv-mono); font-size: 9px; color: var(--qcv-ink-45); }
+.qcv-tl-band i { font-style: normal; font-family: var(--qcv-mono); font-weight: 400; font-size: 9px; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.62); }
 /* §6 — the hint, beside the name in the band's own line */
-.qcv-tl-band em { font-style: normal; font-family: var(--qcv-serif); font-size: 11.5px; color: var(--qcv-ink-45); }
+.qcv-tl-band em { font-style: normal; font-family: var(--qcv-serif); font-weight: 400; font-size: 11.5px; color: rgba(255, 255, 255, 0.62); }
 
 .qcv-tl-row { position: relative; display: grid; grid-template-columns: var(--qcv-tl-names) auto; height: 44px; border-bottom: 1px solid var(--qcv-hair); cursor: pointer; }
 .qcv-tl-row:hover { background: var(--qcv-parchment); }
@@ -190,16 +218,29 @@
 .qcv-tl-due[data-due="none"] b { color: var(--qcv-ink-45); }
 
 /**
- * §7 — AN OVERDUE ROW IS WASHED ACROSS THE WHOLE ROW, THE STICKY NAMES CELL INCLUDED, and the 3px
- * ink edge is on that cell.
+ * §7 — AN OVERDUE ROW'S HIGHLIGHT IS INSET IN THE NAMES CELL, NOT WASHED ACROSS THE ROW.
  *
- * ⚠️ THE CELL NEEDS ITS OWN FILL, NOT THE ROW'S. It is `position: sticky` with an opaque white of
- * its own — that opacity is what stops the dates scrolling visibly behind the names — so a wash on
- * the row alone leaves a white rectangle sliding over a blush row, which is worse than no wash.
+ * ⚠️ THE FULL-ROW WASH IS RETIRED, AND THE REASON IS THE TRACK. The row runs the whole extent —
+ * five thousand pixels on a three-year pipeline — so a wash on it is a blush band across the entire
+ * timeline for one query, and with twenty-five overdue rows the track is blush rather than white.
+ * The fact being marked is about the QUERY, so it is marked where the query is named.
+ *
+ * ⚠️ AND IT IS A `::before` BEHIND THE CELL'S CONTENTS, not a fill on the cell. The cell is sticky
+ * and must stay OPAQUE white — that opacity is what stops the dates scrolling visibly behind the
+ * names — so the highlight is a rounded pill drawn inside it, with the contents above it.
  */
-.qcv-tl-row--late { background: #f8ebe3; border-bottom-color: #efdcd1; }
-.qcv-tl-row--late .qcv-tl-names { background: #f8ebe3; box-shadow: inset 3px 0 0 var(--qcv-ink); }
-.qcv-tl-row--late:hover, .qcv-tl-row--late:hover .qcv-tl-names { background: #f5e3d9; }
+.qcv-tl-row--late .qcv-tl-names::before {
+  content: ""; position: absolute; left: 8px; top: 4px; right: 7px; height: 25px;
+  border-radius: 10px; background: #f8ebe3;
+}
+/* …and the ink tab at its left edge, the mark that says which fact it is */
+.qcv-tl-row--late .qcv-tl-names::after {
+  content: ""; position: absolute; left: 14px; top: 8px; width: 3px; height: 17px;
+  border-radius: 2px; background: var(--qcv-ink);
+}
+/* the contents ride above both */
+.qcv-tl-row--late .qcv-tl-names > * { position: relative; z-index: 1; }
+.qcv-tl-row--late:hover .qcv-tl-names::before { background: #f3ddd1; }
 .qcv-tl-row:hover .qcv-tl-names { background: var(--qcv-parchment); }
 .qcv-tl-ini {
   flex: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
