@@ -133,13 +133,6 @@
 }
 /* the tick is the label's own top 4px — one element, so the two cannot drift apart */
 .qcv-tl-wk::before { content: ""; position: absolute; left: 50%; top: 0; width: 1px; height: 4px; background: rgba(28, 19, 15, 0.3); }
-/**
- * §5 — THE HEAT IS A 6px STRIP ALONG THE ROW'S FOOT. The tall bars are retired: they took 24px of a
- * 52px row to say a thing the strip says in six, and the row has a month band and a date line to
- * carry now. Navy, 2px top corners, one cell per week, and an empty week draws NOTHING.
- */
-.qcv-tl-heat { position: absolute; left: 0; right: 0; bottom: 0; height: 6px; }
-.qcv-tl-heat i { position: absolute; bottom: 0; top: 0; background: var(--sp-anthracite); border-radius: 2px 2px 0 0; }
 /* §5 — TODAY: the ink pill on the dates' line */
 .qcv-tl-todaypill {
   position: absolute; top: 32px; transform: translateX(-50%); z-index: 3;

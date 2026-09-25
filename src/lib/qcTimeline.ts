@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * The expanded Birds-eye view's time model (v65 §8.4–§8.8) — the extent, the scale, the ticks, the
- * heat and every bar, as pure functions.
+ * every bar, as pure functions.
  *
  * ⚠️ ONE SCALE, `pxd`, AND EVERY POSITION IS DERIVED FROM IT. The view zooms and pans, so nothing
  * here may hold a pixel: a tick, a bar, the today line and the TODAY pill are all `(ms − from) ×
@@ -61,7 +61,7 @@ export interface Extent { fromMs: number; toMs: number; days: number }
 /**
  * ⚠️ THE EXTENT STARTS AT THE ACCOUNT'S OWN FIRST QUERY, not at a fixed window. A calendar that
  * began a fixed number of weeks back would cut the earliest journeys off at the left edge on an
- * account with any history, and the heat would begin in the middle of the first query's life.
+ * account with any history, and the bands would begin in the middle of the first query's life.
  */
 export function extentOf(rows: readonly QcRow[], nowMs: number): Extent {
   const starts = rows.map((r) => r.sentMs).filter((m): m is number => m != null);
@@ -156,47 +156,15 @@ export function weekTicks(ext: Extent, pxd: number): Tick[] {
   return out;
 }
 
-/* ── §8.5 · the heat ── */
-
 /**
- * §5 — THE WEIGHTS, STATED ONCE: the current stage and an expected date. The strip is 6px along the
- * date row's foot now rather than a set of tall bars, so a PAST stage no longer earns a weight —
- * §5 names two contributions and two is what this counts.
- */
-export const HEAT_CURRENT = 0.28;
-export const HEAT_EXPECTED = 1;
-export interface HeatWeek { ms: number; weight: number; opacity: number }
-
-/**
- * ⚠️ THE OPACITY IS `.1 + .6 × √(w/max)`, AND THE ROOT IS THE POINT. A linear scale on a fixture
- * where one week carries an offer and twenty carry a single query makes every ordinary week
- * invisible; the root lifts the quiet ones without flattening the busy one.
+ * ⚠️ §B1 — THE HEAT IS GONE, AND ITS DERIVATION WENT WITH IT. `HEAT_CURRENT`, `HEAT_EXPECTED`,
+ * `HeatWeek` and `heatWeeks` are deleted rather than left unmounted: a pure function nothing calls
+ * is a thing the next reader has to trace to a rendered root before they can touch the row it used
+ * to draw in, which this repo has now paid for twice. Recover from `9fb20151` if the strip returns.
  *
- * ⚠️ AND AN EMPTY WEEK IS ZERO, not the floor. A strip whose every cell is faintly navy says the
- * whole year was busy, which is the opposite of what it is for.
+ * Nothing under the dates: the row is month bands, Monday dates and TODAY.
  */
-export function heatWeeks(rows: readonly QcRow[], ext: Extent, nowMs: number): HeatWeek[] {
-  const weeks = new Map<number, number>();
-  const bucket = (ms: number): number => ext.fromMs + Math.floor((ms - ext.fromMs) / WEEK) * WEEK;
-  const add = (ms: number, w: number) => {
-    if (ms < ext.fromMs || ms > ext.toMs) return;
-    const k = bucket(ms);
-    weeks.set(k, (weeks.get(k) ?? 0) + w);
-  };
-  for (const r of rows) {
-    for (const s of r.history.spans) {
-      if (!s.current) continue;
-      const end = s.endMs ?? Math.min(nowMs, ext.toMs);
-      for (let ms = s.startMs; ms <= end; ms += WEEK) add(ms, HEAT_CURRENT);
-    }
-    if (r.expectedMs != null) add(r.expectedMs, HEAT_EXPECTED);
-  }
-  const max = Math.max(...weeks.values(), 0);
-  if (!(max > 0)) return [];
-  return [...weeks.entries()].sort((a, b) => a[0] - b[0]).map(([ms, weight]) => ({
-    ms, weight, opacity: weight > 0 ? Math.min(0.7, 0.1 + 0.6 * Math.sqrt(weight / max)) : 0,
-  }));
-}
+
 
 /* ── §8.7 · the bars ── */
 

@@ -43,7 +43,7 @@ const REPORT = resolve(OUT, "report.json");
  * against the old mock would produce true readings about a design nobody is building — the
  * "plausible numbers about the wrong subject" failure this file's header exists to prevent.
  */
-const REF = "file://" + resolve("design-refs/query-centre-v85.html");
+const REF = "file://" + resolve("design-refs/query-centre-v92.html");
 const TOL = 2;
 const MIN_ASSERTIONS = 95;
 
@@ -1609,7 +1609,9 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
   record({ area: "timeline", what: "on open — what is visible in the tier", got: at?.visible, want: "reported" });
   yes("timeline", `on open — month labels are VISIBLE, not merely rendered (${at?.visible.months} of ${at?.months})`, (at?.visible.months ?? 0) > 0, JSON.stringify(at?.visible));
   yes("timeline", `on open — week ticks are visible (${at?.visible.weeks})`, (at?.visible.weeks ?? 0) > 0, JSON.stringify(at?.visible));
-  yes("timeline", `on open — the heat is visible (${at?.visible.heat} of ${at?.heat})`, (at?.visible.heat ?? 0) > 0, JSON.stringify(at?.visible));
+  /* §B1 — RETIRED WITH ITS SUBJECT, and replaced by the claim the removal makes: nothing draws in
+     the row beneath the dates. Asserting "0 heat cells" instead would be an absence nobody reads. */
+  is("timeline", "§B1 · nothing under the dates — the strip is gone from the row", at?.heat, 0);
   /**
    * ⚠️ THE PRECONDITION EVERY READING BELOW DEPENDS ON: TODAY IS ON SCREEN, at 58% of the track.
    * Without it the line, the pill and twenty-four bar ends agree with each other 9,800px off the
@@ -1649,7 +1651,8 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
   yes("timeline", `…and opaque (${at?.namesBg}) — or the dates scroll visibly behind the names`,
     /^rgb\(/.test(at?.namesBg ?? "") && !/rgba\([^)]*,\s*0?\.\d+\s*\)/.test(at?.namesBg ?? ""), String(at?.namesBg));
   is("timeline", "§8.4 · the date track scrolls sideways", at?.scrolls, true);
-  yes("timeline", `§8.5 · the heat drew weeks (${at?.heat})`, (at?.heat ?? 0) > 4, String(at?.heat));
+  yes("timeline", `§B1 · …and the row still draws its bands and its Mondays (${at?.months}/${at?.visible?.weeks})`,
+    (at?.months ?? 0) > 0 && (at?.visible?.weeks ?? 0) > 0, JSON.stringify({ months: at?.months, weeks: at?.visible?.weeks }));
   yes("timeline", `§8.4 · the tier drew months (${at?.months})`, (at?.months ?? 0) > 2, String(at?.months));
 
   /**

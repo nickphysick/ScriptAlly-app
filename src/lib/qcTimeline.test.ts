@@ -7,9 +7,8 @@
 import { describe, it, expect } from "vitest";
 import { Activity, Agent, Query, QueryStatus } from "../types";
 import { buildQcRows, type QcRow } from "./qcSummary";
-import {
-  HEAT_CURRENT, HEAT_EXPECTED, MONTH_FULL, NUDGE_WEEKS, PXD_DEFAULT, PXD_MAX, PXD_MIN, TODAY_AT, ZOOM_PRESETS,
-  activePreset, clampPxd, crosshairAt, currentWords, edgeCounts, extentOf, ghostFor, heatWeeks, monthBands,
+import { MONTH_FULL, NUDGE_WEEKS, PXD_DEFAULT, PXD_MAX, PXD_MIN, TODAY_AT, ZOOM_PRESETS,
+  activePreset, clampPxd, crosshairAt, currentWords, edgeCounts, extentOf, ghostFor, monthBands,
   msAt, pxdForPreset, scrollForToday, tlRow, trackWidth, weekTicks, xAt, zoomAbout,
 } from "./qcTimeline";
 
@@ -134,37 +133,6 @@ describe("§8.4 · the tier's labels", () => {
   });
 });
 
-describe("§8.5 · the heat", () => {
-  it("§5 · the two weights, stated", () => {
-    expect([HEAT_CURRENT, HEAT_EXPECTED]).toEqual([0.28, 1]);
-  });
-  it("⚠️ an expected date outweighs a week of waiting — it is the thing a reader is looking for", () => {
-    expect(HEAT_EXPECTED).toBeGreaterThan(HEAT_CURRENT * 3);
-  });
-  it("⚠️ the scale is √(w/max), so the quiet weeks stay legible beside the loud one", () => {
-    /* ⚠️ THE FIXTURE MUST HAVE A LOUD WEEK AND A QUIET ONE, or the claim below is about nothing:
-       twelve queries sent in one week (whose expected dates then land in one week too) against one
-       old query dragging a long quiet tail behind it. The precondition is asserted, because a
-       fixture that drifts into one shape is how a scale claim goes quietly green. */
-    const rows = rowsOf([
-      ...Array.from({ length: 12 }, () => mkQ({ dateSent: ago(30) })),
-      mkQ({ dateSent: ago(300) }),
-    ]);
-    const weeks = heatWeeks(rows, extentOf(rows, NOW), NOW);
-    expect(weeks.length).toBeGreaterThan(4);
-    const max = Math.max(...weeks.map((w) => w.weight));
-    const quiet = weeks.find((w) => w.weight < max / 4);
-    expect(quiet, "the fixture has no quiet week — the claim below would be vacuous").toBeTruthy();
-    /* §5 — the strip is 6px of opacity now, not a bar with a height: `.1 + .6 × √(w/max)` */
-    expect(quiet!.opacity).toBeCloseTo(Math.min(0.7, 0.1 + 0.6 * Math.sqrt(quiet!.weight / max)), 6);
-    /* linear would leave the quiet week at a tenth of the loud one; the root lifts it well above */
-    expect(quiet!.opacity).toBeGreaterThan(0.1 + 0.6 * (quiet!.weight / max));
-    for (const w of weeks) expect(w.opacity).toBeLessThanOrEqual(0.7);
-  });
-  it("nothing to weigh draws nothing — never a band of zeros", () => {
-    expect(heatWeeks([], EXT, NOW)).toEqual([]);
-  });
-});
 
 describe("§8.7 · the bars and their words", () => {
   it("⚠️ the tense follows the DATE, not the status", () => {
@@ -319,34 +287,3 @@ describe("§8.7 · every live row draws a bar, at least a day wide (v65.1)", () 
 
 /* ── v65.2 §9 · the heat ───────────────────────────────────────────────────────────────────────── */
 
-describe("§9 · the heat", () => {
-  /**
-   * ⚠️ THE SCALE IS `√(w/max)`, AND A LINEAR ONE IS WHY. On this data a linear scale draws one
-   * spike at the busiest week and a flat line everywhere else; the square root is what makes the
-   * quiet weeks legible beside the loud one, and the 12% floor is so a week with anything in it is
-   * still a mark rather than nothing.
-   */
-  it("§5 · the two weights and the curve are §5's own", () => {
-    /* ⚠️ THE STRIP IS 6px OF OPACITY NOW, NOT A BAR WITH A HEIGHT (§5), and a PAST stage no longer
-       earns a weight: §5 names two contributions — the current stage and the expected date. */
-    expect([HEAT_CURRENT, HEAT_EXPECTED]).toEqual([0.28, 1]);
-    const rows = buildQcRows([mkQ(), mkQ({ dateSent: ago(300) })], [agent()], [], NOW);
-    const ext = extentOf(rows, NOW);
-    const heat = heatWeeks(rows, ext, NOW);
-    expect(heat.length, "the fixture drew no heat at all").toBeGreaterThan(3);
-    const max = Math.max(...heat.map((h) => h.weight));
-    for (const h of heat) {
-      expect(h.opacity, `opacity at w=${h.weight}`).toBeCloseTo(Math.min(0.7, 0.1 + 0.6 * Math.sqrt(h.weight / max)), 6);
-      expect(h, "a height belongs to the retired tall bars").not.toHaveProperty("heightPc");
-    }
-  });
-  /* §9 — every week inside the extent and none outside it: a bar off the track is a week nobody sees */
-  it("every bar is inside the extent", () => {
-    const rows = buildQcRows([mkQ(), mkQ({ dateSent: ago(300) })], [agent()], [], NOW);
-    const ext = extentOf(rows, NOW);
-    for (const h of heatWeeks(rows, ext, NOW)) {
-      expect(h.ms).toBeGreaterThanOrEqual(ext.fromMs);
-      expect(h.ms).toBeLessThanOrEqual(ext.toMs);
-    }
-  });
-});

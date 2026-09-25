@@ -894,16 +894,28 @@ describe("§9 · dragging the dates", () => {
     expect(tlSrc).toMatch(/if \(zoomFrame\.current\) return;/);
     expect(tlSrc).toMatch(/zoomPend\.current = \{ pxd: clampPxd\(from \* Math\.exp/);
   });
-  it("§5 · the heat is a 6px strip along the row's foot, in navy, with 1px gaps", () => {
-    /* ⚠️ THE TALL BARS ARE RETIRED (§5). They took 24px of a 52px row to say a thing the strip says
-       in six, and the row has a month band and a line of dates to carry now. */
-    expect(/\.qcv-tl-heat \{([^}]*)\}/.exec(tl)?.[1] ?? "").toMatch(/height: 6px/);
-    const h = /\.qcv-tl-heat i \{([^}]*)\}/.exec(tl)?.[1] ?? "";
-    expect(h).toMatch(/border-radius: 2px 2px 0 0/);
-    expect(h).toMatch(/background: var\(--sp-anthracite\)/);
-    expect(h).toMatch(/bottom: 0/);
-    /* the 1px gap is the width: a week is `7 × pxd` less one */
-    expect(tlSrc).toMatch(/width: Math\.max\(1, 7 \* pxd - 1\)/);
+  it("⚠️ §B1 · NOTHING UNDER THE DATES — the heat strip and its derivation are GONE", () => {
+    /**
+     * §B1 — the row is month bands, Monday dates and TODAY. The strip said with a pixel of navy
+     * what the bands and the bars say with everything they draw, and it was the one thing in the
+     * row a reader could not act on.
+     *
+     * ⚠️ AND THE DERIVATION WENT WITH IT, which is the half worth locking. A pure function nothing
+     * calls is a thing the next reader has to trace to a rendered root before they can touch the
+     * row it used to draw in — the reachability fault this repo has paid for twice.
+     */
+    expect(tl, "the strip's rules are back").not.toMatch(/[".\s`]qcv-tl-heat[\s{,"`]/);
+    expect(tlSrc, "the strip is rendered again").not.toContain("qcv-tl-heat");
+    const lib = read("src/lib/qcTimeline.ts");
+    for (const gone of ["heatWeeks", "HeatWeek", "HEAT_CURRENT", "HEAT_EXPECTED"]) {
+      expect(lib, `${gone} survived the removal`).not.toContain(gone);
+    }
+    /* …and the three things that DO draw in the row are still there.
+       ⚠️ BOUNDED, because `toContain("tl-month")` is satisfied by `tl-monthX` — the prefix-match
+       fault this file records, and it went green on exactly that mutation before this line. */
+    for (const kept of ["tl-month", "tl-monday", "tl-todaypill"]) {
+      expect(tlSrc, kept).toMatch(new RegExp(`["\\s\`]${kept}["\\s\`]`));
+    }
   });
 });
 

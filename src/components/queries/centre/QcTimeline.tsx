@@ -24,7 +24,7 @@ import { groupRows, type CalView } from "../../../lib/qcCalView";
 import type { QcRow } from "../../../lib/qcSummary";
 import {
   NUDGE_WEEKS, PXD_DEFAULT, ZOOM_PRESETS, activePreset, clampPxd, crosshairAt, edgeCounts, extentOf,
-  heatWeeks, monthBands, msAt, pxdForPreset, scrollForToday, tlRow, trackWidth, weekTicks, xAt, zoomAbout,
+  monthBands, msAt, pxdForPreset, scrollForToday, tlRow, trackWidth, weekTicks, xAt, zoomAbout,
   type Crosshair, type TlRow,
 } from "../../../lib/qcTimeline";
 import "./qcvTimeline.css";
@@ -117,7 +117,6 @@ export const QcTimeline: React.FC<{
   }, [groups, nowMs]);
   const width = trackWidth(ext, pxd);
   const todayX = xAt(ext, pxd, new Date(nowMs).setHours(0, 0, 0, 0));
-  const heat = useMemo(() => heatWeeks(rows, ext, nowMs), [rows, ext, nowMs]);
   const months = useMemo(() => monthBands(ext, pxd), [ext, pxd]);
   const weeks = useMemo(() => weekTicks(ext, pxd), [ext, pxd]);
   const edges = useMemo(() => edgeCounts([...tl.values()], ext, pxd, scrollLeft, boxW), [tl, ext, pxd, scrollLeft, boxW]);
@@ -491,7 +490,7 @@ export const QcTimeline: React.FC<{
         onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerCancel={endDrag}
       >
         <div className="qcv-tl-inner" style={{ width: NAMES_W + width }}>
-          {/* §8.4 — the date tier: the heat, the months, the week ticks and the TODAY pill */}
+          {/* §B1 — the date row: the month bands, the Monday dates and TODAY. Nothing beneath them. */}
           {/**
             * §5–§6 — THE CORNER CELL, over the names, 330 × 60, WHITE AND OPAQUE. It is sticky-left
             * inside the scroller, so it holds its place over the names column while the dates run
@@ -523,12 +522,6 @@ export const QcTimeline: React.FC<{
             {weeks.map((w) => (
               <span key={w.ms} className="qcv-tl-wk" data-qcv="tl-monday" style={{ left: w.x }}>{w.label}</span>
             ))}
-            {/* §5 — the heat strip: 6px along the row's foot, one cell per week */}
-            <span className="qcv-tl-heat" data-qcv="tl-heat" title="Darker weeks are busier" aria-hidden="true">
-              {heat.map((h) => (
-                <i key={h.ms} style={{ left: xAt(ext, pxd, h.ms), width: Math.max(1, 7 * pxd - 1), opacity: h.opacity }} />
-              ))}
-            </span>
             <span className="qcv-tl-todaypill" data-qcv="tl-todaypill" style={{ left: todayX }}>Today</span>
             {/* §10 — the crosshair runs through the DATE TIER as well as the rows: a line that
                 stopped at the tier's foot would leave the tag it belongs to floating over nothing. */}
