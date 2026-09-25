@@ -2060,6 +2060,177 @@ test("§A1 · today at 56–58% — on open, on re-open, and with the data 800ms
   near("open-today", "§A1 · …at 56–58% of the visible track", late?.at, 57, 3);
 });
 
+/**
+ * §A5 · ANY PRESS OUTSIDE AN OPEN PANEL CLOSES IT. The twelve targets below are the brief's own, and
+ * they are the ones that matter because each sits behind a different thing that can swallow a
+ * `pointerdown`: the date row's drag calls `setPointerCapture` and `preventDefault`, the rows carry
+ * their own handlers, and every control that must not open a query calls `stopPropagation`.
+ */
+test("§A5 · a press anywhere outside closes Filter, Group and Sort", async ({ page }) => {
+  await openApp(page, 1440, 900);
+  await page.locator("[data-qcv='be-expand']").first().click();
+  await page.waitForTimeout(1200);
+
+  /**
+   * ⚠️ EVERY OPEN IS BOUNDED AND CHECKS THE CARD FIRST. A press that closed the CARD leaves the
+   * button absent, and an unbounded `click` on an absent locator waits out the whole test timeout —
+   * seven minutes, reported as a hang rather than as "the card went". It fails fast and names which
+   * target took the card with it.
+   */
+  const cardOpen = () => page.locator("[data-qcv='xp-card']").count();
+  const open = async (which: "filter" | "group" | "sort") => {
+    if (!(await cardOpen())) return -1;
+    await page.locator(`[data-qcv='xp-${which}']`).click({ timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(150);
+    return page.locator("[data-qcv='xp-pop']").count();
+  };
+  const shut = () => page.locator("[data-qcv='xp-pop']").count();
+  /* a press at a point, dispatched as the browser would: down, then up, on whatever is there */
+  const pressAt = async (x: number, y: number) => {
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.up();
+    await page.waitForTimeout(160);
+  };
+  /**
+   * ⚠️ THE POINT MUST NOT BE UNDER THE OPEN PANEL, and the names column is exactly where it opens.
+   * Pressing the FIRST name's centre lands on the panel — which is "inside", so the panel correctly
+   * stays open, and the sweep reads that as the names cell failing to dismiss. So the point is
+   * taken from the first matching element whose centre is clear of the panel's box.
+   */
+  const boxOf = async (sel: string) => page.evaluate((s2) => {
+    const card = document.querySelector("[data-qcv='xp-card']");
+    if (!card) return null;
+    const pop = card.querySelector("[data-qcv='xp-pop']")?.getBoundingClientRect() ?? null;
+    /**
+     * ⚠️ AND THE CENTRE OF A SCROLLING-TRACK ELEMENT IS NOT ON SCREEN. The date row and the group
+     * bands span the whole extent — about 11,000px on a three-year pipeline — so their centres sit
+     * thousands of pixels off the right of the window and every sample was discarded. The point is
+     * therefore taken from the element's VISIBLE INTERSECTION with the viewport, which is what a
+     * reader could actually press. (Reported as "missing" rather than as a failure, which is how
+     * two real targets were silently dropped from the sweep.)
+     */
+    for (const e of card.querySelectorAll(s2)) {
+      const b = e.getBoundingClientRect();
+      if (b.width <= 0 || b.height <= 0) continue;
+      const l = Math.max(b.left, 0), r = Math.min(b.right, window.innerWidth);
+      const t = Math.max(b.top, 0), bo = Math.min(b.bottom, window.innerHeight);
+      if (r - l < 4 || bo - t < 4) continue;
+      const y = Math.round((t + bo) / 2);
+      /* step across the visible width so a point under the panel is stepped PAST, not discarded */
+      for (let f = 0.5; f <= 0.96; f += 0.15) {
+        const x = Math.round(l + (r - l) * f);
+        if (pop && x > pop.left && x < pop.right && y > pop.top && y < pop.bottom) continue;
+        return { x, y, under: (document.elementFromPoint(x, y) as HTMLElement | null)?.className ?? null };
+      }
+    }
+    return null;
+  }, sel);
+
+  /* the twelve, each named so a failure says WHICH surface swallowed the press */
+  const targets: [string, string][] = [
+    ["the title", "[data-qcv='xp-title']"],
+    ["today & next up", "[data-qcv='xp-sub']"],
+    ["the hawk", "[data-qcv='xp-hawk']"],
+    ["a count card", "[data-qcv='xp-stat']"],
+    ["Today", "[data-qcv='tl-nav'] button:nth-child(2)"],
+    ["the zoom", "[data-qcv='tl-zoom'] button"],
+    ["Find", "[data-qcv='xp-find']"],
+    ["the date row", "[data-qcv='tl-tier']"],
+    ["a group band", "[data-qcv='tl-band']"],
+    ["a name", "[data-qcv='tl-names']"],
+    ["a bar", "[data-qcv='tl-bar']"],
+  ];
+  const missing: string[] = [];
+  const openers: string[] = [];
+  const stranded: string[] = [];
+  let pressed = 0;
+  /**
+   * ⚠️ TWO OF THE TWELVE OPEN A QUERY, AND THAT IS THE DESIGN RATHER THAN A FAILURE. §D4 says a bar
+   * and the names cell open the query, and this app has ONE house for an open query — the rail — so
+   * opening from the calendar CLOSES the expanded card. The claim under test still holds for both
+   * (the panel is shut after the press); what does not survive is the card, so the sweep puts it
+   * back before the next target. The first cut had no way back and reported the target AFTER an
+   * opener as the broken one: a true reading, about a card my own previous press had closed.
+   */
+  const restore = async (after: string) => {
+    if (await cardOpen()) return;
+    openers.push(after);
+    /**
+     * ⚠️ THE ROUTE, NOT THE BUTTON. Opening a query puts it in the RAIL, so `be-expand` no longer
+     * exists, and Escape does not hand the rail back to the birds-eye — polling for that button
+     * waited 7.5 seconds for a control that was never coming. `?view=calendar` opens the expanded
+     * view directly (§1), which is the one way back that depends on nothing being on screen.
+     */
+    await openApp(page, 1440, 860, "?view=calendar");
+    for (let i = 0; i < 24 && !(await cardOpen()); i += 1) await page.waitForTimeout(250);
+  };
+  for (const [name, sel] of targets) {
+    if (!(await cardOpen())) { stranded.push(name); break; }
+    is("outside", `§A5 · Filter is open before pressing ${name}`, await open("filter"), 1);
+    /* the point is taken WITH the panel open, because the panel is what it must avoid */
+    const at = await boxOf(sel);
+    if (!at) { missing.push(name); await page.keyboard.press("Escape"); continue; }
+    await pressAt(at.x, at.y);
+    is("outside", `§A5 · …and a press on ${name} closed it`, await shut(), 0);
+    pressed += 1;
+    await restore(name);
+    /**
+     * ⚠️ NO ESCAPE HERE, AND THE FIRST CUT OF THIS SWEEP IS WHY. It pressed Escape after each
+     * target "to tidy up" — and the panel was already closed by the press, so the key cascaded to
+     * the CARD and closed it. Every target after the first then resolved to nothing and the sweep
+     * reported `1 of 11`, which reads as ten broken surfaces and was one line of my own tidying.
+     * The press is the whole act; Escape is exercised once, on its own, at the end.
+     */
+  }
+  /* ⚠️ THE POPULATION, or a run where nothing resolved would report a clean sweep of nothing */
+  record({ area: "outside", what: "§A5 · what the sweep reached", got: { pressed, missing, openers, stranded }, want: "reported" });
+  /* an opener is expected; a STRANDED target is a press this sweep never got to make */
+  yes("outside", `§A5 · no target was stranded (${stranded.join(", ") || "none"})`, stranded.length === 0, JSON.stringify(stranded));
+  yes("outside", `§A5 · the two openers are the bar and the names cell (${openers.join(", ") || "none"})`,
+    openers.every((o) => o === "a bar" || o === "a name"), JSON.stringify(openers));
+  yes("outside", `§A5 · the sweep pressed real targets (${pressed} of ${targets.length}${missing.length ? `, missing ${missing.join(", ")}` : ""})`,
+    pressed >= 9, JSON.stringify({ pressed, missing }));
+
+  /* …and the empty corner, after a query has been opened and closed from a bar */
+  const bar = await boxOf("[data-qcv='tl-bar']");
+  if (bar) {
+    await pressAt(bar.x, bar.y);
+    await page.waitForTimeout(500);
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(400);
+  }
+  if (!(await cardOpen())) {
+    await page.locator("[data-qcv='be-expand']").first().click({ timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(900);
+  }
+  if (await cardOpen()) {
+    is("outside", "§A5 · Group is open before the corner press", await open("group"), 1);
+    const corner = await page.evaluate(() => {
+      const c = document.querySelector("[data-qcv='xp-card']")?.querySelector("[data-qcv='tl-corner']");
+      if (!c) return null;
+      const b = c.getBoundingClientRect();
+      return { x: Math.round(b.right - 12), y: Math.round(b.bottom - 8) };   /* empty space, past the controls */
+    });
+    yes("outside", "§A5 · the corner is on the page (the press below is about something)", corner != null, JSON.stringify(corner));
+    await pressAt(corner!.x, corner!.y);
+    is("outside", "§A5 · …and a press on the corner's empty space closed it", await shut(), 0);
+    /* the three buttons still TOGGLE rather than closing and reopening */
+    for (const w of ["filter", "group", "sort"] as const) {
+      is("outside", `§A5 · ${w} opens`, await open(w), 1);
+      await page.locator(`[data-qcv='xp-${w}']`).click({ timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(150);
+      is("outside", `§A5 · …and its own button closes it again`, await shut(), 0);
+    }
+    /* …and Escape is still a way out */
+    is("outside", "§A5 · Sort opens for Escape", await open("sort"), 1);
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(200);
+    is("outside", "§A5 · …and Escape closes it, leaving the card open", await shut(), 0);
+    is("outside", "§A5 · …the card is still open", await page.locator("[data-qcv='xp-card']").count(), 1);
+  }
+});
+
 test("§8.10 · a zoom rebuilds the rows and the lane's controls survive it", async ({ page }) => {
   await openApp(page, 1440, 860, "?view=calendar");
   await page.waitForTimeout(900);

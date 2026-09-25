@@ -251,3 +251,38 @@ it is there so the next change to the placement has to get past it.
 - **Five mutations, all red.**
 - Gates: tsc 0 · build clean · **8,404 passed**.
 - Measurement: **31 passed**.
+
+## A5 — an outside press closes Filter, Group and Sort
+
+The listener moved to the **capture phase at the document**, as the brief asks. The lock presses in
+turn on the title, today & next up, the hawk, a count card, Today, the zoom, Find, the date row, a
+group band, a name and a bar, then reopens and presses the corner's empty space: shut after every
+one. 10 targets pressed, 0 missing.
+
+**⚠️ THE PHASE FIXES NO FAULT I COULD MEASURE, AND MY FIRST COMMENT SAID OTHERWISE.** I wrote that
+the bubbling listener was being swallowed by the date row's `setPointerCapture`, the rows' handlers
+and the controls' `stopPropagation` — plausible, specific, and asserted before it was measured. The
+mutation back to bubbling **passes**: every one of the twelve closes the panel either way. The
+capture phase is kept (a `stopPropagation` cannot un-run a listener already called on the way down,
+so the next control to stop an event cannot strand the panel) and the comment now says so.
+
+Four things the sweep found about itself, each of which had it reporting broken surfaces that were
+not broken:
+
+- **My own Escape "tidying" cascaded to the CARD**, so every target after the first resolved to
+  nothing — `1 of 11`, read as ten dead surfaces. The press is the whole act.
+- **The open panel covers the names column**, so the first name's centre is *inside* and the panel
+  correctly stays open. The point is now taken from the first element clear of the panel.
+- **The date row and the group bands span the whole extent** — about 11,000px — so their centres sit
+  thousands of pixels off screen and both were silently dropped as "missing". The point is taken
+  from the element's visible intersection with the viewport.
+- **A bar and a names cell OPEN a query**, which closes the card, because this app has one house for
+  an open query. That is §D4, not a failure: the panel *is* shut after both. The sweep records them
+  as openers and returns via `?view=calendar` — Escape does not hand the rail back from a query, so
+  polling for `be-expand` waited 7.5s for a control that was never coming.
+
+Proved red by removing the dismissal entirely (`…press on the title closed it`). One existing lock
+had to be retargeted: it pinned `addEventListener("pointerdown", onDown)` verbatim and went red over
+an edit that strengthened the idiom it guards.
+
+Gates 8,404 (baseline 8,390). Measurement 32 (was 31).

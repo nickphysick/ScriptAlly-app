@@ -578,8 +578,15 @@ describe("§8.3 · one popover", () => {
      */
     expect(ctl, "the popover must not listen for Escape itself").not.toContain("Escape");
     expect(src).toMatch(/if \(menuRef\.current\) \{ setMenu\(null\); return; \}/);
-    /* the dismissal idiom it DOES own: pointerdown outside, with the trigger counting as inside */
-    expect(ctl).toMatch(/addEventListener\("pointerdown", onDown\)/);
+    /**
+     * The dismissal idiom it DOES own: pointerdown outside, with the trigger counting as inside.
+     * ⚠️ THE CLAIM IS THE IDIOM, NOT THE SPELLING. This pinned the call verbatim and went red over
+     * §A5 adding a capture-phase argument — a change that makes the idiom MORE reliable, not less.
+     * A lock that fails on an edit which strengthens what it guards is a lock that trains the next
+     * reader to rebaseline it without looking.
+     */
+    expect(ctl).toMatch(/addEventListener\("pointerdown", onDown(, true)?\)/);
+    expect(ctl, "the trigger counts as inside, or its button closes and reopens").toMatch(/ref\.current\?\.contains/);
     expect(ctl).toMatch(/!ref\.current\?\.contains\(e\.target as Node\)/);
   });
 });

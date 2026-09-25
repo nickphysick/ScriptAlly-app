@@ -51,14 +51,29 @@ export const QcCalControls: React.FC<{
 }> = ({ view, onView, menu, onMenu, counts }) => {
   const ref = useRef<HTMLDivElement>(null);
 
-  /* the scope chip's dismissal idiom: pointerdown outside closes; the trigger counts as inside */
+  /**
+   * §A5 — ANY PRESS OUTSIDE THE OPEN PANEL CLOSES IT.
+   *
+   * ⚠️ THE PHASE IS PRECAUTIONARY, AND I SAID OTHERWISE BEFORE MEASURING. A `pointerdown` inside
+   * the expanded view meets the date row's drag (`setPointerCapture` + `preventDefault`), the rows'
+   * own handlers, and a `stopPropagation` on every control that must not open a query — so the
+   * BUBBLING listener this replaced looked certain to be swallowed. Measured over all twelve
+   * targets in the §A5 sweep, it was not: bubbling closed the panel on every one of them, and a
+   * mutation back to bubbling does not redden the lock. The capture phase is kept because
+   * `stopPropagation` cannot un-run a listener already called on the way DOWN — so the next control
+   * to stop an event cannot quietly strand the panel — but it fixes no fault observable today.
+   *
+   * The panel's own cluster is "inside", so its button still toggles rather than closing-and-
+   * reopening; and this never calls `preventDefault`, so the press it observes still does whatever
+   * it was going to do. Escape is unchanged and still cascades from the card's one handler.
+   */
   useEffect(() => {
     if (!menu) return undefined;
     const onDown = (e: PointerEvent) => {
       if (!ref.current?.contains(e.target as Node)) onMenu(null);
     };
-    document.addEventListener("pointerdown", onDown);
-    return () => document.removeEventListener("pointerdown", onDown);
+    document.addEventListener("pointerdown", onDown, true);
+    return () => document.removeEventListener("pointerdown", onDown, true);
   }, [menu, onMenu]);
 
   const set = (over: Partial<CalView>) => onView({ ...view, ...over });
