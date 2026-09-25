@@ -76,6 +76,10 @@ beside it.
 
 ### The rules window (for Nick — one line, when convenient)
 
+> ⚠️ **SUPERSEDED — applied at `19f8fba9` under Nick's ruling (25 Sep), with logline's cap of
+> 2048 rather than the 512 drafted below, and the dialog's second write removed after it. See §11.**
+> The text below is the draft as reported, kept as the record.
+
 `setting`/`series` are accepted on CREATE (isValidManuscript has no trailing hasOnly) and denied
 on UPDATE until the manuscript-update allowlist gains them. The edit dialog therefore writes them
 as a SEPARATE second write and reports a denial in the dialog rather than letting the base save
@@ -254,8 +258,9 @@ serially. The guard's verdict was about the harness, not the page.
 
 ## 9 · Deferred, with owners
 
-- **Rules line for setting/series** — Nick (draft in §2); until it lands, the edit dialog reports
-  the denial and saves everything else.
+- ~~**Rules line for setting/series** — Nick (draft in §2); until it lands, the edit dialog reports
+  the denial and saves everything else.~~ **Done — §11.** Rules in the repo at `19f8fba9`; the
+  dialog writes once. Live on dev when Nick deploys rules and hosting together.
 - **Standalone other materials** — product decision (Nick) before any flow exists; the section
   states the writer's real package lines meanwhile.
 - **Author / pen name** — no field in the model; the byline uses `User.name`. If a pen name is
@@ -287,3 +292,51 @@ serially. The guard's verdict was about the harness, not the page.
 - **Harness incidents recorded** (both the guard's wins): `bundleGuard` voided a matrix run that
   overlapped source mutations (stale bundle, correctly refused; re-run serially); the first L5
   mutation demonstrated the monoculture trap on the smoke fixture and was re-aimed.
+
+## 11 · Addendum — Nick's rulings, 25 Sep
+
+1. **Premises**: all seven corrections accepted as written. No action.
+2. **`firestore.rules`, narrowly** — done at **`19f8fba9`** (`firestore.rules` + `tests/rules/firestore.rules.test.ts` only):
+   two optional-when-present clauses in `isValidManuscript` (a string at **logline's cap, 2048**)
+   and `'setting', 'series'` appended to the manuscript update allowlist. Nothing else joins it.
+   - **The old rules were wrong in two opposite directions**, and the ten new emulator cases assert
+     both: an UPDATE carrying either key was DENIED (the affectedKeys gotcha), while a CREATE
+     carrying either was ACCEPTED with no type check at all.
+   - **Red before**, against main's own rules at `b838182a`: `9 failed | 151 passed (160)`. The seven
+     update cases failed with `FirebaseError: 7 PERMISSION_DENIED`; the two non-string cases failed
+     with *"Expected request to fail, but it succeeded"* at the CREATE half (line 655 — a manuscript
+     created with `setting: 42` went through). The `coverUrl` narrowness witness was green.
+   - **Green after**: `160 passed (160)` — the same population, so every new case ran.
+   - **Mutation** — `'series'` dropped from the allowlist: `4 failed | 156 passed`, exactly the four
+     cases that need it (add, clear-by-omission, the 2048 cap, both facts in one payload). The
+     setting cases and the non-string series case stayed green, as they should. Restored from a
+     path-derived backup: `160 passed`.
+   - **How it ran locally**: this machine had no JDK, so the Firestore emulator had never run here
+     (CI was the only place). Homebrew `openjdk@21` — keg-only, not linked, no sudo — matches CI's
+     Temurin 21 version. It brought 22 dependency formulae with it; the list and the one-command
+     removal are in the session report.
+3. **The dialog, once the test was green** — the "denial reported" path is gone: **one write**,
+   with a fact riding the payload only when it changed (`factPatch`), so a title-only edit never
+   depends on the two keys.
+   - **A shipped defect, caught while doing it**: clearing Setting or Series sent `undefined`, which
+     this app's Firestore rejects outright (no `ignoreUndefinedProperties`). Every clear would have
+     thrown, before and after the rules deploy, and the old dialog blamed it on "a rules deploy that
+     hasn't landed". Clears now send `deleteField()`, the house convention and exactly what the new
+     rules cases prove allowed.
+   - Three unit locks were added beside the page smoke, each proved red by its own mutation: exactly
+     one write (a second write reintroduced → red), a clear is `deleteField()` (the shipped
+     `undefined` restored → red), and the rules carry both keys the dialog writes (`series` dropped
+     from the allowlist → red).
+4. **Other materials**: untouched, per the ruling — the disabled tile and the package-lines
+   display stay exactly as they are; the entity decision waits for the Submission packages /
+   Comparable titles redesign.
+
+**Deploy order, for the record:** new rules accept everything the old dialog wrote, so **rules
+first (or together)** is safe in every order but one: hosting ahead of rules would make an edit
+that CHANGES Setting or Series fail whole, showing "That didn't save". A title-only edit never
+carries the two keys and is unaffected either way.
+
+**Noticed, not touched**: the `elevatorPitch` docblock in `src/types.ts` still says "NEITHER KEY IS
+IN THE FIRESTORE UPDATE ALLOWLIST YET". Half of that is stale — `elevatorPitch` has been listed
+since book profile amendment 2 — and half is still true, because `backCoverBlurb` is not listed.
+It is outside this ruling's scope, so it is recorded here rather than edited.

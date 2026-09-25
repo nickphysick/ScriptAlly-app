@@ -22,7 +22,10 @@ vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSm
 vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pageSmoke")).toastMock());
 
 import { ManuscriptPage } from "./ManuscriptPage";
+import { factPatch } from "./Msv12EditDetails";
 import { SD_VIEWBOX } from "../../../test/statusDotSignature";
+import { sliceBetween } from "../../../test/sliceBetween";
+import { deleteField, type FieldValue } from "firebase/firestore";
 
 afterEach(() => setActiveManuscript(null));
 
@@ -115,14 +118,42 @@ describe("L4 · the owed row's click path writes nothing (source half)", () => {
   });
 });
 
-describe("the two-write edit dialog (the rules window, stated at the seam)", () => {
+/**
+ * The edit dialog's ONE write (Nick's ruling, 25 Sep): the two-write split and its rules-window
+ * message came out once tests/rules proved the allowlist carries `setting` and `series` (19f8fba9).
+ * These are the halves a unit suite can carry; the emulator suite owns the rules themselves.
+ */
+describe("the edit dialog's one write", () => {
   const src = strip(readFileSync(join(__dirname, "Msv12EditDetails.tsx"), "utf8"));
-  it("setting and series ride a SECOND write, so the base save cannot be taken down with them", () => {
-    /* hasOnly fails the WHOLE write on one unlisted changed key — folding the two new keys into
-       the base payload would make every title edit fail until the rules line lands */
-    const base = src.slice(src.indexOf("await updateManuscript(ms.id, {"), src.indexOf("settingChanged"));
-    expect(base).not.toContain("setting");
-    expect(base).not.toContain("series");
-    expect(src).toContain("settingChanged || seriesChanged");
+  const dialog = sliceBetween(src, "export const Msv12EditDetails", "export const Msv12NewVersion", "the edit dialog");
+
+  it("performs exactly one write, and no longer speaks of a rules window", () => {
+    expect(dialog.match(/\bupdateManuscript\(/g)?.length ?? 0, "the dialog writes once").toBe(1);
+    expect(src).not.toMatch(/rules deploy|hasn.t landed/i);
+  });
+
+  it("a fact rides only when it changed, and a cleared fact is REMOVED — never '' and never undefined", () => {
+    expect(factPatch("West Cork", "West Cork")).toBeNull();
+    expect(factPatch("  West Cork ", "West Cork")).toBeNull();
+    expect(factPatch("", undefined)).toBeNull();
+    expect(factPatch("West Cork, today", undefined)).toBe("West Cork, today");
+    expect(factPatch(" Cork ", "West Cork")).toBe("Cork");
+    /* Firestore here rejects `undefined` outright, so a clear that is anything but deleteField()
+       throws — which is exactly what the first cut shipped */
+    const cleared = factPatch("", "West Cork");
+    expect(cleared, "a clear produced no patch").not.toBeNull();
+    expect(typeof cleared, "a clear wrote a value instead of removing the key").not.toBe("string");
+    expect((cleared as FieldValue).isEqual(deleteField()), "a clear is not deleteField()").toBe(true);
+  });
+
+  it("the rules carry both keys the dialog writes — the pairing that makes one write safe", () => {
+    const rules = readFileSync(join(__dirname, "..", "..", "..", "..", "firestore.rules"), "utf8");
+    const block = [...rules.matchAll(/hasOnly\(\[([\s\S]*?)\]/g)]
+      .map((m) => m[1]).find((b) => b.includes("'bookVersions'"));
+    expect(block, "the manuscript update allowlist moved — re-find it").toBeTruthy();
+    /* comments stripped first: a note that NAMES a key must not satisfy a claim that it is LISTED */
+    const listed = block!.replace(/\/\/[^\n]*/g, "");
+    expect(listed, "setting left the allowlist — every setting edit now fails the whole save").toContain("'setting'");
+    expect(listed, "series left the allowlist — every series edit now fails the whole save").toContain("'series'");
   });
 });

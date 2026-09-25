@@ -21,9 +21,9 @@
  * ⚠️ EACH ACCOUNT GETS ITS OWN APP INSTANCE. One Firestore connection serving two sign-ins in
  *    sequence retries in-flight streams under the wrong token; separate instances, separate
  *    connections.
- * ⚠️ `setting` RIDES THE CREATE. `isValidManuscript` has no trailing hasOnly, so a CREATE carrying
- *    `setting` is accepted while an UPDATE carrying it is denied (the affectedKeys gotcha; the
- *    allowlist has no such key yet — the rules line is drafted in the run report).
+ * ⚠️ `setting` IS WRITTEN ON CREATE, which every rules vintage accepts: before 19f8fba9 the create
+ *    path had no clause for it at all (while the update allowlist refused it); since, both take a
+ *    typed string at logline's cap. So the fixture seeds identically on either side of a deploy.
  *
  * USAGE
  *   node tests/e2e/seedManuscriptsV12.mjs                    seed / restore both accounts (pro → Pro)
@@ -129,7 +129,7 @@ await setDoc(doc(db, "users", uid, "manuscripts", MS_ID), {
   id: MS_ID, userId: uid,
   title: MS_TITLE, genre: "Thriller", ageCategory: "Adult", wordCount: 50000,
   logline: MS_LOGLINE,
-  setting: MS_SETTING, // create tolerates the key; the UPDATE allowlist does not yet (see header)
+  setting: MS_SETTING, // a create every rules vintage accepts (see header)
   comps: COMPS,
   status: "Querying", statusChangedDate: "2026-03-03T09:00:00.000Z",
   bookVersions: BV.map((b) => ({ id: b.id, name: b.name, kind: b.kind, createdDate: b.createdDate, note: b.note })),

@@ -292,18 +292,16 @@ export interface Manuscript {
   /**
    * Where the story is set, in the writer's own words — "West Cork, today" (the Manuscripts-v12
    * hero's 2×2 facts grid). Absent means unwritten (the hero renders "Not recorded" with an Add
-   * button, never a dash); cleared by OMITTING the key, the `elevatorPitch` convention.
+   * button, never a dash); cleared by OMITTING the key (`deleteField()`), the `elevatorPitch`
+   * convention — never `""`, and never `undefined`, which this app's Firestore rejects outright.
    *
-   * ⚠️ NOT IN THE FIRESTORE UPDATE ALLOWLIST YET, so an EDIT carrying it is silently denied until
-   * the rules line lands (drafted in reports/manuscripts-v12/REPORT.md — Nick's deploy). A CREATE
-   * carrying it is accepted, because `isValidManuscript` has no trailing hasOnly. The same window
-   * `elevatorPitch` lived through, recorded at the field as that one was.
+   * ⚠️ RULES: a string at logline's cap (2048), in the manuscript update allowlist and type-checked
+   * on create and update since 19f8fba9 (Nick's ruling, 25 Sep; tests/rules proves both halves). A
+   * database enforces what was last DEPLOYED to it, not this repo — check the deploy before
+   * trusting a write.
    */
   setting?: string;
-  /**
-   * The series this book belongs to, if any — same conventions and the same rules window as
-   * `setting` above.
-   */
+  /** The series this book belongs to, if any — the same conventions and rules as `setting`. */
   series?: string;
   /**
    * The pitch shelf's two stored pieces, beside the `logline` above. Derived helpers live in

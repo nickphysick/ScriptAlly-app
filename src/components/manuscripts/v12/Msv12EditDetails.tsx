@@ -10,12 +10,13 @@
  * locked AllManuscripts editor used — the FLOW is reused at the write path, because the old
  * dialog's JSX lives inside a locked file and cannot be imported.
  *
- * ⚠️ SETTING AND SERIES RIDE A SECOND WRITE, DELIBERATELY. The Firestore update allowlist does not
- * carry either key yet (the rules line is drafted for Nick in the run report), and `hasOnly` fails
- * the WHOLE write on one unlisted changed key — so folding them into the base payload would make
- * every title edit fail while the window lasts. The base write always succeeds; the second write
- * carries only the two new keys, only when they changed, and a denial is REPORTED in the dialog
- * rather than swallowed (a silent denial is the affectedKeys trap this repo documents).
+ * ⚠️ ONE WRITE: the base fields and the two facts land together or not at all. It was two writes
+ * while the manuscript update allowlist lacked `setting`/`series` (`hasOnly` fails the WHOLE write
+ * on one unlisted changed key, so folding them in would have taken every title edit down with
+ * them). The rules carry both since 19f8fba9 — proven against the emulator in tests/rules, and
+ * paired by a unit lock beside this file — so the split and its rules-window message are gone.
+ * A fact still rides the payload only when it changed (`factPatch`), which keeps a title-only edit
+ * independent of the two keys whatever rules a database happens to be running.
  *
  * NEW VERSION appends a `BookVersion` through lib/bookVersions' own writers (`newBookVersionId`,
  * `appendBookVersion`) — the module that owns the shape — via the same `updateManuscript`.
@@ -24,6 +25,7 @@
  * app's one overlay implementation, never a second.
  */
 import React, { useRef, useState } from "react";
+import { deleteField, type FieldValue } from "firebase/firestore";
 import { useOverlay } from "../../shell/useOverlay";
 import { appendBookVersion, bookVersionsOf, newBookVersionId, BOOK_VERSION_KINDS, KIND_LABEL } from "../../../lib/bookVersions";
 import { ManuscriptStatus } from "../../../types";
@@ -36,6 +38,21 @@ export interface EditDetailsProps {
 }
 
 const STATUSES: ManuscriptStatus[] = Object.values(ManuscriptStatus);
+
+/**
+ * One of the hero's two facts as it belongs in the edit's payload — or null when it did not
+ * change, so an untouched fact never rides a write at all.
+ *
+ * ⚠️ A CLEARED FACT IS REMOVED, NEVER WRITTEN EMPTY. `deleteField()` omits the key (absent means
+ * unwritten, the `elevatorPitch` convention), and it is the only option that works here: this
+ * app's Firestore rejects `undefined` outright (no `ignoreUndefinedProperties`). The first cut sent
+ * `undefined`, so every clear threw — and the dialog blamed the rules for it.
+ */
+export const factPatch = (next: string, prev: string | undefined): string | FieldValue | null => {
+  const t = next.trim();
+  if (t === (prev ?? "").trim()) return null;
+  return t ? t : deleteField();
+};
 
 export const Msv12EditDetails: React.FC<EditDetailsProps> = ({ ms, updateManuscript, onClose }) => {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -56,32 +73,21 @@ export const Msv12EditDetails: React.FC<EditDetailsProps> = ({ ms, updateManuscr
     if (!d.title.trim()) { setErr("A manuscript needs a title."); return; }
     setBusy(true);
     setErr(null);
+    const setting = factPatch(d.setting, ms.setting);
+    const series = factPatch(d.series, ms.series);
+    const payload: Record<string, unknown> = {
+      title: d.title.trim(), genre: d.genre.trim(), ageCategory: d.ageCategory.trim(),
+      wordCount: Math.max(0, parseInt(d.wordCount.replace(/[^0-9]/g, ""), 10) || 0),
+      logline: d.logline, status: d.status, shelvedReason: d.shelvedReason,
+      ...(setting !== null ? { setting } : {}),
+      ...(series !== null ? { series } : {}),
+    };
     try {
-      await updateManuscript(ms.id, {
-        title: d.title.trim(), genre: d.genre.trim(), ageCategory: d.ageCategory.trim(),
-        wordCount: Math.max(0, parseInt(d.wordCount.replace(/[^0-9]/g, ""), 10) || 0),
-        logline: d.logline, status: d.status, shelvedReason: d.shelvedReason,
-      });
+      await updateManuscript(ms.id, payload as Partial<Manuscript>);
     } catch {
       setErr("That didn’t save. Nothing was recorded.");
       setBusy(false);
       return;
-    }
-    /* the two new facts, alone — see the header. Only when changed, so an untouched dialog
-       performs one write, not two. */
-    const settingChanged = (d.setting.trim() || undefined) !== (ms.setting ?? undefined);
-    const seriesChanged = (d.series.trim() || undefined) !== (ms.series ?? undefined);
-    if (settingChanged || seriesChanged) {
-      try {
-        await updateManuscript(ms.id, {
-          ...(settingChanged ? { setting: d.setting.trim() || undefined } : {}),
-          ...(seriesChanged ? { series: d.series.trim() || undefined } : {}),
-        } as Partial<Manuscript>);
-      } catch {
-        setErr("Everything saved except Setting and Series — recording those needs a rules deploy that hasn’t landed yet.");
-        setBusy(false);
-        return;
-      }
     }
     onClose();
   };
