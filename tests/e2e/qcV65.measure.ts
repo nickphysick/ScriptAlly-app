@@ -2211,6 +2211,57 @@ test("§D1 · the Filter panel: five sections, faceted counts, and a foot that s
 });
 
 /**
+ * ⚠️ §D2 · THE PANEL KEEPS ITS PLACE ACROSS A CHOICE. Every tick re-renders the whole panel — the
+ * counts, the head's pill and the foot all move — so this is not about anyone resetting the scroll
+ * but about the element being new. Measured, because the claim is what a reader is LOOKING AT.
+ */
+test("§D2 · the Filter panel holds its scroll across a choice, and opens fresh at the top", async ({ page }) => {
+  await openApp(page, 1440, 900, "?view=calendar");
+  await page.waitForTimeout(900);
+  if (!(await page.locator("[data-qcv='xp-card']").count())) {
+    await page.locator("[data-qcv='be-expand']").first().click({ timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(900);
+  }
+  await page.locator("[data-qcv='xp-filter']").click();
+  await page.waitForTimeout(250);
+  const body = page.locator("[data-qcv='xp-fbody']");
+  const top = () => page.evaluate(() => Math.round((document.querySelector("[data-qcv='xp-fbody']") as HTMLElement).scrollTop));
+  const room = await page.evaluate(() => {
+    const e = document.querySelector("[data-qcv='xp-fbody']") as HTMLElement;
+    return e.scrollHeight - e.clientHeight;
+  });
+  /* ⚠️ THE PRECONDITION: a body with nothing to scroll makes every reading below 0 === 0, and the
+     case would pass on a panel that had thrown its position away. */
+  yes("d2", `§D2 · the body has somewhere to scroll (${room}px)`, room > 60, String(room));
+  if (room <= 60) return;
+
+  const want = Math.min(260, room);
+  await body.evaluate((e, y) => { e.scrollTop = y; e.dispatchEvent(new Event("scroll")); }, want);
+  await page.waitForTimeout(200);
+  is("d2", `§D2 · scrolled to ${want}`, await top(), want);
+
+  /* three choices, each of which rebuilds the panel */
+  const facets = ["status", "attention", "due"];
+  const made: string[] = [];
+  for (const f of facets) {
+    const btn = page.locator(`[data-qcv='xp-pop'] [data-facet='${f}'][data-qcv='xp-chk']`).first();
+    if (!(await btn.count())) continue;
+    await btn.click({ timeout: 5000 });
+    await page.waitForTimeout(350);
+    made.push(f);
+    is("d2", `§D2 · …and after choosing in ${f} it is still at ${want}`, await top(), want);
+  }
+  yes("d2", `§D2 · three choices were made (${made.join(", ")})`, made.length === 3, JSON.stringify(made));
+
+  /* ⚠️ AND A FRESH OPEN STARTS AT THE TOP — the memory is about one piece of work, not the control */
+  await page.locator("[data-qcv='xp-fdone']").click({ timeout: 5000 });
+  await page.waitForTimeout(250);
+  await page.locator("[data-qcv='xp-filter']").click();
+  await page.waitForTimeout(300);
+  is("d2", "§D2 · a fresh open starts at the top", await top(), 0);
+});
+
+/**
  * ⚠️ §D4 · WHAT OPENS A QUERY, AND WHAT PANS. Only a bar and the names cell open; the empty track
  * is a drag surface with the date row's own behaviour. Every claim here is about a GESTURE, so
  * every one is measured on the page: a source lock could see the handler come off the row and

@@ -514,9 +514,16 @@ describe("§8.1 · the controls at the column's foot", () => {
   });
   it("⚠️ ↺ resets the VIEW and nothing else — it never touches zoom or scroll", () => {
     expect(ctl).toMatch(/onClick=\{\(\) => \{ onView\(CAL_DEFAULT\); onMenu\(null\); \}\}/);
-    for (const forbidden of ["scrollLeft", "pxd", "zoom", "scrollTo"]) {
+    /**
+     * ⚠️ BOUNDED, BECAUSE `scrollTop` CONTAINS `scrollTo`. §D2 gives the Filter panel's body a
+     * remembered vertical position, and a bare substring forbade it — a red on a correct file, over
+     * a property that is not the API this claim is about. The claim is that the RESET does not move
+     * the TRACK: `scrollTo(`, `scrollLeft`, the zoom and the pixels-per-day it is expressed in.
+     */
+    for (const forbidden of ["scrollLeft", "pxd", "zoom"]) {
       expect(ctl, `the reset must not reach ${forbidden}`).not.toContain(forbidden);
     }
+    expect(ctl, "the reset must not reach scrollTo()").not.toMatch(/\bscrollTo\s*\(/);
   });
 });
 

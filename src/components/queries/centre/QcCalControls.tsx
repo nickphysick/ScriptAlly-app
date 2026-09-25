@@ -17,7 +17,7 @@
  * the column, so the ↺ appearing beside the two buttons re-centres all three rather than pushing
  * the pair off the column's midline.
  */
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { ATTENTION_LABEL, ATTENTION_ORDER, EYE_FOCUS, type Attention } from "../../../lib/qcBirdsEye";
 import {
   CAL_DEFAULT, DUE_OPTIONS, GROUP_BY_OPTIONS, SORT_BY_OPTIONS, activeFacets, anyDiffers, clearFilters,
@@ -58,6 +58,45 @@ export const QcCalControls: React.FC<{
   packages: readonly string[];
 }> = ({ view, onView, menu, onMenu, counts, facets, statuses, packages }) => {
   const ref = useRef<HTMLDivElement>(null);
+
+  /**
+   * §D2 — THE PANEL KEEPS ITS PLACE, and the reason it has to is that every choice rebuilds it.
+   *
+   * ⚠️ EVERY TICK RE-RENDERS THE WHOLE PANEL, because the counts, the head's pill and the foot all
+   * move with it — so a reader who has scrolled to Submission package and ticks one is returned to
+   * Status, with the section they were working in off the screen. The scroll is not lost by anyone
+   * deciding to reset it; it is lost because the element is new.
+   *
+   * ⚠️ THE POSITION IS RECORDED FROM THE READER'S SCROLLS ONLY, AND THAT GUARD DOES NOT REDDEN THE
+   * LOCK. A restore writes `scrollTop`, which fires `scroll`, so without `restoring` the restore
+   * records its own value — which is the SAME value, so three choices in a row measure identically
+   * and the mutation passes. The case it is really for is a restore the browser CLAMPS: filter the
+   * list down, the body gets shorter, 260 becomes whatever fits, and recording that clamped number
+   * would take it as the reader's intent and lose the place permanently. Kept for that, not for a
+   * drift I could measure.
+   *
+   * ⚠️ AND A FRESH OPEN STARTS AT THE TOP. Remembering the position ACROSS openings would put a
+   * reader who opened the panel deliberately in the middle of a list they have not seen — the
+   * memory is about one continuous piece of work, not about the control.
+   */
+  const scrolled = useRef(0);
+  const restoring = useRef(false);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const onBodyScroll = useCallback(() => {
+    if (restoring.current) return;
+    scrolled.current = bodyRef.current?.scrollTop ?? 0;
+  }, []);
+  useEffect(() => { if (!menu) scrolled.current = 0; }, [menu]);
+  /* ⚠️ LAYOUT, NOT EFFECT — an ordinary effect paints the panel at the top for one frame first,
+     which is the jump this exists to remove rather than a smaller version of it. */
+  useLayoutEffect(() => {
+    const el = bodyRef.current;
+    if (!el || scrolled.current === 0) return;
+    restoring.current = true;
+    el.scrollTop = scrolled.current;
+    const t = window.setTimeout(() => { restoring.current = false; }, 80);
+    return () => window.clearTimeout(t);
+  });
 
   /**
    * §A5 — ANY PRESS OUTSIDE THE OPEN PANEL CLOSES IT.
@@ -174,7 +213,7 @@ export const QcCalControls: React.FC<{
                 <b>Filter</b>
                 {activeFacets(view) > 0 && <em data-qcv="xp-factive">{activeFacets(view)} active</em>}
               </div>
-              <div className="qcv-xp-fbody" data-qcv="xp-fbody">
+              <div className="qcv-xp-fbody" data-qcv="xp-fbody" ref={bodyRef} onScroll={onBodyScroll}>
                 <section className="qcv-xp-sec" data-qcv="xp-sec" data-facet="status">
                   <h5>Status{view.statuses.length > 0 && <em>{view.statuses.length} selected</em>}</h5>
                   {statuses.map((k) => (
