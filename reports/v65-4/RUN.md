@@ -421,3 +421,56 @@ Nothing was wrong with the app. D2 and D3 therefore share one full measurement r
 in the tree.
 
 Gates 8,418 (baseline 8,390).
+
+---
+
+## §F — deployed to dev
+
+**`bcf0626b`**, built from a clean detached worktree at the pushed tip and deployed with
+`firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`. The served
+bundle was verified against the build: `index-BXkzPOoE.js` both sides. **Prod was not touched.**
+
+**The measurement against the deployed build: 36 passed, 0 failed** (8.0m), and the full local run
+before it was the same 36. Screenshots at 1280 and 1920 are in `reports/v65-4/shots/` — the page,
+the Filter panel open, the page with two facets on, and the mock at each width beside them.
+
+### All fifteen items landed
+
+| | |
+|---|---|
+| A1 | open on today, re-applied on extent/width change and after the reveal |
+| A2 | past bars at 42%, stage name at the bar's start |
+| A3 | month bands clip with `clip-path` |
+| A4 | rail group headings span the card, ink name, mono count pill |
+| A5 | an outside press closes Filter, Group and Sort |
+| B1 | the heat strip and all heat code gone |
+| B2 | overdue marked by an inset edge on the names cell alone |
+| B3 | a missing date is a torn edge, with Add date |
+| C1 | no rust on bars, rail fills or the ghost's ring |
+| C2 | YOUR MOVE beside the ring; a dot in the rail |
+| C3 | overdue agent-side stages are your move; court unchanged |
+| D1 | the sectioned Filter panel with faceted counts |
+| D2 | the panel keeps its scroll across a choice |
+| D3 | the active filters as a floating bar |
+| D4 | only a bar and the names cell open a query; the track pans |
+
+### What I could not support, and said so
+
+Three defences I wrote turned out to fix nothing I could measure, and in each case my first comment
+claimed otherwise. They are kept where they close a real hole, and the comments now say which:
+
+- **A5's capture phase.** I wrote that the bubbling listener was swallowed by the date row's
+  `setPointerCapture` and the controls' `stopPropagation`. Bubbling closes the panel on all twelve
+  targets; the mutation back does not redden.
+- **D4's row handler.** I assumed removing it stopped the empty track opening a query. The track was
+  already not an opener — the drag's `preventDefault` suppresses the click — so the handler was only
+  ever reachable through the names cell. What the change buys is that the two openers now say so
+  themselves rather than depending on the drag's exclusion list.
+- **D2's recording guard.** The restore writes the value it recorded, so three choices measure
+  identically. It is kept for a restore the browser clamps.
+
+### Standing, not done in this pass
+
+The Tracking tab inside the open card is still v11's `QueryTimeline` where the ref draws a
+replacement — now carried through five passes. Nothing on the page names the Next-action grouping's
+thresholds to a reader.
