@@ -115,7 +115,18 @@
  * names column's right + 8 — so the month a reader is looking at is the one named, at every drag
  * position, without anything having to dodge the TODAY pill.
  */
-.qcv-tl-mb { position: absolute; top: 0; bottom: 0; background: #faf7f3; border-left: 1px solid rgba(28, 19, 15, 0.1); }
+/**
+ * ⚠️ §A3 — `clip-path: inset(0)`, NEVER `overflow: hidden`. The band's label is `position: sticky`,
+ * and an `overflow` of any value on an ancestor makes that ancestor the label's scrollport: the
+ * label then sticks to the BAND, which never scrolls, and follows it off the screen. `clip-path`
+ * clips the painting without touching what the sticky is measured against.
+ *
+ * What it stops is a label bleeding into the neighbouring band — on dev, a stray "326" at an edge.
+ */
+.qcv-tl-mb {
+  position: absolute; top: 0; bottom: 0; clip-path: inset(0);
+  background: #faf7f3; border-left: 1px solid rgba(28, 19, 15, 0.1);
+}
 .qcv-tl-mb--alt { background: #f2ede5; }
 .qcv-tl-mb b {
   position: sticky; left: calc(var(--qcv-tl-names) + 8px); display: inline-block;
@@ -254,8 +265,13 @@
   background: var(--qcv-state, var(--state-closed)); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.07);
   overflow: hidden; white-space: nowrap;
 }
-/* a past stage sits back, and comes forward with its row */
-.qcv-tl-bar--past { opacity: 0.42; height: 10px; top: 17px; border-radius: 5px; }
+/**
+ * §A2 — A PAST STAGE IS THE SAME BAR, SET BACK. It was a 10px hairline with 9px words, which reads
+ * as a different KIND of thing from the stage beside it rather than as the same thing, earlier.
+ * The mock draws one bar: 22 tall, 11px corners, its stage's colour at 42%, coming forward to 70%
+ * with its row. The only difference from the current bar is the opacity and where the words sit.
+ */
+.qcv-tl-bar--past { opacity: 0.42; transition: opacity 0.12s; }
 .qcv-tl-row:hover .qcv-tl-bar--past { opacity: 0.7; }
 .qcv-tl-bar--you { box-shadow: inset 3px 0 0 var(--qcv-rust), inset 0 0 0 1px rgba(28, 19, 15, 0.07); }
 .qcv-tl-bar:hover { box-shadow: inset 0 0 0 1.6px var(--qcv-ink); }
@@ -286,7 +302,8 @@
   position: relative; z-index: 1; font-family: var(--qcv-type); font-size: 11.5px; line-height: 22px; color: var(--qcv-ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
 }
-.qcv-tl-bar--past .qcv-tl-words { font-size: 9px; line-height: 10px; color: var(--qcv-ink-70); }
+/* §A2 — the stage name at the bar's START, in the same 11.5px typewriter as the current bar's */
+.qcv-tl-bar--past .qcv-tl-words { color: var(--qcv-ink-70); }
 
 /* §8.7 — the dotted chip and the action ghost */
 .qcv-tl-nudge {

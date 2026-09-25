@@ -105,22 +105,34 @@
 /**
  * §3.4 — THE GROUP HEADINGS, AND THEY ARE STICKY ACROSS THE CARD'S WHOLE INNER WIDTH.
  *
- * ⚠️ A STUCK HEADING THAT DOES NOT SPAN THE CARD LEAVES ROWS VISIBLE BESIDE IT. The rows are inset
- * by the card's padding and the heading was inset by the same, so a row scrolling under a stuck
- * heading showed through the gutters either side of it — a row sliced in half by nothing. The
- * heading therefore pulls out to the card's inner edges (`margin: 0 -22px`) and pays it back in
- * padding, so its ink lands where it did and its BACKGROUND covers the whole width.
+ * ⚠️ A STUCK HEADING THAT DOES NOT SPAN THE CARD LEAVES ROWS VISIBLE BESIDE IT — a row scrolling
+ * under it shows through the gutters either side, sliced in half by nothing. So its BACKGROUND is
+ * the card's full inner width and its CONTENT is inset 22px, level with the rows' initials discs.
+ *
+ * ⚠️ §A4 — AND THE INSET IS PADDING ALONE. It used to pull out by `margin: 0 -22px` and pay the 22
+ * back in padding, which is correct on a scroller that carries 22px of its own padding — and the
+ * scroller carries NONE. Measured: the background started 22px OUTSIDE the card (384 wide against
+ * a 340 card) and the ink landed on the card's own edge, 22px left of the first disc. The rows take
+ * their inset from the row grid, not from a padded scroller, so there was never anything to pay
+ * back. Measured after: background 340 = the card's inner width, ink 1078 = the disc's own x.
  */
 .qcv-be-gh {
   position: sticky; top: 0; z-index: 3;
   display: flex; align-items: center; gap: 8px;
   /* ⚠️ THE 18px OF AIR IS PADDING, NOT MARGIN, and that is the sticky half of this rule. A margin
      sits OUTSIDE the background, so a stuck heading with `margin-top: 18px` shows 18px of rows
-     above it — the same fault as a heading that does not span the card, turned on its side.
-     Measured off the mock: `margin: 0 -22px 4px; padding: 18px 22px 8px`. */
-  margin: 0 -22px 4px; padding: 18px 22px 8px;
+     above it — the same fault as a heading that does not span the card, turned on its side. */
+  margin: 0 0 4px; padding: 18px 22px 8px;
   background: #fff; box-shadow: 0 1px 0 rgba(28, 19, 15, 0.08);
-  font-family: var(--qcv-type); font-weight: 400; font-size: 16px; line-height: 20px;
+  /**
+   * ⚠️ `!important`, AND IT IS THE WHOLE OF §A4's TYPEFACE FAULT. This is an `<h3>`, and
+   * `brand.tsx` injects `h1, h2, h3 { font-family: <serif> !important }` at runtime — so the rule
+   * below was written, valid, matched, and beaten, and the heading rendered in the display serif
+   * through a green suite. The expanded card's title carries the same `!important` for the same
+   * reason; this is the second heading to need it and the law is in CLAUDE.md.
+   */
+  font-family: var(--qcv-type) !important;
+  font-weight: 400; font-size: 16px; line-height: 20px;
   letter-spacing: 0; text-transform: none; color: var(--qcv-ink);
 }
 /* the first heading sits closer to the toggle above it — there is nothing to separate it from */

@@ -1089,6 +1089,55 @@ describe("§7 · closing", () => {
   });
 });
 
+describe("§A2–§A3 · the bars and the bands", () => {
+  const tl = read("src/components/queries/centre/qcvTimeline.css");
+  const r = (sel: string) => {
+    const m = tl.match(new RegExp(`(?:^|\\n)\\s*${sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`));
+    expect(m, `${sel} has no rule`).toBeTruthy();
+    return m![1];
+  };
+
+  it("§A2 · a past stage is the SAME bar as the current one, set back to 42%", () => {
+    /**
+     * It was a 10px hairline with 9px words — which reads as a different KIND of thing from the
+     * stage beside it rather than as the same thing, earlier. The mock draws one bar.
+     */
+    const past = r(".qcv-tl-bar--past");
+    expect(past).toMatch(/opacity: 0\.42/);
+    expect(r(".qcv-tl-row:hover .qcv-tl-bar--past")).toMatch(/opacity: 0\.7/);
+    /* ⚠️ THE SHAPE IS ASSERTED AS AN ABSENCE, which is the only form that cannot drift: the past
+       bar states no height, no top and no radius, so it IS the base bar's 22/11 by construction
+       rather than by two numbers somebody has to keep in step. */
+    for (const own of ["height", "top", "border-radius"]) {
+      expect(past, `a past bar restates its own ${own}`).not.toMatch(new RegExp(`${own}:`));
+    }
+    const base = r(".qcv-tl-bar");
+    expect(base).toMatch(/height: 22px/);
+    expect(base).toMatch(/border-radius: 11px/);
+    /* the words are the current bar's own 11.5px typewriter, in ink-70 */
+    const w = r(".qcv-tl-bar--past .qcv-tl-words");
+    expect(w).toMatch(/color: var\(--qcv-ink-70\)/);
+    expect(w, "a past bar shrinks its own words again").not.toMatch(/font-size|line-height/);
+    expect(r(".qcv-tl-words")).toMatch(/font-size: 11\.5px/);
+    expect(r(".qcv-tl-words")).toMatch(/font-family: var\(--qcv-type\)/);
+  });
+
+  it("⚠️ §A3 · a month band CLIPS its own contents — with `clip-path`, never `overflow`", () => {
+    /**
+     * A label that bleeds into the next band is the fault ("326" at an edge on dev). The fix cannot
+     * be `overflow: hidden`: the label is `position: sticky`, and an `overflow` of any value makes
+     * its ancestor the scrollport it sticks to — so it would stick to the BAND, which never
+     * scrolls, and leave with it. That is the law this repo already records for a sticky inside a
+     * clipping ancestor, arriving from the other side.
+     */
+    const mb = r(".qcv-tl-mb");
+    expect(mb).toMatch(/clip-path: inset\(0\)/);
+    expect(mb, "an `overflow` on the band kills its sticky label").not.toMatch(/overflow/);
+    /* …and the label really is sticky, or the warning above is about nothing */
+    expect(r(".qcv-tl-mb b")).toMatch(/position: sticky/);
+  });
+});
+
 describe("§10 · the crosshair", () => {
   const tl = read("src/components/queries/centre/qcvTimeline.css");
   const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");

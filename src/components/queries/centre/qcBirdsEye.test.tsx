@@ -92,23 +92,28 @@ describe("the view, rendered", () => {
     expect(rule(".qcv-be-track--none")).toMatch(/repeating-linear-gradient/);
     expect(html.length).toBeGreaterThan(0);
   });
-  it("§3.4 · ⚠️ a stuck heading spans the card's INNER width, or rows show beside it", () => {
-    const html = view([mkQ(), mkQ({ status: QueryStatus.PARTIAL_SENT, partialSentDate: ago(3) })]);
-    expect(html, "the due line went with the axis").not.toContain('data-qcv="be-line"');
-    const gh = rule(".qcv-be-gh");
-    expect(gh).toMatch(/position:\s*sticky/);
-    expect(gh).toMatch(/top:\s*0/);
+  it("§3.4 · ⚠️ a stuck heading is on white, sticky, and states no negative margin", () => {
     /**
-     * ⚠️ THE PULL-OUT AND THE PAY-BACK ARE ONE MECHANISM AND ARE ASSERTED TOGETHER. The margin is
-     * what makes the background reach the card's edges; the padding is what keeps the ink where
-     * every other row's is. Either alone is a heading that is wrong in one of two ways, and
-     * removing the margin as tidy-looking dead space is exactly how this breaks.
+     * ⚠️ RETARGETED (§A4), AND THE OLD FORM IS WHY. It required the literal `margin: 0 -22px 4px`
+     * while standing for *"the heading's background spans the card's inner width, so no row shows
+     * beside it"* — and that spelling was the FAULT: the scroller carries no padding of its own, so
+     * the negative margin pulled the background 22px OUTSIDE the card on each side (384 against a
+     * 340 card) and put the ink on the card's edge, 22px left of the first disc.
+     *
+     * A lock pinning a spelling cannot tell a refactor from a regression, which is the only thing a
+     * lock is for. **The width and the ink are geometry and live in the measurement now**
+     * (`qcV65.measure.ts`, §A4: background = the card's inner width, ink = the first disc's x).
+     * What a source lock can honestly carry is what is left here.
      */
-    expect(gh, "the heading does not reach the card's edges").toMatch(/margin:\s*0 -22px 4px/);
-    /* ⚠️ AND THE AIR ABOVE IT IS PADDING: a margin sits outside the background, so a stuck heading
-       with a top margin shows rows above it — the same fault turned on its side. */
-    expect(gh, "…and it does not pay the gutter back").toMatch(/padding:\s*18px 22px 8px/);
-    expect(gh, "a transparent stuck heading is a heading with rows behind it").toMatch(/background:\s*#fff/);
+    const r = rule(".qcv-be-gh");
+    expect(r, "the heading stopped sticking").toMatch(/position:\s*sticky/);
+    expect(r, "a transparent heading has rows scrolling through it").toMatch(/background:\s*#fff/);
+    /* ⚠️ AND IT MUST NOT PULL OUT AGAIN — the one thing this file can still prove about the width */
+    expect(r, "the negative margin is back; the background will overhang the card").not.toMatch(/margin:[^;]*-\d/);
+    /* the air above it is PADDING, so a stuck heading never shows rows above itself */
+    expect(r).toMatch(/padding:\s*18px 22px 8px/);
+    /* §A4 — and the face beats `brand.tsx`'s runtime `h3 { !important }`, or it renders in serif */
+    expect(r, "brand.tsx forces h3 with !important; without this the heading is Playfair").toMatch(/font-family: var\(--qcv-type\) !important/);
   });
   it("group headings carry their count, and Overdue's is ink", () => {
     const html = view([mkQ({ dateSent: ago(400) }), mkQ({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(2) })]);

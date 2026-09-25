@@ -743,6 +743,51 @@ test("§4 · the rail's header — the tray, the words, and the hawk behind them
   /* §4 — the counts line is the three groups, in the stated order */
   yes("be-head", "the counts line names the three groups", /^\d+ OVERDUE · \d+ UPCOMING · \d+ WAITING$/i.test(h.countsText), h.countsText);
   await page.locator("[data-qcv='rail']").first().screenshot({ path: resolve(OUT, "be-head-1440.png") });
+
+  /**
+   * §A4 — THE GROUP HEADINGS, AND ALL FOUR CLAIMS ARE MEASURED RATHER THAN READ. Three of them name
+   * a position on screen, so a source lock could not carry them; the fourth is a typeface that a
+   * source lock DID carry, correctly, about a rule the browser was discarding.
+   */
+  const gh = await page.evaluate(() => {
+    const px = (n: number) => Math.round(n * 10) / 10;
+    const rail = [...document.querySelectorAll("[data-qcv='rail']")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+    const head = rail.querySelector("[data-qcv='be-heading']") as HTMLElement;
+    const grp = head.closest("[data-qcv='be-group']") as HTMLElement;
+    const disc = grp.querySelector(".qcv-be-who") as HTMLElement;
+    const cnt = head.querySelector("[data-qcv='be-gcount']") as HTMLElement;
+    const ink = (() => { const r = document.createRange(); r.selectNodeContents(head.firstChild!); return px(r.getBoundingClientRect().left); })();
+    const hb = head.getBoundingClientRect(); const rb = rail.getBoundingClientRect(); const rc = getComputedStyle(rail);
+    const inner = px(rb.width - parseFloat(rc.paddingLeft) - parseFloat(rc.paddingRight));
+    return { ff: getComputedStyle(head).fontFamily.split(",")[0], fs: getComputedStyle(head).fontSize,
+      pos: getComputedStyle(head).position, bg: getComputedStyle(head).backgroundColor,
+      headX: px(hb.x), headW: px(hb.width), railX: px(rb.x), inner, ink, discX: px(disc.getBoundingClientRect().x),
+      cnt: { ff: getComputedStyle(cnt).fontFamily.split(",")[0], fs: getComputedStyle(cnt).fontSize,
+        bg: getComputedStyle(cnt).backgroundColor, color: getComputedStyle(cnt).color, br: getComputedStyle(cnt).borderRadius },
+      group: grp.getAttribute("data-group") };
+  });
+  record({ area: "be-head", what: "§A4 · the group heading", got: gh, want: "reported" });
+  /* ⚠️ THE TYPEFACE IS THE ONE A SOURCE LOCK GOT WRONG. `brand.tsx` forces `h3` with `!important`
+     at runtime, so the sheet's own `font-family` was valid, matched and discarded. */
+  yes("be-head", `§A4 · the heading is the typewriter, not the display serif (${gh.ff})`, /Special Elite/.test(gh.ff), gh.ff);
+  is("be-head", "§A4 · …at 16px", gh.fs, "16px");
+  is("be-head", "§A4 · …sticky, on white", gh.pos, "sticky");
+  is("be-head", "§A4 · …on white", gh.bg, "rgb(255, 255, 255)");
+  /* the background spans the card's inner width — not 44px wider than it, as the negative margin made it */
+  near("be-head", "§A4 · the background IS the card's inner width", gh.headW, gh.inner, 0.6);
+  near("be-head", "§A4 · …starting at the card's own left", gh.headX, gh.railX, 0.6);
+  /* …and the text starts level with the first initials disc */
+  near("be-head", "§A4 · the name's ink is level with the first disc", gh.ink, gh.discX, 1);
+  /* §A4 — the count is a mono pill, and Overdue's is ink with cream text */
+  yes("be-head", `§A4 · the count is mono 9px (${gh.cnt.ff} ${gh.cnt.fs})`, /Mono/i.test(gh.cnt.ff) && gh.cnt.fs === "9px", JSON.stringify(gh.cnt));
+  is("be-head", "§A4 · …a 9px-cornered pill", gh.cnt.br, "9px");
+  if (gh.group === "overdue") {
+    is("be-head", "§A4 · …ink with cream text, because it is Overdue", gh.cnt.bg, "rgb(28, 19, 15)");
+    is("be-head", "§A4 · …cream", gh.cnt.color, "rgb(245, 241, 235)");
+  } else {
+    is("be-head", "§A4 · …parchment, because it is not Overdue", gh.cnt.bg, "rgb(243, 238, 231)");
+  }
+  seen("be-head", `first group: ${gh.group}`);
 });
 
 test("§3.2–§3.3 · the rail's progress bars and rows — the window, the overrun and the notch", async ({ page }) => {
