@@ -84,11 +84,12 @@ describe("where you stand — the page-local union over the QC's own rows", () =
     const { cards, standing } = contactCensus(CONTACT_FIXTURE_AGENTS, rows, MS.id);
     const [active, never, closed] = cards;
     expect(active.count + never.count + closed.count, "the three cards partition the list").toBe(CONTACT_FIXTURE_AGENTS.length);
-    expect(active.count, "open standings").toBe(5);
-    expect(active.fact).toBe("4 your move");
+    expect(active.count, "open standings — incl. P6's live stub-0 row").toBe(6);
+    expect(active.fact, "the new live query is fresh and agent-court, so not the writer's move").toBe("4 your move");
     expect(active.urgent).toBe(true);
-    expect(never.count, "fresh + sparse have no query").toBe(2);
-    expect(never.fact).toBe("2 open now · 0 closed");
+    /* fresh + sparse, and P6's three housekeeping subjects (stub0, stale, reopen) — none queried */
+    expect(never.count, "the five query-less rows").toBe(5);
+    expect(never.fact, "reopen is the never-queried closed door").toBe("4 open now · 1 closed");
     expect(closed.count).toBe(1);
     expect(closed.fact).toBe("1 passed · 0 no reply");
     /* the selection is an OR; empty means everyone */

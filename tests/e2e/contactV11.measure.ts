@@ -847,3 +847,130 @@ test("§11.7's third leg — saving a window that crosses today MOVES the row's 
     }
   }
 });
+
+/* ══════════════════════════ phase 6 — Housekeeping (§9 / §11.2 / §11.8) ══════════════════════════ */
+
+test("the tray's counts line at (20,74) with the bold gap count, and the toggle persists for the session (§11.2)", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  const r = await page.evaluate((scope) => {
+    const tray = document.querySelector(`${scope} [data-clv="tray"]`) as HTMLElement;
+    const line = document.querySelector(`${scope} [data-clv="hk-counts"]`) as HTMLElement | null;
+    if (!line) return null;
+    const t = tray.getBoundingClientRect(), l = line.getBoundingClientRect();
+    return {
+      left: Math.round(l.left - t.left), top: Math.round(l.top - t.top),
+      bold: line.querySelector("b")?.textContent ?? "",
+      text: line.textContent ?? "",
+      boldWeight: getComputedStyle(line.querySelector("b")!).fontWeight,
+    };
+  }, scope);
+  expect(r, "no counts line in the tray").not.toBeNull();
+  expect(r!.left, "the counts line's x inside the tray").toBe(20);
+  expect(Math.abs(r!.top - 74), "the counts line's y inside the tray").toBeLessThanOrEqual(1);
+  expect(r!.bold).toMatch(/^\d+ GAPS?$/);
+  expect(r!.boldWeight).toBe("700");
+  expect(r!.text).toMatch(/\d+ AGENTS? · \d+ OF \d+ COMPLETE/);
+  /* the seeded stub-0 fixture row carries the inline box on the REAL page, and no live tag */
+  const inline = await page.evaluate((scope) => {
+    const row = document.querySelector(`${scope} [data-clv="hk-row"][data-agent="clv-fx-stub0"]`) as HTMLElement | null;
+    return row ? { hasInline: !!row.querySelector('[data-clv="hk-inline"]'), live: row.dataset.live ?? null } : null;
+  }, scope);
+  expect(inline, "the seeded stub-0 agent is not in the rail — re-run tests/e2e/seedContactFixture.mjs").not.toBeNull();
+  expect(inline!.hasInline, "ruling (c): the stub-0, no-live-query row carries the inline box").toBe(true);
+  expect(inline!.live).toBeNull();
+  /* the grouping persists for the SESSION: flip to By agent, reload, still By agent */
+  await page.click(`${scope} [data-clv="hk-toggle"] button:nth-child(2)`);
+  await page.reload();
+  await page.waitForSelector('[data-clv="hk-toggle"]');
+  const scope2 = await visiblePage(page, ".agl-wpg");
+  const pressed = await page.evaluate(
+    (s) => (document.querySelector(`${s} [data-clv="hk-toggle"] button:nth-child(2)`) as HTMLElement).getAttribute("aria-pressed"),
+    scope2,
+  );
+  expect(pressed, "the grouping did not survive the reload").toBe("true");
+  bump(8);
+});
+
+test("§11.8 — the inline reply box is ABSENT for every agent with a live query (the lab, both populations proved)", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/#/contact-lab");
+  await page.waitForSelector('[data-lab-view="cast"]');
+  await page.click('[data-lab-view="cast"]');
+  const scope = await visiblePage(page, ".agl-wpg");
+  await page.waitForSelector(`${scope} [data-clv="hk-row"]`);
+  const sweep = await page.evaluate((scope) => {
+    const rows = [...document.querySelectorAll(`${scope} [data-clv="hk-row"]`)] as HTMLElement[];
+    return rows.map((r) => ({
+      agent: r.dataset.agent, live: !!r.dataset.live,
+      inline: !!r.querySelector('[data-clv="hk-inline"]'),
+      addForReply: !!r.querySelector('[data-clv="hk-add"]'),
+    }));
+  }, scope);
+  /* populations FIRST, per branch — the cast carries both stub-0 shapes by construction */
+  const inlines = sweep.filter((r) => r.inline);
+  const liveRows = sweep.filter((r) => r.live);
+  expect(inlines.length, "no inline box anywhere — the allowed branch is unexercised").toBeGreaterThan(0);
+  expect(liveRows.length, "no live-query row in the rail — the refused branch is unexercised").toBeGreaterThan(0);
+  expect(sweep.some((r) => r.agent === "fx-stub0-live" && r.live), "the live stub-0 subject is missing from the rail").toBe(true);
+  for (const r of sweep) {
+    expect(r.live && r.inline, `${r.agent} has a live query AND the inline box — the reply note would never be seen (ruling c)`).toBe(false);
+  }
+  bump(3 + sweep.length);
+});
+
+test("§11.8 — CHECKED, REMIND ME and the inline save each remove exactly one gap, and the counts drop with them (the lab)", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/#/contact-lab");
+  await page.waitForSelector('[data-lab-view="cast"]');
+  await page.click('[data-lab-view="cast"]');
+  const scope = await visiblePage(page, ".agl-wpg");
+  await page.waitForSelector(`${scope} [data-clv="hk-row"]`);
+  const gaps = () => page.evaluate(
+    (s) => parseInt((document.querySelector(`${s} [data-clv="hk-counts"] b`) as HTMLElement).textContent ?? "0", 10),
+    scope,
+  );
+  const rowIn = (sec: string, agent: string) => page.evaluate(
+    ({ s, sec, agent }) => !!document.querySelector(`${s} [data-clv="hk-sec"][data-gap="${sec}"] [data-clv="hk-row"][data-agent="${agent}"]`),
+    { s: scope, sec, agent },
+  );
+
+  const n0 = await gaps();
+  /* CHECKED stamps today — the stale row leaves the recheck section, nothing else moves */
+  expect(await rowIn("recheck", "fx-stale"), "precondition: the stale wishlist is listed").toBe(true);
+  await page.click(`${scope} [data-clv="hk-sec"][data-gap="recheck"] [data-agent="fx-stale"] [data-clv="hk-checked"]`);
+  await page.waitForFunction(
+    ({ s }) => !document.querySelector(`${s} [data-clv="hk-sec"][data-gap="recheck"] [data-agent="fx-stale"]`),
+    { s: scope },
+  );
+  expect(await gaps(), "CHECKED must remove exactly one gap").toBe(n0 - 1);
+
+  /* REMIND ME 1 NOV sets the dated task — the reopen row goes, the counts drop again */
+  expect(await rowIn("reopen", "fx-reopen"), "precondition: the dated closed door is listed").toBe(true);
+  const label = await page.textContent(`${scope} [data-clv="hk-sec"][data-gap="reopen"] [data-agent="fx-reopen"] [data-clv="hk-remind"]`);
+  expect(label, "the button carries the reopen date").toBe("REMIND ME 1 NOV");
+  await page.click(`${scope} [data-clv="hk-sec"][data-gap="reopen"] [data-agent="fx-reopen"] [data-clv="hk-remind"]`);
+  await page.waitForFunction(
+    ({ s }) => !document.querySelector(`${s} [data-clv="hk-sec"][data-gap="reopen"] [data-agent="fx-reopen"]`),
+    { s: scope },
+  );
+  expect(await gaps(), "REMIND ME must remove exactly one gap").toBe(n0 - 2);
+
+  /* the bare REMIND ME (no reopensOn) opens the editor at the door instead — ruling (b) */
+  await page.click(`${scope} [data-clv="hk-sec"][data-gap="reopen"] [data-agent="fx-shut"] [data-clv="hk-remind"]`);
+  await page.waitForSelector('[data-clv="profile"].clv-pcard--edit');
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Escape");
+  await page.waitForSelector('[data-clv="profile"]', { state: "detached" });
+
+  /* the inline save writes the window — the stub row leaves the reply section */
+  expect(await rowIn("reply", "fx-stub0"), "precondition: the stub window is listed").toBe(true);
+  await page.fill(`${scope} [data-clv="hk-sec"][data-gap="reply"] [data-agent="fx-stub0"] [data-clv="hk-inline"] input`, "8");
+  await page.click(`${scope} [data-clv="hk-sec"][data-gap="reply"] [data-agent="fx-stub0"] [data-clv="hk-save"]`);
+  await page.waitForFunction(
+    ({ s }) => !document.querySelector(`${s} [data-clv="hk-sec"][data-gap="reply"] [data-agent="fx-stub0"]`),
+    { s: scope },
+  );
+  expect(await gaps(), "the inline save must remove exactly one gap").toBe(n0 - 3);
+  bump(9);
+});

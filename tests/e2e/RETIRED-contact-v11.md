@@ -99,3 +99,25 @@ capture repoint (`sa:contact-add` on /agents; the app-level focus form untouched
   needs a Pro window needs a server-side arrangement or a Pro fixture account — neither built.
 - `cleanupProbeAgent.mjs` joins the seeder: it removes the probe agent AND the `AGENT_ADDED`
   feed line the create writes, because the doc alone would leave the feed naming a stranger.
+
+## Phase 6 (Housekeeping)
+
+Additive: `lib/contactHousekeeping` (the gap model), `ContactHousekeeping` + the rail's counts
+line, the lab's local `addUserTask` (so REMIND ME's gap visibly closes over known content), and
+three fixture members per branch — the stub window with and without a live query, the stale
+wishlist, the dated closed door (`fx-stub0` / `fx-stub0-live` / `fx-stale` / `fx-reopen`, plus
+their seeded twins `clv-fx-*` for the real page).
+
+**The dispositions worth naming:**
+- **Ruling (c) over the table's letter, twice**: absent reply time is the writer's "Unknown" —
+  never a gap, and never a hole in the completeness ring either (a ring that could never fill
+  for an honest Unknown is a chore that cannot be done; only the stub `0` blocks it, the same
+  value that raises the gap, through `agentDataQualityNeeds` so this rail and To-do agree).
+- **The fixes write through the CONTEXT** (`updateAgent` / `addUserTask` — the hkSave
+  discipline, dq flag resolved when a fix was the last data-quality gap), which is also what
+  lets the LAB host the fix choreography: CHECKED, REMIND ME and the inline save are proven
+  there over known content, no account writes; the real page carries the read-only locks
+  (counts geometry, the seeded stub-0 row's inline box, the session-persisted toggle).
+- **The by-agent reply chip** ("+ Reply time") exists only for the live stub-0 shape — §9.3
+  lists no reply chip because the inline box is the fix, but a live stub-0 agent would
+  otherwise have a gap with no action in that grouping.

@@ -34,6 +34,11 @@ import { ContactListEmptyState } from "./ContactListEmptyState";
 
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { ContactRail } from "./contact/ContactRail";
+import { ContactHousekeeping } from "./contact/ContactHousekeeping";
+import { HkBand, hkModel } from "../../lib/contactHousekeeping";
+import { agentRows } from "../../lib/contactList";
+import { agentDataQualityNeeds } from "../../lib/agentDataQuality";
+import { flagKeyForTask } from "../../lib/taskFlags";
 import { ContactProfile } from "./contact/ContactProfile";
 import { ContactAddCard } from "./contact/ContactAddCard";
 import type { FormSection } from "./contact/ContactAgentForm";
@@ -82,7 +87,7 @@ interface AgentListProps {
 
 export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, active = true }) => {
   const navigate = useNavigate();
-  const { agents, queries, manuscripts, activities, updateAgent, addAgent, currentUser, collectionsReady } =
+  const { agents, queries, manuscripts, activities, updateAgent, addAgent, currentUser, collectionsReady, userTasks, addUserTask, resolveTaskFlag } =
     useScriptAllyDb();
 
   /* ⚠️ THE MANUSCRIPT IS THE SWITCHER'S OWN (v11 §10) — the SAME resolver the shell's chip
@@ -587,6 +592,57 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return () => window.clearTimeout(drop);
   }, [newId, factsById]);
 
+  /* ── Housekeeping (v11 §9) ────────────────────────────────────────────────────────────────
+     The gap model over the WHOLE list. "Live" is any live query whatever the manuscript — the
+     reply window fans out to every query, so the scope chip has no say here — and the reopen
+     flag reads the writer's own undone dated tasks (ruling b), so completing the reminder in
+     To-do reopens the gap here by construction. */
+  const hkLiveById = useMemo(() => {
+    const m = new Map<string, HkBand>();
+    for (const a of agents) {
+      const mine = agentRows(qcRows, a.id, null);
+      m.set(a.id, mine.some((r) => r.court !== "closed") ? "live" : mine.length === 0 ? "never" : "closed");
+    }
+    return m;
+  }, [agents, qcRows]);
+  const hkReopenTaskById = useMemo(() => {
+    const m = new Map<string, boolean>();
+    for (const t of userTasks ?? []) {
+      if (t.agentId && !t.done && (t.dueDate ?? "").trim()) m.set(t.agentId, true);
+    }
+    return m;
+  }, [userTasks]);
+  const hk = useMemo(
+    () => hkModel(
+      agents,
+      (a) => ({ hasLiveQuery: hkLiveById.get(a.id) === "live", hasReopenTask: hkReopenTaskById.get(a.id) ?? false, nowMs }),
+      (a) => hkLiveById.get(a.id) ?? "never",
+    ),
+    [agents, hkLiveById, hkReopenTaskById, nowMs],
+  );
+
+  /* the three direct fixes — through the CONTEXT writers (the hkSave discipline, lib/hkSave.ts):
+     the same updateAgent To-do's rail writes with, and the dq flag resolved when this was the
+     agent's last data-quality gap, so "cleared today" agrees across the two surfaces */
+  const onHkInlineSave = useCallback(async (agentId: string, weeks: number) => {
+    const agent = agents.find((a) => a.id === agentId);
+    await updateAgent(agentId, { responseTimeWeeks: weeks });
+    if (agent && agentDataQualityNeeds(agent).length === 1) void resolveTaskFlag(flagKeyForTask("data_quality_poor", agentId));
+  }, [agents, updateAgent, resolveTaskFlag]);
+  const onHkChecked = useCallback(async (agentId: string) => {
+    await updateAgent(agentId, { mswlCheckedAt: new Date().toISOString() } as Partial<Agent>);
+  }, [updateAgent]);
+  const onHkRemind = useCallback((agent: Agent) => {
+    const due = (agent.reopensOn ?? "").trim();
+    if (!due) { onEditAt(agent.id, "door"); return; } // ruling (b): no date → the editor at the door
+    void addUserTask({
+      agentId: agent.id,
+      dueDate: due,
+      text: `${(agent.name ?? "").trim() || agent.agency}'s list reopens — check it and query`,
+    });
+  }, [addUserTask, onEditAt]);
+
+
 
 
 
@@ -761,7 +817,18 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           </div>
         )}
         </div>
-        {pageState === "list" && <ContactRail />}
+        {pageState === "list" && (
+          <ContactRail counts={hk.countsLine}>
+            <ContactHousekeeping
+              model={hk}
+              onOpen={onOpen}
+              onEditAt={onEditAt}
+              onInlineSave={onHkInlineSave}
+              onChecked={onHkChecked}
+              onRemind={onHkRemind}
+            />
+          </ContactRail>
+        )}
         </div>
        </div>
        </WorkspacePageGrid>

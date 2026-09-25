@@ -168,6 +168,54 @@ export const CONTACT_FIXTURE_AGENTS: Agent[] = [
     dateAdded: "2026-09-05T00:00:00.000Z",
     socials: [],
   }),
+  /* ⚠️ THE STUB WINDOW (v11 P6, ruling c) — `responseTimeWeeks: 0` is the quick-add placeholder,
+     the ONE reply-time state Housekeeping flags (`agentDataQualityNeeds`); absence, everywhere
+     else in this cast, is the writer's own "Unknown" and is NOT a gap. No live query, so the
+     inline "wks · SAVE" box is allowed on this row (§9.3). */
+  agent({
+    id: "fx-stub0", name: "Edda Voss", agency: "Voss Literary",
+    email: "edda@vossliterary.com", website: "", city: "Oslo", country: "NO",
+    genres: [FIXTURE_GENRE], mswlNotes: MSWL_TWO_LINES, mswlCheckedAt: "2026-08-20T00:00:00.000Z",
+    responseTimeWeeks: 0,
+    materialsWanted: ["Query letter"],
+    dateAdded: "2026-09-06T00:00:00.000Z", socials: [],
+  }),
+  /* ⚠️ THE STALE WISHLIST (v11 P6) — checked 200+ days before the fixture's NOW (1 Sep 2026),
+     door open: the recheck gap's ONLY subject, because `mswlCheckedAt` is null everywhere else
+     and null NEVER counts as stale. CHECKED stamps today and the gap goes. */
+  agent({
+    id: "fx-stale", name: "Ingrid Marsh", agency: "Marsh & Weir",
+    email: "ingrid@marshweir.co.uk", website: "marshweir.co.uk", city: "York", country: "GB",
+    genres: ["Literary fiction"], mswlNotes: "Quiet novels with a strong sense of place.",
+    mswlCheckedAt: "2026-01-10T00:00:00.000Z",
+    starRating: 4, responseTimeWeeks: 10,
+    materialsWanted: ["Query letter", "Synopsis"],
+    dateAdded: "2026-01-10T00:00:00.000Z", socials: [],
+  }),
+  /* ⚠️ THE STUB WINDOW WITH A LIVE QUERY (v11 P6) — the row §9.3 sends to the EDITOR: the
+     inline box is refused wherever a live query means the reply note must be seen (ruling c's
+     second half), and without this member that refusal has no subject and the §11.8 sweep's
+     live half is vacuous. */
+  agent({
+    id: "fx-stub0-live", name: "Rosa Quill", agency: "Quill & Co",
+    email: "rosa@quillandco.com", website: "", city: "Dublin", country: "IE",
+    genres: [FIXTURE_GENRE], mswlNotes: MSWL_TWO_LINES,
+    responseTimeWeeks: 0,
+    materialsWanted: ["Query letter"],
+    dateAdded: "2026-09-07T00:00:00.000Z", socials: [],
+  }),
+  /* ⚠️ THE REOPEN DATE (v11 P6, ruling b) — closed WITH a recorded `reopensOn`, so REMIND ME
+     can set the dated task; `fx-shut` stays date-less, which is the branch that opens the
+     editor at Open to queries instead. */
+  agent({
+    id: "fx-reopen", name: "Tomas Keller", agency: "Keller Rights",
+    email: "", website: "kellerrights.de", city: "Berlin", country: "DE",
+    submissionStatus: SubmissionStatus.CLOSED, reopensOn: "2026-11-01",
+    genres: ["Crime"], mswlNotes: "",
+    responseTimeWeeks: 8,
+    materialsWanted: ["Query letter"],
+    dateAdded: "2026-04-02T00:00:00.000Z", socials: [],
+  }),
 ];
 
 const q = (id: string, agentId: string, status: QueryStatus, dateSent: string): Query => ({
@@ -181,6 +229,7 @@ const q = (id: string, agentId: string, status: QueryStatus, dateSent: string): 
  * the never-queried case.
  */
 export const CONTACT_FIXTURE_QUERIES: Query[] = [
+  q("fq-stub0", "fx-stub0-live", QueryStatus.QUERIED, "2026-08-25T00:00:00.000Z"),
   q("fq-1", "fx-long", QueryStatus.QUERIED, "2026-08-10T00:00:00.000Z"),
   q("fq-2", "fx-two", QueryStatus.FULL_SENT, "2026-05-02T00:00:00.000Z"),
   q("fq-3", "fx-two", QueryStatus.REJECTED, "2026-03-02T00:00:00.000Z"),
@@ -216,4 +265,8 @@ export const CONTACT_FIXTURE_CASES = [
   "absence: no stars and no stated window",
   "added: distinct dates across five months",
   "sparse: a record with a name and an agency and nothing else",
+  "housekeeping: the stub window (0) with no live query — the one flagged reply state",
+  "housekeeping: the stub window WITH a live query — the inline box refused, Add opens the editor",
+  "housekeeping: a wishlist checked 200+ days ago behind an open door — the recheck gap's subject",
+  "housekeeping: closed with a recorded reopensOn — REMIND ME's set-the-task branch (fx-shut is the editor branch)",
 ] as const;

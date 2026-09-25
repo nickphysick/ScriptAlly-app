@@ -81,6 +81,15 @@ export const ContactListLab: React.FC = () => {
     setCast((prev) => [...prev, { ...a, id, userId: "lab", dateAdded: now, lastCheckedDate: now } as Agent]);
     return { success: true as const, id };
   }, []);
+  /* Housekeeping's REMIND ME (v11 §9.3) — a local task, so the reopen gap visibly CLOSES here
+     the way it does on the account: the rail derives from userTasks, and the stub appends one */
+  const [labTasks, setLabTasks] = useState<{ id: string; agentId?: string; dueDate?: string; done: boolean }[]>([]);
+  const addUserTask = React.useCallback(async (fields: { agentId?: string; dueDate?: string; text?: string }) => {
+    const id = `lab-task-${labTasks.length + 1}`;
+    setLabTasks((prev) => [...prev, { id, agentId: fields.agentId, dueDate: fields.dueDate, done: false }]);
+    return id;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [labTasks.length]);
 
   /* ⚠️ THE STUB IS SHAPED LIKE THE CONTEXT, NOT LIKE THE PAGE'S DESTRUCTURE. A hand-listed set of
      the eight fields `AgentList` happens to read today would go stale the moment it reads a ninth,
@@ -93,10 +102,11 @@ export const ContactListLab: React.FC = () => {
       queries: view === "cast" ? CONTACT_FIXTURE_QUERIES : [],
       manuscripts: view === "cast" ? CONTACT_FIXTURE_MANUSCRIPTS : [],
       activities: [], packages: [], versions: [], notes: [],
-      communityAgents: [], journalEntries: [], tasks: [], userTasks: [], taskFlags: [], dismissedTasks: [],
+      communityAgents: [], journalEntries: [], tasks: [], userTasks: labTasks, taskFlags: [], dismissedTasks: [],
       authReady: true, smartImportUsage: null,
       updateAgent,
       addAgent,
+      addUserTask,
     } as Record<string, unknown>,
     {
       get: (t, k) => (typeof k === "symbol" ? undefined : k in t ? t[k as string] : asyncNoop),

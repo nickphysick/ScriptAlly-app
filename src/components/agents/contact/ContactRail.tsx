@@ -19,7 +19,11 @@
 import React, { useLayoutEffect, useRef } from "react";
 import { RAIL_TOP_GAP, railHeight } from "../../../lib/contactList";
 
-export const ContactRail: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+export const ContactRail: React.FC<{
+  children?: React.ReactNode;
+  /** the counts line (§9.2, at 20,74) — the gap count renders bold, so it arrives split */
+  counts?: { gaps: string; rest: string };
+}> = ({ children, counts }) => {
   const ref = useRef<HTMLElement | null>(null);
 
   useLayoutEffect(() => {
@@ -57,6 +61,11 @@ export const ContactRail: React.FC<{ children?: React.ReactNode }> = ({ children
         <div className="clv-tray" data-clv="tray">
           <img className="clv-peek" src="/images/qc/be-hawk-head.png" alt="" aria-hidden="true" />
           <h2 className="clv-tray-t">Housekeeping</h2>
+          {counts && (
+            <p className="clv-tray-c" data-clv="hk-counts">
+              <b>{counts.gaps}</b>{counts.rest}
+            </p>
+          )}
         </div>
         <div className="clv-railbody" data-clv="railbody">{children}</div>
       </div>
