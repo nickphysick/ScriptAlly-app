@@ -152,8 +152,11 @@ test("⚠️ THE TOOLBAR TAKES THE PAGE'S GROUND, NOT THE MASTHEAD'S — asserte
   }
   console.log("\n══ THE TOOLBAR'S GROUND (1440)\n" + lines.join("\n"));
   /* ⚠️ BOTH DIRECTIONS. Without this the case passes on a build where no page renders a toolbar at
-     all — which is exactly the state Discover was just moved into, so it is not hypothetical. */
-  expect(withBand, "no toolbar was measured — the case proved nothing").toBeGreaterThan(2);
+     all — which is exactly the state Discover was just moved into, so it is not hypothetical.
+     ⚠️ THE FLOOR MOVED 3 → 2 ON 25 SEP: Manuscripts joined the opted-out register (v12 — its head
+     is the hero) and took its toolbar out of the treatment, so two toolbar'd pages is now the
+     app's true population, not a half-walked census. The floor still refuses zero and one. */
+  expect(withBand, "no toolbar was measured — the case proved nothing").toBeGreaterThan(1);
   expect(withBand + withoutBand, "the census was not fully walked").toBe(IN_TREATMENT.length);
 });
 
