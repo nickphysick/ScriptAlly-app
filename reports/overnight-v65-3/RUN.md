@@ -293,3 +293,53 @@ clearing the card first · Escape getting its own exit again · the zoom ceasing
 - Measurement: **30 passed**, 1,267 assertions. Band 12,090 wide against a 12,090 track, sticky at
   60px, anthracite with a white label; gaps `0 · 14 · 14`; the row unwashed, its cell white, the pill
   `#f8ebe3` at 10px corners with a 3px ink tab, and an ordinary row with no pill at all.
+
+
+## Phase 8 — the locks, CLAUDE.md, and the report
+
+**The lock inventory, by claim.** Every §3–§7 claim, where it is asserted, and the mutation that
+proved the assertion can fail. Source claims are in the unit specs; anything whose failure message
+would describe a position on screen is in `tests/e2e/qcV65.measure.ts` instead.
+
+| Claim | Asserted in | Proved red by |
+|---|---|---|
+| §3 the rail's bar is progress + allowance + overrun, with a notch | `qcBirdsEye.test.tsx` · `qcV65` §3.2–§3.3 | the due line restored; the allowance fixed at 1 |
+| §3 true status colours, never deepened | `qcV65` §3.2 (fill colours table) | a deepened fill |
+| §3 the overdue row's inset | `qcV65` §6 | `width: 100%` on the row |
+| §4.1 the card's box is the viewport's, inset 16 | `qcExpanded.test.tsx` · `qcV65` §7 | a box taken from the rail again |
+| §4.2 layout A's seven placements | `qcExpanded.test.tsx` · `qcV65` §4.2 | each placement moved |
+| §4.2 today & next up from the title's MEASURED width | `qcExpanded.test.tsx` | a constant in place of the publish |
+| §5 the date row is one sticky row of two cells | `qcExpanded.test.tsx` §5 | the row unstuck; the corner outside it |
+| §5 the tier is transparent | `qcExpanded.test.tsx` §5 | the tier filled white |
+| §5 the month label is STUCK at the names column's right | `qcExpanded.test.tsx` §5 | the label unstuck |
+| §5 every Monday's date, its tick the label's own top | `qcExpanded.test.tsx` §5 · `qcTimeline.test.ts` | the tick moved off the label |
+| §5 TODAY is an ink pill on the dates' line | `qcExpanded.test.tsx` §5 | the pill off the line |
+| §5 the month POINTS and their track-share clearance are GONE | `qcExpanded.test.tsx` §5 | `.qcv-tl-mon` restored |
+| §5 the heat is a 6px strip at the foot | `qcExpanded.test.tsx` §9 · `qcTimeline.test.ts` | the corners back to the tall bars' |
+| §6 the corner IS the names column | `qcV65` §7 · `controls` | — (an equality, measured) |
+| §6 the compact button set | `qcExpanded.test.tsx` §8.1 · `qcV65` `controls` | 40px outlined |
+| §6 the popover opens from the cluster's left | `qcExpanded.test.tsx` §8.3 | the centring transform back |
+| §6 Group is its own control, with its own "differs" | `qcCalView.test.ts` · `qcExpanded.test.tsx` §6 | Group losing its button; Sort's reset reaching the grouping |
+| §6 the seven next-action groups, in order, with their hints | `qcCalView.test.ts` §6 | a hint invented for the status groups |
+| §6 an R&R is never "waiting on the agent" | `qcCalView.test.ts` §6 | the revision branch deleted |
+| §6 the two close thresholds | `qcCalView.test.ts` §6 | the threshold dropped to a week |
+| §7 the bands are anthracite, sticky below the dates, full-width | `qcExpanded.test.tsx` §7 · `qcV65` `xp-rows` | stuck at 0; stopped at the names column |
+| §7 the 14px gap belongs to the band, not the first | `qcExpanded.test.tsx` §7 · `qcV65` `xp-rows` | the gap removed |
+| §7 the overdue highlight is inset in the cell | `qcExpanded.test.tsx` §7 · `qcV65` `xp-rows` | the full-row wash restored; the contents sunk under the pill |
+| §7 closing lifts the overlays out, across two commits | `qcExpanded.test.tsx` §7 | the close moved ahead of the lifts |
+| §7 one exit for every way out | `qcExpanded.test.tsx` §7 | Escape given its own |
+| §7 every open starts at 3m with today at 58% | `qcExpanded.test.tsx` §7 · `qcTimeline.test.ts` | the zoom default changed |
+
+**28 mutations run and undone in the measurement worktree**, one named thing at a time, across phases
+5, 6 and 7 — plus phases 2–4's own. **None went green.**
+
+**CLAUDE.md.** Two additions. Under Conventions, beneath the existing *"an overlay that lives inside a
+re-rendered region is lost with it"*: **"and closing is a re-render too — the teardown needs the same
+lift, across two commits"**, with the tell (a handler that reads as a sequence and is one commit) and
+the corollary (every way out uses the one exit). And a **Query Centre v65.3** section amending v65.2,
+plus a rewritten "Next session — start here".
+
+⚠️ **The v65.3 section is more than the prompt asked for, and it is deliberate.** Without it CLAUDE.md
+describes a page that no longer exists — the date row, the controls, the bands and the overdue mark
+are all different — which is the "comment outliving what it described" fault this file records at
+length, one level up.
