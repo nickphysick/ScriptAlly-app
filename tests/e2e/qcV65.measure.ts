@@ -2262,6 +2262,120 @@ test("§D2 · the Filter panel holds its scroll across a choice, and opens fresh
 });
 
 /**
+ * ⚠️ §D3 · THE FLOATING ACTIVE-FILTER BAR. Its treatment, and the claim it exists to keep: that
+ * filtering does not move the calendar. A bar in the flow would push every row down the moment
+ * anything was chosen, and back up when it was cleared.
+ */
+test("§D3 · the active filters float over the rows, and nothing below them moves", async ({ page }) => {
+  await openApp(page, 1440, 900, "?view=calendar");
+  await page.waitForTimeout(900);
+  if (!(await page.locator("[data-qcv='xp-card']").count())) {
+    await page.locator("[data-qcv='be-expand']").first().click({ timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(900);
+  }
+  const bar = page.locator("[data-qcv='xp-fbar']");
+  is("d3", "§D3 · nothing filtering, no bar — never an empty one saying 'Filtered'", await bar.count(), 0);
+
+  /**
+   * ⚠️ THE BASELINE IS THE CALENDAR BODY'S TOP, and it is taken BEFORE anything is filtered. This
+   * is the claim: a bar that took height would move it, and the reader's rows with it.
+   */
+  const bodyTop = () => page.evaluate(() =>
+    Math.round((document.querySelector("[data-qcv='tl-scroll']") as HTMLElement).getBoundingClientRect().top * 100) / 100);
+  const before = await bodyTop();
+
+  await page.locator("[data-qcv='xp-filter']").click();
+  await page.waitForTimeout(250);
+  const pick = await page.evaluate(() =>
+    [...document.querySelectorAll("[data-qcv='xp-pop'] [data-facet='status'][data-qcv='xp-chk']")]
+      .findIndex((b) => Number(b.querySelector("u")?.textContent ?? 0) > 0));
+  yes("d3", "§D3 · a status with rows behind it was found", pick >= 0, String(pick));
+  if (pick < 0) return;
+  await page.locator("[data-qcv='xp-pop'] [data-facet='status'][data-qcv='xp-chk']").nth(pick).click({ timeout: 5000 });
+  await page.waitForTimeout(400);
+  await page.locator("[data-qcv='xp-fdone']").click({ timeout: 5000 });
+  await page.waitForTimeout(350);
+
+  is("d3", "§D3 · …and now there is a bar", await bar.count(), 1);
+  is("d3", "§D3 · the calendar body has NOT moved", await bodyTop(), before);
+
+  const look = await page.evaluate(() => {
+    const b = document.querySelector("[data-qcv='xp-fbar']") as HTMLElement;
+    const host = document.querySelector("[data-qcv='xp-body']") as HTMLElement;
+    const cs = getComputedStyle(b), r = b.getBoundingClientRect(), h = host.getBoundingClientRect();
+    return {
+      pos: cs.position, bg: cs.backgroundColor, radius: cs.borderTopLeftRadius,
+      shadow: cs.boxShadow !== "none", wrap: cs.flexWrap,
+      /* ⚠️ `bottom` RESOLVES AGAINST THE PADDING BOX, and `getBoundingClientRect` returns the
+         BORDER box — so the host's 1px border reads as a 41px gap from a rule that says 40. The
+         border is subtracted rather than the assertion loosened: a tolerance here would also
+         swallow a real 1px move, and the number in the sheet is the one being checked. */
+      gapBelow: Math.round((h.bottom - parseFloat(getComputedStyle(host).borderBottomWidth) - r.bottom) * 10) / 10,
+      centre: Math.round(((r.left + r.width / 2) - (h.left + h.width / 2)) * 10) / 10,
+      before: getComputedStyle(b, "::before").content,
+      lines: Math.round(r.height),
+      inside: r.left >= h.left - 0.5 && r.right <= h.right + 0.5,
+    };
+  });
+  record({ area: "d3", what: "§D3 · the bar", got: look, want: "reported" });
+  is("d3", "§D3 · it floats rather than taking a row", look.pos, "absolute");
+  is("d3", "§D3 · ink", look.bg, "rgb(28, 19, 15)");
+  is("d3", "§D3 · 22px corners", look.radius, "22px");
+  yes("d3", "§D3 · …and a soft shadow", look.shadow, String(look.shadow));
+  is("d3", "§D3 · 40px above the panel's foot", look.gapBelow, 40);
+  is("d3", "§D3 · …and centred on it", look.centre, 0);
+  yes("d3", `§D3 · …and it says FILTERED (${look.before})`, /filtered/i.test(look.before), look.before);
+  is("d3", "§D3 · …on one line, whatever is in it", look.wrap, "nowrap");
+  yes("d3", "§D3 · …and inside the panel it floats over", look.inside, JSON.stringify(look));
+
+  /* one pill per FACET, and the × takes that facet off */
+  const pills = () => page.evaluate(() =>
+    [...document.querySelectorAll("[data-qcv='xp-fpill']")].map((e) => ({
+      facet: (e as HTMLElement).dataset.facet, text: (e.textContent ?? "").replace("×", "").trim(),
+    })));
+  is("d3", "§D3 · one pill for one facet", (await pills()).length, 1);
+  is("d3", "§D3 · …and it names the facet", (await pills())[0].facet, "status");
+  is("d3", "§D3 · …and Clear all is absent at one pill", await page.locator("[data-qcv='xp-fclearall']").count(), 0);
+
+  /* a second facet: two pills, one Clear all, and still one line and no movement */
+  await page.locator("[data-qcv='xp-filter']").click();
+  await page.waitForTimeout(250);
+  const att = await page.evaluate(() =>
+    [...document.querySelectorAll("[data-qcv='xp-pop'] [data-facet='attention'][data-qcv='xp-chk']")]
+      .map((b, i) => ({ i, n: Number(b.querySelector("u")?.textContent ?? 0) })).find((x) => x.n > 0) ?? null);
+  if (att) {
+    await page.locator("[data-qcv='xp-pop'] [data-facet='attention'][data-qcv='xp-chk']").nth(att.i).click({ timeout: 5000 });
+    await page.waitForTimeout(350);
+    await page.locator("[data-qcv='xp-fdone']").click({ timeout: 5000 });
+    await page.waitForTimeout(300);
+    is("d3", "§D3 · two facets, two pills", (await pills()).length, 2);
+    is("d3", "§D3 · …and Clear all appears", await page.locator("[data-qcv='xp-fclearall']").count(), 1);
+    is("d3", "§D3 · …and the body still has not moved", await bodyTop(), before);
+    const two = await page.evaluate(() => Math.round((document.querySelector("[data-qcv='xp-fbar']") as HTMLElement).getBoundingClientRect().height));
+    is("d3", "§D3 · …and the bar is still one line", two, look.lines);
+  }
+
+  /* the × removes ITS facet and leaves the other */
+  const rows = () => page.locator("[data-qcv='tl-row']").count();
+  const withBoth = await rows();
+  await page.locator("[data-qcv='xp-fpill'][data-facet='status'] button").click({ timeout: 5000 });
+  await page.waitForTimeout(400);
+  const left = await pills();
+  is("d3", "§D3 · the × takes its own facet off", left.length, att ? 1 : 0);
+  if (att) is("d3", "§D3 · …and leaves the other one on", left[0].facet, "attention");
+  yes("d3", "§D3 · …and the list widened rather than emptying", (await rows()) >= withBoth, String(await rows()));
+  is("d3", "§D3 · …and STILL nothing moved", await bodyTop(), before);
+
+  /* and clearing the last one takes the bar away entirely */
+  if (att) {
+    await page.locator("[data-qcv='xp-fpill'][data-facet='attention'] button").click({ timeout: 5000 });
+    await page.waitForTimeout(400);
+  }
+  is("d3", "§D3 · with nothing filtering the bar is gone, not empty", await bar.count(), 0);
+  is("d3", "§D3 · …and the body is where it started", await bodyTop(), before);
+});
+
+/**
  * ⚠️ §D4 · WHAT OPENS A QUERY, AND WHAT PANS. Only a bar and the names cell open; the empty track
  * is a drag surface with the date row's own behaviour. Every claim here is about a GESTURE, so
  * every one is measured on the page: a source lock could see the handler come off the row and

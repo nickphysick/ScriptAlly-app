@@ -105,6 +105,43 @@ export const togglePackage = (v: CalView, k: string): CalView =>
   ({ ...v, packages: v.packages.includes(k) ? v.packages.filter((a) => a !== k) : [...v.packages, k] });
 /** §D1 — the due window is one choice, and pressing the chosen one releases it back to "any". */
 export const setDue = (v: CalView, k: DueKey): CalView => ({ ...v, due: v.due === k ? "any" : k });
+/**
+ * §D3 — WHAT THE FLOATING BAR STATES: one pill per FACET, never one per value.
+ *
+ * ⚠️ IT IS THE SAME UNIT AS THE BADGE, and it has to be. Three statuses ticked is one answer to one
+ * question, so it is one pill reading "Status is · Queried, Offer" with one ×; three pills with
+ * three crosses would say the reader has filtered three separate times, and the bar would disagree
+ * with the badge two inches above it about how many things are narrowing the list.
+ *
+ * ⚠️ AND THE × REMOVES THE FACET, not the value. A cross that took one status out of three would be
+ * a fourth way to edit the filter — the chips beside the panel and the panel's own rows saying
+ * different things about the same set. The bar is a statement of what is on; the panel is where it
+ * is changed.
+ */
+export interface FilterPill { key: Facet; label: string; value: string }
+
+export const filterPills = (
+  v: CalView, statusName: (s: QueryStatus) => string, attentionName: (a: Attention) => string,
+): FilterPill[] => {
+  const out: FilterPill[] = [];
+  if (v.statuses.length) out.push({ key: "status", label: "Status is", value: v.statuses.map(statusName).join(", ") });
+  if (v.court !== "all") out.push({ key: "court", label: "Whose court", value: v.court === "you" ? "With you" : "With the agent" });
+  if (v.attention.length) out.push({ key: "attention", label: "Attention", value: v.attention.map(attentionName).join(", ") });
+  if (v.due !== "any") out.push({ key: "due", label: "Due", value: DUE_OPTIONS.find((o) => o.key === v.due)!.label });
+  /* ⚠️ `""` is a real choice — "No package" — and it must not read as an empty pill */
+  if (v.packages.length) out.push({ key: "package", label: "Package", value: v.packages.map((n) => n || "No package").join(", ") });
+  return out;
+};
+
+/** §D3 — one facet back to its default. What the × on a pill does. */
+export const clearFacet = (v: CalView, f: Facet): CalView => {
+  if (f === "court") return { ...v, court: CAL_DEFAULT.court };
+  if (f === "attention") return { ...v, attention: [] };
+  if (f === "status") return { ...v, statuses: [] };
+  if (f === "package") return { ...v, packages: [] };
+  return { ...v, due: CAL_DEFAULT.due };
+};
+
 /** §D1 — every facet back to its default, leaving the grouping and the sort alone. */
 export const clearFilters = (v: CalView): CalView => ({
   ...v, court: CAL_DEFAULT.court, attention: [], statuses: [], packages: [], due: CAL_DEFAULT.due,

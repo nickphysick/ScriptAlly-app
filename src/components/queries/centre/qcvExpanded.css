@@ -188,6 +188,54 @@
   flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden;
   margin: 14px 22px 22px; box-sizing: border-box;
   border: 1px solid rgba(28, 19, 15, 0.09); border-radius: 14px; background: #fff;
+  /* §D3 — the floating filter bar is placed against this box */
+  position: relative;
+}
+
+/**
+ * §D3 — THE ACTIVE FILTERS, FLOATING 40px ABOVE THE PANEL'S FOOT.
+ *
+ * ⚠️ ABSOLUTE, NOT A ROW IN THE FLOW. In the flow it would push the calendar down the moment
+ * anything was filtered, so choosing a filter would move every row a reader was looking at and
+ * clearing it would move them back. Over the rows it costs no height and states the same fact.
+ *
+ * ⚠️ AND IT DOES NOT WRAP. `flex-wrap: nowrap` with `overflow: hidden` and a capped width keeps it
+ * one line at any number of facets: a bar that grew to two lines would cover the rows it floats
+ * over, which is the one thing it must not do.
+ */
+.qcv-xp-fbar {
+  position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 30;
+  display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; overflow: hidden;
+  max-width: calc(100% - 120px); padding: 6px 8px 6px 14px; border-radius: 22px;
+  background: var(--qcv-ink); box-shadow: 0 14px 34px -12px rgba(28, 19, 15, 0.55);
+}
+.qcv-xp-fbar::before {
+  content: "Filtered"; flex: none; margin-right: 2px; white-space: nowrap;
+  font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(245, 241, 235, 0.6);
+}
+.qcv-xp-fpill {
+  display: inline-flex; align-items: center; gap: 6px; flex: none;
+  height: 28px; padding: 0 4px 0 12px; border-radius: 15px; white-space: nowrap;
+  background: rgba(255, 255, 255, 0.1);
+}
+.qcv-xp-fpill i {
+  font-family: var(--qcv-mono); font-size: 8px; font-style: normal; letter-spacing: 0.12em;
+  text-transform: uppercase; color: rgba(245, 241, 235, 0.6);
+}
+.qcv-xp-fpill b {
+  max-width: 240px; overflow: hidden; text-overflow: ellipsis;
+  font-family: var(--qcv-type); font-size: 12.5px; font-weight: 400; color: #f5f1eb;
+}
+.qcv-xp-fpill button {
+  width: 22px; height: 22px; border: 0; border-radius: 50%; cursor: pointer;
+  background: rgba(255, 255, 255, 0.14); color: #f5f1eb; font-size: 14px; line-height: 1;
+}
+.qcv-xp-fpill button:hover { background: #f5f1eb; color: var(--qcv-ink); }
+.qcv-xp-fclearall {
+  flex: none; padding: 0 4px; border: 0; background: none; cursor: pointer; white-space: nowrap;
+  font-family: var(--qcv-type); font-size: 12.5px; color: #f5f1eb;
+  text-decoration: underline; text-underline-offset: 3px;
 }
 /**
  * §4.2 — the time controls' host in the tray: right-aligned, its right edge 20px in from the

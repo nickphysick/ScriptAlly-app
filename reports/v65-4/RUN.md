@@ -364,3 +364,60 @@ layout it would break is not the one on screen.
 One older lock retargeted: it asserted the popover is 300px, which is still true of Group and Sort.
 
 Gates 8,414 (baseline 8,390).
+
+## D2 — the panel keeps its place
+
+Every tick re-renders the whole panel — the counts, the head's pill and the foot all move — so a
+reader who has scrolled to Submission package and ticks one is returned to Status with the section
+they were working in off the screen. The position is not lost by anyone resetting it; it is lost
+because the element is new.
+
+Recorded from the reader's scrolls only, restored in a **layout** effect (an ordinary effect paints
+the top for one frame first, which is the jump this exists to remove rather than a smaller version
+of it), and a **fresh open starts at the top** — the memory is about one continuous piece of work,
+not about the control.
+
+Proved red two ways: the restore removed, and the memory surviving a fresh open. **The third — the
+guard that stops the restore recording its own write — does not redden**, because the restore writes
+the same value it recorded, so three choices measure identically. The case it is really for is a
+restore the browser CLAMPS: filter the list down, the body gets shorter, 260 becomes whatever fits,
+and recording that number would take it as the reader's intent and lose the place permanently. Kept
+for that, and the comment says so rather than claiming a drift I could measure.
+
+One older lock retargeted: it forbade `scrollTo` anywhere in the controls file, and `scrollTop`
+contains it. The claim is that ↺ does not move the *track*, so the token is bounded to `scrollTo(`.
+
+## D3 — the active filters, floating
+
+An ink bar with 22px corners and a soft shadow, centred 40px above the calendar panel's foot,
+reading "FILTERED" then one pill per facet with a ×, and Clear all once there is more than one.
+Absent — not empty — when nothing is filtering.
+
+**It is absolute, and that is the point.** A bar in the flow would push the calendar down the moment
+anything was chosen and pull it back when it was cleared, so choosing a filter would move every row
+the reader was looking at. The lock takes the calendar body's top before anything is filtered and
+requires it unmoved through two facets, a × and a clear.
+
+**One pill per facet, never one per value** — the same unit as the badge, so the bar and the button
+two inches apart cannot disagree about how many things are narrowing the list. The × removes the
+*facet*: a cross that took one status out of three would be a fourth way to edit the filter, with
+the bar and the panel's rows saying different things about one set.
+
+The bar does not wrap. `nowrap` with `overflow: hidden` and a capped width keeps it one line at any
+number of facets — a bar that grew to two lines would cover the rows it floats over, which is the
+one thing it must not do.
+
+Proved red five ways: the bar in the flow, rendered empty rather than absent, the × clearing
+everything, and wrapping — plus one pill per value, which reddens at the **model** rather than on
+the page, because the rendered lock only ever ticks one status.
+
+One measurement fault of my own: `bottom: 40px` resolves against the padding box while
+`getBoundingClientRect` returns the border box, so the host's 1px border read as 41. The border is
+subtracted rather than the assertion loosened — a tolerance there would also swallow a real 1px move.
+
+**⚠️ THE D2 MEASUREMENT RUN WAS INVALIDATED BY MY OWN D3 EDITS**, mid-run: `bundleGuard` refused
+eight cases with "dist/ is STALE", and the run reported 27 of 34 with an assertion floor failure.
+Nothing was wrong with the app. D2 and D3 therefore share one full measurement run, taken with both
+in the tree.
+
+Gates 8,418 (baseline 8,390).

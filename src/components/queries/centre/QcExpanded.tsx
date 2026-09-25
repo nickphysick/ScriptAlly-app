@@ -23,8 +23,11 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { createPortal } from "react-dom";
 import { lockStageScroll } from "../../../lib/stageScroll";
 import { ATTENTION_HINT, ATTENTION_LABEL, ATTENTION_ORDER, type Attention } from "../../../lib/qcBirdsEye";
-import { CAL_DEFAULT, attentionCounts, facetCounts, packageNames, type CalView } from "../../../lib/qcCalView";
-import { stageOrder } from "../../../lib/qcSummary";
+import {
+  CAL_DEFAULT, attentionCounts, clearFacet, clearFilters, facetCounts, filterPills, packageNames,
+  type CalView,
+} from "../../../lib/qcCalView";
+import { STAGE_NAME, stageOrder } from "../../../lib/qcSummary";
 import { QcCalControls, type CalMenu } from "./QcCalControls";
 import { QcTimeline } from "./QcTimeline";
 import type { QcRow } from "../../../lib/qcSummary";
@@ -209,6 +212,12 @@ export const QcExpanded: React.FC<{
    */
   const facets = useMemo(() => facetCounts(rows, view, clock, packageName), [rows, view, clock, packageName]);
   const statusList = useMemo(() => stageOrder(rows), [rows]);
+  /**
+   * §D3 — the bar states what is on, one pill per FACET, from the same value the panel edits. It is
+   * built here rather than in the panel because it outlives the panel: closing Filter must not take
+   * the statement of what is filtering with it.
+   */
+  const pills = useMemo(() => filterPills(view, (st) => STAGE_NAME[st], (a) => ATTENTION_LABEL[a]), [view]);
   const packageList = useMemo(() => packageNames(rows, packageName), [rows, packageName]);
   /* §4.2 — Find an agent. It MARKS and FADES; it never filters, so the counts, the grouping and the
      sort are all untouched by typing in it. */
@@ -340,6 +349,30 @@ export const QcExpanded: React.FC<{
             timeHost={timeReady ? timeHost.current : null}
             find={term}
           />
+          {/**
+            * §D3 — THE ACTIVE FILTERS, FLOATING OVER THE ROWS.
+            *
+            * ⚠️ IT IS ABSOLUTE OVER THE BODY, NOT A ROW IN IT, and that is the whole point: a bar in
+            * the flow would move the calendar down the moment anything was filtered — so choosing a
+            * filter would shift every row a reader was looking at, and clearing it would shift them
+            * back. Over the rows it costs nothing and states the same fact.
+            *
+            * ⚠️ AND IT IS ABSENT, NOT EMPTY, WHEN NOTHING IS FILTERING. A bar reading "Filtered"
+            * with no pills is a claim that something is narrowing the list.
+            */}
+          {pills.length > 0 && (
+            <div className="qcv-xp-fbar" data-qcv="xp-fbar">
+              {pills.map((p) => (
+                <span className="qcv-xp-fpill" data-qcv="xp-fpill" data-facet={p.key} key={p.key}>
+                  <i>{p.label}</i><b>{p.value}</b>
+                  <button type="button" aria-label={`Remove the ${p.label.toLowerCase()} filter`} onClick={() => setView(clearFacet(view, p.key))}>×</button>
+                </span>
+              ))}
+              {pills.length > 1 && (
+                <button type="button" className="qcv-xp-fclearall" data-qcv="xp-fclearall" onClick={() => setView(clearFilters(view))}>Clear all</button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>,

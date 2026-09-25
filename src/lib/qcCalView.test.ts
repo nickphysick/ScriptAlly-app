@@ -17,7 +17,8 @@ import { ATTENTION_LABEL, UPCOMING_DAYS } from "./qcBirdsEye";
 import {
   ACTION_GROUPS, CAL_DEFAULT, CLOSE_OVER_DAYS, CLOSE_UNDATED_DAYS, DUE_OPTIONS, GROUP_BY_OPTIONS,
   SORT_BY_OPTIONS, activeFacets, anyDiffers, attentionCounts, clearFilters, dueBucket, dueHit,
-  facetCounts, filterDiffers, groupDiffers, groupRows, nextAction, packageNames, setDue, sortDiffers,
+  clearFacet, facetCounts, filterDiffers, filterPills, groupDiffers, groupRows, nextAction,
+  packageNames, setDue, sortDiffers,
   sortRows, toggleAttention, togglePackage, toggleStatus, type CalView,
 } from "./qcCalView";
 
@@ -482,5 +483,70 @@ describe("§D1 · the filter's five facets", () => {
     expect(toggleStatus(on, QueryStatus.QUERIED).statuses).toEqual([]);
     expect(togglePackage(base, "").packages).toEqual([""]);
     expect(togglePackage(togglePackage(base, ""), "").packages).toEqual([]);
+  });
+});
+
+
+describe("§D3 · what the floating bar states", () => {
+  const stName = (s: QueryStatus) => String(s);
+  const atName = (a: string) => a.toUpperCase();
+  const all = view({
+    court: "you", attention: ["overdue"], statuses: [QueryStatus.QUERIED, QueryStatus.OFFER],
+    packages: ["Opening three"], due: "overdue",
+  });
+
+  it("⚠️ ONE PILL PER FACET, NEVER ONE PER VALUE — the bar and the badge count the same thing", () => {
+    /**
+     * Three statuses ticked is one answer to one question. Three pills with three crosses would say
+     * the reader has filtered three separate times, and the bar would disagree with the badge two
+     * inches above it about how many things are narrowing the list.
+     */
+    const p = filterPills(all, stName, atName);
+    expect(p).toHaveLength(activeFacets(all));
+    expect(p.map((x) => x.key)).toEqual(["status", "court", "attention", "due", "package"]);
+    expect(p[0].value, "the values of one facet are one pill").toBe(`${QueryStatus.QUERIED}, ${QueryStatus.OFFER}`);
+    expect(filterPills(CAL_DEFAULT, stName, atName)).toEqual([]);
+  });
+
+  it("⚠️ `No package` IS A CHOICE, and must not read as an empty pill", () => {
+    const p = filterPills(view({ packages: [""] }), stName, atName);
+    expect(p).toHaveLength(1);
+    expect(p[0].value).toBe("No package");
+    /* and it still reads as a choice beside a named one */
+    expect(filterPills(view({ packages: ["Full", ""] }), stName, atName)[0].value).toBe("Full, No package");
+  });
+
+  it("the × removes the FACET, not the value — and leaves the other four alone", () => {
+    /**
+     * ⚠️ A cross that took one status out of three would be a FOURTH way to edit the filter, with
+     * the bar and the panel's own rows saying different things about one set. The bar states what
+     * is on; the panel is where it is changed.
+     */
+    const v = clearFacet(all, "status");
+    expect(v.statuses).toEqual([]);
+    expect(v.court).toBe("you");
+    expect(v.attention).toEqual(["overdue"]);
+    expect(v.due).toBe("overdue");
+    expect(v.packages).toEqual(["Opening three"]);
+    expect(activeFacets(v)).toBe(activeFacets(all) - 1);
+    /* every facet has a × that works, and each removes exactly one */
+    for (const f of ["court", "attention", "status", "package", "due"] as const) {
+      expect(activeFacets(clearFacet(all, f)), f).toBe(activeFacets(all) - 1);
+    }
+    /* …and clearing them one at a time arrives where Clear all does */
+    let step = all;
+    for (const f of ["court", "attention", "status", "package", "due"] as const) step = clearFacet(step, f);
+    expect(step).toEqual(clearFilters(all));
+  });
+
+  it("the pills' words are the panel's words, handed in rather than restated", () => {
+    /* the status and attention names come from the caller, so the bar cannot name a status one way
+       while the section above it names it another */
+    const p = filterPills(view({ statuses: [QueryStatus.OFFER], attention: ["watch"] }), () => "NAMED", () => "GROUP");
+    expect(p.find((x) => x.key === "status")!.value).toBe("NAMED");
+    expect(p.find((x) => x.key === "attention")!.value).toBe("GROUP");
+    /* the due window's words ARE the lib's, because the options are */
+    expect(filterPills(view({ due: "fortnight" }), stName, atName)[0].value)
+      .toBe(DUE_OPTIONS.find((o) => o.key === "fortnight")!.label);
   });
 });
