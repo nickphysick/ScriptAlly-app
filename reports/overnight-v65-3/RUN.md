@@ -185,3 +185,60 @@ the corner drawn outside the row.
 - Gates: tsc 0 · build clean · **8,374 passed / 3 skipped** (baseline 8,370).
 - Measurement: **30 passed**, 1,248 assertions. Date row 60 · corner left = names left (0) · cluster
   centred (0) · cluster 10px inside the corner · the row's own white.
+
+
+## Phase 6 — landed, pushed
+
+**§6 · the corner's controls, and Group.** Three buttons and a ↺ in the date row's corner — the ref's
+own compact set (34px tall, 9px padding, 12.5px type, borderless `#f7f3ee`, ↺ a 30px disc) — and the
+names column widened 300 → 330 to hold them. The popover opens from the cluster's LEFT edge rather
+than centred on it, because a centred panel at the corner's left hangs half of itself over the dates.
+
+**Group is its own control.** It rode inside Sort's popover, which lit the Sort button for a setting
+Sort does not own and buried the page's most useful arrangement two clicks down. `sortDiffers` splits
+into `groupDiffers` + `sortDiffers`; `anyDiffers` is their union; the panel is still ONE element with
+three sets of contents, so "only one can be open" stays structural.
+
+**Five groupings: Urgency · Status · Next action · Submission package · No grouping.** Two were
+renamed to the mock's own words — "Attention" is a word a reader never sees on the cards, and
+"Nothing" reads as an option that does something.
+
+**Next action, the seventh group, and the one decision in the phase.** The mock classifies by status
+for three with-you cases (offer, full requested, partial requested) and lets everything else fall
+through to a date branch — nudge, consider closing, waiting on the agent. Its fixture has **no
+Revise & Resubmit**, so a live R&R would fall through and be filed under *"Waiting on the agent"*:
+a confident wrong statement about a query where the writer owes a new version. `isWithYou` is ONE
+definition in this app (partial requested · full requested · R&R) and it governs here too, so
+**`revision` — "Revision owed · send the new version"** is the seventh group, drawn only when there
+is one. That is the same shape `stageOrder` already uses for the summary's seventh column, and it is
+an extension rather than an invention: the alternative is a fabricated value rendered with the same
+confidence as a real one, which this repo's own law forbids.
+
+Thresholds are the mock's: past the expected date by more than **28** days, or undated and more than
+**84** days in the stage, is *Consider closing*; past it by less is *Nudge due*.
+
+### Faults found
+
+1. **A fixture that tested the wrong field.** The close-threshold case set `responseDeadline` and a
+   send date far apart; `resolveExpectedDate` reads the last send plus the agency's window, so a case
+   asking for 27 days over got 244. It is driven by the send date now, with the reason at the value.
+2. **Three unit locks and five measurement assertions were about the old arrangement** — 40px white
+   outlined buttons, a centred popover, a 300px names column, a "Nothing" radio inside Sort's panel,
+   and a grouping sequence that clicked through Sort. Each retargeted with its law stated.
+3. **The month-visibility probe counted BANDS BY CONTAINMENT.** The month markers were points, so
+   "wholly inside the box" was the same question as "on screen"; they are bands a month wide now, and
+   at the 6w zoom the window is shorter than a month — so no band is ever wholly inside it and the
+   probe reported **0 of 37** about a row naming its month perfectly well. It counts the sticky
+   LABELS by intersection now, which is what the claim was always about. Measured after: 3 · 2 · 3 · 6
+   labels visible at open, 6w, 3m and 6m.
+
+### Locks, each proved red
+
+Ten mutations: Group losing its own "differs"; Group losing its button; Sort's reset reaching the
+grouping again; an R&R falling through to the date branch; the close threshold dropping to a week; a
+hint invented for the status groups; the buttons back to 40px outlined; the popover centring itself;
+the names column back to 300; the band dropping its hint.
+
+- Gates: tsc 0 · build clean · **8,385 passed / 3 skipped**.
+- Measurement: **30 passed**, 1,256 assertions. Filter/Group/Sort 34px at x 301 · 385.5 · 464, on one
+  line, inside a 330px corner whose box IS the names cell's.

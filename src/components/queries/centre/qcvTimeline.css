@@ -158,6 +158,8 @@
   font-family: var(--qcv-type); font-size: 14px; line-height: 30px; color: var(--qcv-ink);
 }
 .qcv-tl-band i { font-style: normal; font-family: var(--qcv-mono); font-size: 9px; color: var(--qcv-ink-45); }
+/* §6 — the hint, beside the name in the band's own line */
+.qcv-tl-band em { font-style: normal; font-family: var(--qcv-serif); font-size: 11.5px; color: var(--qcv-ink-45); }
 
 .qcv-tl-row { position: relative; display: grid; grid-template-columns: var(--qcv-tl-names) auto; height: 44px; border-bottom: 1px solid var(--qcv-hair); cursor: pointer; }
 .qcv-tl-row:hover { background: var(--qcv-parchment); }

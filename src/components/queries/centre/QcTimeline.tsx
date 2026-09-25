@@ -33,7 +33,7 @@ const DAY = 86_400_000;
 /** §8.6 — the names column, and §8.1's Courier column above it are the same width. */
 /* §6 — 300 since v65.2 (it was 260): the names cell now carries the due date and its distance at
    its right, which is 44px of type the old width had nowhere to put. */
-export const NAMES_W = 300;
+export const NAMES_W = 330;
 
 export const QcTimeline: React.FC<{
   rows: readonly QcRow[];
@@ -549,7 +549,12 @@ export const QcTimeline: React.FC<{
                     only "Nothing" removes them. Its words are the GROUP's, so Status and package
                     groups name themselves rather than falling back to an attention label. */}
                 {view.groupBy !== "none" && (
-                  <div className="qcv-tl-band" data-qcv="tl-band"><span>{g.label}<i>{g.count}</i></span></div>
+                  <div className="qcv-tl-band" data-qcv="tl-band">
+                    {/* §6 — a Next-action band says what the action IS; the other groupings have
+                        nothing to add to their own names, so they carry no hint rather than one
+                        invented to fill the slot. */}
+                    <span>{g.label}{g.hint && <em>{g.hint}</em>}<i>{g.count}</i></span>
+                  </div>
                 )}
                 {g.rows.map((r) => {
                   const t = tl.get(r.id)!;

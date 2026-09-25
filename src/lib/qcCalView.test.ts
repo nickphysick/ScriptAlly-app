@@ -15,8 +15,9 @@ import { Agent, Query, QueryStatus } from "../types";
 import { buildQcRows, type QcRow } from "./qcSummary";
 import { ATTENTION_LABEL, UPCOMING_DAYS } from "./qcBirdsEye";
 import {
-  CAL_DEFAULT, GROUP_BY_OPTIONS, SORT_BY_OPTIONS, anyDiffers, attentionCounts, filterDiffers,
-  groupRows, sortDiffers, sortRows, toggleAttention, type CalView,
+  ACTION_GROUPS, CAL_DEFAULT, CLOSE_OVER_DAYS, CLOSE_UNDATED_DAYS, GROUP_BY_OPTIONS, SORT_BY_OPTIONS,
+  anyDiffers, attentionCounts, filterDiffers, groupDiffers, groupRows, nextAction, sortDiffers,
+  sortRows, toggleAttention, type CalView,
 } from "./qcCalView";
 
 const DAY = 86_400_000;
@@ -78,18 +79,29 @@ describe("§8.3 · the default, and what differs from it", () => {
     expect(filterDiffers(CAL_DEFAULT)).toBe(false);
     expect(sortDiffers(CAL_DEFAULT)).toBe(false);
   });
-  it("the four groupings and the three sorts, with their words", () => {
-    expect(GROUP_BY_OPTIONS.map((o) => o.key)).toEqual(["attention", "status", "package", "none"]);
-    expect(GROUP_BY_OPTIONS.map((o) => o.label)).toEqual(["Attention", "Status", "Submission package", "Nothing"]);
+  it("§6 · the FIVE groupings and the three sorts, with their words", () => {
+    /* §6 — "Next action" joins them, and two were renamed to the mock's own words: "Attention" is
+       the tab a reader never sees ("Urgency" is what the cards are about), and "Nothing" reads as
+       an option that does something. */
+    expect(GROUP_BY_OPTIONS.map((o) => o.key)).toEqual(["attention", "status", "action", "package", "none"]);
+    expect(GROUP_BY_OPTIONS.map((o) => o.label)).toEqual(["Urgency", "Status", "Next action", "Submission package", "No grouping"]);
     expect(SORT_BY_OPTIONS.map((o) => o.key)).toEqual(["queried", "changed", "due"]);
     expect(SORT_BY_OPTIONS.map((o) => o.label)).toEqual(["Date queried", "Status changed", "Next action due"]);
   });
-  it("⚠️ each button lights for its OWN settings, and ↺ for either", () => {
+  /**
+   * ⚠️ §6 · THREE BUTTONS, THREE QUESTIONS ABOUT ONE VALUE — and the split is the point of giving
+   * Group its own control. While the grouping lived inside Sort's popover, `sortDiffers` answered
+   * for a setting Sort did not own, so changing the grouping lit the Sort button.
+   */
+  it("⚠️ each button lights for its OWN settings, and ↺ for any of them", () => {
     for (const v of [view({ court: "you" }), view({ attention: ["overdue"] })]) {
-      expect(filterDiffers(v)).toBe(true); expect(sortDiffers(v)).toBe(false); expect(anyDiffers(v)).toBe(true);
+      expect(filterDiffers(v)).toBe(true); expect(groupDiffers(v)).toBe(false); expect(sortDiffers(v)).toBe(false); expect(anyDiffers(v)).toBe(true);
     }
-    for (const v of [view({ groupBy: "none" }), view({ sortBy: "queried" }), view({ asc: false })]) {
-      expect(sortDiffers(v)).toBe(true); expect(filterDiffers(v)).toBe(false); expect(anyDiffers(v)).toBe(true);
+    for (const v of [view({ groupBy: "none" }), view({ groupBy: "action" })]) {
+      expect(groupDiffers(v)).toBe(true); expect(filterDiffers(v)).toBe(false); expect(sortDiffers(v)).toBe(false); expect(anyDiffers(v)).toBe(true);
+    }
+    for (const v of [view({ sortBy: "queried" }), view({ asc: false })]) {
+      expect(sortDiffers(v)).toBe(true); expect(filterDiffers(v)).toBe(false); expect(groupDiffers(v)).toBe(false); expect(anyDiffers(v)).toBe(true);
     }
   });
   it("the attention set is a SET — order does not make it differ, and a toggle releases", () => {
@@ -98,6 +110,110 @@ describe("§8.3 · the default, and what differs from it", () => {
     expect(v.attention).toEqual(["overdue", "watch"]);
     expect(toggleAttention(v, "overdue").attention).toEqual(["watch"]);
     expect(anyDiffers(toggleAttention(toggleAttention(v, "overdue"), "watch"))).toBe(false);
+  });
+});
+
+/**
+ * §6 · WHAT TO DO NEXT. Seven groups, most pressing first, each saying what the action IS — and the
+ * whole point of the grouping is that a reader can see the shape of their own workload without
+ * reading a single row.
+ */
+describe("§6 · the next-action grouping", () => {
+  /* its own fixture: the branches this classification has, which the file's ROWS do not all reach */
+  const A: Agent[] = [];
+  let m = 0;
+  const q = (over: Partial<Query>): Query => {
+    const id = `b${++m}`;
+    A.push({ id, userId: "u", name: `N${m}`, agency: "X", responseTimeWeeks: 8 } as Agent);
+    return { id: `p${m}`, userId: "u", manuscriptId: "m1", agentId: id, packageId: "", personalisationNotes: "",
+      sendMethod: "Email" as never, status: QueryStatus.QUERIED, dateSent: iso(-10), ...over } as Query;
+  };
+  const QS: Query[] = [
+    q({ status: QueryStatus.OFFER, offerResponseDeadline: iso(6) }),
+    q({ status: QueryStatus.REVISE_RESUBMIT, dateSent: iso(-30) }),
+    q({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: iso(-3) }),
+    q({ status: QueryStatus.PARTIAL_REQUESTED, partialRequestedDate: iso(-3) }),
+    /* agent-side, past its date by less than four weeks → a nudge */
+    q({ dateSent: iso(-70), responseDeadline: iso(-10) }),
+    /* …past it by more than four weeks → consider closing */
+    q({ dateSent: iso(-200), responseDeadline: iso(-40) }),
+    /* …date still ahead → nothing to do */
+    q({ dateSent: iso(-5), responseDeadline: iso(20) }),
+  ];
+  const R = buildQcRows(QS, A, [], NOW);
+  const by = (k: string) => R.filter((r) => nextAction(r, NOW) === k).length;
+
+  it("§6 · the seven groups, in order, each naming its own action", () => {
+    expect(ACTION_GROUPS.map((g) => g.key)).toEqual(["offer", "revision", "full", "partial", "nudge", "close", "wait"]);
+    expect(ACTION_GROUPS.map((g) => g.label)).toEqual([
+      "Offer pending", "Revision owed", "Full owed", "Partial owed", "Nudge due", "Consider closing", "Waiting on the agent",
+    ]);
+    expect(ACTION_GROUPS.map((g) => g.hint)).toEqual([
+      "your decision to make", "send the new version", "send the full manuscript", "send the partial",
+      "chase a query, partial or full", "no word for a long while", "nothing to do yet",
+    ]);
+  });
+
+  it("§6 · every branch is reached, and each by exactly one row", () => {
+    /* ⚠️ THE TALLY IS THE LOCK. A fixture where every row lands in one group proves only that the
+       group it landed in behaves — and this file has already shipped a monoculture once. */
+    const tally = Object.fromEntries(ACTION_GROUPS.map((g) => [g.key, by(g.key)]));
+    expect(tally).toEqual({ offer: 1, revision: 1, full: 1, partial: 1, nudge: 1, close: 1, wait: 1 });
+  });
+
+  /**
+   * ⚠️ THE WITH-YOU STATUSES ARE ANSWERED BY STATUS AND NEVER BY A DATE — which is what makes
+   * "Waiting on the agent" true of everything in it. An offer whose deadline went months ago is
+   * still YOUR decision; the mock's classifier reaches its date branch only from the agent's court.
+   */
+  it("⚠️ §6 · a with-you row keeps its group however old its dates are", () => {
+    const old = buildQcRows([
+      q({ status: QueryStatus.OFFER, dateSent: iso(-400), offerResponseDeadline: iso(-200) }),
+      q({ status: QueryStatus.REVISE_RESUBMIT, dateSent: iso(-400) }),
+    ], A, [], NOW);
+    expect(old.map((r) => nextAction(r, NOW))).toEqual(["offer", "revision"]);
+  });
+
+  /**
+   * ⚠️ `revision` IS THIS APP'S OWN GROUP AND IT IS NOT AN INVENTED FEATURE. The mock's fixture has
+   * no Revise & Resubmit, so its classifier names three with-you statuses and lets the rest fall
+   * through — which would file a live R&R under "Waiting on the agent". `isWithYou` is one
+   * definition in this app (partial requested · full requested · R&R) and it governs here too.
+   */
+  it("⚠️ §6 · an R&R is never described as waiting on the agent", () => {
+    const rr = buildQcRows([q({ status: QueryStatus.REVISE_RESUBMIT, dateSent: iso(-200) })], A, [], NOW);
+    expect(nextAction(rr[0], NOW)).toBe("revision");
+    expect(nextAction(rr[0], NOW)).not.toBe("wait");
+  });
+
+  it("§6 · the two close thresholds, stated and at their edges", () => {
+    expect(CLOSE_OVER_DAYS).toBe(28);
+    expect(CLOSE_UNDATED_DAYS).toBe(84);
+    /* ⚠️ THE DATE IS DRIVEN BY THE SEND, NOT BY `responseDeadline`. `resolveExpectedDate` reads the
+       last send plus the agency's stated window (8 weeks here), so a fixture that sets a deadline
+       field and a send date far apart tests the send date — which is how the first cut of this case
+       asked for 27 days over and got 244. */
+    const at = (d: number) => nextAction(buildQcRows([q({ dateSent: iso(-(d + 56)) })], A, [], NOW)[0], NOW);
+    expect(at(CLOSE_OVER_DAYS - 1)).toBe("nudge");
+    expect(at(CLOSE_OVER_DAYS + 1)).toBe("close");
+  });
+
+  it("§6 · the bands carry their hints, empty groups are not drawn, and the order is the list's", () => {
+    const gs = groupRows(R, view({ groupBy: "action" }), NOW);
+    expect(gs.map((g) => g.key)).toEqual(["offer", "revision", "full", "partial", "nudge", "close", "wait"]);
+    expect(gs.every((g) => g.count > 0)).toBe(true);
+    expect(gs.map((g) => g.hint)).toEqual(ACTION_GROUPS.map((g) => g.hint));
+    /* every live row is in exactly one group — the reconciliation the whole grouping rests on */
+    expect(gs.reduce((n2, g) => n2 + g.count, 0)).toBe(R.length);
+    /* and a grouping with nothing in a group simply omits it */
+    const one = groupRows(buildQcRows([q({ status: QueryStatus.OFFER, offerResponseDeadline: iso(9) })], A, [], NOW), view({ groupBy: "action" }), NOW);
+    expect(one.map((g) => g.key)).toEqual(["offer"]);
+  });
+
+  it("⚠️ §6 · the OTHER groupings carry no hint — one is not invented to fill the slot", () => {
+    for (const g of ["attention", "status", "package", "none"] as const) {
+      expect(groupRows(R, view({ groupBy: g }), NOW).every((x) => x.hint === undefined), g).toBe(true);
+    }
   });
 });
 

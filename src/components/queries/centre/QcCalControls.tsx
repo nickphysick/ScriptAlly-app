@@ -20,15 +20,20 @@
 import React, { useEffect, useRef } from "react";
 import { ATTENTION_LABEL, ATTENTION_ORDER, EYE_FOCUS, type Attention } from "../../../lib/qcBirdsEye";
 import {
-  CAL_DEFAULT, GROUP_BY_OPTIONS, SORT_BY_OPTIONS, anyDiffers, filterDiffers, sortDiffers,
+  CAL_DEFAULT, GROUP_BY_OPTIONS, SORT_BY_OPTIONS, anyDiffers, filterDiffers, groupDiffers, sortDiffers,
   toggleAttention, type CalView,
 } from "../../../lib/qcCalView";
 
-export type CalMenu = "filter" | "sort" | null;
+export type CalMenu = "filter" | "group" | "sort" | null;
 
 const Funnel: React.FC = () => (
   <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
     <path d="M1.5 2.5h12l-4.6 5.3v4.2l-2.8 1.5V7.8L1.5 2.5Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+  </svg>
+);
+const Stack: React.FC = () => (
+  <svg width="13" height="13" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+    <path d="M1.8 3.4h11.4M1.8 7.5h11.4M1.8 11.6h6.6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
   </svg>
 );
 const Arrows: React.FC = () => (
@@ -58,6 +63,7 @@ export const QcCalControls: React.FC<{
 
   const set = (over: Partial<CalView>) => onView({ ...view, ...over });
   const filterOn = filterDiffers(view);
+  const groupOn = groupDiffers(view);
   const sortOn = sortDiffers(view);
 
   return (
@@ -71,6 +77,20 @@ export const QcCalControls: React.FC<{
         onClick={() => onMenu(menu === "filter" ? null : "filter")}
       >
         <Funnel /> Filter
+      </button>
+      {/**
+        * §6 — GROUP IS ITS OWN CONTROL. It rode inside Sort's popover, which lit the Sort button for
+        * a setting Sort does not own and buried the page's most useful arrangement two clicks down.
+        */}
+      <button
+        type="button"
+        className={`qcv-xp-btn${groupOn || menu === "group" ? " qcv-xp-btn--on" : ""}`}
+        data-qcv="xp-group"
+        data-changed={groupOn ? "true" : "false"}
+        aria-expanded={menu === "group"}
+        onClick={() => onMenu(menu === "group" ? null : "group")}
+      >
+        <Stack /> Group
       </button>
       <button
         type="button"
@@ -96,8 +116,24 @@ export const QcCalControls: React.FC<{
       )}
 
       {menu && (
-        <div className="qcv-xp-pop" data-qcv="xp-pop" data-menu={menu} role="group" aria-label={menu === "filter" ? "Filter" : "Sort"}>
-          {menu === "filter" ? (
+        <div
+          className="qcv-xp-pop"
+          data-qcv="xp-pop"
+          data-menu={menu}
+          role="group"
+          aria-label={menu === "filter" ? "Filter" : menu === "group" ? "Group" : "Sort"}
+        >
+          {menu === "group" ? (
+            <>
+              <section className="qcv-xp-sec" role="radiogroup" aria-label="Group by">
+                <h5>Group by</h5>
+                {GROUP_BY_OPTIONS.map((o) => (
+                  <button key={o.key} type="button" role="radio" aria-checked={view.groupBy === o.key} onClick={() => set({ groupBy: o.key })}>{o.label}</button>
+                ))}
+              </section>
+              <button type="button" className="qcv-xp-clear" data-qcv="xp-cleargroup" onClick={() => set({ groupBy: CAL_DEFAULT.groupBy })}>Reset grouping</button>
+            </>
+          ) : menu === "filter" ? (
             <>
               <section className="qcv-xp-sec">
                 <h5>Whose court</h5>
@@ -131,12 +167,6 @@ export const QcCalControls: React.FC<{
             </>
           ) : (
             <>
-              <section className="qcv-xp-sec" role="radiogroup" aria-label="Group by">
-                <h5>Group by</h5>
-                {GROUP_BY_OPTIONS.map((o) => (
-                  <button key={o.key} type="button" role="radio" aria-checked={view.groupBy === o.key} onClick={() => set({ groupBy: o.key })}>{o.label}</button>
-                ))}
-              </section>
               <section className="qcv-xp-sec">
                 <h5>Sort by</h5>
                 {/* ⚠️ THE RADIOS ARE WRAPPED AND THE FLIP IS NOT — a `radiogroup` says its children
@@ -156,7 +186,7 @@ export const QcCalControls: React.FC<{
                 type="button"
                 className="qcv-xp-clear"
                 data-qcv="xp-clearsort"
-                onClick={() => set({ groupBy: CAL_DEFAULT.groupBy, sortBy: CAL_DEFAULT.sortBy, asc: CAL_DEFAULT.asc })}
+                onClick={() => set({ sortBy: CAL_DEFAULT.sortBy, asc: CAL_DEFAULT.asc })}
               >Reset sort</button>
             </>
           )}

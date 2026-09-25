@@ -468,15 +468,25 @@ describe("the timeline", () => {
 describe("§8.1 · the controls at the column's foot", () => {
   const ctl = read("src/components/queries/centre/QcCalControls.tsx");
 
-  it("both buttons are 40px, white, 1px edge, 20px corners, typewriter 14.5px — and no shadow", () => {
+  /**
+   * §6 — THE COMPACT SET, because there are THREE buttons and a ↺ in a 330px corner now. At 40px
+   * tall with 17px of padding and a 1px edge the cluster is wider than the column it sits in; and
+   * an outline on a control that sits on white beside two others reads as three boxes rather than
+   * one row. The ref's own: 34 tall, 9px padding, 12.5px type, no border, `#f7f3ee`.
+   */
+  it("§6 · the buttons are 34px, borderless #f7f3ee, 20px corners, typewriter 12.5px — and no shadow", () => {
     const b = rule(".qcv-xp-btn, .qcv-xp-reset");
-    expect(b).toMatch(/height:\s*40px/);
+    expect(b).toMatch(/height:\s*34px/);
     expect(b).toMatch(/border-radius:\s*20px/);
-    expect(b).toMatch(/border:\s*1px solid rgba\(28, 19, 15, 0\.12\)/);
-    expect(b).toMatch(/background:\s*#fff/);
-    expect(b).toMatch(/font-size:\s*14\.5px/);
+    expect(b).toMatch(/border:\s*0/);
+    expect(b).toMatch(/background:\s*#f7f3ee/);
+    expect(b).toMatch(/font-size:\s*12\.5px/);
+    expect(b).toMatch(/padding:\s*0 9px/);
     expect(b).toMatch(/font-family:\s*var\(--qcv-type\)/);
     expect(b, "§8.1 says no shadow").not.toContain("box-shadow");
+    /* the ↺ is a 30px disc, smaller than the three it follows */
+    expect(rule(".qcv-xp-reset")).toMatch(/width:\s*30px/);
+    expect(rule(".qcv-xp-reset")).toMatch(/height:\s*30px/);
   });
   /**
    * ⚠️ RETIRED IN v65.2 §6 — "the cluster is CENTRED ON THE COLUMN, so the reset appearing
@@ -487,8 +497,9 @@ describe("§8.1 · the controls at the column's foot", () => {
    * same concern answered by the opposite arrangement. The claim lives in "§6 · Filter, Sort and ↺
    * ride the date row's lane" above.
    */
-  it("each button goes ink while open OR while its own settings differ — and ↺ for either", () => {
+  it("§6 · each of the THREE buttons goes ink while open OR while its own settings differ — and ↺ for any", () => {
     expect(ctl).toMatch(/filterOn \|\| menu === "filter"/);
+    expect(ctl).toMatch(/groupOn \|\| menu === "group"/);
     expect(ctl).toMatch(/sortOn \|\| menu === "sort"/);
     expect(ctl).toMatch(/\{anyDiffers\(view\) && \(/);
     expect(rule(".qcv-xp-btn--on")).toMatch(/background:\s*var\(--qcv-ink\)/);
@@ -508,18 +519,23 @@ describe("§8.1 · the controls at the column's foot", () => {
 describe("§8.3 · one popover", () => {
   const ctl = read("src/components/queries/centre/QcCalControls.tsx");
 
-  it("300px, 12px corners, below the buttons and over the names", () => {
+  it("§6 · 300px, 12px corners, opening from the cluster's LEFT EDGE, over the names", () => {
     const p = rule(".qcv-xp-pop");
     expect(p).toMatch(/width:\s*300px/);
     expect(p).toMatch(/border-radius:\s*12px/);
-    expect(p).toMatch(/top:\s*calc\(100% \+ 10px\)/);
+    expect(p).toMatch(/top:\s*calc\(100% \+ 8px\)/);
+    /* ⚠️ LEFT, NOT CENTRED. The cluster sat centred on the Courier's column; §6 puts it at the
+       corner's left, where a centred panel hangs half of itself over the dates. */
+    expect(p).toMatch(/left:\s*0/);
+    expect(p, "a centring transform survived the move").not.toMatch(/transform:\s*translateX/);
     /**
-     * ⚠️ THE TRAY IS STACKED ABOVE THE BODY, and the two declarations are one mechanism. The date
-     * row's lane is positioned and later in the tree, so without this the panel paints BEHIND the
-     * rows — present, correct and invisible. Asserted together, because either alone is meaningless.
+     * ⚠️ THE DATE ROW'S STACKING AND THE PANEL'S ARE ONE MECHANISM. The rows are positioned and
+     * later in the tree, so a panel that did not outrank them would paint BEHIND them — present,
+     * correct and invisible. Asserted together, because either alone is meaningless.
      */
-    expect(rule(".qcv-xp-tray")).toMatch(/z-index:\s*5/);
-    expect(p).toMatch(/z-index:\s*6/);
+    const row = /(?:^|\n)\s*\.qcv-tl-daterow \{([^}]*)\}/.exec(read("src/components/queries/centre/qcvTimeline.css"))?.[1] ?? "";
+    expect(+(/z-index:\s*(\d+)/.exec(row)?.[1] ?? 0)).toBeGreaterThan(5);
+    expect(+(/z-index:\s*(\d+)/.exec(p)?.[1] ?? 0)).toBeGreaterThan(5);
   });
   it("⚠️ ONE panel with two contents — never two components agreeing to close each other", () => {
     /* one element, whose contents are chosen by the open menu */
@@ -527,11 +543,12 @@ describe("§8.3 · one popover", () => {
     expect(ctl).toMatch(/\{menu && \(/);
     expect(ctl).toMatch(/menu === "filter" \? \(/);
   });
-  it("Filter's three sections; Sort's three; and the words are the libs'", () => {
+  it("§6 · Filter's two sections, Group's one, Sort's one; and the words are the libs'", () => {
     expect(ctl).toContain("Whose court");
     expect(ctl).toContain("Attention");
     expect(ctl).toContain("Clear filters");
     expect(ctl).toContain("Group by");
+    expect(ctl).toContain("Reset grouping");
     expect(ctl).toContain("Sort by");
     expect(ctl).toContain("Reset sort");
     expect(ctl).toContain("· flip");
@@ -560,6 +577,43 @@ describe("§8.3 · one popover", () => {
     /* the dismissal idiom it DOES own: pointerdown outside, with the trigger counting as inside */
     expect(ctl).toMatch(/addEventListener\("pointerdown", onDown\)/);
     expect(ctl).toMatch(/!ref\.current\?\.contains\(e\.target as Node\)/);
+  });
+});
+
+/**
+ * §6 · GROUP IS ITS OWN CONTROL. It rode inside Sort's popover, where it lit the Sort button for a
+ * setting Sort does not own and buried the page's most useful arrangement two clicks down.
+ */
+describe("§6 · the Group control", () => {
+  const ctl = read("src/components/queries/centre/QcCalControls.tsx");
+
+  it("§6 · three buttons in the corner, in order: Filter · Group · Sort, then ↺", () => {
+    const order = ["xp-filter", "xp-group", "xp-sort", "xp-reset"].map((k) => ctl.indexOf(`data-qcv="${k}"`));
+    expect(order.every((i) => i > 0), JSON.stringify(order)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+
+  it("§6 · Group opens the SAME one panel, with its own contents", () => {
+    /* still one element — the reason only one can be open is structural, not two components
+       agreeing to close each other */
+    expect((ctl.match(/className="qcv-xp-pop"/g) ?? []).length).toBe(1);
+    expect(ctl).toMatch(/menu === "group" \? \(/);
+    expect(ctl).toMatch(/aria-label=\{menu === "filter" \? "Filter" : menu === "group" \? "Group" : "Sort"\}/);
+    expect(ctl).toMatch(/export type CalMenu = "filter" \| "group" \| "sort" \| null;/);
+  });
+
+  it("⚠️ §6 · Sort no longer carries the grouping — one section, and its reset touches only the sort", () => {
+    const sortArm = ctl.slice(ctl.indexOf('data-qcv="xp-clearfilter"'));
+    expect(sortArm, "Group by is still rendered inside Sort's arm").not.toContain("Group by");
+    expect(ctl).toMatch(/onClick=\{\(\) => set\(\{ sortBy: CAL_DEFAULT\.sortBy, asc: CAL_DEFAULT\.asc \}\)\}/);
+    expect(ctl, "Sort's reset still reaches the grouping").not.toMatch(/xp-clearsort[\s\S]{0,200}groupBy: CAL_DEFAULT\.groupBy/);
+  });
+
+  it("§6 · a Next-action band names the action and says what it is", () => {
+    const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");
+    expect(tlSrc).toMatch(/\{g\.hint && <em>\{g\.hint\}<\/em>\}/);
+    /* the hint is the GROUP's, never the view's — the other groupings carry none */
+    expect(read("src/components/queries/centre/qcvTimeline.css")).toMatch(/\.qcv-tl-band em \{/);
   });
 });
 
@@ -691,8 +745,10 @@ describe("§7 · the rows", () => {
     expect(m, `${sel} has no rule`).toBeTruthy();
     return m![1];
   };
-  it("§6 · the names column is 300, because it now carries the due date and its distance", () => {
-    expect(tlSrc).toMatch(/export const NAMES_W = 300;/);
+  it("§6 · the names column is 330, because it carries the due date, its distance AND the controls", () => {
+    /* 300 while the corner above it held two buttons; §6 puts three and a ↺ there, and the corner
+       IS this column — one token, so widening it moves both or neither. */
+    expect(tlSrc).toMatch(/export const NAMES_W = 330;/);
   });
   /**
    * §7 / §1.8 — THE DUE DATE AND ITS DISTANCE COME FROM THE RAIL'S OWN `dueCell`. Two surfaces, one

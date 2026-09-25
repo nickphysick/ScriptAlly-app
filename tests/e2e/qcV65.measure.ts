@@ -1454,7 +1454,8 @@ test("§7 · the expanded rows — the due cell, the wash, the ink overrun and t
   });
   record({ area: "xp-rows", what: "the rows, the wash, the overrun and the sentences", got: r, want: "reported" });
   yes("xp-rows", `there are rows (${r.rows})`, r.rows > 3, String(r.rows));
-  near("xp-rows", "§6 · the names column is 300", r.namesW, 300, 1);
+  /* §6 — 330 now: the corner above it holds three buttons and a ↺, and the corner IS this column */
+  near("xp-rows", "§6 · the names column is 330", r.namesW, 330, 1);
   /* §7 — every row states its due date AND its distance, and neither clips */
   for (const d of r.due) {
     yes("xp-rows", "a row states both its date and its distance", !!d.date && !!d.dist, JSON.stringify(d));
@@ -1539,8 +1540,18 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
         const sc2 = card.querySelector("[data-qcv='tl-scroll']")!.getBoundingClientRect();
         const nm = card.querySelector("[data-qcv='tl-names']")!.getBoundingClientRect();
         const inBox = (e: Element) => { const r2 = e.getBoundingClientRect(); return r2.left >= nm.right - 1 && r2.right <= sc2.right + 1; };
+        /**
+         * ⚠️ §5 — THE LABELS, BY INTERSECTION, NOT THE BANDS BY CONTAINMENT. The month markers were
+         * POINTS, so "wholly inside the box" was the same question as "on screen". They are BANDS
+         * now, a month wide, and at the 6w zoom the window is shorter than a month — so no band is
+         * ever wholly inside it and a containment count reports 0 about a row that names its month
+         * perfectly well. What the claim was always about is whether a month is NAMED on screen,
+         * and the label is sticky precisely so that one always is.
+         */
+        const meets = (e: Element) => { const r2 = e.getBoundingClientRect(); return r2.right > nm.right - 1 && r2.left < sc2.right + 1; };
         return {
-          months: [...card.querySelectorAll("[data-qcv='tl-month']")].filter(inBox).length,
+          months: [...card.querySelectorAll("[data-qcv='tl-monthlabel']")].filter(meets).length,
+          bands: [...card.querySelectorAll("[data-qcv='tl-month']")].filter(inBox).length,
           weeks: [...card.querySelectorAll(".qcv-tl-wk")].filter(inBox).length,
           heat: [...card.querySelectorAll("[data-qcv='tl-heat'] i")].filter(inBox).length,
           namesR: Math.round(nm.right * 10) / 10, boxR: Math.round(sc2.right * 10) / 10,
@@ -1933,13 +1944,16 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
       corner: box("[data-qcv='tl-corner']"),
       namesCell: box("[data-qcv='tl-names']"),
       filter: box("[data-qcv='xp-filter']"),
+      group: box("[data-qcv='xp-group']"),
       sort: box("[data-qcv='xp-sort']"),
       reset: box("[data-qcv='xp-reset']"),
       pop: box("[data-qcv='xp-pop']"),
       popMenu: card.querySelector("[data-qcv='xp-pop']")?.getAttribute("data-menu") ?? null,
       pops: card.querySelectorAll("[data-qcv='xp-pop']").length,
       /* §8.1 — each button is ink with cream text while open or while its own settings differ */
-      btnInk: ["xp-filter", "xp-sort"].map((k) => {
+      /* ⚠️ APPENDED, NOT INSERTED: every `btnInk[n]` below reads by index, so Group goes at the end
+         rather than between the two it sits between on screen. */
+      btnInk: ["xp-filter", "xp-sort", "xp-group"].map((k) => {
         const e = card.querySelector(`[data-qcv='${k}']`) as HTMLElement | null;
         if (!e) return null;
         const cs = getComputedStyle(e);
@@ -2006,8 +2020,15 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
   record({ area: "controls", what: "at rest", got: rest, want: "reported" });
 
   /* ── §8.1 · where they sit ── */
-  is("controls", "Filter is 40px tall", rest?.filter?.h, 40);
-  is("controls", "Sort is 40px tall", rest?.sort?.h, 40);
+  /* §6 — 34, not 40: three buttons and a ↺ now share a 330px corner (the ref's own compact set) */
+  is("controls", "§6 · Filter is 34px tall", rest?.filter?.h, 34);
+  is("controls", "§6 · Group is 34px tall", rest?.group?.h, 34);
+  is("controls", "§6 · Sort is 34px tall", rest?.sort?.h, 34);
+  yes("controls", `§6 · …and the three sit on one line, in order (${JSON.stringify([rest?.filter?.x, rest?.group?.x, rest?.sort?.x])})`,
+    rest?.filter != null && rest?.group != null && rest?.sort != null
+      && rest.filter.x < rest.group.x && rest.group.x < rest.sort.x
+      && rest.filter.y === rest.group.y && rest.group.y === rest.sort.y,
+    JSON.stringify({ f: rest?.filter, g: rest?.group, s: rest?.sort }));
   /**
    * ⚠️ RETARGETED IN v65.2 §6 — THE CLUSTER LEFT THE COLUMN. It used to be centred on the Courier's
    * column and sat at its foot, and both claims were relationships between two boxes rather than
@@ -2050,8 +2071,12 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
      a tautology with intermediate steps, which is the fault this file's own §8 case records. */
   yes("controls", "the page loads grouped by Attention", (rest?.groups ?? []).length > 0 && (rest?.groups ?? []).every((g) => ["overdue", "upcoming", "watch"].includes(g ?? "")), JSON.stringify(rest?.groups));
   yes("controls", "…and the bands name those groups", (rest?.bands ?? []).length > 0 && (rest?.bands ?? []).every((b) => /^(Overdue|Upcoming|Watch and wait)\s*\d+$/.test(b)), JSON.stringify(rest?.bands));
-  const whiteFilter = rest?.btnInk?.[0]?.bg;
-  yes("controls", `at rest Filter is white (${whiteFilter})`, whiteFilter === "rgb(255, 255, 255)", String(whiteFilter));
+  /* §6 — the resting fill is the ref's `#f7f3ee`, not white and not an outline: three controls on
+     white beside one another read as three boxes if each carries its own edge. What the assertion
+     is FOR is unchanged — that at rest they are not the ink of the "on" state. */
+  const restFill = rest?.btnInk?.[0]?.bg;
+  is("controls", "§6 · at rest Filter is the parchment fill", restFill, "rgb(247, 243, 238)");
+  yes("controls", `§6 · …which is not the ink of the on state (${restFill})`, restFill !== "rgb(28, 19, 15)", String(restFill));
 
   /* ── §8.2 · the cards ARE the filter ── */
   const countsAtRest = (rest?.stats ?? []).map((s) => s.n);
@@ -2075,7 +2100,8 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
   is("controls", "…and the rows are only that group", [...new Set(picked?.groups ?? [])].join(","), firstLive.g);
   is("controls", "Filter now differs", picked?.btnInk?.[0]?.changed, "true");
   is("controls", "…so Filter goes ink with cream text", picked?.btnInk?.[0]?.bg, "rgb(28, 19, 15)");
-  is("controls", "…and the reset appears, 40px round", picked?.reset?.h, 40);
+  /* §6 — 30, not 40: the ↺ is smaller than the three buttons it follows in the ref's compact set */
+  is("controls", "§6 · …and the reset appears, 30px round", picked?.reset?.h, 30);
   is("controls", "…but Sort has not changed", picked?.btnInk?.[1]?.changed, "false");
 
   /* ⚠️ §10 LOCK 8 NAMES FOUR ACTS IN ONE SEQUENCE — a filter, a zoom, a group change and a reset.
@@ -2087,7 +2113,7 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
   const zoomed = await read();
   is("controls", "a zoom while filtered keeps the filter", zoomed?.stats.find((st) => st.g === firstLive.g)?.on, "true");
   is("controls", "…and the zoom took", zoomed?.zoomOn, "6w");
-  yes("controls", "…and the lane's controls survived it", (zoomed?.ctl?.h ?? 0) > 0 && !!zoomed?.filter && !!zoomed?.sort, JSON.stringify({ ctl: zoomed?.ctl?.h, f: !!zoomed?.filter }));
+  yes("controls", "…and the corner's controls survived it", (zoomed?.ctl?.h ?? 0) > 0 && !!zoomed?.filter && !!zoomed?.group && !!zoomed?.sort, JSON.stringify({ ctl: zoomed?.ctl?.h, f: !!zoomed?.filter, g: !!zoomed?.group }));
 
   /* ── §8.3 · one popover, and the checkbox mirrors the card ── */
   await page.locator("[data-qcv='xp-filter']").click();
@@ -2118,23 +2144,39 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
   is("controls", "opening Sort closes Filter — never two panels", spop?.pops, 1);
   is("controls", "…and the one open is Sort's", spop?.popMenu, "sort");
 
-  /* ── §8.3 · Group by Status, then Nothing ── */
+  /**
+   * ── §6 · Group by Status, then No grouping ──
+   *
+   * ⚠️ THROUGH THE GROUP BUTTON, WHICH IS WHAT §6 BUILT. The grouping rode inside Sort's popover,
+   * so this sequence used to pick "Status" out of the panel Sort had just opened — and it is the
+   * third panel now, which is the whole point: Sort lighting for a grouping change was the fault.
+   */
+  await page.locator("[data-qcv='xp-group']").click();
+  await page.waitForTimeout(120);
+  const gpop = await read();
+  is("controls", "opening Group closes Sort — still never two panels", gpop?.pops, 1);
+  is("controls", "…and the one open is Group's", gpop?.popMenu, "group");
   await pop(page).getByRole("radio", { name: "Status", exact: true }).click();
   await page.waitForTimeout(150);
   const byStatus = await read();
+  is("controls", "§6 · Group differs, and Sort does NOT", byStatus?.btnInk?.[2]?.changed, "true");
+  is("controls", "§6 · …Sort is untouched by a grouping change", byStatus?.btnInk?.[1]?.changed, "false");
   record({ area: "controls", what: "grouped by Status", got: { bands: byStatus?.bands, groups: byStatus?.groups }, want: "reported" });
   yes("controls", "the bands are status names, not attention names",
     (byStatus?.bands ?? []).length > 0 && !(byStatus?.bands ?? []).some((b) => /^(Overdue|Upcoming|Watch and wait)/.test(b)), JSON.stringify(byStatus?.bands));
   yes("controls", "…in pipeline order", (byStatus?.bands ?? []).length > 0 && JSON.stringify(byStatus?.bands) !== JSON.stringify([...(byStatus?.bands ?? [])].sort()), JSON.stringify(byStatus?.bands));
 
-  await pop(page).getByRole("radio", { name: "Nothing", exact: true }).click();
+  await pop(page).getByRole("radio", { name: "No grouping", exact: true }).click();
   await page.waitForTimeout(150);
   const flat = await read();
-  is("controls", "Nothing removes the headings altogether", flat?.bands?.length, 0);
+  is("controls", "No grouping removes the headings altogether", flat?.bands?.length, 0);
   yes("controls", "…and keeps every row that was in the groups", (flat?.rowIds ?? []).length === (byStatus?.rowIds ?? []).length && (flat?.rowIds ?? []).length > 0, `${flat?.rowIds?.length} vs ${byStatus?.rowIds?.length}`);
 
   /* ── §8.3 · the sort, and the flip ── */
   const before = flat?.names ?? [];
+  /* §6 — the flip lives in SORT's panel, and Group's is the one open */
+  await page.locator("[data-qcv='xp-sort']").click();
+  await page.waitForTimeout(120);
   await page.locator("[data-qcv='xp-dir']").click();
   await page.waitForTimeout(150);
   const flipped = await read();
@@ -2167,6 +2209,7 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
   record({ area: "controls", what: "after the reset", got: { stats: reset?.stats, bands: reset?.bands, zoom: reset?.zoomOn, scroll: reset?.scrollLeft, was: { zoomBefore, scrollBefore } }, want: "reported" });
   is("controls", "the reset takes the ink off Filter", reset?.btnInk?.[0]?.changed, "false");
   is("controls", "…and off Sort", reset?.btnInk?.[1]?.changed, "false");
+  is("controls", "§6 · …and off Group", reset?.btnInk?.[2]?.changed, "false");
   is("controls", "…and takes itself away", reset?.reset, null);
   yes("controls", "…no card is picked", (reset?.stats ?? []).every((s) => s.on === "false"), JSON.stringify(reset?.stats.map((s) => s.on)));
   yes("controls", "…grouped by Attention again", (reset?.bands ?? []).length > 0 && (reset?.bands ?? []).every((b) => /^(Overdue|Upcoming|Watch and wait)/.test(b)), JSON.stringify(reset?.bands));
@@ -2194,13 +2237,13 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
     const has = (s2: string) => !!card?.querySelector(s2);
     return {
       nav: has("[data-qcv='tl-nav']"), zoom: has("[data-qcv='tl-zoom']"),
-      filter: has("[data-qcv='xp-filter']"), sort: has("[data-qcv='xp-sort']"),
+      filter: has("[data-qcv='xp-filter']"), group: has("[data-qcv='xp-group']"), sort: has("[data-qcv='xp-sort']"),
       today: has("[data-qcv='tl-todayline']"),
       bands: card?.querySelectorAll("[data-qcv='tl-band']").length ?? 0,
     };
   });
   record({ area: "controls", what: "§10 lock 8 — what survived the filter, the zoom, the grouping and the reset", got: survived, want: "reported" });
-  yes("controls", "the nav, the zoom, Filter, Sort and the today line all survived", Object.entries(survived).filter(([k]) => k !== "bands").every(([, v]) => v === true), JSON.stringify(survived));
+  yes("controls", "the nav, the zoom, Filter, Group, Sort and the today line all survived", Object.entries(survived).filter(([k]) => k !== "bands").every(([, v]) => v === true), JSON.stringify(survived));
   /* ⚠️ AGAINST THE PAGE-LOAD READING, NOT AGAINST "3" — a group with nothing in it is dropped, so
      the number of headings is a fact about the account. What the reset must restore is the state
      the page opened in, and that is a comparison of two measured things. */
