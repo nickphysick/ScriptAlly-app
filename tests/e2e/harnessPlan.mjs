@@ -1,12 +1,17 @@
 /**
- * Read or set the dev harness account's plan, so the Pro-gated package write can be exercised.
+ * Read — and historically set — the dev harness account's plan.
  *
- * ⚠️ IT PUTS THE PLAN BACK. `addPackage` refuses on FREE, so proving the builder needs PRO — but the
- * harness fixture is shared with other streams, so leaving it flipped would change their baseline
- * without telling them. Every use is flip → prove → restore, and the current value is printed first.
+ * ⚠️ THE SET HALF IS DEAD, AND DELIBERATELY SO (found 25 Sep, Contact list v11 P5). The user
+ * rules now hold `incoming().plan == existing().plan` — a client may not change its own plan,
+ * because a plan change is a billing event — so `node harnessPlan.mjs Pro` is DENIED on dev.
+ * That guard is right and this helper does not argue with it: the READ half survives (suites
+ * assert their premise's plan), and a measurement that needs a Pro window now needs a server-side
+ * arrangement or a Pro fixture account, neither of which exists yet. The flip → prove → restore
+ * paragraph that stood here described the pre-guard era.
  *
- *   node tests/e2e/harnessPlan.mjs          # read
- *   node tests/e2e/harnessPlan.mjs Pro      # set
+ *   node tests/e2e/harnessPlan.mjs          # read (works)
+ *   node tests/e2e/harnessPlan.mjs Pro      # DENIED by the billing guard — kept so the denial
+ *                                           # is observable rather than remembered
  */
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";

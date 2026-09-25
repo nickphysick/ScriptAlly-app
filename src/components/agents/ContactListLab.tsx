@@ -68,6 +68,19 @@ export const ContactListLab: React.FC = () => {
   const updateAgent = React.useCallback(async (id: string, fields: Partial<Agent>) => {
     setCast((prev) => prev.map((a) => (a.id === id ? ({ ...a, ...fields } as Agent) : a)));
   }, []);
+  /* the add card's write (v11 §8.4) — a local append, so the WHOLE after-add choreography (the
+     Not-yet-queried landing, the centred scroll, the 2.4s ring) runs here over known content
+     with no sign-in and no account writes. The REAL page cannot host that measurement: the dev
+     harness account is Free at 34 agents, and `addAgent`'s free-tier cap correctly refuses a
+     sixth — which is its own lock, taken on /agents. No cap here: the cap is the real
+     `addAgent`'s, and this stub is the lab's, not a copy of the product rule. */
+  const labAddSeq = React.useRef(0);
+  const addAgent = React.useCallback(async (a: Omit<Agent, "id" | "userId" | "dateAdded" | "lastCheckedDate">) => {
+    const id = `lab-added-${++labAddSeq.current}`;
+    const now = new Date().toISOString();
+    setCast((prev) => [...prev, { ...a, id, userId: "lab", dateAdded: now, lastCheckedDate: now } as Agent]);
+    return { success: true as const, id };
+  }, []);
 
   /* ⚠️ THE STUB IS SHAPED LIKE THE CONTEXT, NOT LIKE THE PAGE'S DESTRUCTURE. A hand-listed set of
      the eight fields `AgentList` happens to read today would go stale the moment it reads a ninth,
@@ -83,6 +96,7 @@ export const ContactListLab: React.FC = () => {
       communityAgents: [], journalEntries: [], tasks: [], userTasks: [], taskFlags: [], dismissedTasks: [],
       authReady: true, smartImportUsage: null,
       updateAgent,
+      addAgent,
     } as Record<string, unknown>,
     {
       get: (t, k) => (typeof k === "symbol" ? undefined : k in t ? t[k as string] : asyncNoop),

@@ -5,7 +5,7 @@
  * Contact list v11 — locks for the pure derivations (phase 1: the rail's height law).
  */
 import { describe, expect, it } from "vitest";
-import { RAIL_MAX, RAIL_MIN, RAIL_TOP_GAP, railHeight } from "./contactList";
+import { RAIL_MAX, RAIL_MIN, RAIL_TOP_GAP, findDuplicateAgent, railHeight } from "./contactList";
 
 describe("railHeight — the rail derives its height from its own measured top", () => {
   it("at rest the rail runs from its top to 16px above the fold", () => {
@@ -292,5 +292,19 @@ describe("grouping partitions the ordered list; sorting orders within", () => {
     const byRating = sortFacts(facts, "rating", () => false, NOW);
     const unrated = byRating.findIndex((x) => x.rating == null);
     if (unrated >= 0) for (const x of byRating.slice(unrated)) expect(x.rating == null).toBe(true);
+  });
+});
+
+describe("the add card's duplicate check (§8.2)", () => {
+  const A = CONTACT_FIXTURE_AGENTS;
+  it("matches a NAME case-insensitively and trimmed, and empty matches nobody", () => {
+    const someone = A.find((a) => (a.name ?? "").trim().length > 0)!;
+    expect(findDuplicateAgent(`  ${someone.name.toUpperCase()}  `, A)?.id).toBe(someone.id);
+    expect(findDuplicateAgent("", A)).toBeNull();
+    expect(findDuplicateAgent("   ", A)).toBeNull();
+  });
+  it("does NOT match on agency — proposed in the report, deliberately unbuilt", () => {
+    const agencyOnly = A.find((a) => (a.agency ?? "").trim().length > 0)!;
+    expect(findDuplicateAgent(agencyOnly.agency, A.filter((x) => (x.name ?? "").trim().toLowerCase() !== agencyOnly.agency.trim().toLowerCase()))).toBeNull();
   });
 });

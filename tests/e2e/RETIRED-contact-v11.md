@@ -77,3 +77,25 @@ importers (pre-dates v11). P4's drawer retirement is the natural commit for it.
   the P4 probe before any UI landed): the field was outside the agent-update allowlist, so the
   affectedKeys shape failed the WHOLE write. Allowlisted + `isValidAgent` clause; deployed to dev
   and re-probed ALLOWED. Prod rules deploy is Nick's (final report).
+
+## Phase 5 (the add card)
+
+No retirements — P5 is additive: `ContactAddCard` (the pop-up's chassis around the SAME
+`ContactAgentForm`), `findDuplicateAgent` + `emptyContactDraft` in the libs, the lab's local
+`addAgent` (so the after-add choreography measures over known content), and the ruling-(f)
+capture repoint (`sa:contact-add` on /agents; the app-level focus form untouched elsewhere).
+
+**Found by the §11.9 after-add case, and it reshaped the case rather than the product:**
+- **The dev harness account is FREE at 34 agents, so `addAgent`'s free-tier cap refuses every
+  UI add on it** — correct product behaviour, which means the app-level add form has been
+  refusing on this account for as long as it has been over the cap. The cap is now ITS OWN
+  rendered lock (the card stays open and says why; cleanup proves nothing was written), and the
+  full §8.4 choreography (Not-yet-queried landing, centred scroll, 2.4s ring) is proven on the
+  lab, where the writer is local and no account changes.
+- **`harnessPlan.mjs`'s set half is DEAD, and deliberately**: the user rules'
+  `incoming().plan == existing().plan` billing guard denies a client flipping its own plan, so
+  the packages-era flip → prove → restore pattern no longer exists. Its docstring now says so
+  (the read half survives and the cap lock uses it to assert its premise). A measurement that
+  needs a Pro window needs a server-side arrangement or a Pro fixture account — neither built.
+- `cleanupProbeAgent.mjs` joins the seeder: it removes the probe agent AND the `AGENT_ADDED`
+  feed line the create writes, because the doc alone would leave the feed naming a stranger.

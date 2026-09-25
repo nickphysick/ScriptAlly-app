@@ -507,3 +507,17 @@ export function sortFacts(
   }
   return by;
 }
+
+/* ── the add card's duplicate check (v11 §8.2) ────────────────────────────────────────────── */
+
+/**
+ * The agent already on the list whose NAME matches the typed one — case-insensitive, trimmed —
+ * or null. Name only: the prompt asks whether the model could also match on agency, and it
+ * could (agency-less agents are valid, so agency+name pairs are not unique keys either way);
+ * proposed in the report, deliberately not built.
+ */
+export function findDuplicateAgent(name: string, agents: readonly Agent[]): Agent | null {
+  const typed = name.trim().toLowerCase();
+  if (!typed) return null;
+  return agents.find((a) => (a.name ?? "").trim().toLowerCase() === typed) ?? null;
+}

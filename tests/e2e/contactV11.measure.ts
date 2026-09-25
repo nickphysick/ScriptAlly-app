@@ -662,3 +662,188 @@ test("§11.7 write half — save says what else moved, and the fixture agent is 
   await page.keyboard.press("Escape");
   bump(6);
 });
+
+/* ══════════════════════════ phase 5 — the add card (§8 / §11.9) ══════════════════════════ */
+
+test("the add card (§11.9): disabled until name AND agency, the duplicate blocks with OPEN CARD through, typing keeps the node", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  await page.click(`${scope} [data-clv="herocard"]`);
+  await page.waitForSelector('[data-clv="addcard"]');
+  const disabledAt = async () => page.evaluate(() => (document.querySelector('[data-clv="add-save"]') as HTMLButtonElement).disabled);
+  expect(await disabledAt(), "Add enabled on an empty form").toBe(true);
+  await page.fill('[data-clv="addcard"] [data-clv="f-name"]', "Zz Probe Agent");
+  expect(await disabledAt(), "Add enabled with a name and no agency").toBe(true);
+  await page.fill('[data-clv="addcard"] [data-clv="f-agency"]', "Probe & Co");
+  expect(await disabledAt(), "Add still disabled with name and agency filled").toBe(false);
+
+  /* the duplicate: a NAME already on the list blocks Add and offers the way through */
+  const existing = await page.evaluate((scope) => {
+    for (const r of document.querySelectorAll(`${scope} [data-clv="row"]`)) {
+      const el = r as HTMLElement;
+      const nm = (el.querySelector(".clv-rwho b")?.textContent ?? "").trim();
+      const agy = (el.querySelector(".clv-ragy")?.textContent ?? "").trim();
+      if (nm && agy) return { id: el.dataset.agentCard!, name: nm };
+    }
+    return null;
+  }, scope);
+  expect(existing, "population first — no named agent on the list").not.toBeNull();
+  await page.fill('[data-clv="addcard"] [data-clv="f-name"]', existing!.name);
+  await expect(page.locator('[data-clv="dup"]')).toBeVisible();
+  expect(await disabledAt(), "a duplicate name did not block Add").toBe(true);
+  await page.click('[data-clv="dup-open"]');
+  await page.waitForSelector('[data-clv="profile"]');
+  const opened = await page.evaluate(() => ({
+    add: !!document.querySelector('[data-clv="addcard"]'),
+    who: (document.querySelector('[data-clv="profile"]') as HTMLElement).getAttribute("aria-label") ?? "",
+  }));
+  expect(opened.add, "OPEN CARD left the add card open behind the pop-up").toBe(false);
+  expect(opened.who).toContain(existing!.name);
+  await page.keyboard.press("Escape");
+  await page.waitForSelector('[data-clv="profile"]', { state: "detached" });
+
+  /* §11.9's identity clause: the focused element is the SAME NODE before and after typing */
+  await page.click(`${scope} [data-clv="herocard"]`);
+  await page.waitForSelector('[data-clv="addcard"]');
+  await page.click('[data-clv="addcard"] [data-clv="f-name"]');
+  await page.evaluate(() => { (window as unknown as { __n1: Element | null }).__n1 = document.activeElement; });
+  await page.keyboard.type("Abc");
+  const sameNode = await page.evaluate(() => (window as unknown as { __n1: Element | null }).__n1 === document.activeElement);
+  expect(sameNode, "typing re-rendered the form — the focused element is a different node").toBe(true);
+  await page.keyboard.press("Escape");
+  bump(8);
+});
+
+test("§11.9 the free cap surfaces IN the card — Add refuses, says why, and writes nothing", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  const { execSync } = await import("node:child_process");
+  /* ⚠️ THE PRECONDITION IS THE PREMISE: this lock exists because the harness account is FREE at
+     34 agents, where `addAgent`'s own cap refuses a sixth. A client cannot flip its plan (the
+     rules' billing guard — which is also why harnessPlan.mjs can no longer arrange a Pro window),
+     so the cap IS this fixture's write path, and the full after-add choreography is proven on
+     the lab over known content instead. If the account ever reads Pro, this case must be
+     re-thought, not skipped. */
+  const plan = /plan: (\w+)/.exec(execSync("node tests/e2e/harnessPlan.mjs", { encoding: "utf8" }))?.[1];
+  expect(plan, "the cap lock's premise: a Free account at the cap").toBe("Free");
+  await page.click(`${scope} [data-clv="herocard"]`);
+  await page.waitForSelector('[data-clv="addcard"]');
+  await page.fill('[data-clv="addcard"] [data-clv="f-name"]', "Zz Probe Agent");
+  await page.fill('[data-clv="addcard"] [data-clv="f-agency"]', "Probe & Co");
+  await page.click('[data-clv="add-save"]');
+  /* the refusal lands in the footer's hint, and the card STAYS — a closed card would read as a
+     successful add that silently was not */
+  await expect(page.locator('[data-clv="add-hint"]')).toContainText("capped at 5");
+  expect(await page.locator('[data-clv="addcard"]').count(), "the card closed on a refused add").toBe(1);
+  await page.keyboard.press("Escape");
+  const out = execSync("node tests/e2e/cleanupProbeAgent.mjs", { encoding: "utf8" });
+  expect(out, "a refused add still wrote the agent").toContain("deleted 0 agent");
+  bump(5);
+});
+
+test("§11.9 after adding (the lab, over known content) — Not yet queried, centred, ringed", async ({ page }) => {
+  /* the lab mounts the REAL page over the fixture with a local addAgent, no sign-in, no account
+     writes — the choreography (band, scroll, ring) is the page's own; only the writer is local */
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/#/contact-lab");
+  await page.waitForSelector('[data-lab-view="cast"]');
+  await page.click('[data-lab-view="cast"]');
+  const scope = await visiblePage(page, ".agl-wpg");
+  await page.waitForSelector(`${scope} [data-clv="row"]`);
+  await page.click(`${scope} [data-clv="herocard"]`);
+  await page.waitForSelector('[data-clv="addcard"]');
+  await page.fill('[data-clv="addcard"] [data-clv="f-name"]', "Zz Probe Agent");
+  await page.fill('[data-clv="addcard"] [data-clv="f-agency"]', "Probe & Co");
+  await page.click('[data-clv="add-save"]');
+  await page.waitForSelector('[data-clv="addcard"]', { state: "detached" });
+  const row = page.locator(`${scope} [data-clv="row"]`, { hasText: "Zz Probe Agent" }).first();
+  await expect(row, "the new row never rendered").toBeVisible();
+  /* the ring — the class is the lock (the harness kills animations, and reduced motion shows
+     the same ring statically; either way the CLASS is what carries it) */
+  const ringed = await row.evaluate((el) => el.classList.contains("clv-row--new"));
+  expect(ringed, "the new row carries no ring").toBe(true);
+  /* the band: the nearest preceding group band names the standing */
+  const band = await row.evaluate((el) => {
+    let n: Element | null = el;
+    while (n) {
+      let p = n.previousElementSibling;
+      while (p) { if (p.matches('[data-clv="band"]')) return p.textContent ?? ""; p = p.previousElementSibling; }
+      n = n.parentElement;
+    }
+    return "";
+  });
+  expect(band, "the new agent is not under Not yet queried").toContain("Not yet queried");
+  /* in view, centred: poll until two reads agree, then judge the rect */
+  let last = -1;
+  for (let i = 0; i < 30; i++) {
+    const y = await row.evaluate((el) => el.getBoundingClientRect().top);
+    if (Math.abs(y - last) < 1) break;
+    last = y;
+    await page.waitForTimeout(120);
+  }
+  const rect = await row.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { mid: (r.top + r.bottom) / 2, h: window.innerHeight };
+  });
+  expect(Math.abs(rect.mid - rect.h / 2), "the new row is not scrolled to the centre").toBeLessThanOrEqual(260);
+  bump(5);
+});
+
+test("§11.7's third leg — saving a window that crosses today MOVES the row's group, and moves it back", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  /* a with-the-agent row — under the current manuscript scope the live pool is small, and its
+     shape moves with the account's weather, so BOTH candidate shapes are accepted: a row whose
+     window is UNSTATED (no date line — weeks 1 then dates it in the past, and the restore is a
+     CLEAR back to absence), and a row whose stated window still runs (in Nd — weeks 1 pulls it
+     past, and the restore is the exact number). Either way the send is older than a week on
+     this fixture, so weeks=1 crosses today. */
+  const pick = await page.evaluate((scope) => {
+    const rows = [...document.querySelectorAll(`${scope} [data-clv="row"][data-stand="agent"]`)] as HTMLElement[];
+    return rows[0]?.dataset.agentCard ?? null;
+  }, scope);
+  expect(pick, "population first — no with-the-agent row under this scope").not.toBeNull();
+  let orig: string | null = null; // null = the forward save never landed; "" = unstated
+  try {
+    await page.click(`${scope} [data-agent-card="${pick}"]`);
+    await page.waitForSelector('[data-clv="profile"]');
+    await page.click('[data-clv="edit"]');
+    orig = await page.inputValue('[data-clv="f-weeks"]');
+    await page.fill('[data-clv="f-weeks"]', "1");
+    await page.click('[data-clv="save"]');
+    await page.waitForSelector('[data-clv="savedline"]');
+    await page.keyboard.press("Escape");
+    await page.waitForSelector('[data-clv="profile"]', { state: "detached" });
+    const moved = await page.evaluate(
+      ({ scope, id }) => (document.querySelector(`${scope} [data-agent-card="${id}"]`) as HTMLElement | null)?.dataset.stand ?? "",
+      { scope, id: pick! },
+    );
+    expect(moved, "the save did not move the row to Your move — the group is not reading the engine").toBe("you");
+    bump(2);
+  } finally {
+    if (orig !== null) {
+      /* restore the exact original — a stated number, or a CLEAR back to unstated (the field
+         is deleted, which P4's write-half already proved round-trips) */
+      await page.click(`${scope} [data-agent-card="${pick}"]`);
+      await page.waitForSelector('[data-clv="profile"]');
+      await page.click('[data-clv="edit"]');
+      await page.fill('[data-clv="f-weeks"]', orig);
+      /* a store already holding the original (the forward save never wrote) leaves the form
+         clean and Save disabled — nothing to restore, and clicking would hang */
+      const dirty = await page.evaluate(() => !(document.querySelector('[data-clv="save"]') as HTMLButtonElement).disabled);
+      if (dirty) {
+        await page.click('[data-clv="save"]');
+        await page.waitForSelector('[data-clv="savedline"]');
+      }
+      await page.keyboard.press("Escape");
+      await page.keyboard.press("Escape");
+      await page.waitForSelector('[data-clv="profile"]', { state: "detached" });
+      const back = await page.evaluate(
+        ({ scope, id }) => (document.querySelector(`${scope} [data-agent-card="${id}"]`) as HTMLElement | null)?.dataset.stand ?? "",
+        { scope, id: pick! },
+      );
+      expect(back, "THE RESTORE DID NOT LAND — the account's window is changed").toBe("agent");
+      bump(1);
+    }
+  }
+});

@@ -26,6 +26,8 @@ export interface ContactRowsProps {
   /** the manuscript's genre, matched — the ticked chip comes first */
   genreHit: (g: string) => boolean;
   openId: string | null;
+  /** the just-added agent — its row wears the 2.4s ring (§8.4) */
+  newId?: string | null;
   onOpen: (agentId: string) => void;
   onLogQuery: (agentId: string) => void;
   onAddGenres: (agentId: string) => void;
@@ -39,10 +41,11 @@ const Row: React.FC<{
   nowMs: number;
   genreHit: (g: string) => boolean;
   current: boolean;
+  fresh: boolean;
   onOpen: () => void;
   onLogQuery: () => void;
   onAddGenres: () => void;
-}> = ({ x, nowMs, genreHit, current, onOpen, onLogQuery, onAddGenres }) => {
+}> = ({ x, nowMs, genreHit, current, fresh, onOpen, onLogQuery, onAddGenres }) => {
   const a = x.agent;
   const yourMove = x.stand === "you";
   const line = x.q ? rowDateLine(x.q, nowMs) : null;
@@ -57,7 +60,7 @@ const Row: React.FC<{
   return (
     <button
       type="button"
-      className={`clv-row${x.pastExpected ? " clv-row--late" : ""}`}
+      className={`clv-row${x.pastExpected ? " clv-row--late" : ""}${fresh ? " clv-row--new" : ""}`}
       data-clv="row"
       /* flip.ts's own default selector — the FLIP and the save-notice scroll both find rows by it */
       data-agent-card={a.id}
@@ -131,7 +134,7 @@ const Row: React.FC<{
 };
 
 export const ContactRows: React.FC<ContactRowsProps> = ({
-  groups, byId, nowMs, genreHit, openId, onOpen, onLogQuery, onAddGenres,
+  groups, byId, nowMs, genreHit, openId, newId = null, onOpen, onLogQuery, onAddGenres,
 }) => (
   <div className="clv-list" data-clv="list">
     {groups.map((g) => (
@@ -153,6 +156,7 @@ export const ContactRows: React.FC<ContactRowsProps> = ({
               nowMs={nowMs}
               genreHit={genreHit}
               current={openId === id}
+              fresh={newId === id}
               onOpen={() => onOpen(id)}
               onLogQuery={() => onLogQuery(id)}
               onAddGenres={() => onAddGenres(id)}

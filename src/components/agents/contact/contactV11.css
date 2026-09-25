@@ -1228,6 +1228,79 @@
 .clv-fbody2 .agl-cc-o:hover, .clv-fbody2 .agl-cc-o.sel { background: var(--clv-ground); }
 .clv-fbody2 .agl-cc-o .fi { flex: none; }
 .clv-fbody2 .agl-cc-empty { padding: 9px 8px; font-size: 12px; font-style: italic; color: var(--clv-ink-45); }
+
+/* ── the add card (v11 §8) ────────────────────────────────────────────────────────────────── */
+.clv-addttl {
+  font-family: var(--clv-type);
+  font-size: 19px;
+  color: #fff;
+  flex: 1;
+  min-width: 0;
+}
+/* start-from-a-link — the parchment panel above the who block (§8.2 step 1; FILL IN absent) */
+.clv-lpanel {
+  background: var(--clv-parchment);
+  border: 1px solid var(--clv-hair);
+  border-radius: 10px;
+  padding: 10px 14px 12px;
+  margin-bottom: 16px;
+}
+.clv-lpanel-k {
+  display: block;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 8.5px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--clv-ink-45);
+  margin-bottom: 2px;
+}
+/* the duplicate line — blush, blocking, with the one way through (§8.2) */
+.clv-dup {
+  display: flex; align-items: center; gap: 10px;
+  background: #faf0ea;
+  border: 1px solid #e8c8bc;
+  border-radius: 8px;
+  padding: 7px 10px;
+  margin: 6px 0 2px;
+  font-family: var(--clv-serif);
+  font-size: 12.5px;
+  color: var(--clv-ink);
+}
+.clv-dup-open {
+  flex: none; margin-left: auto; cursor: pointer;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 9px; letter-spacing: .1em;
+  color: #7c3a2a;
+  background: none; border: 0; padding: 2px 0;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+/* §8.3's parked dress — FromLinkTag and FilledCountLine render nowhere until the reader exists */
+.clv-fromlink {
+  display: inline-block;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 8px; letter-spacing: .12em;
+  color: var(--clv-band-slate);
+  border: 1px solid var(--clv-band-slate);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+.clv-filledline {
+  font-family: var(--clv-serif);
+  font-size: 12px; font-style: italic;
+  color: var(--clv-ink-70);
+  margin-top: 6px;
+}
+/* the after-add ring (§8.4) — 2.4s anthracite settling to the row's own selection ring; the
+   keyframe's 100% IS `.clv-row[aria-current="true"]`'s shadow, stated here so the two read as
+   one treatment (the ref's `.row.new`/`newrow` pattern) */
+.clv-row--new { animation: clvNewRow 2.4s ease-out; }
+@keyframes clvNewRow {
+  0% { box-shadow: var(--clv-soft), inset 0 0 0 2px var(--clv-band-slate); }
+  100% { box-shadow: var(--clv-soft), inset 0 0 0 1.5px var(--clv-ink); }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* no animation, and the ring shows AT ONCE (§8.4 — the prompt's clause; the ref only kills
+     the animation, which would show nothing) */
+  .clv-row--new { animation: none; box-shadow: var(--clv-soft), inset 0 0 0 2px var(--clv-band-slate); }
+}
 .clv-fwk {
   display: flex;
   align-items: flex-end;

@@ -420,6 +420,14 @@ function AppContent() {
       return;
     }
     if (subPageName === "Add an agent") {
+      /* Ruling (f), Contact list v11: ON /agents the capture opens the page's own add card —
+         two add surfaces on one page would be the two-asking-surfaces fault — and everywhere
+         else the app-level focus form is untouched. An event rather than a prop because the
+         page stays mounted on every route and already owns the card's state. */
+      if (window.location.pathname === "/agents") {
+        window.dispatchEvent(new CustomEvent("sa:contact-add"));
+        return;
+      }
       setIsAddAgentOpen(true);
       return;
     }

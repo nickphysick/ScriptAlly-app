@@ -46,6 +46,15 @@ export interface ContactDraft {
   starRating: number | null;
 }
 
+/** A blank draft for the add card (§8) — born the way a new agent is born: optionals ABSENT
+ *  (null weeks, undefined NRN, no rating), door open, nothing pre-answered for the writer. */
+export const emptyContactDraft = (): ContactDraft => ({
+  name: "", agency: "", email: "", website: "", city: "", country: "",
+  responseTimeWeeks: null, noResponseMeansNo: undefined,
+  submissionStatus: "Open" as Agent["submissionStatus"], reopensOn: "",
+  genres: [], mswlNotes: "", materialsWanted: [], starRating: null,
+});
+
 export const draftFromAgentRecord = (a: Agent): ContactDraft => ({
   name: a.name ?? "",
   agency: a.agency ?? "",

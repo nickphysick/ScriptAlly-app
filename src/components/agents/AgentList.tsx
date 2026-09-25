@@ -35,6 +35,7 @@ import { ContactListEmptyState } from "./ContactListEmptyState";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { ContactRail } from "./contact/ContactRail";
 import { ContactProfile } from "./contact/ContactProfile";
+import { ContactAddCard } from "./contact/ContactAddCard";
 import type { FormSection } from "./contact/ContactAgentForm";
 import { AlsoNote, ContactDraft, EditCtx, draftFromAgentRecord, savedLine as savedLineFor } from "../../lib/contactEdit";
 import { AgentEditPatch, commitAgentEdits } from "../../lib/saveAgentEdits";
@@ -49,6 +50,7 @@ import {
 import { isGenreMatch } from "../../lib/genreMatch";
 import { ContactControls } from "./contact/ContactControls";
 import { ContactRows } from "./contact/ContactRows";
+import { normaliseSubmissionsUrl } from "../../lib/quickAdd";
 import { BarChip, ContactBar } from "./contact/ContactBar";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
@@ -524,11 +526,66 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, [factsById, openId, discard]);
 
 
-  /* ⚠️ INTERIM (P4): adding opens the app-level "Add an agent" capture — the flip editor that
-     hosted the in-grid draft is deleted with the drawer, and P5's centred add card replaces this
-     line and repoints the capture here (ruling f). One live add path per phase, never zero. */
-  const onAddAgent = () => onNavigate?.("agents", "Add an agent");
+  /* ── adding an agent (v11 §8) ─────────────────────────────────────────────────────────────
+     The centred add card, portalled like the pop-up. `adding` carries WHICH field opens focused
+     — the hero card's body asks for the name, its paste strip for the link (§3.4) — and the
+     app-level "Add an agent" capture reaches here through the `sa:contact-add` event App.tsx
+     dispatches on /agents (ruling f): elsewhere the old focus form is untouched. */
+  const [adding, setAdding] = useState<null | "name" | "link">(null);
+  /* the just-added agent — its row scrolls into view centred and wears the 2.4s ring (§8.4) */
+  const [newId, setNewId] = useState<string | null>(null);
+  const onAddAgent = () => setAdding("name");
   const onLogQuery = (agent: { id: string }) => onNavigate?.("queries", "Log a query", { agentId: agent.id });
+
+  useEffect(() => {
+    if (!active) return;
+    const open = () => setAdding("name");
+    window.addEventListener("sa:contact-add", open);
+    return () => window.removeEventListener("sa:contact-add", open);
+  }, [active]);
+
+  /**
+   * The create — through the SAME `addAgent` path every other creator uses (free-tier cap,
+   * AGENT_ADDED activity, undefined-stripping), with the v11 rules: optionals born ABSENT, the
+   * link field saving to `website` through the scheme allowlist (§8.3 — the importer-shaped
+   * path the allowlist's own docstring reserves itself for), `reopensOn` only when the door is
+   * Closed, and `submissionMethod` defaulting to Email exactly as the app-level form does.
+   */
+  const onCreateAgent = useCallback(async (d: ContactDraft, link: string) => {
+    const res = await addAgent({
+      name: d.name.trim(),
+      agency: d.agency.trim(),
+      email: d.email.trim(),
+      website: d.website.trim() || (link ? normaliseSubmissionsUrl(link) : ""),
+      genres: d.genres,
+      mswlNotes: d.mswlNotes,
+      submissionStatus: d.submissionStatus,
+      submissionMethod: SubmissionMethod.EMAIL,
+      materialsWanted: d.materialsWanted,
+      notes: "",
+      ...(d.city.trim() ? { city: d.city.trim() } : {}),
+      ...(d.country ? { country: d.country } : {}),
+      ...(d.responseTimeWeeks != null ? { responseTimeWeeks: d.responseTimeWeeks } : {}),
+      ...(d.noResponseMeansNo !== undefined ? { noResponseMeansNo: d.noResponseMeansNo } : {}),
+      ...(d.reopensOn.trim() && d.submissionStatus === SubmissionStatus.CLOSED ? { reopensOn: d.reopensOn.trim() } : {}),
+      ...(d.starRating != null ? { starRating: d.starRating as Agent["starRating"] } : {}),
+    });
+    if (!res.success || !res.id) return { ok: false as const, error: res.error };
+    setAdding(null);
+    setNewId(res.id);
+    return { ok: true as const };
+  }, [addAgent]);
+
+  /* §8.4: the new row into view, centred, once the store's own update has rendered it; the ring
+     class rides `newId` and drops when the animation has had its 2.4s (reduced motion shows the
+     ring statically for the same window — the CSS half). */
+  useEffect(() => {
+    if (!newId || !factsById.has(newId)) return;
+    const row = document.querySelector<HTMLElement>(`[data-agent-card="${newId}"]`);
+    row?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    const drop = window.setTimeout(() => setNewId(null), 2500);
+    return () => window.clearTimeout(drop);
+  }, [newId, factsById]);
 
 
 
@@ -603,9 +660,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             cards={census.cards}
             cardSel={cardSel}
             onToggleCard={toggleCard}
-            addOpen={false} /* P5 wires the add card's open state here */
-            onAdd={onAddAgent}
-            onPasteAdd={onAddAgent}
+            addOpen={adding !== null}
+            onAdd={() => setAdding("name")}
+            onPasteAdd={() => setAdding("link")}
             onStacked={setHeroStacked}
             stacked={heroStacked}
           />
@@ -649,6 +706,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               nowMs={nowMs}
               genreHit={(g) => !!tintGenre && isGenreMatch(g, tintGenre)}
               openId={openId}
+              newId={newId}
               onOpen={onOpen}
               onLogQuery={(id) => onLogQuery({ id })}
               onAddGenres={(id) => onEditAt(id, "genres")}
@@ -712,6 +770,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
 
       {/* ⚠️ THE PROFILE IS AN OVERLAY OUTSIDE THE LIST (§7.1) — a list re-render never touches
           it, and it portals to document.body, where the `--clv-*` palette at :root reaches it. */}
+      {adding && (
+        <ContactAddCard
+          focus={adding}
+          agents={agents}
+          msGenre={scoped?.genre ?? null}
+          genrePool={genrePool}
+          onClose={() => setAdding(null)}
+          onCreate={onCreateAgent}
+          onOpenAgent={(id) => { setAdding(null); onOpen(id); }}
+        />
+      )}
       {openAgent && (
         <ContactProfile
           agent={openAgent}
