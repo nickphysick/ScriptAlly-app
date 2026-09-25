@@ -37,6 +37,12 @@ const mkQ = (over: Partial<Query> = {}): Query => ({
 const agent = (over: Partial<Agent> = {}): Agent => ({ id: "a1", userId: "u", name: "Jonathan Marsh", agency: "The Marsh Agency", responseTimeWeeks: 8, ...over } as Agent);
 const rowsOf = (qs: Query[]) => buildQcRows(qs, [agent()], [], NOW);
 const view = (qs: Query[] = [mkQ()]) => renderToStaticMarkup(<QcBirdsEye rows={rowsOf(qs)} nowMs={NOW} onExpand={() => {}} />);
+/* §B3 — an agency that states NO reply window, so the query has no expected date and nothing dates
+   its track. `responseTimeWeeks` is OMITTED rather than zeroed: absence is the app's own "not
+   stated", and `agentWindowMs` then returns null rather than guessing a window. */
+const undatedView = (qs: Query[]) => renderToStaticMarkup(
+  <QcBirdsEye rows={buildQcRows(qs, [{ ...agent(), responseTimeWeeks: undefined } as Agent], [], NOW)} nowMs={NOW} onExpand={() => {}} />,
+);
 
 describe("the view, rendered", () => {
   it("head, focus, rows, legend — in that order, and the axis is GONE", () => {
@@ -82,15 +88,23 @@ describe("the view, rendered", () => {
     expect(al, "no allowance to compare").toBeTruthy();
     expect(notch).toBe(al);
   });
-  it("⚠️ an undated row draws an EMPTY dashed track — never a bar against a date nobody gave", () => {
-    const html = view([mkQ({ responseDeadline: null } as never)]);
-    const undated = renderToStaticMarkup(
-      <QcBirdsEye rows={buildQcRows([mkQ()], [agent({ responseTimeWeeks: undefined as never })], [], NOW)} nowMs={NOW} onExpand={() => {}} />,
-    );
-    expect(undated).toContain("qcv-be-track--none");
-    expect(undated, "an undated track holds nothing").not.toContain('data-qcv="be-fill"');
-    expect(rule(".qcv-be-track--none")).toMatch(/repeating-linear-gradient/);
-    expect(html.length).toBeGreaterThan(0);
+  it("§B3 · an undated row draws an EMPTY WHITE track — never a bar against a date nobody gave", () => {
+    /**
+     * ⚠️ RETARGETED (§B3) — THE DASHED PATTERN IS GONE, AND THE OLD FORM PINNED IT. It required a
+     * `repeating-linear-gradient`, which stood for *"an undated row draws no bar"*. A pattern is a
+     * mark, and a mark is something to read; the fact here is that there is nothing to read, and an
+     * empty track says that with no vocabulary at all. The law is unchanged and the claim survives:
+     * nothing is placed against a date nobody promised.
+     */
+    const none = rule(".qcv-be-track--none");
+    expect(none).toMatch(/background: #fff/);
+    expect(none, "a pattern is back in the empty track").not.toMatch(/repeating-linear-gradient|dashed/);
+    /* the ring is a touch heavier, so an empty track still reads as a track rather than as a gap */
+    expect(none).toMatch(/box-shadow: inset 0 0 0 1\.2px/);
+    /* …and the row really does draw no fill when nothing dates it */
+    expect(undatedView([mkQ({ status: QueryStatus.FULL_SENT })])).toContain('data-dated="no"');
+    /* …and the ordinary case really does say the other thing, or the line above proves nothing */
+    expect(view([mkQ()])).toContain('data-dated="yes"');
   });
   it("§3.4 · ⚠️ a stuck heading is on white, sticky, and states no negative margin", () => {
     /**

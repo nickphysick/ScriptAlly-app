@@ -1204,6 +1204,73 @@ describe("§C1–§C3 · your move", () => {
   });
 });
 
+describe("§B3 · the torn edges, drawn", () => {
+  const tl = read("src/components/queries/centre/qcvTimeline.css");
+  const rawTl = readFileSync(join(process.cwd(), "src/components/queries/centre/qcvTimeline.css"), "utf8");
+  const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");
+  const r = (sel: string) => {
+    const m = tl.match(new RegExp(`(?:^|\\n)\\s*${sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`));
+    expect(m, `${sel} has no rule`).toBeTruthy();
+    return m![1];
+  };
+
+  it("⚠️ §B3 · THE STRIPES AND THE DASHES ARE GONE from both views", () => {
+    /**
+     * A striped or dashed bar reads as a different KIND of thing — the page's dashed grammar
+     * already means "provisional", so a whole bar in it said the STAGE was provisional, when the
+     * only provisional thing is one of its two ends. It also threw the stage colour away, which is
+     * the one thing about the bar that is certain.
+     */
+    expect(tl, "the undated bar's whole treatment is back").not.toMatch(/[".\s`]qcv-tl-bar--undated[\s{,"`]/);
+    expect(tlSrc, "the undated modifier is rendered again").not.toContain("qcv-tl-bar--undated");
+    const be = read("src/components/queries/centre/qcvBirdsEye.css");
+    expect(/\.qcv-be-track--none \{([^}]*)\}/.exec(be)?.[1] ?? "", "the rail's dashes are back").not.toMatch(/repeating-linear-gradient/);
+  });
+
+  it("§B3 · the two torn ends: square at the tear, round at the fact", () => {
+    /* start torn → square LEFT, round right; end torn → round left, square RIGHT */
+    expect(r(".qcv-tl-bar--torn-start")).toMatch(/border-radius: 0 11px 11px 0/);
+    expect(r(".qcv-tl-bar--torn-end")).toMatch(/border-radius: 11px 0 0 11px/);
+    /* the zig-zag is drawn in WHITE over the bar's own end, 8px wide, at the torn side */
+    const st = r(".qcv-tl-bar--torn-start::before"), en = r(".qcv-tl-bar--torn-end::after");
+    for (const [side, rule2] of [["left", st], ["right", en]] as const) {
+      expect(rule2).toMatch(new RegExp(`${side}: -1px`));
+      expect(rule2).toMatch(/width: 8px/);
+      /* ⚠️ THE FILL IS CHECKED ON THE RAW FILE. `read()` strips comments, and the data-URI carries
+         `http://www.w3.org` — whose `//` the line-comment stripper eats, taking the rest of the
+         declaration with it. A stripper is right for prose and wrong for a URL. */
+      expect(rawTl).toMatch(new RegExp(`${side}: -1px`));
+    }
+    /* …and they are MIRRORS: the two paths differ only in which side the teeth point, and both are
+       white — read RAW, because `read()`'s comment stripper eats the `//` in the SVG's namespace */
+    expect(rawTl).toContain("M0 0H6L2 3.7");
+    expect(rawTl).toContain("M8 0H2L6 3.7");
+    expect((rawTl.match(/fill='white'/g) ?? []).length, "a tooth stopped being white").toBe(2);
+    /* the bar keeps its stage colour — the tear says where knowledge stops, not what stage it is */
+    expect(r(".qcv-tl-bar")).toMatch(/background: var\(--qcv-state/);
+    expect(st, "the torn bar paints over its own colour").not.toMatch(/background-color|background:/);
+  });
+
+  it("§B3 · Add date is a mono 8px tag with a 1px inset ring, opening the card's TRACKING tab", () => {
+    const a = r(".qcv-tl-adddate");
+    expect(a).toMatch(/font-family: var\(--qcv-mono\)/);
+    expect(a).toMatch(/font-size: 8px/);
+    expect(a).toMatch(/text-transform: uppercase/);
+    expect(a).toMatch(/background: #fff/);
+    expect(a).toMatch(/box-shadow: inset 0 0 0 1px rgba\(28, 19, 15, 0\.2\)/);
+    expect(a).toMatch(/border-radius: 8px/);
+    /**
+     * ⚠️ IT WRITES THE TAB THROUGH THE CARD'S OWN SEAM, never a new prop. `TAB_KEY` is the
+     * sessionStorage key `readTab` reads, so there is one answer to "which tab is open"; a second
+     * way to choose one is a second thing that can disagree with the card.
+     */
+    expect(tlSrc).toMatch(/sessionStorage\.setItem\(TAB_KEY, "tracking"\)/);
+    expect(tlSrc).toMatch(/\{b\.torn && \(/);
+    /* …and it is only ever drawn on a torn bar */
+    expect(tlSrc, "Add date is drawn on every bar").not.toMatch(/qcv-tl-adddate[\s\S]{0,80}\{b\.current/);
+  });
+});
+
 describe("§10 · the crosshair", () => {
   const tl = read("src/components/queries/centre/qcvTimeline.css");
   const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");

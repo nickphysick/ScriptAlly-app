@@ -183,8 +183,18 @@ export interface TlBar {
   /** The stretch beyond TODAY — drawn hollow, because it has not happened yet. */
   aheadFromMs: number | null;
   you: boolean;
-  /** Nothing dates this stage: it is drawn dashed, from the last thing anything DID date. */
-  undated: boolean;
+  /**
+   * §B3 — WHICH END OF THIS BAR IS UNKNOWN, and a bar has at most one.
+   *
+   * `"start"` — the stage's start date was never recorded, so the bar runs from the last thing
+   * anything DID date and its LEFT end is torn. `"end"` — no expected or send-by date is set, so
+   * the bar runs to today and its RIGHT end is torn. `null` — both ends are facts.
+   *
+   * ⚠️ A TORN EDGE, NEVER A STRIPE OR A DASH. A pattern says "this bar is a different kind of
+   * thing"; a torn edge says "this bar stops here because nobody knows where it stops", which is
+   * the actual fact, and it leaves the stage's own colour saying what stage it is.
+   */
+  torn: "start" | "end" | null;
   /** The sentence at the bar's end; past bars carry only their stage's name. */
   words: string;
   label: string;
@@ -264,7 +274,7 @@ export function tlRow(row: QcRow, nowMs: number): TlRow {
     bars.push({
       key: `${row.id}:${s.status}`, status: s.status, current: false,
       fromMs: s.startMs, toMs: to, overFromMs: null, aheadFromMs: null,
-      you: isWithYou(s.status), undated: false, words: "", label: STAGE_NAME[s.status],
+      you: isWithYou(s.status), torn: null, words: "", label: STAGE_NAME[s.status],
       title: `${STAGE_NAME[s.status]} · ${shortDate(s.startMs)} → ${shortDate(s.endMs ?? today)}`,
     });
   }
@@ -282,16 +292,30 @@ export function tlRow(row: QcRow, nowMs: number): TlRow {
   const undatedSpan = row.stageStartMs == null ? row.history.spans.find((s) => s.current) : null;
   const startMs = row.stageStartMs ?? undatedSpan?.startMs ?? null;
   if (startMs != null) {
-    const undated = row.stageStartMs == null;
+    const noStart = row.stageStartMs == null;
+    const noEnd = row.expectedMs == null;
+    /**
+     * §B3 — A BAR HAS AT MOST ONE TORN END, and the start wins when both are missing. A bar torn at
+     * both ends states nothing at all about where it sits, and the start is the more consequential
+     * absence: without it the bar's LENGTH is a guess, where without an end only its future is.
+     *
+     * ⚠️ THE PRECEDENCE IS STATED HERE AND NOWHERE ELSE. `noEnd` used to carry `!noStart` as well,
+     * so the rule was expressed twice — and a mutation that reversed this ternary changed nothing,
+     * because the other copy still decided it. A lock over a rule written twice cannot fail.
+     */
+    const torn: "start" | "end" | null = noStart ? "start" : noEnd ? "end" : null;
     const end = atLeastADay(startMs, Math.max(row.expectedMs ?? today, today));
     bars.push({
       key: `${row.id}:current`, status: row.status, current: true,
       fromMs: startMs, toMs: end,
-      overFromMs: !undated && row.expectedMs != null && row.expectedMs < today ? row.expectedMs : null,
+      overFromMs: !noStart && row.expectedMs != null && row.expectedMs < today ? row.expectedMs : null,
       aheadFromMs: end > today ? today : null,
-      you: isWithYou(row.status), undated,
-      words: undated ? "stage not dated" : currentWords(row, nowMs), label: STAGE_NAME[row.status],
-      title: undated ? `${STAGE_NAME[row.status]} · stage not dated` : currentWords(row, nowMs),
+      you: isWithYou(row.status), torn,
+      /* §B3 — the start's own wording; the end keeps `currentWords`' "no send-by date" / "no date
+         promised", which already names which date is missing and whose it is. */
+      words: noStart ? `${STAGE_NAME[row.status]} · date not recorded` : currentWords(row, nowMs),
+      label: STAGE_NAME[row.status],
+      title: noStart ? `${STAGE_NAME[row.status]} · date not recorded` : currentWords(row, nowMs),
     });
   }
   /* §8.7 — the chip is AGENT-SIDE ONLY: a nudge is a thing you send someone who owes you a reply */

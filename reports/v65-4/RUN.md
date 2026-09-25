@@ -155,3 +155,55 @@ wordings must appear in the sweep or it proved one of them.
 - **Eleven mutations, all red.**
 - Gates: tsc 0 · build clean · **8,394 passed**.
 - Measurement: **30 passed**.
+
+---
+
+## B3 · a missing date is a torn edge
+
+**What the pattern got wrong.** A striped or dashed bar reads as a different KIND of thing — the
+page's dashed grammar already means *provisional*, so a whole bar in it said the STAGE was
+provisional, when the only provisional thing is one of its two ends. It also threw away the stage
+colour, which is the one certain thing about the bar. A torn edge keeps the colour and says exactly
+where the knowledge stops.
+
+- **torn START** — the stage's start was never recorded: square left, round right, an 8px white
+  saw-tooth over the left end, `"<Stage> · date not recorded"`.
+- **torn END** — no expected or send-by date: round left, square right, the saw-tooth mirrored, and
+  the wording `currentWords` already gives ("no send-by date" / "no date promised"), which names
+  which date is missing and whose it is.
+- The zig-zag is **drawn in white over the bar's own end**, not masked out of it: a mask takes the
+  inset ring with it and leaves a soft edge; paint reads as a torn sheet against the card.
+- **Add date** — mono 8px, white on a 1px inset ring — opens the query card at its **Tracking** tab.
+- The rail's undated bar is an **empty white track** with its ring and nothing in it.
+
+### ⚠️ A LOCK COULD NOT FAIL, BECAUSE THE RULE WAS WRITTEN TWICE
+
+*"A bar has at most one torn end, and the start wins"* was expressed in `noEnd`'s own definition
+(`!noStart && …`) **and** in the ternary that reads it. The mutation that reversed the ternary
+therefore changed nothing and the lock reported green. The precedence is stated **once** now, and
+the mutation reddens it. **A lock over a rule written twice cannot fail** — which is the
+composed-result rule arriving from a new direction: not a property of the parts standing in for the
+whole, but the same property stated in two places so that breaking one is invisible.
+
+### And two smaller traps
+
+- **`read()`'s comment stripper eats a data-URI.** The saw-tooth's SVG carries
+  `http://www.w3.org`, and the line-comment stripper takes the `//` and the rest of the declaration
+  with it — so a check for `fill='white'` failed on a correct file. The URI checks read the RAW file
+  and say so; the stripper is right for prose and wrong for a URL.
+- **A grouped rule broke the sheet's one-rule-per-selector invariant.** `.…torn-start::before,
+  .…torn-end::after { }` plus an individual rule for each made the second selector ambiguous to
+  every first-match slice. Declared per selector, shared properties restated.
+
+Two measurement assertions pinned the dashes and are retargeted; the torn reading is a **tally per
+end**, so a fixture that drifts to one of them shows as a monoculture rather than as a green.
+Measured on the account: **`{start: 2, end: 18}`** — both branches drawn.
+
+- **Nine mutations, all red** (one after the precedence was stated once).
+- Gates: tsc 0 · build clean · **8,401 passed**.
+- Measurement: **30 passed**.
+
+⚠️ **THERE IS NO DEDICATED "SET THE MISSING STAGE DATE" FLOW IN THE APP**, as §B3 anticipated. Add
+date opens the query card at its **Tracking** tab, where the Correction UI lives, through the card's
+own `TAB_KEY` seam rather than a new prop — a second way to choose a tab is a second thing that can
+disagree with the card about which one is open.

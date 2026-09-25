@@ -255,8 +255,10 @@ describe("§8.7 · every live row draws a bar, at least a day wide (v65.1)", () 
     const t = tlRow(r, NOW2);
     const cur = t.bars.filter((b) => b.current);
     expect(cur).toHaveLength(1);
-    expect(cur[0].undated).toBe(true);
-    expect(cur[0].words).toBe("stage not dated");
+    /* §B3 — the bar is TORN AT ITS START now, and says which date is missing rather than that the
+       stage is "not dated": the stage is known, its start is not. */
+    expect(cur[0].torn).toBe("start");
+    expect(cur[0].words).toBe("Full sent · date not recorded");
     /* from the previous stage's end — the only date available — and never from the send */
     expect(cur[0].fromMs).toBe(Date.parse(iso2(-20)));
     expect(t.bars.length, "and the history survives with it").toBeGreaterThan(1);
@@ -342,6 +344,48 @@ describe("§C3 · your move", () => {
       expect(r.yourMove, st).toBe(true);
       expect(r.nudge, `${st} draws a nudge chip`).toBeNull();
     }
+  });
+});
+
+/**
+ * §B3 · A MISSING DATE IS A TORN EDGE. Two cases, one per end, and never both on one bar.
+ */
+describe("§B3 · the torn ends", () => {
+  it("§B3 · no stage start → the bar is torn at its START and says which date is missing", () => {
+    /* FULL SENT with a full REQUESTED date and nothing dating the send itself */
+    const r = one({ status: QueryStatus.FULL_SENT, dateSent: ago(60), fullRequestedDate: ago(20) } as never);
+    const cur = tlRow(r, NOW).bars.find((b) => b.current)!;
+    expect(cur.torn).toBe("start");
+    expect(cur.words).toBe("Full sent · date not recorded");
+  });
+
+  it("§B3 · no expected date → the bar is torn at its END, and keeps the wording that names it", () => {
+    /* an agency stating no window, so nothing promises a reply date */
+    const rows = buildQcRows([mkQ()], [agent({ responseTimeWeeks: undefined })], [], NOW);
+    const cur = tlRow(rows[0], NOW).bars.find((b) => b.current)!;
+    expect(cur.torn).toBe("end");
+    expect(cur.words).toMatch(/no date promised$/);
+  });
+
+  it("⚠️ §B3 · an ordinary bar is torn at NEITHER end", () => {
+    expect(tlRow(one(), NOW).bars.find((b) => b.current)!.torn).toBeNull();
+    /* …and a PAST bar is never torn: both its ends are facts by the time it becomes one */
+    const past = tlRow(one({ status: QueryStatus.FULL_SENT, fullRequestedDate: ago(20), fullSentDate: ago(10) } as never), NOW)
+      .bars.filter((b) => !b.current);
+    expect(past.length).toBeGreaterThan(0);
+    expect(past.every((b) => b.torn === null), JSON.stringify(past.map((b) => b.torn))).toBe(true);
+  });
+
+  it("⚠️ §B3 · a bar has AT MOST ONE torn end, and the start wins", () => {
+    /**
+     * A bar torn at both ends states nothing at all about where it sits. The start is the more
+     * consequential absence: without it the bar's LENGTH is a guess, where without an end only its
+     * future is.
+     */
+    const rows = buildQcRows([mkQ({ status: QueryStatus.FULL_SENT, dateSent: ago(60), fullRequestedDate: ago(20) } as never)],
+      [agent({ responseTimeWeeks: undefined })], [], NOW);
+    const cur = tlRow(rows[0], NOW).bars.find((b) => b.current)!;
+    expect(cur.torn).toBe("start");
   });
 });
 

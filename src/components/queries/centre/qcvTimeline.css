@@ -344,16 +344,51 @@
 }
 
 /**
- * §8.7 — a stage nothing dates (v65.1).
+ * §B3 — A MISSING DATE IS A TORN EDGE, NEVER A STRIPE OR A DASH.
  *
- * ⚠️ DASHED IS THE PAGE'S OWN WORD FOR "NOT ESTABLISHED FACT", and it is the reason this bar may be
- * drawn at all: it runs from the last thing anything DID date to today, which is a guess, and the
- * dash is what admits it. The words say so too — a bar that looked like any other would be the app
- * stating a date it does not have.
+ * ⚠️ WHAT THE PATTERN GOT WRONG. A striped or dashed bar reads as a different KIND of thing — the
+ * page's dashed grammar already means "provisional", so a whole bar in it said the STAGE was
+ * provisional, when the only provisional thing is one of its two ends. It also threw away the stage
+ * colour, which is the one thing about the bar that is certain. A torn edge keeps the colour and
+ * says exactly where the knowledge stops.
+ *
+ * The bar is its stage's own colour in both cases, from `--qcv-state`, like every other bar.
  */
-.qcv-tl-bar--undated {
-  background: #fff;
-  border: 1px dashed rgba(28, 19, 15, 0.45);
-  box-shadow: none;
+/* torn START — the stage's start was never recorded: square left, round right, ragged left end */
+.qcv-tl-bar--torn-start { border-radius: 0 11px 11px 0; }
+/* torn END — no expected or send-by date: round left, square right, ragged right end */
+.qcv-tl-bar--torn-end { border-radius: 11px 0 0 11px; }
+/**
+ * ⚠️ THE ZIG-ZAG IS DRAWN IN WHITE OVER THE BAR'S OWN END, not cut out of it. A `mask` would take
+ * the bar's inset ring with it and leave a soft edge; an 8px white saw-tooth painted on top reads
+ * as a torn sheet against the card, which is the whole metaphor.
+ */
+/* ⚠️ DECLARED PER SELECTOR, NOT GROUPED. This sheet's own invariant is one base rule per selector —
+   a grouped rule plus an individual one makes every first-match slice in the locks ambiguous, which
+   this repo has paid for twice. The shared properties are restated rather than shared. */
+.qcv-tl-bar--torn-start::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -1px; width: 8px; z-index: 2;
+  background-repeat: no-repeat; background-size: 8px 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='22' viewBox='0 0 8 22'%3E%3Cpath d='M0 0H6L2 3.7L6 7.3L2 11L6 14.7L2 18.3L6 22H0Z' fill='white'/%3E%3C/svg%3E");
 }
-.qcv-tl-bar--undated .qcv-tl-words { color: var(--qcv-ink-70); font-style: italic; }
+.qcv-tl-bar--torn-end::after {
+  content: ""; position: absolute; top: 0; bottom: 0; right: -1px; width: 8px; z-index: 2;
+  background-repeat: no-repeat; background-size: 8px 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='22' viewBox='0 0 8 22'%3E%3Cpath d='M8 0H2L6 3.7L2 7.3L6 11L2 14.7L6 18.3L2 22H8Z' fill='white'/%3E%3C/svg%3E");
+}
+/* the half of the sentence naming what is missing is italic and quieter than the stage's name */
+.qcv-tl-bar--torn-start .qcv-tl-words,
+.qcv-tl-bar--torn-end .qcv-tl-words { color: var(--qcv-ink-70); }
+/**
+ * §B3 — ADD DATE: a mono 8px tag at the bar's right, white on a 1px inset ring. It is the only
+ * control inside a bar, so it states its own cursor and its own stacking — the words beside it are
+ * `z-index: 1` and the torn edge is 2.
+ */
+.qcv-tl-adddate {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%); z-index: 3;
+  padding: 2px 7px; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.2);
+  text-decoration: none; cursor: pointer; white-space: nowrap;
+  font-family: var(--qcv-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qcv-ink);
+}
+.qcv-tl-adddate:hover { background: var(--qcv-parchment); }
+.qcv-tl-adddate:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 1px; }

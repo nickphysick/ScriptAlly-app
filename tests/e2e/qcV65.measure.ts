@@ -832,7 +832,9 @@ test("§3.2–§3.3 · the rail's progress bars and rows — the window, the ove
           allowW: al ? al.getBoundingClientRect().width / tb.width : null,
           overW: ov ? ov.getBoundingClientRect().width / tb.width : null,
           notchAt: nt ? (nt.getBoundingClientRect().left + 1 - tb.left) / tb.width : null,
-          dashed: getComputedStyle(tr).backgroundImage.includes("gradient"),
+          /* §B3 — the empty track is WHITE with its ring; the dashes are gone from both views */
+          patterned: getComputedStyle(tr).backgroundImage.includes("gradient"),
+          trackBg: getComputedStyle(tr).backgroundColor,
         };
       }).filter(Boolean),
       lateBg: lateCs?.backgroundColor ?? null, lateEdge: lateCs?.boxShadow ?? null,
@@ -888,8 +890,10 @@ test("§3.2–§3.3 · the rail's progress bars and rows — the window, the ove
     }
   }
   /* ⚠️ AND THE UNDATED BRANCH IS ENTERED, or "every row draws a window" is about rows that all had one */
-  yes("be-rows", `some rows are undated (${undated.length}) — the dashed track`, undated.length > 0, String(undated.length));
-  for (const b of undated) yes("be-rows", "§3.2 · an undated track is dashed and empty", b.dashed && !b.hasAllow, JSON.stringify(b));
+  yes("be-rows", `some rows are undated (${undated.length}) — the empty track`, undated.length > 0, String(undated.length));
+  /* §B3 — an EMPTY WHITE track with its ring and nothing in it. A pattern is a mark, and a mark is
+     something to read; the fact here is that there is nothing to read. */
+  for (const b of undated) yes("be-rows", "§B3 · an undated track is empty, white and unpatterned", !b.patterned && !b.hasAllow && b.trackBg === "rgb(255, 255, 255)", JSON.stringify(b));
   /* §5 — every date and distance fits at 340, and the four kinds are the library's */
   yes("be-rows", `there are rows (${r.cells.length})`, r.cells.length > 3, String(r.cells.length));
   const kinds = [...new Set(r.cells.map((c) => c.kind))].sort();
@@ -1765,10 +1769,15 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
       return {
         id: row.getAttribute("data-id"), name: (row.querySelector(".qcv-tl-nm")?.textContent ?? "").trim(),
         bars, ghostOnLine: g ? Math.abs(g.getBoundingClientRect().left - line) < 4 : false,
-        undated: !!row.querySelector(".qcv-tl-bar--undated"),
+        /* §B3 — a bar whose start or end nobody recorded is TORN at that end, never patterned */
+        torn: row.querySelector("[data-qcv='tl-bar'][class*='qcv-tl-bar--torn-']")?.className.match(/qcv-tl-bar--torn-(start|end)/)?.[1] ?? null,
       };
     });
-    return { total: out.length, noBars: out.filter((x) => x.bars.length === 0), thin: out.filter((x) => x.bars.some((w) => w < 1)), onLine: out.filter((x) => x.ghostOnLine), undated: out.filter((x) => x.undated).length };
+    /* §B3 — a TALLY per torn end, so a fixture that drifted to one of them shows as a monoculture
+       rather than as a green */
+    const tornTally: Record<string, number> = {};
+    for (const x of out) if (x.torn) tornTally[x.torn] = (tornTally[x.torn] ?? 0) + 1;
+    return { total: out.length, noBars: out.filter((x) => x.bars.length === 0), thin: out.filter((x) => x.bars.some((w) => w < 1)), onLine: out.filter((x) => x.ghostOnLine), tornTally };
   });
   record({ area: "timeline", what: "§8.7 · every live row's bars", got: rowsNow, want: "no row without bars, none thinner than a day, no ghost on the line" });
   yes("timeline", `the sweep saw rows at all (${rowsNow.total})`, rowsNow.total > 5, String(rowsNow.total));
@@ -1776,7 +1785,10 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
   is("timeline", "§8.7 · …and none of them is thinner than a day", rowsNow.thin.map((x) => x.name).join(" · "), "");
   is("timeline", "§8.7 · …and no action ghost sits on the today line", rowsNow.onLine.map((x) => x.name).join(" · "), "");
   /* ⚠️ THE BRANCH MUST BE ENTERED, or "every row draws a bar" is a claim about rows that all had one */
-  yes("timeline", `…and the undated branch was exercised (${rowsNow.undated} dashed rows)`, rowsNow.undated > 0, JSON.stringify(rowsNow.undated));
+  /* §B3 — the fixture must reach a torn bar, or the whole treatment is unproved on the page */
+  record({ area: "timeline", what: "§B3 · which ends the fixture tore", got: rowsNow.tornTally, want: "reported" });
+  yes("timeline", `§B3 · …and a torn bar was drawn (${JSON.stringify(rowsNow.tornTally)})`,
+    (rowsNow.tornTally.start ?? 0) + (rowsNow.tornTally.end ?? 0) > 0, JSON.stringify(rowsNow.tornTally));
 
   /* §8.9 — the crosshair follows the pointer and names a day */
   const box = await page.evaluate(() => { const s = document.querySelector("[data-qcv='tl-scroll']")!.getBoundingClientRect(); return { x: s.left + s.width * 0.7, y: s.top + s.height * 0.6 }; });

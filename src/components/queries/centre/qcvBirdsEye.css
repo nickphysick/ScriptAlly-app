@@ -193,11 +193,16 @@
   border-radius: 4px; overflow: hidden;
   box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12);
 }
-/* ⚠️ NOTHING DATES IT: an empty track that says so, rather than a bar placed against a date nobody
-   promised. The dashes are the pattern, and the ring is a touch heavier so an empty track still
-   reads as a track. */
+/**
+ * ⚠️ NOTHING DATES IT: an EMPTY WHITE TRACK with the ring and nothing in it, rather than a bar
+ * placed against a date nobody promised.
+ *
+ * §B3 — THE DASHED PATTERN IS GONE. A pattern is a mark, and a mark is something to read; the fact
+ * here is that there is nothing to read, and an empty track says that with no vocabulary at all.
+ * The ring is a touch heavier so an empty track still reads as a track rather than as a gap.
+ */
 .qcv-be-track--none {
-  background: repeating-linear-gradient(90deg, rgba(28, 19, 15, 0.18) 0 4px, transparent 4px 8px);
+  background: #fff;
   box-shadow: inset 0 0 0 1.2px rgba(28, 19, 15, 0.12);
 }
 /* the allowance: the window the agency asked for, in white, with its own ring */

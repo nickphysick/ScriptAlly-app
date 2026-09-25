@@ -20,6 +20,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { createPortal } from "react-dom";
 import { StatusDot } from "../../StatusDot";
 import { dueCell } from "../../../lib/qcBirdsEye";
+import { TAB_KEY } from "../QueryPanel";
 import { groupRows, type CalView } from "../../../lib/qcCalView";
 import type { QcRow } from "../../../lib/qcSummary";
 import {
@@ -60,6 +61,11 @@ export const QcTimeline: React.FC<{
   find?: string;
   onNudge: (id: string) => void;
 }> = ({ rows, view, packageName, nowMs, focusId = null, onOpen, leftControls, onNudge, timeHost = null, find = "" }) => {
+  /* §B3 — Add date opens the card on Tracking, through the card's own tab seam */
+  const openTracking = useCallback((id: string) => {
+    try { sessionStorage.setItem(TAB_KEY, "tracking"); } catch { /* the card's default is fine */ }
+    onOpen(id);
+  }, [onOpen]);
   const boxRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [boxW, setBoxW] = useState(0);
@@ -392,7 +398,7 @@ export const QcTimeline: React.FC<{
       <button
         key={b.key}
         type="button"
-        className={`qcv-tl-bar${b.current ? " qcv-tl-bar--now" : " qcv-tl-bar--past"}${b.you ? " qcv-tl-bar--you" : ""}${b.undated ? " qcv-tl-bar--undated" : ""}`}
+        className={`qcv-tl-bar${b.current ? " qcv-tl-bar--now" : " qcv-tl-bar--past"}${b.you ? " qcv-tl-bar--you" : ""}${b.torn ? ` qcv-tl-bar--torn-${b.torn}` : ""}`}
         data-qcv="tl-bar"
         data-status={b.status}
         data-current={b.current ? "true" : "false"}
@@ -423,6 +429,27 @@ export const QcTimeline: React.FC<{
           data-qcv="tl-words"
           style={{ marginLeft: Math.max(0, Math.min(scrollLeft + 10 - left, w - 24)) }}
         >{b.current ? b.words : b.label}</span>
+        {/**
+          * §B3 — ADD DATE, on a bar whose start or end nobody recorded. It opens the query card at
+          * its TRACKING tab, which is where the Correction UI lives — there is no dedicated "set
+          * the missing stage date" flow in the app, and this is recorded in the run report rather
+          * than invented here.
+          *
+          * ⚠️ IT WRITES THE TAB THROUGH THE CARD'S OWN SEAM (`TAB_KEY`, the sessionStorage key
+          * `readTab` reads) rather than taking a new prop. A second way to choose a tab is a second
+          * thing that can disagree with the card about which tab is open.
+          */}
+        {b.torn && (
+          <s
+            className="qcv-tl-adddate"
+            data-qcv="tl-adddate"
+            role="button"
+            tabIndex={0}
+            title="Open this query's tracking to record the date"
+            onClick={(e) => { e.stopPropagation(); openTracking(r.id); }}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); openTracking(r.id); } }}
+          >Add date</s>
+        )}
       </button>
     );
   };
