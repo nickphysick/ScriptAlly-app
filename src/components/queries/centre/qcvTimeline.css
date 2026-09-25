@@ -193,7 +193,14 @@
 /* §6 — the hint, beside the name in the band's own line */
 .qcv-tl-band em { font-style: normal; font-family: var(--qcv-serif); font-weight: 400; font-size: 11.5px; color: rgba(255, 255, 255, 0.62); }
 
-.qcv-tl-row { position: relative; display: grid; grid-template-columns: var(--qcv-tl-names) auto; height: 44px; border-bottom: 1px solid var(--qcv-hair); cursor: pointer; }
+/**
+ * §D4 — THE CURSOR SAYS WHICH HALF OF A ROW DOES WHAT. The row carried `pointer` across its whole
+ * width while only two things in it open a query, so the empty track promised a click it no longer
+ * makes. The names cell keeps `pointer`; the track is a drag handle and says so in exactly the two
+ * declarations the date row uses, because it is the same gesture on the same scroller.
+ */
+.qcv-tl-row { position: relative; display: grid; grid-template-columns: var(--qcv-tl-names) auto; height: 44px; border-bottom: 1px solid var(--qcv-hair); cursor: default; }
+/* the track's own rule below carries `cursor: grab` — one rule per selector, per this file */
 .qcv-tl-row:hover { background: var(--qcv-parchment); }
 /* §8.11 — a row arrived at from the rail wears an ink ring */
 .qcv-tl-row--focus { box-shadow: inset 0 0 0 1.6px var(--qcv-ink); }
@@ -205,6 +212,7 @@
 .qcv-tl-names {
   position: sticky; left: 0; z-index: 2; display: flex; align-items: center; gap: 10px;
   box-sizing: border-box; padding: 0 14px 0 18px; background: #fff; border-right: 1px solid var(--qcv-hair);
+  cursor: pointer;                       /* §D4 — it opens the query; the track beside it pans */
 }
 /**
  * §7 — the due date over its distance, at the cell's right. The same two facts the rail's right
@@ -247,7 +255,7 @@
 .qcv-tl-st { display: flex; align-items: center; gap: 5px; font-family: var(--qcv-type); font-size: 11.5px; line-height: 14px; color: var(--qcv-ink-70); white-space: nowrap; overflow: hidden; }
 .qcv-tl-st svg { flex: none; }
 
-.qcv-tl-track { position: relative; height: 44px; }
+.qcv-tl-track { position: relative; height: 44px; cursor: grab; touch-action: pan-y; }
 
 /* §8.7 — the bars */
 .qcv-tl-bar {

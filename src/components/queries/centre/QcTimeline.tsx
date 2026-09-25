@@ -335,7 +335,13 @@ export const QcTimeline: React.FC<{
     const el = scrollRef.current;
     if (!el || e.button !== 0) return;
     const t = e.target as HTMLElement;
-    if (t.closest("button, a, input, [role='button'], [data-qcv='tl-marker'], [data-qcv='tl-names'], [data-qcv='xp-ctl']")) return;
+    /**
+     * §D4 — THE RING IS NAMED BECAUSE IT IS THE ONE THING HERE THAT IS NOT A BUTTON. The bar, the
+     * nudge chip and Add date are all `<button>`, so the first clause already covers them; the
+     * with-you ring is a `<span>` holding a StatusDot, and without its own entry a press on it
+     * started a pan.
+     */
+    if (t.closest("button, a, input, [role='button'], [data-qcv='tl-marker'], [data-qcv='tl-names'], [data-qcv='tl-ghost'], [data-qcv='xp-ctl']")) return;
     drag.current = { id: e.pointerId, x: e.clientX, scroll: el.scrollLeft, moved: false };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     document.body.style.userSelect = "none";
@@ -433,7 +439,7 @@ export const QcTimeline: React.FC<{
         data-current={b.current ? "true" : "false"}
         style={{ left, width: w, ["--qcv-state" as string]: `var(--state-${r.row.state})` }}
         title={b.title}
-        onClick={(e) => { e.stopPropagation(); onOpen(r.id); }}
+        onClick={() => onOpen(r.id)}
       >
         {/* the ink stretch from the expected date to today, and the hollow one beyond today */}
         {b.overFromMs != null && <u className="qcv-tl-over" data-qcv="tl-over" style={{ left: `${pc(b.overFromMs)}%`, right: 0 }} />}
@@ -605,6 +611,24 @@ export const QcTimeline: React.FC<{
                     <span>{g.label}{g.hint && <em>{g.hint}</em>}<i>{g.count}</i></span>
                   </div>
                 )}
+                {/**
+                  * §D4 — THE ROW DOES NOT OPEN THE QUERY; A BAR AND THE NAMES CELL DO, each by its
+                  * own handler.
+                  *
+                  * ⚠️ AND THE EMPTY TRACK WAS ALREADY NOT AN OPENER, WHICH IS NOT WHAT I ASSUMED.
+                  * The row's `onClick` looked like it covered the whole width; it did not, because
+                  * the drag calls `preventDefault()` on `pointerdown` and that suppresses the
+                  * compatibility `click`. Measured: restoring the row's handler leaves a press on
+                  * the track opening nothing. So the row's handler was reachable only through the
+                  * names cell — which is in the drag's exclusion list and therefore keeps its click.
+                  *
+                  * ⚠️ WHAT THE CHANGE IS REALLY FOR IS THE COUPLING. "The track does not open a
+                  * query" was a consequence of the exclusion list rather than a statement anybody
+                  * had made: add one excluded element inside the track and it silently becomes an
+                  * opener, through a handler on a different element, for a reason nobody reading
+                  * either file would see. The two openers now say so themselves, and the cursors
+                  * stop the row promising a click across a width where only part of it acts.
+                  */}
                 {g.rows.map((r) => {
                   const t = tl.get(r.id)!;
                   return (
@@ -614,9 +638,23 @@ export const QcTimeline: React.FC<{
                       data-qcv="tl-row"
                       data-find={find ? (r.row.agentName.toLowerCase().includes(find) ? "hit" : "miss") : undefined}
                       data-id={r.id}
-                      onClick={() => onOpen(r.id)}
                     >
-                      <div className="qcv-tl-names" data-qcv="tl-names">
+                      {/**
+                        * §D4 — THE NAMES CELL IS AN OPENER, AND IT NEEDS ITS OWN HANDLER.
+                        *
+                        * ⚠️ IT HAD NONE. It opened the query only because the ROW did, so taking
+                        * the row's handler off to stop the empty track opening things took the
+                        * names cell with it — a surface the same edit was written to preserve.
+                        * Measured: the bar still opened and the name did nothing.
+                        */}
+                      <div
+                        className="qcv-tl-names"
+                        data-qcv="tl-names"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => onOpen(r.id)}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(r.id); } }}
+                      >
                         <i className="qcv-tl-ini" aria-hidden="true">{r.row.initials}</i>
                         <span className="qcv-tl-who">
                           <b className="qcv-tl-nm">{r.row.agentName}</b>

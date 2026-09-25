@@ -2066,6 +2066,114 @@ test("§A1 · today at 56–58% — on open, on re-open, and with the data 800ms
  * `pointerdown`: the date row's drag calls `setPointerCapture` and `preventDefault`, the rows carry
  * their own handlers, and every control that must not open a query calls `stopPropagation`.
  */
+/**
+ * ⚠️ §D4 · WHAT OPENS A QUERY, AND WHAT PANS. Only a bar and the names cell open; the empty track
+ * is a drag surface with the date row's own behaviour. Every claim here is about a GESTURE, so
+ * every one is measured on the page: a source lock could see the handler come off the row and
+ * could not see that a press on the track now pans instead.
+ */
+test("§D4 · only a bar and a name open a query; the empty track pans", async ({ page }) => {
+  await openApp(page, 1440, 860, "?view=calendar");
+  await page.waitForTimeout(900);
+  const card = page.locator("[data-qcv='xp-card']");
+  if (!(await card.count())) {
+    await page.locator("[data-qcv='be-expand']").first().click({ timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(900);
+  }
+  yes("d4", "§D4 · the expanded view is open", (await card.count()) > 0, String(await card.count()));
+
+  const openCount = () => page.locator("[data-qcv='xp-card']").count();
+  const scrollNow = () => page.evaluate(() => document.querySelector("[data-qcv='tl-scroll']")?.scrollLeft ?? -1);
+
+  /* a point on the track, clear of every bar, chip and ring in its row */
+  const emptyTrack = await page.evaluate(() => {
+    for (const tr of document.querySelectorAll("[data-qcv='tl-track']")) {
+      const b = tr.getBoundingClientRect();
+      if (b.height <= 0) continue;
+      const y = Math.round(b.top + b.height / 2);
+      const l = Math.max(b.left, 0), r = Math.min(b.right, window.innerWidth);
+      for (let x = Math.round(l + 40); x < r - 20; x += 24) {
+        const el = document.elementFromPoint(x, y) as HTMLElement | null;
+        if (el && el.closest("[data-qcv='tl-track']") && !el.closest("button, [data-qcv='tl-ghost']")) {
+          return { x, y, cursor: getComputedStyle(el.closest("[data-qcv='tl-track']")!).cursor };
+        }
+      }
+    }
+    return null;
+  });
+  yes("d4", "§D4 · an empty point on the track was found", emptyTrack != null, JSON.stringify(emptyTrack));
+  if (!emptyTrack) return;
+
+  /* …and it wears the date row's cursor, which is the promise the gesture then has to keep */
+  const tierCursor = await page.evaluate(() =>
+    getComputedStyle(document.querySelector("[data-qcv='tl-tier']") as Element).cursor);
+  is("d4", "§D4 · the track's cursor is the date row's", emptyTrack.cursor, tierCursor);
+  is("d4", "§D4 · …and that cursor is grab", emptyTrack.cursor, "grab");
+
+  /* a press that does not move opens nothing and pans nothing — the 3px dead zone */
+  const before = await scrollNow();
+  await page.mouse.move(emptyTrack.x, emptyTrack.y);
+  await page.mouse.down(); await page.mouse.move(emptyTrack.x + 2, emptyTrack.y); await page.mouse.up();
+  await page.waitForTimeout(350);
+  is("d4", "§D4 · a 2px press on the track opens nothing", await openCount(), 1);
+  is("d4", "§D4 · …and pans nothing (the 3px dead zone)", await scrollNow(), before);
+
+  /* a drag pans 1:1 and still opens nothing */
+  await page.mouse.move(emptyTrack.x, emptyTrack.y);
+  await page.mouse.down();
+  for (let i = 1; i <= 6; i += 1) await page.mouse.move(emptyTrack.x - i * 20, emptyTrack.y);
+  await page.mouse.up();
+  await page.waitForTimeout(350);
+  const after = await scrollNow();
+  is("d4", "§D4 · …and a 120px drag pans 1:1", after - before, 120);
+  is("d4", "§D4 · …and opens nothing", await openCount(), 1);
+
+  /* the two that DO open. A bar first. */
+  /**
+   * ⚠️ THE FIRST BAR IS NOT NECESSARILY A BAR A READER CAN PRESS. The names column is sticky at
+   * `left: 0` with a z-index above the track, so a bar beginning off the left of the viewport has
+   * its opening stretch UNDER the names cell — a press there lands on the name. The point is taken
+   * from the first bar that `elementFromPoint` agrees is on top.
+   */
+  const barAt = await page.evaluate(() => {
+    for (const el of document.querySelectorAll("[data-qcv='tl-bar']")) {
+      const b = el.getBoundingClientRect();
+      if (b.width < 8 || b.height <= 0 || b.top < 0 || b.bottom > window.innerHeight) continue;
+      const y = Math.round(b.top + b.height / 2);
+      const l = Math.max(b.left, 0), r = Math.min(b.right, window.innerWidth);
+      for (let x = Math.round(l + 6); x < r - 4; x += 12) {
+        if ((document.elementFromPoint(x, y) as HTMLElement | null)?.closest("[data-qcv='tl-bar']") === el) return { x, y };
+      }
+    }
+    return null;
+  });
+  yes("d4", "§D4 · a bar was found", barAt != null, JSON.stringify(barAt));
+  if (barAt) {
+    await page.mouse.click(barAt.x, barAt.y);
+    await page.waitForTimeout(700);
+    is("d4", "§D4 · a press on a bar opens the query", await openCount(), 0);
+  }
+
+  /* then the names cell, from a fresh view */
+  await openApp(page, 1440, 860, "?view=calendar");
+  await page.waitForTimeout(900);
+  const nameAt = await page.evaluate(() => {
+    for (const el of document.querySelectorAll("[data-qcv='tl-names']")) {
+      const b = el.getBoundingClientRect();
+      if (b.height <= 0 || b.top < 0 || b.bottom > window.innerHeight) continue;
+      const x = Math.round(b.left + b.width / 2), y = Math.round(b.top + b.height / 2);
+      if ((document.elementFromPoint(x, y) as HTMLElement | null)?.closest("[data-qcv='tl-names']") === el) return { x, y };
+    }
+    return null;
+  });
+  yes("d4", "§D4 · a names cell was found", nameAt != null, JSON.stringify(nameAt));
+  if (nameAt) {
+    await page.mouse.click(nameAt.x, nameAt.y);
+    await page.waitForTimeout(700);
+    is("d4", "§D4 · a press on a name opens the query", await openCount(), 0);
+  }
+});
+
 test("§A5 · a press anywhere outside closes Filter, Group and Sort", async ({ page }) => {
   await openApp(page, 1440, 900);
   await page.locator("[data-qcv='be-expand']").first().click();

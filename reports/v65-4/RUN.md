@@ -286,3 +286,35 @@ had to be retargeted: it pinned `addEventListener("pointerdown", onDown)` verbat
 an edit that strengthened the idiom it guards.
 
 Gates 8,404 (baseline 8,390). Measurement 32 (was 31).
+
+## D4 — what opens a query, and what pans
+
+The row no longer opens the query; a bar and the names cell each do, by their own handler. The
+track carries the date row's `cursor: grab` and `touch-action: pan-y`, and the with-you ring joins
+the drag's exclusion list — it is the one opener in the lane that is not a `<button>`, so a press on
+it used to start a pan.
+
+**⚠️ THE EMPTY TRACK WAS ALREADY NOT AN OPENER, AND I ASSUMED OTHERWISE.** The row's `onClick`
+looked like it covered the whole width. It did not: the drag calls `preventDefault()` on
+`pointerdown`, which suppresses the compatibility `click`, so the handler was reachable only through
+the names cell — which is excluded from the drag and therefore keeps its click. Measured by
+restoring the row's handler: a press on the track still opens nothing.
+
+What the change is really for is the **coupling**. "The track does not open a query" was a
+consequence of the exclusion list rather than a statement anyone had made — add one excluded element
+inside the track and it silently becomes an opener, through a handler on a different element. The
+two openers now say so themselves.
+
+It also caught its own regression: **the names cell had no handler at all**, so taking the row's off
+took the names cell with it. The bar still opened and the name did nothing.
+
+Two things the lock had to learn about pressing: the **names column is sticky above the track**, so a
+bar beginning off the left of the viewport has its opening stretch underneath it and a press there
+lands on the name; and both points are now taken from the first element `elementFromPoint` agrees is
+on top.
+
+Proved red three ways — the track without the grab cursor, the dead zone at 0px, and the names cell
+without its handler. The fourth mutation (the row's handler back) **passes**, which is the finding
+above rather than a gap.
+
+Gates 8,404. Measurement 33.
