@@ -128,3 +128,20 @@ quietly become a claim about the Birds-eye view.
 agents specs fail there from its in-progress work (`AgentList.tsx`, `agents/contact/*`,
 `contactList.ts`, none of them files this pass touches). Verified in an isolated worktree at HEAD
 with only my files: **tsc clean, production build clean, 8,394 passed.**
+
+---
+
+## §F — deployed to dev
+
+**`e36d0a3b`**, built from a clean detached worktree of the pushed tip (never the shared checkout,
+where the Contact list session is live) and deployed with `--only hosting --config firebase.dev.json
+--project scriptally-dev`. Served bundle verified: `index-pCwDpAGA.js` both sides. **Prod untouched.**
+
+**38 passed, 0 failed against the deployed build** (8.6m), 1,530 assertions. **84 of them are the
+door lock's**, and the doors it recorded are `a ledger row · ?q= · a fanned card · a bar · a name` —
+checked in the ledger rather than assumed, because three earlier runs reported green without the
+case in them at all.
+
+**§4 on the deployed build: 58.1% at 100ms, 500ms, 1s and 2s.**
+
+Screenshots in `reports/v65-6/shots/`.
