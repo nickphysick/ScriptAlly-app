@@ -31,6 +31,7 @@ import {
   assertFails,
   assertSucceeds,
   initializeTestEnvironment,
+  RulesTestContext,
   RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
 import { readFileSync } from 'fs';
@@ -607,6 +608,71 @@ describe('/users/{userId}/manuscripts', () => {
     );
     await assertFails(getDoc(doc(db, 'users', ALICE, 'manuscripts', 'ms-1', 'notes', 'n-1')));
     await assertFails(deleteDoc(doc(db, 'users', ALICE, 'manuscripts', 'ms-1', 'notes', 'n-1')));
+  });
+
+  /**
+   * ⚠️ `setting` AND `series` — the Manuscripts page's hero facts (v12), under Nick's ruling of
+   * 25 Sep: optional strings at logline's cap (2048), cleared by omitting the key, and nothing else
+   * joins the allowlist with them.
+   *
+   * ⚠️ BOTH HALVES WERE WRONG BEFORE, IN OPPOSITE DIRECTIONS, AND BOTH ARE ASSERTED. An UPDATE
+   * carrying either key was DENIED by the allowlist — the affectedKeys gotcha, which is why the edit
+   * dialog shipped writing them as a separate second write — while a CREATE carrying either was
+   * ACCEPTED with no type check at all, because `isValidManuscript` had no clause for them and no
+   * trailing hasOnly. Run against the pre-ruling rules, every case below except the coverUrl
+   * witness is red.
+   */
+  describe('setting and series (Manuscripts v12 hero facts)', () => {
+    const msDoc = (ctx: RulesTestContext, id = 'ms-1') =>
+      doc(ctx.firestore(), 'users', ALICE, 'manuscripts', id);
+    const seed = (extra: Record<string, unknown> = {}) =>
+      asAdmin(async (ctx) => {
+        await setDoc(msDoc(ctx), { ...validManuscript(ALICE), ...extra });
+      });
+
+    for (const field of ['setting', 'series'] as const) {
+      it(`an update adding ${field} is allowed`, async () => {
+        await seed();
+        await assertSucceeds(updateDoc(msDoc(aliceCtx()), { [field]: 'West Cork, today' }));
+      });
+
+      it(`an update clearing ${field} by omitting the key is allowed`, async () => {
+        await seed({ [field]: 'West Cork, today' });
+        await assertSucceeds(updateDoc(msDoc(aliceCtx()), { [field]: deleteField() }));
+      });
+
+      it(`${field} at logline's cap (2048) is allowed, and one character past it is denied`, async () => {
+        await seed();
+        const ctx = aliceCtx();
+        await assertSucceeds(updateDoc(msDoc(ctx), { [field]: 'x'.repeat(2048) }));
+        await assertFails(updateDoc(msDoc(ctx), { [field]: 'x'.repeat(2049) }));
+      });
+
+      it(`a non-string ${field} is denied — on update AND on create`, async () => {
+        await seed();
+        const ctx = aliceCtx();
+        await assertFails(updateDoc(msDoc(ctx), { [field]: 42 }));
+        await assertFails(
+          setDoc(msDoc(ctx, 'ms-2'), { ...validManuscript(ALICE), id: 'ms-2', [field]: 42 })
+        );
+      });
+    }
+
+    it("both facts ride ONE write beside a base-field edit — the edit dialog's single payload", async () => {
+      await seed();
+      await assertSucceeds(
+        updateDoc(msDoc(aliceCtx()), {
+          title: 'Harbour of Glass',
+          setting: 'West Cork, today',
+          series: 'The Harbour books',
+        })
+      );
+    });
+
+    it('the allowlist grew by exactly these two — a declared-but-unlisted field (coverUrl) is still denied', async () => {
+      await seed();
+      await assertFails(updateDoc(msDoc(aliceCtx()), { coverUrl: 'https://example.com/cover.jpg' }));
+    });
   });
 });
 

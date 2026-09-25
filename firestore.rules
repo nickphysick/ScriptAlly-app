@@ -131,6 +131,11 @@ service cloud.firestore {
         // `synopsisVersionId`. No relationship between the two is asserted anywhere; whether this is
         // their master or a separate scratch copy is an open product question.
         && (!data.keys().hasAny(['synopsis']) || (data.synopsis is string && data.synopsis.size() <= 32768))
+        // Manuscripts v12 — the hero's two facts (Nick's ruling, 25 Sep): optional strings at
+        // logline's cap, cleared by OMITTING the key like elevatorPitch and synopsis above. Until
+        // these two clauses a CREATE carrying either key was accepted with no type check at all.
+        && (!data.keys().hasAny(['setting']) || (data.setting is string && data.setting.size() <= 2048))
+        && (!data.keys().hasAny(['series']) || (data.series is string && data.series.size() <= 2048))
         // Structured comps — a list of maps {title, author?, publisher?, year?, note?, media?,
         // matchAxis?, inQuery?, source?}. Per-item shape is client-enforced (rules can't iterate a
         // list); optional-when-present so docs written before any field was added stay updatable.
@@ -777,7 +782,10 @@ service cloud.firestore {
           incoming().diff(existing()).affectedKeys().hasOnly([
             'title', 'genre', 'subGenres', 'ageCategory', 'wordCount', 'logline', 'comps', 'status', 'shelvedReason', 'statusChangedDate', 'notes', 'shelved', 'activePackageId', 'bookVersions',
             // book profile amendment 2 — see the two clauses in isValidManuscript above.
-            'elevatorPitch', 'synopsis'
+            'elevatorPitch', 'synopsis',
+            // Manuscripts v12 — the hero's setting and series, and nothing else (the ruling was
+            // narrow; tests/rules asserts a declared-but-unlisted field like coverUrl stays out).
+            'setting', 'series'
           ])
         );
 
