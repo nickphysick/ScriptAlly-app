@@ -2154,6 +2154,125 @@ test("§A1 · today at 56–58% — on open, on re-open, and with the data 800ms
  * their own handlers, and every control that must not open a query calls `stopPropagation`.
  */
 /**
+ * ⚠️ §8.11 · A BAR OR A NAME OPENS THE QUERY **OVER** THE VIEW, NEVER INSTEAD OF IT.
+ *
+ * ⚠️ AND THIS IS WHY A LOCK THAT SAYS A THING "OPENS" MUST ALSO SAY WHERE, AND WHAT STAYS OPEN.
+ * §D4 asserted that a press on a bar and on a name each opened the query — and both did, by closing
+ * the calendar and docking the query in the rail. Every assertion was true and the behaviour was
+ * the opposite of the design. "The card is visible" is half a claim; the other half is that the
+ * view underneath is untouched.
+ */
+test("§8.11 · a bar and a name open the query centred, over a view that does not move", async ({ page }) => {
+  await openApp(page, 1440, 900, "?view=calendar");
+  await page.waitForTimeout(900);
+  if (!(await page.locator("[data-qcv='xp-card']").count())) {
+    await page.locator("[data-qcv='be-expand']").first().click({ timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(900);
+  }
+  const sheet = () => page.locator("[data-qcv='xp-card']").count();
+  const card = () => page.locator("[data-qcv='xp-cardhost']").count();
+  is("centred", "§8.11 · the calendar is open", await sheet(), 1);
+  is("centred", "§8.11 · …and no query card with it", await card(), 0);
+
+  /* the state that must survive: the view's scroll, and what the rail is showing */
+  const viewState = () => page.evaluate(() => {
+    const sc = document.querySelector("[data-qcv='xp-card'] [data-qcv='tl-scroll']") as HTMLElement | null;
+    const rows = document.querySelector("[data-qcv='xp-card'] [data-qcv='tl-rows']") as HTMLElement | null;
+    return {
+      left: sc ? Math.round(sc.scrollLeft) : -1,
+      top: sc ? Math.round(sc.scrollTop) : (rows ? Math.round(rows.scrollTop) : -1),
+      rows: document.querySelectorAll("[data-qcv='xp-card'] [data-qcv='tl-row']").length,
+      /**
+       * ⚠️ THE RAIL IS BEHIND THE SHEET, and what must not happen is it quietly docking the query —
+       * so closing the calendar hands the reader a page they did not ask for.
+       *
+       * ⚠️ AND THE CENTRED CARD IS THE SAME COMPONENT, so it carries the same `open` probe. Counting
+       * them together made this read 0 → 1 by construction: the claim would have failed on a page
+       * where the rail was perfectly untouched, about the card the case had just asked for.
+       */
+      railOpen: [...document.querySelectorAll("[data-qcv='open']")]
+        .filter((e) => !e.closest("[data-qcv='xp-cardhost']")).length,
+      url: location.search,
+    };
+  });
+  /* move the view first, so "unchanged" is a real claim rather than a claim about zero */
+  await page.evaluate(() => {
+    const sc = document.querySelector("[data-qcv='xp-card'] [data-qcv='tl-scroll']") as HTMLElement;
+    sc.scrollLeft = Math.round(sc.scrollLeft - 400);
+  });
+  await page.waitForTimeout(300);
+  const before = await viewState();
+  yes("centred", `§8.11 · the view has been scrolled somewhere of its own (${before.left})`, before.left > 0, JSON.stringify(before));
+
+  const pointAt = (sel: string) => page.evaluate((s2) => {
+    const cardEl = document.querySelector("[data-qcv='xp-card']");
+    for (const e of cardEl?.querySelectorAll(s2) ?? []) {
+      const b = e.getBoundingClientRect();
+      if (b.width < 8 || b.height <= 0 || b.top < 0 || b.bottom > window.innerHeight) continue;
+      const y = Math.round(b.top + b.height / 2);
+      const l = Math.max(b.left, 0), r = Math.min(b.right, window.innerWidth);
+      for (let x = Math.round(l + 6); x < r - 4; x += 12) {
+        if ((document.elementFromPoint(x, y) as HTMLElement | null)?.closest(s2) === e) return { x, y };
+      }
+    }
+    return null;
+  }, sel);
+
+  for (const [what, sel] of [["a bar", "[data-qcv='tl-bar']"], ["a name", "[data-qcv='tl-names']"]] as [string, string][]) {
+    const at = await pointAt(sel);
+    yes("centred", `§8.11 · ${what} was found`, at != null, JSON.stringify(at));
+    if (!at) continue;
+    await page.mouse.click(at.x, at.y);
+    await page.waitForTimeout(700);
+
+    is("centred", `§8.11 · ${what} opens the query card`, await card(), 1);
+    is("centred", `§8.11 · …and the calendar is STILL open`, await sheet(), 1);
+    const now = await viewState();
+    is("centred", "§8.11 · …with its horizontal scroll unchanged", now.left, before.left);
+    is("centred", "§8.11 · …and its vertical scroll unchanged", now.top, before.top);
+    is("centred", "§8.11 · …and its rows unchanged", now.rows, before.rows);
+    is("centred", "§8.11 · …and the rail untouched", now.railOpen, before.railOpen);
+    is("centred", "§8.11 · …and the URL untouched", now.url, before.url);
+
+    const look = await page.evaluate(() => {
+      const h = document.querySelector("[data-qcv='xp-cardhost']") as HTMLElement | null;
+      const back = document.querySelector("[data-qcv='xp-cardback']") as HTMLElement | null;
+      const body = document.querySelector("[data-qcv='xp-body']") as HTMLElement | null;
+      if (!h || !back || !body) return null;
+      const r = h.getBoundingClientRect(), b = body.getBoundingClientRect();
+      return {
+        w: Math.round(r.width), backdrop: getComputedStyle(back).backgroundColor,
+        dx: Math.round(((r.left + r.width / 2) - (b.left + b.width / 2)) * 10) / 10,
+        dy: Math.round(((r.top + r.height / 2) - (b.top + b.height / 2)) * 10) / 10,
+        over: Number(getComputedStyle(h).zIndex) > Number(getComputedStyle(back).zIndex),
+        inside: r.top >= b.top - 0.5 && r.bottom <= b.bottom + 0.5,
+      };
+    });
+    record({ area: "centred", what: `§8.11 · the card from ${what}`, got: look, want: "reported" });
+    is("centred", "§8.11 · …420px wide", look?.w, 420);
+    is("centred", "§8.11 · …over the design's backdrop", look?.backdrop, "rgba(28, 19, 15, 0.42)");
+    is("centred", "§8.11 · …centred horizontally on the view", look?.dx, 0);
+    is("centred", "§8.11 · …and vertically", look?.dy, 0);
+    yes("centred", "§8.11 · …and drawn over its own backdrop", look?.over === true, JSON.stringify(look));
+    yes("centred", "§8.11 · …and inside the view it sits over", look?.inside === true, JSON.stringify(look));
+
+    /* ⚠️ ESCAPE IS A CASCADE, AND BOTH RUNGS ARE ASSERTED. One Escape that closed both would be the
+       key doing two things at once — which is exactly what the card's own handler exists to stop. */
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(450);
+    is("centred", "§8.11 · one Escape closes the card", await card(), 0);
+    is("centred", "§8.11 · …and leaves the calendar open", await sheet(), 1);
+    const after = await viewState();
+    is("centred", "§8.11 · …with the view still where it was", after.left, before.left);
+  }
+
+  /* …and the second Escape closes the calendar */
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(600);
+  is("centred", "§8.11 · a second Escape closes the calendar", await sheet(), 0);
+});
+
+/**
  * ⚠️ §D1 · THE SECTIONED FILTER PANEL. Its geometry, its five sections, the faceted counts and the
  * foot's two figures — all measured, because the claim that matters is what a reader is TOLD a
  * choice would do, and a source lock can only see that the numbers were passed in.
@@ -2478,7 +2597,14 @@ test("§D4 · only a bar and a name open a query; the empty track pans", async (
   }
   yes("d4", "§D4 · the expanded view is open", (await card.count()) > 0, String(await card.count()));
 
+  /**
+   * ⚠️ §8.11 CHANGED WHAT "OPENS" MEANS HERE, and this case is why the general rule was written.
+   * It used to assert that a bar press closed the expanded card — which was true, and was the
+   * behaviour the design forbids. What it always meant was "a query is now open"; what it measured
+   * was "the view has gone". The two are only the same on a page that throws you out.
+   */
   const openCount = () => page.locator("[data-qcv='xp-card']").count();
+  const cardCount = () => page.locator("[data-qcv='xp-cardhost']").count();
   const scrollNow = () => page.evaluate(() => document.querySelector("[data-qcv='tl-scroll']")?.scrollLeft ?? -1);
 
   /* a point on the track, clear of every bar, chip and ring in its row */
@@ -2511,7 +2637,8 @@ test("§D4 · only a bar and a name open a query; the empty track pans", async (
   await page.mouse.move(emptyTrack.x, emptyTrack.y);
   await page.mouse.down(); await page.mouse.move(emptyTrack.x + 2, emptyTrack.y); await page.mouse.up();
   await page.waitForTimeout(350);
-  is("d4", "§D4 · a 2px press on the track opens nothing", await openCount(), 1);
+  is("d4", "§D4 · a 2px press on the track opens nothing", await cardCount(), 0);
+  is("d4", "§D4 · …and leaves the view open", await openCount(), 1);
   is("d4", "§D4 · …and pans nothing (the 3px dead zone)", await scrollNow(), before);
 
   /* a drag pans 1:1 and still opens nothing */
@@ -2522,7 +2649,7 @@ test("§D4 · only a bar and a name open a query; the empty track pans", async (
   await page.waitForTimeout(350);
   const after = await scrollNow();
   is("d4", "§D4 · …and a 120px drag pans 1:1", after - before, 120);
-  is("d4", "§D4 · …and opens nothing", await openCount(), 1);
+  is("d4", "§D4 · …and opens nothing", await cardCount(), 0);
 
   /* the two that DO open. A bar first. */
   /**
@@ -2547,7 +2674,10 @@ test("§D4 · only a bar and a name open a query; the empty track pans", async (
   if (barAt) {
     await page.mouse.click(barAt.x, barAt.y);
     await page.waitForTimeout(700);
-    is("d4", "§D4 · a press on a bar opens the query", await openCount(), 0);
+    is("d4", "§D4 · a press on a bar opens the query", await cardCount(), 1);
+    is("d4", "§D4 · …over a view that is still open", await openCount(), 1);
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(400);
   }
 
   /* then the names cell, from a fresh view */
@@ -2566,7 +2696,8 @@ test("§D4 · only a bar and a name open a query; the empty track pans", async (
   if (nameAt) {
     await page.mouse.click(nameAt.x, nameAt.y);
     await page.waitForTimeout(700);
-    is("d4", "§D4 · a press on a name opens the query", await openCount(), 0);
+    is("d4", "§D4 · a press on a name opens the query", await cardCount(), 1);
+    is("d4", "§D4 · …over a view that is still open", await openCount(), 1);
   }
 });
 
@@ -2658,6 +2789,18 @@ test("§A5 · a press anywhere outside closes Filter, Group and Sort", async ({ 
    * opener as the broken one: a true reading, about a card my own previous press had closed.
    */
   const restore = async (after: string) => {
+    /**
+     * ⚠️ §8.11 — AN OPENER NO LONGER TAKES THE CARD WITH IT. A bar and a name open the query
+     * CENTRED over the view, which stays open — so what has to be undone is the query, not the
+     * view, and one Escape does it. The old route (re-open through `?view=calendar`) would now
+     * throw away the very state §8.11 exists to preserve.
+     */
+    if (await page.locator("[data-qcv='xp-cardhost']").count()) {
+      openers.push(after);
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(400);
+      return;
+    }
     if (await cardOpen()) return;
     openers.push(after);
     /**

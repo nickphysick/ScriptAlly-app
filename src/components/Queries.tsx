@@ -2146,6 +2146,16 @@ export const Queries: React.FC<{
    * the calendar is not the same act as opening it.
    */
   const [beNudge, setBeNudge] = useState<string | null>(null);
+  /**
+   * §8.11 — THE QUERY THE CALENDAR HAS OPEN, which is a DIFFERENT question from the page's own
+   * selection.
+   *
+   * ⚠️ IT DOES NOT TOUCH `?q`, AND THAT IS THE WHOLE POINT. The rail's docked card belongs to
+   * clicks on the page — the ledger and the fanned cards — and writing the URL here would dock a
+   * query the reader opened inside the calendar, so closing the calendar would hand them back a
+   * page they had not asked for. The calendar's card is the calendar's; the page's is the page's.
+   */
+  const [beCard, setBeCard] = useState<string | null>(null);
   const openBirdsEye = useCallback((focusId: string | null) => { setBeFocus(focusId); setBeOpen(true); }, []);
 
   /* ── v11 · THE SENTENCE'S STATE: one filter, one manuscript scope, one sort ──
@@ -2526,7 +2536,17 @@ export const Queries: React.FC<{
   // The active query + its agent/manuscript, resolved live. The reading pane is view-only EXCEPT the
   // 5d click-to-pick shortcuts (send method + manuscript); everything else edits via the Edit Query
   // drawer (openEditQuery) — agent, dates, materials, journal, corrections.
-  const activeQuery = selectedQueryId ? (selectedQuery || queries.find(q => q.id === selectedQueryId)) : null;
+  /**
+   * §8.11 — THE QUERY THE OPEN CARD DESCRIBES, from whichever surface opened it.
+   *
+   * ⚠️ ONE COMPOSITION, TWO HOMES. The three tab bodies, the CTA engine's answer, the notes thread
+   * and the Correction UI are ~250 lines built once from this value; a second set for the
+   * calendar's card would be a second composition of the same query, which is precisely the fault
+   * a single docked card was introduced to end. So the calendar re-points WHICH query is described
+   * and the page decides WHERE the card is drawn — never a second card that has to be kept in step.
+   */
+  const cardQueryId = beCard ?? selectedQueryId;
+  const activeQuery = cardQueryId ? ((selectedQueryId === cardQueryId && selectedQuery) || queries.find(q => q.id === cardQueryId)) : null;
   const currentStatus = activeQuery?.status ?? selectedQuery?.status;
   const activeAgent = activeQuery ? agents.find(a => a.id === activeQuery.agentId) : null;
   /**
@@ -5040,6 +5060,38 @@ export const Queries: React.FC<{
                 />
               )) : null;
 
+  /**
+   * §8.11 — THE OPEN CARD, BUILT ONCE AND DRAWN IN ONE OF TWO HOMES. The rail docks it for clicks
+   * on the page; the calendar centres it for clicks on a bar or a name. One element, so the two
+   * surfaces cannot come to describe a query differently — which is the whole reason the docked
+   * card replaced the drawer.
+   */
+  const qcOpenCardNode = panelRow && activeQuery && qcById.get(activeQuery.id) ? (
+      <QcOpenCard
+      row={qcById.get(activeQuery.id)!}
+      nowMs={Date.now()}
+      /* the ✕ and Escape are one act: clear `?q`, and the rail goes back to Birds-eye */
+      onClose={() => onSelectView?.("cards")}
+      manuscriptTitle={activeMs?.title ?? null}
+      manuscriptTags={activeMs ? [activeMs.ageCategory, activeMs.genre, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString("en-GB")} words` : null].filter((t): t is string => !!t) : []}
+      /* the CTA engine's own answer, through the SAME doors the drawer uses: the desk hosts
+         Record response and Mark sent; an open offer keeps its own journey */
+      onPrimary={(anchor) => {
+        if (panelRow.facts.turn === "offer") { openRecord(activeQuery); return; }
+        openDeskVerb(panelRow.facts.turn === "you" ? "marksent" : "respond", anchor);
+      }}
+      onAction={(action, anchor) => {
+        if (action === "nudge") openDeskVerb("nudge", anchor);
+        else openQuick(action === "snooze" ? "snooze" : "close", activeQuery.id, anchor);
+      }}
+      liveAction={deskVerb === "nudge" ? "nudge" : deskVerb === "closed" ? "closed" : deskVerb ? "primary" : null}
+      tracking={qpTracking}
+      agentTab={qpAgentTab}
+      notesTab={qpNotesTab}
+      noteCount={journalEntries.filter((j) => j.queryId === activeQuery.id).length}
+    />
+  ) : null;
+
   return (
     /* ── F12 root, headerless (shell rollout Phase 6): the v2 shell's top bar draws the crumb
        and the sidebar carries the account block, so F12Page's CrumbStrip + F12Account chrome
@@ -6298,17 +6350,23 @@ export const Queries: React.FC<{
                  * "No package", which is the honest word for a package this page cannot name.
                  */
                 packageName={(id) => packages.find((pk) => pk.id === id)?.packageName ?? null}
-                onClose={() => { setBeOpen(false); setBeFocus(null); }}
+                onClose={() => { setBeOpen(false); setBeFocus(null); setBeCard(null); }}
                 /**
-                 * ⚠️ §8.11 — OPENING A QUERY FROM THE CALENDAR OPENS IT IN THE RAIL, and closes the
-                 * calendar on the way. The brief draws a second, centred copy of the card over the
-                 * backdrop; this app already has exactly one house for an open query on this page,
-                 * and a second one would be two surfaces free to disagree about the same query —
-                 * the fault the docked card replaced the drawer to end. Recorded as a deviation.
+                 * §8.11 — A BAR OR A NAME OPENS THE QUERY CENTRED OVER THIS VIEW, which stays
+                 * exactly as it was underneath: scroll, zoom, filters, grouping and Find.
+                 *
+                 * ⚠️ IT USED TO LEAVE. The view closed and the query docked in the rail, recorded
+                 * at the time as a deliberate deviation on the grounds that one house for an open
+                 * query is better than two. The reasoning was right about the CARD and wrong about
+                 * the ROUTE: there is still exactly one card, built once from `cardQueryId` — what
+                 * changed is that it can be drawn here instead of the rail, so a reader who clicked
+                 * a bar to look at a query is not thrown out of the view they were reading it in.
                  */
-                onOpen={(id) => { setBeOpen(false); setBeFocus(null); onOpenQuery?.(id); }}
+                card={beCard && panelRow && activeQuery && qcById.get(activeQuery.id) ? qcOpenCardNode : null}
+                onCardClose={() => setBeCard(null)}
+                onOpen={(id) => setBeCard(id)}
                 /* ⚠️ THE CHIP OPENS THE APP'S OWN NUDGE FLOW (§9), never a second one */
-                onNudge={(id) => { setBeOpen(false); setBeFocus(null); setBeNudge(id); }}
+                onNudge={(id) => { setBeOpen(false); setBeFocus(null); setBeCard(null); setBeNudge(id); }}
               />
             ) : null}
             fan={qcFan && (() => {
@@ -6370,31 +6428,14 @@ export const Queries: React.FC<{
             rail={(
               <QcRail
                 birdsEye={<QcBirdsEye rows={qcScoped} nowMs={Date.now()} loading={showGridSkeleton} onExpand={openBirdsEye} />}
-                openCard={!qcDocked ? undefined : showGridSkeleton ? (selectedQueryId ? <QcOpenCardSkeleton /> : undefined) : (panelRow && activeQuery && qcById.get(activeQuery.id)) ? (
-                  <QcOpenCard
-                  row={qcById.get(activeQuery.id)!}
-                  nowMs={Date.now()}
-                  /* the ✕ and Escape are one act: clear `?q`, and the rail goes back to Birds-eye */
-                  onClose={() => onSelectView?.("cards")}
-                  manuscriptTitle={activeMs?.title ?? null}
-                  manuscriptTags={activeMs ? [activeMs.ageCategory, activeMs.genre, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString("en-GB")} words` : null].filter((t): t is string => !!t) : []}
-                  /* the CTA engine's own answer, through the SAME doors the drawer uses: the desk hosts
-                     Record response and Mark sent; an open offer keeps its own journey */
-                  onPrimary={(anchor) => {
-                    if (panelRow.facts.turn === "offer") { openRecord(activeQuery); return; }
-                    openDeskVerb(panelRow.facts.turn === "you" ? "marksent" : "respond", anchor);
-                  }}
-                  onAction={(action, anchor) => {
-                    if (action === "nudge") openDeskVerb("nudge", anchor);
-                    else openQuick(action === "snooze" ? "snooze" : "close", activeQuery.id, anchor);
-                  }}
-                  liveAction={deskVerb === "nudge" ? "nudge" : deskVerb === "closed" ? "closed" : deskVerb ? "primary" : null}
-                  tracking={qpTracking}
-                  agentTab={qpAgentTab}
-                  notesTab={qpNotesTab}
-                  noteCount={journalEntries.filter((j) => j.queryId === activeQuery.id).length}
-                />
-                  ) : undefined}
+                /**
+                 * §8.11 — THE DOCKED CARD IS FOR CLICKS ON THE PAGE: the ledger and the fanned
+                 * cards. While the calendar holds it centred, the rail does not also draw it —
+                 * otherwise closing the calendar would hand the reader a docked query they opened
+                 * somewhere else, which is the page changing under them for a click they made in
+                 * an overlay.
+                 */
+                openCard={beCard || !qcDocked ? undefined : showGridSkeleton ? (selectedQueryId ? <QcOpenCardSkeleton /> : undefined) : qcOpenCardNode ?? undefined}
                 />
               )}
             body={

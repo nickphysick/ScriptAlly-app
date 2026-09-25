@@ -284,7 +284,14 @@ describe("§5 · the popover is gone, the modal is mobile-only, the desk took th
     expect(page).toContain("{nudgeTarget && nudgeAgent && (");
     /* the mobile door is still the selected query; the calendar's names one by id */
     expect(page).toMatch(/const nudgeTarget = beNudge \? queries\.find\(\(q\) => q\.id === beNudge\) \?\? null : \(isMobile && isNudgeOpen \? activeQuery : null\);/);
-    expect(page, "the chip must not select the query it nudges").toContain("onNudge={(id) => { setBeOpen(false); setBeFocus(null); setBeNudge(id); }}");
+    /* ⚠️ THE CLAIM IS THAT THE CHIP DOES NOT SELECT — it names the query for the nudge and leaves
+       the page's own selection alone. It pinned the handler verbatim and went red when §8.11 gave
+       the chip one more thing to clear (the calendar's centred card), which changes nothing about
+       what it claims. */
+    const chip = /onNudge=\{\(id\) => \{([^}]*)\}\}/.exec(page)?.[1] ?? "";
+    expect(chip, "the chip's handler").toBeTruthy();
+    expect(chip).toContain("setBeNudge(id)");
+    expect(chip, "the chip must not select the query it nudges").not.toMatch(/setSelectedQueryId|onOpenQuery/);
   });
 
   it("the closure offer's Nudge now opens the DESK, notched to the button that asked", () => {
