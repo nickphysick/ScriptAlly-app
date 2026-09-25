@@ -8,6 +8,7 @@
 import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { sliceBetween } from "../../../test/sliceBetween";
 import { HEAD_W } from "./QcExpanded";
 import { ATTENTION_LABEL } from "../../../lib/qcBirdsEye";
 import { ATTENTION_HINT } from "../../../lib/qcBirdsEye";
@@ -354,12 +355,12 @@ describe("the timeline", () => {
     expect(at, "the placement has moved").toBeGreaterThan(-1);
     const block = tlSrc.slice(at, tlSrc.indexOf("const pan = ", at));
     /**
-     * ⚠️ THE DEPS GAINED `ext.fromMs` IN v65.1, AND IT IS A NUMBER — which is the whole of the rule
-     * this case states. `ext` itself is a fresh object every render and putting IT here is what
-     * cancelled the animation frame for ever; its `fromMs` is a primitive and changes only when the
-     * extent really moves, which is exactly when the view needs placing again.
+     * ⚠️ THE DEPS ARE PRIMITIVES, which is the whole of the rule this case states. `ext` itself is a
+     * fresh object every render and putting IT here is what cancelled the animation frame for ever;
+     * its `fromMs` and (since §A1) its `toMs` are numbers, and they change only when the extent
+     * really moves — which is exactly when the view needs placing again.
      */
-    expect(block, "the deps are objects that change identity every render").toMatch(/\}, \[boxW, rows\.length, ext\.fromMs\]\);/);
+    expect(block, "the deps are objects that change identity every render").toMatch(/\}, \[boxW, rows\.length, ext\.fromMs, ext\.toMs\]\);/);
     expect(block, "`ext` itself would be a new object on every render").not.toMatch(/\}, \[[^\]]*[^.]\bext\b[^.][^\]]*\]\);/);
     /**
      * ⚠️ AND IT WAITS FOR ROWS. With no data the extent is three weeks wide, today's x is about 220
@@ -380,9 +381,9 @@ describe("the timeline", () => {
      * SUCCEEDS its own check, and is recorded as done. Keying on the pair lets a corrected width
      * re-place; keying on the extent alone cannot, because the extent never changed.
      */
-    expect(block).toContain("const key = `${ext.fromMs}:${boxW}`;");
+    expect(block).toContain("const key = `${ext.fromMs}:${ext.toMs}:${boxW}`;");
     expect(block).toContain("if (placedFor.current === key) return undefined;");
-    expect(block, "a success must record the width it was placed against").toMatch(/placedFor\.current = `\$\{L\.ext\.fromMs\}:\$\{L\.boxW\}`/);
+    expect(block, "a success must record the width it was placed against").toMatch(/placedFor\.current = `\$\{L\.ext\.fromMs\}:\$\{L\.ext\.toMs\}:\$\{L\.boxW\}`/);
     expect(block).toContain("if (touched.current ||");
     expect(tlSrc, "every deliberate move marks the view as the reader's").toMatch(/const mine = useCallback\(\(\) => \{ touched\.current = true; \}, \[\]\);/);
     expect((tlSrc.match(/\bmine\(\);/g) ?? []).length, "the wheel, the pan, the zoom, the glide and Today").toBeGreaterThanOrEqual(5);
@@ -1268,6 +1269,50 @@ describe("§B3 · the torn edges, drawn", () => {
     expect(tlSrc).toMatch(/\{b\.torn && \(/);
     /* …and it is only ever drawn on a torn bar */
     expect(tlSrc, "Add date is drawn on every bar").not.toMatch(/qcv-tl-adddate[\s\S]{0,80}\{b\.current/);
+  });
+});
+
+describe("§A1 · opening on today", () => {
+  const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");
+
+  it("⚠️ §A1 · the placement's guard is the WHOLE extent and the measured width", () => {
+    /**
+     * The extent is a PAIR and only `fromMs` was watched, so an extent that grew on its RIGHT — a
+     * query dated further out than anything else on the account — changed the track's width, and
+     * therefore where 58% of it falls, while the guard said the view was already placed.
+     */
+    expect(tlSrc).toMatch(/const key = `\$\{ext\.fromMs\}:\$\{ext\.toMs\}:\$\{boxW\}`/);
+    /* …and what it RECORDS is the same three things, or the guard compares two different keys */
+    expect(tlSrc).toMatch(/placedFor\.current = `\$\{L\.ext\.fromMs\}:\$\{L\.ext\.toMs\}:\$\{L\.boxW\}`/);
+    /* …and both ends are in the deps, or the effect never runs to compare them */
+    expect(tlSrc).toMatch(/\}, \[boxW, rows\.length, ext\.fromMs, ext\.toMs\]\)/);
+  });
+
+  it("⚠️ §A1 · the reveal's end re-places, and a ResizeObserver could never have caught it", () => {
+    /**
+     * The card grows under this component with a `clip-path` transition, which changes what is
+     * PAINTED without changing any box — so no observer fires and `boxW` stays whatever was
+     * measured mid-reveal. Anything that settles with the transition lands after the placement and
+     * is invisible to it.
+     */
+    const body = sliceBetween(tlSrc, "const settle = (e: Event) =>", "card.addEventListener");
+    expect(body).toMatch(/propertyName !== "clip-path"/);
+    expect(body, "it re-places for any transition on any descendant").toMatch(/e\.target !== card/);
+    expect(body).toMatch(/placedFor\.current = null/);
+    expect(tlSrc).toMatch(/card\.addEventListener\("transitionend", settle\)/);
+    expect(tlSrc, "the listener is never removed").toMatch(/card\.removeEventListener\("transitionend", settle\)/);
+  });
+
+  it("⚠️ §A1 · every re-placement still yields to the reader", () => {
+    /**
+     * A reader who drags during the 380ms reveal has moved the view, and a placement that ignored
+     * them would be the view fighting back. `touched` is checked in the placement itself, so the
+     * `transitionend` path cannot route around it — which is why it clears the key and re-reads the
+     * width rather than writing a scroll position of its own.
+     */
+    expect(tlSrc).toMatch(/if \(touched\.current \|\| boxW <= 0 \|\| rows\.length === 0\) return undefined;/);
+    const settle = sliceBetween(tlSrc, "const settle = (e: Event) =>", "card.addEventListener");
+    expect(settle, "the reveal path writes a scroll position of its own, around `touched`").not.toMatch(/scrollLeft\s*=/);
   });
 });
 

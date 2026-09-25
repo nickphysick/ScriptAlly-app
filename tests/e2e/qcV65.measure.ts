@@ -1986,6 +1986,80 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
  * failed, and it fails silently: the rows rebuild, the overlays go with them, and the view looks
  * finished until somebody reaches for a control that is no longer there.
  */
+/**
+ * §A1 · THE VIEW OPENS ON TODAY, AND THE THIRD CASE IS THE ONE THAT REPRODUCES DEV. On the deployed
+ * build it opens in June–September and pressing Today then lands correctly, which is the signature
+ * of a scroll placed BEFORE the rows' extent was final: the extent's left edge is the earliest send
+ * in whatever has arrived, so a position that was 58% of the way along a short extent is the START
+ * of a long one.
+ *
+ * ⚠️ THE FIXTURE IS FAST AND THE READER'S CONNECTION IS NOT, which is why a harness that opens on a
+ * warm page has never seen it. The third case THROTTLES the query so the rows land 800ms after the
+ * card, which is what a reader on a slow morning gets every time.
+ */
+test("§A1 · today at 56–58% — on open, on re-open, and with the data 800ms late", async ({ page }) => {
+  const place = async () => page.evaluate(() => {
+    const card = document.querySelector("[data-qcv='xp-card']");
+    const sc = card?.querySelector("[data-qcv='tl-scroll']") as HTMLElement | null;
+    const line = card?.querySelector("[data-qcv='tl-todayline']")?.getBoundingClientRect();
+    const nm = card?.querySelector("[data-qcv='tl-names']")?.getBoundingClientRect();
+    if (!sc || !line || !nm) return null;
+    const b = sc.getBoundingClientRect();
+    const trackL = nm.right, trackW = b.right - trackL;
+    return { on: line.left > trackL && line.left < b.right, at: Math.round(((line.left - trackL) / trackW) * 1000) / 10,
+      months: [...(card?.querySelectorAll("[data-qcv='tl-monthlabel']") ?? [])]
+        .filter((e) => { const r = e.getBoundingClientRect(); return r.right > trackL && r.left < b.right; })
+        .map((e) => (e.textContent ?? "").trim()).slice(0, 4) };
+  });
+
+  await openApp(page, 1440, 900);
+  await page.locator("[data-qcv='be-expand']").first().click();
+  await page.waitForTimeout(1200);
+  const first = await place();
+  record({ area: "open-today", what: "§A1 · on open", got: first, want: "reported" });
+  yes("open-today", `§A1 · on open, today is on screen (${first?.at}%)`, first?.on === true, JSON.stringify(first));
+  near("open-today", "§A1 · …at 56–58% of the visible track", first?.at, 57, 3);
+
+  /* a re-open, after the reader has moved the track a long way from today */
+  await page.evaluate(() => { const sc = document.querySelector("[data-qcv='tl-scroll']") as HTMLElement; sc.scrollLeft = 0; });
+  await page.waitForTimeout(200);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(600);
+  await page.locator("[data-qcv='be-expand']").first().click();
+  await page.waitForTimeout(1200);
+  const again = await place();
+  record({ area: "open-today", what: "§A1 · on re-open", got: again, want: "reported" });
+  near("open-today", "§A1 · …and a re-open places itself again", again?.at, 57, 3);
+
+  /**
+   * ⚠️ THE DATA 800ms LATE. Firestore's reads are not HTTP requests the route handler can see, so
+   * the throttle is applied to the whole context — every request the page makes after the card is
+   * open is delayed, which is a heavier hand than the brief's and errs the right way: if the view
+   * survives 800ms of everything being late, it survives the rows being late.
+   */
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(400);
+  let delayed = 0;
+  await page.route("**/*", async (route) => { delayed += 1; await new Promise((r) => setTimeout(r, 800)); await route.continue(); });
+  await page.reload();
+  await page.waitForTimeout(2500);
+  await page.locator("[data-qcv='be-expand']").first().click();
+  await page.waitForTimeout(4000);
+  const late = await place();
+  await page.unroute("**/*");
+  /**
+   * ⚠️ THE PRECONDITION, OR THIS CASE IS ABOUT NOTHING. A throttle that matched no request is a
+   * green that proves the page works at full speed — which the two cases above already said. It is
+   * asserted rather than assumed because Firestore's reads travel over a channel a route handler
+   * does not necessarily see, and a silent no-op reads exactly like a pass.
+   */
+  yes("open-today", `§A1 · …and the throttle really delayed the page (${delayed} requests)`, delayed > 0, String(delayed));
+  record({ area: "open-today", what: "§A1 · with the data 800ms late", got: late, want: "reported" });
+  yes("open-today", `§A1 · a late open still lands on today (${late?.at}%, showing ${JSON.stringify(late?.months)})`,
+    late?.on === true, JSON.stringify(late));
+  near("open-today", "§A1 · …at 56–58% of the visible track", late?.at, 57, 3);
+});
+
 test("§8.10 · a zoom rebuilds the rows and the lane's controls survive it", async ({ page }) => {
   await openApp(page, 1440, 860, "?view=calendar");
   await page.waitForTimeout(900);

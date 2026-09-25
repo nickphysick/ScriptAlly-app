@@ -194,7 +194,10 @@ export const QcTimeline: React.FC<{
      * view opened **two years in the past** — on every open after the first, through a green suite.
      * Keying on the pair means a corrected width re-places; `touched` still keeps it off a reader.
      */
-    const key = `${ext.fromMs}:${boxW}`;
+    /* §A1 — AND THE EXTENT IS A PAIR. Only `fromMs` was watched, so an extent that grew on its
+       RIGHT — a query with a date further out than anything else on the account — changed the track's
+       width and therefore where 58% of it falls, while the guard said the view was already placed. */
+    const key = `${ext.fromMs}:${ext.toMs}:${boxW}`;
     if (placedFor.current === key) return undefined;
     const put = () => {
       const node = scrollRef.current;
@@ -204,13 +207,39 @@ export const QcTimeline: React.FC<{
       const at = focus?.row.expectedMs ?? focus?.row.stageStartMs ?? null;
       const want = at != null ? Math.max(0, xAt(L.ext, L.pxd, at) - L.boxW / 2) : scrollForToday(L.ext, L.pxd, L.boxW, L.nowMs);
       node.scrollLeft = want;
-      if (Math.abs(node.scrollLeft - want) < 1) { placedFor.current = `${L.ext.fromMs}:${L.boxW}`; setScrollLeft(node.scrollLeft); return true; }
+      if (Math.abs(node.scrollLeft - want) < 1) { placedFor.current = `${L.ext.fromMs}:${L.ext.toMs}:${L.boxW}`; setScrollLeft(node.scrollLeft); return true; }
       return false;
     };
     if (put()) return undefined;
     const id = requestAnimationFrame(() => { if (!put()) requestAnimationFrame(put); });
     return () => cancelAnimationFrame(id);
-  }, [boxW, rows.length, ext.fromMs]);
+  }, [boxW, rows.length, ext.fromMs, ext.toMs]);
+
+  /**
+   * §A1 — AND ONCE MORE WHEN THE REVEAL HAS FINISHED MOVING.
+   *
+   * ⚠️ THE CARD GROWS UNDER THIS COMPONENT, and a `clip-path` transition changes what is PAINTED
+   * without changing any box — so the ResizeObserver above never fires for it and `boxW` is whatever
+   * the card measured mid-reveal. Any layout that settles with the transition (a wrapped title, a
+   * scrollbar appearing, the tray's own height) therefore lands after the placement and is invisible
+   * to it. One re-place on `transitionend` costs nothing and closes the window.
+   *
+   * ⚠️ AND IT RESPECTS `touched` LIKE EVERY OTHER RE-PLACEMENT. A reader who drags during the 380ms
+   * reveal has moved the view, and a placement that ignored them would be the view fighting back.
+   */
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return undefined;
+    const card = el.closest("[data-qcv='xp-card']");
+    if (!card) return undefined;
+    const settle = (e: Event) => {
+      if ((e as TransitionEvent).propertyName !== "clip-path" || e.target !== card) return;
+      placedFor.current = null;           /* the reveal has finished: whatever was measured mid-way is stale */
+      setBoxW(el.clientWidth - NAMES_W);  /* …and the width is re-read, which re-runs the placement */
+    };
+    card.addEventListener("transitionend", settle);
+    return () => card.removeEventListener("transitionend", settle);
+  }, []);
 
   /**
    * §4.2 — THE FIRST MATCH SCROLLS INTO VIEW, 110px below the body's top.

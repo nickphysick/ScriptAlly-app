@@ -207,3 +207,47 @@ Measured on the account: **`{start: 2, end: 18}`** — both branches drawn.
 date opens the query card at its **Tracking** tab, where the Correction UI lives, through the card's
 own `TAB_KEY` seam rather than a new prop — a second way to choose a tab is a second thing that can
 disagree with the card about which one is open.
+
+---
+
+## A1 · opening on today — ⚠️ AND I COULD NOT REPRODUCE IT
+
+**The fault did not appear in the harness, and that is reported rather than worked around.** What
+was tried, all at 1440×900 on the harness account:
+
+| attempt | result |
+|---|---|
+| open, on the local build | today at **58.1%**, August–October |
+| re-open after scrolling to 0 | **58.1%** |
+| open with every request throttled 800ms | **58.1%** |
+| the same three against the **deployed dev** build | **58.1%** each |
+| `?view=calendar` (opens expanded on load, racing the data) at 0ms and 1200ms latency, read at three settling times | **58.1%**, six of six |
+
+**The throttle was not a no-op** — the case asserts its own precondition and reports **35 delayed
+requests**. So the page really was slow and the view still landed on today. Firestore's reads may
+travel over a channel a route handler does not see; if so, the rows were never actually late, and
+**the case proves the page survives a slow load rather than late rows**. It says so.
+
+**The fix is applied anyway, because both gaps §A1 names are real and neither depends on the
+repro:**
+
+1. **The extent is a PAIR and only `fromMs` was watched.** An extent that grows on its RIGHT — a
+   query dated further out than anything else on the account — changes the track's width, and
+   therefore where 58% of it falls, while the guard said the view was already placed. The key and
+   the deps carry `ext.toMs` now.
+2. **The reveal's end never re-placed.** The card grows under this component with a `clip-path`
+   transition, which changes what is PAINTED without changing any box — so the ResizeObserver never
+   fires for it and `boxW` stays whatever was measured mid-reveal. A `transitionend` on the card
+   (its own `clip-path`, its own target) clears the key and re-reads the width.
+
+⚠️ **And the reveal path cannot route around `touched`.** It clears the key and re-reads the width
+rather than writing a scroll position of its own, so a reader who drags during the 380ms reveal
+keeps their view. The lock asserts that absence — `not.toMatch(/scrollLeft\s*=/)` inside the
+handler — because a re-placement that ignored the reader would be the view fighting back.
+
+**The three-case measurement stands as a guard and is currently GREEN.** It has not caught anything;
+it is there so the next change to the placement has to get past it.
+
+- **Five mutations, all red.**
+- Gates: tsc 0 · build clean · **8,404 passed**.
+- Measurement: **31 passed**.
