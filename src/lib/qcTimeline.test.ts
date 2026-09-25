@@ -6,7 +6,8 @@
  */
 import { describe, it, expect } from "vitest";
 import { Activity, Agent, Query, QueryStatus } from "../types";
-import { buildQcRows, type QcRow } from "./qcSummary";
+import { buildQcRows, tileCourt, type QcRow } from "./qcSummary";
+import { CLOSE_OVER_DAYS } from "./qcCalView";
 import { MONTH_FULL, NUDGE_WEEKS, PXD_DEFAULT, PXD_MAX, PXD_MIN, TODAY_AT, ZOOM_PRESETS,
   activePreset, clampPxd, crosshairAt, currentWords, edgeCounts, extentOf, ghostFor, monthBands,
   msAt, pxdForPreset, scrollForToday, tlRow, trackWidth, weekTicks, xAt, zoomAbout,
@@ -163,7 +164,7 @@ describe("§8.7 · the bars and their words", () => {
     expect(cur.aheadFromMs, "nothing is ahead of today on a bar that ends at today").toBeNull();
   });
   it("⚠️ the nudge chip is AGENT-SIDE ONLY — a nudge is sent to someone who owes you a reply", () => {
-    expect(tlRow(one({ dateSent: ago(400) }), NOW).nudge?.text).toMatch(/overdue · nudge$/);
+    expect(tlRow(one({ dateSent: ago(400) }), NOW).nudge?.text).toMatch(/overdue · (nudge|nudge or close)$/);
     /* a with-you query past its own send-by date owes YOU, so there is nobody to nudge */
     const mine = one({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(40), expectedSendDate: ago(10) });
     expect(mine.expectedMs).toBeLessThan(NOW);
@@ -286,4 +287,61 @@ describe("§8.7 · every live row draws a bar, at least a day wide (v65.1)", () 
  */
 
 /* ── v65.2 §9 · the heat ───────────────────────────────────────────────────────────────────────── */
+
+/**
+ * §C3 · OVERDUE AGENT-SIDE STAGES ARE YOUR MOVE TOO — and the COURT is untouched, which is the half
+ * that matters. A Queried query past its date is still With the agent, because that is where it IS;
+ * what has changed is that nothing will happen until the writer nudges or closes.
+ */
+describe("§C3 · your move", () => {
+  /* ⚠️ THE DATE IS DRIVEN BY THE SEND, not by a deadline field: `resolveExpectedDate` reads the last
+     send plus the agency's stated window (8 weeks here), so `d` days over means a send `d + 56`
+     days ago. A fixture that set a deadline directly would be testing the send date. */
+  const at = (d: number) => tlRow(one({ dateSent: ago(d + 56) }), NOW);
+
+  it("§C3 · an agent-side stage past its date is your move, and one inside its window is not", () => {
+    expect(at(10).yourMove, "10 days over").toBe(true);
+    expect(at(-10).yourMove, "10 days still to go").toBe(false);
+  });
+
+  it("⚠️ §C3 · …and its COURT does not move — it is still with the agent", () => {
+    const r = at(10);
+    expect(tileCourt(r.row.status)).toBe("agent");
+    /* the chip is what makes it actionable, and the chip is agent-side by construction */
+    expect(r.nudge).not.toBeNull();
+    expect(r.nudge!.yourMove).toBe(true);
+  });
+
+  it("§C3 · the chip's wording switches at the CLOSING threshold, read from one constant", () => {
+    /**
+     * ⚠️ SWEPT, AND EACH ROW JUDGED AGAINST THE DAY COUNT IT ITSELF REPORTS. A fixture built from
+     * "send date + window" lands a day either side of the day asked for, because the window carries
+     * a time of day and the count is rounded — so `at(29)` genuinely reports 28 days over. Pinning
+     * the fixture's input would be asserting my arithmetic; pinning the row's own `days` asserts
+     * the product's.
+     */
+    const seen = new Map<boolean, number[]>();
+    for (let d = 20; d <= 40; d += 1) {
+      const n2 = at(d).nudge;
+      if (!n2) continue;
+      const close = / · nudge or close$/.test(n2.text);
+      expect(n2.text, `${n2.days} days over`).toMatch(close ? /overdue · nudge or close$/ : /overdue · nudge$/);
+      expect(close, `${n2.days} days over said "${n2.text}"`).toBe(n2.days > CLOSE_OVER_DAYS);
+      (seen.get(close) ?? seen.set(close, []).get(close)!).push(n2.days);
+    }
+    /* ⚠️ AND BOTH WORDINGS MUST HAVE BEEN SEEN, or the sweep proved one of them */
+    expect([...seen.keys()].sort(), JSON.stringify([...seen])).toEqual([false, true]);
+    /* the threshold is the grouping's own — the Next-action grouping moves the row into *Consider
+       closing* on exactly this day, and two literals would be free to drift apart */
+    expect(CLOSE_OVER_DAYS).toBe(28);
+  });
+
+  it("§C3 · a with-you stage is your move by STATUS, whatever its dates say", () => {
+    for (const st of [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.OFFER]) {
+      const r = tlRow(one({ status: st, dateSent: ago(5) }), NOW);
+      expect(r.yourMove, st).toBe(true);
+      expect(r.nudge, `${st} draws a nudge chip`).toBeNull();
+    }
+  });
+});
 

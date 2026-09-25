@@ -12,6 +12,9 @@
  * afterwards — it is what one derivation makes true.
  */
 import { QueryStatus } from "../types";
+/* §C3 — the chip's second wording switches at the Next-action grouping's own closing threshold.
+   `qcCalView` does not import this module, so there is no cycle; one constant, two surfaces. */
+import { CLOSE_OVER_DAYS } from "./qcCalView";
 import { STAGE_NAME, isWithYou, tileCourt, type QcRow } from "./qcSummary";
 
 const DAY = 86_400_000;
@@ -187,7 +190,7 @@ export interface TlBar {
   label: string;
   title: string;
 }
-export interface TlNudge { days: number; text: string }
+export interface TlNudge { days: number; text: string; yourMove: boolean }
 export interface TlGhost { status: QueryStatus; label: string }
 export interface TlRow {
   id: string;
@@ -195,6 +198,14 @@ export interface TlRow {
   bars: TlBar[];
   /** §8.7 — the dotted chip after an overdue AGENT-side bar, and nothing else. */
   nudge: TlNudge | null;
+  /**
+   * §C3 — WHETHER THIS ROW IS YOUR MOVE, which is NOT the same question as whose court it is in.
+   * A with-you stage is your move because the agent has asked for something; an AGENT-side stage
+   * past its expected date is your move because nobody will do anything until you nudge or close.
+   * The court is unchanged either way — an overdue Queried still counts as With the agent, because
+   * that is where the query IS.
+   */
+  yourMove: boolean;
   /** §8.7 — the dotted ring after a with-you bar, holding what comes next. */
   ghost: TlGhost | null;
 }
@@ -285,10 +296,25 @@ export function tlRow(row: QcRow, nowMs: number): TlRow {
   }
   /* §8.7 — the chip is AGENT-SIDE ONLY: a nudge is a thing you send someone who owes you a reply */
   const overdueDays = row.expectedMs != null && row.expectedMs < today ? Math.round((today - row.expectedMs) / DAY) : 0;
+  /**
+   * §C3 — AND PAST THE CLOSING THRESHOLD IT OFFERS THE OTHER ANSWER TOO. `CLOSE_OVER_DAYS` is the
+   * grouping's own figure for "this has gone quiet", so the chip switches at exactly the day the
+   * Next-action grouping moves the row into *Consider closing* — one threshold, two surfaces, read
+   * from the one constant rather than restated here.
+   */
   const nudge = overdueDays > 0 && tileCourt(row.status) === "agent"
-    ? { days: overdueDays, text: `${overdueDays} ${overdueDays === 1 ? "day" : "days"} overdue · nudge` }
+    ? {
+      days: overdueDays,
+      text: `${overdueDays} ${overdueDays === 1 ? "day" : "days"} overdue · ${overdueDays > CLOSE_OVER_DAYS ? "nudge or close" : "nudge"}`,
+      yourMove: true,
+    }
     : null;
-  return { id: row.id, row, bars, nudge, ghost: tileCourt(row.status) === "you" ? ghostFor(row.status) : null };
+  return {
+    id: row.id, row, bars, nudge,
+    ghost: tileCourt(row.status) === "you" ? ghostFor(row.status) : null,
+    /* §C3 — with-you by status, OR agent-side and past its date */
+    yourMove: tileCourt(row.status) === "you" || nudge != null,
+  };
 }
 
 /* ── §8.8 · the edge markers ── */

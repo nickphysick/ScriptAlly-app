@@ -170,6 +170,13 @@ export interface EyeRow {
   stage: string;
   /** Which court, for the focus toggle's fade — never a filter. */
   court: "you" | "agent";
+  /**
+   * §C3 — WHETHER THIS ROW IS YOUR MOVE, and it is NOT the court. A with-you stage is your move
+   * because the agent has asked for something; an AGENT-side stage past its expected date is your
+   * move because nothing happens until you nudge or close. The court stays "agent" for the second
+   * — the focus toggle still fades it with the agent's rows, because that is where the query IS.
+   */
+  yourMove: boolean;
   title: string;
 }
 export interface EyeGroup { key: Attention; label: string; count: number; rows: EyeRow[] }
@@ -189,9 +196,11 @@ export function eyeRows(rows: readonly QcRow[], nowMs: number): EyeRow[] {
     .map((r): EyeRow => {
       const day = dayCount(r, nowMs);
       const stage = STAGE_NAME[r.status];
+      const due = dueCell(r, nowMs);
       return {
-        id: r.id, row: r, group: attentionGroup(r, nowMs), prog: eyeProgress(r, nowMs), day, due: dueCell(r, nowMs), stage,
+        id: r.id, row: r, group: attentionGroup(r, nowMs), prog: eyeProgress(r, nowMs), day, due, stage,
         court: tileCourt(r.status) === "you" ? "you" : "agent",
+        yourMove: tileCourt(r.status) === "you" || due.kind === "past",
         title: `${r.agentName} — ${stage}, ${r.expectedMs == null ? "no date promised" : day.urgent ? `${day.text.replace(" ago", "")} past the expected date` : `${day.text} to go`}`,
       };
     })

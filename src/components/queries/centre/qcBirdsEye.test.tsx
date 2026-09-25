@@ -298,7 +298,10 @@ describe("§3.2–§3.3 · the bars and the rows", () => {
     const rows = eyeRows(rowsOf([mkQ({ dateSent: ago(400) }), mkQ()]), NOW);
     expect(rows.length).toBeGreaterThan(1);
     const html = view([mkQ({ dateSent: ago(400) }), mkQ()]);
-    const cells = [...html.matchAll(/data-qcv="be-due" data-due="([a-z]+)"><b[^>]*>([^<]*)<\/b><u[^>]*>([^<]*)</g)];
+    /* ⚠️ ORDER-INDEPENDENT (§C2). This matched `data-qcv="be-due" data-due="x"><b`, which is an
+       attribute ORDER rather than a claim — adding `data-ym` between them took it to zero cells and
+       reported "no row states a due cell" about a view where every row does. */
+    const cells = [...html.matchAll(/data-qcv="be-due"[^>]*data-due="([a-z]+)"[^>]*><b[^>]*>([^<]*)<\/b><u[^>]*>([^<]*)</g)];
     expect(cells.length, "no row states a due cell").toBe(rows.length);
     /* the four wordings, stated once here and derived in the library */
     const past = dueCell({ expectedMs: NOW - 10 * DAY } as never, NOW);

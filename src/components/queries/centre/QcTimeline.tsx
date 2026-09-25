@@ -581,11 +581,14 @@ export const QcTimeline: React.FC<{
                       </div>
                       <div className="qcv-tl-track" data-qcv="tl-track" style={{ width }}>
                         {t.bars.map((b) => bar(t, b))}
-                        {/* §8.7 — the dotted chip, after the bar, on agent-side overdue only */}
+                        {/* §8.7 — the dotted chip, after the bar, on agent-side overdue only.
+                            §C3 — and it carries the YOUR MOVE tag, 8px after itself: an agent-side
+                            stage past its date is your move, because nothing happens until you
+                            nudge or close. Its COURT is unchanged — it is still With the agent. */}
                         {t.nudge && (
                           <button
                             type="button"
-                            className="qcv-tl-nudge"
+                            className={`qcv-tl-nudge${t.nudge.yourMove ? " qcv-tl-nudge--ym" : ""}`}
                             data-qcv="tl-nudge"
                             style={{ left: xAt(ext, pxd, t.bars[t.bars.length - 1]?.toMs ?? nowMs) + 10 }}
                             onClick={(e) => { e.stopPropagation(); onNudge(r.id); }}
@@ -595,7 +598,7 @@ export const QcTimeline: React.FC<{
                         )}
                         {/* §8.7 — the dotted ring holding what a with-you stage owes next */}
                         {t.ghost && (
-                          <span className="qcv-tl-ghost" data-qcv="tl-ghost" title={t.ghost.label} style={{ left: xAt(ext, pxd, t.bars[t.bars.length - 1]?.toMs ?? nowMs) + 10 }}>
+                          <span className="qcv-tl-ghost qcv-tl-ghost--you" data-qcv="tl-ghost" title={t.ghost.label} style={{ left: xAt(ext, pxd, t.bars[t.bars.length - 1]?.toMs ?? nowMs) + 10 }}>
                             <StatusDot status={t.ghost.status} overrideSize={13} decorative />
                           </span>
                         )}

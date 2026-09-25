@@ -713,10 +713,14 @@ describe("the dev review — d, e, f (v65.1)", () => {
     expect(chip).not.toMatch(/font-family:\s*var\(--qcv-mono\)/);
     /* and the words are the lib's, with the envelope before them */
     const tlSrc2 = read("src/lib/qcTimeline.ts");
-    /* the string is built, so the literal in the source is the tail of the template */
-    expect(tlSrc2).toContain("overdue · nudge");
+    /* the string is built, so the literal in the source is the tail of the template.
+       §C3 — it carries two endings now, and the SWITCH is asserted in the lib's own spec against
+       `CLOSE_OVER_DAYS` rather than pinned here as a string. */
+    expect(tlSrc2).toContain("overdue · ${");
+    expect(tlSrc2).toContain('"nudge or close" : "nudge"');
     expect(tlSrc2, "singulars agree — one day, not 1 days").toMatch(/overdueDays === 1 \? "day" : "days"/);
     expect(tlSrc2, "the app does not shout at the reader").not.toMatch(/OVERDUE · NUDGE/);
+    expect(tlSrc2, "the app does not shout at the reader").not.toMatch(/NUDGE OR CLOSE/);
     expect(read("src/components/queries/centre/QcTimeline.tsx")).toMatch(/<span aria-hidden="true">✉<\/span> \{t\.nudge\.text\}/);
   });
 
@@ -774,26 +778,25 @@ describe("§7 · the rows", () => {
    * do not scroll visibly behind the names; a wash on the row alone leaves a white rectangle
    * sliding over a blush row, which is worse than no wash at all.
    */
-  it("§7 · an overdue row's highlight is INSET IN THE NAMES CELL, not washed across the row", () => {
+  it("§B2 · an overdue row's ONLY mark is a 4px ink edge down the names cell", () => {
     /**
-     * ⚠️ THE FULL-ROW WASH IS RETIRED, AND THE REASON IS THE TRACK. A row runs the whole extent —
-     * five thousand pixels on a three-year pipeline — so a wash on it is a blush band across the
-     * entire timeline for one query, and with twenty-five overdue rows the track is blush rather
-     * than white. The fact being marked is about the QUERY, so it is marked where the query is
-     * named: a rounded pill inside the names cell, with an ink tab at its left edge.
+     * v65.3 drew a blush pill inside the cell with an ink tab at its left — two marks and a fill for
+     * one fact, on the one column a reader scans down. A wash makes the row look like a different
+     * KIND of row; an edge says "this one" without changing what the row is.
+     *
+     * ⚠️ THE EDGE IS ON THE CELL, NEVER THE ROW. The cell is `position: sticky` with an opaque white
+     * of its own, so a mark on the row alone slides underneath it — the same reason the wash it
+     * replaces needed the cell in the first place.
      */
-    expect(tl, "the retired full-row wash is back").not.toMatch(/\.qcv-tl-row--late \{[^}]*background/);
-    const pill = /\.qcv-tl-row--late \.qcv-tl-names::before \{([^}]*)\}/.exec(tl)?.[1] ?? "";
-    expect(pill, "the highlight has no rule").toBeTruthy();
-    expect(pill).toMatch(/background: #f8ebe3/);
-    expect(pill).toMatch(/border-radius: 10px/);
-    expect(pill).toMatch(/position: absolute/);
-    const tab = /\.qcv-tl-row--late \.qcv-tl-names::after \{([^}]*)\}/.exec(tl)?.[1] ?? "";
-    expect(tab).toMatch(/background: var\(--qcv-ink\)/);
-    expect(tab).toMatch(/width: 3px/);
-    /* ⚠️ AND THE CELL'S CONTENTS RIDE ABOVE BOTH. The pill is drawn behind them; without this the
-       avatar, the name and the due date are under a blush rectangle. */
-    expect(tl).toMatch(/\.qcv-tl-row--late \.qcv-tl-names > \* \{[^}]*z-index: 1/);
+    const late = /\.qcv-tl-row--late \.qcv-tl-names \{([^}]*)\}/.exec(tl)?.[1] ?? "";
+    expect(late, "the overdue mark has no rule").toBeTruthy();
+    expect(late).toMatch(/box-shadow: inset 4px 0 0 var\(--qcv-ink\)/);
+    /* the pill, its tab and the z-index that lifted the contents over them are GONE, not overridden */
+    expect(tl, "the blush pill is back").not.toMatch(/\.qcv-tl-row--late \.qcv-tl-names::before/);
+    expect(tl, "the ink tab is back").not.toMatch(/\.qcv-tl-row--late \.qcv-tl-names::after/);
+    expect(tl, "a wash on the row is back").not.toMatch(/\.qcv-tl-row--late \{/);
+    /* …and the cell keeps the opaque white that stops the dates scrolling visibly behind the names */
+    expect(/\.qcv-tl-names \{([^}]*)\}/.exec(tl)?.[1] ?? "").toMatch(/background: #fff/);
   });
   /**
    * §1.9 — THE OVERRUN IS INK AT FULL OPACITY, IN BOTH VIEWS. It was `rgba(28, 19, 15, 0.55)` in
@@ -1135,6 +1138,69 @@ describe("§A2–§A3 · the bars and the bands", () => {
     expect(mb, "an `overflow` on the band kills its sticky label").not.toMatch(/overflow/);
     /* …and the label really is sticky, or the warning above is about nothing */
     expect(r(".qcv-tl-mb b")).toMatch(/position: sticky/);
+  });
+});
+
+describe("§C1–§C3 · your move", () => {
+  const tl = read("src/components/queries/centre/qcvTimeline.css");
+  const be = read("src/components/queries/centre/qcvBirdsEye.css");
+  const tlSrc = read("src/components/queries/centre/QcTimeline.tsx");
+  const r = (css: string, sel: string) => {
+    const m = css.match(new RegExp(`(?:^|\\n)\\s*${sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`));
+    expect(m, `${sel} has no rule`).toBeTruthy();
+    return m![1];
+  };
+
+  it("⚠️ §C1 · NO RUST on any bar, fill or ring — in either view", () => {
+    /**
+     * Rust marked your move in three places at once: a 3px inset on the bar, the same on the rail's
+     * fill, and the next-step ring's whole border. A colour used nowhere else for this had to be
+     * learnt before it meant anything, and on a bar it competed with the stage colour beneath it.
+     * Your move is said ONCE now, in words (§C2) or as a dot (§C2 rail).
+     */
+    expect(r(tl, ".qcv-tl-bar--you"), "the bar's rust edge is back").not.toMatch(/--qcv-rust|8a4a3c/);
+    expect(r(be, ".qcv-be-track--you .qcv-be-fill"), "the rail fill's rust edge is back").not.toMatch(/--qcv-rust|8a4a3c/);
+    const ghost = r(tl, ".qcv-tl-ghost");
+    expect(ghost, "the next-step ring is rust again").not.toMatch(/--qcv-rust|8a4a3c/);
+    expect(ghost, "§C1 · the ring is a 1.4px dashed ink at 55%").toMatch(/border: 1\.4px dashed rgba\(28, 19, 15, 0\.55\)/);
+    /* ⚠️ THE CROSSHAIR'S TODAY TAG IS STILL RUST AND MUST STAY — it is not a your-move mark, and a
+       sweep for "no rust in this sheet" would take it with everything else. */
+    expect(tl).toMatch(/\.qcv-tl-tag--today \{[^}]*var\(--qcv-rust\)/);
+  });
+
+  it("§C2 · the tag hangs OUTSIDE the bar, 30px from the ring's own left edge", () => {
+    const tag = r(tl, ".qcv-tl-ghost--you::after");
+    expect(tag).toMatch(/content: "YOUR MOVE"/);
+    expect(tag).toMatch(/left: 30px/);
+    expect(tag).toMatch(/background: var\(--sp-anthracite\)/);
+    expect(tag).toMatch(/font-size: 7\.5px/);
+    expect(tag).toMatch(/font-weight: 700/);
+    expect(tag).toMatch(/letter-spacing: 0\.12em/);
+    expect(tag).toMatch(/border-radius: 6px/);
+    expect(tag).toMatch(/padding: 3px 6px/);
+    /* ⚠️ AND THE RING MUST NOT CLIP IT, or the tag is drawn and invisible — the fault this repo
+       records for a `::after` inside a box whose `overflow` nobody thought about. */
+    expect(r(tl, ".qcv-tl-ghost")).toMatch(/overflow: visible/);
+    expect(tlSrc).toContain("qcv-tl-ghost qcv-tl-ghost--you");
+  });
+
+  it("§C2 · the rail says it with a 6px anthracite dot after the due date", () => {
+    const dot = r(be, ".qcv-be-due--ym b::after");
+    expect(dot).toMatch(/width: 6px/);
+    expect(dot).toMatch(/height: 6px/);
+    expect(dot).toMatch(/border-radius: 50%/);
+    expect(dot).toMatch(/background: var\(--sp-anthracite\)/);
+    /* …after the DATE, which is what `b::after` says: the distance beneath it is a second line */
+    expect(read("src/components/queries/centre/QcBirdsEye.tsx")).toMatch(/r\.yourMove \? " qcv-be-due--ym" : ""/);
+  });
+
+  it("§C3 · an overdue agent-side row carries the tag 8px after its nudge chip", () => {
+    const tag = r(tl, ".qcv-tl-nudge--ym::after");
+    expect(tag).toMatch(/content: "YOUR MOVE"/);
+    expect(tag).toMatch(/left: calc\(100% \+ 8px\)/);
+    expect(tag).toMatch(/background: var\(--sp-anthracite\)/);
+    expect(r(tl, ".qcv-tl-nudge--ym"), "the chip clips its own tag").toMatch(/overflow: visible/);
+    expect(tlSrc).toMatch(/t\.nudge\.yourMove \? " qcv-tl-nudge--ym" : ""/);
   });
 });
 

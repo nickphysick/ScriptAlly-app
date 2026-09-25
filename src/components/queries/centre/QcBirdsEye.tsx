@@ -163,7 +163,12 @@ export const QcBirdsEye: React.FC<{
                     * not say whether it has gone. `data-due` is what anything else classifies on —
                     * the wording is for a reader, never for a probe.
                     */}
-                  <span className={`qcv-be-due${r.due.urgent ? " qcv-be-due--late" : ""}`} data-qcv="be-due" data-due={r.due.kind}>
+                  <span
+                    className={`qcv-be-due${r.due.urgent ? " qcv-be-due--late" : ""}${r.yourMove ? " qcv-be-due--ym" : ""}`}
+                    data-qcv="be-due"
+                    data-due={r.due.kind}
+                    data-ym={r.yourMove ? "true" : "false"}
+                  >
                     <b data-qcv="be-due-date">{r.due.date}</b>
                     <u data-qcv="be-due-dist">{r.due.distance}</u>
                   </span>

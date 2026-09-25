@@ -99,3 +99,59 @@ throwing away. Two rendered mutations, both red, each reproducing the fault seen
 
 - Gates: tsc 0 · build clean · 8,386 passed.
 - Measurement: **30 passed**.
+
+---
+
+## B2 · an overdue row's only mark is a 4px ink edge
+
+v65.3 drew a blush pill inside the names cell with an ink tab at its left — **two marks and a fill
+for one fact**, on the one column a reader scans down. A wash makes the row look like a different
+KIND of row; an edge says "this one" without changing what the row is. The edge is on the CELL, not
+the row: the cell is sticky with an opaque white of its own, so a mark on the row alone slides
+underneath it. The rail's overdue rows are untouched — they are a glance, not a working surface.
+
+## C1 · no rust
+
+The 3px inset on the bar, the same on the rail's fill, and the next-step ring's whole border. A
+colour used nowhere else for this had to be learnt before it meant anything, and on a bar it competed
+with the stage colour beneath it. The ring is a **1.4px dashed ink at 55%** — the page's own "not
+established fact" line. ⚠️ **The crosshair's today tag is still rust and the lock says so**: it is
+not a your-move mark, and a sweep for "no rust in this sheet" would take it with everything else.
+
+## C2 · the tag, and the rail's dot
+
+The tag hangs **outside the bar, 30px from the next-step ring's own left edge**, so it can never meet
+a bar's label — which a tag placed inside the bar could not promise. Mono 7.5px bold on anthracite.
+⚠️ **The ring states `overflow: visible`, and the lock asserts it**: a `::after` on a 24px round box
+is drawn and invisible otherwise. The rail says the same thing with a **6px anthracite dot after the
+due date** — a word there would be the longest thing in a 52px column.
+
+## C3 · overdue agent-side stages are your move
+
+⚠️ **AND THE COURT DOES NOT MOVE, which is the half that matters.** A Queried query past its date is
+still *With the agent*, because that is where the query IS; what changed is that nothing happens
+until the writer nudges or closes. `TlRow.yourMove` and `EyeRow.yourMove` are therefore separate
+from the court rather than a redefinition of it, and the lock asserts both.
+
+The chip reads `N days overdue · nudge`, becoming `· nudge or close` past **`CLOSE_OVER_DAYS`** —
+read from the Next-action grouping's own constant, so the wording switches on exactly the day that
+grouping moves the row into *Consider closing*. Two literals would be free to drift apart.
+
+⚠️ **The threshold case is a SWEEP, judged against the day count each row reports.** A fixture built
+from "send date + window" lands a day either side of the day asked for, because the window carries a
+time of day and the count is rounded — `at(29)` genuinely reports 28 days over. Pinning the
+fixture's input would assert my arithmetic; pinning the row's own `days` asserts the product's. Both
+wordings must appear in the sweep or it proved one of them.
+
+### Three locks retargeted, each because it pinned a spelling
+
+1. **An attribute ORDER.** The rail's due-cell check matched `data-qcv="be-due" data-due="x"><b`;
+   inserting `data-ym` between them took it to **zero cells** and reported *"no row states a due
+   cell"* about a view where every row does.
+2. **The chip's exact tail** (`/overdue · nudge$/`), which the second wording legitimately breaks.
+3. **The literal `"overdue · nudge"` in the source**, now the template's two endings, with the
+   switch asserted against the constant in the lib's own spec.
+
+- **Eleven mutations, all red.**
+- Gates: tsc 0 · build clean · **8,394 passed**.
+- Measurement: **30 passed**.

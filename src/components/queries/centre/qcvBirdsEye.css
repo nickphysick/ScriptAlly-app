@@ -216,7 +216,8 @@
   box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14);
 }
 /* the move is the writer's — the same rust, meaning the same thing, as everywhere else */
-.qcv-be-track--you .qcv-be-fill { box-shadow: inset 3px 0 0 var(--qcv-rust), inset 0 0 0 1px rgba(138, 74, 60, 0.35); }
+/* §C1 — NO RUST. The rail says your move with the anthracite dot after the due date (§C2), once. */
+.qcv-be-track--you .qcv-be-fill { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12); }
 /**
  * §3.2 — PAST THE DATE, THE REST OF THE TRACK IS INK, with the track's own right-end corners. It is
  * ink at full opacity, as the expanded view's is: the two draw the same fact and a tint in one of
@@ -242,6 +243,16 @@
  * shouted at because a design wanted small capitals.
  */
 .qcv-be-due { display: block; text-align: right; min-width: 0; }
+/**
+ * §C2 — YOUR MOVE, IN THE RAIL, IS A 6px ANTHRACITE DOT AFTER THE DUE DATE. The rail is a glance at
+ * the shape of everything, so it takes the quietest mark that still reads: a word here would be the
+ * longest thing in a 52px column, and the rust edge it replaces had to be learnt before it meant
+ * anything. The expanded view — a working surface — says it in words instead (§C2, §C3).
+ */
+.qcv-be-due--ym b::after {
+  content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 5px; vertical-align: 1px;
+  border-radius: 50%; background: var(--sp-anthracite);
+}
 .qcv-be-due b {
   display: block; font-family: var(--qcv-serif); font-weight: 600; font-size: 12px; line-height: 1.1;
   color: var(--qcv-ink); white-space: nowrap;

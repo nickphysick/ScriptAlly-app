@@ -1486,6 +1486,8 @@ test("§7 · the expanded rows — the due cell, the wash, the ink overrun and t
       })),
       lateBg: late ? getComputedStyle(late).backgroundColor : null,
       lateCellBg: late ? getComputedStyle(late.querySelector("[data-qcv='tl-names']") as HTMLElement).backgroundColor : null,
+      /* §B2 — the one mark: a 4px ink edge inside the sticky names cell */
+      lateCellEdge: late ? getComputedStyle(late.querySelector("[data-qcv='tl-names']") as HTMLElement).boxShadow : null,
       /* §7 — the highlight and its tab are PSEUDO-ELEMENTS behind the cell's contents */
       latePill: late ? (() => { const c2 = getComputedStyle(late.querySelector("[data-qcv='tl-names']") as HTMLElement, "::before"); return { bg: c2.backgroundColor, r: c2.borderRadius, w: c2.width, h: c2.height, left: c2.left }; })() : null,
       lateTab: late ? (() => { const c2 = getComputedStyle(late.querySelector("[data-qcv='tl-names']") as HTMLElement, "::after"); return { bg: c2.backgroundColor, w: c2.width, h: c2.height }; })() : null,
@@ -1525,21 +1527,23 @@ test("§7 · the expanded rows — the due cell, the wash, the ink overrun and t
   const kinds = [...new Set(r.due.map((d) => d.kind))].sort();
   record({ area: "xp-rows", what: "the due kinds this fixture drew", got: kinds, want: "reported" });
   /**
-   * §7 — THE HIGHLIGHT IS INSET IN THE NAMES CELL, AND THE FULL-ROW WASH IS RETIRED. A row runs the
-   * whole extent, so a wash on it is a blush band across the entire timeline for ONE query — with
-   * twenty-five overdue rows the track is blush rather than white. The fact is about the query, so
-   * it is marked where the query is named.
+   * §B2 — AN OVERDUE ROW'S ONLY MARK IS A 4px INK EDGE DOWN ITS NAMES CELL. The row and the cell
+   * stay white. v65.3's pill-and-tab was two marks and a fill for one fact, on the one column a
+   * reader scans down: a wash makes the row look like a different KIND of row, and an edge says
+   * "this one" without changing what the row is.
    */
-  yes("xp-rows", `some rows are overdue (${r.lateCount}) — or the highlight is unproved`, r.lateCount > 0, String(r.lateCount));
-  record({ area: "xp-rows", what: "§7 · the overdue row's parts", got: { row: r.lateBg, cell: r.lateCellBg, pill: r.latePill, tab: r.lateTab }, want: "reported" });
-  is("xp-rows", "§7 · the ROW itself is not washed", r.lateBg, "rgba(0, 0, 0, 0)");
-  is("xp-rows", "§7 · …and the sticky cell keeps its opaque white, which is what hides the dates behind it", r.lateCellBg, "rgb(255, 255, 255)");
-  is("xp-rows", "§7 · the highlight is a rounded pill drawn inside the cell", r.latePill?.bg, "rgb(248, 235, 227)");
-  is("xp-rows", "§7 · …with 10px corners", r.latePill?.r, "10px");
-  is("xp-rows", "§7 · …and an ink tab 3px wide at its left", r.lateTab?.bg, "rgb(28, 19, 15)");
-  is("xp-rows", "§7 · …3px", r.lateTab?.w, "3px");
-  /* ⚠️ AND AN ORDINARY ROW DRAWS NEITHER — a pill on every row is a highlight that marks nothing */
-  is("xp-rows", "§7 · an ordinary row has no pill at all", r.okPill, "none");
+  yes("xp-rows", `some rows are overdue (${r.lateCount}) — or the mark is unproved`, r.lateCount > 0, String(r.lateCount));
+  record({ area: "xp-rows", what: "§B2 · the overdue row's parts", got: { row: r.lateBg, cell: r.lateCellBg, edge: r.lateCellEdge, pill: r.latePill, tab: r.lateTab }, want: "reported" });
+  is("xp-rows", "§B2 · the ROW is not washed", r.lateBg, "rgba(0, 0, 0, 0)");
+  is("xp-rows", "§B2 · …and the cell keeps its opaque white", r.lateCellBg, "rgb(255, 255, 255)");
+  /* ⚠️ THE EDGE IS ON THE CELL, NOT THE ROW: the cell is sticky with a white of its own, so a mark
+     on the row alone slides underneath it. */
+  yes("xp-rows", `§B2 · a 4px ink edge inside the names cell (${r.lateCellEdge})`,
+    /inset/.test(r.lateCellEdge ?? "") && /4px/.test(r.lateCellEdge ?? "") && /28, 19, 15/.test(r.lateCellEdge ?? ""), String(r.lateCellEdge));
+  /* …and neither the pill nor its tab is drawn any more, on an overdue row or any other */
+  is("xp-rows", "§B2 · the blush pill is gone", r.latePill?.bg, "rgba(0, 0, 0, 0)");
+  is("xp-rows", "§B2 · …and so is its ink tab", r.lateTab?.bg, "rgba(0, 0, 0, 0)");
+  is("xp-rows", "§B2 · an ordinary row has no pill either", r.okPill, "none");
   is("xp-rows", "…and its cell is still white", r.okCellBg, "rgb(255, 255, 255)");
   /* §7 — the bands */
   record({ area: "xp-rows", what: "§7 · the group band", got: { band: r.band, rowsW: r.rowsW, gaps: r.bandGaps }, want: "reported" });
