@@ -526,6 +526,15 @@ describe("§8.3 · one popover", () => {
   it("§6 · 300px, 12px corners, opening from the cluster's LEFT EDGE, over the names", () => {
     const p = rule(".qcv-xp-pop");
     expect(p).toMatch(/width:\s*300px/);
+    /* §D1 — the sectioned Filter panel is 340 and states so in its OWN rule; Group and Sort keep
+       the base width. One rule per selector, so the two widths cannot be read as a duplicate. */
+    const f = rule('.qcv-xp-pop[data-menu="filter"]');
+    expect(f).toMatch(/width:\s*340px/);
+    expect(f, "the cap is the card's own box, 16 + header + corner + 16").toMatch(/max-height:\s*calc\(100vh - 380px\)/);
+    expect(f, "head and foot stay put, so the panel is a column and the BODY scrolls").toMatch(/flex-direction:\s*column/);
+    expect(rule(".qcv-xp-fbody"), "a flex child's min-height: auto is its content, so the foot leaves the screen")
+      .toMatch(/min-height:\s*0/);
+    expect(rule(".qcv-xp-fbody")).toMatch(/overflow-y:\s*auto/);
     expect(p).toMatch(/border-radius:\s*12px/);
     expect(p).toMatch(/top:\s*calc\(100% \+ 8px\)/);
     /* ⚠️ LEFT, NOT CENTRED. The cluster sat centred on the Courier's column; §6 puts it at the
@@ -547,10 +556,13 @@ describe("§8.3 · one popover", () => {
     expect(ctl).toMatch(/\{menu && \(/);
     expect(ctl).toMatch(/menu === "filter" \? \(/);
   });
-  it("§6 · Filter's two sections, Group's one, Sort's one; and the words are the libs'", () => {
+  it("§D1 · Filter's five sections, Group's one, Sort's one; and the words are the libs'", () => {
+    /* §D1 — Status, Whose court, Attention, Next action due, Submission package */
     expect(ctl).toContain("Whose court");
     expect(ctl).toContain("Attention");
-    expect(ctl).toContain("Clear filters");
+    expect(ctl).toContain("Next action due");
+    expect(ctl).toContain("Submission package");
+    expect(ctl).toContain("Clear all");
     expect(ctl).toContain("Group by");
     expect(ctl).toContain("Reset grouping");
     expect(ctl).toContain("Sort by");
@@ -562,6 +574,39 @@ describe("§8.3 · one popover", () => {
     expect(ctl).toMatch(/GROUP_BY_OPTIONS\.map/);
     expect(ctl).toMatch(/SORT_BY_OPTIONS\.map/);
     expect(ctl, "a hand-written option list is how two surfaces come to disagree").not.toMatch(/"Watch and wait"/);
+    expect(ctl, "the due windows are the lib's, not a second list of dates").toMatch(/DUE_OPTIONS\.map/);
+    /**
+     * ⚠️ AND THE STATUS AND PACKAGE LISTS ARE HANDED IN, NOT DERIVED HERE. The statuses come from
+     * `stageOrder`, so the section runs in pipeline order and a live R&R brings its own row; the
+     * packages come from `packageNames`, which is what the grouping already uses. A list built in
+     * this component would be the one place in the app deciding for itself what the pipeline is.
+     */
+    expect(ctl).toMatch(/statuses\.map/);
+    expect(ctl).toMatch(/packages\.map/);
+    expect(ctl, "a second pipeline order here is a second answer").not.toMatch(/stageOrder\(/);
+  });
+  it("§D1 · the counts are FACETED, and the head, the badge and the foot are one derivation", () => {
+    /**
+     * ⚠️ AN OPTION'S COUNT IS "what would I have if I chose this as well" — every OTHER facet
+     * applies and its own does not. With all five applied every unticked option in a narrowed facet
+     * reads 0, which tells a reader that choosing any of them empties the list; with none applied
+     * it ignores the filtering they have already done. Both are one argument from correct.
+     */
+    expect(ctl, "the panel must not recount: the card derives it once").not.toMatch(/facetCounts\(/);
+    expect(ctl).toMatch(/facets\.status\[k\]/);
+    expect(ctl).toMatch(/facets\.court\[f\.key\]/);
+    expect(ctl).toMatch(/facets\.attention\[k\]/);
+    expect(ctl).toMatch(/facets\.due\[o\.key\]/);
+    expect(ctl).toMatch(/facets\.package\[n\]/);
+    /* "Any time" is the ABSENCE of the facet, so it states no count — a number there reads as a
+       sixth window rather than as no window at all */
+    expect(ctl).toMatch(/o\.key !== "any" && <u>/);
+    /* the head's "N active", the button's badge and "is anything filtering" are ONE function */
+    expect(ctl).toMatch(/\{activeFacets\(view\)\} active/);
+    expect(ctl).toMatch(/activeFacets\(view\) > 0 && <i className="qcv-xp-badge"/);
+    expect(read("src/lib/qcCalView.ts")).toMatch(/filterDiffers = \(v: CalView\): boolean => activeFacets\(v\) > 0/);
+    /* the foot states what is showing, from the same match as the rows */
+    expect(ctl).toMatch(/\{facets\.shown\}<\/b> of \{facets\.total\}/);
   });
   it("⚠️ the checkbox and the card are ONE state, read and written through `toggleAttention`", () => {
     expect(ctl).toMatch(/aria-checked=\{view\.attention\.includes\(k\)\}/);

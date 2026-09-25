@@ -19,11 +19,12 @@
  * `stageScroll`, which is the app's one wedge-proof release — never `document.body.overflow`, which
  * this repo has had to unpick twice.
  */
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { lockStageScroll } from "../../../lib/stageScroll";
 import { ATTENTION_HINT, ATTENTION_LABEL, ATTENTION_ORDER, type Attention } from "../../../lib/qcBirdsEye";
-import { CAL_DEFAULT, attentionCounts, type CalView } from "../../../lib/qcCalView";
+import { CAL_DEFAULT, attentionCounts, facetCounts, packageNames, type CalView } from "../../../lib/qcCalView";
+import { stageOrder } from "../../../lib/qcSummary";
 import { QcCalControls, type CalMenu } from "./QcCalControls";
 import { QcTimeline } from "./QcTimeline";
 import type { QcRow } from "../../../lib/qcSummary";
@@ -196,6 +197,19 @@ export const QcExpanded: React.FC<{
   }, [box]);
   /* §8.2 — the whole live pipeline's counts, whatever the filter says */
   const counts = attentionCounts(rows, clock);
+  /**
+   * §D1 — THE PANEL'S FIGURES ARE DERIVED HERE, ONCE, and handed down. The controls are re-rendered
+   * on every choice; deriving five facets' worth of counts inside them would recount the whole
+   * account each time, and — worse — would put a second derivation of "what is showing" beside
+   * `groupRows`, which is the number the foot claims to be stating.
+   *
+   * ⚠️ THE STATUS LIST IS `stageOrder`'s, so the section runs in PIPELINE order and a live Revise &
+   * Resubmit brings its own row, exactly as the summary's seventh column does. A hand-written list
+   * here would be the one place in this app that decides for itself what the pipeline is.
+   */
+  const facets = useMemo(() => facetCounts(rows, view, clock, packageName), [rows, view, clock, packageName]);
+  const statusList = useMemo(() => stageOrder(rows), [rows]);
+  const packageList = useMemo(() => packageNames(rows, packageName), [rows, packageName]);
   /* §4.2 — Find an agent. It MARKS and FADES; it never filters, so the counts, the grouping and the
      sort are all untouched by typing in it. */
   const [find, setFind] = useState("");
@@ -322,7 +336,7 @@ export const QcExpanded: React.FC<{
               dates never scroll under them, and the lane survives every rebuild of the rows. */}
           <QcTimeline
             rows={rows} view={view} packageName={packageName} nowMs={clock} focusId={focusId} onOpen={onOpen} onNudge={onNudge}
-            leftControls={<QcCalControls view={view} onView={setView} menu={menu} onMenu={setMenu} counts={counts} />}
+            leftControls={<QcCalControls view={view} onView={setView} menu={menu} onMenu={setMenu} counts={counts} facets={facets} statuses={statusList} packages={packageList} />}
             timeHost={timeReady ? timeHost.current : null}
             find={term}
           />

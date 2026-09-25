@@ -15,9 +15,10 @@ import { Agent, Query, QueryStatus } from "../types";
 import { buildQcRows, type QcRow } from "./qcSummary";
 import { ATTENTION_LABEL, UPCOMING_DAYS } from "./qcBirdsEye";
 import {
-  ACTION_GROUPS, CAL_DEFAULT, CLOSE_OVER_DAYS, CLOSE_UNDATED_DAYS, GROUP_BY_OPTIONS, SORT_BY_OPTIONS,
-  anyDiffers, attentionCounts, filterDiffers, groupDiffers, groupRows, nextAction, sortDiffers,
-  sortRows, toggleAttention, type CalView,
+  ACTION_GROUPS, CAL_DEFAULT, CLOSE_OVER_DAYS, CLOSE_UNDATED_DAYS, DUE_OPTIONS, GROUP_BY_OPTIONS,
+  SORT_BY_OPTIONS, activeFacets, anyDiffers, attentionCounts, clearFilters, dueBucket, dueHit,
+  facetCounts, filterDiffers, groupDiffers, groupRows, nextAction, packageNames, setDue, sortDiffers,
+  sortRows, toggleAttention, togglePackage, toggleStatus, type CalView,
 } from "./qcCalView";
 
 const DAY = 86_400_000;
@@ -74,7 +75,12 @@ describe("the fixture itself", () => {
 
 describe("§8.3 · the default, and what differs from it", () => {
   it("the page-load default is Everything, no attention filter, grouped by Attention, due ascending", () => {
-    expect(CAL_DEFAULT).toEqual({ court: "all", attention: [], groupBy: "attention", sortBy: "due", asc: true });
+    /* §D1 — the three new facets join it, and `toEqual` is what makes the default EXHAUSTIVE: a
+       facet added without a default is a filter nobody can clear, and ↺ would leave it on. */
+    expect(CAL_DEFAULT).toEqual({
+      court: "all", attention: [], statuses: [], packages: [], due: "any",
+      groupBy: "attention", sortBy: "due", asc: true,
+    });
     expect(anyDiffers(CAL_DEFAULT)).toBe(false);
     expect(filterDiffers(CAL_DEFAULT)).toBe(false);
     expect(sortDiffers(CAL_DEFAULT)).toBe(false);
@@ -324,5 +330,157 @@ describe("§8.3 · the attention filter", () => {
   });
   it("and it composes with the court rather than replacing it", () => {
     expect(names(groupRows(ROWS, view({ court: "agent", attention: ["upcoming"] }), NOW))).toEqual(["Crale"]);
+  });
+});
+
+
+/* ── §D1 · the five facets, their counts and the panel's figures ── */
+
+describe("§D1 · the filter's five facets", () => {
+  const pkgOf = (id: string) => (id === "p1" ? "Opening three" : id === "p2" ? "Full package" : null);
+  /* the same six queries, with two of them carrying a package so the facet has something to say */
+  const PKG_QUERIES = QUERIES.map((q, i) => (i === 0 ? { ...q, packageId: "p1" } : i === 2 ? { ...q, packageId: "p2" } : q));
+  const PKG_ROWS = buildQcRows(PKG_QUERIES, agents, [], NOW);
+
+  it("the windows NEST rather than partition, and `dueBucket` is what partitions", () => {
+    /**
+     * ⚠️ A READER ASKING FOR "within a month" MEANS EVERYTHING UP TO THEN, not the fortnight-to-
+     * month slice. The two questions are different and both are needed — the bands group, the hits
+     * filter — so they are separate functions rather than one with a flag.
+     */
+    const at = (d: number | null): QcRow => ({ expectedMs: d == null ? null : NOW + d * DAY } as QcRow);
+    expect(dueBucket(at(-1), NOW)).toBe("overdue");
+    expect(dueBucket(at(3), NOW)).toBe("week");
+    expect(dueBucket(at(10), NOW)).toBe("fortnight");
+    expect(dueBucket(at(20), NOW)).toBe("month");
+    expect(dueBucket(at(90), NOW)).toBe("later");
+    expect(dueBucket(at(null), NOW)).toBe("nodate");
+    /* nesting: this week is inside the fortnight, and both are inside the month */
+    expect(dueHit(at(3), "fortnight", NOW)).toBe(true);
+    expect(dueHit(at(3), "month", NOW)).toBe(true);
+    expect(dueHit(at(10), "month", NOW)).toBe(true);
+    /* …and overdue is NOT inside any of them: it is behind the reader, not ahead */
+    expect(dueHit(at(-1), "month", NOW)).toBe(false);
+    expect(dueHit(at(-1), "fortnight", NOW)).toBe(false);
+    /* "any" is the absence of the facet, so it holds everything including the undated */
+    expect(DUE_OPTIONS.map((o) => o.key)).toEqual(["any", "overdue", "week", "fortnight", "month", "nodate"]);
+    for (const d of [-1, 3, 10, 20, 90]) expect(dueHit(at(d), "any", NOW)).toBe(true);
+    expect(dueHit(at(null), "any", NOW)).toBe(true);
+  });
+
+  it("⚠️ COUNTS ONE FACET, NEVER ONE VALUE — three statuses ticked is one answer to one question", () => {
+    expect(activeFacets(CAL_DEFAULT)).toBe(0);
+    let v = toggleStatus(view(), QueryStatus.QUERIED);
+    v = toggleStatus(v, QueryStatus.FULL_REQUESTED);
+    v = toggleStatus(v, QueryStatus.OFFER);
+    expect(v.statuses).toHaveLength(3);
+    expect(activeFacets(v), "a badge reading 3 says the reader filtered three different ways").toBe(1);
+    expect(activeFacets({ ...v, court: "you" })).toBe(2);
+    expect(activeFacets({ ...v, court: "you", due: "overdue" })).toBe(3);
+    /* the head's "N active", the button's badge and "is anything filtering" are one derivation */
+    expect(filterDiffers(v)).toBe(true);
+    expect(filterDiffers(CAL_DEFAULT)).toBe(false);
+  });
+
+  it("⚠️ THE FACETS ARE AND, THE VALUES WITHIN ONE ARE OR", () => {
+    const only = (v: Partial<CalView>) => names(groupRows(ROWS, view(v), NOW));
+    /* OR within: two statuses gives the union */
+    expect(only({ statuses: [QueryStatus.FULL_REQUESTED] })).toEqual(["Brand"]);
+    expect(only({ statuses: [QueryStatus.QUERIED] }).sort()).toEqual(["Alder", "Crale", "Dunne", "Ewart"]);
+    expect(only({ statuses: [QueryStatus.QUERIED, QueryStatus.FULL_REQUESTED] }).sort())
+      .toEqual(["Alder", "Brand", "Crale", "Dunne", "Ewart"]);
+    /* AND across: a status that is never in the writer's court leaves nothing */
+    expect(only({ statuses: [QueryStatus.QUERIED], court: "you" })).toEqual([]);
+    expect(only({ statuses: [QueryStatus.FULL_REQUESTED], court: "you" })).toEqual(["Brand"]);
+    /* and the due window narrows again */
+    expect(only({ due: "overdue" }).sort()).toEqual(["Alder", "Ewart"]);
+    expect(only({ due: "overdue", court: "you" })).toEqual([]);
+    /* the undated row is reachable only by its own window */
+    expect(only({ due: "nodate" })).toEqual(["Brand"]);
+    /* ⚠️ AND A CLOSED QUERY IS NEVER IN ANY OF IT — the view draws the live pipeline */
+    for (const v of [{}, { statuses: [QueryStatus.REJECTED] }, { due: "any" as const }]) {
+      expect(only(v)).not.toContain("Frost");
+    }
+  });
+
+  it("⚠️ EVERY COUNT IS FACETED — its own facet is skipped, the other four apply", () => {
+    /**
+     * An option's number is "what would I have if I chose this as well". Counting with ALL five
+     * applied makes every unticked option in a narrowed facet read 0 — the panel then tells a
+     * reader that choosing any of them empties the list. Counting with NONE applied ignores the
+     * filtering they have already done. Both are one argument from correct and neither looks wrong.
+     */
+    const narrowed = view({ court: "agent" });
+    const f = facetCounts(ROWS, narrowed, NOW);
+    /* Brand is the only with-you row, so under court=agent it is out of every other facet's count */
+    expect(f.status[QueryStatus.FULL_REQUESTED] ?? 0).toBe(0);
+    expect(f.status[QueryStatus.QUERIED]).toBe(4);
+    /* …but the COURT facet's own counts ignore the court, or "With you" would read 0 and look dead */
+    expect(f.court.you).toBe(1);
+    expect(f.court.agent).toBe(4);
+    expect(f.court.all).toBe(5);
+    /* and with nothing filtering, every facet sees the whole live pipeline */
+    const all = facetCounts(ROWS, view(), NOW);
+    expect(all.status[QueryStatus.FULL_REQUESTED]).toBe(1);
+    expect(all.total).toBe(5);
+    expect(all.shown).toBe(5);
+    expect(Object.values(all.attention).reduce((a, b) => a + b, 0)).toBe(5);
+  });
+
+  it("the foot's two figures ARE the rows — never a second count of them", () => {
+    for (const v of [view(), view({ court: "you" }), view({ due: "overdue" }), view({ statuses: [QueryStatus.QUERIED] })]) {
+      const shown = names(groupRows(ROWS, v, NOW)).length;
+      expect(facetCounts(ROWS, v, NOW).shown, JSON.stringify(v)).toBe(shown);
+    }
+    /* the total never moves with the filtering — it is what "of M" means */
+    const totals = new Set([view(), view({ court: "you" }), view({ due: "nodate" })].map((v) => facetCounts(ROWS, v, NOW).total));
+    expect(totals).toEqual(new Set([5]));
+  });
+
+  it("packages A–Z with no-package LAST, and the facet is named by the RESOLVER", () => {
+    expect(packageNames(PKG_ROWS, pkgOf)).toEqual(["Full package", "Opening three", ""]);
+    const f = facetCounts(PKG_ROWS, view(), NOW, pkgOf);
+    expect(f.package["Opening three"]).toBe(1);
+    expect(f.package["Full package"]).toBe(1);
+    expect(f.package[""]).toBe(3);
+    /* …and the facet filters on the NAME, so two ids resolving to one name are one choice */
+    expect(names(groupRows(PKG_ROWS, view({ packages: ["Opening three"] }), NOW, pkgOf))).toEqual(["Alder"]);
+    expect(names(groupRows(PKG_ROWS, view({ packages: [""] }), NOW, pkgOf)).sort()).toEqual(["Brand", "Dunne", "Ewart"]);
+    /* OR within the facet */
+    expect(names(groupRows(PKG_ROWS, view({ packages: ["Opening three", "Full package"] }), NOW, pkgOf)).sort())
+      .toEqual(["Alder", "Crale"]);
+  });
+
+  it("⚠️ Clear all clears every FACET and leaves the grouping and the sort alone", () => {
+    const v = clearFilters(view({
+      court: "you", attention: ["overdue"], statuses: [QueryStatus.QUERIED], packages: ["x"], due: "overdue",
+      groupBy: "status", sortBy: "queried", asc: false,
+    }));
+    expect(activeFacets(v)).toBe(0);
+    expect(filterDiffers(v)).toBe(false);
+    /* the two that must survive: a reader clearing a filter has not asked to be re-sorted */
+    expect(v.groupBy).toBe("status");
+    expect(v.sortBy).toBe("queried");
+    expect(v.asc).toBe(false);
+    expect(groupDiffers(v)).toBe(true);
+    expect(sortDiffers(v)).toBe(true);
+  });
+
+  it("the due window is ONE choice, and pressing the chosen one releases it", () => {
+    expect(setDue(view(), "overdue").due).toBe("overdue");
+    expect(setDue(view({ due: "overdue" }), "week").due).toBe("week");
+    /* ⚠️ …and pressing it again means "any", or a reader who chose a window has no way out of it
+       except the panel's Clear all — a radio group with no empty state. */
+    expect(setDue(view({ due: "overdue" }), "overdue").due).toBe("any");
+  });
+
+  it("the multi-selects toggle, and never mutate the view they were handed", () => {
+    const base = view();
+    expect(toggleStatus(base, QueryStatus.QUERIED).statuses).toEqual([QueryStatus.QUERIED]);
+    expect(base.statuses, "the caller's value was mutated").toEqual([]);
+    const on = toggleStatus(base, QueryStatus.QUERIED);
+    expect(toggleStatus(on, QueryStatus.QUERIED).statuses).toEqual([]);
+    expect(togglePackage(base, "").packages).toEqual([""]);
+    expect(togglePackage(togglePackage(base, ""), "").packages).toEqual([]);
   });
 });

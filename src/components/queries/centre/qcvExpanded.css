@@ -284,6 +284,21 @@
   box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 18px 40px -18px rgba(28, 19, 15, 0.45);
   text-align: left;
 }
+/**
+ * §D1 — THE FILTER PANEL IS A HEAD, A SCROLLING BODY AND A FOOT.
+ *
+ * ⚠️ THE CAP IS EXPRESSED AGAINST THE VIEWPORT, AND THIS IS THE ONE PLACE THAT IS HONEST. The house
+ * law is that a height is derived from the element's measured top, because `100vh` is a guess at
+ * everything above it — and the guess is what this panel cannot make, since it opens from a corner
+ * whose own position is the thing being measured. The card itself is inset 16px from the VIEWPORT
+ * (§1.5 keeps it there at every width), so `calc(100vh - 380px)` is a statement about the card's
+ * box rather than about the page's chrome: 16 top, the header's own height, the corner it hangs
+ * from, and 16 at the foot. The body scrolls; the head and the foot never leave.
+ */
+.qcv-xp-pop[data-menu="filter"] {
+  width: 340px; max-height: calc(100vh - 380px); padding: 0;
+  display: flex; flex-direction: column;
+}
 .qcv-xp-sec { padding: 6px 4px 8px; border-bottom: 1px solid var(--qcv-hair); }
 .qcv-xp-sec:last-of-type { border-bottom: 0; }
 .qcv-xp-pop h5 {
@@ -316,6 +331,64 @@
 .qcv-xp-clear {
   margin-top: 4px; font-family: var(--qcv-mono) !important; font-size: 8px !important;
   letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-45);
+}
+
+/* ── §D1 · the Filter panel ── */
+.qcv-xp-fhead {
+  flex: none; display: flex; align-items: baseline; gap: 8px;
+  padding: 13px 16px 11px; border-bottom: 1px solid var(--qcv-hair);
+}
+.qcv-xp-fhead b { font-family: var(--qcv-serif); font-size: 16px; font-weight: 500; color: var(--qcv-ink); }
+/* the "N active" pill: a count, so mono, and it states nothing when nothing is filtering */
+.qcv-xp-fhead em {
+  margin-left: auto; padding: 3px 8px; border-radius: 9px; background: #f3eee7;
+  font-family: var(--qcv-mono); font-size: 9px; font-style: normal; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--qcv-ink-70);
+}
+/**
+ * ⚠️ THE BODY IS THE ONLY SCROLLING PART, and `min-height: 0` is what lets it be. A flex child's
+ * default `min-height: auto` is its content, so without this the body refuses to shrink, the panel
+ * grows past its cap, and the foot — the one part that must never leave — is the first thing off
+ * the bottom of the screen.
+ */
+.qcv-xp-fbody { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 4px 8px; }
+.qcv-xp-fbody .qcv-xp-sec h5 { display: flex; align-items: baseline; gap: 6px; }
+.qcv-xp-fbody .qcv-xp-sec h5 em { margin-left: auto; font-style: normal; color: var(--qcv-ink-70); }
+.qcv-xp-chips { display: flex; flex-wrap: wrap; gap: 5px; padding: 0 4px; }
+.qcv-xp-chip {
+  width: auto !important; display: inline-flex !important; align-items: center; gap: 5px;
+  padding: 5px 10px !important; border: 1px solid rgba(28, 19, 15, 0.14) !important; border-radius: 14px !important;
+  font-family: var(--qcv-type) !important; font-size: 11.5px !important;
+}
+.qcv-xp-chip u { font-family: var(--qcv-mono); font-size: 8.5px; text-decoration: none; color: var(--qcv-ink-45); }
+.qcv-xp-chip--on { background: var(--qcv-ink) !important; border-color: var(--qcv-ink) !important; color: #f5f1eb !important; }
+.qcv-xp-chip--on u { color: rgba(245, 241, 235, 0.7); }
+.qcv-xp-seg button u { margin-left: 5px; font-family: var(--qcv-mono); font-size: 8.5px; text-decoration: none; opacity: 0.6; }
+.qcv-xp-ffoot {
+  flex: none; display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-top: 1px solid var(--qcv-hair); background: #fff; border-radius: 0 0 12px 12px;
+}
+.qcv-xp-ffoot span { font-family: var(--qcv-mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--qcv-ink-45); }
+.qcv-xp-ffoot span b { font-family: var(--qcv-mono); font-size: 11px; color: var(--qcv-ink); }
+/* the rust link is the only rust left on this surface, and it is a LINK rather than a fill (§C1) */
+.qcv-xp-fclear {
+  width: auto !important; margin-left: auto; padding: 4px 2px !important;
+  font-family: var(--qcv-type) !important; font-size: 11.5px !important; color: var(--qcv-rust) !important;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.qcv-xp-fdone {
+  width: auto !important; padding: 6px 14px !important; border-radius: 15px !important;
+  background: var(--qcv-navy) !important;     /* the app already names this colour; a second token for one button is two names for one hue */ color: #fff !important;
+  font-family: var(--qcv-type) !important; font-size: 11.5px !important;
+}
+.qcv-xp-fclear + .qcv-xp-fdone { margin-left: 0; }
+.qcv-xp-ffoot > .qcv-xp-fdone:not(.qcv-xp-fclear + *) { margin-left: auto; }
+/* §D1 — the badge on the Filter button: how many facets are narrowing the list */
+.qcv-xp-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 15px; height: 15px; margin-left: 5px; padding: 0 4px; border-radius: 8px;
+  background: var(--qcv-ink); color: #f5f1eb;
+  font-family: var(--qcv-mono); font-size: 8.5px; font-style: normal; line-height: 1;
 }
 
 /**

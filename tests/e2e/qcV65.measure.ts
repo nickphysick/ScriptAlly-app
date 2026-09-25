@@ -2067,6 +2067,150 @@ test("§A1 · today at 56–58% — on open, on re-open, and with the data 800ms
  * their own handlers, and every control that must not open a query calls `stopPropagation`.
  */
 /**
+ * ⚠️ §D1 · THE SECTIONED FILTER PANEL. Its geometry, its five sections, the faceted counts and the
+ * foot's two figures — all measured, because the claim that matters is what a reader is TOLD a
+ * choice would do, and a source lock can only see that the numbers were passed in.
+ */
+test("§D1 · the Filter panel: five sections, faceted counts, and a foot that states the result", async ({ page }) => {
+  await openApp(page, 1440, 900, "?view=calendar");
+  await page.waitForTimeout(900);
+  if (!(await page.locator("[data-qcv='xp-card']").count())) {
+    await page.locator("[data-qcv='be-expand']").first().click({ timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(900);
+  }
+  await page.locator("[data-qcv='xp-filter']").click();
+  await page.waitForTimeout(250);
+  const pop = page.locator("[data-qcv='xp-pop']");
+  is("d1", "§D1 · the panel is open", await pop.count(), 1);
+
+  const geom = await page.evaluate(() => {
+    const p = document.querySelector("[data-qcv='xp-pop']") as HTMLElement;
+    const b = p.getBoundingClientRect(), cs = getComputedStyle(p);
+    const body = p.querySelector("[data-qcv='xp-fbody']") as HTMLElement | null;
+    const head = p.querySelector("[data-qcv='xp-fhead']") as HTMLElement | null;
+    const foot = p.querySelector("[data-qcv='xp-ffoot']") as HTMLElement | null;
+    return {
+      w: Math.round(b.width), h: Math.round(b.height), cap: window.innerHeight - 380,
+      overflow: body ? getComputedStyle(body).overflowY : null,
+      bodyScrolls: body ? body.scrollHeight > body.clientHeight : null,
+      headIn: head ? head.getBoundingClientRect().bottom <= b.bottom + 1 : null,
+      footIn: foot ? Math.round(foot.getBoundingClientRect().bottom) <= Math.round(b.bottom) + 1 : null,
+      onScreen: b.bottom <= window.innerHeight && b.top >= 0,
+      radius: cs.borderTopLeftRadius,
+    };
+  });
+  is("d1", "§D1 · 340px wide", geom.w, 340);
+  yes("d1", `§D1 · …and no taller than its cap (${geom.h} ≤ ${geom.cap})`, geom.h <= geom.cap + 1, JSON.stringify(geom));
+  yes("d1", "§D1 · …and wholly on screen", geom.onScreen, JSON.stringify(geom));
+  is("d1", "§D1 · the body is the scrolling part", geom.overflow, "auto");
+  yes("d1", "§D1 · …and it really is scrolling, so the cap is load-bearing", geom.bodyScrolls === true, String(geom.bodyScrolls));
+  yes("d1", "§D1 · the head and the foot are inside the panel's box", geom.headIn === true && geom.footIn === true, JSON.stringify(geom));
+
+  /* the five sections, in the mock's order */
+  const secs = await page.evaluate(() =>
+    [...document.querySelectorAll("[data-qcv='xp-pop'] [data-qcv='xp-sec']")].map((e) => ({
+      facet: (e as HTMLElement).dataset.facet, head: e.querySelector("h5")?.textContent ?? "",
+    })));
+  record({ area: "d1", what: "§D1 · the sections", got: secs, want: "reported" });
+  /* ⚠️ the package section is drawn only where there is more than one package to choose between —
+     a facet offering one option filters nothing and says the account has packages it does not. */
+  const want = ["status", "court", "attention", "due"];
+  is("d1", "§D1 · the first four sections, in the mock's order", secs.slice(0, 4).map((x) => x.facet).join(","), want.join(","));
+  yes("d1", "§D1 · …and the headings name them", secs[0].head.startsWith("Status") && secs[1].head === "Whose court"
+    && secs[2].head === "Attention" && secs[3].head === "Next action due", JSON.stringify(secs.map((x) => x.head)));
+
+  /* the foot's figures, before anything is chosen */
+  const footText = async () => (await page.locator("[data-qcv='xp-fcount']").textContent())?.replace(/\s+/g, " ").trim() ?? "";
+  const rowCount = () => page.locator("[data-qcv='tl-row']").count();
+  const first = await footText();
+  yes("d1", `§D1 · the foot states a result ("${first}")`, /^\d+ of \d+ queries$/.test(first), first);
+  const nums = (t: string) => t.match(/\d+/g)!.map(Number);
+  is("d1", "§D1 · …and at rest it is showing everything", nums(first)[0], nums(first)[1]);
+  is("d1", "§D1 · …and that IS the number of rows drawn", nums(first)[0], await rowCount());
+
+  /* no badge and no "N active" until something is filtering */
+  is("d1", "§D1 · no badge at rest", await page.locator("[data-qcv='xp-badge']").count(), 0);
+  is("d1", "§D1 · no 'N active' at rest", await page.locator("[data-qcv='xp-factive']").count(), 0);
+
+  /**
+   * ⚠️ THE FACETED COUNT IS THE CLAIM, and this is the only way to prove it. Read a status option's
+   * count, choose it, and the list must hold exactly that many rows. A count taken with its own
+   * facet applied would read 0 here; one taken with no facets applied would be right at rest and
+   * wrong the moment anything else is chosen — so the check is repeated AFTER narrowing.
+   */
+  const promise = async (facet: string, i: number) => page.evaluate(([f, n]) => {
+    const b = [...document.querySelectorAll(`[data-qcv='xp-pop'] [data-facet='${f}'][data-qcv='xp-chk']`)][n as number] as HTMLElement;
+    return b ? { label: b.textContent ?? "", count: Number(b.querySelector("u")?.textContent ?? "-1") } : null;
+  }, [facet, i] as [string, number]);
+  const press = async (facet: string, i: number) => {
+    const b = page.locator(`[data-qcv='xp-pop'] [data-facet='${facet}'][data-qcv='xp-chk']`).nth(i);
+    await b.click({ timeout: 5000 });
+    await page.waitForTimeout(400);
+  };
+  /* pick the first status option with a non-zero count — a zero would prove nothing either way */
+  const pick = await page.evaluate(() =>
+    [...document.querySelectorAll("[data-qcv='xp-pop'] [data-facet='status'][data-qcv='xp-chk']")]
+      .findIndex((b) => Number(b.querySelector("u")?.textContent ?? 0) > 0));
+  yes("d1", "§D1 · a status with rows behind it was found", pick >= 0, String(pick));
+  if (pick < 0) return;
+  const p1 = await promise("status", pick);
+  await press("status", pick);
+  is("d1", `§D1 · choosing "${p1?.label.trim()}" gives the rows its count promised`, await rowCount(), p1!.count);
+  is("d1", "§D1 · …and the foot agrees", nums(await footText())[0], p1!.count);
+  is("d1", "§D1 · …and the badge appears, counting FACETS", await page.locator("[data-qcv='xp-badge']").textContent(), "1");
+  is("d1", "§D1 · …and the head says so too", (await page.locator("[data-qcv='xp-factive']").textContent())?.trim(), "1 active");
+  is("d1", "§D1 · …and the total is unmoved", nums(await footText())[1], nums(first)[1]);
+
+  /**
+   * ⚠️ AND THE DISCRIMINATOR IS ANOTHER OPTION IN THE SAME FACET, which is the one thing the first
+   * check cannot see. At rest a count taken with its own facet skipped and one taken with every
+   * facet applied are identical, so ticking one status and reading the list proves nothing about
+   * the skip. With a status chosen, every OTHER status must still state its own number; with the
+   * facet applied to its own counts they would all read 0, and the panel would be telling a reader
+   * that adding any second status empties the list — when it can only ever add rows.
+   */
+  const siblings = await page.evaluate(() =>
+    [...document.querySelectorAll("[data-qcv='xp-pop'] [data-facet='status'][data-qcv='xp-chk']")]
+      .map((b, i) => ({ i, on: b.getAttribute("aria-checked") === "true", n: Number(b.querySelector("u")?.textContent ?? -1) })));
+  record({ area: "d1", what: "§D1 · the status counts with one status chosen", got: siblings, want: "reported" });
+  const others = siblings.filter((x) => !x.on);
+  yes("d1", "§D1 · with a status chosen, the others still state their own counts (the skip)",
+    others.some((x) => x.n > 0), JSON.stringify(others));
+
+  /* …and a SECOND value in the same facet is still one facet */
+  const second = others.find((x) => x.n > 0);
+  if (second) {
+    await press("status", second.i);
+    is("d1", "§D1 · two statuses is a UNION, not an intersection", await rowCount(), p1!.count + second.n);
+    is("d1", "§D1 · …and the badge still reads 1 — one answer to one question", await page.locator("[data-qcv='xp-badge']").textContent(), "1");
+    await press("status", second.i);                                        /* back to one */
+  }
+
+  /* now narrow again, and the SECOND facet's counts must already account for the first */
+  const att = await page.evaluate(() =>
+    [...document.querySelectorAll("[data-qcv='xp-pop'] [data-facet='attention'][data-qcv='xp-chk']")]
+      .map((b, i) => ({ i, n: Number(b.querySelector("u")?.textContent ?? 0) })).find((x) => x.n > 0) ?? null);
+  yes("d1", "§D1 · an attention group survives the first choice", att != null, JSON.stringify(att));
+  if (att) {
+    await press("attention", att.i);
+    is("d1", "§D1 · a second facet gives what ITS count promised — so the counts are faceted", await rowCount(), att.n);
+    is("d1", "§D1 · …and the badge counts two facets, not two values", await page.locator("[data-qcv='xp-badge']").textContent(), "2");
+  }
+
+  /* Clear all puts it all back; Done closes without undoing anything */
+  await page.locator("[data-qcv='xp-clearfilter']").click({ timeout: 5000 });
+  await page.waitForTimeout(400);
+  is("d1", "§D1 · Clear all restores every row", await rowCount(), nums(first)[1]);
+  is("d1", "§D1 · …and takes the badge with it", await page.locator("[data-qcv='xp-badge']").count(), 0);
+  await press("status", pick);
+  await page.locator("[data-qcv='xp-fdone']").click({ timeout: 5000 });
+  await page.waitForTimeout(300);
+  is("d1", "§D1 · Done closes the panel", await page.locator("[data-qcv='xp-pop']").count(), 0);
+  is("d1", "§D1 · …and leaves the filtering in place", await rowCount(), p1!.count);
+  is("d1", "§D1 · …with the badge still on the button", await page.locator("[data-qcv='xp-badge']").textContent(), "1");
+});
+
+/**
  * ⚠️ §D4 · WHAT OPENS A QUERY, AND WHAT PANS. Only a bar and the names cell open; the empty track
  * is a drag surface with the date row's own behaviour. Every claim here is about a GESTURE, so
  * every one is measured on the page: a source lock could see the handler come off the row and
@@ -2428,7 +2572,9 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
       bands: [...card.querySelectorAll("[data-qcv='tl-band'] span")].map((b) => (b.textContent ?? "").trim()),
       rowIds: [...card.querySelectorAll("[data-qcv='tl-row']")].map((r) => r.getAttribute("data-id")),
       names: [...card.querySelectorAll("[data-qcv='tl-row'] .qcv-tl-nm")].map((n) => (n.textContent ?? "").trim()),
-      chks: [...card.querySelectorAll("[data-qcv='xp-chk']")].map((c) => ({ g: c.getAttribute("data-group"), on: c.getAttribute("aria-checked"), n: (c.querySelector("u")?.textContent ?? "").trim() })),
+      /* §D1 — the panel has five facets' worth of checkboxes now, so this reads the ATTENTION ones:
+         `data-group` is what the stat cards are keyed by, and it is the mirror being checked. */
+      chks: [...card.querySelectorAll("[data-qcv='xp-chk'][data-facet='attention'], [data-qcv='xp-chk']:not([data-facet])")].map((c) => ({ g: c.getAttribute("data-group"), on: c.getAttribute("aria-checked"), n: (c.querySelector("u")?.textContent ?? "").trim() })),
       zoomOn: [...card.querySelectorAll("[data-qcv='tl-zoom'] button")].find((b) => b.getAttribute("aria-pressed") === "true")?.getAttribute("data-z") ?? null,
       scrollLeft: sc ? Math.round(sc.scrollLeft) : null,
       /* §8.3 — the popover is over the NAMES, which is a stacking claim rather than a position one */
@@ -2577,7 +2723,8 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
   const fpop = await read();
   record({ area: "controls", what: "the Filter popover", got: { pop: fpop?.pop, chks: fpop?.chks, over: fpop?.overNames }, want: "reported" });
   is("controls", "one popover, and it is Filter's", fpop?.pops, 1);
-  is("controls", "…300px wide", fpop?.pop?.w, 300);
+  /* §D1 — the sectioned Filter panel is 340; Group and Sort keep the 300 this used to assert */
+  is("controls", "…340px wide, the sectioned panel's own width", fpop?.pop?.w, 340);
   yes("controls", `…below the buttons (pop ${fpop?.pop?.y}, buttons end ${fpop?.filter?.bottom})`, (fpop?.pop?.y ?? 0) > (fpop?.filter?.bottom ?? 1e9) - 0.5, JSON.stringify({ pop: fpop?.pop?.y, btn: fpop?.filter?.bottom }));
   /* a stacking claim: the panel is over the names, not under them */
   is("controls", "…and NOTHING paints over it — the rows do not swallow the panel", fpop?.overNames, "pop");
@@ -2643,7 +2790,11 @@ test("§8.1–§8.3 · Filter, Sort and Reset — the cards filter, the popover 
   /* ── §8.3 · whose court HIDES ── */
   await page.locator("[data-qcv='xp-filter']").click();
   await page.waitForTimeout(120);
-  await pop(page).getByRole("radio", { name: "With you", exact: true }).click();
+  /* ⚠️ BY ITS KEY, NOT BY ITS WORDS. §D1 puts the facet's count inside the button, so its
+     accessible name became "With you 4" and an exact-name match stopped resolving — a seven-minute
+     timeout, reported as a click that would not land, over a button that was on screen the whole
+     time. The key is what the option IS; the words are what it currently says. */
+  await pop(page).locator("[data-court='you']").click();
   await page.waitForTimeout(150);
   const youOnly = await read();
   record({ area: "controls", what: "with you", got: { rows: youOnly?.rowIds?.length, of: flipped?.rowIds?.length }, want: "reported" });

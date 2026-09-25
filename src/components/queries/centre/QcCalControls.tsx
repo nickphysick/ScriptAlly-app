@@ -20,9 +20,13 @@
 import React, { useEffect, useRef } from "react";
 import { ATTENTION_LABEL, ATTENTION_ORDER, EYE_FOCUS, type Attention } from "../../../lib/qcBirdsEye";
 import {
-  CAL_DEFAULT, GROUP_BY_OPTIONS, SORT_BY_OPTIONS, anyDiffers, filterDiffers, groupDiffers, sortDiffers,
-  toggleAttention, type CalView,
+  CAL_DEFAULT, DUE_OPTIONS, GROUP_BY_OPTIONS, SORT_BY_OPTIONS, activeFacets, anyDiffers, clearFilters,
+  filterDiffers, groupDiffers, setDue, sortDiffers, toggleAttention, togglePackage, toggleStatus,
+  type CalView, type FacetCounts,
 } from "../../../lib/qcCalView";
+import { STAGE_NAME } from "../../../lib/qcSummary";
+import { StatusDot } from "../../StatusDot";
+import type { QueryStatus } from "../../../types";
 
 export type CalMenu = "filter" | "group" | "sort" | null;
 
@@ -48,7 +52,11 @@ export const QcCalControls: React.FC<{
   menu: CalMenu;
   onMenu: (m: CalMenu) => void;
   counts: Record<Attention, number>;
-}> = ({ view, onView, menu, onMenu, counts }) => {
+  /** §D1 — the faceted counts, the package list and the foot's two figures, derived once by the card */
+  facets: FacetCounts;
+  statuses: readonly QueryStatus[];
+  packages: readonly string[];
+}> = ({ view, onView, menu, onMenu, counts, facets, statuses, packages }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   /**
@@ -92,6 +100,8 @@ export const QcCalControls: React.FC<{
         onClick={() => onMenu(menu === "filter" ? null : "filter")}
       >
         <Funnel /> Filter
+        {/* §D1 — the badge counts FACETS, from the one derivation the header also reads */}
+        {activeFacets(view) > 0 && <i className="qcv-xp-badge" data-qcv="xp-badge">{activeFacets(view)}</i>}
       </button>
       {/**
         * §6 — GROUP IS ITS OWN CONTROL. It rode inside Sort's popover, which lit the Sort button for
@@ -150,35 +160,126 @@ export const QcCalControls: React.FC<{
             </>
           ) : menu === "filter" ? (
             <>
-              <section className="qcv-xp-sec">
-                <h5>Whose court</h5>
-                <div className="qcv-xp-seg" role="radiogroup" aria-label="Whose court">
-                  {EYE_FOCUS.map((f) => (
-                    <button key={f.key} type="button" role="radio" aria-checked={view.court === f.key} onClick={() => set({ court: f.key })}>{f.label}</button>
+              {/**
+                * §D1 — HEAD, FIVE SECTIONS, FOOT.
+                *
+                * ⚠️ EVERY COUNT IS FACETED, AND THAT IS THE ONLY HONEST ONE. An option's number is
+                * what the list would hold if this were chosen as well — so the other four facets
+                * apply and its own does not. Counting with all five applied makes every unticked
+                * option in a narrowed facet read 0, which tells a reader that choosing any of them
+                * empties the list; counting with none applied ignores the filtering they have
+                * already done. `facetCounts` is the one place that distinction is made.
+                */}
+              <div className="qcv-xp-fhead" data-qcv="xp-fhead">
+                <b>Filter</b>
+                {activeFacets(view) > 0 && <em data-qcv="xp-factive">{activeFacets(view)} active</em>}
+              </div>
+              <div className="qcv-xp-fbody" data-qcv="xp-fbody">
+                <section className="qcv-xp-sec" data-qcv="xp-sec" data-facet="status">
+                  <h5>Status{view.statuses.length > 0 && <em>{view.statuses.length} selected</em>}</h5>
+                  {statuses.map((k) => (
+                    <button
+                      key={String(k)}
+                      type="button"
+                      className="qcv-xp-chk"
+                      data-qcv="xp-chk"
+                      data-facet="status"
+                      role="checkbox"
+                      aria-checked={view.statuses.includes(k)}
+                      onClick={() => onView(toggleStatus(view, k))}
+                    >
+                      <i aria-hidden="true">{view.statuses.includes(k) ? "✓" : ""}</i>
+                      <StatusDot status={k} overrideSize={12} decorative />
+                      <span>{STAGE_NAME[k]}</span>
+                      <u>{facets.status[k] ?? 0}</u>
+                    </button>
                   ))}
-                </div>
-              </section>
-              <section className="qcv-xp-sec">
-                <h5>Attention</h5>
-                {ATTENTION_ORDER.map((k) => (
-                  <button
-                    key={k}
-                    type="button"
-                    className="qcv-xp-chk"
-                    data-qcv="xp-chk"
-                    data-group={k}
-                    role="checkbox"
-                    aria-checked={view.attention.includes(k)}
-                    disabled={counts[k] === 0}
-                    onClick={() => onView(toggleAttention(view, k))}
-                  >
-                    <i aria-hidden="true">{view.attention.includes(k) ? "✓" : ""}</i>
-                    {ATTENTION_LABEL[k]}
-                    <u>{counts[k]}</u>
-                  </button>
-                ))}
-              </section>
-              <button type="button" className="qcv-xp-clear" data-qcv="xp-clearfilter" onClick={() => set({ court: CAL_DEFAULT.court, attention: [] })}>Clear filters</button>
+                </section>
+                <section className="qcv-xp-sec" data-qcv="xp-sec" data-facet="court">
+                  <h5>Whose court</h5>
+                  <div className="qcv-xp-seg" role="radiogroup" aria-label="Whose court">
+                    {EYE_FOCUS.map((f) => (
+                      /* ⚠️ `data-court` because the count is INSIDE the button, so its accessible
+                         name is now "With you 4" — anything matching on the exact words stops
+                         finding it the moment the facet learns to state its own number. */
+                      <button key={f.key} type="button" role="radio" data-court={f.key} aria-checked={view.court === f.key} onClick={() => set({ court: f.key })}>
+                        {f.label}<u>{facets.court[f.key] ?? 0}</u>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+                <section className="qcv-xp-sec" data-qcv="xp-sec" data-facet="attention">
+                  <h5>Attention</h5>
+                  <div className="qcv-xp-chips">
+                    {ATTENTION_ORDER.map((k) => (
+                      <button
+                        key={k}
+                        type="button"
+                        className={`qcv-xp-chip${view.attention.includes(k) ? " qcv-xp-chip--on" : ""}`}
+                        data-qcv="xp-chk"
+                        data-facet="attention"
+                        data-group={k}
+                        role="checkbox"
+                        aria-checked={view.attention.includes(k)}
+                        onClick={() => onView(toggleAttention(view, k))}
+                      >
+                        {ATTENTION_LABEL[k]}<u>{facets.attention[k] ?? 0}</u>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+                <section className="qcv-xp-sec" data-qcv="xp-sec" data-facet="due">
+                  <h5>Next action due</h5>
+                  <div className="qcv-xp-chips">
+                    {DUE_OPTIONS.map((o) => (
+                      <button
+                        key={o.key}
+                        type="button"
+                        className={`qcv-xp-chip${view.due === o.key ? " qcv-xp-chip--on" : ""}`}
+                        data-qcv="xp-chk"
+                        data-facet="due"
+                        data-due={o.key}
+                        role="radio"
+                        aria-checked={view.due === o.key}
+                        onClick={() => onView(setDue(view, o.key))}
+                      >
+                        {/* ⚠️ "Any time" states no count — it is the ABSENCE of this facet, and a
+                            number beside it would read as a sixth window rather than as no window */}
+                        {o.label}{o.key !== "any" && <u>{facets.due[o.key] ?? 0}</u>}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+                {packages.length > 1 && (
+                  <section className="qcv-xp-sec" data-qcv="xp-sec" data-facet="package">
+                    <h5>Submission package{view.packages.length > 0 && <em>{view.packages.length} selected</em>}</h5>
+                    {packages.map((n) => (
+                      <button
+                        key={n || "__none"}
+                        type="button"
+                        className="qcv-xp-chk"
+                        data-qcv="xp-chk"
+                        data-facet="package"
+                        data-pkg={n || "__none"}
+                        role="checkbox"
+                        aria-checked={view.packages.includes(n)}
+                        onClick={() => onView(togglePackage(view, n))}
+                      >
+                        <i aria-hidden="true">{view.packages.includes(n) ? "✓" : ""}</i>
+                        <span>{n || "No package"}</span>
+                        <u>{facets.package[n] ?? 0}</u>
+                      </button>
+                    ))}
+                  </section>
+                )}
+              </div>
+              <div className="qcv-xp-ffoot" data-qcv="xp-ffoot">
+                <span data-qcv="xp-fcount"><b>{facets.shown}</b> of {facets.total} queries</span>
+                {activeFacets(view) > 0 && (
+                  <button type="button" className="qcv-xp-fclear" data-qcv="xp-clearfilter" onClick={() => onView(clearFilters(view))}>Clear all</button>
+                )}
+                <button type="button" className="qcv-xp-fdone" data-qcv="xp-fdone" onClick={() => onMenu(null)}>Done</button>
+              </div>
             </>
           ) : (
             <>

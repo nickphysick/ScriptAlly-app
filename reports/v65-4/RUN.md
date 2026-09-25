@@ -318,3 +318,49 @@ without its handler. The fourth mutation (the row's handler back) **passes**, wh
 above rather than a gap.
 
 Gates 8,404. Measurement 33.
+
+## D1 — the sectioned Filter panel
+
+340px, capped at `calc(100vh − 380px)`, a head with "Filter" and an "N active" pill, a scrolling
+body of five sections — Status, Whose court, Attention, Next action due, Submission package — and a
+foot stating "N of M queries" with Clear all (a rust link) and Done (an anthracite pill). The Filter
+button carries a badge.
+
+`CalView` gains three facets — `statuses`, `packages` and `due` — and `groupRows` now applies all
+five through one `matchesFilters`. **AND across facets, OR within one.**
+
+**The counts are faceted**, which is the claim that took the most care. An option's number is what
+the list would hold if *this* were chosen as well, so every other facet applies and its own does
+not. Counting with all five applied makes every unticked option in a narrowed facet read 0 — the
+panel then tells a reader that choosing any of them empties the list, when it can only ever add
+rows. Counting with none applied ignores the filtering they have already done. Both are one argument
+from correct and neither looks wrong on the page.
+
+Three decisions worth stating:
+
+- **The badge counts FACETS, never values.** Three statuses ticked is one answer to one question; a
+  badge reading 3 says the reader has filtered three different ways. `activeFacets` is the one
+  derivation the badge, the head's pill and "is anything filtering?" all read.
+- **"Any time" states no count.** It is the absence of the facet, and a number beside it would read
+  as a sixth window rather than as no window.
+- **The package section is drawn only above one package.** A facet offering a single option filters
+  nothing and tells a reader the account has packages it does not.
+- **The status list is `stageOrder`'s and the packages are `packageNames`'**, so the sections run in
+  pipeline order, a live R&R brings its own row, and no list here decides for itself what the
+  pipeline is.
+
+**Two mutations passed at first, and each named a gap in my own lock.** Ticking one status and
+reading the list cannot see the faceting at all — at rest, a count with its own facet skipped and
+one with every facet applied are identical. And ticking one status cannot see a badge that counts
+values. The lock now reads the *other* options' counts with a status chosen, and ticks a second
+value in the same facet. Both then redden.
+
+Proved red five ways: the counts without their skip (every sibling reads 0), the badge counting
+values, the cap removed (810px tall, off the bottom of the screen), OR within a facet becoming AND,
+and the foot counting the whole pipeline. **A sixth — `min-height: auto` on the body — does not
+redden**, and I have not chased it: at this viewport the body's content still fits the cap, so the
+layout it would break is not the one on screen.
+
+One older lock retargeted: it asserted the popover is 300px, which is still true of Group and Sort.
+
+Gates 8,414 (baseline 8,390).
