@@ -148,3 +148,32 @@ touched** — names one of the two font families that sweep forbids. `git status
 by moving anything.
 
 Everything else: tsc clean, production build clean, **8,417 passed** with that one failure.
+
+---
+
+## §F — deployed to dev
+
+**`a1993d0d`**, built from a clean detached worktree at the pushed tip and deployed with
+`firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`. Served bundle
+verified against the build: `index-BA4LBKhu.js` both sides. **Prod was not touched.**
+
+**Measured against the deployed build: 37 passed, 0 failed** (8.3m) — both new locks among them, as
+the brief requires. Screenshots in `reports/v65-5/shots/`.
+
+### Two more locks had to be retargeted, and they are the same fault a third time
+
+The full run went red on **§D4** and **§A5** after fault 2 landed, and neither was a regression:
+
+- **§D4** asserted that a press on a bar left `[data-qcv='xp-card']` at a count of **zero** — i.e.
+  that the view had gone. That is the behaviour the design forbids, written into a lock as the
+  definition of "opens". It now asserts the card host appears *and* the view is still there.
+- **§A5**'s sweep put the view back after an opener by re-opening through `?view=calendar` — which
+  would now throw away the very state §8.11 exists to preserve. It closes the query instead.
+
+Three locks in one pass, each of which said a thing *opened* and measured something else. That is
+the general rule the brief drew, arriving from three different directions in one afternoon.
+
+### Standing
+
+- The Tracking tab is still v11's `QueryTimeline`; left as its own job.
+- `qcReviewAid`'s two new knobs are dev-only and production-stripped, like the two already there.
