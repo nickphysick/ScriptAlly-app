@@ -28,3 +28,22 @@ is swept when P4's editor lands. `contactCard.measure.ts` (grid cards) and
 **Known-red rows already in RED-BACKLOG.md that this rebuild will re-point rather than fix:**
 `stickyRow` (Contact list chrome slab; the masthead leaves in P2), `surfaceCensus` (control row),
 `compactHeader` (reads `.agl-toolbar`; the toolbar leaves in P3).
+
+## Phase 3 (the toolbar, the card grid's mount, and the old filter model retired)
+
+| Subject | Disposition |
+|---|---|
+| `AgentToolbar.tsx` + `src/lib/agentToolbar.test.ts` | deleted — the v11 header row (`ContactControls`) replaces it; the F12Popover desks and the retired facet model went with it |
+| `lib/agentFilters.ts` + its test | deleted — the last live importer was `saveOutcome`, itself retired: the v11 filter/sort/group model lives in `lib/contactList.ts`, locked fixture-derived |
+| `saveOutcome` (lib/agentSaveOutcome) | function retired; the TYPE and `saveNotice` survive — the page derives survival/position against the v11 pipeline inline |
+| the grid mount + card back-face peek in `AgentList` | rows render the list; `AgentCard`/`MaterialSlots`/`ContactPeek` SURVIVE as the DRAWER's dependencies until P4 retires it |
+| `agentsMobile.test` "toolbar popovers present in the sheet" | retired with the toolbar; a mobile presentation for the v11 panels is the mobile pass's own follow-up |
+| `contactPeek.test` / `agentDrawer.test` pins | retargeted (relocation rule): the one-renderer law's host is the drawer; the step order is the grouped `stepOrder` |
+
+**Rows carry `data-agent-card`** (flip.ts's own selector), so the FLIP, the save-notice scroll and
+any probe wanting "an agent's element" keep one address. Lab-hosted suites still alive
+(`contactCard`, `contactDrawer`, `contactEmpty`, `emptyStateSpacing`, `agentAsks`) measure card
+and drawer anatomy that survives only behind the drawer — they retire with it in P4.
+
+**Found dead in passing, not this pass's to sweep:** `AgentResponseGuidelines.tsx` has ZERO
+importers (pre-dates v11). P4's drawer retirement is the natural commit for it.

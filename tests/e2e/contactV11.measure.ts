@@ -18,16 +18,21 @@ import { assertLocalBundleIsDev } from "./bundleGuard";
 import { openRoute, visiblePage } from "./measure";
 
 let asserts = 0;
+let ran = 0;
 const bump = (n = 1) => { asserts += n; };
 
 test.beforeAll(async () => { await assertLocalBundleIsDev(); });
+test.beforeEach(() => { ran += 1; });
 
 test.afterAll(() => {
   // eslint-disable-next-line no-console
-  console.log(`[contactV11] assertions run: ${asserts}`);
+  console.log(`[contactV11] assertions run: ${asserts} across ${ran} tests (this worker)`);
   /* ⚠️ THE FLOOR IS THE GUARD AGAINST A SILENT HALF-RUN — a suite that finds no subject must
-     fail in the language of a failure, not report a shorter green. */
-  if (asserts < 12) throw new Error(`contactV11 ran only ${asserts} assertions — a subject went missing`);
+     fail in the language of a failure, not report a shorter green. It SCALES with the tests this
+     WORKER ran (every case bumps at least twice), because the counter is per worker: a `-g` run,
+     or a worker Playwright restarts after a crash, would otherwise fail the floor with every one
+     of its own assertions green — measured, and the floor's noise then MASKED the real reason. */
+  if (asserts < ran * 2) throw new Error(`contactV11 ran only ${asserts} assertions across ${ran} tests — a subject went missing`);
 });
 
 test.describe("phase 1 — the centred group and the rail shell", () => {
@@ -157,13 +162,13 @@ test.describe("phase 1 — the centred group and the rail shell", () => {
     await openRoute(page, "/agents?view=board", { width: 1440, height: 900 });
     const scope = await visiblePage(page, ".agl-wpg");
     const r = await page.evaluate((scope) => ({
-      grid: !!document.querySelector(`${scope} .agl-grid`),
+      rows: document.querySelectorAll(`${scope} [data-clv="row"]`).length,
       board: !!document.querySelector(`${scope} .agl-bcard`),
       lrow: !!document.querySelector(`${scope} .agl-lrow`),
       switchBtns: document.querySelectorAll(`${scope} [data-view-switch], ${scope} .qvs`).length,
       url: location.search,
     }), scope);
-    expect(r.grid, "the one renderer is not on the page").toBe(true);
+    expect(r.rows > 0, "the one renderer is not on the page").toBe(true);
     expect(r.board, "a board renderer answered a ?view=board URL").toBe(false);
     expect(r.lrow, "a list renderer leaked in").toBe(false);
     expect(r.switchBtns, "a view switch is still mounted").toBe(0);
@@ -254,7 +259,7 @@ test("the hero stacks at 1280 — one-line title beside the sentence, the cards 
   const rowTiles = await page.evaluate((scope) => {
     const row = document.querySelector(`${scope} .clv-tiles--row`) as HTMLElement | null;
     const hero = document.querySelector(`${scope} [data-clv="hero"]`) as HTMLElement | null;
-    const grid = document.querySelector(`${scope} .agl-grid`) as HTMLElement | null;
+    const grid = document.querySelector(`${scope} [data-clv="list"]`) as HTMLElement | null;
     if (!row || !hero || !grid) return null;
     return {
       n: row.querySelectorAll('[data-clv="tile"]').length,
@@ -305,4 +310,180 @@ test("the count cards filter — populations proved non-zero first, OR on multi-
   await tile("closed").click();
   expect(await gridCount(), "clearing the cards restores the list").toBe(total);
   bump(4);
+});
+
+/* ══ phase 3 — the list: header row, faceted filter, bands, rows, the floating bar ══════════ */
+
+test("the header row and the rows — one renderer, StatusDot on every queried row, genre first, no ellipsis", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  const r = await page.evaluate((scope) => {
+    const rows = [...document.querySelectorAll(`${scope} [data-clv="row"]`)] as HTMLElement[];
+    const tally = document.querySelector(`${scope} [data-clv="tally"]`)?.textContent ?? "";
+    return {
+      toolbarGone: !document.querySelector(`${scope} .agl-toolbar`),
+      gridGone: !document.querySelector(`${scope} .agl-grid`),
+      rows: rows.length,
+      tally,
+      queried: rows.filter((x) => x.dataset.status !== "Not queried yet").length,
+      dotted: rows.filter((x) => x.dataset.status !== "Not queried yet" && x.querySelector(".clv-ql svg")).length,
+      hitFirst: rows
+        .filter((x) => x.querySelector(".clv-gch .clv-hit"))
+        .every((x) => x.querySelector(".clv-gch span")!.className.includes("clv-hit")),
+      names: rows.map((x) => {
+        const b = x.querySelector(".clv-rwho b") as HTMLElement;
+        return { over: b.scrollWidth > b.clientWidth + 1 };
+      }),
+      bands: [...document.querySelectorAll(`${scope} [data-clv="band"]`)].map((b) => ({
+        label: b.querySelector("b")?.textContent, n: b.querySelector("i")?.textContent,
+        extra: b.querySelector("small")?.textContent ?? null,
+      })),
+    };
+  }, scope);
+  expect(r.toolbarGone, "the old toolbar is still mounted").toBe(true);
+  expect(r.gridGone, "the card grid is still mounted").toBe(true);
+  expect(r.rows, "population first").toBeGreaterThan(10);
+  expect(r.tally).toBe(`${r.rows} of ${r.rows}`);
+  expect(r.dotted, "a queried row without its StatusDot").toBe(r.queried);
+  expect(r.hitFirst, "a matched genre chip is not first").toBe(true);
+  const over = r.names.filter((n) => n.over).length;
+  expect(over, "an agent's name ellipsised at 1440 on this account").toBe(0);
+  expect(r.bands[0]?.label, "the default grouping's first band").toBe("Your move");
+  expect(r.bands[0]?.extra).toBe("Offers, requests and nudges");
+  bump(8);
+});
+
+test("the filter panel — faceted counts, kept scroll, and an outside pointerdown closing it (§11.4)", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  /* the whole list's facts, read off the rows BEFORE anything narrows them — the oracle the
+     panel's counts are checked against, independent of the panel's own arithmetic */
+  const all = await page.evaluate((scope) =>
+    [...document.querySelectorAll(`${scope} [data-clv="row"]`)].map((x) => ({
+      door: (x as HTMLElement).dataset.door,
+      stand: (x as HTMLElement).dataset.stand,
+      genres: ((x as HTMLElement).dataset.genres ?? "").split("|").filter(Boolean),
+    })), scope);
+  expect(all.length, "population first").toBeGreaterThan(10);
+  bump();
+
+  await page.locator(`${scope} [data-clv="btn-filter"]`).click();
+  await expect(page.locator(`${scope} [data-clv="fpanel"]`)).toBeVisible();
+  /* pick the first genre chip with a non-zero count */
+  const genre = await page.evaluate((scope) => {
+    const chip = [...document.querySelectorAll(`${scope} [data-clv="fsec-genres"] .clv-chip`)]
+      .find((c) => !(c as HTMLElement).dataset.zero && !(c.textContent ?? "").startsWith("Not recorded"));
+    return chip?.firstChild?.textContent?.trim() ?? null;
+  }, scope);
+  expect(genre, "no selectable genre on this account").not.toBeNull();
+  await page.locator(`${scope} [data-clv="fsec-genres"] .clv-chip`, { hasText: genre! }).first().click();
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+
+  const panel = await page.evaluate((scope) => {
+    const opt = (sec: string) => [...document.querySelectorAll(`${scope} [data-clv="fsec-${sec}"] [aria-pressed], ${scope} [data-clv="fsec-${sec}"] [role="checkbox"]`)]
+      .map((o) => ({ v: (o.textContent ?? "").trim(), n: parseInt(o.querySelector("i")?.textContent ?? "0", 10) }));
+    return { door: opt("door"), stand: opt("stand") };
+  }, scope);
+  const pool = all.filter((x) => x.genres.includes(genre!));
+  const doorOpen = panel.door.find((o) => o.v.startsWith("Open"))!;
+  const doorClosed = panel.door.find((o) => o.v.startsWith("Closed"))!;
+  expect(doorOpen.n, "faceted: door Open under the genre filter").toBe(pool.filter((x) => x.door === "open").length);
+  expect(doorClosed.n, "faceted: door Closed under the genre filter").toBe(pool.filter((x) => x.door === "closed").length);
+  bump(3);
+
+  /* kept scroll: scroll the body, tick a checkbox, the place holds */
+  await page.evaluate((scope) => { (document.querySelector(`${scope} [data-clv="fbody"]`) as HTMLElement).scrollTop = 220; }, scope);
+  await page.locator(`${scope} [data-clv="fsec-stand"] .clv-fck`).first().click();
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  const kept = await page.evaluate((scope) => (document.querySelector(`${scope} [data-clv="fbody"]`) as HTMLElement).scrollTop, scope);
+  expect(Math.abs(kept - 220), "the panel lost its place on a selection").toBeLessThanOrEqual(2);
+  bump();
+
+  /* an outside pointerdown closes it — the five §11.4 targets in turn */
+  for (const sel of ["h2", '[data-clv="band"]', '[data-clv="row"]', '[data-clv="tray"]', '[data-clv="herocard"]'] as const) {
+    if (!(await page.locator(`${scope} [data-clv="fpanel"]`).count())) {
+      await page.locator(`${scope} [data-clv="btn-filter"]`).click();
+      await expect(page.locator(`${scope} [data-clv="fpanel"]`)).toBeVisible();
+    }
+    const target = sel === "h2" ? page.locator(`${scope} .clv-ctl h2`) : page.locator(`${scope} ${sel}`).first();
+    await target.dispatchEvent("pointerdown", { bubbles: true });
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    expect(await page.locator(`${scope} [data-clv="fpanel"]`).count(), `a pointerdown on ${sel} left the panel open`).toBe(0);
+    bump();
+  }
+});
+
+test("the floating bar — centred on the list's box, never moving the list (§11.10)", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  const before = await page.evaluate((scope) => {
+    const main = document.querySelector(`${scope} .clv-main`) as HTMLElement;
+    const list = document.querySelector(`${scope} [data-clv="list"]`) as HTMLElement;
+    return { centre: main.getBoundingClientRect().left + main.getBoundingClientRect().width / 2, listTop: list.getBoundingClientRect().top };
+  }, scope);
+  expect(await page.locator(".clv-fbar").count(), "the bar shows with nothing active").toBe(0);
+  await page.locator(`${scope} [data-clv="tile"][data-k="active"]`).click();
+  await expect(page.locator(".clv-fbar")).toBeVisible();
+  const after = await page.evaluate((scope) => {
+    const bar = document.querySelector(".clv-fbar") as HTMLElement;
+    const r = bar.getBoundingClientRect();
+    const list = document.querySelector(`${scope} [data-clv="list"]`) as HTMLElement;
+    return { barCentre: r.left + r.width / 2, bottom: r.bottom, listTop: list.getBoundingClientRect().top, chips: bar.querySelectorAll(".clv-pl").length };
+  }, scope);
+  expect(Math.abs(after.barCentre - before.centre), "the bar is not centred on the list's box").toBeLessThanOrEqual(1);
+  expect(Math.abs(after.bottom - (900 - 22)), "22px above the window's bottom").toBeLessThanOrEqual(1);
+  expect(after.listTop, "the bar moved the list").toBe(before.listTop);
+  expect(after.chips).toBe(1);
+  await page.locator(".clv-fbar .clv-pl button").click();
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  expect(await page.locator(".clv-fbar").count(), "removing the one chip hides the bar").toBe(0);
+  bump(6);
+});
+
+test("narrow rows at 1280 — two lines, the fit beneath its hairline", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1280, height: 800 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  const r = await page.evaluate((scope) => {
+    const rows = [...document.querySelectorAll(`${scope} [data-clv="row"]`)] as HTMLElement[];
+    const withFit = rows.filter((x) => x.querySelector(".clv-rfit .clv-gch, .clv-rfit [data-clv='torn']"));
+    const sample = withFit.slice(0, 6).map((x) => {
+      const who = x.querySelector(".clv-rwho") as HTMLElement;
+      const fit = x.querySelector(".clv-rfit") as HTMLElement;
+      return {
+        h: Math.round(x.getBoundingClientRect().height),
+        fitBelow: fit.getBoundingClientRect().top >= who.getBoundingClientRect().bottom - 1,
+        cols: getComputedStyle(x).gridTemplateColumns.split(" ").length,
+      };
+    });
+    return { n: withFit.length, sample };
+  }, scope);
+  expect(r.n, "population first").toBeGreaterThan(4);
+  for (const s of r.sample) {
+    expect(s.cols, "the narrow template is three tracks").toBe(3);
+    expect(s.fitBelow, "the fit line is not beneath the who block").toBe(true);
+    expect(s.h, "a narrow row should fold to two lines").toBeGreaterThan(100);
+  }
+  bump(1 + r.sample.length * 3);
+});
+
+test("the bands stick at the scroller's top with the page-coloured shadow", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  const r = await page.evaluate(async (scope) => {
+    const scroller = document.querySelector(`${scope} .wpg-scroll`) as HTMLElement;
+    const bands = [...document.querySelectorAll(`${scope} [data-clv="band"]`)] as HTMLElement[];
+    if (bands.length < 2) return null;
+    const second = bands[1];
+    /* scroll until the SECOND band's group is in play, then the FIRST should be gone and the
+       second pinned at the scroller's top */
+    scroller.scrollTop = second.offsetTop + 80;
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const st = scroller.getBoundingClientRect().top;
+    const b = second.getBoundingClientRect();
+    return { pinned: Math.abs(b.top - st) <= 2, sticky: getComputedStyle(second).position === "sticky" };
+  }, scope);
+  expect(r, "fewer than two bands on this account — the pinned claim is unreachable").not.toBeNull();
+  expect(r!.sticky).toBe(true);
+  expect(r!.pinned, "the band does not pin at the scroller's top").toBe(true);
+  bump(3);
 });

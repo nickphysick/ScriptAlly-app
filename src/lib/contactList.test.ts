@@ -54,7 +54,11 @@ import {
    PAST its expected date while fq-1 (Queried, 10 Aug, 6-week window) is still inside its own —
    both union branches exercised, and the tally below proves it. */
 const NOW = Date.parse("2026-09-01T12:00:00.000Z");
-const rows = buildQcRows(CONTACT_FIXTURE_QUERIES, CONTACT_FIXTURE_AGENTS, [], NOW);
+/* fq-7's offer carries the deadline a real offer carries (the engine's own field) — without it
+   the Answer-by branch is unreachable and the tally below says so */
+const QUERIES = CONTACT_FIXTURE_QUERIES.map((q) =>
+  q.id === "fq-7" ? ({ ...q, offerResponseDeadline: "2026-09-15T00:00:00.000Z" } as typeof q) : q);
+const rows = buildQcRows(QUERIES, CONTACT_FIXTURE_AGENTS, [], NOW);
 const MS = CONTACT_FIXTURE_MANUSCRIPTS[0];
 
 describe("where you stand — the page-local union over the QC's own rows", () => {
@@ -158,4 +162,135 @@ describe("heroLayout — the mock's own chain, reproduced from the width", () =>
     }
   });
 
+});
+
+/* ══ phase 3 — row facts, the date line, filters, groups and sorts ══════════════════════════ */
+import {
+  NOT_RECORDED, STAND_LABEL, STATUS_OPTIONS, agentFacts, compareDue, contactFilterCount,
+  contactGroups, emptyContactFilters, facetOptions, matchesContactFilters, rowDateLine,
+  sortFacts, standingQuery,
+} from "./contactList";
+import { QueryStatus } from "../types";
+
+const facts = CONTACT_FIXTURE_AGENTS.map((a) => agentFacts(a, rows, MS.id));
+const factOf = (id: string) => facts.find((x) => x.agent.id === id)!;
+
+describe("the row's standing query and its date line", () => {
+  it("the standing query: furthest live wins; a wholly-closed history speaks by its latest close", () => {
+    expect(standingQuery(agentRows(rows, "fx-two", MS.id))!.id, "Full Sent outranks the old rejection").toBe("fq-2");
+    expect(standingQuery(agentRows(rows, "fx-shut", MS.id))!.id).toBe("fq-5");
+    expect(standingQuery(agentRows(rows, "fx-fresh", MS.id))).toBeNull();
+  });
+
+  it("the five shapes, each from a produced row — and the branch tally proves the spread", () => {
+    const by = new Map(rows.map((r) => [r.id, r]));
+    const lines = new Map([...by.entries()].map(([id, r]) => [id, rowDateLine(r, NOW)]));
+    /* agent's court, past the date → the fact, in ink */
+    expect(lines.get("fq-2")).toEqual({ text: expect.stringMatching(/^Expected \d+ \w+ · \d+d over$/), over: true });
+    /* agent's court, inside the window → a reply coming */
+    expect(lines.get("fq-1")).toEqual({ text: expect.stringMatching(/^Reply by \d+ \w+ · in \d+d$/), over: false });
+    /* the writer's own send-by (partial requested carries the writer clock when one exists) —
+       fq-4 has no writer date on this fixture, so its line is honestly ABSENT, not invented */
+    expect(by.get("fq-4")!.court).toBe("you");
+    expect(lines.get("fq-4"), "no date on the writer's side means no line, never a guess").toBeNull();
+    /* closed without a request on record → plain Passed */
+    expect(lines.get("fq-3")).toEqual({ text: expect.stringMatching(/^Passed · \d+ \w+$/), over: false });
+    const tally = { over: 0, reply: 0, none: 0, closed: 0, offer: 0 };
+    for (const l of lines.values()) {
+      if (!l) tally.none += 1;
+      else if (l.text.startsWith("Answer")) tally.offer += 1;
+      else if (l.over) tally.over += 1;
+      else if (l.text.startsWith("Reply")) tally.reply += 1;
+      else tally.closed += 1;
+    }
+    for (const [k, n] of Object.entries(tally)) expect(n, `branch ${k} never ran on this fixture`).toBeGreaterThan(0);
+  });
+
+  it("a passed close names how far it got, from the log — produced, never typed", () => {
+    const acts = [{ id: "a1", queryId: "fq-3", type: "STATUS_CHANGE", resultingStatus: "Partial Requested", date: "2026-03-10T00:00:00.000Z", description: "" }];
+    const withReach = buildQcRows(QUERIES, CONTACT_FIXTURE_AGENTS, acts as never, NOW);
+    const r = withReach.find((x) => x.id === "fq-3")!;
+    expect(r.furthest).toBe("partial");
+    expect(rowDateLine(r, NOW)!.text).toMatch(/^Passed on the partial · /);
+  });
+});
+
+describe("the filter: OR within a section, AND across, counts faceted", () => {
+  it("each section matches on its own fact, and Not recorded is a real option", () => {
+    const f = emptyContactFilters();
+    expect(matchesContactFilters(factOf("fx-fresh"), { ...f, stand: ["none"] })).toBe(true);
+    expect(matchesContactFilters(factOf("fx-two"), { ...f, stand: ["you"] }), "past-the-date joins Your move (ruling a)").toBe(true);
+    expect(matchesContactFilters(factOf("fx-long"), { ...f, stand: ["you"] })).toBe(false);
+    expect(matchesContactFilters(factOf("fx-bare"), { ...f, status: ["Offer"] })).toBe(true);
+    const noGenres = facts.find((x) => x.genres.length === 0)!;
+    expect(matchesContactFilters(noGenres, { ...f, genres: [NOT_RECORDED] })).toBe(true);
+    expect(contactFilterCount({ ...f, stand: ["you"], genres: ["Thriller", NOT_RECORDED] })).toBe(3);
+  });
+
+  it("faceted counts: every option counted under all the OTHER active narrowing (§11.4's law)", () => {
+    const someGenre = facts.find((x) => x.genres.length > 0)!.genres[0];
+    const f = { ...emptyContactFilters(), genres: [someGenre] };
+    const opts = facetOptions(facts, f, () => true);
+    /* the door counts under the genre filter equal a direct count over the genre-filtered set */
+    const pool = facts.filter((x) => matchesContactFilters(x, f, "door"));
+    for (const o of opts.door) {
+      expect(o.n, `door ${o.value}`).toBe(pool.filter((x) => x.door === o.value).length);
+    }
+    /* the genre section counts under everything EXCEPT itself — here, no other filter, the list */
+    const g = opts.genres.find((o) => o.value === someGenre)!;
+    expect(g.n).toBe(facts.filter((x) => x.genres.includes(someGenre)).length);
+    /* the seven status options are the brief's, verbatim — Full requested and R&R are absent */
+    expect(opts.status.map((o) => o.value)).toEqual([...STATUS_OPTIONS]);
+  });
+});
+
+describe("grouping partitions the ordered list; sorting orders within", () => {
+  it("Where you stand: the four bands in order, the Your-move band carrying its right label", () => {
+    const ordered = sortFacts(facts, "due", () => false, NOW);
+    const g = contactGroups("stand", ordered);
+    expect(g.map((x) => x.label)).toEqual(
+      (Object.values(STAND_LABEL)).filter((l) => g.some((y) => y.label === l)));
+    expect(g[0].label).toBe("Your move");
+    expect(g[0].extra).toBe("Offers, requests and nudges");
+    expect(g.reduce((n, x) => n + x.ids.length, 0), "a partition loses nobody").toBe(facts.length);
+  });
+
+  it("agency ignores a leading The; a live R&R gets the slot the journey gives it", () => {
+    const byAgency = contactGroups("agency", sortFacts(facts, "agency", () => false, NOW));
+    const labels = byAgency.map((x) => x.label);
+    const lantern = labels.indexOf("The Lantern Agency");
+    /* "The Lantern Agency" files under L: after Halcyon, before Rookery */
+    expect(lantern).toBeGreaterThan(labels.indexOf("Halcyon Literary"));
+    expect(lantern).toBeLessThan(labels.indexOf("Rookery & Vale"));
+    const rr = [{ ...QUERIES[0], id: "fq-rr", agentId: "fx-fresh", status: QueryStatus.REVISE_RESUBMIT }];
+    const rrRows = buildQcRows([...QUERIES, ...rr], CONTACT_FIXTURE_AGENTS, [], NOW);
+    const rrFacts = CONTACT_FIXTURE_AGENTS.map((a) => agentFacts(a, rrRows, MS.id));
+    const byStatus = contactGroups("status", sortFacts(rrFacts, "due", () => false, NOW));
+    const sLabels = byStatus.map((x) => x.label);
+    expect(sLabels).toContain("Revise & resubmit");
+    expect(sLabels.indexOf("Revise & resubmit"), "between Offer's slot and Full sent's").toBeLessThan(sLabels.indexOf("Full sent"));
+  });
+
+  it("Next action due: past first, then soonest; the dateless after, open before closed", () => {
+    const ordered = sortFacts(facts, "due", () => false, NOW);
+    const dated = ordered.filter((x) => x.q && x.q.court !== "closed" && x.q.expectedMs != null);
+    for (let i = 1; i < dated.length; i += 1) {
+      expect(dated[i - 1].q!.expectedMs!).toBeLessThanOrEqual(dated[i].q!.expectedMs!);
+    }
+    const firstDateless = ordered.findIndex((x) => !(x.q && x.q.court !== "closed" && x.q.expectedMs != null));
+    expect(firstDateless, "every dated row precedes every dateless one").toBe(dated.length);
+    const tail = ordered.slice(firstDateless);
+    const firstClosed = tail.findIndex((x) => x.standing.kind === "closed");
+    if (firstClosed >= 0) for (const x of tail.slice(firstClosed)) expect(x.standing.kind).toBe("closed");
+    void compareDue;
+  });
+
+  it("Replies fastest and Rating put absence last", () => {
+    const byReply = sortFacts(facts, "reply", () => false, NOW);
+    const noWindow = byReply.findIndex((x) => x.agent.responseTimeWeeks == null);
+    if (noWindow >= 0) for (const x of byReply.slice(noWindow)) expect(x.agent.responseTimeWeeks == null).toBe(true);
+    const byRating = sortFacts(facts, "rating", () => false, NOW);
+    const unrated = byRating.findIndex((x) => x.rating == null);
+    if (unrated >= 0) for (const x of byRating.slice(unrated)) expect(x.rating == null).toBe(true);
+  });
 });

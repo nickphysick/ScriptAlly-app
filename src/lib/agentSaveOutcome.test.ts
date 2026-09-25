@@ -2,96 +2,26 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Locks for what happens to a card after it is saved. The motion is a browser check; the OUTCOME
- * is pure, and it is what decides both the choreography and the sentence — so if these disagree,
- * the interface tells the reader one thing and does another.
+ * The save notice's sentences. `saveOutcome`'s own cases retired with the function (v11 P3 —
+ * the page derives survival and position against the v11 pipeline now, and THOSE derivations
+ * are locked in contactList.test.ts); what still needs a lock here is the wording two surfaces
+ * read, and the 1-based position a person counts.
  */
-import { describe, it, expect } from "vitest";
-import { saveNotice, saveOutcome } from "./agentSaveOutcome";
-import { emptyFilters } from "./agentFilters";
-import { Agent, Query, QueryStatus, SubmissionMethod, SubmissionStatus } from "../types";
+import { describe, expect, it } from "vitest";
+import { saveNotice } from "./agentSaveOutcome";
 
-const mkAgent = (over: Partial<Agent>): Agent => ({
-  id: "a1", userId: "u1", name: "Rosalind Achebe", agency: "Hartley & Co", email: "", website: "",
-  genres: [], mswlNotes: "", submissionStatus: SubmissionStatus.OPEN,
-  submissionMethod: SubmissionMethod.EMAIL, materialsWanted: [],
-  dateAdded: "2026-01-01T00:00:00.000Z", lastCheckedDate: "2026-01-01T00:00:00.000Z", notes: "",
-  ...over,
-});
-
-const mkQuery = (over: Partial<Query>): Query => ({
-  id: "q1", userId: "u1", agentId: "a1", manuscriptId: "m1", status: QueryStatus.QUERIED,
-  dateSent: "2026-03-01T00:00:00.000Z", ...over,
-} as Query);
-
-const ctx = (over: Partial<Parameters<typeof saveOutcome>[1]> = {}) => ({
-  /* ⚠️ THE MODEL MOVED (Phase 6): four facets and six orders, so the sort keys and the facet
-     names change with it. The CLAIMS below are unchanged — a saved card travels to a knowable
-     place under the ACTIVE sort, or it leaves because it no longer matches. */
-  agents: [] as Agent[], queries: [] as Query[], filters: emptyFilters(), search: "",
-  sort: "name" as const, sortDir: "asc" as const, ...over,
-});
-
-describe("saveOutcome · the card travels to a KNOWABLE place", () => {
-  it("states a 1-based position under the active sort — a person counts cards, not array slots", () => {
-    const saved = mkAgent({ id: "b", name: "Bell, Cara" });
-    const agents = [mkAgent({ id: "a", name: "Achebe, Rosalind" }), saved, mkAgent({ id: "c", name: "Dunn, Sophie" })];
-    const out = saveOutcome(saved, ctx({ agents, sort: "name" }));
-    expect(out).toMatchObject({ kind: "travel", index: 2, total: 3, sortLabel: "Agent name" });
+describe("saveNotice — one wording for both outcomes", () => {
+  it("a filtered-out save says so, without blaming the writer", () => {
+    expect(saveNotice("Eleanor Whitfield", { kind: "filtered-out" }))
+      .toBe("Eleanor Whitfield saved. Not shown under your current filters.");
   });
 
-  it("the position follows the ACTIVE sort, not insertion order", () => {
-    const saved = mkAgent({ id: "b", name: "Bell", starRating: 5 });
-    const agents = [mkAgent({ id: "a", name: "Achebe", starRating: 2 }), saved];
-    // by name, Bell is second; by rating, Bell is first
-    expect(saveOutcome(saved, ctx({ agents, sort: "name" }))).toMatchObject({ index: 2 });
-    expect(saveOutcome(saved, ctx({ agents, sort: "priority", sortDir: "desc" }))).toMatchObject({ index: 1, sortLabel: "Priority" });
+  it("a travelling save states a 1-based position under the named sort", () => {
+    expect(saveNotice("Eleanor Whitfield", { kind: "travel", index: 3, total: 12, sortLabel: "Next action due" }))
+      .toBe("Eleanor Whitfield saved. Moved to position 3 under Next action due.");
   });
 
-  it("names the sort in the notice, so the position means something", () => {
-    const saved = mkAgent({ id: "b", name: "Marcus Reed" });
-    const out = saveOutcome(saved, ctx({ agents: [saved], sort: "name" }));
-    expect(saveNotice("Marcus Reed", out)).toBe("Marcus Reed saved. Moved to position 1 under Agent name.");
+  it("a nameless record still gets a subject", () => {
+    expect(saveNotice("  ", { kind: "filtered-out" })).toMatch(/^That agent saved\./);
   });
 });
-
-describe("saveOutcome · a card that fails the filters LEAVES, and says so", () => {
-  it("a never-queried agent saved while filtered to Active queries is filtered-out, not travelling", () => {
-    const saved = mkAgent({ id: "new", name: "Marcus Reed" }); // no queries at all
-    const out = saveOutcome(
-      saved,
-      ctx({ agents: [saved], filters: { ...emptyFilters(), history: ["Active queries"] } }),
-    );
-    expect(
-      out.kind,
-      "a saved agent that cannot survive the active filters was told to travel — there is no slot for it to travel TO, so it would simply vanish, which is the one outcome this must never produce",
-    ).toBe("filtered-out");
-    expect(saveNotice("Marcus Reed", out)).toBe("Marcus Reed saved. Not shown under your current filters.");
-  });
-
-  it("the same agent travels normally once the filter would admit it", () => {
-    const saved = mkAgent({ id: "new" });
-    const queries = [mkQuery({ agentId: "new" })];
-    const out = saveOutcome(
-      saved,
-      ctx({ agents: [saved], queries, filters: { ...emptyFilters(), history: ["Active queries"] } }),
-    );
-    expect(out.kind).toBe("travel");
-  });
-
-  it("a search that excludes the saved card counts as filtered-out too", () => {
-    const saved = mkAgent({ id: "new", name: "Marcus Reed", agency: "Bloomsbury Quill" });
-    expect(saveOutcome(saved, ctx({ agents: [saved], search: "penhallow" })).kind).toBe("filtered-out");
-  });
-
-  it("falls back to a usable sentence when the agent has no name", () => {
-    const out = saveOutcome(mkAgent({ id: "x", name: "" }), ctx({ agents: [mkAgent({ id: "x", name: "" })] }));
-    expect(saveNotice("", out)).toMatch(/^That agent saved\./);
-  });
-});
-
-/* ⚠️ THE SECTION CASES ARE RETIRED WITH THE THING THEY GUARDED (Phase 7). `sectionChanged` and
-   `sectionFor` existed for the GRID's section grouping; grouping arranges the BOARD now, and the
-   grid is flat, so there is no heading for a saved card to fly across. Retired rather than
-   rewritten: the claim they made cannot be restated about a page with no sections, and a case
-   kept alive over a deleted mechanism is the vacuous kind that passes forever. */

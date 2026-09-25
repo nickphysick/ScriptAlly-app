@@ -88,9 +88,14 @@ describe("ONE renderer — nothing else draws these rows", () => {
     expect(drawer, "the drawer stopped rendering the peek at all").toContain("<ContactPeek");
   });
 
-  it("the card mounts the peek for its back face and hosts no editor there", () => {
+  /* ⚠️ RETARGETED (v11 P3): the card FACE and its flip left the page — rows render the list, and
+     the profile opens as an overlay — so the page mounts NO peek at all now, and the drawer is
+     the one page-side renderer of these rows. The one-renderer law is unchanged; its host moved. */
+  it("the page mounts no peek of its own; the drawer is the one page-side renderer", () => {
     const list = readFileSync(new URL("./AgentList.tsx", import.meta.url), "utf8");
-    expect(list).toContain("<ContactPeek");
+    expect(list, "a page-level peek mount returned").not.toContain("<ContactPeek");
+    const drawer = readFileSync(new URL("./AgentDrawer.tsx", import.meta.url), "utf8");
+    expect(drawer).toContain("<ContactPeek");
     expect(list, "the card's back face went back to hosting the editor").not.toMatch(/back=\{[^}]*editorFor/);
   });
 });

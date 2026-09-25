@@ -96,7 +96,8 @@ describe("stepping between agents", () => {
 
   /* the order stepped through is the one on screen — not the underlying store */
   it("steps through the list's own order, filtered and sorted as shown", () => {
-    expect(list).toContain("const drawerIndex = openId ? shown.findIndex((a) => a.id === openId) : -1;");
+    /* retargeted with the v11 rows (see the note above): the rendered order is the grouped one */
+    expect(list).toContain("const drawerIndex = openId ? stepOrder.indexOf(openId) : -1;");
   });
 });
 

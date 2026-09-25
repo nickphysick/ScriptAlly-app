@@ -133,25 +133,19 @@ describe("motion vocabulary lives in ONE shared place", () => {
   });
 });
 
-describe("the load sequence is armed ONCE, on route entry", () => {
-  it("the state class rides the CONTAINER, not the cards", () => {
-    expect(page).toMatch(/className=\{`aglist\$\{loadAnim \? " agl-anim" : ""\}`\}/);
-  });
-
-  it("the sequence DISARMS itself — otherwise filled animations outrank the FLIP transforms", () => {
-    expect(
-      page,
-      "the load class is never cleared; cards keep a filled animation, which outranks an inline transform, and every later bump silently does nothing",
-    ).toContain("setLoadAnim(false)");
-  });
-
-  it("it is not reactive to filters, sort or grouping — a tick must not re-run the page's entrance", () => {
-    const armBlock = page.slice(page.indexOf("if (!loadAnim) return;"), page.indexOf("}, []);", page.indexOf("if (!loadAnim) return;")) + 8);
-    expect(armBlock, "the arming effect gained dependencies — it now re-fires on state changes and the page re-animates as you filter").toMatch(/\}, \[\]\);\s*$/);
-  });
-
-  it("reduced motion never arms it at all — no timer, no measurement, nothing to undo", () => {
-    expect(page).toContain("useState(!prefersReducedMotion())");
+/* ⚠️ THE LOAD SEQUENCE IS RETIRED WITH THE CARD GRID (v11 P3). The staggered entrance introduced
+   a WALL OF CARDS; the v11 rows arrive as a list and the mock draws no entrance for them, so
+   `loadAnim`, the column count and the row stagger left the page with the renderer. The stagger
+   MATHS above stay locked — `rowDelayMs`/`gridColumnCount` are pure and would be the first thing
+   a future entrance reaches for — and the FLIP's own laws live on: the rows carry
+   `data-agent-card`, flip.ts's default selector, asserted below. */
+describe("the FLIP survived the renderer swap", () => {
+  const list = readFileSync(new URL("../components/agents/AgentList.tsx", import.meta.url), "utf8");
+  const rows = readFileSync(new URL("../components/agents/contact/ContactRows.tsx", import.meta.url), "utf8");
+  it("rows carry flip.ts's own selector, and the page still measures before a reflow", () => {
+    expect(rows).toContain("data-agent-card={a.id}");
+    expect(list).toContain("flipBefore.current = measureFlip(gridRef.current)");
+    expect(list).toContain("playFlip(gridRef.current, before, { durationMs: BUMP_MS })");
   });
 });
 
@@ -182,7 +176,9 @@ describe("the save is THREE BEATS, never one", () => {
   });
 
   it("the outcome is computed BEFORE the motion, so the notice and the choreography agree", () => {
-    const outcomeAt = list.indexOf("saveOutcome(saved");
+    /* retargeted (v11 P3): the outcome derives inline against the v11 pipeline now — the LAW is
+       the ORDER, and the anchor is the derivation's own first line */
+    const outcomeAt = list.indexOf("const savedFacts = agentFacts(saved");
     const firstPhase = list.indexOf('setSaveState({ id: saved.id, phase: "fadeout" })');
     expect(
       outcomeAt > -1 && outcomeAt < firstPhase,

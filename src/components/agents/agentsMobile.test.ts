@@ -13,7 +13,6 @@ import { stripComments } from "../../lib/styleWiring";
 
 const css = readFileSync(resolve(__dirname, "./agentList.css"), "utf8");
 const list = readFileSync(resolve(__dirname, "./AgentList.tsx"), "utf8");
-const toolbar = readFileSync(resolve(__dirname, "./AgentToolbar.tsx"), "utf8");
 
 describe("breakpoint law — md is the one mobile/desktop divider", () => {
   it("the 700/640 hand-rolled breakpoints are migrated; desktop-side 900/1100 stay", () => {
@@ -41,8 +40,11 @@ describe("breakpoint law — md is the one mobile/desktop divider", () => {
  */
 describe("baked decision 6 — no 3D flip below md, and now no second editor host either", () => {
   it("the card does not turn over on mobile, and mounts no back face there", () => {
-    expect(list).toContain("peeked={!isMobile && peekId === agent.id}");
-    expect(list).toContain("back={!isMobile && peekId === agent.id ? peekFace(agent) : null}");
+    /* ⚠️ STRONGER SINCE v11 P3: the card FACE left the page (rows render the list), so there is
+       no peek mount at ANY width — the claim graduates from "not below md" to "not at all". The
+       drawer's third container is now the only reader of these rows on the page. */
+    expect(list, "a card-back peek mount returned to the page").not.toMatch(/["\s`]peeked=/);
+    expect(list).not.toContain("peekFace(");
   });
 
   /* ⚠️ ASSERTED AS ABSENCE IN BOTH ARTEFACTS. The component's mount going is not the same as the
@@ -87,14 +89,10 @@ describe("baked decision 6 — no 3D flip below md, and now no second editor hos
    sheet, one set of options in two chassis. What changed is who draws the desktop half — the
    Query Centre's shared popover rather than this page's private one — so the assertion moved
    from a private wrapper's markup to the chooser that picks between them. */
-describe("toolbar popovers present in the sheet below md", () => {
-  it("the same children render in MobileSheet, wrapped for the .aglist scope", () => {
-    expect(toolbar).toContain("<MobileSheet");
-    expect(toolbar).toContain('<div className="aglist agl-inpop">{children}{foot}</div>');
-    expect(toolbar, "the sheet builds its own option list, so the two chassis can offer different filters")
-      .not.toMatch(/isMobile \?[\s\S]{0,200}FACETS\.map/);
-  });
-});
+/* ⚠️ RETIRED (v11 P3): "toolbar popovers present in the sheet below md" read AgentToolbar.tsx,
+   and the toolbar is deleted — the v11 header row's panels are the Contact list's own (a mobile
+   presentation for THEM is the mobile pass's own follow-up, recorded rather than silently
+   dropped). The other mobile laws here are the card's and the drawer's and stand unchanged. */
 
 describe("touch affordances", () => {
   it("the avatar's change-photo veil is always visible below md (hover-only on desktop)", () => {

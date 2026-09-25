@@ -14,7 +14,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../lib/db";
-import { AgentCard } from "./AgentCard";
 import { AgentEditor } from "./AgentEditor";
 import {
   AgentDraft,
@@ -39,33 +38,25 @@ import {
   contactListState,
   matchesAgentSearch,
 } from "../../lib/agentList";
-import {
-  CARDS_START_MS,
-  LOAD_MS,
-  MAX_STAGGER_ROWS,
-  ROW_STEP_MS,
-  gridColumnCount,
-  prefersReducedMotion,
-  rowDelayMs,
-} from "../../lib/agentMotion";
+import { prefersReducedMotion } from "../../lib/agentMotion";
 import { BUMP_MS, EXIT_MS, SAVE_BREATH_MS, SAVE_FADE_IN_MS, SAVE_FADE_OUT_MS } from "../../lib/agentMotion";
-import { saveNotice, saveOutcome } from "../../lib/agentSaveOutcome";
+import { SaveOutcome, saveNotice } from "../../lib/agentSaveOutcome";
 import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
-import { AgentToolbar, AppliedTag, AgentAppliedTags, appliedTags } from "./AgentToolbar";
-import {
-  AgentFilters, DEFAULT_SORT, SortDir, SortKey, emptyFilters, matchesFilters, sortAgents, sortSpec,
-} from "../../lib/agentFilters";
 import { ContactListEmptyState } from "./ContactListEmptyState";
-import { ContactPeek } from "./ContactPeek";
 
 import { AgentDrawer } from "./AgentDrawer";
-import { RotateCcw } from "lucide-react";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { ContactRail } from "./contact/ContactRail";
 import { ContactHero, CountCards } from "./contact/ContactHero";
 import {
-  ContactCardKey, contactCensus, heroFacts, matchesCards,
+  ContactCardKey, ContactFilters, GroupKey, SORT_OPTIONS, STAND_LABEL, SortKey as ContactSortKey, agentFacts,
+  contactCensus, contactFilterCount, contactGroups, emptyContactFilters, facetOptions, heroFacts,
+  matchesCards, matchesContactFilters, sortFacts,
 } from "../../lib/contactList";
+import { isGenreMatch } from "../../lib/genreMatch";
+import { ContactControls } from "./contact/ContactControls";
+import { ContactRows } from "./contact/ContactRows";
+import { BarChip, ContactBar } from "./contact/ContactBar";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
 import "./contact/contactV11.css";
@@ -73,7 +64,7 @@ import { RAIL_GROUPS } from "../shell/railNav";
 import { countryName } from "../../lib/territory";
 import { matchGenre } from "../../lib/genreMatch";
 import { blankDraft } from "../../lib/agentDraft";
-import { useIsMobile, useMobileChrome } from "../shell/mobileChrome";
+import { useMobileChrome } from "../shell/mobileChrome";
 
 /** The shared manuscript-scope key — the same one Packages, Comps and Manuscripts read. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -133,10 +124,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* the hero publishes its stacked flag — below 760 the count cards leave it for the list's top */
   const [heroStacked, setHeroStacked] = useState(false);
 
-  const [filters, setFilters] = useState<AgentFilters>(emptyFilters);
+  const [filters, setFilters] = useState<ContactFilters>(emptyContactFilters);
   const [search, setSearch] = useState(searchQuery?.trim() || "");
-  const [sort, setSort] = useState<SortKey>(DEFAULT_SORT);
-  const [sortDir, setSortDir] = useState<SortDir>(sortSpec(DEFAULT_SORT).defaultDir);
+  const [groupKey, setGroupKey] = useState<GroupKey>("stand");
+  const [sortKey, setSortKey] = useState<ContactSortKey>("due");
   // A draft-only agent that isn't persisted until Done passes validation (decision 16).
   const [newAgent, setNewAgent] = useState<Agent | null>(null);
 
@@ -150,13 +141,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   // animation outranks an inline transform, so cards still holding one would silently ignore the
   // FLIP transforms that arrive in Phase 2. Clearing the class returns them to a movable state.
   const gridRef = useRef<HTMLDivElement>(null);
-  const [columns, setColumns] = useState(1);
-  // The positions captured just BEFORE a change that reflows the grid. Consumed once, by the
-  // layout effect below, on the very next render.
+  /** the LIST column's box — what the floating bar centres on (§5.4) */
+  const mainColRef = useRef<HTMLDivElement>(null);
+  // The positions captured just BEFORE a change that reflows the list. Consumed once, by the
+  // layout effect below, on the very next render. (The FLIP survives the grid→rows move: the
+  // rows carry `data-agent-card`, flip.ts's own default selector.)
   const flipBefore = useRef<FlipRects | null>(null);
-  // A card on its way out: it holds its place, plays `fall`, and only then is really removed —
-  // otherwise the gap closes underneath it and the exit animates nothing.
-  const [leavingId, setLeavingId] = useState<string | null>(null);
   /** The saved card's beat, and the inline notice that outlives the motion. */
   const [saveState, setSaveState] = useState<{ id: string; phase: "fadeout" | "fadein" | "breath" } | null>(null);
   const [notice, setNotice] = useState<{
@@ -167,21 +157,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /** The agent exactly as it was before the last save, so Undo can put it back. Null for a card
    *  that was CREATED by the save — there is no previous version to restore. */
   const undoSnapshot = useRef<Agent | null>(null);
-  const [loadAnim, setLoadAnim] = useState(!prefersReducedMotion());
-
-  // Measured before paint, so the very first frame already carries the right delay.
-  useLayoutEffect(() => setColumns(gridColumnCount(gridRef.current)), []);
-
-  useEffect(() => {
-    if (!loadAnim) return;
-    const done = window.setTimeout(
-      () => setLoadAnim(false),
-      CARDS_START_MS + (MAX_STAGGER_ROWS - 1) * ROW_STEP_MS + LOAD_MS + 40,
-    );
-    return () => window.clearTimeout(done);
-    // armed once, on mount — deliberately not reactive to anything
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // LAST + INVERT + PLAY. Runs after the DOM has the new arrangement but before paint, so the
   // displaced cards are jumped back to their old positions and released on the next frame. Only
@@ -255,23 +230,79 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   // Both axes counted over the WHOLE list — a filter row must state what it would reveal, so it
   // can never read from the already-filtered view.
   /**
-   * ⚠️ FILTER, SEARCH AND SORT ARE APPLIED BEFORE THE VIEW IS CONSULTED, which is what makes the
-   * three renderers three renderers rather than three lists. A view that filtered for itself
-   * would be a second set of rules, and the counts would stop agreeing across a switch.
+   * ⚠️ THE PIPELINE (v11 §5): facts once per agent off the QC's rows; the POOL (count cards +
+   * Find) and the six filter sections narrow; ONE sort orders; grouping PARTITIONS the ordered
+   * list — never a second ordering pass that could disagree.
    */
-  const visible = useMemo(
-    () => sortAgents(
-      agents.filter((a) =>
-        matchesFilters(a, queries, filters)
-        && matchesAgentSearch(a, search)
-        && matchesCards(cardSel, census.standing.get(a.id) ?? { kind: "none" })),
-      sort,
-      sortDir,
-    ),
-    [agents, queries, filters, search, sort, sortDir, cardSel, census],
+  const nowMs = useMemo(() => Date.now(), [qcRows]);
+  const factsAll = useMemo(
+    () => agents.map((a) => agentFacts(a, qcRows, scoped?.id ?? null)),
+    [agents, qcRows, scoped],
   );
-  // The unsaved new agent always rides at the front of the grid, immune to filter and sort.
-  const shown = useMemo(() => (newAgent ? [newAgent, ...visible] : visible), [newAgent, visible]);
+  const genreHitFact = useCallback(
+    (x: { genres: string[] }) => !!tintGenre && x.genres.some((g) => isGenreMatch(g, tintGenre)),
+    [tintGenre],
+  );
+  const inPool = useCallback(
+    (x: { agent: Agent; stand: string }) =>
+      matchesAgentSearch(x.agent, search)
+      && matchesCards(cardSel, census.standing.get(x.agent.id) ?? { kind: "none" }),
+    [search, cardSel, census],
+  );
+  const filterOptions = useMemo(() => facetOptions(factsAll, filters, inPool), [factsAll, filters, inPool]);
+  const visibleFacts = useMemo(
+    () => sortFacts(
+      factsAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)),
+      sortKey, genreHitFact, nowMs,
+    ),
+    [factsAll, inPool, filters, sortKey, genreHitFact, nowMs],
+  );
+  const groups = useMemo(() => contactGroups(groupKey, visibleFacts), [groupKey, visibleFacts]);
+  const factsById = useMemo(() => {
+    const m = new Map(visibleFacts.map((x) => [x.agent.id, x]));
+    /* the unsaved new agent rides at the FRONT of the first group, immune to filter and sort */
+    if (newAgent) m.set(newAgent.id, agentFacts(newAgent, qcRows, scoped?.id ?? null));
+    return m;
+  }, [visibleFacts, newAgent, qcRows, scoped]);
+  const shownGroups = useMemo(() => {
+    if (!newAgent) return groups;
+    if (groups.length === 0) return [{ label: "All agents", ids: [newAgent.id] }];
+    return [{ ...groups[0], ids: [newAgent.id, ...groups[0].ids] }, ...groups.slice(1)];
+  }, [groups, newAgent]);
+  const visible = visibleFacts;
+  const anyActive =
+    contactFilterCount(filters) > 0 || cardSel.size > 0 || search.trim() !== ""
+    || groupKey !== "stand" || sortKey !== "due";
+  const CARD_NAME: Record<ContactCardKey, string> = { active: "Active queries", never: "Never queried", closed: "Query closed" };
+  const barChips: BarChip[] = useMemo(() => {
+    const chips: BarChip[] = [];
+    for (const k of cardSel) chips.push({
+      key: `card-${k}`, label: "Showing", value: CARD_NAME[k],
+      onRemove: () => toggleCard(k),
+    });
+    const drop = <S extends keyof ContactFilters>(section: S, label: string, value: ContactFilters[S][number], shown?: string) =>
+      chips.push({
+        key: `${section}-${String(value)}`, label, value: shown ?? String(value),
+        onRemove: () => setFilters((f) => ({ ...f, [section]: (f[section] as unknown[]).filter((v) => v !== value) }) as ContactFilters),
+      });
+    for (const v of filters.stand) drop("stand", "Standing", v, STAND_LABEL[v]);
+    for (const v of filters.genres) drop("genres", "Genre", v);
+    for (const v of filters.door) drop("door", "Queries", v, v === "open" ? "Open" : "Closed");
+    for (const v of filters.locs) drop("locs", "Location", v);
+    for (const v of filters.status) drop("status", "Status", v);
+    for (const v of filters.rating) drop("rating", "Rating", v, v === 0 ? "Unrated" : "★".repeat(v));
+    if (search.trim()) chips.push({ key: "find", label: "Name has", value: search.trim(), onRemove: () => setSearch("") });
+    return chips;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cardSel, filters, search, toggleCard]);
+
+  const resetList = useCallback(() => {
+    setFilters(emptyContactFilters());
+    setCardSel(new Set());
+    setSearch("");
+    setGroupKey("stand");
+    setSortKey("due");
+  }, []);
 
   /**
    * Loading · blank account · list — the page's three states, derived once in `agentList.ts` and
@@ -291,8 +322,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      produce an empty array. A frozen control is worse than a deleted one, because it reads as a
      feature to whoever finds it next. */
 
-  /** ONE tag per applied value, built from the same set the popover reads. */
-  const tags: AppliedTag[] = useMemo(() => appliedTags(filters, setFilters), [filters]);
 
   // ── Flip + buffered draft (decision 1) ────────────────────────────────────
   // ONE card is open at a time. Opening clones the agent into `draft`; every editor interaction
@@ -304,8 +333,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      exists while driving one that does. The card's own flip is `peekId` now, and what it shows is
      the read-only contact peek. */
   const [openId, setOpenId] = useState<string | null>(null);
-  /** The card whose back face is showing the contact peek (Grid only). One at a time. */
-  const [peekId, setPeekId] = useState<string | null>(null);
 
   /* ⚠️ THE VIEW SWITCH IS RETIRED (v11 decision 1) — one page, one renderer, as the Query
      Centre. A `?view=` parameter in the URL is ACCEPTED AND IGNORED: nothing reads it, nothing
@@ -348,11 +375,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       setNewAgent(null);
       return;
     }
-    setLeavingId(departing);
     window.setTimeout(() => {
       // measure with the leaving card STILL in place, so the survivors' "before" is honest
       flipBefore.current = measureFlip(gridRef.current);
-      setLeavingId(null);
       setNewAgent(null);
     }, EXIT_MS);
   }, [clearEditor, newAgent, openId]);
@@ -378,14 +403,21 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    */
   const beginSaveChoreography = useCallback(
     (saved: Agent) => {
-      const outcome = saveOutcome(saved, {
-        agents: [...agents.filter((a) => a.id !== saved.id), saved],
-        queries,
-        filters,
-        search,
-        sort,
-        sortDir,
-      });
+      /* the outcome, against the NEW pipeline (the old saveOutcome read the retired filter set):
+         does the saved record still match the pool and the panel, and where does it land */
+      const savedFacts = agentFacts(saved, qcRows, scoped?.id ?? null);
+      const survives = inPool(savedFacts) && matchesContactFilters(savedFacts, filters);
+      const afterAll = [...agents.filter((a) => a.id !== saved.id), saved]
+        .map((a) => (a.id === saved.id ? savedFacts : (factsById.get(a.id) ?? agentFacts(a, qcRows, scoped?.id ?? null))));
+      const after = sortFacts(
+        afterAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)),
+        sortKey, genreHitFact, nowMs,
+      );
+      const index = after.findIndex((x) => x.agent.id === saved.id);
+      const outcome: SaveOutcome = !survives
+        ? { kind: "filtered-out" }
+        : { kind: "travel", index: index < 0 ? 0 : index + 1, total: after.length,
+            sortLabel: (SORT_OPTIONS.find((o) => o.key === sortKey)?.label ?? "the current sort") };
       setNotice({
         text: saveNotice(saved.name || saved.agency, outcome),
         kind: outcome.kind,
@@ -418,10 +450,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         window.setTimeout(() => {
           // Beat 3 — the travel (or, for a card that has left the view, the exit).
           if (outcome.kind === "filtered-out") {
-            setLeavingId(saved.id);
             window.setTimeout(() => {
               flipBefore.current = measureFlip(gridRef.current);
-              setLeavingId(null);
               setSaveState(null);
               setNewAgent(null);
             }, EXIT_MS);
@@ -434,7 +464,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         }, SAVE_FADE_IN_MS);
       }, SAVE_FADE_OUT_MS);
     },
-    [agents, queries, filters, search, sort, sortDir, clearEditor],
+    [agents, filters, search, sortKey, genreHitFact, nowMs, qcRows, scoped, factsById, inPool, clearEditor],
   );
 
   /**
@@ -489,7 +519,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    */
   const onOpen = useCallback((agentId: string, at: AgentEditorTab = "contact") => {
     if (!agents.some((a) => a.id === agentId)) return;
-    setPeekId(null);
     setOpenId(agentId);
     setTab(at);
     setDraft(null);
@@ -504,7 +533,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     (agentId: string, at: AgentEditorTab = "contact") => {
       const agent = agents.find((a) => a.id === agentId);
       if (!agent) return;
-      setPeekId(null);
       setOpenId(agentId);
       setDraft(draftFromAgent(agent));
       setTab(at);
@@ -551,7 +579,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      drawer overlays the list instead, so the scroller is never hidden and never clamped, and the
      reader's place is kept by the browser rather than by us. Removing a mechanism beats keeping
      one correct. */
-  const isMobile = useIsMobile();
   const { setMobileDetail } = useMobileChrome();
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -748,12 +775,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return () => window.removeEventListener("keydown", onKey);
   }, [draft, leaveEdit]);
 
-  // A card that scrolls out of the filtered set takes its draft with it. Checked against `shown`,
-  // not `visible` — the unsaved new agent rides only in `shown`, and checking `visible` would
-  // discard a brand-new card the instant it opened.
+  // A row that scrolls out of the filtered set takes its draft with it. Checked against the
+  // RENDERED map, not `visible` — the unsaved new agent rides only there, and checking `visible`
+  // would discard a brand-new record the instant it opened.
   useEffect(() => {
-    if (openId && !shown.some((a) => a.id === openId)) discard();
-  }, [shown, openId, discard]);
+    if (openId && !factsById.has(openId)) discard();
+  }, [factsById, openId, discard]);
 
   /* ⚠️ THE MOBILE EDITOR PUSH IS RETIRED (Phase 4), AND ITS SHELL REGISTRATION WITH IT. Below md
      the card used to render the SAME editor element full-screen in flow, replacing the list, with
@@ -792,7 +819,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       notes: "",
     };
     // Clear every narrowing control so the new card can't be born hidden behind a filter.
-    setFilters(emptyFilters());
+    setFilters(emptyContactFilters());
+    setCardSel(new Set());
     setSearch("");
     // FIRST + settle: where is everything now? Measured BEFORE the insert, so the cards about to
     // be displaced can be sent back to their old places and released into the bump.
@@ -813,36 +841,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      reader sees it. Stepping through the underlying store instead would walk agents that are not
      on screen, which is a different list wearing the same chevrons. -1 when the drawer's agent is
      not in it (an unsaved new record), and both chevrons are then disabled by construction. */
-  const drawerIndex = openId ? shown.findIndex((a) => a.id === openId) : -1;
-
-  /**
-   * THE CARD'S BACK FACE — the same `ContactPeek` the drawer and the List/Board popover render,
-   * with the container's own footer. Nothing about the five rows is decided here.
-   */
-  const peekFace = (agent: Agent) => (
-    <div className="agl-acard agl-backcard">
-      <div className={`agl-band ${isDoorOpen(agent) ? "s-open" : "s-shut"}`}>
-        <span className="agl-doorpill">Contact details</span>
-        <span className="agl-sp" />
-        <button type="button" className="agl-cbtn on" onClick={() => setPeekId(null)} aria-label="Turn the card back">
-          <RotateCcw width={13} height={13} aria-hidden="true" />
-        </button>
-      </div>
-      <ContactPeek
-        agent={agent}
-        variant="face"
-        footer={
-          <button
-            type="button"
-            className="agl-btn agl-btn-ghost"
-            onClick={() => { setPeekId(null); onEdit(agent.id, "contact"); }}
-          >
-            Edit contact details
-          </button>
-        }
-      />
-    </div>
+  const stepOrder = useMemo(
+    () => shownGroups.flatMap((g) => g.ids),
+    [shownGroups],
   );
+  const drawerIndex = openId ? stepOrder.indexOf(openId) : -1;
+
 
   /** ONE editor element builder, shared by the card back face (desktop flip) and the mobile
    *  push host — a second copy would drift the moment the editor gains a prop. */
@@ -900,41 +904,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
                     />
     ) : null;
 
-  /** ONE card renderer, shared by the flat grid and every group section.
-   *
-   *  `index` is the card's position in its own grid, which is what the row stagger reads. The
-   *  delay is set inline because the row depends on the LIVE column count (auto-fill), which no
-   *  stylesheet can know — CSS has no way to derive a row from nth-child without the column count
-   *  baked in at authoring time. The state class stays on the container; only the number is here.
-   *
-   *  Below md the FLIP IS SUPPRESSED (baked decision 6): the card never rotates and carries no
-   *  editor face — the mobile push host renders the same editor element full-screen instead. */
-  const renderCard = (agent: Agent, index: number) => (
-              <AgentCard
-                key={agent.id}
-                style={loadAnim ? { animationDelay: `${rowDelayMs(index, columns)}ms` } : undefined}
-                motionClass={[
-                  leavingId === agent.id ? "agl-leaving" : "",
-                  newAgent?.id === agent.id && !saveState ? "agl-arriving" : "",
-                  saveState?.id === agent.id ? `sv-${saveState.phase}` : "",
-                ].filter(Boolean).join(" ") || undefined}
-                agent={agent}
-                queries={queries}
-                matchGenre={tintGenre}
-                onOpen={onOpen}
-                onEdit={onEdit}
-                onPeek={(id) => setPeekId((p) => (p === id ? null : id))}
-                onLogQuery={onLogQuery}
-                /* ⚠️ THE FLIP IS THE PEEK NOW, AND IT IS DESKTOP-ONLY AS IT ALWAYS WAS. Below md
-                   the card does not rotate; the contact button opens the drawer's Contact tab
-                   instead, which is the same rows in the third container. */
-                peeked={!isMobile && peekId === agent.id}
-                back={!isMobile && peekId === agent.id ? peekFace(agent) : null}
-              />
-  );
-
   return (
-    <div className={`aglist${loadAnim ? " agl-anim" : ""}`} ref={rootRef}>
+    <div className="aglist" ref={rootRef}>
       <div className="agl-page">
        {/* The content column: padding rides the page, the CAP rides here, so a wide monitor
            pools its surplus as symmetric margin rather than stretching the grid. */}
@@ -967,7 +938,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             a blank account's pitch and the settling beat are single-column, and a grid with an
             absent second child would hold a 340px hole open for nothing. */}
         <div className={pageState === "list" ? "clv-group" : undefined}>
-        <div className={pageState === "list" ? "clv-main" : undefined}>
+        <div className={pageState === "list" ? "clv-main" : undefined} ref={mainColRef}>
 
         {/* ⚠️ THE BLANK ACCOUNT IS ITS OWN PAGE, NOT A DASHED BOX IN THE GRID. What it replaces —
             `.agl-empty`'s welcome branch — is DELETED rather than demoted: two doorways for one
@@ -1013,43 +984,60 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {pageState === "list" && heroStacked && (
           <CountCards cards={census.cards} sel={cardSel} onToggle={toggleCard} row />
         )}
-        {/* the interim controls, IN FLOW under the hero (see the grid note above) — P3's header
-            row replaces this component wholesale */}
+        {/* the v11 header row: Your agents · N of M, Find, Filter · Group · Sort · ↺ (§4–5) */}
         {pageState === "list" && (
-          <AgentToolbar
-            agents={agents}
-            queries={queries}
-            search={search}
-            onSearch={setSearch}
+          <ContactControls
+            shownCount={visible.length}
+            total={agents.length}
+            find={search}
+            onFind={setSearch}
             filters={filters}
             onFilters={setFilters}
-            sort={sort}
-            sortDir={sortDir}
-            onSort={(k, d) => { setSort(k); setSortDir(d); }}
-            resultCount={visible.length}
-            total={agents.length}
+            options={filterOptions}
+            groupKey={groupKey}
+            onGroup={setGroupKey}
+            sortKey={sortKey}
+            onSort={setSortKey}
+            anyActive={anyActive}
+            onReset={resetList}
           />
         )}
-        <AgentAppliedTags tags={tags} onClear={() => setFilters(emptyFilters())} />
 
-        {/* ⚠️ ONE SET OF AGENTS, ONE RENDERER (v11 decision 1). Filter, search and sort have all
-            been applied by the time `shown` gets here. */}
-        {(
-        <div className="agl-grid agl-gridwrap" ref={gridRef}>
-          {/* ⚠️ THE FILTERED STATE ONLY — the blank account never reaches this branch, so the
-              condition it used to carry (`agents.length === 0 ? welcome : no match`) has one arm
-              left and no test to make. */}
-          {shown.length === 0 && (
+        {/* ⚠️ ONE SET OF AGENTS, ONE RENDERER (v11 decision 1) — grouped bands over rows. The
+            FLIP container moved with the renderer: rows carry data-agent-card, flip.ts's own
+            default selector, so a filter change still animates the reflow. */}
+        {pageState === "list" && (
+        <div ref={gridRef}>
+          {visible.length === 0 && !newAgent ? (
             <div className="agl-empty">
               <div className="big">No agents match.</div>
               <div className="small">Loosen the filter, or clear the search.</div>
             </div>
+          ) : (
+            <ContactRows
+              groups={shownGroups}
+              byId={factsById}
+              nowMs={nowMs}
+              genreHit={(g) => !!tintGenre && isGenreMatch(g, tintGenre)}
+              openId={openId}
+              onOpen={onOpen}
+              onLogQuery={(id) => onLogQuery({ id })}
+              onAddGenres={(id) => onEdit(id, "wishlist")}
+            />
           )}
-          {shown.map(renderCard)}
         </div>
         )}
         </>
         )}
+        {/* the floating active-filter bar (§5.4): everything narrowing the list, spelled out */}
+        {pageState === "list" && (
+          <ContactBar
+            anchor={mainColRef}
+            onClearAll={resetList}
+            chips={barChips}
+          />
+        )}
+
         {/* The notice sits BENEATH the grid and persists until dismissed or superseded — a card
             that travelled off-screen, or left because it no longer matches the filters, would
             otherwise simply have vanished. It rises in with the same shared vocabulary. */}
@@ -1061,7 +1049,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
                 type="button"
                 className="act"
                 onClick={() => {
-                  setFilters(emptyFilters());
+                  setFilters(emptyContactFilters());
+                  setCardSel(new Set());
                   setSearch("");
                   setNotice(null);
                   // let the cleared list render, then bring the card into view
@@ -1107,12 +1096,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         onStep={(d) => {
           const i = drawerIndex;
           if (i < 0) return;
-          const next = shown[i + d];
-          if (next) onOpen(next.id, tab);
+          const next = stepOrder[i + d];
+          if (next) onOpen(next, tab);
         }}
         canStepBack={drawerIndex > 0}
-        canStepOn={drawerIndex >= 0 && drawerIndex < shown.length - 1}
-        position={drawerIndex >= 0 ? { index: drawerIndex, total: shown.length } : null}
+        canStepOn={drawerIndex >= 0 && drawerIndex < stepOrder.length - 1}
+        position={drawerIndex >= 0 ? { index: drawerIndex, total: stepOrder.length } : null}
         matchGenre={tintGenre}
         editor={drawerAgent ? editorFor(drawerAgent) : null}
         onLogQuery={onLogQuery}
