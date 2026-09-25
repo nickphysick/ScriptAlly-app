@@ -36,7 +36,11 @@
   --cle-pink: var(--agl-pink);
   --cle-pink-line: var(--agl-pinkline);
   --cle-sage-rule: var(--agl-sage-rule);
-  --cle-slate: var(--agl-band);
+  /* ⚠️ REPAIRED (v11 P4): this read `--agl-band`, which was only ever declared on the flip
+     card's `.s-open`/`.s-shut` state rules — never an ancestor of this component — so the slate
+     strip had ALWAYS resolved to nothing and painted transparent, silently. The v11 palette's
+     slate is `:root`-declared (contactV11.css), so it resolves here and everywhere. */
+  --cle-slate: var(--clv-band-slate);
 
   box-sizing: border-box;
   color: var(--cle-ink-body);

@@ -57,7 +57,7 @@ describe("agent list · the page column", () => {
          scroll row at header spec §1; the 48px bottom went into the scroller at amendment 9. What
          is left is nothing, stated. */
       "the page reintroduced an inset — every side of this rule belongs to the grid now",
-    ).toContain("padding: 0 0 0");
+    ).toMatch(/padding:\s*0(\s+0)*\s*;/); // the VALUE is all zeros — the spelling is free to shorten
     /* ⚠️ A CONTRIBUTION, NOT A PADDING. It sets `--wpg-foot`, which the grid sums with the working
        state's reclaim — as a raw `padding-bottom` this rule silently overrode the reclaim, because
        both are 0-2-0 and the page sheet comes later in the bundle. */
@@ -82,16 +82,10 @@ describe("agent list · the page column", () => {
     ).not.toMatch(/padding-right/);
   });
 
-  it("THREE columns to a row, 18px gap — fixed, not auto-fill (agent-list-fixes P3)", () => {
-    const grid = css.match(/\.aglist \.agl-grid \{([^}]*)\}/)?.[1] ?? "";
-    expect(grid).toContain("grid-template-columns: repeat(3, 1fr)");
-    expect(grid).toContain("gap: 18px");
-    expect(grid).not.toContain("repeat(auto-fill"); // the card width follows the content cap now
-    // the reflow: two up (desktop-side), then one below md — the 700px hand-rolled breakpoint
-    // migrated to the single mobile/desktop divider (Mobile Pass 1 breakpoint law)
-    expect(css).toMatch(/@media \(max-width: 1100px\) \{ \.aglist \.agl-grid \{ grid-template-columns: repeat\(2, 1fr\); \} \}/);
-    expect(css).toMatch(/@media \(max-width: 767\.98px\) \{ \.aglist \.agl-grid \{ grid-template-columns: 1fr; \} \}/);
-  });
+  /* ⚠️ THE CARD GRID'S COLUMN LOCK IS RETIRED WITH THE GRID (v11 P4, 25 Sep). `.agl-grid` and
+     its 3/2/1 reflow are deleted — the v11 list is ROWS inside standing bands (contactV11.css),
+     whose narrow fold is a @container query on the page column, locked by contactV11.measure's
+     narrow-rows case and contactList.test's boundary case. Recoverable at 2d160183's parent. */
 });
 
 /**
@@ -112,38 +106,9 @@ describe("the help FAB is RETIRED — Help centre lives in the shared account me
 });
 
 
-/**
- * ⚠️ SHADOW-ONLY HOVER FOR CARDS FLUSH TO A CLIPPED EDGE (amendment 11, commit 4).
- *
- * `CLAUDE.md` states the rule and the reason: a hover LIFT on a card inside a clipping container
- * pushes the lifted edge through the clip. Since the grid conversion the cards sit in `.wpg-scroll`
- * — `overflow-y: auto`, which clips both axes — with the top row flush to its top edge, so the old
- * `translate(-2px, -2px)` cost the top-left cards a sliver on hover.
- *
- * ⚠️ THE TEMPTING WRONG FIX IS PADDING. Adding room for the lift inside the scroller is the
- * compensating fix the locks above already forbid on the horizontal axis, for the same reason: it
- * looks right at one size and drifts everywhere else, and it hides the cause.
- */
-describe("agent card hover — shadow, never a lift", () => {
-  /* ⚠️ RETARGETED, NOT WEAKENED (contact-list v5). The law is unchanged and is stated twice below:
-     a hover on this card may change its SHADOW and must never move it. What moved is where the
-     rule lives — the selector is `.agl-scene:hover .agl-acard` now, because the card's own hover
-     had to reach a wrapper that also hosts the wishlist drift — and what the shadow IS: the
-     letterpress cast is retired for the ref's soft depth, so the old "6 → 8" spelling could not
-     survive whatever happened to the law. Asserting the token rather than the pixels is what
-     stops this lock going red on the next legitimate retone. */
-  it("the card's hover carries NO transform", () => {
-    const hover = /\.aglist \.agl-scene:hover \.agl-acard \{([^}]*)\}/.exec(css)?.[1] ?? "";
-    expect(hover, "the hover rule is gone — the census below would be checking nothing").not.toBe("");
-    expect(hover, "the hover lift came back. Inside a clipping scroller it pushes the card's top-left corner through the clip; the shadow deepening is what reads as the lift.").not.toContain("transform");
-    expect(hover, "the shadow stopped deepening, so the card no longer responds to the pointer at all").toContain("var(--agl-shadow-lift)");
-  });
-
-  /* the resting half of the same claim — a lift is equally wrong when it is the default */
-  it("and neither does its resting state", () => {
-    const rest = /\.aglist \.agl-acard \{([^}]*)\}/.exec(css)?.[1] ?? "";
-    expect(rest, "the card's own rule is gone").not.toBe("");
-    expect(rest, "a transform reached the card's resting state").not.toContain("transform");
-    expect(rest, "the resting shadow stopped reading its token").toContain("var(--agl-shadow)");
-  });
-});
+/* ⚠️ THE CARD-HOVER LOCK IS RETIRED WITH THE CARD (v11 P4, 25 Sep). "Shadow, never a lift" is
+   the APP-WIDE law for anything flush to a clipping edge (CLAUDE.md, amendment 11) and it did
+   not lapse — its subject here (`.agl-scene:hover .agl-acard`) is deleted with the flip card.
+   The v11 rows live in contactV11.css and hover without transforms; the empty state's ghost
+   cards likewise declare no motion at all (its own suite asserts that). Recoverable at
+   2d160183's parent. */

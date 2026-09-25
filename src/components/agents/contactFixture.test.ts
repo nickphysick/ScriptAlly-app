@@ -22,7 +22,9 @@ import {
   CONTACT_FIXTURE_MANUSCRIPTS, FIXTURE_GENRE,
 } from "./contactFixture";
 import { materialRowsFromAgent } from "../../lib/agentMaterials";
-import { agentCardDims, agentRelationship, isDoorOpen } from "../../lib/agentList";
+import { agentRelationship, isDoorOpen } from "../../lib/agentList";
+import { agentRows, contactStanding } from "../../lib/contactList";
+import { buildQcRows } from "../../lib/qcSummary";
 import { SubmissionMethod } from "../../types";
 
 const A = CONTACT_FIXTURE_AGENTS;
@@ -84,13 +86,18 @@ describe("the Contact list fixture — a cast, not a crowd", () => {
 
   /* ⚠️ BOTH CLOSED CASES, AND THE SECOND IS THE ONE THE REF CANNOT SPEAK TO. Its two closed
      agents are both terminal, so it never draws a shut door over a live query — and that is
-     precisely the case `agentCardDims` exists to get right. Without both rows the carve-out is
-     unproved, and an unproved carve-out is one edit from being "simplified" away. */
+     precisely the case the pop-up band's precedence exists to get right ("Closed to submissions"
+     only when the standing is NOT open — ContactProfile.tsx; `agentCardDims` carried the same
+     law on the retired card). Without both rows the carve-out is unproved, and an unproved
+     carve-out is one edit from being "simplified" away. Derived through `contactStanding`, the
+     function the census and the band both read. */
   it("carries a closed door BOTH ways — nothing live, and a live query", () => {
+    const rows = buildQcRows(Q, A, [], Date.parse("2026-09-01T12:00:00.000Z"));
+    const standingOf = (a: (typeof A)[number]) => contactStanding(agentRows(rows, a.id, null));
     const shut = A.filter((a) => !isDoorOpen(a));
     expect(shut.length, "closed agents at all").toBeGreaterThan(1);
-    expect(shut.some((a) => agentCardDims(a, Q)), "closed with nothing live — dims").toBe(true);
-    expect(shut.some((a) => !agentCardDims(a, Q)), "closed with a live query — never dims").toBe(true);
+    expect(shut.some((a) => standingOf(a).kind !== "open"), "closed with nothing live — the band says Closed to submissions").toBe(true);
+    expect(shut.some((a) => standingOf(a).kind === "open"), "closed with a live query — the standing outranks the door").toBe(true);
   });
 
   it("carries a non-GB country and three submission methods", () => {

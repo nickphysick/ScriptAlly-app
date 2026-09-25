@@ -38,6 +38,12 @@ export interface AgentEditPatch {
   website?: string;
   country?: string;
   city?: string;
+  /** v11: the reopen date (Closed reveals it); null = clear (reopened, or withdrawn a date). */
+  reopensOn?: string | null;
+  /** v11: the documented card cache, recomputed when the pop-up adds a note (now allowlisted). */
+  notePreview?: string;
+  /** v11: when the wishlist was last checked; stamped by the editor on a wishlist edit. */
+  mswlCheckedAt?: string;
   // Social handles — the canonical list plus the mirrored discrete fields (X/Bluesky/Instagram) the
   // agent-database display still reads. See [[agent-socials-display-backlog]].
   socials?: AgentSocial[];
@@ -47,7 +53,8 @@ export interface AgentEditPatch {
   genres?: string[];
   mswlNotes?: string;
   notes?: string;
-  starRating?: number;
+  /** null = clear to unrated (v11 §8.2's click-again; arrives as the brief's own control). */
+  starRating?: number | null;
   submissionStatus?: SubmissionStatus | string;
   responseTimeWeeks?: number | null;
   noResponseMeansNo?: boolean;
@@ -142,7 +149,9 @@ export function sanitizeAgentPatch(patch: AgentEditPatch): SanitizedAgentWrite {
 
   if (patch.starRating !== undefined) {
     const n = patch.starRating;
-    if (!Number.isInteger(n) || n < STAR_MIN || n > STAR_MAX) {
+    if (n === null) {
+      deletes.push("starRating");
+    } else if (!Number.isInteger(n) || n < STAR_MIN || n > STAR_MAX) {
       errors.push(`starRating must be an integer ${STAR_MIN}–${STAR_MAX}.`);
     } else {
       fields.starRating = n;
@@ -153,6 +162,22 @@ export function sanitizeAgentPatch(patch: AgentEditPatch): SanitizedAgentWrite {
     if (!Array.isArray(patch.materialsWanted)) errors.push("materialsWanted must be a list.");
     else if (patch.materialsWanted.length > MATERIALS_CAP) errors.push(`materialsWanted is capped at ${MATERIALS_CAP}.`);
     else fields.materialsWanted = patch.materialsWanted;
+  }
+
+  /* v11: the reopen date follows responseTimeWeeks's own pivot — null deletes (the list
+     reopened, or the writer withdrew the date); a present value is a short ISO date string. */
+  if (patch.reopensOn !== undefined) {
+    if (patch.reopensOn === null) deletes.push("reopensOn");
+    else if (typeof patch.reopensOn !== "string" || patch.reopensOn.length > 64) errors.push("reopensOn must be a date string.");
+    else fields.reopensOn = patch.reopensOn.trim();
+  }
+  if (patch.notePreview !== undefined) {
+    if (typeof patch.notePreview !== "string" || patch.notePreview.length > 512) errors.push("notePreview must be a short string.");
+    else fields.notePreview = patch.notePreview;
+  }
+  if (patch.mswlCheckedAt !== undefined) {
+    if (typeof patch.mswlCheckedAt !== "string" || patch.mswlCheckedAt.length > 64) errors.push("mswlCheckedAt must be an ISO string.");
+    else fields.mswlCheckedAt = patch.mswlCheckedAt;
   }
 
   // The "Not set" pivot: null → delete the field; a present value must be a non-negative int.

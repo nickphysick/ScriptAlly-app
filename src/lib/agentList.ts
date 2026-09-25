@@ -72,28 +72,12 @@ export const awaitingYourPages = (agentId: string, queries: Query[]): boolean =>
 export const isDoorOpen = (agent: Pick<Agent, "submissionStatus">): boolean =>
   agent.submissionStatus !== SubmissionStatus.CLOSED;
 
-/** THE CARD'S COLOUR — YOUR HISTORY, never their door (agent-card-visual pack).
- *
- *  Sage means something of yours is live; soft pink means nothing is. The band's pill names
- *  WHICH pink case applies (no active queries vs never queried) — the colour deliberately does
- *  not distinguish them.
- *
- *  The closed-door override that used to return "s-grey" is GONE: the door is expressed in ink
- *  (a hatched band and a `Closed` pill), never in colour. See the two-systems EXCEPTION recorded
- *  in CLAUDE.md — this page inverts the app-wide rule on purpose. */
-export function agentStateClass(agent: Agent, queries: Query[]): "s-sage" | "s-pink" {
-  return agentRelationship(agent.id, queries) === "active" ? "s-sage" : "s-pink";
-}
-
-/** THE DIM RULE: a card fades ONLY when the door is closed AND nothing of yours is live.
- *
- *  A card with an active query NEVER dims, whatever the door is doing — an outstanding full or
- *  a live offer does not matter less because the agency shut its doors. That is exactly the case
- *  the old door-precedence bug hid, and dimming it would reintroduce the same error in a softer
- *  form. Hover restores full strength (CSS): the record stays entirely valid. */
-export function agentCardDims(agent: Agent, queries: Query[]): boolean {
-  return !isDoorOpen(agent) && agentRelationship(agent.id, queries) !== "active";
-}
+/* ⚠️ `agentStateClass` AND `agentCardDims` ARE RETIRED (v11 P4, 25 Sep) — they styled the flip
+   card, and the flip card is deleted. The LAW they carried — a live query outranks the shut
+   door, so a closed agency holding your full never reads as dormant — did not lapse with them:
+   it lives in `contactStanding` (contactList.ts, standing "open" whatever the door says) and in
+   the pop-up's band label (ContactProfile.tsx: "Closed to submissions" only when the standing
+   is NOT open). contactFixture.test.ts asserts the fixture still exercises both branches. */
 
 /* ══════════════════════════════════════════════════════════════════════════════
    THE THREE AXES (rebuild v2 established two; the door became the third, 28 Jul)

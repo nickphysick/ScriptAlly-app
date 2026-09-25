@@ -391,9 +391,19 @@ test("the filter panel — faceted counts, kept scroll, and an outside pointerdo
   expect(doorClosed.n, "faceted: door Closed under the genre filter").toBe(pool.filter((x) => x.door === "closed").length);
   bump(3);
 
-  /* kept scroll: scroll the body, tick a checkbox, the place holds */
+  /* kept scroll: scroll the body, tick a checkbox, the place holds.
+     ⚠️ A NON-ZERO checkbox, by the same population-first law as the genre pick above: the first
+     row blindly was "Your move", and `genre ∧ Your move` went empty as the shared account's
+     statuses drifted — the outside-close loop below then waited its whole timeout for a band
+     that a correctly-filtered EMPTY list is right not to draw. */
   await page.evaluate((scope) => { (document.querySelector(`${scope} [data-clv="fbody"]`) as HTMLElement).scrollTop = 220; }, scope);
-  await page.locator(`${scope} [data-clv="fsec-stand"] .clv-fck`).first().click();
+  const standPick = await page.evaluate((scope) => {
+    const rows = [...document.querySelectorAll(`${scope} [data-clv="fsec-stand"] .clv-fck`)] as HTMLElement[];
+    const i = rows.findIndex((r) => parseInt(r.querySelector("i")?.textContent ?? "0", 10) > 0);
+    return i;
+  }, scope);
+  expect(standPick, "no non-zero standing under the genre filter — the intersection cannot be exercised").toBeGreaterThanOrEqual(0);
+  await page.locator(`${scope} [data-clv="fsec-stand"] .clv-fck`).nth(standPick).click();
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
   const kept = await page.evaluate((scope) => (document.querySelector(`${scope} [data-clv="fbody"]`) as HTMLElement).scrollTop, scope);
   expect(Math.abs(kept - 220), "the panel lost its place on a selection").toBeLessThanOrEqual(2);
@@ -486,4 +496,169 @@ test("the bands stick at the scroller's top with the page-coloured shadow", asyn
   expect(r!.sticky).toBe(true);
   expect(r!.pinned, "the band does not pin at the scroller's top").toBe(true);
   bump(3);
+});
+
+/* ══════════════════════════ phase 4 — the agent pop-up (§11.6 / §11.7) ══════════════════════════ */
+
+test("the pop-up: centred, 540 wide (520 editing), band by standing — and the picker wears the portal dress (§11.6)", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  await page.click(`${scope} [data-clv="row"]`);
+  await page.waitForSelector('[data-clv="profile"]');
+  const view = await page.evaluate(() => {
+    const card = document.querySelector('[data-clv="profile"]') as HTMLElement;
+    const r = card.getBoundingClientRect();
+    return {
+      w: Math.round(r.width),
+      centred: Math.abs((r.left + r.right) / 2 - window.innerWidth / 2),
+      band: (document.querySelector('[data-clv="bandchip"]') as HTMLElement).textContent?.trim() ?? "",
+      dialog: card.getAttribute("role"),
+    };
+  });
+  expect(view.w, "the view card is 540 wide").toBe(540);
+  expect(view.centred, "the card is centred on the viewport").toBeLessThanOrEqual(8);
+  expect(view.band.length, "the band chip states the standing").toBeGreaterThan(0);
+  expect(view.dialog).toBe("dialog");
+
+  await page.click('[data-clv="edit"]');
+  const edit = await page.evaluate(() => {
+    const card = document.querySelector('[data-clv="profile"]') as HTMLElement;
+    const control = document.querySelector('[data-clv="profile"] .agl-cc-control') as HTMLElement;
+    const cs = getComputedStyle(control);
+    return { w: Math.round(card.getBoundingClientRect().width), picker: { borderBottom: cs.borderBottomStyle, cursor: cs.cursor } };
+  });
+  expect(edit.w, "the edit card is 520 wide").toBe(520);
+  /* ⚠️ THE PORTAL-DRESS LOCK. The picker's old rules were all `.aglist .agl-cc*` with tokens on
+     `.aglist`; this card portals to document.body, so it rendered as a BARE BUTTON — default
+     border, default cursor — through a clean build and a green suite. The dressed control is a
+     dashed-underline field (contactV11.css, `:root` palette). */
+  expect(edit.picker.borderBottom, "the picker control lost the portal dress — it is a bare button again").toBe("dashed");
+  expect(edit.picker.cursor).toBe("pointer");
+  await page.click('[data-clv="profile"] .agl-cc-control');
+  const menu = await page.evaluate(() => {
+    const m = document.querySelector('[data-clv="profile"] .agl-cc-menu') as HTMLElement;
+    const cs = getComputedStyle(m);
+    return { bg: cs.backgroundColor, radius: cs.borderRadius, onTop: cs.position === "absolute" };
+  });
+  expect(menu.bg, "the menu panel has no fill — its rules are not reaching the portal").toBe("rgb(255, 255, 255)");
+  expect(menu.radius).toBe("10px");
+  expect(menu.onTop).toBe(true);
+  await page.keyboard.press("Escape"); // the picker's own capture consumes it
+  await page.click('[data-clv="profile"] .clv-cx'); // Cancel back to view, nothing written
+  bump(10);
+});
+
+test("Escape cascades edit → view → closed, and the backdrop is inert while editing (§11.6)", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  await page.click(`${scope} [data-clv="row"]`);
+  await page.waitForSelector('[data-clv="profile"]');
+  await page.click('[data-clv="edit"]');
+  await page.waitForSelector('[data-clv="profile"].clv-pcard--edit');
+  await page.keyboard.press("Escape");
+  const afterFirst = await page.evaluate(() => ({
+    open: !!document.querySelector('[data-clv="profile"]'),
+    editing: !!document.querySelector('[data-clv="profile"].clv-pcard--edit'),
+  }));
+  expect(afterFirst.open, "the first Escape closed the whole card — it must only leave edit mode").toBe(true);
+  expect(afterFirst.editing, "the first Escape did not leave edit mode").toBe(false);
+  await page.keyboard.press("Escape");
+  await page.waitForSelector('[data-clv="profile"]', { state: "detached" });
+
+  /* the backdrop: closes the VIEW, does nothing while editing */
+  await page.click(`${scope} [data-clv="row"]`);
+  await page.waitForSelector('[data-clv="profile"]');
+  await page.click('[data-clv="edit"]');
+  await page.mouse.click(30, 450); // well outside the 540px centred card
+  const heldOpen = await page.evaluate(() => !!document.querySelector('[data-clv="profile"].clv-pcard--edit'));
+  expect(heldOpen, "a backdrop click discarded an edit in progress").toBe(true);
+  await page.click('[data-clv="profile"] .clv-cx');
+  await page.mouse.click(30, 450);
+  await page.waitForSelector('[data-clv="profile"]', { state: "detached" });
+  bump(4);
+});
+
+test("§11.7 — the reply-time note is live as the draft changes, names the engine's dates, and Cancel writes nothing", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  /* an agent whose live query's expected date DEPENDS on the window — walk the with-the-agent
+     rows until one yields a per-query line (a writer-dated or windowless query legitimately
+     yields none; the note's generic lines must appear either way) */
+  const candidates = await page.evaluate(
+    (scope) => [...document.querySelectorAll(`${scope} [data-clv="row"][data-stand="agent"]`)]
+      .map((x) => (x as HTMLElement).dataset.agentCard!).slice(0, 6),
+    scope,
+  );
+  expect(candidates.length, "population first — no with-the-agent rows on this account").toBeGreaterThan(0);
+  let perQuery = "";
+  let generic = "";
+  let summary = "";
+  let before = "";
+  let touchedId = "";
+  for (const id of candidates) {
+    await page.click(`${scope} [data-agent-card="${id}"]`);
+    await page.waitForSelector('[data-clv="profile"]');
+    await page.click('[data-clv="edit"]');
+    const orig = await page.inputValue('[data-clv="f-weeks"]');
+    const next = orig === "12" ? "9" : "12";
+    await page.fill('[data-clv="f-weeks"]', next);
+    const note = await page.evaluate(() => ({
+      warn: (document.querySelector('[data-warn="reply"]') as HTMLElement | null)?.textContent ?? "",
+      summary: (document.querySelector('[data-clv="also-summary"]') as HTMLElement | null)?.textContent ?? "",
+    }));
+    generic = note.warn;
+    summary = note.summary;
+    if (/Query Centre and Birds-eye view:.*→/.test(note.warn)) {
+      perQuery = note.warn; before = orig; touchedId = id;
+      break;
+    }
+    await page.click('[data-clv="profile"] .clv-cx');
+    await page.keyboard.press("Escape");
+    await page.waitForSelector('[data-clv="profile"]', { state: "detached" });
+  }
+  expect(generic, "the reply note never appeared at all").toContain("To-do list and Dashboard");
+  expect(generic).toContain("Analytics");
+  expect(summary, "the footer does not union the surfaces").toContain("Saving also updates");
+  expect(perQuery, "no candidate produced a per-query engine line — the dry run is not reaching the queries").toContain("reply expected");
+  /* the engine's from → to, en-GB — and "no date" is one of its honest answers (an agency with
+     no stated window has no expected date until one is set), so either side may say it, and at
+     least one side must be a real date or the line said nothing */
+  expect(perQuery).toMatch(/(\d{1,2} [A-Z][a-z]{2}|no date) → (\d{1,2} [A-Z][a-z]{2}|no date)/);
+  expect(perQuery).toMatch(/\d{1,2} [A-Z][a-z]{2}/);
+  /* Cancel writes NOTHING: reopen and the stored value is the original */
+  await page.click('[data-clv="profile"] .clv-cx');
+  await page.click('[data-clv="edit"]');
+  const after = await page.inputValue('[data-clv="f-weeks"]');
+  expect(after, `Cancel wrote a draft value to ${touchedId} — the account has been changed`).toBe(before);
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Escape");
+  bump(7);
+});
+
+test("§11.7 write half — save says what else moved, and the fixture agent is restored in the same run", async ({ page }) => {
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  const scope = await visiblePage(page, ".agl-wpg");
+  const fx = `${scope} [data-agent-card="clv-fx-never"]`;
+  expect(await page.locator(fx).count(), "the fixture agent is not on this account — run tests/e2e/seedContactFixture.mjs").toBe(1);
+  await page.click(fx);
+  await page.waitForSelector('[data-clv="profile"]');
+  await page.click('[data-clv="edit"]');
+  expect(await page.inputValue('[data-clv="f-weeks"]'), "precondition: the fixture's reply time is deliberately absent (ruling c)").toBe("");
+  await page.fill('[data-clv="f-weeks"]', "9");
+  await page.click('[data-clv="save"]');
+  await page.waitForSelector('[data-clv="savedline"]');
+  const saved = await page.textContent('[data-clv="savedline"]');
+  /* ⚠️ THE ACCOUNT IS NOW CHANGED — everything from here to the restore runs without navigation */
+  expect(saved, "the saved line is missing — the write may have failed with the account half-changed").toContain("Saved");
+  const who = await page.textContent('[data-clv="profile"]');
+  expect(who, "the view does not show the saved window").toContain("Replies in about 9 weeks");
+  /* restore: back to unstated (the field is DELETED, not zeroed — absence is the fixture) */
+  await page.click('[data-clv="edit"]');
+  await page.fill('[data-clv="f-weeks"]', "");
+  await page.click('[data-clv="save"]');
+  await page.waitForSelector('[data-clv="savedline"]');
+  const restored = await page.evaluate(() => (document.querySelector('[data-clv="profile"]') as HTMLElement).textContent ?? "");
+  expect(restored, "THE FIXTURE WAS NOT RESTORED — clv-fx-never now carries a reply window it must not have").not.toContain("Replies in about");
+  await page.keyboard.press("Escape");
+  bump(6);
 });

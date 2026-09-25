@@ -326,7 +326,19 @@ service cloud.firestore {
         && (!data.keys().hasAll(['setAside']) || data.setAside is bool)
         // Assisted-fill provenance — a small map keyed by agent field name ({source, foundAt} per
         // entry). Written only when a found value is saved unedited (To-do housekeeping batch).
-        && (!data.keys().hasAll(['fieldSources']) || (data.fieldSources is map && data.fieldSources.size() <= 12));
+        && (!data.keys().hasAll(['fieldSources']) || (data.fieldSources is map && data.fieldSources.size() <= 12))
+        // Contact list v11 (25 Sep): the date their list reopens (Closed reveals it in the
+        // editor; REMIND ME reads it), and when the WISHLIST was last checked — wishlist-specific
+        // on purpose: lastCheckedDate above claims the whole record was verified, and "checked
+        // the wishlist" must not assert the email and the window were too. Null never stored;
+        // absence is "never checked", which never counts as stale.
+        && (!data.keys().hasAll(['reopensOn']) || (data.reopensOn is string && data.reopensOn.size() <= 64))
+        && (!data.keys().hasAll(['mswlCheckedAt']) || (data.mswlCheckedAt is string && data.mswlCheckedAt.size() <= 64))
+        // The documented denormalised card cache (types.ts). It was NEVER in this function or the
+        // update allowlist, so every save that recomputed it was denied WHOLE — probed on the
+        // deployed dev ruleset 25 Sep (permission-denied), the affectedKeys shape this file keeps
+        // warning about, live on the page that documented the cache.
+        && (!data.keys().hasAll(['notePreview']) || (data.notePreview is string && data.notePreview.size() <= 512));
     }
 
     // Country allowlist for agent/communityAgent `country` fields. Three tolerated shapes:
@@ -866,7 +878,8 @@ service cloud.firestore {
           incoming().diff(existing()).affectedKeys().hasOnly([
             'name', 'agency', 'email', 'website', 'country', 'city', 'twitter', 'bluesky', 'instagram', 'socials', 'genres', 'mswlNotes',
             'starRating', 'submissionStatus', 'responseTimeWeeks', 'noResponseMeansNo', 'submissionMethod',
-            'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes', 'requeryPreference', 'importedNeedsReview', 'setAside', 'fieldSources'
+            'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes', 'requeryPreference', 'importedNeedsReview', 'setAside', 'fieldSources',
+            'reopensOn', 'mswlCheckedAt', 'notePreview'
           ])
         );
 

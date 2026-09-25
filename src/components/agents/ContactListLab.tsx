@@ -23,7 +23,9 @@
  * and without a live query. The dev harness ACCOUNT covers none of them — measured, it held zero
  * wishlists, one genre and no socials across 22 agents — so a geometric lock taken there would
  * have measured a page where every case is the same case. This route needs no sign-in and writes
- * nothing, so `tests/e2e/contactCard.measure.ts` can open the REAL page over known content.
+ * nothing, so a rendered lock can open the REAL page over known content. (The card-era measure
+ * files that used it retired with the flip card, v11 P4 — the route and the cast stay for the
+ * next one, and the signed-in v11 fixture on dev is `clv-fx-never`, seedContactFixture.mjs.)
  */
 import React, { useState } from "react";
 import { DbContext } from "../../lib/db";

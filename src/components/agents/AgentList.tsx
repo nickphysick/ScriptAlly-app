@@ -14,24 +14,12 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../lib/db";
-import { AgentEditor } from "./AgentEditor";
-import {
-  AgentDraft,
-  AgentEditorTab,
-  DraftError,
-  diffDraft,
-  draftFromAgent,
-  isDiffEmpty,
-  validateDraft,
-  draftDirty,
-} from "../../lib/agentDraft";
 import { collection, deleteDoc, deleteField, doc, onSnapshot, setDoc } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../../lib/firebase";
 import {
-  AgentNote, FLAT_NOTE_ID, committedNotes, computeNotePreview, effectiveNotes, notePreviewWrite, resolvePin,
+  AgentNote, committedNotes, computeNotePreview, effectiveNotes, emptyNotesDraft,
 } from "../../lib/agentNotes";
 import { Agent, SubmissionMethod, SubmissionStatus } from "../../types";
-import { materialsWantedFromRows } from "../../lib/agentMaterials";
 import { agentRelationship } from "../../lib/agentList";
 import {
   isDoorOpen,
@@ -39,14 +27,19 @@ import {
   matchesAgentSearch,
 } from "../../lib/agentList";
 import { prefersReducedMotion } from "../../lib/agentMotion";
-import { BUMP_MS, EXIT_MS, SAVE_BREATH_MS, SAVE_FADE_IN_MS, SAVE_FADE_OUT_MS } from "../../lib/agentMotion";
+import { BUMP_MS } from "../../lib/agentMotion";
 import { SaveOutcome, saveNotice } from "../../lib/agentSaveOutcome";
 import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
 import { ContactListEmptyState } from "./ContactListEmptyState";
 
-import { AgentDrawer } from "./AgentDrawer";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { ContactRail } from "./contact/ContactRail";
+import { ContactProfile } from "./contact/ContactProfile";
+import type { FormSection } from "./contact/ContactAgentForm";
+import { AlsoNote, ContactDraft, EditCtx, draftFromAgentRecord, savedLine as savedLineFor } from "../../lib/contactEdit";
+import { AgentEditPatch, commitAgentEdits } from "../../lib/saveAgentEdits";
+import { computeAgentDeadlineWrites } from "../../lib/computeAgentDeadlineWrites";
+import { useNavigate } from "react-router-dom";
 import { ContactHero, CountCards } from "./contact/ContactHero";
 import {
   ContactCardKey, ContactFilters, GroupKey, SORT_OPTIONS, STAND_LABEL, SortKey as ContactSortKey, agentFacts,
@@ -63,8 +56,6 @@ import "./contact/contactV11.css";
 import { RAIL_GROUPS } from "../shell/railNav";
 import { countryName } from "../../lib/territory";
 import { matchGenre } from "../../lib/genreMatch";
-import { blankDraft } from "../../lib/agentDraft";
-import { useMobileChrome } from "../shell/mobileChrome";
 
 /** The shared manuscript-scope key — the same one Packages, Comps and Manuscripts read. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -88,6 +79,7 @@ interface AgentListProps {
 }
 
 export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, active = true }) => {
+  const navigate = useNavigate();
   const { agents, queries, manuscripts, activities, updateAgent, addAgent, currentUser, collectionsReady } =
     useScriptAllyDb();
 
@@ -128,8 +120,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const [search, setSearch] = useState(searchQuery?.trim() || "");
   const [groupKey, setGroupKey] = useState<GroupKey>("stand");
   const [sortKey, setSortKey] = useState<ContactSortKey>("due");
-  // A draft-only agent that isn't persisted until Done passes validation (decision 16).
-  const [newAgent, setNewAgent] = useState<Agent | null>(null);
 
   // ── Page-load motion (Baked 1) ────────────────────────────────────────────
   // ROUTE ENTRY ONLY. `loadAnim` is armed once on mount and disarmed as soon as the sequence has
@@ -148,7 +138,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   // rows carry `data-agent-card`, flip.ts's own default selector.)
   const flipBefore = useRef<FlipRects | null>(null);
   /** The saved card's beat, and the inline notice that outlives the motion. */
-  const [saveState, setSaveState] = useState<{ id: string; phase: "fadeout" | "fadein" | "breath" } | null>(null);
   const [notice, setNotice] = useState<{
     text: string; kind: "travel" | "filtered-out"; agentId: string; canUndo: boolean;
   } | null>(null);
@@ -171,33 +160,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return () => window.clearTimeout(done);
   });
 
-  /**
-   * ALWAYS scroll the new card fully into view — not only when the grid happens to be off-screen.
-   *
-   * The new-agent card is an EDITOR and is far taller than an ordinary card, so even from the very
-   * top of the page the header and toolbar have to scroll away for it to fit. That is intended.
-   *
-   * `block: "start"` ALWAYS: if the card is taller than the viewport, top-aligning it keeps the top
-   * of the form (the name field the writer is about to type into) on screen. Centring a too-tall
-   * card would push its head off the top, which is the one thing worse than not scrolling.
-   *
-   * The offset beneath the top bar comes from `scroll-margin-top` on the card rather than arithmetic
-   * here, so it stays correct if the bar's height ever changes.
-   *
-   * Runs in a LAYOUT effect keyed on the new card's id: the element has to exist to be scrolled to,
-   * and this way the scroll is requested in the same frame the card is inserted — the scroll and
-   * the 340ms `rise` start TOGETHER. A 7px lift cannot fight a scroll, and sequencing them would
-   * add delay for nothing.
-   */
-  useLayoutEffect(() => {
-    if (!newAgent) return;
-    const card = document.querySelector<HTMLElement>(`[data-agent-card="${newAgent.id}"]`);
-    // scrollIntoView walks to the nearest scrollable ancestor, which is `.aglist` (height:100% +
-    // overflow-y:auto) — the page region inside the content capsule, NOT the document.
-    card?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" });
-    // Only when the card first appears — not on every keystroke that re-renders it.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newAgent?.id]);
 
   /* ⚠️ THE ONE-SHOT REVEAL (board fixes II, P1). The To-do board's ⋯ menu offers "View the
      agent"; this is the receiving end. sessionStorage rather than a route param, deliberately:
@@ -258,18 +220,22 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     [factsAll, inPool, filters, sortKey, genreHitFact, nowMs],
   );
   const groups = useMemo(() => contactGroups(groupKey, visibleFacts), [groupKey, visibleFacts]);
-  const factsById = useMemo(() => {
-    const m = new Map(visibleFacts.map((x) => [x.agent.id, x]));
-    /* the unsaved new agent rides at the FRONT of the first group, immune to filter and sort */
-    if (newAgent) m.set(newAgent.id, agentFacts(newAgent, qcRows, scoped?.id ?? null));
-    return m;
-  }, [visibleFacts, newAgent, qcRows, scoped]);
-  const shownGroups = useMemo(() => {
-    if (!newAgent) return groups;
-    if (groups.length === 0) return [{ label: "All agents", ids: [newAgent.id] }];
-    return [{ ...groups[0], ids: [newAgent.id, ...groups[0].ids] }, ...groups.slice(1)];
-  }, [groups, newAgent]);
+  const factsById = useMemo(
+    () => new Map(visibleFacts.map((x) => [x.agent.id, x])),
+    [visibleFacts],
+  );
+  const shownGroups = groups;
   const visible = visibleFacts;
+  /** every genre already on the writer's list, most-used first (§8.2's options) */
+  const genrePool = useMemo(() => {
+    const freq = new Map<string, number>();
+    for (const a of agents) for (const g of a.genres ?? []) freq.set(g, (freq.get(g) ?? 0) + 1);
+    return [...freq.entries()].sort((x, y) => y[1] - x[1]).map(([g]) => g);
+  }, [agents]);
+  const editCtx: EditCtx = useMemo(
+    () => ({ queries, agents, msGenre: scoped?.genre ?? null, msTitle: scoped?.title ?? null, nowMs }),
+    [queries, agents, scoped, nowMs],
+  );
   const anyActive =
     contactFilterCount(filters) > 0 || cardSel.size > 0 || search.trim() !== ""
     || groupKey !== "stand" || sortKey !== "due";
@@ -312,7 +278,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const pageState = contactListState({
     collectionsReady,
     agentCount: agents.length,
-    adding: !!newAgent,
+    adding: false, /* the in-grid draft retired with the flip editor; P5's add card is an overlay */
   });
 
   /* ⚠️ THE GRID DOES NOT GROUP, AND ITS GROUPING IS RETIRED RATHER THAN LEFT FROZEN (Phase 7).
@@ -340,66 +306,29 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      (`readQcView` is the precedent). Grid/List/Board and their model went with the switch. */
 
 
-  const [draft, setDraft] = useState<AgentDraft | null>(null);
-  const [tab, setTab] = useState<AgentEditorTab>("contact");
-  const [error, setError] = useState<DraftError | null>(null);
-  // ONE notes listener, for the OPEN card only — never one per card in the grid.
+  /** The pop-up's session: which agent, whether it opened straight into edit at a section, and
+   *  the sage line the view returns with after a save. The DRAFT lives inside ContactProfile —
+   *  the overlay is outside the list, so a list re-render cannot touch it (§7.1). */
+  const [editAt, setEditAt] = useState<FormSection | null>(null);
+  const [savedNote, setSavedNote] = useState<string | null>(null);
+  // ONE notes listener, for the OPEN profile only — never one per row.
   const [storedNotes, setStoredNotes] = useState<AgentNote[]>([]);
   const [notesLoaded, setNotesLoaded] = useState(false);
 
-  /** Clear the editor state. Separated from the exit MOTION below so a save (which has its own
-   *  three-beat choreography) and a discard (which reverses) can share the teardown. */
   const clearEditor = useCallback(() => {
     setOpenId(null);
-    setDraft(null);
-    setError(null);
+    setEditAt(null);
+    setSavedNote(null);
     setStoredNotes([]);
     setNotesLoaded(false);
   }, []);
 
-  /**
-   * Discard (Baked 3) — the reverse of the arrival, and faster.
-   *
-   * An unsaved card LEAVES first and the grid closes the gap afterwards: `fall` needs the card to
-   * still occupy its slot while it plays, so removing it from the list immediately would collapse
-   * the gap underneath and animate nothing. Two beats, not one — the exit, then the bump.
-   *
-   * An existing card just flips back; nothing leaves, so there is nothing to animate.
-   */
-  const discard = useCallback(() => {
-    const departing = newAgent?.id && openId === newAgent.id ? newAgent.id : null;
-    clearEditor();
-    if (!departing) return setNewAgent(null);
-
-    if (prefersReducedMotion()) {
-      setNewAgent(null);
-      return;
-    }
-    window.setTimeout(() => {
-      // measure with the leaving card STILL in place, so the survivors' "before" is honest
-      flipBefore.current = measureFlip(gridRef.current);
-      setNewAgent(null);
-    }, EXIT_MS);
-  }, [clearEditor, newAgent, openId]);
+  const discard = clearEditor;
 
   /**
-   * SAVE — three beats (Baked 4). Never one motion: a card flung across the grid the instant you
-   * press Done is unreadable, and you cannot tell whether it saved or simply went away.
-   *
-   *   1. IN PLACE, the editor crossfades into a finished card (170ms out, 200ms in). The
-   *      transformation registers before anything moves.
-   *   2. A breath — 220ms. This is the beat that makes the travel legible as a consequence.
-   *   3. The card travels to its sorted place while everything between bumps around it (340ms).
-   *
-   * Then the notice, which is not decoration: a card that travels off-screen otherwise just
-   * vanishes. The motion answers "did it save?" only for a destination you can see.
-   *
-   * Two exceptions to the travel, both deliberate:
-   *   · the card no longer matches the active filters → it LEAVES with the discard motion and the
-   *     notice says where it went. It must never silently disappear.
-   *   · grouping is on and the card changed SECTION → it falls at the old home and rises at the
-   *     new one. A card moving within a list is a shuffle and sliding is honest; a card that has
-   *     changed category flying across a heading implies a continuity that isn't there.
+   * The SAVE NOTICE (v11 P4). The three-beat card choreography retired with the flip card it
+   * animated; what survives is the sentence — where the record ended up — computed BEFORE
+   * anything else so the notice and the list cannot disagree (the agentMotion law).
    */
   const beginSaveChoreography = useCallback(
     (saved: Agent) => {
@@ -427,44 +356,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         canUndo: !!undoSnapshot.current,
       });
 
-      if (prefersReducedMotion()) {
-        setSaveState(null);
-        clearEditor();
-        setNewAgent(null);
-        return;
-      }
-
-      // Beat 1a — the editor face fades OUT, in place. The card keeps its slot throughout.
-      setSaveState({ id: saved.id, phase: "fadeout" });
-
-      window.setTimeout(() => {
-        // Beat 1b — the finished card fades IN. The rotor's rotation is suppressed for this: a
-        // save is a transformation in place, not a flip back.
-        setSaveState({ id: saved.id, phase: "fadein" });
-        clearEditor();
-
-        window.setTimeout(() => {
-        // Beat 2 — the breath. Nothing moves. This is what makes the travel read as a consequence.
-        setSaveState({ id: saved.id, phase: "breath" });
-
-        window.setTimeout(() => {
-          // Beat 3 — the travel (or, for a card that has left the view, the exit).
-          if (outcome.kind === "filtered-out") {
-            window.setTimeout(() => {
-              flipBefore.current = measureFlip(gridRef.current);
-              setSaveState(null);
-              setNewAgent(null);
-            }, EXIT_MS);
-            return;
-          }
-          flipBefore.current = measureFlip(gridRef.current);
-          setSaveState(null);
-          setNewAgent(null);
-        }, SAVE_BREATH_MS);
-        }, SAVE_FADE_IN_MS);
-      }, SAVE_FADE_OUT_MS);
+      /* the list reflows under the store's own update — measure BEFORE it lands so the FLIP
+         can play the move (rows carry data-agent-card, flip.ts's selector) */
+      flipBefore.current = measureFlip(gridRef.current);
     },
-    [agents, filters, search, sortKey, genreHitFact, nowMs, qcRows, scoped, factsById, inPool, clearEditor],
+    [agents, filters, sortKey, genreHitFact, nowMs, qcRows, scoped, factsById, inPool],
   );
 
   /**
@@ -513,267 +409,112 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return () => unsub();
   }, [openId, currentUser?.id]);
 
-  /**
-   * OPEN the drawer on this agent, READ by default. The tab is reset to Contact because opening a
-   * different agent on whichever tab you last used states a fact about them you did not ask for.
-   */
-  const onOpen = useCallback((agentId: string, at: AgentEditorTab = "contact") => {
+  /** OPEN the profile on this agent — reading, from the top (v11 §7.1). */
+  const onOpen = useCallback((agentId: string) => {
     if (!agents.some((a) => a.id === agentId)) return;
     setOpenId(agentId);
-    setTab(at);
-    setDraft(null);
-    setError(null);
+    setEditAt(null);
+    setSavedNote(null);
   }, [agents]);
 
-  /**
-   * ENTER EDIT — the draft is created here and nowhere else, so `draft !== null` IS the edit
-   * session and the two can never disagree about which mode the drawer is in.
-   */
-  const onEdit = useCallback(
-    (agentId: string, at: AgentEditorTab = "contact") => {
-      const agent = agents.find((a) => a.id === agentId);
-      if (!agent) return;
-      setOpenId(agentId);
-      setDraft(draftFromAgent(agent));
-      setTab(at);
-      setError(null);
-    },
-    [agents],
-  );
+  /** OPEN straight into edit at a section — a torn slip's or Housekeeping's door (§7.1, §9.3). */
+  const onEditAt = useCallback((agentId: string, at: FormSection) => {
+    if (!agents.some((a) => a.id === agentId)) return;
+    setOpenId(agentId);
+    setEditAt(at);
+    setSavedNote(null);
+  }, [agents]);
 
   
 
 
 
-  /** Leave edit and return to READ — the drawer stays open on the same agent. */
-  const cancelEdit = useCallback(() => { setDraft(null); setError(null); }, []);
+  const openAgent = openId ? agents.find((a) => a.id === openId) ?? null : null;
+
+  /* the profile's notes: committed only — the pop-up composes ADDITIONS one at a time (§7.2);
+     the flat legacy note rides as the oldest bubble exactly as the old drawer showed it */
+  const profileNotes = useMemo(
+    () => committedNotes(effectiveNotes(storedNotes, emptyNotesDraft(), {
+      flatNote: openAgent?.notes,
+      dateAdded: openAgent?.dateAdded,
+    })),
+    [storedNotes, openAgent],
+  );
 
   /**
-   * ⚠️ LEAVING EDIT MEANS TWO DIFFERENT THINGS, AND THE DIFFERENCE IS WHETHER THERE IS ANYTHING
-   * TO GO BACK TO. Discarding an edit to an EXISTING agent returns to the read view — the record
-   * is still there and you were only changing it. Discarding an UNSAVED NEW agent has no read
-   * state to return to: nothing has been written, so the honest outcome is that the drawer closes
-   * and the draft card leaves with its own exit motion.
-   *
-   * Both are wired to ONE expression so the Escape key and the form's own Discard cannot disagree
-   * about which of the two just happened.
+   * SAVE from the pop-up (§7.3): diff the draft against the record, send ONLY what changed
+   * through `commitAgentEdits` — sanitised, atomic, with the reply-time deadline fan-out riding
+   * the same batch (`computeAgentDeadlineWrites`; the engine then moves the rows: "It never
+   * writes a derived date"). A wishlist edit stamps `mswlCheckedAt` in the SAME write.
    */
-  const leaveEdit = useCallback(() => {
-    if (newAgent && openId === newAgent.id) { discard(); return; }
-    cancelEdit();
-  }, [newAgent, openId, discard, cancelEdit]);
-
-  // What the Notes pane shows: stored minus buffered deletions, plus buffered additions, with the
-  // legacy flat note as the oldest bubble until it migrates.
-  const openAgent = openId ? agents.find((a) => a.id === openId) ?? null : null;
-  const visibleNotes = draft
-    ? effectiveNotes(storedNotes, draft.notes, { flatNote: openAgent?.notes, dateAdded: openAgent?.dateAdded })
-    : [];
-
-  /* ⚠️ THE MOBILE PUSH IS RETIRED (Phase 4). Below md the card still does not rotate — that is
-     unchanged and is baked decision 6 — but what opens is the DRAWER at full bleed, not a
-     full-screen editor in flow that replaced the list. One editor host at every width.
-
-     The scroll-restore machinery went with it and did not need replacing: the push HID `.aglist`,
-     which clamped its scrollTop to 0, so the position had to be saved and put back by hand. A
-     drawer overlays the list instead, so the scroller is never hidden and never clamped, and the
-     reader's place is kept by the browser rather than by us. Removing a mechanism beats keeping
-     one correct. */
-  const { setMobileDetail } = useMobileChrome();
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  const onDone = useCallback(async () => {
-    if (!draft) return;
-    const invalid = validateDraft(draft);
-    if (invalid) {
-      setError(invalid);
-      setTab(invalid.tab);
-      return;
+  const onProfileSave = useCallback(async (d: ContactDraft, notes: AlsoNote[]): Promise<boolean> => {
+    const orig = openId ? agents.find((a) => a.id === openId) : null;
+    if (!orig || !currentUser) return false;
+    const base = draftFromAgentRecord(orig);
+    const patch: AgentEditPatch = {};
+    if (d.name !== base.name) patch.name = d.name.trim();
+    if (d.agency !== base.agency) patch.agency = d.agency.trim();
+    if (d.email !== base.email) patch.email = d.email.trim();
+    if (d.website !== base.website) patch.website = d.website.trim();
+    if (d.city !== base.city) patch.city = d.city.trim();
+    if (d.country !== base.country) patch.country = d.country;
+    if (d.responseTimeWeeks !== base.responseTimeWeeks) patch.responseTimeWeeks = d.responseTimeWeeks;
+    if (d.noResponseMeansNo !== base.noResponseMeansNo && d.noResponseMeansNo !== undefined) patch.noResponseMeansNo = d.noResponseMeansNo;
+    if (d.submissionStatus !== base.submissionStatus) patch.submissionStatus = d.submissionStatus;
+    if (d.reopensOn !== base.reopensOn) patch.reopensOn = d.reopensOn.trim() === "" ? null : d.reopensOn;
+    if (JSON.stringify(d.genres) !== JSON.stringify(base.genres)) patch.genres = d.genres;
+    if (d.mswlNotes !== base.mswlNotes) {
+      patch.mswlNotes = d.mswlNotes;
+      /* editing the wishlist IS checking it (§10: starts as the date it was last edited) */
+      patch.mswlCheckedAt = new Date().toISOString();
     }
-    // Where does this card sit RIGHT NOW? Read before the write, because the save may change the
-    // very fact the grouping is keyed on.
-    const beforeAgent = agents.find((a) => a.id === draft.id) ?? newAgent;
-    sectionBeforeSave.current = beforeAgent
-      ? null
-      : null;
-    // Only an EXISTING agent has a previous version; a create has nothing to revert to, and
-    // "Undo" there would mean deletion, which this page deliberately has no affordance for.
-    undoSnapshot.current = agents.find((a) => a.id === draft.id) ?? null;
+    if (JSON.stringify(d.materialsWanted) !== JSON.stringify(base.materialsWanted)) patch.materialsWanted = d.materialsWanted;
+    if (d.starRating !== base.starRating) patch.starRating = d.starRating;
+    if (Object.keys(patch).length === 0) return true;
 
-    // A new agent is CREATED on its first valid Done; everything after is the ordinary diff path.
-    if (newAgent && draft.id === newAgent.id) {
-      // Built ONCE and reused: the write payload is also what the save choreography reads to work
-      // out where the card is going, so the motion can't describe a different agent than the one
-      // that landed.
-      const payload = {
-        name: draft.name.trim(),
-        agency: draft.agency.trim(),
-        email: draft.email.trim(),
-        website: draft.website.trim(),
-        ...(draft.country.trim() ? { country: draft.country.trim() } : {}),
-        ...(draft.city.trim() ? { city: draft.city.trim() } : {}),
-        genres: draft.genres,
-        mswlNotes: draft.mswlNotes,
-        submissionStatus: draft.open ? SubmissionStatus.OPEN : SubmissionStatus.CLOSED,
-        submissionMethod: (draft.submissionMethod === "Other" ? draft.methodOther.trim() : draft.submissionMethod) as SubmissionMethod,
-        materialsWanted: materialsWantedFromRows(draft.materials),
-        notes: "",
-        ...(draft.starRating ? { starRating: draft.starRating } : {}),
-        ...(draft.responseWeeks.trim() ? { responseTimeWeeks: Number(draft.responseWeeks.trim()) } : {}),
-        ...(typeof draft.noResponseMeansNo === "boolean" ? { noResponseMeansNo: draft.noResponseMeansNo } : {}),
-        ...(draft.socials.length ? { socials: draft.socials } : {}),
-        ...(draft.image ? { image: draft.image } : {}),
-        // the preview + pin are computed from the buffered notes and ride the CREATE itself,
-        // so a brand-new agent's card is correct from its first render
-        ...(draft.notes.added.length
-          ? {
-              notePreview: computeNotePreview(
-                draft.notes.added.map((n) => ({ id: n.tempId, text: n.text, createdAt: n.createdAt })),
-                draft.pinnedNoteId,
-              ),
-              ...(draft.pinnedNoteId && draft.notes.added.some((n) => n.tempId === draft.pinnedNoteId)
-                ? { pinnedNoteId: draft.pinnedNoteId }
-                : {}),
-            }
-          : {}),
-      } as Parameters<typeof addAgent>[0];
-      const created = await addAgent(payload);
-      if (!created?.success) {
-        // The write failed: the draft STAYS a draft and the error surfaces exactly as before.
-        // Nothing is adopted — a node must never claim an id that doesn't exist.
-        setError({ tab: "contact", msg: created?.error || "That agent couldn't be saved." });
-        return;
-      }
-      // ── ID ADOPTION (gate 2). ONLY on a confirmed successful create.
-      // The draft card is keyed by a temporary id; the saved agent arrives from Firestore with a
-      // real one. Without this, React would destroy the draft node and build a fresh card — and
-      // FLIP cannot animate an element that no longer exists, so the save could never travel.
-      // Adopting the real id onto the existing node means the incoming snapshot MATCHES it and
-      // React moves the node instead of rebuilding it.
-      if (created.id) setNewAgent((n) => (n ? { ...n, id: created.id as string } : n));
-      // buffered notes become real documents under the CREATED id (tempIds are the doc ids, so
-      // the pin written above stays valid)
-      if (created.id && currentUser && draft.notes.added.length) {
-        const notesCol = collection(db, "users", currentUser.id, "agents", created.id, "notes");
-        try {
-          for (const pending of draft.notes.added) {
-            await setDoc(doc(notesCol, pending.tempId), { text: pending.text, createdAt: pending.createdAt });
-          }
-        } catch (e) {
-          handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/agents/${created.id}/notes`);
-        }
-      }
-      // The saved card's outcome is computed BEFORE any motion, so the choreography and the
-      // notice can never describe different things.
-      beginSaveChoreography({
-        ...(payload as unknown as Agent),
-        id: created.id || draft.id,
-        userId: currentUser?.id || "",
-        dateAdded: newAgent.dateAdded,
-        lastCheckedDate: newAgent.lastCheckedDate,
-      });
-      return;
+    const extras = patch.responseTimeWeeks !== undefined
+      ? computeAgentDeadlineWrites(
+          queries.filter((q) => q.agentId === orig.id),
+          typeof patch.responseTimeWeeks === "number" ? patch.responseTimeWeeks : null,
+          (queryId) => doc(db, "users", currentUser.id, "queries", queryId),
+        )
+      : [];
+    /* the pre-save record, so the notice's Undo can put it back in ONE write (the old law) */
+    undoSnapshot.current = { ...orig };
+    const res = await commitAgentEdits(db, currentUser.id, orig.id, patch, extras);
+    if (!res.ok) {
+      /* strictNullChecks is off, so the boolean discriminant does not narrow (the house rule) */
+      setNotice({ text: (res as { ok: false; error: string }).error, kind: "travel", agentId: orig.id, canUndo: false });
+      return false;
     }
+    setSavedNote(savedLineFor(notes));
+    /* the row may change group or leave the filtered view — expected; the notice says where */
+    const saved = { ...orig } as Agent;
+    beginSaveChoreography(Object.assign(saved, patch as Partial<Agent>));
+    return true;
+  }, [openId, agents, currentUser, queries, beginSaveChoreography]);
 
-    const original = agents.find((a) => a.id === draft.id);
-    if (!original) return discard();
-
-    const diff = diffDraft(original, draft);
-
-    // ── notes: the buffered posts / deletions / flat-note migration, committed HERE so the agent
-    // write and the note documents land together (one writer — what makes notePreview safe).
-    if (currentUser) {
-      const notesCol = collection(db, "users", currentUser.id, "agents", draft.id, "notes");
-      try {
-        for (const id of draft.notes.deletedIds) {
-          if (id !== FLAT_NOTE_ID) await deleteDoc(doc(notesCol, id));
-        }
-        for (const pending of draft.notes.added) {
-          await setDoc(doc(notesCol, pending.tempId), { text: pending.text, createdAt: pending.createdAt });
-        }
-        // the legacy flat note becomes a real, pinnable bubble carrying its original timestamp,
-        // and the flat field is blanked in the SAME commit
-        if (draft.notes.migratedFlat && (original.notes || "").trim()) {
-          const migratedId = `note-${Math.random().toString(36).slice(2, 11)}`;
-          await setDoc(doc(notesCol, migratedId), {
-            text: original.notes.trim(),
-            createdAt: original.dateAdded || new Date().toISOString(),
-          });
-          diff.changed.notes = "";
-        }
-      } catch (e) {
-        handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/agents/${draft.id}/notes`);
+  /** Add ONE note from the pop-up — the subcollection write plus the documented cache, together. */
+  const onAddNote = useCallback(async (text: string) => {
+    const orig = openId ? agents.find((a) => a.id === openId) : null;
+    if (!orig || !currentUser) return;
+    const noteId = `note-${Math.random().toString(36).slice(2, 11)}`;
+    const createdAt = new Date().toISOString();
+    try {
+      await setDoc(doc(collection(db, "users", currentUser.id, "agents", orig.id, "notes"), noteId), { text, createdAt });
+      const after = committedNotes(effectiveNotes(
+        [...storedNotes, { id: noteId, text, createdAt }],
+        emptyNotesDraft(),
+        { flatNote: orig.notes, dateAdded: orig.dateAdded },
+      ));
+      const preview = computeNotePreview(after, orig.pinnedNoteId);
+      if ((orig.notePreview ?? "") !== preview) {
+        await commitAgentEdits(db, currentUser.id, orig.id, { notePreview: preview });
       }
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/agents/${orig.id}/notes`);
     }
-
-    // ── notePreview (the documented derived-over-stored exception). Recompute against the notes
-    // as they will be AFTER this commit, gated on the listener having resolved.
-    const afterCommit = committedNotes(
-      effectiveNotes(storedNotes, draft.notes, {
-        flatNote: draft.notes.migratedFlat ? original.notes : undefined,
-        dateAdded: original.dateAdded,
-      }),
-    );
-    const livePin = resolvePin(afterCommit, draft.pinnedNoteId);
-    if ((livePin || "") !== (draft.pinnedNoteId || "")) {
-      if (livePin) diff.changed.pinnedNoteId = livePin;
-      else if (original.pinnedNoteId) diff.deletes.push("pinnedNoteId");
-    }
-    const preview = notePreviewWrite({
-      loaded: notesLoaded,
-      notes: afterCommit,
-      pinnedNoteId: livePin,
-      stored: original.notePreview,
-    });
-    if (preview !== undefined) diff.changed.notePreview = preview;
-
-    const savedAgent: Agent = { ...original, ...(diff.changed as Partial<Agent>) };
-
-    if (!isDiffEmpty(diff)) {
-      // deleteField() for values the writer cleared, so absence round-trips as absence rather
-      // than a stored 0/false (the repo's existing unset convention).
-      const payload: Partial<Agent> = { ...diff.changed };
-      for (const key of diff.deletes) {
-        (payload as Record<string, unknown>)[key] = deleteField();
-      }
-      await updateAgent(draft.id, payload);
-      // An edit that changed something gets the full three beats — it may now sort or group
-      // somewhere else, and that move needs the same explanation a new card gets.
-      beginSaveChoreography(savedAgent);
-      return;
-    }
-    // Nothing changed: no write, no motion, no notice. A no-op Done is not an event.
-    discard();
-  }, [agents, draft, discard, updateAgent, currentUser, storedNotes, notesLoaded, newAgent, addAgent]);
-
-  // ── Escape cascade (three stages, in order) ───────────────────────────────
-  // 1. An open popup consumes Escape and closes itself — AgentCountryPicker listens on the
-  //    CAPTURE phase and calls stopImmediatePropagation, so this bubble-phase handler never runs
-  //    for that key. Dismissing a dropdown must never discard the draft.
-  // 2. Focus in a field → blur it, draft untouched.
-  // 3. Nothing focused → leave EDIT and return to READ. It does not close the drawer: SlideOver
-  //    has its own Escape and does not capture, so one press steps out of the form and a second
-  //    closes the record. Stepping straight from a half-typed form to a closed drawer is two
-  //    dismissals for one key.
-  useEffect(() => {
-    if (!draft) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      const el = document.activeElement as HTMLElement | null;
-      const inField =
-        !!el &&
-        (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable);
-      if (inField) {
-        e.preventDefault();
-        el!.blur();
-        return;
-      }
-      e.preventDefault();
-      leaveEdit();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [draft, leaveEdit]);
+  }, [openId, agents, currentUser, storedNotes]);
 
   // A row that scrolls out of the filtered set takes its draft with it. Checked against the
   // RENDERED map, not `visible` — the unsaved new agent rides only there, and checking `visible`
@@ -782,130 +523,18 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     if (openId && !factsById.has(openId)) discard();
   }, [factsById, openId, discard]);
 
-  /* ⚠️ THE MOBILE EDITOR PUSH IS RETIRED (Phase 4), AND ITS SHELL REGISTRATION WITH IT. Below md
-     the card used to render the SAME editor element full-screen in flow, replacing the list, with
-     Done/Cancel borrowed from the shell bar through `MobileDetailSpec`. The drawer does that job
-     now — `SlideOver` goes full-bleed below md through its own opt-in prop — so there is ONE
-     editor host on every width instead of two that had to be kept in step. The spec seam itself
-     is untouched and still serves the query detail; only this page's editor registration is gone.
 
-     The list's scroll no longer needs saving: the drawer overlays the list rather than replacing
-     it, so `.aglist` is never hidden and its scrollTop is never clamped. */
-  useEffect(() => () => setMobileDetail("agents", null), [setMobileDetail]);
-
-  /**
-   * Add a new agent (decision 16, as amended): a DRAFT-ONLY record — nothing is persisted until
-   * Done passes validation. Filter and search are cleared so it can't be born hidden, and it flips
-   * straight into the editor. Per amendment A it is born with starRating, responseTimeWeeks and
-   * noResponseMeansNo OMITTED — no invented 8 weeks, no invented 3 stars.
-   */
-  const onAddAgent = () => {
-    if (!currentUser) return;
-    const id = `new-${Math.random().toString(36).slice(2, 11)}`;
-    const stub: Agent = {
-      id,
-      userId: currentUser.id,
-      name: "",
-      agency: "",
-      email: "",
-      website: "",
-      genres: [],
-      mswlNotes: "",
-      submissionStatus: SubmissionStatus.OPEN,
-      submissionMethod: SubmissionMethod.EMAIL,
-      materialsWanted: [],
-      dateAdded: new Date().toISOString(),
-      lastCheckedDate: new Date().toISOString(),
-      notes: "",
-    };
-    // Clear every narrowing control so the new card can't be born hidden behind a filter.
-    setFilters(emptyContactFilters());
-    setCardSel(new Set());
-    setSearch("");
-    // FIRST + settle: where is everything now? Measured BEFORE the insert, so the cards about to
-    // be displaced can be sent back to their old places and released into the bump.
-    flipBefore.current = measureFlip(gridRef.current);
-    setNewAgent(stub);
-    setOpenId(id);
-    setDraft(blankDraft(id));
-    setTab("contact");
-    setError(null);
-  };
+  /* ⚠️ INTERIM (P4): adding opens the app-level "Add an agent" capture — the flip editor that
+     hosted the in-grid draft is deleted with the drawer, and P5's centred add card replaces this
+     line and repoints the capture here (ruling f). One live add path per phase, never zero. */
+  const onAddAgent = () => onNavigate?.("agents", "Add an agent");
   const onLogQuery = (agent: { id: string }) => onNavigate?.("queries", "Log a query", { agentId: agent.id });
 
-  /* ⚠️ THE DRAWER'S SUBJECT INCLUDES AN UNSAVED NEW AGENT, which is not in `agents` yet — a
-     draft-only record lives in `newAgent` until Done validates it, and looking it up in the store
-     would open the drawer on nothing. */
-  const drawerAgent = openAgent ?? (newAgent && openId === newAgent.id ? newAgent : null);
-  /* ⚠️ THE STEP ORDER IS `shown` — the list's OWN order, filtered, sorted and grouped as the
-     reader sees it. Stepping through the underlying store instead would walk agents that are not
-     on screen, which is a different list wearing the same chevrons. -1 when the drawer's agent is
-     not in it (an unsaved new record), and both chevrons are then disabled by construction. */
-  const stepOrder = useMemo(
-    () => shownGroups.flatMap((g) => g.ids),
-    [shownGroups],
-  );
-  const drawerIndex = openId ? stepOrder.indexOf(openId) : -1;
 
 
-  /** ONE editor element builder, shared by the card back face (desktop flip) and the mobile
-   *  push host — a second copy would drift the moment the editor gains a prop. */
-  const editorFor = (agent: Agent) =>
-    draft && openId === agent.id ? (
-                    <AgentEditor
-                      draft={draft}
-                      onChange={(patch) => setDraft((d) => (d ? { ...d, ...patch } : d))}
-                      tab={tab}
-                      onTab={setTab}
-                      onDone={() => void onDone()}
-                      onDiscard={leaveEdit}
-                      dirty={draftDirty(draft)}
-                      error={error}
-                      onImageError={(msg) => setError({ tab: "contact", msg })}
-                      isNew={!!newAgent && newAgent.id === agent.id}
-                      hasActiveQueries={agentRelationship(agent.id, queries) === "active"}
-                      notes={visibleNotes}
-                      notesLoaded={notesLoaded}
-                      onPostNote={(text) =>
-                        setDraft((d) =>
-                          d
-                            ? {
-                                ...d,
-                                notes: {
-                                  ...d.notes,
-                                  // posting is what migrates the legacy flat note (decision 13)
-                                  migratedFlat: d.notes.migratedFlat || !!(agent.notes || "").trim(),
-                                  added: [
-                                    ...d.notes.added,
-                                    { tempId: `note-${Math.random().toString(36).slice(2, 11)}`, text, createdAt: new Date().toISOString() },
-                                  ],
-                                },
-                              }
-                            : d,
-                        )
-                      }
-                      onDeleteNote={(id) =>
-                        setDraft((d) =>
-                          d
-                            ? {
-                                ...d,
-                                // deleting the pinned note clears the pin; the preview falls back to latest
-                                pinnedNoteId: d.pinnedNoteId === id ? undefined : d.pinnedNoteId,
-                                notes: {
-                                  ...d.notes,
-                                  deletedIds: [...d.notes.deletedIds, id],
-                                  added: d.notes.added.filter((p) => p.tempId !== id),
-                                },
-                              }
-                            : d,
-                        )
-                      }
-                      onPinNote={(id) => setDraft((d) => (d ? { ...d, pinnedNoteId: id } : d))}
-                    />
-    ) : null;
 
   return (
-    <div className="aglist" ref={rootRef}>
+    <div className="aglist">
       <div className="agl-page">
        {/* The content column: padding rides the page, the CAP rides here, so a wide monitor
            pools its surplus as symmetric margin rather than stretching the grid. */}
@@ -974,7 +603,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             cards={census.cards}
             cardSel={cardSel}
             onToggleCard={toggleCard}
-            addOpen={!!newAgent}
+            addOpen={false} /* P5 wires the add card's open state here */
             onAdd={onAddAgent}
             onPasteAdd={onAddAgent}
             onStacked={setHeroStacked}
@@ -1008,7 +637,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             default selector, so a filter change still animates the reflow. */}
         {pageState === "list" && (
         <div ref={gridRef}>
-          {visible.length === 0 && !newAgent ? (
+          {visible.length === 0 ? (
             <div className="agl-empty">
               <div className="big">No agents match.</div>
               <div className="small">Loosen the filter, or clear the search.</div>
@@ -1022,7 +651,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               openId={openId}
               onOpen={onOpen}
               onLogQuery={(id) => onLogQuery({ id })}
-              onAddGenres={(id) => onEdit(id, "wishlist")}
+              onAddGenres={(id) => onEditAt(id, "genres")}
             />
           )}
         </div>
@@ -1081,31 +710,29 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       </div>
 
 
-      {/* ⚠️ ONE DRAWER, OUTSIDE THE GRID, and it is the shared `SlideOver` rather than a fourth
-          private one. It hosts the editor so the DRAFT OUTLIVES A TAB SWITCH — the tabs are a view
-          onto one buffer, not four forms, and a draft owned by the drawer would be created fresh
-          each time the tab changed. */}
-      <AgentDrawer
-        agent={drawerAgent}
-        open={!!drawerAgent}
-        tab={tab}
-        onTab={setTab}
-        editing={!!draft}
-        onEdit={() => { if (drawerAgent) onEdit(drawerAgent.id, tab); }}
-        onClose={discard}
-        onStep={(d) => {
-          const i = drawerIndex;
-          if (i < 0) return;
-          const next = stepOrder[i + d];
-          if (next) onOpen(next, tab);
-        }}
-        canStepBack={drawerIndex > 0}
-        canStepOn={drawerIndex >= 0 && drawerIndex < stepOrder.length - 1}
-        position={drawerIndex >= 0 ? { index: drawerIndex, total: stepOrder.length } : null}
-        matchGenre={tintGenre}
-        editor={drawerAgent ? editorFor(drawerAgent) : null}
-        onLogQuery={onLogQuery}
-      />
+      {/* ⚠️ THE PROFILE IS AN OVERLAY OUTSIDE THE LIST (§7.1) — a list re-render never touches
+          it, and it portals to document.body, where the `--clv-*` palette at :root reaches it. */}
+      {openAgent && (
+        <ContactProfile
+          agent={openAgent}
+          facts={factsById.get(openAgent.id) ?? agentFacts(openAgent, qcRows, scoped?.id ?? null)}
+          nowMs={nowMs}
+          msGenre={scoped?.genre ?? null}
+          msTitle={scoped?.title ?? null}
+          genreHit={(g) => !!tintGenre && isGenreMatch(g, tintGenre)}
+          genrePool={genrePool}
+          editCtx={editCtx}
+          notes={profileNotes}
+          editAt={editAt}
+          savedLine={savedNote}
+          onClose={clearEditor}
+          onSave={onProfileSave}
+          onAddNote={onAddNote}
+          onOpenQuery={(qid) => { clearEditor(); navigate(`/queries?q=${qid}`); }}
+          onRecordResponse={() => { clearEditor(); onNavigate?.("queries", "Record a response"); }}
+          onLogQuery={() => { const id = openAgent.id; clearEditor(); onLogQuery({ id }); }}
+        />
+      )}
     </div>
   );
 };

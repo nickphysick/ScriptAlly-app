@@ -2,18 +2,17 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Quick add's model — and the one thing in it that is a security boundary.
+ * The agent link + genre hygiene — and the one thing in it that is a security boundary.
+ *
+ * ⚠️ THE QUICK-ADD STRIP'S OWN MODEL IS RETIRED (v11 P4, 25 Sep) — the Tab walk, the per-field
+ * diff and the advisory warnings left with the flip card that rendered them (recoverable at
+ * 2d160183's parent). What is locked here is what still has a caller: the scheme allowlist the
+ * pop-up's Website link renders through, and the typed-genre commit the pop-up form's "+ Other"
+ * input goes through.
  */
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import {
-  QUICK_ORDER, commitTypedGenre, emptyQuickFields, hrefFor, isLiveHref, nextQuickField,
-  normaliseSubmissionsUrl, quickDiff, quickWarning,
-} from "./quickAdd";
-
-const agent = (over: Partial<Parameters<typeof emptyQuickFields>[0]> = {}) => ({
-  email: "", website: "", city: "", country: "", genres: [] as string[], ...over,
-});
+import { commitTypedGenre, hrefFor, isLiveHref, normaliseSubmissionsUrl } from "./quickAdd";
 
 /** A tab, a newline and a NUL, built rather than typed — so what is under test is unambiguous. */
 const TAB = String.fromCharCode(9);
@@ -82,81 +81,13 @@ describe("the submissions-page normaliser is a scheme allowlist", () => {
   /* ⚠️ NO RENDER SITE MAY BUILD ITS OWN HREF. Three of them did it with an inline regex, and three
      copies of a security test is two chances to fix only some of them. */
   it("every surface that renders the address goes through one function", () => {
-    /* v11 phase 1: AgentListView retired with the view switch — the two surviving renderers. */
-    for (const rel of ["../components/agents/ContactPeek.tsx", "../components/agents/AgentCard.tsx"]) {
+    /* v11 phase 4: the pop-up is the ONE surviving renderer of the stored address — the peek and
+       the card retired with the flip grid. A new renderer joins this list, never builds its own. */
+    for (const rel of ["../components/agents/contact/ContactProfile.tsx"]) {
       const src = readFileSync(new URL(rel, import.meta.url), "utf8");
       expect(src, rel + " builds its own href instead of calling hrefFor").not.toMatch(/https:\/\/\$\{/);
       expect(src, rel + " does not use the shared href builder").toMatch(/hrefFor|isLiveHref/);
     }
-  });
-});
-
-describe("the warnings advise, they never gate", () => {
-  it("a malformed email says so", () => {
-    expect(quickWarning("email", "not-an-email")).toContain("doesn't look like an email");
-    expect(quickWarning("email", "a@b.co")).toBeNull();
-  });
-
-  /* ⚠️ AND IT STILL SAVES — the sentence says so, and the diff proves it. */
-  it("…and the malformed value is still written", () => {
-    expect(quickDiff("email", { value: "not-an-email" })).toEqual({ email: "not-an-email" });
-  });
-
-  /* ⚠️ A REWRITE THE READER WAS NOT TOLD ABOUT IS WORSE THAN A REFUSAL — far more likely a
-     mailto: typed into the wrong field than an attack. */
-  it("a non-web scheme is warned about before it is rewritten", () => {
-    expect(quickWarning("website", "mailto:a@b.co")).toContain("Only web addresses");
-    expect(quickWarning("website", "javascript:alert(1)")).toContain("Only web addresses");
-    expect(quickWarning("website", "agency.co.uk")).toContain("https://");
-    expect(quickWarning("website", "https://agency.co.uk")).toBeNull();
-    expect(quickWarning("website", "two words")).toContain("spaces");
-  });
-});
-
-describe("the diff, and what counts as nothing", () => {
-  /* ⚠️ updateAgent APPENDS AN ACTIVITY PER CALL, so an empty save would put a line in the
-     writer's history saying something happened when nothing did. */
-  it("an empty field writes nothing", () => {
-    expect(quickDiff("email", { value: "   " })).toBeNull();
-    expect(quickDiff("website", { value: "" })).toBeNull();
-    expect(quickDiff("location", { location: { city: " ", country: "" } })).toBeNull();
-    expect(quickDiff("genres", { genres: [] })).toBeNull();
-    expect(quickDiff("genres", { genres: ["  "] })).toBeNull();
-  });
-
-  it("the address is normalised on the way into the diff, not on the way out", () => {
-    expect(quickDiff("website", { value: "agency.co.uk" })).toEqual({ website: "https://agency.co.uk" });
-    expect(quickDiff("website", { value: "javascript:alert(1)" })).toEqual({ website: "https://javascript:alert(1)" });
-  });
-
-  /* a city without a country cannot draw a flag — which is why they are one popover and one write */
-  it("city and country travel together, and either alone is still a fact", () => {
-    expect(quickDiff("location", { location: { city: "Bristol", country: "United Kingdom" } })).toEqual({ city: "Bristol", country: "United Kingdom" });
-    expect(quickDiff("location", { location: { city: "Bristol", country: "" } })).toEqual({ city: "Bristol", country: "" });
-  });
-});
-
-describe("where Tab goes", () => {
-  it("walks the columns in the order they are read", () => {
-    expect(QUICK_ORDER).toEqual(["email", "website", "location", "genres"]);
-    expect(emptyQuickFields(agent())).toEqual(["email", "website", "location", "genres"]);
-    expect(emptyQuickFields(agent({ email: "a@b.co", genres: ["Crime"] }))).toEqual(["website", "location"]);
-  });
-
-  it("goes to the next empty field after the one just filled", () => {
-    expect(nextQuickField(agent({ email: "a@b.co" }), "email")).toBe("website");
-    expect(nextQuickField(agent({ email: "a@b.co", website: "https://x" }), "email")).toBe("location");
-  });
-
-  /* ⚠️ IT STOPS AT THE END OF THE ROW. A keystroke that silently moves you to a different record
-     is a data-entry hazard: you would be three fields into somebody else's details before
-     anything on screen told you the row had changed. */
-  it("stops at the end of the row — it never names another agent", () => {
-    const full = agent({ email: "a@b.co", website: "https://x", city: "London", country: "UK", genres: ["Crime"] });
-    expect(nextQuickField(full, "genres")).toBeNull();
-    expect(nextQuickField(agent({ genres: ["Crime"] }), "genres")).toBe("email");
-    const src = readFileSync(new URL("./quickAdd.ts", import.meta.url), "utf8");
-    expect(src, "the walk takes a list of agents — it can only ever see one").not.toMatch(/Agent\[\]/);
   });
 });
 
@@ -183,5 +114,13 @@ describe("a typed genre is committed, never discarded", () => {
 
   it("an empty field commits nothing, so Enter falls through to the save", () => {
     expect(commitTypedGenre("   ", ["Crime"], SUGG)).toBeNull();
+  });
+
+  /* ⚠️ AND THE FORM CONSUMES IT — a raw `[...genres, other.trim()]` in the "+ Other" handler is
+     the case-duplicate fault this function exists to prevent, reintroduced one component along. */
+  it("the pop-up form's + Other input goes through commitTypedGenre", () => {
+    const form = readFileSync(new URL("../components/agents/contact/ContactAgentForm.tsx", import.meta.url), "utf8");
+    expect(form, "the + Other handler stopped canonicalising against the pool").toContain("commitTypedGenre(");
+    expect(form, "a raw push came back beside the canonical commit").not.toMatch(/genres:\s*\[\.\.\.draft\.genres,\s*other\.trim\(\)\]/);
   });
 });

@@ -47,3 +47,33 @@ and drawer anatomy that survives only behind the drawer — they retire with it 
 
 **Found dead in passing, not this pass's to sweep:** `AgentResponseGuidelines.tsx` has ZERO
 importers (pre-dates v11). P4's drawer retirement is the natural commit for it.
+
+## Phase 4 (the pop-up replaces the drawer; the flip-card era's last dependencies retired)
+
+| Subject | Disposition |
+|---|---|
+| `AgentDrawer.tsx` · `AgentEditor.tsx` · `AgentCard.tsx` · `ContactPeek.tsx` · `MaterialSlots.tsx` · `AgentMaterialsEditor.tsx` · `AgentLinkPopover.tsx` · `lib/agentDraft.ts` | deleted — `ContactProfile` (view + edit, one portal) and `ContactAgentForm` (§8.2, shared with P5's add card) replace the whole cluster; the buffered-draft law survives as the form's caller-owned draft + one `commitAgentEdits` on Save |
+| `AgentResponseGuidelines.tsx` | deleted — zero importers since before v11 (flagged in P3; this was the natural commit) |
+| `agentDrawer.test.tsx` · `contactCard.test.tsx` · `contactFields.test.tsx` · `contactPeek.test.tsx` · `materialSlots.test.tsx` · `agentDraft.test.ts` · `agentsMobile.test.ts` · `agentFlip.test.ts` | deleted with their subjects. The flip's five structural rules, the drawer-host law and the card's mobile breakpoints all described elements that no longer exist; the v11 narrow behaviour is @container-driven and locked by `contactV11.measure` (narrow rows) + `contactList.test` (the 700 boundary at a 758 column) |
+| `tests/e2e/contactCard.measure.ts` · `contactDrawer.measure.ts` · `contactEmpty.measure.ts` · `emptyStateSpacing.measure.ts` · `agentAsks.measure.ts` | deleted — card/drawer anatomy, reachable only through the lab or the drawer, both gone (selector-swept: `.agl-acard`, `.agl-drawer`, `data-clv="peek"`) |
+| `agentMotion.test` "three beats" / "id adoption" / "scrolls FULLY into view" | the crossfade–breath–travel, the in-grid draft node and the taller-than-viewport editor scroll all died with the card; the SURVIVING law — the outcome is computed before the FLIP measurement, through the page's own sort — is retargeted onto the v11 anchors in the same file |
+| `expectedDate.test` "§2 · Done and Discard no longer share a class" | retired — the incident's lesson (a shared chassis named for one of two actions) is kept in the note; the pop-up's Cancel/Save share no class named for either |
+| `agentList.test` colour/dim/door-band cases + `lib/agentList.ts` `agentStateClass`/`agentCardDims` | retired together — the live-query-outranks-the-shut-door law moved to `contactStanding` + the pop-up band label, and `contactFixture.test` now derives the carve-out through `contactStanding` |
+| `agentLayout.test` "THREE columns" + "hover — shadow, never a lift" | retired — `.agl-grid` and `.agl-acard` are deleted; shadow-never-lift stays the app-wide law (CLAUDE.md) |
+| `lib/quickAdd.ts` quick-field half (`QuickField`, `QUICK_ORDER`, `quickWarning`, `quickDiff`, `emptyQuickFields`, `nextQuickField`) | deleted (flagged in P1 as dead-but-tested). The scheme allowlist (`normaliseSubmissionsUrl`/`isLiveHref`/`hrefFor` — rendered by the pop-up) and `commitTypedGenre` (now consumed by the form's "+ Other") survive with their locks |
+| `agentList.css` | rebuilt down to its live set (root tokens, grid plumbing, the notice, the empty-state CTAs); ~1,250 lines of card/editor/toolbar/drawer rules deleted. All recoverable at `2d160183`'s parent |
+
+**Found by the sweep, repaired in this phase, and worth more than the sweep:**
+- **The country picker rendered UNSTYLED in the pop-up** — every `.agl-cc*` rule was
+  `.aglist`-scoped with tokens on `.aglist`, and the pop-up portals to `document.body` (the
+  portal-scope law, third instance on this page's own history). It is dressed in `contactV11.css`
+  under `.clv-fbody2` on the `:root` palette now, and `contactV11.measure` §11.6 asserts the
+  dress on the RENDERED portal (proved red by re-scoping the rules under `.aglist`).
+- **The empty state's slate strip had ALWAYS painted transparent** — `--cle-slate` read
+  `--agl-band`, a token only ever declared on the deleted card's `.s-open`/`.s-shut` state rules,
+  never an ancestor of the component. Repointed at `:root`'s `--clv-band-slate`; the empty-state
+  suite's token sweep now includes `contactV11.css` in its defined set.
+- **`notePreview` was silently denied on every save that recomputed it** (pre-existing, found by
+  the P4 probe before any UI landed): the field was outside the agent-update allowlist, so the
+  affectedKeys shape failed the WHOLE write. Allowlisted + `isValidAgent` clause; deployed to dev
+  and re-probed ALLOWED. Prod rules deploy is Nick's (final report).

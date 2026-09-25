@@ -149,103 +149,34 @@ describe("the FLIP survived the renderer swap", () => {
   });
 });
 
-describe("the save is THREE BEATS, never one", () => {
+/* ⚠️ THE THREE-BEAT SAVE IS RETIRED WITH THE FLIP CARD (v11 P4, 25 Sep). Crossfade → breath →
+   travel animated a FACE SWAP — the editor face becoming the card face in place, holding still,
+   then journeying to its sorted position. A v11 save closes a pop-up and reflows ROWS: there is
+   no face to swap, so the fadeout/fadein/breath phases, `SAVE_*_MS` and the `.sv-*` rules left
+   together (recoverable at 2d160183's parent). What SURVIVES is the ordering law the beats were
+   built on, asserted below against the v11 anchors. The id-adoption and scroll-fully-into-view
+   describes went the same way: their subject was the in-grid draft card (an editor taller than
+   the viewport, landed with block:"start"), and the v11 page has no in-grid editor — the two
+   surviving scrolls target a normal-height ROW and centre it, which is the right block for that
+   subject, so the block:"start" law does not transfer. */
+
+describe("the save notice and the FLIP still agree (the surviving law)", () => {
   const list = readFileSync(new URL("../components/agents/AgentList.tsx", import.meta.url), "utf8");
 
-  it("crossfade → breath → travel, in that order, each with its own phase", () => {
-    // anchor on the CALLS, not the state type annotation that also names the phases
-    const fadeout = list.indexOf('setSaveState({ id: saved.id, phase: "fadeout" })');
-    const fadein = list.indexOf('setSaveState({ id: saved.id, phase: "fadein" })');
-    const breath = list.indexOf('setSaveState({ id: saved.id, phase: "breath" })');
-    expect(
-      fadeout > -1 && fadein > fadeout && breath > fadein,
-      "the save's beats collapsed into one motion — a card flung across the grid the instant you press Done is unreadable, and you cannot tell whether it saved or simply went away",
-    ).toBe(true);
-  });
-
-  it("the BREATH is real — the travel does not begin the moment the crossfade ends", () => {
-    expect(
-      list,
-      "the breath was removed; the transformation and the journey now run together, so neither registers",
-    ).toContain("SAVE_BREATH_MS");
-  });
-
-  it("the crossfade suppresses the rotor — a save is a transformation, not a flip back", () => {
-    const css = readFileSync(new URL("../components/agents/agentList.css", import.meta.url), "utf8");
-    expect(css).toMatch(/\.sv-fadeout \.agl-rotor,[\s\S]*?transition: none/);
-  });
-
-  it("the outcome is computed BEFORE the motion, so the notice and the choreography agree", () => {
-    /* retargeted (v11 P3): the outcome derives inline against the v11 pipeline now — the LAW is
-       the ORDER, and the anchor is the derivation's own first line */
+  it("the outcome is computed BEFORE the motion is measured, so the sentence and the travel agree", () => {
+    /* the outcome derives against the v11 pipeline; the anchor is its own first line, and the
+       "motion" is now the FLIP measurement the reflow plays from */
     const outcomeAt = list.indexOf("const savedFacts = agentFacts(saved");
-    const firstPhase = list.indexOf('setSaveState({ id: saved.id, phase: "fadeout" })');
+    const measureAt = list.indexOf("flipBefore.current = measureFlip(gridRef.current)");
     expect(
-      outcomeAt > -1 && outcomeAt < firstPhase,
-      "the outcome is worked out after the motion starts — the card can then travel one way while the sentence describes another",
+      outcomeAt > -1 && measureAt > -1 && outcomeAt < measureAt,
+      "the outcome is worked out after the FLIP measurement — the row can then travel one way while the notice describes another",
     ).toBe(true);
   });
-});
 
-describe("id adoption happens ONLY on a confirmed create", () => {
-  const list = readFileSync(new URL("../components/agents/AgentList.tsx", import.meta.url), "utf8");
-
-  it("the real id is adopted onto the draft node after success", () => {
-    expect(
-      list,
-      "id adoption was removed — React will destroy the draft node and build a fresh card, and FLIP cannot animate an element that no longer exists, so the save can never travel",
-    ).toMatch(/if \(created\.id\) setNewAgent/);
-  });
-
-  it("a FAILED create adopts nothing and leaves the draft a draft", () => {
-    const failBlock = sliceBetween(list, "if (!created?.success)", "ID ADOPTION");
-    expect(
-      failBlock,
-      "the failure path now adopts an id — a node would claim an id that does not exist in the database",
-    ).not.toMatch(/setNewAgent\([^)]*created\.id/);
-    expect(failBlock).toContain("return;");
-  });
-});
-
-describe("Add new agent scrolls the card FULLY into view", () => {
-  const list = readFileSync(new URL("../components/agents/AgentList.tsx", import.meta.url), "utf8");
-  const editor = readFileSync(new URL("../components/agents/AgentEditor.tsx", import.meta.url), "utf8");
-  const css = readFileSync(new URL("../components/agents/agentList.css", import.meta.url), "utf8");
-
-  it("scrolls to the CARD on add, unconditionally — not only when the grid is off-screen", () => {
-    expect(
-      list,
-      "the scroll went back to firing only when the grid is out of view — the new-agent card is an EDITOR and far taller than a normal card, so it needs the header and toolbar scrolled away even from the top of the page",
-    ).not.toMatch(/if \(top >= 0\) return/);
-    expect(list).toMatch(/data-agent-card="\$\{newAgent\.id\}"/);
-    expect(list).toMatch(/scrollIntoView\(\{ block: "start"/);
-  });
-
-  it("ALWAYS block:'start' — a card taller than the viewport must top-align, never centre", () => {
-    const scrollCall = list.slice(list.indexOf("card?.scrollIntoView"), list.indexOf("card?.scrollIntoView") + 160);
-    expect(
-      scrollCall,
-      "the scroll block changed off 'start' — centring a card that is taller than the viewport pushes the top of the form, and the name field, off-screen",
-    ).toContain('block: "start"');
-    expect(scrollCall).not.toContain('block: "center"');
-  });
-
-  it("the offset comes from scroll-margin-top, not arithmetic at the call site", () => {
-    expect(
-      css,
-      "the card lost its scroll-margin-top — the gap beneath the top bar is now either absent or hand-computed somewhere, and it will silently go wrong the next time the bar's height changes",
-    ).toMatch(/\.agl-scene \{[^}]*scroll-margin-top: 16px/);
-  });
-
-  it("⚠️ focus uses preventScroll — otherwise it yanks the page mid-scroll", () => {
-    expect(
-      editor,
-      "the name field is focused without preventScroll (or via autoFocus, which is the same thing): focus scrolls its element into view by default, landing the page somewhere arbitrary part-way through the smooth scroll. It looks like a BROKEN SCROLL ANIMATION, not a focus bug",
-    ).toContain("focus({ preventScroll: true })");
-    expect(editor, "autoFocus came back on the name field — React's autoFocus cannot pass preventScroll").not.toMatch(/id="agl-name"[^>]*autoFocus/);
-  });
-
-  it("reduced motion scrolls instantly, but still scrolls", () => {
-    expect(list).toMatch(/behavior: prefersReducedMotion\(\) \? "auto" : "smooth"/);
+  it("the notice knows where the row LANDED, not where it was — the sort runs before the sentence", () => {
+    const block = sliceBetween(list, "const savedFacts = agentFacts(saved", "flipBefore.current = measureFlip");
+    expect(block, "the landing position is no longer derived through the page's own sort").toContain("sortFacts(");
+    expect(block).toContain("setNotice({");
   });
 });

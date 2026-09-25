@@ -637,6 +637,14 @@ export interface Agent {
   // Agent photo, stored inline as a data URL (centre-cropped square, 256×256, JPEG q0.82 ≈ 15–30KB).
   // Deliberately NOT Firebase Storage — the agent doc carries it. Absent === the initials avatar.
   image?: string;
+  // Contact list v11 (25 Sep): the date their list reopens, as the writer recorded it (the
+  // editor's Closed state reveals the field; REMIND ME reads it). Absent = not recorded.
+  reopensOn?: string;
+  // When the writer last CHECKED the wishlist — wishlist-specific on purpose: `lastCheckedDate`
+  // claims the whole record was verified, and "checked the wishlist" must not assert the email
+  // and the window were too. Stamped when the wishlist is edited or CHECKED is pressed; absent =
+  // never, which NEVER counts as stale (v11 §10).
+  mswlCheckedAt?: string;
   // The note pinned to this agent's card, referencing a doc id in the per-agent `notes`
   // subcollection. One pin max. Absent — or dangling, once that note is deleted — means the card
   // preview falls back to the latest note.

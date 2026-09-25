@@ -376,6 +376,10 @@ describe("the copy", () => {
 
 const css = readFileSync(join(__dirname, "contactListEmpty.css"), "utf8");
 const agl = readFileSync(join(__dirname, "agentList.css"), "utf8");
+/* the v11 page palette — `:root`-declared, so it resolves under `.aglist` too; the empty state's
+   slate strip reads it since the `--agl-band` repair (v11 P4: that token was only ever declared
+   on the deleted card's state rules, so the strip had always painted transparent) */
+const clv = readFileSync(join(__dirname, "contact", "contactV11.css"), "utf8");
 /** ⚠️ A LOCK NEVER READS ITS OWN EXPLANATION — every retirement here is documented by naming what
  *  it retired, so the prose necessarily contains the forbidden token. */
 const decls = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "");
@@ -389,8 +393,11 @@ describe("the stylesheet", () => {
    */
   it("reads no token that nothing defines", () => {
     const defined = new Set(
-      [...decls(css).matchAll(/(--[a-z0-9-]+)\s*:/g), ...decls(agl).matchAll(/(--[a-z0-9-]+)\s*:/g)]
-        .map((m) => m[1]),
+      [
+        ...decls(css).matchAll(/(--[a-z0-9-]+)\s*:/g),
+        ...decls(agl).matchAll(/(--[a-z0-9-]+)\s*:/g),
+        ...decls(clv).matchAll(/(--[a-z0-9-]+)\s*:/g),
+      ].map((m) => m[1]),
     );
     const read = [...decls(css).matchAll(/var\(\s*(--[a-z0-9-]+)/g)].map((m) => m[1]);
     expect(read.length).toBeGreaterThan(20);           // the check measured something

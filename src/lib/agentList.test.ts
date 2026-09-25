@@ -18,8 +18,6 @@ import {
   relationshipLabel,
   awaitingYourPages,
   isDoorOpen,
-  agentStateClass,
-  agentCardDims,
   matchesAgentSearch,
   methodShort,
   metaTokens,
@@ -118,91 +116,22 @@ describe("agentList · the door (UNKNOWN is retired — reads OPEN)", () => {
     expect(isDoorOpen(mkAgent({ submissionStatus: SubmissionStatus.CLOSED }))).toBe(false);
   });
 
-  it("an Unknown agent is NOT closed, gets no grey state, and stays queryable", () => {
+  it("an Unknown agent is NOT closed and stays queryable", () => {
     const unknown = mkAgent({ id: "u", submissionStatus: SubmissionStatus.UNKNOWN });
     expect(matchesFilterSet(unknown, [], { ...emptyFilterSet(), door: ["closed"] })).toBe(false);
-    expect(agentStateClass(unknown, [])).toBe("s-pink");
     expect(agentAxisCounts([unknown], []).door.closed).toBe(0);
   });
 
-  /* THE COLOUR/DOOR SPLIT (agent-card-visual pack). Colour carries YOUR HISTORY only; the door
-     is ink. The old "closed overrides sage/pink" precedence is retired — it was the same class
-     of error the axis split fixed, one level down in the presentation. */
-  it("COLOUR IS HISTORY: the door never changes it, and s-grey is extinct", () => {
-    const closed = mkAgent({ submissionStatus: SubmissionStatus.CLOSED });
-    expect(agentStateClass(closed, [mkQuery({})])).toBe("s-sage"); // a live query, closed door
-    expect(agentStateClass(closed, [])).toBe("s-pink"); // nothing live, closed door
-    expect(agentStateClass(mkAgent({}), [mkQuery({})])).toBe("s-sage");
-    expect(agentStateClass(mkAgent({}), [])).toBe("s-pink");
-  });
-
-  describe("THE DIM RULE — all four states", () => {
-    const closed = mkAgent({ id: "c", submissionStatus: SubmissionStatus.CLOSED });
-    const open = mkAgent({ id: "o" });
-    it("closed + NOT active dims", () => {
-      expect(agentCardDims(closed, [])).toBe(true);
-    });
-    it("closed + ACTIVE does NOT dim — an outstanding query does not matter less", () => {
-      expect(agentCardDims(closed, [mkQuery({ agentId: "c" })])).toBe(false);
-    });
-    it("open never dims, active or not", () => {
-      expect(agentCardDims(open, [])).toBe(false);
-      expect(agentCardDims(open, [mkQuery({ agentId: "o" })])).toBe(false);
-    });
-    it("hover restores full strength (CSS — the class is the contract)", () => {
-      const css = readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8");
-      /* the VALUE moved to the ref's .66; the LAW — a dim card returns to full under the pointer,
-         so the record is always readable — is unchanged and is what both lines assert */
-      expect(css).toMatch(/\.s-dim \.agl-facef \.agl-acard \{ opacity: \.66;/);
-      expect(css).toMatch(/\.s-dim \.agl-facef \.agl-acard:hover \{ opacity: 1; \}/);
-    });
-
-    /* ⚠️ REWRITTEN, AND THE LAW IT ASSERTS IS THE ONE THAT CHANGED (contact-list v5). This case
-       used to require the door be written in INK — a hatch overlay over a band coloured by your
-       HISTORY. The v5 ref reverses it: the band's FILL is the door, sage open and grey shut, and
-       a pill states it in words. So the hatch and the rotated stamp are retired, and the case
-       that guarded them is retired with them rather than left passing over prose.
-       What is asserted instead is the new law and the same underlying principle: the door is
-       said TWICE (fill and words) and no more than twice — a third device was two too many
-       before and still is. */
-    it("THE DOOR IS THE BAND: a fill and a pill, and the hatch and stamp are RETIRED", () => {
-      const css = readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8");
-      const decl = stripComments(css);
-      const card = stripComments(readFileSync(join(__dirname, "..", "components", "agents", "AgentCard.tsx"), "utf8"));
-      // the fill, both ways round — a rule stating only one leaves the other undefined
-      expect(decl).toMatch(/\.s-open \.agl-band \{ background: var\(--agl-band\); \}/);
-      expect(decl).toMatch(/\.s-shut \.agl-band \{ background: var\(--agl-band\); \}/);
-      // …and the colour family behind it, which the EDITOR head also reads
-      expect(decl).toMatch(/\.s-open \{ --agl-band: var\(--agl-sage-band\)/);
-      expect(decl).toMatch(/\.s-shut \{ --agl-band: var\(--agl-grey-band\)/);
-      // the words
-      expect(card).toContain('"Open to queries" : "Closed to queries"');
-      // the third, fourth and fifth devices are gone
-      expect(decl, "the hatch came back — the fill and the pill already say it").not.toContain("repeating-linear-gradient");
-      expect(decl, "the rotated stamp came back").not.toMatch(/["\s`.]agl-stamp["\s`{ ]/);
-      expect(card, "the stamp came back on the card").not.toMatch(/["\s`]agl-stamp["\s`]/);
-    });
-
-    /* ⚠️ THE HUSH IS RETIRED, AND ITS INVERSE IS THE CLAIM NOW. The body used to be withheld from
-       a closed card with nothing live. The v5 card's body IS the genres and the wishlist — which
-       is precisely what you came to read about an agency whose door is shut — so withholding it
-       would hide the page's whole subject on the cards that need it most. */
-    it("THE BODY ALWAYS RENDERS — a shut door hides nothing, it only dims", () => {
-      const card = stripComments(readFileSync(join(__dirname, "..", "components", "agents", "AgentCard.tsx"), "utf8"));
-      const css = stripComments(readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8"));
-      expect(card, "the body went back behind a condition — a closed agency's genres and wishlist are the reason you opened this page").not.toMatch(/\{\s*!?\w+\s*&&\s*<div className="agl-body"/);
-      /* the OPENING TAG, not the whole element: the body gained a click target in Phase 4 and the
-         claim was never about what else is on the tag */
-      expect(card).toContain('<div className="agl-body"');
-      // both sections are inside it, unconditionally
-      const body = sliceBetween(card, '<div className="agl-body"', 'className="agl-foot"');
-      for (const kept of ["Genres sought", "Manuscript wishlist"]) expect(body).toContain(kept);
-      // and the hush's floor is gone with it
-      expect(css, "the hush min-height survived the hush").not.toContain("s-hush");
-      // the dim is still derived from the ONE function, so it cannot drift from the axis
-      expect(card).toContain("agentCardDims(agent, queries)");
-    });
-  });
+  /* ⚠️ THE CARD'S COLOUR AND DIM LAWS ARE RETIRED WITH THE CARD (v11 P4, 25 Sep).
+     `agentStateClass` (sage/pink by YOUR history) and `agentCardDims` (fade only when the door
+     is shut AND nothing is live) styled the flip card; the v11 page draws rows, and rows carry
+     no history tint and never dim. The LAW underneath — a live query outranks the shut door,
+     so a closed agency holding your full never reads as dormant — moved rather than lapsed:
+     `contactStanding` (contactList.ts) answers "open" whatever the door says, and the pop-up's
+     band says "Closed to submissions" only when the standing is NOT open (ContactProfile.tsx).
+     contactFixture.test.ts holds the fixture to exercising both branches of that precedence.
+     The hatch/stamp/hush artefact cases went with their subjects (AgentCard.tsx, deleted).
+     Recoverable at 2d160183's parent. */
 });
 
 /**

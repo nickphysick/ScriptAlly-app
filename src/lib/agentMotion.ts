@@ -35,10 +35,9 @@ export const EXIT_MS = 160;
 /** The bump matches the arrival — the card appearing and the cards moving aside are one event. */
 export const BUMP_MS = 340;
 
-/** Save's three beats: the transformation registers in place, then a breath, then the travel. */
-export const SAVE_FADE_OUT_MS = 170;
-export const SAVE_FADE_IN_MS = 200;
-export const SAVE_BREATH_MS = 220;
+/* The save's three-beat constants (fade-out / fade-in / breath) are RETIRED (v11 P4, 25 Sep):
+   they timed the flip card's face-swap crossfade, and the card is deleted. The v11 save is a
+   sentence (the notice) plus the FLIP travel on BUMP_MS — the grid vocabulary above stays. */
 
 /** The FLIP easing, shared by every bump so nothing travels on a different curve. */
 export const BUMP_EASING = "cubic-bezier(.4, 0, .2, 1)";
