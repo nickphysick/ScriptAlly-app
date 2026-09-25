@@ -1164,11 +1164,19 @@ describe("the feature rows set their own type, and nothing else uses its familie
        is Playfair). One declaration, `--clv-serif` at `:root`, because the agent pop-up and the add
        card portal to `document.body`; the typewriter face there is READ (`var(--sp-type)`), never
        named. A seventh file naming either face is still a decision this fails on. */
+    /* ⚠️ A SEVENTH (Manuscripts v12, 25 Sep), THE SECOND SIGNED-IN OWNER OF THE SERIF, for the
+       Contact list's own reason: the v12 mock's body face is Source Serif 4 (`--f-serif` in
+       design-refs/manuscripts/manuscripts-v12.html) and no app token carries it. One declaration —
+       `--msv12-serif` on the page's grid root — with the family named rather than read from
+       `--clv-serif`, because a cross-PAGE `var()` read is the `--mk-hero-ground` trap: one sheet's
+       refactor silently unstyling another page. The typewriter face there is READ (`var(--sp-type)`).
+       An eighth file naming either face is still a decision this fails on. */
     expect(elsewhere.map((f) => f.slice(src.length + 1).replace(/\\/g, "/")).sort())
       .toEqual([
         "components/agents/contact/contactV11.css",
         "components/dashboard/oneScreen.css",
         "components/dashboard/queryCard.css",
+        "components/manuscripts/v12/msv12.css",
         "components/shell/primitives.css",
         "components/task/taskModal.css",
         "components/todo/taskPane.css",

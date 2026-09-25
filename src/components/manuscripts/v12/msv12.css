@@ -1,0 +1,405 @@
+/**
+ * Manuscripts v12 — the page: ground, hero, owed rows, sections, packages, comps rail, empty
+ * state, and the page's own edit dialog. Ref design-refs/manuscripts/manuscripts-v12.html; every
+ * class is msv12- scoped.
+ *
+ * ⚠️ VALUES ARE THE MOCK'S RENDERED CASCADE, NOT ITS SOURCE. The ref is cumulative (v2 → v12 blocks
+ * overriding earlier ones); these are the values its default render computes, written as one clean
+ * rule per selector — the qcvPage.css discipline.
+ *
+ * ⚠️ FACES ARE READ, NEVER NAMED, where a token exists: the typewriter face is `--sp-type`
+ * (primitives.css, the one declaration). Source Serif 4 has no app token — the mock's serif is
+ * named here with its own fallbacks, as contactV11.css and oneScreen.css already do.
+ *
+ * ⚠️ THE FIVE STATE FILLS ARE `--state-*` AT :ROOT (f12.css) and the object colours are
+ * `--o-ms`/`--o-pkg` at :root (index.css) — this sheet declares NONE of those, it reads them.
+ */
+.msv12-wpg {
+  --msv12-page: #f5f1eb;
+  --msv12-ink: #1c130f;
+  --msv12-btn: #2a3a52;
+  --msv12-parch-1: #fdf9f5;
+  --msv12-parch-2: #f7f3ee;
+  --msv12-parch-3: #f3eee7;
+  --msv12-hair: rgba(28, 19, 15, 0.12);
+  --msv12-muted: rgba(28, 19, 15, 0.58);
+  --msv12-type: var(--sp-type);
+  --msv12-serif: "Source Serif 4", Georgia, serif;
+  --msv12-mono: var(--font-mono);
+  --msv12-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 6px 18px rgba(28, 19, 15, 0.06);
+  --msv12-scout: #467a76;
+  --msv12-agent-disc: #5f7b93;
+}
+
+/* the ground — the page paints its own desk on the scroll row (the window stays the shell's) */
+.msv12-wpg .wpg-scroll { background: var(--msv12-page); }
+
+/* ⚠️ THE GRID OWNS THE GUTTER AND THE CAP — the house pattern (`.qc-wpg--v11`, `.clv-wpg`): the
+   page states its two numbers here and `.wpg-scroll > *` centres the capped column. A root that
+   ALSO padded horizontally was a double inset — measured 109px from the window's edge against
+   the mock's 28. */
+.msv12-wpg { --wpg-gutter: 28px; --wpg-measure: 1480px; }
+
+/* ⚠️ THE FORMAT IS CLOSED, AND BARE ELEMENTS ARE RESET AT 0-1-1 — `lib/brand.tsx` names a body
+   family on bare span/p/div/button at runtime; this beats it by one class and loses to every
+   .msv12- rule that states its own face (the qcvPage.css arrangement). */
+.msv12-own :where(span, p, div, label, li, ul, dd, dt, b, i, a) { font-family: var(--msv12-serif); }
+.msv12-root {
+  box-sizing: border-box;
+  color: var(--msv12-ink);
+  font-family: var(--msv12-serif);
+  font-size: 15px;
+  line-height: 1.45;
+  /* horizontal inset is the GRID's gutter (above); the root pays only the vertical rhythm */
+  padding: 28px 0 120px;
+  min-width: 0;
+  position: relative;
+}
+.msv12-root *, .msv12-root *::before, .msv12-root *::after { box-sizing: border-box; }
+
+/* ── the centred group: hero across the top, column + rail beneath ─────────────────────────── */
+.msv12-group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  column-gap: 28px;
+  row-gap: 22px;
+  align-items: start;
+}
+.msv12-hero { grid-column: 1 / -1; grid-row: 1; }
+.msv12-col { grid-column: 1; grid-row: 2; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.msv12-group > .msv12-rail { grid-column: 2; grid-row: 2; }
+
+/* the page's one chrome control — the mock hosts Edit details in ITS top bar, which in this app
+   is the shell's; here it floats at the page's top-right, out of flow, so the hero keeps the
+   mock's y. It clears the cover plate by construction: the button's foot is at 62 and the cover
+   never starts above 105. */
+.msv12-topline { position: absolute; top: 28px; right: 0; z-index: 3; }
+
+/* ── controls ──────────────────────────────────────────────────────────────────────────────── */
+.msv12-btn {
+  height: 34px; padding: 0 14px; border: 0; border-radius: 9px;
+  background: var(--msv12-parch-2); color: var(--msv12-ink);
+  font-family: var(--msv12-type); font-size: 12.5px;
+  display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+}
+.msv12-btn--dark { background: var(--msv12-btn); color: #fdf9f5; }
+.msv12-btn[aria-disabled="true"] { opacity: 0.55; cursor: default; }
+.msv12-mini {
+  font-family: var(--msv12-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase;
+  background: #fff; border: 0; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.3);
+  border-radius: 6px; padding: 4px 7px; cursor: pointer; color: var(--msv12-ink);
+}
+.msv12-link {
+  font-family: var(--msv12-type); font-size: 12.5px; color: var(--msv12-ink);
+  text-decoration: none; border: 0; background: none; padding: 0; cursor: pointer;
+  border-bottom: 1px solid rgba(28, 19, 15, 0.3);
+}
+.msv12-lbl {
+  font-family: var(--msv12-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--msv12-muted); font-weight: 600;
+}
+.msv12-move {
+  font-family: var(--msv12-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; background: var(--msv12-btn); color: #fff; border-radius: 6px;
+  padding: 3px 6px; white-space: nowrap;
+}
+.msv12-soon {
+  font-family: var(--msv12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; background: rgba(255, 255, 255, 0.6); border-radius: 6px;
+  padding: 4px 7px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1); color: var(--msv12-ink);
+}
+.msv12-soon--teal { color: var(--msv12-scout); box-shadow: inset 0 0 0 1px rgba(70, 122, 118, 0.4); background: #fff; }
+.msv12-sd { display: inline-flex; align-items: center; flex: none; }
+.msv12-disc {
+  width: 22px; height: 22px; border-radius: 50%; background: var(--msv12-btn); color: #fdf9f5;
+  font-family: var(--msv12-mono); font-size: 8px; font-weight: 600;
+  display: grid; place-items: center; flex: none; box-shadow: 0 0 0 2px #fff;
+}
+
+/* ── hero (desk layout, v9/v10 cascade) ────────────────────────────────────────────────────── */
+.msv12-hero {
+  display: grid; grid-template-columns: 360px minmax(0, 1fr) 200px; gap: 40px;
+  align-items: center; padding: 8px 0 10px; position: relative;
+}
+.msv12-heroart { height: 360px; display: flex; align-items: center; justify-content: center; }
+.msv12-heroimg { display: block; height: 100%; width: auto; max-width: 100%; object-fit: contain; }
+.msv12-kick { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.msv12-title {
+  margin: 0; font-family: var(--msv12-type) !important; font-weight: 400; font-size: 48px;
+  /* the mock's 1.0 is safe on its drawn title; a real title is whatever a writer typed, and the
+     house floor for mixed-case display faces guards descenders (the Playfair law, same reason) */
+  line-height: 1.15; letter-spacing: -0.01em;
+}
+.msv12-by { font-family: var(--msv12-type); font-size: 15px; color: var(--msv12-muted); margin-top: 12px; }
+.msv12-log { font-size: 18px; line-height: 1.55; max-width: 46ch; margin: 18px 0 0; }
+.msv12-facts {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 22px;
+  margin: 24px 0 0; border-top: 1px solid var(--msv12-hair); padding-top: 14px;
+}
+.msv12-facts dt {
+  font-family: var(--msv12-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--msv12-muted); font-weight: 600;
+}
+.msv12-facts dd { margin: 3px 0 0; font-size: 14px; display: block; }
+.msv12-facts dd .msv12-sd { vertical-align: -1px; margin-right: 6px; }
+.msv12-facts dd .msv12-mini { margin-left: 6px; }
+.msv12-facts dd.msv12-rust { color: var(--o-ms); font-family: var(--msv12-type); font-size: 14px; }
+.msv12-facts dd.msv12-miss { color: var(--msv12-muted); }
+.msv12-cover { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.msv12-coverph {
+  border: 0; font: inherit; cursor: pointer; width: 200px; aspect-ratio: 2/3; border-radius: 12px;
+  padding: 0; background: var(--msv12-parch-3);
+  box-shadow: inset 0 1px 4px rgba(28, 19, 15, 0.1), inset 0 0 0 1px rgba(28, 19, 15, 0.1);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  color: rgba(28, 19, 15, 0.45);
+}
+.msv12-coverph:hover { background: #efe9e1; }
+.msv12-coverph:focus-visible { outline: 2px solid var(--msv12-btn); outline-offset: 3px; }
+.msv12-coverph[aria-disabled="true"] { cursor: default; }
+.msv12-coverph .msv12-ct { font-family: var(--msv12-type); font-size: 14px; color: rgba(28, 19, 15, 0.55); }
+.msv12-coverph .msv12-cadd {
+  font-family: var(--msv12-mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(28, 19, 15, 0.5);
+}
+
+/* ── owed requests ─────────────────────────────────────────────────────────────────────────── */
+.msv12-owed { display: flex; flex-direction: column; gap: 8px; }
+.msv12-owedrow {
+  display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 12px;
+  padding: 10px 14px; box-shadow: var(--msv12-shadow);
+}
+.msv12-owedrow .msv12-otxt { flex: 1; min-width: 0; }
+.msv12-owedrow .msv12-who { font-weight: 600; }
+.msv12-owedrow .msv12-osub {
+  font-family: var(--msv12-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--msv12-muted);
+}
+
+/* ── sections ──────────────────────────────────────────────────────────────────────────────── */
+.msv12-sec { background: #fff; border-radius: 14px; box-shadow: var(--msv12-shadow); padding: 20px 22px 22px; }
+.msv12-sech { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.msv12-sech h2 { margin: 0; font-family: var(--msv12-type) !important; font-weight: 400; font-size: 22px; }
+.msv12-sech .msv12-sub { font-size: 14px; color: var(--msv12-muted); margin-left: 10px; font-family: var(--msv12-serif); }
+.msv12-sech .msv12-acts { display: flex; gap: 8px; align-items: center; }
+.msv12-pro {
+  font-family: var(--msv12-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: #fff; background: var(--o-pkg); border-radius: 6px;
+  padding: 3px 6px; margin-left: 10px; vertical-align: 5px;
+}
+
+/* versions */
+.msv12-vlist { display: flex; flex-direction: column; gap: 8px; }
+.msv12-vrow {
+  display: grid; grid-template-columns: 18px minmax(0, 1fr) 150px 190px; gap: 14px;
+  align-items: center; padding: 12px 14px; border-radius: 12px;
+  background: var(--msv12-parch-1); box-shadow: inset 0 0 0 1px var(--msv12-hair);
+}
+.msv12-vrow--cur { background: #fff; box-shadow: inset 0 0 0 1.5px rgba(138, 74, 60, 0.5); }
+.msv12-vmark { width: 12px; height: 12px; border-radius: 3px; background: var(--o-ms); opacity: 0.35; }
+.msv12-vrow--cur .msv12-vmark { opacity: 1; }
+.msv12-vname { font-family: var(--msv12-type); font-size: 15px; }
+.msv12-vnote { font-size: 13.5px; color: var(--msv12-muted); }
+.msv12-vfacts {
+  font-family: var(--msv12-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--msv12-muted); line-height: 1.8;
+}
+.msv12-vused { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-family: var(--msv12-mono); font-size: 10px; }
+.msv12-vused > span { display: inline-flex; align-items: center; gap: 5px; font-family: var(--msv12-mono); }
+.msv12-vused .msv12-pkgn { font-size: 7.5px; }
+.msv12-curtag {
+  font-family: var(--msv12-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: #fff; background: var(--o-ms); border-radius: 6px;
+  padding: 3px 6px; margin-left: 8px; vertical-align: 2px;
+}
+.msv12-curtag--och { background: var(--o-pkg); }
+
+/* letters + synopses */
+.msv12-mat2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.msv12-mlist { display: flex; flex-direction: column; gap: 8px; }
+.msv12-mrow {
+  display: grid; grid-template-columns: 10px minmax(0, 1fr); gap: 12px; align-items: center;
+  padding: 11px 13px; border-radius: 12px; background: var(--msv12-parch-1);
+  box-shadow: inset 0 0 0 1px var(--msv12-hair);
+}
+.msv12-mrow i, .msv12-otile i {
+  display: block; width: 10px; height: 10px; border-radius: 2px; background: var(--o-pkg); opacity: 0.4;
+}
+.msv12-mrow--cur { background: #fff; box-shadow: inset 0 0 0 1.5px rgba(154, 114, 51, 0.55); }
+.msv12-mrow--cur i { opacity: 1; }
+.msv12-mn { font-family: var(--msv12-type); font-size: 14.5px; }
+.msv12-mf2 {
+  font-family: var(--msv12-mono); font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--msv12-muted); margin-top: 3px;
+}
+.msv12-mnote { margin: 12px 2px 0; font-size: 13px; color: var(--msv12-muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* other materials */
+.msv12-ogrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.msv12-otile {
+  display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 12px;
+  background: var(--msv12-parch-1); box-shadow: inset 0 0 0 1px var(--msv12-hair);
+  text-align: left; border: 0; font: inherit; color: var(--msv12-ink);
+}
+.msv12-otile i { opacity: 1; margin-bottom: 4px; }
+.msv12-otile--add { flex-direction: row; align-items: center; gap: 12px; background: var(--msv12-parch-2); box-shadow: none; }
+.msv12-otile--add .msv12-plus {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--msv12-btn); color: #fdf9f5;
+  display: grid; place-items: center; font-size: 17px; flex: none; font-family: var(--msv12-serif);
+}
+.msv12-otile--add[aria-disabled="true"] { opacity: 0.6; }
+
+/* packages */
+.msv12-pgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.msv12-pkg {
+  border-radius: 12px; background: var(--msv12-parch-1); box-shadow: inset 0 0 0 1px var(--msv12-hair);
+  padding: 14px; display: flex; flex-direction: column; gap: 10px;
+}
+.msv12-pkgh { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.msv12-pkgh .msv12-pkgname { font-family: var(--msv12-type); font-size: 16px; display: flex; align-items: center; gap: 8px; }
+.msv12-pkgh .msv12-pkgname i { display: block; width: 10px; height: 10px; border-radius: 2px; background: var(--o-pkg); }
+.msv12-pkg ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.msv12-pkg li { display: flex; justify-content: space-between; gap: 8px; font-size: 13.5px; }
+.msv12-pkg li .msv12-pv {
+  font-family: var(--msv12-mono); font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--o-ms); white-space: nowrap;
+}
+.msv12-pkgf { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--msv12-hair); padding-top: 10px; }
+.msv12-discs { display: flex; }
+.msv12-discs .msv12-disc + .msv12-disc { margin-left: -6px; }
+.msv12-pkgf .msv12-used { font-family: var(--msv12-mono); font-size: 9.5px; display: flex; gap: 10px; align-items: center; }
+.msv12-pkgf .msv12-used > span { display: inline-flex; gap: 5px; align-items: center; font-family: var(--msv12-mono); }
+
+/* the free-plan teaser */
+.msv12-lock {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center;
+  background: var(--msv12-parch-1); border-radius: 12px; padding: 16px;
+  box-shadow: inset 0 0 0 1px rgba(154, 114, 51, 0.35);
+}
+.msv12-lock .msv12-lockic {
+  width: 34px; height: 34px; border-radius: 10px; background: #fff; display: grid; place-items: center;
+  box-shadow: inset 0 0 0 1px var(--msv12-hair);
+}
+.msv12-lock .msv12-lockt { font-family: var(--msv12-type); font-size: 15px; }
+.msv12-lock p { margin: 2px 0 0; font-size: 13.5px; color: var(--msv12-muted); }
+
+/* ── the rail ──────────────────────────────────────────────────────────────────────────────── */
+.msv12-rail {
+  position: sticky; top: 28px; background: #fff; border-radius: 14px; box-shadow: var(--msv12-shadow);
+  overflow: hidden; display: flex; flex-direction: column;
+  /* the cap is the SCROLLPORT's, published by the grid — never the viewport's (the house law) */
+  max-height: calc(var(--wpg-port-h, 100vh) - 56px);
+}
+.msv12-tray { position: relative; background: var(--be-accent); padding: 18px 20px 16px; overflow: hidden; flex: none; min-height: 212px; }
+.msv12-tray .msv12-trayh { position: relative; z-index: 2; margin: 0; font-family: var(--msv12-type) !important; font-weight: 400; font-size: 22px; }
+.msv12-tray .msv12-traysub { position: relative; z-index: 2; font-size: 13.5px; margin-top: 4px; max-width: 21ch; }
+.msv12-tray .msv12-lbl { position: relative; z-index: 2; }
+/* ⚠️ 146, NOT THE MOCK'S 150. The art box is anchored at the tray's right edge and is 172px wide
+   in a 340px tray with 20px side padding — so a 150px text cap ends 2px PAST the art's left edge.
+   The mock gets away with it because the cut-out's left margin is transparent; the L8 lock's
+   claim is boxes-clear-of-boxes, and 4px makes it true by construction. No line of the tray's
+   text comes within 20px of either cap, so nothing visible moves. */
+.msv12-traytext { position: relative; z-index: 2; max-width: 146px; }
+.msv12-counts { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; margin-top: 12px; }
+.msv12-cnt { background: rgba(255, 255, 255, 0.55); border-radius: 9px; padding: 6px 9px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.08); }
+.msv12-cnt b { font-family: var(--msv12-serif); font-size: 18px; font-weight: 400; margin-right: 4px; }
+.msv12-cnt span { font-family: var(--msv12-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; }
+.msv12-trayart { position: absolute; right: 0; bottom: 0; width: 172px; height: auto; z-index: 1; pointer-events: none; }
+.msv12-railbody { overflow: auto; padding: 14px 14px 10px; display: flex; flex-direction: column; gap: 8px; }
+.msv12-rh {
+  display: flex; align-items: center; gap: 8px; font-family: var(--msv12-type); font-size: 15px;
+  margin: 6px 4px 2px; position: sticky; top: -14px; background: #fff; padding: 6px 0; z-index: 3;
+}
+.msv12-rh .msv12-pill { font-family: var(--msv12-mono); font-size: 9px; background: var(--msv12-parch-3); border-radius: 10px; padding: 2px 7px; }
+.msv12-comp {
+  display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 11px; padding: 10px;
+  border-radius: 12px; background: var(--msv12-parch-1); box-shadow: inset 0 0 0 1px var(--msv12-hair);
+}
+.msv12-spine {
+  height: 54px; border-radius: 4px 6px 6px 4px; background: var(--o-ms); color: #fdf9f5;
+  display: flex; flex-direction: column; justify-content: space-between; padding: 6px 0 5px;
+  align-items: center; position: relative; overflow: hidden;
+}
+.msv12-spine::before { content: ""; position: absolute; left: 5px; top: 0; bottom: 0; width: 1px; background: rgba(253, 249, 245, 0.35); }
+.msv12-spine .msv12-si { font-family: var(--msv12-type); font-size: 16px; }
+.msv12-spine .msv12-sy { font-family: var(--msv12-mono); font-size: 7px; letter-spacing: 0.06em; }
+.msv12-comp .msv12-ct2 { font-family: var(--msv12-type); font-size: 14px; line-height: 1.2; }
+.msv12-comp .msv12-ca { font-size: 12.5px; color: var(--msv12-muted); }
+.msv12-comp .msv12-why { font-size: 13px; margin-top: 5px; line-height: 1.4; }
+.msv12-comp .msv12-inl { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+.msv12-tag {
+  font-family: var(--msv12-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; border-radius: 6px; padding: 3px 6px;
+  box-shadow: inset 0 0 0 1px rgba(138, 74, 60, 0.4); background: #fff; color: var(--o-ms);
+}
+.msv12-sooncard { margin-top: 6px; border-radius: 12px; padding: 12px 14px; box-shadow: inset 0 0 0 1px rgba(70, 122, 118, 0.4); background: #fff; }
+.msv12-sooncard .msv12-rh2 { display: flex; align-items: center; justify-content: space-between; font-family: var(--msv12-type); font-size: 15px; color: var(--msv12-scout); }
+.msv12-sooncard p { margin: 6px 0 0; font-size: 13px; color: var(--msv12-muted); }
+.msv12-railfoot { flex: none; border-top: 1px solid var(--msv12-hair); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+
+/* ── the empty state ───────────────────────────────────────────────────────────────────────── */
+.msv12-hero--empty .msv12-title { font-size: 44px; line-height: 1.15; }
+.msv12-ecta { display: flex; align-items: center; gap: 14px; margin-top: 22px; flex-wrap: wrap; }
+.msv12-esteps { font-size: 13.5px; color: var(--msv12-muted); }
+.msv12-step {
+  display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--msv12-btn); color: #fdf9f5; font-family: var(--msv12-mono); font-size: 10px;
+  font-weight: 600; margin-right: 10px; vertical-align: 4px;
+}
+.msv12-rh .msv12-step { vertical-align: 0; margin-right: 2px; }
+.msv12-ex {
+  font-family: var(--msv12-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--msv12-muted); box-shadow: inset 0 0 0 1px var(--msv12-hair);
+  border-radius: 6px; padding: 3px 6px; background: #fff;
+}
+.msv12-cap { margin: -4px 0 14px; font-size: 14.5px; line-height: 1.5; max-width: 60ch; }
+.msv12-ghost { opacity: 0.5; filter: saturate(0.7); pointer-events: none; user-select: none; position: relative; }
+.msv12-ghost.msv12-pgrid { grid-template-columns: minmax(0, 1fr); }
+.msv12-sec--e { padding-bottom: 18px; }
+
+/* ── the edit-details dialog (the page's own; TaskModal keeps its own chrome) ──────────────── */
+.msv12-scrim {
+  position: fixed; inset: 0; background: rgba(28, 19, 15, 0.38); display: grid; place-items: center;
+  z-index: 80;
+}
+.msv12-dlg {
+  width: 560px; max-width: calc(100vw - 48px); max-height: calc(100vh - 64px); overflow: auto;
+  background: #fff; border-radius: 14px; box-shadow: 0 20px 60px rgba(28, 19, 15, 0.3);
+  font-family: var(--msv12-serif); color: var(--msv12-ink);
+}
+.msv12-dlg .msv12-dhead { background: var(--be-accent); padding: 18px 22px; }
+.msv12-dlg .msv12-dhead h3 { margin: 0; font-family: var(--msv12-type) !important; font-weight: 400; font-size: 22px; }
+.msv12-dlg .msv12-dhead p { margin: 4px 0 0; font-size: 13.5px; }
+.msv12-dlg form { padding: 18px 22px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.msv12-fld { display: flex; flex-direction: column; gap: 5px; }
+.msv12-fld--w { grid-column: 1 / -1; }
+.msv12-fld label {
+  font-family: var(--msv12-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--msv12-muted); font-weight: 600;
+}
+.msv12-fld input, .msv12-fld select, .msv12-fld textarea {
+  border: 0; border-radius: 9px; background: var(--msv12-parch-2); padding: 0 11px;
+  font-family: var(--msv12-serif); font-size: 14.5px; color: var(--msv12-ink); height: 36px;
+}
+.msv12-fld textarea { height: auto; min-height: 64px; padding: 8px 11px; resize: vertical; }
+.msv12-fld .msv12-hint { font-size: 12px; color: var(--msv12-muted); }
+.msv12-dfoot { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; align-items: center; }
+.msv12-derr { grid-column: 1 / -1; font-size: 13px; color: #7c2d2d; }
+
+/* ── responsive steps (the mock's own two, stated at its viewport boundaries) ──────────────── */
+@media (max-width: 1360px) {
+  .msv12-hero { grid-template-columns: 280px minmax(0, 1fr) 160px; gap: 28px; }
+  .msv12-heroart { height: 300px; }
+  .msv12-coverph { width: 160px; }
+  .msv12-title { font-size: 40px; }
+}
+@media (max-width: 1400px) {
+  .msv12-mat2 { grid-template-columns: 1fr; }
+  .msv12-ogrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .msv12-ogrid .msv12-otile--add { grid-column: 1 / -1; }
+}
+@media (max-width: 1200px) {
+  .msv12-hero { grid-template-columns: 220px minmax(0, 1fr) 130px; gap: 24px; }
+  .msv12-heroart { height: 240px; }
+  .msv12-coverph { width: 130px; }
+  .msv12-title { font-size: 34px; }
+}

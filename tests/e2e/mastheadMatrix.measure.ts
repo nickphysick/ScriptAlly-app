@@ -83,7 +83,8 @@ const PAGES: { name: string; route: string; cls: string; fill: boolean }[] = [
   { name: "Discover",            route: "/agents/discover",     cls: "dv-wpg",  fill: false },
   /* ⚠️ `fill: false` SINCE THE BOOK PROFILE DE-CONTAINERED (27 Aug) — the shelf's row genuinely
      scrolls, by 32px at 1440×900. Same drift, same catch. */
-  { name: "Manuscripts",         route: "/manuscripts",         cls: "msv-wpg", fill: false },
+  /* v12 (25 Sep): the routed page is `manuscripts/v12/ManuscriptPage` — its grid class moved with it */
+  { name: "Manuscripts",         route: "/manuscripts",         cls: "msv12-wpg", fill: false },
   { name: "Comparable titles",   route: "/manuscripts/comps",   cls: "ct-wpg",  fill: false },
   { name: "Submission packages", route: "/manuscripts/packages",cls: "pkgw-wpg",fill: false },
   { name: "To-do list",          route: "/todo",                cls: "tpl-wpg", fill: true  },

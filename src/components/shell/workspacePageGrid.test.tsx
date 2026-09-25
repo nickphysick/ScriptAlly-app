@@ -1057,7 +1057,6 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        identical" report all over again. Ten routes, eight call sites — the Tasks family is three
        pages through one layout. */
     const CONVERTED = [
-      ["Manuscripts", "../AllManuscripts.tsx"],
       ["Discover", "../DiscoverNewAgents.tsx"],
       ["Submission packages", "../SubmissionPackages.tsx"],
       ["Analytics", "../QueryAnalytics.tsx"],
@@ -1070,14 +1069,22 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       expect(src, `${page} stopped rendering a masthead`).toContain('variant="workspace"');
     }
 
-    /* ⚠️ THE OPTED-OUT SET IS EXACTLY TWO PAGES (each one a decision, announced here). The Query
+    /* ⚠️ THE OPTED-OUT SET IS EXACTLY THREE PAGES (each one a decision, announced here). The Query
        Centre (v11, 19 Sep; Nick) renders the grid and NO masthead — its head is its own. The
        CONTACT LIST joined on 25 Sep (Contact list v11, ruling in the go-ahead): its head is the
        hero — title, facts sentence, count cards and the live add card over the Archivist's art —
-       and the grid draws no chrome slab and no collapsed bar. The list is asserted by LENGTH so a
-       third page cannot join it unannounced. */
-    const OPTED_OUT = [["Query Centre", "../Queries.tsx"], ["Contact list", "../agents/AgentList.tsx"]] as const;
-    expect(OPTED_OUT.length, "a page joined the opted-out set — that is a decision, not a diff").toBe(2);
+       and the grid draws no chrome slab and no collapsed bar. MANUSCRIPTS joined the same day
+       (Manuscripts v12, the build prompt's own mock): its head is the desk hero — the Archivist's
+       art, the title block and the cover plate — so the shared masthead would be a second head.
+       The routed page is `manuscripts/v12/ManuscriptPage`; the locked `AllManuscripts.tsx` keeps
+       its masthead but is no longer routed, so it leaves CONVERTED with this entry. The list is
+       asserted by LENGTH so a fourth page cannot join it unannounced. */
+    const OPTED_OUT = [
+      ["Query Centre", "../Queries.tsx"],
+      ["Contact list", "../agents/AgentList.tsx"],
+      ["Manuscripts", "../manuscripts/v12/ManuscriptPage.tsx"],
+    ] as const;
+    expect(OPTED_OUT.length, "a page joined the opted-out set — that is a decision, not a diff").toBe(3);
     for (const [page, file] of OPTED_OUT) {
       const src = readFileSync(resolve(__dirname, file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
       expect(src, `${page} no longer renders the grid`).toContain("<WorkspacePageGrid");

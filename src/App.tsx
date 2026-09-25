@@ -23,7 +23,7 @@ import { Agents } from "./components/Agents";
 import { DiscoverNewAgents } from "./components/DiscoverNewAgents";
 import { SubmissionPackages } from "./components/SubmissionPackages";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
-import { AllManuscripts } from "./components/AllManuscripts";
+import { ManuscriptPage } from "./components/manuscripts/v12/ManuscriptPage";
 import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
 import { ImportCsv } from "./components/ImportCsv";
 import { BrandStudio } from "./components/BrandStudio";
@@ -782,12 +782,13 @@ function AppContent() {
           ) : manuscriptsComps ? (
             <ComparableTitlesPage onNavigate={handleNavigate} />
           ) : (
-            <AllManuscripts
-              searchQuery={searchQuery}
+            /* Manuscripts v12 (25 Sep): the route now renders `ManuscriptPage` — one manuscript,
+               its versions, letters, synopses, packages and comps, built to
+               design-refs/manuscripts/manuscripts-v12.html. `AllManuscripts` is a locked file and
+               stays in the tree, unrouted. */
+            <ManuscriptPage
               onNavigate={handleNavigate}
               openId={manuscriptView}
-              /* ⚠️ LOAD-BEARING: the page stays MOUNTED, so this is the only signal that it has
-                 become visible — which is what the one-shot manuscript reveal keys on. */
               active={routeKey === "manuscripts" && !manuscriptsPackages && !manuscriptsComps}
             />
           )}

@@ -17,9 +17,9 @@ import { ComponentType, QueryStatus } from "../types";
 import type { Manuscript, ManuscriptVersion, Query, SubmissionPackage } from "../types";
 import {
   bylineFor, compLetterTally, currentBookVersion, hasTwoPageSynopsis, initialsOf, letterInUse,
-  materialQueryCount, materialsOf, owedAsk, owedRequests, packageQueries, packageUsageCounts,
-  packagesInUse, queryVersionId, queryingSince, scopedManuscript, unattributedQueryIds,
-  versionUsage,
+  materialQueryCount, materialsOf, otherMaterialTiles, owedAsk, owedRequests, packageQueries,
+  packageUsageCounts, packagesInUse, queryVersionId, queryingSince, scopedManuscript,
+  unattributedQueryIds, versionUsage,
 } from "./manuscriptSummary";
 import { oMs, oPkg } from "./designTokens";
 
@@ -213,6 +213,31 @@ describe("packages", () => {
     expect(initialsOf("Tom Achebe-Grant")).toBe("TA");
     expect(initialsOf("Plainname")).toBe("P");
     expect(initialsOf("")).toBe("?");
+  });
+});
+
+describe("other materials", () => {
+  it("tiles are the writer's own package lines, deduplicated, with the queries that carried them", () => {
+    const packs = [
+      pkg("p1", undefined, { otherMaterials: "Author bio" }),
+      pkg("p2", undefined, { otherMaterials: "Author bio" }),
+      pkg("p3", undefined, { otherMaterials: "Comps paragraph" }),
+      pkg("p4"),
+      pkg("p5", undefined, { otherMaterials: "Retired words", status: "Retired" }),
+    ];
+    const world = [
+      q("a", QueryStatus.QUERIED, "p1"), q("b", QueryStatus.REJECTED, "p2"),
+      q("c", QueryStatus.QUERIED, "p2"), q("d", QueryStatus.QUERIED, "p4"),
+      q("e", QueryStatus.QUERIED, "p5"),
+    ];
+    expect(otherMaterialTiles(packs, world)).toEqual([
+      { label: "Author bio", queries: 3 },
+      { label: "Comps paragraph", queries: 0 },
+    ]);
+  });
+
+  it("no lines, no tiles — never a placeholder row", () => {
+    expect(otherMaterialTiles([pkg("p1")], [])).toEqual([]);
   });
 });
 

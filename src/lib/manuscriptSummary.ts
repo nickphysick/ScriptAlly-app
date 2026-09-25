@@ -274,6 +274,32 @@ export const initialsOf = (name: string | null | undefined): string => {
   return parts.slice(0, 2).map((p) => p[0]!.toUpperCase()).join("");
 };
 
+/**
+ * The Other-materials tiles — the writer's own `otherMaterials` lines across this manuscript's
+ * packages, deduplicated by their exact words, each with the queries that went out carrying it.
+ *
+ * ⚠️ THERE IS NO STANDALONE OTHER-MATERIAL ENTITY (Step 0's reported gap): the app's "Other" is a
+ * package's free-text line, deliberately not a fourth slot. These tiles surface what the writer
+ * really recorded — their own words, from real packages — and invent no word counts, no dates and
+ * no documents. The mock's richer tiles await the entity; run report.
+ */
+export const otherMaterialTiles = (
+  packages: readonly Pick<SubmissionPackage, "id" | "otherMaterials" | "status">[],
+  queries: readonly Pick<Query, "packageId">[],
+): { label: string; queries: number }[] => {
+  const byLabel = new Map<string, Set<string>>();
+  for (const p of packages) {
+    const label = (p.otherMaterials ?? "").trim();
+    if (!label || p.status === "Retired") continue;
+    if (!byLabel.has(label)) byLabel.set(label, new Set());
+    byLabel.get(label)!.add(p.id);
+  }
+  return [...byLabel.entries()].map(([label, pkgIds]) => ({
+    label,
+    queries: queries.filter((q) => !!q.packageId && pkgIds.has(q.packageId)).length,
+  }));
+};
+
 /* ══ comps ════════════════════════════════════════════════════════════════════════════════════ */
 
 /** The tray's two chips: how many comps, how many the letter names (`inQuery`, absent = false). */

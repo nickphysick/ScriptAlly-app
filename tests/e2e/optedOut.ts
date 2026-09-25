@@ -31,10 +31,16 @@
  * Special Elite title and two action pills, a shape no other page has, so holding it to the shared
  * rule would enforce the remains of a treatment this page no longer uses.
  */
-export const OPTED_OUT: readonly string[] = ["Query Centre", "Contact list"];
+/**
+ * **Manuscripts** joined 25 Sep (Manuscripts v12): the page's head is the desk hero — the
+ * Archivist's art, the title block, the byline and facts grid, and the cover plate — drawn on the
+ * page ground with no slab, per design-refs/manuscripts/manuscripts-v12.html. A shared masthead
+ * above that hero would be two heads on one page.
+ */
+export const OPTED_OUT: readonly string[] = ["Query Centre", "Contact list", "Manuscripts"];
 
 /** Routes of the opted-out pages, for suites whose census is keyed by route rather than by name. */
-export const OPTED_OUT_ROUTES: readonly string[] = ["/queries", "/agents"];
+export const OPTED_OUT_ROUTES: readonly string[] = ["/queries", "/agents", "/manuscripts"];
 
 export const isOptedOut = (nameOrRoute: string): boolean =>
   OPTED_OUT.includes(nameOrRoute) || OPTED_OUT_ROUTES.includes(nameOrRoute);
