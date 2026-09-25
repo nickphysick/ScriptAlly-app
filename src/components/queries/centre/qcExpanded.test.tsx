@@ -360,7 +360,20 @@ describe("the timeline", () => {
      * its `fromMs` and (since §A1) its `toMs` are numbers, and they change only when the extent
      * really moves — which is exactly when the view needs placing again.
      */
-    expect(block, "the deps are objects that change identity every render").toMatch(/\}, \[boxW, rows\.length, ext\.fromMs, ext\.toMs\]\);/);
+    /**
+     * ⚠️ THE CLAIM IS THAT EVERY DEP IS A NUMBER, not that the list reads a particular way. It
+     * pinned the five it happened to have and went red when the zoom joined them — an edit that
+     * makes the placement MORE correct. What must never return is an object: `rows` arrives fresh
+     * from the page's own render, so `ext` and `tl` are new every time, and an effect that depends
+     * on one cancels the animation frame it just armed, for ever.
+     */
+    const deps = /\}, \[([^\]]*)\]\);/.exec(block.slice(block.indexOf("const placedFor")))?.[1] ?? "";
+    expect(deps, "the placement's deps").toBeTruthy();
+    for (const d of deps.split(",").map((x) => x.trim())) {
+      expect(d, `${d} is not a number`).toMatch(/^(boxW|pxd|rows\.length|ext\.(fromMs|toMs))$/);
+    }
+    /* …and all three of the things the requirement names are in it */
+    for (const d of ["boxW", "pxd", "ext.fromMs", "ext.toMs"]) expect(deps).toContain(d);
     expect(block, "`ext` itself would be a new object on every render").not.toMatch(/\}, \[[^\]]*[^.]\bext\b[^.][^\]]*\]\);/);
     /**
      * ⚠️ AND IT WAITS FOR ROWS. With no data the extent is three weeks wide, today's x is about 220
@@ -381,9 +394,19 @@ describe("the timeline", () => {
      * SUCCEEDS its own check, and is recorded as done. Keying on the pair lets a corrected width
      * re-place; keying on the extent alone cannot, because the extent never changed.
      */
-    expect(block).toContain("const key = `${ext.fromMs}:${ext.toMs}:${boxW}`;");
+    /* ⚠️ THE KEY IS EVERY INPUT THE PLACEMENT'S ANSWER DEPENDS ON — the extent's two ends, the
+       zoom and the measured width. The track is the extent times `pxd`, so a zoom moves where 58%
+       of it falls exactly as an extent change does; it was in neither the key nor the deps. */
+    for (const term of ["${ext.fromMs}", "${ext.toMs}", "${pxd}", "${boxW}"]) {
+      expect(block, `the key omits ${term}`).toContain(term);
+    }
     expect(block).toContain("if (placedFor.current === key) return undefined;");
-    expect(block, "a success must record the width it was placed against").toMatch(/placedFor\.current = `\$\{L\.ext\.fromMs\}:\$\{L\.ext\.toMs\}:\$\{L\.boxW\}`/);
+    /* ⚠️ AND IT RECORDS THE KEY IT WAS ACTUALLY PLACED AGAINST — from `latest`, which is what the
+       write read, never from the render's own closure. Recording a different key is how a stale
+       placement comes to look current. The terms are the key's, so the two cannot drift. */
+    for (const term of ["${L.ext.fromMs}", "${L.ext.toMs}", "${L.pxd}", "${L.boxW}"]) {
+      expect(block, `the recorded key omits ${term}`).toContain(term);
+    }
     expect(block).toContain("if (touched.current ||");
     expect(tlSrc, "every deliberate move marks the view as the reader's").toMatch(/const mine = useCallback\(\(\) => \{ touched\.current = true; \}, \[\]\);/);
     expect((tlSrc.match(/\bmine\(\);/g) ?? []).length, "the wheel, the pan, the zoom, the glide and Today").toBeGreaterThanOrEqual(5);
@@ -1340,11 +1363,11 @@ describe("§A1 · opening on today", () => {
      * query dated further out than anything else on the account — changed the track's width, and
      * therefore where 58% of it falls, while the guard said the view was already placed.
      */
-    expect(tlSrc).toMatch(/const key = `\$\{ext\.fromMs\}:\$\{ext\.toMs\}:\$\{boxW\}`/);
+    expect(tlSrc).toMatch(/const key = `\$\{ext\.fromMs\}:\$\{ext\.toMs\}:\$\{pxd\}:\$\{boxW\}`/);
     /* …and what it RECORDS is the same three things, or the guard compares two different keys */
-    expect(tlSrc).toMatch(/placedFor\.current = `\$\{L\.ext\.fromMs\}:\$\{L\.ext\.toMs\}:\$\{L\.boxW\}`/);
+    expect(tlSrc).toMatch(/placedFor\.current = `\$\{L\.ext\.fromMs\}:\$\{L\.ext\.toMs\}:\$\{L\.pxd\}:\$\{L\.boxW\}`/);
     /* …and both ends are in the deps, or the effect never runs to compare them */
-    expect(tlSrc).toMatch(/\}, \[boxW, rows\.length, ext\.fromMs, ext\.toMs\]\)/);
+    expect(tlSrc).toMatch(/\}, \[boxW, pxd, rows\.length, ext\.fromMs, ext\.toMs\]\)/);
   });
 
   it("⚠️ §A1 · the reveal's end re-places, and a ResizeObserver could never have caught it", () => {

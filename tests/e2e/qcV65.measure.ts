@@ -1998,6 +1998,45 @@ test("§8 · the expanded body — the today line, the pill and an overdue bar m
  * card, which is what a reader on a slow morning gets every time.
  */
 test("§A1 · today at 56–58% — on open, on re-open, and with the data 800ms late", async ({ page }) => {
+  /**
+   * ⚠️ EVERY WRITE IS WATCHED, NOT JUST THE LAST ONE — and this is the half that catches the fault
+   * rather than its symptom. On the deployed build the view was placed at **3,028** against a
+   * correct **9,412**, because the first read of the scroller's `clientWidth` returned the whole
+   * track (~12,050) instead of its real ~1,082; the write landed, and the success check could not
+   * refuse it because 3,028 is a real position. Only the reveal's `transitionend` corrected it —
+   * so a reading taken after everything settles cannot tell a view that was placed right from one
+   * that was rescued, and removing the guard leaves such a check perfectly green.
+   *
+   * The claim is therefore the requirement itself: until the reader touches the view, EVERY
+   * position it is put in has today at 56–58%.
+   */
+  await page.addInitScript(`(() => {
+    const d = Object.getOwnPropertyDescriptor(Element.prototype, "scrollLeft");
+    window.__SL = [];
+    Object.defineProperty(Element.prototype, "scrollLeft", {
+      configurable: true,
+      get() { return d.get.call(this); },
+      set(v) {
+        d.set.call(this, v);
+        if (this.getAttribute && this.getAttribute("data-qcv") === "tl-scroll") {
+          window.__SL.push({ wrote: Math.round(v), landed: Math.round(d.get.call(this)), cw: this.clientWidth, sw: this.scrollWidth });
+        }
+      },
+    });
+  })();`);
+  /** where each recorded write would have put today, as a share of the visible track */
+  const writes = async () => page.evaluate(() => {
+    const sc = document.querySelector("[data-qcv='xp-card'] [data-qcv='tl-scroll']") as HTMLElement | null;
+    const lineEl = document.querySelector("[data-qcv='xp-card'] [data-qcv='tl-todayline']") as HTMLElement | null;
+    const nm = document.querySelector("[data-qcv='xp-card'] [data-qcv='tl-names']") as HTMLElement | null;
+    const log = (window as unknown as { __SL: { wrote: number; landed: number; cw: number; sw: number }[] }).__SL ?? [];
+    if (!sc || !lineEl || !nm) return { log, at: [] as number[] };
+    /* the line's `left` is in the INNER track's coordinates, which start at the names column */
+    const lineX = parseFloat(getComputedStyle(lineEl).left) - nm.getBoundingClientRect().width;
+    const vis = sc.clientWidth - nm.getBoundingClientRect().width;
+    return { log, at: log.map((w) => Math.round(((lineX - w.landed) / vis) * 1000) / 10) };
+  });
+
   const place = async () => page.evaluate(() => {
     const card = document.querySelector("[data-qcv='xp-card']");
     const sc = card?.querySelector("[data-qcv='tl-scroll']") as HTMLElement | null;
@@ -2040,7 +2079,14 @@ test("§A1 · today at 56–58% — on open, on re-open, and with the data 800ms
   await page.keyboard.press("Escape");
   await page.waitForTimeout(400);
   let delayed = 0;
-  await page.route("**/*", async (route) => { delayed += 1; await new Promise((r) => setTimeout(r, 800)); await route.continue(); });
+  /* ⚠️ THE CONTINUE IS GUARDED. `unroute` does not reach a handler already sleeping, so an
+     in-flight request wakes up after the route has gone and throws "Route is already handled" —
+     which ends the test in the middle of the readings that follow. */
+  await page.route("**/*", async (route) => {
+    delayed += 1;
+    await new Promise((r) => setTimeout(r, 800));
+    await route.continue().catch(() => {});
+  });
   await page.reload();
   await page.waitForTimeout(2500);
   await page.locator("[data-qcv='be-expand']").first().click();
@@ -2058,6 +2104,47 @@ test("§A1 · today at 56–58% — on open, on re-open, and with the data 800ms
   yes("open-today", `§A1 · a late open still lands on today (${late?.at}%, showing ${JSON.stringify(late?.months)})`,
     late?.on === true, JSON.stringify(late));
   near("open-today", "§A1 · …at 56–58% of the visible track", late?.at, 57, 3);
+
+  /**
+   * ⚠️ AND IT STILL DOES TWO SECONDS LATER, which is the half the earlier version of this case
+   * could not see. The fault on Nick's account was a placement that landed in the past and was
+   * RESCUED by the reveal's `transitionend`; a check taken once, after everything has settled,
+   * cannot tell a view that was placed correctly from one that was corrected. A second reading,
+   * with nothing touched in between, is what says the position is the view's own.
+   */
+  await page.waitForTimeout(2000);
+  const held = await place();
+  near("open-today", "§A1 · …and it is still there two seconds later", held?.at, 57, 3);
+
+  /**
+   * ⚠️ AND THE PLACEMENT IS NEVER MADE AGAINST A WIDTH THE SCROLLER CANNOT HAVE. This is the fault
+   * itself rather than its symptom: the first read of `clientWidth` came back as the whole TRACK —
+   * about 12,050 against a real 1,082 — so `scrollForToday` answered 3,028 against a correct 9,412,
+   * the write landed, and the success check could not refuse it, because 3,028 is a real position.
+   * The scroller is inside the window, so it can never be wider than the window; that is a fact
+   * about the layout rather than a tuned threshold.
+   */
+  const box = await page.evaluate(() => {
+    const sc = document.querySelector("[data-qcv='xp-card'] [data-qcv='tl-scroll']") as HTMLElement | null;
+    return sc ? { cw: sc.clientWidth, sw: sc.scrollWidth, win: window.innerWidth } : null;
+  });
+  record({ area: "open-today", what: "§A1 · the scroller's box", got: box, want: "reported" });
+  yes("open-today", `§A1 · the scroller is narrower than the window (${box?.cw} < ${box?.win})`,
+    !!box && box.cw > 0 && box.cw < box.win, JSON.stringify(box));
+  yes("open-today", `§A1 · …and the track really overflows it (${box?.sw} > ${box?.cw})`,
+    !!box && box.sw > box.cw * 2, JSON.stringify(box));
+
+  /* ⚠️ AND NOW THE WHOLE LOG. The reader has touched nothing, so every one of these is a placement
+     the app made on its own, and every one of them must be right. */
+  const w = await writes();
+  record({ area: "open-today", what: "§A1 · every scrollLeft the app wrote", got: w, want: "reported" });
+  yes("open-today", `§A1 · the app placed the view at all (${w.log.length} writes)`, w.log.length > 0, JSON.stringify(w.log));
+  const wrong = w.at.map((at, i) => ({ at, ...w.log[i] })).filter((x) => Math.abs(x.at - 57) > 3);
+  yes("open-today", `§A1 · …and EVERY placement put today at 56–58% (${w.at.join(", ")})`,
+    wrong.length === 0, JSON.stringify(wrong));
+  /* …and none was computed against a width the scroller cannot have */
+  const impossible = w.log.filter((x) => x.cw > 1440);
+  yes("open-today", "§A1 · …none of them against a width wider than the window", impossible.length === 0, JSON.stringify(impossible));
 });
 
 /**

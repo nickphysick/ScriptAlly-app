@@ -127,12 +127,35 @@ export const QcTimeline: React.FC<{
   const weeks = useMemo(() => weekTicks(ext, pxd), [ext, pxd]);
   const edges = useMemo(() => edgeCounts([...tl.values()], ext, pxd, scrollLeft, boxW), [tl, ext, pxd, scrollLeft, boxW]);
 
-  /* the track's own width, measured — everything the lane places is placed against it */
+  /**
+   * The track's own width, measured — everything the lane places is placed against it.
+   *
+   * ⚠️ A WIDTH WIDER THAN THE WINDOW IS NOT A WIDTH, AND REFUSING IT IS THE FIX FOR THE VIEW
+   * OPENING IN THE PAST. Measured on the deployed build, opening from the rail: the first read gave
+   * a `clientWidth` of about 12,050 — the whole TRACK — rather than the ~1,082 the scroller really
+   * has, because the box is read before the card's own layout has clipped it. `scrollForToday` then
+   * answered **3,028** against a correct **9,412**, the write landed, the success check could not
+   * refuse it (3,028 is a real position), and `placedFor` recorded it. The only thing that rescued
+   * it was the reveal's `transitionend` clearing the flag — so on any open where that event does
+   * not arrive (a card already open, an interrupted transition, reduced motion) the view stays
+   * two years in the past with every number in it agreeing.
+   *
+   * The scroller is inside the window, so it can never be wider than the window. That is a fact
+   * about the layout rather than a tuned threshold, and it is the one check that tells a real
+   * narrow box from the content's width without knowing what either should be.
+   */
   useLayoutEffect(() => {
     const el = boxRef.current;
     if (!el) return undefined;
-    const read = () => setBoxW(el.clientWidth - NAMES_W);
+    const read = () => {
+      const w = el.clientWidth;
+      if (w <= 0 || w > window.innerWidth) return;    /* not laid out, or the content's width */
+      setBoxW(w - NAMES_W);
+    };
     read();
+    /* ⚠️ AND AGAIN WHEN THE FONTS LAND. A face arriving late changes the tray's height and the
+       title's width; neither is a resize of this box, so the observer never hears about it. */
+    if (typeof document !== "undefined" && document.fonts) void document.fonts.ready.then(read);
     if (typeof ResizeObserver === "undefined") return undefined;
     const ro = new ResizeObserver(read);
     ro.observe(el);
@@ -197,7 +220,15 @@ export const QcTimeline: React.FC<{
     /* §A1 — AND THE EXTENT IS A PAIR. Only `fromMs` was watched, so an extent that grew on its
        RIGHT — a query with a date further out than anything else on the account — changed the track's
        width and therefore where 58% of it falls, while the guard said the view was already placed. */
-    const key = `${ext.fromMs}:${ext.toMs}:${boxW}`;
+    /**
+     * ⚠️ AND THE ZOOM IS THE THIRD TERM. The track's width is the extent times `pxd`, so a zoom
+     * moves where 58% of it falls exactly as an extent change does — and `pxd` was in neither the
+     * key nor the deps, so any zoom applied before the reader has touched anything left the view
+     * placed for a scale it is no longer at. The requirement is all three: **until the reader's
+     * first move, every change to the extent, the zoom or the body's width re-applies today at
+     * 56–58%.** After it, `touched` refuses every one of them.
+     */
+    const key = `${ext.fromMs}:${ext.toMs}:${pxd}:${boxW}`;
     if (placedFor.current === key) return undefined;
     const put = () => {
       const node = scrollRef.current;
@@ -207,13 +238,13 @@ export const QcTimeline: React.FC<{
       const at = focus?.row.expectedMs ?? focus?.row.stageStartMs ?? null;
       const want = at != null ? Math.max(0, xAt(L.ext, L.pxd, at) - L.boxW / 2) : scrollForToday(L.ext, L.pxd, L.boxW, L.nowMs);
       node.scrollLeft = want;
-      if (Math.abs(node.scrollLeft - want) < 1) { placedFor.current = `${L.ext.fromMs}:${L.ext.toMs}:${L.boxW}`; setScrollLeft(node.scrollLeft); return true; }
+      if (Math.abs(node.scrollLeft - want) < 1) { placedFor.current = `${L.ext.fromMs}:${L.ext.toMs}:${L.pxd}:${L.boxW}`; setScrollLeft(node.scrollLeft); return true; }
       return false;
     };
     if (put()) return undefined;
     const id = requestAnimationFrame(() => { if (!put()) requestAnimationFrame(put); });
     return () => cancelAnimationFrame(id);
-  }, [boxW, rows.length, ext.fromMs, ext.toMs]);
+  }, [boxW, pxd, rows.length, ext.fromMs, ext.toMs]);
 
   /**
    * §A1 — AND ONCE MORE WHEN THE REVEAL HAS FINISHED MOVING.

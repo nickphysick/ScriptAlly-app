@@ -8,6 +8,8 @@
  *
  *   window.__SA_QC_PAD_LIVE = 56   repeat the account's own live queries until that many are live
  *   window.__SA_QC_AHEAD    = 6    re-date N agent's-turn queries so their window has not closed
+ *   window.__SA_QC_OLDEST   = 900  re-date the single oldest live send to N days ago, widening the extent
+ *   window.__SA_QC_BATCH2   = 800  hold the oldest third back for N ms, so the rows arrive in TWO batches
  *
  * ⚠️ IT FABRICATES QUERIES, NOT ROWS, AND THAT IS THE WHOLE POINT. An earlier version copied
  * finished `QcRow`s, so anything it demonstrated was demonstrated about numbers this file had
@@ -67,9 +69,23 @@ function reDate(src: Query, weeks: number, f: number, nowMs: number): Query {
   return copy;
 }
 
+/**
+ * ⚠️ `BATCH2` IS A CLOCK, NOT A FLAG, and it has to be — the point is a SECOND render with a wider
+ * extent, arriving after the first has been placed against a narrower one. It compares the page's
+ * own load time against the module's, so the held-back third reappears on whatever render happens
+ * after the delay (the clock ticks, so there is always one). Nothing is invented: the same queries
+ * are returned, later.
+ */
+const T0 = typeof performance === "undefined" ? 0 : performance.now();
+const held = (): boolean => {
+  const ms = num("__SA_QC_BATCH2");
+  return ms > 0 && typeof performance !== "undefined" && performance.now() - T0 < ms;
+};
+
 export function padLiveQueries(queries: readonly Query[], agents: readonly Agent[], nowMs: number): Query[] {
   const want = num("__SA_QC_PAD_LIVE"), ahead = num("__SA_QC_AHEAD");
-  if (!want && !ahead) return queries as Query[];
+  const oldest = num("__SA_QC_OLDEST"), batch2 = num("__SA_QC_BATCH2");
+  if (!want && !ahead && !oldest && !batch2) return queries as Query[];
   const weeksOf = (q: Query): number | null => agents.find((a) => a.id === q.agentId)?.responseTimeWeeks ?? null;
 
   let out = queries.slice();
@@ -104,6 +120,24 @@ export function padLiveQueries(queries: readonly Query[], agents: readonly Agent
     if (live.length && live.length < want) {
       for (let i = 0; live.length + i < want; i++) out.push({ ...live[i % live.length], id: `${live[i % live.length].id}~pad${i}` });
     }
+  }
+  if (oldest) {
+    /* the ONE oldest live send, moved back, so the extent's left edge is where Nick's is */
+    const live = out.map((q, i) => ({ q, i })).filter((x) => !isClosedStatus(x.q.status));
+    let pick: { q: Query; i: number } | null = null;
+    for (const x of live) {
+      const t = Math.max(...SEND_KEYS.map((k) => anyToMs(field(x.q, k)) ?? -Infinity));
+      if (t !== -Infinity && (pick == null || t < Math.max(...SEND_KEYS.map((k) => anyToMs(field(pick!.q, k)) ?? -Infinity)))) pick = x;
+    }
+    if (pick) out[pick.i] = reDate(pick.q, oldest / 7, 1, nowMs);
+  }
+  if (batch2 && held()) {
+    /* ⚠️ THE OLDEST THIRD IS WHAT IS HELD, because those are the rows that move the extent's LEFT
+       edge — a second batch of recent queries changes nothing a placement depends on. */
+    const at = (q: Query) => Math.max(...SEND_KEYS.map((k) => anyToMs(field(q, k)) ?? Infinity));
+    const order = out.map((q, i) => ({ i, t: at(q) })).sort((a, b) => a.t - b.t);
+    const hide = new Set(order.slice(0, Math.ceil(order.length / 3)).map((x) => x.i));
+    out = out.filter((_, i) => !hide.has(i));
   }
   return out;
 }
