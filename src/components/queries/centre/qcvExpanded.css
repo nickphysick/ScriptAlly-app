@@ -375,6 +375,11 @@
 }
 .qcv-xp-chk[aria-checked="true"] i { background: var(--qcv-ink); border-color: var(--qcv-ink); color: #f5f1eb; }
 .qcv-xp-chk u { margin-left: auto; font-family: var(--qcv-mono); font-size: 9px; text-decoration: none; color: var(--qcv-ink-45); }
+/* §  — the Next-action thresholds, stated where the grouping is chosen */
+.qcv-xp-note {
+  display: block; padding: 2px 10px 6px; font-family: var(--qcv-mono); font-size: 8px;
+  line-height: 1.5; letter-spacing: 0.04em; color: var(--qcv-ink-45);
+}
 .qcv-xp-dir { margin-top: 4px; font-family: var(--qcv-type) !important; font-size: 12.5px !important; color: var(--qcv-ink-70); }
 .qcv-xp-clear {
   margin-top: 4px; font-family: var(--qcv-mono) !important; font-size: 8px !important;

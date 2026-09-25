@@ -20,7 +20,8 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { ATTENTION_LABEL, ATTENTION_ORDER, EYE_FOCUS, type Attention } from "../../../lib/qcBirdsEye";
 import {
-  CAL_DEFAULT, DUE_OPTIONS, GROUP_BY_OPTIONS, SORT_BY_OPTIONS, activeFacets, anyDiffers, clearFilters,
+  CAL_DEFAULT, CLOSE_OVER_DAYS, CLOSE_UNDATED_DAYS, DUE_OPTIONS, GROUP_BY_OPTIONS, SORT_BY_OPTIONS,
+  activeFacets, anyDiffers, clearFilters,
   filterDiffers, groupDiffers, setDue, sortDiffers, toggleAttention, togglePackage, toggleStatus,
   type CalView, type FacetCounts,
 } from "../../../lib/qcCalView";
@@ -192,7 +193,21 @@ export const QcCalControls: React.FC<{
               <section className="qcv-xp-sec" role="radiogroup" aria-label="Group by">
                 <h5>Group by</h5>
                 {GROUP_BY_OPTIONS.map((o) => (
-                  <button key={o.key} type="button" role="radio" aria-checked={view.groupBy === o.key} onClick={() => set({ groupBy: o.key })}>{o.label}</button>
+                  <React.Fragment key={o.key}>
+                    <button type="button" role="radio" aria-checked={view.groupBy === o.key} onClick={() => set({ groupBy: o.key })}>{o.label}</button>
+                    {/**
+                      * ⚠️ NEXT ACTION IS THE ONE GROUPING WHOSE NAMES HIDE A NUMBER. "Nudge due"
+                      * and "Consider closing" are the same question at two distances, and nothing
+                      * on the page said where one becomes the other — so a reader could not tell
+                      * why a query had moved between them. The thresholds are read from the lib
+                      * rather than typed, so the words cannot drift from the classifier.
+                      */}
+                    {o.key === "action" && (
+                      <small className="qcv-xp-note" data-qcv="xp-groupnote">
+                        Nudge due: past the expected date · Consider closing: {CLOSE_OVER_DAYS / 7}+ weeks past, or {CLOSE_UNDATED_DAYS / 7} weeks with no date
+                      </small>
+                    )}
+                  </React.Fragment>
                 ))}
               </section>
               <button type="button" className="qcv-xp-clear" data-qcv="xp-cleargroup" onClick={() => set({ groupBy: CAL_DEFAULT.groupBy })}>Reset grouping</button>
