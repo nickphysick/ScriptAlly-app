@@ -1,0 +1,56 @@
+/**
+ * §1 (v65.6) — the query modal: a scrim over the whole viewport, and the card centred in it.
+ *
+ * ⚠️ EVERY VALUE HERE IS A LITERAL, AND THAT IS DELIBERATE. The sheet is rendered through a portal
+ * to `document.body`, outside `.qcv-page`, so a `var(--qcv-ink)` would resolve to nothing and the
+ * scrim would paint transparent — with the rule reading perfectly correctly.
+ */
+.qcv-qm {
+  position: fixed; inset: 0; z-index: 80;
+  display: flex; align-items: center; justify-content: center;
+}
+/* ⚠️ `inset: 0` ON A `position: fixed` PARENT IS THE VIEWPORT, which is the whole claim: the scrim
+   covers the sidebar, the top bar, the page, the rail and the expanded card's own header. */
+.qcv-qm-back {
+  position: absolute; inset: 0; background: rgba(28, 19, 15, 0.42);
+  animation: qcvQmBack 0.2s ease both;
+}
+/**
+ * ⚠️ THE CARD SCROLLS ITSELF. `max-height` without `overflow` is a card whose foot is unreachable
+ * on a short window — the same fault as a panel that grows past its cap, one element along.
+ */
+.qcv-qm-card {
+  position: relative; width: 420px; max-height: calc(100vh - 80px); overflow: auto;
+  display: flex; flex-direction: column;
+  animation: qcvQmCard 0.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.qcv-qm-x {
+  position: absolute; top: 24px; right: 32px; width: 40px; height: 40px;
+  border: 0; border-radius: 50%; background: #f5f1eb; color: #1c130f;
+  font-size: 14px; line-height: 1; cursor: pointer;
+}
+.qcv-qm-x:hover { background: #fff; }
+/* ⚠️ THE CARD'S OWN ✕ GOES, and the band's height is why as much as the duplication: it is 24px in
+   a band whose type is 15, so the band renders 45px against the design's 36. */
+.qcv-qm-card [data-qcv="open-close"] { display: none; }
+/* ⚠️ NO `var()` IN A KEYFRAME. It fails silently in this setup — no error, no animation, no
+   warning — so the frames carry only opacity and transform, which need no token. */
+@keyframes qcvQmBack { from { opacity: 0 } to { opacity: 1 } }
+@keyframes qcvQmCard {
+  from { opacity: 0; transform: translateY(8px) scale(0.98) }
+  to { opacity: 1; transform: none }
+}
+/* ⚠️ AND `both` MEANS THE `from` STATE IS PAINTED BEFORE THE ANIMATION STARTS — which is why a
+   measurement taken mid-entrance reads the SCALED box. Every reading of this card waits for it. */
+@media (prefers-reduced-motion: reduce) {
+  .qcv-qm-back, .qcv-qm-card { animation: none }
+}
+/**
+ * ⚠️ THE CARD INSIDE IS THE PAGE'S OWN, AND IT ARRIVES SIZED FOR THE RAIL. It caps itself to the
+ * workspace grid's scrollport (`--wpg-port-h`) and sticks to the column it used to dock in; in here
+ * the modal owns the height, so those are released. The component is NOT forked for this — the
+ * mock does the same, neutralising the docked card's geometry where it mounts it.
+ */
+.qcv-qm-card > * {
+  position: static; width: auto; max-width: none; max-height: none; height: auto; margin: 0;
+}

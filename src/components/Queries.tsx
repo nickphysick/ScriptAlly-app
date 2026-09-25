@@ -88,7 +88,10 @@ import { QcRail } from "./queries/centre/QcRail";
 import { QcBirdsEye } from "./queries/centre/QcBirdsEye";
 import { QcExpanded } from "./queries/centre/QcExpanded";
 import { QcList, QcListSkeleton } from "./queries/centre/QcList";
-import { QcOpenCard, QcOpenCardSkeleton } from "./queries/centre/QcOpenCard";
+/* §2 (v65.6) — `QcOpenCardSkeleton` lost its only consumer when the rail stopped docking the card;
+   the page's own loading cover holds the frame now. It survives for its spec and for a future use. */
+import { QcOpenCard } from "./queries/centre/QcOpenCard";
+import { QcQueryModal } from "./queries/centre/QcQueryModal";
 import { useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
@@ -2546,6 +2549,19 @@ export const Queries: React.FC<{
    * and the page decides WHERE the card is drawn — never a second card that has to be kept in step.
    */
   const cardQueryId = beCard ?? selectedQueryId;
+  /**
+   * §1 (v65.6) — CLOSING THE CARD IS ONE ACT, whichever door opened it. The ✕, Escape and a press
+   * on the scrim all come here: a second path is a second behaviour, and this card is reachable
+   * from four doors.
+   *
+   * ⚠️ IT CLEARS ONLY WHAT THAT DOOR SET. A query opened inside the calendar is the calendar's and
+   * never touched `?q`; one opened from the ledger or the URL is the page's. Clearing both would
+   * drop the page's own selection because a reader closed a card they opened in an overlay.
+   */
+  const closeQueryCard = useCallback(() => {
+    if (beCard != null) { setBeCard(null); return; }
+    onSelectView?.("cards");
+  }, [beCard, onSelectView]);
   const activeQuery = cardQueryId ? ((selectedQueryId === cardQueryId && selectedQuery) || queries.find(q => q.id === cardQueryId)) : null;
   const currentStatus = activeQuery?.status ?? selectedQuery?.status;
   const activeAgent = activeQuery ? agents.find(a => a.id === activeQuery.agentId) : null;
@@ -5070,8 +5086,10 @@ export const Queries: React.FC<{
       <QcOpenCard
       row={qcById.get(activeQuery.id)!}
       nowMs={Date.now()}
-      /* the ✕ and Escape are one act: clear `?q`, and the rail goes back to Birds-eye */
-      onClose={() => onSelectView?.("cards")}
+      /* §1 — the ✕, Escape and the scrim are ONE act, and it knows which door opened the card:
+         a query opened inside the calendar is the calendar's, one from the ledger or `?q` is the
+         page's. Clearing both would drop the page's selection for a click made in an overlay. */
+      onClose={closeQueryCard}
       manuscriptTitle={activeMs?.title ?? null}
       manuscriptTags={activeMs ? [activeMs.ageCategory, activeMs.genre, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString("en-GB")} words` : null].filter((t): t is string => !!t) : []}
       /* the CTA engine's own answer, through the SAME doors the drawer uses: the desk hosts
@@ -6362,8 +6380,10 @@ export const Queries: React.FC<{
                  * changed is that it can be drawn here instead of the rail, so a reader who clicked
                  * a bar to look at a query is not thrown out of the view they were reading it in.
                  */
-                card={beCard && panelRow && activeQuery && qcById.get(activeQuery.id) ? qcOpenCardNode : null}
-                onCardClose={() => setBeCard(null)}
+                /* §1 — the card is a VIEWPORT modal now, mounted by the page; this view only says
+                   whether one is open, so its Escape can cascade through it to the calendar. */
+                cardOpen={qcOpenCardNode != null}
+                onCardClose={closeQueryCard}
                 onOpen={(id) => setBeCard(id)}
                 /* ⚠️ THE CHIP OPENS THE APP'S OWN NUDGE FLOW (§9), never a second one */
                 onNudge={(id) => { setBeOpen(false); setBeFocus(null); setBeCard(null); setBeNudge(id); }}
@@ -6429,13 +6449,12 @@ export const Queries: React.FC<{
               <QcRail
                 birdsEye={<QcBirdsEye rows={qcScoped} nowMs={Date.now()} loading={showGridSkeleton} onExpand={openBirdsEye} />}
                 /**
-                 * §8.11 — THE DOCKED CARD IS FOR CLICKS ON THE PAGE: the ledger and the fanned
-                 * cards. While the calendar holds it centred, the rail does not also draw it —
-                 * otherwise closing the calendar would hand the reader a docked query they opened
-                 * somewhere else, which is the page changing under them for a click they made in
-                 * an overlay.
+                 * §2 (v65.6) — THE RAIL IS ALWAYS THE BIRDS-EYE VIEW. It used to swap to the open
+                 * query for clicks on the page, so the same act had two outcomes depending on which
+                 * door you came through, and the rail — the one place that shows the shape of
+                 * everything — went blank exactly when a reader was comparing one query to the rest.
+                 * One way to open a query now, and it is the modal.
                  */
-                openCard={beCard || !qcDocked ? undefined : showGridSkeleton ? (selectedQueryId ? <QcOpenCardSkeleton /> : undefined) : qcOpenCardNode ?? undefined}
                 />
               )}
             body={
@@ -6543,8 +6562,27 @@ export const Queries: React.FC<{
             />
           )}
 
+          {/**
+            * §1 (v65.6) — THE ONE WAY A QUERY IS OPENED: a centred card over a scrim that covers the
+            * whole screen. A ledger row, a fanned card, `?q=` and a bar or a name in the expanded
+            * view all arrive here.
+            *
+            * ⚠️ IT IS MOUNTED BY THE PAGE, NOT BY THE EXPANDED VIEW, and that is what makes the
+            * scrim cover everything. A card drawn inside the calendar sheet cannot scrim the
+            * calendar sheet's own header, whatever its `z-index` — a descendant does not out-stack
+            * its ancestor's box. Both are portals to the body, so the modal's 80 really does sit
+            * over the sheet's 70.
+            *
+            * ⚠️ AND THE EXPANDED VIEW OWNS ESCAPE WHILE IT IS OPEN. Exactly one handler is
+            * registered at a time, so the cascade — popover, card, calendar — is a property of what
+            * is on screen rather than of which component mounted last.
+            */}
+          {qcOpenCardNode && (beCard != null || qcDocked === true) && (
+            <QcQueryModal onClose={closeQueryCard} ownsEscape={!beOpen}>{qcOpenCardNode}</QcQueryModal>
+          )}
+
           {/* UNDER 900px OF COLUMN the open query is today's DRAWER — for a query the reader chose (`?q`),
-              never for the implicit first row, and never while the docked card is on screen */}
+              never for the implicit first row, and never while the centred card is on screen */}
           {panelRow && activeQuery && urlSelectedId && qcDocked === false && (
             <QueryPanel
               open

@@ -59,18 +59,20 @@ export const QcExpanded: React.FC<{
   /** §8.11 — a row or a bar opens the query, centred and in focus. */
   onOpen: (id: string) => void;
   /**
-   * §8.11 — THE QUERY OPENED FROM THIS VIEW, CENTRED OVER IT. The expanded view stays exactly as it
-   * was underneath — scroll, zoom, filters, grouping and Find — because nothing about it changes:
-   * the card is a sibling laid over the top, not a route out.
+   * §1 (v65.6) — WHETHER A QUERY CARD IS OPEN OVER THIS VIEW. The card itself is a VIEWPORT modal
+   * mounted by the page, not a child of this component — a descendant cannot cover its own
+   * ancestor's box however it is stacked, so a card drawn in here could never scrim this view's
+   * own blush header. All this view needs to know is that one is there, so its Escape can reach it
+   * before the calendar.
    */
-  card?: React.ReactNode;
+  cardOpen?: boolean;
   /** …and how it closes, which Escape reaches BEFORE the view's own close. */
   onCardClose?: () => void;
   /** §8.7 — the dotted chip opens the app's nudge flow for that query. */
   onNudge: (id: string) => void;
   /** §8.3 — a package's name, for the package grouping. */
   packageName?: (id: string) => string | null;
-}> = ({ rows, nowMs, onClose, focusId = null, onOpen, onNudge, packageName, card, onCardClose }) => {
+}> = ({ rows, nowMs, onClose, focusId = null, onOpen, onNudge, packageName, cardOpen = false, onCardClose }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState<Box | null>(null);
   /* §8.3 — one value for whose court, which groups, how grouped and how sorted. */
@@ -84,8 +86,8 @@ export const QcExpanded: React.FC<{
   /* ⚠️ REFS, BECAUSE THE KEY HANDLER IS REGISTERED ONCE. A handler with no dependencies reaches for
      whatever it captured at mount, which is how a cascade comes to test a card that has since
      closed — the same reason `exitRef` exists two lines above. */
-  const cardRef = useRef<React.ReactNode>(card);
-  cardRef.current = card;
+  const cardRef = useRef(cardOpen);
+  cardRef.current = cardOpen;
   const cardCloseRef = useRef(onCardClose);
   cardCloseRef.current = onCardClose;
   /* the one exit, held in a ref so the `[]` key handler above reaches the current one */
@@ -144,7 +146,7 @@ export const QcExpanded: React.FC<{
       /* §8.11 — …and an open QUERY is the next rung of the same cascade: the first Escape closes
          the card, the second closes the calendar. One handler, in the order they are stacked on
          screen, so neither can be decided by which component mounted last. */
-      if (cardRef.current != null) { cardCloseRef.current?.(); return; }
+      if (cardRef.current) { cardCloseRef.current?.(); return; }
       /* §7 — through the SAME close the ✕ and the backdrop use, so the overlays are lifted out
          whichever way the card is dismissed. A second path here is a second behaviour. */
       exitRef.current();
@@ -384,14 +386,6 @@ export const QcExpanded: React.FC<{
             * ⚠️ AND IT IS ABSENT, NOT EMPTY, WHEN NOTHING IS FILTERING. A bar reading "Filtered"
             * with no pills is a claim that something is narrowing the list.
             */}
-          {/* §8.11 — the query opened from a bar or a name: centred, 420px, over its own backdrop,
-              with the view untouched beneath it. */}
-          {card != null && (
-            <>
-              <div className="qcv-xp-cardback" data-qcv="xp-cardback" onClick={() => onCardClose?.()} aria-hidden="true" />
-              <div className="qcv-xp-cardhost" data-qcv="xp-cardhost" role="dialog" aria-modal="true" aria-label="Query">{card}</div>
-            </>
-          )}
           {pills.length > 0 && (
             <div className="qcv-xp-fbar" data-qcv="xp-fbar">
               {pills.map((p) => (
