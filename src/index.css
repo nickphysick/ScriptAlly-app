@@ -42,6 +42,17 @@
    * tone off the page beneath it — visible, and unfindable by grepping either sheet alone.
    * Values are the ref's: `linear-gradient(90deg,#ece6de,#f5f1ea 40%,#ece6de 80%)` at 600px, 1.4s.
    */
+  /**
+   * The OBJECT COLOURS (Manuscripts v12, D12) — a hue per kind of thing, never per state:
+   * rust = the manuscript, its versions and comps; ochre = letters, synopses, other materials and
+   * packages. At `:root` because the Manuscripts page and any later surface naming the same
+   * objects must read ONE declaration — rust already existed as five per-sheet copies
+   * (--qcv-rust, --clv-rust, --dash-rust, --tm-rust, --qcard-rust), which is the "literal another
+   * element owns" fault one step from happening again; ochre arrives declared once. Mirrored in
+   * designTokens.ts (oMs / oPkg) for the one JS reader.
+   */
+  --o-ms: #8a4a3c;
+  --o-pkg: #9a7233;
   --sa-sk-base: #ece6de;
   --sa-sk-sheen: linear-gradient(90deg, #ece6de 0%, #f5f1ea 40%, #ece6de 80%);
   --burg: #7c3a2a;    /* query-letter ink · primary brand (=== --color-burgundy) */

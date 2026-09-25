@@ -290,6 +290,22 @@ export interface Manuscript {
   wordCount: number;
   logline: string;
   /**
+   * Where the story is set, in the writer's own words — "West Cork, today" (the Manuscripts-v12
+   * hero's 2×2 facts grid). Absent means unwritten (the hero renders "Not recorded" with an Add
+   * button, never a dash); cleared by OMITTING the key, the `elevatorPitch` convention.
+   *
+   * ⚠️ NOT IN THE FIRESTORE UPDATE ALLOWLIST YET, so an EDIT carrying it is silently denied until
+   * the rules line lands (drafted in reports/manuscripts-v12/REPORT.md — Nick's deploy). A CREATE
+   * carrying it is accepted, because `isValidManuscript` has no trailing hasOnly. The same window
+   * `elevatorPitch` lived through, recorded at the field as that one was.
+   */
+  setting?: string;
+  /**
+   * The series this book belongs to, if any — same conventions and the same rules window as
+   * `setting` above.
+   */
+  series?: string;
+  /**
    * The pitch shelf's two stored pieces, beside the `logline` above. Derived helpers live in
    * src/lib/manuscriptPitch.ts; the shelf's fourth card (Synopsis) stores NOTHING here — it surfaces
    * a `ManuscriptVersion` with `componentType: SYNOPSIS`, which is that prose's single home.

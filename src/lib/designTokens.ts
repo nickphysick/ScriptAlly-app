@@ -200,3 +200,12 @@ export const onbFaint = "#a5988e";
 export const onbMuted = "#6f635b";
 /** Heading ink for the body — plain ink, never burgundy. */
 export const onbHeadingInk = "#241711";
+
+/**
+ * The OBJECT COLOURS (Manuscripts v12, D12) — one hue per KIND of thing, never per state:
+ * rust for the manuscript, its versions and comps; ochre for letters, synopses, other materials
+ * and packages. The CSS declarations live at `:root` in index.css as `--o-ms` / `--o-pkg`; these
+ * are the documented JS mirrors, and manuscriptSummary.test.ts asserts the two files agree.
+ */
+export const oMs = "#8a4a3c";
+export const oPkg = "#9a7233";
