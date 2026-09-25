@@ -2,12 +2,14 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE TOOLBAR — search, three desk popovers, the view switch, and a count line beneath.
+ * THE TOOLBAR — search, two desk popovers, and a count line beneath. (v11 phase 1: the view
+ * switch and the board's Group control are RETIRED — one page, one renderer, and grouping had
+ * nothing left to arrange. The new header-row controls replace this whole component in phase 3.)
  *
  * ⚠️ IT MOUNTS THE QUERY CENTRE'S OWN CONTROLS RATHER THAN A SECOND SET. `ToolbarSearch` and
  * `ToolbarButton` were extracted for exactly this; `F12Popover`'s `mount` chassis is the desk —
  * parchment rim, inset frame, sage band header — with `PRow` for the radio rows and their
- * sub-captions; `QueryViewSwitch` is the switch. This file owns which OPTIONS there are and what
+ * sub-captions. This file owns which OPTIONS there are and what
  * they mean, and nothing about how a popover looks. The version it replaces drew its own popover,
  * its own rows and its own chevron, which is three chances to drift from a page one click away.
  *
@@ -22,34 +24,22 @@
  * kept: an anchored popover is a desktop idiom, and the sheet owns its own dismissal there. The
  * CHILDREN are identical in both — one set of options, two chassis — because a mobile-only copy
  * is how the two come to offer different filters.
- *
- * ⚠️ AND GROUP SAYS WHAT IT DOES. Grouping arranges the BOARD; in Grid and List it would have
- * nothing to arrange, so the control is disabled there and its title says why — a control that
- * silently did nothing would be worse than one that explains itself.
- */
+ * */
 import React from "react";
 import { PageTally } from "../shell/WorkspacePageGrid";
 import { ToolbarButton, ToolbarSearch } from "../shared/ToolbarButton";
-import { QueryViewSwitch } from "../queries/QueryViewSwitch";
 import { F12Popover, PopSection, PRow } from "../shell/F12Shell";
 import { useFixedMenu } from "../forms/useFixedMenu";
-import { AGENT_VIEWS, AgentView } from "./agentViews";
 import { Agent, Query } from "../../types";
 import {
   AgentFilters, FacetKey, SORTS, SortDir, SortKey, emptyFilters, facetOptions, filterCount, sortSpec,
 } from "../../lib/agentFilters";
-import { AgentGroupingKey, GROUPINGS } from "../../lib/agentBoard";
 import { MobileSheet } from "../shell/MobileSheet";
 import { useIsMobile } from "../shell/mobileChrome";
 
 const FILTER_ICON = (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
     <path d="M3 5h18l-7 8v6l-4 2v-8z" />
-  </svg>
-);
-const GROUP_ICON = (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-    <rect x="3" y="4" width="18" height="6" rx="1" /><rect x="3" y="14" width="18" height="6" rx="1" />
   </svg>
 );
 const SORT_ICON = (
@@ -66,7 +56,7 @@ export const FACETS: readonly { key: FacetKey; label: string }[] = [
   { key: "reply", label: "Response time" },
 ];
 
-type Pop = "filter" | "group" | "sort" | null;
+type Pop = "filter" | "sort" | null;
 
 export interface AgentToolbarProps {
   agents: Agent[];
@@ -78,10 +68,6 @@ export interface AgentToolbarProps {
   sort: SortKey;
   sortDir: SortDir;
   onSort: (k: SortKey, d: SortDir) => void;
-  grouping: AgentGroupingKey;
-  onGrouping: (k: AgentGroupingKey) => void;
-  view: AgentView;
-  onView: (v: AgentView) => void;
   /** How many agents survive the current filter, and how many there are. */
   resultCount: number;
   total: number;
@@ -90,7 +76,7 @@ export interface AgentToolbarProps {
 
 export const AgentToolbar: React.FC<AgentToolbarProps> = ({
   agents, queries, search, onSearch, filters, onFilters, sort, sortDir, onSort,
-  grouping, onGrouping, view, onView, resultCount, total, searchRef,
+  resultCount, total, searchRef,
 }) => {
   const [pop, setPop] = React.useState<Pop>(null);
   const panelRef = React.useRef<HTMLElement | null>(null);
@@ -100,15 +86,12 @@ export const AgentToolbar: React.FC<AgentToolbarProps> = ({
      attached to anything. A cast that quiets a signature is the signature telling you the shape
      is wrong. */
   const filterMenu = useFixedMenu<HTMLButtonElement>(pop === "filter", { placement: "auto", align: "auto", menuRef: panelRef });
-  const groupMenu = useFixedMenu<HTMLButtonElement>(pop === "group", { placement: "auto", align: "auto", menuRef: panelRef });
   const sortMenu = useFixedMenu<HTMLButtonElement>(pop === "sort", { placement: "auto", align: "auto", menuRef: panelRef });
-  const menuStyle = pop === "filter" ? filterMenu.menuStyle : pop === "group" ? groupMenu.menuStyle : sortMenu.menuStyle;
+  const menuStyle = pop === "filter" ? filterMenu.menuStyle : sortMenu.menuStyle;
 
   const isMobile = useIsMobile();
   const spec = sortSpec(sort);
   const nFilters = filterCount(filters);
-  /* the board IS grouped; in Grid and List there is nothing to arrange */
-  const groupLive = view === "board";
 
   /**
    * ⚠️ ONE SET OF CHILDREN, TWO CHASSIS. Below md the sheet takes them; above, the desk popover
@@ -153,16 +136,9 @@ export const AgentToolbar: React.FC<AgentToolbarProps> = ({
           open={pop === "filter"} onClick={() => setPop((p) => (p === "filter" ? null : "filter"))}
         />
         <ToolbarButton
-          ref={groupMenu.triggerRef} label="Group" value={GROUPINGS.find((g) => g.key === grouping)?.label}
-          icon={GROUP_ICON} open={pop === "group"} disabled={!groupLive}
-          title={groupLive ? undefined : "Grouping arranges the board — switch to Board to use it"}
-          onClick={() => setPop((p) => (p === "group" ? null : "group"))}
-        />
-        <ToolbarButton
           ref={sortMenu.triggerRef} label="Sort" value={spec.label} icon={SORT_ICON}
           open={pop === "sort"} onClick={() => setPop((p) => (p === "sort" ? null : "sort"))}
         />
-        <QueryViewSwitch view={view} onView={(v) => onView(v as AgentView)} views={AGENT_VIEWS} />
       </div>
 
       <Desk
@@ -195,15 +171,6 @@ export const AgentToolbar: React.FC<AgentToolbarProps> = ({
                 ))}
               </div>
             </PopSection>
-          ))}
-      </Desk>
-
-      <Desk kind="group" title="Group the board" width={326}>
-          {GROUPINGS.map((g) => (
-            <PRow
-              key={g.key} kind="rad" on={grouping === g.key} label={g.label} sub={g.sub}
-              onClick={() => { onGrouping(g.key); setPop(null); }}
-            />
           ))}
       </Desk>
 

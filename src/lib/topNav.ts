@@ -78,7 +78,7 @@ export const NAV_MENUS: NavMenu[] = [
       {
         cap: "Yours",
         items: [
-          { label: "Agent list", blurb: "Everyone you're querying or watching", run: { kind: "path", path: "/agents" } },
+          { label: "Contact list", blurb: "Everyone you're querying or watching", run: { kind: "path", path: "/agents" } },
           { label: "Add an agent", blurb: "Create a new agent record", run: { kind: "capture", capture: "agent" } },
         ],
       },

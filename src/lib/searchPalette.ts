@@ -122,7 +122,7 @@ export const PALETTE_PAGES: PaletteItem[] = [
     run: { kind: "path", path: r.path },
   })),
   { id: "page:packages", group: "Pages", kind: "page", title: "Packages", subtitle: "Submission package workshop", run: { kind: "path", path: "/manuscripts/packages" } },
-  { id: "page:agents", group: "Pages", kind: "page", title: "Agent list", subtitle: "Everyone you are querying", run: { kind: "path", path: "/agents" } },
+  { id: "page:agents", group: "Pages", kind: "page", title: "Contact list", subtitle: "Everyone you are querying", run: { kind: "path", path: "/agents" } },
   { id: "page:discover", group: "Pages", kind: "page", title: "Discover", subtitle: "Find new agents", run: { kind: "path", path: "/agents/discover" } },
   { id: "page:manuscripts", group: "Pages", kind: "page", title: "Manuscripts", subtitle: "Your shelf", run: { kind: "path", path: "/manuscripts" } },
   { id: "page:comps", group: "Pages", kind: "page", title: "Comparable titles", subtitle: "Find comps for your book", run: { kind: "path", path: "/manuscripts/comps" } },

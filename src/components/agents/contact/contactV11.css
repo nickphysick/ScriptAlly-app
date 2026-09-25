@@ -1,0 +1,120 @@
+/**
+ * Contact list v11 — the page's own sheet (design authority: design-refs/contact-list-v11.html).
+ *
+ * ⚠️ THE PALETTE IS AT `:root`, NOT ON THE PAGE, because the agent pop-up and the add card portal
+ * to `document.body` — outside any page class, where a page-scoped token resolves to nothing and
+ * the declaration is dropped in silence (the QC expanded card shipped exactly that way once; the
+ * law now lives under Conventions). The band hexes come from the mock and exist nowhere else in
+ * the app: they are the LANDING CARD's standing colours, not the query-state fills.
+ *
+ * ⚠️ TWO FACES ARE READ, ONE IS NAMED. The typewriter face is `var(--sp-type)` — declared once,
+ * shell/primitives.css:114 — and this sheet never spells it. "Source Serif 4" (names and
+ * sentences, per the v11 brief §1.10) has no app-side token, so THIS sheet is its first signed-in
+ * owner: one declaration, here, and marketingTokens.test.ts names this file in its allowed list.
+ */
+:root {
+  /* the three standing bands (mock :145-146) + the chrome the overlays need outside any scope */
+  --clv-band-slate: #5f7b93;
+  --clv-band-rose: #c09495;
+  --clv-band-taupe: #a79f96;
+  --clv-serif: "Source Serif 4", Georgia, serif;
+  --clv-type: var(--sp-type);
+  --clv-ink: #1c130f;
+  --clv-ink-70: rgba(28, 19, 15, 0.7);
+  --clv-ink-45: rgba(28, 19, 15, 0.45);
+  --clv-hair: rgba(28, 19, 15, 0.11);
+  --clv-parchment: #fdf9f5;
+  --clv-p2: #f7f3ee;
+  --clv-p3: #f3eee7;
+  --clv-btn: var(--sp-anthracite, #2a3a52);
+  --clv-frame: #7c3a2a;
+  --clv-rust: #8a4a3c;
+  --clv-wash: #f8ebe3;
+  --clv-tray: #e9c9b8;
+  --clv-sage: #e0e5dd;
+  --clv-soft: 0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 24px -18px rgba(28, 19, 15, 0.22);
+  /* what the rows sit on — the sticky band's page-coloured shadow must match it exactly */
+  --clv-ground: var(--ws-window, #f7f2e9);
+}
+
+/* ── the page frame: the QC's own group discipline (qc-wpg--v11 is the precedent) ───────────── */
+.agl-wpg {
+  --wpg-gutter: 22px;
+  --wpg-measure: 1480px;
+}
+
+/* the centred group: page column + the housekeeping rail. `align-items: start` keeps the rail's
+   ITEM at its own height while its grid AREA spans the row — which is what gives `sticky` its
+   travel (the packages builder's collapsed-track trap, avoided by construction). */
+.clv-group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 28px;
+  align-items: start;
+}
+/* the page column is a size container so the narrow rows and the stacked hero read THEIR column,
+   not the viewport (the rail is what narrows it) */
+.clv-main {
+  min-width: 0;
+  container-type: inline-size;
+  container-name: col;
+}
+
+/* ── the rail: sticky beside the content, never fixed to the window ─────────────────────────── */
+.clv-rail {
+  position: sticky;
+  top: 16px;
+  min-width: 0;
+  /* the JS writes the real height from the rail's own measured top (lib/contactList.railHeight);
+     the cap here is the same 860 so a frame before the first measurement cannot overshoot */
+  max-height: 860px;
+}
+.clv-hkrail {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 18px 40px -22px rgba(28, 19, 15, 0.28);
+  overflow: hidden;
+}
+
+/* the tray head: the Birds-eye rail head's construction, measured off the mock (324×122 inset 8;
+   title at 19,32; the peek art at 236,61, width 102, BEHIND the text and clipped by the tray) */
+.clv-tray {
+  position: relative;
+  flex: none;
+  height: 122px;
+  margin: 8px 8px 0;
+  border-radius: 14px;
+  background: var(--clv-tray);
+  overflow: hidden;
+}
+.clv-tray-t {
+  position: absolute;
+  left: 19px;
+  top: 32px;
+  z-index: 2;
+  margin: 0;
+  font-family: var(--clv-type);
+  font-weight: 400;
+  font-size: 30px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: var(--clv-ink);
+}
+.clv-peek {
+  position: absolute;
+  left: 236px;
+  top: 61px;
+  width: 102px;
+  height: auto;
+  z-index: 0;
+}
+/* the rail's scrolling body (empty until the Housekeeping phase fills it) */
+.clv-railbody {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-bottom: 12px;
+}

@@ -49,7 +49,7 @@ describe("RAIL_GROUPS — the grouped index shape", () => {
     expect(RAIL_GROUPS.map((g) => g.items.map((i) => i.label))).toEqual([
       ["Dashboard"],
       ["Queries Hub", "To-do"],
-      ["Agent list", "Discover new agents"], // renamed: "Agents database" → "Contact List" → "Agent list"
+      ["Contact list", "Discover new agents"], // renamed: "Agents database" → "Contact List" → "Agent list" → "Contact list" (v11, 25 Sep: the crumb and the sidebar read one table, and the v11 brief names the page Contact list)
       ["Your manuscripts", "Comparable titles", "Submission packages"],
     ]);
   });

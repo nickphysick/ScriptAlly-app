@@ -66,28 +66,23 @@ describe("agent list · the five stacked bands are gone", () => {
  * result rather than gating an Apply; the panel's flip is decided by measurement in a shared
  * place; and Escape dismisses without reaching the page.
  */
-describe("the three controls are the Query Centre's, mounted", () => {
-  it("mount the shared button, search and switch — not a second set", () => {
+/* ⚠️ THE VIEW SWITCH AND THE BOARD'S GROUP CONTROL ARE RETIRED (v11 phase 1) — one page, one
+   renderer, and grouping had nothing left to arrange once the board went. The cases that pinned
+   `<QueryViewSwitch`, the GROUPINGS value and `groupLive` asserted subjects that are deleted;
+   what survives below is the interim toolbar's own truth, until P3 replaces this component. */
+describe("the interim controls are the Query Centre's, mounted", () => {
+  it("mount the shared button and search — and the switch is GONE, not hidden", () => {
     expect(bar).toContain('from "../shared/ToolbarButton"');
     expect(bar).toContain("<ToolbarSearch");
-    expect(bar).toContain("<QueryViewSwitch");
+    expect(stripComments(bar), "the view switch came back").not.toContain("QueryViewSwitch");
+    expect(stripComments(bar), "the board's Group control came back").not.toContain("GROUPINGS");
     expect(stripComments(bar), "a private control chip came back beside the shared one").not.toContain("agl-ctl");
   });
 
   /* a control holding ONE value states it; Filter holds many, so it counts and the tags spell them out */
-  it("Group and Sort state their value; Filter carries a count", () => {
-    expect(bar).toContain("value={GROUPINGS.find((g) => g.key === grouping)?.label}");
+  it("Sort states its value; Filter carries a count", () => {
     expect(bar).toContain("value={spec.label}");
     expect(bar).toContain("count={nFilters}");
-  });
-
-  /* ⚠️ GROUP SAYS WHAT IT DOES. Grouping arranges the BOARD; in Grid and List it would have
-     nothing to arrange, and a control that silently did nothing would be worse than one that
-     explains itself. */
-  it("Group stands down outside the board, and says why", () => {
-    expect(bar).toContain("const groupLive = view === \"board\";");
-    expect(bar).toContain("disabled={!groupLive}");
-    expect(bar).toMatch(/title=\{groupLive \? undefined : "Grouping arranges the board/);
   });
 });
 
@@ -140,7 +135,8 @@ describe("the desk popovers", () => {
        "align", which matches the perfectly correct line that opens each control's own hook. It
        flagged this file's own `pop === "sort", { … align: "auto" }` on its first run. */
     const aligns = [...bar.matchAll(/align:\s*"(\w+)"/g)].map((m) => m[1]);
-    expect(aligns.length, "no control asks for an alignment at all").toBe(3);
+    /* two hooks since v11 phase 1 — Filter and Sort; Group retired with the board */
+    expect(aligns.length, "no control asks for an alignment at all").toBe(2);
     expect(new Set(aligns), "a control was pinned to a side instead of measuring").toEqual(new Set(["auto"]));
   });
 

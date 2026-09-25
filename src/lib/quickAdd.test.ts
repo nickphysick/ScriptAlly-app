@@ -82,7 +82,8 @@ describe("the submissions-page normaliser is a scheme allowlist", () => {
   /* ⚠️ NO RENDER SITE MAY BUILD ITS OWN HREF. Three of them did it with an inline regex, and three
      copies of a security test is two chances to fix only some of them. */
   it("every surface that renders the address goes through one function", () => {
-    for (const rel of ["../components/agents/AgentListView.tsx", "../components/agents/ContactPeek.tsx", "../components/agents/AgentCard.tsx"]) {
+    /* v11 phase 1: AgentListView retired with the view switch — the two surviving renderers. */
+    for (const rel of ["../components/agents/ContactPeek.tsx", "../components/agents/AgentCard.tsx"]) {
       const src = readFileSync(new URL(rel, import.meta.url), "utf8");
       expect(src, rel + " builds its own href instead of calling hrefFor").not.toMatch(/https:\/\/\$\{/);
       expect(src, rel + " does not use the shared href builder").toMatch(/hrefFor|isLiveHref/);

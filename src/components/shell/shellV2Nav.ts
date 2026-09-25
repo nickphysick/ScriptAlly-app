@@ -8,7 +8,7 @@
  *
  * The accordion's grammar: DASHBOARD IS A FLAT LINK (no children); FOUR collapsible sections —
  * Querying (Queries Hub · Packages), To-do (To-do list · Today · Calendar · Noteboard), Agents
- * (Agent list · Discover), Shelf (Manuscripts · Comparable titles). One section open at a time,
+ * (Contact list · Discover), Shelf (Manuscripts · Comparable titles). One section open at a time,
  * following the route. Import is OFF the nav (baked) — it keeps a breadcrumb entry via
  * CRUMB_EXTRAS and stays reachable from the Queries empty state. Paths are matched EXACTLY
  * (query strings are pathname-invisible).
@@ -69,7 +69,7 @@ export const SHELL_SECTIONS: ShellV2Section[] = [
     key: "agents",
     label: "Agents",
     pages: [
-      { key: "agents-list", label: "Agent list", path: "/agents" },
+      { key: "agents-list", label: "Contact list", path: "/agents" },
       { key: "agents-discover", label: "Discover", path: "/agents/discover" },
     ],
   },

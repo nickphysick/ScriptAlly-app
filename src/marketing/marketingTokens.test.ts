@@ -1158,8 +1158,15 @@ describe("the feature rows set their own type, and nothing else uses its familie
        It declares the face rather than reading `--os-type` because it PORTALS to `document.body`,
        outside `.os-root`, where that token resolves to nothing; the fallback is the whole value
        there. A sixth file naming the face is still a decision this fails on. */
+    /* ⚠️ A SIXTH (Contact list v11, 25 Sep), AND IT IS THE FIRST SIGNED-IN OWNER OF THE SERIF.
+       The v11 brief (§1.10) sets the Contact list's names and sentences in Source Serif 4 — the
+       face the public pages already load app-wide — and no app-side token carries it (`--font-serif`
+       is Playfair). One declaration, `--clv-serif` at `:root`, because the agent pop-up and the add
+       card portal to `document.body`; the typewriter face there is READ (`var(--sp-type)`), never
+       named. A seventh file naming either face is still a decision this fails on. */
     expect(elsewhere.map((f) => f.slice(src.length + 1).replace(/\\/g, "/")).sort())
       .toEqual([
+        "components/agents/contact/contactV11.css",
         "components/dashboard/oneScreen.css",
         "components/dashboard/queryCard.css",
         "components/shell/primitives.css",

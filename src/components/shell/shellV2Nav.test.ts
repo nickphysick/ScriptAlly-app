@@ -47,7 +47,7 @@ describe("shellV2Nav — the accordion model", () => {
 
   it("Agents = Agent list + Discover; Shelf = Manuscripts + Comparable titles (Import is OFF the nav — baked)", () => {
     const agents = SHELL_SECTIONS.find((s) => s.key === "agents")!;
-    expect(agents.pages.map((p) => p.label)).toEqual(["Agent list", "Discover"]);
+    expect(agents.pages.map((p) => p.label)).toEqual(["Contact list", "Discover"]);
     const shelf = SHELL_SECTIONS.find((s) => s.key === "shelf")!;
     expect(shelf.pages.map((p) => p.path)).toEqual(["/manuscripts", "/manuscripts/comps"]);
     expect(shelf.pages.some((p) => p.path === "/import")).toBe(false);
@@ -90,7 +90,7 @@ describe("shellV2Nav — path matching", () => {
   it("builds the crumb — Section / Page; the flat Dashboard is its own name; off-nav routes keep crumbs", () => {
     expect(shellCrumbForPath("/todo")).toEqual({ section: "Tasks", page: "To-do list" });
     expect(shellCrumbForPath("/todo/noteboard")).toEqual({ section: "Tasks", page: "Noteboard" });
-    expect(shellCrumbForPath("/agents")).toEqual({ section: "Agents", page: "Agent list" });
+    expect(shellCrumbForPath("/agents")).toEqual({ section: "Agents", page: "Contact list" });
     expect(shellCrumbForPath("/dashboard")).toEqual({ section: "Dashboard", page: "Dashboard" });
     expect(shellCrumbForPath("/import")).toEqual({ section: "Shelf", page: "Import" });
     /* the re-homed focus family (fixes P5): Setup crumbs, no accordion entries
