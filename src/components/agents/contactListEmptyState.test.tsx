@@ -144,10 +144,11 @@ describe("the page mounts each state", () => {
       expect(html, `${control} rendered against an empty list`).not.toContain(control);
     }
     expect(html, "the toolbar rendered against an empty list").not.toContain("agl-toolbar");
-    /* ⚠️ AND THE MASTHEAD'S PRIMARY IS PRESENT, which is the other half of the same fact: the page
-       still offers the one thing a blank account can do. Asserted here so the proxy cannot come
-       back as "no `Add new agent` anywhere". */
-    expect(html, "the blank account lost the one action it can take").toContain("Add new agent");
+    /* ⚠️ AND THE ADD ACTION IS PRESENT, which is the other half of the same fact: the page still
+       offers the one thing a blank account can do. RETARGETED (v11 P2): the masthead and its
+       "Add new agent" primary left with the opt-out — the hero renders only over a LIST — so on
+       a blank account the empty state's OWN hero button is that action, under its own words. */
+    expect(html, "the blank account lost the one action it can take").toContain("Add your first agent");
   });
 
   it("renders NEITHER the empty state nor the toolbar while the collections settle", () => {

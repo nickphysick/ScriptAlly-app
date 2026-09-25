@@ -1057,7 +1057,6 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        identical" report all over again. Ten routes, eight call sites — the Tasks family is three
        pages through one layout. */
     const CONVERTED = [
-      ["Contact list", "../agents/AgentList.tsx"],
       ["Manuscripts", "../AllManuscripts.tsx"],
       ["Discover", "../DiscoverNewAgents.tsx"],
       ["Submission packages", "../SubmissionPackages.tsx"],
@@ -1071,13 +1070,14 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       expect(src, `${page} stopped rendering a masthead`).toContain('variant="workspace"');
     }
 
-    /* ⚠️ THE OPTED-OUT SET IS EXACTLY ONE PAGE: THE QUERY CENTRE (v11, 19 Sep; Nick's decision). It
-       renders the grid and NO masthead — its head is its own, on the page's cream, and with nothing
-       passed the grid draws no chrome and no collapsed bar. It gets an exception row rather than a
-       quiet deletion, per the note below: this fails if the page takes the shared header back, and
-       the list is asserted by LENGTH so a second page cannot join it unannounced. */
-    const OPTED_OUT = [["Query Centre", "../Queries.tsx"]] as const;
-    expect(OPTED_OUT.length, "a page joined the opted-out set — that is a decision, not a diff").toBe(1);
+    /* ⚠️ THE OPTED-OUT SET IS EXACTLY TWO PAGES (each one a decision, announced here). The Query
+       Centre (v11, 19 Sep; Nick) renders the grid and NO masthead — its head is its own. The
+       CONTACT LIST joined on 25 Sep (Contact list v11, ruling in the go-ahead): its head is the
+       hero — title, facts sentence, count cards and the live add card over the Archivist's art —
+       and the grid draws no chrome slab and no collapsed bar. The list is asserted by LENGTH so a
+       third page cannot join it unannounced. */
+    const OPTED_OUT = [["Query Centre", "../Queries.tsx"], ["Contact list", "../agents/AgentList.tsx"]] as const;
+    expect(OPTED_OUT.length, "a page joined the opted-out set — that is a decision, not a diff").toBe(2);
     for (const [page, file] of OPTED_OUT) {
       const src = readFileSync(resolve(__dirname, file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
       expect(src, `${page} no longer renders the grid`).toContain("<WorkspacePageGrid");
@@ -1178,7 +1178,6 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        as tidier and is the house trap: the two tests then fail together for one edit and the
        message names the wrong lock. Each `it` states the anchor it consumes. */
     const PAGES: [string, string][] = [
-      ["Contact list", "../agents/AgentList.tsx"],
       ["Manuscripts", "../AllManuscripts.tsx"],
       ["Comparable titles", "../manuscripts/ComparableTitlesPage.tsx"],
       ["Discover", "../DiscoverNewAgents.tsx"],

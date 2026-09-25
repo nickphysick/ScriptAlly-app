@@ -12,7 +12,6 @@
  * The page owns its own chrome and scroll — it mounts in a bare `fill`+`clip` StagePage.
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { PageHeader } from "../shell/PageHeader";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../lib/db";
 import { AgentCard } from "./AgentCard";
@@ -63,20 +62,21 @@ import { AgentDrawer } from "./AgentDrawer";
 import { RotateCcw } from "lucide-react";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { ContactRail } from "./contact/ContactRail";
+import { ContactHero, CountCards } from "./contact/ContactHero";
+import {
+  ContactCardKey, contactCensus, heroFacts, matchesCards,
+} from "../../lib/contactList";
+import { resolveScopedManuscript } from "../../lib/shellSidebar";
+import { buildQcRows } from "../../lib/qcSummary";
 import "./contact/contactV11.css";
 import { RAIL_GROUPS } from "../shell/railNav";
 import { countryName } from "../../lib/territory";
 import { matchGenre } from "../../lib/genreMatch";
-import { activeTile, agentTiles, scopedManuscript } from "../../lib/agentTiles";
-import { StatTiles } from "../shared/StatTiles";
 import { blankDraft } from "../../lib/agentDraft";
 import { useIsMobile, useMobileChrome } from "../shell/mobileChrome";
 
 /** The shared manuscript-scope key — the same one Packages, Comps and Manuscripts read. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
-/* ⚠️ THE PAGE OWNS ITS OWN MARK. `PageHeader` takes a URL rather than a `MarkName` because these
-   are painted illustrations at 100px, not the registry's 20px monoline glyphs — see the prop. */
-import rolodexIcon from "../../assets/shell/agents-on-file-icon.png";
 import "./agentList.css";
 
 /**
@@ -100,20 +100,38 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const { agents, queries, manuscripts, activities, updateAgent, addAgent, currentUser, collectionsReady } =
     useScriptAllyDb();
 
-  /* ⚠️ THE GENRE TINT'S SUBJECT — the manuscript in scope, read through the SHARED key the rest
-     of the app scopes by, never a second notion of "current". Falls back to the only manuscript
-     when there is one, and to null when there is nothing to compare against; null means no claim
-     and every chip renders plain. */
+  /* ⚠️ THE MANUSCRIPT IS THE SWITCHER'S OWN (v11 §10) — the SAME resolver the shell's chip
+     reads (`resolveScopedManuscript`: the stored id, else the most recently created), through
+     the SAME storage key. The page's earlier only-one fallback returned null beside a switcher
+     visibly showing a book — two notions of "current" three inches apart, caught on the P2
+     screenshot when the facts sentence dropped its clause. */
   const scoped = useMemo(() => {
     let id: string | null = null;
     try { id = window.localStorage.getItem(ACTIVE_MS_KEY); } catch { id = null; }
-    return scopedManuscript(manuscripts, id);
+    return resolveScopedManuscript(manuscripts, id);
   }, [manuscripts]);
-  /* ⚠️ ONE READING OF THE SCOPE, TWO CONSUMERS. The chips tint through `matchGenre` and the tile
-     counts through the same value, so a tile can never count an agent whose chip is not tinted. */
+  /* ⚠️ ONE READING OF THE SCOPE, TWO CONSUMERS. The chips tint through `matchGenre` and the
+     count cards through the same value, so a card can never count an agent whose chip is not
+     tinted. */
   const tintGenre = useMemo(() => matchGenre(scoped?.genre), [scoped]);
-  /* ⚠️ TOTALS, NEVER THE FILTERED VIEW — over `agents`, not `visible`. */
-  const tiles = useMemo(() => agentTiles(agents, queries, scoped), [agents, queries, scoped]);
+
+  /* ⚠️ THE QUERY CENTRE'S OWN ROWS — one derivation for courts, expected dates and past-the-date,
+     so this page and the QC cannot disagree (v11 §10). The clock freezes per data change. */
+  const qcRows = useMemo(() => buildQcRows(queries, agents, activities, Date.now()), [queries, agents, activities]);
+  /* ⚠️ TOTALS, NEVER THE FILTERED VIEW — over `agents`, not `visible` (the house tile law). */
+  const census = useMemo(() => contactCensus(agents, qcRows, scoped?.id ?? null), [agents, qcRows, scoped]);
+  const facts = useMemo(() => heroFacts(agents, census.standing, scoped), [agents, census, scoped]);
+  /* the count cards are a multi-select OR (v11 §3.3); the floating bar spells them out in P3 */
+  const [cardSel, setCardSel] = useState<ReadonlySet<ContactCardKey>>(new Set());
+  const toggleCard = useCallback((k: ContactCardKey) => {
+    setCardSel((prev) => {
+      const next = new Set(prev);
+      if (next.has(k)) next.delete(k); else next.add(k);
+      return next;
+    });
+  }, []);
+  /* the hero publishes its stacked flag — below 760 the count cards leave it for the list's top */
+  const [heroStacked, setHeroStacked] = useState(false);
 
   const [filters, setFilters] = useState<AgentFilters>(emptyFilters);
   const [search, setSearch] = useState(searchQuery?.trim() || "");
@@ -243,11 +261,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    */
   const visible = useMemo(
     () => sortAgents(
-      agents.filter((a) => matchesFilters(a, queries, filters) && matchesAgentSearch(a, search)),
+      agents.filter((a) =>
+        matchesFilters(a, queries, filters)
+        && matchesAgentSearch(a, search)
+        && matchesCards(cardSel, census.standing.get(a.id) ?? { kind: "none" })),
       sort,
       sortDir,
     ),
-    [agents, queries, filters, search, sort, sortDir],
+    [agents, queries, filters, search, sort, sortDir, cardSel, census],
   );
   // The unsaved new agent always rides at the front of the grid, immune to filter and sort.
   const shown = useMemo(() => (newAgent ? [newAgent, ...visible] : visible), [newAgent, visible]);
@@ -928,45 +949,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
        <WorkspacePageGrid
          className="agl-wpg"
          scrollLabel="Contact list"
-         masthead={
-           <PageHeader
-            variant="workspace"
-            mark="contacts"
-            icon={rolodexIcon}
-            title="Contact list"
-            description="Everyone you're querying, watching, or saving for later."
-            /* ⚠️ MOVED FROM THE TOOLBAR, NOT COPIED INTO THE HEADER. `AgentToolbar`'s `agl-tbadd`
-               is deleted in the same commit and its `onAddAgent` prop with it, so the two cannot
-               coexist — which is the difference between a rehome and a duplicate. */
-            primary={{ label: "Add new agent", onClick: onAddAgent }}
-            /* ⚠️ NO ACTIONS — `Add new agent` moved to the control row below (in-flow masthead,
-               step 1), which is the row that stays on screen once the masthead has scrolled away.
-               `PageHeader` throws in development if a masthead is handed one. */
-           />
-         }
-         /* ⚠️ NO TOOLBAR ON A BLANK ACCOUNT, AND NONE WHILE THE COLLECTIONS SETTLE. Not one of the
-             six controls does anything against nothing on file — a count that reads `0 of 0`, a
-             search over an empty set, three narrowing controls with nothing to narrow — and the
-             seventh, `Add new agent`, is the empty state's own hero button. `toolbar` is optional
-             on the grid, so this is an absent row rather than an empty one: the grid's rows 1 and
-             3 close up and nothing is left holding space. It returns the moment an agent exists.
-             ⚠️ SUPPRESSED WHILE SETTLING TOO, so the toolbar and the cards arrive on the same
-             frame rather than the row appearing first and the list dropping in under it. */
-         toolbar={pageState === "list" ? (
-          <AgentToolbar
-            agents={agents}
-            queries={queries}
-            search={search}
-            onSearch={setSearch}
-            filters={filters}
-            onFilters={setFilters}
-            sort={sort}
-            sortDir={sortDir}
-            onSort={(k, d) => { setSort(k); setSortDir(d); }}
-            resultCount={visible.length}
-            total={agents.length}
-          />
-         ) : undefined}
+         /* ⚠️ THE PAGE OPTED OUT OF THE SHARED MASTHEAD (v11 §3; joins the Query Centre in the
+            OPTED_OUT register). The hero below is the page's own head — title, facts sentence,
+            count cards and the live add card over the Archivist — and the grid draws no chrome
+            slab and no collapsed bar when the masthead is null. */
+         masthead={null}
+         /* ⚠️ NO `toolbar` SLOT ON AN OPTED-OUT PAGE. The grid's toolband is `position: sticky;
+             top: var(--bar-h)` — written for pages whose masthead scrolls ahead of it. With the
+             masthead null the band is the scroller's FIRST child, and sticky does not idle there,
+             it CLAMPS (the house law): measured, the band rendered 44px below its flow slot and
+             overlaid the hero's title at 1280. The interim controls render IN FLOW below the
+             hero instead — which is also where the v11 header row lands in P3. */
        >
         <div className="agl-inner">
         {/* ⚠️ THE CENTRED GROUP (v11 §2): page column + the Housekeeping rail, the Query Centre's
@@ -1000,21 +993,41 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
 
         {/* Applied filters live OUTSIDE the popover — closing it must never hide what is
             filtering the list. Each tag removes its own value; "Clear all" empties the set. */}
-        {/* ⚠️ THE TILES ARE THE QUERY CENTRE'S OWN ROW (`StatTiles`), and each one is a filter the
-            popover can already express — a shortcut, never a second filtering mechanism, which is
-            what keeps the row and the applied tags from disagreeing about what is on screen. The
-            lit tile is DERIVED by comparing the sets rather than remembered from a click, so it
-            cannot stay lit while the reader edits the filter underneath it. */}
+        {/* ⚠️ THE HERO IS THE PAGE'S HEAD (v11 §3) — and it renders only over a LIST: the blank
+            account's pitch is its own page, and a hero stating figures about nothing would be
+            the empty-desk fault. The count cards ride inside it side-by-side and move to a row
+            of three above the list when the hero stacks (§3.2). */}
         {pageState === "list" && (
-          <StatTiles
-            tiles={tiles}
-            selected={activeTile(tiles, filters)}
-            onPick={(key) => {
-              const t = tiles.find((x) => x.key === key);
-              if (t) setFilters(t.filters);
-            }}
-            label="Contact list totals"
-            columns={tiles.length}
+          <ContactHero
+            facts={facts}
+            cards={census.cards}
+            cardSel={cardSel}
+            onToggleCard={toggleCard}
+            addOpen={!!newAgent}
+            onAdd={onAddAgent}
+            onPasteAdd={onAddAgent}
+            onStacked={setHeroStacked}
+            stacked={heroStacked}
+          />
+        )}
+        {pageState === "list" && heroStacked && (
+          <CountCards cards={census.cards} sel={cardSel} onToggle={toggleCard} row />
+        )}
+        {/* the interim controls, IN FLOW under the hero (see the grid note above) — P3's header
+            row replaces this component wholesale */}
+        {pageState === "list" && (
+          <AgentToolbar
+            agents={agents}
+            queries={queries}
+            search={search}
+            onSearch={setSearch}
+            filters={filters}
+            onFilters={setFilters}
+            sort={sort}
+            sortDir={sortDir}
+            onSort={(k, d) => { setSort(k); setSortDir(d); }}
+            resultCount={visible.length}
+            total={agents.length}
           />
         )}
         <AgentAppliedTags tags={tags} onClear={() => setFilters(emptyFilters())} />

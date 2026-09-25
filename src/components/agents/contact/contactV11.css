@@ -51,6 +51,12 @@
   grid-template-columns: minmax(0, 1fr) 340px;
   gap: 28px;
   align-items: start;
+  /* ⚠️ 16px of the page's own air, and it is the RAIL'S CLAMP LINE on purpose. With no toolband
+     row the group is the scroller's first child, and the rail's `sticky; top: 16` does not idle
+     at rest — it clamps 16px below its flow slot (the house law, measured here the day the band
+     went). Padding the group by the same 16 puts the content top ON the clamp line: the rail
+     rests level with the column and the clamp has nothing to move. */
+  padding-top: 16px;
 }
 /* the page column is a size container so the narrow rows and the stacked hero read THEIR column,
    not the viewport (the rail is what narrows it) */
@@ -117,4 +123,306 @@
   min-height: 0;
   overflow: auto;
   padding-bottom: 12px;
+}
+
+/* ══ phase 2 — the hero: text · the live card over the art · the count cards ═══════════════ */
+
+/* the hero is its own size container so the title's cqw clamp reads the HERO's width (the rail
+   is what narrows the column, and a viewport unit would never see it) */
+.clv-hero {
+  position: relative;
+  container-type: inline-size;
+  container-name: hero;
+  margin: 0 0 24px;
+  /* the JS writes --clv-hh from heroLayout; the fallback is only the first unmeasured frame */
+  height: var(--clv-hh, 380px);
+}
+.clv-htx {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  width: var(--clv-tw, 273px);
+}
+.clv-hero-t {
+  margin: 0;
+  font-family: var(--clv-type);
+  font-weight: 400;
+  font-size: clamp(38px, 5.1cqw, 50px);
+  line-height: 1.02;
+  white-space: nowrap;
+  color: var(--clv-ink);
+}
+.clv-facts {
+  margin: 12px 0 0;
+  font-family: var(--clv-serif);
+  font-size: clamp(14.5px, 1.95cqw, 16.5px);
+  line-height: 1.5;
+  color: var(--clv-ink-70);
+}
+.clv-facts i {
+  font-family: var(--clv-type);
+  font-style: normal;
+  font-size: 0.94em;
+  color: var(--clv-ink);
+}
+.clv-facts b { font-weight: 600; color: var(--clv-ink); }
+
+/* stacked (hero W < 760): the title and the sentence share one line; the tiles leave the hero */
+.clv-hero--stack .clv-htx {
+  top: 0;
+  transform: none;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 22px;
+}
+.clv-hero--stack .clv-hero-t { flex: none; }
+.clv-hero--stack .clv-facts { margin: 0 0 3px; flex: 1; min-width: 0; font-size: 14.5px; }
+
+/* the art — placed from its VISIBLE edge by the JS, never by the image box */
+.clv-hart {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  height: auto;
+  left: var(--clv-il, 0px);
+  top: var(--clv-it, 0px);
+  width: var(--clv-iw, 454px);
+}
+
+/* ── the count cards (v11 §3.3) — 54px compacts with a coloured tab ── */
+.clv-tiles {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin: 20px 0 0;
+}
+/* stacked: a row of three at the top of the list area */
+.clv-tiles--row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 22px;
+}
+.clv-kt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 54px;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 22px -16px rgba(28, 19, 15, 0.3);
+  transition: opacity 0.15s;
+  color: var(--clv-ink);
+}
+.clv-kt::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  bottom: 6px;
+  width: 5px;
+  border-radius: 3px;
+  background: var(--tc);
+}
+.clv-kt[data-k="active"] { --tc: #e6c5bd; }
+.clv-kt[data-k="never"] { --tc: #bccbd8; }
+.clv-kt[data-k="closed"] { --tc: #cfcac2; }
+.clv-tiles--any .clv-kt[aria-pressed="false"] { opacity: 0.45; }
+.clv-kt[aria-pressed="true"] {
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 22px -16px rgba(28, 19, 15, 0.3),
+    inset 0 0 0 1.5px var(--clv-ink);
+}
+.clv-kh { display: flex; align-items: center; gap: 12px; padding: 0 14px 0 22px; width: 100%; min-width: 0; }
+.clv-kh b { font-family: var(--clv-serif); font-size: 26px; font-weight: 600; line-height: 1; min-width: 26px; }
+.clv-kh .clv-kn { min-width: 0; }
+.clv-kh span { display: block; font-family: var(--clv-type); font-size: 14.5px; white-space: nowrap; }
+.clv-kh small {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 7.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--clv-ink-45);
+  white-space: nowrap;
+}
+.clv-kh small.clv-pd { color: var(--clv-ink); font-weight: 700; }
+
+/* ── the live Add-new-agent card: the landing card's construction, blank (v11 §3.4) ── */
+.clv-ac {
+  position: relative;
+  background: var(--clv-parchment);
+  padding: 7px;
+  border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.06), 0 22px 40px -22px rgba(28, 19, 15, 0.45);
+}
+.clv-ac > .clv-frame {
+  border: 1px solid var(--clv-frame);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.clv-ac-band {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 10px 0 12px;
+  background: var(--clv-btn);
+  color: #fff;
+}
+.clv-ac-band b { font-family: var(--clv-type); font-weight: 400; font-size: 18px; padding-top: 2px; }
+.clv-ac-band .clv-plus {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+}
+.clv-acb { padding: 14px 16px 4px; flex: 1; }
+.clv-ac .clv-who { display: flex; gap: 12px; align-items: flex-start; }
+.clv-ini {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--clv-btn);
+  color: #f5f1eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  flex: none;
+}
+.clv-ac .clv-ini {
+  width: 40px;
+  height: 40px;
+  margin-top: 2px;
+  background: #fff;
+  color: var(--clv-ink-45);
+  box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.3);
+  font-size: 18px;
+  font-family: var(--clv-serif);
+}
+.clv-ph { display: block; border-bottom: 1px dashed rgba(28, 19, 15, 0.28); color: var(--clv-ink-45); padding-bottom: 3px; }
+.clv-ph--nm { font-family: var(--clv-type); font-size: 19px; width: 180px; }
+.clv-ph--sm {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  width: 140px;
+  margin-top: 9px;
+}
+.clv-ph--w2 { width: 190px; }
+.clv-ac .clv-sec { padding: 11px 0; border-top: 1px solid var(--clv-hair); margin-top: 12px; }
+.clv-ac .clv-sec + .clv-sec { margin-top: 0; }
+.clv-ac h5 {
+  margin: 0 0 8px;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-weight: 400;
+  font-size: 7.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--clv-ink-45);
+}
+.clv-gch { display: flex; flex-wrap: wrap; gap: 5px; }
+.clv-gch .clv-d {
+  display: inline-flex;
+  height: 22px;
+  width: 62px;
+  border: 1px dashed rgba(28, 19, 15, 0.28);
+  border-radius: 5px;
+}
+.clv-rule { height: 8px; border-radius: 4px; background: var(--clv-p3); margin: 0 0 7px; }
+.clv-mch { display: flex; flex-wrap: wrap; gap: 5px; }
+.clv-mch span {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 1px 8px 0;
+  border-radius: 5px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22);
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--clv-ink-45);
+  white-space: nowrap;
+}
+.clv-paste {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 16px 14px;
+  height: 38px;
+  padding: 0 6px 0 12px;
+  border-radius: 10px;
+  background: var(--clv-p2);
+}
+.clv-paste span {
+  font-family: var(--clv-type);
+  font-size: 12px;
+  color: var(--clv-ink-45);
+  flex: 1;
+  min-width: 0;
+  padding-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.clv-paste b {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-weight: 400;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--clv-btn);
+  color: #fff;
+  border-radius: 6px;
+  padding: 5px 8px 4px;
+}
+
+/* the hero's mount of the card: one BUTTON, placed and scaled by the JS, rotated −3° */
+.clv-heroc {
+  position: absolute;
+  z-index: 2;
+  width: 300px;
+  left: var(--clv-cl, 300px);
+  top: var(--clv-ct, 14px);
+  transform: rotate(-3deg) scale(var(--clv-cc, 0.8));
+  transform-origin: 0 0;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  background: transparent;
+  display: block;
+  transition: box-shadow 0.2s, translate 0.2s;
+}
+.clv-heroc:hover .clv-ac { box-shadow: 0 1px 2px rgba(28, 19, 15, 0.06), 0 28px 44px -20px rgba(28, 19, 15, 0.5); }
+/* while the add card is open the hero card answers: slate band + a 2px slate ring */
+.clv-heroc[data-open="true"] .clv-ac-band { background: var(--clv-band-slate); }
+.clv-heroc[data-open="true"] .clv-ac {
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.06), 0 22px 40px -22px rgba(28, 19, 15, 0.45),
+    0 0 0 2px var(--clv-band-slate);
+}
+@media (prefers-reduced-motion: reduce) {
+  .clv-heroc { transition: none; }
 }

@@ -31,10 +31,10 @@
  * Special Elite title and two action pills, a shape no other page has, so holding it to the shared
  * rule would enforce the remains of a treatment this page no longer uses.
  */
-export const OPTED_OUT: readonly string[] = ["Query Centre"];
+export const OPTED_OUT: readonly string[] = ["Query Centre", "Contact list"];
 
 /** Routes of the opted-out pages, for suites whose census is keyed by route rather than by name. */
-export const OPTED_OUT_ROUTES: readonly string[] = ["/queries"];
+export const OPTED_OUT_ROUTES: readonly string[] = ["/queries", "/agents"];
 
 export const isOptedOut = (nameOrRoute: string): boolean =>
   OPTED_OUT.includes(nameOrRoute) || OPTED_OUT_ROUTES.includes(nameOrRoute);
