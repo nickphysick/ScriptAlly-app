@@ -133,10 +133,15 @@ describe("one ground, one window", () => {
      panel's right edge was the last thing still claiming otherwise, drawing an edge where there is
      no edge. It is deleted, so what this now asserts is the whole of the rule: same token, sidebar
      paints nothing, and NOTHING divides them. The white content window does the separating. */
-  it("⚠️ ONE GROUND — same token, the sidebar paints nothing, and no rule divides them", () => {
+  /* ⚠️ RETARGETED FOR APP SHELL v3 (26 Sep, decisions D1/D2). The sidebar is no longer
+     transparent on one shared ground: it is Stone, one shade DEEPER than the page, and the one
+     hairline (`--shell-rule`) runs down its right edge as an INSET shadow — the only divide. What
+     survives from the old claim is its second half: nothing else divides them (no ::after, no
+     border). The rendered claim is tests/e2e/shellV3.measure.ts L1 + L2. */
+  it("⚠️ THE TONE STEP — the sidebar paints Stone, and one inset hairline is the only divide", () => {
     expect(rule(".ws-app")).toContain("background: var(--ws-ground)");
-    expect(rule(".ws-main")).toContain("background: var(--ws-ground)");
-    expect(rule(".ws-panel")).toContain("background: transparent");
+    expect(rule(".ws-panel")).toContain("background: var(--shell-side)");
+    expect(rule(".ws-panel")).toContain("box-shadow: inset -1px 0 0 var(--shell-rule)");
     expect(cssRules).not.toContain(".ws-panel::after");
     /* ⚠️ `[1-9]`, NOT A NEGATIVE LOOKAHEAD. The first draft was `/border-right:\s*(?!0)/`, and
        `\s*` backtracks to ZERO characters — so the lookahead ran against the space rather than the
@@ -178,19 +183,22 @@ describe("one ground, one window", () => {
  * back towards its old "narrowest that fits", should fail here and read why.
  */
 describe("the sidebar's type scale, and the width that moved with it", () => {
+  /* app shell v3 (26 Sep) retargets four rows of this table to the ref's `.side`: section labels
+     9 → 8.5px, plan line 12 → 11.5px, wordmark 21 → 20px (beside a 30px mark), nav icons 17 → 16px.
+     Nav items, manuscript title/sub-line, user name and the upgrade control keep their sizes. */
   it("every size in the pack's table", () => {
     expect(rule(".ws-ni")).toContain("font-size: 14.5px");        // nav items
-    expect(rule(".ws-glabel")).toContain("font-size: 9px");       // section labels
+    expect(rule(".ws-glabel")).toContain("font-size: 8.5px");     // section labels
     expect(rule(".ws-mst")).toContain("font-size: 14px");         // manuscript title
     expect(rule(".ws-msg")).toContain("font-size: 11.5px");       // manuscript sub-line
     expect(rule(".ws-n")).toContain("font-size: 14px");           // user name
-    expect(rule(".ws-pl")).toContain("font-size: 12px");          // plan line
+    expect(rule(".ws-pl")).toContain("font-size: 11.5px");        // plan line
     // ⚠️ `.ws-upgrow` since Option D — the pill left the account ROW to become a full-width
     // sibling beneath it, which is what bought the name its width. The SIZE is unchanged at 12px,
     // which is what this table guards; only the selector moved.
     expect(rule(".ws-upgrow")).toContain("font-size: 12px");       // upgrade pill
-    expect(rule(".ws-bwm")).toContain("font-size: 21px");          // the v34 mockup: 21 beside a 40px roundel         // wordmark
-    expect(rule(".ws-ic svg")).toContain("width: 17px");          // nav icons
+    expect(rule(".ws-bwm")).toContain("font-size: 20px");          // wordmark, beside a 30px mark
+    expect(rule(".ws-ic svg")).toContain("width: 16px");          // nav icons
   });
 
   it("the To-do badge steps up with them — in the shared primitive both shells draw", () => {
@@ -205,9 +213,13 @@ describe("the sidebar's type scale, and the width that moved with it", () => {
      reasoning — a width sized for 13.5px rows is not the width for 14.5px — but it is a floor,
      not a lock: this narrowing keeps the type and re-measured the fit instead (index.css records
      the numbers). The type scale above is untouched, which is what this file guards. */
-  it("⚠️ and the panel is 224px — narrowed 15% with the type scale held, fit re-measured", () => {
+  /* ⚠️ RETARGETED AGAIN 224 → 248 (app shell v3, 26 Sep; ruling 5). The sidebar's width is the
+     ref's `--shell-side-w`, and `--shell-panelw` is kept only as an alias of it. The fit is measured
+     on the rendered page (shellV3.measure L8, 1280 no horizontal clip). */
+  it("⚠️ and the panel is 248px (`--shell-side-w`), with the old name an alias of it", () => {
     const idx = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
-    expect(idx).toContain("--shell-panelw: 224px");
+    expect(idx).toContain("--shell-side-w: 248px");
+    expect(idx).toContain("--shell-panelw: var(--shell-side-w)");
   });
 });
 
@@ -384,12 +396,15 @@ describe("the sidebar", () => {
      The foot did not change. `sliceBetween` is used rather than two `indexOf`s so a future move of
      that component fails by NAMING the missing anchor instead of silently widening the slice to
      the rest of the file. */
+  /* ⚠️ RETARGETED (app shell v3, 26 Sep): the hairline is the user row's OWN `border-top` now (the
+     ref's `.me`), so the separate `.ws-pdiv` element is retired and asserted gone; the claim — a
+     hairline, then who you are, and nothing to go to — is unchanged. */
   it("⚠️ the foot is the hairline and the user row — no Settings, nothing else to go to", () => {
     const foot = sliceBetween(srcCode, 'className="ws-pfoot"', "<SettingsRail", "the sidebar foot");
-    const div = foot.indexOf('className="ws-pdiv"');
     const user = foot.indexOf('className="ws-uacct"');
-    expect(div).toBeGreaterThan(-1);
-    expect(user).toBeGreaterThan(div);
+    expect(user).toBeGreaterThan(-1);
+    expect(foot).not.toContain('className="ws-pdiv"');
+    expect(rule(".ws-uacct")).toContain("border-top: 1px solid var(--shell-hairline)");
     expect(foot).not.toContain("ws-setrow");
     expect(foot).not.toContain("Settings");
   });
@@ -400,10 +415,15 @@ describe("the sidebar", () => {
   });
 
   /* ⚠️ RETARGETED — the pack's rule 7, and the one most likely to be undone by a future repaint. */
-  it("⚠️ the active nav item is a WHITE tile with ink text — never a burgundy fill", () => {
-    const on = rule(".ws-ni.on, .ws-nav .on");
-    expect(on).toContain("background: #ffffff");
-    expect(on).toContain("color: #241811");
+  /* ⚠️ RETARGETED AGAIN (app shell v3, 26 Sep, D3): the white tile is superseded — active is
+     ANTHRACITE with cream text, read from the shell tokens. The half that stays is the half that
+     mattered: never a burgundy fill. The v2 grouped rule (`.ws-ni.on, .ws-nav .on`) is gone, so the
+     one active rule is `.ws-ni.on`. */
+  it("⚠️ the active nav item is ANTHRACITE with cream text — never a burgundy fill", () => {
+    const on = rule(".ws-ni.on");
+    expect(on).toContain("background: var(--shell-active-bg)");
+    expect(on).toContain("color: var(--shell-active-fg)");
+    expect(cssRules).not.toContain(".ws-nav .on");
     expect(cssRules).not.toMatch(/\.ws-ni\.on[^}]*background:\s*(#7c3a2a|var\(--burgundy)/);
   });
 

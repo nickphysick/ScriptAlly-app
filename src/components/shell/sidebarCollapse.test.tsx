@@ -197,14 +197,21 @@ describe("the properties", () => {
    * margin). If any of those moves, the headroom moved with it and someone must re-measure —
    * which is what the failure message says.
    */
-  it("⚠️ the label budget is unchanged — 9px of headroom, re-measure if any term moves", () => {
+  /* ⚠️ RETARGETED FOR APP SHELL v3 (26 Sep). The budget's terms all moved — width 224 → 248
+     (`--shell-side-w`), panel padding 0/10 → 16/14/12, row padding 0/10 → 6/10, icon 17 → 16, the face
+     Source Sans → Source Serif 4 — so the old 9px figure describes nothing. The RENDERED claim now
+     lives in tests/e2e/shellV3.measure.ts ("L8 geometry · 1280 no horizontal clip"), which reads every
+     label's scrollWidth against its box at 1280 with the web fonts loaded; this pins the arithmetic
+     either side of that measurement, so a term that moves still says "re-measure". */
+  it("⚠️ the label budget's terms are the v3 ones — re-measure (shellV3 L8) if any moves", () => {
     const idx = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
-    expect(idx, "panel width changed → re-measure the longest label").toContain("--shell-panelw: 224px");
+    expect(idx, "panel width changed → re-measure the longest label").toContain("--shell-side-w: 248px");
+    expect(idx, "the old name is an alias of the new width, never a second number").toContain("--shell-panelw: var(--shell-side-w)");
     const pin = cssRules.slice(cssRules.indexOf(".ws-pin {"));
-    expect(pin.slice(0, pin.indexOf("}")), "panel padding is a term in the budget").toContain("padding: 0 10px 10px");
+    expect(pin.slice(0, pin.indexOf("}")), "panel padding is a term in the budget").toContain("padding: 16px 14px 12px");
     const ni = cssRules.slice(cssRules.indexOf(".ws-ni {"));
-    expect(ni.slice(0, ni.indexOf("}")), "row padding is a term").toContain("padding: 0 10px");
-    expect(cssRules, "the icon's box is a term").toContain("width: 17px; height: 17px");
+    expect(ni.slice(0, ni.indexOf("}")), "row padding is a term").toContain("padding: 6px 10px");
+    expect(cssRules, "the icon's box is a term").toContain(".ws-ic svg { width: 16px; height: 16px");
     expect(cssRules, "the label's own margin is a term").toContain(".ws-lbl { display: inline-block; margin-left: 10px");
   });
 

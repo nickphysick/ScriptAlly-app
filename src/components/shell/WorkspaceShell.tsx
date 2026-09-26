@@ -549,7 +549,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
             ) : <span className="ws-mspill static" aria-hidden="true" />}
           </div>
 
-          <div className="ws-pdiv" />
+          {/* v3: NO DIVIDER UNDER THE SWITCHER — the ref draws none, and the sidebar's own 12px gap is
+              the only separation between the head and the nav. */}
 
           {/* ⚠️ FLAT GROUPS, EVERY DESTINATION VISIBLE (final ref). The accordion is retired:
               a parent row that both navigated AND disclosed was one control doing two jobs, and
@@ -574,6 +575,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                       key={ch.id}
                       className={`ws-ni${on ? " on" : ""}`}
                       aria-current={on ? "page" : undefined}
+                      /* v3 (L9): AN EXPLICIT NAME, identical to the label, so the link is named the
+                         same way in both states rather than by a label span that collapses to 0px.
+                         The tooltip is the portalled rail tip below, not a native `title` — two
+                         tooltips on one hover would be one too many. */
+                      aria-label={ch.label}
                       onClick={() => go(ch.path)}
                       {...railTipFor(ch.label, undefined, undefined, 120, sidebar.collapsed)}
                     >
@@ -613,7 +619,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               ⚠️ THE AVATAR IS BACK. It said "NO avatar (the rail carries the face)" — and the rail
               no longer exists, so nothing carried it. */}
           <div className="ws-pfoot">
-            <div className="ws-pdiv" />
+            {/* v3: the hairline is the user row's own `border-top` now — one element drawing its own
+                edge, as the ref's `.me` does — so the separate divider element is retired. */}
             {/* ⚠️ POLISH §6 — ONE INTERACTIVE ROW, not two text lines. The name gets the full row
                 width on line 1 so a realistic name never truncates at 186px; the plan and the
                 Upgrade pill share line 2.

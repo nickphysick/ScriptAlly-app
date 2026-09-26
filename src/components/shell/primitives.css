@@ -112,6 +112,10 @@
    `lib/brand.tsx` injects a family on bare `span`/`button`/`kbd` at runtime, which a class outranks. */
 :root {
   --sp-type: "Special Elite", "Courier New", Courier, monospace;
+  /* app shell v3 — the sidebar and breadcrumb face. Declared beside the typewriter face for the same
+     reason: these primitives render under two shells, and a token that resolves to nothing falls
+     back in silence. */
+  --sp-serif: "Source Serif 4", Georgia, serif;
   --sp-ctl: 50px;
   --sp-ink: #1c130f;
   --sp-anthracite: #2a3a52;

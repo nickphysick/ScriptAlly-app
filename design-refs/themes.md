@@ -1742,9 +1742,12 @@ The shell's palette sits at **`:root`** in `src/index.css` (portalled chrome doe
 | `--shell-active-bg` | `var(--sp-anthracite)` `#2a3a52` | `var(--rail-ink)` `#1d1712` | `var(--a-ink)` `#233150` |
 | `--shell-active-fg` | `#fdf9f5` | `var(--card)` `#fffefb` | `var(--card)` `#ffffff` |
 | `--shell-hover-bg` | `rgba(255,255,255,.45)` | `var(--rail-hov)` `#f6efec` | `var(--rail-hov)` `#f3f3f2` |
+| `--shell-hairline` | `rgba(28,19,15,.12)` — the ref's `--hair`: switcher ring, user-row rule, avatar ring, collapsed section hairlines | default | default |
+| `--shell-mute` | `rgba(28,19,15,.58)` — the ref's `--muted`: section labels, meta, counts | default | default |
 | `--shell-side-w` | `248px` | — | — |
 | `--shell-side-w-collapsed` | `68px` | — | — |
 | `--shell-top-h` | `64px` | — | — |
 
 - ⚠️ **`--shell-side` changed meaning.** It was a legacy alias of `--shell-rail` (`#efe7db`); its three readers (the mobile tab bar and sheet in `mobileShell.css`, the retired v2 capsule in `shellV2.css`) now read `--shell-rail` and keep their colour.
+- **Faces:** the sidebar and the breadcrumb read `--sp-serif` (`"Source Serif 4", Georgia, serif`), declared at `:root` in `src/components/shell/primitives.css` beside `--sp-type` (Special Elite); section labels stay JetBrains Mono.
 - **Burgundy never appears in the shell.** The active item is anthracite with cream text; the badge dot keeps the colour it has today.

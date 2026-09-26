@@ -69,13 +69,18 @@
 /* A tooltip behind an open flyout is noise pointing at the thing you already opened. */
 
 /* ══ THE PANEL ══ */
+/* ⚠️ APP SHELL v3 — STONE, ONE SHADE DEEPER THAN THE PAGE, AND THE ONE HAIRLINE ON ITS RIGHT EDGE
+   (ref design-refs/shell/app-shell-v3.html). The hairline is an INSET shadow rather than a border,
+   as the ref draws it: a border would add a pixel to the panel's box and move the content window,
+   and "sidebar right = window left" is a relational rule. Nothing else divides the two. */
 .ws-panel {
   flex: none;
-  width: var(--shell-panelw);
+  width: var(--shell-side-w);
   display: flex;
   flex-direction: column;
   position: relative;
-  background: var(--shell-chrome);
+  background: var(--shell-side);
+  box-shadow: inset -1px 0 0 var(--shell-rule);
   transition: width 0.22s var(--shell-ease), opacity 0.18s;
   overflow: hidden;
 }
@@ -85,13 +90,18 @@
 
 /* The inner block keeps its full width while the panel animates to zero, so the contents slide
    out of view rather than reflowing to nothing on the way. */
+/* v3: the ref's `.side` box — 16/14/12 padding and a 12px gap between logo, switcher, nav and foot.
+   `box-sizing` is DECLARED: the padding is inside the 248px, and a harness without Tailwind's
+   preflight would otherwise measure a different sidebar from the one the app serves. */
 .ws-pin {
-  width: var(--shell-panelw);
+  box-sizing: border-box;
+  width: var(--shell-side-w);
   height: 100%;
   display: flex;
   flex-direction: column;
-  /* ⚠️ NO TOP PADDING — the head zone below supplies it, so the pill lands on the bar's line. */
-  padding: 0 10px 10px;
+  gap: 12px;
+  padding: 16px 14px 12px;
+  font-family: var(--sp-serif);
 }
 
 /* head: manuscript pill + collapse ghost */
@@ -139,15 +149,16 @@
    and the gap closes for the right reason. Superseded, not reversed on taste. */
 /* ⚠️ THE CARD IS THE CONTAINER (fixes-2 A1) — the opener and the arrows are its children, so it
    is `position: relative` and carries the frame, while `.ws-msopen` carries the click. */
+/* v3: the switcher card sits on a .7 WHITE fill with a hairline (the ref's `.sw`), 12px corners,
+   sized by its padding — the fixed 56px went with the 30×40 cover slot it was measured around. */
 .ws-mspill {
   position: relative;
   flex: 1;
   min-width: 0;
-  height: 56px;
-  background: #ffffff;
-  border: 1px solid var(--shell-edge);
-  border-radius: 10px;
-  transition: border-color 0.15s;
+  background: rgba(255, 255, 255, 0.7);
+  border: 0;
+  box-shadow: inset 0 0 0 1px var(--shell-hairline);
+  border-radius: 12px;
 }
 .ws-msopen {
   width: 100%;
@@ -158,10 +169,10 @@
   gap: 0;
   /* ⚠️ THE RIGHT PADDING RESERVES THE ARROWS' LANE, so a long title runs UNDER them rather than
      to the card's edge and out of reach beneath a control. */
-  padding: 0 46px 0 10px;
+  padding: 9px 50px 9px 10px;
   background: none;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   font: inherit;
   text-align: left;
@@ -179,14 +190,14 @@
    The distinction is the point: a frame says "this is the cover"; the illustration says "there
    isn't one yet". Do not unify them. */
 .ws-mcov {
-  width: 30px;
-  height: 40px;
-  border-radius: 4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
   flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--shell-burgundy);
+  color: var(--sp-ink);
   overflow: hidden;
 }
 .ws-mcov.framed {
@@ -197,24 +208,26 @@
 /* the uploaded cover fills the slot; TODO(cover-upload) — the slot accepts one already */
 .ws-mcov.framed img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .ws-mcov.illus { background: none; border: 0; box-shadow: none; }
-.ws-mcov.illus img { width: 30px; height: 30px; object-fit: contain; display: block; }
+.ws-mcov.illus img { width: 26px; height: 26px; object-fit: contain; display: block; }
 .ws-mcov svg { width: 14px; height: 14px; stroke-width: 1.6; }
-.ws-mstt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; line-height: 1.2; margin-left: 10px; overflow: hidden; }
+.ws-mstt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0; line-height: 1.2; margin-left: 10px; overflow: hidden; }
 .ws-msg {
+  font-family: inherit;
   font-size: 11.5px;
-  color: var(--shell-muted);
+  line-height: 1.45;
+  color: var(--shell-mute);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.ws-mspill:hover { border-color: #d6cdbf; }
 .ws-mspill.static .ws-msopen { cursor: default; }
 .ws-mspill.static { cursor: default; }
-.ws-mspill.static:hover { border-color: var(--shell-edge); }
 .ws-mst {
+  font-family: inherit;
   font-size: 14px;
   font-weight: 600;
-  color: var(--shell-ink);
+  line-height: 1.2;
+  color: var(--sp-ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -223,12 +236,13 @@
 }
 .ws-mspill .ws-chev { color: var(--shell-muted); display: flex; flex: none; }
 .ws-mspill .ws-chev svg { width: 12px; height: 12px; stroke-width: 1.8; }
-.ws-msmenu { position: absolute; top: 46px; left: 0; right: 0; z-index: 20; }
+.ws-msmenu { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 20; }
 
 /* ⚠️ THE HEAD'S « GHOST IS GONE (polish §3) — it competed with the manuscript pill for the head's
    attention and read as an action ON the manuscript. */
 
-.ws-pdiv { height: 1px; background: var(--shell-hair); margin: 8px 4px 6px; flex: none; }
+/* v3: `.ws-pdiv` IS RETIRED, rule and elements. The ref has no hairline under the switcher, and the
+   foot's divider is the user row's own `border-top` now — one element drawing its own edge. */
 
 /* section rows — the panel's own rhythm, 38px */
 /* 30px, so the pill reads as its own object rather than the first row of the navigation. */
@@ -255,7 +269,9 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
   scrollbar-width: none;
 }
 .ws-nav::-webkit-scrollbar { width: 0; height: 0; }
@@ -266,51 +282,63 @@
 
 /* ⚠️ A LABEL, NOT A CONTROL. Pure typography: not focusable, not clickable, holding no state —
    which is the whole point of retiring the accordion's parent rows. */
+/* v3: the ref's `.nav h6` — mono 8.5px at .18em, 600, muted, 9/8/3 margin. */
 .ws-glabel {
+  flex: none;
   font-family: "JetBrains Mono", monospace;
-  font-size: 9px;
-  letter-spacing: 0.17em;
+  font-size: 8.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--shell-muted);
-  padding: 0 10px 6px;
-  margin-top: 18px;
+  color: var(--shell-mute);
+  margin: 9px 8px 3px;
+  padding: 0;
 }
 .ws-glabel.first { margin-top: 0; }
+/* v3: the ref's `.nav a` — Source Serif 4 at 14.5px, 6/10 padding, 9px corners, sized by its line
+   box (14.5 × 1.45 + 12 = 33px) rather than a fixed height.
+   ⚠️ gap 0 + `.ws-lbl { margin-left: 10px }` — the icon–label 10px lives on the label so it
+   collapses WITH it (sidebar-collapse pack, Phase 2). A flex gap beside a zero-width child holds
+   itself open and parks the icon off the rail's centre. */
 .ws-ni {
-  height: 36px;
+  flex: none;
   display: flex;
   align-items: center;
-  /* ⚠️ gap 0 + `.ws-lbl { margin-left: 10px }` — the icon–label 10px moved onto the label so it
-     collapses WITH it (sidebar-collapse pack, Phase 2). A flex gap beside a zero-width child
-     holds itself open and parks the icon 5px off the rail's centre. Pixel-identical expanded. */
   gap: 0;
-  padding: 0 10px;
+  padding: 6px 10px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 9px;
   background: transparent;
   cursor: pointer;
-  font: inherit;
+  font-family: var(--sp-serif);
   font-size: 14.5px;
-  font-weight: 500;
-  color: #544b44;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--sp-ink);
   transition: background 0.13s, color 0.13s;
   outline: none;
   width: 100%;
   text-align: left;
+  white-space: nowrap;
   /* the collapsed corner badge positions against the row */
   position: relative;
 }
-.ws-lbl { display: inline-block; margin-left: 10px; max-width: 200px; overflow: hidden; white-space: nowrap; }
-.ws-ic { display: flex; flex: none; opacity: 0.9; color: inherit; }
-.ws-ic svg { width: 17px; height: 17px; stroke-width: 1.7; }
-.ws-ni:hover { background: rgba(242, 237, 231, 0.6); color: var(--shell-ink); }
+/* ⚠️ `font-family: inherit` IS LOAD-BEARING — `lib/brand.tsx` names bare `span` as the sans face at
+   runtime, and without it the label renders Source Sans inside a Source Serif row. */
+.ws-lbl { display: inline-block; margin-left: 10px; max-width: 200px; overflow: hidden; white-space: nowrap; font-family: inherit; }
+.ws-ic { display: flex; flex: none; opacity: 0.75; color: inherit; }
+.ws-ic svg { width: 16px; height: 16px; stroke-width: 1.7; }
+.ws-ni:not(.on):hover { background: var(--shell-hover-bg); }
 .ws-ni:hover .ws-ic { opacity: 1; }
-.ws-ni.on { background: var(--shell-parch); color: var(--shell-ink); font-weight: 600; }
+/* ⚠️ ACTIVE IS ANTHRACITE WITH CREAM TEXT (D3) — never white, never pink, never burgundy. */
+.ws-ni.on { background: var(--shell-active-bg); color: var(--shell-active-fg); font-weight: 600; }
 .ws-ni.on .ws-ic { opacity: 1; }
-/* Baked 5 — the open parent goes quiet: bold ink, NO fill, because its child holds the fill. */
-.ws-ni.quiet { color: var(--shell-ink); font-weight: 600; }
-.ws-ni.quiet .ws-ic { opacity: 1; }
 .ws-ni:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
+/* the count: mono 10px, muted, pushed to the row's end (the ref's `.badge`). The urgent dot keeps
+   the colour it has today — Nick's ruling, the one colour the v3 pass deliberately does not touch. */
+.ws-ni .sp-ct { font-size: 10px; color: var(--shell-mute); }
+.ws-ni.on .sp-ct { color: inherit; opacity: 0.8; }
 
 .ws-pch {
   color: var(--shell-muted);
@@ -385,38 +413,41 @@
  * pill right-aligned. The name keeps the full text column, because a foot block that abbreviates
  * who you are is the wrong thing to abbreviate.
  */
+/* v3: the ref's `.me` — a hairline above it (its OWN border-top, the divider element is retired),
+   10/8/2 padding, avatar · name over plan. */
 .ws-uacct {
   display: flex;
   flex-direction: row;
   align-items: center;
-  /* gap 0 + margins on the text column and the pill — the same collapse mechanism as the nav
-     rows (see .ws-ni): a flex gap beside zero-width children holds itself open. */
+  /* gap 0 + margins on the text column — the same collapse mechanism as the nav rows (see .ws-ni):
+     a flex gap beside zero-width children holds itself open. */
   gap: 0;
-  padding: 9px 10px;
-  border-radius: 9px;
+  padding: 10px 8px 2px;
+  border-top: 1px solid var(--shell-hairline);
   cursor: pointer;
   transition: background 0.13s;
   outline: none;
 }
-.ws-uacct:hover { background: rgba(242, 237, 231, 0.6); }
+.ws-uacct:hover { background: var(--shell-hover-bg); }
 .ws-uacct:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
 /* ⚠️ BLOCK, EXPLICITLY. The name and the plan stack; as inline spans they ran together on one
    line — the block-element failure this foot has now hit three times. */
 .ws-n {
   display: block;
+  font-family: var(--sp-serif);
   font-size: 14px;
   font-weight: 600;
-  color: var(--shell-ink);
+  color: var(--sp-ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 /* ⚠️ NOT `.ws-sub` — that name is ALREADY the accordion's container, whose `display:grid;
    grid-template-rows:0fr` would have collapsed this line to zero height. The collision was
    invisible in the markup and instant in the render. */
 .ws-acctline { display: block; }
-.ws-pl { display: block; font-size: 12px; color: var(--shell-muted); line-height: 1.3; }
+.ws-pl { display: block; font-family: var(--sp-serif); font-size: 11.5px; color: var(--shell-mute); line-height: 1.45; }
 /* ⚠️ `.ws-upg` IS RETIRED WITH THE INLINE PILL (Option D). It was `flex: none` beside the name,
    which is precisely what starved the name of width. Its successor is `.ws-upgrow` below — a
    sibling of the account row, full width, filled. The old class name is deleted rather than
@@ -425,23 +456,27 @@
 /* ── Row 2: the Upgrade pill, full width beneath the account row (Option D) ──
    FILLED rather than ghost: it has the width to carry a fill now, and a ghost control at this
    size read as a disabled field. Soft pink on the burgundy family, per the ref's values. */
+/* v3: BURGUNDY NEVER APPEARS IN THE SHELL, so the pink-and-burgundy pill is retired. The ref draws a
+   Pro user and no upgrade control at all; for a free writer the control stays (behaviour unchanged)
+   in the shell's own outline grammar — the Give feedback button's ring and corners, ink text. */
 .ws-upgrow {
   display: block;
   width: 100%;
-  margin-top: 9px;
-  padding: 9px 12px;
-  font: inherit;
+  margin-top: 8px;
+  padding: 7px 12px;
+  font-family: var(--sp-serif);
   font-size: 12px;
   font-weight: 600;
-  color: var(--shell-burgundy);
-  background: #f5e2da;
-  border: 1px solid #e8c8bc;
-  border-radius: 20px;
+  color: var(--sp-ink);
+  background: transparent;
+  border: 0;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.28);
+  border-radius: 10px;
   cursor: pointer;
   text-align: center;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s;
 }
-.ws-upgrow:hover { background: #f0d5c9; border-color: #ddb6a7; }
+.ws-upgrow:hover { background: rgba(255, 255, 255, 0.6); }
 .ws-upgrow:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--shell-focus); }
 /* ⚠️ `.ws-setrow` IS DELETED WITH THE ROW IT STYLED (audit pack P5) — Settings is an ordinary
    `.ws-ni` in the ACCOUNT section now, and a leftover rule for a row that no longer exists is how
@@ -581,7 +616,6 @@
    ⚠️ ONE GROUND. Sidebar and page share `--shell-ground`; the ONLY white surface is the content
    window. A dark rail beside a pale page read as two applications bolted together. */
 .ws-app { background: var(--ws-ground); }
-.ws-panel { background: transparent; border-right: 0; }
 /* ⚠️ NOTHING DIVIDES THE SIDEBAR FROM THE PAGE (audit pack P6). The hairline that used to run down
    `.ws-panel::after` is GONE, and it is gone rather than made fainter: the two surfaces already
    share one ground, and a rule between them drew an edge where there is no edge. The white content
@@ -621,14 +655,16 @@
    16 + 40 + 16 is the collapsed rail's 72px, so left-aligned at 16 it is already centred there — the
    alignment contract's own rule, that icons do not move between states, for free. (`.ws-pin` pads
    10px, hence 6.) */
+/* v3: the ref's `.logo` — 30px mark, 10px gap, 20px wordmark, 0 6px padding: the mark lands at
+   x 20 · y 16 inside the sidebar. Collapsed, the brand centres (see the collapse block). */
 .ws-brand {
   display: flex; align-items: center; justify-content: flex-start; gap: 0;
-  padding: 20px 6px 14px; width: 100%;
+  padding: 0 6px; width: 100%; box-sizing: border-box;
   background: none; border: 0; cursor: pointer; font: inherit; text-align: left;
 }
 /* ⚠️ BARE ARTWORK — no plate, no border, no fill. The mark is transparent, so a plate would be a
    box drawn round a shape that does not want one. */
-.ws-bmark { height: 40px; width: 40px; flex-shrink: 0; display: block; }
+.ws-bmark { height: 30px; width: 30px; flex-shrink: 0; display: block; }
 /* ⚠️ TYPE, NOT AN ASSET — 22px is the cap it looks like, with no ink ratio to keep in step.
    ⚠️ `max-width` + `overflow: hidden` are the COLLAPSE mechanism, not styling: the wordmark
    narrows and clips rather than wrapping or reflowing, and it never leaves the accessibility
@@ -643,8 +679,8 @@
    declaration was applied to mixed-case Playfair. THE RULE: `line-height: 1` is only ever safe on
    uppercase-only text. */
 .ws-bwm {
-  font-family: var(--font-serif); font-weight: 600; font-size: 21px;
-  color: #1c130e; letter-spacing: -0.01em; line-height: 1.3; white-space: nowrap;
+  font-family: var(--sp-serif); font-weight: 600; font-size: 20px;
+  color: var(--sp-ink); letter-spacing: -0.01em; line-height: 1.45; white-space: nowrap;
   margin-left: 10px; max-width: 160px; overflow: hidden;
 }
 .sb-collapsed .ws-bwm { opacity: 0; max-width: 0; margin-left: 0; }
@@ -660,20 +696,15 @@
    line as the greige bar. That bar is gone, so the alignment it served is gone with it — the
    selector is now sized by its own contents beneath the brand block, and `--head` is not read
    here at all. (`--head` itself survives for .sv2-topbar and .tn-mast, which are other shells.) */
-/* ── nav: white active tile, never a burgundy fill ── */
-.ws-ni.on, .ws-nav .on {
-  background: #ffffff; color: #241811; font-weight: 500;
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.06);
-}
-.ws-ni:hover { background: #efeae1; color: #241811; }
+/* v3: the v2 white active tile and its hover are RETIRED — one active rule, above at `.ws-ni.on`. */
 
 /* ── foot: the avatar returned with the rail's departure ──
    ⚠️ THE SECOND `.ws-uacct` RULE THAT LIVED HERE IS GONE (audit P2) — it half-restated the row
    above and left `flex-direction: column` standing. One element, one rule. */
 .ws-av {
-  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
-  background: #ffffff; border: 1px solid var(--shell-edge);
-  font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: #8a7a6c;
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  background: #ffffff; border: 0; box-shadow: inset 0 0 0 1px var(--shell-hairline);
+  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--sp-ink);
   display: grid; place-items: center;
 }
 .ws-utext { min-width: 0; flex: 1; margin-left: 10px; }
@@ -949,9 +980,9 @@
 .ws-ni > .sp-ct { transition: transform 0.14s ease; }
 .ws-ni:hover > .sp-ct { transform: translateX(2px); }
 
-/* manuscript selector: the edge warms and the mark tilts */
-.ws-mspill { transition: border-color 0.16s ease, background-color 0.16s ease; }
-.ws-mspill:hover { border-color: #d8c9b4; }
+/* manuscript selector: the fill brightens and the mark tilts */
+.ws-mspill { transition: background-color 0.16s ease; }
+.ws-mspill:not(.static):hover { background: rgba(255, 255, 255, 0.92); }
 .ws-mspill img, .ws-mspill svg { transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1); }
 .ws-mspill:hover img, .ws-mspill:hover svg { transform: rotate(-3deg); }
 
@@ -989,7 +1020,7 @@
    on top, or the opener would swallow their clicks. */
 .ws-msnav {
   position: absolute;
-  right: 6px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -1001,18 +1032,18 @@
   width: 20px; height: 24px; padding: 0;
   display: grid; place-items: center;
   background: none; border: none; cursor: pointer;
-  color: var(--shell-muted);
+  color: var(--shell-mute);
   border-radius: 6px;
   transition: background-color 0.14s ease, color 0.14s ease, transform 0.14s ease;
 }
 .ws-msarrow svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.9; }
-.ws-msarrow:hover:not(:disabled) { background: #efeae1; color: #241811; }
+.ws-msarrow:hover:not(:disabled) { background: var(--shell-hover-bg); color: var(--sp-ink); }
 .ws-msarrow:active:not(:disabled) { transform: scale(0.97); }
 /* ⚠️ GREYED AND ACTUALLY DISABLED — a control that looks off but still fires is worse than either */
 .ws-msarrow:disabled { opacity: 0.4; cursor: default; }
 .ws-msdots { display: flex; justify-content: center; gap: 4px; margin-top: 5px; }
-.ws-msdot { width: 4px; height: 4px; border-radius: 50%; background: #d6cdbf; transition: background-color 0.14s ease; }
-.ws-msdot.on { background: #8a7a6c; }
+.ws-msdot { width: 4px; height: 4px; border-radius: 50%; background: var(--shell-hairline); transition: background-color 0.14s ease; }
+.ws-msdot.on { background: var(--shell-mute); }
 
 /* ══ SIDEBAR COLLAPSE — the icon rail (sidebar-collapse pack, Phase 2; ref
    design-refs/sidebar-collapse-v1.html) ═══════════════════════════════════════════════════════
@@ -1031,8 +1062,15 @@
   transition: width 240ms cubic-bezier(0.32, 0.72, 0.28, 1), padding 240ms cubic-bezier(0.32, 0.72, 0.28, 1);
 }
 /* 72px, the researched band's upper end — deliberately, because the rail carries mini-badges. */
+/* v3: 68px (`--shell-side-w-collapsed`), the ref's rail, with its own 16/10/12 padding and every row
+   centred — the icons, the switcher tile, the avatar and the mark all sit on the rail's midline. */
 .ws-panel.sb-collapsed,
-.sb-collapsed .ws-pin { width: 72px; }
+.sb-collapsed .ws-pin { width: var(--shell-side-w-collapsed); }
+.sb-collapsed .ws-pin { padding: 16px 10px 12px; align-items: center; }
+.sb-collapsed .ws-brand { padding: 0; justify-content: center; }
+.sb-collapsed .ws-phead { align-items: center; width: 100%; }
+.sb-collapsed .ws-phead .ws-mspill { width: auto; }
+.sb-collapsed .ws-nav { align-items: center; width: 100%; }
 
 /* the collapsing text: opacity leads (140ms), the box follows on the rail's own curve */
 .ws-panel.sb-ready .ws-lbl,
@@ -1045,52 +1083,51 @@
 
 /* nav rows: the icon centres; the label collapses in place. Radius, hover and the parchment
    active card are UNTOUCHED — the pack adds a state, not a restyle. */
-.sb-collapsed .ws-ni { justify-content: center; padding: 0; }
+/* the active item is a 40 × 34 anthracite tile */
+.sb-collapsed .ws-ni { justify-content: center; padding: 0; width: 40px; height: 34px; }
 .sb-collapsed .ws-lbl { opacity: 0; max-width: 0; margin-left: 0; }
 
 /* ⚠️ THE COUNT BECOMES A CORNER MINI-BADGE — same element, same value, restyled in place (the
    mockup snaps this swap with display, so the snap is sanctioned). The dot hides: the pink badge
    IS the alert at this size. No count → CountChip never rendered → no badge, for free. */
+/* v3: THE BADGE BECOMES A 5px DOT in the tile's corner (the ref's collapsed `.badge`). The figure goes
+   to `font-size: 0`; an urgent count keeps its own dot and its colour, and a plain count is drawn
+   the same size in the muted ink, so every badge is still visible at 68px. */
 .sb-collapsed .ws-ni .sp-ct {
   position: absolute;
-  top: 3px;
-  right: 7px;
+  top: 5px;
+  right: 6px;
   gap: 0;
-  background: #f5e2da;
-  border: 1px solid #e8c8bc;
-  border-radius: 8px;
-  padding: 2px 4px;
-  font-size: 8.5px;
-  line-height: 1;
-  color: var(--shell-ink);
+  margin: 0;
+  font-size: 0;
+  line-height: 0;
 }
-.sb-collapsed .ws-ni .sp-ct-dot { display: none; }
+.sb-collapsed .ws-ni .sp-ct:not(:has(.sp-ct-dot))::before {
+  content: "";
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--shell-mute);
+}
 .sb-collapsed .ws-ni:hover > .sp-ct { transform: none; }
 
 /* section headings: the mono label yields to a centred hairline. `color: transparent`, never
    display — the text keeps its exact box (the 22px-rhythm rule) and stays in the a11y tree. */
-.sb-collapsed .ws-glabel { position: relative; color: transparent; user-select: none; }
-.sb-collapsed .ws-glabel::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 22px;
-  height: 1px;
-  background: #e7ddd2;
-}
+/* v3: section labels become a 28px hairline (the ref's collapsed `h6`). `font-size: 0` rather than
+   `display: none`, so the heading stays in the accessibility tree. */
+.sb-collapsed .ws-glabel { height: 1px; width: 28px; margin: 8px auto; padding: 0; background: var(--shell-hairline); font-size: 0; overflow: hidden; color: transparent; user-select: none; }
 
 /* manuscript selector: the 40px book tile alone, centred; title, meta and arrows collapse.
    (Its 10px gap moved onto .ws-mstt as margin — same mechanism as the nav rows.) */
-.sb-collapsed .ws-msopen { justify-content: center; padding: 0 6px; }
+.sb-collapsed .ws-msopen { justify-content: center; padding: 8px; }
 .sb-collapsed .ws-mstt { flex: 0 1 0%; max-width: 0; opacity: 0; margin-left: 0; }
 .sb-collapsed .ws-msnav { opacity: 0; pointer-events: none; }
 .sb-collapsed .ws-msdots { display: none; }
 
 /* user row: the avatar alone. The Upgrade pill zeroes its border and padding — a collapsed pill
    that kept them would survive as a stray 10px lozenge of border beside the avatar. */
-.sb-collapsed .ws-uacct { justify-content: center; padding: 9px 0; }
+.sb-collapsed .ws-uacct { justify-content: center; padding: 10px 0 2px; width: 100%; }
 .sb-collapsed .ws-utext { flex: 0 1 0%; max-width: 0; opacity: 0; margin-left: 0; }
 /* ⚠️ NO COLLAPSED RULE FOR THE PILL — it is not rendered at 72px at all (Option D), so there is
    nothing to zero. The old rule had to null border AND padding or a collapsed pill survived as a

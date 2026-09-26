@@ -330,7 +330,8 @@ export function judge(L: Ledger, p: Probe, ctx: { route: string; size: string; s
   } else if (!p.settings) {
     c("L8 geometry · active 40×34 centred", !!act && !!s && near(act.w, 40, 1) && near(act.h, 34, 1) && near(act.cx, s.cx, 1), `${f1(act?.w)}×${f1(act?.h)} cx ${f1(act?.cx)} side.cx ${f1(s?.cx)}`);
   }
-  if (collapsed) {
+  if (collapsed && !p.settings) {
+    /* ⚠️ NOT IN SETTINGS MODE: the app nav layer, brand included, is hidden and shifted there. */
     c("L8 geometry · mark centred collapsed", !!p.mark && !!s && near(p.mark.cx, s.cx, 1), `mark.cx ${f1(p.mark?.cx)} side.cx ${f1(s?.cx)}`);
   } else if (!p.settings) {
     c("L8 geometry · mark at mock position", !!p.mark && !!s && near(p.mark.x - s.x, 20, 1) && near(p.mark.y - s.y, 16, 1) && near(p.mark.w, 30, 1),
@@ -346,8 +347,11 @@ export function judge(L: Ledger, p: Probe, ctx: { route: string; size: string; s
     c("L9 collapse · labels hidden", p.labelsHidden.length > 0 && p.labelsHidden.every(Boolean), `hidden ${p.labelsHidden.filter(Boolean).length}/${p.labelsHidden.length}`);
   }
   if (!p.settings) {
-    c("L9 collapse · every link named", p.names.length > 0 && p.names.every((n) => (n.aria ?? "").trim() !== "" && (n.title ?? "").trim() !== ""),
-      `unnamed ${p.names.filter((n) => !(n.aria ?? "").trim() || !(n.title ?? "").trim()).length}/${p.names.length}`);
+    /* ⚠️ THE NAME IS AN EXPLICIT `aria-label`, NOT THE LABEL SPAN — collapsed, that span is 0px wide.
+       The tooltip half is the portalled rail tip, asserted by hover in the matrix (native `title`
+       would put a second tooltip on the same hover). */
+    c("L9 collapse · every link named", p.names.length > 0 && p.names.every((n) => (n.aria ?? "").trim() !== ""),
+      `unnamed ${p.names.filter((n) => !(n.aria ?? "").trim()).length}/${p.names.length}`);
   }
 }
 
@@ -361,6 +365,17 @@ for (const vp of SIZES) {
         await openShell(page, r.path, vp, collapsed);
         const p = await probeShell(page);
         judge(L, p, { route: r.name, size: `${vp.width}`, state }, collapsed, vp.width === 1280);
+        /* L9 tooltip: collapsed, hovering a link shows the rail tip carrying its name */
+        if (collapsed && !("settings" in r)) {
+          const item = page.locator("#ws-sidebar nav .ws-ni").nth(1);
+          const name = await item.getAttribute("aria-label");
+          await item.hover();
+          const tip = page.locator(".dk-tip--rail");
+          const shown = await tip.first().waitFor({ state: "visible", timeout: 2000 }).then(() => true).catch(() => false);
+          const text = shown ? ((await tip.first().textContent()) ?? "").trim() : "";
+          L.check("L9 collapse · tooltip on hover", { route: r.name, size: `${vp.width}`, state }, shown && !!name && text.startsWith(name), `tip ${JSON.stringify(text)} name ${JSON.stringify(name)}`);
+          await page.mouse.move(vp.width - 5, vp.height - 5);
+        }
       }
       L.write();
       expect(L.rows.length, "population floor").toBeGreaterThan(ROUTES.length * 20);

@@ -1185,7 +1185,13 @@ describe("the feature rows set their own type, and nothing else uses its familie
     const primOwners = [...prim.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
       .filter((m) => /Special Elite|Source Serif 4/.test(m[2])).map((m) => m[1].trim());
     expect(primOwners, "the shell names the face once, as a token, and every control reads it").toEqual([":root"]);
-    expect(prim).not.toContain("Source Serif 4");
+    /* ⚠️ APP SHELL v3 (26 Sep) MADE THE SERIF A SHELL FACE, AND IT IS NAMED, NOT WAVED THROUGH. Baked
+       decision D6: the sidebar's nav and the breadcrumb are Source Serif 4. The shell renders under
+       two shells and portals its menus, so the face is declared where the typewriter already is —
+       `--sp-serif` in `:root`, the SAME rule, and every shell element reads the token. So the owner set
+       above is unchanged; what moved is that this sheet may now carry the serif's name, once, there. */
+    expect(prim.match(/Source Serif 4/g) ?? [], "the serif is named once, as the `--sp-serif` token").toHaveLength(1);
+    expect(prim).toMatch(/--sp-serif:\s*"Source Serif 4"/);
     const dash = decls(readFileSync(resolve(src, "components/dashboard/oneScreen.css"), "utf8"));
     const dashOwners = [...dash.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
       .filter((m) => /Special Elite|Source Serif 4/.test(m[2])).map((m) => m[1].trim());

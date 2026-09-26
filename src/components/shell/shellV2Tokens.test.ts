@@ -49,6 +49,8 @@ const BAKED: Record<string, string> = {
   "--shell-active-bg": "var(--sp-anthracite)",
   "--shell-active-fg": "#fdf9f5",
   "--shell-hover-bg": "rgba(255, 255, 255, 0.45)",
+  "--shell-hairline": "rgba(28, 19, 15, 0.12)",
+  "--shell-mute": "rgba(28, 19, 15, 0.58)",
   "--shell-canvas": "#f7f2e9", // the CONTENT capsule, and its top bar
   "--shell-card": "#fdfaf5",
   "--shell-panel": "#f2ede7",
@@ -208,6 +210,8 @@ describe("capsule tokens — designTokens.ts twins agree", () => {
     expect(dt.shellActiveBg).toBe("#2a3a52");
     expect(dt.shellActiveFg).toBe("#fdf9f5");
     expect(dt.shellHoverBg).toBe("rgba(255, 255, 255, 0.45)");
+    expect(dt.shellHairline).toBe("rgba(28, 19, 15, 0.12)");
+    expect(dt.shellMute).toBe("rgba(28, 19, 15, 0.58)");
     expect(dt.shellCanvas).toBe("#f7f2e9");
     expect(dt.shellCard).toBe("#fdfaf5");
     expect(dt.shellPanel).toBe("#f2ede7");
@@ -435,9 +439,11 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
        swap safe — a sized box and no plate — because a mark that grew a background would be the
        actual regression. The wordmark keeps the serif, and that is asserted where it lives. */
     /* the v34 mockup (19 Sep): the mark is the hawk-head roundel, 40px square — still bare artwork */
-    expect(wsCss).toMatch(/\.ws-bmark \{[^}]*height: 40px; width: 40px/s);
+    /* app shell v3 (26 Sep): the mark is 30px (the ref's `.logo .av`) and the wordmark is Source
+       Serif 4 through `--sp-serif`. Still bare artwork, still exactly one of each. */
+    expect(wsCss).toMatch(/\.ws-bmark \{[^}]*height: 30px; width: 30px/s);
     expect(wsCss, "the bare mark grew a plate").not.toMatch(/\.ws-bmark \{[^}]*background:/s);
-    expect(wsCss).toMatch(/\.ws-bwm \{[^}]*var\(--font-serif\)/s);
+    expect(wsCss).toMatch(/\.ws-bwm \{[^}]*var\(--sp-serif\)/s);
   });
 });
 

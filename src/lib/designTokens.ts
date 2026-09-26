@@ -143,6 +143,8 @@ export const shellTopH = 64; // the top bar (px)
 export const shellActiveBg = "#2a3a52"; // anthracite (= --sp-anthracite)
 export const shellActiveFg = "#fdf9f5"; // cream on the highlight
 export const shellHoverBg = "rgba(255, 255, 255, 0.45)"; // the hover wash
+export const shellHairline = "rgba(28, 19, 15, 0.12)"; // switcher ring, user-row rule, avatar ring
+export const shellMute = "rgba(28, 19, 15, 0.58)"; // section labels, meta, counts
 export const shellCanvas = "#f7f2e9"; // THE CONTENT capsule — and its top bar
 export const shellCard = "#fdfaf5"; // card surface (=== parchment)
 export const shellPanel = "#f2ede7"; // IN-PAGE grouping surface — content, not chrome fill

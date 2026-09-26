@@ -331,6 +331,8 @@
   --shell-active-bg: var(--sp-anthracite);  /* the anthracite highlight (= the mock's --btn) */
   --shell-active-fg: #fdf9f5;
   --shell-hover-bg: rgba(255, 255, 255, 0.45);
+  --shell-hairline: rgba(28, 19, 15, 0.12); /* the ref's --hair: switcher ring, user-row rule, avatar ring */
+  --shell-mute: rgba(28, 19, 15, 0.58);     /* the ref's --muted: section labels, meta, counts */
   --shell-canvas: #f7f2e9;            /* THE CONTENT capsule — and its top bar */
   --shell-card: #fdfaf5;              /* card surface (=== parchment) */
   /* The interior fill moved WITH the panel (#f2ede7 → #efe8df): against a #f8f4ee panel the
@@ -454,7 +456,7 @@
      at this width (was ~146), so "The Smoke Test" (107px) just tips over. `.ws-mst` has always
      carried `text-overflow: ellipsis` for exactly this — a book title is arbitrary-length and the
      pill is not — but the crossover moved, and longer titles now abbreviate earlier. */
-  --shell-panelw: 224px;              /* the panel — a sibling of the rail, not a band within it */
+  --shell-panelw: var(--shell-side-w); /* v3: an alias of the shell's own width token — f12 and the settings rail still read this name */
   /* ⚠️ AMENDMENT 1 — THE DESK AND THE CAPSULE ARE GONE from the workspace. The shell is
      full-screen: --shell-chrome IS the page ground, and the content is a white card floating on
      it. These two are that card's frame and corner. --shell-desk-grad survives ONLY for whatever
