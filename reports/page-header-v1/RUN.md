@@ -261,3 +261,30 @@ was exactly right. It computes the column from the rule now.
 **CLAUDE.md** gains "The page header — PageHeader, full or compact, and there is no breadcrumb",
 carrying the five laws this build established, and the old masthead section is **fenced as history
 in place** rather than deleted.
+
+---
+
+## Deployed to dev
+
+**`07c4bb1d`**, built from a clean detached worktree of the pushed tip — never the shared checkout,
+where the Contact list session is live. Served bundle verified: **`index-D27ne6fj.js`** both sides.
+Prod untouched.
+
+**13 passed, 0 failed against the deployed build** (6.0m): the bar, the column, the rail, full and
+compact geometry at 1280 and 1440, §4.5's consistency, the route matrix and the art.
+
+Screenshots in `reports/page-header-v1/shots/` — Query Centre, Contact list, Manuscripts and To-do
+at both widths, beside the mock's full and compact.
+
+## What did not land
+
+1. **The Contact list keeps its own hero.** Its layout is measured from the art's box; see Phase 5
+   for what converting it takes. Its drawing is also meant to change to `active_queries_hawk`.
+2. **§4.5's full-size consistency is unproven** — one page in the set makes the claim vacuous, and
+   the lock says so rather than passing.
+3. **`/import` renders no eyebrow**, being in no nav section. The rule is right; the consequence is
+   one page opening without its first line.
+4. **The Query Centre's header spans the ledger, not the whole column** — its rail starts at the top
+   of the page, so a header running the full column would pass underneath it. The mock draws no rail
+   beside its header, so this is a deviation rather than a miss, and it is why the art and the rule
+   stop short of the rail.
