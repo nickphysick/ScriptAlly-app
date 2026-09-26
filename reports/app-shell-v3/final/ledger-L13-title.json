@@ -1,0 +1,258 @@
+[
+ {
+  "lock": "L13 title · both found",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":601.921875,\"parentRight\":890,\"hero\":0} cl {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"36px\",\"narrow\":true,\"overflow\":0,\"right\":498.96875,\"parentRight\":890,\"hero\":620}"
+ },
+ {
+  "lock": "L13 title · Special Elite",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "expanded",
+  "ok": true,
+  "detail": "contact \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · QC confirmed Special Elite",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · never above the QC's size",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc 50px contact 36px"
+ },
+ {
+  "lock": "L13 title · never overflows its column",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "expanded",
+  "ok": true,
+  "detail": "overflow 0 right 498.96875 parent 890"
+ },
+ {
+  "lock": "L13 title · both found",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":421.921875,\"parentRight\":890,\"hero\":0} cl {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"41.6px\",\"narrow\":false,\"overflow\":0,\"right\":362,\"parentRight\":362,\"hero\":800}"
+ },
+ {
+  "lock": "L13 title · Special Elite",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "contact \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · QC confirmed Special Elite",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · never above the QC's size",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc 50px contact 41.6px"
+ },
+ {
+  "lock": "L13 title · never overflows its column",
+  "route": "Contact list",
+  "size": "1280",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "overflow 0 right 362 parent 362"
+ },
+ {
+  "lock": "L13 title · both found",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":601.921875,\"parentRight\":1050,\"hero\":0} cl {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"40.56px\",\"narrow\":false,\"overflow\":0,\"right\":535,\"parentRight\":535,\"hero\":780}"
+ },
+ {
+  "lock": "L13 title · Special Elite",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "contact \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · QC confirmed Special Elite",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · never above the QC's size",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc 50px contact 40.56px"
+ },
+ {
+  "lock": "L13 title · never overflows its column",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "overflow 0 right 535 parent 535"
+ },
+ {
+  "lock": "L13 title · both found",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":510,\"parentRight\":1050,\"hero\":0} cl {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"49.92px\",\"narrow\":false,\"overflow\":0,\"right\":416,\"parentRight\":416,\"hero\":960}"
+ },
+ {
+  "lock": "L13 title · Special Elite",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "contact \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · QC confirmed Special Elite",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · never above the QC's size",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc 50px contact 49.92px"
+ },
+ {
+  "lock": "L13 title · never overflows its column",
+  "route": "Contact list",
+  "size": "1440",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "overflow 0 right 416 parent 416"
+ },
+ {
+  "lock": "L13 title · both found",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":764,\"parentRight\":1456,\"hero\":0} cl {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":674,\"parentRight\":674,\"hero\":1112}"
+ },
+ {
+  "lock": "L13 title · Special Elite",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "expanded",
+  "ok": true,
+  "detail": "contact \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · QC confirmed Special Elite",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · never above the QC's size",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc 50px contact 50px"
+ },
+ {
+  "lock": "L13 title · the QC's size where the hero holds it",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "expanded",
+  "ok": true,
+  "detail": "qc 50px contact 50px hero 1112"
+ },
+ {
+  "lock": "L13 title · never overflows its column",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "expanded",
+  "ok": true,
+  "detail": "overflow 0 right 674 parent 674"
+ },
+ {
+  "lock": "L13 title · both found",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":674,\"parentRight\":1366,\"hero\":0} cl {\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"50px\",\"narrow\":false,\"overflow\":0,\"right\":584,\"parentRight\":584,\"hero\":1112}"
+ },
+ {
+  "lock": "L13 title · Special Elite",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "contact \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · QC confirmed Special Elite",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L13 title · never above the QC's size",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc 50px contact 50px"
+ },
+ {
+  "lock": "L13 title · the QC's size where the hero holds it",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "qc 50px contact 50px hero 1112"
+ },
+ {
+  "lock": "L13 title · never overflows its column",
+  "route": "Contact list",
+  "size": "1920",
+  "state": "collapsed",
+  "ok": true,
+  "detail": "overflow 0 right 584 parent 584"
+ }
+]

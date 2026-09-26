@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "L10 themes · root found",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-capp",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10 themes · tokens declared",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-capp",
+  "ok": true,
+  "detail": "{\"side\":\"#e7e3dc\",\"rule\":\"#1c130f1a\",\"activeBg\":\"#2a3a52\",\"activeFg\":\"#fdf9f5\"}"
+ },
+ {
+  "lock": "L10 themes · surface from token",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-capp",
+  "ok": true,
+  "detail": "bg rgb(231, 227, 220) token rgb(231, 227, 220)"
+ },
+ {
+  "lock": "L10 themes · rule from token",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-capp",
+  "ok": true,
+  "detail": "shadow rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset token rgba(28, 19, 15, 0.1)"
+ },
+ {
+  "lock": "L10 themes · active from tokens",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-capp",
+  "ok": true,
+  "detail": "active rgb(42, 58, 82)/rgb(253, 249, 245) tokens rgb(42, 58, 82)/rgb(253, 249, 245)"
+ },
+ {
+  "lock": "L10 themes · root found",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-bold",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10 themes · tokens declared",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-bold",
+  "ok": true,
+  "detail": "{\"side\":\"#c2cfda\",\"rule\":\"#1d17122e\",\"activeBg\":\"#1d1712\",\"activeFg\":\"#fffefb\"}"
+ },
+ {
+  "lock": "L10 themes · surface from token",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-bold",
+  "ok": true,
+  "detail": "bg rgb(194, 207, 218) token rgb(194, 207, 218)"
+ },
+ {
+  "lock": "L10 themes · rule from token",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-bold",
+  "ok": true,
+  "detail": "shadow rgba(29, 23, 18, 0.18) -1px 0px 0px 0px inset token rgba(29, 23, 18, 0.18)"
+ },
+ {
+  "lock": "L10 themes · active from tokens",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-bold",
+  "ok": true,
+  "detail": "active rgb(29, 23, 18)/rgb(255, 254, 251) tokens rgb(29, 23, 18)/rgb(255, 254, 251)"
+ },
+ {
+  "lock": "L10 themes · root found",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-edn",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10 themes · tokens declared",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-edn",
+  "ok": true,
+  "detail": "{\"side\":\"#f4f4f3\",\"rule\":\"#ececeb\",\"activeBg\":\"#233150\",\"activeFg\":\"#fff\"}"
+ },
+ {
+  "lock": "L10 themes · surface from token",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-edn",
+  "ok": true,
+  "detail": "bg rgb(244, 244, 243) token rgb(244, 244, 243)"
+ },
+ {
+  "lock": "L10 themes · rule from token",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-edn",
+  "ok": true,
+  "detail": "shadow rgb(236, 236, 235) -1px 0px 0px 0px inset token rgb(236, 236, 235)"
+ },
+ {
+  "lock": "L10 themes · active from tokens",
+  "route": "Query Centre",
+  "size": "1440",
+  "state": "t-edn",
+  "ok": true,
+  "detail": "active rgb(35, 49, 80)/rgb(255, 255, 255) tokens rgb(35, 49, 80)/rgb(255, 255, 255)"
+ }
+]

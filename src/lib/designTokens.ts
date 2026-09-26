@@ -145,6 +145,11 @@ export const shellActiveFg = "#fdf9f5"; // cream on the highlight
 export const shellHoverBg = "rgba(255, 255, 255, 0.45)"; // the hover wash
 export const shellHairline = "rgba(28, 19, 15, 0.12)"; // switcher ring, user-row rule, avatar ring
 export const shellMute = "rgba(28, 19, 15, 0.58)"; // section labels, meta, counts
+export const shellRing = "rgba(28, 19, 15, 0.28)"; // the outline ring
+export const shellBtnHover = "rgba(255, 255, 255, 0.6)"; // outline buttons' hover
+export const shellSwitchBg = "rgba(255, 255, 255, 0.7)"; // the switcher card's fill
+export const shellSwitchHover = "rgba(255, 255, 255, 0.92)";
+export const shellControlBg = "#ffffff"; // the search and help circles, the avatar
 export const shellCanvas = "#f7f2e9"; // THE CONTENT capsule — and its top bar
 export const shellCard = "#fdfaf5"; // card surface (=== parchment)
 export const shellPanel = "#f2ede7"; // IN-PAGE grouping surface — content, not chrome fill

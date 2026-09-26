@@ -1,0 +1,1592 @@
+{
+ "1280-expanded": {
+  "mock": {
+   "fonts": [
+    [
+     "Source Serif 4",
+     true
+    ],
+    [
+     "Special Elite",
+     true
+    ],
+    [
+     "JetBrains Mono",
+     true
+    ]
+   ],
+   "sidebar": {
+    "x": 0,
+    "y": 0,
+    "w": 248,
+    "h": 0
+   },
+   "mark": {
+    "x": 20,
+    "y": 16,
+    "w": 30,
+    "h": 30
+   },
+   "wordmark": {
+    "x": 60,
+    "y": 16.5,
+    "w": 105,
+    "h": 29
+   },
+   "switcher": {
+    "x": 14,
+    "y": 58,
+    "w": 220,
+    "h": 51.5
+   },
+   "firstLabel": {
+    "x": 22,
+    "y": 164.5,
+    "w": 204,
+    "h": 12.3
+   },
+   "active": {
+    "x": 14,
+    "y": 367.5,
+    "w": 220,
+    "h": 33
+   },
+   "user": {
+    "x": 14,
+    "y": 741.5,
+    "w": 220,
+    "h": 46.5
+   },
+   "bar": {
+    "x": 0,
+    "y": 0,
+    "w": 1032,
+    "h": 64
+   },
+   "collapse": {
+    "x": 24,
+    "y": 15,
+    "w": 34,
+    "h": 34
+   },
+   "crumb": {
+    "x": 72,
+    "y": 21.1,
+    "w": 273.7,
+    "h": 21.8
+   },
+   "search": {
+    "x": 767.9,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "feedback": {
+    "x": 813.9,
+    "y": 14,
+    "w": 148.1,
+    "h": 36
+   },
+   "help": {
+    "x": 972,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "styles": {
+    "side": "rgb(231, 227, 220)",
+    "sideShadow": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+    "barShadow": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+    "active": {
+     "bg": "rgb(42, 58, 82)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "600",
+     "color": "rgb(253, 249, 245)"
+    },
+    "nav": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    },
+    "label": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"JetBrains Mono\"",
+     "size": "8.5px",
+     "weight": "600",
+     "color": "rgba(28, 19, 15, 0.58)"
+    },
+    "crumbCur": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "15px",
+     "weight": "600",
+     "color": "rgb(28, 19, 15)"
+    },
+    "feedback": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Special Elite\"",
+     "size": "13.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    }
+   }
+  },
+  "app": {
+   "fonts": [
+    [
+     "Source Serif 4",
+     true
+    ],
+    [
+     "Special Elite",
+     true
+    ],
+    [
+     "JetBrains Mono",
+     true
+    ]
+   ],
+   "sidebar": {
+    "x": 0,
+    "y": 0,
+    "w": 248,
+    "h": 0
+   },
+   "mark": {
+    "x": 20,
+    "y": 16,
+    "w": 30,
+    "h": 30
+   },
+   "wordmark": {
+    "x": 60,
+    "y": 16.5,
+    "w": 105,
+    "h": 29
+   },
+   "switcher": {
+    "x": 14,
+    "y": 58,
+    "w": 220,
+    "h": 51.5
+   },
+   "firstLabel": {
+    "x": 22,
+    "y": 173.5,
+    "w": 204,
+    "h": 12.3
+   },
+   "active": {
+    "x": 14,
+    "y": 376.5,
+    "w": 220,
+    "h": 33
+   },
+   "user": {
+    "x": 14,
+    "y": 659.8,
+    "w": 220,
+    "h": 46.5
+   },
+   "bar": {
+    "x": 0,
+    "y": 0,
+    "w": 1032,
+    "h": 64
+   },
+   "collapse": {
+    "x": 24,
+    "y": 15,
+    "w": 34,
+    "h": 34
+   },
+   "crumb": {
+    "x": 72,
+    "y": 21.1,
+    "w": 273.7,
+    "h": 21.8
+   },
+   "search": {
+    "x": 767.9,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "feedback": {
+    "x": 813.9,
+    "y": 14,
+    "w": 148.1,
+    "h": 36
+   },
+   "help": {
+    "x": 972,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "styles": {
+    "side": "rgb(231, 227, 220)",
+    "sideShadow": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+    "barShadow": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+    "active": {
+     "bg": "rgb(42, 58, 82)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "600",
+     "color": "rgb(253, 249, 245)"
+    },
+    "nav": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    },
+    "label": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"JetBrains Mono\"",
+     "size": "8.5px",
+     "weight": "600",
+     "color": "rgba(28, 19, 15, 0.58)"
+    },
+    "crumbCur": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "15px",
+     "weight": "600",
+     "color": "rgb(28, 19, 15)"
+    },
+    "feedback": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Special Elite\"",
+     "size": "13.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    }
+   }
+  }
+ },
+ "1280-collapsed": {
+  "mock": {
+   "fonts": [
+    [
+     "Source Serif 4",
+     true
+    ],
+    [
+     "Special Elite",
+     true
+    ],
+    [
+     "JetBrains Mono",
+     true
+    ]
+   ],
+   "sidebar": {
+    "x": 0,
+    "y": 0,
+    "w": 68,
+    "h": 0
+   },
+   "mark": {
+    "x": 19,
+    "y": 16,
+    "w": 30,
+    "h": 30
+   },
+   "wordmark": null,
+   "switcher": {
+    "x": 13,
+    "y": 58,
+    "w": 42,
+    "h": 42
+   },
+   "firstLabel": {
+    "x": 20,
+    "y": 155,
+    "w": 28,
+    "h": 1
+   },
+   "active": {
+    "x": 14,
+    "y": 341,
+    "w": 40,
+    "h": 34
+   },
+   "user": {
+    "x": 10,
+    "y": 745,
+    "w": 48,
+    "h": 43
+   },
+   "bar": {
+    "x": 0,
+    "y": 0,
+    "w": 1212,
+    "h": 64
+   },
+   "collapse": {
+    "x": 24,
+    "y": 15,
+    "w": 34,
+    "h": 34
+   },
+   "crumb": {
+    "x": 72,
+    "y": 21.1,
+    "w": 273.7,
+    "h": 21.8
+   },
+   "search": {
+    "x": 947.9,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "feedback": {
+    "x": 993.9,
+    "y": 14,
+    "w": 148.1,
+    "h": 36
+   },
+   "help": {
+    "x": 1152,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "styles": {
+    "side": "rgb(231, 227, 220)",
+    "sideShadow": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+    "barShadow": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+    "active": {
+     "bg": "rgb(42, 58, 82)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "600",
+     "color": "rgb(253, 249, 245)"
+    },
+    "nav": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    },
+    "label": {
+     "bg": "rgba(28, 19, 15, 0.12)",
+     "fam": "\"JetBrains Mono\"",
+     "size": "0px",
+     "weight": "600",
+     "color": "rgba(28, 19, 15, 0.58)"
+    },
+    "crumbCur": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "15px",
+     "weight": "600",
+     "color": "rgb(28, 19, 15)"
+    },
+    "feedback": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Special Elite\"",
+     "size": "13.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    }
+   }
+  },
+  "app": {
+   "fonts": [
+    [
+     "Source Serif 4",
+     true
+    ],
+    [
+     "Special Elite",
+     true
+    ],
+    [
+     "JetBrains Mono",
+     true
+    ]
+   ],
+   "sidebar": {
+    "x": 0,
+    "y": 0,
+    "w": 68,
+    "h": 0
+   },
+   "mark": {
+    "x": 19,
+    "y": 16,
+    "w": 30,
+    "h": 30
+   },
+   "wordmark": null,
+   "switcher": {
+    "x": 13,
+    "y": 58,
+    "w": 42,
+    "h": 42
+   },
+   "firstLabel": {
+    "x": 20,
+    "y": 155,
+    "w": 28,
+    "h": 1
+   },
+   "active": {
+    "x": 14,
+    "y": 341,
+    "w": 40,
+    "h": 34
+   },
+   "user": {
+    "x": 10,
+    "y": 703.3,
+    "w": 48,
+    "h": 43
+   },
+   "bar": {
+    "x": 0,
+    "y": 0,
+    "w": 1212,
+    "h": 64
+   },
+   "collapse": {
+    "x": 24,
+    "y": 15,
+    "w": 34,
+    "h": 34
+   },
+   "crumb": {
+    "x": 72,
+    "y": 21.1,
+    "w": 273.7,
+    "h": 21.8
+   },
+   "search": {
+    "x": 947.9,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "feedback": {
+    "x": 993.9,
+    "y": 14,
+    "w": 148.1,
+    "h": 36
+   },
+   "help": {
+    "x": 1152,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "styles": {
+    "side": "rgb(231, 227, 220)",
+    "sideShadow": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+    "barShadow": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+    "active": {
+     "bg": "rgb(42, 58, 82)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "600",
+     "color": "rgb(253, 249, 245)"
+    },
+    "nav": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    },
+    "label": {
+     "bg": "rgba(28, 19, 15, 0.12)",
+     "fam": "\"JetBrains Mono\"",
+     "size": "0px",
+     "weight": "600",
+     "color": "rgba(0, 0, 0, 0)"
+    },
+    "crumbCur": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "15px",
+     "weight": "600",
+     "color": "rgb(28, 19, 15)"
+    },
+    "feedback": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Special Elite\"",
+     "size": "13.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    }
+   }
+  }
+ },
+ "1440-expanded": {
+  "mock": {
+   "fonts": [
+    [
+     "Source Serif 4",
+     true
+    ],
+    [
+     "Special Elite",
+     true
+    ],
+    [
+     "JetBrains Mono",
+     true
+    ]
+   ],
+   "sidebar": {
+    "x": 0,
+    "y": 0,
+    "w": 248,
+    "h": 0
+   },
+   "mark": {
+    "x": 20,
+    "y": 16,
+    "w": 30,
+    "h": 30
+   },
+   "wordmark": {
+    "x": 60,
+    "y": 16.5,
+    "w": 105,
+    "h": 29
+   },
+   "switcher": {
+    "x": 14,
+    "y": 58,
+    "w": 220,
+    "h": 51.5
+   },
+   "firstLabel": {
+    "x": 22,
+    "y": 164.5,
+    "w": 204,
+    "h": 12.3
+   },
+   "active": {
+    "x": 14,
+    "y": 367.5,
+    "w": 220,
+    "h": 33
+   },
+   "user": {
+    "x": 14,
+    "y": 841.5,
+    "w": 220,
+    "h": 46.5
+   },
+   "bar": {
+    "x": 0,
+    "y": 0,
+    "w": 1192,
+    "h": 64
+   },
+   "collapse": {
+    "x": 24,
+    "y": 15,
+    "w": 34,
+    "h": 34
+   },
+   "crumb": {
+    "x": 72,
+    "y": 21.1,
+    "w": 273.7,
+    "h": 21.8
+   },
+   "search": {
+    "x": 927.9,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "feedback": {
+    "x": 973.9,
+    "y": 14,
+    "w": 148.1,
+    "h": 36
+   },
+   "help": {
+    "x": 1132,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "styles": {
+    "side": "rgb(231, 227, 220)",
+    "sideShadow": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+    "barShadow": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+    "active": {
+     "bg": "rgb(42, 58, 82)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "600",
+     "color": "rgb(253, 249, 245)"
+    },
+    "nav": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    },
+    "label": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"JetBrains Mono\"",
+     "size": "8.5px",
+     "weight": "600",
+     "color": "rgba(28, 19, 15, 0.58)"
+    },
+    "crumbCur": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "15px",
+     "weight": "600",
+     "color": "rgb(28, 19, 15)"
+    },
+    "feedback": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Special Elite\"",
+     "size": "13.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    }
+   }
+  },
+  "app": {
+   "fonts": [
+    [
+     "Source Serif 4",
+     true
+    ],
+    [
+     "Special Elite",
+     true
+    ],
+    [
+     "JetBrains Mono",
+     true
+    ]
+   ],
+   "sidebar": {
+    "x": 0,
+    "y": 0,
+    "w": 248,
+    "h": 0
+   },
+   "mark": {
+    "x": 20,
+    "y": 16,
+    "w": 30,
+    "h": 30
+   },
+   "wordmark": {
+    "x": 60,
+    "y": 16.5,
+    "w": 105,
+    "h": 29
+   },
+   "switcher": {
+    "x": 14,
+    "y": 58,
+    "w": 220,
+    "h": 51.5
+   },
+   "firstLabel": {
+    "x": 22,
+    "y": 173.5,
+    "w": 204,
+    "h": 12.3
+   },
+   "active": {
+    "x": 14,
+    "y": 376.5,
+    "w": 220,
+    "h": 33
+   },
+   "user": {
+    "x": 14,
+    "y": 759.8,
+    "w": 220,
+    "h": 46.5
+   },
+   "bar": {
+    "x": 0,
+    "y": 0,
+    "w": 1192,
+    "h": 64
+   },
+   "collapse": {
+    "x": 24,
+    "y": 15,
+    "w": 34,
+    "h": 34
+   },
+   "crumb": {
+    "x": 72,
+    "y": 21.1,
+    "w": 273.7,
+    "h": 21.8
+   },
+   "search": {
+    "x": 927.9,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "feedback": {
+    "x": 973.9,
+    "y": 14,
+    "w": 148.1,
+    "h": 36
+   },
+   "help": {
+    "x": 1132,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "styles": {
+    "side": "rgb(231, 227, 220)",
+    "sideShadow": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+    "barShadow": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+    "active": {
+     "bg": "rgb(42, 58, 82)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "600",
+     "color": "rgb(253, 249, 245)"
+    },
+    "nav": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    },
+    "label": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"JetBrains Mono\"",
+     "size": "8.5px",
+     "weight": "600",
+     "color": "rgba(28, 19, 15, 0.58)"
+    },
+    "crumbCur": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "15px",
+     "weight": "600",
+     "color": "rgb(28, 19, 15)"
+    },
+    "feedback": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Special Elite\"",
+     "size": "13.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    }
+   }
+  }
+ },
+ "1440-collapsed": {
+  "mock": {
+   "fonts": [
+    [
+     "Source Serif 4",
+     true
+    ],
+    [
+     "Special Elite",
+     true
+    ],
+    [
+     "JetBrains Mono",
+     true
+    ]
+   ],
+   "sidebar": {
+    "x": 0,
+    "y": 0,
+    "w": 68,
+    "h": 0
+   },
+   "mark": {
+    "x": 19,
+    "y": 16,
+    "w": 30,
+    "h": 30
+   },
+   "wordmark": null,
+   "switcher": {
+    "x": 13,
+    "y": 58,
+    "w": 42,
+    "h": 42
+   },
+   "firstLabel": {
+    "x": 20,
+    "y": 155,
+    "w": 28,
+    "h": 1
+   },
+   "active": {
+    "x": 14,
+    "y": 341,
+    "w": 40,
+    "h": 34
+   },
+   "user": {
+    "x": 10,
+    "y": 845,
+    "w": 48,
+    "h": 43
+   },
+   "bar": {
+    "x": 0,
+    "y": 0,
+    "w": 1372,
+    "h": 64
+   },
+   "collapse": {
+    "x": 24,
+    "y": 15,
+    "w": 34,
+    "h": 34
+   },
+   "crumb": {
+    "x": 72,
+    "y": 21.1,
+    "w": 273.7,
+    "h": 21.8
+   },
+   "search": {
+    "x": 1107.9,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "feedback": {
+    "x": 1153.9,
+    "y": 14,
+    "w": 148.1,
+    "h": 36
+   },
+   "help": {
+    "x": 1312,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "styles": {
+    "side": "rgb(231, 227, 220)",
+    "sideShadow": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+    "barShadow": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+    "active": {
+     "bg": "rgb(42, 58, 82)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "600",
+     "color": "rgb(253, 249, 245)"
+    },
+    "nav": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    },
+    "label": {
+     "bg": "rgba(28, 19, 15, 0.12)",
+     "fam": "\"JetBrains Mono\"",
+     "size": "0px",
+     "weight": "600",
+     "color": "rgba(28, 19, 15, 0.58)"
+    },
+    "crumbCur": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "15px",
+     "weight": "600",
+     "color": "rgb(28, 19, 15)"
+    },
+    "feedback": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Special Elite\"",
+     "size": "13.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    }
+   }
+  },
+  "app": {
+   "fonts": [
+    [
+     "Source Serif 4",
+     true
+    ],
+    [
+     "Special Elite",
+     true
+    ],
+    [
+     "JetBrains Mono",
+     true
+    ]
+   ],
+   "sidebar": {
+    "x": 0,
+    "y": 0,
+    "w": 68,
+    "h": 0
+   },
+   "mark": {
+    "x": 19,
+    "y": 16,
+    "w": 30,
+    "h": 30
+   },
+   "wordmark": null,
+   "switcher": {
+    "x": 13,
+    "y": 58,
+    "w": 42,
+    "h": 42
+   },
+   "firstLabel": {
+    "x": 20,
+    "y": 155,
+    "w": 28,
+    "h": 1
+   },
+   "active": {
+    "x": 14,
+    "y": 341,
+    "w": 40,
+    "h": 34
+   },
+   "user": {
+    "x": 10,
+    "y": 803.3,
+    "w": 48,
+    "h": 43
+   },
+   "bar": {
+    "x": 0,
+    "y": 0,
+    "w": 1372,
+    "h": 64
+   },
+   "collapse": {
+    "x": 24,
+    "y": 15,
+    "w": 34,
+    "h": 34
+   },
+   "crumb": {
+    "x": 72,
+    "y": 21.1,
+    "w": 273.7,
+    "h": 21.8
+   },
+   "search": {
+    "x": 1107.9,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "feedback": {
+    "x": 1153.9,
+    "y": 14,
+    "w": 148.1,
+    "h": 36
+   },
+   "help": {
+    "x": 1312,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "styles": {
+    "side": "rgb(231, 227, 220)",
+    "sideShadow": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+    "barShadow": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+    "active": {
+     "bg": "rgb(42, 58, 82)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "600",
+     "color": "rgb(253, 249, 245)"
+    },
+    "nav": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    },
+    "label": {
+     "bg": "rgba(28, 19, 15, 0.12)",
+     "fam": "\"JetBrains Mono\"",
+     "size": "0px",
+     "weight": "600",
+     "color": "rgba(0, 0, 0, 0)"
+    },
+    "crumbCur": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "15px",
+     "weight": "600",
+     "color": "rgb(28, 19, 15)"
+    },
+    "feedback": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Special Elite\"",
+     "size": "13.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    }
+   }
+  }
+ },
+ "1920-expanded": {
+  "mock": {
+   "fonts": [
+    [
+     "Source Serif 4",
+     true
+    ],
+    [
+     "Special Elite",
+     true
+    ],
+    [
+     "JetBrains Mono",
+     true
+    ]
+   ],
+   "sidebar": {
+    "x": 0,
+    "y": 0,
+    "w": 248,
+    "h": 0
+   },
+   "mark": {
+    "x": 20,
+    "y": 16,
+    "w": 30,
+    "h": 30
+   },
+   "wordmark": {
+    "x": 60,
+    "y": 16.5,
+    "w": 105,
+    "h": 29
+   },
+   "switcher": {
+    "x": 14,
+    "y": 58,
+    "w": 220,
+    "h": 51.5
+   },
+   "firstLabel": {
+    "x": 22,
+    "y": 164.5,
+    "w": 204,
+    "h": 12.3
+   },
+   "active": {
+    "x": 14,
+    "y": 367.5,
+    "w": 220,
+    "h": 33
+   },
+   "user": {
+    "x": 14,
+    "y": 1021.5,
+    "w": 220,
+    "h": 46.5
+   },
+   "bar": {
+    "x": 0,
+    "y": 0,
+    "w": 1672,
+    "h": 64
+   },
+   "collapse": {
+    "x": 24,
+    "y": 15,
+    "w": 34,
+    "h": 34
+   },
+   "crumb": {
+    "x": 72,
+    "y": 21.1,
+    "w": 273.7,
+    "h": 21.8
+   },
+   "search": {
+    "x": 1407.9,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "feedback": {
+    "x": 1453.9,
+    "y": 14,
+    "w": 148.1,
+    "h": 36
+   },
+   "help": {
+    "x": 1612,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "styles": {
+    "side": "rgb(231, 227, 220)",
+    "sideShadow": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+    "barShadow": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+    "active": {
+     "bg": "rgb(42, 58, 82)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "600",
+     "color": "rgb(253, 249, 245)"
+    },
+    "nav": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    },
+    "label": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"JetBrains Mono\"",
+     "size": "8.5px",
+     "weight": "600",
+     "color": "rgba(28, 19, 15, 0.58)"
+    },
+    "crumbCur": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "15px",
+     "weight": "600",
+     "color": "rgb(28, 19, 15)"
+    },
+    "feedback": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Special Elite\"",
+     "size": "13.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    }
+   }
+  },
+  "app": {
+   "fonts": [
+    [
+     "Source Serif 4",
+     true
+    ],
+    [
+     "Special Elite",
+     true
+    ],
+    [
+     "JetBrains Mono",
+     true
+    ]
+   ],
+   "sidebar": {
+    "x": 0,
+    "y": 0,
+    "w": 248,
+    "h": 0
+   },
+   "mark": {
+    "x": 20,
+    "y": 16,
+    "w": 30,
+    "h": 30
+   },
+   "wordmark": {
+    "x": 60,
+    "y": 16.5,
+    "w": 105,
+    "h": 29
+   },
+   "switcher": {
+    "x": 14,
+    "y": 58,
+    "w": 220,
+    "h": 51.5
+   },
+   "firstLabel": {
+    "x": 22,
+    "y": 173.5,
+    "w": 204,
+    "h": 12.3
+   },
+   "active": {
+    "x": 14,
+    "y": 376.5,
+    "w": 220,
+    "h": 33
+   },
+   "user": {
+    "x": 14,
+    "y": 939.8,
+    "w": 220,
+    "h": 46.5
+   },
+   "bar": {
+    "x": 0,
+    "y": 0,
+    "w": 1672,
+    "h": 64
+   },
+   "collapse": {
+    "x": 24,
+    "y": 15,
+    "w": 34,
+    "h": 34
+   },
+   "crumb": {
+    "x": 72,
+    "y": 21.1,
+    "w": 273.7,
+    "h": 21.8
+   },
+   "search": {
+    "x": 1407.9,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "feedback": {
+    "x": 1453.9,
+    "y": 14,
+    "w": 148.1,
+    "h": 36
+   },
+   "help": {
+    "x": 1612,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "styles": {
+    "side": "rgb(231, 227, 220)",
+    "sideShadow": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+    "barShadow": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+    "active": {
+     "bg": "rgb(42, 58, 82)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "600",
+     "color": "rgb(253, 249, 245)"
+    },
+    "nav": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    },
+    "label": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"JetBrains Mono\"",
+     "size": "8.5px",
+     "weight": "600",
+     "color": "rgba(28, 19, 15, 0.58)"
+    },
+    "crumbCur": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "15px",
+     "weight": "600",
+     "color": "rgb(28, 19, 15)"
+    },
+    "feedback": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Special Elite\"",
+     "size": "13.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    }
+   }
+  }
+ },
+ "1920-collapsed": {
+  "mock": {
+   "fonts": [
+    [
+     "Source Serif 4",
+     true
+    ],
+    [
+     "Special Elite",
+     true
+    ],
+    [
+     "JetBrains Mono",
+     true
+    ]
+   ],
+   "sidebar": {
+    "x": 0,
+    "y": 0,
+    "w": 68,
+    "h": 0
+   },
+   "mark": {
+    "x": 19,
+    "y": 16,
+    "w": 30,
+    "h": 30
+   },
+   "wordmark": null,
+   "switcher": {
+    "x": 13,
+    "y": 58,
+    "w": 42,
+    "h": 42
+   },
+   "firstLabel": {
+    "x": 20,
+    "y": 155,
+    "w": 28,
+    "h": 1
+   },
+   "active": {
+    "x": 14,
+    "y": 341,
+    "w": 40,
+    "h": 34
+   },
+   "user": {
+    "x": 10,
+    "y": 1025,
+    "w": 48,
+    "h": 43
+   },
+   "bar": {
+    "x": 0,
+    "y": 0,
+    "w": 1852,
+    "h": 64
+   },
+   "collapse": {
+    "x": 24,
+    "y": 15,
+    "w": 34,
+    "h": 34
+   },
+   "crumb": {
+    "x": 72,
+    "y": 21.1,
+    "w": 273.7,
+    "h": 21.8
+   },
+   "search": {
+    "x": 1587.9,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "feedback": {
+    "x": 1633.9,
+    "y": 14,
+    "w": 148.1,
+    "h": 36
+   },
+   "help": {
+    "x": 1792,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "styles": {
+    "side": "rgb(231, 227, 220)",
+    "sideShadow": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+    "barShadow": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+    "active": {
+     "bg": "rgb(42, 58, 82)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "600",
+     "color": "rgb(253, 249, 245)"
+    },
+    "nav": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    },
+    "label": {
+     "bg": "rgba(28, 19, 15, 0.12)",
+     "fam": "\"JetBrains Mono\"",
+     "size": "0px",
+     "weight": "600",
+     "color": "rgba(28, 19, 15, 0.58)"
+    },
+    "crumbCur": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "15px",
+     "weight": "600",
+     "color": "rgb(28, 19, 15)"
+    },
+    "feedback": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Special Elite\"",
+     "size": "13.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    }
+   }
+  },
+  "app": {
+   "fonts": [
+    [
+     "Source Serif 4",
+     true
+    ],
+    [
+     "Special Elite",
+     true
+    ],
+    [
+     "JetBrains Mono",
+     true
+    ]
+   ],
+   "sidebar": {
+    "x": 0,
+    "y": 0,
+    "w": 68,
+    "h": 0
+   },
+   "mark": {
+    "x": 19,
+    "y": 16,
+    "w": 30,
+    "h": 30
+   },
+   "wordmark": null,
+   "switcher": {
+    "x": 13,
+    "y": 58,
+    "w": 42,
+    "h": 42
+   },
+   "firstLabel": {
+    "x": 20,
+    "y": 155,
+    "w": 28,
+    "h": 1
+   },
+   "active": {
+    "x": 14,
+    "y": 341,
+    "w": 40,
+    "h": 34
+   },
+   "user": {
+    "x": 10,
+    "y": 983.3,
+    "w": 48,
+    "h": 43
+   },
+   "bar": {
+    "x": 0,
+    "y": 0,
+    "w": 1852,
+    "h": 64
+   },
+   "collapse": {
+    "x": 24,
+    "y": 15,
+    "w": 34,
+    "h": 34
+   },
+   "crumb": {
+    "x": 72,
+    "y": 21.1,
+    "w": 273.7,
+    "h": 21.8
+   },
+   "search": {
+    "x": 1587.9,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "feedback": {
+    "x": 1633.9,
+    "y": 14,
+    "w": 148.1,
+    "h": 36
+   },
+   "help": {
+    "x": 1792,
+    "y": 14,
+    "w": 36,
+    "h": 36
+   },
+   "styles": {
+    "side": "rgb(231, 227, 220)",
+    "sideShadow": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+    "barShadow": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+    "active": {
+     "bg": "rgb(42, 58, 82)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "600",
+     "color": "rgb(253, 249, 245)"
+    },
+    "nav": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "14.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    },
+    "label": {
+     "bg": "rgba(28, 19, 15, 0.12)",
+     "fam": "\"JetBrains Mono\"",
+     "size": "0px",
+     "weight": "600",
+     "color": "rgba(0, 0, 0, 0)"
+    },
+    "crumbCur": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Source Serif 4\"",
+     "size": "15px",
+     "weight": "600",
+     "color": "rgb(28, 19, 15)"
+    },
+    "feedback": {
+     "bg": "rgba(0, 0, 0, 0)",
+     "fam": "\"Special Elite\"",
+     "size": "13.5px",
+     "weight": "400",
+     "color": "rgb(28, 19, 15)"
+    }
+   }
+  }
+ }
+}

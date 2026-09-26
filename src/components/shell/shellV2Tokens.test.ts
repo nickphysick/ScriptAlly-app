@@ -51,6 +51,11 @@ const BAKED: Record<string, string> = {
   "--shell-hover-bg": "rgba(255, 255, 255, 0.45)",
   "--shell-hairline": "rgba(28, 19, 15, 0.12)",
   "--shell-mute": "rgba(28, 19, 15, 0.58)",
+  "--shell-ring": "rgba(28, 19, 15, 0.28)",
+  "--shell-btn-hover": "rgba(255, 255, 255, 0.6)",
+  "--shell-switch-bg": "rgba(255, 255, 255, 0.7)",
+  "--shell-switch-hover": "rgba(255, 255, 255, 0.92)",
+  "--shell-control-bg": "#ffffff",
   "--shell-canvas": "#f7f2e9", // the CONTENT capsule, and its top bar
   "--shell-card": "#fdfaf5",
   "--shell-panel": "#f2ede7",
@@ -212,6 +217,11 @@ describe("capsule tokens — designTokens.ts twins agree", () => {
     expect(dt.shellHoverBg).toBe("rgba(255, 255, 255, 0.45)");
     expect(dt.shellHairline).toBe("rgba(28, 19, 15, 0.12)");
     expect(dt.shellMute).toBe("rgba(28, 19, 15, 0.58)");
+    expect(dt.shellRing).toBe("rgba(28, 19, 15, 0.28)");
+    expect(dt.shellBtnHover).toBe("rgba(255, 255, 255, 0.6)");
+    expect(dt.shellSwitchBg).toBe("rgba(255, 255, 255, 0.7)");
+    expect(dt.shellSwitchHover).toBe("rgba(255, 255, 255, 0.92)");
+    expect(dt.shellControlBg).toBe("#ffffff");
     expect(dt.shellCanvas).toBe("#f7f2e9");
     expect(dt.shellCard).toBe("#fdfaf5");
     expect(dt.shellPanel).toBe("#f2ede7");

@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "L11 save-failure · write was re-addressed",
+  "route": "Settings",
+  "size": "1440",
+  "state": "denied write",
+  "ok": true,
+  "detail": "rewrote 1"
+ },
+ {
+  "lock": "L11 save-failure · error shown",
+  "route": "Settings",
+  "size": "1440",
+  "state": "denied write",
+  "ok": true,
+  "detail": "Couldn't save. Please try again."
+ },
+ {
+  "lock": "L11 save-failure · nothing was written",
+  "route": "Settings",
+  "size": "1440",
+  "state": "denied write",
+  "ok": true,
+  "detail": "name unchanged after reload"
+ }
+]

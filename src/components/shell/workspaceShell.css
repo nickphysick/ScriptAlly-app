@@ -155,7 +155,7 @@
   position: relative;
   flex: 1;
   min-width: 0;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--shell-switch-bg);
   border: 0;
   box-shadow: inset 0 0 0 1px var(--shell-hairline);
   border-radius: 12px;
@@ -470,13 +470,13 @@
   color: var(--sp-ink);
   background: transparent;
   border: 0;
-  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.28);
+  box-shadow: inset 0 0 0 1px var(--shell-ring);
   border-radius: 10px;
   cursor: pointer;
   text-align: center;
   transition: background 0.15s;
 }
-.ws-upgrow:hover { background: rgba(255, 255, 255, 0.6); }
+.ws-upgrow:hover { background: var(--shell-btn-hover); }
 .ws-upgrow:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--shell-focus); }
 /* ⚠️ `.ws-setrow` IS DELETED WITH THE ROW IT STYLED (audit pack P5) — Settings is an ordinary
    `.ws-ni` in the ACCOUNT section now, and a leftover rule for a row that no longer exists is how
@@ -699,7 +699,7 @@
    above and left `flex-direction: column` standing. One element, one rule. */
 .ws-av {
   width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
-  background: #ffffff; border: 0; box-shadow: inset 0 0 0 1px var(--shell-hairline);
+  background: var(--shell-control-bg); border: 0; box-shadow: inset 0 0 0 1px var(--shell-hairline);
   font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--sp-ink);
   display: grid; place-items: center;
 }
@@ -796,13 +796,13 @@
   box-sizing: border-box; flex: none;
   width: 36px; height: 36px; padding: 0;
   display: grid; place-items: center;
-  border: 0; border-radius: 50%; background: #ffffff;
+  border: 0; border-radius: 50%; background: var(--shell-control-bg);
   box-shadow: inset 0 0 0 1px var(--shell-hairline);
   color: var(--sp-ink); cursor: pointer;
   font-family: var(--sp-serif); font-size: 15px; font-weight: 600; line-height: 1;
 }
 .ws-ibtn > span { font-family: inherit; }
-.ws-ibtn:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.28); }
+.ws-ibtn:hover { box-shadow: inset 0 0 0 1px var(--shell-ring); }
 .ws-ibtn svg { display: block; }
 
 /* ── THE FEEDBACK BUTTON (feedback pack) ──
@@ -816,12 +816,12 @@
   height: 36px; padding: 0 16px;
   display: inline-flex; align-items: center; gap: 8px;
   border: 0; border-radius: 10px; background: transparent;
-  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.28);
+  box-shadow: inset 0 0 0 1px var(--shell-ring);
   color: var(--sp-ink); cursor: pointer; white-space: nowrap;
   font-family: var(--sp-type); font-size: 13.5px; line-height: 1;
 }
 .ws-fb-l { font-family: inherit; }
-.ws-fb:hover { background: rgba(255, 255, 255, 0.6); }
+.ws-fb:hover { background: var(--shell-btn-hover); }
 .ws-fb svg { display: block; flex: none; }
 /* ⚠️ `.ws-bdiv` — THE HAIRLINE BETWEEN FEEDBACK AND HELP — IS RETIRED, RULE AND ELEMENT (the v34 mockup, 19 Sep).
    It separated a labelled pill from a cluster of bare glyphs. Both are 50px objects in one language now,
@@ -885,7 +885,7 @@
 
 /* manuscript selector: the fill brightens and the mark tilts */
 .ws-mspill { transition: background-color 0.16s ease; }
-.ws-mspill:not(.static):hover { background: rgba(255, 255, 255, 0.92); }
+.ws-mspill:not(.static):hover { background: var(--shell-switch-hover); }
 .ws-mspill img, .ws-mspill svg { transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1); }
 .ws-mspill:hover img, .ws-mspill:hover svg { transform: rotate(-3deg); }
 
@@ -1024,14 +1024,19 @@
 /* manuscript selector: the 40px book tile alone, centred; title, meta and arrows collapse.
    (Its 10px gap moved onto .ws-mstt as margin — same mechanism as the nav rows.) */
 .sb-collapsed .ws-msopen { justify-content: center; padding: 8px; }
-.sb-collapsed .ws-mstt { flex: 0 1 0%; max-width: 0; opacity: 0; margin-left: 0; }
+/* ⚠️ `max-height: 0` AS WELL AS WIDTH — the hidden title is two lines tall, and a zero-width block of
+   two lines still holds the tile 7.5px taller than the ref's 42px icon-only switcher (measured against
+   the mock). Height and width both collapse; the text stays in the accessibility tree. */
+.sb-collapsed .ws-mstt { flex: 0 1 0%; max-width: 0; max-height: 0; opacity: 0; margin-left: 0; }
 .sb-collapsed .ws-msnav { opacity: 0; pointer-events: none; }
 .sb-collapsed .ws-msdots { display: none; }
 
 /* user row: the avatar alone. The Upgrade pill zeroes its border and padding — a collapsed pill
    that kept them would survive as a stray 10px lozenge of border beside the avatar. */
-.sb-collapsed .ws-uacct { justify-content: center; padding: 10px 0 2px; width: 100%; }
-.sb-collapsed .ws-utext { flex: 0 1 0%; max-width: 0; opacity: 0; margin-left: 0; }
+/* the foot spans the 48px rail so the user row's hairline does (the ref's collapsed `.me`) */
+.sb-collapsed .ws-pfoot { width: 100%; }
+.sb-collapsed .ws-uacct { justify-content: center; padding: 10px 0 2px; width: 100%; box-sizing: border-box; }
+.sb-collapsed .ws-utext { flex: 0 1 0%; max-width: 0; max-height: 0; opacity: 0; margin-left: 0; }
 /* ⚠️ NO COLLAPSED RULE FOR THE PILL — it is not rendered at 72px at all (Option D), so there is
    nothing to zero. The old rule had to null border AND padding or a collapsed pill survived as a
    stray lozenge of border beside the avatar; removing the element outright retires that whole

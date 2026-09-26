@@ -1744,6 +1744,9 @@ The shell's palette sits at **`:root`** in `src/index.css` (portalled chrome doe
 | `--shell-hover-bg` | `rgba(255,255,255,.45)` | `var(--rail-hov)` `#f6efec` | `var(--rail-hov)` `#f3f3f2` |
 | `--shell-hairline` | `rgba(28,19,15,.12)` — the ref's `--hair`: switcher ring, user-row rule, avatar ring, collapsed section hairlines | default | default |
 | `--shell-mute` | `rgba(28,19,15,.58)` — the ref's `--muted`: section labels, meta, counts | default | default |
+| `--shell-ring` | `rgba(28,19,15,.28)` — the outline ring: Give feedback, Upgrade, the circles' hover | default | default |
+| `--shell-btn-hover` / `--shell-switch-bg` / `--shell-switch-hover` | `rgba(255,255,255,.6)` / `.7` / `.92` | default | default |
+| `--shell-control-bg` | `#ffffff` — the search and help circles, the avatar | default | default |
 | `--shell-side-w` | `248px` | — | — |
 | `--shell-side-w-collapsed` | `68px` | — | — |
 | `--shell-top-h` | `64px` | — | — |

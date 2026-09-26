@@ -340,6 +340,11 @@
   --shell-hover-bg: rgba(255, 255, 255, 0.45);
   --shell-hairline: rgba(28, 19, 15, 0.12); /* the ref's --hair: switcher ring, user-row rule, avatar ring */
   --shell-mute: rgba(28, 19, 15, 0.58);     /* the ref's --muted: section labels, meta, counts */
+  --shell-ring: rgba(28, 19, 15, 0.28);     /* the outline ring: Give feedback, Upgrade, the circles' hover */
+  --shell-btn-hover: rgba(255, 255, 255, 0.6); /* the outline buttons' hover wash */
+  --shell-switch-bg: rgba(255, 255, 255, 0.7); /* the switcher card's fill */
+  --shell-switch-hover: rgba(255, 255, 255, 0.92);
+  --shell-control-bg: #ffffff;              /* the search and help circles, the avatar */
   --shell-canvas: #f7f2e9;            /* THE CONTENT capsule — and its top bar */
   --shell-card: #fdfaf5;              /* card surface (=== parchment) */
   /* The interior fill moved WITH the panel (#f2ede7 → #efe8df): against a #f8f4ee panel the
