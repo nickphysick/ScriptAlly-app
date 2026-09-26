@@ -1,0 +1,599 @@
+{
+ "1920x1080": {
+  "fontsLoaded": [],
+  "expanded": {
+   "side": [
+    0,
+    0,
+    248,
+    1080
+   ],
+   "top": [
+    248,
+    0,
+    1672,
+    64
+   ],
+   "win": [
+    248,
+    64,
+    1672,
+    1016
+   ],
+   "collapse": [
+    272,
+    15,
+    34,
+    34
+   ],
+   "crumb": [
+    320,
+    21,
+    243,
+    22
+   ],
+   "search": [
+    1646,
+    14,
+    36,
+    36
+   ],
+   "feedback": [
+    1692,
+    14,
+    158,
+    36
+   ],
+   "help": [
+    1860,
+    14,
+    36,
+    36
+   ],
+   "active": [
+    14,
+    367,
+    220,
+    33
+   ],
+   "logo": [
+    14,
+    16,
+    220,
+    30
+   ],
+   "switcher": [
+    14,
+    58,
+    220,
+    51
+   ],
+   "me": [
+    14,
+    1022,
+    220,
+    46
+   ],
+   "group": [
+    344,
+    92,
+    1480,
+    1145
+   ],
+   "rail": [
+    1484,
+    92,
+    340,
+    678
+   ],
+   "topRightClear": 24,
+   "sideOverflowY": 0,
+   "overflowing": [],
+   "sideBg": "rgb(231, 227, 220)",
+   "sideEdge": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+   "topBg": "rgb(245, 241, 235)",
+   "topEdge": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+   "activeBg": "rgb(42, 58, 82)",
+   "activeFg": "rgb(253, 249, 245)",
+   "navFont": "\"Source Serif 4\"",
+   "navSize": "14.5px",
+   "savedPresent": false
+  },
+  "collapsed": {
+   "side": [
+    0,
+    0,
+    68,
+    1080
+   ],
+   "top": [
+    68,
+    0,
+    1852,
+    64
+   ],
+   "win": [
+    68,
+    64,
+    1852,
+    1016
+   ],
+   "collapse": [
+    92,
+    15,
+    34,
+    34
+   ],
+   "crumb": [
+    140,
+    21,
+    243,
+    22
+   ],
+   "search": [
+    1646,
+    14,
+    36,
+    36
+   ],
+   "feedback": [
+    1692,
+    14,
+    158,
+    36
+   ],
+   "help": [
+    1860,
+    14,
+    36,
+    36
+   ],
+   "active": [
+    14,
+    341,
+    40,
+    34
+   ],
+   "logo": [
+    19,
+    16,
+    30,
+    30
+   ],
+   "switcher": [
+    13,
+    58,
+    42,
+    42
+   ],
+   "me": [
+    10,
+    1025,
+    48,
+    43
+   ],
+   "group": [
+    254,
+    92,
+    1480,
+    1145
+   ],
+   "rail": [
+    1394,
+    92,
+    340,
+    678
+   ],
+   "topRightClear": 24,
+   "sideOverflowY": 0,
+   "overflowing": [],
+   "sideBg": "rgb(231, 227, 220)",
+   "sideEdge": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+   "topBg": "rgb(245, 241, 235)",
+   "topEdge": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+   "activeBg": "rgb(42, 58, 82)",
+   "activeFg": "rgb(253, 249, 245)",
+   "navFont": "\"Source Serif 4\"",
+   "navSize": "14.5px",
+   "savedPresent": false
+  }
+ },
+ "1440x900": {
+  "fontsLoaded": [],
+  "expanded": {
+   "side": [
+    0,
+    0,
+    248,
+    900
+   ],
+   "top": [
+    248,
+    0,
+    1192,
+    64
+   ],
+   "win": [
+    248,
+    64,
+    1192,
+    836
+   ],
+   "collapse": [
+    272,
+    15,
+    34,
+    34
+   ],
+   "crumb": [
+    320,
+    21,
+    243,
+    22
+   ],
+   "search": [
+    1166,
+    14,
+    36,
+    36
+   ],
+   "feedback": [
+    1212,
+    14,
+    158,
+    36
+   ],
+   "help": [
+    1380,
+    14,
+    36,
+    36
+   ],
+   "active": [
+    14,
+    367,
+    220,
+    33
+   ],
+   "logo": [
+    14,
+    16,
+    220,
+    30
+   ],
+   "switcher": [
+    14,
+    58,
+    220,
+    51
+   ],
+   "me": [
+    14,
+    842,
+    220,
+    46
+   ],
+   "group": [
+    276,
+    92,
+    1136,
+    1145
+   ],
+   "rail": [
+    1072,
+    92,
+    340,
+    678
+   ],
+   "topRightClear": 24,
+   "sideOverflowY": 0,
+   "overflowing": [],
+   "sideBg": "rgb(231, 227, 220)",
+   "sideEdge": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+   "topBg": "rgb(245, 241, 235)",
+   "topEdge": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+   "activeBg": "rgb(42, 58, 82)",
+   "activeFg": "rgb(253, 249, 245)",
+   "navFont": "\"Source Serif 4\"",
+   "navSize": "14.5px",
+   "savedPresent": false
+  },
+  "collapsed": {
+   "side": [
+    0,
+    0,
+    68,
+    900
+   ],
+   "top": [
+    68,
+    0,
+    1372,
+    64
+   ],
+   "win": [
+    68,
+    64,
+    1372,
+    836
+   ],
+   "collapse": [
+    92,
+    15,
+    34,
+    34
+   ],
+   "crumb": [
+    140,
+    21,
+    243,
+    22
+   ],
+   "search": [
+    1166,
+    14,
+    36,
+    36
+   ],
+   "feedback": [
+    1212,
+    14,
+    158,
+    36
+   ],
+   "help": [
+    1380,
+    14,
+    36,
+    36
+   ],
+   "active": [
+    14,
+    341,
+    40,
+    34
+   ],
+   "logo": [
+    19,
+    16,
+    30,
+    30
+   ],
+   "switcher": [
+    13,
+    58,
+    42,
+    42
+   ],
+   "me": [
+    10,
+    845,
+    48,
+    43
+   ],
+   "group": [
+    96,
+    92,
+    1316,
+    1145
+   ],
+   "rail": [
+    1072,
+    92,
+    340,
+    678
+   ],
+   "topRightClear": 24,
+   "sideOverflowY": 0,
+   "overflowing": [],
+   "sideBg": "rgb(231, 227, 220)",
+   "sideEdge": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+   "topBg": "rgb(245, 241, 235)",
+   "topEdge": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+   "activeBg": "rgb(42, 58, 82)",
+   "activeFg": "rgb(253, 249, 245)",
+   "navFont": "\"Source Serif 4\"",
+   "navSize": "14.5px",
+   "savedPresent": false
+  }
+ },
+ "1280x800": {
+  "fontsLoaded": [],
+  "expanded": {
+   "side": [
+    0,
+    0,
+    248,
+    800
+   ],
+   "top": [
+    248,
+    0,
+    1032,
+    64
+   ],
+   "win": [
+    248,
+    64,
+    1032,
+    736
+   ],
+   "collapse": [
+    272,
+    15,
+    34,
+    34
+   ],
+   "crumb": [
+    320,
+    21,
+    243,
+    22
+   ],
+   "search": [
+    1006,
+    14,
+    36,
+    36
+   ],
+   "feedback": [
+    1052,
+    14,
+    158,
+    36
+   ],
+   "help": [
+    1220,
+    14,
+    36,
+    36
+   ],
+   "active": [
+    14,
+    367,
+    220,
+    33
+   ],
+   "logo": [
+    14,
+    16,
+    220,
+    30
+   ],
+   "switcher": [
+    14,
+    58,
+    220,
+    51
+   ],
+   "me": [
+    14,
+    742,
+    220,
+    46
+   ],
+   "group": [
+    276,
+    92,
+    976,
+    1126
+   ],
+   "rail": [
+    912,
+    92,
+    340,
+    678
+   ],
+   "topRightClear": 24,
+   "sideOverflowY": 0,
+   "overflowing": [],
+   "sideBg": "rgb(231, 227, 220)",
+   "sideEdge": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+   "topBg": "rgb(245, 241, 235)",
+   "topEdge": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+   "activeBg": "rgb(42, 58, 82)",
+   "activeFg": "rgb(253, 249, 245)",
+   "navFont": "\"Source Serif 4\"",
+   "navSize": "14.5px",
+   "savedPresent": false
+  },
+  "collapsed": {
+   "side": [
+    0,
+    0,
+    68,
+    800
+   ],
+   "top": [
+    68,
+    0,
+    1212,
+    64
+   ],
+   "win": [
+    68,
+    64,
+    1212,
+    736
+   ],
+   "collapse": [
+    92,
+    15,
+    34,
+    34
+   ],
+   "crumb": [
+    140,
+    21,
+    243,
+    22
+   ],
+   "search": [
+    1006,
+    14,
+    36,
+    36
+   ],
+   "feedback": [
+    1052,
+    14,
+    158,
+    36
+   ],
+   "help": [
+    1220,
+    14,
+    36,
+    36
+   ],
+   "active": [
+    14,
+    341,
+    40,
+    34
+   ],
+   "logo": [
+    19,
+    16,
+    30,
+    30
+   ],
+   "switcher": [
+    13,
+    58,
+    42,
+    42
+   ],
+   "me": [
+    10,
+    745,
+    48,
+    43
+   ],
+   "group": [
+    96,
+    92,
+    1156,
+    1107
+   ],
+   "rail": [
+    912,
+    92,
+    340,
+    678
+   ],
+   "topRightClear": 24,
+   "sideOverflowY": 0,
+   "overflowing": [],
+   "sideBg": "rgb(231, 227, 220)",
+   "sideEdge": "rgba(28, 19, 15, 0.1) -1px 0px 0px 0px inset",
+   "topBg": "rgb(245, 241, 235)",
+   "topEdge": "rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset",
+   "activeBg": "rgb(42, 58, 82)",
+   "activeFg": "rgb(253, 249, 245)",
+   "navFont": "\"Source Serif 4\"",
+   "navSize": "14.5px",
+   "savedPresent": false
+  }
+ }
+}

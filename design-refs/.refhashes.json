@@ -80,6 +80,9 @@
     "design-refs/query-centre-v94.html": "eba369a1081523e85e3bdaec304268e0750dafb2d0c7eed36d1cb31c7bf8b0c2",
     "design-refs/manuscripts/manuscripts-v12.html": "3afaaa77aaef65c493cab2a4d65b7e6de5d16733cfec3e1eab6959a6d68ecbfa",
     "design-refs/manuscripts/manuscripts-hero-archivist.png": "1845222092dd272b001c4ddcc353e2153d76ae711b51a2bf9e4f9d242b6f6ea6",
-    "design-refs/manuscripts/comps-tray-archivist.png": "0b2a7884ab29987fcea7d5ee20dc2ca4edca626c674dedeaaed53c5b8272d1dd"
+    "design-refs/manuscripts/comps-tray-archivist.png": "0b2a7884ab29987fcea7d5ee20dc2ca4edca626c674dedeaaed53c5b8272d1dd",
+    "design-refs/shell/app-shell-v3.html": "98a30a87eb58f174920154054164ae70bf7d38a10a8f947ba45d460d1d707b60",
+    "design-refs/shell/page-anatomy.md": "81f0b507622b379d8522b8526837f4b7f1fbe2ccc52ff7583b794a47f854b558",
+    "design-refs/shell/app-shell-v3-geometry.json": "536f9d263b75acb2f8eec4fa7ba44596ea058c5cef9a7c3f3fd565624d509a4c"
   }
 }
